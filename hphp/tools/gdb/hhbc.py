@@ -31,7 +31,7 @@ def op_table(name):
 
 @memoized
 def iva_imm_types():
-    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA']]
+    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA', 'CAR', 'CAW']]
 
 @memoized
 def vec_imm_types():

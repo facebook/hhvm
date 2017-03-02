@@ -265,6 +265,11 @@ struct intva_t {
   intva_t& operator=(int32_t v) { n = v; return *this; }
 };
 
+// wrapper for class-ref slot CA(R|W) operand
+struct clsref_slot {
+  int32_t index;
+};
+
 // wrapper to handle unaligned access to variadic immediates
 template<class T> struct imm_array {
   explicit imm_array(PC pc) : ptr(pc) {}
@@ -289,6 +294,12 @@ ALWAYS_INLINE Iter* decode_iter(PC& pc) {
 
 ALWAYS_INLINE intva_t decode_intva(PC& pc) {
   return intva_t{decode_iva(pc)};
+}
+
+ALWAYS_INLINE clsref_slot decode_clsref_slot(PC& pc) {
+  auto const ca = decode_iva(pc);
+  assertx(ca < vmfp()->m_func->numClsRefSlots());
+  return clsref_slot{ca};
 }
 
 //=============================================================================
@@ -1791,7 +1802,7 @@ OPTBLD_INLINE void iopNop() {
 OPTBLD_INLINE void iopEntryNop() {
 }
 
-OPTBLD_INLINE void iopPopA() {
+OPTBLD_INLINE void iopPopA(clsref_slot slot) {
   vmStack().popA();
 }
 
@@ -1888,7 +1899,7 @@ OPTBLD_INLINE void iopMethod() {
   vmStack().pushStaticString(s);
 }
 
-OPTBLD_INLINE void iopNameA() {
+OPTBLD_INLINE void iopNameA(clsref_slot slot) {
   auto const cls  = vmStack().topA();
   auto const name = cls->name();
   vmStack().popA();
@@ -2135,7 +2146,7 @@ OPTBLD_INLINE void iopDefCns(const StringData* s) {
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
-OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName) {
+OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName, clsref_slot slot) {
   auto const cls    = vmStack().topA();
   auto const clsCns = cls->clsCnsGet(clsCnsName);
 
@@ -2996,12 +3007,12 @@ OPTBLD_INLINE void iopThrow() {
   throw req::root<Object>(std::move(obj));
 }
 
-OPTBLD_INLINE void iopAGetC() {
+OPTBLD_INLINE void iopAGetC(clsref_slot slot) {
   TypedValue* tv = vmStack().topTV();
   lookupClsRef(tv, tv, true);
 }
 
-OPTBLD_INLINE void iopAGetL(local_var fr) {
+OPTBLD_INLINE void iopAGetL(local_var fr, clsref_slot slot) {
   vmStack().pushUninit();
   lookupClsRef(tvToCell(fr.ptr), vmStack().top());
 }
@@ -3158,7 +3169,7 @@ template<bool box> void getS() {
   vmStack().popA();
 }
 
-OPTBLD_INLINE void iopCGetS() {
+OPTBLD_INLINE void iopCGetS(clsref_slot slot) {
   getS<false>();
 }
 
@@ -3261,12 +3272,12 @@ static inline TypedValue* baseSImpl(int32_t clsIdx, TypedValue* key) {
   return lookup.prop;
 }
 
-OPTBLD_INLINE void iopBaseSC(intva_t keyIdx, intva_t clsIdx) {
+OPTBLD_INLINE void iopBaseSC(intva_t keyIdx, intva_t clsIdx, clsref_slot slot) {
   auto& mstate = initMState();
   mstate.base = baseSImpl(clsIdx, vmStack().indTV(keyIdx));
 }
 
-OPTBLD_INLINE void iopBaseSL(local_var keyLoc, intva_t clsIdx) {
+OPTBLD_INLINE void iopBaseSL(local_var keyLoc, intva_t clsIdx, clsref_slot slot) {
   auto& mstate = initMState();
   mstate.base = baseSImpl(clsIdx, tvToCell(keyLoc.ptr));
 }
@@ -3675,7 +3686,7 @@ OPTBLD_INLINE void iopVGetG() {
   vgetl_body(fr, to);
 }
 
-OPTBLD_INLINE void iopVGetS() {
+OPTBLD_INLINE void iopVGetS(clsref_slot slot) {
   getS<true>();
 }
 
@@ -3709,7 +3720,7 @@ OPTBLD_INLINE void iopIssetG() {
   vmStack().replaceC<KindOfBoolean>(e);
 }
 
-OPTBLD_INLINE void iopIssetS() {
+OPTBLD_INLINE void iopIssetS(clsref_slot slot) {
   SpropState ss(vmStack());
   bool e;
   if (!(ss.visible && ss.accessible)) {
@@ -3854,7 +3865,7 @@ OPTBLD_INLINE void iopEmptyG() {
   vmStack().replaceC<KindOfBoolean>(e);
 }
 
-OPTBLD_INLINE void iopEmptyS() {
+OPTBLD_INLINE void iopEmptyS(clsref_slot slot) {
   SpropState ss(vmStack());
   bool e;
   if (!(ss.visible && ss.accessible)) {
@@ -4033,7 +4044,7 @@ OPTBLD_INLINE void iopSetG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetS() {
+OPTBLD_INLINE void iopSetS(clsref_slot slot) {
   TypedValue* tv1 = vmStack().topTV();
   TypedValue* classref = vmStack().indTV(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -4094,7 +4105,7 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopSetOpS(SetOpOp op) {
+OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot slot) {
   Cell* fr = vmStack().topC();
   TypedValue* classref = vmStack().indTV(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -4156,7 +4167,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   cellCopy(IncDecBody(op, tvToCell(gbl)), *nameCell);
 }
 
-OPTBLD_INLINE void iopIncDecS(IncDecOp op) {
+OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
   SpropState ss(vmStack());
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
@@ -4198,7 +4209,7 @@ OPTBLD_INLINE void iopBindG() {
   vmStack().discard();
 }
 
-OPTBLD_INLINE void iopBindS() {
+OPTBLD_INLINE void iopBindS(clsref_slot slot) {
   TypedValue* fr = vmStack().topTV();
   TypedValue* classref = vmStack().indTV(1);
   TypedValue* propn = vmStack().indTV(2);
@@ -4505,7 +4516,7 @@ void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
   setTypesFlag(vmfp(), ar);
 }
 
-OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs) {
+OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot) {
   Cell* c1 = vmStack().indC(1); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4531,7 +4542,7 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
   pushClsMethodImpl<false>(cls, const_cast<StringData*>(name), numArgs);
 }
 
-OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs) {
+OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs, clsref_slot slot) {
   Cell* c1 = vmStack().indC(1); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
@@ -4546,7 +4557,7 @@ OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs) {
   pushClsMethodImpl<true>(cls, name, numArgs);
 }
 
-OPTBLD_INLINE void iopFPushCtor(intva_t numArgs) {
+OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
   TypedValue* tv = vmStack().topTV();
   assert(tv->m_type == KindOfClass);
   Class* cls = tv->m_data.pcls;
@@ -4810,12 +4821,12 @@ OPTBLD_INLINE void iopFPassG(ActRec* ar, intva_t paramId) {
   }
 }
 
-OPTBLD_INLINE void iopFPassS(ActRec* ar, intva_t paramId) {
+OPTBLD_INLINE void iopFPassS(ActRec* ar, intva_t paramId, clsref_slot slot) {
   assert(paramId < ar->numArgs());
   if (!ar->m_func->byRef(paramId)) {
-    iopCGetS();
+    iopCGetS(slot);
   } else {
-    iopVGetS();
+    iopVGetS(slot);
   }
 }
 
@@ -5384,7 +5395,7 @@ OPTBLD_INLINE void iopCatch() {
   vmStack().pushObjectNoRc(fault.m_userException);
 }
 
-OPTBLD_INLINE void iopLateBoundCls() {
+OPTBLD_INLINE void iopLateBoundCls(clsref_slot slot) {
   Class* cls = frameStaticClass(vmfp());
   if (!cls) {
     raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
@@ -5453,7 +5464,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void iopSelf() {
+OPTBLD_INLINE void iopSelf(clsref_slot slot) {
   Class* clss = arGetContextClass(vmfp());
   if (!clss) {
     raise_error(HPHP::Strings::CANT_ACCESS_SELF);
@@ -5461,7 +5472,7 @@ OPTBLD_INLINE void iopSelf() {
   vmStack().pushClass(clss);
 }
 
-OPTBLD_INLINE void iopParent() {
+OPTBLD_INLINE void iopParent(clsref_slot slot) {
   Class* clss = arGetContextClass(vmfp());
   if (!clss) {
     raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
@@ -6267,6 +6278,14 @@ TCA iopWrapper(Op, void(*fn)(const StringData*,const StringData*), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(const StringData*,clsref_slot), PC& pc) {
+  auto s1 = decode_litstr(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(s1, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(local_var), PC& pc) {
   auto var = decode_local(pc);
   fn(var);
@@ -6278,6 +6297,32 @@ TCA iopWrapper(Op, void(*fn)(local_var,local_var), PC& pc) {
   auto var1 = decode_local(pc);
   auto var2 = decode_local(pc);
   fn(var1, var2);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(local_var,clsref_slot), PC& pc) {
+  auto var1 = decode_local(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(var1, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(local_var,intva_t,clsref_slot), PC& pc) {
+  auto var1 = decode_local(pc);
+  auto n = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(var1, n, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(local_var,local_var,clsref_slot), PC& pc) {
+  auto var1 = decode_local(pc);
+  auto var2 = decode_local(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(var1, var2, s);
   return nullptr;
 }
 
@@ -6297,10 +6342,34 @@ TCA iopWrapper(Op, void(*fn)(intva_t,intva_t), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t,clsref_slot), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(n1, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(intva_t,LocalRange), PC& pc) {
   auto n1 = decode_intva(pc);
   auto n2 = decodeLocalRange(pc);
   fn(n1, n2);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(intva_t,intva_t,clsref_slot), PC& pc) {
+  auto n1 = decode_intva(pc);
+  auto n2 = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(n1, n2, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(clsref_slot), PC& pc) {
+  auto s = decode_clsref_slot(pc);
+  fn(s);
   return nullptr;
 }
 
@@ -6343,6 +6412,15 @@ TCA iopWrapper(Op op, void(*fn)(ActRec*,intva_t,local_var), PC& pc) {
   auto n = decode_intva(pc);
   auto var = decode_local(pc);
   fn(ar, n, var);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op op, void(*fn)(ActRec*,intva_t,clsref_slot), PC& pc) {
+  auto ar = arFromInstr(pc - encoded_op_size(op));
+  auto n = decode_intva(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(ar, n, s);
   return nullptr;
 }
 
@@ -6407,6 +6485,14 @@ TCA iopWrapper(Op, void(*fn)(SetOpOp), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(SetOpOp,clsref_slot), PC& pc) {
+  auto subop = decode_oa<SetOpOp>(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(subop, s);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(local_var,SetOpOp), PC& pc) {
   auto var = decode_local(pc);
   auto subop = decode_oa<SetOpOp>(pc);
@@ -6418,6 +6504,14 @@ OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(IncDecOp), PC& pc) {
   auto subop = decode_oa<IncDecOp>(pc);
   fn(subop);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(IncDecOp,clsref_slot), PC& pc) {
+  auto subop = decode_oa<IncDecOp>(pc);
+  auto s = decode_clsref_slot(pc);
+  fn(subop, s);
   return nullptr;
 }
 

@@ -900,7 +900,7 @@ void emitFPushCufSafe(IRGS& env, int32_t numArgs) {
   implFPushCufOp(env, Op::FPushCufSafe, numArgs);
 }
 
-void emitFPushCtor(IRGS& env, int32_t numParams) {
+void emitFPushCtor(IRGS& env, int32_t numParams, int32_t slot) {
   auto const cls  = popA(env);
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
@@ -1203,11 +1203,11 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
   }
 }
 
-void emitFPushClsMethod(IRGS& env, int32_t numParams) {
+void emitFPushClsMethod(IRGS& env, int32_t numParams, int32_t slot) {
   fpushClsMethodCommon<false>(env, numParams);
 }
 
-void emitFPushClsMethodF(IRGS& env, int32_t numParams) {
+void emitFPushClsMethodF(IRGS& env, int32_t numParams, int32_t slot) {
   fpushClsMethodCommon<true>(env, numParams);
 }
 
@@ -1234,11 +1234,11 @@ void emitFPassL(IRGS& env, int32_t argNum, int32_t id) {
   }
 }
 
-void emitFPassS(IRGS& env, int32_t argNum) {
+void emitFPassS(IRGS& env, int32_t argNum, int32_t slot) {
   if (env.currentNormalizedInstruction->preppedByRef) {
-    emitVGetS(env);
+    emitVGetS(env, slot);
   } else {
-    emitCGetS(env);
+    emitCGetS(env, slot);
   }
 }
 

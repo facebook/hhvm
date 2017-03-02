@@ -357,6 +357,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
 #define IMM_IA(n)      ue.emitIVA(data.iter##n);
+#define IMM_CAR(n)     ue.emitIVA(data.slot);
+#define IMM_CAW(n)     ue.emitIVA(data.slot);
 #define IMM_DA(n)      ue.emitDouble(data.dbl##n);
 #define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
 #define IMM_RATA(n)    encodeRAT(ue, data.rat);
@@ -427,6 +429,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -564,6 +568,7 @@ void emit_locals_and_params(FuncEmitter& fe,
   }
   assert(fe.numLocals() == id);
   fe.setNumIterators(func.numIters);
+  fe.setNumClsRefSlots(func.numClsRefSlots);
 
   for (auto& sv : func.staticLocals) {
     fe.staticVars.push_back(Func::SVInfo {sv.name, sv.phpCode});

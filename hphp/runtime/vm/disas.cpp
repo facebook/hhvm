@@ -302,6 +302,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
 #define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
 #define IMM_IA     out.fmt(" {}", decode_iva(pc));
+#define IMM_CAR    out.fmt(" {}", decode_iva(pc));
+#define IMM_CAW    out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
                            escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
@@ -345,6 +347,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -362,6 +366,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
   if (auto const niters = func->numIterators()) {
     out.fmtln(".numiters {};", niters);
+  }
+  if (auto const nslots = func->numClsRefSlots()) {
+    out.fmtln(".numclsrefslots {};", nslots);
   }
   if (func->numNamedLocals() > func->numParams()) {
     std::vector<std::string> locals;

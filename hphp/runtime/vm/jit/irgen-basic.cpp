@@ -50,7 +50,7 @@ bool checkThis(IRGS& env, SSATmp* ctx) {
 
 }
 
-void emitAGetC(IRGS& env) {
+void emitAGetC(IRGS& env, int32_t slot) {
   auto const name = topC(env);
   if (name->type().subtypeOfAny(TObj, TStr)) {
     popC(env);
@@ -61,7 +61,7 @@ void emitAGetC(IRGS& env) {
   }
 }
 
-void emitAGetL(IRGS& env, int32_t id) {
+void emitAGetL(IRGS& env, int32_t id, int32_t slot) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
@@ -304,7 +304,7 @@ void emitClone(IRGS& env) {
   decRef(env, obj);
 }
 
-void emitLateBoundCls(IRGS& env) {
+void emitLateBoundCls(IRGS& env, int32_t slot) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
@@ -315,7 +315,7 @@ void emitLateBoundCls(IRGS& env) {
   push(env, gen(env, LdClsCtx, ctx));
 }
 
-void emitSelf(IRGS& env) {
+void emitSelf(IRGS& env, int32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
     interpOne(env, TCls, 0);
@@ -324,7 +324,7 @@ void emitSelf(IRGS& env) {
   }
 }
 
-void emitParent(IRGS& env) {
+void emitParent(IRGS& env, int32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
     interpOne(env, TCls, 0);
@@ -333,7 +333,7 @@ void emitParent(IRGS& env) {
   }
 }
 
-void emitNameA(IRGS& env) {
+void emitNameA(IRGS& env, int32_t slot) {
   push(env, gen(env, LdClsName, popA(env)));
 }
 
@@ -485,7 +485,7 @@ void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitPopA(IRGS& env)   { popA(env); }
+void emitPopA(IRGS& env, int32_t slot)   { popA(env); }
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }

@@ -704,7 +704,8 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   }
   out << "maxStackCells: " << maxStackCells() << '\n'
       << "numLocals: " << numLocals() << '\n'
-      << "numIterators: " << numIterators() << '\n';
+      << "numIterators: " << numIterators() << '\n'
+      << "numClsRefSlots: " << numClsRefSlots() << '\n';
 
   const EHEntVec& ehtab = shared()->m_ehtab;
   size_t ehId = 0;
@@ -762,6 +763,7 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_hasExtendedSharedData(false)
   , m_returnByValue(false)
   , m_isMemoizeWrapper(false)
+  , m_numClsRefSlots(0)
   , m_originalFilename(nullptr)
 {
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);

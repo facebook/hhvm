@@ -336,6 +336,8 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
 #define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
+#define IMM_CAR(n)     folly::toAppend(" rslot:", data.slot, &ret);
+#define IMM_CAW(n)     folly::toAppend(" wslot:", data.slot, &ret);
 #define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
@@ -374,6 +376,8 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA

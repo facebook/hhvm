@@ -301,6 +301,12 @@ inline int Func::numIterators() const {
   return shared()->m_numIterators;
 }
 
+inline int Func::numClsRefSlots() const {
+  auto const ex = extShared();
+  if (LIKELY(!ex)) return shared()->m_numClsRefSlots;
+  return ex->m_actualNumClsRefSlots;
+}
+
 inline Id Func::numNamedLocals() const {
   return shared()->m_localNames.size();
 }

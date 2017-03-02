@@ -376,7 +376,7 @@ void in(ISS& env, const bc::ClsCns& op) {
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
-      return reduce(env, bc::PopA {},
+      return reduce(env, bc::PopA { op.slot },
                          bc::ClsCnsD { op.str1, dcls.cls.name() });
     }
   }
@@ -1848,7 +1848,7 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
 void in(ISS& env, const bc::FPushClsMethodF& op) {
   // The difference with FPushClsMethod is what ends up on the
   // ActRec (late-bound class), which we currently aren't tracking.
-  impl(env, bc::FPushClsMethod { op.arg1, op.has_unpack });
+  impl(env, bc::FPushClsMethod { op.arg1, op.slot, op.has_unpack });
 }
 
 void ctorHelper(ISS& env, SString name) {
@@ -1873,7 +1873,7 @@ void in(ISS& env, const bc::FPushCtor& op) {
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
-      return reduce(env, bc::PopA {},
+      return reduce(env, bc::PopA { op.slot },
                     bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }
   }
@@ -1979,9 +1979,9 @@ void in(ISS& env, const bc::FPassS& op) {
     }
     return push(env, TInitGen);
   case PrepKind::Val:
-    return reduce_fpass_arg(env, bc::CGetS {}, op.arg1, false);
+    return reduce_fpass_arg(env, bc::CGetS { op.slot }, op.arg1, false);
   case PrepKind::Ref:
-    return reduce_fpass_arg(env, bc::VGetS {}, op.arg1, true);
+    return reduce_fpass_arg(env, bc::VGetS { op.slot }, op.arg1, true);
   }
 }
 

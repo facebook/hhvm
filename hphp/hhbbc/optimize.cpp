@@ -330,7 +330,12 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     switch (op.popFlavor(i)) {
     case Flavor::C:  gen(bc::PopC {}); break;
     case Flavor::V:  gen(bc::PopV {}); break;
-    case Flavor::A:  gen(bc::PopA {}); break;
+    case Flavor::A: {
+      auto const slot = visit(op, ReadClsRefSlotVisitor{});
+      always_assert(slot != NoClsRefSlotId);
+      gen(bc::PopA {slot});
+      break;
+    }
     case Flavor::R:
       gen(bc::UnboxRNop {});
       gen(bc::PopC {});

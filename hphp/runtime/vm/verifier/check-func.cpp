@@ -125,6 +125,7 @@ struct FuncChecker {
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->numParams(); }
+  int numClsRefSlots() const { return m_func->numClsRefSlots(); }
   const Unit* unit() const { return m_func->unit(); }
 
  private:
@@ -461,6 +462,24 @@ bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
   auto const k = decode_iva(pc);
   if (k >= numIters()) {
     error("invalid iterator variable id %d at %d\n", k, offset(instr));
+    return false;
+  }
+  return true;
+}
+
+bool FuncChecker::checkImmCAR(PC& pc, PC const instr) {
+  auto const slot = decode_iva(pc);
+  if (slot < 0 || slot >= numClsRefSlots()) {
+    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
+    return false;
+  }
+  return true;
+}
+
+bool FuncChecker::checkImmCAW(PC& pc, PC const instr) {
+  auto const slot = decode_iva(pc);
+  if (slot < 0 || slot >= numClsRefSlots()) {
+    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
     return false;
   }
   return true;

@@ -627,6 +627,8 @@ bool isAlwaysNop(Op op) {
 #define IVA(n)
 #define I64A(n)
 #define IA(n)
+#define CAR(n)
+#define CAW(n)
 #define DA(n)
 #define SA(n)
 #define AA(n)
@@ -672,6 +674,8 @@ size_t memberKeyImmIdx(Op op) {
 #undef IVA
 #undef I64A
 #undef IA
+#undef CAR
+#undef CAW
 #undef DA
 #undef SA
 #undef AA
@@ -1142,6 +1146,8 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
 #define IMM_I64A(n)    ni.imm[n].u_I64A
 #define IMM_LA(n)      ni.imm[n].u_LA
 #define IMM_IA(n)      ni.imm[n].u_IA
+#define IMM_CAR(n)     ni.imm[n].u_CAR
+#define IMM_CAW(n)     ni.imm[n].u_CAW
 #define IMM_DA(n)      ni.imm[n].u_DA
 #define IMM_SA(n)      ni.unit()->lookupLitstrId(ni.imm[n].u_SA)
 #define IMM_RATA(n)    ni.imm[n].u_RATA
@@ -1178,6 +1184,8 @@ static void translateDispatch(irgen::IRGS& irgs,
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA

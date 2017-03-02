@@ -64,6 +64,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
+  , m_numClsRefSlots(0)
   , m_ehTabSorted(false)
 {}
 
@@ -88,6 +89,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
+  , m_numClsRefSlots(0)
   , m_ehTabSorted(false)
 {}
 
@@ -202,7 +204,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
-    past - base >= Func::kSmallDeltaLimit;
+    past - base >= Func::kSmallDeltaLimit ||
+    m_numClsRefSlots > 3;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -222,6 +225,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_past = past;
     ex->m_returnByValue = false;
     ex->m_isMemoizeWrapper = false;
+    ex->m_actualNumClsRefSlots = m_numClsRefSlots;
   }
 
   std::vector<Func::ParamInfo> fParams;
@@ -252,6 +256,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
   f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
+  f->shared()->m_numClsRefSlots = m_numClsRefSlots;
 
   if (isNative) {
     auto const ex = f->extShared();
@@ -318,6 +323,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (docComment)
     (m_numLocals)
     (m_numIterators)
+    (m_numClsRefSlots)
     (maxStackCells)
     (isClosureBody)
     (isAsync)

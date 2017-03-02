@@ -94,7 +94,7 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(IRGS& env) {
+void emitCGetS(IRGS& env, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {
@@ -110,7 +110,7 @@ void emitCGetS(IRGS& env) {
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(IRGS& env) {
+void emitSetS(IRGS& env, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
   if (!ssaPropName->isA(TStr)) {
@@ -126,7 +126,7 @@ void emitSetS(IRGS& env) {
   bindMem(env, ptr, value);
 }
 
-void emitVGetS(IRGS& env) {
+void emitVGetS(IRGS& env, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {
@@ -146,7 +146,7 @@ void emitVGetS(IRGS& env) {
   pushIncRef(env, val);
 }
 
-void emitBindS(IRGS& env) {
+void emitBindS(IRGS& env, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{2});
 
   if (!ssaPropName->isA(TStr)) {
@@ -161,7 +161,7 @@ void emitBindS(IRGS& env) {
   bindMem(env, propAddr, value);
 }
 
-void emitIssetS(IRGS& env) {
+void emitIssetS(IRGS& env, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
   if (!ssaPropName->isA(TStr)) {
     PUNT(IssetS-PropNameNotString);
@@ -186,7 +186,7 @@ void emitIssetS(IRGS& env) {
   push(env, ret);
 }
 
-void emitEmptyS(IRGS& env) {
+void emitEmptyS(IRGS& env, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
   if (!ssaPropName->isA(TStr)) {
     PUNT(EmptyS-PropNameNotString);
@@ -212,7 +212,7 @@ void emitEmptyS(IRGS& env) {
   push(env, ret);
 }
 
-void emitIncDecS(IRGS& env, IncDecOp subop) {
+void emitIncDecS(IRGS& env, IncDecOp subop, int32_t slot) {
   auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {

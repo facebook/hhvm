@@ -261,6 +261,16 @@ namespace StackSym {
   }
 }
 
+namespace {
+
+// Placeholder for class-ref slot immediates when emitting a bytecode op. The
+// emitter takes care of assigning slots automatically so you do not need to
+// specify one.
+struct ClsRefSlotPlaceholder {};
+constexpr const ClsRefSlotPlaceholder kClsRefSlotPlaceholder{};
+
+}
+
 struct Emitter {
   Emitter(ConstructPtr node, UnitEmitter& ue, EmitterVisitor& ev)
       : m_node(node), m_ue(ue), m_ev(ev) {}
@@ -304,6 +314,8 @@ struct Emitter {
 #define IMM_IVA int32_t
 #define IMM_LA int32_t
 #define IMM_IA int32_t
+#define IMM_CAR ClsRefSlotPlaceholder
+#define IMM_CAW ClsRefSlotPlaceholder
 #define IMM_I64A int64_t
 #define IMM_DA double
 #define IMM_SA const StringData*
@@ -329,6 +341,8 @@ struct Emitter {
 #undef IMM_IVA
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_I64A
 #undef IMM_DA
 #undef IMM_SA
@@ -416,6 +430,11 @@ private:
   // stack.
   int m_fdescCount;
 
+  // The next class-ref slot to be allocated.
+  int m_clsRefTop = 0;
+  // The highest class-ref slot allocated plus 1 (which sizes the number of
+  // slots needed).
+  int m_maxClsRefCount = 0;
 public:
   int* m_actualStackHighWaterPtr;
 
@@ -465,6 +484,19 @@ public:
 
   void pushFDesc();
   void popFDesc();
+
+  // Class-ref slots are allocated in a stack-like manner. We don't need an
+  // actual stack because the slots are always allocated in order.
+  int pushClsRefSlot() {
+    auto slot = m_clsRefTop++;
+    m_maxClsRefCount = std::max(m_clsRefTop, m_maxClsRefCount);
+    return slot;
+  }
+  int popClsRefSlot() { return --m_clsRefTop; }
+  int peekClsRefSlot() const { return m_clsRefTop; }
+  int clsRefSlotStackEmpty() const { return m_clsRefTop <= 0; }
+  int numClsRefSlots() const { return m_maxClsRefCount; }
+  void setNumClsRefSlots(int val) { m_maxClsRefCount = val; }
 };
 
 struct Label {
@@ -655,16 +687,20 @@ public:
   const SymbolicStack& getEvalStack() const { return m_evalStack; }
   SymbolicStack& getEvalStack() { return m_evalStack; }
   void setEvalStack(const SymbolicStack& es) {
+    auto const s = m_evalStack.numClsRefSlots();
     m_evalStack = es;
+    m_evalStack.setNumClsRefSlots(std::max(s, es.numClsRefSlots()));
     m_evalStackIsUnknown = false;
   }
   bool evalStackIsUnknown() { return m_evalStackIsUnknown; }
   void popEvalStack(char symFlavor);
+  int popClsRefSlot();
   void popSymbolicLocal(Op opcode);
   void popEvalStackMMany();
   void popEvalStackMany(int len, char symFlavor);
   void popEvalStackCVMany(int len);
   void pushEvalStack(char symFlavor);
+  int pushClsRefSlot();
   void peekEvalStack(char symFlavor, int depthActual);
   void pokeEvalStack(char symFlavor, int depthActual);
   void prepareEvalStack();
@@ -1269,6 +1305,8 @@ private:
 #define DEC_IVA int32_t
 #define DEC_LA int32_t
 #define DEC_IA int32_t
+#define DEC_CAR ClsRefSlotPlaceholder
+#define DEC_CAW ClsRefSlotPlaceholder
 #define DEC_I64A int64_t
 #define DEC_DA double
 #define DEC_SA const StringData*
@@ -1347,6 +1385,8 @@ private:
 #define POP_LA_ILA(i)
 #define POP_LA_IVA(i)
 #define POP_LA_IA(i)
+#define POP_LA_CAR(i)
+#define POP_LA_CAW(i)
 #define POP_LA_I64A(i)
 #define POP_LA_DA(i)
 #define POP_LA_SA(i)
@@ -1481,6 +1521,26 @@ private:
 #define IMPL3_IA IMPL_IVA(a3)
 #define IMPL4_IA IMPL_IVA(a4)
 
+#define IMPL_CAR do {                         \
+  getUnitEmitter().emitIVA(                   \
+    getEmitterVisitor().popClsRefSlot()       \
+  );                                          \
+} while (0)
+#define IMPL1_CAR IMPL_CAR
+#define IMPL2_CAR IMPL_CAR
+#define IMPL3_CAR IMPL_CAR
+#define IMPL4_CAR IMPL_CAR
+
+#define IMPL_CAW do {                         \
+  getUnitEmitter().emitIVA(                   \
+    getEmitterVisitor().pushClsRefSlot()      \
+  );                                          \
+} while (0)
+#define IMPL1_CAW IMPL_CAW
+#define IMPL2_CAW IMPL_CAW
+#define IMPL3_CAW IMPL_CAW
+#define IMPL4_CAW IMPL_CAW
+
 #define IMPL_I64A(var) getUnitEmitter().emitInt64(var)
 #define IMPL1_I64A IMPL_I64A(a1)
 #define IMPL2_I64A IMPL_I64A(a2)
@@ -1561,6 +1621,8 @@ private:
 #undef DEC_IVA
 #undef DEC_LA
 #undef DEC_IA
+#undef DEC_CAR
+#undef DEC_CAW
 #undef DEC_I64A
 #undef DEC_DA
 #undef DEC_SA
@@ -1598,6 +1660,8 @@ private:
 #undef POP_LA_NA
 #undef POP_LA_IVA
 #undef POP_LA_IA
+#undef POP_LA_CAR
+#undef POP_LA_CAW
 #undef POP_LA_I64A
 #undef POP_LA_DA
 #undef POP_LA_SA
@@ -1656,6 +1720,14 @@ private:
 #undef IMPL2_IA
 #undef IMPL3_IA
 #undef IMPL4_IA
+#undef IMPL1_CAR
+#undef IMPL2_CAR
+#undef IMPL3_CAR
+#undef IMPL4_CAR
+#undef IMPL1_CAW
+#undef IMPL2_CAW
+#undef IMPL3_CAW
+#undef IMPL4_CAW
 #undef IMPL_I64A
 #undef IMPL1_I64A
 #undef IMPL2_I64A
@@ -1732,6 +1804,16 @@ static void checkJmpTargetEvalStack(const SymbolicStack& source,
       return;
     }
   }
+
+  if (source.peekClsRefSlot() != dest.peekClsRefSlot()) {
+    Logger::Warning("Emitter detected a point in the bytecode where the "
+                    "class-ref slot assignments are not the same "
+                    "for all possible control flow paths");
+    Logger::Warning("src stack : %s", source.pretty().c_str());
+    Logger::Warning("dest stack: %s", dest.pretty().c_str());
+    assert(false);
+    return;
+  }
 }
 
 std::string SymbolicStack::SymEntry::pretty() const {
@@ -1762,7 +1844,7 @@ std::string SymbolicStack::pretty() const {
     }
     out << m_symStack[i].pretty();
   }
-  out << ']';
+  out << "] (Class-ref top: " << std::dec << m_clsRefTop << ')';
   return out.str();
 }
 
@@ -1792,6 +1874,7 @@ void SymbolicStack::pop() {
     assert(!m_actualStack.empty());
     m_actualStack.pop_back();
   }
+
   ITRACE(4, "pop: {}\n", m_symStack.back().pretty());
   m_symStack.pop_back();
 }
@@ -1885,6 +1968,7 @@ void SymbolicStack::clear() {
   m_symStack.clear();
   m_actualStack.clear();
   m_fdescCount = 0;
+  m_clsRefTop = 0;
 }
 
 void SymbolicStack::consumeBelowTop(int depth) {
@@ -2910,6 +2994,17 @@ void EmitterVisitor::popEvalStack(char expected) {
   }
 }
 
+int EmitterVisitor::popClsRefSlot() {
+  if (m_evalStack.clsRefSlotStackEmpty()) {
+    InvariantViolation("Emitter emitted an instruction that tries to consume "
+                       "a class-ref slot when the class-ref slot stack is "
+                       "empty (at offset %d)",
+                       m_ue.bcPos());
+    return 0;
+  }
+  return m_evalStack.popClsRefSlot();
+}
+
 void EmitterVisitor::popSymbolicLocal(Op op) {
   // A number of member instructions read locals without consuming an L from
   // the symbolic stack through the normal path.
@@ -3042,6 +3137,10 @@ void EmitterVisitor::pushEvalStack(char symFlavor) {
   m_evalStack.push(symFlavor);
 }
 
+int EmitterVisitor::pushClsRefSlot() {
+  return m_evalStack.pushClsRefSlot();
+}
+
 void EmitterVisitor::peekEvalStack(char expected, int depthActual) {
   int posActual = (m_evalStack.sizeActual() - depthActual - 1);
   if (posActual >= 0 && posActual < (int)m_evalStack.sizeActual()) {
@@ -3089,6 +3188,12 @@ void EmitterVisitor::prepareEvalStack() {
       InvariantViolation("Emitter expected to have an empty evaluation "
                          "stack because the eval stack was unknown, but "
                          "it was non-empty.");
+      return;
+    }
+    if (!m_evalStack.clsRefSlotStackEmpty()) {
+      InvariantViolation("Emitter expected to not have any class-ref slots "
+                         "in use because the eval stack was unknown, but "
+                         "there are some in use.");
       return;
     }
     // Record that we are assuming that the eval stack is empty
@@ -3642,6 +3747,10 @@ void EmitterVisitor::visit(FileScopePtr file) {
 
   if (!m_evalStack.empty()) {
     InvariantViolation("Eval stack was not empty as expected before "
+                       "emitPostponed* phase");
+  }
+  if (!m_evalStack.clsRefSlotStackEmpty()) {
+    InvariantViolation("Class-ref slots aren't not in use as expected before "
                        "emitPostponed* phase");
   }
 
@@ -4231,6 +4340,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         "Emitter detected that the evaluation stack is not empty "
         "at the beginning of a try region: %d", m_ue.bcPos());
     }
+    if (!m_evalStack.clsRefSlotStackEmpty()) {
+      InvariantViolation(
+        "Emitter detected that class-ref slots are in use "
+        "at the beginning of a try region: %d", m_ue.bcPos());
+    }
 
     auto ts = static_pointer_cast<TryStatement>(node);
     auto f = static_pointer_cast<FinallyStatement>(ts->getFinally());
@@ -4262,6 +4376,11 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       if (!m_evalStack.empty()) {
         InvariantViolation("Emitter detected that the evaluation stack "
                            "is not empty at the end of a try region: %d",
+                           end);
+      }
+      if (!m_evalStack.clsRefSlotStackEmpty()) {
+        InvariantViolation("Emitter detected that class-ref slots are in use "
+                           "at the end of a try region: %d",
                            end);
       }
 
@@ -4661,13 +4780,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
           if (isTrait && (isSelf || isParent)) {
             emitConvertToCell(e);
-            if (isSelf) {
-              e.Self();
-            } else if (isParent) {
-              e.Parent();
-            }
 
-            e.NameA();
+            if (isSelf) {
+              e.Self(kClsRefSlotPlaceholder);
+            } else if (isParent) {
+              e.Parent(kClsRefSlotPlaceholder);
+            }
+            e.NameA(kClsRefSlotPlaceholder);
             e.InstanceOf();
           } else {
             if (cls) {
@@ -4762,10 +4881,10 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     // one.
     auto const emitClsCns = [&] {
       if (cc->isColonColonClass()) {
-        e.NameA();
+        e.NameA(kClsRefSlotPlaceholder);
         return;
       }
-      e.ClsCns(nName);
+      e.ClsCns(nName, kClsRefSlotPlaceholder);
     };
     auto const noClassAllowed = [&] {
       auto const nCls = getOriginalClassName();
@@ -4777,7 +4896,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     if (cc->isStatic()) {
       // static::Constant
-      e.LateBoundCls();
+      e.LateBoundCls(kClsRefSlotPlaceholder);
       emitClsCns();
     } else if (cc->getClass()) {
       // $x::Constant
@@ -4796,7 +4915,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       }
     } else if (cc->isSelf()) {
       // self::Constant inside trait or pseudomain
-      e.Self();
+      e.Self(kClsRefSlotPlaceholder);
       if (cc->isColonColonClass() &&
           cc->getFunctionScope()->inPseudoMain()) {
         noClassAllowed();
@@ -4804,7 +4923,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitClsCns();
     } else if (cc->isParent()) {
       // parent::Constant inside trait or pseudomain
-      e.Parent();
+      e.Parent(kClsRefSlotPlaceholder);
       if (cc->isColonColonClass() &&
           cc->getFunctionScope()->inPseudoMain()) {
         noClassAllowed();
@@ -5305,28 +5424,28 @@ bool EmitterVisitor::visit(ConstructPtr node) {
     Offset fpiStart;
     if (ne->isStatic()) {
       // new static()
-      e.LateBoundCls();
+      e.LateBoundCls(kClsRefSlotPlaceholder);
       fpiStart = m_ue.bcPos();
-      e.FPushCtor(numParams);
+      e.FPushCtor(numParams, kClsRefSlotPlaceholder);
     } else if (ne->getOriginalName().empty()) {
       // new $x()
       visit(ne->getNameExp());
       emitAGet(e);
       fpiStart = m_ue.bcPos();
-      e.FPushCtor(numParams);
+      e.FPushCtor(numParams, kClsRefSlotPlaceholder);
     } else if ((ne->isSelf() || ne->isParent()) &&
                (!cls || cls->isTrait() ||
                 (ne->isParent() && cls->getOriginalParent().empty()))) {
       if (ne->isSelf()) {
         // new self() inside a trait or code statically not inside any class
-        e.Self();
+        e.Self(kClsRefSlotPlaceholder);
       } else {
         // new parent() inside a trait, code statically not inside any
         // class, or a class with no parent
-        e.Parent();
+        e.Parent(kClsRefSlotPlaceholder);
       }
       fpiStart = m_ue.bcPos();
-      e.FPushCtor(numParams);
+      e.FPushCtor(numParams, kClsRefSlotPlaceholder);
     } else {
       // new C() inside trait or pseudomain
       fpiStart = m_ue.bcPos();
@@ -5745,6 +5864,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     registerYieldAwait(y);
     assert(m_evalStack.size() == 0);
+    assert(m_evalStack.clsRefSlotStackEmpty());
 
     // evaluate key passed to yield, if applicable
     ExpressionPtr keyExp = y->getKeyExpression();
@@ -5776,6 +5896,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     registerYieldAwait(yf);
     assert(m_evalStack.size() == 0);
+    assert(m_evalStack.clsRefSlotStackEmpty());
 
     emitYieldFrom(e, yf->getExpression());
 
@@ -5786,6 +5907,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
 
     registerYieldAwait(await);
     assert(m_evalStack.size() == 0);
+    assert(m_evalStack.clsRefSlotStackEmpty());
 
     auto expression = await->getExpression();
     if (emitInlineGen(e, expression)) return true;
@@ -6327,10 +6449,10 @@ size_t EmitterVisitor::emitMOp(
       auto const clsIdx = opts.rhsVal ? 1 : 0;
       switch (flavor) {
         case StackSym::C:
-          e.BaseSC(stackIdx(iFirst), clsIdx);
+          e.BaseSC(stackIdx(iFirst), clsIdx, kClsRefSlotPlaceholder);
           break;
         case StackSym::L:
-          e.BaseSL(m_evalStack.getLoc(iFirst), clsIdx);
+          e.BaseSL(m_evalStack.getLoc(iFirst), clsIdx, kClsRefSlotPlaceholder);
           break;
         default:
           unexpectedStackSym(sym, "S-vector base, prop name");
@@ -6459,7 +6581,10 @@ void EmitterVisitor::emitPop(Emitter& e) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i)); // fall through
       case StackSym::CG: e.CGetG(); e.PopC(); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i)); // fall through
-      case StackSym::CS: e.CGetS(); e.PopC(); break;
+      case StackSym::CS:
+        e.CGetS(kClsRefSlotPlaceholder);
+        e.PopC();
+        break;
       case StackSym::V:  e.PopV(); break;
       case StackSym::R:  e.PopR(); break;
       default: {
@@ -6504,10 +6629,10 @@ void EmitterVisitor::emitAGet(Emitter& e) {
   emitConvertToCellOrLoc(e);
   switch (char sym = m_evalStack.top()) {
   case StackSym::L:
-    e.AGetL(m_evalStack.getLoc(m_evalStack.size() - 1));
+    e.AGetL(m_evalStack.getLoc(m_evalStack.size() - 1), kClsRefSlotPlaceholder);
     break;
   case StackSym::C:
-    e.AGetC();
+    e.AGetC(kClsRefSlotPlaceholder);
     break;
   default:
     unexpectedStackSym(sym, "emitAGet");
@@ -6541,7 +6666,7 @@ void EmitterVisitor::emitCGet(Emitter& e) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.CGetG();  break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.CGetS();  break;
+      case StackSym::CS: e.CGetS(kClsRefSlotPlaceholder); break;
       case StackSym::V:  e.Unbox();  break;
       case StackSym::R:  e.UnboxR(); break;
       default: {
@@ -6574,7 +6699,7 @@ void EmitterVisitor::emitCGetQuiet(Emitter& e) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.CGetQuietG();  break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.CGetS();  break;
+      case StackSym::CS: e.CGetS(kClsRefSlotPlaceholder);  break;
       case StackSym::V:  e.Unbox();  break;
       case StackSym::R:  e.UnboxR(); break;
       default: {
@@ -6608,7 +6733,7 @@ bool EmitterVisitor::emitVGet(Emitter& e, bool skipCells) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i)); // fall through
       case StackSym::CG: e.VGetG(); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i)); // fall through
-      case StackSym::CS: e.VGetS(); break;
+      case StackSym::CS: e.VGetS(kClsRefSlotPlaceholder); break;
       case StackSym::V:  /* nop */  break;
       case StackSym::R:  e.BoxR();  break;
       default: {
@@ -6811,7 +6936,9 @@ void EmitterVisitor::emitFPass(Emitter& e, int paramId,
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.FPassG(paramId); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.FPassS(paramId); break;
+      case StackSym::CS:
+        e.FPassS(paramId, kClsRefSlotPlaceholder);
+        break;
       case StackSym::V:  e.FPassV(paramId); break;
       case StackSym::R:  e.FPassR(paramId); break;
       default: {
@@ -6842,7 +6969,7 @@ void EmitterVisitor::emitIsset(Emitter& e) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.IssetG(); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.IssetS(); break;
+      case StackSym::CS: e.IssetS(kClsRefSlotPlaceholder); break;
       //XXX: Zend does not allow isset() on the result
       // of a function call. We allow it here so that emitted
       // code is valid. Once the parser handles this correctly,
@@ -6895,7 +7022,7 @@ void EmitterVisitor::emitEmpty(Emitter& e) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.EmptyG(); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.EmptyS(); break;
+      case StackSym::CS: e.EmptyS(kClsRefSlotPlaceholder); break;
       case StackSym::R:  e.UnboxR(); // fall through
       case StackSym::C:  e.Not(); break;
       default: {
@@ -6971,7 +7098,7 @@ void EmitterVisitor::emitSet(Emitter& e) {
       case StackSym::LG: emitCGetL2(e); // fall through
       case StackSym::CG: e.SetG();   break;
       case StackSym::LS: emitCGetL3(e); // fall through
-      case StackSym::CS: e.SetS();   break;
+      case StackSym::CS: e.SetS(kClsRefSlotPlaceholder);   break;
       default: {
         unexpectedStackSym(sym, "emitSet");
         break;
@@ -7040,7 +7167,7 @@ void EmitterVisitor::emitSetOp(Emitter& e, int tokenOp) {
       case StackSym::LG: emitCGetL2(e); // fall through
       case StackSym::CG: e.SetOpG(op); break;
       case StackSym::LS: emitCGetL3(e); // fall through
-      case StackSym::CS: e.SetOpS(op); break;
+      case StackSym::CS: e.SetOpS(op, kClsRefSlotPlaceholder); break;
       default: {
         unexpectedStackSym(sym, "emitSetOp");
         break;
@@ -7069,7 +7196,7 @@ void EmitterVisitor::emitBind(Emitter& e) {
       case StackSym::LG: emitCGetL2(e); // fall through
       case StackSym::CG: e.BindG();  break;
       case StackSym::LS: emitCGetL3(e); // fall through
-      case StackSym::CS: e.BindS();  break;
+      case StackSym::CS: e.BindS(kClsRefSlotPlaceholder);  break;
       default: {
         unexpectedStackSym(sym, "emitBind");
         break;
@@ -7107,7 +7234,7 @@ void EmitterVisitor::emitIncDec(Emitter& e, IncDecOp op) {
       case StackSym::LG: e.CGetL(m_evalStack.getLoc(i));  // fall through
       case StackSym::CG: e.IncDecG(op); break;
       case StackSym::LS: e.CGetL2(m_evalStack.getLoc(i));  // fall through
-      case StackSym::CS: e.IncDecS(op); break;
+      case StackSym::CS: e.IncDecS(op, kClsRefSlotPlaceholder); break;
       default: {
         unexpectedStackSym(sym, "emitIncDec");
         break;
@@ -7209,13 +7336,13 @@ void EmitterVisitor::emitResolveClsBase(Emitter& e, int pos) {
     emitAGet(e);
     break;
   case SymbolicStack::CLS_LATE_BOUND:
-    e.LateBoundCls();
+    e.LateBoundCls(kClsRefSlotPlaceholder);
     break;
   case SymbolicStack::CLS_SELF:
-    e.Self();
+    e.Self(kClsRefSlotPlaceholder);
     break;
   case SymbolicStack::CLS_PARENT:
-    e.Parent();
+    e.Parent(kClsRefSlotPlaceholder);
     break;
   case SymbolicStack::CLS_NAMED_LOCAL: {
     int loc = m_evalStack.getLoc(pos);
@@ -8128,8 +8255,8 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
     if (b && b->is(BlockScope::ClassScope)) {
       auto clsScope = dynamic_pointer_cast<ClassScope>(b);
       if (clsScope->isTrait()) {
-        e.Self();
-        e.NameA();
+        e.Self(kClsRefSlotPlaceholder);
+        e.NameA(kClsRefSlotPlaceholder);
         e.String(makeStaticString("::" + funcName + ": " + deprMessage));
         e.Concat();
       } else {
@@ -8173,6 +8300,7 @@ void EmitterVisitor::emitMethod(MethodStatementPtr meth) {
   // emit method body
   visit(meth->getStmts());
   assert(m_evalStack.size() == 0);
+  assert(m_evalStack.clsRefSlotStackEmpty());
 
   // if the current position is reachable, emit code to return null
   if (currentPositionIsReachable()) {
@@ -8603,9 +8731,9 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
 
       if (classScope && classScope->isTrait()) {
         e.String(methName);
-        e.Self();
+        e.Self(kClsRefSlotPlaceholder);
         fpiStart = m_ue.bcPos();
-        e.FPushClsMethodF(numParams);
+        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder);
       } else {
         fpiStart = m_ue.bcPos();
         e.FPushClsMethodD(numParams, methName, m_curFunc->pce()->name());
@@ -8693,6 +8821,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   e.RetC();
 
   assert(m_evalStack.size() == 0);
+  assert(m_evalStack.clsRefSlotStackEmpty());
 
   emitMethodDVInitializers(e, m_curFunc, meth, topOfBody);
 }
@@ -9015,9 +9144,9 @@ void EmitterVisitor::emitFuncCall(Emitter& e, FunctionCallPtr node,
       if (isSelfOrParent) {
         // self and parent are "forwarding" calls, so we need to
         // use FPushClsMethodF instead
-        e.FPushClsMethodF(numParams);
+        e.FPushClsMethodF(numParams, kClsRefSlotPlaceholder);
       } else {
-        e.FPushClsMethod(numParams);
+        e.FPushClsMethod(numParams, kClsRefSlotPlaceholder);
       }
     }
   } else if (!nameStr.empty()) {
@@ -9983,6 +10112,8 @@ void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe, int32_t stackPad) {
 // be more appropriate?
 void EmitterVisitor::finishFunc(Emitter& e, FuncEmitter* fe, int32_t stackPad) {
   emitFunclets(e);
+  fe->setNumClsRefSlots(m_evalStack.numClsRefSlots());
+  m_evalStack.setNumClsRefSlots(0);
   saveMaxStackCells(fe, stackPad);
   copyOverCatchAndFaultRegions(fe);
   copyOverFPIRegions(fe);

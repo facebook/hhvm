@@ -1882,13 +1882,13 @@ void emitFPassBaseGL(IRGS& env, int32_t arg, int32_t locId) {
   emitBaseGL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx) {
+void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx, int32_t slot) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{propIdx});
   baseSImpl(env, name, clsIdx);
 }
 
-void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx) {
+void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx, int32_t slot) {
   initTvRefs(env);
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);

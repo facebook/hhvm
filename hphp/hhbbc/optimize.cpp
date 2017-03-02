@@ -125,7 +125,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    if (flav.subtypeOf(TCls)) return;
+    assert(!realT.subtypeOf(TCls));
     if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
       return;
     }
@@ -164,6 +164,7 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     case Op::BaseC:       assert_stack(bcode.BaseC.arg1);       break;
     case Op::BaseNC:      assert_stack(bcode.BaseNC.arg1);      break;
     case Op::BaseGC:      assert_stack(bcode.BaseGC.arg1);      break;
+    case Op::BaseSC:      assert_stack(bcode.BaseSC.arg1);      break;
     case Op::BaseR:       assert_stack(bcode.BaseR.arg1);       break;
     case Op::FPassBaseNC: assert_stack(bcode.FPassBaseNC.arg2); break;
     case Op::FPassBaseGC: assert_stack(bcode.FPassBaseGC.arg2); break;
@@ -208,7 +209,7 @@ bool hasObviousStackOutput(Op op) {
   case Op::NewKeysetArray:
   case Op::AddNewElemC:
   case Op::AddNewElemV:
-  case Op::NameA:
+  case Op::ClsRefName:
   case Op::File:
   case Op::Dir:
   case Op::Concat:
@@ -325,17 +326,14 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
     if (!tv(state.stack[stkSize - i - 1].type)) return false;
   }
 
+  auto const slot = visit(op, ReadClsRefSlotVisitor{});
+  if (slot != NoClsRefSlotId) gen(bc::DiscardClsRef { slot });
+
   // Pop the inputs, and push the constants.
   for (auto i = size_t{0}; i < numPop; ++i) {
     switch (op.popFlavor(i)) {
     case Flavor::C:  gen(bc::PopC {}); break;
     case Flavor::V:  gen(bc::PopV {}); break;
-    case Flavor::A: {
-      auto const slot = visit(op, ReadClsRefSlotVisitor{});
-      always_assert(slot != NoClsRefSlotId);
-      gen(bc::PopA {slot});
-      break;
-    }
     case Flavor::R:
       gen(bc::UnboxRNop {});
       gen(bc::PopC {});
@@ -444,8 +442,6 @@ void first_pass(const Index& index,
 
     if (op.op == Op::CGetL2) {
       srcStack.insert(srcStack.end() - 1, op.op);
-    } else if (op.op == Op::CGetL3) {
-      srcStack.insert(srcStack.end() - 2, op.op);
     } else {
       FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
       for (int i = 0; i < op.numPop(); i++) {

@@ -380,7 +380,6 @@ inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   return assertType(pop(env, tc), TCell);
 }
 
-inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TInitNull); }
 inline SSATmp* popV(IRGS& env) { return assertType(pop(env), TBoxedInitCell); }
 inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
 inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
@@ -449,10 +448,6 @@ inline SSATmp* topV(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
 
 inline SSATmp* topR(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TGen);
-}
-
-inline SSATmp* topA(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
-  return assertType(top(env, i), TCls);
 }
 
 //////////////////////////////////////////////////////////////////////

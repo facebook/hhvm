@@ -105,7 +105,6 @@ enum FlavorDesc {
   NOV,  // None
   CV,   // Cell
   VV,   // Var
-  AV,   // Classref
   RV,   // Return value (cell or var)
   FV,   // Function parameter (cell or var)
   UV,   // Uninit
@@ -334,7 +333,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(Nop,             NA,               NOV,             NOV,        NF) \
   O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
-  O(PopA,            ONE(CAR),         ONE(AV),         NOV,        NF) \
+  O(DiscardClsRef,   ONE(CAR),         NOV,             NOV,        NF) \
   O(PopC,            NA,               ONE(CV),         NOV,        NF) \
   O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   O(PopR,            NA,               ONE(RV),         NOV,        NF) \
@@ -379,9 +378,9 @@ constexpr int32_t kMaxConcatN = 4;
   O(Cns,             ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
-  O(ClsCns,          TWO(SA,CAR),      ONE(AV),         ONE(CV),    NF) \
+  O(ClsCns,          TWO(SA,CAR),      NOV,             ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
-  O(NameA,           ONE(CAR),         ONE(AV),         ONE(CV),    NF) \
+  O(ClsRefName,      ONE(CAR),         NOV,             ONE(CV),    NF) \
   O(File,            NA,               NOV,             ONE(CV),    NF) \
   O(Dir,             NA,               NOV,             ONE(CV),    NF) \
   O(Method,          NA,               NOV,             ONE(CV),    NF) \
@@ -443,29 +442,28 @@ constexpr int32_t kMaxConcatN = 4;
   O(CGetQuietL,      ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
   O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
-  O(CGetL3,          ONE(LA),          NOV,             INS_2(CV),  NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetN,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetQuietN,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetQuietG,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(CGetS,           ONE(CAR),         TWO(AV,CV),      ONE(CV),    NF) \
+  O(CGetS,           ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(VGetL,           ONE(LA),          NOV,             ONE(VV),    NF) \
   O(VGetN,           NA,               ONE(CV),         ONE(VV),    NF) \
   O(VGetG,           NA,               ONE(CV),         ONE(VV),    NF) \
-  O(VGetS,           ONE(CAR),         TWO(AV,CV),      ONE(VV),    NF) \
-  O(AGetC,           ONE(CAW),         ONE(CV),         ONE(AV),    NF) \
-  O(AGetL,           TWO(LA,CAW),      NOV,             ONE(AV),    NF) \
+  O(VGetS,           ONE(CAR),         ONE(CV),         ONE(VV),    NF) \
+  O(ClsRefGetC,      ONE(CAW),         ONE(CV),         NOV,        NF) \
+  O(ClsRefGetL,      TWO(LA,CAW),      NOV,             NOV,        NF) \
   O(GetMemoKeyL,     ONE(LA),          NOV,             ONE(CV),    NF) \
   O(AKExists,        NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(IssetL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(IssetN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(IssetG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(IssetS,          ONE(CAR),         TWO(AV,CV),      ONE(CV),    NF) \
+  O(IssetS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(EmptyL,          ONE(LA),          NOV,             ONE(CV),    NF) \
   O(EmptyN,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(EmptyG,          NA,               ONE(CV),         ONE(CV),    NF) \
-  O(EmptyS,          ONE(CAR),         TWO(AV,CV),      ONE(CV),    NF) \
+  O(EmptyS,          ONE(CAR),         ONE(CV),         ONE(CV),    NF) \
   O(IsTypeC,         ONE(OA(IsTypeOp)),ONE(CV),         ONE(CV),    NF) \
   O(IsTypeL,         TWO(LA,                                            \
                        OA(IsTypeOp)),  NOV,             ONE(CV),    NF) \
@@ -475,23 +473,23 @@ constexpr int32_t kMaxConcatN = 4;
   O(SetL,            ONE(LA),          ONE(CV),         ONE(CV),    NF) \
   O(SetN,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(SetG,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SetS,            ONE(CAR),         THREE(CV,AV,CV), ONE(CV),    NF) \
+  O(SetS,            ONE(CAR),         TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpL,          TWO(LA,                                            \
                        OA(SetOpOp)),   ONE(CV),         ONE(CV),    NF) \
   O(SetOpN,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpG,          ONE(OA(SetOpOp)), TWO(CV,CV),      ONE(CV),    NF) \
   O(SetOpS,          TWO(OA(SetOpOp),CAR),                              \
-                                       THREE(CV,AV,CV), ONE(CV),    NF) \
+                                       TWO(CV,CV),      ONE(CV),    NF) \
   O(IncDecL,         TWO(LA,                                            \
                        OA(IncDecOp)),  NOV,             ONE(CV),    NF) \
   O(IncDecN,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         TWO(OA(IncDecOp),CAR),                             \
-                                       TWO(AV,CV),      ONE(CV),    NF) \
+                                       ONE(CV),         ONE(CV),    NF) \
   O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
   O(BindN,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
-  O(BindS,           ONE(CAR),         THREE(VV,AV,CV), ONE(VV),    NF) \
+  O(BindS,           ONE(CAR),         TWO(VV,CV),      ONE(VV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetN,          NA,               ONE(CV),         NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
@@ -503,10 +501,10 @@ constexpr int32_t kMaxConcatN = 4;
                        OA(ObjMethodOp)), TWO(CV,CV),    NOV,        PF) \
   O(FPushObjMethodD, THREE(IVA,SA,                                      \
                        OA(ObjMethodOp)), ONE(CV),       NOV,        PF) \
-  O(FPushClsMethod,  TWO(IVA,CAR),     TWO(AV,CV),      NOV,        PF) \
-  O(FPushClsMethodF, TWO(IVA,CAR),     TWO(AV,CV),      NOV,        PF) \
+  O(FPushClsMethod,  TWO(IVA,CAR),     ONE(CV),         NOV,        PF) \
+  O(FPushClsMethodF, TWO(IVA,CAR),     ONE(CV),         NOV,        PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(FPushCtor,       TWO(IVA,CAR),     ONE(AV),         ONE(CV),    PF) \
+  O(FPushCtor,       TWO(IVA,CAR),     NOV,             ONE(CV),    PF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
   O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
   O(FPushCufIter,    TWO(IVA,IA),      NOV,             NOV,        PF) \
@@ -522,7 +520,7 @@ constexpr int32_t kMaxConcatN = 4;
   O(FPassL,          TWO(IVA,LA),      NOV,             ONE(FV),    FF) \
   O(FPassN,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
   O(FPassG,          ONE(IVA),         ONE(CV),         ONE(FV),    FF) \
-  O(FPassS,          TWO(IVA,CAR),     TWO(AV,CV),      ONE(FV),    FF) \
+  O(FPassS,          TWO(IVA,CAR),     ONE(CV),         ONE(FV),    FF) \
   O(FCall,           ONE(IVA),         FMANY,           ONE(RV),    CF_FF) \
   O(FCallAwait,      THREE(IVA,SA,SA), FMANY,           ONE(CV),    CF_FF) \
   O(FCallD,          THREE(IVA,SA,SA), FMANY,           ONE(RV),    CF_FF) \
@@ -572,9 +570,9 @@ constexpr int32_t kMaxConcatN = 4;
   O(VerifyParamType, ONE(LA),          NOV,             NOV,        NF) \
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeV,  NA,               ONE(VV),         ONE(VV),    NF) \
-  O(Self,            ONE(CAW),         NOV,             ONE(AV),    NF) \
-  O(Parent,          ONE(CAW),         NOV,             ONE(AV),    NF) \
-  O(LateBoundCls,    ONE(CAW),         NOV,             ONE(AV),    NF) \
+  O(Self,            ONE(CAW),         NOV,             NOV,        NF) \
+  O(Parent,          ONE(CAW),         NOV,             NOV,        NF) \
+  O(LateBoundCls,    ONE(CAW),         NOV,             NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
@@ -614,10 +612,8 @@ constexpr int32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(BaseGL,          TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
-  O(BaseSC,          THREE(IVA, IVA, CAR),                              \
-                                       IDX_A,           IDX_A,      NF) \
-  O(BaseSL,          THREE(LA, IVA, CAR),                               \
-                                       IDX_A,           IDX_A,      NF) \
+  O(BaseSC,          TWO(IVA, CAR),    NOV,             NOV,        NF) \
+  O(BaseSL,          TWO(LA, CAR),     NOV,             NOV,        NF) \
   O(BaseL,           TWO(LA, OA(MOpMode)),                              \
                                        NOV,             NOV,        NF) \
   O(BaseC,           ONE(IVA),         NOV,             NOV,        NF) \

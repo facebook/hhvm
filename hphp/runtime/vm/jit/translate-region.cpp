@@ -407,14 +407,14 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
 
   auto stringProp = same_string_as(0);
   auto stringCls  = same_string_as(1);
-  auto agetc = Atom(Op::AGetC);
+  auto agetc = Atom(Op::ClsRefGetC);
   auto cgets = Atom(Op::CGetS);
 
   // Look for a class static singleton pattern.
   result = BCPattern {
     Atom(Op::String).capture(),
     Atom(Op::String).capture(),
-    Atom(Op::AGetC),
+    Atom(Op::ClsRefGetC),
     Atom(Op::CGetS),
     Atom(Op::IsTypeC),
     Atom::alt(

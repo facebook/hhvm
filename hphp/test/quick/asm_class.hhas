@@ -171,7 +171,7 @@
 
   String "print_it"
   String "Base"
-  AGetC 0
+  ClsRefGetC 0
   FPushClsMethod 1 0
   String "printing this string"
   FPassC 0

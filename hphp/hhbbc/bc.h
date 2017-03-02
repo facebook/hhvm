@@ -416,7 +416,6 @@ namespace imm {
 
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
-#define POP_AV  if (i == 0) return Flavor::A
 #define POP_VV  if (i == 0) return Flavor::V
 #define POP_FV  if (i == 0) return Flavor::F
 #define POP_RV  if (i == 0) return Flavor::R
@@ -475,11 +474,6 @@ namespace imm {
                       return Flavor::CVU;                     \
                     }
 
-#define POP_IDX_A  uint32_t numPop() const { return arg2 + 1; } \
-                   Flavor popFlavor(uint32_t i) const {         \
-                     return i == arg2 ? Flavor::C : Flavor::A;  \
-                   }
-
 #define PUSH_NOV          uint32_t numPush() const { return 0; }
 
 #define PUSH_ONE(x)       uint32_t numPush() const { return 1; }
@@ -487,10 +481,6 @@ namespace imm {
 #define PUSH_TWO(x, y)    uint32_t numPush() const { return 2; }
 
 #define PUSH_INS_1(...)   uint32_t numPush() const { return 1; }
-
-#define PUSH_INS_2(...)   uint32_t numPush() const { return 1; }
-
-#define PUSH_IDX_A        uint32_t numPush() const { return arg2; }
 
 #define FLAGS_NF
 #define FLAGS_TF
@@ -586,12 +576,9 @@ OPCODES
 #undef PUSH_ONE
 #undef PUSH_TWO
 #undef PUSH_INS_1
-#undef PUSH_INS_2
-#undef PUSH_IDX_A
 
 #undef POP_UV
 #undef POP_CV
-#undef POP_AV
 #undef POP_VV
 #undef POP_FV
 #undef POP_RV
@@ -608,7 +595,6 @@ OPCODES
 #undef POP_SMANY
 #undef POP_FMANY
 #undef POP_CVUMANY
-#undef POP_IDX_A
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA

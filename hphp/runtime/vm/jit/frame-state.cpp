@@ -672,9 +672,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       case Op::CGetL2:
         setType(stk(adjustedTop + 1), inst->typeParam());
         break;
-      case Op::CGetL3:
-        setType(stk(adjustedTop + 2), inst->typeParam());
-        break;
       default:
         // We don't track cells pushed by interp one except the top of the
         // stack, aside from the above special cases.

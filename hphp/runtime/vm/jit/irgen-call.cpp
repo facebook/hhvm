@@ -901,7 +901,6 @@ void emitFPushCufSafe(IRGS& env, int32_t numArgs) {
 }
 
 void emitFPushCtor(IRGS& env, int32_t numParams, uint32_t slot) {
-  popA(env);
   auto const cls  = takeClsRef(env, slot);
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
@@ -1140,7 +1139,6 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   trFlags.noProfiledFPush = true;
   auto sideExit = makeExit(env, trFlags);
 
-  popA(env);
   // We can side-exit, so peek the slot rather than reading from it.
   auto const clsVal  = peekClsRef(env, clsRefSlot);
   auto const methVal = popC(env);

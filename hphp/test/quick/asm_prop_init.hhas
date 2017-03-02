@@ -65,7 +65,7 @@
 .function do_test($who) {
   .numclsrefslots 1;
 
-  AGetL $who 0
+  ClsRefGetL $who 0
   ClsCns "BAR" 0
   String "\n"
   Concat
@@ -73,14 +73,14 @@
   PopC
 
   String "foo"
-  AGetL $who 0
+  ClsRefGetL $who 0
   CGetS 0
   String "\n"
   Concat
   Print
   PopC
 
-  AGetL $who 0
+  ClsRefGetL $who 0
   FPushCtor 0 0
   FCall 0
   PopR

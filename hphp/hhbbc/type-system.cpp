@@ -2468,7 +2468,6 @@ Type stack_flav(Type a) {
   if (a.subtypeOf(TInitCell)) return TInitCell;
   if (a.subtypeOf(TRef))      return TRef;
   if (a.subtypeOf(TGen))      return TGen;
-  if (a.subtypeOf(TCls))      return TCls;
   always_assert(0 && "stack_flav passed invalid type");
 }
 

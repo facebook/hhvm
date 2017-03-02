@@ -1286,8 +1286,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
-#define NUM_PUSH_INS_2(a) 1
-#define NUM_PUSH_IDX_A immIVA[1]
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
@@ -1300,7 +1298,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
-#define NUM_POP_IDX_A (immIVA[1] + 1)
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
@@ -1382,7 +1379,6 @@ OPCODES
 #undef NUM_PUSH_THREE
 #undef NUM_PUSH_POS_N
 #undef NUM_PUSH_INS_1
-#undef NUM_PUSH_IDX_A
 #undef NUM_POP_NOV
 #undef NUM_POP_ONE
 #undef NUM_POP_TWO
@@ -1396,7 +1392,6 @@ OPCODES
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
-#undef NUM_POP_IDX_A
 
 void initialize_opcode_map() {
 #define O(name, imm, pop, push, flags) \

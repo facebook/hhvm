@@ -113,12 +113,13 @@ ref. When a ref is duplicated or destroyed, the execution engine is responsible
 for honoring the container's refcount logic. When the container is destroyed,
 the cell it contains is also destroyed.
 
-A "classref" is a structure that contains a reference to a class. When a
-classref is pushed onto the stack or popped of the stack, no refcounting is
-required.
+A "classref" is a structure that contains a reference to a class. Classrefs are
+never stored on the stack or in locals. They can only be manipulated via
+"classref slots". Certain HHBC operations will read or write classref slots as
+a side-effect. Classref slots have "move semantics" in that reading from one
+automatically invalidates its contents.
 
-Values on the evaluation stack may be any of the three flavors listed above.
-Values stored in local variables may only be cells or refs.
+Values on the evaluation stack and local variables may only be cells or refs.
 
 
 Functions
@@ -127,27 +128,28 @@ Functions
 A unit's bytecode is organized into functions. Each function has its own
 metadata that provides essential information about the function, such as the
 name of the function, how many local variables it has, how many iterator
-variables it has, how many formal parameters it has, the names of the local
-variables, the names of the formal parameters, how each parameter should be
-passed (pass by value vs. pass by reference), whether each parameter has a
-default value, and an upper bound for the maximum depth the evaluation stack
-can reach at run time.
+variables it has, how many classref slots it has, how many formal parameters it
+has, the names of the local variables, the names of the formal parameters, how
+each parameter should be passed (pass by value vs. pass by reference), whether
+each parameter has a default value, and an upper bound for the maximum depth
+the evaluation stack can reach at run time.
 
-Each local variable and iterator variable has an id, and HHBC instructions can
-reference these variables using these ids. The id space for local variables is
-distinct from the id space for iterator variables. Thus local id 1 refers to a
-different variable than iterator id 1. Local variable ids and iterator ids are
-signed 32-bit integer values. No function may have more than 2^31 - 1 local
-variables, and no function may have more than 2^31 - 1 iterator variables.
+Each local variable, iterator variable, and classref slot has an id, and HHBC
+instructions can reference these variables using these ids. The id space for
+local variables, iterator variables, and classref slots are all distinct from
+each other. Thus local id 1 refers to a different variable than iterator id
+1. Local variable ids, iterator ids, and classref slots are signed 32-bit
+integer values. No function may have more than 2^31 - 1 each of local
+variables, iterator variables, and classref slots.
 
 Some local variables have names associated with them (called "named local
 variables"), while other local variables do not have names associated with them
 (called "unnamed local variables"). All local variables that reference formally
-declared parameters have names associated with them. Iterator variables do not
-have names associated with them. Variables that have a name associated with
-them will appear in the current variable environment (if they are defined),
-while variables that do not have a name associated with them will never appear
-in the current variable environment.
+declared parameters have names associated with them. Iterator variables and
+classref slots do not have names associated with them. Variables that have a
+name associated with them will appear in the current variable environment (if
+they are defined), while variables that do not have a name associated with them
+will never appear in the current variable environment.
 
 Formally declared parameters are considered to be local variables. Given a
 function with n formally declared parameters, local ids 0 through n-1 will be
@@ -691,11 +693,11 @@ instruction that ends the region, and the number of parameters being passed.
 Flavor descriptors
 ------------------
 
-Any given value on the stack must either be a cell, ref, or classref at run
-time. However, at bytecode generation time the specific flavor of a value on
-the stack is not always known. HipHop bytecode uses symbols called "flavor
-descriptors" to precisely describe what is known at bytecode generation about
-the state of the evaluation stack at each instruction boundary.
+Any given value on the stack must either be a cell or ref at run time. However,
+at bytecode generation time the specific flavor of a value on the stack is not
+always known. HipHop bytecode uses symbols called "flavor descriptors" to
+precisely describe what is known at bytecode generation about the state of the
+evaluation stack at each instruction boundary.
 
 Each instruction description specifies the flavor descriptor produced for each
 of its outputs. Each description also specifies the flavor descriptor consumed
@@ -705,7 +707,6 @@ Here is a description of each flavor descriptor:
 
   C - cell; specifies that the value must be a cell at run time
   V - ref; specifies that the value must be a ref at run time
-  A - classref; specifies that the value must be a classref at run time
   R - return value; specifies that the value may be a cell or a ref at run
       time; this flavor descriptor is used for return values from function
       calls
@@ -715,6 +716,8 @@ Here is a description of each flavor descriptor:
   U - uninit; specifies that the value must be an uninitialized null at run
       time; this is only used for FCallBuiltin, CreateCl, and CUGetL.
 
+Classrefs are not assigned a flavor as they only can appear within classref
+slots and thus are implicit.
 
 Verifiability
 -------------
@@ -751,20 +754,21 @@ available at that given point in the bytecode. Likewise, the flavor descriptor
 of each slot on the evaluation stack must be compatible with the instruction's
 inputs' flavor descriptors.
 
-3) The evaluation stack must be empty at any offset listed as a catch entry
-point.
+3) The evaluation stack must be empty and all classref slots must be
+uninitialized at any offset listed as a catch entry point.
 
 4) If a given instruction is not the target of a forward branch and it follows
 a Jmp, Switch, SSwitch, RetC, RetV, Unwind, Fatal, Throw, or NativeImpl
-instruction, the evaluation stack before executing the given instruction
-must be empty.
+instruction, the evaluation stack before executing the given instruction must
+be empty, and all classref slots must be uninitialized.
 
 5) Before executing the RetC instruction, the evaluation stack must contain
 exactly one value and the flavor descriptor of the value must be cell.
 Likewise, before executing the RetV instruction, the evaluation stack must
 contain exactly one value and the flavor descriptor of the value must be the
 ref. Finally, before executing the Unwind or NativeImpl instructions, the
-evaluation stack must be empty.
+evaluation stack must be empty. In all the above cases, all classref slots must
+be uninitialized.
 
 6) The code for the primary function body and fault funclets must be laid out
 in order in one contiguous block, starting with the primary function body and
@@ -830,6 +834,11 @@ variable.
 15) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
 
+16) The initialization state of each classref slot must be known at every point
+in the code and must be the same for all control paths. A classref slot must be
+initialized before being read and becomes uninitialized after being read. A
+classref slot must be uninitialized before being written to and becomes
+initialized after being written.
 
 Instruction set
 ---------------
@@ -951,7 +960,10 @@ EntryNop []  ->  []
   avoid having jumps to the entry of a function. Contrary to a Nop, EntryNop
   is guaranteed to not be optimized away.
 
-PopA <class-ref slot> [A]  ->  []
+DiscardClsRef <class-ref slot> []  ->  []
+
+  Discard the class in %1.
+
 PopC                  [C]  ->  []
 PopV                  [V]  ->  []
 PopR                  [R]  ->  []
@@ -1175,11 +1187,11 @@ CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
   Get constant. Identical to Cns except returns constant named %2 if the
   constant named %1 is undefined.
 
-ClsCns <litstr id> <class-ref slot>  [A]  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
+ClsCns <litstr id> <class-ref slot>  []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
 
   Get class constant. This instruction pushes the value of the class constant
-  named %1 from class $1 onto the stack. If there is no class constant named %1
-  in class $1, this instruction throws a fatal error.
+  named %1 from class %2 onto the stack. If there is no class constant named %1
+  in class %2, this instruction throws a fatal error.
 
 ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
 
@@ -1201,9 +1213,9 @@ Method  []  ->  [C:Static Str]
   Push string. File pushes __FILE__ onto the stack, Dir pushes __DIR__ onto
   the stack, and Method pushes __METHOD__.
 
-NameA <class-ref slot>  [A] ->  [C:Static Str]
+ClsRefName <class-ref slot>  [] ->  [C:Static Str]
 
-  Push the name of the class in $1 as a string.
+  Push the name of the class in %1 as a string.
 
 
 3. Operator instructions
@@ -1576,16 +1588,6 @@ CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
   If the local variable is not defined, this instruction raises a warning,
   pushes null onto the stack, and then pushes $1 onto the stack.
 
-CGetL3 <local variable id>    [<F2>:<T2> <F1>:<T1>]  ->  [C <F2>:<T2> <F1>:<T1>]
-
-  Get local as cell. If the local variable given by %1 is defined, this
-  instruction gets the value of the local variable, pushes it onto the stack as
-  a cell, then pushes $2 onto the stack, and then pushes $1 onto the stack.
-
-  If the local variable given by %1 is not defined, this instruction raises a
-  warning, pushes null onto the stack, then pushes $2 onto the stack, and then
-  pushes $1 onto the stack.
-
 CUGetL <local variable id>    []  ->  [C|U]
 
   Get local as cell or uninit. If the local variable given by %1 is defined,
@@ -1635,10 +1637,10 @@ CGetQuietG    [C]  ->  [C]
   If there is not a global variable defined named x, this instruction pushes
   null onto the stack.
 
-CGetS <class-ref slot>    [C A]  ->  [C]
+CGetS <class-ref slot>    [C]  ->  [C]
 
-  Get static property as cell. This instruction first checks if class $1 has a
-  visible and accessible static property named (string)$2. If it doesn't, this
+  Get static property as cell. This instruction first checks if class %1 has a
+  visible and accessible static property named (string)$1. If it doesn't, this
   instruction throws a fatal error. Otherwise, this instruction pushes the
   static property onto the stack as a cell.
 
@@ -1667,23 +1669,23 @@ VGetG    [C]  ->  [V]
   to null, boxes it, and pushes the value of the global variable onto the stack
   as a ref.
 
-VGetS <class-ref slot>    [C A]  ->  [V]
+VGetS <class-ref slot>    [C]  ->  [V]
 
-  Get static property as ref. This instruction first checks if class $1 has a
-  visible and accessible static property named (string)$2. If it doesn't, this
+  Get static property as ref. This instruction first checks if class %1 has a
+  visible and accessible static property named (string)$1. If it doesn't, this
   instruction throws a fatal error. Otherwise, this instruction boxes the
   static property and pushes it onto the stack as a ref.
 
-AGetC <class-ref slot>                        [C]  ->  [A]
-AGetL <local variable id> <class-ref slot>    []   ->  [A]
+ClsRefGetC <class-ref slot>                        [C]  ->  []
+ClsRefGetL <local variable id> <class-ref slot>    []   ->  []
 
   Fetch class. This instruction first loads a value into x as shown by the
   following table:
 
-    instruction    x
-    ------------+----
-      AGetC     | $1
-      AGetL     | %1
+      instruction    x
+    ---------------+----
+      ClsRefGetC   | $1
+      ClsRefGetL   | %1
 
   Next this instruction checks if x is a string or an object. If x is not a
   string or object, this instruction throws a fatal error. Otherwise, this
@@ -1694,8 +1696,8 @@ AGetL <local variable id> <class-ref slot>    []   ->  [A]
   defined class. If y still does not match the name of a defined class this
   instruction throws a fatal error.
 
-  Next, this instruction pushes a classref that refers to the class named y.
-
+  Next, this instruction writes a classref that refers to the class named y to
+  %1 for ClsRefGetC, %2 for ClsRefGetL.
 
 6. Isset, Empty, and type querying instructions
 -----------------------------------------------
@@ -1723,13 +1725,13 @@ IssetG    [C]  ->  [C:Bool]
   the global variable is undefined or null, this instruction pushes false onto
   the stack, otherwise it pushes true.
 
-IssetS <class-ref slot>    [C A]  ->  [C:Bool]
+IssetS <class-ref slot>    [C]  ->  [C:Bool]
 
-  Isset static property. This instruction first computes x = (string)$2. Next
-  it checks if class $1 has an accessible static property named x. If it
+  Isset static property. This instruction first computes x = (string)$1. Next
+  it checks if class %1 has an accessible static property named x. If it
   doesn't, this instruction pushes false.
 
-  If class $1 does have an accessible property named x, this instruction reads
+  If class %1 does have an accessible property named x, this instruction reads
   the static property named x. If the static property is null, this instruction
   pushes false onto the stack, otherwise it pushes true.
 
@@ -1751,10 +1753,10 @@ EmptyG    [C]  ->  [C:Bool]
   into x. If the global variable is defined this instruction pushes !(x) onto
   the stack, otherwise it pushes true.
 
-EmptyS <class-ref slot>    [C A]  ->  [C:Bool]
+EmptyS <class-ref slot>    [C]  ->  [C:Bool]
 
-  Empty static property. This instruction first checks if class $1 has an
-  accessible static property named (string)$2. If it doesn't, this instruction
+  Empty static property. This instruction first checks if class %1 has an
+  accessible static property named (string)$1. If it doesn't, this instruction
   pushes true, otherwise this instruction reads the static property into x and
   pushes !(x) onto the stack.
 
@@ -1846,10 +1848,10 @@ SetG    [C C]  ->  [C]
   defined, assigns the value $1 to the global variable, and then pushes $1 onto
   the stack.
 
-SetS <class-ref slot>    [C A C]  ->  [C]
+SetS <class-ref slot>    [C C]  ->  [C]
 
-  Set static property. First this instruction checks if class $2 has an
-  accessible static property named (string)$3. If it doesn't, this instruction
+  Set static property. First this instruction checks if class %1 has an
+  accessible static property named (string)$2. If it doesn't, this instruction
   throws a fatal error. Otherwise, this instruction assigns the value $1 to the
   static property, and then it pushes $1 onto the stack.
 
@@ -1888,10 +1890,10 @@ SetOpG <op>    [C C]  ->  [C]
   opcodes:
     Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd, BitOr, BitXor.
 
-SetOpS <op> <class-ref slot>    [C A C]  ->  [C]
+SetOpS <op> <class-ref slot>    [C C]  ->  [C]
 
-  Set op static property. This instruction first computes x = (string)$3. Next
-  it checks if class $2 has an accessible static property named x. If it
+  Set op static property. This instruction first computes x = (string)$2. Next
+  it checks if class %2 has an accessible static property named x. If it
   doesn't, this instruction throws a fatal error. Otherwise, this instruction
   reads the static property named x into y, executes z = y <op> $1, assigns z
   into the static property, and then pushes z onto the stack. The immediate
@@ -1940,10 +1942,10 @@ IncDecG <op>    [C]  ->  [C]
   If op is PostDec, this instruction pushes v onto the stack and then it
   executes --v.
 
-IncDecS <op> <class-ref slot>    [C A]  ->  [C]
+IncDecS <op> <class-ref slot>    [C]  ->  [C]
 
   Increment/decrement static property. This instruction first computes x =
-  (string)$2. Next it checks if class $1 has an accessible static property
+  (string)$1. Next it checks if class %1 has an accessible static property
   named x. If it doesn't, this instruction throws a fatal error.
 
   Where s is the static property named x, this instruction performs the
@@ -1976,10 +1978,10 @@ BindG    [C V]  ->  [V]
   Bind global. This instruction marks the global variable named (string)$2 as
   defined, binds the global variable to $1, and pushes $1 onto the stack.
 
-BindS <class-ref slot>    [C A V]  ->  [V]
+BindS <class-ref slot>    [C V]  ->  [V]
 
-  Bind static property. This instruction first checks if class $2 has an
-  accessible static property named (string)$3. If it doesn't, this instruction
+  Bind static property. This instruction first checks if class %1 has an
+  accessible static property named (string)$2. If it doesn't, this instruction
   throws a fatal error. Otherwise, this instruction binds the static property
   to $1, and pushes $1 onto the stack.
 
@@ -2089,21 +2091,21 @@ FPushObjMethodD <num params> <litstr id>    [C]  ->  []
   If object x does not have an accessible method named y and it does not have a
   __call method, this instruction throws a fatal error.
 
-FPushClsMethod  <num params> <class-ref slot>           [C A]  ->  []
-FPushClsMethodF <num params> <class-ref slot>           [C A]  ->  []
-FPushClsMethodD <num params> <litstr id> <litstr id>    []     ->  []
+FPushClsMethod  <num params> <class-ref slot>           [C]  ->  []
+FPushClsMethodF <num params> <class-ref slot>           [C]  ->  []
+FPushClsMethodD <num params> <litstr id> <litstr id>    []   ->  []
 
   FPI push class-based method. First, these instructions load values into x and
   y as given by the following table:
 
     instruction           x    y
     -------------------+----+-----
-      FPushClsMethod   | $1 | $2
-      FPushClsMethodF  | $1 | $2
+      FPushClsMethod   | $1 | %2
+      FPushClsMethodF  | $1 | %2
       FPushClsMethodD  | %3 | %2
 
   When loading %3 into x, FPushClsMethodD will perform the work performed by
-  the AGetC instruction to convert the name given by %3 into a classref.
+  the ClsRefGetC instruction to convert the name given by %3 into a classref.
 
   If y is not a string, this instruction throws a fatal error. Next, this
   instruction checks if class x has an accessible method named y. If it does,
@@ -2125,21 +2127,21 @@ FPushClsMethodD <num params> <litstr id> <litstr id>    []     ->  []
   __call method or a __callStatic method could not be found, this instruction
   throws a fatal error.
 
-FPushCtor <num params> <class-ref slot>   [A]  ->  [C]
-FPushCtorD <num params> <litstr id>       []   ->  [C]
-FPushCtorI <num params> <class id>        []   ->  [C]
+FPushCtor <num params> <class-ref slot>   []  ->  [C]
+FPushCtorD <num params> <litstr id>       []  ->  [C]
+FPushCtorI <num params> <class id>        []  ->  [C]
 
   FPI push constructor. First, these instructions load a value into x as given
   by the following table:
 
     instruction     x
     --------------+----
-      FPushCtor   | $1
+      FPushCtor   | %2
       FPushCtorD  | %2
       FPushCtorI  | %2
 
   When loading %2 into x, FPushCtorD will perform the work performed by the
-  AGetC instruction to convert the name given by %2 into a classref, and
+  ClsRefGetC instruction to convert the name given by %2 into a classref, and
   FPushCtorI will load the class in the current unit with id %2.
 
   This instruction pushes an uninitialized object onto the stack (to be
@@ -2230,7 +2232,7 @@ FPassG <param id>    [C]  ->  [F]
   %1 is pass by value, or it behaves like VGetG if parameter %1 is pass by
   reference.
 
-FPassS <param id> <class-ref slot>    [C A]  ->  [F]
+FPassS <param id> <class-ref slot>    [C]  ->  [F]
 
   FPI pass parameter. This instruction behaves as CGetS if parameter %1 is pass
   by value, or it behaves like VGetS if parameter %1 is pass by reference.
@@ -2400,21 +2402,21 @@ BaseGLD <local variable id>    []  ->  [B]
   global variable whose name is given by (string)%1 or (string)$1, defining it
   first if necessary.
 
-BaseSC <class-ref slot>                        [C A]  ->  [B]
-BaseSL <local variable id> <class-ref slot>    [A]    ->  [B]
+BaseSC <class-ref slot>                        [C]  ->  [B]
+BaseSL <local variable id> <class-ref slot>    []   ->  [B]
 
   Get base from static property. First, this operation loads a value into x as
   given by the following table:
 
        operation     x
        -----------+----
-         BaseSC   | $2
+         BaseSC   | $1
          BaseSL   | %1
 
   Next this operation computes y = (string)x. Then this instruction checks if
-  class $1 has an accessible property named y. If it does, this operation
-  outputs a base that points to the static property. Otherwise, this operation
-  throws a fatal error.
+  class in %1 (for BaseSC) or %2 (for BaseSL) has an accessible property named
+  y. If it does, this operation outputs a base that points to the static
+  property. Otherwise, this operation throws a fatal error.
 
 BaseH     []  ->  [B]
 
@@ -3465,12 +3467,12 @@ FPassBaseGL <param id> <local id>       []  ->  []
 
   BaseG{C,L}{,W,D} member operation.
 
-BaseSC <stack index> <stack index>    [A CV?]  ->  [CV?]
-BaseSL <local id>    <stack index>    [A CV?]  ->  [CV?]
+BaseSC <stack index> <class-ref slot>    [CV?]  ->  [CV?]
+BaseSL <local id>    <class-ref slot>    [CV?]  ->  [CV?]
 
   BaseS{C,L} member operation. %1 gives the location of the static property
-  name, and %2 gives the index of the class input. The class is consumed from
-  the stack, leaving an optional cell or var above the class undisturbed.
+  name, and %2 gives the class input. The class is consumed, leaving an
+  optional cell or var on the top of the stack undisturbed.
 
 BaseL <local id> <member op mode>    []  ->  []
 
@@ -3958,24 +3960,24 @@ VerifyRetTypeV    [V] -> [V]
   is compatible with the current function's return type annotation and raises
   a warning if there is a mismatch, and then it pushes $1 back onto the stack.
 
-Self <class-ref slot>    []  ->  [A]
+Self <class-ref slot>    []  ->  []
 
   Creates a classref that refers to the class in which the current function is
   defined. This instruction throws a fatal error if the current method is
-  defined outside of a class, otherwise it pushes a classref on the stack.
+  defined outside of a class, otherwise it writes a classref to %1.
 
-Parent <class-ref slot>  []  ->  [A]
+Parent <class-ref slot>  []  ->  []
 
   Creates a classref that refers to the parent of the class in which the
   current method is defined. This instruction throws a fatal error if the
   current method is defined outside of a class or if the class in which the
-  current method is defined has no parent, otherwise it pushes a classref on
-  the stack.
+  current method is defined has no parent, otherwise it writes a classref to
+  %1.
 
-LateBoundCls <class-ref slot>    []  ->  [A]
+LateBoundCls <class-ref slot>    []  ->  []
 
   Late-bound class. Creates a classref that refers to the current late-bound
-  class and pushes it onto the stack.
+  class and writes it to %1.
 
 NativeImpl    []  ->  []
 

@@ -1808,9 +1808,8 @@ OPTBLD_INLINE void iopNop() {
 OPTBLD_INLINE void iopEntryNop() {
 }
 
-OPTBLD_INLINE void iopPopA(clsref_slot slot) {
+OPTBLD_INLINE void iopDiscardClsRef(clsref_slot slot) {
   slot.take();
-  vmStack().popA();
 }
 
 OPTBLD_INLINE void iopPopC() {
@@ -1906,10 +1905,9 @@ OPTBLD_INLINE void iopMethod() {
   vmStack().pushStaticString(s);
 }
 
-OPTBLD_INLINE void iopNameA(clsref_slot slot) {
+OPTBLD_INLINE void iopClsRefName(clsref_slot slot) {
   auto const cls  = slot.take();
   auto const name = cls->name();
-  vmStack().popA();
   vmStack().pushStaticString(name);
 }
 
@@ -2162,7 +2160,7 @@ OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName, clsref_slot slot) {
                 cls->name()->data(), clsCnsName->data());
   }
 
-  cellDup(clsCns, *vmStack().topTV());
+  cellDup(clsCns, *vmStack().allocTV());
 }
 
 OPTBLD_INLINE void iopClsCnsD(const StringData* clsCnsName, Id classId) {
@@ -3014,18 +3012,15 @@ OPTBLD_INLINE void iopThrow() {
   throw req::root<Object>(std::move(obj));
 }
 
-OPTBLD_INLINE void iopAGetC(clsref_slot slot) {
+OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
   auto const cell = vmStack().topC();
   auto const cls  = lookupClsRef(cell);
   slot.put(cls);
   vmStack().popC();
-  vmStack().pushClass(cls);
 }
 
-OPTBLD_INLINE void iopAGetL(local_var fr, clsref_slot slot) {
-  auto const cls = lookupClsRef(tvToCell(fr.ptr));
-  slot.put(cls);
-  vmStack().pushClass(cls);
+OPTBLD_INLINE void iopClsRefGetL(local_var fr, clsref_slot slot) {
+  slot.put(lookupClsRef(tvToCell(fr.ptr)));
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {
@@ -3074,15 +3069,6 @@ OPTBLD_INLINE void iopCGetL2(local_var fr) {
   TypedValue* newTop = vmStack().allocTV();
   memcpy(newTop, oldTop, sizeof *newTop);
   Cell* to = oldTop;
-  cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
-}
-
-OPTBLD_INLINE void iopCGetL3(local_var fr) {
-  TypedValue* oldTop = vmStack().topTV();
-  TypedValue* oldSubTop = vmStack().indTV(1);
-  TypedValue* newTop = vmStack().allocTV();
-  memmove(newTop, oldTop, sizeof *oldTop * 2);
-  Cell* to = oldSubTop;
   cgetl_body(vmfp(), fr.ptr, to, fr.index, true);
 }
 
@@ -3152,7 +3138,7 @@ struct SpropState {
 
 SpropState::SpropState(Stack& vmstack, clsref_slot slot) {
   cls = slot.take();
-  auto nameCell = output = vmstack.indTV(1);
+  auto nameCell = output = vmstack.topTV();
   lookup_sprop(vmfp(), cls, name, nameCell, val, visible, accessible);
   oldNameCell = *nameCell;
 }
@@ -3177,7 +3163,6 @@ template<bool box> void getS(clsref_slot slot) {
   } else {
     cellDup(*tvToCell(ss.val), *ss.output);
   }
-  vmStack().popA();
 }
 
 OPTBLD_INLINE void iopCGetS(clsref_slot slot) {
@@ -3260,18 +3245,9 @@ OPTBLD_INLINE void iopFPassBaseGL(ActRec* ar, intva_t paramId, local_var loc) {
   baseGImpl(tvToCell(loc.ptr), mode);
 }
 
-static inline TypedValue* baseSImpl(int32_t clsIdx,
-                                    TypedValue* key,
+static inline TypedValue* baseSImpl(TypedValue* key,
                                     clsref_slot slot) {
-  auto& stack = vmStack();
   auto const class_ = slot.take();
-  // Discard the class, preserving the RHS value if it's there.
-  if (clsIdx == 1) {
-    tvCopy(*stack.indTV(0), *stack.indTV(1));
-    stack.discard();
-  } else {
-    stack.popA();
-  }
 
   auto const name = lookup_name(key);
   SCOPE_EXIT { decRefStr(name); };
@@ -3285,14 +3261,14 @@ static inline TypedValue* baseSImpl(int32_t clsIdx,
   return lookup.prop;
 }
 
-OPTBLD_INLINE void iopBaseSC(intva_t keyIdx, intva_t clsIdx, clsref_slot slot) {
+OPTBLD_INLINE void iopBaseSC(intva_t keyIdx, clsref_slot slot) {
   auto& mstate = initMState();
-  mstate.base = baseSImpl(clsIdx, vmStack().indTV(keyIdx), slot);
+  mstate.base = baseSImpl(vmStack().indTV(keyIdx), slot);
 }
 
-OPTBLD_INLINE void iopBaseSL(local_var keyLoc, intva_t clsIdx, clsref_slot slot) {
+OPTBLD_INLINE void iopBaseSL(local_var keyLoc, clsref_slot slot) {
   auto& mstate = initMState();
-  mstate.base = baseSImpl(clsIdx, tvToCell(keyLoc.ptr), slot);
+  mstate.base = baseSImpl(tvToCell(keyLoc.ptr), slot);
 }
 
 OPTBLD_INLINE void baseLImpl(local_var loc, MOpMode mode) {
@@ -3741,7 +3717,6 @@ OPTBLD_INLINE void iopIssetS(clsref_slot slot) {
   } else {
     e = !cellIsNull(tvToCell(ss.val));
   }
-  vmStack().popA();
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
 }
@@ -3886,7 +3861,6 @@ OPTBLD_INLINE void iopEmptyS(clsref_slot slot) {
   } else {
     e = !cellToBool(*tvToCell(ss.val));
   }
-  vmStack().popA();
   ss.output->m_data.num = e;
   ss.output->m_type = KindOfBoolean;
 }
@@ -4060,7 +4034,7 @@ OPTBLD_INLINE void iopSetG() {
 OPTBLD_INLINE void iopSetS(clsref_slot slot) {
   TypedValue* tv1 = vmStack().topTV();
   Class* cls = slot.take();
-  TypedValue* propn = vmStack().indTV(2);
+  TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
@@ -4075,7 +4049,7 @@ OPTBLD_INLINE void iopSetS(clsref_slot slot) {
   tvSet(*tv1, *val);
   tvRefcountedDecRef(propn);
   memcpy(output, tv1, sizeof(TypedValue));
-  vmStack().ndiscard(2);
+  vmStack().ndiscard(1);
 }
 
 OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
@@ -4121,7 +4095,7 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
 OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot slot) {
   Cell* fr = vmStack().topC();
   Class* cls = slot.take();
-  TypedValue* propn = vmStack().indTV(2);
+  TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
@@ -4137,7 +4111,7 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot slot) {
   tvRefcountedDecRef(propn);
   tvRefcountedDecRef(fr);
   cellDup(*tvToCell(val), *output);
-  vmStack().ndiscard(2);
+  vmStack().ndiscard(1);
 }
 
 OPTBLD_INLINE void iopIncDecL(local_var fr, IncDecOp op) {
@@ -4188,7 +4162,6 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
                 ss.name->data());
   }
   cellCopy(IncDecBody(op, tvToCell(ss.val)), *ss.output);
-  vmStack().discard();
 }
 
 OPTBLD_INLINE void iopBindL(local_var to) {
@@ -4225,7 +4198,7 @@ OPTBLD_INLINE void iopBindG() {
 OPTBLD_INLINE void iopBindS(clsref_slot slot) {
   TypedValue* fr = vmStack().topTV();
   Class* cls = slot.take();
-  TypedValue* propn = vmStack().indTV(2);
+  TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
   TypedValue* val;
@@ -4240,7 +4213,7 @@ OPTBLD_INLINE void iopBindS(clsref_slot slot) {
   tvBind(fr, val);
   tvRefcountedDecRef(propn);
   memcpy(output, fr, sizeof(TypedValue));
-  vmStack().ndiscard(2);
+  vmStack().ndiscard(1);
 }
 
 OPTBLD_INLINE void iopUnsetL(local_var loc) {
@@ -4530,14 +4503,14 @@ void pushClsMethodImpl(Class* cls, StringData* name, int numArgs) {
 }
 
 OPTBLD_INLINE void iopFPushClsMethod(intva_t numArgs, clsref_slot slot) {
-  Cell* c1 = vmStack().indC(1); // Method name.
+  Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   Class* cls = slot.take();
   StringData* name = c1->m_data.pstr;
   // pushClsMethodImpl will take care of decReffing name
-  vmStack().ndiscard(2);
+  vmStack().ndiscard(1);
   assert(cls && name);
   pushClsMethodImpl<false>(cls, name, numArgs);
 }
@@ -4554,21 +4527,19 @@ void iopFPushClsMethodD(intva_t numArgs, const StringData* name, Id classId) {
 }
 
 OPTBLD_INLINE void iopFPushClsMethodF(intva_t numArgs, clsref_slot slot) {
-  Cell* c1 = vmStack().indC(1); // Method name.
+  Cell* c1 = vmStack().topC(); // Method name.
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
   Class* cls = slot.take();
-  assert(cls);
   StringData* name = c1->m_data.pstr;
   // pushClsMethodImpl will take care of decReffing name
-  vmStack().ndiscard(2);
+  vmStack().ndiscard(1);
   pushClsMethodImpl<true>(cls, name, numArgs);
 }
 
 OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
   Class* cls = slot.take();
-  assert(cls != nullptr);
   // Lookup the ctor
   const Func* f;
   auto res UNUSED = lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
@@ -4577,7 +4548,6 @@ OPTBLD_INLINE void iopFPushCtor(intva_t numArgs, clsref_slot slot) {
   ObjectData* this_ = newInstance(cls);
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
-  vmStack().popA();
   vmStack().pushObject(this_);
   // Push new activation record.
   ActRec* ar = vmStack().allocA();
@@ -5407,7 +5377,6 @@ OPTBLD_INLINE void iopLateBoundCls(clsref_slot slot) {
     raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
   }
   slot.put(cls);
-  vmStack().pushClass(cls);
 }
 
 OPTBLD_INLINE void iopVerifyParamType(local_var param) {
@@ -5477,7 +5446,6 @@ OPTBLD_INLINE void iopSelf(clsref_slot slot) {
     raise_error(HPHP::Strings::CANT_ACCESS_SELF);
   }
   slot.put(clss);
-  vmStack().pushClass(clss);
 }
 
 OPTBLD_INLINE void iopParent(clsref_slot slot) {
@@ -5490,7 +5458,6 @@ OPTBLD_INLINE void iopParent(clsref_slot slot) {
     raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
   }
   slot.put(parent);
-  vmStack().pushClass(parent);
 }
 
 OPTBLD_INLINE void iopCreateCl(intva_t numArgs, intva_t clsIx) {
@@ -6318,24 +6285,6 @@ TCA iopWrapper(Op, void(*fn)(local_var,clsref_slot), PC& pc) {
 }
 
 OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,intva_t,clsref_slot), PC& pc) {
-  auto var1 = decode_local(pc);
-  auto n = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(var1, n, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(local_var,local_var,clsref_slot), PC& pc) {
-  auto var1 = decode_local(pc);
-  auto var2 = decode_local(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(var1, var2, s);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(intva_t), PC& pc) {
   auto n = decode_intva(pc);
   fn(n);
@@ -6363,15 +6312,6 @@ TCA iopWrapper(Op, void(*fn)(intva_t,LocalRange), PC& pc) {
   auto n1 = decode_intva(pc);
   auto n2 = decodeLocalRange(pc);
   fn(n1, n2);
-  return nullptr;
-}
-
-OPTBLD_INLINE static
-TCA iopWrapper(Op, void(*fn)(intva_t,intva_t,clsref_slot), PC& pc) {
-  auto n1 = decode_intva(pc);
-  auto n2 = decode_intva(pc);
-  auto s = decode_clsref_slot(pc);
-  fn(n1, n2, s);
   return nullptr;
 }
 

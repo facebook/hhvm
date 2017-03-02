@@ -171,7 +171,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType().unbox();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutClassRef:   return TInitNull; // Temporary until A flavors are removed
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
@@ -365,7 +364,6 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
     auto const checkIdx = BCSPRelOffset{
-      (out & InstrFlags::StackIns2) ? 2 :
       (out & InstrFlags::StackIns1) ? 1 : 0
     }.to<FPInvOffset>(env.irb->fs().bcSPOff());
 
@@ -419,7 +417,6 @@ void interpOne(IRGS& env,
 void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
 
 void emitLowInvalid(IRGS& env)                { std::abort(); }
-void emitCGetL3(IRGS& env, int32_t)           { INTERP }
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }

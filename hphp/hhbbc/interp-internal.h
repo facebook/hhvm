@@ -234,6 +234,7 @@ Type popT(ISS& env) {
   assert(!env.state.stack.empty());
   auto const ret = std::move(env.state.stack.back().type);
   FTRACE(2, "    pop:  {}\n", show(ret));
+  assert(ret.subtypeOf(TGen));
   env.state.stack.pop_back();
   return ret;
 }
@@ -247,12 +248,6 @@ Type popC(ISS& env) {
 Type popV(ISS& env) {
   auto const v = popT(env);
   assert(v.subtypeOf(TRef));
-  return v;
-}
-
-Type popA(ISS& env) {
-  auto const v = popT(env);
-  assert(v.subtypeOf(TInitNull));
   return v;
 }
 
@@ -281,11 +276,6 @@ void discard(ISS& env, int n) {
 Type& topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1].type;
-}
-
-Type& topA(ISS& env, uint32_t i = 0) {
-  assert(topT(env, i).subtypeOf(TCls));
-  return topT(env, i);
 }
 
 Type& topC(ISS& env, uint32_t i = 0) {
@@ -515,6 +505,7 @@ const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
 Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
   assert(slot >= 0);
   auto ret = std::move(env.state.clsRefSlots[slot]);
+  FTRACE(2, "    read class-ref: {} -> {}\n", slot, show(ret));
   always_assert_flog(ret.subtypeOf(TCls), "class-ref slot contained non-TCls");
   env.state.clsRefSlots[slot] = TCls;
   return ret;
@@ -524,6 +515,7 @@ void putClsRefSlot(ISS& env, ClsRefSlotId slot, Type ty) {
   assert(slot >= 0);
   always_assert_flog(ty.subtypeOf(TCls),
                      "attempted to set class-ref slot to non-TCls");
+  FTRACE(2, "    write class-ref: {} -> {}\n", slot, show(ty));
   env.state.clsRefSlots[slot] = std::move(ty);
 }
 

@@ -117,9 +117,8 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
 namespace interp_step {
 
 void in(ISS& env, const bc::Nop&)  { nothrow(env); }
-void in(ISS& env, const bc::PopA& op) {
+void in(ISS& env, const bc::DiscardClsRef& op) {
   nothrow(env);
-  popA(env);
   takeClsRefSlot(env, op.slot);
 }
 void in(ISS& env, const bc::PopC&) { nothrow(env); popC(env); }
@@ -380,11 +379,10 @@ void in(ISS& env, const bc::ClsCns& op) {
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
-      return reduce(env, bc::PopA { op.slot },
+      return reduce(env, bc::DiscardClsRef { op.slot },
                          bc::ClsCnsD { op.str1, dcls.cls.name() });
     }
   }
-  popA(env);
   takeClsRefSlot(env, op.slot);
   push(env, TInitCell);
 }
@@ -403,9 +401,8 @@ void in(ISS& env, const bc::File&)   { nothrow(env); push(env, TSStr); }
 void in(ISS& env, const bc::Dir&)    { nothrow(env); push(env, TSStr); }
 void in(ISS& env, const bc::Method&) { nothrow(env); push(env, TSStr); }
 
-void in(ISS& env, const bc::NameA& op) {
+void in(ISS& env, const bc::ClsRefName& op) {
   nothrow(env);
-  popA(env);
   takeClsRefSlot(env, op.slot);
   push(env, TSStr);
 }
@@ -1046,17 +1043,6 @@ void in(ISS& env, const bc::CGetL2& op) {
   push(env, std::move(top));
 }
 
-void in(ISS& env, const bc::CGetL3& op) {
-  // Can't constprop yet because of no INS_2 support in bc.h
-  if (!locCouldBeUninit(env, op.loc1)) nothrow(env);
-  auto loc = locAsCell(env, op.loc1);
-  auto t1 = popT(env);
-  auto t2 = popT(env);
-  push(env, std::move(loc));
-  push(env, std::move(t2));
-  push(env, std::move(t1));
-}
-
 namespace {
 
 template <typename Op> void common_cgetn(ISS& env) {
@@ -1083,7 +1069,6 @@ void in(ISS& env, const bc::CGetG&) { popC(env); push(env, TInitCell); }
 void in(ISS& env, const bc::CGetQuietG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::CGetS& op) {
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1152,7 +1137,6 @@ void in(ISS& env, const bc::VGetN&) {
 void in(ISS& env, const bc::VGetG&) { popC(env); push(env, TRef); }
 
 void in(ISS& env, const bc::VGetS& op) {
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1173,7 +1157,7 @@ void in(ISS& env, const bc::VGetS& op) {
   push(env, TRef);
 }
 
-void aGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
+void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
   auto cls = [&]{
     if (t1.subtypeOf(TObj)) {
       nothrow(env);
@@ -1187,15 +1171,14 @@ void aGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
     }
     return TCls;
   }();
-  push(env, TInitNull);
   putClsRefSlot(env, slot, std::move(cls));
 }
 
-void in(ISS& env, const bc::AGetL& op) {
-  aGetImpl(env, locAsCell(env, op.loc1), op.slot);
+void in(ISS& env, const bc::ClsRefGetL& op) {
+  clsRefGetImpl(env, locAsCell(env, op.loc1), op.slot);
 }
-void in(ISS& env, const bc::AGetC& op) {
-  aGetImpl(env, popC(env), op.slot);
+void in(ISS& env, const bc::ClsRefGetC& op) {
+  clsRefGetImpl(env, popC(env), op.slot);
 }
 
 void in(ISS& env, const bc::AKExists& op) {
@@ -1327,14 +1310,12 @@ void in(ISS& env, const bc::EmptyL& op) {
 }
 
 void in(ISS& env, const bc::EmptyS& op) {
-  popA(env);
   takeClsRefSlot(env, op.slot);
   popC(env);
   push(env, TBool);
 }
 
 void in(ISS& env, const bc::IssetS& op) {
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1532,7 +1513,6 @@ void in(ISS& env, const bc::SetG&) {
 
 void in(ISS& env, const bc::SetS& op) {
   auto const t1    = popC(env);
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1601,7 +1581,6 @@ void in(ISS& env, const bc::SetOpG&) {
 
 void in(ISS& env, const bc::SetOpS& op) {
   popC(env);
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1657,7 +1636,6 @@ void in(ISS& env, const bc::IncDecN& op) {
 void in(ISS& env, const bc::IncDecG&) { popC(env); push(env, TInitCell); }
 
 void in(ISS& env, const bc::IncDecS& op) {
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1710,7 +1688,6 @@ void in(ISS& env, const bc::BindG&) {
 
 void in(ISS& env, const bc::BindS& op) {
   popV(env);
-  popA(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);
   auto const vname = tv(tname);
@@ -1850,7 +1827,6 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
 }
 
 void in(ISS& env, const bc::FPushClsMethod& op) {
-  popA(env);
   auto const t1 = takeClsRefSlot(env, op.slot);
   auto const t2 = popC(env);
   auto const v2 = tv(t2);
@@ -1892,11 +1868,10 @@ void in(ISS& env, const bc::FPushCtor& op) {
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
     if (dcls.type == DCls::Exact) {
-      return reduce(env, bc::PopA { op.slot },
+      return reduce(env, bc::DiscardClsRef { op.slot },
                     bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack });
     }
   }
-  popA(env);
   takeClsRefSlot(env, op.slot);
   push(env, TObj);
   fpiPush(env, ActRec { FPIKind::Ctor });
@@ -1981,7 +1956,6 @@ void in(ISS& env, const bc::FPassS& op) {
   switch (prepKind(env, op.arg1)) {
   case PrepKind::Unknown:
     {
-      popA(env);
       auto tcls        = takeClsRefSlot(env, op.slot);
       auto const self  = selfCls(env);
       auto const tname = popC(env);
@@ -2482,7 +2456,6 @@ void in(ISS& env, const bc::This&) {
 
 void in(ISS& env, const bc::LateBoundCls& op) {
   auto const ty = selfCls(env);
-  push(env, TInitNull);
   putClsRefSlot(env, op.slot, ty ? *ty : TCls);
 }
 
@@ -2630,14 +2603,8 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
 
 // These only occur in traits, so we don't need to do better than
 // this.
-void in(ISS& env, const bc::Self& op) {
-  push(env, TInitNull);
-  putClsRefSlot(env, op.slot, TCls);
-}
-void in(ISS& env, const bc::Parent& op) {
-  push(env, TInitNull);
-  putClsRefSlot(env, op.slot, TCls);
-}
+void in(ISS& env, const bc::Self& op) { putClsRefSlot(env, op.slot, TCls); }
+void in(ISS& env, const bc::Parent& op) { putClsRefSlot(env, op.slot, TCls); }
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;

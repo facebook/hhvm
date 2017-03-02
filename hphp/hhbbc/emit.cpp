@@ -389,15 +389,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
-#define POP_IDX_A      pop(data.arg2 + 1);
 
 #define PUSH_NOV
 #define PUSH_ONE(x)            push(1);
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
-#define PUSH_INS_2(x)          push(1);
-#define PUSH_IDX_A             push(data.arg2);
 
 #define O(opcode, imms, inputs, outputs, flags)                   \
     auto emit_##opcode = [&] (const bc::opcode& data) {           \
@@ -461,15 +458,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
 #undef POP_V_MFINAL
-#undef POP_IDX_A
 
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
 #undef PUSH_THREE
 #undef PUSH_INS_1
-#undef PUSH_INS_2
-#undef PUSH_IDX_A
 
 #define O(opcode, ...)                                        \
     case Op::opcode:                                          \

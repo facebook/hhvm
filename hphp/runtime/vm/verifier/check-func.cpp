@@ -635,7 +635,6 @@ static const char* stkflav(FlavorDesc f) {
   case NOV:  return "N";
   case CV:   return "C";
   case VV:   return "V";
-  case AV:   return "A";
   case RV:   return "R";
   case FV:   return "F";
   case UV:   return "U";
@@ -687,7 +686,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define F_MFINAL { },
   #define C_MFINAL { },
   #define V_MFINAL { },
-  #define IDX_A { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
@@ -704,7 +702,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef TWO
   #undef ONE
   #undef NOV
-  #undef IDX_A
   };
   switch (peek_op(pc)) {
   case Op::QueryM:
@@ -757,18 +754,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
-  case Op::BaseSC:   // TWO(IVA, IVA),    IDX_A,           IDX_A
-  case Op::BaseSL: { // TWO(LA, IVA),    IDX_A,           IDX_A
-    auto const pops = instrNumPops(pc);
-    assert(pops == 2 || pops == 1);
-    if (pops == 1) {
-      m_tmp_sig[0] = AV;
-    } else {
-      m_tmp_sig[0] = AV;
-      m_tmp_sig[1] = CVV;
-    }
-    return m_tmp_sig;
-  }
   default:
     return &inputSigs[size_t(peek_op(pc))][0];
   }
@@ -904,8 +889,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define THREE(a,b,c) { a, b, c },
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define INS_1(a) { a },
-  #define INS_2(a) { a },
-  #define IDX_A { },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
@@ -913,13 +896,11 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #undef CMANY
   #undef SMANY
   #undef INS_1
-  #undef INS_2
   #undef FOUR
   #undef THREE
   #undef TWO
   #undef ONE
   #undef NOV
-  #undef IDX_A
   };
   bool ok = true;
   auto const op = peek_op(pc);

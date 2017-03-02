@@ -29,7 +29,7 @@
   FPushFuncD 1 "var_dump"
     String "arr"
     String "ClassWithArray"
-    AGetC 0
+    ClsRefGetC 0
     CGetS 0
     FPassC 0
   FCall 1
@@ -42,8 +42,8 @@
   FPushFuncD 1 "var_dump"
     String "arr"
     Int 2
-    AGetL $x 0
-    BaseSC 2 0 0
+    ClsRefGetL $x 0
+    BaseSC 1 0
     QueryM 2 CGet EC:0
     FPassC 0
   FCall 1

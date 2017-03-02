@@ -30,12 +30,11 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void implAGet(IRGS& env, SSATmp* classSrc, uint32_t slot) {
+void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot) {
   auto const cls = (classSrc->type() <= TStr)
     ? ldCls(env, classSrc)
     : gen(env, LdObjClass, classSrc);
   putClsRef(env, slot, cls);
-  push(env, cns(env, TInitNull));
 }
 
 const StaticString s_FATAL_NULL_THIS(Strings::FATAL_NULL_THIS);
@@ -50,25 +49,25 @@ bool checkThis(IRGS& env, SSATmp* ctx) {
 
 }
 
-void emitAGetC(IRGS& env, uint32_t slot) {
+void emitClsRefGetC(IRGS& env, uint32_t slot) {
   auto const name = topC(env);
   if (name->type().subtypeOfAny(TObj, TStr)) {
     popC(env);
-    implAGet(env, name, slot);
+    implClsRefGet(env, name, slot);
     decRef(env, name);
   } else {
-    interpOne(env, TInitNull, 1);
+    interpOne(env, 1);
   }
 }
 
-void emitAGetL(IRGS& env, int32_t id, uint32_t slot) {
+void emitClsRefGetL(IRGS& env, int32_t id, uint32_t slot) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   if (src->type().subtypeOfAny(TObj, TStr)) {
-    implAGet(env, src, slot);
+    implClsRefGet(env, src, slot);
   } else {
-    PUNT(AGetL);
+    PUNT(ClsRefGetL);
   }
 }
 
@@ -308,36 +307,32 @@ void emitLateBoundCls(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
-    interpOne(env, TInitNull, 0);
+    interpOne(env, 0);
     return;
   }
   auto const ctx = ldCtx(env);
   putClsRef(env, slot, gen(env, LdClsCtx, ctx));
-  push(env, cns(env, TInitNull));
 }
 
 void emitSelf(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
-    interpOne(env, TInitNull, 0);
+    interpOne(env, 0);
   } else {
     putClsRef(env, slot, cns(env, clss));
-    push(env, cns(env, TInitNull));
   }
 }
 
 void emitParent(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
-    interpOne(env, TInitNull, 0);
+    interpOne(env, 0);
   } else {
     putClsRef(env, slot, cns(env, clss->parent()));
-    push(env, cns(env, TInitNull));
   }
 }
 
-void emitNameA(IRGS& env, uint32_t slot) {
-  popA(env);
+void emitClsRefName(IRGS& env, uint32_t slot) {
   auto const cls = takeClsRef(env, slot);
   push(env, gen(env, LdClsName, cls));
 }
@@ -490,7 +485,8 @@ void emitIncStat(IRGS& env, int32_t counter, int32_t value) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitPopA(IRGS& env, uint32_t slot)   { popA(env); }
+void emitDiscardClsRef(IRGS& env, uint32_t slot)   { killClsRef(env, slot); }
+
 void emitPopC(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopV(IRGS& env)   { popDecRef(env, DataTypeGeneric); }
 void emitPopR(IRGS& env)   { popDecRef(env, DataTypeGeneric); }

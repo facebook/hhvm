@@ -428,14 +428,6 @@ public:
   }
 
   ALWAYS_INLINE
-  void popA() {
-    assert(m_top != m_base);
-    assert(m_top->m_type == KindOfNull);
-    tvDebugTrash(m_top);
-    m_top++;
-  }
-
-  ALWAYS_INLINE
   void popV() {
     assert(m_top != m_base);
     assert(refIsPlausible(*m_top));
@@ -817,13 +809,6 @@ public:
   }
 
   ALWAYS_INLINE
-  const Class* topA() {
-    assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass);
-    return m_top->m_data.pcls;
-  }
-
-  ALWAYS_INLINE
   TypedValue* topTV() {
     assert(m_top != m_base);
     return m_top;
@@ -840,14 +825,6 @@ public:
   TypedValue* indTV(size_t ind) {
     assert(m_top != m_base);
     return &m_top[ind];
-  }
-
-  ALWAYS_INLINE
-  void pushClass(Class* clss) {
-    assert(m_top != m_elms);
-    m_top--;
-    m_top->m_data.num = 0;
-    m_top->m_type = KindOfNull;
   }
 };
 

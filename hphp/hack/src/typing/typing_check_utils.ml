@@ -33,26 +33,3 @@ let check_defs tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
     end;
   )) in
   result
-
-let get_nast_from_fileinfo tcopt fn fileinfo =
-  let funs = fileinfo.FileInfo.funs in
-  let name_function (_, fun_) =
-    let f opts cls = Some (Naming.fun_ opts cls) in
-    Option.value_map
-      (Parser_heap.find_fun_in_file ~full:true tcopt fn fun_)
-      ~default:None
-      ~f:(f tcopt) in
-  let named_functions = List.filter_map funs name_function in
-
-  let classes = fileinfo.FileInfo.classes in
-  let name_class (_, class_) =
-    let f opts cls = Some (Naming.class_ opts cls) in
-    Option.value_map
-      (Parser_heap.find_class_in_file ~full:true tcopt fn class_)
-      ~default:None
-      ~f:(f tcopt) in
-  let named_classes = List.filter_map classes name_class in
-
-  let named_typedefs = [] in (* TODO typedefs *)
-  let named_consts = [] in (* TODO consts *)
-  (named_functions, named_classes, named_typedefs, named_consts)

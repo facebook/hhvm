@@ -18,173 +18,7 @@ open Sys_utils
 
 type options = {
   filename : string;
-  no_builtins : bool;
 }
-
-let builtins_filename =
-  Relative_path.create Relative_path.Dummy "builtins.hhi"
-
-let builtins =
-  "<?hh // decl\n"^
-  "interface Traversable<+Tv> {}\n"^
-  "interface Container<+Tv> extends Traversable<Tv> {}\n"^
-  "interface Iterator<+Tv> extends Traversable<Tv> {}\n"^
-  "interface Iterable<+Tv> extends Traversable<Tv> {}\n"^
-  "interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}\n"^
-  "interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk,Tv> {}\n"^
-  "interface KeyedIterator<+Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterator<Tv> {}\n"^
-  "interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> {}\n"^
-  "interface Awaitable<+T> {"^
-  "  public function getWaitHandle(): WaitHandle<T>;"^
-  "}\n"^
-  "interface WaitHandle<+T> extends Awaitable<T> {}\n"^
-  "interface ConstVector<+Tv> extends KeyedIterable<int, Tv>, KeyedContainer<int, Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ConstVector<Tu>;"^
-  "}\n"^
-  "interface ConstSet<+Tv> extends KeyedIterable<mixed, Tv>, Container<Tv>{}\n"^
-  "interface ConstMap<Tk, +Tv> extends KeyedIterable<Tk, Tv>, KeyedContainer<Tk, Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ConstMap<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ConstMap<Tk, Tu>;"^
-  "}\n"^
-  "final class Vector<Tv> implements ConstVector<Tv>{\n"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): Vector<Tu>;\n"^
-  "  public function filter((function(Tv): bool) $callback): Vector<Tv>;\n"^
-  "  public function reserve(int $sz): void;"^
-  "  public function add(Tv $value): Vector<Tv>;"^
-  "  public function addAll(?Traversable<Tv> $it): Vector<Tv>;"^
-  "}\n"^
-  "final class ImmVector<+Tv> implements ConstVector<Tv> {"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ImmVector<Tu>;"^
-  "}\n"^
-  "final class Map<Tk, Tv> implements ConstMap<Tk, Tv> {"^
-  "  /* HH_FIXME[3007]: This is intentional; not a constructor */"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): Map<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): Map<Tk, Tu>;"^
-  "  public function contains(Tk $k): bool;"^
-  "}\n"^
-  "final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>{"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): ImmMap<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): ImmMap<Tk, Tu>;"^
-  "}\n"^
-  "final class StableMap<Tk, Tv> implements ConstMap<Tk, Tv> {"^
-  "  public function map<Tu>((function(Tv): Tu) $callback): StableMap<Tk, Tu>;"^
-  "  public function mapWithKey<Tu>((function(Tk, Tv): Tu) $fn): StableMap<Tk, Tu>;"^
-  "}\n"^
-  "final class Set<Tv> implements ConstSet<Tv> {}\n"^
-  "final class ImmSet<+Tv> implements ConstSet<Tv> {}\n"^
-  "class Exception {"^
-  "  public function __construct(string $x) {}"^
-  "  public function getMessage(): string;"^
-  "}\n"^
-  "class Generator<Tk, +Tv, -Ts> implements KeyedIterator<Tk, Tv> {\n"^
-  "  public function next(): void;\n"^
-  "  public function current(): Tv;\n"^
-  "  public function key(): Tk;\n"^
-  "  public function rewind(): void;\n"^
-  "  public function valid(): bool;\n"^
-  "  public function send(?Ts $v): void;\n"^
-  "}\n"^
-  "final class Pair<+Tk, +Tv> implements KeyedContainer<int,mixed> {public function isEmpty(): bool {}}\n"^
-  "interface Stringish {public function __toString(): string {}}\n"^
-  "interface XHPChild {}\n"^
-  "function hh_show($val) {}\n"^
-  "function hh_show_env() {}\n"^
-  "interface Countable { public function count(): int; }\n"^
-  "interface AsyncIterator<+Tv> {}\n"^
-  "interface AsyncKeyedIterator<+Tk, +Tv> extends AsyncIterator<Tv> {}\n"^
-  "class AsyncGenerator<Tk, +Tv, -Ts> implements AsyncKeyedIterator<Tk, Tv> {\n"^
-  "  public function next(): Awaitable<?(Tk, Tv)> {}\n"^
-  "  public function send(?Ts $v): Awaitable<?(Tk, Tv)> {}\n"^
-  "  public function raise(Exception $e): Awaitable<?(Tk, Tv)> {}"^
-  "}\n"^
-  "function isset($x): bool;"^
-  "function empty($x): bool;"^
-  "function unset($x): void;"^
-  "namespace HH {\n"^
-  "abstract class BuiltinEnum<T> {\n"^
-  "  final public static function getValues(): array<string, T>;\n"^
-  "  final public static function getNames(): array<T, string>;\n"^
-  "  final public static function coerce(mixed $value): ?T;\n"^
-  "  final public static function assert(mixed $value): T;\n"^
-  "  final public static function isValid(mixed $value): bool;\n"^
-  "  final public static function assertAll(Traversable<mixed> $values): Container<T>;\n"^
-  "}\n"^
-  "}\n"^
-  "function array_map($x, $y, ...);\n"^
-  "function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $c, $i, $d = null) {}\n"^
-  "final class stdClass {}\n" ^
-  "function rand($x, $y): int;\n" ^
-  "function invariant($x, ...): void;\n" ^
-  "function exit(int $exit_code_or_message = 0): noreturn;\n" ^
-  "function invariant_violation(...): noreturn;\n" ^
-  "function get_called_class(): string;\n" ^
-  "abstract final class Shapes {\n" ^
-  "  public static function idx(shape() $shape, arraykey $index, $default = null) {}\n" ^
-  "  public static function keyExists(shape() $shape, arraykey $index): bool {}\n" ^
-  "  public static function removeKey(shape() $shape, arraykey $index): void {}\n" ^
-  "  public static function toArray(shape() $shape): array<arraykey, mixed> {}\n" ^
-  "}\n" ^
-  "newtype typename<+T> as string = string;\n"^
-  "newtype classname<+T> as typename<T> = typename<T>;\n" ^
- "function var_dump($x): void;\n" ^
-  "function gena();\n" ^
-  "function genva();\n" ^
-  "function gen_array_rec();\n"^
-  "function is_int(mixed $x): bool {}\n"^
-  "function is_bool(mixed $x): bool {}\n"^
-  "function is_float(mixed $x): bool {}\n"^
-  "function is_string(mixed $x): bool {}\n"^
-  "function is_null(mixed $x): bool {}\n"^
-  "function is_array(mixed $x): bool {}\n"^
-  "function is_vec(mixed $x): bool {}\n"^
-  "function is_dict(mixed $x): bool {}\n"^
-  "function is_keyset(mixed $x): bool {}\n"^
-  "function is_resource(mixed $x): bool {}\n"^
-  "interface IMemoizeParam {\n"^
-  "  public function getInstanceKey(): string;\n"^
-  "}\n"^
-  "newtype TypeStructure<T> as shape(\n"^
-  "  'kind'=> int,\n"^
-  "  'nullable'=>?bool,\n"^
-  "  'classname'=>?classname<T>,\n"^
-  "  'elem_types' => ?array,\n"^
-  "  'param_types' => ?array,\n"^
-  "  'return_type' => ?array,\n"^
-  "  'generic_types' => ?array,\n"^
-  "  'fields' => ?array,\n"^
-  "  'name' => ?string,\n"^
-  "  'alias' => ?string,\n"^
-  ") = shape(\n"^
-  "  'kind'=> int,\n"^
-  "  'nullable'=>?bool,\n"^
-  "  'classname'=>?classname<T>,\n"^
-  "  'elem_types' => ?array,\n"^
-  "  'param_types' => ?array,\n"^
-  "  'return_type' => ?array,\n"^
-  "  'generic_types' => ?array,\n"^
-  "  'fields' => ?array,\n"^
-  "  'name' => ?string,\n"^
-  "  'alias' => ?string,\n"^
-  ");\n"^
-  "function type_structure($x, $y);\n"^
-  "const int __LINE__ = 0;\n"^
-  "const string __CLASS__ = '';\n"^
-  "const string __TRAIT__ = '';\n"^
-  "const string __FILE__ = '';\n"^
-  "const string __DIR__ = '';\n"^
-  "const string __FUNCTION__ = '';\n"^
-  "const string __METHOD__ = '';\n"^
-  "const string __NAMESPACE__ = '';\n"^
-  "interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}\n"^
-  "abstract final class dict<+Tk, +Tv> implements Indexish<Tk, Tv> {}\n"^
-  "function dict<Tk, Tv>(KeyedTraversable<Tk, Tv> $arr): dict<Tk, Tv> {}\n"^
-  "abstract final class keyset<+T as arraykey> implements Indexish<T, T> {}\n"^
-  "abstract final class vec<+Tv> implements Indexish<int, Tv> {}\n"^
-  "function meth_caller(string $cls_name, string $meth_name);\n"^
-  "namespace HH\\Asio {"^
-  "  function va(...$args);\n"^
-  "}\n"^
-  "function hh_log_level(int $level) {}\n"
 
 (*****************************************************************************)
 (* Helpers *)
@@ -199,19 +33,11 @@ let die str =
 let parse_options () =
   let fn_ref = ref None in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
-  let no_builtins = ref false in
-  let options = [
-    "--no-builtins",
-      Arg.Set no_builtins,
-      " Don't use builtins (e.g. ConstSet)";
-  ] in
-  let options = Arg.align ~limit:25 options in
-  Arg.parse options (fun fn -> fn_ref := Some fn) usage;
+  Arg.parse [] (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn;
-    no_builtins = !no_builtins;
+  { filename = fn
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -297,12 +123,32 @@ let parse_name_and_decl popt files_contents tcopt =
   end
 
 let do_compile opts files_info = begin
+  let get_nast_from_fileinfo tcopt fn fileinfo =
+    let funs = fileinfo.FileInfo.funs in
+    let name_function (_, fun_) =
+      let f opts cls = Some (Naming.fun_ opts cls) in
+      Option.value_map
+        (Parser_heap.find_fun_in_file ~full:true tcopt fn fun_)
+        ~default:None
+        ~f:(f tcopt) in
+    let named_functions = List.filter_map funs name_function in
+    let classes = fileinfo.FileInfo.classes in
+    let name_class (_, class_) =
+      let f opts cls = Some (Naming.class_ opts cls) in
+      Option.value_map
+        (Parser_heap.find_class_in_file ~full:true tcopt fn class_)
+        ~default:None
+        ~f:(f tcopt) in
+    let named_classes = List.filter_map classes name_class in
+    let named_typedefs = [] in (* TODO typedefs *)
+    let named_consts = [] in (* TODO consts *)
+    (named_functions, named_classes, named_typedefs, named_consts) in
   let f_fold fn fileinfo text = begin
     let hhas_text = if (Relative_path.S.to_string fn) = "|builtins.hhi" then
       ""
     else
       let (named_functions, named_classes, _named_typedefs, _named_consts) =
-        Typing_check_utils.get_nast_from_fileinfo opts fn fileinfo in
+        get_nast_from_fileinfo opts fn fileinfo in
       let compiled_funs = Hhbc_from_nast.from_functions named_functions in
       let compiled_classes = Hhbc_from_nast.from_classes named_classes in
       let _compiled_typedefs = [] in (* TODO *)
@@ -319,25 +165,17 @@ end
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename; no_builtins} popt tcopt =
+let decl_and_run_mode {filename} popt tcopt =
   Local_id.track_names := true;
   Ident.track_names := true;
-  let builtins = if no_builtins then "" else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in
   let files_contents = file_to_files filename in
-  let files_contents_with_builtins = Relative_path.Map.add files_contents
-    ~key:builtins_filename ~data:builtins in
-
-  let _, files_info, _ =
-    parse_name_and_decl popt files_contents_with_builtins tcopt in
-
+  let _, files_info, _ = parse_name_and_decl popt files_contents tcopt in
   do_compile tcopt files_info
 
 let main_hack opts =
   let popt = ParserOptions.default in
   let tcopt = TypecheckerOptions.default in
-  Sys_utils.signal Sys.sigusr1
-    (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in

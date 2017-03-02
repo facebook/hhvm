@@ -31,13 +31,11 @@ let debug () fnl =
   let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
   List.iter fnl begin fun (filepath : Path.t) ->
     try
-      let content = Sys_utils.cat (filepath :> string) in
-
       (* Checking that we can parse the output *)
       let parsing_errors1, parser_output1, _ = Errors.do_ begin fun () ->
         let rp =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
-        Parser_hack.program_with_default_popt rp content
+        Full_fidelity_ast.from_file_with_legacy rp
       end in
       if parser_output1.Parser_hack.file_mode = None
         || not (Errors.is_empty parsing_errors1)
@@ -50,9 +48,9 @@ let debug () fnl =
           (filepath :> string);
       end;
 
-      let content = Format_hack.program modes filepath content in
+      let content = parser_output1.Parser_hack.content in
       let content =
-        match content with
+        match Format_hack.program modes filepath content with
         | Format_hack.Success content -> content
         | Format_hack.Disabled_mode ->
             raise Exit

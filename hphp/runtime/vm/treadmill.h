@@ -71,6 +71,13 @@ void deferredFree(void*);
  */
 template<class F> void enqueue(F&& f);
 
+struct Session final {
+  Session() { startRequest(); }
+  ~Session() { finishRequest(); }
+  Session(Session&&) = delete;
+  Session& operator=(Session&&) = delete;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 }}

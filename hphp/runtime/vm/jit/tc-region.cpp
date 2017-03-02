@@ -487,12 +487,7 @@ void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos) {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
-  Treadmill::startRequest();
-  requestInitProfData();
-  SCOPE_EXIT {
-    requestExitProfData();
-    Treadmill::finishRequest();
-  };
+  ProfData::Session pds;
 
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) {

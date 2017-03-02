@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -278,6 +279,16 @@ struct ProfData {
 
   ProfData(const ProfData&) = delete;
   ProfData& operator=(const ProfData&) = delete;
+
+  struct Session final {
+    Session() { requestInitProfData(); }
+    ~Session() { requestExitProfData(); }
+    Session(Session&&) = delete;
+    Session& operator=(Session&&) = delete;
+
+  private:
+    Treadmill::Session m_ts;
+  };
 
   /*
    * Allocate a new id for a translation. Depending on the kind of the

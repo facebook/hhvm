@@ -139,13 +139,7 @@ void enqueueRetranslateOptRequest(OptimizeData* d) {
 
 hfsort::TargetGraph
 createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
-  Treadmill::startRequest();
-  requestInitProfData();
-  SCOPE_EXIT {
-    requestExitProfData();
-    Treadmill::finishRequest();
-  };
-
+  ProfData::Session pds;
   assertx(profData() != nullptr);
 
   using namespace hfsort;
@@ -157,7 +151,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   const auto maxFuncId = pd->maxProfilingFuncId();
   FTRACE(3, "createCallGraph: maxFuncId = {}\n", maxFuncId);
   for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!pd->profiling(fid)) continue;
+    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
     const auto transIds = pd->funcProfTransIDs(fid);
     uint32_t size = 1; // avoid zero-sized functions
     for (auto transId : transIds) {
@@ -183,6 +177,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       const auto callerTransId = pd->jmpTransID(callAddr);
       assertx(callerTransId != kInvalidTransID);
       const auto callerFuncId = pd->transRec(callerTransId)->funcId();
+      if (!Func::isFuncIdValid(callerFuncId)) continue;
       const auto callerTargetId = targetID[callerFuncId];
       const auto callCount = pd->transCounter(callerTransId);
       cg.incArcWeight(callerTargetId, calleeTargetId, callCount);
@@ -193,7 +188,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   };
 
   for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!pd->profiling(fid)) continue;
+    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
 
     auto func = Func::fromFuncId(fid);
     const auto calleeTargetId = targetID[fid];
@@ -230,6 +225,7 @@ void print(hfsort::TargetGraph& cg, const char* fileName,
             cluster.samples, cluster.size);
     for (auto targetId : cluster.targets) {
       auto funcId = target2FuncId[targetId];
+      if (!Func::isFuncIdValid(funcId)) continue;
       fprintf(outfile, "%s\n", Func::fromFuncId(funcId)->fullName()->data());
     }
   }
@@ -263,9 +259,12 @@ void retranslateAll() {
     Logger::Info("retranslateAll: finished building the call graph");
   }
   if (RuntimeOption::EvalJitPGODumpCallGraph) {
+    Treadmill::Session ts;
+
     cg.printDot("/tmp/cg-pgo.dot",
                 [&](hfsort::TargetId targetId) -> const char* {
                   const auto fid = target2FuncId[targetId];
+                  if (!Func::isFuncIdValid(fid)) return "<invalid>";
                   const auto func = Func::fromFuncId(fid);
                   return func->fullName()->data();
                 });
@@ -307,6 +306,8 @@ void retranslateAll() {
   }
 
   if (RuntimeOption::EvalJitPGODumpCallGraph) {
+    Treadmill::Session ts;
+
     print(cg, "/tmp/hotfuncs-pgo.txt", clusters, target2FuncId);
     if (serverMode) {
       Logger::Info("retranslateAll: saved sorted list of hot functions at "
@@ -342,12 +343,7 @@ void retranslateAll() {
   s_retranslateAllComplete.store(true, std::memory_order_release);
 
   if (serverMode) {
-    Treadmill::startRequest();
-    requestInitProfData();
-    SCOPE_EXIT {
-      requestExitProfData();
-      Treadmill::finishRequest();
-    };
+    ProfData::Session pds;
 
     Logger::Info("retranslateAll: finished retranslating all optimized "
                  "translations!");

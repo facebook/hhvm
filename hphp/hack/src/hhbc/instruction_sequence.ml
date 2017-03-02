@@ -57,6 +57,7 @@ let instr_null = instr (ILitConst Null)
 let instr_catch = instr (IMisc Catch)
 let instr_dup = instr (IBasic Dup)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
+let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 
 let instr_setl_named local =
   instr (IMutator (SetL (Local_named local)))
@@ -64,6 +65,10 @@ let instr_setl_unnamed local =
   instr (IMutator (SetL (Local_unnamed local)))
 let instr_unsetl_unnamed local =
   instr (IMutator (UnsetL (Local_unnamed local)))
+
+let instr_issetl_unnamed local =
+  instr (IIsset (IssetL (Local_unnamed local)))
+
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)
 let instr_throw = instr (IContFlow Throw)
@@ -74,6 +79,7 @@ let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
 
+  (* f takes an instruction and produces an instruction list to replace it. *)
   let rec flat_map instrseq ~f =
     let flat_map_list items ~f = Core.List.bind items f in
     match instrseq with
@@ -83,6 +89,16 @@ module InstrSeq = struct
       Instr_list (flat_map_list instrl ~f)
     | Instr_concat instrseql ->
       Instr_concat (List.map instrseql (flat_map ~f))
+
+  (* f takes an instruction and produces an instrseq to replace it. *)
+  let rec flat_map_seq instrseq ~f =
+    match instrseq with
+    | Instr_try_fault (try_body, fault_body) ->
+      Instr_try_fault ((flat_map_seq try_body ~f), (flat_map_seq fault_body ~f))
+    | Instr_list instrl ->
+      Instr_concat (List.map instrl ~f)
+    | Instr_concat instrseql ->
+      Instr_concat (List.map instrseql (flat_map_seq ~f))
 
   let rec fold_left instrseq ~f ~init =
     let fold_instrseq init instrseq =

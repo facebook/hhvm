@@ -131,3 +131,49 @@ let rewrite_in_finally instrseq =
       ]
     | _ -> [ instruction ] in
   InstrSeq.flat_map instrseq ~f:rewriter
+
+(* Obtain a list of unique not-rewritten continues and breaks. *)
+let get_continues_and_breaks instrseq =
+  let module ULCB = Unique_list_continues_breaks in
+  let folder uniq_list instruction =
+    match instruction with
+    | ISpecialFlow x ->  ULCB.add uniq_list x
+    | _ -> uniq_list in
+  let results = InstrSeq.fold_left instrseq ~init:ULCB.empty ~f:folder in
+  List.rev (ULCB.items results)
+
+(* TODO: We must have this already somewhere. *)
+let index_of items item =
+  let rec aux items index =
+  match items with
+  | [] -> failwith "index_of asked to find an item that isn't there"
+  | h :: t -> if item = h then index else aux t (index + 1) in
+  aux items 0
+
+let rewrite_in_try_finally instrseq cont_breaks temp_local finally_label =
+(*
+A continue which appears in the try of a try-finally that branches to a loop
+label inside the try has already been rewritten as a jump. Therefore if there
+are continues and breaks left un-rewritten they must be finally-blocked.
+
+We make a list of all the distinct continues and breaks -- remember, some
+may be multi-level. We then use the index into that list of distinct
+possibilities as a key for what to do. The continue or break is replaced by
+a set of a temporary local to the index, and a jump to the beginning of the
+finally. An epilogue on the finally will deal with ensuring the right
+instruction is generated.
+*)
+  let rewriter instruction =
+    match instruction with
+    | ISpecialFlow x ->
+      gather [
+        instr_int (index_of cont_breaks x);
+        instr_setl_unnamed temp_local;
+        instr_popc;
+        instr_jmp finally_label
+      ]
+    | _ -> instr instruction in
+  if cont_breaks = [] then
+    instrseq
+  else
+    InstrSeq.flat_map_seq instrseq ~f:rewriter

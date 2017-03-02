@@ -17,6 +17,7 @@ module N = Nast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
+module CBR = Continue_break_rewriter
 
 (* These are the three flavors of value that can live on the stack:
  *   C = cell
@@ -765,7 +766,7 @@ and from_while e b =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  Continue_break_rewriter.rewrite_in_loop instrs cont_label break_label
+  CBR.rewrite_in_loop instrs cont_label break_label
 
 and from_do b e =
   let cont_label = Label.get_next_label () in
@@ -779,7 +780,7 @@ and from_do b e =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  Continue_break_rewriter.rewrite_in_loop instrs cont_label break_label
+  CBR.rewrite_in_loop instrs cont_label break_label
 
 and from_for e1 e2 e3 b =
   let break_label = Label.get_next_label () in
@@ -810,7 +811,7 @@ and from_for e1 e2 e3 b =
     instr_jmpnz start_label;
     instr_label break_label;
   ] in
-  Continue_break_rewriter.rewrite_in_loop instrs cont_label break_label
+  CBR.rewrite_in_loop instrs cont_label break_label
 
 and from_switch e cl =
   let switched = from_expr e in
@@ -832,7 +833,7 @@ and from_switch e cl =
     bodies;
     instr_label end_label;
   ] in
-  Continue_break_rewriter.rewrite_in_switch instrs end_label
+  CBR.rewrite_in_switch instrs end_label
 
 and from_catch end_label ((_, id1), (_, id2), b) =
     let next_catch = Label.get_next_label () in
@@ -868,29 +869,125 @@ and from_try_catch try_block catch_list =
     instr_label end_label;
   ]
 
+
+and emit_finally_epilogue cont_and_break temp_local finally_end =
+  match cont_and_break with
+  | [] -> empty
+  | h :: [] ->
+    gather [
+      instr_issetl_unnamed temp_local;
+      instr_jmpz finally_end;
+      instr_unsetl_unnamed temp_local;
+      instr (ISpecialFlow h); ]
+  | _ -> empty
+  (* TODO there are multiple breaks / continues. Generate a switch:
+
+    IssetL temp_local
+    JmpZ L2
+    CGetL temp_local
+    Switch Unbounded 0 <L3 L4 ... >
+
+    ...
+
+    L4:
+    UnsetL temp_local
+    Break
+
+    L3:
+    UnsetL temp_local
+    Continue
+
+    *)
+
 and from_try_finally try_block finally_block =
-  (* TODO: Rewrite finally-blocked continue / break into temp local,
-  finally epilogue.  Note that the rewriter will turn continue / break
-  into jumps to the finally label; if there are none, then it will
-  be removed by the label optimizer. *)
-  (* TODO: The HHVM emitter sometimes emits seemingly spurious
+  (*
+  We need to generate four things:
+  (1) the try-body, which will be followed by
+  (2) the normal-continuation finally body, and
+  (3) an epilogue to the finally body that deals with finally-blocked
+      break and continue
+  (4) the exceptional-continuation fault body.
+  *)
+
+  (* (1) Try body
+
+  The try body might have un-rewritten continues and breaks which
+  branch to a label outside of the try. This means that we must
+  first run the normal-continuation finally, and then branch to the
+  appropriate label.
+
+  We do this by running a rewriter which turns continues and breaks
+  inside the try body into setting temp_local to an integer which indicates
+  what action the finally must perform when it is finished, followed by a
+  jump directly to the finally.
+
+  TODO: We need a local generator, like a label generator.
+  For now, just use the label generator.
+
+  TODO: Unnamed locals should be codegen'd with a leading _
+  *)
+  let try_body = from_stmt try_block in
+  let temp_local = Label.get_next_label () in
+  let finally_start = Label.get_next_label () in
+  let finally_end = Label.get_next_label () in
+  let cont_and_break = CBR.get_continues_and_breaks try_body in
+  let try_body = CBR.rewrite_in_try_finally
+    try_body cont_and_break temp_local finally_start in
+
+  (* (2) Finally body
+
+  Note that this is used both in the normal-continuation and
+  exceptional-continuation cases; we generate the same code twice.
+
+  TODO: We might consider changing the codegen so that the finally block
+  is only generated once. We could do this by making the fault block set a
+  temp local to -1, and then branch to the finally block. In the finally block
+  epilogue it can check to see if the local is -1, and if so, issue an unwind
+  instruction.
+
+  It is illegal to have a continue or break which branches out of a finally.
+  Unfortunately we at present do not detect this at parse time; rather, we
+  generate an exception at run-time by rewriting continue and break
+  instructions found inside finally blocks.
+
+  TODO: If we make this illegal at parse time then we can remove this pass.
+  *)
+  let finally_body = from_stmt finally_block in
+  let finally_body = CBR.rewrite_in_finally finally_body in
+
+  (* (3) Finally epilogue *)
+
+  let finally_epilogue =
+    emit_finally_epilogue cont_and_break temp_local finally_end in
+
+  (* (4) Fault body
+
+  We now emit the fault body; it is just cleanup code for the temp_local,
+  a copy of the finally body (without the branching epilogue, since we are
+  going to unwind rather than branch), and an unwind instruction.
+
+  TODO: The HHVM emitter sometimes emits seemingly spurious
   unset-unnamed-local instructions into the fault block.  These look
   like bugs in the emitter. Investigate; if they are bugs in the HHVM
   emitter, get them fixed there. If not, get a clear explanation of
-  what they are for and why they are required. *)
-  let finally_label = Label.get_next_label () in
-  let try_body = from_stmt try_block in
-  let finally_body = from_stmt finally_block in
-  let finally_body = Continue_break_rewriter.rewrite_in_finally finally_body in
+  what they are for and why they are required.
+  *)
+
+  let cleanup_local =
+    if cont_and_break = [] then empty else instr_unsetl_unnamed temp_local in
   let fault_body = gather [
+      cleanup_local;
       finally_body;
       instr_unwind;
     ] in
   let fault_label = Label.get_next_label () in
+  (* Put it all together. *)
   gather [
     instr_try_fault_no_catch fault_label try_body fault_body;
-    instr_label finally_label;
+    instr_label finally_start;
     finally_body;
+    finally_epilogue;
+    instr_label finally_end;
   ]
 
 and get_foreach_lvalue e =
@@ -944,7 +1041,7 @@ and from_foreach _has_await collection iterator block =
         instr_unwind ]);
     instr_label loop_break_label
   ] in
-  Continue_break_rewriter.rewrite_in_loop
+  CBR.rewrite_in_loop
     instrs loop_continue_label loop_break_label
 
 and from_stmts stl =
@@ -1172,7 +1269,7 @@ let extract_decl_vars instrseq =
     | IMutator (SetL (Local_named s)) -> ULS.add uniq_list s
     | _ -> uniq_list in
   let decl_vars = InstrSeq.fold_left instrseq ~init:ULS.empty ~f:folder in
-  List.rev (Unique_list_string.items decl_vars)
+  List.rev (ULS.items decl_vars)
 
 (* Create a map from defined labels to instruction offset *)
 let create_label_to_offset_map instrseq =

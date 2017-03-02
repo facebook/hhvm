@@ -24,6 +24,8 @@
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
@@ -57,6 +59,7 @@ struct State {
   FlavorDesc* stk; // Evaluation stack.
   FpiState* fpi;    // FPI stack.
   bool* iters;      // defined/not-defined state of each iter var.
+  boost::dynamic_bitset<> clsRefSlots; // init state of class-ref slots
   int stklen;       // length of evaluation stack.
   int fpilen;       // length of FPI stack.
   bool mbr_live;    // liveness of member base register
@@ -96,6 +99,7 @@ struct FuncChecker {
   ARGTYPES
 #undef ARGTYPE
 #undef ARGTYPEVEC
+  bool checkOp(State*, PC, Op);
   template<typename Subop> bool checkImmOAImpl(PC& pc, PC instr);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
@@ -104,17 +108,19 @@ struct FuncChecker {
   bool checkTerminal(State* cur, PC pc);
   bool checkFpi(State* cur, PC pc, Block* b);
   bool checkIter(State* cur, PC pc);
+  bool checkClsRefSlots(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
   void reportEscapeEdge(Block* b, Block* s);
-  std::string stateToString(const State& cur);
-  std::string sigToString(int len, const FlavorDesc* sig);
-  std::string stkToString(int len, const FlavorDesc* args);
-  std::string fpiToString(const FpiState&);
-  std::string iterToString(const State& cur);
+  std::string stateToString(const State& cur) const;
+  std::string sigToString(int len, const FlavorDesc* sig) const;
+  std::string stkToString(int len, const FlavorDesc* args) const;
+  std::string fpiToString(const FpiState&) const;
+  std::string iterToString(const State& cur) const;
+  std::string slotsToString(const boost::dynamic_bitset<>&) const;
   void copyState(State* to, const State* from);
   void initState(State* s);
   const FlavorDesc* sig(PC pc);
@@ -348,13 +354,6 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
           error("Unwind may not appear in %s\n", name);
           ok = false;
         }
-      }
-    }
-
-    if (op == Op::GetMemoKeyL || op == Op::MemoGet || op == Op::MemoSet) {
-      if (!m_func->isMemoizeWrapper()) {
-        error("%s can only appear within memoize wrappers\n", opcodeToName(op));
-        ok = false;
       }
     }
   }
@@ -787,6 +786,11 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
              cur->stklen);
       return false;
     }
+    if (cur->clsRefSlots.any()) {
+      ferror("all class-ref slots must be uninitialized after Ret* and Unwind; "
+             "got {}\n", slotsToString(cur->clsRefSlots));
+      return false;
+    }
   }
   return true;
 }
@@ -878,6 +882,99 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   return ok;
 }
 
+std::array<int32_t, 4> getReadClsRefSlots(PC pc) {
+  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
+  size_t index = 0;
+
+  auto const op = peek_op(pc);
+  auto const numImmeds = numImmediates(op);
+  for (int i = 0; i < numImmeds; ++i) {
+    if (immType(op, i) == ArgType::CAR) {
+      assertx(index < ret.size());
+      ret[index++] = getImm(pc, i).u_CAR;
+    }
+  }
+  return ret;
+}
+
+std::array<int32_t, 4> getWrittenClsRefSlots(PC pc) {
+  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
+  size_t index = 0;
+
+  auto const op = peek_op(pc);
+  auto const numImmeds = numImmediates(op);
+  for (int i = 0; i < numImmeds; ++i) {
+    if (immType(op, i) == ArgType::CAW) {
+      assertx(index < ret.size());
+      ret[index++] = getImm(pc, i).u_CAW;
+    }
+  }
+  return ret;
+}
+
+bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
+  bool ok = true;
+
+  auto const op = peek_op(pc);
+
+  for (auto const read : getReadClsRefSlots(pc)) {
+    if (read < 0) continue;
+    if (!cur->clsRefSlots[read]) {
+      ferror("{} trying to read from uninitialized class-ref slot {} at {}\n",
+             opcodeToName(op), read, offset(pc));
+      ok = false;
+    }
+    cur->clsRefSlots[read] = false;
+  }
+  for (auto const write : getWrittenClsRefSlots(pc)) {
+    if (write < 0) continue;
+    if (cur->clsRefSlots[write]) {
+      ferror(
+        "{} trying to write to already initialized class-ref slot {} at {}\n",
+        opcodeToName(op), write, offset(pc)
+      );
+      ok = false;
+    }
+    cur->clsRefSlots[write] = true;
+  }
+
+  return ok;
+}
+
+bool FuncChecker::checkOp(State* cur, PC pc, Op op) {
+  switch (op) {
+    case Op::GetMemoKeyL:
+    case Op::MemoGet:
+    case Op::MemoSet:
+      if (!m_func->isMemoizeWrapper()) {
+        ferror("{} can only appear within memoize wrappers\n",
+               opcodeToName(op));
+        return false;
+      }
+      break;
+    case Op::AssertRATStk:
+    case Op::BaseNC:
+    case Op::BaseGC:
+    case Op::BaseSC:
+    case Op::BaseC:
+    case Op::BaseR:
+    case Op::FPassBaseNC:
+    case Op::FPassBaseGC: {
+      auto const stackIdx = getImm(pc, 0).u_IVA;
+      if (stackIdx >= cur->stklen) {
+        ferror("{} indexes ({}) past end of stack ({})\n", opcodeToName(op),
+               stackIdx, cur->stklen);
+        return false;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  return true;
+}
+
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][4] = {
   #define NOV { },
@@ -946,7 +1043,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   return ok;
 }
 
-std::string FuncChecker::stkToString(int len, const FlavorDesc* args) {
+std::string FuncChecker::stkToString(int len, const FlavorDesc* args) const {
   std::stringstream out;
   out << '[';
   for (int i = 0; i < len; ++i) {
@@ -956,7 +1053,7 @@ std::string FuncChecker::stkToString(int len, const FlavorDesc* args) {
   return out.str();
 }
 
-std::string FuncChecker::sigToString(int len, const FlavorDesc* sig) {
+std::string FuncChecker::sigToString(int len, const FlavorDesc* sig) const {
   std::stringstream out;
   out << '[';
   for (int i = 0; i < len; ++i) {
@@ -966,7 +1063,7 @@ std::string FuncChecker::sigToString(int len, const FlavorDesc* sig) {
   return out.str();
 }
 
-std::string FuncChecker::iterToString(const State& cur) {
+std::string FuncChecker::iterToString(const State& cur) const {
   int n = numIters();
   if (!n) return "";
   std::stringstream out;
@@ -978,11 +1075,23 @@ std::string FuncChecker::iterToString(const State& cur) {
   return out.str();
 }
 
-std::string FuncChecker::stateToString(const State& cur) {
-  return iterToString(cur) + stkToString(cur.stklen, cur.stk);
+std::string
+FuncChecker::slotsToString(const boost::dynamic_bitset<>& slots) const {
+  std::ostringstream oss;
+  oss << slots;
+  return oss.str();
 }
 
-std::string FuncChecker::fpiToString(const FpiState& fpi) {
+std::string FuncChecker::stateToString(const State& cur) const {
+  return folly::sformat(
+    "{}{}[{}]",
+    iterToString(cur),
+    stkToString(cur.stklen, cur.stk),
+    slotsToString(cur.clsRefSlots)
+  );
+}
+
+std::string FuncChecker::fpiToString(const FpiState& fpi) const {
   std::stringstream out;
   out << '(' << fpi.fpush << ':' << fpi.stkmin << ',' << fpi.next << ')';
   return out.str();
@@ -993,6 +1102,7 @@ void FuncChecker::initState(State* s) {
   s->fpi = new (m_arena) FpiState[maxFpi()];
   s->iters = new (m_arena) bool[numIters()];
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
+  s->clsRefSlots.resize(numClsRefSlots());
   s->stklen = 0;
   s->fpilen = 0;
   s->mbr_live = false;
@@ -1004,6 +1114,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
   memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
+  to->clsRefSlots = from->clsRefSlots;
   to->stklen = from->stklen;
   to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
@@ -1038,12 +1149,14 @@ bool FuncChecker::checkFlow() {
                      stateToString(cur) << " " <<
                      instrToString(pc, unit()) << std::endl;
       }
-      ok &= checkInputs(&cur, pc, b);
       auto const op = peek_op(pc);
+      ok &= checkOp(&cur, pc, op);
+      ok &= checkInputs(&cur, pc, b);
       auto const flags = instrFlags(op);
       if (flags & TF) ok &= checkTerminal(&cur, pc);
       if (flags & FF) ok &= checkFpi(&cur, pc, b);
       if (isIter(pc)) ok &= checkIter(&cur, pc);
+      ok &= checkClsRefSlots(&cur, pc);
       ok &= checkOutputs(&cur, pc, b);
     }
     ok &= checkSuccEdges(b, &cur);
@@ -1059,15 +1172,19 @@ bool FuncChecker::checkFlow() {
 
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
-  // Reachable catch blocks and fault funclets have an empty stack.
+  // Reachable catch blocks and fault funclets have an empty stack and
+  // non-initialized class-ref slots.
   if (b->exn) {
     int save_stklen = cur->stklen;
     int save_fpilen = cur->fpilen;
+    auto save_slots = cur->clsRefSlots;
     cur->stklen = 0;
     cur->fpilen = 0;
+    cur->clsRefSlots.reset();
     ok &= checkEdge(b, *cur, b->exn);
     cur->stklen = save_stklen;
     cur->fpilen = save_fpilen;
+    cur->clsRefSlots = std::move(save_slots);
   }
   if (isIter(b->last) && numSuccBlocks(b) == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
@@ -1127,7 +1244,6 @@ bool FuncChecker::checkEHStack(const EHEnt& handler, Block* b) {
  * Otherwise, require the state exactly match.
  */
 bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
-  bool ok = true;
   State& state = m_info[t->id].state_in;
   if (!state.stk) {
     copyState(&state, &cur);
@@ -1171,7 +1287,19 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
       }
     }
   }
-  return ok;
+
+  // Check class-ref slot state.
+  if (state.clsRefSlots != cur.clsRefSlots) {
+    ferror(
+      "mismatched class-ref state on edge B{}->B{}, current {} target {}\n",
+      b->id, t->id,
+      slotsToString(cur.clsRefSlots),
+      slotsToString(state.clsRefSlots)
+    );
+    return false;
+  }
+
+  return true;
 }
 
 void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {

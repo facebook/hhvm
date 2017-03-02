@@ -861,6 +861,14 @@ template<class T> Bytecode bc_with_loc(int32_t loc, const T& t) {
  * called result_type that indicates the return type of the call.
  */
 template<class Visit>
+typename Visit::result_type visit(Bytecode& b, Visit v) {
+#define O(opcode, ...) case Op::opcode: return v(b.opcode);
+  switch (b.op) { OPCODES }
+#undef O
+  not_reached();
+}
+
+template<class Visit>
 typename Visit::result_type visit(const Bytecode& b, Visit v) {
 #define O(opcode, ...) case Op::opcode: return v(b.opcode);
   switch (b.op) { OPCODES }
@@ -883,6 +891,16 @@ struct ReadClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
 
   template<class T>
   typename std::enable_if<has_car<T>::value,ClsRefSlotId>::type
+  operator()(T const& t) const { return t.slot; }
+};
+
+struct WriteClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
+  template<class T>
+  typename std::enable_if<!has_caw<T>::value,ClsRefSlotId>::type
+  operator()(T const& t) const { return NoClsRefSlotId; }
+
+  template<class T>
+  typename std::enable_if<has_caw<T>::value,ClsRefSlotId>::type
   operator()(T const& t) const { return t.slot; }
 };
 

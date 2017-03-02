@@ -870,23 +870,26 @@ and from_try_catch try_block catch_list =
 
 and from_try_finally try_block finally_block =
   (* TODO: Rewrite finally-blocked continue / break into temp local,
-  finally epilogue. *)
-  let l0 = Label.get_next_label () in
+  finally epilogue.  Note that the rewriter will turn continue / break
+  into jumps to the finally label; if there are none, then it will
+  be removed by the label optimizer. *)
+  (* TODO: The HHVM emitter sometimes emits seemingly spurious
+  unset-unnamed-local instructions into the fault block.  These look
+  like bugs in the emitter. Investigate; if they are bugs in the HHVM
+  emitter, get them fixed there. If not, get a clear explanation of
+  what they are for and why they are required. *)
+  let finally_label = Label.get_next_label () in
   let try_body = from_stmt try_block in
-  let try_body = gather [try_body; instr_jmp l0;] in
   let finally_body = from_stmt finally_block in
   let finally_body = Continue_break_rewriter.rewrite_in_finally finally_body in
   let fault_body = gather [
-      (* TODO: What are these unnamed locals? *)
-      instr_unsetl_unnamed 0;
-      instr_unsetl_unnamed 0;
       finally_body;
       instr_unwind;
     ] in
   let fault_label = Label.get_next_label () in
   gather [
     instr_try_fault_no_catch fault_label try_body fault_body;
-    instr_label l0;
+    instr_label finally_label;
     finally_body;
   ]
 

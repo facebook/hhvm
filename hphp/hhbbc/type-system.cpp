@@ -434,8 +434,8 @@ void destroy(T& t) { t.~T(); }
 
 template <typename T, typename... Args>
 void construct_inner(T& dest, Args&&... args) {
-  using Inner = typename std::remove_reference<decltype(*dest)>::type;
-  construct(dest, new Inner { std::forward<Args>(args)... });
+  construct(dest);
+  dest.emplace(std::forward<Args>(args)...);
 }
 
 /*
@@ -1490,7 +1490,7 @@ bool Type::checkInvariants() const {
 Type wait_handle(const Index& index, Type inner) {
   auto const rwh = index.builtin_class(s_WaitHandle.get());
   auto t = subObj(rwh);
-  t.m_data.dobj.whType.reset(new Type(std::move(inner)));
+  t.m_data.dobj.whType.emplace(std::move(inner));
   return t;
 }
 
@@ -1792,8 +1792,9 @@ Type spec_vec_union(Type specVecA, Type vecB) {
   assert(specVecA.m_dataTag == DataTag::Vec);
   assert(vecB.m_dataTag == DataTag::Vec);
 
-  auto& lenA = specVecA.m_data.vec->len;
-  auto& valA = specVecA.m_data.vec->val;
+  auto vec = specVecA.m_data.vec.mutate();
+  auto& lenA = vec->len;
+  auto& valA = vec->val;
   if (!lenA || !vecB.m_data.vec->len || *lenA != *vecB.m_data.vec->len) {
     lenA = folly::none;
   }
@@ -1828,8 +1829,9 @@ Type spec_dict_union(Type specDictA, Type dictB) {
   assert(specDictA.m_dataTag == DataTag::Dict);
   assert(dictB.m_dataTag == DataTag::Dict);
 
-  auto& keyA = specDictA.m_data.dict->key;
-  auto& valA = specDictA.m_data.dict->val;
+  auto dict = specDictA.m_data.dict.mutate();
+  auto& keyA = dict->key;
+  auto& valA = dict->val;
   keyA = union_of(keyA, dictB.m_data.dict->key);
   valA = union_of(valA, dictB.m_data.dict->val);
   specDictA.m_bits = bits;
@@ -1862,7 +1864,7 @@ Type spec_keyset_union(Type specKeysetA, Type keysetB) {
   assert(specKeysetA.m_dataTag == DataTag::Keyset);
   assert(keysetB.m_dataTag == DataTag::Keyset);
 
-  auto& kvA = specKeysetA.m_data.keyset->keyval;
+  auto& kvA = specKeysetA.m_data.keyset.mutate()->keyval;
   kvA = union_of(kvA, keysetB.m_data.keyset->keyval);
   specKeysetA.m_bits = bits;
 
@@ -2234,8 +2236,8 @@ Type Type::unionArr(const Type& a, const Type& b) {
     {
       ret = a;
       ret.m_bits = newBits;
-      ret.m_data.apackedn->type = union_of(a.m_data.apackedn->type,
-                                           b.m_data.apackedn->type);
+      auto apackedn = ret.m_data.apackedn.mutate();
+      apackedn->type = union_of(apackedn->type, b.m_data.apackedn->type);
       return ret;
     }
   case DataTag::ArrStruct:
@@ -2266,7 +2268,7 @@ Type union_of(Type a, Type b) {
    */
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
-      *a.m_data.dobj.whType = union_of(
+      *a.m_data.dobj.whType.mutate() = union_of(
         *a.m_data.dobj.whType,
         *b.m_data.dobj.whType
       );
@@ -2748,14 +2750,14 @@ Type arrayN_set(Type arr, const Type& undisectedKey, const Type& val) {
     ensure_counted();
     if (key.i) {
       if (*key.i >= 0 && *key.i < arr.m_data.apacked->elems.size()) {
-        auto& current = arr.m_data.apacked->elems[*key.i];
+        auto& current = arr.m_data.apacked.mutate()->elems[*key.i];
         if (current.subtypeOf(TInitCell)) {
           current = val;
         }
         return arr;
       }
       if (*key.i == arr.m_data.apacked->elems.size()) {
-        arr.m_data.apacked->elems.push_back(val);
+        arr.m_data.apacked.mutate()->elems.push_back(val);
         return arr;
       }
     }
@@ -2770,8 +2772,8 @@ Type arrayN_set(Type arr, const Type& undisectedKey, const Type& val) {
   case DataTag::ArrStruct:
     ensure_counted();
     {
-      auto& map = arr.m_data.astruct->map;
       if (key.s) {
+        auto& map = arr.m_data.astruct.mutate()->map;
         auto it = map.find(*key.s);
         if (it == end(map)) {
           map[*key.s] = val;
@@ -3070,7 +3072,7 @@ vec_set(Type vec, const Type& undisectedKey, const Type& val) {
     /* fallthrough */
   }
   case DataTag::Vec:
-    auto& ty = vec.m_data.vec->val;
+    auto& ty = vec.m_data.vec.mutate()->val;
     // If we don't know for sure if the value is a cell or not, we don't know
     // for sure if we'll throw or not.
     ty = union_of(std::move(ty), val.subtypeOf(TInitCell) ? val : TInitCell);
@@ -3114,9 +3116,10 @@ Type vec_newelem(Type vec, const Type& val) {
     /* fallthrough */
   }
   case DataTag::Vec:
-    auto& ty = vec.m_data.vec->val;
+    auto v = vec.m_data.vec.mutate();
+    auto& ty = v->val;
     ty = union_of(std::move(ty), val.subtypeOf(TInitCell) ? val : TInitCell);
-    if (vec.m_data.vec->len) (*vec.m_data.vec->len)++;
+    if (v->len) (*v->len)++;
     return vec;
   }
   not_reached();
@@ -3238,8 +3241,9 @@ dict_set(Type dict, const Type& undisectedKey, const Type& val) {
     /* fallthrough */
   }
   case DataTag::Dict:
-    auto& kt = dict.m_data.dict->key;
-    auto& vt = dict.m_data.dict->val;
+    auto d = dict.m_data.dict.mutate();
+    auto& kt = d->key;
+    auto& vt = d->val;
     kt = union_of(std::move(kt), key.type);
     vt = union_of(std::move(vt), validVal ? val : TInitCell);
     return {std::move(dict), validKey && validVal};
@@ -3278,11 +3282,14 @@ Type dict_newelem(Type dict, const Type& val) {
     /* fallthrough */
   }
   case DataTag::Dict:
-    auto& kt = dict.m_data.dict->key;
-    auto& vt = dict.m_data.dict->val;
-    kt = union_of(std::move(kt), TInt);
-    vt = union_of(std::move(vt), val.subtypeOf(TInitCell) ? val : TInitCell);
-    return dict;
+    {
+      auto d = dict.m_data.dict.mutate();
+      auto& kt = d->key;
+      auto& vt = d->val;
+      kt = union_of(std::move(kt), TInt);
+      vt = union_of(std::move(vt), val.subtypeOf(TInitCell) ? val : TInitCell);
+      return dict;
+    }
   }
   not_reached();
 }
@@ -3382,7 +3389,7 @@ Type keyset_newelem(Type keyset, const Type& val) {
     /* fallthrough */
   }
   case DataTag::Keyset:
-    auto& ty = keyset.m_data.keyset->keyval;
+    auto& ty = keyset.m_data.keyset.mutate()->keyval;
     ty = union_of(std::move(ty), val.subtypeOf(TInitCell) ? val : TInitCell);
     return keyset;
   }

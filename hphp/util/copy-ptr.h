@@ -24,64 +24,39 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * A smart pointer that does deep copies when you copy construct it.
+ * A refcounted smart pointer that does deep copies if you ask for a
+ * mutable copy when the ref-count is greater than one.
  */
 template<class T>
 struct copy_ptr {
-  copy_ptr() noexcept : m_p(nullptr) {}
-  explicit copy_ptr(T* t) noexcept : m_p(t) {}
-
-  copy_ptr(const copy_ptr& o) : m_p(o.m_p ? new T(*o.m_p) : nullptr) {}
-
-  copy_ptr(copy_ptr&& o) noexcept
-    : m_p(o.m_p)
-  {
-    o.m_p = nullptr;
-  }
-
-  copy_ptr& operator=(const copy_ptr& o) {
-    if (!m_p) {
-      m_p = o.m_p ? new T(*o.m_p) : nullptr;
-      return *this;
-    }
-
-    if (o.m_p) {
-      *m_p = *o.m_p;
-      return *this;
-    }
-
-    delete m_p;
-    m_p = nullptr;
-    return *this;
-  }
-
-  copy_ptr& operator=(copy_ptr&& o) noexcept {
-    delete m_p;
-    m_p = o.m_p;
-    o.m_p = nullptr;
-    return *this;
-  }
-
-  ~copy_ptr() {
-    delete m_p;
-#ifdef DEBUG
-    m_p = nullptr;
-#endif
-  }
+  copy_ptr() noexcept {}
+  explicit copy_ptr(T* t) : m_p(t) {}
+  copy_ptr(const copy_ptr& o) = default;
+  copy_ptr(copy_ptr&& o) noexcept = default;
+  copy_ptr& operator=(const copy_ptr& o) = default;
+  copy_ptr& operator=(copy_ptr&& o) noexcept = default;
 
   explicit operator bool() const { return !!m_p; }
 
-  T& operator*() const { return *m_p; }
-  T* operator->() const { return m_p; }
-  T* get() const { return m_p; }
-
-  void reset(T* p = nullptr) {
-    std::unique_ptr<T> old(m_p);
-    m_p = p;
+  const T& operator*() const { return *m_p; }
+  const T* operator->() const { return m_p.get(); }
+  const T* get() const { return m_p.get(); }
+  T* mutate() {
+    if (m_p.use_count() != 1) {
+      emplace(*m_p);
+    }
+    return m_p.get();
   }
 
+  void reset(T* p = nullptr) {
+    m_p.reset(p);
+  }
+
+  template <typename... Args> void emplace(Args&&... args) {
+    m_p = std::make_shared<T>(std::forward<Args>(args)...);
+  }
 private:
-  T* m_p;
+  std::shared_ptr<T> m_p;
 };
 
 //////////////////////////////////////////////////////////////////////

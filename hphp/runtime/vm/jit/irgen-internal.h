@@ -221,12 +221,25 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
+  auto const next_block  = defBlock(env);
   auto const taken_block = defBlock(env);
   auto const done_block  = defBlock(env);
 
   branch(taken_block);
+  auto const branch_block = env.irb->curBlock();
 
+  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
+    gen(env, Jmp, next_block);
+  } else if (!branch_block->back().isTerminal()) {
+    branch_block->back().setNext(next_block);
+  }
+  // The above logic ensures that `branch_block' always ends with an
+  // isBlockEnd() instruction, so its out state is meaningful.
+  env.irb->fs().setSaveOutState(branch_block);
+
+  env.irb->appendBlock(next_block);
   next();
+
   // Patch the last block added by the Next lambda to jump to the done block.
   // Note that last might not be taken_block.
   auto const cur = env.irb->curBlock();
@@ -235,7 +248,7 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   } else if (!cur->back().isTerminal()) {
     cur->back().setNext(done_block);
   }
-  env.irb->appendBlock(taken_block);
+  env.irb->appendBlock(taken_block, branch_block);
 
   taken();
   // Patch the last block added by the Taken lambda to jump to the done block.

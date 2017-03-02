@@ -187,7 +187,7 @@ let rec from_expr expr =
       instr (IContFlow (JmpNZ end_label));
       instr (IBasic PopC);
       from_expr e2;
-      instr (ILabel end_label);
+      instr_label end_label;
     ]
   | A.Cast(hint, e) ->
     gather [from_expr e; emit_cast hint]
@@ -199,9 +199,9 @@ let rec from_expr expr =
       instr (IContFlow (JmpZ false_label));
       from_expr etrue;
       instr (IContFlow (Jmp end_label));
-      instr (ILabel false_label);
+      instr_label false_label;
       from_expr efalse;
-      instr (ILabel end_label)
+      instr_label end_label;
     ]
   | A.Eif (etest, None, efalse) ->
     let end_label = Label.get_next_label () in
@@ -211,7 +211,7 @@ let rec from_expr expr =
       instr (IContFlow (JmpNZ end_label));
       instr (IBasic PopC);
       from_expr efalse;
-      instr (ILabel end_label)
+      instr_label end_label;
     ]
   | A.Expr_list es -> gather @@ List.map es ~f:from_expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) ->
@@ -1181,7 +1181,7 @@ let create_label_to_offset_map instrseq =
   snd @@
   InstrSeq.fold_left instrseq ~init:(0, IMap.empty) ~f:(fun (i, m) instr ->
     begin match instr with
-    | ILabel l -> (i,     IMap.add l i m)
+    | ILabel (l, RegularL) -> (i, IMap.add l i m)
     | _        -> (i + 1, m)
     end)
 
@@ -1277,11 +1277,11 @@ let relabel_instrseq instrseq =
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
     (* TODO: other uses of rel_offset in instructions *)
-    | ILabel l ->
+    | ILabel (l, RegularL) ->
       if ISet.mem l used then
         let ix = lookup_def l defs in
         begin match IMap.get ix refs with
-        | Some l' -> Some (ILabel l')
+        | Some l' -> Some (ILabel (l', RegularL))
         | None -> None
         end
       else None

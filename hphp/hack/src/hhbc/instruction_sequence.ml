@@ -42,8 +42,9 @@ let instr_iterfree id =
 let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
 let instr_jmpnz label = instr (IContFlow (JmpNZ label))
-let instr_label label = instr (ILabel label)
-let instr_label_catch label = instr (IExceptionLabel (label, CatchL))
+let instr_label label = instr (ILabel (label, RegularL))
+let instr_label_catch label = instr (ILabel (label, CatchL))
+let instr_label_fault label = instr (ILabel (label, FaultL))
 let instr_continue level = instr (ISpecialFlow (Continue (level, level)))
 let instr_break level = instr (ISpecialFlow (Break (level, level)))
 let instr_unwind = instr (IContFlow Unwind)
@@ -142,8 +143,9 @@ let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 
 let instr_try_fault_begin fault_label fault_body =
   let fault_body = instr_seq_to_list fault_body in
-  let fl = IExceptionLabel (fault_label, FaultL) in
+  let fl = ILabel (fault_label, FaultL) in
   instr (ITry (TryFaultBegin (fault_label, fl :: fault_body)))
+
 let instr_try_fault_end = instr (ITry TryFaultEnd)
 let instr_try_fault_no_catch fault_label try_body fault_body =
   gather [
@@ -151,5 +153,6 @@ let instr_try_fault_no_catch fault_label try_body fault_body =
     try_body;
     instr_try_fault_end;
   ]
+
 let instr_try_catch_begin catch_label = instr (ITry (TryCatchBegin catch_label))
 let instr_try_catch_end = instr (ITry TryCatchEnd)

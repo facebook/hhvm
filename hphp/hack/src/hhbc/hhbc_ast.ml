@@ -517,9 +517,11 @@ type async_functions =
   | WHResult
   | Await
 
-type exception_label =
+type label_flavor =
+  | RegularL
   | CatchL
   | FaultL
+  | DefaultArgL
 
 type instruct_try =
   | TryCatchBegin of rel_offset
@@ -541,8 +543,7 @@ and instruct =
   | IIsset of instruct_isset
   | IBase of instruct_base
   | IFinal of instruct_final
-  | ILabel of rel_offset
-  | IExceptionLabel of rel_offset * exception_label
+  | ILabel of rel_offset * label_flavor
   | ITry of instruct_try
   | IComment of string
 

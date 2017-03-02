@@ -117,6 +117,7 @@ struct TypeAnnotation {
   void setTypeAccess() { m_typeaccess = true; }
   void setShape() { m_shape = true; }
   void setClsCnsShapeField() { m_clsCnsShapeField = true; }
+  void setOptionalShapeField() { m_optionalShapeField = true; }
   void setGenerics(const std::string& generics) { m_generics = generics; }
 
   const std::string& getGenerics() const { return m_generics; }
@@ -245,6 +246,7 @@ private:
   unsigned m_typeaccess : 1;
   unsigned m_shape : 1;
   unsigned m_clsCnsShapeField : 1;
+  unsigned m_optionalShapeField : 1;
 };
 
 }

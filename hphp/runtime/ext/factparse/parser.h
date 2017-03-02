@@ -348,6 +348,7 @@ struct Parser : ParserBase {
   void onTypeAnnotation(Token& out, Token& name, const Token& typeArgs);
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
+  void onShapeFieldSpecialization(Token& shapeField, char specialization);
   void onClsCnsShapeField(Token& out, const Token& cls, const Token& cns,
     const Token& value);
   void onShape(Token& out, const Token& shapeMemberList);

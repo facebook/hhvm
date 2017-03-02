@@ -2382,6 +2382,13 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
   }
 }
 
+void Parser::onShapeFieldSpecialization(
+    Token& shapeField, char specialization) {
+  if (specialization == '?') {
+    shapeField.typeAnnotation->setOptionalShapeField();
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // namespace support
 

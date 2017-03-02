@@ -41,7 +41,8 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_typevar(false),
                                 m_typeaccess(false),
                                 m_shape(false),
-                                m_clsCnsShapeField(false) { }
+                                m_clsCnsShapeField(false),
+                                m_optionalShapeField(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime

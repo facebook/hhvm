@@ -1,4 +1,4 @@
-%{
+ %{
 
 /* By default this grammar is set up to be used by HPHP's compile parser.
  * However, it can be used to make parsers for different purposes by
@@ -3388,17 +3388,24 @@ hh_shape_member_type:
       T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
       hh_type                      {
-                                     /* should not reach here as
-                                      * optional shape fields are not
-                                      * supported in strict mode */
                                      validate_shape_keyname($2, _p);
                                      _p->onTypeAnnotation($$, $2, $4);
+                                     _p->onShapeFieldSpecialization($$, '?');
                                    }
  |  class_namespace_string_typeargs
       T_DOUBLE_COLON
       ident_no_semireserved
       T_DOUBLE_ARROW
       hh_type                      { _p->onClsCnsShapeField($$, $1, $3, $5); }
+ |  '?'
+      class_namespace_string_typeargs
+      T_DOUBLE_COLON
+      ident_no_semireserved
+      T_DOUBLE_ARROW
+      hh_type                      {
+                                     _p->onClsCnsShapeField($$, $2, $4, $6);
+                                     _p->onShapeFieldSpecialization($$, '?');
+                                   }
 ;
 
 hh_non_empty_shape_member_list:

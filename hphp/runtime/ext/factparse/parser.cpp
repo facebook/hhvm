@@ -752,6 +752,10 @@ void Parser::onClsCnsShapeField(Token& out,
                                 const Token& value) {
 }
 
+void Parser::onShapeFieldSpecialization(
+    Token& shapeField, char specialization) {
+}
+
 void Parser::onShape(Token &out, const Token &shapeFieldsList) {
 }
 

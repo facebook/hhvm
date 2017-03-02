@@ -422,6 +422,10 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
+SSATmp* IRBuilder::preOptimizeLdClsRef(IRInstruction* inst) {
+  return preOptimizeLdLocation(inst, cslot(inst->extra<LdClsRef>()->slot));
+}
+
 SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
   auto const off = inst->extra<CastStk>()->offset;
   auto const curType = stack(off, DataTypeGeneric).type;
@@ -470,6 +474,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
+  X(LdClsRef)
   X(CastStk)
   X(CoerceStk)
   X(LdARFuncPtr)
@@ -697,7 +702,9 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
 
 bool IRBuilder::constrainLocation(Location l, TypeConstraint tc,
                                   const std::string& why) {
-  if (!shouldConstrainGuards() || tc.empty()) return false;
+  if (!shouldConstrainGuards() ||
+      l.tag() == LTag::CSlot ||
+      tc.empty()) return false;
 
   ITRACE(1, "constraining {} to {} (for {})\n", show(l), tc, why);
   Indent _i;
@@ -820,6 +827,10 @@ const StackState& IRBuilder::stack(IRSPRelOffset offset, TypeConstraint tc) {
   return m_state.stack(offset);
 }
 
+const CSlotState& IRBuilder::clsRefSlot(uint32_t slot) {
+  return m_state.clsRefSlot(slot);
+}
+
 SSATmp* IRBuilder::valueOf(Location l, TypeConstraint tc) {
   constrainLocation(l, tc, "");
   return m_state.valueOf(l);
@@ -851,7 +862,7 @@ Type IRBuilder::predictedMBaseInnerType() const {
 }
 
 /*
- * Wrap a local or stack ID into a Location.
+ * Wrap a local, stack ID, or class-ref slot into a Location.
  */
 Location IRBuilder::loc(uint32_t id) const {
   return Location::Local { id };
@@ -859,6 +870,9 @@ Location IRBuilder::loc(uint32_t id) const {
 Location IRBuilder::stk(IRSPRelOffset off) const {
   auto const fpRel = off.to<FPInvOffset>(m_state.irSPOff());
   return Location::Stack { fpRel };
+}
+Location IRBuilder::cslot(uint32_t slot) const {
+  return Location::CSlot { slot };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

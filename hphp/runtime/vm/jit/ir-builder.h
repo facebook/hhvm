@@ -117,6 +117,7 @@ struct IRBuilder {
    */
   const LocalState& local(uint32_t id, TypeConstraint tc);
   const StackState& stack(IRSPRelOffset offset, TypeConstraint tc);
+  const CSlotState& clsRefSlot(uint32_t slot);
   SSATmp* valueOf(Location l, TypeConstraint tc);
   Type     typeOf(Location l, TypeConstraint tc);
 
@@ -282,6 +283,7 @@ private:
    */
   Location loc(uint32_t) const;
   Location stk(IRSPRelOffset) const;
+  Location cslot(uint32_t) const;
 
   /*
    * preOptimize() and helpers.
@@ -313,6 +315,7 @@ private:
   SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
+  SSATmp* preOptimizeLdClsRef(IRInstruction*);
   SSATmp* preOptimizeCastStk(IRInstruction*);
   SSATmp* preOptimizeCoerceStk(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);

@@ -1644,6 +1644,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
         case LTag::Stack:
           return top(env, offsetFromBCSP(env, baseLoc->stackIdx()));
         case LTag::MBase:
+        case LTag::CSlot:
           always_assert(false);
       }
       not_reached();
@@ -1674,6 +1675,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
           sp(env), newArr);
       break;
     case LTag::MBase:
+    case LTag::CSlot:
       always_assert(false);
   }
   return value;

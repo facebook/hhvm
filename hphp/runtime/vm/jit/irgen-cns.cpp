@@ -183,7 +183,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
   auto const clsTmp = peekClsRef(env, slot);
   auto const clsTy = clsTmp->type();
   if (!clsTy.clsSpec()) {
-    interpOne(env, TUncountedInit, 0);
+    interpOne(env, *env.currentNormalizedInstruction);
     return;
   }
   auto const cls = clsTy.clsSpec().cls();
@@ -198,7 +198,6 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
       implClsCns(env, cls, cnsNameStr, cls->name());
     },
     [&] {
-      env.irb->exceptionStackBoundary();
       gen(env, Jmp, makeExitSlow(env));
     }
   );

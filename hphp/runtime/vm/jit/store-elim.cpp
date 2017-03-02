@@ -536,6 +536,7 @@ void visit(Local& env, IRInstruction& inst) {
       // things.
       addAllLoad(env);
       killSet(env, env.global.ainfo.all_frame);
+      killSet(env, env.global.ainfo.all_clsRefSlot);
       kill(env, l.kills);
     },
 

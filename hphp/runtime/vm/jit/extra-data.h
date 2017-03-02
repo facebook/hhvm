@@ -835,10 +835,22 @@ struct InterpOneData : IRExtraData {
     Type type;
   };
 
+  struct ClsRefSlot {
+    explicit ClsRefSlot(uint32_t id = 0, bool write = false)
+      : id{id}
+      , write{write}
+    {}
+
+    uint32_t id;
+    bool write;
+  };
+
   explicit InterpOneData(IRSPRelOffset spOffset)
     : spOffset(spOffset)
     , nChangedLocals(0)
     , changedLocals(nullptr)
+    , nChangedClsRefSlots(0)
+    , changedClsRefSlots(nullptr)
     , smashesAllLocals(false)
   {}
 
@@ -861,6 +873,9 @@ struct InterpOneData : IRExtraData {
   uint32_t nChangedLocals;
   LocalType* changedLocals;
 
+  uint32_t nChangedClsRefSlots;
+  ClsRefSlot* changedClsRefSlots;
+
   bool smashesAllLocals;
 
   InterpOneData* clone(Arena& arena) const {
@@ -871,8 +886,12 @@ struct InterpOneData : IRExtraData {
     id->opcode = opcode;
     id->nChangedLocals = nChangedLocals;
     id->changedLocals = new (arena) LocalType[nChangedLocals];
+    id->nChangedClsRefSlots = nChangedClsRefSlots;
+    id->changedClsRefSlots = new (arena) ClsRefSlot[nChangedClsRefSlots];
     id->smashesAllLocals = smashesAllLocals;
     std::copy(changedLocals, changedLocals + nChangedLocals, id->changedLocals);
+    std::copy(changedClsRefSlots, changedClsRefSlots + nChangedClsRefSlots,
+              id->changedClsRefSlots);
     return id;
   }
 
@@ -892,6 +911,13 @@ struct InterpOneData : IRExtraData {
         ret += folly::sformat(", Local {} -> {}",
                               changedLocals[i].id,
                               changedLocals[i].type);
+      }
+    }
+    if (nChangedClsRefSlots) {
+      for (auto i = 0; i < nChangedClsRefSlots; ++i) {
+        ret += folly::sformat(", Slot {}{}",
+                              changedClsRefSlots[i].id,
+                              changedClsRefSlots[i].write ? "W" : "R");
       }
     }
 

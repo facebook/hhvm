@@ -340,6 +340,24 @@ interpOutputLocals(IRGS& env,
   return locals;
 }
 
+jit::vector<InterpOneData::ClsRefSlot>
+interpClsRefSlots(IRGS& env, const NormalizedInstruction& inst) {
+  jit::vector<InterpOneData::ClsRefSlot> slots;
+
+  auto const op = inst.op();
+  auto const numImmeds = numImmediates(op);
+  for (auto i = uint32_t{0}; i < numImmeds; ++i) {
+    auto const type = immType(op, i);
+    if (type == ArgType::CAR) {
+      slots.emplace_back(inst.imm[i].u_CAR, false);
+    } else if (type == ArgType::CAW) {
+      slots.emplace_back(inst.imm[i].u_CAW, true);
+    }
+  }
+
+  return slots;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -359,6 +377,10 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
     stackType);
   idata.nChangedLocals = locals.size();
   idata.changedLocals = locals.data();
+
+  auto slots = interpClsRefSlots(env, inst);
+  idata.nChangedClsRefSlots = slots.size();
+  idata.changedClsRefSlots = slots.data();
 
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {

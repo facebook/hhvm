@@ -56,7 +56,7 @@ void emitClsRefGetC(IRGS& env, uint32_t slot) {
     implClsRefGet(env, name, slot);
     decRef(env, name);
   } else {
-    interpOne(env, 1);
+    interpOne(env, *env.currentNormalizedInstruction);
   }
 }
 
@@ -307,7 +307,7 @@ void emitLateBoundCls(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (!clss) {
     // no static context class, so this will raise an error
-    interpOne(env, 0);
+    interpOne(env, *env.currentNormalizedInstruction);
     return;
   }
   auto const ctx = ldCtx(env);
@@ -317,7 +317,7 @@ void emitLateBoundCls(IRGS& env, uint32_t slot) {
 void emitSelf(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
-    interpOne(env, 0);
+    interpOne(env, *env.currentNormalizedInstruction);
   } else {
     putClsRef(env, slot, cns(env, clss));
   }
@@ -326,7 +326,7 @@ void emitSelf(IRGS& env, uint32_t slot) {
 void emitParent(IRGS& env, uint32_t slot) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
-    interpOne(env, 0);
+    interpOne(env, *env.currentNormalizedInstruction);
   } else {
     putClsRef(env, slot, cns(env, clss->parent()));
   }

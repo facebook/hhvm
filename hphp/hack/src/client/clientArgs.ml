@@ -442,6 +442,7 @@ let parse_build_args () =
   let steps = ref None in
   let ignore_killswitch = ref false in
   let no_steps = ref None in
+  let use_factsdb_static = ref false in
   let verbose = ref false in
   let serial = ref false in
   let test_dir = ref None in
@@ -462,6 +463,8 @@ let parse_build_args () =
     "--no-steps", Arg.String (fun x ->
       no_steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps not to run";
+    "--use-factsdb-static", Arg.Set use_factsdb_static,
+    " build autoload-map and arc-facts using FactsDB";
     "--no-run-scripts", Arg.Clear run_scripts,
     " don't run unported arc build scripts";
     "--serial", Arg.Set serial,
@@ -498,6 +501,7 @@ let parse_build_args () =
       steps = !steps;
       ignore_killswitch = !ignore_killswitch;
       no_steps = !no_steps;
+      use_factsdb_static = !use_factsdb_static;
       run_scripts = !run_scripts;
       serial = !serial;
       test_dir = !test_dir;

@@ -15,6 +15,7 @@ type build_opts = {
                          None means 'all except kill-switched' *)
   ignore_killswitch: bool; (* when true, also build kill-switched steps *)
   no_steps: string list option; (* ...but don't run these steps *)
+  use_factsdb_static: bool; (* use FactsDB generators for certain steps *)
   run_scripts: bool; (* when true, run remaining arc build steps
                      that we haven't figured out how to port yet*)
   serial: bool; (* when true, don't use parallel workers *)

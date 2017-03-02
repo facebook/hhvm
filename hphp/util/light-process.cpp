@@ -465,10 +465,10 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   afdt_error_t err = AFDT_ERROR_T_INIT;
   auto afdt_lid = afdt_listen(afdt_filename.c_str(), &err);
   if (afdt_lid < 0) {
-    Logger::Warning("Unable to afdt_listen to %s: %d %s",
-                    afdt_filename.c_str(),
-                    errno, folly::errnoStr(errno).c_str());
-    return;
+    Logger::Error("Unable to afdt_listen to %s: %d %s",
+                  afdt_filename.c_str(),
+                  errno, folly::errnoStr(errno).c_str());
+    abort();
   }
 
   SCOPE_EXIT {

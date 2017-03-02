@@ -21,6 +21,9 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -29,8 +32,7 @@
 #include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit {
 namespace {
@@ -813,6 +815,10 @@ bool findWeakActRecUses(const BlockList& blocks,
     case AssertLoc:
     case LdLocAddr:
     case HintLocInner:
+    // these can be rewritten to use an outer frame pointer
+    case LdClsRef:
+    case StClsRef:
+    case KillClsRef:
       incWeak(inst, inst->src(0));
       break;
 
@@ -864,6 +870,116 @@ IRSPRelOffset locToStkOff(IRInstruction& inst) {
   assertx(fpInst->is(DefInlineFP));
 
   return fpInst->extra<DefInlineFP>()->spOffset - locId - 1;
+}
+
+/*
+ * Convert an instruction using the frame pointer into one that uses the
+ * caller's frame pointer, skipping frames marked as dead.
+ */
+template <typename F>
+void rewriteToParentFrameImpl(IRUnit& unit, IRInstruction& inst, F dead) {
+  assertx(inst.is(LdClsRef, StClsRef, KillClsRef));
+  assertx(inst.src(0)->inst()->is(DefInlineFP));
+
+  auto fp = inst.src(0);
+
+  // Figure out the FPInvOffset of the stack pointer from the outermost frame
+  // pointer. We'll use this to find the offsets of the various frame pointers.
+  auto const spOffsetFromTop = [&]{
+    auto const sp = fp->inst()->src(0);
+    auto const defSp = sp->inst();
+    assertx(defSp->is(DefSP));
+    return defSp->extra<DefSP>()->offset;
+  }();
+
+  // Given a frame pointer, determine its offset from the outermost frame
+  // pointer in the unit.
+  auto const getFpOffsetFromTop = [&](const SSATmp* s) {
+    auto const i = s->inst();
+    if (i->is(DefFP)) return FPInvOffset{0};
+    if (i->is(DefInlineFP)) {
+      return i->extra<DefInlineFP>()->spOffset.to<FPInvOffset>(spOffsetFromTop);
+    }
+    always_assert(false);
+  };
+
+  // Given a frame pointer, determine the associated Func*.
+  auto const getFunc = [](const SSATmp* s) {
+    auto const i = s->inst();
+    if (i->is(DefFP)) return i->func();
+    if (i->is(DefInlineFP)) return i->extra<DefInlineFP>()->target;
+    always_assert(false);
+  };
+
+  auto const slot = inst.extra<ClsRefSlotData>()->slot;
+  auto const origFpOffset = getFpOffsetFromTop(fp);
+  auto const origFunc = getFunc(fp);
+
+  // Walk up the def/use chain of the frame pointers, stopping if we encounter
+  // the outermost frame pointer, or if we find an inlined frame which is not
+  // dead. This will be the frame pointer we rewrite the instruction to.
+  do {
+    fp = fp->inst()->src(1);
+    assertx(fp->inst()->is(DefFP, DefInlineFP));
+  } while (!fp->inst()->is(DefFP) && dead(fp->inst()));
+
+  // Calculate the new offset (in bytes) that should be used to calculate the
+  // new slot. Take the difference between the original frame pointer offset and
+  // the new frame pointer offset. This is in slots, so multiple by the slot
+  // size. Add in the space between the original frame pointer to the original
+  // slot, and subtract out the space between the new frame pointer and the
+  // first slot. (frame_clsref_offset returns negative numbers, hence the
+  // reversed operations).
+
+  /*
+   *  --------------------------------
+   *  |   ActRec                     |
+   *  -------------------------------- fp <---------------------|
+   *  |   ..................         |                          |
+   *  |   ..................         |                          |
+   *  |   ..................         |                          |
+   *  --------------------------------                          |
+   *  |   ActRec                     |                          |
+   *  -------------------------------- origFp <-|               |- new offset
+   *  |   Locals + Iterators         |          |               |
+   *  --------------------------------          |               |
+   *  |   Class-ref slots #0 -> N-1  |          |- orig offset  |
+   *  --------------------------------          |               |
+   *  |   Class-ref slot #N          |          |               |
+   *  -------------------------------- <--------- <--------------
+   */
+
+  auto const newOffset =
+    cellsToBytes(origFpOffset - getFpOffsetFromTop(fp))
+    - frame_clsref_offset(origFunc, slot)
+    + frame_clsref_offset(getFunc(fp), 0);
+  assertx((newOffset % sizeof(LowPtr<Class>)) == 0);
+  // Now that we have the new offset in bytes, convert it to an actual slot
+  // number.
+  auto const newSlot = newOffset / sizeof(LowPtr<Class>);
+
+  // Sanity check that both the before and after result in the same byte offset
+  if (debug) {
+    DEBUG_ONLY auto const origOffset =
+      cellsToBytes(origFpOffset.offset)
+      - frame_clsref_offset(origFunc, slot);
+    DEBUG_ONLY auto const newOffset =
+      cellsToBytes(getFpOffsetFromTop(fp).offset)
+      - frame_clsref_offset(getFunc(fp), newSlot);
+    assertx(origOffset == newOffset);
+  }
+
+  ITRACE(3, "rewriting {} to use frame-ptr {} with slot {}\n",
+         inst, *fp, newSlot);
+
+  // Update the instruction:
+  inst.setSrc(0, fp);
+  switch (inst.op()) {
+    case LdClsRef:   inst.extra<LdClsRef>()->slot = newSlot; break;
+    case StClsRef:   inst.extra<StClsRef>()->slot = newSlot; break;
+    case KillClsRef: inst.extra<KillClsRef>()->slot = newSlot; break;
+    default: not_reached();
+  }
 }
 
 /*
@@ -923,6 +1039,18 @@ void performActRecFixups(const BlockList& blocks,
       case HintLocInner:
         if (state[inst.src(0)->inst()].isDead()) {
           convertToStackInst(unit, inst);
+        }
+        break;
+
+      case LdClsRef:
+      case StClsRef:
+      case KillClsRef:
+        if (state[inst.src(0)->inst()].isDead()) {
+          rewriteToParentFrameImpl(
+            unit,
+            inst,
+            [&](const IRInstruction* i){ return state[i].isDead(); }
+          );
         }
         break;
 
@@ -1014,6 +1142,12 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
     default: break;
   }
   not_reached();
+}
+
+void rewriteToParentFrame(IRUnit& unit, IRInstruction& inst) {
+  rewriteToParentFrameImpl(
+    unit, inst, [&](const IRInstruction*) { return false; }
+  );
 }
 
 void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {

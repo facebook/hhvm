@@ -125,19 +125,20 @@ After determining the callee main blocks the optimize pass will process every
 use of the callee frame pointer to determine if the use is compatible with
 sinking the DefInlineFP into exit-heads. Any use occuring within an exit-block
 is accepted as these uses will have access to the sunk frame pointer. Uses on
-the main block that can either be transformed to stack relative uses or
-adjusted to use the parent frame pointer (generally with some additional fixup
-                                          in any associated catch traces) are
-also accepted.
+the main block that can either be transformed to stack relative uses or adjusted
+to use the parent frame pointer (generally with some additional fixup in any
+associated catch traces) are also accepted.
 
 All pure memory access and pointer logic can be transformed, in particular:
-LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, and AssertLoc.
+LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, AssertLoc, LdClsRef, StClsRef,
+and KillClsRef.
 
-Currently only EagerSyncVMRegs, CallBuiltin, and Call can be adjusted to use
-the parent frame. For calls only those calls which are known to not access the
-caller frame can be modified in this manner. All C++ builtins can do this but
-many hot functions do not. A whitelist exists for builtin functions which are
-safe to call without a valid caller frame.
+Currently only EagerSyncVMRegs, CallBuiltin, Call, LdClsRef, StClsRef, and
+KillClsRef can be adjusted to use the parent frame. For calls only those calls
+which are known to not access the caller frame can be modified in this
+manner. All C++ builtins can do this but many hot functions do not. A whitelist
+exists for builtin functions which are safe to call without a valid caller
+frame.
 
 A special list of instructions known to access the current frame without
 explicitly depending on it are also blacklisted.
@@ -400,6 +401,10 @@ void replace(Block* block, SSATmp* oldSrc, SSATmp* newSrc, FPUseMap& map) {
  */
 bool canConvertToStack(IRInstruction& inst) {
   return inst.is(LdLoc, StLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
+}
+
+bool canRewriteToParent(const IRInstruction& inst) {
+  return inst.is(LdClsRef, StClsRef, KillClsRef);
 }
 
 /*
@@ -735,6 +740,11 @@ void transformUses(OptimizeContext& ctx, InstructionSet& uses) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Converting to stack relative instruction: {}\n", *inst);
       convertToStackInst(*ctx.unit, *inst);
+    } else if (canRewriteToParent(*inst)) {
+      assertx(ctx.mainBlocks.count(block) != 0);
+      ITRACE(3, "Converting to use parent frame for instruction: {}\n", *inst);
+      rewriteToParentFrame(*ctx.unit, *inst);
+      recordNewUse(ctx, inst, parentFp);
     } else if (canAdjustFrame(*inst)) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Using parent frame for instruction: {}\n", *inst);
@@ -869,6 +879,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
     uses.end(),
     [&] (IRInstruction* inst) { return ctx.mainBlocks.count(inst->block()) &&
                                        !canConvertToStack(*inst) &&
+                                       !canRewriteToParent(*inst) &&
                                        !canAdjustFrame(*inst); }
   );
   if (hasMainUse) {

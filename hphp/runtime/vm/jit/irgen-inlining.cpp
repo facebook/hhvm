@@ -168,6 +168,13 @@ bool beginInlining(IRGS& env,
   }
   emitPrologueLocals(env, numParams, target, ctx);
 
+  // "Kill" all the class-ref slots initially. This normally won't do anything
+  // (the class-ref slots should be unoccupied at this point), but in debugging
+  // builds it will write poison values to them.
+  for (uint32_t slot = 0; slot < target->numClsRefSlots(); ++slot) {
+    killClsRef(env, slot);
+  }
+
   if (data.ctx && data.ctx->isA(TObj)) {
     assertx(startSk.hasThis());
   } else if (data.ctx && !data.ctx->type().maybe(TObj)) {

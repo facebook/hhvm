@@ -148,11 +148,23 @@ void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+const Func* funcFromFp(const SSATmp* fp) {
+  auto const inst = fp->inst();
+  assertx(inst->is(DefFP, DefInlineFP));
+  if (inst->is(DefFP)) return inst->marker().func();
+  if (inst->is(DefInlineFP)) return inst->extra<DefInlineFP>()->target;
+  not_reached();
+}
+
+}
+
 void cgLdClsRef(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const off = frame_clsref_offset(
-    inst->marker().func(),
+    funcFromFp(inst->src(0)),
     inst->extra<ClsRefSlotData>()->slot
   );
   emitLdLowPtr(vmain(env), fp[off], dst, sizeof(LowPtr<Class>));
@@ -162,7 +174,7 @@ void cgStClsRef(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const src = srcLoc(env, inst, 1).reg();
   auto const off = frame_clsref_offset(
-    inst->marker().func(),
+    funcFromFp(inst->src(0)),
     inst->extra<ClsRefSlotData>()->slot
   );
   emitStLowPtr(vmain(env), src, fp[off], sizeof(LowPtr<Class>));
@@ -174,7 +186,7 @@ void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = frame_clsref_offset(
-    inst->marker().func(),
+    funcFromFp(inst->src(0)),
     inst->extra<ClsRefSlotData>()->slot
   );
 

@@ -219,10 +219,10 @@ struct State {
   bool initialized = false;
   bool unreachable = false;
   bool thisAvailable = false;
-  std::vector<Type> locals;
-  std::vector<Iter> iters;
-  std::vector<StackElem> stack;
-  std::vector<ActRec> fpiStack;
+  CompactVector<Type> locals;
+  CompactVector<Iter> iters;
+  CompactVector<StackElem> stack;
+  CompactVector<ActRec> fpiStack;
 
   /*
    * The current member base. Updated as we move through bytecodes representing
@@ -236,13 +236,13 @@ struct State {
    * used for locals.  This vector tracks the base,key type pair that was used
    * at each stage.  See irgen-minstr.cpp:resolveArrayChain().
    */
-  std::vector<std::pair<Type,Type>> arrayChain;
+  CompactVector<std::pair<Type,Type>> arrayChain;
 
   /*
    * Mapping of a local to another local which is known to have an equivalent
    * value.
    */
-  std::vector<LocalId> equivLocals;
+  CompactVector<LocalId> equivLocals;
 };
 
 /*

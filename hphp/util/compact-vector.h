@@ -78,6 +78,7 @@ struct CompactVector {
   void emplace_back(Args&&... args);
   void pop_back();
   void erase(iterator);
+  void erase(iterator, iterator);
   void resize(size_type sz);
   void resize(size_type sz, const value_type& value);
 
@@ -154,7 +155,7 @@ bool CompactVector<T>::operator==(const CompactVector& other) const {
   auto const sz = size();
   if (sz != other.size()) return false;
   for (size_type i = 0; i < sz; ++i) {
-    if (*get(i) != other[i]) return false;
+    if (!(*get(i) == other[i])) return false;
   }
   return true;
 }
@@ -205,6 +206,16 @@ void CompactVector<T>::erase(iterator elm) {
   elm->~T();
   m_data->m_len--;
   memmove(elm, elm + 1, (char*)end() - (char*)elm);
+}
+
+template <typename T>
+void CompactVector<T>::erase(iterator elm1, iterator elm2) {
+  assert(elems() <= elm1 && elm1 <= elm2 && elm2 <= end());
+  for (auto elm = elm1; elm < elm2; elm++) {
+    elm->~T();
+  }
+  memmove(elm1, elm2, (char*)end() - (char*)elm2);
+  m_data->m_len -= elm2 - elm1;
 }
 
 template <typename T>

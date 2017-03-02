@@ -401,8 +401,9 @@ void setLocalForBase(ISS& env, Type ty) {
 // to produce the array type that incorporates the effects of any
 // intermediate defining dims.
 Type currentChainType(ISS& env, Type val) {
-  auto it = env.state.arrayChain.rbegin();
-  for (; it != env.state.arrayChain.rend(); ++it) {
+  auto it = env.state.arrayChain.end();
+  while (it != env.state.arrayChain.begin()) {
+    --it;
     if (it->first.subtypeOf(TArr)) {
       val = array_set(it->first, it->second, val);
     } else if (it->first.subtypeOf(TVec)) {

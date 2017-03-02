@@ -627,6 +627,7 @@ void RequestInjectionData::reset() {
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
+  m_suppressHackArrayCompatNotices = false;
   m_breakPointFilter.clear();
   m_flowFilter.clear();
   m_lineBreakPointFilter.clear();

@@ -164,6 +164,12 @@ struct RequestInjectionData {
   void setJitFolding(bool);
 
   /*
+   * Whether to suppress the emission of Hack array compat notices.
+   */
+  bool getSuppressHackArrayCompatNotices() const;
+  void setSuppressHackArrayCompatNotices(bool);
+
+  /*
    * Whether coverage is being collected.
    */
   bool getCoverage() const;
@@ -283,6 +289,7 @@ private:
   bool m_jit{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};
+  bool m_suppressHackArrayCompatNotices{false};
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};

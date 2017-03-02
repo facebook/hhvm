@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -119,6 +120,7 @@ void raise_disallowed_dynamic_call(const Func* f) {
 }
 
 void raise_hackarr_compat_notice(const std::string& msg) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
   raise_notice(std::string{"Hack Array Compat: "} + msg);
 }
 
@@ -428,4 +430,16 @@ void raise_message(ErrorMode mode,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+SuppressHackArrCompatNotices::SuppressHackArrCompatNotices()
+  : old{RID().getSuppressHackArrayCompatNotices()} {
+  RID().setSuppressHackArrayCompatNotices(true);
+}
+
+SuppressHackArrCompatNotices::~SuppressHackArrCompatNotices() {
+  RID().setSuppressHackArrayCompatNotices(old);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

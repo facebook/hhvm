@@ -41,6 +41,14 @@ inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
 }
 
+inline bool RequestInjectionData::getSuppressHackArrayCompatNotices() const {
+  return m_suppressHackArrayCompatNotices;
+}
+
+inline void RequestInjectionData::setSuppressHackArrayCompatNotices(bool flag) {
+  m_suppressHackArrayCompatNotices = flag;
+}
+
 inline bool RequestInjectionData::getCoverage() const {
   return m_coverage;
 }

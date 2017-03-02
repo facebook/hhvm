@@ -130,6 +130,21 @@ void raise_return_typehint_error(const std::string& msg);
 
 void raise_disallowed_dynamic_call(const Func* f);
 
+// RAII mechanism to temporarily suppress Hack array compat notices within a
+// scope.
+struct SuppressHackArrCompatNotices {
+  SuppressHackArrCompatNotices();
+  ~SuppressHackArrCompatNotices();
+  SuppressHackArrCompatNotices(const SuppressHackArrCompatNotices&) = delete;
+  SuppressHackArrCompatNotices(SuppressHackArrCompatNotices&&) = delete;
+  SuppressHackArrCompatNotices&
+  operator=(const SuppressHackArrCompatNotices&) = delete;
+  SuppressHackArrCompatNotices&
+  operator=(SuppressHackArrCompatNotices&&) = delete;
+private:
+  bool old;
+};
+
 void raise_hackarr_compat_notice(const std::string& msg);
 
 ///////////////////////////////////////////////////////////////////////////////

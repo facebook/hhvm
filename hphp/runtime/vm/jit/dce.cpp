@@ -268,6 +268,7 @@ bool canDCE(IRInstruction* inst) {
   case GetTime:
   case Select:
   case MemoGet:
+  case LdARCtx:
     assertx(!inst->isControlFlow());
     return true;
 

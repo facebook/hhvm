@@ -71,7 +71,7 @@ struct FPIInfo {
    */
   const Func* func;
 
-  bool interp;
+  bool inlineEligible;
   bool spansCall;
 };
 
@@ -490,7 +490,7 @@ private:
    * Stack state update helpers.
    */
   void spillFrameStack(IRSPRelOffset, FPInvOffset, const IRInstruction*);
-  void clearStackForCall();
+  void writeToSpilledFrame(IRSPRelOffset, const SSATmp*);
 
 private:
   struct BlockState {

@@ -1317,6 +1317,11 @@ To string conversions:
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'
   cells to the ActRec.
 
+| LdARCtx<T,offset>, DParam, S(StkPtr), NF
+
+  Loads the m_this/m_cls member of an ActRec. S0 is the base address, with
+  `offset' cells to the ActRec.
+
 | LdARNumParams, D(Int), S(FramePtr), NF
 
   Loads the number of params from an ActRec. S0 is the address of the ActRec

@@ -1241,14 +1241,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case LdARFuncPtr:
-    // This instruction is essentially a PureLoad, but we don't handle non-TV's
-    // in PureLoad so we have to treat it as may_load_store.  We also treat it
-    // as loading an entire ActRec-sized part of the stack, although it only
-    // loads the slot containing the Func.
+  case LdARCtx:
+    // These instructions are essentially PureLoads, but we don't handle
+    // non-TV's in PureLoad so we have to treat it as may_load_store.  We also
+    // treat it as loading an entire ActRec-sized part of the stack, although it
+    // only loads a single value from it.
     return may_load_store(
       AStack {
         inst.src(0),
-        inst.extra<LdARFuncPtr>()->offset + int32_t{kNumActRecCells} - 1,
+        inst.extra<IRSPRelOffsetData>()->offset + int32_t{kNumActRecCells} - 1,
         int32_t{kNumActRecCells}
       },
       AEmpty

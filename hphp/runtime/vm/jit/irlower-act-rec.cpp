@@ -206,6 +206,13 @@ void cgLdARFuncPtr(IRLS& env, const IRInstruction* inst) {
   vmain(env) << load{sp[off + AROFF(m_func)], dst};
 }
 
+void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const off = cellsToBytes(inst->extra<LdARCtx>()->offset.offset);
+  vmain(env) << load{sp[off + AROFF(m_thisUnsafe)], dst};
+}
+
 void cgLdARNumArgsAndFlags(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();

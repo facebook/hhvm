@@ -166,9 +166,10 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     always_assert(isFPush(dstInfo.fpushOpc) &&
                   dstInfo.fpushOpc == srcInfo.fpushOpc);
 
-    // If one of the merged edges was interp'ed mark the result as interp'ed
-    if (!dstInfo.interp && srcInfo.interp) {
-      dstInfo.interp = true;
+    // If one of the merged edges is not eligible for inlining, mark the result
+    // as not eligibile.
+    if (dstInfo.inlineEligible && !srcInfo.inlineEligible) {
+      dstInfo.inlineEligible = false;
       changed = true;
     }
 
@@ -608,6 +609,22 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                     cur().bcSPOff, inst);
     break;
 
+  case LookupClsMethod:
+    writeToSpilledFrame(inst->extra<LookupClsMethod>()->calleeAROffset,
+                        inst->src(2));
+    break;
+  case LdObjMethod:
+    writeToSpilledFrame(inst->extra<LdObjMethod>()->offset,
+                        inst->src(1));
+    break;
+  case LdArrFuncCtx:
+  case LdArrFPushCuf:
+  case LdStrFPushCuf:
+  case LdFunc:
+    writeToSpilledFrame(inst->extra<IRSPRelOffsetData>()->offset,
+                        inst->src(1));
+    break;
+
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
@@ -618,7 +635,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                                          nullptr,
                                          extra.opcode,
                                          nullptr,
-                                         true /* interp */,
+                                         false /* inlineEligible */,
                                          false /* spansCall */});
     } else if (isFCallStar(extra.opcode) && !cur().fpiStack.empty()) {
       cur().fpiStack.pop_back();
@@ -1660,9 +1677,29 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
     ctx,
     opc,
     func,
-    false /* interp */,
+    true /* inlineEligible */,
     false /* spans */
   });
+}
+
+void FrameStateMgr::writeToSpilledFrame(IRSPRelOffset offset,
+                                        const SSATmp* sp) {
+  auto const invOff = offset.to<FPInvOffset>(cur().irSPOff) - kNumActRecCells;
+  for (auto& fpi : cur().fpiStack) {
+    if (fpi.returnSP == sp && fpi.returnSPOff == invOff) {
+      // The ops which write to a pre-live ActRec after the fact are generally
+      // used when we don't have sufficient Func or Ctx information. This makes
+      // it hard to predict what they actually write to the ActRec, so be
+      // generic. Mark this entry as not eligible for inlining because the
+      // generic type information isn't sufficient for inlining. (We usually
+      // won't even try to inline such things anyways).
+      fpi.ctxType = TCtx;
+      fpi.ctx = nullptr;
+      fpi.func = nullptr;
+      fpi.inlineEligible = false;
+      break;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -202,7 +202,6 @@ void StringBuffer::append(const Variant& v) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       append(v.toString());
   }
 }

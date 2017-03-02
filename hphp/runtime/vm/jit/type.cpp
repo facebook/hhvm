@@ -291,7 +291,6 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfArray            : return kArr;
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
-    case KindOfClass            : return kCls;
     case KindOfRef:
       assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
@@ -323,7 +322,6 @@ DataType Type::toDataType() const {
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;
   if (*this <= TBoxedCell)   return KindOfRef;
-  if (*this <= TCls)         return KindOfClass;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);
 }
@@ -560,7 +558,7 @@ Type Type::operator-(Type rhs) const {
 // Conversions.
 
 Type typeFromTV(const TypedValue* tv, const Class* ctx) {
-  assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
     auto const cls = tv->m_data.pobj->getVMClass();

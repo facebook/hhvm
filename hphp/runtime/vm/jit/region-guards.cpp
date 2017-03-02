@@ -125,7 +125,7 @@ LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
 bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
                        Type                               guardType,
                        DataTypeCategory&                  guardCategory) {
-  if (guardType <= TCls) return false;
+  assertx(guardType <= TGen);
   auto relaxedType = relaxType(guardType, guardCategory);
 
   int64_t totalWgt   = 0; // sum of all the block weights
@@ -134,7 +134,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
   for (auto& typeWgt : typeWeights) {
     auto type = typeWgt.first;
     auto weight = typeWgt.second;
-    if (type <= TCls) continue;
+    assertx(type <= TGen);
     const bool fitsConstraint = guardCategory == DataTypeSpecialized
       ? type.isSpecialized()
       : typeFitsConstraint(type, guardCategory);
@@ -578,12 +578,12 @@ void optimizeGuards(RegionDesc& region, bool simple) {
     auto& oldPreConds = block->typePreConditions();
 
     for (auto& preCond : oldPreConds) {
+      assertx(preCond.type <= TGen);
       auto category = preCond.category;
       if (simple && category > DataTypeGeneric && category < DataTypeSpecific) {
         category = DataTypeSpecific;
       }
-      auto newType = preCond.type == TCls ? TCls :
-                     relaxType(preCond.type, category);
+      auto newType = relaxType(preCond.type, category);
 
       if (newType != TGen) {
         newPreConds.push_back({preCond.location, newType, preCond.category});

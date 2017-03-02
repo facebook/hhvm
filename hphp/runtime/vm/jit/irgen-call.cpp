@@ -1143,7 +1143,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   auto const clsVal  = peekClsRef(env, clsRefSlot);
   auto const methVal = popC(env);
 
-  if (!methVal->isA(TStr) || !clsVal->isA(TCls)) {
+  if (!methVal->isA(TStr)) {
     PUNT(FPushClsMethod-unknownType);
   }
 

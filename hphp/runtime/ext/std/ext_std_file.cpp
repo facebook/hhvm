@@ -733,9 +733,6 @@ Variant HHVM_FUNCTION(file_put_contents,
       }
       break;
     }
-
-    case KindOfClass:
-      not_reached();
   }
 
   // like fwrite(), fclose() can error when fflush()ing

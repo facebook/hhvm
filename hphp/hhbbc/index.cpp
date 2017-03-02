@@ -2267,7 +2267,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               : subObj(*rcls);
           }
           return TInitCell;
-        case KindOfClass:
         case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
@@ -2343,7 +2342,6 @@ Type Index::satisfies_constraint_helper(Context ctx,
             return subObj(*rcls);
           }
           return TBottom;
-        case KindOfClass:
         case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;

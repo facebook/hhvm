@@ -109,7 +109,7 @@ std::string show(const IRGS& irgs) {
     auto const stkVal = irgs.irb->stack(spRel, DataTypeGeneric).value;
 
     std::string elemStr;
-    if (stkTy == TStkElem) {
+    if (stkTy == TGen) {
       elemStr = "unknown";
     } else if (stkVal) {
       elemStr = stkVal->inst()->toString();

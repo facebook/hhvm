@@ -49,7 +49,6 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   always_assert(false);

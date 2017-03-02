@@ -124,7 +124,6 @@ void cgLdCns(IRLS& env, const IRInstruction* inst) {
         v << copy{v.cns(cns.m_data.dbl), dst.reg(0)};
         break;
       case KindOfUninit:
-      case KindOfClass:
         not_reached();
     }
     v << copy{v.cns(cns.m_type), dst.reg(1)};

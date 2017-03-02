@@ -475,9 +475,6 @@ StaticString getDataTypeString(DataType t) {
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;
     case KindOfRef:        return s_ref;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }

@@ -77,7 +77,7 @@ void ifNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
 template<class Then>
 void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
   if (!ty.maybe(TCounted)) return;
-  if (ty <= TStkElem && ty.isKnownDataType()) {
+  if (ty <= TGen && ty.isKnownDataType()) {
     if (isRefcountedType(ty.toDataType())) then(v);
     return;
   }
@@ -87,7 +87,7 @@ void ifRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc, Then then) {
     v << testqi{ActRec::kHasClassBit, loc.reg(0), sf};
     cond = CC_E;
   } else {
-    assert(ty <= TStkElem);
+    assert(ty <= TGen);
     emitCmpTVType(v, sf, KindOfRefCountThreshold, loc.reg(1));
   }
   unlikelyIfThen(v, vtaken, cond, sf, then);
@@ -281,7 +281,6 @@ CallSpec getDtorCallSpec(DataType type) {
     case KindOfRef:
       return CallSpec::method(&RefData::release);
     DT_UNCOUNTED_CASE:
-    case KindOfClass:
       break;
   }
   always_assert(false);

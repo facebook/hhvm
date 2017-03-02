@@ -24,6 +24,7 @@
 
 namespace HPHP {
 struct ArrayData;
+struct Class;
 struct c_Pair;
 struct c_Vector;
 struct c_ImmVector;

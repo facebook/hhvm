@@ -131,7 +131,7 @@ inline Type::Type()
 
 inline Type::Type(DataType outer, DataType inner)
   : m_bits(bitsFromDataType(outer, inner))
-  , m_ptrKind(outer == KindOfClass ? Ptr::Bottom : Ptr::NotPtr)
+  , m_ptrKind(Ptr::NotPtr)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -190,7 +190,7 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assertx(*this <= TStkElem);
+  assertx(*this <= TGen);
 
   // Some unions correspond to single KindOfs.
   return subtypeOfAny(TStr, TArr, TVec, TDict,
@@ -198,7 +198,7 @@ inline bool Type::isKnownDataType() const {
 }
 
 inline bool Type::needsReg() const {
-  return *this <= TStkElem && !isKnownDataType();
+  return *this <= TGen && !isKnownDataType();
 }
 
 inline bool Type::isSimpleType() const {
@@ -249,7 +249,6 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfNull:
         not_reached();
 
-      case KindOfClass:
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:

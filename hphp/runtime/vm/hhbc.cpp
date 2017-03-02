@@ -672,7 +672,6 @@ void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
           case KindOfObject:
           case KindOfResource:
           case KindOfRef:
-          case KindOfClass:
             not_reached();
         }
       }();
@@ -713,7 +712,6 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

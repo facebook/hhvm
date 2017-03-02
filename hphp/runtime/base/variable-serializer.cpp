@@ -1408,9 +1408,6 @@ void VariableSerializer::serializeVariant(const Variant& self,
     case KindOfRef:
       serializeRef(tv, isArrayKey);
       return;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }

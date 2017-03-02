@@ -65,8 +65,6 @@ enum class Kind : uint8_t {
   T_xhp = 103,
 };
 
-bool KindOfClass(Kind kind);
-
 String toString(const Array& arr);
 
 Array resolve(const Class::Const& typeCns,

@@ -538,7 +538,6 @@ void ConvertTvToUncounted(TypedValue* source) {
     case KindOfDouble: {
       break;
     }
-    case KindOfClass:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

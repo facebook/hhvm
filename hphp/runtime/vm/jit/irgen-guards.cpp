@@ -153,7 +153,7 @@ static void assertTypeMBase(IRGS& env, Type type) {
 }
 
 void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
-  assertx(type <= TStkElem);
+  assertx(type <= TGen);
 
   switch (loc.tag()) {
     case LTag::Stack:

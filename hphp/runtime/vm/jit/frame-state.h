@@ -90,8 +90,7 @@ struct LocationState {
                 "invalid LTag for LocationState");
 
   static constexpr Type default_type() {
-    return (tag == LTag::Stack)
-      ? TStkElem : (tag == LTag::CSlot) ? TCls : TGen;
+    return (tag == LTag::CSlot) ? TCls : TGen;
   }
 
   template<LTag other>

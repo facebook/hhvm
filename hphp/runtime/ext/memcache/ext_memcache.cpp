@@ -168,9 +168,6 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfResource:
     case KindOfRef:
       return MMC_TYPE_STRING;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }

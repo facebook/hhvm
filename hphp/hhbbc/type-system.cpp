@@ -2128,7 +2128,6 @@ Type from_cell(Cell cell) {
     always_assert(cell.m_data.parr->isPHPArray());
     return aval(cell.m_data.parr);
 
-  case KindOfClass:
   case KindOfRef:
   case KindOfObject:
   case KindOfResource:
@@ -2157,7 +2156,6 @@ Type from_DataType(DataType dt) {
   case KindOfRef:      return TRef;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-  case KindOfClass:
     break;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");

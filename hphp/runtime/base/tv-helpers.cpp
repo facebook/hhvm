@@ -116,9 +116,6 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfRef:
         assert(!"KindOfRef found in a Cell");
         break;
-      case KindOfClass:
-        assert(!"Invalid Cell type");
-        break;
     }
     not_reached();
   }();
@@ -210,7 +207,6 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -277,7 +273,6 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -343,7 +338,6 @@ void cellCastToInt64InPlace(Cell* cell) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -400,7 +394,6 @@ double tvCastToDouble(TypedValue* tv) {
       return tv->m_data.pres->data()->o_toDouble();
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -477,7 +470,6 @@ void tvCastToStringInPlace(TypedValue* tv) {
       return;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -539,7 +531,6 @@ StringData* tvCastToString(const TypedValue* tv) {
       return tv->m_data.pres->data()->o_toString().detach();
 
     case KindOfRef:
-    case KindOfClass:
       not_reached();
   }
   not_reached();
@@ -633,7 +624,6 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -752,7 +742,6 @@ void tvCastToVecInPlace(TypedValue* tv) {
       }
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -858,7 +847,6 @@ void tvCastToDictInPlace(TypedValue* tv) {
       }
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -964,7 +952,6 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       }
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1022,7 +1009,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         return;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1067,7 +1053,6 @@ void tvCastToResourceInPlace(TypedValue* tv) {
         // no op, return
         return;
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1110,7 +1095,6 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1160,7 +1144,6 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1233,7 +1216,6 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1273,7 +1255,6 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1306,7 +1287,6 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv) {
       return true;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1339,7 +1319,6 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv) {
       return true;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1372,7 +1351,6 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv) {
       return true;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

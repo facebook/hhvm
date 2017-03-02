@@ -659,13 +659,6 @@ Array resolveTS(const Array& arr,
 
 } // anonymous namespace
 
-bool TypeStructure::KindOfClass(TypeStructure::Kind kind) {
-  return kind == TypeStructure::Kind::T_class
-    || kind == TypeStructure::Kind::T_interface
-    || kind == TypeStructure::Kind::T_trait
-    || kind == TypeStructure::Kind::T_enum;
-}
-
 String TypeStructure::toString(const Array& arr) {
   if (arr.empty()) return String();
 

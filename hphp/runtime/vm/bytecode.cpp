@@ -736,9 +736,6 @@ static std::string toStringElm(const TypedValue* tv) {
     os << toStringElm(tv->m_data.pref->tv());
     os << ")";
     return os.str();
-  case KindOfClass:
-    os << "A:";
-    break;
   case KindOfUninit:
   case KindOfNull:
   case KindOfBoolean:
@@ -843,10 +840,6 @@ static std::string toStringElm(const TypedValue* tv) {
       continue;
     case KindOfRef:
       break;
-    case KindOfClass:
-      os << tv->m_data.pcls
-         << ":" << tv->m_data.pcls->name()->data();
-      continue;
     }
     not_reached();
   } while (0);
@@ -2457,7 +2450,6 @@ OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
       return cls && tv->m_data.pobj->instanceof(cls);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -2712,7 +2704,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
             case KindOfObject:
             case KindOfResource:
             case KindOfRef:
-            case KindOfClass:
               not_reached();
           }
           tvRefcountedDecRef(val);
@@ -2754,7 +2745,6 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
           return;
 
         case KindOfRef:
-        case KindOfClass:
           break;
       }
       not_reached();

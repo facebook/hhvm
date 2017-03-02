@@ -6233,7 +6233,6 @@ bool EmitterVisitor::emitScalarValue(Emitter& e, const Variant& v) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       return false;
   }
   not_reached();

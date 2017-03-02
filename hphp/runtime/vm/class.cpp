@@ -2233,9 +2233,6 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
     case KindOfResource:
     case KindOfRef:
       return false;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }

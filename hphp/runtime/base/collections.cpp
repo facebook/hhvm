@@ -248,7 +248,6 @@ void deepCopy(TypedValue* tv) {
     case KindOfString:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       return;
 
     case KindOfVec: {

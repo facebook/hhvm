@@ -1515,7 +1515,6 @@ TypedValue HHVM_FUNCTION(strlen,
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

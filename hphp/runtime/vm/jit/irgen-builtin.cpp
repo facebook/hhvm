@@ -655,9 +655,6 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfResource:
       case KindOfRef:
         return nullptr;
-      case KindOfClass:
-        always_assert(0);
-        break;
     }
   } catch (...) {
     // If an exception or notice occurred, don't optimize

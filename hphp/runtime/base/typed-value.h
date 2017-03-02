@@ -29,7 +29,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Class;
 struct ArrayData;
 struct StringData;
 struct ObjectData;
@@ -51,7 +50,6 @@ union Value {
   ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfKeyset
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
-  Class*        pcls;   // only in vm stack, no type tag.
   RefData*      pref;   // KindOfRef
   MaybeCountable* pcnt; // for alias-safe generic refcounting operations
 };

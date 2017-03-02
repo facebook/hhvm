@@ -284,7 +284,6 @@ std::pair<int, double> sizeOfArray(
             num, key_size_pair.first, key_size_pair.second);
           break;
         }
-        case KindOfClass:
         case KindOfUninit:
         case KindOfNull:
         case KindOfPersistentVec:
@@ -375,7 +374,6 @@ void stringsOfArray(
           path->push_back(std::string("[" + key_str + "]"));
           break;
         }
-        case KindOfClass:
         case KindOfUninit:
         case KindOfNull:
         case KindOfPersistentVec:
@@ -435,8 +433,7 @@ std::pair<int, double> tvGetSize(
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
-    case KindOfDouble:
-    case KindOfClass: {
+    case KindOfDouble: {
       // Counted as part sizeof(TypedValue)
       break;
     }
@@ -609,7 +606,6 @@ void tvGetStrings(
   std::unordered_set<void*>* pointers
 ) {
   switch (tv->m_type) {
-    case HPHP::KindOfClass:
     case HPHP::KindOfUninit:
     case HPHP::KindOfResource:
     case HPHP::KindOfNull:

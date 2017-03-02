@@ -416,7 +416,6 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

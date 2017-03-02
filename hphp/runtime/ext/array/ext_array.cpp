@@ -342,7 +342,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfInt64:
       return ad->exists(cell->m_data.num);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -771,9 +770,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -796,9 +792,6 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1051,9 +1044,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1076,9 +1066,6 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1380,7 +1367,6 @@ int64_t HHVM_FUNCTION(count,
       return 1;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

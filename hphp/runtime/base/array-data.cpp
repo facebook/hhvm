@@ -1091,9 +1091,6 @@ const char* describeKeyType(const TypedValue* tv) {
 
   case KindOfRef:
     return describeKeyType(tv->m_data.pref->var()->asTypedValue());
-
-  case KindOfClass:
-    break;
   }
   not_reached();
 }
@@ -1121,7 +1118,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfArray:
   case KindOfResource:
   case KindOfObject:
-  case KindOfClass:
     return "<invalid key type>";
   }
   not_reached();

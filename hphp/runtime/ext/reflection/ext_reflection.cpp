@@ -845,7 +845,6 @@ static Array get_function_param_info(const Func* func) {
     if (
       fpi.typeConstraint.isCallable() ||
       (fpi.typeConstraint.underlyingDataType() &&
-       fpi.typeConstraint.underlyingDataType() != KindOfClass &&
        fpi.typeConstraint.underlyingDataType() != KindOfObject
       )
     ) {
@@ -947,7 +946,6 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     if (
       retType.isCallable() || // callable type hint is considered builtin
       (retType.underlyingDataType() &&
-       retType.underlyingDataType() != KindOfClass && // stdclass is not
        retType.underlyingDataType() != KindOfObject
       )
     ) {

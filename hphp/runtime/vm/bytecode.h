@@ -447,7 +447,7 @@ public:
   ALWAYS_INLINE
   void popTV() {
     assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass || tvIsPlausible(*m_top));
+    assert(tvIsPlausible(*m_top));
     tvRefcountedDecRef(m_top);
     tvDebugTrash(m_top);
     m_top++;

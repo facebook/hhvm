@@ -633,8 +633,6 @@ struct Variant : private TypedValue {
         return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1430,7 +1428,6 @@ private:
         assert(m_data.pres->checkCount());
         return;
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1602,7 +1599,6 @@ inline VarNR Variant::toKey(const ArrayData* ad) const {
   case KindOfPersistentString:
   case KindOfString:
   case KindOfInt64:
-  case KindOfClass:
     break;
   }
   not_reached();

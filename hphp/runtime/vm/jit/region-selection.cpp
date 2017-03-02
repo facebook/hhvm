@@ -620,7 +620,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 void RegionDesc::Block::addPredicted(TypedLocation locType) {
   FTRACE(2, "Block::addPredicted({})\n", show(locType));
   assertx(locType.type != TBottom);
-  assertx(locType.type <= TStkElem);
+  assertx(locType.type <= TGen);
   // type predictions should be added in order of location
   assertx(m_typePredictions.size() == 0 ||
           (m_typePredictions.back().location < locType.location));
@@ -630,7 +630,7 @@ void RegionDesc::Block::addPredicted(TypedLocation locType) {
 void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
   FTRACE(2, "Block::addPreCondition({})\n", show(locGuard));
   assertx(locGuard.type != TBottom);
-  assertx(locGuard.type <= TStkElem);
+  assertx(locGuard.type <= TGen);
   assertx(locGuard.type.isSpecialized() ||
           typeFitsConstraint(locGuard.type, locGuard.category));
   m_typePreConditions.push_back(locGuard);

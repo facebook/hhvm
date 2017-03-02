@@ -267,8 +267,6 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
           compat = false;
           return;
         }
-      /* fall through */
-      case KindOfClass:
         break;
     }
     always_assert(false /* likely parser bug */);

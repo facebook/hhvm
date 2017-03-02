@@ -415,7 +415,7 @@ void recordDependencies(Env& env) {
                          Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
-    if (type <= TCls) return;
+    assertx(type <= TGen);
     auto& whichMap = hint ? hintMap : guardMap;
     auto inret = whichMap.insert(std::make_pair(loc, type));
     // Unconstrained pseudo-main guards will be relaxed to Gen by the guard
@@ -513,13 +513,9 @@ RegionDescPtr form_region(Env& env) {
 
   for (auto const& lt : env.ctx.liveTypes) {
     auto t = lt.type;
-    if (t <= TCls) {
-      irgen::assertTypeLocation(env.irgs, lt.location, t);
-      env.curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
-    } else {
-      irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
-                       true /* outerOnly */);
-    }
+    assertx(t <= TGen);
+    irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
+                     true /* outerOnly */);
   }
 
   irgen::gen(env.irgs, EndGuards);

@@ -960,7 +960,7 @@ To string conversions:
 
 7. Loads
 
-| LdStk<T,offset>, DParamMayRelax(StkElem), S(StkPtr), NF
+| LdStk<T,offset>, DParamMayRelax(Gen), S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
@@ -1690,7 +1690,7 @@ To string conversions:
   Store the value in S1 into the RefData pointed to by S0. Stores the
   RefData::m_type also.
 
-| StStk<offset>, ND, S(StkPtr) S(StkElem), CRc
+| StStk<offset>, ND, S(StkPtr) S(Gen), CRc
 
   Store S1 to the stack pointed to by S0, at a given offset (in cells).
 

@@ -160,7 +160,6 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfRef:
-  case KindOfClass:
   case KindOfResource:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;

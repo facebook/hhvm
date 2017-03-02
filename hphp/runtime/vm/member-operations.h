@@ -456,7 +456,6 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
     case KindOfObject:
       return ElemObject<mode, keyType>(tvRef, base, key);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -801,7 +800,6 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfObject:
       return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1009,7 +1007,6 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1116,7 +1113,6 @@ inline TypedValue* NewElem(TypedValue& tvRef,
     case KindOfObject:
       return NewElemObject(tvRef, base);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1543,7 +1539,6 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
       SetElemObject<keyType>(base, key, value);
       return nullptr;
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1740,7 +1735,6 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     case KindOfObject:
       return SetNewElemObject(base, value);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1854,7 +1848,6 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1935,7 +1928,6 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2093,7 +2085,6 @@ inline Cell IncDecElem(
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2174,7 +2165,6 @@ inline Cell IncDecNewElem(
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2399,7 +2389,6 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2586,7 +2575,6 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
       return IssetEmptyElemObj<useEmpty, keyType>(base->m_data.pobj, key);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2733,7 +2721,6 @@ TypedValue* propPre(TypedValue& tvRef, TypedValue* base) {
       return base;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2769,7 +2756,6 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
     case KindOfObject:
       return base->m_data.pobj->prop(&tvRef, ctx, key);
     case KindOfRef:
-    case KindOfClass:
       always_assert(false);
   }
   not_reached();
@@ -2906,7 +2892,6 @@ inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
       return SetPropObj<keyType>(ctx, base->m_data.pobj, key, val);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2985,7 +2970,6 @@ inline TypedValue* SetOpProp(TypedValue& tvRef,
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -3066,7 +3050,6 @@ inline Cell IncDecProp(
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);

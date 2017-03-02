@@ -221,6 +221,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   for (auto const& pred : typePredictions) {
     auto type = pred.type;
     auto loc  = pred.location;
+    assertx(type <= TGen);
     irgen::predictType(irgs, loc, type);
   }
 
@@ -228,13 +229,8 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   for (auto const& preCond : typePreConditions) {
     auto type = preCond.type;
     auto loc  = preCond.location;
-    if (type <= TCls) {
-      // Do not generate guards for class; instead assert the type.
-      assertx(loc.tag() == LTag::Stack);
-      irgen::assertTypeLocation(irgs, loc, type);
-    } else {
-      irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
-    }
+    assertx(type <= TGen);
+    irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
   }
 
   // Emit reffiness predictions.

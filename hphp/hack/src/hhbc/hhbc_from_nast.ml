@@ -371,21 +371,18 @@ and emit_collection expr es =
     emit_dynamic_collection expr es
 
 and emit_pipe e1 e2 =
-  (* TODO: We need a local generator, like a label generator.
-  For now, just use the label generator. *)
-  (* TODO: Unnamed locals should be codegen'd with a leading _ *)
-  let temp = Label.get_next_label () in
+  let temp = Label.get_unnamed_local () in
   let fault_label = Label.get_next_label () in
   let rewrite_dollardollar e =
     let rewriter i =
       match i with
       | IGet (CGetL2 (Local_pipe)) ->
-        IGet (CGetL2 (Local_unnamed temp))
+        IGet (CGetL2 temp)
       | _ -> i in
     InstrSeq.map e ~f:rewriter in
   gather [
     from_expr e1;
-    instr_setl_unnamed temp;
+    instr_setl temp;
     instr_popc;
     instr_try_fault_no_catch
       fault_label
@@ -393,9 +390,9 @@ and emit_pipe e1 e2 =
       (rewrite_dollardollar (from_expr e2))
       (* fault block *)
       (gather [
-        instr_unsetl_unnamed temp;
+        instr_unsetl temp;
         instr_unwind ]);
-    instr_unsetl_unnamed temp
+    instr_unsetl temp
   ]
 
 and emit_logical_and e1 e2 =
@@ -835,13 +832,14 @@ and from_switch e cl =
   ] in
   CBR.rewrite_in_switch instrs end_label
 
-and from_catch end_label ((_, id1), (_, id2), b) =
+and from_catch end_label ((_, catch_type), (_, catch_local), b) =
     let next_catch = Label.get_next_label () in
+    let catch_local = Local_named catch_local in
     gather [
       instr_dup;
-      instr_instanceofd id1;
+      instr_instanceofd catch_type;
       instr_jmpz next_catch;
-      instr_setl_named id2;
+      instr_setl catch_local;
       instr_popc;
       from_stmt (A.Block b);
       instr_jmp end_label;
@@ -875,9 +873,9 @@ and emit_finally_epilogue cont_and_break temp_local finally_end =
   | [] -> empty
   | h :: [] ->
     gather [
-      instr_issetl_unnamed temp_local;
+      instr_issetl temp_local;
       instr_jmpz finally_end;
-      instr_unsetl_unnamed temp_local;
+      instr_unsetl temp_local;
       instr (ISpecialFlow h); ]
   | _ -> empty
   (* TODO there are multiple breaks / continues. Generate a switch:
@@ -920,14 +918,9 @@ and from_try_finally try_block finally_block =
   inside the try body into setting temp_local to an integer which indicates
   what action the finally must perform when it is finished, followed by a
   jump directly to the finally.
-
-  TODO: We need a local generator, like a label generator.
-  For now, just use the label generator.
-
-  TODO: Unnamed locals should be codegen'd with a leading _
   *)
   let try_body = from_stmt try_block in
-  let temp_local = Label.get_next_label () in
+  let temp_local = Label.get_unnamed_local () in
   let finally_start = Label.get_next_label () in
   let finally_end = Label.get_next_label () in
   let cont_and_break = CBR.get_continues_and_breaks try_body in
@@ -974,7 +967,7 @@ and from_try_finally try_block finally_block =
   *)
 
   let cleanup_local =
-    if cont_and_break = [] then empty else instr_unsetl_unnamed temp_local in
+    if cont_and_break = [] then empty else instr_unsetl temp_local in
   let fault_body = gather [
       cleanup_local;
       finally_body;
@@ -1386,6 +1379,7 @@ let relabel_instrseq instrseq =
 let from_fun_ : Nast.fun_ -> Hhas_function.t option =
   fun nast_fun ->
   Label.reset_label ();
+  Label.reset_local ();
   let function_name = Litstr.to_string @@ snd nast_fun.Nast.f_name in
   match nast_fun.N.f_body with
   | N.NamedBody _ ->

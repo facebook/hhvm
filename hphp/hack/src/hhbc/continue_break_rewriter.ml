@@ -168,7 +168,7 @@ instruction is generated.
     | ISpecialFlow x ->
       gather [
         instr_int (index_of cont_breaks x);
-        instr_setl_unnamed temp_local;
+        instr_setl temp_local;
         instr_popc;
         instr_jmp finally_label
       ]

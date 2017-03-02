@@ -59,15 +59,9 @@ let instr_dup = instr (IBasic Dup)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 
-let instr_setl_named local =
-  instr (IMutator (SetL (Local_named local)))
-let instr_setl_unnamed local =
-  instr (IMutator (SetL (Local_unnamed local)))
-let instr_unsetl_unnamed local =
-  instr (IMutator (UnsetL (Local_unnamed local)))
-
-let instr_issetl_unnamed local =
-  instr (IIsset (IssetL (Local_unnamed local)))
+let instr_setl local = instr (IMutator (SetL local))
+let instr_unsetl local = instr (IMutator (UnsetL local))
+let instr_issetl local = instr (IIsset (IssetL local))
 
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)

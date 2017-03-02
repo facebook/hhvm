@@ -171,7 +171,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType().unbox();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutClassRef:   return TCls;
+    case OutClassRef:   return TInitNull; // Temporary until A flavors are removed
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
@@ -434,7 +434,7 @@ void emitEmptyN(IRGS& env)                    { INTERP }
 void emitSetN(IRGS& env)                      { INTERP }
 void emitSetOpN(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
-void emitSetOpS(IRGS& env, SetOpOp, int32_t)  { INTERP }
+void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
 void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }

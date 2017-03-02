@@ -243,6 +243,17 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
+struct ClsRefSlotData : IRExtraData {
+  explicit ClsRefSlotData(uint32_t slot) : slot{slot} {}
+
+  std::string show() const { return folly::to<std::string>(slot); }
+
+  bool equals(ClsRefSlotData o) const { return slot == o.slot; }
+  size_t hash() const { return std::hash<uint32_t>()(slot); }
+
+  uint32_t slot;
+};
+
 /*
  * Index into, e.g., an array.
  */
@@ -1179,6 +1190,9 @@ X(LdLocPseudoMain,              LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
 X(StLocRange,                   LocalIdRange);
+X(LdClsRef,                     ClsRefSlotData);
+X(StClsRef,                     ClsRefSlotData);
+X(KillClsRef,                   ClsRefSlotData);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);

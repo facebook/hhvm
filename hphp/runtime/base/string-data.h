@@ -458,6 +458,8 @@ struct StringData final : MaybeCountable,
 
   bool isImmutable() const;
 
+  bool checkSane() const;
+
 private:
   struct Proxy {
     StringDataNode node;
@@ -490,7 +492,6 @@ private:
   void enlist();
   void delist();
   void incrementHelper();
-  bool checkSane() const;
   void preCompute();
 
   // We have the next fields blocked into qword-size unions so

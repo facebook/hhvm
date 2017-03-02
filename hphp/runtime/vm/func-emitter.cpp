@@ -467,6 +467,7 @@ void FuncEmitter::sortFPITab(bool load) {
       // the AR itself. Fix it here.
       fpitab[i].m_fpOff += m_numLocals
         + m_numIterators * kNumIterCells
+        + clsRefCountToCells(m_numClsRefSlots)
         + (fpitab[i].m_fpiDepth) * kNumActRecCells;
     }
   }

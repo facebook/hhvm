@@ -667,7 +667,7 @@ struct FrameRestore {
       tmp.initNumArgs(0);
       vmfp() = &tmp;
       vmpc() = preClass->unit()->at(preClass->getOffset());
-      pushLocalsAndIterators(tmp.m_func);
+      pushFrameSlots(tmp.m_func);
     } else {
       m_top = nullptr;
       m_fp = nullptr;

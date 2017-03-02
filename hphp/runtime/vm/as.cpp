@@ -707,7 +707,8 @@ struct AsmState {
 
     fe->maxStackCells +=
       fe->numLocals() +
-      fe->numIterators() * kNumIterCells;
+      fe->numIterators() * kNumIterCells +
+      clsRefCountToCells(fe->numClsRefSlots());
 
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);

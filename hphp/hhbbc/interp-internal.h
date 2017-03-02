@@ -252,7 +252,7 @@ Type popV(ISS& env) {
 
 Type popA(ISS& env) {
   auto const v = popT(env);
-  assert(v.subtypeOf(TCls));
+  assert(v.subtypeOf(TInitNull));
   return v;
 }
 
@@ -498,6 +498,33 @@ void unsetUnknownLocal(ISS& env) {
   for (auto& l : env.state.locals) l = union_of(l, TUninit);
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+}
+
+//////////////////////////////////////////////////////////////////////
+// class-ref slots
+
+// Read the specified class-ref slot without discarding the stored value.
+const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
+  assert(slot >= 0);
+  always_assert_flog(env.state.clsRefSlots[slot].subtypeOf(TCls),
+                     "class-ref slot contained non-TCls");
+  return env.state.clsRefSlots[slot];
+}
+
+// Read the specified class-ref slot and discard the stored value.
+Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
+  assert(slot >= 0);
+  auto ret = std::move(env.state.clsRefSlots[slot]);
+  always_assert_flog(ret.subtypeOf(TCls), "class-ref slot contained non-TCls");
+  env.state.clsRefSlots[slot] = TCls;
+  return ret;
+}
+
+void putClsRefSlot(ISS& env, ClsRefSlotId slot, Type ty) {
+  assert(slot >= 0);
+  always_assert_flog(ty.subtypeOf(TCls),
+                     "attempted to set class-ref slot to non-TCls");
+  env.state.clsRefSlots[slot] = std::move(ty);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1134,11 +1134,11 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   gen(env, StMBase, gblPtr);
 }
 
-void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx) {
+void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx, uint32_t clsRefSlot) {
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
 
-  auto cls = topA(env, BCSPRelOffset{clsIdx});
-  auto spropPtr = ldClsPropAddr(env, cls, name, true);
+  auto const cls = takeClsRef(env, clsRefSlot);
+  auto const spropPtr = ldClsPropAddr(env, cls, name, true);
   gen(env, StMBase, spropPtr);
 
   if (clsIdx == 1) {
@@ -1882,17 +1882,17 @@ void emitFPassBaseGL(IRGS& env, int32_t arg, int32_t locId) {
   emitBaseGL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx, int32_t slot) {
+void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx, uint32_t slot) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{propIdx});
-  baseSImpl(env, name, clsIdx);
+  baseSImpl(env, name, clsIdx, slot);
 }
 
-void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx, int32_t slot) {
+void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx, uint32_t slot) {
   initTvRefs(env);
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);
-  baseSImpl(env, name, clsIdx);
+  baseSImpl(env, name, clsIdx, slot);
 }
 
 void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {

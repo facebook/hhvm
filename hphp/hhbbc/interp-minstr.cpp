@@ -1414,9 +1414,10 @@ void miFinalSetWithRef(ISS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void miBaseSImpl(ISS& env, bool hasRhs, Type prop) {
+void miBaseSImpl(ISS& env, bool hasRhs, Type prop, ClsRefSlotId slot) {
   auto rhs = hasRhs ? popT(env) : TTop;
-  auto const cls = popA(env);
+  popA(env);
+  auto const cls = takeClsRefSlot(env, slot);
   env.state.base = miBaseSProp(env, cls, prop);
   if (hasRhs) push(env, rhs);
 }
@@ -1524,13 +1525,13 @@ void in(ISS& env, const bc::BaseGL& op) {
 void in(ISS& env, const bc::BaseSC& op) {
   assert(env.state.arrayChain.empty());
   auto const prop = topC(env, op.arg1);
-  miBaseSImpl(env, op.arg2 == 1, prop);
+  miBaseSImpl(env, op.arg2 == 1, prop, op.slot);
 }
 
 void in(ISS& env, const bc::BaseSL& op) {
   assert(env.state.arrayChain.empty());
   auto const prop = locAsCell(env, op.loc1);
-  miBaseSImpl(env, op.arg2 == 1, prop);
+  miBaseSImpl(env, op.arg2 == 1, prop, op.slot);
 }
 
 void in(ISS& env, const bc::BaseL& op) {

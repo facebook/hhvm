@@ -310,6 +310,12 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
   emitPrologueLocals(env, argc, func, nullptr);
+  // "Kill" all the class-ref slots initially. This normally won't do anything
+  // (the class-ref slots should be unoccupied at this point), but in debugging
+  // builds it will write poison values to them.
+  for (uint32_t slot = 0; slot < func->numClsRefSlots(); ++slot) {
+    killClsRef(env, slot);
+  }
   warn_missing_args(env, argc);
 
   // Check surprise flags in the same place as the interpreter: after setting

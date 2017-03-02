@@ -456,9 +456,13 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     return true;
   };
 
-  auto requireTypeParam = [&] {
+  auto requireTypeParam = [&] (Type ty) {
     checkDst(inst->hasTypeParam() || inst->is(DefConst),
              "Missing paramType for DParam instruction");
+    if (inst->hasTypeParam()) {
+      checkDst(inst->typeParam() <= ty,
+               "Invalid paramType for DParam instruction");
+    }
   };
 
   auto requireTypeParamPtr = [&] (Ptr kind) {
@@ -509,9 +513,9 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                              "invalid src num");
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
-                      requireTypeParam();
-#define DParamMayRelax requireTypeParam();
-#define DParam         requireTypeParam();
+                      requireTypeParam(Top);
+#define DParamMayRelax(t) requireTypeParam(t);
+#define DParam(t)         requireTypeParam(t);
 #define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
 #define DUnion(...)    forEachSrcIdx(                                          \
                          [&](uint32_t idx) {                                   \

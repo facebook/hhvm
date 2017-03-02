@@ -179,21 +179,22 @@ void emitClsCnsD(IRGS& env,
   implClsCns(env, Unit::lookupClass(clsNameStr), cnsNameStr, clsNameStr);
 }
 
-void emitClsCns(IRGS& env, const StringData* cnsNameStr, int32_t slot) {
-  auto const clsTy = topType(env, BCSPRelOffset{0});
-  if (!(clsTy < TCls) || !clsTy.clsSpec()) {
+void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
+  auto const clsTmp = peekClsRef(env, slot);
+  auto const clsTy = clsTmp->type();
+  if (!clsTy.clsSpec()) {
     interpOne(env, TUncountedInit, 1);
     return;
   }
-
   auto const cls = clsTy.clsSpec().cls();
-  auto const clsTmp = topA(env);
+
   ifThenElse(
     env,
     [&] (Block* taken) {
       gen(env, CheckType, taken, Type::ExactCls(cls), clsTmp);
     },
     [&] {
+      killClsRef(env, slot);
       discard(env, 1);
       implClsCns(env, cls, cnsNameStr, cls->name());
     },

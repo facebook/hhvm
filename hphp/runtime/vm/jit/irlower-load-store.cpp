@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/ref-data.h"
 
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -143,6 +144,55 @@ void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<DbgTrashStk>()->offset.offset);
   trashTV(vmain(env), sp, off, kTVTrashJITStk);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgLdClsRef(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const off = frame_clsref_offset(
+    inst->marker().func(),
+    inst->extra<ClsRefSlotData>()->slot
+  );
+  emitLdLowPtr(vmain(env), fp[off], dst, sizeof(LowPtr<Class>));
+}
+
+void cgStClsRef(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 1).reg();
+  auto const off = frame_clsref_offset(
+    inst->marker().func(),
+    inst->extra<ClsRefSlotData>()->slot
+  );
+  emitStLowPtr(vmain(env), src, fp[off], sizeof(LowPtr<Class>));
+}
+
+void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
+  if (!debug) return;
+
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const off = frame_clsref_offset(
+    inst->marker().func(),
+    inst->extra<ClsRefSlotData>()->slot
+  );
+
+  LowPtr<Class> trash;
+  memset(&trash, kTrashClsRef, sizeof(trash));
+  Immed64 immed(trash.get());
+
+  if (sizeof(trash) == 4) {
+    v << storeli{immed.l(), fp[off]};
+  } else if (sizeof(trash) == 8) {
+    if (immed.fits(sz::dword)) {
+      v << storeqi{immed.l(), fp[off]};
+    } else {
+      v << store{v.cns(immed.q()), fp[off]};
+    }
+  } else {
+    not_implemented();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

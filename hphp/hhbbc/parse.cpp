@@ -455,12 +455,12 @@ void populate_block(ParseUnitState& puState,
                        }();
 #define IMM_CAR(n)     auto slot = [&] {                                \
                          ClsRefSlotId id = decode_iva(pc);              \
-                         always_assert(id < func.numClsRefSlots);       \
+                         always_assert(id >= 0 && id < func.numClsRefSlots); \
                          return id;                                     \
                        }();
 #define IMM_CAW(n)     auto slot = [&] {                                \
                          ClsRefSlotId id = decode_iva(pc);              \
-                         always_assert(id < func.numClsRefSlots);       \
+                         always_assert(id >= 0 && id < func.numClsRefSlots); \
                          return id;                                     \
                        }();
 #define IMM_DA(n)      auto dbl##n = decode<double>(pc);

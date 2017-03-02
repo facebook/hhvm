@@ -47,8 +47,8 @@ TRACE_SET_MOD(hhir);
 #define D(n)           HasDest
 #define DofS(n)        HasDest
 #define DRefineS(n)    HasDest
-#define DParamMayRelax HasDest
-#define DParam         HasDest
+#define DParamMayRelax(t) HasDest
+#define DParam(t)      HasDest
 #define DParamPtr(k)   HasDest
 #define DLdObjCls      HasDest
 #define DUnboxPtr      HasDest

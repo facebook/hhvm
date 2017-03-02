@@ -891,6 +891,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.maxStackCells = info.maxStackDepth +
                      fe.numLocals() +
                      fe.numIterators() * kNumIterCells +
+                     clsRefCountToCells(fe.numClsRefSlots()) +
                      info.maxFpiDepth * kNumActRecCells;
 
   fe.finish(fe.ue().bcPos(), false /* load */);

@@ -960,21 +960,26 @@ To string conversions:
 
 7. Loads
 
-| LdStk<T,offset>, DParamMayRelax, S(StkPtr), NF
+| LdStk<T,offset>, DParamMayRelax(StkElem), S(StkPtr), NF
 
   Loads from S0 at offset (in cells), and puts the value in D as type T.
 
-| LdLoc<T,localId>, DParamMayRelax, S(FramePtr), NF
+| LdLoc<T,localId>, DParamMayRelax(Gen), S(FramePtr), NF
 
   Loads local slot localId from the frame S0 and puts the value in D as type T.
 
-| LdLocPseudoMain<T,localId>, DParam, S(FramePtr), B
+| LdLocPseudoMain<T,localId>, DParam(Gen), S(FramePtr), B
 
   Loads local number localId from frame S0 and puts the value in D if the
   local's type is a subtype of T. If the local's type is not a subtype of T,
   then the load does not happen, and this instruction branches to B. This
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
+
+| LdClsRef<T,slot>, DParamMayRelax(Cls), S(FramePtr), NF
+
+  Loads class-ref from slot `slot` in frame S0 and puts the value in D as type
+  T. T must be a sub-type of TCls.
 
 | LdStkAddr<T,offset>, D(PtrToStkGen), S(StkPtr), NF
 
@@ -985,7 +990,7 @@ To string conversions:
 
   Loads the address of the local slot localId from the frame S0 into D.
 
-| LdRDSAddr<T,RDSHandle>, DParam, NA, NF
+| LdRDSAddr<T,RDSHandle>, DParam(PtrToGen), NA, NF
 
   Load the address of a Gen that lives at the specified RDS handle. The type
   param must be a subtype of PtrToGen.
@@ -997,11 +1002,11 @@ To string conversions:
   Loads the base pointer to an array of Cells from the given collection
   instance in S0.
 
-| LdMem<T>, DParam, S(PtrToGen), NF
+| LdMem<T>, DParam(Gen), S(PtrToGen), NF
 
   Loads from S0 and puts the value in D.
 
-| LdContField<T>, DParam, S(Obj) C(Int), NF
+| LdContField<T>, DParam(Gen), S(Obj) C(Int), NF
 
   Loads a property from the object referenced by S0 at the offset given by S1
   and puts the value in D. S0 must be a Generator.
@@ -1030,7 +1035,7 @@ To string conversions:
   Check that the inner type of the boxed cell in S0 is T, and if not take the
   branch to B.
 
-| LdRef<T>, DParam, S(BoxedCell), NF
+| LdRef<T>, DParam(Cell), S(BoxedCell), NF
 
   TODO(#2939547): this should take BoxedInitCell
 
@@ -1050,7 +1055,7 @@ To string conversions:
   compiler should generate this only if it can prove that the frame does not
   contain a nullptr or $this pointer.
 
-| LdClosure<T>, DParam, S(FramePtr), NF
+| LdClosure<T>, DParam(Ctx), S(FramePtr), NF
 
   Loads into D the value of the m_this/m_cls field out of the frame pointer S0.
   The compiler should generate this only if it can prove that the frame context
@@ -1081,13 +1086,13 @@ To string conversions:
 
   Define the class corresponding to PreClass S0 in the current unit.
 
-| DefConst<T>, DParam, NA, NF
+| DefConst<T>, DParam(Top), NA, NF
 
   Define a constant value of type T. D is presumed to be globally available and
   the DefConst instruction will not actually appear in the IR instruction
   stream.
 
-| Conjure<T>, DParam, NA, NF
+| Conjure<T>, DParam(Top), NA, NF
 
   Define a value of type T. This instruction aborts at runtime; it is meant to
   be used in tests or code that is known to be unreachable.
@@ -1317,7 +1322,7 @@ To string conversions:
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'
   cells to the ActRec.
 
-| LdARCtx<T,offset>, DParam, S(StkPtr), NF
+| LdARCtx<T,offset>, DParam(Ctx), S(StkPtr), NF
 
   Loads the m_this/m_cls member of an ActRec. S0 is the base address, with
   `offset' cells to the ActRec.
@@ -1625,7 +1630,7 @@ To string conversions:
   Pass control to any pending fast resumable wait handles, bypassing the
   scheduler.  If no fast resumables are pending, behave like AsyncRetCtrl.
 
-| LdRetVal<T>, DParam, S(FramePtr), NF
+| LdRetVal<T>, DParam(Gen), S(FramePtr), NF
 
   Load the return value from the already-returned-from ActRec pointed to by S0
   into the dest.  This is used by NativeImpl.  TODO(#7150575): We want to make
@@ -1675,6 +1680,10 @@ To string conversions:
 
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
+
+| StClsRef<slot>, ND, S(FramePtr) S(Cls), NF
+
+  Store S1 to class-ref slot `slot` on the frame pointed to by S0.
 
 | StRef, ND, S(BoxedCell) S(Cell), CRc
 
@@ -2089,6 +2098,12 @@ To string conversions:
 
   Returns a double of the current time in seconds.
 
+| KillClsRef<slot>, ND, S(FramePtr), NF
+
+  Mark the class-ref slot `slot` in frame S0 as no longer containing a
+  meaningful value. This is used to aid in memory analysis. In debugging
+  builds, it may overwrite the slot with a poison value.
+
 15. Generators & Closures
 
 | LdClosureCtx, DCtx, S(Obj), NF
@@ -2211,7 +2226,7 @@ To string conversions:
   Store the resume address S1 into the Generator whose ActRec is given by S0,
   marking the offset to resume at as `offset'.
 
-| LdContArValue, DParam, S(FramePtr), PRc
+| LdContArValue, DParam(Cell), S(FramePtr), PRc
 
   Loads 'value' from the Generator object ActRec of which is S0.
 
@@ -2220,7 +2235,7 @@ To string conversions:
   Stores 'value' into the Generator object ActRec of which is S0. S1 is the
   new value.
 
-| LdContArKey, DParam, S(FramePtr), PRc
+| LdContArKey, DParam(Cell), S(FramePtr), PRc
 
   Loads 'key' from the Generator object ActRec of which is S0.
 
@@ -2265,7 +2280,7 @@ To string conversions:
   handle states in ext_asio.h. This instruction has undefined behavior if S0 is
   not a WaitHandle.
 
-| LdWHResult, DParam, S(Obj), NF
+| LdWHResult, DParam(Gen), S(Obj), NF
 
   Loads the result of the WaitHandle in S0. This instruction has undefined
   behavior if S0 is not a WaitHandle, or if S0 is not finished.
@@ -2427,7 +2442,7 @@ To string conversions:
   Load an MInstrState address. Returns a pointer to offset S0 within the
   current MInstrState.
 
-| LdMBase, DParam, NA, NF
+| LdMBase, DParam(PtrToGen), NA, NF
 
   Load the current value of the member base register.
 
@@ -2983,7 +2998,7 @@ fields of that struct for holding intermediate values.
   to the unwinder rather than side exiting.  Used to control behavior in catch
   traces for the InvalidSetMException and TVCoercionException situations.
 
-| LdUnwinderValue<T>, DParam, NA, PRc
+| LdUnwinderValue<T>, DParam(Cell), NA, PRc
 
   Loads the value contained by the current unwinder exception.
 

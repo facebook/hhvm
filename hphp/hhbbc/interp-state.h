@@ -221,6 +221,7 @@ struct State {
   bool thisAvailable = false;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
+  CompactVector<Type> clsRefSlots;
   CompactVector<StackElem> stack;
   CompactVector<ActRec> fpiStack;
 

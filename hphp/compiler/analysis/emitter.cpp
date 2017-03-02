@@ -10103,6 +10103,7 @@ void EmitterVisitor::saveMaxStackCells(FuncEmitter* fe, int32_t stackPad) {
   fe->maxStackCells +=
     fe->numIterators() * kNumIterCells +
     fe->numLocals() +
+    clsRefCountToCells(fe->numClsRefSlots()) +
     stackPad;
 
   m_evalStack.m_actualStackHighWaterPtr = nullptr;

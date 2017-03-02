@@ -99,6 +99,15 @@ void discardStackTemps(const ActRec* const fp,
     }
   );
 
+  if (debug) {
+    auto const numSlots = fp->m_func->numClsRefSlots();
+    for (int i = 0; i < numSlots; ++i) {
+      ITRACE(2, "  trash class-ref slot : {}\n", i);
+      auto const slot = frame_clsref_slot(fp, i);
+      memset(slot, kTrashClsRef, sizeof(*slot));
+    }
+  }
+
   ITRACE(2, "discardStackTemps ends with sp = {}\n",
          implicit_cast<void*>(stack.top()));
 }

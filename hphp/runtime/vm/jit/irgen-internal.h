@@ -380,7 +380,7 @@ inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   return assertType(pop(env, tc), TCell);
 }
 
-inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TCls); }
+inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TInitNull); }
 inline SSATmp* popV(IRGS& env) { return assertType(pop(env), TBoxedInitCell); }
 inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
 inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
@@ -820,6 +820,27 @@ inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->mayHaveThis()) return;
   auto const ctx = ldCtx(env);
   decRef(env, ctx);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Class-ref slots
+
+inline void killClsRef(IRGS& env, uint32_t slot) {
+  gen(env, KillClsRef, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* peekClsRef(IRGS& env, uint32_t slot) {
+  return gen(env, LdClsRef, TCls, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* takeClsRef(IRGS& env, uint32_t slot) {
+  auto const cls = peekClsRef(env, slot);
+  killClsRef(env, slot);
+  return cls;
+}
+
+inline void putClsRef(IRGS& env, uint32_t slot, SSATmp* cls) {
+  gen(env, StClsRef, ClsRefSlotData{slot}, fp(env), cls);
 }
 
 //////////////////////////////////////////////////////////////////////

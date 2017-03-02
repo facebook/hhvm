@@ -196,7 +196,11 @@ template<size_t sz>
 struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
+#ifdef DEBUG
+  static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
+#else
   static_assert(sz == (use_lowptr ? 252 : 296), "Change this only on purpose");
+#endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
 
@@ -425,6 +429,11 @@ Class::~Class() {
   EnumCache::deleteValues(this);
 
   low_free_data(m_vtableVec.get());
+
+#ifdef DEBUG
+  validate();
+  m_magic = ~m_magic;
+#endif
 }
 
 void Class::releaseRefs() {
@@ -1183,7 +1192,6 @@ void Class::setInstanceBitsImpl() {
   m_instanceBits = bits;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Private methods.
 //
@@ -1491,7 +1499,12 @@ void checkDeclarationCompat(const PreClass* preClass,
 Class::Class(PreClass* preClass, Class* parent,
              std::vector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
+#ifdef DEBUG
+  : m_magic{kMagic}
+  , m_parent(parent)
+#else
   : m_parent(parent)
+#endif
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))

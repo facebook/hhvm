@@ -979,6 +979,10 @@ public:
 
 
   bool needsInitSProps() const;
+
+  // For assertions:
+  void validate() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1229,6 +1233,13 @@ public:
   LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:
+  static constexpr uint32_t kMagic = 0xce7adb33;
+
+#ifdef DEBUG
+  // For asserts only.
+  uint32_t m_magic;
+#endif
+
   default_ptr<ExtraData> m_extra;
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type

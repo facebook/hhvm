@@ -900,8 +900,9 @@ void emitFPushCufSafe(IRGS& env, int32_t numArgs) {
   implFPushCufOp(env, Op::FPushCufSafe, numArgs);
 }
 
-void emitFPushCtor(IRGS& env, int32_t numParams, int32_t slot) {
-  auto const cls  = popA(env);
+void emitFPushCtor(IRGS& env, int32_t numParams, uint32_t slot) {
+  popA(env);
+  auto const cls  = takeClsRef(env, slot);
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
   pushIncRef(env, obj);
@@ -1132,12 +1133,16 @@ void emitFPushClsMethodD(IRGS& env,
 
 
 template<bool forward>
-ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
+ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
+                                        int32_t numParams,
+                                        int32_t clsRefSlot) {
   TransFlags trFlags;
   trFlags.noProfiledFPush = true;
   auto sideExit = makeExit(env, trFlags);
 
-  auto const clsVal  = popA(env);
+  popA(env);
+  // We can side-exit, so peek the slot rather than reading from it.
+  auto const clsVal  = peekClsRef(env, clsRefSlot);
   auto const methVal = popC(env);
 
   if (!methVal->isA(TStr) || !clsVal->isA(TCls)) {
@@ -1158,6 +1163,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
     if (cls) {
       if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
                               exact, false, forward)) {
+        killClsRef(env, clsRefSlot);
         return;
       }
     }
@@ -1169,11 +1175,13 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
 
       if (optimizeProfiledPushMethod(env, *profile,
                                      clsVal, sideExit, methodName, numParams)) {
+        killClsRef(env, clsRefSlot);
         return;
       }
     }
   }
 
+  killClsRef(env, clsRefSlot);
   fpushActRec(env,
               cns(env, TNullptr),
               cns(env, TNullptr),
@@ -1203,12 +1211,12 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env, int32_t numParams) {
   }
 }
 
-void emitFPushClsMethod(IRGS& env, int32_t numParams, int32_t slot) {
-  fpushClsMethodCommon<false>(env, numParams);
+void emitFPushClsMethod(IRGS& env, int32_t numParams, uint32_t slot) {
+  fpushClsMethodCommon<false>(env, numParams, slot);
 }
 
-void emitFPushClsMethodF(IRGS& env, int32_t numParams, int32_t slot) {
-  fpushClsMethodCommon<true>(env, numParams);
+void emitFPushClsMethodF(IRGS& env, int32_t numParams, uint32_t slot) {
+  fpushClsMethodCommon<true>(env, numParams, slot);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1234,7 +1242,7 @@ void emitFPassL(IRGS& env, int32_t argNum, int32_t id) {
   }
 }
 
-void emitFPassS(IRGS& env, int32_t argNum, int32_t slot) {
+void emitFPassS(IRGS& env, int32_t argNum, uint32_t slot) {
   if (env.currentNormalizedInstruction->preppedByRef) {
     emitVGetS(env, slot);
   } else {

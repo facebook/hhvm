@@ -173,6 +173,7 @@ bool canDCE(IRInstruction* inst) {
   case BoxPtr:
   case LdStk:
   case LdLoc:
+  case LdClsRef:
   case LdStkAddr:
   case LdLocAddr:
   case LdRDSAddr:
@@ -430,6 +431,7 @@ bool canDCE(IRInstruction* inst) {
   case StLoc:
   case StLocPseudoMain:
   case StLocRange:
+  case StClsRef:
   case StRef:
   case EagerSyncVMRegs:
   case ReqBindJmp:
@@ -650,6 +652,7 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodCacheFunc:
   case ProfileInstanceCheck:
   case MemoSet:
+  case KillClsRef:
     return false;
   }
   not_reached();

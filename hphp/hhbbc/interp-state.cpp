@@ -84,6 +84,7 @@ bool operator==(const State& a, const State& b) {
   return a.initialized == b.initialized &&
     a.thisAvailable == b.thisAvailable &&
     a.locals == b.locals &&
+    a.clsRefSlots == b.clsRefSlots &&
     a.stack == b.stack &&
     a.fpiStack == b.fpiStack;
 }
@@ -114,6 +115,7 @@ State without_stacks(const State& src) {
   }
 
   ret.locals        = src.locals;
+  ret.clsRefSlots   = src.clsRefSlots;
   ret.iters         = src.iters;
   return ret;
 }
@@ -212,6 +214,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(src.initialized);
   assert(dst.locals.size() == src.locals.size());
   assert(dst.iters.size() == src.iters.size());
+  assert(dst.clsRefSlots.size() == src.clsRefSlots.size());
   assert(dst.stack.size() == src.stack.size());
   assert(dst.fpiStack.size() == src.fpiStack.size());
 
@@ -253,6 +256,15 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     if (dst.locals[i] != newT) {
       changed = true;
       dst.locals[i] = std::move(newT);
+    }
+  }
+
+  for (auto i = size_t{0}; i < dst.clsRefSlots.size(); ++i) {
+    auto newT = join(dst.clsRefSlots[i], src.clsRefSlots[i]);
+    assert(newT.subtypeOf(TCls));
+    if (dst.clsRefSlots[i] != newT) {
+      changed = true;
+      dst.clsRefSlots[i] = std::move(newT);
     }
   }
 
@@ -344,6 +356,11 @@ std::string state_string(const php::Func& f, const State& st) {
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {
     folly::format(&ret, "iter {: <2}   :: {}\n", i, show(st.iters[i]));
+  }
+
+  for (auto i = size_t{0}; i < st.clsRefSlots.size(); ++i) {
+    folly::format(&ret, "class-ref slot {: <2}   :: {}\n",
+                  i, show(st.clsRefSlots[i]));
   }
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {

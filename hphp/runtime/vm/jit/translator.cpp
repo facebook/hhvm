@@ -1209,7 +1209,7 @@ Type flavorToType(FlavorDesc f) {
     case CUV: return TCell;
     case UV: return TUninit;
     case VV: return TBoxedInitCell;
-    case AV: return TCls;
+    case AV: return TInitNull; // Temporary until this flavor goes away
     case RV: case CRV: case FV: case CVV: case CVUV: return TGen;
   }
   not_reached();

@@ -326,7 +326,8 @@ inline int Func::maxStackCells() const {
 
 inline int Func::numSlotsInFrame() const {
   return shared()->m_numLocals +
-    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell));
+    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell)) +
+    (numClsRefSlots() * sizeof(Class*) + sizeof(Cell) - 1) / sizeof(Cell);
 }
 
 inline bool Func::hasForeignThis() const {

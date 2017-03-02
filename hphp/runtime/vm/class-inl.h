@@ -28,6 +28,14 @@ inline bool Class::isZombie() const {
   return !m_cachedClass.bound();
 }
 
+
+inline void Class::validate() const {
+#ifdef DEBUG
+  assertx(m_magic == kMagic);
+#endif
+  assertx(name()->checkSane());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 

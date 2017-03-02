@@ -839,6 +839,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AFrameAny, AFrameAny);
 
   //////////////////////////////////////////////////////////////////////
+  // Instructions that manipulate class-ref slots
+
+  case LdClsRef:
+  case StClsRef:
+  case KillClsRef:
+    return UnknownEffects {};
+
+  //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores
 
   case LdMem:

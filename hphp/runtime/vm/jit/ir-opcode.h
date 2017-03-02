@@ -52,8 +52,9 @@ struct SSATmp;
  *     D(type)      single dst has a specific type
  *     DofS(N)      single dst has the type of src N
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
- *     DParam       single dst has type of the instruction's type parameter
- *     DParamMayRelax like DParam, except type may relax
+ *     DParam(t)    single dst has type of the instruction's type parameter,
+ *                    which must be a subtype of t
+ *     DParamMayRelax(t) like DParam, except type may relax
  *     DParamPtr(k) like DParam, but the param must be a PtrTo* of kind k
  *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
  *     DBoxPtr      Boxed PtrTo*T

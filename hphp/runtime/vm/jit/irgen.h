@@ -321,8 +321,8 @@ Type predictedType(const IRGS&, const Location&);
 #define IMM_I64A       int64_t
 #define IMM_LA         int32_t
 #define IMM_IA         int32_t
-#define IMM_CAR        int32_t
-#define IMM_CAW        int32_t
+#define IMM_CAR        uint32_t
+#define IMM_CAW        uint32_t
 #define IMM_DA         double
 #define IMM_SA         const StringData*
 #define IMM_RATA       RepoAuthType

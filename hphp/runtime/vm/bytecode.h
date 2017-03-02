@@ -303,6 +303,10 @@ struct CallCtx {
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
+constexpr size_t clsRefCountToCells(size_t n) {
+  return (n * sizeof(LowPtr<Class>*) + sizeof(Cell) - 1) / sizeof(Cell);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -426,7 +430,7 @@ public:
   ALWAYS_INLINE
   void popA() {
     assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass);
+    assert(m_top->m_type == KindOfNull);
     tvDebugTrash(m_top);
     m_top++;
   }
@@ -742,6 +746,15 @@ public:
   }
 
   ALWAYS_INLINE
+  void allocClsRefSlots(size_t n) {
+    assert((uintptr_t)&m_top[-clsRefCountToCells(n)] >= (uintptr_t)m_elms);
+    m_top -= clsRefCountToCells(n);
+    if (debug) {
+      memset(m_top, kTrashClsRef, clsRefCountToCells(n) * sizeof(Cell));
+    }
+  }
+
+  ALWAYS_INLINE
   void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
@@ -793,8 +806,7 @@ public:
   ALWAYS_INLINE
   Cell* topC() {
     assert(m_top != m_base);
-    assert(m_top->m_type != KindOfRef);
-    return (Cell*)m_top;
+    return tvAssertCell(m_top);
   }
 
   ALWAYS_INLINE
@@ -821,7 +833,7 @@ public:
   Cell* indC(size_t ind) {
     assert(m_top != m_base);
     assert(m_top[ind].m_type != KindOfRef);
-    return (Cell*)(&m_top[ind]);
+    return tvAssertCell(&m_top[ind]);
   }
 
   ALWAYS_INLINE
@@ -834,8 +846,8 @@ public:
   void pushClass(Class* clss) {
     assert(m_top != m_elms);
     m_top--;
-    m_top->m_data.pcls = clss;
-    m_top->m_type = KindOfClass;
+    m_top->m_data.num = 0;
+    m_top->m_type = KindOfNull;
   }
 };
 
@@ -906,7 +918,7 @@ extern InterpOneFunc interpOneEntryPoints[];
 bool doFCallArrayTC(PC pc, int32_t numArgs, void*);
 bool doFCall(ActRec* ar, PC& pc);
 jit::TCA dispatchBB();
-void pushLocalsAndIterators(const Func* func, int nparams = 0);
+void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
 jit::TCA suspendStack(PC& pc);
 

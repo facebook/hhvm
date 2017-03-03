@@ -71,7 +71,7 @@ function hphp_create_object_without_constructor(string $name): object;
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_get_property(
   object $obj,
-  string $cls = "", // null will convert to this and do what we expect
+  ?string $cls = "", // null will convert to this and do what we expect
   string $prop): mixed;
 
 /**
@@ -87,7 +87,7 @@ function hphp_get_property(
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_set_property(
   object $obj,
-  string $cls = "", // null will convert to this and do what we expect
+  ?string $cls = "", // null will convert to this and do what we expect
   string $prop,
   mixed $value): void;
 

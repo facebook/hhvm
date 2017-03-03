@@ -1840,6 +1840,14 @@ and transform_binary_expression ~is_nested expr =
         (EditableToken.kind t)
       | _ -> raise (Failure "Operator should always be a token")
   in
+  let operator_has_surrounding_spaces op =
+    match op with
+      | None -> failwith "operator_has_surrounding_spaces: Operator expected"
+      | Some op ->
+        match get_operator_type op with
+          | Full_fidelity_operator.ConcatenationOperator -> false
+          | _ -> true
+  in
 
   let (left, operator, right) = get_binary_expression_children expr in
   let operator_t = get_operator_type operator in
@@ -1891,9 +1899,21 @@ and transform_binary_expression ~is_nested expr =
         if not is_nested then builder#nest ~skip_parent:true ();
         tl_with ~rule:(LazyRuleID lazy_argument_rule) ~nest:is_nested ~f:(
           fun () ->
-            List.iteri tl ~f:(fun i x ->
-              if (i mod 2) = 0 then begin pending_space (); transform x end
-              else begin split ~space:true (); transform_operand x end
+            ignore @@ List.foldi tl ~init:None ~f:(fun i last_op x ->
+              if (i mod 2) = 0 then begin
+                let op = x in
+                let op_has_spaces = operator_has_surrounding_spaces (Some op) in
+                if op_has_spaces then pending_space ();
+                transform op;
+                Some op
+              end
+              else begin
+                let operand = x in
+                let op_has_spaces = operator_has_surrounding_spaces last_op in
+                split ~space:op_has_spaces ();
+                transform_operand operand;
+                None
+              end
             )
         ) ();
         if not is_nested then builder#unnest ();

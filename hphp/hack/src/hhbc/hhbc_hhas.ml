@@ -10,6 +10,7 @@
 
 module B = Buffer
 module H = Hhbc_ast
+module A = Ast
 open H
 
 (* Naming convention for functions below:
@@ -518,10 +519,33 @@ let string_of_type_info_option tio =
   | None -> ""
   | Some ti -> string_of_type_info ti ^ " "
 
+let string_of_param_default_value expr =
+  match snd expr with
+  | A.Float (_, litstr)
+  | A.Int (_, litstr) -> litstr
+  | A.String (_, litstr) -> "\\\"" ^ litstr ^ "\\\""
+  | A.Null -> "NULL"
+  | A.True -> "true"
+  | A.False -> "false"
+  (* TODO: printing for other expressions e.g. arrays, vecs, shapes.. *)
+  | _ -> "string_of_param_default_value - NYI"
+
+let string_of_param_default_value_option = function
+  | None -> ""
+  | Some (i, e) ->
+    " = DV"
+    ^ (string_of_int i)
+    ^ "(\"\"\""
+    ^ (string_of_param_default_value e)
+    ^ "\"\"\")"
+
 let string_of_param p =
   let param_type_info = Hhas_param.type_info p in
   let param_name = Hhas_param.name p in
-  string_of_type_info_option param_type_info ^ param_name
+  let param_default_value = Hhas_param.default_value p in
+  string_of_type_info_option param_type_info
+  ^ param_name
+  ^ string_of_param_default_value_option param_default_value
 
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"

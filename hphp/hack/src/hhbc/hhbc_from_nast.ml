@@ -1171,7 +1171,10 @@ let from_param tparams p =
   let param_name = snd p.A.param_id in
   let param_type_info = Option.map p.A.param_hint
     (hint_to_type_info ~always_extended:false tparams) in
-  Hhas_param.make param_name param_type_info
+  let param_default_value = Option.map p.A.param_expr
+    ~f:(fun e -> Label.get_next_label (), e)
+  in
+  Hhas_param.make param_name param_type_info param_default_value
 
 let has_type_constraint ti =
   match ti with
@@ -1185,6 +1188,24 @@ let emit_method_prolog params =
     if has_type_constraint param_type_info
     then Some (instr (IMisc (VerifyParamType (Param_named param_name))))
     else None))
+
+let emit_param_default_value_setter params =
+  let setters = List.filter_map params (fun p ->
+    let param_name = Hhas_param.name p in
+    let dvo = Hhas_param.default_value p in
+    Option.map dvo (fun (l, e) ->
+      gather [
+        instr_label_default_arg l;
+        from_expr e;
+        instr_setl (Local_named param_name);
+        instr_popc;
+      ]) )
+  in
+  if List.length setters = 0
+  then empty, empty
+  else
+    let l = Label.get_next_label () in
+    instr_label l, gather [gather setters; instr_jmpns l]
 
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)
@@ -1226,6 +1247,7 @@ let verify_returns body =
   InstrSeq.flat_map body ~f:rewriter
 
 let from_body tparams params ret b =
+  Label.reset_label ();
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in
@@ -1240,17 +1262,23 @@ let from_body tparams params ret b =
     gather [instr_null; instr_retc]
   in
   let fault_instrs = emit_fault_instructions stmt_instrs in
+  let begin_label, default_value_setters =
+    emit_param_default_value_setter params
+  in
   let body_instrs = gather [
+    begin_label;
     emit_method_prolog params;
     stmt_instrs;
     ret_instrs;
+    default_value_setters;
     fault_instrs;
   ] in
   body_instrs, params, return_type_info
 
 let extract_decl_vars instrseq =
   let module ULS = Unique_list_string in
-  (* TODO: Just SetL?  What if we have a local that is only ever read? *)
+  (* TODO: Both reads and writes need to go into decl vars *)
+  (* TODO: Default arguments should not be in declvars *)
   let folder uniq_list instruction =
     match instruction with
     | IMutator (SetL (Local_named s)) -> ULS.add uniq_list s
@@ -1372,7 +1400,6 @@ let relabel_instrseq instrseq =
 
 let from_fun_ : A.fun_ -> Hhas_function.t option =
   fun ast_fun ->
-  Label.reset_label ();
   let function_name = Litstr.to_string @@ snd ast_fun.A.f_name in
   match ast_fun.A.f_body with
   | b ->

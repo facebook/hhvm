@@ -9,12 +9,14 @@
 *)
 
 type t = {
-  param_name      : Litstr.id;
-  param_type_info : Hhas_type_info.t option;
+  param_name          : Litstr.id;
+  param_type_info     : Hhas_type_info.t option;
+  param_default_value : (Hhbc_ast.rel_offset * Ast.expr) option
 }
 
-let make param_name param_type_info =
-  { param_name; param_type_info }
+let make param_name param_type_info param_default_value =
+  { param_name; param_type_info; param_default_value }
 
 let name p = p.param_name
 let type_info p = p.param_type_info
+let default_value p = p.param_default_value

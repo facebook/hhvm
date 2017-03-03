@@ -17,7 +17,7 @@ open Ide_api_types
 
 type error = Pos.absolute Errors.error_
 
-type request =
+type client_request =
   | Init of init_params
   | Autocomplete of file_position
   | Infer_type of file_position
@@ -55,6 +55,19 @@ and did_change_file_params = {
   changes : text_edit list;
 }
 
+type server_notification =
+  | Diagnostics_notification of diagnostics_notification
+
+and diagnostics_notification = {
+  subscription_id : int; (* Nuclide-rpc specific *)
+  diagnostics_notification_filename : string;
+  diagnostics : error list;
+}
+
+type request =
+  | Client_request of client_request
+  | Server_notification of server_notification
+
 type response =
   | Init_response of init_response
   | Autocomplete_response of autocomplete_response
@@ -66,7 +79,6 @@ type response =
   | Highlight_references_response of highlight_references_response
   | Format_response of format_response
   | Coverage_levels_response of coverage_levels_response
-  | Diagnostics_notification of diagnostics_notification
 
 and init_response = {
   server_api_version : int;
@@ -119,12 +131,16 @@ and highlight_references_response = range list
 
 and format_response = string
 
-and diagnostics_notification = {
-  subscription_id : int; (* Nuclide-rpc specific *)
-  diagnostics_notification_filename : string;
-  diagnostics : error list;
-}
-
 type message =
   | Request of request
   | Response of response
+
+let server_notification_method_name = function
+  | Diagnostics_notification _ -> "diagnostics"
+
+(* There is no use-case for printing client requests for now *)
+let client_request_method_name _ = failwith "not implemented"
+
+let request_method_name = function
+  | Server_notification x -> server_notification_method_name x
+  | Client_request x -> client_request_method_name x

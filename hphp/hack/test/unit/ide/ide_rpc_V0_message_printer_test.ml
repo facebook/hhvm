@@ -16,6 +16,7 @@ open Ide_rpc_protocol_parser_types
 
 let test_response = test_response JSON_RPC2 V0
 let test_request = test_request JSON_RPC2 V0
+let test_notification = test_notification JSON_RPC2 V0
 
 let test_error error expected =
   let response = Json_rpc_message_printer.error_to_json
@@ -341,6 +342,23 @@ let test_format_response () =
     "result": "aaaa"
   }|}
 
+let test_diagnostics_notification () =
+  let notification = Diagnostics_notification {
+    subscription_id = 4;
+    diagnostics_notification_filename = "foo.php";
+    diagnostics = []
+  } in
+  test_notification notification
+  {|{
+    "jsonrpc": "2.0",
+    "method": "diagnostics",
+    "params": {
+      "filename": "foo.php",
+      "errors": [
+      ]
+    }
+  }|}
+
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_init_response", test_init_response;
@@ -352,6 +370,7 @@ let tests = [
   "test_find_references_response", test_find_references_response;
   "test_highlight_references_response", test_highlight_references_response;
   "test_format_response", test_format_response;
+  "test_diagnostics_notification", test_diagnostics_notification;
 ]
 
 let () =

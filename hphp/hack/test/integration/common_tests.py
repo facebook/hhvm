@@ -1116,8 +1116,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             stdout,
             '{{"jsonrpc":"2.0","id":234,"result":' +
             '{{"server_api_version":0}}}}\n' +
-            '{{"jsonrpc":"2.0","id":null,"result":{{"filename":' +
-            '"{root}a.php","errors":[{{"message":[{{"descr":"Expected }}",' +
-            '"path":"{root}a.php","line":3,"start":1,"end":0,' +
-            '"code":1002}}]}}]}}}}\n'
+            '{{"jsonrpc":"2.0","method":"diagnostics","params":{{"filename":"' +
+            '{root}a.php","errors":[[{{"message":"Expected }}","range":' +
+            '{{"filename":"{root}a.php","range":{{"start":' +
+            '{{"line":3,"column":1}},"end":{{"line":3,"column":1}}}}}}}}]]}}}}\n'
         )

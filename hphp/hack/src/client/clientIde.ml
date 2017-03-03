@@ -128,9 +128,9 @@ let print_message id protocol message =
 let print_response id protocol response =
   print_message id protocol (Response response)
 
-let print_push_message =
-  (* Push notifications are responses without ID field *)
-  print_response None
+let print_push_message protocol notification =
+  (* Push notifications are requests without ID field *)
+  print_message None protocol (Request (Server_notification notification))
 
 let handle_push_message = function
   | ServerCommandTypes.DIAGNOSTIC (subscription_id, errors) ->

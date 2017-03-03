@@ -66,3 +66,7 @@ let test_response protocol version response expected =
 
 let test_request protocol version request expected =
   test_message protocol version (Ide_message.Request request) expected
+
+let test_notification protocol version notification expected =
+  test_message protocol version
+    Ide_message.(Request (Server_notification notification)) expected

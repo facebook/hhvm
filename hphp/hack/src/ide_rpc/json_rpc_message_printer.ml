@@ -13,10 +13,11 @@ open Ide_message
 open Ide_rpc_protocol_parser
 
 let build_message id fields =
-  JSON_Object ([
-    "jsonrpc", JSON_String "2.0";
-    "id", opt_int_to_json id;
-  ] @ fields)
+  JSON_Object (
+    ["jsonrpc", JSON_String "2.0"]
+    @ Ide_parser_utils.opt_field id "id" int_
+    @ fields
+  )
 
 let success_to_json id result =
   build_message id ["result", result]
@@ -27,7 +28,11 @@ let error_to_json ~id ~error =
     "message", JSON_String (error_t_to_string error);
   ]]
 
-let request_to_json _r _params_as_json = failwith "not implemented"
+let request_to_json r params_as_json =
+  build_message None [
+    "method", JSON_String (request_method_name r);
+    "params", params_as_json;
+  ]
 
 let to_json ~id ~message ~message_as_json = match message with
   | Response _ -> success_to_json id message_as_json

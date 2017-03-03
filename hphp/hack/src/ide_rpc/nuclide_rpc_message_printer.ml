@@ -188,12 +188,15 @@ let response_to_json = function
   | Find_references_response x -> find_references_response_to_json x
   | Highlight_references_response x -> highlight_references_response_to_json x
   | Format_response _ -> should_not_happen
+
+let notification_to_json = function
   | Diagnostics_notification x -> diagnostics_to_json x
 
 let to_json ~message = match message with
   | Response r -> response_to_json r
+  | Request (Server_notification n) -> notification_to_json n
   (* There is no use-case for printing client requests for now *)
-  | Request _ ->  failwith "not implemented"
+  | Request (Client_request _) ->  failwith "not implemented"
 
 let print_json ~response =
   to_json (Response response) |>

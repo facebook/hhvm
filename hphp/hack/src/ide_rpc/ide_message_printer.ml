@@ -12,7 +12,8 @@ open Ide_message
 open Ide_rpc_protocol_parser_types
 
 let get_subscription_id = function
-  | Response ((Diagnostics_notification {subscription_id; _})) ->
+  | Request (Server_notification
+        (Diagnostics_notification {subscription_id; _})) ->
       (* Nuclide subscriptions are special snowflakes with different output
       * format *)
       Some subscription_id

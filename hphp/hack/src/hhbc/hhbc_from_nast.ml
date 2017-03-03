@@ -140,7 +140,13 @@ let extract_shape_field_name = function
   | A.SFlit (_, s)
   | A.SFclass_const (_, (_, s)) -> s
 
-let rec from_expr expr =
+let rec expr_and_newc instr_to_add_new instr_to_add = function
+  | A.AFvalue e ->
+    gather [from_expr e; instr_to_add_new]
+  | A.AFkvalue (k, v) ->
+    gather [from_expr k; from_expr v; instr_to_add]
+
+and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
   | A.Float (_, litstr) ->
@@ -245,6 +251,16 @@ let rec from_expr expr =
       [ from_expr (pos, A.Array fields)
       ; instr @@ ILitConst (ColFromArray collection_type)
       ]
+  end
+  | A.Collection ((_, "Pair"), fields) -> begin
+    let collection_type = collection_type "Pair" in
+    let values = List.fold_right
+      fields
+      ~f:(fun x acc ->
+        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x::acc)
+      ~init:[] in
+    let newCol = instr @@ ILitConst (NewCol collection_type) in
+    gather (newCol::values)
   end
   | A.Array_get(e1, Some e2) ->
     emit_array_get None e1 e2
@@ -353,11 +369,7 @@ and emit_dynamic_collection expr es =
     in
     gather @@
       (instr @@ ILitConst lit_constructor) ::
-      (List.map es
-        ~f:(function A.AFvalue e ->
-                      gather [from_expr e; instr_add_new_elemc]
-                   | A.AFkvalue (k, v) ->
-                      gather [from_expr k; from_expr v; instr_add_elemc]))
+      (List.map es ~f:(expr_and_newc instr_add_new_elemc instr_add_elemc))
   end
 
 and emit_collection expr es =

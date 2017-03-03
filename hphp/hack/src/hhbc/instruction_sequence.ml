@@ -69,6 +69,7 @@ let instr_throw = instr (IContFlow Throw)
 
 let instr_add_elemc = instr (ILitConst (AddElemC))
 let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
+let instr_col_add_new_elemc = instr (ILitConst (ColAddNewElemC))
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

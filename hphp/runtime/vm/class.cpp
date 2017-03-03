@@ -123,8 +123,10 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     unsigned newCap = folly::nextPowTwo(m_size + 1);
     m_capacity = static_cast<int32_t>(newCap);
     auto newData = malloc_huge(newCap * sizeof(TypedValue));
-    memcpy(newData, m_data, m_size * sizeof(*m_data));
-    if (m_data) free_huge(m_data);
+    if (m_data) {
+      memcpy(newData, m_data, m_size * sizeof(*m_data));
+      free_huge(m_data);
+    }
     m_data = reinterpret_cast<TypedValueAux*>(newData);
     assert(m_data);
   }

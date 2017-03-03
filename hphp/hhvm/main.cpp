@@ -30,19 +30,20 @@
 
 /*
  * These are here to work around a gcc-5 lto bug. Without them,
- * certain symbols don't get defined, even though they're referenced, but
- * the build succeeds, and the references get set to nullptr (so get
+ * certain symbols don't get defined, even though they're referenced,
+ * but the build succeeds, and the references get set to nullptr (so
  * calls to vector<string>::~vector() end up as a call to 0.
  *
  * See t15096405
  */
-std::vector<std::string> dummy_vec { "hello" };
-std::set<std::string> dummy_set { std::string("hel") + "lo" };
+std::vector<std::string> dummy_vec { "hello", "foo" };
+std::set<std::string> dummy_set { "hello" };
 
 int main(int argc, char** argv) {
-
+  // Also for t15096405
+  std::string (*ptr)(std::string&&, const char*) = std::operator+;
   if (!argc) {
-    return 0;
+    return intptr_t(ptr);
   }
   int len = strlen(argv[0]);
   if (len >= 4 && !strcmp(argv[0] + len - 4, "hphp")) {

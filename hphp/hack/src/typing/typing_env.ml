@@ -400,8 +400,31 @@ let set_fn_kind env fn_type =
   let genv = { genv with fun_kind = fn_type } in
   { env with genv = genv }
 
-let add_todo env x =
-  { env with todo = x :: env.todo }
+(* Add a function on environments that gets run at some later stage to check
+ * constraints, by which time unresolved type variables may be resolved.
+ * Because the validity of the constraint might depend on tpenv
+ * at the point that the `add_todo` is called, we extend the environment at
+ * the point that the function gets run with `tpenv` captured at the point
+ * that `add_todo` gets called.
+ * Typical examples are `instanceof` tests that introduce bounds on fresh
+ * type parameters (e.g. named T#1) or on existing type parameters, which
+ * are removed after the end of the `instanceof` conditional block. e.g.
+ *   function foo<T as arraykey>(T $x): void { }
+ *   class C<+T> { }
+ *   class D extends C<arraykey> { }
+ *   function test<Tu>(C<Tu> $x, Tu $y): void {
+ *   if ($x instanceof D) {
+ *     // Here we know Tu <: arraykey but the constraint is checked later
+ *     foo($y);
+ *   }
+ *)
+ let add_todo env f =
+  let tpenv_now = env.lenv.tpenv in
+  let f' env =
+    let old_tpenv = env.lenv.tpenv in
+    let env = f (env_with_tpenv env tpenv_now) in
+    env_with_tpenv env old_tpenv in
+  { env with todo = f' :: env.todo }
 
 let add_anonymous env x =
   let genv = env.genv in

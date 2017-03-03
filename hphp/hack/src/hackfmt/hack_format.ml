@@ -1411,7 +1411,8 @@ let rec transform node =
     let (variance, name, constraints) = get_type_parameter_children x in
     t variance;
     t name;
-    pending_space ();
+    if syntax constraints <> Missing then
+      pending_space ();
     handle_possible_list constraints;
   | TypeConstraint x ->
     let (kw, constraint_type) = get_type_constraint_children x in
@@ -1779,21 +1780,37 @@ and transform_argish left_p arg_list right_p =
   end else transform right_p;
   ()
 
+and remove_trailing_trivia node =
+  let trailing_token = match Syntax.trailing_token node with
+    | Some t -> t
+    | None -> failwith "Expected trailing token"
+  in
+  let rewritten_node, changed = Rewriter.rewrite_pre (fun rewrite_node ->
+    match syntax rewrite_node with
+      | Token t when t == trailing_token ->
+        Some (Syntax.make_token {t with EditableToken.trailing = []}, true)
+      | _  -> Some (rewrite_node, false)
+  ) node in
+  if not changed then failwith "Trailing token not rewritten";
+  rewritten_node, EditableToken.trailing trailing_token
+
 and transform_last_arg node =
   match syntax node with
     | ListItem x ->
       let (item, separator) = get_list_item_children x in
-      transform item;
-      builder#set_pending_comma ();
       (match syntax separator with
-        | Token x -> builder#token_trivia_only x;
-        | Missing -> ();
+        | Token x ->
+          transform item;
+          builder#set_pending_comma ();
+          builder#token_trivia_only x;
+        | Missing ->
+          let item, trailing_trivia = remove_trailing_trivia item in
+          transform item;
+          builder#set_pending_comma ();
+          builder#handle_trivia ~is_leading:false trailing_trivia;
         | _ -> raise (Failure "Expected separator to be a token");
       );
     | _ ->
-      (* TODO: handle case where last arg has trivia but no comma) *)
-      (* see TODO in hphp/hack/test/hackfmt/tests/trailing_line_comments.php
-         for examples *)
       transform node;
       builder#set_pending_comma ();
 

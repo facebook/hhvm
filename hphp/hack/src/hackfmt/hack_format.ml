@@ -508,8 +508,8 @@ let rec transform node =
     ()
   | SyntaxList _ ->
     raise (Failure (Printf.sprintf
-"Error: SyntaxList should never be handled directly;
-offending text is '%s'." (text node)));
+      "Error: SyntaxList should never be handled directly;
+      offending text is '%s'." (text node)));
   | ScriptHeader x ->
     let (lt, q, lang_kw) = get_script_header_children x in
     t lt;
@@ -605,7 +605,7 @@ offending text is '%s'." (text node)));
   | NamespaceUseClause _ ->
     let error = Printf.sprintf "%s not supported - exiting \n"
       (SyntaxKind.to_string (kind node)) in
-    raise (Failure error);
+    raise (Hackfmt_error.UnsupportedSyntax error);
   | FunctionDeclaration x ->
     let (attr, header, body) = get_function_declaration_children x in
     t attr;
@@ -1489,7 +1489,7 @@ offending text is '%s'." (text node)));
     let (left_p, types, right_p) = get_tuple_type_specifier_children x in
     transform_argish left_p types right_p;
   | ErrorSyntax _ ->
-    raise (Failure "Error: Cannot format a syntax tree with an error node");
+    raise Hackfmt_error.InvalidSyntax
   | ListItem x ->
     t x.list_item;
     t x.list_separator
@@ -1910,5 +1910,7 @@ let format_node ?(debug=false) node start_char end_char =
 let format_content content =
   let source_text = SourceText.make content in
   let syntax_tree = SyntaxTree.make source_text in
+  if not @@ List.is_empty @@ SyntaxTree.errors syntax_tree
+    then raise Hackfmt_error.InvalidSyntax;
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
   format_node editable

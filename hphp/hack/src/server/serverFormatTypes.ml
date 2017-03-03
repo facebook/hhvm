@@ -10,7 +10,7 @@
 
 
 type action = string * int * int (* file contents, offset start, offset end *)
-type result = string Format_hack.return
+type result = (Ide_message.format_response, string) Result.t
 
 type ide_action = Ide_api_types.file_range
 type ide_result = (Ide_message.format_response, string) Result.t

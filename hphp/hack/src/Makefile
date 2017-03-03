@@ -61,6 +61,7 @@ MODULES=\
   h2tp/mapper\
   h2tp/unparser\
   h2tp\
+  hackfmt/error\
   heap\
   hh_matcher\
   hh_matcher/test\

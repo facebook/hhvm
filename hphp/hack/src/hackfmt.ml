@@ -89,4 +89,5 @@ let parse_options () =
 
   parse_and_print (source_text, out_channel, start_c, end_c, !debug)
 
-let () = parse_options ()
+let () = try parse_options () with
+  | exn -> exit (Hackfmt_error.get_exception_exit_value exn)

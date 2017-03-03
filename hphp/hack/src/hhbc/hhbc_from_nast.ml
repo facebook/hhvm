@@ -13,7 +13,6 @@ open Hhbc_ast
 open Instruction_sequence
 
 module A = Ast
-module N = Nast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
@@ -617,31 +616,19 @@ and literal_from_expr expr =
   | A.Null -> Null
   | A.False -> False
   | A.True -> True
-  | _ -> failwith "Expected a literal expression"
-
-and literal_from_named_expr expr =
-  match snd expr with
-  | N.Float (_, litstr) -> Double litstr
-  | N.String (_, litstr) -> String litstr
-  | N.Int (_, litstr) -> Int (Int64.of_string litstr)
-  | N.Null -> Null
-  | N.False -> False
-  | N.True -> True
   (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
    this seems reasonable to allow. Right now this will crash if given an
    expression rather than a literal in here.  In particular, see what unary
    minus does; do we allow it on a literal int? We should. *)
-  | _ -> failwith (Printf.sprintf
-    "Expected a literal expression in literal_from_named_expr, got %s"
-    (N.expr_to_string (snd expr)))
+   | _ -> failwith "Expected a literal expression"
 
-and literals_from_named_exprs_with_index exprs =
+and literals_from_exprs_with_index exprs =
   List.rev @@ snd @@
   List.fold_left
     exprs
     ~init:(0, [])
     ~f:(fun (index, l) e ->
-      (index + 1, literal_from_named_expr e :: Int (Int64.of_int index) :: l))
+      (index + 1, literal_from_expr e :: Int (Int64.of_int index) :: l))
 
 (* Emit code for an l-value, returning instructions and the location that
  * must be set. For now, this is just a local. *)
@@ -1066,102 +1053,85 @@ and from_case c =
   in
   (e, l), gather [instr_label l; b]
 
-let fmt_prim x =
-  match x with
-  | N.Tvoid   -> "HH\\void"
-  | N.Tint    -> "HH\\int"
-  | N.Tbool   -> "HH\\bool"
-  | N.Tfloat  -> "HH\\float"
-  | N.Tstring -> "HH\\string"
-  | N.Tnum    -> "HH\\num"
-  | N.Tresource -> "HH\\resource"
-  | N.Tarraykey -> "HH\\arraykey"
-  | N.Tnoreturn -> "HH\\noreturn"
-
 (* TODO *)
 let fmt_name s = s
 
-let extract_shape_fields smap =
-  let get_pos =
-    function A.SFlit (p, _) | A.SFclass_const ((p, _), _) -> p in
-  List.sort (fun (k1, _) (k2, _) -> Pos.compare (get_pos k1) (get_pos k2))
-    (Nast.ShapeMap.elements smap)
+let fmt_name_or_prim x =
+  match x with
+  | "void" -> "HH\\void"
+  | "int" -> "HH\\int"
+  | "bool" -> "HH\\bool"
+  | "float" -> "HH\\float"
+  | "string" -> "HH\\string"
+  | "num" -> "HH\\num"
+  | "resource" -> "HH\\resource"
+  | "arraykey" -> "HH\\arraykey"
+  | "noreturn" -> "HH\\noreturn"
+  | "mixed" -> "HH\\mixed"
+  | "this" -> "HH\\this"
+  | _ -> fmt_name x
 
 (* Produce the "userType" bit of the annotation *)
 let rec fmt_hint (_, h) =
   match h with
-  | N.Hany -> ""
-  | N.Hmixed -> "HH\\mixed"
-  | N.Hthis -> "HH\\this"
-  | N.Hprim prim -> fmt_prim prim
-  | N.Habstr s -> fmt_name s
+  | A.Happly ((_, s), []) -> fmt_name_or_prim s
+  | A.Happly ((_, s), args) ->
+    fmt_name_or_prim s ^ "<" ^ String.concat ", " (List.map args fmt_hint) ^ ">"
 
-  | N.Happly ((_, s), []) -> fmt_name s
-  | N.Happly ((_, s), args) ->
-    fmt_name s ^ "<" ^ String.concat ", " (List.map args fmt_hint) ^ ">"
-
-  | N.Hfun (args, _, ret) ->
+  | A.Hfun (args, _, ret) ->
     "(function (" ^ String.concat ", " (List.map args fmt_hint) ^ "): " ^
       fmt_hint ret ^ ")"
 
-  | N.Htuple hs ->
+  | A.Htuple hs ->
     "(" ^ String.concat ", " (List.map hs fmt_hint) ^ ")"
 
-  | N.Haccess (h, accesses) ->
-    fmt_hint h ^ "::" ^ String.concat "::" (List.map accesses snd)
+  | A.Haccess (h1, h2, accesses) ->
+    String.concat "::" (List.map (h1::h2::accesses) snd)
 
-  | N.Hoption t -> "?" ^ fmt_hint t
+  | A.Hoption t -> "?" ^ fmt_hint t
 
-  | N.Harray (None, None) -> "array"
-  | N.Harray (Some h, None) -> "array<" ^ fmt_hint h ^ ">"
-  | N.Harray (Some h1, Some h2) ->
-    "array<" ^ fmt_hint h1 ^ ", " ^ fmt_hint h2 ^ ">"
-  | N.Harray _ -> failwith "bogus array"
-  | N.Hshape smap ->
+  | A.Hshape smap ->
     let fmt_field = function
       | A.SFlit (_, s) -> "'" ^ s ^ "'"
       | A.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
     in
-    let format_shape_field (k, { N.sfi_hint; _ }) =
-      fmt_field k ^ "=>" ^ fmt_hint sfi_hint in
+    let format_shape_field ({ A.sf_name; A.sf_hint; _ }) =
+      fmt_field sf_name ^ "=>" ^ fmt_hint sf_hint in
     let shape_fields =
-      List.map ~f:format_shape_field (extract_shape_fields smap) in
+      List.map ~f:format_shape_field smap in
     "HH\\shape(" ^ String.concat ", " shape_fields ^ ")"
 
 let rec hint_to_type_constraint tparams (_, h) =
 match h with
-| N.Hany | N.Hmixed | N.Hfun (_, _, _) | N.Hthis
-| N.Hprim N.Tvoid ->
+| A.Happly ((_, ("mixed" | "this" | "void")), []) ->
   TC.make None []
 
-| N.Hprim prim ->
-  let tc_name = Some (fmt_prim prim) in
-  let tc_flags = [TC.HHType] in
-  TC.make tc_name tc_flags
+| A.Hfun (_, _, _) ->
+  TC.make None []
 
-| N.Haccess (_, _) ->
+| A.Haccess _ ->
   let tc_name = Some "" in
   let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
   TC.make tc_name tc_flags
 
 (* Need to differentiate between type params and classes *)
-| N.Habstr s | N.Happly ((_, s), _) ->
+| A.Happly ((_, s), _) ->
   if List.mem tparams s then
     let tc_name = Some "" in
     let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
     TC.make tc_name tc_flags
   else
-    let tc_name = Some s in
+    let tc_name = Some (fmt_name_or_prim s) in
     let tc_flags = [TC.HHType] in
     TC.make tc_name tc_flags
 
 (* Shapes and tuples are just arrays *)
-| N.Harray (_, _) | N.Hshape _ |  N.Htuple _ ->
+| A.Hshape _ |  A.Htuple _ ->
   let tc_name = Some "array" in
   let tc_flags = [TC.HHType] in
   TC.make tc_name tc_flags
 
-| N.Hoption t ->
+| A.Hoption t ->
   let tc = hint_to_type_constraint tparams t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
@@ -1186,8 +1156,8 @@ let hints_to_type_infos ~always_extended tparams hints =
   List.map hints mapper
 
 let from_param tparams p =
-  let param_name = p.N.param_name in
-  let param_type_info = Option.map p.N.param_hint
+  let param_name = snd p.A.param_id in
+  let param_type_info = Option.map p.A.param_hint
     (hint_to_type_info ~always_extended:false tparams) in
   Hhas_param.make param_name param_type_info
 
@@ -1247,14 +1217,14 @@ let from_body tparams params ret b =
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in
-  let stmt_instrs = from_stmts b.N.fub_ast in
+  let stmt_instrs = from_stmts b in
   let stmt_instrs =
     if has_type_constraint return_type_info then
       verify_returns stmt_instrs
     else
       stmt_instrs in
   let ret_instrs =
-    match List.last b.N.fub_ast with Some (A.Return _) -> empty | _ ->
+    match List.last b with Some (A.Return _) -> empty | _ ->
     gather [instr_null; instr_retc]
   in
   let fault_instrs = emit_fault_instructions stmt_instrs in
@@ -1388,18 +1358,15 @@ let relabel_instrseq instrseq =
     | _ -> Some instr)
 
 
-let from_fun_ : Nast.fun_ -> Hhas_function.t option =
-  fun nast_fun ->
+let from_fun_ : A.fun_ -> Hhas_function.t option =
+  fun ast_fun ->
   Label.reset_label ();
-  Label.reset_local ();
-  let function_name = Litstr.to_string @@ snd nast_fun.Nast.f_name in
-  match nast_fun.N.f_body with
-  | N.NamedBody _ ->
-    None
-  | N.UnnamedBody b ->
-    let tparams = tparams_to_strings nast_fun.N.f_tparams in
+  let function_name = Litstr.to_string @@ snd ast_fun.A.f_name in
+  match ast_fun.A.f_body with
+  | b ->
+    let tparams = tparams_to_strings ast_fun.A.f_tparams in
     let body_instrs, function_params, function_return_type =
-      from_body tparams nast_fun.N.f_params nast_fun.N.f_ret b in
+      from_body tparams ast_fun.A.f_params ast_fun.A.f_ret b in
     let body_instrs = relabel_instrseq body_instrs in
     let function_decl_vars = extract_decl_vars body_instrs in
     let function_body = instr_seq_to_list body_instrs in
@@ -1410,45 +1377,39 @@ let from_fun_ : Nast.fun_ -> Hhas_function.t option =
       function_body
       function_decl_vars)
 
-let from_functions nast_functions =
-  Core.List.filter_map nast_functions from_fun_
+let from_functions ast_functions =
+  List.filter_map ast_functions from_fun_
 
 let from_attribute_base attribute_name arguments =
-  let attribute_arguments = literals_from_named_exprs_with_index arguments in
+  let attribute_arguments = literals_from_exprs_with_index arguments in
   Hhas_attribute.make attribute_name attribute_arguments
 
-let from_attribute : Nast.user_attribute -> Hhas_attribute.t =
-  fun nast_attr ->
-  let attribute_name = Litstr.to_string @@ snd nast_attr.Nast.ua_name in
-  from_attribute_base attribute_name nast_attr.Nast.ua_params
+let from_attribute : A.user_attribute -> Hhas_attribute.t =
+  fun ast_attr ->
+  let attribute_name = Litstr.to_string @@ snd ast_attr.A.ua_name in
+  from_attribute_base attribute_name ast_attr.A.ua_params
 
-let from_attributes nast_attributes =
-  (* The list of attributes is reversed in the Nast. *)
-  List.map (List.rev nast_attributes) from_attribute
+let from_attributes ast_attributes =
+  (* The list of attributes is reversed in the A. *)
+  List.map (List.rev ast_attributes) from_attribute
 
-let from_method : bool -> Nast.class_ -> Nast.method_ -> Hhas_method.t option =
-  fun method_is_static nast_class nast_method ->
-  let class_tparams = tparams_to_strings (fst nast_class.N.c_tparams) in
-  let method_name = Litstr.to_string @@ snd nast_method.Nast.m_name in
-  let method_is_abstract = nast_method.Nast.m_abstract in
-  (* TODO: An abstract method must generate
-.method [protected abstract] <"HH\\void" N  > protected_abstract_method() {
-String "Cannot call abstract method AbstractClass::protected_abstract_method()"
-Fatal RuntimeOmitFrame
-} *)
-  let method_is_final = nast_method.Nast.m_final in
-  let method_is_private = nast_method.Nast.m_visibility = Nast.Private in
-  let method_is_protected = nast_method.Nast.m_visibility = Nast.Protected in
-  let method_is_public = nast_method.Nast.m_visibility = Nast.Public in
-  let method_attributes = from_attributes nast_method.Nast.m_user_attributes in
-  match nast_method.N.m_body with
-  | N.NamedBody _ ->
-    None
-  | N.UnnamedBody b ->
-    let method_tparams = tparams_to_strings nast_method.N.m_tparams in
+let from_method : A.class_ -> A.method_ -> Hhas_method.t option =
+  fun ast_class ast_method ->
+  let class_tparams = tparams_to_strings ast_class.A.c_tparams in
+  let method_name = Litstr.to_string @@ snd ast_method.A.m_name in
+  let method_is_abstract = List.mem ast_method.A.m_kind A.Abstract in
+  let method_is_final = List.mem ast_method.A.m_kind A.Final in
+  let method_is_private = List.mem ast_method.A.m_kind A.Private in
+  let method_is_protected = List.mem ast_method.A.m_kind A.Protected in
+  let method_is_public = List.mem ast_method.A.m_kind A.Public in
+  let method_is_static = List.mem ast_method.A.m_kind A.Static in
+  let method_attributes = from_attributes ast_method.A.m_user_attributes in
+  match ast_method.A.m_body with
+  | b ->
+    let method_tparams = tparams_to_strings ast_method.A.m_tparams in
     let tparams = class_tparams @ method_tparams in
     let body_instrs, method_params, method_return_type =
-      from_body tparams nast_method.N.m_params nast_method.N.m_ret b in
+      from_body tparams ast_method.A.m_params ast_method.A.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
     let m = Hhas_method.make
       method_attributes
@@ -1464,20 +1425,20 @@ Fatal RuntimeOmitFrame
       method_body in
     Some m
 
-let from_methods method_is_static nast_class nast_methods =
-  Core.List.filter_map nast_methods (from_method method_is_static nast_class)
+let from_methods ast_class ast_methods =
+  List.filter_map ast_methods (from_method ast_class)
 
-let is_interface nast_class =
-  nast_class.N.c_kind = Ast.Cinterface
+let is_interface ast_class =
+  ast_class.A.c_kind = Ast.Cinterface
 
-let default_constructor nast_class =
+let default_constructor ast_class =
   let method_attributes = [] in
   let method_name = "86ctor" in
   let method_body = instr_seq_to_list (gather [
     instr (ILitConst Null);
     instr (IContFlow RetC)
   ]) in
-  let method_is_abstract = is_interface nast_class in
+  let method_is_abstract = is_interface ast_class in
   let method_is_final = false in
   let method_is_private = false in
   let method_is_protected = false in
@@ -1498,15 +1459,6 @@ let default_constructor nast_class =
     method_return_type
     method_body
 
-let add_constructor nast_class class_methods =
-  match nast_class.N.c_constructor with
-  | None -> (default_constructor nast_class) :: class_methods
-  | Some nast_ctor ->
-    begin
-      match from_method false nast_class nast_ctor with
-      | None -> class_methods
-      | Some m -> m :: class_methods
-    end
 
 let from_extends tparams extends =
   (* TODO: This prints out "extends <"\\Mammal" "\\Mammal" hh_type >"
@@ -1524,23 +1476,22 @@ let from_implements tparams implements =
   *)
   hints_to_type_infos ~always_extended:false tparams implements
 
-let from_property property_is_static class_var =
+let from_class_var cv_kind_list class_var =
+  let (_, (_, cv_name), _) = class_var in
   (* TODO: xhp, type, initializer *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
-  let property_name = Litstr.to_string @@ snd class_var.N.cv_id in
-  let property_is_private = class_var.N.cv_visibility = N.Private in
-  let property_is_protected = class_var.N.cv_visibility = N.Protected in
-  let property_is_public = class_var.N.cv_visibility = N.Public in
+  let property_name = Litstr.to_string @@ cv_name in
+  let property_is_private = List.mem cv_kind_list A.Private in
+  let property_is_protected = List.mem cv_kind_list A.Protected in
+  let property_is_public = List.mem cv_kind_list A.Public in
+  let property_is_static = List.mem cv_kind_list A.Static in
   Hhas_property.make
     property_is_private
     property_is_protected
     property_is_public
     property_is_static
     property_name
-
-let from_properties property_is_static class_vars =
-  List.map class_vars (from_property property_is_static)
 
 let from_constant (_hint, name, const_init) =
   (* The type hint is omitted. *)
@@ -1551,49 +1502,75 @@ let from_constant (_hint, name, const_init) =
     let constant_name = Litstr.to_string @@ snd name in
     Some (Hhas_constant.make constant_name)
 
-let from_constants nast_constants =
-  Core.List.filter_map nast_constants from_constant
+let from_constants ast_constants =
+  List.filter_map ast_constants from_constant
 
-let from_type_constant nast_type_constant =
-  match nast_type_constant.N.c_tconst_type with
+let from_type_constant ast_type_constant =
+  match ast_type_constant.A.tconst_type with
   | None -> None (* Abstract type constants are omitted *)
   | Some _init ->
     (* TODO: Deal with the initializer *)
     let type_constant_name = Litstr.to_string @@
-      snd nast_type_constant.N.c_tconst_name in
+      snd ast_type_constant.A.tconst_name in
     Some (Hhas_type_constant.make type_constant_name)
 
-let from_type_constants nast_type_constants =
-  Core.List.filter_map nast_type_constants from_type_constant
+let from_type_constants ast_type_constants =
+  List.filter_map ast_type_constants from_type_constant
 
-let from_class : Nast.class_ -> Hhas_class.t =
-  fun nast_class ->
-  let class_attributes = from_attributes nast_class.N.c_user_attributes in
-  let class_name = Litstr.to_string @@ snd nast_class.N.c_name in
-  let class_is_trait = nast_class.N.c_kind = Ast.Ctrait in
-  let class_is_enum = nast_class.N.c_kind = Ast.Cenum in
-  let class_is_interface = is_interface nast_class in
-  let class_is_abstract = nast_class.N.c_kind = Ast.Cabstract in
+let from_class_elt_method ast_class elt =
+  match elt with
+  | A.Method m -> from_method ast_class m
+  | _ -> None
+
+let from_class_elt_classvars elt =
+  match elt with
+  | A.ClassVars (kind_list, _, cvl) ->
+    List.map cvl (from_class_var kind_list)
+  | _ -> []
+
+let from_class_elt_constants elt =
+  match elt with
+  | A.Const(hint_opt, l) ->
+    List.filter_map l (fun (id, e) -> from_constant (hint_opt, id, Some e))
+  | _ -> []
+
+let from_class_elt_typeconsts elt =
+  match elt with
+  | A.TypeConst tc -> from_type_constant tc
+  | _ -> None
+
+let from_class : A.class_ -> Hhas_class.t =
+  fun ast_class ->
+  let class_attributes = from_attributes ast_class.A.c_user_attributes in
+  let class_name = Litstr.to_string @@ snd ast_class.A.c_name in
+  let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
+  let class_is_enum = ast_class.A.c_kind = Ast.Cenum in
+  let class_is_interface = is_interface ast_class in
+  let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
-    nast_class.N.c_final || class_is_trait || class_is_enum in
-  let tparams = tparams_to_strings (fst nast_class.N.c_tparams) in
+    ast_class.A.c_final || class_is_trait || class_is_enum in
+  let tparams = tparams_to_strings ast_class.A.c_tparams in
   let class_base =
     if class_is_interface then None
-    else from_extends tparams nast_class.N.c_extends in
+    else from_extends tparams ast_class.A.c_extends in
   let implements =
-    if class_is_interface then nast_class.N.c_extends
-    else nast_class.N.c_implements in
+    if class_is_interface then ast_class.A.c_extends
+    else ast_class.A.c_implements in
   let class_implements = from_implements tparams implements in
-  let instance_methods = from_methods false nast_class nast_class.N.c_methods in
-  let static_methods =
-    from_methods true nast_class nast_class.N.c_static_methods in
-  let class_methods = instance_methods @ static_methods in
-  let class_methods = add_constructor nast_class class_methods in
-  let instance_properties = from_properties false nast_class.N.c_vars in
-  let static_properties = from_properties true nast_class.N.c_static_vars in
-  let class_properties = static_properties @ instance_properties in
-  let class_constants = from_constants nast_class.N.c_consts in
-  let class_type_constants = from_type_constants nast_class.N.c_typeconsts in
+  let class_body = ast_class.A.c_body in
+  let has_constructor = List.exists class_body
+    (fun elt -> match elt with
+                | A.Method { A.m_name; _} -> snd m_name = SN.Members.__construct
+                | _ -> false) in
+  let class_methods =
+    if has_constructor then [] else [default_constructor ast_class] in
+  let class_methods =
+    List.filter_map class_body (from_class_elt_method ast_class)
+    @ class_methods in
+  let class_properties = List.concat_map class_body from_class_elt_classvars in
+  let class_constants = List.concat_map class_body from_class_elt_constants in
+  let class_type_constants =
+    List.filter_map class_body from_class_elt_typeconsts in
   (* TODO: uses, xhp attr uses, xhp category *)
   Hhas_class.make
     class_attributes
@@ -1610,5 +1587,5 @@ let from_class : Nast.class_ -> Hhas_class.t =
     class_constants
     class_type_constants
 
-let from_classes nast_classes =
-  Core.List.map nast_classes from_class
+let from_classes ast_classes =
+  List.map ast_classes from_class

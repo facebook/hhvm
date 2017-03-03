@@ -21,7 +21,6 @@
   * --program-text
   * --pretty-print
   * --show-file-name
-  * --codegen
   *
   * TODO: Parser for things other than scripts:
   *       types, expressions, statements, declarations, etc.
@@ -44,7 +43,6 @@ module FullFidelityParseArgs = struct
     program_text : bool;
     pretty_print : bool;
     show_file_name : bool;
-    codegen : bool;
     files : string list
   }
 
@@ -58,7 +56,6 @@ module FullFidelityParseArgs = struct
     program_text
     pretty_print
     show_file_name
-    codegen
     files = {
     full_fidelity_json;
     full_fidelity_errors;
@@ -69,7 +66,6 @@ module FullFidelityParseArgs = struct
     program_text;
     pretty_print;
     show_file_name;
-    codegen;
     files }
 
   let parse_args () =
@@ -93,8 +89,6 @@ module FullFidelityParseArgs = struct
     let set_pretty_print () = pretty_print := true in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
-    let codegen = ref false in
-    let set_codegen () = codegen := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
     let options =  [
@@ -128,9 +122,7 @@ No errors are filtered out.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
-      "--codegen",
-        Arg.Unit set_codegen,
-        "Displays codegen."] in
+      ] in
     Arg.parse options push_file usage;
     make
       !full_fidelity_json
@@ -142,7 +134,6 @@ No errors are filtered out.";
       !program_text
       !pretty_print
       !show_file_name
-      !codegen
       (List.rev !files)
 end
 
@@ -184,12 +175,6 @@ let compile_file (funs, classes, typedefs, consts) =
   Hhas_program.make compiled_functions compiled_classes
   (* TODO: typedefs, consts *)
 
-let do_codegen filename =
-  let parsed_file = parse_file filename in
-  let named_file = type_file filename parsed_file in
-  let hhas_prog = compile_file named_file in
-  Hhbc_hhas.to_string hhas_prog
-
 let handle_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -209,10 +194,6 @@ let handle_file args filename =
   if args.program_text then begin
     let text = Full_fidelity_editable_syntax.text editable in
     Printf.printf "%s\n" text
-  end;
-  if args.codegen then begin
-    let codegen = do_codegen filename in
-    Printf.printf "%s\n" codegen
   end;
   if args.pretty_print then begin
     let pretty = Full_fidelity_pretty_printer.pretty_print editable in

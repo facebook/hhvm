@@ -126,7 +126,7 @@ let do_compile opts files_info = begin
   let get_nast_from_fileinfo tcopt fn fileinfo =
     let funs = fileinfo.FileInfo.funs in
     let name_function (_, fun_) =
-      let f opts cls = Some (Naming.fun_ opts cls) in
+      let f _opts cls = Some (cls) in
       Option.value_map
         (Parser_heap.find_fun_in_file ~full:true tcopt fn fun_)
         ~default:None
@@ -134,7 +134,7 @@ let do_compile opts files_info = begin
     let named_functions = List.filter_map funs name_function in
     let classes = fileinfo.FileInfo.classes in
     let name_class (_, class_) =
-      let f opts cls = Some (Naming.class_ opts cls) in
+      let f _opts cls = Some (cls) in
       Option.value_map
         (Parser_heap.find_class_in_file ~full:true tcopt fn class_)
         ~default:None

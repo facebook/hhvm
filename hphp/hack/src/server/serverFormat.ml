@@ -61,7 +61,7 @@ let hh_format_result_to_response x =
   | Internal_error -> Result.Error ("Formatter internal error")
   | Success s -> Result.Ok s
 
-let go_hh_format genv content from to_ =
+let go_hh_format _ content from to_ =
     let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
     hh_format_result_to_response @@
       Format_hack.region modes Path.dummy_path from to_ content

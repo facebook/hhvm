@@ -94,7 +94,7 @@ let file_to_files file =
   else
     Relative_path.Map.singleton file content
 
-let parse_name_and_decl popt files_contents tcopt =
+let parse_name popt files_contents =
   Errors.do_ begin fun () ->
     let parsed_files =
       Relative_path.Map.mapi
@@ -110,47 +110,30 @@ let parse_name_and_decl popt files_contents tcopt =
           consider_names_just_for_autoload = false }
       end parsed_files in
 
-    Relative_path.Map.iter files_info begin fun _ fileinfo ->
-      let {FileInfo.funs; classes; typedefs; consts; _} = fileinfo in
-      NamingGlobal.make_env popt ~funs ~classes ~typedefs ~consts
-    end;
-
-    Relative_path.Map.iter files_info begin fun fn _ ->
-      Decl.make_env tcopt fn
-    end;
-
     files_info
   end
 
 let do_compile opts files_info = begin
   let get_nast_from_fileinfo tcopt fn fileinfo =
     let funs = fileinfo.FileInfo.funs in
-    let name_function (_, fun_) =
-      let f _opts cls = Some (cls) in
-      Option.value_map
-        (Parser_heap.find_fun_in_file ~full:true tcopt fn fun_)
-        ~default:None
-        ~f:(f tcopt) in
-    let named_functions = List.filter_map funs name_function in
+    let parse_function (_, fun_) =
+        Parser_heap.find_fun_in_file ~full:true tcopt fn fun_ in
+    let parsed_functions = List.filter_map funs parse_function in
     let classes = fileinfo.FileInfo.classes in
-    let name_class (_, class_) =
-      let f _opts cls = Some (cls) in
-      Option.value_map
-        (Parser_heap.find_class_in_file ~full:true tcopt fn class_)
-        ~default:None
-        ~f:(f tcopt) in
-    let named_classes = List.filter_map classes name_class in
-    let named_typedefs = [] in (* TODO typedefs *)
-    let named_consts = [] in (* TODO consts *)
-    (named_functions, named_classes, named_typedefs, named_consts) in
+    let parse_class (_, class_) =
+        Parser_heap.find_class_in_file ~full:true tcopt fn class_ in
+    let parsed_classes = List.filter_map classes parse_class in
+    let parsed_typedefs = [] in (* TODO typedefs *)
+    let parsed_consts = [] in (* TODO consts *)
+    (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts) in
   let f_fold fn fileinfo text = begin
     let hhas_text = if (Relative_path.S.to_string fn) = "|builtins.hhi" then
       ""
     else
-      let (named_functions, named_classes, _named_typedefs, _named_consts) =
+      let (parsed_functions, parsed_classes, _parsed_typedefs, _parsed_consts) =
         get_nast_from_fileinfo opts fn fileinfo in
-      let compiled_funs = Hhbc_from_nast.from_functions named_functions in
-      let compiled_classes = Hhbc_from_nast.from_classes named_classes in
+      let compiled_funs = Hhbc_from_nast.from_functions parsed_functions in
+      let compiled_classes = Hhbc_from_nast.from_classes parsed_classes in
       let _compiled_typedefs = [] in (* TODO *)
       let _compiled_consts = [] in (* TODO *)
       let hhas_prog = Hhas_program.make compiled_funs compiled_classes in
@@ -170,7 +153,7 @@ let decl_and_run_mode {filename} popt tcopt =
   Ident.track_names := true;
   let filename = Relative_path.create Relative_path.Dummy filename in
   let files_contents = file_to_files filename in
-  let _, files_info, _ = parse_name_and_decl popt files_contents tcopt in
+  let _, files_info, _ = parse_name popt files_contents in
   do_compile tcopt files_info
 
 let main_hack opts =

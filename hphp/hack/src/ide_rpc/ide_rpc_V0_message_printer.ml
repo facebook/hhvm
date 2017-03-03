@@ -103,7 +103,7 @@ let coverage_levels_response_to_json x = match x with
       JSON_Array (List.map spans ~f:span_to_json)
   | deprecated_response ->
       let response = Coverage_levels_response deprecated_response in
-      Nuclide_rpc_message_printer.to_json ~response
+      Nuclide_rpc_message_printer.to_json (Response response)
 
 let identify_symbol_response_to_json results =
   JSON_Array (List.map results ~f:begin fun { occurrence; definition } ->
@@ -136,8 +136,7 @@ let highlight_references_response_to_json x =
 
 let format_response_to_json x = JSON_String x
 
-let to_json ~id:_ ~response =
-  match response with
+let response_to_json = function
   | Init_response x -> init_response_to_json x
   | Autocomplete_response x -> autocomplete_response_to_json x
   | Infer_type_response x -> infer_type_response x
@@ -148,4 +147,8 @@ let to_json ~id:_ ~response =
   | Format_response x -> format_response_to_json x
   | Coverage_levels_response x -> coverage_levels_response_to_json x
   (* Delegate unhandled messages to previous version of API *)
-  | _ -> Nuclide_rpc_message_printer.to_json ~response
+  | r -> Nuclide_rpc_message_printer.to_json (Response r)
+
+let to_json ~message = match message with
+  | Response r -> response_to_json r
+  | Request _ as m -> Nuclide_rpc_message_printer.to_json m

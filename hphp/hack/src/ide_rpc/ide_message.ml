@@ -124,3 +124,7 @@ and diagnostics_notification = {
   diagnostics_notification_filename : string;
   diagnostics : error list;
 }
+
+type message =
+  | Request of request
+  | Response of response

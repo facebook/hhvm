@@ -16,6 +16,7 @@ open Ide_rpc_protocol_parser_types
 (* Test suite for Nuclide-rpc version of the API responses  *)
 
 let test_response = test_response Nuclide_rpc V0
+let test_request = test_request Nuclide_rpc V0
 
 let test_autocomplete_response () =
   let response = Autocomplete_response [{

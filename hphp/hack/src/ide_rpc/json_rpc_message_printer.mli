@@ -10,10 +10,13 @@
 
 open Hh_json
 
-val response_to_json:
+val error_to_json :
   id:int option ->
-  result:[
-    `Result of json |
-    `Error of Ide_rpc_protocol_parser_types.error_t
-  ] ->
+  error:Ide_rpc_protocol_parser_types.error_t ->
+  json
+
+val to_json :
+  id:int option ->
+  message:Ide_message.message ->
+  message_as_json:json ->
   json

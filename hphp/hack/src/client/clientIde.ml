@@ -90,7 +90,8 @@ let rpc conn command =
 let read_push_message_from_server fd : ServerCommandTypes.push =
   let open ServerCommandTypes in
   match Marshal_tools.from_fd_with_preamble fd with
-  | Response _ -> failwith "unexpected response without a request"
+  | ServerCommandTypes.Response _ ->
+    failwith "unexpected response without a request"
   | Push m -> m
 
 let get_next_push_message fd =
@@ -118,11 +119,14 @@ let get_ready_message server_in_fd =
   else if List.mem readable server_in_fd then `Server
   else `Stdin
 
-let print_response id protocol response =
+let print_message id protocol message =
   Ide_message_printer.to_json
-    ~id ~protocol ~response ~version:!init_version |>
+    ~id ~protocol ~version:!init_version ~message |>
   Hh_json.json_to_string |>
   write_response
+
+let print_response id protocol response =
+  print_message id protocol (Response response)
 
 let print_push_message =
   (* Push notifications are responses without ID field *)
@@ -150,7 +154,7 @@ let handle_error id protocol error =
     Printf.eprintf "%s\n" (Ide_rpc_protocol_parser.error_t_to_string error);
     flush stderr
   | JSON_RPC2 ->
-    Json_rpc_message_printer.response_to_json ~id ~result:(`Error error) |>
+    Json_rpc_message_printer.error_to_json ~id ~error |>
     Hh_json.json_to_string |>
     write_response
 

@@ -15,11 +15,12 @@ open Ide_rpc_protocol_parser_types
 (* Test suite for V0 version of the API responses  *)
 
 let test_response = test_response JSON_RPC2 V0
+let test_request = test_request JSON_RPC2 V0
 
 let test_error error expected =
-  let response = Json_rpc_message_printer.response_to_json
+  let response = Json_rpc_message_printer.error_to_json
     ~id:(Some 4)
-    ~result:(`Error error)
+    ~error
   in
   assert_json_equal expected response;
   true

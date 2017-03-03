@@ -8,7 +8,6 @@
  *
  *)
 
-val to_json :
-  id:int option ->
-  response:Ide_message.response ->
+ val to_json :
+  message:Ide_message.message ->
   Hh_json.json

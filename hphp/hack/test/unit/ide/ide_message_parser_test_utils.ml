@@ -51,12 +51,18 @@ let test message check_function =
   check_function (Ide_message_parser.parse ~version:V0 ~message);
   true
 
-let test_response protocol version response expected =
-  let response = Ide_message_printer.to_json
+let test_message protocol version message expected =
+  let message = Ide_message_printer.to_json
     ~id:(Some 4)
     ~protocol
     ~version
-    ~response
+    ~message
   in
-  assert_json_equal expected response;
+  assert_json_equal expected message;
   true
+
+let test_response protocol version response expected =
+  test_message protocol version (Ide_message.Response response) expected
+
+let test_request protocol version request expected =
+  test_message protocol version (Ide_message.Request request) expected

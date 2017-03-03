@@ -984,15 +984,25 @@ and from_try_finally try_block finally_block =
 
 and get_foreach_lvalue e =
   match e with
-  | A.Lvar (_, x) -> H.Local_named x
-  | _ -> failwith "foreach codegen does not support arbitrary lvalues yet"
+  | A.Lvar (_, x) -> Some (H.Local_named x)
+  | _ -> None
 
 and get_foreach_key_value iterator =
   match iterator with
   | A.As_kv ((_, k), (_, v)) ->
-    (Some (get_foreach_lvalue k)), get_foreach_lvalue v
+    begin match get_foreach_lvalue v with
+    | None -> None
+    | Some v_lid ->
+      match get_foreach_lvalue k with
+      | None -> None
+      | Some k_lid ->
+        Some (Some k_lid, v_lid)
+    end
   | A.As_v (_, v) ->
-    None, get_foreach_lvalue v
+    begin match get_foreach_lvalue v with
+    | None -> None
+    | Some lid -> Some (None, lid)
+    end
 
 and from_foreach _has_await collection iterator block =
   (* TODO: await *)
@@ -1005,36 +1015,38 @@ and from_foreach _has_await collection iterator block =
   let fault_label = Label.get_next_label () in
   let loop_continue_label = Label.get_next_label () in
   let loop_break_label = Label.get_next_label () in
-  let (k, v) = get_foreach_key_value iterator in
-  let init, next = match k with
-  | Some k ->
-    let init = instr_iterinitk iterator_number loop_break_label k v in
-    let cont = instr_iternextk iterator_number loop_continue_label k v in
-    init, cont
-  | None ->
-    let init = instr_iterinit iterator_number loop_break_label v in
-    let cont = instr_iternext iterator_number loop_continue_label v in
-    init, cont in
-  let body = from_stmt block in
-  let instrs = gather [
-    from_expr collection;
-    init;
-    instr_try_fault_no_catch
-      fault_label
-      (* try body *)
-      (gather [
-        instr_label loop_continue_label;
-        body;
-        next
-      ])
-      (* fault body *)
-      (gather [
-        instr_iterfree iterator_number;
-        instr_unwind ]);
-    instr_label loop_break_label
-  ] in
-  CBR.rewrite_in_loop
-    instrs loop_continue_label loop_break_label
+  match get_foreach_key_value iterator with
+  | None -> emit_nyi "foreach codegen does not support arbitrary lvalues yet"
+  | Some (k, v) ->
+    let init, next = match k with
+    | Some k ->
+      let init = instr_iterinitk iterator_number loop_break_label k v in
+      let cont = instr_iternextk iterator_number loop_continue_label k v in
+      init, cont
+    | None ->
+      let init = instr_iterinit iterator_number loop_break_label v in
+      let cont = instr_iternext iterator_number loop_continue_label v in
+      init, cont in
+    let body = from_stmt block in
+    let instrs = gather [
+      from_expr collection;
+      init;
+      instr_try_fault_no_catch
+        fault_label
+        (* try body *)
+        (gather [
+          instr_label loop_continue_label;
+          body;
+          next
+        ])
+        (* fault body *)
+        (gather [
+          instr_iterfree iterator_number;
+          instr_unwind ]);
+      instr_label loop_break_label
+    ] in
+    CBR.rewrite_in_loop
+      instrs loop_continue_label loop_break_label
 
 and from_stmts stl =
   let results = List.map stl from_stmt in

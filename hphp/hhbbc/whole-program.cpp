@@ -425,6 +425,8 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
               int num_threads) {
   trace_time tracer("whole program");
 
+  RuntimeOption::EvalLowStaticArrays = false;
+
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
   }

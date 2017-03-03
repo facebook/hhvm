@@ -50,6 +50,17 @@ PackedArray::VecInitializer PackedArray::s_initializer;
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
+inline ArrayData* alloc_packed_static(size_t cap) {
+  auto size = sizeof(ArrayData) + cap * sizeof(TypedValue);
+  auto ret = RuntimeOption::EvalLowStaticArrays ?
+    low_malloc_data(size) : malloc(size);
+  return static_cast<ArrayData*>(ret);
+}
+
+}
+
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assert(arr->hasPackedLayout());
   assert(arr->checkCount());
@@ -374,9 +385,7 @@ NEVER_INLINE
 ArrayData* PackedArray::CopyStaticHelper(const ArrayData* adIn) {
   auto const fpcap = CapCode::ceil(adIn->m_size);
   auto const cap = fpcap.decode();
-  auto const ad = static_cast<ArrayData*>(
-    low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
+  auto const ad = alloc_packed_static(cap);
   ad->m_sizeAndPos = adIn->m_sizeAndPos;
   ad->initHeader(fpcap, adIn->m_kind, StaticValue);
   assert(ad->cap() == cap);
@@ -394,9 +403,7 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
     // There's no reason to use the full capacity, since static/uncounted
     // arrays are not mutable.
     auto const cap = adIn->m_size;
-    ad = static_cast<ArrayData*>(
-      low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
-    );
+    ad = alloc_packed_static(cap);
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = adIn->m_sizeAndPos;
   } else {
@@ -419,9 +426,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   ArrayData* ad;
   if (LIKELY(arr->m_size <= CapCode::Threshold)) {
     auto const cap = arr->m_size;
-    ad = static_cast<ArrayData*>(
-      low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
-    );
+    ad = alloc_packed_static(cap);
     assert(cap == CapCode::ceil(cap).code);
     ad->m_sizeAndPos = arr->m_sizeAndPos;
     ad->initHeader(CapCode::exact(cap), HeaderKind::Packed, StaticValue);
@@ -447,9 +452,7 @@ NEVER_INLINE
 ArrayData* PackedArray::ConvertStaticHelper(const ArrayData* arr) {
   auto const fpcap = CapCode::ceil(arr->m_size);
   auto const cap = fpcap.decode();
-  auto const ad = static_cast<ArrayData*>(
-    low_malloc_data(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
+  auto const ad = alloc_packed_static(cap);
   ad->m_sizeAndPos = arr->m_sizeAndPos;
   ad->initHeader(fpcap, HeaderKind::Packed, StaticValue);
   assert(ad->isPacked());

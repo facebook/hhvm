@@ -158,7 +158,7 @@ let string_of_member_key mk =
   | PC -> "PC"
   (* hhas doesn't yet support this syntax *)
   | PL id -> "PL:" ^ string_of_local_id id
-  | PT _ -> "PT"
+  | PT str -> "PT:" ^ quote_str str
   | QT _ -> "QT"
   | W -> "W"
 
@@ -390,6 +390,7 @@ let string_of_misc instruction =
     | VerifyParamType id -> "VerifyParamType " ^ string_of_param_id id
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"
+    | CheckThis -> "CheckThis"
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =

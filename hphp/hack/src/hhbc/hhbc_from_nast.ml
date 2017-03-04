@@ -288,6 +288,10 @@ and from_expr expr =
         gather es;
         instr @@ ILitConst (NewStructArray keys);
       ]
+
+  | A.Obj_get (expr, prop, nullflavor)  ->
+    emit_obj_get expr prop nullflavor
+
   (* TODO *)
   | A.Collection ((_, type_str), _) ->
     emit_nyi @@ "collection: " ^ type_str
@@ -296,7 +300,6 @@ and from_expr expr =
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
-  | A.Obj_get (_, _, _)         -> emit_nyi "obj_get"
   | A.Array_get (_, _)          -> emit_nyi "array_get"
   | A.Class_get (_, _)          -> emit_nyi "class_get"
   | A.Class_const (_, _)        -> emit_nyi "class_const"
@@ -478,10 +481,37 @@ and emit_array_get param_num_opt e1 e2 =
       final_instr
     ]
 
+(* TODO: Nullflavor is currently being ignored, start using it *)
+and emit_obj_get expr prop _ =
+  let base_instrs, n = emit_base None expr in
+  let mk, stack_size =
+    match snd prop with
+    | A.Id (_, litstr) -> MemberKey.PT litstr, n
+    | A.Lvar (_, x) -> MemberKey.PL (Local_named x), n
+      (* TODO: Work out when to use MemberKey.QT  *)
+    | _ -> MemberKey.PC, n+1 in
+    let final_instr =
+      instr (IFinal (
+        (* TODO: Work out when this should be FPassM *)
+        match None with
+        | None -> QueryM (stack_size, QueryOp.CGet, mk)
+        | Some id -> FPassM (id, stack_size, mk)
+      )) in
+      gather [
+        if mk = MemberKey.PC then from_expr prop else empty;
+        base_instrs;
+        final_instr
+      ]
+
 (* Emit instructions to construct base for `expr`, and also return
  * the stack size for subsequent query operations *)
 and emit_base param_num_opt (_, expr_ as expr) =
   match expr_ with
+  | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
+    gather [
+     instr (IMisc CheckThis);
+     instr (IBase BaseH)
+    ], 0
   | A.Lvar (_, x) ->
     instr (IBase (
       match param_num_opt with

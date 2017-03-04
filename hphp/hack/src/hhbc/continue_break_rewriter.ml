@@ -200,7 +200,7 @@ let emit_finally_epilogue cont_and_break temp_local finally_end =
       match instructions with
       | [] -> (labels, bodies)
       | instruction :: t ->
-        let label = Label.get_next_label () in
+        let label = Label.next_regular () in
         let body = gather [
           instr_label label;
           instr_unsetl temp_local;

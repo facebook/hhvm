@@ -230,19 +230,10 @@ let string_of_mutator x =
 
 let string_of_label label =
   match label with
-    | RegularL id -> "L" ^ (string_of_int id)
-    | CatchL id -> "C" ^ (string_of_int id)
-    | FaultL id -> "F" ^ (string_of_int id)
-    | DefaultArgL id -> "DV" ^ (string_of_int id)
-
-let string_of_catch_label label =
-  string_of_label (CatchL label)
-
-let string_of_fault_label label =
-  string_of_label (FaultL label)
-
-let string_of_regular_label label =
-  string_of_label (RegularL label)
+    | Label.Regular id -> "L" ^ (string_of_int id)
+    | Label.Catch id -> "C" ^ (string_of_int id)
+    | Label.Fault id -> "F" ^ (string_of_int id)
+    | Label.DefaultArg id -> "DV" ^ (string_of_int id)
 
 let string_of_switch_kind kind =
   match kind with
@@ -251,15 +242,15 @@ let string_of_switch_kind kind =
 
 let string_of_switch kind base labels =
   let kind = string_of_switch_kind kind in
-  let labels = String.concat " " @@ List.map string_of_regular_label labels in
+  let labels = String.concat " " @@ List.map string_of_label labels in
   Printf.sprintf "Switch %s %d <%s>" kind base labels
 
 let string_of_control_flow instruction =
   match instruction with
-  | Jmp l -> "Jmp " ^ string_of_regular_label l
-  | JmpNS l -> "JmpNS " ^ string_of_regular_label l
-  | JmpZ l -> "JmpZ " ^ string_of_regular_label l
-  | JmpNZ l -> "JmpNZ " ^ string_of_regular_label l
+  | Jmp l -> "Jmp " ^ string_of_label l
+  | JmpNS l -> "JmpNS " ^ string_of_label l
+  | JmpZ l -> "JmpZ " ^ string_of_label l
+  | JmpNZ l -> "JmpNZ " ^ string_of_label l
   | RetC -> "RetC"
   | RetV -> "RetV"
   | Throw -> "Throw"
@@ -365,7 +356,7 @@ let string_of_call instruction =
   | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ quote_str id
   | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ quote_str id
   | DecodeCufIter (n, l) ->
-    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_regular_label l
+    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_label l
   | FPushCufIter (n, id) ->
     "FPushCufIter " ^ string_of_int n ^ " " ^ string_of_iterator_id id
   | FPushCuf n -> "FPushCuf " ^ string_of_int n
@@ -414,23 +405,23 @@ let string_of_iterator instruction =
   | IterInit (id, label, value) ->
     "IterInit " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_regular_label label) ^ " " ^
+    (string_of_label label) ^ " " ^
     (string_of_local_id value)
   | IterInitK (id, label, key, value) ->
     "IterInitK " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_regular_label label) ^ " " ^
+    (string_of_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
   | IterNext (id, label, value) ->
     "IterNext " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_regular_label label) ^ " " ^
+    (string_of_label label) ^ " " ^
     (string_of_local_id value)
   | IterNextK (id, label, key, value) ->
     "IterNextK " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_regular_label label) ^ " " ^
+    (string_of_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
   | IterFree id ->
@@ -440,9 +431,9 @@ let string_of_iterator instruction =
 let string_of_try instruction =
   match instruction with
   | TryFaultBegin label ->
-    ".try_fault " ^ (string_of_fault_label label) ^ " {"
+    ".try_fault " ^ (string_of_label label) ^ " {"
   | TryCatchBegin label ->
-    ".try_catch " ^ (string_of_catch_label label) ^ " {"
+    ".try_catch " ^ (string_of_label label) ^ " {"
   | TryFaultEnd
   | TryCatchEnd -> "}"
 
@@ -542,11 +533,11 @@ let string_of_param_default_value expr =
 
 let string_of_param_default_value_option = function
   | None -> ""
-  | Some (i, e) ->
+  | Some (label, expr) ->
     " = DV"
-    ^ (string_of_int i)
+    ^ (string_of_int (Label.id label))
     ^ "(\"\"\""
-    ^ (string_of_param_default_value e)
+    ^ (string_of_param_default_value expr)
     ^ "\"\"\")"
 
 let string_of_param p =

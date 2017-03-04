@@ -10,7 +10,6 @@
 
 (**
  * TODO (hgo): see within HHVM codebase what those types actually are *)
-type rel_offset = int
 type property_name = string
 type iter_vec = int
 type check_started = bool
@@ -181,14 +180,14 @@ type switchkind =
   | Unbounded
 
 type instruct_control_flow =
-  | Jmp of rel_offset
-  | JmpNS of rel_offset
-  | JmpZ of rel_offset
-  | JmpNZ of rel_offset
+  | Jmp of Label.t
+  | JmpNS of Label.t
+  | JmpZ of Label.t
+  | JmpNZ of Label.t
   (* bounded, base, offset vector *)
-  | Switch of switchkind * int * rel_offset list
+  | Switch of switchkind * int * Label.t list
   (* litstr id / offset vector *)
-  | SSwitch of (Litstr.id * rel_offset) list
+  | SSwitch of (Litstr.id * Label.t) list
   | RetC
   | RetV
   | Unwind
@@ -305,7 +304,7 @@ type instruct_call =
   | FPushCtor of num_params
   | FPushCtorD of num_params * Litstr.id
   | FPushCtorI of num_params * class_id
-  | DecodeCufIter of num_params * rel_offset
+  | DecodeCufIter of num_params * Label.t
   | FPushCufIter of num_params * Iterator.t
   | FPushCuf of num_params
   | FPushCufF of num_params
@@ -421,22 +420,22 @@ type instruct_final =
   | SetWithRefRML of local_id
 
 type instruct_iterator =
-  | IterInit of Iterator.t * rel_offset * local_id
-  | IterInitK of Iterator.t * rel_offset * local_id * local_id
-  | WIterInit of Iterator.t * rel_offset * local_id
-  | WIterInitK of Iterator.t * rel_offset * local_id * local_id
-  | MIterInit of Iterator.t * rel_offset * local_id
-  | MIterInitK of Iterator.t * rel_offset * local_id * local_id
-  | IterNext of Iterator.t * rel_offset * local_id
-  | IterNextK of Iterator.t * rel_offset * local_id * local_id
-  | WIterNext of Iterator.t * rel_offset * local_id
-  | WIterNextK of Iterator.t * rel_offset * local_id * local_id
-  | MIterNext of Iterator.t * rel_offset * local_id
-  | MIterNextK of Iterator.t * rel_offset * local_id * local_id
+  | IterInit of Iterator.t * Label.t * local_id
+  | IterInitK of Iterator.t * Label.t * local_id * local_id
+  | WIterInit of Iterator.t * Label.t * local_id
+  | WIterInitK of Iterator.t * Label.t * local_id * local_id
+  | MIterInit of Iterator.t * Label.t * local_id
+  | MIterInitK of Iterator.t * Label.t * local_id * local_id
+  | IterNext of Iterator.t * Label.t * local_id
+  | IterNextK of Iterator.t * Label.t * local_id * local_id
+  | WIterNext of Iterator.t * Label.t * local_id
+  | WIterNextK of Iterator.t * Label.t * local_id * local_id
+  | MIterNext of Iterator.t * Label.t * local_id
+  | MIterNextK of Iterator.t * Label.t * local_id * local_id
   | IterFree of Iterator.t
   | MIterFree of Iterator.t
   | CIterFree of Iterator.t
-  | IterBreak of rel_offset * iter_vec
+  | IterBreak of Label.t * iter_vec
 
 type instruct_include_eval_define =
   | Incl
@@ -514,16 +513,10 @@ type async_functions =
   | WHResult
   | Await
 
-type label =
-  | RegularL of int
-  | CatchL of int
-  | FaultL of int
-  | DefaultArgL of int
-
 type instruct_try =
-  | TryCatchBegin of rel_offset
+  | TryCatchBegin of Label.t
   | TryCatchEnd
-  | TryFaultBegin of rel_offset
+  | TryFaultBegin of Label.t
   | TryFaultEnd
 
 and instruct =
@@ -540,7 +533,7 @@ and instruct =
   | IIsset of instruct_isset
   | IBase of instruct_base
   | IFinal of instruct_final
-  | ILabel of label
+  | ILabel of Label.t
   | ITry of instruct_try
   | IComment of string
 

@@ -11,7 +11,7 @@
 type t = {
   param_name          : Litstr.id;
   param_type_info     : Hhas_type_info.t option;
-  param_default_value : (Hhbc_ast.rel_offset * Ast.expr) option
+  param_default_value : (Label.t * Ast.expr) option
 }
 
 let make param_name param_type_info param_default_value =

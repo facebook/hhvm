@@ -184,13 +184,13 @@ and from_expr expr =
   | A.InstanceOf (e1, e2) ->
     gather [from_expr e1; from_expr e2; instr (IOp InstanceOf)]
   | A.NullCoalesce(e1, e2) ->
-    let end_label = Label.get_next_label () in
+    let end_label = Label.next_regular () in
     gather [
       emit_quiet_expr e1;
       instr (IBasic Dup);
       instr (IIsset (IsTypeC OpNull));
       instr (IOp Not);
-      instr (IContFlow (JmpNZ end_label));
+      instr_jmpnz end_label;
       instr (IBasic PopC);
       from_expr e2;
       instr_label end_label;
@@ -198,23 +198,23 @@ and from_expr expr =
   | A.Cast(hint, e) ->
     gather [from_expr e; emit_cast hint]
   | A.Eif (etest, Some etrue, efalse) ->
-    let false_label = Label.get_next_label () in
-    let end_label = Label.get_next_label () in
+    let false_label = Label.next_regular () in
+    let end_label = Label.next_regular () in
     gather [
       from_expr etest;
-      instr (IContFlow (JmpZ false_label));
+      instr_jmpz false_label;
       from_expr etrue;
-      instr (IContFlow (Jmp end_label));
+      instr_jmp end_label;
       instr_label false_label;
       from_expr efalse;
       instr_label end_label;
     ]
   | A.Eif (etest, None, efalse) ->
-    let end_label = Label.get_next_label () in
+    let end_label = Label.next_regular () in
     gather [
       from_expr etest;
       instr (IBasic Dup);
-      instr (IContFlow (JmpNZ end_label));
+      instr_jmpnz end_label;
       instr (IBasic PopC);
       from_expr efalse;
       instr_label end_label;
@@ -386,7 +386,7 @@ and emit_collection expr es =
 
 and emit_pipe e1 e2 =
   let temp = Local.get_unnamed_local () in
-  let fault_label = Label.get_next_label () in
+  let fault_label = Label.next_fault () in
   let rewrite_dollardollar e =
     let rewriter i =
       match i with
@@ -398,7 +398,7 @@ and emit_pipe e1 e2 =
     from_expr e1;
     instr_setl temp;
     instr_popc;
-    instr_try_fault_no_catch
+    instr_try_fault
       fault_label
       (* try block *)
       (rewrite_dollardollar (from_expr e2))
@@ -410,9 +410,9 @@ and emit_pipe e1 e2 =
   ]
 
 and emit_logical_and e1 e2 =
-  let left_is_false = Label.get_next_label () in
-  let right_is_true = Label.get_next_label () in
-  let its_done = Label.get_next_label () in
+  let left_is_false = Label.next_regular () in
+  let right_is_true = Label.next_regular () in
+  let its_done = Label.next_regular () in
   gather [
     from_expr e1;
     instr_jmpz left_is_false;
@@ -426,8 +426,8 @@ and emit_logical_and e1 e2 =
     instr_label its_done ]
 
 and emit_logical_or e1 e2 =
-  let its_true = Label.get_next_label () in
-  let its_done = Label.get_next_label () in
+  let its_true = Label.next_regular () in
+  let its_done = Label.next_regular () in
   gather [
     from_expr e1;
     instr_jmpnz its_true;
@@ -756,8 +756,8 @@ and from_stmt st =
   | A.Noop -> empty
 
 and from_if condition consequence alternative =
-  let alternative_label = Label.get_next_label () in
-  let done_label = Label.get_next_label () in
+  let alternative_label = Label.next_regular () in
+  let done_label = Label.next_regular () in
   gather [
     from_expr condition;
     instr_jmpz alternative_label;
@@ -769,9 +769,9 @@ and from_if condition consequence alternative =
   ]
 
 and from_while e b =
-  let break_label = Label.get_next_label () in
-  let cont_label = Label.get_next_label () in
-  let start_label = Label.get_next_label () in
+  let break_label = Label.next_regular () in
+  let cont_label = Label.next_regular () in
+  let start_label = Label.next_regular () in
   let cond = from_expr e in
   (* TODO: This is *bizarre* codegen for a while loop.
   It would be better to generate this as
@@ -795,9 +795,9 @@ and from_while e b =
   CBR.rewrite_in_loop instrs cont_label break_label
 
 and from_do b e =
-  let cont_label = Label.get_next_label () in
-  let break_label = Label.get_next_label () in
-  let start_label = Label.get_next_label () in
+  let cont_label = Label.next_regular () in
+  let break_label = Label.next_regular () in
+  let start_label = Label.next_regular () in
   let instrs = gather [
     instr_label start_label;
     from_stmt b;
@@ -809,9 +809,9 @@ and from_do b e =
   CBR.rewrite_in_loop instrs cont_label break_label
 
 and from_for e1 e2 e3 b =
-  let break_label = Label.get_next_label () in
-  let cont_label = Label.get_next_label () in
-  let start_label = Label.get_next_label () in
+  let break_label = Label.next_regular () in
+  let cont_label = Label.next_regular () in
+  let start_label = Label.next_regular () in
   let cond = from_expr e2 in
   (* TODO: this is bizarre codegen for a "for" loop.
      This should be codegen'd as
@@ -841,7 +841,7 @@ and from_for e1 e2 e3 b =
 
 and from_switch e cl =
   let switched = from_expr e in
-  let end_label = Label.get_next_label () in
+  let end_label = Label.next_regular () in
   (* "continue" in a switch in PHP has the same semantics as break! *)
   let cl = List.map cl ~f:from_case in
   let bodies = gather @@ List.map cl ~f:snd in
@@ -862,7 +862,9 @@ and from_switch e cl =
   CBR.rewrite_in_switch instrs end_label
 
 and from_catch end_label ((_, catch_type), (_, catch_local), b) =
-    let next_catch = Label.get_next_label () in
+    (* Note that this is a "regular" label; we're not going to branch to
+    it directly in the event of an exception. *)
+    let next_catch = Label.next_regular () in
     gather [
       instr_dup;
       instr_instanceofd catch_type;
@@ -878,8 +880,8 @@ and from_catches catch_list end_label =
   gather (List.map catch_list ~f:(from_catch end_label))
 
 and from_try_catch try_block catch_list =
-  let end_label = Label.get_next_label () in
-  let catch_label = Label.get_next_label () in
+  let end_label = Label.next_regular () in
+  let catch_label = Label.next_catch () in
   let try_body = gather [
     from_stmt try_block;
     instr_jmp end_label;
@@ -888,15 +890,12 @@ and from_try_catch try_block catch_list =
     instr_try_catch_begin catch_label;
     try_body;
     instr_try_catch_end;
-    instr_label_catch catch_label;
+    instr_label catch_label;
     instr_catch;
     from_catches catch_list end_label;
     instr_throw;
     instr_label end_label;
   ]
-
-
-
 
 and from_try_finally try_block finally_block =
   (*
@@ -922,8 +921,8 @@ and from_try_finally try_block finally_block =
   *)
   let try_body = from_stmt try_block in
   let temp_local = Local.get_unnamed_local () in
-  let finally_start = Label.get_next_label () in
-  let finally_end = Label.get_next_label () in
+  let finally_start = Label.next_regular () in
+  let finally_end = Label.next_regular () in
   let cont_and_break = CBR.get_continues_and_breaks try_body in
   let try_body = CBR.rewrite_in_try_finally
     try_body cont_and_break temp_local finally_start in
@@ -974,10 +973,10 @@ and from_try_finally try_block finally_block =
       finally_body;
       instr_unwind;
     ] in
-  let fault_label = Label.get_next_label () in
+  let fault_label = Label.next_fault () in
   (* Put it all together. *)
   gather [
-    instr_try_fault_no_catch fault_label try_body fault_body;
+    instr_try_fault fault_label try_body fault_body;
     instr_label finally_start;
     finally_body;
     finally_epilogue;
@@ -1013,9 +1012,9 @@ and from_foreach _has_await collection iterator block =
      pair. This will require writing a preamble into the block, in the general
      case. For now we just support locals. *)
   let iterator_number = Iterator.get_iterator () in
-  let fault_label = Label.get_next_label () in
-  let loop_continue_label = Label.get_next_label () in
-  let loop_break_label = Label.get_next_label () in
+  let fault_label = Label.next_fault () in
+  let loop_continue_label = Label.next_regular () in
+  let loop_break_label = Label.next_regular () in
   match get_foreach_key_value iterator with
   | None -> emit_nyi "foreach codegen does not support arbitrary lvalues yet"
   | Some (k, v) ->
@@ -1029,10 +1028,10 @@ and from_foreach _has_await collection iterator block =
       let cont = instr_iternext iterator_number loop_continue_label v in
       init, cont in
     let body = from_stmt block in
-    let instrs = gather [
+    let result = gather [
       from_expr collection;
       init;
-      instr_try_fault_no_catch
+      instr_try_fault
         fault_label
         (* try body *)
         (gather [
@@ -1047,14 +1046,14 @@ and from_foreach _has_await collection iterator block =
       instr_label loop_break_label
     ] in
     CBR.rewrite_in_loop
-      instrs loop_continue_label loop_break_label
+      result loop_continue_label loop_break_label
 
 and from_stmts stl =
   let results = List.map stl from_stmt in
   gather results
 
 and from_case c =
-  let l = Label.get_next_label () in
+  let l = Label.next_regular () in
   let b = match c with
     | A.Default b
     | A.Case (_, b) ->
@@ -1173,7 +1172,7 @@ let from_param tparams p =
   let param_type_info = Option.map p.A.param_hint
     (hint_to_type_info ~always_extended:false tparams) in
   let param_default_value = Option.map p.A.param_expr
-    ~f:(fun e -> Label.get_next_label (), e)
+    ~f:(fun e -> Label.next_default_arg (), e)
   in
   Hhas_param.make param_name param_type_info param_default_value
 
@@ -1196,7 +1195,7 @@ let emit_param_default_value_setter params =
     let dvo = Hhas_param.default_value p in
     Option.map dvo (fun (l, e) ->
       gather [
-        instr_label_default_arg l;
+        instr_label l;
         from_expr e;
         instr_setl (Local.Named param_name);
         instr_popc;
@@ -1205,7 +1204,7 @@ let emit_param_default_value_setter params =
   if List.length setters = 0
   then empty, empty
   else
-    let l = Label.get_next_label () in
+    let l = Label.next_regular () in
     instr_label l, gather [gather setters; instr_jmpns l]
 
 let tparams_to_strings tparams =
@@ -1294,7 +1293,7 @@ let create_label_to_offset_map instrseq =
   snd @@
   InstrSeq.fold_left instrseq ~init:(0, IMap.empty) ~f:(fun (i, m) instr ->
     begin match instr with
-    | ILabel (RegularL l) -> (i, IMap.add l i m)
+    | ILabel (Label.Regular l) -> (i, IMap.add l i m)
     | _        -> (i + 1, m)
     end)
 
@@ -1311,6 +1310,7 @@ let create_label_ref_map defs instrseq =
   InstrSeq.fold_left instrseq ~init:(0, (ISet.empty, IMap.empty))
     ~f:(fun acc instr ->
     let process_ref (n, (used, refs) as acc) l =
+      let l = Label.id l in
       let ix = lookup_def l defs in
       match IMap.get ix refs with
       (* This is the first time we've seen a reference to a label for
@@ -1337,7 +1337,10 @@ let create_label_ref_map defs instrseq =
       List.fold_left ls ~f:process_ref ~init:acc
     | IContFlow (SSwitch pairs) ->
       List.fold_left pairs ~f:(fun acc (_,l) -> process_ref acc l) ~init:acc
-    (* TODO: other uses of rel_offset in instructions *)
+    (* TODO: other uses of Label.t in instructions:
+      DecodeCufIter
+      IterBreak
+     *)
     | _ -> acc)
 
 (* Relabel the instruction sequence so that
@@ -1349,13 +1352,13 @@ let relabel_instrseq instrseq =
   let defs = create_label_to_offset_map instrseq in
   let used, refs = create_label_ref_map defs instrseq in
   let relabel l =
+    let l = Label.id l in
     let ix = lookup_def l defs in
     match IMap.get ix refs with
     | None -> failwith "relabel_instrseq: offset not in refs"
-    | Some l' -> l' in
+    | Some l' -> Label.Regular l' in
   InstrSeq.filter_map instrseq ~f:(fun instr ->
     match instr with
-
     | IIterator (IterInit (id, l, v)) ->
       Some (IIterator (IterInit (id, relabel l, v)))
     | IIterator (IterInitK (id, l, k, v)) ->
@@ -1389,17 +1392,21 @@ let relabel_instrseq instrseq =
     | IContFlow (SSwitch pairs) ->
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
-    (* TODO: other uses of rel_offset in instructions *)
-    | ILabel (RegularL l) ->
+    (* TODO: other uses of Label.t in instructions:
+      DecodeCufIter
+      IterBreak
+     *)
+    | ILabel (Label.Regular l) ->
+      (* TODO: Write test cases for things like catch and fault labels followed
+      by loop start labels. *)
       if ISet.mem l used then
         let ix = lookup_def l defs in
         begin match IMap.get ix refs with
-        | Some l' -> Some (ILabel (RegularL l'))
+        | Some l' -> Some (ILabel (Label.Regular l'))
         | None -> None
         end
       else None
     | _ -> Some instr)
-
 
 let from_fun_ : A.fun_ -> Hhas_function.t option =
   fun ast_fun ->

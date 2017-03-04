@@ -16,10 +16,8 @@ type iter_vec = int
 type check_started = bool
 type free_iterator = int
 type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
-type local_id =
-  | Local_unnamed of int
-  | Local_named of string
-  | Local_pipe (* Will be rewritten to an unnamed local. *)
+type local_id = Local.t
+
 type param_id =
   | Param_unnamed of int
   | Param_named of string

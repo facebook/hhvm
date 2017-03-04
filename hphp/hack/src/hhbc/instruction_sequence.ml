@@ -65,8 +65,10 @@ let instr_setl local = instr (IMutator (SetL local))
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
 let instr_cgetl local = instr (IGet (CGetL local))
-
-let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
+let instr_cgetl2 local = instr (IGet (CGetL2 local))
+let instr_cgetquietl local = instr (IGet (CGetQuietL local))
+let instr_cgetl2_pipe = instr_cgetl2 Local.Pipe
+let instr_fpassl param local = instr (ICall (FPassL (param, local)))
 let instr_popc = instr (IBasic PopC)
 let instr_throw = instr (IContFlow Throw)
 

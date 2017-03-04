@@ -124,9 +124,9 @@ let string_of_param_num i = string_of_int i
 
 let string_of_local_id x =
   match x with
-  | Local_unnamed i -> "_" ^ (string_of_int i)
-  | Local_named s -> s
-  | Local_pipe -> failwith "$$ should not have survived to codegen"
+  | Local.Unnamed i -> "_" ^ (string_of_int i)
+  | Local.Named s -> s
+  | Local.Pipe -> failwith "$$ should not have survived to codegen"
 
 let string_of_get x =
   match x with

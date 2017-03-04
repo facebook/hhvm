@@ -159,7 +159,7 @@ and from_expr expr =
   | A.False -> instr (ILitConst False)
   | A.True -> instr (ILitConst True)
   | A.Lvar (_, x) when x = SN.SpecialIdents.this -> instr (IMisc This)
-  | A.Lvar (_, x) -> instr (IGet (CGetL (Local_named x)))
+  | A.Lvar (_, x) -> instr_cgetl (Local.Named x)
   | A.Class_const ((_, cid), (_, id)) when id = SN.Members.mClass ->
     instr (ILitConst (String cid))
   | A.Unop (op, e) ->
@@ -172,7 +172,7 @@ and from_expr expr =
     emit_assignment obop e1 e2
   (* Special case to make use of CGetL2 *)
   | A.Binop (op, (_, A.Lvar (_, x)), e) ->
-    gather [from_expr e; instr (IGet (CGetL2 (Local_named x))); from_binop op]
+    gather [from_expr e; instr_cgetl2 (Local.Named x); from_binop op]
   | A.Binop (op, e1, e2) ->
     gather [from_expr e2; from_expr e1; from_binop op]
   | A.Pipe (e1, e2) ->
@@ -385,12 +385,12 @@ and emit_collection expr es =
     emit_dynamic_collection expr es
 
 and emit_pipe e1 e2 =
-  let temp = Label.get_unnamed_local () in
+  let temp = Local.get_unnamed_local () in
   let fault_label = Label.get_next_label () in
   let rewrite_dollardollar e =
     let rewriter i =
       match i with
-      | IGet (CGetL2 (Local_pipe)) ->
+      | IGet (CGetL2 Local.Pipe) ->
         IGet (CGetL2 temp)
       | _ -> i in
     InstrSeq.map e ~f:rewriter in
@@ -442,7 +442,7 @@ and emit_logical_or e1 e2 =
 and emit_quiet_expr (_, expr_ as expr) =
   match expr_ with
   | A.Lvar (_, x) ->
-    instr (IGet (CGetQuietL (Local_named x)))
+    instr_cgetquietl (Local.Named x)
   | _ ->
     from_expr expr
 
@@ -455,7 +455,7 @@ and emit_array_get param_num_opt e1 e2 =
   let mk, stack_size =
     match snd e2 with
       (* Special case for local index *)
-    | A.Lvar (_, x) -> MemberKey.EL (Local_named x), n
+    | A.Lvar (_, x) -> MemberKey.EL (Local.Named x), n
       (* Special case for literal integer index *)
     | A.Int (_, litstr) -> MemberKey.EI (Int64.of_string litstr), n
       (* Special case for literal string index *)
@@ -487,7 +487,7 @@ and emit_obj_get expr prop _ =
   let mk, stack_size =
     match snd prop with
     | A.Id (_, litstr) -> MemberKey.PT litstr, n
-    | A.Lvar (_, x) -> MemberKey.PL (Local_named x), n
+    | A.Lvar (_, x) -> MemberKey.PL (Local.Named x), n
       (* TODO: Work out when to use MemberKey.QT  *)
     | _ -> MemberKey.PC, n+1 in
     let final_instr =
@@ -515,8 +515,8 @@ and emit_base param_num_opt (_, expr_ as expr) =
   | A.Lvar (_, x) ->
     instr (IBase (
       match param_num_opt with
-      | None -> BaseL (Local_named x, MemberOpMode.Warn)
-      | Some i -> FPassBaseL (i, Local_named x)
+      | None -> BaseL (Local.Named x, MemberOpMode.Warn)
+      | Some i -> FPassBaseL (i, Local.Named x)
       )), 0
   | _ ->
     let instrs, flavor = emit_flavored_expr expr in
@@ -535,7 +535,7 @@ and instr_fpassr i = instr (ICall (FPassR i))
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
-  | A.Lvar (_, x) -> instr (ICall (FPassL (i, Local_named x)))
+  | A.Lvar (_, x) -> instr_fpassl i (Local.Named x)
 
   | A.Array_get(e1, Some e2) ->
     emit_array_get (Some i) e1 e2
@@ -664,8 +664,8 @@ and literals_from_exprs_with_index exprs =
  * must be set. For now, this is just a local. *)
 and emit_lval (_, expr_) =
   match expr_ with
-  | A.Lvar id -> empty, Local_named (snd id)
-  | _ -> emit_nyi "lval expression", Local_unnamed 0
+  | A.Lvar (_, id) -> empty, Local.Named id
+  | _ -> emit_nyi "lval expression", Local.Unnamed 0
 
 and emit_assignment obop e1 e2 =
   let instrs1, lval = emit_lval e1 in
@@ -863,12 +863,11 @@ and from_switch e cl =
 
 and from_catch end_label ((_, catch_type), (_, catch_local), b) =
     let next_catch = Label.get_next_label () in
-    let catch_local = Local_named catch_local in
     gather [
       instr_dup;
       instr_instanceofd catch_type;
       instr_jmpz next_catch;
-      instr_setl catch_local;
+      instr_setl (Local.Named catch_local);
       instr_popc;
       from_stmt (A.Block b);
       instr_jmp end_label;
@@ -922,7 +921,7 @@ and from_try_finally try_block finally_block =
   jump directly to the finally.
   *)
   let try_body = from_stmt try_block in
-  let temp_local = Label.get_unnamed_local () in
+  let temp_local = Local.get_unnamed_local () in
   let finally_start = Label.get_next_label () in
   let finally_end = Label.get_next_label () in
   let cont_and_break = CBR.get_continues_and_breaks try_body in
@@ -987,7 +986,7 @@ and from_try_finally try_block finally_block =
 
 and get_foreach_lvalue e =
   match e with
-  | A.Lvar (_, x) -> Some (H.Local_named x)
+  | A.Lvar (_, x) -> Some (Local.Named x)
   | _ -> None
 
 and get_foreach_key_value iterator =
@@ -1199,7 +1198,7 @@ let emit_param_default_value_setter params =
       gather [
         instr_label_default_arg l;
         from_expr e;
-        instr_setl (Local_named param_name);
+        instr_setl (Local.Named param_name);
         instr_popc;
       ]) )
   in
@@ -1250,7 +1249,7 @@ let verify_returns body =
 
 let from_body tparams params ret b =
   Label.reset_label ();
-  Label.reset_local ();
+  Local.reset_local ();
   Iterator.reset_iterator ();
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
@@ -1285,7 +1284,7 @@ let extract_decl_vars instrseq =
   (* TODO: Default arguments should not be in declvars *)
   let folder uniq_list instruction =
     match instruction with
-    | IMutator (SetL (Local_named s)) -> ULS.add uniq_list s
+    | IMutator (SetL (Local.Named s)) -> ULS.add uniq_list s
     | _ -> uniq_list in
   let decl_vars = InstrSeq.fold_left instrseq ~init:ULS.empty ~f:folder in
   List.rev (ULS.items decl_vars)

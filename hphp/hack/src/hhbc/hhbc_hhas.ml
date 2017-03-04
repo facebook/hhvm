@@ -237,6 +237,25 @@ let string_of_label id flavor =
   in
   prefix ^ (string_of_int id)
 
+let string_of_catch_label label =
+  string_of_label label CatchL
+
+let string_of_fault_label label =
+  string_of_label label FaultL
+
+let string_of_regular_label label =
+  string_of_label label RegularL
+
+let string_of_switch_kind kind =
+  match kind with
+  | Unbounded -> "Unbounded"
+  | Bounded -> "Bounded"
+
+let string_of_switch kind base labels =
+  let kind = string_of_switch_kind kind in
+  let labels = String.concat " " @@ List.map string_of_regular_label labels in
+  Printf.sprintf "Switch %s %d <%s>" kind base labels
+
 let string_of_control_flow instruction =
   let f = RegularL in
   match instruction with
@@ -248,6 +267,7 @@ let string_of_control_flow instruction =
   | RetV -> "RetV"
   | Throw -> "Throw"
   | Unwind -> "Unwind"
+  | Switch (kind, base, labels) -> string_of_switch kind base labels
   | _ -> failwith "instruction_control_flow Not Implemented"
 
 let string_of_iterator_id i = string_of_int i
@@ -421,12 +441,6 @@ let string_of_iterator instruction =
   | IterFree id ->
     "IterFree " ^ (string_of_iterator_id id)
   | _ -> "### string_of_iterator instruction not implemented"
-
-let string_of_catch_label label =
-  string_of_label label CatchL
-
-let string_of_fault_label label =
-  string_of_label label FaultL
 
 let string_of_try instruction =
   match instruction with

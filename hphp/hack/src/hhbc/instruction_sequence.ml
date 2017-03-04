@@ -64,6 +64,7 @@ let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 let instr_setl local = instr (IMutator (SetL local))
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
+let instr_cgetl local = instr (IGet (CGetL local))
 
 let instr_cgetl2_pipe = instr (IGet (CGetL2 (Local_pipe)))
 let instr_popc = instr (IBasic PopC)
@@ -72,6 +73,7 @@ let instr_throw = instr (IContFlow Throw)
 let instr_add_elemc = instr (ILitConst (AddElemC))
 let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
 let instr_col_add_new_elemc = instr (ILitConst (ColAddNewElemC))
+let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

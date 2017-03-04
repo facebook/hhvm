@@ -897,34 +897,7 @@ and from_try_catch try_block catch_list =
   ]
 
 
-and emit_finally_epilogue cont_and_break temp_local finally_end =
-  match cont_and_break with
-  | [] -> empty
-  | h :: [] ->
-    gather [
-      instr_issetl temp_local;
-      instr_jmpz finally_end;
-      instr_unsetl temp_local;
-      instr (ISpecialFlow h); ]
-  | _ -> empty
-  (* TODO there are multiple breaks / continues. Generate a switch:
 
-    IssetL temp_local
-    JmpZ L2
-    CGetL temp_local
-    Switch Unbounded 0 <L3 L4 ... >
-
-    ...
-
-    L4:
-    UnsetL temp_local
-    Break
-
-    L3:
-    UnsetL temp_local
-    Continue
-
-    *)
 
 and from_try_finally try_block finally_block =
   (*
@@ -980,7 +953,7 @@ and from_try_finally try_block finally_block =
   (* (3) Finally epilogue *)
 
   let finally_epilogue =
-    emit_finally_epilogue cont_and_break temp_local finally_end in
+    CBR.emit_finally_epilogue cont_and_break temp_local finally_end in
 
   (* (4) Fault body
 

@@ -1010,11 +1010,10 @@ and get_foreach_key_value iterator =
 and from_foreach _has_await collection iterator block =
   (* TODO: await *)
   (* TODO: generate .numiters based on maximum nesting depth *)
-  (* TODO: We need an iterator generator. Use the label generator for now. *)
   (* TODO: We need to be able to process arbitrary lvalues in the key, value
      pair. This will require writing a preamble into the block, in the general
      case. For now we just support locals. *)
-  let iterator_number = Label.get_next_label () in
+  let iterator_number = Iterator.get_iterator () in
   let fault_label = Label.get_next_label () in
   let loop_continue_label = Label.get_next_label () in
   let loop_break_label = Label.get_next_label () in
@@ -1251,6 +1250,8 @@ let verify_returns body =
 
 let from_body tparams params ret b =
   Label.reset_label ();
+  Label.reset_local ();
+  Iterator.reset_iterator ();
   let params = List.map params (from_param tparams) in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in

@@ -270,7 +270,7 @@ let string_of_control_flow instruction =
   | Switch (kind, base, labels) -> string_of_switch kind base labels
   | _ -> failwith "instruction_control_flow Not Implemented"
 
-let string_of_iterator_id i = string_of_int i
+let string_of_iterator_id i = Iterator.to_string i
 let string_of_class_id id = quote_str id
 let string_of_function_id id = quote_str id
 let string_of_null_flavor nf =

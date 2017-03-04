@@ -24,7 +24,6 @@ type param_id =
   | Param_unnamed of int
   | Param_named of string
 type param_num = int
-type iterator_id = int
 type stack_index = int
 type class_id = string
 type function_id = string
@@ -309,7 +308,7 @@ type instruct_call =
   | FPushCtorD of num_params * Litstr.id
   | FPushCtorI of num_params * class_id
   | DecodeCufIter of num_params * rel_offset
-  | FPushCufIter of num_params * iterator_id
+  | FPushCufIter of num_params * Iterator.t
   | FPushCuf of num_params
   | FPushCufF of num_params
   | FPushCufSafe of num_params
@@ -424,21 +423,21 @@ type instruct_final =
   | SetWithRefRML of local_id
 
 type instruct_iterator =
-  | IterInit of iterator_id * rel_offset * local_id
-  | IterInitK of iterator_id * rel_offset * local_id * local_id
-  | WIterInit of iterator_id * rel_offset * local_id
-  | WIterInitK of iterator_id * rel_offset * local_id * local_id
-  | MIterInit of iterator_id * rel_offset * local_id
-  | MIterInitK of iterator_id * rel_offset * local_id * local_id
-  | IterNext of iterator_id * rel_offset * local_id
-  | IterNextK of iterator_id * rel_offset * local_id * local_id
-  | WIterNext of iterator_id * rel_offset * local_id
-  | WIterNextK of iterator_id * rel_offset * local_id * local_id
-  | MIterNext of iterator_id * rel_offset * local_id
-  | MIterNextK of iterator_id * rel_offset * local_id * local_id
-  | IterFree of iterator_id
-  | MIterFree of iterator_id
-  | CIterFree of iterator_id
+  | IterInit of Iterator.t * rel_offset * local_id
+  | IterInitK of Iterator.t * rel_offset * local_id * local_id
+  | WIterInit of Iterator.t * rel_offset * local_id
+  | WIterInitK of Iterator.t * rel_offset * local_id * local_id
+  | MIterInit of Iterator.t * rel_offset * local_id
+  | MIterInitK of Iterator.t * rel_offset * local_id * local_id
+  | IterNext of Iterator.t * rel_offset * local_id
+  | IterNextK of Iterator.t * rel_offset * local_id * local_id
+  | WIterNext of Iterator.t * rel_offset * local_id
+  | WIterNextK of Iterator.t * rel_offset * local_id * local_id
+  | MIterNext of Iterator.t * rel_offset * local_id
+  | MIterNextK of Iterator.t * rel_offset * local_id * local_id
+  | IterFree of Iterator.t
+  | MIterFree of Iterator.t
+  | CIterFree of Iterator.t
   | IterBreak of rel_offset * iter_vec
 
 type instruct_include_eval_define =

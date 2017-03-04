@@ -514,11 +514,11 @@ type async_functions =
   | WHResult
   | Await
 
-type label_flavor =
-  | RegularL
-  | CatchL
-  | FaultL
-  | DefaultArgL
+type label =
+  | RegularL of int
+  | CatchL of int
+  | FaultL of int
+  | DefaultArgL of int
 
 type instruct_try =
   | TryCatchBegin of rel_offset
@@ -540,7 +540,7 @@ and instruct =
   | IIsset of instruct_isset
   | IBase of instruct_base
   | IFinal of instruct_final
-  | ILabel of rel_offset * label_flavor
+  | ILabel of label
   | ITry of instruct_try
   | IComment of string
 

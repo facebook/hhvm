@@ -228,23 +228,21 @@ let string_of_mutator x =
   | CheckProp _ -> failwith "NYI"
   | InitProp _ -> failwith "NYI"
 
-let string_of_label id flavor =
-  let prefix = match flavor with
-    | RegularL -> "L"
-    | CatchL -> "C"
-    | FaultL -> "F"
-    | DefaultArgL -> "DV"
-  in
-  prefix ^ (string_of_int id)
+let string_of_label label =
+  match label with
+    | RegularL id -> "L" ^ (string_of_int id)
+    | CatchL id -> "C" ^ (string_of_int id)
+    | FaultL id -> "F" ^ (string_of_int id)
+    | DefaultArgL id -> "DV" ^ (string_of_int id)
 
 let string_of_catch_label label =
-  string_of_label label CatchL
+  string_of_label (CatchL label)
 
 let string_of_fault_label label =
-  string_of_label label FaultL
+  string_of_label (FaultL label)
 
 let string_of_regular_label label =
-  string_of_label label RegularL
+  string_of_label (RegularL label)
 
 let string_of_switch_kind kind =
   match kind with
@@ -257,12 +255,11 @@ let string_of_switch kind base labels =
   Printf.sprintf "Switch %s %d <%s>" kind base labels
 
 let string_of_control_flow instruction =
-  let f = RegularL in
   match instruction with
-  | Jmp l -> "Jmp " ^ string_of_label l f
-  | JmpNS l -> "JmpNS " ^ string_of_label l f
-  | JmpZ l -> "JmpZ " ^ string_of_label l f
-  | JmpNZ l -> "JmpNZ " ^ string_of_label l f
+  | Jmp l -> "Jmp " ^ string_of_regular_label l
+  | JmpNS l -> "JmpNS " ^ string_of_regular_label l
+  | JmpZ l -> "JmpZ " ^ string_of_regular_label l
+  | JmpNZ l -> "JmpNZ " ^ string_of_regular_label l
   | RetC -> "RetC"
   | RetV -> "RetV"
   | Throw -> "Throw"
@@ -351,7 +348,6 @@ let string_of_final instruction =
 *)
 
 let string_of_call instruction =
-  let f = RegularL in
   match instruction with
   | FPushFunc n -> "FPushFunc " ^ string_of_int n
   | FPushFuncD (n, id) -> "FPushFuncD " ^ string_of_int n ^ " " ^ quote_str id
@@ -369,7 +365,7 @@ let string_of_call instruction =
   | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ quote_str id
   | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ quote_str id
   | DecodeCufIter (n, l) ->
-    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_label l f
+    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_regular_label l
   | FPushCufIter (n, id) ->
     "FPushCufIter " ^ string_of_int n ^ " " ^ string_of_iterator_id id
   | FPushCuf n -> "FPushCuf " ^ string_of_int n
@@ -414,28 +410,27 @@ let string_of_misc instruction =
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =
-  let f = RegularL in
   match instruction with
   | IterInit (id, label, value) ->
     "IterInit " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_label label f) ^ " " ^
+    (string_of_regular_label label) ^ " " ^
     (string_of_local_id value)
   | IterInitK (id, label, key, value) ->
     "IterInitK " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_label label f) ^ " " ^
+    (string_of_regular_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
   | IterNext (id, label, value) ->
     "IterNext " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_label label f) ^ " " ^
+    (string_of_regular_label label) ^ " " ^
     (string_of_local_id value)
   | IterNextK (id, label, key, value) ->
     "IterNextK " ^
     (string_of_iterator_id id) ^ " " ^
-    (string_of_label label f) ^ " " ^
+    (string_of_regular_label label) ^ " " ^
     (string_of_local_id key) ^ " " ^
     (string_of_local_id value)
   | IterFree id ->
@@ -462,7 +457,7 @@ let string_of_instruction instruction =
   | IMisc                i -> string_of_misc i
   | IGet                 i -> string_of_get i
   | IMutator             i -> string_of_mutator i
-  | ILabel          (l, f) -> string_of_label l f ^ ":"
+  | ILabel               l -> string_of_label l ^ ":"
   | IIsset               i -> string_of_isset i
   | IBase                i -> string_of_base i
   | IFinal               i -> string_of_final i

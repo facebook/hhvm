@@ -44,10 +44,10 @@ let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
 let instr_jmpnz label = instr (IContFlow (JmpNZ label))
 let instr_jmpns label = instr (IContFlow (JmpNS label))
-let instr_label label = instr (ILabel (label, RegularL))
-let instr_label_catch label = instr (ILabel (label, CatchL))
-let instr_label_fault label = instr (ILabel (label, FaultL))
-let instr_label_default_arg label = instr (ILabel (label, DefaultArgL))
+let instr_label label = instr (ILabel (RegularL label))
+let instr_label_catch label = instr (ILabel (CatchL label))
+let instr_label_fault label = instr (ILabel (FaultL label))
+let instr_label_default_arg label = instr (ILabel (DefaultArgL label))
 let instr_continue level = instr (ISpecialFlow (Continue (level, level)))
 let instr_break level = instr (ISpecialFlow (Break (level, level)))
 let instr_unwind = instr (IContFlow Unwind)
@@ -144,7 +144,7 @@ let instr_seq_to_list t = instr_seq_to_list_aux [t] []
 let instr_try_fault_begin fault_label fault_body =
   let try_begin = instr (ITry (TryFaultBegin (fault_label))) in
   let fault_body = gather [
-    instr (ILabel (fault_label, FaultL));
+    instr (ILabel (FaultL fault_label));
     fault_body
   ] in
   Instr_try_fault (try_begin, fault_body)

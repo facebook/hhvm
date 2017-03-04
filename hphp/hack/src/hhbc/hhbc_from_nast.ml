@@ -1294,7 +1294,7 @@ let create_label_to_offset_map instrseq =
   snd @@
   InstrSeq.fold_left instrseq ~init:(0, IMap.empty) ~f:(fun (i, m) instr ->
     begin match instr with
-    | ILabel (l, RegularL) -> (i, IMap.add l i m)
+    | ILabel (RegularL l) -> (i, IMap.add l i m)
     | _        -> (i + 1, m)
     end)
 
@@ -1390,11 +1390,11 @@ let relabel_instrseq instrseq =
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
     (* TODO: other uses of rel_offset in instructions *)
-    | ILabel (l, RegularL) ->
+    | ILabel (RegularL l) ->
       if ISet.mem l used then
         let ix = lookup_def l defs in
         begin match IMap.get ix refs with
-        | Some l' -> Some (ILabel (l', RegularL))
+        | Some l' -> Some (ILabel (RegularL l'))
         | None -> None
         end
       else None

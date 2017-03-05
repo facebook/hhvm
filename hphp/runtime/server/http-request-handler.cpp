@@ -121,7 +121,7 @@ AccessLog HttpRequestHandler::s_accessLog(
 
 HttpRequestHandler::HttpRequestHandler(int timeout)
     : RequestHandler(timeout), m_pathTranslation(true)
-    , m_requestTimedOutOnQueue(ServiceData::createTimeseries(
+    , m_requestTimedOutOnQueue(ServiceData::createTimeSeries(
                                  "requests_timed_out_on_queue",
                                  {ServiceData::StatsType::COUNT})) { }
 

@@ -167,11 +167,11 @@ ProxygenServer::ProxygenServer(
   const std::vector<std::chrono::seconds> levels {
     std::chrono::seconds(10), std::chrono::seconds(120)};
   ProxygenTransport::s_requestErrorCount =
-    ServiceData::createTimeseries("http_response_error",
+    ServiceData::createTimeSeries("http_response_error",
                                   {ServiceData::StatsType::COUNT},
                                   levels, 10);
   ProxygenTransport::s_requestNonErrorCount =
-    ServiceData::createTimeseries("http_response_nonerror",
+    ServiceData::createTimeSeries("http_response_nonerror",
                                   {ServiceData::StatsType::COUNT},
                                   levels, 10);
 }

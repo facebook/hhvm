@@ -1104,7 +1104,7 @@ void Transport::onSendEnd() {
     m_compressionDecision = CompressionDecision::ShouldNot;
     sendRawInternal("", 0);
   }
-  auto httpResponseStats = ServiceData::createTimeseries(
+  auto httpResponseStats = ServiceData::createTimeSeries(
     folly::to<std::string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
     {ServiceData::StatsType::SUM});
   httpResponseStats->addValue(1);

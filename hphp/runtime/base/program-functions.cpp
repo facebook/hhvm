@@ -380,12 +380,12 @@ void bump_counter_and_rethrow(bool isPsp) {
     throw;
   } catch (const RequestTimeoutException& e) {
     if (isPsp) {
-      static auto requestTimeoutPSPCounter = ServiceData::createTimeseries(
+      static auto requestTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
       requestTimeoutPSPCounter->addValue(1);
       ServerStats::Log("request.timed_out.psp", 1);
     } else {
-      static auto requestTimeoutCounter = ServiceData::createTimeseries(
+      static auto requestTimeoutCounter = ServiceData::createTimeSeries(
         "requests_timed_out_non_psp", {ServiceData::StatsType::COUNT});
       requestTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.non_psp", 1);
@@ -393,12 +393,12 @@ void bump_counter_and_rethrow(bool isPsp) {
     throw;
   } catch (const RequestCPUTimeoutException& e) {
     if (isPsp) {
-      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeseries(
+      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
       requestCPUTimeoutPSPCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.psp", 1);
     } else {
-      static auto requestCPUTimeoutCounter = ServiceData::createTimeseries(
+      static auto requestCPUTimeoutCounter = ServiceData::createTimeSeries(
         "requests_cpu_timed_out_non_psp", {ServiceData::StatsType::COUNT});
       requestCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.non_psp", 1);
@@ -407,12 +407,12 @@ void bump_counter_and_rethrow(bool isPsp) {
   } catch (const RequestMemoryExceededException& e) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
-        ServiceData::createTimeseries(
+        ServiceData::createTimeSeries(
           "requests_memory_exceeded_psp", {ServiceData::StatsType::COUNT});
       requestMemoryExceededPSPCounter->addValue(1);
       ServerStats::Log("request.memory_exceeded.psp", 1);
     } else {
-      static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
+      static auto requestMemoryExceededCounter = ServiceData::createTimeSeries(
         "requests_memory_exceeded_non_psp", {ServiceData::StatsType::COUNT});
       requestMemoryExceededCounter->addValue(1);
       ServerStats::Log("request.memory_exceeded.non_psp", 1);

@@ -15,6 +15,26 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(WINDOWS TRUE)
 endif()
 
+# Do this until cmake has a define for ARMv8
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __x86_64__
+#error Not x64
+#endif
+int main() { return 0; }" IS_X64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __AARCH64EL__
+#error Not ARMv8
+#endif
+int main() { return 0; }" IS_AARCH64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __powerpc64__
+#error Not PPC64
+#endif
+int main() { return 0; }" IS_PPC64)
+
 # using Clang or GCC
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # Warnings to disable by name, -Wno-${name}
@@ -79,7 +99,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       # issue. (SSE4.2 has been available on processors for quite some time now.)
       "msse4.2"
     )
-    # Also need to pass the right option to ASM files to avoid inconsistencies 
+    # Also need to pass the right option to ASM files to avoid inconsistencies
     # in CRC hash function handling
     set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
     list(APPEND GENERAL_CXX_OPTIONS

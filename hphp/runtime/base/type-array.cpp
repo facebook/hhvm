@@ -709,7 +709,7 @@ const Variant& Array::rvalAtRef(const Variant& key, AccessFlags flags) const {
 
     case KindOfDouble:
       bad_key();
-      return m_arr->get((int64_t)key.asTypedValue()->m_data.dbl,
+      return m_arr->get(HPHP::toInt64(key.asTypedValue()->m_data.dbl),
                         any(flags & AccessFlags::Error));
 
     case KindOfPersistentString:

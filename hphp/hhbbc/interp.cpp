@@ -2928,12 +2928,7 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
     auto const flags = interpOps(interp, iter, stop, propagate);
     if (interp.state.unreachable) {
       FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
-      if (interp.state.fpiStack.empty()) {
-        // We have no reason to continue running the interpreter if there's no
-        // FPI region active.
-        return RunFlags {};
-      }
-      continue;
+      return RunFlags {};
     }
 
     switch (flags.jmpFlag) {

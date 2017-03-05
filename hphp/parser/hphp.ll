@@ -931,13 +931,13 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_VAR_OFFSET>"]" {
         yy_pop_state(yyscanner);
-        return ']';
+        RETSTEP(']');
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[({}\"`] {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
-        return yytext[0];
+        RETSTEP(yytext[0]);
 }
 
 <ST_VAR_OFFSET>[ \n\r\t\\\'#] {
@@ -1098,7 +1098,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         _scanner->setToken(yytext, yyleng, yytext + bprefix, yyleng - bprefix);
         BEGIN(ST_DOUBLE_QUOTES);
-        return '\"';
+        RETSTEP('\"');
 }
 
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|[']{LABEL}[']|["]{LABEL}["]){NEWLINE} {
@@ -1159,7 +1159,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_XHP_IN_TAG>"/>" {
   BEGIN(ST_XHP_END_SINGLETON_TAG);
   yyless(1);
-  return '/';
+  RETSTEP('/');
 }
 
 <ST_XHP_IN_TAG>{ANY_CHAR} {
@@ -1429,12 +1429,12 @@ doc_scan_done:
 
 <ST_DOUBLE_QUOTES>[\"] {
         BEGIN(ST_IN_SCRIPTING);
-        return '"';
+        RETSTEP('"');
 }
 
 <ST_BACKQUOTE>[\`] {
         BEGIN(ST_IN_SCRIPTING);
-        return '`';
+        RETSTEP('`');
 }
 
 <ST_COMMENT,ST_DOC_COMMENT><<EOF>> {

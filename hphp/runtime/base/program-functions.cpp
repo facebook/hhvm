@@ -2383,7 +2383,7 @@ void hphp_memory_cleanup() {
   mm.resetCouldOOM();
 }
 
-void hphp_session_exit() {
+void hphp_session_exit(const Transport* transport) {
   assert(s_sessionInitialized);
   // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
@@ -2402,6 +2402,10 @@ void hphp_session_exit() {
   jit::tc::requestExit();
 
   TI().onSessionExit();
+
+  if (transport) {
+    HardwareCounter::UpdateServiceData(transport->getCpuTime());
+  }
 
   // We might have events from after the final surprise flag check of the
   // request, so consume them here.

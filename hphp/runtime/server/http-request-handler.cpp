@@ -216,7 +216,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   m_sourceRootInfo.clear();
 
   if (is_hphp_session_initialized()) {
-    hphp_session_exit();
+    hphp_session_exit(transport);
   } else {
     // Even though there are no sessions, memory is allocated to perform
     // INI setting bindings when the thread is initialized.

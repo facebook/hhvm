@@ -26,6 +26,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Transport;
+
 #if defined(__APPLE__) || defined(_MSC_VER)
 extern const void* __hot_start;
 extern const void* __hot_end;
@@ -118,7 +120,12 @@ void hphp_thread_init();
 void hphp_thread_exit();
 
 void hphp_memory_cleanup();
-void hphp_session_exit();
+/*
+ * Tear down various internal state at the very end of a session. If transport
+ * is provided, various statistics about resources consumed by the request will
+ * be logged to ServiceData.
+ */
+void hphp_session_exit(const Transport* transport = nullptr);
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
 std::string get_systemlib(std::string* hhas = nullptr,

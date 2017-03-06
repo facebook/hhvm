@@ -28,6 +28,15 @@ type num_params = int
 
 type collection_type = int
 
+(* These are the three flavors of value that can live on the stack:
+ *   C = cell
+ *   R = ref
+ *   A = classref
+ *)
+module Flavor = struct
+  type t = Cell | Ref | Classref
+end
+
 module MemberOpMode = struct
 
   type t =

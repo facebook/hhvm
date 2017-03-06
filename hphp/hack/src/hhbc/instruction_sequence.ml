@@ -66,7 +66,15 @@ let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
 let instr_cgetl2_pipe = instr_cgetl2 Local.Pipe
 let instr_fpassl param local = instr (ICall (FPassL (param, local)))
+let instr_popr = instr (IBasic PopR)
 let instr_popc = instr (IBasic PopC)
+let instr_popa = instr (IBasic PopA)
+let instr_pop flavor =
+  match flavor with
+  | Flavor.Ref -> instr_popr
+  | Flavor.Cell -> instr_popc
+  | Flavor.Classref -> instr_popa
+
 let instr_throw = instr (IContFlow Throw)
 
 let instr_add_elemc = instr (ILitConst (AddElemC))

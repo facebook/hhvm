@@ -18,15 +18,6 @@ module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module CBR = Continue_break_rewriter
 
-(* These are the three flavors of value that can live on the stack:
- *   C = cell
- *   R = ref
- *   A = classref
- *)
-module Flavor = struct
-  type t = C | R | A
-end
-
 (* When using the PassX instructions we need to emit the right kind *)
 module PassByRefKind = struct
   type t = AllowCell | WarnOnCell | ErrorOnCell
@@ -229,7 +220,7 @@ and from_expr expr =
     gather [
       instrs;
       (* If the instruction has produced a ref then unbox it *)
-      if flavor = Flavor.R then instr (IBasic UnboxR) else empty
+      if flavor = Flavor.Ref then instr (IBasic UnboxR) else empty
     ]
   | A.New ((_, A.Id (_, id)), args, uargs) ->
       let nargs = List.length args + List.length uargs in
@@ -522,7 +513,7 @@ and emit_base param_num_opt (_, expr_ as expr) =
     let instrs, flavor = emit_flavored_expr expr in
     gather [
       instrs;
-      instr (IBase (if flavor = Flavor.R then BaseR 0 else BaseC 0))
+      instr (IBase (if flavor = Flavor.Ref then BaseR 0 else BaseC 0))
     ], 1
 
 and instr_fpass kind i =
@@ -544,22 +535,16 @@ and emit_arg i ((_, expr_) as e) =
     let instrs, flavor = emit_flavored_expr e in
     gather [
       instrs;
-      if flavor = Flavor.R
+      if flavor = Flavor.Ref
       then instr_fpassr i
       else instr_fpass (get_passByRefKind e) i
     ]
-
-and emit_pop flavor =
-  match flavor with
-  | Flavor.R -> instr (IBasic PopR)
-  | Flavor.C -> instr (IBasic PopC)
-  | Flavor.A -> instr (IBasic PopA)
 
 and emit_ignored_expr e =
   let instrs, flavor = emit_flavored_expr e in
   gather [
     instrs;
-    emit_pop flavor;
+    instr_pop flavor;
   ]
 
 (* Emit code to construct the argument frame and then make the call *)
@@ -605,18 +590,18 @@ and emit_call (_, expr_ as expr) args uargs =
          gather [
            from_expr arg;
            instr (IOp Print);
-           if i = nargs-1 then empty else emit_pop Flavor.C
+           if i = nargs-1 then empty else instr_popc
          ] end in
-    instrs, Flavor.C
+    instrs, Flavor.Cell
 
   | A.Obj_get _ | A.Class_const _ | A.Id _ ->
     gather [
       emit_call_lhs expr nargs;
       emit_args_and_call args uargs;
-    ], Flavor.R
+    ], Flavor.Ref
 
   | _ ->
-    emit_nyi "call expression", Flavor.C
+    emit_nyi "call expression", Flavor.Cell
 
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
@@ -626,7 +611,7 @@ and emit_flavored_expr (_, expr_ as expr) =
   | A.Call (e, args, uargs) ->
     emit_call e args uargs
   | _ ->
-    from_expr expr, Flavor.C
+    from_expr expr, Flavor.Cell
 
 and is_literal expr =
   match snd expr with

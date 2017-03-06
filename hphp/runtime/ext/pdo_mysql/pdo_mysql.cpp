@@ -241,8 +241,8 @@ bool PDOMySqlConnection::create(const Array& options) {
   /* handle MySQL options */
   if (!options.empty()) {
     long connect_timeout = pdo_attr_lval(options, PDO_ATTR_TIMEOUT, 30);
-    long read_timeout = pdo_attr_lval(options, PDO_ATTR_READ_TIMEOUT, -1);
-    long write_timeout = pdo_attr_lval(options, PDO_ATTR_WRITE_TIMEOUT, -1);
+    long read_timeout = pdo_attr_lval(options, PDO_MYSQL_ATTR_READ_TIMEOUT, -1);
+    long write_timeout = pdo_attr_lval(options, PDO_MYSQL_ATTR_WRITE_TIMEOUT, -1);
 
     long local_infile = pdo_attr_lval(options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
     String init_cmd, default_file, default_group, ssl_ca, ssl_capath, ssl_cert,

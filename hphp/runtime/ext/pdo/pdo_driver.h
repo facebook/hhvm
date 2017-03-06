@@ -118,8 +118,6 @@ enum PDOAttributeType {
   PDO_ATTR_PREFETCH,            /* configure the prefetch size for drivers
                                    that support it. Size is in KB */
   PDO_ATTR_TIMEOUT,             /* connection timeout in seconds */
-  PDO_ATTR_READ_TIMEOUT,        /* read connection timeout in seconds */
-  PDO_ATTR_WRITE_TIMEOUT,       /* write connection timeout in seconds */
   PDO_ATTR_ERRMODE,             /* control how errors are handled */
   PDO_ATTR_SERVER_VERSION,      /* database server version */
   PDO_ATTR_CLIENT_VERSION,      /* client library version */

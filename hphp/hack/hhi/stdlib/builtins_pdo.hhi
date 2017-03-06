@@ -45,8 +45,6 @@ class PDO {
   const ATTR_AUTOCOMMIT = 0;
   const ATTR_PREFETCH = 0;
   const ATTR_TIMEOUT = 0;
-  const ATTR_READ_TIMEOUT = 0;
-  const ATTR_WRITE_TIMEOUT = 0;
   const ATTR_ERRMODE = 0;
   const ATTR_SERVER_VERSION = 0;
   const ATTR_CLIENT_VERSION = 0;
@@ -93,6 +91,8 @@ class PDO {
   const MYSQL_ATTR_DIRECT_QUERY = 0;
   const MYSQL_ATTR_FOUND_ROWS = 0;
   const MYSQL_ATTR_IGNORE_SPACE = 0;
+  const MYSQL_ATTR_READ_TIMEOUT = 0;
+  const MYSQL_ATTR_WRITE_TIMEOUT = 0;
   public function __construct($dsn, $username = null, $password = null, $options = null) { }
   public function prepare($statement, $options = null) { }
   public function beginTransaction() { }

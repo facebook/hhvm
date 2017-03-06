@@ -79,25 +79,6 @@ let unop_to_incdec_op op =
   | A.Updecr -> Some PostDecO
   | _ -> None
 
-(* TODO: there are lots of ways of specifying the same type in a cast.
- * Sort this out!
- *)
-let emit_cast (_, hint_) =
-  match hint_ with
-  | A.Happly((_, id), []) when id = SN.Typehints.int ->
-    instr (IOp CastInt)
-  | A.Happly((_, id), []) when id = SN.Typehints.bool ->
-    instr (IOp CastBool)
-  | A.Happly((_, id), []) when id = SN.Typehints.string ->
-    instr (IOp CastString)
-  | A.Happly((_, id), []) when id = SN.Typehints.object_cast ->
-    instr (IOp CastObject)
-  | A.Happly((_, id), []) when id = SN.Typehints.array ->
-    instr (IOp CastArray)
-  | A.Happly((_, id), []) when id = SN.Typehints.float ->
-    instr (IOp CastDouble)
-  | _ -> emit_nyi "cast type"
-
 let collection_type = function
   | "Vector"    -> 17
   | "Map"       -> 18
@@ -136,59 +117,78 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
   | A.AFkvalue (k, v) ->
     gather [from_expr k; from_expr v; instr_to_add]
 
-and from_expr expr =
-  (* Note that this takes an Ast.expr, not a Nast.expr. *)
-  match snd expr with
-  | A.Float (_, litstr) ->
-    instr (ILitConst (Double litstr))
-  | A.String (_, litstr) ->
-    instr (ILitConst (String litstr))
-  | A.Int (_, litstr) ->
-    (* TODO deal with integer out of range *)
-    instr (ILitConst (Int (Int64.of_string litstr)))
-  | A.Null -> instr (ILitConst Null)
-  | A.False -> instr (ILitConst False)
-  | A.True -> instr (ILitConst True)
-  | A.Lvar (_, x) when x = SN.SpecialIdents.this -> instr (IMisc This)
-  | A.Lvar (_, x) -> instr_cgetl (Local.Named x)
-  | A.Class_const ((_, cid), (_, id)) when id = SN.Members.mClass ->
-    instr (ILitConst (String cid))
-  | A.Unop (op, e) ->
-    emit_unop op e
-  | A.Binop (A.AMpamp, e1, e2) ->
-    emit_logical_and e1 e2
-  | A.Binop (A.BArbar, e1, e2) ->
-    emit_logical_or e1 e2
-  | A.Binop (A.Eq obop, e1, e2) ->
-    emit_assignment obop e1 e2
+and from_local x =
+  if x = SN.SpecialIdents.this then instr_this
+  else instr_cgetl (Local.Named x)
+
+and emit_binop op e1 e2 =
+  match (op, e1, e2) with
+  | (A.AMpamp, e1, e2) ->  emit_logical_and e1 e2
+  | (A.BArbar, e1, e2) -> emit_logical_or e1 e2
+  | (A.Eq obop, e1, e2) -> emit_assignment obop e1 e2
   (* Special case to make use of CGetL2 *)
-  | A.Binop (op, (_, A.Lvar (_, x)), e) ->
-    gather [from_expr e; instr_cgetl2 (Local.Named x); from_binop op]
-  | A.Binop (op, e1, e2) ->
-    gather [from_expr e1; from_expr e2; from_binop op]
-  | A.Pipe (e1, e2) ->
-    emit_pipe e1 e2
-  | A.Dollardollar ->
-    instr_cgetl2_pipe (* This will get rewritten into a temp local *)
-  | A.InstanceOf (e1, (_, A.Id (_, id))) ->
-    gather [from_expr e1; instr (IOp (InstanceOfD id))]
-  | A.InstanceOf (e1, e2) ->
-    gather [from_expr e1; from_expr e2; instr (IOp InstanceOf)]
-  | A.NullCoalesce(e1, e2) ->
-    let end_label = Label.next_regular () in
+  | (op, (_, A.Lvar (_, local)), e2) ->
     gather [
-      emit_quiet_expr e1;
-      instr (IBasic Dup);
-      instr (IIsset (IsTypeC OpNull));
-      instr (IOp Not);
-      instr_jmpnz end_label;
-      instr (IBasic PopC);
       from_expr e2;
-      instr_label end_label;
-    ]
-  | A.Cast(hint, e) ->
-    gather [from_expr e; emit_cast hint]
-  | A.Eif (etest, Some etrue, efalse) ->
+      instr_cgetl2 (Local.Named local);
+      from_binop op ]
+  | (op, e1, e2) ->
+    gather [
+      from_expr e1;
+      from_expr e2;
+      from_binop op ]
+
+and emit_instanceof e1 e2 =
+  match (e1, e2) with
+  | (_, (_, A.Id (_, id))) ->
+    gather [
+      from_expr e1;
+      instr_instanceofd id ]
+  | _ ->
+    gather [
+      from_expr e1;
+      from_expr e2;
+      instr_instanceof ]
+
+and emit_null_coalesce e1 e2 =
+  let end_label = Label.next_regular () in
+  gather [
+    emit_quiet_expr e1;
+    instr_dup;
+    instr_istypec OpNull;
+    instr_not;
+    instr_jmpnz end_label;
+    instr_popc;
+    from_expr e2;
+    instr_label end_label;
+  ]
+
+(* TODO: there are lots of ways of specifying the same type in a cast.
+ * Sort this out!
+ *)
+and emit_cast hint expr =
+  let op = match hint with
+  | A.Happly((_, id), []) when id = SN.Typehints.int ->
+    instr (IOp CastInt)
+  | A.Happly((_, id), []) when id = SN.Typehints.bool ->
+    instr (IOp CastBool)
+  | A.Happly((_, id), []) when id = SN.Typehints.string ->
+    instr (IOp CastString)
+  | A.Happly((_, id), []) when id = SN.Typehints.object_cast ->
+    instr (IOp CastObject)
+  | A.Happly((_, id), []) when id = SN.Typehints.array ->
+    instr (IOp CastArray)
+  | A.Happly((_, id), []) when id = SN.Typehints.float ->
+    instr (IOp CastDouble)
+  | _ -> emit_nyi "cast type" in
+  gather [
+    from_expr expr;
+    op;
+  ]
+
+and emit_conditional_expression etest etrue efalse =
+  match etrue with
+  | Some etrue ->
     let false_label = Label.next_regular () in
     let end_label = Label.next_regular () in
     gather [
@@ -200,100 +200,137 @@ and from_expr expr =
       from_expr efalse;
       instr_label end_label;
     ]
-  | A.Eif (etest, None, efalse) ->
+  | None ->
     let end_label = Label.next_regular () in
     gather [
       from_expr etest;
-      instr (IBasic Dup);
+      instr_dup;
       instr_jmpnz end_label;
-      instr (IBasic PopC);
+      instr_popc;
       from_expr efalse;
       instr_label end_label;
     ]
-  | A.Expr_list es -> gather @@ List.map es ~f:from_expr
-  | A.Call ((p, A.Id (_, "tuple")), es, _) ->
-    (* Did you know that tuples are functions? *)
-    let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
-    from_expr (p, A.Array af_list)
-  | A.Call _ ->
-    let instrs, flavor = emit_flavored_expr expr in
+
+and emit_new_id id args uargs =
+  let nargs = List.length args + List.length uargs in
+  gather [
+    instr_fpushctord nargs id;
+    emit_args_and_call args uargs;
+    instr_popr;
+  ]
+
+and emit_new typename args uargs =
+  match typename with
+  | A.Id (_, id) -> emit_new_id id args uargs
+  | _ -> emit_nyi "new" (* TODO *)
+
+and emit_clone expr =
+  gather [
+    from_expr expr;
+    instr_clone;
+  ]
+
+and emit_shape expr fl =
+  let are_values_all_literals =
+    List.for_all fl ~f:(fun (_, e) -> is_literal e)
+  in
+  let p = fst expr in
+  if are_values_all_literals then
+    let fl =
+      List.map fl
+        ~f:(fun (fn, e) ->
+              A.AFkvalue ((p,
+                A.String (extract_shape_field_name_pstring fn)), e))
+    in
+    from_expr (fst expr, A.Array fl)
+  else
+    let es = List.map fl ~f:(fun (_, e) -> from_expr e) in
+    let keys = List.map fl ~f:(fun (fn, _) -> extract_shape_field_name fn) in
     gather [
-      instrs;
-      (* If the instruction has produced a ref then unbox it *)
-      if flavor = Flavor.Ref then instr (IBasic UnboxR) else empty
+      gather es;
+      instr_newstructarray keys;
     ]
-  | A.New ((_, A.Id (_, id)), args, uargs) ->
-      let nargs = List.length args + List.length uargs in
-      gather [
-        instr (ICall (FPushCtorD (nargs, id)));
-        emit_args_and_call args uargs;
-        instr (IBasic PopR)
-      ]
-  | A.Array es
-  | A.Collection ((_, "dict"), es)
-  | A.Collection ((_, "vec"), es)
-  | A.Collection ((_, "keyset"), es) -> emit_collection expr es
-  | A.Collection ((pos, "Set"), fields)  -> begin
+
+and emit_named_collection expr pos name fields =
+  match name with
+  | "dict" | "vec" | "keyset" -> emit_collection expr fields
+  | "Set" -> begin
     let collection_type = collection_type "Set" in
     match fields with
-    | [] -> instr @@ ILitConst (NewCol collection_type)
-    | _ -> gather
-      [ from_expr (pos, A.Array fields)
-      ; instr @@ ILitConst (ColFromArray collection_type)
-      ]
-  end
-  | A.Collection ((_, "Pair"), fields) -> begin
+    | [] -> instr_newcol collection_type
+    | _ -> gather [
+      from_expr (pos, A.Array fields);
+      instr_colfromarray collection_type ]
+    end
+  | "Pair" -> begin
     let collection_type = collection_type "Pair" in
-    let values = List.fold_right
+    let values = gather @@ List.fold_right
       fields
       ~f:(fun x acc ->
         expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x::acc)
       ~init:[] in
-    let newCol = instr @@ ILitConst (NewCol collection_type) in
-    gather (newCol::values)
-  end
-  | A.Array_get(e1, Some e2) ->
-    emit_array_get None e1 e2
-  | A.Clone e ->
     gather [
-      from_expr e;
-      instr (IOp Clone)
-    ]
-  | A.Shape fl ->
-    let are_values_all_literals =
-      List.for_all fl ~f:(fun (_, e) -> is_literal e)
-    in
-    let p = fst expr in
-    if are_values_all_literals then
-      let fl =
-        List.map fl
-          ~f:(fun (fn, e) ->
-                A.AFkvalue ((p,
-                  A.String (extract_shape_field_name_pstring fn)), e))
-      in
-      from_expr (fst expr, A.Array fl)
-    else
-      let es = List.map fl ~f:(fun (_, e) -> from_expr e) in
-      let keys = List.map fl ~f:(fun (fn, _) -> extract_shape_field_name fn) in
-      gather [
-        gather es;
-        instr @@ ILitConst (NewStructArray keys);
-      ]
+      instr_newcol collection_type;
+      values ]
+  end
+  | _ -> emit_nyi @@ "collection: " ^ name (* TODO: Are there more? *)
 
-  | A.Obj_get (expr, prop, nullflavor)  ->
-    emit_obj_get expr prop nullflavor
+and emit_tuple p es =
+  (* Did you know that tuples are functions? *)
+  let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
+  from_expr (p, A.Array af_list)
 
+and emit_call_expr expr =
+  let instrs, flavor = emit_flavored_expr expr in
+  gather [
+    instrs;
+    (* If the instruction has produced a ref then unbox it *)
+    if flavor = Flavor.Ref then instr_unboxr else empty
+  ]
+
+and emit_class_const cid id =
+  if id = SN.Members.mClass then instr_string cid
+  else emit_nyi "class_const" (* TODO *)
+
+and from_expr expr =
+  (* Note that this takes an Ast.expr, not a Nast.expr. *)
+  match snd expr with
+  | A.Float (_, litstr) -> instr_double litstr
+  | A.String (_, litstr) -> instr_string litstr
+  (* TODO deal with integer out of range *)
+  | A.Int (_, litstr) -> instr_int_of_string litstr
+  | A.Null -> instr_null
+  | A.False -> instr_false
+  | A.True -> instr_true
+  | A.Lvar (_, x) -> from_local x
+  | A.Class_const ((_, cid), (_, id)) -> emit_class_const cid id
+  | A.Unop (op, e) -> emit_unop op e
+  | A.Binop (op, e1, e2) -> emit_binop op e1 e2
+  | A.Pipe (e1, e2) -> emit_pipe e1 e2
+  | A.Dollardollar -> instr_cgetl2 Local.Pipe
+  | A.InstanceOf (e1, e2) -> emit_instanceof e1 e2
+  | A.NullCoalesce (e1, e2) -> emit_null_coalesce e1 e2
+  | A.Cast((_, hint), e) -> emit_cast hint e
+  | A.Eif (etest, etrue, efalse) ->
+    emit_conditional_expression etest etrue efalse
+  | A.Expr_list es -> gather @@ List.map es ~f:from_expr
+  | A.Call ((p, A.Id (_, "tuple")), es, _) -> emit_tuple p es
+  | A.Call _ -> emit_call_expr expr
+  | A.New ((_, typename), args, uargs) -> emit_new typename args uargs
+  | A.Array es -> emit_collection expr es
+  | A.Collection ((pos, name), fields) ->
+    emit_named_collection expr pos name fields
+  | A.Array_get(e1, Some e2) -> emit_array_get None e1 e2
+  | A.Clone e -> emit_clone e
+  | A.Shape fl -> emit_shape expr fl
+  | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get expr prop nullflavor
   (* TODO *)
-  | A.Collection ((_, type_str), _) ->
-    emit_nyi @@ "collection: " ^ type_str
-  | A.New _                     -> emit_nyi "new"
   | A.Yield_break               -> emit_nyi "yield_break"
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
   | A.Array_get (_, _)          -> emit_nyi "array_get"
   | A.Class_get (_, _)          -> emit_nyi "class_get"
-  | A.Class_const (_, _)        -> emit_nyi "class_const"
   | A.String2 _                 -> emit_nyi "string2"
   | A.Yield _                   -> emit_nyi "yield"
   | A.Await _                   -> emit_nyi "await"

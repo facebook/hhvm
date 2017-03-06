@@ -8,6 +8,10 @@
  *
  *)
 
+(**
+ * Parses and gathers information from the .hhconfig in the repo.
+ *)
+
 open Core
 open Config_file.Getters
 open Reordered_argument_collections
@@ -17,6 +21,14 @@ type t = {
   load_script_timeout : int; (* in seconds *)
 
   load_mini_script : Path.t option;
+
+  (** Script to call to prefetch a saved state. Expected invocation is:
+    *   state_prefetcher_script <svn revision number>
+    *
+   * Which is expected to put a saved state into the correct place which the
+   * above load_script will be able to use.
+   *)
+  state_prefetcher_script : Path.t option;
 
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
@@ -152,6 +164,8 @@ let load config_filename options =
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
   let load_mini_script =
     Option.map (SMap.get config "load_mini_script") maybe_relative_path in
+  let state_prefetcher_script =
+    Option.map (SMap.get config "state_prefetcher_script") maybe_relative_path in
   let formatter_override =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let global_opts = GlobalOptions.make
@@ -165,6 +179,7 @@ let load config_filename options =
     load_script = load_script;
     load_script_timeout = load_script_timeout;
     load_mini_script = load_mini_script;
+    state_prefetcher_script = state_prefetcher_script;
     gc_control = make_gc_control config;
     sharedmem_config = make_sharedmem_config config options local_config;
     tc_options = global_opts;
@@ -177,6 +192,7 @@ let default_config = {
   load_script = None;
   load_script_timeout = 0;
   load_mini_script = None;
+  state_prefetcher_script = None;
   gc_control = GlobalConfig.gc_control;
   sharedmem_config = GlobalConfig.default_sharedmem_config;
   tc_options = TypecheckerOptions.default;

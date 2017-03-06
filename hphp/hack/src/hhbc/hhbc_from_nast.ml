@@ -174,7 +174,7 @@ and from_expr expr =
   | A.Binop (op, (_, A.Lvar (_, x)), e) ->
     gather [from_expr e; instr_cgetl2 (Local.Named x); from_binop op]
   | A.Binop (op, e1, e2) ->
-    gather [from_expr e2; from_expr e1; from_binop op]
+    gather [from_expr e1; from_expr e2; from_binop op]
   | A.Pipe (e1, e2) ->
     emit_pipe e1 e2
   | A.Dollardollar ->

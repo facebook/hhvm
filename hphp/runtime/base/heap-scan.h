@@ -259,7 +259,13 @@ inline void scanRds(rds::Header* rds, type_scan::Scanner& scanner) {
   scanner.conservative(sp, uintptr_t(stack_end) - uintptr_t(sp));
 }
 
-inline void MemoryManager::scanSweepLists(type_scan::Scanner& scanner) const {
+inline void MemoryManager::scanRoots(type_scan::Scanner& scanner) const {
+  scanner.where("RootHandles");
+  for (const auto root : m_root_handles) root->scan(scanner);
+
+  // treat sweep lists as roots until we are ready to test what happens
+  // when we start calling various sweep() functions early.
+  scanner.where("SweepLists");
   for (auto s = m_sweepables.next(); s != &m_sweepables; s = s->next()) {
     if (auto h = static_cast<Header*>(s->owner())) {
       assert(h->kind() == HeaderKind::Resource || isObjectKind(h->kind()));
@@ -269,13 +275,6 @@ inline void MemoryManager::scanSweepLists(type_scan::Scanner& scanner) const {
   for (auto& node: m_natives) {
     scanner.scan(node); // used to be mark.implicit(Native::obj(node))
   }
-}
-
-inline void MemoryManager::scanRootMaps(type_scan::Scanner& scanner) const {
-  // these all used to call mark.implicit
-  if (m_objectRoots) scanner.scan(*m_objectRoots);
-  if (m_resourceRoots) scanner.scan(*m_resourceRoots);
-  for (const auto root : m_root_handles) root->scan(scanner);
 }
 
 inline void ThreadLocalManager::scan(type_scan::Scanner& scanner) const {
@@ -316,13 +315,8 @@ inline void scanRoots(type_scan::Scanner& scanner) {
   // ThreadLocal nodes (but skip MemoryManager)
   scanner.where("ThreadLocalManager");
   ThreadLocalManager::GetManager().scan(scanner);
-  // Root maps
-  scanner.where("RootMaps");
-  MM().scanRootMaps(scanner);
-  // treat sweep lists as roots until we are ready to test what happens
-  // when we start calling various sweep() functions early.
-  scanner.where("SweepLists");
-  MM().scanSweepLists(scanner);
+  // Root handles & sweep lists
+  MM().scanRoots(scanner);
   if (auto asio = AsioSession::Get()) {
     // ThreadLocalProxy<T> instances aren't in ThreadLocalManager.
     // asio was created with req::make_raw<AsioSession>, but we dont have

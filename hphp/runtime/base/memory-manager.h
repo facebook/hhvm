@@ -803,21 +803,7 @@ struct MemoryManager {
    */
   StringDataNode& getStringList();
 
-  /*
-   * Methods for maintaining maps of root objects keyed by RootIds.
-   *
-   * The id/object associations are only valid for a single request.  This
-   * interface is useful for extensions that cannot physically hold on to a
-   * req::ptr, etc. or other handle class.
-   */
-  template <typename T> RootId addRoot(req::ptr<T>&& ptr);
-  template <typename T> RootId addRoot(const req::ptr<T>& ptr);
-  template <typename T> req::ptr<T> lookupRoot(RootId tok) const;
-  template <typename T> bool removeRoot(const req::ptr<T>& ptr);
-  template <typename T> bool removeRoot(const T* ptr);
-  template <typename T> req::ptr<T> removeRoot(RootId token);
-  void scanRootMaps(type_scan::Scanner&) const;
-  void scanSweepLists(type_scan::Scanner&) const;
+  void scanRoots(type_scan::Scanner&) const;
 
   /*
    * Run the experimental collector.
@@ -858,9 +844,6 @@ private:
     void sweep() override {}
     void* owner() override { return nullptr; }
   };
-
-  template <typename T>
-  using RootMap = req::hash_map<RootId, req::ptr<T>>;
 
   /*
    * Request-local heap profiling context.
@@ -903,56 +886,9 @@ private:
   void initHole(void* ptr, uint32_t size);
   void initHole();
 
-  void dropRootMaps();
-  void deleteRootMaps();
-
   void requestEagerGC();
   void resetEagerGC();
   void requestGC();
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ResourceData,T>::value,
-    RootMap<ResourceData>&
-  >::type getRootMap() {
-    if (UNLIKELY(!m_resourceRoots)) {
-      m_resourceRoots = req::make_raw<RootMap<ResourceData>>();
-    }
-    return *m_resourceRoots;
-  }
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ObjectData,T>::value,
-    RootMap<ObjectData>&
-  >::type getRootMap() {
-    if (UNLIKELY(!m_objectRoots)) {
-      m_objectRoots = req::make_raw<RootMap<ObjectData>>();
-    }
-    return *m_objectRoots;
-  }
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ResourceData,T>::value,
-    const RootMap<ResourceData>&
-  >::type getRootMap() const {
-    if (UNLIKELY(!m_resourceRoots)) {
-      m_resourceRoots = req::make_raw<RootMap<ResourceData>>();
-    }
-    return *m_resourceRoots;
-  }
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ObjectData,T>::value,
-    const RootMap<ObjectData>&
-  >::type getRootMap() const {
-    if (UNLIKELY(!m_objectRoots)) {
-      m_objectRoots = req::make_raw<RootMap<ObjectData>>();
-    }
-    return *m_objectRoots;
-  }
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -970,8 +906,6 @@ private:
   std::vector<NativeNode*> m_natives;
   SweepableList m_sweepables;
 
-  mutable RootMap<ResourceData>* m_resourceRoots{nullptr};
-  mutable RootMap<ObjectData>* m_objectRoots{nullptr};
   mutable std::vector<req::root_handle*> m_root_handles;
 
   bool m_exiting{false};

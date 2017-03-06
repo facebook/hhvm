@@ -408,53 +408,6 @@ inline StringDataNode& MemoryManager::getStringList() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-MemoryManager::RootId MemoryManager::addRoot(req::ptr<T>&& ptr) {
-  assert(ptr);
-  const RootId token = ptr->getId();
-  getRootMap<T>().emplace(token, std::move(ptr));
-  return token;
-}
-
-template <typename T>
-MemoryManager::RootId MemoryManager::addRoot(const req::ptr<T>& ptr) {
-  assert(ptr);
-  const RootId token = ptr->getId();
-  getRootMap<T>()[token] = ptr;
-  return token;
-}
-
-template <typename T>
-req::ptr<T> MemoryManager::lookupRoot(RootId token) const {
-  auto& handleMap = getRootMap<T>();
-  auto itr = handleMap.find(token);
-  return itr != handleMap.end() ? unsafe_cast_or_null<T>(itr->second) : nullptr;
-}
-
-template <typename T>
-req::ptr<T> MemoryManager::removeRoot(RootId token) {
-  auto& handleMap = getRootMap<T>();
-  auto itr = handleMap.find(token);
-  if(itr != handleMap.end()) {
-    auto ptr = std::move(itr->second);
-    handleMap.erase(itr);
-    return unsafe_cast_or_null<T>(ptr);
-  }
-  return nullptr;
-}
-
-template <typename T>
-bool MemoryManager::removeRoot(const req::ptr<T>& ptr) {
-  return (bool)removeRoot<T>(ptr->getId());
-}
-
-template <typename T>
-bool MemoryManager::removeRoot(const T* ptr) {
-  return (bool)removeRoot<T>(ptr->getId());
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
 #endif

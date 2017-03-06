@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -72,12 +73,14 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_errors = xmlErrorVec();
     m_entity_loader_disabled = false;
     m_streams_context = nullptr;
+    m_streams.reset();
   }
 
   void requestShutdown() override {
     m_use_error = false;
     m_errors = xmlErrorVec();
     m_streams_context = nullptr;
+    m_streams.reset();
   }
 
   bool m_entity_loader_disabled;
@@ -85,6 +88,7 @@ struct LibXmlRequestData final : RequestEventHandler {
   bool m_use_error;
   xmlErrorVec m_errors;
   req::ptr<StreamContext> m_streams_context;
+  RootMap<File> m_streams;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
@@ -95,29 +99,29 @@ namespace {
 // a void* token that can be used to lookup the File later.  This
 // is so a reference to the file can be stored in an XML context
 // object as a void*.  The set of remembered files is cleared out
-// during MemoryManager reset.  The ext_libxml extension is the only
-// XML extension that should be storing streams in the MemoryManager
+// at request shutdown. The ext_libxml extension is the only
+// XML extension that should be storing streams as roots,
 // since it has no other place to safely store a req::ptr.
 // The other XML extensions either own the req::ptr<File> locally
 // or are able to store it in a object.
 inline void* rememberStream(req::ptr<File>&& stream) {
-  return reinterpret_cast<void*>(MM().addRoot(std::move(stream)));
+  return reinterpret_cast<void*>(
+    tl_libxml_request_data->m_streams.addRoot(std::move(stream))
+  );
 }
 
 // This function returns the File associated with the given token.
-// If the token is not in the MemoryManager map, it means a pointer to
+// If the token is not in the m_streams map, it means a pointer to
 // the File has been stored directly in the XML context.
 inline req::ptr<File> getStream(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  auto res = MM().lookupRoot<File>(token);
-  return res ? res : *reinterpret_cast<req::ptr<File>*>(token);
+  auto file = tl_libxml_request_data->m_streams.lookupRoot(userData);
+  return file ? file : *reinterpret_cast<req::ptr<File>*>(userData);
 }
 
 // This closes and deletes the File associated with the given token.
 // It is used by the XML callback that destroys a context.
 inline bool forgetStream(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  auto ptr = MM().removeRoot<File>(token);
+  auto ptr = tl_libxml_request_data->m_streams.removeRoot(userData);
   return ptr->close();
 }
 

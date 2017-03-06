@@ -47,6 +47,7 @@ MODULES=\
   decl\
   deps\
   dfind\
+  diff\
   emitter\
   debug\
   find\

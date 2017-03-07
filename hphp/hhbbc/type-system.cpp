@@ -492,7 +492,7 @@ folly::Optional<DArrLikePackedN> toDArrLikePackedN(SArray ar) {
     auto const key = *iter.first().asTypedValue();
     if (key.m_type != KindOfInt64) return folly::none;
     if (key.m_data.num != idx)     return folly::none;
-    t = union_of(t, from_cell(*iter.secondRef().asTypedValue()));
+    t |= from_cell(*iter.secondRef().asTypedValue());
   }
 
   return DArrLikePackedN { std::move(t), idx };
@@ -530,8 +530,8 @@ DArrLikeMapN toDArrLikeMapN(SArray ar) {
   auto v = TBottom;
   for (ArrayIter iter(ar); iter; ++iter) {
     auto const key = *iter.first().asTypedValue();
-    k = union_of(k, from_cell(key));
-    v = union_of(v, from_cell(*iter.secondRef().asTypedValue()));
+    k |= from_cell(key);
+    v |= from_cell(*iter.secondRef().asTypedValue());
   }
 
   return DArrLikeMapN { k, v };
@@ -588,15 +588,15 @@ bool couldBeMap(const DArrLikeMap& a, const DArrLikeMap& b) {
 std::pair<Type,Type> map_key_values(const DArrLikeMap& a) {
   auto ret = std::make_pair(TBottom, TBottom);
   for (auto& kv : a.map) {
-    ret.first = union_of(std::move(ret.first), from_cell(kv.first));
-    ret.second = union_of(std::move(ret.second), kv.second);
+    ret.first |= from_cell(kv.first);
+    ret.second |= kv.second;
   }
   return ret;
 }
 
 Type packed_values(const DArrLikePacked& a) {
   auto ret = TBottom;
-  for (auto& e : a.elems) ret = union_of(ret, e);
+  for (auto& e : a.elems) ret |= e;
   return ret;
 }
 
@@ -763,7 +763,7 @@ struct DualDispatchUnionImpl {
     }
     auto ret = a.elems;
     for (auto i = size_t{0}; i < a.elems.size(); ++i) {
-      ret[i] = union_of(ret[i], b.elems[i]);
+      ret[i] |= b.elems[i];
     }
     return packed_impl(bits, std::move(ret));
   }
@@ -1119,6 +1119,16 @@ Type::~Type() noexcept {
     #undef DT
   }
   not_reached();
+}
+
+const Type& Type::operator |= (const Type& other) {
+  *this = union_of(std::move(*this), other);
+  return *this;
+}
+
+const Type& Type::operator |= (Type&& other) {
+  *this = union_of(std::move(*this), std::move(other));
+  return *this;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2073,7 +2083,7 @@ Type from_hni_constraint(SString s) {
   auto ret = TBottom;
 
   if (*p == '?') {
-    ret = union_of(ret, TInitNull);
+    ret |= TInitNull;
     ++p;
   }
 
@@ -2114,10 +2124,7 @@ Type union_of(Type a, Type b) {
    */
   if (is_specialized_wait_handle(a)) {
     if (is_specialized_wait_handle(b)) {
-      *a.m_data.dobj.whType.mutate() = union_of(
-        *a.m_data.dobj.whType,
-        *b.m_data.dobj.whType
-      );
+      *a.m_data.dobj.whType.mutate() |= *b.m_data.dobj.whType;
       return a;
     }
     if (b == TInitNull) return opt(a);
@@ -2316,11 +2323,11 @@ Type stack_flav(Type a) {
 Type loosen_statics(Type a) {
   // TODO(#3696042): this should be modified to keep specialized array
   // information, including whether the array is possibly empty.
-  if (a.couldBe(TSStr)) a = union_of(a, TStr);
-  if (a.couldBe(TSArr)) a = union_of(a, TArr);
-  if (a.couldBe(TSVec)) a = union_of(a, TVec);
-  if (a.couldBe(TSDict)) a = union_of(a, TDict);
-  if (a.couldBe(TSKeyset)) a = union_of(a, TKeyset);
+  if (a.couldBe(TSStr))    a |= TStr;
+  if (a.couldBe(TSArr))    a |= TArr;
+  if (a.couldBe(TSVec))    a |= TVec;
+  if (a.couldBe(TSDict))   a |= TDict;
+  if (a.couldBe(TSKeyset)) a |= TKeyset;
   return a;
 }
 
@@ -2502,7 +2509,7 @@ std::pair<Type,bool> arr_packed_elem(const Type& pack, const ArrKey& key) {
   }
   auto ret = packed_values(*pack.m_data.packed);
   if (isPhpArray) {
-    ret = union_of(std::move(ret), TInitNull);
+    ret |= TInitNull;
   }
   return { ret, false };
 }
@@ -2546,7 +2553,7 @@ bool arr_packedn_set(Type& pack,
   auto const isPhpArray = (pack.m_bits & BOptArr) == pack.m_bits;
   auto const isVecArray = (pack.m_bits & BOptVec) == pack.m_bits;
   auto& ty = pack.m_data.packedn.mutate()->type;
-  ty = union_of(std::move(ty), val);
+  ty |= val;
   if (key.i) {
     if (pack.m_data.packedn->len) {
       if (0 > *key.i ||
@@ -2661,8 +2668,8 @@ bool arr_mapn_set(Type& map,
                   const Type& val) {
   assert(map.m_dataTag == DataTag::ArrLikeMapN);
   auto& mapn = *map.m_data.mapn.mutate();
-  mapn.val = union_of(std::move(mapn.val), val);
-  mapn.key = union_of(std::move(mapn.key), key.type);
+  mapn.val |= val;
+  mapn.key |= key.type;
   return true;
 }
 
@@ -2732,7 +2739,7 @@ std::pair<Type, bool> array_like_elem(const Type& arr, const ArrKey& key) {
     ret.first = TInitCell;
   } else if (maybeEmpty) {
     if (isPhpArray) {
-      ret.first = union_of(std::move(ret.first), TInitNull);
+      ret.first |= TInitNull;
     } else {
       ret.second = false;
     }
@@ -2950,7 +2957,7 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
       auto packedn = arr.m_data.packedn.mutate();
       auto len = packedn->len;
       if (len) *packedn->len += 1;
-      packedn->type = union_of(std::move(packedn->type), val);
+      packedn->type |= val;
       return { std::move(arr), len ? ival(*len) : TInt };
     }
 

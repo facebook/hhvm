@@ -506,16 +506,16 @@ void handleBaseElemU(ISS& env) {
   auto& ty = env.state.base.type;
   if (ty.couldBe(TArr)) {
     // We're conservative with unsets on array types for now.
-    ty = union_of(ty, TArr);
+    ty |= TArr;
   }
   if (ty.couldBe(TVec)) {
-    ty = union_of(ty, TVec);
+    ty |= TVec;
   }
   if (ty.couldBe(TDict)) {
-    ty = union_of(ty, TDict);
+    ty |= TDict;
   }
   if (ty.couldBe(TKeyset)) {
-    ty = union_of(ty, TKeyset);
+    ty |= TKeyset;
   }
   if (ty.couldBe(TSStr)) {
     ty = loosen_statics(env.state.base.type);
@@ -1122,7 +1122,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       // Note here that a string type stays a string (with a changed character,
       // and loss of staticness), unless it was the empty string, where it
       // becomes an array.  Do it conservatively for now:
-      ty = union_of(loosen_statics(ty), counted_aempty());
+      ty = union_of(loosen_statics(std::move(ty)), counted_aempty());
     }
     if (!ty.subtypeOf(TStr)) {
       handleBaseElemD(env);

@@ -307,7 +307,7 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
         useMap = false;
       }
     }
-    ty = union_of(ty, t);
+    ty |= std::move(t);
   }
   if (useMap) {
     push(env, keyset_map(std::move(map)));

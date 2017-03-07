@@ -168,7 +168,7 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 
   assert(types.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
-    current[i] = union_of(std::move(current[i]), std::move(types[i]));
+    current[i] |= std::move(types[i]);
   }
 }
 

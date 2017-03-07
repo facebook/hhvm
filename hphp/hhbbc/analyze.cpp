@@ -335,8 +335,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
     auto interp   = Interp { index, ctx, collect, blk, stateOut };
     auto flags    = run(interp, propagate);
     if (flags.returned) {
-      ai.inferredReturn = union_of(std::move(ai.inferredReturn),
-                                   std::move(*flags.returned));
+      ai.inferredReturn |= std::move(*flags.returned);
     }
   }
 
@@ -622,7 +621,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   // have one after 86sinit, throw it away.
   for (auto& kv : clsAnalysis.privateStatics) {
     if (is_specialized_array(kv.second)) {
-      kv.second = union_of(kv.second, TArr);
+      kv.second |= TArr;
     }
   }
 

@@ -485,7 +485,7 @@ void boxUnknownLocal(ISS& env) {
 void unsetUnknownLocal(ISS& env) {
   readUnknownLocals(env);
   FTRACE(2, "  unsetUnknownLocal\n");
-  for (auto& l : env.state.locals) l = union_of(l, TUninit);
+  for (auto& l : env.state.locals) l |= TUninit;
   killAllLocEquiv(env);
   killAllStkEquiv(env);
 }
@@ -634,7 +634,7 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
 void mergeThisProp(ISS& env, SString name, Type type) {
   auto const t = thisPropRaw(env, name);
   if (!t) return;
-  *t = union_of(*t, loosen_statics(loosen_values(type)));
+  *t |= loosen_statics(loosen_values(type));
 }
 
 /*
@@ -664,7 +664,7 @@ void unsetUnknownThisProp(ISS& env) {
 void boxThisProp(ISS& env, SString name) {
   auto const t = thisPropRaw(env, name);
   if (!t) return;
-  *t = union_of(*t, TRef);
+  *t |= TRef;
 }
 
 /*
@@ -724,7 +724,7 @@ folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
 void mergeSelfProp(ISS& env, SString name, Type type) {
   auto const t = selfPropRaw(env, name);
   if (!t) return;
-  *t = union_of(*t, type);
+  *t |= type;
 }
 
 /*

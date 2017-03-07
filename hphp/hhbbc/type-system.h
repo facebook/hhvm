@@ -411,6 +411,9 @@ struct Type {
   bool operator!=(const Type& o) const { return !(*this == o); }
   size_t hash() const;
 
+  const Type& operator |= (const Type& other);
+  const Type& operator |= (Type&& other);
+
   /*
    * Returns true if this type is definitely going to be a subtype or a strict
    * subtype of `o' at runtime.  If this function returns false, this may

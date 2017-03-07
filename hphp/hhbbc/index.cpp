@@ -2453,7 +2453,7 @@ Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
       auto ret = TBottom;
       for (auto& f : fam->possibleFuncs) {
         add_dependency(*m_data, f->first, ctx, Dep::ReturnTy);
-        ret = union_of(ret, f->second.returnTy);
+        ret |= f->second.returnTy;
       }
       return ret;
     }
@@ -2981,7 +2981,7 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
     if (m_unknown.insert(acc, vname->m_data.pstr)) {
       acc->second = val;
     } else {
-      acc->second = union_of(acc->second, val);
+      acc->second |= val;
     }
     return;
   }
@@ -3032,7 +3032,7 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
   if (m_known.insert(acc, KnownKey { affectedCInfo, vname->m_data.pstr })) {
     acc->second = val;
   } else {
-    acc->second = union_of(acc->second, val);
+    acc->second |= val;
   }
 }
 

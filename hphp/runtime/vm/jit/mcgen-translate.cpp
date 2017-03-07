@@ -149,6 +149,10 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 
   // Create one node (aka target) for each function that was profiled.
   const auto maxFuncId = pd->maxProfilingFuncId();
+
+  // Maybe we didn't profile anything
+  if (maxFuncId == InvalidFuncId) return cg;
+
   FTRACE(3, "createCallGraph: maxFuncId = {}\n", maxFuncId);
   for (FuncId fid = 0; fid <= maxFuncId; fid++) {
     if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;

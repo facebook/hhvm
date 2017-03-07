@@ -447,7 +447,8 @@ struct ProfData {
    * The maximum FuncId among all the functions that are being profiled.
    */
   FuncId maxProfilingFuncId() const {
-    return m_profilingFuncs.size() - 1;
+    auto const s = m_profilingFuncs.size();
+    return s > 0 ? s - 1 : InvalidFuncId;
   }
 
   /*

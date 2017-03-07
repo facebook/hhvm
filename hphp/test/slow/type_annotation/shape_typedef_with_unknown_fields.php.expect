@@ -1,7 +1,9 @@
-string(10) "HH\shape()"
-array(2) {
+string(13) "HH\shape(...)"
+array(3) {
   ["kind"]=>
   int(14)
+  ["allows_unknown_fields"]=>
+  bool(true)
   ["fields"]=>
   array(0) {
   }

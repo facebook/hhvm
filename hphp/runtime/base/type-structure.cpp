@@ -52,6 +52,7 @@ const StaticString
   s_root_name("root_name"),
   s_access_list("access_list"),
   s_fields("fields"),
+  s_allows_unknown_fields("allows_unknown_fields"),
   s_is_cls_cns("is_cls_cns"),
   s_optional_shape_field("optional_shape_field"),
   s_value("value"),
@@ -194,6 +195,10 @@ void shapeTypeName(const Array& arr, std::string& name) {
 
     folly::toAppend("=>", fullName(value), &name);
     sep = ", ";
+  }
+
+  if (arr.exists(s_allows_unknown_fields)) {
+    folly::toAppend(sep, "...", &name);
   }
 
   name += ")";
@@ -509,6 +514,10 @@ Array resolveTS(const Array& arr,
   auto newarr = Array::Create();
   if (arr.exists(s_nullable)) newarr.add(s_nullable, true_varNR);
   newarr.add(s_kind, Variant(static_cast<uint8_t>(kind)));
+
+  if (arr.exists(s_allows_unknown_fields)) {
+    newarr.add(s_allows_unknown_fields, true_varNR);
+  }
 
   switch (kind) {
     case TypeStructure::Kind::T_tuple: {

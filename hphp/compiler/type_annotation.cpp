@@ -330,6 +330,7 @@ const StaticString
   s_root_name("root_name"),
   s_access_list("access_list"),
   s_fields("fields"),
+  s_allows_unknown_fields("allows_unknown_fields"),
   s_is_cls_cns("is_cls_cns"),
   s_optional_shape_field("optional_shape_field"),
   s_value("value"),
@@ -377,6 +378,11 @@ Array TypeAnnotation::getScalarArrayRep() const {
   bool nullable = (bool) m_nullable;
   if (nullable) {
     rep.add(s_nullable, true_varNR);
+  }
+
+  bool allowsUnknownFields = (bool) m_allowsUnknownFields;
+  if (allowsUnknownFields) {
+    rep.add(s_allows_unknown_fields, true_varNR);
   }
 
   TypeStructure::Kind kind = getKind();

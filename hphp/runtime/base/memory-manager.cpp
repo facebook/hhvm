@@ -548,7 +548,7 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-const std::array<char*,NumHeaderKinds> header_names = {
+const std::array<char*,NumHeaderKinds> header_names = {{
   "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref",
@@ -557,7 +557,7 @@ const std::array<char*,NumHeaderKinds> header_names = {
   "AsyncFuncFrame", "NativeData", "ClosureHdr",
   "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole"
-};
+}};
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {

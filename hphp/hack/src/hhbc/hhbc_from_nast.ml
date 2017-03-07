@@ -1660,3 +1660,14 @@ let from_class : A.class_ -> Hhas_class.t =
 
 let from_classes ast_classes =
   List.map ast_classes from_class
+
+let from_program
+  (parsed_functions,
+  parsed_classes,
+  _parsed_typedefs,
+  _parsed_consts) =
+  let compiled_funs = from_functions parsed_functions in
+  let compiled_classes = from_classes parsed_classes in
+  let _compiled_typedefs = [] in (* TODO *)
+  let _compiled_consts = [] in (* TODO *)
+  Hhas_program.make compiled_funs compiled_classes

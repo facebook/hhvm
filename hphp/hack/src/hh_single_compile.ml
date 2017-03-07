@@ -130,13 +130,8 @@ let do_compile opts files_info = begin
     let hhas_text = if (Relative_path.S.to_string fn) = "|builtins.hhi" then
       ""
     else
-      let (parsed_functions, parsed_classes, _parsed_typedefs, _parsed_consts) =
-        get_nast_from_fileinfo opts fn fileinfo in
-      let compiled_funs = Hhbc_from_nast.from_functions parsed_functions in
-      let compiled_classes = Hhbc_from_nast.from_classes parsed_classes in
-      let _compiled_typedefs = [] in (* TODO *)
-      let _compiled_consts = [] in (* TODO *)
-      let hhas_prog = Hhas_program.make compiled_funs compiled_classes in
+      let program = get_nast_from_fileinfo opts fn fileinfo in
+      let hhas_prog = Hhbc_from_nast.from_program program in
       Hhbc_hhas.to_string hhas_prog in
     text ^ hhas_text
   end in

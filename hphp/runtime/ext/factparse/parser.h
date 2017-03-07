@@ -351,7 +351,8 @@ struct Parser : ParserBase {
   void onShapeFieldSpecialization(Token& shapeField, char specialization);
   void onClsCnsShapeField(Token& out, const Token& cls, const Token& cns,
     const Token& value);
-  void onShape(Token& out, const Token& shapeMemberList);
+  void onShape(
+    Token& out, const Token& shapeMemberList, bool terminatedWithEllipsis);
 
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
   void onNamespaceEnd();

@@ -116,6 +116,7 @@ struct TypeAnnotation {
   void setTypeVar() { m_typevar = true; }
   void setTypeAccess() { m_typeaccess = true; }
   void setShape() { m_shape = true; }
+  void setAllowsUnknownFields() { m_allowsUnknownFields = true; }
   void setClsCnsShapeField() { m_clsCnsShapeField = true; }
   void setOptionalShapeField() { m_optionalShapeField = true; }
   void setGenerics(const std::string& generics) { m_generics = generics; }
@@ -130,6 +131,7 @@ struct TypeAnnotation {
   bool isTypeVar() const { return m_typevar; }
   bool isTypeAccess() const { return m_typeaccess; }
   bool isShape() const { return m_shape; }
+  bool allowsUnknownFields() const { return m_allowsUnknownFields; }
   bool isClsCnsShapeField() const { return m_clsCnsShapeField; }
   bool isOptionalShapeField() const { return m_optionalShapeField; }
 
@@ -246,6 +248,7 @@ private:
   unsigned m_typevar : 1;
   unsigned m_typeaccess : 1;
   unsigned m_shape : 1;
+  unsigned m_allowsUnknownFields : 1;
   unsigned m_clsCnsShapeField : 1;
   unsigned m_optionalShapeField : 1;
 };

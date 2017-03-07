@@ -3416,9 +3416,17 @@ hh_non_empty_shape_member_list:
 
 hh_shape_member_list:
     hh_non_empty_shape_member_list
-    possible_comma                     { _p->onShape($$, $1); }
+    ','
+    T_ELLIPSIS                         { _p->onShape($$, $1, true); }
+  | hh_non_empty_shape_member_list
+    possible_comma                     { _p->onShape($$, $1, false); }
+  | T_ELLIPSIS                         {
+                                         Token t;
+                                         t.reset();
+                                         _p->onShape($$, t, true);
+                                       }
   | /* empty */                        { Token t; t.reset();
-                                         _p->onShape($$, t); }
+                                         _p->onShape($$, t, false); }
 ;
 
 hh_shape_type:

@@ -756,7 +756,8 @@ void Parser::onShapeFieldSpecialization(
     Token& shapeField, char specialization) {
 }
 
-void Parser::onShape(Token &out, const Token &shapeFieldsList) {
+void Parser::onShape(
+  Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
 }
 
 void Parser::onTypeSpecialization(Token& type, char specialization) {

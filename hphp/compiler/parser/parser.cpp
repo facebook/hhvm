@@ -2351,10 +2351,14 @@ void Parser::onClsCnsShapeField(Token& out,
   out.typeAnnotation->setClsCnsShapeField();
 }
 
-void Parser::onShape(Token &out, const Token &shapeFieldsList) {
+void Parser::onShape(
+    Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
     "array", shapeFieldsList.typeAnnotation);
   out.typeAnnotation->setShape();
+  if (terminatedWithEllipsis) {
+    out.typeAnnotation->setAllowsUnknownFields();
+  }
 }
 
 void Parser::onTypeSpecialization(Token& type, char specialization) {

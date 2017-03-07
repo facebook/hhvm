@@ -1,0 +1,13 @@
+string(21) "HH\shape('a'=>HH\int)"
+array(2) {
+  ["kind"]=>
+  int(14)
+  ["fields"]=>
+  array(1) {
+    ["a"]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}

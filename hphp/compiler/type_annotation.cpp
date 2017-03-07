@@ -41,6 +41,7 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_typevar(false),
                                 m_typeaccess(false),
                                 m_shape(false),
+                                m_allowsUnknownFields(false),
                                 m_clsCnsShapeField(false),
                                 m_optionalShapeField(false) { }
 

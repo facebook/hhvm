@@ -88,6 +88,7 @@ type instruct_basic =
   | PopC
   | PopV
   | PopR
+  | PopU
   | Dup
   | Box
   | Unbox
@@ -499,6 +500,9 @@ type instruct_misc =
   | Silence of local_id * op_silence
   | GetMemoKey
   | VarEnvDynCall
+  | IsUninit
+  | CGetCUNop
+  | UGetCUNop
 
 type gen_creation_execution =
   | CreateCont

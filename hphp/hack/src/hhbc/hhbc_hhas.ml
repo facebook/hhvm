@@ -25,6 +25,7 @@ let string_of_basic instruction =
     | PopC        -> "PopC"
     | PopV        -> "PopV"
     | PopR        -> "PopR"
+    | PopU        -> "PopU"
     | Dup         -> "Dup"
     | Box         -> "Box"
     | Unbox       -> "Unbox"
@@ -398,6 +399,11 @@ let string_of_misc instruction =
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"
     | CheckThis -> "CheckThis"
+    | IsUninit -> "IsUninit"
+    | CGetCUNop -> "CGetCUNop"
+    | UGetCUNop -> "UGetCUNop"
+    | StaticLoc (local, text) ->
+      "StaticLoc " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =

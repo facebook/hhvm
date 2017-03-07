@@ -17,7 +17,8 @@ open Sys_utils
 (*****************************************************************************)
 
 type options = {
-  filename : string;
+  filename    : string;
+  fallback    : bool;
 }
 
 (*****************************************************************************)
@@ -32,12 +33,20 @@ let die str =
 
 let parse_options () =
   let fn_ref = ref None in
+  let fallback = ref false in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
-  Arg.parse [] (fun fn -> fn_ref := Some fn) usage;
+  let options =
+    [ "--fallback"
+    , Arg.Set fallback
+    , " Enables fallback compilation"
+    ] in
+  let options = Arg.align ~limit:25 options in
+  Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
   { filename = fn
+  ; fallback = !fallback
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -113,7 +122,32 @@ let parse_name popt files_contents =
     files_info
   end
 
-let do_compile opts files_info = begin
+let hhvm_unix_call filename =
+  Printf.printf "compiling: %s\n" filename;
+  let readme, writeme = Unix.pipe () in
+  let prog_name = "/usr/local/hphpi/bin/hhvm" in
+  let params =
+    [| prog_name
+    ;  "-v"
+    ;  "Eval.DumpHhas=1"
+    ;  filename
+    |] in
+  let _ =
+    Unix.create_process prog_name params Unix.stdin writeme Unix.stderr in
+  Unix.close writeme;
+  let in_channel = Unix.in_channel_of_descr readme in
+  let rec aux acc : string list =
+    try
+      aux @@ input_line in_channel :: acc
+    with End_of_file -> List.rev acc
+  in
+  let result =
+    List.fold_left (aux []) ~f:(fun acc line -> acc ^ line ^ "\n") ~init:"" in
+  Unix.close readme;
+  result
+
+let do_compile compiler_options opts files_info = begin
+  let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
   let get_nast_from_fileinfo tcopt fn fileinfo =
     let funs = fileinfo.FileInfo.funs in
     let parse_function (_, fun_) =
@@ -127,13 +161,18 @@ let do_compile opts files_info = begin
     let parsed_consts = [] in (* TODO consts *)
     (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts) in
   let f_fold fn fileinfo text = begin
-    let hhas_text = if (Relative_path.S.to_string fn) = "|builtins.hhi" then
-      ""
-    else
-      let program = get_nast_from_fileinfo opts fn fileinfo in
-      let hhas_prog = Hhbc_from_nast.from_program program in
+    let hhas_text =
+      let (parsed_functions, parsed_classes, _parsed_typedefs, _parsed_consts) =
+        get_nast_from_fileinfo opts fn fileinfo in
+      let compiled_funs = Hhbc_from_nast.from_functions parsed_functions in
+      let compiled_classes = Hhbc_from_nast.from_classes parsed_classes in
+      let _compiled_typedefs = [] in (* TODO *)
+      let _compiled_consts = [] in (* TODO *)
+      let hhas_prog = Hhas_program.make compiled_funs compiled_classes in
       Hhbc_hhas.to_string hhas_prog in
-    text ^ hhas_text
+    if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
+    then text ^ hhvm_unix_call @@ Relative_path.to_absolute fn
+    else text ^ hhas_text
   end in
   let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in
   Printf.printf "%s" hhas_text
@@ -143,13 +182,14 @@ end
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename} popt tcopt =
+let decl_and_run_mode compiler_options popt tcopt =
   Local_id.track_names := true;
   Ident.track_names := true;
-  let filename = Relative_path.create Relative_path.Dummy filename in
+  let filename =
+    Relative_path.create Relative_path.Dummy compiler_options.filename in
   let files_contents = file_to_files filename in
   let _, files_info, _ = parse_name popt files_contents in
-  do_compile tcopt files_info
+  do_compile compiler_options tcopt files_info
 
 let main_hack opts =
   let popt = ParserOptions.default in

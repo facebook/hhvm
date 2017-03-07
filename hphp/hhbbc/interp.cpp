@@ -23,6 +23,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/trace.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-arith.h"
@@ -262,36 +263,58 @@ void in(ISS& env, const bc::NewMixedArray& op) {
 
 void in(ISS& env, const bc::NewPackedArray& op) {
   auto elems = std::vector<Type>{};
+  elems.reserve(op.arg1);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    elems.push_back(popC(env));
+    elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
   }
-  std::reverse(begin(elems), end(elems));
-  push(env, carr_packed(std::move(elems)));
+  discard(env, op.arg1);
+  push(env, arr_packed(std::move(elems)));
+  constprop(env);
 }
 
 void in(ISS& env, const bc::NewStructArray& op) {
-  auto map = StructMap{};
+  auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
-    map[*--it] = popC(env);
+    map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
-  push(env, carr_struct(std::move(map)));
+  push(env, arr_map(std::move(map)));
+  constprop(env);
 }
 
 void in(ISS& env, const bc::NewVecArray& op) {
-  auto ty = TBottom;
+  auto elems = std::vector<Type>{};
+  elems.reserve(op.arg1);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    ty = union_of(ty, popC(env));
+    elems.push_back(std::move(topC(env, op.arg1 - i - 1)));
   }
-  push(env, cvec_n(ty, op.arg1));
+  discard(env, op.arg1);
+  constprop(env);
+  push(env, vec(std::move(elems)));
 }
 
 void in(ISS& env, const bc::NewKeysetArray& op) {
   assert(op.arg1 > 0);
+  auto map = MapElems{};
   auto ty = TBottom;
+  auto useMap = true;
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    ty = union_of(ty, popC(env));
+    auto t = popC(env);
+    if (useMap) {
+      auto const k = disect_strict_key(t);
+      if (auto const v = k.tv()) {
+        map.emplace_front(*v, k.type);
+      } else {
+        useMap = false;
+      }
+    }
+    ty = union_of(ty, t);
   }
-  push(env, ckeyset_n(ty));
+  if (useMap) {
+    push(env, keyset_map(std::move(map)));
+    constprop(env);
+  } else {
+    push(env, keyset_n(ty));
+  }
 }
 
 void in(ISS& env, const bc::NewLikeArrayL& op) {
@@ -300,13 +323,29 @@ void in(ISS& env, const bc::NewLikeArrayL& op) {
 }
 
 void in(ISS& env, const bc::AddElemC& op) {
-  popC(env); popC(env);
-  auto const ty = popC(env);
-  auto const outTy =
-    ty.subtypeOf(TArr) ? TArr
-    : ty.subtypeOf(TDict) ? TDict
-    : union_of(TArr, TDict);
-  push(env, outTy);
+  auto const v = popC(env);
+  auto const k = popC(env);
+
+  auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
+    if (ty.subtypeOf(TArr)) {
+      return array_set(std::move(ty), k, v);
+    }
+    if (ty.subtypeOf(TDict)) {
+      return dict_set(std::move(ty), k, v).first;
+    }
+    return folly::none;
+  }(popC(env));
+
+  if (!outTy) {
+    return push(env, union_of(TArr, TDict));
+  }
+
+  if (outTy->subtypeOf(TBottom)) {
+    unreachable(env);
+  } else {
+    constprop(env);
+  }
+  push(env, std::move(*outTy));
 }
 
 void in(ISS& env, const bc::AddElemV& op) {
@@ -320,10 +359,27 @@ void in(ISS& env, const bc::AddElemV& op) {
 }
 
 void in(ISS& env, const bc::AddNewElemC&) {
-  popC(env);
-  popC(env);
-  push(env, TArr);
+  auto v = popC(env);
+
+  auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
+    if (ty.subtypeOf(TArr)) {
+      return array_newelem(std::move(ty), std::move(v));
+    }
+    return folly::none;
+  }(popC(env));
+
+  if (!outTy) {
+    return push(env, TInitCell);
+  }
+
+  if (outTy->subtypeOf(TBottom)) {
+    unreachable(env);
+  } else {
+    constprop(env);
+  }
+  push(env, std::move(*outTy));
 }
+
 void in(ISS& env, const bc::AddNewElemV&) {
   popV(env);
   popC(env);

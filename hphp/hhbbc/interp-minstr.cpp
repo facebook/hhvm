@@ -185,7 +185,7 @@ bool couldBeInPublicStatic(ISS& env, const Base& b) {
 
 template<typename R, typename B, typename... T>
 typename std::enable_if<
-  !std::is_same<R, Type>::value,
+  std::is_same<R, std::pair<Type,bool>>::value,
   folly::Optional<Type>
 >::type hack_array_op(
   ISS& env,
@@ -218,8 +218,8 @@ typename std::enable_if<
 }
 template<typename R, typename B, typename... T>
 typename std::enable_if<
-  std::is_same<R, Type>::value,
-  folly::Optional<Type>
+  !std::is_same<R, std::pair<Type,bool>>::value,
+  folly::Optional<R>
 >::type hack_array_op(
   ISS& env,
   R opV(B, const T&...),
@@ -844,7 +844,7 @@ void miNewElem(ISS& env) {
   if (couldDoChain) {
     auto par = [&] () -> std::pair<Type, Type> {
       auto ty = hack_array_do(env, newelem, TInitNull);
-      if (ty) return {*ty, TInt};
+      if (ty) return std::move(*ty);
       return array_newelem_key(env.state.base.type, TInitNull);
     }();
     env.state.arrayChain.push_back(par);
@@ -1284,7 +1284,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       return;
     }
     if (auto res = hack_array_do(env, newelem, ty)) {
-      env.state.base.type = *res;
+      env.state.base.type = std::move(res->first);
       return;
     }
   }
@@ -1294,7 +1294,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       return;
     }
     if (auto res = hack_array_do(env, newelem, ty)) {
-      env.state.base.type = *res;
+      env.state.base.type = std::move(res->first);
       return;
     }
   }
@@ -1333,7 +1333,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       return;
     }
     if (auto ty = hack_array_do(env, newelem, t1)) {
-      env.state.base.type = *ty;
+      env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
     }
@@ -1345,7 +1345,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       return;
     }
     if (auto ty = hack_array_do(env, newelem, t1)) {
-      env.state.base.type = *ty;
+      env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
     }

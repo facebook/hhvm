@@ -534,18 +534,12 @@ std::string show(const Type& t) {
   case DataTag::Obj:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ArrPacked:
-  case DataTag::ArrPackedN:
-  case DataTag::ArrStruct:
-  case DataTag::ArrMapN:
-  case DataTag::Dict:
-  case DataTag::Vec:
-  case DataTag::Keyset:
+  case DataTag::ArrLikePacked:
+  case DataTag::ArrLikePackedN:
+  case DataTag::ArrLikeMap:
+  case DataTag::ArrLikeMapN:
     break;
-  case DataTag::VecVal:
-  case DataTag::DictVal:
-  case DataTag::ArrVal:
-  case DataTag::KeysetVal:
+  case DataTag::ArrLikeVal:
     folly::toAppend("~", &ret);
     break;
   case DataTag::Str:
@@ -555,14 +549,16 @@ std::string show(const Type& t) {
     break;
   }
 
+  auto showElem = [&] (const Type& key, const Type& val) -> std::string {
+    if (t.subtypeOf(TOptKeyset)) return show(key);
+    return show(key) + ":" + show(val);
+  };
+
   switch (t.m_dataTag) {
   case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
   case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
   case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
-  case DataTag::VecVal:
-  case DataTag::DictVal:
-  case DataTag::KeysetVal:
-  case DataTag::ArrVal:
+  case DataTag::ArrLikeVal:
     ret += array_string(t.m_data.aval);
     break;
   case DataTag::Obj:
@@ -590,69 +586,45 @@ std::string show(const Type& t) {
     break;
   case DataTag::None:
     break;
-  case DataTag::ArrPacked:
+  case DataTag::ArrLikePacked:
     folly::format(
       &ret,
       "({})",
       [&] {
         using namespace folly::gen;
-        return from(t.m_data.apacked->elems)
+        return from(t.m_data.packed->elems)
           | map([&] (const Type& t) { return show(t); })
           | unsplit<std::string>(",");
       }()
     );
     break;
-  case DataTag::ArrPackedN:
-    folly::format(&ret, "([{}])", show(t.m_data.apackedn->type));
+  case DataTag::ArrLikePackedN:
+    if (t.m_data.packedn->len) {
+      folly::format(&ret, "([{}]:{})",
+                    show(t.m_data.packedn->type), *t.m_data.packedn->len);
+    } else {
+      folly::format(&ret, "([{}])", show(t.m_data.packedn->type));
+    }
     break;
-  case DataTag::ArrStruct:
+  case DataTag::ArrLikeMap:
     folly::format(
       &ret,
       "({})",
       [&] {
         using namespace folly::gen;
-        return from(t.m_data.astruct->map)
-          | map([&] (const std::pair<SString,Type>& kv) {
-              return folly::format("{}:{}",
-                kv.first->data(), show(kv.second)).str();
+        return from(t.m_data.map->map)
+          | map([&] (const std::pair<Cell,Type>& kv) {
+              return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");
       }()
     );
     break;
-  case DataTag::ArrMapN:
-    folly::format(
-      &ret,
-      "([{}:{}])",
-      show(t.m_data.amapn->key),
-      show(t.m_data.amapn->val)
-    );
-    break;
-  case DataTag::Dict:
-    folly::format(
-      &ret,
-      "([{}:{}])",
-      show(t.m_data.dict->key),
-      show(t.m_data.dict->val)
-    );
-    break;
-  case DataTag::Vec:
-    if (t.m_data.vec->len) {
-      folly::format(
-        &ret,
-        "([{}]:{})",
-        show(t.m_data.vec->val),
-        *t.m_data.vec->len
-      );
-    } else {
-      folly::format(&ret, "([{}])", show(t.m_data.vec->val));
-    }
-    break;
-  case DataTag::Keyset:
+  case DataTag::ArrLikeMapN:
     folly::format(
       &ret,
       "([{}])",
-      show(t.m_data.keyset->keyval)
+      showElem(t.m_data.mapn->key, t.m_data.mapn->val)
     );
     break;
   }

@@ -169,12 +169,6 @@ let type_file filename (funs, classes, typedefs, consts) =
   let named_consts = [] in (* TODO *)
   (named_funs, named_classes, named_typedefs, named_consts)
 
-let compile_file (funs, classes, typedefs, consts) =
-  let compiled_functions = Hhbc_from_nast.from_functions funs in
-  let compiled_classes = Hhbc_from_nast.from_classes classes in
-  Hhas_program.make compiled_functions compiled_classes
-  (* TODO: typedefs, consts *)
-
 let handle_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in

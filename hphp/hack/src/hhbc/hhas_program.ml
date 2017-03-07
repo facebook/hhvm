@@ -21,3 +21,14 @@ let functions hhas_prog =
 
 let classes hhas_prog =
   hhas_prog.hhas_classes
+
+let from_ast
+  (parsed_functions,
+  parsed_classes,
+  _parsed_typedefs,
+  _parsed_consts) =
+  let compiled_funs = Hhbc_from_nast.from_functions parsed_functions in
+  let compiled_classes = Hhas_class.from_asts parsed_classes in
+  let _compiled_typedefs = [] in (* TODO *)
+  let _compiled_consts = [] in (* TODO *)
+  make compiled_funs compiled_classes

@@ -161,15 +161,9 @@ let do_compile compiler_options opts files_info = begin
     let parsed_consts = [] in (* TODO consts *)
     (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts) in
   let f_fold fn fileinfo text = begin
-    let hhas_text =
-      let (parsed_functions, parsed_classes, _parsed_typedefs, _parsed_consts) =
-        get_nast_from_fileinfo opts fn fileinfo in
-      let compiled_funs = Hhbc_from_nast.from_functions parsed_functions in
-      let compiled_classes = Hhbc_from_nast.from_classes parsed_classes in
-      let _compiled_typedefs = [] in (* TODO *)
-      let _compiled_consts = [] in (* TODO *)
-      let hhas_prog = Hhas_program.make compiled_funs compiled_classes in
-      Hhbc_hhas.to_string hhas_prog in
+    let ast = get_nast_from_fileinfo opts fn fileinfo in
+    let hhas_prog = Hhas_program.from_ast ast in
+    let hhas_text = Hhbc_hhas.to_string hhas_prog in
     if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
     then text ^ hhvm_unix_call @@ Relative_path.to_absolute fn
     else text ^ hhas_text

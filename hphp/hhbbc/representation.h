@@ -26,6 +26,7 @@
 
 #include <boost/variant.hpp>
 
+#include "hphp/util/atomic-vector.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/md5.h"
 
@@ -557,7 +558,23 @@ struct Unit {
  * A php Program is a set of compilation units.
  */
 struct Program {
+  enum CInit {
+    ForAnalyze = 1,
+    ForOptimize = 2,
+    ForAll = ForAnalyze | ForOptimize,
+  };
+
+  explicit Program(size_t numUnitsGuess) :
+      nextConstInit(0),
+      constInits(100 + (numUnitsGuess / 4), 0) {
+  }
+  static uintptr_t tagged_func(Func* f, CInit ci) {
+    return reinterpret_cast<uintptr_t>(f) | ci;
+  }
+
   std::vector<std::unique_ptr<Unit>> units;
+  std::atomic<size_t> nextConstInit;
+  AtomicVector<uintptr_t> constInits;
 };
 
 //////////////////////////////////////////////////////////////////////

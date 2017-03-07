@@ -43,6 +43,7 @@
 
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
@@ -57,7 +58,19 @@ const StaticString s_Closure("Closure");
 const StaticString s_toString("__toString");
 const StaticString s_Stringish("Stringish");
 const StaticString s_86cinit("86cinit");
+const StaticString s_86sinit("86sinit");
+const StaticString s_86pinit("86pinit");
 const StaticString s_attr_Deprecated("__Deprecated");
+
+//////////////////////////////////////////////////////////////////////
+
+void record_const_init(php::Program& prog, uintptr_t encoded_func) {
+  auto id = prog.nextConstInit.fetch_add(1, std::memory_order_relaxed);
+  prog.constInits.ensureSize(id + 1);
+
+  DEBUG_ONLY auto const oldVal = prog.constInits.exchange(id, encoded_func);
+  assert(oldVal == 0);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -99,6 +112,16 @@ struct ParseUnitState {
     }
   };
   std::unordered_map<php::SrcLoc, int32_t, SrcLocHash> srcLocs;
+
+  /*
+   * Set of functions that should be processed in the constant
+   * propagation pass.
+   *
+   * Must include every function with a DefCns for correctness; cinit,
+   * pinit and sinit functions are added to improve overall
+   * performance.
+   */
+  std::unordered_map<borrowed_ptr<php::Func>, int> constPassFuncs;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -422,6 +445,12 @@ void populate_block(ParseUnitState& puState,
     return ret;
   };
 
+  auto defcns = [&] () {
+    puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
+  };
+  auto addelem = [&] () {
+    puState.constPassFuncs[&func] |= php::Program::ForOptimize;
+  };
   auto defcls = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefCls.arg1] = &func;
   };
@@ -522,6 +551,9 @@ void populate_block(ParseUnitState& puState,
       FLAGS_##flags                                     \
       new (&b.opcode) bc::opcode { IMM_ARG_##imms       \
                                    FLAGS_ARG_##flags }; \
+      if (Op::opcode == Op::DefCns) defcns();           \
+      if (Op::opcode == Op::AddElemC ||                 \
+          Op::opcode == Op::AddNewElemC) addelem();     \
       if (Op::opcode == Op::DefCls)    defcls(b);       \
       if (Op::opcode == Op::DefClsNop) defclsnop(b);    \
       if (Op::opcode == Op::CreateCl)  createcl(b);     \
@@ -832,8 +864,12 @@ void parse_methods(ParseUnitState& puState,
   for (auto& me : pce.methods()) {
     auto f = parse_func(puState, unit, ret, *me);
     if (f->name == s_86cinit.get()) {
+      puState.constPassFuncs[borrow(f)] |= php::Program::ForAnalyze;
       cinit = std::move(f);
     } else {
+      if (f->name == s_86pinit.get() || f->name == s_86sinit.get()) {
+        puState.constPassFuncs[borrow(f)] |= php::Program::ForAnalyze;
+      }
       ret->methods.push_back(std::move(f));
     }
   }
@@ -991,7 +1027,8 @@ void find_additional_metadata(const ParseUnitState& puState,
 
 }
 
-std::unique_ptr<php::Unit> parse_unit(std::unique_ptr<UnitEmitter> uep) {
+std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
+                                      std::unique_ptr<UnitEmitter> uep) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, uep->isASystemLib()};
   FTRACE(2, "parse_unit {}\n", uep->m_filepath->data());
 
@@ -1039,6 +1076,11 @@ std::unique_ptr<php::Unit> parse_unit(std::unique_ptr<UnitEmitter> uep) {
   }
 
   find_additional_metadata(puState, borrow(ret));
+
+  for (auto const item : puState.constPassFuncs) {
+    auto encoded_val = reinterpret_cast<uintptr_t>(item.first) | item.second;
+    record_const_init(prog, encoded_val);
+  }
 
   return ret;
 }

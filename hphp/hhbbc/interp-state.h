@@ -317,9 +317,11 @@ struct CollectedInfo {
   explicit CollectedInfo(const Index& index,
                          Context ctx,
                          ClassAnalysis* cls,
-                         PublicSPropIndexer* publicStatics)
+                         PublicSPropIndexer* publicStatics,
+                         bool trackConstantArrays)
     : props{index, ctx, cls}
     , publicStatics{publicStatics}
+    , trackConstantArrays{trackConstantArrays}
   {}
 
   ClosureUseVarMap closureUseTypes;
@@ -328,6 +330,7 @@ struct CollectedInfo {
   ConstantMap cnsMap;
   bool mayUseVV{false};
   bool readsUntrackedConstants{false};
+  const bool trackConstantArrays;
 };
 
 //////////////////////////////////////////////////////////////////////

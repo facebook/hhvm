@@ -50,6 +50,7 @@ namespace {
 
 const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
+const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -961,7 +962,30 @@ void emit_class(EmitUnitState& state,
 
   pce->setIfaceVtableSlot(state.index.lookup_iface_vtable_slot(&cls));
 
+  bool needs86cinit = false;
+
+  for (auto& cconst : cls.constants) {
+    if (!cconst.val.hasValue()) {
+      pce->addAbstractConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        cconst.isTypeconst
+      );
+    } else {
+      needs86cinit |= cconst.val->m_type == KindOfUninit;
+
+      pce->addConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        &cconst.val.value(),
+        cconst.phpCode,
+        cconst.isTypeconst
+      );
+    }
+  }
+
   for (auto& m : cls.methods) {
+    if (!needs86cinit && m->name == s_86cinit.get()) continue;
     FTRACE(2, "    method: {}\n", m->name->data());
     auto const fe = ue.newMethodEmitter(m->name, pce);
     emit_init_func(*fe, *m);
@@ -1020,24 +1044,6 @@ void emit_class(EmitUnitState& state,
     );
   }
   assert(uvIt == useVars.end());
-
-  for (auto& cconst : cls.constants) {
-    if (!cconst.val.hasValue()) {
-      pce->addAbstractConstant(
-        cconst.name,
-        cconst.typeConstraint,
-        cconst.isTypeconst
-      );
-    } else {
-      pce->addConstant(
-        cconst.name,
-        cconst.typeConstraint,
-        &cconst.val.value(),
-        cconst.phpCode,
-        cconst.isTypeconst
-      );
-    }
-  }
 
   pce->setEnumBaseTy(cls.enumBaseTy);
 }

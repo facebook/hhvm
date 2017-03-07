@@ -279,7 +279,7 @@ void insert_assertions(const Index& index,
 
   auto lastStackOutputObvious = false;
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -418,7 +418,7 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true };
   auto interp = Interp { index, ctx, collect, blk, state };
 
   auto peephole = make_peephole(newBCs, index, ctx);
@@ -607,14 +607,15 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
        * We need to perform a final type analysis before we do
        * anything else.
        */
-      ainfo = analyze_func(index, ainfo.ctx);
+      ainfo = analyze_func(index, ainfo.ctx, true);
     }
 
     // If we merged blocks, there could be new optimization opportunities
   } while (again);
 
   auto const func = ainfo.ctx.func;
-  if (func->name == s_86pinit.get() || func->name == s_86sinit.get()) {
+  if (index.frozen() &&
+      (func->name == s_86pinit.get() || func->name == s_86sinit.get())) {
     auto const& blk = *func->blocks[func->mainEntry];
     if (blk.hhbcs.size() == 2 &&
         blk.hhbcs[0].op == Op::Null &&

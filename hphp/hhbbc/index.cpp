@@ -2600,6 +2600,19 @@ bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
   return !lookup_public_static_impl(*m_data, cls, name).everModified;
 }
 
+void Index::fixup_public_static(borrowed_ptr<const php::Class> cls,
+                                SString name, const Type& ty) const {
+  auto const classes = find_range(m_data->classInfo, cls->name);
+  for (auto& cinfo : classes) {
+    if (cinfo.second->cls == cls) {
+      auto const it = cinfo.second->publicStaticProps.find(name);
+      if (it != end(cinfo.second->publicStaticProps)) {
+        it->second.inferredType = it->second.initializerType = ty;
+      }
+    }
+  }
+}
+
 Slot
 Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
   return folly::get_default(m_data->ifaceSlotMap, cls, kInvalidSlot);
@@ -2609,7 +2622,6 @@ Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
 
 void Index::refine_class_constants(const Context& ctx, ContextSet& deps) {
   bool changed = false;
-  bool any_dynamic = false;
   for (auto& c : ctx.func->cls->constants) {
     if (c.val && c.val->m_type == KindOfUninit) {
       auto const fa = analyze_func_inline(*this, ctx, { sval(c.name) });
@@ -2617,14 +2629,8 @@ void Index::refine_class_constants(const Context& ctx, ContextSet& deps) {
       if (val) {
         changed = true;
         c.val = *val;
-      } else {
-        any_dynamic = true;
       }
     }
-  }
-  if (!any_dynamic) {
-    assert(ctx.func->cls->methods.back()->name == s_86cinit.get());
-    ctx.func->cls->methods.pop_back();
   }
   if (changed) find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
 }

@@ -571,6 +571,18 @@ struct Index {
   Type lookup_public_static(borrowed_ptr<const php::Class>, SString name) const;
 
   /*
+   * If we resolve a public static initializer to a constant, and eliminate the
+   * 86pinit, we need to update the initializer in the index.
+   *
+   * Note that this is called from code that runs in parallel, and
+   * consequently isn't normally allowed to modify the index. Its safe
+   * in this case, because for any given property there can only be
+   * one InitProp which sets it, and all we do is modify an existing
+   * element of a map.
+   */
+  void fixup_public_static(borrowed_ptr<const php::Class>, SString name,
+                           const Type& ty) const;
+  /*
    * Returns whether a public static property is known to be immutable.  This
    * is used to add AttrPersistent flags to static properties, and relies on
    * AnalyzePublicStatics (without this flag it will always return false).

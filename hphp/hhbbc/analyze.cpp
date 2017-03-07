@@ -400,8 +400,11 @@ FuncAnalysis do_analyze_collect(const Index& index,
 FuncAnalysis do_analyze(const Index& index,
                         Context const ctx,
                         ClassAnalysis* clsAnalysis,
-                        const std::vector<Type>* knownArgs) {
-  CollectedInfo collect { index, ctx, clsAnalysis, nullptr };
+                        const std::vector<Type>* knownArgs,
+                        bool trackConstantArrays) {
+  CollectedInfo collect {
+    index, ctx, clsAnalysis, nullptr, trackConstantArrays
+  };
   return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
 }
 
@@ -480,10 +483,11 @@ FuncAnalysis::FuncAnalysis(Context ctx)
   }
 }
 
-FuncAnalysis analyze_func(const Index& index, Context const ctx) {
+FuncAnalysis analyze_func(const Index& index, Context const ctx,
+                          bool trackConstantArrays) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
     is_systemlib_part(*ctx.unit)};
-  return do_analyze(index, ctx, nullptr, nullptr);
+  return do_analyze(index, ctx, nullptr, nullptr, trackConstantArrays);
 }
 
 FuncAnalysis analyze_func_collect(const Index& index,
@@ -500,7 +504,7 @@ FuncAnalysis analyze_func_inline(const Index& index,
   FTRACE(2, "{:.^70}\n", "Inline Interp");
   SCOPE_EXIT { FTRACE(2, "{:.^70}\n", "End Inline Interp"); };
   assert(!ctx.func->isClosureBody);
-  return do_analyze(index, ctx, nullptr, &args);
+  return do_analyze(index, ctx, nullptr, &args, true);
 }
 
 ClassAnalysis analyze_class(const Index& index, Context const ctx) {
@@ -587,7 +591,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       index,
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
-      nullptr
+      nullptr,
+      true
     );
   }
   if (auto f = find_method(ctx.cls, s_86sinit.get())) {
@@ -595,7 +600,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       index,
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
-      nullptr
+      nullptr,
+      true
     );
   }
 
@@ -652,7 +658,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
           index,
           Context { ctx.unit, borrow(f), ctx.cls },
           &clsAnalysis,
-          nullptr
+          nullptr,
+          true
         )
       );
     }
@@ -665,7 +672,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
             index,
             Context { ctx.unit, invoke, c },
             &clsAnalysis,
-            nullptr
+            nullptr,
+            true
           )
         );
       }
@@ -731,7 +739,7 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});

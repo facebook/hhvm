@@ -409,7 +409,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   if (!options.extendedStats) return;
 
   auto const ctx = Context { func.unit, &func, func.cls };
-  auto const fa  = analyze_func(index, ctx);
+  auto const fa  = analyze_func(index, ctx, false);
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
     for (auto& blk : func.blocks) {
@@ -417,7 +417,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;
 
-      CollectedInfo collect { index, ctx, nullptr, nullptr };
+      CollectedInfo collect { index, ctx, nullptr, nullptr, false };
       Interp interp { index, ctx, collect, borrow(blk), state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State&) {};

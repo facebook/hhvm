@@ -328,10 +328,12 @@ void in(ISS& env, const bc::AddElemC& op) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return array_set(std::move(ty), k, v);
+      return env.collect.trackConstantArrays ?
+        array_set(std::move(ty), k, v) : TArrN;
     }
     if (ty.subtypeOf(TDict)) {
-      return dict_set(std::move(ty), k, v).first;
+      return env.collect.trackConstantArrays ?
+        dict_set(std::move(ty), k, v).first : TDictN;
     }
     return folly::none;
   }(popC(env));
@@ -343,7 +345,7 @@ void in(ISS& env, const bc::AddElemC& op) {
   if (outTy->subtypeOf(TBottom)) {
     unreachable(env);
   } else {
-    constprop(env);
+    if (env.collect.trackConstantArrays) constprop(env);
   }
   push(env, std::move(*outTy));
 }
@@ -363,7 +365,8 @@ void in(ISS& env, const bc::AddNewElemC&) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return array_newelem(std::move(ty), std::move(v));
+      return env.collect.trackConstantArrays ?
+        array_newelem(std::move(ty), std::move(v)) : TArrN;
     }
     return folly::none;
   }(popC(env));
@@ -375,7 +378,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
   if (outTy->subtypeOf(TBottom)) {
     unreachable(env);
   } else {
-    constprop(env);
+    if (env.collect.trackConstantArrays) constprop(env);
   }
   push(env, std::move(*outTy));
 }
@@ -2803,6 +2806,11 @@ void in(ISS& env, const bc::InitProp& op) {
       if (prop.name == op.str1) {
         ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
         prop.val = *v;
+        if (op.subop2 == InitPropOp::Static &&
+            !env.collect.publicStatics &&
+            !env.index.frozen()) {
+          env.index.fixup_public_static(env.ctx.func->cls, prop.name, t);
+        }
         return reduce(env, bc::PopC {});
       }
     }

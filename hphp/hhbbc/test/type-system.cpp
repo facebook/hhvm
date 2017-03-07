@@ -61,7 +61,7 @@ const StaticString s_WaitHandle("HH\\WaitHandle");
 
 // A test program so we can actually test things involving object or
 // class types.
-std::unique_ptr<php::Unit> make_test_unit() {
+std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
   assert(SystemLib::s_inited);
   std::string const hhas = R"(
     .main {
@@ -154,12 +154,12 @@ std::unique_ptr<php::Unit> make_test_unit() {
     "ignore.php",
     MD5("12345432123454321234543212345432")
   ));
-  return parse_unit(std::move(ue));
+  return parse_unit(program, std::move(ue));
 }
 
 std::unique_ptr<php::Program> make_program() {
-  auto program = folly::make_unique<php::Program>();
-  program->units.push_back(make_test_unit());
+  auto program = folly::make_unique<php::Program>(1);
+  program->units.push_back(make_test_unit(*program));
   return program;
 }
 

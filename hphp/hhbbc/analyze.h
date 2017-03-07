@@ -133,7 +133,7 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, Context);
+FuncAnalysis analyze_func(const Index&, Context, bool trackConstantArrays);
 
 /*
  * Analyze a function like analyze_func, but exposing gathered CollectedInfo

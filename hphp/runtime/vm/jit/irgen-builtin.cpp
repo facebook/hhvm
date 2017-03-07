@@ -1681,19 +1681,6 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
     auto const key = popC(env);
     auto const stack_base = popC(env);
 
-    if (!loaded_collection_array && RuntimeOption::EvalHackArrCompatNotices) {
-      gen(
-        env,
-        RaiseHackArrCompatNotice,
-        cns(
-          env,
-          makeStaticString(
-            makeHackArrCompatImplicitArrayKeyMsg(uninit_variant.asTypedValue())
-          )
-        )
-      );
-    }
-
     // if the key is null it will not be found so just return the default
     push(env, def);
     decRef(env, stack_base);
@@ -1915,27 +1902,8 @@ void emitIdx(IRGS& env) {
 
   if (keyType <= TNull || !baseType.maybe(TArr | TObj | TStr)) {
     auto const def = popC(env, DataTypeGeneric);
-
-    if (RuntimeOption::EvalHackArrCompatNotices &&
-        keyType <= TNull && baseType <= TArr) {
-      // Constrain to specific
-      popC(env);
-      popC(env);
-      gen(
-        env,
-        RaiseHackArrCompatNotice,
-        cns(
-          env,
-          makeStaticString(
-            makeHackArrCompatImplicitArrayKeyMsg(uninit_variant.asTypedValue())
-          )
-        )
-      );
-    } else {
-      popC(env, keyType <= TNull ? DataTypeSpecific : DataTypeGeneric);
-      popC(env, keyType <= TNull ? DataTypeGeneric : DataTypeSpecific);
-    }
-
+    popC(env, keyType <= TNull ? DataTypeSpecific : DataTypeGeneric);
+    popC(env, keyType <= TNull ? DataTypeGeneric : DataTypeSpecific);
     push(env, def);
     decRef(env, base);
     decRef(env, key);

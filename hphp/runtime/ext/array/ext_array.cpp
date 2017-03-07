@@ -2797,9 +2797,6 @@ TypedValue HHVM_FUNCTION(hphp_array_idx,
     } else {
       raise_error("hphp_array_idx: search must be an array");
     }
-  } else if (RuntimeOption::EvalHackArrCompatNotices &&
-             search.isPHPArray() && !search.isNull()) {
-    raiseHackArrCompatImplicitArrayKey(uninit_variant.asTypedValue());
   }
   return tvReturn(def);
 }

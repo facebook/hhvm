@@ -1430,27 +1430,6 @@ let relabel_instrseq instrseq =
       else None
     | _ -> Some instr)
 
-let from_fun_ : A.fun_ -> Hhas_function.t option =
-  fun ast_fun ->
-  let function_name = Litstr.to_string @@ snd ast_fun.A.f_name in
-  match ast_fun.A.f_body with
-  | b ->
-    let tparams = tparams_to_strings ast_fun.A.f_tparams in
-    let body_instrs, function_params, function_return_type =
-      from_body tparams ast_fun.A.f_params ast_fun.A.f_ret b in
-    let body_instrs = relabel_instrseq body_instrs in
-    let function_decl_vars = extract_decl_vars body_instrs in
-    let function_body = instr_seq_to_list body_instrs in
-    Some (Hhas_function.make
-      function_name
-      function_params
-      function_return_type
-      function_body
-      function_decl_vars)
-
-let from_functions ast_functions =
-  List.filter_map ast_functions from_fun_
-
 let from_attribute_base attribute_name arguments =
   let attribute_arguments = literals_from_exprs_with_index arguments in
   Hhas_attribute.make attribute_name attribute_arguments
@@ -1463,6 +1442,29 @@ let from_attribute : A.user_attribute -> Hhas_attribute.t =
 let from_attributes ast_attributes =
   (* The list of attributes is reversed in the A. *)
   List.map (List.rev ast_attributes) from_attribute
+
+let from_fun_ : A.fun_ -> Hhas_function.t option =
+  fun ast_fun ->
+  let function_name = Litstr.to_string @@ snd ast_fun.A.f_name in
+  match ast_fun.A.f_body with
+  | b ->
+    let tparams = tparams_to_strings ast_fun.A.f_tparams in
+    let body_instrs, function_params, function_return_type =
+      from_body tparams ast_fun.A.f_params ast_fun.A.f_ret b in
+    let body_instrs = relabel_instrseq body_instrs in
+    let function_decl_vars = extract_decl_vars body_instrs in
+    let function_body = instr_seq_to_list body_instrs in
+    let function_attributes = from_attributes ast_fun.A.f_user_attributes in
+    Some (Hhas_function.make
+      function_attributes
+      function_name
+      function_params
+      function_return_type
+      function_body
+      function_decl_vars)
+
+let from_functions ast_functions =
+  List.filter_map ast_functions from_fun_
 
 let from_method : A.class_ -> A.method_ -> Hhas_method.t option =
   fun ast_class ast_method ->

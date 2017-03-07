@@ -567,21 +567,6 @@ let add_decl_vars buf decl_vars = if decl_vars = [] then () else begin
   B.add_string buf ";\n"
   end
 
-let add_fun_def buf fun_def =
-  let function_name = fmt_name (Hhas_function.name fun_def) in
-  let function_return_type = Hhas_function.return_type fun_def in
-  let function_params = Hhas_function.params fun_def in
-  let function_body = Hhas_function.body fun_def in
-  let function_decl_vars = Hhas_function.decl_vars fun_def in
-  B.add_string buf "\n.function ";
-  B.add_string buf (string_of_type_info_option function_return_type);
-  B.add_string buf function_name;
-  B.add_string buf (string_of_params function_params);
-  B.add_string buf " {\n";
-  add_decl_vars buf function_decl_vars;
-  add_instruction_list buf 2 function_body;
-  B.add_string buf "}\n"
-
 let attribute_argument_to_string argument =
   let value = match argument with
   | Null -> "N"
@@ -619,6 +604,28 @@ let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
   attribute_to_string_helper ~if_class_attribute:true name args
+
+let function_attributes f =
+  let user_attrs = Hhas_function.attributes f in
+  let attrs = List.map attribute_to_string user_attrs in
+  let text = String.concat " " attrs in
+  if text = "" then "" else "[" ^ text ^ "] "
+
+let add_fun_def buf fun_def =
+  let function_name = fmt_name (Hhas_function.name fun_def) in
+  let function_return_type = Hhas_function.return_type fun_def in
+  let function_params = Hhas_function.params fun_def in
+  let function_body = Hhas_function.body fun_def in
+  let function_decl_vars = Hhas_function.decl_vars fun_def in
+  B.add_string buf "\n.function ";
+  B.add_string buf (function_attributes fun_def);
+  B.add_string buf (string_of_type_info_option function_return_type);
+  B.add_string buf function_name;
+  B.add_string buf (string_of_params function_params);
+  B.add_string buf " {\n";
+  add_decl_vars buf function_decl_vars;
+  add_instruction_list buf 2 function_body;
+  B.add_string buf "}\n"
 
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in

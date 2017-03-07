@@ -505,10 +505,6 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
   // First fill the request local method cache for this call.
   lookup<fatal>(mce, ar, name, cls, ctx);
 
-  // We are using whether the code is already smashed to determine which thread
-  // should free the SmashLoc.
-  auto codeLock = tc::lockCode();
-
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);
     if (!(imm & 1)) return false;

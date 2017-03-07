@@ -39,3 +39,5 @@ let params f = f.function_params
 let return_type f = f.function_return_type
 let body f = f.function_body
 let decl_vars f = f.function_decl_vars
+let with_name f function_name = { f with function_name }
+let with_body f function_body = { f with function_body }

@@ -1461,8 +1461,19 @@ let from_fun_ : A.fun_ -> Hhas_function.t =
     function_body
     function_decl_vars
 
+let is_memoized attributes =
+  let f attr = (Hhas_attribute.name attr) = "__Memoize" in
+  List.exists attributes f
+
 let from_functions ast_functions =
-  List.map ast_functions from_fun_
+  let f ast_fun =
+    let compiled = from_fun_ ast_fun in
+    if is_memoized (Hhas_function.attributes compiled) then
+      let (renamed, memoized) = Generate_memoized.memoize_function compiled in
+      [ renamed; memoized ]
+    else
+      [ compiled ] in
+  Core.List.bind ast_functions f
 
 let from_method : A.class_ -> A.method_ -> Hhas_method.t option =
   fun ast_class ast_method ->

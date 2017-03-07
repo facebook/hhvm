@@ -15,7 +15,7 @@
  *)
 (*****************************************************************************)
 
-open Parse_diff
+type file_diff = Path.t * (int * int) list
 
 val parse_diff: Path.t -> string -> file_diff list
 val apply:

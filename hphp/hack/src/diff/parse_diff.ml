@@ -30,14 +30,11 @@ open Core
  *)
 (*****************************************************************************)
 
-type filename = Path.t
+type filename = string
 type interval = int * int
 type file_diff = filename * interval list
 
 type env = {
-  (* The prefix of the files in this diff *)
-  prefix : Path.t;
-
   (* The file we are currently parsing (None for '/dev/null') *)
   mutable file: string option;
 
@@ -52,8 +49,8 @@ type env = {
 }
 
 (* The entry point *)
-let rec go prefix content =
-  let env = { prefix; file = None; modified = []; line = 0; result = [] } in
+let rec go content =
+  let env = { file = None; modified = []; line = 0; result = [] } in
   let lines = String_utils.split_on_newlines content in
   start env lines;
   List.rev env.result
@@ -118,8 +115,7 @@ and add_file env =
   match env.file with
   | None -> ()
   | Some filename ->
-      let path = Path.concat env.prefix filename in
-      env.result <- (path, lines_modified) :: env.result
+      env.result <- (filename, lines_modified) :: env.result
 
 (* Merges intervals when necessary.
  * For example: '[(1, 2), (2, 2), (2, 5); ...]' becomes '[(1, 5); ...]'.

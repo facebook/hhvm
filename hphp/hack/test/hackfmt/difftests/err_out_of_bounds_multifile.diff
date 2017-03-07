@@ -1,0 +1,41 @@
+diff --git a/balanced_brackets.php b/balanced_brackets.php
+--- a/balanced_brackets.php
++++ b/balanced_brackets.php
+@@ -3,7 +3,7 @@
+ // https://rosettacode.org/wiki/Balanced_brackets#PHP
+
+ function isbalanced(string $s): bool {
+-  $bal = 0; // balance
++  $bal = 0;
+   for ($i = 0; $i < strlen($s); ++$i) {
+     $ch = substr($s, $i, 1);
+     if ($ch == '[') {
+diff --git a/chaining.php b/chaining.php
+--- a/chaining.php
++++ b/chaining.php
+@@ -31,7 +31,7 @@
+
+   $my_object?->getASubObjectFromMyObject
+             ->getSomeOtherObject()
+-            ->directObject
++            ->changed
+             ?->field
+             ->subField
+             ->method();
+diff --git a/fibonacci.php b/fibonacci.php
+--- a/fibonacci.php
++++ b/fibonacci.php
+@@ -1,9 +1,9 @@
+ <?hh // strict
+
+ function fibonacci($pos){
+-  $a = array(0, 1);
++  $arr = array(0, 1);
+   for ($i = 2; $i <= $pos; ++$i)
+-    $a[$i] =
+-      $a[$i-1] + $a[$i-2];
+-  return $a[$pos];
++    $arr[$i] =
++      $arr[$i-1] + $arr[$i-2];
++  return $arr[$pos];
+ }

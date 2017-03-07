@@ -222,8 +222,12 @@ let apply_blocks ~should_patch filename blocks lines =
 (* Formats a diff (in place) *)
 (*****************************************************************************)
 
+type file_diff = Path.t * (int * int) list
+
 let parse_diff prefix diff_text =
-  Parse_diff.go prefix diff_text
+  List.map (Parse_diff.go diff_text) (fun (filename, modified_lines) ->
+    Path.concat prefix filename, modified_lines
+  )
 
 let rec apply modes apply_mode ~diff:file_and_lines_modified =
   List.iter file_and_lines_modified begin fun (filepath, modified_lines) ->

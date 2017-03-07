@@ -254,16 +254,16 @@ let main = function
   | Diff (root, dry) ->
     let root = get_root root in
     let diff = read_stdin () in
-    let parsed_diff = Parse_diff.go root diff in
-    let formatted_files = List.map parsed_diff (fun (filename, intervals) ->
-      let filename = Path.to_string filename in
+    let parsed_diff = Parse_diff.go diff in
+    let formatted_files = List.map parsed_diff (fun (rel_path, intervals) ->
+      let filename = Path.concat root rel_path |> Path.to_string in
       if not (file_exists filename) then
-        raise (InvalidDiff ("No such file or directory: " ^ filename));
+        raise (InvalidDiff ("No such file or directory: " ^ rel_path));
       let contents = parse (Some filename) |> format_intervals intervals in
-      filename, contents
+      rel_path, filename, contents
     ) in
-    List.iter formatted_files (fun (filename, contents) ->
-      if dry then printf "*** %s\n" filename;
+    List.iter formatted_files (fun (rel_path, filename, contents) ->
+      if dry then printf "*** %s\n" rel_path;
       let filename = if dry then None else Some filename in
       output ?filename contents
     )

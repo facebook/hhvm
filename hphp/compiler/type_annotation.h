@@ -131,6 +131,7 @@ struct TypeAnnotation {
   bool isTypeAccess() const { return m_typeaccess; }
   bool isShape() const { return m_shape; }
   bool isClsCnsShapeField() const { return m_clsCnsShapeField; }
+  bool isOptionalShapeField() const { return m_optionalShapeField; }
 
   /*
    * Return a shallow copy of this TypeAnnotation, except with

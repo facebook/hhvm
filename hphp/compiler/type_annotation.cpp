@@ -330,6 +330,7 @@ const StaticString
   s_access_list("access_list"),
   s_fields("fields"),
   s_is_cls_cns("is_cls_cns"),
+  s_optional_shape_field("optional_shape_field"),
   s_value("value"),
   s_typevars("typevars")
 ;
@@ -357,6 +358,11 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
     assert(shapeField->m_typeArgs);
     auto field = Array::Create();
     if (shapeField->isClsCnsShapeField()) field.add(s_is_cls_cns, true_varNR);
+
+    if (shapeField->isOptionalShapeField()) {
+      field.add(s_optional_shape_field, true_varNR);
+    }
+
     field.add(s_value, Variant(shapeField->m_typeArgs->getScalarArrayRep()));
     fields.add(String(shapeField->m_name), Variant(field.get()));
     shapeField = shapeField->m_typeList;

@@ -53,6 +53,7 @@ const StaticString
   s_access_list("access_list"),
   s_fields("fields"),
   s_is_cls_cns("is_cls_cns"),
+  s_optional_shape_field("optional_shape_field"),
   s_value("value"),
   s_this("HH\\this"),
   s_self("self"),
@@ -176,6 +177,9 @@ void shapeTypeName(const Array& arr, std::string& name) {
     auto const field = fields->getKey(i);
     auto value = fields->getValue(i).toCArrRef();
     auto quote = "'";
+    if (value.exists(s_optional_shape_field)) {
+      name += "?";
+    }
     if (value.exists(s_value)) {
       // if unresolved, ignore wrapper
       if (value.exists(s_is_cls_cns)) quote = "";
@@ -449,6 +453,11 @@ Array resolveShape(const Array& arr,
     auto valueArr = wrapper[s_value].toArray();
     auto value =
       resolveTS(valueArr, typeCns, typeCnsCls, generics, persistent);
+
+    if (wrapper.exists(s_optional_shape_field)) {
+      value.add(s_optional_shape_field, true_varNR);
+    }
+
     newfields.add(key, Variant(value));
   }
 

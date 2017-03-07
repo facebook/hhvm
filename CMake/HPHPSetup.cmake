@@ -2,26 +2,6 @@ include(Options)
 
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug DebugOpt RelWithDebInfo)
 
-# Do this until cmake has a define for ARMv8
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("
-#ifndef __x86_64__
-#error Not x64
-#endif
-int main() { return 0; }" IS_X64)
-
-CHECK_CXX_SOURCE_COMPILES("
-#ifndef __AARCH64EL__
-#error Not ARMv8
-#endif
-int main() { return 0; }" IS_AARCH64)
-
-CHECK_CXX_SOURCE_COMPILES("
-#ifndef __powerpc64__
-#error Not PPC64
-#endif
-int main() { return 0; }" IS_PPC64)
-
 set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_static
     hphp_runtime_ext

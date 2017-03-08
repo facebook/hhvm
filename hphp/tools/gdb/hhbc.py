@@ -78,11 +78,11 @@ class HHBC(object):
         encoding."""
 
         pc = pc.cast(T('uint8_t').pointer())
-        raw_val = (~pc.dereference()).cast(T('size_t'))
+        raw_val = (pc.dereference()).cast(T('size_t'))
 
         if (raw_val == 0xff):
             pc += 1
-            byte = ~pc.dereference()
+            byte = pc.dereference()
             raw_val += byte
 
         return [raw_val.cast(T('HPHP::Op')), 2 if raw_val >= 0xff else 1]

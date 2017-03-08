@@ -39,9 +39,7 @@ struct UnitEmitter;
  *
  * We currently use a variable-width encoding scheme that can store [0, 0xff)
  * using one byte and [0xff, 0x1fe) using two bytes. If and when we hit 0x1fe
- * bytecodes we can adjust the encoding. All bytes are written with their bits
- * flipped, to ensure that any code attempting to read raw Ops from a bytecode
- * stream will fail.
+ * bytecodes we can adjust the encoding.
  */
 
 /*
@@ -68,13 +66,13 @@ void encode_op(Op op, F write_byte) {
                 "Op encoding scheme doesn't support Ops >= 0x1fe");
   auto rawVal = static_cast<size_t>(op);
   if (rawVal >= 0xff) {
-    // Write a 0xff signal byte, with its bits flipped.
-    write_byte(static_cast<uint8_t>(0));
+    // Write a 0xff signal byte
+    write_byte(static_cast<uint8_t>(0xff));
     rawVal -= 0xff;
   }
   assert(rawVal < 0xff);
 
-  write_byte(~rawVal);
+  write_byte(rawVal);
 }
 
 /*
@@ -83,15 +81,8 @@ void encode_op(Op op, F write_byte) {
  * decoding scheme with arbitrary values.
  */
 inline Op decode_op_unchecked(PC& pc) {
-  size_t rawVal = static_cast<uint8_t>(~decode_byte(pc));
-  if (rawVal == 0xff) {
-    auto const byte = static_cast<uint8_t>(~decode_byte(pc));
-    assert(byte < 0xff);
-    rawVal += byte;
-  }
-
-  auto const op = static_cast<Op>(rawVal);
-  return op;
+  uint32_t raw = decode_byte(pc);
+  return LIKELY(raw != 0xff) ? Op(raw) : Op(decode_byte(pc) + 0xff);
 }
 
 /*

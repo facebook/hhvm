@@ -465,7 +465,8 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
     s_1GPages[s_num1GPages++] = ret;
   }
 #ifdef HAVE_NUMA
-  if (node >= 0) {
+  if (memMask) {
+    assert(interleaveMask);
     numa_set_membind(memMask);
     numa_set_interleave_mask(interleaveMask);
     numa_bitmask_free(memMask);

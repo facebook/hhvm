@@ -171,7 +171,7 @@ let from_type_constants ast_type_constants =
 
 let from_class_elt_method ast_class elt =
   match elt with
-  | A.Method m -> from_method ast_class m
+  | A.Method m -> Hhas_method.from_ast ast_class m
   | _ -> None
 
 let from_class_elt_classvars elt =
@@ -193,8 +193,9 @@ let from_class_elt_typeconsts elt =
 
 let from_ast : A.class_ -> t =
   fun ast_class ->
-  let class_attributes = from_attributes ast_class.A.c_user_attributes in
-  let class_name = Litstr.to_string @@ snd ast_class.A.c_name in
+  let class_attributes =
+    Emit_attribute.from_asts ast_class.Ast.c_user_attributes in
+  let class_name = Litstr.to_string @@ snd ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
   let class_is_enum = ast_class.A.c_kind = Ast.Cenum in
   let class_is_interface = ast_is_interface ast_class in

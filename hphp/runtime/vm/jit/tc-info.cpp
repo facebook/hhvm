@@ -50,7 +50,6 @@ bool dumpTCCode(folly::StringPiece filename) {
   OPEN_FILE(aprofFile,      "_aprof");
   OPEN_FILE(acoldFile,      "_acold");
   OPEN_FILE(afrozenFile,    "_afrozen");
-  OPEN_FILE(helperAddrFile, "_helpers_addrs.txt");
 
 #undef OPEN_FILE
 

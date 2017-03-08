@@ -106,11 +106,11 @@ private:
   }
 
   std::pair<iterator, bool> emplace_back(const K& k, const V& v) {
-    return getList().emplace_back(k, v);
+    return getList().push_back({k, v});
   }
 
   std::pair<iterator, bool> emplace_front(const K& k, const V& v) {
-    return getList().emplace_front(k, v);
+    return getList().push_front({k, v});
   }
 
   iterator begin() { return getList().begin(); }

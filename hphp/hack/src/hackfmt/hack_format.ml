@@ -1095,8 +1095,10 @@ let rec transform node =
   | ConditionalExpression x ->
     let (test_expr, q_kw, true_expr, c_kw, false_expr) =
       get_conditional_expression_children x in
+    let lazy_argument_rule = builder#create_lazy_rule
+      ~rule_kind:(Rule.Argument) () in
     t test_expr;
-    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+    tl_with ~nest ~rule:(LazyRuleID lazy_argument_rule) ~f:(fun () ->
       split ~space ();
       t q_kw;
       if not (is_missing true_expr) then begin

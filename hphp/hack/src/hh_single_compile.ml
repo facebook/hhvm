@@ -105,9 +105,8 @@ let file_to_files file =
 
 let parse_name popt files_contents =
   Errors.do_ begin fun () ->
-    let parsed_files =
-      Relative_path.Map.mapi
-       (Parser_hack.program popt) files_contents in
+    let parser = Full_fidelity_ast.from_text_with_legacy ~parser_options:popt in
+    let parsed_files = Relative_path.Map.mapi parser files_contents in
 
     let files_info =
       Relative_path.Map.mapi begin fun fn parsed_file ->

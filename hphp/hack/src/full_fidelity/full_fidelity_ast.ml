@@ -19,6 +19,7 @@ module TK = Full_fidelity_token_kind
 module PT = Full_fidelity_positioned_token
 
 
+
 let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
   let len = String.length str in
   pos, if cnt >= len then "" else String.sub str cnt (len - cnt)
@@ -199,6 +200,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.PlusEqual                   -> Binop (Eq (Some Plus),    lhs, rhs)
   | Some TK.MinusEqual                  -> Binop (Eq (Some Minus),   lhs, rhs)
   | Some TK.StarEqual                   -> Binop (Eq (Some Star),    lhs, rhs)
+  | Some TK.StarStarEqual               -> Binop (Eq (Some Starstar),lhs, rhs)
   | Some TK.SlashEqual                  -> Binop (Eq (Some Slash),   lhs, rhs)
   | Some TK.DotEqual                    -> Binop (Eq (Some Dot),     lhs, rhs)
   | Some TK.PercentEqual                -> Binop (Eq (Some Percent), lhs, rhs)
@@ -223,6 +225,8 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
    *)
   | Some TK.BarGreaterThan              -> Pipe         (lhs, rhs)
   | Some TK.QuestionQuestion            -> NullCoalesce (lhs, rhs)
+  (* TODO: Figure out why this fails silently when used in a pBlock; probably
+     just caught somewhere *)
   | _ -> missing_syntax "binary operator" node env
 
 let pImportFlavor : import_flavor parser = fun node env ->
@@ -948,7 +952,6 @@ and pStmt : stmt parser = fun node env ->
   | BreakStatement _ -> Break (get_pos node)
   | ContinueStatement _ -> Continue (get_pos node)
   | _ -> missing_syntax "statement" node env
-
 
 let pTConstraintTy : hint parser = fun node ->
   match syntax node with

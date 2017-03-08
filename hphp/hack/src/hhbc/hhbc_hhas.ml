@@ -13,6 +13,11 @@ module H = Hhbc_ast
 module A = Ast
 open H
 
+(* Generic helpers *)
+let sep pieces = String.concat " " pieces
+
+let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
+
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
  *   add_X takes a buffer and an X, and appends to the buffer
@@ -34,10 +39,10 @@ let string_of_basic instruction =
     | UnboxRNop   -> "UnboxRNop"
     | RGetCNop    -> "RGetCNop"
 
-let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
-
 let string_of_list_of_shape_fields sl =
   String.concat " " @@ List.map quote_str sl
+
+let string_of_stack_index si = string_of_int si
 
 let string_of_lit_const instruction =
   match instruction with
@@ -151,16 +156,16 @@ let string_of_get x =
 let string_of_member_key mk =
   let open MemberKey in
   match mk with
-  | EC -> "EC:0"
+  | EC i -> "EC:" ^ string_of_stack_index i
   (* hhas doesn't yet support this syntax *)
   | EL id -> "EL:" ^ string_of_local_id id
   | ET str -> "ET:" ^ quote_str str
   | EI i -> "EI:" ^ Int64.to_string i
-  | PC -> "PC"
+  | PC i -> "PC:" ^ string_of_stack_index i
   (* hhas doesn't yet support this syntax *)
   | PL id -> "PL:" ^ string_of_local_id id
   | PT str -> "PT:" ^ quote_str str
-  | QT _ -> "QT"
+  | QT str -> "QT:" ^ quote_str str
   | W -> "W"
 
 let string_of_eq_op op =
@@ -282,40 +287,42 @@ let string_of_isset instruction =
   | IsTypeL (id, op) ->
     "IsTypeL " ^ string_of_local_id id ^ " " ^ string_of_istype_op op
 
-let string_of_stack_index si = string_of_int si
-
 let string_of_base x =
   match x with
   | BaseNC (si, m) ->
-    "BaseNC " ^ string_of_stack_index si ^ " " ^ MemberOpMode.to_string m
+    sep ["BaseNC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseNL (id, m) ->
-    "BaseNL " ^ string_of_local_id id ^ " " ^ MemberOpMode.to_string m
+    sep ["BaseNL"; string_of_local_id id; MemberOpMode.to_string m]
   | FPassBaseNC (i, si) ->
-    "FBaseBaseNC " ^ string_of_param_num i ^ " " ^ string_of_stack_index si
+    sep ["FBaseBaseNC"; string_of_param_num i; string_of_stack_index si]
   | FPassBaseNL (i, lid) ->
-    "FPassBaseNL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
+    sep ["FPassBaseNL"; string_of_param_num i; string_of_local_id lid]
   | BaseGC (si, m) ->
-    "BaseGC " ^ string_of_stack_index si ^ " " ^ MemberOpMode.to_string m
+    sep ["BaseGC"; string_of_stack_index si; MemberOpMode.to_string m]
   | BaseGL (id, m) ->
-    "BaseGL " ^ string_of_local_id id ^ " " ^ MemberOpMode.to_string m
+    sep ["BaseGL"; string_of_local_id id; MemberOpMode.to_string m]
   | FPassBaseGC (i, si) ->
-    "FPassBaseGC " ^ string_of_param_num i ^ " " ^ string_of_stack_index si
+    sep ["FPassBaseGC"; string_of_param_num i; string_of_stack_index si]
   | FPassBaseGL (i, lid) ->
-    "FPassBaseGL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
+    sep ["FPassBaseGL"; string_of_param_num i; string_of_local_id lid]
   | BaseSC (si1, si2) ->
-    "BaseSC " ^ string_of_stack_index si1 ^ " " ^ string_of_stack_index si2
+    sep ["BaseSC"; string_of_stack_index si1; string_of_stack_index si2]
   | BaseSL (lid, si) ->
-    "BaseSL " ^ string_of_local_id lid ^ " " ^ string_of_stack_index si
+    sep ["BaseSL"; string_of_local_id lid; string_of_stack_index si]
   | BaseL (lid, m) ->
-    "BaseL " ^ string_of_local_id lid ^ " " ^ MemberOpMode.to_string m
+    sep ["BaseL"; string_of_local_id lid; MemberOpMode.to_string m]
   | FPassBaseL (i, lid) ->
-    "FPassBaseL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
+    sep ["FPassBaseL"; string_of_param_num i; string_of_local_id lid]
   | BaseC si ->
-    "BaseC " ^ string_of_stack_index si
+    sep ["BaseC"; string_of_stack_index si]
   | BaseR si ->
-    "BaseR " ^ string_of_stack_index si
+    sep ["BaseR"; string_of_stack_index si]
   | BaseH ->
     "BaseH"
+  | Dim (m, mk) ->
+    sep ["Dim"; MemberOpMode.to_string m; string_of_member_key mk]
+  | FPassDim (i, mk) ->
+    sep ["FPassDim"; string_of_param_num i; string_of_member_key mk]
 
 let string_of_final instruction =
   match instruction with

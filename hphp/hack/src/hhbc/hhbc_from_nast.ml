@@ -323,7 +323,7 @@ and from_expr expr =
   | A.Array_get(e1, Some e2) -> emit_array_get None e1 e2
   | A.Clone e -> emit_clone e
   | A.Shape fl -> emit_shape expr fl
-  | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get expr prop nullflavor
+  | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get None expr prop nullflavor
   (* TODO *)
   | A.Yield_break               -> emit_nyi "yield_break"
   | A.Id _                      -> emit_nyi "id"
@@ -479,79 +479,155 @@ and emit_quiet_expr (_, expr_ as expr) =
  * then this is the i'th parameter to a function
  *)
 and emit_array_get param_num_opt e1 e2 =
-  let base_instrs, n = emit_base param_num_opt e1 in
-  let mk, stack_size =
-    match snd e2 with
-      (* Special case for local index *)
-    | A.Lvar (_, x) -> MemberKey.EL (Local.Named x), n
-      (* Special case for literal integer index *)
-    | A.Int (_, litstr) -> MemberKey.EI (Int64.of_string litstr), n
-      (* Special case for literal string index *)
-    | A.String (_, litstr) -> MemberKey.ET litstr, n
-      (* General case *)
-    | _ -> MemberKey.EC, n+1 in
+  let elem_expr_instrs, elem_stack_size = emit_elem_instrs e2 in
+  let base_expr_instrs, base_setup_instrs, base_stack_size =
+    emit_base elem_stack_size param_num_opt e1 in
+  let mk = get_elem_member_key 0 e2 in
+  let total_stack_size = elem_stack_size + base_stack_size in
   let final_instr =
     instr (IFinal (
       match param_num_opt with
-      | None -> QueryM (stack_size, QueryOp.CGet, mk)
-      | Some i -> FPassM (i, stack_size, mk)
+      | None -> QueryM (total_stack_size, QueryOp.CGet, mk)
+      | Some i -> FPassM (i, total_stack_size, mk)
     )) in
-  match mk with
-  | MemberKey.EC ->
-    gather [
-      from_expr e2;
-      base_instrs;
-      final_instr
-    ]
-  | _ ->
-    gather [
-      base_instrs;
-      final_instr
-    ]
+  gather [
+    base_expr_instrs;
+    elem_expr_instrs;
+    base_setup_instrs;
+    final_instr
+  ]
 
-(* TODO: Nullflavor is currently being ignored, start using it *)
-and emit_obj_get expr prop _ =
-  let base_instrs, n = emit_base None expr in
-  let mk, stack_size =
-    match snd prop with
-    | A.Id (_, litstr) -> MemberKey.PT litstr, n
-    | A.Lvar (_, x) -> MemberKey.PL (Local.Named x), n
-      (* TODO: Work out when to use MemberKey.QT  *)
-    | _ -> MemberKey.PC, n+1 in
-    let final_instr =
-      instr (IFinal (
-        (* TODO: Work out when this should be FPassM *)
-        match None with
-        | None -> QueryM (stack_size, QueryOp.CGet, mk)
-        | Some id -> FPassM (id, stack_size, mk)
-      )) in
-      gather [
-        if mk = MemberKey.PC then from_expr prop else empty;
-        base_instrs;
-        final_instr
-      ]
-
-(* Emit instructions to construct base for `expr`, and also return
- * the stack size for subsequent query operations *)
-and emit_base param_num_opt (_, expr_ as expr) =
-  match expr_ with
-  | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
-    gather [
-     instr (IMisc CheckThis);
-     instr (IBase BaseH)
-    ], 0
-  | A.Lvar (_, x) ->
-    instr (IBase (
+(* Emit code for e1->e2 or e1?->e2.
+ * If param_num_opt = Some i
+ * then this is the i'th parameter to a function
+ *)
+and emit_obj_get param_num_opt expr prop null_flavor =
+  let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop in
+  let base_expr_instrs, base_setup_instrs, base_stack_size =
+    emit_base prop_stack_size param_num_opt expr in
+  let mk = get_prop_member_key null_flavor 0 prop in
+  let total_stack_size = prop_stack_size + base_stack_size in
+  let final_instr =
+    instr (IFinal (
       match param_num_opt with
-      | None -> BaseL (Local.Named x, MemberOpMode.Warn)
-      | Some i -> FPassBaseL (i, Local.Named x)
-      )), 0
-  | _ ->
-    let instrs, flavor = emit_flavored_expr expr in
-    gather [
-      instrs;
-      instr (IBase (if flavor = Flavor.Ref then BaseR 0 else BaseC 0))
-    ], 1
+      | None -> QueryM (total_stack_size, QueryOp.CGet, mk)
+      | Some i -> FPassM (i, total_stack_size, mk)
+    )) in
+  gather [
+    base_expr_instrs;
+    prop_expr_instrs;
+    base_setup_instrs;
+    final_instr
+  ]
+
+and emit_elem_instrs (_, expr_ as expr) =
+  match expr_ with
+  (* These all have special inline versions of member keys *)
+  | A.Lvar _ | A.Int _ | A.String _ -> empty, 0
+  | _ -> from_expr expr, 1
+
+and emit_prop_instrs (_, expr_ as expr) =
+  match expr_ with
+  (* These all have special inline versions of member keys *)
+  | A.Lvar _ | A.Id _ -> empty, 0
+  | _ -> from_expr expr, 1
+
+(* Get the member key for an array element *)
+and get_elem_member_key stack_index (_, expr_) =
+  match expr_ with
+  (* Special case for local *)
+  | A.Lvar (_, x) -> MemberKey.EL (Local.Named x)
+  (* Special case for literal integer *)
+  | A.Int (_, str) -> MemberKey.EI (Int64.of_string str)
+  (* Special case for literal string *)
+  | A.String (_, str) -> MemberKey.ET str
+  (* General case *)
+  | _ -> MemberKey.EC stack_index
+
+(* Get the member key for a property *)
+and get_prop_member_key null_flavor stack_index (_, expr_) =
+  match expr_ with
+  (* Special case for known property name *)
+  | A.Id (_, str) ->
+    begin match null_flavor with
+    | Ast.OG_nullthrows -> MemberKey.PT str
+    | Ast.OG_nullsafe -> MemberKey.QT str
+    end
+  (* Special case for local *)
+  | A.Lvar (_, x) -> MemberKey.PL (Local.Named x)
+  (* General case *)
+  | _ -> MemberKey.PC stack_index
+
+(* Emit code for a base expression `expr` that forms part of
+ * an element access `expr[elem]` or field access `expr->fld`.
+ * The instructions are divided into three sections:
+ *   1. base and element/property expression instructions:
+ *      push non-trivial base and key values on the stack
+ *   2. base selector instructions: a sequence of Base/Dim instructions that
+ *      actually constructs the base address from "member keys" that are inlined
+ *      in the instructions, or pulled from the key values that
+ *      were pushed on the stack in section 1.
+ *   3. (constructed by the caller) a final accessor e.g. QueryM or setter
+ *      e.g. SetOpM instruction that has the final key inlined in the
+ *      instruction, or pulled from the key values that were pushed on the
+ *      stack in section 1.
+ * The function returns a triple (base_instrs, base_setup_instrs, stack_size)
+ * where base_instrs is section 1 above, base_setup_instrs is section 2, and
+ * stack_size is the number of values pushed onto the stack by section 1.
+ *
+ * For example, the r-value expression $arr[3][$ix+2]
+ * will compile to
+ *   # Section 1, pushing the value of $ix+2 on the stack
+ *   Int 2
+ *   CGetL2 $ix
+ *   AddO
+ *   # Section 2, constructing the base address of $arr[3]
+ *   BaseL $arr Warn
+ *   Dim Warn EI:3
+ *   # Section 3, indexing the array using the value at stack position 0 (EC:0)
+ *   QueryM 1 CGet EC:0
+ *)
+and emit_base base_offset param_num_opt (_, expr_ as expr) =
+   match expr_ with
+   | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
+     instr (IMisc CheckThis),
+     instr (IBase BaseH),
+     0
+
+   | A.Lvar (_, x) ->
+     empty,
+     instr (IBase (
+       match param_num_opt with
+       | None -> BaseL (Local.Named x, MemberOpMode.Warn)
+       | Some i -> FPassBaseL (i, Local.Named x)
+       )),
+     0
+
+   | A.Array_get(e1, Some e2) ->
+     let elem_expr_instrs, elem_stack_size = emit_elem_instrs e2 in
+     let base_expr_instrs, base_setup_instrs, base_stack_size =
+       emit_base (base_offset + elem_stack_size) param_num_opt e1 in
+     let mk = get_elem_member_key base_offset e2 in
+     let total_stack_size = base_stack_size + elem_stack_size in
+     gather [
+       base_expr_instrs;
+       elem_expr_instrs;
+     ],
+     gather [
+       base_setup_instrs;
+       instr (IBase (
+         match param_num_opt with
+         | None -> Dim (MemberOpMode.Warn, mk)
+         | Some i -> FPassDim (i, mk)
+       ))
+     ],
+     total_stack_size
+   | _ ->
+     let base_expr_instrs, flavor = emit_flavored_expr expr in
+     base_expr_instrs,
+     instr (IBase (if flavor = Flavor.Ref
+                   then BaseR base_offset else BaseC base_offset)),
+     1
 
 and instr_fpass kind i =
   match kind with
@@ -567,6 +643,9 @@ and emit_arg i ((_, expr_) as e) =
 
   | A.Array_get(e1, Some e2) ->
     emit_array_get (Some i) e1 e2
+
+  | A.Obj_get(e1, e2, nullflavor) ->
+    emit_obj_get (Some i) e1 e2 nullflavor
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in

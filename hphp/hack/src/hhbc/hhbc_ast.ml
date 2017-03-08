@@ -70,11 +70,11 @@ end (* of QueryOp *)
 
 module MemberKey = struct
   type t =
-  | EC
+  | EC of stack_index
   | EL of local_id
   | ET of Litstr.id
   | EI of int64
-  | PC
+  | PC of stack_index
   | PL of local_id
   | PT of Litstr.id
   | QT of Litstr.id
@@ -416,6 +416,8 @@ type instruct_base =
   | BaseC of stack_index
   | BaseR of stack_index
   | BaseH
+  | Dim of MemberOpMode.t * MemberKey.t
+  | FPassDim of param_num * MemberKey.t
 
 type instruct_final =
   | QueryM of num_params * QueryOp.t * MemberKey.t

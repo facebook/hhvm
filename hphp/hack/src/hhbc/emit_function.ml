@@ -19,6 +19,9 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
     ast_fun.Ast.f_body in
   let body_instrs = Label_rewriter.relabel_instrseq body_instrs in
   let function_decl_vars = extract_decl_vars body_instrs in
+  let body_instrs = Local_id_rewriter.unname_instrseq
+    (List.map ast_fun.Ast.f_params (fun p -> snd p.Ast.param_id) @ function_decl_vars)
+    body_instrs in
   let function_body = instr_seq_to_list body_instrs in
   let function_attributes =
     Emit_attribute.from_asts ast_fun.Ast.f_user_attributes in

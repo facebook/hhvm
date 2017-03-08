@@ -59,6 +59,14 @@ struct LitstrTable {
   static void init();
 
   /*
+   * Destroy the singleton LitstrTable.
+   *
+   * Must not be called in concurrent contexts---the table pointer is not
+   * atomic.
+   */
+  static void fini();
+
+  /*
    * Get the singleton LitstrTable.
    */
   static LitstrTable& get();

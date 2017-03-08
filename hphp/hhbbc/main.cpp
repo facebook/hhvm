@@ -243,6 +243,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   auto gd                     = Repo::GlobalData{};
   gd.UsedHHBBC                = true;
+  gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints            = options.HardTypeHints;
   gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
@@ -294,6 +295,15 @@ int main(int argc, char** argv) try {
     return 1;
   }
 
+  initialize_repo();
+
+  LitstrTable::init();
+  RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoEvalMode = "readonly";
+  open_repo(input_repo);
+  Repo::get().loadGlobalData();
+  LitstrTable::fini();
+
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
   RuntimeOption::Load(ini, config);
@@ -308,7 +318,6 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoAuthoritative = true;
 
   register_process_init();
-  initialize_repo();
 
   hphp_process_init();
   SCOPE_EXIT { hphp_process_exit(); };

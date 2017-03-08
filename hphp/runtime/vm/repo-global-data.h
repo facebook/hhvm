@@ -37,6 +37,11 @@ struct Repo::GlobalData {
   bool UsedHHBBC = false;
 
   /*
+   * Was the repo compiled with EnableHipHopSyntax.
+   */
+  bool EnableHipHopSyntax = false;
+
+  /*
    * Indicates whether a repo was compiled with HardTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
@@ -127,6 +132,7 @@ struct Repo::GlobalData {
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
+      (EnableHipHopSyntax)
       (HardTypeHints)
       (HardPrivatePropInference)
       (arrayTypeTable)

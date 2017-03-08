@@ -11186,6 +11186,7 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
 static void
 commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   auto gd                     = Repo::GlobalData{};
+  gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints            = HHBBC::options.HardTypeHints;
   gd.HardReturnTypeHints      = HHBBC::options.HardReturnTypeHints;
   gd.ElideAutoloadInvokes     = HHBBC::options.ElideAutoloadInvokes;

@@ -25,6 +25,11 @@ inline void LitstrTable::init() {
   LitstrTable::s_litstrTable = new LitstrTable();
 }
 
+inline void LitstrTable::fini() {
+  delete LitstrTable::s_litstrTable;
+  LitstrTable::s_litstrTable = nullptr;
+}
+
 inline LitstrTable& LitstrTable::get() {
   return *LitstrTable::s_litstrTable;
 }

@@ -184,14 +184,15 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     // which control Option or RuntimeOption values -- the others are read out
     // in an inconsistent and ad-hoc manner. But I don't understand their uses
     // and interactions well enough to feel comfortable fixing now.
-    RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
-    RuntimeOption::PHP7_ScalarTypes  = s_globalData.PHP7_ScalarTypes;
-    RuntimeOption::PHP7_Substr       = s_globalData.PHP7_Substr;
-    RuntimeOption::PHP7_Builtins     = s_globalData.PHP7_Builtins;
-    RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
-    HHBBC::options.HardTypeHints = s_globalData.HardTypeHints;
-    HHBBC::options.HardReturnTypeHints = s_globalData.HardReturnTypeHints;
-    HHBBC::options.ElideAutoloadInvokes = s_globalData.ElideAutoloadInvokes;
+    RuntimeOption::EnableHipHopSyntax     = s_globalData.EnableHipHopSyntax;
+    RuntimeOption::PHP7_IntSemantics      = s_globalData.PHP7_IntSemantics;
+    RuntimeOption::PHP7_ScalarTypes       = s_globalData.PHP7_ScalarTypes;
+    RuntimeOption::PHP7_Substr            = s_globalData.PHP7_Substr;
+    RuntimeOption::PHP7_Builtins          = s_globalData.PHP7_Builtins;
+    RuntimeOption::AutoprimeGenerators    = s_globalData.AutoprimeGenerators;
+    HHBBC::options.HardTypeHints          = s_globalData.HardTypeHints;
+    HHBBC::options.HardReturnTypeHints    = s_globalData.HardReturnTypeHints;
+    HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
 
     return;

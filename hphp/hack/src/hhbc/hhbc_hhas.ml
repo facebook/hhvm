@@ -404,6 +404,14 @@ let string_of_misc instruction =
     | UGetCUNop -> "UGetCUNop"
     | StaticLoc (local, text) ->
       "StaticLoc " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
+    | MemoGet (count, Local.Unnamed first, Local.Unnamed last) ->
+      Printf.sprintf "MemoGet %s L:%d+%d"
+        (string_of_int count) first (last - first)
+    | MemoGet _ -> failwith "MemoGet needs two unnamed locals"
+    | MemoSet (count, Local.Unnamed first, Local.Unnamed last) ->
+      Printf.sprintf "MemoSet %s L:%d+%d"
+        (string_of_int count) first (last - first)
+    | MemoSet _ -> failwith "MemoSet needs two unnamed locals"
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =

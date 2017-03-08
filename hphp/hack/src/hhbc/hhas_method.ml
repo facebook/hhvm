@@ -9,7 +9,6 @@
 *)
 open Core
 open Instruction_sequence
-open Hhbc_from_nast
 
 module A = Ast
 
@@ -66,7 +65,6 @@ let body method_def = method_def.method_body
 
 let from_ast : A.class_ -> A.method_ -> t option =
   fun ast_class ast_method ->
-  let class_tparams = tparams_to_strings ast_class.A.c_tparams in
   let method_name = Litstr.to_string @@ snd ast_method.A.m_name in
   let method_is_abstract = List.mem ast_method.A.m_kind A.Abstract in
   let method_is_final = List.mem ast_method.A.m_kind A.Final in
@@ -78,10 +76,9 @@ let from_ast : A.class_ -> A.method_ -> t option =
     Emit_attribute.from_asts ast_method.A.m_user_attributes in
   match ast_method.A.m_body with
   | b ->
-    let method_tparams = tparams_to_strings ast_method.A.m_tparams in
-    let tparams = class_tparams @ method_tparams in
+    let tparams = ast_class.A.c_tparams @ ast_method.A.m_tparams in
     let body_instrs, method_params, method_return_type =
-      from_body tparams ast_method.A.m_params ast_method.A.m_ret b in
+      Emit_body.from_ast tparams ast_method.A.m_params ast_method.A.m_ret b in
     let method_body = instr_seq_to_list body_instrs in
     let m = make
       method_attributes

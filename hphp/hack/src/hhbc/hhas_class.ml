@@ -202,7 +202,7 @@ let from_ast : A.class_ -> t =
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
     ast_class.A.c_final || class_is_trait || class_is_enum in
-  let tparams = tparams_to_strings ast_class.A.c_tparams in
+  let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams in
   let class_base =
     if class_is_interface then None
     else from_extends tparams ast_class.A.c_extends in

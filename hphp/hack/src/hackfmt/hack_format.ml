@@ -1428,7 +1428,7 @@ let rec transform node =
     let key_list_item = make_list_item key comma_kw in
     let val_list_item = make_list_item value (make_missing ()) in
     let args = make_list [key_list_item; val_list_item] in
-    transform_argish left_a args right_a;
+    transform_argish ~allow_trailing:false left_a args right_a;
   | DictionaryTypeSpecifier x ->
     let (kw, left_a, members, right_a) =
       get_dictionary_type_specifier_children x
@@ -1757,7 +1757,8 @@ and transform_argish_with_return_type ~in_span left_p params right_p colon
   tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
     tl_with ~nest:true ~f:(fun () ->
       handle_possible_list
-        ~after_each:after_each_argument ~handle_last:transform_last_arg params
+      ~after_each:after_each_argument
+      ~handle_last:(transform_last_arg ~allow_trailing:true) params
     ) ();
     transform right_p;
     transform colon;
@@ -1766,7 +1767,7 @@ and transform_argish_with_return_type ~in_span left_p params right_p colon
   ) ();
   ()
 
-and transform_argish left_p arg_list right_p =
+and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
   transform left_p;
   if not (is_missing arg_list) then begin
     split ();
@@ -1774,7 +1775,7 @@ and transform_argish left_p arg_list right_p =
       tl_with ~nest:true ~f:(fun () ->
         handle_possible_list
           ~after_each:after_each_argument
-          ~handle_last:transform_last_arg arg_list
+          ~handle_last:(transform_last_arg ~allow_trailing) arg_list
       ) ();
       split ();
       transform right_p;
@@ -1796,25 +1797,27 @@ and remove_trailing_trivia node =
   if not changed then failwith "Trailing token not rewritten";
   rewritten_node, EditableToken.trailing trailing_token
 
-and transform_last_arg node =
+and transform_last_arg ~allow_trailing node =
+  let set_pending_comma () =
+    if allow_trailing then builder#set_pending_comma () in
   match syntax node with
     | ListItem x ->
       let (item, separator) = get_list_item_children x in
       (match syntax separator with
         | Token x ->
           transform item;
-          builder#set_pending_comma ();
+          set_pending_comma ();
           builder#token_trivia_only x;
         | Missing ->
           let item, trailing_trivia = remove_trailing_trivia item in
           transform item;
-          builder#set_pending_comma ();
+          set_pending_comma ();
           builder#handle_trivia ~is_leading:false trailing_trivia;
         | _ -> raise (Failure "Expected separator to be a token");
       );
     | _ ->
       transform node;
-      builder#set_pending_comma ();
+      set_pending_comma ();
 
 and transform_mapish_entry key arrow value =
   transform key;

@@ -175,6 +175,21 @@ function getArray(
   return array("foo" => "bar");
 }
 
+function getDict(
+): dict<
+  string, // strings
+  string // strings
+> {
+  return dict["foo" => "bar"];
+}
+
+function getDict(
+): dict< string // strings
+        , string // strings
+        > {
+  return dict["foo" => "bar"];
+}
+
 function swap<
   T, // T
   U // U

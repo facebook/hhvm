@@ -48,8 +48,6 @@
 #  include "malloc.h"
 # endif
 #else
-# undef MALLOCX_LG_ALIGN
-# undef MALLOCX_ZERO
 # include <jemalloc/jemalloc.h>
 # if JEMALLOC_VERSION_MAJOR == 4
 #  define USE_JEMALLOC_CHUNK_HOOKS 1

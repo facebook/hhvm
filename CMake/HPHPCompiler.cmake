@@ -93,15 +93,18 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   endif()
 
   if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") # using Clang
-    list(APPEND GENERAL_OPTIONS
-      # For unclear reasons, our detection for what crc32 intrinsics you have
-      # will cause clang to ICE. Specifying a baseline here works around the
-      # issue. (SSE4.2 has been available on processors for quite some time now.)
-      "msse4.2"
-    )
-    # Also need to pass the right option to ASM files to avoid inconsistencies
-    # in CRC hash function handling
-    set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
+    if (IS_X64)
+      list(APPEND GENERAL_OPTIONS
+        # For unclear reasons, our detection for what crc32 intrinsics you have
+        # will cause clang to ICE. Specifying a baseline here works around the
+        # issue. (SSE4.2 has been available on processors for quite some time now.)
+        "msse4.2"
+      )
+      # Also need to pass the right option to ASM files to avoid inconsistencies
+      # in CRC hash function handling
+      set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
+    endif()
+
     list(APPEND GENERAL_CXX_OPTIONS
       "Qunused-arguments"
     )

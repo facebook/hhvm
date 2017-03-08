@@ -411,6 +411,8 @@ let string_of_misc instruction =
     | UGetCUNop -> "UGetCUNop"
     | StaticLoc (local, text) ->
       "StaticLoc " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
+    | StaticLocInit (local, text) -> (* TODO: The $ is unnecessarily escaped. *)
+      "StaticLocInit " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
     | MemoGet (count, Local.Unnamed first, Local.Unnamed last) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
         (string_of_int count) first (last - first)

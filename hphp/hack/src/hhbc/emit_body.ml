@@ -12,12 +12,6 @@ open Hhbc_ast
 open Instruction_sequence
 open Emit_type_hint
 
-module A = Ast
-module H = Hhbc_ast
-module TC = Hhas_type_constraint
-module SN = Naming_special_names
-module CBR = Continue_break_rewriter
-
 let has_type_constraint ti =
   match ti with
   | Some ti when (Hhas_type_info.has_type_constraint ti) -> true

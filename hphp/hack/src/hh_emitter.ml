@@ -58,16 +58,15 @@ let parse_options () =
 (* Main body *)
 (*****************************************************************************)
 let emit_file { filename; read_stdin; is_test } () =
-  let module Text = Full_fidelity_source_text in
   let filename = Relative_path.create Relative_path.Dummy filename in
-  let contents =
-    if read_stdin
-    then Text.make (Sys_utils.read_stdin_to_string ())
-    else Text.from_file filename
-  in
 
   (* Parse the file and pull out the parts we need *)
-  let parsed_file = Full_fidelity_ast.from_text_with_legacy filename contents in
+  let parsed_file =
+    let open Full_fidelity_ast in
+    if read_stdin
+    then from_text_with_legacy filename (Sys_utils.read_stdin_to_string ())
+    else from_file_with_legacy filename
+  in
   let {Parser_hack.file_mode; comments; ast; _} = parsed_file in
   let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
 

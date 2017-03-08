@@ -39,7 +39,6 @@ let sanity_test_classic_parser source =
   else Debug.dump_ast (Ast.AProgram result.Parser_hack.ast)
 
 let full_fidelity_to_classic source =
-  let source = SourceText.make source in
   let path = Relative_path.create Relative_path.Dummy "<inline>" in
   let classic_ast = Full_fidelity_ast.from_text_with_legacy path source in
   let str = Debug.dump_ast (Ast.AProgram classic_ast.Parser_hack.ast) in

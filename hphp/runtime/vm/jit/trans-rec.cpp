@@ -141,7 +141,7 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
 }
 
 std::string
-TransRec::print(uint64_t profCount) const {
+TransRec::print() const {
   if (!isValid()) return "Translation -1 {\n}\n\n";
 
   std::string ret;
@@ -211,11 +211,7 @@ TransRec::print(uint64_t profCount) const {
                   annotation.first, annotation.second);
   }
 
-  folly::format(
-    &ret,
-    "  profCount = {}\n"
-    "  bcMapping = {}\n",
-    profCount, bcMapping.size());
+  folly::format(&ret, "  bcMapping = {}\n", bcMapping.size());
 
   for (auto const& info : bcMapping) {
     folly::format(

@@ -1299,7 +1299,16 @@ let next_xhp_body_token lexer =
     let lexer = start_new_lexeme lexer in
     let (lexer, kind) = scan_xhp_body lexer in
     let w = width lexer in
-    let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
+    let (lexer, trailing) =
+      (* Trivia (leading and trailing) is semantically
+         significant for XHPBody tokens. When we find elements or
+         braced expressions inside the body, the trivia should be
+         seen as leading the next token, but we should certainly
+         keep it trailing if this is an XHPBody token. *)
+      if kind = TokenKind.XHPBody
+      then scan_trailing_xhp_trivia lexer
+      else (lexer, [])
+    in
     (lexer, Token.make kind w leading trailing) in
   scan_assert_progress scanner lexer
 

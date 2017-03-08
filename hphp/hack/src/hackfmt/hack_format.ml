@@ -1114,13 +1114,13 @@ let rec transform node =
   | FunctionCallExpression x ->
     handle_function_call_expression x
   | EvalExpression x ->
-    let (kw, left_p, args, right_p) = get_eval_expression_children x in
+    let (kw, left_p, arg, right_p) = get_eval_expression_children x in
     t kw;
-    transform_argish left_p args right_p;
+    transform_braced_item left_p arg right_p;
   | EmptyExpression x ->
-    let (kw, left_p, args, right_p) = get_empty_expression_children x in
+    let (kw, left_p, arg, right_p) = get_empty_expression_children x in
     t kw;
-    transform_argish left_p args right_p;
+    transform_braced_item left_p arg right_p;
   | IssetExpression x ->
     let (kw, left_p, args, right_p) = get_isset_expression_children x in
     t kw;
@@ -1225,7 +1225,7 @@ let rec transform node =
   | SubscriptExpression x ->
     let (receiver, lb, expr, rb) = get_subscript_expression_children x in
     t receiver;
-    transform_argish lb expr rb;
+    transform_braced_item lb expr rb;
     ()
   | AwaitableCreationExpression x ->
     let (kw, body) = get_awaitable_creation_expression_children x in
@@ -1395,19 +1395,19 @@ let rec transform node =
     let (kw, left_a, vec_type, right_a) =
       get_vector_array_type_specifier_children x in
     t kw;
-    transform_argish left_a vec_type right_a;
+    transform_braced_item left_a vec_type right_a;
     ()
   | VectorTypeSpecifier x ->
     let (kw, left_a, vec_type, right_a) =
       get_vector_type_specifier_children x in
     t kw;
-    transform_argish left_a vec_type right_a;
+    transform_braced_item left_a vec_type right_a;
     ()
   | KeysetTypeSpecifier x ->
-    let (kw, left_a, vec_type, right_a) =
+    let (kw, left_a, ks_type, right_a) =
       get_keyset_type_specifier_children x in
     t kw;
-    transform_argish left_a vec_type right_a;
+    transform_braced_item left_a ks_type right_a;
     ()
   | TypeParameter x ->
     let (variance, name, constraints) = get_type_parameter_children x in
@@ -1447,7 +1447,7 @@ let rec transform node =
     let (kw, left_a, class_type, right_a) =
       get_classname_type_specifier_children x in
     t kw;
-    transform_argish left_a class_type right_a;
+    transform_braced_item left_a class_type right_a;
   | FieldSpecifier x ->
     let (name, arrow_kw, field_type) = get_field_specifier_children x in
     transform_mapish_entry name arrow_kw field_type;
@@ -1783,6 +1783,15 @@ and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
   end else transform right_p;
   ()
 
+and transform_braced_item left_p item right_p =
+  transform left_p;
+  split ();
+  tl_with ~span:(Some Cost.Base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+    tl_with ~nest:true ~f:(fun () -> transform item) ();
+    split ();
+    transform right_p;
+  ) ();
+
 and remove_trailing_trivia node =
   let trailing_token = match Syntax.trailing_token node with
     | Some t -> t
@@ -1816,8 +1825,7 @@ and transform_last_arg ~allow_trailing node =
         | _ -> raise (Failure "Expected separator to be a token");
       );
     | _ ->
-      transform node;
-      set_pending_comma ();
+      failwith "Expected ListItem"
 
 and transform_mapish_entry key arrow value =
   transform key;

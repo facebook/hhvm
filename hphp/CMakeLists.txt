@@ -30,6 +30,8 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
                         ${CMAKE_MODULE_PATH})
 endif()
 
+include(HHVMProject)
+
 include(HHVMExtensionConfig)
 # Before we do anything else, we'll configure the extensions,
 # so that the defines take effect globally.

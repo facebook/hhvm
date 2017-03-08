@@ -43,11 +43,6 @@ if(ENABLE_FASTCGI)
   endif()
 endif()
 
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE "Release")
-  message(STATUS "Build type not specified: cmake build type Release.")
-endif()
-
 if(HHVM_DYNAMIC_EXTENSION_DIR)
   add_definitions(-DHHVM_DYNAMIC_EXTENSION_DIR="${HHVM_DYNAMIC_EXTENSION_DIR}")
 else()

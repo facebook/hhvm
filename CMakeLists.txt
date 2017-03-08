@@ -16,6 +16,9 @@ SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
 
 PROJECT(${PACKAGE_NAME} C CXX ASM)
+
+include(HHVMProject)
+
 if (MSVC)
   enable_language(ASM_MASM)
 endif()

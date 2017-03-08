@@ -30,6 +30,7 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
+#include "hphp/util/arch.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hdf.h"
@@ -504,7 +505,8 @@ static inline uint32_t resetProfCountersDefault() {
 }
 
 static inline int retranslateAllRequestDefault() {
-  return RuntimeOption::ServerExecutionMode() ? 3000 : 0;
+  return RuntimeOption::ServerExecutionMode() &&
+    arch() != Arch::ARM ? 3000 : 0;
 }
 
 uint64_t ahotDefault() {

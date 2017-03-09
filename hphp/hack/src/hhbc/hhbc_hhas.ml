@@ -413,14 +413,14 @@ let string_of_misc instruction =
       "StaticLoc " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
     | StaticLocInit (local, text) -> (* TODO: The $ is unnecessarily escaped. *)
       "StaticLocInit " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
-    | MemoGet (count, Local.Unnamed first, Local.Unnamed last) ->
+    | MemoGet (count, Local.Unnamed first, local_count) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
-        (string_of_int count) first (last - first)
-    | MemoGet _ -> failwith "MemoGet needs two unnamed locals"
-    | MemoSet (count, Local.Unnamed first, Local.Unnamed last) ->
+        (string_of_int count) first (local_count - 1)
+    | MemoGet _ -> failwith "MemoGet needs an unnamed local"
+    | MemoSet (count, Local.Unnamed first, local_count) ->
       Printf.sprintf "MemoSet %s L:%d+%d"
-        (string_of_int count) first (last - first)
-    | MemoSet _ -> failwith "MemoSet needs two unnamed locals"
+        (string_of_int count) first (local_count - 1)
+    | MemoSet _ -> failwith "MemoSet needs an unnamed local"
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =

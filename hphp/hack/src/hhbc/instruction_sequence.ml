@@ -104,8 +104,11 @@ let instr_fcall count = instr (ICall(FCall count))
 let instr_isuninit = instr (IMisc IsUninit)
 let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
-(* TODO: MemoGet 0 L:2+0 *)
-(* TODO: MemoSet 0 L:2+0*)
+let instr_memoget count local local_count =
+  instr (IMisc (MemoSet(count, local, local_count)))
+let instr_memoset count local local_count =
+  instr (IMisc (MemoSet(count, local, local_count)))
+
 (* TODO: GetMemoKeyL $n *)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)

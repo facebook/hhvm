@@ -33,7 +33,7 @@ let memoized_body params =
         PopC
     *)
     instr_basel static_local Warn;
-    (* TODO: instr_memoget 0 lowest_unnamed highest_unnamed *)
+    (* TODO: instr_memoget 0 lowest_unnamed param_count *)
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -47,7 +47,7 @@ let memoized_body params =
     (* TODO: instr_fcall param_count *)
     instr_unboxr;
     instr_basel static_local Define;
-    (* TODO: instr_memoset 0 lowest_unnamed highest_unnamed *)
+    (* TODO: instr_memoset 0 lowest_unnamed param_count *)
     instr_retc
   ]
 
@@ -58,5 +58,5 @@ let memoize_function compiled =
   let params = Hhas_function.params compiled in
   let body = memoized_body params in
   let body = instr_seq_to_list body in
-  let memoized = Hhas_function.with_body compiled body in (* TODO *)
+  let memoized = Hhas_function.with_body compiled body in
   (renamed, memoized)

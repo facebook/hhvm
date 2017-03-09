@@ -98,6 +98,12 @@ struct FuncAnalysis {
    * to recompute it to prevent errors in later passes.
    */
   bool builtinsRemoved{false};
+
+  /*
+   * Flag to indicate that the function does something that requires a
+   * variable environment.
+   */
+  bool mayUseVV;
 };
 
 /*

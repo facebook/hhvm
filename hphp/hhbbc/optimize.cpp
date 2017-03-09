@@ -33,6 +33,7 @@
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/dce.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/misc.h"
@@ -629,6 +630,11 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
       return;
     }
   }
+
+  func->attrs = (is_pseudomain(ainfo.ctx.func) ||
+                 ainfo.ctx.func->attrs & AttrInterceptable ||
+                 ainfo.mayUseVV) ?
+    Attr(func->attrs | AttrMayUseVV) : Attr(func->attrs & ~AttrMayUseVV);
 
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, insert_assertions);

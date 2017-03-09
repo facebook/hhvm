@@ -4,6 +4,7 @@
 
 EXTRA_INCLUDE_PATHS=
 EXTRA_LIB_PATHS=
+EXTRA_LINK_OPTS=
 EXTRA_CC_FLAGS=
 BYTECODE=
 
@@ -136,10 +137,10 @@ NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_NATIVE_LIB_OPTS=$(foreach lib, $(EXTRA_NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_INCLUDE_OPTS=$(foreach dir, $(EXTRA_INCLUDE_PATHS),-ccopt -I$(dir))
 EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
-EXTRA_LIB_OPTS=$(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
+EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
 
-LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LIB_OPTS) \
+LINKER_FLAGS=$(NATIVE_OBJECT_FILES) $(NATIVE_LIB_OPTS) $(EXTRA_LINK) \
 	     $(EXTRA_NATIVE_LIB_OPTS) $(FRAMEWORK_OPTS) $(SECTCREATE)
 # Function to recursively find files, eg: $(call rwildcard,dir/to/look/in/,*.c)
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))

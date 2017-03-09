@@ -598,14 +598,57 @@ let rec transform node =
     t name;
     t prop_initializer;
     ()
-  | NamespaceDeclaration _
-  | NamespaceBody _
-  | NamespaceUseDeclaration _
-  | NamespaceGroupUseDeclaration _
-  | NamespaceUseClause _ ->
-    let error = Printf.sprintf "%s not supported - exiting \n"
-      (SyntaxKind.to_string (kind node)) in
-    raise (Hackfmt_error.UnsupportedSyntax error);
+  | NamespaceDeclaration x ->
+    let (kw, name, body) = get_namespace_declaration_children x in
+    t kw;
+    pending_space ();
+    t name;
+    t body;
+    builder#end_chunks ();
+    ()
+  | NamespaceBody x ->
+    let (left_b, decls, right_b) = get_namespace_body_children x in
+    pending_space ();
+    t left_b;
+    builder#end_chunks ();
+    builder#start_block_nest ();
+    tl_with ~f:(fun () -> handle_possible_list decls) ();
+    transform_and_unnest_closing_brace right_b;
+    ()
+  | NamespaceUseDeclaration x ->
+    let (kw, use_kind, clauses, semi) =
+      get_namespace_use_declaration_children x in
+    t kw;
+    pending_space ();
+    t use_kind;
+    if not (is_missing use_kind) then pending_space ();
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+      handle_possible_list clauses ~after_each:after_each_argument;
+    ) ();
+    t semi;
+    builder#end_chunks ();
+    ()
+  | NamespaceGroupUseDeclaration x ->
+    let (kw, use_kind, prefix, left_b, clauses, right_b, semi) =
+      get_namespace_group_use_declaration_children x in
+    t kw;
+    pending_space ();
+    t use_kind;
+    if not (is_missing use_kind) then pending_space ();
+    t prefix;
+    transform_argish left_b clauses right_b;
+    t semi;
+    builder#end_chunks ();
+    ()
+  | NamespaceUseClause x ->
+    let (use_kind, name, as_kw, alias) = get_namespace_use_clause_children x in
+    t use_kind;
+    t name;
+    if not (is_missing as_kw) then pending_space ();
+    t as_kw;
+    if not (is_missing alias) then pending_space ();
+    t alias;
+    ()
   | FunctionDeclaration x ->
     let (attr, header, body) = get_function_declaration_children x in
     t attr;

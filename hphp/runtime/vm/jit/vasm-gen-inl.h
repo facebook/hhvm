@@ -84,6 +84,8 @@ TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     Vauto vauto { main, cold, data, meta ? *meta : dummy_meta, kind };
     gen(vauto.main(), vauto.cold());
   }
+
+  dummy_meta.process_literals();
   assertx(dummy_meta.empty());
 
   return start;

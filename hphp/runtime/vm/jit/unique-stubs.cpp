@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/stack-overflow.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
@@ -1264,6 +1265,19 @@ TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
   });
 }
 
+template<class F>
+TCA emitHelperThunk(CodeCache& code, CodeBlock& cb, DataBlock& data, F* func) {
+  // we only emit these calls into hot, main and cold.
+  if (deltaFits(code.base() - (TCA)func, sz::dword) &&
+      deltaFits(code.frozen().base() - (TCA)func, sz::dword)) {
+    return (TCA)func;
+  }
+  alignJmpTarget(cb);
+  return vwrap(cb, data, [&] (Vout& v) {
+      v << jmpi{(TCA)func};
+  });
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1320,6 +1334,19 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(callToExit,         emitCallToExit(main, data, *this));
   ADD(throwSwitchMode,    emitThrowSwitchMode(frozen, data));
 
+  ADD(handlePrimeCacheInit,
+      emitHelperThunk(code, cold, data,
+                      MethodCache::handlePrimeCacheInit<false>));
+  ADD(handlePrimeCacheInitFatal,
+      emitHelperThunk(code, cold, data,
+                      MethodCache::handlePrimeCacheInit<true>));
+  ADD(handleSlowPath,
+      emitHelperThunk(code, main, data,
+                      MethodCache::handleSlowPath<false>));
+  ADD(handleSlowPathFatal,
+      emitHelperThunk(code, main, data,
+                      MethodCache::handleSlowPath<true>));
+
 #undef ADD
 
   add("freeLocalsHelpers",
@@ -1336,6 +1363,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
 TCA UniqueStubs::add(const char* name, TCA start,
                      const CodeCache& code, Debug::DebugInfo& dbg) {
+  if (!code.isValidCodeAddress(start)) return start;
+
   auto& cb = code.blockFor(start);
   auto const end = cb.frontier();
 

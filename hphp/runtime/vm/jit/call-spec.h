@@ -116,6 +116,10 @@ struct CallSpec {
     return CallSpec { Kind::Smashable, reinterpret_cast<void*>(fp) };
   }
 
+  static CallSpec smashable(TCA fp) {
+    return CallSpec { Kind::Smashable, fp };
+  }
+
   /*
    * An ArrayVirt call, for the array function table `p'.
    *

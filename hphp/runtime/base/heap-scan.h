@@ -308,9 +308,12 @@ inline void scanRoots(type_scan::Scanner& scanner) {
     auto tm_end = tm + tdata.second;
     auto mm = (char*)&MM();
     auto mm_end = mm + sizeof(MemoryManager);
-    assert(mm >= tm && mm_end <= tm_end);
-    scanner.conservative(tm, mm - tm);
-    scanner.conservative(mm_end, tm_end - mm_end);
+    if (mm >= tm && mm_end <= tm_end) {
+      scanner.conservative(tm, mm - tm);
+      scanner.conservative(mm_end, tm_end - mm_end);
+    } else {
+      scanner.conservative(tm, tdata.second);
+    }
   }
   // ThreadLocal nodes (but skip MemoryManager)
   scanner.where("ThreadLocalManager");

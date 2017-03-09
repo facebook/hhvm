@@ -128,6 +128,14 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
                           Class* ctx,
                           uintptr_t rawTarget);
 
+template<bool fatal>
+void handleSlowPath(rds::Handle mce_handle,
+                    ActRec* ar,
+                    StringData* name,
+                    Class* cls,
+                    Class* ctx,
+                    uintptr_t mcePrime);
+
 } // namespace MethodCache
 
 //////////////////////////////////////////////////////////////////////

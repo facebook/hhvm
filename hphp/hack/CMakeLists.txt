@@ -47,11 +47,11 @@ else()
     list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
     get_filename_component(pth ${LZ4_LIBRARY} PATH)
     list(APPEND extra_lib_paths ${pth})
+    list(APPEND extra_native_libraries "lz4")
   else()
     list(APPEND extra_include_paths "${TP_DIR}/lz4/src/lib")
-    list(APPEND extra_lib_paths "${TP_BUILD_DIR}/lz4")
+    list(APPEND extra_lib_opts "$<TARGET_LINKER_FILE:lz4>")
   endif()
-  list(APPEND extra_native_libraries "lz4")
 
   if(PC_SQLITE3_FOUND)
     list(APPEND extra_include_paths ${LIBSQLITE3_INCLUDE_DIR})
@@ -74,6 +74,7 @@ else()
     COMMAND
           $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
           EXTRA_LIB_PATHS="${extra_lib_paths}"
+          EXTRA_LIB_OPTS="${extra_lib_opts}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
           BYTECODE="${EMIT_OCAML_BYTECODE}"
@@ -90,6 +91,7 @@ else()
     COMMAND
           $(MAKE) test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
           EXTRA_LIB_PATHS="${extra_lib_paths}"
+          EXTRA_LIB_OPTS="${extra_lib_opts}"
           EXTRA_CC_FLAGS="${extra_cc_flags}"
           EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
           BYTECODE="${EMIT_OCAML_BYTECODE}"

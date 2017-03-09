@@ -22,6 +22,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -879,9 +880,23 @@ IRSPRelOffset locToStkOff(IRInstruction& inst) {
 template <typename F>
 void rewriteToParentFrameImpl(IRUnit& unit, IRInstruction& inst, F dead) {
   assertx(inst.is(LdClsRef, StClsRef, KillClsRef));
-  assertx(inst.src(0)->inst()->is(DefInlineFP));
 
   auto fp = inst.src(0);
+  assertx(canonical(fp)->inst()->is(DefInlineFP, DefLabel));
+
+  auto const chaseFpTmp = [](const SSATmp* s) {
+    s = canonical(s);
+    auto i = s->inst();
+    if (UNLIKELY(i->is(DefLabel))) {
+      i = resolveFpDefLabel(s);
+      assertx(i);
+    }
+    always_assert(i->is(DefFP, DefInlineFP));
+    return i->dst();
+  };
+
+  fp = chaseFpTmp(fp);
+  assertx(fp->inst()->is(DefInlineFP));
 
   // Figure out the FPInvOffset of the stack pointer from the outermost frame
   // pointer. We'll use this to find the offsets of the various frame pointers.
@@ -919,8 +934,7 @@ void rewriteToParentFrameImpl(IRUnit& unit, IRInstruction& inst, F dead) {
   // the outermost frame pointer, or if we find an inlined frame which is not
   // dead. This will be the frame pointer we rewrite the instruction to.
   do {
-    fp = fp->inst()->src(1);
-    assertx(fp->inst()->is(DefFP, DefInlineFP));
+    fp = chaseFpTmp(fp->inst()->src(1));
   } while (!fp->inst()->is(DefFP) && dead(fp->inst()));
 
   // Calculate the new offset (in bytes) that should be used to calculate the
@@ -1103,9 +1117,59 @@ void optimizeActRecs(const BlockList& blocks,
   }
 }
 
+IRInstruction* resolveFpDefLabelImpl(
+  const SSATmp* fp,
+  jit::flat_set<const IRInstruction*>& visited
+) {
+  auto const inst = fp->inst();
+  assertx(inst->is(DefLabel));
+
+  // We already examined this, avoid loops.
+  if (visited.count(inst)) return nullptr;
+
+  auto const dests = inst->dsts();
+  auto const destIdx =
+    std::find(dests.begin(), dests.end(), fp) - dests.begin();
+  always_assert(destIdx >= 0 && destIdx < inst->numDsts());
+
+  // If any of the inputs to the Phi aren't Phis themselves, then just choose
+  // that.
+  IRInstruction* outInst = nullptr;
+  inst->block()->forEachSrc(
+    destIdx,
+    [&] (const IRInstruction*, const SSATmp* tmp) {
+      if (outInst) return;
+      auto const i = canonical(tmp)->inst();
+      if (!i->is(DefLabel)) outInst = i;
+    }
+  );
+  if (outInst) return outInst;
+
+  // Otherwise we need to recursively look at the linked Phis, avoiding visiting
+  // this Phi again.
+  visited.insert(inst);
+  inst->block()->forEachSrc(
+    destIdx,
+    [&] (const IRInstruction*, const SSATmp* tmp) {
+      if (outInst) return;
+      tmp = canonical(tmp);
+      auto const DEBUG_ONLY label = tmp->inst();
+      assertx(label->is(DefLabel));
+      outInst = resolveFpDefLabelImpl(tmp, visited);
+    }
+  );
+
+  return outInst;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
+
+IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
+  jit::flat_set<const IRInstruction*> visited;
+  return resolveFpDefLabelImpl(fp, visited);
+}
 
 void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));

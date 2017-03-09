@@ -20,17 +20,19 @@
 #include "hphp/runtime/base/ref-data.h"
 
 #include "hphp/runtime/vm/runtime.h"
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -151,11 +153,16 @@ void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
 namespace {
 
 const Func* funcFromFp(const SSATmp* fp) {
-  auto const inst = fp->inst();
+  fp = canonical(fp);
+  auto inst = fp->inst();
+  if (UNLIKELY(inst->is(DefLabel))) {
+    inst = resolveFpDefLabel(fp);
+    assertx(inst);
+  }
   assertx(inst->is(DefFP, DefInlineFP));
   if (inst->is(DefFP)) return inst->marker().func();
   if (inst->is(DefInlineFP)) return inst->extra<DefInlineFP>()->target;
-  not_reached();
+  always_assert(false);
 }
 
 }

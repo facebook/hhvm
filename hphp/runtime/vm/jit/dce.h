@@ -20,6 +20,7 @@ namespace HPHP { namespace jit {
 
 struct IRUnit;
 struct IRInstruction;
+struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -71,6 +72,15 @@ void rewriteToParentFrame(IRUnit& unit, IRInstruction& inst);
  * Postcondition: inst is InlineReturnNoFrame
  */
 void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst);
+
+/*
+ * Given a SSATmp representing a FramePtr which comes from a DefLabel
+ * instruction, chase the definitions to the first non-DefLabel instruction it
+ * can find. This assumes that all inputs to the DefLabel are equivalent.
+ *
+ * Precondition: fp->inst()->is(DefLabel) && fp->is(TFramePtr)
+ */
+IRInstruction* resolveFpDefLabel(const SSATmp* fp);
 
 //////////////////////////////////////////////////////////////////////
 

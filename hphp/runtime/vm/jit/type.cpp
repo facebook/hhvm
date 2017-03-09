@@ -763,7 +763,7 @@ static Type relaxCell(Type t, DataTypeCategory cat) {
 }
 
 Type relaxType(Type t, DataTypeCategory cat) {
-  always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
+  always_assert_flog(t <= TGen, "t = {}", t);
   if (cat == DataTypeGeneric) return TGen;
   auto const relaxed =
     (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, cat);

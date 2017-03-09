@@ -310,8 +310,7 @@ struct Variant : private TypedValue {
    * refs and turn uninits to null.
    */
   Variant& operator=(Variant &&rhs) noexcept {
-    assert(this != &rhs); // TODO(#2484130): we end up as null on a
-                          // self move-assign; decide if this is ok.
+    assert(this != &rhs); // we end up as null on a self move-assign.
     if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
 
     Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;

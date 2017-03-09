@@ -14,7 +14,7 @@ require_once 'full_fidelity_utilities.php';
 require_once 'full_fidelity_editable.php';
 
 function parse_file_to_json(string $file) : mixed {
-  $results = execute("full_fidelity_parse --full-fidelity-json $file");
+  $results = execute("hh_parse --full-fidelity-json $file");
   $json = json_decode($results[0]);
   return $json;
 }

@@ -80,11 +80,15 @@ if(LZ4_FOUND)
   list(APPEND extra_include_paths ${LZ4_INCLUDE_DIR})
   get_filename_component(pth ${LZ4_LIBRARY} PATH)
   list(APPEND extra_lib_paths ${pth})
+  list(APPEND extra_native_libraries "lz4")
 else()
   list(APPEND extra_include_paths "${TP_DIR}/lz4/src/lib")
-  list(APPEND extra_lib_paths "${TP_BUILD_DIR}/lz4")
+  # If LZ4_FOUND is false either we didn't find lz4 or we found it but it's the
+  # wrong version.  We can't just add the new path and a native_lib because we
+  # can't control the order (and -l won't accept the raw path to the lib).  By
+  # doing it this way we specify the path explicitly.
+  list(APPEND extra_link_opts "$<TARGET_LINKER_FILE:lz4>")
 endif()
-list(APPEND extra_native_libraries "lz4")
 
 if(PC_SQLITE3_FOUND)
   list(APPEND extra_include_paths ${LIBSQLITE3_INCLUDE_DIR})
@@ -107,6 +111,7 @@ add_custom_target(
   COMMAND
         $(MAKE) EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
+        EXTRA_LINK_OPTS="${extra_link_opts}"
         EXTRA_CC_FLAGS="${extra_cc_flags}"
         EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
         BYTECODE="${EMIT_OCAML_BYTECODE}"
@@ -123,6 +128,7 @@ add_custom_target(
   COMMAND
         $(MAKE) test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
+        EXTRA_LINK_OPTS="${extra_link_opts}"
         EXTRA_CC_FLAGS="${extra_cc_flags}"
         EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
         BYTECODE="${EMIT_OCAML_BYTECODE}"

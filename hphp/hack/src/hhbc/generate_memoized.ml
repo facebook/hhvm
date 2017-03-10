@@ -13,6 +13,7 @@ open Hhbc_ast.MemberOpMode
 
 let memoize_suffix = "$memoize_impl"
 let memoize_cache = "static$memoize_cache"
+let memoize_guard = "static$memoize_cache$guard"
 
 let param_code_sets params local =
   let rec aux params local block =
@@ -37,8 +38,65 @@ let param_code_gets params =
       aux t (index + 1) block in
   aux params 0 empty
 
-let memoized_body params renamed_name =
-  (* TODO: This codegen is wrong for the case where there are zero params *)
+let memoize_no_params renamed_name =
+  (* TODO: A lot of this codegen doesn't make a lot of sense to me.
+  Try to understand it and see if it can be improved. *)
+  let local_cache = Local.Unnamed 0 in
+  let local_guard = Local.Unnamed 1 in
+  let label_0 = Label.Regular 0 in
+  let label_1 = Label.Regular 1 in
+  let label_2 = Label.Regular 2 in
+  let label_3 = Label.Regular 3 in
+  let label_4 = Label.Regular 4 in
+  let label_5 = Label.Regular 5 in
+  gather [
+    instr_entrynop;
+    instr_false;
+    instr_staticlocinit local_guard memoize_guard;
+    instr_null;
+    instr_staticlocinit local_cache memoize_cache;
+    instr_null;
+    instr_ismemotype;
+    instr_jmpnz label_0;
+    instr_cgetl local_cache;
+    instr_dup;
+    instr_istypec Hhbc_ast.OpNull;
+    instr_jmpnz label_1;
+    instr_retc;
+    instr_label label_1;
+    instr_popc;
+    instr_label label_0;
+    instr_null;
+    instr_maybememotype;
+    instr_jmpz label_2;
+    instr_cgetl local_guard;
+    instr_jmpz label_2;
+    instr_null;
+    instr_retc;
+    instr_label label_2;
+    instr_null;
+    instr_ismemotype;
+    instr_jmpnz label_3;
+    instr_fpushfuncd 0 renamed_name;
+    instr_fcall 0;
+    instr_unboxr;
+    instr_setl local_cache;
+    instr_jmp label_4;
+    instr_label label_3;
+    instr_fpushfuncd 0 renamed_name;
+    instr_fcall 0;
+    instr_unboxr;
+    instr_label label_4;
+    instr_null;
+    instr_maybememotype;
+    instr_jmpz label_5;
+    instr_true;
+    instr_setl local_guard;
+    instr_popc;
+    instr_label label_5;
+    instr_retc ]
+
+let memoize_with_params params renamed_name =
   let param_count = List.length params in
   let static_local = Local.Unnamed param_count in
   let label = Label.Regular 0 in
@@ -67,6 +125,12 @@ let memoized_body params renamed_name =
     instr_memoset 0 first_local param_count;
     instr_retc
   ]
+
+let memoized_body params renamed_name =
+  if params = [] then
+    memoize_no_params renamed_name
+  else
+    memoize_with_params params renamed_name
 
 let memoize_function compiled =
   let original_name = Hhas_function.name compiled in

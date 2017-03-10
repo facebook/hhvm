@@ -432,6 +432,8 @@ let string_of_misc instruction =
         (string_of_int count) first (local_count - 1)
     | MemoSet _ -> failwith "MemoSet needs an unnamed local"
     | GetMemoKeyL local -> "GetMemoKeyL " ^ (string_of_local_id local)
+    | IsMemoType -> "IsMemoType"
+    | MaybeMemoType -> "MaybeMemoType"
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =

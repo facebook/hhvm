@@ -507,6 +507,8 @@ type instruct_misc =
   | UGetCUNop
   | MemoSet of int * local_id * int
   | MemoGet of int * local_id * int
+  | IsMemoType
+  | MaybeMemoType
 
 type gen_creation_execution =
   | CreateCont

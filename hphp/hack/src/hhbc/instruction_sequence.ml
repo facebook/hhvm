@@ -109,6 +109,8 @@ let instr_memoget count local local_count =
 let instr_memoset count local local_count =
   instr (IMisc (MemoSet(count, local, local_count)))
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
+let instr_ismemotype = instr (IMisc IsMemoType)
+let instr_maybememotype = instr (IMisc MaybeMemoType)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

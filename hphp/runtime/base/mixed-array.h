@@ -116,10 +116,10 @@ struct MixedArray final : ArrayData,
     }
 
     TYPE_SCAN_CUSTOM() {
-      if (!isTombstone()) {
-        if (hasStrKey()) scanner.scan(skey);
-        scanner.scan(data);
-      }
+      // if data is a Tombstone, the TypedValue scanner will ignore it
+      static_assert(!isRefcountedType(kInvalidDataType), "");
+      if (hasStrKey()) scanner.scan(skey);
+      scanner.scan(data);
     }
 
     static constexpr ptrdiff_t keyOff() {

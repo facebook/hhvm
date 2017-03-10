@@ -25,19 +25,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FilesMatch::FilesMatch(const IniSetting::Map& ini, const Hdf& vh) {
-  if (vh.exists()) {
-    m_pattern = format_pattern(vh["pattern"].configGetString(), true);
-    vh["headers"].configGet(m_headers);
-  } else {
-    m_pattern = format_pattern(
-      ini[String("pattern")].toString().toCppString(),
-      true
-    );
-    for (ArrayIter iter(ini[String("headers")].toArray());
-         iter; ++iter) {
-      m_headers.push_back(iter.second().toString().toCppString());
-    }
-  }
+
+  m_pattern = format_pattern(Config::GetString(ini, vh, "Pattern", "", false),
+                             true);
+  m_headers = Config::GetVector(ini, vh, "headers", m_headers, false);
 }
 
 bool FilesMatch::match(const std::string &filename) const {

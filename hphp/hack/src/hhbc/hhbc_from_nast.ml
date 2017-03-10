@@ -23,6 +23,15 @@ module PassByRefKind = struct
   type t = AllowCell | WarnOnCell | ErrorOnCell
 end
 
+(* Locals, array elements, and properties all support the same range of l-value
+ * operations. *)
+module LValOp = struct
+  type t =
+  | Set
+  | SetOp of eq_op
+  | IncDec of incdec_op
+end
+
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
@@ -125,7 +134,12 @@ and emit_binop op e1 e2 =
   match (op, e1, e2) with
   | (A.AMpamp, e1, e2) ->  emit_logical_and e1 e2
   | (A.BArbar, e1, e2) -> emit_logical_or e1 e2
-  | (A.Eq obop, e1, e2) -> emit_assignment obop e1 e2
+  | (A.Eq None, e1, e2) -> emit_lval_op None LValOp.Set e1 (Some e2)
+  | (A.Eq (Some obop), e1, e2) ->
+    begin match binop_to_eqop obop with
+    | None -> emit_nyi "illegal eq op"
+    | Some op -> emit_lval_op None (LValOp.SetOp op) e1 (Some e2)
+    end
   (* Special case to make use of CGetL2 *)
   | (op, (_, A.Lvar (_, local)), e2) ->
     gather [
@@ -320,7 +334,8 @@ and from_expr expr =
   | A.Array es -> emit_collection expr es
   | A.Collection ((pos, name), fields) ->
     emit_named_collection expr pos name fields
-  | A.Array_get(e1, Some e2) -> emit_array_get None e1 e2
+  | A.Array_get(base_expr, opt_elem_expr) ->
+    emit_array_get None base_expr opt_elem_expr
   | A.Clone e -> emit_clone e
   | A.Shape fl -> emit_shape expr fl
   | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get None expr prop nullflavor
@@ -329,7 +344,6 @@ and from_expr expr =
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
-  | A.Array_get (_, _)          -> emit_nyi "array_get"
   | A.Class_get (_, _)          -> emit_nyi "class_get"
   | A.String2 _                 -> emit_nyi "string2"
   | A.Yield _                   -> emit_nyi "yield"
@@ -478,11 +492,11 @@ and emit_quiet_expr (_, expr_ as expr) =
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_array_get param_num_opt e1 e2 =
-  let elem_expr_instrs, elem_stack_size = emit_elem_instrs e2 in
+and emit_array_get param_num_opt base_expr opt_elem_expr =
+  let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base elem_stack_size param_num_opt e1 in
-  let mk = get_elem_member_key 0 e2 in
+    emit_base MemberOpMode.Warn elem_stack_size param_num_opt base_expr in
+  let mk = get_elem_member_key 0 opt_elem_expr in
   let total_stack_size = elem_stack_size + base_stack_size in
   let final_instr =
     instr (IFinal (
@@ -504,7 +518,7 @@ and emit_array_get param_num_opt e1 e2 =
 and emit_obj_get param_num_opt expr prop null_flavor =
   let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base prop_stack_size param_num_opt expr in
+    emit_base MemberOpMode.Warn prop_stack_size param_num_opt expr in
   let mk = get_prop_member_key null_flavor 0 prop in
   let total_stack_size = prop_stack_size + base_stack_size in
   let final_instr =
@@ -520,11 +534,12 @@ and emit_obj_get param_num_opt expr prop null_flavor =
     final_instr
   ]
 
-and emit_elem_instrs (_, expr_ as expr) =
-  match expr_ with
+and emit_elem_instrs opt_elem_expr =
+  match opt_elem_expr with
   (* These all have special inline versions of member keys *)
-  | A.Lvar _ | A.Int _ | A.String _ -> empty, 0
-  | _ -> from_expr expr, 1
+  | Some (_, (A.Lvar _ | A.Int _ | A.String _)) -> empty, 0
+  | Some expr -> from_expr expr, 1
+  | None -> empty, 0
 
 and emit_prop_instrs (_, expr_ as expr) =
   match expr_ with
@@ -532,29 +547,34 @@ and emit_prop_instrs (_, expr_ as expr) =
   | A.Lvar _ | A.Id _ -> empty, 0
   | _ -> from_expr expr, 1
 
-(* Get the member key for an array element *)
-and get_elem_member_key stack_index (_, expr_) =
-  match expr_ with
+(* Get the member key for an array element expression: the `elem` in
+ * expressions of the form `base[elem]`.
+ * If the array element is missing, use the special key `W`.
+ *)
+and get_elem_member_key stack_index opt_expr =
+  match opt_expr with
   (* Special case for local *)
-  | A.Lvar (_, x) -> MemberKey.EL (Local.Named x)
+  | Some (_, A.Lvar (_, x)) -> MemberKey.EL (Local.Named x)
   (* Special case for literal integer *)
-  | A.Int (_, str) -> MemberKey.EI (Int64.of_string str)
+  | Some (_, A.Int (_, str)) -> MemberKey.EI (Int64.of_string str)
   (* Special case for literal string *)
-  | A.String (_, str) -> MemberKey.ET str
+  | Some (_, A.String (_, str)) -> MemberKey.ET str
   (* General case *)
-  | _ -> MemberKey.EC stack_index
+  | Some _ -> MemberKey.EC stack_index
+  (* ELement missing (so it's array append) *)
+  | None -> MemberKey.W
 
 (* Get the member key for a property *)
-and get_prop_member_key null_flavor stack_index (_, expr_) =
-  match expr_ with
+and get_prop_member_key null_flavor stack_index prop_expr =
+  match prop_expr with
   (* Special case for known property name *)
-  | A.Id (_, str) ->
+  | (_, A.Id (_, str)) ->
     begin match null_flavor with
     | Ast.OG_nullthrows -> MemberKey.PT str
     | Ast.OG_nullsafe -> MemberKey.QT str
     end
   (* Special case for local *)
-  | A.Lvar (_, x) -> MemberKey.PL (Local.Named x)
+  | (_, A.Lvar (_, x)) -> MemberKey.PL (Local.Named x)
   (* General case *)
   | _ -> MemberKey.PC stack_index
 
@@ -587,7 +607,7 @@ and get_prop_member_key null_flavor stack_index (_, expr_) =
  *   # Section 3, indexing the array using the value at stack position 0 (EC:0)
  *   QueryM 1 CGet EC:0
  *)
-and emit_base base_offset param_num_opt (_, expr_ as expr) =
+and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
    match expr_ with
    | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
      instr (IMisc CheckThis),
@@ -598,16 +618,16 @@ and emit_base base_offset param_num_opt (_, expr_ as expr) =
      empty,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseL (Local.Named x, MemberOpMode.Warn)
+       | None -> BaseL (Local.Named x, mode)
        | Some i -> FPassBaseL (i, Local.Named x)
        )),
      0
 
-   | A.Array_get(e1, Some e2) ->
-     let elem_expr_instrs, elem_stack_size = emit_elem_instrs e2 in
+   | A.Array_get(base_expr, opt_elem_expr) ->
+     let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
      let base_expr_instrs, base_setup_instrs, base_stack_size =
-       emit_base (base_offset + elem_stack_size) param_num_opt e1 in
-     let mk = get_elem_member_key base_offset e2 in
+       emit_base mode (base_offset + elem_stack_size) param_num_opt base_expr in
+     let mk = get_elem_member_key base_offset opt_elem_expr in
      let total_stack_size = base_stack_size + elem_stack_size in
      gather [
        base_expr_instrs;
@@ -617,11 +637,34 @@ and emit_base base_offset param_num_opt (_, expr_ as expr) =
        base_setup_instrs;
        instr (IBase (
          match param_num_opt with
-         | None -> Dim (MemberOpMode.Warn, mk)
+         | None -> Dim (mode, mk)
          | Some i -> FPassDim (i, mk)
        ))
      ],
      total_stack_size
+
+   | A.Obj_get(base_expr, prop_expr, null_flavor) ->
+     let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop_expr in
+     let base_expr_instrs, base_setup_instrs, base_stack_size =
+       emit_base mode (base_offset + prop_stack_size) param_num_opt base_expr in
+     let mk = get_prop_member_key null_flavor base_offset prop_expr in
+     let total_stack_size = prop_stack_size + base_stack_size in
+     let final_instr =
+       instr (IBase (
+         match param_num_opt with
+         | None -> Dim (mode, mk)
+         | Some i -> FPassDim (i, mk)
+       )) in
+     gather [
+       base_expr_instrs;
+       prop_expr_instrs;
+     ],
+     gather [
+       base_setup_instrs;
+       final_instr
+     ],
+     total_stack_size
+
    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr expr in
      base_expr_instrs,
@@ -641,8 +684,8 @@ and emit_arg i ((_, expr_) as e) =
   match expr_ with
   | A.Lvar (_, x) -> instr_fpassl i (Local.Named x)
 
-  | A.Array_get(e1, Some e2) ->
-    emit_array_get (Some i) e1 e2
+  | A.Array_get(base_expr, opt_elem_expr) ->
+    emit_array_get (Some i) base_expr opt_elem_expr
 
   | A.Obj_get(e1, e2, nullflavor) ->
     emit_obj_get (Some i) e1 e2 nullflavor
@@ -761,23 +804,69 @@ and literals_from_exprs_with_index exprs =
     ~f:(fun (index, l) e ->
       (index + 1, literal_from_expr e :: Int (Int64.of_int index) :: l))
 
-(* Emit code for an l-value, returning instructions and the location that
- * must be set. For now, this is just a local. *)
-and emit_lval (_, expr_) =
-  match expr_ with
-  | A.Lvar (_, id) -> empty, Local.Named id
-  | _ -> emit_nyi "lval expression", Local.Unnamed 0
+and emit_final_member_op param_num_opt stack_index op mk =
+  match param_num_opt, op with
+  | None, LValOp.Set -> instr (IFinal (SetM (stack_index, mk)))
+  | Some i, LValOp.Set -> instr (IFinal (FPassM (i, stack_index, mk)))
+  | None, LValOp.SetOp op -> instr (IFinal (SetOpM (stack_index, op, mk)))
+  | None, LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
+  | _ -> emit_nyi "emit_final_member_op"
 
-and emit_assignment obop e1 e2 =
-  let instrs1, lval = emit_lval e1 in
-  let instrs2 = from_expr e2 in
-  gather [instrs1; instrs2;
-    match obop with
-    | None -> instr (IMutator (SetL lval))
-    | Some bop ->
-      match binop_to_eqop bop with
-      | None -> emit_nyi "op-assignment"
-      | Some eqop -> instr (IMutator (SetOpL (lval, eqop)))
+and emit_final_local_op op lid =
+  match op with
+  | LValOp.Set -> instr (IMutator (SetL lid))
+  | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
+  | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
+
+(* Emit code for an l-value operation *)
+and emit_lval_op param_num_opt op expr1 opt_expr2 =
+  let rhs_instrs, rhs_stack_size =
+    match opt_expr2 with
+    | None -> empty, 0
+    | Some e -> from_expr e, 1 in
+  match expr1 with
+  | (_, A.Lvar (_, id)) ->
+    gather [
+      rhs_instrs;
+      emit_final_local_op op (Local.Named id)
+    ]
+
+  | (_, A.Array_get(base_expr, opt_elem_expr)) ->
+    let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
+    let base_offset = elem_stack_size + rhs_stack_size in
+    let base_expr_instrs, base_setup_instrs, base_stack_size =
+      emit_base MemberOpMode.Define base_offset param_num_opt base_expr in
+    let mk = get_elem_member_key rhs_stack_size opt_elem_expr in
+    let total_stack_size = elem_stack_size + base_stack_size in
+    let final_instr = emit_final_member_op param_num_opt total_stack_size op mk in
+    gather [
+      base_expr_instrs;
+      elem_expr_instrs;
+      rhs_instrs;
+      base_setup_instrs;
+      final_instr
+    ]
+
+  | (_, A.Obj_get(e1, e2, null_flavor)) ->
+    let prop_expr_instrs, prop_stack_size = emit_prop_instrs e2 in
+    let base_offset = prop_stack_size + rhs_stack_size in
+    let base_expr_instrs, base_setup_instrs, base_stack_size =
+      emit_base MemberOpMode.Define base_offset param_num_opt e1 in
+    let mk = get_prop_member_key null_flavor rhs_stack_size e2 in
+    let total_stack_size = prop_stack_size + base_stack_size in
+    let final_instr = emit_final_member_op param_num_opt total_stack_size op mk in
+    gather [
+      base_expr_instrs;
+      prop_expr_instrs;
+      rhs_instrs;
+      base_setup_instrs;
+      final_instr
+    ]
+
+  | _ ->
+    gather [
+      emit_nyi "lval expression";
+      rhs_instrs;
     ]
 
 and emit_unop op e =
@@ -793,11 +882,11 @@ and emit_unop op e =
     from_expr e;
     instr (IOp SubO)]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
-    let instrs, lval = emit_lval e in
-    gather [instrs;
-      match unop_to_incdec_op op with
-      | None -> emit_nyi "incdec"
-      | Some incdec_op -> instr (IMutator (IncDecL (lval, incdec_op)))]
+    begin match unop_to_incdec_op op with
+    | None -> emit_nyi "incdec"
+    | Some incdec_op ->
+      emit_lval_op None (LValOp.IncDec incdec_op) e None
+    end
   | A.Uref ->
     emit_nyi "references"
 

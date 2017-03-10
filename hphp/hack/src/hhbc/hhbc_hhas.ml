@@ -327,13 +327,23 @@ let string_of_base x =
 let string_of_final instruction =
   match instruction with
   | QueryM (n, op, mk) ->
-    "QueryM " ^ string_of_int n ^ " " ^ QueryOp.to_string op ^ " " ^
-    string_of_member_key mk
+    sep ["QueryM";
+      string_of_int n; QueryOp.to_string op; string_of_member_key mk]
   | VGetM (n, mk) ->
-    "VGetM " ^ string_of_int n ^ " " ^ string_of_member_key mk
+    sep ["VGetM";
+      string_of_int n; string_of_member_key mk]
   | FPassM (i, n, mk) ->
-    "FPassM " ^ string_of_param_num i ^ " " ^ string_of_int n
-    ^ " " ^ string_of_member_key mk
+    sep ["FPassM";
+      string_of_param_num i; string_of_int n; string_of_member_key mk]
+  | SetM (i, mk) ->
+    sep ["SetM";
+      string_of_param_num i; string_of_member_key mk]
+  | SetOpM (i, op, mk) ->
+    sep ["SetOpM";
+      string_of_param_num i; string_of_eq_op op; string_of_member_key mk]
+  | IncDecM (i, op, mk) ->
+    sep ["IncDecM";
+      string_of_param_num i; string_of_incdec_op op; string_of_member_key mk]
   | _ ->
     "# string_of_final NYI"
 (*

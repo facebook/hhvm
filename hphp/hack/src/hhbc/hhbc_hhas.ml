@@ -688,7 +688,7 @@ let add_method_def buf method_def =
   B.add_string buf (string_of_params method_params);
   B.add_string buf " {\n";
   add_instruction_list buf 4 method_body;
-  B.add_string buf "  }\n"
+  B.add_string buf "  }"
 
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
@@ -738,19 +738,19 @@ let add_property buf property =
   B.add_string buf (Hhas_property.name property);
   (* TODO: Get the actual initializer when we can codegen it. Properties
   that lack an initializer get a null. *)
-  B.add_string buf " =\n    \"\"\"N;\"\"\";\n"
+  B.add_string buf " =\n    \"\"\"N;\"\"\";"
 
 let add_constant buf c =
   B.add_string buf "\n  .const ";
   B.add_string buf (Hhas_constant.name c);
   (* TODO: Get the actual initializer when we can codegen it. *)
-  B.add_string buf " = \"\"\"N;\"\"\";\n"
+  B.add_string buf " = \"\"\"N;\"\"\";"
 
 let add_type_constant buf c =
   B.add_string buf "\n  .const ";
   B.add_string buf (Hhas_type_constant.name c);
   (* TODO: Get the actual initializer when we can codegen it. *)
-  B.add_string buf " isType = \"\"\"N;\"\"\";\n"
+  B.add_string buf " isType = \"\"\"N;\"\"\";"
 
 let add_class_def buf class_def =
   let class_name = fmt_name (Hhas_class.name class_def) in
@@ -760,13 +760,13 @@ let add_class_def buf class_def =
   B.add_string buf class_name;
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
-  B.add_string buf " {\n";
+  B.add_string buf " {";
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
   List.iter (add_property buf) (Hhas_class.properties class_def);
   List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)
-  B.add_string buf "}\n"
+  B.add_string buf "\n}\n"
 
 let add_defcls buf classes =
   List.iteri

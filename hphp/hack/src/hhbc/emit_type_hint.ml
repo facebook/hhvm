@@ -114,3 +114,8 @@ let hint_to_type_info ~always_extended tparams h =
 let hints_to_type_infos ~always_extended tparams hints =
   let mapper hint = hint_to_type_info always_extended tparams hint in
   List.map hints mapper
+
+let hint_to_class h =
+  match h with
+  | (_, A.Happly ((_, s), _)) -> s
+  | _ -> "__type_is_not_class__"

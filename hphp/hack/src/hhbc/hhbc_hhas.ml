@@ -705,10 +705,10 @@ let class_special_attributes c =
 let add_extends buf class_base =
   match class_base with
   | None -> ()
-  | Some type_info ->
+  | Some name ->
     begin
       B.add_string buf " extends ";
-      add_type_info buf type_info;
+      B.add_string buf (fmt_name name);
     end
 
 let add_implements buf class_implements =
@@ -717,7 +717,7 @@ let add_implements buf class_implements =
   | _ ->
   begin
     B.add_string buf " implements (";
-    add_type_infos buf class_implements;
+    B.add_string buf (String.concat " " (List.map fmt_name class_implements));
     B.add_string buf ") ";
   end
 

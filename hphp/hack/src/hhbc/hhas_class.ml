@@ -23,8 +23,8 @@ open Hhbc_from_nast
 
 type t = {
   class_attributes   : Hhas_attribute.t list;
-  class_base         : Hhas_type_info.t option;
-  class_implements   : Hhas_type_info.t list;
+  class_base         : Litstr.id option;
+  class_implements   : Litstr.id list;
   class_name         : Litstr.id;
   class_is_final     : bool;
   class_is_abstract  : bool;
@@ -112,21 +112,13 @@ let default_constructor ast_class =
     method_return_type
     method_body
 
-let from_extends tparams extends =
-  (* TODO: This prints out "extends <"\\Mammal" "\\Mammal" hh_type >"
-  instead of "extends Mammal" -- figure out how to have it produce the
-  simpler form in this clause.
-  *)
+let from_extends _tparams extends =
   match extends with
   | [] -> None
-  | h :: _ -> Some (hint_to_type_info ~always_extended:false tparams h)
+  | h :: _ -> Some (hint_to_class h)
 
-let from_implements tparams implements =
-  (* TODO: This prints out "implements <"\\IFoo" "\\IFoo" hh_type >"
-  instead of "implements IFoo" -- figure out how to have it produce the
-  simpler form in this clause.
-  *)
-  hints_to_type_infos ~always_extended:false tparams implements
+let from_implements _tparams implements =
+  List.map implements hint_to_class
 
 let from_class_var cv_kind_list class_var =
   let (_, (_, cv_name), _) = class_var in

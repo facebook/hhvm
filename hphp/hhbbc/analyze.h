@@ -104,6 +104,11 @@ struct FuncAnalysis {
    * variable environment.
    */
   bool mayUseVV;
+
+  /*
+   * Known types of local statics.
+   */
+  CompactVector<Type> localStaticTypes;
 };
 
 /*
@@ -185,7 +190,7 @@ ClassAnalysis analyze_class(const Index&, Context);
  */
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
-                          Context,
+                          const FuncAnalysis&,
                           borrowed_ptr<const php::Block>,
                           State stateIn);
 

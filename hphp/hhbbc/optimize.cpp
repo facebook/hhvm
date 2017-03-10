@@ -280,7 +280,7 @@ void insert_assertions(const Index& index,
 
   auto lastStackOutputObvious = false;
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr, true };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true, &ainfo };
   auto interp = Interp { index, ctx, collect, blk, state };
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -419,7 +419,7 @@ void first_pass(const Index& index,
   std::vector<Bytecode> newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr, true };
+  CollectedInfo collect { index, ctx, nullptr, nullptr, true, &ainfo };
   auto interp = Interp { index, ctx, collect, blk, state };
 
   auto peephole = make_peephole(newBCs, index, ctx);

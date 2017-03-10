@@ -277,6 +277,11 @@ struct FuncInfoValue {
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes;
+
+  /*
+   * Type info for local statics.
+   */
+  CompactVector<Type> localStaticTypes;
 };
 
 using FuncInfoMap = std::unordered_map<borrowed_ptr<const php::Func>,
@@ -2691,6 +2696,37 @@ void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
   if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
   if (func->name == s_86cinit.get()) {
     refine_class_constants(fa.ctx, deps);
+  }
+}
+
+void Index::refine_local_static_types(
+  borrowed_ptr<const php::Func> func,
+  const CompactVector<Type>& localStaticTypes) {
+
+  auto& fdata = create_func_info(*m_data, func)->second;
+  if (localStaticTypes.empty()) {
+    fdata.localStaticTypes.clear();
+    return;
+  }
+
+  fdata.localStaticTypes.resize(localStaticTypes.size(), TTop);
+  for (auto i = size_t{0}; i < localStaticTypes.size(); i++) {
+    auto& indexTy = fdata.localStaticTypes[i];
+    auto const& newTy = localStaticTypes[i];
+    always_assert_flog(
+      newTy.subtypeOf(indexTy),
+      "Index local static type invariant violated in {} {}{}.\n"
+      "   Static Local {}: {} is not a subtype of {}\n",
+      func->unit->filename->data(),
+      func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
+      : std::string{},
+      func->name->data(),
+      local_string(*func, i),
+      show(newTy),
+      show(indexTy)
+    );
+    if (!newTy.strictSubtypeOf(indexTy)) continue;
+    indexTy = newTy;
   }
 }
 

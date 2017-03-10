@@ -68,6 +68,21 @@ std::string show(const Iter& iter) {
 
 //////////////////////////////////////////////////////////////////////
 
+CollectedInfo::CollectedInfo(const Index& index,
+                             Context ctx,
+                             ClassAnalysis* cls,
+                             PublicSPropIndexer* publicStatics,
+                             bool trackConstantArrays,
+                             const FuncAnalysis* fa)
+    : props{index, ctx, cls}
+    , publicStatics{publicStatics}
+    , trackConstantArrays{trackConstantArrays}
+{
+  if (fa) localStaticTypes = fa->localStaticTypes;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool operator==(const ActRec& a, const ActRec& b) {
   auto const fsame =
     a.func.hasValue() != b.func.hasValue() ? false :
@@ -294,6 +309,25 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     }
   }
 
+  auto const sz = std::max(dst.localStaticBindings.size(),
+                           src.localStaticBindings.size());
+  if (sz) {
+    CompactVector<LocalStaticBinding> lsb;
+    for (auto i = size_t{0}; i < sz; i++) {
+      auto b1 = i < dst.localStaticBindings.size() ?
+        dst.localStaticBindings[i] : LocalStaticBinding::None;
+      auto b2 = i < src.localStaticBindings.size() ?
+        src.localStaticBindings[i] : LocalStaticBinding::None;
+
+      if (b1 != LocalStaticBinding::None || b2 != LocalStaticBinding::None) {
+        lsb.resize(i + 1);
+        lsb[i] = b1 == b2 ? b1 : LocalStaticBinding::Maybe;
+        changed |= lsb[i] != b1;
+      }
+    }
+    dst.localStaticBindings = std::move(lsb);
+  }
+
   return changed;
 }
 
@@ -334,7 +368,8 @@ std::string show(const ActRec& a) {
   );
 }
 
-std::string state_string(const php::Func& f, const State& st) {
+std::string state_string(const php::Func& f, const State& st,
+                         const CollectedInfo& collect) {
   std::string ret;
 
   if (!st.initialized) {
@@ -348,10 +383,25 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    folly::format(&ret, "{: <8} :: {}\n",
+    auto staticLocal = [&] () -> std::string {
+      if (i >= st.localStaticBindings.size() ||
+          st.localStaticBindings[i] == LocalStaticBinding::None) {
+        return "";
+      }
+
+      if (i >= collect.localStaticTypes.size()) {
+        return "(!!! unknown static !!!)";
+      }
+
+      return folly::sformat(
+        "({}static: {})",
+        st.localStaticBindings[i] == LocalStaticBinding::Maybe ? "maybe-" : "",
+        show(collect.localStaticTypes[i]));
+    };
+    folly::format(&ret, "{: <8} :: {} {}\n",
                   local_string(f, i),
-                  show(st.locals[i])
-    );
+                  show(st.locals[i]),
+                  staticLocal());
   }
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {

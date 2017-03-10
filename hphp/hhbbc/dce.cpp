@@ -797,7 +797,7 @@ void dispatch_dce(Env& env, const Bytecode& op) {
 
 folly::Optional<DceState>
 dce_visit(const Index& index,
-          Context const ctx,
+          const FuncAnalysis& fa,
           borrowed_ptr<const php::Block> const blk,
           const State& stateIn,
           std::bitset<kMaxTrackedLocals> locLiveOut,
@@ -815,10 +815,10 @@ dce_visit(const Index& index,
     return folly::none;
   }
 
-  auto const states = locally_propagated_states(index, ctx, blk, stateIn);
+  auto const states = locally_propagated_states(index, fa, blk, stateIn);
 
   auto dceState = DceState{};
-  dceState.func = ctx.func;
+  dceState.func = fa.ctx.func;
   dceState.markedDead.resize(blk->hhbcs.size());
   dceState.liveLocals = locLiveOut;
   dceState.liveSlots.set();
@@ -832,7 +832,7 @@ dce_visit(const Index& index,
   for (auto idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
-    FTRACE(2, "  == #{} {}\n", idx, show(ctx.func, op));
+    FTRACE(2, "  == #{} {}\n", idx, show(fa.ctx.func, op));
 
     auto visit_env = Env {
       dceState,
@@ -905,7 +905,7 @@ struct DceAnalysis {
 };
 
 DceAnalysis analyze_dce(const Index& index,
-                        Context const ctx,
+                        const FuncAnalysis& fa,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn) {
   // During this analysis pass, we have to assume everything could be
@@ -913,7 +913,7 @@ DceAnalysis analyze_dce(const Index& index,
   // real liveOut sets.)
   auto allLocLive = std::bitset<kMaxTrackedLocals>{};
   allLocLive.set();
-  if (auto dceState = dce_visit(index, ctx, blk, stateIn,
+  if (auto dceState = dce_visit(index, fa, blk, stateIn,
                                 allLocLive, allLocLive)) {
     return DceAnalysis {
       dceState->locGen,
@@ -927,13 +927,13 @@ DceAnalysis analyze_dce(const Index& index,
 std::pair<std::bitset<kMaxTrackedLocals>,
           std::bitset<kMaxTrackedClsRefSlots>>
 optimize_dce(const Index& index,
-             Context const ctx,
+             const FuncAnalysis& fa,
              borrowed_ptr<php::Block> const blk,
              const State& stateIn,
              std::bitset<kMaxTrackedLocals> locLiveOut,
              std::bitset<kMaxTrackedLocals> locLiveOutExn) {
   auto const dceState = dce_visit(
-    index, ctx, blk,
+    index, fa, blk,
     stateIn, locLiveOut,
     locLiveOutExn
   );
@@ -1082,7 +1082,7 @@ void local_dce(const Index& index,
   // live-out set for the block.
   auto allLocLive = std::bitset<kMaxTrackedLocals>();
   allLocLive.set();
-  optimize_dce(index, ainfo.ctx, blk, stateIn,
+  optimize_dce(index, ainfo, blk, stateIn,
                allLocLive, allLocLive);
 }
 
@@ -1123,7 +1123,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     FTRACE(2, "block #{}\n", b->id);
     auto const dinfo = analyze_dce(
       index,
-      ai.ctx,
+      ai,
       b,
       ai.bdata[b->id].stateIn
     );
@@ -1230,7 +1230,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     FTRACE(2, "block #{}\n", b->id);
     auto const used = optimize_dce(
       index,
-      ai.ctx,
+      ai,
       b,
       ai.bdata[b->id].stateIn,
       blockStates[rpoId(b)].locLiveOut,

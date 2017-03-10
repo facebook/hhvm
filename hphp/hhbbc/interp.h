@@ -53,6 +53,13 @@ struct RunFlags {
    * block, with this type.
    */
   folly::Optional<Type> returned;
+
+  /*
+   * Map from the local statics whose types were used by this block,
+   * to the type that was used.  This is used to force re-analysis of
+   * the corresponding blocks when the type of the static changes.
+   */
+  std::shared_ptr<std::map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -132,6 +139,14 @@ struct StepFlags {
    * step, with this type.
    */
   folly::Optional<Type> returned;
+
+  /*
+   * Map from the local statics whose types were used by this
+   * instruction, to the type that was used.  This is used to force
+   * re-analysis of the corresponding blocks when the type of the
+   * static changes.
+   */
+  std::shared_ptr<std::map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////

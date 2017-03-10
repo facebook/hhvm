@@ -34,18 +34,19 @@
 
 #include "hphp/runtime/ext/hh/ext_hh.h"
 
+#include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/interp-state.h"
-#include "hphp/hhbbc/type-ops.h"
+#include "hphp/hhbbc/optimize.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-builtins.h"
+#include "hphp/hhbbc/type-ops.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
-#include "hphp/hhbbc/analyze.h"
 
 #include "hphp/hhbbc/interp-internal.h"
 
@@ -1187,6 +1188,7 @@ void in(ISS& env, const bc::VGetN&) {
                          bc::VGetL { loc });
     }
   }
+  modifyLocalStatic(env, NoLocalId, TRef);
   popC(env);
   boxUnknownLocal(env);
   mayUseVV(env);
@@ -1716,6 +1718,12 @@ void in(ISS& env, const bc::IncDecS& op) {
 }
 
 void in(ISS& env, const bc::BindL& op) {
+  // If the op.loc1 was bound to a local static, its going to be
+  // unbound from it. If the thing its being bound /to/ is a local
+  // static, we've already marked it as modified via the VGetL, so
+  // there's nothing more to track.
+  // Unbind it before any updates.
+  modifyLocalStatic(env, op.loc1, TUninit);
   nothrow(env);
   auto t1 = popV(env);
   setLocRaw(env, op.loc1, t1);
@@ -1730,6 +1738,7 @@ void in(ISS& env, const bc::BindN&) {
   auto const knownLoc = v2 && v2->m_type == KindOfPersistentString
     ? findLocal(env, v2->m_data.pstr)
     : NoLocalId;
+  unbindLocalStatic(env, knownLoc);
   if (knownLoc != NoLocalId) {
     setLocRaw(env, knownLoc, t1);
   } else {
@@ -1967,14 +1976,10 @@ void in(ISS& env, const bc::FPassL& op) {
     // now.
     setLocRaw(env, op.loc2, TGen);
     return push(env, TInitGen);
-  case PrepKind::Val: return reduce_fpass_arg(env,
-                                              bc::CGetL { op.loc2 },
-                                              op.arg1,
-                                              false);
-  case PrepKind::Ref: return reduce_fpass_arg(env,
-                                              bc::VGetL { op.loc2 },
-                                              op.arg1,
-                                              true);
+  case PrepKind::Val:
+    return reduce_fpass_arg(env, bc::CGetL { op.loc2 }, op.arg1, false);
+  case PrepKind::Ref:
+    return reduce_fpass_arg(env, bc::VGetL { op.loc2 }, op.arg1, true);
   }
 }
 
@@ -2338,6 +2343,7 @@ void in(ISS& env, const bc::IterInit& op) {
 void in(ISS& env, const bc::MIterInit& op) {
   popV(env);
   env.propagate(op.target, env.state);
+  unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
 }
 
@@ -2359,6 +2365,7 @@ void in(ISS& env, const bc::IterInitK& op) {
 void in(ISS& env, const bc::MIterInitK& op) {
   popV(env);
   env.propagate(op.target, env.state);
+  unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
   setLoc(env, op.loc4, TInitCell);
 }
@@ -2384,17 +2391,22 @@ void in(ISS& env, const bc::IterNext& op) {
 
   match<void>(
     env.state.iters[op.iter1],
-    [&] (UnknownIter)           { setLoc(env, op.loc3, TInitCell); },
-    [&] (const TrackedIter& ti) { setLoc(env, op.loc3, ti.kv.second); }
+    [&] (UnknownIter)           {
+      setLoc(env, op.loc3, TInitCell);
+    },
+    [&] (const TrackedIter& ti) {
+      setLoc(env, op.loc3, ti.kv.second);
+    }
   );
   env.propagate(op.target, env.state);
 
   freeIter(env, op.iter1);
-  setLocRaw(env, op.loc3, curLoc3);
+  if (curLoc3.subtypeOf(TInitCell)) setLocRaw(env, op.loc3, curLoc3);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
   env.propagate(op.target, env.state);
+  unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
 }
 
@@ -2416,12 +2428,13 @@ void in(ISS& env, const bc::IterNextK& op) {
   env.propagate(op.target, env.state);
 
   freeIter(env, op.iter1);
-  setLocRaw(env, op.loc3, curLoc3);
-  setLocRaw(env, op.loc4, curLoc4);
+  if (curLoc3.subtypeOf(TInitCell)) setLocRaw(env, op.loc3, curLoc3);
+  if (curLoc4.subtypeOf(TInitCell)) setLocRaw(env, op.loc4, curLoc4);
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {
   env.propagate(op.target, env.state);
+  unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
   setLoc(env, op.loc4, TInitCell);
 }
@@ -2552,14 +2565,37 @@ void in(ISS& env, const bc::InitThisLoc& op) {
   setLocRaw(env, op.loc1, TCell);
 }
 
+folly::Optional<Cell> staticLocHelper(ISS& env, LocalId l, Type init) {
+  unbindLocalStatic(env, l);
+  setLocRaw(env, l, TRef);
+  bindLocalStatic(env, l, std::move(init));
+  if (!env.ctx.func->isClosureBody &&
+      env.collect.localStaticTypes.size() > l) {
+    auto t = env.collect.localStaticTypes[l];
+    if (auto v = tv(t)) {
+      useLocalStatic(env, l);
+      setLocRaw(env, l, t);
+      return v;
+    }
+  }
+  return folly::none;
+}
+
 void in(ISS& env, const bc::StaticLoc& op) {
-  setLocRaw(env, op.loc1, TRef);
+  if (auto const v = staticLocHelper(env, op.loc1, TBottom)) {
+    return reduce(env,
+                  gen_constant(*v),
+                  bc::SetL { op.loc1 }, bc::PopC {},
+                  bc::True {});
+  }
   push(env, TBool);
 }
 
 void in(ISS& env, const bc::StaticLocInit& op) {
+  if (staticLocHelper(env, op.loc1, topC(env))) {
+    return reduce(env, bc::SetL { op.loc1 }, bc::PopC {});
+  }
   popC(env);
-  setLocRaw(env, op.loc1, TRef);
 }
 
 /*
@@ -2983,22 +3019,34 @@ StepFlags interpOps(Interp& interp,
 
 RunFlags run(Interp& interp, PropagateFn propagate) {
   SCOPE_EXIT {
-    FTRACE(2, "out {}\n", state_string(*interp.ctx.func, interp.state));
+    FTRACE(2, "out {}\n",
+           state_string(*interp.ctx.func, interp.state, interp.collect));
   };
 
+  auto ret = RunFlags {};
   auto const stop = end(interp.blk->hhbcs);
   auto iter       = begin(interp.blk->hhbcs);
   while (iter != stop) {
     auto const flags = interpOps(interp, iter, stop, propagate);
+    if (flags.usedLocalStatics) {
+      if (!ret.usedLocalStatics) {
+        ret.usedLocalStatics = std::move(flags.usedLocalStatics);
+      } else {
+        for (auto& elm : *flags.usedLocalStatics) {
+          ret.usedLocalStatics->insert(std::move(elm));
+        }
+      }
+    }
+
     if (interp.state.unreachable) {
       FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
-      return RunFlags {};
+      return ret;
     }
 
     switch (flags.jmpFlag) {
     case StepFlags::JmpFlags::Taken:
       FTRACE(2, "  <took branch; no fallthrough>\n");
-      return RunFlags {};
+      return ret;
     case StepFlags::JmpFlags::Fallthrough:
     case StepFlags::JmpFlags::Either:
       break;
@@ -3007,7 +3055,8 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       FTRACE(2, "  returned {}\n", show(*flags.returned));
       always_assert(iter == stop);
       always_assert(interp.blk->fallthrough == NoBlockId);
-      return RunFlags { *flags.returned };
+      ret.returned = flags.returned;
+      return ret;
     }
   }
 
@@ -3015,7 +3064,7 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
   if (interp.blk->fallthrough != NoBlockId) {
     propagate(interp.blk->fallthrough, interp.state);
   }
-  return RunFlags {};
+  return ret;
 }
 
 StepFlags step(Interp& interp, const Bytecode& op) {

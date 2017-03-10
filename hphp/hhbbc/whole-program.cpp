@@ -291,6 +291,7 @@ void analyze_iteratively(Index& index, php::Program& program,
       ContextSet deps;
       index.refine_return_type(fa.ctx.func, fa.inferredReturn, deps);
       index.refine_constants(fa, deps);
+      index.refine_local_static_types(fa.ctx.func, fa.localStaticTypes);
       for (auto& d : deps) revisit.insert(work_item_for(d, mode));
 
       for (auto& kv : fa.closureUseTypes) {

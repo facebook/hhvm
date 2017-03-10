@@ -34,6 +34,7 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 struct ClassAnalysis;
+struct FuncAnalysis;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -189,6 +190,19 @@ struct StackElem {
 };
 
 /*
+ * Used to track the state of the binding between locals, and their
+ * corresponding static (if any).
+ */
+enum class LocalStaticBinding {
+  // This local is not bound to a local static
+  None,
+  // This local might be bound to its local static
+  Maybe,
+  // This local is known to be bound to its local static
+  Bound
+};
+
+/*
  * A program state at a position in a php::Block.
  *
  * The `initialized' flag indicates whether the state knows anything.  All
@@ -244,6 +258,11 @@ struct State {
    * value.
    */
   CompactVector<LocalId> equivLocals;
+
+  /*
+   * LocalStaticBindings. Only allocated on demand.
+   */
+  CompactVector<LocalStaticBinding> localStaticBindings;
 };
 
 /*
@@ -318,11 +337,8 @@ struct CollectedInfo {
                          Context ctx,
                          ClassAnalysis* cls,
                          PublicSPropIndexer* publicStatics,
-                         bool trackConstantArrays)
-    : props{index, ctx, cls}
-    , publicStatics{publicStatics}
-    , trackConstantArrays{trackConstantArrays}
-  {}
+                         bool trackConstantArrays,
+                         const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
@@ -331,6 +347,7 @@ struct CollectedInfo {
   bool mayUseVV{false};
   bool readsUntrackedConstants{false};
   const bool trackConstantArrays;
+  CompactVector<Type> localStaticTypes;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -357,7 +374,7 @@ bool widen_into(State&, const State&);
  */
 std::string show(const ActRec& a);
 std::string property_state_string(const PropertiesInfo&);
-std::string state_string(const php::Func&, const State&);
+std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 
 //////////////////////////////////////////////////////////////////////
 

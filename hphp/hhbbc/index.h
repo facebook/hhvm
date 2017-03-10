@@ -627,6 +627,12 @@ struct Index {
   void refine_constants(const FuncAnalysis& fa, ContextSet& deps);
 
   /*
+   * Refine the types of the local statics owned by the function.
+   */
+  void refine_local_static_types(borrowed_ptr<const php::Func> func,
+                                 const CompactVector<Type>& localStaticTypes);
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *

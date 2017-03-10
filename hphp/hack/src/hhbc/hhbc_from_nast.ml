@@ -134,11 +134,11 @@ and emit_binop op e1 e2 =
   match (op, e1, e2) with
   | (A.AMpamp, e1, e2) ->  emit_logical_and e1 e2
   | (A.BArbar, e1, e2) -> emit_logical_or e1 e2
-  | (A.Eq None, e1, e2) -> emit_lval_op None LValOp.Set e1 (Some e2)
+  | (A.Eq None, e1, e2) -> emit_lval_op LValOp.Set e1 (Some e2)
   | (A.Eq (Some obop), e1, e2) ->
     begin match binop_to_eqop obop with
     | None -> emit_nyi "illegal eq op"
-    | Some op -> emit_lval_op None (LValOp.SetOp op) e1 (Some e2)
+    | Some op -> emit_lval_op (LValOp.SetOp op) e1 (Some e2)
     end
   (* Special case to make use of CGetL2 *)
   | (op, (_, A.Lvar (_, local)), e2) ->
@@ -804,13 +804,11 @@ and literals_from_exprs_with_index exprs =
     ~f:(fun (index, l) e ->
       (index + 1, literal_from_expr e :: Int (Int64.of_int index) :: l))
 
-and emit_final_member_op param_num_opt stack_index op mk =
-  match param_num_opt, op with
-  | None, LValOp.Set -> instr (IFinal (SetM (stack_index, mk)))
-  | Some i, LValOp.Set -> instr (IFinal (FPassM (i, stack_index, mk)))
-  | None, LValOp.SetOp op -> instr (IFinal (SetOpM (stack_index, op, mk)))
-  | None, LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
-  | _ -> emit_nyi "emit_final_member_op"
+and emit_final_member_op stack_index op mk =
+  match op with
+  | LValOp.Set -> instr (IFinal (SetM (stack_index, mk)))
+  | LValOp.SetOp op -> instr (IFinal (SetOpM (stack_index, op, mk)))
+  | LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
 
 and emit_final_local_op op lid =
   match op with
@@ -818,12 +816,71 @@ and emit_final_local_op op lid =
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
 
+(* Given a local $local and a list of integer array indices i_1, ..., i_n,
+ * generate code to extract the value of $local[i_n]...[i_1]:
+ *   BaseL $local Warn
+ *   Dim Warn EI:i_n ...
+ *   Dim Warn EI:i_2
+ *   QueryM 0 CGet EI:i_1
+ *)
+and emit_array_get_fixed local indices =
+  gather (
+    instr (IBase (BaseL (local, MemberOpMode.Warn))) ::
+    List.rev_mapi indices (fun i ix ->
+      let mk = MemberKey.EI (Int64.of_int ix) in
+      if i = 0
+      then instr (IFinal (QueryM (0, QueryOp.CGet, mk)))
+      else instr (IBase (Dim (MemberOpMode.Warn, mk))))
+      )
+
+(* Generate code for each lvalue assignment in a list destructuring expression.
+ * Lvalues are assigned right-to-left, regardless of the nesting structure. So
+ *     list($a, list($b, $c)) = $d
+ * and list(list($a, $b), $c) = $d
+ * will both assign to $c, $b and $a in that order.
+ *)
+ and emit_lval_op_list local indices expr =
+  match expr with
+  | (_, A.List exprs) ->
+    gather @@
+    List.rev @@
+    List.mapi exprs (fun i expr -> emit_lval_op_list local (i::indices) expr)
+  | _ ->
+    (* Generate code to access the element from the array *)
+    let access_instrs = emit_array_get_fixed local indices in
+    (* Generate code to assign to the lvalue *)
+    let assign_instrs = emit_lval_op_nonlist LValOp.Set expr access_instrs 1 in
+    gather [
+      assign_instrs;
+      instr_popc
+    ]
+
 (* Emit code for an l-value operation *)
-and emit_lval_op param_num_opt op expr1 opt_expr2 =
+and emit_lval_op op expr1 opt_expr2 =
   let rhs_instrs, rhs_stack_size =
     match opt_expr2 with
     | None -> empty, 0
     | Some e -> from_expr e, 1 in
+  match op, expr1 with
+    (* Special case for list destructuring, only on assignment *)
+    | LValOp.Set, (_, A.List _) ->
+      (* Potential optimization: if we know the type (e.g. a tuple) we
+       * can avoid wrapping a fault handler *)
+      let temp_local = Local.get_unnamed_local () in
+      let fault_label = Label.next_fault () in
+      let fault_body = gather [instr_unsetl temp_local; instr_unwind] in
+      let try_body = emit_lval_op_list temp_local [] expr1 in
+      gather [
+        rhs_instrs;
+        instr (IMutator (SetL temp_local));
+        instr_popc;
+        instr_try_fault fault_label try_body fault_body;
+        instr (IGet (PushL temp_local));
+      ]
+    | _ ->
+      emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
+
+and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
   match expr1 with
   | (_, A.Lvar (_, id)) ->
     gather [
@@ -835,10 +892,10 @@ and emit_lval_op param_num_opt op expr1 opt_expr2 =
     let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
     let base_offset = elem_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
-      emit_base MemberOpMode.Define base_offset param_num_opt base_expr in
+      emit_base MemberOpMode.Define base_offset None base_expr in
     let mk = get_elem_member_key rhs_stack_size opt_elem_expr in
     let total_stack_size = elem_stack_size + base_stack_size in
-    let final_instr = emit_final_member_op param_num_opt total_stack_size op mk in
+    let final_instr = emit_final_member_op total_stack_size op mk in
     gather [
       base_expr_instrs;
       elem_expr_instrs;
@@ -851,10 +908,10 @@ and emit_lval_op param_num_opt op expr1 opt_expr2 =
     let prop_expr_instrs, prop_stack_size = emit_prop_instrs e2 in
     let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
-      emit_base MemberOpMode.Define base_offset param_num_opt e1 in
+      emit_base MemberOpMode.Define base_offset None e1 in
     let mk = get_prop_member_key null_flavor rhs_stack_size e2 in
     let total_stack_size = prop_stack_size + base_stack_size in
-    let final_instr = emit_final_member_op param_num_opt total_stack_size op mk in
+    let final_instr = emit_final_member_op total_stack_size op mk in
     gather [
       base_expr_instrs;
       prop_expr_instrs;
@@ -885,7 +942,7 @@ and emit_unop op e =
     begin match unop_to_incdec_op op with
     | None -> emit_nyi "incdec"
     | Some incdec_op ->
-      emit_lval_op None (LValOp.IncDec incdec_op) e None
+      emit_lval_op (LValOp.IncDec incdec_op) e None
     end
   | A.Uref ->
     emit_nyi "references"

@@ -20,6 +20,27 @@ if (MSVC)
   enable_language(ASM_MASM)
 endif()
 
+# Look for and apply patches to the third-party (and sub) repo.
+file(GLOB PATCHES "${CMAKE_SOURCE_DIR}/patches/*.patch")
+if (PATCHES)
+  message(STATUS "Patches: ${PATCHES}")
+  foreach(PATCH ${PATCHES})
+    message(STATUS "Applying ${PATCH}")
+    execute_process(
+      COMMAND patch -p1
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      INPUT_FILE "${PATCH}"
+      RESULT_VARIABLE RESULT)
+    if (RESULT EQUAL 0)
+      message(STATUS "Patch applied: ${PATCH}")
+      file(REMOVE ${PATCH})
+    else()
+      message(FATAL_ERROR "Error applying patch ${PATCH}")
+    endif()
+  endforeach(PATCH)
+endif()
+
+
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
 IF(APPLE)
   # CMake really likes finding libraries inside OS X frameworks. This can

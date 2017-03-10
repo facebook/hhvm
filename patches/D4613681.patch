@@ -1,0 +1,191 @@
+diff --git a/third-party/proxygen/lib/http/codec/compress/HeaderTable.cpp b/third-party/proxygen/lib/http/codec/compress/HeaderTable.cpp
+--- a/third-party/proxygen/lib/http/codec/compress/HeaderTable.cpp
++++ b/third-party/proxygen/lib/http/codec/compress/HeaderTable.cpp
+@@ -134,30 +134,42 @@
+ }
+ 
+ void HeaderTable::setCapacity(uint32_t capacity) {
++  // TODO: ddmello - the below is a little dangerous as we update the
++  // capacity right away.  Some properties of the class utilize that variable
++  // and so might be better to refactor and update capacity at the end of the
++  // method (and update other methods)
+   auto oldCapacity = capacity_;
+   capacity_ = capacity;
+-  if (capacity_ <= oldCapacity) {
++  if (capacity_ == oldCapacity) {
++    return;
++  } else if (capacity_ < oldCapacity) {
++    // NOTE: currently no actual resizing is performed...
+     evict(0);
+   } else {
+-    auto oldTail = tail();
+-    auto oldLength = table_.size();
++    // NOTE: due to the above lack of resizing, we must determine whether a
++    // resize is actually appropriate (to handle cases where the underlying
++    // vector is still >= to the size related to the new capacity requested)
+     uint32_t newLength = (capacity_ >> 5) + 1;
+-    table_.resize(newLength);
+-    if (size_ > 0 && oldTail > head_) {
+-      // the list wrapped around, need to move oldTail..oldLength to the end of
+-      // the now-larger table_
+-      std::copy(table_.begin() + oldTail, table_.begin() + oldLength,
+-                table_.begin() + newLength - (oldLength - oldTail));
+-      // Update the names indecies that pointed to the old range
+-      for (auto& names_it: names_) {
+-        for (auto& idx: names_it.second) {
+-          if (idx >= oldTail) {
+-            DCHECK_LT(idx + (table_.size() - oldLength), table_.size());
+-            idx += (table_.size() - oldLength);
+-          } else {
+-            // remaining indecies in the list were smaller than oldTail, so
+-            // should be indexed from 0
+-            break;
++    if (newLength > table_.size()) {
++      auto oldTail = tail();
++      auto oldLength = table_.size();
++      table_.resize(newLength);
++      if (size_ > 0 && oldTail > head_) {
++        // the list wrapped around, need to move oldTail..oldLength to the end
++        // of the now-larger table_
++        std::copy(table_.begin() + oldTail, table_.begin() + oldLength,
++                  table_.begin() + newLength - (oldLength - oldTail));
++        // Update the names indecies that pointed to the old range
++        for (auto& names_it: names_) {
++          for (auto& idx: names_it.second) {
++            if (idx >= oldTail) {
++              DCHECK_LT(idx + (table_.size() - oldLength), table_.size());
++              idx += (table_.size() - oldLength);
++            } else {
++              // remaining indecies in the list were smaller than oldTail, so
++              // should be indexed from 0
++              break;
++            }
+           }
+         }
+       }
+diff --git a/third-party/proxygen/lib/http/codec/compress/test/HeaderTableTests.cpp b/third-party/proxygen/lib/http/codec/compress/test/HeaderTableTests.cpp
+--- a/third-party/proxygen/lib/http/codec/compress/test/HeaderTableTests.cpp
++++ b/third-party/proxygen/lib/http/codec/compress/test/HeaderTableTests.cpp
+@@ -25,6 +25,27 @@
+     EXPECT_EQ(HeaderTable::toInternal(head_, length_, external), internal);
+   }
+ 
++  void resizeTable(HeaderTable& table, uint32_t newCapacity, uint32_t newMax) {
++    table.setCapacity(newCapacity);
++    // On resizing the table size (count of headers) remains the same or sizes
++    // down; can not size up
++    EXPECT_LE(table.size(), newMax);
++  }
++
++  void resizeAndFillTable(
++      HeaderTable& table, HPACKHeader& header, uint32_t newMax,
++      uint32_t fillCount) {
++    uint32_t newCapacity = header.bytes() * newMax;
++    resizeTable(table, newCapacity, newMax);
++    // Fill the table (with one extra) and make sure we haven't violated our
++    // size (bytes) limits (expected one entry to be evicted)
++    for (size_t i = 0; i <= fillCount; ++i) {
++      EXPECT_EQ(table.add(header), true);
++    }
++    EXPECT_EQ(table.size(), newMax);
++    EXPECT_EQ(table.bytes(), newCapacity);
++  }
++
+   uint32_t head_{0};
+   uint32_t length_{0};
+ };
+@@ -94,11 +115,12 @@
+   EXPECT_EQ(table.names().size(), 0);
+ }
+ 
+-TEST_F(HeaderTableTests, set_capacity) {
++TEST_F(HeaderTableTests, reduce_capacity) {
+   HPACKHeader accept("accept-encoding", "gzip");
+   uint32_t max = 10;
+   uint32_t capacity = accept.bytes() * max;
+   HeaderTable table(capacity);
++  EXPECT_GT(table.length(), max);
+ 
+   // fill the table
+   for (size_t i = 0; i < max; i++) {
+@@ -167,4 +189,79 @@
+ 
+ }
+ 
++TEST_F(HeaderTableTests, varyCapacity) {
++  HPACKHeader accept("accept-encoding", "gzip");
++  uint32_t max = 6;
++  uint32_t capacity = accept.bytes() * max;
++  HeaderTable table(capacity);
++
++  // Fill the table (extra) and make sure we haven't violated our
++  // size (bytes) limits (expected one entry to be evicted)
++  for (size_t i = 0; i <= table.length(); ++i) {
++    EXPECT_EQ(table.add(accept), true);
++  }
++  EXPECT_EQ(table.size(), max);
++
++  // Size down the table and verify we are still honoring our size (bytes)
++  // limits
++  resizeAndFillTable(table, accept, 4, 5);
++
++  // Size up the table (in between previous max and min within test) and verify
++  // we are still horing our size (bytes) limits
++  resizeAndFillTable(table, accept, 5, 6);
++
++  // Finally reize up one last timestamps
++  resizeAndFillTable(table, accept, 8, 9);
+ }
++
++TEST_F(HeaderTableTests, varyCapacityMalignHeadIndex) {
++  // Test checks for a previous bug/crash condition where due to resizing
++  // the underlying table to a size lower than a previous max but up from the
++  // current size and the position of the head_ index an out of bounds index
++  // would occur
++
++  // Initialize header table
++  HPACKHeader accept("accept-encoding", "gzip");
++  uint32_t max = 6;
++  uint32_t capacity = accept.bytes() * max;
++  HeaderTable table(capacity);
++
++  // Push head_ to last index in underlying table before potential wrap
++  // This is our max table size for the duration of the test
++  for (size_t i = 0; i < table.length(); ++i) {
++    EXPECT_EQ(table.add(accept), true);
++  }
++  EXPECT_EQ(table.size(), max);
++  EXPECT_EQ(table.bytes(), capacity);
++
++  // Flush underlying table (head_ remains the same at the previous max index)
++  // Header guranteed to cause a flush as header itself requires 32 bytes plus
++  // the sizes of the name and value anyways (which themselves would cause a
++  // flush)
++  string strLargerThanTableCapacity = string(capacity + 1, 'a');
++  HPACKHeader flush("flush", strLargerThanTableCapacity);
++  EXPECT_EQ(table.add(flush), false);
++  EXPECT_EQ(table.size(), 0);
++
++  // Now reduce capacity of table (in functional terms table.size() is lowered
++  // but currently table.length() remains the same)
++  max = 3;
++  resizeTable(table, accept.bytes() * max, max);
++
++  // Increase capacity of table (but smaller than all time max; head_ still at
++  // previous max index).  Previously (now fixed) this size up resulted in
++  // incorrect resizing semantics
++  max = 4;
++  resizeTable(table, accept.bytes() * max, max);
++
++  // Now try and add headers; there should be no crash with current position of
++  // head_ in the underlying table.  Note this is merely one possible way we
++  // could force the test to crash as a result of the resize bug this test was
++  // added for
++  for (size_t i = 0; i <= table.length(); ++i) {
++    EXPECT_EQ(table.add(accept), true);
++  }
++  EXPECT_EQ(table.size(), max);
++}
++
++}
+

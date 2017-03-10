@@ -28,7 +28,7 @@ let from_ast
   _parsed_typedefs,
   _parsed_consts) =
   let compiled_funs = Emit_function.from_asts parsed_functions in
-  let compiled_classes = Hhas_class.from_asts parsed_classes in
+  let compiled_classes = Emit_class.from_asts parsed_classes in
   let _compiled_typedefs = [] in (* TODO *)
   let _compiled_consts = [] in (* TODO *)
   make compiled_funs compiled_classes

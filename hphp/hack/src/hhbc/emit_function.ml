@@ -11,7 +11,7 @@
 open Core
 open Instruction_sequence
 
-let from_ast : Ast.fun_ -> Hhas_function.t =
+let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
   fun ast_fun ->
   let function_name = Litstr.to_string @@ snd ast_fun.Ast.f_name in
   let body_instrs, function_params, function_return_type = Emit_body.from_ast
@@ -20,7 +20,8 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
   let body_instrs = Label_rewriter.relabel_instrseq body_instrs in
   let function_decl_vars = extract_decl_vars body_instrs in
   let body_instrs = Local_id_rewriter.unname_instrseq
-    (List.map ast_fun.Ast.f_params (fun p -> snd p.Ast.param_id) @ function_decl_vars)
+    (List.map ast_fun.Ast.f_params (fun p -> snd p.Ast.param_id) @
+    function_decl_vars)
     body_instrs in
   let function_body = instr_seq_to_list body_instrs in
   let function_attributes =
@@ -33,16 +34,14 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
     function_body
     function_decl_vars
 
-let is_memoized attributes =
-  let f attr = (Hhas_attribute.name attr) = "__Memoize" in
-  List.exists attributes f
+let from_ast : Ast.fun_ -> Hhas_function.t list =
+  fun ast_fun ->
+  let compiled = from_ast_no_memoization ast_fun in
+  if Hhas_attribute.is_memoized (Hhas_function.attributes compiled) then
+    let (renamed, memoized) = Generate_memoized.memoize_function compiled in
+    [ renamed; memoized ]
+  else
+    [ compiled ]
 
 let from_asts ast_functions =
-  let f ast_fun =
-    let compiled = from_ast ast_fun in
-    if is_memoized (Hhas_function.attributes compiled) then
-      let (renamed, memoized) = Generate_memoized.memoize_function compiled in
-      [ renamed; memoized ]
-    else
-      [ compiled ] in
-  Core.List.bind ast_functions f
+  Core.List.bind ast_functions from_ast

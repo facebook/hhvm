@@ -8,6 +8,8 @@
  *
 *)
 
+open Core
+
 type t = {
   attribute_name          : Litstr.id;
   attribute_arguments     : Hhbc_ast.instruct_lit_const list
@@ -18,3 +20,6 @@ let make attribute_name attribute_arguments =
 
 let name a = a.attribute_name
 let arguments a = a.attribute_arguments
+let is_memoized attributes =
+  let f attr = (name attr) = "__Memoize" in
+  List.exists attributes f

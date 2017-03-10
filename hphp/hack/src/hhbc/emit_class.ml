@@ -95,7 +95,7 @@ let from_type_constants ast_type_constants =
 
 let from_class_elt_method ast_class elt =
   match elt with
-  | A.Method m -> Emit_method.from_ast ast_class m
+  | A.Method m -> Some (Emit_method.from_ast ast_class m)
   | _ -> None
 
 let from_class_elt_classvars elt =

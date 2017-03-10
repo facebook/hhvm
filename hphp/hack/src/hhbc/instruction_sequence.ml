@@ -82,6 +82,7 @@ let instr_pop flavor =
   | Flavor.Cell -> instr_popc
   | Flavor.Classref -> instr_popa
 
+let instr_pushl local = instr (IGet (PushL local))
 let instr_throw = instr (IContFlow Throw)
 
 let instr_add_elemc = instr (ILitConst (AddElemC))

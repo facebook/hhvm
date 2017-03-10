@@ -438,8 +438,8 @@ and emit_collection expr es =
     emit_dynamic_collection expr es
 
 and emit_pipe e1 e2 =
-  let temp = Local.get_unnamed_local () in
-  let fault_label = Label.next_fault () in
+  stash_in_local e1
+  begin fun temp _break_label ->
   let rewrite_dollardollar e =
     let rewriter i =
       match i with
@@ -447,20 +447,8 @@ and emit_pipe e1 e2 =
         IGet (CGetL2 temp)
       | _ -> i in
     InstrSeq.map e ~f:rewriter in
-  gather [
-    from_expr e1;
-    instr_setl temp;
-    instr_popc;
-    instr_try_fault
-      fault_label
-      (* try block *)
-      (rewrite_dollardollar (from_expr e2))
-      (* fault block *)
-      (gather [
-        instr_unsetl temp;
-        instr_unwind ]);
-    instr_unsetl temp
-  ]
+  rewrite_dollardollar (from_expr e2)
+  end
 
 and emit_logical_and e1 e2 =
   let left_is_false = Label.next_regular () in
@@ -868,27 +856,18 @@ and emit_array_get_fixed local indices =
 
 (* Emit code for an l-value operation *)
 and emit_lval_op op expr1 opt_expr2 =
-  let rhs_instrs, rhs_stack_size =
-    match opt_expr2 with
-    | None -> empty, 0
-    | Some e -> from_expr e, 1 in
-  match op, expr1 with
+  match op, expr1, opt_expr2 with
     (* Special case for list destructuring, only on assignment *)
-    | LValOp.Set, (_, A.List _) ->
-      (* Potential optimization: if we know the type (e.g. a tuple) we
-       * can avoid wrapping a fault handler *)
-      let temp_local = Local.get_unnamed_local () in
-      let fault_label = Label.next_fault () in
-      let fault_body = gather [instr_unsetl temp_local; instr_unwind] in
-      let try_body = emit_lval_op_list temp_local [] expr1 in
-      gather [
-        rhs_instrs;
-        instr (IMutator (SetL temp_local));
-        instr_popc;
-        instr_try_fault fault_label try_body fault_body;
-        instr (IGet (PushL temp_local));
-      ]
+    | LValOp.Set, (_, A.List _), Some expr2 ->
+      stash_in_local ~leave_on_stack:true expr2
+      begin fun local _break_label ->
+        emit_lval_op_list local [] expr1
+      end
     | _ ->
+      let rhs_instrs, rhs_stack_size =
+        match opt_expr2 with
+        | None -> empty, 0
+      | Some e -> from_expr e, 1 in
       emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
 
 and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
@@ -1097,9 +1076,36 @@ and from_for e1 e2 e3 b =
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label
 
-and from_switch e cl =
-  let switched = from_expr e in
-  let end_label = Label.next_regular () in
+and stash_in_local ?(leave_on_stack=false) e f =
+  let break_label = Label.next_regular () in
+  match e with
+  | (_, A.Lvar (_, id)) ->
+    gather [
+      f (Local.Named id) break_label;
+      instr_label break_label;
+    ]
+  | _ ->
+    let temp = Local.get_unnamed_local () in
+    let fault_label = Label.next_fault () in
+    gather [
+      from_expr e;
+      instr_setl temp;
+      instr_popc;
+      instr_try_fault
+        fault_label
+        (* try block *)
+        (f temp break_label)
+        (* fault block *)
+        (gather [
+          instr_unsetl temp;
+          instr_unwind ]);
+      instr_label break_label;
+      if leave_on_stack then instr_pushl temp else instr_unsetl temp
+    ]
+
+and from_switch scrutinee_expr cl =
+  stash_in_local scrutinee_expr
+  begin fun local break_label ->
   (* "continue" in a switch in PHP has the same semantics as break! *)
   let cl = List.map cl ~f:from_case in
   let bodies = gather @@ List.map cl ~f:snd in
@@ -1107,17 +1113,23 @@ and from_switch e cl =
     ~f: begin fun x ->
           let (e_opt, l) = fst x in
           match e_opt with
-          | None -> instr_jmp l
+          | None ->
+            instr_jmp l
           | Some e ->
-            gather [from_expr e; switched; instr_eq; instr_jmpnz l]
+            (* Special case for simple scrutinee *)
+            match scrutinee_expr with
+            | (_, A.Lvar _) ->
+              gather [from_expr e; instr_cgetl2 local; instr_eq; instr_jmpnz l]
+            | _ ->
+              gather [instr_cgetl local; from_expr e; instr_eq; instr_jmpnz l]
         end
   in
   let instrs = gather [
     init;
     bodies;
-    instr_label end_label;
   ] in
-  CBR.rewrite_in_switch instrs end_label
+  CBR.rewrite_in_switch instrs break_label
+  end
 
 and from_catch end_label ((_, catch_type), (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to

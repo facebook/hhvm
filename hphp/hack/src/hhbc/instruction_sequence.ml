@@ -108,8 +108,7 @@ let instr_memoget count local local_count =
   instr (IMisc (MemoSet(count, local, local_count)))
 let instr_memoset count local local_count =
   instr (IMisc (MemoSet(count, local, local_count)))
-
-(* TODO: GetMemoKeyL $n *)
+let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

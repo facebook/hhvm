@@ -500,7 +500,7 @@ type instruct_misc =
   | AssertRATStk of stack_index * repo_auth_type
   | BreakTraceHint
   | Silence of local_id * op_silence
-  | GetMemoKey
+  | GetMemoKeyL of local_id
   | VarEnvDynCall
   | IsUninit
   | CGetCUNop

@@ -14,26 +14,44 @@ open Hhbc_ast.MemberOpMode
 let memoize_suffix = "$memoize_impl"
 let memoize_cache = "static$memoize_cache"
 
-let memoized_body params =
-  (* TODO: The unnamed local count should start fresh here, at the number
-  of parameters. So if there are two params, it should start at _2. *)
-  Label.reset_label ();
-  Local.reset_local ();
-  let static_local = Local.get_unnamed_local () in
-  let label = Label.next_regular () in
+let param_code_sets params local =
+  let rec aux params local block =
+  match params with
+  | [] -> block
+  | h :: t ->
+    let code = gather [
+      instr_getmemokeyl (Local.Named (Hhas_param.name h));
+      instr_setl (Local.Unnamed local);
+      instr_popc ] in
+    aux t (local + 1) (gather [block; code]) in
+  aux params local empty
+
+let param_code_gets params =
+  let rec aux params index block =
+    match params with
+    | [] -> block
+    | h :: t ->
+      let block = gather [
+        block;
+        instr_fpassl index (Local.Named (Hhas_param.name h)) ] in
+      aux t (index + 1) block in
+  aux params 0 empty
+
+let memoized_body params renamed_name =
+  (* TODO: This codegen is wrong for the case where there are zero params *)
+  let param_count = List.length params in
+  let static_local = Local.Unnamed param_count in
+  let label = Label.Regular 0 in
+  let first_local = Local.Unnamed (param_count + 1) in
   gather [
-    (* TODO: Why do we emit a no-op that cannot be removed here? *)
+    (* Why do we emit a no-op that cannot be removed here? *)
     instr_entrynop;
     Emit_body.emit_method_prolog params;
     instr_dict 0 [];
     instr_staticlocinit static_local memoize_cache;
-    (*  TODO: one of these sequences per param
-        instr_getmemokeyl param_name
-        SetL new_unnamed_local
-        PopC
-    *)
+    param_code_sets params (param_count + 1);
     instr_basel static_local Warn;
-    (* TODO: instr_memoget 0 lowest_unnamed param_count *)
+    instr_memoget 0 first_local param_count;
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -41,13 +59,12 @@ let memoized_body params =
     instr_label label;
     instr_ugetcunop;
     instr_popu;
-    (* TODO: instr_fpushfuncd param_count new_name *)
-    (* TODO: one of these for each parameter:
-    instr_fpassl param_index param_name *)
-    (* TODO: instr_fcall param_count *)
+    instr_fpushfuncd param_count renamed_name;
+    param_code_gets params;
+    instr_fcall param_count;
     instr_unboxr;
     instr_basel static_local Define;
-    (* TODO: instr_memoset 0 lowest_unnamed param_count *)
+    instr_memoset 0 first_local param_count;
     instr_retc
   ]
 
@@ -56,7 +73,7 @@ let memoize_function compiled =
   let renamed_name = original_name ^ memoize_suffix in
   let renamed = Hhas_function.with_name compiled renamed_name in
   let params = Hhas_function.params compiled in
-  let body = memoized_body params in
+  let body = memoized_body params renamed_name in
   let body = instr_seq_to_list body in
   let memoized = Hhas_function.with_body compiled body in
   (renamed, memoized)

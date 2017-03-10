@@ -124,33 +124,44 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
     gather [from_expr e; instr_to_add_new]
   | A.AFkvalue (k, v) ->
-    gather [from_expr k; from_expr v; instr_to_add]
+    gather [
+      emit_two_exprs k v;
+      instr_to_add
+    ]
 
 and from_local x =
   if x = SN.SpecialIdents.this then instr_this
   else instr_cgetl (Local.Named x)
 
+and emit_two_exprs e1 e2 =
+  (* Special case to make use of CGetL2 *)
+  match e1 with
+  | (_, A.Lvar (_, local)) ->
+    gather [
+      from_expr e2;
+      instr_cgetl2 (Local.Named local);
+    ]
+  | _ ->
+    gather [
+      from_expr e1;
+      from_expr e2;
+    ]
+
 and emit_binop op e1 e2 =
-  match (op, e1, e2) with
-  | (A.AMpamp, e1, e2) ->  emit_logical_and e1 e2
-  | (A.BArbar, e1, e2) -> emit_logical_or e1 e2
-  | (A.Eq None, e1, e2) -> emit_lval_op LValOp.Set e1 (Some e2)
-  | (A.Eq (Some obop), e1, e2) ->
+  match op with
+  | A.AMpamp -> emit_logical_and e1 e2
+  | A.BArbar -> emit_logical_or e1 e2
+  | A.Eq None -> emit_lval_op LValOp.Set e1 (Some e2)
+  | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> emit_nyi "illegal eq op"
     | Some op -> emit_lval_op (LValOp.SetOp op) e1 (Some e2)
     end
-  (* Special case to make use of CGetL2 *)
-  | (op, (_, A.Lvar (_, local)), e2) ->
+  | _ ->
     gather [
-      from_expr e2;
-      instr_cgetl2 (Local.Named local);
-      from_binop op ]
-  | (op, e1, e2) ->
-    gather [
-      from_expr e1;
-      from_expr e2;
-      from_binop op ]
+      emit_two_exprs e1 e2;
+      from_binop op
+    ]
 
 and emit_instanceof e1 e2 =
   match (e1, e2) with

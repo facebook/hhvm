@@ -765,8 +765,8 @@ void in(ISS& env, const bc::Jmp&) {
   always_assert(0 && "blocks should not contain Jmp instructions");
 }
 
-template<bool Negate, class Op>
-void jmpImpl(ISS& env, const Op& op) {
+template<bool Negate, class JmpOp>
+void jmpImpl(ISS& env, const JmpOp& op) {
   nothrow(env);
   auto const t1 = popC(env);
   auto const v1 = tv(t1);
@@ -778,6 +778,19 @@ void jmpImpl(ISS& env, const Op& op) {
     } else {
       jmp_nevertaken(env);
     }
+    return;
+  }
+  auto follow = [&] (BlockId id) {
+    auto& blks = env.ctx.func->blocks;
+    while (blks[id]->fallthrough != NoBlockId &&
+           blks[id]->hhbcs.size() == 1 &&
+           blks[id]->hhbcs.front().op == Op::Nop) {
+      id = blks[id]->fallthrough;
+    }
+    return id;
+  };
+  if (follow(env.blk.fallthrough) == follow(op.target)) {
+    jmp_nevertaken(env);
     return;
   }
   env.propagate(op.target, env.state);

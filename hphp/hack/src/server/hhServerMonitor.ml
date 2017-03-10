@@ -19,66 +19,11 @@
       hh_server (detached mode).
 *)
 
-open HhServerMonitorConfig
+module Program = HhServerMonitorConfig.Program
 module SP = ServerProcess
-module SM = ServerMonitor.Make_monitor (HhMonitorInformant);;
+module SM = ServerMonitor.Make_monitor
+  (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;
 
-
-let start_server options name log_link daemon_entry =
-  let log_fds =
-    if ServerArgs.should_detach options then begin
-      (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
-      let log_file = Sys_utils.make_link_of_timestamped log_link in
-      Hh_logger.log "About to spawn %s daemon. Logs will go to %s\n%!"
-        name (if Sys.win32 then log_file else log_link);
-      let fd = Daemon.fd_of_path log_file in
-      fd, fd
-    end else begin
-      Hh_logger.log "About to spawn %s daemon. Logs will go here." name;
-      Unix.stdout, Unix.stderr
-    end
-  in
-  let start_t = Unix.time () in
-  let state = ServerGlobalState.save () in
-  let {Daemon.pid; Daemon.channels = (ic, oc)} =
-    Daemon.spawn
-      ~channel_mode:`socket
-      log_fds
-      daemon_entry
-      (state, options) in
-  Hh_logger.log "Just started %s server with pid: %d." name pid;
-  let server =
-    SP.({
-      pid = pid;
-      name = name;
-      in_fd = Daemon.descr_of_in_channel ic;
-      out_fd = Daemon.descr_of_out_channel oc;
-      start_t = start_t;
-      last_request_handoff = ref (Unix.time());
-    }) in
-  server
-
-let start_hh_server options  =
-  let log_link = ServerFiles.log_link (ServerArgs.root options) in
-  start_server options Program.hh_server log_link ServerMain.entry
-
-(*
- * Every server has lazy incremental mode capability, but we want to know
- * whether this particular run actually exercised it.
- *)
-let check_log_for_lazy_incremental monitor_config =
-  let cmd = Printf.sprintf "grep -m 1 %s %s | wc -l"
-    ServerTypeCheck.(check_kind_to_string Lazy_check)
-    monitor_config.ServerMonitorUtils.server_log_file
-  in
-  try
-    match Sys_utils.exec_read cmd with
-    | "0" -> ()
-    | "1" -> HackEventLogger.set_lazy_incremental ()
-    | x -> Hh_logger.log "Unexpected output of command '%s': %s" cmd x
-  with e ->
-    Hh_logger.log "Exception while running command '%s': %s"
-      cmd (Printexc.to_string e)
 
 (** Main method of the server monitor daemon. The daemon is responsible for
  * listening to socket requests from hh_client, checking Build ID, and relaying
@@ -119,31 +64,20 @@ let monitor_daemon_main (options: ServerArgs.options) =
     SharedMem.connect handle ~is_master:true;
     ServerMain.run_once options handle
   else
-    let hh_server_monitor_starter =
-      begin function
-        | Some c
-          when c = Exit_status.(exit_code Sql_assertion_failure) ||
-               c = Exit_status.(exit_code Sql_cantopen) ||
-               c = Exit_status.(exit_code Sql_corrupt) ||
-               c = Exit_status.(exit_code Sql_misuse) ->
-          start_hh_server (ServerArgs.set_no_load options true)
-        | _ -> start_hh_server options
-      end
-    in
     let waiting_client = ServerArgs.waiting_client options in
     let informant_options = {
       HhMonitorInformant.root = ServerArgs.root options;
       allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
       use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
     } in
-    SM.start_monitoring ~waiting_client informant_options ServerMonitorUtils.({
+    SM.start_monitoring ~waiting_client options informant_options
+    ServerMonitorUtils.({
       socket_file = ServerFiles.socket_file www_root;
       lock_file = ServerFiles.lock_file www_root;
       server_log_file = ServerFiles.log_link www_root;
       monitor_log_file = ServerFiles.monitor_log_link www_root;
       load_script_log_file = ServerFiles.load_log www_root;
-      on_server_exit = check_log_for_lazy_incremental
-    }) hh_server_monitor_starter
+    })
 
 let daemon_entry =
   Daemon.register_entry_point

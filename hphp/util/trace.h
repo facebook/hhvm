@@ -118,6 +118,7 @@ namespace Trace {
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
       TM(hhbbc_index)   \
+      TM(hhbbc_stats)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
       TM(hhir)          \

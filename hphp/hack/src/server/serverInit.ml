@@ -26,8 +26,28 @@ module LSC = LoadScriptConfig
 exception No_loader
 exception Loader_timeout of string
 
+type load_mini_approach =
+  | Load_mini_script of Path.t
+  | Precomputed of ServerArgs.mini_state_target
 
 module ServerInitCommon = struct
+
+  let lock_and_load_deptable fn =
+    (* The sql deptable must be loaded in the master process *)
+    try
+      (* Take a lock on the info file for the sql *)
+      LoadScriptUtils.lock_saved_state fn;
+      let read_deptable_time =
+        SharedMem.load_dep_table_sqlite fn
+      in
+      Hh_logger.log
+        "Reading the dependency file took (sec): %d" read_deptable_time;
+      HackEventLogger.load_deptable_end read_deptable_time;
+    with SharedMem.Sql_assertion_failure 11 as e -> (* SQL_corrupt *)
+      LoadScriptUtils.delete_corrupted_saved_state fn;
+      raise e
+
+
   (* Return all the files that we need to typecheck *)
   let make_next_files genv : Relative_path.t MultiWorker.nextlist =
     let next_files_root = compose
@@ -135,20 +155,7 @@ module ServerInitCommon = struct
         is_cached,
         end_time,
         deptable_fn) ->
-        (* The sql deptable must be loaded in the master process *)
-        (try
-          (* Take a lock on the info file for the sql *)
-          LoadScriptUtils.lock_saved_state deptable_fn;
-          let read_deptable_time =
-            SharedMem.load_dep_table_sqlite deptable_fn
-          in
-          Hh_logger.log
-            "Reading the dependency file took (sec): %d" read_deptable_time;
-          HackEventLogger.load_deptable_end read_deptable_time;
-        with SharedMem.Sql_assertion_failure 11 as e -> (* SQL_corrupt *)
-          LoadScriptUtils.delete_corrupted_saved_state deptable_fn;
-          raise e);
-
+        lock_and_load_deptable deptable_fn;
         HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
         let time_taken = end_time -. start_time in
         Hh_logger.log "Loading mini-state took %.2fs" time_taken;
@@ -181,6 +188,23 @@ module ServerInitCommon = struct
        * through *)
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
+
+  let invoke_approach root approach = match approach with
+   | Load_mini_script cmd ->
+     mk_state_future root cmd
+   | Precomputed { ServerArgs.saved_state_fn;
+     corresponding_base_revision; deptable_fn; changes } ->
+     lock_and_load_deptable deptable_fn;
+     let changes = Relative_path.set_of_list changes in
+     let chan = open_in saved_state_fn in
+     let old_saved = Marshal.from_channel chan in
+     let get_dirty_files = (fun () -> Result.Ok (
+       saved_state_fn,
+       corresponding_base_revision,
+       changes,
+       old_saved
+     )) in
+     Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&
@@ -391,7 +415,7 @@ type lazy_level = Off | Decl | Parse | Init
 
 module type InitKind = sig
   val init :
-    load_mini_script:(Path.t, exn) Result.t ->
+    load_mini_approach:(load_mini_approach, exn) Result.t ->
     ServerEnv.genv ->
     lazy_level ->
     ServerEnv.env ->
@@ -424,14 +448,14 @@ end
 *)
 module ServerEagerInit : InitKind = struct
   open ServerInitCommon
-  let init ~load_mini_script genv lazy_level env root =
+  let init ~load_mini_approach genv lazy_level env root =
     (* Spawn this first so that it can run in the background while parsing is
      * going on. The script can fail in a variety of ways, but the resolution
      * is always the same -- we fall back to rechecking everything. Running it
      * in the Result monad provides a convenient way to locate the error
      * handling code in one place. *)
     let state_future =
-     load_mini_script >>= mk_state_future root in
+     load_mini_approach >>= invoke_approach root in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     let env, t = parsing ~lazy_parse genv env ~get_next t in
@@ -563,10 +587,10 @@ module ServerLazyInit : InitKind = struct
 
 
 
-  let init ~load_mini_script genv lazy_level env root =
+  let init ~load_mini_approach genv lazy_level env root =
     assert (lazy_level = Init);
     let state_future =
-      load_mini_script >>= mk_state_future root in
+      load_mini_approach >>= invoke_approach root in
 
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->
@@ -713,16 +737,17 @@ let get_lazy_level genv =
 
 
 (* entry point *)
-let init ?load_mini_script genv =
+let init ?load_mini_approach genv =
   let lazy_lev = get_lazy_level genv in
-  let load_mini_script = Result.of_option load_mini_script ~error:No_loader in
+  let load_mini_approach = Result.of_option load_mini_approach
+    ~error:No_loader in
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
   let (env, t), state =
     if lazy_lev = Init then
-      ServerLazyInit.init ~load_mini_script genv lazy_lev env root
+      ServerLazyInit.init ~load_mini_approach genv lazy_lev env root
     else
-      ServerEagerInit.init ~load_mini_script genv lazy_lev env root
+      ServerEagerInit.init ~load_mini_approach genv lazy_lev env root
   in
   let env, _t = ai_check genv env.files_info env t in
   SharedMem.init_done ();

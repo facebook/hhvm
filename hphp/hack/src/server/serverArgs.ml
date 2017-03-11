@@ -8,6 +8,8 @@
  *
  *)
 
+include ServerArgs_sig.Types
+
 (*****************************************************************************)
 (* The options from the command line *)
 (*****************************************************************************)
@@ -21,6 +23,7 @@ type options = {
   convert          : Path.t option;
   max_procs        : int;
   no_load          : bool;
+  with_mini_state  : mini_state_target option;
   save_filename    : string option;
   waiting_client   : Unix.file_descr option;
   debug_client     : Handle.handle option;
@@ -49,6 +52,9 @@ module Messages = struct
   let save_mini     = " save mini server state to file"
   let max_procs     = " max numbers of workers"
   let no_load       = " don't load from a saved state"
+  let with_mini_state = " init with the given saved state instead of getting" ^
+                        " it by running load mini state script." ^
+                        " Expects a JSON blob."
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
   let debug_client  = " send significant server events to this file descriptor"
@@ -67,6 +73,34 @@ let print_json_version () =
 (* The main entry point *)
 (*****************************************************************************)
 
+let verify_with_mini_state v = match !v with
+  | None -> None
+  | Some blob ->
+    let json = Hh_json.json_of_string blob in
+    let json = Hh_json.Access.return json in
+    let open Hh_json.Access in
+    let result =
+      json >>= get_string "state" >>= fun (state, _state_keytrace) ->
+      json >>= get_string "corresponding_base_revision"
+        >>= fun (for_base_rev, _for_base_rev_keytrace) ->
+      json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
+      json >>= get_array "changes" >>= fun (changes, _) ->
+        let changes = List.fold_left
+          (fun acc file -> (Hh_json.get_string_exn file) :: acc) [] changes in
+        let changes = List.map Relative_path.(concat Root) changes in
+        return (Some {
+          saved_state_fn = state;
+          corresponding_base_revision = for_base_rev;
+          deptable_fn = deptable;
+          changes = changes;
+        })
+    in
+    counit_with (fun access_failure ->
+      Hh_logger.log "parsing optional arg with_mini_state failed: %s"
+        (access_failure_to_string access_failure);
+      Hh_logger.log "See input: %s" blob;
+      None) result
+
 let parse_options () =
   let root          = ref "" in
   let from_vim      = ref false in
@@ -81,16 +115,20 @@ let parse_options () =
   let save          = ref None in
   let max_procs     = ref GlobalConfig.nbr_procs in
   let no_load       = ref false in
+  let with_mini_state = ref None in
   let version       = ref false in
   let waiting_client= ref None in
   let debug_client  = ref None in
   let cdir          = fun s -> convert_dir := Some s in
-  let set_ai        = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
+  let set_ai        = fun s ->
+    ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun s -> max_procs := min !max_procs s in
   let set_save ()   = Printf.eprintf "DEPRECATED\n"; exit 1 in
   let set_save_mini = fun s -> save := Some s in
-  let set_wait      = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
+  let set_wait      = fun fd ->
+    waiting_client := Some (Handle.wrap_handle fd) in
   let set_debug = fun fd -> debug_client := Some fd in
+  let set_with_mini_state = fun s -> with_mini_state := Some s in
   let options =
     ["--debug"         , Arg.Set debug         , Messages.debug;
      "--ai"            , Arg.String set_ai     , Messages.ai;
@@ -106,6 +144,8 @@ let parse_options () =
      "--save-mini"     , Arg.String set_save_mini, Messages.save_mini;
      "--max-procs"     , Arg.Int set_max_procs , Messages.max_procs;
      "--no-load"       , Arg.Set no_load       , Messages.no_load;
+     "--with-mini-state", Arg.String set_with_mini_state,
+       Messages.with_mini_state;
      "--version"       , Arg.Set version       , "";
      "--waiting-client", Arg.Int set_wait      , Messages.waiting_client;
      "--debug-client"  , Arg.Int set_debug     , Messages.debug_client;
@@ -126,6 +166,7 @@ let parse_options () =
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
   end;
+  let with_mini_state = verify_with_mini_state with_mini_state in
   (match !root with
   | "" ->
       Printf.eprintf "You must specify a root directory!\n";
@@ -149,6 +190,7 @@ let parse_options () =
     convert       = convert;
     max_procs     = !max_procs;
     no_load       = !no_load;
+    with_mini_state = with_mini_state;
     save_filename = !save;
     waiting_client= !waiting_client;
     debug_client  = !debug_client;
@@ -164,6 +206,7 @@ let default_options ~root = {
   convert = None;
   max_procs = GlobalConfig.nbr_procs;
   no_load = true;
+  with_mini_state = None;
   save_filename = None;
   waiting_client = None;
   debug_client = None;
@@ -181,6 +224,7 @@ let should_detach options = options.should_detach
 let convert options = options.convert
 let max_procs options = options.max_procs
 let no_load options = options.no_load
+let with_mini_state options = options.with_mini_state
 let save_filename options = options.save_filename
 let waiting_client options = options.waiting_client
 let debug_client options = options.debug_client

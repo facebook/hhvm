@@ -100,6 +100,7 @@ let instr_entrynop = instr (IBasic EntryNop)
 let instr_dict x xs = instr (ILitConst (Dict(x, xs)))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
+let instr_baseh = instr (IBase BaseH)
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
 let instr_fcall count = instr (ICall(FCall count))
 let instr_isuninit = instr (IMisc IsUninit)
@@ -112,6 +113,13 @@ let instr_memoset count local local_count =
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_ismemotype = instr (IMisc IsMemoType)
 let instr_maybememotype = instr (IMisc MaybeMemoType)
+let instr_checkthis = instr (IMisc CheckThis)
+let instr_dim op key = instr (IBase (Dim (op, key)))
+let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
+let instr_fpushobjmethodd num_params method_ flavor =
+  instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
+let instr_fpushobjmethodd_nullthrows num_params method_ =
+  instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

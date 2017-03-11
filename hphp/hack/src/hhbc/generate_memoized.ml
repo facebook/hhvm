@@ -105,7 +105,10 @@ let memoize_function_with_params params renamed_name =
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed (param_count + 1) in
   gather [
-    (* Why do we emit a no-op that cannot be removed here? *)
+    (* Why do we emit a no-op that cannot be removed here?
+    The alleged reason for this no-op is because the runtime handles a branch
+    to the first intruction poorly, but we know there will never be any such
+    branch in this method. *)
     instr_entrynop;
     Emit_body.emit_method_prolog params;
     instr_dict 0 [];
@@ -204,19 +207,38 @@ let memoize_method_no_params renamed_name =
     instr_label label_5;
     instr_retc ]
 
-let memoize_method_with_params params renamed_name =
+let memoize_method_with_params params renamed_name total_count index =
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
+  (* All memoized methods in the same class share a cache. We distinguish the
+  methods from each other by adding a unique integer indexing the method itself
+  to the set of indices for the cache. *)
+  let index_block =
+    if total_count = 1 then
+      empty
+    else
+      gather [
+        instr_int index;
+        instr_setl first_local;
+        instr_popc ] in
+  (* The total number of unnamed locals is one for the optional index, and
+  one for each formal parameter. *)
+  let local_count = if total_count = 1 then param_count else param_count + 1 in
+  (* The index of the first local that represents a formal is the number of
+  parameters, plus one for the optional index. This is equal to the count
+  of locals, so we'll just use that. *)
+  let first_parameter_local = local_count in
   gather [
     (* Why do we emit a no-op that cannot be removed here? *)
     instr_entrynop;
     Emit_body.emit_method_prolog params;
     instr_checkthis;
-    param_code_sets params param_count;
+    index_block;
+    param_code_sets params first_parameter_local;
     instr_baseh;
     instr_dim_warn_pt memoize_shared_cache;
-    instr_memoget 0 first_local param_count;
+    instr_memoget 0 first_local local_count;
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -231,24 +253,22 @@ let memoize_method_with_params params renamed_name =
     instr_unboxr;
     instr_baseh;
     instr_dim_define_pt memoize_shared_cache;
-    instr_memoset 0 first_local param_count;
+    instr_memoset 0 first_local local_count;
     instr_retc ]
 
-let memoized_method_body params renamed_name =
-  if params = [] then
+let memoized_method_body params renamed_name total_count index =
+  if params = [] && total_count = 1 then
     memoize_method_no_params renamed_name
   else
-    memoize_method_with_params params renamed_name
+    memoize_method_with_params params renamed_name total_count index
 
-(* TODO: We need to generate different code if there is exactly one
-memoized method in this class or more than one. *)
-let memoize_method compiled _total_count _index =
+let memoize_method compiled total_count index =
   let original_name = Hhas_method.name compiled in
   let renamed_name = original_name ^ memoize_suffix in
   let renamed = Hhas_method.with_name compiled renamed_name in
   let renamed = Hhas_method.make_private renamed in
   let params = Hhas_method.params compiled in
-  let body = memoized_method_body params renamed_name in
+  let body = memoized_method_body params renamed_name total_count index in
   let body = instr_seq_to_list body in
   let memoized = Hhas_method.with_body compiled body in
   (renamed, memoized)

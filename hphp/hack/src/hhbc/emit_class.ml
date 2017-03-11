@@ -93,10 +93,12 @@ let from_type_constant ast_type_constant =
 let from_type_constants ast_type_constants =
   List.filter_map ast_type_constants from_type_constant
 
-let from_class_elt_method ast_class elt =
-  match elt with
-  | A.Method m -> Emit_method.from_ast ast_class m
-  | _ -> []
+let ast_methods ast_class_body =
+  let mapper elt =
+    match elt with
+    | A.Method m -> Some m
+    | _ -> None in
+  List.filter_map ast_class_body mapper
 
 let from_class_elt_classvars elt =
   match elt with
@@ -139,11 +141,11 @@ let from_ast : A.class_ -> Hhas_class.t =
     (fun elt -> match elt with
                 | A.Method { A.m_name; _} -> snd m_name = SN.Members.__construct
                 | _ -> false) in
-  let class_methods =
+  let additional_methods =
     if has_constructor then [] else [default_constructor ast_class] in
   let class_methods =
-    (Core.List.bind class_body (from_class_elt_method ast_class))
-    @ class_methods in
+    Emit_method.from_asts ast_class (ast_methods class_body) in
+  let class_methods = class_methods @ additional_methods in
   let class_properties = List.concat_map class_body from_class_elt_classvars in
   let class_constants = List.concat_map class_body from_class_elt_constants in
   let class_type_constants =

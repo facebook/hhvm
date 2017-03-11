@@ -116,6 +116,7 @@ let instr_maybememotype = instr (IMisc MaybeMemoType)
 let instr_checkthis = instr (IMisc CheckThis)
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
+let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
 let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
 let instr_fpushobjmethodd_nullthrows num_params method_ =

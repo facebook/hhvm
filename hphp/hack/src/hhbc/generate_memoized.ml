@@ -14,6 +14,7 @@ open Hhbc_ast.MemberOpMode
 let memoize_suffix = "$memoize_impl"
 let memoize_cache = "static$memoize_cache"
 let memoize_guard = "static$memoize_cache$guard"
+let memoize_shared_cache = "$shared$multi$memoize_cache"
 
 let param_code_sets params local =
   let rec aux params local block =
@@ -142,35 +143,47 @@ let memoize_function compiled =
   let memoized = Hhas_function.with_body compiled body in
   (renamed, memoized)
 
-let memoized_method_body _params _renamed_name =
-  (* TODO
-    EntryNop
-    VerifyParamType $a
-    CheckThis
-    GetMemoKeyL $a
-    SetL _1
-    PopC
-    BaseH
-    Dim Warn PT:"$shared$multi$memoize_cache"
-    MemoGet 0 L:1+0
-    IsUninit
-    JmpNZ L0
-    CGetCUNop
-    RetC
-    L0:
-    UGetCUNop
-    PopU
-    This
-    FPushObjMethodD 1 "one$memoize_impl" NullThrows
-    FPassL 0 $a
-    FCall 1
-    UnboxR
-    BaseH
-    Dim Define PT:"$shared$multi$memoize_cache"
-    MemoSet 0 L:1+0
-    RetC
-  *)
-  gather [ instr_null; instr_retc; ]
+let memoize_method_no_params _renamed_name =
+  (* TODO: *)
+  gather [
+    instr_null;
+    instr_retc ]
+
+let memoize_method_with_params params renamed_name =
+  let param_count = List.length params in
+  let label = Label.Regular 0 in
+  let first_local = Local.Unnamed param_count in
+  gather [
+    (* Why do we emit a no-op that cannot be removed here? *)
+    instr_entrynop;
+    Emit_body.emit_method_prolog params;
+    instr_checkthis;
+    param_code_sets params param_count;
+    instr_baseh;
+    instr_dim_warn_pt memoize_shared_cache;
+    instr_memoget 0 first_local param_count;
+    instr_isuninit;
+    instr_jmpnz label;
+    instr_cgetcunop;
+    instr_retc;
+    instr_label label;
+    instr_ugetcunop;
+    instr_popu;
+    instr_this;
+    instr_fpushobjmethodd_nullthrows param_count renamed_name;
+    param_code_gets params;
+    instr_fcall param_count;
+    instr_unboxr;
+    instr_baseh;
+    instr_dim_define_pt memoize_shared_cache;
+    instr_memoset 0 first_local param_count;
+    instr_retc ]
+
+let memoized_method_body params renamed_name =
+  if params = [] then
+    memoize_method_no_params renamed_name
+  else
+    memoize_method_with_params params renamed_name
 
 let memoize_method compiled =
   let original_name = Hhas_method.name compiled in

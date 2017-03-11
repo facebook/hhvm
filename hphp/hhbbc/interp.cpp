@@ -782,10 +782,13 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
   auto follow = [&] (BlockId id) {
     auto& blks = env.ctx.func->blocks;
-    while (blks[id]->fallthrough != NoBlockId &&
-           blks[id]->hhbcs.size() == 1 &&
+    while (blks[id]->hhbcs.size() == 1 &&
            blks[id]->hhbcs.front().op == Op::Nop) {
       id = blks[id]->fallthrough;
+      // If we've determined that the block is unreachable, we could
+      // have replaced it with a nop block with no fallthrough. But in
+      // that case, we should know that the jmp was taken above.
+      always_assert(id != NoBlockId);
     }
     return id;
   };

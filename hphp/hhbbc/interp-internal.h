@@ -226,7 +226,13 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
     if (options.DisallowDynamicVarEnvFuncs) return;
   }
 
-  if (func.mightWriteCallerFrame()) {
+  /*
+   * Skip-frame functions won't write or read to the caller's frame, but they
+   * might dynamically call a function which can. So, skip-frame functions kill
+   * our locals unless they can't call such functions.
+   */
+  if (func.mightWriteCallerFrame() ||
+      (!options.DisallowDynamicVarEnvFuncs && func.mightBeSkipFrame())) {
     readUnknownLocals(env);
     killLocals(env);
     mayUseVV(env);
@@ -262,6 +268,18 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
   case FPIKind::ClsMeth:
   case FPIKind::ObjInvoke:
   case FPIKind::CallableArr:
+    /*
+     * Methods cannot read or write to the caller's frame, but they can be
+     * skip-frame (if they're a builtin). So, its possible they'll dynamically
+     * call a function which reads or writes to the caller's frame. If we don't
+     * forbid this, we have to be pessimistic. Imagine something like
+     * Vector::map calling assert.
+     */
+    if (!options.DisallowDynamicVarEnvFuncs) {
+      readUnknownLocals(env);
+      killLocals(env);
+      mayUseVV(env);
+    }
     break;
   }
 }

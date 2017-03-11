@@ -641,6 +641,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
   if (attrs & AttrReadsCallerFrame) { out << " (reads_caller_frame)"; }
   if (attrs & AttrWritesCallerFrame) { out << " (writes_caller_frame)"; }
+  if (attrs & AttrSkipFrame) { out << " (skip_frame)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -1077,6 +1078,13 @@ bool disallowDynamicVarEnvFuncs() {
 
 bool funcDestroysLocals(const Func* callee) {
   assertx(callee != nullptr);
+
+  // A skip-frame function can dynamically call a function which writes to the
+  // caller's frame. If we don't forbid such dynamic calls, we have to be
+  // pessimistic.
+  if (callee->isSkipFrame() && !disallowDynamicVarEnvFuncs()) {
+    return true;
+  }
 
   if (!callee->writesCallerFrame()) return false;
 

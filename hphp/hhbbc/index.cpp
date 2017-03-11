@@ -640,6 +640,8 @@ bool Func::cantBeMagicCall() const {
 bool Func::mightReadCallerFrame() const {
   return match<bool>(
     val,
+    // Only non-method builtins can read the caller's frame and builtins are
+    // always uniquely resolvable.
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
     [&] (borrowed_ptr<FuncInfo> fi)   {
@@ -657,6 +659,8 @@ bool Func::mightReadCallerFrame() const {
 bool Func::mightWriteCallerFrame() const {
   return match<bool>(
     val,
+    // Only non-method builtins can write to the caller's frame and builtins are
+    // always uniquely resolvable.
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
     [&] (borrowed_ptr<FuncInfo> fi)   {
@@ -685,6 +689,25 @@ bool Func::isFoldable() const {
         if (!(finfo->first->attrs & AttrIsFoldable)) return false;
       }
       return true;
+    }
+  );
+}
+
+bool Func::mightBeSkipFrame() const {
+  return match<bool>(
+    val,
+    // Only builtins can be skip frame and non-method builtins are always
+    // uniquely resolvable. Methods are more complicated though.
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return true; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->first->attrs & AttrSkipFrame;
+    },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (finfo->first->attrs & AttrSkipFrame) return true;
+      }
+      return false;
     }
   );
 }
@@ -1995,13 +2018,13 @@ Index::resolve_closure_class(Context ctx, int32_t idx) const {
 
 res::Class Index::builtin_class(SString name) const {
   auto const rcls = resolve_class(Context {}, name);
-  if (!rcls) {
-    std::fprintf(stderr, "failed to resolve a builtin class: %s\n",
-      name->data());
-    std::abort();
-  }
-  assert(rcls->val.right() &&
-    (rcls->val.right()->cls->attrs & AttrBuiltin));
+  always_assert_flog(
+    rcls.hasValue() &&
+    rcls->val.right() &&
+    (rcls->val.right()->cls->attrs & AttrBuiltin),
+    "A builtin class ({}) failed to resolve",
+    name->data()
+  );
   return *rcls;
 }
 

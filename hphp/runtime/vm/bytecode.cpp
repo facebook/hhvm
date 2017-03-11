@@ -424,13 +424,14 @@ void VarEnv::enterFP(ActRec* oldFP, ActRec* newFP) {
   if (oldFP == nullptr) {
     assert(isGlobalScope() && m_depth == 0);
   } else {
-    assert(m_depth >= 1);
+    assertx(m_depth >= 1);
+    assertx(g_context->getPrevVMStateSkipFrame(newFP) == oldFP);
     if (debug) {
       auto prev = newFP;
       while (true) {
         prev = g_context->getPrevVMState(prev);
         if (prev == oldFP) break;
-        assert(!(prev->m_func->attrs() & AttrMayUseVV) || !prev->m_varEnv);
+        assertx(!(prev->m_func->attrs() & AttrMayUseVV) || !prev->hasVarEnv());
       }
     }
     m_nvTable.detach(oldFP);
@@ -1533,7 +1534,11 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
     enterFnAr->setVarEnv(varEnv);
     assert(enterFnAr->func()->isPseudoMain());
     pushFrameSlots(enterFnAr->func());
-    varEnv->enterFP(varEnv->getFP(), enterFnAr);
+    auto oldFp = vmfp();
+    if (UNLIKELY(oldFp && oldFp->skipFrame())) {
+      oldFp = g_context->getPrevVMStateSkipFrame(oldFp);
+    }
+    varEnv->enterFP(oldFp, enterFnAr);
     vmfp() = enterFnAr;
     vmpc() = enterFnAr->func()->getEntry();
   } else {

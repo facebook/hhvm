@@ -283,6 +283,11 @@ struct Func {
    */
   bool isFoldable() const;
 
+  /*
+   * Returns whether this resolved function could possibly be skipped when
+   * looking for a caller's frame.
+   */
+  bool mightBeSkipFrame() const;
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {

@@ -454,8 +454,8 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     if (it == end(propState)) return;
 
     /*
-     * When HardTypeHints isn't on, or any functions are
-     * interceptable, we don't require the constraints to actually
+     * When HardTypeHints isn't on, DisallowDynamicVarEnvFuncs isn't on, or any
+     * functions are interceptable, we don't require the constraints to actually
      * match, and relax all the HNI types to Gen.
      *
      * This is because extensions may wish to assign to properties
@@ -466,7 +466,9 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
      * some properties, or not to take their arguments by reference.
      */
     auto const hniTy =
-      !options.HardTypeHints || clsAnalysis.anyInterceptable
+      !options.HardTypeHints ||
+      !options.DisallowDynamicVarEnvFuncs ||
+      clsAnalysis.anyInterceptable
         ? TGen
         : from_hni_constraint(prop.typeConstraint);
     if (it->second.subtypeOf(hniTy)) {

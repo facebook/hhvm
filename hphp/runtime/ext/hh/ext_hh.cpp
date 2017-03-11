@@ -108,7 +108,8 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata) {
   VMRegAnchor _;
   auto fp = vmfp();
-  if (fp && fp->skipFrame()) fp = g_context->getPrevVMState(fp);
+  if (UNLIKELY(!fp)) return;
+  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
   if (UNLIKELY(!fp)) return;
 
   if (LIKELY(!(fp->func()->attrs() & AttrMayUseVV)) ||

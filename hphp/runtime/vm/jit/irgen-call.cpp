@@ -754,8 +754,8 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 
   auto const checkTaintId = [&](Id id) {
     auto const str = unit->lookupLitstrId(id);
-    // Only builtins can destroy a caller's locals and if we can't lookup the
-    // function, we know its not a builtin.
+    // Only builtins can destroy a caller's locals or be skip-frame and if we
+    // can't lookup the function, we know its not a builtin.
     auto const callee = Unit::lookupFunc(str);
     return callee && funcDestroysLocals(callee);
   };
@@ -794,8 +794,11 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
     case OpFPushCtorD:
     case OpFPushCtorI:
       // None of these touch the caller's frame because they all call methods,
-      // not top-level functions.
-      return false;
+      // not top-level functions. However, they might still be might marked as
+      // skip-frame and therefore something they call can affect our frame. We
+      // don't have to worry about this if they're not allowed to call such
+      // functions dynamically.
+      return !disallowDynamicVarEnvFuncs();
 
     default:
       always_assert("Unhandled FPush type in callDestroysLocals" && 0);

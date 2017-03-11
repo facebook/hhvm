@@ -132,11 +132,7 @@ bool shouldRunUserProfiler(const Func* func) {
 
 ALWAYS_INLINE
 ActRec* getParentFrame(const ActRec* ar) {
-  ActRec* ret = g_context->getPrevVMState(ar);
-  while (ret != nullptr && ret->skipFrame()) {
-    ret = g_context->getPrevVMState(ret);
-  }
-  return ret;
+  return g_context->getPrevVMStateSkipFrame(ar);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {

@@ -95,7 +95,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
   if (hardBreakPoint && fp->skipFrame()) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
-    fp = context->getPrevVMState(fp, &m_offset);
+    fp = context->getPrevVMStateSkipFrame(fp, &m_offset);
   } else {
     auto const *pc = vmpc();
     auto f = fp->m_func;

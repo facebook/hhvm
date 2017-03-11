@@ -273,9 +273,7 @@ inline ActRec* regAnchorFP(ActRec* cur, Offset* pc = nullptr) {
   // over php-defined builtin functions in order to find the true context.
   auto const context = g_context.getNoCheck();
   if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
-  while (cur && cur->skipFrame()) {
-    cur = context->getPrevVMState(cur, pc);
-  }
+  if (cur && cur->skipFrame()) cur = context->getPrevVMStateSkipFrame(cur, pc);
   return cur;
 }
 

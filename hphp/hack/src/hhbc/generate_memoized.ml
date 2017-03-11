@@ -15,6 +15,8 @@ let memoize_suffix = "$memoize_impl"
 let memoize_cache = "static$memoize_cache"
 let memoize_guard = "static$memoize_cache$guard"
 let memoize_shared_cache = "$shared$multi$memoize_cache"
+let memoize_single_cache = "$shared$guarded_single$memoize_cache"
+let memoized_single_guard = "$shared$guarded_single$memoize_cache$guard"
 
 let param_code_sets params local =
   let rec aux params local block =
@@ -143,10 +145,63 @@ let memoize_function compiled =
   let memoized = Hhas_function.with_body compiled body in
   (renamed, memoized)
 
-let memoize_method_no_params _renamed_name =
-  (* TODO: *)
+let memoize_method_no_params renamed_name =
+  (* TODO: A lot of this codegen doesn't make a lot of sense to me.
+  Try to understand it and see if it can be improved. *)
+  let label_0 = Label.Regular 0 in
+  let label_1 = Label.Regular 1 in
+  let label_2 = Label.Regular 2 in
+  let label_3 = Label.Regular 3 in
+  let label_4 = Label.Regular 4 in
+  let label_5 = Label.Regular 5 in
   gather [
+    instr_entrynop;
+    instr_checkthis;
     instr_null;
+    instr_ismemotype;
+    instr_jmpnz label_0;
+    instr_baseh;
+    instr_querym_cget_pt 0 memoize_single_cache;
+    instr_dup;
+    instr_istypec Hhbc_ast.OpNull;
+    instr_jmpnz label_1;
+    instr_retc;
+    instr_label label_1;
+    instr_popc;
+    instr_label label_0;
+    instr_null;
+    instr_maybememotype;
+    instr_jmpz label_2;
+    instr_baseh;
+    instr_querym_cget_pt 0 memoized_single_guard;
+    instr_jmpz label_2;
+    instr_null;
+    instr_retc;
+    instr_label label_2;
+    instr_null;
+    instr_ismemotype;
+    instr_jmpnz label_3;
+    instr_this;
+    instr_fpushobjmethodd_nullthrows 0 renamed_name;
+    instr_fcall 0;
+    instr_unboxr;
+    instr_baseh;
+    instr_setm_pt 0 memoize_single_cache;
+    instr_jmp label_4;
+    instr_label label_3;
+    instr_this;
+    instr_fpushobjmethodd_nullthrows 0 renamed_name;
+    instr_fcall 0;
+    instr_unboxr;
+    instr_label label_4;
+    instr_null;
+    instr_maybememotype;
+    instr_jmpz label_5;
+    instr_true;
+    instr_baseh;
+    instr_setm_pt 0 memoized_single_guard;
+    instr_popc;
+    instr_label label_5;
     instr_retc ]
 
 let memoize_method_with_params params renamed_name =

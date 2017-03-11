@@ -11,7 +11,7 @@
 open Core
 open Instruction_sequence
 
-let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
+let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
   fun ast_class ast_method ->
   let method_name = Litstr.to_string @@ snd ast_method.Ast.m_name in
   let method_is_abstract = List.mem ast_method.Ast.m_kind Ast.Abstract in
@@ -40,5 +40,14 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
     method_return_type
     method_body
 
+let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t list =
+  fun ast_class ast_method ->
+  let compiled = from_ast_no_memoization ast_class ast_method in
+  if Hhas_attribute.is_memoized (Hhas_method.attributes compiled) then
+    let (renamed, memoized) = Generate_memoized.memoize_method compiled in
+    [ renamed; memoized ]
+  else
+    [ compiled ]
+
 let from_asts ast_class ast_methods =
-  List.map ast_methods (from_ast ast_class)
+  Core.List.bind ast_methods (from_ast ast_class)

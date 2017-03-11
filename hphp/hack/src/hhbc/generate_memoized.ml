@@ -38,7 +38,7 @@ let param_code_gets params =
       aux t (index + 1) block in
   aux params 0 empty
 
-let memoize_no_params renamed_name =
+let memoize_function_no_params renamed_name =
   (* TODO: A lot of this codegen doesn't make a lot of sense to me.
   Try to understand it and see if it can be improved. *)
   let local_cache = Local.Unnamed 0 in
@@ -96,7 +96,7 @@ let memoize_no_params renamed_name =
     instr_label label_5;
     instr_retc ]
 
-let memoize_with_params params renamed_name =
+let memoize_function_with_params params renamed_name =
   let param_count = List.length params in
   let static_local = Local.Unnamed param_count in
   let label = Label.Regular 0 in
@@ -126,18 +126,59 @@ let memoize_with_params params renamed_name =
     instr_retc
   ]
 
-let memoized_body params renamed_name =
+let memoized_function_body params renamed_name =
   if params = [] then
-    memoize_no_params renamed_name
+    memoize_function_no_params renamed_name
   else
-    memoize_with_params params renamed_name
+    memoize_function_with_params params renamed_name
 
 let memoize_function compiled =
   let original_name = Hhas_function.name compiled in
   let renamed_name = original_name ^ memoize_suffix in
   let renamed = Hhas_function.with_name compiled renamed_name in
   let params = Hhas_function.params compiled in
-  let body = memoized_body params renamed_name in
+  let body = memoized_function_body params renamed_name in
   let body = instr_seq_to_list body in
   let memoized = Hhas_function.with_body compiled body in
+  (renamed, memoized)
+
+let memoized_method_body _params _renamed_name =
+  (* TODO
+    EntryNop
+    VerifyParamType $a
+    CheckThis
+    GetMemoKeyL $a
+    SetL _1
+    PopC
+    BaseH
+    Dim Warn PT:"$shared$multi$memoize_cache"
+    MemoGet 0 L:1+0
+    IsUninit
+    JmpNZ L0
+    CGetCUNop
+    RetC
+    L0:
+    UGetCUNop
+    PopU
+    This
+    FPushObjMethodD 1 "one$memoize_impl" NullThrows
+    FPassL 0 $a
+    FCall 1
+    UnboxR
+    BaseH
+    Dim Define PT:"$shared$multi$memoize_cache"
+    MemoSet 0 L:1+0
+    RetC
+  *)
+  gather [ instr_null; instr_retc; ]
+
+let memoize_method compiled =
+  let original_name = Hhas_method.name compiled in
+  let renamed_name = original_name ^ memoize_suffix in
+  let renamed = Hhas_method.with_name compiled renamed_name in
+  let renamed = Hhas_method.make_private renamed in
+  let params = Hhas_method.params compiled in
+  let body = memoized_method_body params renamed_name in
+  let body = instr_seq_to_list body in
+  let memoized = Hhas_method.with_body compiled body in
   (renamed, memoized)

@@ -55,6 +55,13 @@ let is_static method_def = method_def.method_is_static
 let is_final method_def = method_def.method_is_final
 let is_abstract method_def = method_def.method_is_abstract
 let name method_def = method_def.method_name
+let with_name method_def method_name = { method_def with method_name }
+let make_private method_def =
+  { method_def with
+    method_is_protected = false;
+    method_is_public = false;
+    method_is_private = true }
 let params method_def = method_def.method_params
 let return_type method_def = method_def.method_return_type
 let body method_def = method_def.method_body
+let with_body method_def method_body = { method_def with method_body }

@@ -687,8 +687,8 @@ module Make (GetLocals : GetLocals) = struct
       is_static_var env h
 
   and shape_field_to_shape_field_info env { sf_optional; sf_name=_; sf_hint } =
-    N.{
-      sfi_optional=sf_optional;
+    {
+      N.sfi_optional=sf_optional;
       sfi_hint=hint env sf_hint;
     }
 

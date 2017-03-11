@@ -240,7 +240,9 @@ let memoized_method_body params renamed_name =
   else
     memoize_method_with_params params renamed_name
 
-let memoize_method compiled =
+(* TODO: We need to generate different code if there is exactly one
+memoized method in this class or more than one. *)
+let memoize_method compiled _total_count _index =
   let original_name = Hhas_method.name compiled in
   let renamed_name = original_name ^ memoize_suffix in
   let renamed = Hhas_method.with_name compiled renamed_name in

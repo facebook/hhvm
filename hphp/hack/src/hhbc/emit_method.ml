@@ -40,14 +40,18 @@ let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
     method_return_type
     method_body
 
-let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t list =
-  fun ast_class ast_method ->
-  let compiled = from_ast_no_memoization ast_class ast_method in
-  if Hhas_attribute.is_memoized (Hhas_method.attributes compiled) then
-    let (renamed, memoized) = Generate_memoized.memoize_method compiled in
-    [ renamed; memoized ]
-  else
-    [ compiled ]
-
 let from_asts ast_class ast_methods =
-  Core.List.bind ast_methods (from_ast ast_class)
+  let is_memoized ast_method =
+    let attributes = ast_method.Ast.m_user_attributes in
+    Emit_attribute.ast_any_is_memoize attributes in
+  let memoized_count = List.count ast_methods is_memoized in
+  let folder (count, acc) ast_method =
+    let compiled = from_ast_no_memoization ast_class ast_method in
+    if Hhas_attribute.is_memoized (Hhas_method.attributes compiled) then
+      let (renamed, memoized) =
+        Generate_memoized.memoize_method compiled memoized_count count in
+      (count + 1, memoized :: renamed :: acc)
+    else
+      (count, compiled :: acc) in
+  let (_, methods) = Core.List.fold_left ast_methods ~init:(0, []) ~f:folder in
+  List.rev methods

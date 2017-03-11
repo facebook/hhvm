@@ -52,9 +52,22 @@ module Messages = struct
   let save_mini     = " save mini server state to file"
   let max_procs     = " max numbers of workers"
   let no_load       = " don't load from a saved state"
+  let mini_state_json_descr =
+    "Either\n" ^
+    "   { \"data_dump\" : <mini_state_target json> }\n" ^
+    "or\n" ^
+    "   { \"from_file\" : <path to file containing mini_state_target json }\n" ^
+    "where mini_state_target json looks liks:\n" ^
+    "   {\n" ^
+    "      \"state\" : <saved state filename>\n" ^
+    "      \"corresponding_base_revision\" : <SVN rev #>\n" ^
+    "      \"deptable_fn\" : <dependency table filename>\n" ^
+    "      \"changes\" : [array of files changed since that saved state]\n" ^
+    "   }"
   let with_mini_state = " init with the given saved state instead of getting" ^
                         " it by running load mini state script." ^
-                        " Expects a JSON blob."
+                        " Expects a JSON blob specified as" ^
+                        mini_state_json_descr
   let waiting_client= " send message to fd/handle when server has begun \
                       \ starting and again when it's done starting"
   let debug_client  = " send significant server events to this file descriptor"
@@ -73,33 +86,65 @@ let print_json_version () =
 (* The main entry point *)
 (*****************************************************************************)
 
+let parse_mini_state_json (json, _keytrace) =
+  let json = Hh_json.Access.return json in
+  let open Hh_json.Access in
+  json >>= get_string "state" >>= fun (state, _state_keytrace) ->
+    json >>= get_string "corresponding_base_revision"
+      >>= fun (for_base_rev, _for_base_rev_keytrace) ->
+    json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
+    json >>= get_array "changes" >>= fun (changes, _) ->
+      let changes = List.fold_left
+        (fun acc file -> (Hh_json.get_string_exn file) :: acc) [] changes in
+      let changes = List.map Relative_path.(concat Root) changes in
+      return {
+        saved_state_fn = state;
+        corresponding_base_revision = for_base_rev;
+        deptable_fn = deptable;
+        changes = changes;
+      }
+
 let verify_with_mini_state v = match !v with
   | None -> None
   | Some blob ->
     let json = Hh_json.json_of_string blob in
     let json = Hh_json.Access.return json in
     let open Hh_json.Access in
-    let result =
-      json >>= get_string "state" >>= fun (state, _state_keytrace) ->
-      json >>= get_string "corresponding_base_revision"
-        >>= fun (for_base_rev, _for_base_rev_keytrace) ->
-      json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
-      json >>= get_array "changes" >>= fun (changes, _) ->
-        let changes = List.fold_left
-          (fun acc file -> (Hh_json.get_string_exn file) :: acc) [] changes in
-        let changes = List.map Relative_path.(concat Root) changes in
-        return (Some {
-          saved_state_fn = state;
-          corresponding_base_revision = for_base_rev;
-          deptable_fn = deptable;
-          changes = changes;
-        })
+    let data_dump_parse_result =
+      json
+        >>= get_obj "data_dump"
+        >>= parse_mini_state_json
     in
-    counit_with (fun access_failure ->
-      Hh_logger.log "parsing optional arg with_mini_state failed: %s"
-        (access_failure_to_string access_failure);
+    let from_file_parse_result =
+      json
+        >>= get_string "from_file"
+        >>= fun (filename, _filename_keytrace) ->
+        let contents = Sys_utils.cat filename in
+        let json = Hh_json.json_of_string contents in
+        (Hh_json.Access.return json)
+          >>= parse_mini_state_json
+    in
+    match
+      (Result.ok_fst data_dump_parse_result),
+      (Result.ok_fst from_file_parse_result) with
+    | (`Fst (parsed_data_dump, _)), (`Fst (_parsed_from_file, _)) ->
+      Hh_logger.log "Warning - %s"
+        ("Parsed mini state target from both JSON blob data dump" ^
+        " and from contents of file.");
+      Hh_logger.log "Preferring data dump result";
+      Some parsed_data_dump
+    | (`Fst (parsed_data_dump, _)), (`Snd _) ->
+      Some parsed_data_dump
+    | (`Snd _), (`Fst (parsed_from_file, _)) ->
+      Some parsed_from_file
+    | (`Snd data_dump_failure), (`Snd from_file_failure) ->
+      Hh_logger.log "parsing optional arg with_mini_state failed:\n%s\n%s"
+        (Printf.sprintf "  data_dump failure:%s"
+              (access_failure_to_string data_dump_failure))
+        (Printf.sprintf "  from_file failure:%s"
+              (access_failure_to_string from_file_failure));
       Hh_logger.log "See input: %s" blob;
-      None) result
+      raise (Arg.Bad "--with-mini-state")
 
 let parse_options () =
   let root          = ref "" in

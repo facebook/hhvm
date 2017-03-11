@@ -822,12 +822,7 @@ void ProxygenTransport::beginPartialPostEcho() {
 void ProxygenTransport::abort() {
   unlink();
   if (m_clientTxn) {
-    if (m_repost) {
-      VLOG(2) << "Sending EOM for repost abort";
-      m_clientTxn->sendEOM();
-    } else {
-      m_clientTxn->sendAbort();
-    }
+    m_clientTxn->sendAbort();
   }
   s_requestErrorCount->addValue(1);
 }

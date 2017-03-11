@@ -577,6 +577,7 @@ void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewDictArray&)  { pushRemovable(env); }
 void dce(Env& env, const bc::NewMixedArray&) { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
+void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
 void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the

@@ -2833,7 +2833,13 @@ void in(ISS& env, const bc::ArrayIdx&) {
   push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::CheckProp&) { push(env, TBool); }
+void in(ISS& env, const bc::CheckProp&) {
+  if (env.ctx.cls->attrs & AttrNoOverride) {
+    return reduce(env, bc::False {});
+  }
+  nothrow(env);
+  push(env, TBool);
+}
 
 void in(ISS& env, const bc::InitProp& op) {
   auto const t = topC(env);

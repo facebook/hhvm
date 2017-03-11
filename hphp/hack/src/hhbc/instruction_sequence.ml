@@ -121,6 +121,12 @@ let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
 let instr_fpushobjmethodd_nullthrows num_params method_ =
   instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
+let instr_querym num_params op key =
+  instr (IFinal (QueryM (num_params, op, key)))
+let instr_querym_cget_pt num_params key =
+  instr_querym num_params QueryOp.CGet (MemberKey.PT key)
+let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
+let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

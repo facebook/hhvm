@@ -332,6 +332,12 @@ let string_of_final instruction =
   | VGetM (n, mk) ->
     sep ["VGetM";
       string_of_int n; string_of_member_key mk]
+  | UnsetM (n, mk) ->
+    sep ["SetM";
+      string_of_int n; string_of_member_key mk]
+  | BindM (n, mk) ->
+    sep ["BindM";
+      string_of_int n; string_of_member_key mk]
   | FPassM (i, n, mk) ->
     sep ["FPassM";
       string_of_param_num i; string_of_int n; string_of_member_key mk]
@@ -347,11 +353,8 @@ let string_of_final instruction =
   | _ ->
     "# string_of_final NYI"
 (*
-| SetM of num_params * MemberKey.t
 | IncDecM of num_params * incdec_op * MemberKey.t
 | SetOpM of num_params  * eq_op * MemberKey.t
-| BindM of num_params * MemberKey.t
-| UnsetM of num_params * MemberKey.t
 | SetWithRefLML of local_id * local_id
 | SetWithRefRML of local_id
 *)

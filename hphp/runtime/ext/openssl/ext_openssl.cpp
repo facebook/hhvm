@@ -654,7 +654,7 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
     req->digest = req->md_alg = EVP_get_digestbyname(req->digest_name);
   }
   if (req->md_alg == nullptr) {
-    req->md_alg = req->digest = EVP_md5();
+    req->md_alg = req->digest = EVP_sha256();
   }
 
 #ifdef HAVE_EVP_PKEY_EC

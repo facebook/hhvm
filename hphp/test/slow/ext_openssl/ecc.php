@@ -38,7 +38,6 @@ $dn = array(
   "emailAddress" => "hnangelo@php.net"
 );
 
-/*
 // openssl_csr_new creates a new public key pair if the key argument is null
 echo "Testing openssl_csr_new with key generation\n";
 $keyGenerate = null;
@@ -46,7 +45,6 @@ var_dump($keyGenerate);
 $csr = openssl_csr_new($dn, $keyGenerate, $args);
 
 var_dump($keyGenerate);
-*/
 
 $args["digest_alg"] = "sha1";
 echo "Testing openssl_csr_new with existing ecc key\n";

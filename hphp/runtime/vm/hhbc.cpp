@@ -79,8 +79,8 @@ ArgType immType(const Op opcode, int idx) {
 }
 
 static size_t encoded_iva_size(uint8_t lowByte) {
-  // Low order bit set => 4-byte.
-  return (lowByte & 0x1 ? sizeof(int32_t) : sizeof(int8_t));
+  // High order bit set => 4-byte.
+  return int8_t(lowByte) >= 0 ? 1 : 4;
 }
 
 int immSize(PC origPC, int idx) {
@@ -230,11 +230,11 @@ T decodeImm(const unsigned char** immPtr) {
 // TODO: merge with emitIVA in unit.h
 size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   if (LIKELY((n & 0x7f) == n)) {
-    *buf = static_cast<unsigned char>(n) << 1;
+    *buf = static_cast<unsigned char>(n);
     return 1;
   }
   assert((n & 0x7fffffff) == n);
-  *reinterpret_cast<uint32_t*>(buf) = (uint32_t(n) << 1) | 0x1;
+  *reinterpret_cast<uint32_t*>(buf) = (n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f);
   return 4;
 }
 

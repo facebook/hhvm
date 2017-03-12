@@ -115,10 +115,10 @@ inline void UnitEmitter::emitIVA(bool n) {
 template<typename T>
 void UnitEmitter::emitIVA(T n) {
   if (LIKELY((n & 0x7f) == n)) {
-    emitByte((unsigned char)n << 1);
+    emitByte((unsigned char)n);
   } else {
     assert((n & 0x7fffffff) == n);
-    emitInt32((n << 1) | 0x1);
+    emitInt32((n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f));
   }
 }
 

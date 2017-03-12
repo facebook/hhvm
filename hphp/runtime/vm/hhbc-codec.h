@@ -121,12 +121,12 @@ template<class T> T decode_oa(PC& pc) {
 
 ALWAYS_INLINE int32_t decode_iva(PC& pc) {
   auto const small = *pc;
-  if (UNLIKELY(small & 0x1)) {
+  if (UNLIKELY(int8_t(small) < 0)) {
     auto const large = decode_raw<uint32_t>(pc);
-    return (int32_t)(large >> 1);
+    return (large & 0xffffff00) >> 1 | (small & 0x7f);
   }
   pc++;
-  return (int32_t)(small >> 1);
+  return small;
 }
 
 /*

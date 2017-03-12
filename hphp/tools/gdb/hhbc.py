@@ -130,14 +130,13 @@ class HHBC(object):
         if immtype in iva_imm_types():
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
 
-            if imm & 0x1:
-                iva_type = T('int32_t')
+            if imm & 0x80:
+                raw = ptr.cast(T('uint32_t').pointer()).dereference()
+                info['value'] = ((raw & 0xffffff00) >> 1) | (raw & 0x7f);
+                info['size'] = 4
             else:
-                iva_type = T('unsigned char')
-
-            imm = ptr.cast(iva_type.pointer()).dereference()
-            info['size'] = iva_type.sizeof
-            info['value'] = imm >> 1
+                info['value'] = imm
+                info['size'] = 1
 
         elif immtype in vec_imm_types():
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]

@@ -1966,10 +1966,11 @@ let make_result env te1 ty1 = (env, T.make_typed_expr p ty1 te1, ty1) in
       try_over_concrete_supertypes env folded_ty2
         begin fun env ty2 ->
           match ty2 with
-          (* Vector<t> or ImmVector<t> or ConstVector<t> *)
+          (* Vector<t> or ImmVector<t> or ConstVector<t> or vec<T> *)
           | (_, Tclass ((_, x), [elt_type]))
           when x = SN.Collections.cVector
             || x = SN.Collections.cImmVector
+            || x = SN.Collections.cVec
             || x = SN.Collections.cConstVector ->
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in

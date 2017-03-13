@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
@@ -995,8 +996,12 @@ String ExecutionContext::getenv(const String& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();
   }
-  char *value = ::getenv(name.data());
-  if (value) {
+  if (is_cli_mode()) {
+    auto envs = cli_env();
+    if (envs.exists(name)) return envs[name].toString();
+    return String();
+  }
+  if (auto value = ::getenv(name.data())) {
     return String(value, CopyString);
   }
   if (RuntimeOption::EnvVariables.find(name.c_str()) != RuntimeOption::EnvVariables.end()) {

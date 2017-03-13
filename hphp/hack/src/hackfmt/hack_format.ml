@@ -857,6 +857,7 @@ let rec transform node =
     t kw;
     transform_argish left_p args right_p;
     t semi;
+    builder#end_chunks ();
   | WhileStatement x ->
     t x.while_keyword;
     add_space ();

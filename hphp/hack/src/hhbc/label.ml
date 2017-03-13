@@ -8,6 +8,7 @@
  *
 *)
 
+(* Labels, regardless of flavor have unique IDs *)
 type t =
   | Regular of int
   | Catch of int
@@ -20,6 +21,24 @@ let id label =
   | Catch id
   | Fault id
   | DefaultArg id -> id
+
+let option_map f label =
+  match label with
+  | Regular id ->
+    begin match f id with None -> None | Some id -> Some (Regular id) end
+  | Catch id ->
+    begin match f id with None -> None | Some id -> Some (Catch id) end
+  | Fault id ->
+    begin match f id with None -> None | Some id -> Some (Fault id) end
+  | DefaultArg id ->
+    begin match f id with None -> None | Some id -> Some (DefaultArg id) end
+
+let map f label =
+  match label with
+  | Regular id -> Regular (f id)
+  | Catch id -> Catch (f id)
+  | Fault id -> Fault (f id)
+  | DefaultArg id -> DefaultArg (f id)
 
 (* Numbers for string label *)
 let next_label = ref 0

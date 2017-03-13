@@ -573,8 +573,8 @@ let string_of_param_default_value expr =
 let string_of_param_default_value_option = function
   | None -> ""
   | Some (label, expr) ->
-    " = DV"
-    ^ (string_of_int (Label.id label))
+    " = "
+    ^ (string_of_label label)
     ^ "(\"\"\""
     ^ (string_of_param_default_value expr)
     ^ "\"\"\")"
@@ -724,7 +724,7 @@ let add_implements buf class_implements =
   begin
     B.add_string buf " implements (";
     B.add_string buf (String.concat " " (List.map fmt_name class_implements));
-    B.add_string buf ") ";
+    B.add_string buf ")";
   end
 
 let property_attributes p =

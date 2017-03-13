@@ -17,7 +17,7 @@ let create_label_to_offset_map instrseq =
   snd @@
   InstrSeq.fold_left instrseq ~init:(0, IMap.empty) ~f:(fun (i, m) instr ->
     begin match instr with
-    | ILabel (Label.Regular l) -> (i, IMap.add l i m)
+    | ILabel l -> (i, IMap.add (Label.id l) i m)
     | _        -> (i + 1, m)
     end)
 
@@ -26,62 +26,84 @@ let lookup_def l defs =
   | None -> failwith "lookup_def: label missing"
   | Some ix -> ix
 
-(* Generate new labels for all labels referenced in instructions, in the
- * order that the instructions appear. Also record which labels are
- *)
-let create_label_ref_map defs instrseq =
-  snd @@
-  InstrSeq.fold_left instrseq ~init:(0, (ISet.empty, IMap.empty))
-    ~f:(fun acc instr ->
-    let process_ref (n, (used, refs) as acc) l =
-      let l = Label.id l in
-      let ix = lookup_def l defs in
-      match IMap.get ix refs with
-      (* This is the first time we've seen a reference to a label for
-       * this instruction offset, so generate a new label *)
-      | None -> (n + 1, (ISet.add l used, IMap.add ix n refs))
-      (* We already have a label for this instruction offset *)
-      | Some _ -> acc in
-    match instr with
-    | IIterator (IterInit (_, l, _))
-    | IIterator (IterInitK (_, l, _, _))
-    | IIterator (WIterInit (_, l, _))
-    | IIterator (WIterInitK (_, l, _, _))
-    | IIterator (MIterInit (_, l, _))
-    | IIterator (MIterInitK (_, l, _, _))
-    | IIterator (IterNext (_, l, _))
-    | IIterator (IterNextK (_, l, _, _))
-    | IIterator (WIterNext (_, l, _))
-    | IIterator (WIterNextK (_, l, _, _))
-    | IIterator (MIterNext (_, l, _))
-    | IIterator (MIterNextK (_, l, _, _))
-    | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) ->
-      process_ref acc l
-    | IContFlow (Switch (_, _, ls)) ->
-      List.fold_left ls ~f:process_ref ~init:acc
-    | IContFlow (SSwitch pairs) ->
-      List.fold_left pairs ~f:(fun acc (_,l) -> process_ref acc l) ~init:acc
-    (* TODO: other uses of Label.t in instructions:
-      DecodeCufIter
-      IterBreak
-     *)
-    | _ -> acc)
+(* Get any regular labels referenced by this instruction *)
+let get_regular_labels instr =
+  match instr with
+  | IIterator (IterInit (_, l, _))
+  | IIterator (IterInitK (_, l, _, _))
+  | IIterator (WIterInit (_, l, _))
+  | IIterator (WIterInitK (_, l, _, _))
+  | IIterator (MIterInit (_, l, _))
+  | IIterator (MIterInitK (_, l, _, _))
+  | IIterator (IterNext (_, l, _))
+  | IIterator (IterNextK (_, l, _, _))
+  | IIterator (WIterNext (_, l, _))
+  | IIterator (WIterNextK (_, l, _, _))
+  | IIterator (MIterNext (_, l, _))
+  | IIterator (MIterNextK (_, l, _, _))
+  | IIterator (IterBreak (l, _))
+  | ICall (DecodeCufIter (_, l))
+  | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) -> [l]
+  | IContFlow (Switch (_, _, ls)) -> ls
+  | IContFlow (SSwitch pairs) -> List.map pairs snd
+  | _ -> []
 
-(* Relabel the instruction sequence so that
+(* Get any labels referred to in catch or fault handlers *)
+let get_catch_or_fault_labels instr =
+  match instr with
+  | ITry (TryCatchBegin l | TryFaultBegin l) -> [l]
+  | _ -> []
+
+(* Generate new labels for all labels referenced in instructions and default
+ * parameter values, in the same order as used by DumpHhas:
+ *   1. First, labels referenced by normal control-flow (jumps, switches, etc)
+ *   2. Next, labels referenced by catch or fault handlers
+ *   3. Last, labels referenced by default parameter values
+ *)
+let create_label_ref_map defs params body =
+  let process_ref (n, (used, refs) as acc) l =
+    let l = Label.id l in
+    let ix = lookup_def l defs in
+    match IMap.get ix refs with
+    (* This is the first time we've seen a reference to a label for
+     * this instruction offset, so generate a new label *)
+    | None -> (n + 1, (ISet.add l used, IMap.add ix n refs))
+    (* We already have a label for this instruction offset *)
+    | Some _ -> acc in
+  let gather_using get_labels acc instrseq =
+    InstrSeq.fold_left instrseq ~init:acc
+    ~f:(fun acc instr ->
+    List.fold_left (get_labels instr) ~init:acc ~f:process_ref) in
+  let acc = (0, (ISet.empty, IMap.empty)) in
+  let acc = gather_using get_regular_labels acc body in
+  let acc = gather_using get_catch_or_fault_labels acc body in
+  let acc =
+    List.fold_left params ~init:acc
+    ~f:(fun acc param ->
+      match Hhas_param.default_value param with
+       | None -> acc
+       | Some (l, _) -> process_ref acc l) in
+  snd acc
+
+(* Relabel the instruction sequence and parameter values so that
  *   1. No instruction is preceded by more than one label
  *   2. No label is unreferenced
  *   3. References to labels occur in strict label number order, starting at 0
  *)
-let relabel_instrseq instrseq =
-  let defs = create_label_to_offset_map instrseq in
-  let used, refs = create_label_ref_map defs instrseq in
-  let relabel l =
-    let l = Label.id l in
+let rewrite_params_and_body defs used refs params body =
+  let relabel_id l =
     let ix = lookup_def l defs in
     match IMap.get ix refs with
     | None -> failwith "relabel_instrseq: offset not in refs"
-    | Some l' -> Label.Regular l' in
-  InstrSeq.filter_map instrseq ~f:(fun instr ->
+    | Some l' -> l' in
+  (* Rewrite a label that's referenced by an instruction or parameter *)
+  let relabel l = Label.map relabel_id l in
+  (* Rewrite or remove a label definition *)
+  let relabel_define_label_id id =
+    if ISet.mem id used then IMap.get (lookup_def id defs) refs
+    else None in
+  (* Rewrite a single instruction *)
+  let rewrite_instr instr =
     match instr with
     | IIterator (IterInit (id, l, v)) ->
       Some (IIterator (IterInit (id, relabel l, v)))
@@ -107,6 +129,10 @@ let relabel_instrseq instrseq =
       Some (IIterator (MIterNext (id, relabel l, v)))
     | IIterator (MIterNextK (id, l, k, v)) ->
       Some (IIterator (MIterNextK (id, relabel l, k, v)))
+    | IIterator (IterBreak (l, x)) ->
+      Some (IIterator (IterBreak (relabel l, x)))
+    | ICall (DecodeCufIter (x, l)) ->
+      Some (ICall (DecodeCufIter (x, relabel l)))
     | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))
     | IContFlow (JmpNS l) -> Some (IContFlow (JmpNS (relabel l)))
     | IContFlow (JmpZ l)  -> Some (IContFlow (JmpZ (relabel l)))
@@ -116,18 +142,27 @@ let relabel_instrseq instrseq =
     | IContFlow (SSwitch pairs) ->
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
-    (* TODO: other uses of Label.t in instructions:
-      DecodeCufIter
-      IterBreak
-     *)
-    | ILabel (Label.Regular l) ->
-      (* TODO: Write test cases for things like catch and fault labels followed
-      by loop start labels. *)
-      if ISet.mem l used then
-        let ix = lookup_def l defs in
-        begin match IMap.get ix refs with
-        | Some l' -> Some (ILabel (Label.Regular l'))
-        | None -> None
-        end
-      else None
-    | _ -> Some instr)
+    | ITry (TryCatchBegin l) -> Some (ITry (TryCatchBegin (relabel l)))
+    | ITry (TryFaultBegin l) -> Some (ITry (TryFaultBegin (relabel l)))
+    | ILabel l ->
+      begin match Label.option_map relabel_define_label_id l with
+      | None -> None
+      | Some l' -> Some (ILabel l')
+      end
+    | _ -> Some instr in
+    (* Rewrite any label referred to in a default value *)
+    let rewrite_param param =
+      let dv = Hhas_param.default_value param in
+      match dv with
+      | None -> param
+      | Some (l, e) ->
+        Hhas_param.make (Hhas_param.name param) (Hhas_param.type_info param)
+          (Some (relabel l, e)) in
+    let params = List.map params rewrite_param in
+    let body = InstrSeq.filter_map body ~f:rewrite_instr in
+    (params, body)
+
+let relabel_function params body =
+  let defs = create_label_to_offset_map body in
+  let used, refs = create_label_ref_map defs params body in
+  rewrite_params_and_body defs used refs params body

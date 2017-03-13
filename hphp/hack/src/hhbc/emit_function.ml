@@ -17,7 +17,8 @@ let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
   let body_instrs, function_params, function_return_type = Emit_body.from_ast
     ast_fun.Ast.f_tparams ast_fun.Ast.f_params ast_fun.Ast.f_ret
     ast_fun.Ast.f_body in
-  let body_instrs = Label_rewriter.relabel_instrseq body_instrs in
+  let function_params, body_instrs =
+    Label_rewriter.relabel_function function_params body_instrs in
   let function_decl_vars = extract_decl_vars body_instrs in
   let body_instrs = Local_id_rewriter.unname_instrseq
     (List.map ast_fun.Ast.f_params (fun p -> snd p.Ast.param_id) @

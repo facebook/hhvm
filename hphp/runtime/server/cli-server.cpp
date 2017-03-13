@@ -940,7 +940,12 @@ void CLIWorker::doJob(int client) {
         Logger::SetThreadHook(nullptr, nullptr);
         Stream::setThreadLocalFileHandler(nullptr);
         execute_command_line_end(xhprofFlags, true, args[0].c_str());
-        cli_write(client, "exit", ret);
+        try {
+          cli_write(client, "exit", ret);
+        } catch (const Exception& ex) {
+          Logger::Warning("Could not send exit code %i to CLI socket: %s\n",
+                          ret, ex.what());
+        }
       };
 
       auto ini = init_ini_settings(iniSettings);
@@ -967,8 +972,6 @@ void CLIWorker::doJob(int client) {
       }
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);
     }
-
-    cli_write(client, "exit", ret);
   } catch (const Exception& ex) {
     Logger::Warning("CLI Job failed: %s", ex.what());
   }

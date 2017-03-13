@@ -1175,12 +1175,14 @@ TypedValue HHVM_FUNCTION(array_unshift,
 }
 
 Variant array_values(const Variant& input) {
-  if (input.isVecArray()) {
+  auto const cell = *input.asCell();
+  if (isArrayLikeType(cell.m_type) &&
+      cell.m_data.parr->hasPackedLayout()) {
     return input;
   }
 
   folly::Optional<PackedArrayInit> ai;
-  auto ok = IterateV(*input.asCell(),
+  auto ok = IterateV(cell,
                      [&](ArrayData* adata) {
                        ai.emplace(adata->size());
                      },

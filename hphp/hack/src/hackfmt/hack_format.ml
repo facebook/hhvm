@@ -393,8 +393,6 @@ let builder = object (this)
           this#advance (Trivia.width t);
           (match Trivia.kind t with
             | TriviaKind.WhiteSpace ->
-              (* Needed for the XHP whitespace hack, see XHPExpression *)
-              this#check_range ();
               newlines, only_whitespace
             | TriviaKind.EndOfLine ->
               if only_whitespace && is_leading then
@@ -1364,13 +1362,16 @@ let rec transform node =
     t name;
     if not (is_missing attrs) then begin
       split ~space ();
-      tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
-        handle_possible_list ~after_each:(fun is_last ->
-          if not is_last then split ~space (); ()
-        ) attrs;
-      ) ();
-    end;
-    handle_xhp_open_right_angle_token right_a;
+      tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () -> begin
+        tl_with ~nest ~f:(fun () ->
+          handle_possible_list ~after_each:(fun is_last ->
+            if not is_last then split ~space (); ()
+          ) attrs;
+        ) ();
+        handle_xhp_open_right_angle_token right_a;
+      end) ();
+    end else
+      handle_xhp_open_right_angle_token right_a;
     ()
   | XHPExpression x ->
     (**
@@ -1378,54 +1379,39 @@ let rec transform node =
      * XHPOpen tag then it becomes leading trivia for the first token in the
      * XHPBody instead of trailing trivia for the open tag.
      *
-     * To deal with this we map these newlines to whitespace. We do this instead
-     * of removing the trivia in order to maintain an accurate character
-     * processed count for partial formatting.
+     * To deal with this we remove the body's leading trivia, split it after the
+     * first newline, and treat the first half as trailing trivia.
      *)
-    let token_has_trailing_trivia_kind trivia_kind node =
-      List.exists (Syntax.trailing_trivia node)
-        ~f:(fun trivia -> Trivia.kind trivia = trivia_kind)
-    in
-    let token_has_trailing_newline =
-      token_has_trailing_trivia_kind TriviaKind.EndOfLine in
-    let token_has_trailing_whitespace =
-      token_has_trailing_trivia_kind TriviaKind.WhiteSpace in
-    let remove_leading_trivia node =
-      let found = ref false in
-      let rewritten_node, _ = Rewriter.rewrite_pre (fun rewrite_node ->
-        match syntax rewrite_node with
-          | Token t when not !found ->
-            found := true;
-            let new_triv = List.map (EditableToken.leading t) ~f:(fun triv ->
-              match Trivia.kind triv with
-                | TriviaKind.EndOfLine -> Trivia.make_whitespace @@
-                  (String.make (Trivia.width triv) ' ')
-                | _ -> triv
-            ) in
-            Some (
-              Syntax.make_token {t with EditableToken.leading = new_triv},
-              true
-            )
-          | _  -> Some (rewrite_node, false)
-      ) node in
-      rewritten_node
-    in
-
     let handle_xhp_body body =
-      let body_with_stripped_hd = remove_leading_trivia body in
-      let after_each_with_node node is_last =
-        if token_has_trailing_whitespace node then pending_space ();
-        if not is_last && token_has_trailing_newline node
-          then builder#hard_split ();
-      in
-      let rec aux l = match l with
-        | hd :: tl -> t hd; after_each_with_node hd (List.is_empty tl); aux tl;
-        | [] -> ()
-      in
-      match syntax body_with_stripped_hd with
+      match syntax body with
         | Missing -> ()
-        | SyntaxList sl -> split (); aux sl
-        | _ -> split (); aux [body]
+        | SyntaxList (hd :: tl) ->
+          split ();
+
+          let leading, hd = remove_leading_trivia hd in
+          let (up_to_first_newline, after_newline, _) =
+            List.fold leading
+              ~init:([], [], false)
+              ~f:(fun (upto, after, seen) t ->
+                if seen then upto, t :: after, true
+                else t :: upto, after, Trivia.kind t = TriviaKind.EndOfLine
+              )
+          in
+          builder#handle_trivia ~is_leading:false up_to_first_newline;
+          builder#simple_split_if_unsplit ();
+          builder#handle_trivia ~is_leading:true after_newline;
+
+          List.iter (hd :: tl) ~f:(fun node -> begin
+            t node;
+            let has_trailing_whitespace =
+              List.exists (Syntax.trailing_trivia node)
+                ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.WhiteSpace)
+            in
+            match syntax node with
+              | XHPExpression _ -> split ~space:has_trailing_whitespace ()
+              | _ -> if has_trailing_whitespace then pending_space ();
+          end)
+        | _ -> failwith "Expected SyntaxList"
     in
 
     let (xhp_open, body, close) = get_xhp_expression_children x in
@@ -1433,8 +1419,13 @@ let rec transform node =
       tl_with ~nest ~f:(fun () ->
         handle_xhp_body body
       ) ();
-      if not (is_missing close) then split ();
-      t (remove_leading_trivia close);
+      if not (is_missing close) then begin
+        split ();
+        let leading, close = remove_leading_trivia close in
+        (* Ignore extra newlines by treating this as trailing trivia *)
+        builder#handle_trivia ~is_leading:false leading;
+        t close;
+      end;
       ()
     ) in
 
@@ -1666,7 +1657,7 @@ and handle_possible_list
 and handle_xhp_open_right_angle_token t =
   match syntax t with
     | Token token ->
-      if EditableToken.text token = "/>" then add_space ();
+      if EditableToken.text token = "/>" then split ~space:true ();
       transform t
     | _ -> raise (Failure "expected xhp_open right_angle token")
 
@@ -1860,6 +1851,20 @@ and transform_braced_item left_p item right_p =
     split ();
     transform right_p;
   ) ();
+
+and remove_leading_trivia node =
+  let leading_token = match Syntax.leading_token node with
+    | Some t -> t
+    | None -> failwith "Expected leading token"
+  in
+  let rewritten_node, changed = Rewriter.rewrite_pre (fun rewrite_node ->
+    match syntax rewrite_node with
+      | Token t when t == leading_token ->
+        Some (Syntax.make_token {t with EditableToken.leading = []}, true)
+      | _  -> Some (rewrite_node, false)
+  ) node in
+  if not changed then failwith "Leading token not rewritten";
+  EditableToken.leading leading_token, rewritten_node
 
 and remove_trailing_trivia node =
   let trailing_token = match Syntax.trailing_token node with

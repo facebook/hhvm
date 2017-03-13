@@ -1817,7 +1817,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
 
   and parse_xhp_expression parser name name_text =
     let (parser, attrs) = parse_list_until_none parser parse_xhp_attribute in
-    let (parser1, token, _) = next_xhp_element_token parser in
+    let (parser1, token, _) = next_xhp_element_token ~no_trailing:true parser in
     match (Token.kind token) with
     | SlashGreaterThan ->
       let xhp_open = make_xhp_open name attrs (make_token token) in

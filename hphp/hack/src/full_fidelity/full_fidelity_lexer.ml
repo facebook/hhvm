@@ -1267,21 +1267,16 @@ let next_token_as_name lexer =
 let next_token_in_type lexer =
   scan_next_token_as_keyword scan_token_inside_type lexer
 
-let next_xhp_element_token lexer =
+let next_xhp_element_token ~no_trailing lexer =
   (* XHP elements have whitespace, newlines and Hack comments. *)
   let tokenizer lexer =
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia scan_xhp_token true lexer in
-    (* We do not scan trivia after a > or />. If that is the beginning of
+    (* We do not scan trivia after an XHPOpen's >. If that is the beginning of
        an XHP body then we want any whitespace or newlines to be leading trivia
-       of the body token.
-       TODO: If we are at the outermost > or /> in an XHP expression then the
-       trailing trivia *should* be associated with the token. But we don't know
-       at lex time that we're in the outermost XHP block. We would have to
-       maintain that state in the parser and pass it in to the lexer. *)
+       of the body token. *)
     match kind with
-    | TokenKind.GreaterThan
-    | TokenKind.SlashGreaterThan ->
+    | TokenKind.GreaterThan when no_trailing ->
       (lexer, Token.make kind w leading [])
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in

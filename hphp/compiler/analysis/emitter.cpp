@@ -4624,7 +4624,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                            end);
       }
 
-      if (catch_count > 0) {
+      if (catch_count > 0 && start != end) {
         newCatchRegion(start, end, new Label(e));
         e.Catch();
 
@@ -4660,13 +4660,15 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       region->m_finallyLabel.set(e);
       visit(f);
       emitFinallyEpilogue(e, region.get());
-      auto func = getFunclet(f);
-      if (func == nullptr) {
-        auto thunklet =
-          new FinallyThunklet(f, m_curFunc->numLiveIterators());
-        func = addFunclet(f, thunklet);
+      if (start != end_catches) {
+        auto func = getFunclet(f);
+        if (func == nullptr) {
+          auto thunklet =
+            new FinallyThunklet(f, m_curFunc->numLiveIterators());
+          func = addFunclet(f, thunklet);
+        }
+        newFaultRegion(start, end_catches, &func->m_entry);
       }
-      newFaultRegion(start, end_catches, &func->m_entry);
     }
 
     return false;
@@ -10255,6 +10257,7 @@ void EmitterVisitor::newCatchRegion(Offset start,
                                     Offset end,
                                     Label* entry,
                                     FaultIterInfo iter) {
+  assert(start < end);
   auto r = new CatchRegion(start, end, entry, iter.iterId, iter.kind);
   m_catchRegions.push_back(r);
 }
@@ -10263,6 +10266,7 @@ void EmitterVisitor::newFaultRegion(Offset start,
                                     Offset end,
                                     Label* entry,
                                     FaultIterInfo iter) {
+  assert(start < end);
   auto r = new FaultRegion(start, end, entry, iter.iterId, iter.kind);
   m_faultRegions.push_back(r);
 }
@@ -10271,6 +10275,10 @@ void EmitterVisitor::newFaultRegionAndFunclet(Offset start,
                                               Offset end,
                                               Thunklet* t,
                                               FaultIterInfo iter) {
+  if (start == end) {
+    delete t;
+    return;
+  }
   Funclet* f = addFunclet(t);
   newFaultRegion(start, end, &f->m_entry, iter);
 }
@@ -10280,6 +10288,10 @@ void EmitterVisitor::newFaultRegionAndFunclet(StatementPtr stmt,
                                               Offset end,
                                               Thunklet* t,
                                               FaultIterInfo iter) {
+  if (start == end) {
+    delete t;
+    return;
+  }
   Funclet* f = addFunclet(stmt, t);
   newFaultRegion(start, end, &f->m_entry, iter);
 }

@@ -202,13 +202,13 @@ let get_root = function
 
 let line_interval_to_char_range char_ranges (start_line, end_line) =
   if start_line > end_line then
-    raise (InvalidDiff (sprintf
-      "Illegal line interval: %d,%d" start_line end_line));
+    invalid_arg (sprintf
+      "Illegal line interval: %d,%d" start_line end_line);
   if start_line < 1 || start_line > Array.length char_ranges ||
      end_line < 1 || end_line > Array.length char_ranges then
-      raise (InvalidDiff (sprintf
+      invalid_arg (sprintf
         "Can't format line interval %d,%d in file with %d lines"
-        start_line end_line (Array.length char_ranges)));
+        start_line end_line (Array.length char_ranges));
   let start_char, _ = char_ranges.(start_line - 1) in
   let _, end_char = char_ranges.(end_line - 1) in
   start_char, end_char
@@ -236,6 +236,10 @@ let format_intervals intervals parsed_file =
   );
   Buffer.contents buf
 
+let format_diff_intervals intervals parsed_file =
+  try format_intervals intervals parsed_file with
+  | Invalid_argument s -> raise (InvalidDiff s)
+
 let main = function
   | Print (filename, range, debug) ->
     if debug then
@@ -259,7 +263,7 @@ let main = function
       let filename = Path.concat root rel_path |> Path.to_string in
       if not (file_exists filename) then
         raise (InvalidDiff ("No such file or directory: " ^ rel_path));
-      let contents = parse (Some filename) |> format_intervals intervals in
+      let contents = parse (Some filename) |> format_diff_intervals intervals in
       rel_path, filename, contents
     ) in
     List.iter formatted_files (fun (rel_path, filename, contents) ->
@@ -275,16 +279,16 @@ let () =
     |> main
   with exn ->
     let exit_code = get_exception_exit_value exn in
-    let err_str = get_error_string_from_exit_value exit_code in
+    let err_str = get_error_string_from_exn exn in
     let msg = match exn with
-      | Failure s
-      | UnsupportedSyntax s
+      | InvalidSyntax ->
+        err_str
       | InvalidCliArg s
       | InvalidDiff s ->
         err_str ^ ": " ^ s
-      | InvalidSyntax
       | _ ->
-        err_str
+        err_str ^ ": " ^ (Printexc.to_string exn)
     in
+    Printexc.print_backtrace stderr;
     eprintf "%s\n" msg;
     exit exit_code

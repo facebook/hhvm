@@ -9,22 +9,20 @@
  *)
 
 exception InvalidSyntax
-exception UnsupportedSyntax of string
 exception InvalidCliArg of string
 exception InvalidDiff of string
 
 let get_exception_exit_value = function
-  | Failure _ -> 1
   | InvalidSyntax -> 2
-  | UnsupportedSyntax _ -> 3
-  | InvalidCliArg _ -> 4
-  | InvalidDiff _ -> 5
+  | InvalidCliArg _ -> 3
+  | InvalidDiff _ -> 4
   | _ -> 255
 
 let get_error_string_from_exit_value = function
-  | 1 -> "Internal Error"
   | 2 -> "File failed to parse without errors"
-  | 3 -> "File contains unsupported syntax"
-  | 4 -> "Invalid argument"
-  | 5 -> "Invalid diff"
-  | _ -> "Unknown Error"
+  | 3 -> "Invalid argument"
+  | 4 -> "Invalid diff"
+  | _ -> "Internal Error"
+
+let get_error_string_from_exn exn =
+  get_exception_exit_value exn |> get_error_string_from_exit_value

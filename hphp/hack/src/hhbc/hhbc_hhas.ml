@@ -559,15 +559,46 @@ let string_of_type_info_option tio =
   | None -> ""
   | Some ti -> string_of_type_info ti ^ " "
 
-let string_of_param_default_value expr =
+let rec string_of_afield = function
+  | A.AFvalue e -> string_of_param_default_value e
+  | A.AFkvalue (k, v) ->
+    string_of_param_default_value k ^ " => " ^ string_of_param_default_value v
+
+and string_of_afield_list afl =
+  if List.length afl = 0
+  then "\\n"
+  else String.concat ", " @@ List.map string_of_afield afl
+
+and shape_field_name_to_expr = function
+  | A.SFlit (pos, s)
+  | A.SFclass_const (_, (pos, s)) -> (pos, A.String (pos, s))
+
+and string_of_param_default_value expr =
   match snd expr with
+  | A.Lvar (_, litstr)
   | A.Float (_, litstr)
   | A.Int (_, litstr) -> litstr
   | A.String (_, litstr) -> "\\\"" ^ litstr ^ "\\\""
   | A.Null -> "NULL"
   | A.True -> "true"
   | A.False -> "false"
-  (* TODO: printing for other expressions e.g. arrays, vecs, shapes.. *)
+  (* For empty array there is a space between array and left paren? a bug ? *)
+  | A.Array afl -> "array(" ^ string_of_afield_list afl ^ ")"
+  | A.Collection ((_, name), afl) when
+    name = "vec" || name = "dict" || name = "keyset" ->
+    name ^ "[" ^ string_of_afield_list afl ^ "]"
+  | A.Collection ((_, name), afl) when
+    name = "Set" || name = "Pair" ->
+    "HH\\\\" ^ name ^ "{" ^ string_of_afield_list afl ^ "}"
+  | A.Shape fl ->
+    let fl =
+      List.map
+        (fun (f_name, e) ->
+          A.AFkvalue (shape_field_name_to_expr f_name, e))
+        fl
+    in
+    string_of_param_default_value (fst expr, A.Array fl)
+  (* TODO: printing for other expressions *)
   | _ -> "string_of_param_default_value - NYI"
 
 let string_of_param_default_value_option = function

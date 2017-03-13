@@ -389,7 +389,7 @@ void miThrow(ISS& env) {
 void setLocalForBase(ISS& env, Type ty) {
   assert(mustBeInFrame(env.state.base) ||
          env.state.base.loc == BaseLoc::LocalArrChain);
-  if (!env.state.base.local) return loseNonRefLocalTypes(env);
+  if (env.state.base.local == NoLocalId) return loseNonRefLocalTypes(env);
   setLoc(env, env.state.base.local, ty);
   FTRACE(4, "      ${} := {}\n",
     env.state.base.locName ? env.state.base.locName->data() : "$<unnamed>",
@@ -1489,7 +1489,11 @@ void in(ISS& env, const bc::BaseNC& op) {
   topC(env, op.arg1);
   readUnknownLocals(env);
   mayUseVV(env);
-  env.state.base = Base{TInitCell, BaseLoc::Frame};
+  env.state.base = Base { TInitCell,
+                          BaseLoc::Frame,
+                          TBottom,
+                          SString{},
+                          NoLocalId };
 }
 
 void in(ISS& env, const bc::BaseNL& op) {
@@ -1497,7 +1501,11 @@ void in(ISS& env, const bc::BaseNL& op) {
   locAsCell(env, op.loc1);
   readUnknownLocals(env);
   mayUseVV(env);
-  env.state.base = Base{TInitCell, BaseLoc::Frame};
+  env.state.base = Base { TInitCell,
+                          BaseLoc::Frame,
+                          TBottom,
+                          SString{},
+                          NoLocalId };
 }
 
 void in(ISS& env, const bc::BaseGC& op) {

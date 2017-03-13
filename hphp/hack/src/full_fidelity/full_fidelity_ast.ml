@@ -187,6 +187,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.Minus                       -> Binop (Minus,             lhs, rhs)
   | Some TK.Star                        -> Binop (Star,              lhs, rhs)
   | Some TK.Or                          -> Binop (BArbar,            lhs, rhs)
+  | Some TK.And                         -> Binop (AMpamp,            lhs, rhs)
   | Some TK.Xor                         -> Binop (Xor,               lhs, rhs)
   | Some TK.Carat                       -> Binop (Xor,               lhs, rhs)
   | Some TK.Slash                       -> Binop (Slash,             lhs, rhs)

@@ -780,6 +780,14 @@ let rec get_doc node =
     let op = get_doc safe_member_operator in
     let nm = get_doc safe_member_name in
     group_doc (ob ^^^ op ^^^ nm)
+  | EmbeddedMemberSelectionExpression
+    { embedded_member_object;
+      embedded_member_operator;
+      embedded_member_name } ->
+    let ob = get_doc embedded_member_object in
+    let op = get_doc embedded_member_operator in
+    let nm = get_doc embedded_member_name in
+    group_doc (ob ^^^ op ^^^ nm)
   | YieldExpression x ->
     let y = get_doc x.yield_keyword in
     let o = get_doc x.yield_operand in
@@ -938,6 +946,14 @@ let rec get_doc node =
     let expr = get_doc braced_expression_expression in
     let right = get_doc braced_expression_right_brace in
     indent_block_no_space left expr right indt
+  | EmbeddedBracedExpression {
+    embedded_braced_expression_left_brace;
+    embedded_braced_expression_expression;
+    embedded_braced_expression_right_brace } ->
+    let left = get_doc embedded_braced_expression_left_brace in
+    let expr = get_doc embedded_braced_expression_expression in
+    let right = get_doc embedded_braced_expression_right_brace in
+    indent_block_no_space left expr right indt
   | ListExpression
     { list_keyword; list_left_paren; list_members; list_right_paren } ->
     let keyword = get_doc list_keyword in
@@ -1046,6 +1062,12 @@ let rec get_doc node =
     let left = get_doc x.subscript_left_bracket in
     let index = get_doc x.subscript_index in
     let right = get_doc x.subscript_right_bracket in
+    receiver ^^^ left ^^^ index ^^^ right
+  | EmbeddedSubscriptExpression x ->
+    let receiver = get_doc x.embedded_subscript_receiver in
+    let left = get_doc x.embedded_subscript_left_bracket in
+    let index = get_doc x.embedded_subscript_index in
+    let right = get_doc x.embedded_subscript_right_bracket in
     receiver ^^^ left ^^^ index ^^^ right
   | AwaitableCreationExpression x ->
     let async = get_doc x.awaitable_async in

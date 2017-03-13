@@ -1114,6 +1114,15 @@
         { "field_name" : "operator" },
         { "field_name" : "name" }
       ] },
+    { "kind_name" : "EmbeddedMemberSelectionExpression",
+      "type_name" : "embedded_member_selection_expression",
+      "description" : "embedded_member_selection_expression",
+      "prefix" : "embedded_member",
+      "fields" : [
+        { "field_name" : "object" },
+        { "field_name" : "operator" },
+        { "field_name" : "name" }
+      ] },
     { "kind_name" : "YieldExpression",
       "type_name" : "yield_expression",
       "description" : "yield_expression",
@@ -1243,6 +1252,15 @@
         { "field_name" : "expression" },
         { "field_name" : "right_brace" }
       ] },
+    { "kind_name" : "EmbeddedBracedExpression",
+      "type_name" : "embedded_braced_expression",
+      "description" : "embedded_braced_expression",
+      "prefix" : "embedded_braced_expression",
+      "fields" : [
+        { "field_name" : "left_brace" },
+        { "field_name" : "expression" },
+        { "field_name" : "right_brace" }
+      ] },
     { "kind_name" : "ListExpression",
       "type_name" : "list_expression",
       "description" : "list_expression",
@@ -1336,6 +1354,16 @@
       "type_name" : "subscript_expression",
       "description" : "subscript_expression",
       "prefix" : "subscript",
+      "fields" : [
+        { "field_name" : "receiver" },
+        { "field_name" : "left_bracket" },
+        { "field_name" : "index" },
+        { "field_name" : "right_bracket" }
+      ] },
+    { "kind_name" : "EmbeddedSubscriptExpression",
+      "type_name" : "embedded_subscript_expression",
+      "description" : "embedded_subscript_expression",
+      "prefix" : "embedded_subscript",
       "fields" : [
         { "field_name" : "receiver" },
         { "field_name" : "left_bracket" },

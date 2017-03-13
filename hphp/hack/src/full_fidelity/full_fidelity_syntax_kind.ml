@@ -93,6 +93,7 @@ type t =
 | ScopeResolutionExpression
 | MemberSelectionExpression
 | SafeMemberSelectionExpression
+| EmbeddedMemberSelectionExpression
 | YieldExpression
 | PrintExpression
 | PrefixUnaryExpression
@@ -107,6 +108,7 @@ type t =
 | FunctionCallExpression
 | ParenthesizedExpression
 | BracedExpression
+| EmbeddedBracedExpression
 | ListExpression
 | CollectionLiteralExpression
 | ObjectCreationExpression
@@ -117,6 +119,7 @@ type t =
 | VectorIntrinsicExpression
 | ElementInitializer
 | SubscriptExpression
+| EmbeddedSubscriptExpression
 | AwaitableCreationExpression
 | XHPChildrenDeclaration
 | XHPCategoryDeclaration
@@ -232,6 +235,7 @@ let to_string kind =
   | ScopeResolutionExpression -> "scope_resolution_expression"
   | MemberSelectionExpression -> "member_selection_expression"
   | SafeMemberSelectionExpression -> "safe_member_selection_expression"
+  | EmbeddedMemberSelectionExpression -> "embedded_member_selection_expression"
   | YieldExpression -> "yield_expression"
   | PrintExpression -> "print_expression"
   | PrefixUnaryExpression -> "prefix_unary_expression"
@@ -246,6 +250,7 @@ let to_string kind =
   | FunctionCallExpression -> "function_call_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
+  | EmbeddedBracedExpression -> "embedded_braced_expression"
   | ListExpression -> "list_expression"
   | CollectionLiteralExpression -> "collection_literal_expression"
   | ObjectCreationExpression -> "object_creation_expression"
@@ -256,6 +261,7 @@ let to_string kind =
   | VectorIntrinsicExpression -> "vector_intrinsic_expression"
   | ElementInitializer -> "element_initializer"
   | SubscriptExpression -> "subscript_expression"
+  | EmbeddedSubscriptExpression -> "embedded_subscript_expression"
   | AwaitableCreationExpression -> "awaitable_creation_expression"
   | XHPChildrenDeclaration -> "xhp_children_declaration"
   | XHPCategoryDeclaration -> "xhp_category_declaration"

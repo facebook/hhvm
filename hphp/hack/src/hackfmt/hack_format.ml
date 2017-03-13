@@ -1099,6 +1099,12 @@ let rec transform node =
     handle_possible_chaining
       (get_safe_member_selection_expression_children x)
       None
+  | EmbeddedMemberSelectionExpression x ->
+    let (obj, op, name) = get_embedded_member_selection_expression_children x in
+    t obj;
+    t op;
+    t name;
+    ()
   | YieldExpression x ->
     let (kw, operand) = get_yield_expression_children x in
     t kw;
@@ -1197,6 +1203,18 @@ let rec transform node =
       t right_b
     ) ();
     ()
+  | EmbeddedBracedExpression x ->
+    (* TODO: Consider finding a way to avoid treating these expressions as
+    opportunities for line breaks in long strings:
+
+    $sql = "DELETE FROM `foo` WHERE `left` BETWEEN {$res->left} AND {$res
+      ->right} ORDER BY `level` DESC";
+    *)
+    let (left_b, expr, right_b) = get_embedded_braced_expression_children x in
+    t left_b;
+    t_with ~nest expr;
+    t right_b;
+    ()
   | ListExpression x ->
     let (kw, lp, members, rp) = get_list_expression_children x in
     t kw;
@@ -1269,6 +1287,14 @@ let rec transform node =
     let (receiver, lb, expr, rb) = get_subscript_expression_children x in
     t receiver;
     transform_braced_item lb expr rb;
+    ()
+  | EmbeddedSubscriptExpression x ->
+    let (receiver, lb, expr, rb) =
+      get_embedded_subscript_expression_children x in
+    t receiver;
+    t lb;
+    t expr;
+    t rb;
     ()
   | AwaitableCreationExpression x ->
     let (kw, body) = get_awaitable_creation_expression_children x in

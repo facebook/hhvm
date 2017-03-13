@@ -289,6 +289,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return MemberSelectionExpression::from_json($json, $position, $source);
     case 'safe_member_selection_expression':
       return SafeMemberSelectionExpression::from_json($json, $position, $source);
+    case 'embedded_member_selection_expression':
+      return EmbeddedMemberSelectionExpression::from_json($json, $position, $source);
     case 'yield_expression':
       return YieldExpression::from_json($json, $position, $source);
     case 'print_expression':
@@ -317,6 +319,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return ParenthesizedExpression::from_json($json, $position, $source);
     case 'braced_expression':
       return BracedExpression::from_json($json, $position, $source);
+    case 'embedded_braced_expression':
+      return EmbeddedBracedExpression::from_json($json, $position, $source);
     case 'list_expression':
       return ListExpression::from_json($json, $position, $source);
     case 'collection_literal_expression':
@@ -337,6 +341,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return ElementInitializer::from_json($json, $position, $source);
     case 'subscript_expression':
       return SubscriptExpression::from_json($json, $position, $source);
+    case 'embedded_subscript_expression':
+      return EmbeddedSubscriptExpression::from_json($json, $position, $source);
     case 'awaitable_creation_expression':
       return AwaitableCreationExpression::from_json($json, $position, $source);
     case 'xhp_children_declaration':
@@ -12407,6 +12413,91 @@ final class SafeMemberSelectionExpression extends EditableSyntax {
     yield break;
   }
 }
+final class EmbeddedMemberSelectionExpression extends EditableSyntax {
+  private EditableSyntax $_object;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_name;
+  public function __construct(
+    EditableSyntax $object,
+    EditableSyntax $operator,
+    EditableSyntax $name) {
+    parent::__construct('embedded_member_selection_expression');
+    $this->_object = $object;
+    $this->_operator = $operator;
+    $this->_name = $name;
+  }
+  public function object(): EditableSyntax {
+    return $this->_object;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function name(): EditableSyntax {
+    return $this->_name;
+  }
+  public function with_object(EditableSyntax $object): EmbeddedMemberSelectionExpression {
+    return new EmbeddedMemberSelectionExpression(
+      $object,
+      $this->_operator,
+      $this->_name);
+  }
+  public function with_operator(EditableSyntax $operator): EmbeddedMemberSelectionExpression {
+    return new EmbeddedMemberSelectionExpression(
+      $this->_object,
+      $operator,
+      $this->_name);
+  }
+  public function with_name(EditableSyntax $name): EmbeddedMemberSelectionExpression {
+    return new EmbeddedMemberSelectionExpression(
+      $this->_object,
+      $this->_operator,
+      $name);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $object = $this->object()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $name = $this->name()->rewrite($rewriter, $new_parents);
+    if (
+      $object === $this->object() &&
+      $operator === $this->operator() &&
+      $name === $this->name()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmbeddedMemberSelectionExpression(
+        $object,
+        $operator,
+        $name), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $object = EditableSyntax::from_json(
+      $json->embedded_member_object, $position, $source);
+    $position += $object->width();
+    $operator = EditableSyntax::from_json(
+      $json->embedded_member_operator, $position, $source);
+    $position += $operator->width();
+    $name = EditableSyntax::from_json(
+      $json->embedded_member_name, $position, $source);
+    $position += $name->width();
+    return new EmbeddedMemberSelectionExpression(
+        $object,
+        $operator,
+        $name);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_object;
+    yield $this->_operator;
+    yield $this->_name;
+    yield break;
+  }
+}
 final class YieldExpression extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_operand;
@@ -13679,6 +13770,91 @@ final class BracedExpression extends EditableSyntax {
     yield break;
   }
 }
+final class EmbeddedBracedExpression extends EditableSyntax {
+  private EditableSyntax $_left_brace;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_right_brace;
+  public function __construct(
+    EditableSyntax $left_brace,
+    EditableSyntax $expression,
+    EditableSyntax $right_brace) {
+    parent::__construct('embedded_braced_expression');
+    $this->_left_brace = $left_brace;
+    $this->_expression = $expression;
+    $this->_right_brace = $right_brace;
+  }
+  public function left_brace(): EditableSyntax {
+    return $this->_left_brace;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function right_brace(): EditableSyntax {
+    return $this->_right_brace;
+  }
+  public function with_left_brace(EditableSyntax $left_brace): EmbeddedBracedExpression {
+    return new EmbeddedBracedExpression(
+      $left_brace,
+      $this->_expression,
+      $this->_right_brace);
+  }
+  public function with_expression(EditableSyntax $expression): EmbeddedBracedExpression {
+    return new EmbeddedBracedExpression(
+      $this->_left_brace,
+      $expression,
+      $this->_right_brace);
+  }
+  public function with_right_brace(EditableSyntax $right_brace): EmbeddedBracedExpression {
+    return new EmbeddedBracedExpression(
+      $this->_left_brace,
+      $this->_expression,
+      $right_brace);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_brace = $this->left_brace()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
+    if (
+      $left_brace === $this->left_brace() &&
+      $expression === $this->expression() &&
+      $right_brace === $this->right_brace()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmbeddedBracedExpression(
+        $left_brace,
+        $expression,
+        $right_brace), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_brace = EditableSyntax::from_json(
+      $json->embedded_braced_expression_left_brace, $position, $source);
+    $position += $left_brace->width();
+    $expression = EditableSyntax::from_json(
+      $json->embedded_braced_expression_expression, $position, $source);
+    $position += $expression->width();
+    $right_brace = EditableSyntax::from_json(
+      $json->embedded_braced_expression_right_brace, $position, $source);
+    $position += $right_brace->width();
+    return new EmbeddedBracedExpression(
+        $left_brace,
+        $expression,
+        $right_brace);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_brace;
+    yield $this->_expression;
+    yield $this->_right_brace;
+    yield break;
+  }
+}
 final class ListExpression extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_paren;
@@ -14734,6 +14910,115 @@ final class SubscriptExpression extends EditableSyntax {
       $json->subscript_right_bracket, $position, $source);
     $position += $right_bracket->width();
     return new SubscriptExpression(
+        $receiver,
+        $left_bracket,
+        $index,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_receiver;
+    yield $this->_left_bracket;
+    yield $this->_index;
+    yield $this->_right_bracket;
+    yield break;
+  }
+}
+final class EmbeddedSubscriptExpression extends EditableSyntax {
+  private EditableSyntax $_receiver;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_index;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $receiver,
+    EditableSyntax $left_bracket,
+    EditableSyntax $index,
+    EditableSyntax $right_bracket) {
+    parent::__construct('embedded_subscript_expression');
+    $this->_receiver = $receiver;
+    $this->_left_bracket = $left_bracket;
+    $this->_index = $index;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function receiver(): EditableSyntax {
+    return $this->_receiver;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function index(): EditableSyntax {
+    return $this->_index;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_receiver(EditableSyntax $receiver): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $receiver,
+      $this->_left_bracket,
+      $this->_index,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $this->_receiver,
+      $left_bracket,
+      $this->_index,
+      $this->_right_bracket);
+  }
+  public function with_index(EditableSyntax $index): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $this->_receiver,
+      $this->_left_bracket,
+      $index,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $this->_receiver,
+      $this->_left_bracket,
+      $this->_index,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $receiver = $this->receiver()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $index = $this->index()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $receiver === $this->receiver() &&
+      $left_bracket === $this->left_bracket() &&
+      $index === $this->index() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmbeddedSubscriptExpression(
+        $receiver,
+        $left_bracket,
+        $index,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $receiver = EditableSyntax::from_json(
+      $json->embedded_subscript_receiver, $position, $source);
+    $position += $receiver->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->embedded_subscript_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $index = EditableSyntax::from_json(
+      $json->embedded_subscript_index, $position, $source);
+    $position += $index->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->embedded_subscript_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new EmbeddedSubscriptExpression(
         $receiver,
         $left_bracket,
         $index,

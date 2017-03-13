@@ -226,6 +226,8 @@ class EditableSyntax
       return MemberSelectionExpression.from_json(json, position, source);
     case 'safe_member_selection_expression':
       return SafeMemberSelectionExpression.from_json(json, position, source);
+    case 'embedded_member_selection_expression':
+      return EmbeddedMemberSelectionExpression.from_json(json, position, source);
     case 'yield_expression':
       return YieldExpression.from_json(json, position, source);
     case 'print_expression':
@@ -254,6 +256,8 @@ class EditableSyntax
       return ParenthesizedExpression.from_json(json, position, source);
     case 'braced_expression':
       return BracedExpression.from_json(json, position, source);
+    case 'embedded_braced_expression':
+      return EmbeddedBracedExpression.from_json(json, position, source);
     case 'list_expression':
       return ListExpression.from_json(json, position, source);
     case 'collection_literal_expression':
@@ -274,6 +278,8 @@ class EditableSyntax
       return ElementInitializer.from_json(json, position, source);
     case 'subscript_expression':
       return SubscriptExpression.from_json(json, position, source);
+    case 'embedded_subscript_expression':
+      return EmbeddedSubscriptExpression.from_json(json, position, source);
     case 'awaitable_creation_expression':
       return AwaitableCreationExpression.from_json(json, position, source);
     case 'xhp_children_declaration':
@@ -10444,6 +10450,89 @@ class SafeMemberSelectionExpression extends EditableSyntax
     return SafeMemberSelectionExpression._children_keys;
   }
 }
+class EmbeddedMemberSelectionExpression extends EditableSyntax
+{
+  constructor(
+    object,
+    operator,
+    name)
+  {
+    super('embedded_member_selection_expression', {
+      object: object,
+      operator: operator,
+      name: name });
+  }
+  get object() { return this.children.object; }
+  get operator() { return this.children.operator; }
+  get name() { return this.children.name; }
+  with_object(object){
+    return new EmbeddedMemberSelectionExpression(
+      object,
+      this.operator,
+      this.name);
+  }
+  with_operator(operator){
+    return new EmbeddedMemberSelectionExpression(
+      this.object,
+      operator,
+      this.name);
+  }
+  with_name(name){
+    return new EmbeddedMemberSelectionExpression(
+      this.object,
+      this.operator,
+      name);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var object = this.object.rewrite(rewriter, new_parents);
+    var operator = this.operator.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    if (
+      object === this.object &&
+      operator === this.operator &&
+      name === this.name)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new EmbeddedMemberSelectionExpression(
+        object,
+        operator,
+        name), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let object = EditableSyntax.from_json(
+      json.embedded_member_object, position, source);
+    position += object.width;
+    let operator = EditableSyntax.from_json(
+      json.embedded_member_operator, position, source);
+    position += operator.width;
+    let name = EditableSyntax.from_json(
+      json.embedded_member_name, position, source);
+    position += name.width;
+    return new EmbeddedMemberSelectionExpression(
+        object,
+        operator,
+        name);
+  }
+  get children_keys()
+  {
+    if (EmbeddedMemberSelectionExpression._children_keys == null)
+      EmbeddedMemberSelectionExpression._children_keys = [
+        'object',
+        'operator',
+        'name'];
+    return EmbeddedMemberSelectionExpression._children_keys;
+  }
+}
 class YieldExpression extends EditableSyntax
 {
   constructor(
@@ -11679,6 +11768,89 @@ class BracedExpression extends EditableSyntax
     return BracedExpression._children_keys;
   }
 }
+class EmbeddedBracedExpression extends EditableSyntax
+{
+  constructor(
+    left_brace,
+    expression,
+    right_brace)
+  {
+    super('embedded_braced_expression', {
+      left_brace: left_brace,
+      expression: expression,
+      right_brace: right_brace });
+  }
+  get left_brace() { return this.children.left_brace; }
+  get expression() { return this.children.expression; }
+  get right_brace() { return this.children.right_brace; }
+  with_left_brace(left_brace){
+    return new EmbeddedBracedExpression(
+      left_brace,
+      this.expression,
+      this.right_brace);
+  }
+  with_expression(expression){
+    return new EmbeddedBracedExpression(
+      this.left_brace,
+      expression,
+      this.right_brace);
+  }
+  with_right_brace(right_brace){
+    return new EmbeddedBracedExpression(
+      this.left_brace,
+      this.expression,
+      right_brace);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
+    var expression = this.expression.rewrite(rewriter, new_parents);
+    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
+    if (
+      left_brace === this.left_brace &&
+      expression === this.expression &&
+      right_brace === this.right_brace)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new EmbeddedBracedExpression(
+        left_brace,
+        expression,
+        right_brace), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_brace = EditableSyntax.from_json(
+      json.embedded_braced_expression_left_brace, position, source);
+    position += left_brace.width;
+    let expression = EditableSyntax.from_json(
+      json.embedded_braced_expression_expression, position, source);
+    position += expression.width;
+    let right_brace = EditableSyntax.from_json(
+      json.embedded_braced_expression_right_brace, position, source);
+    position += right_brace.width;
+    return new EmbeddedBracedExpression(
+        left_brace,
+        expression,
+        right_brace);
+  }
+  get children_keys()
+  {
+    if (EmbeddedBracedExpression._children_keys == null)
+      EmbeddedBracedExpression._children_keys = [
+        'left_brace',
+        'expression',
+        'right_brace'];
+    return EmbeddedBracedExpression._children_keys;
+  }
+}
 class ListExpression extends EditableSyntax
 {
   constructor(
@@ -12698,6 +12870,110 @@ class SubscriptExpression extends EditableSyntax
         'index',
         'right_bracket'];
     return SubscriptExpression._children_keys;
+  }
+}
+class EmbeddedSubscriptExpression extends EditableSyntax
+{
+  constructor(
+    receiver,
+    left_bracket,
+    index,
+    right_bracket)
+  {
+    super('embedded_subscript_expression', {
+      receiver: receiver,
+      left_bracket: left_bracket,
+      index: index,
+      right_bracket: right_bracket });
+  }
+  get receiver() { return this.children.receiver; }
+  get left_bracket() { return this.children.left_bracket; }
+  get index() { return this.children.index; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_receiver(receiver){
+    return new EmbeddedSubscriptExpression(
+      receiver,
+      this.left_bracket,
+      this.index,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new EmbeddedSubscriptExpression(
+      this.receiver,
+      left_bracket,
+      this.index,
+      this.right_bracket);
+  }
+  with_index(index){
+    return new EmbeddedSubscriptExpression(
+      this.receiver,
+      this.left_bracket,
+      index,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new EmbeddedSubscriptExpression(
+      this.receiver,
+      this.left_bracket,
+      this.index,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var receiver = this.receiver.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var index = this.index.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      receiver === this.receiver &&
+      left_bracket === this.left_bracket &&
+      index === this.index &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new EmbeddedSubscriptExpression(
+        receiver,
+        left_bracket,
+        index,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let receiver = EditableSyntax.from_json(
+      json.embedded_subscript_receiver, position, source);
+    position += receiver.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.embedded_subscript_left_bracket, position, source);
+    position += left_bracket.width;
+    let index = EditableSyntax.from_json(
+      json.embedded_subscript_index, position, source);
+    position += index.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.embedded_subscript_right_bracket, position, source);
+    position += right_bracket.width;
+    return new EmbeddedSubscriptExpression(
+        receiver,
+        left_bracket,
+        index,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (EmbeddedSubscriptExpression._children_keys == null)
+      EmbeddedSubscriptExpression._children_keys = [
+        'receiver',
+        'left_bracket',
+        'index',
+        'right_bracket'];
+    return EmbeddedSubscriptExpression._children_keys;
   }
 }
 class AwaitableCreationExpression extends EditableSyntax
@@ -16087,6 +16363,7 @@ exports.CastExpression = CastExpression;
 exports.ScopeResolutionExpression = ScopeResolutionExpression;
 exports.MemberSelectionExpression = MemberSelectionExpression;
 exports.SafeMemberSelectionExpression = SafeMemberSelectionExpression;
+exports.EmbeddedMemberSelectionExpression = EmbeddedMemberSelectionExpression;
 exports.YieldExpression = YieldExpression;
 exports.PrintExpression = PrintExpression;
 exports.PrefixUnaryExpression = PrefixUnaryExpression;
@@ -16101,6 +16378,7 @@ exports.IssetExpression = IssetExpression;
 exports.FunctionCallExpression = FunctionCallExpression;
 exports.ParenthesizedExpression = ParenthesizedExpression;
 exports.BracedExpression = BracedExpression;
+exports.EmbeddedBracedExpression = EmbeddedBracedExpression;
 exports.ListExpression = ListExpression;
 exports.CollectionLiteralExpression = CollectionLiteralExpression;
 exports.ObjectCreationExpression = ObjectCreationExpression;
@@ -16111,6 +16389,7 @@ exports.KeysetIntrinsicExpression = KeysetIntrinsicExpression;
 exports.VectorIntrinsicExpression = VectorIntrinsicExpression;
 exports.ElementInitializer = ElementInitializer;
 exports.SubscriptExpression = SubscriptExpression;
+exports.EmbeddedSubscriptExpression = EmbeddedSubscriptExpression;
 exports.AwaitableCreationExpression = AwaitableCreationExpression;
 exports.XHPChildrenDeclaration = XHPChildrenDeclaration;
 exports.XHPCategoryDeclaration = XHPCategoryDeclaration;

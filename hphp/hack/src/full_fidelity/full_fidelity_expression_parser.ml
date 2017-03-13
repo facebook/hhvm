@@ -295,7 +295,7 @@ module WithStatementAndDeclAndTypeParser
         (parser1, make_token token)
       else
         (with_error parser SyntaxError.error1006, (make_missing())) in
-    let node = make_braced_expression left_brace expr right_brace in
+    let node = make_embedded_braced_expression left_brace expr right_brace in
     (parser, node)
 
   and parse_string_literal parser head name =
@@ -411,24 +411,27 @@ module WithStatementAndDeclAndTypeParser
       let (parser3, token3) = next_token_in_string parser2 name in
       match (Token.kind token1, Token.kind token2, Token.kind token3) with
       | (MinusGreaterThan, Name, _) ->
-        let expr = make_member_selection_expression var_expr
+        let expr = make_embedded_member_selection_expression var_expr
           (make_token token1) (make_token token2) in
         (parser2, expr)
       | (LeftBracket, Name, RightBracket) ->
-        let expr = make_subscript_expression var_expr (make_token token1)
+        let expr = make_embedded_subscript_expression var_expr
+          (make_token token1)
           (make_qualified_name_expression (make_token token2))
           (make_token token3) in
         (parser3, expr)
       | (LeftBracket, Variable, RightBracket) ->
-        let expr = make_subscript_expression var_expr (make_token token1)
-          (make_variable_expression (make_token token2)) (make_token token3) in
+        let expr = make_embedded_subscript_expression var_expr
+          (make_token token1) (make_variable_expression (make_token token2))
+          (make_token token3) in
         (parser3, expr)
       | (LeftBracket, DecimalLiteral, RightBracket)
       | (LeftBracket, OctalLiteral, RightBracket)
       | (LeftBracket, HexadecimalLiteral, RightBracket)
       | (LeftBracket, BinaryLiteral, RightBracket) ->
-        let expr = make_subscript_expression var_expr (make_token token1)
-          (make_literal_expression (make_token token2)) (make_token token3) in
+        let expr = make_embedded_subscript_expression var_expr
+          (make_token token1) (make_literal_expression (make_token token2))
+          (make_token token3) in
         (parser3, expr)
       | _ -> (parser, var_expr) in
 

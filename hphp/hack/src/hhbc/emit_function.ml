@@ -15,7 +15,7 @@ let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
   let function_name = Litstr.to_string @@ snd ast_fun.Ast.f_name in
   let body_instrs, function_decl_vars, function_params, function_return_type =
     Emit_body.from_ast
-    ast_fun.Ast.f_tparams ast_fun.Ast.f_params ast_fun.Ast.f_ret
+    ~self:None ast_fun.Ast.f_tparams ast_fun.Ast.f_params ast_fun.Ast.f_ret
     ast_fun.Ast.f_body in
   let function_body = instr_seq_to_list body_instrs in
   let function_attributes =

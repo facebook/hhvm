@@ -36,11 +36,12 @@ let verify_returns body =
     | _ -> [ i ] in
   InstrSeq.flat_map body ~f:rewriter
 
-let from_ast tparams params ret b =
+let from_ast ~self tparams params ret b =
   let tparams = tparams_to_strings tparams in
   Label.reset_label ();
   Local.reset_local ();
   Iterator.reset_iterator ();
+  Hhbc_from_nast.set_self self;
   let params = Emit_param.from_asts tparams params in
   let return_type_info = Option.map ret
     (hint_to_type_info ~always_extended:true tparams) in

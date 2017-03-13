@@ -131,7 +131,7 @@ type instruct_lit_const =
   | CnsE of Litstr.id
   | CnsU of int * Litstr.id (* litstr fallback *)
   | ClsCns of Litstr.id
-  | ClsCnssD of Litstr.id * Litstr.id
+  | ClsCnsD of Litstr.id * Litstr.id
   | File
   | Dir
   | Method

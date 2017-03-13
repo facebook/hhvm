@@ -23,9 +23,10 @@ let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
   let method_attributes =
     Emit_attribute.from_asts ast_method.Ast.m_user_attributes in
   let tparams = ast_class.Ast.c_tparams @ ast_method.Ast.m_tparams in
+  let (_,name) = ast_class.Ast.c_name in
   let body_instrs, method_decl_vars, method_params, method_return_type =
     Emit_body.from_ast
-    tparams ast_method.Ast.m_params ast_method.Ast.m_ret
+    ~self:(Some name) tparams ast_method.Ast.m_params ast_method.Ast.m_ret
     ast_method.Ast.m_body in
   let method_body = instr_seq_to_list body_instrs in
   Hhas_method.make

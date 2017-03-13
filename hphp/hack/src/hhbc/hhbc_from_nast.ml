@@ -32,9 +32,16 @@ module LValOp = struct
   | IncDec of incdec_op
 end
 
+let self_name = ref (None : string option)
+
+let set_self n = self_name := n
+
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
+
+let strip_dollar id =
+  String.sub id 1 (String.length id - 1)
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
@@ -313,9 +320,51 @@ and emit_call_expr expr =
     if flavor = Flavor.Ref then instr_unboxr else empty
   ]
 
+and emit_known_class_id cid =
+  gather [
+    instr_string (Utils.strip_ns cid);
+    instr (IGet AGetC)
+  ]
+
+and emit_class_id cid =
+  if cid = SN.Classes.cStatic
+  then instr (IMisc LateBoundCls)
+  else
+  if cid = SN.Classes.cSelf
+  then match !self_name with
+  | None -> instr (IMisc Self)
+  | Some cid -> emit_known_class_id cid
+  else emit_known_class_id cid
+
+and emit_class_get param_num_opt cid id =
+    gather [
+      (* We need to strip off the initial dollar *)
+      instr_string (strip_dollar id);
+      emit_class_id cid;
+      match param_num_opt with
+      | None -> instr (IGet CGetS)
+      | Some i -> instr (ICall (FPassS i))
+    ]
+
 and emit_class_const cid id =
   if id = SN.Members.mClass then instr_string cid
-  else emit_nyi "class_const" (* TODO *)
+  else if cid = SN.Classes.cStatic
+  then
+    instrs [
+      IMisc LateBoundCls;
+      ILitConst (ClsCns id);
+    ]
+  else if cid = SN.Classes.cSelf
+  then
+    match !self_name with
+    | None ->
+      instrs [
+        IMisc Self;
+        ILitConst (ClsCns id);
+      ]
+    | Some cid -> instr (ILitConst (ClsCnsD (id, cid)))
+  else
+    instr (ILitConst (ClsCnsD (id, cid)))
 
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
@@ -355,7 +404,7 @@ and from_expr expr =
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
-  | A.Class_get (_, _)          -> emit_nyi "class_get"
+  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
   | A.String2 _                 -> emit_nyi "string2"
   | A.Yield _                   -> emit_nyi "yield"
   | A.Await _                   -> emit_nyi "await"
@@ -664,7 +713,18 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      ],
      total_stack_size
 
-   | _ ->
+   | A.Class_get((_, cid), (_, id)) ->
+     let prop_expr_instrs = instr_string (strip_dollar id) in
+     gather [
+       prop_expr_instrs;
+       emit_class_id cid
+     ],
+     gather [
+       instr (IBase (BaseSC (base_offset + 1, base_offset)))
+     ],
+     1
+
+    | _ ->
      let base_expr_instrs, flavor = emit_flavored_expr expr in
      base_expr_instrs,
      instr (IBase (if flavor = Flavor.Ref
@@ -688,6 +748,9 @@ and emit_arg i ((_, expr_) as e) =
 
   | A.Obj_get(e1, e2, nullflavor) ->
     emit_obj_get (Some i) e1 e2 nullflavor
+
+  | A.Class_get((_, cid), (_, id)) ->
+    emit_class_get (Some i) cid id
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in
@@ -725,10 +788,10 @@ and emit_call_lhs (_, expr_) nargs =
     ]
 
   | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
-    instrs [
-      ILitConst (String id);
-      IMisc LateBoundCls;
-      ICall (FPushClsMethod nargs);
+    gather [
+      instr_string id;
+      instr (IMisc LateBoundCls);
+      instr (ICall (FPushClsMethod nargs));
     ]
 
   | A.Class_const ((_, cid), (_, id)) ->
@@ -814,6 +877,12 @@ and emit_final_local_op op lid =
   | LValOp.Set -> instr (IMutator (SetL lid))
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
+
+and emit_final_static_op op =
+  match op with
+  | LValOp.Set -> instr (IMutator SetS)
+  | LValOp.SetOp op -> instr (IMutator (SetOpS op))
+  | LValOp.IncDec op -> instr (IMutator (IncDecS op))
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:
@@ -907,6 +976,16 @@ and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
       prop_expr_instrs;
       rhs_instrs;
       base_setup_instrs;
+      final_instr
+    ]
+
+  | (_, A.Class_get((_, cid), (_, id))) ->
+    let prop_expr_instrs = instr_string (strip_dollar id) in
+    let final_instr = emit_final_static_op op in
+    gather [
+      prop_expr_instrs;
+      emit_class_id cid;
+      rhs_instrs;
       final_instr
     ]
 

@@ -18,6 +18,9 @@ let sep pieces = String.concat " " pieces
 
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 
+let string_of_class_id id = quote_str (Utils.strip_ns id)
+let string_of_function_id id = quote_str id
+
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
  *   add_X takes a buffer and an X, and appends to the buffer
@@ -68,6 +71,9 @@ let string_of_lit_const instruction =
     | NewStructArray l  ->
       "NewStructArray <" ^ string_of_list_of_shape_fields l ^ ">"
     | Vec (i, _)        -> "Vec @A_" ^ string_of_int i
+    | ClsCns name -> "ClsCns " ^ quote_str name
+    | ClsCnsD (name, class_name) -> "ClsCnsD " ^ quote_str name ^ " "
+      ^ string_of_class_id class_name
 
     (* TODO *)
     | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
@@ -265,8 +271,6 @@ let string_of_control_flow instruction =
   | _ -> failwith "instruction_control_flow Not Implemented"
 
 let string_of_iterator_id i = Iterator.to_string i
-let string_of_class_id id = quote_str id
-let string_of_function_id id = quote_str id
 let string_of_null_flavor nf =
   match nf with
   | Ast.OG_nullthrows -> "NullThrows"

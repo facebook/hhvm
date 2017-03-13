@@ -364,14 +364,12 @@ let builder = object (this)
       List.split_while rev_leading_trivia ~f:is_not_end_of_line in
 
     this#handle_trivia ~is_leading:true @@
-      this#break_out_delimited @@ List.rev rev_rest_including_last_newline;
+      List.rev rev_rest_including_last_newline;
     this#end_chunks();
     this#end_block_nest ();
-    this#handle_trivia ~is_leading:true @@
-      this#break_out_delimited @@ List.rev rev_after_last_newline;
+    this#handle_trivia ~is_leading:true @@ List.rev rev_after_last_newline;
     this#handle_token x;
-    this#handle_trivia ~is_leading:false @@
-      this#break_out_delimited (EditableToken.trailing x);
+    this#handle_trivia ~is_leading:false @@ EditableToken.trailing x;
     ()
 
   (* TODO: Handle (aka remove) excess whitespace inside of an ast node *)
@@ -388,6 +386,7 @@ let builder = object (this)
       in
 
       this#check_range ();
+      let trivia_list = this#break_out_delimited ~is_leading trivia_list in
       let newlines, only_whitespace  = List.fold trivia_list ~init:(0, true)
         ~f:(fun (newlines, only_whitespace) t ->
           this#advance (Trivia.width t);
@@ -428,30 +427,29 @@ let builder = object (this)
     this#advance (EditableToken.width t);
 
   method token x =
-    this#handle_trivia
-      ~is_leading:true (this#break_out_delimited @@ EditableToken.leading x);
+    this#handle_trivia ~is_leading:true @@ EditableToken.leading x;
     this#handle_token x;
-    this#handle_trivia
-      ~is_leading:false (this#break_out_delimited @@ EditableToken.trailing x);
+    this#handle_trivia ~is_leading:false @@ EditableToken.trailing x;
     ()
 
   method token_trivia_only x =
-    this#handle_trivia
-      ~is_leading:true (this#break_out_delimited @@ EditableToken.leading x);
+    this#handle_trivia ~is_leading:true @@ EditableToken.leading x;
     this#check_range ();
     this#advance (EditableToken.width x);
-    this#handle_trivia
-      ~is_leading:false (this#break_out_delimited @@ EditableToken.trailing x);
+    this#handle_trivia ~is_leading:false @@ EditableToken.trailing x;
     ()
 
-  method break_out_delimited trivia =
+  method private break_out_delimited ~is_leading trivia =
     let new_line_regex = Str.regexp "\n" in
+    let indent = ref 0 in
+    let currently_leading = ref is_leading in
     List.concat_map trivia ~f:(fun triv ->
       match Trivia.kind triv with
         | TriviaKind.UnsafeExpression
         | TriviaKind.FixMe
         | TriviaKind.IgnoreError
         | TriviaKind.DelimitedComment ->
+          currently_leading := false;
           let delimited_lines =
             Str.split new_line_regex @@ Trivia.text triv in
           let map_tail str =
@@ -464,7 +462,14 @@ let builder = object (this)
               in
               aux 0
             in
-            let start_index = min block_indent (prefix_space_count str) in
+            (* If we're dealing with trailing trivia, then we don't have a good
+               signal for the indent level, so we just cut all leading spaces.
+               Otherwise, we cut a number of spaces equal to the indent before
+               the delimited comment opener. *)
+            let start_index = if is_leading
+              then min !indent (prefix_space_count str)
+              else prefix_space_count str
+            in
             let len = String.length str - start_index in
             let dc = Trivia.make_delimited_comment @@
               String.sub str start_index len in
@@ -476,7 +481,15 @@ let builder = object (this)
 
           Trivia.make_delimited_comment (List.hd_exn delimited_lines) ::
             List.concat_map (List.tl_exn delimited_lines) ~f:map_tail
+        | TriviaKind.EndOfLine ->
+          indent := 0;
+          currently_leading := true;
+          [triv]
+        | TriviaKind.WhiteSpace ->
+          if !currently_leading then indent := Trivia.width triv;
+          [triv]
         | _ ->
+          currently_leading := false;
           [triv]
     )
 

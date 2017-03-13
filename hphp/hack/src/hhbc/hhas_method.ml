@@ -20,6 +20,7 @@ type t = {
   method_params        : Hhas_param.t list;
   method_return_type   : Hhas_type_info.t option;
   method_body          : Hhbc_ast.instruct list;
+  method_decl_vars     : string list; (* Actually local_id list *)
 }
 
 let make
@@ -33,7 +34,9 @@ let make
   method_name
   method_params
   method_return_type
-  method_body = {
+  method_body
+  method_decl_vars
+= {
     method_attributes;
     method_is_protected;
     method_is_public;
@@ -44,7 +47,8 @@ let make
     method_name;
     method_params;
     method_return_type;
-    method_body
+    method_body;
+    method_decl_vars;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -64,4 +68,5 @@ let make_private method_def =
 let params method_def = method_def.method_params
 let return_type method_def = method_def.method_return_type
 let body method_def = method_def.method_body
+let decl_vars method_def = method_def.method_decl_vars
 let with_body method_def method_body = { method_def with method_body }

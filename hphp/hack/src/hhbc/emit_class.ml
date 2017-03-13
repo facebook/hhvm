@@ -43,6 +43,7 @@ let default_constructor ast_class =
     method_params
     method_return_type
     method_body
+    []
 
 let from_extends _tparams extends =
   match extends with

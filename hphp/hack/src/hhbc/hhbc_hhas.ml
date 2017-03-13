@@ -600,8 +600,9 @@ let fix_xhp_name s =
 
 let fmt_name s = fix_xhp_name (Utils.strip_ns s)
 
-let add_decl_vars buf decl_vars = if decl_vars = [] then () else begin
-  B.add_string buf "  .declvars ";
+let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
+  B.add_string buf (String.make indent ' ');
+  B.add_string buf ".declvars ";
   B.add_string buf @@ String.concat " " decl_vars;
   B.add_string buf ";\n"
   end
@@ -662,7 +663,7 @@ let add_fun_def buf fun_def =
   B.add_string buf function_name;
   B.add_string buf (string_of_params function_params);
   B.add_string buf " {\n";
-  add_decl_vars buf function_decl_vars;
+  add_decl_vars buf 2 function_decl_vars;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
@@ -687,12 +688,14 @@ let add_method_def buf method_def =
   let method_return_type = Hhas_method.return_type method_def in
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
+  let method_decl_vars = Hhas_method.decl_vars method_def in
   B.add_string buf "\n  .method ";
   B.add_string buf (method_attributes method_def);
   B.add_string buf (string_of_type_info_option method_return_type);
   B.add_string buf method_name;
   B.add_string buf (string_of_params method_params);
   B.add_string buf " {\n";
+  add_decl_vars buf 4 method_decl_vars;
   add_instruction_list buf 4 method_body;
   B.add_string buf "  }"
 

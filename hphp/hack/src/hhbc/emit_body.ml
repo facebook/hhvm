@@ -66,4 +66,10 @@ let from_ast tparams params ret b =
     default_value_setters;
     fault_instrs;
   ] in
-  body_instrs, params, return_type_info
+  let params, body_instrs =
+    Label_rewriter.relabel_function params body_instrs in
+  let function_decl_vars = extract_decl_vars body_instrs in
+  let body_instrs = Local_id_rewriter.unname_instrseq
+    (List.map params Hhas_param.name @ function_decl_vars)
+    body_instrs in
+  body_instrs, function_decl_vars, params, return_type_info

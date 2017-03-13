@@ -1051,8 +1051,7 @@ let rec transform node =
     transform_argish_with_return_type ~in_span:false lp params rp colon
       ret_type;
     t use;
-    handle_possible_compound_statement body;
-    builder#end_chunks ();
+    handle_possible_compound_statement ~space:false body;
     ()
   | AnonymousFunctionUseClause x ->
     (* TODO: Revisit *)
@@ -1590,11 +1589,11 @@ and handle_lambda_body node =
         t_with ~nest:true node;
       ) ()
 
-and handle_possible_compound_statement node =
+and handle_possible_compound_statement ?space:(space=true) node =
   match syntax node with
     | CompoundStatement x ->
       handle_compound_statement x;
-      pending_space ();
+      if space then pending_space ();
       ()
     | _ ->
       builder#end_chunks ();

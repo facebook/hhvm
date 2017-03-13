@@ -49,7 +49,7 @@
 # endif
 #else
 # include <jemalloc/jemalloc.h>
-# if JEMALLOC_VERSION_MAJOR == 4
+# if (JEMALLOC_VERSION_MAJOR == 4) && defined(__linux__)
 #  define USE_JEMALLOC_CHUNK_HOOKS 1
 # endif
 #endif

@@ -467,7 +467,8 @@ private:
   };
 
 private:
-  static StringData* MakeShared(folly::StringPiece sl, bool trueStatic);
+  template<bool trueStatic>
+  static StringData* MakeShared(folly::StringPiece sl);
   static StringData* MakeProxySlowPath(const APCString*);
 
   StringData(const StringData&) = delete;

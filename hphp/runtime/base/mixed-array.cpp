@@ -420,11 +420,22 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
   not_reached();
 }
 
+ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+  return high_huge1g_arena && RuntimeOption::EvalUncountedMixedArrayHuge;
+#else
+  return false;
+#endif
+}
+
 ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto a = asMixed(array);
   assertx(!a->empty());
   auto const scale = a->scale();
-  char* mem = static_cast<char*>(malloc_huge(extra + computeAllocBytes(scale)));
+  auto const allocSize = extra + computeAllocBytes(scale);
+  auto const mem = static_cast<char*>(
+    UncountedMixedArrayOnHugePage() ? malloc_huge(allocSize) : malloc(allocSize)
+  );
   auto const ad = reinterpret_cast<MixedArray*>(mem + extra);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
@@ -522,8 +533,11 @@ void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
       });
     }
   }
-
-  free_huge(reinterpret_cast<char*>(ad) - extra);
+  if (UncountedMixedArrayOnHugePage()) {
+    free_huge(reinterpret_cast<char*>(ad) - extra);
+  } else {
+    free(reinterpret_cast<char*>(ad) - extra);
+  }
 }
 
 //=============================================================================

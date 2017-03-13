@@ -599,6 +599,8 @@ struct RuntimeOption {
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
   F(bool, LowStaticArrays,             true)                            \
+  F(bool, UncountedMixedArrayHuge,     true)                            \
+  F(bool, UncountedStringHuge,         true)                            \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, EnableGC,                    eagerGcDefault())                \
   /* Run GC eagerly at each surprise point. */                          \

@@ -164,21 +164,30 @@ std::aligned_storage<
 
 //////////////////////////////////////////////////////////////////////
 
+ALWAYS_INLINE static bool UncountedStringOnHugePage() {
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+  return high_huge1g_arena && RuntimeOption::EvalUncountedStringHuge;
+#else
+  return false;
+#endif
+}
+
 // Create either a static or an uncounted string.
 // Diffrence between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
 // Uncounted are not ref counted but will be deleted at some point.
-ALWAYS_INLINE
-StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
+template <bool trueStatic> ALWAYS_INLINE
+StringData* StringData::MakeShared(folly::StringPiece sl) {
   if (UNLIKELY(sl.size() > StringData::MaxSize)) {
     throw_string_too_large(sl.size());
   }
 
   auto const cc = CapCode::ceil(sl.size());
-  auto const need = cc.decode() + kCapOverhead;
-  auto const sd = static_cast<StringData*>(
-    trueStatic ? low_malloc_data(need) : malloc_huge(need)
-  );
+  auto const allocSize = cc.decode() + kCapOverhead;
+  StringData* sd = reinterpret_cast<StringData*>(
+    trueStatic ? low_malloc_data(allocSize)
+               : UncountedStringOnHugePage() ? malloc_huge(allocSize)
+               : malloc(allocSize));
   auto const data = reinterpret_cast<char*>(sd + 1);
 
 #ifndef NO_M_DATA
@@ -202,11 +211,11 @@ StringData* StringData::MakeShared(folly::StringPiece sl, bool trueStatic) {
 }
 
 StringData* StringData::MakeStatic(folly::StringPiece sl) {
-  return MakeShared(sl, true);
+  return MakeShared<true>(sl);
 }
 
 StringData* StringData::MakeUncounted(folly::StringPiece sl) {
-  return MakeShared(sl, false);
+  return MakeShared<false>(sl);
 }
 
 StringData* StringData::MakeEmpty() {
@@ -241,7 +250,11 @@ void StringData::destructStatic() {
 void StringData::destructUncounted() {
   assert(checkSane() && isUncounted());
   assert(isFlat());
-  free_huge(this);
+  if (UncountedStringOnHugePage()) {
+    free_huge(this);
+  } else {
+    free(this);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -480,6 +480,10 @@ let string_of_try instruction =
   | TryFaultEnd
   | TryCatchEnd -> "}"
 
+let string_of_async = function
+  | Await -> "Await"
+  | WHResult -> "# string of WHResult - NYI"
+
 let string_of_instruction instruction =
   let s = match instruction with
   | IIterator            i -> string_of_iterator i
@@ -497,6 +501,7 @@ let string_of_instruction instruction =
   | IFinal               i -> string_of_final i
   | ITry                 i -> string_of_try i
   | IComment             s -> "# " ^ s
+  | IAsync               i -> string_of_async i
   | _ -> failwith "invalid instruction" in
   s ^ "\n"
 
@@ -692,11 +697,13 @@ let add_fun_def buf fun_def =
   let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in
   let function_decl_vars = Hhas_function.decl_vars fun_def in
+  let function_is_async = Hhas_function.is_async fun_def in
   B.add_string buf "\n.function ";
   B.add_string buf (function_attributes fun_def);
   B.add_string buf (string_of_type_info_option function_return_type);
   B.add_string buf function_name;
   B.add_string buf (string_of_params function_params);
+  if function_is_async then B.add_string buf " isAsync";
   B.add_string buf " {\n";
   add_decl_vars buf 2 function_decl_vars;
   add_instruction_list buf 2 function_body;
@@ -724,11 +731,13 @@ let add_method_def buf method_def =
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
   let method_decl_vars = Hhas_method.decl_vars method_def in
+  let method_is_async = Hhas_method.is_async method_def in
   B.add_string buf "\n  .method ";
   B.add_string buf (method_attributes method_def);
   B.add_string buf (string_of_type_info_option method_return_type);
   B.add_string buf method_name;
   B.add_string buf (string_of_params method_params);
+  if method_is_async then B.add_string buf " isAsync";
   B.add_string buf " {\n";
   add_decl_vars buf 4 method_decl_vars;
   add_instruction_list buf 4 method_body;

@@ -21,6 +21,7 @@ type t = {
   method_return_type   : Hhas_type_info.t option;
   method_body          : Hhbc_ast.instruct list;
   method_decl_vars     : string list; (* Actually local_id list *)
+  method_is_async      : bool;
 }
 
 let make
@@ -36,6 +37,7 @@ let make
   method_return_type
   method_body
   method_decl_vars
+  method_is_async
 = {
     method_attributes;
     method_is_protected;
@@ -49,6 +51,7 @@ let make
     method_return_type;
     method_body;
     method_decl_vars;
+    method_is_async;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -69,4 +72,5 @@ let params method_def = method_def.method_params
 let return_type method_def = method_def.method_return_type
 let body method_def = method_def.method_body
 let decl_vars method_def = method_def.method_decl_vars
+let is_async method_def = method_def.method_is_async
 let with_body method_def method_body = { method_def with method_body }

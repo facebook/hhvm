@@ -555,3 +555,4 @@ and instruct =
   | ILabel of Label.t
   | ITry of instruct_try
   | IComment of string
+  | IAsync of async_functions

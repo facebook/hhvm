@@ -374,6 +374,17 @@ and emit_class_const cid id =
   else
     instr (ILitConst (ClsCnsD (id, cid)))
 
+and emit_await e =
+  let after_await = Label.next_regular () in
+  gather [
+    from_expr e;
+    instr_dup;
+    instr_istypec OpNull;
+    instr_jmpnz after_await;
+    instr_await;
+    instr_label after_await;
+  ]
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -407,6 +418,7 @@ and from_expr expr =
   | A.Clone e -> emit_clone e
   | A.Shape fl -> emit_shape expr fl
   | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get None expr prop nullflavor
+  | A.Await e -> emit_await e
   (* TODO *)
   | A.Yield_break               -> emit_nyi "yield_break"
   | A.Id _                      -> emit_nyi "id"
@@ -415,7 +427,6 @@ and from_expr expr =
   | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
   | A.String2 _                 -> emit_nyi "string2"
   | A.Yield _                   -> emit_nyi "yield"
-  | A.Await _                   -> emit_nyi "await"
   | A.List _                    -> emit_nyi "list"
   | A.Efun (_, _)               -> emit_nyi "efun"
   | A.Lfun _                    -> emit_nyi "lfun"

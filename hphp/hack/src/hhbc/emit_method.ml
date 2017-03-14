@@ -27,10 +27,21 @@ let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
   let ret =
     if method_name = Naming_special_names.Members.__construct
     then None else ast_method.Ast.m_ret in
-  let body_instrs, method_decl_vars, method_params, method_return_type =
+  let body_instrs,
+      method_decl_vars,
+      method_params,
+      method_return_type =
     Emit_body.from_ast
-    ~self:(Some name) tparams ast_method.Ast.m_params ret
-    ast_method.Ast.m_body in
+      ~self:(Some name)
+      tparams
+      ast_method.Ast.m_params
+      ret
+      ast_method.Ast.m_body
+  in
+  let method_is_async =
+    ast_method.Ast.m_fun_kind = Ast_defs.FAsync
+    || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator
+  in
   let method_body = instr_seq_to_list body_instrs in
   Hhas_method.make
     method_attributes
@@ -45,6 +56,7 @@ let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
     method_return_type
     method_body
     method_decl_vars
+    method_is_async
 
 let from_asts ast_class ast_methods =
   let is_memoized ast_method =

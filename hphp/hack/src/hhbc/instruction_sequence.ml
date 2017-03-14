@@ -128,6 +128,8 @@ let instr_querym_cget_pt num_params key =
 let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
 let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
 
+let instr_await = instr (IAsync Await)
+
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
 

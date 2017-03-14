@@ -203,24 +203,35 @@ and emit_null_coalesce e1 e2 =
     instr_label end_label;
   ]
 
-(* TODO: there are lots of ways of specifying the same type in a cast.
- * Sort this out!
- *)
 and emit_cast hint expr =
-  let op = match hint with
-  | A.Happly((_, id), []) when id = SN.Typehints.int ->
-    instr (IOp CastInt)
-  | A.Happly((_, id), []) when id = SN.Typehints.bool ->
-    instr (IOp CastBool)
-  | A.Happly((_, id), []) when id = SN.Typehints.string ->
-    instr (IOp CastString)
-  | A.Happly((_, id), []) when id = SN.Typehints.object_cast ->
-    instr (IOp CastObject)
-  | A.Happly((_, id), []) when id = SN.Typehints.array ->
-    instr (IOp CastArray)
-  | A.Happly((_, id), []) when id = SN.Typehints.float ->
-    instr (IOp CastDouble)
-  | _ -> emit_nyi "cast type" in
+  let op =
+    begin match hint with
+    | A.Happly((_, id), [])
+      when id = SN.Typehints.int
+        || id = SN.Typehints.integer ->
+      instr (IOp CastInt)
+    | A.Happly((_, id), [])
+      when id = SN.Typehints.bool
+        || id = SN.Typehints.boolean ->
+      instr (IOp CastBool)
+    | A.Happly((_, id), [])
+      when id = SN.Typehints.string ->
+      instr (IOp CastString)
+    | A.Happly((_, id), [])
+      when id = SN.Typehints.object_cast ->
+      instr (IOp CastObject)
+    | A.Happly((_, id), [])
+      when id = SN.Typehints.array ->
+      instr (IOp CastArray)
+    | A.Happly((_, id), [])
+      when id = SN.Typehints.real
+        || id = SN.Typehints.double
+        || id = SN.Typehints.float ->
+      instr (IOp CastDouble)
+      (* TODO: unset *)
+    | _ ->
+      emit_nyi "cast type"
+    end in
   gather [
     from_expr expr;
     op;

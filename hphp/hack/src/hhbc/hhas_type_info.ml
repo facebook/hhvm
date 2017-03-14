@@ -12,7 +12,6 @@
 type t = {
   type_info_user_type : string option;
   type_info_type_constraint : Hhas_type_constraint.t;
-  (* TODO: consider making the constraint nullable *)
 }
 
 let make type_info_user_type type_info_type_constraint =

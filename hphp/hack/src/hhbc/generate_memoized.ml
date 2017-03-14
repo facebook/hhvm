@@ -148,6 +148,15 @@ let memoize_function compiled =
   let memoized = Hhas_function.with_body compiled body in
   (renamed, memoized)
 
+let memoize_functions compiled_funcs =
+  let mapper compiled =
+    if Hhas_attribute.is_memoized (Hhas_function.attributes compiled) then
+    let (renamed, memoized) = memoize_function compiled in
+      [ renamed; memoized ]
+    else
+      [ compiled ] in
+  Core.List.bind compiled_funcs mapper
+
 let memoize_method_no_params renamed_name =
   (* TODO: A lot of this codegen doesn't make a lot of sense to me.
   Try to understand it and see if it can be improved. *)
@@ -272,3 +281,24 @@ let memoize_method compiled total_count index =
   let body = instr_seq_to_list body in
   let memoized = Hhas_method.with_body compiled body in
   (renamed, memoized)
+
+let memoize_methods methods =
+  let is_memoized method_ =
+    Hhas_attribute.is_memoized (Hhas_method.attributes method_) in
+  let memoized_count = Core.List.count methods is_memoized in
+  let folder (count, acc) method_ =
+    if is_memoized method_ then
+      let (renamed, memoized) = memoize_method method_ memoized_count count in
+      (count + 1, memoized :: renamed :: acc)
+    else
+      (count, method_ :: acc) in
+  let (_, methods) = Core.List.fold_left methods ~init:(0, []) ~f:folder in
+  List.rev methods
+
+let memoize_class class_ =
+  let methods = Hhas_class.methods class_ in
+  let methods = memoize_methods methods in
+  Hhas_class.with_methods class_ methods
+
+let memoize_classes classes =
+  List.map memoize_class classes

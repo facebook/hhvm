@@ -10,7 +10,7 @@
 
 open Instruction_sequence
 
-let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
+let from_ast : Ast.fun_ -> Hhas_function.t =
   fun ast_fun ->
   let function_name = Litstr.to_string @@ snd ast_fun.Ast.f_name in
   let body_instrs,
@@ -44,14 +44,5 @@ let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
     function_is_generator
     function_is_pair_generator
 
-let from_ast : Ast.fun_ -> Hhas_function.t list =
-  fun ast_fun ->
-  let compiled = from_ast_no_memoization ast_fun in
-  if Hhas_attribute.is_memoized (Hhas_function.attributes compiled) then
-    let (renamed, memoized) = Generate_memoized.memoize_function compiled in
-    [ renamed; memoized ]
-  else
-    [ compiled ]
-
 let from_asts ast_functions =
-  Core.List.bind ast_functions from_ast
+  List.map from_ast ast_functions

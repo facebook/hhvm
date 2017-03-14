@@ -210,6 +210,7 @@ Unit::~Unit() {
       memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
     }
     free(const_cast<unsigned char*>(m_bc));
+    g_hhbc_size->addValue(-int64_t(m_bclen));
   }
 
   if (m_mergeInfo) {

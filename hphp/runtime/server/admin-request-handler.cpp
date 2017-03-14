@@ -931,8 +931,6 @@ static bool send_status(Transport *transport, Writer::Format format,
   return true;
 }
 
-  extern size_t hhbc_arena_capacity();
-
 bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
@@ -963,6 +961,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     appendStat("load", server->getActiveWorker());
     appendStat("queued", server->getQueuedJobs());
     appendStat("hhbc-roarena-capac", hhbc_arena_capacity());
+    appendStat("hhbc-size", g_hhbc_size->getSum());
     auto const memInfos = jit::tc::getTCMemoryUsage();
     for (auto const info : memInfos) {
         auto isMain = info.name == "main";

@@ -502,8 +502,16 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   }
 }
 
+ServiceData::ExportedTimeSeries* g_hhbc_size = ServiceData::createTimeSeries(
+  "vm.hhbc-size",
+  {ServiceData::StatsType::AVG,
+   ServiceData::StatsType::SUM,
+   ServiceData::StatsType::COUNT}
+);
+
 static const unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
+  g_hhbc_size->addValue(bclen);
   if (RuntimeOption::RepoAuthoritative) {
     // In RepoAuthoritative, we assume we won't ever deallocate units
     // and that this is read-only, mostly cold data.  So we throw it

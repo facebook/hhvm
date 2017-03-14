@@ -44,6 +44,13 @@ struct FuncEmitter;
 struct PreClassEmitter;
 struct StringData;
 
+/*
+ * Report capacity of RepoAuthoritative mode bytecode arena.
+ *
+ * Returns 0 if !RuntimeOption::RepoAuthoritative.
+ */
+size_t hhbc_arena_capacity();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

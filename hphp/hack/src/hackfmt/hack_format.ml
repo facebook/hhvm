@@ -1967,6 +1967,14 @@ and transform_binary_expression ~is_nested expr =
           | Full_fidelity_operator.ConcatenationOperator -> false
           | _ -> true
   in
+  let operator_is_leading op =
+    match op with
+      | None -> failwith "operator_is_leading: Operator expected"
+      | Some op ->
+        match get_operator_type op with
+          | Full_fidelity_operator.PipeOperator -> true
+          | _ -> false
+  in
 
   let (left, operator, right) = get_binary_expression_children expr in
   let operator_t = get_operator_type operator in
@@ -2022,14 +2030,20 @@ and transform_binary_expression ~is_nested expr =
               if (i mod 2) = 0 then begin
                 let op = x in
                 let op_has_spaces = operator_has_surrounding_spaces (Some op) in
-                if op_has_spaces then pending_space ();
+                if operator_is_leading (Some op) then
+                  split ~space:op_has_spaces ()
+                else
+                  if op_has_spaces then pending_space ();
                 transform op;
                 Some op
               end
               else begin
                 let operand = x in
                 let op_has_spaces = operator_has_surrounding_spaces last_op in
-                split ~space:op_has_spaces ();
+                if operator_is_leading last_op then
+                  (if op_has_spaces then pending_space ())
+                else
+                  split ~space:op_has_spaces ();
                 transform_operand operand;
                 None
               end

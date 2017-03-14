@@ -745,9 +745,7 @@ let scan_xhp_token lexer =
   | ('}', _) -> (advance lexer 1, TokenKind.RightBrace)
   | ('=', _) -> (advance lexer 1, TokenKind.Equal)
   | ('<', '/') -> (advance lexer 2, TokenKind.LessThanSlash)
-  | ('<', _) ->
-    if is_name_nondigit ch1 then scan_xhp_element_name (advance lexer 1)
-    else (advance lexer 1, TokenKind.LessThan)
+  | ('<', _) -> (advance lexer 1, TokenKind.LessThan)
   | ('"', _) -> scan_xhp_string_literal lexer
   | ('/', '>') -> (advance lexer 2, TokenKind.SlashGreaterThan)
   | ('>', _) -> (advance lexer 1, TokenKind.GreaterThan)
@@ -809,9 +807,7 @@ let scan_xhp_body lexer =
   | ('}', _, _, _) -> (advance lexer 1, TokenKind.RightBrace)
   | ('<', '!', '-', '-') -> (scan_xhp_comment lexer, TokenKind.XHPComment)
   | ('<', '/', _, _) -> (advance lexer 2, TokenKind.LessThanSlash)
-  | ('<', _, _, _) ->
-    if is_name_nondigit ch1 then scan_xhp_element_name (advance lexer 1)
-    else (advance lexer 1, TokenKind.LessThan)
+  | ('<', _, _, _) -> (advance lexer 1, TokenKind.LessThan)
   | _ -> ((aux lexer), TokenKind.XHPBody)
 
 let scan_dollar_token lexer =

@@ -15760,17 +15760,23 @@ final class XHPAttribute extends EditableSyntax {
   }
 }
 final class XHPOpen extends EditableSyntax {
+  private EditableSyntax $_left_angle;
   private EditableSyntax $_name;
   private EditableSyntax $_attributes;
   private EditableSyntax $_right_angle;
   public function __construct(
+    EditableSyntax $left_angle,
     EditableSyntax $name,
     EditableSyntax $attributes,
     EditableSyntax $right_angle) {
     parent::__construct('xhp_open');
+    $this->_left_angle = $left_angle;
     $this->_name = $name;
     $this->_attributes = $attributes;
     $this->_right_angle = $right_angle;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
   }
   public function name(): EditableSyntax {
     return $this->_name;
@@ -15781,20 +15787,30 @@ final class XHPOpen extends EditableSyntax {
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
+  public function with_left_angle(EditableSyntax $left_angle): XHPOpen {
+    return new XHPOpen(
+      $left_angle,
+      $this->_name,
+      $this->_attributes,
+      $this->_right_angle);
+  }
   public function with_name(EditableSyntax $name): XHPOpen {
     return new XHPOpen(
+      $this->_left_angle,
       $name,
       $this->_attributes,
       $this->_right_angle);
   }
   public function with_attributes(EditableSyntax $attributes): XHPOpen {
     return new XHPOpen(
+      $this->_left_angle,
       $this->_name,
       $attributes,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): XHPOpen {
     return new XHPOpen(
+      $this->_left_angle,
       $this->_name,
       $this->_attributes,
       $right_angle);
@@ -15806,16 +15822,19 @@ final class XHPOpen extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $attributes = $this->attributes()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
+      $left_angle === $this->left_angle() &&
       $name === $this->name() &&
       $attributes === $this->attributes() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPOpen(
+        $left_angle,
         $name,
         $attributes,
         $right_angle), $parents ?? []);
@@ -15823,6 +15842,9 @@ final class XHPOpen extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $left_angle = EditableSyntax::from_json(
+      $json->xhp_open_left_angle, $position, $source);
+    $position += $left_angle->width();
     $name = EditableSyntax::from_json(
       $json->xhp_open_name, $position, $source);
     $position += $name->width();
@@ -15833,11 +15855,13 @@ final class XHPOpen extends EditableSyntax {
       $json->xhp_open_right_angle, $position, $source);
     $position += $right_angle->width();
     return new XHPOpen(
+        $left_angle,
         $name,
         $attributes,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_angle;
     yield $this->_name;
     yield $this->_attributes;
     yield $this->_right_angle;

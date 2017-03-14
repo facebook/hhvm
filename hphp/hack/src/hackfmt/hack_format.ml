@@ -1371,7 +1371,8 @@ let rec transform node =
     ) ();
     ()
   | XHPOpen x ->
-    let (name, attrs, right_a) = get_xhp_open_children x in
+    let (left_a, name, attrs, right_a) = get_xhp_open_children x in
+    t left_a;
     t name;
     if not (is_missing attrs) then begin
       split ~space ();

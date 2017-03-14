@@ -714,6 +714,7 @@ module WithToken(Token: TokenType) = struct
       xhp_attribute_expression: t;
     }
     and xhp_open = {
+      xhp_open_left_angle: t;
       xhp_open_name: t;
       xhp_open_attributes: t;
       xhp_open_right_angle: t;
@@ -2842,10 +2843,12 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_xhp_open_children {
+      xhp_open_left_angle;
       xhp_open_name;
       xhp_open_attributes;
       xhp_open_right_angle;
     } = (
+      xhp_open_left_angle,
       xhp_open_name,
       xhp_open_attributes,
       xhp_open_right_angle
@@ -4256,10 +4259,12 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_expression;
       ]
       | XHPOpen {
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
       } -> [
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
@@ -5644,10 +5649,12 @@ module WithToken(Token: TokenType) = struct
         "xhp_attribute_expression";
       ]
       | XHPOpen {
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
       } -> [
+        "xhp_open_left_angle";
         "xhp_open_name";
         "xhp_open_attributes";
         "xhp_open_right_angle";
@@ -7195,11 +7202,13 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_expression;
         }
       | (SyntaxKind.XHPOpen, [
+          xhp_open_left_angle;
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
         ]) ->
         XHPOpen {
+          xhp_open_left_angle;
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
@@ -8864,11 +8873,13 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_xhp_open
+      xhp_open_left_angle
       xhp_open_name
       xhp_open_attributes
       xhp_open_right_angle
     =
       from_children SyntaxKind.XHPOpen [
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;

@@ -13694,32 +13694,45 @@ class XHPAttribute extends EditableSyntax
 class XHPOpen extends EditableSyntax
 {
   constructor(
+    left_angle,
     name,
     attributes,
     right_angle)
   {
     super('xhp_open', {
+      left_angle: left_angle,
       name: name,
       attributes: attributes,
       right_angle: right_angle });
   }
+  get left_angle() { return this.children.left_angle; }
   get name() { return this.children.name; }
   get attributes() { return this.children.attributes; }
   get right_angle() { return this.children.right_angle; }
+  with_left_angle(left_angle){
+    return new XHPOpen(
+      left_angle,
+      this.name,
+      this.attributes,
+      this.right_angle);
+  }
   with_name(name){
     return new XHPOpen(
+      this.left_angle,
       name,
       this.attributes,
       this.right_angle);
   }
   with_attributes(attributes){
     return new XHPOpen(
+      this.left_angle,
       this.name,
       attributes,
       this.right_angle);
   }
   with_right_angle(right_angle){
     return new XHPOpen(
+      this.left_angle,
       this.name,
       this.attributes,
       right_angle);
@@ -13730,10 +13743,12 @@ class XHPOpen extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var attributes = this.attributes.rewrite(rewriter, new_parents);
     var right_angle = this.right_angle.rewrite(rewriter, new_parents);
     if (
+      left_angle === this.left_angle &&
       name === this.name &&
       attributes === this.attributes &&
       right_angle === this.right_angle)
@@ -13743,6 +13758,7 @@ class XHPOpen extends EditableSyntax
     else
     {
       return rewriter(new XHPOpen(
+        left_angle,
         name,
         attributes,
         right_angle), parents);
@@ -13750,6 +13766,9 @@ class XHPOpen extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let left_angle = EditableSyntax.from_json(
+      json.xhp_open_left_angle, position, source);
+    position += left_angle.width;
     let name = EditableSyntax.from_json(
       json.xhp_open_name, position, source);
     position += name.width;
@@ -13760,6 +13779,7 @@ class XHPOpen extends EditableSyntax
       json.xhp_open_right_angle, position, source);
     position += right_angle.width;
     return new XHPOpen(
+        left_angle,
         name,
         attributes,
         right_angle);
@@ -13768,6 +13788,7 @@ class XHPOpen extends EditableSyntax
   {
     if (XHPOpen._children_keys == null)
       XHPOpen._children_keys = [
+        'left_angle',
         'name',
         'attributes',
         'right_angle'];

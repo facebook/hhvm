@@ -1078,12 +1078,16 @@ let rec get_doc node =
     let expr = get_doc x.xhp_body in
     let right = get_doc x.xhp_close in
     left ^^^ expr ^^^ right
-  | XHPOpen
-    { xhp_open_name; xhp_open_attributes; xhp_open_right_angle } ->
+  | XHPOpen {
+    xhp_open_left_angle;
+    xhp_open_name;
+    xhp_open_attributes;
+    xhp_open_right_angle } ->
+    let left = get_doc xhp_open_left_angle in
     let name = get_doc xhp_open_name in
     let attrs = get_doc xhp_open_attributes in
-    let close = get_doc xhp_open_right_angle in
-    group_doc (group_doc (indent_doc name attrs indt) ^| close)
+    let right = get_doc xhp_open_right_angle in
+    group_doc (group_doc (indent_doc (left ^^^ name) attrs indt) ^| right)
   | XHPAttribute
     { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expression }->
     let name = get_doc xhp_attribute_name in

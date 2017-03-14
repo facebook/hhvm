@@ -773,7 +773,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       ; xhp_body = body
       ; _ } ->
       let name =
-        let pos, name = drop_pstr 1 (pos_name xhp_open_name) in
+        let pos, name = pos_name xhp_open_name in
         (pos, ":" ^ name)
       in
       let combine b e =

@@ -9,54 +9,12 @@
  *)
 
 type t = {
- (* When we encounter an unknown class|function|constant name outside
-  * of strict mode, is that an error? *)
- tco_assume_php : bool;
- (* For somewhat silly historical reasons having to do with the lack
-  * of .hhi's for fairly core XHP classes, we unfortunately mark all
-  * XHP classes as not having their members fully known at Facebook.
-  *
-  * We've also historically not typechecked attributes, and using string
-  * literals for things that aren't strings (eg colspan="3") is common.
-  *
-  * If set to true, this option disables the new, stricter behavior. Please
-  * don't use for new code, but it's useful for migrating existing XHP
-  * codebases. *)
- tco_unsafe_xhp : bool;
-
- (**
-  * Enforces array subtyping relationships.
-  *
-  * There are a few kinds of arrays in Hack:
-  *   1. array: This is a type parameter-less array, that behaves like a PHP
-  *      array, but may be used in place of the arrays listed below.
-  *   2. array<T>: This is a vector-like array. It may be implemented with a
-  *      compact representation. Keys are integer indices. Values are of type T.
-  *   3. array<Tk, Tv>: This is a dictionary-like array. It is generally
-  *      implemented as a hash table. Keys are of type Tk. Values are of type
-  *      Tv.
-  *
-  * Unfortunately, there is no consistent subtyping relationship between these
-  * types:
-  *   1. An array<T> may be provided where an array is required.
-  *   2. An array may be provided where an array<T> is required.
-  *   3. An array<Tk, Tv> may be provided where an array is required.
-  *   4. An array may be provided where an array<Tk, Tv> is required.
-  *
-  * This option enforces a stricter subtyping relationship within these types.
-  * In particular, when enabled, points 2. and 4. from the above list become
-  * typing errors.
-  *)
- tco_safe_array : bool;
-
- (* List of <<UserAttribute>> names expected in the codebase *)
- tco_user_attrs : SSet.t option;
-
- (* Set of experimental features, in lowercase. *)
- tco_experimental_features : SSet.t;
-
- (* Namespace aliasing map *)
- po_auto_namespace_map : (string * string) list;
+  tco_assume_php : bool;
+  tco_unsafe_xhp : bool;
+  tco_safe_array : bool;
+  tco_user_attrs : SSet.t option;
+  tco_experimental_features : SSet.t;
+  po_auto_namespace_map : (string * string) list;
 }
 
 let tco_experimental_instanceof = "instanceof"

@@ -43,6 +43,7 @@ type options = {
   filename : string;
   mode : mode;
   no_builtins : bool;
+  tcopt : GlobalOptions.t;
 }
 
 let builtins_filename =
@@ -234,6 +235,7 @@ let parse_options () =
     then raise (Arg.Bad "only a single mode should be specified")
     else mode := x in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
+  let safe_array = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -305,15 +307,24 @@ let parse_options () =
       Arg.Unit (set_mode Decl_compare),
       " Test comparison functions used in incremental mode on declarations" ^
       " in provided file";
+    "--safe_array",
+      Arg.Set safe_array,
+      " Enforce array subtyping relationships so that array<T> and array<Tk, \
+      Tv> are each subtypes of array but not vice-versa.";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
+  let tcopt = {
+    GlobalOptions.default with
+      GlobalOptions.tco_safe_array = !safe_array;
+  } in
   { filename = fn;
     mode = !mode;
     no_builtins = !no_builtins;
+    tcopt;
   }
 
 let suggest_and_print tcopt fn { FileInfo.funs; classes; typedefs; consts; _ } =
@@ -688,7 +699,7 @@ let handle_mode mode filename opts popt files_contents files_info errors =
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename; mode; no_builtins} popt tcopt =
+let decl_and_run_mode {filename; mode; no_builtins; tcopt} popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Local_id.track_names := true;
   Ident.track_names := true;
@@ -704,10 +715,9 @@ let decl_and_run_mode {filename; mode; no_builtins} popt tcopt =
   handle_mode mode filename tcopt popt files_contents files_info
     (Errors.get_error_list errors)
 
-let main_hack ({filename; mode; no_builtins;} as opts) =
+let main_hack ({filename; mode; no_builtins; _} as opts) =
   (* TODO: We should have a per file config *)
   let popt = ParserOptions.default in
-  let tcopt = TypecheckerOptions.default in
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
   EventLogger.init EventLogger.Event_logger_fake 0.0;
@@ -718,7 +728,7 @@ let main_hack ({filename; mode; no_builtins;} as opts) =
   | Ai ai_options ->
     Ai.do_ Typing_check_utils.check_defs filename ai_options
   | _ ->
-    decl_and_run_mode opts popt tcopt
+    decl_and_run_mode opts popt
 
 (* command line driver *)
 let _ =

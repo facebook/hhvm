@@ -40,16 +40,17 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # Warnings to disable by name, -Wno-${name}
   set(DISABLED_NAMED_WARNINGS)
   list(APPEND DISABLED_NAMED_WARNINGS
-    "deprecated"
-    "strict-aliasing"
-    "write-strings"
-    "invalid-offsetof"
     "error=array-bounds"
     "error=switch"
-    "unused-result"
-    "sign-compare"
     "attributes"
-    "maybe-uninitialized"
+    "deprecated"
+    "invalid-offsetof"
+    "sign-compare"
+    "strict-aliasing"
+    "unused-function"
+    "unused-local-typedefs"
+    "unused-result"
+    "write-strings"
   )
 
   # Warnings to disable by name when building C code.
@@ -108,9 +109,13 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     list(APPEND GENERAL_CXX_OPTIONS
       "Qunused-arguments"
     )
+    list(APPEND DISABLED_C_NAMED_WARNINGS
+      "unused-command-line-argument"
+    )
     list(APPEND DISABLED_NAMED_WARNINGS
-      "unknown-warning-option"
       "return-type-c-linkage"
+      "unknown-warning-option"
+      "unused-command-line-argument"
     )
 
     # Enabled GCC/LLVM stack-smashing protection
@@ -130,11 +135,11 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
   else() # using GCC
     list(APPEND DISABLED_NAMED_WARNINGS
-      "unused-local-typedefs"
       "deprecated-declarations"
-      "unused-function"
+      "maybe-uninitialized"
     )
     list(APPEND DISABLED_C_NAMED_WARNINGS
+      "maybe-uninitialized"
       "old-style-declaration"
     )
     list(APPEND GENERAL_CXX_OPTIONS

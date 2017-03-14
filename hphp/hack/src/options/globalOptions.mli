@@ -12,11 +12,13 @@ type t
 val make :
   tco_assume_php: bool ->
   tco_unsafe_xhp: bool ->
+  tco_safe_array: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   po_auto_namespace_map: (string * string) list -> t
 val tco_assume_php : t -> bool
 val tco_unsafe_xhp : t -> bool
+val tco_safe_array : t -> bool
 val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool

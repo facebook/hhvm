@@ -171,6 +171,7 @@ let load config_filename options =
   let global_opts = GlobalOptions.make
     (bool_ "assume_php" ~default:true config)
     (bool_ "unsafe_xhp" ~default:false config)
+    (bool_ "safe_array" ~default:false config)
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (prepare_auto_namespace_map config)

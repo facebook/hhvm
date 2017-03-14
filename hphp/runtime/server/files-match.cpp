@@ -26,7 +26,7 @@ namespace HPHP {
 
 FilesMatch::FilesMatch(const IniSetting::Map& ini, const Hdf& vh) {
 
-  m_pattern = format_pattern(Config::GetString(ini, vh, "Pattern", "", false),
+  m_pattern = format_pattern(Config::GetString(ini, vh, "pattern", "", false),
                              true);
   m_headers = Config::GetVector(ini, vh, "headers", m_headers, false);
 }

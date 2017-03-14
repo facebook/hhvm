@@ -164,6 +164,7 @@ let get_doc_from_trivia trivia_lst allow_break =
     | Kind.SingleLineComment ->
       (* no code after comments *)
       (text (Trivia.text trivia), true)
+    | Kind.Markup
     | Kind.FixMe
     | Kind.IgnoreError
     | Kind.UnsafeExpression
@@ -222,8 +223,6 @@ let rec get_doc node =
                       (x.header_language |> get_doc |> add_break)
   | Script x -> group_doc ( get_doc x.script_header
                      ^| get_doc x.script_declarations )
-  | ScriptFooter { footer_question_greater_than } ->
-    get_doc footer_question_greater_than
   | ClassishDeclaration
     { classish_attribute; classish_modifiers; classish_keyword;
       classish_name; classish_type_parameters; classish_extends_keyword;

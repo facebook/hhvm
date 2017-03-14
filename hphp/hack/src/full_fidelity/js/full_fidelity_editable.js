@@ -77,6 +77,8 @@ class EditableSyntax
       return IgnoreError.from_json(json, position, source);
     case 'fall_through':
       return FallThrough.from_json(json, position, source);
+    case 'markup':
+      return Markup.from_json(json, position, source);
 
     case 'missing':
       return Missing.missing;
@@ -86,8 +88,6 @@ class EditableSyntax
       return ScriptHeader.from_json(json, position, source);
     case 'script':
       return Script.from_json(json, position, source);
-    case 'footer':
-      return ScriptFooter.from_json(json, position, source);
     case 'simple_type_specifier':
       return SimpleTypeSpecifier.from_json(json, position, source);
     case 'literal':
@@ -835,8 +835,6 @@ class EditableToken extends EditableSyntax
        return new RightBraceToken(leading, trailing);
     case '.':
        return new DotToken(leading, trailing);
-    case '?>':
-       return new QuestionGreaterThanToken(leading, trailing);
     case '->':
        return new MinusGreaterThanToken(leading, trailing);
     case '++':
@@ -1758,13 +1756,6 @@ class DotToken extends EditableToken
     super('.', leading, trailing, '.');
   }
 }
-class QuestionGreaterThanToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('?>', leading, trailing, '?>');
-  }
-}
 class MinusGreaterThanToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -2533,6 +2524,8 @@ class EditableTrivia extends EditableSyntax
         return new IgnoreError(trivia_text);
       case 'fall_through':
         return new FallThrough(trivia_text);
+      case 'markup':
+        return new Markup(trivia_text);
 
       default: throw 'unexpected json kind: ' + json.kind; // TODO: Better error
     }
@@ -2626,6 +2619,15 @@ class FallThrough extends EditableTrivia
   with_text(text)
   {
     return new FallThrough(text);
+  }
+}
+
+class Markup extends EditableTrivia
+{
+  constructor(text) { super('markup', text); }
+  with_text(text)
+  {
+    return new Markup(text);
   }
 }
 
@@ -2846,53 +2848,6 @@ class Script extends EditableSyntax
         'header',
         'declarations'];
     return Script._children_keys;
-  }
-}
-class ScriptFooter extends EditableSyntax
-{
-  constructor(
-    question_greater_than)
-  {
-    super('footer', {
-      question_greater_than: question_greater_than });
-  }
-  get question_greater_than() { return this.children.question_greater_than; }
-  with_question_greater_than(question_greater_than){
-    return new ScriptFooter(
-      question_greater_than);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var question_greater_than = this.question_greater_than.rewrite(rewriter, new_parents);
-    if (
-      question_greater_than === this.question_greater_than)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new ScriptFooter(
-        question_greater_than), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let question_greater_than = EditableSyntax.from_json(
-      json.footer_question_greater_than, position, source);
-    position += question_greater_than.width;
-    return new ScriptFooter(
-        question_greater_than);
-  }
-  get children_keys()
-  {
-    if (ScriptFooter._children_keys == null)
-      ScriptFooter._children_keys = [
-        'question_greater_than'];
-    return ScriptFooter._children_keys;
   }
 }
 class SimpleTypeSpecifier extends EditableSyntax
@@ -16212,7 +16167,6 @@ exports.RightParenToken = RightParenToken;
 exports.LeftBraceToken = LeftBraceToken;
 exports.RightBraceToken = RightBraceToken;
 exports.DotToken = DotToken;
-exports.QuestionGreaterThanToken = QuestionGreaterThanToken;
 exports.MinusGreaterThanToken = MinusGreaterThanToken;
 exports.PlusPlusToken = PlusPlusToken;
 exports.MinusMinusToken = MinusMinusToken;
@@ -16310,11 +16264,11 @@ exports.UnsafeExpression = UnsafeExpression;
 exports.FixMe = FixMe;
 exports.IgnoreError = IgnoreError;
 exports.FallThrough = FallThrough;
+exports.Markup = Markup;
 
 exports.EndOfFile = EndOfFile;
 exports.ScriptHeader = ScriptHeader;
 exports.Script = Script;
-exports.ScriptFooter = ScriptFooter;
 exports.SimpleTypeSpecifier = SimpleTypeSpecifier;
 exports.LiteralExpression = LiteralExpression;
 exports.VariableExpression = VariableExpression;

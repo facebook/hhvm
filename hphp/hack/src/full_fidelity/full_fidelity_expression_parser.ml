@@ -999,7 +999,6 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | MinusEqual
     | MinusGreaterThan
     | Question
-    | QuestionGreaterThan
     | QuestionMinusGreaterThan
     | QuestionQuestion
     | RightBrace

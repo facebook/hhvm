@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-03-06-0001"
+let full_fidelity_schema_version_number = "2017-03-06-0002"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -100,11 +100,6 @@ let schema = List.map from_list [
     "script";
     "header";
     "declarations" ];
-  [ "ScriptFooter";
-    "script_footer";
-    "footer";
-    "footer";
-    "question_greater_than" ];
   [ "SimpleTypeSpecifier";
     "simple_type_specifier";
     "simple_type_specifier";
@@ -1244,7 +1239,6 @@ let given_text_tokens = List.map token_node_from_list [
   [ "LeftBrace"; "{" ];
   [ "RightBrace"; "}" ];
   [ "Dot"; "." ];
-  [ "QuestionGreaterThan"; "?>" ];
   [ "MinusGreaterThan"; "->" ];
   [ "PlusPlus"; "++" ];
   [ "MinusMinus"; "--" ];
@@ -1313,7 +1307,8 @@ let trivia_kinds = List.map trivia_node_from_list [
   [ "UnsafeExpression"; "unsafe_expression" ];
   [ "FixMe"; "fix_me" ];
   [ "IgnoreError"; "ignore_error" ];
-  [ "FallThrough"; "fall_through" ]]
+  [ "FallThrough"; "fall_through" ];
+  [ "Markup"; "markup" ]]
 
 let map_and_concat_separated separator f items =
   String.concat separator (List.map f items)

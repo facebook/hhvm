@@ -40,6 +40,7 @@ let rewrite_tree_no_whitespace node =
           | TriviaKind.IgnoreError
           | TriviaKind.UnsafeExpression
           | TriviaKind.FixMe
+          | TriviaKind.Markup
           | TriviaKind.SingleLineComment
           | TriviaKind.DelimitedComment -> true
           | TriviaKind.EndOfLine

@@ -106,9 +106,6 @@ module WithToken(Token: TokenType) = struct
       script_header: t;
       script_declarations: t;
     }
-    and script_footer = {
-      footer_question_greater_than: t;
-    }
     and simple_type_specifier = {
       simple_type_specifier: t;
     }
@@ -861,7 +858,6 @@ module WithToken(Token: TokenType) = struct
     | EndOfFile of end_of_file
     | ScriptHeader of script_header
     | Script of script
-    | ScriptFooter of script_footer
     | SimpleTypeSpecifier of simple_type_specifier
     | LiteralExpression of literal_expression
     | VariableExpression of variable_expression
@@ -1021,8 +1017,6 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ScriptHeader
       | Script _ ->
         SyntaxKind.Script
-      | ScriptFooter _ ->
-        SyntaxKind.ScriptFooter
       | SimpleTypeSpecifier _ ->
         SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression _ ->
@@ -1302,8 +1296,6 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ScriptHeader
     let is_script node =
       kind node = SyntaxKind.Script
-    let is_script_footer node =
-      kind node = SyntaxKind.ScriptFooter
     let is_simple_type_specifier node =
       kind node = SyntaxKind.SimpleTypeSpecifier
     let is_literal_expression node =
@@ -1626,12 +1618,6 @@ module WithToken(Token: TokenType) = struct
     } = (
       script_header,
       script_declarations
-    )
-
-    let get_script_footer_children {
-      footer_question_greater_than;
-    } = (
-      footer_question_greater_than
     )
 
     let get_simple_type_specifier_children {
@@ -3150,11 +3136,6 @@ module WithToken(Token: TokenType) = struct
         script_header;
         script_declarations;
       ]
-      | ScriptFooter {
-        footer_question_greater_than;
-      } -> [
-        footer_question_greater_than;
-      ]
       | SimpleTypeSpecifier {
         simple_type_specifier;
       } -> [
@@ -4539,11 +4520,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "script_header";
         "script_declarations";
-      ]
-      | ScriptFooter {
-        footer_question_greater_than;
-      } -> [
-        "footer_question_greater_than";
       ]
       | SimpleTypeSpecifier {
         simple_type_specifier;
@@ -5986,12 +5962,6 @@ module WithToken(Token: TokenType) = struct
         Script {
           script_header;
           script_declarations;
-        }
-      | (SyntaxKind.ScriptFooter, [
-          footer_question_greater_than;
-        ]) ->
-        ScriptFooter {
-          footer_question_greater_than;
         }
       | (SyntaxKind.SimpleTypeSpecifier, [
           simple_type_specifier;
@@ -7550,13 +7520,6 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.Script [
         script_header;
         script_declarations;
-      ]
-
-    let make_script_footer
-      footer_question_greater_than
-    =
-      from_children SyntaxKind.ScriptFooter [
-        footer_question_greater_than;
       ]
 
     let make_simple_type_specifier

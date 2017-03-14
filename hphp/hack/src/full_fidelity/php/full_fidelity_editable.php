@@ -140,6 +140,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return IgnoreError::from_json($json, $position, $source);
     case 'fall_through':
       return FallThrough::from_json($json, $position, $source);
+    case 'markup':
+      return Markup::from_json($json, $position, $source);
 
     case 'missing':
       return Missing::missing();
@@ -149,8 +151,6 @@ abstract class EditableSyntax implements ArrayAccess {
       return ScriptHeader::from_json($json, $position, $source);
     case 'script':
       return Script::from_json($json, $position, $source);
-    case 'footer':
-      return ScriptFooter::from_json($json, $position, $source);
     case 'simple_type_specifier':
       return SimpleTypeSpecifier::from_json($json, $position, $source);
     case 'literal':
@@ -940,8 +940,6 @@ abstract class EditableToken extends EditableSyntax {
        return new RightBraceToken($leading, $trailing);
     case '.':
        return new DotToken($leading, $trailing);
-    case '?>':
-       return new QuestionGreaterThanToken($leading, $trailing);
     case '->':
        return new MinusGreaterThanToken($leading, $trailing);
     case '++':
@@ -2661,21 +2659,6 @@ final class DotToken extends EditableToken {
     return new DotToken($this->leading(), $trailing);
   }
 }
-final class QuestionGreaterThanToken extends EditableToken {
-  public function __construct(
-    EditableSyntax $leading,
-    EditableSyntax $trailing) {
-    parent::__construct('?>', $leading, $trailing, '?>');
-  }
-
-  public function with_leading(EditableSyntax $leading): QuestionGreaterThanToken {
-    return new QuestionGreaterThanToken($leading, $this->trailing());
-  }
-
-  public function with_trailing(EditableSyntax $trailing): QuestionGreaterThanToken {
-    return new QuestionGreaterThanToken($this->leading(), $trailing);
-  }
-}
 final class MinusGreaterThanToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -4140,6 +4123,8 @@ abstract class EditableTrivia extends EditableSyntax {
         return new IgnoreError($trivia_text);
       case 'fall_through':
         return new FallThrough($trivia_text);
+      case 'markup':
+        return new Markup($trivia_text);
 
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
@@ -4233,6 +4218,15 @@ class FallThrough extends EditableTrivia {
   }
   public function with_text(string $text): FallThrough {
     return new FallThrough($text);
+  }
+}
+
+class Markup extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('markup', $text);
+  }
+  public function with_text(string $text): Markup {
+    return new Markup($text);
   }
 }
 
@@ -4470,49 +4464,6 @@ final class Script extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_header;
     yield $this->_declarations;
-    yield break;
-  }
-}
-final class ScriptFooter extends EditableSyntax {
-  private EditableSyntax $_question_greater_than;
-  public function __construct(
-    EditableSyntax $question_greater_than) {
-    parent::__construct('footer');
-    $this->_question_greater_than = $question_greater_than;
-  }
-  public function question_greater_than(): EditableSyntax {
-    return $this->_question_greater_than;
-  }
-  public function with_question_greater_than(EditableSyntax $question_greater_than): ScriptFooter {
-    return new ScriptFooter(
-      $question_greater_than);
-  }
-
-  public function rewrite(
-    ( function
-      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
-    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
-    $new_parents = $parents ?? [];
-    array_push($new_parents, $this);
-    $question_greater_than = $this->question_greater_than()->rewrite($rewriter, $new_parents);
-    if (
-      $question_greater_than === $this->question_greater_than()) {
-      return $rewriter($this, $parents ?? []);
-    } else {
-      return $rewriter(new ScriptFooter(
-        $question_greater_than), $parents ?? []);
-    }
-  }
-
-  public static function from_json(mixed $json, int $position, string $source) {
-    $question_greater_than = EditableSyntax::from_json(
-      $json->footer_question_greater_than, $position, $source);
-    $position += $question_greater_than->width();
-    return new ScriptFooter(
-        $question_greater_than);
-  }
-  public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_question_greater_than;
     yield break;
   }
 }

@@ -1349,11 +1349,6 @@ module WithExpressionAndStatementAndTypeParser
       (* TODO figure out what global const differs from class const *)
     | Const -> parse_const_declaration parser1 (make_missing ())
               (make_token token)
-    | QuestionGreaterThan ->
-      (* We do not support this tag in Hack.
-       TODO: Give an error in a later pass if this is found in a Hack file.
-       TODO: Give an error in a later pass if this is not at the end. *)
-       (parser1, make_script_footer (make_token token))
     | _ ->
       parse_statement parser
       (* TODO: What if it's not a legal statement? Do we still make progress

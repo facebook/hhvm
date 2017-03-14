@@ -404,6 +404,7 @@ let builder = object (this)
             | TriviaKind.FixMe
             | TriviaKind.IgnoreError
             | TriviaKind.SingleLineComment
+            | TriviaKind.Markup
             | TriviaKind.DelimitedComment ->
               handle_newlines ~is_trivia:true newlines;
               this#add_string ~is_trivia:true @@ Trivia.text t;
@@ -448,6 +449,7 @@ let builder = object (this)
         | TriviaKind.UnsafeExpression
         | TriviaKind.FixMe
         | TriviaKind.IgnoreError
+        | TriviaKind.Markup
         | TriviaKind.DelimitedComment ->
           currently_leading := false;
           let delimited_lines =
@@ -534,7 +536,6 @@ let rec transform node =
     let (header, declarations) = get_script_children x in
     t header;
     handle_possible_list declarations;
-  | ScriptFooter x -> t @@ get_script_footer_children x
   | SimpleTypeSpecifier x -> t @@ get_simple_type_specifier_children x
   | LiteralExpression x ->
     (* Double quoted string literals can create a list *)

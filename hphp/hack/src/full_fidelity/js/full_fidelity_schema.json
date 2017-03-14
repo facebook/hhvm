@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-03-06-0001",
+  "version" : "2017-03-06-0002",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -19,7 +19,9 @@
     { "trivia_kind_name" : "IgnoreError",
       "trivia_type_name" : "ignore_error" },
     { "trivia_kind_name" : "FallThrough",
-      "trivia_type_name" : "fall_through" } ],
+      "trivia_type_name" : "fall_through" },
+    { "trivia_kind_name" : "Markup",
+      "trivia_type_name" : "markup" } ],
   "tokens" : [
     { "token_kind" : "Abstract",
       "token_text" : "abstract" },
@@ -217,8 +219,6 @@
       "token_text" : "}" },
     { "token_kind" : "Dot",
       "token_text" : "." },
-    { "token_kind" : "QuestionGreaterThan",
-      "token_text" : "?>" },
     { "token_kind" : "MinusGreaterThan",
       "token_text" : "->" },
     { "token_kind" : "PlusPlus",
@@ -417,13 +417,6 @@
       "fields" : [
         { "field_name" : "header" },
         { "field_name" : "declarations" }
-      ] },
-    { "kind_name" : "ScriptFooter",
-      "type_name" : "script_footer",
-      "description" : "footer",
-      "prefix" : "footer",
-      "fields" : [
-        { "field_name" : "question_greater_than" }
       ] },
     { "kind_name" : "SimpleTypeSpecifier",
       "type_name" : "simple_type_specifier",

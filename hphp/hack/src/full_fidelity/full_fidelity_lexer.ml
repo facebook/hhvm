@@ -931,7 +931,6 @@ let scan_token in_type lexer =
   | ('&', _, _) -> (advance lexer 1, TokenKind.Ampersand)
   | ('?', '-', '>') -> (advance lexer 3, TokenKind.QuestionMinusGreaterThan)
   | ('?', '?', _) -> (advance lexer 2, TokenKind.QuestionQuestion)
-  | ('?', '>', _) -> (advance lexer 2, TokenKind.QuestionGreaterThan)
   | ('?', _, _) -> (advance lexer 1, TokenKind.Question)
   | (':', ':', _) -> (advance lexer 2, TokenKind.ColonColon)
   | (':', _, _) -> (advance lexer 1, TokenKind.Colon)
@@ -1028,6 +1027,26 @@ let scan_single_line_comment lexer =
       Trivia.make_single_line_comment w in
   (lexer, c)
 
+let rec skip_to_end_of_markup_comment lexer =
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  let ch2 = peek_char lexer 2 in
+  let ch3 = peek_char lexer 3 in
+  let ch4 = peek_char lexer 4 in
+  if ch0 = invalid && at_end lexer then
+    (* It's not an error to run off the end of one of these. *)
+    lexer
+  else if ch0 = '<' && ch1 = '?' && ch2 = 'p' && ch3 = 'h' && ch4 = 'p' then
+    advance lexer 5
+  else
+    skip_to_end_of_markup_comment (advance lexer 1)
+
+let scan_markup_comment lexer =
+  let lexer = skip_to_end_of_markup_comment lexer in
+  let w = width lexer in
+  let c = Trivia.make_markup w in
+  (lexer, c)
+
 let rec skip_to_end_of_delimited_comment lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
@@ -1069,10 +1088,27 @@ let scan_delimited_comment lexer =
   (lexer, c)
 
 let scan_php_trivia lexer =
+  (* Hack does not support PHP style embedded markup:
+  <?php
+  if (x) {
+  ?>
+  <foo>bar</foo>
+  <?php
+  } else { ... }
+
+However, ?> is never legal in Hack, so we can treat ?> ... any text ... <?php
+as a comment, and then give an error saying that this feature is not supported
+in Hack.
+
+TODO: Give an error if this appears in a Hack program.
+*)
   let lexer = start_new_lexeme lexer in
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
   match (ch0, ch1) with
+  | ('?', '>' ) ->
+    let (lexer, c) = scan_markup_comment lexer in
+    (lexer, Some c)
   | ('#', _) ->
     let (lexer, c) = scan_hash_comment lexer in
     (lexer, Some c)

@@ -23,7 +23,6 @@ type t =
 | EndOfFile
 | ScriptHeader
 | Script
-| ScriptFooter
 | SimpleTypeSpecifier
 | LiteralExpression
 | VariableExpression
@@ -165,7 +164,6 @@ let to_string kind =
   | EndOfFile -> "end_of_file"
   | ScriptHeader -> "header"
   | Script -> "script"
-  | ScriptFooter -> "footer"
   | SimpleTypeSpecifier -> "simple_type_specifier"
   | LiteralExpression -> "literal"
   | VariableExpression -> "variable"

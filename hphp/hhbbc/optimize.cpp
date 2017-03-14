@@ -32,6 +32,7 @@
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/dce.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp.h"
@@ -599,7 +600,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
     }
     if (options.GlobalDCE) {
       global_dce(index, ainfo);
-      again = merge_blocks(ainfo);
+      again = control_flow_opts(ainfo);
       assert(check(*ainfo.ctx.func));
       /*
        * Global DCE can change types of locals across blocks.  See

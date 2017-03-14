@@ -13,42 +13,30 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HHBBC_DCE_H_
-#define incl_HHBBC_DCE_H_
-
-#include <vector>
-
-#include "hphp/runtime/base/type-string.h"
-
-#include "hphp/hhbbc/misc.h"
+#ifndef incl_HHBBC_CFG_OPTS_H_
+#define incl_HHBBC_CFG_OPTS_H_
 
 namespace HPHP { namespace HHBBC {
 
 struct Index;
-struct State;
-struct Context;
-struct Bytecode;
 struct FuncAnalysis;
-namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Perform DCE on a single basic block.
+ * Assist in removing blocks that aren't reachable by removing
+ * conditional jumps that are never taken.  Conditional jumps that are
+ * always taken are turned into unconditional jumps in first_pass.
+ *
+ * If options.RemoveDeadBlocks is off, this function just replaces
+ * blocks we believe are unreachable with fatal opcodes.
  */
-void local_dce(const Index&, const FuncAnalysis&, borrowed_ptr<php::Block>,
-  const State&);
+void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
 
 /*
- * Eliminate dead code in a function, across basic blocks, based on
- * results from a previous analyze_func call.
+ * Simplify control flow, and create Switch and SSwitch bytecodes.
  */
-void global_dce(const Index&, const FuncAnalysis&);
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_unreachable("static analysis error: supposedly "
-                                 "unreachable code was reached");
+bool control_flow_opts(const FuncAnalysis&);
 
 //////////////////////////////////////////////////////////////////////
 

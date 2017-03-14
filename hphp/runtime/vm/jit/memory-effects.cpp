@@ -707,7 +707,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CallArray:
     return CallEffects {
-      inst.extra<CallArray>()->destroyLocals,
+      inst.extra<CallArray>()->writeLocals,
       AMIStateAny,
       // The AStackAny on this is more conservative than it could be; see Call
       // and CallBuiltin.
@@ -720,7 +720,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<Call>();
       return CallEffects {
-        extra->destroyLocals,
+        extra->writeLocals,
         // kill
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // We might side-exit inside the callee, and interpret a return.  So we
@@ -745,7 +745,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
+      auto const locs = extra->writeLocals ? AFrameAny : AEmpty;
       return may_raise(
         inst, may_load_store_kill(stk | AHeapAny | locs, locs, AMIStateAny));
     }
@@ -1959,7 +1959,7 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (CallEffects x) -> R {
       return CallEffects {
-        x.destroys_locals,
+        x.writes_locals,
         canonicalize(x.kills),
         canonicalize(x.stack)
       };

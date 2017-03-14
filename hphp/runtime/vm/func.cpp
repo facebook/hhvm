@@ -1076,7 +1076,7 @@ bool disallowDynamicVarEnvFuncs() {
     RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON;
 }
 
-bool funcDestroysLocals(const Func* callee) {
+bool funcWritesLocals(const Func* callee) {
   assertx(callee != nullptr);
 
   // A skip-frame function can dynamically call a function which writes to the

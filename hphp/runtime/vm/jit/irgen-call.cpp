@@ -739,12 +739,12 @@ const StaticString
   s_php_errormsg("php_errormsg");
 
 /*
- * Could `inst' clobber the locals in the environment of `caller'?
+ * Could `inst' write to the locals in the environment of `caller'?
  *
  * This occurs, e.g., if `inst' is a call to extract().
  */
-bool callDestroysLocals(const NormalizedInstruction& inst,
-                        const Func* caller) {
+bool callWritesLocals(const NormalizedInstruction& inst,
+                      const Func* caller) {
   // We don't handle these two cases, because we don't compile functions
   // containing them:
   assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
@@ -754,10 +754,10 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
 
   auto const checkTaintId = [&](Id id) {
     auto const str = unit->lookupLitstrId(id);
-    // Only builtins can destroy a caller's locals or be skip-frame and if we
+    // Only builtins can write to a caller's locals or be skip-frame and if we
     // can't lookup the function, we know its not a builtin.
     auto const callee = Unit::lookupFunc(str);
-    return callee && funcDestroysLocals(callee);
+    return callee && funcWritesLocals(callee);
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
@@ -801,7 +801,7 @@ bool callDestroysLocals(const NormalizedInstruction& inst,
       return !disallowDynamicVarEnvFuncs();
 
     default:
-      always_assert("Unhandled FPush type in callDestroysLocals" && 0);
+      always_assert("Unhandled FPush type in callWritesLocals" && 0);
   }
 }
 
@@ -1299,9 +1299,9 @@ void emitFPassCW(IRGS& env, int32_t argNum) {
 void emitFCallArray(IRGS& env) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
-  auto const destroyLocals = callee
-    ? funcDestroysLocals(callee)
-    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
+  auto const writeLocals = callee
+    ? funcWritesLocals(callee)
+    : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
 
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
@@ -1309,7 +1309,7 @@ void emitFCallArray(IRGS& env) {
     bcOff(env),
     nextBcOff(env),
     callee,
-    destroyLocals
+    writeLocals
   };
   auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
   push(env, retVal);
@@ -1318,9 +1318,9 @@ void emitFCallArray(IRGS& env) {
 void emitFCallUnpack(IRGS& env, int32_t numParams) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
-  auto const destroyLocals = callee
-    ? funcDestroysLocals(callee)
-    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
+  auto const writeLocals = callee
+    ? funcWritesLocals(callee)
+    : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
 
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
@@ -1328,7 +1328,7 @@ void emitFCallUnpack(IRGS& env, int32_t numParams) {
     bcOff(env),
     nextBcOff(env),
     callee,
-    destroyLocals
+    writeLocals
   };
   auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
   push(env, retVal);
@@ -1345,9 +1345,9 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
   auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
   auto const callee = env.currentNormalizedInstruction->funcd;
 
-  auto const destroyLocals = callee
-    ? funcDestroysLocals(callee)
-    : callDestroysLocals(*env.currentNormalizedInstruction, curFunc(env));
+  auto const writeLocals = callee
+    ? funcWritesLocals(callee)
+    : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
   auto const needsCallerFrame = callee
     ? funcNeedsCallerFrame(callee)
     : callNeedsCallerFrame(
@@ -1364,7 +1364,7 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
-      destroyLocals,
+      writeLocals,
       needsCallerFrame,
       op == Op::FCallAwait
     },
@@ -1402,7 +1402,7 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
       static_cast<uint32_t>(numParams),
       returnBcOffset,
       callee,
-      funcDestroysLocals(callee),
+      funcWritesLocals(callee),
       funcNeedsCallerFrame(callee),
       false
     },

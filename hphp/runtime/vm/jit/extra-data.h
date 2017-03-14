@@ -606,13 +606,13 @@ struct CallArrayData : IRExtraData {
                          Offset pcOffset,
                          Offset after,
                          const Func* callee,
-                         bool destroyLocals)
+                         bool writeLocals)
     : spOffset(spOffset)
     , numParams(numParams)
     , pc(pcOffset)
     , after(after)
     , callee(callee)
-    , destroyLocals(destroyLocals)
+    , writeLocals(writeLocals)
   {}
 
   std::string show() const {
@@ -622,7 +622,7 @@ struct CallArrayData : IRExtraData {
       callee
         ? folly::sformat(",{}", callee->fullName())
         : std::string{},
-      destroyLocals ? ",destroyLocals" : "");
+      writeLocals ? ",writeLocals" : "");
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
@@ -630,19 +630,19 @@ struct CallArrayData : IRExtraData {
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   const Func* callee; // nullptr if not statically known
-  bool destroyLocals;
+  bool writeLocals;
 };
 
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            const Func* callee,
                            int32_t numNonDefault,
-                           bool destroyLocals,
+                           bool writeLocals,
                            bool needsFrame)
     : spOffset(spOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
-    , destroyLocals{destroyLocals}
+    , writeLocals{writeLocals}
     , needsCallerFrame{needsFrame}
   {}
 
@@ -650,7 +650,7 @@ struct CallBuiltinData : IRExtraData {
     return folly::to<std::string>(
       spOffset.offset, ',',
       callee->fullName()->data(),
-      destroyLocals ? ",destroyLocals" : "",
+      writeLocals ? ",writeLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : ""
     );
   }
@@ -658,7 +658,7 @@ struct CallBuiltinData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
   const Func* callee;
   int32_t numNonDefault;
-  bool destroyLocals;
+  bool writeLocals;
   bool needsCallerFrame;
 };
 
@@ -667,14 +667,14 @@ struct CallData : IRExtraData {
                     uint32_t numParams,
                     Offset after,
                     const Func* callee,
-                    bool destroy,
+                    bool writeLocals,
                     bool needsFrame,
                     bool fcallAwait)
     : spOffset(spOffset)
     , numParams(numParams)
     , after(after)
     , callee(callee)
-    , destroyLocals(destroy)
+    , writeLocals(writeLocals)
     , needsCallerFrame(needsFrame)
     , fcallAwait(fcallAwait)
   {}
@@ -685,7 +685,7 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
-      destroyLocals ? ",destroyLocals" : "",
+      writeLocals ? ",writeLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : "",
       fcallAwait ? ",fcallAwait" : ""
     );
@@ -695,7 +695,7 @@ struct CallData : IRExtraData {
   uint32_t numParams;
   Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
-  bool destroyLocals;
+  bool writeLocals;
   bool needsCallerFrame;
   bool fcallAwait;
 };

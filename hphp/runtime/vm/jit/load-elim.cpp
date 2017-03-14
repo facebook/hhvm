@@ -412,7 +412,7 @@ Flags handle_general_effects(Local& env,
 }
 
 void handle_call_effects(Local& env, CallEffects effects) {
-  if (effects.destroys_locals) {
+  if (effects.writes_locals) {
     clear_everything(env);
     return;
   }

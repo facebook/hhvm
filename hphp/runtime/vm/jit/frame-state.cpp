@@ -421,7 +421,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto i = uint32_t{0}; i < kNumActRecCells + extra->numParams; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
-      trackCall(extra->destroyLocals);
+      trackCall(extra->writeLocals);
       // The return value is known to be at least a Gen.
       setType(
         stk(extra->spOffset + kNumActRecCells + extra->numParams - 1),
@@ -449,7 +449,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
       for (auto i = uint32_t{0}; i < numCells; ++i) {
         setValue(stk(extra->spOffset + i), nullptr);
       }
-      trackCall(extra->destroyLocals);
+      trackCall(extra->writeLocals);
       setType(stk(extra->spOffset + numCells - 1), TGen);
       // A CallArray pops the ActRec, actual args, and an array arg.
       assertx(cur().bcSPOff == inst->marker().spOff());
@@ -465,7 +465,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case CallBuiltin:
-    if (inst->extra<CallBuiltin>()->destroyLocals) clearLocals();
+    if (inst->extra<CallBuiltin>()->writeLocals) clearLocals();
     break;
 
   case ContEnter:
@@ -1033,7 +1033,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
     [&] (PureStore m)       { handle_stores(m.dst); },
     [&] (PureSpillFrame m)  { handle_stores(m.stk); },
     [&] (CallEffects x) {
-      if (x.destroys_locals) handle_stores(AFrameAny);
+      if (x.writes_locals) handle_stores(AFrameAny);
       handle_stores(x.stack);
     },
     [&] (PureLoad m)        {},
@@ -1355,8 +1355,8 @@ void FrameStateMgr::trackInlineReturn() {
  * Keeping a value live across a Call requires spilling, so we avoid it---but
  * we do continue keeping track of types.
  */
-void FrameStateMgr::trackCall(bool destroysLocals) {
-  if (destroysLocals) clearLocals();
+void FrameStateMgr::trackCall(bool writesLocals) {
+  if (writesLocals) clearLocals();
   for (auto& state : m_stack) {
     for (auto& loc : state.locals) {
       if (loc.value && !loc.value->inst()->is(DefConst)) loc.value = nullptr;

@@ -1874,7 +1874,7 @@ void handle_call(Env& env,
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
   auto bset = ALocBits{};
-  if (e.destroys_locals) bset |= env.ainfo.all_frame;
+  if (e.writes_locals) bset |= env.ainfo.all_frame;
   bset |= env.ainfo.may_alias(e.stack);
   bset |= env.ainfo.may_alias(AHeapAny);
   bset &= ~env.ainfo.expand(e.kills);

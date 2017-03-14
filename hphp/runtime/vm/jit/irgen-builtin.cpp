@@ -1324,7 +1324,7 @@ SSATmp* builtinCall(IRGS& env,
       spOffBCFromIRSP(env),
       callee,
       params.count ? -1 : numNonDefault,
-      funcDestroysLocals(callee),
+      funcWritesLocals(callee),
       funcNeedsCallerFrame(callee)
     },
     catchMaker.makeUnusualCatch(),

@@ -223,6 +223,7 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
+  void acceptRequestEventHandlers(bool enable);
   std::size_t registerRequestEventHandler(RequestEventHandler* handler);
   void unregisterRequestEventHandler(RequestEventHandler* handler,
                                      std::size_t index);
@@ -512,6 +513,7 @@ private:
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
+  bool m_acceptRequestEventHandlers;
 
   // error handling
   req::vector<std::pair<Variant,int>> m_userErrorHandlers;

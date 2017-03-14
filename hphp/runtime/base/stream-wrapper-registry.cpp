@@ -193,11 +193,13 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 
   // Global, non-disabled wrapper?
   {
-    auto& disabled = s_request_wrappers->disabled();
+    auto disabledWrappers = [] () -> RequestWrappers::DisabledSet& {
+      return s_request_wrappers->disabled();
+    };
     auto it = s_wrappers.find(lscheme.data());
     if ((it != s_wrappers.end()) &&
         (!have_request_wrappers ||
-        (disabled.find(lscheme) == disabled.end()))) {
+        (disabledWrappers().find(lscheme) == disabledWrappers().end()))) {
       return it->second;
     }
   }

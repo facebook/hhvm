@@ -2049,6 +2049,8 @@ void hphp_process_init() {
   BootStats::mark("xmlInitParser");
 
   g_context.getCheck();
+  // Some event handlers are registered during the startup process.
+  g_context->acceptRequestEventHandlers(true);
   InitFiniNode::ProcessPreInit();
   // TODO(9795696): Race in thread map may trigger spurious logging at
   // thread exit, so for now, only spawn threads if we're a server.
@@ -2178,6 +2180,10 @@ void hphp_session_init() {
   // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
+  // Allow request event handlers to be created now that a new request has
+  // started.
+  g_context->acceptRequestEventHandlers(true);
+
   g_context->requestInit();
   s_sessionInitialized = true;
   ExtensionRegistry::requestInit();
@@ -2290,6 +2296,10 @@ void hphp_context_shutdown() {
   // Extension shutdown could have re-initialized some
   // request locals
   context->onRequestShutdown();
+
+  // This causes request event handler registration to fail until the next
+  // request starts.
+  context->acceptRequestEventHandlers(false);
 }
 
 void hphp_context_exit(bool shutdown /* = true */) {

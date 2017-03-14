@@ -578,9 +578,14 @@ void ExecutionContext::popUserExceptionHandler() {
   }
 }
 
+void ExecutionContext::acceptRequestEventHandlers(bool enable) {
+  m_acceptRequestEventHandlers = enable;
+}
+
 std::size_t ExecutionContext::registerRequestEventHandler(
   RequestEventHandler *handler) {
   assert(handler && handler->getInited());
+  assert(m_acceptRequestEventHandlers);
   m_requestEventHandlers.push_back(handler);
   return m_requestEventHandlers.size()-1;
 }

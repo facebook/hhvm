@@ -83,6 +83,7 @@ let instr_pop flavor =
   | Flavor.Classref -> instr_popa
 
 let instr_pushl local = instr (IGet (PushL local))
+let instr_agetc = instr (IGet AGetC)
 let instr_throw = instr (IContFlow Throw)
 
 let instr_add_elemc = instr (ILitConst (AddElemC))
@@ -100,6 +101,7 @@ let instr_entrynop = instr (IBasic EntryNop)
 let instr_dict x xs = instr (ILitConst (Dict(x, xs)))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
+let instr_basesc x y = instr (IBase(BaseSC(x, y)))
 let instr_baseh = instr (IBase BaseH)
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))
 let instr_fcall count = instr (ICall(FCall count))
@@ -119,6 +121,8 @@ let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
 let instr_fpushobjmethodd num_params method_ flavor =
   instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
+let instr_fpushclsmethodd num_params class_name method_name =
+  instr (ICall (FPushClsMethodD (num_params, class_name, method_name)))
 let instr_fpushobjmethodd_nullthrows num_params method_ =
   instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
 let instr_querym num_params op key =

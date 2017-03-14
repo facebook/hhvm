@@ -33,8 +33,10 @@ module LValOp = struct
 end
 
 let self_name = ref (None : string option)
-
 let set_self n = self_name := n
+
+let compiler_options = ref Hhbc_options.default
+let set_compiler_options o = compiler_options := o
 
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
@@ -45,10 +47,12 @@ let strip_dollar id =
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
+  let ints_overflow_to_ints =
+    Hhbc_options.ints_overflow_to_ints !compiler_options in
   match op with
-  | A.Plus -> instr (IOp AddO)
-  | A.Minus -> instr (IOp SubO)
-  | A.Star -> instr (IOp MulO)
+  | A.Plus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
+  | A.Minus -> instr (IOp (if ints_overflow_to_ints then Sub else  SubO))
+  | A.Star -> instr (IOp (if ints_overflow_to_ints then Mul else MulO))
   | A.Slash -> instr (IOp Div)
   | A.Eqeq -> instr (IOp Eq)
   | A.EQeqeq -> instr (IOp Same)
@@ -72,10 +76,12 @@ let from_binop op =
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
+  let ints_overflow_to_ints =
+    Hhbc_options.ints_overflow_to_ints !compiler_options in
   match op with
-  | A.Plus -> Some PlusEqualO
-  | A.Minus -> Some MinusEqualO
-  | A.Star -> Some MulEqualO
+  | A.Plus -> Some (if ints_overflow_to_ints then PlusEqual else PlusEqualO)
+  | A.Minus -> Some (if ints_overflow_to_ints then MinusEqual else MinusEqualO)
+  | A.Star -> Some (if ints_overflow_to_ints then MulEqual else MulEqualO)
   | A.Slash -> Some DivEqual
   | A.Starstar -> Some PowEqual
   | A.Amp -> Some AndEqual
@@ -88,11 +94,13 @@ let binop_to_eqop op =
   | _ -> None
 
 let unop_to_incdec_op op =
+  let ints_overflow_to_ints =
+    Hhbc_options.ints_overflow_to_ints !compiler_options in
   match op with
-  | A.Uincr -> Some PreIncO
-  | A.Udecr -> Some PreDecO
-  | A.Upincr -> Some PostIncO
-  | A.Updecr -> Some PostDecO
+  | A.Uincr -> Some (if ints_overflow_to_ints then PreInc else PreIncO)
+  | A.Udecr -> Some (if ints_overflow_to_ints then PreDec else PreDecO)
+  | A.Upincr -> Some (if ints_overflow_to_ints then PostInc else PostIncO)
+  | A.Updecr -> Some (if ints_overflow_to_ints then PostDec else PostDecO)
   | _ -> None
 
 let collection_type = function
@@ -996,17 +1004,19 @@ and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
     ]
 
 and emit_unop op e =
+  let ints_overflow_to_ints =
+    Hhbc_options.ints_overflow_to_ints !compiler_options in
   match op with
   | A.Utild -> gather [from_expr e; instr (IOp BitNot)]
   | A.Unot -> gather [from_expr e; instr (IOp Not)]
   | A.Uplus -> gather
     [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (IOp AddO)]
+    instr (IOp (if ints_overflow_to_ints then Add else AddO))]
   | A.Uminus -> gather
     [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (IOp SubO)]
+    instr (IOp (if ints_overflow_to_ints then Sub else SubO))]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     begin match unop_to_incdec_op op with
     | None -> emit_nyi "incdec"

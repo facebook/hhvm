@@ -19,6 +19,7 @@ open Sys_utils
 type options = {
   filename    : string;
   fallback    : bool;
+  config      : string list;
 }
 
 (*****************************************************************************)
@@ -34,11 +35,17 @@ let die str =
 let parse_options () =
   let fn_ref = ref None in
   let fallback = ref false in
+  let config = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
-    [ "--fallback"
-    , Arg.Set fallback
-    , " Enables fallback compilation"
+    [ ("--fallback"
+      , Arg.Set fallback
+      , " Enables fallback compilation"
+      );
+      ("-v"
+      , Arg.String (fun str -> config := str :: !config)
+      , " Configuration: Eval.EnableHipHopSyntax=<value> or Hack.Lang.IntsOverflowToInts=<value>"
+      )
     ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -47,6 +54,7 @@ let parse_options () =
     | None -> die usage in
   { filename = fn
   ; fallback = !fallback
+  ; config = !config
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -121,16 +129,13 @@ let parse_name popt files_contents =
     files_info
   end
 
-let hhvm_unix_call filename =
+let hhvm_unix_call config filename =
   Printf.printf "compiling: %s\n" filename;
   let readme, writeme = Unix.pipe () in
   let prog_name = "/usr/local/hphpi/bin/hhvm" in
-  let params =
-    [| prog_name
-    ;  "-v"
-    ;  "Eval.DumpHhas=1"
-    ;  filename
-    |] in
+  let options =
+    List.concat_map ("Eval.DumpHhas=1" :: config) (fun s -> ["-v"; s]) in
+  let params = Array.of_list ([prog_name] @ options @ [filename]) in
   let _ =
     Unix.create_process prog_name params Unix.stdin writeme Unix.stderr in
   Unix.close writeme;
@@ -161,10 +166,14 @@ let do_compile compiler_options opts files_info = begin
     (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts) in
   let f_fold fn fileinfo text = begin
     let ast = get_nast_from_fileinfo opts fn fileinfo in
+    let options = Hhbc_options.get_options_from_config
+      compiler_options.config in
+    Hhbc_from_nast.set_compiler_options options;
     let hhas_prog = Hhas_program.from_ast ast in
     let hhas_text = Hhbc_hhas.to_string hhas_prog in
     if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
-    then text ^ hhvm_unix_call @@ Relative_path.to_absolute fn
+    then text ^
+      hhvm_unix_call compiler_options.config (Relative_path.to_absolute fn)
     else text ^ hhas_text
   end in
   let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in

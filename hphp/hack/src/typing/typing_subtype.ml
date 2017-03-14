@@ -739,6 +739,9 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
   | (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
     when xhp_child = SN.Classes.cXHPChild -> env
+  | (_, (Tarraykind _)), (_, (Tarraykind AKany)) ->
+      (* An array of any kind is a subtype of an array of Tany. *)
+      env
   | (_, (Tarraykind (AKvec ty_sub))), (_, (Tarraykind (AKvec ty_super))) ->
       sub_type env ty_sub ty_super
   | (_, Tarraykind AKmap (tk_sub, tv_sub)), (_, (Tarraykind (AKmap (tk_super, tv_super)))) ->

@@ -104,9 +104,19 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
     else
       let () = TUtils.uerror r1 ty1 r2 ty2 in
       env, Terr
-  | Tarraykind (AKany | AKempty), (Tarraykind _ as ty)
-  | (Tarraykind _ as ty), Tarraykind (AKany | AKempty) ->
+  | Tarraykind AKempty, (Tarraykind _ as ty)
+  | (Tarraykind _ as ty), Tarraykind AKempty
+  | (Tarraykind AKany as ty), Tarraykind AKany ->
       env, ty
+  | Tarraykind AKany, (Tarraykind _ as ty)
+  | (Tarraykind _ as ty), Tarraykind AKany ->
+      let safe_array =
+        TypecheckerOptions.safe_array (Env.get_options env) in
+      if safe_array then
+        (TUtils.uerror r1 ty1 r2 ty2;
+        env, Terr)
+      else
+        env, ty
   | Tarraykind AKvec ty1, Tarraykind AKvec ty2 ->
       let env, ty = unify env ty1 ty2 in
       env, Tarraykind (AKvec ty)

@@ -30,7 +30,9 @@ let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
   let body_instrs,
       method_decl_vars,
       method_params,
-      method_return_type =
+      method_return_type,
+      method_is_generator,
+      method_is_pair_generator =
     Emit_body.from_ast
       ~self:(Some name)
       tparams
@@ -57,6 +59,8 @@ let from_ast_no_memoization : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
     method_body
     method_decl_vars
     method_is_async
+    method_is_generator
+    method_is_pair_generator
 
 let from_asts ast_class ast_methods =
   let is_memoized ast_method =

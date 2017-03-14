@@ -16,7 +16,9 @@ let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
   let body_instrs,
       function_decl_vars,
       function_params,
-      function_return_type =
+      function_return_type,
+      function_is_generator,
+      function_is_pair_generator =
     Emit_body.from_ast
       ~self:None
       ast_fun.Ast.f_tparams
@@ -39,6 +41,8 @@ let from_ast_no_memoization : Ast.fun_ -> Hhas_function.t =
     function_body
     function_decl_vars
     function_is_async
+    function_is_generator
+    function_is_pair_generator
 
 let from_ast : Ast.fun_ -> Hhas_function.t list =
   fun ast_fun ->

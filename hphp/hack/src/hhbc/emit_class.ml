@@ -33,6 +33,8 @@ let default_constructor ast_class =
   let method_return_type = None in
   let method_decl_vars = [] in
   let method_is_async = false in
+  let method_is_generator = false in
+  let method_is_pair_generator = false in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -47,6 +49,8 @@ let default_constructor ast_class =
     method_body
     method_decl_vars
     method_is_async
+    method_is_generator
+    method_is_pair_generator
 
 let from_extends _tparams extends =
   match extends with

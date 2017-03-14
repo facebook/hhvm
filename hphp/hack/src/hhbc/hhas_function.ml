@@ -16,6 +16,8 @@ type t = {
   function_body          : Hhbc_ast.instruct list;
   function_decl_vars     : string list; (* Actually local_id list *)
   function_is_async      : bool;
+  function_is_generator  : bool;
+  function_is_pair_generator : bool;
 }
 
 let make
@@ -25,7 +27,9 @@ let make
   function_return_type
   function_body
   function_decl_vars
-  function_is_async =
+  function_is_async
+  function_is_generator
+  function_is_pair_generator =
   {
     function_attributes;
     function_name;
@@ -34,6 +38,8 @@ let make
     function_body;
     function_decl_vars;
     function_is_async;
+    function_is_generator;
+    function_is_pair_generator;
   }
 
 let attributes f = f.function_attributes
@@ -43,5 +49,7 @@ let return_type f = f.function_return_type
 let body f = f.function_body
 let decl_vars f = f.function_decl_vars
 let is_async f = f.function_is_async
+let is_generator f = f.function_is_generator
+let is_pair_generator f = f.function_is_pair_generator
 let with_name f function_name = { f with function_name }
 let with_body f function_body = { f with function_body }

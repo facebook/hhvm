@@ -62,9 +62,12 @@ let from_ast ~self tparams params ret b =
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter params
   in
+  let (is_generator, is_pair_generator) = is_function_generator stmt_instrs in
+  let generator_instr = if is_generator then instr_createcont else empty in
   let body_instrs = gather [
     begin_label;
     emit_method_prolog params;
+    generator_instr;
     stmt_instrs;
     ret_instrs;
     default_value_setters;
@@ -75,5 +78,11 @@ let from_ast ~self tparams params ret b =
   let function_decl_vars = extract_decl_vars body_instrs in
   let body_instrs = Local_id_rewriter.unname_instrseq
     (List.map params Hhas_param.name @ function_decl_vars)
-    body_instrs in
-  body_instrs, function_decl_vars, params, return_type_info
+    body_instrs
+  in
+  body_instrs,
+  function_decl_vars,
+  params,
+  return_type_info,
+  is_generator,
+  is_pair_generator

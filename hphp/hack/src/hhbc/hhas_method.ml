@@ -22,6 +22,8 @@ type t = {
   method_body          : Hhbc_ast.instruct list;
   method_decl_vars     : string list; (* Actually local_id list *)
   method_is_async      : bool;
+  method_is_generator  : bool;
+  method_is_pair_generator  : bool;
 }
 
 let make
@@ -38,7 +40,8 @@ let make
   method_body
   method_decl_vars
   method_is_async
-= {
+  method_is_generator
+  method_is_pair_generator = {
     method_attributes;
     method_is_protected;
     method_is_public;
@@ -52,6 +55,8 @@ let make
     method_body;
     method_decl_vars;
     method_is_async;
+    method_is_generator;
+    method_is_pair_generator;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -73,4 +78,6 @@ let return_type method_def = method_def.method_return_type
 let body method_def = method_def.method_body
 let decl_vars method_def = method_def.method_decl_vars
 let is_async method_def = method_def.method_is_async
+let is_generator method_def = method_def.method_is_generator
+let is_pair_generator method_def = method_def.method_is_pair_generator
 let with_body method_def method_body = { method_def with method_body }

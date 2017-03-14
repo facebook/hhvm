@@ -129,6 +129,9 @@ let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
 let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
 
 let instr_await = instr (IAsync Await)
+let instr_yield = instr (IGenerator Yield)
+let instr_yieldk = instr (IGenerator YieldK)
+let instr_createcont = instr (IGenerator CreateCont)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
@@ -251,3 +254,12 @@ let extract_fault_instructions instrseq =
     | Instr_concat ([]) -> acc
     | Instr_concat (h :: t) -> aux (Instr_concat t) (aux h acc) in
   gather (aux instrseq [])
+
+(* Returns a tuple of is_generator and is_pair_generator *)
+let is_function_generator instrseq =
+  InstrSeq.fold_left
+    instrseq
+    ~init:(false, false)
+    ~f:(fun (b, b_p) i ->
+      ((b || i = IGenerator Yield || i = IGenerator YieldK),
+      b_p || i = IGenerator YieldK))

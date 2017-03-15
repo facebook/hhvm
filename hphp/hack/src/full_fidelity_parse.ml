@@ -26,6 +26,7 @@
   *       types, expressions, statements, declarations, etc.
   *)
 
+module Schema = Full_fidelity_schema
 module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
@@ -42,6 +43,7 @@ module FullFidelityParseArgs = struct
     original_parser_s_expr : bool;
     program_text : bool;
     pretty_print : bool;
+    schema: bool;
     show_file_name : bool;
     files : string list
   }
@@ -55,6 +57,7 @@ module FullFidelityParseArgs = struct
     original_parser_s_expr
     program_text
     pretty_print
+    schema
     show_file_name
     files = {
     full_fidelity_json;
@@ -65,6 +68,7 @@ module FullFidelityParseArgs = struct
     original_parser_s_expr;
     program_text;
     pretty_print;
+    schema;
     show_file_name;
     files }
 
@@ -87,6 +91,8 @@ module FullFidelityParseArgs = struct
     let set_program_text () = program_text := true in
     let pretty_print = ref false in
     let set_pretty_print () = pretty_print := true in
+    let schema = ref false in
+    let set_schema () = schema := true in
     let show_file_name = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
@@ -119,6 +125,9 @@ No errors are filtered out.";
       "--pretty-print",
         Arg.Unit set_pretty_print,
         "Displays the text of the given file after pretty-printing.";
+      "--schema",
+        Arg.Unit set_schema,
+        "Displays the parser version and schema of nodes.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
@@ -133,6 +142,7 @@ No errors are filtered out.";
       !original_parser_s_expr
       !program_text
       !pretty_print
+      !schema
       !show_file_name
       (List.rev !files)
 end
@@ -220,6 +230,10 @@ let handle_file args filename =
   end
 
 let rec main args files =
+  if args.schema then begin
+    let schema = Schema.schema_as_json() in
+    Printf.printf "%s\n" schema
+  end;
   match files with
   | [] -> ()
   | file :: tail ->

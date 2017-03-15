@@ -206,27 +206,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
       }
       break;
 
-    // The class_alias builtin can create new names for other classes;
-    // we need to mark some of these classes redeclaring to avoid
-    // making incorrect assumptions during WholeProgram mode.  See
-    // AnalysisResult::collectFunctionsAndClasses.
-    case FunType::ClassAlias:
-      if (m_params &&
-          (m_params->getCount() == 2 || m_params->getCount() == 3) &&
-          Option::WholeProgram) {
-        if (!(*m_params)[0]->isLiteralString() ||
-            !(*m_params)[1]->isLiteralString()) {
-          parseTimeFatal(
-            fs,
-            Compiler::NoError,
-            "class_alias with non-literal parameters is not allowed when "
-            "WholeProgram optimizations are turned on");
-        }
-        fs->addClassAlias((*m_params)[0]->getLiteralString(),
-                          (*m_params)[1]->getLiteralString());
-      }
-      break;
-
     case FunType::VariableArgument:
       /*
         Note:

@@ -255,6 +255,13 @@ void analyze_iteratively(Index& index, php::Program& program,
   std::atomic<uint32_t> total_classes{0};
   auto round = uint32_t{0};
 
+  SCOPE_EXIT {
+    if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
+      Trace::traceRelease("total class visits %u\n", total_classes.load());
+      Trace::traceRelease("total function visits %u\n", total_funcs.load());
+    }
+  };
+
   auto work = initial_work(program, mode);
   while (!work.empty()) {
     auto const results = [&] {
@@ -326,11 +333,6 @@ void analyze_iteratively(Index& index, php::Program& program,
     }
 
     work.assign(begin(revisit), end(revisit));
-  }
-
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
-    Trace::traceRelease("total class visits %u\n", total_classes.load());
-    Trace::traceRelease("total function visits %u\n", total_funcs.load());
   }
 }
 
@@ -467,6 +469,7 @@ whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
       analyze_iteratively(index, *program, AnalyzeMode::NormalPass);
     }
     final_pass(index, *program);
+    index.mark_persistent_classes_and_functions(*program);
     state_after("optimize", *program);
   }
 

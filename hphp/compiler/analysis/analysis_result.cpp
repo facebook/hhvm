@@ -356,60 +356,27 @@ void AnalysisResult::markRedeclaringClasses() {
     }
   }
 
-  auto markRedeclaring = [&] (const std::string& name, bool over) {
+  auto markRedeclaring = [&] (const std::string& name) {
     auto it = m_classDecs.find(name);
     if (it != m_classDecs.end()) {
       auto& classes = it->second;
       for (size_t i = 0; i < classes.size(); ++i) {
         auto cls = classes[i];
         cls->setRedeclaring(ar, i);
-        // If a class_alias was extended, we don't
-        // keep track of that fact... so we need to mark
-        // them all as not final.
-        if (over) cls->setAttribute(ClassScope::NotFinal);
       }
     }
   };
 
   /*
-   * In WholeProgram mode, during parse time we collected all
-   * class_alias calls so we can mark the targets of such calls
-   * redeclaring if necessary.
-   *
-   * Two cases here that definitely require this:
-   *
-   *  - If an alias name has the same name as another class, we need
-   *    to mark *that* class as redeclaring, since it may mean
-   *    different things in different requests now.
-   *
-   *  - If an alias name can refer to more than one class, each of
-   *    those classes must be marked redeclaring.
-   *
-   * In the simple case of a unique alias name and a unique target
-   * name, we might be able to get away with manipulating the target
-   * classes' volatility.
-   *
-   * Rather than work through the various cases here, though, we've
-   * just decided to just play it safe and mark all the names involved
-   * as redeclaring for now.
-   */
-  for (auto& kv : m_classAliases) {
-    assert(kv.first == toLower(kv.first));
-    assert(kv.second == toLower(kv.second));
-    markRedeclaring(kv.first, true);
-    markRedeclaring(kv.second, true);
-  }
-
-  /*
-   * Similar to class_alias, when a type alias is declared with the
-   * same name as a class in the program, we need to make sure the
-   * class is marked redeclaring.  It is possible in some requests
-   * that things like 'instanceof Foo' will not mean the same thing.
+   * When a type alias is declared with the same name as a class in
+   * the program, we need to make sure the class is marked
+   * redeclaring.  It is possible in some requests that things like
+   * 'instanceof Foo' will not mean the same thing.
    */
   for (auto& name : m_typeAliasNames) {
     assert(toLower(name) == name);
     // unlike class_alias, you can't extend a type alias
-    markRedeclaring(name, false);
+    markRedeclaring(name);
   }
 }
 
@@ -523,8 +490,6 @@ void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
     clsVec.insert(clsVec.end(), iter.second.begin(), iter.second.end());
   }
 
-  m_classAliases.insert(fs->getClassAliases().begin(),
-                        fs->getClassAliases().end());
   m_typeAliasNames.insert(fs->getTypeAliasNames().begin(),
                           fs->getTypeAliasNames().end());
 }

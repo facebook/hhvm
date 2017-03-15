@@ -78,6 +78,7 @@ const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
 const StaticString s_86cinit("86cinit");
+const StaticString s_Closure("Closure");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -335,8 +336,8 @@ struct FuncInfo : FuncInfoMap::value_type {};
 
 /*
  * Known information about a particular possible instantiation of a
- * PHP class.  This is 1:1 with php::Class iff the php::Class has
- * AttrUnique.
+ * PHP class.  The php::Class will be marked AttrUnique if there is a
+ * unique ClassInfo with the same name, and no interfering class_aliases.
  */
 struct ClassInfo {
   /*
@@ -748,6 +749,9 @@ struct IndexData {
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
   std::unordered_map<SString, ConstInfo> constants;
+  std::unordered_set<SString,
+                     string_data_hash,
+                     string_data_isame>  classAliases;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -1095,6 +1099,11 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   for (auto& ta : unit.typeAliases) {
     index.typeAliases.insert({ta->name, borrow(ta)});
   }
+
+  for (auto& ca : unit.classAliases) {
+    index.classAliases.insert(ca.first);
+    index.classAliases.insert(ca.second);
+  }
 }
 
 struct NamingEnv {
@@ -1140,8 +1149,6 @@ private:
 void resolve_combinations(IndexData& index,
                           NamingEnv& env,
                           borrowed_ptr<const php::Class> cls) {
-  if (cls->attrs & AttrTrait) return;
-
   // Recurse with all combinations of bases and interfaces in the
   // naming environment.
   if (cls->parentName) {
@@ -1509,31 +1516,22 @@ void find_magic_methods(IndexData& index) {
   }
 }
 
-// We want const qualifiers on various index data structures for php object
-// pointers, but during index creation time we need to manipulate some of their
-// attributes (changing the representation).  These little wrappers keep the
-// const_casting out of the main line of code below.
-template<class PhpObject>
-void add_attribute(borrowed_ptr<const PhpObject> obj, Attr attr) {
-  const_cast<borrowed_ptr<PhpObject>>(obj)->attrs = obj->attrs | attr;
-}
-template<class PhpObject>
-void remove_attribute(borrowed_ptr<const PhpObject> obj, Attr attr) {
-  auto const newAttrs = static_cast<Attr>(obj->attrs & ~attr);
-  const_cast<borrowed_ptr<PhpObject>>(obj)->attrs = newAttrs;
+// We want const qualifiers on various index data structures for php
+// object pointers, but during index creation time we need to
+// manipulate some of their attributes (changing the representation).
+// This little wrapper keeps the const_casting out of the main line of
+// code below.
+void attribute_setter(const Attr& attrs, bool set, Attr attr) {
+  attrSetter(const_cast<Attr&>(attrs), set, attr);
 }
 
 void mark_no_override_classes(IndexData& index) {
   for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->subclassList.size() == 1 &&
-        !(cinfo->cls->attrs & AttrInterface) &&
-        cinfo->cls->attrs & AttrUnique) {
-      assert(cinfo->subclassList.front() == borrow(cinfo));
-      if (!(cinfo->cls->attrs & AttrNoOverride)) {
-        FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name);
-      }
-      add_attribute(cinfo->cls, AttrNoOverride);
-    }
+    auto const set = (cinfo->subclassList.size() == 1 &&
+                      !(cinfo->cls->attrs & AttrInterface) &&
+                      cinfo->cls->attrs & AttrUnique);
+    assert(!set || cinfo->subclassList.front() == borrow(cinfo));
+    attribute_setter(cinfo->cls->attrs, set, AttrNoOverride);
 
     for (auto& kv : magicMethodMap) {
       if (kv.second.attrBit == AttrNone) continue;
@@ -1541,19 +1539,20 @@ void mark_no_override_classes(IndexData& index) {
         FTRACE(2, "Adding no-override of {} to {}\n",
           kv.first->data(),
           cinfo->cls->name);
-        add_attribute(cinfo->cls, kv.second.attrBit);
+        attribute_setter(cinfo->cls->attrs, true, kv.second.attrBit);
       }
     }
   }
 }
 
-void mark_no_override_functions(IndexData& index) {
+void mark_no_override_methods(IndexData& index) {
   // First, mark every (non-interface, non-special) method as AttrNoOverride.
   for (auto& meth : index.methods) {
-    if (meth.second->cls->attrs & AttrInterface) continue;
-    if (!(meth.second->cls->attrs & AttrUnique)) continue;
-    if (is_special_method_name(meth.second->name)) continue;
-    add_attribute(meth.second, AttrNoOverride);
+    auto const set =
+      !(meth.second->cls->attrs & AttrInterface) &&
+      (meth.second->cls->attrs & AttrUnique) &&
+      !(is_special_method_name(meth.second->name));
+    attribute_setter(meth.second->attrs, set, AttrNoOverride);
   }
 
   // Then run through every ClassInfo, and for each of its parent classes clear
@@ -1570,21 +1569,24 @@ void mark_no_override_functions(IndexData& index) {
             FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
               it->second.func->cls->name,
               it->second.func->name);
+            attribute_setter(it->second.func->attrs, false, AttrNoOverride);
           }
-          remove_attribute(it->second.func, AttrNoOverride);
         }
       }
     }
   }
 }
 
-void mark_unique_type_aliases(IndexData& index) {
-  for (auto& ta : index.typeAliases) {
-    auto& name = ta.first;
-    if (index.typeAliases.count(name) == 1 && index.classes.count(name) == 0) {
-      const_cast<borrowed_ptr<php::TypeAlias>>(ta.second)->attrs
-        = AttrUnique | AttrPersistent;
+template <class T, class F>
+void mark_unique_entities(ISStringToMany<T>& entities, F marker) {
+  for (auto it = entities.begin(), end = entities.end(); it != end; ) {
+    auto first = it++;
+    auto flag = true;
+    while (it != end && it->first->isame(first->first)) {
+      marker(it++->second, false);
+      flag = false;
     }
+    marker(first->second, flag);
   }
 }
 
@@ -1645,17 +1647,12 @@ void check_invariants(IndexData& data) {
     auto const name = kv.first;
     auto const cls  = kv.second;
     if (!(cls->attrs & AttrUnique)) continue;
-    if (cls->attrs & AttrTrait)     continue;
 
     auto const range = find_range(data.classInfo, name);
     if (begin(range) != end(range)) {
       always_assert(std::next(begin(range)) == end(range));
     }
   }
-
-  // Note: it's tempting to say every unique ClassInfo object has an
-  // AttrUnique class, but that may or may not apply right now.
-  // Depends on hphpc.
 
   // Every FuncFamily is non-empty and contain functions with the same
   // name.
@@ -1911,23 +1908,50 @@ Index::Index(borrowed_ptr<php::Program> program)
   for (auto& u : program->units) {
     Trace::Bump bumper{Trace::hhbbc, kSystemLibBump, is_systemlib_part(*u)};
     for (auto& c : u->classes) {
+      // Classes with no possible resolutions won't get visited in the
+      // mark_persistent pass; make sure everything starts off with
+      // the attributes clear.
+      attrSetter(c->attrs, false, AttrUnique | AttrPersistent);
       preresolve(*m_data, env, c->name);
     }
   }
+
+  mark_unique_entities(m_data->typeAliases,
+                       [&] (const php::TypeAlias* ta, bool flag) {
+                         attribute_setter(
+                           ta->attrs,
+                           flag &&
+                           !m_data->classes.count(ta->name) &&
+                           !m_data->classAliases.count(ta->name),
+                           AttrUnique);
+                       });
+  // Use classInfo, rather than classes, because we can't mark a
+  // uniquely named class as unique, if eg a parent was non-unique.
+  mark_unique_entities(m_data->classInfo,
+                       [&] (ClassInfo* cinfo, bool flag) {
+                         attribute_setter(
+                           cinfo->cls->attrs,
+                           flag &&
+                           !m_data->classAliases.count(cinfo->cls->name),
+                           AttrUnique);
+                       });
+  mark_unique_entities(m_data->funcs,
+                       [&] (const php::Func* func, bool flag) {
+                         attribute_setter(func->attrs, flag, AttrUnique);
+                       });
 
   // Part of the index building routines happens before the various asserted
   // index invariants hold.  These each may depend on computations from
   // previous functions, so be careful changing the order here.
   compute_subclass_list(*m_data);
-  mark_no_override_functions(*m_data);
+  mark_no_override_methods(*m_data);    // uses AttrUnique
   define_func_families(*m_data);        // uses AttrNoOverride functions
   find_magic_methods(*m_data);          // uses the subclass lists
   compute_iface_vtables(*m_data);
 
   check_invariants(*m_data);
 
-  mark_no_override_classes(*m_data);
-  mark_unique_type_aliases(*m_data);
+  mark_no_override_classes(*m_data);    // uses AttrUnique
 }
 
 // Defined here so IndexData is a complete type for the unique_ptr
@@ -1935,6 +1959,43 @@ Index::Index(borrowed_ptr<php::Program> program)
 Index::~Index() {}
 
 //////////////////////////////////////////////////////////////////////
+
+void Index::mark_persistent_classes_and_functions(php::Program& program) {
+  for (auto& unit : program.units) {
+    for (auto& f : unit->funcs) {
+      attribute_setter(f->attrs,
+                       unit->persistent && (f->attrs & AttrUnique),
+                       AttrPersistent);
+    }
+
+    for (auto& t : unit->typeAliases) {
+      attribute_setter(t->attrs,
+                       unit->persistent && (t->attrs & AttrUnique),
+                       AttrPersistent);
+    }
+  }
+
+  auto check_persistent = [&] (const ClassInfo& cinfo) {
+    if (cinfo.parent && !(cinfo.parent->cls->attrs & AttrPersistent)) {
+      return false;
+    }
+
+    for (auto const intrf : cinfo.declInterfaces) {
+      if (!(intrf->cls->attrs & AttrPersistent)) return false;
+    }
+
+    return true;
+  };
+
+  for (auto& c : m_data->allClassInfos) {
+    attribute_setter(c->cls->attrs,
+                     (c->cls->unit->persistent ||
+                      c->cls->parentName == s_Closure.get()) &&
+                     (c->cls->attrs & AttrUnique) &&
+                     check_persistent(*c),
+                     AttrPersistent);
+  }
+}
 
 const CompactVector<borrowed_ptr<const php::Class>>*
 Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
@@ -1980,7 +2041,7 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   auto const classes = find_range(m_data->classInfo, clsName);
   for (auto it = begin(classes); it != end(classes); ++it) {
     auto const cinfo = it->second;
-    if ((cinfo->cls->attrs & AttrUnique) || std::next(it) == end(classes)) {
+    if (cinfo->cls->attrs & AttrUnique) {
       if (debug && std::next(it) != end(classes)) {
         std::fprintf(stderr, "non unique \"unique\" class: %s\n",
           cinfo->cls->name->data());
@@ -2203,9 +2264,13 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
   };
 
   if (begin(funcs) == end(funcs))              return name_only();
-  if (std::next(begin(funcs)) != end(funcs))   return name_only();
   auto const func = begin(funcs)->second;
-  if (!(func->attrs & AttrUnique))             return name_only();
+  if (!(func->attrs & AttrUnique)) {
+    assert(std::next(begin(funcs)) != end(funcs));
+    return name_only();
+  }
+
+  assert(std::next(begin(funcs)) == end(funcs));
   if (func->attrs & AttrInterceptable)         return name_only();
 
   return do_resolve(func);

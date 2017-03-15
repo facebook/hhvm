@@ -122,14 +122,6 @@ public:
    */
   void declareConstant(AnalysisResultPtr ar, const std::string &name);
 
-  void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.emplace(toLower(target), toLower(alias));
-  }
-
-  std::multimap<std::string,std::string> const& getClassAliases() const {
-    return m_classAliasMap;
-  }
-
   void addTypeAliasName(const std::string& name) {
     m_typeAliasNames.emplace(toLower(name));
   }
@@ -185,10 +177,6 @@ private:
 
   std::string m_pseudoMainName;
   std::set<std::string> m_redecBases;
-
-  // Map from class alias names to the class they are aliased to.
-  // This is only needed in WholeProgram mode.
-  std::multimap<std::string,std::string> m_classAliasMap;
 
   // Set of names that are on the left hand side of type alias
   // declarations.  We need this to make sure we don't mark classes

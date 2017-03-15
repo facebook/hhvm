@@ -47,8 +47,6 @@ MethodMap make_method_map(SinglePassReadableRange&);
  * Perform whole-program optimization on a set of UnitEmitters.
  *
  * Currently this process relies on some information from HPHPc.  It
- * expects AttrUnique/AttrPersistent have already been set up
- * correctly (but won't be wrong if they aren't set up at all), and
  * expects traits are already flattened (it might be wrong if they
  * aren't).
  */

@@ -692,6 +692,11 @@ struct Index {
   void refine_public_statics(const PublicSPropIndexer&);
 
   /*
+   * Identify the persistent classes, functions and typeAliases.
+   */
+  void mark_persistent_classes_and_functions(php::Program& program);
+
+  /*
    * Return true if the resolved function is an async
    * function.
    */

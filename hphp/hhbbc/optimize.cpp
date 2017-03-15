@@ -322,6 +322,39 @@ void insert_assertions(const Index& index,
   blk->hhbcs = std::move(newBCs);
 }
 
+bool persistence_check(borrowed_ptr<php::Block> const blk) {
+  for (auto& op : blk->hhbcs) {
+    switch (op.op) {
+      case Op::Nop:
+      case Op::DefCls:
+      case Op::DefClsNop:
+      case Op::DefCns:
+      case Op::DefTypeAlias:
+      case Op::Null:
+      case Op::True:
+      case Op::False:
+      case Op::Int:
+      case Op::Double:
+      case Op::String:
+      case Op::Vec:
+      case Op::Dict:
+      case Op::Keyset:
+      case Op::Array:
+        continue;
+      case Op::PopC:
+        // Not strictly no-side effects, but as long as the rest of
+        // the unit is limited to the above, we're fine (and we expect
+        // one following a DefCns).
+        continue;
+      case Op::RetC:
+        continue;
+      default:
+        return false;
+    }
+  }
+  return true;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 template<class Gen>
@@ -640,14 +673,28 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
     }
   }
 
-  func->attrs = (is_pseudomain(ainfo.ctx.func) ||
-                 ainfo.ctx.func->attrs & AttrInterceptable ||
+  auto pseudomain = is_pseudomain(func);
+  func->attrs = (pseudomain ||
+                 func->attrs & AttrInterceptable ||
                  ainfo.mayUseVV) ?
     Attr(func->attrs | AttrMayUseVV) : Attr(func->attrs & ~AttrMayUseVV);
+
+  if (pseudomain) {
+    auto persistent = true;
+    visit_blocks("persistence check", index, ainfo,
+                 [&] (const Index&,
+                      const FuncAnalysis&,
+                      borrowed_ptr<php::Block> const blk,
+                      const State&) {
+                   if (!persistence_check(blk)) persistent = false;
+                 });
+    func->unit->persistent = persistent;
+  }
 
   if (options.InsertAssertions) {
     visit_blocks("insert assertions", index, ainfo, insert_assertions);
   }
+
 }
 
 //////////////////////////////////////////////////////////////////////

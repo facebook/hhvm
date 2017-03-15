@@ -72,13 +72,6 @@ static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// static strings
-
-const StaticString
-  s_IMemoizeParam("HH\\IMemoizeParam"),
-  s_getInstanceKey("getInstanceKey");
-
-///////////////////////////////////////////////////////////////////////////////
 
 /* enum of thrift types */
 enum TType {
@@ -296,11 +289,6 @@ const uint64_t kInt54Prefix         = kInt54PrefixMsb << (6 * 8);
 const uint64_t kCodeMask            = 0x0f;
 const uint64_t kCodePrefix          = 0xf0;
 
-static_assert(kCodePrefix > '~',
-  "kCodePrefix must be greater than ASCII '~' or serialize_memoize_param() "
-  "could produce strings that when used as array keys could collide with  "
-  "keys it produces.");
-
 static void fb_compact_serialize_code(StringBuffer& sb,
                                       FbCompactSerializeCode code) {
   assert(code == (code & kCodeMask));
@@ -385,16 +373,15 @@ static bool fb_compact_serialize_is_list(const Array& arr, int64_t& index_limit)
   return true;
 }
 
-static int fb_compact_serialize_variant(StringBuffer& sd,
-  const Variant& var, int depth, FBCompactSerializeBehavior behavior);
+static int fb_compact_serialize_variant(
+  StringBuffer& sd, const Variant& var, int depth);
 
 static void fb_compact_serialize_array_as_list_map(
-    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth,
-    FBCompactSerializeBehavior behavior) {
+    StringBuffer& sb, const Array& arr, int64_t index_limit, int depth) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   for (int64_t i = 0; i < index_limit; ++i) {
     if (arr.exists(i)) {
-      fb_compact_serialize_variant(sb, arr[i], depth + 1, behavior);
+      fb_compact_serialize_variant(sb, arr[i], depth + 1);
     } else {
       fb_compact_serialize_code(sb, FB_CS_SKIP);
     }
@@ -403,21 +390,19 @@ static void fb_compact_serialize_array_as_list_map(
 }
 
 static void fb_compact_serialize_vec(
-  StringBuffer& sb, const Array& arr, int depth,
-  FBCompactSerializeBehavior behavior) {
+    StringBuffer& sb, const Array& arr, int depth) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
   PackedArray::IterateV(
     arr.get(),
     [&](const TypedValue* v) {
-      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1, behavior);
+      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1);
     }
   );
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 static void fb_compact_serialize_array_as_map(
-    StringBuffer& sb, const Array& arr, int depth,
-    FBCompactSerializeBehavior behavior) {
+    StringBuffer& sb, const Array& arr, int depth) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
   IterateKV(
     arr.get(),
@@ -428,14 +413,14 @@ static void fb_compact_serialize_array_as_map(
         assertx(k->m_type == KindOfInt64);
         fb_compact_serialize_int64(sb, k->m_data.num);
       }
-      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1, behavior);
+      fb_compact_serialize_variant(sb, tvAsCVarRef(v), depth + 1);
     }
   );
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
 static void fb_compact_serialize_keyset(
-  StringBuffer& sb, const Array& arr, FBCompactSerializeBehavior behavior) {
+    StringBuffer& sb, const Array& arr) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
   SetArray::Iterate(
     SetArray::asSet(arr.get()),
@@ -453,16 +438,9 @@ static void fb_compact_serialize_keyset(
   fb_compact_serialize_code(sb, FB_CS_STOP);
 }
 
-static int fb_compact_serialize_variant(StringBuffer& sb,
-                                        const Variant& var,
-                                        int depth,
-                                        FBCompactSerializeBehavior behavior) {
+static int fb_compact_serialize_variant(
+    StringBuffer& sb, const Variant& var, int depth) {
   if (depth > 256) {
-    if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Array depth exceeded");
-    }
-
     return 1;
   }
 
@@ -500,7 +478,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
     case KindOfVec: {
       Array arr = var.toArray();
       assert(arr->isVecArray());
-      fb_compact_serialize_vec(sb, std::move(arr), depth, behavior);
+      fb_compact_serialize_vec(sb, std::move(arr), depth);
       return 0;
     }
 
@@ -508,7 +486,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
     case KindOfDict: {
       Array arr = var.toArray();
       assert(arr->isDict());
-      fb_compact_serialize_array_as_map(sb, std::move(arr), depth, behavior);
+      fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
       return 0;
     }
 
@@ -516,7 +494,7 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
     case KindOfKeyset: {
       Array arr = var.toArray();
       assert(arr->isKeyset());
-      fb_compact_serialize_keyset(sb, std::move(arr), behavior);
+      fb_compact_serialize_keyset(sb, std::move(arr));
       return 0;
     }
 
@@ -526,43 +504,15 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       assert(arr->isPHPArray());
       int64_t index_limit;
       if (fb_compact_serialize_is_list(arr, index_limit)) {
-        fb_compact_serialize_array_as_list_map(sb, std::move(arr), index_limit,
-                                               depth, behavior);
+        fb_compact_serialize_array_as_list_map(
+          sb, std::move(arr), index_limit, depth);
       } else {
-        fb_compact_serialize_array_as_map(sb, std::move(arr), depth, behavior);
+        fb_compact_serialize_array_as_map(sb, std::move(arr), depth);
       }
       return 0;
     }
 
-    case KindOfObject: {
-      if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
-        Object obj = var.toObject();
-
-        if (obj->isCollection()) {
-          fb_compact_serialize_variant(sb, obj->toArray(), depth, behavior);
-          return 0;
-        }
-
-        if (!obj.instanceof(s_IMemoizeParam)) {
-          auto msg = folly::format(
-            "Cannot serialize object of type {} because it does not implement "
-            "HH\\IMemoizeParam",
-            obj->getClassName().asString()).str();
-
-          SystemLib::throwInvalidArgumentExceptionObject(msg);
-        }
-
-        // Marker that shows that this was an obj so it doesn't collide with
-        // strings
-        fb_compact_serialize_code(sb, FB_CS_OBJ);
-
-        Variant ser = obj->o_invoke_few_args(s_getInstanceKey, 0);
-        fb_compact_serialize_string(sb, ser.toString());
-        return 0;
-      }
-    }
-    // If not FBCompactSerializeBehavior::MemoizeParam fall-through to default
-
+    case KindOfObject:
     case KindOfResource:
     case KindOfRef:
       fb_compact_serialize_code(sb, FB_CS_NULL);
@@ -572,17 +522,10 @@ static int fb_compact_serialize_variant(StringBuffer& sb,
       break;
   }
 
-  if (behavior == FBCompactSerializeBehavior::MemoizeParam) {
-    SystemLib::throwInvalidArgumentExceptionObject(
-      folly::format("Cannot Serialize unexpected type {}",
-                    tname(var.getType())).str()
-    );
-  }
   return 1;
 }
 
-String fb_compact_serialize(const Variant& thing,
-                            FBCompactSerializeBehavior behavior) {
+String fb_compact_serialize(const Variant& thing) {
   /**
    * If thing is a single int value [0, 127] normally we would serialize
    * it as a single byte (7 bit unsigned int).
@@ -603,7 +546,7 @@ String fb_compact_serialize(const Variant& thing,
   }
 
   StringBuffer sb;
-  if (fb_compact_serialize_variant(sb, thing, 0, behavior)) {
+  if (fb_compact_serialize_variant(sb, thing, 0)) {
     return String();
   }
 
@@ -611,7 +554,7 @@ String fb_compact_serialize(const Variant& thing,
 }
 
 Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing) {
-  return fb_compact_serialize(thing, FBCompactSerializeBehavior::Base);
+  return fb_compact_serialize(thing);
 }
 
 /* Check if there are enough bytes left in the buffer */

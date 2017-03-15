@@ -65,17 +65,11 @@ Array HHVM_FUNCTION(fb_call_user_func_array_safe,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum FBCompactSerializeBehavior {
-  Base,
-  MemoizeParam,
-};
-
 Variant fb_unserialize(const char* str,
                        int len,
                        VRefParam success,
                        int64_t options);
-String fb_compact_serialize(const Variant& thing,
-                            FBCompactSerializeBehavior behavior);
+String fb_compact_serialize(const Variant& thing);
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
                                VRefParam errcode = uninit_variant);

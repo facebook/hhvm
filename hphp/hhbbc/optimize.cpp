@@ -188,8 +188,8 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
  * bools or objects, etc.  We might consider making stack flavors have
  * subtypes and adding this to the opcode table.
  */
-bool hasObviousStackOutput(Op op) {
-  switch (op) {
+bool hasObviousStackOutput(const Bytecode& op, const State& state) {
+  switch (op.op) {
   case Op::Box:
   case Op::BoxR:
   case Op::Null:
@@ -261,6 +261,13 @@ bool hasObviousStackOutput(Op op) {
   // of SetL is obvious if you know what its input is (which we'll
   // assert if we know).
   case Op::CGetL:
+    if (state.locals[op.CGetL.loc1].couldBe(TRef) &&
+        state.stack.back().type.strictSubtypeOf(TInitCell)) {
+      // In certain cases (local static, for example) we can have
+      // information about the unboxed value of the local which isn't
+      // obvious from the local itself (which will be TRef or TGen).
+      return false;
+    }
   case Op::SetL:
     return true;
 
@@ -292,7 +299,7 @@ void insert_assertions(const Index& index,
       FTRACE(2, "   + {}\n", show(ctx.func, newBCs.back()));
 
       lastStackOutputObvious =
-        newb.numPush() != 0 && hasObviousStackOutput(newb.op);
+        newb.numPush() != 0 && hasObviousStackOutput(newb, state);
     };
 
     auto const preState = state;

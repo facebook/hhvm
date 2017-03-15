@@ -298,6 +298,8 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
 
   std::vector<MergeBlockInfo> blockInfo(func.blocks.size(), MergeBlockInfo {});
 
+  bool removedAny = false;
+
   auto reachable = [&](BlockId id) {
     auto const& state = ainfo.bdata[id].stateIn;
     return state.initialized && !state.unreachable;
@@ -313,15 +315,28 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
     } else {
       analyzeSwitch(*blk, blockInfo, nullptr);
     }
-    forEachSuccessor(*blk, [&](BlockId succId) {
-        auto& bsi = blockInfo[succId];
-        if (bsi.hasPred) {
-          bsi.multiplePreds = true;
-        } else {
-          bsi.hasPred = true;
+    auto handleSucc = [&] (BlockId succId) {
+      auto& bsi = blockInfo[succId];
+      if (bsi.hasPred) {
+        bsi.multiplePreds = true;
+      } else {
+        bsi.hasPred = true;
+      }
+      numSucc++;
+    };
+    forEachNormalSuccessor(*blk, [&](const BlockId& succId) {
+        auto succ = borrow(func.blocks[succId]);
+        while (succ->id != NoBlockId &&
+               is_single_nop(*succ) &&
+               succId < succ->fallthrough) {
+          always_assert(succ->fallthrough != NoBlockId);
+          const_cast<BlockId&>(succId) = succ->fallthrough;
+          succ = borrow(func.blocks[succId]);
+          removedAny = true;
         }
-        numSucc++;
+        handleSucc(succId);
       });
+    for (auto& ex : blk->factoredExits) handleSucc(ex);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
   blockInfo[func.mainEntry].multiplePreds = true;
@@ -331,7 +346,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
     }
   }
 
-  bool removedAny = false;
   for (auto& blk : func.blocks) {
     if (blk->id == NoBlockId) continue;
     while (blk->fallthrough != NoBlockId) {

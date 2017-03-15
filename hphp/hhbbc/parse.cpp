@@ -122,6 +122,11 @@ struct ParseUnitState {
    * performance.
    */
   std::unordered_map<borrowed_ptr<php::Func>, int> constPassFuncs;
+
+  /*
+   * List of class aliases defined by this unit
+   */
+  CompactVector<std::pair<SString,SString>> classAliases;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -457,6 +462,9 @@ void populate_block(ParseUnitState& puState,
   auto defclsnop = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefClsNop.arg1] = &func;
   };
+  auto aliascls = [&] (const Bytecode& b) {
+    puState.classAliases.emplace_back(b.AliasCls.str1, b.AliasCls.str2);
+  };
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
@@ -556,6 +564,7 @@ void populate_block(ParseUnitState& puState,
           Op::opcode == Op::AddNewElemC) addelem();     \
       if (Op::opcode == Op::DefCls)    defcls(b);       \
       if (Op::opcode == Op::DefClsNop) defclsnop(b);    \
+      if (Op::opcode == Op::AliasCls) aliascls(b);      \
       if (Op::opcode == Op::CreateCl)  createcl(b);     \
       blk.hhbcs.push_back(std::move(b));                \
       assert(pc == next);                               \
@@ -1074,6 +1083,8 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
       folly::make_unique<php::TypeAlias>(ta)
     );
   }
+
+  ret->classAliases = std::move(puState.classAliases);
 
   find_additional_metadata(puState, borrow(ret));
 

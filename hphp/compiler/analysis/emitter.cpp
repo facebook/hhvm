@@ -5380,6 +5380,29 @@ bool EmitterVisitor::visit(ConstructPtr node) {
           return true;
         }
       }
+    } else if (call->isCallToFunction("class_alias")) {
+      if (params &&
+          (params->getCount() == 2 ||
+           params->getCount() == 3)) {
+        ExpressionPtr p0 = (*params)[0];
+        ExpressionPtr p1 = (*params)[1];
+        Variant v0, v1;
+        if (p0->getScalarValue(v0) && v0.isString() &&
+            p1->getScalarValue(v1) && v1.isString()) {
+          const StringData* orig_name =
+            makeStaticString(v0.toString());
+          const StringData* alias_name =
+            makeStaticString(v1.toString());
+          if (params->getCount() == 3) {
+            visit((*params)[1]);
+            emitConvertToCell(e);
+          } else {
+            e.True();
+          }
+          e.AliasCls(orig_name, alias_name);
+          return true;
+        }
+      }
     } else if (call->isCallToFunction("assert")) {
       // Special-case some logic around emitting assert(), or jumping around
       // it. This all applies only for direct calls to assert() -- dynamic

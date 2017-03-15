@@ -844,11 +844,25 @@ bool isPHP7ReservedType(const StringData* alias) {
 }
 }
 
-bool Unit::aliasClass(Class* original, const StringData* alias) {
+bool Unit::aliasClass(const StringData* original, const StringData* alias,
+                      bool autoload) {
   if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
     raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
                 alias->data());
   }
+  auto const origClass =
+    autoload ? Unit::loadClass(original)
+             : Unit::lookupClass(original);
+  if (!origClass) {
+    raise_warning("Class %s not found", original->data());
+    return false;
+  }
+  if (origClass->isBuiltin()) {
+    raise_warning("First argument of class_alias() must be "
+                  "the name of a user defined class");
+    return false;
+  }
+
   auto const aliasNe = NamedEntity::get(alias);
   aliasNe->m_cachedClass.bind();
 
@@ -857,7 +871,7 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
     raise_warning("Cannot redeclare class %s", alias->data());
     return false;
   }
-  aliasNe->setCachedClass(original);
+  aliasNe->setCachedClass(origClass);
   return true;
 }
 

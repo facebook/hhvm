@@ -254,6 +254,7 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
   case Op::IsTypeL:
   case Op::IsUninit:
   case Op::OODeclExists:
+  case Op::AliasCls:
     return true;
 
   // Consider CGetL obvious because if we knew the type of the local,

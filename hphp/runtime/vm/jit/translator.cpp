@@ -362,6 +362,7 @@ static const struct {
   { OpDefTypeAlias,{None,             None,         OutNone         }},
   { OpDefCls,      {None,             None,         OutNone         }},
   { OpDefCns,      {Stack1,           Stack1,       OutBoolean      }},
+  { OpAliasCls,    {Stack1,           Stack1,       OutBoolean      }},
 
   /*** 13. Miscellaneous instructions ***/
 
@@ -858,6 +859,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::IsUninit:
   case Op::IncDecL:
   case Op::DefCls:
+  case Op::AliasCls:
   case Op::FPushCuf:
   case Op::FPushCufF:
   case Op::FPushCufSafe:

@@ -5283,6 +5283,17 @@ OPTBLD_INLINE void iopDefCls(intva_t cid) {
   Unit::defClass(c);
 }
 
+OPTBLD_INLINE void iopAliasCls(const StringData* original,
+                               const StringData* alias) {
+  TypedValue* aloadTV = vmStack().topTV();
+  tvCastToBooleanInPlace(aloadTV);
+  assert(aloadTV->m_type == KindOfBoolean);
+  bool autoload = aloadTV->m_data.num;
+  vmStack().popX();
+
+  vmStack().pushBool(Unit::aliasClass(original, alias, autoload));
+}
+
 OPTBLD_INLINE void iopDefClsNop(intva_t cid) {
 }
 

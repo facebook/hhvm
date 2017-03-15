@@ -3864,6 +3864,15 @@ DefClsNop <class id>  []  ->  []
   pseudo-main where a DefCls would've existed, but doesn't need to be. (It is
   used as a place to raise errors from if the class fails to define.)
 
+AliasCls <class-name, alias-name>    [C]  ->  [C:bool]
+
+  This instruction will attempt to bind the name alias-name as an alias for the
+  class class-name. If class-name is not an existing class, and $1 is true,
+  this instruction will attempt to autoload the class. If class-name is still
+  not an existing class, this instruction will raise a warning and return
+  false. If alias-name is already bound, this instruction will raise a warning
+  and return false. Otherwise it binds the name and returns true.
+
 DefCns <litstr id>    [C]  ->  [C]
 
   Define constant. If there is already a global constant named %1, raises a

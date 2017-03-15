@@ -551,6 +551,7 @@ struct Unit {
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
+  CompactVector<std::pair<SString,SString>> classAliases;
   CompactVector<SrcLoc> srcLocs;
 };
 

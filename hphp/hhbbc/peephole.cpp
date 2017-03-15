@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,6 +77,10 @@ void BasicPeephole::push_back(const Bytecode& next) {
   m_next.push_back(next);
 }
 
+std::string BasicPeephole::show(const Bytecode& op) {
+  return ::HPHP::HHBBC::show(m_ctx.func, op);
+}
+
 void ConcatPeephole::finalize() {
   while (!m_working.empty()) {
     squash();
@@ -87,7 +91,7 @@ void ConcatPeephole::finalize() {
 void ConcatPeephole::append(const Bytecode& op,
                             const State& state,
                             const std::vector<Op>& srcStack) {
-  FTRACE(1, "ConcatPeephole::append {}\n", show(op));
+  FTRACE(1, "ConcatPeephole::append {}\n", m_next.show(op));
   assert(state.stack.size() == srcStack.size());
   int nstack = state.stack.size();
 
@@ -105,8 +109,8 @@ void ConcatPeephole::append(const Bytecode& op,
     auto ind2 = nstack - 2;
 
     // Non-string concat; just append, squashing if this terminates a stream.
-    if (!state.stack[ind1].subtypeOf(TStr) ||
-        !state.stack[ind2].subtypeOf(TStr)) {
+    if (!state.stack[ind1].type.subtypeOf(TStr) ||
+        !state.stack[ind2].type.subtypeOf(TStr)) {
       if (nstack == prevsz) {
         squash();
       }

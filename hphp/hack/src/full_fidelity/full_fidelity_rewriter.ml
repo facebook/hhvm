@@ -25,12 +25,13 @@ module WithSyntax(Syntax: RewritableType) = struct
 
   let parented_rewrite_post f node =
     let rec aux parents node =
-      let folder child (acc, changed) = match aux (node :: parents) child with
-        | Some (child, changed') -> (child :: acc, changed || changed')
-        | None -> (acc, true)
+      let mapper changed child = match aux (node :: parents) child with
+        | Some (child, changed') -> changed || changed', Some child
+        | None -> true, None
       in
-      let (new_children, changed) =
-        List.fold_right folder (Syntax.children node) ([], false) in
+      let (changed, option_new_children) =
+        Core.List.map_env false (Syntax.children node) ~f:mapper in
+      let new_children = Core.List.filter_opt option_new_children in
       let node = if changed then
           Syntax.from_children (Syntax.kind node) new_children
         else
@@ -44,17 +45,18 @@ module WithSyntax(Syntax: RewritableType) = struct
 
   let parented_rewrite_pre f node =
     let rec aux parents node =
-      let folder child (acc, changed) = match aux (node :: parents) child with
-        | Some (child, changed') -> (child :: acc, changed || changed')
-        | None -> (acc, true)
+      let mapper changed child = match aux (node :: parents) child with
+        | Some (child, changed') -> changed || changed', Some child
+        | None -> true, None
       in
       Option.map (f parents node) ~f:begin fun (new_node, node_changed) ->
         let cs = Syntax.children new_node in
-        let (new_children, child_changed) =
-          List.fold_right folder cs ([], false) in
+        let (child_changed, option_new_children) =
+          Core.List.map_env false cs ~f:mapper in
+        let new_children = Core.List.filter_opt option_new_children in
         let with_new_children =
           if child_changed then
-            Syntax.from_children (Syntax.kind new_node) (List.rev new_children)
+            Syntax.from_children (Syntax.kind new_node) new_children
           else
             new_node in
         (with_new_children, node_changed || child_changed)

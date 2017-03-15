@@ -9,5 +9,7 @@
  * *)
 type notifier_changes =
   | Notifier_unavailable
+  | Notifier_state_enter of string * Hh_json.json option
+  | Notifier_state_leave of string * Hh_json.json option
   | Notifier_synchronous_changes of SSet.t
   | Notifier_async_changes of SSet.t

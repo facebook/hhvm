@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@ namespace HPHP {
 template<class SerDe>
 void FPIEnt::serde(SerDe& sd) {
   sd(m_fpushOff)
-    (m_fcallOff)
+    (m_fpiEndOff)
     (m_fpOff)
     // These fields are recomputed by sortFPITab:
     // (m_parentIndex)
@@ -230,8 +230,17 @@ inline bool Func::contains(Offset offset) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Return type.
 
-inline MaybeDataType Func::returnType() const {
-  return shared()->m_returnType;
+inline MaybeDataType Func::hniReturnType() const {
+  auto const ex = extShared();
+  return ex ? ex->m_hniReturnType : folly::none;
+}
+
+inline RepoAuthType Func::repoReturnType() const {
+  return shared()->m_repoReturnType;
+}
+
+inline RepoAuthType Func::repoAwaitedReturnType() const {
+  return shared()->m_repoAwaitedReturnType;
 }
 
 inline bool Func::isReturnByValue() const {
@@ -292,6 +301,12 @@ inline int Func::numIterators() const {
   return shared()->m_numIterators;
 }
 
+inline int Func::numClsRefSlots() const {
+  auto const ex = extShared();
+  if (LIKELY(!ex)) return shared()->m_numClsRefSlots;
+  return ex->m_actualNumClsRefSlots;
+}
+
 inline Id Func::numNamedLocals() const {
   return shared()->m_localNames.size();
 }
@@ -307,6 +322,12 @@ inline LowStringPtr const* Func::localNames() const {
 
 inline int Func::maxStackCells() const {
   return m_maxStackCells;
+}
+
+inline int Func::numSlotsInFrame() const {
+  return shared()->m_numLocals +
+    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell)) +
+    (numClsRefSlots() * sizeof(Class*) + sizeof(Cell) - 1) / sizeof(Cell);
 }
 
 inline bool Func::hasForeignThis() const {
@@ -373,6 +394,15 @@ inline bool Func::mayHaveThis() const {
 
 inline bool Func::isPreFunc() const {
   return m_isPreFunc;
+}
+
+inline bool Func::isMemoizeWrapper() const {
+  return shared()->m_isMemoizeWrapper;
+}
+
+inline const StringData* Func::memoizeImplName() const {
+  assertx(isMemoizeWrapper());
+  return genMemoizeImplName(name());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -556,6 +586,29 @@ inline const Func::FPIEntVec& Func::fpitab() const {
   return shared()->m_fpitab;
 }
 
+inline const EHEnt* Func::findEH(Offset o) const {
+  assert(o >= base() && o < past());
+  return findEH(shared()->m_ehtab, o);
+}
+
+template<class Container>
+const typename Container::value_type*
+Func::findEH(const Container& ehtab, Offset o) {
+  const typename Container::value_type* eh = nullptr;
+
+  for (uint32_t i = 0, sz = ehtab.size(); i < sz; ++i) {
+    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
+      eh = &ehtab[i];
+    }
+  }
+  return eh;
+}
+
+inline const FPIEnt* Func::findFPI(Offset o) const {
+  assertx(o >= base() && o < past());
+  return findFPI(fpitab().begin(), fpitab().end(), o);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // JIT data.
 
@@ -577,13 +630,6 @@ inline uint8_t* Func::getPrologue(int index) const {
 
 inline void Func::setPrologue(int index, unsigned char* tca) {
   m_prologueTable[index] = tca;
-}
-
-inline int Func::getMaxNumPrologues(int numParams) {
-  // Maximum number of prologues is numParams + 2. The extra 2 are for the case
-  // where the number of actual params equals numParams and the case where the
-  // number of actual params is greater than numParams.
-  return numParams + 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -381,7 +381,9 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
 
   // Preserve original filename (as this varies per-function and not per-unit
   // in the case of methods imported from flattened traits)
-  cloneMeth->setOriginalFilename(meth->getFileScope()->getName());
+  auto const& name = meth->getOriginalFilename().empty() ?
+    meth->getFileScope()->getName() : meth->getOriginalFilename();
+  cloneMeth->setOriginalFilename(name);
 
   return cloneMeth;
 }

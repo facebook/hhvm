@@ -818,7 +818,7 @@
 .text.hash_string_i_unaligned_crc*
 .text._ZN4HPHP9ArrayData10IsValidKeyERKNS_7VariantE*
 .text._ZN4HPHP21tvMatchesRepoAuthTypeENS_10TypedValueENS_12RepoAuthTypeE*
-.text._ZN4HPHP18IsSSEHashSupportedEv*
+.text._ZN4HPHP17IsHWHashSupportedEv*
 .text._ZNK4HPHP6String5toKeyEv*
 .text._ZN4HPHP5VarNRC1EPNS_10StringDataE*
 .text._ZN4HPHP5VarNRC2EPNS_10StringDataE*

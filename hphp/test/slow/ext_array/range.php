@@ -22,4 +22,20 @@ var_dump($ret[8]);
 
 var_dump(range("c", "a"));
 
+var_dump(range(1.0, 3.0));
+var_dump(range(3.0, 1.0));
 
+// test large range boundaries. Old versions of php and HHVM internally
+// converted range boundaries to floating point numbers, which could couse
+// precision loss.
+var_dump(range(-9223372036854775298, -9223372036854775294));
+var_dump(range('-9223372036854775298', '-9223372036854775294'));
+var_dump(range(1<<55, (1<<55) + 20, 10));
+
+// verify, floating point boundaries do not need to infinite loop
+$ret = range(-9223372036854775298.0, -9223372036854775294.0);
+var_dump(gettype($ret));
+var_dump(count($ret) >= 1024);
+$ret = range('-9223372036854775298.0', '-9223372036854775294.0');
+var_dump(gettype($ret));
+var_dump(count($ret) >= 1024);

@@ -1,5 +1,9 @@
-\E::FOO
-ClassConst
-line 8, characters 6-8
-defined: line 4, characters 3-5
-definition span: line 4, character 3 - line 4, character 9
+name: \E::FOO, kind: member_const, span: line 8, characters 6-8, definition: 
+ FOO
+   kind: const
+   id: class_const::E::FOO
+   position: line 4, characters 3-5
+   span: line 4, character 3 - line 4, character 9
+   modifiers: 
+
+

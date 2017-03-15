@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,21 @@ inline bool Class::isZombie() const {
   return !m_cachedClass.bound();
 }
 
+
+inline void Class::validate() const {
+#ifdef DEBUG
+  assertx(m_magic == kMagic);
+#endif
+  assertx(name()->checkSane());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
+
+inline Class::PropInitVec::PropInitVec() : m_data(nullptr),
+                                           m_size(0),
+                                           m_capacity(0) {
+}
 
 inline Class::PropInitVec::iterator Class::PropInitVec::begin() {
   return m_data;
@@ -51,6 +64,10 @@ inline TypedValueAux& Class::PropInitVec::operator[](size_t i) {
 inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
   assert(i < m_size);
   return m_data[i];
+}
+
+inline bool Class::PropInitVec::reqAllocated() const {
+  return m_capacity < 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,9 +294,17 @@ inline rds::Handle Class::sPropInitHandle() const {
 }
 
 inline rds::Handle Class::sPropHandle(Slot index) const {
+  return sPropLink(index).handle();
+}
+
+inline rds::Link<TypedValue> Class::sPropLink(Slot index) const {
   assert(m_sPropCacheInit.bound());
   assert(numStaticProperties() > index);
-  return m_sPropCache[index].handle();
+  return m_sPropCache[index];
+}
+
+inline rds::Link<bool> Class::sPropInitLink() const {
+  return m_sPropCacheInit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

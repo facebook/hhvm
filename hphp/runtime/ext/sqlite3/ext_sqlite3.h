@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -107,15 +107,7 @@ struct SQLite3Stmt {
     int type;
     int index;
     Variant value;
-    template<class F> void scan(F& mark) const {
-      mark(value);
-    }
   };
-
-  void scan(IMarker& mark) const {
-    mark(m_db);
-    for (auto& p : m_bound_params) p->scan(mark);
-  }
 
 public:
   Object m_db;
@@ -149,13 +141,9 @@ struct SQLite3Result {
   void validate() const;
   static Class *getClass();
 
-  void scan(IMarker& mark) const {
-    mark(m_stmt_obj);
-  }
-
 public:
   Object m_stmt_obj;
-  SQLite3Stmt *m_stmt;
+  SQLite3Stmt *m_stmt; // XXX why not scanned?
   static Class *s_class;
   static const StaticString s_className;
 };

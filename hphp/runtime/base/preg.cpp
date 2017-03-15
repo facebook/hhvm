@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,6 +65,10 @@ using jit::TCA;
 
 PCREglobals::PCREglobals() {
   jit_stack = pcre_jit_stack_alloc(32768, 524288);
+  // Set these to handle uses of pcre prior to PcreExtension::threadInit
+  // In particular, for matching tier overrides during RuntimeOption::Load
+  preg_backtrace_limit = RuntimeOption::PregBacktraceLimit;
+  preg_recursion_limit = RuntimeOption::PregRecursionLimit;
 }
 
 PCREglobals::~PCREglobals() {
@@ -209,9 +213,9 @@ public:
   }
 
   void reinit(CacheKind kind);
-  bool find(Accessor& accessor, const String& key,
+  bool find(Accessor& accessor, const StringData* key,
             TempKeyCache& keyCache);
-  void insert(Accessor& accessor, const String& regex,
+  void insert(Accessor& accessor, const StringData* regex,
               TempKeyCache& keyCache, const pcre_cache_entry* ent);
   void dump(const std::string& filename);
   size_t size() const;
@@ -253,6 +257,102 @@ pcre_cache_entry::~pcre_cache_entry() {
   }
   free(subpat_names);
   pcre_free(re);
+}
+
+pcre_literal_data::pcre_literal_data(const char* pattern, int coptions) {
+  if (coptions & ~PCRE_CASELESS) {
+    return;
+  }
+
+  auto p = pattern;
+  if (*p == '^') {
+    match_start = true;
+    p++;
+  }
+
+  std::string pattern_buffer;
+  while (isalnum((unsigned char)*p) || (*p && strchr("/\\ :-_", *p))) {
+    // backslash + alphanumeric character --> not a literal (i.e. \d).
+    // backslash + non-alphanumeric character --> literal symbol (i.e. \.)
+    if (*p == '\\') {
+      if (!p[1] || isalnum((unsigned char)p[1])) {
+        break;
+      } else {
+        p++;
+      }
+    }
+    pattern_buffer += *p++;
+  }
+  if (*p == '$') {
+    match_end = true;
+    p++;
+  }
+  if (!*p) {
+    /* This is an encoding of a literal string. */
+    case_insensitive = coptions & PCRE_CASELESS;
+    literal_str = std::move(pattern_buffer);
+  }
+}
+
+bool pcre_literal_data::isLiteral() const {
+  return literal_str.hasValue();
+}
+
+bool pcre_literal_data::matches(const StringData* subject,
+                                int pos,
+                                int* offsets) const {
+  assertx(isLiteral());
+  assertx(pos >= 0);
+
+  // Subject must be at least as long as the literal pattern
+  // for a match to occur.
+  if (subject->size() < literal_str->length() + pos) {
+    return false;
+  }
+
+  size_t literal_strlen = literal_str->length();
+  auto const subject_c = subject->data();
+  auto const literal_c = literal_str->c_str();
+  if (match_start) {
+    // Make sure an exact match has the right length.
+    if (pos || (match_end && subject->size() != literal_strlen)) {
+      return false;
+    }
+    // If only matching the start (^), compare the strings
+    // for the length of the literal pattern.
+    if (case_insensitive ?
+        bstrcaseeq(subject_c, literal_c, literal_strlen) :
+        memcmp(subject_c, literal_c, literal_strlen) == 0) {
+      offsets[0] = 0;
+      offsets[1] = literal_strlen * sizeof(char);
+      return true;
+    }
+  } else if (match_end) {
+    // Compare the literal pattern against the tail end of the subject.
+    auto const subject_tail = subject_c + (subject->size() - literal_strlen);
+    if (case_insensitive ?
+        bstrcaseeq(subject_tail, literal_c, literal_strlen) :
+        memcmp(subject_tail, literal_c, literal_strlen) == 0) {
+      offsets[0] = (subject->size() - literal_strlen) * sizeof(char);
+      offsets[1] = subject->size() * sizeof(char);
+      return true;
+    }
+  } else {
+    if (!literal_strlen) {
+      offsets[0] = offsets[1] = pos;
+      return true;
+    }
+    // Check if the literal pattern occurs as a substring of the subject.
+    auto const subject_str = StrNR(subject);
+    auto const find_response = subject_str.asString().find(
+      *literal_str, pos, !case_insensitive);
+    if (find_response >= 0) {
+      offsets[0] = find_response * sizeof(char);
+      offsets[1] = offsets[0] + literal_strlen * sizeof(char);
+      return true;
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -316,7 +416,7 @@ void PCRECache::reinit(CacheKind kind) {
 }
 
 bool PCRECache::find(Accessor& accessor,
-                     const String& regex,
+                     const StringData* regex,
                      TempKeyCache& keyCache)
 {
   switch (m_kind) {
@@ -325,7 +425,7 @@ bool PCRECache::find(Accessor& accessor,
         assert(m_staticCache.load());
         StaticCache::iterator it;
         auto cache = m_staticCache.load(std::memory_order_acquire);
-        if ((it = cache->find(regex.get())) != cache->end()) {
+        if ((it = cache->find(regex)) != cache->end()) {
           accessor = it->second;
           return true;
         }
@@ -335,7 +435,7 @@ bool PCRECache::find(Accessor& accessor,
     case CacheKind::Scalable:
       {
         if (!keyCache) {
-          keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
+          keyCache.reset(new LRUCacheKey(regex->data(), regex->size()));
         }
         bool found;
         if (m_kind == CacheKind::Lru) {
@@ -366,7 +466,7 @@ void PCRECache::clearStatic() {
 
 void PCRECache::insert(
   Accessor& accessor,
-  const String& regex,
+  const StringData* regex,
   TempKeyCache& keyCache,
   const pcre_cache_entry* ent
 ) {
@@ -379,16 +479,16 @@ void PCRECache::insert(
           clearStatic();
         }
         auto cache = m_staticCache.load(std::memory_order_acquire);
-        auto key = regex.get()->isStatic()
-          ? regex.get()
-          : StringData::MakeUncounted(regex.slice());
+        auto key = regex->isStatic()
+          ? regex
+          : StringData::MakeUncounted(regex->slice());
         auto pair = cache->insert(StaticCachePair(key, ent));
         if (pair.second) {
           // Inserted, container owns the pointer
           accessor = ent;
         } else {
           // Not inserted, caller needs to own the pointer
-          if (key->isUncounted()) key->destructUncounted();
+          if (key != regex) const_cast<StringData*>(key)->destructUncounted();
           accessor = EntryPtr(ent);
         }
       }
@@ -397,7 +497,7 @@ void PCRECache::insert(
     case CacheKind::Scalable:
       {
         if (!keyCache) {
-          keyCache.reset(new LRUCacheKey(regex.c_str(), regex.size()));
+          keyCache.reset(new LRUCacheKey(regex->data(), regex->size()));
         }
         // Pointer ownership is shared between container and caller
         accessor = EntryPtr(ent);
@@ -587,7 +687,7 @@ static bool get_pcre_fullinfo(pcre_cache_entry* pce) {
 
 static bool
 pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
-                              const String& regex) {
+                              const StringData* regex) {
   PCRECache::TempKeyCache tkc;
 
   /* Try to lookup the cached regex entry, and if successful, just pass
@@ -598,7 +698,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
 
   /* Parse through the leading whitespace, and display a warning if we
      get to the end without encountering a delimiter. */
-  const char *p = regex.data();
+  const char *p = regex->data();
   while (isspace((int)*(unsigned char *)p)) p++;
   if (*p == 0) {
     raise_warning("Empty regular expression");
@@ -633,7 +733,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
     }
     if (*pp == 0) {
       raise_warning("No ending delimiter '%c' found: [%s]", delimiter,
-                      regex.data());
+                      regex->data());
       return false;
     }
   } else {
@@ -654,7 +754,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
     }
     if (*pp == 0) {
       raise_warning("No ending matching delimiter '%c' found: [%s]",
-                      end_delimiter, regex.data());
+                      end_delimiter, regex->data());
       return false;
     }
   }
@@ -702,14 +802,14 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
       break;
 
     default:
-      raise_warning("Unknown modifier '%c': [%s]", pp[-1], regex.data());
+      raise_warning("Unknown modifier '%c': [%s]", pp[-1], regex->data());
       return false;
     }
   }
 
   /* We've reached a null byte, now check if we're actually at the end of the
      string.  If not this is a bad expression, and a potential security hole. */
-  if (regex.length() != (pp - regex.data())) {
+  if (regex->size() != (pp - regex->data())) {
     raise_error("Error: Null byte found in pattern");
   }
 
@@ -721,51 +821,58 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
     raise_warning("Compilation failed: %s at offset %d", error, erroffset);
     return false;
   }
+
   // Careful: from here 're' needs to be freed if something throws.
+
+  // TODO(t14969501): enable literal_data everywhere and skip the
+  // pcre_compile above.
+  auto const literal_data = pcre_literal_data(pattern, coptions);
 
   /* If study option was specified, study the pattern and
      store the result in extra for passing to pcre_exec. */
   pcre_extra *extra = nullptr;
-  if (do_study || PCRE_STUDY_JIT_COMPILE) {
-    int soptions = PCRE_STUDY_JIT_COMPILE;
-    extra = pcre_study(re, soptions, &error);
-    if (extra) {
-      extra->flags |= PCRE_EXTRA_MATCH_LIMIT |
-        PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-      pcre_assign_jit_stack(extra, alloc_jit_stack, nullptr);
-    }
-    if (error != nullptr) {
-      try {
-        raise_warning("Error while studying pattern");
-      } catch (...) {
-        pcre_free(re);
-        throw;
+  if (!literal_data.isLiteral()) {
+    if (do_study || PCRE_STUDY_JIT_COMPILE) {
+      int soptions = PCRE_STUDY_JIT_COMPILE;
+      extra = pcre_study(re, soptions, &error);
+      if (extra) {
+        extra->flags |= PCRE_EXTRA_MATCH_LIMIT |
+          PCRE_EXTRA_MATCH_LIMIT_RECURSION;
+        pcre_assign_jit_stack(extra, alloc_jit_stack, nullptr);
       }
-    }
-    if ((!RuntimeOption::EvalJitNoGdb ||
-         RuntimeOption::EvalJitUseVtuneAPI ||
-         RuntimeOption::EvalPerfPidMap) &&
-        extra->executable_jit != nullptr) {
-      unsigned int size;
-      pcre_fullinfo(re, extra, PCRE_INFO_JITSIZE, &size);
+      if (error != nullptr) {
+        try {
+          raise_warning("Error while studying pattern");
+        } catch (...) {
+          pcre_free(re);
+          throw;
+        }
+      }
+      if ((!RuntimeOption::EvalJitNoGdb ||
+           RuntimeOption::EvalJitUseVtuneAPI ||
+           RuntimeOption::EvalPerfPidMap) &&
+          extra->executable_jit != nullptr) {
+        size_t size;
+        pcre_fullinfo(re, extra, PCRE_INFO_JITSIZE, &size);
 
-      TCA start = *(TCA *)(extra->executable_jit);
-      TCA end = start + size;
-      std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
+        TCA start = *(TCA *)(extra->executable_jit);
+        TCA end = start + size;
+        std::string name = folly::sformat("HHVM::pcre_jit::{}", pattern);
 
-      if (!RuntimeOption::EvalJitNoGdb && jit::mcgen::initialized()) {
-        Debug::DebugInfo::Get()->recordStub(Debug::TCRange(start, end, false),
-                                            name);
-      }
-      if (RuntimeOption::EvalJitUseVtuneAPI) {
-        HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
-      }
-      if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
-        Debug::DebugInfo::Get()->recordPerfMap(
-          Debug::TCRange(start, end, false),
-          SrcKey{}, nullptr, false, false,
-          HPHP::JSON::Escape(name.c_str())
-        );
+        if (!RuntimeOption::EvalJitNoGdb && jit::mcgen::initialized()) {
+          Debug::DebugInfo::Get()->recordStub(Debug::TCRange(start, end, false),
+                                              name);
+        }
+        if (RuntimeOption::EvalJitUseVtuneAPI) {
+          HPHP::jit::reportHelperToVtune(name.c_str(), start, end);
+        }
+        if (RuntimeOption::EvalPerfPidMap && jit::mcgen::initialized()) {
+          Debug::DebugInfo::Get()->recordPerfMap(
+            Debug::TCRange(start, end, false),
+            SrcKey{}, nullptr, false, false,
+            HPHP::JSON::Escape(name.c_str())
+          );
+        }
       }
     }
   }
@@ -774,6 +881,10 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   pcre_cache_entry* new_entry = new pcre_cache_entry();
   new_entry->re = re;
   new_entry->extra = extra;
+  if (literal_data.isLiteral()) {
+    new_entry->literal_data =
+      folly::make_unique<pcre_literal_data>(std::move(literal_data));
+  }
 
   assert((poptions & ~0x1) == 0);
   new_entry->preg_options = poptions;
@@ -874,7 +985,7 @@ static void pcre_handle_exec_error(int pcre_code) {
 
 Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
-  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
+  if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
     return false;
   }
   const pcre_cache_entry* pce = accessor.get();
@@ -932,7 +1043,8 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static Variant preg_match_impl(const String& pattern, const String& subject,
+static Variant preg_match_impl(const StringData* pattern,
+                               const StringData* subject,
                                Variant* subpats, int flags, int start_offset,
                                bool global) {
   PCRECache::Accessor accessor;
@@ -970,7 +1082,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
 
   /* Negative offset counts from the end of the string. */
   if (start_offset < 0) {
-    start_offset = subject.size() + start_offset;
+    start_offset = subject->size() + start_offset;
     if (start_offset < 0) {
       start_offset = 0;
     }
@@ -1005,15 +1117,30 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
   const char** stringlist; // Holds list of subpatterns
   int i;
   do {
-    /* Execute the regular expression. */
-    int count = pcre_exec(pce->re, &extra, subject.data(), subject.size(),
-                          start_offset,
-                          exec_options | g_notempty,
-                          offsets, size_offsets);
 
-    /* The string was already proved to be valid UTF-8 */
-    exec_options |= PCRE_NO_UTF8_CHECK;
+    int count = 0;
+    /*
+     * Optimization: If the pattern defines a literal substring,
+     * compare the strings directly (i.e. memcmp) instead of performing
+     * the full regular expression evaluation.
+     * Take the slow path if there are any special compile options.
+     */
+    if (pce->literal_data && !global) {
+      assertx(pce->literal_data->isLiteral());
+      /* TODO(t13140878): compare literal against multiple substrings
+       * in the preg_match_all (global == true) case. */
+      count = pce->literal_data->matches(subject, start_offset, offsets) ? 1
+        : PCRE_ERROR_NOMATCH;
+    } else {
+      /* Execute the regular expression. */
+      count = pcre_exec(pce->re, &extra, subject->data(), subject->size(),
+                        start_offset,
+                        exec_options | g_notempty,
+                        offsets, size_offsets);
 
+      /* The string was already proved to be valid UTF-8 */
+      exec_options |= PCRE_NO_UTF8_CHECK;
+    }
     /* Check for too many substrings condition. */
     if (count == 0) {
       raise_warning("Matched, but too many substrings");
@@ -1027,7 +1154,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
       if (subpats) {
         // Try to get the list of substrings and display a warning if failed.
         if (offsets[1] < offsets[0] ||
-            pcre_get_substring_list(subject.data(), offsets, count,
+            pcre_get_substring_list(subject->data(), offsets, count,
                                     &stringlist) < 0) {
           raise_warning("Get subpatterns list failed");
           return false;
@@ -1113,7 +1240,7 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
          this is not necessarily the end. We need to advance
          the start offset, and continue. Fudge the offset values
          to achieve this, unless we're already at the end of the string. */
-      if (g_notempty && start_offset < subject.size()) {
+      if (g_notempty && start_offset < subject->size()) {
         offsets[0] = start_offset;
         offsets[1] = start_offset + 1;
       } else
@@ -1121,8 +1248,8 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
     } else {
       if (pcre_need_log_error(count)) {
         pcre_log_error(__FUNCTION__, __LINE__, count,
-                       pattern.data(), pattern.size(),
-                       subject.data(), subject.size(),
+                       pattern->data(), pattern->size(),
+                       subject->data(), subject->size(),
                        "", 0,
                        flags, start_offset, g_notempty, global);
       }
@@ -1149,17 +1276,28 @@ static Variant preg_match_impl(const String& pattern, const String& subject,
       forceToArray(*subpats).append(match_sets[i]);
     }
   }
-
   return matched;
 }
 
 Variant preg_match(const String& pattern, const String& subject,
                    Variant* matches /* = nullptr */, int flags /* = 0 */,
                    int offset /* = 0 */) {
+  return preg_match(pattern.get(), subject.get(), matches, flags, offset);
+}
+
+Variant preg_match(const StringData* pattern, const StringData* subject,
+                   Variant* matches /* = nullptr */, int flags /* = 0 */,
+                   int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, matches, flags, offset, false);
 }
 
 Variant preg_match_all(const String& pattern, const String& subject,
+                       Variant* matches /* = nullptr */,
+                       int flags /* = 0 */, int offset /* = 0 */) {
+  return preg_match_all(pattern.get(), subject.get(), matches, flags, offset);
+}
+
+Variant preg_match_all(const StringData* pattern, const StringData* subject,
                        Variant* matches /* = nullptr */,
                        int flags /* = 0 */, int offset /* = 0 */) {
   return preg_match_impl(pattern, subject, matches, flags, offset, true);
@@ -1228,7 +1366,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
                                 const Variant& replace_var, bool callable,
                                 int limit, int* replace_count) {
   PCRECache::Accessor accessor;
-  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
+  if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
     return false;
   }
   const pcre_cache_entry* pce = accessor.get();
@@ -1666,7 +1804,7 @@ int preg_filter(Variant& result,
 Variant preg_split(const String& pattern, const String& subject,
                    int limit /* = -1 */, int flags /* = 0 */) {
   PCRECache::Accessor accessor;
-  if (!pcre_get_compiled_regex_cache(accessor, pattern)) {
+  if (!pcre_get_compiled_regex_cache(accessor, pattern.get())) {
     return false;
   }
   const pcre_cache_entry* pce = accessor.get();
@@ -1768,7 +1906,8 @@ Variant preg_split(const String& pattern, const String& subject,
       if (g_notempty != 0 && start_offset < subject.size()) {
         if (pce->compile_options & PCRE_UTF8) {
           if (bump_pce == nullptr) {
-            if (!pcre_get_compiled_regex_cache(bump_accessor, "/./us")) {
+            if (!pcre_get_compiled_regex_cache(bump_accessor,
+                                               String("/./us").get())) {
               return false;
             }
             bump_pce = bump_accessor.get();

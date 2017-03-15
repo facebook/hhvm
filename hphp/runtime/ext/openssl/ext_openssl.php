@@ -409,7 +409,7 @@ function openssl_get_publickey(mixed $certificate): mixed {
  * or FALSE on error.
  */
 <<__Native>>
-function openssl_pkey_new(mixed $configargs = null): resource;
+function openssl_pkey_new(mixed $configargs = null): mixed;
 
 /* openssl_private_decrypt() decrypts data that was previous encrypted via
  * openssl_public_encrypt() and stores the result into decrypted.  You can use
@@ -745,6 +745,12 @@ function openssl_digest(string $data,
  */
 <<__Native>>
 function openssl_get_cipher_methods(bool $aliases = false): array<string>;
+
+/**
+ * Return array of available elliptic curves or FALSE on failure.
+ */
+<<__Native>>
+function openssl_get_curve_names(): mixed;
 
 /* Gets a list of available digest methods.
  * @param bool $aliases - Set to TRUE if digest aliases should be included

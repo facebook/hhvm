@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -57,8 +57,6 @@
 
 namespace HPHP {
 
-namespace {
-
 struct PDOData {
   sp_PDOResource m_dbh;
 };
@@ -71,7 +69,6 @@ struct PDOStatementData {
   Variant m_row;
   int m_rowIndex;
 };
-}
 
 using std::string;
 ///////////////////////////////////////////////////////////////////////////////
@@ -2058,6 +2055,8 @@ static bool generic_stmt_attr_get(sp_PDOStatement stmt, Variant &ret,
 ///////////////////////////////////////////////////////////////////////////////
 // SQL parser
 
+namespace {
+
 #define PDO_PARSER_TEXT 1
 #define PDO_PARSER_BIND 2
 #define PDO_PARSER_BIND_POS 3
@@ -2329,6 +2328,8 @@ yy28:
 
 }
 
+}
+
 struct placeholder {
   char *pos;
   int len;
@@ -2525,9 +2526,6 @@ safe:
                   goto clean_up;
                 }
                 continue;
-
-              case KindOfClass:
-                break;
             }
             not_reached();
           } while (0);

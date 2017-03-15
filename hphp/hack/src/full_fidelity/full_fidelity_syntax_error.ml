@@ -34,6 +34,11 @@ let compare err1 err2 =
   else if err1.end_offset > err2.end_offset then 1
   else 0
 
+let exactly_equal err1 err2 =
+  err1.start_offset = err2.start_offset &&
+    err1.end_offset = err2.end_offset &&
+    err1.message = err2.message
+
 (* Lexical errors *)
 let error0001 = "A hexadecimal literal needs at least one digit."
 let error0002 = "A binary literal needs at least one digit."
@@ -108,6 +113,9 @@ let error1050 = "A name or variable name is expected here."
 let error1051 = "The 'required' keyword is expected here."
 let error1052 = "An XHP category name beginning with a '%' is expected here."
 let error1053 = "An XHP name or category name is expected here."
+let error1054 = "A comma is expected here."
+let error1055 = "A fallthrough directive can only appear at the end of" ^
+  " a switch section."
 
 let error2001 = "A type annotation is required in strict mode."
 let error2002 = "An XHP attribute name may not contain '-' or ':'."
@@ -134,14 +142,14 @@ let error2018 =
 let error2019 = "A method cannot be both abstract and final."
 let error2020 = "Use of the '{}' subscript operator is deprecated; " ^
   " use '[]' instead."
-let error2021 = "An ellipsis '...' may only appear at the end of a " ^
-  "parameter list."
-let error2022 = "An ellipsis '...' may not be followed by a comma ','."
+let error2021 = "A variadic parameter ('...') may only appear at the end of " ^
+  "a parameter list."
+let error2022 = "A variadic parameter ('...') may not be followed by a comma."
 
 let error2029 = "Only traits and interfaces may use 'require extends'."
 let error2030 = "Only traits may use 'require implements'."
 let error2031 =
   "A class, interface, or trait declaration cannot have duplicate modifiers."
 let error2032 = "The array type is not allowed in strict mode."
-let error2033 = "Variadic parameter or argument must be the last in a" ^
-  " parameter or argument list."
+let error2033 = "A variadic argument ('...') may only appear at the end of " ^
+  "an argument list."

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,9 +24,15 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdAuth : DebuggerCommand {
-  explicit CmdAuth() : DebuggerCommand(KindOfAuth) {}
+  CmdAuth() : DebuggerCommand(KindOfAuth) {}
 
   const std::string& getToken() const { return m_token; }
+  const std::string& getSandboxPath() const { return m_sandboxPath; }
+
+  std::string getFullTokenScriptPath(const std::string& tokenScriptPath);
+  void setSandboxPath(const std::string& sandboxPath) {
+    m_sandboxPath = sandboxPath;
+  };
 
   bool onServer(DebuggerProxy&) override;
   void onClient(DebuggerClient&) override;
@@ -37,6 +43,7 @@ protected:
 
 private:
   std::string m_token;
+  std::string m_sandboxPath = "";
 };
 
 ///////////////////////////////////////////////////////////////////////////////

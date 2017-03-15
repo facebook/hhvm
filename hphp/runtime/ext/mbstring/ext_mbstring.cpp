@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1084,12 +1084,12 @@ Variant HHVM_FUNCTION(mb_list_encodings_alias_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
 
         if (encoding->aliases != nullptr) {
           j = 0;
@@ -1136,12 +1136,12 @@ Variant HHVM_FUNCTION(mb_list_mime_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
         if (encoding->mime_name != nullptr) {
           return String(encoding->mime_name, CopyString);
         }
@@ -1321,6 +1321,10 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 
   ret = mbfl_ja_jp_hantozen(&string, &result, opt);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1547,6 +1551,10 @@ static Variant php_mb_numericentity_exec(const String& str,
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
   free(iconvmap);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1685,6 +1693,10 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
   ret = mbfl_mime_header_encode(&string, &result, charsetenc, transenc,
                                 linefeed.data(), indent);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -2876,9 +2888,104 @@ Variant HHVM_FUNCTION(mb_strstr,
   return false;
 }
 
+const StaticString s_utf_8("utf-8");
+
+/**
+ * Fast check for the most common form of the UTF-8 encoding identifier.
+ */
+ALWAYS_INLINE
+static bool isUtf8(const Variant& encoding) {
+  return encoding.getStringDataOrNull() == s_utf_8.get();
+}
+
+/**
+ * Given a byte sequence, return
+ *    0 if it contains bytes >= 128 (thus non-ASCII), else
+ *   -1 if it contains any upper-case character ('A'-'Z'), else
+ *    1 (and thus is a lower-case ASCII string).
+ */
+ALWAYS_INLINE
+static int isUtf8AsciiLower(folly::StringPiece s) {
+  const auto bytelen = s.size();
+  bool caseOK = true;
+  for (uint32_t i = 0; i < bytelen; ++i) {
+    uint8_t byte = s[i];
+    if (byte >= 128) {
+      return 0;
+    } else if (byte <= 'Z' && byte >= 'A') {
+      caseOK = false;
+    }
+  }
+  return caseOK ? 1 : -1;
+}
+
+/**
+ * Return a string containing the lower-case of a given ASCII string.
+ */
+ALWAYS_INLINE
+static StringData* asciiToLower(const StringData* s) {
+  const auto size = s->size();
+  auto ret = StringData::Make(s, CopyString);
+  auto output = ret->mutableData();
+  for (int i = 0; i < size; ++i) {
+    auto& c = output[i];
+    if (c <= 'Z' && c >= 'A') {
+      c |= 0x20;
+    }
+  }
+  ret->invalidateHash(); // We probably modified it.
+  return ret;
+}
+
+/* Like isUtf8AsciiLower, but with upper/lower swapped. */
+ALWAYS_INLINE
+static int isUtf8AsciiUpper(folly::StringPiece s) {
+  const auto bytelen = s.size();
+  bool caseOK = true;
+  for (uint32_t i = 0; i < bytelen; ++i) {
+    uint8_t byte = s[i];
+    if (byte >= 128) {
+      return 0;
+    } else if (byte >= 'a' && byte <= 'z') {
+      caseOK = false;
+    }
+  }
+  return caseOK ? 1 : -1;
+}
+
+/* Like asciiToLower, but with upper/lower swapped. */
+ALWAYS_INLINE
+static StringData* asciiToUpper(const StringData* s) {
+  const auto size = s->size();
+  auto ret = StringData::Make(s, CopyString);
+  auto output = ret->mutableData();
+  for (int i = 0; i < size; ++i) {
+    auto& c = output[i];
+    if (c >= 'a' && c <= 'z') {
+      c -= (char)0x20;
+    }
+  }
+  ret->invalidateHash(); // We probably modified it.
+  return ret;
+}
+
 Variant HHVM_FUNCTION(mb_strtolower,
                       const String& str,
                       const Variant& opt_encoding) {
+  /* Fast-case for empty static string without dereferencing any pointers. */
+  if (str.get() == staticEmptyString()) return empty_string_variant();
+  if (LIKELY(isUtf8(opt_encoding))) {
+    /* Fast-case for ASCII. */
+    if (auto sd = str.get()) {
+      auto sl = sd->slice();
+      auto r = isUtf8AsciiLower(sl);
+      if (r > 0) {
+        return str;
+      } else if (r < 0) {
+        return String::attach(asciiToLower(sd));
+      }
+    }
+  }
   const String encoding = convertArg(opt_encoding);
 
   const char *from_encoding;
@@ -2901,6 +3008,20 @@ Variant HHVM_FUNCTION(mb_strtolower,
 Variant HHVM_FUNCTION(mb_strtoupper,
                       const String& str,
                       const Variant& opt_encoding) {
+  /* Fast-case for empty static string without dereferencing any pointers. */
+  if (str.get() == staticEmptyString()) return empty_string_variant();
+  if (LIKELY(isUtf8(opt_encoding))) {
+    /* Fast-case for ASCII. */
+    if (auto sd = str.get()) {
+      auto sl = sd->slice();
+      auto r = isUtf8AsciiUpper(sl);
+      if (r > 0) {
+        return str;
+      } else if (r < 0) {
+        return String::attach(asciiToUpper(sd));
+      }
+    }
+  }
   const String encoding = convertArg(opt_encoding);
 
   const char *from_encoding;

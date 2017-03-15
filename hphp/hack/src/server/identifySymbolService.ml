@@ -15,8 +15,13 @@ open Typing_defs
 type result =
   ((string SymbolOccurrence.t) * (string SymbolDefinition.t option)) list
 
-type cache = (Relative_path.t * FileInfo.t * Ast.def list *
-  Relative_path.t SymbolOccurrence.t list) SMap.t
+let result_to_ide_message x =
+  let open Ide_message in
+  Identify_symbol_response (
+    List.map x begin fun (occurrence, definition) ->
+      {occurrence; definition}
+    end
+  )
 
 let is_target target_line target_char pos =
   let l, start, end_ = Pos.info_pos pos in
@@ -55,15 +60,15 @@ let process_member result_ref is_target_fun c_name id ~is_method ~is_const =
            }
   end
 
-let process_method_id result_ref is_target_fun class_ id _ _
+let process_method_id result_ref is_target_fun class_ ~targs:_ id _ _
     ~is_method ~is_const =
   let class_name = class_.Typing_defs.tc_name in
   process_member result_ref is_target_fun class_name id is_method is_const
 
-let process_constructor result_ref is_target_fun class_ _ p =
+let process_constructor result_ref is_target_fun class_ ~targs _ p =
   process_method_id
     result_ref is_target_fun
-      class_ (p, Naming_special_names.Members.__construct)
+      class_ ~targs (p, Naming_special_names.Members.__construct)
         () () ~is_method:true ~is_const:false
 
 let process_fun_id result_ref is_target_fun id =

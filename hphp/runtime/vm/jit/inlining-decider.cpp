@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,7 +214,7 @@ bool isInlinableCPPBuiltin(const Func* f) {
   }
 
   // ARM currently can't handle floating point returns.
-  if (f->returnType() == KindOfDouble &&
+  if (f->hniReturnType() == KindOfDouble &&
       !Native::allowFCallBuiltinDoubles()) {
     return false;
   }
@@ -331,7 +331,9 @@ Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
     TransKind::Optimize,
     TransFlags{},
     at,
-    FPInvOffset{0},
+    // We can pretend the stack is empty, but we at least need to account for
+    // the locals, iters, and slots, etc.
+    FPInvOffset{at.func()->numSlotsInFrame()},
     callerFPushOp
   };
 
@@ -532,7 +534,7 @@ RegionDescPtr selectCalleeTracelet(const Func* callee,
 
   for (uint32_t i = 0; i < numArgs; ++i) {
     auto type = argTypes[i];
-    assertx((type <= TGen) || (type <= TCls));
+    assertx(type <= TGen);
     ctx.liveTypes.push_back({Location::Local{i}, type});
   }
 
@@ -655,11 +657,12 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
     auto type = irgen::publicTopType(irgs, BCSPRelOffset{i});
+    assertx(type <= TGen);
 
     // If we don't have sufficient type information to inline the region return
     // early
     if (type == TBottom) return nullptr;
-    if (!(type <= TCell) && !(type <= TBoxedCell) && !(type <= TCls)) {
+    if (!(type <= TCell) && !(type <= TBoxedCell)) {
       return nullptr;
     }
     argTypes.push_back(type);

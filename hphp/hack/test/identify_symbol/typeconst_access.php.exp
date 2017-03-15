@@ -1,5 +1,9 @@
-\C::BAR
-Typeconst
-line 11, characters 26-28
-defined: line 4, characters 14-16
-definition span: line 4, character 3 - line 4, character 25
+name: \C::BAR, kind: typeconst, span: line 11, characters 26-28, definition: 
+ BAR
+   kind: typeconst
+   id: class_const::C::BAR
+   position: line 4, characters 14-16
+   span: line 4, character 3 - line 4, character 25
+   modifiers: 
+
+

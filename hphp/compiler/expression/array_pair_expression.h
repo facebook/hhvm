@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,7 @@ DECLARE_BOOST_TYPES(ArrayPairExpression);
 
 struct ArrayPairExpression : Expression {
   ArrayPairExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
-                      ExpressionPtr name, ExpressionPtr value, bool ref,
-                      bool collection = false);
+                      ExpressionPtr name, ExpressionPtr value, bool ref);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   bool containsDynamicConstant(AnalysisResultPtr ar) const override;
@@ -44,7 +43,6 @@ private:
   ExpressionPtr m_name;
   ExpressionPtr m_value;
   bool m_ref;
-  bool m_collection;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

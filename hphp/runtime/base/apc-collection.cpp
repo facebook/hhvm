@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -103,20 +103,30 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
     auto const features = walker.traverseData(const_cast<ArrayData*>(array));
     assert(!features.isCircular);
     if (!features.hasObjectOrResource) {
+      auto const makeUncounted = [&] () {
+        if (isVectorCollection(obj->collectionType())) {
+          return APCArray::MakeUncountedVec(const_cast<ArrayData*>(array));
+        }
+        return APCArray::MakeUncountedArray(const_cast<ArrayData*>(array));
+      };
       return WrapArray(
-        { APCArray::MakeUncountedArray(const_cast<ArrayData*>(array)),
-          getMemSize(array) + sizeof(APCTypedValue) },
+        { makeUncounted(), getMemSize(array) + sizeof(APCTypedValue) },
         obj->collectionType()
       );
     }
   }
 
-  return WrapArray(
-    APCArray::MakeSharedArray(const_cast<ArrayData*>(array),
-                              level,
-                              unserializeObj),
-    obj->collectionType()
-  );
+  auto const makeShared = [&] () {
+    if (isVectorCollection(obj->collectionType())) {
+      return APCArray::MakeSharedVec(const_cast<ArrayData*>(array),
+                                     level,
+                                     unserializeObj);
+    }
+    return APCArray::MakeSharedArray(const_cast<ArrayData*>(array),
+                                     level,
+                                     unserializeObj);
+  };
+  return WrapArray(makeShared(), obj->collectionType());
 }
 
 void APCCollection::Delete(APCHandle* h) {
@@ -151,7 +161,8 @@ Object APCCollection::createObject() const {
     );
   }
 
-  if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedArray)) {
+  if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedVec ||
+               m_arrayHandle->kind() == APCKind::SerializedArray)) {
     return createFromSerialized(m_colType, m_arrayHandle);
   }
 

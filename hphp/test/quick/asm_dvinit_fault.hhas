@@ -1,5 +1,5 @@
 #
-# Fault funclets / try catch in a DV initializer.
+# Try/catch in a DV initializer.
 #
 # HHVM doesn't generate code like this, but it's legal bytecode.
 #
@@ -22,7 +22,7 @@
     Add
     RetC
 
-  ex:
+  outer_handler:
     Catch
     PopC
     Jmp out_of_catch
@@ -32,8 +32,8 @@
     SetL $x
     PopC
   dv_init2:
-   .try_catch (Exception ex) {
-     .try_fault fault {
+   .try_catch outer_handler {
+     .try_catch inner_handler {
         Int 1
         SetL $y
         PopC
@@ -43,13 +43,13 @@
         PopR
         Throw
      }
+    inner_handler: 
+      Catch
+      Int 4321
+      SetL $x
+      PopC
+      Throw
    }
   out_of_catch:
-   Jmp main_entry
-
-fault:
-   Int 4321
-   SetL $x
-   PopC
-   Unwind
+    Jmp main_entry
 }

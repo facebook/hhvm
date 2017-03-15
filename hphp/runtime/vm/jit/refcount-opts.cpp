@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -568,6 +568,7 @@ way than to complicate the main pass further.
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/Conv.h>
+#include <folly/portability/Stdlib.h>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -1439,12 +1440,10 @@ DEBUG_ONLY bool check_state(const RCState& state) {
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
-    if (set.memory_support.any()) {
-      for (auto id = uint32_t{0}; id < set.memory_support.size(); ++id) {
-        if (!set.memory_support[id]) continue;
-        always_assert(state.support_map[id] == asetID);
-      }
-    }
+    bitset_for_each_set(
+      set.memory_support,
+      [&](size_t id) { always_assert(state.support_map[id] == asetID); }
+    );
 
     if (set.pessimized) {
       always_assert(set.lower_bound == 0);
@@ -1589,13 +1588,13 @@ bool merge_into(Env& env, RCState& dst, const RCState& src) {
       changed = true;
     }
 
-    auto const& mem = dst.asets[asetID].memory_support;
-    if (mem.none()) continue;
-    for (auto loc = uint32_t{0}; loc < mem.size(); ++loc) {
-      if (!mem[loc]) continue;
-      assertx(dst.support_map[loc] == -1);
-      dst.support_map[loc] = asetID;
-    }
+    bitset_for_each_set(
+      dst.asets[asetID].memory_support,
+      [&](size_t loc) {
+        assertx(dst.support_map[loc] == -1);
+        dst.support_map[loc] = asetID;
+      }
+    );
   }
 
   assertx(check_state(dst));
@@ -1613,14 +1612,6 @@ void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   fn(asetID);
 }
 
-template<class Fn>
-void for_each_bit(ALocBits bits, Fn fn) {
-  for (auto i = uint32_t{0}; i < bits.size(); ++i) {
-    if (!bits[i]) continue;
-    fn(i);
-  }
-}
-
 void reduce_lower_bound(Env& env, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
@@ -1633,13 +1624,11 @@ void pessimize_one(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   if (aset.pessimized) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
-  if (aset.memory_support.any()) {
-    for (auto id = uint32_t{0}; id < aset.memory_support.size(); ++id) {
-      if (!aset.memory_support[id]) continue;
-      state.support_map[id] = -1;
-    }
-    aset.memory_support.reset();
-  }
+  bitset_for_each_set(
+    aset.memory_support,
+    [&](size_t id) { state.support_map[id] = -1; }
+  );
+  aset.memory_support.reset();
   aset.pessimized = true;
   add_node(asetID, NHalt{});
 }
@@ -1777,9 +1766,12 @@ bool reduce_support_bits(Env& env,
                          NAdder add_node) {
   FTRACE(2, "    remove: {}\n", show(set));
   auto ret = true;
-  for_each_bit(set, [&] (uint32_t locID) {
-    if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
-  });
+  bitset_for_each_set(
+    set,
+    [&](uint32_t locID) {
+      if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
+    }
+  );
   return ret;
 }
 
@@ -1808,9 +1800,12 @@ void drop_support_bit(Env& env, RCState& state, uint32_t bit) {
 
 void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
   FTRACE(3, "    drop support {}\n", show(bits));
-  for_each_bit(bits, [&] (uint32_t bit) {
-    drop_support_bit(env, state, bit);
-  });
+  bitset_for_each_set(
+    bits,
+    [&] (uint32_t bit) {
+      drop_support_bit(env, state, bit);
+    }
+  );
 }
 
 template<class NAdder>
@@ -1879,7 +1874,7 @@ void handle_call(Env& env,
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
   auto bset = ALocBits{};
-  if (e.destroys_locals) bset |= env.ainfo.all_frame;
+  if (e.writes_locals) bset |= env.ainfo.all_frame;
   bset |= env.ainfo.may_alias(e.stack);
   bset |= env.ainfo.may_alias(AHeapAny);
   bset &= ~env.ainfo.expand(e.kills);
@@ -2064,7 +2059,8 @@ bool consumes_reference_next_not_taken(const IRInstruction& inst,
  */
 bool observes_reference(const IRInstruction& inst, uint32_t srcID) {
   return consumes_reference_next_not_taken(inst, srcID) ||
-         consumes_reference_taken(inst, srcID);
+         consumes_reference_taken(inst, srcID) ||
+         (inst.op() == CheckArrayCOW && srcID == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3404,7 +3400,7 @@ void sink_incs(Env& env) {
     }
 
     auto const& succ = *iter;
-    if (succ.is(CheckType, CheckLoc, CheckStk)) {
+    if (succ.is(CheckType, CheckLoc, CheckStk, CheckMBase)) {
       // try to sink past Check* instructions
       if (!can_sink(env, inc, block)) continue;
 

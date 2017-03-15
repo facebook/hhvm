@@ -120,10 +120,10 @@ let try_with_channel oc f1 f2 =
 
 let iter_n_acc n f acc =
   let acc = ref acc in
-  for i = 1 to n do
-    acc := f !acc
+  for i = 1 to n-1 do
+    acc := fst (f !acc)
   done;
-  !acc
+  f !acc
 
 let map_of_list list =
   List.fold_left ~f:(fun m (k, v) -> SMap.add k v m) ~init:SMap.empty list
@@ -158,6 +158,11 @@ let fold_fun_list acc fl =
   List.fold_left fl ~f:(|>) ~init:acc
 
 let compose f g x = f (g x)
+
+let try_finally ~f ~(finally: unit -> unit) =
+  let res = try f () with e -> finally (); raise e in
+  finally ();
+  res
 
 let with_context ~enter ~exit ~do_ =
   enter ();

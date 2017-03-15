@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,13 +29,12 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct Class;
 struct ArrayData;
 struct StringData;
 struct ObjectData;
 struct RefData;
 struct ResourceHdr;
-struct TypedValue;
+struct MaybeCountable;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -51,8 +50,8 @@ union Value {
   ArrayData*    parr;   // KindOfArray, KindOfVec, KindOfDict, KindOfKeyset
   ObjectData*   pobj;   // KindOfObject
   ResourceHdr*  pres;   // KindOfResource
-  Class*        pcls;   // only in vm stack, no type tag.
   RefData*      pref;   // KindOfRef
+  MaybeCountable* pcnt; // for alias-safe generic refcounting operations
 };
 
 enum VarNrFlag { NR_FLAG = 1<<29 };
@@ -77,6 +76,8 @@ union AuxUnion {
   int32_t u_rdsHandle;
   // Used by Class::Const.
   ConstModifiers u_constModifiers;
+  // Used by InvokeResult
+  bool u_ok;
 };
 
 /*
@@ -96,7 +97,7 @@ union AuxUnion {
  */
 
 /*
- * A TypedValue is a descriminated PHP Value.  m_tag describes the contents
+ * A TypedValue is a descriminated PHP Value.  m_type describes the contents
  * of m_data.  m_aux is described above, and must only be read or written
  * in specialized contexts.
  */
@@ -108,28 +109,7 @@ struct TypedValue {
   std::string pretty() const; // debug formatting. see trace.h
 
   TYPE_SCAN_CUSTOM() {
-    switch (m_type) {
-      case KindOfObject: scanner.enqueue(m_data.pobj); break;
-      case KindOfResource: scanner.enqueue(m_data.pres); break;
-      case KindOfString: scanner.enqueue(m_data.pstr); break;
-      case KindOfVec:
-      case KindOfDict:
-      case KindOfKeyset:
-      case KindOfArray: scanner.enqueue(m_data.parr); break;
-      case KindOfRef: scanner.enqueue(m_data.pref); break;
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfBoolean:
-      case KindOfInt64:
-      case KindOfDouble:
-      case KindOfPersistentString:
-      case KindOfPersistentArray:
-      case KindOfPersistentVec:
-      case KindOfPersistentDict:
-      case KindOfPersistentKeyset:
-      case KindOfClass:
-        break;
-    }
+    if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);
   }
 };
 
@@ -321,6 +301,13 @@ typename std::enable_if<
   return reinterpret_cast<typename DataTypeCPPType<DType>::type>
            (tv->m_data.pstr);
 }
+
+/*
+ * Unlike init_null_variant and uninit_variant, these should be placed
+ * in .rodata and cause a segfault if written to.
+ */
+extern const Cell immutable_null_base;
+extern const Cell immutable_uninit_base;
 
 //////////////////////////////////////////////////////////////////////
 

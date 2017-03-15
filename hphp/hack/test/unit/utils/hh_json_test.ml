@@ -85,6 +85,21 @@ let test_access_object_number () =
   | _ ->
     false
 
+let test_access_object_val () =
+  let json = Hh_json.json_of_string
+    "{ \"foo\": { \"bar\": { \"baz\": 5 } } }" in
+  let open Hh_json.Access in
+  let result = (return json)
+    >>= get_obj "foo"
+    >>= get_obj "bar"
+    >>= get_val "baz"
+  in
+  match result with
+  | Result.Ok (Hh_json.JSON_Number "5", _) ->
+    true
+  | _ ->
+    false
+
 let test_access_object_key_doesnt_exist () =
   let json = Hh_json.json_of_string
     "{ \"foo\": { \"bar\": { \"baz\": 5 } } }" in
@@ -141,6 +156,7 @@ let tests = [
   "test_access_object_string", test_access_object_string;
   "test_access_object_bool", test_access_object_bool;
   "test_access_object_number", test_access_object_number;
+  "test_access_object_val", test_access_object_val;
   "test_access_object_key_doesnt_exit", test_access_object_key_doesnt_exist;
   "test_access_object_type_invalid", test_access_object_type_invalid;
   "test_access_object_error_in_middle", test_access_object_error_in_middle;

@@ -1,0 +1,50 @@
+PASSED version get test
+Testing one-shot
+PASS
+Testing subscription
+Subscribed
+Waiting for got_fresh
+PASS
+Waiting for got_update
+PASS
+Unsubscribing
+PASS
+Confirming subscription no longer exists
+PASS
+Test corrupt subscription callback
+Got expected exception: Problem(s) on subscription named 'X'. Connection IS alive.
+First error:
+syntax error, unexpected '}'
+PASS
+Test delete subscription callback
+Got expected exception: Problem(s) on subscription named 'X'. Connection IS alive.
+First error:
+%s: Unit '/tmp/%s' no longer exists.
+PASS
+Stess test subscription
+..............................
+PASS (%d, %d, %d, %d)
+Testing syncing
+Subscribed, sleeping for 1 second...
+Sync expecting timeout after 100ms...
+PASS
+Sync expecting no timeout...
+PASS
+Sync expecting immediate return...
+PASS
+Unsubscribing
+Check catching exception raised in a subscription callback
+Got exception: Problem(s) on subscription named 'X'. Connection IS alive.
+First error:
+exception 'Exception' with message 'expected exception' in %s:%d
+Stack trace:
+#0 (): callback_exception()
+#1 {main}
+PASS
+Check unsubscribing while callback in progress
+PASS
+Checking connecting to a bad socket is graceful
+Got exception: %sAsyncSocketException%s
+PASS
+Checking detection of dead Watchman server connection
+PASS (connection error)

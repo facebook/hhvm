@@ -11,8 +11,14 @@ function foo() {
   }
 }
 
-foo(); foo(); foo();
-$start = memory_get_peak_usage(true);
-foo();
-$end = memory_get_peak_usage(true);
-echo $end - $start, "\n";
+function test() {
+  foo(); foo(); foo();
+  $start = memory_get_peak_usage(true);
+  foo();
+  $end = memory_get_peak_usage(true);
+  return $end - $start;
+}
+
+$x = test();
+$x = test();
+echo $x, "\n";

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -205,9 +205,6 @@ struct StringBuffer {
   void read(FILE *in, int page_size = 1024);
   void read(File *in, int page_size = 1024);
 
-  template<class F> void scan(F& mark) const {
-    mark(m_str);
-  }
 private:
   void appendHelper(const char* s, int len);
   void appendHelper(char c);

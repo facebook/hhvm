@@ -2,7 +2,7 @@
  +----------------------------------------------------------------------+
  | HipHop for PHP                                                       |
  +----------------------------------------------------------------------+
- | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+ | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
  | Copyright (c) 1997-2010 The PHP Group                                |
  +----------------------------------------------------------------------+
  | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,6 +23,8 @@
 #include "hphp/runtime/base/file.h"
 
 #include <libintl.h>
+
+#include <folly/portability/Stdlib.h>
 
 #define PHP_GETTEXT_MAX_DOMAIN_LENGTH 1024
 #define PHP_GETTEXT_MAX_MSGID_LENGTH 4096

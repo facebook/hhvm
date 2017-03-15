@@ -1,5 +1,10 @@
-\C::foo
-Method
-line 4, characters 19-21
-defined: line 4, characters 19-21
-definition span: line 4, character 3 - line 4, character 26
+name: \C::foo, kind: method, span: line 4, characters 19-21, definition: 
+ foo
+   kind: method
+   id: method::C::foo
+   position: line 4, characters 19-21
+   span: line 4, character 3 - line 4, character 26
+   modifiers: public 
+   params:
+
+

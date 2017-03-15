@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +42,12 @@ private:
   StubNode* m_list;
 };
 
+std::mutex s_stubLock;
+
 void FreeStubList::push(TCA stub) {
+  always_assert(tc::isValidCodeAddress(stub));
+  std::unique_lock<std::mutex> l(s_stubLock);
+
   /*
    * A freed stub may be released by Treadmill more than once if multiple
    * threads execute the service request before it is freed. We detect
@@ -60,6 +65,8 @@ void FreeStubList::push(TCA stub) {
 }
 
 TCA FreeStubList::maybePop() {
+  std::unique_lock<std::mutex> l(s_stubLock);
+
   StubNode* ret = m_list;
   if (ret) {
     TRACE(1, "alloc stub %p\n", ret);

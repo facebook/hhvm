@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,6 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
 template <typename T>
 std::shared_ptr<T> getSingleton() {
   return folly::Singleton<T>::try_get();
@@ -40,7 +39,7 @@ std::shared_ptr<T> getSingleton() {
 char *strndup(const char* str, size_t len);
 int dprintf(int fd, ATTRIBUTE_PRINTF_STRING const char *format, ...)
   ATTRIBUTE_PRINTF(2,3);
-typedef int clockid_t;
+
 int pipe2(int pipefd[2], int flags);
 #endif
 
@@ -53,8 +52,7 @@ int pipe2(int pipefd[2], int flags);
 int fadvise_dontneed(int fd, off_t len);
 int advise_out(const std::string& fileName);
 
-#if defined(__CYGWIN__) || defined(_MSC_VER)
-
+#ifdef _MSC_VER
 typedef struct {
   const char *dli_fname;
   void *dli_fbase;
@@ -63,8 +61,7 @@ typedef struct {
 } Dl_info;
 
 int dladdr(const void *addr, Dl_info *info);
-int backtrace (void **buffer, int size);
-
+int backtrace(void **buffer, int size);
 #endif
 
 //////////////////////////////////////////////////////////////////////

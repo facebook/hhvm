@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -175,7 +175,7 @@ void callFunc(const Func* func, void *ctx,
   int GP_count = 0, SIMD_count = 0;
 
   auto const numArgs = func->numParams();
-  auto retType = func->returnType();
+  auto retType = func->hniReturnType();
 
   if (ctx) {
     GP_args[GP_count++] = (int64_t)ctx;
@@ -257,7 +257,6 @@ void callFunc(const Func* func, void *ctx,
     }
 
     case KindOfUninit:
-    case KindOfClass:
       break;
   }
 
@@ -345,7 +344,6 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfRef:
-      case KindOfClass:
         not_reached();
     }
   }
@@ -422,8 +420,8 @@ TypedValue* functionWrapper(ActRec* ar) {
 
   assert(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
-  tvCopy(rv, ar->m_r);
-  return &ar->m_r;
+  tvCopy(rv, *ar->retSlot());
+  return ar->retSlot();
 }
 
 template<bool usesDoubles>
@@ -442,8 +440,8 @@ TypedValue* methodWrapper(ActRec* ar) {
        (nativeWrapperCheckArgs(ar))) &&
       (coerceFCallArgs(args, numArgs, numNonDefault, func, strict))) {
     // Prepend a context arg for methods
-    // KindOfClass when it's being called statically Foo::bar()
-    // KindOfObject when it's being called on an instance $foo->bar()
+    // Class when it's being called statically Foo::bar()
+    // Object when it's being called on an instance $foo->bar()
     void* ctx;  // ObjectData* or Class*
     if (ar->hasThis()) {
       if (isStatic) {
@@ -469,8 +467,8 @@ TypedValue* methodWrapper(ActRec* ar) {
   } else {
     frame_free_locals_inl(ar, func->numLocals(), &rv);
   }
-  tvCopy(rv, ar->m_r);
-  return &ar->m_r;
+  tvCopy(rv, *ar->retSlot());
+  return ar->retSlot();
 }
 
 TypedValue* unimplementedWrapper(ActRec* ar) {
@@ -479,19 +477,19 @@ TypedValue* unimplementedWrapper(ActRec* ar) {
   if (cls) {
     raise_error("Call to unimplemented native method %s::%s()",
                 cls->name()->data(), func->name()->data());
-    ar->m_r.m_type = KindOfNull;
+    tvWriteNull(ar->retSlot());
     if (func->isStatic()) {
-      frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
+      frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
     } else {
-      frame_free_locals_inl(ar, func->numParams(), &ar->m_r);
+      frame_free_locals_inl(ar, func->numParams(), ar->retSlot());
     }
   } else {
     raise_error("Call to unimplemented native function %s()",
                 func->displayName()->data());
-    ar->m_r.m_type = KindOfNull;
-    frame_free_locals_no_this_inl(ar, func->numParams(), &ar->m_r);
+    tvWriteNull(ar->retSlot());
+    frame_free_locals_no_this_inl(ar, func->numParams(), ar->retSlot());
   }
-  return &ar->m_r;
+  return ar->retSlot();
 }
 
 void getFunctionPointers(const BuiltinFunctionInfo& info,
@@ -577,7 +575,6 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfNull:         return ty == T::Void;
     case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
-    case KindOfClass:        break;
   }
   not_reached();
 }

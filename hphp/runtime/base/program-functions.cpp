@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/xdebug/status.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 #include "hphp/runtime/server/admin-request-handler.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/rpc-request-handler.h"
@@ -99,8 +100,9 @@
 #include <folly/Range.h>
 #include <folly/Portability.h>
 #include <folly/Singleton.h>
-#include <folly/portability/Environment.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
+#include <folly/portability/Stdlib.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
@@ -121,7 +123,7 @@
 #include <string>
 #include <vector>
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#ifdef _MSC_VER
 #include <windows.h>
 #include <winuser.h>
 #endif
@@ -186,6 +188,7 @@ struct StartTime {
 static StartTime s_startTime;
 static std::string tempFile;
 std::vector<std::string> s_config_files;
+std::vector<std::string> s_ini_strings;
 
 time_t start_time() {
   return s_startTime.startTime;
@@ -221,11 +224,12 @@ static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argv, argvArray);
 }
 
-void process_env_variables(Array& variables) {
-  for (auto& kv : RuntimeOption::EnvVariables) {
+static void process_env_variables(Array& variables, char** envp,
+                           std::map<std::string, std::string>& envVariables) {
+  for (auto& kv : envVariables) {
     variables.set(String(kv.first), String(kv.second));
   }
-  for (char **env = environ; env && *env; env++) {
+  for (char **env = envp; env && *env; env++) {
     char *p = strchr(*env, '=');
     if (p) {
       String name(*env, p - *env, CopyString);
@@ -233,6 +237,10 @@ void process_env_variables(Array& variables) {
                         String(p + 1, CopyString));
     }
   }
+}
+
+void process_env_variables(Array& variables) {
+  process_env_variables(variables, environ, RuntimeOption::EnvVariables);
 }
 
 // Handle adding a variable to an array, supporting keys that look
@@ -372,12 +380,12 @@ void bump_counter_and_rethrow(bool isPsp) {
     throw;
   } catch (const RequestTimeoutException& e) {
     if (isPsp) {
-      static auto requestTimeoutPSPCounter = ServiceData::createTimeseries(
+      static auto requestTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_timed_out_psp", {ServiceData::StatsType::COUNT});
       requestTimeoutPSPCounter->addValue(1);
       ServerStats::Log("request.timed_out.psp", 1);
     } else {
-      static auto requestTimeoutCounter = ServiceData::createTimeseries(
+      static auto requestTimeoutCounter = ServiceData::createTimeSeries(
         "requests_timed_out_non_psp", {ServiceData::StatsType::COUNT});
       requestTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.non_psp", 1);
@@ -385,12 +393,12 @@ void bump_counter_and_rethrow(bool isPsp) {
     throw;
   } catch (const RequestCPUTimeoutException& e) {
     if (isPsp) {
-      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeseries(
+      static auto requestCPUTimeoutPSPCounter = ServiceData::createTimeSeries(
         "requests_cpu_timed_out_psp", {ServiceData::StatsType::COUNT});
       requestCPUTimeoutPSPCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.psp", 1);
     } else {
-      static auto requestCPUTimeoutCounter = ServiceData::createTimeseries(
+      static auto requestCPUTimeoutCounter = ServiceData::createTimeSeries(
         "requests_cpu_timed_out_non_psp", {ServiceData::StatsType::COUNT});
       requestCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.non_psp", 1);
@@ -399,12 +407,12 @@ void bump_counter_and_rethrow(bool isPsp) {
   } catch (const RequestMemoryExceededException& e) {
     if (isPsp) {
       static auto requestMemoryExceededPSPCounter =
-        ServiceData::createTimeseries(
+        ServiceData::createTimeSeries(
           "requests_memory_exceeded_psp", {ServiceData::StatsType::COUNT});
       requestMemoryExceededPSPCounter->addValue(1);
       ServerStats::Log("request.memory_exceeded.psp", 1);
     } else {
-      static auto requestMemoryExceededCounter = ServiceData::createTimeseries(
+      static auto requestMemoryExceededCounter = ServiceData::createTimeSeries(
         "requests_memory_exceeded_non_psp", {ServiceData::StatsType::COUNT});
       requestMemoryExceededCounter->addValue(1);
       ServerStats::Log("request.memory_exceeded.non_psp", 1);
@@ -599,7 +607,7 @@ void handle_destructor_exception(const char* situation) {
   }
 }
 
-void execute_command_line_begin(int argc, char **argv, int xhprof) {
+void init_command_line_session(int argc, char** argv) {
   StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
   std::string args;
   for (int i = 0; i < argc; i++) {
@@ -611,13 +619,19 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   hphp_session_init();
   auto const context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
+}
 
+void
+init_command_line_globals(int argc, char** argv, char** envp,
+                          int xhprof,
+                          std::map<std::string, std::string>& serverVariables,
+                          std::map<std::string, std::string>& envVariables) {
   auto& variablesOrder = RID().getVariablesOrder();
 
   if (variablesOrder.find('e') != std::string::npos ||
       variablesOrder.find('E') != std::string::npos) {
     Array envArr(Array::Create());
-    process_env_variables(envArr);
+    process_env_variables(envArr, envp, envVariables);
     envArr.set(s_HPHP, 1);
     envArr.set(s_HHVM, 1);
     if (RuntimeOption::EvalJit) {
@@ -642,7 +656,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   if (variablesOrder.find('s') != std::string::npos ||
       variablesOrder.find('S') != std::string::npos) {
     Array serverArr(Array::Create());
-    process_env_variables(serverArr);
+    process_env_variables(serverArr, envp, envVariables);
     time_t now;
     struct timeval tp = {0};
     double now_double;
@@ -669,13 +683,14 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
     serverArr.set(s_PWD, g_context->getCwd());
     char hostname[1024];
     if (RuntimeOption::ServerExecutionMode() &&
+        !is_cli_mode() &&
         !gethostname(hostname, sizeof(hostname))) {
       // gethostname may not null-terminate
       hostname[sizeof(hostname) - 1] = '\0';
       serverArr.set(s_HOSTNAME, String(hostname, CopyString));
     }
 
-    for (auto& kv : RuntimeOption::ServerVariables) {
+    for (auto& kv : serverVariables) {
       serverArr.set(String(kv.first.c_str()), String(kv.second.c_str()));
     }
 
@@ -697,6 +712,13 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   InitFiniNode::GlobalsInit();
   // Initialize the debugger
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
+}
+
+void execute_command_line_begin(int argc, char **argv, int xhprof) {
+  init_command_line_session(argc, argv);
+  init_command_line_globals(argc, argv, environ, xhprof,
+                            RuntimeOption::ServerVariables,
+                            RuntimeOption::EnvVariables);
 }
 
 void execute_command_line_end(int xhprof, bool coverage, const char *program) {
@@ -724,45 +746,9 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   }
 }
 
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+#if defined(__APPLE__) || defined(_MSC_VER)
 const void* __hot_start = nullptr;
 const void* __hot_end = nullptr;
-#endif
-
-#if FACEBOOK && defined USE_SSECRC
-// Overwrite the functiosn
-NEVER_INLINE void copyFunc(void* dst, void* src, uint32_t sz = 64) {
-  if (dst >= reinterpret_cast<void*>(__hot_start) &&
-      dst < reinterpret_cast<void*>(__hot_end)) {
-    memcpy(dst, src, sz);
-    Logger::Info("Successfully overwrite function at %p.", dst);
-  } else {
-    Logger::Info("Failed to patch code at %p.", dst);
-  }
-}
-
-NEVER_INLINE void copyHashFuncs() {
-#ifdef __OPTIMIZE__
-  if (IsSSEHashSupported()) {
-#ifdef NO_M_DATA
-    copyFunc(getMethodPtr(&HPHP::StringData::hashHelper),
-             reinterpret_cast<void*>(g_hashHelper_crc), 64);
-#endif // NO_M_DATA
-    typedef strhash_t (*HashFunc) (const char*, uint32_t);
-    auto hash_func = [](HashFunc x) {
-      return reinterpret_cast<void*>(x);
-    };
-    copyFunc(hash_func(hash_string_cs_unsafe),
-             hash_func(hash_string_cs_crc), 48);
-    copyFunc(hash_func(hash_string_cs),
-             hash_func(hash_string_cs_unaligned_crc), 64);
-    copyFunc(hash_func(hash_string_i_unsafe),
-             hash_func(hash_string_i_crc), 64);
-    copyFunc(hash_func(hash_string_i),
-             hash_func(hash_string_i_unaligned_crc), 128);
-  }
-#endif
-}
 #endif
 
 #if FACEBOOK
@@ -801,11 +787,6 @@ hugifyText(char* from, char* to) {
   // Needs the attribute((optimize("2")) to prevent
   // g++ from turning this back into memcpy(!)
   wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
-  // When supported, string hash functions using SSE 4.2 CRC32 instruction will
-  // be used, so we don't have to check every time.
-#ifdef USE_SSECRC
-  copyHashFuncs();
-#endif
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
   mlock(from, to - from);
@@ -882,23 +863,22 @@ static void pagein_self(void) {
   free(buf);
 }
 
-/* Sets RuntimeOption::ExecutionMode according
- * to commandline options prior to config load
+/* Sets RuntimeOption::ExecutionMode according to commandline options prior to
+ * config load.  Returns false upon unrecognized mode.
  */
-static void set_execution_mode(folly::StringPiece mode) {
+static bool set_execution_mode(folly::StringPiece mode) {
   if (mode == "daemon" || mode == "server" || mode == "replay") {
-    RuntimeOption::ExecutionMode = "srv";
+    RuntimeOption::ServerMode = true;
     Logger::Escape = true;
-  } else if (mode == "run" || mode == "debug") {
-    RuntimeOption::ExecutionMode = "cli";
+    return true;
+  } else if (mode == "run" || mode == "debug" || mode == "translate") {
+    // We don't run PHP in "translate" mode, so just treat it like cli mode.
+    RuntimeOption::ServerMode = false;
     Logger::Escape = false;
-  } else if (mode == "translate") {
-    RuntimeOption::ExecutionMode = "";
-    Logger::Escape = false;
-  } else {
-    // Undefined mode
-    always_assert(false);
+    return true;
   }
+  // Invalid mode.
+  return false;
 }
 
 /* Reads a file into the OS page cache, with rate limiting. */
@@ -937,12 +917,36 @@ static int start_server(const std::string &username, int xhprof) {
   HttpServer::CheckMemAndWait();
   InitFiniNode::ServerPreInit();
 
+  if (!RuntimeOption::EvalUnixServerPath.empty()) {
+    init_cli_server(RuntimeOption::EvalUnixServerPath.c_str());
+  }
+
   // Before we start the webserver, make sure the entire
   // binary is paged into memory.
   pagein_self();
   BootStats::mark("pagein_self");
 
   set_execution_mode("server");
+
+#if !defined(SKIP_USER_CHANGE)
+  if (!username.empty()) {
+    if (Logger::UseCronolog) {
+      for (const auto& el : RuntimeOption::ErrorLogs) {
+        Cronolog::changeOwner(username, el.second.symLink);
+      }
+    }
+    Capability::ChangeUnixUser(username);
+    LightProcess::ChangeUser(username);
+  }
+  Capability::SetDumpable();
+#endif
+
+  hphp_process_init();
+  SCOPE_EXIT {
+    hphp_process_exit();
+    try { Logger::Info("all servers stopped"); } catch(...) {}
+  };
+
   HttpRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs,
      username);
@@ -957,19 +961,6 @@ static int start_server(const std::string &username, int xhprof) {
   SCOPE_EXIT { AdminRequestHandler::GetAccessLog().flushAllWriters(); };
   SCOPE_EXIT { RPCRequestHandler::GetAccessLog().flushAllWriters(); };
   SCOPE_EXIT { Logger::FlushAll(); };
-
-#if !defined(SKIP_USER_CHANGE)
-  if (!username.empty()) {
-    if (Logger::UseCronolog) {
-      for (const auto& el : RuntimeOption::ErrorLogs) {
-        Cronolog::changeOwner(username, el.second.symLink);
-      }
-    }
-    Capability::ChangeUnixUser(username);
-    LightProcess::ChangeUser(username);
-  }
-  Capability::SetDumpable();
-#endif
 
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
     HttpServer::CheckMemAndWait();
@@ -1125,10 +1116,23 @@ static int start_server(const std::string &username, int xhprof) {
     readaheadThread.reset();
   }
 
+  if (!RuntimeOption::EvalUnixServerPath.empty()) {
+    start_cli_server();
+  }
+
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();
+
   return 0;
 }
+
+static void logSettings() {
+  if (RuntimeOption::ServerLogSettingsOnStartup) {
+    Logger::Info("Settings: %s\n", IniSetting::GetAllAsJSON().c_str());
+  }
+}
+
+static InitFiniNode s_logSettings(logSettings, InitFiniNode::When::ServerInit);
 
 std::string translate_stack(const char *hexencoded, bool with_frame_numbers) {
   if (!hexencoded || !*hexencoded) {
@@ -1312,13 +1316,9 @@ static void set_stack_size() {
   struct rlimit rlim;
   if (getrlimit(RLIMIT_STACK, &rlim) != 0) return;
 
-  if (rlim.rlim_cur < kStackSizeMinimum
-#ifndef __CYGWIN__
-      || rlim.rlim_cur == RLIM_INFINITY
-#endif
-      ) {
-#ifdef __CYGWIN__
-    Logger::Error("stack limit too small, use peflags -x to increase  %zd\n",
+  if (rlim.rlim_cur < kStackSizeMinimum || rlim.rlim_cur == RLIM_INFINITY) {
+#ifdef _WIN32
+    Logger::Error("stack limit too small, use peflags -x to increase %zd\n",
                   kStackSizeMinimum);
 #else
     rlim.rlim_cur = kStackSizeMinimum;
@@ -1498,17 +1498,13 @@ static int execute_program_impl(int argc, char** argv) {
       // Process the options
       store(opts, vm);
       notify(vm);
-      if (vm.count("interactive") /* or -a */) {
-        po.mode = "debug";
-      }
-      if (po.mode == "d") po.mode = "debug";
-      if (po.mode == "s") po.mode = "server";
-      if (po.mode == "t") po.mode = "translate";
-      if (po.mode == "")  po.mode = "run";
-      if (po.mode == "daemon" || po.mode == "server" || po.mode == "replay" ||
-          po.mode == "run" || po.mode == "debug"|| po.mode == "translate") {
-        set_execution_mode(po.mode);
-      } else {
+      if (vm.count("interactive") /* or -a */) po.mode = "debug";
+      else if (po.mode.empty()) po.mode = "run";
+      else if (po.mode == "d") po.mode = "debug";
+      else if (po.mode == "s") po.mode = "server";
+      else if (po.mode == "t") po.mode = "translate";
+
+      if (!set_execution_mode(po.mode)) {
         Logger::Error("Error in command line: invalid mode: %s",
                       po.mode.c_str());
         cout << desc << "\n";
@@ -1642,6 +1638,7 @@ static int execute_program_impl(int argc, char** argv) {
       }
     }
     // Now, take care of CLI options and then officially load and bind things
+    s_ini_strings = po.iniStrings;
     RuntimeOption::Load(ini, config, po.iniStrings, po.confStrings, &messages);
     std::vector<std::string> badnodes;
     config.lint(badnodes);
@@ -1651,6 +1648,7 @@ static int execute_program_impl(int argc, char** argv) {
       messages.push_back(msg);
     }
   }
+
   std::vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
@@ -1741,6 +1739,8 @@ static int execute_program_impl(int argc, char** argv) {
     }
 
     hphp_process_init();
+    SCOPE_EXIT { hphp_process_exit(); };
+
     try {
       auto const unit = lookupUnit(
         makeStaticString(po.lint.c_str()), "", nullptr);
@@ -1799,6 +1799,24 @@ static int execute_program_impl(int argc, char** argv) {
 
     int ret = 0;
     hphp_process_init();
+    SCOPE_EXIT { hphp_process_exit(); };
+
+    if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
+        !RuntimeOption::EvalUnixServerPath.empty() &&
+        (!po.file.empty() || !po.args.empty())) {
+      std::vector<std::string> args;
+      if (!po.file.empty()) {
+        args.emplace_back(po.file);
+      }
+      args.insert(args.end(), po.args.begin(), po.args.end());
+      run_command_on_cli_server(
+        RuntimeOption::EvalUnixServerPath.c_str(), args
+      );
+      if (RuntimeOption::EvalUseRemoteUnixServer == "only") {
+        Logger::Error("Failed to connect to unix server.");
+        exit(255);
+      }
+    }
 
     std::string file;
     if (new_argc > 0) {
@@ -1868,7 +1886,6 @@ static int execute_program_impl(int argc, char** argv) {
     }
 
     free(new_argv);
-    hphp_process_exit();
 
     return ret;
   }
@@ -1985,6 +2002,11 @@ static void update_constants_and_options() {
   for (auto& filename: s_config_files) {
     Config::ParseIniFile(filename, ini, true);
   }
+  // Reset the INI settings from the CLI.
+  for (auto& iniStr: s_ini_strings) {
+    Config::ParseIniString(iniStr, ini, true);
+  }
+
   // Reset, possibly, some request dependent runtime options based on certain
   // setting values. Do this here so we ensure the constants have been loaded
   // correctly (e.g., error_reporting E_ALL, etc.)
@@ -2080,10 +2102,13 @@ void hphp_process_init() {
   BootStats::mark("xmlInitParser");
 
   g_context.getCheck();
+  // Some event handlers are registered during the startup process.
+  g_context->acceptRequestEventHandlers(true);
   InitFiniNode::ProcessPreInit();
   // TODO(9795696): Race in thread map may trigger spurious logging at
   // thread exit, so for now, only spawn threads if we're a server.
   const uint32_t maxWorkers = RuntimeOption::ServerExecutionMode() ? 3 : 0;
+  folly::SingletonVault::singleton()->registrationComplete();
   InitFiniNode::ProcessInitConcurrentStart(maxWorkers);
   SCOPE_EXIT {
     InitFiniNode::ProcessInitConcurrentWaitForEnd();
@@ -2208,6 +2233,10 @@ void hphp_session_init() {
   // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
+  // Allow request event handlers to be created now that a new request has
+  // started.
+  g_context->acceptRequestEventHandlers(true);
+
   g_context->requestInit();
   s_sessionInitialized = true;
   ExtensionRegistry::requestInit();
@@ -2238,7 +2267,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool &error, std::string &errorMsg,
                  bool once, bool warmupOnly,
                  bool richErrorMsg) {
-  bool isServer = RuntimeOption::ServerExecutionMode();
+  bool isServer =
+    RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   error = false;
 
   // Make sure we have the right current working directory within the repo
@@ -2320,6 +2350,10 @@ void hphp_context_shutdown() {
   // Extension shutdown could have re-initialized some
   // request locals
   context->onRequestShutdown();
+
+  // This causes request event handler registration to fail until the next
+  // request starts.
+  context->acceptRequestEventHandlers(false);
 }
 
 void hphp_context_exit(bool shutdown /* = true */) {
@@ -2354,15 +2388,17 @@ void hphp_memory_cleanup() {
   // cleanup, so destroy it before its too late
   g_context.destroy();
 
+  weakref_cleanup();
   mm.resetAllocator();
   mm.resetCouldOOM();
 }
 
-void hphp_session_exit() {
+void hphp_session_exit(const Transport* transport) {
   assert(s_sessionInitialized);
-  // Server note has to live long enough for the access log to fire.
+  // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
+  IniSetting::ResetSavedDefaults();
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();
@@ -2376,6 +2412,10 @@ void hphp_session_exit() {
   jit::tc::requestExit();
 
   TI().onSessionExit();
+
+  if (transport) {
+    HardwareCounter::UpdateServiceData(transport->getCpuTime());
+  }
 
   // We might have events from after the final surprise flag check of the
   // request, so consume them here.
@@ -2394,21 +2434,29 @@ void hphp_session_exit() {
   s_extra_request_microseconds = 0;
 }
 
-void hphp_process_exit() {
-  Xenon::getInstance().stop();
-  PageletServer::Stop();
-  XboxServer::Stop();
+void hphp_process_exit() noexcept {
+  // We want to do clean up on a best-effort basis: don't skip later steps if
+  // an earlier step fails, and don't propagate exceptions ouf of this function
+#define LOG_AND_IGNORE(voidexpr) try { voidexpr; } catch (...) { \
+    Logger::Error("got exception in cleanup step: " #voidexpr); }
+  LOG_AND_IGNORE(teardown_cli_server())
+  LOG_AND_IGNORE(Xenon::getInstance().stop())
+  LOG_AND_IGNORE(jit::mcgen::processExit())
+  LOG_AND_IGNORE(PageletServer::Stop())
+  LOG_AND_IGNORE(XboxServer::Stop())
+  LOG_AND_IGNORE(jit::mcgen::processExit())
   // Debugger::Stop() needs an execution context
-  g_context.getCheck();
-  Eval::Debugger::Stop();
-  g_context.destroy();
-  ExtensionRegistry::moduleShutdown();
+  LOG_AND_IGNORE(g_context.getCheck())
+  LOG_AND_IGNORE(Eval::Debugger::Stop())
+  LOG_AND_IGNORE(g_context.destroy())
+  LOG_AND_IGNORE(ExtensionRegistry::moduleShutdown())
 #ifndef _MSC_VER
-  LightProcess::Close();
+  LOG_AND_IGNORE(LightProcess::Close())
 #endif
-  InitFiniNode::ProcessFini();
-  folly::SingletonVault::singleton()->destroyInstances();
-  embedded_data_cleanup();
+  LOG_AND_IGNORE(InitFiniNode::ProcessFini())
+  LOG_AND_IGNORE(folly::SingletonVault::singleton()->destroyInstances())
+  LOG_AND_IGNORE(embedded_data_cleanup())
+#undef LOG_AND_IGNORE
 }
 
 bool is_hphp_session_initialized() {

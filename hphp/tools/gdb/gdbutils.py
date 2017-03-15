@@ -95,7 +95,8 @@ def _bit_reflect(num, nbits):
         mask >>= 1
     return out
 
-def _crc32q(crc, quad):
+
+def crc32q(crc, quad):
     """Intel SSE4 CRC32 implementation."""
 
     crc = _bit_reflect(crc, 32)
@@ -142,7 +143,7 @@ def hash_string(s):
     crc = 0xffffffff
 
     for i in xrange(0, size, 8):
-        crc = _crc32q(crc, _unpack(s[i:i+8]))
+        crc = crc32q(crc, _unpack(s[i:i+8]))
 
     if tail_sz == 0:
         return crc >> 1
@@ -150,7 +151,7 @@ def hash_string(s):
     shift = -((tail_sz - 8) << 3) & 0b111111
     tail = _unpack(s[size:].ljust(8, '\0'))
 
-    crc = _crc32q(crc, tail << shift)
+    crc = crc32q(crc, tail << shift)
     return crc >> 1
 
 

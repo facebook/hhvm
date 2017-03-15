@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,8 +25,13 @@ namespace HPHP {
 
 enum class PerfEvent { Load, Store };
 
+struct perf_event_sample_tail;
+
 /*
  * Raw data from a sampled perf event.
+ *
+ * A perf_event_sample is always followed immediately in memory by the
+ * corresponding perf_event_sample_tail.
  */
 struct perf_event_sample {
   uintptr_t ip;     // address of the sampled instruction
@@ -35,7 +40,47 @@ struct perf_event_sample {
   uintptr_t addr;   // memory address corresponding to the event, if applicable
   uint64_t nr;      // number of addresses in the callchain
   uintptr_t ips[];  // instruction pointers in the callchain for the event
+
+  const perf_event_sample_tail* tail() const {
+    return reinterpret_cast<const perf_event_sample_tail*>(
+      reinterpret_cast<const uintptr_t*>(this + 1) + nr
+    );
+  }
+  perf_event_sample_tail* tail() {
+    return const_cast<perf_event_sample_tail*>(
+      const_cast<const perf_event_sample*>(this)->tail()
+    );
+  }
 };
+
+struct perf_event_sample_tail {
+  uint64_t data_src;
+};
+
+/*
+ * Metadata about the raw `data_src' of a perf_event_sample.
+ */
+struct perf_event_data_src_info {
+  const char* mem_lvl;  // memory hierarchy level reported
+  const char* tlb;      // TLB level reported
+
+  /*
+   * Ternary bits: 1 is true, -1 is false, 0 is unknown.
+   */
+  int mem_hit : 2;    // cache hit/miss
+  int snoop : 2;      // snoop?
+  int snoop_hit : 2;  // snoop hit/miss
+  int snoop_hitm : 2; // snoop hit modified?
+  int locked : 2;     // whether the op was part of a locked transaction
+  int tlb_hit : 2;    // TLB hit/miss
+};
+
+/*
+ * Interpret a raw `data_src' value, based on the event `kind'.
+ */
+perf_event_data_src_info perf_event_data_src(PerfEvent kind, uint64_t data_src);
+
+///////////////////////////////////////////////////////////////////////////////
 
 using perf_event_signal_fn_t = void (*)(PerfEvent);
 using perf_event_consume_fn_t = void (*)(PerfEvent, const perf_event_sample*);

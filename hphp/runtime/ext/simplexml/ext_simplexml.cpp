@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -60,7 +60,6 @@ const Class* SimpleXMLIterator_classof() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // NativeData definitions
-namespace {
 
 struct SimpleXMLElement {
   SimpleXMLElement() {
@@ -134,8 +133,6 @@ struct SimpleXMLElementIterator {
 };
 
 using SimpleXMLIterator = SimpleXMLElement;
-
-} // anon namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -1436,6 +1433,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
       int strval_len;
       xmlDocDumpMemoryEnc(doc, &strval, &strval_len,
                           (const char*)doc->encoding);
+      if (!strval) {
+        return false;
+      }
       String ret = String((char*)strval);
       xmlFree(strval);
       return ret;
@@ -1457,6 +1457,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
 #else
       str = (char*)outbuf->buffer->content;
 #endif
+      if (!str) {
+        return false;
+      }
       String ret = String(str);
       xmlOutputBufferClose(outbuf);
       return ret;

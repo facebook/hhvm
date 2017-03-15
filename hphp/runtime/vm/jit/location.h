@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,29 +27,37 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class LTag : uint32_t {
-  Local,
-  Stack,
+  Local,  // local variable
+  Stack,  // stack slot
+  MBase,  // pointee of the member base
+  CSlot   // class-ref slot
 };
 
 /*
  * An HHBC-visible location that we track during irgen---for use in guards,
  * hints, region post-conditions, etc.
  *
- * This is currently either local variables or stack slots.  Local variables
- * are addressed by local id, and stack slots are addressed by offset from the
- * frame pointer.
+ * This is currently either local variables, stack slots, the member base
+ * register, or class-ref slots.  Local variables are addressed by local id,
+ * stack slots are addressed by offset from the frame pointer, and class-ref
+ * slots are addressed by their slot number.
  */
 struct Location {
   struct Local { uint32_t locId; };
   struct Stack { FPInvOffset stackIdx; };
+  struct MBase { uint32_t unused; };
+  struct CSlot { uint32_t slot; };
 
   /* implicit */ Location(Local l) : m_tag{LTag::Local}, m_local(l) {}
   /* implicit */ Location(Stack s) : m_tag{LTag::Stack}, m_stack(s) {}
+  /* implicit */ Location(MBase m) : m_tag{LTag::MBase}, m_mbase(m) {}
+  /* implicit */ Location(CSlot s) : m_tag{LTag::CSlot}, m_clsref(s) {}
 
   LTag tag() const { return m_tag; };
 
   uint32_t localId() const;
   FPInvOffset stackIdx() const;
+  uint32_t clsRefSlot() const;
 
   bool operator==(const Location& other) const;
   bool operator!=(const Location& other) const;
@@ -69,6 +77,8 @@ private:
   union {
     Local m_local;
     Stack m_stack;
+    MBase m_mbase;
+    CSlot m_clsref;
   };
 };
 

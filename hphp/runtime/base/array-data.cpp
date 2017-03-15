@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,7 @@ using ArrayDataMap = tbb::concurrent_hash_map<ArrayData::ScalarArrayKey,
 static ArrayDataMap s_arrayDataMap;
 
 const StaticString s_InvalidKeysetOperationMsg("Invalid operation on keyset");
+const StaticString s_VecUnsetMsg("Vecs do not support unsetting non-end elements");
 
 ArrayData::ScalarArrayKey ArrayData::GetScalarArrayKey(const char* str,
                                                        size_t sz) {
@@ -727,22 +728,6 @@ bool ArrayData::IsValidKey(const Variant& k) {
          (k.isString() && IsValidKey(k.getStringData()));
 }
 
-ArrayData *ArrayData::Create() {
-  return staticEmptyArray();
-}
-
-ArrayData* ArrayData::CreateVec() {
-  return staticEmptyVecArray();
-}
-
-ArrayData* ArrayData::CreateDict() {
-  return staticEmptyDictArray();
-}
-
-ArrayData* ArrayData::CreateKeyset() {
-  return staticEmptyKeysetArray();
-}
-
 ArrayData *ArrayData::Create(const Variant& value) {
   PackedArrayInit pai(1);
   pai.append(value);
@@ -890,6 +875,9 @@ int ArrayData::compare(const ArrayData* v2) const {
 
   if (isPHPArray()) {
     if (UNLIKELY(!v2->isPHPArray())) {
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+        raiseHackArrCompatArrMixedCmp();
+      }
       if (v2->isVecArray()) throw_vec_compare_exception();
       if (v2->isDict()) throw_dict_compare_exception();
       if (v2->isKeyset()) throw_keyset_compare_exception();
@@ -899,8 +887,19 @@ int ArrayData::compare(const ArrayData* v2) const {
   }
 
   if (isVecArray()) {
-    if (UNLIKELY(!v2->isVecArray())) throw_vec_compare_exception();
+    if (UNLIKELY(!v2->isVecArray())) {
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
+                   v2->isPHPArray())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
+      throw_vec_compare_exception();
+    }
     return PackedArray::VecCmp(this, v2);
+  }
+
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
+               v2->isPHPArray())) {
+    raiseHackArrCompatArrMixedCmp();
   }
 
   if (isDict()) throw_dict_compare_exception();
@@ -912,25 +911,33 @@ int ArrayData::compare(const ArrayData* v2) const {
 bool ArrayData::equal(const ArrayData* v2, bool strict) const {
   assert(v2);
 
+  auto const mixed = [&]{
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices &&
+                 v2->isHackArray())) {
+      raiseHackArrCompatArrMixedCmp();
+    }
+    return false;
+  };
+
   if (isPHPArray()) {
-    if (UNLIKELY(!v2->isPHPArray())) return false;
+    if (UNLIKELY(!v2->isPHPArray())) return mixed();
     return strict ? Same(this, v2) : Equal(this, v2);
   }
 
   if (isVecArray()) {
-    if (UNLIKELY(!v2->isVecArray())) return false;
+    if (UNLIKELY(!v2->isVecArray())) return mixed();
     return strict
       ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
   }
 
   if (isDict()) {
-    if (UNLIKELY(!v2->isDict())) return false;
+    if (UNLIKELY(!v2->isDict())) return mixed();
     return strict
       ? MixedArray::DictSame(this, v2) : MixedArray::DictEqual(this, v2);
   }
 
   if (isKeyset()) {
-    if (UNLIKELY(!v2->isKeyset())) return false;
+    if (UNLIKELY(!v2->isKeyset())) return mixed();
     return strict ? SetArray::Same(this, v2) : SetArray::Equal(this, v2);
   }
 
@@ -1084,9 +1091,6 @@ const char* describeKeyType(const TypedValue* tv) {
 
   case KindOfRef:
     return describeKeyType(tv->m_data.pref->var()->asTypedValue());
-
-  case KindOfClass:
-    break;
   }
   not_reached();
 }
@@ -1114,7 +1118,6 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfArray:
   case KindOfResource:
   case KindOfObject:
-  case KindOfClass:
     return "<invalid key type>";
   }
   not_reached();
@@ -1206,5 +1209,51 @@ void throwInvalidAdditionException(const ArrayData* ad) {
   );
 }
 
+void throwVecUnsetException() {
+  SystemLib::throwInvalidOperationExceptionObject(s_VecUnsetMsg);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+void raiseHackArrCompatRefBind(int64_t k) {
+  raise_hackarr_compat_notice(
+    folly::sformat("Binding ref in array with key {}", k)
+  );
+}
+
+void raiseHackArrCompatRefBind(const StringData* k) {
+  raise_hackarr_compat_notice(
+    folly::sformat("Binding ref in array with key \"{}\"", k)
+  );
+}
+
+void raiseHackArrCompatRefNew() {
+  raise_hackarr_compat_notice("Binding new-element ref in array");
+}
+
+void raiseHackArrCompatRefIter() {
+  raise_hackarr_compat_notice("Ref binding iteration on array");
+}
+
+void raiseHackArrCompatAdd() {
+  raise_hackarr_compat_notice("Using + operator on arrays");
+}
+
+void raiseHackArrCompatArrMixedCmp() {
+  raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
+}
+
+std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
+  return folly::sformat(
+    "Implicit conversion of {} to array key",
+    describeKeyType(key)
+  );
+}
+
+void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
+  raise_hackarr_compat_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

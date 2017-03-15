@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,9 +94,10 @@ bool ArrayOffsetProfile::update(int32_t pos, uint32_t count) {
 }
 
 void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i) {
+  auto h = hash_int64(i);
   auto const pos =
-    ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(i, hashint(i)) :
-    ad->isKeyset() ? SetArray::asSet(ad)->find(i, hashint(i)) :
+    ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(i, h) :
+    ad->isKeyset() ? SetArray::asSet(ad)->find(i, h) :
     -1;
   update(pos, 1);
 }
@@ -110,7 +111,7 @@ void ArrayOffsetProfile::update(const ArrayData* ad,
 
       int64_t i;
       return checkForInt && ad->convertKey(sd, i)
-        ? a->find(i, hashint(i))
+        ? a->find(i, hash_int64(i))
         : a->find(sd, sd->hash());
     } else if (ad->isKeyset()) {
       return SetArray::asSet(ad)->find(sd, sd->hash());

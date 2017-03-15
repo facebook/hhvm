@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,8 @@
 #include "hphp/runtime/server/transport.h"
 
 namespace HPHP {
+
+const StaticString s_fake("fake");
 
 /**
  * Fake Transport to be passed to the access log when a real transport is not
@@ -83,6 +85,13 @@ struct FakeTransport final : Transport {
   void removeHeaderImpl(const char *name) override {
     LOG(FATAL) << "FakeTransport::removeHeaderImpl";
   }
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_fake;
+  }
+
 
   /**
    * Send back a response with specified code.

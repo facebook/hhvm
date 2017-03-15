@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -159,9 +159,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     }
   }
 
-  /*
-   * Fill the first block predictions with the live types.
-   */
+  // Fill the first block predictions with the live types.
   assertx(!ret->empty());
   for (auto& lt : context.liveTypes) {
     switch (lt.location.tag()) {
@@ -173,6 +171,10 @@ RegionDescPtr selectMethod(const RegionContext& context) {
         }
         break;
       case LTag::Stack:
+      case LTag::MBase:
+        break;
+      case LTag::CSlot:
+        assertx("Class-ref slot live-type" && false);
         break;
     }
   }

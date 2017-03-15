@@ -130,12 +130,14 @@ void AutoloadHandler::requestInit() {
   assert(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
   new (&m_handlers) req::deque<HandlerBundle>();
+  m_handlers_valid = true;
 }
 
 void AutoloadHandler::requestShutdown() {
   m_map.reset();
   m_map_root.reset();
   m_loading.reset();
+  m_handlers_valid = false;
   // m_spl_stack_inited will be re-initialized by the next requestInit
   // m_handlers will be re-initialized by the next requestInit
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,10 +30,10 @@
 
 #include <folly/portability/SysSyscall.h>
 #include <folly/portability/Time.h>
+#include <folly/portability/Unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -77,9 +77,9 @@ static bool use_arch_timestamp;
 /* On most newer Linux kernels CLOCK_MONOTONIC is defined in <bits/time.h> */
 /* <time.h> includes <bits/time.h> */
 #if defined(CLOCK_MONOTONIC)
-static int perf_clk_id = CLOCK_MONOTONIC;
+static clockid_t perf_clk_id = CLOCK_MONOTONIC;
 #else
-static int perf_clk_id = CLOCK_REALTIME;
+static clockid_t perf_clk_id = CLOCK_REALTIME;
 #endif
 #define NSEC_PER_SEC    1000000000
 

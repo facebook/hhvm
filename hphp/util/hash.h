@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,31 +22,39 @@
 
 #include "hphp/util/portability.h"
 
-#if defined __x86_64__
-#  if (!defined USE_SSECRC)
-#    define USE_SSECRC
+#ifndef FACEBOOK
+#  include "hphp/util/hphp-config.h"
+#endif
+
+#if defined(__x86_64__) && !defined(_MSC_VER)
+#  if (!defined USE_HWCRC)
+#    define USE_HWCRC
+#  endif
+#elif defined __aarch64__ && defined ENABLE_AARCH64_CRC
+#  if (!defined USE_HWCRC)
+#    define USE_HWCRC
 #  endif
 #else
-#  undef USE_SSECRC
+#  undef USE_HWCRC
 #endif
 
 // Killswitch
-#if NO_SSECRC
-#  undef USE_SSECRC
+#if NO_HWCRC
+#  undef USE_HWCRC
 #endif
 
 namespace HPHP {
 
-bool IsSSEHashSupported();
+bool IsHWHashSupported();
 
 ///////////////////////////////////////////////////////////////////////////////
 
 using strhash_t = int32_t;
 using inthash_t = int32_t;
-const strhash_t STRHASH_MASK = 0x7fffffff;
-const strhash_t STRHASH_MSB  = 0x80000000;
+constexpr strhash_t STRHASH_MASK = 0x7fffffff;
+constexpr strhash_t STRHASH_MSB  = 0x80000000;
 
-inline long long hash_int64(long long key) {
+inline size_t hash_int64_fallback(int64_t key) {
   // "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
   // http://www.concentric.net/~ttwang/tech/inthash.htm
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
@@ -55,25 +63,40 @@ inline long long hash_int64(long long key) {
   key = key ^ ((unsigned long long)key >> 14);
   key = (key + (key << 2)) + (key << 4); // key * 21
   key = key ^ ((unsigned long long)key >> 28);
-  key = key + (key << 31);
-  return key < 0 ? -key : key;
+  return static_cast<size_t>(static_cast<uint32_t>(key));
 }
 
-inline long long hash_int64_pair(long long k1, long long k2) {
-  // Shift the first key, so (a,b) hashes somewhere other than (b,a)
-  return (hash_int64(k1) << 1) ^ hash_int64(k2);
-}
-
-// int64->int32 hash function to use for MixedArrays
-ALWAYS_INLINE inthash_t hashint(int64_t k) {
-  static_assert(sizeof(inthash_t) == sizeof(strhash_t), "");
-#if defined(USE_SSECRC) && (defined(FACEBOOK) || defined(__SSE4_2__))
-  int64_t h = 0;
-  __asm("crc32 %1, %0\n" : "+r"(h) : "r"(k));
+ALWAYS_INLINE size_t hash_int64(int64_t k) {
+#if defined(USE_HWCRC) && defined(__SSE4_2__)
+  size_t h = 0;
+  __asm("crc32q %1, %0\n" : "+r"(h) : "rm"(k));
   return h;
+#elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
+  size_t res;
+  __asm("crc32cx %w0, wzr, %x1\n" : "=r"(res) : "r"(k));
+  return res;
 #else
-  return hash_int64(k);
+  return hash_int64_fallback(k);
 #endif
+}
+
+
+inline size_t hash_int64_pair(int64_t k1, int64_t k2) {
+#if defined(USE_HWCRC) && defined(__SSE4_2__)
+  // crc32 is commutative, so we need to perturb k1 so that (k1, k2) hashes
+  // differently from (k2, k1).
+  k1 += k1;
+  __asm("crc32q %1, %0\n" : "+r" (k1) : "rm"(k2));
+  return k1;
+#elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
+  size_t res;
+  k1 += k1;
+  __asm("crc32cx %w0, %w1, %x2\n" : "=r"(res) : "r"(k2), "r"(k1));
+  return res;
+#else
+  return (hash_int64(k1) << 1) ^ hash_int64(k2);
+#endif
+
 }
 
 namespace MurmurHash3 {
@@ -199,19 +222,20 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 //   i: case-insensitive;
 //   unsafe: safe for strings aligned at 8-byte boundary;
 
-// Fallback versions uses CRC hash when supported, and use MurmurHash otherwise.
-strhash_t hash_string_cs_fallback(const char *arKey, uint32_t nKeyLength);
-strhash_t hash_string_i_fallback(const char *arKey, uint32_t nKeyLength);
+#if defined USE_HWCRC && (defined __SSE4_2__ || defined ENABLE_AARCH64_CRC)
 
-#if FACEBOOK && defined USE_SSECRC
-
+// We will surely use CRC32, these are implemented directly in hash-crc-*.S
 strhash_t hash_string_cs_unsafe(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength);
 strhash_t hash_string_i(const char *arKey, uint32_t nKeyLength);
-
 #else
 
+strhash_t hash_string_cs_fallback(const char*, uint32_t);
+strhash_t hash_string_i_fallback(const char*, uint32_t);
+
+// We may need to do CPUID checks in the fallback versions, only when we are not
+// sure CRC hash is used.
 inline strhash_t hash_string_cs(const char *arKey, uint32_t nKeyLength) {
   return hash_string_cs_fallback(arKey, nKeyLength);
 }
@@ -314,14 +338,13 @@ struct StringData;
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#ifdef USE_SSECRC
-// The following functions are implemented in ASM directly for x86_64.
+#if defined(USE_HWCRC) && !defined(__SSE4_2__) && !defined(_MSC_VER)
+// The following functions are implemented in ASM directly for x86_64 and ARM
 extern "C" {
   HPHP::strhash_t hash_string_cs_crc(const char*, uint32_t);
   HPHP::strhash_t hash_string_i_crc(const char*, uint32_t);
   HPHP::strhash_t hash_string_cs_unaligned_crc(const char*, uint32_t);
   HPHP::strhash_t hash_string_i_unaligned_crc(const char*, uint32_t);
-  HPHP::strhash_t g_hashHelper_crc(const HPHP::StringData*);
 }
 #endif
 

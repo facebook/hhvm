@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,7 +77,7 @@ Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
  */
 void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
                          folly::Optional<AuxUnion> aux) {
-  auto const type = [&] {
+  auto const tp = [&] {
     auto const mask = [&] { return uint64_t{(*aux).u_raw} << 32; };
 
     if (!retLoc.hasReg(1)) {
@@ -99,9 +99,9 @@ void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
     v << orq{extended, v.cns(mask()), result, v.makeReg()};
     return result;
   }();
-  auto const data = zeroExtendIfBool(v, retVal, retLoc.reg(0));
+  auto const data = zeroExtendIfBool(v, retVal->type(), retLoc.reg(0));
 
-  v << syncvmret{data, type};
+  v << syncvmret{data, tp};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,12 +175,12 @@ void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {
 void cgLdRetVal(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  loadTV(v, inst->dst(), dstLoc(env, inst, 0), fp[AROFF(m_r)], true);
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), fp[kArRetOff], true);
 }
 
 void cgDbgTrashRetVal(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  trashTV(v, srcLoc(env, inst, 0).reg(), AROFF(m_r), kTVTrashJITRetVal);
+  trashTV(v, srcLoc(env, inst, 0).reg(), kArRetOff, kTVTrashJITRetVal);
 }
 
 void cgFreeActRec(IRLS& env, const IRInstruction* inst) {

@@ -27,19 +27,6 @@ if (LIBDL_INCLUDE_DIRS)
   endif()
 endif()
 
-# boost checks
-find_package(Boost 1.51.0 COMPONENTS system program_options filesystem context REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
-add_definitions("-DHAVE_BOOST1_49")
-
-
-# features.h
-FIND_PATH(FEATURES_HEADER features.h)
-if (FEATURES_HEADER)
-  add_definitions("-DHAVE_FEATURES_H=1")
-endif()
-
 # google-glog
 find_package(Glog REQUIRED)
 if (LIBGLOG_STATIC)
@@ -440,7 +427,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
-  target_link_libraries(${target} ${Boost_LIBRARIES})
+  target_link_libraries(${target} boost)
   target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)

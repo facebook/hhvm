@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -422,6 +422,7 @@ public:
     uint64_t out;
     uint8_t r[2];
     uint8_t i = 0;
+    bool adjust;
 
     auto const go = [&] (uint64_t& bits, off_t off) {
       while (fls64(bits, out)) {
@@ -432,14 +433,21 @@ public:
           f(PhysReg(r[0]), PhysReg(r[1]));
           i = 0;
         }
+        if (adjust) {
+          assertx(i == 1);
+          f(InvalidReg, PhysReg(r[0]));
+          adjust = false;
+          i = 0;
+        }
       }
     };
 
     // High to low.
     auto copy = *this;
+    adjust = (folly::popcount(copy.m_hi) +
+              folly::popcount(copy.m_lo)) & 0x1;
     go(copy.m_hi, 64);
     go(copy.m_lo, 0);
-    if (i > 0) f(PhysReg(r[0]), InvalidReg);
   }
 
   /*

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
+#include "hphp/util/low-ptr.h"
 
 namespace HPHP {
 struct StringData;
@@ -52,18 +53,27 @@ borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
  * String that must be a static string, and and Array that must be a
  * static array.
  */
-using SString = const StringData*;
-using SArray  = const ArrayData*;
+using SString  = const StringData*;
+using LSString = LowPtr<const StringData>;
+using SArray   = const ArrayData*;
 
 /*
  * HHBC evaluation stack flavors.
  */
-enum class Flavor { C, V, A, R, F, U, CR, CVU };
+enum class Flavor { C, V, R, F, U, CR, CVU, CUV };
 
 /*
  * Types of parameter preparation (or unknown).
  */
 enum class PrepKind { Ref, Val, Unknown };
+
+using LocalId = uint32_t;
+constexpr const LocalId NoLocalId = -1;
+using IterId = uint32_t;
+using ClsRefSlotId = uint32_t;
+constexpr const ClsRefSlotId NoClsRefSlotId = -1;
+using BlockId = uint32_t;
+constexpr const BlockId NoBlockId = -1;
 
 //////////////////////////////////////////////////////////////////////
 

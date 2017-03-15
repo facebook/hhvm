@@ -21,6 +21,7 @@
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
 #include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
@@ -136,17 +137,15 @@ static Variant do_eval(Unit* evalUnit, int depth, bool bypassCheck) {
 
   g_context->debuggerSettings.bypassCheck = bypassCheck;
   // Do the eval
-  Variant result;
-  bool failure = g_context->evalPHPDebugger((TypedValue*)&result,
-                                            evalUnit, depth);
+  auto const result = g_context->evalPHPDebugger(evalUnit, depth);
   g_context->debuggerSettings.bypassCheck = false;
 
   // Restore the error reporting level and then either return or throw
   req_data.setErrorReportingLevel(old_level);
-  if (failure) {
-    throw_exn(Error::EvaluatingCode);
+  if (result.failed) {
+    throw_exn(Error::EvaluatingCode, result.error);
   }
-  return result;
+  return result.result;
 }
 
 // Same as do_eval(const Unit*, int) except that this evaluates a string
@@ -941,7 +940,9 @@ struct StackDepthCmd : XDebugCommand {
 // Returns the stack at the given depth, or the entire stack if no depth is
 // provided
 
-const StaticString s_FILE("file");
+const StaticString s_file("file");
+const StaticString s_line("line");
+const StaticString s_function("function");
 
 struct StackGetCmd : XDebugCommand {
   StackGetCmd(XDebugServer& server, const String& cmd, const Array& args)
@@ -960,76 +961,54 @@ struct StackGetCmd : XDebugCommand {
   bool isValidInStatus(Status status) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
-    int oldestEvalFrameDepth = findOldestEvalFrameDepth();
-    // Iterate up the stack. We need to keep track of both the frame actrec and
-    // our current depth in case the client passed us a depth
-    Offset offset;
-    int depth = 0;
-    for (const ActRec* fp = g_context->getStackFrame();
-         fp != nullptr && (m_clientDepth == -1 || depth <= m_clientDepth);
-         fp = g_context->getPrevVMState(fp, &offset), depth++) {
+    auto backtraceArgs = BacktraceArgs()
+      .withSelf()
+      .withPseudoMain();
+    if (m_clientDepth >= 0) {
+      backtraceArgs.setLimit(m_clientDepth);
+    }
+    const Array backtrace = createBacktrace(backtraceArgs);
+    for (int depth = 0; depth < backtrace.size() - 1; depth++) {
       // If a depth was provided, we're only interested in that depth
       if (m_clientDepth < 0 || depth == m_clientDepth) {
-        auto frame = getFrame(fp, offset, depth, oldestEvalFrameDepth);
-        xdebug_xml_add_child(&xml, frame);
+        // We need the function name in the parent frame, because in this
+        // data structure, a frame's function name is actually the function
+        // being called in that frame.
+        const auto parent_frame = backtrace.rvalAt(depth + 1);
+        const auto func_name = parent_frame.getArrayData()->get(s_function);
+        const auto frame = backtrace.rvalAt(depth);
+        const auto xdebug_frame = getFrame(
+          frame.getArrayData(),
+          depth,
+          func_name.toString()
+        );
+        xdebug_xml_add_child(&xml, xdebug_frame);
       }
     }
   }
 
 private:
-  // Returns -1 if there are no eval frames on the stack, otherwise
-  // returns the index of the first eval frame.
-  int findOldestEvalFrameDepth() {
-    int oldestEvalFrameDepth = -1;
-    int depth = 0;
-    for (auto fp = g_context->getStackFrame();
-         fp != nullptr;
-         fp = g_context->getPrevVMState(fp), depth++) {
-      const auto func = fp->func();
-      if (func->isPseudoMain() && g_context->getPrevVMState(fp) != nullptr) {
-        oldestEvalFrameDepth = depth;
-      }
-    }
-    return oldestEvalFrameDepth;
-  }
-
   // Returns the xml node for the given stack frame. If level is non-zero,
   // offset is the current offset within the frame
   xdebug_xml_node* getFrame(
-    const ActRec* fp,
-    Offset offset,
+    HPHP::ArrayData* frame,
     int level,
-    int oldestEvalFrameDepth
+    const String& func_name
   ) {
-    const auto func = fp->func();
-    const auto unit = fp->unit();
-
-    // Compute the function name. php5 xdebug includes names for each type of
-    // include, we don't have access to that
-    auto const func_name =
-      func->isPseudoMain() ?
-        (g_context->getPrevVMState(fp) == nullptr ? "{main}" : "include") :
-        func->fullName()->data();
+    const auto file = frame->get(s_file);
+    const auto line = frame->get(s_line);
 
     // Create the frame node
-    auto node = xdebug_xml_node_init("stack");
-    xdebug_xml_add_attribute(node, "where", func_name);
+    const auto node = xdebug_xml_node_init("stack");
+    xdebug_xml_add_attribute_dup(node, "where", func_name.data());
     xdebug_xml_add_attribute(node, "level", level);
-    if (level <= oldestEvalFrameDepth) {
-      xdebug_xml_add_attribute(node, "type", "eval");
-    } else {
-      xdebug_xml_add_attribute(node, "type", "file");
-    }
+    xdebug_xml_add_attribute(node, "type", "file");
 
-    // Grab the file/line for the frame. For level 0, this is the current
-    // file/line, for all other frames this is the stored file/line #
-    auto file =
-      xdebug_path_to_url(String(const_cast<StringData*>(unit->filepath())));
-    auto line = level == 0 ? g_context->getLine() : unit->getLineNumber(offset);
+    const auto xdebug_file = xdebug_path_to_url(file.toString());
 
     // Add the call file/line. Duplication is necessary due to xml api
-    xdebug_xml_add_attribute_dup(node, "filename", file.data());
-    xdebug_xml_add_attribute(node, "lineno", line);
+    xdebug_xml_add_attribute_dup(node, "filename", xdebug_file.data());
+    xdebug_xml_add_attribute(node, "lineno", line.toInt64());
     return node;
   }
 

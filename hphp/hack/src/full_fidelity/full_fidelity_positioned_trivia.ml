@@ -65,14 +65,9 @@ let end_position trivia =
   SourceText.offset_to_position (source_text trivia) (end_offset trivia)
 
 let from_minimal source_text minimal_trivia offset =
+  let kind = MinimalTrivia.kind minimal_trivia in
   let width = MinimalTrivia.width minimal_trivia in
-  match MinimalTrivia.kind minimal_trivia with
-  | TriviaKind.WhiteSpace -> make_whitespace source_text offset width
-  | TriviaKind.EndOfLine -> make_eol source_text offset width
-  | TriviaKind.SingleLineComment ->
-    make_single_line_comment source_text offset width
-  | TriviaKind.DelimitedComment ->
-    make_delimited_comment source_text offset width
+  { kind; source_text; offset; width }
 
 let from_minimal_list source_text ts offset =
   let rec aux acc ts offset =

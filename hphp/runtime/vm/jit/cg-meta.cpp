@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,6 +79,14 @@ void CGMeta::process(
   clear();
 }
 
+void CGMeta::process_literals() {
+  for (auto& pair : literals) {
+    if (s_literals.find(pair.first)) continue;
+    s_literals.insert(pair.first, pair.second);
+  }
+  literals.clear();
+}
+
 void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
@@ -108,11 +116,7 @@ void CGMeta::process_only(
   }
   jmpTransIDs.clear();
 
-  for (auto& pair : literals) {
-    if (s_literals.find(pair.first)) continue;
-    s_literals.insert(pair.first, pair.second);
-  }
-  literals.clear();
+  process_literals();
 
   if (inProgressTailBranches) {
     inProgressTailJumps.swap(*inProgressTailBranches);

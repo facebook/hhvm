@@ -1,4 +1,5 @@
 (script(header((<))((?))((name)(end_of_line)))
+(list
 (classish_declaration(missing)(missing)
 ((class)(whitespace))((name)(whitespace))
 (missing)(missing)(missing)(missing)(missing)
@@ -12,4 +13,4 @@
 ((whitespace)(const)(whitespace))((type)(whitespace))
 ((name)(whitespace))(type_constraint((as)(whitespace))
 (simple_type_specifier((name)(whitespace))))
-((=)(whitespace))(simple_type_specifier((name)))((;)(end_of_line))))((})))))
+((=)(whitespace))(simple_type_specifier((name)))((;)(end_of_line))))((}))))))

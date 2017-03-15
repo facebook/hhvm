@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,8 +35,7 @@ struct APCArray;
 
 //////////////////////////////////////////////////////////////////////
 
-struct SetArray final
-  : private ArrayData, type_scan::MarkCountable<SetArray> {
+struct SetArray final : ArrayData, type_scan::MarkCountable<SetArray> {
 
 //////////////////////////////////////////////////////////////////////
 // Set Layout
@@ -102,12 +101,9 @@ public:
   constexpr static uint32_t Empty     = -uint32_t{1};
   constexpr static uint32_t Tombstone = -uint32_t{2};
 
-  template<class F> void scan(F& mark) const {
+  void scan(type_scan::Scanner& scanner) const {
     auto const elms = data();
-    auto const used = m_used;
-    for (uint32_t i = 0; i < used; ++i) {
-      elms[i].scan(mark);
-    }
+    scanner.scan(*elms, m_used * sizeof(*elms));
   }
 
 //////////////////////////////////////////////////////////////////////
@@ -196,6 +192,25 @@ public:
       }
     }
   }
+
+//////////////////////////////////////////////////////////////////////
+// Sorting
+
+public:
+  static ArrayData* EscalateForSort(ArrayData* ad, SortFunction);
+
+  static void Sort(ArrayData*, int, bool);
+  static void Ksort(ArrayData*, int, bool);
+  static constexpr auto Asort = &Ksort;
+
+  static bool Usort(ArrayData*, const Variant&);
+  static bool Uksort(ArrayData*, const Variant&);
+  static constexpr auto Uasort = &Uksort;
+
+private:
+  template <typename AccessorT>
+  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
+  void postSort();
 
 //////////////////////////////////////////////////////////////////////
 // Set Internals
@@ -352,7 +367,6 @@ public:
       tv.hash() = h | STRHASH_MSB;
       assert(!isInvalid());
       assert(hasIntKey());
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
     }
 
     void setTombstone() {
@@ -387,10 +401,6 @@ public:
     hash_t hash() const {
       return tv.hash();
     }
-
-    template<class F> void scan(F& mark) const {
-      if (!isTombstone()) mark(tv);
-    }
   };
 
 //////////////////////////////////////////////////////////////////////
@@ -421,9 +431,11 @@ public:
 //////////////////////////////////////////////////////////////////////
 // Misc ArrayData Methods
 
-  // These using directives ensure the full set of overloaded functions
-  // are visible in this class, to avoid triggering implicit conversions
-  // from a const Variant& key to int64.
+  /*
+   * These using directives ensure the full set of overloaded functions
+   * are visible in this class, to avoid triggering implicit conversions
+   * from a const Variant& key to int64.
+   */
 private:
   using ArrayData::exists;
   using ArrayData::lval;
@@ -456,6 +468,8 @@ private:
   friend struct c_AwaitAllWaitHandle;
 
   friend size_t getMemSize(const ArrayData*);
+  template <typename AccessorT, class ArrayT>
+  friend SortFlavor genericPreSort(ArrayT&, const AccessorT&, bool);
 
 //////////////////////////////////////////////////////////////////////
 // ArrayData API
@@ -490,15 +504,6 @@ public:
   static ssize_t IterRewind(const ArrayData*, ssize_t);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
-  static ArrayData* EscalateForSort(ArrayData* ad, SortFunction) { return ad; }
-  static void SortThrow(ArrayData*, int, bool);
-  static constexpr auto Ksort = &SortThrow;
-  static constexpr auto Sort = &SortThrow;
-  static constexpr auto Asort = &SortThrow;
-  static bool USortThrow(ArrayData*, const Variant&);
-  static constexpr auto Uksort = &USortThrow;
-  static constexpr auto Usort = &USortThrow;
-  static constexpr auto Uasort = &USortThrow;
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
@@ -542,20 +547,7 @@ private:
     uint64_t m_scale_used;
   };
   uint64_t m_padding;
-
 };
-
-//////////////////////////////////////////////////////////////////////
-
-extern std::aligned_storage<
-  SetArray::ComputeAllocBytes(SetArray::SmallScale),
-  folly::constexpr_max(alignof(SetArray), size_t(16))
->::type s_theEmptySetArray;
-
-ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
-  void* vp = &s_theEmptySetArray;
-  return static_cast<ArrayData*>(vp);
-}
 
 //////////////////////////////////////////////////////////////////////
 

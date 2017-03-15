@@ -9,7 +9,7 @@
  *)
 
 open Core
-open Coverage_level
+open Ide_api_types
 
 module C = Tty
 
@@ -43,7 +43,11 @@ let go file_input output_json pos_level_l =
   in
   let results = ColorFile.go str pos_level_l in
   if output_json then
-    print_endline (Hh_json.json_to_string (ServerColorFile.to_json results))
+    let open Ide_message in
+    let response = Coverage_levels_response
+      (Deprecated_text_span_coverage_levels_response results)
+    in
+    Nuclide_rpc_message_printer.print_json ~response
   else if Unix.isatty Unix.stdout
   then C.cprint (replace_colors results)
   else print_endline str

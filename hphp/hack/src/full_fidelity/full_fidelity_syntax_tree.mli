@@ -12,10 +12,12 @@ type t
 val make : Full_fidelity_source_text.t -> t
 val root : t -> Full_fidelity_minimal_syntax.t
 val text : t -> Full_fidelity_source_text.t
+val all_errors : t -> Full_fidelity_syntax_error.t list
 val errors : t -> Full_fidelity_syntax_error.t list
 val language : t -> string
 val mode : t -> string
 val is_hack : t -> bool
 val is_php : t -> bool
 val is_strict : t -> bool
+val is_decl : t -> bool
 val to_json : t -> Hh_json.json

@@ -9,4 +9,4 @@
  *)
 
 let go _ _ _ _ = Some (fun _ _ -> ())
-let get_live_targets _ = []
+let get_live_targets _ = ([], [])

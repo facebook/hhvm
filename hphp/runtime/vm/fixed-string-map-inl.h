@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ template<class V, bool CaseSensitive, class E>
 NEVER_INLINE
 void FixedStringMap<V,CaseSensitive,E>::clear() {
   if (m_table && m_table != (Elm*)&FSM::null_key + 1) {
-    free(m_table - m_mask - 1);
+    free_huge(m_table - m_mask - 1);
   }
   m_table = nullptr;
   m_mask = 0;
@@ -52,14 +52,17 @@ void FixedStringMap<V,CaseSensitive,E>::init(int num, uint32_t numExtraBytes) {
     return;
   }
 
-  static const double kLoadFactor = 0.80;
+  static const double kLoadScale = 5;
   int capac = 1;
-  while (num >= kLoadFactor * capac) {
+  while (kLoadScale * num >= (kLoadScale - 1) * capac) {
     capac *= 2;
   }
   TRACE_MOD(Trace::runtime, 1, "FixedStringMap::init: %d -> %d\n", num, capac);
   assert(!m_table);
-  m_table = (Elm*)calloc(capac * sizeof(Elm) + numExtraBytes, 1) + capac;
+  auto const allocSize = capac * sizeof(Elm) + numExtraBytes;
+  auto ptr = malloc_huge(allocSize);
+  std::memset(ptr, 0, allocSize);
+  m_table = (Elm*)ptr + capac;
   assert(m_table);
   m_mask = capac - 1;
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,6 +73,7 @@ void fixupRanges(AsmInfo* asmInfo, AreaIndex area, RelocationInfo& rel) {
 size_t relocateImpl(RelocationInfo& rel,
                     CodeBlock& destBlock,
                     TCA start, TCA end,
+                    DataBlock& srcBlock,
                     CGMeta& fixups,
                     TCA* exitAddr,
                     WideJmpSet& wideJmps) {
@@ -88,7 +89,7 @@ size_t relocateImpl(RelocationInfo& rel,
   try {
     while (src != end) {
       assertx(src < end);
-      DecodedInstruction di(src);
+      DecodedInstruction di(srcBlock.toDestAddress(src), src);
       asm_count++;
 
       int destRange = 0;
@@ -118,8 +119,8 @@ size_t relocateImpl(RelocationInfo& rel,
         keepNopLow <= src && keepNopHigh > src;
       TCA target = nullptr;
       TCA dest = destBlock.frontier();
-      destBlock.bytes(di.size(), src);
-      DecodedInstruction d2(dest);
+      destBlock.bytes(di.size(), srcBlock.toDestAddress(src));
+      DecodedInstruction d2(destBlock.toDestAddress(dest), dest);
       if (di.hasPicOffset()) {
         if (di.isBranch(false)) {
           target = di.picAddress();
@@ -215,7 +216,7 @@ size_t relocateImpl(RelocationInfo& rel,
       src = start;
       bool ok = true;
       while (src != end) {
-        DecodedInstruction di(src);
+        DecodedInstruction di(srcBlock.toDestAddress(src), src);
         TCA newPicAddress = nullptr;
         int64_t newImmediate = 0;
         if (di.hasPicOffset() &&
@@ -232,7 +233,7 @@ size_t relocateImpl(RelocationInfo& rel,
         }
         if (newImmediate || newPicAddress) {
           TCA dest = rel.adjustedAddressAfter(src);
-          DecodedInstruction d2(dest);
+          DecodedInstruction d2(destBlock.toDestAddress(dest), dest);
           if (newPicAddress) {
             if (!d2.setPicAddress(newPicAddress)) {
               always_assert(d2.isBranch() && d2.size() == 2);
@@ -442,6 +443,22 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& li : meta.literals) {
+    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
+      li.second = (uint64_t*)adjusted;
+    }
+  }
+
+  decltype(meta.codePointers) updatedCP;
+  for (auto cp : meta.codePointers) {
+    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
+      updatedCP.emplace(adjusted);
+    } else {
+      updatedCP.emplace(cp);
+    }
+  }
+  updatedCP.swap(meta.codePointers);
+
   if (asmInfo) {
     assert(asmInfo->validate());
     fixupRanges(asmInfo, AreaIndex::Main, rel);
@@ -508,12 +525,13 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
+                DataBlock& srcBlock,
                 CGMeta& fixups,
                 TCA* exitAddr) {
   WideJmpSet wideJmps;
   while (true) {
     try {
-      return relocateImpl(rel, destBlock, start, end,
+      return relocateImpl(rel, destBlock, start, end, srcBlock,
                           fixups, exitAddr, wideJmps);
     } catch (JmpOutOfRange& j) {
     }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ APCString::MakeSharedString(APCKind kind, StringData* data) {
 #ifndef NO_M_DATA
   apcStr->m_str.m_data = chars;
 #endif
-  apcStr->m_str.m_hdr.init(cc, HeaderKind::String, UncountedValue);
+  apcStr->m_str.initHeader(cc, HeaderKind::String, UncountedValue);
   apcStr->m_str.m_len         = len; // don't store hash
 
   assert(apcStr == reinterpret_cast<APCString*>(chars) - 1);

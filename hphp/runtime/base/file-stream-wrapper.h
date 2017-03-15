@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,12 +18,12 @@
 #define HPHP_FILE_STREAM_WRAPPER_H
 
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include <folly/String.h>
+#include <folly/portability/SysStat.h>
 #include <folly/portability/Unistd.h>
 
 #define ERROR_RAISE_WARNING(exp)        \
@@ -62,12 +62,9 @@ struct FileStreamWrapper final : Stream::Wrapper {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }
+  bool isNormalFileStream() const override { return true; }
 
   req::ptr<Directory> opendir(const String& path) override;
-
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
 
  private:
   int mkdir_recursive(const String& path, int mode);

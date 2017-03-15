@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -428,6 +428,16 @@ struct UniqueStubs {
    * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
    */
   TCA throwSwitchMode;
+
+  /*
+   * Method lookup helpers. Normally point to the corresponding c++
+   * functions, but may be generated stubs if the c++ code is too far
+   * from the translation cache.
+   */
+  TCA handlePrimeCacheInit;
+  TCA handlePrimeCacheInitFatal;
+  TCA handleSlowPath;
+  TCA handleSlowPathFatal;
 
   /////////////////////////////////////////////////////////////////////////////
 

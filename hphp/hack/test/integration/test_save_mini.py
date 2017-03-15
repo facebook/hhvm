@@ -6,10 +6,7 @@ from __future__ import unicode_literals
 import json
 import os
 import shlex
-import shutil
 import stat
-import subprocess
-import tempfile
 import time
 import unittest
 
@@ -18,139 +15,52 @@ import hierarchy_tests
 
 from hh_paths import hh_server, hh_client
 
+from mini_state_test_driver import MiniStateTestDriver
+
 def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
 
-class MiniStateTestDriver(common_tests.CommonTestDriver):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        # we create the state in a different dir from the one we run our tests
-        # on, to verify that the saved state does not depend on any absolute
-        # paths
-        init_dir = os.path.join(cls.base_tmp_dir, 'init')
-        shutil.copytree(cls.template_repo, init_dir)
-        cls.saved_state_dir = tempfile.mkdtemp()
-        cls.save_command(init_dir)
-        shutil.rmtree(init_dir)
-
-    @classmethod
-    def tearDownClass(cls):
-        shutil.rmtree(cls.saved_state_dir)
-
-    @classmethod
-    def saved_state_path(cls):
-        return os.path.join(cls.saved_state_dir, 'foo')
-
-    @classmethod
-    def save_command(cls, init_dir):
-        stdout, stderr, retcode = cls.proc_call([
-            hh_server,
-            '--check', init_dir,
-            '--save-mini', cls.saved_state_path()
-        ])
-        if retcode != 0:
-            raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
-                    (stdout, stderr))
-
+class LazyInitTestDriver(MiniStateTestDriver):
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
-            f.write(r"""
+            f.write(
+                r"""
 # some comment
 use_mini_state = true
 use_watchman = true
-""")
-
-    def write_hhconfig(self, script_name):
-        with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
-            f.write(r"""
-# some comment
-assume_php = false
-load_mini_script = %s
-auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
-""" % os.path.join(self.repo_dir, script_name))
-
-    def write_watchman_config(self):
-        with open(os.path.join(self.repo_dir, '.watchmanconfig'), 'w') as f:
-            f.write('{}')
-
-        os.mkdir(os.path.join(self.repo_dir, '.hg'))
-
-    def write_load_config(self, *changed_files):
-        with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
-            f.write("#! /bin/sh\n")
-            os.fchmod(f.fileno(), 0o700)
-            write_echo_json(f, {
-                'state': self.saved_state_path(),
-                'is_cached': True,
-                'deptable': self.saved_state_path() + '.deptable',
-                })
-            write_echo_json(f, {
-                'changes': changed_files,
-                })
-            os.fchmod(f.fileno(), 0o700)
-
-        self.write_local_conf()
-        self.write_hhconfig('server_options.sh')
-        self.write_watchman_config()
-
-    def run_check(self, stdin=None, options=None):
-        options = [] if options is None else options
-        root = self.repo_dir + os.path.sep
-        return self.proc_call([
-            hh_client,
-            'check',
-            '--retries',
-            '20',
-            self.repo_dir
-            ] + list(map(lambda x: x.format(root=root), options)),
-            stdin=stdin)
-
-    def check_cmd(self, expected_output, stdin=None, options=None):
-        (output, err, _) = self.run_check(stdin, options)
-        logs = self.get_server_logs()
-        self.assertIn('Using watchman', logs)
-        self.assertIn('Successfully loaded mini-state', logs)
-        root = self.repo_dir + os.path.sep
-        self.assertCountEqual(
-            map(lambda x: x.format(root=root), expected_output),
-            output.splitlines())
-        return err
-
-    def assertEqualString(self, first, second, msg=None):
-        root = self.repo_dir + os.path.sep
-        second = second.format(root=root)
-        self.assertEqual(first, second, msg)
-
-
-class LazyDeclTestDriver(MiniStateTestDriver):
-    def write_local_conf(self):
-        with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
-            f.write(r"""
-# some comment
-use_mini_state = true
-use_watchman = true
+watchman_subscribe = true
 lazy_decl = true
 lazy_parse = true
-""")
+lazy_init = true
+enable_fuzzy_search = false
+"""
+            )
 
-class MiniStateCommonTests(common_tests.CommonTests, MiniStateTestDriver,
-        unittest.TestCase):
+
+class LazyInitCommonTests(
+    common_tests.CommonTests, LazyInitTestDriver, unittest.TestCase
+):
     pass
 
-class LazyDeclCommonTests(common_tests.CommonTests, LazyDeclTestDriver,
-        unittest.TestCase):
+
+class LazyInitHeirarchyTests(
+    hierarchy_tests.HierarchyTests, LazyInitTestDriver, unittest.TestCase
+):
     pass
 
-class MiniStateHierarchyTests(hierarchy_tests.HierarchyTests,
-        MiniStateTestDriver, unittest.TestCase):
+
+class MiniStateCommonTests(
+    common_tests.CommonTests, MiniStateTestDriver, unittest.TestCase
+):
     pass
 
-class LazyDeclHierarchyTests(hierarchy_tests.HierarchyTests,
-        LazyDeclTestDriver, unittest.TestCase):
-    def test_failed_decl(self):
-        super().test_failed_decl()
+
+class MiniStateHierarchyTests(
+    hierarchy_tests.HierarchyTests, MiniStateTestDriver, unittest.TestCase
+):
+    pass
+
 
 class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
     """
@@ -163,9 +73,7 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
         error_msg = 'No such rev'
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
             f.write("#! /bin/sh\n")
-            write_echo_json(f, {
-                'error': error_msg,
-                })
+            write_echo_json(f, {'error': error_msg, })
             os.fchmod(f.fileno(), 0o700)
 
         self.write_local_conf()
@@ -184,14 +92,15 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
         error_msg = 'hg is not playing nice today'
         with open(os.path.join(self.repo_dir, 'server_options.sh'), 'w') as f:
             f.write("#! /bin/sh\n")
-            write_echo_json(f, {
-                'state': self.saved_state_path(),
-                'is_cached': True,
-                'deptable': self.saved_state_path() + '.deptable',
-                })
-            write_echo_json(f, {
-                'error': error_msg,
-                })
+            write_echo_json(
+                f, {
+                    'state': self.saved_state_path(),
+                    'corresponding_base_revision': '1',
+                    'is_cached': True,
+                    'deptable': self.saved_state_path() + '.sql',
+                }
+            )
+            write_echo_json(f, {'error': error_msg, })
             os.fchmod(f.fileno(), 0o700)
 
         self.write_local_conf()
@@ -214,11 +123,13 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
         self.write_load_config()
         self.check_cmd(['No errors!'])
         with open(os.path.join(self.repo_dir, '.hhconfig'), 'w') as f:
-            f.write(r"""
+            f.write(
+                r"""
 # some comment
 assume_php = true
 load_mini_script = %s
-""" % os.path.join(self.repo_dir, 'server_options.sh'))
+""" % os.path.join(self.repo_dir, 'server_options.sh')
+            )
 
         # Server may take some time to kill itself.
         time.sleep(2)
@@ -227,8 +138,8 @@ load_mini_script = %s
         self.check_cmd(['No errors!'])
         # check how the old one exited
         log_file = self.proc_call([
-            hh_client, '--logname', self.repo_dir]
-            )[0].strip() + '.old'
+            hh_client, '--logname', self.repo_dir
+        ])[0].strip() + '.old'
         with open(log_file) as f:
             logs = f.read()
             self.assertIn('.hhconfig changed in an incompatible way', logs)
@@ -248,4 +159,4 @@ watchman_init_timeout = 1
         self.run_check()
         # Stop the server, ensuring that its logs get flushed
         self.proc_call([hh_client, 'stop', self.repo_dir])
-        self.assertIn('Watchman.Timeout', self.get_server_logs())
+        self.assertIn('Watchman_sig.Types.Timeout', self.get_server_logs())

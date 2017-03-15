@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -75,7 +75,6 @@ struct Vunit;
   O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
-  O(ldimmqs, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) U(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -104,7 +103,8 @@ struct Vunit;
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
   O(syncvmsp, Inone, U(s), Dn)\
-  O(defvmret, Inone, Un, D(data) D(type))\
+  O(defvmretdata, Inone, Un, D(data))\
+  O(defvmrettype, Inone, Un, D(type))\
   O(syncvmret, Inone, U(data) U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), D(d))\
@@ -119,102 +119,101 @@ struct Vunit;
   O(inittc, Inone, Un, Dn)\
   O(leavetc, Inone, U(args), Dn)\
   /* exception intrinsics */\
-  O(landingpad, I(fromPHPCall), Un, Dn)\
+  O(landingpad, Inone, Un, Dn)\
   O(nothrow, Inone, Un, Dn)\
   O(syncpoint, I(fix), Un, Dn)\
   O(unwind, Inone, Un, Dn)\
-  /* arithmetic intrinsics */\
-  O(absdbl, Inone, U(s), D(d))\
-  O(srem, Inone, U(s0) U(s1), D(d))\
-  O(divint, Inone, U(s0) U(s1), D(d))\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
   O(ud2, Inone, Un, Dn)\
+  /* restrict/unrestrict new virtuals */\
+  O(vregrestrict, Inone, Un, Dn)\
+  O(vregunrestrict, Inone, Un, Dn)\
   /* arithmetic instructions */\
-  O(addl, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(addli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(addlm, Inone, U(s0) U(m), D(sf)) \
-  O(addlim, I(s0), U(m), D(sf)) \
-  O(addq, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(addqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(addqim, I(s0), U(m), D(sf)) \
+  O(addl, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(addli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(addlm, I(fl), U(s0) U(m), D(sf)) \
+  O(addlim, I(s0) I(fl), U(m), D(sf)) \
+  O(addq, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(addqim, I(s0) I(fl), U(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
-  O(andb, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(andbi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andbim, I(s), U(m), D(sf)) \
-  O(andl, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(andli, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andq, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(andqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(decl, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(declm, Inone, U(m), D(sf))\
-  O(decq, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(decqm, Inone, U(m), D(sf))\
-  O(decqmlock, Inone, U(m), D(sf))\
-  O(incw, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(incwm, Inone, U(m), D(sf))\
-  O(incl, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(inclm, Inone, U(m), D(sf))\
-  O(incq, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(incqm, Inone, U(m), D(sf))\
-  O(incqmlock, Inone, U(m), D(sf))\
-  O(imul, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(neg, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(andb, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andbim, I(s) I(fl), U(m), D(sf)) \
+  O(andl, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(declm, I(fl), U(m), D(sf))\
+  O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(decqm, I(fl), U(m), D(sf))\
+  O(decqmlock, I(fl), U(m), D(sf))\
+  O(incw, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(incwm, I(fl), U(m), D(sf))\
+  O(incl, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(inclm, I(fl), U(m), D(sf))\
+  O(incq, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(incqm, I(fl), U(m), D(sf))\
+  O(imul, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(divint, Inone, U(s0) U(s1), D(d))\
+  O(srem, Inone, U(s0) U(s1), D(d))\
+  O(neg, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
-  O(orbim, I(s0), U(m), D(sf))\
-  O(orwim, I(s0), U(m), D(sf))\
-  O(orq, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(orqi, I(s0), UH(s1,d), DH(d,s1) D(sf)) \
-  O(orqim, I(s0), U(m), D(sf))\
-  O(sar, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(shl, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(sarqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(shlli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(shlqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(shrli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(shrqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(psllq, I(s0), UH(s1,d), DH(d,s1))\
-  O(psrlq, I(s0), UH(s1,d), DH(d,s1))\
-  O(subbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(subl, Inone, UA(s0) U(s1), D(d) D(sf))\
-  O(subli, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(subq, Inone, UA(s0) U(s1), D(d) D(sf))\
-  O(subqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(orbim, I(s0) I(fl), U(m), D(sf))\
+  O(orwim, I(s0) I(fl), U(m), D(sf))\
+  O(orq, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(orqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(orqim, I(s0) I(fl), U(m), D(sf))\
+  O(sar, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(shl, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(sarqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(shlli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(shlqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(shrli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(shrqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(subb, I(fl), UA(s0) U(s1), D(d) D(sf))\
+  O(subbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(subl, I(fl), UA(s0) U(s1), D(d) D(sf))\
+  O(subli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(subq, I(fl), UA(s0) U(s1), D(d) D(sf))\
+  O(subqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subsd, Inone, UA(s0) U(s1), D(d))\
-  O(xorb, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(xorbi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(xorl, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(xorq, Inone, U(s0) U(s1), D(d) D(sf))\
-  O(xorqi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorb, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(xorbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
+  O(xorl, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(xorq, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(xorqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   /* compares and tests */\
-  O(cmpb, Inone, U(s0) U(s1), D(sf))\
-  O(cmpbi, I(s0), U(s1), D(sf))\
-  O(cmpbim, I(s0), U(s1), D(sf))\
-  O(cmpbm, Inone, U(s0) U(s1), D(sf))\
-  O(cmpwim, I(s0), U(s1), D(sf))\
-  O(cmpwm, Inone, U(s0) U(s1), D(sf))\
-  O(cmpl, Inone, U(s0) U(s1), D(sf))\
-  O(cmpli, I(s0), U(s1), D(sf))\
-  O(cmplm, Inone, U(s0) U(s1), D(sf))\
-  O(cmplim, I(s0), U(s1), D(sf))\
-  O(cmpq, Inone, U(s0) U(s1), D(sf))\
-  O(cmpqi, I(s0), U(s1), D(sf))\
-  O(cmpqm, Inone, U(s0) U(s1), D(sf))\
-  O(cmpqim, I(s0), U(s1), D(sf))\
+  O(cmpb, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpbi, I(s0) I(fl), U(s1), D(sf))\
+  O(cmpbim, I(s0) I(fl), U(s1), D(sf))\
+  O(cmpbm, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpwim, I(s0) I(fl), U(s1), D(sf))\
+  O(cmpwm, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpl, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpli, I(s0) I(fl), U(s1), D(sf))\
+  O(cmplm, I(fl), U(s0) U(s1), D(sf))\
+  O(cmplim, I(s0) I(fl), U(s1), D(sf))\
+  O(cmpq, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpqi, I(s0) I(fl), U(s1), D(sf))\
+  O(cmpqm, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpqim, I(s0) I(fl), U(s1), D(sf))\
   O(cmpsd, I(pred), UA(s0) U(s1), D(d))\
-  O(ucomisd, Inone, U(s0) U(s1), D(sf))\
-  O(testb, Inone, U(s0) U(s1), D(sf))\
-  O(testbi, I(s0), U(s1), D(sf))\
-  O(testbim, I(s0), U(s1), D(sf))\
-  O(testwim, I(s0), U(s1), D(sf))\
-  O(testl, Inone, U(s0) U(s1), D(sf))\
-  O(testli, I(s0), U(s1), D(sf))\
-  O(testlim, I(s0), U(s1), D(sf))\
-  O(testq, Inone, U(s0) U(s1), D(sf))\
-  O(testqi, I(s0), U(s1), D(sf))\
-  O(testqm, Inone, U(s0) U(s1), D(sf))\
-  O(testqim, I(s0), U(s1), D(sf))\
+  O(ucomisd, I(fl), U(s0) U(s1), D(sf))\
+  O(testb, I(fl), U(s0) U(s1), D(sf))\
+  O(testbi, I(s0) I(fl), U(s1), D(sf))\
+  O(testbim, I(s0) I(fl), U(s1), D(sf))\
+  O(testwim, I(s0) I(fl), U(s1), D(sf))\
+  O(testl, I(fl), U(s0) U(s1), D(sf))\
+  O(testli, I(s0) I(fl), U(s1), D(sf))\
+  O(testlim, I(s0) I(fl), U(s1), D(sf))\
+  O(testq, I(fl), U(s0) U(s1), D(sf))\
+  O(testqi, I(s0) I(fl), U(s1), D(sf))\
+  O(testqm, I(fl), U(s0) U(s1), D(sf))\
+  O(testqim, I(s0) I(fl), U(s1), D(sf))\
   /* conditional operations */\
   O(cloadq, I(cc), U(sf) U(f) U(t), D(d))\
   O(cmovb, I(cc), U(sf) UH(f,d) U(t), DH(d,f))\
@@ -270,70 +269,43 @@ struct Vunit;
   O(jmpi, I(target), U(args), Dn)\
   /* push/pop */\
   O(pop, Inone, Un, D(d))\
-  O(popm, Inone, U(d), Dn)\
   O(popf, Inone, Un, D(d))\
+  O(popm, Inone, U(d), Dn)\
+  O(popp, Inone, Un, D(d0) D(d1))\
+  O(poppm, Inone, U(d0) U(d1), Dn)\
   O(push, Inone, U(s), Dn)\
-  O(pushm, Inone, U(s), Dn)\
   O(pushf, Inone, U(s), Dn)\
+  O(pushm, Inone, U(s), Dn)\
+  O(pushp, Inone, U(s0) U(s1), Dn)\
+  O(pushpm, Inone, U(s0) U(s1), Dn)\
   /* floating-point conversions */\
   O(cvttsd2siq, Inone, U(s), D(d))\
   O(cvtsi2sd, Inone, U(s), D(d))\
   O(cvtsi2sdm, Inone, U(s), D(d))\
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   /* other floating-point */\
+  O(absdbl, Inone, UH(s,d), DH(d,s))\
   O(divsd, Inone, UA(s0) U(s1), D(d))\
   O(mulsd, Inone, U(s0) U(s1), D(d))\
   O(roundsd, I(dir), U(s), D(d))\
   O(sqrtsd, Inone, U(s), D(d))\
   /* x64 instructions */\
   O(cqo, Inone, Un, Dn)\
-  O(idiv, Inone, U(s), D(sf))\
-  O(sarq, Inone, UH(s,d), DH(d,s) D(sf))\
-  O(shlq, Inone, UH(s,d), DH(d,s) D(sf))\
+  O(idiv, I(fl), U(s), D(sf))\
+  O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   /* arm instructions */\
-  O(addxi, I(s0), UH(s1,d), DH(d,s1))\
-  O(asrxi, I(s0), UH(s1,d), DH(d,s1))\
-  O(asrxis, I(s0), U(s1) U(d), D(df) D(sf))\
-  O(bln, Inone, Un, Dn)\
-  O(cmplims, I(s0), U(s1), D(sf))\
-  O(cmpsds, I(pred), UA(s0) U(s1), D(d))\
-  O(fabs, Inone, U(s), D(d))\
   O(fcvtzs, Inone, U(s), D(d))\
-  O(lslwi, I(s0), UH(s1,d), DH(d,s1))\
-  O(lslwis, I(s0), U(s1) U(d), D(df) D(sf))\
-  O(lslxi, I(s0), UH(s1,d), DH(d,s1))\
-  O(lslxis, I(s0), U(s1) U(d), D(df) D(sf))\
-  O(lsrwi, I(s0), UH(s1,d), DH(d,s1))\
-  O(lsrwis, I(s0), U(s1) U(d), D(df) D(sf))\
-  O(lsrxi, I(s0), UH(s1,d), DH(d,s1))\
-  O(lsrxis, I(s0), U(s1) U(d), D(df) D(sf))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
-  O(orswi, I(s0), UH(s1,d), DH(d,s1) D(sf))\
-  O(orsw, Inone, U(s0) U(s1), D(d) D(sf)) \
-  O(popp, Inone, Un, D(d0) D(d1))\
-  O(pushp, Inone, U(s0) U(s1), Dn)\
-  O(subsb, Inone, UA(s0) U(s1), D(d) D(sf))\
-  O(uxth, Inone, U(s), D(d))\
   /* ppc64 instructions */\
-  O(extrb, Inone, UH(s,d), DH(d,s))\
-  O(extrw, Inone, UH(s,d), DH(d,s))\
   O(extsb, Inone, UH(s,d), DH(d,s))\
-  O(extsw, Inone, UH(s,d), DH(d,s))\
+  O(extsl, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
   O(fctidz, Inone, U(s), D(d) D(sf))\
-  O(ldarx, Inone, U(s), D(d))\
-  O(mfcr, Inone, Un, D(d))\
   O(mflr, Inone, Un, D(d))\
-  O(mfvsrd, Inone, U(s), D(d))\
   O(mtlr, Inone, U(s), Dn)\
-  O(mtvsrd, Inone, U(s), D(d))\
-  O(stdcx, Inone, U(s) U(d), Dn)\
-  O(xscvdpsxds, Inone, U(s), D(d))\
-  O(xscvsxddp, Inone, U(s), D(d))\
-  O(xxlxor, Inone, U(s0) U(s1), D(d))\
-  O(xxpermdi, Inone, U(s0) U(s1), D(d))\
   /* */
 
 /*
@@ -359,6 +331,9 @@ struct Vunit;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Service requests.
+//
+// `spOff' is the bytecode eval stack pointer's offset from rvmfp(); we use it
+// to sync rvmsp().
 
 struct bindjmp {
   explicit bindjmp(SrcKey target,
@@ -501,7 +476,6 @@ struct ldimmb { Immed s; Vreg d; };
 struct ldimmw { Immed s; Vreg16 d; };
 struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
-struct ldimmqs { Immed64 s; Vreg d; };
 
 /*
  * Memory operand load and store.
@@ -693,7 +667,8 @@ struct syncvmsp { Vreg s; };
  * Used right after an instruction that makes a PHP call (like the
  * suggestively-named callphp{}) to receive the values as Vregs.
  */
-struct defvmret { Vreg data; Vreg type; };
+struct defvmretdata { Vreg data; };
+struct defvmrettype { Vreg type; };
 
 /*
  * Copy a PHP return value into the return registers (rreg(0) and rreg(1)).
@@ -850,7 +825,7 @@ struct leavetc { RegSet args; };
 /*
  * Header for catch blocks.
  */
-struct landingpad { bool fromPHPCall; };
+struct landingpad {};
 
 /*
  * Register a null catch trace at this position.
@@ -874,24 +849,6 @@ struct syncpoint { Fixup fix; };
 struct unwind { Vlabel targets[2]; };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Arithmetic intrinsics.
-
-/*
- * Absolute value for a double-precision value.
- */
-struct absdbl { Vreg s, d; };
-
-/*
- * Modulus of two integers.
- */
-struct srem { Vreg s0, s1, d; };
-
-/*
- * Integer division.
- */
-struct divint { Vreg s0, s1, d; };
-
-///////////////////////////////////////////////////////////////////////////////
 
 /*
  * Unless specifically noted otherwise, instructions with Vreg{8,16,32} dsts
@@ -905,108 +862,115 @@ struct nop {};
 struct ud2 {};
 
 /*
+ * Restrict/unrestrict new virtuals.
+ */
+struct vregrestrict {};
+struct vregunrestrict {};
+
+/*
  * Arithmetic instructions.
  */
 // add: s0 + {s1|m} => {d|m}, sf
-struct addl   { Vreg32 s0, s1, d; VregSF sf; };
-struct addli  { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct addlm  { Vreg32 s0; Vptr m; VregSF sf; };
-struct addlim { Immed s0; Vptr m; VregSF sf; };
-struct addq  { Vreg64 s0, s1, d; VregSF sf; };
-struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct addqim { Immed s0; Vptr m; VregSF sf; };
+struct addl   { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
+struct addli  { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct addlm  { Vreg32 s0; Vptr m; VregSF sf; Vflags fl; };
+struct addlim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct addq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct addqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
 struct addsd  { VregDbl s0, s1, d; };
 // and: s0 & {s1|m} => {d|m}, sf
-struct andb  { Vreg8 s0, s1, d; VregSF sf; };
-struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; };
-struct andbim { Immed s; Vptr m; VregSF sf; };
-struct andl  { Vreg32 s0, s1, d; VregSF sf; };
-struct andli { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct andq  { Vreg64 s0, s1, d; VregSF sf; };
-struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct andb  { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
+struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
+struct andbim { Immed s; Vptr m; VregSF sf; Vflags fl; };
+struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
+struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // dec: {s|m} - 1 => {d|m}, sf
-struct decl { Vreg32 s, d; VregSF sf; };
-struct declm { Vptr m; VregSF sf; };
-struct decq { Vreg64 s, d; VregSF sf; };
-struct decqm { Vptr m; VregSF sf; };
-struct decqmlock { Vptr m; VregSF sf; };
+struct decl { Vreg32 s, d; VregSF sf; Vflags fl; };
+struct declm { Vptr m; VregSF sf; Vflags fl; };
+struct decq { Vreg64 s, d; VregSF sf; Vflags fl; };
+struct decqm { Vptr m; VregSF sf; Vflags fl; };
+struct decqmlock { Vptr m; VregSF sf; Vflags fl; };
 // inc: {s|m} + 1 => {d|m}, sf
-struct incw { Vreg16 s, d; VregSF sf; };
-struct incwm { Vptr m; VregSF sf; };
-struct incl { Vreg32 s, d; VregSF sf; };
-struct inclm { Vptr m; VregSF sf; };
-struct incq { Vreg64 s, d; VregSF sf; };
-struct incqm { Vptr m; VregSF sf; };
-struct incqmlock { Vptr m; VregSF sf; };
+struct incw { Vreg16 s, d; VregSF sf; Vflags fl; };
+struct incwm { Vptr m; VregSF sf; Vflags fl; };
+struct incl { Vreg32 s, d; VregSF sf; Vflags fl; };
+struct inclm { Vptr m; VregSF sf;  Vflags fl;};
+struct incq { Vreg64 s, d; VregSF sf; Vflags fl; };
+struct incqm { Vptr m; VregSF sf; Vflags fl; };
 // mul: s0 * s1 => d, sf
-struct imul { Vreg64 s0, s1, d; VregSF sf; };
+struct imul { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+// div/mod: s0 / s1 => d
+struct divint { Vreg64 s0, s1, d; };
+struct srem { Vreg64 s0, s1, d; };
 // neg: 0 - s => d, sf
-struct neg { Vreg64 s, d; VregSF sf; };
+struct neg { Vreg64 s, d; VregSF sf; Vflags fl; };
 // not: ~s => d
 struct notb { Vreg8 s, d; };
 struct not { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
-struct orbim { Immed s0; Vptr m; VregSF sf; };
-struct orwim { Immed s0; Vptr m; VregSF sf; };
-struct orq { Vreg64 s0, s1, d; VregSF sf; };
-struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct orqim { Immed s0; Vptr m; VregSF sf; };
+struct orbim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orwim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct orqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
 // shift: s1 << s0 => d, sf
-struct sar { Vreg64 s0, s1, d; VregSF sf; };
-struct shl { Vreg64 s0, s1, d; VregSF sf; };
-struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; };
-struct psllq { Immed s0; VregDbl s1, d; };
-struct psrlq { Immed s0; VregDbl s1, d; };
+struct sar { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct shl { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct sarqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct shlli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // sub: s1 - s0 => d, sf
-struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; };
-struct subl { Vreg32 s0, s1, d; VregSF sf; };
-struct subli { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct subq { Vreg64 s0, s1, d; VregSF sf; };
-struct subqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct subb { Vreg8 s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
+struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
+struct subl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
+struct subli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
+struct subq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct subqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct subsd { VregDbl s0, s1, d; };
 // xor: s0 ^ s1 => d, sf
-struct xorb { Vreg8 s0, s1, d; VregSF sf; };
-struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; };
-struct xorl { Vreg32 s0, s1, d; VregSF sf; };
-struct xorq { Vreg64 s0, s1, d; VregSF sf; };
-struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; };
+struct xorb { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
+struct xorbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
+struct xorl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
+struct xorq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
+struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 
 /*
  * Compares and tests.
  */
 // s1 - s0 => sf
-struct cmpb { Vreg8 s0; Vreg8 s1; VregSF sf; };
-struct cmpbi { Immed s0; Vreg8 s1; VregSF sf; };
-struct cmpbim { Immed s0; Vptr s1; VregSF sf; };
-struct cmpbm { Vreg8 s0; Vptr s1; VregSF sf; };
-struct cmpwim { Immed s0; Vptr s1; VregSF sf; };
-struct cmpwm { Vreg16 s0; Vptr s1; VregSF sf; };
-struct cmpl { Vreg32 s0; Vreg32 s1; VregSF sf; };
-struct cmpli { Immed s0; Vreg32 s1; VregSF sf; };
-struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; };
-struct cmplim { Immed s0; Vptr s1; VregSF sf; };
-struct cmpq { Vreg64 s0; Vreg64 s1; VregSF sf; };
-struct cmpqi { Immed s0; Vreg64 s1; VregSF sf; };
-struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; };
-struct cmpqim { Immed s0; Vptr s1; VregSF sf; };
+struct cmpb { Vreg8 s0; Vreg8 s1; VregSF sf; Vflags fl; };
+struct cmpbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
+struct cmpbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpbm { Vreg8 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpwm { Vreg16 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpl { Vreg32 s0; Vreg32 s1; VregSF sf; Vflags fl; };
+struct cmpli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
+struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmplim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpq { Vreg64 s0; Vreg64 s1; VregSF sf; Vflags fl; };
+struct cmpqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
+struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpqim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
-struct ucomisd { VregDbl s0, s1; VregSF sf; };
+struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 // s1 & s0 => sf
-struct testb { Vreg8 s0, s1; VregSF sf; };
-struct testbi { Immed s0; Vreg8 s1; VregSF sf; };
-struct testbim { Immed s0; Vptr s1; VregSF sf; };
-struct testwim { Immed s0; Vptr s1; VregSF sf; };
-struct testl { Vreg32 s0, s1; VregSF sf; };
-struct testli { Immed s0; Vreg32 s1; VregSF sf; };
-struct testlim { Immed s0; Vptr s1; VregSF sf; };
-struct testq { Vreg64 s0, s1; VregSF sf; };
-struct testqi { Immed s0; Vreg64 s1; VregSF sf; };
-struct testqm { Vreg64 s0; Vptr s1; VregSF sf; };
-struct testqim { Immed s0; Vptr s1; VregSF sf; };
+struct testb { Vreg8 s0, s1; VregSF sf; Vflags fl; };
+struct testbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
+struct testbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testl { Vreg32 s0, s1; VregSF sf; Vflags fl; };
+struct testli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
+struct testlim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testq { Vreg64 s0, s1; VregSF sf; Vflags fl; };
+struct testqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
+struct testqm { Vreg64 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testqim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
 
 /*
  * Conditional operations.
@@ -1093,11 +1057,17 @@ struct jmpi { TCA target; RegSet args; };
  * Push/pop to rsp().
  */
 struct pop { Vreg64 d; };
-struct popm { Vptr d; };
 struct popf { VregSF d; };
+struct popm { Vptr d; };
+// popp[m]{d0, d1} -> pop[m]{d0}, pop[m]{d1}
+struct popp { Vreg64 d0, d1; };
+struct poppm { Vptr d0, d1; };
 struct push { Vreg64 s; };
-struct pushm { Vptr s; };
 struct pushf { VregSF s; };
+struct pushm { Vptr s; };
+// pushp[m]{s0, s1} -> push[m]{s0}, push[m]{s1}
+struct pushp { Vreg64 s0, s1; };
+struct pushpm { Vptr s0, s1; };
 
 /*
  * Integer-float conversions.
@@ -1110,6 +1080,7 @@ struct unpcklpd { VregDbl s0, s1; Vreg128 d; };
 /*
  * Undocumented floating-point instructions.
  */
+struct absdbl { VregDbl s, d; };
 struct divsd { VregDbl s0, s1, d; };
 struct mulsd  { VregDbl s0, s1, d; };
 struct roundsd { RoundDirection dir; VregDbl s, d; };
@@ -1121,59 +1092,27 @@ struct sqrtsd { VregDbl s, d; };
  * x64 intrinsics.
  */
 struct cqo {};
-struct idiv { Vreg64 s; VregSF sf; };
-struct sarq { Vreg64 s, d; VregSF sf; }; // uses rcx
-struct shlq { Vreg64 s, d; VregSF sf; }; // uses rcx
+struct idiv { Vreg64 s; VregSF sf; Vflags fl; };
+struct sarq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
+struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 
 /*
  * arm intrinsics.
  */
-struct addxi { Immed s0; Vreg64 s1, d; };
-struct asrxi { Immed s0; Vreg64 s1, d; };
-struct asrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
-struct bln {};
-struct cmplims { Immed s0; Vptr s1; VregSF sf; };
-struct cmpsds { ComparisonPred pred; VregDbl s0, s1, d; VregSF sf; };
-struct fabs { VregDbl s, d; };
 struct fcvtzs { VregDbl s; Vreg64 d;};
-struct lslwi { Immed s0; Vreg32 s1, d; };
-struct lslwis { Immed s0; Vreg32 s1, d, df; VregSF sf; };
-struct lslxi { Immed s0; Vreg64 s1, d; };
-struct lslxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
-struct lsrwi { Immed s0; Vreg32 s1, d; };
-struct lsrwis { Immed s0; Vreg32 s1, d, df; VregSF sf; };
-struct lsrxi { Immed s0; Vreg64 s1, d; };
-struct lsrxis { Immed s0; Vreg64 s1, d, df; VregSF sf; };
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
-struct orswi { Immed s0; Vreg32 s1, d; VregSF sf; };
-struct orsw { Vreg32 s0, s1, d; VregSF sf; };
-struct popp { Vreg64 d0, d1; };
-struct pushp { Vreg64 s0, s1; };
-struct subsb { Vreg8 s0, s1, d; VregSF sf; };
-struct uxth { Vreg16 s; Vreg32 d; };
 
 /*
  * ppc64 intrinsics.
  */
-struct extrb { Vreg8 s; Vreg8 d; };   // Extract and zeros the upper bits
-struct extrw { Vreg16 s; Vreg64 d; }; // Extract and zeros the upper bits
-struct extsb { Vreg64 s; Vreg64 d; }; // Extend byte sign
-struct extsw { Vreg64 s; Vreg64 d; }; // Extend word sign
+struct extsb { Vreg8 s; Vreg64 d; };  // Extend byte sign
+struct extsl { Vreg32 s; Vreg64 d; }; // Extend word sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
-struct ldarx { Vptr s; Vreg64 d; };
-struct mfcr { Vreg64 d; };
 struct mflr { Vreg64 d; };
-struct mfvsrd { Vreg128 s; Vreg64 d; };
-struct xscvdpsxds { Vreg128 s, d; };
 struct mtlr { Vreg64 s; };
-struct mtvsrd { Vreg64 s; Vreg128 d; };
-struct stdcx { Vreg64 s; Vptr d; };
-struct xscvsxddp { Vreg128 s, d; };
-struct xxlxor { Vreg128 s0, s1, d; };
-struct xxpermdi { Vreg128 s0, s1, d; };
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -14,16 +14,18 @@
  *)
 
 module GEnv: sig
-  val type_pos: string -> Pos.t option
+  val get_full_pos : ParserOptions.t -> FileInfo.pos * string -> Pos.t * string
+  val type_pos: ParserOptions.t -> string -> Pos.t option
   val type_canon_name: string -> string option
-  val type_info: string -> (Pos.t * [`Class | `Typedef]) option
+  val type_info:
+    ParserOptions.t -> string -> (Pos.t * [`Class | `Typedef]) option
 
-  val fun_pos: string -> Pos.t option
+  val fun_pos: ParserOptions.t ->  string -> Pos.t option
   val fun_canon_name: string -> string option
 
-  val typedef_pos: string -> Pos.t option
+  val typedef_pos: ParserOptions.t -> string -> Pos.t option
 
-  val gconst_pos: string -> Pos.t option
+  val gconst_pos: ParserOptions.t -> string -> Pos.t option
 end
 
 (* Canonicalizes a key *)
@@ -36,10 +38,11 @@ val canon_key: String.t -> String.t
  * It all the entities passed as parameters and adds them to the shared heap.
 *)
 val make_env:
-      funs:Ast.id list ->
-      classes:Ast.id list ->
-      typedefs:Ast.id list ->
-      consts:Ast.id list -> unit
+      ParserOptions.t ->
+      funs:FileInfo.id list ->
+      classes:FileInfo.id list ->
+      typedefs:FileInfo.id list ->
+      consts:FileInfo.id list -> unit
 
 (* Removing declarations *)
 val remove_decls:
@@ -48,6 +51,14 @@ val remove_decls:
       typedefs: SSet.t ->
       consts: SSet.t -> unit
 
+val ndecl_file_fast:
+  Relative_path.t ->
+  funs: SSet.t ->
+  classes: SSet.t ->
+  typedefs: SSet.t ->
+  consts: SSet.t -> unit
+
 val ndecl_file:
+  ParserOptions.t ->
   Relative_path.t -> FileInfo.t ->
   Errors.t * Relative_path.Set.t

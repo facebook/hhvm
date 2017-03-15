@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,8 @@ enum CopyStringMode { CopyString };
  *   Flat   |   X    |     X    |    X
  *   Proxy  |        |          |    X
  */
-struct StringData final: type_scan::MarkCountable<StringData> {
+struct StringData final : MaybeCountable,
+                          type_scan::MarkCountable<StringData> {
   friend struct APCString;
   friend StringData* allocFlatSmallImpl(size_t len);
   friend StringData* allocFlatSlowImpl(size_t len);
@@ -167,6 +168,7 @@ struct StringData final: type_scan::MarkCountable<StringData> {
   static constexpr ptrdiff_t dataOff() { return offsetof(StringData, m_data); }
 #endif
   static constexpr ptrdiff_t sizeOff() { return offsetof(StringData, m_len); }
+  static constexpr ptrdiff_t hashOff() { return offsetof(StringData, m_hash); }
 
   /*
    * Proxy StringData's have a sweep list running through them for
@@ -198,9 +200,12 @@ struct StringData final: type_scan::MarkCountable<StringData> {
   /*
    * Reference-counting related.
    */
-  IMPLEMENT_COUNTABLE_METHODS
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
 
-  bool kindIsValid() const { return m_hdr.kind == HeaderKind::String; }
+  bool kindIsValid() const { return m_kind == HeaderKind::String; }
 
   /*
    * Append the supplied range to this string.  If there is not sufficient
@@ -453,6 +458,8 @@ struct StringData final: type_scan::MarkCountable<StringData> {
 
   bool isImmutable() const;
 
+  bool checkSane() const;
+
 private:
   struct Proxy {
     StringDataNode node;
@@ -460,7 +467,8 @@ private:
   };
 
 private:
-  static StringData* MakeShared(folly::StringPiece sl, bool trueStatic);
+  template<bool trueStatic>
+  static StringData* MakeShared(folly::StringPiece sl);
   static StringData* MakeProxySlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
@@ -485,34 +493,23 @@ private:
   void enlist();
   void delist();
   void incrementHelper();
-  bool checkSane() const;
   void preCompute();
 
   // We have the next fields blocked into qword-size unions so
   // StringData initialization can do fewer stores to initialize the
   // fields.  (gcc does not combine the stores itself.)
 private:
-#ifdef NO_M_DATA
-  union {
-    struct {
-      uint32_t m_len;
-      mutable strhash_t m_hash;   // precomputed for persistent strings
-    };
-    uint64_t m_lenAndHash;
-  };
-  HeaderWord<CapCode,Counted::Maybe> m_hdr;
-#else
+#ifndef NO_M_DATA
   // TODO(5601154): Add KindOfApcString and remove StringData m_data field.
   char* m_data;
-  HeaderWord<CapCode,Counted::Maybe> m_hdr;
+#endif
   union {
     struct {
       uint32_t m_len;
-      mutable strhash_t m_hash;   // precomputed for persistent strings
+      mutable int32_t m_hash;           // precomputed for persistent strings
     };
     uint64_t m_lenAndHash;
   };
-#endif
 };
 
 //////////////////////////////////////////////////////////////////////

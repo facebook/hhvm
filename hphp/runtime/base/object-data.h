@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,10 +59,21 @@ struct TypedValue;
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
+struct InvokeResult {
+  TypedValue val;
+  InvokeResult() {}
+  InvokeResult(bool ok, TypedValue v) : val(v) {
+    val.m_aux.u_ok = ok;
+  }
+  InvokeResult(bool ok, Variant&& v);
+  bool ok() const { return val.m_aux.u_ok; }
+  explicit operator bool() const { return ok(); }
+};
+
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-struct ObjectData: type_scan::MarkCountable<ObjectData> {
+struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()
@@ -115,22 +126,29 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
                       NoInit) noexcept;
 
  public:
-  IMPLEMENT_COUNTABLE_METHODS
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
   bool kindIsValid() const { return isObjectKind(headerKind()); }
 
-  template<class F> void scan(F&) const;
+  void scan(type_scan::Scanner&) const;
 
   size_t heapSize() const;
 
   // WeakRef control methods.
   inline void invalidateWeakRef() const {
-    if (UNLIKELY(m_hdr.weak_refed)) {
+    if (UNLIKELY(m_weak_refed)) {
       WeakRefData::invalidateWeakRef((uintptr_t)this);
     }
   }
 
-  inline void setWeakRefed(bool weak_refed) const {
-    m_hdr.weak_refed = weak_refed;
+  inline void setWeakRefed(bool flag) const {
+    m_weak_refed = flag;
+  }
+
+  inline void setPartiallyInited(bool f) const {
+    m_partially_inited = f;
   }
 
  public:
@@ -330,7 +348,7 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   // Properties.
  private:
   void initDynProps(int numDynamic = 0);
-  Slot declPropInd(TypedValue* prop) const;
+  Slot declPropInd(const TypedValue* prop) const;
 
   inline Variant o_getImpl(const String& propName, int flags, bool error = true,
                            const String& context = null_string);
@@ -369,22 +387,19 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   };
 
  private:
-  template <MOpFlags flags>
-  TypedValue* propImpl(
-    TypedValue* tvRef,
-    const Class* ctx,
-    const StringData* key
-  );
+  template<MOpMode mode>
+  TypedValue* propImpl(TypedValue* tvRef, const Class* ctx,
+                       const StringData* key);
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
-  bool invokeSet(const StringData* key, TypedValue* val);
-  bool invokeGet(TypedValue* retval, const StringData* key);
-  bool invokeIsset(TypedValue* retval, const StringData* key);
+  bool invokeSet(const StringData* key, const TypedValue* val);
+  InvokeResult invokeGet(const StringData* key);
+  InvokeResult invokeIsset(const StringData* key);
   bool invokeUnset(const StringData* key);
-  bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
+  InvokeResult invokeNativeGetProp(const StringData* key);
   bool invokeNativeSetProp(const StringData* key, TypedValue* val);
-  bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
+  InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
@@ -421,8 +436,7 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
 
-  void incDecProp(Class* ctx, IncDecOp op, const StringData* key,
-                  TypedValue& dest);
+  Cell incDecProp(Class* ctx, IncDecOp op, const StringData* key);
 
   void unsetProp(Class* ctx, const StringData* key);
 
@@ -435,36 +449,24 @@ struct ObjectData: type_scan::MarkCountable<ObjectData> {
     return offsetof(ObjectData, m_cls);
   }
   static constexpr ptrdiff_t attributeOff() {
-    return offsetof(ObjectData, m_hdr) +
-           offsetof(HeaderWord<uint16_t>, aux);
+    return offsetof(ObjectData, m_aux16);
   }
   const char* classname_cstr() const;
 
 private:
   friend struct MemoryProfile;
 
-  static void compileTimeAssertions();
-
   bool toBooleanImpl() const noexcept;
   int64_t toInt64Impl() const noexcept;
   double toDoubleImpl() const noexcept;
 
-// offset:  0    4   8       12     16   20          32
-// 64bit:   cls      header  count  id   [subclass]  [props...]
-// lowptr:  cls  id  header  count  [subclass][props...]
+// offset:  0        8       12   16   20          32
+// 64bit:   header   cls          id   [subclass]  [props...]
+// lowptr:  header   cls     id   [subclass][props...]
 
 private:
-#ifdef USE_LOWPTR
   LowPtr<Class> m_cls;
-  // Numeric identifier of this object (used for var_dump(), and WeakRefs)
-  uint32_t o_id;
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-#else
-  LowPtr<Class> m_cls;
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-  // Numeric identifier of this object (used for var_dump(), and WeakRefs)
-  uint32_t o_id;
-#endif
+  uint32_t o_id; // id of this object (used for var_dump(), and WeakRefs)
 };
 #ifdef _MSC_VER
 #pragma pack(pop)
@@ -520,6 +522,7 @@ typename std::enable_if<
   req::ptr<T>
 >::type make(Args&&... args) {
   auto const mem = MM().mallocSmallSize(sizeof(T));
+  (void)type_scan::getIndexForMalloc<T>(); // ensure T* ptrs are interesting
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
     assert(t->hasExactlyOneRef());

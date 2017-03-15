@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -217,8 +217,8 @@ private:
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                                    const Array& dependencies);
 public:
-  template<class F> void scan(F& mark) const {
-    mark(m_ref);
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_ref);
   }
 
 private:
@@ -226,7 +226,7 @@ private:
   // const ProxyArray* as a parameter, but we need to modify the inner array
   // to box and proxy the return values, so making this mutable avoids a
   // const_cast.
-  mutable RefData *m_ref;
+  mutable RefData* m_ref;
 };
 
 //////////////////////////////////////////////////////////////////////

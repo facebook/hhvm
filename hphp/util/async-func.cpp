@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/numa.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,6 +34,8 @@ void* AsyncFuncImpl::s_initFuncArg = nullptr;
 
 PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = nullptr;
 void* AsyncFuncImpl::s_finiFuncArg = nullptr;
+
+std::atomic<uint32_t> AsyncFuncImpl::s_count { 0 };
 
 AsyncFuncImpl::AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
     : m_obj(obj), m_func(func),
@@ -82,6 +85,7 @@ void AsyncFuncImpl::start() {
 
   pthread_create(&m_threadId, &m_attr, ThreadFunc, (void*)this);
   assert(m_threadId);
+  s_count++;
 }
 
 void AsyncFuncImpl::cancel() {
@@ -107,6 +111,7 @@ bool AsyncFuncImpl::waitForEnd(int seconds /* = 0 */) {
 
   void *ret = nullptr;
   pthread_join(m_threadId, &ret);
+  s_count--;
   m_threadId = 0;
 
   if (m_threadStack != nullptr) {

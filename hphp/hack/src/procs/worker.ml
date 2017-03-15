@@ -36,6 +36,12 @@ exception Worker_exited_abnormally of int
 exception Worker_oomed
 exception Worker_busy
 
+type send_job_failure =
+  | Worker_already_exited of Unix.process_status
+  | Other_send_job_failure of exn
+
+exception Worker_failed_to_send_job of send_job_failure
+
 (* Should we 'prespawn' the worker ? *)
 let use_prespawned = not Sys.win32
 
@@ -133,7 +139,15 @@ and 'a slave = {
  *****************************************************************************)
 
 let slave_main ic oc =
+  let start_user_time = ref 0.0 in
+  let start_system_time = ref 0.0 in
   let send_result data =
+    let tm = Unix.times () in
+    let end_user_time = tm.Unix.tms_utime +. tm.Unix.tms_cutime in
+    let end_system_time = tm.Unix.tms_stime +. tm.Unix.tms_cstime in
+    Measure.sample "worker_user_time" (end_user_time -. !start_user_time);
+    Measure.sample "worker_system_time" (end_system_time -. !start_system_time);
+
     let stats = Measure.serialize (Measure.pop_global ()) in
     let s = Marshal.to_string (data,stats) [Marshal.Closures] in
     let len = String.length s in
@@ -148,7 +162,11 @@ let slave_main ic oc =
     Daemon.output_string oc s;
     Daemon.flush oc in
   try
+    Measure.push_global ();
     let Request do_process = Daemon.from_channel ic in
+    let tm = Unix.times () in
+    start_user_time := tm.Unix.tms_utime +. tm.Unix.tms_cutime;
+    start_system_time := tm.Unix.tms_stime +. tm.Unix.tms_cstime;
     do_process { send = send_result };
     exit 0
   with
@@ -160,6 +178,14 @@ let slave_main ic oc =
       Exit_status.(exit Hash_table_full)
   | SharedMem.Heap_full ->
       Exit_status.(exit Heap_full)
+  | SharedMem.Sql_assertion_failure err_num ->
+      let exit_code = match err_num with
+        | 11 -> Exit_status.Sql_corrupt
+        | 14 -> Exit_status.Sql_cantopen
+        | 21 -> Exit_status.Sql_misuse
+        | _ -> Exit_status.Sql_assertion_failure
+      in
+      Exit_status.exit exit_code
   | e ->
       let e_str = Printexc.to_string e in
       Printf.printf "Exception: %s\n" e_str;
@@ -302,9 +328,17 @@ let call w (type a) (type b) (f : a -> b) (x : a) : b handle =
 
   in
   (* Send the job to the slave. *)
-  Daemon.to_channel outc
+  let () = try Daemon.to_channel outc
     ~flush:true ~flags:[Marshal.Closures]
-    request;
+    request with
+    | e -> begin
+      match Unix.waitpid [Unix.WNOHANG] slave_pid with
+      | 0, _ ->
+        raise (Worker_failed_to_send_job (Other_send_job_failure e))
+      | _, status ->
+        raise (Worker_failed_to_send_job (Worker_already_exited status))
+    end
+  in
   (* And returned the 'handle'. *)
   ref (Processing slave)
 

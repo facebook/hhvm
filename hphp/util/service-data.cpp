@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,7 +201,7 @@ struct Impl {
     return getOrCreateWithArgs(m_counterMap, name);
   }
 
-  ExportedTimeSeries* createTimeseries(
+  ExportedTimeSeries* createTimeSeries(
       const std::string& name,
       const std::vector<ServiceData::StatsType>& types,
       const std::vector<std::chrono::seconds>& levels,
@@ -306,12 +306,12 @@ ExportedCounter* createCounter(const std::string& name) {
   return getServiceDataInstance().createCounter(name);
 }
 
-ExportedTimeSeries* createTimeseries(
+ExportedTimeSeries* createTimeSeries(
     const std::string& name,
     const std::vector<ServiceData::StatsType>& types,
     const std::vector<std::chrono::seconds>& levels,
     int numBuckets) {
-  return getServiceDataInstance().createTimeseries(
+  return getServiceDataInstance().createTimeSeries(
     name, types, levels, numBuckets);
 }
 

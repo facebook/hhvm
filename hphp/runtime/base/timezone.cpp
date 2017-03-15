@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -95,18 +95,25 @@ void timezone_init() {
   s_tzvCache = TimeZoneValidityCache::create(kMaxTimeZoneCache).release();
 }
 
-const timelib_tzdb* timezone_get_builtin_tzdb() {
-  if (s_tzdb_cache.load() != nullptr) return s_tzdb_cache;
+const timelib_tzdb* (*timezone_raw_get_tzdb)() = timelib_builtin_db;
 
-  Lock tzdbLock(s_tzdb_mutex);
-  if (s_tzdb_cache.load() == nullptr) s_tzdb_cache = timelib_builtin_db();
+const timelib_tzdb* timezone_get_tzdb() {
+  if (s_tzdb_cache.load() == nullptr) {
+    Lock tzdbLock(s_tzdb_mutex);
+    if (s_tzdb_cache.load() == nullptr) {
+      s_tzdb_cache = (*timezone_raw_get_tzdb)();
+    }
+  }
+  if (s_tzdb_cache == nullptr) {
+    raise_error("Couldn't load tzdata");
+  }
   return s_tzdb_cache;
 }
 
 const timelib_tzdb *TimeZone::GetDatabase() {
   const timelib_tzdb *&Database = s_timezone_data->Database;
   if (Database == nullptr) {
-    Database = timezone_get_builtin_tzdb();
+    Database = timezone_get_tzdb();
   }
   return Database;
 }

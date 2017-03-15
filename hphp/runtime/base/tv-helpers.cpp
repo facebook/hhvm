@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,9 +116,6 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfRef:
         assert(!"KindOfRef found in a Cell");
         break;
-      case KindOfClass:
-        assert(!"Invalid Cell type");
-        break;
     }
     not_reached();
   }();
@@ -149,7 +146,7 @@ bool tvDecRefWillRelease(TypedValue* tv) {
   if (tv->m_type == KindOfRef) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
-  return TV_GENERIC_DISPATCH(*tv, decWillRelease);
+  return tv->m_data.pcnt->decWillRelease();
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -210,7 +207,6 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -277,7 +273,6 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -343,7 +338,6 @@ void cellCastToInt64InPlace(Cell* cell) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -400,7 +394,6 @@ double tvCastToDouble(TypedValue* tv) {
       return tv->m_data.pres->data()->o_toDouble();
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -477,7 +470,6 @@ void tvCastToStringInPlace(TypedValue* tv) {
       return;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -539,7 +531,6 @@ StringData* tvCastToString(const TypedValue* tv) {
       return tv->m_data.pres->data()->o_toString().detach();
 
     case KindOfRef:
-    case KindOfClass:
       not_reached();
   }
   not_reached();
@@ -633,7 +624,6 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -644,6 +634,13 @@ void tvCastToArrayInPlace(TypedValue* tv) {
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
   assert(cellIsPlausible(*tv));
+}
+
+static Array arrayFromCollection(ObjectData* obj) {
+  if (auto ad = collections::asArray(obj)) {
+    return ArrNR{ad}.asArray();
+  }
+  return collections::toArray(obj);
 }
 
 void tvCastToVecInPlace(TypedValue* tv) {
@@ -724,7 +721,12 @@ void tvCastToVecInPlace(TypedValue* tv) {
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = collections::toArray(obj).toVec().detach();
+          a = arrayFromCollection(obj).toVec().detach();
+          decRefObj(obj);
+          tv->m_data.parr = a;
+          tv->m_type = KindOfVec;
+          assert(cellIsPlausible(*tv));
+          return;
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateVec();
           for (ArrayIter iter(obj); iter; ++iter) {
@@ -740,7 +742,6 @@ void tvCastToVecInPlace(TypedValue* tv) {
       }
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -830,7 +831,7 @@ void tvCastToDictInPlace(TypedValue* tv) {
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = collections::toArray(obj).toDict().detach();
+          a = arrayFromCollection(obj).toDict().detach();
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateDict();
           for (ArrayIter iter(obj); iter; ++iter) {
@@ -846,7 +847,6 @@ void tvCastToDictInPlace(TypedValue* tv) {
       }
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -936,7 +936,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       case KindOfObject: {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
-          a = collections::toArray(obj).toKeyset().detach();
+          a = arrayFromCollection(obj).toKeyset().detach();
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateKeyset();
           for (ArrayIter iter(obj); iter; ++iter) {
@@ -952,7 +952,6 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
       }
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1010,7 +1009,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         return;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1055,7 +1053,6 @@ void tvCastToResourceInPlace(TypedValue* tv) {
         // no op, return
         return;
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1098,7 +1095,6 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1148,7 +1144,6 @@ bool tvCanBeCoercedToNumber(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1221,7 +1216,6 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1261,7 +1255,6 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1294,7 +1287,6 @@ bool tvCoerceParamToVecInPlace(TypedValue* tv) {
       return true;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1327,7 +1319,6 @@ bool tvCoerceParamToDictInPlace(TypedValue* tv) {
       return true;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1360,7 +1351,6 @@ bool tvCoerceParamToKeysetInPlace(TypedValue* tv) {
       return true;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

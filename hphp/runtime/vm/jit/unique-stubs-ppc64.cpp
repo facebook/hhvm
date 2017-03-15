@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -215,10 +215,10 @@ void assert_tc_saved_rip(void* saved_lr_pointer) {
   auto const branch_instr = branch_block + jccLen;
   auto const exittc = tc::ustubs().enterTCExit;
 
-  ppc64_asm::DecodedInstruction di(branch_instr);
+  ppc64_asm::DecodedInstruction const di(branch_instr);
   if (di.isJmp()) {
-    auto const jmp_target = TCA(ppc64_asm::Assembler::getLi64(branch_block));
-    always_assert(di.isJmp() && jmp_target == exittc);
+    ppc64_asm::DecodedInstruction const di_target(branch_block);
+    always_assert(di.isJmp() && (di_target.farBranchTarget() == exittc));
   } else {
     always_assert(saved_lr == exittc);
   }
@@ -255,10 +255,8 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
   // Reinitialize r1 for the external code found after enterTCExit's stubret
   a.addi(rsfp(), rsp(), 8);
 
-  // r31 should have the same value as caller's r1. Loading it soon on stubret.
-  // (this corrupts the backchain, but it's not relevant as this frame will be
-  // destroyed soon)
-  a.std(rsfp(), rsp()[8]);
+  // Restore the rvmfp when leaving the VM, which must be the same of rsfp.
+  a.mr(rvmfp(), rsfp());
 
   // Emulate a ret to enterTCExit without actually doing one to avoid
   // unbalancing the return stack buffer.

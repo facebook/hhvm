@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,6 +41,10 @@ inline void ActRec::setReturnVMExit() {
   m_sfp = nullptr;
   m_savedRip = reinterpret_cast<uintptr_t>(jit::tc::ustubs().callToExit);
   m_soff = 0;
+#ifdef __powerpc64__
+  // Save the TOC value, as it will need to be restored when unwinding.
+  asm ("mr %0, 2" : "=r" (m_savedToc));
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

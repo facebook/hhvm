@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -52,12 +52,16 @@ extern const int64_t k_OPENSSL_PKCS1_PADDING;
 #define OPENSSL_ALGO_RMD160     10
 #endif
 
+#if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
+#define HAVE_EVP_PKEY_EC 1
+#endif
+
 enum php_openssl_key_type {
   OPENSSL_KEYTYPE_RSA,
   OPENSSL_KEYTYPE_DSA,
   OPENSSL_KEYTYPE_DH,
   OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
   OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH + 1
 #endif
 };
@@ -151,7 +155,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key);
 Variant HHVM_FUNCTION(openssl_pkey_get_private, const Variant& key,
                                  const String& passphrase = null_string);
 Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate);
-Resource HHVM_FUNCTION(openssl_pkey_new,
+Variant HHVM_FUNCTION(openssl_pkey_new,
                        const Variant& configargs = uninit_variant);
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
                                             VRefParam decrypted,
@@ -214,6 +218,7 @@ Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
 Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
                                       bool raw_output = false);
 Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases = false);
+Variant HHVM_FUNCTION(openssl_get_curve_names);
 Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases = false);
 
 ///////////////////////////////////////////////////////////////////////////////

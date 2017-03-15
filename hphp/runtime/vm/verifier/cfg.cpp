@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,38 +111,13 @@ void GraphBuilder::linkBlocks() {
  * of each handler is also a boundary.
  */
 void GraphBuilder::createExBlocks() {
-  m_graph->exn_cap = m_func->ehtab().size();
   for (auto& handler : m_func->ehtab()) {
     createBlock(handler.m_base);
     if (handler.m_past != m_func->past()) {
       createBlock(handler.m_past);
     }
-    if (handler.m_type == EHEnt::Type::Catch) {
-      m_graph->exn_cap += handler.m_catches.size() - 1;
-      for (auto const& c : handler.m_catches) {
-        createBlock(c.second);
-      }
-    } else {
-      createBlock(handler.m_fault);
-    }
+    createBlock(handler.m_handler);
   }
-}
-
-/**
- * Find the EHEnt for the fault funclet that off is inside of.  Off is an
- * offset in the funclet's handler (e.g. &Unwind), not the funclets protected
- * try region.
- */
-const EHEnt* findFunclet(const Func::EHEntVec& ehtab, Offset off) {
-  const EHEnt* nearest = 0;
-  for (auto& eh : ehtab) {
-    if (eh.m_type != EHEnt::Type::Fault) continue;
-    if (eh.m_fault <= off && (!nearest || eh.m_fault > nearest->m_fault)) {
-      nearest = &eh;
-    }
-  }
-  assert(nearest != 0 && nearest->m_fault <= off);
-  return nearest;
 }
 
 /**
@@ -167,45 +142,16 @@ const EHEnt* nextOuter(const Func::EHEntVec& ehtab, const EHEnt* eh) {
  * "dominate" outer-more handlers.
  */
 void GraphBuilder::linkExBlocks() {
-  const Func::EHEntVec& ehtab = m_func->ehtab();
   // For every block, add edges to reachable fault and catch handlers.
   for (LinearBlocks i = linearBlocks(m_graph); !i.empty(); ) {
     Block* b = i.popFront();
     assert(m_func->findEH(offset(b->start)) == m_func->findEH(offset(b->last)));
     Offset off = offset(b->start);
-    int exn_index = 0;
-    for (const EHEnt* eh = m_func->findEH(off); eh != 0; ) {
+    const EHEnt* eh = m_func->findEH(off);
+    if (eh != nullptr) {
       assert(eh->m_base <= off && off < eh->m_past);
-      if (eh->m_type == EHEnt::Type::Catch) {
-        // each catch block is reachable from b
-        for (auto const& j : eh->m_catches) {
-          exns(b)[exn_index++] = at(j.second);
-        }
-        eh = nextOuter(ehtab, eh);
-      } else {
-        // this is the innermost fault funclet reachable from b.
-        exns(b)[exn_index++] = at(eh->m_fault);
-        break;
-      }
-    }
-    if (peek_op(b->last) == OpUnwind) {
-      // We're in a fault funclet.  Find which one, then add edges
-      // to reachable catches and the enclosing fault funclet, if any.
-      const EHEnt* eh = findFunclet(ehtab, offset(b->last));
-      eh = nextOuter(ehtab, eh);
-      while (eh) {
-        if (eh->m_type == EHEnt::Type::Catch) {
-          // each catch target for eh is reachable from b
-          for (auto const& j : eh->m_catches) {
-            exns(b)[exn_index++] = at(j.second);
-          }
-          eh = nextOuter(ehtab, eh);
-        } else {
-          // eh is the innermost fault funclet reachable from b.
-          exns(b)[exn_index++] = at(eh->m_fault);
-          break;
-        }
-      }
+      // the innermost exception handler is reachable from b
+      b->exn = at(eh->m_handler);
     }
   }
 }
@@ -217,14 +163,6 @@ Block** GraphBuilder::succs(Block* b) {
     memset(s, 0, sizeof(*s) * num_succs);
   }
   return b->succs;
-}
-
-Block** GraphBuilder::exns(Block* b) {
-  if (!b->exns) {
-    Block** e = b->exns = new (m_arena) Block*[m_graph->exn_cap];
-    memset(e, 0, sizeof(*e) * m_graph->exn_cap);
-  }
-  return b->exns;
 }
 
 Block* GraphBuilder::createBlock(PC pc) {
@@ -284,7 +222,7 @@ RpoSort::RpoSort(Graph* g) : g(g), rpo_id(0) {
 void RpoSort::visit(Block* b) {
   if (visited[b->id]) return;
   visited[b->id] = true;
-  for (BlockPtrRange i = exnBlocks(g, b); !i.empty(); ) visit(i.popBack());
+  if (b->exn) visit(b->exn);
   for (BlockPtrRange i = succBlocks(b); !i.empty(); ) visit(i.popBack());
   b->next_rpo = g->first_rpo;
   g->first_rpo = b;

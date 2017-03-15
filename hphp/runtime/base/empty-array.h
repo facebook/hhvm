@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,7 +48,7 @@ struct ArrayLval;
  * Other arrays may also be empty in the sense that size() == 0, but
  * this one is dealt with commonly enough to deserve special handlers.
  */
-struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
+struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
   static void Release(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t) {
     return nullptr;
@@ -79,11 +79,11 @@ struct EmptyArray final: type_scan::MarkCountable<EmptyArray> {
     return false;
   }
   static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
+  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
+  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static ArrayLval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);

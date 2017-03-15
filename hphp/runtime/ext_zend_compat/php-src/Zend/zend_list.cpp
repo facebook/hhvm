@@ -88,17 +88,6 @@ namespace HPHP {
         raw_ptr_is_resource{true} { ptr->incRefCount(); }
     ~ZendResourceWrapper();
 
-    template <typename M> void scan(M& mark) const {
-      if (raw_ptr_is_resource) {
-        // We know exactly what it is, so mark exactly.
-        mark(static_cast<ResourceData*>(raw_ptr));
-      } else {
-        // Otherwise, we don't know, and raw_ptr could point to an arbitrary
-        // type, counted or not, so scan it conservatively.
-        mark(&raw_ptr, sizeof(void*));
-      }
-    }
-
     void* raw_ptr;
     TYPE_SCAN_CONSERVATIVE_FIELD(raw_ptr);
     int id;
@@ -217,7 +206,7 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
   rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type TSRMLS_CC);
 
   if (rsrc_result) {
-    ZVAL_RESOURCE(rsrc_result, rsrc_id);
+    ZVAL_RESOURCE_CC(rsrc_result, rsrc_id);
   }
 
   return rsrc_id;

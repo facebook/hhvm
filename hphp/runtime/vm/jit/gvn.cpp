@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,7 +251,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvIntToDbl:
   case ConvBoolToInt:
   case ConvDblToInt:
-  case ConvBoolToStr:
   case ConvClsToCctx:
   case GtInt:
   case GteInt:
@@ -355,8 +354,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdContActRec:
   case LdAFWHActRec:
   case LdResumableArObj:
-  case LdPackedArrayElemAddr:
-  case LdVecElemAddr:
+  case LdPackedArrayDataElemAddr:
   case OrdStr:
   case ChrInt:
   case CheckRange:
@@ -364,6 +362,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountVec:
   case CountDict:
   case CountKeyset:
+  case Select:
     return true;
   default:
     return false;

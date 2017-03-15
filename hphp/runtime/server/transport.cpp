@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -194,9 +194,10 @@ void Transport::parsePostParams() {
     size_t size;
     const char *data = (const char *)getPostData(size);
     if (data && *data && size) {
-      // Post data may be binary, but if parsePostParams() is called, it is
-      // correct to handle it as a null-terminated string
-      m_postData = strdup(data);
+      // Post data may be binary, but if parsePostParams() is called, any
+      // wellformed data cannot have embedded NULs. If it does, we simply
+      // truncate it.
+      m_postData = strndup(data, size);
       parseQuery(m_postData, m_postParams);
     }
     m_postDataParsed = true;
@@ -1103,7 +1104,7 @@ void Transport::onSendEnd() {
     m_compressionDecision = CompressionDecision::ShouldNot;
     sendRawInternal("", 0);
   }
-  auto httpResponseStats = ServiceData::createTimeseries(
+  auto httpResponseStats = ServiceData::createTimeSeries(
     folly::to<std::string>(HTTP_RESPONSE_STATS_PREFIX, getResponseCode()),
     {ServiceData::StatsType::SUM});
   httpResponseStats->addValue(1);

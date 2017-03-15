@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,10 +34,10 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-std::aligned_storage<
-  SetArray::ComputeAllocBytes(SetArray::SmallScale),
-  folly::constexpr_max(alignof(SetArray), size_t(16))
->::type s_theEmptySetArray;
+static_assert(SetArray::ComputeAllocBytes(SetArray::SmallScale) ==
+              kEmptySetArraySize, "");
+
+std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 struct SetArray::Initializer {
   Initializer() {
@@ -46,7 +46,7 @@ struct SetArray::Initializer {
     InitHash(hash, SetArray::SmallScale);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = SetArray::SmallScale;
-    ad->m_hdr.init(HeaderKind::Keyset, StaticValue);
+    ad->initHeader(HeaderKind::Keyset, StaticValue);
   }
 };
 SetArray::Initializer SetArray::s_initializer;
@@ -69,7 +69,9 @@ SetArray* keysetReqAllocSet(uint32_t scale) {
 
 SetArray* keysetStaticAllocSet(uint32_t scale) {
   auto const allocBytes = SetArray::ComputeAllocBytes(scale);
-  return static_cast<SetArray*>(std::malloc(allocBytes));
+  return static_cast<SetArray*>(RuntimeOption::EvalLowStaticArrays ?
+                                low_malloc_data(allocBytes) :
+                                malloc(allocBytes));
 }
 
 } // namespace
@@ -122,7 +124,7 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   assert(ClearElms(SetData(ad), Capacity(scale)));
   InitHash(hash, scale);
 
-  ad->m_hdr.init(HeaderKind::Keyset, 1);
+  ad->initHeader(HeaderKind::Keyset, 1);
   ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
@@ -166,7 +168,8 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   assertx(!a->empty());
   auto const scale = a->scale();
   auto const used = a->m_used;
-  char* mem = static_cast<char*>(std::malloc(extra + ComputeAllocBytes(scale)));
+  char* mem =
+    static_cast<char*>(malloc_huge(extra + ComputeAllocBytes(scale)));
   auto const ad = reinterpret_cast<SetArray*>(mem + extra);
 
   assert((extra % 16) == 0);
@@ -175,7 +178,7 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   memcpy16_inline(ad, a, sizeof(SetArray) + sizeof(Elm) * used);
   assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
   CopyHash(SetHashTab(ad, scale), a->hashTab(), scale);
-  ad->m_hdr.count = UncountedValue;
+  ad->m_count = UncountedValue;
 
   // Make sure all strings are uncounted.
   auto const elms = a->data();
@@ -209,7 +212,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
   CopyHash(SetHashTab(ad, scale), other.hashTab(), scale);
   RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
-  ad->m_hdr.init(HeaderKind::Keyset, count);
+  ad->initHeader(HeaderKind::Keyset, count);
 
   // Bump refcounts.
   auto const elms = other.data();
@@ -220,7 +223,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     tvRefcountedIncRef(&elm.tv);
   }
 
-  assert(ad->m_hdr.kind == HeaderKind::Keyset);
+  assert(ad->m_kind == HeaderKind::Keyset);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(mode == AllocMode::Request ?
@@ -341,7 +344,7 @@ void SetArray::ReleaseUncounted(ArrayData* in, size_t extra) {
       });
     }
   }
-  std::free(reinterpret_cast<char*>(ad) - extra);
+  free_huge(reinterpret_cast<char*>(ad) - extra);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -456,7 +459,7 @@ void SetArray::insert(int64_t k, inthash_t h) {
     elm->setIntKey(k, h);
   }
 }
-void SetArray::insert(int64_t k) { return insert(k, hashint(k)); }
+void SetArray::insert(int64_t k) { return insert(k, hash_int64(k)); }
 
 void SetArray::insert(StringData* k, strhash_t h) {
   assert(!isFull());
@@ -549,7 +552,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   auto const oldUsed = m_used;
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
-  ad->m_hdr.init(m_hdr, 1);
+  ad->initHeader(*this, 1);
   assert(reinterpret_cast<uintptr_t>(SetData(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
   memcpy16_inline(SetData(ad), data(), sizeof(Elm) * oldUsed);
@@ -569,7 +572,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   assert(ad->kind() == kind());
   assert(ad->m_size == m_size);
   assert(ad->m_scale == newScale);
-  assert(ad->m_used = oldUsed);
+  assert(ad->m_used == oldUsed);
   assert(ad->checkInvariants());
   return ad;
 }
@@ -737,7 +740,7 @@ const TypedValue* SetArray::tvOfPos(uint32_t pos) const {
 
 const TypedValue* SetArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto a = asSet(ad);
-  auto i = a->find(ki, hashint(ki));
+  auto i = a->find(ki, hash_int64(ki));
   if (LIKELY(i >= 0)) {
     return a->tvOfPos(i);
   } else {
@@ -792,7 +795,7 @@ bool SetArray::IsVectorData(const ArrayData*) {
 
 bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
   auto a = asSet(ad);
-  return a->find(k, hashint(k)) != -1;
+  return a->find(k, hash_int64(k)) != -1;
 }
 
 bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
@@ -853,7 +856,7 @@ ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell, bool) {
 ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asSet(ad);
   if (copy) a = a->copySet();
-  auto const h = hashint(k);
+  auto const h = hash_int64(k);
   if (auto const loc = a->findHash<FindType::Remove>(k, h)) {
     a->erase(loc);
   }
@@ -903,13 +906,13 @@ bool SetArray::AdvanceMArrayIter(ArrayData*, MArrayIter&) {
   );
 }
 
-void SetArray::SortThrow(ArrayData*, int, bool) {
+void SetArray::Sort(ArrayData*, int, bool) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (sort)"
   );
 }
 
-bool SetArray::USortThrow(ArrayData*, const Variant&) {
+bool SetArray::Usort(ArrayData*, const Variant&) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (usort)"
   );
@@ -956,33 +959,9 @@ ArrayData* SetArray::AppendRef(ArrayData* ad, Variant&, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData* others) {
-  for (ArrayIter it(others); !it.end(); it.next()) {
-    Variant key = it.first();
-    auto tv = key.asTypedValue();
-    if (!isIntType(tv->m_type) && !isStringType(tv->m_type)) {
-      throwInvalidArrayKeyException(tv, ad);
-    }
-  }
-  auto a = asSet(ad);
-  auto const neededSize = a->size() + others->size();
-  if (a->cowCheck()) {
-    a = CopyReserve(a, neededSize);
-  }
-  for (ArrayIter it(others); !it.end(); it.next()) {
-    if (UNLIKELY(a->isFull())) {
-      assert(a == ad);
-      a = CopyReserve(a, neededSize);
-    }
-    Variant key = it.first();
-    auto tv = key.asTypedValue();
-    if (isIntType(tv->m_type)) {
-      a->insert(tv->m_data.num);
-    } else {
-      a->insert(tv->m_data.pstr);
-    }
-  }
-  return a;
+ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {
+  assertx(asSet(ad)->checkInvariants());
+  throwInvalidAdditionException(ad);
 }
 
 ArrayData* SetArray::Merge(ArrayData*, const ArrayData*) {
@@ -1042,7 +1021,7 @@ ArrayData* SetArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   Elm e;
   assert(ClearElms(&e, 1));
   if (isIntType(v.m_type)) {
-    e.setIntKey(v.m_data.num, hashint(v.m_data.num));
+    e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
   } else if (isStringType(v.m_type)) {
     e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
   } else {
@@ -1079,14 +1058,7 @@ void SetArray::OnSetEvalScalar(ArrayData* ad) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    StringData*& skey = elm.tv.m_data.pstr;
-    if (elm.hasStrKey() && !skey->isStatic()) {
-      if (auto const st = lookupStaticString(skey)) {
-        skey = st;
-      } else {
-        skey = StringData::MakeUncounted(skey->slice());
-      }
-    }
+    tvAsVariant(&elm.tv).setEvalScalar();
   }
 }
 
@@ -1108,9 +1080,15 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     if (elm.hasIntKey()) {
-      init.add(elm.intKey(), tvAsCVarRef(&elm.tv), /* keyConverted */ true);
+      init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
-      init.add(elm.strKey(), tvAsCVarRef(&elm.tv), /* keyConverted */ true);
+      auto const key = elm.strKey();
+      int64_t n;
+      if (key->isStrictlyInteger(n)) {
+        init.set(n, VarNR{n});
+      } else {
+        init.set(key, tvAsCVarRef(&elm.tv));
+      }
     }
   }
 

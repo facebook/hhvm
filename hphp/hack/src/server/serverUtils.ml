@@ -27,7 +27,6 @@ let hh_monitor_config root = ServerMonitorUtils.({
   server_log_file = ServerFiles.log_link root;
   monitor_log_file = ServerFiles.monitor_log_link root;
   load_script_log_file = ServerFiles.load_log root;
-  on_server_exit = fun _ -> ();
 })
 
 let shut_down_server root =
@@ -45,3 +44,64 @@ let die_nicely () =
    * pipe and then exit with SIGPIPE, so it is unnecessary to kill it
    * explicitly *)
   exit 0
+
+let print_hash_stats () =
+  let { SharedMem.
+    used_slots;
+    slots;
+    nonempty_slots = _ } = SharedMem.dep_stats () in
+  let load_factor = float_of_int used_slots /. float_of_int slots in
+  Hh_logger.log "Dependency table load factor: %d / %d (%.02f)"
+    used_slots slots load_factor;
+  let { SharedMem.
+    used_slots;
+    slots;
+    nonempty_slots } = SharedMem.hash_stats () in
+  let load_factor = float_of_int used_slots /. float_of_int slots in
+  Hh_logger.log
+    "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
+    used_slots slots load_factor nonempty_slots;
+  ()
+
+let with_exit_on_exception f =
+  try f () with
+  | SharedMem.Out_of_shared_memory ->
+    print_hash_stats ();
+    Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
+    Exit_status.(exit Out_of_shared_memory)
+  | SharedMem.Hash_table_full ->
+    print_hash_stats ();
+    Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
+    Exit_status.(exit Hash_table_full)
+  | Worker.Worker_oomed as e->
+    Hh_logger.exc e;
+    Exit_status.(exit Worker_oomed)
+  | Worker.Worker_busy as e ->
+    Hh_logger.exc e;
+    Exit_status.(exit Worker_busy)
+  | (Worker.Worker_exited_abnormally i) as e ->
+    Hh_logger.exc e;
+    (** Exit with the same exit code that that worker used. *)
+    exit i
+  | Worker.Worker_failed_to_send_job _ as e->
+    Hh_logger.exc e;
+    Exit_status.(exit Worker_failed_to_send_job)
+  | File_heap.File_heap_stale ->
+    Exit_status.(exit File_heap_stale)
+  | Decl_class.Decl_heap_elems_bug ->
+    Exit_status.(exit Decl_heap_elems_bug)
+  | SharedMem.C_assertion_failure _ as e ->
+    Hh_logger.exc e;
+    Exit_status.(exit Shared_mem_assertion_failure)
+  | SharedMem.Sql_assertion_failure err_num as e ->
+    Hh_logger.exc e;
+    let exit_code = match err_num with
+      | 11 -> Exit_status.Sql_corrupt
+      | 14 -> Exit_status.Sql_cantopen
+      | 21 -> Exit_status.Sql_misuse
+      | _ -> Exit_status.Sql_assertion_failure
+    in
+    Exit_status.exit exit_code
+  | e ->
+    Hh_logger.exc e;
+    Exit_status.(exit Uncaught_exception)

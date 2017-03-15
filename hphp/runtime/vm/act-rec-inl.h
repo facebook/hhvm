@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,9 +16,7 @@
 
 #include "hphp/util/compilation-flags.h"
 
-#ifndef NDEBUG
 #include "hphp/runtime/vm/func.h"
-#endif
 
 namespace HPHP {
 
@@ -26,6 +24,18 @@ namespace HPHP {
 
 inline const Func* ActRec::func() const {
   return m_func;
+}
+
+inline const Unit* ActRec::unit() const {
+  func()->validate();
+  return func()->unit();
+}
+
+inline ActRec* ActRec::sfp() const {
+  if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
+    return nullptr;
+  }
+  return m_sfp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,7 +34,7 @@ struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArray final : private ArrayData,
+struct MixedArray final : ArrayData,
                           type_scan::MarkCountable<MixedArray> {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
@@ -105,20 +105,21 @@ struct MixedArray final : private ArrayData,
 
     void setIntKey(int64_t k, inthash_t h) {
       ikey = k;
-      data.hash() = h | STRHASH_MSB;
+      data.hash() = static_cast<int32_t>(h) | STRHASH_MSB;
       assert(hasIntKey());
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
+      static_assert(static_cast<int32_t>(STRHASH_MSB) < 0,
+                    "high bit indicates int key");
     }
 
     bool isTombstone() const {
       return MixedArray::isTombstone(data.m_type);
     }
 
-    template<class F> void scan(F& mark) const {
-      if (!isTombstone()) {
-        if (hasStrKey()) mark(skey);
-        mark(data);
-      }
+    TYPE_SCAN_CUSTOM() {
+      // if data is a Tombstone, the TypedValue scanner will ignore it
+      static_assert(!isRefcountedType(kInvalidDataType), "");
+      if (hasStrKey()) scanner.scan(skey);
+      scanner.scan(data);
     }
 
     static constexpr ptrdiff_t keyOff() {
@@ -127,6 +128,9 @@ struct MixedArray final : private ArrayData,
     static constexpr ptrdiff_t dataOff() {
       return offsetof(Elm, data);
     }
+    static constexpr ptrdiff_t hashOff() {
+      return offsetof(Elm, data) + offsetof(TypedValue, m_aux);
+    }
   };
 
   static constexpr ptrdiff_t dataOff() {
@@ -134,6 +138,9 @@ struct MixedArray final : private ArrayData,
   }
   static constexpr ptrdiff_t usedOff() {
     return offsetof(MixedArray, m_used);
+  }
+  static constexpr ptrdiff_t scaleOff() {
+    return offsetof(MixedArray, m_scale);
   }
 
   static constexpr ptrdiff_t elmOff(uint32_t pos) {
@@ -149,11 +156,10 @@ struct MixedArray final : private ArrayData,
       StringData* skey;
       int64_t ikey;
     };
-    hash_t hash;
+    int32_t hash;
 
-    TYPE_SCAN_CUSTOM() {
-      if (hash < 0) scanner.enqueue(skey);
-      static_assert(STRHASH_MSB < 0, "using strhash_t = int32_t");
+    TYPE_SCAN_CUSTOM_FIELD(skey) {
+      if (hash < 0) scanner.scan(skey);
     }
   };
 
@@ -194,6 +200,13 @@ struct MixedArray final : private ArrayData,
   static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
 
   /*
+   * Allocates a new request-local array with given key,value,key,value,... in
+   * natural order. Returns nullptr if there are duplicate keys. Does not check
+   * for integer-like keys. Takes ownership of keys and values iff successful.
+   */
+  static MixedArray* MakeMixed(uint32_t size, const TypedValue* keysAndValues);
+
+  /*
    * Like MakePacked, but given static strings, make a struct-like array.
    * Also requires size > 0.
    */
@@ -232,6 +245,23 @@ struct MixedArray final : private ArrayData,
   static bool DictSame(const ArrayData*, const ArrayData*);
   static bool DictNotSame(const ArrayData*, const ArrayData*);
 
+  /*
+   * Memoization interface.
+   *
+   * Both functions take a current base (which should either be a memoization
+   * cache, or a RefData pointing to one), a pointer to a contiguous range of
+   * keys to use for the lookup, and the length of the range. The length should
+   * always be at least one.
+   *
+   * MemoGet will return the stored value corresponding to the keys, or
+   * KindOfUninit if not found.
+   *
+   * MemoSet will store the given Cell at the location corresponding to the
+   * keys, updating the base if the underlying dicts are mutated.
+   */
+  static Cell MemoGet(const TypedValue*, const Cell*, uint32_t);
+  static void MemoSet(TypedValue*, const Cell*, uint32_t, Cell);
+
   using ArrayData::decRefCount;
   using ArrayData::hasMultipleRefs;
   using ArrayData::hasExactlyOneRef;
@@ -264,18 +294,6 @@ private:
   using ArrayData::nvGet;
   using ArrayData::release;
 
-  static const TypedValue* NvTryGetIntHackArr(const ArrayData*, int64_t);
-  static const TypedValue* NvTryGetStrHackArr(const ArrayData*,
-                                              const StringData*);
-
-  static ArrayLval LvalIntRefHackArr(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStrRefHackArr(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNewRefHackArr(ArrayData*, bool);
-  static ArrayData* SetRefIntHackArr(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrHackArr(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefHackArr(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefHackArr(ArrayData*, const Variant&, bool);
-
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
 
@@ -295,11 +313,11 @@ public:
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static ArrayLval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
+  static ArrayLval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
   static ArrayLval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
+  static ArrayLval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
   static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static ArrayLval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
@@ -347,9 +365,9 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static constexpr auto NvTryGetIntDict = &NvTryGetIntHackArr;
+  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t);
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static constexpr auto NvTryGetStrDict = &NvTryGetStrHackArr;
+  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
@@ -385,13 +403,13 @@ public:
   static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static constexpr auto LvalIntRefDict = &LvalIntRefHackArr;
-  static constexpr auto LvalStrRefDict = &LvalStrRefHackArr;
-  static constexpr auto LvalNewRefDict = &LvalNewRefHackArr;
-  static constexpr auto SetRefIntDict = &SetRefIntHackArr;
-  static constexpr auto SetRefStrDict = &SetRefStrHackArr;
-  static constexpr auto AppendRefDict = &AppendRefHackArr;
-  static constexpr auto AppendWithRefDict = &AppendWithRefHackArr;
+  static ArrayLval LvalIntRefDict(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStrRefDict(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNewRefDict(ArrayData*, bool);
+  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
+  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -488,6 +506,8 @@ private:
   enum class CloneMixed {};
 
   friend size_t getMemSize(const ArrayData*);
+  template <typename AccessorT, class ArrayT>
+  friend SortFlavor genericPreSort(ArrayT&, const AccessorT&, bool);
 
 public:
   // Safe downcast helpers
@@ -565,10 +585,6 @@ private:
   static ArrayData* ArrayPlusEqGeneric(ArrayData*, MixedArray*,
                                        const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
-
-  template <class AppendFunc>
-  static ArrayData* AppendWithRefNoRef(ArrayData*, const Variant&,
-                                       bool, AppendFunc);
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);
@@ -726,7 +742,7 @@ private:
   void setZombie() { m_used = -uint32_t{1}; }
 
 public:
-  template<class F> void scan(F&) const; // in mixed-array-defs.h
+  void scan(type_scan::Scanner&) const; // in mixed-array-defs.h
 
 private:
   struct Initializer;
@@ -744,24 +760,14 @@ private:
   int64_t  m_nextKI;        // Next integer key to use for append.
 };
 
-inline constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
-  return size_t(mask) - size_t(mask) / LoadScale;
+ALWAYS_INLINE constexpr size_t MixedArray::computeMaxElms(uint32_t mask) {
+  return mask - mask / LoadScale;
 }
 
 ALWAYS_INLINE constexpr size_t computeAllocBytes(uint32_t scale) {
   return sizeof(MixedArray) +
          MixedArray::HashSize(scale) * sizeof(int32_t) +
          MixedArray::Capacity(scale) * sizeof(MixedArray::Elm);
-}
-
-extern std::aligned_storage<
-  computeAllocBytes(1),
-  folly::constexpr_max(alignof(MixedArray), size_t(16))
->::type s_theEmptyDictArray;
-
-ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
-  void* vp = &s_theEmptyDictArray;
-  return static_cast<ArrayData*>(vp);
 }
 
 ALWAYS_INLINE Array empty_dict_array() {

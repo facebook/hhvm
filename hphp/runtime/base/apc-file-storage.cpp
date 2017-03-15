@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/timer.h"
 
 #include "hphp/runtime/base/apc-stats.h"
@@ -30,7 +31,7 @@
 #include <folly/portability/SysMman.h>
 
 #if !defined(HAVE_POSIX_FALLOCATE) && \
-  (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L || defined(__CYGWIN__))
+  (_XOPEN_SOURCE >= 600 || _POSIX_C_SOURCE >= 200112L)
 # define HAVE_POSIX_FALLOCATE 1
 #endif
 
@@ -45,14 +46,8 @@ void APCFileStorage::enable(const std::string& prefix, size_t chunkSize) {
   if (chunkSize <= PaddingSize) return;
   m_prefix = prefix;
   m_chunkSize = chunkSize;
+  assert(m_chunkSize < ~uint32_t(0));  // Must fit in low 32 bits of m_current.
   if (m_state != StorageState::Invalid) {
-    return;
-  }
-  if (!addFile()) {
-    Logger::Error(
-        "Failed to open initial file for file-backed APC storage, "
-        "falling back to in-memory mode");
-    m_state = StorageState::Full;
     return;
   }
   m_state = StorageState::Open;
@@ -63,10 +58,11 @@ char* APCFileStorage::put(const char* data, uint32_t len) {
   if (m_state != StorageState::Open || totalLen > m_chunkSize) {
     return nullptr;
   }
-  assert(!m_chunks.empty());
 
   auto maxOffset = m_chunkSize - totalLen;
   auto current = m_current.load(std::memory_order_relaxed);
+  // m_current is intialized to -1 to postpone allocation to first 'put'.
+  assert(!m_chunks.empty() || current == ~0ull);
   do {
     if (UNLIKELY(static_cast<uint32_t>(current) > maxOffset)) {
       std::lock_guard<std::mutex> lock(m_lock);

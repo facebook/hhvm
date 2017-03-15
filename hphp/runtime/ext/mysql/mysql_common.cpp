@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -631,21 +631,7 @@ static void mysql_set_ssl_options(
   if (!ssl_provider || !mySQL || mySQL->get() == nullptr) {
     return;
   }
-  auto ssl_context = ssl_provider->getSSLContext();
-  if (!ssl_context) {
-    return; // shouldn't happen
-  }
-
-  MYSQL* conn = mySQL->get();
-  mysql_options(conn, MYSQL_OPT_SSL_CONTEXT, ssl_context->getSSLCtx());
-  auto ssl_session = ssl_provider->getSSLSession();
-  if (ssl_session) {
-    mysql_options4(
-        conn,
-        MYSQL_OPT_SSL_SESSION,
-        ssl_session,
-        (void*)1 /* take ownership */);
-  }
+  ssl_provider->setMysqlSSLOptions(mySQL->get());
 }
 
 static void mysql_store_ssl_session(
@@ -654,14 +640,7 @@ static void mysql_store_ssl_session(
   if (!ssl_provider || !mySQL || mySQL->get() == nullptr) {
     return;
   }
-  MYSQL* conn = mySQL->get();
-  // if we reused the session it means we already have it, no need to store
-  if (!mysql_get_ssl_session_reused(conn)) {
-    wangle::SSLSessionPtr session((SSL_SESSION*)mysql_get_ssl_session(conn));
-    if (session) {
-      ssl_provider->storeSSLSession(std::move(session));
-    }
-  }
+  ssl_provider->storeMysqlSSLSession(mySQL->get());
 }
 
 Variant php_mysql_do_connect_on_link(
@@ -1594,8 +1573,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
           preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is", query);
         if (!same(ret, false)) {
           MYSQL *new_conn = create_new_conn();
-          IOStatusHelper io("mysql::kill", rconn->m_host.c_str(),
-                            rconn->m_port);
+          IOStatusHelper io2("mysql::kill", rconn->m_host.c_str(),
+                             rconn->m_port);
           MYSQL *connected = mysql_real_connect
             (new_conn, rconn->m_host.c_str(), rconn->m_username.c_str(),
              rconn->m_password.c_str(), nullptr, rconn->m_port, nullptr, 0);

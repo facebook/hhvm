@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include <atomic>
 #include <vector>
 
-#if !defined(__CYGWIN__) && !defined(_MSC_VER)
+#ifndef _MSC_VER
 #include <execinfo.h>
 #endif
 
@@ -36,10 +36,12 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/maphuge.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/debug/debug.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 
 namespace HPHP { namespace rds {
@@ -66,6 +68,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
   std::string operator()(StaticMethod k) const { return "StaticMethod"; }
   std::string operator()(StaticMethodF k) const { return "StaticMethodF"; }
   std::string operator()(Profile k) const { return "Profile"; }
+  std::string operator()(SPropCache k) const { return "SPropCache"; }
 };
 
 struct SymbolRep : boost::static_visitor<std::string> {
@@ -96,6 +99,10 @@ struct SymbolRep : boost::static_visitor<std::string> {
       k.transId,
       k.bcOff
     ).str();
+  }
+  std::string operator()(SPropCache k) const {
+    return k.cls->name()->toCppString() + "::" +
+           k.cls->staticProperties()[k.slot].name->toCppString();
   }
 };
 
@@ -134,6 +141,10 @@ struct SymbolEq : boost::static_visitor<bool> {
     assert(t1.name->isStatic() && t2.name->isStatic());
     return t1.name->isame(t2.name);
   }
+
+  bool operator()(SPropCache k1, SPropCache k2) const {
+    return k1.cls == k2.cls && k1.slot == k2.slot;
+  }
 };
 
 struct SymbolHash : boost::static_visitor<size_t> {
@@ -161,6 +172,13 @@ struct SymbolHash : boost::static_visitor<size_t> {
 
   size_t operator()(StaticMethod k)  const { return k.name->hash(); }
   size_t operator()(StaticMethodF k) const { return k.name->hash(); }
+
+  size_t operator()(SPropCache k) const {
+    return folly::hash::hash_combine(
+      k.cls, k.slot
+    );
+  }
+
 };
 
 struct HashCompare {
@@ -213,6 +231,7 @@ size_t s_local_frontier = 0;
 Link<GenNumber> g_current_gen_link{kInvalidHandle};
 
 AllocDescriptorList s_normal_alloc_descs;
+AllocDescriptorList s_local_alloc_descs;
 
 /*
  * Round base up to align, which must be a power of two.
@@ -269,16 +288,18 @@ Handle alloc(Mode mode, size_t numBytes,
     case Mode::Normal: {
       align = folly::nextPowTwo(std::max(align, alignof(GenNumber)));
       auto const prefix = roundUp(sizeof(GenNumber), align);
-      auto const adjustedBytes = numBytes + prefix;
-      always_assert(align <= adjustedBytes);
+      auto const adjBytes = numBytes + prefix;
+      always_assert(align <= adjBytes);
 
-      if (auto free = findFreeBlock(s_normal_free_lists, adjustedBytes, align)) {
+      if (auto free = findFreeBlock(s_normal_free_lists, adjBytes, align)) {
         auto const begin = *free;
         addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
         auto const handle = begin + prefix;
-        s_normal_alloc_descs.push_back(
-          AllocDescriptor{Handle(handle), numBytes, tyIndex}
-        );
+        if (type_scan::hasScanner(tyIndex)) {
+          s_normal_alloc_descs.push_back(
+            AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
+          );
+        }
         return handle;
       }
 
@@ -287,7 +308,7 @@ Handle alloc(Mode mode, size_t numBytes,
 
       addFreeBlock(s_normal_free_lists, oldFrontier,
                   s_normal_frontier - oldFrontier);
-      s_normal_frontier += adjustedBytes;
+      s_normal_frontier += adjBytes;
       if (debug && !jit::VMProtect::is_protected) {
         memset(
           (char*)(tl_base) + oldFrontier,
@@ -300,14 +321,16 @@ Handle alloc(Mode mode, size_t numBytes,
         "Ran out of RDS space (mode=Normal)"
       );
 
-      auto const begin = s_normal_frontier - adjustedBytes;
+      auto const begin = s_normal_frontier - adjBytes;
       addFreeBlock(s_normal_free_lists, begin, prefix - sizeof(GenNumber));
 
       auto const handle = begin + prefix;
 
-      s_normal_alloc_descs.push_back(
-        AllocDescriptor{Handle(handle), numBytes, tyIndex}
-      );
+      if (type_scan::hasScanner(tyIndex)) {
+        s_normal_alloc_descs.push_back(
+          AllocDescriptor{Handle(handle), uint32_t(numBytes), tyIndex}
+        );
+      }
       return handle;
     }
     case Mode::Persistent: {
@@ -346,7 +369,11 @@ Handle alloc(Mode mode, size_t numBytes,
         frontier >= s_normal_frontier,
         "Ran out of RDS space (mode=Local)"
       );
-
+      if (type_scan::hasScanner(tyIndex)) {
+        s_local_alloc_descs.push_back(
+          AllocDescriptor{Handle(frontier), uint32_t(numBytes), tyIndex}
+        );
+      }
       return frontier;
     }
   }
@@ -606,7 +633,7 @@ void threadInit(bool shouldRegister) {
     "Failed to mmap persistent RDS region. errno = {}",
     folly::errnoStr(errno).c_str()
   );
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   // MapViewOfFileEx() requires "the specified memory region is not already in
   // use by the calling process" when mapping the shared area below. Otherwise
   // it will return MAP_FAILED. We first map the full size to make sure the
@@ -678,13 +705,26 @@ void threadExit(bool shouldUnregister) {
       (char*)tl_base + RuntimeOption::EvalJitTargetCacheSize,
       "-rds");
   }
-#if defined(__CYGWIN__) || defined(_MSC_VER)
-  munmap(tl_base, s_persistent_base);
-  munmap((char*)tl_base + s_persistent_base,
-         RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
+
+  auto const base = tl_base;
+  auto do_unmap = [base] {
+#ifdef _MSC_VER
+    munmap(base, s_persistent_base);
+    munmap((char*)base + s_persistent_base,
+           RuntimeOption::EvalJitTargetCacheSize - s_persistent_base);
 #else
-  munmap(tl_base, RuntimeOption::EvalJitTargetCacheSize);
+    munmap(base, RuntimeOption::EvalJitTargetCacheSize);
 #endif
+  };
+
+  // Other requests may be reading from this rds section via the s_tlBaseList.
+  // We just removed ourself from the list now, but defer the unmap until after
+  // any outstanding requests have completed.
+  if (shouldUnregister) {
+    Treadmill::enqueue(std::move(do_unmap));
+  } else {
+    do_unmap();
+  }
 }
 
 void recordRds(Handle h, size_t size,

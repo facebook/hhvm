@@ -154,7 +154,7 @@ and toplevel acc env =
               Ast.NSClass cname in
           let newacc = {
             acc with
-              classes = elaborated::acc.classes
+              classes = (FileInfo.pos_full elaborated)::acc.classes
           } in
           toplevel newacc env
       | "function" ->
@@ -165,7 +165,7 @@ and toplevel acc env =
               Ast.NSFun fname in
           let newacc = {
             acc with
-              funs = elaborated::acc.funs
+              funs = (FileInfo.pos_full elaborated)::acc.funs
           } in
           toplevel newacc env
 

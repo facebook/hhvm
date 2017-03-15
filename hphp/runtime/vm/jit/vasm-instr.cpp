@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -93,7 +93,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::ldimmw:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
-    case Vinstr::ldimmqs:
     case Vinstr::load:
     case Vinstr::store:
     case Vinstr::mcprep:
@@ -118,7 +117,8 @@ Width width(Vinstr::Opcode op) {
     // php function abi
     case Vinstr::defvmsp:
     case Vinstr::syncvmsp:
-    case Vinstr::defvmret:
+    case Vinstr::defvmretdata:
+    case Vinstr::defvmrettype:
     case Vinstr::syncvmret:
     case Vinstr::phplogue:
     case Vinstr::stubtophp:
@@ -139,13 +139,12 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::nothrow:
     case Vinstr::syncpoint:
     case Vinstr::unwind:
-    // arithmetic intrinsics
-    case Vinstr::absdbl:
-    case Vinstr::srem:
-    case Vinstr::divint:
     // nop and trap
     case Vinstr::nop:
     case Vinstr::ud2:
+    // restrict/unrestrict new virtuals
+    case Vinstr::vregrestrict:
+    case Vinstr::vregunrestrict:
     // zero-extending/truncating copies
     case Vinstr::movzbw:
     case Vinstr::movzbl:
@@ -166,11 +165,15 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::jmpi:
     // push/pop
     case Vinstr::pop:
-    case Vinstr::popm:
     case Vinstr::popf:
+    case Vinstr::popm:
+    case Vinstr::popp:
+    case Vinstr::poppm:
     case Vinstr::push:
-    case Vinstr::pushm:
     case Vinstr::pushf:
+    case Vinstr::pushm:
+    case Vinstr::pushp:
+    case Vinstr::pushpm:
     // floating-point conversions
     case Vinstr::cvttsd2siq:
     case Vinstr::cvtsi2sd:
@@ -182,49 +185,17 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::sarq:
     case Vinstr::shlq:
     // arm instructions
-    case Vinstr::addxi:
-    case Vinstr::asrxi:
-    case Vinstr::asrxis:
-    case Vinstr::bln:
-    case Vinstr::cmplims:
-    case Vinstr::cmpsds:
-    case Vinstr::fabs:
-    case Vinstr::lslwi:
-    case Vinstr::lslwis:
-    case Vinstr::lslxi:
-    case Vinstr::lslxis:
-    case Vinstr::lsrwi:
-    case Vinstr::lsrwis:
-    case Vinstr::lsrxi:
-    case Vinstr::lsrxis:
+    case Vinstr::fcvtzs:
     case Vinstr::mrs:
     case Vinstr::msr:
-    case Vinstr::orsw:
-    case Vinstr::orswi:
-    case Vinstr::popp:
-    case Vinstr::pushp:
-    case Vinstr::subsb:
-    case Vinstr::uxth:
     // ppc64 instructions
-    case Vinstr::extrb:
-    case Vinstr::extrw:
     case Vinstr::extsb:
-    case Vinstr::extsw:
+    case Vinstr::extsl:
     case Vinstr::fcmpo:
     case Vinstr::fcmpu:
     case Vinstr::fctidz:
-    case Vinstr::fcvtzs:
-    case Vinstr::ldarx:
-    case Vinstr::mfcr:
     case Vinstr::mflr:
-    case Vinstr::mfvsrd:
     case Vinstr::mtlr:
-    case Vinstr::mtvsrd:
-    case Vinstr::stdcx:
-    case Vinstr::xscvdpsxds:
-    case Vinstr::xscvsxddp:
-    case Vinstr::xxlxor:
-    case Vinstr::xxpermdi:
       return Width::AnyNF;
 
     case Vinstr::andb:
@@ -232,6 +203,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::andbim:
     case Vinstr::notb:
     case Vinstr::orbim:
+    case Vinstr::subb:
     case Vinstr::subbi:
     case Vinstr::xorb:
     case Vinstr::xorbi:
@@ -304,8 +276,9 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::decqmlock:
     case Vinstr::incq:
     case Vinstr::incqm:
-    case Vinstr::incqmlock:
     case Vinstr::imul:
+    case Vinstr::divint:
+    case Vinstr::srem:
     case Vinstr::neg:
     case Vinstr::not:
     case Vinstr::orq:
@@ -345,13 +318,12 @@ Width width(Vinstr::Opcode op) {
       return Width::Octa;
 
     case Vinstr::addsd:
-    case Vinstr::psllq:
-    case Vinstr::psrlq:
     case Vinstr::subsd:
     case Vinstr::cmpsd:
     case Vinstr::ucomisd:
     case Vinstr::loadsd:
     case Vinstr::storesd:
+    case Vinstr::absdbl:
     case Vinstr::divsd:
     case Vinstr::mulsd:
     case Vinstr::roundsd:

@@ -65,7 +65,7 @@ struct HashCollection : ObjectData {
   Array toValuesArray();
 
   bool contains(int64_t key) const {
-    return find(key, hashint(key)) != Empty;
+    return find(key, hash_int64(key)) != Empty;
   }
   bool contains(StringData* key) const {
     return find(key, key->hash()) != Empty;
@@ -281,7 +281,7 @@ struct HashCollection : ObjectData {
   }
 
   TypedValue* findForUnserialize(int64_t k) {
-    auto h = hashint(k);
+    auto h = hash_int64(k);
     auto p = findForInsert(k, h);
     if (UNLIKELY(validPos(*p))) return nullptr;
     auto e = &allocElm(p);
@@ -447,7 +447,7 @@ struct HashCollection : ObjectData {
   }
 
   static bool hitStringKey(const HashCollection::Elm& e,
-                           const StringData* s, int32_t hash) {
+                           const StringData* s, strhash_t hash) {
     // hitStringKey() should only be called on an Elm that is
     // referenced by a hash table entry. HashCollection guarantees
     // that when it adds a hash table entry that it always sets it to
@@ -496,7 +496,7 @@ struct HashCollection : ObjectData {
     }
   }
 
-  ALWAYS_INLINE int32_t* findForNewInsert(hash_t h0) const {
+  ALWAYS_INLINE int32_t* findForNewInsert(size_t h0) const {
     return findForNewInsert(hashTab(), tableMask(), h0);
   }
 
@@ -700,10 +700,9 @@ struct HashCollection : ObjectData {
 
   static bool instanceof(const ObjectData*);
 
-  template<typename F>
-  void scan(F& mark) const {
-    mark(m_arr);
-    mark(m_immCopy);
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_arr);
+    scanner.scan(m_immCopy);
   }
 
  protected:

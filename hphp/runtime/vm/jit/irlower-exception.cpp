@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,13 +41,9 @@ TRACE_SET_MOD(irlower);
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgBeginCatch(IRLS& env, const IRInstruction* inst) {
-  auto const callType = env.catch_calls[inst->block()];
-  always_assert(callType != CatchCall::Uninit &&
-                "Tried to emit BeginCatch with Uninit call type.\n"
-                "Catch blocks must be emitted after their predecessors.");
   auto& v = vmain(env);
 
-  v << landingpad{callType == CatchCall::PHP};
+  v << landingpad{};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
@@ -85,6 +81,15 @@ static void raiseVarEnvDynCall(const Func* func) {
 
 void cgRaiseVarEnvDynCall(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, CallSpec::direct(raiseVarEnvDynCall),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+static void raiseHackArrCompatNotice(const StringData* msg) {
+  raise_hackarr_compat_notice(msg->toCppString());
+}
+
+void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseHackArrCompatNotice),
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 

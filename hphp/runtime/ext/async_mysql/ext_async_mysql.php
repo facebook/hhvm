@@ -133,6 +133,39 @@ final class AsyncMysqlClient {
                                         ): Awaitable<AsyncMysqlConnection>;
 
   /**
+   * Begin an async connection and query  to a MySQL instance.
+   *
+   * Use this to asynchronously connect and query a MySQL instance.
+   *
+   * Normally you would use this to make one query to the
+   * MySQL client.
+   *
+   * If you want to be able to reuse the connection use connect or
+   * connectWithOpts
+   *
+   * @param $host - The hostname to connect to.
+   * @param $port - The port to connect to.
+   * @param $dbname - The initial database to use when connecting.
+   * @param $user - The user to connect as.
+   * @param $password - The password to connect with.
+   * @param $connection_options - A set of options used for connection.
+   *
+   * @return - an `Awaitable` representing the result of your query. Use
+   *           `await` or `join` to get the actual `AsyncMysqlQueryResult`
+   *           object.
+   */
+  <<__HipHopSpecific, __Native>>
+    public static function connectAndQuery(
+                                        array $queries,
+                                        string $host,
+                                        int $port,
+                                        string $dbname,
+                                        string $user,
+                                        string $password,
+                                        AsyncMysqlConnectionOptions $conn_opts,
+                                      ): Awaitable<Vector<AsyncMysqlQueryResult>>;
+
+  /**
    * Create a new async connection from a synchronous MySQL instance.
    *
    * This is a synchronous function. You will block until the connection has

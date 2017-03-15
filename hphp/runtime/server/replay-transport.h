@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,8 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_replay("replay");
 
 /**
  * This transport will capture what's in another transport's requests, and
@@ -52,6 +54,13 @@ struct ReplayTransport final : Transport {
   void removeHeaderImpl(const char *name) override;
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_replay;
+  }
 
   int getResponseCode() const { return m_code;}
   const std::string &getResponse() const { return m_response;}

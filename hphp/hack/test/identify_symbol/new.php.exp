@@ -1,10 +1,18 @@
-\Foo::__construct
-Method
-line 6, characters 3-11
-defined: line 3, characters 7-9
-definition span: line 3, character 1 - line 3, character 12
-\Foo
-Class
-line 6, characters 7-9
-defined: line 3, characters 7-9
-definition span: line 3, character 1 - line 3, character 12
+name: \Foo, kind: type_id, span: line 6, characters 7-9, definition: 
+ Foo
+   kind: class
+   id: type_id::Foo
+   position: line 3, characters 7-9
+   span: line 3, character 1 - line 3, character 12
+   modifiers: 
+
+
+name: \Foo::__construct, kind: method, span: line 6, characters 3-11, definition: 
+ Foo
+   kind: class
+   id: type_id::Foo
+   position: line 3, characters 7-9
+   span: line 3, character 1 - line 3, character 12
+   modifiers: 
+
+

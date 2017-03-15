@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -113,7 +113,7 @@ int Option::GetScannerType() {
 
 bool Option::DumpAst = false;
 bool Option::WholeProgram = true;
-bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC2");
+bool Option::UseHHBBC = !getenv("HHVM_DISABLE_HHBBC");
 bool Option::RecordErrors = true;
 
 bool Option::AllVolatile = false;
@@ -222,12 +222,17 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(HHBBC::options.HardReturnTypeHints, ini, config,
                "HardReturnTypeHints", false);
   Config::Bind(HardConstProp, ini, config, "HardConstProp", true);
+  Config::Bind(HHBBC::options.ElideAutoloadInvokes, ini, config,
+               "ElideAutoloadInvokes", true);
 
   Config::Bind(APCProfile, ini, config, "APCProfile");
 
   Config::Bind(RuntimeOption::EnableHipHopSyntax,
                ini, config, "EnableHipHopSyntax",
                RuntimeOption::EnableHipHopSyntax);
+  Config::Bind(RuntimeOption::EvalPromoteEmptyObject,
+               ini, config, "PromoteEmptyObject",
+               RuntimeOption::EvalPromoteEmptyObject);
   Config::Bind(RuntimeOption::EnableZendCompat, ini, config, "EnableZendCompat",
                RuntimeOption::EnableZendCompat);
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
@@ -334,10 +339,6 @@ void Option::FilterFiles(std::vector<std::string> &files,
 
 void initialize_hhbbc_options() {
   if (!Option::UseHHBBC) return;
-  HHBBC::options.AllFuncsInterceptable  =
-    RuntimeOption::EvalJitEnableRenameFunction;
-  HHBBC::options.InterceptableFunctions = HHBBC::make_method_map(
-    RuntimeOption::DynamicInvokeFunctions);
   HHBBC::options.HardConstProp          = Option::HardConstProp;
   HHBBC::options.DisallowDynamicVarEnvFuncs =
     (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);

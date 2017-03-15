@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@
 
 #ifdef HAVE_NUMA
 #include <sys/prctl.h>
-#include <numa.h>
 #endif
 
 #ifdef __APPLE__
@@ -39,6 +38,7 @@
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
+#include "hphp/util/numa.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -226,17 +226,13 @@ int32_t __thread s_numaNode;
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void enable_numa(bool local) {}
-int next_numa_node() { return 0; }
 void set_numa_binding(int node) {}
-int num_numa_nodes() { return 1; }
-void numa_interleave(void* start, size_t size) {}
-void numa_local(void* start, size_t size) {}
-void numa_bind_to(void* start, size_t size, int node) {}
 #endif
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
 unsigned low_huge1g_arena = 0;
+unsigned high_huge1g_arena = 0;
 std::atomic<int> low_huge_pages(0);
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
@@ -244,58 +240,8 @@ static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
 static const unsigned kHugePageMask = (1 << kLgHugeGranularity) - 1;
 
 #ifdef HAVE_NUMA
-static uint32_t numa_node_set;
-static uint32_t numa_num_nodes;
-static uint32_t numa_node_mask;
 static uint32_t base_arena;
-static std::atomic<uint32_t> numa_cur_node;
-static std::vector<bitmask*> *node_to_cpu_mask;
-static bool use_numa = false;
 static bool threads_bind_local = false;
-
-extern "C" {
-HHVM_ATTRIBUTE_WEAK extern void numa_init(void);
-}
-static void initNuma() {
-
-  // When linked dynamically numa_init() is called before JEMallocInitializer()
-  // numa_init is not exported by libnuma.so so it will be NULL
-  // however when linked statically numa_init() is not guaranteed to be called
-  // before JEMallocInitializer(), so call it here.
-  if (&numa_init) {
-    numa_init();
-  }
-  if (numa_available() < 0) return;
-
-  // set interleave for early code. we'll then force interleave
-  // for a few regions, and switch to local for the threads
-  numa_set_interleave_mask(numa_all_nodes_ptr);
-
-  int max_node = numa_max_node();
-  if (!max_node || max_node >= 32) return;
-
-  bool ret = true;
-  bitmask* run_nodes = numa_get_run_node_mask();
-  bitmask* mem_nodes = numa_get_mems_allowed();
-  for (int i = 0; i <= max_node; i++) {
-    if (!numa_bitmask_isbitset(run_nodes, i) ||
-        !numa_bitmask_isbitset(mem_nodes, i)) {
-      // Only deal with the case of a contiguous set
-      // of nodes where we can run/allocate memory
-      // on each node.
-      ret = false;
-      break;
-    }
-    numa_node_set |= (uint32_t)1 << i;
-    numa_num_nodes++;
-  }
-  numa_bitmask_free(run_nodes);
-  numa_bitmask_free(mem_nodes);
-
-  if (!ret || numa_num_nodes <= 1) return;
-
-  numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
-}
 
 static bool purge_decay_hard() {
   const char *purge;
@@ -395,7 +341,6 @@ void enable_numa(bool local) {
   if (numa_sched_getaffinity(0, enabled) < 0) {
     return;
   }
-  node_to_cpu_mask = new std::vector<bitmask*>;
   int num_cpus = numa_num_configured_cpus();
   int max_node = numa_max_node();
   for (int i = 0; i <= max_node; i++) {
@@ -406,29 +351,19 @@ void enable_numa(bool local) {
         numa_bitmask_clearbit(cpus_for_node, j);
       }
     }
-    assert(node_to_cpu_mask->size() == i);
-    node_to_cpu_mask->push_back(cpus_for_node);
+    assert(node_to_cpu_mask.size() == i);
+    node_to_cpu_mask.push_back(cpus_for_node);
   }
   numa_bitmask_free(enabled);
 
   use_numa = true;
 }
 
-int next_numa_node() {
-  if (!use_numa) return 0;
-  int node;
-  do {
-    node = numa_cur_node.fetch_add(1, std::memory_order_relaxed);
-    node &= numa_node_mask;
-  } while (!((numa_node_set >> node) & 1));
-  return node;
-}
-
 void set_numa_binding(int node) {
   if (!use_numa) return;
 
   s_numaNode = node;
-  numa_sched_setaffinity(0, (*node_to_cpu_mask)[node]);
+  numa_sched_setaffinity(0, node_to_cpu_mask[node]);
   if (threads_bind_local) {
     numa_set_interleave_mask(numa_no_nodes_ptr);
     bitmask* nodes = numa_allocate_nodemask();
@@ -445,29 +380,89 @@ void set_numa_binding(int node) {
   prctl(PR_SET_NAME, buf);
 }
 
-int num_numa_nodes() {
-  if (!use_numa) return 1;
-  return numa_num_nodes;
-}
-
-void numa_interleave(void* start, size_t size) {
-  if (!use_numa) return;
-  numa_interleave_memory(start, size, numa_all_nodes_ptr);
-}
-
-void numa_local(void* start, size_t size) {
-  if (!use_numa) return;
-  numa_setlocal_memory(start, size);
-}
-
-void numa_bind_to(void* start, size_t size, int node) {
-  if (!use_numa) return;
-  numa_tonode_memory(start, size, node);
-}
-
 #else
-static void initNuma() {}
 static void numa_purge_arena() {}
+#endif
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+/*
+ * Get `pages` (at most 2) 1G huge pages and map to low memory.  We can do
+ * either one or two pages here.  Explicit NUMA balancing is performed.
+ */
+void setup_low_1g_arena(int pages) {
+  if (pages <= 0) return;
+  if (pages > 2) pages = 2;             // At most 2 1G pages in low memory
+  size_t hugeSize = 0;
+  int max_node = 0;
+#ifdef HAVE_NUMA
+  max_node = numa_max_node();
+#endif
+  void* base = nullptr;
+  int node = max_node;
+  // Try to get the first page.
+  while (node >= 0) {
+    base = mmap_1g((void*)0xc0000000, node--);
+    if (base != nullptr) {
+      hugeSize += size1g;
+      break;
+    }
+  }
+  // If first page is obtained, try get a second one if asked.
+  if (base != nullptr && pages >= 2) {
+    // Try the rest of the NUMA nodes, and all nodes (-1) at last.
+    do {
+      auto const newBase = mmap_1g((void*)0x80000000, node--);
+      if (newBase != nullptr) {
+        base = newBase;
+        hugeSize += size1g;
+        break;
+      }
+    } while (node >= -1);
+  }
+  if (base) {
+    try {
+      auto ma = new ManagedArena(base, hugeSize); // leaked
+      if (ma) low_huge1g_arena = ma->getArenaId();
+    } catch (...) { /* unclear what can be done here */ }
+  }
+}
+
+/*
+ * Get `pages` 1G huge pages with explicit NUMA balancing.
+ */
+void setup_high_1g_arena(int pages) {
+  if (pages <= 0) return;
+  // Always map to a region starting from `base`.
+  auto const base = reinterpret_cast<char*>(32ull << 30);
+  size_t hugeSize = 0;
+#ifdef HAVE_NUMA
+  const int max_node = numa_max_node();
+#else
+  constexpr int max_node = 0;
+#endif
+  int node = 0;
+  int fails = 0;
+  // This loop exits when all the demanded pages are mapped in, or when there
+  // are (max_node + 1) consecutive failures, indicating the lack of reserved 1G
+  // huge pages in all the nodes.
+  while (pages > 0) {
+    if (mmap_1g(base + hugeSize, node++)) {
+      hugeSize += size1g;
+      --pages;
+      fails = 0;
+    } else {
+      if (++fails > max_node) break;
+    }
+    if (node > max_node) node = 0;
+  }
+  if (hugeSize > 0) {
+    try {
+      auto ma = new ManagedArena(base, hugeSize); // leaked
+      if (ma) high_huge1g_arena = ma->getArenaId();
+    } catch (...) { /* unclear what can be done here */ }
+  }
+}
+
 #endif
 
 struct JEMallocInitializer {
@@ -519,63 +514,32 @@ struct JEMallocInitializer {
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
-    int nPages = 0;
-    if (char* lowMem1GPages = getenv("HHVM_LOW_1G_PAGE")) {
-      sscanf(lowMem1GPages, "%d", &nPages);
+#if defined USE_JEMALLOC_CHUNK_HOOKS && defined __linux__
+    // Number of 1G huge pages for data in low memeory
+    int low_1g_pages = 0;
+    if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
+      sscanf(buffer, "%d", &low_1g_pages);
     }
-    if (nPages > 0) {
+    // Number of 1G pages for shared data not in low memory (e.g., APC)
+    int high_1g_pages = 0;
+    if (char* buffer = getenv("HHVM_HIGH_1G_PAGE")) {
+      sscanf(buffer, "%d", &high_1g_pages);
+    }
+
+    if (low_1g_pages > 0 || high_1g_pages > 0) {
       KernelVersion version;
       if (version.m_major < 3 ||
           (version.m_major == 3 && version.m_minor < 9)) {
         // Older kernels need an explicit hugetlbfs mount point.
         find_hugetlbfs_path() || auto_mount_hugetlbfs();
       }
-      size_t hugeSize = 0;
-      int node = -1;
-#ifdef HAVE_NUMA
-      node = numa_max_node();
-      if (node == 0 || nPages < 2) node = -1;
-#endif
-      void* base = nullptr;
-      if (node > 0) {                   // explicit NUMA balancing
-        while (node >= 0) {
-          base = mmap_1g((void*)0xc0000000, node--);
-          if (base != nullptr) {
-            break;
-          }
-        }
-        if (base != nullptr) {
-          // Try the rest of the NUMA nodes, and all nodes (-1) at last.
-          do {
-            void *newBase = mmap_1g((void*)0x80000000, node--);
-            if (newBase != nullptr) {
-              base = newBase;
-              hugeSize += 1 << 30;
-              break;
-            }
-          } while (node >= -1);
-        }
-      } else {                          // don't care about NUMA
-        base = mmap_1g((void*)0xc0000000, -1);
-        if (base) {
-          hugeSize = 1 << 30;
-          if (nPages > 1) {
-            void* newBase = mmap_1g((void*)0x80000000, -1);
-            if (newBase) {
-              base = newBase;
-              hugeSize += 1 << 30;
-            }
-          }
-        }
-      }
+    }
 
-      if (base) {
-        try {
-          auto ma = new ManagedArena(base, hugeSize); // leaked
-          if (ma) low_huge1g_arena = ma->getArenaId();
-        } catch (...) { }
-      }
+    if (low_1g_pages > 0) {
+      setup_low_1g_arena(low_1g_pages);
+    }
+    if (high_1g_pages > 0) {
+      setup_high_1g_arena(high_1g_pages);
     }
 #endif
   }
@@ -630,6 +594,7 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
+  if (size == 0) return nullptr;
   void* ptr = mallocx(size, low_mallocx_flags());
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
@@ -646,9 +611,21 @@ void low_malloc_skip_huge(void* start, void* end) {
 
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
 void* low_malloc_huge1g_impl(size_t size) {
-  assert(low_huge1g_arena != 0);
-  return mallocx(size, low_mallocx_huge1g_flags());
+  if (size == 0) return nullptr;
+  if (low_huge1g_arena == 0) return low_malloc(size);
+  auto ret = mallocx(size, low_mallocx_huge1g_flags());
+  if (ret) return ret;
+  return low_malloc(size);
 }
+
+void* malloc_huge1g_impl(size_t size) {
+  if (size == 0) return nullptr;
+  if (high_huge1g_arena == 0) return malloc(size);
+  auto ret = mallocx(size, mallocx_huge1g_flags());
+  if (ret) return ret;
+  return malloc(size);
+}
+
 #endif
 
 #else

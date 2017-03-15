@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,9 +40,9 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
-#include "hphp/util/assertions.h"
-#include "hphp/util/match.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 
+#include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
 
@@ -54,6 +54,10 @@
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/analyze.h"
+
+#include "hphp/util/algorithm.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/match.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -73,6 +77,7 @@ const StaticString s_isset("__isset");
 const StaticString s_unset("__unset");
 const StaticString s_callStatic("__callStatic");
 const StaticString s_86ctor("86ctor");
+const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -127,7 +132,14 @@ copy_range(const MultiMap& map, typename MultiMap::key_type key) {
 
 //////////////////////////////////////////////////////////////////////
 
-enum class Dep : uintptr_t { ReturnTy = 0x1 };
+enum class Dep : uintptr_t {
+  /* This dependency should trigger when the return type changes */
+  ReturnTy = 0x1,
+  /* This dependency should trigger when a DefCns is resolved */
+  ConstVal = 0x2,
+  /* This dependency should trigger when a class constant is resolved */
+  ClsConst = 0x4,
+};
 
 Dep operator|(Dep a, Dep b) {
   return static_cast<Dep>(
@@ -142,7 +154,6 @@ bool has_dep(Dep m, Dep t) {
 /*
  * Maps functions to contexts that depend on information about that
  * function, with information about the type of dependency.
- * (Currently only return types.)
  */
 using DepMap =
   tbb::concurrent_hash_map<
@@ -226,6 +237,78 @@ PropState make_unknown_propstate(borrowed_ptr<const php::Class> cls,
   return ret;
 }
 
+/*
+ * Currently inferred information about a PHP function.
+ *
+ * Nothing in this structure can ever be untrue.  The way the
+ * algorithm works, whatever is in here must be factual (even if it is
+ * not complete information), because we may deduce other facts based
+ * on it.
+ */
+struct FuncInfoValue {
+  /*
+   * The best-known return type of the function, if we have any
+   * information.  May be TBottom if the function is known to never
+   * return (e.g. always throws).
+   */
+  Type returnTy = TInitGen;
+
+  /*
+   * The number of times we've refined returnTy.
+   */
+  uint32_t returnRefinments{0};
+
+  /*
+   * Whether $this can be null or not on entry to the method. Only applies
+   * to method and it's always false for functions.
+   */
+  bool thisAvailable = false;
+
+  /*
+   * Call-context sensitive return types are cached here.  This is not
+   * an optimization.
+   *
+   * The reason we need to retain this information about the
+   * calling-context-sensitive return types is that once the Index is
+   * frozen (during the final optimization pass), calls to
+   * lookup_return_type with a CallContext can't look at the bytecode
+   * bodies of functions other than the calling function.  So we need
+   * to know what we determined the last time we were alloewd to do
+   * that so we can return it again.
+   */
+  ContextRetTyMap contextualReturnTypes;
+
+  /*
+   * Type info for local statics.
+   */
+  CompactVector<Type> localStaticTypes;
+};
+
+using FuncInfoMap = std::unordered_map<borrowed_ptr<const php::Func>,
+                                       FuncInfoValue>;
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Known information about a particular constant:
+ *  - if system is true, it's a system constant and other definitions
+ *    will be ignored.
+ *  - for non-system constants, if func is non-null it's the unique
+ *    pseudomain defining the constant; otherwise there was more than
+ *    one definition, or a non-pseudomain definition, and the type will
+ *    be TInitCell
+ *  - readonly is true if we've only seen uses of the constant, and no
+ *    definitions (this could change during the first pass, but not after
+ *    that).
+ */
+
+struct ConstInfo {
+  borrowed_ptr<const php::Func> func;
+  Type                          type;
+  bool                          system;
+  bool                          readonly;
+};
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -248,58 +331,7 @@ struct FuncFamily {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Currently inferred information about a PHP function.
- *
- * Nothing in this structure can ever be untrue.  The way the
- * algorithm works, whatever is in here must be factual (even if it is
- * not complete information), because we may deduce other facts based
- * on it.
- */
-struct FuncInfo {
-  /*
-   * Pointer to the underlying php::Func this has information about.
-   */
-  borrowed_ptr<const php::Func> func = nullptr;
-
-  /*
-   * The best-known return type of the function, if we have any
-   * information.  May be TBottom if the function is known to never
-   * return (e.g. always throws).
-   */
-  Type returnTy = TInitGen;
-
-  /*
-   * The number of times we've refined returnTy.
-   */
-  uint32_t returnRefinments{0};
-
-  /*
-   * Whether $this can be null or not on entry to the method. Only applies
-   * to method and it's always false for functions.
-   */
-  bool thisAvailable = false;
-
-  /*
-   * Whether this function can potentially read or write to the caller's frame.
-   */
-  bool readsCallerFrame = false;
-  bool writesCallerFrame = false;
-
-  /*
-   * Call-context sensitive return types are cached here.  This is not
-   * an optimization.
-   *
-   * The reason we need to retain this information about the
-   * calling-context-sensitive return types is that once the Index is
-   * frozen (during the final optimization pass), calls to
-   * lookup_return_type with a CallContext can't look at the bytecode
-   * bodies of functions other than the calling function.  So we need
-   * to know what we determined the last time we were alloewd to do
-   * that so we can return it again.
-   */
-  ContextRetTyMap contextualReturnTypes;
-};
+struct FuncInfo : FuncInfoMap::value_type {};
 
 /*
  * Known information about a particular possible instantiation of a
@@ -491,7 +523,7 @@ bool Class::couldBe(const Class& o) const {
 SString Class::name() const {
   return val.match(
     [] (SString s) { return s; },
-    [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name; }
+    [] (borrowed_ptr<ClassInfo> ci) { return ci->cls->name.get(); }
   );
 }
 
@@ -548,7 +580,7 @@ std::string show(const Class& c) {
       return s->data();
     },
     [] (borrowed_ptr<ClassInfo> cinfo) {
-      return folly::format("{}*", cinfo->cls->name).str();
+      return folly::sformat("{}*", cinfo->cls->name);
     }
   );
 }
@@ -571,16 +603,27 @@ SString Func::name() const {
     val,
     [&] (FuncName s) { return s.name; },
     [&] (MethodName s) { return s.name; },
-    [&] (borrowed_ptr<FuncInfo> fi) { return fi->func->name; },
+    [&] (borrowed_ptr<FuncInfo> fi) { return fi->first->name; },
     [&] (borrowed_ptr<FuncFamily> fa) {
-      auto const name = fa->possibleFuncs.front()->func->name;
+      auto const name = fa->possibleFuncs.front()->first->name;
       if (debug) {
         for (DEBUG_ONLY auto& f : fa->possibleFuncs) {
-          assert(f->func->name->isame(name));
+          assert(f->first->name->isame(name));
         }
       }
       return name;
     }
+  );
+}
+
+borrowed_ptr<const php::Func> Func::exactFunc() const {
+  using Ret = borrowed_ptr<const php::Func>;
+  return match<Ret>(
+    val,
+    [&] (FuncName s)                  { return Ret{}; },
+    [&] (MethodName s)                { return Ret{}; },
+    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->first; },
+    [&] (borrowed_ptr<FuncFamily> fa) { return Ret{}; }
   );
 }
 
@@ -597,12 +640,16 @@ bool Func::cantBeMagicCall() const {
 bool Func::mightReadCallerFrame() const {
   return match<bool>(
     val,
+    // Only non-method builtins can read the caller's frame and builtins are
+    // always uniquely resolvable.
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->readsCallerFrame; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->first->attrs & AttrReadsCallerFrame;
+    },
     [&] (borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->readsCallerFrame) return true;
+        if (finfo->first->attrs & AttrReadsCallerFrame) return true;
       }
       return false;
     }
@@ -612,12 +659,53 @@ bool Func::mightReadCallerFrame() const {
 bool Func::mightWriteCallerFrame() const {
   return match<bool>(
     val,
+    // Only non-method builtins can write to the caller's frame and builtins are
+    // always uniquely resolvable.
     [&] (FuncName s)                  { return false; },
     [&] (MethodName s)                { return false; },
-    [&] (borrowed_ptr<FuncInfo> fi)   { return fi->writesCallerFrame; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->first->attrs & AttrWritesCallerFrame;
+    },
     [&] (borrowed_ptr<FuncFamily> fa) {
       for (auto const& finfo : fa->possibleFuncs) {
-        if (finfo->writesCallerFrame) return true;
+        if (finfo->first->attrs & AttrWritesCallerFrame) return true;
+      }
+      return false;
+    }
+  );
+}
+
+bool Func::isFoldable() const {
+  return match<bool>(
+    val,
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return false; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->first->attrs & AttrIsFoldable;
+    },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      if (fa->possibleFuncs.empty()) return false;
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (!(finfo->first->attrs & AttrIsFoldable)) return false;
+      }
+      return true;
+    }
+  );
+}
+
+bool Func::mightBeSkipFrame() const {
+  return match<bool>(
+    val,
+    // Only builtins can be skip frame and non-method builtins are always
+    // uniquely resolvable. Methods are more complicated though.
+    [&] (FuncName s)                  { return false; },
+    [&] (MethodName s)                { return true; },
+    [&] (borrowed_ptr<FuncInfo> fi)   {
+      return fi->first->attrs & AttrSkipFrame;
+    },
+    [&] (borrowed_ptr<FuncFamily> fa) {
+      for (auto const& finfo : fa->possibleFuncs) {
+        if (finfo->first->attrs & AttrSkipFrame) return true;
       }
       return false;
     }
@@ -649,20 +737,23 @@ struct IndexData {
   ~IndexData() = default;
 
   bool frozen{false};
+  bool any_interceptable_functions{false};
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
-  ISStringToMany<const php::Class>     classes;
-  ISStringToMany<const php::Func>      methods;
-  ISStringToMany<const php::Func>      funcs;
-  ISStringToMany<const php::TypeAlias> typeAliases;
-  ISStringToMany<const php::Class>     enums;
+  ISStringToMany<const php::Class>       classes;
+  ISStringToMany<const php::Func>        methods;
+  ISStringToOneT<uint64_t>               method_ref_params_by_name;
+  ISStringToMany<const php::Func>        funcs;
+  ISStringToMany<const php::TypeAlias>   typeAliases;
+  ISStringToMany<const php::Class>       enums;
+  std::unordered_map<SString, ConstInfo> constants;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
   std::unordered_map<
     borrowed_ptr<const php::Class>,
-    std::unordered_set<borrowed_ptr<php::Class>>
+    CompactVector<borrowed_ptr<const php::Class>>
   > classClosureMap;
 
   /*
@@ -680,7 +771,7 @@ struct IndexData {
   std::vector<std::unique_ptr<FuncFamily>> funcFamilies;
 
   std::mutex funcInfoLock;
-  std::unordered_map<borrowed_ptr<const php::Func>,FuncInfo> funcInfo;
+  FuncInfoMap funcInfo;
 
   // Private instance and static property types are stored separately
   // from ClassInfo, because you don't need to resolve a class to get
@@ -746,32 +837,30 @@ void add_dependency(IndexData& data,
 // be in a single threaded situation).
 borrowed_ptr<FuncInfo> create_func_info(IndexData& data,
                                         borrowed_ptr<const php::Func> f) {
-  auto& ret = data.funcInfo[f];
-  if (ret.func) return &ret;
-  ret.func = f;
-  if (f->nativeInfo) {
-    // We'd infer this anyway when we look at the bytecode body
-    // (NativeImpl) for the HNI function, but just initializing it
-    // here saves on whole-program iterations.
-    ret.returnTy = native_function_return_type(f);
+  auto val = data.funcInfo.emplace(f, FuncInfoValue{});
+  auto& ret = static_cast<FuncInfo&>(*val.first);
+  if (val.second) {
+    if (f->nativeInfo) {
+      // We'd infer this anyway when we look at the bytecode body
+      // (NativeImpl) for the HNI function, but just initializing it
+      // here saves on whole-program iterations.
+      ret.second.returnTy = native_function_return_type(f);
+    }
+    ret.second.thisAvailable = false;
   }
-  if (f->attrs & AttrReadsCallerFrame) ret.readsCallerFrame = true;
-  if (f->attrs & AttrWritesCallerFrame) ret.writesCallerFrame = true;
-  ret.thisAvailable = false;
   return &ret;
 }
 
-std::vector<Context> find_deps(IndexData& data,
-                               borrowed_ptr<const php::Func> src,
-                               Dep mask) {
-  std::vector<Context> ret;
+void find_deps(IndexData& data,
+               borrowed_ptr<const php::Func> src,
+               Dep mask,
+               ContextSet& deps) {
   DepMap::const_accessor acc;
   if (data.dependencyMap.find(acc, src)) {
     for (auto& kv : acc->second) {
-      if (has_dep(kv.second, mask)) ret.push_back(kv.first);
+      if (has_dep(kv.second, mask)) deps.insert(kv.first);
     }
   }
-  return ret;
 }
 
 bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
@@ -918,7 +1007,26 @@ bool build_cls_info(borrowed_ptr<ClassInfo> cinfo) {
 
 //////////////////////////////////////////////////////////////////////
 
+void add_system_constants_to_index(IndexData& index) {
+  for (auto cnsPair : Native::getConstants()) {
+    auto& c = index.constants[cnsPair.first];
+    auto t = cnsPair.second.m_type == KindOfUninit ?
+      TInitCell : from_cell(cnsPair.second);
+    c.func = nullptr;
+    c.type = t;
+    c.system = true;
+    c.readonly = false;
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void add_unit_to_index(IndexData& index, const php::Unit& unit) {
+  std::unordered_map<
+    borrowed_ptr<const php::Class>,
+    std::unordered_set<borrowed_ptr<const php::Class>>
+  > closureMap;
+
   for (auto& c : unit.classes) {
     if (c->attrs & AttrEnum) {
       index.enums.insert({c->name, borrow(c)});
@@ -928,21 +1036,59 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
 
     for (auto& m : c->methods) {
       index.methods.insert({m->name, borrow(m)});
-
-      if (is_interceptable_function(borrow(c), borrow(m))) {
-        m->attrs = m->attrs | AttrInterceptable;
+      uint64_t refs = 0;
+      uint64_t cur = 1;
+      bool anyByRef = false;
+      for (auto& p : m->params) {
+        if (p.byRef) {
+          refs |= cur;
+          anyByRef = true;
+        }
+        // It doesn't matter that we lose parameters beyond the 64th,
+        // for those, we'll conservatively check everything anyway.
+        cur <<= 1;
+      }
+      if (anyByRef) {
+        index.method_ref_params_by_name[m->name] |= refs;
+      }
+      if (m->attrs & AttrInterceptable) {
+        index.any_interceptable_functions = true;
       }
     }
 
     if (c->closureContextCls) {
-      index.classClosureMap[c->closureContextCls].insert(borrow(c));
+      closureMap[c->closureContextCls].insert(borrow(c));
+    }
+  }
+
+  if (!closureMap.empty()) {
+    for (auto const& c1 : closureMap) {
+      auto& s = index.classClosureMap[c1.first];
+      for (auto const& c2 : c1.second) {
+        s.push_back(c2);
+      }
     }
   }
 
   for (auto& f : unit.funcs) {
-    if (is_interceptable_function(nullptr, borrow(f))) {
-      f->attrs = f->attrs | AttrInterceptable;
+    /*
+     * A function can be defined with the same name as a builtin in the
+     * repo. Any such attempts will fatal at runtime, so we can safely ignore
+     * any such definitions. This ensures that names referring to builtins are
+     * always fully resolvable.
+     */
+    auto const funcs = index.funcs.equal_range(f->name);
+    if (funcs.first != funcs.second) {
+      auto const& old_func = funcs.first->second;
+      // If there is a builtin, it will always be the first (and only) func on
+      // the list.
+      if (old_func->attrs & AttrBuiltin) {
+        always_assert(!(f->attrs & AttrBuiltin));
+        continue;
+      }
+      if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
     }
+    if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
     index.funcs.insert({f->name, borrow(f)});
   }
 
@@ -1037,7 +1183,7 @@ void resolve_combinations(IndexData& index,
 
   if (!build_cls_info(borrow(cinfo))) return;
 
-  ITRACE(2, "  resolved: {}\n", cls->name->data());
+  ITRACE(2, "  resolved: {}\n", cls->name);
   index.allClassInfos.push_back(std::move(cinfo));
   index.classInfo.emplace(cls->name, borrow(index.allClassInfos.back()));
 }
@@ -1048,7 +1194,7 @@ void preresolve(IndexData& index, NamingEnv& env, SString clsName) {
   // TODO(#3649211): we'll need to handle inheritance cycles here
   // after hphpc is fixed not to just remove them.
 
-  ITRACE(2, "preresolve: {}\n", clsName->data());
+  ITRACE(2, "preresolve: {}\n", clsName);
   for (auto& kv : find_range(index.classes, clsName)) {
     if (kv.second->parentName) {
       preresolve(index, env, kv.second->parentName);
@@ -1317,14 +1463,18 @@ void compute_iface_vtables(IndexData& index) {
     slot_uses[slot] += iface_uses[iface];
   }
 
+  // Make sure we have an initialized entry for each slot for the sort below.
+  for (Slot slot = 0; slot < max_slot; ++slot) {
+    assert(slot_uses.count(slot));
+  }
+
   // Finally, sort and reassign slots so the most frequently used slots come
   // first. This slightly reduces the number of wasted vtable vector entries at
   // runtime.
-  std::vector<Slot> slots;
-  slots.reserve(max_slot + 1);
-  for (Slot i = 0; i <= max_slot; ++i) slots.emplace_back(i);
-  auto slot_cmp = [&](Slot a, Slot b) { return slot_uses[a] > slot_uses[b]; };
-  std::sort(begin(slots), end(slots), slot_cmp);
+  auto const slots = sort_keys_by_value(
+    slot_uses,
+    [&] (int a, int b) { return a > b; }
+  );
 
   std::vector<Slot> slots_permute(max_slot + 1, 0);
   for (size_t i = 0; i <= max_slot; ++i) slots_permute[slots[i]] = i;
@@ -1380,7 +1530,7 @@ void mark_no_override_classes(IndexData& index) {
         cinfo->cls->attrs & AttrUnique) {
       assert(cinfo->subclassList.front() == borrow(cinfo));
       if (!(cinfo->cls->attrs & AttrNoOverride)) {
-        FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name->data());
+        FTRACE(2, "Adding AttrNoOverride to {}\n", cinfo->cls->name);
       }
       add_attribute(cinfo->cls, AttrNoOverride);
     }
@@ -1390,7 +1540,7 @@ void mark_no_override_classes(IndexData& index) {
       if (!(cinfo.get()->*kv.second.pmem).derivedHas) {
         FTRACE(2, "Adding no-override of {} to {}\n",
           kv.first->data(),
-          cinfo->cls->name->data());
+          cinfo->cls->name);
         add_attribute(cinfo->cls, kv.second.attrBit);
       }
     }
@@ -1418,8 +1568,8 @@ void mark_no_override_functions(IndexData& index) {
         if (it->second.func != derivedMethod.second.func) {
           if (it->second.func->attrs & AttrNoOverride) {
             FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
-              it->second.func->cls->name->data(),
-              it->second.func->name->data());
+              it->second.func->cls->name,
+              it->second.func->name);
           }
           remove_attribute(it->second.func, AttrNoOverride);
         }
@@ -1511,9 +1661,9 @@ void check_invariants(IndexData& data) {
   // name.
   for (auto& ffam : data.funcFamilies) {
     always_assert(!ffam->possibleFuncs.empty());
-    auto const name = ffam->possibleFuncs.front()->func->name;
+    auto const name = ffam->possibleFuncs.front()->first->name;
     for (auto& finfo : ffam->possibleFuncs) {
-      always_assert(finfo->func->name->isame(name));
+      always_assert(finfo->first->name->isame(name));
     }
   }
 
@@ -1527,7 +1677,7 @@ void check_invariants(IndexData& data) {
 Type context_sensitive_return_type(const Index& index,
                                    borrowed_ptr<FuncInfo> finfo,
                                    CallContext callCtx) {
-  auto const callInsensitiveType = finfo->returnTy;
+  auto const callInsensitiveType = finfo->second.returnTy;
 
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
@@ -1538,14 +1688,14 @@ Type context_sensitive_return_type(const Index& index,
   // $this.)
   bool const tryContextSensitive =
     options.ContextSensitiveInterp &&
-    !finfo->func->params.empty() &&
+    !finfo->first->params.empty() &&
     interp_nesting_level + 1 < max_interp_nexting_level;
   if (!tryContextSensitive) {
     return callInsensitiveType;
   }
 
   ContextRetTyMap::accessor acc;
-  if (finfo->contextualReturnTypes.insert(acc, callCtx)) {
+  if (finfo->second.contextualReturnTypes.insert(acc, callCtx)) {
     acc->second = TTop;
   }
 
@@ -1556,9 +1706,9 @@ Type context_sensitive_return_type(const Index& index,
     SCOPE_EXIT { --interp_nesting_level; };
 
     auto const calleeCtx = Context {
-      finfo->func->unit,
-      const_cast<borrowed_ptr<php::Func>>(finfo->func),
-      finfo->func->cls
+      finfo->first->unit,
+      const_cast<borrowed_ptr<php::Func>>(finfo->first),
+      finfo->first->cls
     };
     return analyze_func_inline(index, calleeCtx, callCtx.args).inferredReturn;
   }();
@@ -1606,8 +1756,8 @@ Type context_sensitive_return_type(const Index& index,
     FTRACE(1, "{} <= {} didn't happen on {} called from {} ({})\n",
       show(contextType),
       show(callInsensitiveType),
-      finfo->func->name->data(),
-      callCtx.caller.func->name->data(),
+      finfo->first->name,
+      callCtx.caller.func->name,
       callCtx.caller.cls ? callCtx.caller.cls->name->data() : "");
     return callInsensitiveType;
   }
@@ -1650,13 +1800,14 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
      * Or if we've got AllFuncsInterceptable we need to assume someone could
      * rename a function to the new name.
      */
-    return options.AllFuncsInterceptable ? PrepKind::Unknown : PrepKind::Val;
+    return RuntimeOption::EvalJitEnableRenameFunction ?
+      PrepKind::Unknown : PrepKind::Val;
   }
 
   struct FuncFind {
     using F = borrowed_ptr<const php::Func>;
     static F get(std::pair<SString,F> p) { return p.second; }
-    static F get(borrowed_ptr<FuncInfo> finfo) { return finfo->func; }
+    static F get(borrowed_ptr<FuncInfo> finfo) { return finfo->first; }
   };
 
   folly::Optional<PrepKind> prep;
@@ -1750,6 +1901,8 @@ Index::Index(borrowed_ptr<php::Program> program)
 
   m_data->arrTableBuilder.reset(new ArrayTypeTable::Builder());
 
+  add_system_constants_to_index(*m_data);
+
   for (auto& u : program->units) {
     add_unit_to_index(*m_data, *u);
   }
@@ -1783,14 +1936,13 @@ Index::~Index() {}
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<borrowed_ptr<php::Class>>
+const CompactVector<borrowed_ptr<const php::Class>>*
 Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
-  std::vector<borrowed_ptr<php::Class>> ret;
   auto const it = m_data->classClosureMap.find(cls);
   if (it != end(m_data->classClosureMap)) {
-    ret.assign(begin(it->second), end(it->second));
+    return &it->second;
   }
-  return ret;
+  return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1866,13 +2018,13 @@ Index::resolve_closure_class(Context ctx, int32_t idx) const {
 
 res::Class Index::builtin_class(SString name) const {
   auto const rcls = resolve_class(Context {}, name);
-  if (!rcls) {
-    std::fprintf(stderr, "failed to resolve a builtin class: %s\n",
-      name->data());
-    std::abort();
-  }
-  assert(rcls->val.right() &&
-    (rcls->val.right()->cls->attrs & AttrBuiltin));
+  always_assert_flog(
+    rcls.hasValue() &&
+    rcls->val.right() &&
+    (rcls->val.right()->cls->attrs & AttrBuiltin),
+    "A builtin class ({}) failed to resolve",
+    name->data()
+  );
   return *rcls;
 }
 
@@ -2086,9 +2238,9 @@ Index::resolve_func_fallback(Context ctx,
       resolve_func_helper(r2, fallbackName)
     );
   }
-  return begin(r1) == end(r1)
-    ? std::make_pair(resolve_func_helper(r2, fallbackName), folly::none)
-    : std::make_pair(resolve_func_helper(r1, nsName), folly::none);
+  return begin(r2) == end(r2)
+    ? std::make_pair(resolve_func_helper(r1, nsName), folly::none)
+    : std::make_pair(resolve_func_helper(r2, fallbackName), folly::none);
 }
 
 Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
@@ -2143,7 +2295,6 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
               : subObj(*rcls);
           }
           return TInitCell;
-        case KindOfClass:
         case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
@@ -2219,7 +2370,6 @@ Type Index::satisfies_constraint_helper(Context ctx,
             return subObj(*rcls);
           }
           return TBottom;
-        case KindOfClass:
         case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
@@ -2255,17 +2405,21 @@ bool Index::is_async_func(res::Func rfunc) const {
     [&] (res::Func::FuncName s)        { return false; },
     [&] (res::Func::MethodName s)      { return false; },
     [&] (borrowed_ptr<FuncInfo> finfo) {
-      return finfo->func->isAsync && !finfo->func->isGenerator;
+      return finfo->first->isAsync && !finfo->first->isGenerator;
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
       for (auto const& finfo : fam->possibleFuncs) {
-        if (!finfo->func->isAsync || finfo->func->isGenerator) {
+        if (!finfo->first->isAsync || finfo->first->isGenerator) {
           return false;
         }
       }
       return true;
     }
   );
+}
+
+bool Index::any_interceptable_functions() const {
+  return m_data->any_interceptable_functions;
 }
 
 Type Index::lookup_class_constant(Context ctx,
@@ -2281,8 +2435,12 @@ Type Index::lookup_class_constant(Context ctx,
       return TInitCell;
     }
     if (it->second->val.value().m_type == KindOfUninit) {
-      // This is a class constant that needs an 86cinit to run.  It
-      // would be good to eventually be able to analyze these.
+      // This is a class constant that needs an 86cinit to run.
+      // We'll add a dependency to make sure we're re-run if it
+      // resolves anything.
+      auto const cinit = borrow(it->second->cls->methods.back());
+      assert(cinit->name == s_86cinit.get());
+      add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
       return TInitCell;
     }
     return from_cell(it->second->val.value());
@@ -2290,31 +2448,40 @@ Type Index::lookup_class_constant(Context ctx,
   return TInitCell;
 }
 
-const StaticString s_array_map("array_map");
-const StaticString s_array_filter("array_filter");
+folly::Optional<Type> Index::lookup_constant(Context ctx,
+                                             SString cnsName) const {
+  auto const it = m_data->constants.find(cnsName);
+  if (it == m_data->constants.end()) {
+    // flag to indicate that the constant isn't in the index yet.
+    if (options.HardConstProp) return folly::none;
+    return TInitCell;
+  }
+
+  if (it->second.func &&
+      !it->second.readonly &&
+      !it->second.system &&
+      !tv(it->second.type)) {
+    // we might refine the type
+    add_dependency(*m_data, it->second.func, ctx, Dep::ConstVal);
+  }
+
+  return it->second.type;
+}
 
 Type Index::lookup_return_type(Context ctx, res::Func rfunc) const {
   return match<Type>(
     rfunc.val,
-    [&] (res::Func::FuncName s) {
-      // The HHAS systemlib functions are not currently visible to hhbbc, but
-      // we know they can't return references.
-      if (s.name->isame(s_array_map.get()) ||
-          s.name->isame(s_array_filter.get())) {
-        return TInitCell;
-      }
-      return TInitGen;
-    },
+    [&] (res::Func::FuncName s) { return TInitGen; },
     [&] (res::Func::MethodName s) { return TInitGen; },
     [&] (borrowed_ptr<FuncInfo> finfo) {
-      add_dependency(*m_data, finfo->func, ctx, Dep::ReturnTy);
-      return finfo->returnTy;
+      add_dependency(*m_data, finfo->first, ctx, Dep::ReturnTy);
+      return finfo->second.returnTy;
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
       auto ret = TBottom;
       for (auto& f : fam->possibleFuncs) {
-        add_dependency(*m_data, f->func, ctx, Dep::ReturnTy);
-        ret = union_of(ret, f->returnTy);
+        add_dependency(*m_data, f->first, ctx, Dep::ReturnTy);
+        ret |= f->second.returnTy;
       }
       return ret;
     }
@@ -2331,7 +2498,7 @@ Type Index::lookup_return_type(CallContext callCtx, res::Func rfunc) const {
       return lookup_return_type(callCtx.caller, rfunc);
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {
-      add_dependency(*m_data, finfo->func, callCtx.caller, Dep::ReturnTy);
+      add_dependency(*m_data, finfo->first, callCtx.caller, Dep::ReturnTy);
       return context_sensitive_return_type(*this, finfo, callCtx);
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
@@ -2374,19 +2541,30 @@ PrepKind Index::lookup_param_prep(Context ctx,
       return prep_kind_from_set(find_range(m_data->funcs, s.name), paramId);
     },
     [&] (res::Func::MethodName s) {
-      /*
-       * If we think it's supposed to be PrepKind::Ref, we still can't be sure
-       * unless we go though some effort to guarantee that it can't be going to
-       * an __call function magically (which will never take anything by ref).
-       */
+      auto const it = m_data->method_ref_params_by_name.find(s.name);
+      if (it == end(m_data->method_ref_params_by_name)) {
+        // There was no entry, so no method by this name takes a parameter
+        // by reference.
+        return PrepKind::Val;
+      }
+      if (paramId < sizeof(it->second) * CHAR_BIT &&
+          !((it->second >> paramId) & 1)) {
+        // no method by this name takes this parameter by reference
+        return PrepKind::Val;
+      }
       auto const kind = prep_kind_from_set(
         find_range(m_data->methods, s.name),
         paramId
       );
+      /*
+       * If we think it's supposed to be PrepKind::Ref, we still can't be sure
+       * unless we go through some effort to guarantee that it can't be going to
+       * an __call function magically (which will never take anything by ref).
+       */
       return kind == PrepKind::Ref ? PrepKind::Unknown : kind;
     },
     [&] (borrowed_ptr<FuncInfo> finfo) {
-      return func_param_prep(finfo->func, paramId);
+      return func_param_prep(finfo->first, paramId);
     },
     [&] (borrowed_ptr<FuncFamily> fam) {
       return prep_kind_from_set(fam->possibleFuncs, paramId);
@@ -2450,6 +2628,19 @@ bool Index::lookup_public_static_immutable(borrowed_ptr<const php::Class> cls,
   return !lookup_public_static_impl(*m_data, cls, name).everModified;
 }
 
+void Index::fixup_public_static(borrowed_ptr<const php::Class> cls,
+                                SString name, const Type& ty) const {
+  auto const classes = find_range(m_data->classInfo, cls->name);
+  for (auto& cinfo : classes) {
+    if (cinfo.second->cls == cls) {
+      auto const it = cinfo.second->publicStaticProps.find(name);
+      if (it != end(cinfo.second->publicStaticProps)) {
+        it->second.inferredType = it->second.initializerType = ty;
+      }
+    }
+  }
+}
+
 Slot
 Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
   return folly::get_default(m_data->ifaceSlotMap, cls, kInvalidSlot);
@@ -2457,12 +2648,117 @@ Index::lookup_iface_vtable_slot(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<Context>
-Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
+void Index::refine_class_constants(const Context& ctx, ContextSet& deps) {
+  bool changed = false;
+  for (auto& c : ctx.func->cls->constants) {
+    if (c.val && c.val->m_type == KindOfUninit) {
+      auto const fa = analyze_func_inline(*this, ctx, { sval(c.name) });
+      auto val = tv(fa.inferredReturn);
+      if (val) {
+        changed = true;
+        c.val = *val;
+      }
+    }
+  }
+  if (changed) find_deps(*m_data, ctx.func, Dep::ClsConst, deps);
+}
+
+void Index::refine_constants(const FuncAnalysis& fa, ContextSet& deps) {
+  auto const func = fa.ctx.func;
+  for (auto const& it : fa.cnsMap) {
+    if (it.second.m_type == kReadOnlyConstant) {
+      // this constant was read, but there was nothing mentioning it
+      // in the index. Should only happen on the first iteration. We
+      // need to reprocess this func.
+      assert(fa.readsUntrackedConstants);
+      // if there's already an entry, we don't want to do anything,
+      // otherwise just insert a dummy entry to indicate that it was
+      // read.
+      m_data->constants.emplace(it.first,
+                                ConstInfo {func, TInitCell, false, true});
+      continue;
+    }
+
+    if (it.second.m_type == kDynamicConstant || !is_pseudomain(func)) {
+      // two definitions, or a non-pseuodmain definition
+      auto& c = m_data->constants[it.first];
+      if (!c.system) {
+        c.func = nullptr;
+        c.type = TInitCell;
+        c.readonly = false;
+      }
+      continue;
+    }
+
+    auto t = it.second.m_type == KindOfUninit ?
+      TInitCell : from_cell(it.second);
+
+    auto const res = m_data->constants.emplace(it.first, ConstInfo {func, t});
+
+    if (res.second || res.first->second.system) continue;
+
+    if (res.first->second.readonly) {
+      res.first->second.func = func;
+      res.first->second.type = t;
+      res.first->second.readonly = false;
+      continue;
+    }
+
+    if (res.first->second.func != func) {
+      res.first->second.func = nullptr;
+      res.first->second.type = TInitCell;
+      continue;
+    }
+
+    assert(t.subtypeOf(res.first->second.type));
+    if (t != res.first->second.type) {
+      res.first->second.type = t;
+      find_deps(*m_data, func, Dep::ConstVal, deps);
+    }
+  }
+  if (fa.readsUntrackedConstants) deps.emplace(fa.ctx);
+  if (func->name == s_86cinit.get()) {
+    refine_class_constants(fa.ctx, deps);
+  }
+}
+
+void Index::refine_local_static_types(
+  borrowed_ptr<const php::Func> func,
+  const CompactVector<Type>& localStaticTypes) {
+
+  auto& fdata = create_func_info(*m_data, func)->second;
+  if (localStaticTypes.empty()) {
+    fdata.localStaticTypes.clear();
+    return;
+  }
+
+  fdata.localStaticTypes.resize(localStaticTypes.size(), TTop);
+  for (auto i = size_t{0}; i < localStaticTypes.size(); i++) {
+    auto& indexTy = fdata.localStaticTypes[i];
+    auto const& newTy = localStaticTypes[i];
+    always_assert_flog(
+      newTy.subtypeOf(indexTy),
+      "Index local static type invariant violated in {} {}{}.\n"
+      "   Static Local {}: {} is not a subtype of {}\n",
+      func->unit->filename->data(),
+      func->cls ? folly::to<std::string>(func->cls->name->data(), "::")
+      : std::string{},
+      func->name->data(),
+      local_string(*func, i),
+      show(newTy),
+      show(indexTy)
+    );
+    if (!newTy.strictSubtypeOf(indexTy)) continue;
+    indexTy = newTy;
+  }
+}
+
+void Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t,
+                               ContextSet& deps) {
   auto const fdata = create_func_info(*m_data, func);
 
   always_assert_flog(
-    t.subtypeOf(fdata->returnTy),
+    t.subtypeOf(fdata->second.returnTy),
     "Index return type invariant violated in {} {}{}.\n"
     "   {} is not a subtype of {}\n",
     func->unit->filename->data(),
@@ -2470,18 +2766,18 @@ Index::refine_return_type(borrowed_ptr<const php::Func> func, Type t) {
               : std::string{},
     func->name->data(),
     show(t),
-    show(fdata->returnTy)
+    show(fdata->second.returnTy)
   );
 
-  if (!t.strictSubtypeOf(fdata->returnTy)) return {};
-  if (fdata->returnRefinments + 1 < options.returnTypeRefineLimit) {
-    fdata->returnTy = t;
-    ++fdata->returnRefinments;
-    return find_deps(*m_data, func, Dep::ReturnTy);
+  if (!t.strictSubtypeOf(fdata->second.returnTy)) return;
+  if (fdata->second.returnRefinments + 1 < options.returnTypeRefineLimit) {
+    fdata->second.returnTy = t;
+    ++fdata->second.returnRefinments;
+    find_deps(*m_data, func, Dep::ReturnTy, deps);
+    return;
   }
   FTRACE(1, "maxed out return type refinements on {}:{}\n",
-    func->unit->filename->data(), func->name->data());
-  return {};
+    func->unit->filename, func->name);
 }
 
 bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
@@ -2498,7 +2794,7 @@ bool Index::refine_closure_use_vars(borrowed_ptr<const php::Class> cls,
   auto changed = false;
   for (auto i = uint32_t{0}; i < vars.size(); ++i) {
     always_assert(vars[i].subtypeOf(current[i]));
-    if (current[i].strictSubtypeOf(vars[i])) {
+    if (vars[i].strictSubtypeOf(current[i])) {
       changed = true;
       current[i] = vars[i];
     }
@@ -2585,8 +2881,8 @@ void Index::refine_public_statics(const PublicSPropIndexer& indexer) {
     auto const it      = cinfo->publicStaticProps.find(name);
 
     FTRACE(2, "refine_public_statics: {} {} <-- {}\n",
-      cinfo->cls->name->data(),
-      name->data(),
+      cinfo->cls->name,
+      name,
       show(newType));
 
     // Cases where it's not public should've already been filtered out in the
@@ -2744,7 +3040,7 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
     if (m_unknown.insert(acc, vname->m_data.pstr)) {
       acc->second = val;
     } else {
-      acc->second = union_of(acc->second, val);
+      acc->second |= val;
     }
     return;
   }
@@ -2795,7 +3091,7 @@ void PublicSPropIndexer::merge(Context ctx, Type tcls, Type name, Type val) {
   if (m_known.insert(acc, KnownKey { affectedCInfo, vname->m_data.pstr })) {
     acc->second = val;
   } else {
-    acc->second = union_of(acc->second, val);
+    acc->second |= val;
   }
 }
 

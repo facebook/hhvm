@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -69,11 +69,21 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
   int size;
+#if LZ4_VERSION_NUMBER >= 10700
+  if (high) {
+    size = LZ4_compress_HC(
+        uncompressed.data(), compressed, uncompressed.size(), bufsize, 0);
+  } else {
+    size = LZ4_compress_default(
+        uncompressed.data(), compressed, uncompressed.size(), bufsize);
+  }
+#else
   if (high) {
     size = LZ4_compressHC(uncompressed.data(), compressed, uncompressed.size());
   } else {
     size = LZ4_compress(uncompressed.data(), compressed, uncompressed.size());
   }
+#endif
   if (size < 0) {
     return false;
   }
@@ -90,17 +100,10 @@ Variant HHVM_FUNCTION(lz4_uncompress, const String& compressed) {
   int inSize = compressed.size() - (compressed_ptr - compressed.data());
   String s = String(dsize, ReserveString);
   char* uncompressed = s.mutableData();
-#ifdef LZ4_MAX_INPUT_SIZE
   int ret = LZ4_decompress_safe(compressed_ptr, uncompressed, inSize, dsize);
   if (ret != dsize) {
     return false;
   }
-#else
-  int ret = LZ4_decompress_fast(compressed_ptr, uncompressed, dsize);
-  if (ret <= 0 || ret > inSize) {
-    return false;
-  }
-#endif
 
   return s.setSize(dsize);
 }

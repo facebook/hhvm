@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -677,7 +677,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunction *function,
     }
   }
   if (params) {
-    int num_of_params = 0;
+    num_of_params = 0;
     xmlNodePtr trav = params;
     while (trav != nullptr) {
       if (trav->type == XML_ELEMENT_NODE) {
@@ -994,7 +994,6 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
     while (trav != nullptr) {
       if (trav->type == XML_ELEMENT_NODE) {
         xmlNodePtr hdr_func = trav;
-        xmlAttrPtr attr;
         int mustUnderstand = 0;
 
         if (version == SOAP_1_1) {
@@ -1247,7 +1246,6 @@ static xmlDocPtr serialize_response_call(
     string fault_ns;
 
     if (!headers.empty()) {
-      xmlNodePtr head;
       encodePtr hdr_enc;
       int hdr_use = SOAP_LITERAL;
       Variant hdr_ret = obj->o_get("headerfault");
@@ -1439,15 +1437,15 @@ static xmlDocPtr serialize_response_call(
           if (fault->bindingAttributes) {
             sdlSoapBindingFunctionFaultPtr fb = fault->bindingAttributes;
             if (!fb->ns.empty()) {
-              xmlNsPtr ns = encode_add_ns(x, fb->ns.c_str());
-              xmlSetNs(x, ns);
+              xmlNsPtr ns2 = encode_add_ns(x, fb->ns.c_str());
+              xmlSetNs(x, ns2);
             }
           }
         } else {
           if (sparam->element) {
-            xmlNsPtr ns = encode_add_ns(x, sparam->element->namens.c_str());
+            xmlNsPtr ns2 = encode_add_ns(x, sparam->element->namens.c_str());
             xmlNodeSetName(x, BAD_CAST(sparam->element->name.c_str()));
-            xmlSetNs(x, ns);
+            xmlSetNs(x, ns2);
           }
         }
       }
@@ -1691,15 +1689,16 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
         }
       } else {
         sdlTypePtr elementType;
-        sdlAttributeMap::iterator iter;
-        sdlExtraAttributeMap::iterator iterExtra;
+        sdlAttributeMap::iterator sdlIter;
+        sdlExtraAttributeMap::iterator sdlIterExtra;
         if (!type->attributes.empty() &&
-            ((iter = type->attributes.find(SOAP_1_2_ENC_NAMESPACE":itemType"))
+            (
+            (sdlIter = type->attributes.find(SOAP_1_2_ENC_NAMESPACE":itemType"))
              != type->attributes.end())) {
-          if ((iterExtra = iter->second->extraAttributes.find
+          if ((sdlIterExtra = sdlIter->second->extraAttributes.find
                (WSDL_NAMESPACE":itemType"))
-              != iter->second->extraAttributes.end()) {
-            auto ext = iterExtra->second;
+              != sdlIter->second->extraAttributes.end()) {
+            auto ext = sdlIterExtra->second;
             buf.append(ext->val);
             buf.append(' ');
           }
@@ -1714,12 +1713,13 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
         }
         buf.append(type->name);
         if (!type->attributes.empty() &&
-            ((iter = type->attributes.find(SOAP_1_2_ENC_NAMESPACE":arraySize"))
+            (
+            (sdlIter = type->attributes.find(SOAP_1_2_ENC_NAMESPACE":arraySize"))
              != type->attributes.end())) {
-          if ((iterExtra = iter->second->extraAttributes.find
+          if ((sdlIterExtra = sdlIter->second->extraAttributes.find
                (WSDL_NAMESPACE":itemType"))
-              != iter->second->extraAttributes.end()) {
-            auto ext = iterExtra->second;
+              != sdlIter->second->extraAttributes.end()) {
+            auto ext = sdlIterExtra->second;
             buf.append('[');
             buf.append(ext->val);
             buf.append(']');
@@ -1780,14 +1780,13 @@ static void type_to_string(sdlType *type, StringBuffer &buf, int level) {
 
 static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
                             int level) {
-  int i;
   switch (model->kind) {
   case XSD_CONTENT_ELEMENT:
     type_to_string(model->u_element, buf, level);
     buf.append(";\n");
     break;
   case XSD_CONTENT_ANY:
-    for (i = 0;i < level;i++) {
+    for (int i = 0;i < level;i++) {
       buf.append(' ');
     }
     buf.append("<anyXML> any;\n");

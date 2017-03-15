@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -278,7 +278,6 @@ constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
   IRTP(PtrToCounted, Ptr,    kCounted)                                  \
   IRT(Gen,                   kCell|kBoxedCell)                          \
   IRT(InitGen,               kGen & ~kUninit)                           \
-  IRT(StkElem,               kGen|kCls)                                 \
   IRTP(PtrToGen,     Ptr,    kGen)                                      \
   IRTP(PtrToInitGen, Ptr,    kInitGen)                                  \
   PTR_TYPES(IRTP_FROM_PTR, PTR_R, Gen)                                  \
@@ -398,7 +397,7 @@ public:
    * Return true iff there exists a DataType in the range [KindOfUninit,
    * KindOfRef] that represents a non-strict supertype of this type.
    *
-   * @requires: *this <= StkElem
+   * @requires: *this <= Gen
    */
   bool isKnownDataType() const;
 
@@ -537,17 +536,16 @@ public:
   // Constant introspection.                                            [const]
 
   /*
-   * Does this Type have a constant value? If true, we can call xxVal().
+   * Does this Type have a constant value?  If true, we can call xxVal().
    *
    * Note: Bottom is a type with no value, and Uninit/InitNull/Nullptr are
    * considered types with a single unique value, so this function returns false
-   * for those types. You may want to explicitly check for them as needed.
-   *
+   * for those types.  You may want to explicitly check for them as needed.
    */
   bool hasConstVal() const;
 
   /*
-   * @return hasConstVal() && *this <= t.
+   * @returns: hasConstVal() && *this <= t
    */
   bool hasConstVal(Type t) const;
 
@@ -558,6 +556,13 @@ public:
    */
   template<typename T>
   bool hasConstVal(T val) const;
+
+  /*
+   * Whether this Type represents a single possible value.
+   *
+   * @returns: hasConstVal() || subtypeOfAny(TNullptr, TInitNull, TUninit)
+   */
+  bool admitsSingleVal() const;
 
   /*
    * Return the const value for a const Type as a uint64_t.
@@ -617,6 +622,13 @@ public:
    */
   Type unspecialize() const;
 
+  /*
+   * Return a copy of this Type with the specialization and staticness
+   * dropped.
+   *
+   * @requires *this <= TInitCell
+   */
+  Type modified() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Specialization introspection.                                      [const]

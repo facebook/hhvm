@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,9 +94,6 @@ void parse_options(int argc, char** argv) {
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
-    ("interceptable",
-      po::value(&interceptable_fns)->composing(),
-      "Add an interceptable function")
     ("trace",
       po::value(&trace_fns)->composing(),
       "Add a function to increase tracing level on (for debugging)")
@@ -122,6 +119,7 @@ void parse_options(int argc, char** argv) {
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
+    ("remove-unused-clsref-slots", po::value(&options.RemoveUnusedClsRefSlots))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
@@ -132,7 +130,6 @@ void parse_options(int argc, char** argv) {
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
-    ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
     ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
     ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
     ;
@@ -171,7 +168,6 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
-  options.InterceptableFunctions = make_method_map(interceptable_fns);
   options.TraceFunctions         = make_method_map(trace_fns);
   logging = !no_logging;
 }
@@ -191,12 +187,19 @@ UNUSED void validate_options() {
     std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
     std::exit(1);
   }
+
+  if (options.RemoveUnusedClsRefSlots && !options.GlobalDCE) {
+    std::cerr << "-fremove-unused-clsref-slots requires -fglobal-dce\n";
+    std::exit(1);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void open_repo(const std::string& path) {
   RuntimeOption::RepoCentralPath = path;
+  // Make sure the changes take effect
+  Repo::shutdown();
   Repo::get();
 }
 
@@ -208,6 +211,12 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   open_repo(input_repo);
   Repo::get().loadGlobalData();
   SCOPE_EXIT { Repo::shutdown(); };
+
+  RuntimeOption::EvalPromoteEmptyObject =
+    Repo::get().global().PromoteEmptyObject;
+
+  RuntimeOption::EvalJitEnableRenameFunction =
+    Repo::get().global().EnableRenameFunction;
 
   if (Repo::get().global().UsedHHBBC) {
     throw std::runtime_error(
@@ -234,14 +243,19 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   auto gd                     = Repo::GlobalData{};
   gd.UsedHHBBC                = true;
+  gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints            = options.HardTypeHints;
   gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
+  gd.ElideAutoloadInvokes     = options.ElideAutoloadInvokes;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
   gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
+  gd.PHP7_Builtins            = RuntimeOption::PHP7_Builtins;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
+  gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
@@ -281,6 +295,15 @@ int main(int argc, char** argv) try {
     return 1;
   }
 
+  initialize_repo();
+
+  LitstrTable::init();
+  RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoEvalMode = "readonly";
+  open_repo(input_repo);
+  Repo::get().loadGlobalData();
+  LitstrTable::fini();
+
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
   RuntimeOption::Load(ini, config);
@@ -295,9 +318,10 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoAuthoritative = true;
 
   register_process_init();
-  initialize_repo();
 
   hphp_process_init();
+  SCOPE_EXIT { hphp_process_exit(); };
+
   Repo::shutdown();
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);

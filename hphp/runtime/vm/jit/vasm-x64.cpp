@@ -83,7 +83,6 @@ struct Vgen {
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
-  void emit(const ldimmqs& i);
   void emit(const load& i);
   void emit(const store& i);
   void emit(const mcprep& i);
@@ -103,7 +102,6 @@ struct Vgen {
 
   // php function abi
   void emit(const phpret& i);
-  void emit(const callphp& i);
   void emit(const tailcallphp& i);
   void emit(const callarray& i);
   void emit(const contenter& i);
@@ -120,6 +118,7 @@ struct Vgen {
   void emit(const unwind& i);
 
   // instructions
+  void emit(absdbl i) { unary(i); a.psllq(1, i.d); a.psrlq(1, i.d); }
   void emit(andb i) { commuteSF(i); a.andb(i.s0, i.d); }
   void emit(andbi i) { binary(i); a.andb(i.s0, i.d); }
   void emit(const andbim& i) { a.andb(i.s, i.m); }
@@ -171,7 +170,6 @@ struct Vgen {
   void emit(const inclm& i) { a.incl(i.m); }
   void emit(incq i) { unary(i); a.incq(i.d); }
   void emit(const incqm& i) { a.incq(i.m); }
-  void emit(const incqmlock& i) { a.lock(); a.incq(i.m); }
   void emit(const incwm& i) { a.incw(i.m); }
   void emit(const jcc& i);
   void emit(const jcci& i);
@@ -214,8 +212,6 @@ struct Vgen {
   void emit(const pop& i) { a.pop(i.d); }
   void emit(const popm& i) { a.pop(i.d); }
   void emit(const popf& i) { assertx(i.d == RegSF{0}); a.popf(); }
-  void emit(psllq i) { binary(i); a.psllq(i.s0, i.d); }
-  void emit(psrlq i) { binary(i); a.psrlq(i.s0, i.d); }
   void emit(const push& i) { a.push(i.s); }
   void emit(const pushm& i) { a.push(i.s); }
   void emit(const pushf& i) { assertx(i.s == RegSF{0}); a.pushf(); }
@@ -346,15 +342,125 @@ X64Assembler& prefix(X64Assembler& a, const Vptr& ptr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * Returns true iff the status flags necessary to take a j<a> imply that a j<b>
+ * will also be taken.
+ */
+bool ccImplies(ConditionCode a, ConditionCode b) {
+  if (a == b) return true;
+
+  switch (a) {
+    case CC_None:
+    case CC_O:  case CC_NO:
+    case CC_AE: case CC_BE:
+    case CC_NE:
+    case CC_S:  case CC_NS:
+    case CC_P:  case CC_NP:
+    case CC_GE: case CC_LE:
+      return false;
+
+    case CC_B: return b == CC_BE;
+    case CC_E: return b == CC_BE || b == CC_LE;
+    case CC_A: return b == CC_AE || b == CC_NE;
+    case CC_L: return b == CC_LE;
+    case CC_G: return b == CC_NE || b == CC_GE;
+  }
+  always_assert(false);
+}
+
+static CodeAddress toReal(Venv& env, CodeAddress a) {
+  if (env.text.main().code.contains(a)) {
+    return env.text.main().code.toDestAddress(a);
+  }
+  if (env.text.cold().code.contains(a)) {
+    return env.text.cold().code.toDestAddress(a);
+  }
+  if (env.text.frozen().code.contains(a)) {
+    return env.text.frozen().code.toDestAddress(a);
+  }
+  return a;
+}
+
+/*
+ * When two jccs go to the same destination, the cc of the first is compatible
+ * with the cc of the second, and they're within a one-byte offset of each
+ * other, retarget the first to jump to the second. This will allow the
+ * relocator to shrink the first one, and the extra jmp shouldn't matter since
+ * we try to only do this to rarely taken jumps.
+ */
+void retargetJumps(Venv& env,
+                   const jit::hash_map<TCA, jit::vector<TCA>>& jccs) {
+  jit::hash_set<TCA> retargeted;
+  for (auto& pair : jccs) {
+    auto const& jmps = pair.second;
+    if (jmps.size() < 2) continue;
+
+    for (size_t i = 0; i < jmps.size(); ++i) {
+      DecodedInstruction di(toReal(env, jmps[i]), jmps[i]);
+      // Don't bother if the jump is already a short jump.
+      if (di.size() != 6) continue;
+
+      for (size_t j = jmps.size() - 1; j > i; --j) {
+        auto const delta = jmps[j] - jmps[i] + 2;
+        // Backwards jumps are probably not guards, and don't retarget to a
+        // dest that's more than a one-byte offset away.
+        if (delta < 0 || !deltaFits(delta, sz::byte)) continue;
+
+        DecodedInstruction dj(toReal(env, jmps[j]), jmps[j]);
+        if (!ccImplies(di.jccCondCode(), dj.jccCondCode())) continue;
+
+        di.setPicAddress(jmps[j]);
+        retargeted.insert(jmps[i]);
+
+        // We might've converted a smashable jump to a regular in-unit jump, so
+        // remove any smashable alignments.
+        auto range = env.meta.alignments.equal_range(jmps[i]);
+        while (range.first != range.second) {
+          auto iter = range.first;
+          ++range.first;
+
+          auto& align = iter->second;
+          if (align.first == Alignment::SmashJcc &&
+              align.second == AlignContext::Live) {
+            env.meta.alignments.erase(iter);
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  // Finally, remove any retargeted jmps from inProgressTailJumps.
+  if (!retargeted.empty()) {
+    GrowableVector<IncomingBranch> newTailJumps;
+    for (auto& jmp : env.meta.inProgressTailJumps) {
+      if (retargeted.count(jmp.toSmash()) == 0) {
+        newTailJumps.push_back(jmp);
+      }
+    }
+    env.meta.inProgressTailJumps.swap(newTailJumps);
+  }
+}
+
 void Vgen::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJmp(p.instr, env.addrs[p.target]);
+    X64Assembler::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
   }
+
+  auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
+  jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJcc(p.instr, env.addrs[p.target]);
+    X64Assembler::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    if (optLevel >= 2 ||
+        (optLevel == 1 && p.target >= env.unit.blocks.size())) {
+      jccs[env.addrs[p.target]].emplace_back(p.instr);
+    }
   }
+
+  if (!jccs.empty()) retargetJumps(env, jccs);
 }
 
 void Vgen::pad(CodeBlock& cb) {
@@ -453,10 +559,6 @@ void Vgen::emit(const ldimmq& i) {
   }
 }
 
-void Vgen::emit(const ldimmqs& i) {
-  emitSmashableMovq(a.code(), env.meta, i.s.q(), i.d);
-}
-
 void Vgen::emit(const load& i) {
   prefix(a, i.s);
   auto mref = i.s.mr();
@@ -490,7 +592,7 @@ void Vgen::emit(const mcprep& i) {
    */
   auto const mov_addr = emitSmashableMovq(a.code(), env.meta, 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
-  smashMovq(mov_addr, (imm << 1) | 1);
+  smashMovq(a.toDestAddress(mov_addr), (imm << 1) | 1);
 
   env.meta.addressImmediates.insert(reinterpret_cast<TCA>(~imm));
 }
@@ -554,12 +656,6 @@ void Vgen::emit(const phpret& i) {
   a.ret();
 }
 
-void Vgen::emit(const callphp& i) {
-  const auto call = emitSmashableCall(a.code(), env.meta, i.stub);
-  setJmpTransID(env, call);
-  emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
 void Vgen::emit(const tailcallphp& i) {
   emit(pushm{i.fp[AROFF(m_savedRip)]});
   emit(jmpr{i.target, i.args});
@@ -568,21 +664,6 @@ void Vgen::emit(const tailcallphp& i) {
 void Vgen::emit(const callarray& i) {
   emit(call{i.target, i.args});
 }
-
-void Vgen::emit(const calltc& i) {
-  a.push(i.exittc);
-  a.push(i.fp[AROFF(m_savedRip)]);
-
-  Label stub;
-  a.call(stub);
-
-  asm_label(a, stub);
-  assertx(!i.args.contains(reg::rax));
-  a.pop(reg::rax);  // unused
-  a.jmp(i.target);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const contenter& i) {
   Label Stub, End;
@@ -597,6 +678,21 @@ void Vgen::emit(const contenter& i) {
   a.call(Stub);
   // m_savedRip will point here.
   emit(unwind{{i.targets[0], i.targets[1]}});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Vgen::emit(const calltc& i) {
+  a.push(i.exittc);
+  a.push(i.fp[AROFF(m_savedRip)]);
+
+  Label stub;
+  a.call(stub);
+
+  asm_label(a, stub);
+  assertx(!i.args.contains(reg::rax));
+  a.pop(reg::rax);  // unused
+  a.jmp(i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -804,6 +900,36 @@ void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void lower(Vunit& unit, popp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << pop{inst.d0};
+    v << pop{inst.d1};
+  });
+}
+
+void lower(Vunit& unit, poppm& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << popm{inst.d0};
+    v << popm{inst.d1};
+  });
+}
+
+void lower(Vunit& unit, pushp& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << push{inst.s0};
+    v << push{inst.s1};
+  });
+}
+
+void lower(Vunit& unit, pushpm& inst, Vlabel b, size_t i) {
+  lower_impl(unit, b, i, [&] (Vout& v) {
+    v << pushm{inst.s0};
+    v << pushm{inst.s1};
+  });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   if (inst.saveframe) {
     unit.blocks[b].code[i] = push{rvmfp()};
@@ -836,15 +962,6 @@ void lower(Vunit& unit, resumetc& inst, Vlabel b, size_t i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void lower(Vunit& unit, absdbl& inst, Vlabel b, size_t i) {
-  lower_impl(unit, b, i, [&] (Vout& v) {
-    // Clear the high bit.
-    auto tmp = v.makeReg();
-    v << psllq{1, inst.s, tmp};
-    v << psrlq{1, tmp, inst.d};
-  });
-}
 
 void lower(Vunit& unit, sar& inst, Vlabel b, size_t i) {
   lower_impl(unit, b, i, [&] (Vout& v) {
@@ -895,65 +1012,21 @@ void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void lower_vcallarray(Vunit& unit, Vlabel b) {
-  auto& code = unit.blocks[b].code;
-  // vcallarray can only appear at the end of a block.
-  auto const inst = code.back().get<vcallarray>();
-  auto const irctx = code.back().irctx();
-
-  auto argRegs = inst.args;
-  auto const& srcs = unit.tuples[inst.extraArgs];
-  jit::vector<Vreg> dsts;
-  for (int i = 0; i < srcs.size(); ++i) {
-    dsts.emplace_back(rarg(i));
-    argRegs |= rarg(i);
-  }
-
-  code.back() = copyargs{unit.makeTuple(srcs), unit.makeTuple(std::move(dsts))};
-  code.emplace_back(callarray{inst.target, argRegs}, irctx);
-  code.emplace_back(unwind{{inst.targets[0], inst.targets[1]}}, irctx);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
-  Timer timer(Timer::vasm_lower, unit.log_entry);
+  vasm_lower(unit, [&] (const VLS& env, Vinstr& inst, Vlabel b, size_t i) {
+    switch (inst.op) {
+#define O(name, ...)                      \
+      case Vinstr::name:                  \
+        lower(unit, inst.name##_, b, i);  \
+        break;
 
-  // This pass relies on having no critical edges in the unit.
-  splitCriticalEdges(unit);
-
-  // Scratch block can change blocks allocation, hence cannot use regular
-  // iterators.
-  auto& blocks = unit.blocks;
-
-  PostorderWalker{unit}.dfs([&] (Vlabel ib) {
-    assertx(!blocks[ib].code.empty());
-
-    auto& back = blocks[ib].code.back();
-    if (back.op == Vinstr::vcallarray) {
-      lower_vcallarray(unit, Vlabel{ib});
-    }
-
-    for (size_t ii = 0; ii < blocks[ib].code.size(); ++ii) {
-      vlower(unit, ib, ii);
-
-      auto& inst = blocks[ib].code[ii];
-      switch (inst.op) {
-#define O(name, ...)                          \
-        case Vinstr::name:                    \
-          lower(unit, inst.name##_, ib, ii);  \
-          break;
-
-        VASM_OPCODES
+      VASM_OPCODES
 #undef O
-      }
     }
   });
-
-  printUnit(kVasmLowerLevel, "after lower for X64", unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -970,11 +1043,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   assertx(checkWidths(unit));
 
-  if (abi.canSpill && RuntimeOption::EvalProfBranchSampleFreq > 0) {
-    // Only profile branches if we're allowed to spill (and if branch profiling
-    // is on, of course).  This is not only for the freedom to generate
-    // arbitrary code, but also because we don't want to profile unique stubs
-    // and such.
+  if (unit.context && !isProfiling(unit.context->kind) && abi.canSpill &&
+      RuntimeOption::EvalProfBranchSampleFreq > 0) {
+    // Even when branch profiling is on, we still only want to profile
+    // non-profiling translations of PHP functions.  We also require that we
+    // can spill, so that we can generate arbitrary profiling code, and also to
+    // ensure we don't profile unique stubs and such.
     profile_branches(unit);
   }
 
@@ -997,7 +1071,7 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
   }
 }
 
-void emitX64(const Vunit& unit, Vtext& text, CGMeta& fixups,
+void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
   vasm_emit<Vgen>(unit, text, fixups, asmInfo);
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "hphp/util/portability.h"
 
 #include <folly/CPortability.h> // FOLLY_SANITIZE_ADDRESS
+#include <folly/Format.h>
 
 #include <algorithm>
 #include <atomic>
@@ -227,6 +228,21 @@ using AtomicLowPtr =
                                               write_order>>;
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+namespace folly {
+template<class T> class FormatValue<HPHP::LowPtr<T>> {
+ public:
+  explicit FormatValue(HPHP::LowPtr<T> v) : m_val(v) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<T*>(m_val.get()).format(arg, cb);
+  }
+
+ private:
+  const HPHP::LowPtr<T> m_val;
+};
 }
 
 #endif // incl_HPHP_LOW_PTR_H_

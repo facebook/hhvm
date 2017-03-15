@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_MCGEN_H_
 #define incl_HPHP_JIT_MCGEN_H_
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -31,6 +32,8 @@ namespace jit {
 
 struct IRUnit;
 struct Vunit;
+
+namespace tc { struct ThreadTCBuffer; }
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -69,13 +72,6 @@ struct TransEnv {
   TransID transID{kInvalidTransID};
 
   /*
-   * If set regenerate the prologue for this trans rec. This is intended for
-   * optimized translations of DV initializers which should always follow their
-   * prologues.
-   */
-  ProfTransRec* prologue{nullptr};
-
-  /*
    * hhir and vasm units. Both will be set iff bytecode -> hhir lowering was
    * successful (hhir -> vasm lowering never fails).
    */
@@ -93,6 +89,36 @@ struct TransEnv {
 
 namespace mcgen {
 
+struct UseThreadLocalTC {
+  UseThreadLocalTC(UseThreadLocalTC&&) = delete;
+  UseThreadLocalTC& operator=(UseThreadLocalTC&&) = delete;
+
+#ifdef NDEBUG
+  explicit UseThreadLocalTC(tc::ThreadTCBuffer&) {}
+#else
+  explicit UseThreadLocalTC(tc::ThreadTCBuffer& buf);
+  ~UseThreadLocalTC();
+
+private:
+  tc::ThreadTCBuffer& m_buf;
+#endif
+};
+
+struct ReadThreadLocalTC {
+  ReadThreadLocalTC(ReadThreadLocalTC&&) = delete;
+  ReadThreadLocalTC& operator=(ReadThreadLocalTC&&) = delete;
+
+#ifdef NDEBUG
+  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer&) {}
+#else
+  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer& m_buf);
+  ~ReadThreadLocalTC();
+
+private:
+  const tc::ThreadTCBuffer& m_buf;
+#endif
+};
+
 /*
  * Look up or translate a func prologue or func body.
  */
@@ -109,7 +135,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx);
 /*
  * Regionize and optimize the given function using profile data.
  *
- * Returns true iff the function was successfully retranslated.
+ * Returns true iff the function has been successfully optimized.
  */
 bool retranslateOpt(FuncId funcId);
 
@@ -123,6 +149,12 @@ void checkRetranslateAll();
  * Called once when the JIT is activated to initialize internal mcgen structures
  */
 void processInit();
+
+/*
+ * Called once before process shutdown. May block to wait for any pending JIT
+ * worker threads.
+ */
+void processExit();
 
 /*
  * True iff mcgen::processInit() has been called
@@ -139,6 +171,26 @@ int64_t jitInitTime();
  * `transKind'.
  */
 bool dumpTCAnnotation(const Func& func, TransKind transKind);
+
+/*
+ * Is the thread local TC in use
+ */
+bool isLocalTCEnabled();
+
+/*
+ * Expected size of all thread local TC buffers
+ */
+size_t localTCSize();
+
+/*
+ * Per-thread cached TC buffer
+ */
+TCA cachedLocalTCBuffer();
+
+/*
+ * Is still a pending call to retranslateAll()
+ */
+bool retranslateAllPending();
 
 }}}
 

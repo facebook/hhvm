@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -74,9 +74,7 @@ void IntlError::throwException(const char *format, ...) {
 static __thread std::string* s_defaultLocale;
 
 void IntlExtension::bindIniSettings() {
-  // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
-  // but right now this is called for every request.
-  if (s_defaultLocale) return;
+  assert(!s_defaultLocale);
   s_defaultLocale = new std::string;
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                    "intl.default_locale", "",

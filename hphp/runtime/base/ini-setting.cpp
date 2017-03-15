@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -28,6 +29,7 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/ext/json/ext_json.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
@@ -489,9 +491,23 @@ IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
   return *this;
 }
 
+namespace {
+void mergeSettings(Variant& curval, const Variant& v) {
+  if (v.isArray() && curval.isArray()) {
+    for (auto i = v.toCArrRef().begin(); !i.end(); i.next()) {
+      mergeSettings(curval.toArrRef().lvalAt(i.first()),
+                    i.secondRef());
+    }
+  } else {
+    curval = v;
+  }
+}
+}
+
 void IniSettingMap::set(const String& key, const Variant& v) {
   assert(this->isArray());
-  m_map.toArrRef().set(key, v);
+  auto& curval = m_map.toArrRef().lvalAt(key);
+  mergeSettings(curval, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -877,30 +893,34 @@ static CallbackMap s_system_ini_callbacks;
 //
 static IMPLEMENT_THREAD_LOCAL(CallbackMap, s_user_callbacks);
 
-struct SettingMap {
-  std::map<std::string, Variant> settings;
-  TYPE_SCAN_CUSTOM_FIELD(settings) {
-    for (auto& e : settings) scanner.scan(e);
+struct SystemSettings {
+  std::unordered_map<std::string,Variant> settings;
+  TYPE_SCAN_IGNORE_ALL; // the variants are always static
+};
+
+struct LocalSettings {
+  using Map = req::hash_map<std::string,Variant>;
+  folly::Optional<Map> settings;
+  Map& init() {
+    if (!settings) settings.emplace();
+    return settings.value();
   }
+  void clear() { settings.clear(); }
+  bool empty() { return !settings.hasValue() || settings.value().empty(); }
 };
 
 // Set by a .ini file at the start
-static SettingMap s_system_settings;
+static SystemSettings s_system_settings;
 
 // Changed during the course of the request
-static IMPLEMENT_THREAD_LOCAL(SettingMap, s_saved_defaults);
+static IMPLEMENT_THREAD_LOCAL(LocalSettings, s_saved_defaults);
 
 struct IniSettingExtension final : Extension {
   IniSettingExtension() : Extension("hhvm.ini", NO_EXTENSION_VERSION_YET) {}
 
   // s_saved_defaults should be clear at the beginning of any request
   void requestInit() override {
-    assert(s_saved_defaults->settings.empty());
-  }
-
-  void requestShutdown() override {
-    IniSetting::ResetSavedDefaults();
-    assert(s_saved_defaults->settings.empty());
+    assert(!s_saved_defaults->settings.hasValue());
   }
 } s_ini_extension;
 
@@ -993,9 +1013,9 @@ void IniSetting::Unbind(const std::string& name) {
 }
 
 static IniCallbackData* get_callback(const std::string& name) {
-  CallbackMap::iterator iter = s_system_ini_callbacks.find(name.data());
+  CallbackMap::iterator iter = s_system_ini_callbacks.find(name);
   if (iter == s_system_ini_callbacks.end()) {
-    iter = s_user_callbacks->find(name.data());
+    iter = s_user_callbacks->find(name);
     if (iter == s_user_callbacks->end()) {
       return nullptr;
     }
@@ -1017,8 +1037,21 @@ bool IniSetting::Get(const String& name, String& value) {
   return ret;
 }
 
+static bool shouldHideSetting(const std::string& name) {
+  for (auto& sub : RuntimeOption::EvalIniGetHide) {
+    if (name.find(sub) != std::string::npos) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool IniSetting::Get(const String& name, Variant& value) {
-  auto cb = get_callback(name.toCppString());
+  auto nameStr = name.toCppString();
+  if (shouldHideSetting(nameStr)) {
+    return false;
+  }
+  auto cb = get_callback(nameStr);
   if (!cb) {
     return false;
   }
@@ -1077,23 +1110,26 @@ bool IniSetting::GetSystem(const String& name, Variant& value) {
 }
 
 bool IniSetting::SetUser(const String& name, const Variant& value) {
-  auto it = s_saved_defaults->settings.find(name.toCppString());
-  if (it == s_saved_defaults->settings.end()) {
+  auto& defaults = s_saved_defaults->init();
+  auto it = defaults.find(name.toCppString());
+  if (it == defaults.end()) {
     Variant def;
     auto success = Get(name, def); // def gets populated here
     if (success) {
-      s_saved_defaults->settings[name.toCppString()] = def;
+      defaults[name.toCppString()] = def;
     }
   }
   return ini_set(name.toCppString(), value, PHP_INI_SET_USER);
 }
 
 void IniSetting::RestoreUser(const String& name) {
-  auto& defaults = s_saved_defaults->settings;
-  auto it = defaults.find(name.toCppString());
-  if (it != defaults.end() &&
-      ini_set(name.toCppString(), it->second, PHP_INI_SET_USER)) {
-    defaults.erase(it);
+  if (!s_saved_defaults->empty()) {
+    auto& defaults = s_saved_defaults->settings.value();
+    auto it = defaults.find(name.toCppString());
+    if (it != defaults.end() &&
+        ini_set(name.toCppString(), it->second, PHP_INI_SET_USER)) {
+      defaults.erase(it);
+    }
   }
 };
 
@@ -1106,10 +1142,13 @@ bool IniSetting::ResetSystemDefault(const std::string& name) {
 }
 
 void IniSetting::ResetSavedDefaults() {
-  for (auto& item : s_saved_defaults->settings) {
-    ini_set(item.first, item.second, PHP_INI_SET_USER);
+  if (!s_saved_defaults->empty()) {
+    for (auto& item : s_saved_defaults->settings.value()) {
+      ini_set(item.first, item.second, PHP_INI_SET_USER);
+    }
   }
-  s_saved_defaults->settings.clear();
+  // destroy the local settings hashtable even if it's empty
+  s_saved_defaults->clear();
 }
 
 bool IniSetting::GetMode(const std::string& name, Mode& mode) {
@@ -1142,6 +1181,9 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     if (ext && ext != iter.second.extension) {
       continue;
     }
+    if (shouldHideSetting(iter.first)) {
+      continue;
+    }
 
     auto value = iter.second.getCallback();
     // Cast all non-arrays to strings since that is what everything used ot be
@@ -1168,6 +1210,12 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
     }
   }
   return r;
+}
+
+std::string IniSetting::GetAllAsJSON() {
+  Array settings = GetAll(empty_string(), true);
+  String out = Variant::attach(HHVM_FN(json_encode)(settings)).toString();
+  return std::string(out.c_str());
 }
 
 void add_default_config_files_globbed(

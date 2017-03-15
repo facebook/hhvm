@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,8 +44,6 @@ void updateFuncPrologue(TCA start, ProfTransRec* rec) {
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
 
-  auto codeLock = lockCode();
-
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.
@@ -76,7 +74,6 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
 
   profileSetHotFuncAttr();
-  auto codeLock = lockCode();
   auto codeView = code().view(kind);
   TCA mainOrig = codeView.main().frontier();
   CGMeta fixups;
@@ -109,8 +106,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
 
   TCA start = genFuncPrologue(transID, kind, func, argc, codeView, fixups);
 
-  auto loc = maker.markEnd();
-  auto metaLock = lockMetadata();
+  auto loc = maker.markEnd().loc();
 
   if (RuntimeOption::EvalEnableReusableTC) {
     TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),
@@ -160,9 +156,7 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
         func->fullName()->data(), argc, start);
   func->setPrologue(paramIndex, start);
 
-  assertx(kind == TransKind::LivePrologue ||
-          kind == TransKind::ProfPrologue ||
-          kind == TransKind::OptPrologue);
+  assertx(isPrologue(kind));
 
   auto tr = maker.rec(funcBody, transID, kind);
   transdb::addTranslation(tr);
@@ -172,18 +166,13 @@ TCA emitFuncPrologueImpl(Func* func, int argc, TransKind kind) {
 
 
   recordGdbTranslation(funcBody, func, codeView.main(), loc.mainStart(),
-                       false, true);
+                       loc.mainEnd(), false, true);
   recordBCInstr(OpFuncPrologue, loc.mainStart(), loc.mainEnd(), false);
 
   return start;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-}
-
-TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
-  VMProtect _;
-
+TCA emitFuncPrologueInternal(Func* func, int argc, TransKind kind) {
   try {
     return emitFuncPrologueImpl(func, argc, kind);
   } catch (const DataBlockFull& dbFull) {
@@ -197,23 +186,45 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
     code().disableHot();
     try {
       return emitFuncPrologueImpl(func, argc, kind);
-    } catch (const DataBlockFull& dbFull) {
+    } catch (const DataBlockFull& dbStillFull) {
       always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
+                         dbStillFull.name, dbStillFull.what());
     }
   }
 }
 
-TCA emitFuncPrologueOpt(ProfTransRec* rec) {
-  VMProtect _;
+////////////////////////////////////////////////////////////////////////////////
+}
 
-  auto start = emitFuncPrologue(
+TCA emitFuncPrologueOptInternal(ProfTransRec* rec) {
+  assertOwnsCodeLock();
+  assertOwnsMetadataLock();
+
+  auto start = emitFuncPrologueInternal(
     rec->func(),
     rec->prologueArgs(),
     TransKind::OptPrologue
   );
   updateFuncPrologue(start, rec);
   return start;
+}
+
+TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
+  VMProtect _;
+
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
+
+  return emitFuncPrologueInternal(func, argc, kind);
+}
+
+TCA emitFuncPrologueOpt(ProfTransRec* rec) {
+  VMProtect _;
+
+  auto codeLock = lockCode();
+  auto metaLock = lockMetadata();
+
+  return emitFuncPrologueOptInternal(rec);
 }
 
 TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs) {

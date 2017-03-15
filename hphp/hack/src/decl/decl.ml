@@ -27,6 +27,7 @@ module Attrs = Attributes
 
 module SN = Naming_special_names
 
+exception Decl_not_found of string
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -288,10 +289,10 @@ and class_hint_decl class_env hint =
   match hint with
   | _, Happly ((_, cid), _) ->
     begin match Naming_heap.TypeIdHeap.get cid with
-      | Some (p, `Class) when not (Decl_heap.Classes.mem cid) ->
+      | Some (pos, `Class) when not (Decl_heap.Classes.mem cid) ->
+        let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
-        let fn = Pos.filename p in
-        let class_opt = Parser_heap.find_class_in_file fn cid in
+        let class_opt = Parser_heap.find_class_in_file class_env.tcopt fn cid in
         Option.iter class_opt (class_decl_if_missing class_env)
       | _ -> ()
     end
@@ -315,7 +316,7 @@ and class_decl tcopt c =
     List.fold_left ~f:(class_var_decl env c) ~init:props c.c_vars in
   let m = inherited.Decl_inherit.ih_methods in
   let m = List.fold_left
-      ~f:(method_decl_acc ~is_static:false env c)
+      ~f:(method_decl_acc tcopt ~is_static:false env c )
       ~init:m c.c_methods in
   let consts = inherited.Decl_inherit.ih_consts in
   let consts = List.fold_left ~f:(class_const_decl env c)
@@ -329,7 +330,7 @@ and class_decl tcopt c =
   let sprops = List.fold_left c.c_static_vars ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
   let sm = List.fold_left c.c_static_methods
-      ~f:(method_decl_acc ~is_static:true env c)
+      ~f:(method_decl_acc tcopt ~is_static:true env c )
       ~init:sm in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl env parent_cstr c in
@@ -343,7 +344,7 @@ and class_decl tcopt c =
     | Some { elt_origin = cls; _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
-      let pos = method_pos ~is_static:false cls SN.Members.__toString in
+      let pos = method_pos tcopt ~is_static:false cls SN.Members.__toString  in
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
       ty :: impl
     | _ -> impl
@@ -410,10 +411,10 @@ and class_decl tcopt c =
   if Ast.Cnormal = c.c_kind then
     begin
       SMap.iter (
-        method_check_trait_overrides ~is_static:false c
+        method_check_trait_overrides tcopt ~is_static:false c
       ) m;
       SMap.iter (
-        method_check_trait_overrides ~is_static:true c
+        method_check_trait_overrides tcopt ~is_static:true c
       ) sm;
     end
   else ();
@@ -687,7 +688,7 @@ and method_decl env m =
     ft_ret      = ret;
   }
 
-and method_check_override ~is_static c m acc =
+and method_check_override opt ~is_static c m acc  =
   let pos, id = m.m_name in
   let _, class_id = c.c_name in
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
@@ -696,7 +697,7 @@ and method_check_override ~is_static c m acc =
   match SMap.get id acc with
   | Some { elt_final = is_final; elt_origin = cls; _ } ->
     if is_final then begin
-      let meth_pos = method_pos ~is_static cls id in
+      let meth_pos = method_pos opt ~is_static cls id in
       Errors.override_final ~parent:(meth_pos) ~child:pos
     end;
     false
@@ -706,8 +707,8 @@ and method_check_override ~is_static c m acc =
     false
   | None -> false
 
-and method_decl_acc ~is_static env c acc m =
-  let check_override = method_check_override ~is_static c m acc in
+and method_decl_acc opt ~is_static env c acc m  =
+  let check_override = method_check_override opt ~is_static c m acc  in
   let ft = method_decl env m in
   let _, id = m.m_name in
   let vis =
@@ -733,9 +734,9 @@ and method_decl_acc ~is_static env c acc m =
   let acc = SMap.add id elt acc in
   acc
 
-and method_check_trait_overrides ~is_static c id meth =
+and method_check_trait_overrides opt ~is_static c id meth =
   if meth.elt_override then begin
-    let pos = method_pos ~is_static meth.elt_origin id in
+    let pos = method_pos opt ~is_static meth.elt_origin id in
     Errors.override_per_trait c.c_name id pos
   end
 
@@ -744,7 +745,7 @@ and method_check_trait_overrides ~is_static c id meth =
  * are cases when the method has not been added to the Decl_heap yet, in which
  * case we fallback to retrieving the position from the parsing AST.
  *)
-and method_pos ~is_static class_id meth =
+and method_pos opt ~is_static class_id meth  =
   let get_meth = if is_static then
       Decl_heap.StaticMethods.get
     else
@@ -754,9 +755,9 @@ and method_pos ~is_static class_id meth =
   | None ->
     try
       match Naming_heap.TypeIdHeap.get class_id with
-      | Some (p, `Class) ->
-        let fn = Pos.filename p in
-        begin match Parser_heap.find_class_in_file fn class_id with
+      | Some (pos, `Class) ->
+        let fn = FileInfo.get_pos_filename pos in
+        begin match Parser_heap.find_class_in_file opt fn class_id with
           | None -> raise Not_found
           | Some { Ast.c_body; _ } ->
             let elt = List.find ~f:begin fun x ->
@@ -863,29 +864,36 @@ let name_and_declare_types_program tcopt prog =
   end
 
 let make_env tcopt fn =
-  match Parser_heap.ParserHeap.get fn with
-  | None -> ()
-  | Some (prog, _) ->
-    name_and_declare_types_program tcopt prog
+  let ast = Parser_heap.get_from_parser_heap tcopt fn in
+  name_and_declare_types_program tcopt ast
+
+let err_not_found file name =
+  let err_str =
+    Printf.sprintf "%s not found in %s" name (Relative_path.to_absolute file) in
+raise (Decl_not_found err_str)
 
 let declare_class_in_file tcopt file name =
-  match Parser_heap.find_class_in_file file name with
+  match Parser_heap.find_class_in_file tcopt file name with
   | Some cls ->
     let class_env = { tcopt; stack = SSet.empty; } in
     class_decl_if_missing class_env cls
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name
 
 let declare_fun_in_file tcopt file name =
-  match Parser_heap.find_fun_in_file file name with
+  match Parser_heap.find_fun_in_file tcopt file name with
   | Some f -> ifun_decl tcopt f
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name
 
 let declare_typedef_in_file tcopt file name =
-  match Parser_heap.find_typedef_in_file file name with
+  match Parser_heap.find_typedef_in_file tcopt file name with
   | Some t -> type_typedef_naming_and_decl tcopt t
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name
 
 let declare_const_in_file tcopt file name =
-  match Parser_heap.find_const_in_file file name with
+  match Parser_heap.find_const_in_file tcopt file name with
   | Some cst -> iconst_decl tcopt cst
-  | None -> raise Not_found
+  | None ->
+    err_not_found file name

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,7 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   auto const numRealProps = propInfo.size();
   auto const numApcProps = numRealProps + hasDynProps;
   auto size = sizeof(APCObject) + sizeof(APCHandle*) * numApcProps;
-  auto const apcObj = new (std::malloc(size)) APCObject(clsOrName, numApcProps);
+  auto const apcObj = new (malloc_huge(size)) APCObject(clsOrName, numApcProps);
   apcObj->m_persistent = 1;
 
   // Set a few more flags for faster fetching: whether or not the object has a
@@ -130,7 +130,7 @@ APCHandle::Pair APCObject::ConstructSlow(ObjectData* objectData,
   auto const propCount = odProps.size();
 
   auto size = sizeof(APCObject) + sizeof(Prop) * propCount;
-  auto const apcObj = new (std::malloc(size)) APCObject(name, propCount);
+  auto const apcObj = new (malloc_huge(size)) APCObject(name, propCount);
   if (!propCount) return {apcObj->getHandle(), size};
 
   auto prop = apcObj->props();
@@ -196,7 +196,7 @@ void APCObject::Delete(APCHandle* handle) {
   auto const obj = fromHandle(handle);
   obj->~APCObject();
   // No need to run Prop destructors.
-  std::free(obj);
+  free_huge(obj);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -237,21 +237,18 @@ Object APCObject::createObject() const {
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {
-    if (UNLIKELY(MM().isGCEnabled())) {
-      // TODO: t11328828 recursive apc fast-init re-enters vm with uninit objs
-      memset(objProp, KindOfUninit, numProps * sizeof(*objProp));
-    }
+    obj->setPartiallyInited(true);
     unsigned i = 0;
     try {
-      while (i < numProps) {
+      for (; i < numProps; ++i) {
         new (objProp + i) Variant(apcProp[i]->toLocal());
-        ++i;
       }
+      obj->setPartiallyInited(false);
     } catch (...) {
-      while (i < numProps) {
+      for (; i < numProps; ++i) {
         new (objProp + i) Variant();
-        ++i;
       }
+      obj->setPartiallyInited(false);
       throw;
     }
   } else {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,7 +48,6 @@ enum PerfEventType {
   EVENT_LLC_STORE_MISSES,
   EVENT_ITLB_MISSES,
   EVENT_DTLB_MISSES,
-  SPECIAL_PROF_COUNTERS,
   NUM_EVENT_TYPES
 };
 
@@ -331,7 +330,7 @@ public:
     EventsArray events = getAllEvents(key);
 
     bool anyEvents = false;
-    for (size_t i = 0; i < SPECIAL_PROF_COUNTERS; i++) {
+    for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
       if (events[i]) {
         anyEvents = true;
         break;
@@ -341,7 +340,7 @@ public:
     if (anyEvents) {
       printf("  == Perf events ==\n");
 
-      for (size_t i = 0; i < SPECIAL_PROF_COUNTERS; i++) {
+      for (size_t i = 0; i < NUM_EVENT_TYPES; i++) {
         if (events[i]) {
           printf("  %-16s = %" PRIu64  "\n",
                  eventTypeToCommandLineArgument((PerfEventType)i),

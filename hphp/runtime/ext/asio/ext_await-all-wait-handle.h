@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -96,7 +96,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void onUnblocked(uint32_t idx);
   c_WaitableWaitHandle* getChild();
   template<typename T> void forEachChild(T fn);
-  template<class F> void scanChildren(F&) const;
 
   size_t heapSize() const { return heapSize(m_cap); }
   static size_t heapSize(unsigned count) {
@@ -130,6 +129,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
   Node m_children[0]; // allocated off the end
+  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_children);
 
  public:
   static const int8_t STATE_BLOCKED = 2;

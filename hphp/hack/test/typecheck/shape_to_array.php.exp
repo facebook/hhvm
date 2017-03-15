@@ -1,6 +1,11 @@
-array<arraykey, mixed>
-array<^[unresolved], ^[unresolved]>
-array<^(string), ^(string | int)>
-array<^(int), ^(string | int)>
-array<^(string), ^(int)>
+File "shape_to_array.php", line 11, characters 3-30:
+  array<arraykey, mixed>
+File "shape_to_array.php", line 12, characters 3-35:
+  array<^[unresolved], ^[unresolved]>
+File "shape_to_array.php", line 13, characters 3-57:
+  array<^(string), ^(string | int)>
+File "shape_to_array.php", line 14, characters 3-65:
+  array<^(int), ^(string | int)>
+File "shape_to_array.php", line 17, characters 3-30:
+  array<^(string), ^(int)>
 No errors

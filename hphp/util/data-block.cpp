@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,10 +48,12 @@ void* DataBlock::allocInner(size_t len) {
 
   if (freeList->second.empty()) m_freeLists.erase(freeList);
 
-  return m_base + off;
+  return m_destBase + off;
 }
 
-void DataBlock::free(void* addr, size_t len) {
+void DataBlock::free(void* vaddr, size_t len) {
+  auto addr = static_cast<void*>(((char*)vaddr - (char*)m_destBase) + m_base);
+
   assert(len < std::numeric_limits<uint32_t>::max() &&
          (CodeAddress)addr + len <= m_frontier);
 

@@ -57,7 +57,7 @@ end:
   RetC
 }
 
-.function [mayusevv] test_outer($type, $x) {
+.function test_outer($type, $x) {
   CGetL $type
   JmpZ cls2
 
@@ -89,7 +89,7 @@ cls2:
   RetC
 }
 
-.function [mayusevv] loop($type, $total) {
+.function loop($type, $total) {
   Int 0
   SetL $count
   PopC

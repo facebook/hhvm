@@ -35,15 +35,18 @@ type mode =
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
 
-type id = Pos.t * string
-
+type name_type = Fun | Class | Typedef | Const
+type pos = Full of Pos.t | File of name_type * Relative_path.t
+type id = pos  * string
+val pos_full : (Pos.t * string) -> id
+val get_pos_filename : pos -> Relative_path.t
 type t = {
   file_mode : mode option;
   funs : id list;
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list;
+  comments : (Pos.t * string) list option;
   consider_names_just_for_autoload: bool;
 }
 
@@ -52,7 +55,6 @@ val empty_t: t
 (*****************************************************************************)
 (* The simplified record used after parsing. *)
 (*****************************************************************************)
-
 type names = {
   n_funs    : SSet.t;
   n_classes : SSet.t;
@@ -62,12 +64,23 @@ type names = {
 
 type fast = names Relative_path.Map.t
 
+
+(*****************************************************************************)
+(* The record used in our saved state. *)
+(*****************************************************************************)
+type saved
+type saved_state_info = saved Relative_path.Map.t
+
+
 val empty_names: names
 
 (*****************************************************************************)
 (* Functions simplifying the file information. *)
 (*****************************************************************************)
-
+val saved_to_info : saved_state_info -> t Relative_path.Map.t
+val saved_to_fast: saved_state_info -> fast
+val saved_to_hack_files: saved_state_info -> fast
+val info_to_saved : t Relative_path.Map.t -> saved_state_info
 val simplify: t -> names
 val merge_names: names -> names -> names
 val simplify_fast: t Relative_path.Map.t -> fast

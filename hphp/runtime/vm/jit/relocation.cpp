@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,16 +58,25 @@ void RelocationInfo::rewind(TCA start, TCA end) {
   }
   auto it = m_adjustedAddresses.lower_bound(start);
   if (it == m_adjustedAddresses.end()) return;
+
+  // convenience function for erasing a m_smashableRelocations entry
+  auto eraseSmashableRelocation = [this](TCA addr) {
+    auto it = m_smashableRelocations.find(addr);
+    if (it != m_smashableRelocations.end()) m_smashableRelocations.erase(it);
+  };
+
   if (it->first == start) {
     // if it->second.first is set, start is also the end
     // of an existing region. Don't erase it in that case
     if (it->second.first) {
+      eraseSmashableRelocation(it->second.second);
       it++->second.second = 0;
     } else {
       m_adjustedAddresses.erase(it++);
     }
   }
   while (it != m_adjustedAddresses.end() && it->first < end) {
+    eraseSmashableRelocation(it->second.second);
     m_adjustedAddresses.erase(it++);
   }
   if (it == m_adjustedAddresses.end()) return;
@@ -75,6 +84,7 @@ void RelocationInfo::rewind(TCA start, TCA end) {
     // Similar to start above, end could be the start of an
     // existing region.
     if (it->second.second) {
+      eraseSmashableRelocation(it->second.second);
       it++->second.first = 0;
     } else {
       m_adjustedAddresses.erase(it++);
@@ -108,10 +118,11 @@ void findFixups(TCA start, TCA end, CGMeta& fixups) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
+                CodeBlock& srcBlock,
                 CGMeta& fixups,
                 TCA* exitAddr) {
-  return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, fixups,
-      exitAddr);
+  return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, srcBlock,
+                          fixups, exitAddr);
 }
 
 //////////////////////////////////////////////////////////////////////

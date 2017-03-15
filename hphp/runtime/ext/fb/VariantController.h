@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -57,25 +57,22 @@ struct VariantControllerImpl {
         if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::MAP;
         }
-        throw HPHP::serialize::SerializeError(
-          "don't know how to serialize HPHP Variant");
+        throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentVec:
       case KindOfVec: {
         if (HackArraysMode == VariantControllerHackArraysMode::ON) {
           return HPHP::serialize::Type::LIST;
         }
-        throw HPHP::serialize::SerializeError(
-          "don't know how to serialize HPHP Variant");
+        throw HPHP::serialize::HackArraySerializeError{};
       }
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+        throw HPHP::serialize::KeysetSerializeError{};
       case KindOfResource:
       case KindOfRef:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
-      case KindOfClass:
-        break;
     }
     not_reached();
   }

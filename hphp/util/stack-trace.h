@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -97,10 +97,16 @@ struct StackTrace : StackTraceBase {
   //////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Construct the curent stacktrace if `trace' is true, else an empty
-   * stacktrace.
+   * Construct the current stacktrace if `trace' and Enabled are true,
+   * else an empty stacktrace.
    */
   explicit StackTrace(bool trace = true);
+
+  /*
+   * Construct the current stacktrace even when Enabled is false.
+   */
+  enum Force {};
+  explicit StackTrace(Force);
 
   /*
    * Construct a stacktrace from a list of instruction pointers.

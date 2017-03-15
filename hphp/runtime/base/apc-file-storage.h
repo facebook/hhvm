@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ private:
 
 private:
   // [32-bit chunk index]:[32-bit offset]
-  std::atomic_uint_fast64_t m_current{0};
+  std::atomic_uint_fast64_t m_current{~0ull};
   size_t m_chunkSize{0};
   StorageState m_state{StorageState::Invalid};
   std::vector<char*> m_chunks;

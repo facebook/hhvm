@@ -105,10 +105,7 @@ struct BaseMap : HashCollection {
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
-  enum EqualityFlavor { OrderMatters, OrderIrrelevant };
-
-  static bool Equals(EqualityFlavor eq,
-                     const ObjectData* obj1, const ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   [[noreturn]] static void throwBadKeyType();
 
@@ -149,7 +146,7 @@ struct BaseMap : HashCollection {
 
   template<bool throwOnError>
   TypedValue* atImpl(int64_t key) const {
-    auto p = find(key, hashint(key));
+    auto p = find(key, hash_int64(key));
     if (UNLIKELY(p == Empty)) {
       if (throwOnError) {
         collections::throwUndef(key);

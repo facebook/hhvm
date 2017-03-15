@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,8 +49,7 @@ static ResolverLibInitializer _resolver_lib_initializer;
 // thread-safe network functions
 
 bool safe_gethostbyname(const char *address, HostEnt &result) {
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
-    defined(_MSC_VER)
+#if defined(__APPLE__) || defined(_MSC_VER)
   // NOTE: on windows gethostbyname is "thread safe"
   // the hostent is allocated once per thread by winsock2
   // and cleaned up by winsock when the thread ends

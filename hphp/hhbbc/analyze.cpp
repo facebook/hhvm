@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,8 +56,8 @@ const StaticString s_Closure("Closure");
  * Short-hand to get the rpoId of a block in a given FuncAnalysis.  (The RPO
  * ids are re-assigned per analysis.)
  */
-uint32_t rpoId(const FuncAnalysis& ai, borrowed_ptr<php::Block> blk) {
-  return ai.bdata[blk->id].rpoId;
+uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
+  return ai.bdata[blk].rpoId;
 }
 
 State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
@@ -65,8 +65,10 @@ State pseudomain_entry_state(borrowed_ptr<const php::Func> func) {
   ret.initialized = true;
   ret.thisAvailable = false;
   ret.locals.resize(func->locals.size());
-  ret.iters.resize(func->iters.size());
+  ret.iters.resize(func->numIters);
+  ret.clsRefSlots.resize(func->numClsRefSlots);
   for (auto& l : ret.locals) l = TGen;
+  for (auto& s : ret.clsRefSlots) s = TCls;
   return ret;
 }
 
@@ -78,7 +80,10 @@ State entry_state(const Index& index,
   ret.initialized = true;
   ret.thisAvailable = index.lookup_this_available(ctx.func);
   ret.locals.resize(ctx.func->locals.size());
-  ret.iters.resize(ctx.func->iters.size());
+  ret.iters.resize(ctx.func->numIters);
+  ret.clsRefSlots.resize(ctx.func->numClsRefSlots);
+
+  for (auto& s : ret.clsRefSlots) s = TCls;
 
   // TODO(#3788877): when we're doing a context sensitive analyze_func_inline,
   // thisAvailable and specific type of $this should be able to come from the
@@ -90,8 +95,11 @@ State entry_state(const Index& index,
     // a function takes a param by ref, it might come in as a Cell
     // still if FPassC was used.
     if (knownArgs) {
-      ret.locals[locId] = locId < knownArgs->size() ? (*knownArgs)[locId]
-                                                    : TUninit;
+      if (locId < knownArgs->size()) {
+        ret.locals[locId] = (*knownArgs)[locId];
+      } else {
+        ret.locals[locId] = ctx.func->params[locId].isVariadic ? TArr : TUninit;
+      }
       continue;
     }
     ret.locals[locId] = ctx.func->params[locId].byRef ? TGen : TCell;
@@ -139,7 +147,7 @@ State entry_state(const Index& index,
   // Finally, make sure any volatile locals are set to Gen, even if they are
   // parameters.
   for (auto locId = uint32_t{0}; locId < ctx.func->locals.size(); ++locId) {
-    if (is_volatile_local(ctx.func, borrow(ctx.func->locals[locId]))) {
+    if (is_volatile_local(ctx.func, locId)) {
       ret.locals[locId] = TGen;
     }
   }
@@ -152,10 +160,12 @@ State entry_state(const Index& index,
  * (i.e. each dv init and the main entry), and all of them count as places the
  * function could be entered, so they all must be visited at least once.
  *
- * If we're entering at a DV-init, all higher parameter locals must be Uninit.
- * It is also possible that the DV-init is reachable from within the function
- * with these parameter locals already initialized (although the normal php
- * emitter can't do this), but that case will be discovered when iterating.
+ * If we're entering at a DV-init, all higher parameter locals must be
+ * Uninit, with the possible exception of a final variadic param
+ * (which will be an array). It is also possible that the DV-init is
+ * reachable from within the function with these parameter locals
+ * already initialized (although the normal php emitter can't do
+ * this), but that case will be discovered when iterating.
  */
 dataflow_worklist<uint32_t>
 prepare_incompleteQ(const Index& index,
@@ -182,8 +192,9 @@ prepare_incompleteQ(const Index& index,
     auto const useDvInit = [&] {
       if (knownArgs->size() >= numParams) return false;
       for (auto i = knownArgs->size(); i < numParams; ++i) {
-        if (auto const dv = ctx.func->params[i].dvEntryPoint) {
-          ai.bdata[dv->id].stateIn = entryState;
+        auto const dv = ctx.func->params[i].dvEntryPoint;
+        if (dv != NoBlockId) {
+          ai.bdata[dv].stateIn = entryState;
           incompleteQ.push(rpoId(ai, dv));
           return true;
         }
@@ -192,7 +203,7 @@ prepare_incompleteQ(const Index& index,
     }();
 
     if (!useDvInit) {
-      ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
+      ai.bdata[ctx.func->mainEntry].stateIn = entryState;
       incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
@@ -200,16 +211,18 @@ prepare_incompleteQ(const Index& index,
   }
 
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
-    if (auto const dv = ctx.func->params[paramId].dvEntryPoint) {
-      ai.bdata[dv->id].stateIn = entryState;
+    auto const dv = ctx.func->params[paramId].dvEntryPoint;
+    if (dv != NoBlockId) {
+      ai.bdata[dv].stateIn = entryState;
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
-        ai.bdata[dv->id].stateIn.locals[locId] = TUninit;
+        ai.bdata[dv].stateIn.locals[locId] =
+          ctx.func->params[locId].isVariadic ? TArr : TUninit;
       }
     }
   }
 
-  ai.bdata[ctx.func->mainEntry->id].stateIn = entryState;
+  ai.bdata[ctx.func->mainEntry].stateIn = entryState;
   incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
 
   return incompleteQ;
@@ -236,7 +249,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
                                 ClassAnalysis* clsAnalysis,
                                 const std::vector<Type>* knownArgs) {
   auto const ctx = adjust_closure_context(inputCtx);
-  FuncAnalysis ai(ctx);
+  FuncAnalysis ai{ctx};
 
   Trace::Bump bumper{Trace::hhbbc, kTraceFuncBump,
     is_trace_function(ctx.cls, ctx.func)};
@@ -266,10 +279,15 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * Terminiation is guaranteed because the widening operator has only
    * finite chains in the type lattice.
    */
-  auto nonWideVisits = std::vector<uint32_t>(ctx.func->nextBlockId);
+  auto nonWideVisits = std::vector<uint32_t>(ctx.func->blocks.size());
 
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
+
+  // Used to force blocks that depended on the types of local statics
+  // to be re-analyzed when the local statics change.
+  std::unordered_map<borrowed_ptr<const php::Block>, std::map<LocalId, Type>>
+    usedLocalStatics;
 
   /*
    * Iterate until a fixed point.
@@ -279,55 +297,76 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * always visit blocks with earlier RPO ids first, which hopefully
    * means less iterations.
    */
-  while (!incompleteQ.empty()) {
-    auto const blk = ai.rpoBlocks[incompleteQ.pop()];
+  do {
+    while (!incompleteQ.empty()) {
+      auto const blk = ai.rpoBlocks[incompleteQ.pop()];
 
-    if (nonWideVisits[blk->id]++ > options.analyzeFuncWideningLimit) {
-      nonWideVisits[blk->id] = 0;
-    }
-
-    FTRACE(2, "block #{}\nin {}{}", blk->id,
-      state_string(*ctx.func, ai.bdata[blk->id].stateIn),
-      property_state_string(collect.props));
-    ++interp_counter;
-
-    auto propagate = [&] (php::Block& target, const State& st) {
-      auto const needsWiden =
-        nonWideVisits[target.id] >= options.analyzeFuncWideningLimit;
-
-      // We haven't optimized the widening operator much, because it
-      // doesn't happen in practice right now.  We want to know when
-      // it starts happening:
-      if (needsWiden) {
-        std::fprintf(stderr, "widening in %s on %s\n",
-          ctx.unit->filename->data(),
-          ctx.func->name->data());
+      if (nonWideVisits[blk->id]++ > options.analyzeFuncWideningLimit) {
+        nonWideVisits[blk->id] = 0;
       }
 
-      FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target.id);
-      FTRACE(4, "target old {}",
-        state_string(*ctx.func, ai.bdata[target.id].stateIn));
+      FTRACE(2, "block #{}\nin {}{}", blk->id,
+             state_string(*ctx.func, ai.bdata[blk->id].stateIn, collect),
+             property_state_string(collect.props));
+      ++interp_counter;
 
-      auto const changed =
-        needsWiden ? widen_into(ai.bdata[target.id].stateIn, st)
-                   : merge_into(ai.bdata[target.id].stateIn, st);
-      if (changed) {
-        incompleteQ.push(rpoId(ai, &target));
+      auto propagate = [&] (BlockId target, const State& st) {
+        auto const needsWiden =
+          nonWideVisits[target] >= options.analyzeFuncWideningLimit;
+
+        // We haven't optimized the widening operator much, because it
+        // doesn't happen in practice right now.  We want to know when
+        // it starts happening:
+        if (needsWiden) {
+          std::fprintf(stderr, "widening in %s on %s\n",
+            ctx.unit->filename->data(),
+            ctx.func->name->data());
+        }
+
+        FTRACE(2, "     {}-> {}\n", needsWiden ? "widening " : "", target);
+        FTRACE(4, "target old {}",
+               state_string(*ctx.func, ai.bdata[target].stateIn, collect));
+
+        auto const changed =
+          needsWiden ? widen_into(ai.bdata[target].stateIn, st)
+                     : merge_into(ai.bdata[target].stateIn, st);
+        if (changed) {
+          incompleteQ.push(rpoId(ai, target));
+        }
+        FTRACE(4, "target new {}",
+               state_string(*ctx.func, ai.bdata[target].stateIn, collect));
+      };
+
+      auto stateOut = ai.bdata[blk->id].stateIn;
+      auto interp   = Interp { index, ctx, collect, blk, stateOut };
+      auto flags    = run(interp, propagate);
+      // We only care about the usedLocalStatics from the last visit
+      if (flags.usedLocalStatics) {
+        usedLocalStatics[blk] = std::move(*flags.usedLocalStatics);
+      } else {
+        usedLocalStatics.erase(blk);
       }
-      FTRACE(4, "target new {}",
-        state_string(*ctx.func, ai.bdata[target.id].stateIn));
-    };
 
-    auto stateOut = ai.bdata[blk->id].stateIn;
-    auto interp   = Interp { index, ctx, collect, blk, stateOut };
-    auto flags    = run(interp, propagate);
-    if (flags.returned) {
-      ai.inferredReturn = union_of(std::move(ai.inferredReturn),
-                                   std::move(*flags.returned));
+      if (flags.returned) {
+        ai.inferredReturn |= std::move(*flags.returned);
+      }
     }
-  }
+    // maybe some local statics changed type since the last time their
+    // blocks were visited.
+    for (auto const& elm : usedLocalStatics) {
+      for (auto const& ls : elm.second) {
+        if (collect.localStaticTypes[ls.first] != ls.second) {
+          incompleteQ.push(rpoId(ai, elm.first->id));
+          break;
+        }
+      }
+    }
+  } while (!incompleteQ.empty());
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
+  ai.cnsMap = std::move(collect.cnsMap);
+  ai.readsUntrackedConstants = collect.readsUntrackedConstants;
+  ai.mayUseVV = collect.mayUseVV;
 
   if (ctx.func->isGenerator) {
     if (ctx.func->isAsync) {
@@ -365,28 +404,33 @@ FuncAnalysis do_analyze_collect(const Index& index,
       bsep
     ).str();
     for (auto& bd : ai.bdata) {
-      ret += folly::format(
+      folly::format(
+        &ret,
         "{}block {}:\nin {}",
         sep,
         ai.rpoBlocks[bd.rpoId]->id,
-        state_string(*ctx.func, bd.stateIn)
-      ).str();
+        state_string(*ctx.func, bd.stateIn, collect)
+      );
     }
     ret += sep + bsep;
-    folly::format(&ret,
-      "Inferred return type: {}\n", show(ai.inferredReturn));
+    folly::format(&ret, "Inferred return type: {}\n", show(ai.inferredReturn));
     ret += bsep;
     return ret;
   }());
 
+  // Do this after the tracing above
+  ai.localStaticTypes = std::move(collect.localStaticTypes);
   return ai;
 }
 
 FuncAnalysis do_analyze(const Index& index,
                         Context const ctx,
                         ClassAnalysis* clsAnalysis,
-                        const std::vector<Type>* knownArgs) {
-  CollectedInfo collect { index, ctx, clsAnalysis, nullptr };
+                        const std::vector<Type>* knownArgs,
+                        bool trackConstantArrays) {
+  CollectedInfo collect {
+    index, ctx, clsAnalysis, nullptr, trackConstantArrays
+  };
   return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
 }
 
@@ -410,21 +454,21 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     if (it == end(propState)) return;
 
     /*
-     * When HardTypeHints isn't on, AllFuncsInterceptable is on, or any
-     * InterceptableFunctions are listed, we don't require the constraints to
-     * actually match, and relax all the HNI types to Gen.
+     * When HardTypeHints isn't on, DisallowDynamicVarEnvFuncs isn't on, or any
+     * functions are interceptable, we don't require the constraints to actually
+     * match, and relax all the HNI types to Gen.
      *
-     * This is because extensions may wish to assign to properties after a
-     * typehint guard, which is going to fail without HardTypeHints.  Or, with
-     * AllFuncsInterceptable or InterceptableFunctions, it's quite possible
-     * that some function calls in systemlib might not be known to return
-     * things matching the property type hints for some properties, or not to
-     * take their arguments by reference.
+     * This is because extensions may wish to assign to properties
+     * after a typehint guard, which is going to fail without
+     * HardTypeHints.  Or, with any interceptable functions, it's
+     * quite possible that some function calls in systemlib might not
+     * be known to return things matching the property type hints for
+     * some properties, or not to take their arguments by reference.
      */
     auto const hniTy =
       !options.HardTypeHints ||
-          options.AllFuncsInterceptable ||
-          !options.InterceptableFunctions.empty()
+      !options.DisallowDynamicVarEnvFuncs ||
+      clsAnalysis.anyInterceptable
         ? TGen
         : from_hni_constraint(prop.typeConstraint);
     if (it->second.subtypeOf(hniTy)) {
@@ -467,10 +511,11 @@ FuncAnalysis::FuncAnalysis(Context ctx)
   }
 }
 
-FuncAnalysis analyze_func(const Index& index, Context const ctx) {
+FuncAnalysis analyze_func(const Index& index, Context const ctx,
+                          bool trackConstantArrays) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
     is_systemlib_part(*ctx.unit)};
-  return do_analyze(index, ctx, nullptr, nullptr);
+  return do_analyze(index, ctx, nullptr, nullptr, trackConstantArrays);
 }
 
 FuncAnalysis analyze_func_collect(const Index& index,
@@ -487,7 +532,7 @@ FuncAnalysis analyze_func_inline(const Index& index,
   FTRACE(2, "{:.^70}\n", "Inline Interp");
   SCOPE_EXIT { FTRACE(2, "{:.^70}\n", "End Inline Interp"); };
   assert(!ctx.func->isClosureBody);
-  return do_analyze(index, ctx, nullptr, &args);
+  return do_analyze(index, ctx, nullptr, &args, true);
 }
 
 ClassAnalysis analyze_class(const Index& index, Context const ctx) {
@@ -496,7 +541,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   assert(ctx.cls && !ctx.func);
   FTRACE(2, "{:#^70}\n", "Class");
 
-  ClassAnalysis clsAnalysis(ctx);
+  ClassAnalysis clsAnalysis(ctx, index.any_interceptable_functions());
   auto const associatedClosures = index.lookup_closures(ctx.cls);
   auto const isHNIBuiltin       = ctx.cls->attrs & AttrBuiltin;
 
@@ -574,7 +619,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       index,
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
-      nullptr
+      nullptr,
+      true
     );
   }
   if (auto f = find_method(ctx.cls, s_86sinit.get())) {
@@ -582,7 +628,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       index,
       Context { ctx.unit, f, ctx.cls },
       &clsAnalysis,
-      nullptr
+      nullptr,
+      true
     );
   }
 
@@ -603,7 +650,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   // have one after 86sinit, throw it away.
   for (auto& kv : clsAnalysis.privateStatics) {
     if (is_specialized_array(kv.second)) {
-      kv.second = union_of(kv.second, TArr);
+      kv.second |= TArr;
     }
   }
 
@@ -639,21 +686,25 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
           index,
           Context { ctx.unit, borrow(f), ctx.cls },
           &clsAnalysis,
-          nullptr
+          nullptr,
+          true
         )
       );
     }
 
-    for (auto& c : associatedClosures) {
-      auto const invoke = borrow(c->methods[0]);
-      closureResults.push_back(
-        do_analyze(
-          index,
-          Context { ctx.unit, invoke, c },
-          &clsAnalysis,
-          nullptr
-        )
-      );
+    if (associatedClosures) {
+      for (auto& c : *associatedClosures) {
+        auto const invoke = borrow(c->methods[0]);
+        closureResults.push_back(
+          do_analyze(
+            index,
+            Context { ctx.unit, invoke, c },
+            &clsAnalysis,
+            nullptr,
+            true
+          )
+        );
+      }
     }
 
     // Check if we've reached a fixed point yet.
@@ -708,7 +759,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index& index,
-                          const Context ctx,
+                          const FuncAnalysis& fa,
                           borrowed_ptr<const php::Block> blk,
                           State state) {
   Trace::Bump bumper{Trace::hhbbc, 10};
@@ -716,8 +767,9 @@ locally_propagated_states(const Index& index,
   std::vector<std::pair<State,StepFlags>> ret;
   ret.reserve(blk->hhbcs.size() + 1);
 
-  CollectedInfo collect { index, ctx, nullptr, nullptr };
-  auto interp = Interp { index, ctx, collect, blk, state };
+  CollectedInfo collect { index, fa.ctx, nullptr, nullptr, true, &fa };
+  auto interp = Interp { index, fa.ctx, collect, blk, state };
+
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});
     ret.back().second = step(interp, op);

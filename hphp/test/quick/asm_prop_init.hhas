@@ -63,23 +63,25 @@
 }
 
 .function do_test($who) {
-  AGetL $who
-  ClsCns "BAR"
+  .numclsrefslots 1;
+
+  ClsRefGetL $who 0
+  ClsCns "BAR" 0
   String "\n"
   Concat
   Print
   PopC
 
   String "foo"
-  AGetL $who
-  CGetS
+  ClsRefGetL $who 0
+  CGetS 0
   String "\n"
   Concat
   Print
   PopC
 
-  AGetL $who
-  FPushCtor 0
+  ClsRefGetL $who 0
+  FPushCtor 0 0
   FCall 0
   PopR
   SetL $obj

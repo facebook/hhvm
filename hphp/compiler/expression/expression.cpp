@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -228,7 +228,7 @@ bool Expression::IsIdentifier(const std::string &value) {
     return false;
   }
   for (unsigned int i = 1; i < value.size(); i++) {
-    unsigned char ch = value[i];
+    ch = value[i];
     if (((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
          (ch < '0' || ch > '9') && ch < '\x7f' && ch != '_')) {
       if (ch == '\\' && i < value.size() - 1 && value[i+1] != '\\') {

@@ -47,7 +47,9 @@ let sleep_and_check in_fd persistent_client_opt =
   in
   let ready_fd_l, _, _ = Unix.select l [] [] (0.1) in
   match ready_fd_l with
-    | [_; _] -> accept_client_opt in_fd, true
+    | [_; _] ->
+        (* Prioritize persistent client requests over command line ones *)
+        None, true
     | [fd] when fd = in_fd -> accept_client_opt in_fd, false
     | [fd] when fd <> in_fd -> None, true
     | _ -> None, false
@@ -97,10 +99,12 @@ let send_push_message_to_client client response =
       raise Client_went_away
 
 let read_client_msg ic =
-  Timeout.with_timeout
+  try
+    Timeout.with_timeout
     ~timeout:1
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
+  with End_of_file -> raise Client_went_away
 
 let read_client_msg = function
   | Non_persistent_client (ic, _) -> read_client_msg ic

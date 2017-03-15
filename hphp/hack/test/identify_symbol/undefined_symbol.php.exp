@@ -1,5 +1,2 @@
-\undefined_function
-Function
-line 6, characters 3-20
-defined: None
-definition span: None
+name: \undefined_function, kind: function, span: line 6, characters 3-20, definition: None
+

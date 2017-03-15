@@ -50,7 +50,8 @@ CurlResource::ToFree::~ToFree() {
 
 CurlResource::CurlResource(const String& url,
                            CurlHandlePoolPtr pool /*=nullptr */)
-: m_emptyPost(true), m_connPool(pool), m_pooledHandle(nullptr) {
+: m_emptyPost(true), m_safeUpload(true), m_connPool(pool),
+  m_pooledHandle(nullptr) {
   if (m_connPool) {
     m_pooledHandle = m_connPool->fetch();
     m_cp = m_pooledHandle->useHandle();
@@ -68,7 +69,7 @@ CurlResource::CurlResource(const String& url,
   m_read.method  = PHP_CURL_DIRECT;
   m_write_header.method = PHP_CURL_IGNORE;
 
-  reset();
+  setDefaultOptions();
 
   if (!url.empty()) {
 #if LIBCURL_VERSION_NUM >= 0x071100
@@ -114,6 +115,7 @@ CurlResource::CurlResource(req::ptr<CurlResource> src)
 
   m_to_free = src->m_to_free;
   m_emptyPost = src->m_emptyPost;
+  m_safeUpload = src->m_safeUpload;
 }
 
 void CurlResource::sweep() {
@@ -160,7 +162,10 @@ void CurlResource::reseat() {
 
 void CurlResource::reset() {
   curl_easy_reset(m_cp);
+  setDefaultOptions();
+}
 
+void CurlResource::setDefaultOptions() {
   curl_easy_setopt(m_cp, CURLOPT_NOPROGRESS,        1);
   curl_easy_setopt(m_cp, CURLOPT_VERBOSE,           0);
   curl_easy_setopt(m_cp, CURLOPT_WRITEFUNCTION,     curl_write);
@@ -244,6 +249,8 @@ bool CurlResource::setOption(long option, const Variant& value) {
     ret = setLongOption(option, value.toInt64());
   } else if (isStringOption(option)) {
     ret = setStringOption(option, value.toString());
+  } else if (isNullableStringOption(option)) {
+    ret = setNullableStringOption(option, value);
   } else if (isFileOption(option)) {
     auto fp = dyn_cast_or_null<File>(value);
     if (!fp) return false;
@@ -298,70 +305,192 @@ CURL* CurlResource::get(bool nullOkay /*=false*/) {
 
 bool CurlResource::isLongOption(long option) {
   switch (option) {
-    case CURLOPT_TIMEOUT:
-    case CURLOPT_TIMEOUT_MS:
-    case CURLOPT_INFILESIZE:
-    case CURLOPT_VERBOSE:
-    case CURLOPT_HEADER:
-    case CURLOPT_NOPROGRESS:
-    case CURLOPT_NOBODY:
-    case CURLOPT_FAILONERROR:
-    case CURLOPT_UPLOAD:
-    case CURLOPT_POST:
+    case CURLOPT_DNS_USE_GLOBAL_CACHE:
+      // This is not thread-safe when set to true, so pretend we don't know what
+      // it is.
+      return false;
+
+    // These first few are in their own case statements in PHP
+    case CURLOPT_CLOSEPOLICY:
+    case CURLOPT_SSL_VERIFYHOST:
+    case CURLOPT_FOLLOWLOCATION:
 #if LIBCURL_VERSION_NUM >= 0x071301
     case CURLOPT_POSTREDIR:
 #endif
-    case CURLOPT_PROTOCOLS:
-    case CURLOPT_REDIR_PROTOCOLS:
-    case CURLOPT_FTPLISTONLY:
-    case CURLOPT_FTPAPPEND:
-    case CURLOPT_NETRC:
-    case CURLOPT_PUT:
-    case CURLOPT_FTP_USE_EPSV:
-    case CURLOPT_LOW_SPEED_LIMIT:
-    case CURLOPT_SSLVERSION:
-    case CURLOPT_LOW_SPEED_TIME:
-    case CURLOPT_RESUME_FROM:
-    case CURLOPT_TIMEVALUE:
-    case CURLOPT_TIMECONDITION:
-    case CURLOPT_TRANSFERTEXT:
-    case CURLOPT_HTTPPROXYTUNNEL:
-    case CURLOPT_FILETIME:
-    case CURLOPT_MAXREDIRS:
-    case CURLOPT_MAXCONNECTS:
-    case CURLOPT_CLOSEPOLICY:
-    case CURLOPT_FRESH_CONNECT:
-    case CURLOPT_FORBID_REUSE:
-    case CURLOPT_CONNECTTIMEOUT:
-#if LIBCURL_VERSION_NUM >= 0x071002
-    case CURLOPT_CONNECTTIMEOUT_MS:
-#endif
-    case CURLOPT_SSL_VERIFYHOST:
-    case CURLOPT_SSL_VERIFYPEER:
-      //case CURLOPT_DNS_USE_GLOBAL_CACHE: not thread-safe when set to true
-    case CURLOPT_NOSIGNAL:
-    case CURLOPT_PROXYTYPE:
+
+    // Everything else
+    case CURLOPT_AUTOREFERER:
     case CURLOPT_BUFFERSIZE:
-    case CURLOPT_HTTPGET:
-    case CURLOPT_HTTP_VERSION:
+    case CURLOPT_CONNECTTIMEOUT:
+    case CURLOPT_COOKIESESSION:
     case CURLOPT_CRLF:
     case CURLOPT_DNS_CACHE_TIMEOUT:
-    case CURLOPT_PROXYPORT:
+    case CURLOPT_FAILONERROR:
+    case CURLOPT_FILETIME:
+    case CURLOPT_FORBID_REUSE:
+    case CURLOPT_FRESH_CONNECT:
     case CURLOPT_FTP_USE_EPRT:
-    case CURLOPT_HTTPAUTH:
-    case CURLOPT_PROXYAUTH:
-    case CURLOPT_FTP_CREATE_MISSING_DIRS:
-    case CURLOPT_FTPSSLAUTH:
-    case CURLOPT_FTP_SSL:
-    case CURLOPT_UNRESTRICTED_AUTH:
+    case CURLOPT_FTP_USE_EPSV:
+    case CURLOPT_HEADER:
+    case CURLOPT_HTTPGET:
+    case CURLOPT_HTTPPROXYTUNNEL:
+    case CURLOPT_HTTP_VERSION:
+    case CURLOPT_INFILESIZE:
+    case CURLOPT_LOW_SPEED_LIMIT:
+    case CURLOPT_LOW_SPEED_TIME:
+    case CURLOPT_MAXCONNECTS:
+    case CURLOPT_MAXREDIRS:
+    case CURLOPT_NETRC:
+    case CURLOPT_NOBODY:
+    case CURLOPT_NOPROGRESS:
+    case CURLOPT_NOSIGNAL:
     case CURLOPT_PORT:
-    case CURLOPT_AUTOREFERER:
-    case CURLOPT_COOKIESESSION:
-    case CURLOPT_TCP_NODELAY:
+    case CURLOPT_POST:
+    case CURLOPT_PROXYPORT:
+    case CURLOPT_PROXYTYPE:
+    case CURLOPT_PUT:
+    case CURLOPT_RESUME_FROM:
+    case CURLOPT_SSLVERSION:
+    case CURLOPT_SSL_VERIFYPEER:
+    case CURLOPT_TIMECONDITION:
+    case CURLOPT_TIMEOUT:
+    case CURLOPT_TIMEVALUE:
+    case CURLOPT_TRANSFERTEXT:
+    case CURLOPT_UNRESTRICTED_AUTH:
+    case CURLOPT_UPLOAD:
+    case CURLOPT_VERBOSE:
+#if LIBCURL_VERSION_NUM >= 0x070a06 /* Available since 7.10.6 */
+    case CURLOPT_HTTPAUTH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070a07 /* Available since 7.10.7 */
+    case CURLOPT_FTP_CREATE_MISSING_DIRS:
+    case CURLOPT_PROXYAUTH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070a08 /* Available since 7.10.8 */
+    case CURLOPT_FTP_RESPONSE_TIMEOUT:
     case CURLOPT_IPRESOLVE:
-    case CURLOPT_FOLLOWLOCATION:
-#if LIBCURL_VERSION_NUM >= 0x072500
+    case CURLOPT_MAXFILESIZE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070b02 /* Available since 7.11.2 */
+    case CURLOPT_TCP_NODELAY:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070c02 /* Available since 7.12.2 */
+    case CURLOPT_FTPSSLAUTH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070e01 /* Available since 7.14.1 */
+    case CURLOPT_IGNORE_CONTENT_LENGTH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070f00 /* Available since 7.15.0 */
+    case CURLOPT_FTP_SKIP_PASV_IP:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070f01 /* Available since 7.15.1 */
+    case CURLOPT_FTP_FILEMETHOD:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070f02 /* Available since 7.15.2 */
+    case CURLOPT_CONNECT_ONLY:
+    case CURLOPT_LOCALPORT:
+    case CURLOPT_LOCALPORTRANGE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071000 /* Available since 7.16.0 */
+    case CURLOPT_SSL_SESSIONID_CACHE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+    case CURLOPT_FTP_SSL_CCC:
+    case CURLOPT_SSH_AUTH_TYPES:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071002 /* Available since 7.16.2 */
+    case CURLOPT_CONNECTTIMEOUT_MS:
+    case CURLOPT_HTTP_CONTENT_DECODING:
+    case CURLOPT_HTTP_TRANSFER_DECODING:
+    case CURLOPT_TIMEOUT_MS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
+    case CURLOPT_NEW_DIRECTORY_PERMS:
+    case CURLOPT_NEW_FILE_PERMS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071100 /* Available since 7.17.0 */
+    case CURLOPT_USE_SSL:
+#elif LIBCURL_VERSION_NUM >= 0x070b00 /* Available since 7.11.0 */
+    case CURLOPT_FTP_SSL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071100 /* Available since 7.17.0 */
+    case CURLOPT_APPEND:
+    case CURLOPT_DIRLISTONLY:
+#else
+    case CURLOPT_FTPAPPEND:
+    case CURLOPT_FTPLISTONLY:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
+    case CURLOPT_PROXY_TRANSFER_MODE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
+    case CURLOPT_ADDRESS_SCOPE:
+#endif
+#if LIBCURL_VERSION_NUM >  0x071301 /* Available since 7.19.1 */
+    case CURLOPT_CERTINFO:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
+    case CURLOPT_PROTOCOLS:
+    case CURLOPT_REDIR_PROTOCOLS:
+    case CURLOPT_SOCKS5_GSSAPI_NEC:
+    case CURLOPT_TFTP_BLKSIZE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
+    case CURLOPT_FTP_USE_PRET:
+    case CURLOPT_RTSP_CLIENT_CSEQ:
+    case CURLOPT_RTSP_REQUEST:
+    case CURLOPT_RTSP_SERVER_CSEQ:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+    case CURLOPT_WILDCARDMATCH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071504 /* Available since 7.21.4 */
+    case CURLOPT_TLSAUTH_TYPE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071600 /* Available since 7.22.0 */
+    case CURLOPT_GSSAPI_DELEGATION:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071800 /* Available since 7.24.0 */
+    case CURLOPT_ACCEPTTIMEOUT_MS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071900 /* Available since 7.25.0 */
+    case CURLOPT_SSL_OPTIONS:
+    case CURLOPT_TCP_KEEPALIVE:
+    case CURLOPT_TCP_KEEPIDLE:
+    case CURLOPT_TCP_KEEPINTVL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071f00 /* Available since 7.31.0 */
+    case CURLOPT_SASL_IR:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072400 /* Available since 7.36.0 */
+    case CURLOPT_EXPECT_100_TIMEOUT_MS:
+    case CURLOPT_SSL_ENABLE_ALPN:
+    case CURLOPT_SSL_ENABLE_NPN:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
     case CURLOPT_HEADEROPT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072900 /* Available since 7.41.0 */
+    case CURLOPT_SSL_VERIFYSTATUS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072a00 /* Available since 7.42.0 */
+    case CURLOPT_PATH_AS_IS:
+    case CURLOPT_SSL_FALSESTART:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072b00 /* Available since 7.43.0 */
+    case CURLOPT_PIPEWAIT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072e00 /* Available since 7.46.0 */
+    case CURLOPT_STREAM_WEIGHT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073000 /* Available since 7.48.0 */
+    case CURLOPT_TFTP_NO_OPTIONS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
+    case CURLOPT_TCP_FASTOPEN:
+#endif
+#if CURLOPT_MUTE != 0
+    case CURLOPT_MUTE:
 #endif
       return true;
     default:
@@ -388,47 +517,133 @@ bool CurlResource::setLongOption(long option, long value) {
   return m_error_no == CURLE_OK;
 }
 
-bool CurlResource::isStringOption(long option) {
+bool CurlResource::isStringFilePathOption(long option) {
   switch (option) {
-    case CURLOPT_PRIVATE:
-    case CURLOPT_URL:
-    case CURLOPT_PROXY:
-    case CURLOPT_USERPWD:
-    case CURLOPT_PROXYUSERPWD:
-    case CURLOPT_RANGE:
-    case CURLOPT_CUSTOMREQUEST:
-    case CURLOPT_USERAGENT:
-    case CURLOPT_FTPPORT:
-    case CURLOPT_COOKIE:
-    case CURLOPT_REFERER:
-    case CURLOPT_INTERFACE:
-    case CURLOPT_KRB4LEVEL:
-    case CURLOPT_EGDSOCKET:
-    case CURLOPT_CAINFO:
-    case CURLOPT_CAPATH:
-#ifdef FACEBOOK
-    case CURLOPT_SERVICE_NAME:
-#endif
-    case CURLOPT_SSL_CIPHER_LIST:
-    case CURLOPT_SSLKEY:
-    case CURLOPT_SSLKEYTYPE:
-    case CURLOPT_SSLKEYPASSWD:
-    case CURLOPT_SSLENGINE:
-    case CURLOPT_SSLENGINE_DEFAULT:
-    case CURLOPT_SSLCERTTYPE:
-    case CURLOPT_ENCODING:
-    case CURLOPT_COOKIEJAR:
-    case CURLOPT_SSLCERT:
-    case CURLOPT_RANDOM_FILE:
     case CURLOPT_COOKIEFILE:
+    case CURLOPT_COOKIEJAR:
+    case CURLOPT_RANDOM_FILE:
+    case CURLOPT_SSLCERT:
+#if LIBCURL_VERSION_NUM >= 0x070b00 /* Available since 7.11.0 */
+    case CURLOPT_NETRC_FILE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+    case CURLOPT_SSH_PRIVATE_KEYFILE:
+    case CURLOPT_SSH_PUBLIC_KEYFILE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
+    case CURLOPT_CRLFILE:
+    case CURLOPT_ISSUERCERT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071306 /* Available since 7.19.6 */
+    case CURLOPT_SSH_KNOWNHOSTS:
+#endif
       return true;
     default:
       return false;
   }
 }
 
+bool CurlResource::isStringOption(long option) {
+  switch (option) {
+    // Not in PHP's main string case
+    case CURLOPT_PRIVATE:
+    case CURLOPT_URL:
+    case CURLOPT_KRB4LEVEL:
+
+    // Everything else
+    case CURLOPT_CAINFO:
+    case CURLOPT_CAPATH:
+    case CURLOPT_COOKIE:
+    case CURLOPT_EGDSOCKET:
+    case CURLOPT_INTERFACE:
+    case CURLOPT_PROXY:
+    case CURLOPT_PROXYUSERPWD:
+    case CURLOPT_REFERER:
+    case CURLOPT_SSLCERTTYPE:
+    case CURLOPT_SSLENGINE:
+    case CURLOPT_SSLENGINE_DEFAULT:
+    case CURLOPT_SSLKEY:
+    case CURLOPT_SSLKEYPASSWD:
+    case CURLOPT_SSLKEYTYPE:
+    case CURLOPT_SSL_CIPHER_LIST:
+    case CURLOPT_USERAGENT:
+    case CURLOPT_USERPWD:
+#if LIBCURL_VERSION_NUM >= 0x070e01 /* Available since 7.14.1 */
+    case CURLOPT_COOKIELIST:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x070f05 /* Available since 7.15.5 */
+    case CURLOPT_FTP_ALTERNATIVE_TO_USER:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071101 /* Available since 7.17.1 */
+    case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
+    case CURLOPT_PASSWORD:
+    case CURLOPT_PROXYPASSWORD:
+    case CURLOPT_PROXYUSERNAME:
+    case CURLOPT_USERNAME:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071304 /* Available since 7.19.4 */
+    case CURLOPT_NOPROXY:
+    case CURLOPT_SOCKS5_GSSAPI_SERVICE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
+    case CURLOPT_MAIL_FROM:
+    case CURLOPT_RTSP_STREAM_URI:
+    case CURLOPT_RTSP_TRANSPORT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071504 /* Available since 7.21.4 */
+    case CURLOPT_TLSAUTH_PASSWORD:
+    case CURLOPT_TLSAUTH_USERNAME:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071506 /* Available since 7.21.6 */
+    case CURLOPT_ACCEPT_ENCODING:
+    case CURLOPT_TRANSFER_ENCODING:
+#else
+    case CURLOPT_ENCODING:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071800 /* Available since 7.24.0 */
+    case CURLOPT_DNS_SERVERS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071900 /* Available since 7.25.0 */
+    case CURLOPT_MAIL_AUTH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072200 /* Available since 7.34.0 */
+    case CURLOPT_LOGIN_OPTIONS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
+    case CURLOPT_PINNEDPUBLICKEY:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072b00 /* Available since 7.43.0 */
+    case CURLOPT_PROXY_SERVICE_NAME:
+    case CURLOPT_SERVICE_NAME:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072d00 /* Available since 7.45.0 */
+    case CURLOPT_DEFAULT_PROTOCOL:
+#endif
+      return true;
+    default:
+      return isStringFilePathOption(option);
+  }
+}
+
 bool CurlResource::setStringOption(long option, const String& value) {
   assertx(isStringOption(option));
+
+  // the following options deal with files, therefore the open_basedir check
+  // is required.
+  if (isStringFilePathOption(option) && !value.empty()) {
+    String filename = File::TranslatePath(value);
+    if (filename.empty()) {
+      raise_warning(
+        "open_basedir restriction in effect. File(%s) is not within "
+        "the allowed paths",
+        value.data()
+      );
+      return false;
+    }
+  }
+
   if (option == CURLOPT_URL) m_url = value;
 
 #if LIBCURL_VERSION_NUM >= 0x071100
@@ -440,6 +655,58 @@ bool CurlResource::setStringOption(long option, const String& value) {
   m_to_free->str.push_back(copystr);
   m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, copystr);
 #endif
+
+  return m_error_no == CURLE_OK;
+}
+
+bool CurlResource::isNullableStringOption(long option) {
+  switch (option) {
+    case CURLOPT_CUSTOMREQUEST:
+    case CURLOPT_FTPPORT:
+    case CURLOPT_RANGE:
+#if LIBCURL_VERSION_NUM >= 0x070d00 /* Available since 7.13.0 */
+    case CURLOPT_FTP_ACCOUNT:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
+    case CURLOPT_RTSP_SESSION_ID:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072100 /* Available since 7.33.0 */
+    case CURLOPT_DNS_INTERFACE:
+    case CURLOPT_DNS_LOCAL_IP4:
+    case CURLOPT_DNS_LOCAL_IP6:
+    case CURLOPT_XOAUTH2_BEARER:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
+    case CURLOPT_UNIX_SOCKET_PATH:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
+    case CURLOPT_KRBLEVEL:
+#else
+    case CURLOPT_KRB4LEVEL:
+#endif
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool CurlResource::setNullableStringOption(long option, const Variant& value) {
+  assertx(isNullableStringOption(option));
+
+  if (value.isNull()) {
+    m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, nullptr);
+  } else {
+    auto const strValue = value.toString();
+#if LIBCURL_VERSION_NUM >= 0x071100
+    /* Strings passed to libcurl as 'char *' arguments, are copied
+       by the library... NOTE: before 7.17.0 strings were not copied. */
+    m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, strValue.c_str());
+#else
+    char *copystr = req::strndup(strValue.data(), strValue.size());
+    m_to_free->str.push_back(copystr);
+    m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, copystr);
+#endif
+  }
 
   return m_error_no == CURLE_OK;
 }
@@ -497,7 +764,10 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
       String val = var_val.toString();
       auto postval = val.data();
 
-      if (*postval == '@' && strlen(postval) == val.size()) {
+      if (!RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+          !m_safeUpload &&
+          *postval == '@' &&
+          strlen(postval) == val.size()) {
         /* Given a string like:
          *   "@/foo/bar;type=herp/derp;filename=ponies\0"
          * - Temporarily convert to:
@@ -506,6 +776,11 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
          *   curl_formadd
          * - Revert changes to postval at the end
          */
+        raise_deprecated(
+          "curl_setopt(): The usage of the @filename API for file uploading "
+          "is deprecated. Please use the CURLFile class instead"
+        );
+
         if (val.get()->isImmutable()) {
           val = String::attach(
             StringData::Make(val.data(), val.size(), CopyString));
@@ -609,15 +884,29 @@ bool CurlResource::setFileOption(long option, const req::ptr<File>& fp) {
 }
 
 bool CurlResource::isStringListOption(long option) {
-  return (option == CURLOPT_HTTPHEADER) ||
-         (option == CURLOPT_QUOTE) ||
-         (option == CURLOPT_HTTP200ALIASES) ||
-         (option == CURLOPT_POSTQUOTE) ||
-         (option == CURLOPT_RESOLVE)
-#if LIBCURL_VERSION_NUM >= 0x072500
-         || (option == CURLOPT_PROXYHEADER)
+  switch (option) {
+    case CURLOPT_HTTP200ALIASES:
+    case CURLOPT_HTTPHEADER:
+    case CURLOPT_POSTQUOTE:
+    case CURLOPT_PREQUOTE:
+    case CURLOPT_QUOTE:
+    case CURLOPT_TELNETOPTIONS:
+#if LIBCURL_VERSION_NUM >= 0x071400 /* Available since 7.20.0 */
+    case CURLOPT_MAIL_RCPT:
 #endif
-         ;
+#if LIBCURL_VERSION_NUM >= 0x071503 /* Available since 7.21.3 */
+    case CURLOPT_RESOLVE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
+    case CURLOPT_PROXYHEADER:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
+    case CURLOPT_CONNECT_TO:
+#endif
+      return true;
+    default:
+      return false;
+  }
 }
 
 bool CurlResource::setStringListOption(long option, const Variant& value) {
@@ -655,7 +944,8 @@ bool CurlResource::isNonCurlOption(long option) {
          (option == CURLOPT_HEADERFUNCTION) ||
          (option == CURLOPT_PROGRESSFUNCTION) ||
          (option == CURLOPT_FB_TLS_VER_MAX) ||
-         (option == CURLOPT_FB_TLS_CIPHER_SPEC);
+         (option == CURLOPT_FB_TLS_CIPHER_SPEC) ||
+         (option == CURLOPT_SAFE_UPLOAD);
 }
 
 bool CurlResource::setNonCurlOption(long option, const Variant& value) {
@@ -704,6 +994,16 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
         raise_warning("CURLOPT_FB_TLS_CIPHER_SPEC requires a non-empty string");
       }
       return false;
+    case CURLOPT_SAFE_UPLOAD:
+      if (RuntimeOption::PHP7_DisallowUnsafeCurlUploads &&
+          value.toInt64() == 0) {
+        raise_warning(
+          "curl_setopt(): Disabling safe uploads is no longer supported"
+        );
+        return false;
+      }
+      m_safeUpload = value.toBoolean();
+      return true;
   }
   return false;
 }

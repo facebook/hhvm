@@ -18,6 +18,7 @@ let server_config = ServerEnvBuild.default_genv.ServerEnv.config
 let global_opts = GlobalOptions.make
   ~tco_assume_php: false
   ~tco_unsafe_xhp: false
+  ~tco_safe_array: false
   ~tco_user_attrs: None
   ~tco_experimental_features: GlobalOptions.tco_experimental_all
   ~po_auto_namespace_map: []
@@ -167,7 +168,7 @@ let open_file env ?contents file_name =
 let edit_file env name contents =
   let env, loop_output = run_loop_once env { default_loop_input with
     persistent_client_request = Some (EDIT_FILE
-      (root ^ name, [File_content.{range = None; text = contents;}])
+      (root ^ name, [{Ide_api_types.range = None; text = contents;}])
     )
   } in
   (match loop_output.persistent_client_response with
@@ -198,7 +199,7 @@ let autocomplete env contents =
 let ide_autocomplete env (path, line, column) =
   run_loop_once env { default_loop_input with
     persistent_client_request = Some (IDE_AUTOCOMPLETE
-      (root ^ path, File_content.{line; column})
+      (root ^ path, Ide_api_types.{line; column})
     )
   }
 
@@ -211,11 +212,15 @@ let assert_no_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) ->
     fail "Did not expect to receive push diagnostics."
-  | None -> ()
+  | Some NEW_CLIENT_CONNECTED ->
+    fail "Unexpected push message"
+  | _ -> ()
 
 let assert_has_diagnostics loop_output =
   match loop_output.push_message with
   | Some (DIAGNOSTIC _) -> ()
+  | Some NEW_CLIENT_CONNECTED ->
+    fail "Unexpected push message"
   | None -> fail "Expected to receive push diagnostics."
 
 let errors_to_string buf x =
@@ -237,10 +242,15 @@ let diagnostics_to_string x =
   end;
   Buffer.contents buf
 
+let errors_to_string x =
+  let buf = Buffer.create 1024 in
+  errors_to_string buf x;
+  Buffer.contents buf
+
 let assert_diagnostics loop_output expected =
   let diagnostics = match loop_output.push_message with
-    | None -> fail "Expected push diagnostics"
     | Some (DIAGNOSTIC (_, m)) -> m
+    | _ -> fail "Expected push diagnostics"
   in
 
   let diagnostics_as_string = diagnostics_to_string diagnostics in

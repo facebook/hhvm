@@ -1,5 +1,5 @@
 
-Warning: Invalid argument: option: -1 in %s/test/slow/invalid_argument/1381.php on line 7
+Warning: Invalid argument: option: -1337 in %s/test/slow/invalid_argument/1381.php on line 7
 bool(false)
 
 Warning: Invalid argument: Charset parameter exceeds the maximum allowed length of 64 characters in %s/test/slow/invalid_argument/1381.php on line 9

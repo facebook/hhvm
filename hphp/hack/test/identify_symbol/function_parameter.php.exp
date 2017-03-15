@@ -1,0 +1,8 @@
+name: $string, kind: local, span: line 9, characters 9-15, definition: 
+ $string
+   kind: local
+   position: line 8, characters 3-9
+   span: line 8, character 3 - line 8, character 9
+   modifiers: 
+
+

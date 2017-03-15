@@ -243,7 +243,7 @@ let rec check_lvalue env = function
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter el (check_lvalue env)
   | pos, (Array _ | Shape _ | Collection _
-  | Null | True | False | Id _ | Clone _
+  | Null | True | False | Id _ | Clone _ | Id_type_arguments _
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
@@ -303,7 +303,7 @@ let priorities = [
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
   (Left, [Tlb]);
-  (Right, [Teq; Tpluseq; Tminuseq; Tstareq;
+  (Right, [Teq; Tpluseq; Tminuseq; Tstareq; Tstarstareq;
            Tslasheq; Tdoteq; Tpercenteq;
            Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq]);
   (Left, [Tarrow; Tnsarrow]);
@@ -403,7 +403,7 @@ let identifier env =
 (* $variable *)
 let variable env =
   match L.token env.file env.lb with
-  | Tlvar | Tdollardollar ->
+  | Tlvar  ->
       Pos.make env.file env.lb, Lexing.lexeme env.lb
   | _ ->
       error_expect env "variable";
@@ -414,15 +414,10 @@ let ref_variable env =
   let is_ref = ref_opt env in
   (variable env, is_ref)
 
-(* &...$arg *)
-let ref_param env =
-  let is_ref = ref_opt env in
-  let is_variadic = match L.token env.file env.lb with
-    | Tellipsis -> true
-    | _ -> L.back env.lb; false
-  in
-  let var = variable env in
-  is_ref, is_variadic, var
+let ellipsis_opt env =
+  match L.token env.file env.lb with
+  | Tellipsis -> true
+  | _ -> L.back env.lb; false
 
 (*****************************************************************************)
 (* Entry point *)
@@ -2347,7 +2342,10 @@ and statement_try env =
   let st = statement env in
   let cl = catch_list env in
   let fin = finally env in
-  Try ([st], cl, fin)
+  (* At least one catch or finally block must be provided after every try *)
+  match cl, fin with
+  | [], [] -> error_expect env "catch or finally"; Try([st], [], [])
+  | _ -> Try ([st], cl, fin)
 
 and catch_list env =
   match L.token env.file env.lb with
@@ -2392,10 +2390,30 @@ and echo_args env =
 (*****************************************************************************)
 
 and parameter_list env =
+  (* A parameter list follows one of these five patterns:
+
+    (  )
+    ( normal-parameters )
+    ( normal-parameters  ,  )
+    ( variadic-parameter  )
+    ( normal-parameters  ,  variadic-parameter  )
+
+    A variadic parameter follows one of these two patterns:
+
+    ...
+    attributes-opt modifiers-opt typehint-opt  ...  $variable
+
+    Note that:
+    * A variadic parameter is never followed by a comma
+    * A variadic parameter with a type must also have a variable.
+
+ *)
   expect env Tlp;
   parameter_list_remain env
 
 and parameter_list_remain env =
+  (* We have either just parsed the left paren that opens a parameter list,
+  or a normal parameter -- possibly ending in a comma. *)
   match L.token env.file env.lb with
   | Trp -> []
   | Tellipsis ->
@@ -2403,12 +2421,10 @@ and parameter_list_remain env =
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
-      let p = param ~variadic:false env in
+      let p = param env in
       match L.token env.file env.lb with
       | Trp ->
           [p]
-      | Tellipsis ->
-          [p ; parameter_varargs env]
       | Tcomma ->
           if !(env.errors) != error_state
           then [p]
@@ -2416,51 +2432,66 @@ and parameter_list_remain env =
       | _ ->
           error_expect env ")"; [p]
 
+and parameter_default_with_variadic is_variadic env =
+  let default = parameter_default env in
+  if default <> None && is_variadic then begin
+    error env "A variadic parameter cannot have a default value."
+  end;
+  if is_variadic then None else default
+
 and parameter_varargs env =
+  (* We were looking for a parameter; we got "...".  We are now expecting
+     an optional variable followed immediately by a right paren.
+     ... $x = whatever   is an error. *)
   let pos = Pos.make env.file env.lb in
   (match L.token env.file env.lb with
-    | Tcomma -> expect env Trp; make_param_ellipsis pos
-    | Trp -> make_param_ellipsis pos;
+    | Trp -> make_param_ellipsis (pos, "...");
     | _ ->
       L.back env.lb;
-      let p = param ~variadic:true env in
-      expect env Trp; p
-  )
+      let param_id = variable env in
+      let _ = parameter_default_with_variadic true env in
+      expect env Trp;
+      make_param_ellipsis param_id
+    )
 
-and make_param_ellipsis pos =
+and make_param_ellipsis param_id =
   { param_hint = None;
     param_is_reference = false;
     param_is_variadic = true;
-    param_id = (pos, "...");
+    param_id;
     param_expr = None;
     param_modifier = None;
     param_user_attributes = [];
   }
 
-and param ~variadic env =
-  let attrs = attribute env in
-  let modifs = parameter_modifier env in
-  let h = parameter_hint env in
-  let is_ref, variadic_after_hint, name = ref_param env in
-  assert ((not variadic_after_hint) || (not variadic));
-  let variadic = variadic || variadic_after_hint in
-  let default = parameter_default env in
-  let default =
-    if variadic && default <> None then
-      let () = error env "Variadic arguments don't have default values" in
-      None
-    else default in
-  if variadic_after_hint then begin
+and param env =
+  (* We have a parameter that does not start with ... so it is of one of
+  these two forms:
+
+  attributes-opt modifiers-opt typehint-opt ref-opt $name default-opt
+  attributes-opt modifiers-opt typehint-opt ... $name
+  *)
+  let param_user_attributes = attribute env in
+  let param_modifier = parameter_modifier env in
+  let param_hint = parameter_hint env in
+  let param_is_reference = ref_opt env in
+  let param_is_variadic = ellipsis_opt env in
+  if param_is_reference && param_is_variadic then begin
+    error env "A variadic parameter may not be passed by reference."
+  end;
+  let param_id = variable env in
+  let param_expr = parameter_default_with_variadic param_is_variadic env in
+  if param_is_variadic then begin
     expect env Trp;
     L.back env.lb
-  end else ();
-  { param_hint = h;
-    param_is_reference = is_ref;
-    param_is_variadic = variadic;
-    param_id = name;
-    param_expr = default;
-    param_modifier = modifs;
-    param_user_attributes = attrs;
+  end;
+  { param_hint;
+    param_is_reference;
+    param_is_variadic;
+    param_id;
+    param_expr;
+    param_modifier;
+    param_user_attributes;
   }
 
 and parameter_modifier env =
@@ -2573,6 +2604,8 @@ and expr_remain env e1 =
       expr_assign env Tbareq (Eq (Some Bar)) e1
   | Tpluseq ->
       expr_assign env Tpluseq (Eq (Some Plus)) e1
+  | Tstarstareq ->
+      expr_assign env Tstarstareq (Eq (Some Starstar)) e1
   | Tstareq ->
       expr_assign env Tstareq (Eq (Some Star)) e1
   | Tslasheq ->
@@ -3311,12 +3344,17 @@ and expr_new env pos_start =
     let cname =
       let e = expr env in
       match e with
+      | p, Id id ->
+        let typeargs = class_hint_params env in
+        if typeargs == []
+        then e
+        else (p, Id_type_arguments (id, typeargs))
       | _, Lvar _
       | _, Array_get _
       | _, Obj_get _
       | _, Class_get _
-      | _, Call _
-      | _, Id _ -> e
+      | _, Call _ ->
+        e
       | p, _ ->
           error_expect env "class name";
           e
@@ -3349,7 +3387,7 @@ and is_cast env =
       (* We cannot be making a cast if the next token is a binary / ternary
        * operator, or if it's the end of a statement (i.e. a semicolon.) *)
       | Tqm | Tsc | Tstar | Tslash | Txor | Tpercent | Tlt | Tgt | Tltlt | Tgtgt
-      | Tlb | Trb | Tdot | Tlambda -> false
+      | Tlb | Trb | Tdot | Tlambda | Trp -> false
       | _ -> true
     end
   end
@@ -3771,6 +3809,10 @@ and shape_field_list_remain env =
       | _ -> error_expect env ")"; [fd]
 
 and shape_field env =
+  if L.token env.file env.lb = Tqm then
+    error env "Shape construction should not specify optional types.";
+  L.back env.lb;
+
   let name = shape_field_name env in
   expect env Tsarrow;
   let value = expr { env with priority = 0 } in
@@ -4036,10 +4078,19 @@ and hint_shape_field_list_remain env =
           [fd]
 
 and hint_shape_field env =
-  let name = shape_field_name env in
+  (* Consume the next token to determine if we're creating an optional field. *)
+  let sf_optional =
+    if L.token env.file env.lb = Tqm then
+      true
+    else
+      (* In this case, we did not find an optional type, so we'll back out by a
+         token to parse the shape. *)
+      (L.back env.lb; false)
+  in
+  let sf_name = shape_field_name env in
   expect env Tsarrow;
-  let ty = hint env in
-  name, ty
+  let sf_hint = hint env in
+  { sf_optional; sf_name; sf_hint }
 
 (*****************************************************************************)
 (* Namespaces *)
@@ -4159,6 +4210,11 @@ let from_file ?(quick = false) popt file =
   let content =
     try Sys_utils.cat (Relative_path.to_absolute file) with _ -> "" in
   program ~quick popt file content
+
+let get_file_mode popt file content =
+  let lb = Lexing.from_string content in
+  let env = init_env file lb popt false in
+  snd (get_header env)
 
 let from_file_with_default_popt ?(quick = false) file =
   from_file ~quick ParserOptions.default file

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,19 +25,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FilesMatch::FilesMatch(const IniSetting::Map& ini, const Hdf& vh) {
-  if (vh.exists()) {
-    m_pattern = format_pattern(vh["pattern"].configGetString(), true);
-    vh["headers"].configGet(m_headers);
-  } else {
-    m_pattern = format_pattern(
-      ini[String("pattern")].toString().toCppString(),
-      true
-    );
-    for (ArrayIter iter(ini[String("headers")].toArray());
-         iter; ++iter) {
-      m_headers.push_back(iter.second().toString().toCppString());
-    }
-  }
+
+  m_pattern = format_pattern(Config::GetString(ini, vh, "pattern", "", false),
+                             true);
+  m_headers = Config::GetVector(ini, vh, "headers", m_headers, false);
 }
 
 bool FilesMatch::match(const std::string &filename) const {

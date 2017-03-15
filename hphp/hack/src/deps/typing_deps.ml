@@ -88,11 +88,14 @@ module DepSet = Reordered_argument_set(Set.Make (Dep))
 module Graph = struct
   external hh_add_dep: int -> unit     = "hh_add_dep"
   external hh_get_dep: int -> int list = "hh_get_dep"
+  external hh_get_dep_sqlite: int -> int list = "hh_get_dep_sqlite"
 
   let add x y = hh_add_dep ((x lsl 31) lor y)
 
+  let union_deps l1 l2 = List.dedup (List.append l1 l2)
+
   let get x =
-    let l = hh_get_dep x in
+    let l = union_deps (hh_get_dep x) (hh_get_dep_sqlite x) in
     List.fold_left l ~f:begin fun acc node ->
       DepSet.add acc node
     end ~init:DepSet.empty
@@ -158,8 +161,8 @@ let get_files deps =
     with Not_found -> acc
   end deps ~init:Relative_path.Set.empty
 
-let update_files fast =
-  Relative_path.Map.iter fast begin fun filename info ->
+let update_files fileInfo =
+  Relative_path.Map.iter fileInfo begin fun filename info ->
     let {FileInfo.funs; classes; typedefs;
          consts = _ (* TODO probably a bug #3844332 *);
          comments = _;

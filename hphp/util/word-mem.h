@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,7 +58,7 @@ namespace HPHP {
  */
 
 inline char* memcpy8(void* dst, const void* src, uint32_t len) {
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   return reinterpret_cast<char*>(_memcpy8(dst, src, len));
 #else
   memcpy(dst, src, len);
@@ -68,7 +68,7 @@ inline char* memcpy8(void* dst, const void* src, uint32_t len) {
 
 inline char* memcpy16(void* dst, const void* src, uint32_t len) {
   assertx(len > 0 && len % 16 == 0);
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   return reinterpret_cast<char*>(_memcpy16(dst, src, len));
 #else
   return reinterpret_cast<char*>(memcpy(dst, src, len));
@@ -77,7 +77,7 @@ inline char* memcpy16(void* dst, const void* src, uint32_t len) {
 
 inline void bcopy32(void* dst, const void* src, uint32_t len) {
   assertx(len >= 32);
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   _bcopy32(dst, src, len);
 #else
   memcpy(dst, src, len / 32 * 32);
@@ -86,7 +86,7 @@ inline void bcopy32(void* dst, const void* src, uint32_t len) {
 
 inline void bcopy_in_64(void* dst, const void* src, uint32_t lenIn64) {
   assertx(lenIn64 != 0);
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
   _bcopy_in_64(dst, src, lenIn64);
 #else
   memcpy(dst, src, lenIn64 * 64);
@@ -109,6 +109,21 @@ inline void bcopy32_inline(void* dst, const void* src, uint32_t len) {
                        "jg     .LBCP32%=\n"
                        : "+r"(len), "+r"(src), "+r"(dst)
                        :: "xmm0", "xmm1"
+                      );
+#elif defined(__aarch64__)
+  int64_t t3, t4, t5, t6, t7;
+  __asm__ __volatile__("lsr    %x0, %x0, #5\n"
+                       "sub    %x1, %x1, #16\n"
+                       "sub    %x2, %x2, #16\n"
+                       ".LBCP32%=:\n"
+                       "ldp    %x3, %x4, [%x1, #16]\n"
+                       "ldp    %x5, %x6, [%x1, #32]!\n"
+                       "stp    %x3, %x4, [%x2, #16]\n"
+                       "stp    %x5, %x6, [%x2, #32]!\n"
+                       "subs   %x0, %x0, #1\n"
+                       "bgt    .LBCP32%=\n"
+                       : "+r"(len), "+r"(src), "+r"(dst),
+                         "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6), "=r"(t7)
                       );
 #else
   bcopy32(dst, src, len);
@@ -134,6 +149,30 @@ inline void memcpy16_inline(void* dst, const void* src, uint64_t len) {
                        ".LEND%=:\n"
                        : "+r"(len), "+r"(src), "+r"(dst)
                        :: "xmm0", "xmm1"
+                      );
+#elif defined(__aarch64__)
+  int64_t t3, t4, t5, t6, s1, d1, d2;
+  __asm__ __volatile__("mov    %x7, %x1\n"
+                       "add    %x1, %x1, %x0\n"
+                       "ldp    %x3, %x4, [%x1, #-16]!\n"
+                       "mov    %x8, %x2\n"
+                       "add    %x2, %x2, %x0\n"
+                       "stp    %x3, %x4, [%x2, #-16]!\n"
+                       "lsr    %x0, %x0, #5\n"
+                       "cbz    %x0, .LEND%=\n"
+                       "sub    %x7, %x7, #16\n"
+                       "sub    %x8, %x8, #16\n"
+                       ".LR32%=:\n"
+                       "ldp    %x3, %x4, [%x7, #16]\n"
+                       "ldp    %x5, %x6, [%x7, #32]!\n"
+                       "stp    %x3, %x4, [%x8, #16]\n"
+                       "stp    %x5, %x6, [%x8, #32]!\n"
+                       "subs   %x0, %x0, #1\n"
+                       "bgt    .LR32%=\n"
+                       ".LEND%=:\n"
+                       : "+r"(len), "+r"(src), "+r"(dst),
+                         "=r"(t3), "=r"(t4), "=r"(t5), "=r"(t6),
+                         "=r"(s1), "=r"(d1), "=r"(d2)
                       );
 #else
   memcpy16(dst, src, len);

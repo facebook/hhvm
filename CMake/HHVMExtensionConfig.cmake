@@ -140,8 +140,7 @@ include(Options)
 # Dependencies prefixed with "os" represent the OS required to
 # build the extension. The only valid value for this currently
 # is osPosix, which represents everything with a valid posix
-# API, which is most everything except for Windows. Cygwin and
-# MinGW are both included in osPosix.
+# API, which is most everything except for Windows.
 #
 # Dependencies prefixed with "var" represent a CMake variable
 # which must evaluate to a trueish value for the extension to
@@ -971,7 +970,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
       return()
     endif()
-    
+
     if(${addPaths})
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${PGSQL_INCLUDE_DIR})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${PGSQL_LIBRARY})
@@ -1054,6 +1053,17 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBUODBC_INCLUDE_DIRS})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBUODBC_LIBRARIES})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBUODBC")
+    endif()
+  elseif (${libraryName} STREQUAL "watchmanclient")
+    find_package(libWatchmanClient ${requiredVersion})
+    if (NOT WATCHMANCLIENT_INCLUDE_DIRS OR NOT WATCHMANCLIENT_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${WATCHMANCLIENT_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${WATCHMANCLIENT_LIBRARIES})
     endif()
   else()
     message(FATAL_ERROR "Unknown library '${originalLibraryName}' as a dependency of the '${HHVM_EXTENSION_${extensionID}_PRETTY_NAME}' extension!")

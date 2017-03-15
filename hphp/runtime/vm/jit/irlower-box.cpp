@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -75,16 +75,11 @@ void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  cond(v, CC_E, sf, dst,
-    [&] (Vout& v) {
-      auto const ref_ptr = v.makeReg();
-      auto const cell_ptr = v.makeReg();
-      v << load{src[TVOFF(m_data)], ref_ptr};
-      v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
-      return cell_ptr;
-    },
-    [&] (Vout& v) { return src; }
-  );
+  auto const ref_ptr = v.makeReg();
+  auto const cell_ptr = v.makeReg();
+  v << load{src[TVOFF(m_data)], ref_ptr};
+  v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
+  v << cmovq{CC_E, sf, src, cell_ptr, dst};
 }
 
 IMPL_OPCODE_CALL(Box)

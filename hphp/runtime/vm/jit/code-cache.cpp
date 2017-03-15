@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
@@ -24,6 +25,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -58,15 +60,25 @@ CodeCache::CodeCache()
   auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
   auto rd = [=] (size_t sz) { return sz & ~(kRoundUp - 1); };
 
+  // We want to ensure that all code blocks are close to each other so that we
+  // can short jump/point between them. Thus we allocate one slab and divide it
+  // between the various blocks.
+  auto const thread_local_size = ru(
+    RuntimeOption::EvalThreadTCMainBufferSize +
+    RuntimeOption::EvalThreadTCColdBufferSize +
+    RuntimeOption::EvalThreadTCFrozenBufferSize +
+    RuntimeOption::EvalThreadTCDataBufferSize
+  );
+
   auto const kAHotSize    = ru(CodeCache::AHotSize);
   auto const kASize       = ru(CodeCache::ASize);
   auto const kAProfSize   = ru(CodeCache::AProfSize);
   auto const kAColdSize   = ru(CodeCache::AColdSize);
   auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
 
-  auto const kGDataSize   = ru(CodeCache::GlobalDataSize);
+  auto kGDataSize = ru(CodeCache::GlobalDataSize);
   m_totalSize = kAHotSize + kASize + kAColdSize + kAProfSize +
-                kAFrozenSize + kGDataSize;
+                kAFrozenSize + kGDataSize + thread_local_size;
   m_codeSize = m_totalSize - kGDataSize;
 
   if ((kASize < (10 << 20)) ||
@@ -88,7 +100,9 @@ CodeCache::CodeCache()
   auto enhugen = [&](void* base, int numMB) {
     if (CodeCache::MapTCHuge) {
       assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
-      hintHuge(base, numMB << 20);
+      hintHugeDeleteData((char*)base, numMB << 20,
+                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                         false /* MAP_SHARED */);
     }
   };
 
@@ -145,6 +159,7 @@ CodeCache::CodeCache()
   }
   assert(base);
   base += baseAdjustment;
+
   m_base = base;
 
   numa_interleave(base, m_totalSize);
@@ -171,6 +186,10 @@ CodeCache::CodeCache()
   enhugen(base, CodeCache::TCNumHugeColdMB);
   base += kAColdSize;
 
+  TRACE(1, "init thread_local @%p\n", base);
+  m_threadLocalStart = base;
+  base += thread_local_size;
+
   TRACE(1, "init afrozen @%p\n", base);
   m_frozen.init(base, kAFrozenSize, "afrozen");
   base += kAFrozenSize;
@@ -184,8 +203,16 @@ CodeCache::CodeCache()
   // the memory is marked executable.
   unprotect();
 
+  // Assert that no one is actually writing to or reading from the pseudo
+  // addresses used to emit thread local translations
+  if (thread_local_size) {
+    mprotect(m_threadLocalStart, thread_local_size, PROT_NONE);
+  }
+  m_threadLocalSize = thread_local_size;
+
   assert(base - m_base <= allocationSize);
   assert(base - m_base + 2 * kRoundUp > allocationSize);
+  assert(base - m_base <= (2ul << 30));
 }
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
@@ -208,7 +235,9 @@ size_t CodeCache::totalUsed() const {
 }
 
 bool CodeCache::isValidCodeAddress(ConstCodeAddress addr) const {
-    return addr >= m_base && addr < m_base + m_codeSize;
+  return addr >= m_base && addr < m_base + m_codeSize &&
+    (addr < m_threadLocalStart ||
+     addr >= m_threadLocalStart + m_threadLocalSize);
 }
 
 void CodeCache::protect() {
@@ -220,19 +249,24 @@ void CodeCache::unprotect() {
 }
 
 CodeCache::View CodeCache::view(TransKind kind) {
-  tc::assertOwnsCodeLock();
+  assertx(!mcgen::isLocalTCEnabled());
 
-  if (kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
-    return View{m_prof, m_frozen, m_frozen, m_data};
-  }
+  auto view = [&] {
+    if (isProfiling(kind)) {
+      return View{m_prof, m_frozen, m_frozen, m_data, false};
+    }
 
-  const bool isOpt = kind == TransKind::Optimize ||
-                     kind == TransKind::OptPrologue;
-  if (isOpt && m_useHot && m_hot.available() > kMinTranslationBytes) {
-    return View{m_hot, m_cold, m_frozen, m_data};
-  }
+    const bool isOpt = kind == TransKind::Optimize ||
+                       kind == TransKind::OptPrologue;
+    if (isOpt && m_useHot && m_hot.available() > kMinTranslationBytes) {
+      return View{m_hot, m_cold, m_frozen, m_data, false};
+    }
 
-  return View{m_main, m_cold, m_frozen, m_data};
+    return View{m_main, m_cold, m_frozen, m_data, false};
+  }();
+
+  tc::assertOwnsCodeLock(view);
+  return view;
 }
 
 }}

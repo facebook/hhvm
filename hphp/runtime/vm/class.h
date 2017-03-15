@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,10 +201,16 @@ struct Class : AtomicCountable {
   private:
     PropInitVec(const PropInitVec&);
 
+    bool reqAllocated() const;
+
     TypedValueAux* m_data;
-    unsigned m_size;
-    bool m_req_allocated;
+    uint32_t m_size;
+    // m_capacity > 0, allocated on global huge heap
+    // m_capacity = 0, not request allocated, m_data is nullptr
+    // m_capacity < 0, request allocated, with '~m_capacity' slots
+    int32_t m_capacity;
   };
+  static_assert(sizeof(PropInitVec) <= 16, "");
 
   /*
    * A slot in a Class vtable vector, pointing to the vtable for an interface
@@ -441,6 +447,11 @@ public:
    */
   const Class* commonAncestor(const Class* cls) const;
 
+  /*
+   * Given that this class exists, return a class named "name" that is
+   * also guaranteed to exist, or nullptr if there is none.
+   */
+  const Class* getClassDependency(const StringData* name) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]
@@ -697,6 +708,8 @@ public:
    * RDS handle for the static property at `index'.
    */
   rds::Handle sPropHandle(Slot index) const;
+  rds::Link<TypedValue> sPropLink(Slot index) const;
+  rds::Link<bool> sPropInitLink() const;
 
   /*
    * Get the PropInitVec for the current request.
@@ -966,6 +979,10 @@ public:
 
 
   bool needsInitSProps() const;
+
+  // For assertions:
+  void validate() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1205,12 +1222,6 @@ private:
   // Static data members.
 
 public:
-  /*
-   * Callback which, if set, runs during setMethods().
-   */
-  static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1219,10 +1230,16 @@ public:
   // The ordering is reverse order of hotness because m_classVec is relatively
   // hot, and must be the last member.
 
-public:
   LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:
+  static constexpr uint32_t kMagic = 0xce7adb33;
+
+#ifdef DEBUG
+  // For asserts only.
+  uint32_t m_magic;
+#endif
+
   default_ptr<ExtraData> m_extra;
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type

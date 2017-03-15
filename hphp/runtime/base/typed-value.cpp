@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,9 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+const Cell immutable_null_base{0, KindOfNull};
+const Cell immutable_uninit_base{0, KindOfUninit};
 
 std::string TypedValue::pretty() const {
   char buf[20];

@@ -1,0 +1,16 @@
+
+.main {
+  FPushFuncD 0 "hello_world"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function  hello_world() {
+  String "Hello, world!"
+  Print
+  PopC
+  Null
+  RetC
+}

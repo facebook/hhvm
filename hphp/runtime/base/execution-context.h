@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,11 +56,6 @@ struct VMState {
   TypedValue* sp;
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
-
-  template<class F> void scan(F& mark) const {
-    mInstrState.scan(mark);
-    mark(&jitCalledFrame, sizeof(jitCalledFrame));
-  }
 };
 
 enum class InclOpFlags {
@@ -228,6 +223,7 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
+  void acceptRequestEventHandlers(bool enable);
   std::size_t registerRequestEventHandler(RequestEventHandler* handler);
   void unregisterRequestEventHandler(RequestEventHandler* handler,
                                      std::size_t index);
@@ -246,6 +242,7 @@ public:
   Variant pushUserExceptionHandler(const Variant& function);
   void popUserErrorHandler();
   void popUserExceptionHandler();
+  void clearUserErrorHandlers();
   bool errorNeedsHandling(int errnum,
                           bool callUserHandler,
                           ErrorThrowMode mode);
@@ -310,11 +307,6 @@ private:
     Variant handler;
     int chunk_size;
     OBFlags flags;
-    template<class F> void scan(F& mark) {
-      mark(oss);
-      mark(handler);
-      mark(chunk_size);
-    }
   };
 
 private:
@@ -375,13 +367,17 @@ public:
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);
 
-  // Compiles the passed string and evaluates it in the given frame. Returns
-  // false on failure.
-  bool evalPHPDebugger(TypedValue* retval, StringData* code, int frame);
+  struct EvaluationResult {
+    bool failed;
+    Variant result;
+    std::string error;
+  };
+
+  // Compiles the passed string and evaluates it in the given frame.
+  EvaluationResult evalPHPDebugger(StringData* code, int frame);
 
   // Evaluates the a unit compiled via compile_string in the given frame.
-  // Returns false on failure.
-  bool evalPHPDebugger(TypedValue* retval, Unit* unit, int frame);
+  EvaluationResult evalPHPDebugger(Unit* unit, int frame);
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
@@ -407,7 +403,10 @@ public:
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
                          bool* fromVMEntry = nullptr);
-
+  ActRec* getPrevVMStateSkipFrame(const ActRec* fp,
+                                  Offset* prevPc = nullptr,
+                                  TypedValue** prevSp = nullptr,
+                                  bool* fromVMEntry = nullptr);
   /*
    * Returns the caller of the given frame.
    */
@@ -491,61 +490,6 @@ private:
                             FInitArgs doInitArgs,
                             FEnterVM doEnterVM);
 
-public:
-  template<class F> void scan(F& mark) {
-    //mark(m_transport); Transport &subclasses must not contain heap ptrs.
-    mark(m_cwd);
-    //mark(m_sb); // points into m_buffers
-    //mark(m_out); // points into m_buffers
-    mark(m_remember_chunk);
-    for (auto& b : m_buffers) b.scan(mark);
-    mark(m_insideOBHandler);
-    mark(m_implicitFlush);
-    mark(m_protectedLevel);
-    //mark(m_stdout);
-    //mark(m_stdoutData);
-    mark(m_stdoutBytesWritten);
-    mark(m_rawPostData);
-    //mark(m_requestEventHandlers); type_scanned via ThreadLocal<T>
-    mark(m_shutdowns);
-    mark(m_userErrorHandlers);
-    mark(m_userExceptionHandlers);
-    //mark(m_errorState);
-    mark(m_lastError);
-    mark(m_errorPage);
-    mark(m_envs);
-    mark(m_timezone);
-    mark(m_throwAllErrors);
-    //mark(m_streamContext);
-    mark(m_shutdownsBackup);
-    mark(m_userErrorHandlersBackup);
-    mark(m_userExceptionHandlersBackup);
-    mark(m_exitCallback);
-    mark(m_sandboxId);
-    //mark(m_vhost); // VirtualHost* not allocated in php request heap
-    //mark(debuggerSettings);
-    mark.implicit(m_liveBCObjs); // exact ptrs, but not refcounted.
-    mark(m_apcMemSize);
-    //mark(m_apcHandles);
-    //mark(dynPropTable); // don't root objects with dyn props
-    mark(m_globalVarEnv);
-    for (auto& e : m_evaledFiles) { mark(e.first); mark(e.second.unit); }
-    mark(m_evaledFilesOrder);
-    mark(m_createdFuncs);
-    //for (auto& f : m_faults) mark(f);
-    mark(m_lambdaCounter);
-    for (auto& vmstate : m_nestedVMs) vmstate.scan(mark);
-    mark(m_nesting);
-    mark(m_dbgNoBreak);
-    mark(m_evaledArgs);
-    mark(m_lastErrorPath);
-    mark(m_lastErrorLine);
-    mark(m_setprofileCallback);
-    mark(m_memThresholdCallback);
-    mark(m_executingSetprofileCallback);
-    mark(m_headerCallback);
-  }
-
 ///////////////////////////////////////////////////////////////////////////////
 // only fields past here, please.
 private:
@@ -569,6 +513,7 @@ private:
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
+  bool m_acceptRequestEventHandlers;
 
   // error handling
   req::vector<std::pair<Variant,int>> m_userErrorHandlers;

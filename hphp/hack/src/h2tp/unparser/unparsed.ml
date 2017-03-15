@@ -24,6 +24,7 @@ type unparsed =
   | StrSemiList of unparsed list (* semicolon separated list *)
   | StrParens of unparsed (* an item that should be in parens () *)
   | StrBraces of unparsed (* an item that should be in braces {} *)
+  | StrAngles of unparsed (* an item that should be in angles <> *)
 
 let dump strs =
   let buf = Buffer.create 10_000 in
@@ -46,6 +47,7 @@ let dump strs =
     | StrSemiList ss -> items [Str "StrSemiList"] ss
     | StrParens s -> add "("; add "StrParens "; process s; add ")"
     | StrBraces s -> add "("; add "StrBraces "; process s; add ")"
+    | StrAngles s -> add "("; add "StrAngles "; process s; add ")"
   and items cons ss =
     add "(";
     List.iter ~f:process cons;
@@ -83,6 +85,7 @@ let to_string strs =
         intersperse StrSemi ss |> process_list;
     | StrParens s -> add "("; process s; add ")";
     | StrBraces s -> add "{"; process s; add "}";
+    | StrAngles s -> add "<"; process s; add ">";
   and nonempty = List.filter ~f:(fun s -> s <> StrEmpty)
   and process_list ss = nonempty ss |> List.iter ~f:process
   and intersperse sep ss = nonempty ss |> List.intersperse ~sep

@@ -11,6 +11,9 @@
 open Full_fidelity_token_kind
 
 type t =
+| DollarOperator
+(* TODO: Is there a better name? Operators should be named as what they do,
+not how they look on the page. *)
 | IndexingOperator
 | FunctionCallOperator
 | AwaitOperator
@@ -29,7 +32,9 @@ type t =
 | EqualOperator
 | StrictEqualOperator
 | NotEqualOperator
+| PhpNotEqualOperator
 | StrictNotEqualOperator
+| SpaceshipOperator
 | LessThanOperator
 | LessThanOrEqualOperator
 | GreaterThanOperator
@@ -114,18 +119,18 @@ let precedence operator =
   | ExclusiveOrOperator -> 12
   | AndOperator -> 13
   | EqualOperator | StrictEqualOperator
-  | NotEqualOperator | StrictNotEqualOperator -> 14
-  | LessThanOperator | LessThanOrEqualOperator
+  | PhpNotEqualOperator | NotEqualOperator | StrictNotEqualOperator -> 14
+  | SpaceshipOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator -> 15
   | LeftShiftOperator | RightShiftOperator -> 16
   | AdditionOperator | SubtractionOperator | ConcatenationOperator -> 17
   | MultiplicationOperator | DivisionOperator | RemainderOperator -> 18
-  | InstanceofOperator -> 19
   | CastOperator
   | ReferenceOperator | ErrorControlOperator
   | PrefixIncrementOperator | PrefixDecrementOperator
   | LogicalNotOperator| NotOperator
-  | UnaryPlusOperator | UnaryMinusOperator -> 20
+  | DollarOperator | UnaryPlusOperator | UnaryMinusOperator -> 19
+  | InstanceofOperator -> 20
   | ExponentOperator -> 21
   | PostfixIncrementOperator | PostfixDecrementOperator -> 22
   | FunctionCallOperator -> 23
@@ -136,10 +141,10 @@ let precedence operator =
 
 let associativity operator =
   match operator with
-  | EqualOperator | StrictEqualOperator | NotEqualOperator
+  | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
-  | NewOperator | CloneOperator | AwaitOperator
+  | NewOperator | CloneOperator | AwaitOperator | SpaceshipOperator
     -> NotAssociative
 
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
@@ -157,10 +162,9 @@ let associativity operator =
   (* elseif *)
   (* else *)
   (* endif *)
-  (* variable operator $ *)
     -> LeftAssociative
   | CoalesceOperator| LogicalNotOperator | NotOperator | CastOperator
-  | UnaryPlusOperator | UnaryMinusOperator  (* TODO: Correct? *)
+  | DollarOperator | UnaryPlusOperator | UnaryMinusOperator  (* TODO: Correct? *)
   | ErrorControlOperator | ReferenceOperator (* TODO: Correct? *)
   | PostfixIncrementOperator | PostfixDecrementOperator
   | PrefixIncrementOperator | PrefixDecrementOperator | ExponentOperator
@@ -181,6 +185,7 @@ let prefix_unary_from_token token =
   | Tilde -> NotOperator
   | PlusPlus -> PrefixIncrementOperator
   | MinusMinus -> PrefixDecrementOperator
+  | Dollar -> DollarOperator
   | Plus -> UnaryPlusOperator
   | Minus -> UnaryMinusOperator
   | Ampersand -> ReferenceOperator
@@ -216,8 +221,10 @@ let is_trailing_operator_token token =
   | Bar
   | EqualEqual
   | EqualEqualEqual
+  | LessThanGreaterThan
   | ExclamationEqual
   | ExclamationEqualEqual
+  | LessThanEqualGreaterThan
   | LessThan
   | LessThanEqual
   | GreaterThan
@@ -265,8 +272,10 @@ let trailing_from_token token =
   | EqualEqual -> EqualOperator
   | EqualEqualEqual -> StrictEqualOperator
   | ExclamationEqual -> NotEqualOperator
+  | LessThanGreaterThan -> PhpNotEqualOperator
   | ExclamationEqualEqual -> StrictNotEqualOperator
   | LessThan -> LessThanOperator
+  | LessThanEqualGreaterThan -> SpaceshipOperator
   | LessThanEqual -> LessThanOrEqualOperator
   | GreaterThan -> GreaterThanOperator
   | GreaterThanEqual -> GreaterThanOrEqualOperator
@@ -321,7 +330,9 @@ let is_binary_operator_token token =
   | EqualEqual
   | EqualEqualEqual
   | ExclamationEqual
+  | LessThanGreaterThan
   | ExclamationEqualEqual
+  | LessThanEqualGreaterThan
   | LessThan
   | LessThanEqual
   | GreaterThan
@@ -366,6 +377,20 @@ let is_assignment operator =
   | RightShiftAssignmentOperator -> true
   | _ -> false
 
+let is_comparison operator =
+  match operator with
+  | EqualOperator
+  | StrictEqualOperator
+  | NotEqualOperator
+  | PhpNotEqualOperator
+  | StrictNotEqualOperator
+  | LessThanOperator
+  | LessThanOrEqualOperator
+  | GreaterThanOperator
+  | GreaterThanOrEqualOperator
+  | SpaceshipOperator -> true
+  | _ -> false
+
 let to_string kind =
   match kind with
   | PHPAndOperator -> "php_and"
@@ -386,8 +411,10 @@ let to_string kind =
   | EqualOperator -> "equal"
   | StrictEqualOperator -> "strict_equal"
   | NotEqualOperator -> "not_equal"
+  | PhpNotEqualOperator -> "php_not_equal"
   | StrictNotEqualOperator -> "strict_not_equal"
   | LessThanOperator -> "less_than"
+  | SpaceshipOperator -> "spaceship"
   | LessThanOrEqualOperator -> "less_than_or_equal"
   | GreaterThanOperator -> "greater_than"
   | GreaterThanOrEqualOperator -> "greater_than_or_equal"
@@ -428,6 +455,7 @@ let to_string kind =
   | MemberSelectionOperator -> "member_selection"
   | NullSafeMemberSelectionOperator -> "null_safe_member_selection"
   | ScopeResolutionOperator -> "scope_resolution"
+  | DollarOperator -> "dollar"
   | UnaryPlusOperator -> "unary_plus"
   | UnaryMinusOperator -> "unary_minus"
   | IncludeOperator -> "include"

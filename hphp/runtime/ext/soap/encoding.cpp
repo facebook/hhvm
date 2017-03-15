@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -2306,8 +2306,8 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
       } else {
         string replaced;
         replaced.reserve(array_size.size());
-        for (int i = 0; i < (int)array_size.size(); i++) {
-          char ch = array_size[i];
+        for (int i2 = 0; i2 < (int)array_size.size(); i2++) {
+          char ch = array_size[i2];
           if (ch == ',') {
             replaced += ' ';
           } else {

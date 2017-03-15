@@ -18,8 +18,9 @@ module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 open TokenKind
 open Full_fidelity_minimal_syntax
 
-module WithExpressionAndTypeParser
+module WithExpressionAndDeclAndTypeParser
   (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
+  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType)
   (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
@@ -28,6 +29,13 @@ module WithExpressionAndTypeParser
 
   let rec parse_statement parser =
     match peek_token_kind parser with
+    | Function -> parse_possible_php_function parser
+    | Abstract
+    | Final
+    | Interface
+    | Trait
+    | Class -> parse_php_class parser
+    | Fallthrough -> parse_possible_erroneous_fallthrough parser
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser
     | Do -> parse_do_statement parser
@@ -39,14 +47,63 @@ module WithExpressionAndTypeParser
     | Continue -> parse_continue_statement parser
     | Return -> parse_return_statement parser
     | Throw -> parse_throw_statement parser
-    | Default -> parse_default_label_statement parser
-    | Case -> parse_case_label_statement parser
     | LeftBrace -> parse_compound_statement parser
     | Static ->
       parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
     | Global -> parse_global_statement_or_expression_statement parser
+    | Unset -> parse_unset_statement parser
+    | Case ->
+      let (parser, result) = parse_case_label parser in
+      (* TODO: This puts the error in the wrong place. We should highlight
+      the entire label, not the trailing colon. *)
+      let parser = with_error parser SyntaxError.error2003 in
+      (parser, result)
+    | Default ->
+      let (parser, result) = parse_default_label parser in
+      (* TODO: This puts the error in the wrong place. We should highlight
+      the entire label, not the trailing colon. *)
+      let parser = with_error parser SyntaxError.error2004 in
+      (parser, result)
     | _ -> parse_expression_statement parser
+
+  and parse_php_function parser =
+    use_decl_parser DeclParser.parse_function parser
+
+  and parse_possible_php_function parser =
+    (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
+    (Hack only supports anonymous nested functions as expressions.)
+
+    If we have a statement beginning with function left-paren, then parse it
+    as a statement expression beginning with an anonymous function; it will
+    then have to end with a semicolon.
+
+    If it starts with something else, parse it as a function.
+
+    TODO: Give an error for nested nominal functions in a later pass.
+
+    *)
+    if peek_token_kind ~lookahead:1 parser = LeftParen then
+      parse_expression_statement parser
+    else
+      parse_php_function parser
+
+  and parse_php_class parser =
+    (* PHP allows classes nested inside of functions, but hack does not *)
+    (* TODO check for hack error: no classish declarations inside functions *)
+    let f decl_parser =
+      DeclParser.parse_classish_declaration decl_parser (make_missing ()) in
+    use_decl_parser f parser
+
+  and use_decl_parser
+      (f : DeclParser.t -> DeclParser.t * Full_fidelity_minimal_syntax.t)
+      parser =
+    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let decl_parser, node = f decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let parser = make lexer errors in
+    parser, node
 
   (* Helper: parses ( expr ) *)
   and parse_paren_expr parser =
@@ -55,52 +112,31 @@ module WithExpressionAndTypeParser
     let (parser, right_paren) = expect_right_paren parser in
     (parser, left_paren, expr_syntax, right_paren)
 
-  (* List of expressions and commas. No trailing comma. *)
-  and parse_for_expr_group parser is_last =
-    let rec aux parser acc =
-      let (parser, expr) = parse_expression parser in
-      let acc = expr :: acc in
-      let (parser1, token) = next_token parser in
-      match (Token.kind token) with
-      | Comma -> aux parser1 ((make_token token) :: acc)
-      | RightParen when is_last -> (parser, acc)
-      | Semicolon when not is_last -> (parser, acc)
-      (* TODO a similar error is reported by caller, should we duplicate? *)
-      | _ when is_last ->
-        let parser = with_error parser SyntaxError.error1009 in
-        (parser, acc)
-      | _ ->
-        let parser = with_error parser SyntaxError.error1024 in
-        (parser, acc)
-    in
-    let (parser, expressions_and_commas) = aux parser [] in
-    (parser, make_list (List.rev expressions_and_commas))
-
-  and parse_for_expr parser =
-    let token = peek_token parser in
-    let parser, for_expr_group = match Token.kind token with
-      | Semicolon -> parser, make_missing ()
-      | _ -> parse_for_expr_group parser false
-    in
-    let parser, semicolon = expect_semicolon parser in
-    parser, for_expr_group, semicolon
-
-  and parse_last_for_expr parser =
-    let token = peek_token parser in
-    let parser, for_expr_group = match Token.kind token with
-      | RightParen -> parser, make_missing ()
-      | _ -> parse_for_expr_group parser true
-    in
-    (parser, for_expr_group)
-
   and parse_for_statement parser =
+    (* SPEC
+    for-statement:
+      for   (   for-initializer-opt   ;   for-control-opt   ;    \
+        for-end-of-loop-opt   )   statement
+
+    Each clause is an optional, comma-separated list of expressions.
+    Note that unlike most such lists in Hack, it may *not* have a trailing
+    comma.
+    TODO: There is no compelling reason to not allow a trailing comma
+    from the grammatical point of view. Each clause unambiguously ends in
+    either a semi or a paren, so we can allow a trailing comma without
+    difficulty.
+
+    *)
     let parser, for_keyword_token = assert_token parser For in
     let parser, for_left_paren = expect_left_paren parser in
-    let parser, for_initializer_expr, for_first_semicolon =
-      parse_for_expr parser in
-    let parser, for_control_expr, for_second_semicolon =
-      parse_for_expr parser in
-    let parser, for_end_of_loop_expr = parse_last_for_expr parser in
+    let parser, for_initializer_expr = parse_comma_list_opt
+      parser Semicolon SyntaxError.error1015 parse_expression in
+    let parser, for_first_semicolon = expect_semicolon parser in
+    let parser, for_control_expr = parse_comma_list_opt
+      parser Semicolon SyntaxError.error1015 parse_expression in
+    let parser, for_second_semicolon = expect_semicolon parser in
+    let parser, for_end_of_loop_expr = parse_comma_list_opt
+      parser RightParen SyntaxError.error1015 parse_expression in
     let parser, for_right_paren = expect_right_paren parser in
     let parser, for_statement = parse_statement parser in
     let syntax = make_for_statement for_keyword_token for_left_paren
@@ -166,7 +202,43 @@ module WithExpressionAndTypeParser
       expr_node right_paren_token statement_node in
     (parser, syntax)
 
+  and parse_unset_statement parser =
+    (*
+    TODO: This is listed as unsupported in Hack in the spec; is that true?
+    TODO: If it is formally supported in Hack then update the spec; if not
+    TODO: then should we make it illegal in strict mode?
+    TODO: Can the list be comma-terminated?
+    TODO: Can the list be empty?
+    TODO: The list has to be expressions which evaluate as variables;
+          add an error checking pass.
+    TODO: Unset is case-insentive. Should non-lowercase be an error?
+    *)
+    let (parser, keyword) = assert_token parser Unset in
+    let (parser, left_paren, variables, right_paren) =
+      parse_parenthesized_comma_list_opt_allow_trailing
+        parser parse_expression in
+    let (parser, semi) = expect_semicolon parser in
+    let result = make_unset_statement
+      keyword left_paren variables right_paren semi in
+    (parser, result)
+
   and parse_if_statement parser =
+    (* SPEC:
+  if-statement:
+    if   (   expression   )   statement   elseif-clauses-opt   else-clause-opt
+
+  elseif-clauses:
+    elseif-clause
+    elseif-clauses   elseif-clause
+
+  elseif-clause:
+    elseif   (   expression   )   statement
+
+  else-clause:
+    else   statement
+
+    *)
+
     (* parses the "( expr ) statement" segment of If, Elseif or Else clauses.
      * Return a tuple of 5 elements, the first one being the resultant parser
      *)
@@ -177,20 +249,17 @@ module WithExpressionAndTypeParser
         (parser_body, left_paren_token, expr_node, right_paren_token,
         statement_node)
     in
-    (* Parse a elseif clause. Do not eat token and return Missing if the
-     * first keyword is not elseif
-     *)
     let parse_elseif_opt parser_elseif =
-      let (parser_elseif, elseif_token) = optional_token parser_elseif Elseif in
-      match syntax elseif_token with
-      | Missing -> (parser_elseif, elseif_token)  (* return original parser *)
-      | _ ->
+      if peek_token_kind parser_elseif = Elseif then
+        let (parser_elseif, elseif_token) = assert_token parser_elseif Elseif in
         let (parser_elseif, elseif_left_paren, elseif_condition_expr,
           elseif_right_paren, elseif_statement) =
           parse_if_body_helper parser_elseif in
         let elseif_syntax = make_elseif_clause elseif_token elseif_left_paren
           elseif_condition_expr elseif_right_paren elseif_statement in
-        (parser_elseif, elseif_syntax)
+        (parser_elseif, Some elseif_syntax)
+      else
+        (parser_elseif, None)
     in
     (* do not eat token and return Missing if first token is not Else *)
     let parse_else_opt parser_else =
@@ -202,81 +271,209 @@ module WithExpressionAndTypeParser
         let else_syntax = make_else_clause else_token else_consequence in
         (parser_else, else_syntax)
     in
-    (* keep parsing until there is no else if clause
-     * return the new parser and a syntax list of all else if statements
-     * return Missing if there is no Elseif, with parser unchanged
-     *)
-    let parse_elseif_clauses parser_elseif =
-      let rec parse_clauses_helper acc parser_elseif =
-        let (parser_elseif, elseif_syntax) = parse_elseif_opt parser_elseif in
-        match (syntax elseif_syntax, acc) with
-        | Missing, [] -> (parser_elseif, elseif_syntax)
-        | Missing, _ -> (parser_elseif, make_list (List.rev acc))
-        | _, _ -> parse_clauses_helper (elseif_syntax :: acc) parser_elseif
-      in
-      parse_clauses_helper [] parser_elseif
-    in
     let (parser, if_keyword_token) = assert_token parser If in
     let (parser, if_left_paren, if_expr, if_right_paren, if_consequence) =
       parse_if_body_helper parser in
-    let (parser, elseif_syntax) = parse_elseif_clauses parser in
+    let (parser, elseif_syntax) =
+      parse_list_until_none parser parse_elseif_opt in
     let (parser, else_syntax) = parse_else_opt parser in
     let syntax = make_if_statement if_keyword_token if_left_paren if_expr
       if_right_paren if_consequence elseif_syntax else_syntax in
     (parser, syntax)
+
   and parse_switch_statement parser =
-    let (parser, switch_keyword_token) =
-      assert_token parser Switch in
+    (* SPEC:
+
+    The spec for switches is very simple:
+
+    switch-statement:
+      switch  (  expression  )  compound-statement
+    labeled-statement:
+      case-label
+      default-label
+    case-label:
+      case   expression  :  statement
+    default-label:
+      default  :  statement
+
+    where the compound statement, if not empty, must consist of only labeled
+    statements.
+
+    These rules give a nice simple parse but it has some unfortunate properties.
+    Consider:
+
+    switch (foo)
+    {
+      case 1:
+      case 2:
+        break;
+      default:
+        break;
+    }
+
+    What's the parse of the compound statement contents based on that grammar?
+
+    case 1:
+        case 2:
+            break;
+    default:
+        break;
+
+    That is, the second case is a child of the first. That makes it harder
+    to write analyzers, it makes it harder to write pretty printers, and so on.
+
+    What do we really want here? We want a switch to be a collection of
+    *sections* where each section has one or more *labels* and zero or more
+    *statements*.
+
+    switch-statement:
+      switch  (  expression  )  { switch-sections-opt }
+
+    switch-sections:
+      switch-section
+      switch-sections switch-section
+
+    switch-section:
+      section-labels
+      section-statements-opt
+      section-fallthrough-opt
+
+    section-fallthrough:
+      fallthrough  ;
+
+    section-labels:
+      section-label
+      section-labels section-label
+
+    section-statements:
+      statement
+      section-statements statement
+
+    The parsing of course has to be greedy; we never want to say that there
+    are zero statements *between* two sections.
+
+    TODO: Update the specification with these rules.
+
+    *)
+
+    let (parser, switch_keyword_token) = assert_token parser Switch in
     let (parser, left_paren_token, expr_node, right_paren_token) =
       parse_paren_expr parser in
-    let (parser, statement_node) =
-      parse_compound_statement parser in
+    let (parser, left_brace_token) = expect_left_brace parser in
+    (* TODO: I'm not convinced that this always terminates in some cases.
+    Check that. *)
+    let (parser, section_list) =
+      parse_terminated_list parser parse_switch_section RightBrace in
+    let (parser, right_brace_token) = expect_right_brace parser in
     let syntax = make_switch_statement switch_keyword_token left_paren_token
-      expr_node right_paren_token statement_node in
+      expr_node right_paren_token left_brace_token section_list
+      right_brace_token in
     (parser, syntax)
 
+  and is_switch_fallthrough parser =
+    peek_token_kind parser = Fallthrough &&
+    peek_token_kind ~lookahead:1 parser = Semicolon
+
+  and parse_possible_erroneous_fallthrough parser =
+    if is_switch_fallthrough parser then
+      let (parser, result) = parse_switch_fallthrough parser in
+      (* TODO: This puts the error on the semi; it should be on
+      the whole thing. *)
+      let parser = with_error parser SyntaxError.error1055 in
+      (parser, result)
+    else
+      parse_expression_statement parser
+
+  and parse_switch_fallthrough parser =
+    (* We don't get here unless we have fallthrough ; *)
+    let (parser, keyword) = assert_token parser Fallthrough in
+    let (parser, semi) = assert_token parser Semicolon in
+    let result = make_switch_fallthrough keyword semi in
+    (parser, result)
+
+  and parse_switch_fallthrough_opt parser =
+    if is_switch_fallthrough parser then
+      parse_switch_fallthrough parser
+    else
+      (parser, (make_missing()))
+
+  and parse_switch_section parser =
+    (* See parse_switch_statement for grammar *)
+    let (parser, labels) =
+      parse_list_until_none parser parse_switch_section_label in
+    let parser = if is_missing labels then
+        with_error parser SyntaxError.error2008
+      else
+        parser in
+    let (parser, statements) =
+      parse_list_until_none parser parse_switch_section_statement in
+    let (parser, fallthrough) = parse_switch_fallthrough_opt parser in
+    let result = make_switch_section labels statements fallthrough in
+    (parser, result)
+
+  and parse_switch_section_statement parser =
+    if is_switch_fallthrough parser then (parser, None)
+    else match peek_token_kind parser with
+    | Default
+    | Case
+    | RightBrace
+    | TokenKind.EndOfFile -> (parser, None)
+    | _ ->
+      let (parser, statement) = parse_statement parser in
+      (parser, Some statement)
+
+  and parse_switch_section_label parser =
+    (* See the grammar under parse_switch_statement *)
+    match peek_token_kind parser with
+    | Case ->
+      let (parser, label) = parse_case_label parser in
+      (parser, Some label)
+    | Default ->
+      let (parser, label) = parse_default_label parser in
+      (parser, Some label)
+    | _ -> (parser, None)
+
+  and parse_catch_clause_opt parser =
+    (* SPEC
+      catch  (  type-specification variable-name  )  compound-statement
+    *)
+    if peek_token_kind parser = Catch then
+      let (parser, catch_token) = assert_token parser Catch in
+      let (parser, left_paren) = expect_left_paren parser in
+      let (parser, catch_type) = parse_type_specifier parser in
+      let (parser, catch_var) = expect_variable parser in
+      let (parser, right_paren) = expect_right_paren parser in
+      let (parser, compound_stmt) = parse_compound_statement parser in
+      let catch_clause = make_catch_clause catch_token left_paren
+        catch_type catch_var right_paren compound_stmt in
+      (parser, Some catch_clause)
+    else
+      (parser, None)
+
+  and parse_finally_clause_opt parser =
+    (* SPEC
+    finally-clause:
+      finally   compound-statement
+    *)
+    if peek_token_kind parser = Finally then
+      let (parser, finally_token) = assert_token parser Finally in
+      let (parser, compound_stmt) = parse_compound_statement parser in
+      let finally_clause = make_finally_clause finally_token compound_stmt in
+      (parser, finally_clause)
+    else
+      (parser, (make_missing()))
+
   and parse_try_statement parser =
-    let parse_catch_clause_opt parser_catch =
-      let (parser_catch, catch_token) = optional_token parser_catch Catch in
-      match syntax catch_token with
-      | Missing -> (parser_catch, catch_token)
-      | _ ->
-      (* SPEC
-        catch  (  type-specification variable-name  )  compound-statement
-      *)
-        let (parser_catch, left_paren) = expect_left_paren parser_catch in
-        let (parser_catch, catch_type) = parse_type_specifier parser_catch in
-        let (parser_catch, catch_var) = expect_variable parser_catch in
-        let (parser_catch, right_paren) = expect_right_paren parser_catch in
-        let (parser_catch, compound_stmt) =
-          parse_compound_statement parser_catch in
-        let catch_clause = make_catch_clause catch_token left_paren
-          catch_type catch_var right_paren compound_stmt in
-        (parser_catch, catch_clause)
-    in
-    let parse_finally_clause_opt parser_f =
-      let (parser_f, finally_token) = optional_token parser_f Finally in
-      match syntax finally_token with
-      | Missing -> (parser_f, finally_token)
-      | _ ->
-        let (parser_f, compound_stmt) = parse_compound_statement parser_f in
-        let finally_clause = make_finally_clause finally_token compound_stmt in
-        (parser_f, finally_clause)
-    in
-    let parse_catch_clauses parser_catch =
-      let rec aux acc parser_catch =
-        let (parser_catch, catch_clause) =
-          parse_catch_clause_opt parser_catch in
-        match (syntax catch_clause, acc) with
-        | Missing, [] -> (parser_catch, catch_clause)
-        | Missing, _ -> (parser_catch, acc |> List.rev |> make_list)
-        | _, _ -> aux (catch_clause :: acc) parser_catch
-      in
-      aux [] parser_catch
-    in
+    (* SPEC:
+    try-statement:
+      try  compound-statement   catch-clauses
+      try  compound-statement   finally-clause
+      try  compound-statement   catch-clauses   finally-clause
+    *)
     let (parser, try_keyword_token) = assert_token parser Try in
     let (parser, try_compound_stmt) = parse_compound_statement parser in
-    let (parser, catch_clauses) = parse_catch_clauses parser in
+    let (parser, catch_clauses) =
+      parse_list_until_none parser parse_catch_clause_opt in
     let (parser, finally_clause) = parse_finally_clause_opt parser in
     (* If the catch and finally are both missing then we give an error in
        a later pass. *)
@@ -337,38 +534,48 @@ module WithExpressionAndTypeParser
     let (parser, semi_token) = expect_semicolon parser in
     (parser, make_throw_statement throw_token expr semi_token)
 
-  and parse_default_label_statement parser =
-    (* SPEC:
-      default-label:
-        default  :  statement
+  and parse_default_label parser =
+    (*
+    See comments under parse_switch_statement for the grammar.
+    TODO: Update the spec.
     TODO: The spec is wrong; it implies that a statement must always follow
           the default:, but in fact
           switch($x) { default: }
-          is legal. Fix the spec. *)
-    (* We detect if we are not inside a switch in a later pass. *)
+          is legal. Fix the spec.
+    TODO: PHP allows a default to end in a semi; Hack does not.  We allow a semi
+          here; add an error in a later pass.
+    *)
     let (parser, default_token) = assert_token parser Default in
-    let (parser, colon_token) = expect_colon parser in
-    let (parser, stmt) =
-      if peek_token_kind parser = RightBrace then (parser, make_missing())
-      else parse_statement parser in
-    (parser, make_default_statement default_token colon_token stmt)
+    let (parser, semi_token) = optional_token parser Semicolon in
+    let (parser, colon_token) =
+      if is_missing semi_token then
+        expect_colon parser
+      else
+        (parser, semi_token) in
+    let result = make_default_label default_token colon_token in
+    (parser, result)
 
-  and parse_case_label_statement parser =
-    (* We detect if we are not inside a switch in a later pass. *)
+  and parse_case_label parser =
     (* SPEC:
-      case-label:
-        case expression  :  statement
+      See comments under parse_switch_statement for the grammar.
     TODO: The spec is wrong; it implies that a statement must always follow
           the case, but in fact
           switch($x) { case 10: }
-          is legal. Fix the spec. *)
+          is legal. Fix the spec.
+    TODO: PHP allows a case to end in a semi; Hack does not.  We allow a semi
+          here; add an error in a later pass.
+          *)
+
     let (parser, case_token) = assert_token parser Case in
     let (parser, expr) = parse_expression parser in
-    let (parser, colon_token) = expect_colon parser in
-    let (parser, stmt) =
-      if peek_token_kind parser = RightBrace then (parser, make_missing())
-      else parse_statement parser in
-    (parser, make_case_statement case_token expr colon_token stmt)
+    let (parser, semi_token) = optional_token parser Semicolon in
+    let (parser, colon_token) =
+      if is_missing semi_token then
+        expect_colon parser
+      else
+        (parser, semi_token) in
+    let result = make_case_label case_token expr colon_token in
+    (parser, result)
 
   and parse_global_statement_or_expression_statement parser =
     (* PHP has a statement of the form
@@ -472,26 +679,18 @@ module WithExpressionAndTypeParser
       let (parser, token) = expect_semicolon parser in
       (parser, make_expression_statement expression token)
 
-  and parse_statement_list_opt parser =
-     let rec aux parser acc =
-       let token = peek_token parser in
-       match (Token.kind token) with
-       | RightBrace
-       | EndOfFile -> (parser, acc)
-       | _ ->
-         let (parser, statement) = parse_statement parser in
-         aux parser (statement :: acc) in
-     let (parser, statements) = aux parser [] in
-     let statements = List.rev statements in
-     (parser, make_list statements)
-
   and parse_compound_statement parser =
-    let (parser, left_brace_token) = expect_left_brace parser in
-    let (parser, statement_list) = parse_statement_list_opt parser in
-    let (parser, right_brace_token) = expect_right_brace parser in
-    let syntax = make_compound_statement
-      left_brace_token statement_list right_brace_token in
-    (parser, syntax)
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Semicolon -> (parser1, make_token token)
+    | _ ->
+      let (parser, left_brace_token) = expect_left_brace parser in
+      let (parser, statement_list) =
+        parse_terminated_list parser parse_statement RightBrace in
+      let (parser, right_brace_token) = expect_right_brace parser in
+      let syntax = make_compound_statement
+        left_brace_token statement_list right_brace_token in
+      (parser, syntax)
 
   and parse_expression parser =
     let expression_parser = ExpressionParser.make parser.lexer parser.errors in

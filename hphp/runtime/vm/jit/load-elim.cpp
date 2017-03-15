@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -368,6 +368,7 @@ Flags handle_general_effects(Local& env,
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckMBase:
   case CheckRefInner:
     if (auto flags = handleCheck(inst.typeParam())) return *flags;
     break;
@@ -411,19 +412,20 @@ Flags handle_general_effects(Local& env,
 }
 
 void handle_call_effects(Local& env, CallEffects effects) {
-  if (effects.destroys_locals) {
+  if (effects.writes_locals) {
     clear_everything(env);
     return;
   }
 
   /*
-   * Keep types for stack and frame locations, and throw away the values.  We
-   * are just doing this to avoid extending lifetimes across php calls, which
-   * currently always leads to spilling.
+   * Keep types for stack, locals, and class-ref slots, and throw away the
+   * values.  We are just doing this to avoid extending lifetimes across php
+   * calls, which currently always leads to spilling.
    */
-  auto const stk_and_frame = env.global.ainfo.all_stack |
-                             env.global.ainfo.all_frame;
-  env.state.avail &= stk_and_frame;
+  auto const stk_frame_cslot = env.global.ainfo.all_stack |
+                               env.global.ainfo.all_frame |
+                               env.global.ainfo.all_clsRefSlot;
+  env.state.avail &= stk_frame_cslot;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
       ++aloc) {
@@ -462,14 +464,16 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
 }
 
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
-  for (auto i = uint32_t{0}; i < kMaxTrackedALocs; ++i) {
-    if (!env.state.avail[i]) continue;
-    auto& tracked = env.state.tracked[i];
-    if (tracked.knownValue != oldVal) continue;
-    FTRACE(4, "       refining {} to {}\n", i, newVal->toString());
-    tracked.knownValue = newVal;
-    tracked.knownType  = newVal->type();
-  }
+  bitset_for_each_set(
+    env.state.avail,
+    [&](size_t i) {
+      auto& tracked = env.state.tracked[i];
+      if (tracked.knownValue != oldVal) return;
+      FTRACE(4, "       refining {} to {}\n", i, newVal->toString());
+      tracked.knownValue = newVal;
+      tracked.knownType  = newVal->type();
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -682,6 +686,7 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckMBase:
   case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
     break;
@@ -711,23 +716,23 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     flags,
     [&] (FNone) {},
 
-    [&] (FRedundant flags) {
-      auto const resolved = resolve_value(env, inst, flags);
+    [&] (FRedundant redundantFlags) {
+      auto const resolved = resolve_value(env, inst, redundantFlags);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
              inst.dst()->toString(),
-             flags.knownType.toString(),
+             redundantFlags.knownType.toString(),
              resolved->toString());
 
       if (resolved->type().subtypeOfAny(TGen, TCls)) {
-        env.unit.replace(&inst, AssertType, flags.knownType, resolved);
+        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);
       }
     },
 
-    [&] (FReducible flags) { reduce_inst(env, inst, flags); },
+    [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
@@ -741,7 +746,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
   );
 
   // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplify(env.unit, &inst);
+  if (inst.is(AssertType)) simplifyInPlace(env.unit, &inst);
 }
 
 void optimize_block(Local& env, Global& genv, Block* blk) {
@@ -751,7 +756,7 @@ void optimize_block(Local& env, Global& genv, Block* blk) {
   }
 
   for (auto& inst : *blk) {
-    simplify(genv.unit, &inst);
+    simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
     optimize_inst(genv, inst, flags);
   }
@@ -841,14 +846,15 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
 
   dst.avail &= src.avail;
 
-  for (auto idx = uint32_t{0}; idx < kMaxTrackedALocs; ++idx) {
-    if (!src.avail[idx]) continue;
-    dst.avail &= ~genv.ainfo.locations_inv[idx].conflicts;
-
-    if (dst.avail[idx]) {
-      merge_into(target, dst.tracked[idx], src.tracked[idx]);
+  bitset_for_each_set(
+    src.avail,
+    [&](size_t idx) {
+      dst.avail &= ~genv.ainfo.locations_inv[idx].conflicts;
+      if (dst.avail[idx]) {
+        merge_into(target, dst.tracked[idx], src.tracked[idx]);
+      }
     }
-  }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,10 +79,6 @@ inline SrcKey nextSrcKey(const IRGS& env) {
 
 inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
-}
-
-inline FPInvOffset invSPOff(const IRGS& env) {
-  return env.irb->fs().bcSPOff();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -225,12 +221,25 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
+  auto const next_block  = defBlock(env);
   auto const taken_block = defBlock(env);
   auto const done_block  = defBlock(env);
 
   branch(taken_block);
+  auto const branch_block = env.irb->curBlock();
 
+  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
+    gen(env, Jmp, next_block);
+  } else if (!branch_block->back().isTerminal()) {
+    branch_block->back().setNext(next_block);
+  }
+  // The above logic ensures that `branch_block' always ends with an
+  // isBlockEnd() instruction, so its out state is meaningful.
+  env.irb->fs().setSaveOutState(branch_block);
+
+  env.irb->appendBlock(next_block);
   next();
+
   // Patch the last block added by the Next lambda to jump to the done block.
   // Note that last might not be taken_block.
   auto const cur = env.irb->curBlock();
@@ -239,7 +248,7 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   } else if (!cur->back().isTerminal()) {
     cur->back().setNext(done_block);
   }
-  env.irb->appendBlock(taken_block);
+  env.irb->appendBlock(taken_block, branch_block);
 
   taken();
   // Patch the last block added by the Taken lambda to jump to the done block.
@@ -316,31 +325,16 @@ void ifElse(IRGS& env, Branch branch, Next next) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
-  auto const stackOff = invSPOff(env);
-
-  FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
-         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
-
-  return BCMarker {
-    SrcKey(curSrcKey(env), bcOff),
-    stackOff,
-    env.profTransID,
-    env.irb->fs().fp()
-  };
-}
-
-inline void updateMarker(IRGS& env) {
-  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
-}
-
-//////////////////////////////////////////////////////////////////////
 // Eval stack manipulation
 
 inline SSATmp* assertType(SSATmp* tmp, Type type) {
   assert(!tmp || tmp->isA(type));
   return tmp;
+}
+
+inline FPInvOffset offsetFromFP(const IRGS& env, IRSPRelOffset irSPRel) {
+  auto const irSPOff = env.irb->fs().irSPOff();
+  return irSPRel.to<FPInvOffset>(irSPOff);
 }
 
 inline IRSPRelOffset offsetFromIRSP(const IRGS& env, FPInvOffset fpRel) {
@@ -364,9 +358,12 @@ inline BCSPRelOffset offsetFromBCSP(const IRGS& env, IRSPRelOffset irSPRel) {
 }
 
 /*
- * Offset of the bytecode stack pointer relative to the IR stack pointer.
+ * Offset of the bytecode stack pointer.
  */
-inline IRSPRelOffset bcSPOffset(const IRGS& env) {
+inline FPInvOffset spOffBCFromFP(const IRGS& env) {
+  return env.irb->fs().bcSPOff();
+}
+inline IRSPRelOffset spOffBCFromIRSP(const IRGS& env) {
   return offsetFromIRSP(env, BCSPRelOffset { 0 });
 }
 
@@ -383,10 +380,10 @@ inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   return assertType(pop(env, tc), TCell);
 }
 
-inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TCls); }
 inline SSATmp* popV(IRGS& env) { return assertType(pop(env), TBoxedInitCell); }
 inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
 inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
+inline SSATmp* popU(IRGS& env) { return assertType(pop(env), TUninit); }
 
 inline void discard(IRGS& env, uint32_t n) {
   env.irb->fs().decBCSPDepth(n);
@@ -453,8 +450,24 @@ inline SSATmp* topR(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TGen);
 }
 
-inline SSATmp* topA(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
-  return assertType(top(env, i), TCls);
+//////////////////////////////////////////////////////////////////////
+
+inline BCMarker makeMarker(IRGS& env, Offset bcOff) {
+  auto const stackOff = spOffBCFromFP(env);
+
+  FTRACE(2, "makeMarker: bc {} sp {} fn {}\n",
+         bcOff, stackOff.offset, curFunc(env)->fullName()->data());
+
+  return BCMarker {
+    SrcKey(curSrcKey(env), bcOff),
+    stackOff,
+    env.profTransID,
+    env.irb->fs().fp()
+  };
+}
+
+inline void updateMarker(IRGS& env) {
+  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -484,7 +497,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
   auto const inner = exit ? (type & TBoxedCell).inner() : TInitCell;
 
   if (type <= TCell) {
-    env.irb->constrainValue(val, DataTypeCountness);
+    env.irb->constrainValue(val, DataTypeBoxAndCountness);
     return val;
   }
   if (type <= TBoxedCell) {
@@ -498,7 +511,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
       return gen(env, CheckType, TBoxedCell, taken, val);
     },
     [&](SSATmp* box) { // Next: val is a ref
-      env.irb->constrainValue(box, DataTypeCountness);
+      env.irb->constrainValue(box, DataTypeBoxAndCountness);
       gen(env, CheckRefInner, inner, exit, box);
       return gen(env, LdRef, inner, box);
     },
@@ -594,9 +607,9 @@ inline SSATmp* ldLocInner(IRGS& env,
                           Block* ldrefExit,
                           Block* ldPMExit,
                           TypeConstraint constraint) {
-  // We only care if the local is KindOfRef or not. DataTypeCountness
+  // We only care if the local is KindOfRef or not. DataTypeBoxAndCountness
   // gets us that.
-  auto const loc = ldLoc(env, locId, ldPMExit, DataTypeCountness);
+  auto const loc = ldLoc(env, locId, ldPMExit, DataTypeBoxAndCountness);
 
   if (loc->type() <= TCell) {
     env.irb->constrainValue(loc, constraint);
@@ -635,7 +648,7 @@ inline SSATmp* ldLocInnerWarn(IRGS& env,
     return cns(env, TInitNull);
   };
 
-  env.irb->constrainLocal(id, DataTypeCountnessInit, "ldLocInnerWarn");
+  env.irb->constrainLocal(id, DataTypeBoxAndCountnessInit, "ldLocInnerWarn");
 
   if (locVal->type() <= TUninit) return warnUninit();
   if (!locVal->type().maybe(TUninit)) return locVal;
@@ -690,7 +703,7 @@ inline SSATmp* stLocImpl(IRGS& env,
                          bool incRefNew) {
   assertx(!newVal->type().maybe(TBoxedCell));
 
-  auto const cat = decRefOld ? DataTypeCountness : DataTypeGeneric;
+  auto const cat = decRefOld ? DataTypeBoxAndCountness : DataTypeGeneric;
   auto const oldLoc = ldLoc(env, id, ldPMExit, cat);
 
   auto unboxed_case = [&] {
@@ -715,7 +728,7 @@ inline SSATmp* stLocImpl(IRGS& env,
     if (incRefNew) gen(env, IncRef, newVal);
     if (decRefOld) {
       decRef(env, innerCell);
-      env.irb->constrainValue(box, DataTypeCountness);
+      env.irb->constrainValue(box, DataTypeBoxAndCountness);
     }
     return newVal;
   };
@@ -770,7 +783,7 @@ inline SSATmp* pushStLoc(IRGS& env,
     incRefNew
   );
 
-  env.irb->constrainValue(ret, DataTypeCountness);
+  env.irb->constrainValue(ret, DataTypeBoxAndCountness);
   return push(env, ret);
 }
 
@@ -802,6 +815,28 @@ inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->mayHaveThis()) return;
   auto const ctx = ldCtx(env);
   decRef(env, ctx);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Class-ref slots
+
+inline void killClsRef(IRGS& env, uint32_t slot) {
+  gen(env, KillClsRef, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* peekClsRef(IRGS& env, uint32_t slot) {
+  auto const knownType = env.irb->clsRefSlot(slot).type;
+  return gen(env, LdClsRef, knownType, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* takeClsRef(IRGS& env, uint32_t slot) {
+  auto const cls = peekClsRef(env, slot);
+  killClsRef(env, slot);
+  return cls;
+}
+
+inline void putClsRef(IRGS& env, uint32_t slot, SSATmp* cls) {
+  gen(env, StClsRef, ClsRefSlotData{slot}, fp(env), cls);
 }
 
 //////////////////////////////////////////////////////////////////////

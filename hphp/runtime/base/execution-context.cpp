@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
@@ -572,15 +573,24 @@ void ExecutionContext::popUserErrorHandler() {
   }
 }
 
+void ExecutionContext::clearUserErrorHandlers() {
+  while (!m_userErrorHandlers.empty()) m_userErrorHandlers.pop_back();
+}
+
 void ExecutionContext::popUserExceptionHandler() {
   if (!m_userExceptionHandlers.empty()) {
     m_userExceptionHandlers.pop_back();
   }
 }
 
+void ExecutionContext::acceptRequestEventHandlers(bool enable) {
+  m_acceptRequestEventHandlers = enable;
+}
+
 std::size_t ExecutionContext::registerRequestEventHandler(
   RequestEventHandler *handler) {
   assert(handler && handler->getInited());
+  assert(m_acceptRequestEventHandlers);
   m_requestEventHandlers.push_back(handler);
   return m_requestEventHandlers.size()-1;
 }
@@ -849,7 +859,9 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
     try {
       ErrorStateHelper esh(this, ErrorState::ExecutingUserHandler);
       auto const ar = g_context->getFrameAtDepth(0);
-      auto const context = getDefinedVariables(ar);
+      auto const context = RuntimeOption::EnableContextInErrorHandler
+        ? getDefinedVariables(ar)
+        : empty_array();
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
                  make_packed_array(errnum, String(e.getMessage()),
@@ -858,25 +870,25 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
                 false)) {
         return true;
       }
-    } catch (const RequestTimeoutException& e) {
+    } catch (const RequestTimeoutException&) {
       static auto requestErrorHandlerTimeoutCounter =
-          ServiceData::createTimeseries("requests_timed_out_error_handler",
+          ServiceData::createTimeSeries("requests_timed_out_error_handler",
                                         {ServiceData::StatsType::COUNT});
       requestErrorHandlerTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.error_handler", 1);
 
       if (!swallowExceptions) throw;
-    } catch (const RequestCPUTimeoutException& e) {
+    } catch (const RequestCPUTimeoutException&) {
       static auto requestErrorHandlerCPUTimeoutCounter =
-          ServiceData::createTimeseries("requests_cpu_timed_out_error_handler",
+          ServiceData::createTimeSeries("requests_cpu_timed_out_error_handler",
                                         {ServiceData::StatsType::COUNT});
       requestErrorHandlerCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.error_handler", 1);
 
       if (!swallowExceptions) throw;
-    } catch (const RequestMemoryExceededException& e) {
+    } catch (const RequestMemoryExceededException&) {
       static auto requestErrorHandlerMemoryExceededCounter =
-          ServiceData::createTimeseries(
+          ServiceData::createTimeSeries(
               "requests_memory_exceeded_error_handler",
               {ServiceData::StatsType::COUNT});
       requestErrorHandlerMemoryExceededCounter->addValue(1);
@@ -885,7 +897,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       if (!swallowExceptions) throw;
     } catch (...) {
       static auto requestErrorHandlerOtherExceptionCounter =
-          ServiceData::createTimeseries(
+          ServiceData::createTimeSeries(
               "requests_other_exception_error_handler",
               {ServiceData::StatsType::COUNT});
       requestErrorHandlerOtherExceptionCounter->addValue(1);
@@ -989,8 +1001,12 @@ String ExecutionContext::getenv(const String& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();
   }
-  char *value = ::getenv(name.data());
-  if (value) {
+  if (is_cli_mode()) {
+    auto envs = cli_env();
+    if (envs.exists(name)) return envs[name].toString();
+    return String();
+  }
+  if (auto value = ::getenv(name.data())) {
     return String(value, CopyString);
   }
   if (RuntimeOption::EnvVariables.find(name.c_str()) != RuntimeOption::EnvVariables.end()) {
@@ -1085,11 +1101,8 @@ ActRec* ExecutionContext::getStackFrame() {
 ObjectData* ExecutionContext::getThis() {
   VMRegAnchor _;
   ActRec* fp = vmfp();
-  if (fp->skipFrame()) {
-    fp = getPrevVMState(fp);
-    if (!fp) return nullptr;
-  }
-  if (fp->func()->cls() && fp->hasThis()) {
+  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
+  if (fp && fp->func()->cls() && fp->hasThis()) {
     return fp->getThis();
   }
   return nullptr;
@@ -1099,11 +1112,8 @@ Class* ExecutionContext::getContextClass() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
   assert(ar != nullptr);
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
-    if (!ar) return nullptr;
-  }
-  return ar->m_func->cls();
+  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
+  return ar ? ar->m_func->cls() : nullptr;
 }
 
 Class* ExecutionContext::getParentContextClass() {
@@ -1117,10 +1127,8 @@ StringData* ExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
   if (ar == nullptr) return staticEmptyString();
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
-    if (ar == nullptr) return staticEmptyString();
-  }
+  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
+  if (ar == nullptr) return staticEmptyString();
   Unit* unit = ar->m_func->unit();
   assert(unit->filepath()->isStatic());
   // XXX: const StringData* -> Variant(bool) conversion problem makes this ugly
@@ -1133,9 +1141,7 @@ int ExecutionContext::getLine() {
   Unit* unit = ar ? ar->m_func->unit() : nullptr;
   Offset pc = unit ? pcOff() : 0;
   if (ar == nullptr) return -1;
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar, &pc);
-  }
+  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar, &pc);
   if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
   return unit->getLineNumber(pc);
 }
@@ -1149,7 +1155,8 @@ Array ExecutionContext::getCallerInfo() {
   VMRegAnchor _;
   auto ar = vmfp();
   if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
+    ar = getPrevVMStateSkipFrame(ar);
+    if (!ar) return empty_array();
   }
   while (ar->func()->name()->isame(s_call_user_func.get())
          || ar->func()->name()->isame(s_call_user_func_array.get())) {
@@ -1194,14 +1201,17 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   auto fp = vmfp();
   if (UNLIKELY(!fp)) return nullptr;
   auto pc = fp->func()->unit()->offsetOf(vmpc());
-  for (; frame > 0; --frame) {
+  while (frame > 0) {
+    fp = getPrevVMState(fp, &pc);
+    if (UNLIKELY(!fp)) return nullptr;
+    if (UNLIKELY(fp->skipFrame())) continue;
+    --frame;
+  }
+  while (fp->skipFrame()) {
     fp = getPrevVMState(fp, &pc);
     if (UNLIKELY(!fp)) return nullptr;
   }
-  if (fp->skipFrame()) {
-    fp = getPrevVMState(fp, &pc);
-  }
-  if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
+  if (UNLIKELY(fp->localsDecRefd())) return nullptr;
   auto const curOp = fp->func()->unit()->getOp(pc);
   if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV ||
                curOp == Op::CreateCont || curOp == Op::Await)) {
@@ -1226,16 +1236,16 @@ void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMState(fp);
-  fp->getVarEnv()->set(name, v);
+  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
+  if (fp) fp->getVarEnv()->set(name, v);
 }
 
 void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMState(fp);
-  fp->getVarEnv()->bind(name, v);
+  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
+  if (fp) fp->getVarEnv()->bind(name, v);
 }
 
 Array ExecutionContext::getLocalDefinedVariables(int frame) {
@@ -1818,7 +1828,6 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   Stats::inc(Stats::PseudoMain_Executed);
 
   ActRec* ar = vmStack().allocA();
-  assertx(AROFF(m_func) < AROFF(m_r));
   auto const cls = vmfp()->func()->cls();
   auto const func = unit->getMain(cls);
   assert(!func->isCPPBuiltin());
@@ -1832,13 +1841,19 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   ar->initNumArgs(0);
   assert(vmfp());
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  pushLocalsAndIterators(func);
-  assert(vmfp()->func()->attrs() & AttrMayUseVV);
-  if (!vmfp()->hasVarEnv()) {
-    vmfp()->setVarEnv(VarEnv::createLocal(vmfp()));
+  pushFrameSlots(func);
+
+  auto prevFp = vmfp();
+  if (UNLIKELY(prevFp->skipFrame())) {
+    prevFp = g_context->getPrevVMStateSkipFrame(prevFp);
   }
-  ar->m_varEnv = vmfp()->m_varEnv;
-  ar->m_varEnv->enterFP(vmfp(), ar);
+  assertx(prevFp);
+  assertx(prevFp->func()->attrs() & AttrMayUseVV);
+  if (!prevFp->hasVarEnv()) {
+    prevFp->setVarEnv(VarEnv::createLocal(prevFp));
+  }
+  ar->m_varEnv = prevFp->m_varEnv;
+  ar->m_varEnv->enterFP(prevFp, ar);
 
   vmfp() = ar;
   pc = func->getEntry();
@@ -2024,32 +2039,26 @@ StrNR ExecutionContext::createFunction(const String& args,
   return lambda->nameStr();
 }
 
-bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
-                                       StringData* code,
-                                       int frame) {
-  assert(retval);
+ExecutionContext::EvaluationResult
+ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
   // The code has "<?php" prepended already
   auto unit = compile_string(code->data(), code->size());
   if (unit == nullptr) {
     raise_error("Syntax error");
-    tvWriteNull(retval);
-    return true;
+    return {true, init_null_variant, "Syntax error"};
   }
 
   // Do not JIT this unit, we are using it exactly once.
   unit->setInterpretOnly();
-  return evalPHPDebugger(retval, unit, frame);
+  return evalPHPDebugger(unit, frame);
 }
 
-bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
-                                       Unit* unit,
-                                       int frame) {
-  assert(retval);
+ExecutionContext::EvaluationResult
+ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   always_assert(!RuntimeOption::RepoAuthoritative);
 
   VMRegAnchor _;
 
-  auto failed = true;
   auto fp = vmfp();
   if (fp) {
     for (; frame > 0; --frame) {
@@ -2091,6 +2100,9 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
   const static StaticString s_phpException("Hit a php exception");
   const static StaticString s_exit("Hit exit");
   const static StaticString s_fatal("Hit fatal");
+  std::ostringstream errorString;
+  std::string stack;
+
   try {
     // Start with the correct parent FP so that VarEnv can properly exitFP().
     // Note that if the same VarEnv is used across multiple frames, the most
@@ -2105,41 +2117,46 @@ bool ExecutionContext::evalPHPDebugger(TypedValue* retval,
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or
     // class used to execute the current function.
-    *retval = invokeFunc(unit->getMain(functionClass), init_null_variant,
-               this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
-               InvokePseudoMain);
-    failed = false;
+    return {false, Variant::attach(
+        invokeFunc(unit->getMain(functionClass), init_null_variant,
+                   this_, frameClass, fp ? fp->m_varEnv : nullptr, nullptr,
+                   InvokePseudoMain)
+    ), ""};
   } catch (FatalErrorException &e) {
-    g_context->write(s_fatal);
-    g_context->write(" : ");
-    g_context->write(e.getMessage().c_str());
-    g_context->write("\n");
-    g_context->write(ExtendedLogger::StringOfStackTrace(e.getBacktrace()));
+    errorString << s_fatal.data();
+    errorString << " : ";
+    errorString << e.getMessage().c_str();
+    errorString << "\n";
+    stack = ExtendedLogger::StringOfStackTrace(e.getBacktrace());
   } catch (ExitException &e) {
-    g_context->write(s_exit.data());
-    g_context->write(" : ");
-    std::ostringstream os;
-    os << ExitException::ExitCode;
-    g_context->write(os.str());
+    errorString << s_exit.data();
+    errorString << " : ";
+    errorString << ExitException::ExitCode;
   } catch (Eval::DebuggerException &e) {
   } catch (Exception &e) {
-    g_context->write(s_cppException.data());
-    g_context->write(" : ");
-    g_context->write(e.getMessage().c_str());
+    errorString << s_cppException.data();
+    errorString << " : ";
+    errorString << e.getMessage().c_str();
     ExtendedException* ee = dynamic_cast<ExtendedException*>(&e);
     if (ee) {
-      g_context->write("\n");
-      g_context->write(
-        ExtendedLogger::StringOfStackTrace(ee->getBacktrace()));
+      errorString << "\n";
+      stack = ExtendedLogger::StringOfStackTrace(ee->getBacktrace());
     }
   } catch (Object &e) {
-    g_context->write(s_phpException.data());
-    g_context->write(" : ");
-    g_context->write(e->invokeToString().data());
+    errorString << s_phpException.data();
+    errorString << " : ";
+    errorString << e->invokeToString().data();
   } catch (...) {
-    g_context->write(s_cppException.data());
+    errorString << s_cppException.data();
   }
-  return failed;
+
+  auto errorStr = errorString.str();
+  g_context->write(errorStr);
+  if (!stack.empty()) {
+    g_context->write(stack.c_str());
+  }
+
+  return {true, init_null_variant, errorStr};
 }
 
 void ExecutionContext::enterDebuggerDummyEnv() {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ void cgProfileArrayKind(IRLS& env, const IRInstruction* inst) {
                SyncOptions::None, argGroup(env, inst).reg(profile).ssa(0));
 }
 
-void cgCheckPackedArrayBounds(IRLS& env, const IRInstruction* inst) {
+void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");
 
   // We may check packed array bounds on profiled arrays that we do not

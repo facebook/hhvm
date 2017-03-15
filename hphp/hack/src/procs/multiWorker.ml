@@ -10,14 +10,14 @@
 
 open Core
 
-type 'a bucket =
-  | Job of 'a list
+type 'a nextlist = 'a list Bucket.next
+
+type 'a bucket = 'a Bucket.bucket =
+  | Job of 'a
   | Wait
+  | Done
 
-type 'a nextlist_dynamic =
-  unit -> 'a bucket
-
-let single_threaded_call_dynamic job merge neutral next =
+let single_threaded_call job merge neutral next =
   let x = ref (next()) in
   let acc = ref neutral in
   (* This is a just a sanity check that the job is serializable and so
@@ -25,7 +25,7 @@ let single_threaded_call_dynamic job merge neutral next =
    * mode.
    *)
   let _ = Marshal.to_string job [Marshal.Closures] in
-  while !x <> Job [] do
+  while !x <> Done do
     match !x with
     | Wait ->
         (* this state should never be reached in single threaded mode, since
@@ -33,17 +33,18 @@ let single_threaded_call_dynamic job merge neutral next =
         failwith "stuck!"
     | Job l ->
         let res = job neutral l in
-        acc := merge !acc res;
+        acc := merge res !acc;
         x := next()
+    | Done -> ()
   done;
   !acc
 
-let multi_threaded_call_dynamic
-  (type a) (type b)
-  workers (job: b -> a list -> b)
-  (merge: b -> b -> b)
-  (neutral: b)
-  (next: a nextlist_dynamic) =
+let multi_threaded_call
+  (type a) (type b) (type c)
+  workers (job: c -> a -> b)
+  (merge: b -> c -> c)
+  (neutral: c)
+  (next: a Bucket.next) =
   let rec dispatch workers handles acc =
     (* 'worker' represents available workers. *)
     (* 'handles' represents pendings jobs. *)
@@ -57,7 +58,7 @@ let multi_threaded_call_dynamic
         (* At least one worker is available... *)
         match next () with
         | Wait -> collect (worker :: workers) handles acc
-        | Job [] ->
+        | Done ->
             (* ... but no more job to be distributed, let's collect results. *)
             dispatch [] handles acc
         | Job bucket ->
@@ -80,18 +81,10 @@ let multi_threaded_call_dynamic
     dispatch workers waiters acc in
   dispatch workers [] neutral
 
-let call_dynamic workers ~job ~merge ~neutral ~next =
-  match workers with
-  | None -> single_threaded_call_dynamic job merge neutral next
-  | Some workers -> multi_threaded_call_dynamic workers job merge neutral next
-
-(* special case of call_dynamic with no waiting, useful for static worklists *)
-type 'a nextlist =
-  unit -> 'a list
-
 let call workers ~job ~merge ~neutral ~next =
-  let next = fun () -> Job (next ()) in
-  call_dynamic workers ~job ~merge ~neutral ~next
+  match workers with
+  | None -> single_threaded_call job merge neutral next
+  | Some workers -> multi_threaded_call workers job merge neutral next
 
 let next ?max_size workers =
   Bucket.make

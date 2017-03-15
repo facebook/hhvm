@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,10 +46,13 @@ namespace HPHP { namespace jit { namespace tc {
 TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
-  auto const tDest = sr->getTopTranslation();
-  if (tDest == nullptr) return nullptr;
+  if (sr->getTopTranslation() == nullptr) return nullptr;
 
   auto codeLock = lockCode();
+
+  // Check again now that we have the lock
+  auto const tDest = sr->getTopTranslation();
+  if (tDest == nullptr) return nullptr;
 
   auto const isJcc = [&] {
     switch (arch()) {
@@ -65,7 +68,7 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
 
       case Arch::PPC64:
         ppc64_asm::DecodedInstruction di(toSmash);
-        return (di.isBranch() && !di.isJmp());
+        return di.isBranch(ppc64_asm::AllowCond::OnlyCond);
     }
     not_reached();
   }();
@@ -93,10 +96,13 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
 TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
-  auto const tDest = sr->getTopTranslation();
-  if (tDest == nullptr) return nullptr;
+  if (sr->getTopTranslation() == nullptr) return nullptr;
 
   auto codeLock = lockCode();
+
+  // Check again now that we have the lock
+  auto const tDest = sr->getTopTranslation();
+  if (tDest == nullptr) return nullptr;
 
   auto addr = reinterpret_cast<TCA*>(toSmash);
   if (*addr == tDest) {

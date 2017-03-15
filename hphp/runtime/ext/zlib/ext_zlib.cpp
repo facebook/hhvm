@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -69,13 +69,9 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     auto file = req::make<ZipFile>();
     bool ret = file->open(translated, mode);
     if (!ret) {
-      raise_warning("%s", file->getLastError().c_str());
       return nullptr;
     }
     return file;
-  }
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
   }
 } s_zlib_stream_wrapper;
 
@@ -437,7 +433,6 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Chunk-based API
-namespace {
 
 const StaticString s_SystemLib_ChunkedInflator("__SystemLib\\ChunkedInflator");
 
@@ -497,6 +492,9 @@ struct ChunkedInflator {
  private:
   ::z_stream m_zstream;
   bool m_eof;
+
+  // z_stream contains void* that we don't care about.
+  TYPE_SCAN_IGNORE_FIELD(m_zstream);
 };
 
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
@@ -514,8 +512,6 @@ String HHVM_METHOD(ChunkedInflator,
   FETCH_CHUNKED_INFLATOR(data, this_);
   assert(data);
   return data->inflateChunk(chunk);
-}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

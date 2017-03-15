@@ -25,22 +25,25 @@ and class_element_ =
 | Class_const
 | Typeconst
 
-let get_class_by_name x =
-  Naming_heap.TypeIdHeap.get x >>= fun (p, _) ->
-  Parser_heap.find_class_in_file (Pos.filename p) x
+let get_class_by_name opt x =
+  Naming_heap.TypeIdHeap.get x >>= fun (pos, _) ->
+  let fn = FileInfo.get_pos_filename pos in
+  Parser_heap.find_class_in_file opt fn x
 
-let get_function_by_name x =
-  Naming_heap.FunPosHeap.get x >>= fun p ->
-  Parser_heap.find_fun_in_file (Pos.filename p) x
+let get_function_by_name opt x =
+  Naming_heap.FunPosHeap.get x >>= fun pos ->
+  let fn = FileInfo.get_pos_filename pos in
+  Parser_heap.find_fun_in_file opt fn x
 
-let get_gconst_by_name x =
-  Naming_heap.ConstPosHeap.get x >>= fun p ->
-  Parser_heap.find_const_in_file (Pos.filename p) x
+let get_gconst_by_name opt x =
+  Naming_heap.ConstPosHeap.get x >>= fun pos ->
+  let fn = FileInfo.get_pos_filename pos in
+  Parser_heap.find_const_in_file opt fn x
 
 (* Span information is stored only in parsing AST *)
-let get_member_def (x : class_element) =
+let get_member_def opt (x : class_element) =
   let type_, member_origin, member_name = x in
-  get_class_by_name member_origin >>= fun c ->
+  get_class_by_name opt member_origin >>= fun c ->
   let member_origin = Utils.strip_ns member_origin in
   match type_ with
   | Constructor
@@ -106,43 +109,44 @@ let go tcopt ast result =
       if method_name = Naming_special_names.Members.__construct then begin
         match fst class_.tc_construct with
           | Some m ->
-            get_member_def (Constructor, m.ce_origin, method_name)
+            get_member_def tcopt (Constructor, m.ce_origin, method_name)
           | None ->
-            get_class_by_name c_name >>= fun c ->
+            get_class_by_name tcopt c_name >>= fun c ->
             Some (FileOutline.summarize_class c ~no_children:true)
       end else begin
         match SMap.get method_name class_.tc_methods with
-        | Some m -> get_member_def (Method, m.ce_origin, method_name)
+        | Some m -> get_member_def tcopt (Method, m.ce_origin, method_name)
         | None ->
           SMap.get method_name class_.tc_smethods >>= fun m ->
-          get_member_def (Static_method, m.ce_origin, method_name)
+          get_member_def tcopt (Static_method, m.ce_origin, method_name)
       end
     | SymbolOccurrence.Property (c_name, property_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
+      let property_name = clean_member_name property_name in
       begin match SMap.get property_name class_.tc_props with
-      | Some m -> get_member_def (Property, m.ce_origin, property_name)
+      | Some m -> get_member_def tcopt (Property, m.ce_origin, property_name)
       | None ->
-        SMap.get property_name class_.tc_sprops >>= fun m ->
-        get_member_def
-          (Static_property, m.ce_origin, clean_member_name property_name)
+        SMap.get ("$" ^ property_name) class_.tc_sprops >>= fun m ->
+        get_member_def tcopt
+          (Static_property, m.ce_origin, property_name)
       end
     | SymbolOccurrence.ClassConst (c_name, const_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       SMap.get const_name class_.tc_consts >>= fun m ->
-      get_member_def (Class_const, m.cc_origin, const_name)
+      get_member_def tcopt (Class_const, m.cc_origin, const_name)
     | SymbolOccurrence.Function ->
-      get_function_by_name result.SymbolOccurrence.name >>= fun f ->
+      get_function_by_name tcopt result.SymbolOccurrence.name >>= fun f ->
       Some (FileOutline.summarize_fun f)
     | SymbolOccurrence.GConst ->
-      get_gconst_by_name result.SymbolOccurrence.name >>= fun cst ->
+      get_gconst_by_name tcopt result.SymbolOccurrence.name >>= fun cst ->
       Some (FileOutline.summarize_gconst cst)
     | SymbolOccurrence.Class ->
-      get_class_by_name result.SymbolOccurrence.name >>= fun c ->
+      get_class_by_name tcopt result.SymbolOccurrence.name >>= fun c ->
       Some (FileOutline.summarize_class c ~no_children:true)
     | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       SMap.get typeconst_name class_.tc_typeconsts >>= fun m ->
-      get_member_def (Typeconst, m.ttc_origin, typeconst_name)
+      get_member_def tcopt (Typeconst, m.ttc_origin, typeconst_name)
     | SymbolOccurrence.LocalVar ->
       get_local_var_def
         ast result.SymbolOccurrence.name result.SymbolOccurrence.pos

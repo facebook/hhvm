@@ -31,6 +31,24 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
+  let next_token_no_trailing parser =
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_token_no_trailing lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
+  let next_docstring_header parser =
+    let lexer = Parser.lexer parser in
+    let (lexer, token, name) = Parser.Lexer.next_docstring_header lexer in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token, name)
+
+  let next_token_in_string parser name =
+    let lexer = Parser.lexer parser in
+    let (lexer, token) = Parser.Lexer.next_token_in_string lexer name in
+    let parser = Parser.with_lexer parser lexer in
+    (parser, token)
+
   let peek_token ?(lookahead=0) parser =
     let rec lex_ahead lexer n =
       let (next_lexer, token) = Parser.Lexer.next_token lexer in
@@ -47,8 +65,8 @@ module WithParser(Parser : ParserType) = struct
     let parser = Parser.with_lexer parser lexer in
     (parser, token)
 
-  let peek_token_kind parser =
-    Token.kind (peek_token parser)
+  let peek_token_kind ?(lookahead=0) parser =
+    Token.kind (peek_token ~lookahead parser)
 
   let skip_token parser =
     let (parser, _) = next_token parser in
@@ -223,6 +241,9 @@ module WithParser(Parser : ParserType) = struct
   let expect_while parser =
     expect_token parser TokenKind.While SyntaxError.error1018
 
+  let expect_comma parser =
+    expect_token parser TokenKind.Comma SyntaxError.error1054
+
   let expect_coloncolon parser =
     expect_token parser TokenKind.ColonColon SyntaxError.error1047
 
@@ -281,8 +302,16 @@ module WithParser(Parser : ParserType) = struct
 
   let assert_token parser kind =
     let (parser, token) = next_token parser in
-    assert ((Token.kind token) = kind);
+    if (Token.kind token) <> kind then
+      failwith (Printf.sprintf "Expected token %s but got %s\n"
+        (TokenKind.to_string kind)
+        (TokenKind.to_string (Token.kind token)));
     (parser, make_token token)
+
+  type separated_list_kind =
+    | NoTrailing
+    | TrailingAllowed
+    | ItemsOptional
 
   (* This helper method parses a list of the form
 
@@ -299,7 +328,7 @@ module WithParser(Parser : ParserType) = struct
     * Otherwise, a list of the form (item, separator) ... item is returned.
 *)
 
-  let parse_separated_list parser separator_kind allow_trailing
+  let parse_separated_list parser separator_kind list_kind
       close_kind error parse_item =
     let rec aux parser acc =
       (* At this point we are expecting an item followed by a separator,
@@ -308,14 +337,24 @@ module WithParser(Parser : ParserType) = struct
       let kind = Token.kind token in
       if kind = close_kind || kind = TokenKind.EndOfFile then
         (* ERROR RECOVERY: We expected an item but we found a close or
-           the end of the file. Make the item "missing" and give an error. *)
-        let parser = with_error parser error in
-        let item = make_missing() in
-        (parser, (item :: acc))
+           the end of the file. Make the item and separator both
+           "missing" and give an error.
+
+           If items are optional and we found a close, the last item was
+           omitted and there was no error. *)
+        let parser = if kind = TokenKind.EndOfFile || list_kind <> ItemsOptional
+          then with_error parser error
+          else parser in
+        let list_item = make_list_item (make_missing()) (make_missing()) in
+        (parser, (list_item :: acc))
       else if kind = separator_kind then
 
         (* ERROR RECOVERY: We expected an item but we got a separator.
            Assume the item was missing, eat the separator, and move on.
+
+           If items are optional, there was no error, so eat the separator and
+           continue.
+
            TODO: This could be poor recovery. For example:
 
                 function bar (Foo< , int blah)
@@ -324,7 +363,9 @@ module WithParser(Parser : ParserType) = struct
           the type argument list, it's associated with the formal
           parameter list.  *)
 
-        let parser = with_error parser1 error in
+        let parser = if list_kind <> ItemsOptional
+          then with_error parser1 error
+          else parser1 in
         let item = make_missing() in
         let separator = make_token token in
         let list_item = make_list_item item separator  in
@@ -337,11 +378,14 @@ module WithParser(Parser : ParserType) = struct
         let (parser1, token) = next_token parser in
         let kind = Token.kind token in
         if kind = close_kind then
-          (parser, (item :: acc))
+          let separator = make_missing() in
+          let list_item = make_list_item item separator in
+          (parser, (list_item :: acc))
         else if kind = separator_kind then
           let separator = make_token token in
           let list_item = make_list_item item separator in
           let acc = list_item :: acc in
+          let allow_trailing = list_kind <> NoTrailing in
           (* We got an item followed by a separator; what if the thing
              that comes next is a close? *)
           if allow_trailing && (peek_token_kind parser1) = close_kind then
@@ -351,7 +395,9 @@ module WithParser(Parser : ParserType) = struct
         else
           (* ERROR RECOVERY: We were expecting a close or separator, but
              got neither. Bail out. Caller will give an error. *)
-          (parser, (item :: acc)) in
+          let separator = make_missing() in
+          let list_item = make_list_item item separator in
+          (parser, (list_item :: acc)) in
     let (parser, items) = aux parser [] in
     (parser, make_list (List.rev items))
 
@@ -366,22 +412,25 @@ module WithParser(Parser : ParserType) = struct
         parser separator_kind allow_trailing close_kind error parse_item
 
   let parse_comma_list parser =
-    parse_separated_list parser TokenKind.Comma false
+    parse_separated_list parser TokenKind.Comma NoTrailing
 
   let parse_comma_list_allow_trailing parser =
-    parse_separated_list parser TokenKind.Comma true
+    parse_separated_list parser TokenKind.Comma TrailingAllowed
 
   let parse_comma_list_opt parser =
-    parse_separated_list_opt parser TokenKind.Comma false
+    parse_separated_list_opt parser TokenKind.Comma NoTrailing
 
   let parse_comma_list_opt_allow_trailing parser =
-    parse_separated_list_opt parser TokenKind.Comma true
+    parse_separated_list_opt parser TokenKind.Comma TrailingAllowed
+
+  let parse_comma_list_opt_items_opt parser =
+    parse_separated_list_opt parser TokenKind.Comma ItemsOptional
 
   let parse_semi_list parser =
-    parse_separated_list parser TokenKind.Semicolon false
+    parse_separated_list parser TokenKind.Semicolon NoTrailing
 
   let parse_semi_list_opt parser =
-    parse_separated_list_opt parser TokenKind.Semicolon false
+    parse_separated_list_opt parser TokenKind.Semicolon NoTrailing
 
   let parse_delimited_list
       parser left_kind left_error right_kind right_error parse_items =
@@ -412,6 +461,12 @@ module WithParser(Parser : ParserType) = struct
         parser TokenKind.RightParen SyntaxError.error1011 parse_item in
     parse_parenthesized_list parser parse_items
 
+  let parse_parenthesized_comma_list_opt_items_opt parser parse_item =
+    let parse_items parser =
+      parse_comma_list_opt_items_opt
+        parser TokenKind.RightParen SyntaxError.error1011 parse_item in
+    parse_parenthesized_list parser parse_items
+
   let parse_braced_list parser parse_items =
     parse_delimited_list parser TokenKind.LeftBrace SyntaxError.error1034
       TokenKind.RightBrace SyntaxError.error1006 parse_items
@@ -427,5 +482,66 @@ module WithParser(Parser : ParserType) = struct
       parse_comma_list_opt_allow_trailing
         parser TokenKind.RightBrace SyntaxError.error1006 parse_item in
     parse_braced_list parser parse_items
+
+  let parse_bracketted_list parser parse_items =
+    parse_delimited_list parser TokenKind.LeftBracket SyntaxError.error1026
+      TokenKind.RightBracket SyntaxError.error1031 parse_items
+
+  let parse_bracketted_comma_list_opt_allow_trailing parser parse_item =
+    let parse_items parser =
+      parse_comma_list_opt_allow_trailing
+        parser TokenKind.RightBracket SyntaxError.error1031 parse_item in
+    parse_bracketted_list parser parse_items
+
+  let parse_double_angled_list parser parse_items =
+    parse_delimited_list parser TokenKind.LessThanLessThan SyntaxError.error1029
+      TokenKind.GreaterThanGreaterThan SyntaxError.error1029 parse_items
+
+  let parse_double_angled_comma_list_allow_trailing parser parse_item =
+    let parse_items parser =
+      parse_comma_list_allow_trailing parser
+        TokenKind.GreaterThanGreaterThan SyntaxError.error1029 parse_item in
+    parse_double_angled_list parser parse_items
+
+  (* Parse with parse_item while a condition is met. *)
+  let parse_list_while parser parse_item predicate =
+    let rec aux parser acc =
+      if peek_token_kind parser = TokenKind.EndOfFile ||
+        not (predicate parser) then
+        (parser, acc)
+      else
+        let (parser, result) = parse_item parser in
+        aux parser (result :: acc) in
+    let (parser, items) = aux parser [] in
+    (parser, make_list (List.rev items))
+
+  let parse_terminated_list parser parse_item terminator =
+    let predicate parser = peek_token_kind parser != terminator in
+    parse_list_while parser parse_item predicate
+
+  let parse_list_until_none parser parse_item =
+    let rec aux parser acc =
+      let (parser, maybe_item) = parse_item parser in
+      match maybe_item with
+      | None -> (parser, acc)
+      | Some item -> aux parser (item :: acc) in
+    let (parser, items) = aux parser [] in
+    (parser, make_list (List.rev items))
+
+  (* Parse a comma-separated list of items until there is an item that
+  does not end in a comma. *)
+  let parse_list_until_no_comma parser parse_item =
+    let rec aux parser acc =
+      let (parser, item) = parse_item parser in
+      match syntax item with
+      | ListItem { list_item; list_separator } ->
+        if is_missing list_separator then
+          (parser, item :: acc)
+        else
+          aux parser (item :: acc)
+      | _ ->
+        (parser, item :: acc) in
+    let (parser, items) = aux parser [] in
+    (parser, make_list (List.rev items))
 
 end

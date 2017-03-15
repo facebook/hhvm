@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,6 +44,8 @@ TRACE_SET_MOD(mcg);
 namespace HPHP { namespace jit { namespace svcreq {
 
 namespace {
+
+///////////////////////////////////////////////////////////////////////////////
 
 RegionContext getContext(SrcKey sk) {
   RegionContext ctx {
@@ -88,6 +90,27 @@ RegionContext getContext(SrcKey sk) {
       FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
     }
   );
+
+  // Get the bytecode for `ctx', skipping Asserts.
+  auto const op = [&] {
+    auto pc = ctx.func->unit()->at(ctx.bcOffset);
+    while (isTypeAssert(peek_op(pc))) {
+      pc += instrLen(pc);
+    }
+    return peek_op(pc);
+  }();
+  assertx(!isTypeAssert(op));
+
+  // Track the mbase type.  The member base register is only valid after a
+  // member base op and before a member final op---and only AssertRAT*'s are
+  // allowed to intervene in a sequence of bytecode member operations.
+  if (isMemberDimOp(op) || isMemberFinalOp(op)) {
+    auto const mbase = vmMInstrState().base;
+    assertx(mbase != nullptr);
+
+    ctx.liveTypes.push_back({ Location::MBase{}, typeFromTV(mbase, ctxClass) });
+    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
+  }
 
   return ctx;
 }
@@ -221,6 +244,7 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 TCA funcBodyHelper(ActRec* fp) {
@@ -325,8 +349,8 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       if (ar->isFCallAwait()) {
         // If there was an interped FCallAwait, and we return via the
         // jit, we need to deal with the suspend case here.
-        assert(ar->m_r.m_aux.u_fcallAwaitFlag < 2);
-        if (ar->m_r.m_aux.u_fcallAwaitFlag) {
+        assert(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
+        if (ar->retSlot()->m_aux.u_fcallAwaitFlag) {
           start = tc::ustubs().fcallAwaitSuspendHelper;
           break;
         }
@@ -356,6 +380,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
 
   if (smashed && info.stub) {
     auto const stub = info.stub;
+    FTRACE(3, "Freeing stub {} on treadmill\n", stub);
     Treadmill::enqueue([stub] { tc::freeTCStub(stub); });
   }
 
@@ -464,5 +489,7 @@ TCA handleResume(bool interpFirst) {
   tl_regState = VMRegState::DIRTY;
   return start;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }}}

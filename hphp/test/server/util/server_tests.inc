@@ -8,6 +8,7 @@ function tlog($str) {
 
   fwrite($error_log_file, $str);
   fwrite($error_log_file, "\n");
+  fflush($error_log_file);
   // error_log($str);
 }
 
@@ -233,7 +234,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   return $serverProc;
 }
 
-function http_request($host, $port, $path, $timeout = 1200) {
+function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   global $test_run_id, $LOG_ROOT;
 
   @list($path, $post, $headers) = (array)$path;
@@ -250,7 +251,7 @@ function http_request($host, $port, $path, $timeout = 1200) {
   $url = "http://$host:$port/$path";
   $host_name = "hphpd.debugger.".php_uname('n');
   $cmd = "curl $post --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
-    "--silent --connect-timeout $timeout ".
+    "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");
   if (exec($cmd, $result) === null) return null;

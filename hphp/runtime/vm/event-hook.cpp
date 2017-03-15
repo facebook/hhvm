@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -132,11 +132,7 @@ bool shouldRunUserProfiler(const Func* func) {
 
 ALWAYS_INLINE
 ActRec* getParentFrame(const ActRec* ar) {
-  ActRec* ret = g_context->getPrevVMState(ar);
-  while (ret != nullptr && ret->skipFrame()) {
-    ret = g_context->getPrevVMState(ret);
-  }
-  return ret;
+  return g_context->getPrevVMStateSkipFrame(ar);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
@@ -365,6 +361,14 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                bool unwind, ObjectData* phpException,
                                size_t flags, bool isSuspend) {
+  // Inlined calls normally skip the function enter and exit events. If we
+  // side exit in an inlined callee, we short-circuit here in order to skip
+  // exit events that could unbalance the call stack.
+  if (RuntimeOption::EvalJit &&
+      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
+    return;
+  }
+
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
@@ -384,15 +388,6 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     if (flags & IntervalTimerFlag) {
       IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
     }
-  }
-
-
-  // Inlined calls normally skip the function enter and exit events. If we
-  // side exit in an inlined callee, we short-circuit here in order to skip
-  // exit events that could unbalance the call stack.
-  if (RuntimeOption::EvalJit &&
-      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
-    return;
   }
 
   // User profiler

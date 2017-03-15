@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -142,8 +142,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutVUnknown:    return TBoxedInitCell;
 
     case OutSameAsInput1: return topType(env, BCSPRelOffset{0});
-    case OutSameAsInput2: return topType(env, BCSPRelOffset{1});
-    case OutSameAsInput3: return topType(env, BCSPRelOffset{2});
+    case OutModifiedInput3: return topType(env, BCSPRelOffset{2}).modified();
     case OutVInput:      return boxed(topType(env, BCSPRelOffset{0}));
     case OutVInputL:     return boxed(localType());
     case OutFInputL:
@@ -172,7 +171,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType().unbox();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutClassRef:   return TCls;
     case OutFPushCufSafe: return folly::none;
 
     case OutNone:       return folly::none;
@@ -227,7 +225,7 @@ interpOutputLocals(IRGS& env,
            useTy;
   };
 
-  auto const mDefine = static_cast<unsigned char>(MOpFlags::Define);
+  auto const mDefine = static_cast<unsigned char>(MOpMode::Define);
 
   switch (inst.op()) {
     case OpSetN:
@@ -280,6 +278,7 @@ interpOutputLocals(IRGS& env,
 
     // New minstrs are handled extremely conservatively.
     case OpQueryM:
+    case OpMemoGet:
       break;
     case OpDim:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
@@ -294,6 +293,7 @@ interpOutputLocals(IRGS& env,
     case OpUnsetM:
     case OpSetWithRefLML:
     case OpSetWithRefRML:
+    case OpMemoSet:
       smashesAllLocals = true;
       break;
 
@@ -340,6 +340,24 @@ interpOutputLocals(IRGS& env,
   return locals;
 }
 
+jit::vector<InterpOneData::ClsRefSlot>
+interpClsRefSlots(IRGS& env, const NormalizedInstruction& inst) {
+  jit::vector<InterpOneData::ClsRefSlot> slots;
+
+  auto const op = inst.op();
+  auto const numImmeds = numImmediates(op);
+  for (auto i = uint32_t{0}; i < numImmeds; ++i) {
+    auto const type = immType(op, i);
+    if (type == ArgType::CAR) {
+      slots.emplace_back(inst.imm[i].u_CAR, false);
+    } else if (type == ArgType::CAW) {
+      slots.emplace_back(inst.imm[i].u_CAW, true);
+    }
+  }
+
+  return slots;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -354,17 +372,20 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
          stackType.hasValue() ? stackType->toString() : "<none>",
          popped, pushed);
 
-  InterpOneData idata { bcSPOffset(env) };
+  InterpOneData idata { spOffBCFromIRSP(env) };
   auto locals = interpOutputLocals(env, inst, idata.smashesAllLocals,
     stackType);
   idata.nChangedLocals = locals.size();
   idata.changedLocals = locals.data();
 
+  auto slots = interpClsRefSlots(env, inst);
+  idata.nChangedClsRefSlots = slots.size();
+  idata.changedClsRefSlots = slots.data();
+
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
     auto const checkIdx = BCSPRelOffset{
-      (out & InstrFlags::StackIns2) ? 2 :
       (out & InstrFlags::StackIns1) ? 1 : 0
     }.to<FPInvOffset>(env.irb->fs().bcSPOff());
 
@@ -374,12 +395,12 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
 }
 
 void interpOne(IRGS& env, int popped) {
-  InterpOneData idata { bcSPOffset(env) };
+  InterpOneData idata { spOffBCFromIRSP(env) };
   interpOne(env, folly::none, popped, 0, idata);
 }
 
 void interpOne(IRGS& env, Type outType, int popped) {
-  InterpOneData idata { bcSPOffset(env) };
+  InterpOneData idata { spOffBCFromIRSP(env) };
   interpOne(env, outType, popped, 1, idata);
 }
 
@@ -418,7 +439,6 @@ void interpOne(IRGS& env,
 void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
 
 void emitLowInvalid(IRGS& env)                { std::abort(); }
-void emitCGetL3(IRGS& env, int32_t)           { INTERP }
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
@@ -433,7 +453,7 @@ void emitEmptyN(IRGS& env)                    { INTERP }
 void emitSetN(IRGS& env)                      { INTERP }
 void emitSetOpN(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
-void emitSetOpS(IRGS& env, SetOpOp)           { INTERP }
+void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
 void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }

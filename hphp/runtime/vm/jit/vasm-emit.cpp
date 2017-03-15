@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,7 +81,6 @@ private:
 void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   if (vunit.dataBlocks.empty()) return;
 
-  tc::assertOwnsCodeLock();
   Timer timer(Timer::vasm_bind_ptrs);
   FTRACE(1, "{:-^80}\n", "binding VdataPtrs");
 
@@ -89,7 +88,7 @@ void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   for (auto& dataBlock : vunit.dataBlocks) {
     auto oldPtr = dataBlock.data.get();
     auto newPtr = data.allocRaw(dataBlock.size, dataBlock.align);
-    std::memcpy(newPtr, oldPtr, dataBlock.size);
+    std::memcpy(data.toDestAddress((TCA)newPtr), oldPtr, dataBlock.size);
     FTRACE(2, "  allocated {} bytes at {:#x}, moving from {:#x}\n",
            dataBlock.size, (uintptr_t)newPtr, (uintptr_t)oldPtr);
     blocks.emplace((uintptr_t)oldPtr,
@@ -106,7 +105,7 @@ void bindDataPtrs(Vunit& vunit, DataBlock& data) {
   });
 }
 
-void emit(const Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
+void emit(Vunit& vunit, Vtext& vtext, CGMeta& meta, AsmInfo* ai) {
   switch (arch()) {
     case Arch::X64:
       emitX64(vunit, vtext, meta, ai);
@@ -126,7 +125,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
                CodeCache::View code, CGMeta& meta, Annotations* annotations) {
   Timer _t(Timer::vasm_emit);
   SCOPE_ASSERT_DETAIL("vasm unit") { return show(vunit); };
-  tc::assertOwnsCodeLock();
+  tc::assertOwnsCodeLock(code);
 
   CodeBlock& main_in = code.main();
   CodeBlock& cold_in = code.cold();
@@ -135,17 +134,31 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   CodeBlock cold;
   CodeBlock* frozen = &code.frozen();
 
-  auto const do_relocate = arch() == Arch::X64 &&
+  auto const do_relocate = arch_any(Arch::X64, Arch::PPC64) &&
     !RuntimeOption::EvalEnableReusableTC &&
     RuntimeOption::EvalJitRelocationSize &&
-    cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3);
+    cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3) &&
+    (!RuntimeOption::EvalEnableOptTCBuffer ||
+     unit.context().kind != TransKind::Optimize) &&
+    (!RuntimeOption::EvalJitRetranslateAllRequest ||
+     unit.context().kind != TransKind::Optimize);
 
   // If code relocation is supported and enabled, set up temporary code blocks.
   if (do_relocate) {
     // Allocate enough space that the relocated cold code doesn't overlap the
     // emitted cold code.
     static unsigned seed = 42;
-    auto off = rand_r(&seed) & (cache_line_size() - 1);
+    auto code_alignment = [](void) -> uint8_t {
+      switch (arch()) {
+        case Arch::X64:
+          return 1;
+        case Arch::PPC64:
+        case Arch::ARM:
+          return 4;
+      }
+      not_reached();
+    }();
+    auto off = rand_r(&seed) & (cache_line_size() - code_alignment);
 
     cold.init(cold_in.frontier() +
               RuntimeOption::EvalJitRelocationSize + off,
@@ -157,8 +170,12 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
     // Use separate code blocks, so that attempts to use code's blocks
     // directly will fail (e.g., by overwriting the same memory being written
     // through these locals).
-    cold.init(cold_in.frontier(), cold_in.available(), cold_in.name().c_str());
-    main.init(main_in.frontier(), main_in.available(), main_in.name().c_str());
+    auto const coldStart = cold_in.frontier();
+    cold.init(coldStart, cold_in.toDestAddress(coldStart), cold_in.available(),
+              cold_in.name().c_str());
+    auto const mainStart = main_in.frontier();
+    main.init(mainStart, main_in.toDestAddress(mainStart), main_in.available(),
+              main_in.name().c_str());
   }
 
   if (frozen == &cold_in) frozen = &cold;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,8 +47,8 @@ TRACE_SET_MOD(hhir);
 #define D(n)           HasDest
 #define DofS(n)        HasDest
 #define DRefineS(n)    HasDest
-#define DParamMayRelax HasDest
-#define DParam         HasDest
+#define DParamMayRelax(t) HasDest
+#define DParam(t)      HasDest
 #define DParamPtr(k)   HasDest
 #define DLdObjCls      HasDest
 #define DUnboxPtr      HasDest
@@ -66,8 +66,11 @@ TRACE_SET_MOD(hhir);
 #define DSetElem       HasDest
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
+#define DCall          HasDest
 #define DSubtract(n,t) HasDest
 #define DCns           HasDest
+#define DUnion(...)    HasDest
+#define DMemoKey       HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -126,9 +129,12 @@ OpInfo g_opInfo[] = {
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam
+#undef DCall
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
+#undef DUnion
+#undef DMemoKey
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -168,6 +174,7 @@ bool isGuardOp(Opcode opc) {
     case CheckLoc:
     case CheckStk:
     case CheckType:
+    case CheckMBase:
       return true;
 
     default:

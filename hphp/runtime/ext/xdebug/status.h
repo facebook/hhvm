@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -76,10 +76,14 @@ enum class XDebugError {
 /* An exception wrapper over XDebugError. */
 struct XDebugExn : std::exception {
   explicit XDebugExn(XDebugError error) : error(error) {}
+  XDebugExn(XDebugError error,
+            const std::string& errorMsg) : error(error),
+                                           errorMsg(errorMsg) {}
 
   const char* what() const noexcept override;
 
   XDebugError error;
+  const std::string errorMsg;
 };
 
 /*
@@ -101,6 +105,7 @@ const char* xdebug_error_str(XDebugError);
 
 /* Helper for throwing XDebug errors. */
 void throw_exn(XDebugError);
+void throw_exn(XDebugError, const std::string&);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

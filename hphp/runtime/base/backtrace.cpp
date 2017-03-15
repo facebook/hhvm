@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,11 +18,16 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
+#include "hphp/util/struct-log.h"
 
 #include <folly/small_vector.h>
 
@@ -180,19 +185,31 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       assert(unit);
       pc = unit->offsetOf(vmpc());
     }
+
+    if (btArgs.m_skipInlined && RuntimeOption::EvalJit) {
+      while (fp && (jit::TCA)fp->m_savedRip == jit::tc::ustubs().retInlHelper) {
+        fp = getPrevActRec(fp, &pc, visitedWHs);
+      }
+      if (!fp) return bt;
+    }
   }
 
   // Handle the top frame.
   if (btArgs.m_withSelf) {
-    // Builtins don't have a file and line number.
-    if (!fp->func()->isBuiltin()) {
-      auto const unit = fp->func()->unit();
+    // Builtins don't have a file and line number, so find the first user frame
+    auto curFp = fp;
+    auto curPc = pc;
+    while (curFp && curFp->func()->isBuiltin()) {
+      curFp = g_context->getPrevVMState(curFp, &curPc);
+    }
+    if (curFp) {
+      auto const unit = curFp->func()->unit();
       assert(unit);
-      auto const filename = fp->func()->filename();
+      auto const filename = curFp->func()->filename();
 
       ArrayInit frame(btArgs.m_parserFrame ? 4 : 2, ArrayInit::Map{});
       frame.set(s_file, Variant{const_cast<StringData*>(filename)});
-      frame.set(s_line, unit->getLineNumber(pc));
+      frame.set(s_line, unit->getLineNumber(curPc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
         frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
@@ -370,6 +387,21 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   }
 
   return bt;
+}
+
+void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols) {
+  std::vector<folly::StringPiece> files;
+  std::vector<folly::StringPiece> functions;
+  std::vector<folly::StringPiece> lines;
+  for (ArrayIter it(bt.get()); it; ++it) {
+    Array frame = it.second().toArray();
+    files.emplace_back(frame[s_file].toString().data());
+    functions.emplace_back(frame[s_function].toString().data());
+    lines.emplace_back(frame[s_line].toString().data());
+  }
+  cols.setVec("php_files", files);
+  cols.setVec("php_functions", functions);
+  cols.setVec("php_lines", lines);
 }
 
 int64_t createBacktraceHash() {

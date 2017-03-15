@@ -11,38 +11,37 @@ namespace HH {
  */
 
 type ObjprofPathsStats = shape(
-  'instances' => int,
-  'bytes' => int,
-  'path' => array<string>,
+  'refs' => int,
 );
 
 type ObjprofObjectStats = shape(
-  'instances' => int,
-  'bytes' => int,
-  'paths' => ObjprofPathsStats,
+  'instances'        => int,
+  'bytes'            => int,
+  'bytes_normalized' => float,
+  'paths'            => ?array<string, ObjprofPathsStats>,
 );
 
 type ObjprofStringStats = shape(
-  'dups' => int,
-  'refs' => int,
+  'dups'  => int,
+  'refs'  => int,
   'srefs' => int,
-  'path' => string,
+  'path'  => string,
 );
 
 <<__Native>>
 function objprof_get_data(
   int $flags = OBJPROF_FLAGS_DEFAULT,
-  array $exclude_list = array(),
+  array<string> $exclude_list = array(),
 ): array<string, ObjprofObjectStats>;
-
-<<__Native>>
-function objprof_get_strings(int $min_dup): array<string, ObjprofStringStats>;
 
 <<__Native>>
 function objprof_get_paths(
   int $flags = OBJPROF_FLAGS_DEFAULT,
-  array $exclude_list = array(),
+  array<string> $exclude_list = array(),
 ): array<string, ObjprofObjectStats>;
+
+<<__Native>>
+function objprof_get_strings(int $min_dup): array<string, ObjprofStringStats>;
 
 <<__Native>>
 function thread_memory_stats(): array<string, int>;
@@ -52,4 +51,5 @@ function thread_mark_stack(): void;
 
 <<__Native>>
 function set_mem_threshold_callback(int $threshold, mixed $callback): void;
-}
+
+} // namespace HH

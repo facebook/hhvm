@@ -1,0 +1,4 @@
+Fatal error: Uncaught exception 'ReflectionException' with message 'Given object is not an instance of the class this method was declared in' in %s:%d
+Stack trace:
+#0 %s(%d): ReflectionMethod->invoke()
+#1 {main}

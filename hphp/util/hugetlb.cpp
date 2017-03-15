@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,10 +28,8 @@
 #include <unistd.h>
 
 #include "hphp/util/kernel-version.h"
+#include "hphp/util/numa.h"
 
-#ifdef HAVE_NUMA
-#include <numa.h>
-#endif
 #endif
 
 #include <assert.h>
@@ -42,11 +40,15 @@
 
 namespace HPHP {
 
-constexpr size_t size1g = 1 << 30;
-
 static char s_hugePath[256];
 constexpr size_t maxErrorMsgLen = 256;
 static char s_errorMsg[maxErrorMsgLen];
+
+static unsigned s_num1GPages;
+constexpr unsigned kMaxNum1GPages = 16;
+static void* s_1GPages[kMaxNum1GPages];
+
+static unsigned s_num2MPages;
 
 // Record error message based on errno, with an optional message.
 static void record_err_msg(const char* msg = nullptr) {
@@ -149,39 +151,50 @@ static int readNumFrom(const char* fileName) {
   return result;
 }
 
-Huge1GPageInfo get_huge1g_info(int node /* = -1 */) {
+HugePageInfo read_hugepage_info(uint32_t pagesizekb, int node /* = -1 */) {
   int nr_huge = 0, free_huge = 0;
 #ifdef __linux__
   char fileName[256];
   if (node >= 0) {
     snprintf(fileName, sizeof(fileName),
              "/sys/devices/system/node/node%d/hugepages/"
-             "hugepages-1048576kB/nr_hugepages", node);
+             "hugepages-%dkB/nr_hugepages",
+             node, pagesizekb);
     nr_huge = readNumFrom(fileName);
     snprintf(fileName, sizeof(fileName),
              "/sys/devices/system/node/node%d/hugepages/"
-             "hugepages-1048576kB/free_hugepages", node);
+             "hugepages-%dkB/free_hugepages",
+             node, pagesizekb);
     free_huge = readNumFrom(fileName);
-    return Huge1GPageInfo{nr_huge, free_huge};
+    return HugePageInfo{nr_huge, free_huge};
   }
+  // All nodes
 #ifdef HAVE_NUMA
   const int MAX_NUMA_NODE = numa_max_node();
 #else
-  const int MAX_NUMA_NODE = 0;
+  constexpr int MAX_NUMA_NODE = 0;
 #endif
   for (int i = 0; i <= MAX_NUMA_NODE; ++i) {
-    auto const info = get_huge1g_info(i);
-    nr_huge += info.total;
-    free_huge += info.available;
+    auto const info = read_hugepage_info(pagesizekb, i);
+    nr_huge += info.nr_hugepages;
+    free_huge += info.free_hugepages;
   }
 #endif
-  return Huge1GPageInfo{nr_huge, free_huge};
+  return HugePageInfo{nr_huge, free_huge};
+}
+
+HugePageInfo get_huge1g_info(int node /* = -1 */) {
+  return read_hugepage_info(1024 * 1024 /* kB */, node);
+}
+
+HugePageInfo get_huge2m_info(int node /* = -1 */) {
+  return read_hugepage_info(2048 /* kB */, node);
 }
 
 bool auto_mount_hugetlbfs() {
 #ifdef __linux__
   auto const info = get_huge1g_info();
-  if (info.total <= 0) return false;   // No 1G page reserved.
+  if (info.nr_hugepages <= 0) return false; // No page reserved.
 
   const char* hugePath = "/tmp/huge1g";
   if (mkdir(hugePath, 0777)) {
@@ -201,8 +214,44 @@ bool auto_mount_hugetlbfs() {
 #endif
 }
 
-inline void* mmap_1g_impl(void* addr) {
 #ifdef __linux__
+// Beware that MAP_FIXED overrides existing mapping silently.  If the specified
+// memory was mapped in, it may no longer be after this function fails.
+// mincore() can be used to check if a memory region is stilled mapped in.
+inline void* mmap_2m_impl(void* addr, int prot, bool shared, bool fixed) {
+  void* ret = MAP_FAILED;
+  int flags = MAP_ANONYMOUS | MAP_HUGETLB
+    | (shared ? MAP_SHARED : MAP_PRIVATE)
+    | (fixed ? MAP_FIXED : 0);
+  // MAP_HUGE_2MB can be specified after 3.8 kernel.
+  static KernelVersion version;
+  if (version.m_major > 3 || (version.m_major == 3 && version.m_minor >= 8)) {
+#ifndef MAP_HUGE_2MB
+#define MAP_HUGE_2MB (21 << 26)
+#endif
+    flags |= MAP_HUGE_2MB;
+  }
+  ret = mmap(addr, size2m, prot, flags, -1, 0);
+  if (ret == MAP_FAILED) {
+    record_err_msg("mmap() with MAP_HUGE_2MB failed: ");
+    return nullptr;
+  }
+
+  // Fault the page in.  This guarantees availablility of memory, and avoids
+  // subsequent errors when the huge page isn't really available.  Ideally the
+  // kernel should've failed mmap() in such a case, but it doesn't seem to even
+  // with MAP_LOCKED | MAP_POPULATE.
+  if (mlock(ret, 1)) {
+    snprintf(s_errorMsg, maxErrorMsgLen, "mlock() failed for %p: ", ret);
+    record_err_msg();
+    munmap(ret, size2m);
+    return nullptr;
+  }
+
+  return ret;
+}
+
+inline void* mmap_1g_impl(void* addr) {
   void* ret = MAP_FAILED;
   if (s_hugePath[0] != 0) {
     int fd = -1;
@@ -238,8 +287,7 @@ inline void* mmap_1g_impl(void* addr) {
       return nullptr;
     }
 
-    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE,
-               MAP_PRIVATE, fd, 0);
+    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (ret == MAP_FAILED) {
       snprintf(s_errorMsg, maxErrorMsgLen,
                "mmap() for hugetlbfs file failed: ");
@@ -255,8 +303,8 @@ inline void* mmap_1g_impl(void* addr) {
 #ifndef MAP_HUGE_1GB
 #define MAP_HUGE_1GB (30 << 26)
 #endif
-      int flags = MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB;
-      ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, 0, 0);
+      int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB;
+      ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
       if (ret == MAP_FAILED) {
         record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
         return nullptr;
@@ -286,17 +334,124 @@ inline void* mmap_1g_impl(void* addr) {
   }
 
   return ret;
-#else
+}
+#endif
+
+void* mmap_2m(void* addr, int prot, int node /* = -1 */,
+              bool map_shared /* = false */, bool map_fixed /* = false */) {
+#ifdef __linux__
+  if (get_huge2m_info(node).free_hugepages <= 0) return nullptr;
+#ifdef HAVE_NUMA
+  bitmask* memMask = nullptr;
+  bitmask* interleaveMask = nullptr;
+  if (node >= 0 && numa_num_nodes > 1) {
+    assert(numa_node_set != 0);
+    if ((numa_node_set & (1u << node)) == 0) {
+      // Numa policy forbids allocation on the node.
+      return nullptr;
+    }
+    memMask = numa_get_membind();
+    interleaveMask = numa_get_interleave_mask();
+    bitmask* mask = numa_allocate_nodemask();
+    numa_bitmask_setbit(mask, node);
+    numa_set_membind(mask);
+    numa_bitmask_free(mask);
+  }
+#endif
+  void* ret = mmap_2m_impl(addr, prot, map_shared, map_fixed);
+  s_num2MPages += !!ret;
+#ifdef HAVE_NUMA
+  if (memMask) {
+    numa_set_membind(memMask);
+    numa_set_interleave_mask(interleaveMask);
+    numa_bitmask_free(memMask);
+    numa_bitmask_free(interleaveMask);
+  }
+#endif
+  return ret;
+#else  // not linux
   return nullptr;
+#endif
+}
+
+size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
+                                  bool shared /* = false */) {
+#ifdef __linux__
+  assert(reinterpret_cast<uintptr_t>(addr) % size2m == 0);
+  assert(addr != nullptr);
+
+  if (pages == 0) return 0;
+
+#ifdef HAVE_NUMA
+  const int maxNode = numa_max_node();
+  bitmask* memMask = nullptr;
+  bitmask* interleaveMask = nullptr;
+  bitmask* mask = nullptr;
+  if (maxNode > 0) {
+    memMask = numa_get_membind();
+    interleaveMask = numa_get_interleave_mask();
+    mask = numa_allocate_nodemask();
+  }
+#else
+  constexpr int maxNode = 0;
+#endif
+  int node = -1;
+  int failed = 0;                       // consecutive failure count
+  int mapped_count = 0;
+  do {
+#ifdef HAVE_NUMA
+    if (maxNode > 0) {
+      if (++node > maxNode) node = 0;
+      if (numa_node_set && !(numa_node_set & (1 << node))) {
+        // Numa policy forbids allocation on node
+        if (++failed > maxNode) break;
+        continue;
+      }
+      numa_bitmask_setbit(mask, node);
+      numa_set_membind(mask);
+      numa_bitmask_clearbit(mask, node);
+    }
+#endif
+    // Fail early if we don't have huge pages reserved.
+    if (get_huge2m_info(node).free_hugepages > 0 &&
+        mmap_2m_impl(addr, prot, shared, true /* MAP_FIXED */)) {
+      addr = (char*)addr + size2m;
+      ++mapped_count;
+      failed = 0;
+      continue;
+    }
+    // We failed on node, give up if we have failed on all nodes
+    if (++failed > maxNode) break;
+  } while (mapped_count < pages);
+
+#ifdef HAVE_NUMA
+  if (mask) {
+    numa_set_membind(memMask);
+    numa_set_interleave_mask(interleaveMask);
+    numa_bitmask_free(mask);
+    numa_bitmask_free(interleaveMask);
+    numa_bitmask_free(memMask);
+  }
+#endif
+  return mapped_count;
+#else  // not linux
+  return 0;
 #endif
 }
 
 void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
 #ifdef __linux__
+  if (s_num1GPages >= kMaxNum1GPages) return nullptr;
+  if (get_huge1g_info(node).free_hugepages <= 0) return nullptr;
 #ifdef HAVE_NUMA
   bitmask* memMask = nullptr;
   bitmask* interleaveMask = nullptr;
-  if (node >= 0) {
+  if (node >= 0 && numa_num_nodes > 1) {
+    assert(numa_node_set != 0);
+    if ((numa_node_set & (1u << node)) == 0) {
+      // Numa policy forbids allocation on the node.
+      return nullptr;
+    }
     memMask = numa_get_membind();
     interleaveMask = numa_get_interleave_mask();
     bitmask* mask = numa_allocate_nodemask();
@@ -306,8 +461,12 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
   }
 #endif
   void* ret = mmap_1g_impl(addr);
+  if (ret != nullptr) {
+    s_1GPages[s_num1GPages++] = ret;
+  }
 #ifdef HAVE_NUMA
-  if (node >= 0) {
+  if (memMask) {
+    assert(interleaveMask);
     numa_set_membind(memMask);
     numa_set_interleave_mask(interleaveMask);
     numa_bitmask_free(memMask);
@@ -318,6 +477,30 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
 #else
   return nullptr;
 #endif
+}
+
+unsigned num_1g_pages() {
+  return s_num1GPages;
+}
+
+unsigned num_2m_pages() {
+  return s_num2MPages;
+}
+
+int mprotect_1g_pages(int prot) {
+#ifdef __linux__
+  for (unsigned i = 0; i < s_num1GPages; ++i) {
+    void* p = s_1GPages[i];
+    assert(p != nullptr &&
+           (reinterpret_cast<uintptr_t>(p) & (size1g - 1)) == 0);
+    if (auto ret = mprotect(p, size1g, prot)) {
+      // mprotect() failed for this page, callers should check errno if they
+      // care.
+      return ret;
+    }
+  }
+#endif
+  return 0;
 }
 
 }

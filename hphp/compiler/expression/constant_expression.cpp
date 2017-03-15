@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -149,8 +149,19 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   ConstructPtr decl;
   while (!isScalar() && !m_dynamic && !(m_context & LValue)) {
     const Symbol *sym = resolveNS(ar);
-    if (sym &&
-        (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic())) {
+    if (!sym) {
+      // The constant may be defined in a native extension, so check if its
+      // available and persistent.
+      auto const cns = Unit::lookupPersistentCns(makeStaticString(m_name));
+      if (!cns) break;
+      auto const& value = tvAsCVarRef(cns);
+      if (!value.isAllowedAsConstantValue()) break;
+      auto rep = makeScalarExpression(ar, value);
+      rep->setComment(getText());
+      copyLocationTo(rep);
+      return replaceValue(rep);
+    }
+    if (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic()) {
       sym = 0;
       m_dynamic = true;
     }

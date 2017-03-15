@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,15 @@ namespace HPHP {
 struct Func;
 struct SrcKey;
 
-namespace jit { namespace mcgen {
+namespace jit {
+
+namespace tc {
+
+struct FuncMetaInfo;
+
+}
+
+namespace mcgen {
 
 /*
  * Regenerate all prologues of func that were previously generated.  The
@@ -37,7 +45,7 @@ namespace jit { namespace mcgen {
  * Returns true iff the body of the function was included in at least one
  * dvInit translation.
  */
-bool regeneratePrologues(Func* func);
+bool regeneratePrologues(Func* func, tc::FuncMetaInfo&);
 
 }}}
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -114,7 +114,7 @@ inline void* MemoryManager::FreeList::maybePop() {
 inline FreeNode*
 FreeNode::InitFrom(void* addr, uint32_t size, HeaderKind kind) {
   auto node = static_cast<FreeNode*>(addr);
-  node->hdr.init(kind, size);
+  node->initHeader(kind, size);
   return node;
 }
 
@@ -153,6 +153,13 @@ inline uint32_t MemoryManager::bsr(uint32_t x) {
 #elif defined(__powerpc64__)
   uint32_t ret;
   __asm__ ("cntlzw %0, %1"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return 31 - ret;
+#elif defined(__aarch64__)
+  uint32_t ret;
+  __asm__ ("clz %w0, %w1"
            : "=r"(ret) // Outputs.
            : "r"(x)    // Inputs.
            );
@@ -384,7 +391,7 @@ inline Header* MemoryManager::find(const void* p) {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline bool MemoryManager::sweeping() {
-  return !TlsWrapper::isNull() && MM().m_sweeping;
+  return !TlsWrapper::isNull() && tl_sweeping;
 }
 
 inline bool MemoryManager::exiting() {
@@ -397,53 +404,6 @@ inline void MemoryManager::setExiting() {
 
 inline StringDataNode& MemoryManager::getStringList() {
   return m_strings;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-MemoryManager::RootId MemoryManager::addRoot(req::ptr<T>&& ptr) {
-  assert(ptr);
-  const RootId token = ptr->getId();
-  getRootMap<T>().emplace(token, std::move(ptr));
-  return token;
-}
-
-template <typename T>
-MemoryManager::RootId MemoryManager::addRoot(const req::ptr<T>& ptr) {
-  assert(ptr);
-  const RootId token = ptr->getId();
-  getRootMap<T>()[token] = ptr;
-  return token;
-}
-
-template <typename T>
-req::ptr<T> MemoryManager::lookupRoot(RootId token) const {
-  auto& handleMap = getRootMap<T>();
-  auto itr = handleMap.find(token);
-  return itr != handleMap.end() ? unsafe_cast_or_null<T>(itr->second) : nullptr;
-}
-
-template <typename T>
-req::ptr<T> MemoryManager::removeRoot(RootId token) {
-  auto& handleMap = getRootMap<T>();
-  auto itr = handleMap.find(token);
-  if(itr != handleMap.end()) {
-    auto ptr = std::move(itr->second);
-    handleMap.erase(itr);
-    return unsafe_cast_or_null<T>(ptr);
-  }
-  return nullptr;
-}
-
-template <typename T>
-bool MemoryManager::removeRoot(const req::ptr<T>& ptr) {
-  return (bool)removeRoot<T>(ptr->getId());
-}
-
-template <typename T>
-bool MemoryManager::removeRoot(const T* ptr) {
-  return (bool)removeRoot<T>(ptr->getId());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

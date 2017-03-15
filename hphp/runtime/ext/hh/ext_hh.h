@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,8 +26,16 @@ bool HHVM_FUNCTION(autoload_set_paths,
                    const Variant& map,
                    const String& root);
 bool HHVM_FUNCTION(could_include, const String& file);
-Variant HHVM_FUNCTION(serialize_memoize_param, const Variant& param);
+TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param);
 void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata);
+
+extern const StaticString
+  s_nullMemoKey,
+  s_trueMemoKey,
+  s_falseMemoKey,
+  s_emptyArrMemoKey,
+  s_emptyStrMemoKey;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

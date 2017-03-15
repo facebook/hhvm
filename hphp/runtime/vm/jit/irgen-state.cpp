@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,9 +33,10 @@ BCMarker initial_marker(TransContext ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-IRGS::IRGS(IRUnit& unit)
+IRGS::IRGS(IRUnit& unit, const RegionDesc* region)
   : context(unit.context())
   , transFlags(unit.context().flags)
+  , region(region)
   , unit(unit)
   , irb(new IRBuilder(unit, initial_marker(context)))
   , bcStateStack { context.srcKey() }
@@ -108,7 +109,7 @@ std::string show(const IRGS& irgs) {
     auto const stkVal = irgs.irb->stack(spRel, DataTypeGeneric).value;
 
     std::string elemStr;
-    if (stkTy == TStkElem) {
+    if (stkTy == TGen) {
       elemStr = "unknown";
     } else if (stkVal) {
       elemStr = stkVal->inst()->toString();

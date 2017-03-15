@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,11 @@ const char* const kPerfCounterNames[] = {
   TRANS_PERF_COUNTERS
 };
 #undef TPC
+#define TPC(n) StaticString("jit_" #n),
+const StaticString s_PerfCounterNames[tpc_num_counters] = {
+  TRANS_PERF_COUNTERS
+};
+#undef TPC
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,8 +59,7 @@ void getPerfCounters(Array& ret) {
     // Until perflab can automatically scale the values we give it to an
     // appropriate range, we have to fudge these numbers so they look more like
     // reasonable hardware counter values.
-    ret.set(String::FromCStr(kPerfCounterNames[i]),
-            tl_perf_counters[i] * 1000);
+    ret.set(s_PerfCounterNames[i], tl_perf_counters[i] * 1000);
   }
 
   for (auto const& pair : Timer::Counters()) {

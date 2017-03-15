@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,16 +68,24 @@ struct DataBlockFull : std::runtime_error {
 struct DataBlock {
   DataBlock() = default;
 
-  DataBlock(const DataBlock& other) = delete;
-  DataBlock& operator=(const DataBlock& other) = delete;
+  DataBlock(DataBlock&& other) = default;
+  DataBlock& operator=(DataBlock&& other) = default;
 
   /**
    * Uses an existing chunk of memory.
+   *
+   * Addresses returned by DataBlock will be in the range [start, start + sz),
+   * while writes and reads will happen from the range [dest, dest + sz).
    */
-  void init(Address start, size_t sz, const char* name) {
+  void init(Address start, Address dest, size_t sz, const char* name) {
     m_base = m_frontier = start;
+    m_destBase = dest;
     m_size = sz;
     m_name = name;
+  }
+
+  void init(Address start, size_t sz, const char* name) {
+    init(start, start, sz, name);
   }
 
   /*
@@ -90,7 +98,7 @@ struct DataBlock {
   void* allocRaw(size_t sz, size_t align = 16) {
     // Round frontier up to a multiple of align
     align = folly::nextPowTwo(align) - 1;
-    m_frontier = (uint8_t*)(((uintptr_t)m_frontier + align) & ~align);
+    setFrontier((uint8_t*)(((uintptr_t)m_frontier + align) & ~align));
     auto data = m_frontier;
     m_frontier += sz;
     assertx(m_frontier < m_base + m_size);
@@ -120,22 +128,22 @@ struct DataBlock {
 
   void byte(const uint8_t byte) {
     assertCanEmit(sz::byte);
-    *m_frontier = byte;
+    *dest() = byte;
     m_frontier += sz::byte;
   }
   void word(const uint16_t word) {
     assertCanEmit(sz::word);
-    *(uint16_t*)m_frontier = word;
+    *(uint16_t*)dest() = word;
     m_frontier += sz::word;
   }
   void dword(const uint32_t dword) {
     assertCanEmit(sz::dword);
-    *(uint32_t*)m_frontier = dword;
+    *(uint32_t*)dest() = dword;
     m_frontier += sz::dword;
   }
   void qword(const uint64_t qword) {
     assertCanEmit(sz::qword);
-    *(uint64_t*)m_frontier = qword;
+    *(uint64_t*)dest() = qword;
     m_frontier += sz::qword;
   }
 
@@ -149,7 +157,7 @@ struct DataBlock {
         uint64_t qword;
         uint8_t bytes[8];
       } u;
-      u.qword = *(uint64_t*)m_frontier;
+      u.qword = *(uint64_t*)dest();
       for (size_t i = 0; i < n; ++i) {
         u.bytes[i] = bs[i];
       }
@@ -157,9 +165,9 @@ struct DataBlock {
       // If this address spans cache lines, on x64 this is not an atomic store.
       // This being the case, use caution when overwriting code that is
       // reachable by multiple threads: make sure it doesn't span cache lines.
-      *reinterpret_cast<uint64_t*>(m_frontier) = u.qword;
+      *reinterpret_cast<uint64_t*>(dest()) = u.qword;
     } else {
-      memcpy(m_frontier, bs, n);
+      memcpy(dest(), bs, n);
     }
     m_frontier += n;
   }
@@ -172,6 +180,17 @@ struct DataBlock {
   Address base() const { return m_base; }
   Address frontier() const { return m_frontier; }
   std::string name() const { return m_name; }
+
+  /*
+   * DataBlock can emit into a range [A, B] while returning addresses in range
+   * [A', B']. This function  will map an address in [A', B'] into [A, B], and
+   * it must be used before writing or reading from any address returned by
+   * DataBlock.
+   */
+  Address toDestAddress(CodeAddress addr) {
+    assertx(m_base <= addr && addr <= (m_base + m_size));
+    return Address(m_destBase + (addr - m_base));
+  }
 
   void setFrontier(Address addr) {
     assertx(m_base <= addr && addr <= (m_base + m_size));
@@ -190,7 +209,7 @@ struct DataBlock {
     return m_size - (m_frontier - m_base);
   }
 
-  bool contains(CodeAddress addr) const {
+  bool contains(ConstCodeAddress addr) const {
     return addr >= m_base && addr < (m_base + m_size);
   }
 
@@ -199,11 +218,11 @@ struct DataBlock {
   }
 
   void clear() {
-    m_frontier = m_base;
+    setFrontier(m_base);
   }
 
   void zero() {
-    memset(m_base, 0, m_frontier - m_base);
+    memset(m_destBase, 0, m_frontier - m_base);
     clear();
   }
 
@@ -222,6 +241,13 @@ private:
 
   using Offset = uint32_t;
   using Size = uint32_t;
+
+  Address dest() const { return m_destBase + (m_frontier - m_base); }
+
+  // DataBlock can track an alternate pseudo-frontier to support clients that
+  // wish to emit code to one location while keeping memory references relative
+  // to a separate location. The actual writes will be to m_dest.
+  Address m_destBase{nullptr};
 
   Address m_base{nullptr};
   Address m_frontier{nullptr};

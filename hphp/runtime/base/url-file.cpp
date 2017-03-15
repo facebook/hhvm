@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -127,9 +127,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
   VMRegAnchor vra;
   ActRec* fp = vmfp();
-  while (fp->skipFrame()) {
-    fp = g_context->getPrevVMState(fp);
-  }
+  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
   auto id = fp->func()->lookupVarId(s_http_response_header.get());
   if (id != kInvalidId) {
     auto tvTo = frame_local(fp, id);

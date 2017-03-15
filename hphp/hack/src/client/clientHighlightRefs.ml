@@ -15,10 +15,11 @@ let to_json res =
   JSON_Array (List.map res (Pos.json))
 
 let print_json res =
-  print_endline (Hh_json.json_to_string (to_json res))
+  let response = Ide_message.Highlight_references_response res in
+  Nuclide_rpc_message_printer.print_json ~response
 
 let print_result pos =
-  Printf.printf "%s\n" (Pos.string_no_file pos)
+  Printf.printf "%s\n" (Ide_api_types.range_to_string_single_line pos)
 
 let print_readable res =
   List.iter res print_result;

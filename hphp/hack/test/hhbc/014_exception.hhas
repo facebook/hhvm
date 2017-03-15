@@ -1,0 +1,13 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  FPushCtorD 0 "Exception"
+  FCall 0
+  PopR
+  Throw
+}
+

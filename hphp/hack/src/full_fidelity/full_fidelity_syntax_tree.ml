@@ -68,10 +68,35 @@ let get_language_and_mode text root =
   | _ -> failwith "unexpected missing script node"
     (* The parser never produces a missing script, even if the file is empty *)
 
+let remove_duplicates errors equals =
+  (* Assumes the list is sorted so that equal items are together. *)
+  let rec aux errors acc =
+    match errors with
+    | [] -> acc
+    | h1 :: t1 ->
+      begin
+        match t1 with
+        | [] -> h1 :: acc
+        | h2 :: t2 ->
+        if equals h1 h2 then
+          aux (h1 :: t2) acc
+        else
+          aux t1 (h1 :: acc)
+      end in
+  let result = aux errors [] in
+  List.rev result
+
 let make text =
   let parser = Parser.make text in
   let (parser, root) = Parser.parse_script parser in
+  (* We've got the lexical errors and the parser errors together, both
+  with lexically later errors earlier in the list. We want to reverse the
+  list so that later errors come later, and then do a stable sort to put the
+  lexical and parser errors together. *)
   let errors = Parser.errors parser in
+  let errors = List.rev errors in
+  let errors = List.stable_sort SyntaxError.compare errors in
+  let errors = remove_duplicates errors SyntaxError.exactly_equal in
   let (language, mode) = get_language_and_mode text root in
   { text; root; errors; language; mode }
 
@@ -81,8 +106,12 @@ let root tree =
 let text tree =
   tree.text
 
-let errors tree =
+let all_errors tree =
   tree.errors
+
+let remove_cascading errors =
+  let equals e1 e2 = (SyntaxError.compare e1 e2) = 0 in
+  remove_duplicates errors equals
 
 let language tree =
   tree.language
@@ -99,10 +128,31 @@ let is_php tree =
 let is_strict tree =
   (is_hack tree) && tree.mode = "strict"
 
+let is_decl tree =
+  (is_hack tree) && tree.mode = "decl"
+
+let errors_no_bodies tree =
+  let not_in_body error =
+    not (is_in_body tree.root error.SyntaxError.start_offset) in
+  List.filter not_in_body tree.errors
+
+(* By default we strip out (1) all cascading errors, and (2) in decl mode,
+all errors that happen in a body. *)
+
+let errors tree =
+  let e =
+    if is_decl tree then begin
+      errors_no_bodies tree end
+    else
+      all_errors tree in
+  remove_cascading e
+
 let to_json tree =
+  let version = Full_fidelity_schema.full_fidelity_schema_version_number in
   let root = to_json tree.root in
   let text = Hh_json.JSON_String tree.text.SourceText.text in
   Hh_json.JSON_Object [
     "parse_tree", root;
     "program_text", text;
+    "version", Hh_json.JSON_String version
   ]

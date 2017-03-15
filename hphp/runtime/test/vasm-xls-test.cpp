@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,14 +40,22 @@ template<class T> uint64_t test_const(T val) {
     .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
   };
-  static uint8_t code[1000];
-  // None of these tests should use any data.
-  static uint8_t data_buffer[0];
+
+  constexpr auto blockSize = 4096;
+  auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
+                                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+  SCOPE_EXIT { munmap(code, blockSize); };
+
+  constexpr auto dataSize = 100;
+  constexpr auto codeSize = blockSize - dataSize;
+  // None of these tests should use much data.
+  auto data_buffer = code + codeSize;
 
   CodeBlock main;
-  main.init(code, sizeof(code), "test");
+  main.init(code, codeSize, "test");
   DataBlock data;
-  data.init(data_buffer, sizeof(data), "data");
+  data.init(data_buffer, dataSize, "data");
 
   Vunit unit;
   Vasm vasm{unit};

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/process/ext_process.h"
@@ -146,7 +147,7 @@ void raise_infinite_recursion_error() {
 
 static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
-    RuntimeOption::ClientExecutionMode()
+    !RuntimeOption::ServerExecutionMode() || is_cli_mode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
     RID().getTimeout());
@@ -181,16 +182,40 @@ static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
     "request has exceeded memory limit", exceptionStack);
 }
 
+// suppress certain callbacks when we're running a user error handler;
+// to reduce the chances that a subsequent error occurs in the callback
+// and obscures the effect that the first handler would have had.
+static bool callbacksOk() {
+  switch (g_context->getErrorState()) {
+    case ExecutionContext::ErrorState::NoError:
+    case ExecutionContext::ErrorState::ErrorRaised:
+    case ExecutionContext::ErrorState::ErrorRaisedByUserHandler:
+      return true;
+    case ExecutionContext::ErrorState::ExecutingUserHandler:
+      return false;
+  }
+  not_reached();
+}
+
 size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
+  NoHandleSurpriseScope::AssertNone(static_cast<SurpriseFlag>(mask));
   auto& info = TI();
   auto& p = info.m_reqInjectionData;
 
-  auto const flags = fetchAndClearSurpriseFlags() & mask;
+  auto flags = fetchAndClearSurpriseFlags() & mask;
   auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the thread.
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
+
+  if (auto cbFlags =
+      flags & (XenonSignalFlag | MemThresholdFlag | IntervalTimerFlag)) {
+    if (!callbacksOk()) {
+      setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
+      flags -= cbFlags;
+    }
+  }
 
   if ((flags & TimedOutFlag) && !debugging) {
     p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.

@@ -47,7 +47,6 @@ let aliases_to_hh = [
   "objprof_get_strings";
   "objprof_get_data";
   "objprof_get_paths";
-  "objprof_start";
   "server_warmup_status";
   (* From Parser::getAutoAliasedClassName in hphp/compiler/parser/parser.cpp *)
   "AsyncIterator";

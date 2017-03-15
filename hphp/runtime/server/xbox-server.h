@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -93,6 +93,8 @@ struct XboxServerInfo : SatelliteServerInfo {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_xbox("xbox");
+
 struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(
     const folly::StringPiece message,
@@ -131,6 +133,13 @@ struct XboxTransport final : Transport, Synchronizable {
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override;
   void onSendEndImpl() override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_xbox;
+  }
 
   /**
    * Task interface.

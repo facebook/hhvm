@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Ide_api_types
 open Typing_defs
 open Utils
 
@@ -20,13 +21,7 @@ let sample_rate = 0
 let display_limit = 10
 let samples_limit = 5
 
-type level =
-  | Unchecked (* Completely unchecked code, i.e. Tanys *)
-  | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
-                 concrete type parameters *)
-  | Checked   (* Completely checked code *)
-
-type result = ((int * int) * level) list
+type result = (Pos.t * coverage_level) list
 
 let string_of_level = function
   | Checked   -> "checked"
@@ -34,7 +29,7 @@ let string_of_level = function
   | Unchecked -> "unchecked"
 
 module CLMap = MyMap.Make (struct
-  type t = level
+  type t = coverage_level
   let compare x y = Pervasives.compare x y
 end)
 
@@ -201,7 +196,7 @@ type 'a trie =
   | Node of 'a * 'a trie SMap.t
 
 let rec is_tany ty = match ty with
-  | r, Tany -> Some r
+  | r, (Tany | Terr) -> Some r
   | _, Tunresolved [] -> None
   | _, Tunresolved (h::tl) -> begin match is_tany h with
     | Some r when
@@ -228,3 +223,9 @@ let level_of_type fixme_map (p, ty) =
 let level_of_type_mapper fn =
   let fixme_map = Fixmes.HH_FIXMES.find_unsafe fn in
   level_of_type fixme_map
+
+let result_to_ide_message x =
+  let offsets_to_range (pos, level) = (Ide_api_types.pos_to_range pos, level) in
+  let open Ide_message in
+  Coverage_levels_response
+    (Range_coverage_levels_response (List.map x ~f:offsets_to_range))

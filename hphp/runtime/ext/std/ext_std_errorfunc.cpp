@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -133,16 +133,16 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     buf.append("(");
     if (!ignore_args) {
       bool first = true;
-      for (ArrayIter it(frame->get(s_args).toArray());
-          !it.end();
-          it.next()) {
+      for (ArrayIter argsIt(frame->get(s_args).toArray());
+          !argsIt.end();
+          argsIt.next()) {
         if (!first) {
           buf.append(", ");
         } else {
           first = false;
         }
         try {
-          buf.append(it.second().toString());
+          buf.append(argsIt.second().toString());
         } catch (FatalErrorException& fe) {
           buf.append(fe.getMessage());
         }
@@ -227,7 +227,12 @@ bool HHVM_FUNCTION(restore_exception_handler) {
 
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
                                          int error_types /* = k_E_ALL */) {
-  return g_context->pushUserErrorHandler(error_handler, error_types);
+  if (!is_null(error_handler)) {
+    return g_context->pushUserErrorHandler(error_handler, error_types);
+  } else {
+    g_context->clearUserErrorHandlers();
+    return init_null_variant;
+  }
 }
 
 Variant HHVM_FUNCTION(set_exception_handler, const Variant& exception_handler) {

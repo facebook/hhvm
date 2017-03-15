@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,7 +201,7 @@ void reclaimTranslation(TransLoc loc) {
   // Erase meta-data about these regions of the TC
   {
     ITRACE(1, "Clearing translation meta-data\n");
-    Trace::Indent _i;
+    Trace::Indent _i2;
     clearTCMaps(loc.mainStart(), loc.mainEnd());
     clearTCMaps(loc.coldCodeStart(), loc.coldEnd());
     clearTCMaps(loc.frozenCodeStart(), loc.frozenEnd());
@@ -341,10 +341,10 @@ void reclaimFunction(const Func* func) {
     auto metaLock = lockMetadata();
 
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
-    Trace::Indent _i;
+    Trace::Indent _i2;
     {
       ITRACE(1, "Reclaiming Prologues\n");
-      Trace::Indent _i;
+      Trace::Indent _i3;
       for (auto& loc : movedData->prologues) {
         reclaimTranslation(loc);
       }

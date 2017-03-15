@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,12 +17,19 @@
 #ifndef incl_HPHP_TCPRINT_H_
 #define incl_HPHP_TCPRINT_H_
 
-#include <string>
-
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
 
-[[noreturn]] void error(const std::string& msg);
+#include <folly/Format.h>
+
+#include <iostream>
+#include <string>
+
+template<typename... Args>
+[[noreturn]] void error(Args&&... args) {
+  std::cerr << "Error: " << folly::format(std::forward<Args>(args)...) << '\n';
+  exit(1);
+}
 
 extern HPHP::jit::RepoWrapper* g_repo;
 extern HPHP::jit::OfflineTransData* g_transData;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -564,9 +564,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
           stripped == "func_get_args" ||
           stripped == "func_get_arg") {
         funcName = stripped;
-        if (m_funcContexts.size() > 0) {
-          m_funcContexts.back().hasCallToGetArgs = true;
-        }
       }
       // Auto import a few functions from the HH namespace
       // TODO(#4245628): merge those into m_fnAliasTable
@@ -589,7 +586,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
            stripped == "objprof_get_paths" ||
-           stripped == "objprof_start" ||
            stripped == "heapgraph_create" ||
            stripped == "heapgraph_stats" ||
            stripped == "heapgraph_foreach_node" ||
@@ -1030,22 +1026,6 @@ void Parser::onEmptyCollection(Token &out) {
   out->exp = NEW_EXP0(ExpressionList);
 }
 
-void
-Parser::onCollectionPair(Token &out, Token *pairs, Token *name, Token &value) {
-  if (!value->exp) return;
-
-  ExpressionPtr expList;
-  if (pairs && pairs->exp) {
-    expList = pairs->exp;
-  } else {
-    expList = NEW_EXP0(ExpressionList);
-  }
-  ExpressionPtr nameExp = name ? name->exp : ExpressionPtr();
-  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, value->exp, false,
-                              true));
-  out->exp = expList;
-}
-
 void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
                              Token &value) {
   ExpressionPtr expList;
@@ -1306,16 +1286,12 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
     func->onParse(m_ar, m_file);
     completeScope(func->getFunctionScope());
-    if (func->ignored()) {
-      return NEW_STMT0(StatementList);
-    }
     mth = func;
   }
 
   // check and set generator/async flags
   FunctionContext funcContext = m_funcContexts.back();
   checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
-  mth->setHasCallToGetArgs(funcContext.hasCallToGetArgs);
   mth->setMayCallSetFrameMetadata(funcContext.mayCallSetFrameMetadata);
   mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
   mth->getFunctionScope()->setAsync(modifiersExp->isAsync());
@@ -1350,11 +1326,6 @@ void Parser::onVariadicParam(Token &out, Token *params,
                 "; variadic params with type constraints are not supported"
                 " in non-Hack files",
                 var.text().c_str(), type.text().c_str());
-  }
-  if (ref) {
-    PARSE_ERROR("Parameter $%s is both variadic and by reference"
-                "; this is unsupported",
-                var.text().c_str());
   }
 
   ExpressionPtr expList;
@@ -1521,7 +1492,6 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
-    std::string name = param->getName();
     std::string type = param->hasUserType() ? param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
@@ -1531,7 +1501,7 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
       BlockScopePtr(), range);
     modifier->add(mod);
     SimpleVariablePtr svar = std::make_shared<SimpleVariable>(
-      BlockScopePtr(), range, name);
+      BlockScopePtr(), range, param->getName());
     ExpressionListPtr expList = std::make_shared<ExpressionList>(
       BlockScopePtr(), range);
     expList->addElement(svar);
@@ -2381,10 +2351,14 @@ void Parser::onClsCnsShapeField(Token& out,
   out.typeAnnotation->setClsCnsShapeField();
 }
 
-void Parser::onShape(Token &out, const Token &shapeFieldsList) {
+void Parser::onShape(
+    Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
     "array", shapeFieldsList.typeAnnotation);
   out.typeAnnotation->setShape();
+  if (terminatedWithEllipsis) {
+    out.typeAnnotation->setAllowsUnknownFields();
+  }
 }
 
 void Parser::onTypeSpecialization(Token& type, char specialization) {
@@ -2409,6 +2383,13 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
       type.typeAnnotation->setTypeAccess();
       break;
     }
+  }
+}
+
+void Parser::onShapeFieldSpecialization(
+    Token& shapeField, char specialization) {
+  if (specialization == '?') {
+    shapeField.typeAnnotation->setOptionalShapeField();
   }
 }
 

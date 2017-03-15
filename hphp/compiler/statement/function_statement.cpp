@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,7 @@ FunctionStatement::FunctionStatement
  ExpressionListPtr attrList)
   : MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(FunctionStatement),
                     modifiers, ref, name, params, retTypeAnnotation, stmt,
-                    attr, docComment, attrList, false), m_ignored(false) {
+                    attr, docComment, attrList, false) {
 }
 
 StatementPtr FunctionStatement::clone() {
@@ -71,10 +71,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   // is a global function, not a class method.
   FunctionScopePtr fs = onInitialParse(ar, scope);
   FunctionScope::RecordFunctionInfo(m_originalName, fs);
-  if (!scope->addFunction(ar, fs)) {
-    m_ignored = true;
-    return;
-  }
+  scope->addFunction(ar, fs);
 
   fs->setPersistent(false);
 

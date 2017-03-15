@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@ namespace HPHP { namespace jit { namespace MInstrHelpers {
 
 //////////////////////////////////////////////////////////////////////
 
-template <MOpFlags flags>
+template<MOpMode mode>
 TypedValue* baseGImpl(TypedValue key) {
   auto const name = prepareKey(key);
   SCOPE_EXIT { decRefStr(name); };
@@ -39,29 +39,29 @@ TypedValue* baseGImpl(TypedValue key) {
 
   auto base = varEnv->lookup(name);
   if (base == nullptr) {
-    if (flags & MOpFlags::Warn) {
+    if (mode == MOpMode::Warn) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
-    if (flags & MOpFlags::Define) {
+    if (mode == MOpMode::Define) {
       auto tv = make_tv<KindOfNull>();
       varEnv->set(name, &tv);
       base = varEnv->lookup(name);
     } else {
-      return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+      return const_cast<TypedValue*>(&immutable_null_base);
     }
   }
   return tvToCell(base);
 }
 
 #define BASE_G_HELPER_TABLE(m)                  \
-  /* name    flags                 */           \
-  m(baseG,   MOpFlags::None)                    \
-  m(baseGW,  MOpFlags::Warn)                    \
-  m(baseGD,  MOpFlags::Define)                  \
+  /* name    mode                  */           \
+  m(baseG,   MOpMode::None)                     \
+  m(baseGW,  MOpMode::Warn)                     \
+  m(baseGD,  MOpMode::Define)                   \
 
-#define X(nm, flags)                            \
+#define X(nm, mode)                             \
 inline TypedValue* nm(TypedValue key) {         \
-  return baseGImpl<flags>(key);                 \
+  return baseGImpl<mode>(key);                  \
 }
 BASE_G_HELPER_TABLE(X)
 #undef X
@@ -69,39 +69,39 @@ BASE_G_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 #define PROP_HELPER_TABLE(m)                                \
-  /* name      flags                 keyType     */ \
-  m(propC,     MOpFlags::None,       KeyType::Any)   \
-  m(propCS,    MOpFlags::None,       KeyType::Str)   \
-  m(propCD,    MOpFlags::Define,     KeyType::Any)   \
-  m(propCDS,   MOpFlags::Define,     KeyType::Str)   \
-  m(propCU,    MOpFlags::Unset,      KeyType::Any)   \
-  m(propCUS,   MOpFlags::Unset,      KeyType::Str)   \
-  m(propCW,    MOpFlags::Warn,       KeyType::Any)   \
-  m(propCWS,   MOpFlags::Warn,       KeyType::Str)
+  /* name      mode                  keyType     */ \
+  m(propC,     MOpMode::None,       KeyType::Any)   \
+  m(propCS,    MOpMode::None,       KeyType::Str)   \
+  m(propCD,    MOpMode::Define,     KeyType::Any)   \
+  m(propCDS,   MOpMode::Define,     KeyType::Str)   \
+  m(propCU,    MOpMode::Unset,      KeyType::Any)   \
+  m(propCUS,   MOpMode::Unset,      KeyType::Str)   \
+  m(propCW,    MOpMode::Warn,       KeyType::Any)   \
+  m(propCWS,   MOpMode::Warn,       KeyType::Str)
 
-#define X(nm, flags, kt)                                              \
+#define X(nm, mode, kt)                                               \
 inline TypedValue* nm(Class* ctx, TypedValue* base, key_type<kt> key, \
                       TypedValue& tvRef) {                            \
-  return Prop<flags,kt>(tvRef, ctx, base, key);                       \
+  return Prop<mode,kt>(tvRef, ctx, base, key);                        \
 }
 PROP_HELPER_TABLE(X)
 #undef X
 
 #define PROP_OBJ_HELPER_TABLE(m)                      \
-  /* name      flags                 keyType     */   \
-  m(propCDO,   MOpFlags::Define,     KeyType::Any)    \
-  m(propCDOS,  MOpFlags::Define,     KeyType::Str)    \
-  m(propCO,    MOpFlags::None,       KeyType::Any)    \
-  m(propCOS,   MOpFlags::None,       KeyType::Str)    \
-  m(propCUO,   MOpFlags::Unset,      KeyType::Any)    \
-  m(propCUOS,  MOpFlags::Unset,      KeyType::Str)    \
-  m(propCWO,   MOpFlags::Warn,       KeyType::Any)    \
-  m(propCWOS,  MOpFlags::Warn,       KeyType::Str)    \
+  /* name      mode                  keyType     */   \
+  m(propCDO,   MOpMode::Define,     KeyType::Any)    \
+  m(propCDOS,  MOpMode::Define,     KeyType::Str)    \
+  m(propCO,    MOpMode::None,       KeyType::Any)    \
+  m(propCOS,   MOpMode::None,       KeyType::Str)    \
+  m(propCUO,   MOpMode::Unset,      KeyType::Any)    \
+  m(propCUOS,  MOpMode::Unset,      KeyType::Str)    \
+  m(propCWO,   MOpMode::Warn,       KeyType::Any)    \
+  m(propCWOS,  MOpMode::Warn,       KeyType::Str)    \
 
-#define X(nm, flags, kt)                                              \
+#define X(nm, mode, kt)                                               \
 inline TypedValue* nm(Class* ctx, ObjectData* base, key_type<kt> key, \
                       TypedValue& tvRef) {                            \
-  return PropObj<flags,kt>(tvRef, ctx, base, key);                    \
+  return PropObj<mode,kt>(tvRef, ctx, base, key);                     \
 }
 PROP_OBJ_HELPER_TABLE(X)
 #undef X
@@ -141,32 +141,32 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
 }
 
 #define CGET_PROP_HELPER_TABLE(m)                       \
-  /* name            keyType       flags */             \
-  m(cGetPropCQuiet,  KeyType::Any, MOpFlags::None)      \
-  m(cGetPropSQuiet,  KeyType::Str, MOpFlags::None)      \
-  m(cGetPropC,       KeyType::Any, MOpFlags::Warn)      \
-  m(cGetPropS,       KeyType::Str, MOpFlags::Warn)      \
+  /* name            keyType       mode  */             \
+  m(cGetPropCQuiet,  KeyType::Any, MOpMode::None)      \
+  m(cGetPropSQuiet,  KeyType::Str, MOpMode::None)      \
+  m(cGetPropC,       KeyType::Any, MOpMode::Warn)      \
+  m(cGetPropS,       KeyType::Str, MOpMode::Warn)      \
 
-#define X(nm, kt, flags)                                               \
+#define X(nm, kt, mode)                                                \
 inline TypedValue nm(Class* ctx, TypedValue* base, key_type<kt> key) { \
   TypedValue localTvRef;                                               \
-  auto result = Prop<flags,kt>(localTvRef, ctx, base, key);            \
+  auto result = Prop<mode,kt>(localTvRef, ctx, base, key);             \
   return cGetRefShuffle(localTvRef, result);                           \
 }
 CGET_PROP_HELPER_TABLE(X)
 #undef X
 
 #define CGET_OBJ_PROP_HELPER_TABLE(m)                   \
-  /* name            keyType       flags */             \
-  m(cGetPropCOQuiet, KeyType::Any, MOpFlags::None)      \
-  m(cGetPropSOQuiet, KeyType::Str, MOpFlags::None)      \
-  m(cGetPropCO,      KeyType::Any, MOpFlags::Warn)      \
-  m(cGetPropSO,      KeyType::Str, MOpFlags::Warn)      \
+  /* name            keyType       mode */             \
+  m(cGetPropCOQuiet, KeyType::Any, MOpMode::None)      \
+  m(cGetPropSOQuiet, KeyType::Str, MOpMode::None)      \
+  m(cGetPropCO,      KeyType::Any, MOpMode::Warn)      \
+  m(cGetPropSO,      KeyType::Str, MOpMode::Warn)      \
 
-#define X(nm, kt, flags)                                               \
+#define X(nm, kt, mode)                                                \
 inline TypedValue nm(Class* ctx, ObjectData* base, key_type<kt> key) { \
   TypedValue localTvRef;                                               \
-  auto result = PropObj<flags,kt>(localTvRef, ctx, base, key);         \
+  auto result = PropObj<mode,kt>(localTvRef, ctx, base, key);          \
   return cGetRefShuffle(localTvRef, result);                           \
 }
 CGET_OBJ_PROP_HELPER_TABLE(X)
@@ -216,7 +216,7 @@ inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
 #define X(nm, kt)                                                     \
 inline RefData* nm(Class* ctx, TypedValue* base, key_type<kt> key) {  \
   TypedValue localTvRef;                                              \
-  auto result = Prop<MOpFlags::Define,kt>(localTvRef, ctx, base, key);\
+  auto result = Prop<MOpMode::Define,kt>(localTvRef, ctx, base, key);\
   return vGetRefShuffle(localTvRef, result);                          \
 }
 VGET_PROP_HELPER_TABLE(X)
@@ -230,7 +230,7 @@ VGET_PROP_HELPER_TABLE(X)
 #define X(nm, kt)                                                     \
 inline RefData* nm(Class* ctx, ObjectData* base, key_type<kt> key) {  \
   TypedValue localTvRef;                                              \
-  auto result = PropObj<MOpFlags::Define,kt>(localTvRef, ctx, base, key);\
+  auto result = PropObj<MOpMode::Define,kt>(localTvRef, ctx, base, key);\
   return vGetRefShuffle(localTvRef, result);\
 }
 VGET_OBJ_PROP_HELPER_TABLE(X)
@@ -254,14 +254,14 @@ void bindPropImpl(RefData* val, PropImpl prop_impl) {
 inline void bindPropC(Class* ctx, TypedValue* base, TypedValue key,
                       RefData* val) {
   bindPropImpl(val, [&](TypedValue& tvref) {
-    return Prop<MOpFlags::Define,KeyType::Any>(tvref, ctx, base, key);
+    return Prop<MOpMode::Define,KeyType::Any>(tvref, ctx, base, key);
   });
 }
 
 inline void bindPropCO(Class* ctx, ObjectData* base, TypedValue key,
                       RefData* val) {
   bindPropImpl(val, [&](TypedValue& tvref) {
-    return PropObj<MOpFlags::Define,KeyType::Any>(tvref, ctx, base, key);
+    return PropObj<MOpMode::Define,KeyType::Any>(tvref, ctx, base, key);
   });
 }
 
@@ -321,16 +321,14 @@ inline TypedValue setOpPropCO(Class* ctx, ObjectData* base, TypedValue key,
 
 inline TypedValue incDecPropC(Class* ctx, TypedValue* base, TypedValue key,
                               IncDecOp op) {
-  auto result = make_tv<KindOfUninit>();
-  HPHP::IncDecProp(ctx, op, base, key, result);
+  auto const result = HPHP::IncDecProp(ctx, op, base, key);
   assertx(result.m_type != KindOfRef);
   return result;
 }
 
 inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,
                                IncDecOp op) {
-  auto result = make_tv<KindOfUninit>();
-  HPHP::IncDecPropObj(ctx, op, base, key, result);
+  auto const result = HPHP::IncDecPropObj(ctx, op, base, key);
   assertx(result.m_type != KindOfRef);
   return result;
 }
@@ -444,41 +442,41 @@ PROFILE_KEYSET_OFFSET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, MOpFlags flags>
+template <KeyType keyType, MOpMode mode>
 TypedValue* elemImpl(TypedValue* base,
                      key_type<keyType> key,
                      TypedValue& tvRef) {
-  if (flags & MOpFlags::Unset) {
+  if (mode == MOpMode::Unset) {
     return ElemU<keyType>(tvRef, base, key);
   }
-  if (flags & MOpFlags::Define) {
-    return ElemD<flags, false, keyType>(tvRef, base, key);
+  if (mode == MOpMode::Define) {
+    return ElemD<mode, false, keyType>(tvRef, base, key);
   }
   // We won't really modify the TypedValue in the non-D case, so
   // this const_cast is safe.
-  return const_cast<TypedValue*>(Elem<flags, keyType>(tvRef, base, key));
+  return const_cast<TypedValue*>(Elem<mode, keyType>(tvRef, base, key));
 }
 
 #define ELEM_HELPER_TABLE(m)                          \
-  /* name      keyType         attrs  */              \
-  m(elemC,     KeyType::Any,   MOpFlags::None)        \
-  m(elemCD,    KeyType::Any,   MOpFlags::Define)      \
-  m(elemCU,    KeyType::Any,   MOpFlags::Unset)       \
-  m(elemCW,    KeyType::Any,   MOpFlags::Warn)        \
-  m(elemI,     KeyType::Int,   MOpFlags::None)        \
-  m(elemID,    KeyType::Int,   MOpFlags::Define)      \
-  m(elemIU,    KeyType::Int,   MOpFlags::Unset)       \
-  m(elemIW,    KeyType::Int,   MOpFlags::Warn)        \
-  m(elemS,     KeyType::Str,   MOpFlags::None)        \
-  m(elemSD,    KeyType::Str,   MOpFlags::Define)      \
-  m(elemSU,    KeyType::Str,   MOpFlags::Unset)       \
-  m(elemSW,    KeyType::Str,   MOpFlags::Warn)        \
+  /* name      keyType         mode   */              \
+  m(elemC,     KeyType::Any,   MOpMode::None)        \
+  m(elemCD,    KeyType::Any,   MOpMode::Define)      \
+  m(elemCU,    KeyType::Any,   MOpMode::Unset)       \
+  m(elemCW,    KeyType::Any,   MOpMode::Warn)        \
+  m(elemI,     KeyType::Int,   MOpMode::None)        \
+  m(elemID,    KeyType::Int,   MOpMode::Define)      \
+  m(elemIU,    KeyType::Int,   MOpMode::Unset)       \
+  m(elemIW,    KeyType::Int,   MOpMode::Warn)        \
+  m(elemS,     KeyType::Str,   MOpMode::None)        \
+  m(elemSD,    KeyType::Str,   MOpMode::Define)      \
+  m(elemSU,    KeyType::Str,   MOpMode::Unset)       \
+  m(elemSW,    KeyType::Str,   MOpMode::Warn)        \
 
-#define X(nm, keyType, flags)                              \
+#define X(nm, keyType, mode)                               \
 inline TypedValue* nm(TypedValue* base,                    \
                       key_type<keyType> key,               \
                       TypedValue& tvRef) {                 \
-  return elemImpl<keyType, flags>(base, key, tvRef);       \
+  return elemImpl<keyType,mode>(base, key, tvRef);         \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -500,31 +498,31 @@ inline const TypedValue* checkedGet(ArrayData* a, int64_t key) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<MOpFlags flags>
+template<MOpMode mode>
 NEVER_INLINE
 const TypedValue* elemArrayNotFound(int64_t k) {
-  if (flags & MOpFlags::Warn) {
+  if (mode == MOpMode::Warn) {
     raise_notice("Undefined index: %" PRId64, k);
   }
-  return uninit_variant.asTypedValue();
+  return &immutable_uninit_base;
 }
 
-template<MOpFlags flags>
+template<MOpMode mode>
 NEVER_INLINE
 const TypedValue* elemArrayNotFound(const StringData* k) {
-  if (flags & MOpFlags::Warn) {
+  if (mode == MOpMode::Warn) {
     raise_notice("Undefined index: %s", k->data());
   }
-  return uninit_variant.asTypedValue();
+  return &immutable_uninit_base;
 }
 
-template<KeyType keyType, bool checkForInt, MOpFlags flags>
+template<KeyType keyType, bool checkForInt, MOpMode mode>
 inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
-  auto constexpr warn = flags & MOpFlags::Warn;
+  auto constexpr warn = mode == MOpMode::Warn;
   auto const ret = checkForInt ?
     checkedGet<warn>(ad, key) :
     (warn ? ad->nvTryGet(key) : ad->nvGet(key));
-  if (!ret) return elemArrayNotFound<flags>(key);
+  if (!ret) return elemArrayNotFound<mode>(key);
   return ret;
 }
 
@@ -537,7 +535,7 @@ inline const TypedValue* elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
 inline TypedValue* nm(TypedValue* base, key_type<keyType> key) {       \
   auto cbase = tvToCell(base);                                         \
   assertx(isArrayType(cbase->m_type));                                 \
-  return ElemDArray<MOpFlags::None, false, keyType>(cbase, key);       \
+  return ElemDArray<MOpMode::None, false, keyType>(cbase, key);       \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X
@@ -557,17 +555,17 @@ ELEM_ARRAY_U_HELPER_TABLE(X)
 #undef X
 
 #define ELEM_ARRAY_HELPER_TABLE(m)                              \
-  /* name               keyType  checkForInt   warn */          \
-  m(elemArrayS,    KeyType::Str,       false,  MOpFlags::None)  \
-  m(elemArraySi,   KeyType::Str,        true,  MOpFlags::None)  \
-  m(elemArrayI,    KeyType::Int,       false,  MOpFlags::None)  \
-  m(elemArraySW,   KeyType::Str,       false,  MOpFlags::Warn)  \
-  m(elemArraySiW,  KeyType::Str,        true,  MOpFlags::Warn)  \
-  m(elemArrayIW,   KeyType::Int,       false,  MOpFlags::Warn)  \
+  /* name               keyType  checkForInt   mode */          \
+  m(elemArrayS,    KeyType::Str,       false,  MOpMode::None)  \
+  m(elemArraySi,   KeyType::Str,        true,  MOpMode::None)  \
+  m(elemArrayI,    KeyType::Int,       false,  MOpMode::None)  \
+  m(elemArraySW,   KeyType::Str,       false,  MOpMode::Warn)  \
+  m(elemArraySiW,  KeyType::Str,        true,  MOpMode::Warn)  \
+  m(elemArrayIW,   KeyType::Int,       false,  MOpMode::Warn)  \
 
-#define X(nm, keyType, checkForInt, flags)                          \
+#define X(nm, keyType, checkForInt, mode)                           \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return elemArrayImpl<keyType, checkForInt, flags>(ad, key);       \
+  return elemArrayImpl<keyType, checkForInt, mode>(ad, key);       \
 }
 ELEM_ARRAY_HELPER_TABLE(X)
 #undef X
@@ -629,15 +627,15 @@ ELEM_DICT_U_HELPER_TABLE(X)
 #undef X
 
 #define ELEM_DICT_HELPER_TABLE(m)                               \
-  /* name               keyType        warn */                  \
-  m(elemDictS,     KeyType::Str,       MOpFlags::None)          \
-  m(elemDictI,     KeyType::Int,       MOpFlags::None)          \
-  m(elemDictSW,    KeyType::Str,       MOpFlags::Warn)          \
-  m(elemDictIW,    KeyType::Int,       MOpFlags::Warn)          \
+  /* name               keyType        mode */                  \
+  m(elemDictS,     KeyType::Str,       MOpMode::None)          \
+  m(elemDictI,     KeyType::Int,       MOpMode::None)          \
+  m(elemDictSW,    KeyType::Str,       MOpMode::Warn)          \
+  m(elemDictIW,    KeyType::Int,       MOpMode::Warn)          \
 
-#define X(nm, keyType, flags)                                       \
+#define X(nm, keyType, mode)                                       \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemDict<flags, keyType>(ad, key);                   \
+  return HPHP::ElemDict<mode, keyType>(ad, key);                   \
 }
 ELEM_DICT_HELPER_TABLE(X)
 #undef X
@@ -659,15 +657,15 @@ ELEM_KEYSET_U_HELPER_TABLE(X)
 #undef X
 
 #define ELEM_KEYSET_HELPER_TABLE(m)                               \
-  /* name            keyType             warn */                  \
-  m(elemKeysetS,     KeyType::Str,       MOpFlags::None)          \
-  m(elemKeysetI,     KeyType::Int,       MOpFlags::None)          \
-  m(elemKeysetSW,    KeyType::Str,       MOpFlags::Warn)          \
-  m(elemKeysetIW,    KeyType::Int,       MOpFlags::Warn)          \
+  /* name            keyType             mode */                  \
+  m(elemKeysetS,     KeyType::Str,       MOpMode::None)          \
+  m(elemKeysetI,     KeyType::Int,       MOpMode::None)          \
+  m(elemKeysetSW,    KeyType::Str,       MOpMode::Warn)          \
+  m(elemKeysetIW,    KeyType::Int,       MOpMode::Warn)          \
 
-#define X(nm, keyType, flags)                                       \
+#define X(nm, keyType, mode)                                       \
 inline const TypedValue* nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemKeyset<flags, keyType>(ad, key);                 \
+  return HPHP::ElemKeyset<mode, keyType>(ad, key);                 \
 }
 ELEM_KEYSET_HELPER_TABLE(X)
 #undef X
@@ -675,15 +673,15 @@ ELEM_KEYSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 #define DICTGET_HELPER_TABLE(m)                                  \
-  /* name          keyType        flags */                       \
-  m(dictGetS,      KeyType::Str,  MOpFlags::Warn)                \
-  m(dictGetI,      KeyType::Int,  MOpFlags::Warn)                \
-  m(dictGetSQuiet, KeyType::Str,  MOpFlags::None)                \
-  m(dictGetIQuiet, KeyType::Int,  MOpFlags::None)                \
+  /* name          keyType        mode  */                       \
+  m(dictGetS,      KeyType::Str,  MOpMode::Warn)                \
+  m(dictGetI,      KeyType::Int,  MOpMode::Warn)                \
+  m(dictGetSQuiet, KeyType::Str,  MOpMode::None)                \
+  m(dictGetIQuiet, KeyType::Int,  MOpMode::None)                \
 
-#define X(nm, keyType, flags)                                \
+#define X(nm, keyType, mode)                                \
 inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
-  return *HPHP::ElemDict<flags, keyType>(a, key);            \
+  return *HPHP::ElemDict<mode, keyType>(a, key);            \
 }
 DICTGET_HELPER_TABLE(X)
 #undef X
@@ -691,40 +689,40 @@ DICTGET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 #define KEYSETGET_HELPER_TABLE(m)                                  \
-  /* name            keyType        flags */                       \
-  m(keysetGetS,      KeyType::Str,  MOpFlags::Warn)                \
-  m(keysetGetI,      KeyType::Int,  MOpFlags::Warn)                \
-  m(keysetGetSQuiet, KeyType::Str,  MOpFlags::None)                \
-  m(keysetGetIQuiet, KeyType::Int,  MOpFlags::None)                \
+  /* name            keyType        mode */                       \
+  m(keysetGetS,      KeyType::Str,  MOpMode::Warn)                \
+  m(keysetGetI,      KeyType::Int,  MOpMode::Warn)                \
+  m(keysetGetSQuiet, KeyType::Str,  MOpMode::None)                \
+  m(keysetGetIQuiet, KeyType::Int,  MOpMode::None)                \
 
-#define X(nm, keyType, flags)                                \
+#define X(nm, keyType, mode)                                \
 inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
-  return *HPHP::ElemKeyset<flags, keyType>(a, key);          \
+  return *HPHP::ElemKeyset<mode, keyType>(a, key);          \
 }
 KEYSETGET_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, MOpFlags flags>
+template <KeyType keyType, MOpMode mode>
 TypedValue cGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = Elem<flags, keyType>(localTvRef, base, key);
+  auto result = Elem<mode, keyType>(localTvRef, base, key);
   return cGetRefShuffle(localTvRef, result);
 }
 
 #define CGETELEM_HELPER_TABLE(m)                  \
-  /* name            key          attrs  */       \
-  m(cGetElemCQuiet, KeyType::Any, MOpFlags::None) \
-  m(cGetElemIQuiet, KeyType::Int, MOpFlags::None) \
-  m(cGetElemSQuiet, KeyType::Str, MOpFlags::None) \
-  m(cGetElemC,      KeyType::Any, MOpFlags::Warn) \
-  m(cGetElemI,      KeyType::Int, MOpFlags::Warn) \
-  m(cGetElemS,      KeyType::Str, MOpFlags::Warn) \
+  /* name            key          mode  */       \
+  m(cGetElemCQuiet, KeyType::Any, MOpMode::None) \
+  m(cGetElemIQuiet, KeyType::Int, MOpMode::None) \
+  m(cGetElemSQuiet, KeyType::Str, MOpMode::None) \
+  m(cGetElemC,      KeyType::Any, MOpMode::Warn) \
+  m(cGetElemI,      KeyType::Int, MOpMode::Warn) \
+  m(cGetElemS,      KeyType::Str, MOpMode::Warn) \
 
-#define X(nm, kt, flags)                                                \
+#define X(nm, kt, mode)                                                \
 inline TypedValue nm(TypedValue* base, key_type<kt> key) {              \
-  return cGetElemImpl<kt, flags>(base, key);                            \
+  return cGetElemImpl<kt, mode>(base, key);                            \
 }
 CGETELEM_HELPER_TABLE(X)
 #undef X
@@ -734,7 +732,7 @@ CGETELEM_HELPER_TABLE(X)
 template <KeyType keyType>
 RefData* vGetElemImpl(TypedValue* base, key_type<keyType> key) {
   TypedValue localTvRef;
-  auto result = ElemD<MOpFlags::Define, true, keyType>(localTvRef, base, key);
+  auto result = ElemD<MOpMode::Define, true, keyType>(localTvRef, base, key);
   return vGetRefShuffle(localTvRef, result);
 }
 
@@ -871,6 +869,7 @@ inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
 
 template<KeyType keyType>
 void keysetSetNewElemImpl(TypedValue* tv, key_type<keyType> key) {
+  tv = tvToCell(tv);
   assertx(tvIsPlausible(*tv));
   assertx(tvIsKeyset(tv));
   auto oldArr = tv->m_data.parr;

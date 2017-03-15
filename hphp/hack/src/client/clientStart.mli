@@ -13,6 +13,7 @@ type env = {
   no_load: bool;
   silent: bool;
   ai_mode: string option;
+  debug_port: Unix.file_descr option;
 }
 
 val main : env -> Exit_status.t

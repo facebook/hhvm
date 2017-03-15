@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,7 +58,7 @@ MaybeDataType nameToMaybeDataType(const std::string& typeName) {
  */
 static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
   static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair = []() {
-    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair;
+    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mappedPairs;
     const struct Pair {
       const char* name;
       AnnotType type;
@@ -82,10 +82,10 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\keyset",   AnnotType::Keyset },
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
-      mapPair.first[makeStaticString(pairs[i].name)] = pairs[i].type;
-      mapPair.second[pairs[i].name] = pairs[i].type;
+      mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
+      mappedPairs.second[pairs[i].name] = pairs[i].type;
     }
-    return mapPair;
+    return mappedPairs;
   }();
   return mapPair;
 }

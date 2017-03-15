@@ -7,45 +7,11 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
+include Typing_env_types_sig.S
 
 open Typing_defs
 open Typing_heap
 
-type fake_members = {
-  last_call : Pos.t option;
-  invalid : SSet.t;
-  valid : SSet.t;
-}
-type expression_id = Ident.t
-type local = locl ty list * locl ty * expression_id
-type tpenv
-type tparam_bounds = locl ty list
-
-(* Local environment incldues types of locals and bounds on type parameters. *)
-type local_env = {
-  fake_members  : fake_members;
-  local_types   : local Local_id.Map.t;
-  (* Type parameter environment, assigning lower and upper bounds to type
-   * parameters.  Contraasting with tenv and subst, bounds are
-   * *assumptions* for type inference, not conclusions.
-   *)
-  tpenv         : tpenv;
-}
-
-type env = {
-  pos : Pos.t;
-  tenv : locl ty IMap.t;
-  subst : int IMap.t;
-  lenv : local_env;
-  genv : genv;
-  decl_env : Decl_env.env;
-  todo : tfun list;
-  in_loop : bool;
-  grow_super : bool;
-}
-and genv
-and anon = env -> locl fun_params -> env * locl ty
-and tfun = env -> env
 val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : unit -> locl ty
@@ -68,7 +34,7 @@ val get_enum : env -> Classes.key -> Classes.t option
 val is_enum : env -> Classes.key -> bool
 val get_enum_constraint : env -> Classes.key -> decl ty option
 val add_wclass : env -> string -> unit
-val fresh_tenv : env -> (env -> unit) -> unit
+val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> Classes.key -> Classes.t option
 val get_typedef : env -> Typedefs.key -> Typedefs.t option
 val get_const : env -> class_type -> string -> class_const option
@@ -83,10 +49,8 @@ val get_construct : env -> class_type -> class_elt option * bool
 val get_todo : env -> tfun list
 val get_return : env -> locl ty
 val set_return : env -> locl ty -> env
-val with_return : env -> (env -> env) -> env
+val with_return : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool
-val grow_super : env -> bool
-val invert_grow_super : env -> (env -> env) -> env
 val get_self : env -> locl ty
 val get_self_id : env -> string
 val is_outside_class : env -> bool
@@ -134,7 +98,6 @@ val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
 val add_upper_bound : env -> string -> locl ty -> env
 val add_lower_bound : env -> string -> locl ty -> env
-val add_constraint : env -> string -> Ast.constraint_kind -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
@@ -142,6 +105,11 @@ val get_generic_parameters : env -> string list
 val add_fresh_generic_parameter : env -> string -> env * string
 val get_tpenv_size : env -> int
 val freeze_local_env : env -> env
-val env_with_locals : env -> local Local_id.Map.t -> env
+val env_with_locals :
+  env -> local_types -> local_history Local_id.Map.t -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
-val in_loop : env -> (env -> env) -> env
+val in_loop : env -> (env -> env * 'a) -> env * 'a
+val merge_locals_and_history : local_env -> old_local Local_id.Map.t
+val seperate_locals_and_history :
+  old_local Local_id.Map.t ->
+  (local_types * local_history Local_id.Map.t)

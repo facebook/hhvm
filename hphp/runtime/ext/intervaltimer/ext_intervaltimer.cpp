@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -28,24 +29,26 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TimerPool final : RequestEventHandler {
+  using TimerSet = req::hash_set<IntervalTimer*>;
+  TimerSet& timers() { return *m_timers; }
+
   void requestInit() override {
-    timers = std::unordered_set<IntervalTimer*>();
+    m_timers.emplace();
   }
 
   void requestShutdown() override {
     do {
-      for (auto it = timers.begin(); it != timers.end(); ) {
+      for (auto it = m_timers->begin(); it != m_timers->end(); ) {
         auto timer = *it;
-        it = timers.erase(it);
+        it = m_timers->erase(it);
         timer->~IntervalTimer();
       }
-    } while (!timers.empty());
+    } while (!m_timers->empty());
+    m_timers.clear();
   }
 
-  std::unordered_set<IntervalTimer*> timers;
-  TYPE_SCAN_CUSTOM_FIELD(timers) {
-    for (auto& e : timers) scanner.scan(e);
-  }
+ private:
+  folly::Optional<TimerSet> m_timers;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);
@@ -78,9 +81,9 @@ void IntervalTimer::RunCallbacks(
 ) {
   clearSurpriseFlag(IntervalTimerFlag);
 
-  auto const timers = s_timer_pool->timers;
+  auto const timers = s_timer_pool->timers(); // makes a copy!
   for (auto timer : timers) {
-    if (!s_timer_pool->timers.count(timer)) {
+    if (!s_timer_pool->timers().count(timer)) {
       // This timer has been removed from the pool by one of the callbacks.
       continue;
     }
@@ -124,7 +127,7 @@ void IntervalTimer::start() {
   if (m_thread.joinable()) return;
   m_done = false;
   m_thread = std::thread([](IntervalTimer* t) { t->run(); }, this);
-  s_timer_pool->timers.insert(this);
+  s_timer_pool->timers().insert(this);
 }
 
 void IntervalTimer::stop() {
@@ -136,7 +139,7 @@ void IntervalTimer::stop() {
   }
   m_cv.notify_one();
   m_thread.join();
-  s_timer_pool->timers.erase(this);
+  s_timer_pool->timers().erase(this);
 }
 
 void IntervalTimer::run() {

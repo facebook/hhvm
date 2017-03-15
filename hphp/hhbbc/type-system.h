@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,8 +20,6 @@
 #include <vector>
 #include <utility>
 
-#include <boost/container/flat_map.hpp>
-
 #include <folly/Optional.h>
 
 #include "hphp/util/copy-ptr.h"
@@ -29,8 +27,9 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 
-#include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/array-like-map.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/misc.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -122,6 +121,24 @@ struct Type;
  *              | /   \  |     | /   \  |
  *             SArrN  CArrN   CArrE  SArrE
  *
+ *   NOTE: Having SArr be a sibling of CArr is problematic. There is
+ *   an assumption that types in the index only ever get more refined,
+ *   but eg we might "know" that a type is CArr early on (because eg
+ *   we stored a value to it, thus modifying it), but later we might
+ *   know the value both before and after the modification, and just
+ *   replace each with a static array. In fact, this is almost
+ *   guaranteed to happen when building arrays from constants (not
+ *   literals), because on the first pass we won't know the constant
+ *   values, and will produce a CArr, but eventually we could figure
+ *   them out, and produce an SArr. This means that in practice, we
+ *   can't use CArr anywhere, because it might be improved to SArr,
+ *   which is not a subtype. Even if we only generated CArr after all
+ *   modifications are done (eg during the insert-assertions phase) we
+ *   could still run into problems where we annotate an array as CArr
+ *   but jit time analysis/optimization was able to produce a static
+ *   array - so it doesn't appear to be useful, except as a superclass
+ *   of SArr.
+ *
  *   "Specialized" array types may be found as subtypes of any of the above
  *   types except SArrE and CArrE, or of optional versions of the above types
  *   (e.g. as a subtype of ?ArrN).  The information about additional structure
@@ -142,13 +159,17 @@ struct Type;
  *         Non-empty reference counted array with contiguous zero-based integer
  *         keys, unknown size, values all are subtypes of Bool.
  *
+ *     CArrN([Int]:24)
+ *
+ *         Reference counted array with contiguous zero-based integer keys,
+ *         size 24, values all are subtypes of Int.
+ *
  *     ArrN(x:Int,y:Int)
  *
  *         Struct-like array with known fields "x" and "y" that have Int
  *         values, and no other fields.  Struct-like arrays always have known
  *         string keys, and the type contains only those array values with
- *         exactly the given key set.  The order of the array elements is not
- *         tracked in this type system.
+ *         exactly the given key set, in the order specified.
  *
  *     Arr([SStr:InitCell])
  *
@@ -234,7 +255,6 @@ enum trep : uint32_t {
   BKeysetN  = BSKeysetN | BCKeysetN,
   BKeyset   = BKeysetE | BKeysetN,
 
-
   // Nullable types.
   BOptTrue     = BInitNull | BTrue,
   BOptFalse    = BInitNull | BFalse,
@@ -297,26 +317,31 @@ enum trep : uint32_t {
   BTop      = static_cast<uint32_t>(-1),
 };
 
+// Useful constants. Don't put them in the enum itself, because they
+// can't actually occur, but are convenient masks.
+constexpr auto BArrLikeE = static_cast<trep>(BArrE | BVecE | BDictE | BKeysetE);
+constexpr auto BArrLikeN = static_cast<trep>(BArrN | BVecN | BDictN | BKeysetN);
+constexpr auto BSArrLike = static_cast<trep>(BSArr | BSVec | BSDict | BSKeyset);
+
+#define DATATAGS                                                \
+  DT(Str, SString, sval)                                        \
+  DT(Int, int64_t, ival)                                        \
+  DT(Dbl, double, dval)                                         \
+  DT(ArrLikeVal, SArray, aval)                                  \
+  DT(Obj, DObj, dobj)                                           \
+  DT(Cls, DCls, dcls)                                           \
+  DT(RefInner, copy_ptr<Type>, inner)                           \
+  DT(ArrLikePacked, copy_ptr<DArrLikePacked>, packed)           \
+  DT(ArrLikePackedN, copy_ptr<DArrLikePackedN>, packedn)        \
+  DT(ArrLikeMap, copy_ptr<DArrLikeMap>, map)                    \
+  DT(ArrLikeMapN, copy_ptr<DArrLikeMapN>, mapn)
+
 // Tag for what kind of specialized data a Type object has.
 enum class DataTag : uint8_t {
   None,
-  Str,
-  Obj,
-  Int,
-  Dbl,
-  Cls,
-  RefInner,
-  ArrVal,
-  ArrPacked,
-  ArrPackedN,
-  ArrStruct,
-  ArrMapN,
-  VecVal,
-  Vec,
-  DictVal,
-  Dict,
-  KeysetVal,
-  Keyset,
+#define DT(name,...) name,
+  DATATAGS
+#undef DT
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -326,7 +351,14 @@ enum class DataTag : uint8_t {
  * subtype of the supplied class.
  */
 struct DCls {
-  enum { Exact, Sub } type;
+  enum Tag { Exact, Sub };
+
+  DCls(Tag type, res::Class cls)
+    : type(type)
+    , cls(cls)
+  {}
+
+  Tag type;
   res::Class cls;
 };
 
@@ -340,7 +372,7 @@ struct DCls {
 struct DObj {
   enum Tag { Exact, Sub };
 
-  explicit DObj(Tag type, res::Class cls)
+  DObj(Tag type, res::Class cls)
     : type(type)
     , cls(cls)
   {}
@@ -350,15 +382,12 @@ struct DObj {
   copy_ptr<Type> whType;
 };
 
-struct DArrPacked;
-struct DArrPackedN;
-struct DArrStruct;
-struct DArrMapN;
-using StructMap = boost::container::flat_map<SString,Type>;
-struct DVec;
-struct DDict;
-struct DKeyset;
-
+struct DArrLikePacked;
+struct DArrLikePackedN;
+struct DArrLikeMap;
+struct DArrLikeMapN;
+using MapElems = ArrayLikeMap<Cell>;
+struct ArrKey;
 //////////////////////////////////////////////////////////////////////
 
 struct Type {
@@ -382,19 +411,22 @@ struct Type {
   bool operator!=(const Type& o) const { return !(*this == o); }
   size_t hash() const;
 
+  const Type& operator |= (const Type& other);
+  const Type& operator |= (Type&& other);
+
   /*
    * Returns true if this type is definitely going to be a subtype or a strict
    * subtype of `o' at runtime.  If this function returns false, this may
    * still be a subtype of `o' at runtime, it just may not be known.
    */
-  bool subtypeOf(Type o) const;
-  bool strictSubtypeOf(Type o) const;
+  bool subtypeOf(const Type& o) const;
+  bool strictSubtypeOf(const Type& o) const;
 
   /*
    * Subtype of any of the list of types.
    */
   template<class... Types>
-  bool subtypeOfAny(Type t, Types... ts) const {
+  bool subtypeOfAny(const Type& t, Types... ts) const {
     return subtypeOf(t) || subtypeOfAny(ts...);
   }
   bool subtypeOfAny() const { return false; }
@@ -409,12 +441,12 @@ struct Type {
    * Essentially this function can conservatively return true but must be
    * precise when returning false.
    */
-  bool couldBe(Type o) const;
+  bool couldBe(const Type& o) const;
 
 private:
   friend Type wait_handle(const Index&, Type);
   friend bool is_specialized_wait_handle(const Type&);
-  friend bool is_specialized_array(const Type&);
+  friend bool is_specialized_array_like(const Type& t);
   friend bool is_specialized_obj(const Type&);
   friend bool is_specialized_cls(const Type&);
   friend bool is_ref_with_inner(const Type&);
@@ -428,18 +460,10 @@ private:
   friend Type subCls(res::Class);
   friend Type clsExact(res::Class);
   friend Type ref_to(Type);
-  friend Type arr_packed(std::vector<Type>);
-  friend Type sarr_packed(std::vector<Type>);
-  friend Type carr_packed(std::vector<Type>);
-  friend Type arr_packedn(Type);
-  friend Type sarr_packedn(Type);
-  friend Type carr_packedn(Type);
-  friend Type arr_struct(StructMap);
-  friend Type sarr_struct(StructMap);
-  friend Type carr_struct(StructMap);
-  friend Type arr_mapn(Type k, Type v);
-  friend Type sarr_mapn(Type k, Type v);
-  friend Type carr_mapn(Type k, Type v);
+  friend Type packed_impl(trep, std::vector<Type>);
+  friend Type packedn_impl(trep, Type, folly::Optional<int64_t>);
+  friend Type map_impl(trep, MapElems);
+  friend Type mapn_impl(trep bits, Type k, Type v);
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);
@@ -447,46 +471,51 @@ private:
   friend Type promote_emptyish(Type, Type);
   friend Type opt(Type);
   friend Type unopt(Type);
-  friend bool is_opt(Type);
-  friend folly::Optional<Cell> tv(Type);
-  friend std::string show(Type);
-  friend struct ArrKey disect_array_key(const Type&);
+  friend bool is_opt(const Type&);
+  friend folly::Optional<Cell> tv(const Type&);
+  friend std::string show(const Type&);
+  friend ArrKey disect_array_key(const Type&);
+  friend std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key);
+  friend std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key);
+  friend std::pair<Type,bool> arr_packed_elem(const Type& pack,
+                                              const ArrKey& key);
+  friend std::pair<Type,bool> arr_packedn_elem(const Type& pack,
+                                               const ArrKey& key);
+  friend std::pair<Type, bool> array_like_elem(const Type& arr,
+                                               const ArrKey& key);
+  friend std::pair<Type,bool> array_like_set(Type arr,
+                                             const ArrKey& key,
+                                             const Type& val);
+  friend std::pair<Type,Type> array_like_newelem(Type arr, const Type& val);
+  friend bool arr_map_set(Type& map, const ArrKey& key, const Type& val);
+  friend bool arr_packed_set(Type& pack, const ArrKey& key, const Type& val);
+  friend bool arr_packedn_set(Type& pack, const ArrKey& key,
+                              const Type& val, bool maybeEmpty);
+  friend bool arr_mapn_set(Type& map, const ArrKey& key, const Type& val);
+  friend Type arr_map_newelem(Type& map, const Type& val);
   friend Type array_elem(const Type&, const Type&);
   friend Type arrayN_set(Type, const Type&, const Type&);
   friend Type array_set(Type, const Type&, const Type&);
-  friend std::pair<Type,Type> arrayN_newelem_key(const Type&, const Type&);
+  friend std::pair<Type,Type> arrayN_newelem_key(Type, const Type&);
   friend std::pair<Type,Type> array_newelem_key(const Type&, const Type&);
   friend std::pair<Type,Type> iter_types(const Type&);
   friend RepoAuthType make_repo_type_arr(ArrayTypeTable::Builder&,
     const Type&);
 
-  friend struct VecKey disect_vec_key(const Type&);
-  friend struct StrictKey disect_strict_key(const Type&);
+  friend struct ArrKey disect_strict_key(const Type&);
 
   friend std::pair<Type, bool> vec_elem(const Type&, const Type&);
   friend std::pair<Type, bool> vec_set(Type, const Type&, const Type&);
-  friend Type vec_newelem(Type, const Type&);
   friend std::pair<Type, bool> dict_elem(const Type&, const Type&);
   friend std::pair<Type, bool> dict_set(Type, const Type&, const Type&);
-  friend Type dict_newelem(Type, const Type&);
   friend std::pair<Type, bool> keyset_elem(const Type&, const Type&);
   friend std::pair<Type, bool> keyset_set(Type, const Type&, const Type&);
-  friend Type keyset_newelem(Type, const Type&);
 
-  friend Type spec_vec_union(Type, Type);
-  friend Type spec_dict_union(Type, Type);
-  friend Type spec_keyset_union(Type, Type);
-  friend bool is_specialized_vec(const Type&);
-  friend bool is_specialized_dict(const Type&);
-  friend bool is_specialized_keyset(const Type&);
-  friend Type toDVecType(Type);
-  friend Type toDDictType(Type);
-  friend Type toDKeysetType(Type);
+  friend Type spec_array_like_union(Type&, Type&, const Type&, const Type&);
   friend Type vec_val(SArray);
   friend Type dict_val(SArray);
   friend Type keyset_val(SArray);
   template<trep t> friend Type dict_n_impl(Type, Type);
-  template<trep t> friend Type vec_n_impl(Type, folly::Optional<int64_t>);
   template<trep t> friend Type keyset_n_impl(Type);
 
 private:
@@ -494,37 +523,25 @@ private:
     Data() {}
     ~Data() {}
 
-    SString sval;
-    int64_t ival;
-    double dval;
-    SArray aval;
-    DObj dobj;
-    DCls dcls;
-    copy_ptr<Type> inner;
-    copy_ptr<DArrPacked> apacked;
-    copy_ptr<DArrPackedN> apackedn;
-    copy_ptr<DArrStruct> astruct;
-    copy_ptr<DArrMapN> amapn;
-    copy_ptr<DVec> vec;
-    copy_ptr<DDict> dict;
-    copy_ptr<DKeyset> keyset;
+#define DT(tag_name,type,name) type name;
+  DATATAGS
+#undef DT
   };
 
   template<class Ret, class T, class Function>
-  struct DJHelperFn;
-  struct ArrKey;
+  struct DDHelperFn;
 
 private:
   static Type wait_handle_outer(const Type&);
-  static Type unionArr(const Type& a, const Type& b);
+  static Type unionArrLike(const Type& a, const Type& b);
 
 private:
   template<class Ret, class T, class Function>
-  DJHelperFn<Ret,T,Function> djbind(const Function& f, const T& t) const;
+  DDHelperFn<Ret,T,Function> ddbind(const Function& f, const T& t) const;
   template<class Ret, class T, class Function>
-  Ret dj2nd(const Type&, DJHelperFn<Ret,T,Function>) const;
-  template<class Function>
-  typename Function::result_type disjointDataFn(const Type&, Function) const;
+  Ret dd2nd(const Type&, DDHelperFn<Ret,T,Function>) const;
+  template<class Function> typename Function::result_type
+  dualDispatchDataFn(const Type&, Function) const;
   bool hasData() const;
   bool equivData(const Type&) const;
   bool subtypeData(const Type&) const;
@@ -539,56 +556,53 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct DArrPacked {
-  explicit DArrPacked(std::vector<Type> elems)
+struct ArrKey {
+  folly::Optional<int64_t> i;
+  folly::Optional<SString> s;
+  Type type;
+
+  folly::Optional<Cell> tv() const {
+    assert(!i || !s);
+    if (i) {
+      return make_tv<KindOfInt64>(*i);
+    }
+    if (s) {
+      return make_tv<KindOfPersistentString>(*s);
+    }
+    return folly::none;
+  }
+};
+
+struct DArrLikePacked {
+  explicit DArrLikePacked(std::vector<Type> elems)
     : elems(std::move(elems))
   {}
 
   std::vector<Type> elems;
 };
 
-struct DArrPackedN {
-  explicit DArrPackedN(Type t) : type(std::move(t)) {}
+struct DArrLikePackedN {
+  explicit DArrLikePackedN(Type t) : type(std::move(t)) {}
+  DArrLikePackedN(Type t, int64_t l) : type(std::move(t)), len(l) {}
+  DArrLikePackedN(Type t, folly::Optional<int64_t> l) :
+      type(std::move(t)), len(l) {}
   Type type;
+  folly::Optional<int64_t> len;
 };
 
-struct DArrStruct {
-  explicit DArrStruct(StructMap map) : map(std::move(map)) {}
-  StructMap map;
+struct DArrLikeMap {
+  DArrLikeMap() {}
+  explicit DArrLikeMap(MapElems map) : map(std::move(map)) {}
+  MapElems map;
 };
 
-struct DArrMapN {
-  explicit DArrMapN(Type key, Type val)
+struct DArrLikeMapN {
+  explicit DArrLikeMapN(Type key, Type val)
     : key(std::move(key))
     , val(std::move(val))
   {}
   Type key;
   Type val;
-};
-
-struct DVec {
-  explicit DVec(Type t, folly::Optional<int64_t> s)
-    : val(std::move(t))
-    , len(std::move(s))
-  {}
-
-  Type val;
-  folly::Optional<int64_t> len;
-};
-
-struct DDict {
-  explicit DDict(Type k, Type v)
-    : key(std::move(k))
-    , val(std::move(v))
-  {}
-
-  Type key;
-  Type val;
-};
-
-struct DKeyset {
-  explicit DKeyset(Type kv) : keyval(std::move(kv)) {}
-  Type keyval;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -786,18 +800,17 @@ Type carr_packed(std::vector<Type> v);
  *
  * Note that these types imply the arrays are non-empty.
  */
-Type arr_packedn(Type);
-Type sarr_packedn(Type);
-Type carr_packedn(Type);
+Type arr_packedn(Type, folly::Optional<int64_t> = folly::none);
+Type sarr_packedn(Type, folly::Optional<int64_t> = folly::none);
+Type carr_packedn(Type, folly::Optional<int64_t> = folly::none);
 
 /*
  * Struct-like arrays.
  *
  * Pre: !m.empty()
  */
-Type arr_struct(StructMap m);
-Type sarr_struct(StructMap m);
-Type carr_struct(StructMap m);
+Type arr_map(MapElems m);
+Type sarr_map(MapElems m);
 
 /*
  * Map-like arrays.
@@ -807,17 +820,23 @@ Type sarr_mapn(Type k, Type v);
 Type carr_mapn(Type k, Type v);
 
 /*
+ * vec types with known size.
+ *
+ * Pre: !v.empty()
+ */
+Type vec(std::vector<Type> v);
+Type svec(std::vector<Type> v);
+
+/*
  * Vec type of optionally known size.
  */
 Type vec_n(Type, folly::Optional<int64_t>);
-Type cvec_n(Type, folly::Optional<int64_t>);
 Type svec_n(Type, folly::Optional<int64_t>);
 
 /*
  * Dict with key/value types.
  */
 Type dict_n(Type, Type);
-Type cdict_n(Type, Type);
 Type sdict_n(Type, Type);
 
 /*
@@ -825,7 +844,11 @@ Type sdict_n(Type, Type);
  */
 Type keyset_n(Type);
 Type ckeyset_n(Type);
-Type skeyset_n(Type);
+
+/*
+ * Keyset from MapElems
+ */
+inline Type keyset_map(MapElems m) { return map_impl(BKeysetN, std::move(m)); }
 
 /*
  * Create the optional version of the Type t.
@@ -846,7 +869,7 @@ Type unopt(Type t);
  * optional types.  (Note that this does not include types like
  * TInitUnc---it's only the TOpt* types.)
  */
-bool is_opt(Type t);
+bool is_opt(const Type& t);
 
 /*
  * Returns true if type 't' represents a "specialized" object, that is an
@@ -869,11 +892,14 @@ bool is_specialized_cls(const Type&);
 bool is_specialized_wait_handle(const Type& t);
 
 /*
- * Returns whether `t' is a Arr=something or Arr(something) type, or
- * an optional version of one of those types.  That is, an array with
+ * Returns whether `t' is a one of the array like types, or
+ * an optional version of one of those types.  That is, with
  * either a constant value or some (maybe partially) known shape.
  */
 bool is_specialized_array(const Type& t);
+bool is_specialized_vec(const Type& t);
+bool is_specialized_dict(const Type& t);
+bool is_specialized_keyset(const Type& t);
 
 /*
  * Returns the best known TCls subtype for an object type.
@@ -888,7 +914,22 @@ Type objcls(const Type& t);
  *
  * The returned Cell can only contain non-reference-counted types.
  */
-folly::Optional<Cell> tv(Type t);
+folly::Optional<Cell> tv(const Type& t);
+
+/*
+ * Produce a packed-array like cell from a vector of types.
+ * AInit can be PackedArrayInit to produce a PackedArray, or
+ * VecArrayInit to produce a Vec.
+ */
+template<typename AInit>
+folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems);
+
+/*
+ * Produce a mixed-array like cell from an ArrayLikeMap of types.
+ * AInit can be MixedArrayInit, or DictInit
+ */
+template<typename AInit, typename Key>
+folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc
@@ -1069,9 +1110,9 @@ std::pair<Type, bool> keyset_set(Type keyset, const Type& key, const Type& val);
  * Perform a newelem operation on a hack array type. Returns a new type which
  * represents the result of this operation.
  */
-Type vec_newelem(Type vec, const Type& val);
-Type dict_newelem(Type dict, const Type& val);
-Type keyset_newelem(Type keyset, const Type& val);
+std::pair<Type,Type> vec_newelem(Type vec, const Type& val);
+std::pair<Type,Type> dict_newelem(Type dict, const Type& val);
+std::pair<Type,Type> keyset_newelem(Type keyset, const Type& val);
 
 /*
  * Return the best known key and value type for iteration of the

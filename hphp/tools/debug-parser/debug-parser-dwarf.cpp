@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -977,7 +977,9 @@ folly::Optional<Dwarf_Off> TypeParserImpl::findSpecification(Dwarf_Die die,
         case DW_AT_abstract_origin:
           offset = m_dwarf.onDIEAtOffset(
             m_dwarf.getAttributeValueRef(attr),
-            [&](Dwarf_Die die) { return findSpecification(die, false); }
+            [&](Dwarf_Die die2) {
+              return findSpecification(die2, false);
+            }
           );
           break;
         case DW_AT_specification:
@@ -1431,7 +1433,7 @@ Type TypeParserImpl::genType(Dwarf_Die die) {
   const auto recurse = [&](Dwarf_Off offset) {
     return m_dwarf.onDIEAtOffset(
       offset,
-      [&](Dwarf_Die die) { return genType(die); }
+      [&](Dwarf_Die die2) { return genType(die2); }
     );
   };
 
@@ -1636,9 +1638,9 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
     if (count > 0) {
       m_dwarf.onDIEAtOffset(
         range.first->second,
-        [&](Dwarf_Die die) {
+        [&](Dwarf_Die die2) {
           m_dwarf.forEachAttribute(
-            die,
+            die2,
             [&](Dwarf_Attribute attr) {
               switch (m_dwarf.getAttributeType(attr)) {
                 case DW_AT_linkage_name:
@@ -1662,7 +1664,7 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
 
   auto type = m_dwarf.onDIEAtOffset(
     *die_offset,
-    [&](Dwarf_Die die){ return genType(die); }
+    [&](Dwarf_Die die2){ return genType(die2); }
   );
 
   if (name.empty()) {
@@ -1785,9 +1787,9 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
   while (range.first != range.second) {
     m_dwarf.onDIEAtOffset(
       range.first->second,
-      [&](Dwarf_Die die) {
+      [&](Dwarf_Die die2) {
         m_dwarf.forEachAttribute(
-          die,
+          die2,
           [&](Dwarf_Attribute attr) {
             switch (m_dwarf.getAttributeType(attr)) {
               case DW_AT_linkage_name:
@@ -1898,7 +1900,7 @@ Object::Base TypeParserImpl::genBase(Dwarf_Die die,
   auto type =
     m_dwarf.onDIEAtOffset(
       *die_offset,
-      [&](Dwarf_Die die) { return genType(die); }
+      [&](Dwarf_Die die2) { return genType(die2); }
     );
 
   if (auto obj = type.asObject()) {
@@ -1939,7 +1941,7 @@ Object::TemplateParam TypeParserImpl::genTemplateParam(Dwarf_Die die) {
     die_offset ?
       m_dwarf.onDIEAtOffset(
         *die_offset,
-        [&](Dwarf_Die die){ return genType(die); }
+        [&](Dwarf_Die die2){ return genType(die2); }
       ) :
       VoidType{}
   };

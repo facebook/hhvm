@@ -9,6 +9,7 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -92,6 +93,9 @@ module WithToken(Token: TokenType) = struct
     type t = {
       syntax : syntax ;
       value : SyntaxValue.t
+    }
+    and end_of_file = {
+      end_of_file_token: t;
     }
     and script_header = {
       header_less_than: t;
@@ -201,6 +205,16 @@ module WithToken(Token: TokenType) = struct
       function_right_paren: t;
       function_colon: t;
       function_type: t;
+      function_where_clause: t;
+    }
+    and where_clause = {
+      where_clause_keyword: t;
+      where_clause_constraints: t;
+    }
+    and where_constraint = {
+      where_constraint_left_type: t;
+      where_constraint_operator: t;
+      where_constraint_right_type: t;
     }
     and methodish_declaration = {
       methodish_attribute: t;
@@ -269,6 +283,9 @@ module WithToken(Token: TokenType) = struct
       parameter_name: t;
       parameter_default_value: t;
     }
+    and variadic_parameter = {
+      variadic_parameter_ellipsis: t;
+    }
     and attribute_specification = {
       attribute_specification_left_double_angle: t;
       attribute_specification_attributes: t;
@@ -296,6 +313,13 @@ module WithToken(Token: TokenType) = struct
     and expression_statement = {
       expression_statement_expression: t;
       expression_statement_semicolon: t;
+    }
+    and unset_statement = {
+      unset_keyword: t;
+      unset_left_paren: t;
+      unset_variables: t;
+      unset_right_paren: t;
+      unset_semicolon: t;
     }
     and while_statement = {
       while_keyword: t;
@@ -366,7 +390,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword: t;
       foreach_left_paren: t;
       foreach_collection: t;
-      foreach_await: t;
+      foreach_await_keyword: t;
       foreach_as: t;
       foreach_key: t;
       foreach_arrow: t;
@@ -379,18 +403,27 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren: t;
       switch_expression: t;
       switch_right_paren: t;
-      switch_body: t;
+      switch_left_brace: t;
+      switch_sections: t;
+      switch_right_brace: t;
     }
-    and case_statement = {
+    and switch_section = {
+      switch_section_labels: t;
+      switch_section_statements: t;
+      switch_section_fallthrough: t;
+    }
+    and switch_fallthrough = {
+      fallthrough_keyword: t;
+      fallthrough_semicolon: t;
+    }
+    and case_label = {
       case_keyword: t;
       case_expression: t;
       case_colon: t;
-      case_statement: t;
     }
-    and default_statement = {
+    and default_label = {
       default_keyword: t;
       default_colon: t;
-      default_statement: t;
     }
     and return_statement = {
       return_keyword: t;
@@ -486,6 +519,11 @@ module WithToken(Token: TokenType) = struct
       safe_member_operator: t;
       safe_member_name: t;
     }
+    and embedded_member_selection_expression = {
+      embedded_member_object: t;
+      embedded_member_operator: t;
+      embedded_member_name: t;
+    }
     and yield_expression = {
       yield_keyword: t;
       yield_operand: t;
@@ -519,6 +557,30 @@ module WithToken(Token: TokenType) = struct
       conditional_colon: t;
       conditional_alternative: t;
     }
+    and eval_expression = {
+      eval_keyword: t;
+      eval_left_paren: t;
+      eval_argument: t;
+      eval_right_paren: t;
+    }
+    and empty_expression = {
+      empty_keyword: t;
+      empty_left_paren: t;
+      empty_argument: t;
+      empty_right_paren: t;
+    }
+    and define_expression = {
+      define_keyword: t;
+      define_left_paren: t;
+      define_argument_list: t;
+      define_right_paren: t;
+    }
+    and isset_expression = {
+      isset_keyword: t;
+      isset_left_paren: t;
+      isset_argument_list: t;
+      isset_right_paren: t;
+    }
     and function_call_expression = {
       function_call_receiver: t;
       function_call_left_paren: t;
@@ -534,6 +596,11 @@ module WithToken(Token: TokenType) = struct
       braced_expression_left_brace: t;
       braced_expression_expression: t;
       braced_expression_right_brace: t;
+    }
+    and embedded_braced_expression = {
+      embedded_braced_expression_left_brace: t;
+      embedded_braced_expression_expression: t;
+      embedded_braced_expression_right_brace: t;
     }
     and list_expression = {
       list_keyword: t;
@@ -565,6 +632,24 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_members: t;
       array_intrinsic_right_paren: t;
     }
+    and dictionary_intrinsic_expression = {
+      dictionary_intrinsic_keyword: t;
+      dictionary_intrinsic_left_bracket: t;
+      dictionary_intrinsic_members: t;
+      dictionary_intrinsic_right_bracket: t;
+    }
+    and keyset_intrinsic_expression = {
+      keyset_intrinsic_keyword: t;
+      keyset_intrinsic_left_bracket: t;
+      keyset_intrinsic_members: t;
+      keyset_intrinsic_right_bracket: t;
+    }
+    and vector_intrinsic_expression = {
+      vector_intrinsic_keyword: t;
+      vector_intrinsic_left_bracket: t;
+      vector_intrinsic_members: t;
+      vector_intrinsic_right_bracket: t;
+    }
     and element_initializer = {
       element_key: t;
       element_arrow: t;
@@ -575,6 +660,12 @@ module WithToken(Token: TokenType) = struct
       subscript_left_bracket: t;
       subscript_index: t;
       subscript_right_bracket: t;
+    }
+    and embedded_subscript_expression = {
+      embedded_subscript_receiver: t;
+      embedded_subscript_left_bracket: t;
+      embedded_subscript_index: t;
+      embedded_subscript_right_bracket: t;
     }
     and awaitable_creation_expression = {
       awaitable_async: t;
@@ -611,12 +702,16 @@ module WithToken(Token: TokenType) = struct
       xhp_attribute_decl_initializer: t;
       xhp_attribute_decl_required: t;
     }
+    and xhp_simple_class_attribute = {
+      xhp_simple_class_attribute_type: t;
+    }
     and xhp_attribute = {
       xhp_attribute_name: t;
       xhp_attribute_equal: t;
       xhp_attribute_expression: t;
     }
     and xhp_open = {
+      xhp_open_left_angle: t;
       xhp_open_name: t;
       xhp_open_attributes: t;
       xhp_open_right_angle: t;
@@ -637,10 +732,22 @@ module WithToken(Token: TokenType) = struct
       type_constant_right_type: t;
     }
     and vector_type_specifier = {
-      vector_array: t;
-      vector_left_angle: t;
-      vector_type: t;
-      vector_right_angle: t;
+      vector_type_keyword: t;
+      vector_type_left_angle: t;
+      vector_type_type: t;
+      vector_type_right_angle: t;
+    }
+    and keyset_type_specifier = {
+      keyset_type_keyword: t;
+      keyset_type_left_angle: t;
+      keyset_type_type: t;
+      keyset_type_right_angle: t;
+    }
+    and vector_array_type_specifier = {
+      vector_array_keyword: t;
+      vector_array_left_angle: t;
+      vector_array_type: t;
+      vector_array_right_angle: t;
     }
     and type_parameter = {
       type_variance: t;
@@ -651,13 +758,19 @@ module WithToken(Token: TokenType) = struct
       constraint_keyword: t;
       constraint_type: t;
     }
-    and map_type_specifier = {
-      map_array: t;
-      map_left_angle: t;
-      map_key: t;
-      map_comma: t;
-      map_value: t;
-      map_right_angle: t;
+    and map_array_type_specifier = {
+      map_array_keyword: t;
+      map_array_left_angle: t;
+      map_array_key: t;
+      map_array_comma: t;
+      map_array_value: t;
+      map_array_right_angle: t;
+    }
+    and dictionary_type_specifier = {
+      dictionary_type_keyword: t;
+      dictionary_type_left_angle: t;
+      dictionary_type_members: t;
+      dictionary_type_right_angle: t;
     }
     and closure_type_specifier = {
       closure_outer_left_paren: t;
@@ -696,6 +809,12 @@ module WithToken(Token: TokenType) = struct
       shape_expression_left_paren: t;
       shape_expression_fields: t;
       shape_expression_right_paren: t;
+    }
+    and tuple_expression = {
+      tuple_expression_keyword: t;
+      tuple_expression_left_paren: t;
+      tuple_expression_items: t;
+      tuple_expression_right_paren: t;
     }
     and generic_type_specifier = {
       generic_class_type: t;
@@ -736,6 +855,7 @@ module WithToken(Token: TokenType) = struct
     | Token of Token.t
     | Missing
     | SyntaxList of t list
+    | EndOfFile of end_of_file
     | ScriptHeader of script_header
     | Script of script
     | SimpleTypeSpecifier of simple_type_specifier
@@ -755,6 +875,8 @@ module WithToken(Token: TokenType) = struct
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
     | FunctionDeclarationHeader of function_declaration_header
+    | WhereClause of where_clause
+    | WhereConstraint of where_constraint
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
@@ -765,12 +887,14 @@ module WithToken(Token: TokenType) = struct
     | TypeConstDeclaration of type_const_declaration
     | DecoratedExpression of decorated_expression
     | ParameterDeclaration of parameter_declaration
+    | VariadicParameter of variadic_parameter
     | AttributeSpecification of attribute_specification
     | Attribute of attribute
     | InclusionExpression of inclusion_expression
     | InclusionDirective of inclusion_directive
     | CompoundStatement of compound_statement
     | ExpressionStatement of expression_statement
+    | UnsetStatement of unset_statement
     | WhileStatement of while_statement
     | IfStatement of if_statement
     | ElseifClause of elseif_clause
@@ -782,8 +906,10 @@ module WithToken(Token: TokenType) = struct
     | ForStatement of for_statement
     | ForeachStatement of foreach_statement
     | SwitchStatement of switch_statement
-    | CaseStatement of case_statement
-    | DefaultStatement of default_statement
+    | SwitchSection of switch_section
+    | SwitchFallthrough of switch_fallthrough
+    | CaseLabel of case_label
+    | DefaultLabel of default_label
     | ReturnStatement of return_statement
     | ThrowStatement of throw_statement
     | BreakStatement of break_statement
@@ -801,6 +927,7 @@ module WithToken(Token: TokenType) = struct
     | ScopeResolutionExpression of scope_resolution_expression
     | MemberSelectionExpression of member_selection_expression
     | SafeMemberSelectionExpression of safe_member_selection_expression
+    | EmbeddedMemberSelectionExpression of embedded_member_selection_expression
     | YieldExpression of yield_expression
     | PrintExpression of print_expression
     | PrefixUnaryExpression of prefix_unary_expression
@@ -808,16 +935,25 @@ module WithToken(Token: TokenType) = struct
     | BinaryExpression of binary_expression
     | InstanceofExpression of instanceof_expression
     | ConditionalExpression of conditional_expression
+    | EvalExpression of eval_expression
+    | EmptyExpression of empty_expression
+    | DefineExpression of define_expression
+    | IssetExpression of isset_expression
     | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
+    | EmbeddedBracedExpression of embedded_braced_expression
     | ListExpression of list_expression
     | CollectionLiteralExpression of collection_literal_expression
     | ObjectCreationExpression of object_creation_expression
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
+    | DictionaryIntrinsicExpression of dictionary_intrinsic_expression
+    | KeysetIntrinsicExpression of keyset_intrinsic_expression
+    | VectorIntrinsicExpression of vector_intrinsic_expression
     | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
+    | EmbeddedSubscriptExpression of embedded_subscript_expression
     | AwaitableCreationExpression of awaitable_creation_expression
     | XHPChildrenDeclaration of xhp_children_declaration
     | XHPCategoryDeclaration of xhp_category_declaration
@@ -825,21 +961,26 @@ module WithToken(Token: TokenType) = struct
     | XHPRequired of xhp_required
     | XHPClassAttributeDeclaration of xhp_class_attribute_declaration
     | XHPClassAttribute of xhp_class_attribute
+    | XHPSimpleClassAttribute of xhp_simple_class_attribute
     | XHPAttribute of xhp_attribute
     | XHPOpen of xhp_open
     | XHPExpression of xhp_expression
     | XHPClose of xhp_close
     | TypeConstant of type_constant
     | VectorTypeSpecifier of vector_type_specifier
+    | KeysetTypeSpecifier of keyset_type_specifier
+    | VectorArrayTypeSpecifier of vector_array_type_specifier
     | TypeParameter of type_parameter
     | TypeConstraint of type_constraint
-    | MapTypeSpecifier of map_type_specifier
+    | MapArrayTypeSpecifier of map_array_type_specifier
+    | DictionaryTypeSpecifier of dictionary_type_specifier
     | ClosureTypeSpecifier of closure_type_specifier
     | ClassnameTypeSpecifier of classname_type_specifier
     | FieldSpecifier of field_specifier
     | FieldInitializer of field_initializer
     | ShapeTypeSpecifier of shape_type_specifier
     | ShapeExpression of shape_expression
+    | TupleExpression of tuple_expression
     | GenericTypeSpecifier of generic_type_specifier
     | NullableTypeSpecifier of nullable_type_specifier
     | SoftTypeSpecifier of soft_type_specifier
@@ -859,11 +1000,19 @@ module WithToken(Token: TokenType) = struct
     let value node =
       node.value
 
+    let syntax_node_to_list node =
+      match syntax node with
+      | SyntaxList x -> x
+      | Missing -> []
+      | _ -> [node]
+
     let to_kind syntax =
       match syntax with
       | Missing -> SyntaxKind.Missing
       | Token _  -> SyntaxKind.Token
       | SyntaxList _ -> SyntaxKind.SyntaxList
+      | EndOfFile _ ->
+        SyntaxKind.EndOfFile
       | ScriptHeader _ ->
         SyntaxKind.ScriptHeader
       | Script _ ->
@@ -902,6 +1051,10 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.FunctionDeclaration
       | FunctionDeclarationHeader _ ->
         SyntaxKind.FunctionDeclarationHeader
+      | WhereClause _ ->
+        SyntaxKind.WhereClause
+      | WhereConstraint _ ->
+        SyntaxKind.WhereConstraint
       | MethodishDeclaration _ ->
         SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ ->
@@ -922,6 +1075,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.DecoratedExpression
       | ParameterDeclaration _ ->
         SyntaxKind.ParameterDeclaration
+      | VariadicParameter _ ->
+        SyntaxKind.VariadicParameter
       | AttributeSpecification _ ->
         SyntaxKind.AttributeSpecification
       | Attribute _ ->
@@ -934,6 +1089,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.CompoundStatement
       | ExpressionStatement _ ->
         SyntaxKind.ExpressionStatement
+      | UnsetStatement _ ->
+        SyntaxKind.UnsetStatement
       | WhileStatement _ ->
         SyntaxKind.WhileStatement
       | IfStatement _ ->
@@ -956,10 +1113,14 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ForeachStatement
       | SwitchStatement _ ->
         SyntaxKind.SwitchStatement
-      | CaseStatement _ ->
-        SyntaxKind.CaseStatement
-      | DefaultStatement _ ->
-        SyntaxKind.DefaultStatement
+      | SwitchSection _ ->
+        SyntaxKind.SwitchSection
+      | SwitchFallthrough _ ->
+        SyntaxKind.SwitchFallthrough
+      | CaseLabel _ ->
+        SyntaxKind.CaseLabel
+      | DefaultLabel _ ->
+        SyntaxKind.DefaultLabel
       | ReturnStatement _ ->
         SyntaxKind.ReturnStatement
       | ThrowStatement _ ->
@@ -994,6 +1155,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.MemberSelectionExpression
       | SafeMemberSelectionExpression _ ->
         SyntaxKind.SafeMemberSelectionExpression
+      | EmbeddedMemberSelectionExpression _ ->
+        SyntaxKind.EmbeddedMemberSelectionExpression
       | YieldExpression _ ->
         SyntaxKind.YieldExpression
       | PrintExpression _ ->
@@ -1008,12 +1171,22 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.InstanceofExpression
       | ConditionalExpression _ ->
         SyntaxKind.ConditionalExpression
+      | EvalExpression _ ->
+        SyntaxKind.EvalExpression
+      | EmptyExpression _ ->
+        SyntaxKind.EmptyExpression
+      | DefineExpression _ ->
+        SyntaxKind.DefineExpression
+      | IssetExpression _ ->
+        SyntaxKind.IssetExpression
       | FunctionCallExpression _ ->
         SyntaxKind.FunctionCallExpression
       | ParenthesizedExpression _ ->
         SyntaxKind.ParenthesizedExpression
       | BracedExpression _ ->
         SyntaxKind.BracedExpression
+      | EmbeddedBracedExpression _ ->
+        SyntaxKind.EmbeddedBracedExpression
       | ListExpression _ ->
         SyntaxKind.ListExpression
       | CollectionLiteralExpression _ ->
@@ -1024,10 +1197,18 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression _ ->
         SyntaxKind.ArrayIntrinsicExpression
+      | DictionaryIntrinsicExpression _ ->
+        SyntaxKind.DictionaryIntrinsicExpression
+      | KeysetIntrinsicExpression _ ->
+        SyntaxKind.KeysetIntrinsicExpression
+      | VectorIntrinsicExpression _ ->
+        SyntaxKind.VectorIntrinsicExpression
       | ElementInitializer _ ->
         SyntaxKind.ElementInitializer
       | SubscriptExpression _ ->
         SyntaxKind.SubscriptExpression
+      | EmbeddedSubscriptExpression _ ->
+        SyntaxKind.EmbeddedSubscriptExpression
       | AwaitableCreationExpression _ ->
         SyntaxKind.AwaitableCreationExpression
       | XHPChildrenDeclaration _ ->
@@ -1042,6 +1223,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.XHPClassAttributeDeclaration
       | XHPClassAttribute _ ->
         SyntaxKind.XHPClassAttribute
+      | XHPSimpleClassAttribute _ ->
+        SyntaxKind.XHPSimpleClassAttribute
       | XHPAttribute _ ->
         SyntaxKind.XHPAttribute
       | XHPOpen _ ->
@@ -1054,12 +1237,18 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.TypeConstant
       | VectorTypeSpecifier _ ->
         SyntaxKind.VectorTypeSpecifier
+      | KeysetTypeSpecifier _ ->
+        SyntaxKind.KeysetTypeSpecifier
+      | VectorArrayTypeSpecifier _ ->
+        SyntaxKind.VectorArrayTypeSpecifier
       | TypeParameter _ ->
         SyntaxKind.TypeParameter
       | TypeConstraint _ ->
         SyntaxKind.TypeConstraint
-      | MapTypeSpecifier _ ->
-        SyntaxKind.MapTypeSpecifier
+      | MapArrayTypeSpecifier _ ->
+        SyntaxKind.MapArrayTypeSpecifier
+      | DictionaryTypeSpecifier _ ->
+        SyntaxKind.DictionaryTypeSpecifier
       | ClosureTypeSpecifier _ ->
         SyntaxKind.ClosureTypeSpecifier
       | ClassnameTypeSpecifier _ ->
@@ -1072,6 +1261,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ShapeTypeSpecifier
       | ShapeExpression _ ->
         SyntaxKind.ShapeExpression
+      | TupleExpression _ ->
+        SyntaxKind.TupleExpression
       | GenericTypeSpecifier _ ->
         SyntaxKind.GenericTypeSpecifier
       | NullableTypeSpecifier _ ->
@@ -1099,6 +1290,8 @@ module WithToken(Token: TokenType) = struct
     let is_list node =
       kind node = SyntaxKind.SyntaxList
 
+    let is_end_of_file node =
+      kind node = SyntaxKind.EndOfFile
     let is_script_header node =
       kind node = SyntaxKind.ScriptHeader
     let is_script node =
@@ -1137,6 +1330,10 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.FunctionDeclaration
     let is_function_declaration_header node =
       kind node = SyntaxKind.FunctionDeclarationHeader
+    let is_where_clause node =
+      kind node = SyntaxKind.WhereClause
+    let is_where_constraint node =
+      kind node = SyntaxKind.WhereConstraint
     let is_methodish_declaration node =
       kind node = SyntaxKind.MethodishDeclaration
     let is_classish_declaration node =
@@ -1157,6 +1354,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.DecoratedExpression
     let is_parameter_declaration node =
       kind node = SyntaxKind.ParameterDeclaration
+    let is_variadic_parameter node =
+      kind node = SyntaxKind.VariadicParameter
     let is_attribute_specification node =
       kind node = SyntaxKind.AttributeSpecification
     let is_attribute node =
@@ -1169,6 +1368,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.CompoundStatement
     let is_expression_statement node =
       kind node = SyntaxKind.ExpressionStatement
+    let is_unset_statement node =
+      kind node = SyntaxKind.UnsetStatement
     let is_while_statement node =
       kind node = SyntaxKind.WhileStatement
     let is_if_statement node =
@@ -1191,10 +1392,14 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ForeachStatement
     let is_switch_statement node =
       kind node = SyntaxKind.SwitchStatement
-    let is_case_statement node =
-      kind node = SyntaxKind.CaseStatement
-    let is_default_statement node =
-      kind node = SyntaxKind.DefaultStatement
+    let is_switch_section node =
+      kind node = SyntaxKind.SwitchSection
+    let is_switch_fallthrough node =
+      kind node = SyntaxKind.SwitchFallthrough
+    let is_case_label node =
+      kind node = SyntaxKind.CaseLabel
+    let is_default_label node =
+      kind node = SyntaxKind.DefaultLabel
     let is_return_statement node =
       kind node = SyntaxKind.ReturnStatement
     let is_throw_statement node =
@@ -1229,6 +1434,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.MemberSelectionExpression
     let is_safe_member_selection_expression node =
       kind node = SyntaxKind.SafeMemberSelectionExpression
+    let is_embedded_member_selection_expression node =
+      kind node = SyntaxKind.EmbeddedMemberSelectionExpression
     let is_yield_expression node =
       kind node = SyntaxKind.YieldExpression
     let is_print_expression node =
@@ -1243,12 +1450,22 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.InstanceofExpression
     let is_conditional_expression node =
       kind node = SyntaxKind.ConditionalExpression
+    let is_eval_expression node =
+      kind node = SyntaxKind.EvalExpression
+    let is_empty_expression node =
+      kind node = SyntaxKind.EmptyExpression
+    let is_define_expression node =
+      kind node = SyntaxKind.DefineExpression
+    let is_isset_expression node =
+      kind node = SyntaxKind.IssetExpression
     let is_function_call_expression node =
       kind node = SyntaxKind.FunctionCallExpression
     let is_parenthesized_expression node =
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node =
       kind node = SyntaxKind.BracedExpression
+    let is_embedded_braced_expression node =
+      kind node = SyntaxKind.EmbeddedBracedExpression
     let is_list_expression node =
       kind node = SyntaxKind.ListExpression
     let is_collection_literal_expression node =
@@ -1259,10 +1476,18 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression node =
       kind node = SyntaxKind.ArrayIntrinsicExpression
+    let is_dictionary_intrinsic_expression node =
+      kind node = SyntaxKind.DictionaryIntrinsicExpression
+    let is_keyset_intrinsic_expression node =
+      kind node = SyntaxKind.KeysetIntrinsicExpression
+    let is_vector_intrinsic_expression node =
+      kind node = SyntaxKind.VectorIntrinsicExpression
     let is_element_initializer node =
       kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
+    let is_embedded_subscript_expression node =
+      kind node = SyntaxKind.EmbeddedSubscriptExpression
     let is_awaitable_creation_expression node =
       kind node = SyntaxKind.AwaitableCreationExpression
     let is_xhp_children_declaration node =
@@ -1277,6 +1502,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.XHPClassAttributeDeclaration
     let is_xhp_class_attribute node =
       kind node = SyntaxKind.XHPClassAttribute
+    let is_xhp_simple_class_attribute node =
+      kind node = SyntaxKind.XHPSimpleClassAttribute
     let is_xhp_attribute node =
       kind node = SyntaxKind.XHPAttribute
     let is_xhp_open node =
@@ -1289,12 +1516,18 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.TypeConstant
     let is_vector_type_specifier node =
       kind node = SyntaxKind.VectorTypeSpecifier
+    let is_keyset_type_specifier node =
+      kind node = SyntaxKind.KeysetTypeSpecifier
+    let is_vector_array_type_specifier node =
+      kind node = SyntaxKind.VectorArrayTypeSpecifier
     let is_type_parameter node =
       kind node = SyntaxKind.TypeParameter
     let is_type_constraint node =
       kind node = SyntaxKind.TypeConstraint
-    let is_map_type_specifier node =
-      kind node = SyntaxKind.MapTypeSpecifier
+    let is_map_array_type_specifier node =
+      kind node = SyntaxKind.MapArrayTypeSpecifier
+    let is_dictionary_type_specifier node =
+      kind node = SyntaxKind.DictionaryTypeSpecifier
     let is_closure_type_specifier node =
       kind node = SyntaxKind.ClosureTypeSpecifier
     let is_classname_type_specifier node =
@@ -1307,6 +1540,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ShapeTypeSpecifier
     let is_shape_expression node =
       kind node = SyntaxKind.ShapeExpression
+    let is_tuple_expression node =
+      kind node = SyntaxKind.TupleExpression
     let is_generic_type_specifier node =
       kind node = SyntaxKind.GenericTypeSpecifier
     let is_nullable_type_specifier node =
@@ -1360,6 +1595,12 @@ module WithToken(Token: TokenType) = struct
     let is_ellipsis = is_specific_token Full_fidelity_token_kind.DotDotDot
     let is_comma = is_specific_token Full_fidelity_token_kind.Comma
     let is_array = is_specific_token Full_fidelity_token_kind.Array
+
+    let get_end_of_file_children {
+      end_of_file_token;
+    } = (
+      end_of_file_token
+    )
 
     let get_script_header_children {
       header_less_than;
@@ -1566,6 +1807,7 @@ module WithToken(Token: TokenType) = struct
       function_right_paren;
       function_colon;
       function_type;
+      function_where_clause;
     } = (
       function_async,
       function_keyword,
@@ -1576,7 +1818,26 @@ module WithToken(Token: TokenType) = struct
       function_parameter_list,
       function_right_paren,
       function_colon,
-      function_type
+      function_type,
+      function_where_clause
+    )
+
+    let get_where_clause_children {
+      where_clause_keyword;
+      where_clause_constraints;
+    } = (
+      where_clause_keyword,
+      where_clause_constraints
+    )
+
+    let get_where_constraint_children {
+      where_constraint_left_type;
+      where_constraint_operator;
+      where_constraint_right_type;
+    } = (
+      where_constraint_left_type,
+      where_constraint_operator,
+      where_constraint_right_type
     )
 
     let get_methodish_declaration_children {
@@ -1713,6 +1974,12 @@ module WithToken(Token: TokenType) = struct
       parameter_default_value
     )
 
+    let get_variadic_parameter_children {
+      variadic_parameter_ellipsis;
+    } = (
+      variadic_parameter_ellipsis
+    )
+
     let get_attribute_specification_children {
       attribute_specification_left_double_angle;
       attribute_specification_attributes;
@@ -1767,6 +2034,20 @@ module WithToken(Token: TokenType) = struct
     } = (
       expression_statement_expression,
       expression_statement_semicolon
+    )
+
+    let get_unset_statement_children {
+      unset_keyword;
+      unset_left_paren;
+      unset_variables;
+      unset_right_paren;
+      unset_semicolon;
+    } = (
+      unset_keyword,
+      unset_left_paren,
+      unset_variables,
+      unset_right_paren,
+      unset_semicolon
     )
 
     let get_while_statement_children {
@@ -1903,7 +2184,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword;
       foreach_left_paren;
       foreach_collection;
-      foreach_await;
+      foreach_await_keyword;
       foreach_as;
       foreach_key;
       foreach_arrow;
@@ -1914,7 +2195,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword,
       foreach_left_paren,
       foreach_collection,
-      foreach_await,
+      foreach_await_keyword,
       foreach_as,
       foreach_key,
       foreach_arrow,
@@ -1928,35 +2209,53 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren;
       switch_expression;
       switch_right_paren;
-      switch_body;
+      switch_left_brace;
+      switch_sections;
+      switch_right_brace;
     } = (
       switch_keyword,
       switch_left_paren,
       switch_expression,
       switch_right_paren,
-      switch_body
+      switch_left_brace,
+      switch_sections,
+      switch_right_brace
     )
 
-    let get_case_statement_children {
+    let get_switch_section_children {
+      switch_section_labels;
+      switch_section_statements;
+      switch_section_fallthrough;
+    } = (
+      switch_section_labels,
+      switch_section_statements,
+      switch_section_fallthrough
+    )
+
+    let get_switch_fallthrough_children {
+      fallthrough_keyword;
+      fallthrough_semicolon;
+    } = (
+      fallthrough_keyword,
+      fallthrough_semicolon
+    )
+
+    let get_case_label_children {
       case_keyword;
       case_expression;
       case_colon;
-      case_statement;
     } = (
       case_keyword,
       case_expression,
-      case_colon,
-      case_statement
+      case_colon
     )
 
-    let get_default_statement_children {
+    let get_default_label_children {
       default_keyword;
       default_colon;
-      default_statement;
     } = (
       default_keyword,
-      default_colon,
-      default_statement
+      default_colon
     )
 
     let get_return_statement_children {
@@ -2147,6 +2446,16 @@ module WithToken(Token: TokenType) = struct
       safe_member_name
     )
 
+    let get_embedded_member_selection_expression_children {
+      embedded_member_object;
+      embedded_member_operator;
+      embedded_member_name;
+    } = (
+      embedded_member_object,
+      embedded_member_operator,
+      embedded_member_name
+    )
+
     let get_yield_expression_children {
       yield_keyword;
       yield_operand;
@@ -2213,6 +2522,54 @@ module WithToken(Token: TokenType) = struct
       conditional_alternative
     )
 
+    let get_eval_expression_children {
+      eval_keyword;
+      eval_left_paren;
+      eval_argument;
+      eval_right_paren;
+    } = (
+      eval_keyword,
+      eval_left_paren,
+      eval_argument,
+      eval_right_paren
+    )
+
+    let get_empty_expression_children {
+      empty_keyword;
+      empty_left_paren;
+      empty_argument;
+      empty_right_paren;
+    } = (
+      empty_keyword,
+      empty_left_paren,
+      empty_argument,
+      empty_right_paren
+    )
+
+    let get_define_expression_children {
+      define_keyword;
+      define_left_paren;
+      define_argument_list;
+      define_right_paren;
+    } = (
+      define_keyword,
+      define_left_paren,
+      define_argument_list,
+      define_right_paren
+    )
+
+    let get_isset_expression_children {
+      isset_keyword;
+      isset_left_paren;
+      isset_argument_list;
+      isset_right_paren;
+    } = (
+      isset_keyword,
+      isset_left_paren,
+      isset_argument_list,
+      isset_right_paren
+    )
+
     let get_function_call_expression_children {
       function_call_receiver;
       function_call_left_paren;
@@ -2243,6 +2600,16 @@ module WithToken(Token: TokenType) = struct
       braced_expression_left_brace,
       braced_expression_expression,
       braced_expression_right_brace
+    )
+
+    let get_embedded_braced_expression_children {
+      embedded_braced_expression_left_brace;
+      embedded_braced_expression_expression;
+      embedded_braced_expression_right_brace;
+    } = (
+      embedded_braced_expression_left_brace,
+      embedded_braced_expression_expression,
+      embedded_braced_expression_right_brace
     )
 
     let get_list_expression_children {
@@ -2305,6 +2672,42 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_right_paren
     )
 
+    let get_dictionary_intrinsic_expression_children {
+      dictionary_intrinsic_keyword;
+      dictionary_intrinsic_left_bracket;
+      dictionary_intrinsic_members;
+      dictionary_intrinsic_right_bracket;
+    } = (
+      dictionary_intrinsic_keyword,
+      dictionary_intrinsic_left_bracket,
+      dictionary_intrinsic_members,
+      dictionary_intrinsic_right_bracket
+    )
+
+    let get_keyset_intrinsic_expression_children {
+      keyset_intrinsic_keyword;
+      keyset_intrinsic_left_bracket;
+      keyset_intrinsic_members;
+      keyset_intrinsic_right_bracket;
+    } = (
+      keyset_intrinsic_keyword,
+      keyset_intrinsic_left_bracket,
+      keyset_intrinsic_members,
+      keyset_intrinsic_right_bracket
+    )
+
+    let get_vector_intrinsic_expression_children {
+      vector_intrinsic_keyword;
+      vector_intrinsic_left_bracket;
+      vector_intrinsic_members;
+      vector_intrinsic_right_bracket;
+    } = (
+      vector_intrinsic_keyword,
+      vector_intrinsic_left_bracket,
+      vector_intrinsic_members,
+      vector_intrinsic_right_bracket
+    )
+
     let get_element_initializer_children {
       element_key;
       element_arrow;
@@ -2325,6 +2728,18 @@ module WithToken(Token: TokenType) = struct
       subscript_left_bracket,
       subscript_index,
       subscript_right_bracket
+    )
+
+    let get_embedded_subscript_expression_children {
+      embedded_subscript_receiver;
+      embedded_subscript_left_bracket;
+      embedded_subscript_index;
+      embedded_subscript_right_bracket;
+    } = (
+      embedded_subscript_receiver,
+      embedded_subscript_left_bracket,
+      embedded_subscript_index,
+      embedded_subscript_right_bracket
     )
 
     let get_awaitable_creation_expression_children {
@@ -2397,6 +2812,12 @@ module WithToken(Token: TokenType) = struct
       xhp_attribute_decl_required
     )
 
+    let get_xhp_simple_class_attribute_children {
+      xhp_simple_class_attribute_type;
+    } = (
+      xhp_simple_class_attribute_type
+    )
+
     let get_xhp_attribute_children {
       xhp_attribute_name;
       xhp_attribute_equal;
@@ -2408,10 +2829,12 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_xhp_open_children {
+      xhp_open_left_angle;
       xhp_open_name;
       xhp_open_attributes;
       xhp_open_right_angle;
     } = (
+      xhp_open_left_angle,
       xhp_open_name,
       xhp_open_attributes,
       xhp_open_right_angle
@@ -2448,15 +2871,39 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_vector_type_specifier_children {
-      vector_array;
-      vector_left_angle;
-      vector_type;
-      vector_right_angle;
+      vector_type_keyword;
+      vector_type_left_angle;
+      vector_type_type;
+      vector_type_right_angle;
     } = (
-      vector_array,
-      vector_left_angle,
-      vector_type,
-      vector_right_angle
+      vector_type_keyword,
+      vector_type_left_angle,
+      vector_type_type,
+      vector_type_right_angle
+    )
+
+    let get_keyset_type_specifier_children {
+      keyset_type_keyword;
+      keyset_type_left_angle;
+      keyset_type_type;
+      keyset_type_right_angle;
+    } = (
+      keyset_type_keyword,
+      keyset_type_left_angle,
+      keyset_type_type,
+      keyset_type_right_angle
+    )
+
+    let get_vector_array_type_specifier_children {
+      vector_array_keyword;
+      vector_array_left_angle;
+      vector_array_type;
+      vector_array_right_angle;
+    } = (
+      vector_array_keyword,
+      vector_array_left_angle,
+      vector_array_type,
+      vector_array_right_angle
     )
 
     let get_type_parameter_children {
@@ -2477,20 +2924,32 @@ module WithToken(Token: TokenType) = struct
       constraint_type
     )
 
-    let get_map_type_specifier_children {
-      map_array;
-      map_left_angle;
-      map_key;
-      map_comma;
-      map_value;
-      map_right_angle;
+    let get_map_array_type_specifier_children {
+      map_array_keyword;
+      map_array_left_angle;
+      map_array_key;
+      map_array_comma;
+      map_array_value;
+      map_array_right_angle;
     } = (
-      map_array,
-      map_left_angle,
-      map_key,
-      map_comma,
-      map_value,
-      map_right_angle
+      map_array_keyword,
+      map_array_left_angle,
+      map_array_key,
+      map_array_comma,
+      map_array_value,
+      map_array_right_angle
+    )
+
+    let get_dictionary_type_specifier_children {
+      dictionary_type_keyword;
+      dictionary_type_left_angle;
+      dictionary_type_members;
+      dictionary_type_right_angle;
+    } = (
+      dictionary_type_keyword,
+      dictionary_type_left_angle,
+      dictionary_type_members,
+      dictionary_type_right_angle
     )
 
     let get_closure_type_specifier_children {
@@ -2569,6 +3028,18 @@ module WithToken(Token: TokenType) = struct
       shape_expression_right_paren
     )
 
+    let get_tuple_expression_children {
+      tuple_expression_keyword;
+      tuple_expression_left_paren;
+      tuple_expression_items;
+      tuple_expression_right_paren;
+    } = (
+      tuple_expression_keyword,
+      tuple_expression_left_paren,
+      tuple_expression_items,
+      tuple_expression_right_paren
+    )
+
     let get_generic_type_specifier_children {
       generic_class_type;
       generic_argument_list;
@@ -2644,6 +3115,11 @@ module WithToken(Token: TokenType) = struct
       | Missing -> []
       | Token _ -> []
       | SyntaxList x -> x
+      | EndOfFile {
+        end_of_file_token;
+      } -> [
+        end_of_file_token;
+      ]
       | ScriptHeader {
         header_less_than;
         header_question;
@@ -2831,6 +3307,7 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
       } -> [
         function_async;
         function_keyword;
@@ -2842,6 +3319,23 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
+      ]
+      | WhereClause {
+        where_clause_keyword;
+        where_clause_constraints;
+      } -> [
+        where_clause_keyword;
+        where_clause_constraints;
+      ]
+      | WhereConstraint {
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
+      } -> [
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
       ]
       | MethodishDeclaration {
         methodish_attribute;
@@ -2967,6 +3461,11 @@ module WithToken(Token: TokenType) = struct
         parameter_name;
         parameter_default_value;
       ]
+      | VariadicParameter {
+        variadic_parameter_ellipsis;
+      } -> [
+        variadic_parameter_ellipsis;
+      ]
       | AttributeSpecification {
         attribute_specification_left_double_angle;
         attribute_specification_attributes;
@@ -3016,6 +3515,19 @@ module WithToken(Token: TokenType) = struct
       } -> [
         expression_statement_expression;
         expression_statement_semicolon;
+      ]
+      | UnsetStatement {
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
+      } -> [
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
       ]
       | WhileStatement {
         while_keyword;
@@ -3142,7 +3654,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -3153,7 +3665,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -3166,33 +3678,49 @@ module WithToken(Token: TokenType) = struct
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       } -> [
         switch_keyword;
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       ]
-      | CaseStatement {
+      | SwitchSection {
+        switch_section_labels;
+        switch_section_statements;
+        switch_section_fallthrough;
+      } -> [
+        switch_section_labels;
+        switch_section_statements;
+        switch_section_fallthrough;
+      ]
+      | SwitchFallthrough {
+        fallthrough_keyword;
+        fallthrough_semicolon;
+      } -> [
+        fallthrough_keyword;
+        fallthrough_semicolon;
+      ]
+      | CaseLabel {
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       } -> [
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       ]
-      | DefaultStatement {
+      | DefaultLabel {
         default_keyword;
         default_colon;
-        default_statement;
       } -> [
         default_keyword;
         default_colon;
-        default_statement;
       ]
       | ReturnStatement {
         return_keyword;
@@ -3365,6 +3893,15 @@ module WithToken(Token: TokenType) = struct
         safe_member_operator;
         safe_member_name;
       ]
+      | EmbeddedMemberSelectionExpression {
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      } -> [
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      ]
       | YieldExpression {
         yield_keyword;
         yield_operand;
@@ -3424,6 +3961,50 @@ module WithToken(Token: TokenType) = struct
         conditional_colon;
         conditional_alternative;
       ]
+      | EvalExpression {
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      } -> [
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      ]
+      | EmptyExpression {
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      } -> [
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      ]
+      | DefineExpression {
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      } -> [
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      ]
+      | IssetExpression {
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      } -> [
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      ]
       | FunctionCallExpression {
         function_call_receiver;
         function_call_left_paren;
@@ -3452,6 +4033,15 @@ module WithToken(Token: TokenType) = struct
         braced_expression_left_brace;
         braced_expression_expression;
         braced_expression_right_brace;
+      ]
+      | EmbeddedBracedExpression {
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
+      } -> [
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
       ]
       | ListExpression {
         list_keyword;
@@ -3508,6 +4098,39 @@ module WithToken(Token: TokenType) = struct
         array_intrinsic_members;
         array_intrinsic_right_paren;
       ]
+      | DictionaryIntrinsicExpression {
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      } -> [
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      ]
+      | KeysetIntrinsicExpression {
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      } -> [
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      ]
+      | VectorIntrinsicExpression {
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      } -> [
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      ]
       | ElementInitializer {
         element_key;
         element_arrow;
@@ -3527,6 +4150,17 @@ module WithToken(Token: TokenType) = struct
         subscript_left_bracket;
         subscript_index;
         subscript_right_bracket;
+      ]
+      | EmbeddedSubscriptExpression {
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
+      } -> [
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
       ]
       | AwaitableCreationExpression {
         awaitable_async;
@@ -3591,6 +4225,11 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_decl_initializer;
         xhp_attribute_decl_required;
       ]
+      | XHPSimpleClassAttribute {
+        xhp_simple_class_attribute_type;
+      } -> [
+        xhp_simple_class_attribute_type;
+      ]
       | XHPAttribute {
         xhp_attribute_name;
         xhp_attribute_equal;
@@ -3601,10 +4240,12 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_expression;
       ]
       | XHPOpen {
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
       } -> [
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
@@ -3637,15 +4278,37 @@ module WithToken(Token: TokenType) = struct
         type_constant_right_type;
       ]
       | VectorTypeSpecifier {
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+        vector_type_keyword;
+        vector_type_left_angle;
+        vector_type_type;
+        vector_type_right_angle;
       } -> [
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+        vector_type_keyword;
+        vector_type_left_angle;
+        vector_type_type;
+        vector_type_right_angle;
+      ]
+      | KeysetTypeSpecifier {
+        keyset_type_keyword;
+        keyset_type_left_angle;
+        keyset_type_type;
+        keyset_type_right_angle;
+      } -> [
+        keyset_type_keyword;
+        keyset_type_left_angle;
+        keyset_type_type;
+        keyset_type_right_angle;
+      ]
+      | VectorArrayTypeSpecifier {
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
+      } -> [
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
       ]
       | TypeParameter {
         type_variance;
@@ -3663,20 +4326,31 @@ module WithToken(Token: TokenType) = struct
         constraint_keyword;
         constraint_type;
       ]
-      | MapTypeSpecifier {
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+      | MapArrayTypeSpecifier {
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
       } -> [
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
+      ]
+      | DictionaryTypeSpecifier {
+        dictionary_type_keyword;
+        dictionary_type_left_angle;
+        dictionary_type_members;
+        dictionary_type_right_angle;
+      } -> [
+        dictionary_type_keyword;
+        dictionary_type_left_angle;
+        dictionary_type_members;
+        dictionary_type_right_angle;
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
@@ -3748,6 +4422,17 @@ module WithToken(Token: TokenType) = struct
         shape_expression_fields;
         shape_expression_right_paren;
       ]
+      | TupleExpression {
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
+      } -> [
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
+      ]
       | GenericTypeSpecifier {
         generic_class_type;
         generic_argument_list;
@@ -3815,6 +4500,11 @@ module WithToken(Token: TokenType) = struct
       | Missing -> []
       | Token _ -> []
       | SyntaxList _ -> []
+      | EndOfFile {
+        end_of_file_token;
+      } -> [
+        "end_of_file_token";
+      ]
       | ScriptHeader {
         header_less_than;
         header_question;
@@ -4002,6 +4692,7 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
       } -> [
         "function_async";
         "function_keyword";
@@ -4013,6 +4704,23 @@ module WithToken(Token: TokenType) = struct
         "function_right_paren";
         "function_colon";
         "function_type";
+        "function_where_clause";
+      ]
+      | WhereClause {
+        where_clause_keyword;
+        where_clause_constraints;
+      } -> [
+        "where_clause_keyword";
+        "where_clause_constraints";
+      ]
+      | WhereConstraint {
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
+      } -> [
+        "where_constraint_left_type";
+        "where_constraint_operator";
+        "where_constraint_right_type";
       ]
       | MethodishDeclaration {
         methodish_attribute;
@@ -4138,6 +4846,11 @@ module WithToken(Token: TokenType) = struct
         "parameter_name";
         "parameter_default_value";
       ]
+      | VariadicParameter {
+        variadic_parameter_ellipsis;
+      } -> [
+        "variadic_parameter_ellipsis";
+      ]
       | AttributeSpecification {
         attribute_specification_left_double_angle;
         attribute_specification_attributes;
@@ -4187,6 +4900,19 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "expression_statement_expression";
         "expression_statement_semicolon";
+      ]
+      | UnsetStatement {
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
+      } -> [
+        "unset_keyword";
+        "unset_left_paren";
+        "unset_variables";
+        "unset_right_paren";
+        "unset_semicolon";
       ]
       | WhileStatement {
         while_keyword;
@@ -4313,7 +5039,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -4324,7 +5050,7 @@ module WithToken(Token: TokenType) = struct
         "foreach_keyword";
         "foreach_left_paren";
         "foreach_collection";
-        "foreach_await";
+        "foreach_await_keyword";
         "foreach_as";
         "foreach_key";
         "foreach_arrow";
@@ -4337,33 +5063,49 @@ module WithToken(Token: TokenType) = struct
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       } -> [
         "switch_keyword";
         "switch_left_paren";
         "switch_expression";
         "switch_right_paren";
-        "switch_body";
+        "switch_left_brace";
+        "switch_sections";
+        "switch_right_brace";
       ]
-      | CaseStatement {
+      | SwitchSection {
+        switch_section_labels;
+        switch_section_statements;
+        switch_section_fallthrough;
+      } -> [
+        "switch_section_labels";
+        "switch_section_statements";
+        "switch_section_fallthrough";
+      ]
+      | SwitchFallthrough {
+        fallthrough_keyword;
+        fallthrough_semicolon;
+      } -> [
+        "fallthrough_keyword";
+        "fallthrough_semicolon";
+      ]
+      | CaseLabel {
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       } -> [
         "case_keyword";
         "case_expression";
         "case_colon";
-        "case_statement";
       ]
-      | DefaultStatement {
+      | DefaultLabel {
         default_keyword;
         default_colon;
-        default_statement;
       } -> [
         "default_keyword";
         "default_colon";
-        "default_statement";
       ]
       | ReturnStatement {
         return_keyword;
@@ -4536,6 +5278,15 @@ module WithToken(Token: TokenType) = struct
         "safe_member_operator";
         "safe_member_name";
       ]
+      | EmbeddedMemberSelectionExpression {
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      } -> [
+        "embedded_member_object";
+        "embedded_member_operator";
+        "embedded_member_name";
+      ]
       | YieldExpression {
         yield_keyword;
         yield_operand;
@@ -4595,6 +5346,50 @@ module WithToken(Token: TokenType) = struct
         "conditional_colon";
         "conditional_alternative";
       ]
+      | EvalExpression {
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      } -> [
+        "eval_keyword";
+        "eval_left_paren";
+        "eval_argument";
+        "eval_right_paren";
+      ]
+      | EmptyExpression {
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      } -> [
+        "empty_keyword";
+        "empty_left_paren";
+        "empty_argument";
+        "empty_right_paren";
+      ]
+      | DefineExpression {
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      } -> [
+        "define_keyword";
+        "define_left_paren";
+        "define_argument_list";
+        "define_right_paren";
+      ]
+      | IssetExpression {
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      } -> [
+        "isset_keyword";
+        "isset_left_paren";
+        "isset_argument_list";
+        "isset_right_paren";
+      ]
       | FunctionCallExpression {
         function_call_receiver;
         function_call_left_paren;
@@ -4623,6 +5418,15 @@ module WithToken(Token: TokenType) = struct
         "braced_expression_left_brace";
         "braced_expression_expression";
         "braced_expression_right_brace";
+      ]
+      | EmbeddedBracedExpression {
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
+      } -> [
+        "embedded_braced_expression_left_brace";
+        "embedded_braced_expression_expression";
+        "embedded_braced_expression_right_brace";
       ]
       | ListExpression {
         list_keyword;
@@ -4679,6 +5483,39 @@ module WithToken(Token: TokenType) = struct
         "array_intrinsic_members";
         "array_intrinsic_right_paren";
       ]
+      | DictionaryIntrinsicExpression {
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      } -> [
+        "dictionary_intrinsic_keyword";
+        "dictionary_intrinsic_left_bracket";
+        "dictionary_intrinsic_members";
+        "dictionary_intrinsic_right_bracket";
+      ]
+      | KeysetIntrinsicExpression {
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      } -> [
+        "keyset_intrinsic_keyword";
+        "keyset_intrinsic_left_bracket";
+        "keyset_intrinsic_members";
+        "keyset_intrinsic_right_bracket";
+      ]
+      | VectorIntrinsicExpression {
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      } -> [
+        "vector_intrinsic_keyword";
+        "vector_intrinsic_left_bracket";
+        "vector_intrinsic_members";
+        "vector_intrinsic_right_bracket";
+      ]
       | ElementInitializer {
         element_key;
         element_arrow;
@@ -4698,6 +5535,17 @@ module WithToken(Token: TokenType) = struct
         "subscript_left_bracket";
         "subscript_index";
         "subscript_right_bracket";
+      ]
+      | EmbeddedSubscriptExpression {
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
+      } -> [
+        "embedded_subscript_receiver";
+        "embedded_subscript_left_bracket";
+        "embedded_subscript_index";
+        "embedded_subscript_right_bracket";
       ]
       | AwaitableCreationExpression {
         awaitable_async;
@@ -4762,6 +5610,11 @@ module WithToken(Token: TokenType) = struct
         "xhp_attribute_decl_initializer";
         "xhp_attribute_decl_required";
       ]
+      | XHPSimpleClassAttribute {
+        xhp_simple_class_attribute_type;
+      } -> [
+        "xhp_simple_class_attribute_type";
+      ]
       | XHPAttribute {
         xhp_attribute_name;
         xhp_attribute_equal;
@@ -4772,10 +5625,12 @@ module WithToken(Token: TokenType) = struct
         "xhp_attribute_expression";
       ]
       | XHPOpen {
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
       } -> [
+        "xhp_open_left_angle";
         "xhp_open_name";
         "xhp_open_attributes";
         "xhp_open_right_angle";
@@ -4808,15 +5663,37 @@ module WithToken(Token: TokenType) = struct
         "type_constant_right_type";
       ]
       | VectorTypeSpecifier {
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+        vector_type_keyword;
+        vector_type_left_angle;
+        vector_type_type;
+        vector_type_right_angle;
       } -> [
-        "vector_array";
-        "vector_left_angle";
-        "vector_type";
-        "vector_right_angle";
+        "vector_type_keyword";
+        "vector_type_left_angle";
+        "vector_type_type";
+        "vector_type_right_angle";
+      ]
+      | KeysetTypeSpecifier {
+        keyset_type_keyword;
+        keyset_type_left_angle;
+        keyset_type_type;
+        keyset_type_right_angle;
+      } -> [
+        "keyset_type_keyword";
+        "keyset_type_left_angle";
+        "keyset_type_type";
+        "keyset_type_right_angle";
+      ]
+      | VectorArrayTypeSpecifier {
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
+      } -> [
+        "vector_array_keyword";
+        "vector_array_left_angle";
+        "vector_array_type";
+        "vector_array_right_angle";
       ]
       | TypeParameter {
         type_variance;
@@ -4834,20 +5711,31 @@ module WithToken(Token: TokenType) = struct
         "constraint_keyword";
         "constraint_type";
       ]
-      | MapTypeSpecifier {
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+      | MapArrayTypeSpecifier {
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
       } -> [
-        "map_array";
-        "map_left_angle";
-        "map_key";
-        "map_comma";
-        "map_value";
-        "map_right_angle";
+        "map_array_keyword";
+        "map_array_left_angle";
+        "map_array_key";
+        "map_array_comma";
+        "map_array_value";
+        "map_array_right_angle";
+      ]
+      | DictionaryTypeSpecifier {
+        dictionary_type_keyword;
+        dictionary_type_left_angle;
+        dictionary_type_members;
+        dictionary_type_right_angle;
+      } -> [
+        "dictionary_type_keyword";
+        "dictionary_type_left_angle";
+        "dictionary_type_members";
+        "dictionary_type_right_angle";
       ]
       | ClosureTypeSpecifier {
         closure_outer_left_paren;
@@ -4918,6 +5806,17 @@ module WithToken(Token: TokenType) = struct
         "shape_expression_left_paren";
         "shape_expression_fields";
         "shape_expression_right_paren";
+      ]
+      | TupleExpression {
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
+      } -> [
+        "tuple_expression_keyword";
+        "tuple_expression_left_paren";
+        "tuple_expression_items";
+        "tuple_expression_right_paren";
       ]
       | GenericTypeSpecifier {
         generic_class_type;
@@ -5040,6 +5939,12 @@ module WithToken(Token: TokenType) = struct
 
     let syntax_from_children kind ts =
       match kind, ts with
+      | (SyntaxKind.EndOfFile, [
+          end_of_file_token;
+        ]) ->
+        EndOfFile {
+          end_of_file_token;
+        }
       | (SyntaxKind.ScriptHeader, [
           header_less_than;
           header_question;
@@ -5245,6 +6150,7 @@ module WithToken(Token: TokenType) = struct
           function_right_paren;
           function_colon;
           function_type;
+          function_where_clause;
         ]) ->
         FunctionDeclarationHeader {
           function_async;
@@ -5257,6 +6163,25 @@ module WithToken(Token: TokenType) = struct
           function_right_paren;
           function_colon;
           function_type;
+          function_where_clause;
+        }
+      | (SyntaxKind.WhereClause, [
+          where_clause_keyword;
+          where_clause_constraints;
+        ]) ->
+        WhereClause {
+          where_clause_keyword;
+          where_clause_constraints;
+        }
+      | (SyntaxKind.WhereConstraint, [
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
+        ]) ->
+        WhereConstraint {
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
         }
       | (SyntaxKind.MethodishDeclaration, [
           methodish_attribute;
@@ -5392,6 +6317,12 @@ module WithToken(Token: TokenType) = struct
           parameter_name;
           parameter_default_value;
         }
+      | (SyntaxKind.VariadicParameter, [
+          variadic_parameter_ellipsis;
+        ]) ->
+        VariadicParameter {
+          variadic_parameter_ellipsis;
+        }
       | (SyntaxKind.AttributeSpecification, [
           attribute_specification_left_double_angle;
           attribute_specification_attributes;
@@ -5447,6 +6378,20 @@ module WithToken(Token: TokenType) = struct
         ExpressionStatement {
           expression_statement_expression;
           expression_statement_semicolon;
+        }
+      | (SyntaxKind.UnsetStatement, [
+          unset_keyword;
+          unset_left_paren;
+          unset_variables;
+          unset_right_paren;
+          unset_semicolon;
+        ]) ->
+        UnsetStatement {
+          unset_keyword;
+          unset_left_paren;
+          unset_variables;
+          unset_right_paren;
+          unset_semicolon;
         }
       | (SyntaxKind.WhileStatement, [
           while_keyword;
@@ -5582,7 +6527,7 @@ module WithToken(Token: TokenType) = struct
           foreach_keyword;
           foreach_left_paren;
           foreach_collection;
-          foreach_await;
+          foreach_await_keyword;
           foreach_as;
           foreach_key;
           foreach_arrow;
@@ -5594,7 +6539,7 @@ module WithToken(Token: TokenType) = struct
           foreach_keyword;
           foreach_left_paren;
           foreach_collection;
-          foreach_await;
+          foreach_await_keyword;
           foreach_as;
           foreach_key;
           foreach_arrow;
@@ -5607,36 +6552,54 @@ module WithToken(Token: TokenType) = struct
           switch_left_paren;
           switch_expression;
           switch_right_paren;
-          switch_body;
+          switch_left_brace;
+          switch_sections;
+          switch_right_brace;
         ]) ->
         SwitchStatement {
           switch_keyword;
           switch_left_paren;
           switch_expression;
           switch_right_paren;
-          switch_body;
+          switch_left_brace;
+          switch_sections;
+          switch_right_brace;
         }
-      | (SyntaxKind.CaseStatement, [
+      | (SyntaxKind.SwitchSection, [
+          switch_section_labels;
+          switch_section_statements;
+          switch_section_fallthrough;
+        ]) ->
+        SwitchSection {
+          switch_section_labels;
+          switch_section_statements;
+          switch_section_fallthrough;
+        }
+      | (SyntaxKind.SwitchFallthrough, [
+          fallthrough_keyword;
+          fallthrough_semicolon;
+        ]) ->
+        SwitchFallthrough {
+          fallthrough_keyword;
+          fallthrough_semicolon;
+        }
+      | (SyntaxKind.CaseLabel, [
           case_keyword;
           case_expression;
           case_colon;
-          case_statement;
         ]) ->
-        CaseStatement {
+        CaseLabel {
           case_keyword;
           case_expression;
           case_colon;
-          case_statement;
         }
-      | (SyntaxKind.DefaultStatement, [
+      | (SyntaxKind.DefaultLabel, [
           default_keyword;
           default_colon;
-          default_statement;
         ]) ->
-        DefaultStatement {
+        DefaultLabel {
           default_keyword;
           default_colon;
-          default_statement;
         }
       | (SyntaxKind.ReturnStatement, [
           return_keyword;
@@ -5826,6 +6789,16 @@ module WithToken(Token: TokenType) = struct
           safe_member_operator;
           safe_member_name;
         }
+      | (SyntaxKind.EmbeddedMemberSelectionExpression, [
+          embedded_member_object;
+          embedded_member_operator;
+          embedded_member_name;
+        ]) ->
+        EmbeddedMemberSelectionExpression {
+          embedded_member_object;
+          embedded_member_operator;
+          embedded_member_name;
+        }
       | (SyntaxKind.YieldExpression, [
           yield_keyword;
           yield_operand;
@@ -5892,6 +6865,54 @@ module WithToken(Token: TokenType) = struct
           conditional_colon;
           conditional_alternative;
         }
+      | (SyntaxKind.EvalExpression, [
+          eval_keyword;
+          eval_left_paren;
+          eval_argument;
+          eval_right_paren;
+        ]) ->
+        EvalExpression {
+          eval_keyword;
+          eval_left_paren;
+          eval_argument;
+          eval_right_paren;
+        }
+      | (SyntaxKind.EmptyExpression, [
+          empty_keyword;
+          empty_left_paren;
+          empty_argument;
+          empty_right_paren;
+        ]) ->
+        EmptyExpression {
+          empty_keyword;
+          empty_left_paren;
+          empty_argument;
+          empty_right_paren;
+        }
+      | (SyntaxKind.DefineExpression, [
+          define_keyword;
+          define_left_paren;
+          define_argument_list;
+          define_right_paren;
+        ]) ->
+        DefineExpression {
+          define_keyword;
+          define_left_paren;
+          define_argument_list;
+          define_right_paren;
+        }
+      | (SyntaxKind.IssetExpression, [
+          isset_keyword;
+          isset_left_paren;
+          isset_argument_list;
+          isset_right_paren;
+        ]) ->
+        IssetExpression {
+          isset_keyword;
+          isset_left_paren;
+          isset_argument_list;
+          isset_right_paren;
+        }
       | (SyntaxKind.FunctionCallExpression, [
           function_call_receiver;
           function_call_left_paren;
@@ -5923,6 +6944,16 @@ module WithToken(Token: TokenType) = struct
           braced_expression_left_brace;
           braced_expression_expression;
           braced_expression_right_brace;
+        }
+      | (SyntaxKind.EmbeddedBracedExpression, [
+          embedded_braced_expression_left_brace;
+          embedded_braced_expression_expression;
+          embedded_braced_expression_right_brace;
+        ]) ->
+        EmbeddedBracedExpression {
+          embedded_braced_expression_left_brace;
+          embedded_braced_expression_expression;
+          embedded_braced_expression_right_brace;
         }
       | (SyntaxKind.ListExpression, [
           list_keyword;
@@ -5984,6 +7015,42 @@ module WithToken(Token: TokenType) = struct
           array_intrinsic_members;
           array_intrinsic_right_paren;
         }
+      | (SyntaxKind.DictionaryIntrinsicExpression, [
+          dictionary_intrinsic_keyword;
+          dictionary_intrinsic_left_bracket;
+          dictionary_intrinsic_members;
+          dictionary_intrinsic_right_bracket;
+        ]) ->
+        DictionaryIntrinsicExpression {
+          dictionary_intrinsic_keyword;
+          dictionary_intrinsic_left_bracket;
+          dictionary_intrinsic_members;
+          dictionary_intrinsic_right_bracket;
+        }
+      | (SyntaxKind.KeysetIntrinsicExpression, [
+          keyset_intrinsic_keyword;
+          keyset_intrinsic_left_bracket;
+          keyset_intrinsic_members;
+          keyset_intrinsic_right_bracket;
+        ]) ->
+        KeysetIntrinsicExpression {
+          keyset_intrinsic_keyword;
+          keyset_intrinsic_left_bracket;
+          keyset_intrinsic_members;
+          keyset_intrinsic_right_bracket;
+        }
+      | (SyntaxKind.VectorIntrinsicExpression, [
+          vector_intrinsic_keyword;
+          vector_intrinsic_left_bracket;
+          vector_intrinsic_members;
+          vector_intrinsic_right_bracket;
+        ]) ->
+        VectorIntrinsicExpression {
+          vector_intrinsic_keyword;
+          vector_intrinsic_left_bracket;
+          vector_intrinsic_members;
+          vector_intrinsic_right_bracket;
+        }
       | (SyntaxKind.ElementInitializer, [
           element_key;
           element_arrow;
@@ -6005,6 +7072,18 @@ module WithToken(Token: TokenType) = struct
           subscript_left_bracket;
           subscript_index;
           subscript_right_bracket;
+        }
+      | (SyntaxKind.EmbeddedSubscriptExpression, [
+          embedded_subscript_receiver;
+          embedded_subscript_left_bracket;
+          embedded_subscript_index;
+          embedded_subscript_right_bracket;
+        ]) ->
+        EmbeddedSubscriptExpression {
+          embedded_subscript_receiver;
+          embedded_subscript_left_bracket;
+          embedded_subscript_index;
+          embedded_subscript_right_bracket;
         }
       | (SyntaxKind.AwaitableCreationExpression, [
           awaitable_async;
@@ -6076,6 +7155,12 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_decl_initializer;
           xhp_attribute_decl_required;
         }
+      | (SyntaxKind.XHPSimpleClassAttribute, [
+          xhp_simple_class_attribute_type;
+        ]) ->
+        XHPSimpleClassAttribute {
+          xhp_simple_class_attribute_type;
+        }
       | (SyntaxKind.XHPAttribute, [
           xhp_attribute_name;
           xhp_attribute_equal;
@@ -6087,11 +7172,13 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_expression;
         }
       | (SyntaxKind.XHPOpen, [
+          xhp_open_left_angle;
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
         ]) ->
         XHPOpen {
+          xhp_open_left_angle;
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
@@ -6127,16 +7214,40 @@ module WithToken(Token: TokenType) = struct
           type_constant_right_type;
         }
       | (SyntaxKind.VectorTypeSpecifier, [
-          vector_array;
-          vector_left_angle;
-          vector_type;
-          vector_right_angle;
+          vector_type_keyword;
+          vector_type_left_angle;
+          vector_type_type;
+          vector_type_right_angle;
         ]) ->
         VectorTypeSpecifier {
-          vector_array;
-          vector_left_angle;
-          vector_type;
-          vector_right_angle;
+          vector_type_keyword;
+          vector_type_left_angle;
+          vector_type_type;
+          vector_type_right_angle;
+        }
+      | (SyntaxKind.KeysetTypeSpecifier, [
+          keyset_type_keyword;
+          keyset_type_left_angle;
+          keyset_type_type;
+          keyset_type_right_angle;
+        ]) ->
+        KeysetTypeSpecifier {
+          keyset_type_keyword;
+          keyset_type_left_angle;
+          keyset_type_type;
+          keyset_type_right_angle;
+        }
+      | (SyntaxKind.VectorArrayTypeSpecifier, [
+          vector_array_keyword;
+          vector_array_left_angle;
+          vector_array_type;
+          vector_array_right_angle;
+        ]) ->
+        VectorArrayTypeSpecifier {
+          vector_array_keyword;
+          vector_array_left_angle;
+          vector_array_type;
+          vector_array_right_angle;
         }
       | (SyntaxKind.TypeParameter, [
           type_variance;
@@ -6156,21 +7267,33 @@ module WithToken(Token: TokenType) = struct
           constraint_keyword;
           constraint_type;
         }
-      | (SyntaxKind.MapTypeSpecifier, [
-          map_array;
-          map_left_angle;
-          map_key;
-          map_comma;
-          map_value;
-          map_right_angle;
+      | (SyntaxKind.MapArrayTypeSpecifier, [
+          map_array_keyword;
+          map_array_left_angle;
+          map_array_key;
+          map_array_comma;
+          map_array_value;
+          map_array_right_angle;
         ]) ->
-        MapTypeSpecifier {
-          map_array;
-          map_left_angle;
-          map_key;
-          map_comma;
-          map_value;
-          map_right_angle;
+        MapArrayTypeSpecifier {
+          map_array_keyword;
+          map_array_left_angle;
+          map_array_key;
+          map_array_comma;
+          map_array_value;
+          map_array_right_angle;
+        }
+      | (SyntaxKind.DictionaryTypeSpecifier, [
+          dictionary_type_keyword;
+          dictionary_type_left_angle;
+          dictionary_type_members;
+          dictionary_type_right_angle;
+        ]) ->
+        DictionaryTypeSpecifier {
+          dictionary_type_keyword;
+          dictionary_type_left_angle;
+          dictionary_type_members;
+          dictionary_type_right_angle;
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
           closure_outer_left_paren;
@@ -6247,6 +7370,18 @@ module WithToken(Token: TokenType) = struct
           shape_expression_left_paren;
           shape_expression_fields;
           shape_expression_right_paren;
+        }
+      | (SyntaxKind.TupleExpression, [
+          tuple_expression_keyword;
+          tuple_expression_left_paren;
+          tuple_expression_items;
+          tuple_expression_right_paren;
+        ]) ->
+        TupleExpression {
+          tuple_expression_keyword;
+          tuple_expression_left_paren;
+          tuple_expression_items;
+          tuple_expression_right_paren;
         }
       | (SyntaxKind.GenericTypeSpecifier, [
           generic_class_type;
@@ -6353,11 +7488,19 @@ module WithToken(Token: TokenType) = struct
       let make_missing () =
         from_children SyntaxKind.Missing []
 
+      (* An empty list is represented by Missing; everything else is a
+        SyntaxList, even if the list has only one item. *)
       let make_list items =
         match items with
         | [] -> make_missing()
-        | h :: [] -> h
         | _ -> from_children SyntaxKind.SyntaxList items
+
+    let make_end_of_file
+      end_of_file_token
+    =
+      from_children SyntaxKind.EndOfFile [
+        end_of_file_token;
+      ]
 
     let make_script_header
       header_less_than
@@ -6582,6 +7725,7 @@ module WithToken(Token: TokenType) = struct
       function_right_paren
       function_colon
       function_type
+      function_where_clause
     =
       from_children SyntaxKind.FunctionDeclarationHeader [
         function_async;
@@ -6594,6 +7738,27 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
+      ]
+
+    let make_where_clause
+      where_clause_keyword
+      where_clause_constraints
+    =
+      from_children SyntaxKind.WhereClause [
+        where_clause_keyword;
+        where_clause_constraints;
+      ]
+
+    let make_where_constraint
+      where_constraint_left_type
+      where_constraint_operator
+      where_constraint_right_type
+    =
+      from_children SyntaxKind.WhereConstraint [
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
       ]
 
     let make_methodish_declaration
@@ -6740,6 +7905,13 @@ module WithToken(Token: TokenType) = struct
         parameter_default_value;
       ]
 
+    let make_variadic_parameter
+      variadic_parameter_ellipsis
+    =
+      from_children SyntaxKind.VariadicParameter [
+        variadic_parameter_ellipsis;
+      ]
+
     let make_attribute_specification
       attribute_specification_left_double_angle
       attribute_specification_attributes
@@ -6800,6 +7972,21 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.ExpressionStatement [
         expression_statement_expression;
         expression_statement_semicolon;
+      ]
+
+    let make_unset_statement
+      unset_keyword
+      unset_left_paren
+      unset_variables
+      unset_right_paren
+      unset_semicolon
+    =
+      from_children SyntaxKind.UnsetStatement [
+        unset_keyword;
+        unset_left_paren;
+        unset_variables;
+        unset_right_paren;
+        unset_semicolon;
       ]
 
     let make_while_statement
@@ -6945,7 +8132,7 @@ module WithToken(Token: TokenType) = struct
       foreach_keyword
       foreach_left_paren
       foreach_collection
-      foreach_await
+      foreach_await_keyword
       foreach_as
       foreach_key
       foreach_arrow
@@ -6957,7 +8144,7 @@ module WithToken(Token: TokenType) = struct
         foreach_keyword;
         foreach_left_paren;
         foreach_collection;
-        foreach_await;
+        foreach_await_keyword;
         foreach_as;
         foreach_key;
         foreach_arrow;
@@ -6971,38 +8158,58 @@ module WithToken(Token: TokenType) = struct
       switch_left_paren
       switch_expression
       switch_right_paren
-      switch_body
+      switch_left_brace
+      switch_sections
+      switch_right_brace
     =
       from_children SyntaxKind.SwitchStatement [
         switch_keyword;
         switch_left_paren;
         switch_expression;
         switch_right_paren;
-        switch_body;
+        switch_left_brace;
+        switch_sections;
+        switch_right_brace;
       ]
 
-    let make_case_statement
+    let make_switch_section
+      switch_section_labels
+      switch_section_statements
+      switch_section_fallthrough
+    =
+      from_children SyntaxKind.SwitchSection [
+        switch_section_labels;
+        switch_section_statements;
+        switch_section_fallthrough;
+      ]
+
+    let make_switch_fallthrough
+      fallthrough_keyword
+      fallthrough_semicolon
+    =
+      from_children SyntaxKind.SwitchFallthrough [
+        fallthrough_keyword;
+        fallthrough_semicolon;
+      ]
+
+    let make_case_label
       case_keyword
       case_expression
       case_colon
-      case_statement
     =
-      from_children SyntaxKind.CaseStatement [
+      from_children SyntaxKind.CaseLabel [
         case_keyword;
         case_expression;
         case_colon;
-        case_statement;
       ]
 
-    let make_default_statement
+    let make_default_label
       default_keyword
       default_colon
-      default_statement
     =
-      from_children SyntaxKind.DefaultStatement [
+      from_children SyntaxKind.DefaultLabel [
         default_keyword;
         default_colon;
-        default_statement;
       ]
 
     let make_return_statement
@@ -7210,6 +8417,17 @@ module WithToken(Token: TokenType) = struct
         safe_member_name;
       ]
 
+    let make_embedded_member_selection_expression
+      embedded_member_object
+      embedded_member_operator
+      embedded_member_name
+    =
+      from_children SyntaxKind.EmbeddedMemberSelectionExpression [
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      ]
+
     let make_yield_expression
       yield_keyword
       yield_operand
@@ -7283,6 +8501,58 @@ module WithToken(Token: TokenType) = struct
         conditional_alternative;
       ]
 
+    let make_eval_expression
+      eval_keyword
+      eval_left_paren
+      eval_argument
+      eval_right_paren
+    =
+      from_children SyntaxKind.EvalExpression [
+        eval_keyword;
+        eval_left_paren;
+        eval_argument;
+        eval_right_paren;
+      ]
+
+    let make_empty_expression
+      empty_keyword
+      empty_left_paren
+      empty_argument
+      empty_right_paren
+    =
+      from_children SyntaxKind.EmptyExpression [
+        empty_keyword;
+        empty_left_paren;
+        empty_argument;
+        empty_right_paren;
+      ]
+
+    let make_define_expression
+      define_keyword
+      define_left_paren
+      define_argument_list
+      define_right_paren
+    =
+      from_children SyntaxKind.DefineExpression [
+        define_keyword;
+        define_left_paren;
+        define_argument_list;
+        define_right_paren;
+      ]
+
+    let make_isset_expression
+      isset_keyword
+      isset_left_paren
+      isset_argument_list
+      isset_right_paren
+    =
+      from_children SyntaxKind.IssetExpression [
+        isset_keyword;
+        isset_left_paren;
+        isset_argument_list;
+        isset_right_paren;
+      ]
+
     let make_function_call_expression
       function_call_receiver
       function_call_left_paren
@@ -7316,6 +8586,17 @@ module WithToken(Token: TokenType) = struct
         braced_expression_left_brace;
         braced_expression_expression;
         braced_expression_right_brace;
+      ]
+
+    let make_embedded_braced_expression
+      embedded_braced_expression_left_brace
+      embedded_braced_expression_expression
+      embedded_braced_expression_right_brace
+    =
+      from_children SyntaxKind.EmbeddedBracedExpression [
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
       ]
 
     let make_list_expression
@@ -7383,6 +8664,45 @@ module WithToken(Token: TokenType) = struct
         array_intrinsic_right_paren;
       ]
 
+    let make_dictionary_intrinsic_expression
+      dictionary_intrinsic_keyword
+      dictionary_intrinsic_left_bracket
+      dictionary_intrinsic_members
+      dictionary_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.DictionaryIntrinsicExpression [
+        dictionary_intrinsic_keyword;
+        dictionary_intrinsic_left_bracket;
+        dictionary_intrinsic_members;
+        dictionary_intrinsic_right_bracket;
+      ]
+
+    let make_keyset_intrinsic_expression
+      keyset_intrinsic_keyword
+      keyset_intrinsic_left_bracket
+      keyset_intrinsic_members
+      keyset_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.KeysetIntrinsicExpression [
+        keyset_intrinsic_keyword;
+        keyset_intrinsic_left_bracket;
+        keyset_intrinsic_members;
+        keyset_intrinsic_right_bracket;
+      ]
+
+    let make_vector_intrinsic_expression
+      vector_intrinsic_keyword
+      vector_intrinsic_left_bracket
+      vector_intrinsic_members
+      vector_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.VectorIntrinsicExpression [
+        vector_intrinsic_keyword;
+        vector_intrinsic_left_bracket;
+        vector_intrinsic_members;
+        vector_intrinsic_right_bracket;
+      ]
+
     let make_element_initializer
       element_key
       element_arrow
@@ -7405,6 +8725,19 @@ module WithToken(Token: TokenType) = struct
         subscript_left_bracket;
         subscript_index;
         subscript_right_bracket;
+      ]
+
+    let make_embedded_subscript_expression
+      embedded_subscript_receiver
+      embedded_subscript_left_bracket
+      embedded_subscript_index
+      embedded_subscript_right_bracket
+    =
+      from_children SyntaxKind.EmbeddedSubscriptExpression [
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
       ]
 
     let make_awaitable_creation_expression
@@ -7484,6 +8817,13 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_decl_required;
       ]
 
+    let make_xhp_simple_class_attribute
+      xhp_simple_class_attribute_type
+    =
+      from_children SyntaxKind.XHPSimpleClassAttribute [
+        xhp_simple_class_attribute_type;
+      ]
+
     let make_xhp_attribute
       xhp_attribute_name
       xhp_attribute_equal
@@ -7496,11 +8836,13 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_xhp_open
+      xhp_open_left_angle
       xhp_open_name
       xhp_open_attributes
       xhp_open_right_angle
     =
       from_children SyntaxKind.XHPOpen [
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
@@ -7540,16 +8882,42 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_vector_type_specifier
-      vector_array
-      vector_left_angle
-      vector_type
-      vector_right_angle
+      vector_type_keyword
+      vector_type_left_angle
+      vector_type_type
+      vector_type_right_angle
     =
       from_children SyntaxKind.VectorTypeSpecifier [
-        vector_array;
-        vector_left_angle;
-        vector_type;
-        vector_right_angle;
+        vector_type_keyword;
+        vector_type_left_angle;
+        vector_type_type;
+        vector_type_right_angle;
+      ]
+
+    let make_keyset_type_specifier
+      keyset_type_keyword
+      keyset_type_left_angle
+      keyset_type_type
+      keyset_type_right_angle
+    =
+      from_children SyntaxKind.KeysetTypeSpecifier [
+        keyset_type_keyword;
+        keyset_type_left_angle;
+        keyset_type_type;
+        keyset_type_right_angle;
+      ]
+
+    let make_vector_array_type_specifier
+      vector_array_keyword
+      vector_array_left_angle
+      vector_array_type
+      vector_array_right_angle
+    =
+      from_children SyntaxKind.VectorArrayTypeSpecifier [
+        vector_array_keyword;
+        vector_array_left_angle;
+        vector_array_type;
+        vector_array_right_angle;
       ]
 
     let make_type_parameter
@@ -7572,21 +8940,34 @@ module WithToken(Token: TokenType) = struct
         constraint_type;
       ]
 
-    let make_map_type_specifier
-      map_array
-      map_left_angle
-      map_key
-      map_comma
-      map_value
-      map_right_angle
+    let make_map_array_type_specifier
+      map_array_keyword
+      map_array_left_angle
+      map_array_key
+      map_array_comma
+      map_array_value
+      map_array_right_angle
     =
-      from_children SyntaxKind.MapTypeSpecifier [
-        map_array;
-        map_left_angle;
-        map_key;
-        map_comma;
-        map_value;
-        map_right_angle;
+      from_children SyntaxKind.MapArrayTypeSpecifier [
+        map_array_keyword;
+        map_array_left_angle;
+        map_array_key;
+        map_array_comma;
+        map_array_value;
+        map_array_right_angle;
+      ]
+
+    let make_dictionary_type_specifier
+      dictionary_type_keyword
+      dictionary_type_left_angle
+      dictionary_type_members
+      dictionary_type_right_angle
+    =
+      from_children SyntaxKind.DictionaryTypeSpecifier [
+        dictionary_type_keyword;
+        dictionary_type_left_angle;
+        dictionary_type_members;
+        dictionary_type_right_angle;
       ]
 
     let make_closure_type_specifier
@@ -7669,6 +9050,19 @@ module WithToken(Token: TokenType) = struct
         shape_expression_left_paren;
         shape_expression_fields;
         shape_expression_right_paren;
+      ]
+
+    let make_tuple_expression
+      tuple_expression_keyword
+      tuple_expression_left_paren
+      tuple_expression_items
+      tuple_expression_right_paren
+    =
+      from_children SyntaxKind.TupleExpression [
+        tuple_expression_keyword;
+        tuple_expression_left_paren;
+        tuple_expression_items;
+        tuple_expression_right_paren;
       ]
 
     let make_generic_type_specifier

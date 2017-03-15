@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,12 +85,12 @@ struct alignas(16) Resumable {
   // This function is temporary till we move AFWH to HNI
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
-    auto node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
+    (void)type_scan::getIndexForMalloc<ActRec>();
+    auto node = new (MM().objMalloc(totalSize))
+                NativeNode(HeaderKind::AsyncFuncFrame,
+                           sizeof(NativeNode) + frameSize + sizeof(Resumable));
     auto frame = reinterpret_cast<char*>(node + 1);
-    auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
-    node->obj_offset = sizeof(NativeNode) + frameSize + sizeof(Resumable);
-    node->hdr.kind = HeaderKind::AsyncFuncFrame;
-    return resumable;
+    return reinterpret_cast<Resumable*>(frame + frameSize);
   }
 
   template<bool clone,
@@ -162,6 +162,7 @@ struct alignas(16) Resumable {
 private:
   // ActRec of the resumed frame.
   ActRec m_actRec;
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_actRec);
 
   // Resume address.
   jit::TCA m_resumeAddr;

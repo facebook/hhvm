@@ -21,6 +21,10 @@ let rec hint env (p, h) =
   let h = hint_ p env h in
   Typing_reason.Rhint p, h
 
+(* TODO(tingley): Record the optional status and use this to reconcile types. *)
+and shape_field_info_to_shape_field_type env { sfi_optional=_; sfi_hint } =
+  hint env sfi_hint
+
 and hint_ p env = function
   | Hany -> Tany
   | Hmixed -> Tmixed
@@ -36,13 +40,13 @@ and hint_ p env = function
     Tgeneric x
   | Hoption (_, Hprim Tvoid) ->
     Errors.option_return_only_typehint p `void;
-    Tany
+    Terr
   | Hoption (_, Hprim Tnoreturn) ->
     Errors.option_return_only_typehint p `noreturn;
-    Tany
+    Terr
   | Hoption (_, Hmixed) ->
     Errors.option_mixed p;
-    Tany
+    Terr
   | Hoption h ->
     let h = hint env h in
     Toption h
@@ -68,7 +72,7 @@ and hint_ p env = function
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
     Errors.tuple_syntax p;
-    Tany
+    Terr
   | Happly (((_p, c) as id), argl) ->
     Decl_hooks.dispatch_class_id_hook id None;
     Decl_env.add_wclass env c;
@@ -81,7 +85,7 @@ and hint_ p env = function
     let tyl = List.map hl (hint env) in
     Ttuple tyl
   | Hshape fdm ->
-    let fdm = ShapeMap.map (hint env) fdm in
+    let fdm = ShapeMap.map (shape_field_info_to_shape_field_type env) fdm in
     (* Fields are only partially known, because this shape type comes from
      * type hint - shapes that contain listed fields can be passed here, but
      * due to structural subtyping they can also contain other fields, that we

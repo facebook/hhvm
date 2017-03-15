@@ -12,6 +12,7 @@ open Core
 
 let make_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.push_stack();
+  File_heap.FileHeap.LocalChanges.push_stack();
   Parser_heap.ParserHeap.LocalChanges.push_stack();
 
   Naming_heap.FunPosHeap.LocalChanges.push_stack();
@@ -33,6 +34,7 @@ let make_local_changes () =
 
 let revert_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.pop_stack();
+  File_heap.FileHeap.LocalChanges.pop_stack();
   Parser_heap.ParserHeap.LocalChanges.pop_stack();
 
   Naming_heap.FunPosHeap.LocalChanges.pop_stack();
@@ -86,13 +88,13 @@ let declare_and_check content ~f tcopt =
       List.fold_left ast ~f:begin fun (funs, classes, typedefs, consts) def ->
         match def with
         | Ast.Fun { Ast.f_name; _ } ->
-          f_name::funs, classes, typedefs, consts
+          (FileInfo.pos_full f_name)::funs, classes, typedefs, consts
         | Ast.Class { Ast.c_name; _ } ->
-          funs, c_name::classes, typedefs, consts
+          funs, (FileInfo.pos_full c_name)::classes, typedefs, consts
         | Ast.Typedef { Ast.t_id; _ } ->
-          funs, classes, t_id::typedefs, consts
+          funs, classes, (FileInfo.pos_full t_id)::typedefs, consts
         | Ast.Constant { Ast.cst_name; _ } ->
-          funs, classes, typedefs, cst_name::consts
+          funs, classes, typedefs, (FileInfo.pos_full cst_name)::consts
         | _ -> funs, classes, typedefs, consts
       end ~init:([], [], [], []) in
 
@@ -107,24 +109,20 @@ let declare_and_check content ~f tcopt =
       ~classes:n_classes
       ~typedefs:n_types
       ~consts:n_consts;
-    NamingGlobal.make_env ~funs ~classes ~typedefs ~consts;
-    let nast = Naming.program tcopt ast in
-    List.iter nast begin function
-      | Nast.Fun f -> Decl.fun_decl f
-      | Nast.Class c -> Decl.class_decl tcopt c
-      | Nast.Typedef t -> Decl.typedef_decl t
-      | Nast.Constant cst -> Decl.const_decl cst
-    end;
+    NamingGlobal.make_env tcopt ~funs ~classes ~typedefs ~consts;
 
-    (* We must run all the declaration steps first to ensure that the
-     * typechecking below sees all the new declarations. Lazy decl
-     * won't work in this case because we haven't put the new ASTs into
-     * the parsing heap. *)
+    (* Decl is not necessary to run typing, since typing would get
+     * whatever it needs using lazy decl, but we run it anyway in order to
+     * ensure that hooks attached to decl phase are executed. *)
+    Decl.name_and_declare_types_program tcopt ast;
+
+    let nast = Naming.program tcopt ast in
+
     List.iter nast begin function
-      | Nast.Fun f -> Typing.fun_def tcopt f;
-      | Nast.Class c -> Typing.class_def tcopt c;
+      | Nast.Fun f -> ignore (Typing.fun_def tcopt f);
+      | Nast.Class c -> ignore (Typing.class_def tcopt c);
       | Nast.Typedef t -> Typing.typedef_def tcopt t;
-      | Nast.Constant cst -> Typing.gconst_def cst tcopt;
+      | Nast.Constant cst -> ignore (Typing.gconst_def cst tcopt);
     end;
     f path file_info
   end

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,6 +78,8 @@ struct PageletServer {
   static int GetQueuedJobs();
 };
 
+const StaticString s_pagelet("pagelet");
+
 struct PageletTransport final : Transport, Synchronizable {
   PageletTransport(
     const String& url, const Array& headers, const String& postData,
@@ -102,6 +104,13 @@ struct PageletTransport final : Transport, Synchronizable {
   void onSendEndImpl() override;
   bool isUploadedFile(const String& filename) override;
   bool getFiles(std::string &files) override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_pagelet;
+  }
 
   // task interface
   bool isDone();

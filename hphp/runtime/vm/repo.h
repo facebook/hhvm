@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,16 +42,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Repo : RepoProxy {
-private:
-  static SimpleMutex s_lock;
-  static unsigned s_nRepos;
-
-public:
   struct GlobalData;
 
   // Do not directly instantiate this class; a thread-local creates one per
   // thread on demand when Repo::get() is called.
   static Repo& get();
+  // Prefork is called before forking. It attempts to shut down other
+  // threads and returns true if forking should be prevented, false if
+  // it's ok to proceed.
   static bool prefork();
   static void postfork(pid_t pid);
 

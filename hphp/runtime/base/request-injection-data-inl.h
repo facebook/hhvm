@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,14 @@ inline bool RequestInjectionData::getJitFolding() const {
 
 inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
+}
+
+inline bool RequestInjectionData::getSuppressHackArrayCompatNotices() const {
+  return m_suppressHackArrayCompatNotices;
+}
+
+inline void RequestInjectionData::setSuppressHackArrayCompatNotices(bool flag) {
+  m_suppressHackArrayCompatNotices = flag;
 }
 
 inline bool RequestInjectionData::getCoverage() const {
@@ -202,6 +210,10 @@ inline const std::string& RequestInjectionData::getTimeZone() const {
 
 inline void RequestInjectionData::setTimeZone(const std::string& tz) {
   m_timezone = tz;
+}
+
+inline void RequestInjectionData::setSafeFileAccess(bool b) {
+  m_safeFileAccess = b;
 }
 
 inline bool RequestInjectionData::hasSafeFileAccess() const {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -242,35 +242,18 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
 
     case FunType::Extract:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      fs->setAttribute(FileScope::ContainsExtract);
       break;
 
     case FunType::Assert:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      fs->setAttribute(FileScope::ContainsAssert);
       break;
 
-    case FunType::Compact: {
-      // If all the parameters in the compact() call are statically known,
-      // there is no need to create a variable table.
-      std::vector<ExpressionPtr> literals;
-      if (false && m_params->flattenLiteralStrings(literals)) {
-        m_type = FunType::StaticCompact;
-        m_params->clearElements();
-        for (unsigned i = 0; i < literals.size(); i++) {
-          m_params->addElement(literals[i]);
-        }
-      } else {
-        fs->setAttribute(FileScope::ContainsDynamicVariable);
-      }
-      fs->setAttribute(FileScope::ContainsCompact);
+    case FunType::Compact:
+      fs->setAttribute(FileScope::ContainsDynamicVariable);
       break;
-    }
 
     case FunType::GetDefinedVars:
       fs->setAttribute(FileScope::ContainsDynamicVariable);
-      fs->setAttribute(FileScope::ContainsGetDefinedVars);
-      fs->setAttribute(FileScope::ContainsCompact);
       break;
 
     case FunType::Unknown:
@@ -294,6 +277,7 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
   assert(iter != FunctionTypeMap.end());
   m_type = iter->second;
   mungeIfSpecialFunction(ar, fs);
+  updateVtFlags();
 }
 
 
@@ -451,48 +435,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    if (m_type == FunType::StaticCompact) {
-      FunctionScopePtr fs = getFunctionScope();
-      VariableTablePtr vt = fs->getVariables();
-      if (vt->isPseudoMainTable() ||
-          vt->getAttribute(VariableTable::ContainsDynamicVariable)) {
-        // When there is a variable table already, we will keep the ordinary
-        // compact() call.
-        m_type = FunType::Compact;
-      } else {
-        // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c)
-        std::vector<ExpressionPtr> new_params;
-        std::vector<std::string> strs;
-        for (int i = 0; i < m_params->getCount(); i++) {
-          ExpressionPtr e = (*m_params)[i];
-          always_assert(e->isLiteralString());
-          auto const name = e->getLiteralString();
-
-          // no need to record duplicate names
-          bool found = false;
-          for (unsigned j = 0; j < strs.size(); j++) {
-            if (strcasecmp(name.data(), strs[j].data()) == 0) {
-              found = true;
-              break;
-            }
-          }
-          if (found) continue;
-          strs.push_back(name);
-
-          SimpleVariablePtr var(new SimpleVariable(
-                                  e->getScope(), e->getRange(), name));
-          var->copyContext(e);
-          var->updateSymbol(SimpleVariablePtr());
-          new_params.push_back(e);
-          new_params.push_back(var);
-        }
-        m_params->clearElements();
-        for (unsigned i = 0; i < new_params.size(); i++) {
-          m_params->addElement(new_params[i]);
-        }
-      }
-    }
-
     if (m_params) {
       markRefParams(m_funcScope, m_origName);
     }
@@ -558,20 +500,14 @@ void SimpleFunctionCall::updateVtFlags() {
     switch (m_type) {
       case FunType::Extract:
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
-        vt->setAttribute(VariableTable::ContainsExtract);
         break;
       case FunType::Assert:
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
-        vt->setAttribute(VariableTable::ContainsAssert);
       case FunType::Compact:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
-      case FunType::StaticCompact:
-        vt->setAttribute(VariableTable::ContainsCompact);
         break;
       case FunType::GetDefinedVars:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
-        vt->setAttribute(VariableTable::ContainsGetDefinedVars);
-        vt->setAttribute(VariableTable::ContainsCompact);
         break;
       default:
         break;
@@ -707,9 +643,9 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             auto rep = std::make_shared<ExpressionList>(
               getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
             std::string root_name;
-            int n = arr ? arr->getCount() : 0;
+            int n2 = arr ? arr->getCount() : 0;
             int i, j, k;
-            for (i = j = k = 0; i < n; i++) {
+            for (i = j = k = 0; i < n2; i++) {
               auto ap = dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]);
               always_assert(ap);
               String name;

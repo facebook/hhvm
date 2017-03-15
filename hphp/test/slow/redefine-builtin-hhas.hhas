@@ -1,0 +1,17 @@
+#
+# Can't redefine builtins, even if you bypass the parser
+#
+
+.main {
+  FPushFuncD 0 "extract"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function extract {
+  String "Fake extract!\n"
+  Print
+  RetC
+}

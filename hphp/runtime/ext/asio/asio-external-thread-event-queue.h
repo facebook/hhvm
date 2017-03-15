@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -49,14 +49,9 @@ struct AsioExternalThreadEventQueue final {
   void receiveSome();
   void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
-  template<class F> void scan(F& mark) const {
-    mark(m_received);
-    // TODO: t7930461 if other threads have ptrs to our heap stashed in their
-    // thread-local or stack, we need to also scan them, or track them
-    // as roots somewhere. and if they're allowed to mutate our heap
-    // asyncronously, we need to rethink the single-threaded-gc
-    mark(m_queue.load());
-  }
+  // TODO: t7930461 if other threads have ptrs to our heap stashed in their
+  // thread-local or stack, we need to also scan them, or track them
+  // as roots somewhere.
 
 private:
   c_ExternalThreadEventWaitHandle* m_received;

@@ -1,5 +1,9 @@
-\:xhp:foo-element
-Class
-line 6, characters 14-28
-defined: line 3, characters 7-22
-definition span: line 3, character 1 - line 3, character 25
+name: \:xhp:foo-element, kind: type_id, span: line 6, characters 14-28, definition: 
+ :xhp:foo-element
+   kind: class
+   id: type_id:::xhp:foo-element
+   position: line 3, characters 7-22
+   span: line 3, character 1 - line 3, character 25
+   modifiers: 
+
+

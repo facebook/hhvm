@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,16 +116,16 @@ TypedValue* zend_wrap_func(ActRec* ar) {
   TypedValue return_value_copy = *return_value;
   return_value->m_type = KindOfNull; // clear the Variant's copy
   frame_free_locals_inl(ar, ar->func()->numLocals(), &return_value_copy);
-  memcpy(&ar->m_r, &return_value_copy, sizeof(TypedValue));
   if (ar->func()->isReturnRef()) {
-    if (!ar->m_r.m_data.pref->isReferenced()) {
-      tvUnbox(&ar->m_r);
+    if (!return_value_copy.m_data.pref->isReferenced()) {
+      tvUnbox(&return_value_copy);
     }
   } else {
-    tvUnbox(&ar->m_r);
+    tvUnbox(&return_value_copy);
   }
-
-  return &ar->m_r;
+  auto ret_slot = ar->retSlot();
+  tvCopy(return_value_copy, *ret_slot);
+  return ret_slot;
 }
 
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -276,8 +276,7 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfArray:   return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;
     case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:   return INVALID_TYPE;
+    case KindOfRef:     return INVALID_TYPE;
   }
   return INVALID_TYPE;
 }

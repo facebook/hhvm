@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -156,6 +156,13 @@ inline RegSet php_return_regs() {
  * TODO(#2288359): We don't want this to include rvmsp() eventually.
  */
 inline RegSet fcall_array_regs() { return vm_regs_with_sp(); }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return the status flags that must be set when testing 'cc'.
+ */
+Vflags required_flags(ConditionCode cc);
 
 ///////////////////////////////////////////////////////////////////////////////
 

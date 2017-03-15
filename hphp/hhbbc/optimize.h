@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,12 +16,15 @@
 #ifndef incl_HPHP_OPTIMIZE_H_
 #define incl_HPHP_OPTIMIZE_H_
 
+#include "hphp/runtime/base/typed-value.h"
+
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 struct Index;
 struct FuncAnalysis;
+struct Bytecode;
 
 /*
  * Use information from an analyze call to perform various
@@ -34,7 +37,12 @@ struct FuncAnalysis;
  * php::Func, but it won't modify the top-level meta-data in the
  * php::Func itself.
  */
-void optimize_func(const Index&, FuncAnalysis);
+void optimize_func(const Index&, FuncAnalysis&&);
+
+/*
+ * Return a bytecode to generate the value in cell
+ */
+Bytecode gen_constant(const Cell& cell);
 
 //////////////////////////////////////////////////////////////////////
 

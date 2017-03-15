@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -129,6 +129,23 @@ void raise_typehint_error(const std::string& msg);
 void raise_return_typehint_error(const std::string& msg);
 
 void raise_disallowed_dynamic_call(const Func* f);
+
+// RAII mechanism to temporarily suppress Hack array compat notices within a
+// scope.
+struct SuppressHackArrCompatNotices {
+  SuppressHackArrCompatNotices();
+  ~SuppressHackArrCompatNotices();
+  SuppressHackArrCompatNotices(const SuppressHackArrCompatNotices&) = delete;
+  SuppressHackArrCompatNotices(SuppressHackArrCompatNotices&&) = delete;
+  SuppressHackArrCompatNotices&
+  operator=(const SuppressHackArrCompatNotices&) = delete;
+  SuppressHackArrCompatNotices&
+  operator=(SuppressHackArrCompatNotices&&) = delete;
+private:
+  bool old;
+};
+
+void raise_hackarr_compat_notice(const std::string& msg);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

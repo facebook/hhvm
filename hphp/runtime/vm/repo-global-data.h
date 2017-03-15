@@ -37,6 +37,11 @@ struct Repo::GlobalData {
   bool UsedHHBBC = false;
 
   /*
+   * Was the repo compiled with EnableHipHopSyntax.
+   */
+  bool EnableHipHopSyntax = false;
+
+  /*
    * Indicates whether a repo was compiled with HardTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
@@ -73,6 +78,13 @@ struct Repo::GlobalData {
   bool DisallowDynamicVarEnvFuncs = false;
 
   /*
+   * Indicates whether the repo was compiled with ElideAutoloadInvokes. If so,
+   * potential invocations of the autoloader may have been optimized away if it
+   * could be proven the invocation would not find a viable function.
+   */
+  bool ElideAutoloadInvokes = true;
+
+  /*
    * Indicates whether the repo was compiled with PHP7 integer semantics. This
    * slightly changes the way certain arithmetic operations are evaluated, in
    * small enough ways that don't warrant new bytecodes, but in ways that do
@@ -89,6 +101,11 @@ struct Repo::GlobalData {
   bool PHP7_ScalarTypes = false;
 
   /*
+   * Indicates whether the repo was compiled with PHP7 builtins enabled.
+   */
+  bool PHP7_Builtins = false;
+
+  /*
    * Indicates whether the repo was compiled with PHP7 substr behavior which
    * returns an empty string if the stringi length is equal to start characters
    * long, instead of PHP5's false.
@@ -101,20 +118,35 @@ struct Repo::GlobalData {
    */
   bool AutoprimeGenerators = true;
 
+  /*
+   * Should emptyish in lval context be promoted to a stdclass object?
+   */
+  bool PromoteEmptyObject = true;
+
+  /*
+   * Should all functions be interceptable?
+   */
+  bool EnableRenameFunction = false;
+
   std::vector<const StringData*> APCProfile;
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
+      (EnableHipHopSyntax)
       (HardTypeHints)
       (HardPrivatePropInference)
       (arrayTypeTable)
       (DisallowDynamicVarEnvFuncs)
+      (ElideAutoloadInvokes)
       (HardReturnTypeHints)
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)
       (PHP7_Substr)
+      (PHP7_Builtins)
       (AutoprimeGenerators)
       (APCProfile)
+      (PromoteEmptyObject)
+      (EnableRenameFunction)
       ;
   }
 };

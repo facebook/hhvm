@@ -223,14 +223,6 @@ visible at the PHP level.
   TCA            | Machine code address
   Nullptr        | C++ `nullptr`
 
-There is also one special type which represents all the possible types that can
-be on the VM evaluation stack: all PHP-visible types plus the runtime-internal
-`Cls` type.
-
-  Type          | HHVM representation
-  --------------|--------------------
-  StkElem       | `{Gen+Cls}`
-
 ### Values, Instructions, and Blocks
 
 An HHIR program is made up of `Blocks`, each containing one or more

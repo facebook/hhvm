@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 2014-2015 Etsy, Inc. (http://www.etsy.com)             |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -99,7 +99,9 @@ TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   static std::unordered_map<std::string, bool> fileWritten;
   SavedAnnotation saved = {
-    folly::sformat("/tmp/tc_annotations.txt{}", compress ? ".gz" : ""),
+    folly::sformat("{}/tc_annotations.txt{}",
+                   RuntimeOption::EvalDumpTCPath,
+                   compress ? ".gz" : ""),
     0,
     0
   };
@@ -139,7 +141,7 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
 }
 
 std::string
-TransRec::print(uint64_t profCount) const {
+TransRec::print() const {
   if (!isValid()) return "Translation -1 {\n}\n\n";
 
   std::string ret;
@@ -209,11 +211,7 @@ TransRec::print(uint64_t profCount) const {
                   annotation.first, annotation.second);
   }
 
-  folly::format(
-    &ret,
-    "  profCount = {}\n"
-    "  bcMapping = {}\n",
-    profCount, bcMapping.size());
+  folly::format(&ret, "  bcMapping = {}\n", bcMapping.size());
 
   for (auto const& info : bcMapping) {
     folly::format(

@@ -1,8 +1,8 @@
-testing fault region
+testing catch region
 In region
 about to throw: the message
-throw_stuff's fault ...
-In foo's fault handler
+throw_stuff's exception handler ...
+In foo's exception handler
 top-level catch handler got: the message
 one
 two

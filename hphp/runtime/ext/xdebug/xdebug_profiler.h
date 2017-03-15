@@ -237,11 +237,6 @@ private:
   // Writes the given function's name in cachegrind format
   void writeCachegrindFuncName(const Func* func, bool isTopPseudoMain);
 
-public:
-  void scan(type_scan::Scanner& scanner) const override {
-    scanner.scan(*this);
-  }
-
 private:
   FrameData* m_frameBuffer = nullptr;
   int64_t m_frameBufferSize = 0;

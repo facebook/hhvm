@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,11 +31,25 @@ extern const StaticString s_Closure;
 
 // native data for closures. Memory layout looks like this:
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
-struct ClosureHdr {
-  void* ctx;
-  HeaderWord<> hdr;
-  uint32_t& size() { return hdr.hi32; }
-  uint32_t size() const { return hdr.hi32; }
+struct ClosureHdr : HeapObject {
+  explicit ClosureHdr(uint32_t size) {
+    initHeader(HeaderKind::ClosureHdr, size);
+  }
+  uint32_t& size() { return m_aux32; }
+  uint32_t size() const { return m_aux32; }
+  static constexpr uintptr_t kClassBit = 0x1;
+  bool ctxIsClass() const {
+    return ctx_bits & kClassBit;
+  }
+  TYPE_SCAN_CUSTOM_FIELD(ctx) {
+    if (!ctxIsClass()) scanner.scan(ctx_this);
+  }
+ public:
+  union {
+    void* ctx;
+    uintptr_t ctx_bits;
+    ObjectData* ctx_this;
+  };
 };
 
 struct c_Closure final : ObjectData {
@@ -107,34 +121,25 @@ struct c_Closure final : ObjectData {
   void* getThisOrClass() const { return hdr()->ctx; }
   void setThisOrClass(void* p) { hdr()->ctx = p; }
   ObjectData* getThisUnchecked() const {
-    assertx(!ctxIsClass());
-    return reinterpret_cast<ObjectData*>(hdr()->ctx);
+    assertx(!hdr()->ctxIsClass());
+    return hdr()->ctx_this;
   }
   ObjectData* getThis() const {
-    if (UNLIKELY(ctxIsClass())) {
-      return nullptr;
-    }
-    return getThisUnchecked();
+    return UNLIKELY(hdr()->ctxIsClass()) ? nullptr : getThisUnchecked();
   }
-  void setThis(ObjectData* od) { hdr()->ctx = od; }
-  bool hasThis() const { return hdr()->ctx && !ctxIsClass(); }
+  void setThis(ObjectData* od) { hdr()->ctx_this = od; }
+  bool hasThis() const { return hdr()->ctx && !hdr()->ctxIsClass(); }
 
   Class* getClass() const {
-    if (LIKELY(ctxIsClass())) {
-      return reinterpret_cast<Class*>(
-        reinterpret_cast<uintptr_t>(hdr()->ctx) & ~kClassBit
-      );
-    } else {
-      return nullptr;
-    }
+    return LIKELY(hdr()->ctxIsClass()) ?
+      reinterpret_cast<Class*>(hdr()->ctx_bits & ~ClosureHdr::kClassBit) :
+      nullptr;
   }
   void setClass(Class* cls) {
     assertx(cls);
-    hdr()->ctx = reinterpret_cast<void*>(
-      reinterpret_cast<uintptr_t>(cls) | kClassBit
-    );
+    hdr()->ctx_bits = reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit;
   }
-  bool hasClass() const { return ctxIsClass(); }
+  bool hasClass() const { return hdr()->ctxIsClass(); }
 
   ObjectData* clone();
 
@@ -153,11 +158,6 @@ private:
 
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
-
-  static constexpr uintptr_t kClassBit = 0x1;
-  bool ctxIsClass() const {
-    return reinterpret_cast<uintptr_t>(hdr()->ctx) & kClassBit;
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

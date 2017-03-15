@@ -96,4 +96,5 @@ function openssl_encrypt($data, $method, $password, $options = 0, $iv = null, &$
 function openssl_decrypt($data, $method, $password, $options = 0, $iv = null, $tag = null, $aad = null);
 function openssl_digest($data, $method, $raw_output = false);
 function openssl_get_cipher_methods($aliases = false);
+function openssl_get_curve_names();
 function openssl_get_md_methods($aliases = false);

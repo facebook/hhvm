@@ -369,7 +369,6 @@ and p_type_constraint = "TypeConstraint", fun () ->
 and p_statement = "Statement", fun () -> [
   [NonTerm p_function_static_declaration];
   [NonTerm p_compound_statement];
-  [NonTerm p_labeled_statement];
   [NonTerm p_expression_statement];
   [NonTerm p_if_statement];
   [NonTerm p_switch_statement];
@@ -393,6 +392,17 @@ and p_static_declarator = "StaticDeclarator", fun () -> [
 
 and p_variable_name = "VariableName", fun () -> [[dollar]]
 
+and p_switch_section_labels = "SwitchSectionLabels", fun () -> [
+  [NonTerm p_switch_section_label];
+  [NonTerm p_switch_section_labels; NonTerm p_switch_section_label]]
+
+and p_switch_section = "SwitchSection", fun () -> [
+  [NonTerm p_switch_section_labels; NonTerm p_statement_list]]
+
+and p_switch_sections = "SwitchSections", fun () -> [
+  [NonTerm p_switch_section];
+  [NonTerm p_switch_sections; NonTerm p_switch_section]]
+
 and p_compound_statement = "CompoundStatement", fun () -> [
   [left_brace; right_brace];
   [left_brace; NonTerm p_statement_list; right_brace]]
@@ -401,9 +411,9 @@ and p_statement_list = "StatementList", fun () -> [
   [NonTerm p_statement];
   [NonTerm p_statement_list; NonTerm p_statement]]
 
-and p_labeled_statement = "LabeledStatement", fun () -> [
-  [case; NonTerm p_expression; colon; NonTerm p_statement];
-  [default; colon; NonTerm p_statement]]
+and p_switch_section_label = "SwitchSectionLabel", fun () -> [
+  [case; NonTerm p_expression; colon];
+  [default; colon]]
 
 and p_jump_statement = "JumpStatement", fun () -> [
   [continue; semicolon]; [break; semicolon];
@@ -445,7 +455,7 @@ and p_elseif_clause = "ElseifClause", fun () -> [
 
 and p_switch_statement = "SwitchStatement", fun () -> [
   [switch; left_paren; NonTerm p_expression; right_paren;
-    NonTerm p_compound_statement]]
+    left_brace; NonTerm p_switch_sections; right_brace ]]
 
 and p_while_statement = "WhileStatement", fun () -> [
   [term_while; left_paren; NonTerm p_expression; right_paren;
@@ -582,6 +592,18 @@ and p_expression = "Expression", fun () -> [
   (* [yield; array_element_initializer] *)
   ]
 
+and p_expression_no_name = "ExpressionNoName", fun () -> [
+  (* DEVIATION non-assignment options are pre-expanded to increase their
+   * likelihood *)
+  [NonTerm p_assignment_expression];
+  [NonTerm p_primary_expression_no_name];
+  [NonTerm p_unary_expression];
+  (* DEVIATION: complex hierarchy is flattened here *)
+  [NonTerm p_binary_expression];
+  [NonTerm p_xhp_expression]
+  (* [yield; array_element_initializer] *)
+  ]
+
 and p_xhp_expression = "XHPExpression", fun () -> [
   (* Note: 1. opening and closing names are not made the same
    *       2. opening is used as xhp_element_name which comes with a < token
@@ -646,6 +668,19 @@ and p_instanceof_expression = "InstanceofExpression", fun () -> [
 and p_instance_designator = "InstanceTypeDesignator", fun () -> [
   [qualified_name]; [NonTerm p_variable_name]]
 
+and p_primary_expression_no_name = "PrimaryExpressionNoName", fun () -> [
+  (* TODO *)
+  [NonTerm p_variable_name];
+  [NonTerm p_literal];
+  [NonTerm p_intrinsic];
+  (* [NonTerm p_collection_literal]; *)
+  (* [NonTerm p_tuple_literal]; *)
+  [NonTerm p_shape_literal];
+  [NonTerm p_anonymous_fun_creation];
+  (* [NonTerm p_awaitable_creation]; *)
+  [left_paren; NonTerm p_expression_no_name; right_paren];
+  [dollar_dollar]]
+
 and p_primary_expression = "PrimaryExpression", fun () -> [
   (* TODO *)
   [NonTerm p_variable_name];
@@ -657,7 +692,7 @@ and p_primary_expression = "PrimaryExpression", fun () -> [
   [NonTerm p_shape_literal];
   [NonTerm p_anonymous_fun_creation];
   (* [NonTerm p_awaitable_creation]; *)
-  [left_paren; NonTerm p_expression; right_paren];
+  [left_paren; NonTerm p_expression_no_name; right_paren];
   [dollar_dollar]]
 
 and p_list_intrinsic = "ListIntrinsic", fun () -> [
@@ -665,10 +700,12 @@ and p_list_intrinsic = "ListIntrinsic", fun () -> [
   [term_list; left_paren; NonTerm p_list_expression_list; right_paren]]
 
 and p_list_expression_list = "ListExpressionList", fun () -> [
+  [NonTerm p_expressions];
+  [NonTerm p_expressions; comma]]
+
+and p_expressions = "Expressions", fun () -> [
   [NonTerm p_expression];
-  [comma];
-  [NonTerm p_list_expression_list; comma];
-  [NonTerm p_list_expression_list; comma; NonTerm p_expression]]
+  [NonTerm p_expressions; comma; NonTerm p_expression]]
 
 and p_literal = "Literal", fun () -> [
   [boolean_literal];

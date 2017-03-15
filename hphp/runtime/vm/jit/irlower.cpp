@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -168,7 +168,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
     // vasm-xls can fail if it tries to allocate too many spill slots.
     logLowPriPerfWarning(
       "vasm-optimize punt",
-      250,
+      1000,
       [&](StructuredLogEntry& cols) {
         cols.setStr("punt_type", e.what());
         cols.setStr("vasm_unit", show(*vunit));

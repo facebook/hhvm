@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,10 +29,6 @@ namespace HPHP {
 
 #ifndef NO_HARDWARE_COUNTERS
 
-struct InstructionCounter;
-struct LoadCounter;
-struct StoreCounter;
-
 struct PerfTable {
   const char* name;
   uint32_t type;
@@ -57,8 +53,13 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
   static void ClearPerfEvents();
-  static void Init(bool enable, const std::string& events, bool subProc);
+  static void UpdateServiceData(const timespec& begin);
+  static void Init(bool enable,
+                   const std::string& events,
+                   bool subProc,
+                   bool excludeKernel);
   static void RecordSubprocessTimes();
+  static void ExcludeKernel();
   static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
   bool m_countersSet{false};
 private:
@@ -70,11 +71,14 @@ private:
   bool addPerfEvent(const char* event);
   bool setPerfEvents(folly::StringPiece events);
   void getPerfEvents(PerfEventCallback f, void* data);
+  template<typename F>
+  void forEachCounter(F func);
   void clearPerfEvents();
+  void updateServiceData();
 
-  std::unique_ptr<InstructionCounter> m_instructionCounter;
-  std::unique_ptr<LoadCounter> m_loadCounter;
-  std::unique_ptr<StoreCounter> m_storeCounter;
+  std::unique_ptr<HardwareCounterImpl> m_instructionCounter;
+  std::unique_ptr<HardwareCounterImpl> m_loadCounter;
+  std::unique_ptr<HardwareCounterImpl> m_storeCounter;
   std::vector<std::unique_ptr<HardwareCounterImpl>> m_counters;
 };
 
@@ -100,8 +104,13 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
-  static void Init(bool enable, const std::string& events, bool subProc) {}
+  static void UpdateServiceData(const timespec& begin) { }
+  static void Init(bool enable,
+                   const std::string& events,
+                   bool subProc,
+                   bool excludeKernel) {}
   static void RecordSubprocessTimes() {}
+  static void ExcludeKernel() {}
 
   // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
   void getCheck() { }

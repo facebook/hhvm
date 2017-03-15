@@ -21,26 +21,47 @@ let make_genv options config local_config handle =
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
     not check_mode || ServerArgs.convert options <> None ||
-    ServerArgs.save_filename options <> None;
+      ServerArgs.save_filename options <> None;
+  let nbr_procs = ServerArgs.max_procs options in
   let gc_control = ServerConfig.gc_control config in
-  let workers = Some (ServerWorker.make gc_control handle) in
+  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
   let watchman_env =
     if check_mode || not local_config.SLC.use_watchman
     then None
     else Watchman.init {
       Watchman.init_timeout = local_config.SLC.watchman_init_timeout;
-      subscribe_to_changes = local_config.SLC.watchman_subscribe;
+      subscribe_mode = if local_config.SLC.watchman_subscribe
+        then Some Watchman.Defer_changes
+        else None;
       sync_directory = local_config.SLC.watchman_sync_directory;
       root = root;
     }
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
+  let debug_port = Option.map (ServerArgs.debug_client options)
+    ~f:(fun handle -> Debug_port.out_port_of_handle handle)
+  in
+  let debug_port = match debug_port,
+    local_config.SLC.start_with_recorder_on with
+    | Some _, _ ->
+      Hh_logger.log "Using debug-client pre-fork fd";
+      debug_port
+    | None, true ->
+      let daemon = Recorder_daemon.start_daemon
+        (ServerFiles.recorder_out_link root)
+        (ServerFiles.recorder_log_link root) in
+      Hh_logger.log "Spawned recorder daemon with pid: %d." daemon.Daemon.pid;
+      Some (Debug_port.out_port_of_out_channel @@ snd @@ daemon.Daemon.channels)
+    | _ ->
+      Hh_logger.log "No debug port attached";
+      None
+  in
   let indexer, notifier_async, notifier, wait_until_ready =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
         let files = Watchman.get_all_files watchman_env in
-        Bucket.make
+        Bucket.make_list
           ~num_workers:GlobalConfig.nbr_procs
           ~max_size:1000
           (List.filter filter files)
@@ -56,9 +77,10 @@ let make_genv options config local_config handle =
         match changes with
         | Watchman.Watchman_unavailable -> Notifier_unavailable
         | Watchman.Watchman_pushed changes -> begin match changes with
-          | Watchman.State_enter _
-          | Watchman.State_leave _ ->
-            Notifier_async_changes SSet.empty
+          | Watchman.State_enter (name, metadata) ->
+            Notifier_state_enter (name, metadata)
+          | Watchman.State_leave (name, metadata) ->
+            Notifier_state_leave (name, metadata)
           | Watchman.Files_changed changes ->
             Notifier_async_changes changes
           end
@@ -106,6 +128,7 @@ let make_genv options config local_config handle =
   { options;
     config;
     local_config;
+    debug_port;
     workers;
     indexer;
     notifier_async;
@@ -119,6 +142,7 @@ let default_genv =
   { options          = ServerArgs.default_options "";
     config           = ServerConfig.default_config;
     local_config     = ServerLocalConfig.default;
+    debug_port       = None;
     workers          = None;
     indexer          = (fun _ -> fun () -> []);
     notifier_async   = (fun () ->
@@ -141,11 +165,11 @@ let make_env config =
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;
     last_idle_job_time = 0.0;
-    edited_files   = Relative_path.Map.empty;
+    edited_files   = Relative_path.Set.empty;
     ide_needs_parsing = Relative_path.Set.empty;
     disk_needs_parsing = Relative_path.Set.empty;
-    needs_decl = Relative_path.Set.empty;
-    needs_check = Relative_path.Set.empty;
+    needs_phase2_redecl = Relative_path.Set.empty;
+    needs_recheck = Relative_path.Set.empty;
     needs_full_check = false;
     diag_subscribe = None;
     recent_recheck_loop_stats = empty_recheck_loop_stats;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,6 +46,19 @@ void raiseWarning(const StringData* sd);
 void raiseNotice(const StringData* sd);
 void raiseArrayIndexNotice(int64_t index);
 void raiseArrayKeyNotice(const StringData* key);
+
+inline intptr_t frame_clsref_offset(const Func* f, uint32_t slot) {
+  return
+    -((f->numLocals() + f->numIterators() * kNumIterCells) * sizeof(Cell) +
+      (slot + 1) * sizeof(LowPtr<Class>));
+}
+
+inline LowPtr<Class>*
+frame_clsref_slot(const ActRec* fp, uint32_t slot) {
+  return (LowPtr<Class>*)(
+    uintptr_t(fp) + frame_clsref_offset(fp->m_func, slot)
+  );
+}
 
 inline Iter*
 frame_iter(const ActRec* fp, int i) {
@@ -164,7 +177,7 @@ frame_free_locals_no_this_inl(ActRec* fp, int numLocals, TypedValue* rv) {
 // Helper for iopFCallBuiltin.
 void ALWAYS_INLINE
 frame_free_args(TypedValue* args, int count) {
-  for (int i = 0; i < count; i++) {
+  for (auto i = count; i--; ) {
     TypedValue* loc = args - i;
     DataType t = loc->m_type;
     if (isRefcountedType(t)) {

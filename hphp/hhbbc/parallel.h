@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,12 +100,9 @@ void for_each(const std::vector<Item>& inputs, Func func) {
  * If `func' throws an exception, the results of the output vector
  * will contain some default-constructed values.
  */
-template<class Func, class Item>
-std::vector<typename std::result_of<Func (Item)>::type>
-map(const std::vector<Item>& inputs, Func func) {
-  using RetT = typename std::result_of<Func (Item)>::type;
-
-  std::vector<RetT> retVec(inputs.size());
+template<class Func, class Items>
+auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
+  std::vector<decltype(func(inputs[0]))> retVec(inputs.size());
   auto const retMem = &retVec[0];
 
   std::atomic<bool> failed{false};

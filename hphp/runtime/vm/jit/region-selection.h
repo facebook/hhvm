@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,6 +116,13 @@ struct RegionDesc {
    * regions that are linear traces.
    */
   SrcKey            lastSrcKey() const;
+
+  /*
+   * Returns the profile count associated with block `bid'.  In case other
+   * blocks have been merged into this block, the returned count includes the
+   * counts of these other blocks as well.
+   */
+  int64_t           blockProfCount(BlockId bid) const;
 
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
   void              replaceBlock(BlockId bid, BlockPtr newBlock);

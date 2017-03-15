@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,17 @@
 #include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
+
+namespace detail {
+
+ALWAYS_INLINE void hackArrCompatCheck(const Array& arr) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices && !arr.isNull())) {
+    raiseHackArrCompatArrMixedCmp();
+  }
+}
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Variant
 
@@ -192,7 +203,10 @@ inline bool less(bool v1, const StringData *v2) {
 inline bool less(bool v1, const String& v2) { return less(v1,v2.toBoolean()); }
 inline bool less(bool v1, const char* v2) = delete;
 inline bool less(bool v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return less(v1, v2.toBoolean());
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return less(v1, v2.toBoolean());
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -214,7 +228,10 @@ inline bool more(bool v1, const StringData *v2) {
 inline bool more(bool v1, const String& v2) { return more(v1,v2.toBoolean()); }
 inline bool more(bool v1, const char* v2)  = delete;
 inline bool more(bool v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return more(v1, v2.toBoolean());
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return more(v1, v2.toBoolean());
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -267,7 +284,10 @@ bool less(int v1, const StringData *v2);
 inline bool less(int v1, const String& v2) { return less(v1, v2.get()); }
 inline bool less(int v1, const char* v2)  = delete;
 inline bool less(int v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return true;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return true;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -287,7 +307,10 @@ bool more(int v1, const StringData *v2);
 inline bool more(int v1, const String& v2) { return more(v1, v2.get()); }
 inline bool more(int v1, const char* v2)  = delete;
 inline bool more(int v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return false;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return false;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -348,7 +371,10 @@ bool less(int64_t v1, const StringData *v2);
 inline bool less(int64_t v1, const String& v2) { return less(v1, v2.get()); }
 inline bool less(int64_t v1, const char* v2)  = delete;
 inline bool less(int64_t v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return true;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return true;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -374,7 +400,10 @@ bool more(int64_t v1, const StringData *v2);
 inline bool more(int64_t v1, const String& v2) { return more(v1, v2.get()); }
 inline bool more(int64_t v1, const char* v2)  = delete;
 inline bool more(int64_t v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return false;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return false;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -440,7 +469,10 @@ inline bool less(double v1, const StringData *v2) {
 inline bool less(double v1, const String& v2) { return less(v1,v2.toDouble()); }
 inline bool less(double v1, const char* v2)  = delete;
 inline bool less(double v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return true;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return true;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -466,7 +498,10 @@ inline bool more(double v1, const StringData *v2) {
 inline bool more(double v1, const String& v2) { return more(v1,v2.toDouble()); }
 inline bool more(double v1, const char* v2)  = delete;
 inline bool more(double v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return false;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return false;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -576,6 +611,7 @@ inline bool less(const StringData *v1, const String& v2) {
 inline bool less(const StringData *v1, const char* v2) = delete;
 inline bool less(const StringData *v1, const Array& v2) {
   if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
     if (v1 == nullptr || v2.get() == nullptr) {
       return less(toBoolean(v1), v2.toBoolean());
     }
@@ -628,6 +664,7 @@ inline bool more(const StringData *v1, const String& v2) {
 inline bool more(const StringData *v1, const char* v2) = delete;
 inline bool more(const StringData *v1, const Array& v2) {
   if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
     if (v1 == nullptr || v2.get() == nullptr) {
       return more(toBoolean(v1), v2.toBoolean());
     }
@@ -844,7 +881,10 @@ inline bool less(const Array& v1, const String& v2) { return more(v2, v1); }
 inline bool less(const Array& v1, const char* v2) = delete;
 inline bool less(const Array& v1, const Array& v2) { return v1.less(v2); }
 inline bool less(const Array& v1, const Object& v2) { return v1.less(v2); }
-inline bool less(const Array& v1, const Resource& v2) { return false; }
+inline bool less(const Array& v1, const Resource& v2) {
+  if (v1.isPHPArray()) detail::hackArrCompatCheck(v1);
+  return false;
+}
 inline bool less(const Array& v1, const Variant& v2) { return v1.less(v2); }
 
 inline bool more(const Array& v1, bool    v2) { return less(v2, v1); }
@@ -856,7 +896,10 @@ inline bool more(const Array& v1, const String& v2) { return less(v2, v1); }
 inline bool more(const Array& v1, const char* v2)  = delete;
 inline bool more(const Array& v1, const Array& v2) { return v1.more(v2); }
 inline bool more(const Array& v1, const Object& v2) { return v1.more(v2); }
-inline bool more(const Array& v1, const Resource& v2) { return true; }
+inline bool more(const Array& v1, const Resource& v2) {
+  if (v1.isPHPArray()) detail::hackArrCompatCheck(v1);
+  return true;
+}
 inline bool more(const Array& v1, const Variant& v2) { return v1.more(v2); }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1010,7 +1053,10 @@ inline bool less(const Resource& v1, const StringData *v2) {
 inline bool less(const Resource& v1, const String& v2) { return more(v2, v1); }
 inline bool less(const Resource& v1, const char* v2)  = delete;
 inline bool less(const Resource& v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return true;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return true;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());
@@ -1030,7 +1076,10 @@ inline bool more(const Resource& v1, const StringData *v2) {
 inline bool more(const Resource& v1, const String& v2) { return less(v2, v1); }
 inline bool more(const Resource& v1, const char*  v2)  = delete;
 inline bool more(const Resource& v1, const Array& v2) {
-  if (LIKELY(v2.isPHPArray())) return false;
+  if (LIKELY(v2.isPHPArray())) {
+    detail::hackArrCompatCheck(v2);
+    return false;
+  }
   if (v2.isVecArray()) throw_vec_compare_exception();
   if (v2.isDict()) throw_dict_compare_exception();
   assert(v2.isKeyset());

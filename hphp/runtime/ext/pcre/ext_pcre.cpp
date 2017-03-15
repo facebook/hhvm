@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -44,18 +44,18 @@ TypedValue HHVM_FUNCTION(preg_match,
                          StringArg pattern, StringArg subject,
                          OutputArg matches /* = null */,
                          int flags /* = 0 */, int offset /* = 0 */) {
-  return tvReturn(preg_match(StrNR(pattern.get()), StrNR(subject.get()),
+  return tvReturn(preg_match(pattern.get(), subject.get(),
                              matches.get() ? matches->var() : nullptr,
                              flags, offset));
 }
 
 TypedValue HHVM_FUNCTION(preg_match_all,
-                         const String& pattern,
-                         const String& subject,
+                         StringArg pattern,
+                         StringArg subject,
                          OutputArg matches /* = null */,
                          int flags /* = 0 */,
                          int offset /* = 0 */) {
-  return tvReturn(preg_match_all(pattern, subject,
+  return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  matches.get() ? matches->var() : nullptr,
                                  flags, offset));
 }

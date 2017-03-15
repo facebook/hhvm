@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -262,6 +262,19 @@ inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
     if (fp->hasVarEnv()) return fp->getVarEnv();
   }
   return nullptr;
+}
+
+inline ActRec*
+ExecutionContext::getPrevVMStateSkipFrame(const ActRec* fp,
+                                          Offset* prevPc /* = NULL */,
+                                          TypedValue** prevSp /* = NULL */,
+                                          bool* fromVMEntry /* = NULL */) {
+  auto prev = getPrevVMState(fp, prevPc, prevSp, fromVMEntry);
+  if (LIKELY(!prev || !prev->skipFrame())) return prev;
+  do {
+    prev = getPrevVMState(prev, prevPc, prevSp, fromVMEntry);
+  } while (prev && prev->skipFrame());
+  return prev;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

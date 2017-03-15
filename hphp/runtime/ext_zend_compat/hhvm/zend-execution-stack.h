@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,9 +18,11 @@
 #define incl_HPHP_ZEND_EXECUTION_STACK
 
 #include "hphp/runtime/ext_zend_compat/php-src/Zend/zend_types.h"
-#include <vector>
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/req-containers.h"
+
+#include <vector>
 
 namespace HPHP {
 
@@ -55,17 +57,14 @@ struct ZendExecutionStack final : RequestEventHandler {
 private:
   static ZendExecutionStack & getStack();
   void clear() {
-    m_stack.clear();
+    m_stack = req::vector<ZendStackEntry>{};
     if (m_nullArg) {
       m_nullArg->release();
       m_nullArg = nullptr;
     }
   }
-  std::vector<ZendStackEntry> m_stack;
+  req::vector<ZendStackEntry> m_stack;
   RefData* m_nullArg;
-  TYPE_SCAN_CUSTOM_FIELD(m_stack) {
-    for (auto& e : m_stack) scanner.scan(e);
-  }
 };
 
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,6 +55,7 @@ struct Vreg {
   explicit Vreg(size_t r) : rn(r) {}
   /* implicit */ Vreg(Reg64 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg32 r)  : rn(int(r)) {}
+  /* implicit */ Vreg(Reg16 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg8 r)   : rn(int(r)) {}
   /* implicit */ Vreg(RegXMM r) : rn(X0+int(r)) {}
   /* implicit */ Vreg(RegSF r)  : rn(S0+int(r)) {}

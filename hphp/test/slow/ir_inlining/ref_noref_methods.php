@@ -1,0 +1,46 @@
+<?hh
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+class Cls1 {
+  public function &get() {
+    static $_ = ['type' => 1];
+    return $_;
+  }
+}
+
+class Cls2 {
+  public function get() {
+    static $_ = ['type' => 2];
+    return $_;
+  }
+}
+
+function run($x) {
+  $a = $x->get();
+  return $a['type'];
+}
+
+function inline_run() {
+  run(new Cls2());
+}
+
+__hhvm_intrinsics\disable_inlining('Cls1::get');
+__hhvm_intrinsics\disable_inlining('Cls2::get');
+
+// Profile a region within run() for both cases where $x->get() returns a ref
+// and not.
+$b = new Cls1();
+$d = new Cls2();
+for ($i = 0; $i < 100; $i++) {
+  run($b);
+  run($d);
+}
+
+// Now inline run() with an argument that will always fail one of the guards in
+// the region. We shouldn't choke on incompatible types in the unreachable
+// region.
+for ($i = 0; $i < 200; $i++) {
+  inline_run();
+}
+
+echo "DONE\n";

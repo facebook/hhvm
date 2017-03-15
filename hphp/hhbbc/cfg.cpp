@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,13 +25,14 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-void postorderWalk(std::vector<borrowed_ptr<php::Block>>& out,
+void postorderWalk(const php::Func& func,
+                   std::vector<borrowed_ptr<php::Block>>& out,
                    boost::dynamic_bitset<>& visited,
                    php::Block& blk) {
   if (visited[blk.id]) return;
   visited[blk.id] = true;
-  forEachSuccessor(blk, [&] (php::Block& next) {
-    postorderWalk(out, visited, next);
+  forEachSuccessor(blk, [&] (BlockId next) {
+      postorderWalk(func, out, visited, *func.blocks[next]);
   });
   out.push_back(&blk);
 }
@@ -41,19 +42,19 @@ void postorderWalk(std::vector<borrowed_ptr<php::Block>>& out,
 //////////////////////////////////////////////////////////////////////
 
 std::vector<borrowed_ptr<php::Block>> rpoSortFromMain(const php::Func& func) {
-  boost::dynamic_bitset<> visited(func.nextBlockId);
+  boost::dynamic_bitset<> visited(func.blocks.size());
   std::vector<borrowed_ptr<php::Block>> ret;
-  ret.reserve(func.nextBlockId);
-  postorderWalk(ret, visited, *func.mainEntry);
+  ret.reserve(func.blocks.size());
+  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
 std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
-  boost::dynamic_bitset<> visited(func.nextBlockId);
+  boost::dynamic_bitset<> visited(func.blocks.size());
   std::vector<borrowed_ptr<php::Block>> ret;
-  ret.reserve(func.nextBlockId);
-  postorderWalk(ret, visited, *func.mainEntry);
+  ret.reserve(func.blocks.size());
+  postorderWalk(func, ret, visited, *func.blocks[func.mainEntry]);
 
   /*
    * We've already marked the blocks reachable from the main entry
@@ -61,9 +62,10 @@ std::vector<borrowed_ptr<php::Block>> rpoSortAddDVs(const php::Func& func) {
    * visited set (so we'll stop if they chain to the main entry, which
    * is the normal case).
    */
-  for (auto rit = func.params.rbegin(); rit != func.params.rend(); ++rit) {
-    if (!rit->dvEntryPoint) continue;
-    postorderWalk(ret, visited, *rit->dvEntryPoint);
+  for (auto it = func.params.end(); it != func.params.begin(); ) {
+    --it;
+    if (it->dvEntryPoint == NoBlockId) continue;
+    postorderWalk(func, ret, visited, *func.blocks[it->dvEntryPoint]);
   }
   std::reverse(begin(ret), end(ret));
   return ret;
@@ -77,11 +79,11 @@ computeNormalPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
     if (preds.size() < b->id + 1) {
       preds.resize(b->id + 1);
     }
-    forEachNormalSuccessor(*b, [&] (php::Block& blk) {
-      if (preds.size() < blk.id + 1) {
-        preds.resize(blk.id + 1);
+    forEachNormalSuccessor(*b, [&] (BlockId blkId) {
+      if (preds.size() < blkId + 1) {
+        preds.resize(blkId + 1);
       }
-      preds[blk.id].insert(b);
+      preds[blkId].insert(b);
     });
   }
   return preds;
@@ -96,10 +98,10 @@ computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
       preds.resize(b->id + 1);
     }
     for (auto& ex : b->factoredExits) {
-      if (preds.size() < ex->id + 1) {
-        preds.resize(ex->id + 1);
+      if (preds.size() < ex + 1) {
+        preds.resize(ex + 1);
       }
-      preds[ex->id].insert(b);
+      preds[ex].insert(b);
     }
   }
   return preds;

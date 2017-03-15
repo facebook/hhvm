@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,11 @@ inline FPInvOffset Location::stackIdx() const {
   return m_stack.stackIdx;
 }
 
+inline uint32_t Location::clsRefSlot() const {
+  assertx(m_tag == LTag::CSlot);
+  return m_clsref.slot;
+}
+
 inline bool Location::operator==(const Location& other) const {
   if (m_tag != other.m_tag) return false;
 
@@ -38,6 +43,10 @@ inline bool Location::operator==(const Location& other) const {
       return localId() == other.localId();
     case LTag::Stack:
       return stackIdx() == other.stackIdx();
+    case LTag::MBase:
+      return true;
+    case LTag::CSlot:
+      return clsRefSlot() == other.clsRefSlot();
   }
   not_reached();
   return false;
@@ -55,6 +64,10 @@ inline bool Location::operator<(const Location& other) const {
       return localId() < other.localId();
     case LTag::Stack:
       return stackIdx() < other.stackIdx();
+    case LTag::MBase:
+      return false;
+    case LTag::CSlot:
+      return clsRefSlot() < other.clsRefSlot();
   }
   not_reached();
   return false;

@@ -157,7 +157,7 @@ let is_collection_str name =
 let rec is_collection_expr_ = function
   | Collection _ -> Some true
   | New ((_, Id (_, name)), _, _) when is_collection_str name -> Some true
-  | New ((_, Id (_, _)), _, _) -> Some false
+  | New ((_, Id _), _, _) -> Some false
   | Lvar _ | Lvarvar _ | Clone _ | Obj_get _ | Array_get _ | Class_get _
   | Yield _
   (* casts to object are the only type we need to worry about *)
@@ -166,7 +166,7 @@ let rec is_collection_expr_ = function
   | Binop ((Eq None), _, (_, e)) | Unop (Uref, (_, e)) -> is_collection_expr_ e
   | Array _  | Shape _ | Null | True | False | Class_const _ | Int _
   | Float _ | String _ | String2 _ | Yield_break | List _  | InstanceOf _
-  | Efun _ | Lfun _ | Xml _ | Import _ | Id _
+  | Efun _ | Lfun _ | Xml _ | Import _ | Id _ | Id_type_arguments _
    (* await returns an awaitable *)
   | Await _ | Unop _ | Binop _ | Pipe _ | Dollardollar
   | Cast _ -> Some false

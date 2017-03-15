@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -129,8 +129,10 @@ struct Generator {
     // Ignore everything, a trivial scanner
     bool ignore_all = false;
 
-    // Conservative scan everything
+    // Conservative scan everything (not including bases)
     bool conservative_all = false;
+    // Conservative scan all bases
+    bool conservative_all_bases = false;
 
     // This type should be ignored (used for system types we can't modify). This
     // is different from ignore_all where ignore_all will still process base
@@ -189,7 +191,8 @@ struct Generator {
     // does not need to be exact.
     bool isAlwaysNonTrivial() const {
       return !ignore_all && !whitelisted && (
-        conservative_all || (custom_all && custom_guards.empty()) ||
+        conservative_all || conservative_all_bases ||
+        (custom_all && custom_guards.empty()) ||
         (custom_bases_scanner && !custom_bases.empty()) ||
         !conservative_fields.empty() || !custom_fields.empty());
     }
@@ -244,6 +247,7 @@ struct Generator {
 
   static void sanityCheckTemplateParams(const Object&);
 
+  bool findMemberHelper(const std::string& field, const Object &a_object) const;
   void genAllLayouts();
   void checkForLayoutErrors() const;
   void assignUniqueLayouts();
@@ -258,9 +262,17 @@ struct Generator {
 
   const Object& getMarkedCountable(const Object&) const;
 
-  void genLayout(const Type&, Layout&, size_t) const;
+  void genLayout(const Type&, Layout&, size_t,
+                 bool conservative_everything = false) const;
   void genLayout(const Object&, Layout&, size_t,
-                 bool do_forbidden_check = true) const;
+                 bool do_forbidden_check = true,
+                 bool conservative_everything = false) const;
+  bool checkMemberSpecialAction(const Object& base_object,
+                                const Object::Member& member,
+                                const Action& action,
+                                Layout& layout,
+                                size_t base_obj_offset,
+                                size_t offset) const;
 
   IndexedType getIndexedType(const Object&) const;
   std::vector<IndexedType> getIndexedTypes(
@@ -286,8 +298,10 @@ struct Generator {
   void makePtrFollowable(const Type& type);
   void makePtrFollowable(const Object& object);
 
-  const Action& getAction(const Object& object) const;
-  Action inferAction(const Object& object) const;
+  const Action& getAction(const Object& object,
+                          bool conservative_everything = false) const;
+  Action inferAction(const Object& object,
+                     bool conservative_everything = false) const;
 
   void genMetrics(std::ostream&) const;
   void genForwardDecls(std::ostream&) const;
@@ -659,7 +673,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
   // Before beginning the actual layout generation, we can speed things up a bit
   // by marking any types which we know are always pointer followable. This will
-  // let us reach the fixed point in less iterations.
+  // let us reach the fixed point in fewer iterations.
   for (const auto& indexed : m_indexed_types) {
     // Indexed types just for scanning are never pointer followable (because
     // they're not actually heap allocated).
@@ -688,7 +702,7 @@ Generator::Generator(const std::string& filename, bool skip) {
 
     // If this indexed type is always going to be a complete conservative scan,
     // than we're always going to have a non-trivial action for its scanner, so
-    // its always pointer followable.
+    // it's always pointer followable.
     if (indexed.conservative && indexed.conservative_guards.empty()) {
       makePtrFollowable(*indexed.type);
     }
@@ -893,15 +907,15 @@ int Generator::compareIndexedTypes(const IndexedType& t1,
   if (t1.conservative < t2.conservative) return -1;
   else if (t1.conservative > t2.conservative) return 1;
 
-  const auto compare_guards = [](const IndexedType& t1,
-                                 const IndexedType& t2) {
+  const auto compare_guards = [](const IndexedType& type1,
+                                 const IndexedType& type2) {
     return std::lexicographical_compare(
-      t1.conservative_guards.begin(),
-      t1.conservative_guards.end(),
-      t2.conservative_guards.begin(),
-      t2.conservative_guards.end(),
-      [](const Type* t1, const Type* t2) {
-        return compareTypes(*t1, *t2) < 0;
+      type1.conservative_guards.begin(),
+      type1.conservative_guards.end(),
+      type2.conservative_guards.begin(),
+      type2.conservative_guards.end(),
+      [](const Type* tp1, const Type* tp2) {
+        return compareTypes(*tp1, *tp2) < 0;
       }
     );
   };
@@ -1511,16 +1525,38 @@ Generator::IndexedType Generator::getIndexedType(const Object& indexer) const {
 
 // Retrieve the action associated with the given object type, computing a new
 // one if it isn't already present.
-const Generator::Action& Generator::getAction(const Object& object) const {
+const Generator::Action& Generator::getAction(const Object& object,
+                                              bool conservative) const {
   auto iter = m_actions.find(&object);
   if (iter != m_actions.end()) return iter->second;
-  return m_actions.emplace(&object, inferAction(object)).first->second;
+  return m_actions.emplace(
+    &object,
+    inferAction(object, conservative)
+  ).first->second;
+}
+
+bool Generator::findMemberHelper(const std::string& field,
+                                 const Object &a_object) const {
+  return std::any_of(
+    a_object.members.begin(),
+    a_object.members.end(),
+    [&](const Object::Member& m) {
+      if (m.type.isObject()) {
+        const Object &inner_object = getObject(*m.type.asObject());
+        if (inner_object.kind == Object::Kind::k_union) {
+          return findMemberHelper(field, inner_object);
+        }
+      }
+      return m.offset && m.name == field;
+    }
+  );
 }
 
 // Given an object type, examine it to infer all the needed actions for that
 // type. The actions are inferred by looking for member functions with special
 // names, and static members with special names.
-Generator::Action Generator::inferAction(const Object& object) const {
+Generator::Action Generator::inferAction(const Object& object,
+                                         bool conservative_everything) const {
   if (object.incomplete) {
     throw Exception{
       folly::sformat(
@@ -1534,6 +1570,12 @@ Generator::Action Generator::inferAction(const Object& object) const {
   }
 
   Action action;
+
+  if (conservative_everything) {
+    action.conservative_all = true;
+    action.conservative_all_bases = true;
+    return action;
+  }
 
   // White-listing and forbidden templates are determined by just checking the
   // name against explicit lists.
@@ -1551,15 +1593,12 @@ Generator::Action Generator::inferAction(const Object& object) const {
   if (HPHP::type_scan::detail::isForcedConservativeTemplate(object.name.name)) {
     sanityCheckTemplateParams(object);
     action.conservative_all = true;
+    action.conservative_all_bases = true;
     return action;
   }
 
   const auto find_member = [&](const std::string& field) {
-    return std::any_of(
-      object.members.begin(),
-      object.members.end(),
-      [&](const Object::Member& m) { return m.offset && m.name == field; }
-    );
+    return findMemberHelper(field, object);
   };
 
   const auto find_base = [&](const Object& base) {
@@ -1570,7 +1609,7 @@ Generator::Action Generator::inferAction(const Object& object) const {
     );
   };
 
-  for (const auto& func : object.functions) {
+  for (const auto& fun : object.functions) {
     // Sanity check special member function. All the functions should take a
     // const pointer to the contained object type as the first parameter (the
     // this pointer), and a non-const reference to HPHP::type_scan::Scanner as
@@ -1727,11 +1766,11 @@ Generator::Action Generator::inferAction(const Object& object) const {
 
     // Custom scanner for particular field.
     auto custom_field = splitFieldName(
-      func.name,
+      fun.name,
       HPHP::type_scan::detail::kCustomFieldName
     );
     if (!custom_field.empty()) {
-      verify_func(func);
+      verify_func(fun);
 
       if (!find_member(custom_field)) {
         throw Exception{
@@ -1748,21 +1787,21 @@ Generator::Action Generator::inferAction(const Object& object) const {
 
       action.custom_fields.emplace(
         std::move(custom_field),
-        func.linkage_name
+        fun.linkage_name
       );
     }
 
     // Custom scanner for entire object.
-    if (func.name == HPHP::type_scan::detail::kCustomName) {
-      verify_func(func);
-      action.custom_all = func.linkage_name;
+    if (fun.name == HPHP::type_scan::detail::kCustomName) {
+      verify_func(fun);
+      action.custom_all = fun.linkage_name;
       continue;
     }
 
     // Custom scanner for base classes.
-    if (func.name == HPHP::type_scan::detail::kCustomBasesScannerName) {
-      verify_func(func);
-      action.custom_bases_scanner = func.linkage_name;
+    if (fun.name == HPHP::type_scan::detail::kCustomBasesScannerName) {
+      verify_func(fun);
+      action.custom_bases_scanner = fun.linkage_name;
       continue;
     }
   }
@@ -2167,9 +2206,12 @@ const Object& Generator::getObject(const ObjectType& type) const {
 // construct is encountered.
 void Generator::genLayout(const Type& type,
                           Layout& layout,
-                          size_t offset) const {
+                          size_t offset,
+                          bool conservative_everything) const {
   return type.match<void>(
-    [&](const ObjectType* t) { genLayout(getObject(*t), layout, offset); },
+    [&](const ObjectType* t) {
+      genLayout(getObject(*t), layout, offset, true, conservative_everything);
+    },
     [&](const PtrType* t) {
       // Don't care about pointers to non-pointer followable types.
       if (!isPtrFollowable(type)) return;
@@ -2207,20 +2249,87 @@ void Generator::genLayout(const Type& type,
         };
       }
       Layout sublayout{determineSize(t->element)};
-      genLayout(t->element, sublayout, 0);
+      genLayout(t->element, sublayout, 0, conservative_everything);
       layout.addSubLayout(
         offset,
         *t->count,
         sublayout
       );
     },
-    [&](const ConstType* t) { genLayout(t->modified, layout, offset); },
-    [&](const VolatileType* t) { genLayout(t->modified, layout, offset); },
-    [&](const RestrictType* t) { genLayout(t->modified, layout, offset); },
+    [&](const ConstType* t) {
+      genLayout(t->modified, layout, offset, conservative_everything);
+    },
+    [&](const VolatileType* t) {
+      genLayout(t->modified, layout, offset, conservative_everything);
+    },
+    [&](const RestrictType* t) {
+      genLayout(t->modified, layout, offset, conservative_everything);
+    },
     [&](const FuncType*) {},
     [&](const MemberType*) {},
     [&](const VoidType*) {}
   );
+}
+
+// Check if the given object member is associated with a special action,
+// recording it into the given Layout as needed. Unnamed unions are recursed
+// into with their members being treated as members of the enclosing
+// object. Returns true if the layout was modified, false otherwise.
+bool Generator::checkMemberSpecialAction(const Object& base_object,
+                                         const Object::Member& member,
+                                         const Action& action,
+                                         Layout& layout,
+                                         size_t base_obj_offset,
+                                         size_t offset) const {
+  if (member.type.isObject()) {
+    auto const& object = getObject(*member.type.asObject());
+    // Treat members of an unnamed union as members
+    // of the enclosing struct.
+    if (object.kind == Object::Kind::k_union) {
+      for (auto const& obj_member : object.members) {
+        if (!obj_member.offset) continue;
+        // Recurse: the unions themselves might contain unnamed unions.
+        if (checkMemberSpecialAction(base_object, obj_member, action,
+                                     layout, base_obj_offset,
+                                     offset + *obj_member.offset)) {
+          return true;
+        }
+      }
+    }
+  }
+
+  // The sole purpose of marking the flexible array member is so we know
+  // where the suffix begins. The suffix usually begins at the end of the
+  // object, but sometimes within it.
+  if (member.type.isArr() && action.flexible_array_field == member.name) {
+    layout.suffix_begin = offset;
+    return true;
+  }
+
+  if (action.ignore_fields.count(member.name) > 0) return true;
+
+  if (action.conservative_fields.count(member.name) > 0) {
+    layout.addConservative(offset, determineSize(member.type));
+    return true;
+  }
+
+  auto custom_iter = action.custom_fields.find(member.name);
+  if (custom_iter != action.custom_fields.end()) {
+    if (custom_iter->second.empty()) {
+      throw LayoutError{
+        folly::sformat(
+          "'{}' needs to have external linkage (not in unnamed namespace)"
+          " to use custom field scanner. If a template, template parameters"
+          " must have external linkage as well.",
+          base_object.name.name
+        )
+      };
+    }
+    layout.addCustom(base_obj_offset, custom_iter->second);
+    return true;
+  }
+
+  return false;
 }
 
 // Given an object type representation, fill the given Layout (starting at
@@ -2229,7 +2338,8 @@ void Generator::genLayout(const Type& type,
 void Generator::genLayout(const Object& object,
                           Layout& layout,
                           size_t offset,
-                          bool do_forbidden_check) const {
+                          bool do_forbidden_check,
+                          bool conservative_everything) const {
   // Never generate layout for countable types, unless it was marked as
   // scannable.
   if (m_countable.count(&object) > 0 &&
@@ -2237,7 +2347,7 @@ void Generator::genLayout(const Object& object,
     return;
   }
 
-  const auto& action = getAction(object);
+  const auto& action = getAction(object, conservative_everything);
 
   // A whitelisted type should be ignored entirely.
   if (action.whitelisted) return;
@@ -2287,7 +2397,8 @@ void Generator::genLayout(const Object& object,
         obj,
         layout,
         offset + *base.offset,
-        !action.silenced_bases.count(&obj)
+        !action.silenced_bases.count(&obj),
+        action.conservative_all_bases
       );
     } catch (LayoutError& exn) {
       exn.addContext(
@@ -2305,7 +2416,7 @@ void Generator::genLayout(const Object& object,
     if (action.custom_bases_scanner->empty()) {
       throw LayoutError{
         folly::sformat(
-          "'{}' needs to have external linkage (not in anonymous namespace)"
+          "'{}' needs to have external linkage (not in unnamed namespace)"
           " to use custom base scanner. If a template, template parameters"
           " must have external linkage as well.",
           object.name.name
@@ -2334,7 +2445,7 @@ void Generator::genLayout(const Object& object,
       if (action.custom_all->empty()) {
         throw LayoutError{
           folly::sformat(
-            "'{}' needs to have external linkage (not in anonymous namespace)"
+            "'{}' needs to have external linkage (not in unnamed namespace)"
             " to use custom scanner. If a template, template parameters must"
             " have external linkage as well.",
             object.name.name
@@ -2374,11 +2485,11 @@ void Generator::genLayout(const Object& object,
       if (!member.offset) continue;
 
       if (first) {
-        genLayout(member.type, first_layout, 0);
+        genLayout(member.type, first_layout, 0, conservative_everything);
         first = false;
       } else {
         Layout other_layout{object.size};
-        genLayout(member.type, other_layout, 0);
+        genLayout(member.type, other_layout, 0, conservative_everything);
         if (first_layout != other_layout) {
           throw LayoutError{
             folly::sformat(
@@ -2398,45 +2509,26 @@ void Generator::genLayout(const Object& object,
     return;
   }
 
-  // Per-member field actions:
   for (const auto& member : object.members) {
     // Only non-static members.
     if (!member.offset) continue;
 
-    if (action.ignore_fields.count(member.name) > 0) continue;
-
-    if (action.conservative_fields.count(member.name) > 0) {
-      layout.addConservative(offset + *member.offset,
-                             determineSize(member.type));
+    // Check if this member has a special action. If it does, we're done
+    // processing it.
+    if (checkMemberSpecialAction(object, member, action,
+                                 layout, offset,
+                                 offset + *member.offset)) {
       continue;
     }
 
-    auto custom_iter = action.custom_fields.find(member.name);
-    if (custom_iter != action.custom_fields.end()) {
-      if (custom_iter->second.empty()) {
-        throw LayoutError{
-          folly::sformat(
-            "'{}' needs to have external linkage (not in anonymous namespace)"
-            " to use custom field scanner. If a template, template parameters"
-            " must have external linkage as well.",
-            object.name.name
-          )
-        };
-      }
-      layout.addCustom(offset, custom_iter->second);
-      continue;
-    }
-
-    // The sole purpose of marking the flexible array member is so we know where
-    // the suffix begins. The suffix sometimes begins at the end of the object,
-    // but sometimes within it.
-    if (member.type.isArr() && action.flexible_array_field == member.name) {
-      layout.suffix_begin = *member.offset;
-      continue;
-    }
-
+    // Otherwise generate its layout recursively.
     try {
-      genLayout(member.type, layout, offset + *member.offset);
+      genLayout(
+        member.type,
+        layout,
+        offset + *member.offset,
+        conservative_everything
+      );
     } catch (LayoutError& exn) {
       exn.addContext(
         folly::sformat(
@@ -2938,10 +3030,16 @@ void Generator::genScannerFunc(std::ostream& os,
   // First generate calls to the scanner to record all the pointers. We use the
   // version of insert() which takes an initializator list because it is more
   // efficient.
-  if (!layout.ptrs.empty()) {
-    indent(2) << "scanner.m_ptrs.insert(scanner.m_ptrs.end(), {\n";
+  if (layout.ptrs.size() == 1) {
+    indent(2) << "scanner.m_addrs.emplace_back(\n";
+    const auto& ptr = layout.ptrs.back();
+    indent(4) << "((const void**)(uintptr_t(ptr)"
+              << offset_str << "+" << ptr.offset << "))\n";
+    indent(2) << ");\n";
+  } else if (!layout.ptrs.empty()) {
+    indent(2) << "scanner.m_addrs.insert(scanner.m_addrs.end(), {\n";
     for (const auto& ptr : layout.ptrs) {
-      indent(4) << "*((const void**)(uintptr_t(ptr)"
+      indent(4) << "((const void**)(uintptr_t(ptr)"
                 << offset_str << "+" << ptr.offset
                 << ((&ptr == &layout.ptrs.back()) ? "))\n" : ")),\n");
     }
@@ -2949,7 +3047,14 @@ void Generator::genScannerFunc(std::ostream& os,
   }
 
   // In a similar manner, insert conservative ranges.
-  if (!layout.conservative.empty()) {
+  if (layout.conservative.size() == 1) {
+    indent(2) << "scanner.m_conservative.emplace_back(\n";
+    const auto& conservative = layout.conservative.back();
+    indent(4) << "(const void*)(uintptr_t(ptr)"
+              << offset_str << "+" << conservative.offset << "), "
+              << conservative.size << "\n";
+    indent(2) << ");\n";
+  } else if (!layout.conservative.empty()) {
     indent(2) << "scanner.m_conservative.insert(scanner.m_conservative.end(), "
               << "{\n";
     for (const auto& conservative : layout.conservative) {

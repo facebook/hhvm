@@ -108,7 +108,10 @@ def tbb_chm_at(chm, key, hasher=None):
     h -= 1 << s & ~1                            # segment_base
 
     # bucket_accessor b(this, h & m) <=> this->get_bucket(h & m).
-    seg = chm['my_table'][s]
+    try:
+        seg = chm['my_table'][s]
+    except:
+        return None
     b = seg[h].address
 
     if b['node_list'] == V('tbb::interface5::internal::rehash_req'):
@@ -316,8 +319,12 @@ hash, if valid, will be used instead of the default hash for the key type.
             print('idx: Element not found.')
             return None
 
+        ty = str(value.type.pointer())
+        ty_parts = re.split('([*&])', ty, 1)
+        ty_parts[0] = "'%s'" % ty_parts[0]
+
         gdb.execute('print *(%s)%s' % (
-            str(value.type.pointer()), str(value.address)))
+            ''.join(ty_parts), str(value.address)))
 
 
 class IdxFunction(gdb.Function):

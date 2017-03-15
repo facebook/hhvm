@@ -16,8 +16,7 @@
 
 #include "hphp/util/etch-helpers.h"
 
-/* Guard with FACEBOOK temporarily to avoid breaking OSS users without SSE4.2 */
-#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42)
+#if defined __SSE4_2__ && !defined _MSC_VER
         .file     "hphp/util/strcmp-sse42.S"
         ETCH_SECTION(strcmp)
 

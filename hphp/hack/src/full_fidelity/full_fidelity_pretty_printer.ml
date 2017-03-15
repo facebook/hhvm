@@ -26,10 +26,6 @@
  *  4. unary operators must be on the same line as the argument
  *  5. semicolons have to be on the same line as the last line of the statement
  *     that it ends
- *  6. Switch statements are specially treated since case label is only a label
- *     and not a block in the grammar. Cases are broken up into blocks in the
- *     printer and each case is grouped together to have individual layout
- *     options
  *)
 
 (* The main data type that is used in the pretty printer is a 5 tuple:
@@ -163,9 +159,15 @@ let get_doc_from_trivia trivia_lst allow_break =
   let handle_trivia trivia = match Trivia.kind trivia with
     | Kind.WhiteSpace -> (nil, false)
     | Kind.EndOfLine -> (nil, false)
+    | Kind.Unsafe
+    | Kind.FallThrough
     | Kind.SingleLineComment ->
       (* no code after comments *)
       (text (Trivia.text trivia), true)
+    | Kind.Markup
+    | Kind.FixMe
+    | Kind.IgnoreError
+    | Kind.UnsafeExpression
     | Kind.DelimitedComment ->
       (text (Trivia.text trivia), false)
   in
@@ -205,11 +207,17 @@ let rec get_doc node =
 
   | SyntaxList x -> get_from_children x
   | ErrorSyntax { error_error } -> get_doc error_error
-  | LiteralExpression x -> get_doc x.literal_expression
+  | LiteralExpression x ->
+    begin
+    match syntax x.literal_expression with
+    | SyntaxList l -> get_from_children_no_space l
+    | _ -> get_doc x.literal_expression
+    end
   | VariableExpression x -> get_doc x.variable_expression
   | QualifiedNameExpression x -> get_doc x.qualified_name_expression
   | PipeVariableExpression x -> get_doc x.pipe_variable_expression
   | ListItem x -> (get_doc x.list_item) ^^^ (get_doc x.list_separator)
+  | EndOfFile { end_of_file_token } -> get_doc end_of_file_token
   | ScriptHeader x -> get_doc x.header_less_than ^^^
                       get_doc x.header_question ^^^
                       (x.header_language |> get_doc |> add_break)
@@ -306,6 +314,8 @@ let rec get_doc node =
     let i = get_doc xhp_attribute_decl_initializer in
     let r = get_doc xhp_attribute_decl_required in
     group_doc (t ^| n ^| i ^| r)
+  | XHPSimpleClassAttribute { xhp_simple_class_attribute_type } ->
+    get_doc xhp_simple_class_attribute_type
   | TraitUse {
     trait_use_keyword;
     trait_use_names;
@@ -443,7 +453,7 @@ let rec get_doc node =
     { function_async; function_keyword; function_ampersand; function_name;
       function_type_parameter_list; function_left_paren;
       function_parameter_list; function_right_paren; function_colon;
-      function_type }
+      function_type; function_where_clause }
    ->
     let preface = group_doc ( get_doc function_async
                               ^| get_doc function_keyword) in
@@ -462,12 +472,23 @@ let rec get_doc node =
     let type_declaration =
       let fun_colon = get_doc function_colon in
       let fun_type = get_doc function_type in
-      group_doc (fun_colon ^| fun_type)
+      let where_clause = get_doc function_where_clause in
+      group_doc (fun_colon ^| fun_type ^| where_clause)
     in
     group_doc (
       group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
       ^| type_declaration
     )
+  | WhereClause { where_clause_keyword; where_clause_constraints } ->
+    let w = get_doc where_clause_keyword in
+    let c = get_doc where_clause_constraints in
+    w ^| c
+  | WhereConstraint { where_constraint_left_type; where_constraint_operator ;
+    where_constraint_right_type } ->
+    let l = get_doc where_constraint_left_type in
+    let o = get_doc where_constraint_operator in
+    let r = get_doc where_constraint_right_type in
+    l ^| o ^| r
   | MethodishDeclaration
     { methodish_attribute; methodish_modifiers; methodish_function_decl_header;
       methodish_function_body; methodish_semicolon } ->
@@ -499,6 +520,8 @@ let rec get_doc node =
     group_doc
       ( attr ^| visibility ^| parameter_type ^| parameter_name
       ^| parameter_default )
+  | VariadicParameter { variadic_parameter_ellipsis } ->
+      get_doc variadic_parameter_ellipsis
   | AttributeSpecification {
       attribute_specification_left_double_angle;
       attribute_specification_attributes;
@@ -534,6 +557,18 @@ let rec get_doc node =
     let semicolon = get_doc expression_statement_semicolon in
     (* semicolon always follows the last line *)
     body ^^^ semicolon |> group_doc |> add_break
+  | UnsetStatement {
+    unset_keyword;
+    unset_left_paren;
+    unset_variables;
+    unset_right_paren;
+    unset_semicolon} ->
+    let u = get_doc unset_keyword in
+    let l = get_doc unset_left_paren in
+    let v = get_doc unset_variables in
+    let r = get_doc unset_right_paren in
+    let s = get_doc unset_semicolon in
+    group_doc (u ^^^ l ^^^ v ^^^ r ^^^ s)
   | WhileStatement
     { while_keyword; while_left_paren; while_condition; while_right_paren;
       while_body } ->
@@ -668,7 +703,7 @@ let rec get_doc node =
     foreach_keyword;
     foreach_left_paren;
     foreach_collection;
-    foreach_await;
+    foreach_await_keyword;
     foreach_as;
     foreach_key;
     foreach_arrow;
@@ -679,7 +714,7 @@ let rec get_doc node =
     let left = get_doc foreach_left_paren in
     let right = get_doc foreach_right_paren in
     let collection_name = get_doc foreach_collection in
-    let await_keyword = get_doc foreach_await in
+    let await_keyword = get_doc foreach_await_keyword in
     let as_keyword = get_doc foreach_as in
     let key = get_doc foreach_key in
     let arrow = get_doc foreach_arrow in
@@ -692,15 +727,41 @@ let rec get_doc node =
     let middle_part = group_doc (as_part ^| arrow_part) in
     let start_block = indent_block_no_space left_part middle_part right indt in
     handle_compound_brace_prefix_indent start_block statement indt |> add_break
-  | SwitchStatement x ->
-    let keyword = get_doc x.switch_keyword in
-    let left = get_doc x.switch_left_paren in
-    let right = get_doc x.switch_right_paren in
-    let expr = get_doc x.switch_expression in
-    let left_part = group_doc (keyword ^^| left) in
-    let start_block = indent_block_no_space left_part expr right indt in
-    handle_switch start_block x
-    (* group_doc (start_block ^| statement) *)
+  | SwitchStatement {
+    switch_keyword;
+    switch_left_paren;
+    switch_expression;
+    switch_right_paren;
+    switch_left_brace;
+    switch_sections;
+    switch_right_brace } ->
+    let keyword = get_doc switch_keyword in
+    let lparen= get_doc switch_left_paren in
+    let expr = get_doc switch_expression in
+    let rparen = get_doc switch_right_paren in
+    let lbrace = get_doc switch_left_brace in
+    let sections = get_doc switch_sections in
+    let rbrace = get_doc switch_right_brace in
+    (* TODO Fix this *)
+    let h = keyword ^| lparen ^| expr ^| rparen ^| space ^| lbrace in
+    let h = add_break h in
+    h ^| sections ^| rbrace
+  | SwitchSection {
+    switch_section_labels;
+    switch_section_statements;
+    switch_section_fallthrough } ->
+    (* TODO Fix this *)
+    let labels = get_doc switch_section_labels in
+    let statements = get_doc switch_section_statements in
+    let fallthrough = get_doc switch_section_fallthrough in
+    (add_break labels) ^| (add_break statements) ^| (add_break fallthrough)
+  | SwitchFallthrough {
+    fallthrough_keyword;
+    fallthrough_semicolon
+  } ->
+    let f = get_doc fallthrough_keyword in
+    let s = get_doc fallthrough_semicolon in
+    f ^^^ s
   | ScopeResolutionExpression x ->
     let q = get_doc x.scope_resolution_qualifier in
     let o = get_doc x.scope_resolution_operator in
@@ -717,6 +778,14 @@ let rec get_doc node =
     let ob = get_doc safe_member_object in
     let op = get_doc safe_member_operator in
     let nm = get_doc safe_member_name in
+    group_doc (ob ^^^ op ^^^ nm)
+  | EmbeddedMemberSelectionExpression
+    { embedded_member_object;
+      embedded_member_operator;
+      embedded_member_name } ->
+    let ob = get_doc embedded_member_object in
+    let op = get_doc embedded_member_operator in
+    let nm = get_doc embedded_member_name in
     group_doc (ob ^^^ op ^^^ nm)
   | YieldExpression x ->
     let y = get_doc x.yield_keyword in
@@ -820,6 +889,46 @@ let rec get_doc node =
     let args = get_doc function_call_argument_list in
     let rparen = get_doc function_call_right_paren in
     receiver ^^^ lparen ^^^ args ^^^ rparen
+  | EvalExpression {
+    eval_keyword;
+    eval_left_paren;
+    eval_argument;
+    eval_right_paren } ->
+    let keyword = get_doc eval_keyword in
+    let lparen = get_doc eval_left_paren in
+    let arg = get_doc eval_argument in
+    let rparen = get_doc eval_right_paren in
+    keyword ^^^ lparen ^^^ arg ^^^ rparen
+  | EmptyExpression {
+    empty_keyword;
+    empty_left_paren;
+    empty_argument;
+    empty_right_paren } ->
+    let keyword = get_doc empty_keyword in
+    let lparen = get_doc empty_left_paren in
+    let arg = get_doc empty_argument in
+    let rparen = get_doc empty_right_paren in
+    keyword ^^^ lparen ^^^ arg ^^^ rparen
+  | IssetExpression {
+    isset_keyword;
+    isset_left_paren;
+    isset_argument_list;
+    isset_right_paren } ->
+    let keyword = get_doc isset_keyword in
+    let lparen = get_doc isset_left_paren in
+    let args = get_doc isset_argument_list in
+    let rparen = get_doc isset_right_paren in
+    keyword ^^^ lparen ^^^ args ^^^ rparen
+  | DefineExpression {
+    define_keyword;
+    define_left_paren;
+    define_argument_list;
+    define_right_paren } ->
+    let keyword = get_doc define_keyword in
+    let lparen = get_doc define_left_paren in
+    let args = get_doc define_argument_list in
+    let rparen = get_doc define_right_paren in
+    keyword ^^^ lparen ^^^ args ^^^ rparen
   | ParenthesizedExpression {
     parenthesized_expression_left_paren;
     parenthesized_expression_expression;
@@ -835,6 +944,14 @@ let rec get_doc node =
     let left = get_doc braced_expression_left_brace in
     let expr = get_doc braced_expression_expression in
     let right = get_doc braced_expression_right_brace in
+    indent_block_no_space left expr right indt
+  | EmbeddedBracedExpression {
+    embedded_braced_expression_left_brace;
+    embedded_braced_expression_expression;
+    embedded_braced_expression_right_brace } ->
+    let left = get_doc embedded_braced_expression_left_brace in
+    let expr = get_doc embedded_braced_expression_expression in
+    let right = get_doc embedded_braced_expression_right_brace in
     indent_block_no_space left expr right indt
   | ListExpression
     { list_keyword; list_left_paren; list_members; list_right_paren } ->
@@ -877,16 +994,61 @@ let rec get_doc node =
     let fs = get_doc shape_expression_fields in
     let rp = get_doc shape_expression_right_paren in
     sh ^| lp ^^^ fs ^^^ rp
+  | TupleExpression
+    { tuple_expression_keyword; tuple_expression_left_paren;
+       tuple_expression_items; tuple_expression_right_paren } ->
+    let tu = get_doc tuple_expression_keyword in
+    let lp = get_doc tuple_expression_left_paren in
+    let xs = get_doc tuple_expression_items in
+    let rp = get_doc tuple_expression_right_paren in
+    tu ^| lp ^^^ xs ^^^ rp
   | ArrayCreationExpression x ->
     let left_bracket = get_doc x.array_creation_left_bracket in
     let right_bracket = get_doc x.array_creation_right_bracket in
     let members = get_doc x.array_creation_members in
     indent_block_no_space left_bracket members right_bracket indt
-  | ArrayIntrinsicExpression x ->
-    let keyword = get_doc x.array_intrinsic_keyword in
-    let left = get_doc x.array_intrinsic_left_paren in
-    let right = get_doc x.array_intrinsic_right_paren in
-    let members = get_doc x.array_intrinsic_members in
+  | ArrayIntrinsicExpression {
+    array_intrinsic_keyword;
+    array_intrinsic_left_paren;
+    array_intrinsic_members;
+    array_intrinsic_right_paren } ->
+    let keyword = get_doc array_intrinsic_keyword in
+    let left = get_doc array_intrinsic_left_paren in
+    let members = get_doc array_intrinsic_members in
+    let right = get_doc array_intrinsic_right_paren in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | DictionaryIntrinsicExpression {
+    dictionary_intrinsic_keyword;
+    dictionary_intrinsic_left_bracket;
+    dictionary_intrinsic_members;
+    dictionary_intrinsic_right_bracket } ->
+    let keyword = get_doc dictionary_intrinsic_keyword in
+    let left = get_doc dictionary_intrinsic_left_bracket in
+    let members = get_doc dictionary_intrinsic_members in
+    let right = get_doc dictionary_intrinsic_right_bracket in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | KeysetIntrinsicExpression {
+    keyset_intrinsic_keyword;
+    keyset_intrinsic_left_bracket;
+    keyset_intrinsic_members;
+    keyset_intrinsic_right_bracket } ->
+    let keyword = get_doc keyset_intrinsic_keyword in
+    let left = get_doc keyset_intrinsic_left_bracket in
+    let members = get_doc keyset_intrinsic_members in
+    let right = get_doc keyset_intrinsic_right_bracket in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | VectorIntrinsicExpression {
+    vector_intrinsic_keyword;
+    vector_intrinsic_left_bracket;
+    vector_intrinsic_members;
+    vector_intrinsic_right_bracket } ->
+    let keyword = get_doc vector_intrinsic_keyword in
+    let left = get_doc vector_intrinsic_left_bracket in
+    let members = get_doc vector_intrinsic_members in
+    let right = get_doc vector_intrinsic_right_bracket in
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
   | ElementInitializer x ->
@@ -900,6 +1062,12 @@ let rec get_doc node =
     let index = get_doc x.subscript_index in
     let right = get_doc x.subscript_right_bracket in
     receiver ^^^ left ^^^ index ^^^ right
+  | EmbeddedSubscriptExpression x ->
+    let receiver = get_doc x.embedded_subscript_receiver in
+    let left = get_doc x.embedded_subscript_left_bracket in
+    let index = get_doc x.embedded_subscript_index in
+    let right = get_doc x.embedded_subscript_right_bracket in
+    receiver ^^^ left ^^^ index ^^^ right
   | AwaitableCreationExpression x ->
     let async = get_doc x.awaitable_async in
     let stmt = x.awaitable_compound_statement in
@@ -909,12 +1077,16 @@ let rec get_doc node =
     let expr = get_doc x.xhp_body in
     let right = get_doc x.xhp_close in
     left ^^^ expr ^^^ right
-  | XHPOpen
-    { xhp_open_name; xhp_open_attributes; xhp_open_right_angle } ->
+  | XHPOpen {
+    xhp_open_left_angle;
+    xhp_open_name;
+    xhp_open_attributes;
+    xhp_open_right_angle } ->
+    let left = get_doc xhp_open_left_angle in
     let name = get_doc xhp_open_name in
     let attrs = get_doc xhp_open_attributes in
-    let close = get_doc xhp_open_right_angle in
-    group_doc (group_doc (indent_doc name attrs indt) ^| close)
+    let right = get_doc xhp_open_right_angle in
+    group_doc (group_doc (indent_doc (left ^^^ name) attrs indt) ^| right)
   | XHPAttribute
     { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expression }->
     let name = get_doc xhp_attribute_name in
@@ -955,19 +1127,64 @@ let rec get_doc node =
     let name = get_doc generic_class_type in
     let argument = get_doc generic_argument_list in
     group_doc (indent_doc_no_space name argument indt)
-  | VectorTypeSpecifier x ->
-    let ar = get_doc x.vector_array in
-    let la = get_doc x.vector_left_angle in
-    let ty = get_doc x.vector_type in
-    let ra = get_doc x.vector_right_angle in
+  | VectorArrayTypeSpecifier {
+      vector_array_keyword;
+      vector_array_left_angle;
+      vector_array_type;
+      vector_array_right_angle
+    } ->
+    let ar = get_doc vector_array_keyword in
+    let la = get_doc vector_array_left_angle in
+    let ty = get_doc vector_array_type in
+    let ra = get_doc vector_array_right_angle in
     ar ^^^ la ^^^ ty ^^^ ra
-  | MapTypeSpecifier x ->
-    let ar = get_doc x.map_array in
-    let la = get_doc x.map_left_angle in
-    let kt = get_doc x.map_key in
-    let co = get_doc x.map_comma in
-    let vt = get_doc x.map_value in
-    let ra = get_doc x.map_right_angle in
+  | VectorTypeSpecifier {
+      vector_type_keyword;
+      vector_type_left_angle;
+      vector_type_type;
+      vector_type_right_angle
+    } ->
+    let ar = get_doc vector_type_keyword in
+    let la = get_doc vector_type_left_angle in
+    let ty = get_doc vector_type_type in
+    let ra = get_doc vector_type_right_angle in
+    ar ^^^ la ^^^ ty ^^^ ra
+  | KeysetTypeSpecifier {
+      keyset_type_keyword;
+      keyset_type_left_angle;
+      keyset_type_type;
+      keyset_type_right_angle
+    } ->
+    let ar = get_doc keyset_type_keyword in
+    let la = get_doc keyset_type_left_angle in
+    let ty = get_doc keyset_type_type in
+    let ra = get_doc keyset_type_right_angle in
+    ar ^^^ la ^^^ ty ^^^ ra
+  | DictionaryTypeSpecifier {
+      dictionary_type_keyword;
+      dictionary_type_left_angle;
+      dictionary_type_members;
+      dictionary_type_right_angle
+    } ->
+    let ar = get_doc dictionary_type_keyword in
+    let la = get_doc dictionary_type_left_angle in
+    let ms = get_doc dictionary_type_members in
+    let ra = get_doc dictionary_type_right_angle in
+    ar ^^^ la ^^^ ms ^^^ ra
+  | MapArrayTypeSpecifier {
+      map_array_keyword;
+      map_array_left_angle;
+      map_array_key;
+      map_array_comma;
+      map_array_value;
+      map_array_right_angle
+    } ->
+    let ar = get_doc map_array_keyword in
+    let la = get_doc map_array_left_angle in
+    let kt = get_doc map_array_key in
+    let co = get_doc map_array_comma in
+    let vt = get_doc map_array_value in
+    let ra = get_doc map_array_right_angle in
     ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
   | ClosureTypeSpecifier
   { closure_outer_left_paren;
@@ -1028,19 +1245,20 @@ let rec get_doc node =
     let right = get_doc x.tuple_right_paren in
     indent_block_no_space left types right indt
   (* this ideally should never be called *)
-  | CaseStatement x ->
-    let keyword = get_doc x.case_keyword in
-    let expr = get_doc x.case_expression in
-    let colon = get_doc x.case_colon in
-    let statement = x.case_statement in
-    let front_part = keyword ^^^ space ^^^ expr ^^^ colon in
-    handle_compound_brace_prefix_indent front_part statement indt
-  | DefaultStatement x ->
-    let keyword = get_doc x.default_keyword in
-    let colon = get_doc x.default_colon in
-    let statement = x.default_statement in
-    let front_part = keyword ^^^ colon in
-    handle_compound_brace_prefix_indent front_part statement indt
+  | CaseLabel {
+    case_keyword;
+    case_expression;
+    case_colon } ->
+    let keyword = get_doc case_keyword in
+    let expr = get_doc case_expression in
+    let colon = get_doc case_colon in
+    keyword ^^^ space ^^^ expr ^^^ colon
+  | DefaultLabel {
+      default_keyword;
+      default_colon } ->
+    let keyword = get_doc default_keyword in
+    let colon = get_doc default_colon in
+    keyword ^^^ colon
   | ReturnStatement x ->
     let keyword = get_doc x.return_keyword in
     let expr = get_doc x.return_expression in
@@ -1098,6 +1316,9 @@ let rec get_doc node =
     group_doc (e ^| v)
 
 (* sep is the compulsory separator separating the children in the list *)
+and get_from_children_no_space children =
+  let fold_fun acc el = acc ^^^ get_doc el in
+  group_doc (List.fold_left fold_fun (make_simple nil) children)
 and get_from_children_with_sep sep children =
   let fold_fun acc el = (acc ^^^ sep) ^| get_doc el in
   group_doc (List.fold_left fold_fun (make_simple nil) children)
@@ -1107,58 +1328,6 @@ and peek_and_decide_indent x default =
   match syntax x with
   | CompoundStatement _ -> 0
   | _ -> default
-(* Generate documents for a switch statement *)
-and handle_switch prefix switch =
-  match syntax switch.switch_body with
-  | CompoundStatement x ->
-    let left = get_doc x.compound_left_brace in
-    let left = group_doc (prefix ^| left) in
-    let right = get_doc x.compound_right_brace in
-    let body =
-      let compound_body = x.compound_statements in
-      match syntax compound_body with
-      | SyntaxList lst -> handle_switch_lists lst
-      | _ -> get_doc compound_body
-    in
-    indent_block_no_space left body right indt |> add_break
-  | _ -> prefix ^| get_doc switch.switch_body |> add_break
-(* specifically identify case chunks and generate docs from the list of
- * statements inside the compound statement of the switch statements *)
-and handle_switch_lists lst =
-  (* fold on a reversed statement list, if the element is not a case or default
-   * label, then add the element to the [current] chunk. Otherwise, group the
-   * current chunks together with the label, resulting in an indented block *)
-  let fold_fun (current, docs) node =
-    match syntax node with
-    | CaseStatement x ->
-      let keyword = get_doc x.case_keyword in
-      let expr = get_doc x.case_expression in
-      let colon = get_doc x.case_colon in
-      let front_part = keyword ^^^ space ^^^ expr ^^^ colon |> add_break in
-      let case_chunk = SyntaxList (x.case_statement :: current) in
-      let new_list = make case_chunk (value node) in
-      let end_part = get_doc new_list in
-      let new_chunk = group_doc (indent_doc front_part end_part indt) in
-      ([], new_chunk :: docs)
-    | DefaultStatement x ->
-      let keyword =  get_doc x.default_keyword in
-      let colon = get_doc x.default_colon in
-      let front_part = keyword ^^^ colon |> add_break in
-      let default_chunk = SyntaxList (x.default_statement :: current) in
-      let new_list = make default_chunk (value node) in
-      let end_part = get_doc new_list in
-      let new_chunk = group_doc (indent_doc front_part end_part indt) in
-      ([], new_chunk :: docs)
-    (* if this is not a case statement, add it to current *)
-    | _ -> (node :: current, docs)
-  in
-  let (rest, docs) = List.fold_left fold_fun ([], []) (List.rev lst) in
-  let rest_list = SyntaxList rest in
-  (* TODO better interface to do this? *)
-  let rest_node = make rest_list Syntax.EditableSyntaxValue.NoValue in
-  let rest_doc = get_doc rest_node in
-  let all_docs = rest_doc :: docs in
-  List.fold_left (^|) (make_simple nil) all_docs
 (* puts [prefix] on the same line as a compound brace. If the statement is not
  * compound, put an optional newline and group the result *)
 and handle_compound_inline_brace prefix statement postfix =

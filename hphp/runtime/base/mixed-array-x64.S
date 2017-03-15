@@ -1,7 +1,9 @@
+#include "hphp/runtime/base/mixed-array-x64.h"
+#include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/etch-helpers.h"
-#include "hphp/runtime/base/string-data-macros.h"  // NO_M_DATA
 
-#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42) && defined(NO_M_DATA)
+#if defined(__SSE4_2__) && defined(NO_M_DATA) && !defined(NO_HWCRC) && \
+    !defined(_MSC_VER)
 
         .file     "hphp/runtime/base/mixed-array-x64.S"
 
@@ -12,18 +14,17 @@ ETCH_SECTION(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE)
 ETCH_NAME(hashHelper_NvGetStr):
         CFI(startproc)
 
-        mov       (%rsi), %ecx          // key->size()
-        lea       0x10(%rsi, %rcx), %r9 // key->data() + key->size()
-        not       %edx                  // initialize to -1 (assert: it was 0)
-        movabs    $0xdfdfdfdfdfdfdfdf, %r8
+        mov       SD_LEN(%rsi), %ecx       // key->size()
+        lea       SD_DATA(%rsi, %rcx), %r9 // key->data() + key->size()
+        not       %edx                     // initialize to -1 (assert: it was 0)
         neg       %rcx
         jnz       ETCH_LABEL(hheader)
         jmp       ETCH_LABEL(hend)
 ETCH_LABEL(hloop):
         crc32q    %r11, %rdx
 ETCH_LABEL(hheader):
-        mov       (%r9, %rcx), %r11
-        and       %r8, %r11
+        movabs    $0xdfdfdfdfdfdfdfdf, %r11
+        and       (%r9, %rcx), %r11
         add       $8, %rcx
         js        ETCH_LABEL(hloop)
 
@@ -33,7 +34,7 @@ ETCH_LABEL(hheader):
 
 ETCH_LABEL(hend):
         shr       %edx
-        or        %edx, 0x4(%rsi)
+        or        %edx, SD_HASH(%rsi)   // store hash
         jmp       ETCH_LABEL(hasHash)
 
         CFI(endproc)
@@ -48,11 +49,11 @@ ETCH_LABEL(hend):
 ETCH_NAME(_ZN4HPHP10MixedArray8NvGetStrEPKNS_9ArrayDataEPKNS_10StringDataE):
         CFI(startproc)
 
-        mov       0x4(%rsi), %edx       // hash
-        mov       0x10(%rdi), %eax      // scale
+        mov       SD_HASH(%rsi), %edx   // key->hash
+        mov       MA_SCALE(%rdi), %eax  // scale
         push      %rbp
         mov       %rsp, %rbp
-        add       $0x20, %rdi           // rdi: ad->data()
+        add       $MA_DATA, %rdi        // rdi: ad->data()
         push      %rbx
         or        $-1, %ebx
         lea       (%ebx, %eax, 4), %ebx // mask = scale * 4 -1
@@ -86,14 +87,14 @@ ETCH_LABEL(nextprobe):
 ETCH_LABEL(cmphash):
         lea       (%r8, %r8, 2), %r8
         lea       (%rdi, %r8, 8), %r8
-        cmp       %edx, 0x14(%r8)       // Same hash?
+        cmp       %edx, ELM_HASH(%r8)   // Same hash?
         jne       ETCH_LABEL(nextprobe)
 
-        mov       (%r8), %r11           // StringData* in the table
+        mov       ELM_KEY(%r8), %r11    // StringData* in the table
         cmp       %rsi, %r11            // Same pointer?
         jne       ETCH_LABEL(cmplength)
 ETCH_LABEL(found):
-        lea       0x8(%r8), %rax
+        lea       ELM_DATA(%r8), %rax
         pop       %rbx
         pop       %rbp
         ret
@@ -109,16 +110,16 @@ ETCH_LABEL(fail):
         ret
 
 ETCH_LABEL(cmplength):
-        mov       (%rsi), %ecx          // string length
-        cmp       %ecx, (%r11)
+        mov       SD_LEN(%rsi), %ecx    // string length
+        cmp       %ecx, SD_LEN(%r11)
         jne       ETCH_LABEL(nextprobe)
 
         neg       %rcx
         jz        ETCH_LABEL(found)     // both emtpy strings
 
         push      %rdi
-        lea       0x10(%r11), %r11
-        lea       0x10(%rsi), %rdi
+        lea       SD_DATA(%r11), %r11      // s->data()
+        lea       SD_DATA(%rsi), %rdi      // key->data()
         push      %rdx
         sub       %rcx, %r11
         sub       %rcx, %rdi
@@ -143,7 +144,7 @@ ETCH_LABEL(tail):                       // assert(ecx >= 0)
         pop       %rdi
         jnz       ETCH_LABEL(nextprobe)
 
-        lea       0x8(%r8), %rax
+        lea       ELM_DATA(%r8), %rax
         pop       %rbx
         pop       %rbp
         ret

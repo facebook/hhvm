@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -228,6 +228,9 @@ struct PreClassEmitter {
     return std::make_pair(m_line1, m_line2);
   }
 
+  bool areMemoizeCacheKeysAllocated() const {
+    return m_memoizeInstanceSerial > 0;
+  }
   int getNextMemoizeCacheKey() {
     return m_memoizeInstanceSerial++;
   }

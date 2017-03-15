@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,7 +23,7 @@ namespace HPHP {
 IMPLEMENT_REQUEST_LOCAL(ZendObjectStore, ZendObjectStore::tl_instance);
 
 void ZendObjectStore::requestShutdown() {
-  m_store.clear();
+  m_store = req::vector<zend_object_store_bucket>{};
   m_free_list_head = 0;
 }
 
@@ -61,7 +61,7 @@ zend_object_handle ZendObjectStore::insertObject(void *object,
 
 }
 
-void * ZendObjectStore::getObject(zend_object_handle handle) {
+void* ZendObjectStore::getObject(zend_object_handle handle) {
   return m_store.at(handle).bucket.obj.object;
 }
 

@@ -33,18 +33,33 @@ Requesting 'test_header.php?test_string=f%%0d%%0aoo'
 NULL
 Requesting 'test_duplicate_headers.php'
 string(%d) "array(5) {
+  ["Accept"]=>
+  string(3) "*/*"
+  ["Host"]=>
+  string(%d) "%s"
+  ["User-Agent"]=>
+  string(%s) "%s"
   ["xxxxx"]=>
   string(2) "45"
   ["xyzzy"]=>
   string(2) "44"
-  ["Host"]=>
-  string(%d) "%s"
-  ["Accept"]=>
-  string(3) "*/*"
-  ["User-Agent"]=>
-  string(%s) "%s"
 }
 array(5) {
+  ["accept"]=>
+  array(1) {
+    [0]=>
+    string(3) "*/*"
+  }
+  ["host"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
+  ["user-agent"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
   ["xxxxx"]=>
   array(1) {
     [0]=>
@@ -58,21 +73,6 @@ array(5) {
     string(2) "43"
     [2]=>
     string(2) "44"
-  }
-  ["host"]=>
-  array(1) {
-    [0]=>
-    string(%d) "%s"
-  }
-  ["accept"]=>
-  array(1) {
-    [0]=>
-    string(3) "*/*"
-  }
-  ["user-agent"]=>
-  array(1) {
-    [0]=>
-    string(%d) "%s"
   }
 }"
 Requesting 'test_curl_multi_except.php'

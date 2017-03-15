@@ -309,11 +309,13 @@ function get_runtime_build(bool $use_php = false): string {
   }
   invariant(
     file_exists($executable),
-    $executable.' does not exist'
+    '%s does not exist',
+    $executable,
   );
   invariant(
     is_executable($executable),
-    $executable.' is not executable'
+    '%s is not executable',
+    $executable,
   );
   return nullthrows($command);
 }

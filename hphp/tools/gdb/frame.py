@@ -24,7 +24,7 @@ import repo
 
 def is_jitted(fp, ip):
     # Get the value of `s_code', the global CodeCache pointer.
-    s_code = V('HPHP::jit::tc::(anonymous namespace)::s_code')
+    s_code = K('HPHP::jit::tc::g_code')
 
     # Set the bounds of the TC.
     try:

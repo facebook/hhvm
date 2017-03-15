@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ struct ArrayLval {
   Variant* val;     // pointer to lval within new array
 };
 
-struct ArrayData {
+struct ArrayData : MaybeCountable {
   // Runtime type tag of possible array types.  This is intentionally
   // not an enum class, since we're using it pretty much as raw bits
   // (these tag values are not private), which avoids boilerplate
@@ -79,10 +79,10 @@ protected:
    */
   explicit ArrayData(ArrayKind kind, RefCount initial_count = 1)
     : m_sizeAndPos(uint32_t(-1)) {
-    m_hdr.init(static_cast<HeaderKind>(kind), initial_count);
+    initHeader(static_cast<HeaderKind>(kind), initial_count);
     assert(m_size == -1);
     assert(m_pos == 0);
-    assert(m_hdr.kind == static_cast<HeaderKind>(kind));
+    assert(m_kind == static_cast<HeaderKind>(kind));
   }
 
   /*
@@ -95,9 +95,14 @@ protected:
   ~ArrayData();
 
 public:
-  IMPLEMENT_COUNTABLE_METHODS
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
 
-  bool kindIsValid() const { return isArrayKind(m_hdr.kind); }
+  bool kindIsValid() const {
+    return isArrayKind(m_kind);
+  }
 
   /**
    * Create a new ArrayData with specified array element(s).
@@ -131,7 +136,7 @@ public:
    */
   ArrayKind kind() const {
     assert(kindIsValid());
-    return static_cast<ArrayKind>(m_hdr.kind);
+    return static_cast<ArrayKind>(m_kind);
   }
 
   /*
@@ -147,7 +152,7 @@ public:
    * with MixedArray::capacity
    */
   uint32_t cap() const {
-    return m_hdr.aux.decode();
+    return aux<CapCode>().decode();
   }
 
   /**
@@ -505,9 +510,6 @@ public:
 
 private:
   friend size_t getMemSize(const ArrayData*);
-  static void compileTimeAssertions() {
-    static_assert(offsetof(ArrayData, m_hdr) == HeaderOffset, "");
-  }
 
   static bool EqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t CompareHelper(const ArrayData*, const ArrayData*);
@@ -546,7 +548,6 @@ protected:
     };
     uint64_t m_sizeAndPos; // careful, m_pos is signed
   };
-  HeaderWord<CapCode,Counted::Maybe> m_hdr;
 };
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
@@ -560,15 +561,12 @@ static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
 
 //////////////////////////////////////////////////////////////////////
 
-extern std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyArray;
-
-extern std::aligned_storage<
-  sizeof(ArrayData),
-  alignof(ArrayData)
->::type s_theEmptyVecArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
+constexpr size_t kEmptyMixedArraySize = 120;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
+constexpr size_t kEmptySetArraySize = 96;
+extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
  * Return the "static empty array".  This is a singleton static array
@@ -583,6 +581,32 @@ ALWAYS_INLINE ArrayData* staticEmptyArray() {
 ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
   void* vp = &s_theEmptyVecArray;
   return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyDictArray() {
+  void* vp = &s_theEmptyDictArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* staticEmptyKeysetArray() {
+  void* vp = &s_theEmptySetArray;
+  return static_cast<ArrayData*>(vp);
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::Create() {
+  return staticEmptyArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateVec() {
+  return staticEmptyVecArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateDict() {
+  return staticEmptyDictArray();
+}
+
+ALWAYS_INLINE ArrayData* ArrayData::CreateKeyset() {
+  return staticEmptyKeysetArray();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -680,6 +704,19 @@ void decRefArr(ArrayData* arr) {
 [[noreturn]] void throwRefInvalidArrayValueException(const Array& arr);
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
+[[noreturn]] void throwVecUnsetException();
+
+void raiseHackArrCompatRefBind(int64_t);
+void raiseHackArrCompatRefBind(const StringData*);
+void raiseHackArrCompatRefNew();
+void raiseHackArrCompatRefIter();
+
+void raiseHackArrCompatAdd();
+
+void raiseHackArrCompatArrMixedCmp();
+
+std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
+void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -103,7 +103,7 @@ inline void exception_handler(Action action) {
       auto const outer = fp->m_sfp;
       auto const off = outer->func()->base() + fp->m_soff;
       auto const fe = outer->func()->findPrecedingFPI(off);
-      vmpc() = outer->func()->unit()->at(fe->m_fcallOff);
+      vmpc() = outer->func()->unit()->at(fe->m_fpiEndOff);
       assertx(isFCallStar(peek_op(vmpc())));
       vmfp() = outer;
       assert(vmsp() == reinterpret_cast<Cell*>(fp) - fp->numArgs());

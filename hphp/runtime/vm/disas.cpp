@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -120,7 +120,7 @@ std::string escaped_long(Cell cell) {
 //////////////////////////////////////////////////////////////////////
 
 struct EHFault { std::string label; };
-struct EHCatch { std::map<std::string,std::string> blocks; };
+struct EHCatch { std::string label; };
 using EHInfo = boost::variant< EHFault
                              , EHCatch
                              >;
@@ -165,13 +165,13 @@ FuncInfo find_func_info(const Func* func) {
 
     for (; pc != stop; pc += instrLen(pc)) {
       auto const op = peek_op(pc);
-      auto const off = func->unit()->offsetOf(pc);
       if (isSwitch(op)) {
         foreachSwitchTarget(pc, [&] (Offset off) {
           add_target("L", pc - bcBase + off);
         });
         continue;
       }
+      auto const off = func->unit()->offsetOf(pc);
       auto const target = instrJumpTarget(bcBase, off);
       if (target != InvalidAbsoluteOffset) {
         add_target("L", target);
@@ -185,16 +185,9 @@ FuncInfo find_func_info(const Func* func) {
       finfo.ehInfo[&eh] = [&]() -> EHInfo {
         switch (eh.m_type) {
         case EHEnt::Type::Catch:
-          {
-            auto catches = EHCatch {};
-            for (auto& kv : eh.m_catches) {
-              auto const clsName = func->unit()->lookupLitstrId(kv.first);
-              catches.blocks[clsName->data()] = add_target("C", kv.second);
-            }
-            return catches;
-          }
+          return EHCatch { add_target("C", eh.m_handler) };
         case EHEnt::Type::Fault:
-          return EHFault { add_target("F", eh.m_fault) };
+          return EHFault { add_target("F", eh.m_handler) };
         }
         not_reached();
       }();
@@ -309,6 +302,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_I64A   out.fmt(" {}", decode<int64_t>(pc));
 #define IMM_LA     out.fmt(" {}", loc_name(finfo, decode_iva(pc)));
 #define IMM_IA     out.fmt(" {}", decode_iva(pc));
+#define IMM_CAR    out.fmt(" {}", decode_iva(pc));
+#define IMM_CAW    out.fmt(" {}", decode_iva(pc));
 #define IMM_DA     out.fmt(" {}", decode<double>(pc));
 #define IMM_SA     out.fmt(" {}", \
                            escaped(finfo.unit->lookupLitstrId(decode<Id>(pc))));
@@ -319,6 +314,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
                      subopToName(static_cast<ty>(decode<uint8_t>(pc))));
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", show(decode_member_key(pc, finfo.unit)));
+#define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x
@@ -351,6 +347,8 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -359,6 +357,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #undef IMM_OA
 #undef IMM_VSA
 #undef IMM_KA
+#undef IMM_LAR
 
   out.nl();
 }
@@ -367,6 +366,9 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
   const Func* func = finfo.func;
   if (auto const niters = func->numIterators()) {
     out.fmtln(".numiters {};", niters);
+  }
+  if (auto const nslots = func->numClsRefSlots()) {
+    out.fmtln(".numclsrefslots {};", nslots);
   }
   if (func->numNamedLocals() > func->numParams()) {
     std::vector<std::string> locals;
@@ -407,14 +409,8 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
       always_assert(info != end(finfo.ehInfo));
       match<void>(
         info->second,
-        [&] (const EHCatch& catches) {
-          out.indent();
-          out.fmt(".try_catch");
-          for (auto& kv : catches.blocks) {
-            out.fmt(" ({} {})", kv.first, kv.second);
-          }
-          out.fmt(" {{");
-          out.nl();
+        [&] (const EHCatch& ehCatch) {
+          out.fmtln(".try_catch {} {{", ehCatch.label);
         },
         [&] (const EHFault& fault) {
           out.fmtln(".try_fault {} {{", fault.label);

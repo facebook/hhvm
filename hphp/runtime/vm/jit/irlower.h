@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,12 +42,6 @@ enum class SyncOptions {
   SyncAdjustOne,
 };
 
-enum class CatchCall {
-  Uninit,
-  PHP,
-  CPP,
-};
-
 /*
  * State updated and tracked across vasm generation for individual instructions
  * and blocks.
@@ -57,7 +51,6 @@ struct IRLS {
     : unit(unit)
     , labels(unit, Vlabel())
     , locs(unit, Vloc{})
-    , catch_calls(unit, CatchCall::Uninit)
   {}
 
   /*
@@ -83,15 +76,6 @@ struct IRLS {
    * Vlocs for each SSATmp used or defined in a reachable block.
    */
   StateVector<SSATmp,Vloc> locs;
-
-  /*
-   * Metadata used to handle catch blocks that are targets of calls.
-   *
-   * This StateVector is used to propagate information from the cg* function
-   * which produces the call, to cgBeginCatch(), which encodes the information
-   * in the landingpad{} instruction.
-   */
-  StateVector<Block,CatchCall> catch_calls;
 };
 
 /*

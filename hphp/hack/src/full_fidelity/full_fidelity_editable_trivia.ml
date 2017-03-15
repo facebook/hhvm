@@ -53,13 +53,10 @@ let text_from_trivia_list trivia_list =
   List.fold_left folder "" trivia_list
 
 let from_minimal source_text minimal_trivia offset =
+  let kind = MinimalTrivia.kind minimal_trivia in
   let width = MinimalTrivia.width minimal_trivia in
   let text = SourceText.sub source_text offset width in
-  match MinimalTrivia.kind minimal_trivia with
-  | TriviaKind.WhiteSpace -> make_whitespace text
-  | TriviaKind.EndOfLine -> make_eol text
-  | TriviaKind.SingleLineComment -> make_single_line_comment text
-  | TriviaKind.DelimitedComment -> make_delimited_comment text
+  { kind; text }
 
 let from_minimal_list source_text ts offset =
   let rec aux acc ts offset =

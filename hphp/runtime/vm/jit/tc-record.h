@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_TC_RECORD_H_
 
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/growable-vector.h"
@@ -46,7 +47,8 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
  * Record translation for gdb debugging of the tc.
  */
 void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
-                          const TCA start, bool exit, bool inPrologue);
+                          const TCA start, const TCA end, bool exit,
+                          bool inPrologue);
 
 /*
  * Record BC instruction ranges in the tc for the perf map.
@@ -61,7 +63,7 @@ void reportJitMaturity(const CodeCache& code);
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */
-void logTranslation(const TransEnv& env);
+void logTranslation(const TransEnv& env, const TransRange& range);
 
 /*
  * Record smashed calls in the TC that may need to be re-smashed in the event

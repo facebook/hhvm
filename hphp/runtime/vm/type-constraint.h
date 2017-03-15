@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,10 +79,12 @@ struct TypeConstraint {
     /*
      * Indicates a type constraint is a type constant, which is similar to a
      * type alias defined inside a class. For instance, the constraint on $x
-     * is a TypeConstant
+     * is a TypeConstant:
+     *
      * class Foo {
      *   const type T = int;
      *   public function bar(Foo::T $x) { ... }
+     * }
      */
      TypeConstant = 0x20,
   };
@@ -273,6 +275,33 @@ operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Its possible to use type constraints on function parameters to devise better
+ * memoization key generation schemes. For example, if we know the
+ * type-constraint limits the parameter to only ever being an integer or string,
+ * then the memoization key scheme can just be the identity. This is because
+ * integers and strings won't collide with each other, and we know it won't ever
+ * be anything else. Without such a constraint, the string would need escaping.
+ *
+ * This function takes a type-constraint and returns the suitable "memo-key
+ * constraint" if it corresponds to one. Note: HHBBC, the interpreter, and the
+ * JIT all need to agree exactly on the scheme for each constraint. It is the
+ * caller's responsibility to actually verify that type-hints are being
+ * enforced. If they are not, then none of this information can be used.
+ */
+enum class MemoKeyConstraint {
+  Null,
+  Int,
+  IntOrNull,
+  Bool,
+  BoolOrNull,
+  Str,
+  StrOrNull,
+  IntOrStr,
+  None
+};
+MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
 }
 

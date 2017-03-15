@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,12 +49,8 @@ std::string blockToString(const Block* b, const Graph* g, const Unit* u) {
     const Block* s = j.popFront();
     out << "B" << s->id << (j.empty() ? "" : ",");
   }
-  if (g->exn_cap) {
-    out << " exns=";
-    for (BlockPtrRange j = exnBlocks(g, b); !j.empty(); ) {
-      const Block* s = j.popFront();
-      out << "B" << s->id << (j.empty() ? "" : ",");
-    }
+  if (b->exn) {
+    out << " exn=B" << b->exn->id;
   }
   return out.str();
 }
@@ -132,12 +128,11 @@ void printGml(const Unit* unit) {
         fprintf(file, "  edge [ source %d target %d ]\n",
                 nextid + b->id, nextid + s->id);
       }
-      for (BlockPtrRange k = exnBlocks(g, b); !k.empty();) {
-        const Block* s = k.popFront();
+      if (b->exn) {
         fprintf(file, "  edge [ source %d target %d"
                       "    graphics [ style \"dotted\" ]"
                       "  ]\n",
-                nextid + b->id, nextid + s->id);
+                nextid + b->id, nextid + b->exn->id);
       }
     }
     nextid += g->block_count + 1;

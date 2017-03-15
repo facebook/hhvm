@@ -93,6 +93,28 @@ let autocomplete_result_to_json res =
       "expected_ty", Hh_json.JSON_Bool expected_ty;
   ]
 
+let autocomplete_result_to_ide_response res =
+  let param_to_ide_response x = {
+    Ide_message.callable_param_name = x.param_name;
+    callable_param_type = x.param_ty;
+  } in
+
+  let callable_details_to_ide_response res = {
+    Ide_message.return_type = res.return_ty;
+    callable_params = List.map res.params param_to_ide_response;
+  } in
+
+  let callable_details_to_ide_response =
+    Option.map ~f:callable_details_to_ide_response in
+
+  let autocomplete_result_to_ide_response res = {
+    Ide_message.autocomplete_item_text = res.res_name;
+    autocomplete_item_type = res.res_ty;
+    callable_details = callable_details_to_ide_response res.func_details;
+  } in
+  Ide_message.Autocomplete_response
+    (List.map res ~f:autocomplete_result_to_ide_response)
+
 let get_result name ty =
   {
     ty   = ty;
@@ -131,7 +153,7 @@ let autocomplete_hint = autocomplete_token Autocomplete.Actype None
 
 let autocomplete_new cid env _ =
   match cid with
-  | Nast.CI sid -> autocomplete_token Autocomplete.Acnew (Some env) sid
+  | Nast.CI (sid, _) -> autocomplete_token Autocomplete.Acnew (Some env) sid
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =
@@ -140,7 +162,8 @@ let get_class_elt_types env class_ cid elts =
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 
-let autocomplete_method is_static class_ id env cid ~is_method:_ ~is_const:_ =
+let autocomplete_method is_static class_ ~targs:_ id env cid
+    ~is_method:_ ~is_const:_ =
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
@@ -402,7 +425,7 @@ let result_compare a b =
   else 1
 
 let get_results tcopt funs classes =
-  Errors.ignore_ begin fun() ->
+  Errors.ignore_ begin fun () ->
     let completion_type = !Autocomplete.argument_global_type in
     if completion_type = Some Autocomplete.Acid ||
        completion_type = Some Autocomplete.Acnew ||

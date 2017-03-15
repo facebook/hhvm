@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,9 +64,15 @@ bool mustBeEmptyish(Type ty) {
 }
 
 bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
-bool propCouldPromoteToObj(Type ty) { return couldBeEmptyish(ty); }
 bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
-bool propMustPromoteToObj(Type ty)  { return mustBeEmptyish(ty); }
+
+bool propCouldPromoteToObj(Type ty) {
+  return RuntimeOption::EvalPromoteEmptyObject && couldBeEmptyish(ty);
+}
+
+bool propMustPromoteToObj(Type ty)  {
+  return RuntimeOption::EvalPromoteEmptyObject && mustBeEmptyish(ty);
+}
 
 bool keyCouldBeWeird(Type key) {
   return key.couldBe(TObj) || key.couldBe(TArr) || key.couldBe(TVec) ||
@@ -179,7 +185,7 @@ bool couldBeInPublicStatic(ISS& env, const Base& b) {
 
 template<typename R, typename B, typename... T>
 typename std::enable_if<
-  !std::is_same<R, Type>::value,
+  std::is_same<R, std::pair<Type,bool>>::value,
   folly::Optional<Type>
 >::type hack_array_op(
   ISS& env,
@@ -212,8 +218,8 @@ typename std::enable_if<
 }
 template<typename R, typename B, typename... T>
 typename std::enable_if<
-  std::is_same<R, Type>::value,
-  folly::Optional<Type>
+  !std::is_same<R, std::pair<Type,bool>>::value,
+  folly::Optional<R>
 >::type hack_array_op(
   ISS& env,
   R opV(B, const T&...),
@@ -246,9 +252,11 @@ void handleInThisPropD(ISS& env, bool isNullsafe) {
     return;
   }
 
-  mergeEachThisPropRaw(env, [&] (Type t) {
-    return propCouldPromoteToObj(t) ? TObj : TBottom;
-  });
+  if (RuntimeOption::EvalPromoteEmptyObject) {
+    mergeEachThisPropRaw(env, [&] (Type t) {
+      return propCouldPromoteToObj(t) ? TObj : TBottom;
+    });
+  }
 }
 
 void handleInSelfPropD(ISS& env, bool isNullsafe) {
@@ -371,8 +379,8 @@ void handleInPublicStaticElemU(ISS& env) {
 // MInstrs can throw in between each op, so the states of locals
 // need to be propagated across factored exit edges.
 void miThrow(ISS& env) {
-  for (auto& factored : env.blk.factoredExits) {
-    env.propagate(*factored, without_stacks(env.state));
+  for (auto factored : env.blk.factoredExits) {
+    env.propagate(factored, without_stacks(env.state));
   }
 }
 
@@ -381,7 +389,7 @@ void miThrow(ISS& env) {
 void setLocalForBase(ISS& env, Type ty) {
   assert(mustBeInFrame(env.state.base) ||
          env.state.base.loc == BaseLoc::LocalArrChain);
-  if (!env.state.base.local) return loseNonRefLocalTypes(env);
+  if (env.state.base.local == NoLocalId) return loseNonRefLocalTypes(env);
   setLoc(env, env.state.base.local, ty);
   FTRACE(4, "      ${} := {}\n",
     env.state.base.locName ? env.state.base.locName->data() : "$<unnamed>",
@@ -393,8 +401,9 @@ void setLocalForBase(ISS& env, Type ty) {
 // to produce the array type that incorporates the effects of any
 // intermediate defining dims.
 Type currentChainType(ISS& env, Type val) {
-  auto it = env.state.arrayChain.rbegin();
-  for (; it != env.state.arrayChain.rend(); ++it) {
+  auto it = env.state.arrayChain.end();
+  while (it != env.state.arrayChain.begin()) {
+    --it;
     if (it->first.subtypeOf(TArr)) {
       val = array_set(it->first, it->second, val);
     } else if (it->first.subtypeOf(TVec)) {
@@ -439,7 +448,7 @@ Type resolveArrayChain(ISS& env, Type val) {
   return val;
 }
 
-void moveBase(ISS& env, folly::Optional<Base> base) {
+void moveBase(ISS& env, folly::Optional<Base> base, bool updateLocal) {
   SCOPE_EXIT { if (base) env.state.base = *base; };
 
   // Note: these miThrows probably can be left out if base is folly::none
@@ -453,17 +462,23 @@ void moveBase(ISS& env, folly::Optional<Base> base) {
        * update the type of the local for new minstrs, and for the exception
        * edge of old minstrs.
        */
-      setLocalForBase(env, currentChainType(env, base->type));
+      if (updateLocal) {
+        setLocalForBase(env, currentChainType(env, base->type));
+      }
       miThrow(env);
     } else {
-      setLocalForBase(env, resolveArrayChain(env, env.state.base.type));
+      if (updateLocal) {
+        setLocalForBase(env, resolveArrayChain(env, env.state.base.type));
+      }
     }
 
     return;
   }
 
   if (mustBeInFrame(env.state.base)) {
-    setLocalForBase(env, env.state.base.type);
+    if (updateLocal) {
+      setLocalForBase(env, env.state.base.type);
+    }
     miThrow(env);
   }
 }
@@ -491,17 +506,16 @@ void handleBaseElemU(ISS& env) {
   auto& ty = env.state.base.type;
   if (ty.couldBe(TArr)) {
     // We're conservative with unsets on array types for now.
-    ty = union_of(ty, TArr);
+    ty |= TArr;
   }
   if (ty.couldBe(TVec)) {
-    // Unset on a vec might turn it into a dict.
-    ty = union_of(ty, union_of(TVec, TDict));
+    ty |= TVec;
   }
   if (ty.couldBe(TDict)) {
-    ty = union_of(ty, TDict);
+    ty |= TDict;
   }
   if (ty.couldBe(TKeyset)) {
-    ty = union_of(ty, TKeyset);
+    ty |= TKeyset;
   }
   if (ty.couldBe(TSStr)) {
     ty = loosen_statics(env.state.base.type);
@@ -601,12 +615,13 @@ Type key_type(ISS& env, MKey mkey) {
 //////////////////////////////////////////////////////////////////////
 // base ops
 
-Base miBaseLoc(ISS& env, borrowed_ptr<php::Local> locBase, bool isDefine) {
+Base miBaseLoc(ISS& env, LocalId locBase, bool isDefine) {
+  auto const locName = env.ctx.func->locals[locBase].name;
   if (!isDefine) {
     return Base { derefLoc(env, locBase),
                   BaseLoc::Frame,
                   TBottom,
-                  locBase->name,
+                  locName,
                   locBase };
   }
 
@@ -617,7 +632,7 @@ Base miBaseLoc(ISS& env, borrowed_ptr<php::Local> locBase, bool isDefine) {
   return Base { locAsCell(env, locBase),
                 BaseLoc::Frame,
                 TBottom,
-                locBase->name,
+                locName,
                 locBase };
 }
 
@@ -641,13 +656,15 @@ Base miBaseSProp(ISS& env, Type cls, Type tprop) {
 //////////////////////////////////////////////////////////////////////
 // intermediate ops
 
-void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
+void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
   auto const name     = mStringKey(key);
-  auto const isDefine = flags & MOpFlags::Define;
-  auto const isUnset  = flags & MOpFlags::Unset;
-
+  auto const isDefine = mode == MOpMode::Define;
+  auto const isUnset  = mode == MOpMode::Unset;
+  // PHP5 doesn't modify an unset local if you unset a property or
+  // array elem on it, but hhvm does (it promotes it to init-null).
+  auto const updateLocal = isDefine || isUnset;
   /*
-   * MOpFlags::Unset Props doesn't promote "emptyish" things to stdClass, or
+   * MOpMode::Unset Props doesn't promote "emptyish" things to stdClass, or
    * affect arrays, however it can define a property on an object base.  This
    * means we don't need any couldBeInFoo logic, but if the base could actually
    * be $this, and a declared property could be Uninit, we need to merge
@@ -686,28 +703,34 @@ void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
       auto const propTy = thisPropAsCell(env, name);
-      moveBase(env, Base { propTy ? *propTy : TInitCell,
-                           BaseLoc::PostProp,
-                           thisTy,
-                           name });
+      moveBase(env,
+               Base { propTy ? *propTy : TInitCell,
+                      BaseLoc::PostProp,
+                      thisTy,
+                      name },
+              updateLocal);
     } else {
-      moveBase(env, Base { TInitCell, BaseLoc::PostProp, thisTy });
+      moveBase(env,
+               Base { TInitCell, BaseLoc::PostProp, thisTy },
+               updateLocal);
     }
     return;
   }
 
   // We know for sure we're going to be in an object property.
   if (env.state.base.type.subtypeOf(TObj)) {
-    moveBase(env, Base { TInitCell,
-                         BaseLoc::PostProp,
-                         env.state.base.type,
-                         name });
+    moveBase(env,
+             Base { TInitCell,
+                    BaseLoc::PostProp,
+                    env.state.base.type,
+                    name },
+             updateLocal);
     return;
   }
 
   /*
    * Otherwise, intermediate props with define can promote a null, false, or ""
-   * to stdClass.  Those cases, and others, if it's MOpFlags::Define, will set
+   * to stdClass.  Those cases, and others, if it's MOpMode::Define, will set
    * the base to a null value in tvScratch.  The base may also legitimately be
    * an object and our next base is in an object property.
    *
@@ -721,15 +744,19 @@ void miProp(ISS& env, bool isNullsafe, MOpFlags flags, Type key) {
       ? objExact(env.index.builtin_class(s_stdClass.get()))
       : TTop;
 
-  moveBase(env, Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name });
+  moveBase(env,
+           Base { TInitCell, BaseLoc::PostProp, newBaseLocTy, name },
+           updateLocal);
 }
 
-void miElem(ISS& env, MOpFlags flags, Type key) {
-  auto const isDefine = flags & MOpFlags::Define;
-  auto const isUnset  = flags & MOpFlags::Unset;
+void miElem(ISS& env, MOpMode mode, Type key) {
+  auto const isDefine = mode == MOpMode::Define;
+  auto const isUnset  = mode == MOpMode::Unset;
+
+  auto const updateLocal = isDefine || isUnset;
 
   /*
-   * Elem dims with MOpFlags::Unset can change a base from a static array into a
+   * Elem dims with MOpMode::Unset can change a base from a static array into a
    * reference counted array.  It never promotes emptyish types, however.
    *
    * We only need to handle this for self props, because we don't track
@@ -759,8 +786,8 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
     if (couldDoChain) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       auto ty = [&] {
-        if (auto ty = hack_array_do(env, elem, key)) {
-          return *ty;
+        if (auto type = hack_array_do(env, elem, key)) {
+          return *type;
         }
         return array_elem(env.state.base.type, key);
       }();
@@ -768,7 +795,7 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
                            BaseLoc::LocalArrChain,
                            TBottom,
                            env.state.base.locName,
-                           env.state.base.local });
+                           env.state.base.local }, true);
       return;
     }
   }
@@ -776,17 +803,17 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
   if (env.state.base.type.subtypeOf(TArr)) {
     moveBase(env, Base { array_elem(env.state.base.type, key),
                          BaseLoc::PostElem,
-                         env.state.base.type });
+                         env.state.base.type }, updateLocal);
     return;
   }
   if (auto ty = hack_array_do(env, elem, key)) {
     moveBase(env, Base { *ty,
                          BaseLoc::PostElem,
-                         env.state.base.type });
+                         env.state.base.type }, updateLocal);
     return;
   }
   if (env.state.base.type.subtypeOf(TStr)) {
-    moveBase(env, Base { TStr, BaseLoc::PostElem });
+    moveBase(env, Base { TStr, BaseLoc::PostElem }, updateLocal);
     return;
   }
 
@@ -798,7 +825,7 @@ void miElem(ISS& env, MOpFlags flags, Type key) {
    * init_null_variant, or inside tvScratch.  We represent this with the
    * PostElem base location with locType TTop.
    */
-  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop });
+  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop }, updateLocal);
 }
 
 void miNewElem(ISS& env) {
@@ -817,7 +844,7 @@ void miNewElem(ISS& env) {
   if (couldDoChain) {
     auto par = [&] () -> std::pair<Type, Type> {
       auto ty = hack_array_do(env, newelem, TInitNull);
-      if (ty) return {*ty, TInt};
+      if (ty) return std::move(*ty);
       return array_newelem_key(env.state.base.type, TInitNull);
     }();
     env.state.arrayChain.push_back(par);
@@ -825,16 +852,18 @@ void miNewElem(ISS& env) {
                          BaseLoc::LocalArrChain,
                          TBottom,
                          env.state.base.locName,
-                         env.state.base.local });
+                         env.state.base.local }, true);
     return;
   }
 
   if (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset) {
-    moveBase(env, Base { TInitNull, BaseLoc::PostElem, env.state.base.type });
+    moveBase(env,
+             Base { TInitNull, BaseLoc::PostElem, env.state.base.type },
+             true);
     return;
   }
 
-  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop });
+  moveBase(env, Base { TInitCell, BaseLoc::PostElem, TTop }, true);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1047,8 +1076,8 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key) {
     if (env.state.base.type.subtypeOf(TArr)) {
       return array_elem(env.state.base.type, key);
     }
-    if (auto ty = hack_array_do(env, elem, key)) {
-      return *ty;
+    if (auto type = hack_array_do(env, elem, key)) {
+      return *type;
     }
     return TInitCell;
   }();
@@ -1093,7 +1122,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       // Note here that a string type stays a string (with a changed character,
       // and loss of staticness), unless it was the empty string, where it
       // becomes an array.  Do it conservatively for now:
-      ty = union_of(loosen_statics(ty), counted_aempty());
+      ty = union_of(loosen_statics(std::move(ty)), counted_aempty());
     }
     if (!ty.subtypeOf(TStr)) {
       handleBaseElemD(env);
@@ -1126,9 +1155,9 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
                         !isvec &&
                         !isdict &&
                         !iskeyset);
-  auto isSuitableHackKey = [&](Type key) {
-    if (isvec) return key.couldBe(TInt);
-    if (isdict) return key.couldBe(TInt) || key.couldBe(TStr);
+  auto isSuitableHackKey = [&](Type k) {
+    if (isvec) return k.couldBe(TInt);
+    if (isdict) return k.couldBe(TInt) || k.couldBe(TStr);
     return false;
   };
 
@@ -1255,7 +1284,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       return;
     }
     if (auto res = hack_array_do(env, newelem, ty)) {
-      env.state.base.type = *res;
+      env.state.base.type = std::move(res->first);
       return;
     }
   }
@@ -1265,7 +1294,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       return;
     }
     if (auto res = hack_array_do(env, newelem, ty)) {
-      env.state.base.type = *res;
+      env.state.base.type = std::move(res->first);
       return;
     }
   }
@@ -1304,7 +1333,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       return;
     }
     if (auto ty = hack_array_do(env, newelem, t1)) {
-      env.state.base.type = *ty;
+      env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
     }
@@ -1316,7 +1345,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       return;
     }
     if (auto ty = hack_array_do(env, newelem, t1)) {
-      env.state.base.type = *ty;
+      env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
     }
@@ -1375,7 +1404,7 @@ void miFinalSetWithRef(ISS& env) {
   auto const isvec = env.state.base.type.subtypeOf(TVec);
   auto const isdict = env.state.base.type.subtypeOf(TDict);
   auto const iskeyset = env.state.base.type.subtypeOf(TKeyset);
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
   if (!isvec && !isdict && !iskeyset) {
     killLocals(env);
     killThisProps(env);
@@ -1385,48 +1414,65 @@ void miFinalSetWithRef(ISS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-void miBaseSImpl(ISS& env, bool hasRhs, Type prop) {
-  auto rhs = hasRhs ? popT(env) : TTop;
-  auto const cls = popA(env);
-  env.state.base = miBaseSProp(env, cls, prop);
-  if (hasRhs) push(env, rhs);
-}
-
-//////////////////////////////////////////////////////////////////////
-
 template<typename A, typename B>
 void mergePaths(ISS& env, A a, B b) {
   auto const start = env.state;
+  assert(!env.flags.canConstProp);
+  assert(env.flags.wasPEI);
   a();
   auto const aState = env.state;
+  auto const aFlags = env.flags;
+  env.flags.canConstProp = false;
+  env.flags.wasPEI = true;
   env.state = start;
   b();
   merge_into(env.state, aState);
+  // The bases must match. The types could be different because the
+  // Define side could have promoted the base, or at least removed
+  // Uninit.
+  if (env.state.base.loc == BaseLoc::LocalArrChain) {
+    resolveArrayChain(env, env.state.base.type);
+    env.state.base.loc = BaseLoc::PostElem;
+  }
+  assert(env.state.base.loc == aState.base.loc);
+  if (aState.base.loc == BaseLoc::Frame) {
+    assert(env.state.base.loc == aState.base.loc);
+    assert(env.state.base.locTy == aState.base.locTy);
+    assert(env.state.base.locName == aState.base.locName);
+    assert(env.state.base.local == aState.base.local);
+  }
+  auto newT = union_of(env.state.base.type, aState.base.type);
+  if (newT != env.state.base.type) {
+    env.state.base.type = newT;
+  }
+  env.flags.wasPEI |= aFlags.wasPEI;
+  env.flags.canConstProp &= aFlags.canConstProp;
   assert(env.flags.wasPEI);
+  // an FPass instruction can have side effects if it ends up by-ref
   assert(!env.flags.canConstProp);
 }
 
 /*
- * Helpers to set the MOpFlags immediate of a bytecode struct, whether it's
+ * Helpers to set the MOpMode immediate of a bytecode struct, whether it's
  * subop2 for Base* opcodes or subop1 for a Dim. All users of these functions
  * start with the flags set to Warn.
  */
 template<typename BC>
-void setMOpFlags(BC& op, MOpFlags flags) {
-  assert(op.subop2 == MOpFlags::Warn);
-  op.subop2 = flags;
+void setMOpMode(BC& op, MOpMode mode) {
+  assert(op.subop2 == MOpMode::Warn);
+  op.subop2 = mode;
 }
 
-void setMOpFlags(bc::Dim& op, MOpFlags flags) {
-  assert(op.subop1 == MOpFlags::Warn);
-  op.subop1 = flags;
+void setMOpMode(bc::Dim& op, MOpMode mode) {
+  assert(op.subop1 == MOpMode::Warn);
+  op.subop1 = mode;
 }
 
-folly::Optional<MOpFlags> fpassFlags(ISS& env, int32_t arg) {
+folly::Optional<MOpMode> fpassMode(ISS& env, int32_t arg) {
   switch (prepKind(env, arg)) {
     case PrepKind::Unknown: return folly::none;
-    case PrepKind::Val:     return MOpFlags::Warn;
-    case PrepKind::Ref:     return MOpFlags::Define;
+    case PrepKind::Val:     return MOpMode::Warn;
+    case PrepKind::Ref:     return MOpMode::Define;
   }
   always_assert(false);
 }
@@ -1442,14 +1488,24 @@ void in(ISS& env, const bc::BaseNC& op) {
   assert(env.state.arrayChain.empty());
   topC(env, op.arg1);
   readUnknownLocals(env);
-  env.state.base = Base{TInitCell, BaseLoc::Frame};
+  mayUseVV(env);
+  env.state.base = Base { TInitCell,
+                          BaseLoc::Frame,
+                          TBottom,
+                          SString{},
+                          NoLocalId };
 }
 
 void in(ISS& env, const bc::BaseNL& op) {
   assert(env.state.arrayChain.empty());
   locAsCell(env, op.loc1);
   readUnknownLocals(env);
-  env.state.base = Base{TInitCell, BaseLoc::Frame};
+  mayUseVV(env);
+  env.state.base = Base { TInitCell,
+                          BaseLoc::Frame,
+                          TBottom,
+                          SString{},
+                          NoLocalId };
 }
 
 void in(ISS& env, const bc::BaseGC& op) {
@@ -1466,19 +1522,21 @@ void in(ISS& env, const bc::BaseGL& op) {
 
 void in(ISS& env, const bc::BaseSC& op) {
   assert(env.state.arrayChain.empty());
-  auto const prop = topC(env, op.arg1);
-  miBaseSImpl(env, op.arg2 == 1, prop);
+  auto prop = topC(env, op.arg1);
+  auto cls = takeClsRefSlot(env, op.slot);
+  env.state.base = miBaseSProp(env, std::move(cls), std::move(prop));
 }
 
 void in(ISS& env, const bc::BaseSL& op) {
   assert(env.state.arrayChain.empty());
-  auto const prop = locAsCell(env, op.loc1);
-  miBaseSImpl(env, op.arg2 == 1, prop);
+  auto prop = locAsCell(env, op.loc1);
+  auto cls = takeClsRefSlot(env, op.slot);
+  env.state.base = miBaseSProp(env, std::move(cls), std::move(prop));
 }
 
 void in(ISS& env, const bc::BaseL& op) {
   assert(env.state.arrayChain.empty());
-  env.state.base = miBaseLoc(env, op.loc1, op.subop2 & MOpFlags::Define);
+  env.state.base = miBaseLoc(env, op.loc1, op.subop2 == MOpMode::Define);
 }
 
 void in(ISS& env, const bc::BaseC& op) {
@@ -1501,8 +1559,8 @@ void in(ISS& env, const bc::BaseH& op) {
 
 template<typename BC>
 static void fpassImpl(ISS& env, int32_t arg, BC op) {
-  if (auto const flags = fpassFlags(env, arg)) {
-    setMOpFlags(op, *flags);
+  if (auto const mode = fpassMode(env, arg)) {
+    setMOpMode(op, *mode);
     return reduce(env, op);
   }
 
@@ -1510,30 +1568,30 @@ static void fpassImpl(ISS& env, int32_t arg, BC op) {
     env,
     [&] { in(env, op); },
     [&] {
-      setMOpFlags(op, MOpFlags::Define);
+      setMOpMode(op, MOpMode::Define);
       in(env, op);
     }
   );
 }
 
 void in(ISS& env, const bc::FPassBaseNC& op) {
-  fpassImpl(env, op.arg1, bc::BaseNC{op.arg2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseNC{op.arg2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseNL& op) {
-  fpassImpl(env, op.arg1, bc::BaseNL{op.loc2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseNL{op.loc2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseGC& op) {
-  fpassImpl(env, op.arg1, bc::BaseGC{op.arg2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseGC{op.arg2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseGL& op) {
-  fpassImpl(env, op.arg1, bc::BaseGL{op.loc2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseGL{op.loc2, MOpMode::Warn});
 }
 
 void in(ISS& env, const bc::FPassBaseL& op) {
-  fpassImpl(env, op.arg1, bc::BaseL{op.loc2, MOpFlags::Warn});
+  fpassImpl(env, op.arg1, bc::BaseL{op.loc2, MOpMode::Warn});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1551,7 +1609,7 @@ void in(ISS& env, const bc::Dim& op) {
 }
 
 void in(ISS& env, const bc::FPassDim& op) {
-  fpassImpl(env, op.arg1, bc::Dim{MOpFlags::Warn, op.mkey});
+  fpassImpl(env, op.arg1, bc::Dim{MOpMode::Warn, op.mkey});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1601,7 +1659,7 @@ void in(ISS& env, const bc::VGetM& op) {
   } else {
     miFinalVGetNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::SetM& op) {
@@ -1613,7 +1671,7 @@ void in(ISS& env, const bc::SetM& op) {
   } else {
     miFinalSetNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::IncDecM& op) {
@@ -1625,7 +1683,7 @@ void in(ISS& env, const bc::IncDecM& op) {
   } else {
     miFinalIncDecNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::SetOpM& op) {
@@ -1637,7 +1695,7 @@ void in(ISS& env, const bc::SetOpM& op) {
   } else {
     miFinalSetOpNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::BindM& op) {
@@ -1649,7 +1707,7 @@ void in(ISS& env, const bc::BindM& op) {
   } else {
     miFinalBindNewElem(env, op.arg1);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::UnsetM& op) {
@@ -1660,7 +1718,7 @@ void in(ISS& env, const bc::UnsetM& op) {
     assert(mcodeIsElem(op.mkey.mcode));
     miFinalUnsetElem(env, op.arg1, key);
   }
-  moveBase(env, folly::none);
+  moveBase(env, folly::none, true);
 }
 
 void in(ISS& env, const bc::SetWithRefLML& op) {
@@ -1679,9 +1737,9 @@ void in(ISS& env, const bc::FPassM& op) {
   auto const cget = bc::QueryM{op.arg2, QueryMOp::CGet, op.mkey};
   auto const vget = bc::VGetM{op.arg2, op.mkey};
 
-  if (auto const flags = fpassFlags(env, op.arg1)) {
-    return flags == MOpFlags::Warn ? reduce(env, cget, bc::FPassC{op.arg1})
-                                   : reduce(env, vget, bc::FPassVNop{op.arg1});
+  if (auto const mode = fpassMode(env, op.arg1)) {
+    return mode == MOpMode::Warn ? reduce_fpass_arg(env, cget, op.arg1, false)
+                                 : reduce_fpass_arg(env, vget, op.arg1, true);
   }
 
   mergePaths(
@@ -1689,6 +1747,104 @@ void in(ISS& env, const bc::FPassM& op) {
     [&] { in(env, cget); },
     [&] { in(env, vget); }
   );
+}
+
+namespace {
+
+// Find a contiguous local range which is equivalent to the given range and has
+// a smaller starting id. Only returns the equivalent first local because the
+// size doesn't change.
+LocalId equivLocalRange(ISS& env, const LocalRange& range) {
+  auto const equivFirst = findLocEquiv(env, range.first);
+  if (equivFirst == NoLocalId || equivFirst >= range.first) return NoLocalId;
+
+  for (uint32_t i = 0; i < range.restCount; ++i) {
+    auto const equiv = findLocEquiv(env, range.first + i + 1);
+    if (equiv == NoLocalId || equiv != equivFirst + i + 1) return NoLocalId;
+  }
+
+  return equivFirst;
+}
+
+}
+
+void in(ISS& env, const bc::MemoGet& op) {
+  always_assert(env.ctx.func->isMemoizeWrapper);
+  always_assert(env.state.arrayChain.empty());
+  always_assert(op.locrange.first + op.locrange.restCount
+                < env.ctx.func->locals.size());
+
+  // If we can use an equivalent, earlier range, then use that instead.
+  auto const equiv = equivLocalRange(env, op.locrange);
+  if (equiv != NoLocalId) {
+    return reduce(
+      env,
+      bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
+    );
+  }
+
+  nothrow(env);
+  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+    mayReadLocal(env, op.locrange.first + i);
+  }
+  discard(env, op.arg1);
+  // The pushed value is always the return type of the wrapped function with
+  // TUninit unioned in, but that's always going to result in TCell right now.
+  push(env, TCell);
+}
+
+void in(ISS& env, const bc::MemoSet& op) {
+  always_assert(env.ctx.func->isMemoizeWrapper);
+  always_assert(env.state.arrayChain.empty());
+  always_assert(op.locrange.first + op.locrange.restCount
+                < env.ctx.func->locals.size());
+
+  // If we can use an equivalent, earlier range, then use that instead.
+  auto const equiv = equivLocalRange(env, op.locrange);
+  if (equiv != NoLocalId) {
+    return reduce(
+      env,
+      bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
+    );
+  }
+
+  nothrow(env);
+  for (uint32_t i = 0; i < op.locrange.restCount + 1; ++i) {
+    mayReadLocal(env, op.locrange.first + i);
+  }
+
+  auto const t1 = popC(env);
+  discard(env, op.arg1);
+
+  // The cache set always writes a counted non-empty dict to the base.
+  env.state.base.type = TCDictN;
+
+  if (couldBeInThis(env, env.state.base)) {
+    if (auto const name = env.state.base.locName) {
+      mergeThisProp(env, name, env.state.base.type);
+    } else {
+      mergeEachThisPropRaw(env, [&](Type){ return env.state.base.type; });
+    }
+  }
+
+  if (couldBeInSelf(env, env.state.base)) {
+    if (auto const name = env.state.base.locName) {
+      mergeSelfProp(env, name, env.state.base.type);
+    } else {
+      mergeEachSelfPropRaw(env, [&](Type){ return env.state.base.type; });
+    }
+  }
+
+  if (couldBeInPublicStatic(env, env.state.base)) {
+    if (auto const indexer = env.collect.publicStatics) {
+      auto const name = baseLocNameType(env.state.base);
+      indexer->merge(env.ctx, env.state.base.locTy, name, env.state.base.type);
+    }
+  }
+
+  if (mustBeInFrame(env.state.base)) setLocalForBase(env, env.state.base.type);
+
+  push(env, t1);
 }
 
 }

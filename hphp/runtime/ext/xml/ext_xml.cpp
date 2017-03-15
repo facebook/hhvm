@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -169,19 +171,25 @@ const String& XmlParser::o_getClassNameHook() const {
   return classnameof();
 }
 
+struct XmlParserData final : RequestEventHandler {
+  void requestInit() override { parsers.reset(); }
+  void requestShutdown() override { parsers.reset(); }
+  RootMap<XmlParser> parsers;
+};
+IMPLEMENT_STATIC_REQUEST_LOCAL(XmlParserData, s_xml_data);
+
 namespace {
 
 inline req::ptr<XmlParser> getParserFromToken(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  return MM().lookupRoot<XmlParser>(token);
+  return s_xml_data->parsers.lookupRoot(userData);
 }
 
 inline void* getParserToken(const req::ptr<XmlParser>& parser) {
-  return reinterpret_cast<void*>(MM().addRoot(parser));
+  return reinterpret_cast<void*>(s_xml_data->parsers.addRoot(parser));
 }
 
 inline void clearParser(const req::ptr<XmlParser>& p) {
-  MM().removeRoot(p);
+  s_xml_data->parsers.removeRoot(p);
 }
 
 }

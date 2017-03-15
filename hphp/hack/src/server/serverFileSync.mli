@@ -12,10 +12,14 @@ val open_file : ServerEnv.env -> string -> string -> ServerEnv.env
 
 val edit_file :
   ServerEnv.env ->
-  string -> File_content.code_edit list -> ServerEnv.env
+  string ->
+  Ide_api_types.text_edit list ->
+  ServerEnv.env
 
 val close_file : ServerEnv.env -> string -> ServerEnv.env
 
 val clear_sync_data : ServerEnv.env -> ServerEnv.env
 
 val try_relativize_path : string -> Relative_path.t option
+
+val get_file_content : ServerUtils.file_input -> string

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,18 +52,6 @@ bool isDebuggerReturnHelper(void* address) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-ActRec* ActRec::sfp() const {
-  if (UNLIKELY(((uintptr_t)m_sfp - s_stackLimit) < s_stackSize)) {
-    return nullptr;
-  }
-  return m_sfp;
-}
-
-const Unit* ActRec::unit() const {
-  func()->validate();
-  return func()->unit();
-}
 
 void ActRec::setReturn(ActRec* fp, PC pc, void* retAddr) {
   assert(fp->func()->contains(pc));

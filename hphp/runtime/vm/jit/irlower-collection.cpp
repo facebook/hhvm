@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -114,6 +114,24 @@ void cgNewColFromArray(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
+void cgLdColVec(IRLS& env, const IRInstruction* inst) {
+  auto const ty = inst->src(0)->type();
+  auto const cls = ty.clsSpec().cls();
+
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  always_assert_flog(
+    ty == TBottom ||
+    collections::isType(cls, CollectionType::Vector, CollectionType::ImmVector),
+    "LdColVec received an unsupported type: {}\n",
+    ty.toString()
+  );
+
+  v << load{src[BaseVector::arrOffset()], dst};
+}
+
 void cgLdColArray(IRLS& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
   auto const cls = ty.clsSpec().cls();
@@ -123,20 +141,15 @@ void cgLdColArray(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   always_assert_flog(
+    ty == TBottom ||
     collections::isType(cls,
-                        CollectionType::Vector, CollectionType::ImmVector,
                         CollectionType::Map, CollectionType::ImmMap,
                         CollectionType::Set, CollectionType::ImmSet),
     "LdColArray received an unsupported type: {}\n",
     ty.toString()
   );
 
-  auto const offset = collections::isType(cls, CollectionType::Vector,
-                                          CollectionType::ImmVector)
-    ? BaseVector::arrOffset()
-    : HashCollection::arrOffset();
-
-  v << load{src[offset], dst};
+  v << load{src[HashCollection::arrOffset()], dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

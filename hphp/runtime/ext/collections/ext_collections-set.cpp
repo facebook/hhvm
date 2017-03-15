@@ -115,7 +115,7 @@ void BaseSet::addImpl(int64_t k) {
   if (!raw) {
     mutate();
   }
-  auto h = hashint(k);
+  auto h = hash_int64(k);
   auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {
@@ -185,7 +185,7 @@ void BaseSet::add(StringData *key) {
 
 void BaseSet::addFront(int64_t k) {
   mutate();
-  auto h = hashint(k);
+  auto h = hash_int64(k);
   auto p = findForInsert(k, h);
   assert(p);
   if (validPos(*p)) {
@@ -323,18 +323,7 @@ Object c_Set::getImmutableCopy() {
 bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st1 = static_cast<const BaseSet*>(obj1);
   auto st2 = static_cast<const BaseSet*>(obj2);
-  if (st1->m_size != st2->m_size) return false;
-
-  auto eLimit = st1->elmLimit();
-  for (auto e = st1->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    if (e->hasIntKey()) {
-      if (!st2->contains(e->data.m_data.num)) return false;
-    } else {
-      assert(e->hasStrKey());
-      if (!st2->contains(e->data.m_data.pstr)) return false;
-    }
-  }
-  return true;
+  return ArrayData::Equal(st1->arrayData(), st2->arrayData());
 }
 
 BaseSet::~BaseSet() {

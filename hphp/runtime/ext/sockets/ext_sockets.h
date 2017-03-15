@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,6 +24,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
+                             bool asStream);
 
 Variant HHVM_FUNCTION(socket_create,
                       int domain,

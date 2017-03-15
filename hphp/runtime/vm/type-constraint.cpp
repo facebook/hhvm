@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -398,7 +398,6 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
       return tv->m_data.pres->data()->o_getClassName().c_str();
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -573,4 +572,58 @@ void TypeConstraint::parentToTypeName(const Func* func,
 
 //////////////////////////////////////////////////////////////////////
 
+MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
+  using MK = MemoKeyConstraint;
+
+  // Soft constraints aren't useful because they're not enforced.
+  if (!tc.hasConstraint() || tc.isTypeVar() ||
+      tc.isTypeConstant() || tc.isSoft()) {
+    return MK::None;
+  }
+
+  // Only a subset of possible type-constraints are useful to use. Namely,
+  // single types which might be nullable, and int/string combination.
+  switch (tc.metaType()) {
+    case AnnotMetaType::Precise: {
+      auto const dt = tc.underlyingDataType();
+      assert(dt.hasValue());
+      switch (*dt) {
+        case KindOfNull:         return MK::Null;
+        case KindOfBoolean:
+          return tc.isNullable() ? MK::BoolOrNull : MK::Bool;
+        case KindOfInt64:
+          return tc.isNullable() ? MK::IntOrNull : MK::Int;
+        case KindOfPersistentString:
+        case KindOfString:
+          return tc.isNullable() ? MK::StrOrNull : MK::Str;
+        case KindOfDouble:
+        case KindOfPersistentVec:
+        case KindOfVec:
+        case KindOfPersistentDict:
+        case KindOfDict:
+        case KindOfPersistentKeyset:
+        case KindOfKeyset:
+        case KindOfPersistentArray:
+        case KindOfArray:
+        case KindOfResource:
+        case KindOfObject:       return MK::None;
+        case KindOfUninit:
+        case KindOfRef:
+          always_assert_flog(false, "Unexpected DataType");
+      }
+      not_reached();
+    }
+    case AnnotMetaType::ArrayKey:
+      return tc.isNullable() ? MK::None : MK::IntOrStr;
+    case AnnotMetaType::Mixed:
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+    case AnnotMetaType::Callable:
+    case AnnotMetaType::Number:
+      return MK::None;
+  }
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
 }

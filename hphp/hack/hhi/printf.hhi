@@ -85,9 +85,8 @@ interface SprintfQuote {
 }
 
 function sprintf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): string;
-function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): void;
+function printf(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): int;
 
 // Results in an \HH\InvariantException whose message is the result of
 // calling sprintf with the arguments given this function
-// function invariant_violation(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): noreturn;
-function invariant_violation(string $fmt, ...$fmt_args): noreturn;
+function invariant_violation(\HH\FormatString<PlainSprintf> $fmt, ...$fmt_args): noreturn;

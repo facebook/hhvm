@@ -227,13 +227,14 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
 (*****************************************************************************)
 (* Code invalidating the heap *)
 (*****************************************************************************)
-let oldify_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
+let oldify_defs { FileInfo.n_funs; n_classes; n_types; n_consts }
+    elems ~collect_garbage =
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
-  SharedMem.collect `gentle;
+  if collect_garbage then SharedMem.collect `gentle;
   ()
 
 let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
@@ -245,13 +246,14 @@ let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
   SharedMem.collect `gentle;
   ()
 
-let remove_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
+let remove_defs { FileInfo.n_funs; n_classes; n_types; n_consts }
+    elems ~collect_garbage =
   Decl_heap.Funs.remove_batch n_funs;
   Decl_class_elements.remove_all elems;
   Decl_heap.Classes.remove_batch n_classes;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
-  SharedMem.collect `gentle;
+  if collect_garbage then SharedMem.collect `gentle;
   ()
 
 let intersection_nonempty s1 mem_f s2  =
@@ -360,7 +362,7 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
   (* Oldify the remaining defs along with their elements *)
   let get_elems = get_elems workers ~bucket_size in
   let current_elems = get_elems current_defs ~old:false in
-  oldify_defs current_defs current_elems;
+  oldify_defs current_defs current_elems ~collect_garbage:true;
 
   (* Fetch the already oldified elements too so we can remove them later *)
   let oldified_elems = get_elems oldified_defs ~old:true in
@@ -379,25 +381,32 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
   remove_old_defs defs all_elems;
   result
 
-let oldify_type_decl workers file_info ~bucket_size all_oldified_defs defs =
+let oldify_type_decl
+    ?collect_garbage:(collect_garbage=true)
+    workers file_info ~bucket_size all_oldified_defs defs =
 
-  (* Some defs are already oldified - ignore them *)
-  let _oldified_defs, current_defs =
+  (* Some defs are already oldified, waiting for their recheck *)
+  let oldified_defs, current_defs =
     Decl_utils.split_defs defs all_oldified_defs in
 
-  let current_elems = get_elems workers ~bucket_size current_defs ~old:false in
+  let get_elems = get_elems workers ~bucket_size in
+  (* Oldify things that are not oldified yet *)
+  let current_elems = get_elems current_defs ~old:false in
+  oldify_defs current_defs current_elems ~collect_garbage;
 
-  oldify_defs current_defs current_elems;
+  (* For the rest, just invalidate their current versions *)
+  let oldified_elems = get_elems oldified_defs ~old:false in
+  remove_defs oldified_defs oldified_elems ~collect_garbage;
 
-  (* Oldifying classes also oldifies their elements (see Decl_class_elements),
-   * which might be shared with other classes. We need to remove all of them too
-   * to avoid dangling references *)
-  let current_classes = current_defs.FileInfo.n_classes in
+  (* Oldifying/removing classes also affects their elements
+   * (see Decl_class_elements), which might be shared with other classes. We
+   * need to remove all of them too to avoid dangling references *)
+  let all_classes = defs.FileInfo.n_classes in
   let dependent_classes =
-    get_dependent_classes workers file_info ~bucket_size current_classes in
+    get_dependent_classes workers file_info ~bucket_size all_classes in
 
   let dependent_classes = FileInfo.({ empty_names with
-    n_classes = SSet.diff dependent_classes current_classes
+    n_classes = SSet.diff dependent_classes all_classes
   }) in
 
-  remove_defs dependent_classes SMap.empty
+  remove_defs dependent_classes SMap.empty ~collect_garbage

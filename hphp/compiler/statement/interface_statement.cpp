@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -122,8 +122,8 @@ void InterfaceStatement::checkArgumentsToPromote(
     if (meth && meth->isNamed("__construct")) {
       ExpressionListPtr params = meth->getParams();
       if (params) {
-        for (int i = 0; i < params->getCount(); i++) {
-          auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+        for (int i2 = 0; i2 < params->getCount(); i2++) {
+          auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i2]);
           if (param->getModifier() != 0) {
             if (type == T_TRAIT || type == T_INTERFACE) {
               param->parseTimeFatal(scope,

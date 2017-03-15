@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,7 +68,8 @@ struct Config {
   static void ParseHdfFile(const std::string &filename, Hdf &hdf);
 
   // Parse and process a .ini string (e.g., -d)
-  static void ParseIniString(const std::string &iniStr, IniSettingMap &ini);
+  static void ParseIniString(const std::string &iniStr, IniSettingMap &ini,
+                             const bool constants_only = false);
 
   // Parse and process a .hdf string (e.g., -v)
   static void ParseHdfString(const std::string &hdfStr, Hdf &hdf);

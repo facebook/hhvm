@@ -29,7 +29,7 @@ namespace HH {
 
       throw new \InvalidArgumentException(\sprintf(
         'Only integer values and string values may be used with Sets, got %s',
-        is_object($k) ? get_class($k) : gettype($k),
+        is_object($k) ? get_class($k) : gettype($k)
       ));
     }
 
@@ -56,7 +56,7 @@ namespace HH {
 
       throw new \InvalidArgumentException(\sprintf(
         'Parameter must be an array or an instance of Traversable, got %s',
-        is_object($it) ? get_class($it) : gettype($it),
+        is_object($it) ? get_class($it) : gettype($it)
       ));
     }
 
@@ -151,7 +151,7 @@ namespace HH {
         } else {
           throw new \InvalidArgumentException(\sprintf(
             'Parameters must be arrays but got %s',
-            is_object($arg) ? get_class($arg) : gettype($arg),
+            is_object($arg) ? get_class($arg) : gettype($arg)
           ));
         }
       }
@@ -175,7 +175,7 @@ namespace HH {
       } else {
         throw new \InvalidArgumentException(\sprintf(
           'Parameter must be a container (array or collection) but got %s',
-          is_object($it) ? get_class($it) : gettype($it),
+          is_object($it) ? get_class($it) : gettype($it)
         ));
       }
     }

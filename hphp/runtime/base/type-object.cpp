@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,6 +83,15 @@ const char* Object::classname_cstr() const {
 }
 
 void Object::setToDefaultObject() {
+  if (!RuntimeOption::EvalPromoteEmptyObject) {
+    if (RuntimeOption::PHP7_EngineExceptions) {
+      SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
+    } else {
+      SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
+    }
+    not_reached();
+  }
+
   raise_warning(Strings::CREATING_DEFAULT_OBJECT);
   operator=(SystemLib::AllocStdClassObject());
 }

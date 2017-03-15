@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,10 +20,11 @@
 #include <string>
 #include <cstdint>
 
-#include "hphp/util/sparse-id-containers.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+
+#include "hphp/util/sparse-id-containers.h"
 
 namespace HPHP { namespace jit {
 
@@ -38,7 +39,7 @@ struct IRUnit;
  * using information from this module must be conservative about locations that
  * aren't assigned an id.  (E.g. via calls to may_alias in AliasAnalysis.)
  */
-constexpr uint32_t kMaxTrackedALocs = 128;
+constexpr uint32_t kMaxTrackedALocs = 256;
 using ALocBits = std::bitset<kMaxTrackedALocs>;
 
 //////////////////////////////////////////////////////////////////////
@@ -75,18 +76,26 @@ struct AliasAnalysis {
   jit::hash_map<AliasClass,ALocMeta,AliasClass::Hash> locations;
   jit::vector<ALocMeta> locations_inv;
 
+  using LocationMap = jit::hash_map<AliasClass,ALocBits,AliasClass::Hash>;
+
   /*
    * If an AStack covers multiple locations, it will have an entry in this
    * map. It is OK if not all locations covered by the AStack are tracked. We
    * only store the tracked subset here.
    */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stack_ranges;
+  LocationMap stack_ranges;
 
   /*
    * Similar to `stack_ranges', if an AFrame covers multiple locations, it will
    * have an entry in this map.
    */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> local_sets;
+  LocationMap local_sets;
+
+  /*
+   * Similar to `stack_ranges', if an AClsRefSlot covers multiple locations, it
+   * will have an entry in this map.
+   */
+  LocationMap clsref_sets;
 
   /*
    * Short-hand to find an alias class in the locations map, or get folly::none
@@ -102,6 +111,7 @@ struct AliasAnalysis {
   ALocBits all_elemIs;
   ALocBits all_frame;
   ALocBits all_stack;
+  ALocBits all_clsRefSlot;
   ALocBits all_ref;
   ALocBits all_iterPos;
   ALocBits all_iterBase;
@@ -149,12 +159,6 @@ struct AliasAnalysis {
    * Sets of alias classes that are used by expand().
    */
   jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_expand_map;
-
-  /*
-   * Map from frame SSATmp ids to the location bits for all of the frame's
-   * locals.
-   */
-  jit::sparse_idptr_map<SSATmp,ALocBits> per_frame_bits;
 };
 
 //////////////////////////////////////////////////////////////////////

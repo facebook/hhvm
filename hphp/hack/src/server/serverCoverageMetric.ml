@@ -94,23 +94,24 @@ let get_coverage root tcopt neutral fnl  =
   SharedMem.invalidate_caches();
   let files_info = FileInfoStore.load () in
   let file_counts = List.rev_filter_map fnl begin fun fn ->
-    match Relative_path.Map.get files_info fn with
+    let relativized_fn = relativize root (Relative_path.to_absolute fn) in
+    match relativized_fn with
     | None -> None
-    | Some defs ->
-        let type_acc = accumulate_types fn defs tcopt in
-        let counts = count_exprs fn type_acc in
-        Some (fn, counts)
+    | Some relativized_fn ->
+      match Relative_path.Map.get files_info fn with
+      | None -> None
+      | Some defs ->
+          let type_acc = accumulate_types fn defs tcopt in
+          let counts = count_exprs fn type_acc in
+          Some (relativized_fn, counts)
   end in
-  let relativize_list = List.map ~f:(fun (p, c) ->
-    (relativize root (Relative_path.to_absolute p) |> unsafe_opt, c)) in
-  let result = relativize_list file_counts in
-  mk_trie neutral result
+  mk_trie neutral file_counts
 
 let go_ fn genv env =
   let root = Path.make fn in
   let module RP = Relative_path in
   let next_files = compose
-    (List.map ~f:(RP.create RP.Root))
+    (fun paths -> paths |> List.map ~f:(RP.create RP.Root) |> Bucket.of_list)
     (genv.ServerEnv.indexer FindUtils.is_php)
   in
   FileInfoStore.store env.ServerEnv.files_info;
@@ -129,5 +130,5 @@ let go_ fn genv env =
 let go fn genv env =
   try go_ fn genv env
   with Failure _ | Invalid_argument _ ->
-    print_string "Coverage collection failed!";
+    Hh_logger.log "Coverage collection failed!";
     None

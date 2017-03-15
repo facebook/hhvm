@@ -373,7 +373,7 @@ function join(mixed $arg1, mixed $arg2 = null): string;
  *   array element.
  *
  */
-<<__ParamCoerceModeNull, __Native>>
+<<__ParamCoerceModeNull, __IsFoldable, __Native>>
 function str_split(string $str, int $split_length = 1): mixed;
 
 /**
@@ -388,7 +388,7 @@ function str_split(string $str, int $split_length = 1): mixed;
  * @return mixed - Returns the chunked string.
  *
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function chunk_split(string $body,
                      int $chunklen = 76,
                      string $end = "\r\n"): mixed;

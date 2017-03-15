@@ -8,4 +8,4 @@
  *
  *)
 
-val make : Gc.control -> SharedMem.handle -> Worker.t list
+val make : ?nbr_procs:int -> Gc.control -> SharedMem.handle -> Worker.t list

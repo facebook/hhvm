@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,6 +49,12 @@ struct RelocationInfo {
   bool isAddressImmediate(TCA ip) {
     return addressImmediates.count(ip);
   }
+  void markSmashableRelocation(TCA ip) {
+    m_smashableRelocations.insert(ip);
+  }
+  bool isSmashableRelocation(TCA ip) {
+    return m_smashableRelocations.count(ip);
+  }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
   const RangeVec& srcRanges() { return m_srcRanges; }
   const RangeVec& dstRanges() { return m_dstRanges; }
@@ -64,6 +70,7 @@ struct RelocationInfo {
    */
   std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
   std::set<TCA> addressImmediates;
+  std::set<TCA> m_smashableRelocations;
 };
 
 void adjustForRelocation(RelocationInfo&);
@@ -76,6 +83,7 @@ void findFixups(TCA start, TCA end, CGMeta& fixups);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
+                DataBlock& srcBlock,
                 CGMeta& fixups,
                 TCA* exitAddr);
 

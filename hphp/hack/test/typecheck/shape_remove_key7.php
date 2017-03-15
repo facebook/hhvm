@@ -20,5 +20,6 @@ type t = shape('x' => int);
 function test(t $s): I<s> {
   Shapes::removeKey($s, 'z');
   $s = f($s);
+  // This is legal. See shape28.php
   return $s;
 }

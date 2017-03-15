@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,21 +60,6 @@ void for_each_strong_iterator(Fn fn) {
   }
 }
 
-template<typename F> void ArrayIter::scan(F& mark) const {
-  if (hasArrayData()) {
-    mark(getArrayData());
-  } else {
-    mark(getObject());
-  }
-}
-
-template<typename F> void MArrayIter::scan(F& mark) const {
-  mark(getArray());
-  mark(getContainer());
-}
-
 //////////////////////////////////////////////////////////////////////
-
 }
-
 #endif

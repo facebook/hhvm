@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,21 +51,20 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SweepFunc sweep,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
-                            NativeDataInfo::ScanFunc scan) {
+                            type_scan::Index tyindex) {
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   assert((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
-  assert(scan);
   NativeDataInfo info;
   info.sz = sz;
   info.odattrs = ObjectData::Attribute::HasNativeData;
+  info.tyindex = tyindex;
   info.init = init;
   info.copy = copy;
   info.destroy = destroy;
   info.sweep = sweep;
   info.sleep = sleep;
   info.wakeup = wakeup;
-  info.scan = scan;
   s_nativedatainfo[name] = info;
 }
 
@@ -99,7 +98,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     MM().objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
-  node->hdr.kind = HeaderKind::NativeData;
+  node->initHeader(ndi->tyindex, HeaderKind::NativeData, 0);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   assert(obj->hasExactlyOneRef());

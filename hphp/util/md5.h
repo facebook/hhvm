@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,8 +87,7 @@ struct MD5 : private boost::totally_ordered<MD5> {
   }
 
   uint64_t hash() const {
-    // hash_int64_pair does way more work than necessary; all the bits here
-    // are fantastically good.
+    // All the bits here are fantastically good.
     return q[0];
   }
 };

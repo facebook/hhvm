@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -97,8 +97,10 @@ multibitset<N>::reference::operator=(uint64_t val) {
   constexpr auto mask = (1ull << N) - 1;
   assertx((val & mask) == val);
 
-  auto& word = m_mbs.m_bits[m_word];
-  word = (word & ~(mask << m_bit)) | ((val & mask) << m_bit);
+  {
+    auto& word = m_mbs.m_bits[m_word];
+    word = (word & ~(mask << m_bit)) | ((val & mask) << m_bit);
+  }
 
   if (m_bit + N > 64) {
     auto const head_nbits = 64 - m_bit;
@@ -223,11 +225,13 @@ chunked_multibitset<N>::operator[](size_t pos) {
 
 template<size_t N>
 size_t chunked_multibitset<N>::ffs(size_t pos) const {
-  auto const c = std::max(pos / m_chunk_sz, m_lowwater);
-  auto const it = m_chunks.find(c);
-  if (it != m_chunks.end()) {
-    auto const res = it->second.ffs(pos % m_chunk_sz);
-    if (res != npos) return c * m_chunk_sz + res;
+  {
+    auto const c = std::max(pos / m_chunk_sz, m_lowwater);
+    auto const it = m_chunks.find(c);
+    if (it != m_chunks.end()) {
+      auto const res = it->second.ffs(pos % m_chunk_sz);
+      if (res != npos) return c * m_chunk_sz + res;
+    }
   }
 
   for (auto c = pos / m_chunk_sz + 1; c <= m_highwater; ++c) {
@@ -242,11 +246,13 @@ size_t chunked_multibitset<N>::ffs(size_t pos) const {
 
 template<size_t N>
 size_t chunked_multibitset<N>::fls(size_t pos) const {
-  auto const c = std::min(pos / m_chunk_sz, m_highwater);
-  auto const it = m_chunks.find(c);
-  if (it != m_chunks.end()) {
-    auto const res = it->second.fls(pos != npos ? pos % m_chunk_sz : npos);
-    if (res != npos) return c * m_chunk_sz + res;
+  {
+    auto const c = std::min(pos / m_chunk_sz, m_highwater);
+    auto const it = m_chunks.find(c);
+    if (it != m_chunks.end()) {
+      auto const res = it->second.fls(pos != npos ? pos % m_chunk_sz : npos);
+      if (res != npos) return c * m_chunk_sz + res;
+    }
   }
 
   for (auto c = pos / m_chunk_sz; c-- > m_lowwater; ) {

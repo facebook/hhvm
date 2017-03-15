@@ -657,7 +657,6 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
   }
   /* Non-truecolor case, restored to its more or less original form */
   for (row = 0; row < bitmap.rows; row++) {
-    int pcr;
     pc = row * bitmap.pitch;
     pcr = pc;
     if (bitmap.pixel_mode==ft_pixel_mode_mono) {

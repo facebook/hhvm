@@ -5,7 +5,7 @@ auto_sources(files "*.cpp" "")
 list(APPEND CXX_SOURCES ${files})
 
 # Windows targets use a generated rc file for embedding libraries
-if(CYGWIN OR MSVC OR MINGW)
+if(MSVC)
   list(APPEND CXX_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/embed.rc)
 endif()
 
@@ -38,14 +38,6 @@ if (ENABLE_SPLIT_DWARF)
   endif()
   message(STATUS "Enabled split DWARF files")
   target_link_libraries(hhvm debug "-Wl,--gdb-index")
-endif()
-
-# cygwin has an issue with linking to crypt and intl
-# this is the only way the redirection stuff works
-if(CYGWIN)
-  target_link_libraries(hhvm crypt)
-  target_link_libraries(hhvm intl)
-  target_link_libraries(hhvm dbghelp)
 endif()
 
 # Check whether atomic operations require -latomic or not

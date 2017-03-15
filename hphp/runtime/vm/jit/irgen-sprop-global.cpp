@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,14 +94,14 @@ SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {
 
 //////////////////////////////////////////////////////////////////////
 
-void emitCGetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+void emitCGetS(IRGS& env, uint32_t slot) {
+  auto const ssaPropName = topC(env);
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(CGetS-PropNameNotString);
   }
 
-  auto const ssaCls   = popA(env);
+  auto const ssaCls   = takeClsRef(env, slot);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const unboxed  = gen(env, UnboxPtr, propAddr);
   auto const ldMem    = gen(env, LdMem, unboxed->type().deref(), unboxed);
@@ -110,15 +110,15 @@ void emitCGetS(IRGS& env) {
   pushIncRef(env, ldMem);
 }
 
-void emitSetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{2});
+void emitSetS(IRGS& env, uint32_t slot) {
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(SetS-PropNameNotString);
   }
 
   auto const value    = popC(env, DataTypeCountness);
-  auto const ssaCls   = popA(env);
+  auto const ssaCls   = takeClsRef(env, slot);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const ptr      = gen(env, UnboxPtr, propAddr);
 
@@ -126,14 +126,14 @@ void emitSetS(IRGS& env) {
   bindMem(env, ptr, value);
 }
 
-void emitVGetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+void emitVGetS(IRGS& env, uint32_t slot) {
+  auto const ssaPropName = topC(env);
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(VGetS-PropNameNotString);
   }
 
-  auto const ssaCls   = popA(env);
+  auto const ssaCls   = takeClsRef(env, slot);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
 
   destroyName(env, ssaPropName);
@@ -146,27 +146,27 @@ void emitVGetS(IRGS& env) {
   pushIncRef(env, val);
 }
 
-void emitBindS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{2});
+void emitBindS(IRGS& env, uint32_t slot) {
+  auto const ssaPropName = topC(env, BCSPRelOffset{1});
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(BindS-PropNameNotString);
   }
 
   auto const value    = popV(env);
-  auto const ssaCls   = popA(env);
+  auto const ssaCls   = takeClsRef(env, slot);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
 
   destroyName(env, ssaPropName);
   bindMem(env, propAddr, value);
 }
 
-void emitIssetS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+void emitIssetS(IRGS& env, uint32_t slot) {
+  auto const ssaPropName = topC(env);
   if (!ssaPropName->isA(TStr)) {
     PUNT(IssetS-PropNameNotString);
   }
-  auto const ssaCls = popA(env);
+  auto const ssaCls = takeClsRef(env, slot);
 
   auto const ret = cond(
     env,
@@ -186,13 +186,13 @@ void emitIssetS(IRGS& env) {
   push(env, ret);
 }
 
-void emitEmptyS(IRGS& env) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+void emitEmptyS(IRGS& env, uint32_t slot) {
+  auto const ssaPropName = topC(env);
   if (!ssaPropName->isA(TStr)) {
     PUNT(EmptyS-PropNameNotString);
   }
 
-  auto const ssaCls = popA(env);
+  auto const ssaCls = takeClsRef(env, slot);
   auto const ret = cond(
     env,
     [&] (Block* taken) {
@@ -212,14 +212,14 @@ void emitEmptyS(IRGS& env) {
   push(env, ret);
 }
 
-void emitIncDecS(IRGS& env, IncDecOp subop) {
-  auto const ssaPropName = topC(env, BCSPRelOffset{1});
+void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
+  auto const ssaPropName = topC(env);
 
   if (!ssaPropName->isA(TStr)) {
     PUNT(IncDecS-PropNameNotString);
   }
 
-  auto const ssaCls   = popA(env);
+  auto const ssaCls   = takeClsRef(env, slot);
   auto const propAddr = ldClsPropAddr(env, ssaCls, ssaPropName, true);
   auto const unboxed  = gen(env, UnboxPtr, propAddr);
   auto const oldVal   = gen(env, LdMem, unboxed->type().deref(), unboxed);

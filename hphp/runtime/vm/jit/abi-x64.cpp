@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 const RegSet kGPCallerSaved =
   reg::rax | reg::rcx | reg::rdx |
   reg::r8  | reg::r9  | reg::r10 | reg::r11;
@@ -114,7 +114,7 @@ const Abi helper_abi {
 
 // x64 INTEGER class argument registers.
 constexpr PhysReg gp_args[] = {
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   reg::rcx, reg::rdx, reg::r8, reg::r9
 #else
   reg::rdi, reg::rsi, reg::rdx, reg::rcx, reg::r8, reg::r9
@@ -123,7 +123,7 @@ constexpr PhysReg gp_args[] = {
 
 // x64 SSE class argument registers.
 constexpr PhysReg simd_args[] = {
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,
 #else
   reg::xmm0, reg::xmm1, reg::xmm2, reg::xmm3,

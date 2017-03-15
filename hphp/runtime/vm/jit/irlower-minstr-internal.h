@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@ namespace HPHP { namespace jit { namespace {
 template<typename T> constexpr unsigned bitWidth() {
   return std::is_same<T, bool>::value ? 1
     : std::is_same<T, KeyType>::value ? 2
-    : std::is_same<T, MOpFlags>::value ? 4
+    : std::is_same<T, MOpMode>::value ? 2
     : sizeof(T) * CHAR_BIT;
 }
 

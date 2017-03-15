@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -131,7 +131,7 @@ inline Type::Type()
 
 inline Type::Type(DataType outer, DataType inner)
   : m_bits(bitsFromDataType(outer, inner))
-  , m_ptrKind(outer == KindOfClass ? Ptr::Bottom : Ptr::NotPtr)
+  , m_ptrKind(Ptr::NotPtr)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -190,7 +190,7 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assertx(*this <= TStkElem);
+  assertx(*this <= TGen);
 
   // Some unions correspond to single KindOfs.
   return subtypeOfAny(TStr, TArr, TVec, TDict,
@@ -198,7 +198,7 @@ inline bool Type::isKnownDataType() const {
 }
 
 inline bool Type::needsReg() const {
-  return *this <= TStkElem && !isKnownDataType();
+  return *this <= TGen && !isKnownDataType();
 }
 
 inline bool Type::isSimpleType() const {
@@ -249,7 +249,6 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfNull:
         not_reached();
 
-      case KindOfClass:
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
@@ -315,6 +314,10 @@ inline bool Type::hasConstVal(Type t) const {
 template<typename T>
 bool Type::hasConstVal(T val) const {
   return hasConstVal(cns(val));
+}
+
+inline bool Type::admitsSingleVal() const {
+  return hasConstVal() || subtypeOfAny(TNullptr, TInitNull, TUninit);
 }
 
 inline uint64_t Type::rawVal() const {
@@ -453,9 +456,7 @@ inline Type Type::box() const {
   assertx(*this <= TCell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
   assertx(!maybe(TUninit) || *this == TCell);
-  return Type(m_bits << kBoxShift,
-              ptrKind(),
-              isSpecialized() && !m_hasConstVal ? m_extra : 0);
+  return Type(m_bits << kBoxShift, ptrKind()).specialize(spec());
 }
 
 inline Type Type::inner() const {
@@ -473,9 +474,7 @@ inline Type Type::ptr(Ptr kind) const {
   assertx(ptrSubsetOf(kind, Ptr::Ptr));
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
-  return Type(m_bits,
-              kind,
-              isSpecialized() && !m_hasConstVal ? m_extra : 0);
+  return Type(m_bits, kind).specialize(spec());
 }
 
 inline Type Type::deref() const {

@@ -41,7 +41,7 @@ module ExprDepTy = struct
               let ereason, dep = new_() in
               pos, ereason, dep
           )
-      | N.CI (p, cls) ->
+      | N.CI ((p, cls), _) ->
           p, Reason.ERclass cls, `cls cls
       | N.CIstatic ->
           pos, Reason.ERstatic, `static
@@ -94,10 +94,8 @@ module ExprDepTy = struct
     let env, ty = Env.expand_type env ty in
     match snd ty with
     | Tabstract (AKgeneric _, _) ->
-      begin match Typing_utils.get_concrete_supertypes env ty with
-        | _, None -> true
-        | _, Some ty -> should_apply env ty
-      end
+      let env, tyl = Typing_utils.get_concrete_supertypes env ty in
+      List.exists tyl (should_apply env)
     | Toption ty
     | Tabstract (
         ( AKnewtype _
@@ -120,7 +118,7 @@ module ExprDepTy = struct
           ~f:(fun class_ty ->
               not (TUtils.class_is_final_and_not_contravariant class_ty))
     | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
-    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ ->
+    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ | Terr ->
         false
 
   (****************************************************************************)

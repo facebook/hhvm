@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -142,10 +142,14 @@ struct CodeCache {
    */
   bool hotEnabled() const { return m_useHot; }
 
+  Address threadLocalStart() { return m_threadLocalStart; }
+
 private:
+  Address m_threadLocalStart{nullptr};
   CodeAddress m_base;
   size_t m_codeSize;
   size_t m_totalSize;
+  size_t m_threadLocalSize;
   bool m_useHot;
 
   CodeBlock m_main;
@@ -157,11 +161,13 @@ private:
 };
 
 struct CodeCache::View {
-  View(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen, DataBlock& data)
+  View(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen, DataBlock& data,
+       bool isLocal)
     : m_main(main)
     , m_cold(cold)
     , m_frozen(frozen)
     , m_data(data)
+    , m_isLocal(isLocal)
   {}
 
   CodeBlock& main()   { return m_main; }
@@ -169,6 +175,7 @@ struct CodeCache::View {
   CodeBlock& frozen() { return m_frozen; }
   DataBlock& data()   { return m_data; }
 
+  bool  isLocal()           const { return m_isLocal; }
   const CodeBlock& main()   const { return m_main; }
   const CodeBlock& cold()   const { return m_cold; }
   const CodeBlock& frozen() const { return m_frozen; }
@@ -179,6 +186,7 @@ private:
   CodeBlock& m_cold;
   CodeBlock& m_frozen;
   DataBlock& m_data;
+  bool m_isLocal;
 };
 
 }}

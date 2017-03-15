@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,13 +45,33 @@ namespace irgen {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FPIInfo {
+  /*
+   * Value of IRSP after the call returns.
+   */
   SSATmp* returnSP;
-  FPInvOffset returnSPOff; // return's logical sp offset; stkptr might differ
-  Type ctxType; // tracked separately as a union of observed ctx types
+
+  /*
+   * BCSP offset after the call returns.
+   */
+  FPInvOffset returnSPOff;
+
+  /*
+   * Union of observed context Class* types, and its value if known.
+   */
+  Type ctxType;
   SSATmp* ctx;
-  Op fpushOpc; // bytecode for FPush*
+
+  /*
+   * Bytecode for the FPush* of the call.
+   */
+  Op fpushOpc;
+
+  /*
+   * Function being called.
+   */
   const Func* func;
-  bool interp;
+
+  bool inlineEligible;
   bool spansCall;
 };
 
@@ -64,12 +84,23 @@ template<LTag tag>
 struct LocationState {
   static_assert(tag == LTag::Stack ||
                 tag == LTag::Local ||
+                tag == LTag::MBase ||
+                tag == LTag::CSlot ||
                 false,
                 "invalid LTag for LocationState");
 
   static constexpr Type default_type() {
-    return tag == LTag::Stack ? TStkElem :
-        /* tag == LTag::Local */ TGen;
+    return (tag == LTag::CSlot) ? TCls : TGen;
+  }
+
+  template<LTag other>
+  LocationState<tag>& operator=(const LocationState<other>& o) {
+    value = o.value;
+    type = o.type;
+    predictedType = o.predictedType;
+    typeSrcs = o.typeSrcs;
+    maybeChanged = o.maybeChanged;
+    return *this;
   }
 
   /*
@@ -114,10 +145,8 @@ struct LocationState {
 
 using LocalState = LocationState<LTag::Local>;
 using StackState = LocationState<LTag::Stack>;
-
-struct MBaseState {
-  SSATmp* value{nullptr};
-};
+using MBaseState = LocationState<LTag::MBase>;
+using CSlotState = LocationState<LTag::CSlot>;
 
 /*
  * MBRState tracks the value and type of the member base register pointer.
@@ -127,7 +156,7 @@ struct MBaseState {
  */
 struct MBRState {
   SSATmp* ptr{nullptr};
-  AliasClass pointee{AUnknownTV};
+  AliasClass pointee{AEmpty}; // defaults to "invalid", not "Top"
   Type ptrType{TPtrToGen};
 };
 
@@ -197,10 +226,16 @@ struct FrameState {
   jit::vector<StackState> stack;
 
   /*
-   * Vector of local variable inforation; sized for numLocals on the curFunc
+   * Vector of local variable information; sized for numLocals on the curFunc
    * (if the state is initialized).
    */
   jit::vector<LocalState> locals;
+
+  /*
+   * Vector of class-ref slot information; sized for numClsRefSlots on the
+   * curFunc (if the state is initialized).
+   */
+  jit::vector<CSlotState> clsRefSlots;
 
   /*
    * Values and types of the member base register and its pointee.
@@ -325,11 +360,25 @@ struct FrameStateMgr final {
   SSATmp*     ctx()               const { return cur().ctx; }
   FPInvOffset irSPOff()           const { return cur().irSPOff; }
   FPInvOffset bcSPOff()           const { return cur().bcSPOff; }
-  SSATmp*     memberBaseValue()   const { return cur().mbase.value; }
   bool        needRatchet()       const { return cur().needRatchet; }
   bool        frameMaySpanCall()  const { return cur().frameMaySpanCall; }
   bool        stackModified()     const { return cur().stackModified; }
   const jit::vector<FPIInfo>& fpiStack() const { return cur().fpiStack; }
+
+  /*
+   * Current inlining depth (not including the toplevel frame).
+   */
+  unsigned inlineDepth() const { return m_stack.size() - 1; }
+
+  /*
+   * Get the irSPOff for the parent frame of the most-inlined frame.
+   *
+   * @requires: inlineDepth() > 0
+   */
+  FPInvOffset callerIRSPOff() const {
+    assertx(inlineDepth() > 0);
+    return m_stack.at(m_stack.size() - 2).irSPOff;
+  }
 
   /*
    * FrameState modifiers.
@@ -337,17 +386,11 @@ struct FrameStateMgr final {
    * In the presence of inlining, these modify state for the most-inlined
    * frame.
    */
-  void setMemberBaseValue(SSATmp* base) { cur().mbase.value = base; }
   void setNeedRatchet(bool b)           { cur().needRatchet = b; }
   void resetStackModified()             { cur().stackModified = false; }
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
   void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
-
-  /*
-   * Current inlining depth (not including the toplevel frame).
-   */
-  unsigned inlineDepth() const { return m_stack.size() - 1; }
 
   /*
    * Return the LocationState for local `id' or stack element at `off' in the
@@ -356,6 +399,7 @@ struct FrameStateMgr final {
   const LocalState& local(uint32_t id) const;
   const StackState& stack(IRSPRelOffset off) const;
   const StackState& stack(FPInvOffset off) const;
+  const CSlotState& clsRefSlot(uint32_t slot) const;
 
   /*
    * Generic accessors for LocationState members.
@@ -369,6 +413,13 @@ struct FrameStateMgr final {
    * Return tracked state for the member base register.
    */
   const MBRState& mbr()     const { return cur().mbr; }
+  const MBaseState& mbase() const { return cur().mbase; }
+
+  /*
+   * Set the value, type, and (optionally) predicted type for mbase().
+   */
+  void setMemberBase(SSATmp* base,
+                     folly::Optional<Type> predicted = folly::none);
 
   /*
    * Update the predicted type for `l'.
@@ -391,20 +442,25 @@ private:
    */
   Location loc(uint32_t) const;
   Location stk(IRSPRelOffset) const;
+  Location cslot(uint32_t) const;
+
   LocalState& localState(uint32_t);
   LocalState& localState(Location l); // @requires: l.tag() == LTag::Local
   StackState& stackState(IRSPRelOffset);
   StackState& stackState(FPInvOffset);
   StackState& stackState(Location l); // @requires: l.tag() == LTag::Stack
+  CSlotState& clsRefSlotState(uint32_t);
+  CSlotState& clsRefSlotState(Location l); // @requires: l.tag() == LTag::CSlot
 
   /*
    * Helpers for update().
    */
   bool checkInvariants() const;
   void updateMInstr(const IRInstruction*);
+  void updateMBase(const IRInstruction*);
   void trackDefInlineFP(const IRInstruction* inst);
   void trackInlineReturn();
-  void trackCall(bool destroyLocals);
+  void trackCall(bool writeLocals);
 
   /*
    * Per-block state helpers.
@@ -447,7 +503,12 @@ private:
    * Stack state update helpers.
    */
   void spillFrameStack(IRSPRelOffset, FPInvOffset, const IRInstruction*);
-  void clearStackForCall();
+  void writeToSpilledFrame(IRSPRelOffset, const SSATmp*);
+
+  /*
+   * Class-ref slot state update helpers.
+   */
+  void clearClsRefSlots();
 
 private:
   struct BlockState {

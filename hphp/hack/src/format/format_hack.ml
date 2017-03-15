@@ -2580,7 +2580,7 @@ and expr_remain lowest env =
           back env;
           expr_binop lowest ">" Tgt env
       )
-  | Teq | Tbareq | Tpluseq | Tstareq | Tslasheq
+  | Teq | Tbareq | Tpluseq | Tstareq | Tslasheq | Tstarstareq
   | Tdoteq | Tminuseq | Tpercenteq | Txoreq
   | Tampeq | Tlshifteq | Trshifteq ->
       space env;
@@ -2742,13 +2742,13 @@ and expr_atomic_word env last_tok = function
       expect "(" env;
       right env array_body;
       expect ")" env
-  | "dict" ->
+  | "dict" when next_token env == Tlb ->
       out "dict" env;
       expect (token_to_string Tlb) env;
       (** Dict body looks exactly like an array body. *)
       right env array_body;
       expect (token_to_string Trb) env;
-  | "keyset" | "vec" as v ->
+  | "keyset" | "vec" as v when next_token env == Tlb ->
       out v env;
       expect (token_to_string Tlb) env;
       right env (list_comma_nl ~trailing:true expr);

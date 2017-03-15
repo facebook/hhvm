@@ -80,6 +80,11 @@ module Program =
         Relative_path.Set.filter updates begin fun update ->
           ServerEnv.file_filter (Relative_path.suffix update)
         end in
+      let genv = if Relative_path.Set.is_empty to_recheck then genv else {
+        genv with
+        debug_port = Debug_port.write_opt (Debug_event.Disk_files_modified
+          (Relative_path.Set.elements to_recheck)) genv.debug_port
+      } in
       let config_in_updates =
         Relative_path.Set.mem updates ServerConfig.filename in
       if config_in_updates then begin
@@ -96,6 +101,10 @@ module Program =
       to_recheck
   end
 
+let shutdown_persistent_client env client =
+  ClientProvider.shutdown_client client;
+  ServerFileSync.clear_sync_data env
+
 (*****************************************************************************)
 (* The main loop *)
 (*****************************************************************************)
@@ -105,16 +114,16 @@ let handle_connection_ genv env client =
   try
     match ClientProvider.read_connection_type client with
     | Persistent ->
-      (match env.persistent_client with
-      | Some _ ->
-        ClientProvider.send_response_to_client client
-          Persistent_client_alredy_exists;
-        env
-      | None ->
-        ClientProvider.send_response_to_client client
-          Persistent_client_connected;
-        { env with persistent_client =
-            Some (ClientProvider.make_persistent client)})
+      let env = match env.persistent_client with
+        | Some old_client ->
+          ClientProvider.send_push_message_to_client old_client
+            NEW_CLIENT_CONNECTED;
+          shutdown_persistent_client env old_client
+        | None -> env
+      in
+      ClientProvider.send_response_to_client client Connected;
+      { env with persistent_client =
+          Some (ClientProvider.make_persistent client)}
     | Non_persistent ->
       ServerCommand.handle genv env client
   with
@@ -136,15 +145,11 @@ let handle_connection_ genv env client =
   | e ->
     HackEventLogger.handle_connection_exception e;
     let msg = Printexc.to_string e in
-    EventLogger.master_exception msg;
+    EventLogger.master_exception e;
     Printf.fprintf stderr "Error: %s\n%!" msg;
     Printexc.print_backtrace stderr;
     ClientProvider.shutdown_client client;
     env
-
-let shutdown_persistent_client env client =
-  ClientProvider.shutdown_client client;
-  ServerFileSync.clear_sync_data env
 
 let handle_persistent_connection_ genv env client =
    try
@@ -154,11 +159,12 @@ let handle_persistent_connection_ genv env client =
    | Unix.Unix_error (Unix.EPIPE, _, _)
    | Sys_error("Connection reset by peer")
    | Sys_error("Broken pipe")
-   | ServerCommandTypes.Read_command_timeout ->
+   | ServerCommandTypes.Read_command_timeout
+   | ServerClientProvider.Client_went_away ->
      shutdown_persistent_client env client
    | e ->
      let msg = Printexc.to_string e in
-     EventLogger.master_exception msg;
+     EventLogger.master_exception e;
      Printf.fprintf stderr "Error: %s\n%!" msg;
      Printexc.print_backtrace stderr;
      shutdown_persistent_client env client
@@ -182,7 +188,7 @@ let recheck genv old_env check_kind =
  * right after one rechecking round finishes to be part of the same
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
-let rec recheck_loop acc genv env new_client =
+let rec recheck_loop acc genv env new_client has_persistent =
   let open ServerNotifierTypes in
   let t = Unix.gettimeofday () in
   (** When a new client connects, we use the synchronous notifier.
@@ -201,17 +207,23 @@ let rec recheck_loop acc genv env new_client =
   | None ->
     env, Notifier_async_changes SSet.empty
   in
-  let acc, raw_updates = match raw_updates with
+  let genv, acc, raw_updates = match raw_updates with
   | Notifier_unavailable ->
+    genv, { acc with updates_stale = true; }, SSet.empty
+  | Notifier_state_enter (name, _) ->
+    let event = (Debug_event.Fresh_vcs_state name) in
+    { genv with debug_port = Debug_port.write_opt event genv.debug_port },
     { acc with updates_stale = true; }, SSet.empty
+  | Notifier_state_leave _ ->
+    genv, { acc with updates_stale = true; }, SSet.empty
   | Notifier_async_changes updates ->
-    { acc with updates_stale = true; }, updates
+    genv, { acc with updates_stale = true; }, updates
   | Notifier_synchronous_changes updates ->
-    { acc with updates_stale = false; }, updates
+    genv, { acc with updates_stale = false; }, updates
   in
   let updates = Program.process_updates genv env raw_updates in
 
-  let is_idle = t -. env.last_command_time > 0.1 in
+  let is_idle = (not has_persistent) && t -. env.last_command_time > 0.1 in
 
   let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
@@ -236,11 +248,12 @@ let rec recheck_loop acc genv env new_client =
       rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
     } in
-    recheck_loop acc genv env new_client
+    recheck_loop acc genv env new_client has_persistent
   end
 
-let recheck_loop genv env client =
-  let stats, env = recheck_loop empty_recheck_loop_stats genv env client in
+let recheck_loop genv env client has_persistent =
+  let stats, env =
+    recheck_loop empty_recheck_loop_stats genv env client has_persistent in
   { env with recent_recheck_loop_stats = stats }
 
 let new_serve_iteration_id () =
@@ -273,7 +286,7 @@ let serve_one_iteration genv env client_provider =
   end else env in
   let start_t = Unix.gettimeofday () in
   HackEventLogger.with_id ~stage:`Recheck recheck_id @@ fun () ->
-  let env = recheck_loop genv env client in
+  let env = recheck_loop genv env client has_persistent in
   let stats = env.recent_recheck_loop_stats in
   if stats.rechecked_count > 0 then begin
     HackEventLogger.recheck_end start_t has_parsing_hook
@@ -345,25 +358,45 @@ let program_init genv =
    * This solution is not fully correct. Checkout can still happen between
    * this call and the next but it minimizes the damage.
    * *)
-  MercurialUtils.wait_until_stable_repository (ServerArgs.root genv.options);
+  let repo_wait_success =
+    MercurialUtils.wait_until_stable_repository (ServerArgs.root genv.options)
+  in
   let env, init_type =
     (* If we are saving, always start from a fresh state -- just in case
      * incremental mode introduces any errors. *)
     if genv.local_config.ServerLocalConfig.use_mini_state &&
       not (ServerArgs.no_load genv.options) &&
-      ServerArgs.save_filename genv.options = None then
-      match ServerConfig.load_mini_script genv.config with
+      ServerArgs.save_filename genv.options = None &&
+      repo_wait_success then
+      let load_mini_approach = match
+        (ServerConfig.load_mini_script genv.config),
+        (ServerArgs.with_mini_state genv.options) with
+        | None, None ->
+          None
+        | Some load_mini_script, None ->
+          Some (ServerInit.Load_mini_script load_mini_script)
+        | None, Some target ->
+          Some (ServerInit.Precomputed target)
+        | Some _, Some target ->
+          Hh_logger.log "Warning - Both a mini script in the server config %s"
+            "and a mini state target in server args are configured";
+          Hh_logger.log "Ignoring the script and using precomputed target";
+          Some (ServerInit.Precomputed target)
+      in
+      match load_mini_approach with
       | None ->
         let env, _ = ServerInit.init genv in
         env, "fresh"
-      | Some load_mini_script ->
-        let env, did_load = ServerInit.init ~load_mini_script genv in
+      | Some load_mini_approach ->
+        let env, did_load = ServerInit.init ~load_mini_approach genv in
         env, if did_load then "mini_load" else "mini_load_fail"
     else
       let env, _ = ServerInit.init genv in
-      env, "fresh"
+      env, if repo_wait_success then "fresh" else "fresh_repo_wait_fail"
   in
-  HackEventLogger.init_end init_type;
+  let timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
+  EventLogger.set_init_type init_type;
+  HackEventLogger.init_end init_type timeout;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
@@ -383,8 +416,8 @@ let setup_server options handle =
     cpu_priority;
     io_priority;
     enable_on_nfs;
-    lazy_decl;
     lazy_parse;
+    lazy_init;
     load_script_config;
     _
   } as local_config = local_config in
@@ -398,8 +431,8 @@ let setup_server options handle =
     root
     init_id
     (Unix.gettimeofday ())
-    lazy_decl
     lazy_parse
+    lazy_init
     saved_state_load_type
     use_sql;
   let root_s = Path.to_string root in
@@ -456,31 +489,9 @@ let daemon_main (state, options) (ic, oc) =
     in case the tmp folder changes *)
   ignore (Hhi.get_hhi_root());
 
-  try daemon_main_exn options (ic, oc)
-  with
-  | SharedMem.Out_of_shared_memory ->
-    ServerInit.print_hash_stats ();
-    Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
-    Exit_status.(exit Out_of_shared_memory)
-  | SharedMem.Hash_table_full ->
-    ServerInit.print_hash_stats ();
-    Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
-    Exit_status.(exit Hash_table_full)
-  | Worker.Worker_oomed as e->
-    Hh_logger.exc e;
-    Exit_status.(exit Worker_oomed)
-  | Worker.Worker_busy as e ->
-    Hh_logger.exc e;
-    Exit_status.(exit Worker_busy)
-  | (Worker.Worker_exited_abnormally i) as e ->
-    Hh_logger.exc e;
-    (** Exit with the same exit code that that worker used. *)
-    exit i
-  | Decl_class.Decl_heap_elems_bug ->
-    Exit_status.(exit Decl_heap_elems_bug)
-  | SharedMem.C_assertion_failure _ as e ->
-    Hh_logger.exc e;
-    Exit_status.(exit Shared_mem_assertion_failure)
+  ServerUtils.with_exit_on_exception @@ fun () ->
+  daemon_main_exn options (ic, oc)
+
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

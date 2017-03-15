@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,6 +117,41 @@ void simplifyOrdStrIdx(IRUnit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * This pass fixes the hints in the blocks to make sure that a block is not
+ * marked as hotter (i.e. more likely to execute) than any of its predecessors.
+ */
+void fixBlockHints(IRUnit& unit) {
+  TRACE_SET_MOD(hhir_fixhint);
+  bool changed = false;
+  auto blocks = rpoSortCfg(unit);
+  do {
+    changed = false;
+    for (auto& block : blocks) {
+      // The unit entry has no predecessor but we want to keep it in the main
+      // area code.
+      if (block == unit.entry()) continue;
+
+      uint8_t maxPredHint = static_cast<uint8_t>(Block::Hint::Unused);
+      for (auto& inEdge : block->preds()) {
+        const auto& pred = inEdge.from();
+        auto predHint = static_cast<uint8_t>(pred->hint());
+        maxPredHint = std::max(maxPredHint, predHint);
+      }
+
+      if (static_cast<uint8_t>(block->hint()) > maxPredHint) {
+        const auto newHint = static_cast<Block::Hint>(maxPredHint);
+        FTRACE(3, "fixBlockHints: changing B{} from {} to {}\n", block->id(),
+               blockHintName(block->hint()), blockHintName(newHint));
+        block->setHint(newHint);
+        changed = true;
+      }
+    }
+  } while (changed);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 void optimize(IRUnit& unit, TransKind kind) {
@@ -127,10 +162,6 @@ void optimize(IRUnit& unit, TransKind kind) {
   fullDCE(unit);
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
-
-  if (RuntimeOption::EvalHHIRTypeCheckHoisting) {
-    doPass(unit, hoistTypeChecks, DCE::Minimal);
-  }
 
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(unit, optimizePredictions, DCE::None);
@@ -179,9 +210,17 @@ void optimize(IRUnit& unit, TransKind kind) {
   // Perform final cleanup passes to collapse any critical edges that were
   // split, and simplify our instructions before shipping off to codegen.
   doPass(unit, cleanCfg, DCE::None);
+
+  if (kind != TransKind::Profile &&
+      RuntimeOption::EvalHHIRGlobalValueNumbering) {
+    doPass(unit, gvn, DCE::Full);
+  }
+
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
     doPass(unit, simplifyPass, DCE::Full);
   }
+
+  doPass(unit, fixBlockHints, DCE::None);
 }
 
 //////////////////////////////////////////////////////////////////////

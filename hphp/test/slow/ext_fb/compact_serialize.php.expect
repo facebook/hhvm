@@ -159,8 +159,8 @@ bool(true)
 bool(true)
 bool(true)
 ====
-fb_compact_serialize(): unable to serialize object/resource/ref/class
-fb_compact_serialize(): unable to serialize object/resource/ref/class
+fb_compact_serialize(): unable to serialize object/resource/ref
+fb_compact_serialize(): unable to serialize object/resource/ref
 bool(true)
 bool(true)
 int(1)

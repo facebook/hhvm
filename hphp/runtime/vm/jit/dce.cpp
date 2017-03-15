@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,16 +20,20 @@
 #include <folly/MapUtil.h>
 
 #include "hphp/util/trace.h"
+
+#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/simplify.h"
+#include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
-#include "hphp/runtime/vm/jit/cfg.h"
-#include "hphp/runtime/vm/jit/check.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit {
 namespace {
@@ -75,12 +79,10 @@ bool canDCE(IRInstruction* inst) {
   case ConvIntToDbl:
   case ConvStrToDbl:
   case ConvResToDbl:
-  case ConvArrToInt:
   case ConvBoolToInt:
   case ConvDblToInt:
   case ConvStrToInt:
   case ConvResToInt:
-  case ConvBoolToStr:
   case ConvDblToStr:
   case ConvIntToStr:
   case ConvDictToVec:
@@ -148,6 +150,7 @@ bool canDCE(IRInstruction* inst) {
   case EqCls:
   case EqFunc:
   case EqStrPtr:
+  case EqArrayDataPtr:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -173,6 +176,7 @@ bool canDCE(IRInstruction* inst) {
   case BoxPtr:
   case LdStk:
   case LdLoc:
+  case LdClsRef:
   case LdStkAddr:
   case LdLocAddr:
   case LdRDSAddr:
@@ -202,14 +206,13 @@ bool canDCE(IRInstruction* inst) {
   case LdFuncNumParams:
   case LdStrLen:
   case LdVecElem:
-  case LdVecElemAddr:
+  case LdPackedArrayDataElemAddr:
   case LdClosureStaticLoc:
   case NewInstanceRaw:
   case NewArray:
   case NewMixedArray:
   case NewDictArray:
   case NewLikeArray:
-  case LdPackedArrayElemAddr:
   case NewCol:
   case FreeActRec:
   case DefInlineFP:
@@ -244,6 +247,7 @@ bool canDCE(IRInstruction* inst) {
   case ColIsEmpty:
   case ColIsNEmpty:
   case LdUnwinderValue:
+  case LdColVec:
   case LdColArray:
   case OrdStr:
   case ChrInt:
@@ -265,6 +269,10 @@ bool canDCE(IRInstruction* inst) {
   case KeysetIsset:
   case KeysetEmptyElem:
   case KeysetIdx:
+  case GetTime:
+  case Select:
+  case MemoGet:
+  case LdARCtx:
     assertx(!inst->isControlFlow());
     return true;
 
@@ -277,11 +285,14 @@ bool canDCE(IRInstruction* inst) {
   case CheckNullptr:
   case CheckTypeMem:
   case HintLocInner:
-  case CheckLoc:
-  case AssertLoc:
   case HintStkInner:
+  case HintMBaseInner:
+  case CheckLoc:
   case CheckStk:
+  case CheckMBase:
+  case AssertLoc:
   case AssertStk:
+  case AssertMBase:
   case CastStk:
   case CastMem:
   case CoerceStk:
@@ -354,7 +365,8 @@ bool canDCE(IRInstruction* inst) {
   case ReturnHook:
   case SuspendHookE:
   case SuspendHookR:
-  case Halt:
+  case EndBlock:
+  case Unreachable:
   case Jmp:
   case DefLabel:
   case Box:
@@ -422,6 +434,7 @@ bool canDCE(IRInstruction* inst) {
   case StLoc:
   case StLocPseudoMain:
   case StLocRange:
+  case StClsRef:
   case StRef:
   case EagerSyncVMRegs:
   case ReqBindJmp:
@@ -451,6 +464,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
   case RaiseVarEnvDynCall:
+  case RaiseHackArrCompatNotice:
   case InitClosureStaticLoc:
   case InitStaticLoc:
   case PrintStr:
@@ -590,6 +604,7 @@ bool canDCE(IRInstruction* inst) {
   case SetNewElemArray:
   case SetNewElemVec:
   case SetNewElemKeyset:
+  case ReservePackedArrayDataNewElem:
   case BindNewElem:
   case VectorIsset:
   case PairIsset:
@@ -599,7 +614,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileArrayKind:
   case ProfileType:
   case ProfileMethod:
-  case CheckPackedArrayBounds:
+  case CheckPackedArrayDataBounds:
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:
@@ -639,6 +654,8 @@ bool canDCE(IRInstruction* inst) {
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:
   case ProfileInstanceCheck:
+  case MemoSet:
+  case KillClsRef:
     return false;
   }
   not_reached();
@@ -799,6 +816,10 @@ bool findWeakActRecUses(const BlockList& blocks,
     case AssertLoc:
     case LdLocAddr:
     case HintLocInner:
+    // these can be rewritten to use an outer frame pointer
+    case LdClsRef:
+    case StClsRef:
+    case KillClsRef:
       incWeak(inst, inst->src(0));
       break;
 
@@ -850,6 +871,129 @@ IRSPRelOffset locToStkOff(IRInstruction& inst) {
   assertx(fpInst->is(DefInlineFP));
 
   return fpInst->extra<DefInlineFP>()->spOffset - locId - 1;
+}
+
+/*
+ * Convert an instruction using the frame pointer into one that uses the
+ * caller's frame pointer, skipping frames marked as dead.
+ */
+template <typename F>
+void rewriteToParentFrameImpl(IRUnit& unit, IRInstruction& inst, F dead) {
+  assertx(inst.is(LdClsRef, StClsRef, KillClsRef));
+
+  auto fp = inst.src(0);
+  assertx(canonical(fp)->inst()->is(DefInlineFP, DefLabel));
+
+  auto const chaseFpTmp = [](const SSATmp* s) {
+    s = canonical(s);
+    auto i = s->inst();
+    if (UNLIKELY(i->is(DefLabel))) {
+      i = resolveFpDefLabel(s);
+      assertx(i);
+    }
+    always_assert(i->is(DefFP, DefInlineFP));
+    return i->dst();
+  };
+
+  fp = chaseFpTmp(fp);
+  assertx(fp->inst()->is(DefInlineFP));
+
+  // Figure out the FPInvOffset of the stack pointer from the outermost frame
+  // pointer. We'll use this to find the offsets of the various frame pointers.
+  auto const spOffsetFromTop = [&]{
+    auto const sp = fp->inst()->src(0);
+    auto const defSp = sp->inst();
+    assertx(defSp->is(DefSP));
+    return defSp->extra<DefSP>()->offset;
+  }();
+
+  // Given a frame pointer, determine its offset from the outermost frame
+  // pointer in the unit.
+  auto const getFpOffsetFromTop = [&](const SSATmp* s) {
+    auto const i = s->inst();
+    if (i->is(DefFP)) return FPInvOffset{0};
+    if (i->is(DefInlineFP)) {
+      return i->extra<DefInlineFP>()->spOffset.to<FPInvOffset>(spOffsetFromTop);
+    }
+    always_assert(false);
+  };
+
+  // Given a frame pointer, determine the associated Func*.
+  auto const getFunc = [](const SSATmp* s) {
+    auto const i = s->inst();
+    if (i->is(DefFP)) return i->func();
+    if (i->is(DefInlineFP)) return i->extra<DefInlineFP>()->target;
+    always_assert(false);
+  };
+
+  auto const slot = inst.extra<ClsRefSlotData>()->slot;
+  auto const origFpOffset = getFpOffsetFromTop(fp);
+  auto const origFunc = getFunc(fp);
+
+  // Walk up the def/use chain of the frame pointers, stopping if we encounter
+  // the outermost frame pointer, or if we find an inlined frame which is not
+  // dead. This will be the frame pointer we rewrite the instruction to.
+  do {
+    fp = chaseFpTmp(fp->inst()->src(1));
+  } while (!fp->inst()->is(DefFP) && dead(fp->inst()));
+
+  // Calculate the new offset (in bytes) that should be used to calculate the
+  // new slot. Take the difference between the original frame pointer offset and
+  // the new frame pointer offset. This is in slots, so multiple by the slot
+  // size. Add in the space between the original frame pointer to the original
+  // slot, and subtract out the space between the new frame pointer and the
+  // first slot. (frame_clsref_offset returns negative numbers, hence the
+  // reversed operations).
+
+  /*
+   *  --------------------------------
+   *  |   ActRec                     |
+   *  -------------------------------- fp <---------------------|
+   *  |   ..................         |                          |
+   *  |   ..................         |                          |
+   *  |   ..................         |                          |
+   *  --------------------------------                          |
+   *  |   ActRec                     |                          |
+   *  -------------------------------- origFp <-|               |- new offset
+   *  |   Locals + Iterators         |          |               |
+   *  --------------------------------          |               |
+   *  |   Class-ref slots #0 -> N-1  |          |- orig offset  |
+   *  --------------------------------          |               |
+   *  |   Class-ref slot #N          |          |               |
+   *  -------------------------------- <--------- <--------------
+   */
+
+  auto const newOffset =
+    cellsToBytes(origFpOffset - getFpOffsetFromTop(fp))
+    - frame_clsref_offset(origFunc, slot)
+    + frame_clsref_offset(getFunc(fp), 0);
+  assertx((newOffset % sizeof(LowPtr<Class>)) == 0);
+  // Now that we have the new offset in bytes, convert it to an actual slot
+  // number.
+  auto const newSlot = newOffset / sizeof(LowPtr<Class>);
+
+  // Sanity check that both the before and after result in the same byte offset
+  if (debug) {
+    DEBUG_ONLY auto const origOffset =
+      cellsToBytes(origFpOffset.offset)
+      - frame_clsref_offset(origFunc, slot);
+    DEBUG_ONLY auto const newOffset =
+      cellsToBytes(getFpOffsetFromTop(fp).offset)
+      - frame_clsref_offset(getFunc(fp), newSlot);
+    assertx(origOffset == newOffset);
+  }
+
+  ITRACE(3, "rewriting {} to use frame-ptr {} with slot {}\n",
+         inst, *fp, newSlot);
+
+  // Update the instruction:
+  inst.setSrc(0, fp);
+  switch (inst.op()) {
+    case LdClsRef:   inst.extra<LdClsRef>()->slot = newSlot; break;
+    case StClsRef:   inst.extra<StClsRef>()->slot = newSlot; break;
+    case KillClsRef: inst.extra<KillClsRef>()->slot = newSlot; break;
+    default: not_reached();
+  }
 }
 
 /*
@@ -912,6 +1056,18 @@ void performActRecFixups(const BlockList& blocks,
         }
         break;
 
+      case LdClsRef:
+      case StClsRef:
+      case KillClsRef:
+        if (state[inst.src(0)->inst()].isDead()) {
+          rewriteToParentFrameImpl(
+            unit,
+            inst,
+            [&](const IRInstruction* i){ return state[i].isDead(); }
+          );
+        }
+        break;
+
       /*
        * DecRef* are special: they're the only instructions that can reenter
        * but not throw. This means it's safe to elide their inlined frame, as
@@ -961,9 +1117,59 @@ void optimizeActRecs(const BlockList& blocks,
   }
 }
 
+IRInstruction* resolveFpDefLabelImpl(
+  const SSATmp* fp,
+  jit::flat_set<const IRInstruction*>& visited
+) {
+  auto const inst = fp->inst();
+  assertx(inst->is(DefLabel));
+
+  // We already examined this, avoid loops.
+  if (visited.count(inst)) return nullptr;
+
+  auto const dests = inst->dsts();
+  auto const destIdx =
+    std::find(dests.begin(), dests.end(), fp) - dests.begin();
+  always_assert(destIdx >= 0 && destIdx < inst->numDsts());
+
+  // If any of the inputs to the Phi aren't Phis themselves, then just choose
+  // that.
+  IRInstruction* outInst = nullptr;
+  inst->block()->forEachSrc(
+    destIdx,
+    [&] (const IRInstruction*, const SSATmp* tmp) {
+      if (outInst) return;
+      auto const i = canonical(tmp)->inst();
+      if (!i->is(DefLabel)) outInst = i;
+    }
+  );
+  if (outInst) return outInst;
+
+  // Otherwise we need to recursively look at the linked Phis, avoiding visiting
+  // this Phi again.
+  visited.insert(inst);
+  inst->block()->forEachSrc(
+    destIdx,
+    [&] (const IRInstruction*, const SSATmp* tmp) {
+      if (outInst) return;
+      tmp = canonical(tmp);
+      auto const DEBUG_ONLY label = tmp->inst();
+      assertx(label->is(DefLabel));
+      outInst = resolveFpDefLabelImpl(tmp, visited);
+    }
+  );
+
+  return outInst;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 } // anonymous namespace
+
+IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
+  jit::flat_set<const IRInstruction*> visited;
+  return resolveFpDefLabelImpl(fp, visited);
+}
 
 void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));
@@ -1002,6 +1208,12 @@ void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
   not_reached();
 }
 
+void rewriteToParentFrame(IRUnit& unit, IRInstruction& inst) {
+  rewriteToParentFrameImpl(
+    unit, inst, [&](const IRInstruction*) { return false; }
+  );
+}
+
 void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(InlineReturn));
   auto const frameInst = inst.src(0)->inst();
@@ -1010,9 +1222,9 @@ void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
   auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
   auto const spOff = spInst->extra<DefSP>()->offset;
 
-  InlineReturnNoFrameData data {
+  auto const data = FPRelOffsetData {
     // Offset of the callee's return value relative to the frame pointer.
-    calleeAROff.to<FPRelOffset>(spOff) + (AROFF(m_r) / sizeof(TypedValue))
+    calleeAROff.to<FPRelOffset>(spOff) + (kArRetOff / sizeof(TypedValue))
   };
   unit.replace(&inst, InlineReturnNoFrame, data);
 }

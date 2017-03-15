@@ -87,11 +87,15 @@ and shape f sm =
   end sm ShapeMap.empty
 
 and shape_field f = function
-  | SFlit pstr -> SFlit (pstring f pstr)
-  | SFclass_const (sid, pstr) -> SFclass_const (pstring f sid, pstring f pstr)
+  | Ast.SFlit pstr -> Ast.SFlit (pstring f pstr)
+  | Ast.SFclass_const (sid, pstr) ->
+    Ast.SFclass_const (pstring f sid, pstring f pstr)
 
 and pstring f (p, s) =
   f p, s
+
+and instantiated_sid f (sid, hl) =
+  (pstring f sid, List.map hl (hint f))
 
 and special_func f = function
   | Gena e -> Gena (expr f e)
@@ -103,7 +107,7 @@ and class_id f = function
   | CIself -> CIself
   | CIstatic -> CIstatic
   | CIexpr e -> CIexpr (expr f e)
-  | CI sid -> CI (pstring f sid)
+  | CI isid -> CI (instantiated_sid f isid)
 
 and hint f (p, h) = f p, hint_ f h
 
@@ -122,10 +126,13 @@ and hint_ f = function
     Hfun (List.map hl (hint f), b, hint f h)
   | Happly (sid, hl) -> Happly (pstring f sid, List.map hl (hint f))
   | Hshape sm ->
-    let sm = ShapeMap.fold begin fun sf h acc ->
+    let sm = ShapeMap.fold begin fun sf shape_field_info acc ->
+      let map_over_shape_field_info ~f shape_field_info =
+        { shape_field_info with sfi_hint=f shape_field_info.sfi_hint } in
       let sf = shape_field f sf in
-      let h = hint f h in
-      ShapeMap.add sf h acc
+      let h = hint f in
+      let shape_field_info = map_over_shape_field_info ~f:h shape_field_info in
+      ShapeMap.add sf shape_field_info acc
     end sm ShapeMap.empty in
     Hshape sm
   | Haccess (h, sids) -> Haccess (hint f h, List.map sids (pstring f))

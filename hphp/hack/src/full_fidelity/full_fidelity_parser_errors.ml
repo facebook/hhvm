@@ -56,37 +56,39 @@ let assert_last_in_list assert_fun node =
     | _ :: t -> aux t in
   aux (syntax_to_list_no_separators node)
 
-(* If an ellipsis appears in a position other than the last element in the
-   list then return it. *)
-let misplaced_ellipsis params =
-  assert_last_in_list is_ellipsis params
-
-let is_variadic node =
+let is_variadic_expression node =
   begin match syntax node with
     | DecoratedExpression { decorated_expression_decorator; _; } ->
       is_ellipsis decorated_expression_decorator
     | _ -> false
   end
 
+let is_variadic_parameter_variable node =
+  (* TODO: This shouldn't be a decorated *expression* because we are not
+  expecting an expression at all. We're expecting a declaration. *)
+  is_variadic_expression node
+
+let is_variadic_parameter_declaration node =
+  begin match syntax node with
+  | VariadicParameter _ -> true
+  | ParameterDeclaration { parameter_name; _ } ->
+      is_variadic_parameter_variable parameter_name
+  | _ -> false
+  end
+
 let misplaced_variadic_param params =
-  let is_variadic node =
-    begin match syntax node with
-    | ParameterDeclaration { parameter_name; _ } ->
-        is_variadic parameter_name
-    | _ -> false
-    end
-  in
-  assert_last_in_list is_variadic params
+  assert_last_in_list is_variadic_parameter_declaration params
 
 let misplaced_variadic_arg args =
-  assert_last_in_list is_variadic args
+  assert_last_in_list is_variadic_expression args
 
-(* If a list ends with an ellipsis followed by a comma, return it *)
-let ends_with_ellipsis_comma params =
+(* If a list ends with a variadic parameter followed by a comma, return it *)
+let ends_with_variadic_comma params =
   let rec aux params =
     match params with
     | [] -> None
-    | x :: y :: [] when is_ellipsis x && is_comma y -> Some y
+    | x :: y :: [] when is_variadic_parameter_declaration x && is_comma y ->
+      Some y
     | _ :: t -> aux t in
   aux (syntax_to_list_with_separators params)
 
@@ -153,7 +155,7 @@ let methodish_modifier_contains_helper p node =
   match syntax node with
   | MethodishDeclaration syntax ->
     let node = syntax.methodish_modifiers in
-    (list_contains_predicate p node || p node)
+    list_contains_predicate p node
   | _ -> false
 
 (* tests whether the methodish contains > 1 modifier that satisfies [p] *)
@@ -202,17 +204,15 @@ let class_constructor_has_static node parents =
  * and that the header containing it has visibility modifiers in parameters
  *)
 let class_non_constructor_has_visibility_param node parents =
-  let label = node.function_name in
-  let params = node.function_parameter_list in
   let has_visibility node =
     match syntax node with
     | ParameterDeclaration { parameter_visibility; _ } ->
       parameter_visibility |> is_missing |> not
     | _ -> false
   in
-  ( not (is_construct label)) &&
-  ( list_contains_predicate has_visibility params ||
-    has_visibility params)
+  let label = node.function_name in
+  let params = syntax_to_list_no_separators node.function_parameter_list in
+  (not (is_construct label)) && (List.exists has_visibility params)
 
 (* Given a function declaration header, confirm that it is a destructor
  * and that the methodish containing it has non-empty parameters *)
@@ -285,37 +285,6 @@ let methodish_abstract_conflict_with_final node =
   let is_abstract = methodish_contains_abstract node in
   let has_final = methodish_contains_final node in
   is_abstract && has_final
-
-let statement_directly_in_switch parents =
-  match parents with
-  | l :: c :: s :: _ when (is_compound_statement c) && (is_list l) &&
-    (is_switch_statement s) ->
-    true
-  | c :: s :: _ when (is_compound_statement c) && (is_switch_statement s) ->
-    true
-  | _ -> false
-
-let first_statement compound =
-  match syntax compound with
-  | CompoundStatement { compound_statements; _ } ->
-    begin
-      match syntax compound_statements with
-      | Missing -> None (* Empty block *)
-      | SyntaxList (first :: _ ) -> Some first
-      | _ -> Some compound_statements (* Singleton statement in a block *)
-    end
-  | _ -> None
-
-let switch_first_is_label compound =
-  match first_statement compound with
-  | None -> true
-  | Some statement ->
-    begin
-      match syntax statement with
-      | DefaultStatement _
-      | CaseStatement _ -> true
-      | _ -> false
-    end
 
 let rec parameter_type_is_required parents =
   match parents with
@@ -437,29 +406,20 @@ let methodish_errors node parents =
   | _ -> [ ]
 
 let params_errors params =
-  let errors = match misplaced_ellipsis params with
-  | None -> []
-  | Some ellipsis ->
-    let s = start_offset ellipsis in
-    let e = end_offset ellipsis in
-    [ SyntaxError.make s e SyntaxError.error2021 ] in
   let errors =
-    if errors = [] then
-      match ends_with_ellipsis_comma params with
-      | None -> []
-      | Some comma ->
-        let s = start_offset comma in
-        let e = end_offset comma in
-        [ SyntaxError.make s e SyntaxError.error2022 ]
-    else
-      errors
+    match ends_with_variadic_comma params with
+    | None -> []
+    | Some comma ->
+      let s = start_offset comma in
+      let e = end_offset comma in
+      [ SyntaxError.make s e SyntaxError.error2022 ]
   in
     match misplaced_variadic_param params with
     | None -> errors
     | Some param ->
       let s = start_offset param in
       let e = end_offset param in
-      ( SyntaxError.make s e SyntaxError.error2033 ) :: errors
+      ( SyntaxError.make s e SyntaxError.error2021 ) :: errors
 
 let parameter_errors node parents is_strict =
   match syntax node with
@@ -492,13 +452,6 @@ let function_errors node _parents is_strict =
 
 let statement_errors node parents =
   let result = match syntax node with
-  | CaseStatement _
-    when not (statement_directly_in_switch parents) ->
-    Some (node, SyntaxError.error2003)
-  | DefaultStatement _
-    when not (statement_directly_in_switch parents) ->
-    Some (node, SyntaxError.error2004)
-    (* TODO: Detect when there is more than one default. *)
   | BreakStatement _
     when not (break_is_legal parents) ->
     Some (node, SyntaxError.error2005)
@@ -508,9 +461,6 @@ let statement_errors node parents =
   | TryStatement { try_catch_clauses; try_finally_clause; _ }
     when (is_missing try_catch_clauses) && (is_missing try_finally_clause) ->
     Some (node, SyntaxError.error2007)
-  | SwitchStatement { switch_body; _ }
-    when not (switch_first_is_label switch_body) ->
-    Some (switch_body, SyntaxError.error2008)
   | _ -> None in
   match result with
   | None -> [ ]

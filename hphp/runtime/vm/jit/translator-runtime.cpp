@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,7 +43,6 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
-#include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unwind.h"
@@ -175,6 +174,8 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   assertx(a1->isPHPArray());
   assertx(a2->isPHPArray());
 
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+
   if (!a2->empty()) {
     if (a1->empty()) {
       // We consume refs on a2 and also produce references, so there's
@@ -288,9 +289,16 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
   return a;
 }
 
+static Array arrayFromCollection(ObjectData* obj) {
+  if (auto ad = collections::asArray(obj)) {
+    return ArrNR{ad}.asArray();
+  }
+  return collections::toArray(obj);
+}
+
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   if (obj->isCollection()) {
-    auto a = collections::toArray(obj).toVec();
+    auto a = arrayFromCollection(obj).toVec();
     decRefObj(obj);
     return a.detach();
   }
@@ -333,7 +341,7 @@ ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
 
 ArrayData* convObjToDictHelper(ObjectData* obj) {
   if (obj->isCollection()) {
-    auto a = collections::toArray(obj).toDict();
+    auto a = arrayFromCollection(obj).toDict();
     decRefObj(obj);
     return a.detach();
   }
@@ -376,7 +384,7 @@ ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
 
 ArrayData* convObjToKeysetHelper(ObjectData* obj) {
   if (obj->isCollection()) {
-    auto a = collections::toArray(obj).toKeyset();
+    auto a = arrayFromCollection(obj).toKeyset();
     decRefObj(obj);
     return a.detach();
   }
@@ -415,10 +423,6 @@ int64_t convCellToDblHelper(TypedValue tv) {
   return reinterpretDblAsInt(tvCastToDouble(&tv));
 }
 
-int64_t convArrToIntHelper(ArrayData* a) {
-  return a->empty() ? 0 : 1;
-}
-
 ObjectData* convCellToObjHelper(TypedValue tv) {
   // Note: the call sites of this function all assume that
   // no user code will run and no recoverable exceptions will
@@ -451,13 +455,6 @@ StringData* convResToStrHelper(ResourceHdr* r) {
   // toString() returns a counted String; detach() it to move ownership
   // of the count to the caller
   return r->data()->o_toString().detach();
-}
-
-TypedValue getMemoKeyHelper(TypedValue tv) {
-  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(&tv));
-  auto res = var.asTypedValue();
-  tvRefcountedIncRef(res);
-  return *res;
 }
 
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
@@ -530,7 +527,6 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -584,7 +580,6 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -619,8 +614,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
                               return array_string.get();
     case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
     case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
-    case KindOfRef:
-    case KindOfClass:         break;
+    case KindOfRef:           break;
   }
   not_reached();
 }
@@ -754,11 +748,6 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isPHPArray());
-  return arrayIdxI(a, key, def);
-}
-
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isDict());
   return getDefaultIfNullCell(MixedArray::NvGetIntDict(a, key), def);
@@ -867,7 +856,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -913,7 +901,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
       ar->func()->validate();
     },
     [](const TypedValue* tv) {
-      assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+      assertx(tvIsPlausible(*tv));
     }
   );
 }
@@ -1046,7 +1034,7 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 
 void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   TypedValue localTvRef;
-  auto elem = HPHP::ElemD<MOpFlags::Define, true>(localTvRef, base, key);
+  auto elem = HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, key);
 
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
@@ -1062,16 +1050,15 @@ void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(&keyTV);
   auto elem = UNLIKELY(val.m_type == KindOfRef)
-    ? HPHP::ElemD<MOpFlags::Define, true>(localTvRef, base, *keyC)
-    : HPHP::ElemD<MOpFlags::Define, false>(localTvRef, base, *keyC);
+    ? HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, *keyC)
+    : HPHP::ElemD<MOpMode::Define, false>(localTvRef, base, *keyC);
   // Intentionally leak the old value pointed to by elem, including from magic
   // methods.
   tvDup(val, *elem);
 }
 
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
-  TypedValue result;
-  HPHP::IncDecElem(op, base, key, result);
+  auto const result = HPHP::IncDecElem(op, base, key);
   assertx(result.m_type != KindOfRef);
   return result;
 }

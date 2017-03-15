@@ -35,8 +35,16 @@ let rewrite_tree_no_whitespace node =
       trivia_list
       ~f:(fun t ->
         match MinimalTrivia.kind t with
-          | TriviaKind.SingleLineComment | TriviaKind.DelimitedComment -> true
-          | _ -> false
+          | TriviaKind.FallThrough
+          | TriviaKind.Unsafe
+          | TriviaKind.IgnoreError
+          | TriviaKind.UnsafeExpression
+          | TriviaKind.FixMe
+          | TriviaKind.Markup
+          | TriviaKind.SingleLineComment
+          | TriviaKind.DelimitedComment -> true
+          | TriviaKind.EndOfLine
+          | TriviaKind.WhiteSpace -> false
       )
   in
 

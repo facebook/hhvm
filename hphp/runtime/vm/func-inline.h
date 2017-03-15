@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,12 @@ ALWAYS_INLINE void setCachedFunc(Func* func, bool debugger) {
   auto& funcAddr = rds::handleToRef<LowPtr<Func>>(handle);
 
   if (rds::isPersistentHandle(handle)) {
-    assertx(funcAddr.get() == nullptr || funcAddr.get() == func);
+    auto const oldFunc = funcAddr.get();
+    if (oldFunc == func) return;
+    if (UNLIKELY(oldFunc != nullptr)) {
+      assertx(oldFunc->isBuiltin() && !func->isBuiltin());
+      raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
+    }
   } else {
     assertx(rds::isNormalHandle(handle));
     if (!rds::isHandleInit(handle, rds::NormalTag{})) {

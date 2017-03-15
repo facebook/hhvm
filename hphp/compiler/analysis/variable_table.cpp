@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -172,21 +172,6 @@ bool VariableTable::isLocal(const Symbol *sym) const {
             !sym->isParameter());
   }
   return false;
-}
-
-bool VariableTable::needLocalCopy(const std::string &name) const {
-  return needLocalCopy(getSymbol(name));
-}
-
-bool VariableTable::needLocalCopy(const Symbol *sym) const {
-  return sym &&
-    (sym->isGlobal() || sym->isStatic()) &&
-    (sym->isRedeclared() ||
-     sym->isNestedStatic() ||
-     sym->isLocalGlobal() ||
-     getAttribute(ContainsDynamicVariable) ||
-     getAttribute(ContainsExtract) ||
-     getAttribute(ContainsUnset));
 }
 
 bool VariableTable::isInherited(const std::string &name) const {

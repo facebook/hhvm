@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,23 +16,29 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/array-offset-profile.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/code-gen-internal.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
-#include "hphp/runtime/vm/jit/array-offset-profile.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/immed.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/trace.h"
 
 // This file does ugly things with macros so include last.
@@ -45,8 +51,8 @@ TRACE_SET_MOD(irlower);
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgBaseG(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<MOpFlagsData>()->flags;
-  BUILD_OPTAB(BASE_G_HELPER_TABLE, flags);
+  auto const mode = inst->extra<MOpModeData>()->mode;
+  BUILD_OPTAB(BASE_G_HELPER_TABLE, mode);
 
   auto const args = argGroup(env, inst).typedValue(0);
 
@@ -73,17 +79,17 @@ ArgGroup propArgs(IRLS& env, const IRInstruction* inst) {
 }
 
 void implProp(IRLS& env, const IRInstruction* inst) {
-  auto const flags   = inst->extra<MOpFlagsData>()->flags;
+  auto const mode    = inst->extra<MOpModeData>()->mode;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
   void (*helper)();
   if (base->isA(TObj)) {
-    BUILD_OPTAB(PROP_OBJ_HELPER_TABLE, flags, keyType);
+    BUILD_OPTAB(PROP_OBJ_HELPER_TABLE, mode, keyType);
     helper = opFunc;
   } else {
-    BUILD_OPTAB(PROP_HELPER_TABLE, flags, keyType);
+    BUILD_OPTAB(PROP_HELPER_TABLE, mode, keyType);
     helper = opFunc;
   }
 
@@ -139,17 +145,17 @@ void cgPropQ(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCGetProp(IRLS& env, const IRInstruction* inst) {
-  auto const flags   = inst->extra<MOpFlagsData>()->flags;
+  auto const mode    = inst->extra<MOpModeData>()->mode;
   auto const base    = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
   void (*helper)();
   if (base->isA(TObj)) {
-    BUILD_OPTAB(CGET_OBJ_PROP_HELPER_TABLE, keyType, flags);
+    BUILD_OPTAB(CGET_OBJ_PROP_HELPER_TABLE, keyType, mode);
     helper = opFunc;
   } else {
-    BUILD_OPTAB(CGET_PROP_HELPER_TABLE, keyType, flags);
+    BUILD_OPTAB(CGET_PROP_HELPER_TABLE, keyType, mode);
     helper = opFunc;
   }
 
@@ -303,9 +309,9 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
 }
 
 void implElem(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), flags);
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
 
   auto const args = elemArgs(env, inst).ssa(2);
 
@@ -333,9 +339,9 @@ void cgElemDX(IRLS& env, const IRInstruction* i) { implElem(env, i); }
 void cgElemUX(IRLS& env, const IRInstruction* i) { implElem(env, i); }
 
 void cgCGetElem(IRLS& env, const IRInstruction* inst) {
-  auto const flags = inst->extra<MOpFlagsData>()->flags;
+  auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), flags);
+  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mode);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
@@ -556,10 +562,10 @@ namespace {
 void implElemArray(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemArrayW ? MOpFlags::Warn : MOpFlags::None;
+  auto const mode = inst->op() == ElemArrayW ? MOpMode::Warn : MOpMode::None;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
-              keyInfo.type, keyInfo.checkForInt, flags);
+              keyInfo.type, keyInfo.checkForInt, mode);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -736,18 +742,65 @@ void implVecSet(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
+/*
+ * Thread-local RDS packed array access sampling counter.
+ */
+rds::Link<uint32_t> s_counter{rds::kInvalidHandle};
+
 }
 
-void cgLdPackedArrayElemAddr(IRLS& env, const IRInstruction* inst) {
-  auto const arrLoc = srcLoc(env, inst, 0);
-  auto const idxLoc = srcLoc(env, inst, 1);
-  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
-  vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
+void record_packed_access(const ArrayData* ad) {
+  assertx(s_counter.bound());
+  *s_counter = RuntimeOption::EvalProfPackedArraySampleFreq;
+
+  auto record = StructuredLogEntry{};
+  record.setInt("size", ad->size());
+
+  auto const st = StackTrace(StackTrace::Force{});
+  auto frames = std::vector<folly::StringPiece>{};
+  folly::split("\n", st.toString(), frames);
+  record.setVec("stacktrace", frames);
+
+  FTRACE_MOD(Trace::prof_array, 1,
+             "prof_array: {}\n", show(record).c_str());
+  StructuredLog::log("hhvm_arrays", record);
 }
 
-void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
+void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
+  auto& v = vmain(env);
+  auto& vc = vcold(env);
+
+  if (UNLIKELY(RuntimeOption::EvalProfPackedArraySampleFreq > 0)) {
+    auto const arrTy = inst->src(0)->type();
+    auto const packedTy = Type::Array(ArrayData::kPackedKind);
+
+    if (arrTy.maybe(packedTy)) {
+      s_counter.bind(rds::Mode::Local);
+
+      auto const profile = [&] (Vout& v) {
+        auto const handle = s_counter.handle();
+        auto const sf = v.makeReg();
+        v << declm{rvmtl()[handle], sf};
+
+        unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
+          // Log this array access.
+          v << vcall{CallSpec::direct(record_packed_access),
+                     v.makeVcallArgs({{arrLoc.reg()}}), v.makeTuple({})};
+        });
+      };
+
+      if (arrTy <= packedTy) {
+        profile(v);
+      } else {
+        auto const sf = v.makeReg();
+        v << cmpbim{ArrayData::kPackedKind, arrLoc.reg()[HeaderKindOffset], sf};
+        ifThen(v, CC_E, sf, profile);
+      }
+    }
+  }
+
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
   vmain(env) << lea{addr, dstLoc(env, inst, 0).reg()};
 }
@@ -767,6 +820,39 @@ void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
 
 IMPL_OPCODE_CALL(SetNewElemVec);
 
+void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
+  static_assert(ArrayData::sizeofSize() == 4, "");
+
+  auto& v = vmain(env);
+  auto arrayData = srcLoc(env, i, 0).reg();
+  auto const sizePtr = arrayData[ArrayData::offsetofSize()];
+
+  // If the check below succeeds, we'll end up returning the original size
+  // so just use the destination register to hold the orignal size
+  auto const size = dstLoc(env, i, 0).reg();
+  v << loadzlq{sizePtr, size};
+
+  { // Bail out unless size < cap
+    auto const codew = v.makeReg();
+    v << loadw{arrayData[HeaderAuxOffset], codew};
+    auto const code = v.makeReg();
+    v << movzwq{codew, code};
+
+    auto const mant = v.makeReg();
+    v << andqi{CapCode::M, code, mant, v.makeReg()};
+    auto const exp = v.makeReg();
+    v << shrqi{(int)CapCode::B, code, exp, v.makeReg()};
+    auto const cap = v.makeReg();
+    v << shl{exp, mant, cap, v.makeReg()};
+
+    auto const sf = v.makeReg();
+    v << cmpq{size, cap, sf};
+    ifThen(v, CC_BE, sf, label(env, i->taken()));
+  }
+
+  v << inclm{sizePtr, v.makeReg()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dict.
 
@@ -774,8 +860,8 @@ namespace {
 
 void implElemDict(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemDictW ? MOpFlags::Warn : MOpFlags::None;
-  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode = inst->op() == ElemDictW ? MOpMode::Warn : MOpMode::None;
+  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -786,9 +872,9 @@ void implElemDict(IRLS& env, const IRInstruction* inst) {
 
 void implDictGet(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags =
-    (inst->op() == DictGetQuiet) ? MOpFlags::None : MOpFlags::Warn;
-  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode =
+    (inst->op() == DictGetQuiet) ? MOpMode::None : MOpMode::Warn;
+  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -911,10 +997,10 @@ namespace {
 
 void implElemKeyset(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags = inst->op() == ElemKeysetW
-    ? MOpFlags::Warn
-    : MOpFlags::None;
-  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode = inst->op() == ElemKeysetW
+    ? MOpMode::Warn
+    : MOpMode::None;
+  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -925,10 +1011,10 @@ void implElemKeyset(IRLS& env, const IRInstruction* inst) {
 
 void implKeysetGet(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  auto const flags = inst->op() == KeysetGetQuiet
-    ? MOpFlags::None
-    : MOpFlags::Warn;
-  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), flags);
+  auto const mode = inst->op() == KeysetGetQuiet
+    ? MOpMode::None
+    : MOpMode::Warn;
+  BUILD_OPTAB(KEYSETGET_HELPER_TABLE, getKeyType(key), mode);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -1069,6 +1155,39 @@ IMPL_OPCODE_CALL(MapIdx);
 
 IMPL_OPCODE_CALL(MapAddElemC);
 IMPL_OPCODE_CALL(ColAddNewElemC);
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgMemoGet(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoGet>();
+  auto const fp    = srcLoc(env, inst, 0).reg();
+  auto& v          = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .ssa(1)
+    .addr(fp, localOffset(extra->locals.first))
+    .imm(extra->locals.restCount + 1);
+  cgCallHelper(
+    v, env, CallSpec::direct(MixedArray::MemoGet),
+    callDestTV(env, inst), SyncOptions::None, args
+  );
+}
+
+void cgMemoSet(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<MemoSet>();
+  auto const fp    = srcLoc(env, inst, 0).reg();
+  auto& v          = vmain(env);
+
+  auto const args = argGroup(env, inst)
+    .ssa(1)
+    .addr(fp, localOffset(extra->locals.first))
+    .imm(extra->locals.restCount + 1)
+    .typedValue(2);
+  cgCallHelper(
+    v, env, CallSpec::direct(MixedArray::MemoSet),
+    kVoidDest, SyncOptions::Sync, args
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,8 +1,9 @@
 /*
+
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +23,7 @@
 #include <stdarg.h>
 
 #include <folly/Format.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
@@ -111,11 +113,13 @@ namespace Trace {
       TM(hfsort)        \
       TM(hhas)          \
       TM(hhbbc)         \
+      TM(hhbbc_cfg)     \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
       TM(hhbbc_index)   \
+      TM(hhbbc_stats)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
       TM(hhir)          \
@@ -124,6 +128,8 @@ namespace Trace {
       TM(hhir_cfg)      \
       TM(hhir_checkhoist) \
       TM(hhir_dce)      \
+      TM(hhir_fixhint)  \
+      TM(hhir_fsm)      \
       TM(hhir_gvn)      \
       TM(hhir_licm)     \
       TM(hhir_load)     \
@@ -132,6 +138,7 @@ namespace Trace {
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \
       TM(hhir_store)    \
+      TM(hhir_unreachable) \
       TM(hhprof)        \
       TM(inlining)      \
       TM(instancebits)  \
@@ -150,6 +157,7 @@ namespace Trace {
       TM(pgo)           \
       TM(printir)       \
       TM(prof_branch)   \
+      TM(prof_array)    \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \
@@ -178,6 +186,8 @@ namespace Trace {
       TM(xls)           \
       TM(xls_stats)     \
       TM(pdce_inline)   \
+      TM(clisrv)        \
+      TM(factparse)     \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \

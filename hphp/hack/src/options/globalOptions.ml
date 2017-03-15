@@ -9,41 +9,32 @@
  *)
 
 type t = {
- (* When we encounter an unknown class|function|constant name outside
-  * of strict mode, is that an error? *)
- tco_assume_php : bool;
- (* For somewhat silly historical reasons having to do with the lack
-  * of .hhi's for fairly core XHP classes, we unfortunately mark all
-  * XHP classes as not having their members fully known at Facebook.
-  *
-  * We've also historically not typechecked attributes, and using string
-  * literals for things that aren't strings (eg colspan="3") is common.
-  *
-  * If set to true, this option disables the new, stricter behavior. Please
-  * don't use for new code, but it's useful for migrating existing XHP
-  * codebases. *)
- tco_unsafe_xhp : bool;
-
- (* List of <<UserAttribute>> names expected in the codebase *)
- tco_user_attrs : SSet.t option;
-
- (* Set of experimental features, in lowercase. *)
- tco_experimental_features : SSet.t;
-
- (* Namespace aliasing map *)
- po_auto_namespace_map : (string * string) list;
+  tco_assume_php : bool;
+  tco_unsafe_xhp : bool;
+  tco_safe_array : bool;
+  tco_user_attrs : SSet.t option;
+  tco_experimental_features : SSet.t;
+  po_auto_namespace_map : (string * string) list;
 }
 
-let tco_experimental_dict = "dict"
 let tco_experimental_instanceof = "instanceof"
+
+(* Whether opetional shape fields are enabled. Please see t16016001 for more
+   background on this feature. *)
+let tco_experimental_optional_shape_field = "optional_shape_field"
+
 let tco_experimental_all =
  List.fold_left
    (fun acc x -> SSet.add x acc) SSet.empty
-   [tco_experimental_dict; tco_experimental_instanceof]
+   [
+     tco_experimental_instanceof;
+     tco_experimental_optional_shape_field
+   ]
 
 let default = {
  tco_assume_php = true;
  tco_unsafe_xhp = false;
+ tco_safe_array = false;
  tco_user_attrs = None;
  (** Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
@@ -67,17 +58,20 @@ let make_permissive tcopt =
 
 let make ~tco_assume_php
          ~tco_unsafe_xhp
+         ~tco_safe_array
          ~tco_user_attrs
          ~tco_experimental_features
          ~po_auto_namespace_map = {
                    tco_assume_php;
                    tco_unsafe_xhp;
+                   tco_safe_array;
                    tco_user_attrs;
                    tco_experimental_features;
                    po_auto_namespace_map;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_unsafe_xhp t = t.tco_unsafe_xhp
+let tco_safe_array t = t.tco_safe_array
 let tco_user_attrs t = t.tco_user_attrs
 let tco_allowed_attribute t name = match t.tco_user_attrs with
  | None -> true

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@
 
 #ifdef __APPLE__
 #include <mach-o/getsect.h>
-#elif defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#elif defined(_MSC_VER)
 #include <windows.h>
 #include <winuser.h>
 #else
@@ -68,7 +68,7 @@ bool get_embedded_data(const char* section, embedded_data* desc,
                        const std::string& filename /*= "" */) {
   auto const fname = filename.empty() ? current_executable_path() : filename;
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   HMODULE moduleHandle = GetModuleHandleA(fname.data());
   HGLOBAL loadedResource;
   HRSRC   resourceInfo;
@@ -114,7 +114,7 @@ bool get_embedded_data(const char* section, embedded_data* desc,
   return false;
 }
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#ifdef _MSC_VER
 
 std::string read_embedded_data(const embedded_data& desc) {
   return std::string((const char*)LockResource(desc.m_handle), desc.m_len);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Unistd.h>
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"
@@ -42,12 +43,11 @@ using std::string;
 
 static const int kGzipLevel = 9;
 
-CacheData::CacheData()
-    : should_free_(false) {}
+CacheData::CacheData() {}
 
 CacheData::~CacheData() {
-  if (should_free_) {
-    free((void*) file_data_);
+  if (m_should_free) {
+    free((void*) m_file_data);
   }
 }
 
@@ -70,19 +70,19 @@ bool CacheData::loadFromFile(const string& name, uint64_t id,
     return false;
   }
 
-  id_ = id;
-  mtime_ = fs.st_mtime;
-  flags_ = 0 | kFlag_RegularFile;
-  file_data_length_ = fs.st_size;
+  m_id = id;
+  m_mtime = fs.st_mtime;
+  m_flags = 0 | kFlag_RegularFile;
+  m_file_data_length = fs.st_size;
 
-  char* temp_data = static_cast<char*>(malloc(file_data_length_));
+  char* temp_data = static_cast<char*>(malloc(m_file_data_length));
   always_assert(temp_data != nullptr);
 
   ScopeGuard guard = makeGuard([&] { free(temp_data); });
 
-  should_free_ = true;
+  m_should_free = true;
 
-  ssize_t read_len = read(fd, temp_data, file_data_length_);
+  ssize_t read_len = read(fd, temp_data, m_file_data_length);
 
   if (read_len < 0) {
     Logger::Error(format("Unable to load from {}: {}",
@@ -106,49 +106,49 @@ bool CacheData::loadFromFile(const string& name, uint64_t id,
       free(temp_data);
       temp_data = compressed;
 
-      file_data_length_ = new_len;
-      flags_ |= kFlag_Compressed;
+      m_file_data_length = new_len;
+      m_flags |= kFlag_Compressed;
 
     } else {
       free(compressed);
     }
   }
 
-  checksum_ = createChecksum();
+  m_checksum = createChecksum();
 
-  name_ = name;
-  file_data_ = temp_data;
+  m_name = name;
+  m_file_data = temp_data;
 
   return true;
 }
 
 void CacheData::createEmpty(const string& name, uint64_t id) {
-  name_ = name;
-  id_ = id;
-  mtime_ = 0;
-  flags_ = 0 | kFlag_EmptyEntry;
-  file_data_ = nullptr;
-  file_data_length_ = 0;
-  should_free_ = false;
-  checksum_ = createChecksum();
+  m_name = name;
+  m_id = id;
+  m_mtime = 0;
+  m_flags = 0 | kFlag_EmptyEntry;
+  m_file_data = nullptr;
+  m_file_data_length = 0;
+  m_should_free = false;
+  m_checksum = createChecksum();
 }
 
 void CacheData::createDirectory(const std::string& name, uint64_t id) {
-  name_ = name;
-  id_ = id;
-  mtime_ = 0;
-  flags_ = 0 | kFlag_Directory;
-  file_data_ = nullptr;
-  file_data_length_ = 0;
-  should_free_ = false;
-  checksum_ = createChecksum();
+  m_name = name;
+  m_id = id;
+  m_mtime = 0;
+  m_flags = 0 | kFlag_Directory;
+  m_file_data = nullptr;
+  m_file_data_length = 0;
+  m_should_free = false;
+  m_checksum = createChecksum();
 }
 
 bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
-  if (!mmap_file->readUInt64(&id_) ||
-      !mmap_file->readUInt64(&flags_) ||
-      !mmap_file->readUInt64(&mtime_) ||
-      !mmap_file->readUInt64(&checksum_)) {
+  if (!mmap_file->readUInt64(&m_id) ||
+      !mmap_file->readUInt64(&m_flags) ||
+      !mmap_file->readUInt64(&m_mtime) ||
+      !mmap_file->readUInt64(&m_checksum)) {
     Logger::Error("Can't read initial metadata for file");
     return false;
   }
@@ -167,7 +167,7 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
     return false;
   }
 
-  if (!mmap_file->readUInt64(&file_data_length_)) {
+  if (!mmap_file->readUInt64(&m_file_data_length)) {
     return false;
   }
 
@@ -176,12 +176,12 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
     return false;
   }
 
-  if (!mmap_file->makePointer(temp_ofs, file_data_length_, &file_data_)) {
+  if (!mmap_file->makePointer(temp_ofs, m_file_data_length, &m_file_data)) {
     Logger::Error("Unable to get pointer for file data into mmapped space");
     return false;
   }
 
-  should_free_ = false;
+  m_should_free = false;
 
   *name = temp_name;
   return true;
@@ -190,35 +190,35 @@ bool CacheData::loadFromMmap(MmapFile* mmap_file, string* name) {
 bool CacheData::save(CacheSaver* cs) const {
   CacheSaver::DirEntry de;
 
-  de.id = id_;
-  de.flags = flags_;
-  de.mtime = mtime_;
-  de.checksum = checksum_;
-  de.data_len = file_data_length_;
-  de.data_ptr = file_data_;
-  de.name = name_;
+  de.id = m_id;
+  de.flags = m_flags;
+  de.mtime = m_mtime;
+  de.checksum = m_checksum;
+  de.data_len = m_file_data_length;
+  de.data_ptr = m_file_data;
+  de.name = m_name;
 
   return cs->writeDirEntry(de);
 }
 
 bool CacheData::isRegularFile() const {
-  return (flags_ & kFlag_RegularFile) == kFlag_RegularFile;
+  return (m_flags & kFlag_RegularFile) == kFlag_RegularFile;
 }
 
 bool CacheData::isDirectory() const {
-  return (flags_ & kFlag_Directory) == kFlag_Directory;
+  return (m_flags & kFlag_Directory) == kFlag_Directory;
 }
 
 bool CacheData::isCompressed() const {
-  return (flags_ & kFlag_Compressed) == kFlag_Compressed;
+  return (m_flags & kFlag_Compressed) == kFlag_Compressed;
 }
 
 bool CacheData::isEmpty() const {
-  return (flags_ & kFlag_EmptyEntry) == kFlag_EmptyEntry;
+  return (m_flags & kFlag_EmptyEntry) == kFlag_EmptyEntry;
 }
 
 uint64_t CacheData::fileSize() const {
-  return file_data_length_;
+  return m_file_data_length;
 }
 
 bool CacheData::getDataPointer(const char** data, uint64_t* data_len,
@@ -230,8 +230,8 @@ bool CacheData::getDataPointer(const char** data, uint64_t* data_len,
 
   // This would be a great place to verify the checksum... once.
 
-  *data = file_data_;
-  *data_len = file_data_length_;
+  *data = m_file_data;
+  *data_len = m_file_data_length;
   *compressed = isCompressed();
   return true;
 }
@@ -241,8 +241,8 @@ bool CacheData::getDecompressedData(string* data) const {
     return false;
   }
 
-  int new_len = file_data_length_;    // Changed by gzdecode(), sigh.
-  char *temp = gzdecode(file_data_, new_len);
+  int new_len = m_file_data_length;    // Changed by gzdecode(), sigh.
+  char *temp = gzdecode(m_file_data, new_len);
 
   if (temp == nullptr) {
     return false;
@@ -272,10 +272,10 @@ void CacheData::dump() const {
     "  Flags: 0x%08" PRIx64 "\n"
     "  Size: %" PRIu64 "\n"
     "  ID: %" PRIu64 "\n",
-    name_.c_str(),
-    flags_,
+    m_name.c_str(),
+    m_flags,
     fileSize(),
-    id_
+    m_id
   );
 }
 

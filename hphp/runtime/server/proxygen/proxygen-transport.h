@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,6 +84,8 @@ struct ResponseMessage {
 
 struct PushTxnHandler;
 
+const StaticString s_proxygen("proxygen");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -156,6 +158,13 @@ struct ProxygenTransport final
   void getHeaders(HeaderMap &headers) override;
 
   /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_proxygen;
+  }
+
+  /**
    * Add/remove a response header.
    */
   void addHeaderImpl(const char *name, const char *value) override;
@@ -183,7 +192,8 @@ struct ProxygenTransport final
   bool supportsServerPush() override;
 
   int64_t pushResource(const char *host, const char *path,
-                       uint8_t priority, const Array &headers,
+                       uint8_t priority, const Array &promiseHeaders,
+                       const Array &responseHeaders,
                        const void *data, int size, bool eom) override;
 
   void pushResourceBody(int64_t id,
@@ -345,6 +355,7 @@ struct ProxygenTransport final
   uint16_t m_localPort{0};
   int64_t m_nextPushId{1};
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
+  bool m_egressError{false};
 
  public:
   // List of ProxygenTransport not yet handed to the server will sit

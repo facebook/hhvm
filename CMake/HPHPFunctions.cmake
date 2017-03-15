@@ -1,3 +1,7 @@
+if (${CMAKE_MAJOR_VERSION} GREATER 2)
+  cmake_policy(SET CMP0026 OLD)
+endif()
+
 include(GNUInstallDirs)
 
 function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
@@ -109,7 +113,7 @@ macro(MYSQL_SOCKET_SEARCH)
 endmacro()
 
 function(append_systemlib TARGET SOURCE SECTNAME)
-  if(CYGWIN OR MSVC OR MINGW)
+  if(MSVC)
     list(APPEND ${TARGET}_SLIBS_NAMES "${SECTNAME}")
     set(${TARGET}_SLIBS_NAMES ${${TARGET}_SLIBS_NAMES} PARENT_SCOPE)
     list(APPEND ${TARGET}_SLIBS_SOURCES "${SOURCE}")
@@ -139,7 +143,7 @@ function(embed_sections TARGET DEST)
     set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
     set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA})
-  elseif(CYGWIN OR MSVC OR MINGW)
+  elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}\n")
@@ -176,7 +180,7 @@ macro(embed_systemlib_byname TARGET SLIB)
   string(MD5 SLIB_HASH_NAME ${SLIB_EXTNAME})
   # Some platforms limit section names to 16 characters :(
   string(SUBSTRING ${SLIB_HASH_NAME} 0 12 SLIB_HASH_NAME_SHORT)
-  if (CYGWIN OR MINGW OR MSVC)
+  if (MSVC)
     # The dot would be causing the RC lexer to begin a number in the
     # middle of our resource name, so use an underscore instead.
     append_systemlib(${TARGET} ${SLIB} "ext_${SLIB_HASH_NAME_SHORT}")

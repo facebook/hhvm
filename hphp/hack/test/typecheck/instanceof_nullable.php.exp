@@ -1,3 +1,4 @@
-object
+File "instanceof_nullable.php", line 7, characters 5-15:
+  object
 File "instanceof_nullable.php", line 6, characters 21-22:
 Was expecting a class, but got a nullable type (Typing[4026])

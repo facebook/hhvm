@@ -466,12 +466,27 @@ let get_bool_exn = function
   | JSON_Bool b -> b
   | _ -> assert false
 
+let opt_string_to_json = function
+  | Some x -> JSON_String x
+  | None -> JSON_Null
+
+let opt_int_to_json = function
+  | Some x -> JSON_Number (string_of_int x)
+  | None -> JSON_Null
+
 type json_type =
   | Object_t
   | Array_t
   | String_t
   | Number_t
   | Bool_t
+
+let json_type_to_string = function
+  | Object_t -> "Object"
+  | Array_t -> "Array"
+  | String_t -> "String"
+  | Number_t -> "Number"
+  | Bool_t -> "Bool"
 
 module type Access = sig
   type keytrace = string list
@@ -483,14 +498,18 @@ module type Access = sig
 
   type 'a m = (('a * keytrace), access_failure) Result.t
 
+  val access_failure_to_string : access_failure -> string
+
   val return : 'a -> 'a m
 
   val (>>=) : 'a m -> (('a * keytrace) -> 'b m) -> 'b m
+  val counit_with : (access_failure -> 'a) -> 'a m -> 'a
   val get_obj : string -> json * keytrace -> json m
   val get_bool : string -> json * keytrace -> bool m
   val get_string : string -> json * keytrace -> string m
   val get_number : string -> json * keytrace -> string m
   val get_array: string -> json * keytrace -> (json list) m
+  val get_val: string -> json * keytrace -> json m
 end
 
 module Access = struct
@@ -503,9 +522,29 @@ module Access = struct
 
   type 'a m = (('a * keytrace), access_failure) Result.t
 
+  let keytrace_to_string x =
+    if x = [] then "" else
+    let res = List.map x (fun x -> "[" ^ x ^ "]")  |> String.concat " " in
+    " (at field " ^ res ^ ")"
+
+  let access_failure_to_string = function
+    | Not_an_object x ->
+      Printf.sprintf "Value is not an object %s" (keytrace_to_string x)
+    | Missing_key_error (x, y) ->
+      Printf.sprintf "Missing key: %s%s" x (keytrace_to_string y)
+    | Wrong_type_error (x, y) ->
+      Printf.sprintf "Value expected to be %s%s"
+        (json_type_to_string y) (keytrace_to_string x)
+
   let return v = Result.Ok (v, [])
 
   let (>>=) m f = Result.bind m f
+
+  let counit_with f m = match m with
+    | Result.Ok (v, _) ->
+      v
+    | Result.Error e ->
+      f e
 
   let catch_type_error exp f (v, keytrace) =
     try Result.Ok (f v, keytrace) with

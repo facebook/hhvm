@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,8 +49,7 @@ struct EHEntEmitter {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  std::vector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
 
   template<class SerDe> void serde(SerDe& sd);
 };
@@ -146,12 +145,14 @@ struct FuncEmitter {
   Id numLocals() const;
   Id numIterators() const;
   Id numLiveIterators() const;
+  Id numClsRefSlots() const;
 
   /*
    * Set things.
    */
   void setNumIterators(Id numIterators);
   void setNumLiveIterators(Id id);
+  void setNumClsRefSlots(Id num);
 
   /*
    * Check existence of, look up, and allocate named locals.
@@ -216,6 +217,7 @@ public:
   bool isPseudoMain() const;
   bool isMethod() const;
   bool isVariadic() const;
+  bool isVariadicByRef() const;
 
   /*
    * @returns: std::make_pair(line1, line2)
@@ -275,7 +277,7 @@ public:
   SVInfoVec staticVars;
   int maxStackCells;
 
-  MaybeDataType returnType;
+  MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
 
@@ -297,8 +299,11 @@ public:
 
   UserAttributeMap userAttributes;
 
-  StringData *memoizePropName;
+  StringData* memoizePropName;
+  StringData* memoizeGuardPropName;
   int memoizeSharedPropIndex;
+  RepoAuthType repoReturnType;
+  RepoAuthType repoAwaitedReturnType;
 
   Id dynCallWrapperId{kInvalidId};
 
@@ -312,6 +317,7 @@ private:
   int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
+  Id m_numClsRefSlots;
   bool m_ehTabSorted;
 };
 

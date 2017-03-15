@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,13 +71,17 @@ struct Env {
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
     , unit(TransContext{kInvalidTransID, kind, TransFlags{}, sk, ctx.spOffset})
-    , irgs(unit)
+    , irgs(unit, nullptr)
     , arStates(1)
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
     , profiling(kind == TransKind::Profile)
     , inlining(inlining)
-  {}
+  {
+    if (RuntimeOption::EvalRegionRelaxGuards) {
+      irgs.irb->enableConstrainGuards();
+    }
+  }
 
   const RegionContext& ctx;
   InterpSet& interp;
@@ -94,7 +98,6 @@ struct Env {
   RefDeps refDeps;
   uint32_t numJmps;
   int32_t numBCInstrs;
-  SrcKey minstrStart;
   // This map memoizes reachability of IR blocks during tracelet
   // formation.  A block won't have it's reachability stored in this
   // map until it's been computed.
@@ -152,8 +155,8 @@ bool consumeInput(Env& env, const InputInfo& input) {
 
   if (!input.dontBreak && !type.isKnownDataType()) {
     // Trying to consume a value without a precise enough type.
-    FTRACE(1, "selectTracelet: {} tried to consume {}\n",
-           env.inst.toString(), show(input.loc));
+    FTRACE(1, "selectTracelet: {} tried to consume {}, type {}\n",
+           env.inst.toString(), show(input.loc), type.toString());
     return false;
   }
 
@@ -375,6 +378,11 @@ void visitGuards(IRUnit& unit, F func) {
                inst.is(HintStkInner));
           break;
         }
+        case HintMBaseInner:
+        case CheckMBase:
+          func(&inst, Location::MBase{}, inst.typeParam(),
+               inst.is(HintMBaseInner));
+          break;
         default: break;
       }
     }
@@ -407,7 +415,7 @@ void recordDependencies(Env& env) {
                          Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
-    if (type <= TCls) return;
+    assertx(type <= TGen);
     auto& whichMap = hint ? hintMap : guardMap;
     auto inret = whichMap.insert(std::make_pair(loc, type));
     // Unconstrained pseudo-main guards will be relaxed to Gen by the guard
@@ -505,13 +513,9 @@ RegionDescPtr form_region(Env& env) {
 
   for (auto const& lt : env.ctx.liveTypes) {
     auto t = lt.type;
-    if (t <= TCls) {
-      irgen::assertTypeLocation(env.irgs, lt.location, t);
-      env.curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
-    } else {
-      irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
-                       true /* outerOnly */);
-    }
+    assertx(t <= TGen);
+    irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
+                     true /* outerOnly */);
   }
 
   irgen::gen(env.irgs, EndGuards);
@@ -530,16 +534,6 @@ RegionDescPtr form_region(Env& env) {
     }
 
     if (!prepareInstruction(env)) break;
-
-    // Until the rest of the pipeline can handle it without regressing, try to
-    // not break tracelets in the middle of new minstr sequences. Note that
-    // this is just an optimization; we can generate correct code regardless of
-    // how the minstrs are chopped up.
-    if (!firstInst && isMemberBaseOp(env.inst.op())) {
-      env.minstrStart = env.sk;
-    } else if (isMemberFinalOp(env.inst.op())) {
-      env.minstrStart = SrcKey{};
-    }
 
     env.curBlock->setKnownFunc(env.sk, env.inst.funcd);
 
@@ -600,12 +594,6 @@ RegionDescPtr form_region(Env& env) {
     if (isFCallStar(env.inst.op())) env.arStates.back().pop();
   }
 
-  // Return an empty region to restart region formation at env.minstrStart.
-  if (env.minstrStart.valid()) {
-    env.breakAt = env.minstrStart;
-    env.region.reset();
-  }
-
   if (env.region && !env.region->empty()) {
     // Make sure we end the region before trying to print the IRUnit.
     irgen::endRegion(env.irgs, env.sk);
@@ -630,12 +618,12 @@ RegionDescPtr form_region(Env& env) {
       auto const mainExit = findMainExitBlock(env.irgs.irb->unit(), lastSk);
       always_assert_flog(mainExit, "No main exits found!");
       /*
-       * If the last instruction is a Halt, its probably due to
-       * unreachable code. We don't want to truncate the tracelet
-       * in that case, because we could lose the assertion (eg
-       * if the Halt is due to a failed AssertRAT).
+       * If the last instruction is an Unreachable, its probably due to
+       * unreachable code. We don't want to truncate the tracelet in that case,
+       * because we could lose the assertion (eg if the Unreachable is due to a
+       * failed AssertRAT).
        */
-      return !mainExit->back().is(Halt);
+      return !mainExit->back().is(Unreachable);
     }();
 
     if (truncate) {

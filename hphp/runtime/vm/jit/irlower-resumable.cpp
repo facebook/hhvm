@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,7 +107,6 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
 
   v << contenter{fp, target, cross_trace_regs_resumed(),
                  {next, label(env, inst->taken())}};
-  env.catch_calls[inst->taken()] = CatchCall::PHP;
   v = next;
 }
 

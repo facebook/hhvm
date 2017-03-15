@@ -1,0 +1,24 @@
+diff --git a/Point.php b/Point.php
+--- a/Point.php
++++ b/Point.php
+@@ -4,20 +4,17 @@
+ {
+     private $x;    // Cartesian x-coordinate
+     private $y;    // Cartesian y-coordinate
+-    private $z;    // Cartesian z-coordinate
+
+     public function __construct($x = 0, $y = 0)
+     {
+         $this->x = $x;
+         $this->y = $y;
+-        $this->z = 0;
+     }
+
+     public function move($x, $y)
+     {
+         $this->x = $x;
+         $this->y = $y;
+-        $this->z = $0;
+     }
+
+     public function translate($x, $y)

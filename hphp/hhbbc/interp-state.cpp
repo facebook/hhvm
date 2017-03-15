@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,6 +68,21 @@ std::string show(const Iter& iter) {
 
 //////////////////////////////////////////////////////////////////////
 
+CollectedInfo::CollectedInfo(const Index& index,
+                             Context ctx,
+                             ClassAnalysis* cls,
+                             PublicSPropIndexer* publicStatics,
+                             bool trackConstantArrays,
+                             const FuncAnalysis* fa)
+    : props{index, ctx, cls}
+    , publicStatics{publicStatics}
+    , trackConstantArrays{trackConstantArrays}
+{
+  if (fa) localStaticTypes = fa->localStaticTypes;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool operator==(const ActRec& a, const ActRec& b) {
   auto const fsame =
     a.func.hasValue() != b.func.hasValue() ? false :
@@ -84,6 +99,7 @@ bool operator==(const State& a, const State& b) {
   return a.initialized == b.initialized &&
     a.thisAvailable == b.thisAvailable &&
     a.locals == b.locals &&
+    a.clsRefSlots == b.clsRefSlots &&
     a.stack == b.stack &&
     a.fpiStack == b.fpiStack;
 }
@@ -114,6 +130,7 @@ State without_stacks(const State& src) {
   }
 
   ret.locals        = src.locals;
+  ret.clsRefSlots   = src.clsRefSlots;
   ret.iters         = src.iters;
   return ret;
 }
@@ -166,7 +183,7 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 
   assert(types.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
-    current[i] = union_of(std::move(current[i]), std::move(types[i]));
+    current[i] |= std::move(types[i]);
   }
 }
 
@@ -212,6 +229,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(src.initialized);
   assert(dst.locals.size() == src.locals.size());
   assert(dst.iters.size() == src.iters.size());
+  assert(dst.clsRefSlots.size() == src.clsRefSlots.size());
   assert(dst.stack.size() == src.stack.size());
   assert(dst.fpiStack.size() == src.fpiStack.size());
 
@@ -237,10 +255,14 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   }
 
   for (auto i = size_t{0}; i < dst.stack.size(); ++i) {
-    auto newT = join(dst.stack[i], src.stack[i]);
-    if (dst.stack[i] != newT) {
+    auto newT = join(dst.stack[i].type, src.stack[i].type);
+    if (dst.stack[i].type != newT) {
       changed = true;
-      dst.stack[i] = std::move(newT);
+      dst.stack[i].type = std::move(newT);
+    }
+    if (dst.stack[i].equivLocal != src.stack[i].equivLocal) {
+      changed = true;
+      dst.stack[i].equivLocal = NoLocalId;
     }
   }
 
@@ -249,6 +271,15 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     if (dst.locals[i] != newT) {
       changed = true;
       dst.locals[i] = std::move(newT);
+    }
+  }
+
+  for (auto i = size_t{0}; i < dst.clsRefSlots.size(); ++i) {
+    auto newT = join(dst.clsRefSlots[i], src.clsRefSlots[i]);
+    assert(newT.subtypeOf(TCls));
+    if (dst.clsRefSlots[i] != newT) {
+      changed = true;
+      dst.clsRefSlots[i] = std::move(newT);
     }
   }
 
@@ -262,6 +293,39 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     if (merge_into(dst.fpiStack[i], src.fpiStack[i])) {
       changed = true;
     }
+  }
+
+  dst.equivLocals.resize(
+    std::max(dst.equivLocals.size(), src.equivLocals.size()), NoLocalId
+  );
+  for (auto i = size_t{0}; i < dst.equivLocals.size(); ++i) {
+    auto const dstLoc = dst.equivLocals[i];
+    auto const srcLoc =
+      (i < src.equivLocals.size()) ? src.equivLocals[i] : NoLocalId;
+    auto const newLoc = (dstLoc == srcLoc) ? dstLoc : NoLocalId;
+    if (newLoc != dstLoc) {
+      changed = true;
+      dst.equivLocals[i] = newLoc;
+    }
+  }
+
+  auto const sz = std::max(dst.localStaticBindings.size(),
+                           src.localStaticBindings.size());
+  if (sz) {
+    CompactVector<LocalStaticBinding> lsb;
+    for (auto i = size_t{0}; i < sz; i++) {
+      auto b1 = i < dst.localStaticBindings.size() ?
+        dst.localStaticBindings[i] : LocalStaticBinding::None;
+      auto b2 = i < src.localStaticBindings.size() ?
+        src.localStaticBindings[i] : LocalStaticBinding::None;
+
+      if (b1 != LocalStaticBinding::None || b2 != LocalStaticBinding::None) {
+        lsb.resize(i + 1);
+        lsb[i] = b1 == b2 ? b1 : LocalStaticBinding::Maybe;
+        changed |= lsb[i] != b1;
+      }
+    }
+    dst.localStaticBindings = std::move(lsb);
   }
 
   return changed;
@@ -286,6 +350,7 @@ static std::string fpiKindStr(FPIKind k) {
   case FPIKind::ObjMeth:     return "objm";
   case FPIKind::ClsMeth:     return "clsm";
   case FPIKind::ObjInvoke:   return "invoke";
+  case FPIKind::Builtin:     return "builtin";
   }
   not_reached();
 }
@@ -303,7 +368,8 @@ std::string show(const ActRec& a) {
   );
 }
 
-std::string state_string(const php::Func& f, const State& st) {
+std::string state_string(const php::Func& f, const State& st,
+                         const CollectedInfo& collect) {
   std::string ret;
 
   if (!st.initialized) {
@@ -317,21 +383,49 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    folly::format(&ret, "{: <8} :: {}\n",
-      local_string(borrow(f.locals[i])),
-      show(st.locals[i])
-    );
+    auto staticLocal = [&] () -> std::string {
+      if (i >= st.localStaticBindings.size() ||
+          st.localStaticBindings[i] == LocalStaticBinding::None) {
+        return "";
+      }
+
+      if (i >= collect.localStaticTypes.size()) {
+        return "(!!! unknown static !!!)";
+      }
+
+      return folly::sformat(
+        "({}static: {})",
+        st.localStaticBindings[i] == LocalStaticBinding::Maybe ? "maybe-" : "",
+        show(collect.localStaticTypes[i]));
+    };
+    folly::format(&ret, "{: <8} :: {} {}\n",
+                  local_string(f, i),
+                  show(st.locals[i]),
+                  staticLocal());
   }
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {
     folly::format(&ret, "iter {: <2}   :: {}\n", i, show(st.iters[i]));
   }
 
+  for (auto i = size_t{0}; i < st.clsRefSlots.size(); ++i) {
+    folly::format(&ret, "class-ref slot {: <2}   :: {}\n",
+                  i, show(st.clsRefSlots[i]));
+  }
+
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {
-    folly::format(&ret, "stk[{:02}] :: {}\n",
-      i,
-      show(st.stack[i])
-    );
+    folly::format(&ret, "stk[{:02}] :: {} [{}]\n",
+                  i,
+                  show(st.stack[i].type),
+                  st.stack[i].equivLocal != NoLocalId ?
+                  local_string(f, st.stack[i].equivLocal) : "");
+  }
+
+  for (auto i = size_t{0}; i < st.equivLocals.size(); ++i) {
+    if (st.equivLocals[i] == NoLocalId) continue;
+    folly::format(&ret, "{: <8} == {}\n",
+                  local_string(f, i),
+                  local_string(f, st.equivLocals[i]));
   }
 
   return ret;

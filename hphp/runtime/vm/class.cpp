@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,8 +53,6 @@ const StaticString s_86ctor("86ctor");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 
-void (*Class::MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
 Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,49 +83,51 @@ const Class* getOwningClassForFunc(const Func* f) {
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
-Class::PropInitVec::PropInitVec()
-  : m_data(nullptr)
-  , m_size(0)
-  , m_req_allocated(false)
-{}
-
 Class::PropInitVec::~PropInitVec() {
-  if (!m_req_allocated) free(m_data);
+  if (m_capacity > 0) {
+    free_huge(m_data);
+  }
 }
 
 Class::PropInitVec*
 Class::PropInitVec::allocWithReqAllocator(const PropInitVec& src) {
   PropInitVec* p = req::make_raw<PropInitVec>();
-  p->m_size = src.size();
-  p->m_data = req::make_raw_array<TypedValueAux>(src.size());
-  memcpy(p->m_data, src.m_data, src.size() * sizeof(*p->m_data));
-  p->m_req_allocated = true;
+  uint32_t sz = src.m_size;
+  p->m_size = sz;
+  p->m_capacity = ~sz;
+  p->m_data = req::make_raw_array<TypedValueAux>(sz);
+  memcpy(p->m_data, src.m_data, sz * sizeof(*p->m_data));
   return p;
 }
 
 const Class::PropInitVec&
 Class::PropInitVec::operator=(const PropInitVec& piv) {
-  assert(!m_req_allocated);
+  assert(!reqAllocated());
   if (this != &piv) {
-    unsigned sz = m_size = piv.size();
-    if (sz) sz = folly::nextPowTwo(sz);
-    free(m_data);
-    m_data = (TypedValueAux*)malloc(sz * sizeof(*m_data));
+    if (UNLIKELY(m_capacity)) {
+      free_huge(m_data);
+      m_data = nullptr;
+    }
+    unsigned sz = m_size = m_capacity = piv.size();
+    if (sz == 0) return *this;
+    m_data = (TypedValueAux*)malloc_huge(sz * sizeof(*m_data));
     assert(m_data);
-    memcpy(m_data, piv.m_data, piv.size() * sizeof(*m_data));
+    memcpy(m_data, piv.m_data, sz * sizeof(*m_data));
   }
   return *this;
 }
 
 void Class::PropInitVec::push_back(const TypedValue& v) {
-  assert(!m_req_allocated);
-  /*
-   * the allocated size is always the next power of two (or zero)
-   * so we just need to reallocate when we hit a power of two
-   */
-  if (!m_size || folly::isPowTwo(m_size)) {
-    unsigned size = m_size ? m_size * 2 : 1;
-    m_data = (TypedValueAux*)realloc(m_data, size * sizeof(*m_data));
+  assert(!reqAllocated());
+  if (m_size == m_capacity) {
+    unsigned newCap = folly::nextPowTwo(m_size + 1);
+    m_capacity = static_cast<int32_t>(newCap);
+    auto newData = malloc_huge(newCap * sizeof(TypedValue));
+    if (m_data) {
+      memcpy(newData, m_data, m_size * sizeof(*m_data));
+      free_huge(m_data);
+    }
+    m_data = reinterpret_cast<TypedValueAux*>(newData);
     assert(m_data);
   }
   cellDup(v, m_data[m_size++]);
@@ -198,7 +198,11 @@ template<size_t sz>
 struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
+#ifdef DEBUG
+  static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
+#else
   static_assert(sz == (use_lowptr ? 252 : 296), "Change this only on purpose");
+#endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
 
@@ -299,7 +303,6 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
 
   auto cloneClass = [&] {
     auto const cls = newClass(m_preClass.get(), m_parent.get());
-    cls->setClassHandle(template_cls->m_cachedClass);
     return cls;
   };
 
@@ -341,10 +344,21 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
       ScopedCloneBackref { ClassPtr(template_cls), attrs });
   }
 
+  auto updateClones = [&] {
+    if (template_cls != fermeture.get()) {
+      scopedClones[key] = fermeture;
+      fermeture.get()->setClassHandle(template_cls->m_cachedClass);
+    }
+  };
+
   InstanceBits::ifInitElse(
-    [&] { fermeture->setInstanceBits();
-          if (this != fermeture.get()) scopedClones[key] = fermeture; },
-    [&] { if (this != fermeture.get()) scopedClones[key] = fermeture; }
+    [&] {
+      fermeture->setInstanceBits();
+      updateClones();
+    },
+    [&] {
+      updateClones();
+    }
   );
 
   return fermeture.get();
@@ -396,7 +410,7 @@ Class::~Class() {
     for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
       m_sPropCache[i].~Link();
     }
-    free(m_sPropCache);
+    free_huge(m_sPropCache);
   }
 
   for (auto i = size_t{}, n = numMethods(); i < n; i++) {
@@ -417,6 +431,11 @@ Class::~Class() {
   EnumCache::deleteValues(this);
 
   low_free_data(m_vtableVec.get());
+
+#ifdef DEBUG
+  validate();
+  m_magic = ~m_magic;
+#endif
 }
 
 void Class::releaseRefs() {
@@ -585,6 +604,14 @@ const Class* Class::commonAncestor(const Class* cls) const {
   return nullptr;
 }
 
+const Class* Class::getClassDependency(const StringData* name) const {
+  for (auto idx = m_classVecLen; idx--; ) {
+    auto cls = m_classVec[idx];
+    if (cls->name()->isame(name)) return cls;
+  }
+
+  return m_interfaces.lookupDefault(name, nullptr);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Magic methods.
@@ -765,13 +792,13 @@ void Class::initSPropHandles() const {
         if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
           propHandle.bind(rds::Mode::Persistent);
           *propHandle = sProp.val;
+          rds::recordRds(propHandle.handle(), sizeof(TypedValue),
+                         rds::SPropCache{this, slot});
         } else {
-          propHandle.bind(rds::Mode::Local);
+          propHandle = rds::bind<TypedValue>(
+              rds::SPropCache{this, slot}, rds::Mode::Local
+          );
         }
-
-        auto msg = name()->toCppString() + "::" + sProp.name->toCppString();
-        rds::recordRds(propHandle.handle(),
-                       sizeof(TypedValue), "SPropCache", msg);
       } else {
         auto realSlot = sProp.cls->lookupSProp(sProp.name);
         propHandle = sProp.cls->m_sPropCache[realSlot];
@@ -836,7 +863,7 @@ Class::PropLookup<Slot> Class::getDeclPropIndex(
   if (propInd != kInvalidSlot) {
     auto const attrs = m_declProperties[propInd].attrs;
     if ((attrs & (AttrProtected|AttrPrivate)) &&
-        !g_context->debuggerSettings.bypassCheck) {
+        (g_context.isNull() || !g_context->debuggerSettings.bypassCheck)) {
       // Fetch the class in the inheritance tree which first declared the
       // property
       auto const baseClass = m_declProperties[propInd].cls;
@@ -1167,7 +1194,6 @@ void Class::setInstanceBitsImpl() {
   m_instanceBits = bits;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Private methods.
 //
@@ -1475,7 +1501,12 @@ void checkDeclarationCompat(const PreClass* preClass,
 Class::Class(PreClass* preClass, Class* parent,
              std::vector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
+#ifdef DEBUG
+  : m_magic{kMagic}
+  , m_parent(parent)
+#else
   : m_parent(parent)
+#endif
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
@@ -1628,11 +1659,11 @@ void Class::setMethods() {
     }
   }
 
-  auto traitsBeginIdx = builder.size();
+  auto const traitsBeginIdx = builder.size();
   if (m_extra->m_usedTraits.size()) {
     importTraitMethods(builder);
   }
-  auto traitsEndIdx = builder.size();
+  auto const traitsEndIdx = builder.size();
 
   // Make copies of Funcs inherited from the parent class that have
   // static locals
@@ -1663,12 +1694,6 @@ void Class::setMethods() {
         }
       }
     }
-  }
-
-  if (Class::MethodCreateHook) {
-    Class::MethodCreateHook(this, builder);
-    // running MethodCreateHook may add methods to builder
-    traitsEndIdx = builder.size();
   }
 
   if (m_extra) {
@@ -1984,10 +2009,10 @@ void Class::setProperties() {
       // those of the parent, and append this class's private properties.
       // Append order doesn't matter here (unlike in setMethods()).
       // Prohibit static-->non-static redeclaration.
-      SPropMap::Builder::iterator it2 = curSPropMap.find(preProp->name());
-      if (it2 != curSPropMap.end()) {
+      SPropMap::Builder::iterator it5 = curSPropMap.find(preProp->name());
+      if (it5 != curSPropMap.end()) {
         raise_error("Cannot redeclare static %s::$%s as non-static %s::$%s",
-                    curSPropMap[it2->second].cls->name()->data(),
+                    curSPropMap[it5->second].cls->name()->data(),
                     preProp->name()->data(), m_preClass->name()->data(),
                     preProp->name()->data());
       }
@@ -2175,7 +2200,7 @@ void Class::setProperties() {
   m_staticProperties.create(curSPropMap);
 
   m_sPropCache = (rds::Link<TypedValue>*)
-    malloc(numStaticProperties() * sizeof(*m_sPropCache));
+    malloc_huge(numStaticProperties() * sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
     new (&m_sPropCache[i]) rds::Link<TypedValue>(rds::kInvalidHandle);
   }
@@ -2210,9 +2235,6 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
     case KindOfResource:
     case KindOfRef:
       return false;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }
@@ -2573,7 +2595,7 @@ void Class::setInterfaceVtables() {
     auto const slot = iface->preClass()->ifaceVtableSlot();
     if (slot == kInvalidSlot) continue;
     ITRACE(3, "{} @ slot {}\n", iface->name()->data(), slot);
-    Trace::Indent indent;
+    Trace::Indent indent2;
     always_assert(slot < nVtables);
 
     auto const nMethods = iface->numMethods();

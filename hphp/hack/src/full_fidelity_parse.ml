@@ -14,11 +14,13 @@
   *
   * --full-fidelity-json
   * --full-fidelity-errors
+  * --full-fidelity-errors-all
   * --full-fidelity-s-expression
   * --original-parser-errors
   * --original-parser-s-expression
   * --program-text
   * --pretty-print
+  * --show-file-name
   *
   * TODO: Parser for things other than scripts:
   *       types, expressions, statements, declarations, etc.
@@ -34,30 +36,36 @@ module FullFidelityParseArgs = struct
   {
     full_fidelity_json : bool;
     full_fidelity_errors : bool;
+    full_fidelity_errors_all : bool;
     full_fidelity_s_expr : bool;
     original_parser_errors : bool;
     original_parser_s_expr : bool;
     program_text : bool;
     pretty_print : bool;
+    show_file_name : bool;
     files : string list
   }
 
   let make
     full_fidelity_json
     full_fidelity_errors
+    full_fidelity_errors_all
     full_fidelity_s_expr
     original_parser_errors
     original_parser_s_expr
     program_text
     pretty_print
+    show_file_name
     files = {
     full_fidelity_json;
     full_fidelity_errors;
+    full_fidelity_errors_all;
     full_fidelity_s_expr;
     original_parser_errors;
     original_parser_s_expr;
     program_text;
     pretty_print;
+    show_file_name;
     files }
 
   let parse_args () =
@@ -66,6 +74,9 @@ module FullFidelityParseArgs = struct
     let set_full_fidelity_json () = full_fidelity_json := true in
     let full_fidelity_errors = ref false in
     let set_full_fidelity_errors () = full_fidelity_errors := true in
+    let full_fidelity_errors_all = ref false in
+    let set_full_fidelity_errors_all () =
+      full_fidelity_errors_all := true in
     let full_fidelity_s_expr = ref false in
     let set_full_fidelity_s_expr () = full_fidelity_s_expr := true in
     let original_parser_errors = ref false in
@@ -76,6 +87,8 @@ module FullFidelityParseArgs = struct
     let set_program_text () = program_text := true in
     let pretty_print = ref false in
     let set_pretty_print () = pretty_print := true in
+    let show_file_name = ref false in
+    let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
     let options =  [
@@ -85,7 +98,12 @@ module FullFidelityParseArgs = struct
         "Displays the full-fidelity parse tree in JSON format.";
       "--full-fidelity-errors",
         Arg.Unit set_full_fidelity_errors,
-        "Displays the full-fidelity parser errors, if any.";
+        "Displays the full-fidelity parser errors, if any.
+Some errors may be filtered out.";
+      "--full-fidelity-errors-all",
+        Arg.Unit set_full_fidelity_errors_all,
+        "Displays the full-fidelity parser errors, if any.
+No errors are filtered out.";
       "--full-fidelity-s-expression",
         Arg.Unit set_full_fidelity_s_expr,
         "Displays the full-fidelity parse tree in S-expression format.";
@@ -100,16 +118,22 @@ module FullFidelityParseArgs = struct
         "Displays the text of the given file.";
       "--pretty-print",
         Arg.Unit set_pretty_print,
-        "Displays the text of the given file after pretty-printing."] in
+        "Displays the text of the given file after pretty-printing.";
+      "--show-file-name",
+        Arg.Unit set_show_file_name,
+        "Displays the file name.";
+      ] in
     Arg.parse options push_file usage;
     make
       !full_fidelity_json
       !full_fidelity_errors
+      !full_fidelity_errors_all
       !full_fidelity_s_expr
       !original_parser_errors
       !original_parser_s_expr
       !program_text
       !pretty_print
+      !show_file_name
       (List.rev !files)
 end
 
@@ -125,6 +149,26 @@ let print_full_fidelity_error source_text error =
     error (SourceText.offset_to_position source_text) in
   Printf.printf "%s\n" text
 
+(* returns a tuple of functions, classes, typedefs and consts *)
+let parse_file filename =
+  let path = Relative_path.create Relative_path.Dummy filename in
+  let options = ParserOptions.default in
+  let { Parser_hack.ast; _} = Parser_hack.from_file options path in
+  Ast_utils.get_defs ast
+
+let type_file filename (funs, classes, typedefs, consts) =
+  NamingGlobal.make_env ParserOptions.default ~funs ~classes ~typedefs ~consts;
+  let path = Relative_path.create Relative_path.Dummy filename in
+  let name_function (_, fun_) =
+    Typing_check_service.type_fun TypecheckerOptions.default path fun_ in
+  let named_funs = Core.List.filter_map funs name_function in
+  let name_class (_, class_) =
+    Typing_check_service.type_class TypecheckerOptions.default path class_ in
+  let named_classes = Core.List.filter_map classes name_class in
+  let named_typedefs = [] in (* TODO *)
+  let named_consts = [] in (* TODO *)
+  (named_funs, named_classes, named_typedefs, named_consts)
+
 let handle_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
@@ -138,6 +182,9 @@ let handle_file args filename =
       fun () -> Parser_hack.from_file ParserOptions.default file
     end in
 
+  if args.show_file_name then begin
+    Printf.printf "%s\n" filename
+  end;
   if args.program_text then begin
     let text = Full_fidelity_editable_syntax.text editable in
     Printf.printf "%s\n" text
@@ -148,7 +195,10 @@ let handle_file args filename =
   end;
   if args.full_fidelity_errors then begin
     let errors = (SyntaxTree.errors syntax_tree) in
-    let errors = List.sort SyntaxError.compare errors in
+    List.iter (print_full_fidelity_error source_text) errors
+  end;
+  if args.full_fidelity_errors_all then begin
+    let errors = (SyntaxTree.all_errors syntax_tree) in
     List.iter (print_full_fidelity_error source_text) errors
   end;
   if args.full_fidelity_s_expr then begin

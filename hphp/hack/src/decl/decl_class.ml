@@ -19,7 +19,9 @@ let wrap_not_found elem_name find x =
     find x
     (* TODO: t13396089 *)
   with Not_found ->
-    Hh_logger.log "Decl_heap_elems_bug: could not find %s" elem_name;
+    Hh_logger.log "Decl_heap_elems_bug: could not find %s:\n%s"
+      elem_name
+      (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100));
     raise Decl_heap_elems_bug
 
 let rec apply_substs substs class_context ty =

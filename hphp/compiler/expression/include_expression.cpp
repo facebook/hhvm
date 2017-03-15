@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,7 +87,6 @@ static std::string get_include_file_path(const std::string &source,
     // if file cannot be found, resolve it using search paths
     for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
       auto const filename = Option::IncludeSearchPaths[i] + "/" + lit;
-      struct stat sb;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
       }

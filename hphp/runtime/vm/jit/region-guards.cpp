@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,38 +116,69 @@ LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
 }
 
 /*
- * We consider relaxation profitable if there's not a single dominating
- * type that accounts for RuntimeOption::EvalJitPGORelaxPercent or more
- * of the time during profiling.
+ * We consider relaxation profitable if there's not a single dominating type
+ * that accounts for RuntimeOption::EvalJitPGORelaxPercent or more of the time
+ * during profiling.  Besides that, if `guardCategory' is DataTypeCountness, we
+ * also consider relaxing all the way to Gen, in which case `guardCategory' is
+ * updated to DataTypeGeneric.
  */
-bool relaxIsProfitable(Type                               guardType,
-                       DataTypeCategory                   guardCategory,
-                       const jit::hash_map<Type,int64_t>& typeWeights) {
-  if (guardType <= TCls) return false;
+bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
+                       Type                               guardType,
+                       DataTypeCategory&                  guardCategory) {
+  assertx(guardType <= TGen);
   auto relaxedType = relaxType(guardType, guardCategory);
 
-  int64_t totalWgt = 0;
-  int64_t maxWgt   = 0;
-  Type    maxType  = TBottom;
+  int64_t totalWgt   = 0; // sum of all the block weights
+  int64_t relaxWgt   = 0; // total weight if we relax guardType w/ guardCategory
+  int64_t noRelaxWgt = 0; // total weight if we don't relax guardType at all
   for (auto& typeWgt : typeWeights) {
     auto type = typeWgt.first;
     auto weight = typeWgt.second;
-    if (type <= TCls) continue;
+    assertx(type <= TGen);
     const bool fitsConstraint = guardCategory == DataTypeSpecialized
       ? type.isSpecialized()
       : typeFitsConstraint(type, guardCategory);
-    if (fitsConstraint && relaxType(type, guardCategory) == relaxedType) {
-      totalWgt += weight;
-      if (weight > maxWgt) {
-        maxWgt  = weight;
-        maxType = type;
-      }
+    totalWgt += weight;
+    if (!fitsConstraint) continue;
+    if (type <= guardType) noRelaxWgt += weight;
+    if (relaxType(type, guardCategory) == relaxedType) relaxWgt += weight;
+  }
+
+  // Consider relaxing Countness to Gen, which we do if the sum of the weights
+  // of all the blocks that would pass the relaxed guard would be less than a
+  // certain threshold.  We use different thresholds for counted versus
+  // uncounted types, because incref/decref are much more expensive for Gen than
+  // for uncounted (where it's a no-op).  For counted types, the difference
+  // between generic and specialized incref/decrefs is much smaller, so we're
+  // willing to relax to Gen more often for counted types.
+  bool profitable = false;
+  auto newCategory = guardCategory;
+  if (guardCategory == DataTypeCountness) {
+    const auto cntPct = RuntimeOption::EvalJitPGORelaxCountedToGenPercent;
+    const auto uncPct = RuntimeOption::EvalJitPGORelaxUncountedToGenPercent;
+    if ((guardType.maybe(TCounted)  && relaxWgt * 100 < cntPct * totalWgt) ||
+        (!guardType.maybe(TCounted) && relaxWgt * 100 < uncPct * totalWgt)) {
+      newCategory = DataTypeGeneric;
+      profitable = true;
     }
   }
 
-  FTRACE(3, "relaxIsProfitable: totalWgt = {} ; maxWgt = {} ; maxType = {}\n",
-         totalWgt, maxWgt, maxType);
-  return maxWgt * 100 < totalWgt * RuntimeOption::EvalJitPGORelaxPercent;
+  // If we didn't relax to Gen, consider relaxing to the input guardCategory.
+  if (!profitable) {
+    if (noRelaxWgt * 100 < relaxWgt * RuntimeOption::EvalJitPGORelaxPercent) {
+      profitable = true;
+    }
+  }
+
+  FTRACE(3,
+         "relaxIsProfitable({}, {}): noRelaxWgt={} ; relaxWgt={} ; totalWgt={} "
+         "=> ({}, {})\n",
+         guardType, guardCategory, noRelaxWgt, relaxWgt, totalWgt,
+         profitable, newCategory
+        );
+
+  guardCategory = newCategory;
+  return profitable;
 }
 
 /*
@@ -160,8 +191,10 @@ void relaxGuards(BlockDataVec& blockData) {
 
   for (auto& bd : blockData) {
     for (auto& guard : bd.guards) {
-      if (!relaxIsProfitable(guard.type, guard.category,
-                             locTypes[guard.location])) {
+
+      DataTypeCategory UNUSED origCategory = guard.category;
+      if (!relaxIsProfitable(locTypes[guard.location],
+                             guard.type, guard.category)) {
         FTRACE(2, "relaxGuards(Block {}): skipping {}: {} -- not profitable\n",
                bd.blockId, show(guard.location), guard.type,
                typeCategoryName(guard.category));
@@ -173,8 +206,9 @@ void relaxGuards(BlockDataVec& blockData) {
       guard.type = relaxType(guard.type, guard.category);
       if (oldType != guard.type) {
         bd.relaxed = true;
-        FTRACE(2, "relaxGuards(Block {}): {}: {} => {} ({})\n",
+        FTRACE(2, "relaxGuards(Block {}): {}: {} => {} ({} => {})\n",
                bd.blockId, show(guard.location), oldType, guard.type,
+               typeCategoryName(origCategory),
                typeCategoryName(guard.category));
       }
     }
@@ -389,7 +423,9 @@ void updateRegion(RegionDesc&         region,
     // Actually update the type guards.
     newBlock->clearPreConditions();
     for (auto& guard : bd.guards) {
-      newBlock->addPreCondition(guard);
+      if (guard.type < TGen) {
+        newBlock->addPreCondition(guard);
+      }
     }
   }
 
@@ -542,12 +578,12 @@ void optimizeGuards(RegionDesc& region, bool simple) {
     auto& oldPreConds = block->typePreConditions();
 
     for (auto& preCond : oldPreConds) {
+      assertx(preCond.type <= TGen);
       auto category = preCond.category;
       if (simple && category > DataTypeGeneric && category < DataTypeSpecific) {
         category = DataTypeSpecific;
       }
-      auto newType = preCond.type == TCls ? TCls :
-                     relaxType(preCond.type, category);
+      auto newType = relaxType(preCond.type, category);
 
       if (newType != TGen) {
         newPreConds.push_back({preCond.location, newType, preCond.category});
@@ -555,7 +591,7 @@ void optimizeGuards(RegionDesc& region, bool simple) {
 
       if (newType != preCond.type) {
         assertx(preCond.type < newType);
-        FTRACE(1, "optimizeGuardEagerly: Block {}, {} [{}]: {} => {}\n",
+        FTRACE(1, "optimizeGuard: Block {}, {} [{}]: {} => {}\n",
                block->id(), show(preCond.location),
                typeCategoryName(category), preCond.type, newType);
         relaxed = true;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,6 @@ string TCRegionString[] = {
   "hot", "main", "profile", "cold", "frozen"
 };
 
-static string helpersMapFileName("/tc_dump_helpers_addrs.txt");
 static string nmMapFileName("/hhvm.nm");
 static string tcRegionFileNames[TCRCount] = { "/tc_dump_ahot",
                                               "/tc_dump_a",
@@ -221,12 +220,16 @@ void OfflineX86Code::disasm(FILE* file,
 
   if (codeLen == 0) return;
 
-  if (fseek(file, codeStartAddr - fileStartAddr, SEEK_SET)) {
+  auto const offset = codeStartAddr - fileStartAddr;
+  if (fseek(file, offset, SEEK_SET)) {
     error("disasm error: seeking file");
   }
 
   size_t readLen = fread(code, codeLen, 1, file);
-  if (readLen != 1) error("disasm error: reading file");
+  if (readLen != 1) {
+    error("Failed to read {} bytes at offset {} from code file due to {}",
+          codeLen, offset, feof(file) ? "EOF" : "read error");
+  }
 
   xed_decoded_inst_t xedd;
 
@@ -323,45 +326,6 @@ void OfflineX86Code::disasm(FILE* file,
 }
 
 void OfflineX86Code::loadSymbolsMap() {
-  loadSymbolsMapNm();
-  loadSymbolsMapTramp();
-}
-
-
-void OfflineX86Code::loadSymbolsMapTramp() {
-  FILE* helpersMapFile;
-
-  string helpersFileName = dumpDir + helpersMapFileName;
-  helpersMapFile = fopen(helpersFileName.c_str(), "rt");
-
-  if (!helpersMapFile) return;
-
-  TCA trampAddr, helperAddr;
-  char symName[MAX_SYM_LEN];
-  uint32_t count=0;
-
-  while (fscanf(helpersMapFile, "%p %p ", (void**)&trampAddr,
-                (void**)&helperAddr) == 2) {
-    if (fgets(symName, MAX_SYM_LEN, helpersMapFile) == nullptr) break;
-
-    // remove trailing '\n'
-    size_t symLen = strlen(symName);
-    if (symLen && symName[symLen - 1] == '\n') {
-      symName[symLen - 1] = 0;
-    }
-    string strSymName = symName;
-    addr2SymMap[trampAddr] = strSymName;
-    addr2SymMap[helperAddr] = strSymName;
-    count++;
-  }
-
-  printf("# Read %u symbols from file %s\n", count, helpersFileName.c_str());
-
-  fclose(helpersMapFile);
-}
-
-
-void OfflineX86Code::loadSymbolsMapNm() {
   FILE* nmMapFile;
 
   string nmFileName = dumpDir + nmMapFileName;

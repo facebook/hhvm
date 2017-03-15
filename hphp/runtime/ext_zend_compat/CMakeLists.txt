@@ -73,6 +73,7 @@ auto_source_group("hphp_ext_zend_compat" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 object_library_ld_link_libraries(hphp_ext_zend_compat ${EZC_LINK_LIBRARIES})
 object_library_hphp_link(hphp_ext_zend_compat)
+add_dependencies(hphp_ext_zend_compat hphp_runtime_static)
 
 HHVM_PUBLIC_HEADERS(ext_zend_compat ${HEADER_SOURCES})
 

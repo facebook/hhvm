@@ -18,11 +18,14 @@ const int PHP_URL_PATH = 5;
 const int PHP_URL_QUERY = 6;
 const int PHP_URL_FRAGMENT = 7;
 
+const int PHP_QUERY_RFC1738 = 1;
+const int PHP_QUERY_RFC3986 = 2;
+
 function base64_decode($data, $strict = false);
 function base64_encode($data);
 function get_headers($url, $format = 0);
 function get_meta_tags($filename, $use_include_path = false);
-function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null): string;
+function http_build_query($formdata, $numeric_prefix = null, $arg_separator = null, $enc_type = PHP_QUERY_RFC1738): string;
 function parse_url($url, $component = -1);
 function rawurldecode($str);
 function rawurlencode($str);

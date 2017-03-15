@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -35,6 +36,7 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/hh/ext_hh.h"
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/abi-cxx.h"
@@ -54,6 +56,7 @@ constexpr irlower::SyncOptions SNone = irlower::SyncOptions::None;
 constexpr irlower::SyncOptions SSync = irlower::SyncOptions::Sync;
 
 constexpr DestType DSSA  = DestType::SSA;
+constexpr DestType DDbl  = DestType::Dbl;
 constexpr DestType DTV   = DestType::TV;
 constexpr DestType DNone = DestType::None;
 
@@ -189,8 +192,6 @@ static CallMap s_callMap {
     {ConvCellToDbl,      convCellToDblHelper, DSSA, SSync,
                            {{TV, 0}}},
 
-    {ConvArrToInt,       convArrToIntHelper, DSSA, SNone,
-                           {{SSA, 0}}},
     {ConvObjToInt,       &ObjectData::toInt64, DSSA, SSync,
                            {{SSA, 0}}},
     {ConvStrToInt,       &StringData::toInt64, DSSA, SNone,
@@ -548,7 +549,10 @@ static CallMap s_callMap {
     /* method_exists($obj, $meth) */
     {MethodExists, methodExistsHelper, DSSA, SNone, {{SSA, 0}, {SSA, 1}}},
 
-    {GetMemoKey, getMemoKeyHelper, DTV, SSync, {{TV, 0}}},
+    {GetMemoKey, HHVM_FN(serialize_memoize_param), DTV, SSync, {{TV, 0}}},
+
+    /* microtime(true) */
+    {GetTime, TimeStamp::CurrentSecond, DDbl, SNone, {}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

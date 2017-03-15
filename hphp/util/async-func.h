@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,8 @@
 #define incl_HPHP_CONCURRENCY_ASYNC_FUNC_H_
 
 #include <pthread.h>
+
+#include <atomic>
 
 #include <folly/Portability.h>
 
@@ -156,6 +158,8 @@ struct AsyncFuncImpl {
   }
 
   void setNoInitFini() { m_noInitFini = true; }
+
+  static uint32_t count() { return s_count; }
 private:
   Synchronizable m_stopMonitor;
 
@@ -165,6 +169,7 @@ private:
   static PFN_THREAD_FUNC* s_finiFunc;
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
+  static std::atomic<uint32_t> s_count;
   void* m_threadStack;
   pthread_attr_t m_attr;
   pthread_t m_threadId;

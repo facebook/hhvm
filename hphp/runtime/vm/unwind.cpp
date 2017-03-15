@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -99,6 +99,15 @@ void discardStackTemps(const ActRec* const fp,
     }
   );
 
+  if (debug) {
+    auto const numSlots = fp->m_func->numClsRefSlots();
+    for (int i = 0; i < numSlots; ++i) {
+      ITRACE(2, "  trash class-ref slot : {}\n", i);
+      auto const slot = frame_clsref_slot(fp, i);
+      memset(slot, kTrashClsRef, sizeof(*slot));
+    }
+  }
+
   ITRACE(2, "discardStackTemps ends with sp = {}\n",
          implicit_cast<void*>(stack.top()));
 }
@@ -137,27 +146,16 @@ UnwindAction checkHandlers(const EHEnt* eh,
       switch (eh->m_type) {
       case EHEnt::Type::Fault:
         ITRACE(1, "checkHandlers: entering fault at {}: save {}\n",
-               eh->m_fault,
+               eh->m_handler,
                func->unit()->offsetOf(pc));
-        pc = func->unit()->entry() + eh->m_fault;
+        pc = func->unit()->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return UnwindAction::ResumeVM;
       case EHEnt::Type::Catch:
-        auto const obj = fault.m_userException;
-        for (auto& idOff : eh->m_catches) {
-          ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
-          auto handler = func->unit()->at(idOff.second);
-          auto const cls = Unit::lookupClass(
-            func->unit()->lookupNamedEntityId(idOff.first)
-          );
-          if (!cls || !obj->instanceof(cls)) continue;
-
-          ITRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
-          pc = handler;
-          DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-          return UnwindAction::ResumeVM;
-        }
-        break;
+        ITRACE(1, "checkHandlers: entering catch at {}\n", eh->m_handler);
+        pc = func->unit()->at(eh->m_handler);
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
+        return UnwindAction::ResumeVM;
       }
     }
     if (eh->m_parentIndex != -1) {
@@ -195,7 +193,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // logically finished and we're unwinding for some internal reason (timeout
   // or user profiler, most likely). More importantly, fp->m_this may have
   // already been destructed and/or overwritten due to sharing space with
-  // fp->m_r.
+  // the return value via fp->retSlot().
   if (curOp != OpRetC &&
       !fp->localsDecRefd() &&
       fp->m_func->cls() &&
@@ -258,8 +256,8 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
-      assert(stack.topTV() == &fp->m_r);
-      cellCopy(make_tv<KindOfObject>(waitHandle), fp->m_r);
+      assert(stack.topTV() == fp->retSlot());
+      cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
     } else {
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());

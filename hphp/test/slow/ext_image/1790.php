@@ -8,6 +8,8 @@ $textcolor = imagecolorallocate($im, 0, 0, 255);
 // Write the string at the top left
 imagestring($im, 5, 0, 0, 'Hello world!', $textcolor);
 // Output the image
-header('Content-type: image/png');
+ob_start();
 imagepng($im);
+$md5 = md5(ob_get_clean());
 imagedestroy($im);
+echo "md5: $md5\n";

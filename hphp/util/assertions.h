@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -179,8 +179,19 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+# if !defined __GNUC__ || defined __STRICT_ANSI__
 #define assert_impl(cond, fail) \
   ((cond) ? static_cast<void>(0) : ((fail), static_cast<void>(0)))
+#else
+/*
+ * This is preferred, because "cond" is not over-parenthesized, and
+ * thus -Wparentheses can warn about errors like "always_assert(a=1)".
+ * With -pedantic, we cannot use "({...})" statement expressions,
+ * so must resort to the old way, above.
+ */
+#define assert_impl(cond, fail) \
+  ({ if (cond) ; else { fail; } static_cast<void>(0); })
+#endif
 
 #define assert_fail_impl(e, msg) \
   ::HPHP::assert_fail(#e, __FILE__, __LINE__, __PRETTY_FUNCTION__, msg)

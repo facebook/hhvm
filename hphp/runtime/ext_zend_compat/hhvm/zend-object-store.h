@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -49,23 +49,15 @@ struct ZendObjectStore final : RequestEventHandler {
       zend_objects_free_object_storage_t free_storage,
       zend_objects_store_clone_t clone);
 
-  void * getObject(zend_object_handle handle);
+  void* getObject(zend_object_handle handle);
   void freeObject(zend_object_handle handle);
   zend_object_handle cloneObject(zend_object_handle handle);
 
 private:
   DECLARE_STATIC_REQUEST_LOCAL(ZendObjectStore, tl_instance);
 
-  std::vector<zend_object_store_bucket> m_store;
+  req::vector<zend_object_store_bucket> m_store;
   zend_object_handle m_free_list_head;
-
-  TYPE_SCAN_CUSTOM_FIELD(m_store) {
-    // zend_object_store_buckets can have pointers:
-    // m_store[i].bucket.obj.object is a void* that typically points to an
-    // extension custom object, which can contain zval* (RefData*),
-    // HashTable* (ArrayData*), etc.
-    for (auto& b : m_store) scanner.conservative(&b, sizeof(b));
-  }
 };
 
 }

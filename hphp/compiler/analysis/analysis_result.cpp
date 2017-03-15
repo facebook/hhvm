@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 
 #include <folly/Conv.h>
+#include <folly/portability/SysStat.h>
 
 #include <algorithm>
 #include <fstream>
@@ -287,6 +288,14 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
     // we need someone to hold on to a reference to it
     // even though we're not going to do anything with it
     this->lock()->m_ignoredScopes.push_back(funcScope);
+
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::REDECLARE_BUILTIN,
+      funcScope->getScopeName().c_str()
+    );
+    funcScope->setFatal(msg);
     return false;
   }
 
@@ -528,7 +537,6 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
-  getVariables()->setAttribute(VariableTable::ContainsExtract);
   getVariables()->setAttribute(VariableTable::ForceGlobal);
 
   // Analyze Includes

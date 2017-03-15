@@ -16,7 +16,7 @@ open ClientRefactor
 module Cmd = ServerCommand
 module Rpc = ServerCommandTypes
 
-let get_list_files conn (args:client_check_env): string list =
+let get_list_files conn: string list =
   let ic, oc = conn in
   Cmd.stream_request oc ServerCommandTypes.LIST_FILES;
   let res = ref [] in
@@ -93,7 +93,7 @@ let main args =
     match args.mode with
     | MODE_LIST_FILES ->
       let conn = connect args in
-      let infol = get_list_files conn args in
+      let infol = get_list_files conn in
       List.iter infol (Printf.printf "%s\n");
       Exit_status.No_error
     | MODE_LIST_MODES ->
@@ -144,14 +144,16 @@ let main args =
       Exit_status.No_error
     | MODE_IDE_FIND_REFS arg ->
       let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
+      let content =
+        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
       let results =
         rpc args @@ Rpc.IDE_FIND_REFS (content, line, char) in
-      ClientFindRefs.go results args.output_json;
+      ClientFindRefs.go_ide results args.output_json;
       Exit_status.No_error
     | MODE_IDE_HIGHLIGHT_REFS arg ->
       let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
+      let content =
+        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
       let results =
         rpc args @@ Rpc.IDE_HIGHLIGHT_REFS (content, line, char) in
       ClientHighlightRefs.go results ~output_json:args.output_json;
@@ -172,22 +174,13 @@ let main args =
       let conn = connect args in
       ClientRefactor.go conn args ref_mode before after;
       Exit_status.No_error
-    | MODE_IDENTIFY_FUNCTION arg ->
+    | MODE_IDENTIFY_SYMBOL1 arg
+    | MODE_IDENTIFY_SYMBOL2 arg
+    | MODE_IDENTIFY_SYMBOL3 arg ->
       let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
-      let result = match List.hd result with
-        | Some (result, _) -> Utils.strip_ns result.SymbolOccurrence.name
-        | _ -> ""
-      in
-      print_endline result;
-      Exit_status.No_error
-    | MODE_GET_DEFINITION arg ->
-      let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
+      let content =
+        ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
+      let result = rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
       ClientGetDefinition.go result args.output_json;
       Exit_status.No_error
     | MODE_GET_DEFINITION_BY_ID id ->
@@ -212,52 +205,28 @@ let main args =
           Printf.eprintf "Invalid position\n";
           raise Exit_status.(Exit_with Input_error)
       in
-      let pos, ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
-      ClientTypeAtPos.go pos ty args.output_json;
-      Exit_status.No_error
-    | MODE_ARGUMENT_INFO arg ->
-      let tpos = Str.split (Str.regexp ":") arg in
-      let line, char =
-        try
-          match tpos with
-          | [line; char] ->
-              int_of_string line, int_of_string char
-          | _ -> raise Exit
-        with _ ->
-          Printf.eprintf "Invalid position\n";
-          raise Exit_status.(Exit_with Input_error)
-      in
-      let content = Sys_utils.read_stdin_to_string () in
-      let results =
-        rpc args @@ Rpc.ARGUMENT_INFO (content, line, char) in
-      ClientArgumentInfo.go results args.output_json;
+      let ty = rpc args @@ Rpc.INFER_TYPE (fn, line, char) in
+      ClientTypeAtPos.go ty args.output_json;
       Exit_status.No_error
     | MODE_AUTO_COMPLETE ->
       let content = Sys_utils.read_stdin_to_string () in
       let results = rpc args @@ Rpc.AUTOCOMPLETE content in
       ClientAutocomplete.go results args.output_json;
       Exit_status.No_error
-    | MODE_OUTLINE ->
+    | MODE_OUTLINE | MODE_OUTLINE2 ->
       let content = Sys_utils.read_stdin_to_string () in
       let results = FileOutline.outline
-        (**
-         * TODO: Don't use default parser options.
-         *
-         * Parser options enables certain features (such as namespace aliasing)
-         * Thus, for absolute correctness of outlining, we need to use the same
-         * parser options that the server uses. But this client request doesn't
-         * hit the server at all. So either change this to a server RPC, or
-         * ask the server what its parser options are, or parse the
-         * options from the .hhconfig file (needs to be the same hhconfig file the
-         * server used).
-         * *)
-        ParserOptions.default content in
-      ClientOutline.go_legacy results args.output_json;
-      Exit_status.No_error
-    | MODE_OUTLINE2 ->
-      let content = Sys_utils.read_stdin_to_string () in
-      let results = FileOutline.outline
-        (** TODO: Don't use default parser options. See same comment above. *)
+      (**
+       * TODO: Don't use default parser options.
+       *
+       * Parser options enables certain features (such as namespace aliasing)
+       * Thus, for absolute correctness of outlining, we need to use the same
+       * parser options that the server uses. But this client request doesn't
+       * hit the server at all. So either change this to a server RPC, or
+       * ask the server what its parser options are, or parse the
+       * options from the .hhconfig file (needs to be the same hhconfig file the
+       * server used).
+       * *)
         ParserOptions.default content in
       ClientOutline.go results args.output_json;
       Exit_status.No_error
@@ -340,20 +309,17 @@ let main args =
       then print_patches_json file_map
       else apply_patches file_map;
       Exit_status.No_error
-    | MODE_FIND_LVAR_REFS arg ->
-      let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let results =
-        rpc args @@ Rpc.FIND_LVAR_REFS (content, line, char) in
-      ClientFindLocals.go results args.output_json;
-      Exit_status.No_error
-    | MODE_GET_METHOD_NAME arg ->
-      let line, char = parse_position_string arg in
-      let content = Sys_utils.read_stdin_to_string () in
-      let result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION (content, line, char) in
-      ClientGetMethodName.go (List.hd result) args.output_json;
-      Exit_status.No_error
+    | MODE_IGNORE_FIXMES files ->
+      let conn = connect args in
+      let error_list = ServerCommand.rpc conn @@ Rpc.IGNORE_FIXMES files in
+      if args.output_json || args.from <> "" || error_list = []
+      then begin
+        let oc = if args.output_json then stderr else stdout in
+        ServerError.print_errorl None args.output_json error_list oc
+      end else begin
+        List.iter error_list ClientCheckStatus.print_error_color
+      end;
+      if error_list = [] then Exit_status.No_error else Exit_status.Type_error
     | MODE_FORMAT (from, to_) ->
       let content = Sys_utils.read_stdin_to_string () in
       let result =
@@ -394,6 +360,10 @@ let main args =
         let json = Full_fidelity_syntax_tree.to_json syntax_tree in
         Hh_json.json_to_string json in
       ClientFullFidelityParse.go results;
+      Exit_status.No_error
+    | MODE_FULL_FIDELITY_SCHEMA ->
+      let schema = Full_fidelity_schema.schema_as_json() in
+      print_string schema;
       Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;

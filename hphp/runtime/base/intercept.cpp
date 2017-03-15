@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,14 +43,9 @@ namespace HPHP {
 TRACE_SET_MOD(intercept);
 
 struct InterceptRequestData final : RequestEventHandler {
-  InterceptRequestData()
-      : m_use_allowed_functions(false) {
-  }
+  InterceptRequestData() {}
 
   void clear() {
-    m_use_allowed_functions = false;
-    m_allowed_functions.clear();
-    m_renamed_functions.clear();
     m_global_handler.releaseForSweep();
     m_intercept_handlers.clear();
   }
@@ -58,22 +53,22 @@ struct InterceptRequestData final : RequestEventHandler {
   void requestInit() override { clear(); }
   void requestShutdown() override { clear(); }
 
-public:
-  bool m_use_allowed_functions;
-  StringISet m_allowed_functions;
-  StringIMap<String> m_renamed_functions;
-  Variant m_global_handler;
-  StringIMap<Variant> m_intercept_handlers;
+  Variant& global_handler() { return m_global_handler; }
+  req::StringIMap<Variant>& intercept_handlers() {
+    if (!m_intercept_handlers) m_intercept_handlers.emplace();
+    return *m_intercept_handlers;
+  }
+  bool empty() const {
+    return !m_intercept_handlers.hasValue() ||
+            m_intercept_handlers->empty();
+  }
+  void clearHandlers() {
+    m_intercept_handlers.clear();
+  }
 
-  TYPE_SCAN_CUSTOM_FIELD(m_allowed_functions) {
-    for (auto& s : m_allowed_functions) scanner.scan(s);
-  }
-  TYPE_SCAN_CUSTOM_FIELD(m_renamed_functions) {
-    for (auto& e : m_renamed_functions) scanner.scan(e);
-  }
-  TYPE_SCAN_CUSTOM_FIELD(m_intercept_handlers) {
-    for (auto& e : m_intercept_handlers) scanner.scan(e);
-  }
+private:
+  Variant m_global_handler;
+  folly::Optional<req::StringIMap<Variant>> m_intercept_handlers;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(InterceptRequestData, s_intercept_data);
 
@@ -99,18 +94,18 @@ static void flag_maybe_intercepted(std::vector<int8_t*> &flags) {
 
 bool register_intercept(const String& name, const Variant& callback,
                         const Variant& data) {
-  StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
   if (!callback.toBoolean()) {
     if (name.empty()) {
-      s_intercept_data->m_global_handler.unset();
-      StringIMap<Variant> empty;
-      handlers.swap(empty);
+      s_intercept_data->global_handler().unset();
+      s_intercept_data->clear();
     } else {
-      auto tmp = handlers[name];
-      auto it = handlers.find(name);
-      if (it != handlers.end()) {
-        auto tmp = it->second;
-        handlers.erase(it);
+      if (!s_intercept_data->empty()) {
+        auto& handlers = s_intercept_data->intercept_handlers();
+        auto it = handlers.find(name);
+        if (it != handlers.end()) {
+          auto tmp = it->second;
+          handlers.erase(it);
+        }
       }
     }
     return true;
@@ -121,10 +116,10 @@ bool register_intercept(const String& name, const Variant& callback,
   Array handler = make_packed_array(callback, data);
 
   if (name.empty()) {
-    s_intercept_data->m_global_handler = handler;
-    StringIMap<Variant> empty;
-    handlers.swap(empty);
+    s_intercept_data->global_handler() = handler;
+    s_intercept_data->clearHandlers();
   } else {
+    auto& handlers = s_intercept_data->intercept_handlers();
     handlers[name] = handler;
   }
 
@@ -147,16 +142,16 @@ bool register_intercept(const String& name, const Variant& callback,
 }
 
 static Variant *get_enabled_intercept_handler(const String& name) {
-  Variant *handler = nullptr;
-  StringIMap<Variant> &handlers = s_intercept_data->m_intercept_handlers;
-  StringIMap<Variant>::iterator iter = handlers.find(name);
-  if (iter != handlers.end()) {
-    handler = &iter->second;
-  } else {
-    handler = &s_intercept_data->m_global_handler;
-    if (handler->isNull()) {
-      return nullptr;
+  if (!s_intercept_data->empty()) {
+    auto& handlers = s_intercept_data->intercept_handlers();
+    auto iter = handlers.find(name);
+    if (iter != handlers.end()) {
+      return &iter->second;
     }
+  }
+  auto handler = &s_intercept_data->global_handler();
+  if (handler->isNull()) {
+    return nullptr;
   }
   return handler;
 }

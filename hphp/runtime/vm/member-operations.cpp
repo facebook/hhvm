@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -204,49 +204,49 @@ void throw_cannot_use_newelem_for_lval_read_keyset() {
   );
 }
 
-void incDecBodySlow(IncDecOp op, Cell* fr, TypedValue* to) {
+Cell incDecBodySlow(IncDecOp op, Cell* fr) {
   assert(cellIsPlausible(*fr));
   assert(fr->m_type != KindOfUninit);
 
-  auto dup = [&]() { cellDup(*fr, *to); };
+  auto dup = [&]() { tvRefcountedIncRef(fr); return *fr; };
 
   switch (op) {
   case IncDecOp::PreInc:
     cellInc(*fr);
-    dup();
-    return;
-  case IncDecOp::PostInc:
-    dup();
+    return dup();
+  case IncDecOp::PostInc: {
+    auto const tmp = dup();
     cellInc(*fr);
-    return;
+    return tmp;
+  }
   case IncDecOp::PreDec:
     cellDec(*fr);
-    dup();
-    return;
-  case IncDecOp::PostDec:
-    dup();
+    return dup();
+  case IncDecOp::PostDec: {
+    auto const tmp = dup();
     cellDec(*fr);
-    return;
+    return tmp;
+  }
   default: break;
   }
 
   switch (op) {
   case IncDecOp::PreIncO:
     cellIncO(*fr);
-    dup();
-    return;
-  case IncDecOp::PostIncO:
-    dup();
+    return dup();
+  case IncDecOp::PostIncO: {
+    auto const tmp = dup();
     cellIncO(*fr);
-    return;
+    return tmp;
+  }
   case IncDecOp::PreDecO:
     cellDecO(*fr);
-    dup();
-    return;
-  case IncDecOp::PostDecO:
-    dup();
+    return dup();
+  case IncDecOp::PostDecO: {
+    auto const tmp = dup();
     cellDecO(*fr);
-    return;
+    return tmp;
+  }
   default: break;
   }
   not_reached();

@@ -254,7 +254,7 @@ struct AsyncMysqlQueryResult : AsyncMysqlResult {
   std::unique_ptr<am::QueryResult> m_query_result;
 
   // Created here for buildRows and passed to RowBlocks
-  std::shared_ptr<FieldIndex> m_field_index;
+  req::shared_ptr<FieldIndex> m_field_index;
   static Class* s_class;
   static const StaticString s_className;
 
@@ -312,6 +312,12 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
     m_multi_op = op;
   }
 
+  AsyncMysqlMultiQueryEvent() : AsioExternalThreadEvent() {}
+
+  void setQueryOp(std::shared_ptr<am::MultiQueryOperation> op) {
+    m_multi_op = std::move(op);
+  }
+
   void opFinished() { markAsFinished(); }
 
   void setClientStats(db::ClientPerfStats stats) {
@@ -338,10 +344,10 @@ struct AsyncMysqlRowBlock {
   FieldType getFieldAs(int64_t row, const Variant& field);
   static Class* getClass();
   static Object newInstance(am::RowBlock* row_block,
-                            std::shared_ptr<FieldIndex> indexer);
+                            req::shared_ptr<FieldIndex> indexer);
 
   std::unique_ptr<am::RowBlock> m_row_block;
-  std::shared_ptr<FieldIndex> m_field_index;
+  req::shared_ptr<FieldIndex> m_field_index;
   static Class* s_class;
   static const StaticString s_className;
 

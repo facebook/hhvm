@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,6 +81,14 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
   case 'B':
     out = folly::to<T>(responseSize);
     break;
+  case 'c':
+    {
+      if (arg.empty()) return false;
+      std::string config = IniSetting::Get(arg);
+      if (config.empty()) return false;
+      out = folly::to<T>(config);
+    }
+    break;
   case 'C':
     {
       if (arg.empty()) return false;
@@ -113,6 +121,10 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
        if (host.empty()) host = transport->getRemoteAddr();
        out = folly::to<T>(host);
     }
+    break;
+  case 'H':
+    if (arg.empty()) return false;
+    out = folly::to<T>(ServerStats::Get(arg));
     break;
   case 'i':
     {

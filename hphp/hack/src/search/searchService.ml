@@ -59,10 +59,10 @@ module Make(S : SearchUtils.Searchable) = struct
       in
       let trie_results = match type_, is_fuzzy_indexed with
         | Some _, false
-        | None, _ -> Trie.MasterApi.search_query input
+        | None, _ -> Trie.MasterApi.search_query input type_
+        | Some _, true when not fuzzy -> Trie.MasterApi.search_query input type_
         | _ -> []
       in
-
       let fuzzy_results = if not fuzzy then [] else
         match type_, is_fuzzy_indexed with
           | Some _, true

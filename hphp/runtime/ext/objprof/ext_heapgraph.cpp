@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -86,8 +86,7 @@ const StaticString
 // Extra information about a HeapGraph::Node.
 struct CapturedNode {
   HeaderKind kind;
-  uint32_t size;
-  const char* classname;
+  LowPtr<Class> cls;
 };
 
 // Extra information about a HeapGraph::Ptr
@@ -218,16 +217,22 @@ std::string getObjectConnectionName(
   return "";
 }
 
-std::string getEdgeKindName(HeapGraph::PtrKind kind) {
-  switch (kind) {
-    case HeapGraph::Counted:
-      return "Ptr:Counted";
-    case HeapGraph::Implicit:
-      return "Ptr:Implicit";
-    case HeapGraph::Ambiguous:
-      return "Ptr:Ambiguous";
+static const StringData* edge_kind_strs[3];
+static const char* edge_kind_cstrs[] = {
+  "Ptr:Counted", "Ptr:Implicit", "Ptr:Ambiguous"
+};
+
+const StringData* edgeKindName(HeapGraph::PtrKind kind) {
+  auto s = edge_kind_strs[(int)kind];
+  if (!s) {
+    s = makeStaticString(edge_kind_cstrs[(int)kind]);
+    edge_kind_strs[(int)kind] = s;
   }
-  not_reached();
+  return s;
+  static_assert(HeapGraph::NumPtrKinds == 3, "");
+  static_assert(HeapGraph::Counted == 0, "");
+  static_assert(HeapGraph::Implicit == 1, "");
+  static_assert(HeapGraph::Ambiguous == 2, "");
 }
 
 std::string getNodesConnectionName(
@@ -236,8 +241,8 @@ std::string getNodesConnectionName(
   int from,
   int to
 ) {
-  // For non Ambiguous pointers, try to drill down and resolve the edge name
-  if (from != -1 && to != -1 && g.ptrs[ptr].ptr_kind != HeapGraph::Ambiguous) {
+  // Try to drill down and resolve the edge name
+  if (from != -1 && to != -1) {
     auto h = g.nodes[from].h;
     auto th = g.nodes[to].h;
 
@@ -305,10 +310,10 @@ std::string getNodesConnectionName(
         break;
     }
   } else if (from == -1 && to != -1) {
-    return root_kind_names[(unsigned)g.ptrs[ptr].root_kind];
+    return g.ptrs[ptr].description;
   }
 
-  return getEdgeKindName(g.ptrs[ptr].ptr_kind);
+  return edgeKindName(g.ptrs[ptr].ptr_kind)->data();
 }
 
 void heapgraphCallback(Array fields, const Variant& callback) {
@@ -323,17 +328,26 @@ void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   vm_call_user_func(callback, params);
 }
 
+static const StringData* header_name_strs[NumHeaderKinds];
+
 Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
+  const auto& node = hgptr->hg.nodes[index];
   const auto& cnode = hgptr->cnodes[index];
+
+  auto kind_str = header_name_strs[int(cnode.kind)];
+  if (!kind_str) {
+    kind_str = makeStaticString(header_names[int(cnode.kind)]);
+    header_name_strs[int(cnode.kind)] = kind_str;
+  }
 
   auto node_arr = make_map_array(
     s_index, Variant(index),
-    s_kind, Variant(header_names[int(cnode.kind)]),
-    s_size, Variant(int64_t(cnode.size))
+    s_kind, VarNR(kind_str),
+    s_size, Variant(int64_t(node.size))
   );
 
-  if (cnode.classname != nullptr) {
-    node_arr.set(s_class, Variant(cnode.classname));
+  if (cnode.cls) {
+    node_arr.set(s_class, VarNR(cnode.cls->nameStr()));
   }
 
   return node_arr;
@@ -345,10 +359,10 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
 
   auto ptr_arr = make_map_array(
     s_index, Variant(index),
-    s_kind, Variant(getEdgeKindName(ptr.ptr_kind)),
+    s_kind, VarNR(edgeKindName(ptr.ptr_kind)),
     s_from, Variant(ptr.from),
     s_to, Variant(ptr.to),
-    s_seat, Variant(root_kind_names[(unsigned)ptr.root_kind]),
+    s_seat, Variant(makeStaticString(ptr.description)),
     s_name, Variant(cptr.edgename)
   );
 
@@ -395,8 +409,7 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
     auto obj = src_node.h->obj();
     auto new_node = CapturedNode{
       /* kind */      src_node.h->kind(),
-      /* size */      uint32_t(src_node.h->size()),
-      /* classname */ obj ? obj->classname_cstr() : nullptr
+      /* classname */ obj ? obj->getVMClass() : nullptr
     };
     cnodes.push_back(new_node);
 
@@ -440,8 +453,8 @@ void HHVM_FUNCTION(heapgraph_foreach_root,
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr || callback.isNull()) return;
-  for (int i = 0; i < hgptr->hg.roots.size(); i++) {
-    auto phpedge = createPhpEdge(hgptr, hgptr->hg.roots[i]);
+  for (int i = 0, n = hgptr->hg.root_ptrs.size(); i < n; ++i) {
+    auto phpedge = createPhpEdge(hgptr, hgptr->hg.root_ptrs[i]);
     heapgraphCallback(phpedge, callback);
   }
 }
@@ -533,7 +546,7 @@ Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto result = make_map_array(
     s_nodes, Variant(hgptr->hg.nodes.size()),
     s_edges, Variant(hgptr->hg.ptrs.size()),
-    s_roots, Variant(hgptr->hg.roots.size())
+    s_roots, Variant(hgptr->hg.root_ptrs.size())
   );
   return result;
 }

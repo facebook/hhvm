@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -133,6 +133,61 @@ void cgJmp(IRLS& env, const IRInstruction* inst) {
   v << phijmp{target, v.makeTuple(std::move(args))};
 }
 
+void cgSelect(IRLS& env, const IRInstruction* inst) {
+  auto const condReg  = srcLoc(env, inst, 0).reg();
+  auto const trueTy   = inst->src(1)->type();
+  auto const falseTy  = inst->src(2)->type();
+  auto const tloc     = srcLoc(env, inst, 1);
+  auto const floc     = srcLoc(env, inst, 2);
+  auto const dloc     = dstLoc(env, inst, 0);
+  auto& v             = vmain(env);
+
+  auto const sf = v.makeReg();
+  if (inst->src(0)->isA(TBool)) {
+    v << testb{condReg, condReg, sf};
+  } else {
+    v << testq{condReg, condReg, sf};
+  }
+
+  // First copy the type if the destination needs one. This should only apply to
+  // types <= TGen.
+  if (dloc.hasReg(1)) {
+    assertx(trueTy.isKnownDataType() || tloc.hasReg(1));
+    assertx(falseTy.isKnownDataType() || floc.hasReg(1));
+
+    auto const trueTyReg = trueTy.isKnownDataType()
+      ? v.cns(trueTy.toDataType())
+      : tloc.reg(1);
+    auto const falseTyReg = falseTy.isKnownDataType()
+      ? v.cns(falseTy.toDataType())
+      : floc.reg(1);
+
+    v << cmovb{CC_NZ, sf, falseTyReg, trueTyReg, dloc.reg(1)};
+  }
+
+  // If the value is statically known (IE, its one of the types with a singleton
+  // value), don't bother copying it (this also applies to Bottom).
+  if (!inst->dst(0)->type().subtypeOfAny(TNull, TNullptr)) {
+    if (trueTy <= TBool && falseTy <= TBool) {
+      v << cmovb{CC_NZ, sf, floc.reg(0), tloc.reg(0), dloc.reg(0)};
+    } else {
+      auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
+      auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
+
+      if (trueTy <= TDbl || falseTy <= TDbl) {
+        cond(
+          v, v, CC_NZ, sf, dloc.reg(0),
+          [&](Vout&){ return tloc.reg(0); },
+          [&](Vout&){ return floc.reg(0); },
+          ""
+        );
+      } else {
+        v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
+      }
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -257,11 +312,11 @@ void cgJmpSwitchDest(IRLS& env, const IRInstruction* inst) {
   auto const marker = inst->marker();
   auto& v = vmain(env);
 
-  maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->irSPOff);
+  maybe_syncsp(v, marker, srcLoc(env, inst, 1).reg(), extra->spOffBCFromIRSP);
 
   auto const table = v.allocData<TCA>(extra->cases);
   for (int i = 0; i < extra->cases; i++) {
-    v << bindaddr{&table[i], extra->targets[i], extra->invSPOff};
+    v << bindaddr{&table[i], extra->targets[i], extra->spOffBCFromFP};
   }
 
   auto const t = v.makeReg();
@@ -311,12 +366,12 @@ void cgLdSSwitchDestFast(IRLS& env, const IRInstruction* inst) {
     // VdataPtrs, so bind them here.
     VdataPtr<TCA> dataPtr{nullptr};
     dataPtr.bind(addr);
-    v << bindaddr{dataPtr, extra->cases[i].dest, extra->spOff};
+    v << bindaddr{dataPtr, extra->cases[i].dest, extra->bcSPOff};
   }
 
   // Bind the default case target.
   auto const def = v.allocData<TCA>();
-  v << bindaddr{def, extra->defaultSk, extra->spOff};
+  v << bindaddr{def, extra->defaultSk, extra->bcSPOff};
 
   auto const args = argGroup(env, inst)
     .ssa(0)
@@ -336,9 +391,9 @@ void cgLdSSwitchDestSlow(IRLS& env, const IRInstruction* inst) {
 
   for (int64_t i = 0; i < extra->numCases; ++i) {
     strtab[i] = extra->cases[i].str;
-    v << bindaddr{&jmptab[i], extra->cases[i].dest, extra->spOff};
+    v << bindaddr{&jmptab[i], extra->cases[i].dest, extra->bcSPOff};
   }
-  v << bindaddr{&jmptab[extra->numCases], extra->defaultSk, extra->spOff};
+  v << bindaddr{&jmptab[extra->numCases], extra->defaultSk, extra->bcSPOff};
 
   auto const args = argGroup(env, inst)
     .typedValue(0)
@@ -409,7 +464,7 @@ void cgLdBindAddr(IRLS& env, const IRInstruction* inst) {
 
   // Emit service request to smash address of SrcKey into 'addr'.
   auto const addrPtr = v.allocData<TCA>();
-  v << bindaddr{addrPtr, extra->sk, extra->spOff};
+  v << bindaddr{addrPtr, extra->sk, extra->bcSPOff};
   v << loadqd{reinterpret_cast<uint64_t*>(addrPtr), dst};
 }
 

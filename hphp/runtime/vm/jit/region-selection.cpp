@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,6 @@
 namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(region);
-
 
 //////////////////////////////////////////////////////////////////////
 
@@ -209,7 +208,8 @@ const RegionDesc::BlockVec& RegionDesc::blocks() const {
 
 RegionDesc::BlockData& RegionDesc::data(BlockId id) {
   auto it = m_data.find(id);
-  always_assert_flog(it != m_data.end(), "BlockId {} doesn't exist in m_data");
+  always_assert_flog(it != m_data.end(),
+                     "BlockId {} doesn't exist in m_data", id);
   return it->second;
 }
 
@@ -268,6 +268,20 @@ void RegionDesc::removeArc(BlockId srcID, BlockId dstID) {
 
 void RegionDesc::addMerged(BlockId fromId, BlockId intoId) {
   data(intoId).merged.insert(fromId);
+}
+
+int64_t RegionDesc::blockProfCount(RegionDesc::BlockId bid) const {
+  const auto pd = profData();
+  if (pd == nullptr) return 1;
+  if (bid < 0) return 1;
+  assertx(bid < pd->numTransRecs());
+  const auto tr = pd->transRec(bid);
+  if (tr->kind() != TransKind::Profile) return 1;
+  int64_t total = pd->transCounter(bid);
+  for (auto mid : merged(bid)) {
+    total += pd->transCounter(mid);
+  }
+  return total;
 }
 
 void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
@@ -489,17 +503,24 @@ void RegionDesc::chainRetransBlocks() {
 
   // 5. For each block with multiple successors in the same chain,
   //    only keep the successor that first appears in the chain.
+  BlockIdSet erased_ids;
   for (auto b : blocks()) {
     auto& succSet = data(b->id()).succs;
     for (auto s : succSet) {
+      if (erased_ids.count(s)) continue;
       auto& c = chains[block2chain[s]];
       auto selectedSucc = findFirstInSet(c, succSet);
       for (auto other : c.blocks) {
         if (other == selectedSucc) continue;
-        succSet.erase(other);
-        data(other).preds.erase(b->id());
+        // You can't erase from a flat_set while iterating it, so track
+        // the ids we erased here.
+        if (erased_ids.insert(other).second) {
+          data(other).preds.erase(b->id());
+        }
       }
     }
+    for (auto id : erased_ids) succSet.erase(id);
+    erased_ids.clear();
   }
 
   // 6. Reorder the blocks in the region in topological order (if
@@ -599,7 +620,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 void RegionDesc::Block::addPredicted(TypedLocation locType) {
   FTRACE(2, "Block::addPredicted({})\n", show(locType));
   assertx(locType.type != TBottom);
-  assertx(locType.type <= TStkElem);
+  assertx(locType.type <= TGen);
   // type predictions should be added in order of location
   assertx(m_typePredictions.size() == 0 ||
           (m_typePredictions.back().location < locType.location));
@@ -609,7 +630,7 @@ void RegionDesc::Block::addPredicted(TypedLocation locType) {
 void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
   FTRACE(2, "Block::addPreCondition({})\n", show(locGuard));
   assertx(locGuard.type != TBottom);
-  assertx(locGuard.type <= TStkElem);
+  assertx(locGuard.type <= TGen);
   assertx(locGuard.type.isSpecialized() ||
           typeFitsConstraint(locGuard.type, locGuard.category));
   m_typePreConditions.push_back(locGuard);
@@ -705,6 +726,10 @@ void RegionDesc::Block::checkMetadata() const {
           assertx(loc.localId() < m_func->numLocals());
           break;
         case LTag::Stack:
+        case LTag::MBase:
+          break;
+        case LTag::CSlot:
+          assertx("Class-ref slot type-prediction" && false);
           break;
       }
     }
@@ -720,6 +745,10 @@ void RegionDesc::Block::checkMetadata() const {
           assertx(loc.localId() < m_func->numLocals());
           break;
         case LTag::Stack:
+        case LTag::MBase:
+          break;
+        case LTag::CSlot:
+          assertx("Class-ref slot type-precondition" && false);
           break;
       }
     }
@@ -1234,7 +1263,7 @@ std::string show(const RegionDesc& region) {
     if (!profData) return 0;
     auto tid = b->profTransID();
     if (tid == kInvalidTransID) return 0;
-    return profData->transCounter(tid);
+    return region.blockProfCount(tid);
   };
 
   uint64_t maxBlockWgt = 1; // avoid div by 0

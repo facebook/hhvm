@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,30 +19,11 @@
 
 #include <vector>
 #include <cstdint>
+#include <cstddef>
 
 namespace HPHP {
 
 struct Header;
-
-// some labels for different kinds of root pointers
-enum class RootKind : uint8_t {
-  NotARoot,
-  RdsNormal,
-  RdsLocal,
-  RdsPersistent,
-  PhpStack,
-  ExecutionContext,
-  ThreadInfo,
-  CppStack,
-  CppTls,
-  ThreadLocalManager,
-  Extensions,
-  RootMaps,
-  SweepLists,
-  AsioSession,
-  GetServerNote,
-  EzcResources
-};
 
 // Graph representation of the heap. The heap consists of some objects
 // (Nodes), and directed pointers (Ptrs) from Node to Node. For each
@@ -66,8 +47,10 @@ struct HeapGraph {
     Implicit, // exactly-marked but not counted
     Ambiguous, // any ambiguous pointer into a valid object
   };
+  static constexpr auto NumPtrKinds = 3;
   struct Node {
     const Header* h;
+    size_t size; // allocated size including size-class padding
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
   };
@@ -75,11 +58,11 @@ struct HeapGraph {
     int from, to; // node ids. if root, from == -1
     int next_out, next_in; // from's next out-ptr, to's next in-ptr
     PtrKind ptr_kind;
-    RootKind root_kind;
+    const char* description;
   };
   std::vector<Node> nodes;
   std::vector<Ptr> ptrs;
-  std::vector<int> roots; // ptr ids. ptr.from = -1, ptr.to = object
+  std::vector<int> root_ptrs; // ptr ids. ptr.from = -1, ptr.to = object
 
   template<class F> void eachSuccNode(int n, F f) const {
     eachOutPtr(n, [&](int p) { f(ptrs[p].to); });
@@ -103,8 +86,8 @@ struct HeapGraph {
     }
   }
 
-  template<class F> void eachRoot(F f) const {
-    for (auto p : roots) f(ptrs[p]);
+  template<class F> void eachRootPtr(F f) const {
+    for (auto p : root_ptrs) f(ptrs[p]);
   }
 };
 
@@ -113,9 +96,6 @@ struct HeapCycles {
   using NodeList = std::vector<int>;
   std::vector<NodeList> live_cycles, leaked_cycles;
 };
-
-// descriptors indexable by RootKind
-extern const char* root_kind_names[];
 
 // Make a snapshot of the heap. It will contain pointers to objects
 // in the heap so their properties or contents can be inspected.

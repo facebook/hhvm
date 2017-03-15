@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,13 +55,10 @@ size_t PackedArray::heapSize(const ArrayData* ad) {
   return sizeof(ArrayData) + sizeof(TypedValue) * ad->cap();
 }
 
-template<class Marker>
-void PackedArray::scan(const ArrayData* a, Marker& mark) {
+inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   assert(checkInvariants(a));
   auto data = packedData(a);
-  for (unsigned i = 0, n = a->getSize(); i < n; ++i) {
-    mark(data[i]);
-  }
+  scanner.scan(*data, a->getSize() * sizeof(*data));
 }
 
 template <class F, bool inc>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -126,7 +126,6 @@ struct IRInstruction {
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;
-  bool killsSources() const;
   bool mayRaiseError() const;
   bool isTerminal() const;
   bool hasEdges() const;
@@ -364,6 +363,11 @@ struct IRInstruction {
   bool isBlockEnd() const;
   bool isRawLoad() const;
 
+  /*
+   * Clear any outgoing edges this instruction has, if any.
+   */
+  void clearEdges();
+
 private:
   /*
    * Block/edge implementations.
@@ -371,7 +375,6 @@ private:
   Block* succ(int i) const;
   Edge* succEdge(int i);
   void setSucc(int i, Block* b);
-  void clearEdges();
 
 
   /////////////////////////////////////////////////////////////////////////////

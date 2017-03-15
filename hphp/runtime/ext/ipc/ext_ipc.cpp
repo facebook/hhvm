@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,12 +32,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-#ifdef __CYGWIN__
-/* These is missing from cygwin ipc headers. */
-#define MSG_EXCEPT 02000
-#endif
-
-#if defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(__APPLE__)
 /* OS X defines msgbuf, but it is defined with extra fields and some weird
  * types. It turns out that the actual msgsnd() and msgrcv() calls work fine
  * with the same structure that other OSes use. This is weird, but this is also
@@ -747,12 +742,7 @@ bool HHVM_FUNCTION(shm_remove,
 
   if (shmctl(shm_list_ptr->id, IPC_RMID,NULL) < 0) {
     raise_warning(
-#ifdef __CYGWIN__
-      // key is a long long int in cygwin
-      "failed for key 0x%lld, id %" PRId64 ": %s",
-#else
       "failed for key 0x%x, id %" PRId64 ": %s",
-#endif
       shm_list_ptr->key, shm_identifier, folly::errnoStr(errno).c_str()
     );
     return false;

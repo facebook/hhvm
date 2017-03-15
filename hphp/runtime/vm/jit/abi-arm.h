@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,6 +91,44 @@ inline vixl::VRegister x2v(PhysReg x64reg) {
   return vixl::VRegister(vixl::CPURegister(x64reg));
 }
 
+/*
+ * ARM    int meaning                fp meaning
+ *        bit tests                  JIT mapping        JIT meaning
+ * ----------------------------------------------------------------------------
+ * eq     equal                      equal
+ *        Z == 1                     CC_E/CC_Z          equal
+ * ne     not equal                  not equal or unordered
+ *        Z == 0                     CC_NE/CC_NZ        not equal
+ * cs/hs  carry set                  greater than, equal, or unordered
+ *        C == 1                     CC_AE/CC_NB/CC_NC  unsigned higher or same
+ * cc/lo  carry clear                less than
+ *        C == 0                     CC_B/CC_NAE        unsigned lower
+ * mi     minus, negative            less than
+ *        N == 1                     CC_S               minus (sign set)
+ * pl     plus, nonnegative          greater than, equal, or unordered
+ *        N == 0                     CC_NS              plus (sign clear)
+ * vs     overflow                   unordered
+ *        V == 1                     CC_O               overflow set
+ * vc     no overflow                ordered
+ *        V == 0                     CC_NO              overflow clear
+ * hi     unsigned higher            greater than, or unordered
+ *        C == 1 && Z == 0           CC_A/CC_NBE        unsigned higher
+ * ls     unsigned lower or same     less than or equal
+ *        !(C == 1 && Z == 0)        CC_BE/CC_NA        unsigned lower or same
+ * ge     signed greater or equal    greater than or equal
+ *        N == V                     CC_GE/CC_NL        signed greater or equal
+ * lt     signed less than           less than, or unordered
+ *        N != V                     CC_L/CC_NGE        signed less than
+ * gt     signed greater than        greater than
+ *        Z == 0 && N == V           CC_G/CC_NLE        signed greater than
+ * le     signed less than or equal  less than, equal, or unordered
+ *        !(Z == 0 && N == V)        CC_LE/CC_NG        signed less or equal
+ * al     always (not used)          always (not used)
+ *        any                        CC_P               parity
+ * nv     not valid
+ *        any                        CC_NP              no parity
+ */
+
 inline vixl::Condition convertCC(jit::ConditionCode cc) {
   assertx(cc >= 0 && cc <= 0xF);
 
@@ -108,8 +146,8 @@ inline vixl::Condition convertCC(jit::ConditionCode cc) {
     hi,  // unsigned higher
     mi,  // minus (N set)
     pl,  // plus (N clear)
-    vs,  // FIXME: parity = 1, valid for 'ucomisd' based jumps only
-    vc,  // FIXME: parity = 0
+    vs,  // parity = 1, valid only for float conversion and comparison
+    vc,  // parity = 0
     lt,  // signed less than
     ge,  // signed greater or equal
     le,  // signed less or equal
@@ -144,12 +182,56 @@ inline jit::ConditionCode convertCC(vixl::Condition cc) {
   return mapping[cc];
 }
 
+enum class StatusFlags : uint8_t {
+  None = 0,
+  V    = 1,
+  Z    = 1 << 1,
+  C    = 1 << 2,
+  N    = 1 << 3,
+  CZ   = C | Z,
+  NV = N | V,
+  NZV = N | Z | V,
+  NotC = N | Z | V,
+  NotV = N | C | Z,
+  All  = N | C | Z | V,
+};
+
+inline Vflags required_flags(jit::ConditionCode cc) {
+  assertx(cc >= 0 && cc <= 0xF);
+
+  // A jit cc is first converted to an ARM cc before using this mapping
+  constexpr StatusFlags mapping[] = {
+    StatusFlags::Z,         // eq
+    StatusFlags::Z,         // ne
+    StatusFlags::C,         // hs
+    StatusFlags::C,         // lo
+    StatusFlags::N,         // mi
+    StatusFlags::N,         // pl
+    StatusFlags::V,         // vs
+    StatusFlags::V,         // vc
+    StatusFlags::CZ,        // hi
+    StatusFlags::CZ,        // ls
+    StatusFlags::NV,        // ge
+    StatusFlags::NV,        // lt
+    StatusFlags::NZV,       // gt
+    StatusFlags::NZV,       // le
+    StatusFlags::None,      // nv (invalid)
+    StatusFlags::None,      // al (invalid)
+  };
+
+  return static_cast<Vflags>(mapping[convertCC(cc)]);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline vixl::Register svcReqArgReg(unsigned index) {
   // First arg holds the request number
   return x2a(rarg(index + 1));
 }
+
+// x16 and x17 are vixl macroassembler temporaries
+const vixl::Register rVixlScratch0(vixl::x16);
+const vixl::Register rVixlScratch1(vixl::x17);
 
 // x18 is used as assembler temporary
 const vixl::Register rAsm(vixl::x18);

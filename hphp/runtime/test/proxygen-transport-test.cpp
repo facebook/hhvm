@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <folly/io/async/HHWheelTimer.h>
 #include <ostream>
@@ -16,6 +16,10 @@ using proxygen::MockHTTPTransaction;
 using proxygen::TransportDirection;
 using proxygen::HTTPCodec;
 using proxygen::WheelTimerInstance;
+
+MATCHER_P(IsResponseStatusCode, statusCode, "") {
+  return arg.getStatusCode() == statusCode;
+}
 
 namespace boost {
 /*
@@ -42,6 +46,8 @@ struct MockProxygenServer : ProxygenServer {
 
   MockProxygenServer()
       : ProxygenServer(s_options) {}
+
+  MOCK_METHOD1(onRequestError, void(Transport*));
 
   MOCK_METHOD1(onRequest, void(std::shared_ptr<ProxygenTransport>));
   virtual void putResponseMessage(ResponseMessage&& message) {
@@ -115,13 +121,14 @@ struct ProxygenTransportTest : testing::Test {
     transport->detachTransaction();
   }
 
-  uint64_t pushResource(Array& headers, uint8_t pri, bool eom = false) {
+  uint64_t pushResource(Array& promiseHeaders, Array& responseHeaders,
+                        uint8_t pri, bool eom = false) {
     m_txn.enablePush();
     EXPECT_CALL(m_txn.mockCodec_, getProtocol())
       .WillRepeatedly(Return(proxygen::CodecProtocol::HTTP_2));
     EXPECT_TRUE(m_transport->supportsServerPush());
-    auto id = m_transport->pushResource("foo", "/bar", pri, headers,
-                                        nullptr, 0, eom);
+    auto id = m_transport->pushResource("foo", "/bar", pri, promiseHeaders,
+                                        responseHeaders,  nullptr, 0, eom);
     EXPECT_GT(id, 0);
     EXPECT_EQ(m_server.m_messageQueue.size(), 2);
     return id;
@@ -142,6 +149,8 @@ struct ProxygenTransportTest : testing::Test {
           }))
       .WillOnce(Invoke([] (const HTTPMessage& response) {
             EXPECT_TRUE(response.isResponse());
+            EXPECT_EQ(response.getHeaders().getSingleOrEmpty("foo"),
+                      std::string("bar"));
           }));
   }
 
@@ -164,7 +173,6 @@ struct ProxygenTransportTest : testing::Test {
 };
 
 struct ProxygenTransportRepostTest : ProxygenTransportTest {
-
   // Initiates a simple GET request to the transport
   void SetUp() override {
   }
@@ -177,9 +185,6 @@ struct ProxygenTransportRepostTest : ProxygenTransportTest {
     transport->detachTransaction();
     EXPECT_EQ(m_transport.use_count(), 1);
   }
-
-
-
 };
 
 TEST_F(ProxygenTransportTest, basic) {
@@ -188,11 +193,13 @@ TEST_F(ProxygenTransportTest, basic) {
 
 TEST_F(ProxygenTransportTest, push) {
   // Push a resource
-  Array headers;
+  Array promiseHeaders;
+  Array responseHeaders;
   uint8_t pri = 1;
 
-  headers.append("hello: world"); // vec serialization path
-  auto id = pushResource(headers, pri);
+  promiseHeaders.append("hello: world"); // vec serialization path
+  responseHeaders.append("foo: bar");
+  auto id = pushResource(promiseHeaders, responseHeaders, pri);
 
   // And some body bytes
   std::string body("12345");
@@ -220,11 +227,14 @@ TEST_F(ProxygenTransportTest, push) {
 
 TEST_F(ProxygenTransportTest, push_empty_body) {
   // Push a resource
-  Array headers;
+  Array promiseHeaders;
+  Array responseHeaders;
   uint8_t pri = 1;
 
-  headers.add(String("hello"), String("world"));  // dict serializtion path
-  pushResource(headers, pri, true /* eom, no body */);
+  promiseHeaders.add(String("hello"),
+                     String("world"));  // dict serializtion path
+  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  pushResource(promiseHeaders, responseHeaders, pri, true /* eom, no body */);
 
   // Creates a new transaction and sends headers and an empty body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
@@ -242,11 +252,14 @@ TEST_F(ProxygenTransportTest, push_empty_body) {
 
 TEST_F(ProxygenTransportTest, push_abort_incomplete) {
   // Push a resource
-  Array headers;
+  Array promiseHeaders;
+  Array responseHeaders;
   uint8_t pri = 1;
 
-  headers.add(String("hello"), String("world"));  // dict serializtion path
-  pushResource(headers, pri);
+  promiseHeaders.add(String("hello"),
+                     String("world"));  // dict serializtion path
+  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  pushResource(promiseHeaders, responseHeaders, pri);
 
   // Creates a new transaction and sends headers, but not body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
@@ -268,11 +281,14 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
 
 TEST_F(ProxygenTransportTest, push_abort) {
   // Push a resource
-  Array headers;
+  Array promiseHeaders;
+  Array responseHeaders;
   uint8_t pri = 1;
 
-  headers.add(String("hello"), String("world"));  // dict serializtion path
-  auto id = pushResource(headers, pri);
+  promiseHeaders.add(String("hello"),
+                     String("world"));  // dict serializtion path
+  responseHeaders.add(String("foo"), String("bar"));  // dict serializtion path
+  auto id = pushResource(promiseHeaders, responseHeaders, pri);
 
   // Creates a new transaction and sends headers, but not body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
@@ -291,6 +307,39 @@ TEST_F(ProxygenTransportTest, push_abort) {
   m_transport->pushResourceBody(id, nullptr, 0, true);
   m_server.deliverMessages();
   sendResponse("12345");
+}
+
+TEST_F(ProxygenTransportTest, client_timeout) {
+  // Verify a Http 408 response would be returned on client request timeout
+  HTTPException ex(HTTPException::Direction::INGRESS,
+      folly::to<std::string>("ingress timeout, requestId=test"));
+  ex.setProxygenError(proxygen::kErrorTimeout);
+  ex.setCodecStatusCode(proxygen::ErrorCode::CANCEL);
+
+  // Setting up the expectation that canSendHeaders returns true is required
+  // due to the fact that most of the methods that control internal state
+  // within the MockHTTPTransaction are mocked and thus its internal state is
+  // invalid
+  EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(true));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(408)));
+  m_transport->onError(ex);
+}
+
+TEST_F(ProxygenTransportTest, client_timeout_incomplete_reply) {
+  // Verify the connection is aborted in case where there is a client timeout
+  // but we are in a mid reply
+  HTTPException ex(HTTPException::Direction::INGRESS,
+      folly::to<std::string>("ingress timeout, requestId=test"));
+  ex.setProxygenError(proxygen::kErrorTimeout);
+  ex.setCodecStatusCode(proxygen::ErrorCode::CANCEL);
+
+  // Setting up the expectation that canSendHeaders returns false is required
+  // due to the fact that most of the methods that control internal state
+  // within the MockHTTPTransaction are mocked and thus its internal state is
+  // invalid
+  EXPECT_CALL(m_txn, canSendHeaders()).WillOnce(Return(false));
+  EXPECT_CALL(m_txn, sendAbort());
+  m_transport->onError(ex);
 }
 
 TEST_F(ProxygenTransportRepostTest, no_body) {

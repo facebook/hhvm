@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -90,7 +90,6 @@ TypedNum numericConvHelper(Cell cell) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -156,6 +155,9 @@ struct Add {
   Cell operator()(int64_t a, int64_t b) const { return make_int(a + b); }
 
   ArrayData* operator()(ArrayData* a1, ArrayData* a2) const {
+    if (UNLIKELY(a1->isHackArray())) throwInvalidAdditionException(a1);
+    if (UNLIKELY(a2->isHackArray())) throwInvalidAdditionException(a2);
+    if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
     a1->incRefCount(); // force COW
     SCOPE_EXIT { a1->decRefCount(); };
     return a1->plusEq(a2);
@@ -302,6 +304,9 @@ struct AddEq {
   double  operator()(double  a, double  b) const { return a + b; }
 
   ArrayData* operator()(ArrayData* ad1, ArrayData* ad2) const {
+    if (UNLIKELY(ad1->isHackArray())) throwInvalidAdditionException(ad1);
+    if (UNLIKELY(ad2->isHackArray())) throwInvalidAdditionException(ad2);
+    if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
     if (ad2->empty() || ad1 == ad2) return ad1;
     if (ad1->empty()) {
       ad2->incRefCount();
@@ -458,7 +463,6 @@ void cellIncDecOp(Op op, Cell& cell) {
       return;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -510,7 +514,11 @@ struct DecBase {
   void dblCase(Cell& cell) { --cell.m_data.dbl; }
   Cell emptyString() const { return make_int(-1); }
   void nullCase(Cell&) const {}
-  void nonNumericString(Cell&) const {}
+  void nonNumericString(Cell& cell) const {
+    if (RuntimeOption::EnableHipHopSyntax) {
+      raise_notice("Decrement on string '%s'", cell.m_data.pstr->data());
+    }
+  }
 };
 
 struct Dec : DecBase {
@@ -751,7 +759,6 @@ void cellBitNot(Cell& cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       raise_error("Unsupported operand type for ~");
   }
 }

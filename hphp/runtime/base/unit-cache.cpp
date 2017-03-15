@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,13 +17,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <memory>
 #include <string>
 #include <cstdlib>
 #include <thread>
 
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Fcntl.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/rank.h"
@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/repo.h"
@@ -161,6 +162,14 @@ using NonRepoUnitCache = RankedCHM<
 >;
 NonRepoUnitCache s_nonRepoUnitCache;
 
+// When running in remote unix server mode with UnixServerQuarantineUnits set,
+// we need to cache any unit generated from a file descriptor passed via the
+// client process in a special quarantined cached. Units in this cache may only
+// be loaded in unix server requests from the same user and are never used when
+// handling web requests.
+using PerUserCache = folly::AtomicHashMap<uid_t, NonRepoUnitCache*>;
+PerUserCache s_perUserUnitCaches(10);
+
 #ifndef _MSC_VER
 int64_t timespecCompare(const struct timespec& l,
                         const struct timespec& r) {
@@ -195,7 +204,14 @@ bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
          stressUnitCache();
 }
 
-folly::Optional<String> readFileAsString(const StringData* path) {
+folly::Optional<String> readFileAsString(Stream::Wrapper* w,
+                                         const StringData* path) {
+  if (w) {
+    if (const auto f = w->open(StrNR(path), "r", 0, nullptr)) {
+      return f->read();
+    }
+    return folly::none;
+  }
   auto const fd = open(path->data(), O_RDONLY);
   if (fd < 0) return folly::none;
   auto file = req::make<PlainFile>(fd);
@@ -226,10 +242,65 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
 }
 
 CachedUnit createUnitFromFile(const StringData* const path,
-                              Unit** releaseUnit) {
-  auto const contents = readFileAsString(path);
+                              Unit** releaseUnit, Stream::Wrapper* w) {
+  auto const contents = readFileAsString(w, path);
   return contents ? createUnitFromString(path->data(), *contents, releaseUnit)
                   : CachedUnit{};
+}
+
+// When running via the CLI server special access checks may need to be
+// performed, and in the event that the server is unable to load the file an
+// alternative per client cache may be used.
+NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
+                                  Stream::Wrapper*& w) {
+  if (auto uc = get_cli_ucred()) {
+    if (!(w = Stream::getWrapperFromURI(StrNR(rpath)))) {
+      return s_nonRepoUnitCache;
+    }
+
+    auto unit_check_quarantine = [&] () -> NonRepoUnitCache& {
+      if (!RuntimeOption::EvalUnixServerQuarantineUnits) {
+        return s_nonRepoUnitCache;
+      }
+      auto iter = s_perUserUnitCaches.find(uc->uid);
+      if (iter != s_perUserUnitCaches.end()) return *iter->second;
+      auto cache = new NonRepoUnitCache;
+      auto res = s_perUserUnitCaches.insert(uc->uid, cache);
+      if (!res.second) delete cache;
+      return *res.first->second;
+    };
+
+    // If the server cannot access rpath attempt to open the unit on the
+    // client. When UnixServerQuarantineUnits is set store units opened by
+    // clients in per UID caches which are never accessible by server web
+    // requests.
+    if (access(rpath->data(), R_OK) == -1) {
+      return unit_check_quarantine();
+    }
+
+    // When UnixServerVerifyExeAccess is set clients may not execute units if
+    // they cannot read them, even when the server has access. To verify that
+    // clients have access they are asked to open the file for read access,
+    // and using fstat the server verifies that the file it sees is identical
+    // to the unit opened by the client.
+    if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
+      struct stat local, remote;
+      auto remoteFile = w->open(StrNR(rpath), "r", 0, nullptr);
+      if (!remoteFile ||
+          fcntl(remoteFile->fd(), F_GETFL) != O_RDONLY ||
+          fstat(remoteFile->fd(), &remote) != 0 ||
+          stat(rpath->data(), &local) != 0 ||
+          remote.st_dev != local.st_dev ||
+          remote.st_ino != local.st_ino) {
+        return unit_check_quarantine();
+      }
+    }
+
+    // When the server is able to read the file prefer to access it that way,
+    // in all modes units loaded by the server are cached for all clients.
+    w = nullptr;
+  }
+  return s_nonRepoUnitCache;
 }
 
 CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
@@ -265,6 +336,14 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     return path;
   }();
 
+  Stream::Wrapper* w = nullptr;
+  auto& cache = getNonRepoCache(rpath, w);
+
+  assert(
+    !w || &cache != &s_nonRepoUnitCache ||
+    !RuntimeOption::EvalUnixServerQuarantineUnits
+  );
+
   // Freeing a unit while holding the tbb lock would cause a rank violation when
   // recycle-tc is enabled as reclaiming dead functions requires that the code
   // and metadata locks be acquired.
@@ -274,7 +353,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   auto const cuptr = [&] () -> std::shared_ptr<CachedUnitWithFree> {
     NonRepoUnitCache::accessor rpathAcc;
 
-    if (!s_nonRepoUnitCache.insert(rpathAcc, rpath)) {
+    if (!cache.insert(rpathAcc, rpath)) {
       if (!isChanged(rpathAcc->second, statInfo)) {
         return rpathAcc->second.cachedUnit;
       }
@@ -290,7 +369,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
      * expected to be low contention).
      */
 
-    auto const cu = createUnitFromFile(rpath, &releaseUnit);
+    auto const cu = createUnitFromFile(rpath, &releaseUnit, w);
     rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
 #ifdef _MSC_VER
     rpathAcc->second.mtime      = statInfo.st_mtime;
@@ -306,7 +385,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
   if (path != rpath) {
     NonRepoUnitCache::accessor pathAcc;
-    s_nonRepoUnitCache.insert(pathAcc, path);
+    cache.insert(pathAcc, path);
     pathAcc->second.cachedUnit = cuptr;
 #ifdef _MSC_VER
     pathAcc->second.mtime      = statInfo.st_mtime;
@@ -344,7 +423,8 @@ struct ResolveIncludeContext {
   bool allow_dir; // return true for dirs?
 };
 
-bool findFile(const StringData* path, struct stat* s, bool allow_dir) {
+bool findFile(const StringData* path, struct stat* s, bool allow_dir,
+              Stream::Wrapper* w) {
   // We rely on this side-effect in RepoAuthoritative mode right now, since the
   // stat information is an output-param of resolveVmInclude, but we aren't
   // really going to call stat.
@@ -354,14 +434,16 @@ bool findFile(const StringData* path, struct stat* s, bool allow_dir) {
     return lookupUnitRepoAuth(path).unit != nullptr;
   }
 
-  auto const ret = StatCache::stat(path->data(), s) == 0 &&
-    !S_ISDIR(s->st_mode);
-  if (S_ISDIR(s->st_mode) && allow_dir) {
+  if (StatCache::stat(path->data(), s) == 0) {
     // The call explicitly populates the struct for dirs, but returns false for
     // them because it is geared toward file includes.
-    return true;
+    return allow_dir || !S_ISDIR(s->st_mode);
   }
-  return ret;
+
+  if (w && w->stat(StrNR(path), s) == 0) {
+    return allow_dir || !S_ISDIR(s->st_mode);
+  }
+  return false;
 }
 
 bool findFileWrapper(const String& file, void* ctx) {
@@ -369,7 +451,7 @@ bool findFileWrapper(const String& file, void* ctx) {
   assert(context->path.isNull());
 
   Stream::Wrapper* w = Stream::getWrapperFromURI(file);
-  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
+  if (w && !w->isNormalFileStream()) {
     if (w->stat(file, context->s) == 0) {
       context->path = file;
       return true;
@@ -383,18 +465,26 @@ bool findFileWrapper(const String& file, void* ctx) {
 
   if (!w) return false;
 
+  auto passW =
+    RuntimeOption::RepoAuthoritative ||
+    dynamic_cast<FileStreamWrapper*>(w) ||
+    !w->isNormalFileStream()
+      ? nullptr
+      : w;
+
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
   if (!FileUtil::isAbsolutePath(file.toCppString())) {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir,
+                 passW)) {
       context->path = translatedPath;
       return true;
     }
     return false;
   }
   if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir, passW)) {
       context->path = translatedPath;
       return true;
     }
@@ -408,7 +498,7 @@ bool findFileWrapper(const String& file, void* ctx) {
     }
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
-  if (findFile(rel_path.get(), context->s, context->allow_dir)) {
+  if (findFile(rel_path.get(), context->s, context->allow_dir, passW)) {
     context->path = rel_path;
     return true;
   }

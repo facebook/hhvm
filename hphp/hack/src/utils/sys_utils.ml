@@ -92,6 +92,12 @@ let cat_no_fail filename =
 let nl_regexp = Str.regexp "[\r\n]"
 let split_lines = Str.split nl_regexp
 
+(** Returns true if substring occurs somewhere inside str. *)
+let string_contains str substring =
+  (** regexp_string matches only this string and nothing else. *)
+  let re = Str.regexp_string substring in
+  try (Str.search_forward re str 0) >= 0 with Not_found -> false
+
 let exec_read cmd =
   let ic = Unix.open_process_in cmd in
   let result = input_line ic in
@@ -108,6 +114,28 @@ let exec_read_lines ?(reverse=false) cmd =
   with End_of_file -> ());
   assert (Unix.close_process_in ic = Unix.WEXITED 0);
   if not reverse then List.rev !result else !result
+
+(** Deletes the file given by "path". If it is a directory, recursively
+ * deletes all its contents then removes the directory itself. *)
+let rec rm_dir_tree path =
+  try begin
+    let stats = Unix.lstat path in
+    match stats.Unix.st_kind with
+    | Unix.S_DIR ->
+      let contents = Sys.readdir path in
+      List.iter (Array.to_list contents) ~f:(fun name ->
+        let name = Filename.concat path name in
+        rm_dir_tree name);
+      Unix.rmdir path
+    | Unix.S_LNK | Unix.S_REG | Unix.S_CHR | Unix.S_BLK | Unix.S_FIFO
+    | Unix.S_SOCK ->
+      Unix.unlink path
+  end with
+  (** Path has been deleted out from under us - can ignore it. *)
+  | Sys_error(s) when s = Printf.sprintf "%s: No such file or directory" path ->
+    ()
+  | Unix.Unix_error(Unix.ENOENT, _, _) ->
+    ()
 
 let restart () =
   let cmd = Sys.argv.(0) in

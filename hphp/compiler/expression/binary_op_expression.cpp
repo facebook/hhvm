@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -181,6 +181,26 @@ int BinaryOpExpression::getLocalEffects() const {
       m_canThrow = true;
     }
     break;
+  case '<':
+  case T_IS_SMALLER_OR_EQUAL:
+  case '>':
+  case T_IS_GREATER_OR_EQUAL:
+  case T_IS_EQUAL:
+  case T_IS_NOT_EQUAL:
+  case T_SPACESHIP:
+  case T_IS_IDENTICAL:
+  case T_IS_NOT_IDENTICAL: {
+    // Normally === and !== cannot have effects, but with
+    // EvalHackArrCompatNotices they can.
+    Variant v1;
+    Variant v2;
+    if (!m_exp1->getScalarValue(v1) || !m_exp2->getScalarValue(v2) ||
+        v1.isPHPArray() != v2.isPHPArray()) {
+      effect = UnknownEffect;
+      m_canThrow = true;
+    }
+    break;
+  }
   default:
     break;
   }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -47,7 +47,8 @@ struct XMLReader {
   req::ptr<File> m_stream; // input stream
   xmlTextReaderPtr m_ptr;
   xmlParserInputBufferPtr m_input;
-  void* m_schema;
+  void* m_schema; // really xmlRelaxNG*.
+  TYPE_SCAN_IGNORE_FIELD(m_schema);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

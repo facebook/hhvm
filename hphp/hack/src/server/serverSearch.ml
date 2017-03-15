@@ -20,13 +20,15 @@ let scope_string_from_type result_type =
 
 let desc_string_from_type result_type =
   match result_type with
-  | SS.Class class_kind ->
+  | SS.Class (Some class_kind) ->
     (match class_kind with
      | Ast.Cabstract -> "abstract class"
      | Ast.Cnormal -> "class"
      | Ast.Cinterface -> "interface"
      | Ast.Ctrait -> "trait"
      | Ast.Cenum -> "enum")
+  (* This should never happen *)
+  | SS.Class None ->  assert false
   | SS.Method (static, scope) ->
     if static
     then "static method in "^scope
@@ -55,7 +57,9 @@ let result_to_json res =
       "scope", Hh_json.JSON_String scope_string;
     ]
 
-let go workers query type_ =
+let go popt workers query type_ =
   let fuzzy = !Parsing_hooks.fuzzy in
-  let results = HackSearchService.MasterApi.query ~fuzzy workers query type_ in
+  let results =
+    HackSearchService.MasterApi.query popt ~fuzzy workers query type_ in
+
   List.map results SearchUtils.to_absolute

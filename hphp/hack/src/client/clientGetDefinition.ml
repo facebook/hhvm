@@ -9,44 +9,22 @@
 *)
 
 open Core
-open Hh_json
-
-let to_json x =
-  JSON_Array (List.map x begin function (symbol, definition) ->
-    let definition_pos, definition_span, definition_id =
-      Option.value_map definition
-      ~f:(fun x -> Pos.json x.SymbolDefinition.pos,
-                   Pos.multiline_json x.SymbolDefinition.span,
-                   x.SymbolDefinition.id)
-      ~default:(JSON_Null, JSON_Null, None)
-    in
-    let definition_id = Option.value_map definition_id
-      ~f:(fun x -> JSON_String x) ~default:JSON_Null
-    in
-    JSON_Object [
-      "name",           JSON_String symbol.SymbolOccurrence.name;
-      "result_type",    JSON_String
-        (ClientGetMethodName.get_result_type symbol);
-      "pos",            Pos.json (symbol.SymbolOccurrence.pos);
-      "definition_pos", definition_pos;
-      "definition_span", definition_span;
-      "definition_id", definition_id;
-    ]
-  end)
 
 let print_json res =
-  print_endline (Hh_json.json_to_string (to_json res))
+  let response = IdentifySymbolService.result_to_ide_message res in
+  Nuclide_rpc_message_printer.print_json ~response
 
-let print_readable x =
-  List.iter x begin function (symbol, definition) ->
-    Printf.printf "Name: %s, type: %s, position: %s"
-      symbol.SymbolOccurrence.name
-      (ClientGetMethodName.get_result_type symbol)
-      (Pos.string_no_file symbol.SymbolOccurrence.pos);
-    Option.iter definition begin fun x ->
-      Printf.printf ", defined: %s" (Pos.string_no_file x.SymbolDefinition.pos);
-      Printf.printf ", definition span: %s"
-        (Pos.multiline_string_no_file x.SymbolDefinition.pos)
+let print_readable ?short_pos:(short_pos=false) x =
+  List.iter x begin function (occurrence, definition) ->
+    let open SymbolOccurrence in
+    let {name; type_; pos;} = occurrence in
+    Printf.printf "name: %s, kind: %s, span: %s, definition: "
+      name (kind_to_string type_) (Pos.string_no_file pos);
+    begin match definition with
+    | None ->  Printf.printf "None\n"
+    | Some definition ->
+      print_newline ();
+      FileOutline.print_def ~short_pos " " definition
     end;
     print_newline ()
   end

@@ -9,6 +9,7 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -40,7 +41,9 @@ type t =
   | Construct
   | Continue
   | Default
+  | Define
   | Destruct
+  | Dict
   | Do
   | Double
   | Echo
@@ -48,7 +51,9 @@ type t =
   | Elseif
   | Empty
   | Enum
+  | Eval
   | Extends
+  | Fallthrough
   | Float
   | Final
   | Finally
@@ -64,6 +69,8 @@ type t =
   | Insteadof
   | Int
   | Interface
+  | Isset
+  | Keyset
   | List
   | Mixed
   | Namespace
@@ -98,7 +105,9 @@ type t =
   | Unset
   | Use
   | Var
+  | Vec
   | Void
+  | Where
   | While
   | Xor
   | Yield
@@ -121,6 +130,8 @@ type t =
   | Dollar
   | Slash
   | Percent
+  | LessThanGreaterThan
+  | LessThanEqualGreaterThan
   | LessThanLessThan
   | GreaterThanGreaterThan
   | LessThan
@@ -176,9 +187,15 @@ type t =
   | HexadecimalLiteral
   | BinaryLiteral
   | FloatingLiteral
+  | ExecutionString
   | SingleQuotedStringLiteral
   | DoubleQuotedStringLiteral
+  | DoubleQuotedStringLiteralHead
+  | StringLiteralBody
+  | DoubleQuotedStringLiteralTail
   | HeredocStringLiteral
+  | HeredocStringLiteralHead
+  | HeredocStringLiteralTail
   | NowdocStringLiteral
   | BooleanLiteral
   | XHPCategoryName
@@ -214,7 +231,9 @@ let from_string keyword =
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
   | "default" -> Some Default
+  | "define" -> Some Define
   | "__destruct" -> Some Destruct
+  | "dict" -> Some Dict
   | "do" -> Some Do
   | "double" -> Some Double
   | "echo" -> Some Echo
@@ -222,7 +241,9 @@ let from_string keyword =
   | "elseif" -> Some Elseif
   | "empty" -> Some Empty
   | "enum" -> Some Enum
+  | "eval" -> Some Eval
   | "extends" -> Some Extends
+  | "fallthrough" -> Some Fallthrough
   | "float" -> Some Float
   | "final" -> Some Final
   | "finally" -> Some Finally
@@ -238,6 +259,8 @@ let from_string keyword =
   | "insteadof" -> Some Insteadof
   | "int" -> Some Int
   | "interface" -> Some Interface
+  | "isset" -> Some Isset
+  | "keyset" -> Some Keyset
   | "list" -> Some List
   | "mixed" -> Some Mixed
   | "namespace" -> Some Namespace
@@ -272,7 +295,9 @@ let from_string keyword =
   | "unset" -> Some Unset
   | "use" -> Some Use
   | "var" -> Some Var
+  | "vec" -> Some Vec
   | "void" -> Some Void
+  | "where" -> Some Where
   | "while" -> Some While
   | "xor" -> Some Xor
   | "yield" -> Some Yield
@@ -295,6 +320,8 @@ let from_string keyword =
   | "$" -> Some Dollar
   | "/" -> Some Slash
   | "%" -> Some Percent
+  | "<>" -> Some LessThanGreaterThan
+  | "<=>" -> Some LessThanEqualGreaterThan
   | "<<" -> Some LessThanLessThan
   | ">>" -> Some GreaterThanGreaterThan
   | "<" -> Some LessThan
@@ -366,7 +393,9 @@ match kind with
   | Construct -> "__construct"
   | Continue -> "continue"
   | Default -> "default"
+  | Define -> "define"
   | Destruct -> "__destruct"
+  | Dict -> "dict"
   | Do -> "do"
   | Double -> "double"
   | Echo -> "echo"
@@ -374,7 +403,9 @@ match kind with
   | Elseif -> "elseif"
   | Empty -> "empty"
   | Enum -> "enum"
+  | Eval -> "eval"
   | Extends -> "extends"
+  | Fallthrough -> "fallthrough"
   | Float -> "float"
   | Final -> "final"
   | Finally -> "finally"
@@ -390,6 +421,8 @@ match kind with
   | Insteadof -> "insteadof"
   | Int -> "int"
   | Interface -> "interface"
+  | Isset -> "isset"
+  | Keyset -> "keyset"
   | List -> "list"
   | Mixed -> "mixed"
   | Namespace -> "namespace"
@@ -424,7 +457,9 @@ match kind with
   | Unset -> "unset"
   | Use -> "use"
   | Var -> "var"
+  | Vec -> "vec"
   | Void -> "void"
+  | Where -> "where"
   | While -> "while"
   | Xor -> "xor"
   | Yield -> "yield"
@@ -447,6 +482,8 @@ match kind with
   | Dollar -> "$"
   | Slash -> "/"
   | Percent -> "%"
+  | LessThanGreaterThan -> "<>"
+  | LessThanEqualGreaterThan -> "<=>"
   | LessThanLessThan -> "<<"
   | GreaterThanGreaterThan -> ">>"
   | LessThan -> "<"
@@ -502,9 +539,15 @@ match kind with
   | HexadecimalLiteral -> "hexadecimal_literal"
   | BinaryLiteral -> "binary_literal"
   | FloatingLiteral -> "floating_literal"
+  | ExecutionString -> "execution_string"
   | SingleQuotedStringLiteral -> "single_quoted_string_literal"
   | DoubleQuotedStringLiteral -> "double_quoted_string_literal"
+  | DoubleQuotedStringLiteralHead -> "double_quoted_string_literal_head"
+  | StringLiteralBody -> "string_literal_body"
+  | DoubleQuotedStringLiteralTail -> "double_quoted_string_literal_tail"
   | HeredocStringLiteral -> "heredoc_string_literal"
+  | HeredocStringLiteralHead -> "heredoc_string_literal_head"
+  | HeredocStringLiteralTail -> "heredoc_string_literal_tail"
   | NowdocStringLiteral -> "nowdoc_string_literal"
   | BooleanLiteral -> "boolean_literal"
   | XHPCategoryName -> "XHP_category_name"
@@ -513,3 +556,4 @@ match kind with
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
   | XHPComment -> "XHP_comment"
+

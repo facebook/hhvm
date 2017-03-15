@@ -23,7 +23,7 @@ function(HHVM_EXTENSION EXTNAME)
   get_target_property(TY ${EXTNAME} TYPE)
   # Don't install via target, because it triggers a re-link that doesn't
   # run the POST_BUILD custom command that embeds the systemlib on Linux.
-  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_API_VERSION}\" TYPE ${TY} FILES \"${LOC}\")")
+  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_VERSION_BRANCH}\" TYPE ${TY} FILES \"${LOC}\")")
 endfunction()
 
 # Add an extension that uses the Zend compatibility layer.
@@ -49,7 +49,7 @@ endfunction()
 function(embed_systemlibs TARGET DEST)
   if (APPLE)
     target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
-  elseif(CYGWIN OR MSVC OR MINGW)
+  elseif (MSVC)
     message(FATAL_ERROR "Shared extensions are not supported on Windows")
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD

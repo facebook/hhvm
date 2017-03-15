@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,8 @@
 
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/parser/parser.h"
+
+#include "hphp/runtime/base/static-string-table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -164,6 +166,7 @@ struct FunctionScope : BlockScope,
    */
   bool allowsVariableArguments() const;
   bool hasVariadicParam() const;
+  bool hasRefVariadicParam() const;
   bool usesVariableArgumentFunc() const;
   bool isReferenceVariableArgument() const;
   void setVariableArgument(int reference);
@@ -221,10 +224,6 @@ struct FunctionScope : BlockScope,
   bool isVolatile() const { return m_volatile; }
   bool isPersistent() const { return m_persistent; }
   void setPersistent(bool p) { m_persistent = p; }
-
-  /* Indicates if a function may need to use a VarEnv or varargs (aka
-   * extraArgs) at run time */
-  bool mayUseVV() const;
 
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
@@ -297,6 +296,16 @@ struct FunctionScope : BlockScope,
   static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
   static FunctionInfoPtr GetFunctionInfo(const std::string& fname);
 
+  const StringData* getFatalMessage() const {
+    return m_fatal_error_msg;
+  }
+
+  void setFatal(const std::string& msg) {
+    assert(m_fatal_error_msg == nullptr);
+    m_fatal_error_msg = makeStaticString(msg);
+    assert(m_fatal_error_msg != nullptr);
+  }
+
 private:
   void init(AnalysisResultConstPtr ar);
 
@@ -337,6 +346,9 @@ private:
   ExpressionListPtr m_closureVars;
   ExpressionListPtr m_closureValues;
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
+
+  // holds the fact that defining this function is a fatal error
+  const StringData* m_fatal_error_msg = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

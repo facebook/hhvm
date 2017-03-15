@@ -1,5 +1,9 @@
-\Foo
-Class
-line 8, characters 12-14
-defined: line 3, characters 7-9
-definition span: line 3, character 1 - line 3, character 30
+name: \Foo, kind: type_id, span: line 8, characters 12-14, definition: 
+ Foo
+   kind: class
+   id: type_id::Foo
+   position: line 3, characters 7-9
+   span: line 3, character 1 - line 3, character 30
+   modifiers: 
+
+

@@ -30,7 +30,7 @@ module MinimalSyntax =
   SyntaxWithMinimalToken.WithSyntaxValue(MinimalSyntaxValue)
 
 module MinimalValueBuilder = struct
-  let value_from_children kind nodes =
+  let value_from_children _kind nodes =
     let folder sum node =
       let v = MinimalSyntax.value node in
       let w = MinimalSyntaxValue.full_width v in
@@ -60,3 +60,35 @@ let trailing_width node =
 
 let width node =
   (full_width node) - (leading_width node) - (trailing_width node)
+
+(* Takes a node and an offset; produces the descent through the parse tree
+   to that position. *)
+let parentage node position =
+  let rec aux nodes position acc =
+    match nodes with
+    | [] -> acc
+    | h :: t ->
+      let width = full_width h in
+      if position < width then
+        aux (children h) position (h :: acc)
+      else
+        aux t (position - width) acc in
+  aux [node] position []
+
+let is_in_body node position =
+  let rec aux parents =
+    match parents with
+    | [] -> false
+    | h1 :: t1 ->
+      if is_compound_statement h1 then
+        match t1 with
+        | [] -> false
+        | h2 :: _ ->
+          if ((is_methodish_declaration h2) || is_function_declaration h2) then
+            true
+          else
+            aux t1
+      else
+        aux t1 in
+  let parents = parentage node position in
+  aux parents

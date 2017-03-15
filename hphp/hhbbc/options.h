@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,17 +37,6 @@ using MethodMap = std::map<
  * Publically-settable options that control compilation.
  */
 struct Options {
-  /*
-   * Functions that we should assume may be used with fb_intercept.  Functions
-   * that aren't named in this list may be optimized with the assumption they
-   * aren't intercepted, in whole_program mode.
-   *
-   * If AllFuncsInterceptable, it's as if this list contains every function in
-   * the program.
-   */
-  MethodMap InterceptableFunctions;
-  bool AllFuncsInterceptable = false;
-
   /*
    * When debugging, it can be useful to ask for certain functions to be traced
    * at a higher level than the rest of the program.
@@ -139,6 +128,12 @@ struct Options {
    * GlobalDCE.
    */
   bool RemoveUnusedLocals = true;
+
+  /*
+   * Whether to remove completely unused class-ref slots.  This requires
+   * GlobalDCE.
+   */
+  bool RemoveUnusedClsRefSlots = true;
 
   /*
    * If true, insert opcodes that assert inferred types, so we can assume them
@@ -243,6 +238,13 @@ struct Options {
    * have effects on unknown locals (i.e. are not extract / compact /...).
    */
   bool DisallowDynamicVarEnvFuncs = true;
+
+  /*
+   * If true, we'll perform optimizations which can remove invocations of the
+   * autoloader, if it can be proven the invocation would not find a viable
+   * function.
+   */
+  bool ElideAutoloadInvokes = true;
 
   /*
    * The filepath where to save the stats file.  If the path is empty, then we

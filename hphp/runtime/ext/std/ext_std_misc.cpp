@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,8 +31,10 @@
 
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -43,10 +45,6 @@
 
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
-
-#ifndef _MSC_VER
-#include <sys/param.h> // MAXPATHLEN is here
-#endif
 
 namespace HPHP {
 
@@ -65,7 +63,9 @@ const int64_t k_CONNECTION_NORMAL = 0;
 const int64_t k_CONNECTION_ABORTED = 1;
 const int64_t k_CONNECTION_TIMEOUT = 2;
 
-static String HHVM_FUNCTION(server_warmup_status) {
+namespace {
+
+String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted at least Eval.JitWarmupStatusBytes of code.
   size_t begin, end;
   jit::tc::codeEmittedThisRequest(begin, end);
@@ -91,6 +91,10 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
+  if (jit::mcgen::retranslateAllPending()) {
+    return "Waiting on retranslateAll()";
+  }
+
   auto tpc_diff = jit::tl_perf_counters[jit::tpc_interp_bb] -
                   jit::tl_perf_counters[jit::tpc_interp_bb_force];
   if (tpc_diff) {
@@ -100,6 +104,22 @@ static String HHVM_FUNCTION(server_warmup_status) {
   return empty_string();
 }
 
+const StaticString
+  s_clisrv("clisrv"),
+  s_cli("cli"),
+  s_worker("worker");
+
+String HHVM_FUNCTION(execution_context) {
+  if (is_cli_mode()) return s_clisrv;
+
+  if (auto t = g_context->getTransport()) {
+    return t->describe();
+  }
+
+  return RuntimeOption::ServerExecutionMode() ? s_worker : s_cli;
+}
+
+}
 
 void StandardExtension::threadInitMisc() {
     IniSetting::Bind(
@@ -174,6 +194,7 @@ StaticString get_PHP_VERSION() {
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    HHVM_FALIAS(HH\\execution_context, execution_context);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);
     HHVM_FE(connection_timeout);
@@ -242,8 +263,8 @@ void StandardExtension::initMisc() {
 
     HHVM_RC_STR(PHP_BINARY, current_executable_path());
     HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
-    HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString().toCppString());
-    HHVM_RC_STR(PHP_SAPI, RuntimeOption::ExecutionMode);
+    HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
+    HHVM_RC_STR(PHP_SAPI, HHVM_FN(php_sapi_name()));
 
     HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);
@@ -568,13 +589,9 @@ Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
 }
 
 Array HHVM_FUNCTION(sys_getloadavg) {
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  return make_packed_array(0, 0, 0);
-#else
   double load[3];
   getloadavg(load, 3);
   return make_packed_array(load[0], load[1], load[2]);
-#endif
 }
 
 // We want token IDs to remain stable regardless of how we change the

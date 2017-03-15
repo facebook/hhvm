@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -113,11 +113,6 @@ struct ExtraArgs {
    */
   TypedValue* getExtraArg(unsigned argInd) const;
 
-  template<class F> void scan(F& mark, unsigned int nargs) const {
-    for (unsigned i = 0; i < nargs; ++i) {
-      mark(*(m_extraArgs + i));
-    }
-  }
 private:
   ExtraArgs();
   ~ExtraArgs();
@@ -153,9 +148,6 @@ struct VarEnv {
   ExtraArgs* m_extraArgs;
   uint16_t m_depth;
   const bool m_global;
-
- public:
-  template<class F> void scan(F& mark) const;
 
  public:
   explicit VarEnv();
@@ -274,8 +266,8 @@ void frame_free_locals_no_hook(ActRec* fp);
     TypedValue val_;                            \
     new (&val_) Variant(x);                     \
     frame_free_locals_no_hook(ar_);             \
-    ar_->m_r = val_;                            \
-    return &ar_->m_r;                           \
+    tvCopy(val_, *ar_->retSlot());              \
+    return ar_->retSlot();                      \
   }())
 
 #define tvReturn(x)                                                     \
@@ -311,6 +303,10 @@ struct CallCtx {
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
+constexpr size_t clsRefCountToCells(size_t n) {
+  return (n * sizeof(LowPtr<Class>*) + sizeof(Cell) - 1) / sizeof(Cell);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -338,10 +334,6 @@ struct Fault {
       m_raiseFrame(nullptr),
       m_raiseOffset(kInvalidOffset),
       m_handledCount(0) {}
-
-  template<class F> void scan(F& mark) const {
-    mark(m_userException);
-  }
 
   ObjectData* m_userException;
 
@@ -436,14 +428,6 @@ public:
   }
 
   ALWAYS_INLINE
-  void popA() {
-    assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass);
-    tvDebugTrash(m_top);
-    m_top++;
-  }
-
-  ALWAYS_INLINE
   void popV() {
     assert(m_top != m_base);
     assert(refIsPlausible(*m_top));
@@ -453,9 +437,17 @@ public:
   }
 
   ALWAYS_INLINE
+  void popU() {
+    assert(m_top != m_base);
+    assert(m_top->m_type == KindOfUninit);
+    tvDebugTrash(m_top);
+    ++m_top;
+  }
+
+  ALWAYS_INLINE
   void popTV() {
     assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass || tvIsPlausible(*m_top));
+    assert(tvIsPlausible(*m_top));
     tvRefcountedDecRef(m_top);
     tvDebugTrash(m_top);
     m_top++;
@@ -746,6 +738,15 @@ public:
   }
 
   ALWAYS_INLINE
+  void allocClsRefSlots(size_t n) {
+    assert((uintptr_t)&m_top[-clsRefCountToCells(n)] >= (uintptr_t)m_elms);
+    m_top -= clsRefCountToCells(n);
+    if (debug) {
+      memset(m_top, kTrashClsRef, clsRefCountToCells(n) * sizeof(Cell));
+    }
+  }
+
+  ALWAYS_INLINE
   void replaceC(const Cell c) {
     assert(m_top != m_base);
     assert(m_top->m_type != KindOfRef);
@@ -797,8 +798,7 @@ public:
   ALWAYS_INLINE
   Cell* topC() {
     assert(m_top != m_base);
-    assert(m_top->m_type != KindOfRef);
-    return (Cell*)m_top;
+    return tvAssertCell(m_top);
   }
 
   ALWAYS_INLINE
@@ -806,13 +806,6 @@ public:
     assert(m_top != m_base);
     assert(m_top->m_type == KindOfRef);
     return (Ref*)m_top;
-  }
-
-  ALWAYS_INLINE
-  const Class* topA() {
-    assert(m_top != m_base);
-    assert(m_top->m_type == KindOfClass);
-    return m_top->m_data.pcls;
   }
 
   ALWAYS_INLINE
@@ -825,21 +818,13 @@ public:
   Cell* indC(size_t ind) {
     assert(m_top != m_base);
     assert(m_top[ind].m_type != KindOfRef);
-    return (Cell*)(&m_top[ind]);
+    return tvAssertCell(&m_top[ind]);
   }
 
   ALWAYS_INLINE
   TypedValue* indTV(size_t ind) {
     assert(m_top != m_base);
     return &m_top[ind];
-  }
-
-  ALWAYS_INLINE
-  void pushClass(Class* clss) {
-    assert(m_top != m_elms);
-    m_top--;
-    m_top->m_data.pcls = clss;
-    m_top->m_type = KindOfClass;
   }
 };
 
@@ -910,7 +895,7 @@ extern InterpOneFunc interpOneEntryPoints[];
 bool doFCallArrayTC(PC pc, int32_t numArgs, void*);
 bool doFCall(ActRec* ar, PC& pc);
 jit::TCA dispatchBB();
-void pushLocalsAndIterators(const Func* func, int nparams = 0);
+void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
 jit::TCA suspendStack(PC& pc);
 
@@ -928,17 +913,6 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
                       TypedValue* retval);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-template<class F> void VarEnv::scan(F& mark) const {
-  mark(m_nvTable);
-  if (m_extraArgs) {
-    if (const auto ar = m_nvTable.getFP()) {
-      const int numExtra =
-        ar->numArgs() - ar->m_func->numNonVariadicParams();
-      m_extraArgs->scan(mark, numExtra);
-    }
-  }
-}
 
 }
 

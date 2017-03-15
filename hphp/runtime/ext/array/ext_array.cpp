@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -241,6 +241,8 @@ TypedValue HHVM_FUNCTION(array_fill,
   if (num < 0) {
     throw_invalid_argument("Number of elements can't be negative");
     return make_tv<KindOfBoolean>(false);
+  } else if (num == 0) {
+    return tvReturn(empty_array());
   }
 
   if (start_index == 0) {
@@ -305,6 +307,9 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
+      if (RuntimeOption::EvalHackArrCompatNotices && ad->useWeakKeys()) {
+        raiseHackArrCompatImplicitArrayKey(cell);
+      }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
 
     case KindOfBoolean:
@@ -320,6 +325,9 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfObject:
     case KindOfResource:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raiseHackArrCompatImplicitArrayKey(cell);
+      }
       raise_warning("Array key should be either a string or an integer");
       return false;
 
@@ -334,7 +342,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfInt64:
       return ad->exists(cell->m_data.num);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -763,9 +770,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -788,9 +792,6 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1043,9 +1044,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1068,9 +1066,6 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1180,12 +1175,14 @@ TypedValue HHVM_FUNCTION(array_unshift,
 }
 
 Variant array_values(const Variant& input) {
-  if (input.isVecArray()) {
+  auto const cell = *input.asCell();
+  if (isArrayLikeType(cell.m_type) &&
+      cell.m_data.parr->hasPackedLayout()) {
     return input;
   }
 
   folly::Optional<PackedArrayInit> ai;
-  auto ok = IterateV(*input.asCell(),
+  auto ok = IterateV(cell,
                      [&](ArrayData* adata) {
                        ai.emplace(adata->size());
                      },
@@ -1372,7 +1369,6 @@ int64_t HHVM_FUNCTION(count,
       return 1;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1628,7 +1624,7 @@ TypedValue HHVM_FUNCTION(range,
       if (type1 == KindOfInt64 || type2 == KindOfInt64) {
         if (type1 != KindOfInt64) n1 = slow.toInt64();
         if (type2 != KindOfInt64) n2 = shigh.toInt64();
-        return tvReturn(ArrayUtil::Range((double)n1, (double)n2, lstep));
+        return tvReturn(ArrayUtil::Range(n1, n2, lstep));
       }
 
       return tvReturn(ArrayUtil::Range((unsigned char)slow.charAt(0),
@@ -1641,7 +1637,7 @@ TypedValue HHVM_FUNCTION(range,
   }
 
   int64_t lstep = toInt64(dstep);
-  return tvReturn(ArrayUtil::Range(low.toDouble(), high.toDouble(), lstep));
+  return tvReturn(ArrayUtil::Range(toInt64(low), toInt64(high), lstep));
 }
 ///////////////////////////////////////////////////////////////////////////////
 // diff/intersect helpers
@@ -2889,6 +2885,9 @@ Array HHVM_FUNCTION(HH_dict, const Variant& input) {
     return ArrNR{inputCell->m_data.parr}.asArray().toDict();
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
+    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
+      return ArrNR{ad}.asArray().toDict();
+    }
     return HHVM_FN(HH_dict)(toArray(inputCell->m_data.pobj));
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
@@ -2912,6 +2911,9 @@ Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
     return ArrNR{inputCell->m_data.parr}.asArray().toKeyset();
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
+    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
+      return ArrNR{ad}.asArray().toKeyset();
+    }
     return HHVM_FN(HH_keyset)(toArray(inputCell->m_data.pobj));
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
@@ -2935,6 +2937,9 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
     return ArrNR{inputCell->m_data.parr}.asArray().toVec();
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->isCollection()) {
+    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
+      return ArrNR{ad}.asArray().toVec();
+    }
     return HHVM_FN(HH_vec)(toArray(inputCell->m_data.pobj));
   } else if (inputCell->m_type == KindOfObject &&
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {

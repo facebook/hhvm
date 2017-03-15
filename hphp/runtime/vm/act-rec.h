@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,58 +58,35 @@ struct VarEnv;
  * state.
  */
 struct ActRec {
-  union {
-    // This pair of uint64_t's must be the first two elements in the structure
-    // so that the pointer to the ActRec can also be used for RBP chaining.
-    // Note that ActRecs are also native frames, so this is an implicit machine
-    // dependency.
-    TypedValue _dummyA;
-    struct {
 #if defined(__powerpc64__)
-      ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
-      uint32_t m_savedCR;    // PPC64's sign flags (CR)
-      uint32_t m_reserved;   // Reserved word as on ABI
-      uint64_t m_savedRip;   // In-TC address to return to.
-      uint64_t m_savedToc;   // TOC save doubleword
+  ActRec* m_sfp;         // Previous hardware frame pointer/ActRec.
+  uint32_t m_savedCR;    // PPC64's sign flags (CR)
+  uint32_t m_reserved;   // Reserved word as on ABI
+  uint64_t m_savedRip;   // In-TC address to return to.
+  uint64_t m_savedToc;   // TOC save doubleword
 #else // X64 style
-      // Previous ActRec (or hardware frame pointer, for reentry frames).
-      ActRec* m_sfp;
-      // In-TC address to return to.
-      uint64_t m_savedRip;
+  // This pair of uint64_t's must be the first two elements in the structure
+  // so that the pointer to the ActRec can also be used for RBP chaining.
+  // Note that ActRecs are also native frames, so this is an implicit machine
+  // dependency.
+  ActRec* m_sfp;       // Previous hardware frame pointer/ActRec
+  uint64_t m_savedRip; // native (in-TC) return address
 #endif
-    };
+  const Func* m_func;  // Function.
+  uint32_t m_soff;     // offset of caller from its bytecode start.
+  uint32_t m_numArgsAndFlags; // arg_count:28, flags:4
+  union {
+    ObjectData* m_thisUnsafe; // This.
+    Class* m_clsUnsafe;       // Late bound class.
   };
   union {
-    TypedValue _dummyB;
-    struct {
-      // Function.
-      const Func* m_func;
-      // Saved offset of caller from beginning of the caller Func's bytecode.
-      uint32_t m_soff;
-      // Bits 0-27 are the number of function args.  Bits 28-31 are values from
-      // the Flags enum.
-      uint32_t m_numArgsAndFlags;
-    };
+    VarEnv* m_varEnv;       // Variable environment when live
+    ExtraArgs* m_extraArgs; // Lightweight extra args, when live
+    StringData* m_invName;  // Invoked name, used for __call(), when pre-live
   };
-  union {
-    // Return value is teleported here when the ActRec is post-live.
-    TypedValue m_r;
-    struct {
-      union {
-        ObjectData* m_thisUnsafe; // This.
-        Class* m_clsUnsafe;       // Late bound class.
-      };
-      union {
-        // Variable environment; only used when the ActRec is live.
-        VarEnv* m_varEnv;
-        // Lightweight extra args; only used when the ActRec is live.
-        ExtraArgs* m_extraArgs;
-        // Invoked function name, used for __call().  Only used when the ActRec
-        // is pre-live.
-        StringData* m_invName;
-      };
-    };
-  };
+
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_thisUnsafe);
+  TYPE_SCAN_CONSERVATIVE_FIELD(m_varEnv);
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -372,6 +349,13 @@ struct ActRec {
    * Returns nullptr if there are no extra arguments.
    */
   TypedValue* getExtraArg(unsigned ind) const;
+
+  /*
+   * address to teleport the return value after destroying this actrec.
+   */
+  TypedValue* retSlot() {
+    return reinterpret_cast<TypedValue*>(this + 1) - 1;
+  }
 };
 
 static_assert(offsetof(ActRec, m_sfp) == 0,
@@ -380,7 +364,13 @@ static_assert(offsetof(ActRec, m_sfp) == 0,
 /*
  * Size in bytes of the target architecture's call frame.
  */
-constexpr auto kNativeFrameSize = offsetof(ActRec, _dummyB);
+constexpr auto kNativeFrameSize = offsetof(ActRec, m_func);
+
+/*
+ * offset from frame ptr to return value slot after teardown
+ */
+constexpr auto kArRetOff = sizeof(ActRec) - sizeof(TypedValue);
+static_assert(kArRetOff % sizeof(TypedValue) == 0, "");
 
 /*
  * Whether `address' is a helper stub that we're permitted to set

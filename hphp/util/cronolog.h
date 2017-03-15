@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <mutex>
 
+#include <folly/portability/Stdlib.h>
+
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/log-file-flusher.h"
 
@@ -29,47 +31,33 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Cronolog {
-  Cronolog() :
-    m_periodicity(UNKNOWN),
-    m_periodDelayUnits(UNKNOWN),
-    m_periodMultiple(1),
-    m_periodDelay(0),
-    m_useAmericanDateFormats(0),
-    m_startTime(nullptr),
-    m_prevLinkName(nullptr),
-    m_timeOffset(0),
-    m_nextPeriod(0),
-    m_prevFile(nullptr),
-    m_file(nullptr) {}
+  Cronolog() = default;
+  Cronolog(const Cronolog&) = delete;
+  Cronolog& operator=(const Cronolog&) = delete;
   ~Cronolog() {
     if (m_prevFile) fclose(m_prevFile);
     if (m_file) fclose(m_file);
   }
   void setPeriodicity();
-  FILE *getOutputFile();
-  static void changeOwner(const std::string &username,
-                          const std::string &symlink);
-public:
-  PERIODICITY m_periodicity;
-  PERIODICITY m_periodDelayUnits;
-  int m_periodMultiple;
-  int m_periodDelay;
-  int m_useAmericanDateFormats;
+  FILE* getOutputFile();
+  static void changeOwner(const std::string& username,
+                          const std::string& symlink);
+  PERIODICITY m_periodicity{UNKNOWN};
+  PERIODICITY m_periodDelayUnits{UNKNOWN};
+  int m_periodMultiple{1};
+  int m_periodDelay{0};
+  int m_useAmericanDateFormats{0};
   char m_fileName[PATH_MAX];
-  char *m_startTime;
+  char* m_startTime{nullptr};
   std::string m_template;
   std::string m_linkName;
-  char *m_prevLinkName;
-  time_t m_timeOffset;
-  time_t m_nextPeriod;
-  FILE *m_prevFile;
-  FILE *m_file;
+  char* m_prevLinkName{nullptr};
+  time_t m_timeOffset{0};
+  time_t m_nextPeriod{0};
+  FILE* m_prevFile{nullptr};
+  FILE* m_file{nullptr};
   LogFileFlusher flusher;
   std::mutex m_mutex;
-
-private:
-  Cronolog(const Cronolog &); // suppress
-  Cronolog &operator=(const Cronolog &); // suppress
 };
 
 ///////////////////////////////////////////////////////////////////////////////

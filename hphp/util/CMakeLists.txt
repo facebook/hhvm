@@ -52,7 +52,7 @@ if (ENABLE_COTIRE)
   cotire(hphp_util)
 endif()
 
-if (LIBNUMA_LIBRARIES AND JEMALLOC_ENABLED)
+if (LIBNUMA_LIBRARIES)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()
 if (ENABLE_ASYNC_MYSQL)

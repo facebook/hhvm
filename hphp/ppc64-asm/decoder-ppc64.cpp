@@ -14,11 +14,13 @@
    +----------------------------------------------------------------------+
 */
 
-#include <cassert>
+#include "hphp/ppc64-asm/decoder-ppc64.h"
 
 #include "hphp/ppc64-asm/branch-ppc64.h"
-#include "hphp/ppc64-asm/decoder-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
+#include "hphp/ppc64-asm/asm-ppc64.h"
+
+#include "hphp/util/assertions.h"
 
 namespace ppc64_asm {
 
@@ -284,7 +286,7 @@ Decoder::Decoder() {
 #undef XS
 #undef XT
 
-std::string DecoderInfo::toString() {
+std::string DecoderInfo::toString() const {
   if (m_form == Form::kInvalid) return ".long " + std::to_string(m_image);
   if (isNop())                  return "nop";
 
@@ -295,14 +297,14 @@ std::string DecoderInfo::toString() {
   for (auto oper : m_operands) {
     auto op = m_image & oper.m_mask;
     if (!(oper.m_flags & PPC_OPERAND_NOSHIFT)) op >>= oper.operandShift();
-    auto toHex = [] (std::string& instr, intptr_t n) {
+    auto toHex = [] (std::string& instruction, intptr_t n) {
       std::stringstream stringStream;
       if (n < 0) {
           stringStream << "-0x";
           n = -n;
       } else stringStream << "0x";
       stringStream << std::hex << n;
-      instr += stringStream.str();
+      instruction += stringStream.str();
     };
     if (oper.m_flags & PPC_OPERAND_GPR)   { instr += "r"; }
     if (oper.m_flags & PPC_OPERAND_GPR_0) { if (op != 0) instr += "r"; }
@@ -332,6 +334,19 @@ std::string DecoderInfo::toString() {
   return instr;
 }
 
+bool DecoderInfo::isException() const {
+  // trap is a mnemonic of tw 31,0,0
+  if ((m_form == Form::kX) && (m_opn == OpcodeNames::op_tw)) {
+    X_form_t xform;
+    xform.instruction = m_image;
+    if ((31 == xform.RT) && (!xform.RA) && (!xform.RB) && (4 == xform.XO)) {
+      // trap
+      return true;
+    }
+  }
+  return false;
+}
+
 bool DecoderInfo::isNop() const {
   // no-op is a mnemonic of ori 0,0,0
   if ((m_form == Form::kD) && (m_opn == OpcodeNames::op_ori)) {
@@ -345,55 +360,142 @@ bool DecoderInfo::isNop() const {
   return false;
 }
 
+bool DecoderInfo::isLd(bool toc) const {
+  if ((m_form == Form::kDS) && (m_opn == OpcodeNames::op_ld)) {
+    if (!toc) return true;
 
-bool DecoderInfo::isBranch(bool allowCond /* = true */) const {
-  // allowCond: true
-  //   b, ba, bl - unconditional branches
-  //   bc, bca, bcctr, bcctrl, bcl, bcla, bclr, bclrl, bctar, bctarl
-  //
-  // allowCond: false
-  //   b, ba, bl - unconditional branches
+    DS_form_t dsform;
+    dsform.instruction = m_image;
+    if (Reg64(dsform.RA) == reg::r2) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * Auxiliary for isLwz and isAddis
+ */
+bool DecoderInfo::isDformOp(OpcodeNames opn, bool toc) const {
+  if ((m_form == Form::kD) && (m_opn == opn)) {
+    if (!toc) return true;
+
+    D_form_t dform;
+    dform.instruction = m_image;
+    if (Reg64(dform.RA) == reg::r2) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool DecoderInfo::isLwz(bool toc) const {
+  return isDformOp(OpcodeNames::op_lwz, toc);
+}
+
+bool DecoderInfo::isAddis(bool toc) const {
+  return isDformOp(OpcodeNames::op_addis, toc);
+}
+
+bool DecoderInfo::isOffsetBranch(AllowCond ac /* = AllowCond::Any */) const {
+  // ac: OnlyUncond
+  //   b, bl   - unconditional branches
   //  And also, if condition is "branch always" (BO field is 1x1xx):
-  //   bc, bca, bcctr, bcctrl, bcl, bcla, bclr, bclrl, bctar, bctarl
+  //   bc, bcl
+  //
+  // ac: Any
+  //   b, bl   - unconditional branches
+  //   bc, bcl - conditional branches
+  //
+  // ac: OnlyCond
+  //   bc, bcl - conditional branches and it can't be "branch always"
   //
   // (based on the branch instructions defined on this Decoder)
-  constexpr uint32_t uncondition_bo = 0x14;
-
   switch (m_opn) {
     case OpcodeNames::op_b:
-    case OpcodeNames::op_ba:
     case OpcodeNames::op_bl:
-      return true;
+      return (AllowCond::OnlyCond != ac);
       break;
     case OpcodeNames::op_bc:
-    case OpcodeNames::op_bca:
     case OpcodeNames::op_bcl:
-    case OpcodeNames::op_bcla:
-    case OpcodeNames::op_bclr:
-      if (!allowCond) {
+      {
         // checking if the condition is "always branch", then it counts as an
         // unconditional branch
         assert(m_form == Form::kB);
         B_form_t bform;
         bform.instruction = m_image;
-        return ((bform.BO & uncondition_bo) == uncondition_bo);
+        BranchParams uncondition_bp(BranchConditions::Always);
+
+        if (uncondition_bp.bo() == bform.BO) {
+          // not acceptable if it was required to have a condition
+          return (AllowCond::OnlyCond != ac);
+        } else {
+          // it's a conditional branch
+          return (AllowCond::OnlyUncond != ac);
+        }
+        break;
       }
-      return true;
+    default:
       break;
-    case OpcodeNames::op_bcctr:
+  }
+  return false;
+}
+
+/*
+ * True if bcctrl (as "branch always" condition) or bl
+ * False otherwise
+ */
+bool DecoderInfo::isBranchWithLR() const {
+  switch (m_opn) {
     case OpcodeNames::op_bcctrl:
-    case OpcodeNames::op_bclrl:
-    case OpcodeNames::op_bctar:
-    case OpcodeNames::op_bctarl:
-      if (!allowCond) {
+      {
         // checking if the condition is "always branch", then it counts as an
         // unconditional branch
         assert(m_form == Form::kXL);
         XL_form_t xlform;
         xlform.instruction = m_image;
-        return ((xlform.BT & uncondition_bo) == uncondition_bo);
+        BranchParams uncondition_bp(BranchConditions::Always);
+        return xlform.BT == uncondition_bp.bo();
       }
+      break;
+    case OpcodeNames::op_bl:
       return true;
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+
+bool DecoderInfo::isRegisterBranch(AllowCond ac /* = AllowCond::Any */) const {
+  // ac: Any
+  //   bcctr, bcctrl
+  //
+  // ac: OnlyUncond
+  //   bcctr, bcctrl - only if condition is "branch always" (BO field: 1x1xx)
+  //
+  // ac: OnlyCond
+  //   bcctr, bcctrl - only if condition is NOT "branch always" (BO field)
+  //
+  // NOTE: not considering bclr as it's more like a return than a branch
+  switch (m_opn) {
+    case OpcodeNames::op_bcctr:
+    case OpcodeNames::op_bcctrl:
+      {
+        // checking if the condition is "always branch", then it counts as an
+        // unconditional branch
+        assert(m_form == Form::kXL);
+        XL_form_t xlform;
+        xlform.instruction = m_image;
+        BranchParams uncondition_bp(BranchConditions::Always);
+        if (uncondition_bp.bo() == xlform.BT) {
+          // unconditional is only allowed if it's not OnlyCond
+          return (AllowCond::OnlyCond != ac);
+        } else {
+          // it's a conditional branch
+          return (AllowCond::OnlyUncond != ac);
+        }
+      }
       break;
     default:
       break;
@@ -444,6 +546,91 @@ int32_t DecoderInfo::offset() const {
   instr_d.instruction = m_image;
   // As the instruction is known, the immediate is a signed number of
   // 16bits, so to consider the sign, it must be casted to int16_t.
+  return static_cast<int16_t>(instr_d.D);
+}
+
+/*
+ * Return offset of a branch by offset like b or bc.
+ */
+int32_t DecoderInfo::branchOffset() const {
+  int32_t offset = 0;
+  switch (m_opn) {
+    case OpcodeNames::op_b:
+    case OpcodeNames::op_bl:
+      {
+        I_form_t iform;
+        iform.instruction = m_image;
+        // sign bit of LI
+        auto signBit = 1 << 25;
+        auto li = iform.LI << 2;
+        // sign-extend 32-bits from a 26-bit value, if negative
+        offset = (signBit & li) ? ((int32_t(-1) - ((1<<26)-1)) | li) : li;
+        break;
+      }
+    case OpcodeNames::op_bc:
+    case OpcodeNames::op_bcl:
+      {
+        B_form_t bform;
+        bform.instruction = m_image;
+        offset = int16_t(bform.BD << 2);
+        break;
+      }
+    default:
+      always_assert(false && "Instruction not expected.");
+      break;
+  }
+  return offset;
+}
+
+/*
+ * Set offset of a branch by offset like b or bc. Return that instruction
+ */
+PPC64Instr DecoderInfo::setBranchOffset(int32_t offset) const {
+  switch (m_opn) {
+    case OpcodeNames::op_b:
+    case OpcodeNames::op_bl:
+      {
+        I_form_t iform;
+        iform.instruction = m_image;
+        iform.LI = offset >> 2;
+        return iform.instruction;
+        break;
+      }
+    case OpcodeNames::op_bc:
+    case OpcodeNames::op_bcl:
+      {
+        B_form_t bform;
+        bform.instruction = m_image;
+        bform.BD = offset >> 2;
+        return bform.instruction;
+        break;
+      }
+    default:
+      always_assert(false && "Instruction not expected.");
+      return 0;
+      break;
+  }
+}
+/*
+ * Find the offset from instructions like ld, which was created by
+ * limmediate.
+ */
+int16_t DecoderInfo::offsetDS() const {
+  always_assert(m_form == Form::kDS && "Instruction not expected.");
+  DS_form_t instr_d;
+  instr_d.instruction = m_image;
+
+  return static_cast<int16_t>(instr_d.DS << 2);
+}
+
+/*
+ * Find the offset from instructions like lwz.
+ */
+int16_t DecoderInfo::offsetD() const {
+  always_assert(m_form == Form::kD && "Instruction not expected.");
+  D_form_t instr_d;
+  instr_d.instruction = m_image;
+
   return static_cast<int16_t>(instr_d.D);
 }
 

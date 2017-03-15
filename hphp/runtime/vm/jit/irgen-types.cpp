@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -295,6 +295,7 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
 
 DataType typeOpToDataType(IsTypeOp op) {
   switch (op) {
+  case IsTypeOp::Uninit: return KindOfUninit;
   case IsTypeOp::Null:   return KindOfNull;
   case IsTypeOp::Int:    return KindOfInt64;
   case IsTypeOp::Dbl:    return KindOfDouble;
@@ -565,6 +566,29 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
     push(env, gen(env, IsType, Type(t), val));
   }
 }
+
+void emitIsUninit(IRGS& env) {
+  push(env, gen(env, IsType, TUninit, topC(env)));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// These exist only for HHBBC optimizations, so always provide the conservative
+// result:
+
+void emitMaybeMemoType(IRGS& env) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  popDecRef(env);
+  push(env, cns(env, true));
+}
+
+void emitIsMemoType(IRGS& env) {
+  assertx(curFunc(env)->isMemoizeWrapper());
+  popDecRef(env);
+  push(env, cns(env, false));
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void emitAssertRATL(IRGS& env, int32_t loc, RepoAuthType rat) {
   if (auto const t = ratToAssertType(env, rat)) {

@@ -76,7 +76,7 @@ and terminal_cl tcopt nsenv ~in_try = function
   | Case (_, b) :: rl ->
     (try
       terminal tcopt nsenv ~in_try b;
-      if List.exists b (function Break _ -> true | _ -> false)
+      if blockHasBreak b
       then ()
       else raise Exit
     with Exit -> terminal_cl tcopt nsenv ~in_try rl)
@@ -85,6 +85,19 @@ and terminal_cl tcopt nsenv ~in_try = function
       | Exit ->
         terminal_cl tcopt nsenv ~in_try rl
     end
+
+and blockHasBreak = function
+  | [] -> false
+  | Break _ :: _ -> true
+  | x :: xs ->
+    let x' =
+      match x with
+      | If (_, [], []) -> false
+      | If (_, b, []) | If (_, [], b) -> blockHasBreak b
+      | If (_, b1, b2) -> blockHasBreak b1 && blockHasBreak b2
+      | _ -> false
+    in
+    x' || blockHasBreak xs
 
 let is_terminal tcopt nsenv stl =
   try terminal tcopt nsenv ~in_try:false stl; false

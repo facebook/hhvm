@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/server/http-server.h"
 
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
@@ -32,12 +33,14 @@
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/struct-log.h"
 
 #include <folly/Conv.h>
@@ -124,9 +127,9 @@ HttpServer::HttpServer()
     m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
-  ServerOptions admin_options
-    (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
-     RuntimeOption::AdminThreadCount);
+  ServerOptions admin_options(RuntimeOption::AdminServerIP,
+                              RuntimeOption::AdminServerPort,
+                              RuntimeOption::AdminThreadCount);
   admin_options.m_queueToWorkerRatio =
     RuntimeOption::AdminServerQueueToWorkerRatio;
   m_adminServer = serverFactory->createServer(admin_options);
@@ -151,7 +154,6 @@ HttpServer::HttpServer()
   }
 
   StaticContentCache::TheCache.load();
-  hphp_process_init();
 
   signal(SIGTERM, on_kill);
   signal(SIGUSR1, on_kill);
@@ -232,7 +234,45 @@ HttpServer::~HttpServer() {
   stop();
 }
 
+static StaticString s_file{"file"}, s_line{"line"};
+
 void HttpServer::runOrExitProcess() {
+  if (StaticContentCache::TheFileCache &&
+      StructuredLog::enabled() &&
+      StructuredLog::coinflip(RuntimeOption::EvalStaticContentsLogRate)) {
+    CacheManager::setLogger([](bool existsCheck, const std::string& name) {
+        auto record = StructuredLogEntry{};
+        record.setInt("existsCheck", existsCheck);
+        record.setStr("file", name);
+        bool needsCppStack = true;
+        if (!g_context.isNull()) {
+          VMRegAnchor _;
+          if (vmfp()) {
+            auto const bt =
+              createBacktrace(BacktraceArgs().withArgValues(false));
+            std::vector<std::string> frameStrings;
+            std::vector<folly::StringPiece> frames;
+            for (int i = 0; i < bt.size(); i++) {
+              auto f = bt.rvalAt(i).toArray();
+              if (f.exists(s_file)) {
+                std::string s = f.rvalAt(s_file).toString().toCppString();
+                if (f.exists(s_line)) {
+                  s += folly::sformat(":{}", f.rvalAt(s_line).toInt64());
+                }
+                frameStrings.emplace_back(std::move(s));
+                frames.push_back(frameStrings.back());
+              }
+            }
+            record.setVec("stack", frames);
+            needsCppStack = false;
+          }
+        }
+        if (needsCppStack) {
+          record.setStackTrace("stack", StackTrace{StackTrace::Force{}});
+        }
+        StructuredLog::log("hhvm_file_cache", record);
+      });
+  }
   auto startupFailure = [] (const std::string& msg) {
     Logger::Error(msg);
     Logger::Error("Shutting down due to failure(s) to bind in "
@@ -331,8 +371,6 @@ void HttpServer::runOrExitProcess() {
   waitForServers();
   m_watchDog.waitForEnd();
   playShutdownRequest(RuntimeOption::ServerCleanupRequest);
-  hphp_process_exit();
-  Logger::Info("all servers stopped");
 }
 
 void HttpServer::waitForServers() {
@@ -357,12 +395,27 @@ static void exit_on_timeout(int sig) {
   abort();
 }
 
+// Tell OOM killer to kill this process if it has to.  This is used during
+// server shutdown.  If we are dying anyway, let's try to protect others.
+static void oom_sacrifice() {
+#ifdef __linux__
+  // Use open() instead of fopen() here to avoid additional buffering and
+  // allocation, which could go wrong if memory is really limited.
+  int fd = open("/proc/self/oom_score_adj", O_WRONLY, 0);
+  if (fd >= 0) {
+    write(fd, "800", 3);
+    close(fd);
+  }
+#endif
+}
+
 void HttpServer::stop(const char* stopReason) {
   if (m_stopped) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
+  oom_sacrifice();
 
   if (RuntimeOption::ServerKillOnTimeout) {
     int totalWait =
@@ -404,6 +457,7 @@ void HttpServer::stopOnSignal(int sig) {
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
+  oom_sacrifice();
 
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM
@@ -515,7 +569,7 @@ void HttpServer::watchDog() {
 
 static bool sendAdminCommand(const char* cmd) {
   if (RuntimeOption::AdminServerPort <= 0) return false;
-  std::string host = RuntimeOption::ServerIP;
+  std::string host = RuntimeOption::AdminServerIP;
   if (host.empty()) host = "localhost";
   auto passwords = RuntimeOption::AdminPasswords;
   if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {

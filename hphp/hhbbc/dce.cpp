@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,20 +24,23 @@
 #include <set>
 
 #include <boost/dynamic_bitset.hpp>
+#include <boost/container/flat_map.hpp>
 
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
-#include "hphp/util/trace.h"
+#include "hphp/util/bitops.h"
 #include "hphp/util/dataflow-worklist.h"
+#include "hphp/util/trace.h"
 
-#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/cfg-opts.h"
+#include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
-#include "hphp/hhbbc/cfg.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -167,14 +170,24 @@ namespace {
 bool couldRunDestructor(const Type& t) {
   // We could check for specialized objects to see if they don't
   // declare a user-defined destructor, but currently don't.
-  return t.couldBe(TObj) || t.couldBe(TCArr) || t.couldBe(TRef);
+  return
+    t.couldBe(TObj) ||
+    t.couldBe(TRef) ||
+    t.couldBe(TCArrN) ||
+    t.couldBe(TCVecN) ||
+    t.couldBe(TCDictN);
 }
 
 // Returns whether a set on something containing type t could have
 // side-effects (running destuctors, or modifying arbitrary things via
 // a Ref).
 bool setCouldHaveSideEffects(const Type& t) {
-  return t.couldBe(TObj) || t.couldBe(TCArr) || t.couldBe(TRef);
+  return
+    t.couldBe(TObj) ||
+    t.couldBe(TRef) ||
+    t.couldBe(TCArrN) ||
+    t.couldBe(TCVecN) ||
+    t.couldBe(TCDictN);
 }
 
 // Some reads could raise warnings and run arbitrary code.
@@ -231,6 +244,13 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> liveLocals;
 
   /*
+   * Class-ref slots known to be live at a point in a DCE walk.  This is used
+   * when we're actually acting on information we discovered during liveness
+   * analysis.
+   */
+  std::bitset<kMaxTrackedClsRefSlots> liveSlots;
+
+  /*
    * These variable sets are used to compute the transfer function for
    * the global liveness analysis in global_dce.
    *
@@ -243,9 +263,9 @@ struct DceState {
    * conservative) set instead of kill when crossing a factored exit
    * edge.
    */
-  std::bitset<kMaxTrackedLocals> gen;
-  std::bitset<kMaxTrackedLocals> kill;
-  std::bitset<kMaxTrackedLocals> killBeforePEI;
+  std::bitset<kMaxTrackedLocals> locGen;
+  std::bitset<kMaxTrackedLocals> locKill;
+  std::bitset<kMaxTrackedLocals> locKillBeforePEI;
 
   /*
    * Instructions marked in this set are dead.  If any of them are
@@ -255,12 +275,20 @@ struct DceState {
   boost::dynamic_bitset<> markedDead{};
 
   /*
-   * The set of locals that were ever live in this block.  (This
-   * includes locals that were live going out of this block.)  This
-   * set is used by global DCE to remove locals that are completely
+   * The set of locals and class-ref slots that were ever live in this block.
+   * (This includes ones that were live going out of this block.)  This set is
+   * used by global DCE to remove locals and class-ref slots that are completely
    * unused in the entire function.
    */
   std::bitset<kMaxTrackedLocals> usedLocals;
+  std::bitset<kMaxTrackedClsRefSlots> usedSlots;
+
+  /*
+   * Mapping of class-ref slots to instruction sets. If the usage of a class-ref
+   * slot is removed, all the instructions currently in the set must also be
+   * removed.
+   */
+  std::vector<InstrIdSet> slotDependentInstrs;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -286,8 +314,8 @@ std::string DEBUG_ONLY show(const UseInfo& ui) {
   return folly::format("{}@{}", show(ui.first), show(ui.second)).str();
 }
 
-std::string DEBUG_ONLY bits_string(borrowed_ptr<const php::Func> func,
-                                   std::bitset<kMaxTrackedLocals> locs) {
+std::string DEBUG_ONLY loc_bits_string(borrowed_ptr<const php::Func> func,
+                                       std::bitset<kMaxTrackedLocals> locs) {
   std::ostringstream out;
   if (func->locals.size() < kMaxTrackedLocals) {
     for (auto i = func->locals.size(); i-- > 0;) {
@@ -295,6 +323,20 @@ std::string DEBUG_ONLY bits_string(borrowed_ptr<const php::Func> func,
     }
   } else {
     out << locs;
+  }
+  return out.str();
+}
+
+std::string DEBUG_ONLY
+slot_bits_string(borrowed_ptr<const php::Func> func,
+                 std::bitset<kMaxTrackedClsRefSlots> slots) {
+  std::ostringstream out;
+  if (func->numClsRefSlots < kMaxTrackedClsRefSlots) {
+    for (auto i = 0; i < func->numClsRefSlots; ++i) {
+      out << (slots.test(i) ? '1' : '0');
+    }
+  } else {
+    out << slots;
   }
   return out.str();
 }
@@ -330,7 +372,7 @@ void pop(Env& env) { pop(env, Use::Used, InstrIdSet{}); }
 
 Type topT(Env& env, uint32_t idx = 0) {
   assert(idx < env.stateBefore.stack.size());
-  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1];
+  return env.stateBefore.stack[env.stateBefore.stack.size() - idx - 1].type;
 }
 
 Type topC(Env& env, uint32_t idx = 0) {
@@ -411,33 +453,34 @@ void pushRemovable(Env& env) {
 //////////////////////////////////////////////////////////////////////
 // locals
 
-void addGenSet(Env& env, std::bitset<kMaxTrackedLocals> locs) {
-  FTRACE(4, "      conservative: {}\n", bits_string(env.dceState.func, locs));
+void addLocGenSet(Env& env, std::bitset<kMaxTrackedLocals> locs) {
+  FTRACE(4, "      loc-conservative: {}\n",
+         loc_bits_string(env.dceState.func, locs));
   env.dceState.liveLocals |= locs;
-  env.dceState.gen |= locs;
-  env.dceState.kill &= ~locs;
-  env.dceState.killBeforePEI &= ~locs;
+  env.dceState.locGen |= locs;
+  env.dceState.locKill &= ~locs;
+  env.dceState.locKillBeforePEI &= ~locs;
 }
 
-void addGen(Env& env, uint32_t id) {
-  FTRACE(2, "      gen: {}\n", id);
+void addLocGen(Env& env, uint32_t id) {
+  FTRACE(2, "      loc-gen: {}\n", id);
   if (id >= kMaxTrackedLocals) return;
   env.dceState.liveLocals[id] = 1;
-  env.dceState.gen[id] = 1;
-  env.dceState.kill[id] = 0;
-  env.dceState.killBeforePEI[id] = 0;
+  env.dceState.locGen[id] = 1;
+  env.dceState.locKill[id] = 0;
+  env.dceState.locKillBeforePEI[id] = 0;
 }
 
-void addKill(Env& env, uint32_t id) {
-  FTRACE(2, "     kill: {}\n", id);
+void addLocKill(Env& env, uint32_t id) {
+  FTRACE(2, "     loc-kill: {}\n", id);
   if (id >= kMaxTrackedLocals) return;
   env.dceState.liveLocals[id] = 0;
-  env.dceState.gen[id] = 0;
-  env.dceState.kill[id] = 1;
-  env.dceState.killBeforePEI[id] = 1;
+  env.dceState.locGen[id] = 0;
+  env.dceState.locKill[id] = 1;
+  env.dceState.locKillBeforePEI[id] = 1;
 }
 
-bool isLive(Env& env, uint32_t id) {
+bool isLocLive(Env& env, uint32_t id) {
   if (id >= kMaxTrackedLocals) {
     // Conservatively assume it's potentially live.
     return true;
@@ -445,16 +488,55 @@ bool isLive(Env& env, uint32_t id) {
   return env.dceState.liveLocals[id];
 }
 
-Type locRaw(Env& env, borrowed_ptr<php::Local> loc) {
-  return env.stateBefore.locals[loc->id];
+Type locRaw(Env& env, LocalId loc) {
+  return env.stateBefore.locals[loc];
 }
 
 void readDtorLocs(Env& env) {
   for (auto i = size_t{0}; i < env.stateBefore.locals.size(); ++i) {
     if (couldRunDestructor(env.stateBefore.locals[i])) {
-      addGen(env, i);
+      addLocGen(env, i);
     }
   }
+}
+
+//////////////////////////////////////////////////////////////////////
+// class-ref slots
+
+void readSlot(Env& env, uint32_t id) {
+  FTRACE(2, "     read-slot: {}\n", id);
+  if (id >= kMaxTrackedClsRefSlots) return;
+  env.dceState.liveSlots[id] = 1;
+  env.dceState.usedSlots[id] = 1;
+  env.dceState.slotDependentInstrs[id].clear();
+}
+
+// Read a slot, but in a usage that is discardable. If this read actually is
+// discarded, then also discard the given instructions.
+void readSlotDiscardable(Env& env, uint32_t id, InstrIdSet instrs) {
+  FTRACE(2, "     read-slot (discardable): {}\n", id);
+  if (id >= kMaxTrackedClsRefSlots) return;
+  env.dceState.liveSlots[id] = 0;
+  env.dceState.usedSlots[id] = 1;
+  instrs.insert(env.id);
+  env.dceState.slotDependentInstrs[id] = std::move(instrs);
+}
+
+void writeSlot(Env& env, uint32_t id) {
+  FTRACE(2, "     write-slot: {}\n", id);
+  if (id >= kMaxTrackedClsRefSlots) return;
+  env.dceState.liveSlots[id] = 0;
+  env.dceState.usedSlots[id] = 1;
+  env.dceState.slotDependentInstrs[id].clear();
+}
+
+bool isSlotLive(Env& env, uint32_t id) {
+  if (id >= kMaxTrackedClsRefSlots) return true;
+  return env.dceState.liveSlots[id];
+}
+
+InstrIdSet slotDependentInstrs(Env& env, uint32_t id) {
+  return env.dceState.slotDependentInstrs[id];
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -475,27 +557,79 @@ void readDtorLocs(Env& env) {
  * eliminating the CGetL.
  */
 
-void dce(Env& env, const bc::PopC&)       { discardNonDtors(env); }
+void dce(Env& env, const bc::PopC&)          { discardNonDtors(env); }
 // For PopV and PopR currently we never know if can't run a
 // destructor.
-void dce(Env& env, const bc::PopA&)       { discard(env); }
-void dce(Env& env, const bc::Int&)        { pushRemovable(env); }
-void dce(Env& env, const bc::String&)     { pushRemovable(env); }
-void dce(Env& env, const bc::Array&)      { pushRemovable(env); }
-void dce(Env& env, const bc::Dict&)       { pushRemovable(env); }
-void dce(Env& env, const bc::Vec&)        { pushRemovable(env); }
-void dce(Env& env, const bc::Keyset&)     { pushRemovable(env); }
-void dce(Env& env, const bc::Double&)     { pushRemovable(env); }
-void dce(Env& env, const bc::True&)       { pushRemovable(env); }
-void dce(Env& env, const bc::False&)      { pushRemovable(env); }
-void dce(Env& env, const bc::Null&)       { pushRemovable(env); }
-void dce(Env& env, const bc::NullUninit&) { pushRemovable(env); }
-void dce(Env& env, const bc::File&)       { pushRemovable(env); }
-void dce(Env& env, const bc::Dir&)        { pushRemovable(env); }
-void dce(Env& env, const bc::NameA&)      { popCond(env, push(env)); }
-void dce(Env& env, const bc::NewArray&)   { pushRemovable(env); }
-void dce(Env& env, const bc::NewCol&)     { pushRemovable(env); }
-void dce(Env& env, const bc::AGetC&)      { popCond(env, push(env)); }
+void dce(Env& env, const bc::PopU&)          { discard(env); }
+void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
+void dce(Env& env, const bc::String&)        { pushRemovable(env); }
+void dce(Env& env, const bc::Array&)         { pushRemovable(env); }
+void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }
+void dce(Env& env, const bc::Vec&)           { pushRemovable(env); }
+void dce(Env& env, const bc::Keyset&)        { pushRemovable(env); }
+void dce(Env& env, const bc::Double&)        { pushRemovable(env); }
+void dce(Env& env, const bc::True&)          { pushRemovable(env); }
+void dce(Env& env, const bc::False&)         { pushRemovable(env); }
+void dce(Env& env, const bc::Null&)          { pushRemovable(env); }
+void dce(Env& env, const bc::NullUninit&)    { pushRemovable(env); }
+void dce(Env& env, const bc::File&)          { pushRemovable(env); }
+void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
+void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
+void dce(Env& env, const bc::NewDictArray&)  { pushRemovable(env); }
+void dce(Env& env, const bc::NewMixedArray&) { pushRemovable(env); }
+void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
+void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
+
+void dce(Env& env, const bc::ClsRefName& op) {
+  // If the usage of the name is discardable, then so is this read of the
+  // class-ref.
+  auto ui = push(env);
+  switch (ui.first) {
+    case Use::Not:
+      readSlotDiscardable(env, op.slot, std::move(ui.second));
+      break;
+    case Use::UsedIfLastRef:
+    case Use::Used:
+      readSlot(env, op.slot);
+      break;
+  }
+}
+
+void dce(Env& env, const bc::ClsRefGetC& op) {
+  // If the usage of this class-ref slot is dead, then it can be potentially be
+  // removed if the source is dead as well.
+  if (!isSlotLive(env, op.slot)) {
+    auto instrs = slotDependentInstrs(env, op.slot);
+    instrs.insert(env.id);
+    writeSlot(env, op.slot);
+    return pop(
+      env,
+      couldRunDestructor(topC(env)) ? Use::UsedIfLastRef : Use::Not,
+      std::move(instrs)
+    );
+  }
+  writeSlot(env, op.slot);
+  pop(env);
+}
+
+void dce(Env& env, const bc::ClsRefGetL& op) {
+  auto const ty = locRaw(env, op.loc1);
+  addLocGen(env, op.loc1);
+
+  if (!isSlotLive(env, op.slot) && !readCouldHaveSideEffects(ty)) {
+    auto instrs = slotDependentInstrs(env, op.slot);
+    instrs.insert(env.id);
+    writeSlot(env, op.slot);
+    markSetDead(env, std::move(instrs));
+    return;
+  }
+
+  writeSlot(env, op.slot);
+}
+
+void dce(Env& env, const bc::DiscardClsRef& op) {
+  readSlotDiscardable(env, op.slot, InstrIdSet{});
+}
 
 void dce(Env& env, const bc::Dup&) {
   auto const u1 = push(env);
@@ -530,7 +664,7 @@ void dce(Env& env, const bc::Dup&) {
 
 void dce(Env& env, const bc::CGetL& op) {
   auto const ty = locRaw(env, op.loc1);
-  addGen(env, op.loc1->id);
+  addLocGen(env, op.loc1);
   if (readCouldHaveSideEffects(ty)) {
     push(env);
   } else {
@@ -540,28 +674,13 @@ void dce(Env& env, const bc::CGetL& op) {
 
 void dce(Env& env, const bc::CGetL2& op) {
   auto const ty = locRaw(env, op.loc1);
-  addGen(env, op.loc1->id);
+  addLocGen(env, op.loc1);
   auto const u1 = push(env);
   auto const u2 = push(env);
   if (readCouldHaveSideEffects(ty)) {
     pop(env);
   } else {
     popCond(env, u1, u2);
-  }
-}
-
-void dce(Env& env, const bc::CGetL3& op) {
-  auto const ty = locRaw(env, op.loc1);
-  addGen(env, op.loc1->id);
-  auto const u1 = push(env);
-  auto const u2 = push(env);
-  auto const u3 = push(env);
-  if (readCouldHaveSideEffects(ty)) {
-    pop(env);
-    pop(env);
-  } else {
-    popCond(env, u1, u2, u3);
-    popCond(env, u1, u2, u3);
   }
 }
 
@@ -573,13 +692,13 @@ void dce(Env& env, const bc::Exit&)  { push(env); pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::SetL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setCouldHaveSideEffects(oldTy);
-  if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
+  if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
   push(env);
   pop(env);
   if (effects) {
-    addGen(env, op.loc1->id);
+    addLocGen(env, op.loc1);
   } else {
-    addKill(env, op.loc1->id);
+    addLocKill(env, op.loc1);
   }
 }
 
@@ -587,11 +706,11 @@ void dce(Env& env, const bc::UnsetL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setCouldHaveSideEffects(oldTy);
   if (oldTy.subtypeOf(TUninit)) return markDead(env);
-  if (!isLive(env, op.loc1->id) && !effects) return markDead(env);
+  if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
   if (effects) {
-    addGen(env, op.loc1->id);
+    addLocGen(env, op.loc1);
   } else {
-    addKill(env, op.loc1->id);
+    addLocKill(env, op.loc1);
   }
 }
 
@@ -606,10 +725,10 @@ void dce(Env& env, const bc::IncDecL& op) {
   auto const effects = setCouldHaveSideEffects(oldTy) ||
                          readCouldHaveSideEffects(oldTy);
   auto const u1      = push(env);
-  if (!isLive(env, op.loc1->id) && !effects && allUnused(u1)) {
+  if (!isLocLive(env, op.loc1) && !effects && allUnused(u1)) {
     return markSetDead(env, u1.second);
   }
-  addGen(env, op.loc1->id);
+  addLocGen(env, op.loc1);
 }
 
 /*
@@ -623,13 +742,13 @@ void dce(Env& env, const bc::SetOpL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setCouldHaveSideEffects(oldTy) ||
                          readCouldHaveSideEffects(oldTy);
-  if (!isLive(env, op.loc1->id) && !effects) {
+  if (!isLocLive(env, op.loc1) && !effects) {
     popCond(env, push(env));
   } else {
     push(env);
     pop(env);
   }
-  addGen(env, op.loc1->id);
+  addLocGen(env, op.loc1);
 }
 
 /*
@@ -639,16 +758,34 @@ void dce(Env& env, const bc::SetOpL& op) {
  * We also assume all the locals in the mayReadLocalSet must be
  * added to the live local set, and don't remove anything from it.
  */
+
+template<typename Op>
+typename std::enable_if<has_car<Op>::value,void>::type
+dce_slot_default(Env& env, const Op& op) {
+  readSlot(env, op.slot);
+}
+
+template<typename Op>
+typename std::enable_if<has_caw<Op>::value,void>::type
+dce_slot_default(Env& env, const Op& op) {
+  writeSlot(env, op.slot);
+}
+
+template<typename Op>
+typename std::enable_if<!has_car<Op>::value && !has_caw<Op>::value,void>::type
+dce_slot_default(Env& env, const Op& op) {}
+
 template<class Op>
 void dce(Env& env, const Op& op) {
-  addGenSet(env, env.flags.mayReadLocalSet);
+  addLocGenSet(env, env.flags.mayReadLocalSet);
   env.dceState.liveLocals |= env.flags.mayReadLocalSet;
   for (auto i = uint32_t{0}; i < op.numPush(); ++i) {
     push(env);
   }
   for (auto i = uint32_t{0}; i < op.numPop(); ++i) {
-    pop(env, Use::Used, InstrIdSet{});
+    pop(env);
   }
+  dce_slot_default(env, op);
 }
 
 void dispatch_dce(Env& env, const Bytecode& op) {
@@ -662,11 +799,11 @@ void dispatch_dce(Env& env, const Bytecode& op) {
 
 folly::Optional<DceState>
 dce_visit(const Index& index,
-          Context const ctx,
+          const FuncAnalysis& fa,
           borrowed_ptr<const php::Block> const blk,
           const State& stateIn,
-          std::bitset<kMaxTrackedLocals> liveOut,
-          std::bitset<kMaxTrackedLocals> liveOutExn) {
+          std::bitset<kMaxTrackedLocals> locLiveOut,
+          std::bitset<kMaxTrackedLocals> locLiveOutExn) {
   if (!stateIn.initialized) {
     /*
      * Skip unreachable blocks.
@@ -680,22 +817,24 @@ dce_visit(const Index& index,
     return folly::none;
   }
 
-  auto const states = locally_propagated_states(index, ctx, blk, stateIn);
+  auto const states = locally_propagated_states(index, fa, blk, stateIn);
 
   auto dceState = DceState{};
-  dceState.func = ctx.func;
+  dceState.func = fa.ctx.func;
   dceState.markedDead.resize(blk->hhbcs.size());
-  dceState.liveLocals = liveOut;
+  dceState.liveLocals = locLiveOut;
+  dceState.liveSlots.set();
   dceState.stack.resize(states.back().first.stack.size());
-  dceState.usedLocals = liveOut;
+  dceState.usedLocals = locLiveOut;
   for (auto& s : dceState.stack) {
     s = UseInfo { Use::Used, InstrIdSet{} };
   }
+  dceState.slotDependentInstrs.resize(states.back().first.clsRefSlots.size());
 
   for (auto idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
-    FTRACE(2, "  == #{} {}\n", idx, show(op));
+    FTRACE(2, "  == #{} {}\n", idx, show(fa.ctx.func, op));
 
     auto visit_env = Env {
       dceState,
@@ -713,8 +852,9 @@ dce_visit(const Index& index,
      */
     if (states[idx].second.wasPEI) {
       FTRACE(2, "    <-- exceptions\n");
-      dceState.liveLocals |= liveOutExn;
-      dceState.killBeforePEI.reset();
+      dceState.liveLocals |= locLiveOutExn;
+      dceState.liveSlots.set();
+      dceState.locKillBeforePEI.reset();
     }
 
     dceState.usedLocals |= dceState.liveLocals;
@@ -731,8 +871,24 @@ dce_visit(const Index& index,
       [&] {
         using namespace folly::gen;
         return from(states[idx].first.stack)
-          | map([&] (const Type& t) { return show(t); })
+          | map([&] (const StackElem& e) { return show(e.type); })
           | unsplit<std::string>(" ");
+      }()
+    );
+
+    FTRACE(4, "    cls-ref slots: {}\n{}\n",
+      slot_bits_string(dceState.func, dceState.liveSlots),
+      [&]{
+        using namespace folly::gen;
+        auto i = uint32_t{0};
+        return from(dceState.slotDependentInstrs)
+          | mapped(
+            [&] (const InstrIdSet& s) {
+              if (s.empty()) return std::string{};
+              return folly::sformat("  {}: [{}]\n",
+                                    i++, show(s));
+            })
+          | unsplit<std::string>("");
       }()
     );
 
@@ -745,40 +901,48 @@ dce_visit(const Index& index,
 }
 
 struct DceAnalysis {
-  std::bitset<kMaxTrackedLocals> gen;
-  std::bitset<kMaxTrackedLocals> kill;
-  std::bitset<kMaxTrackedLocals> killExn;
+  std::bitset<kMaxTrackedLocals> locGen;
+  std::bitset<kMaxTrackedLocals> locKill;
+  std::bitset<kMaxTrackedLocals> locKillExn;
 };
 
 DceAnalysis analyze_dce(const Index& index,
-                        Context const ctx,
+                        const FuncAnalysis& fa,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn) {
   // During this analysis pass, we have to assume everything could be
   // live out, so we set allLive here.  (Later we'll determine the
   // real liveOut sets.)
-  auto allLive = std::bitset<kMaxTrackedLocals>{};
-  allLive.set();
-  if (auto dceState = dce_visit(index, ctx, blk, stateIn, allLive, allLive)) {
+  auto allLocLive = std::bitset<kMaxTrackedLocals>{};
+  allLocLive.set();
+  if (auto dceState = dce_visit(index, fa, blk, stateIn,
+                                allLocLive, allLocLive)) {
     return DceAnalysis {
-      dceState->gen,
-      dceState->kill,
-      dceState->killBeforePEI
+      dceState->locGen,
+      dceState->locKill,
+      dceState->locKillBeforePEI
     };
   }
   return DceAnalysis {};
 }
 
-std::bitset<kMaxTrackedLocals>
+std::pair<std::bitset<kMaxTrackedLocals>,
+          std::bitset<kMaxTrackedClsRefSlots>>
 optimize_dce(const Index& index,
-             Context const ctx,
+             const FuncAnalysis& fa,
              borrowed_ptr<php::Block> const blk,
              const State& stateIn,
-             std::bitset<kMaxTrackedLocals> liveOut,
-             std::bitset<kMaxTrackedLocals> liveOutExn) {
-  auto const dceState = dce_visit(index, ctx, blk,
-    stateIn, liveOut, liveOutExn);
-  if (!dceState) return std::bitset<kMaxTrackedLocals>{};
+             std::bitset<kMaxTrackedLocals> locLiveOut,
+             std::bitset<kMaxTrackedLocals> locLiveOutExn) {
+  auto const dceState = dce_visit(
+    index, fa, blk,
+    stateIn, locLiveOut,
+    locLiveOutExn
+  );
+  if (!dceState) {
+    return {std::bitset<kMaxTrackedLocals>{},
+            std::bitset<kMaxTrackedClsRefSlots>{}};
+  }
 
   // Remove all instructions that were marked dead, and replace
   // instructions that can be replaced with pops but aren't dead.
@@ -792,7 +956,7 @@ optimize_dce(const Index& index,
     blk->hhbcs.push_back(bc::Nop {});
   }
 
-  return dceState->usedLocals;
+  return {dceState->usedLocals, dceState->usedSlots};
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -813,25 +977,96 @@ void remove_unused_locals(Context const ctx,
    */
   if (func->isClosureBody) return;
 
-  func->locals.erase(
-    std::remove_if(
-      begin(func->locals) + func->params.size(),
-      end(func->locals),
-      [&] (const std::unique_ptr<php::Local>& l) {
-        if (l->id < kMaxTrackedLocals && !usedLocals.test(l->id)) {
-          FTRACE(2, "  removing: {}\n", local_string(borrow(l)));
-          return true;
-        }
-        return false;
-      }
-    ),
-    end(func->locals)
+  for (auto loc = func->locals.begin() + func->params.size();
+       loc != func->locals.end(); ++loc) {
+    if (loc->killed) {
+      assert(loc->id < kMaxTrackedLocals && !usedLocals.test(loc->id));
+      continue;
+    }
+    if (loc->id < kMaxTrackedLocals && !usedLocals.test(loc->id)) {
+      FTRACE(2, "  killing: {}\n", local_string(*func, loc->id));
+      const_cast<php::Local&>(*loc).killed = true;
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+struct WritableClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId*> {
+  template<class T>
+  typename std::enable_if<
+    !has_car<T>::value && !has_caw<T>::value, ClsRefSlotId*
+  >::type
+  operator()(T& t) const { return nullptr; }
+
+  template<class T>
+  typename std::enable_if<
+    has_car<T>::value || has_caw<T>::value, ClsRefSlotId*
+  >::type
+  operator()(T& t) const { return &t.slot; }
+};
+
+}
+
+// Remove totally unused class-ref slots. Shift any usages downward so we can
+// reduce the total number of class-ref slots needed.
+void remove_unused_clsref_slots(Context const ctx,
+                                std::bitset<kMaxTrackedClsRefSlots> usedSlots) {
+  if (!options.RemoveUnusedClsRefSlots) return;
+  auto func = ctx.func;
+
+  auto numSlots = func->numClsRefSlots;
+  if (numSlots > kMaxTrackedClsRefSlots) return;
+
+  auto unusedSlots = usedSlots;
+  unusedSlots.flip();
+
+  // Construct a mapping of class-ref slots that should be rewritten to a
+  // different one. For each totally unused class-ref slot, rewrite a higher
+  // (used) class-ref to it.
+  boost::container::flat_map<size_t, size_t> rewrites;
+  while (numSlots > 0) {
+    if (!unusedSlots[numSlots - 1]) {
+      auto const unused = bitset_find_first(unusedSlots);
+      if (unused >= numSlots) break;
+      unusedSlots[unused] = false;
+      unusedSlots[numSlots - 1] = true;
+      rewrites[numSlots - 1] = unused;
+    }
+    --numSlots;
+  }
+
+  FTRACE(2, "    cls-ref rewrites: {}\n",
+    [&]{
+      using namespace folly::gen;
+      return from(rewrites)
+        | mapped(
+          [&] (const std::pair<size_t, size_t>& p) {
+            return folly::sformat("{}->{}", p.first, p.second);
+          })
+        | unsplit<std::string>(";");
+    }()
   );
 
-  // Fixup local ids, in case we removed any.
-  for (auto i = uint32_t{0}; i < func->locals.size(); ++i) {
-    func->locals[i]->id = i;
+  // Do the actually rewriting
+  if (!rewrites.empty()) {
+    for (auto& block : func->blocks) {
+      for (auto& bcop : block->hhbcs) {
+        if (auto* slot = visit(bcop, WritableClsRefSlotVisitor{})) {
+          auto const iter = rewrites.find(*slot);
+          if (iter == rewrites.end()) continue;
+          auto const oldOp = bcop;
+          *slot = iter->second;
+          FTRACE(4, "    rewriting {} to {}\n",
+                 show(func, oldOp), show(func, bcop));
+        }
+      }
+    }
   }
+
+  func->numClsRefSlots = numSlots;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -847,9 +1082,10 @@ void local_dce(const Index& index,
 
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
-  auto allLive = std::bitset<kMaxTrackedLocals>();
-  allLive.set();
-  optimize_dce(index, ainfo.ctx, blk, stateIn, allLive, allLive);
+  auto allLocLive = std::bitset<kMaxTrackedLocals>();
+  allLocLive.set();
+  optimize_dce(index, ainfo, blk, stateIn,
+               allLocLive, allLocLive);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -868,8 +1104,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto i = uint32_t{0};
     return from(ai.ctx.func->locals)
       | mapped(
-        [&] (const std::unique_ptr<php::Local>& l) {
-          return folly::sformat("  {} {}\n", i++, local_string(borrow(l)));
+        [&] (const php::Local& l) {
+          return folly::sformat("  {} {}\n",
+                                i++, local_string(*ai.ctx.func, l.id));
         })
       | unsplit<std::string>("");
   }());
@@ -888,7 +1125,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     FTRACE(2, "block #{}\n", b->id);
     auto const dinfo = analyze_dce(
       index,
-      ai.ctx,
+      ai,
       b,
       ai.bdata[b->id].stateIn
     );
@@ -903,8 +1140,8 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * exceptional successor.
    */
   struct BlockState {
-    std::bitset<kMaxTrackedLocals> liveOut;
-    std::bitset<kMaxTrackedLocals> liveOutExn;
+    std::bitset<kMaxTrackedLocals> locLiveOut;
+    std::bitset<kMaxTrackedLocals> locLiveOutExn;
   };
   std::vector<BlockState> blockStates(ai.rpoBlocks.size());
 
@@ -938,11 +1175,12 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     FTRACE(2, "block #{}\n", blk->id);
 
-    auto const liveOut    = blockStates[rpoId(blk)].liveOut;
-    auto const liveOutExn = blockStates[rpoId(blk)].liveOutExn;
-    auto const transfer   = blockAnalysis[rpoId(blk)];
-    auto const liveIn     = transfer.gen | (liveOut & ~transfer.kill)
-                                         | (liveOutExn & ~transfer.killExn);
+    auto const locLiveOut    = blockStates[rpoId(blk)].locLiveOut;
+    auto const locLiveOutExn = blockStates[rpoId(blk)].locLiveOutExn;
+    auto const transfer      = blockAnalysis[rpoId(blk)];
+    auto const liveIn        = transfer.locGen |
+                               (locLiveOut & ~transfer.locKill) |
+                               (locLiveOutExn & ~transfer.locKillExn);
 
     FTRACE(2, "live out : {}\n"
               "out exn  : {}\n"
@@ -950,18 +1188,18 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
               "kill     : {}\n"
               "kill exn : {}\n"
               "live in  : {}\n",
-              bits_string(ai.ctx.func, liveOut),
-              bits_string(ai.ctx.func, liveOutExn),
-              bits_string(ai.ctx.func, transfer.gen),
-              bits_string(ai.ctx.func, transfer.kill),
-              bits_string(ai.ctx.func, transfer.killExn),
-              bits_string(ai.ctx.func, liveIn));
+              loc_bits_string(ai.ctx.func, locLiveOut),
+              loc_bits_string(ai.ctx.func, locLiveOutExn),
+              loc_bits_string(ai.ctx.func, transfer.locGen),
+              loc_bits_string(ai.ctx.func, transfer.locKill),
+              loc_bits_string(ai.ctx.func, transfer.locKillExn),
+              loc_bits_string(ai.ctx.func, liveIn));
 
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
     for (auto& pred : normalPreds[blk->id]) {
       FTRACE(2, "  -> {}\n", pred->id);
-      auto& predState = blockStates[rpoId(pred)].liveOut;
+      auto& predState = blockStates[rpoId(pred)].locLiveOut;
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
@@ -974,7 +1212,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     // liveOutExn state, so again reschedule if it changes.
     for (auto& pred : factoredPreds[blk->id]) {
       FTRACE(2, "  => {}\n", pred->id);
-      auto& predState = blockStates[rpoId(pred)].liveOutExn;
+      auto& predState = blockStates[rpoId(pred)].locLiveOutExn;
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
@@ -989,138 +1227,26 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    */
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
   std::bitset<kMaxTrackedLocals> usedLocals;
+  std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
-    usedLocals |= optimize_dce(
+    auto const used = optimize_dce(
       index,
-      ai.ctx,
+      ai,
       b,
       ai.bdata[b->id].stateIn,
-      blockStates[rpoId(b)].liveOut,
-      blockStates[rpoId(b)].liveOutExn
+      blockStates[rpoId(b)].locLiveOut,
+      blockStates[rpoId(b)].locLiveOutExn
     );
+    usedLocals |= used.first;
+    usedSlots  |= used.second;
   }
 
-  FTRACE(1, "  used locals: {}\n", bits_string(ai.ctx.func, usedLocals));
+  FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);
-}
 
-//////////////////////////////////////////////////////////////////////
-
-void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
-  auto reachable = [&](php::Block& b) {
-    return ainfo.bdata[b.id].stateIn.initialized;
-  };
-
-  for (auto& blk : ainfo.rpoBlocks) {
-    if (reachable(*blk)) continue;
-    auto const srcLoc = blk->hhbcs.front().srcLoc;
-    blk->hhbcs = {
-      bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
-      bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
-    };
-    blk->fallthrough = nullptr;
-  }
-
-  if (!options.RemoveDeadBlocks) return;
-
-  for (auto& blk : ainfo.rpoBlocks) {
-    auto reachableTargets = false;
-    forEachTakenEdge(blk->hhbcs.back(), [&] (php::Block& target) {
-        if (reachable(target)) reachableTargets = true;
-      });
-    if (reachableTargets) continue;
-    switch (blk->hhbcs.back().op) {
-    case Op::JmpNZ:
-    case Op::JmpZ:
-      blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
-      break;
-    default:
-      break;
-    }
-  }
-}
-
-bool merge_blocks(const FuncAnalysis& ainfo) {
-  auto& func = *ainfo.ctx.func;
-  FTRACE(2, "merge_blocks: {}\n", func.name);
-
-  boost::dynamic_bitset<> hasPred(func.nextBlockId);
-  boost::dynamic_bitset<> multiplePreds(func.nextBlockId);
-  boost::dynamic_bitset<> multipleSuccs(func.nextBlockId);
-  boost::dynamic_bitset<> removed(func.nextBlockId);
-  auto reachable = [&](php::Block& b) {
-    auto const& state = ainfo.bdata[b.id].stateIn;
-    return state.initialized && !state.unreachable;
-  };
-  // find all the blocks with multiple preds; they can't be merged
-  // into their predecessors
-  for (auto& blk : func.blocks) {
-    int numSucc = 0;
-    if (!reachable(*blk)) multiplePreds[blk->id] = true;
-    forEachSuccessor(*blk, [&](php::Block& succ) {
-        if (hasPred[succ.id]) {
-          multiplePreds[succ.id] = true;
-        } else {
-          hasPred[succ.id] = true;
-        }
-        numSucc++;
-      });
-    if (numSucc > 1) multipleSuccs[blk->id] = true;
-  }
-  multiplePreds[func.mainEntry->id] = true;
-  for (auto& blk: func.dvEntries) {
-    if (blk) {
-      multiplePreds[blk->id] = true;
-    }
-  }
-
-  bool removedAny = false;
-  for (auto& blk : func.blocks) {
-    while (auto nxt = blk->fallthrough) {
-      if (multipleSuccs[blk->id] ||
-          multiplePreds[nxt->id] ||
-          blk->exnNode != nxt->exnNode ||
-          blk->section != nxt->section) {
-        break;
-      }
-
-      FTRACE(1, "merging: {} into {}\n", (void*)nxt, (void*)blk.get());
-      multipleSuccs[blk->id] = multipleSuccs[nxt->id];
-      blk->fallthrough = nxt->fallthrough;
-      blk->fallthroughNS = nxt->fallthroughNS;
-      if (nxt->factoredExits.size()) {
-        if (blk->factoredExits.size()) {
-          std::set<borrowed_ptr<php::Block>> exitSet;
-          std::copy(begin(blk->factoredExits), end(blk->factoredExits),
-                    std::inserter(exitSet, begin(exitSet)));
-          std::copy(nxt->factoredExits.begin(), nxt->factoredExits.end(),
-                    std::inserter(exitSet, begin(exitSet)));
-          blk->factoredExits.clear();
-          std::copy(begin(exitSet), end(exitSet),
-                    std::back_inserter(blk->factoredExits));
-        } else {
-          blk->factoredExits = std::move(nxt->factoredExits);
-        }
-      }
-      std::copy(nxt->hhbcs.begin(), nxt->hhbcs.end(),
-                std::back_inserter(blk->hhbcs));
-      nxt->fallthrough = nullptr;
-      removed[nxt->id] = removedAny = true;
-    }
-  }
-
-  if (!removedAny) return false;
-
-  func.blocks.erase(std::remove_if(func.blocks.begin(), func.blocks.end(),
-                                   [&](std::unique_ptr<php::Block>& blk) {
-                                     return removed[blk->id];
-                                   }), func.blocks.end());
-  func.nextBlockId = 0;
-  for (auto& blk : func.blocks) {
-    blk->id = func.nextBlockId++;
-  }
-  return true;
+  FTRACE(1, "  used slots: {}\n", slot_bits_string(ai.ctx.func, usedSlots));
+  remove_unused_clsref_slots(ai.ctx, usedSlots);
 }
 
 //////////////////////////////////////////////////////////////////////

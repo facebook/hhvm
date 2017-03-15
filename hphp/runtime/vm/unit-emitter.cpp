@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/disas.h"
@@ -501,8 +502,16 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   }
 }
 
+ServiceData::ExportedTimeSeries* g_hhbc_size = ServiceData::createTimeSeries(
+  "vm.hhbc-size",
+  {ServiceData::StatsType::AVG,
+   ServiceData::StatsType::SUM,
+   ServiceData::StatsType::COUNT}
+);
+
 static const unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
+  g_hhbc_size->addValue(bclen);
   if (RuntimeOption::RepoAuthoritative) {
     // In RepoAuthoritative, we assume we won't ever deallocate units
     // and that this is read-only, mostly cold data.  So we throw it
@@ -831,6 +840,10 @@ std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
   if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
+
+  if (RuntimeOption::XenonTraceUnitLoad) {
+    Xenon::getInstance().logNoSurprise(Xenon::UnitLoadEvent, name.c_str());
+  }
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {

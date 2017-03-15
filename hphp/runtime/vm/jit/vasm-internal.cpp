@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -143,23 +143,44 @@ bool is_empty_catch(const Vblock& block) {
 }
 
 void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
-  bool const is_empty = is_empty_catch(env.unit.blocks[p.target]);
+  // If the catch block is empty, we can just let tc_unwind_resume() and
+  // tc_unwind_personality() skip over our frame.
+  if (is_empty_catch(env.unit.blocks[p.target])) return;
 
-  auto const catch_target = is_empty
-    ? tc::ustubs().endCatchHelper
-    : env.addrs[p.target];
+  auto const catch_target = env.addrs[p.target];
   assertx(catch_target);
-
   env.meta.catches.emplace_back(p.instr, catch_target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
+namespace {
+
+/*
+ * Record in ProfData that the control-transfer instruction `jmp' is associated
+ * with the current translation being emitted.
+ */
+void setJmpTransID(Venv& env, TCA jmp) {
+  if (!env.unit.context) return;
+
+  env.meta.setJmpTransID(
+    jmp, env.unit.context->transID, env.unit.context->kind
+  );
+}
+
+void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {
   auto const incoming = cc == CC_None ? IncomingBranch::jmpFrom(jmp)
                                       : IncomingBranch::jccFrom(jmp);
 
   env.meta.inProgressTailJumps.push_back(incoming);
+}
+
+}
+
+bool emit(Venv& env, const callphp& i) {
+  const auto call = emitSmashableCall(*env.cb, env.meta, i.stub);
+  setJmpTransID(env, call);
+  return true;
 }
 
 bool emit(Venv& env, const bindjmp& i) {
@@ -180,7 +201,7 @@ bool emit(Venv& env, const bindjcc& i) {
 bool emit(Venv& env, const bindaddr& i) {
   env.stubs.push_back({nullptr, nullptr, i});
   setJmpTransID(env, TCA(i.addr.get()));
-  env.meta.codePointers.insert(i.addr.get());
+  env.meta.codePointers.emplace(i.addr.get());
   return true;
 }
 
@@ -234,7 +255,12 @@ void emit_svcreq_stub(Venv& env, const Venv::SvcReqPatch& p) {
         stub = svcreq::emit_bindaddr_stub(frozen, env.text.data(),
                                           env.meta, i.spOff, i.addr.get(),
                                           i.target, TransFlags{});
-        *i.addr.get() = stub;
+        // The bound pointer may not belong to the data segment, as is the case
+        // with SSwitchMap (see #10347945)
+        auto realAddr = env.text.data().contains((TCA)i.addr.get())
+          ? (TCA*)env.text.data().toDestAddress((TCA)i.addr.get())
+          : (TCA*)i.addr.get();
+        *realAddr = stub;
       } break;
 
     case Vinstr::fallback:
@@ -290,22 +316,20 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
   auto& pending = env.meta.literals;
   auto it = pending.find(val);
   if (it != pending.end()) {
-    assertx(*it->second == val);
+    DEBUG_ONLY auto realAddr =
+      (uint64_t*)env.text.data().toDestAddress((TCA)it->second);
+    assertx(*realAddr == val);
     return it->second;
   }
 
   auto addr = env.text.data().alloc<uint64_t>(alignof(uint64_t));
-  *addr = val;
+  auto realAddr = (uint64_t*)env.text.data().toDestAddress((TCA)addr);
+  *realAddr = val;
+
   pending.emplace(val, addr);
   return addr;
 }
 
-void setJmpTransID(Venv& env, TCA jmp) {
-  if (!env.unit.context) return;
-
-  env.meta.setJmpTransID(
-    jmp, env.unit.context->transID, env.unit.context->kind
-  );
-}
+///////////////////////////////////////////////////////////////////////////////
 
 }}

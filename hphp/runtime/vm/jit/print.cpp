@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -560,22 +560,38 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   os << "digraph G {\n";
   for (auto block : blocks) {
     if (block->empty()) continue;
-    if (dotBodies && block->hint() != Block::Hint::Unlikely &&
-        block->hint() != Block::Hint::Unused) {
-      // Include the IR in the body of the node
-      std::ostringstream out;
-      print(out, block, AreaIndex::Main, asmInfo, guards, &curMarker);
-      auto bodyRaw = out.str();
-      std::string body;
-      body.reserve(bodyRaw.size() * 1.25);
-      for (auto c : bodyRaw) {
-        if (c == '\n')      body += "\\n";
-        else if (c == '"')  body += "\\\"";
-        else if (c == '\\') body += "\\\\";
-        else                body += c;
+    if (dotBodies) {
+      if (block->hint() != Block::Hint::Unlikely &&
+          block->hint() != Block::Hint::Unused) {
+        // Include the IR in the body of the node
+        std::ostringstream out;
+        print(out, block, AreaIndex::Main, asmInfo, guards, &curMarker);
+        auto bodyRaw = out.str();
+        std::string body;
+        body.reserve(bodyRaw.size() * 1.25);
+        for (auto c : bodyRaw) {
+          if (c == '\n')      body += "\\n";
+          else if (c == '"')  body += "\\\"";
+          else if (c == '\\') body += "\\\\";
+          else                body += c;
+        }
+        os << folly::format("B{} [shape=box,label=\"{}\"]\n",
+                            block->id(), body);
       }
-      os << folly::format("B{} [shape=\"box\" label=\"{}\"]\n",
-                          block->id(), body);
+    } else {
+      const auto color = [&] {
+        switch (block->hint()) {
+          case Block::Hint::Likely :  return "red";
+          case Block::Hint::Neither:  return "orange";
+          case Block::Hint::Unlikely: return "blue";
+          case Block::Hint::Unused:   return "gray";
+        }
+        not_reached();
+      }();
+      os << folly::format(
+        "B{} [shape=box,color={},label=\"B{}\\ncount={}\"]\n",
+        block->id(), color, block->id(), block->profCount()
+      );
     }
 
     auto next = block->nextEdge();
@@ -584,10 +600,9 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
     auto edge_color = [&] (Edge* edge) {
       auto const target = edge->to();
       return
-        target->isCatch() ? " [color=blue]" :
-        target->isExit() ? " [color=cyan]" :
-        retreating_edges.count(edge) ? " [color=red]" :
-        target->hint() == Block::Hint::Unlikely ? " [color=green]" : "";
+        target->isCatch() ? " [color=gray]" :
+        target->hint() == Block::Hint::Unlikely ? " [color=blue]" :
+        retreating_edges.count(edge) ? " [color=red]" : "";
     };
     auto show_edge = [&] (Edge* edge) {
       os << folly::format(

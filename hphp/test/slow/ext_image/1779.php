@@ -9,5 +9,8 @@ imagecolortransparent($im, $black);
 // Draw a red rectangle
 imagefilledrectangle($im, 4, 4, 50, 25, $red);
 // Save the image
+ob_start();
 imagepng($im);
+$md5 = md5(ob_get_clean());
 imagedestroy($im);
+echo "md5: $md5\n";

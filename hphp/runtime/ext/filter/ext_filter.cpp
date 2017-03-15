@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/php-globals.h"
 
@@ -122,14 +121,6 @@ struct FilterRequestData final {
     return empty_array();
   }
 
-  void vscan(IMarker& mark) const {
-    mark(m_GET);
-    mark(m_POST);
-    mark(m_COOKIE);
-    mark(m_SERVER);
-    mark(m_ENV);
-  }
-
 private:
   Array m_GET;
   Array m_POST;
@@ -218,14 +209,6 @@ static struct FilterExtension final : Extension {
   void requestShutdown() override {
     // warm up the s_filter_request_data
     s_filter_request_data->requestShutdown();
-  }
-
-  void vscan(IMarker& m) const override {
-    if (!s_filter_request_data.isNull()) {
-      // this also is scanned by RequestEventHandler; maybe it's redundant,
-      // or maybe the handler isn't registered yet.
-      s_filter_request_data->vscan(m);
-    }
   }
 } s_filter_extension;
 

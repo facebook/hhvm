@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,7 +66,7 @@ namespace {
  * Bump this whenever the log format changes, so that it's easy to filter out
  * old, incompatible results.
  */
-constexpr auto kVersion = 1;
+constexpr auto kVersion = 2;
 
 /*
  * Update `record' with the data member that `internal' is in, relative to
@@ -376,6 +376,18 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
     not_reached();
   }());
   record.setInt("addr", uintptr_t(addr));
+
+  auto const data_src = sample->tail()->data_src;
+  auto const info = perf_event_data_src(kind, data_src);
+  record.setInt("data_src", data_src);
+  record.setStr("mem_lvl", info.mem_lvl);
+  record.setStr("tlb", info.tlb);
+  record.setInt("mem_hit", info.mem_hit);
+  record.setInt("snoop", info.snoop);
+  record.setInt("snoop_hit", info.snoop_hit);
+  record.setInt("snoop_hitm", info.snoop_hitm);
+  record.setInt("locked", info.locked);
+  record.setInt("tlb_hit", info.tlb_hit);
 
   auto const should_log = [&] {
     auto const tca = reinterpret_cast<TCA>(const_cast<void*>(addr));

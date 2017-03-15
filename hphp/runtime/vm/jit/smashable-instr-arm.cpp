@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -118,7 +118,7 @@ TCA emitSmashableJmp(CodeBlock& cb, CGMeta& fixups, TCA target) {
 // are both changed then the behavior can cause old cc to jump to new
 // target or new cc to jump to old target. Therefore we'll keep
 // the branch as an indirect branch to a target stored in the
-// instruction stream. This we we can at least guarantee that old cc
+// instruction stream. This way we can at least guarantee that old cc
 // won't jump to new target. We can still have an issue where new cc
 // jumps to old target, but that old target is *likely* a stub.
 TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,

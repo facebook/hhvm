@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,7 @@ struct ArrayLval;
  * php arrays with zero-based contiguous integer keys, and values of mixed
  * types.  The TypedValue's are placed right after the array header.
  */
-struct PackedArray final: type_scan::MarkCountable<PackedArray> {
+struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
   static constexpr uint32_t SmallSize = 3;
 
@@ -68,11 +68,11 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
   static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
+  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
+  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static ArrayLval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);
@@ -200,7 +200,7 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static uint32_t getMaxCapInPlaceFast(uint32_t cap);
 
   static size_t heapSize(const ArrayData*);
-  template<class Marker> static void scan(const ArrayData*, Marker&);
+  static void scan(const ArrayData*, type_scan::Scanner&);
 
   static ArrayData* MakeReserve(uint32_t capacity);
   static ArrayData* MakeReserveVec(uint32_t capacity);
@@ -213,6 +213,10 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
    */
   static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
+  /*
+   * Like MakePacked, but with `values' array in natural (not reversed) order.
+   */
+  static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
 
   static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
@@ -253,6 +257,7 @@ private:
   static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
   static ArrayData* MakeReserveSlow(uint32_t, HeaderKind);
 
+  template<bool reverse>
   static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
 
   static ArrayData* MakeUninitializedImpl(uint32_t, HeaderKind);

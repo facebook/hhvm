@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,8 @@ bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
 bool            verboseStats    = false;
 folly::Optional<MD5> md5Filter;
-PerfEventType   sortBy          = SPECIAL_PROF_COUNTERS;
+PerfEventType   sortBy          = EVENT_CYCLES;
+bool            sortByDensity   = false;
 double          helpersMinPercentage = 0;
 ExtOpcode       filterByOpcode  = 0;
 std::string     kindFilter      = "all";
@@ -75,11 +76,6 @@ PerfEventsMap<TransID> transPerfEvents;
 #define NFUNCS        (g_transData->getNumFuncs())
 #define TREC(TID)     (g_transData->getTransRec(TID))
 
-void error(const std::string& msg) {
-  fprintf(stderr, "Error: %s\n", msg.c_str());
-  exit(1);
-}
-
 void warnTooFew(const std::string& name,
                 uint32_t requested,
                 uint32_t available) {
@@ -101,6 +97,8 @@ void usage() {
   printf("Usage: tc-print [OPTIONS]\n"
          "  Options:\n"
          "    -c <FILE>       : uses the given config file\n"
+         "    -D              : used along with -t, this option sorts the top "
+         "translations by density (count / size) of the selected perf event\n"
          "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
          "(default: /tmp)\n"
          "    -f <FUNC_ID>    : prints the translations for the given "
@@ -159,7 +157,7 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  while ((c = getopt (argc, argv, "hc:d:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
+  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
          != -1) {
     switch (c) {
       case 'A':
@@ -225,6 +223,9 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'k':
         kindFilter = optarg;
+        break;
+      case 'D':
+        sortByDensity = true;
         break;
       case 'e':
         if (!strcmp(optarg, kListKeyword)) {
@@ -440,16 +441,6 @@ void loadProfData() {
   if (!profFileName.empty()) {
     loadPerfEvents();
   }
-
-  // The prof-counters are collected independently.
-  for (TransID tid = 0; tid < NTRANS; tid++) {
-    if (!TREC(tid)->isValid()) continue;
-
-    PerfEvent profCounters;
-    profCounters.type  = SPECIAL_PROF_COUNTERS;
-    profCounters.count = g_transData->getTransCounter(tid);
-    transPerfEvents.addEvent(tid, profCounters);
-  }
 }
 
 // Prints the metadata, bytecode, and disassembly for the given translation
@@ -544,15 +535,13 @@ void printCFG() {
 
   printf("digraph CFG {\n");
 
-  uint64_t maxProfCount = g_transData->findFuncTrans(selectedFuncId, &inodes);
+  g_transData->findFuncTrans(selectedFuncId, &inodes);
 
   // Print nodes
   for (uint32_t i = 0; i < inodes.size(); i++) {
     auto tid = inodes[i];
-    uint64_t profCount = g_transData->getTransCounter(tid);
     uint32_t bcStart   = TREC(tid)->src.offset();
     uint32_t bcStop    = TREC(tid)->bcPast();
-    uint32_t coldness  = 255 - (255 * profCount / maxProfCount);
     const auto kind = TREC(tid)->kind;
     bool isPrologue = kind == TransKind::LivePrologue ||
                       kind == TransKind::OptPrologue;
@@ -565,9 +554,8 @@ void printCFG() {
       case TransKind::OptPrologue : shape = "invtrapezium"; break;
       default:                      shape = "box";
     }
-    printf("t%u [shape=%s,label=\"T: %u\\np: %" PRIu64 "\\nbc: [0x%x-0x%x)\","
-           "style=filled,fillcolor=\"#ff%02x%02x\"%s];\n", tid, shape, tid,
-           profCount, bcStart, bcStop, coldness, coldness,
+    printf("t%u [shape=%s,label=\"T: %u\\nbc: [0x%x-0x%x)\","
+           "style=filled%s];\n", tid, shape, tid, bcStart, bcStop,
            (isPrologue ? ",color=blue" : ""));
   }
 
@@ -602,8 +590,14 @@ public:
     transPerfEvents(_transPerfEvents), etype(_etype) {}
 
   bool operator()(TransID t1, TransID t2) const {
-    return transPerfEvents.getEventCount(t1, etype) >
-           transPerfEvents.getEventCount(t2, etype);
+    const auto count1 = transPerfEvents.getEventCount(t1, etype);
+    const auto count2 = transPerfEvents.getEventCount(t2, etype);
+    if (sortByDensity) {
+      const auto size1 = TREC(t1)->aLen;
+      const auto size2 = TREC(t2)->aLen;
+      return count1 * size2 > count2 * size1;
+    }
+    return count1 > count2;
   }
 };
 
@@ -612,7 +606,9 @@ void printTopTrans() {
 
   // The summary currently includes all translations, so it's misleading
   // if we're filtering a specific kind of translations or address range.
-  if (kindFilter == "all" && minAddr == 0 && maxAddr == (TCA)-1) {
+  // It also doesn't sort by density, so do print it if sortByDensity is set.
+  if (kindFilter == "all" && minAddr == 0 && maxAddr == (TCA)-1 &&
+      !sortByDensity) {
     transPerfEvents.printEventsSummary(sortBy,
                                        "TransId",
                                        nTopTrans,

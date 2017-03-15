@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -274,7 +274,7 @@ void emitNewKeysetArray(IRGS& env, int32_t numArgs) {
     env,
     NewKeysetArray,
     NewKeysetArrayData {
-      bcSPOffset(env),
+      spOffBCFromIRSP(env),
       static_cast<uint32_t>(numArgs)
     },
     sp(env)
@@ -317,7 +317,7 @@ void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
       env,
       InitPackedLayoutArrayLoop,
       InitPackedArrayLoopData {
-        bcSPOffset(env),
+        spOffBCFromIRSP(env),
         static_cast<uint32_t>(numArgs)
       },
       array,
@@ -355,7 +355,7 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const ids = immVec.vec32();
 
   NewStructData extra;
-  extra.offset  = bcSPOffset(env);
+  extra.offset  = spOffBCFromIRSP(env);
   extra.numKeys = numArgs;
   extra.keys    = new (env.unit.arena()) StringData*[numArgs];
   for (auto i = size_t{0}; i < numArgs; ++i) {
@@ -462,16 +462,18 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
     if (curFunc(env)->isClosureBody()) {
-      auto const box = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+      auto const theBox = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
       ifThen(
         env,
-        [&] (Block* taken) { gen(env, CheckClosureStaticLocInit, taken, box); },
+        [&] (Block* taken) {
+          gen(env, CheckClosureStaticLocInit, taken, theBox);
+        },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          gen(env, InitClosureStaticLoc, box, value);
+          gen(env, InitClosureStaticLoc, theBox, value);
         }
       );
-      return box;
+      return theBox;
     }
 
     return cond(
@@ -484,7 +486,7 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
           taken
         );
       },
-      [&] (SSATmp* box) { return box; },
+      [&] (SSATmp* theBox) { return theBox; },
       [&] {
         hint(env, Block::Hint::Unlikely);
         return gen(
@@ -547,8 +549,8 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
           taken
         );
       },
-      [&] (SSATmp* box) { // Next: the static local is already initialized
-        return std::make_pair(box, cns(env, true));
+      [&] (SSATmp* box2) { // Next: the static local is already initialized
+        return std::make_pair(box2, cns(env, true));
       },
       [&] { // Taken: need to initialize the static local
         hint(env, Block::Hint::Unlikely);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,9 +31,9 @@ inline void ObjectData::resetMaxId() {
 inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  m_hdr.init(flags, kind, 1);
-  assert(m_hdr.aux == flags && hasExactlyOneRef());
-  assert(isObjectKind(kind));
+  initHeader(flags, kind, 1);
+  assert(m_aux16 == flags && hasExactlyOneRef());
+  assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 
@@ -50,8 +50,8 @@ inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
 inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
   : m_cls(cls)
 {
-  m_hdr.init(0, HeaderKind::Object, 1);
-  assert(m_hdr.aux == 0 && hasExactlyOneRef());
+  initHeader(uint16_t(0), HeaderKind::Object, 1);
+  assert(m_aux16 == 0 && hasExactlyOneRef());
   assert(!cls->needInitialization() || cls->initialized());
   o_id = ++os_max_id;
 }
@@ -62,9 +62,9 @@ inline ObjectData::ObjectData(Class* cls,
                               NoInit) noexcept
   : m_cls(cls)
 {
-  m_hdr.init(flags, kind, 1);
-  assert(m_hdr.aux == flags && hasExactlyOneRef());
-  assert(isObjectKind(kind));
+  initHeader(flags, kind, 1);
+  assert(m_aux16 == flags && hasExactlyOneRef());
+  assert(isObjectKind(m_kind));
   assert(!cls->needInitialization() || cls->initialized());
   assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));
   assert(cls->numDeclProperties() == 0);
@@ -117,13 +117,13 @@ inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   size_t size = sizeForNProps(nProps);
   auto& mm = MM();
   auto const obj = new (mm.objMalloc(size)) ObjectData(cls, NoInit{});
-  obj->m_hdr.aux |= cls->getODAttrs();
+  obj->m_aux16 |= cls->getODAttrs();
   assert(obj->hasExactlyOneRef());
   return obj;
 }
 
 inline void ObjectData::instanceInit(Class* cls) {
-  m_hdr.aux |= cls->getODAttrs();
+  m_aux16 |= cls->getODAttrs();
 
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
@@ -132,13 +132,15 @@ inline void ObjectData::instanceInit(Class* cls) {
       assert(propInitVec != nullptr);
       assert(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy(propVec(), &(*propInitVec)[0], nProps * sizeof(TypedValue));
+        memcpy16_inline(propVec(),
+                        &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
         deepInitHelper(propVec(), &(*propInitVec)[0], nProps);
       }
     } else {
       assert(nProps == cls->declPropInit().size());
-      memcpy(propVec(), &cls->declPropInit()[0], nProps * sizeof(TypedValue));
+      memcpy16_inline(propVec(),
+                      &cls->declPropInit()[0], nProps * sizeof(TypedValue));
     }
   }
 }
@@ -169,12 +171,12 @@ inline bool ObjectData::isImmutableCollection() const {
 }
 
 inline CollectionType ObjectData::collectionType() const {
-  assert(isValidCollection(static_cast<CollectionType>(m_hdr.kind)));
-  return static_cast<CollectionType>(m_hdr.kind);
+  assert(isValidCollection(static_cast<CollectionType>(m_kind)));
+  return static_cast<CollectionType>(m_kind);
 }
 
 inline HeaderKind ObjectData::headerKind() const {
-  return m_hdr.kind;
+  return m_kind;
 }
 
 inline bool ObjectData::isIterator() const {
@@ -182,11 +184,11 @@ inline bool ObjectData::isIterator() const {
 }
 
 inline bool ObjectData::getAttribute(Attribute attr) const {
-  return m_hdr.aux & attr;
+  return m_aux16 & attr;
 }
 
 inline void ObjectData::setAttribute(Attribute attr) {
-  m_hdr.aux |= attr;
+  m_aux16 |= attr;
 }
 
 inline bool ObjectData::noDestruct() const {
@@ -198,11 +200,11 @@ inline void ObjectData::setNoDestruct() {
 }
 
 inline void ObjectData::clearNoDestruct() {
-  m_hdr.aux &= ~NoDestructor;
+  m_aux16 &= ~NoDestructor;
 }
 
 inline bool ObjectData::hasInstanceDtor() const {
-  return m_hdr.aux & (IsCppBuiltin | HasNativeData);
+  return m_aux16 & (IsCppBuiltin | HasNativeData);
 }
 
 inline uint32_t ObjectData::getId() const {

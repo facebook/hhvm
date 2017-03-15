@@ -9,6 +9,7 @@
 #endif
 
 // macros for flex
+#define yyguts_t hphpguts_t
 #define YYSTYPE HPHP::ScannerToken
 #define YYLTYPE HPHP::Location
 #define YY_EXTRA_TYPE HPHP::Scanner*

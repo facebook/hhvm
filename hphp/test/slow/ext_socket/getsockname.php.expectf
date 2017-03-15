@@ -1,4 +1,4 @@
-resource(%d) of type (stream)
+resource(%d) of type (Socket)
 bool(true)
 bool(true)
 string(%d) "/tmp/socktest%d"

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,20 @@ uint64_t packBitVec(const std::vector<bool>& bits, unsigned i) {
   return retval;
 }
 
+// If its known that the location doesn't contain a boxed value, then everything
+// after the check should be unreachable. Bail out now to avoid asserting on
+// incompatible types. This can happen if we're inlining and one of the
+// arguments has a type which doesn't match what we previously profiled (the
+// guard will always fail).
+bool haltIfNotBoxed(IRGS& env, const Location& loc) {
+  auto const knownType = env.irb->fs().typeOf(loc);
+  if (!knownType.maybe(TBoxedInitCell)) {
+    gen(env, Unreachable);
+    return true;
+  }
+  return false;
+}
+
 void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
                     Offset dest, bool outerOnly) {
   auto exit = env.irb->guardFailBlock();
@@ -51,6 +65,9 @@ void checkTypeLocal(IRGS& env, uint32_t locId, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckLoc, TBoxedInitCell, LocalId(locId), exit, fp(env));
+
+  if (haltIfNotBoxed(env, Location::Local{locId})) return;
+
   gen(env, HintLocInner, type, LocalId { locId }, fp(env));
 
   auto const innerType = env.irb->predictedLocalInnerType(locId);
@@ -76,13 +93,45 @@ void checkTypeStack(IRGS& env, BCSPRelOffset idx, Type type,
   assertx(type <= TBoxedInitCell);
 
   gen(env, CheckStk, TBoxedInitCell, soff, exit, sp(env));
+
+  if (haltIfNotBoxed(env, Location::Stack{offsetFromFP(env, soff.offset)})) {
+    return;
+  }
+
   gen(env, HintStkInner, type, soff, sp(env));
 
   auto const innerType = env.irb->predictedStackInnerType(soff.offset);
   if (!outerOnly && innerType < TInitCell) {
     env.irb->constrainStack(soff.offset, DataTypeSpecific);
-    auto stk = gen(env, LdStk, TBoxedInitCell, soff, sp(env));
+    auto const stk = gen(env, LdStk, TBoxedInitCell, soff, sp(env));
     gen(env, CheckRefInner, innerType, exit, stk);
+  }
+}
+
+void checkTypeMBase(IRGS& env, Type type, Offset dest, bool outerOnly) {
+  auto exit = env.irb->guardFailBlock();
+  if (exit == nullptr) exit = makeExit(env, dest);
+
+  auto const mbr = gen(env, LdMBase, TPtrToGen);
+
+  if (type <= TCell) {
+    gen(env, CheckMBase, type, exit, mbr);
+    return;
+  }
+  assertx(type <= TBoxedInitCell);
+
+  gen(env, CheckMBase, TBoxedInitCell, exit, mbr);
+
+  if (haltIfNotBoxed(env, Location::MBase{})) return;
+
+  gen(env, HintMBaseInner, type);
+
+  auto const innerType = env.irb->predictedMBaseInnerType();
+  if (!outerOnly && innerType < TInitCell) {
+    env.irb->constrainLocation(Location::MBase{}, DataTypeSpecific);
+    auto const basePtr = gen(env, LdMBase, TPtrToGen);
+    auto const base = gen(env, LdMem, TBoxedInitCell, basePtr);
+    gen(env, CheckRefInner, innerType, exit, base);
   }
 }
 
@@ -99,8 +148,12 @@ void assertTypeStack(IRGS& env, BCSPRelOffset idx, Type type) {
       IRSPRelOffsetData { offsetFromIRSP(env, idx) }, sp(env));
 }
 
+static void assertTypeMBase(IRGS& env, Type type) {
+  gen(env, AssertMBase, type);
+}
+
 void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
-  assertx(type <= TStkElem);
+  assertx(type <= TGen);
 
   switch (loc.tag()) {
     case LTag::Stack:
@@ -108,6 +161,12 @@ void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
       break;
     case LTag::Local:
       assertTypeLocal(env, loc.localId(), type);
+      break;
+    case LTag::MBase:
+      assertTypeMBase(env, type);
+      break;
+    case LTag::CSlot:
+      assertx("Attempting to emit assert-type for class-ref slot" && false);
       break;
   }
 }
@@ -123,6 +182,12 @@ void checkType(IRGS& env, const Location& loc,
       break;
     case LTag::Local:
       checkTypeLocal(env, loc.localId(), type, dest, outerOnly);
+      break;
+    case LTag::MBase:
+      checkTypeMBase(env, type, dest, outerOnly);
+      break;
+    case LTag::CSlot:
+      assertx("Attempting to emit check-type for class-ref slot" && false);
       break;
   }
 }
@@ -144,7 +209,7 @@ void checkRefs(IRGS& env,
                const std::vector<bool>& mask,
                const std::vector<bool>& vals,
                Offset dest) {
-  auto const actRecOff = entryArDelta + bcSPOffset(env);
+  auto const actRecOff = entryArDelta + spOffBCFromIRSP(env);
   auto const funcPtr = gen(env, LdARFuncPtr,
                            IRSPRelOffsetData { actRecOff }, sp(env));
   SSATmp* nParams = nullptr;

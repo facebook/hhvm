@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,15 +29,16 @@ struct Type;
  * Hardcoded information about builtin functions. Right now this just
  * encodes the behavior of collection methods that return $this.
  */
-bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
-                                         borrowed_ptr<php::Func> func);
+bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
+                                         borrowed_ptr<const php::Func> func);
 
 /*
  * Given an HNI function, figure out the real return type. Thanks to
  * ParamCoerceMode, this will either be a nullable or falsable version
  * of the declared return type.
  */
-Type native_function_return_type(borrowed_ptr<const php::Func> func);
+Type native_function_return_type(borrowed_ptr<const php::Func> func,
+                                 bool include_coercion_failures = true);
 
 //////////////////////////////////////////////////////////////////////
 

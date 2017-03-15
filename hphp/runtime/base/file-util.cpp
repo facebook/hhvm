@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,12 +22,12 @@
 #include <boost/filesystem.hpp>
 
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
+#include <folly/portability/SysStat.h>
 
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/lock.h"

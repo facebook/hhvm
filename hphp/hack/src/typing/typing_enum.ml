@@ -57,8 +57,8 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     | Tprim (Tint | Tstring) -> ()
     (* Enums have to be valid array keys *)
     | Tabstract (AKenum _, _) -> ()
-    | Tany when allow_any -> ()
-    | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+    | Terr | Tany when allow_any -> ()
+    | Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _ ->
         f_fail p (Reason.to_pos r) (Typing_print.error t') trail);
@@ -109,7 +109,7 @@ let enum_class_check env tc consts const_types =
           (* Don't tell anyone, but we allow type params too, since there are
            * Enum subclasses that need to do that *)
           | Tabstract (AKgeneric _, _) -> ()
-          | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
+          | Terr | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
             | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
             | Tunresolved _ | Tobject | Tfun _ | Tshape _ ->
               Errors.enum_type_bad (Reason.to_pos r)
@@ -129,7 +129,7 @@ let enum_class_check env tc consts const_types =
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
-  | Case ((pos, Class_const (CI (_, cls), (_, const))), _) ->
+  | Case ((pos, Class_const (CI ((_, cls), _), (_, const))), _) ->
     if cls <> tc.tc_name then
       (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
        (seen, has_default))

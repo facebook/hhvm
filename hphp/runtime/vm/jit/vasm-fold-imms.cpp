@@ -356,11 +356,21 @@ struct ImmFolder {
 
   template<typename Inst>
   void fold(Inst& i, Vinstr& out) {}
-
   void fold(addq& in, Vinstr& out) {
     int val;
-    if (arith_imm(in.s0, val)) { out = addqi{val, in.s1, in.d, in.sf}; }
-    else if (arith_imm(in.s1, val)) { out = addqi{val, in.s0, in.d, in.sf}; }
+    if (arith_imm(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) {
+        out = copy{in.s1,in.d};
+      } else {
+        out = addqi{val, in.s1, in.d, in.sf};
+      }
+    } else if (arith_imm(in.s1, val)) {
+      if (val == 0 && !used[in.sf]) {
+        out = copy{in.s0, in.d};
+      } else {
+        out = addqi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
   void fold(andq& in, Vinstr& out) {
     int val;
@@ -374,6 +384,12 @@ struct ImmFolder {
   void fold(cmpq& in, Vinstr& out) {
     int val;
     if (arith_imm(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }
+  }
+  void fold(copy& in, Vinstr& out) {
+    if (in.d.isVirt() && valid.test(in.s)) {
+      valid.set(in.d);
+      vals[in.d] = vals[in.s];
+    }
   }
   void fold(orq& in, Vinstr& out) {
     int val;
@@ -394,12 +410,34 @@ struct ImmFolder {
   }
   void fold(subq& in, Vinstr& out) {
     int val;
-    if (arith_imm(in.s0, val)) { out = subqi{val, in.s1, in.d, in.sf}; }
+    if (arith_imm(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) {
+        out = copy{in.s1, in.d};
+      } else {
+        out = subqi{val, in.s1, in.d, in.sf};
+      }
+    }
+  }
+  void fold(subqi& in, Vinstr& out) {
+    if (in.s0.l() == 0 && !used[in.sf]) {  // copy sets no flags.
+      out = copy{in.s1, in.d};
+    }
   }
   void fold(xorq& in, Vinstr& out) {
     int val;
-    if (logical_imm(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
-    else if (logical_imm(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
+    if (logical_imm(in.s0, val)) {
+      if (val == 0 && !used[in.sf]) {
+        out = copy{in.s1, in.d};
+      } else {
+        out = xorqi{val, in.s1, in.d, in.sf};
+      }
+    } else if (logical_imm(in.s1, val)) {
+      if (val == 0 && !used[in.sf]) {
+        out = copy{in.s0, in.d};
+      } else {
+        out = xorqi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
 };
 }

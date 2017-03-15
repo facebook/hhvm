@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,8 @@ void emit_svcreq(CodeBlock& cb,
   auto const is_reused = start != cb.frontier();
 
   CodeBlock stub;
-  stub.init(start, stub_size(), "svcreq_stub");
+  auto const realAddr = is_reused ? start : cb.toDestAddress(start);
+  stub.init(start, realAddr, stub_size(), "svcreq_stub");
 
   {
     CGMeta fixups;
@@ -164,6 +165,24 @@ TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                        FPInvOffset spOff,
                        TCA* addr, SrcKey target, TransFlags trflags) {
+  // Right now it's possible that addr isn't PIC addressable, as it may be into
+  // the heap (SSwitchMap binds addresses directly into its heap memory,
+  // see #10347945). Passing a TCA generates an RIP relative address which can
+  // be handled by the relocation logic, while a TCA* will generate an immediate
+  // address which will not be remapped.
+  if (deltaFits((TCA)addr - cb.frontier(), sz::dword)) {
+    return emit_ephemeral(
+      cb,
+      data,
+      allocTCStub(cb, &fixups),
+      target.resumed() ? folly::none : folly::make_optional(spOff),
+      REQ_BIND_ADDR,
+      (TCA)addr, // needs to be RIP relative so that we can relocate it
+      target.toAtomicInt(),
+      trflags.packed
+    );
+  }
+
   return emit_ephemeral(
     cb,
     data,

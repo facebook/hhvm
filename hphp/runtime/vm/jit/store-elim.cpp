@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -340,6 +340,10 @@ struct Global {
 
 // Block-local environment.
 struct Local {
+  explicit Local(Global& global)
+    : global(global)
+  {}
+
   Global& global;
 
   ALocBits antLoc;     // Copied to BlockAnalysis::antLoc
@@ -349,6 +353,8 @@ struct Local {
   ALocBits delLoc;     // Copied to BlockAnalysis::delLoc
 
   ALocBits reStores;
+
+  bool containsCall{false}; // If there's a Call instruction in this block
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -362,6 +368,16 @@ std::string show(TrackedStore ts) {
   not_reached();
 }
 
+bool srcsCanSpanCall(const IRInstruction& inst) {
+  for (auto i = inst.numSrcs(); i--; ) {
+    auto const src = inst.src(i);
+    if (!src->isA(TStkPtr) &&
+        !src->isA(TFramePtr) &&
+        !src->inst()->is(DefConst)) return false;
+  }
+  return true;
+}
+
 const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
   auto it = genv.spillFrameMap.find(ts);
   if (it == genv.spillFrameMap.end()) return nullptr;
@@ -369,19 +385,33 @@ const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
 }
 
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
-  env.global.trackedStoreMap[
-    StoreKey { inst.block(), StoreKey::Out, bit }].set(&inst);
+  auto& ts = env.global.trackedStoreMap[
+    StoreKey { inst.block(), StoreKey::Out, bit }];
+  // Don't propagate tracked stores if it would cause a tmp to span a call.
+  if (env.containsCall && !srcsCanSpanCall(inst)) {
+    ts.setBad();
+  } else {
+    ts.set(&inst);
+  }
 }
 
 void set_movable_spill_frame(Local& env, const ALocBits& bits,
                              IRInstruction& inst) {
-  TrackedStore ts { &inst };
-  for (uint32_t i = env.global.ainfo.count(); i--; ) {
-    if (bits[i]) {
+  TrackedStore ts;
+  // Don't propagate tracked stores if it would cause a tmp to span a call.
+  if (env.containsCall && !srcsCanSpanCall(inst)) {
+    ts.setBad();
+  } else {
+    ts.set(&inst);
+  }
+
+  bitset_for_each_set(
+    bits,
+    [&](uint32_t i) {
       env.global.trackedStoreMap[
         StoreKey { inst.block(), StoreKey::Out, i }] = ts;
     }
-  }
+  );
   env.global.spillFrameMap[ts] = bits;
 }
 
@@ -535,6 +565,7 @@ void visit(Local& env, IRInstruction& inst) {
       // things.
       addAllLoad(env);
       killSet(env, env.global.ainfo.all_frame);
+      killSet(env, env.global.ainfo.all_clsRefSlot);
       kill(env, l.kills);
     },
 
@@ -550,6 +581,8 @@ void visit(Local& env, IRInstruction& inst) {
      * read them.
      */
     [&] (CallEffects l) {
+      env.containsCall = true;
+
       load(env, AHeapAny);
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
@@ -645,6 +678,7 @@ struct BlockAnalysis {
   ALocBits alteredAvl;
   ALocBits avlLoc;
   ALocBits delLoc;
+  bool containsCall;
 };
 
 BlockAnalysis analyze_block(Global& genv, Block* block) {
@@ -661,7 +695,8 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
     // env.antLoc and env.delLoc is required for correctness here.
     env.mayLoad | env.mayStore | env.antLoc | env.delLoc,
     env.avlLoc,
-    env.delLoc
+    env.delLoc,
+    env.containsCall
   };
 }
 
@@ -847,8 +882,10 @@ void optimize_block_pre(Global& genv, Block* block,
            block->id(),
            show(insertBits));
 
-    for (uint32_t i = 0; i < genv.ainfo.count(); i++) {
-      if (insertBits[i] && store_insert.go()) {
+    bitset_for_each_set(
+      insertBits,
+      [&](size_t i){
+        if (!store_insert.go()) return;
         const ALocBits* sf = nullptr;
         auto const cinst = resolve_ts(genv, block, StoreKey::In, i, &sf);
         if (sf) {
@@ -859,7 +896,7 @@ void optimize_block_pre(Global& genv, Block* block,
         auto const inst = genv.unit.clone(cinst);
         block->prepend(inst);
       }
-    }
+    );
   }
 }
 
@@ -1029,9 +1066,9 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
   if (s2.isUnseen() || s1.isBad()) return s1;
 
   enum class Compat { Same, Compat, Bad };
-  auto compat = [](TrackedStore s1, TrackedStore s2) {
-    auto i1 = s1.instruction();
-    auto i2 = s2.instruction();
+  auto compat = [](TrackedStore store1, TrackedStore store2) {
+    auto i1 = store1.instruction();
+    auto i2 = store2.instruction();
     assert(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
@@ -1115,14 +1152,25 @@ void compute_available_stores(
     [&](Block* blk, const BlockAnalysis& transfer, BlockState& state) {
       state.ppOut = transfer.avlLoc | (state.ppIn & ~transfer.alteredAvl);
       auto propagate = state.ppOut & ~transfer.avlLoc;
-      if (propagate.any()) {
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (!propagate[i]) continue;
+      bitset_for_each_set(
+        propagate,
+        [&](uint32_t i) {
           auto const& tsIn =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::In, i }];
           auto& tsOut =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          assert(!tsIn.isUnseen());
+          assertx(!tsIn.isUnseen());
+
+          // Prevent tmps from spanning calls by not propagating tracked stores
+          // thru any block which contains a call. The exception is if the store
+          // only uses constants as those do not create a problem.
+          if (transfer.containsCall &&
+              (!tsIn.instruction() || !srcsCanSpanCall(*tsIn.instruction()))) {
+            tsOut.setBad();
+          } else {
+            tsOut = tsIn;
+          }
+
           tsOut = tsIn;
           if (tsOut.isBad()) {
             state.ppOut[i] = 0;
@@ -1132,15 +1180,16 @@ void compute_available_stores(
             }
           }
         }
-      }
+      );
       auto showv DEBUG_ONLY = [&] (StoreKey::Where w, const ALocBits& pp) {
         std::string r;
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (pp[i]) {
+        bitset_for_each_set(
+          pp,
+          [&](uint32_t i) {
             auto& ts = genv.trackedStoreMap[StoreKey { blk, w, i}];
             folly::format(&r, " {}:{}", i, show(ts));
           }
-        }
+        );
         return r;
       };
       FTRACE(4,
@@ -1165,11 +1214,11 @@ void compute_available_stores(
       auto const oldPpIn = succState.ppIn;
       succState.ppIn &= state.ppOut;
       bool changed = succState.ppIn != oldPpIn;
-      if (succState.ppIn.any()) {
-        auto blk = genv.poBlockList[state.id];
-        auto succ = genv.poBlockList[succState.id];
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (!succState.ppIn[i]) continue;
+      auto blk = genv.poBlockList[state.id];
+      auto succ = genv.poBlockList[succState.id];
+      bitset_for_each_set(
+        succState.ppIn,
+        [&](uint32_t i) {
           auto& ts =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
           auto& tsSucc =
@@ -1180,7 +1229,7 @@ void compute_available_stores(
               changed = true;
               tsSucc.setBad();
               succState.ppIn &= ~*sf;
-              continue;
+              return;
             }
           }
           auto tsNew = succ->numPreds() == 1 ? ts : recompute_ts(genv, i, succ);
@@ -1197,7 +1246,7 @@ void compute_available_stores(
             }
           }
         }
-      }
+      );
       return changed;
     });
 }
@@ -1252,17 +1301,19 @@ void compute_placement_possible(
         });
 
       auto bitsToClear = state.ppOut & ~restrictBits;
+      // ensure that if we clear any spill frame bits, we clear
+      // them all.
       if (bitsToClear.any()) {
-        // ensure that if we clear any spill frame bits, we clear
-        // them all.
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (!bitsToClear[i]) continue;
-          auto const ts =
-            genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          if (auto sf = findSpillFrame(genv, ts)) {
-            restrictBits &= ~*sf;
+        bitset_for_each_set(
+          bitsToClear,
+          [&](uint32_t i) {
+            auto const ts =
+              genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
+            if (auto sf = findSpillFrame(genv, ts)) {
+              restrictBits &= ~*sf;
+            }
           }
-        }
+        );
         state.ppOut &= restrictBits;
       }
       trace();

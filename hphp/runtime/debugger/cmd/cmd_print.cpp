@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -349,13 +349,13 @@ bool CmdPrint::onServer(DebuggerProxy &proxy) {
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   {
     EvalBreakControl eval(m_noBreak);
-    bool failed;
-    m_ret =
-      proxy.ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                       m_output, m_frame, failed,
-                       DebuggerProxy::ExecutePHPFlagsAtInterrupt |
-                       (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
-                        DebuggerProxy::ExecutePHPFlagsNone));
+    auto const ret = proxy.ExecutePHP(
+      DebuggerProxy::MakePHPReturn(m_body), m_output, m_frame,
+      DebuggerProxy::ExecutePHPFlagsAtInterrupt |
+        (!proxy.isLocal() ? DebuggerProxy::ExecutePHPFlagsLog :
+         DebuggerProxy::ExecutePHPFlagsNone)
+    );
+    m_ret = ret.second;
   }
   g_context->debuggerSettings.bypassCheck = false;
   locSave.swap(rid.m_flowFilter);

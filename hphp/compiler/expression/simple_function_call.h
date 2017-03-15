@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,6 @@ public:
   bool isFatalFunction() const {
     return isParseFatalFunction() ||  m_type == FunType::ThrowFatal;
   }
-  int isStaticCompact() const { return m_type == FunType::StaticCompact; }
 
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
@@ -90,7 +89,6 @@ protected:
     Extract,
     Assert,
     Compact,
-    StaticCompact, // compact() with statically known variable names
     ShellExec,
     Constant,
     Defined,

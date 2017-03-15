@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -407,7 +407,7 @@ Variant HHVM_FUNCTION(stream_get_meta_data,
 }
 
 Array HHVM_FUNCTION(stream_get_transports) {
-  return make_packed_array("tcp", "udp", "unix", "udg");
+  return make_packed_array("tcp", "udp", "unix", "udg", "ssl", "tls");
 }
 
 Variant HHVM_FUNCTION(stream_resolve_include_path,
@@ -445,14 +445,11 @@ Object HHVM_FUNCTION(stream_await,
 bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,
                    bool mode) {
-  auto file = cast<File>(stream);
-  int flags = fcntl(file->fd(), F_GETFL, 0);
-  if (mode) {
-    flags &= ~O_NONBLOCK;
+  if (isa<File>(stream)) {
+    return cast<File>(stream)->setBlocking(mode);
   } else {
-    flags |= O_NONBLOCK;
+    return false;
   }
-  return fcntl(file->fd(), F_SETFL, flags) != -1;
 }
 
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
@@ -503,8 +500,12 @@ bool HHVM_FUNCTION(stream_set_timeout,
     return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
        make_map_array(s_sec, seconds, s_usec, microseconds));
+  } else if (isa<File>(stream)) {
+    return cast<File>(stream)->setTimeout(
+      (uint64_t)seconds * 1000000 + microseconds);
+  } else {
+    return false;
   }
-  return false;
 }
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
@@ -576,8 +577,9 @@ bool HHVM_FUNCTION(stream_wrapper_register,
     return false;
   }
 
-  auto wrapper = std::unique_ptr<Stream::Wrapper>(
-    new UserStreamWrapper(protocol, cls, flags));
+  auto wrapper = req::unique_ptr<Stream::Wrapper>(
+      req::make_raw<UserStreamWrapper>(protocol, cls, flags)
+  );
   if (!Stream::registerRequestWrapper(protocol, std::move(wrapper))) {
     raise_warning("Unable to register protocol: %s\n", protocol.data());
     return false;
@@ -618,7 +620,7 @@ static Variant socket_accept_impl(
   } else {
     auto sock = cast<Socket>(socket);
     auto new_fd = accept(sock->fd(), addr, addrlen);
-    new_sock = req::make<Socket>(new_fd, sock->getType());
+    new_sock = req::make<StreamSocket>(new_fd, sock->getType());
   }
 
   if (!new_sock->valid()) {
@@ -832,7 +834,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!HHVM_FN(socket_create_pair)(domain, type, protocol, ref(fd))) {
+  if (!socket_create_pair_impl(domain, type, protocol, ref(fd), true)) {
     return false;
   }
   return fd;

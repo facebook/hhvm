@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,20 +19,25 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/func.h"
+
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/edge.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/irgen-builtin.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/ir-instr-table.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/minstr-effects.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-#include "hphp/util/arena.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+
+#include "hphp/util/arena.h"
 
 #include <folly/Range.h>
 
@@ -384,16 +389,44 @@ Type newColReturn(const IRInstruction* inst) {
 }
 
 Type builtinReturn(const IRInstruction* inst) {
-  assertx(inst->op() == CallBuiltin);
+  assertx(inst->is(CallBuiltin));
+  return irgen::builtinReturnType(inst->extra<CallBuiltin>()->callee);
+}
 
-  Type t = inst->typeParam();
-  if (t.isSimpleType() || t == TCell) {
-    return t;
+Type callReturn(const IRInstruction* inst) {
+  assertx(inst->is(Call, CallArray));
+
+  if (inst->is(Call)) {
+    // FCallAwait needs to load TVAux
+    if (inst->extra<Call>()->fcallAwait) return TInitGen;
+    auto callee = inst->extra<Call>()->callee;
+    return callee ? irgen::callReturnType(callee) : TInitGen;
   }
-  if (t.isReferenceType() || t == TBoxedCell) {
-    return t | TInitNull;
+  if (inst->is(CallArray)) {
+    auto callee = inst->extra<CallArray>()->callee;
+    return callee ? irgen::callReturnType(callee) : TInitGen;
   }
   not_reached();
+}
+
+// Integers get mapped to integer memo keys, everything else gets mapped to
+// strings.
+Type memoKeyReturn(const IRInstruction* inst) {
+  assertx(inst->is(GetMemoKey));
+  auto const srcType = inst->src(0)->type();
+  if (srcType <= TInt) return TInt;
+  if (!srcType.maybe(TInt)) return TStr;
+  return TInt | TStr;
+}
+
+template <uint32_t...> struct IdxSeq {};
+
+inline Type unionReturn(const IRInstruction* inst, IdxSeq<>) { return TBottom; }
+
+template <uint32_t Idx, uint32_t... Rest>
+inline Type unionReturn(const IRInstruction* inst, IdxSeq<Idx, Rest...>) {
+  assertx(Idx < inst->numSrcs());
+  return inst->src(Idx)->type() | unionReturn(inst, IdxSeq<Rest...>{});
 }
 
 } // namespace
@@ -405,8 +438,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
-#define DParamMayRelax  return inst->typeParam();
-#define DParam          return inst->typeParam();
+#define DParamMayRelax(t) return inst->typeParam();
+#define DParam(t)       return inst->typeParam();
 #define DParamPtr(k)    assertx(inst->typeParam() <= TGen.ptr(Ptr::k)); \
                         return inst->typeParam();
 #define DLdObjCls {                                                \
@@ -430,9 +463,12 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
 #define DBuiltin        return builtinReturn(inst);
+#define DCall           return callReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
 #define DCns            return TUninit | TInitNull | TBool | \
                                TInt | TDbl | TStr | TRes;
+#define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
+#define DMemoKey        return memoKeyReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -464,9 +500,12 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #undef DCtxCls
 #undef DMulti
 #undef DSetElem
+#undef DCall
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
+#undef DUnion
+#undef DMemoKey
 }
 
 }}

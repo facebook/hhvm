@@ -1,0 +1,76 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"" N  > filter_has_var($type, $variable_name) {
+  .declvars $_GET $_POST $_COOKIE $_SERVER $_ENV;
+  IsTypeL $type Int
+  JmpNZ L0
+  String "filter_has_var() expects parameter 1 to be long, "
+  CGetL $type
+  FCallBuiltin 1 1 "gettype"
+  UnboxRNop
+  String " given"
+  Concat
+  Concat
+  Cns "E_WARNING"
+  FCallBuiltin 2 2 "trigger_error"
+  UnboxRNop
+  PopC
+  False
+  RetC
+L0:
+  IncStat 916 1
+  Cns "INPUT_GET"
+  CGetL2 $type
+  Eq
+  JmpNZ L1
+  Cns "INPUT_POST"
+  CGetL2 $type
+  Eq
+  JmpNZ L2
+  Cns "INPUT_COOKIE"
+  CGetL2 $type
+  Eq
+  JmpNZ L3
+  Cns "INPUT_SERVER"
+  CGetL2 $type
+  Eq
+  JmpNZ L4
+  Cns "INPUT_ENV"
+  CGetL2 $type
+  Eq
+  JmpNZ L5
+  Jmp L6
+L1:
+  String "_GET"
+  BaseGC 0 None
+  QueryM 1 Isset EL:1
+  RetC
+L2:
+  String "_POST"
+  BaseGC 0 None
+  QueryM 1 Isset EL:1
+  RetC
+L3:
+  String "_COOKIE"
+  BaseGC 0 None
+  QueryM 1 Isset EL:1
+  RetC
+L4:
+  String "_SERVER"
+  BaseGC 0 None
+  QueryM 1 Isset EL:1
+  RetC
+L5:
+  String "_ENV"
+  BaseGC 0 None
+  QueryM 1 Isset EL:1
+  RetC
+L6:
+  False
+  RetC
+}
+

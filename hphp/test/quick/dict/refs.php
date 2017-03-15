@@ -188,15 +188,6 @@ function nested_refs($d) {
   var_dump($converted);
 }
 
-function create_with_ref($a, $b, $c) {
-  echo "========== create_with_ref =========================\n";
-  try {
-    var_dump(dict[1 => &$a, 'a' => &$b, 2 => &$c]);
-  } catch (Exception $e) {
-    echo "create_with_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-}
-
 function main() {
   $d = dict[0 => 1, 1 => 2, 2=> 3, 3 => 4,
             "key1" => "abc", 4 => [5, 6, 7]];
@@ -209,6 +200,5 @@ function main() {
   convert_with_ref();
   ref_unserialize();
   nested_refs($d);
-  create_with_ref('a', 'b', 'c');
 }
 main();

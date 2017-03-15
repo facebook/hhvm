@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,13 +27,10 @@ void EHEntEmitter::serde(SerDe& sd) {
     (m_base)
     (m_past)
     (m_iterId)
-    (m_fault)
+    (m_handler)
     (m_itRef)
     (m_parentIndex)
     ;
-  if (m_type == EHEnt::Type::Catch) {
-    sd(m_catches);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,6 +68,10 @@ inline Id FuncEmitter::numIterators() const {
   return m_numIterators;
 }
 
+inline Id FuncEmitter::numClsRefSlots() const {
+  return m_numClsRefSlots;
+}
+
 inline Id FuncEmitter::numLiveIterators() const {
   return m_nextFreeIterator;
 }
@@ -82,6 +83,11 @@ inline void FuncEmitter::setNumIterators(Id numIterators) {
 
 inline void FuncEmitter::setNumLiveIterators(Id id) {
   m_nextFreeIterator = id;
+}
+
+inline void FuncEmitter::setNumClsRefSlots(Id num) {
+  assert(m_numClsRefSlots == 0);
+  m_numClsRefSlots = num;
 }
 
 inline bool FuncEmitter::hasVar(const StringData* name) const {
@@ -127,6 +133,10 @@ inline bool FuncEmitter::isMethod() const {
 
 inline bool FuncEmitter::isVariadic() const {
   return params.size() && params[(params.size() - 1)].isVariadic();
+}
+
+inline bool FuncEmitter::isVariadicByRef() const {
+  return isVariadic() && params[(params.size() -1)].byRef;
 }
 
 inline std::pair<int,int> FuncEmitter::getLocation() const {

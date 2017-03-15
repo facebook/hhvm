@@ -39,18 +39,6 @@ ArrayIter getArrayIterHelper(const Variant& v, size_t& sz) {
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
 
-size_t heapSize(HeaderKind kind) {
-  switch (kind) {
-#define X(T) case HeaderKind::T: \
-               return sizeof(c_##T);
-COLLECTIONS_ALL_TYPES(X)
-#undef X
-    default: always_assert(false);
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
 template<bool oob>
 [[noreturn]] ALWAYS_INLINE
 void throwInt(int64_t key) {

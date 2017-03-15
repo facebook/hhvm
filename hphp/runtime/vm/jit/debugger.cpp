@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,12 +19,14 @@
 
 #include "hphp/runtime/vm/jit/debugger.h"
 
-#include "hphp/runtime/vm/jit/cg-meta.h"
-#include "hphp/runtime/vm/jit/translator.h"
-
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/runtime/vm/srckey.h"
+
+#include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/lock.h"
@@ -88,17 +90,23 @@ void stashDebuggerCatch(const ActRec* fp) {
     tl_debuggerCatches = new std::unordered_map<const ActRec*, TCA>();
   }
 
-  auto optCatchBlock = getCatchTrace(TCA(fp->m_savedRip));
-  always_assert(optCatchBlock && *optCatchBlock);
-  auto catchBlock = *optCatchBlock;
-  FTRACE(1, "Pushing debugger catch {} with fp {}\n", catchBlock, fp);
-  tl_debuggerCatches->emplace(fp, catchBlock);
+  if (auto const catchBlock = getCatchTrace(TCA(fp->m_savedRip))) {
+    // Record the corresponding catch trace for `fp'.  There might not be one,
+    // if the one we would have registered was empty.
+    always_assert(*catchBlock);
+    FTRACE(1, "Pushing debugger catch {} with fp {}\n", *catchBlock, fp);
+    tl_debuggerCatches->emplace(fp, *catchBlock);
+  }
 }
 
 TCA unstashDebuggerCatch(const ActRec* fp) {
   always_assert(tl_debuggerCatches);
+
   auto const it = tl_debuggerCatches->find(fp);
-  always_assert(it != tl_debuggerCatches->end());
+  if (it == tl_debuggerCatches->end()) {
+    return tc::ustubs().endCatchHelper;
+  }
+
   auto const catchBlock = it->second;
   tl_debuggerCatches->erase(it);
   FTRACE(1, "Popped debugger catch {} for fp {}\n", catchBlock, fp);

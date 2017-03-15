@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,4 +67,18 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void encodeLocalRange(UnitEmitter& ue, const LocalRange& range) {
+  ue.emitIVA(range.first);
+  ue.emitIVA(range.restCount);
+}
+
+LocalRange decodeLocalRange(const unsigned char*& pc) {
+  auto const first = decode_iva(pc);
+  auto const restCount = decode_iva(pc);
+  return LocalRange{uint32_t(first), uint32_t(restCount)};
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

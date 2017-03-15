@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -291,6 +291,13 @@ std::string show(const IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Find and return a unique block that ends the unit at lastSk.
+ *
+ * If one cannot be found, abort, unless the unit has 0 main exits and 1 or
+ * more blocks that end with Unreachable, in which case return nullptr. This
+ * indicates regions that ended early due to type contradictions.
+ */
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk);
 
 //////////////////////////////////////////////////////////////////////

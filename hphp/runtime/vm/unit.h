@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,6 +32,7 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/service-data.h"
 
 #include <map>
 #include <ostream>
@@ -178,6 +179,11 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 void stashLineTable(const Unit* unit, LineTable table);
 
 const SourceLocTable& getSourceLocTable(const Unit*);
+
+/*
+ * Sum of all Unit::m_bclen
+ */
+extern ServiceData::ExportedTimeSeries* g_hhbc_size;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -572,10 +578,10 @@ public:
    *
    * Return nullptr if there is no such class.
    */
-  static Class* lookupUniqueClassInContext(const NamedEntity* ne,
-                                           const Class* ctx);
-  static Class* lookupUniqueClassInContext(const StringData* name,
-                                           const Class* ctx);
+  static const Class* lookupUniqueClassInContext(const NamedEntity* ne,
+                                                 const Class* ctx);
+  static const Class* lookupUniqueClassInContext(const StringData* name,
+                                                 const Class* ctx);
 
   /*
    * Look up, or autoload and define, the Class in this request with name

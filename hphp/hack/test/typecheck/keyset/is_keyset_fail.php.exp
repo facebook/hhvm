@@ -7,4 +7,4 @@ File "is_keyset_fail.php", line 4, characters 7-15:
 File "is_keyset_fail.php", line 3, characters 30-35:
 This is a string
 File "is_keyset_fail.php", line 4, characters 7-15:
-It is incompatible with an array key (int/string) from the condition on the predicate \is_keyset
+It is incompatible with an array key (int/string) from the argument to this \is_keyset test

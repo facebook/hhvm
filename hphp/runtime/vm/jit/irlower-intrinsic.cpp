@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,7 +88,11 @@ void cgMov(IRLS& env, const IRInstruction* inst) {
   copyTV(vmain(env), src, dst, inst->dst()->type());
 }
 
-void cgHalt(IRLS& env, const IRInstruction* inst) {
+void cgUnreachable(IRLS& env, const IRInstruction* inst) {
+  vmain(env) << ud2{};
+}
+
+void cgEndBlock(IRLS& env, const IRInstruction* inst) {
   vmain(env) << ud2{};
 }
 
@@ -125,6 +129,10 @@ void cgInterpOneCF(IRLS& env, const IRInstruction* inst) {
   v << jmpi{tc::ustubs().interpOneCFHelpers.at(extra->opcode),
             interp_one_cf_regs()};
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(GetTime);
 
 ///////////////////////////////////////////////////////////////////////////////
 

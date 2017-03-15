@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,11 +17,16 @@
 #ifndef incl_HPHP_JIT_TC_INTERNAL_H_
 #define incl_HPHP_JIT_TC_INTERNAL_H_
 
+#include "hphp/runtime/vm/jit/tc.h"
+
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/mutex.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP { namespace jit { namespace tc {
 
@@ -39,13 +44,21 @@ struct TransLocMaker {
    * and frozen (if they aren't the same) to record sizes.
    */
   void markStart() {
-    loc.setMainStart(cache.main().frontier());
-    loc.setColdStart(cache.cold().frontier());
-    loc.setFrozenStart(cache.frozen().frontier());
+    mainStart = cache.main().frontier();
+    coldStart = cache.cold().frontier();
+    frozenStart = cache.frozen().frontier();
     dataStart = cache.data().frontier();
 
     cache.cold().dword(0);
     if (&cache.cold() != &cache.frozen()) cache.frozen().dword(0);
+  }
+
+  TcaRange dataRange() const {
+    return TcaRange{dataStart, cache.data().frontier()};
+  }
+
+  bool empty() const {
+    return !mainStart && !coldStart && !frozenStart && !dataStart;
   }
 
   /*
@@ -53,26 +66,40 @@ struct TransLocMaker {
    * blocks to the positions recorded by the last call to markStart().
    */
   void rollback() {
-    if (loc.empty()) return;
+    if (empty()) return;
 
-    cache.main().setFrontier(loc.mainStart());
-    cache.cold().setFrontier(loc.coldStart());
-    cache.frozen().setFrontier(loc.frozenStart());
+    cache.main().setFrontier(mainStart);
+    cache.cold().setFrontier(coldStart);
+    cache.frozen().setFrontier(frozenStart);
     cache.data().setFrontier(dataStart);
+  }
+
+  TransRange range() const {
+    assertx(!empty() && mainEnd && coldEnd && frozenEnd && dataEnd);
+    return TransRange{
+      {mainStart, mainEnd},
+      {coldStart + sizeof(uint32_t), coldEnd},
+      {frozenStart + sizeof(uint32_t), frozenEnd},
+      {dataStart, dataEnd}
+    };
   }
 
   /*
    * Record the end of a translation, storing the size of cold and frozen,
-   * returns a TransLoc representing the translation.
+   * returns a TransRange representing the translation.
    */
-  TransLoc markEnd() {
-    uint32_t* coldSize   = (uint32_t*)loc.coldStart();
-    uint32_t* frozenSize = (uint32_t*)loc.frozenStart();
-    *coldSize   = cache  .cold().frontier() - loc.coldStart();
-    *frozenSize = cache.frozen().frontier() - loc.frozenStart();
-    loc.setMainSize(cache.main().frontier() - loc.mainStart());
+  TransRange markEnd() {
+    uint32_t* coldSize   = (uint32_t*)cache.cold().toDestAddress(coldStart);
+    uint32_t* frozenSize = (uint32_t*)cache.frozen().toDestAddress(frozenStart);
+    *coldSize   = cache  .cold().frontier() - coldStart;
+    *frozenSize = cache.frozen().frontier() - frozenStart;
 
-    return loc;
+    mainEnd = cache.main().frontier();
+    coldEnd = cache.cold().frontier();
+    frozenEnd = cache.frozen().frontier();
+    dataEnd = cache.data().frontier();
+
+    return range();
   }
 
   /*
@@ -87,18 +114,27 @@ struct TransLocMaker {
       std::vector<TransBCMapping> bcmap   = std::vector<TransBCMapping>(),
       Annotations&&               annot   = Annotations(),
       bool                        hasLoop = false) const {
+    auto r = range();
     return TransRec(sk, transID, kind,
-                    loc.mainStart(), loc.mainSize(),
-                    loc.coldCodeStart(), loc.coldCodeSize(),
-                    loc.frozenCodeStart(), loc.frozenCodeSize(),
+                    r.main.begin(), r.main.size(),
+                    r.cold.begin(), r.cold.size(),
+                    r.frozen.begin(), r.frozen.size(),
                     std::move(region), std::move(bcmap),
                     std::move(annot), hasLoop);
   }
 
+  CodeCache::View view() const { return cache; }
+
 private:
   CodeCache::View cache;
-  TransLoc loc;
-  Address dataStart;
+  TCA mainStart{nullptr};
+  TCA mainEnd{nullptr};
+  TCA coldStart{nullptr};
+  TCA coldEnd{nullptr};
+  TCA frozenStart{nullptr};
+  TCA frozenEnd{nullptr};
+  TCA dataStart{nullptr};
+  TCA dataEnd{nullptr};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,18 +169,6 @@ private:
  */
 
 /*
- * Structure representing the various parts of the TC available to the JIT. The
- * code lock must be acquired before attempting to write into code.
- */
-CodeCache& code();
-
-/*
- * Structure containing records for each SrcKey present in the TC. The metadata
- * lock must be acquired before reading or writing the srcdb.
- */
-SrcDB& srcDB();
-
-/*
  * Acquire a lock on this object's code cache.
  *
  * Must be held even if the current thread owns the global write lease.
@@ -163,6 +187,25 @@ std::unique_lock<SimpleMutex> lockMetadata();
  * translation will not exceed the global translation limit.
  */
 bool newTranslation();
+
+/*
+ * Structure representing the various parts of the TC available to the JIT. The
+ * code lock must be acquired before attempting to write into code.
+ */
+ALWAYS_INLINE CodeCache& code() {
+  extern CodeCache* g_code;
+  assert(g_code);
+  return *g_code;
+}
+
+/*
+ * Structure containing records for each SrcKey present in the TC. The metadata
+ * lock must be acquired before reading or writing the srcdb.
+ */
+ALWAYS_INLINE SrcDB& srcDB() {
+  extern SrcDB g_srcDB;
+  return g_srcDB;
+}
 
 }}}
 

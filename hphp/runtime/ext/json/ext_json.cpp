@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -137,6 +137,10 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 
   if (json.empty()) {
+    return make_tv<KindOfNull>();
+  }
+  if (depth < 0 || depth > INT_MAX) {
+    json_set_last_error_code(json_error_codes::JSON_ERROR_DEPTH);
     return make_tv<KindOfNull>();
   }
 
@@ -274,10 +278,6 @@ struct JsonExtension final : Extension {
 
   void requestInit() override {
     json_parser_init();
-  }
-
-  void vscan(IMarker& mark) const override {
-    json_parser_scan(mark);
   }
 
 } s_json_extension;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,9 +39,6 @@ namespace HPHP {
  * needed to represent this.  (Known dependency in unwind-x64.h.)
  */
 enum DataType : int8_t {
-  // Values below zero are not PHP values, but runtime-internal.
-  KindOfClass            = -16,      //  11110000
-
   // Any code that static_asserts about the value of KindOfNull may also depend
   // on there not being any values between KindOfUninit and KindOfNull.
 
@@ -113,7 +110,7 @@ constexpr unsigned kDataTypeMask = 0x7f;
 /*
  * DataType limits.
  */
-constexpr int8_t kMinDataType  = KindOfClass;
+constexpr int8_t kMinDataType  = KindOfUninit;
 constexpr int8_t kMaxDataType  = KindOfKeyset;
 
 /*
@@ -192,10 +189,15 @@ constexpr DataType KindOfRefCountThreshold = KindOfPersistentKeyset;
 // DataTypeCategory
 
 // These must be kept in order from least to most specific.
+//
+// Note that Countness can be relaxed to Generic in optimizeProfiledGuards(), so
+// it should only be used to constrain values used by instructions that work
+// even in the absence of type information.
 #define DT_CATEGORIES(func)                     \
   func(Generic)                                 \
   func(Countness)                               \
-  func(CountnessInit)                           \
+  func(BoxAndCountness)                         \
+  func(BoxAndCountnessInit)                     \
   func(Specific)                                \
   func(Specialized)
 
@@ -234,7 +236,6 @@ inline std::string tname(DataType t) {
     CS(Object)
     CS(Resource)
     CS(Ref)
-    CS(Class)
 #undef CS
 
     default: {
@@ -277,7 +278,7 @@ constexpr unsigned typeToDestrIdx(DataType t) {
  * Whether a type is valid.
  */
 constexpr bool isRealType(DataType t) {
-  return (t >= KindOfUninit && t <= kMaxDataType) || t == KindOfClass;
+  return (t >= kMinDataType && t <= kMaxDataType);
 }
 
 /*
@@ -426,7 +427,6 @@ static_assert(!isStringType(KindOfKeyset),          "");
 static_assert(!isStringType(KindOfObject),          "");
 static_assert(!isStringType(KindOfResource),        "");
 static_assert(!isStringType(KindOfRef),             "");
-static_assert(!isStringType(KindOfClass),           "");
 
 static_assert(isArrayType(KindOfArray),             "");
 static_assert(isArrayType(KindOfPersistentArray),   "");
@@ -446,7 +446,6 @@ static_assert(!isArrayType(KindOfString),           "");
 static_assert(!isArrayType(KindOfObject),           "");
 static_assert(!isArrayType(KindOfResource),         "");
 static_assert(!isArrayType(KindOfRef),              "");
-static_assert(!isArrayType(KindOfClass),            "");
 
 static_assert(isVecType(KindOfVec),                 "");
 static_assert(isVecType(KindOfPersistentVec),       "");
@@ -466,7 +465,6 @@ static_assert(!isVecType(KindOfString),             "");
 static_assert(!isVecType(KindOfObject),             "");
 static_assert(!isVecType(KindOfResource),           "");
 static_assert(!isVecType(KindOfRef),                "");
-static_assert(!isVecType(KindOfClass),              "");
 
 static_assert(isDictType(KindOfDict),               "");
 static_assert(isDictType(KindOfPersistentDict),     "");
@@ -486,7 +484,6 @@ static_assert(!isDictType(KindOfString),            "");
 static_assert(!isDictType(KindOfObject),            "");
 static_assert(!isDictType(KindOfResource),          "");
 static_assert(!isDictType(KindOfRef),               "");
-static_assert(!isDictType(KindOfClass),             "");
 
 static_assert(isKeysetType(KindOfKeyset),           "");
 static_assert(isKeysetType(KindOfPersistentKeyset), "");
@@ -506,7 +503,6 @@ static_assert(!isKeysetType(KindOfString),          "");
 static_assert(!isKeysetType(KindOfObject),          "");
 static_assert(!isKeysetType(KindOfResource),        "");
 static_assert(!isKeysetType(KindOfRef),             "");
-static_assert(!isKeysetType(KindOfClass),           "");
 
 static_assert(isArrayLikeType(KindOfArray),             "");
 static_assert(isArrayLikeType(KindOfPersistentArray),   "");
@@ -526,7 +522,6 @@ static_assert(!isArrayLikeType(KindOfString),           "");
 static_assert(!isArrayLikeType(KindOfObject),           "");
 static_assert(!isArrayLikeType(KindOfResource),         "");
 static_assert(!isArrayLikeType(KindOfRef),              "");
-static_assert(!isArrayLikeType(KindOfClass),            "");
 
 static_assert(isNullType(KindOfUninit),            "");
 static_assert(isNullType(KindOfNull),              "");
@@ -546,7 +541,6 @@ static_assert(!isNullType(KindOfString),           "");
 static_assert(!isNullType(KindOfObject),           "");
 static_assert(!isNullType(KindOfResource),         "");
 static_assert(!isNullType(KindOfRef),              "");
-static_assert(!isNullType(KindOfClass),            "");
 
 static_assert(isRefcountedType(KindOfString),            "");
 static_assert(isRefcountedType(KindOfObject),            "");
@@ -566,7 +560,6 @@ static_assert(!isRefcountedType(KindOfPersistentArray),  "");
 static_assert(!isRefcountedType(KindOfPersistentVec),    "");
 static_assert(!isRefcountedType(KindOfPersistentDict),   "");
 static_assert(!isRefcountedType(KindOfPersistentKeyset), "");
-static_assert(!isRefcountedType(KindOfClass),            "");
 
 static_assert(isIntKeyType(KindOfUninit),            "");
 static_assert(isIntKeyType(KindOfNull),              "");
@@ -640,7 +633,6 @@ static_assert(!(KindOfKeyset     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfObject     & KindOfUncountedInitBit), "");
 static_assert(!(KindOfResource   & KindOfUncountedInitBit), "");
 static_assert(!(KindOfRef        & KindOfUncountedInitBit), "");
-static_assert(!(KindOfClass      & KindOfUncountedInitBit), "");
 
 static_assert(KindOfString       & KindOfHasPersistentBits, "");
 static_assert(KindOfArray        & KindOfHasPersistentBits, "");
@@ -660,7 +652,6 @@ static_assert(!(KindOfUninit     & KindOfHasPersistentBits), "");
 static_assert(!(KindOfObject     & KindOfHasPersistentBits), "");
 static_assert(!(KindOfResource   & KindOfHasPersistentBits), "");
 static_assert(!(KindOfRef        & KindOfHasPersistentBits), "");
-static_assert(!(KindOfClass      & KindOfHasPersistentBits), "");
 
 static_assert(KindOfUninit == 0,
               "Several things assume this tag is 0, especially RDS");

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -372,15 +372,15 @@ struct CompactWriter {
           }
 
         case T_MAP:
-          writeMap(value.toArray(), valueSpec);
+          writeMap(value, valueSpec);
           break;
 
         case T_LIST:
-          writeList(value.toArray(), valueSpec, C_LIST_LIST);
+          writeList(value, valueSpec, C_LIST_LIST);
           break;
 
         case T_SET:
-          writeList(value.toArray(), valueSpec, C_LIST_SET);
+          writeList(value, valueSpec, C_LIST_SET);
           break;
 
         default:
@@ -389,7 +389,7 @@ struct CompactWriter {
       }
     }
 
-    void writeMap(Array arr, const Array& spec) {
+    void writeMap(const Variant& map, const Array& spec) {
       TType keyType = (TType)spec
         .rvalAt(s_ktype, AccessFlags::ErrorKey).toByte();
       TType valueType = (TType)spec
@@ -398,33 +398,62 @@ struct CompactWriter {
       Array keySpec = spec.rvalAt(s_key, AccessFlags::ErrorKey).toArray();
       Array valueSpec = spec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
 
-      writeMapBegin(keyType, valueType, arr.size());
+      auto elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+        writeField(tvAsCVarRef(k), keySpec, keyType);
+        writeField(tvAsCVarRef(v), valueSpec, valueType);
+        return false;
+      };
 
-      for (ArrayIter arrIter = arr.begin(); !arrIter.end(); ++arrIter) {
-        writeField(arrIter.first(), keySpec, keyType);
-        writeField(arrIter.second(), valueSpec, valueType);
+      if (isContainer(map)) {
+        writeMapBegin(keyType, valueType, getContainerSize(map));
+        IterateKV(
+          *map.asCell(),
+          [](const ArrayData* ad) { return false; },
+          elemWriter,
+          [](const ObjectData* o) { return false; }
+        );
+      } else {
+        auto const arr = map.toArray();
+        writeMapBegin(keyType, valueType, arr.size());
+        IterateKV(arr.get(), elemWriter);
       }
 
       writeCollectionEnd();
     }
 
-    void writeList(Array arr, const Array& spec, CListType listType) {
+    void writeList(const Variant& list, const Array& spec, CListType listType) {
       TType valueType = (TType)spec
         .rvalAt(s_etype, AccessFlags::ErrorKey).toByte();
       Array valueSpec = spec
         .rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
 
-      writeListBegin(valueType, arr.size());
+      std::function<bool(const TypedValue*, const TypedValue*)> elemWriter;
+      if (listType == C_LIST_LIST) {
+        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+          writeField(tvAsCVarRef(v), valueSpec, valueType);
+          return false;
+        };
+      } else if (listType == C_LIST_SET) {
+        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+          writeField(tvAsCVarRef(k), valueSpec, valueType);
+          return false;
+        };
+      } else {
+        always_assert(false);
+      }
 
-      for (ArrayIter arrIter = arr.begin(); !arrIter.end(); ++arrIter) {
-        Variant x;
-        if (listType == C_LIST_LIST) {
-          x = arrIter.second();
-        } else if (listType == C_LIST_SET) {
-          x = arrIter.first();
-        }
-
-        writeField(x, valueSpec, valueType);
+      if (isContainer(list)) {
+        writeListBegin(valueType, getContainerSize(list));
+        IterateKV(
+          *list.asCell(),
+          [](const ArrayData* ad) { return false; },
+          elemWriter,
+          [](const ObjectData* o) { return false; }
+        );
+      } else {
+        auto const arr = list.toArray();
+        writeListBegin(valueType, arr.size());
+        IterateKV(arr.get(), elemWriter);
       }
 
       writeCollectionEnd();
@@ -691,8 +720,8 @@ struct CompactReader {
             }
 
             Object obj = newStruct.toObject();
-            Array spec(get_tspec(obj->getVMClass()));
-            readStruct(obj, spec);
+            Array arrSpec(get_tspec(obj->getVMClass()));
+            readStruct(obj, arrSpec);
             return newStruct;
           }
 
@@ -863,11 +892,36 @@ struct CompactReader {
 
       Array keySpec = spec.rvalAt(s_key,
         AccessFlags::Error).toArray();
-      Array valueSpec = spec.rvalAt(s_val,
-        AccessFlags::Error).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        DictInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          switch (keyType) {
+            case TType::T_I08:
+            case TType::T_I16:
+            case TType::T_I32:
+            case TType::T_I64: {
+              int64_t key = readField(keySpec, keyType).toInt64();
+              Variant value = readField(valueSpec, valueType);
+              arr.set(key, value);
+              break;
+            }
+            case TType::T_STRING: {
+              String key = readField(keySpec, keyType).toString();
+              Variant value = readField(valueSpec, valueType);
+              arr.set(key, value);
+              break;
+            }
+            default:
+              thrift_error(
+                  "Unable to deserialize non int/string array keys",
+                  ERR_INVALID_DATA);
+          }
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
@@ -895,7 +949,14 @@ struct CompactReader {
 
       Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
       String format = spec.rvalAt(s_format, AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      if (format.equal(s_harray)) {
+        VecArrayInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.append(readField(valueSpec, valueType));
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
           pvec->add(readField(valueSpec, valueType));
@@ -919,7 +980,14 @@ struct CompactReader {
 
       Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
       String format = spec.rvalAt(s_format, AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      if (format.equal(s_harray)) {
+        KeysetInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.add(readField(valueSpec, valueType));
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -358,6 +358,14 @@ Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
   return invoke(name.data(), params);
 }
 
+static const StaticString s_invoke_not_instanceof_error(
+  "Given object is not an instance of the class this method was declared in"
+);
+
+static const StaticString s_invoke_non_object(
+  "Non-object passed to Invoke()"
+);
+
 Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
                                           const String& cls,
                                           const String& name,
@@ -366,19 +374,35 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
     return invoke_static_method(cls, name, params);
   }
 
+  if (!obj.is(KindOfObject)) {
+    Reflection::ThrowReflectionExceptionObject(s_invoke_non_object);
+  }
+
+  auto const providedClass = Unit::loadClass(cls.get());
+  if (!providedClass) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+  auto const selectedFunc = providedClass->lookupMethod(name.get());
+  if (!selectedFunc) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+
+  auto const objData = obj.toCObjRef().get();
+  auto const implementingClass = selectedFunc->implCls();
+  if (!objData->instanceof(implementingClass)) {
+    Reflection::ThrowReflectionExceptionObject(s_invoke_not_instanceof_error);
+  }
+
   // Get the CallCtx this way instead of using vm_decode_function() because
   // vm_decode_function() has no way to specify a class independent from the
   // class::function being called.
   // Note that this breaks the rules for name lookup (for protected and private)
   // but that's okay because so does Zend's implementation.
   CallCtx ctx;
-  ctx.cls = Unit::loadClass(cls.get());
-  ctx.this_ = obj.toObject().get();
+  ctx.cls = providedClass;
+  ctx.this_ = objData;
   ctx.invName = nullptr;
-  ctx.func = ctx.cls->lookupMethod(name.get());
-  if (!ctx.func) {
-    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
-  }
+  ctx.func = selectedFunc;
 
   return Variant::attach(
     g_context->invokeFunc(ctx, params)
@@ -413,6 +437,65 @@ void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
       "You can't change accessibility in Whole Program mode"
     );
   }
+
+  /*
+   * This interface can be used to clear memo caches, but we don't want to allow
+   * setting the memo cache values to arbitrary values. HHBBC and the JIT make
+   * aggressive assumptions about the layout and values of the caches to improve
+   * performance. So, if the property being set is a memo cache, we'll allow
+   * resetting it to an empty value, but nothing else.
+   *
+   * Furthermore, existing PHP code assumes that the memo cache stores arrays,
+   * not dicts, so for backwards compatibility, we'll allow null or any empty
+   * array-like value to mean clear.
+   */
+  auto const isMultiMemo = prop.slice().endsWith("$multi$memoize_cache");
+  auto const isSingleMemo = prop.slice().endsWith("$single$memoize_cache");
+  auto const isGuardedSingleMemo =
+    prop.slice().endsWith("$guarded_single$memoize_cache");
+  auto const isGuard =
+    prop.slice().endsWith("$guarded_single$memoize_cache$guard");
+
+  if (isGuard) {
+    // Allow setting the guard to false only. Clear out the associated cache at
+    // the same time.
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfBoolean || tv->m_data.num) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    obj->o_set(prop, false_varNR, cls);
+    obj->o_set(
+      prop.slice().subpiece(0, prop.length() - 6),
+      init_null_variant,
+      cls
+    );
+    return;
+  }
+
+  if (isMultiMemo || isSingleMemo || isGuardedSingleMemo) {
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfNull &&
+        (!isArrayLikeType(tv->m_type) || tv->m_data.parr->size() != 0)) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    // Reset to empty value. Depending on the type of the memo cache, this might
+    // be null or an empty dict.
+    if (isMultiMemo) {
+      obj->o_set(
+        prop,
+        cellAsCVarRef(make_tv<KindOfPersistentDict>(staticEmptyDictArray())),
+        cls
+      );
+    } else if (isSingleMemo || isGuardedSingleMemo) {
+      obj->o_set(prop, init_null_variant, cls);
+      if (isGuardedSingleMemo) {
+        // If there's a guard, reset it to false as well.
+        obj->o_set(folly::sformat("{}$guard", prop), false_varNR, cls);
+      }
+    }
+    return;
+  }
+
   obj->o_set(prop, value, cls);
 }
 
@@ -468,6 +551,74 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
+
+  /*
+   * Like in hphp_set_property(), this interface can be used to clear memo
+   * caches, but we don't want to allow setting the memo cache values to
+   * arbitrary values. HHBBC and the JIT make aggressive assumptions about the
+   * layout and values of the caches to improve performance. So, if the property
+   * being set is a memo cache, we'll allow resetting it to an empty value, but
+   * nothing else.
+   *
+   * Furthermore, existing PHP code assumes that the memo cache stores arrays,
+   * not dicts, so for backwards compatibility, we'll allow null or any empty
+   * array-like value to mean clear.
+   */
+  auto const isMultiMemo = prop.slice().endsWith("$multi$memoize_cache");
+  auto const isSingleMemo = prop.slice().endsWith("$single$memoize_cache");
+  auto const isGuardedSingleMemo =
+    prop.slice().endsWith("$guarded_single$memoize_cache");
+  auto const isGuard =
+    prop.slice().endsWith("$guarded_single$memoize_cache$guard");
+
+  if (isGuard) {
+    // Allow setting the guard to false only. Clear out the associated cache at
+    // the same time.
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfBoolean || tv->m_data.num) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    cellSet(make_tv<KindOfBoolean>(false), *lookup.prop);
+
+    auto const cacheLookup = class_->getSProp(
+      force ? class_ : arGetContextClass(vmfp()),
+      String{prop.slice().subpiece(0, prop.length() - 6)}.get()
+    );
+    if (cacheLookup.prop) {
+      cellSet(make_tv<KindOfNull>(), *cacheLookup.prop);
+    }
+    return;
+  }
+
+  if (isMultiMemo || isSingleMemo || isGuardedSingleMemo) {
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfNull &&
+        (!isArrayLikeType(tv->m_type) || tv->m_data.parr->size() != 0)) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    // Reset to empty value. Depending on the type of the memo cache, this might
+    // be null or an empty dict.
+    if (isMultiMemo) {
+      cellSet(
+        make_tv<KindOfPersistentDict>(staticEmptyDictArray()),
+        *lookup.prop
+      );
+    } else if (isSingleMemo || isGuardedSingleMemo) {
+      cellSet(make_tv<KindOfNull>(), *lookup.prop);
+      if (isGuardedSingleMemo) {
+        // If there's a guard, reset it to false as well.
+        auto const guardLookup = class_->getSProp(
+          force ? class_ : arGetContextClass(vmfp()),
+          String{folly::sformat("{}$guard", prop)}.get()
+        );
+        if (guardLookup.prop) {
+          cellSet(make_tv<KindOfBoolean>(false), *guardLookup.prop);
+        }
+      }
+    }
+    return;
+  }
+
   tvAsVariant(lookup.prop) = value;
 }
 
@@ -694,7 +845,6 @@ static Array get_function_param_info(const Func* func) {
     if (
       fpi.typeConstraint.isCallable() ||
       (fpi.typeConstraint.underlyingDataType() &&
-       fpi.typeConstraint.underlyingDataType() != KindOfClass &&
        fpi.typeConstraint.underlyingDataType() != KindOfObject
       )
     ) {
@@ -796,7 +946,6 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     if (
       retType.isCallable() || // callable type hint is considered builtin
       (retType.underlyingDataType() &&
-       retType.underlyingDataType() != KindOfClass && // stdclass is not
        retType.underlyingDataType() != KindOfObject
       )
     ) {
@@ -1225,7 +1374,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  StringISet visitedMethods;
+  req::StringISet visitedMethods;
   auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
@@ -1242,13 +1391,13 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   std::function<void(const Class*)> collect;
   std::function<void(const Class*)> collectInterface;
 
-  collect = [&] (const Class* cls) {
-    if (!cls) return;
+  collect = [&] (const Class* clas) {
+    if (!clas) return;
 
-    auto const methods = cls->preClass()->methods();
-    auto const numMethods = cls->preClass()->numMethods();
+    auto const methods = clas->preClass()->methods();
+    auto const numMethods = clas->preClass()->numMethods();
 
-    auto numDeclMethods = cls->preClass()->numDeclMethods();
+    auto numDeclMethods = clas->preClass()->numDeclMethods();
     if (numDeclMethods == -1) numDeclMethods = numMethods;
 
     // Add declared methods.
@@ -1257,15 +1406,15 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
     }
 
     // Recurse; we need to order the parent's methods before our trait methods.
-    collect(cls->parent());
+    collect(clas->parent());
 
     for (Slot i = numDeclMethods; i < numMethods; ++i) {
       // For repo mode, where trait methods are flattened at compile-time.
       add(methods[i]);
     }
-    for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
+    for (Slot i = clas->traitsBeginIdx(); i < clas->traitsEndIdx(); ++i) {
       // For non-repo mode, where they are added at Class-creation time.
-      add(cls->getMethod(i));
+      add(clas->getMethod(i));
     }
   };
 

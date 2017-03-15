@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <string>
+#include <atomic>
 
 namespace HPHP {
 
@@ -60,6 +61,20 @@ struct CacheData {
   bool isCompressed() const;
   bool isEmpty() const;
 
+  bool existChecked() {
+    // this flag only ever changes from false to true, so do a load first
+    // to avoid thrashing the caches for subsequent checks.
+    return
+      m_exist_checked.load(std::memory_order_relaxed) ||
+      m_exist_checked.exchange(true, std::memory_order_relaxed);
+  }
+
+  bool dataFetched() {
+    return
+      m_data_fetched.load(std::memory_order_relaxed) ||
+      m_data_fetched.exchange(true, std::memory_order_relaxed);
+  }
+
   uint64_t fileSize() const;
 
   // Access contents if possible.  Populates all three arguments on success.
@@ -82,19 +97,21 @@ struct CacheData {
   uint64_t createChecksum() const;
   bool sufficientlyCompressed(uint64_t orig_size, uint64_t new_size) const;
 
-  uint64_t id_;
-  uint64_t flags_;
-  uint64_t mtime_;
-  uint64_t checksum_;
+  uint64_t m_id;
+  uint64_t m_flags;
+  uint64_t m_mtime;
+  uint64_t m_checksum;
 
   // It might be something we malloced, or something we got via mmap...
-  const char* file_data_;
-  uint64_t file_data_length_;
+  const char* m_file_data;
+  uint64_t m_file_data_length;
 
   // ... hence this bool.
-  bool should_free_;
+  bool m_should_free{false};
+  std::atomic<bool> m_exist_checked{false};
+  std::atomic<bool> m_data_fetched{false};
 
-  std::string name_;
+  std::string m_name;
 };
 
 }  // namespace HPHP

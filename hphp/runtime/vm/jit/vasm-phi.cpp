@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -190,14 +190,14 @@ void optimizePhis(Vunit& unit) {
         auto const is_jcc = it->op == Vinstr::jcc;
 
         using Iter = decltype(it);
-        auto predNeedsFixing = [&](Iter it, Iter begin) -> bool {
-          if (it->op != Vinstr::phijmp) return false;
-          auto const use = unit.tuples[it->phijmp_.uses][0];
+        auto predNeedsFixing = [&](Iter it2, Iter begin) -> bool {
+          if (it2->op != Vinstr::phijmp) return false;
+          auto const use = unit.tuples[it2->phijmp_.uses][0];
           if (!unit.regToConst.count(use)) {
             if (useCounts[use] > 1) return false;
-            if (it == begin) return false;
-            --it;
-            if (it->op != Vinstr::setcc || use != it->setcc_.d) return false;
+            if (it2 == begin) return false;
+            --it2;
+            if (it2->op != Vinstr::setcc || use != it2->setcc_.d) return false;
           }
           return true;
         };

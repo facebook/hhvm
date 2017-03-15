@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -220,10 +220,10 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   }
 
   auto data = JmpSwitchData{};
-  data.cases       = iv.size();
-  data.targets     = &targets[0];
-  data.invSPOff    = invSPOff(env);
-  data.irSPOff     = bcSPOffset(env);
+  data.cases = iv.size();
+  data.targets = &targets[0];
+  data.spOffBCFromFP = spOffBCFromFP(env);
+  data.spOffBCFromIRSP = spOffBCFromIRSP(env);
 
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
@@ -260,7 +260,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.cases      = &cases[0];
   data.defaultSk  = SrcKey{curSrcKey(env),
                            bcOff(env) + iv.strvec()[iv.size() - 1].dest};
-  data.spOff      = invSPOff(env);
+  data.bcSPOff    = spOffBCFromFP(env);
 
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast
@@ -271,7 +271,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   gen(
     env,
     JmpSSwitchDest,
-    IRSPRelOffsetData { bcSPOffset(env) },
+    IRSPRelOffsetData { spOffBCFromIRSP(env) },
     dest,
     sp(env),
     fp(env)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,7 @@ namespace HPHP {
  *
  * ServiceData provides a globally accessible entry point to all the internal
  * statistics. A 'statistic counter' of different types could be created by
- * calling createCouter() createTimeseries() or createHistogram(). The caller
+ * calling createCouter() createTimeSeries() or createHistogram(). The caller
  * can then add values at different time points to the statistic counters. The
  * statistic can then be retrieved and reported via the exportAll() call on
  * ServiceData.
@@ -65,7 +65,7 @@ namespace HPHP {
  *
  * // create timeseries data named bar with default setting (avg value for the
  * // last 1 minute, 10 minute, hour and all time).
- * auto timeseries = ServiceData::createTimeseries("bar");
+ * auto timeseries = ServiceData::createTimeSeries("bar");
  * timeseries->addValue(3);
  *
  * // create a histogram with 10 buckets, min of 1, max of 100 and export the
@@ -135,7 +135,7 @@ ExportedCounter* createCounter(const std::string& name);
  * 'numBuckets' specifies how many buckets to keep at each level. More buckets
  * will produce more precise data at the expense of memory.
  */
-ExportedTimeSeries* createTimeseries(
+ExportedTimeSeries* createTimeSeries(
   const std::string& name,
   const std::vector<StatsType>& exportTypes =
   std::vector<StatsType>{ StatsType::AVG },

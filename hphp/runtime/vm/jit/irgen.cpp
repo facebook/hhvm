@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ Block* create_catch_block(IRGS& env) {
   env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
 
   gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPRelOffsetData { bcSPOffset(env) },
+  gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
       fp(env), sp(env));
   return catchBlock;
 }
@@ -57,9 +57,10 @@ void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
 
 uint64_t curProfCount(const IRGS& env) {
   auto tid = env.profTransID;
-  assertx(tid == kInvalidTransID || profData());
+  assertx(tid == kInvalidTransID ||
+          (env.region != nullptr && profData() != nullptr));
   return env.profFactor *
-         (tid != kInvalidTransID ? profData()->transCounter(tid) : 1);
+         (tid != kInvalidTransID ? env.region->blockProfCount(tid) : 1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -135,7 +136,7 @@ void prepareEntry(IRGS& env) {
    * C++ function that checks the state of everything.
    */
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const data = IRSPRelOffsetData { bcSPOffset(env) };
+    auto const data = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, DbgTraceCall, data, fp(env), sp(env));
   }
 
@@ -164,8 +165,8 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   }
   auto const data = ReqBindJmpData {
     nextSk,
-    invSPOff(env),
-    bcSPOffset(env),
+    spOffBCFromFP(env),
+    spOffBCFromIRSP(env),
     TransFlags{}
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));
@@ -190,6 +191,10 @@ Type predictedType(const IRGS& env, const Location& loc) {
       return fs.stack(offsetFromIRSP(env, loc.stackIdx())).predictedType;
     case LTag::Local:
       return fs.local(loc.localId()).predictedType;
+    case LTag::MBase:
+      return fs.mbase().predictedType;
+    case LTag::CSlot:
+      return fs.clsRefSlot(loc.clsRefSlot()).predictedType;
   }
   not_reached();
 }
@@ -202,6 +207,10 @@ Type provenType(const IRGS& env, const Location& loc) {
       return fs.stack(offsetFromIRSP(env, loc.stackIdx())).type;
     case LTag::Local:
       return fs.local(loc.localId()).type;
+    case LTag::MBase:
+      return fs.mbase().type;
+    case LTag::CSlot:
+      return fs.clsRefSlot(loc.clsRefSlot()).type;
   }
   not_reached();
 }

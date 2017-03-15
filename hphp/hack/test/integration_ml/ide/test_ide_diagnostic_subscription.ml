@@ -21,12 +21,20 @@ let foo_contents = "<?hh
 "
 
 let foo_diagnostics = "
+/bar.php:
+File \"/bar.php\", line 3, characters 10-13:
+Was expecting a return type hint (Typing[4030])
+
 /foo.php:
 File \"/foo.php\", line 3, characters 1-0:
 Expected } (Parsing[1002])
 "
 
 let foo_clear_diagnostics = "
+/bar.php:
+File \"/bar.php\", line 3, characters 10-13:
+Was expecting a return type hint (Typing[4030])
+
 /foo.php:
 "
 
@@ -74,8 +82,9 @@ let () =
   let env = Test.wait env in
   let env, loop_outputs = Test.(run_loop_once env default_loop_input) in
   assert_no_push_message loop_outputs;
-  (* Change the file, but still no errors *)
+  (* Change the file, but still no new errors *)
   let env, _ = Test.edit_file env foo_name "<?hh\n" in
   let env = Test.wait env in
   let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
-  assert_no_push_message loop_outputs
+  (* Back to initial list of errors *)
+  Test.assert_diagnostics loop_outputs bar_diagnostics

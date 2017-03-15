@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,22 +66,8 @@ struct OfflineTransData {
     return &translations[id];
   }
 
-  uint64_t getTransCounter(TransID id) const {
-    assert(id < transCounters.size());
-    return transCounters[id];
-  }
-
-  void setTransCounter(TransID id, uint64_t value) {
-    transCounters[id] = value;
-  }
-
-  void incTransCounter(TransID id) {
-    transCounters[id]++;
-  }
-
-  void addTrans(TransRec& transRec, uint64_t profCount) {
+  void addTrans(TransRec& transRec) {
     translations.push_back(transRec);
-    transCounters.push_back(profCount);
     preds.push_back(TransIDSet());
     succs.push_back(TransIDSet());
   }
@@ -164,8 +150,7 @@ struct OfflineTransData {
   }
 
   // Find translations that belong to the selectedFuncId
-  // Also returns the max prof count among them
-  uint64_t findFuncTrans(uint32_t selectedFuncId, std::vector<TransID> *inodes);
+  void findFuncTrans(uint32_t selectedFuncId, std::vector<TransID> *inodes);
 
   void printTransRec(TransID transId, const PerfEventsMap<TransID>& transStats);
 
@@ -187,7 +172,6 @@ struct OfflineTransData {
 private:
   uint32_t                    nTranslations;
   std::vector<TransRec>       translations;
-  std::vector<uint64_t>       transCounters;
   std::vector<TransIDSet>     preds;
   std::vector<TransIDSet>     succs;
 

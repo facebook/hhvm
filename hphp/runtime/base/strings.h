@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,6 +51,8 @@ const char* const CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
 const char* const CREATING_DEFAULT_OBJECT =
   "Creating default object from empty value";
+const char* const SET_PROP_NON_OBJECT =
+  "Setting a property on a non-object";
 const char* const NULLSAFE_PROP_WRITE_ERROR =
   "?-> is not allowed in write context";
 const char* const NULLSAFE_THIS_BASE_ERROR = "?-> is not allowed with $this";
@@ -92,7 +94,11 @@ const char* const TRAIT_BAD_REQ_IMPLEMENTS =
 const char* const INCONSISTENT_INSTEADOF =
   "Inconsistent insteadof definition. The method %s is to be used from %s, "
   "but %s is also on the exclude list";
+const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
 const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
+const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
+  "Comparing array with non-array";
+
 } // namespace Strings
 } // namespace HPHP
 

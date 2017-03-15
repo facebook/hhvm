@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,7 @@
 #include "hphp/util/process.h"
 
 #include <folly/String.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/SysFile.h>
 
 #include <algorithm>
@@ -445,6 +446,20 @@ bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
     }
   }
   return true;
+}
+
+bool File::setBlocking(bool mode) {
+  int flags = fcntl(fd(), F_GETFL, 0);
+  if (mode) {
+    flags &= ~O_NONBLOCK;
+  } else {
+    flags |= O_NONBLOCK;
+  }
+  return fcntl(fd(), F_SETFL, flags) != -1;
+}
+
+bool File::setTimeout(uint64_t usecs) {
+  return false;
 }
 
 int64_t File::tell() {

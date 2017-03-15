@@ -1,7 +1,13 @@
-?^(A)
-^(A)
-?^(B)
-^(B)
-?^(B | A)
-^(AB | A | B)
+File "shape_idx6.php", line 18, characters 3-31:
+  ?^(A)
+File "shape_idx6.php", line 19, characters 3-35:
+  ^(A)
+File "shape_idx6.php", line 20, characters 3-31:
+  ?^(B)
+File "shape_idx6.php", line 21, characters 3-35:
+  ^(B)
+File "shape_idx6.php", line 29, characters 3-31:
+  ?^(B | A)
+File "shape_idx6.php", line 30, characters 3-36:
+  ^(AB | A | B)
 No errors

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,9 +61,6 @@ struct SocketData : FileData {
 struct Socket : File {
   DECLARE_RESOURCE_ALLOCATION(Socket);
 
-  Socket();
-  Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
-         double timeout = 0, const StaticString& streamType = empty_string_ref);
   virtual ~Socket();
 
   // overriding ResourceData
@@ -89,14 +86,11 @@ struct Socket : File {
 
   // This is only for updating a local copy of timeouts set by setsockopt()
   // outside of this class.
-  void setTimeout(struct timeval &tv);
-
-  bool setBlocking(bool blocking);
+  void internalSetTimeout(struct timeval &tv);
 
   std::string getAddress() const { return m_data->m_address; }
   int         getPort() const    { return m_data->m_port; }
 
-  explicit Socket(std::shared_ptr<SocketData> data);
   std::shared_ptr<SocketData> getData() const {
     return std::static_pointer_cast<SocketData>(File::getData());
   }
@@ -104,6 +98,9 @@ protected:
   bool waitForData();
   bool timedOut() const { return m_data->m_timedOut; }
 
+  Socket();
+  Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
+         double timeout = 0, const StaticString& streamType = empty_string_ref);
   Socket(std::shared_ptr<SocketData> data,
          int sockfd,
          int type,
@@ -111,6 +108,7 @@ protected:
          int port = 0,
          double timeout = 0,
          const StaticString& streamType = empty_string_ref);
+  explicit Socket(std::shared_ptr<SocketData> data);
 
   // make private?
   SocketData* getSocketData() { return m_data; }
@@ -120,6 +118,35 @@ private:
   void inferStreamType();
   SocketData* m_data;
   static __thread int s_lastErrno;
+};
+
+// This class provides exactly the same functionality as Socket but reports as a
+// class/resource of 'Socket' instead of 'stream'.
+struct ConcreteSocket final : Socket {
+  CLASSNAME_IS("Socket");
+  RESOURCENAME_IS("Socket");
+
+  ConcreteSocket() = default;
+  ConcreteSocket(int sockfd, int type, const char *address = nullptr,
+                 int port = 0, double timeout = 0,
+                 const StaticString& streamType = empty_string_ref) :
+      Socket(sockfd, type, address, port, timeout, streamType) { }
+  explicit ConcreteSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
+
+  // overriding ResourceData
+  const String& o_getClassNameHook() const override { return classnameof(); }
+  const String& o_getResourceName() const override { return resourcenameof(); }
+};
+
+// This class provides exactly the same functionality as ConcreteSocket but
+// reports the default behavior for File.
+struct StreamSocket final : Socket {
+  StreamSocket() = default;
+  StreamSocket(int sockfd, int type, const char *address = nullptr,
+                 int port = 0, double timeout = 0,
+                 const StaticString& streamType = empty_string_ref) :
+      Socket(sockfd, type, address, port, timeout, streamType) { }
+  explicit StreamSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

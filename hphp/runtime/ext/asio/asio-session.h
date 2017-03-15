@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -154,28 +154,6 @@ struct AsioSession final {
   void onSleepCreate(c_SleepWaitHandle* waitHandle);
   void onSleepSuccess(c_SleepWaitHandle* waitHandle);
 
-  template<class F> void scan(F& mark) const {
-    for (auto cxt : m_contexts) cxt->scan(mark);
-    // TODO: #7930461 add list of externalThreadEvents that not in any context
-    for (auto wh : m_sleepEvents) mark(wh);
-    m_externalThreadEventQueue.scan(mark);
-    mark(m_abruptInterruptException);
-    mark(m_onIOWaitEnter);
-    mark(m_onIOWaitExit);
-    mark(m_onJoin);
-    mark(m_onResumableCreate);
-    mark(m_onResumableAwait);
-    mark(m_onResumableSuccess);
-    mark(m_onResumableFail);
-    mark(m_onAwaitAllCreate);
-    mark(m_onConditionCreate);
-    mark(m_onExtThreadEventCreate);
-    mark(m_onExtThreadEventSuccess);
-    mark(m_onExtThreadEventFail);
-    mark(m_onSleepCreate);
-    mark(m_onSleepSuccess);
-  }
-
 private:
   AsioSession();
   friend AsioSession* req::make_raw<AsioSession>();
@@ -185,6 +163,7 @@ private:
   req::vector<AsioContext*> m_contexts;
   req::vector<c_SleepWaitHandle*> m_sleepEvents;
   AsioExternalThreadEventQueue m_externalThreadEventQueue;
+  // TODO: #7930461 add list of externalThreadEvents that aren't in any context
 
   Object m_abruptInterruptException;
   Object m_onIOWaitEnter;

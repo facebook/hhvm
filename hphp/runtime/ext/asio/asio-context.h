@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -74,21 +74,6 @@ struct AsioContext final {
 
   static constexpr uint32_t QUEUE_DEFAULT       = 0;
   static constexpr uint32_t QUEUE_NO_PENDING_IO = 1;
-
-  template<class F> void scan(F& mark) const {
-    // m_savedFP is a pointer to a frame on the stack that represents
-    // a \HH\Asio\join() call; it's guaranteed to be on the stack
-    mark(m_runnableQueue);
-    mark(m_fastRunnableQueue);
-    for (auto& p : m_priorityQueueDefault) {
-      for (auto wh : p.second) mark(wh);
-    }
-    for (auto& p : m_priorityQueueNoPendingIO) {
-      for (auto wh : p.second) mark(wh);
-    }
-    mark(m_sleepEvents);
-    mark(m_externalThreadEvents);
-  }
 
 private:
   typedef req::map<int64_t, req::deque<c_RescheduleWaitHandle*>>

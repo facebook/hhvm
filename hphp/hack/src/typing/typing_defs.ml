@@ -82,6 +82,8 @@ and _ ty_ =
   | Tany
   | Tmixed
 
+  | Terr
+
   (* Nullable, called "option" in the ML parlance. *)
   | Toption : 'phase ty -> 'phase ty_
 
@@ -480,13 +482,6 @@ module AbstractKind = struct
              "<expr#"^string_of_int display_id^">" in
        String.concat "::" (dt::ids)
 end
-
-(*****************************************************************************)
-(* Accumulate method calls mode *)
-(*****************************************************************************)
-
-let accumulate_method_calls = ref false
-let (accumulate_method_calls_result: (Pos.t * string) list ref) = ref []
 
 (*****************************************************************************)
 (* Suggest mode *)

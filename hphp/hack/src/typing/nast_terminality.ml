@@ -18,7 +18,7 @@ module FuncTerm = Typing_func_terminality
 
 let static_meth_terminal env ci meth_id =
   let class_name = match ci with
-    | CI cls_id -> Some (snd cls_id)
+    | CI (cls_id, _) -> Some (snd cls_id)
     | CIself | CIstatic -> Some (Typing_env.get_self_id env)
     | CIparent -> Some (Typing_env.get_parent_id env)
     | CIexpr _ -> None (* we declared the types, but didn't check the bodies yet
@@ -75,7 +75,7 @@ end = struct
     | While ((_, True), b)
     | Do (b, (_, True))
     | For ((_, Expr_list []), (_, Expr_list []), (_, Expr_list []), b) ->
-        if not (Nast_visitor.HasBreak.block b) then raise Exit
+        if not (Nast.Visitor.HasBreak.block b) then raise Exit
     | Do _
     | While _
     | For _

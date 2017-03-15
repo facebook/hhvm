@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -174,19 +174,31 @@
 //////////////////////////////////////////////////////////////////////
 // CALLEE_SAVED_BARRIER
 
-#if defined(__CYGWIN__) || defined(__MINGW__)
-  #define CALLEE_SAVED_BARRIER()\
-    asm volatile("" : : : "rbx", "rsi", "rdi", "r12", "r13", "r14", "r15");
-#elif defined(_MSC_VER)
+#ifdef _MSC_VER
   // Unfortunately, we have no way to tell MSVC to do this, so we'll
   // probably have to use a pair of assembly stubs to manage this.
   #define CALLEE_SAVED_BARRIER() always_assert(false);
 #elif defined (__powerpc64__)
+ // After gcc 5.4.1 we can't clobber r30 on PPC64 anymore because it's used as
+ // PIC register.
+ #if __GNUC__ > 5 || (__GNUC__ == 5 && (__GNUC_MINOR__ >= 4) && \
+   (__GNUC_PATCHLEVEL__ >= 1))
+   #define  CALLEE_SAVED_BARRIER()\
+     asm volatile("" : : : "r2", "r14", "r15", "r16", "r17", "r18", "r19",\
+                  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", \
+                  "r28", "r29", "cr2", "cr3", "cr4", "v20", "v21", "v22", \
+                  "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", \
+                  "v31");
+ #else
+  // On gcc versions < 5.4.1 we need to include r30 on barrier as it's not
+  // saved by gcc.
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "r2", "r14", "r15", "r16", "r17", "r18", "r19",\
-        "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28",   \
-        "r29", "r30", "cr2", "cr3", "cr4", "v20", "v21", "v22", "v23",   \
-        "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31");
+                 "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", \
+                 "r28", "r29", "r30", "cr2", "cr3", "cr4", "v20", "v21", \
+                 "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", \
+                 "v30", "v31");
+ #endif
 #elif defined (__AARCH64EL__)
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25",\

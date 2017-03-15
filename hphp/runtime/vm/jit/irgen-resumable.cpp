@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,7 +76,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   // copying local variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true, hasThis(env));
-  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const waitHandle =
     gen(env,
@@ -124,7 +124,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
   // Suspend the async function.
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true, hasThis(env));
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StAsyncArResume, ResumeOffset { resumeOffset }, fp(env),
       resumeAddr);
@@ -137,7 +137,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   auto const retVal = cns(env, TInitNull);
   push(env, retVal);
 
-  gen(env, AsyncSwitchFast, RetCtrlData { bcSPOffset(env), true },
+  gen(env, AsyncSwitchFast, RetCtrlData { spOffBCFromIRSP(env), true },
       sp(env), fp(env), retVal);
 }
 
@@ -145,7 +145,7 @@ void yieldReturnControl(IRGS& env) {
   auto const retVal = cns(env, TInitNull);
   push(env, retVal);
 
-  gen(env, RetCtrl, RetCtrlData { bcSPOffset(env), true },
+  gen(env, RetCtrl, RetCtrlData { spOffBCFromIRSP(env), true },
       sp(env), fp(env), retVal);
 }
 
@@ -154,7 +154,7 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
   auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true, hasThis(env));
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
+  auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StContArResume, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
 
@@ -168,6 +168,18 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
   gen(env, StContArState,
       GeneratorState { BaseGenerator::State::Started },
       fp(env));
+}
+
+Type returnTypeAwaited(SSATmp* retVal) {
+  while (retVal->inst()->isPassthrough()) {
+    retVal = retVal->inst()->getPassthroughValue();
+  }
+  auto const inst = retVal->inst();
+  if (!inst->is(Call)) return TInitCell;
+  auto const callee = inst->extra<Call>()->callee;
+  return callee
+    ? typeFromRAT(callee->repoAwaitedReturnType(), inst->func()->cls())
+    : TInitCell;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -186,7 +198,7 @@ void emitWHResult(IRGS& env) {
     "we test state for non-zero, success must be zero"
   );
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
-  auto const res = gen(env, LdWHResult, TInitCell, child);
+  auto const res = gen(env, LdWHResult, returnTypeAwaited(child), child);
   gen(env, IncRef, res);
   decRef(env, child);
   push(env, res);
@@ -198,7 +210,7 @@ void emitAwait(IRGS& env) {
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
-  auto const exitSlow   = makeExitSlow(env);
+  auto const exitSlow = makeExitSlow(env);
 
   if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
 
@@ -226,10 +238,10 @@ void emitAwait(IRGS& env) {
     auto pc = curUnit(env)->at(resumeOffset);
     if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
     auto const stkLoc = decode_iva(pc);
-    if (stkLoc != 0) return TInitCell;
+    if (stkLoc != 0) return returnTypeAwaited(child);
     auto const rat = decodeRAT(curUnit(env), pc);
     auto const ty = ratToAssertType(env, rat);
-    return ty ? *ty : TInitCell;
+    return ty ? *ty : returnTypeAwaited(child);
   }();
 
   ifThenElse(
@@ -263,7 +275,7 @@ void emitFCallAwait(IRGS& env,
   auto const resumeOffset = nextBcOff(env);
 
   auto const ret = implFCall(env, numParams);
-  assertTypeStack(env, BCSPRelOffset{0}, TCell);
+  assertTypeStack(env, BCSPRelOffset{0}, TInitCell);
   ifThen(
     env,
     [&] (Block* taken) {
@@ -293,6 +305,7 @@ void emitFCallAwait(IRGS& env,
       }
     }
   );
+  assertTypeStack(env, BCSPRelOffset{0}, returnTypeAwaited(ret));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -308,7 +321,7 @@ void emitCreateCont(IRGS& env) {
   // variables and iterators.
   auto const func = curFunc(env);
   auto const resumeSk = SrcKey(func, resumeOffset, true, hasThis(env));
-  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const cont =
     gen(env,
@@ -359,7 +372,7 @@ void emitContEnter(IRGS& env) {
   gen(
     env,
     ContEnter,
-    ContEnterData { bcSPOffset(env), returnBcOffset },
+    ContEnterData { spOffBCFromIRSP(env), returnBcOffset },
     sp(env),
     fp(env),
     genFp,

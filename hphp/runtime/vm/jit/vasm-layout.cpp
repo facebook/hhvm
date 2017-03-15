@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,12 +157,13 @@ int64_t Scale::findProfCount(Vlabel blk) const {
 void Scale::computeBlockWeights() {
   m_blkWgts.resize(m_unit.blocks.size(), 0);
 
-  // We divide the corresponding region block's profile counter by the
-  // following factors, depending on the code area the block is
-  // assigned to.
-  static int areaWeightFactors[] = { 1,  /* main   */
-                                     10, /* cold   */
-                                     100 /* frozen */ };
+  // We multiply the corresponding region block's profile counter by the
+  // following factors, depending on the code area the block is assigned to.
+  static int areaWeightFactors[] = {
+    RuntimeOption::EvalJitLayoutMainFactor, // main
+    RuntimeOption::EvalJitLayoutColdFactor, // cold
+    1                                       // frozen
+  };
 
   static_assert(
     sizeof(areaWeightFactors) / sizeof(areaWeightFactors[0]) == kNumAreas,
@@ -171,7 +172,7 @@ void Scale::computeBlockWeights() {
   for (auto b : m_blocks) {
     auto a = unsigned(m_unit.blocks[b].area_idx);
     assertx(a < 3);
-    m_blkWgts[b] = findProfCount(b) / areaWeightFactors[a];
+    m_blkWgts[b] = findProfCount(b) * areaWeightFactors[a];
     if (m_blkWgts[b] < 0) m_blkWgts[b] = 0;
   }
 }
@@ -227,13 +228,14 @@ std::string Scale::toString() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Clusterizer {
-  Clusterizer(const Vunit& unit, const Scale& scale)
+  Clusterizer(Vunit& unit, const Scale& scale)
       : m_unit(unit)
       , m_scale(scale)
       , m_blocks(sortBlocks(unit)) {
     initClusters();
     clusterize();
     sortClusters();
+    splitHotColdClusters();
     FTRACE(1, "{}", toString());
   }
 
@@ -247,8 +249,9 @@ struct Clusterizer {
   void initClusters();
   void clusterize();
   void sortClusters();
+  void splitHotColdClusters();
 
-  const Vunit&              m_unit;
+  Vunit&                    m_unit;
   const Scale&              m_scale;
   const jit::vector<Vlabel> m_blocks;
   jit::vector<Cluster>      m_clusters;
@@ -310,6 +313,10 @@ void Clusterizer::clusterize() {
   for (auto& arcInfo : arcInfos) {
     auto src = arcInfo.src;
     auto dst = arcInfo.dst;
+
+    // Only merge blocks in the same area.
+    if (m_unit.blocks[src].area_idx != m_unit.blocks[dst].area_idx) continue;
+
     auto srcCid = m_blockCluster[src];
     auto dstCid = m_blockCluster[dst];
     if (srcCid == dstCid) continue;
@@ -409,9 +416,47 @@ void Clusterizer::sortClusters() {
   m_clusterOrder = dfsSort.sort(m_blockCluster[m_unit.entry]);
 }
 
+
+void Clusterizer::splitHotColdClusters() {
+  // compute the average weight of each cluster
+  jit::vector<uint64_t> clusterAvgWgt(m_clusters.size());
+  for (size_t c = 0; c < m_clusters.size(); c++) {
+    uint64_t totalWeight = 0;
+    uint64_t totalSize   = 0;
+    for (auto b : m_clusters[c]) {
+      const auto numInsts = m_unit.blocks[b].code.size();
+      totalSize   += numInsts;
+      totalWeight += numInsts * m_scale.weight(b);
+    }
+    clusterAvgWgt[c] = totalSize == 0 ? 0 : totalWeight / totalSize;
+  }
+
+  const auto entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
+  const uint64_t hotThreshold = entryAvgWgt *
+                                RuntimeOption::EvalJitLayoutHotThreshold;
+  FTRACE(3, "splitHotColdClusters: entryAvgWgt = {} ; hotThreshold = {}\n",
+         entryAvgWgt, hotThreshold);
+
+  for (auto cid : m_clusterOrder) {
+    if (m_clusters[cid].size() == 0) continue;
+    const AreaIndex area = clusterAvgWgt[cid] >= hotThreshold ? AreaIndex::Main
+                                                              : AreaIndex::Cold;
+    FTRACE(3, "  -> C{}: {} (avg wgt = {}): ",
+           cid, area_names[unsigned(area)], clusterAvgWgt[cid]);
+    for (auto b : m_clusters[cid]) {
+      // don't reassign blocks that are in frozen
+      if (m_unit.blocks[b].area_idx == AreaIndex::Frozen) continue;
+      m_unit.blocks[b].area_idx = area;
+      FTRACE(3, "{}, ", b);
+    }
+    FTRACE(3, "\n");
+  }
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
   // Compute block & arc weights.
   Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
@@ -425,12 +470,21 @@ jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
     [&] (Vlabel b) {
       return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Main);
     });
-  if (cold_iter == labels.end()) return labels;
+  if (cold_iter != labels.end()) {
+    std::stable_partition(cold_iter, labels.end(),
+      [&] (Vlabel b) {
+        return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
+      });
+  }
 
-  std::stable_partition(cold_iter, labels.end(),
-    [&] (Vlabel b) {
-      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
-    });
+  if (Trace::moduleEnabled(Trace::layout, 1)) {
+    FTRACE(1, "pgoLayout: final block list: ");
+    for (DEBUG_ONLY auto b : labels) {
+      FTRACE(1, "{}, ", b);
+    }
+    FTRACE(1, "\n");
+  }
+
   return labels;
 }
 
@@ -438,7 +492,7 @@ jit::vector<Vlabel> pgoLayout(const Vunit& unit, const Vtext& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> layoutBlocks(const Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text) {
   Timer timer(Timer::vasm_layout);
 
   return unit.context && unit.context->kind == TransKind::Optimize

@@ -16,7 +16,7 @@
 
 #include "hphp/util/etch-helpers.h"
 
-#if defined(__x86_64__) && !defined(__CYGWIN__) && !defined(__MINGW__)
+#if defined(__x86_64__)
               .file "hphp/util/memcpy-x64.S"
               ETCH_SECTION(memcpy)
 

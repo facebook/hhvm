@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,7 @@ public:
   std::string getName() const override { return m_originalName; }
   void setOriginalName(const std::string name) { m_originalName = name; }
   std::string getOriginalFullName() const;
-  std::string getOriginalFilename() const { return m_originalFilename; }
+  const std::string &getOriginalFilename() const { return m_originalFilename; }
   ExpressionListPtr getParams() { return m_params;}
   const std::string getReturnTypeConstraint() const {
     return m_retTypeAnnotation.get() ? m_retTypeAnnotation->fullName() : "";
@@ -118,16 +118,12 @@ public:
   void addTraitMethodToScope(AnalysisResultConstPtr ar,
                              ClassScopePtr classScope);
 
-  void setHasCallToGetArgs(bool f) { m_hasCallToGetArgs = f; }
-  bool hasCallToGetArgs() const { return m_hasCallToGetArgs; }
-
   void setMayCallSetFrameMetadata(bool f) { m_mayCallSetFrameMetadata = f; }
   bool mayCallSetFrameMetadata() const { return m_mayCallSetFrameMetadata; }
 
 protected:
   bool m_method;
   bool m_ref;
-  bool m_hasCallToGetArgs;
   bool m_mayCallSetFrameMetadata;
   int m_attribute;
   int m_cppLength;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
 #include "hphp/test/ext/test_util.h"
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/shared-string.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/config.h"
 
@@ -37,7 +36,6 @@ TestUtil::TestUtil() {
 
 bool TestUtil::RunTests(const std::string &which) {
   bool ret = true;
-  RUN_TEST(TestSharedString);
   RUN_TEST(TestCanonicalize);
   RUN_TEST(TestHDF);
   return ret;
@@ -64,40 +62,6 @@ struct IHash {
 struct IEq {
   bool operator()(int i, int j) const { return i == j; }
 };
-
-bool TestUtil::TestSharedString() {
-  {
-    SharedString foo = "foo";
-    SharedString bah("bah");
-    VERIFY(bah->getString() == "bah");
-    {
-      SharedString bah2 = bah;
-      VERIFY(bah2->getString() == "bah");
-      VERIFY(bah.get() == bah2.get());
-      SharedString bah3 = "bah";
-      VERIFY(bah.get() == bah3.get());
-    }
-    VERIFY(bah->getString() == "bah");
-    VERIFY(foo->getString() == "foo");
-  }
-  {
-    hphp_shared_string_map<int64_t> map;
-    for (int i = 0; i < 100; i++) {
-      std::string k("key");
-      k += i;
-      map[k] = i;
-    }
-    for (int i = 0; i < 100; i++) {
-      std::string k("key");
-      k += i;
-      auto const it = map.find(k);
-      VERIFY(it != map.end());
-      VERIFY(it->second == i);
-    }
-  }
-
-  return Count(true);
-}
 
 bool TestUtil::TestCanonicalize() {
   VERIFY(FileUtil::canonicalize(String("foo")) == String("foo"));

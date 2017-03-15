@@ -1,2 +1,3 @@
-(int | string)
+File "static_get_unresolved.php", line 23, characters 5-17:
+  (int | string)
 No errors

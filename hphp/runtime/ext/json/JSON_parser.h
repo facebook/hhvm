@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,14 +24,12 @@ namespace HPHP {
 
 struct StringBuffer;
 struct Variant;
-struct IMarker;
 
 void utf16_to_utf8(StringBuffer& buf, unsigned short utf16);
 bool JSON_parser(Variant& z, const char *p, int length,
                  bool assoc, int depth, int64_t options);
 void json_parser_init(); // called at request-init
 void json_parser_flush_caches(); // called when thread idle
-void json_parser_scan(IMarker&);
 
 enum json_error_codes {
   JSON_ERROR_NONE = 0,

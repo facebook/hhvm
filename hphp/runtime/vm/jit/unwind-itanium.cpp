@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/dwarf-reg.h"
 #include "hphp/util/eh-frame.h"
@@ -293,7 +294,17 @@ TCUnwindInfo tc_unwind_resume(ActRec* fp) {
       // If we're the top VM frame, there's nothing we need to do; we can just
       // let the native C++ unwinder take over.
       ITRACE(1, "top VM frame, passing back to _Unwind_Resume\n");
-      return {nullptr, sfp};
+
+      switch (arch()) {
+        case Arch::ARM:
+        case Arch::X64:
+          return {nullptr, sfp};
+        case Arch::PPC64:
+          // On PPC64 the fp->m_savedRip is not the return address of the
+          // context of fp, but from the next frame. So if the callToExit is
+          // found in fp->m_savedRip, the correct frame to be returned is fp.
+          return {nullptr, fp};
+      }
     }
 
     // When we're unwinding through a TC frame (as opposed to stopping at a
@@ -358,7 +369,30 @@ void write_tc_cie(EHFrameWriter& ehfw) {
 
   // The following calculation is related to the "top" of the record.  There is
   // an implicit -8 factor as defined by EHFrameWriter::m_cie.data_align.
-  ehfw.offset_extended_sf(dw_reg::IP, (record_size - AROFF(m_savedRip)) / 8);
+
+  switch (arch()) {
+    case Arch::ARM:
+    case Arch::X64:
+      ehfw.offset_extended_sf(dw_reg::IP,
+                              (record_size - AROFF(m_savedRip)) / 8);
+      break;
+
+    case Arch::PPC64:
+      // On PPC64, the return address for the current frame is found in the
+      // parent frame.  The following expression uses the FP to get the parent
+      // frame and recovers the return address from it.
+      //
+      // LR is at (*SP) + 2 * data_align
+      ehfw.begin_val_expression(dw_reg::IP);
+      ehfw.op_breg(dw_reg::FP, 0);
+      ehfw.op_deref();                              // Previous frame
+      ehfw.op_consts(AROFF(m_savedRip));            // LR position
+      ehfw.op_plus();
+      ehfw.op_deref();                              // Grab data, not address
+      ehfw.end_expression();
+      break;
+  }
+
   ehfw.offset_extended_sf(dw_reg::FP, (record_size - AROFF(m_sfp)) / 8);
 
 #if defined(__powerpc64__)

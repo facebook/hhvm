@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -301,6 +301,7 @@ folly::Optional<perf_event_handle> enable_event(const char* event_name,
                    | PERF_SAMPLE_TID
                    | PERF_SAMPLE_ADDR
                    | PERF_SAMPLE_CALLCHAIN
+                   | PERF_SAMPLE_DATA_SRC
                    ;
 
   auto const ret = syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0);
@@ -429,7 +430,9 @@ void consume_events(PerfEvent kind, perf_event_handle& pe,
 
       assertx(header->size == sizeof(struct perf_event_header) +
                               sizeof(perf_event_sample) +
-                              sample->nr * sizeof(*sample->ips));
+                              sample->nr * sizeof(*sample->ips) +
+                              sizeof(perf_event_sample_tail));
+      assertx((char*)(sample->tail() + 1) == (char*)header + header->size);
       consume(kind, sample);
     }
   }
@@ -440,6 +443,117 @@ void consume_events(PerfEvent kind, perf_event_handle& pe,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+perf_event_data_src_info
+perf_event_data_src(PerfEvent kind, uint64_t data_src) {
+  auto info = perf_event_data_src_info{};
+
+  DEBUG_ONLY auto const mem_op = data_src;
+  switch (kind) {
+    case PerfEvent::Load:
+      assertx(mem_op & PERF_MEM_OP_LOAD);
+      break;
+    case PerfEvent::Store:
+      assertx(mem_op & PERF_MEM_OP_STORE);
+      break;
+  }
+
+  auto const mem_lvl = data_src >> PERF_MEM_LVL_SHIFT;
+
+  if (mem_lvl & PERF_MEM_LVL_NA) {
+    info.mem_lvl = "(unknown)";
+    info.mem_hit = 0;
+  } else {
+    info.mem_hit = (mem_lvl & PERF_MEM_LVL_HIT)  ?  1 :
+                   (mem_lvl & PERF_MEM_LVL_MISS) ? -1 : 0;
+
+#define MEM_LVLS \
+  X(L1) \
+  X(LFB) \
+  X(L2) \
+  X(L3) \
+  X(LOC_RAM) \
+  X(REM_RAM1) \
+  X(REM_RAM2) \
+  X(REM_CCE1) \
+  X(REM_CCE2) \
+  X(IO) \
+  X(UNC)
+
+    auto const mem_lvl_only = mem_lvl & (0x0
+#define X(lvl)  | PERF_MEM_LVL_##lvl
+      MEM_LVLS
+#undef X
+    );
+
+    info.mem_lvl = [&]() -> const char* {
+      switch (mem_lvl_only) {
+        case 0x0: return "(none)";
+#define X(lvl)  \
+        case PERF_MEM_LVL_##lvl: return #lvl;
+        MEM_LVLS
+#undef X
+        default: return "(mixed)";
+      }
+    }();
+  }
+
+#undef MEM_LVLS
+
+  auto const mem_snoop = data_src >> PERF_MEM_SNOOP_SHIFT;
+  if (mem_snoop & PERF_MEM_SNOOP_NA) {
+    info.snoop = 0;
+    info.snoop_hit = 0;
+    info.snoop_hitm = 0;
+  } else {
+    info.snoop_hit = (mem_snoop & PERF_MEM_SNOOP_HIT)  ?  1 :
+                     (mem_snoop & PERF_MEM_SNOOP_MISS) ? -1 : 0;
+    info.snoop      = (mem_snoop & PERF_MEM_SNOOP_NONE) ? -1 : 1;
+    info.snoop_hitm = (mem_snoop & PERF_MEM_SNOOP_HITM) ? 1 : -1;
+  }
+
+  auto const mem_lock = data_src >> PERF_MEM_LOCK_SHIFT;
+  info.locked = (mem_lock & PERF_MEM_LOCK_NA) ? 0 :
+                (mem_lock & PERF_MEM_LOCK_LOCKED) ? 1 : -1;
+
+  auto const mem_tlb = data_src >> PERF_MEM_TLB_SHIFT;
+
+  if (mem_tlb & PERF_MEM_TLB_NA) {
+    info.tlb = "(unknown)";
+    info.tlb_hit = 0;
+  } else {
+    info.tlb_hit = (mem_tlb & PERF_MEM_TLB_HIT)  ?  1 :
+                   (mem_tlb & PERF_MEM_TLB_MISS) ? -1 : 0;
+
+#define TLBS \
+  X(L1) \
+  X(L2) \
+  X(WK) \
+  X(OS)
+
+    auto const tlb_only = mem_tlb & (0x0
+#define X(tlb)  | PERF_MEM_TLB_##tlb
+      TLBS
+#undef X
+    );
+
+    info.tlb = [&]() -> const char* {
+      switch (tlb_only) {
+        case 0x0: return "(none)";
+#define X(tlb)  \
+        case PERF_MEM_TLB_##tlb: return #tlb;
+        TLBS
+#undef X
+        case (PERF_MEM_TLB_L1 | PERF_MEM_TLB_L2): return "L1-L2";
+        default: return "(mixed)";
+      }
+    }();
+  }
+
+  return info;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -506,6 +620,11 @@ void perf_event_consume(perf_event_consume_fn_t consume) {
 #else // defined(__linux__) && defined(__x86_64__)
 
 namespace HPHP {
+
+perf_event_data_src_info
+perf_event_data_src(PerfEvent kind, uint64_t data_src) {
+  return perf_event_data_src_info{};
+}
 
 bool perf_event_enable(uint64_t, perf_event_signal_fn_t) { return false; }
 void perf_event_disable() {}

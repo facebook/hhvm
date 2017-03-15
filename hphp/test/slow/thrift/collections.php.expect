@@ -1,0 +1,96 @@
+---- real collections ----
+object(TestStruct)#7 (3) {
+  ["aList"]=>
+  object(HH\Vector)#8 (3) {
+    [0]=>
+    float(13.3)
+    [1]=>
+    float(23.4)
+    [2]=>
+    float(3576.2)
+  }
+  ["aMap"]=>
+  object(HH\Map)#9 (2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  object(HH\Set)#10 (2) {
+    int(10)
+    int(11)
+  }
+}
+---- hack arrays ----
+object(TestStruct)#13 (3) {
+  ["aList"]=>
+  object(HH\Vector)#14 (3) {
+    [0]=>
+    float(13.3)
+    [1]=>
+    float(23.4)
+    [2]=>
+    float(3576.2)
+  }
+  ["aMap"]=>
+  object(HH\Map)#15 (2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  object(HH\Set)#16 (2) {
+    int(10)
+    int(11)
+  }
+}
+---- php arrays ----
+object(TestStruct)#19 (3) {
+  ["aList"]=>
+  object(HH\Vector)#20 (3) {
+    [0]=>
+    float(13.3)
+    [1]=>
+    float(23.4)
+    [2]=>
+    float(3576.2)
+  }
+  ["aMap"]=>
+  object(HH\Map)#21 (2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  object(HH\Set)#22 (2) {
+    int(10)
+    int(11)
+  }
+}
+---- sadly, this is legal ----
+object(TestStruct)#28 (3) {
+  ["aList"]=>
+  object(HH\Vector)#29 (3) {
+    [0]=>
+    float(13.3)
+    [1]=>
+    float(23.4)
+    [2]=>
+    float(3576.2)
+  }
+  ["aMap"]=>
+  object(HH\Map)#30 (2) {
+    [10]=>
+    float(1.2)
+    [43]=>
+    float(5.33)
+  }
+  ["aSet"]=>
+  object(HH\Set)#31 (2) {
+    int(10)
+    int(11)
+  }
+}

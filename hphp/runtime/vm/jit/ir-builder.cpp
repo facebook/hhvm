@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/punt.h"
+#include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -55,72 +56,15 @@ const typename M::mapped_type& get_required(const M& m,
 SSATmp* fwdGuardSource(IRInstruction* inst) {
   if (inst->is(AssertType, CheckType)) return inst->src(0);
 
-  assertx(inst->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
+  assertx(inst->is(AssertLoc,   CheckLoc,
+                   AssertStk,   CheckStk,
+                   AssertMBase, CheckMBase));
   inst->convertToNop();
   return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-/* For each possible dest type, determine if its type might relax. */
-#define ND             always_assert(false);
-#define D(t)           return false; // fixed type
-#define DofS(n)        return typeMightRelax(inst->src(n));
-#define DRefineS(n)    return true;  // typeParam may relax
-#define DLdObjCls      return typeMightRelax(inst->src(0));
-#define DParamMayRelax return true;  // typeParam may relax
-#define DParam         return false;
-#define DParamPtr(k)   return false;
-#define DUnboxPtr      return false;
-#define DBoxPtr        return false;
-#define DAllocObj      return false; // fixed type from ExtraData
-#define DArrPacked     return false; // fixed type
-#define DArrElem       assertx(inst->is(ArrayGet));           \
-                         return typeMightRelax(inst->src(0));
-#define DVecElem       assertx(inst->is(LdVecElem)); \
-                         return false;
-#define DDictElem      return dictElemMightRelax(inst);
-#define DKeysetElem    return keysetElemMightRelax(inst);
-#define DCol           return false; // fixed in bytecode
-#define DCtx           return false;
-#define DCtxCls        return false;
-#define DMulti         return true;  // DefLabel; value could be anything
-#define DSetElem       return false; // fixed type
-#define DBuiltin       return false; // from immutable typeParam
-#define DSubtract(n,t) DofS(n)
-#define DCns           return false; // fixed type
-
-bool typeMightRelax(const SSATmp* tmp) {
-  if (tmp == nullptr) return true;
-
-  if (tmp->isA(TCls) || tmp->type() == TGen) return false;
-  if (canonical(tmp)->inst()->is(DefConst)) return false;
-
-  auto inst = tmp->inst();
-  // Do the rest based on the opcode's dest type
-  switch (inst->op()) {
-#define O(name, dst, src, flags) case name: dst
-  IR_OPCODES
-#undef O
-  }
-
-  return true;
-}
-
-bool keysetElemMightRelax(const IRInstruction* inst) {
-  assertx(inst->is(KeysetGet, KeysetGetK, KeysetGetQuiet, KeysetIdx));
-  if (inst->is(KeysetIdx)) return typeMightRelax(inst->src(2));
-  return false;
-}
-
-bool dictElemMightRelax(const IRInstruction* inst) {
-  assertx(inst->is(DictGet, DictGetK, DictGetQuiet, DictIdx));
-  if (inst->is(DictIdx)) return typeMightRelax(inst->src(2));
-  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -138,12 +82,12 @@ IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
   m_state.startBlock(m_curBlock, false);
 }
 
-bool IRBuilder::shouldConstrainGuards() const {
-  return m_unit.context().kind != TransKind::Optimize;
+void IRBuilder::enableConstrainGuards() {
+  m_constrainGuards = true;
 }
 
-bool IRBuilder::typeMightRelax(SSATmp* tmp /* = nullptr */) const {
-  return shouldConstrainGuards() && irgen::typeMightRelax(tmp);
+bool IRBuilder::shouldConstrainGuards() const {
+  return m_constrainGuards;
 }
 
 void IRBuilder::appendInstruction(IRInstruction* inst) {
@@ -161,6 +105,10 @@ void IRBuilder::appendInstruction(IRInstruction* inst) {
         case CheckStk:
         case LdStk:
           return stk(inst->extra<IRSPRelOffsetData>()->offset);
+
+        case AssertMBase:
+        case CheckMBase:
+          return folly::make_optional<Location>(Location::MBase{});
 
         default:
           return folly::none;
@@ -247,17 +195,6 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
   }
 
   auto const oldType = typeOf(l, DataTypeGeneric);
-  auto const typeParam = inst->typeParam();
-
-  if (!oldType.maybe(typeParam)) {
-    // This check will always fail.  It's probably due to an incorrect
-    // prediction.  Generate a Jmp and return the src.  The fact that the type
-    // will be slightly off is ok because all the code after the Jmp is
-    // unreachable.
-    gen(Jmp, inst->taken());
-    return fwdGuardSource(inst);
-  }
-
   auto const newType = oldType & inst->typeParam();
 
   if (oldType <= newType) {
@@ -265,7 +202,6 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
     // is unnecessary.
     return fwdGuardSource(inst);
   }
-
   return nullptr;
 }
 
@@ -275,6 +211,10 @@ SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
 
 SSATmp* IRBuilder::preOptimizeCheckStk(IRInstruction* inst) {
   return preOptimizeCheckLocation(inst, stk(inst->extra<CheckStk>()->offset));
+}
+
+SSATmp* IRBuilder::preOptimizeCheckMBase(IRInstruction* inst) {
+  return preOptimizeCheckLocation(inst, Location::MBase{});
 }
 
 SSATmp* IRBuilder::preOptimizeHintInner(IRInstruction* inst, Location l) {
@@ -289,6 +229,10 @@ SSATmp* IRBuilder::preOptimizeHintLocInner(IRInstruction* inst) {
   return preOptimizeHintInner(inst, loc(inst->extra<HintLocInner>()->locId));
 }
 
+SSATmp* IRBuilder::preOptimizeHintMBaseInner(IRInstruction* inst) {
+  return preOptimizeHintInner(inst, Location::MBase{});
+}
+
 SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
                                            const Type oldType,
                                            SSATmp* oldVal,
@@ -298,23 +242,35 @@ SSATmp* IRBuilder::preOptimizeAssertTypeOp(IRInstruction* inst,
          oldVal ? oldVal->toString() : "nullptr",
          typeSrc ? typeSrc->toString() : "nullptr");
 
-  if (canSimplifyAssertType(inst, oldType, typeMightRelax(oldVal))) {
-    if (!oldType.maybe(inst->typeParam())) {
-      gen(Halt);
-      return m_unit.cns(TBottom);
-    }
+  auto const newType = oldType & inst->typeParam();
+
+  // Eliminate this AssertTypeOp if:
+  // 1) oldType is at least as good as newType and:
+  //      a) typeParam == Gen
+  //      b) oldVal is from a DefConst
+  //      c) oldType.hasConstVal()
+  //    The AssertType will never be useful for guard constraining in these
+  //     situations.
+  // 2) The type source is another assert that's at least as good as this one.
+  if ((oldType <= newType &&
+       (inst->typeParam() == TGen ||
+        (oldVal && oldVal->inst()->is(DefConst)) ||
+        oldType.hasConstVal())) ||
+      (typeSrc &&
+       typeSrc->is(AssertType, AssertLoc, AssertStk, AssertMBase) &&
+       typeSrc->typeParam() <= inst->typeParam())) {
     return fwdGuardSource(inst);
   }
 
-  auto const newType = oldType & inst->typeParam();
+  // 3) We're not constraining guards, and the old type is at least as good as
+  //    the new type.
+  if (!shouldConstrainGuards()) {
+    if (newType == TBottom) {
+      gen(Unreachable);
+      return inst->is(AssertType) ? m_unit.cns(TBottom) : nullptr;
+    }
 
-  // Eliminate this AssertTypeOp if the source value is another assert that's
-  // good enough.
-  if (oldType <= newType &&
-      typeSrc &&
-      typeSrc->is(AssertType, AssertLoc, AssertStk) &&
-      typeSrc->typeParam() <= inst->typeParam()) {
-    return fwdGuardSource(inst);
+    if (oldType <= newType) return fwdGuardSource(inst);
   }
 
   return nullptr;
@@ -455,12 +411,6 @@ SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
   }
   inst->setTypeParam(std::min(type, inst->typeParam()));
 
-  if (typeMightRelax()) return nullptr;
-
-  if (inst->typeParam().hasConstVal() ||
-      inst->typeParam().subtypeOfAny(TUninit, TInitNull)) {
-    return m_unit.cns(inst->typeParam());
-  }
   return nullptr;
 }
 
@@ -472,12 +422,14 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
+SSATmp* IRBuilder::preOptimizeLdClsRef(IRInstruction* inst) {
+  return preOptimizeLdLocation(inst, cslot(inst->extra<LdClsRef>()->slot));
+}
+
 SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
   auto const off = inst->extra<CastStk>()->offset;
   auto const curType = stack(off, DataTypeGeneric).type;
-  auto const curVal = stack(off, DataTypeGeneric).value;
 
-  if (typeMightRelax(curVal)) return nullptr;
   if (inst->typeParam() == TNullableObj && curType <= TNull) {
     // If we're casting Null to NullableObj, we still need to call
     // tvCastToNullableObjectInPlace. See comment there and t3879280 for
@@ -494,9 +446,6 @@ SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
 SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
   auto const off = inst->extra<CoerceStk>()->offset;
   auto const curType = stack(off, DataTypeGeneric).type;
-  auto const curVal = stack(off, DataTypeGeneric).value;
-
-  if (typeMightRelax(curVal)) return nullptr;
 
   if (curType <= inst->typeParam()) {
     inst->convertToNop();
@@ -516,13 +465,16 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
 #define X(op) case op: return preOptimize##op(inst);
   switch (inst->op()) {
   X(HintLocInner)
+  X(HintMBaseInner)
   X(AssertType)
   X(AssertLoc)
   X(AssertStk)
-  X(CheckStk)
   X(CheckLoc)
+  X(CheckStk)
+  X(CheckMBase)
   X(LdLoc)
   X(LdStk)
+  X(LdClsRef)
   X(CastStk)
   X(CoerceStk)
   X(LdARFuncPtr)
@@ -565,9 +517,11 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     return inst->dst(0);
   };
 
-  // copy and const propagation on inst source operands
+  // Copy propagation on inst source operands. Only perform constant
+  // propagation if we're not constraining guards, to avoid breaking the
+  // use-def chains it uses to find guards.
   copyProp(inst);
-  constProp(m_unit, inst, shouldConstrainGuards());
+  if (!shouldConstrainGuards()) constProp(m_unit, inst);
 
   // Since preOptimize can inspect tracked state, we don't
   // perform it on non-main traces.
@@ -584,11 +538,16 @@ SSATmp* IRBuilder::optimizeInst(IRInstruction* inst,
     if (inst->op() == Nop) return cloneAndAppendOriginal();
   }
 
-  if (!m_enableSimplification) {
+  // We skip simplification for AssertType when guard constraining is enabled
+  // because information that appears to be redundant may allow us to avoid
+  // constraining certain guards. preOptimizeAssertType() still eliminates some
+  // subset of redundant AssertType instructions.
+  if (!m_enableSimplification ||
+      (shouldConstrainGuards() && inst->is(AssertType))) {
     return cloneAndAppendOriginal();
   }
 
-  auto const simpResult = simplify(m_unit, inst, shouldConstrainGuards());
+  auto const simpResult = simplify(m_unit, inst);
 
   // These are the possible outputs:
   //
@@ -743,7 +702,9 @@ bool IRBuilder::constrainValue(SSATmp* const val, TypeConstraint tc) {
 
 bool IRBuilder::constrainLocation(Location l, TypeConstraint tc,
                                   const std::string& why) {
-  if (!shouldConstrainGuards() || tc.empty()) return false;
+  if (!shouldConstrainGuards() ||
+      l.tag() == LTag::CSlot ||
+      tc.empty()) return false;
 
   ITRACE(1, "constraining {} to {} (for {})\n", show(l), tc, why);
   Indent _i;
@@ -779,7 +740,9 @@ bool IRBuilder::constrainTypeSrc(TypeSource typeSrc, TypeConstraint tc) {
   assertx(typeSrc.isGuard());
   auto const guard = typeSrc.guard;
 
-  always_assert(guard->is(AssertLoc, CheckLoc, AssertStk, CheckStk));
+  always_assert(guard->is(AssertLoc,   CheckLoc,
+                          AssertStk,   CheckStk,
+                          AssertMBase, CheckMBase));
 
   // If the dest of the Assert/Check doesn't fit `tc', there's no point in
   // continuing.
@@ -832,7 +795,7 @@ bool IRBuilder::constrainAssert(const IRInstruction* inst,
  */
 bool IRBuilder::constrainCheck(const IRInstruction* inst,
                                TypeConstraint tc, Type srcType) {
-  assertx(inst->is(CheckType, CheckLoc, CheckStk));
+  assertx(inst->is(CheckType, CheckLoc, CheckStk, CheckMBase));
 
   auto changed = false;
   auto const typeParam = inst->typeParam();
@@ -864,6 +827,10 @@ const StackState& IRBuilder::stack(IRSPRelOffset offset, TypeConstraint tc) {
   return m_state.stack(offset);
 }
 
+const CSlotState& IRBuilder::clsRefSlot(uint32_t slot) {
+  return m_state.clsRefSlot(slot);
+}
+
 SSATmp* IRBuilder::valueOf(Location l, TypeConstraint tc) {
   constrainLocation(l, tc, "");
   return m_state.valueOf(l);
@@ -888,8 +855,14 @@ Type IRBuilder::predictedStackInnerType(IRSPRelOffset offset) const {
   return predictedInnerType(stk(offset));
 }
 
+Type IRBuilder::predictedMBaseInnerType() const {
+  auto const ty = m_state.mbase().predictedType;
+  assertx(ty <= TBoxedCell);
+  return ldRefReturn(ty.unbox());
+}
+
 /*
- * Wrap a local or stack ID into a Location.
+ * Wrap a local, stack ID, or class-ref slot into a Location.
  */
 Location IRBuilder::loc(uint32_t id) const {
   return Location::Local { id };
@@ -897,6 +870,9 @@ Location IRBuilder::loc(uint32_t id) const {
 Location IRBuilder::stk(IRSPRelOffset off) const {
   auto const fpRel = off.to<FPInvOffset>(m_state.irSPOff());
   return Location::Stack { fpRel };
+}
+Location IRBuilder::cslot(uint32_t slot) const {
+  return Location::CSlot { slot };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

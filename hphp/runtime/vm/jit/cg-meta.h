@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,6 +41,8 @@ namespace HPHP { namespace jit {
 struct CGMeta {
   void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
   void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process_literals();
+
   bool empty() const;
   void clear();
 
@@ -101,6 +103,12 @@ struct CGMeta {
    * see cgReqRetranslate().
    */
   GrowableVector<IncomingBranch> inProgressTailJumps;
+
+  /*
+   * Smashable locations. Used on relocation to be sure a smashable instruction
+   * is not optimized in size.
+   */
+  std::set<TCA> smashableLocations;
 
   /*
    * Debug-only map from bytecode to machine code address.

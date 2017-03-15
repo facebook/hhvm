@@ -1,84 +1,84 @@
 fun
   kind: function
   id: function::fun
-  position: File "", line 3, characters 16-18:
-  span: File "", line 3, character 1 - line 3, character 23:
+  position: line 3, characters 16-18
+  span: line 3, character 1 - line 3, character 23
   modifiers: async 
   params:
 
 C
   kind: class
   id: type_id::C
-  position: File "", line 5, characters 16-16:
-  span: File "", line 5, character 1 - line 16, character 1:
+  position: line 5, characters 16-16
+  span: line 5, character 1 - line 16, character 1
   modifiers: abstract 
 
   FOO
     kind: const
     id: class_const::C::FOO
-    position: File "", line 6, characters 18-20:
-    span: File "", line 6, character 18 - line 6, character 20:
+    position: line 6, characters 18-20
+    span: line 6, character 18 - line 6, character 20
     modifiers: abstract 
 
   x1
     kind: property
     id: property::C::x1
-    position: File "", line 7, characters 17-19:
-    span: File "", line 7, character 17 - line 7, character 19:
+    position: line 7, characters 17-19
+    span: line 7, character 17 - line 7, character 19
     modifiers: public static 
 
   x2
     kind: property
     id: property::C::x2
-    position: File "", line 8, characters 17-19:
-    span: File "", line 8, character 17 - line 8, character 19:
+    position: line 8, characters 17-19
+    span: line 8, character 17 - line 8, character 19
     modifiers: static public 
 
   bar1
     kind: method
     id: method::C::bar1
-    position: File "", line 10, characters 44-47:
-    span: File "", line 10, character 3 - line 10, character 50:
+    position: line 10, characters 44-47
+    span: line 10, character 3 - line 10, character 50
     modifiers: protected static abstract async 
     params:
 
   bar2
     kind: method
     id: method::C::bar2
-    position: File "", line 11, characters 44-47:
-    span: File "", line 11, character 3 - line 11, character 50:
+    position: line 11, characters 44-47
+    span: line 11, character 3 - line 11, character 50
     modifiers: protected abstract static async 
     params:
 
   bar3
     kind: method
     id: method::C::bar3
-    position: File "", line 12, characters 44-47:
-    span: File "", line 12, character 3 - line 12, character 50:
+    position: line 12, characters 44-47
+    span: line 12, character 3 - line 12, character 50
     modifiers: static protected abstract async 
     params:
 
   bar4
     kind: method
     id: method::C::bar4
-    position: File "", line 13, characters 44-47:
-    span: File "", line 13, character 3 - line 13, character 50:
+    position: line 13, characters 44-47
+    span: line 13, character 3 - line 13, character 50
     modifiers: static abstract protected async 
     params:
 
   bar5
     kind: method
     id: method::C::bar5
-    position: File "", line 14, characters 44-47:
-    span: File "", line 14, character 3 - line 14, character 50:
+    position: line 14, characters 44-47
+    span: line 14, character 3 - line 14, character 50
     modifiers: abstract static protected async 
     params:
 
   bar6
     kind: method
     id: method::C::bar6
-    position: File "", line 15, characters 44-47:
-    span: File "", line 15, character 3 - line 15, character 50:
+    position: line 15, characters 44-47
+    span: line 15, character 3 - line 15, character 50
     modifiers: abstract protected static async 
     params:
 

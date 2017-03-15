@@ -4,9 +4,11 @@ $data = 'iVBORw0KGgoAAAANSUhEUgAAABwAAAASCAMAAAB/2U7WAAAABl'       . 'BMVEUAAAD/
 $data = base64_decode($data);
 $im = imagecreatefromstring($data);
 if ($im !== false) {
-    header('Content-Type: image/png');
-    imagepng($im);
-    imagedestroy($im);
+  ob_start();
+  imagepng($im);
+  $md5 = md5(ob_get_clean());
+  imagedestroy($im);
+  echo "md5: $md5\n";
 }
 else {
     echo 'An error occurred.';

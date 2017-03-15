@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,26 +25,21 @@
 
 #include <folly/Hash.h>
 
-#include "hphp/util/tiny-vector.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/hhbbc/src-loc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/type-system.h"
 
-namespace HPHP {
-struct StringData;
-struct ArrayData;
-}
-
 namespace HPHP { namespace HHBBC {
 
 struct Bytecode;
 
 namespace php {
-  struct Block;
-  struct Local;
-  struct Iter;
+
+struct Func;
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -67,7 +62,7 @@ struct MKey {
     , int64{0}
   {}
 
-  MKey(MemberCode mcode, borrowed_ptr<php::Local> local)
+  MKey(MemberCode mcode, LocalId local)
     : mcode{mcode}
     , local{local}
   {}
@@ -92,7 +87,7 @@ struct MKey {
     SString litstr;
     int64_t int64;
     int64_t idx;
-    borrowed_ptr<php::Local> local;
+    LocalId local;
   };
 };
 
@@ -104,21 +99,73 @@ inline bool operator!=(MKey a, MKey b) {
   return !(a == b);
 }
 
-struct BCHashHelper {
+// Represents a non-empty range of locals. There's always a first local,
+// followed by a count of additional ones.
+struct LocalRange {
+  LocalId  first;
+  uint32_t restCount;
+};
+
+inline bool operator==(const LocalRange& a, const LocalRange& b) {
+  return a.first == b.first && a.restCount == b.restCount;
+}
+
+inline bool operator!=(const LocalRange& a, const LocalRange& b) {
+  return !(a == b);
+}
+
+using IterTabEnt    = std::pair<IterKind,IterId>;
+using IterTab       = CompactVector<IterTabEnt>;
+
+using SwitchTab     = CompactVector<BlockId>;
+
+// The final entry in the SSwitchTab is the default case, it will
+// always have a nullptr for the string.
+using SSwitchTabEnt = std::pair<LSString,BlockId>;
+using SSwitchTab    = CompactVector<SSwitchTabEnt>;
+
+//////////////////////////////////////////////////////////////////////
+
+namespace bc {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace detail {
+
+/*
+ * Trivial hasher overrides, which will cause bytecodes to hash according to
+ * the hashes defined by hasher_impl.
+ */
+struct hasher_default {};
+
+/*
+ * Default bytecode immediate hashers.
+ */
+struct hasher_impl {
+  static size_t hash(SString s)  { return s->hash(); }
+  static size_t hash(LSString s) { return s->hash(); }
   static size_t hash(RepoAuthType rat) { return rat.hash(); }
-  static size_t hash(SString s) { return s->hash(); }
+
+  static size_t hash(std::pair<IterKind,IterId> kv) {
+    return std::hash<IterId>()(kv.second);
+  }
+
   static size_t hash(MKey mkey) {
     return HPHP::hash_int64_pair(mkey.mcode, mkey.int64);
   }
 
   template<class T>
-  static size_t hash(const std::vector<T>& v) {
+  static size_t hash(const CompactVector<T>& v) {
     assert(!v.empty());
-    return v.size() && hash(v.front());
+    return v.size() ^ hash(v.front());
   }
 
-  static size_t hash(std::pair<IterKind,borrowed_ptr<php::Iter>> kv) {
-    return std::hash<decltype(kv.second)>()(kv.second);
+  static size_t hash(std::pair<LSString,BlockId> kv) {
+    return HPHP::hash_int64_pair(kv.first->hash(), kv.second);
+  }
+
+  static size_t hash(LocalRange range) {
+    return HPHP::hash_int64_pair(range.first, range.restCount);
   }
 
   template<class T>
@@ -137,35 +184,137 @@ struct BCHashHelper {
   >::type hash(const T& t) { return std::hash<T>()(t); }
 };
 
-using IterTabEnt    = std::pair<IterKind,borrowed_ptr<php::Iter>>;
-using IterTab       = std::vector<IterTabEnt>;
+/*
+ * Hash operand wrapper.
+ */
+template<typename T, typename S>
+struct hash_operand { const T& val; S type; };
 
-using SwitchTab     = std::vector<borrowed_ptr<php::Block>>;
+/*
+ * Hash T using H::operator() if it is compatible, else fall back to
+ * hasher_impl (e.g., if H := hasher_default).
+ */
+template<typename T, typename S, class H>
+auto hash(const hash_operand<T,S>& t, H h) -> decltype(h(t.val)) {
+  return h(t.val);
+}
+template<typename T, typename S, class H>
+auto hash(const hash_operand<T,S>& t, H h) -> decltype(h(t.val, t.type)) {
+  return h(t.val, t.type);
+}
+template<typename T, typename S, typename... Unused>
+typename std::enable_if<sizeof...(Unused) == 1, size_t>::type
+hash(const hash_operand<T,S>& t, Unused...) {
+  return hasher_impl::hash(t.val);
+}
 
-// The final entry in the SSwitchTab is the default case, it will
-// always have a nullptr for the string.
-using SSwitchTabEnt = std::pair<SString,borrowed_ptr<php::Block>>;
-using SSwitchTab    = std::vector<SSwitchTabEnt>;
+/*
+ * Clone of folly::hash::hash_combine_generic(), but with a hasher argument
+ * instead of a hasher template parameter.
+ */
+template<class H> size_t hash_combine(H h) { return 0; }
+
+template<class H, typename T, typename... Ts>
+size_t hash_combine(H h, const T& t, const Ts&... ts) {
+  auto const seed = size_t{hash(t, h)};
+  if (sizeof...(ts) == 0) return seed;
+
+  auto const remainder = hash_combine(h, ts...);
+  return static_cast<size_t>(folly::hash::hash_128_to_64(seed, remainder));
+}
+
+/*
+ * Trivial equality overrides, which will cause bytecodes to compare via
+ * operator==() on the various immediate types.
+ */
+struct eq_default {};
+
+/*
+ * Equality operand wrapper.
+ */
+template<typename T, typename S>
+struct eq_operand { const T& l; const T& r; S type; };
+
+/*
+ * Compare two values, using E::operator() if it exists, else the default
+ * operator==.
+ */
+template<typename T, typename S, class E>
+auto equals(const eq_operand<T,S>& t, E e) -> decltype(e(t.l, t.r)) {
+  return e(t.l, t.r);
+}
+template<typename T, typename S, class E>
+auto equals(const eq_operand<T,S>& t, E e) -> decltype(e(t.l, t.r, t.type)) {
+  return e(t.l, t.r, t.type);
+}
+template<typename T, typename S, typename... Unused>
+typename std::enable_if<sizeof...(Unused) == 1, bool>::type
+equals(const eq_operand<T,S>& t, Unused...) {
+  return t.l == t.r;
+}
+
+/*
+ * Check if a list of eq_operands are pairwise-equal.
+ */
+template<class E> bool eq_pairs(E e) { return true; }
+
+template<class E, typename T, typename... Ts>
+bool eq_pairs(E e, const T& t, const Ts&... ts) {
+  return equals(t, e) && (sizeof...(ts) == 0 || eq_pairs(e, ts...));
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
-namespace bc {
+/*
+ * Bytecode immediate type tags.
+ */
+namespace imm {
+#define ARGTYPE(name, type)     enum class name : uint8_t {};
+#define ARGTYPEVEC(name, type)  enum class name : uint8_t {};
+  ARGTYPES
+#undef ARGTYPE
+#undef ARGTYPEVEC
+}
+
+#define IMM_ID_BLA      BLA
+#define IMM_ID_SLA      SLA
+#define IMM_ID_ILA      ILA
+#define IMM_ID_IVA      IVA
+#define IMM_ID_I64A     I64A
+#define IMM_ID_LA       LA
+#define IMM_ID_IA       IA
+#define IMM_ID_CAR      CAR
+#define IMM_ID_CAW      CAW
+#define IMM_ID_DA       DA
+#define IMM_ID_SA       SA
+#define IMM_ID_RATA     RATA
+#define IMM_ID_AA       AA
+#define IMM_ID_BA       BA
+#define IMM_ID_OA(type) OA
+#define IMM_ID_VSA      VSA
+#define IMM_ID_KA       KA
+#define IMM_ID_LAR      LAR
 
 #define IMM_TY_BLA      SwitchTab
 #define IMM_TY_SLA      SSwitchTab
 #define IMM_TY_ILA      IterTab
 #define IMM_TY_IVA      int32_t
 #define IMM_TY_I64A     int64_t
-#define IMM_TY_LA       borrowed_ptr<php::Local>
-#define IMM_TY_IA       borrowed_ptr<php::Iter>
+#define IMM_TY_LA       LocalId
+#define IMM_TY_IA       IterId
+#define IMM_TY_CAR      ClsRefSlotId
+#define IMM_TY_CAW      ClsRefSlotId
 #define IMM_TY_DA       double
 #define IMM_TY_SA       SString
 #define IMM_TY_RATA     RepoAuthType
 #define IMM_TY_AA       SArray
-#define IMM_TY_BA       borrowed_ptr<php::Block>
+#define IMM_TY_BA       BlockId
 #define IMM_TY_OA(type) type
-#define IMM_TY_VSA      std::vector<SString>
+#define IMM_TY_VSA      CompactVector<LSString>
 #define IMM_TY_KA       MKey
+#define IMM_TY_LAR      LocalRange
 
 #define IMM_NAME_BLA(n)     targets
 #define IMM_NAME_SLA(n)     targets
@@ -174,6 +323,8 @@ namespace bc {
 #define IMM_NAME_I64A(n)    arg##n
 #define IMM_NAME_LA(n)      loc##n
 #define IMM_NAME_IA(n)      iter##n
+#define IMM_NAME_CAR(n)     slot
+#define IMM_NAME_CAW(n)     slot
 #define IMM_NAME_DA(n)      dbl##n
 #define IMM_NAME_SA(n)      str##n
 #define IMM_NAME_RATA(n)    rat
@@ -183,6 +334,7 @@ namespace bc {
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
 #define IMM_NAME_KA(n)      mkey
+#define IMM_NAME_LAR(n)     locrange
 
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
@@ -191,6 +343,8 @@ namespace bc {
 #define IMM_EXTRA_I64A
 #define IMM_EXTRA_LA
 #define IMM_EXTRA_IA
+#define IMM_EXTRA_CAR       using has_car_flag = std::true_type;
+#define IMM_EXTRA_CAW       using has_caw_flag = std::true_type;
 #define IMM_EXTRA_DA
 #define IMM_EXTRA_SA
 #define IMM_EXTRA_RATA
@@ -199,41 +353,41 @@ namespace bc {
 #define IMM_EXTRA_OA(x)
 #define IMM_EXTRA_VSA
 #define IMM_EXTRA_KA
+#define IMM_EXTRA_LAR
 
 #define IMM_MEM(which, n)          IMM_TY_##which IMM_NAME_##which(n)
 #define IMM_MEM_NA
 #define IMM_MEM_ONE(x)             IMM_MEM(x, 1);
 #define IMM_MEM_TWO(x, y)          IMM_MEM(x, 1); IMM_MEM(y, 2);
-#define IMM_MEM_THREE(x, y, z)     IMM_MEM(x, 1); IMM_MEM(y, 2);  \
+#define IMM_MEM_THREE(x, y, z)     IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                    IMM_MEM(z, 3);
 #define IMM_MEM_FOUR(x, y, z, l)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
                                    IMM_MEM(z, 3); IMM_MEM(l, 4);
 
-#define IMM_EQ(which, n)          if (IMM_NAME_##which(n) !=  \
-                                      o.IMM_NAME_##which(n)) return false;
-#define IMM_EQ_NA
-#define IMM_EQ_ONE(x)             IMM_EQ(x, 1);
-#define IMM_EQ_TWO(x, y)          IMM_EQ(x, 1); IMM_EQ(y, 2);
-#define IMM_EQ_THREE(x, y, z)     IMM_EQ(x, 1); IMM_EQ(y, 2);  \
-                                  IMM_EQ(z, 3);
-#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ(x, 1); IMM_EQ(y, 2); \
-                                  IMM_EQ(z, 3); IMM_EQ(l, 4);
+#define IMM_EQ_WRAP(e, ...)       detail::eq_pairs(e, __VA_ARGS__)
+#define IMM_EQ(which, n)          detail::eq_operand<     \
+                                    IMM_TY_##which,       \
+                                    imm::IMM_ID_##which   \
+                                  > { \
+                                    IMM_NAME_##which(n),  \
+                                    o.IMM_NAME_##which(n) \
+                                  }
+#define IMM_EQ_NA                 detail::eq_operand<void*,imm::NA> { 0, 0 }
+#define IMM_EQ_ONE(x)             IMM_EQ(x, 1)
+#define IMM_EQ_TWO(x, y)          IMM_EQ_ONE(x), IMM_EQ(y, 2)
+#define IMM_EQ_THREE(x, y, z)     IMM_EQ_TWO(x, y), IMM_EQ(z, 3)
+#define IMM_EQ_FOUR(x, y, z, l)   IMM_EQ_THREE(x, y, z), IMM_EQ(l, 4)
 
-#define IMM_HASH_DO(...)            folly::hash:: \
-                                      hash_combine_generic<BCHashHelper>( \
-                                        __VA_ARGS__)
-#define IMM_HASH(which, n)          IMM_NAME_##which(n)
-#define IMM_HASH_NA                 0
-#define IMM_HASH_ONE(x)             IMM_HASH_DO(IMM_HASH(x, 1))
-#define IMM_HASH_TWO(x, y)          IMM_HASH_DO(IMM_HASH(x, 1), \
-                                                IMM_HASH(y, 2))
-#define IMM_HASH_THREE(x, y, z)     IMM_HASH_DO(IMM_HASH(x, 1), \
-                                                IMM_HASH(y, 2), \
-                                                IMM_HASH(z, 3))
-#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_DO(IMM_HASH(x, 1), \
-                                                IMM_HASH(y, 2), \
-                                                IMM_HASH(z, 3), \
-                                                IMM_HASH(l, 4))
+#define IMM_HASH_WRAP(h, ...)       detail::hash_combine(h, __VA_ARGS__)
+#define IMM_HASH(which, n)          detail::hash_operand<     \
+                                      IMM_TY_##which,         \
+                                      imm::IMM_ID_##which     \
+                                    > { IMM_NAME_##which(n) }
+#define IMM_HASH_NA                 detail::hash_operand<void*,imm::NA> { 0 }
+#define IMM_HASH_ONE(x)             IMM_HASH(x, 1)
+#define IMM_HASH_TWO(x, y)          IMM_HASH_ONE(x), IMM_HASH(y, 2)
+#define IMM_HASH_THREE(x, y, z)     IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
+#define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
 
 #define IMM_EXTRA_NA
 #define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
@@ -250,7 +404,8 @@ namespace bc {
 #define IMM_CTOR_FOUR(x, y, z, l)  IMM_CTOR(x, 1), IMM_CTOR(y, 2), \
                                    IMM_CTOR(z, 3), IMM_CTOR(l, 4)
 
-#define IMM_INIT(which, n)         IMM_NAME_##which(n) ( IMM_NAME_##which(n) )
+#define IMM_INIT(which, n)         IMM_NAME_##which(n) \
+                                     ( std::move(IMM_NAME_##which(n)) )
 #define IMM_INIT_NA
 #define IMM_INIT_ONE(x)            : IMM_INIT(x, 1)
 #define IMM_INIT_TWO(x, y)         : IMM_INIT(x, 1), IMM_INIT(y, 2)
@@ -261,10 +416,10 @@ namespace bc {
 
 #define POP_UV  if (i == 0) return Flavor::U
 #define POP_CV  if (i == 0) return Flavor::C
-#define POP_AV  if (i == 0) return Flavor::A
 #define POP_VV  if (i == 0) return Flavor::V
 #define POP_FV  if (i == 0) return Flavor::F
 #define POP_RV  if (i == 0) return Flavor::R
+#define POP_CUV if (i == 0) return Flavor::CUV
 
 #define POP_NOV             uint32_t numPop() const { return 0; } \
                             Flavor popFlavor(uint32_t) const { not_reached(); }
@@ -319,11 +474,6 @@ namespace bc {
                       return Flavor::CVU;                     \
                     }
 
-#define POP_IDX_A  uint32_t numPop() const { return arg2 + 1; } \
-                   Flavor popFlavor(uint32_t i) const {         \
-                     return i == arg2 ? Flavor::C : Flavor::A;  \
-                   }
-
 #define PUSH_NOV          uint32_t numPush() const { return 0; }
 
 #define PUSH_ONE(x)       uint32_t numPush() const { return 1; }
@@ -332,48 +482,103 @@ namespace bc {
 
 #define PUSH_INS_1(...)   uint32_t numPush() const { return 1; }
 
-#define PUSH_INS_2(...)   uint32_t numPush() const { return 1; }
+#define FLAGS_NF
+#define FLAGS_TF
+#define FLAGS_CF
+#define FLAGS_FF
+#define FLAGS_PF bool has_unpack;
+#define FLAGS_CF_TF
+#define FLAGS_CF_FF
 
-#define PUSH_IDX_A        uint32_t numPush() const { return arg2; }
+#define FLAGS_CTOR_NF
+#define FLAGS_CTOR_TF
+#define FLAGS_CTOR_CF
+#define FLAGS_CTOR_FF
+#define FLAGS_CTOR_PF ,bool hu
+#define FLAGS_CTOR_CF_TF
+#define FLAGS_CTOR_CF_FF
+
+#define FLAGS_INIT_NF
+#define FLAGS_INIT_TF
+#define FLAGS_INIT_CF
+#define FLAGS_INIT_FF
+#define FLAGS_INIT_PF ,has_unpack(hu)
+#define FLAGS_INIT_CF_TF
+#define FLAGS_INIT_CF_FF
 
 #define O(opcode, imms, inputs, outputs, flags) \
   struct opcode {                               \
     static constexpr Op op = Op::opcode;        \
-    explicit opcode ( IMM_CTOR_##imms )         \
+    explicit opcode ( IMM_CTOR_##imms           \
+                      FLAGS_CTOR_##flags)       \
       IMM_INIT_##imms                           \
+      FLAGS_INIT_##flags                        \
     {}                                          \
                                                 \
     IMM_MEM_##imms                              \
+    FLAGS_##flags                               \
     IMM_EXTRA_##imms                            \
     POP_##inputs                                \
     PUSH_##outputs                              \
                                                 \
     bool operator==(const opcode& o) const {    \
-      IMM_EQ_##imms                             \
-      return true;                              \
+      return equals(o, detail::eq_default{});   \
     }                                           \
                                                 \
     bool operator!=(const opcode& o) const {    \
       return !(*this == o);                     \
     }                                           \
                                                 \
+    template<class E>                           \
+    bool equals(const opcode& o, E e) const {   \
+      return IMM_EQ_WRAP(e, IMM_EQ_##imms);     \
+    }                                           \
+                                                \
     size_t hash() const {                       \
-      return IMM_HASH_##imms;                   \
+      return IMM_HASH_WRAP(                     \
+        detail::hasher_default{},               \
+        IMM_HASH_##imms);                       \
+    }                                           \
+                                                \
+    template<class H>                           \
+    size_t hash(H h) const {                    \
+      return IMM_HASH_WRAP(h, IMM_HASH_##imms); \
     }                                           \
   };
 OPCODES
 #undef O
 
+#undef FLAGS_NA
+#undef FLAGS_TF
+#undef FLAGS_CF
+#undef FLAGS_FF
+#undef FLAGS_PF
+#undef FLAGS_CF_TF
+#undef FLAGS_CF_FF
+
+#undef FLAGS_CTOR_NA
+#undef FLAGS_CTOR_TF
+#undef FLAGS_CTOR_CF
+#undef FLAGS_CTOR_FF
+#undef FLAGS_CTOR_PF
+#undef FLAGS_CTOR_CF_TF
+#undef FLAGS_CTOR_CF_FF
+
+#undef FLAGS_INIT_NA
+#undef FLAGS_INIT_TF
+#undef FLAGS_INIT_CF
+#undef FLAGS_INIT_FF
+#undef FLAGS_INIT_PF
+#undef FLAGS_INIT_CF_TF
+#undef FLAGS_INIT_CF_FF
+
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
 #undef PUSH_INS_1
-#undef PUSH_INS_2
-#undef PUSH_IDX_A
 
 #undef POP_UV
 #undef POP_CV
-#undef POP_AV
 #undef POP_VV
 #undef POP_FV
 #undef POP_RV
@@ -390,7 +595,6 @@ OPCODES
 #undef POP_SMANY
 #undef POP_FMANY
 #undef POP_CVUMANY
-#undef POP_IDX_A
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA
@@ -400,6 +604,8 @@ OPCODES
 #undef IMM_TY_I64A
 #undef IMM_TY_LA
 #undef IMM_TY_IA
+#undef IMM_TY_CAR
+#undef IMM_TY_CAW
 #undef IMM_TY_DA
 #undef IMM_TY_SA
 #undef IMM_TY_RATA
@@ -408,6 +614,7 @@ OPCODES
 #undef IMM_TY_OA
 #undef IMM_TY_VSA
 #undef IMM_TY_KA
+#undef IMM_TY_LAR
 
 // These are deliberately not undefined, so they can be used in other
 // places.
@@ -418,6 +625,8 @@ OPCODES
 // #undef IMM_NAME_I64A
 // #undef IMM_NAME_LA
 // #undef IMM_NAME_IA
+// #undef IMM_NAME_CAR
+// #undef IMM_NAME_CAW
 // #undef IMM_NAME_DA
 // #undef IMM_NAME_SA
 // #undef IMM_NAME_RATA
@@ -425,6 +634,7 @@ OPCODES
 // #undef IMM_NAME_BA
 // #undef IMM_NAME_OA
 // #undef IMM_NAME_OA_IMPL
+// #undef IMM_NAME_LAR
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
@@ -433,6 +643,8 @@ OPCODES
 #undef IMM_EXTRA_I64A
 #undef IMM_EXTRA_LA
 #undef IMM_EXTRA_IA
+#undef IMM_EXTRA_CAR
+#undef IMM_EXTRA_CAW
 #undef IMM_EXTRA_DA
 #undef IMM_EXTRA_SA
 #undef IMM_EXTRA_RATA
@@ -440,6 +652,7 @@ OPCODES
 #undef IMM_EXTRA_BA
 #undef IMM_EXTRA_OA
 #undef IMM_EXTRA_KA
+#undef IMM_EXTRA_LAR
 
 #undef IMM_MEM
 #undef IMM_MEM_NA
@@ -562,7 +775,7 @@ struct Bytecode {
   }
 
   Op op;
-  php::SrcLoc srcLoc;
+  int32_t srcLoc{-1};
 
 #define O(opcode, ...) bc::opcode opcode;
   union { OPCODES };
@@ -596,15 +809,31 @@ inline bool operator!=(const Bytecode& a, const Bytecode& b) {
   return !(a == b);
 }
 
-inline size_t hash(const Bytecode& b) {
+template<class E>
+inline bool equals(const Bytecode& a, const Bytecode& b, E equals) {
+  if (a.op != b.op) return false;
+#define O(opcode, ...)  \
+  case Op::opcode: return a.opcode.equals(b.opcode, equals);
+  switch (a.op) { OPCODES }
+#undef O
+  not_reached();
+}
+
+template<class H>
+inline size_t hash(const Bytecode& b, H hasher) {
   auto hash = 14695981039346656037ULL;
   auto o = static_cast<size_t>(b.op);
   hash ^= o;
-#define O(opcode, ...) \
-  case Op::opcode: return folly::hash::hash_combine(b.opcode.hash(), hash);
+#define O(opcode, ...)  \
+  case Op::opcode:      \
+    return folly::hash::hash_combine(b.opcode.hash(hasher), hash);
   switch (b.op) { OPCODES }
 #undef O
   not_reached();
+}
+
+inline size_t hash(const Bytecode& b) {
+  return hash(b, bc::detail::hasher_default{});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -615,7 +844,7 @@ inline size_t hash(const Bytecode& b) {
  * Ex:
  *    auto b = bc_with_loc(something.srcLoc, bc::Nop {});
  */
-template<class T> Bytecode bc_with_loc(php::SrcLoc loc, const T& t) {
+template<class T> Bytecode bc_with_loc(int32_t loc, const T& t) {
   Bytecode b = t;
   b.srcLoc = loc;
   return b;
@@ -632,6 +861,14 @@ template<class T> Bytecode bc_with_loc(php::SrcLoc loc, const T& t) {
  * called result_type that indicates the return type of the call.
  */
 template<class Visit>
+typename Visit::result_type visit(Bytecode& b, Visit v) {
+#define O(opcode, ...) case Op::opcode: return v(b.opcode);
+  switch (b.op) { OPCODES }
+#undef O
+  not_reached();
+}
+
+template<class Visit>
 typename Visit::result_type visit(const Bytecode& b, Visit v) {
 #define O(opcode, ...) case Op::opcode: return v(b.opcode);
   switch (b.op) { OPCODES }
@@ -642,10 +879,38 @@ typename Visit::result_type visit(const Bytecode& b, Visit v) {
 //////////////////////////////////////////////////////////////////////
 
 BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_target, has_target_flag, false);
+BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_car, has_car_flag, false);
+BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_caw, has_caw_flag, false);
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(const Bytecode& bc);
+struct ReadClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
+  template<class T>
+  typename std::enable_if<!has_car<T>::value,ClsRefSlotId>::type
+  operator()(T const& t) const { return NoClsRefSlotId; }
+
+  template<class T>
+  typename std::enable_if<has_car<T>::value,ClsRefSlotId>::type
+  operator()(T const& t) const { return t.slot; }
+};
+
+struct WriteClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
+  template<class T>
+  typename std::enable_if<!has_caw<T>::value,ClsRefSlotId>::type
+  operator()(T const& t) const { return NoClsRefSlotId; }
+
+  template<class T>
+  typename std::enable_if<has_caw<T>::value,ClsRefSlotId>::type
+  operator()(T const& t) const { return t.slot; }
+};
+
+//////////////////////////////////////////////////////////////////////
+
+std::string show(const php::Func&, const Bytecode& bc);
+inline std::string show(borrowed_ptr<const php::Func> func,
+                        const Bytecode& bc) {
+  return show(*func, bc);
+}
 
 //////////////////////////////////////////////////////////////////////
 

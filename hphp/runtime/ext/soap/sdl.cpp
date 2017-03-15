@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -579,9 +579,9 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
   schema_pass2(&ctx);
 
   int i = 0;
-  for (xmlNodeMap::iterator iter = ctx.services.begin();
-       iter != ctx.services.end(); ++iter, ++i) {
-    xmlNodePtr service = iter->second;
+  for (auto servicesIter = ctx.services.begin();
+       servicesIter != ctx.services.end(); ++servicesIter, ++i) {
+    xmlNodePtr service = servicesIter->second;
     xmlNodePtr port;
     bool has_soap_port = false;
     xmlNodePtr trav = service->children;
@@ -886,8 +886,8 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
         fault = portTypeOperation->children;
         while (fault) {
           if (node_is_equal_ex(fault, "fault", WSDL_NAMESPACE)) {
-            xmlAttrPtr name = get_attribute(fault->properties, "name");
-            if (name == nullptr) {
+            xmlAttrPtr propName = get_attribute(fault->properties, "name");
+            if (propName == nullptr) {
               throw SoapException("Parsing WSDL: Missing name for <fault> "
                                   "of '%s'", op_name->children->content);
             }
@@ -898,7 +898,7 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
             }
 
             auto f = std::make_shared<sdlFault>();
-            f->name = (char*)name->children->content;
+            f->name = (char*)propName->children->content;
             wsdl_message(&ctx, f->details, message->children->content);
             if (f->details.size() != 1) {
               throw SoapException("Parsing WSDL: The fault message '%s' must "
@@ -912,12 +912,13 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                                            WSDL_NAMESPACE, "name",
                                            (char*)f->name.c_str(), nullptr);
               if (soap_fault) {
-                xmlNodePtr trav = soap_fault->children;
-                while (trav) {
-                  if (node_is_equal_ex(trav, "fault", wsdl_soap_namespace)) {
+                xmlNodePtr childTrav = soap_fault->children;
+                while (childTrav) {
+                  if (node_is_equal_ex(
+                          childTrav, "fault", wsdl_soap_namespace)) {
                     auto binding = f->bindingAttributes =
                          std::make_shared<sdlSoapBindingFunctionFault>();
-                    xmlAttrPtr tmp = get_attribute(trav->properties, "use");
+                    xmlAttrPtr tmp = get_attribute(childTrav->properties, "use");
                     if (tmp && !strncmp((char*)tmp->children->content,
                                         "encoded", sizeof("encoded"))) {
                       binding->use = SOAP_ENCODED;
@@ -925,13 +926,14 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                       binding->use = SOAP_LITERAL;
                     }
 
-                    tmp = get_attribute(trav->properties, "namespace");
+                    tmp = get_attribute(childTrav->properties, "namespace");
                     if (tmp) {
                       binding->ns = (char*)tmp->children->content;
                     }
 
                     if (binding->use == SOAP_ENCODED) {
-                      tmp = get_attribute(trav->properties, "encodingStyle");
+                      tmp = get_attribute(childTrav->properties,
+                          "encodingStyle");
                       if (tmp) {
                         if (strncmp((char*)tmp->children->content,
                                     SOAP_1_1_ENC_NAMESPACE,
@@ -952,12 +954,12 @@ sdlPtr load_wsdl(char *struri, HttpClient *http) {
                                             "encodingStyle");
                       }
                     }
-                  } else if (is_wsdl_element(trav) &&
-                             !node_is_equal(trav,"documentation")) {
+                  } else if (is_wsdl_element(childTrav) &&
+                             !node_is_equal(childTrav,"documentation")) {
                     throw SoapException("Parsing WSDL: Unexpected WSDL "
-                                        "element <%s>", trav->name);
+                                        "element <%s>", childTrav->name);
                   }
-                  trav = trav->next;
+                  childTrav = childTrav->next;
                 }
               }
             }

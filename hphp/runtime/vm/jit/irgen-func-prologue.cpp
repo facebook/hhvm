@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -310,6 +310,12 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
   emitPrologueLocals(env, argc, func, nullptr);
+  // "Kill" all the class-ref slots initially. This normally won't do anything
+  // (the class-ref slots should be unoccupied at this point), but in debugging
+  // builds it will write poison values to them.
+  for (uint32_t slot = 0; slot < func->numClsRefSlots(); ++slot) {
+    killClsRef(env, slot);
+  }
   warn_missing_args(env, argc);
 
   // Check surprise flags in the same place as the interpreter: after setting
@@ -331,7 +337,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
         ReqBindJmpData {
           SrcKey { func, func->getEntryForNumArgs(argc), false, hasThis },
           FPInvOffset { func->numSlotsInFrame() },
-          bcSPOffset(env),
+          spOffBCFromIRSP(env),
           TransFlags{}
         },
         sp(env),
@@ -435,7 +441,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
               ReqBindJmpData {
                 SrcKey { func, dv.second, false, hasThis },
                 FPInvOffset { func->numSlotsInFrame() },
-                bcSPOffset(env),
+                spOffBCFromIRSP(env),
                 TransFlags{}
               },
               sp(env),
@@ -451,7 +457,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
         ReqBindJmpData {
           SrcKey { func, func->base(), false, hasThis },
           FPInvOffset { func->numSlotsInFrame() },
-          bcSPOffset(env),
+          spOffBCFromIRSP(env),
           TransFlags{}
         },
         sp(env),

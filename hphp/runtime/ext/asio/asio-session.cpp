@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -61,10 +61,10 @@ namespace {
     assert(function.get());
     try {
       vm_call_user_func(function, params);
-    } catch (const Object& exception) {
+    } catch (const Object&) {
       try {
         raise_warning("[asio] Ignoring exception thrown by %s callback", name);
-      } catch (const Object& exception) {
+      } catch (const Object&) {
         // Swallow the exception. Callers are not designed to deal with
         // PHP exceptions.
       }

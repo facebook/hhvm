@@ -1,5 +1,6 @@
 (script
   (header((<))((?))((name)(end_of_line)))
+  (list
   (classish_declaration
     (missing)(missing)
     ((class)(whitespace))
@@ -21,7 +22,7 @@
             (missing)((lparen))
             (missing)((rparen)(whitespace))
             ((:)(whitespace))
-            (simple_type_specifier((void)(whitespace))))
+            (simple_type_specifier((void)(whitespace)))(missing))
           (compound_statement
             (({))(missing)((})(end_of_line)))
           (missing))
@@ -38,18 +39,19 @@
               ((name)(whitespace))
               (missing)((lparen))
               (missing)((rparen)(whitespace))
-              (missing)(missing))
+              (missing)(missing)(missing))
             (missing)
             ((;)(end_of_line)))
           (methodish_declaration
             (attribute_specification
               ((whitespace)(<<))
-              (list_item
+              (list
+                (list_item
                 (attribute
                   ((name))(missing)(missing)(missing))
-                  (missing))
+                (missing)))
               ((>>)(whitespace)))
-            ((public)(whitespace))
+            (list((public)(whitespace)))
             (function_declaration_header
               (missing)
               ((function)(whitespace))
@@ -57,19 +59,20 @@
               ((name)(whitespace))(missing)
               ((lparen))(missing)
               ((rparen)(whitespace))
-              (missing)(missing))
+              (missing)(missing)(missing))
             (compound_statement
               (({))(missing)((})(end_of_line)))
             (missing))
           (methodish_declaration
             (attribute_specification
               ((whitespace)(<<))
-              (list_item
+                (list
+                (list_item
                 (attribute((name))
                 (missing)
                 (missing)
                 (missing))
-                (missing))
+                (missing)))
               ((>>)(whitespace)))
             (list
               ((public)(whitespace))
@@ -82,8 +85,8 @@
               ((lparen))(missing)
               ((rparen)(whitespace))
               ((:)(whitespace))
-              (simple_type_specifier((void)(whitespace))))
+              (simple_type_specifier((void)(whitespace)))(missing))
             (compound_statement
               (({))(missing)((})(end_of_line)))
             (missing)))
-        ((})))))
+        ((}))))))

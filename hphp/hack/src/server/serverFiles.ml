@@ -33,3 +33,6 @@ let dfind_log root = path_of_root root "dfind"
 let load_log root = path_of_root root "load"
 
 let monitor_log_link root = path_of_root root "monitor_log"
+let recorder_log_link root = path_of_root root "recorder_log"
+let recorder_out_link root = path_of_root root "recorder_out"
+let recorder_lock root = path_of_root root "recorder_lock"

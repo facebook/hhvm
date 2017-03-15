@@ -39,9 +39,10 @@ type genv = {
     options          : ServerArgs.options;
     config           : ServerConfig.t;
     local_config     : ServerLocalConfig.t;
+    debug_port       : Debug_port.out_port option;
     workers          : Worker.t list option;
     (* Returns the list of files under .hhconfig, subject to a filter *)
-    indexer          : (string -> bool) -> string MultiWorker.nextlist;
+    indexer          : (string -> bool) -> (unit -> string list);
     (* Each time this is called, it should return the files that have changed
      * since the last invocation *)
     notifier_async   : unit -> ServerNotifierTypes.notifier_changes;
@@ -65,9 +66,19 @@ type env = {
     tcopt          : TypecheckerOptions.t;
     popt           : ParserOptions.t;
     errorl         : Errors.t;
-    (* Sets of files that were known to have errors in corresponding phases.
-     * During full check, we add those files to the set of files to reanalyze
-     * at each stage in order to regenerate their error lists.
+    (* Sets of files that were known to GENERATE errors in corresponding phases.
+     * Note that this is different from HAVING errors - it's possible for
+     * checking of A to generate error in B - in this case failed_check
+     * should contain A, not B.
+     * Conversly, if declaring A will require declaring B, we should put
+     * B in failed_decl. Same if checking A will cause declaring B (via lazy
+     * decl).
+     *
+     * During recheck, we add those files to the set of files to reanalyze
+     * at each stage in order to regenerate their error lists. So those
+     * failed_ sets are the main piece of mutable state that incremental mode
+     * needs to maintain - ServerEnv.errorl is more of a cache, and should
+     * always be possible to be regenerated based on those sets.
      *
      * failed_naming is also used as kind of a dependency tracking mechanism:
      * if files A.php and B.php both define class C, then those files are
@@ -90,7 +101,7 @@ type env = {
     (* Timestamp of last ServerIdle.go run *)
     last_idle_job_time : float;
     (* The map from full path to synchronized file contents *)
-    edited_files   : File_content.t Relative_path.Map.t;
+    edited_files   : Relative_path.Set.t;
     (* Files which parse trees were invalidated (because they changed on disk
      * or in editor) and need to be re-parsed *)
     ide_needs_parsing : Relative_path.Set.t;
@@ -99,8 +110,8 @@ type env = {
      * on lazy decl to update them on as-needed basis. Things that require
      * entire global state to be up to date (like global list of errors, build,
      * or find all references) must be preceded by Full_check. *)
-    needs_decl : Relative_path.Set.t;
-    needs_check : Relative_path.Set.t;
+    needs_phase2_redecl : Relative_path.Set.t;
+    needs_recheck : Relative_path.Set.t;
     needs_full_check : bool;
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;

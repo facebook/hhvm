@@ -44,8 +44,13 @@ bool is_pseudomain(borrowed_ptr<const php::Func>);
  * could modify them through $GLOBALS, so in a pseudomain we don't track any
  * local types.
  */
-bool is_volatile_local(borrowed_ptr<const php::Func>,
-                       borrowed_ptr<const php::Local>);
+bool is_volatile_local(borrowed_ptr<const php::Func>, LocalId);
+
+/*
+ * Given a function which is a memoize wrapper, return the name of the function
+ * that the wrapper is wrapping.
+ */
+SString memoize_impl_name(borrowed_ptr<const php::Func>);
 
 //////////////////////////////////////////////////////////////////////
 

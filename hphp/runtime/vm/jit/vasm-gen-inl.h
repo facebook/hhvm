@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,6 +84,8 @@ TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
     Vauto vauto { main, cold, data, meta ? *meta : dummy_meta, kind };
     gen(vauto.main(), vauto.cold());
   }
+
+  dummy_meta.process_literals();
   assertx(dummy_meta.empty());
 
   return start;

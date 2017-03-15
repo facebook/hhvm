@@ -8,13 +8,15 @@
  *
  *)
 
+type load_mini_approach =
+  | Load_mini_script of Path.t
+  | Precomputed of ServerArgs.mini_state_target
+
 (* Saves the state that load_mini_script below reads in *)
 val save_state: ServerEnv.env -> string -> unit
 
 (* will parse, name, typecheck, the next set of files
  * and refresh the environment and update the many shared heaps
  *)
-val init: ?load_mini_script:Path.t -> ServerEnv.genv
+val init: ?load_mini_approach:load_mini_approach -> ServerEnv.genv
   -> ServerEnv.env * bool (* whether the script succeeded *)
-
-val print_hash_stats: unit -> unit

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -338,6 +338,8 @@ Variant* VariableUnserializer::getByRef(int id) {
       assert(info.isDictValue());
       throwDictRefValue();
     }
+  } else if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatRefNew();
   }
   Variant* ret = info.var();
   if (!ret) throwColRefKey();
@@ -774,7 +776,10 @@ void VariableUnserializer::unserializeVariant(
         throwVecRefValue();
       } else if (UNLIKELY(mode == UnserializeMode::DictValue)) {
         throwDictRefValue();
+      } else if (RuntimeOption::EvalHackArrCompatNotices) {
+        raiseHackArrCompatRefNew();
       }
+
       int64_t id = readInt();
       Variant *v = getByRef(id);
       if (!v) throwOutOfRange(id);
@@ -882,7 +887,7 @@ void VariableUnserializer::unserializeVariant(
       expectChar('}');
       auto rsrc = req::make<DummyResource>();
       rsrc->o_setResourceId(id);
-      rsrc->m_class_name = rsrcName;
+      rsrc->m_class_name = std::move(rsrcName);
       tvMove(make_tv<KindOfResource>(rsrc.detach()->hdr()),
              *self.asTypedValue());
     }
@@ -1310,8 +1315,9 @@ Array VariableUnserializer::unserializeKeyset() {
   return init.toArray();
 }
 
-String VariableUnserializer::unserializeString(char delimiter0 /* = '"' */,
-                         char delimiter1 /* = '"' */) {
+
+folly::StringPiece
+VariableUnserializer::unserializeStringPiece(char delimiter0, char delimiter1) {
   int64_t size = readInt();
   if (size >= RuntimeOption::MaxSerializedStringSize) {
     throwLargeStringSize(size);
@@ -1321,12 +1327,17 @@ String VariableUnserializer::unserializeString(char delimiter0 /* = '"' */,
   }
   expectChar(':');
   expectChar(delimiter0);
-  auto r = readStr(size);
-  auto str = String::attach(readOnly() ?
-                            makeStaticString(r) :
-                            StringData::Make(r, CopyString));
+  auto const piece = readStr(size);
   expectChar(delimiter1);
-  return str;
+  return piece;
+}
+
+String VariableUnserializer::unserializeString(char delimiter0,
+                                               char delimiter1) {
+  auto const piece = unserializeStringPiece(delimiter0, delimiter1);
+  return String::attach(readOnly() ?
+                        makeStaticString(piece) :
+                        StringData::Make(piece, CopyString));
 }
 
 void VariableUnserializer::unserializeCollection(ObjectData* obj, int64_t sz,
@@ -1606,8 +1617,8 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
       buf.append(type);
       buf.append(sep);
 
-      String clsName = unserializeString();
-      buf.append(clsName.size());
+      auto const clsName = unserializeStringPiece();
+      buf.append(static_cast<int>(clsName.size()));
       buf.append(":\"");
       buf.append(clsName.data(), clsName.size());
       buf.append("\":");
@@ -1636,15 +1647,15 @@ void VariableUnserializer::reserialize(StringBuffer& buf) {
       buf.append(type);
       buf.append(sep);
 
-      String clsName = unserializeString();
-      buf.append(clsName.size());
+      auto const clsName = unserializeStringPiece();
+      buf.append(static_cast<int>(clsName.size()));
       buf.append(":\"");
       buf.append(clsName.data(), clsName.size());
       buf.append("\":");
 
       sep = readChar(); // ':'
-      String serialized = unserializeString('{', '}');
-      buf.append(serialized.size());
+      auto const serialized = unserializeStringPiece('{', '}');
+      buf.append(static_cast<int>(serialized.size()));
       buf.append(":{");
       buf.append(serialized.data(), serialized.size());
       buf.append('}');

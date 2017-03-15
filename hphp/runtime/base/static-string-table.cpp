@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,8 @@
 #include "hphp/util/low-ptr.h"
 
 #include <folly/AtomicHashMap.h>
+
+#include <type_traits>
 
 namespace HPHP {
 
@@ -99,29 +101,37 @@ using StringDataMap = folly::AtomicHashMap<
   StrInternKey,
   rds::Link<TypedValue>,
   strintern_hash,
-  strintern_eq
+  strintern_eq,
+  HugeAllocator<char>
 >;
 
 struct EmbeddedStringMap {
-  EmbeddedStringMap() {}
-  ~EmbeddedStringMap() {}
-
   explicit operator bool() const { return inited; }
-  StringDataMap& operator*() { assert(inited); return value; }
-  StringDataMap* operator->() { assert(inited); return &value; }
+
+  StringDataMap* operator->() {
+    assert(inited);
+    return reinterpret_cast<StringDataMap*>(&data);
+  }
+  StringDataMap& operator*() { assert(inited); return *operator->(); }
+
   void emplace(uint32_t size, const StringDataMap::Config& config) {
     assert(!inited);
-    new (&value) StringDataMap(size, config);
+    new (&data) StringDataMap(size, config);
     inited = true;
   }
+
   void clear() {
     if (inited) {
-      value.~StringDataMap();
+      operator*().~StringDataMap();
       inited = false;
     }
   }
+
  private:
-  union { StringDataMap value; };
+  typename std::aligned_storage<
+    sizeof(StringDataMap),
+    alignof(StringDataMap)
+  >::type data;
   bool inited;
 };
 

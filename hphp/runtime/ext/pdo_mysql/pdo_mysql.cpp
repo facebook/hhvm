@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -674,7 +674,6 @@ bool PDOMySqlStatement::executePrepared() {
       int calc_max_length = m_conn->buffered() && m_max_length == 1;
       m_fields = mysql_fetch_fields(m_result);
       if (m_bound_result) {
-        int i;
         for (i = 0; i < column_count; i++) {
           free(m_bound_result[i].buffer);
         }

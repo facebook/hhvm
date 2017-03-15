@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -279,12 +280,27 @@ struct ProfData {
   ProfData(const ProfData&) = delete;
   ProfData& operator=(const ProfData&) = delete;
 
+  struct Session final {
+    Session() { requestInitProfData(); }
+    ~Session() { requestExitProfData(); }
+    Session(Session&&) = delete;
+    Session& operator=(Session&&) = delete;
+
+  private:
+    Treadmill::Session m_ts;
+  };
+
   /*
    * Allocate a new id for a translation. Depending on the kind of the
    * translation, a TransRec for it may or may not be created later by calling
    * addTransProfile() or addTransProfPrologue().
    */
   TransID allocTransID();
+
+  size_t numTransRecs() {
+    ReadLock lock{m_transLock};
+    return m_transRecs.size();
+  }
 
   ProfTransRec* transRec(TransID id) {
     ReadLock lock{m_transLock};
@@ -383,6 +399,18 @@ struct ProfData {
   }
 
   /*
+   * Returns true on the first call for the given `funcId', false for all
+   * subsequent calls.
+   *
+   * Used to ensure that each FuncId is only put in the retranslation queue
+   * once.
+   */
+  bool shouldQueue(FuncId funcId) {
+    m_queuedFuncs.ensureSize(funcId + 1);
+    return !m_queuedFuncs[funcId].exchange(true, std::memory_order_relaxed);
+  }
+
+  /*
    * Forget that a SrcKey is optimized.
    */
   void clearOptimized(SrcKey sk) {
@@ -419,7 +447,8 @@ struct ProfData {
    * The maximum FuncId among all the functions that are being profiled.
    */
   FuncId maxProfilingFuncId() const {
-    return m_profilingFuncs.size() - 1;
+    auto const s = m_profilingFuncs.size();
+    return s > 0 ? s - 1 : InvalidFuncId;
   }
 
   /*
@@ -531,6 +560,11 @@ private:
   std::atomic<int64_t> m_profilingFuncCount{0};
   std::atomic<int64_t> m_profilingBCSize{0};
   std::atomic<int64_t> m_optimizedFuncCount{0};
+
+  /*
+   * Funcs that have been queued for asynchronous retranslation.
+   */
+  AtomicVector<bool> m_queuedFuncs;
 
   /*
    * SrcKeys that have already been optimized. SrcKeys are marked as not

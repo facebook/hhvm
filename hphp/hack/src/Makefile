@@ -42,40 +42,52 @@ endif
 ################################################################################
 
 MODULES=\
+  ast\
   client\
   decl\
   deps\
   dfind\
+  diff\
   emitter\
+  debug\
   find\
   format\
 	full_fidelity\
+	full_fidelity/schema\
+  hackfmt/debug\
+  hackfmt/line_splitter\
+  hackfmt\
   globals\
   h2tp/common\
   h2tp/mapper\
   h2tp/unparser\
   h2tp\
+  hackfmt/error\
   heap\
   hh_matcher\
   hh_matcher/test\
+  hhbc\
   hhi\
+  ide_rpc\
   injection/default_injector\
   libancillary\
   naming\
   options\
   parsing\
   procs\
+  recorder\
   search\
   server\
   socket\
   stubs\
   third-party/avl\
   third-party/core\
-  typed_ast\
   typing\
   utils\
   utils/collections\
   utils/disk\
+  utils/process\
+  utils/hg\
   utils/hh_json\
   monitor\
   watchman\
@@ -112,6 +124,7 @@ NATIVE_LIBRARIES=\
 TARGETS_BASE=_build/hh_server _build/hh_client \
 	_build/hh_single_type_check _build/hh_emitter \
 	_build/hh_format _build/h2tp \
+	_build/hackfmt \
 	_build/hh_match \
 	_build/code_extent_tests \
 	_build/matcher_test \
@@ -148,7 +161,7 @@ all: build-hhi-archive build-hack copy-hack-files
 all-ocp: build-hhi-archive build-hack-with-ocp copy-hack-files-ocp
 
 clean:
-	ocamlbuild -clean
+	$(OCAMLBUILD) -clean
 	find ../bin -mindepth 1 -not -path ../bin/README -delete
 	rm -f utils/get_build_id.gen.c
 
@@ -157,6 +170,11 @@ build-hack: $(TARGETS) build-hhi-archive
 build-hack-with-ocp: build-hhi-archive _build/utils/get_build_id.gen.o
 	[ -d ${ROOT}/../_obuild ] || ( cd ${ROOT}/.. && ocp-build init )
 	ocp-build build
+
+# These are needed so we can turn OCAMLBUILD from 'a,b,c' into 'a b c' below
+comma := ,
+space :=
+space +=
 
 # All targets are built in one time, so no parallelization is necessary
 .NOTPARALLEL: $(TARGETS)
@@ -167,7 +185,7 @@ $(TARGETS): $(ALL_SRC_FILES)
 	# build-hack-native-deps is a dependency of $(TARGETS) but as it is phony
 	# we place it here to avoid unnecessary rebuilds
 	$(MAKE) build-hack-native-deps build-hhi-archive
-	ocamlbuild -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -no-links -cflag -g $(INCLUDE_OPTS) $(LIB_OPTS) \
 		-lflags "-g $(LINKER_FLAGS)" -tag custom \
 		$(patsubst _build/%,%,$(TARGETS))
 	# Touching the targets is necessary because the ocaml build
@@ -176,7 +194,7 @@ $(TARGETS): $(ALL_SRC_FILES)
 	touch $(TARGETS)
 
 build-hack-native-deps: $(NATIVE_C_FILES) _build/utils/get_build_id.gen.o
-	ocamlbuild -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(OBJECT_FILES_TO_BUILD)
+	$(OCAMLBUILD) $(subst $(comma),$(space),$(OCAMLBUILD_FLAGS)) -cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" $(OBJECT_FILES_TO_BUILD)
 
 .PHONY: _build/utils/get_build_id.gen.c # run every time, depends on git commit
 _build/utils/get_build_id.gen.c:
@@ -185,7 +203,7 @@ _build/utils/get_build_id.gen.c:
         ocaml -I scripts -w -3 unix.cma scripts/gen_build_id.ml src/_build/utils/get_build_id.gen.c
 
 _build/utils/get_build_id.gen.o: _build/utils/get_build_id.gen.c
-	cd $(dir $@) && ocamlopt $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
+	cd $(dir $@) && $(OCAMLC) $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
 
 build-hhi-archive:
 	mkdir -p ../bin
@@ -201,6 +219,7 @@ endif
 	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
 	cp _build/hh_emitter.$(TARGET_EXT) ../bin/hh_emitter
+	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
 	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
 	cp _build/h2tp/h2tp.$(TARGET_EXT) ../bin/h2tp
 	cp _build/hh_match.$(TARGET_EXT) ../bin/hh_match
@@ -214,6 +233,7 @@ else
 endif
 	cp ../_obuild/hh_client/hh_client.asm ../bin/hh_client
 	cp ../_obuild/hh_single_type_check/hh_single_type_check.asm ../bin/hh_single_type_check
+	cp ../_obuild/hh_format/hackfmt.asm ../bin/hackfmt
 	cp ../_obuild/hh_format/hh_format.asm ../bin/hh_format
 	cp ../_obuild/h2tp/h2tp.asm ../bin/h2tp
 	cp ../_obuild/hh_match/hh_match.asm ../bin/hh_match

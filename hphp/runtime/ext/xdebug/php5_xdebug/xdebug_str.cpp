@@ -40,14 +40,24 @@ char* xdebug_sprintf(const char* fmt, ...) {
     va_end(args);
 
     if (n > -1 && n < size) {
+      // Success case.
       break;
-    }
-    if (n < 0) {
-      size *= 2;
+    } else if (n < 0) {
+      // vsnprintf returned an error, free the allocated string and bail.
+      if (new_str) {
+        HPHP::req::free(new_str);
+        new_str = nullptr;
+      }
+      break;
     } else {
+      // vsnprintf indicated the supplied buffer was too small. In this case,
+      // the return value of vsnprintf indicates the number of characters
+      // the buffer was required to hold, not including the terminating NULL
+      // char, so set size = n + 1 (to include enough space for the NULL),
+      // reallocate the buffer and try again.
       size = n + 1;
+      new_str = (char*)HPHP::req::realloc_noptrs(new_str, size);
     }
-    new_str = (char*)HPHP::req::realloc_noptrs(new_str, size);
   }
   return new_str;
 }

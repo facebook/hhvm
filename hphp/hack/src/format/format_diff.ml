@@ -11,150 +11,6 @@
 open Core
 
 (*****************************************************************************)
-(* Helper function, splits the content of a file into a list of lines.  *)
-(*****************************************************************************)
-
-let split_lines content =
-  let re = Str.regexp "[\n]" in
-  let lines = Str.split_delim re content in
-  (* don't create a list entry for the line after a trailing newline *)
-  match List.rev lines with
-  | "" :: rest -> List.rev rest
-  | _ -> lines
-
-(*****************************************************************************)
-(* Section building a list of intervals per file for a given diff.
- *
- * Typically, the output of git/hg looks like:
- * --- a/path/filename
- * +++ b/path/filename
- * @@ -line,length +line, length @@
- *
- * The information that we are interested in is the filename after +++
- * and the line number after '+' in the header section (the section after @@).
- * That's because we don't really care about what has been removed.
- * What we want is to format the new content, not the old one.
- * ParseDiff builds a list of intervals of modified lines for each file in
- * a diff.
- *
- * For example: ["myfile1", [4, 6; 7, 7]] means that the file named "myfile1"
- * has modified lines, from line 4 to 6 (inclusive) and the line 7.
- *)
-(*****************************************************************************)
-
-type filename = Path.t
-type interval = int * int
-type file_diff = filename * interval list
-
-module ParseDiff: sig
-
-  val go: Path.t -> string -> file_diff list
-
-end = struct
-
-  type filename = Path.t
-  type interval = int * int
-  type file_diff = filename * interval list
-
-  type env = {
-    (* The prefix of the files in this diff *)
-    prefix : Path.t;
-
-    (* The file we are currently parsing (None for '/dev/null') *)
-    mutable file: string option;
-
-    (* The list of lines that have been modified *)
-    mutable modified: int list;
-
-    (* The current line *)
-    mutable line: int;
-
-    (* The accumulator (for the result) *)
-    mutable result: file_diff list;
-  }
-
-  (* The entry point *)
-  let rec go prefix content =
-    let env = { prefix; file = None; modified = []; line = 0; result = [] } in
-    let lines = split_lines content in
-    start env lines;
-    List.rev env.result
-
-  (* Skip the text before the first +++ (to make things work with git show) *)
-  and start env = function
-    | [] -> ()
-    | line :: lines
-      when String_utils.string_starts_with line "+++" ->
-        header env line;
-        modified env 0 lines
-    | _ :: lines -> start env lines
-
-  (* Parses the content of a line starting with +++ (extracts the filename) *)
-  and header env line =
-    add_file env;
-    let filename = String.sub line 4 (String.length line - 4) in
-    (* Getting rid of the prefix b/ *)
-    let filename =
-      if filename = Sys_utils.null_path
-      then None
-      else if String.length filename >= 2 && String.sub filename 0 2 = "b/"
-      then Some (String.sub filename 2 (String.length filename - 2))
-      else Some filename
-    in
-    env.file <- filename;
-    env.modified <- []
-
-  (* Parses the lines *)
-  and modified env nbr = function
-    | [] -> add_file env
-    | line :: lines
-      when String.length line > 4 && String.sub line 0 3 = "+++" ->
-        header env line;
-        modified env 0 lines
-    | line :: lines
-      when String.length line > 2 && String.sub line 0 2 = "@@" ->
-        (* Find the position right after '+' in '@@ -line,len +line, len@@' *)
-        let _ = Str.search_forward (Str.regexp "[+][0-9]+") line 0 in
-        let matched = Str.matched_string line in
-        let matched = String.sub matched 1 (String.length matched - 1) in
-        let nbr = int_of_string matched in
-        modified env nbr lines
-    | line :: lines
-      when String.length line >= 1 && String.sub line 0 1 = "+" ->
-        (* Adds the line to the list of modified lines *)
-        env.line <- env.line + 1;
-        env.modified <- nbr :: env.modified;
-        modified env (nbr+1) lines
-    | line :: lines
-      when String.length line >= 1 && String.sub line 0 1 = "-" ->
-        (* Skips the line (we don't care about removed code) *)
-        modified env nbr lines
-    | _ :: lines ->
-        modified env (nbr+1) lines
-
-  and add_file env =
-    (* Given a list of modified lines => returns a list of intervals *)
-    let lines_modified = List.rev_map env.modified (fun x -> (x, x)) in
-    let lines_modified = normalize_intervals [] lines_modified in
-    (* Adds the file to the list of results *)
-    match env.file with
-    | None -> ()
-    | Some filename ->
-        let path = Path.concat env.prefix filename in
-        env.result <- (path, lines_modified) :: env.result
-
-  (* Merges intervals when necessary.
-   * For example: '[(1, 2), (2, 2), (2, 5); ...]' becomes '[(1, 5); ...]'.
-   *)
-  and normalize_intervals acc = function
-    | [] -> List.rev acc
-    | (start1, end1) :: (start2, end2) :: rl when end1 + 1 >= start2 ->
-        normalize_intervals acc ((min start1 start2, max end1 end2) :: rl)
-    | x :: rl -> normalize_intervals (x :: acc) rl
-
-end
-
-(*****************************************************************************)
 (* TextBlocks.make produces a list of indivisible blocks for a given file.
  *
  * Let's consider the following input:
@@ -269,7 +125,7 @@ end
  *
  * 'intervals' correspond to the ranges that have been modified by a diff.
  * intervals = [(1, 3); (4; 4)] should be read as: the lines 1 to 3 and the
- * line 4 have been modified (cf ParseDiff module above).
+ * line 4 have been modified (cf Parse_diff module).
  *
  * 'blocks' is the list of indivisible blocks produced by TextBlocks.
  *
@@ -341,7 +197,7 @@ let apply_blocks ~should_patch filename blocks lines =
         (* Cut the old content. *)
         let old_lines, lines =
           List.split_n lines (end_block - start_block + 1) in
-        let new_lines = split_lines new_content in
+        let new_lines = String_utils.split_on_newlines new_content in
         let hunk = (start_block, new_lineno, old_lines, new_lines) in
         let new_lineno = new_lineno + (List.length new_lines) in
         (* only show nonempty hunks *)
@@ -366,8 +222,12 @@ let apply_blocks ~should_patch filename blocks lines =
 (* Formats a diff (in place) *)
 (*****************************************************************************)
 
+type file_diff = Path.t * (int * int) list
+
 let parse_diff prefix diff_text =
-  ParseDiff.go prefix diff_text
+  List.map (Parse_diff.go diff_text) (fun (filename, modified_lines) ->
+    Path.concat prefix filename, modified_lines
+  )
 
 let rec apply modes apply_mode ~diff:file_and_lines_modified =
   List.iter file_and_lines_modified begin fun (filepath, modified_lines) ->
@@ -394,7 +254,7 @@ and apply_formatted apply_mode filepath formatted_content file_content
     modified_lines =
   let blocks = TextBlocks.make formatted_content in
   let blocks = matching_blocks [] modified_lines blocks in
-  let lines = split_lines file_content in
+  let lines = String_utils.split_on_newlines file_content in
   let filename = Path.to_string filepath in
   let should_patch =
     if apply_mode <> Format_mode.Patch

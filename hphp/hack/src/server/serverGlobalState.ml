@@ -22,3 +22,8 @@ let restore (saved_root, saved_hhi, trace, fuzzy) =
   Relative_path.(set_path_prefix Root saved_root);
   Relative_path.(set_path_prefix Hhi saved_hhi);
   Typing_deps.trace := trace
+
+let get_hhi_path (hhi_path, _, _, _) = hhi_path
+let get_root_path (_, root_path, _, _) = root_path
+
+let fake_state = Path.make ".", Path.make ".", false, false

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -75,11 +75,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *RuntimeOption::ExecutionMode = "";
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::DeploymentId;
 std::string RuntimeOption::PidFile = "www.pid";
+
+bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
@@ -91,6 +92,7 @@ bool RuntimeOption::EnableEmitterStats = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
+bool RuntimeOption::EnableContextInErrorHandler = true;
 bool RuntimeOption::EnableZendCompat = false;
 bool RuntimeOption::EnableZendSorting = false;
 bool RuntimeOption::EnableZendIniCompat = true;
@@ -127,6 +129,7 @@ int RuntimeOption::RuntimeErrorReportingLevel =
 int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
+std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
@@ -165,6 +168,7 @@ bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
 bool RuntimeOption::ServerFixPathInfo = false;
 bool RuntimeOption::ServerAddVaryEncoding = true;
+bool RuntimeOption::ServerLogSettingsOnStartup = false;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
 std::string RuntimeOption::ServerCleanupRequest;
 int RuntimeOption::ServerInternalWarmupThreads = 0;
@@ -307,6 +311,7 @@ bool RuntimeOption::UnserializationWhitelistCheckWarningOnly = true;
 int64_t RuntimeOption::UnserializationBigMapThreshold = 1 << 16;
 
 std::string RuntimeOption::TakeoverFilename;
+std::string RuntimeOption::AdminServerIP;
 int RuntimeOption::AdminServerPort = 0;
 int RuntimeOption::AdminThreadCount = 1;
 int RuntimeOption::AdminServerQueueToWorkerRatio = 1;
@@ -417,6 +422,7 @@ bool RuntimeOption::PHP7_ScalarTypes = false;
 bool RuntimeOption::PHP7_Substr = false;
 bool RuntimeOption::PHP7_InfNanFloatParse = false;
 bool RuntimeOption::PHP7_UVS = false;
+bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 
 std::map<std::string, std::string> RuntimeOption::AliasedNamespaces;
 
@@ -464,7 +470,7 @@ static inline uint64_t pgoThresholdDefault() {
 }
 
 static inline bool evalJitDefault() {
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   return false;
 #else
   return true;
@@ -497,12 +503,16 @@ static inline uint32_t resetProfCountersDefault() {
   return RuntimeOption::EvalJitConcurrently ? 250 : 1000;
 }
 
+static inline int retranslateAllRequestDefault() {
+  return RuntimeOption::ServerExecutionMode() ? 3000 : 0;
+}
+
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
 
 const uint64_t kEvalVMStackElmsDefault =
-#ifdef VALGRIND
+#if defined(VALGRIND) && !defined(FOLLY_SANITIZE_ADDRESS)
  0x800
 #else
  0x4000
@@ -536,6 +546,7 @@ std::string RuntimeOption::RepoCentralPath;
 int32_t RuntimeOption::RepoCentralFileMode;
 std::string RuntimeOption::RepoCentralFileUser;
 std::string RuntimeOption::RepoCentralFileGroup;
+bool RuntimeOption::RepoAllowFallbackPath = true;
 std::string RuntimeOption::RepoEvalMode;
 std::string RuntimeOption::RepoJournal = "delete";
 bool RuntimeOption::RepoCommit = true;
@@ -567,6 +578,7 @@ bool RuntimeOption::EnableDebuggerPrompt = true;
 bool RuntimeOption::EnableDebuggerServer = false;
 bool RuntimeOption::EnableDebuggerUsageLog = false;
 bool RuntimeOption::DebuggerDisableIPv6 = false;
+std::string RuntimeOption::DebuggerServerIP;
 int RuntimeOption::DebuggerServerPort = 8089;
 int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
@@ -575,7 +587,7 @@ int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
-std::string RuntimeOption::DebuggerAuthTokenScript;
+std::string RuntimeOption::DebuggerAuthTokenScriptBin;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -603,6 +615,8 @@ int RuntimeOption::Fb303ServerPoolThreads = 1;
 
 double RuntimeOption::XenonPeriodSeconds = 0.0;
 bool RuntimeOption::XenonForceAlwaysOn = false;
+bool RuntimeOption::XenonTraceUnitLoad = false;
+std::string RuntimeOption::XenonStructLogDest;
 bool RuntimeOption::TrackPerUnitMemory = false;
 
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
@@ -1020,52 +1034,52 @@ void RuntimeOption::Load(
   }
   {
     // Repo
-    {
-      // Local Repo
-      Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode");
-      if (RepoLocalMode.empty()) {
-        const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
-        if (HHVM_REPO_LOCAL_MODE != nullptr) {
-          RepoLocalMode = HHVM_REPO_LOCAL_MODE;
-        }
-        RepoLocalMode = "r-";
+    // Local Repo
+    Config::Bind(RepoLocalMode, ini, config, "Repo.Local.Mode");
+    if (RepoLocalMode.empty()) {
+      const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
+      if (HHVM_REPO_LOCAL_MODE != nullptr) {
+        RepoLocalMode = HHVM_REPO_LOCAL_MODE;
       }
-      if (RepoLocalMode.compare("rw")
-          && RepoLocalMode.compare("r-")
-          && RepoLocalMode.compare("--")) {
-        Logger::Error("Bad config setting: Repo.Local.Mode=%s",
-                      RepoLocalMode.c_str());
-        RepoLocalMode = "rw";
-      }
-      // Repo.Local.Path.
-      Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
-      if (RepoLocalPath.empty()) {
-        const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
-        if (HHVM_REPO_LOCAL_PATH != nullptr) {
-          RepoLocalPath = HHVM_REPO_LOCAL_PATH;
-        }
-      }
-      Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
-      Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");
-      Config::Bind(RepoCentralFileGroup, ini, config, "Repo.Central.FileGroup");
+      RepoLocalMode = "r-";
     }
-    {
-      // Central Repo
-      Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
+    if (RepoLocalMode.compare("rw")
+        && RepoLocalMode.compare("r-")
+        && RepoLocalMode.compare("--")) {
+      Logger::Error("Bad config setting: Repo.Local.Mode=%s",
+                    RepoLocalMode.c_str());
+      RepoLocalMode = "rw";
     }
-    {
-      // Repo - Eval
-      Config::Bind(RepoEvalMode, ini, config, "Repo.Eval.Mode");
-      if (RepoEvalMode.empty()) {
-        RepoEvalMode = "readonly";
-      } else if (RepoEvalMode.compare("local")
-                 && RepoEvalMode.compare("central")
-                 && RepoEvalMode.compare("readonly")) {
-        Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
-                      RepoEvalMode.c_str());
-        RepoEvalMode = "readonly";
+    // Repo.Local.Path
+    Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
+    if (RepoLocalPath.empty()) {
+      const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
+      if (HHVM_REPO_LOCAL_PATH != nullptr) {
+        RepoLocalPath = HHVM_REPO_LOCAL_PATH;
       }
     }
+
+    // Central Repo
+    Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
+    Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
+    Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");
+    Config::Bind(RepoCentralFileGroup, ini, config, "Repo.Central.FileGroup");
+
+    Config::Bind(RepoAllowFallbackPath, ini, config, "Repo.AllowFallbackPath",
+                 RepoAllowFallbackPath);
+
+    // Repo - Eval
+    Config::Bind(RepoEvalMode, ini, config, "Repo.Eval.Mode");
+    if (RepoEvalMode.empty()) {
+      RepoEvalMode = "readonly";
+    } else if (RepoEvalMode.compare("local")
+               && RepoEvalMode.compare("central")
+               && RepoEvalMode.compare("readonly")) {
+      Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
+                    RepoEvalMode.c_str());
+      RepoEvalMode = "readonly";
+    }
+
     Config::Bind(RepoJournal, ini, config, "Repo.Journal", "delete");
     Config::Bind(RepoCommit, ini, config, "Repo.Commit", true);
     Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", true);
@@ -1119,11 +1133,17 @@ void RuntimeOption::Load(
     if (EvalPerfRelocate > 0) {
       setRelocateRequests(EvalPerfRelocate);
     }
+    if (!RuntimeOption::ServerExecutionMode()) {
+      // We only allow jit worker threads in server mode to avoid issues with
+      // fork() and the worker threads. This may change in the future.
+      EvalJitWorkerThreads = 0;
+    }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),
-                          false);
+                          false,
+                          EvalProfileHWExcludeKernel);
 
     Config::Bind(EnableEmitterStats, ini, config, "Eval.EnableEmitterStats",
                  EnableEmitterStats);
@@ -1145,6 +1165,8 @@ void RuntimeOption::Load(
     // NB: after we know the value of RepoAuthoritative.
     Config::Bind(EnableArgsInBacktraces, ini, config,
                  "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
+    Config::Bind(EnableContextInErrorHandler, ini, config,
+                 "Eval.EnableContextInErrorHandler", !RepoAuthoritative);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
     if (RepoAuthoritative) {
@@ -1161,6 +1183,7 @@ void RuntimeOption::Load(
                    "Eval.Debugger.EnableDebuggerServer");
       Config::Bind(EnableDebuggerUsageLog, ini, config,
                    "Eval.Debugger.EnableDebuggerUsageLog");
+      Config::Bind(DebuggerServerIP, ini, config, "Eval.Debugger.IP");
       Config::Bind(DebuggerServerPort, ini, config, "Eval.Debugger.Port", 8089);
       Config::Bind(DebuggerDisableIPv6, ini, config,
                    "Eval.Debugger.DisableIPv6", false);
@@ -1178,8 +1201,8 @@ void RuntimeOption::Load(
                    "Eval.Debugger.RPC.HostDomain");
       Config::Bind(DebuggerDefaultRpcTimeout, ini, config,
                    "Eval.Debugger.RPC.DefaultTimeout", 30);
-      Config::Bind(DebuggerAuthTokenScript, ini, config,
-                   "Eval.Debugger.Auth.TokenScript");
+      Config::Bind(DebuggerAuthTokenScriptBin, ini, config,
+                   "Eval.Debugger.Auth.TokenScriptBin");
     }
   }
   {
@@ -1298,6 +1321,8 @@ void RuntimeOption::Load(
     Config::Bind(PHP7_InfNanFloatParse, ini, config, "PHP7.InfNanFloatParse",
                  s_PHP7_master);
     Config::Bind(PHP7_UVS, ini, config, "PHP7.UVS", s_PHP7_master);
+    Config::Bind(PHP7_DisallowUnsafeCurlUploads, ini, config,
+                 "PHP7.DisallowUnsafeCurlUploads", s_PHP7_master);
   }
   {
     // Server
@@ -1341,6 +1366,8 @@ void RuntimeOption::Load(
     Config::Bind(ServerFixPathInfo, ini, config, "Server.FixPathInfo", false);
     Config::Bind(ServerAddVaryEncoding, ini, config, "Server.AddVaryEncoding",
                  ServerAddVaryEncoding);
+    Config::Bind(ServerLogSettingsOnStartup, ini, config,
+                 "Server.LogSettingsOnStartup", false);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
     Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
     Config::Bind(ServerInternalWarmupThreads, ini, config,
@@ -1655,6 +1682,7 @@ void RuntimeOption::Load(
   }
   {
     // Admin Server
+    Config::Bind(AdminServerIP, ini, config, "AdminServer.IP", ServerIP);
     Config::Bind(AdminServerPort, ini, config, "AdminServer.Port", 0);
     // Single-threaded by default. If increasing the max thread count > 1, the
     // queue-to-worker ratio can be raised for a more conservative growth: e.g.,
@@ -1803,6 +1831,8 @@ void RuntimeOption::Load(
     // Xenon
     Config::Bind(XenonPeriodSeconds, ini, config, "Xenon.Period", 0.0);
     Config::Bind(XenonForceAlwaysOn, ini, config, "Xenon.ForceAlwaysOn", false);
+    Config::Bind(XenonTraceUnitLoad, ini, config, "Xenon.TraceUnitLoad", false);
+    Config::Bind(XenonStructLogDest, ini, config, "Xenon.StructLogDest", "");
   }
   {
     // We directly read zend.assertions here, so that we can get its INI value
@@ -1830,6 +1860,8 @@ void RuntimeOption::Load(
 
     ++it;
   }
+
+  Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
@@ -1962,7 +1994,6 @@ void RuntimeOption::Load(
   Config::Bind(RuntimeOption::Extensions, ini, config, "extensions");
   Config::Bind(RuntimeOption::DynamicExtensions, ini,
                config, "DynamicExtensions");
-
 
   ExtensionRegistry::moduleLoad(ini, config);
   initialize_apc();

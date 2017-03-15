@@ -9,6 +9,7 @@
  *
  *)
 (* THIS FILE IS GENERATED; DO NOT EDIT IT *)
+(* @generated *)
 (**
   To regenerate this file build hphp/hack/src:generate_full_fidelity and run
   the binary.
@@ -19,6 +20,7 @@ type t =
 | Token
 | Missing
 | SyntaxList
+| EndOfFile
 | ScriptHeader
 | Script
 | SimpleTypeSpecifier
@@ -38,6 +40,8 @@ type t =
 | NamespaceUseClause
 | FunctionDeclaration
 | FunctionDeclarationHeader
+| WhereClause
+| WhereConstraint
 | MethodishDeclaration
 | ClassishDeclaration
 | ClassishBody
@@ -48,12 +52,14 @@ type t =
 | TypeConstDeclaration
 | DecoratedExpression
 | ParameterDeclaration
+| VariadicParameter
 | AttributeSpecification
 | Attribute
 | InclusionExpression
 | InclusionDirective
 | CompoundStatement
 | ExpressionStatement
+| UnsetStatement
 | WhileStatement
 | IfStatement
 | ElseifClause
@@ -65,8 +71,10 @@ type t =
 | ForStatement
 | ForeachStatement
 | SwitchStatement
-| CaseStatement
-| DefaultStatement
+| SwitchSection
+| SwitchFallthrough
+| CaseLabel
+| DefaultLabel
 | ReturnStatement
 | ThrowStatement
 | BreakStatement
@@ -84,6 +92,7 @@ type t =
 | ScopeResolutionExpression
 | MemberSelectionExpression
 | SafeMemberSelectionExpression
+| EmbeddedMemberSelectionExpression
 | YieldExpression
 | PrintExpression
 | PrefixUnaryExpression
@@ -91,16 +100,25 @@ type t =
 | BinaryExpression
 | InstanceofExpression
 | ConditionalExpression
+| EvalExpression
+| EmptyExpression
+| DefineExpression
+| IssetExpression
 | FunctionCallExpression
 | ParenthesizedExpression
 | BracedExpression
+| EmbeddedBracedExpression
 | ListExpression
 | CollectionLiteralExpression
 | ObjectCreationExpression
 | ArrayCreationExpression
 | ArrayIntrinsicExpression
+| DictionaryIntrinsicExpression
+| KeysetIntrinsicExpression
+| VectorIntrinsicExpression
 | ElementInitializer
 | SubscriptExpression
+| EmbeddedSubscriptExpression
 | AwaitableCreationExpression
 | XHPChildrenDeclaration
 | XHPCategoryDeclaration
@@ -108,21 +126,26 @@ type t =
 | XHPRequired
 | XHPClassAttributeDeclaration
 | XHPClassAttribute
+| XHPSimpleClassAttribute
 | XHPAttribute
 | XHPOpen
 | XHPExpression
 | XHPClose
 | TypeConstant
 | VectorTypeSpecifier
+| KeysetTypeSpecifier
+| VectorArrayTypeSpecifier
 | TypeParameter
 | TypeConstraint
-| MapTypeSpecifier
+| MapArrayTypeSpecifier
+| DictionaryTypeSpecifier
 | ClosureTypeSpecifier
 | ClassnameTypeSpecifier
 | FieldSpecifier
 | FieldInitializer
 | ShapeTypeSpecifier
 | ShapeExpression
+| TupleExpression
 | GenericTypeSpecifier
 | NullableTypeSpecifier
 | SoftTypeSpecifier
@@ -138,6 +161,7 @@ let to_string kind =
   | Missing -> "missing"
   | Token -> "token"
   | SyntaxList -> "list"
+  | EndOfFile -> "end_of_file"
   | ScriptHeader -> "header"
   | Script -> "script"
   | SimpleTypeSpecifier -> "simple_type_specifier"
@@ -157,6 +181,8 @@ let to_string kind =
   | NamespaceUseClause -> "namespace_use_clause"
   | FunctionDeclaration -> "function_declaration"
   | FunctionDeclarationHeader -> "function_declaration_header"
+  | WhereClause -> "where_clause"
+  | WhereConstraint -> "where_constraint"
   | MethodishDeclaration -> "methodish_declaration"
   | ClassishDeclaration -> "classish_declaration"
   | ClassishBody -> "classish_body"
@@ -167,12 +193,14 @@ let to_string kind =
   | TypeConstDeclaration -> "type_const_declaration"
   | DecoratedExpression -> "decorated_expression"
   | ParameterDeclaration -> "parameter_declaration"
+  | VariadicParameter -> "variadic_parameter"
   | AttributeSpecification -> "attribute_specification"
   | Attribute -> "attribute"
   | InclusionExpression -> "inclusion_expression"
   | InclusionDirective -> "inclusion_directive"
   | CompoundStatement -> "compound_statement"
   | ExpressionStatement -> "expression_statement"
+  | UnsetStatement -> "unset_statement"
   | WhileStatement -> "while_statement"
   | IfStatement -> "if_statement"
   | ElseifClause -> "elseif_clause"
@@ -184,8 +212,10 @@ let to_string kind =
   | ForStatement -> "for_statement"
   | ForeachStatement -> "foreach_statement"
   | SwitchStatement -> "switch_statement"
-  | CaseStatement -> "case_statement"
-  | DefaultStatement -> "default_statement"
+  | SwitchSection -> "switch_section"
+  | SwitchFallthrough -> "switch_fallthrough"
+  | CaseLabel -> "case_label"
+  | DefaultLabel -> "default_label"
   | ReturnStatement -> "return_statement"
   | ThrowStatement -> "throw_statement"
   | BreakStatement -> "break_statement"
@@ -203,6 +233,7 @@ let to_string kind =
   | ScopeResolutionExpression -> "scope_resolution_expression"
   | MemberSelectionExpression -> "member_selection_expression"
   | SafeMemberSelectionExpression -> "safe_member_selection_expression"
+  | EmbeddedMemberSelectionExpression -> "embedded_member_selection_expression"
   | YieldExpression -> "yield_expression"
   | PrintExpression -> "print_expression"
   | PrefixUnaryExpression -> "prefix_unary_expression"
@@ -210,16 +241,25 @@ let to_string kind =
   | BinaryExpression -> "binary_expression"
   | InstanceofExpression -> "instanceof_expression"
   | ConditionalExpression -> "conditional_expression"
+  | EvalExpression -> "eval_expression"
+  | EmptyExpression -> "empty_expression"
+  | DefineExpression -> "define_expression"
+  | IssetExpression -> "isset_expression"
   | FunctionCallExpression -> "function_call_expression"
   | ParenthesizedExpression -> "parenthesized_expression"
   | BracedExpression -> "braced_expression"
+  | EmbeddedBracedExpression -> "embedded_braced_expression"
   | ListExpression -> "list_expression"
   | CollectionLiteralExpression -> "collection_literal_expression"
   | ObjectCreationExpression -> "object_creation_expression"
   | ArrayCreationExpression -> "array_creation_expression"
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
+  | DictionaryIntrinsicExpression -> "dictionary_intrinsic_expression"
+  | KeysetIntrinsicExpression -> "keyset_intrinsic_expression"
+  | VectorIntrinsicExpression -> "vector_intrinsic_expression"
   | ElementInitializer -> "element_initializer"
   | SubscriptExpression -> "subscript_expression"
+  | EmbeddedSubscriptExpression -> "embedded_subscript_expression"
   | AwaitableCreationExpression -> "awaitable_creation_expression"
   | XHPChildrenDeclaration -> "xhp_children_declaration"
   | XHPCategoryDeclaration -> "xhp_category_declaration"
@@ -227,21 +267,26 @@ let to_string kind =
   | XHPRequired -> "xhp_required"
   | XHPClassAttributeDeclaration -> "xhp_class_attribute_declaration"
   | XHPClassAttribute -> "xhp_class_attribute"
+  | XHPSimpleClassAttribute -> "xhp_simple_class_attribute"
   | XHPAttribute -> "xhp_attribute"
   | XHPOpen -> "xhp_open"
   | XHPExpression -> "xhp_expression"
   | XHPClose -> "xhp_close"
   | TypeConstant -> "type_constant"
   | VectorTypeSpecifier -> "vector_type_specifier"
+  | KeysetTypeSpecifier -> "keyset_type_specifier"
+  | VectorArrayTypeSpecifier -> "vector_array_type_specifier"
   | TypeParameter -> "type_parameter"
   | TypeConstraint -> "type_constraint"
-  | MapTypeSpecifier -> "map_type_specifier"
+  | MapArrayTypeSpecifier -> "map_array_type_specifier"
+  | DictionaryTypeSpecifier -> "dictionary_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"
   | ClassnameTypeSpecifier -> "classname_type_specifier"
   | FieldSpecifier -> "field_specifier"
   | FieldInitializer -> "field_initializer"
   | ShapeTypeSpecifier -> "shape_type_specifier"
   | ShapeExpression -> "shape_expression"
+  | TupleExpression -> "tuple_expression"
   | GenericTypeSpecifier -> "generic_type_specifier"
   | NullableTypeSpecifier -> "nullable_type_specifier"
   | SoftTypeSpecifier -> "soft_type_specifier"

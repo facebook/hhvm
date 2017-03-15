@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -513,26 +513,15 @@ Variant HHVM_FUNCTION(explode,
 String HHVM_FUNCTION(implode,
                      const Variant& arg1,
                      const Variant& arg2 /* = uninit_variant */) {
-  Array items;
-  String delim;
   if (isContainer(arg1)) {
-    items = arg1;
-    delim = arg2.toString();
+    return StringUtil::Implode(arg1, arg2.toString(), false);
   } else if (isContainer(arg2)) {
-    items = arg2;
-    delim = arg1.toString();
+    return StringUtil::Implode(arg2, arg1.toString(), false);
   } else {
     throw_bad_type_exception("implode() expects a container as "
                              "one of the arguments");
     return String();
   }
-  return StringUtil::Implode(items, delim, false);
-}
-
-String HHVM_FUNCTION(join,
-                     const Variant& arg1,
-                     const Variant& arg2 /* = uninit_variant */) {
-  return HHVM_FN(implode)(arg1, arg2);
 }
 
 TypedValue HHVM_FUNCTION(str_split, const String& str, int64_t split_length) {
@@ -598,8 +587,8 @@ static Variant strtok(const String& str, const Variant& token) {
   }
 
   // reset mask
-  for (int i = 0; i < stoken.size(); i++) {
-    mask[(unsigned char)stoken.data()[i]] = 0;
+  for (int i2 = 0; i2 < stoken.size(); i2++) {
+    mask[(unsigned char)stoken.data()[i2]] = 0;
   }
 
   if (pos0 == sstr.size()) {
@@ -1526,7 +1515,6 @@ TypedValue HHVM_FUNCTION(strlen,
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -1976,9 +1964,9 @@ void WuManberReplacement::initTables() {
       }
       // init shift tab
       for (int j = 0; j < max_shift; j++) {
-        uint16_t h = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
+        uint16_t h2 = patterns[i].hash( j, B ) & SHIFT_TAB_MASK;
         assert((long long) m - (long long) j - B >= 0);
-        shift[h] = MIN(shift[h], m - j - B);
+        shift[h2] = MIN(shift[h2], m - j - B);
       }
       // init prefix
       prefix.push_back(patterns[i].hash(0, Bp));
@@ -2483,7 +2471,7 @@ struct StringExtension final : Extension {
     HHVM_FE(chop);
     HHVM_FE(explode);
     HHVM_FE(implode);
-    HHVM_FE(join);
+    HHVM_FALIAS(join, implode);
     HHVM_FE(str_split);
     HHVM_FE(chunk_split);
     HHVM_FE(strtok);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,8 @@
 
 #include <cstring>
 #include <string>
+
+#include <folly/portability/String.h>
 
 #include "hphp/util/hash.h"
 
@@ -82,7 +84,7 @@ struct stringHashCompare {
 
 struct int64_hash {
   size_t operator() (const int64_t v) const {
-    return (size_t)hash_int64(v);
+    return hash_int64(v);
   }
   size_t hash(const int64_t v) const {
     return operator()(v);
@@ -95,7 +97,7 @@ struct int64_hash {
 template<typename T>
 struct pointer_hash {
   size_t operator() (const T *const p) const {
-    return (size_t)hash_int64(intptr_t(p));
+    return hash_int64(intptr_t(p));
   }
   size_t hash(const T *const p) const {
     return operator()(p);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2016 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,7 +52,7 @@ bool checkUnit(const Unit*, bool verbose = false);
  * Checked:
  * 1.  Depth of eval stack must be same for any control-flow path.
  *     flavor descriptors for every stack element are same for any path.
- * 2.  Stack underflow & overflow not allowed.  INS_1 and INS_2 stack
+ * 2.  Stack underflow & overflow not allowed.  INS_1 stack
  *     refs must be in-bounds.
  * 3.  Empty stack at try-region starts (but not ends).
  * 5.  |stack| == 1 before Ret*, == 0 before Unwind.

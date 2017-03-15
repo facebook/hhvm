@@ -28,6 +28,7 @@ let start_server root =
     retries = 800;
     timeout = None;
     autostart = true;
+    force_dormant_start = false;
     no_load = false;
     ai_mode = None;
   } in

@@ -48,6 +48,7 @@ let parse_check_args cmd =
   let no_load = ref false in
   let timeout = ref None in
   let autostart = ref true in
+  let force_dormant_start = ref false in
   let from = ref "" in
   let version = ref false in
   let monitor_logname = ref false in
@@ -305,6 +306,10 @@ let parse_check_args cmd =
     "--autostart-server",
       Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";
+    "--force-dormant-start",
+      Arg.Bool (fun x -> force_dormant_start := x),
+      " If server is dormant, force start a new one instead of waiting for"^
+      " the next one to start up automatically (default: false)";
     "--ai",
       Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
@@ -367,6 +372,7 @@ let parse_check_args cmd =
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;
+    force_dormant_start = !force_dormant_start;
     no_load = !no_load;
     ai_mode = !ai_mode;
   }

@@ -59,6 +59,7 @@ type client_check_env = {
   retries: int;
   timeout: float option;
   autostart: bool;
+  force_dormant_start: bool;
   no_load: bool;
   ai_mode: string option;
 }

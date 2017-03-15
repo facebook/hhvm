@@ -329,3 +329,33 @@ let report informant = match informant with
   | Resigned -> Informant_sig.Move_along
   | Active env ->
     Revision_tracker.make_report env.revision_tracker
+
+
+(** This is useful only for testing.
+ *
+ * It oscillates between Move_along, Kill_server and Restart_server
+ * every 6 seconds.
+ * TODO: Consider injecting this version when injector config is improved. *)
+module Fake_informant = struct
+  type t = {
+    init_time : float;
+  }
+
+  include HhMonitorInformant_sig.Types
+
+  let init _ = {
+    init_time = Unix.time ();
+  }
+
+  let report env =
+    let elapsed = Unix.time () -. env.init_time in
+    let multiple = int_of_float @@ floor @@ elapsed /. 6.0 in
+    let bucket = multiple mod 3 in
+    match bucket with
+      | 0 -> Informant_sig.Move_along
+      | 1 -> Informant_sig.Kill_server
+      | 2 -> Informant_sig.Restart_server
+      | _ ->
+        (* Actually unreachable by modulus. *)
+        Informant_sig.Move_along
+end

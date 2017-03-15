@@ -28,10 +28,11 @@ let init_protocol = ref Ide_rpc_protocol_parser_types.Nuclide_rpc
 let rec connect_persistent env retries start_time =
   if retries < 0 then raise Exit_status.(Exit_with Out_of_retries);
   let connect_once_start_t = Unix.time () in
-
-  let server_name = HhServerMonitorConfig.Program.hh_server in
-
-  let conn = ServerUtils.connect_to_monitor env.root server_name in
+  let handoff_options = {
+    MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
+    force_dormant_start = false;
+  } in
+  let conn = ServerUtils.connect_to_monitor env.root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Result.Ok (ic, oc) ->
@@ -51,6 +52,7 @@ let rec connect_persistent env retries start_time =
     | SMUtils.Monitor_connection_failure
     | SMUtils.Server_busy ->
       raise Exit_status.(Exit_with IDE_out_of_retries)
+    | SMUtils.Server_dormant
     | SMUtils.Server_died
     | SMUtils.Server_missing
     | SMUtils.Build_id_mismatched ->

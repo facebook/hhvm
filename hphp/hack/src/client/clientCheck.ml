@@ -63,6 +63,7 @@ let connect args =
   ClientConnect.connect { ClientConnect.
     root = args.root;
     autostart = args.autostart;
+    force_dormant_start = args.force_dormant_start;
     retries = Some args.retries;
     retry_if_init = args.retry_if_init;
     expiry = args.timeout;

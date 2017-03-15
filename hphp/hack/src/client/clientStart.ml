@@ -83,14 +83,22 @@ let start_server env =
 
 let should_start env =
   let root_s = Path.to_string env.root in
+  let handoff_options = {
+    MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
+    force_dormant_start = false;
+  } in
   match ServerUtils.connect_to_monitor
-    env.root HhServerMonitorConfig.Program.hh_server with
+    env.root handoff_options with
   | Result.Ok _conn -> false
   | Result.Error
       ( SMUtils.Server_missing
       | SMUtils.Build_id_mismatched
       | SMUtils.Server_died
       ) -> true
+  | Result.Error SMUtils.Server_dormant ->
+    Printf.eprintf
+      "Server already exists but is dormant";
+    false
   | Result.Error SMUtils.Server_busy
   | Result.Error SMUtils.Monitor_connection_failure ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;

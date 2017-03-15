@@ -121,10 +121,8 @@ struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
  * for killing stack slots below the call depth.)
  *
  * The `stack' set contains stack locations the call will read as arguments, as
- * well as stack locations it may read or write via other means
- * (e.g. debug_backtrace, or pointers to stack slots to a CallBuiltin).
- * Locations in any intersection between `stack' and `kills' may be assumed to
- * be killed.
+ * well as stack locations it may read or write via other means. Locations in
+ * any intersection between `stack' and `kills' may be assumed to be killed.
  *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.

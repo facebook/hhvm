@@ -340,6 +340,10 @@ struct Global {
 
 // Block-local environment.
 struct Local {
+  explicit Local(Global& global)
+    : global(global)
+  {}
+
   Global& global;
 
   ALocBits antLoc;     // Copied to BlockAnalysis::antLoc
@@ -349,6 +353,8 @@ struct Local {
   ALocBits delLoc;     // Copied to BlockAnalysis::delLoc
 
   ALocBits reStores;
+
+  bool containsCall{false}; // If there's a Call instruction in this block
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -362,6 +368,16 @@ std::string show(TrackedStore ts) {
   not_reached();
 }
 
+bool srcsCanSpanCall(const IRInstruction& inst) {
+  for (auto i = inst.numSrcs(); i--; ) {
+    auto const src = inst.src(i);
+    if (!src->isA(TStkPtr) &&
+        !src->isA(TFramePtr) &&
+        !src->inst()->is(DefConst)) return false;
+  }
+  return true;
+}
+
 const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
   auto it = genv.spillFrameMap.find(ts);
   if (it == genv.spillFrameMap.end()) return nullptr;
@@ -369,13 +385,26 @@ const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
 }
 
 void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
-  env.global.trackedStoreMap[
-    StoreKey { inst.block(), StoreKey::Out, bit }].set(&inst);
+  auto& ts = env.global.trackedStoreMap[
+    StoreKey { inst.block(), StoreKey::Out, bit }];
+  // Don't propagate tracked stores if it would cause a tmp to span a call.
+  if (env.containsCall && !srcsCanSpanCall(inst)) {
+    ts.setBad();
+  } else {
+    ts.set(&inst);
+  }
 }
 
 void set_movable_spill_frame(Local& env, const ALocBits& bits,
                              IRInstruction& inst) {
-  TrackedStore ts { &inst };
+  TrackedStore ts;
+  // Don't propagate tracked stores if it would cause a tmp to span a call.
+  if (env.containsCall && !srcsCanSpanCall(inst)) {
+    ts.setBad();
+  } else {
+    ts.set(&inst);
+  }
+
   bitset_for_each_set(
     bits,
     [&](uint32_t i) {
@@ -552,6 +581,8 @@ void visit(Local& env, IRInstruction& inst) {
      * read them.
      */
     [&] (CallEffects l) {
+      env.containsCall = true;
+
       load(env, AHeapAny);
       load(env, AFrameAny);  // Not necessary for some builtin calls, but it
                              // depends which builtin...
@@ -647,6 +678,7 @@ struct BlockAnalysis {
   ALocBits alteredAvl;
   ALocBits avlLoc;
   ALocBits delLoc;
+  bool containsCall;
 };
 
 BlockAnalysis analyze_block(Global& genv, Block* block) {
@@ -663,7 +695,8 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
     // env.antLoc and env.delLoc is required for correctness here.
     env.mayLoad | env.mayStore | env.antLoc | env.delLoc,
     env.avlLoc,
-    env.delLoc
+    env.delLoc,
+    env.containsCall
   };
 }
 
@@ -1126,7 +1159,18 @@ void compute_available_stores(
             genv.trackedStoreMap[StoreKey { blk, StoreKey::In, i }];
           auto& tsOut =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          assert(!tsIn.isUnseen());
+          assertx(!tsIn.isUnseen());
+
+          // Prevent tmps from spanning calls by not propagating tracked stores
+          // thru any block which contains a call. The exception is if the store
+          // only uses constants as those do not create a problem.
+          if (transfer.containsCall &&
+              (!tsIn.instruction() || !srcsCanSpanCall(*tsIn.instruction()))) {
+            tsOut.setBad();
+          } else {
+            tsOut = tsIn;
+          }
+
           tsOut = tsIn;
           if (tsOut.isBad()) {
             state.ppOut[i] = 0;

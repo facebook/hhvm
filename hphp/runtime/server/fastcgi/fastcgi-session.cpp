@@ -19,7 +19,6 @@
 #include "hphp/util/logger.h"
 
 #include <folly/Memory.h>
-#include <folly/MoveWrapper.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
@@ -342,9 +341,8 @@ void FastCGISession::onStdOut(std::unique_ptr<IOBuf> chain) {
   // FastCGITransport doesn't run in the same event base. Calling into internal
   // functions here is unsafe from other threads so we enqueue the work for the
   // event base.
-  folly::MoveWrapper<std::unique_ptr<IOBuf>> chain_wrapper(std::move(chain));
-  m_eventBase->runInEventBaseThread([this, chain_wrapper]() mutable {
-    writeStream(fcgi::STDOUT, std::move(*chain_wrapper));
+  m_eventBase->runInEventBaseThread([this, chain = std::move(chain)]() mutable {
+    writeStream(fcgi::STDOUT, std::move(chain));
   });
 }
 
@@ -714,4 +712,3 @@ void FastCGISession::writeStream(fcgi::Type type,
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

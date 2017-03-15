@@ -382,7 +382,7 @@ const Func* Func::fromFuncId(FuncId id) {
 }
 
 bool Func::isFuncIdValid(FuncId id) {
-  assert(id < s_nextFuncId);
+  if (id >= s_nextFuncId) return false;
   return s_funcVec.get(id) != nullptr;
 }
 

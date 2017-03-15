@@ -444,11 +444,17 @@ struct ProfData {
   }
 
   /*
-   * The maximum FuncId among all the functions that are being profiled.
+   * This returns an upper bound for the FuncIds of all the functions that are
+   * being profiled.  A proper call to profiling(funcId) still needs to be made
+   * to check whether each funcId was indeed profiled.
    */
   FuncId maxProfilingFuncId() const {
     auto const s = m_profilingFuncs.size();
-    return s > 0 ? s - 1 : InvalidFuncId;
+    // Avoid wrapping around and returning a large integer.
+    if (s == 0) return 0;
+    // Avoid returning obviously invalid FuncIds.
+    if (s >= Func::nextFuncId()) return Func::nextFuncId() - 1;
+    return s - 1;
   }
 
   /*

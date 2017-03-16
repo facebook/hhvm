@@ -1958,9 +1958,10 @@ folly::Optional<Cell> tv(const Type& t) {
         return fromTypeVec<VecArrayInit>(t.m_data.packed->elems);
       } else if ((t.m_bits & BDictN) == t.m_bits) {
         return fromTypeVec<DictInit>(t.m_data.packed->elems);
-      } else {
+      } else if ((t.m_bits & BArrN) == t.m_bits) {
         return fromTypeVec<PackedArrayInit>(t.m_data.packed->elems);
       }
+      break;
     case DataTag::RefInner:
     case DataTag::ArrLikePackedN:
     case DataTag::ArrLikeMapN:

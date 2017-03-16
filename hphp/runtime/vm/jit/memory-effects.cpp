@@ -706,20 +706,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case CallArray:
-    {
-      auto const extra = inst.extra<CallArray>();
-      return CallEffects {
-        extra->writeLocals,
-        // Kills. Everything on the stack below the incoming parameters.
-        stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The act-rec, incoming parameters, and everything below.
-        stack_below(
-          inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1
-        )
-      };
-    }
-
+    return CallEffects {
+      inst.extra<CallArray>()->writeLocals,
+      AMIStateAny,
+      // The AStackAny on this is more conservative than it could be; see Call
+      // and CallBuiltin.
+      AStackAny
+    };
   case ContEnter:
     return CallEffects { false, AMIStateAny, AStackAny };
 
@@ -728,13 +721,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto const extra = inst.extra<Call>();
       return CallEffects {
         extra->writeLocals,
-        // Kills. Everything on the stack below the incoming parameters.
+        // kill
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
-        // Stack. The act-rec, incoming parameters, and everything below.
-        stack_below(
-          inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1
-        )
+        // We might side-exit inside the callee, and interpret a return.  So we
+        // can read anything anywhere on the eval stack above the call's entry
+        // depth here.
+        AStackAny
       };
     }
 

@@ -238,7 +238,7 @@ let rec get_extend_deps_ trace cid_hash to_redecl =
       then
         let to_redecl = DepSet.add acc obj in
         get_extend_deps_ trace obj to_redecl
-      else to_redecl
+      else acc
     end ideps ~init:to_redecl
   end
 

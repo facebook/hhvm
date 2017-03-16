@@ -727,22 +727,46 @@ void in(ISS& env, const bc::CastInt&) {
   push(env, TInt);
 }
 
-void castImpl(ISS& env, Type target) {
+void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
   auto const t = topC(env);
   if (t.subtypeOf(target)) return reduce(env, bc::Nop {});
-  constprop(env);
-  // TODO(#3875556): constant evaluate conversions when we can.
   popC(env);
+  if (fn) {
+    if (auto val = tv(t)) {
+      if (auto result = eval_cell([&] { fn(&*val); return *val; })) {
+        constprop(env);
+        target = *result;
+      }
+    }
+  }
   push(env, std::move(target));
 }
 
-void in(ISS& env, const bc::CastDouble&) { castImpl(env, TDbl); }
-void in(ISS& env, const bc::CastString&) { castImpl(env, TStr); }
-void in(ISS& env, const bc::CastArray&)  { castImpl(env, TArr); }
-void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj); }
-void in(ISS& env, const bc::CastDict&)   { castImpl(env, TDict); }
-void in(ISS& env, const bc::CastVec&)    { castImpl(env, TVec); }
-void in(ISS& env, const bc::CastKeyset&) { castImpl(env, TKeyset); }
+void in(ISS& env, const bc::CastDouble&) {
+  castImpl(env, TDbl, tvCastToDoubleInPlace);
+}
+
+void in(ISS& env, const bc::CastString&) {
+  castImpl(env, TStr, tvCastToStringInPlace);
+}
+
+void in(ISS& env, const bc::CastArray&)  {
+  castImpl(env, TArr, tvCastToArrayInPlace);
+}
+
+void in(ISS& env, const bc::CastObject&) { castImpl(env, TObj, nullptr); }
+
+void in(ISS& env, const bc::CastDict&)   {
+  castImpl(env, TDict, tvCastToDictInPlace);
+}
+
+void in(ISS& env, const bc::CastVec&)    {
+  castImpl(env, TVec, tvCastToVecInPlace);
+}
+
+void in(ISS& env, const bc::CastKeyset&) {
+  castImpl(env, TKeyset, tvCastToKeysetInPlace);
+}
 
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
 

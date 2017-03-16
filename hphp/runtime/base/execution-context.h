@@ -419,7 +419,8 @@ public:
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
   const Variant& getEvaledArg(const StringData* val,
-                              const String& namespacedName);
+                              const String& namespacedName,
+                              const Unit* funcUnit);
 
 private:
   template <bool forwarding>

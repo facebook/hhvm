@@ -1364,9 +1364,11 @@ static void threadLogger(const char* header, const char* msg,
 
 StaticString
   s_php_namespace("<?php namespace "),
+  s_hh_namespace("<?hh namespace "),
   s_curly_return(" { return "),
   s_semicolon_curly("; }"),
   s_php_return("<?php return "),
+  s_hh_return("<?hh return "),
   s_semicolon(";"),
   s_stdclass("stdclass");
 
@@ -1865,7 +1867,8 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
 }
 
 const Variant& ExecutionContext::getEvaledArg(const StringData* val,
-                                         const String& namespacedName) {
+                                              const String& namespacedName,
+                                              const Unit* funcUnit) {
   auto key = StrNR(val);
 
   if (m_evaledArgs.get()) {
@@ -1877,9 +1880,11 @@ const Variant& ExecutionContext::getEvaledArg(const StringData* val,
   int pos = namespacedName.rfind('\\');
   if (pos != -1) {
     auto ns = namespacedName.substr(0, pos);
-    code = s_php_namespace + ns + s_curly_return + key + s_semicolon_curly;
+    code = (funcUnit->isHHFile() ? s_hh_namespace : s_php_namespace) +
+      ns + s_curly_return + key + s_semicolon_curly;
   } else {
-    code = s_php_return + key + s_semicolon;
+    code = (funcUnit->isHHFile() ? s_hh_return : s_php_return) +
+      key + s_semicolon;
   }
   Unit* unit = compileEvalString(code.get());
   assert(unit != nullptr);
@@ -2002,7 +2007,8 @@ StrNR ExecutionContext::createFunction(const String& args,
   // user function named __lambda_func when you call create_function. Huzzah!)
   static StringData* oldName = makeStaticString("__lambda_func");
   std::ostringstream codeStr;
-  codeStr << "<?php function " << oldName->data()
+  codeStr << (vmfp()->unit()->isHHFile() ? "<?hh" : "<?php")
+          << " function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
   std::string evalCode = codeStr.str();

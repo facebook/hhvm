@@ -156,11 +156,10 @@ Unit* compile_file(const char* s, size_t sz, const MD5& md5,
 }
 
 std::string mangleSystemMd5(const std::string& fileMd5) {
-  // This resembles mangleUnitMd5(...), however, only settings that HHBBC is
-  // aware of may be used here or it will be unable to load systemlib!
   std::string t = fileMd5 + '\0'
     + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     ;
   return string_md5(t);
 }

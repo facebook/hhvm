@@ -5235,7 +5235,10 @@ OPTBLD_INLINE void iopEval(PC& pc) {
   }
 
   auto code = String::attach(prepareKey(*c1));
-  String prefixedCode = concat("<?php ", code);
+  String prefixedCode = concat(
+    vmfp()->unit()->isHHFile() ? "<?hh " : "<?php ",
+    code
+  );
 
   auto evalFilename = std::string();
   auto vm = &*g_context;

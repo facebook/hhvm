@@ -141,7 +141,11 @@ static Variant HHVM_FUNCTION(assert_options,
 }
 
 static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
-  String prefixedCode = concat3("<?php return ", codeStr, ";");
+  String prefixedCode = concat3(
+    curFP->unit()->isHHFile() ? "<?hh return " : "<?php return ",
+    codeStr,
+    ";"
+  );
 
   auto const oldErrorLevel =
     s_option_data->assertQuietEval ? HHVM_FN(error_reporting)(Variant(0)) : 0;

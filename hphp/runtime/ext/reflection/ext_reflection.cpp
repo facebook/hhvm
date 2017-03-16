@@ -150,7 +150,8 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
       // We use cls() instead of implCls() because we want the namespace and
       // class context for which the closure is scoped, not that of the Closure
       // subclass (which, among other things, is always globally namespaced).
-      func->cls() ? func->cls()->nameStr() : func->nameStr()
+      func->cls() ? func->cls()->nameStr() : func->nameStr(),
+      func->unit()
     );
   }
 }

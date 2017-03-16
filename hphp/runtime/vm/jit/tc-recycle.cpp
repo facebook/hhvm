@@ -38,6 +38,7 @@
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
+#include "hphp/vixl/a64/instructions-a64.h"
 
 #include <condition_variable>
 
@@ -196,24 +197,57 @@ folly::Optional<SmashedCall> eraseSmashedCall(TCA start) {
 void clearTCMaps(TCA start, TCA end) {
   auto const profData = jit::profData();
   while (start < end) {
-#if defined(__powerpc64__)
-    ppc64_asm::DecodedInstruction di(start);
-#else
-    x64::DecodedInstruction di(start);
-#endif
-    if (profData && (di.isBranch() || di.isNop() || di.isCall())) {
+    bool isBranch, isNop, isCall;
+    size_t instSz;
+    switch (arch()) {
+      case Arch::ARM: {
+        using namespace vixl;
+        Instruction* instr = Instruction::Cast(start);
+        isBranch = instr->IsCondBranchImm() || instr->IsUncondBranchImm() ||
+          instr->IsUncondBranchReg() || instr->IsCompareBranch() ||
+          instr->IsTestBranch();
+        isNop = instr->Mask(SystemHintFMask) == SystemHintFixed &&
+          instr->ImmHint() == NOP;
+        isCall = instr->Mask(UnconditionalBranchMask) == BL ||
+          instr->Mask(UnconditionalBranchToRegisterMask) == BLR;
+        instSz = vixl::kInstructionSize;
+        break;
+      }
+      case Arch::PPC64: {
+        ppc64_asm::DecodedInstruction di(start);
+        isBranch = di.isBranch();
+        isNop = di.isNop();
+        isCall = di.isCall();
+        instSz = di.size();
+        break;
+      }
+      case Arch::X64: {
+        x64::DecodedInstruction di(start);
+        isBranch = di.isBranch();
+        isNop = di.isNop();
+        isCall = di.isCall();
+        instSz = di.size();
+        break;
+      }
+      default: {
+        not_reached();
+        break;
+      }
+    }
+
+    if (profData && (isBranch || isNop || isCall)) {
       auto const id = profData->clearJmpTransID(start);
       if (id != kInvalidTransID) {
         ITRACE(1, "Erasing jmpTransID @ {} to {}\n", start, id);
       }
     }
     eraseCatchTrace(start);
-    if (di.isCall()) {
+    if (isCall) {
       if (auto call = eraseSmashedCall(start)) {
         clearProfCaller(start, call->isGuard, call->rec);
       }
     }
-    start += di.size();
+    start += instSz;
   }
 }
 

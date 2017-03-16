@@ -268,7 +268,7 @@ struct Vgen {
   void emit(const jmpi& i);
   void emit(const jmpr& i) { a->Br(X(i.target)); }
   void emit(const lea& i);
-  void emit(const leap& i) { a->Mov(X(i.d), i.s.r.disp); }
+  void emit(const leap& i);
   void emit(const lead& i) { a->Mov(X(i.d), i.s.get()); }
   void emit(const loadb& i) { a->Ldrsb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
@@ -688,6 +688,8 @@ void Vgen::emit(const jcc& i) {
     jccs.push_back({a->frontier(), taken});
     vixl::Label skip, data;
 
+    // Emit a sequence similar to a smashable for easy patching later.
+    // Static relocation might be able to simplify the branch.
     a->B(&skip, vixl::InvertCondition(C(i.cc)));
     a->Ldr(rAsm, &data);
     a->Br(rAsm);
@@ -711,6 +713,9 @@ void Vgen::emit(const jmp& i) {
   if (next == i.target) return;
   jmps.push_back({a->frontier(), i.target});
   vixl::Label data;
+
+  // Emit a sequence similar to a smashable for easy patching later.
+  // Static relocation might be able to simplify the branch.
   a->Ldr(rAsm, &data);
   a->Br(rAsm);
   a->bind(&data);
@@ -726,6 +731,8 @@ void Vgen::emit(const jmpi& i) {
   if (vixl::is_int26(diff)) {
     a->b(diff);
   } else {
+    // Cannot use simple a->Mov() since such a sequence cannot be
+    // adjusted while live following a relocation.
     a->Ldr(rAsm, &data);
     a->Br(rAsm);
     a->bind(&data);
@@ -742,6 +749,19 @@ void Vgen::emit(const lea& i) {
   } else {
     a->Add(X(i.d), X(p.base), p.disp);
   }
+}
+
+void Vgen::emit(const leap& i) {
+  vixl::Label imm_data;
+  vixl::Label after_data;
+
+  // Cannot use simple a->Mov() since such a sequence cannot be
+  // adjusted while live following a relocation.
+  a->Ldr(X(i.d), &imm_data);
+  a->B(&after_data);
+  a->bind(&imm_data);
+  a->dc64(i.s.r.disp);
+  a->bind(&after_data);
 }
 
 #define Y(vasm_opc, arm_opc, src_dst, m)                             \

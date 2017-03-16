@@ -12,12 +12,13 @@ open Instruction_sequence
 open Hhbc_ast.MemberOpMode
 
 let memoize_suffix = "$memoize_impl"
-let memoize_cache = "static$memoize_cache"
-let memoize_guard = "static$memoize_cache$guard"
-let memoize_static_cache = "$multi$memoize_cache"
-let memoize_shared_cache = "$shared$multi$memoize_cache"
-let memoize_single_cache = "$shared$guarded_single$memoize_cache"
-let memoized_single_guard = "$shared$guarded_single$memoize_cache$guard"
+let static_memoize_cache = "static$memoize_cache"
+let static_memoize_cache_guard = "static$memoize_cache$guard"
+let multi_memoize_cache = "$multi$memoize_cache"
+let shared_multi_memoize_cache = "$shared$multi$memoize_cache"
+let shared_single_memoize_cache = "$shared$guarded_single$memoize_cache"
+let shared_single_memoize_cache_guard =
+  "$shared$guarded_single$memoize_cache$guard"
 
 let param_code_sets params local =
   let rec aux params local block =
@@ -56,9 +57,9 @@ let memoize_function_no_params renamed_name =
   gather [
     instr_entrynop;
     instr_false;
-    instr_staticlocinit local_guard memoize_guard;
+    instr_staticlocinit local_guard static_memoize_cache_guard;
     instr_null;
-    instr_staticlocinit local_cache memoize_cache;
+    instr_staticlocinit local_cache static_memoize_cache;
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_0;
@@ -113,7 +114,7 @@ let memoize_function_with_params params renamed_name =
     instr_entrynop;
     Emit_body.emit_method_prolog params;
     instr_dict 0 [];
-    instr_staticlocinit static_local memoize_cache;
+    instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
     instr_basel static_local Warn;
     instr_memoget 0 first_local param_count;
@@ -158,7 +159,8 @@ let memoize_functions compiled_funcs =
       [ compiled ] in
   Core.List.bind compiled_funcs mapper
 
-let memoize_method_no_params renamed_name =
+let memoize_instance_method_no_params original_name =
+  let renamed_name = original_name ^ memoize_suffix in
   (* TODO: A lot of this codegen doesn't make a lot of sense to me.
   Try to understand it and see if it can be improved. *)
   let label_0 = Label.Regular 0 in
@@ -174,7 +176,7 @@ let memoize_method_no_params renamed_name =
     instr_ismemotype;
     instr_jmpnz label_0;
     instr_baseh;
-    instr_querym_cget_pt 0 memoize_single_cache;
+    instr_querym_cget_pt 0 shared_single_memoize_cache;
     instr_dup;
     instr_istypec Hhbc_ast.OpNull;
     instr_jmpnz label_1;
@@ -186,7 +188,7 @@ let memoize_method_no_params renamed_name =
     instr_maybememotype;
     instr_jmpz label_2;
     instr_baseh;
-    instr_querym_cget_pt 0 memoized_single_guard;
+    instr_querym_cget_pt 0 shared_single_memoize_cache_guard;
     instr_jmpz label_2;
     instr_null;
     instr_retc;
@@ -199,7 +201,7 @@ let memoize_method_no_params renamed_name =
     instr_fcall 0;
     instr_unboxr;
     instr_baseh;
-    instr_setm_pt 0 memoize_single_cache;
+    instr_setm_pt 0 shared_single_memoize_cache;
     instr_jmp label_4;
     instr_label label_3;
     instr_this;
@@ -212,12 +214,13 @@ let memoize_method_no_params renamed_name =
     instr_jmpz label_5;
     instr_true;
     instr_baseh;
-    instr_setm_pt 0 memoized_single_guard;
+    instr_setm_pt 0 shared_single_memoize_cache_guard;
     instr_popc;
     instr_label label_5;
     instr_retc ]
 
-let memoize_method_with_params params renamed_name total_count index =
+let memoize_instance_method_with_params params original_name total_count index =
+  let renamed_name = original_name ^ memoize_suffix in
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
@@ -247,7 +250,7 @@ let memoize_method_with_params params renamed_name total_count index =
     index_block;
     param_code_sets params first_parameter_local;
     instr_baseh;
-    instr_dim_warn_pt memoize_shared_cache;
+    instr_dim_warn_pt shared_multi_memoize_cache;
     instr_memoget 0 first_local local_count;
     instr_isuninit;
     instr_jmpnz label;
@@ -262,11 +265,13 @@ let memoize_method_with_params params renamed_name total_count index =
     instr_fcall param_count;
     instr_unboxr;
     instr_baseh;
-    instr_dim_define_pt memoize_shared_cache;
+    instr_dim_define_pt shared_multi_memoize_cache;
     instr_memoset 0 first_local local_count;
     instr_retc ]
 
-let memoize_static_method_body params original_name renamed_name class_name =
+let memoize_static_method_body class_ params original_name =
+  let class_name = Hhas_class.name class_ in
+  let renamed_name = original_name ^ memoize_suffix in
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
@@ -274,7 +279,7 @@ let memoize_static_method_body params original_name renamed_name class_name =
     instr_entrynop;
     Emit_body.emit_method_prolog params;
     param_code_sets params param_count;
-    instr_string (original_name ^ memoize_static_cache);
+    instr_string (original_name ^ multi_memoize_cache);
     instr_string class_name;
     instr_agetc;
     instr_basesc 1 0;
@@ -287,7 +292,7 @@ let memoize_static_method_body params original_name renamed_name class_name =
     instr_ugetcunop;
     instr_popu;
     (* TODO: The strings have extra leading slashes unnecessarily *)
-    instr_string (original_name ^ memoize_static_cache);
+    instr_string (original_name ^ multi_memoize_cache);
     instr_string class_name;
     instr_agetc;
     instr_fpushclsmethodd param_count renamed_name class_name;
@@ -298,36 +303,28 @@ let memoize_static_method_body params original_name renamed_name class_name =
     instr_memoset 1 first_local param_count;
     instr_retc ]
 
-let memoized_instance_method_body params renamed_name total_count index =
+let memoized_instance_method_body total_count index params original_name =
   if params = [] && total_count = 1 then
-    memoize_method_no_params renamed_name
+    memoize_instance_method_no_params original_name
   else
-    memoize_method_with_params params renamed_name total_count index
+    memoize_instance_method_with_params params original_name total_count index
 
-let memoize_instance_method compiled total_count index =
-  let original_name = Hhas_method.name compiled in
-  let renamed_name = original_name ^ memoize_suffix in
-  let renamed = Hhas_method.with_name compiled renamed_name in
-  let renamed = Hhas_method.make_private renamed in
-  let params = Hhas_method.params compiled in
-  let body = memoized_instance_method_body
-    params renamed_name total_count index in
-  let body = instr_seq_to_list body in
-  let memoized = Hhas_method.with_body compiled body in
-  (renamed, memoized)
-
-let memoize_static_method class_ method_ =
+let memoize_method method_ memoizer =
   let original_name = Hhas_method.name method_ in
   let renamed_name = original_name ^ memoize_suffix in
   let renamed = Hhas_method.with_name method_ renamed_name in
   let renamed = Hhas_method.make_private renamed in
   let params = Hhas_method.params method_ in
-  let class_name = Hhas_class.name class_ in
-  let body = memoize_static_method_body
-    params original_name renamed_name class_name in
+  let body = memoizer params original_name in
   let body = instr_seq_to_list body in
   let memoized = Hhas_method.with_body method_ body in
   (renamed, memoized)
+
+let memoize_instance_method method_ total_count index =
+  memoize_method method_ (memoized_instance_method_body total_count index)
+
+let memoize_static_method class_ method_ =
+  memoize_method method_ (memoize_static_method_body class_)
 
 let memoize_instance_methods class_ =
   let is_memoized_instance method_ =

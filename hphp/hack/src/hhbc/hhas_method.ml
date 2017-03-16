@@ -24,6 +24,7 @@ type t = {
   method_is_async      : bool;
   method_is_generator  : bool;
   method_is_pair_generator  : bool;
+  method_is_closure_body : bool;
 }
 
 let make
@@ -41,7 +42,8 @@ let make
   method_decl_vars
   method_is_async
   method_is_generator
-  method_is_pair_generator = {
+  method_is_pair_generator
+  method_is_closure_body = {
     method_attributes;
     method_is_protected;
     method_is_public;
@@ -57,6 +59,7 @@ let make
     method_is_async;
     method_is_generator;
     method_is_pair_generator;
+    method_is_closure_body;
   }
 
 let attributes method_def = method_def.method_attributes
@@ -80,4 +83,5 @@ let decl_vars method_def = method_def.method_decl_vars
 let is_async method_def = method_def.method_is_async
 let is_generator method_def = method_def.method_is_generator
 let is_pair_generator method_def = method_def.method_is_pair_generator
+let is_closure_body method_def = method_def.method_is_closure_body
 let with_body method_def method_body = { method_def with method_body }

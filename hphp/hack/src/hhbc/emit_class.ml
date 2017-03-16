@@ -35,6 +35,7 @@ let default_constructor ast_class =
   let method_is_async = false in
   let method_is_generator = false in
   let method_is_pair_generator = false in
+  let method_is_closure_body = false in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -51,6 +52,7 @@ let default_constructor ast_class =
     method_is_async
     method_is_generator
     method_is_pair_generator
+    method_is_closure_body
 
 let from_extends _tparams extends =
   match extends with
@@ -130,7 +132,7 @@ let from_ast : A.class_ -> Hhas_class.t =
   let class_attributes =
     Emit_attribute.from_asts ast_class.Ast.c_user_attributes in
   let class_name = Litstr.to_string @@ snd ast_class.Ast.c_name in
-  let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
+let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
   let class_is_enum = ast_class.A.c_kind = Ast.Cenum in
   let class_is_interface = ast_is_interface ast_class in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
@@ -145,12 +147,14 @@ let from_ast : A.class_ -> Hhas_class.t =
     else ast_class.A.c_implements in
   let class_implements = from_implements tparams implements in
   let class_body = ast_class.A.c_body in
-  let has_constructor = List.exists class_body
+  let has_constructor_or_invoke = List.exists class_body
     (fun elt -> match elt with
-                | A.Method { A.m_name; _} -> snd m_name = SN.Members.__construct
+                | A.Method { A.m_name; _} ->
+                  snd m_name = SN.Members.__construct ||
+                  snd m_name = "__invoke"
                 | _ -> false) in
   let additional_methods =
-    if has_constructor then [] else [default_constructor ast_class] in
+    if has_constructor_or_invoke then [] else [default_constructor ast_class] in
   let class_methods =
     Emit_method.from_asts ast_class (ast_methods class_body) in
   let class_methods = class_methods @ additional_methods in

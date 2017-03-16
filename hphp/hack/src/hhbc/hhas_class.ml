@@ -76,3 +76,5 @@ let with_methods hhas_class class_methods = { hhas_class with class_methods }
 let properties hhas_class = hhas_class.class_properties
 let constants hhas_class = hhas_class.class_constants
 let type_constants hhas_class = hhas_class.class_type_constants
+let is_closure_class hhas_class =
+  List.exists Hhas_method.is_closure_body (methods hhas_class)

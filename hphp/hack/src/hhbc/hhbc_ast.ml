@@ -23,6 +23,7 @@ type param_id =
 type param_num = int
 type stack_index = int
 type class_id = string
+type class_num = int
 type function_id = string
 type num_params = int
 
@@ -493,7 +494,7 @@ type instruct_misc =
   | NativeImpl
   | IncStat of int * int (* counter id, value *)
   | AKExists
-  | CreateCl of num_params * class_id
+  | CreateCl of num_params * class_num
   | Idx
   | ArrayIdx
   | AssertRATL of local_id * repo_auth_type
@@ -538,7 +539,7 @@ type instruct_try =
   | TryFaultBegin of Label.t
   | TryFaultEnd
 
-and instruct =
+type instruct =
   | IBasic of instruct_basic
   | IIterator of instruct_iterator
   | ILitConst of instruct_lit_const

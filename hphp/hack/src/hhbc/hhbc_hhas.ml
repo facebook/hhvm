@@ -441,6 +441,8 @@ let string_of_misc instruction =
     | GetMemoKeyL local -> "GetMemoKeyL " ^ (string_of_local_id local)
     | IsMemoType -> "IsMemoType"
     | MaybeMemoType -> "MaybeMemoType"
+    | CreateCl (n, cid) ->
+      sep ["CreateCl"; string_of_int n; string_of_int cid]
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =
@@ -745,6 +747,7 @@ let add_method_def buf method_def =
   let method_is_async = Hhas_method.is_async method_def in
   let method_is_generator = Hhas_method.is_generator method_def in
   let method_is_pair_generator = Hhas_method.is_pair_generator method_def in
+  let method_is_closure_body = Hhas_method.is_closure_body method_def in
   B.add_string buf "\n  .method ";
   B.add_string buf (method_attributes method_def);
   B.add_string buf (string_of_type_info_option method_return_type);
@@ -753,6 +756,7 @@ let add_method_def buf method_def =
   if method_is_generator then B.add_string buf " isGenerator";
   if method_is_async then B.add_string buf " isAsync";
   if method_is_pair_generator then B.add_string buf " isPairGenerator";
+  if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
   add_decl_vars buf 4 method_decl_vars;
   add_instruction_list buf 4 method_body;
@@ -761,6 +765,9 @@ let add_method_def buf method_def =
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
   let attrs = List.map attribute_to_string user_attrs in
+  let attrs = if Hhas_class.is_closure_class c
+              then "no_override" :: "unique" :: attrs
+              else attrs in
   let attrs = if Hhas_class.is_trait c then "trait" :: attrs else attrs in
   let attrs = if Hhas_class.is_interface c then "interface" :: attrs else attrs in
   let attrs = if Hhas_class.is_final c then "final" :: attrs else attrs in
@@ -800,13 +807,15 @@ let property_attributes p =
   let text = if text = "" then "" else "[" ^ text ^ "] " in
   text
 
-let add_property buf property =
+let add_property class_def buf property =
   B.add_string buf "\n  .property ";
   B.add_string buf (property_attributes property);
   B.add_string buf (Hhas_property.name property);
   (* TODO: Get the actual initializer when we can codegen it. Properties
   that lack an initializer get a null. *)
-  B.add_string buf " =\n    \"\"\"N;\"\"\";"
+  if Hhas_class.is_closure_class class_def
+  then B.add_string buf " =\n    uninit;"
+  else B.add_string buf " =\n    \"\"\"N;\"\"\";"
 
 let add_constant buf c =
   B.add_string buf "\n  .const ";
@@ -831,7 +840,7 @@ let add_class_def buf class_def =
   B.add_string buf " {";
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
-  List.iter (add_property buf) (Hhas_class.properties class_def);
+  List.iter (add_property class_def buf) (Hhas_class.properties class_def);
   List.iter (add_method_def buf) (Hhas_class.methods class_def);
   (* TODO: other members *)
   B.add_string buf "\n}\n"
@@ -870,13 +879,16 @@ let add_data_region buf functions =
   B.add_string buf "\n"
 
 let add_top_level buf hhas_prog =
+  let non_closure_classes =
+    List.filter (fun c -> not (Hhas_class.is_closure_class c))
+    (Hhas_program.classes hhas_prog) in
   let main_stmts =
     [ ILitConst (Int Int64.one)
     ; IContFlow RetC
     ] in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
-  add_defcls buf (Hhas_program.classes hhas_prog);
+  add_defcls buf non_closure_classes;
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"
 

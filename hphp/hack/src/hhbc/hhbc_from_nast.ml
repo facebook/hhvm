@@ -409,6 +409,17 @@ and emit_yield = function
       instr_yieldk;
     ]
 
+and emit_lambda fundef ids =
+  (* Closure conversion puts the class number used for CreateCl in the "name"
+   * of the function definition *)
+  let class_num = int_of_string (snd fundef.A.f_name) in
+  gather [
+    (* TODO: deal with explicit use (...) capture variables *)
+    gather @@ List.map ids
+      (fun (x, _isref) -> instr (IGet (CUGetL (Local.Named (snd x)))));
+    instr (IMisc (CreateCl (List.length ids, class_num)))
+  ]
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -444,6 +455,9 @@ and from_expr expr =
   | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get None expr prop nullflavor
   | A.Await e -> emit_await e
   | A.Yield e -> emit_yield e
+  | A.Lfun _ ->
+    failwith "expected Lfun to be converted to Efun during closure conversion"
+  | A.Efun (fundef, ids) -> emit_lambda fundef ids
   (* TODO *)
   | A.Yield_break               -> emit_nyi "yield_break"
   | A.Id _                      -> emit_nyi "id"
@@ -452,8 +466,6 @@ and from_expr expr =
   | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
   | A.String2 _                 -> emit_nyi "string2"
   | A.List _                    -> emit_nyi "list"
-  | A.Efun (_, _)               -> emit_nyi "efun"
-  | A.Lfun _                    -> emit_nyi "lfun"
   | A.Xml (_, _, _)             -> emit_nyi "xml"
   | A.Unsafeexpr _              -> emit_nyi "unsafexpr"
   | A.Import (_, _)             -> emit_nyi "import"
@@ -822,7 +834,7 @@ and emit_args_and_call args uargs =
     else instr (ICall (FCallUnpack nargs))
   ]
 
-and emit_call_lhs (_, expr_) nargs =
+and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
@@ -844,7 +856,10 @@ and emit_call_lhs (_, expr_) nargs =
     instr (ICall (FPushFuncD (nargs, id)))
 
   | _ ->
-    emit_nyi "call lhs expression"
+    gather [
+      from_expr expr;
+      instr (ICall (FPushFunc nargs))
+    ]
 
 and emit_call (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
@@ -858,14 +873,11 @@ and emit_call (_, expr_ as expr) args uargs =
          ] end in
     instrs, Flavor.Cell
 
-  | A.Obj_get _ | A.Class_const _ | A.Id _ ->
+  | A.Obj_get _ | A.Class_const _ | A.Id _ | _ ->
     gather [
       emit_call_lhs expr nargs;
       emit_args_and_call args uargs;
     ], Flavor.Ref
-
-  | _ ->
-    emit_nyi "call expression", Flavor.Cell
 
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.

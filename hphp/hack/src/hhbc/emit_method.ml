@@ -11,7 +11,7 @@
 open Core
 open Instruction_sequence
 
-let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
+let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   fun ast_class ast_method ->
   let method_name = Litstr.to_string @@ snd ast_method.Ast.m_name in
   let method_is_abstract = List.mem ast_method.Ast.m_kind Ast.Abstract in
@@ -44,6 +44,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator
   in
+  let method_is_closure_body = snd ast_method.Ast.m_name = "__invoke" in
   let method_body = instr_seq_to_list body_instrs in
   Hhas_method.make
     method_attributes
@@ -61,6 +62,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t  =
     method_is_async
     method_is_generator
     method_is_pair_generator
+    method_is_closure_body
 
 let from_asts ast_class ast_methods =
   List.map ast_methods (from_ast ast_class)

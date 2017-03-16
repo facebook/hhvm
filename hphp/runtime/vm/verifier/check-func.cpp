@@ -362,11 +362,8 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   for (auto branch : branches) {
     if (isSwitch(peek_op(branch))) {
       foreachSwitchTarget(branch, [&](Offset o) {
-        // TODO(#2464197): dce breaks switch for verify
-        if (offset(branch + o) != -1) {
-          ok &= checkOffset("switch target", offset(branch + o),
-                            name, base, past);
-        }
+        ok &= checkOffset("switch target", offset(branch + o),
+                          name, base, past);
       });
     } else {
       Offset target = instrJumpTarget(bc, offset(branch));

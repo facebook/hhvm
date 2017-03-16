@@ -112,6 +112,12 @@ function showAllEdges($edges) {
   }
 }
 
+function showClassOnly($node) {
+  if (idx($node, 'class')) {
+    echo_buffer($node['class']."\n");
+  }
+}
+
 function showClass($node) {
   if (idx($node, 'class')) {
     echo_buffer($node['class']."\n");
@@ -183,7 +189,7 @@ echo_flush();
 
 // DFS NODES
 echo "\nDoing DFS from root class on nodes:\n";
-heapgraph_dfs_nodes($hg, array($id_of_rootclass), array(), 'showClass');
+heapgraph_dfs_nodes($hg, array($id_of_rootclass), array(), 'showClassOnly');
 echo_flush();
 
 echo "\nDoing DFS from root class on nodes (skipping root):\n";

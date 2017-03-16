@@ -757,12 +757,12 @@ static Array get_function_static_variables(const Func* func) {
 
   for (size_t i = 0; i < staticVars.size(); ++i) {
     const Func::SVInfo &sv = staticVars[i];
-    auto const refData = rds::bindStaticLocal(func, sv.name);
+    auto const staticLocalData = rds::bindStaticLocal(func, sv.name);
     // FIXME: this should not require variant hops
     ai.setUnknownKey(
       VarNR(sv.name),
-      refData.isInit()
-        ? tvAsCVarRef(refData.get()->tv())
+      staticLocalData.isInit()
+        ? tvAsCVarRef(staticLocalData.get()->ref.tv())
         : uninit_variant
     );
   }

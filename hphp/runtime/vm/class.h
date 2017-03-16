@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -63,6 +63,14 @@ struct NativePropHandler;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Utility wrapper for static properties. Allows distinguishing them
+ * via type_scan::Index.
+ */
+struct StaticPropData {
+  TypedValue val;
+};
 
 using ClassPtr = AtomicSharedLowPtr<Class>;
 
@@ -708,7 +716,7 @@ public:
    * RDS handle for the static property at `index'.
    */
   rds::Handle sPropHandle(Slot index) const;
-  rds::Link<TypedValue> sPropLink(Slot index) const;
+  rds::Link<StaticPropData> sPropLink(Slot index) const;
   rds::Link<bool> sPropInitLink() const;
 
   /*
@@ -1306,7 +1314,7 @@ private:
    * 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
    *    called, and the values are actually initialized.
    */
-  mutable rds::Link<TypedValue>* m_sPropCache{nullptr};
+  mutable rds::Link<StaticPropData>* m_sPropCache{nullptr};
   mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
 
   veclen_t m_classVecLen;

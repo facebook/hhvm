@@ -297,7 +297,7 @@ inline rds::Handle Class::sPropHandle(Slot index) const {
   return sPropLink(index).handle();
 }
 
-inline rds::Link<TypedValue> Class::sPropLink(Slot index) const {
+inline rds::Link<StaticPropData> Class::sPropLink(Slot index) const {
   assert(m_sPropCacheInit.bound());
   assert(numStaticProperties() > index);
   return m_sPropCache[index];

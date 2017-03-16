@@ -360,7 +360,8 @@ struct FreeNode : HeapObject {
 
 // header for HNI objects with NativeData payloads. see native-data.h
 // for details about memory layout.
-struct NativeNode : HeapObject {
+struct NativeNode : HeapObject,
+                    type_scan::MarkCountable<NativeNode> {
   NativeNode(HeaderKind k, uint32_t off) : obj_offset(off) {
     initHeader(k, 0);
   }
@@ -642,6 +643,12 @@ struct MemoryManager {
   template<class Fn> void forEachObject(Fn fn);
 
   /*
+   * Iterate over the roots owned by MemoryManager.
+   * call fn(ptr, size, type_scan::Index) for each root
+   */
+  template<class Fn> void iterateRoots(Fn) const;
+
+  /*
    * Find the Header* in the heap which contains `p', else nullptr if `p' is
    * not contained in any heap allocation.
    */
@@ -802,8 +809,6 @@ struct MemoryManager {
    * StringData during a reset, enlist, and delist
    */
   StringDataNode& getStringList();
-
-  void scanRoots(type_scan::Scanner&) const;
 
   /*
    * Run the experimental collector.

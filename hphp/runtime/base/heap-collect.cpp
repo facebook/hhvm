@@ -220,15 +220,15 @@ NEVER_INLINE void Marker::init() {
 
 void Marker::finish_typescan() {
   type_scanner_.finish(
-    [this](const void* p, const char*) {
+    [this](const void* p) {
       xscanned_ += sizeof(p);
       checkedEnqueue(p, GCBits::Pin);
     },
-    [this](const void* p, std::size_t size, const char*) {
+    [this](const void* p, std::size_t size) {
       // we could extract the addresses of ambiguous ptrs, if desired.
       conservativeScan(p, size);
     },
-    [this](const void** addr, const char*) {
+    [this](const void** addr) {
       xscanned_ += sizeof(*addr);
       checkedEnqueue(*addr, GCBits::Mark);
     }
@@ -238,8 +238,10 @@ void Marker::finish_typescan() {
 NEVER_INLINE void Marker::traceRoots() {
   auto const t0 = cpu_micros();
   SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
-  scanRoots(type_scanner_);
-  finish_typescan();
+  iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
+    type_scanner_.scanByIndex(tyindex, p, size);
+    finish_typescan();
+  });
   cscanned_roots_ = cscanned_;
   xscanned_roots_ = xscanned_;
 }

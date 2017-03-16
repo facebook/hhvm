@@ -5355,13 +5355,13 @@ static inline RefData* lookupStatic(const StringData* name,
       frame_local(fp, func->numParams())->m_data.pobj, name, inited);
   }
 
-  auto const refData = rds::bindStaticLocal(func, name);
-  inited = refData.isInit();
+  auto const staticLocalData = rds::bindStaticLocal(func, name);
+  inited = staticLocalData.isInit();
   if (!inited) {
-    refData->initInRDS();
-    refData.markInit();
+    staticLocalData->ref.initInRDS();
+    staticLocalData.markInit();
   }
-  return refData.get();
+  return &staticLocalData.get()->ref;
 }
 
 OPTBLD_INLINE void iopStaticLoc(local_var loc, const StringData* var) {

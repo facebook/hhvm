@@ -57,6 +57,8 @@ SSATmp* ldClsPropAddrKnown(IRGS& env,
       : cls->staticPropRepoAuthType(slot);
   auto const ptrTy = typeFromRAT(repoTy, curClass(env)).ptr(Ptr::SProp);
   return gen(env, LdRDSAddr, RDSHandleData { handle }, ptrTy);
+  static_assert(sizeof(StaticPropData) == sizeof(TypedValue),
+                "StaticPropData expected to only wrap TypedValue");
 }
 
 SSATmp* ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName, bool raise) {

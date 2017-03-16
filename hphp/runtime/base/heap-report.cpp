@@ -104,8 +104,9 @@ DEBUG_ONLY
 std::string describePtr(const HeapGraph& g, const HeapGraph::Ptr& ptr) {
   std::ostringstream out;
   out << " " << ptrSym[(unsigned)ptr.ptr_kind];
-  if (ptr.from != -1) out << describe(g, ptr.from);
-  else if (ptr.description) out << ptr.description;
+  auto& from = g.nodes[ptr.from];
+  if (!from.is_root) out << describe(g, ptr.from);
+  else out << type_scan::getName(from.tyindex);
   return out.str();
 }
 

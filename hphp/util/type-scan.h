@@ -300,47 +300,26 @@ struct Scanner {
     }
   }
 
-  struct WhereIndex {
-    uint32_t addr, ptr, cons;
-    const char* description;
-  };
-
-  // Called once all the scanning is done. Reports enqueued pointers via the
-  // first passed callback, and conservative ranges via the second passed
-  // callback. Afterwards, all the state is cleared. The Scanner can be re-used
-  // after this.
+  // Called once all the scanning is done. Callbacks report different
+  // pointer types:
+  //   F1 - called to report enqueued raw pointers (no address available)
+  //   F2 - called to report conservative ranges
+  //   F3 - called to report addresses of pointers
+  // Afterwards, all the state is cleared, and the scanner can be re-used.
   template <typename F1, typename F2, typename F3>
   void finish(F1&& f1, F2&& f2, F3&& f3) {
-    where(""); // sentinel
-    auto description = "";
-    size_t i = 0, j = 0, k = 0;
-    for (auto& w : m_where) {
-      for (; i < w.ptr; ++i) {
-        f1(m_ptrs[i], description);
-      }
-      for (; j < w.cons; ++j) {
-        auto& r = m_conservative[j];
-        f2(r.first, r.second, description);
-      }
-      for (; k < w.addr; ++k) {
-        f3(m_addrs[k], description);
-      }
-      description = w.description;
+    for (auto ptr : m_ptrs) {
+      f1(ptr);
+    }
+    for (auto r : m_conservative) {
+      f2(r.first, r.second);
+    }
+    for (auto addr : m_addrs) {
+      f3(addr);
     }
     m_addrs.clear();
     m_ptrs.clear();
     m_conservative.clear();
-    m_where.clear();
-  }
-
-  // record where we are in root scanning now.
-  void where(const char* description) {
-    m_where.push_back({
-      uint32_t(m_addrs.size()),
-      uint32_t(m_ptrs.size()),
-      uint32_t(m_conservative.size()),
-      description
-    });
   }
 
   // These are logically private, but they're public so that the generated
@@ -348,7 +327,6 @@ struct Scanner {
   std::vector<const void**> m_addrs; // pointer locations
   std::vector<const void*> m_ptrs; // pointer values
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
-  std::vector<WhereIndex> m_where;
 };
 
 /*

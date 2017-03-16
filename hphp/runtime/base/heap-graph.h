@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_HEAP_GRAPH_H_
 #define incl_HPHP_HEAP_GRAPH_H_
 
+#include "hphp/util/type-scan.h"
 #include <vector>
 #include <cstdint>
 #include <cstddef>
@@ -49,20 +50,26 @@ struct HeapGraph {
   };
   static constexpr auto NumPtrKinds = 3;
   struct Node {
-    const Header* h;
-    size_t size; // allocated size including size-class padding
+    union {
+      const void* ptr;
+      const Header* h;
+    };
+    size_t size;
+    bool is_root;
+    type_scan::Index tyindex;
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
   };
   struct Ptr {
     int from, to; // node ids. if root, from == -1
     int next_out, next_in; // from's next out-ptr, to's next in-ptr
+    int offset; // byte offset of ptr within from node. (0 if unknown)
     PtrKind ptr_kind;
-    const char* description;
   };
   std::vector<Node> nodes;
   std::vector<Ptr> ptrs;
-  std::vector<int> root_ptrs; // ptr ids. ptr.from = -1, ptr.to = object
+  std::vector<int> root_ptrs; // ptr ids
+  std::vector<int> root_nodes; // node ids
 
   template<class F> void eachSuccNode(int n, F f) const {
     eachOutPtr(n, [&](int p) { f(ptrs[p].to); });

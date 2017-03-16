@@ -743,7 +743,7 @@ void Class::initSProps() const {
     auto const& sProp = m_staticProperties[slot];
 
     if (sProp.cls == this && !m_sPropCache[slot].isPersistent()) {
-      *m_sPropCache[slot] = sProp.val;
+      m_sPropCache[slot]->val = sProp.val;
     }
   }
 
@@ -791,11 +791,11 @@ void Class::initSPropHandles() const {
       if (sProp.cls == this) {
         if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
           propHandle.bind(rds::Mode::Persistent);
-          *propHandle = sProp.val;
-          rds::recordRds(propHandle.handle(), sizeof(TypedValue),
+          propHandle->val = sProp.val;
+          rds::recordRds(propHandle.handle(), sizeof(StaticPropData),
                          rds::SPropCache{this, slot});
         } else {
-          propHandle = rds::bind<TypedValue>(
+          propHandle = rds::bind<StaticPropData>(
               rds::SPropCache{this, slot}, rds::Mode::Local
           );
         }
@@ -811,7 +811,7 @@ void Class::initSPropHandles() const {
        * read the property, but sees uninit-null for the value (and asserts
        * in a dbg build)
        */
-      *propHandle = sProp.val;
+      propHandle->val = sProp.val;
     }
     if (!propHandle.isPersistent()) {
       allPersistentHandles = false;
@@ -845,7 +845,8 @@ Class::PropInitVec* Class::getPropData() const {
 
 TypedValue* Class::getSPropData(Slot index) const {
   assert(numStaticProperties() > index);
-  return m_sPropCache[index].bound() ? m_sPropCache[index].get() : nullptr;
+  return m_sPropCache[index].bound() ? &m_sPropCache[index].get()->val :
+         nullptr;
 }
 
 
@@ -2199,10 +2200,10 @@ void Class::setProperties() {
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
 
-  m_sPropCache = (rds::Link<TypedValue>*)
+  m_sPropCache = (rds::Link<StaticPropData>*)
     malloc_huge(numStaticProperties() * sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
-    new (&m_sPropCache[i]) rds::Link<TypedValue>(rds::kInvalidHandle);
+    new (&m_sPropCache[i]) rds::Link<StaticPropData>(rds::kInvalidHandle);
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;

@@ -32,15 +32,17 @@ namespace HPHP { namespace req {
  * as roots (thread locals, stack, rds, ExecutionContext, etc).
  */
 struct root_handle {
-  static constexpr auto INVALID = ~size_t(0);
+  static constexpr uint32_t INVALID = ~0;
 
-  root_handle()
-    : m_id(addRootHandle())
+  root_handle(uint16_t size, type_scan::Index tyindex)
+    : m_id(addRootHandle()), m_size(size), m_tyindex(tyindex)
   {}
 
   // move construction takes over the old handle's id.
   root_handle(root_handle&& h) noexcept
     : m_id(h.m_id != INVALID ? stealRootHandle(&h) : INVALID)
+    , m_size(h.m_size)
+    , m_tyindex(h.m_tyindex)
   {}
 
   // move-assignment poaches the old handle's id if necessary.
@@ -63,28 +65,45 @@ struct root_handle {
   }
   virtual void scan(type_scan::Scanner&) const = 0;
   virtual void detach() = 0;
+
+  template<class Fn> void iterate(Fn fn) const {
+    fn(this, m_size, m_tyindex);
+  }
 private:
-  size_t addRootHandle();
-  size_t stealRootHandle(root_handle*);
+  uint32_t addRootHandle();
+  uint32_t stealRootHandle(root_handle*);
   void delRootHandle();
 private:
-  size_t m_id;
+  uint32_t m_id;
+protected:
+  const uint16_t m_size;
+  const type_scan::Index m_tyindex;
 };
 
 // e.g. req::root<Array>, req::root<Variant>
 template<class T>
 struct root : T, root_handle {
-  root() : T(), root_handle() {}
+  root() : T(),
+    root_handle(sizeof(root<T>), type_scan::getIndexForScan<root<T>>())
+  {
+    static_assert(sizeof(root<T>) <= 0xffff, "");
+  }
 
   // copy constructor
   root(const root<T>& r)
-    : T(static_cast<const T&>(r)), root_handle()
-  {}
+    : T(static_cast<const T&>(r)),
+      root_handle(sizeof(root<T>), type_scan::getIndexForScan<root<T>>())
+  {
+    static_assert(sizeof(root<T>) <= 0xffff, "");
+  }
 
   // conversion constructor
   template<class S> /* implicit */ root(const S& s)
-    : T(s), root_handle()
-  {}
+    : T(s),
+      root_handle(sizeof(root<T>), type_scan::getIndexForScan<root<T>>())
+  {
+    static_assert(sizeof(root<T>) <= 0xffff, "");
+  }
 
   // copy assign
   root<T>& operator=(const root<T>& r) {
@@ -103,7 +122,8 @@ struct root : T, root_handle {
     : T(std::move(r)), root_handle(std::move(r))
   {}
   /* implicit */ root(T&& t) noexcept
-    : T(std::move(t)), root_handle()
+    : T(std::move(t)),
+      root_handle(sizeof(root<T>), type_scan::getIndexForScan<root<T>>())
   {}
 
   // move assign

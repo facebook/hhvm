@@ -409,6 +409,22 @@ and emit_yield = function
       instr_yieldk;
     ]
 
+and emit_yield_break () =
+  gather [
+    instr_null;
+    instr_retc;
+  ]
+
+and emit_string2 = function
+  | e1::e2::es ->
+    gather @@
+      List.rev @@
+        List.fold_left
+          es
+          ~init:[instr (IOp Concat); from_expr e2; from_expr e1]
+          ~f:(fun acc e -> instr (IOp Concat) :: from_expr e :: acc)
+  | _ -> failwith "String2 with zero or one arguments is impossible"
+
 and emit_lambda fundef ids =
   (* Closure conversion puts the class number used for CreateCl in the "name"
    * of the function definition *)
@@ -455,19 +471,19 @@ and from_expr expr =
   | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get None expr prop nullflavor
   | A.Await e -> emit_await e
   | A.Yield e -> emit_yield e
+  | A.Yield_break -> emit_yield_break ()
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda fundef ids
+  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
+  | A.String2 es -> emit_string2 es
+  | A.Unsafeexpr e -> from_expr e
   (* TODO *)
-  | A.Yield_break               -> emit_nyi "yield_break"
   | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
-  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
-  | A.String2 _                 -> emit_nyi "string2"
   | A.List _                    -> emit_nyi "list"
   | A.Xml (_, _, _)             -> emit_nyi "xml"
-  | A.Unsafeexpr _              -> emit_nyi "unsafexpr"
   | A.Import (_, _)             -> emit_nyi "import"
 
 and emit_static_collection expr es =

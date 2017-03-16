@@ -14,6 +14,7 @@ open Hhbc_ast.MemberOpMode
 let memoize_suffix = "$memoize_impl"
 let memoize_cache = "static$memoize_cache"
 let memoize_guard = "static$memoize_cache$guard"
+let memoize_static_cache = "$multi$memoize_cache"
 let memoize_shared_cache = "$shared$multi$memoize_cache"
 let memoize_single_cache = "$shared$guarded_single$memoize_cache"
 let memoized_single_guard = "$shared$guarded_single$memoize_cache$guard"
@@ -265,40 +266,105 @@ let memoize_method_with_params params renamed_name total_count index =
     instr_memoset 0 first_local local_count;
     instr_retc ]
 
-let memoized_method_body params renamed_name total_count index =
+let memoize_static_method_body params original_name renamed_name class_name =
+  let param_count = List.length params in
+  let label = Label.Regular 0 in
+  let first_local = Local.Unnamed param_count in
+  gather [
+    instr_entrynop;
+    Emit_body.emit_method_prolog params;
+    param_code_sets params param_count;
+    instr_string (original_name ^ memoize_static_cache);
+    instr_string class_name;
+    instr_agetc;
+    instr_basesc 1 0;
+    instr_memoget 0 first_local param_count;
+    instr_isuninit;
+    instr_jmpnz label;
+    instr_cgetcunop;
+    instr_retc;
+    instr_label label;
+    instr_ugetcunop;
+    instr_popu;
+    (* TODO: The strings have extra leading slashes unnecessarily *)
+    instr_string (original_name ^ memoize_static_cache);
+    instr_string class_name;
+    instr_agetc;
+    instr_fpushclsmethodd param_count renamed_name class_name;
+    param_code_gets params;
+    instr_fcall param_count;
+    instr_unboxr;
+    instr_basesc 2 1;
+    instr_memoset 1 first_local param_count;
+    instr_retc ]
+
+let memoized_instance_method_body params renamed_name total_count index =
   if params = [] && total_count = 1 then
     memoize_method_no_params renamed_name
   else
     memoize_method_with_params params renamed_name total_count index
 
-let memoize_method compiled total_count index =
+let memoize_instance_method compiled total_count index =
   let original_name = Hhas_method.name compiled in
   let renamed_name = original_name ^ memoize_suffix in
   let renamed = Hhas_method.with_name compiled renamed_name in
   let renamed = Hhas_method.make_private renamed in
   let params = Hhas_method.params compiled in
-  let body = memoized_method_body params renamed_name total_count index in
+  let body = memoized_instance_method_body
+    params renamed_name total_count index in
   let body = instr_seq_to_list body in
   let memoized = Hhas_method.with_body compiled body in
   (renamed, memoized)
 
-let memoize_methods methods =
-  let is_memoized method_ =
+let memoize_static_method class_ method_ =
+  let original_name = Hhas_method.name method_ in
+  let renamed_name = original_name ^ memoize_suffix in
+  let renamed = Hhas_method.with_name method_ renamed_name in
+  let renamed = Hhas_method.make_private renamed in
+  let params = Hhas_method.params method_ in
+  let class_name = Hhas_class.name class_ in
+  let body = memoize_static_method_body
+    params original_name renamed_name class_name in
+  let body = instr_seq_to_list body in
+  let memoized = Hhas_method.with_body method_ body in
+  (renamed, memoized)
+
+let memoize_instance_methods class_ =
+  let is_memoized_instance method_ =
+    (not (Hhas_method.is_static method_)) &&
     Hhas_attribute.is_memoized (Hhas_method.attributes method_) in
-  let memoized_count = Core.List.count methods is_memoized in
+  let methods = Hhas_class.methods class_ in
+  let memoized_count = Core.List.count methods is_memoized_instance in
   let folder (count, acc) method_ =
-    if is_memoized method_ then
-      let (renamed, memoized) = memoize_method method_ memoized_count count in
+    if is_memoized_instance method_ then
+      let (renamed, memoized) = memoize_instance_method
+        method_ memoized_count count in
       (count + 1, memoized :: renamed :: acc)
     else
       (count, method_ :: acc) in
+  (* TODO: properties *)
   let (_, methods) = Core.List.fold_left methods ~init:(0, []) ~f:folder in
-  List.rev methods
+  let methods = List.rev methods in
+  Hhas_class.with_methods class_ methods
+
+let memoize_static_methods class_ =
+  let is_memoized_static method_ =
+    (Hhas_method.is_static method_) &&
+    Hhas_attribute.is_memoized (Hhas_method.attributes method_) in
+  let mapper method_ =
+    if is_memoized_static method_ then
+      let (renamed, memoized) = memoize_static_method class_ method_ in
+      [ renamed ; memoized ]
+    else
+      [ method_ ] in
+  let methods = Hhas_class.methods class_ in
+  let methods = Core.List.bind methods mapper in
+  (* TODO: properties *)
+  Hhas_class.with_methods class_ methods
 
 let memoize_class class_ =
-  let methods = Hhas_class.methods class_ in
-  let methods = memoize_methods methods in
-  Hhas_class.with_methods class_ methods
+  let class_ = memoize_instance_methods class_ in
+  memoize_static_methods class_
 
 let memoize_classes classes =
   List.map memoize_class classes

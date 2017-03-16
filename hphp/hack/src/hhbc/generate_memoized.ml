@@ -16,9 +16,12 @@ let static_memoize_cache = "static$memoize_cache"
 let static_memoize_cache_guard = "static$memoize_cache$guard"
 let multi_memoize_cache = "$multi$memoize_cache"
 let shared_multi_memoize_cache = "$shared$multi$memoize_cache"
+let single_memoize_cache = "$guarded_single$memoize_cache"
+let single_memoize_cache_guard = "$guarded_single$memoize_cache$guard"
 let shared_single_memoize_cache = "$shared$guarded_single$memoize_cache"
 let shared_single_memoize_cache_guard =
   "$shared$guarded_single$memoize_cache$guard"
+
 
 let param_code_sets params local =
   let rec aux params local block =
@@ -269,8 +272,71 @@ let memoize_instance_method_with_params params original_name total_count index =
     instr_memoset 0 first_local local_count;
     instr_retc ]
 
-let memoize_static_method_body class_ params original_name =
-  let class_name = Hhas_class.name class_ in
+let memoize_static_method_no_params original_name class_name =
+  (* TODO: A lot of this codegen doesn't make a lot of sense to me.
+  Try to understand it and see if it can be improved. *)
+  let label_0 = Label.Regular 0 in
+  let label_1 = Label.Regular 1 in
+  let label_2 = Label.Regular 2 in
+  let label_3 = Label.Regular 3 in
+  let label_4 = Label.Regular 4 in
+  let label_5 = Label.Regular 5 in
+  gather [
+    instr_entrynop;
+    instr_null;
+    instr_ismemotype;
+    instr_jmpnz label_0;
+    instr_string (original_name ^ single_memoize_cache);
+    instr_string class_name;
+    instr_agetc;
+    instr_cgets;
+    instr_dup;
+    instr_istypec Hhbc_ast.OpNull;
+    instr_jmpnz label_1;
+    instr_retc;
+    instr_label label_1;
+    instr_popc;
+    instr_label label_0;
+    instr_null;
+    instr_maybememotype;
+    instr_jmpz label_2;
+    instr_string (original_name ^ single_memoize_cache_guard);
+    instr_string class_name;
+    instr_agetc;
+    instr_cgets;
+    instr_jmpz label_2;
+    instr_null;
+    instr_retc;
+    instr_label label_2;
+    instr_null;
+    instr_ismemotype;
+    instr_jmpnz label_3;
+    instr_string (original_name ^ single_memoize_cache);
+    instr_string class_name;
+    instr_agetc;
+    instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
+    instr_fcall 0;
+    instr_unboxr;
+    instr_sets;
+    instr_jmp label_4;
+    instr_label label_3;
+    instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
+    instr_fcall 0;
+    instr_unboxr;
+    instr_label label_4;
+    instr_null;
+    instr_maybememotype;
+    instr_jmpz label_5;
+    instr_string (original_name ^ single_memoize_cache_guard);
+    instr_string class_name;
+    instr_agetc;
+    instr_true;
+    instr_sets;
+    instr_popc;
+    instr_label label_5;
+    instr_retc ]
+
+let memoize_static_method_with_params params original_name class_name =
   let renamed_name = original_name ^ memoize_suffix in
   let param_count = List.length params in
   let label = Label.Regular 0 in
@@ -303,7 +369,13 @@ let memoize_static_method_body class_ params original_name =
     instr_memoset 1 first_local param_count;
     instr_retc ]
 
-let memoized_instance_method_body total_count index params original_name =
+let memoize_static_method_body class_name params original_name =
+  if params = [] then
+    memoize_static_method_no_params original_name class_name
+  else
+    memoize_static_method_with_params params original_name class_name
+
+let memoize_instance_method_body total_count index params original_name =
   if params = [] && total_count = 1 then
     memoize_instance_method_no_params original_name
   else
@@ -321,10 +393,11 @@ let memoize_method method_ memoizer =
   (renamed, memoized)
 
 let memoize_instance_method method_ total_count index =
-  memoize_method method_ (memoized_instance_method_body total_count index)
+  memoize_method method_ (memoize_instance_method_body total_count index)
 
 let memoize_static_method class_ method_ =
-  memoize_method method_ (memoize_static_method_body class_)
+  let class_name = Hhas_class.name class_ in
+  memoize_method method_ (memoize_static_method_body class_name)
 
 let memoize_instance_methods class_ =
   let is_memoized_instance method_ =

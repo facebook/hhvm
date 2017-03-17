@@ -83,6 +83,12 @@ let is_stale_msg liveness =
       " watchman being unresponsive)\n")
     | Rpc.Live_status -> None
 
+let warn_unsaved_changes () =
+  Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
+  prerr_endline
+{|there is an editor connected to the Hack server.
+The errors below may reflect your unsaved changes in the editor.|}
+
 let main args =
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.client_set_from args.from;
@@ -240,7 +246,11 @@ let main args =
       ClientMethodJumps.go results false args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->
-      let liveness, error_list = rpc args Rpc.STATUS in
+      let {
+        Rpc.Server_status.liveness;
+        has_unsaved_changes;
+        error_list;
+      } = rpc args Rpc.STATUS in
       let stale_msg = is_stale_msg liveness in
       if args.output_json || args.from <> "" || error_list = []
       then begin
@@ -250,6 +260,7 @@ let main args =
         ServerError.print_errorl
           stale_msg args.output_json error_list oc
       end else begin
+        if has_unsaved_changes then warn_unsaved_changes ();
         List.iter error_list ClientCheckStatus.print_error_color;
         Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg)
       end;
@@ -312,12 +323,16 @@ let main args =
       Exit_status.No_error
     | MODE_IGNORE_FIXMES files ->
       let conn = connect args in
-      let error_list = ServerCommand.rpc conn @@ Rpc.IGNORE_FIXMES files in
+      let {
+        Rpc.Ignore_fixmes_result.has_unsaved_changes;
+        error_list;
+      } = ServerCommand.rpc conn @@ Rpc.IGNORE_FIXMES files in
       if args.output_json || args.from <> "" || error_list = []
       then begin
         let oc = if args.output_json then stderr else stdout in
         ServerError.print_errorl None args.output_json error_list oc
       end else begin
+        if has_unsaved_changes then warn_unsaved_changes ();
         List.iter error_list ClientCheckStatus.print_error_color
       end;
       if error_list = [] then Exit_status.No_error else Exit_status.Type_error

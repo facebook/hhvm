@@ -54,8 +54,7 @@ val ide_autocomplete :
 val status :
   ServerEnv.env ->
   ServerEnv.env *
-    (ServerCommandTypes.status_liveness *
-      Pos.absolute Errors.error_ list, 'a) loop_outputs
+    (ServerCommandTypes.Server_status.t, 'a) loop_outputs
 
 val prepend_root: string -> string
 

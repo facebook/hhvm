@@ -11,10 +11,25 @@ type status_liveness =
   | Stale_status
   | Live_status
 
+module Server_status = struct
+  type t = {
+    liveness : status_liveness;
+    has_unsaved_changes : bool;
+    error_list : Pos.absolute Errors.error_ list;
+  }
+end
+
+module Ignore_fixmes_result = struct
+  type t = {
+    has_unsaved_changes : bool;
+    error_list : Pos.absolute  Errors.error_ list;
+  }
+end
+
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
-  | STATUS : (status_liveness * Pos.absolute Errors.error_ list) t
+  | STATUS : Server_status.t t
   | INFER_TYPE : ServerUtils.file_input * int * int ->
       InferAtPosService.result t
   | COVERAGE_LEVELS : ServerUtils.file_input -> Coverage_level.result t
@@ -33,7 +48,7 @@ type _ t =
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> ServerRefactorTypes.patch list t
-  | IGNORE_FIXMES : string list -> Pos.absolute Errors.error_ list t
+  | IGNORE_FIXMES : string list -> Ignore_fixmes_result.t t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t

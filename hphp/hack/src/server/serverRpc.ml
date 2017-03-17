@@ -15,10 +15,12 @@ open ServerCommandTypes
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   fun genv env ~is_stale -> function
     | STATUS ->
-      HackEventLogger.check_response (Errors.get_error_list env.errorl);
-        let el = Errors.get_sorted_error_list env.errorl in
-        let el = List.map ~f:Errors.to_absolute el in
-        env, ((if is_stale then Stale_status else Live_status), el)
+        HackEventLogger.check_response (Errors.get_error_list env.errorl);
+        let error_list = Errors.get_sorted_error_list env.errorl in
+        let error_list = List.map ~f:Errors.to_absolute error_list in
+        let liveness = (if is_stale then Stale_status else Live_status) in
+        let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
+        env, { Server_status.liveness; has_unsaved_changes; error_list; }
     | COVERAGE_LEVELS fn -> env, ServerColorFile.go env fn
     | INFER_TYPE (fn, line, char) ->
         env, ServerInferType.go env (fn, line, char)
@@ -73,10 +75,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       (* Everything should happen on the master process *)
       let genv = {genv with workers = None} in
       let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
-      let el = Errors.get_sorted_error_list env.errorl in
-      let el = List.map ~f:Errors.to_absolute el in
+      let error_list = Errors.get_sorted_error_list env.errorl in
+      let error_list = List.map ~f:Errors.to_absolute error_list in
       Errors.set_ignored_fixmes None;
-      original_env, el
+      let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
+      original_env, { Ignore_fixmes_result.has_unsaved_changes; error_list; }
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->

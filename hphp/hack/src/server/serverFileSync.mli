@@ -23,3 +23,5 @@ val clear_sync_data : ServerEnv.env -> ServerEnv.env
 val try_relativize_path : string -> Relative_path.t option
 
 val get_file_content : ServerUtils.file_input -> string
+
+val has_unsaved_changes : ServerEnv.env -> bool

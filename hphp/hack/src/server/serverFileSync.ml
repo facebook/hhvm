@@ -83,6 +83,10 @@ let clear_sync_data env =
   diag_subscribe = None;
 }
 
+let get_file_content_from_disk path =
+  let f () = Sys_utils.cat (Relative_path.to_absolute path) in
+  Option.try_with f
+
 let get_file_content = function
   | ServerUtils.FileContent s -> s
   | ServerUtils.FileName path ->
@@ -90,8 +94,22 @@ let get_file_content = function
       match File_heap.FileHeap.get path with
         | Some (Ide f) -> Some f
         | Some (Disk c) -> Some c
-        | None -> Option.try_with (fun () -> (* Use the disk version *)
-            (Sys_utils.cat (Relative_path.to_absolute path)))
+        | None -> get_file_content_from_disk path
     end
       (* In case of errors, proceed with empty file contents *)
       |> Option.value ~default:""
+
+let has_unsaved_changes env =
+  Relative_path.Set.exists env.edited_files ~f:begin fun path ->
+    match FileHeap.get path with
+    | Some Ide contents ->
+      begin match get_file_content_from_disk path with
+      | Some disk_contents -> contents <> disk_contents
+      | None ->
+        (* If one creates a new file, then there will not be corresponding
+        * disk contents, and we should consider there to be unsaved changes in
+        * the editor. *)
+        true
+      end
+    | _ -> false
+  end

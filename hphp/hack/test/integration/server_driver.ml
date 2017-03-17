@@ -83,7 +83,7 @@ exception Response_doesnt_match_expected of string * response_matcher
  * in the GADT so we know the type of the response. *)
 let response_to_string : type a. a SCT.t -> a -> string = begin
   fun cmd response -> match cmd, response with
-    | SCT.STATUS, (_, errors) ->
+    | SCT.STATUS, ({ SCT.Server_status.error_list = errors; _ }) ->
       let errors = List.map (fun e -> Errors.to_string e) errors in
       let errors = String.concat "\n" errors in
       errors

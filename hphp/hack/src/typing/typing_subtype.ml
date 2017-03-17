@@ -747,7 +747,8 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tarraykind AKmap (tk_sub, tv_sub)), (_, (Tarraykind (AKmap (tk_super, tv_super)))) ->
       let env = sub_type env tk_sub tk_super in
       sub_type env tv_sub tv_super
-  | (reason, Tarraykind (AKvec elt_ty)), (_, Tarraykind AKmap _) ->
+  | (reason, Tarraykind (AKvec elt_ty)), (_, Tarraykind AKmap _)
+    when not (TypecheckerOptions.safe_vector_array (Env.get_options env)) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason, Reason.Rnone) in
       let int_type = int_reason, Tprim Nast.Tint in
       sub_type env (reason, Tarraykind (AKmap (int_type, elt_ty))) ty_super

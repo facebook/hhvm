@@ -630,7 +630,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
-        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (yyg->yy_start_stack_ptr) {
           yy_pop_state(yyscanner);
           if (YY_START == ST_IN_SCRIPTING) {
@@ -648,7 +647,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
-        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (yyg->yy_start_stack_ptr) yy_pop_state(yyscanner);
         return '}';
 }

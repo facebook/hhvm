@@ -225,25 +225,39 @@ struct InstrId {
   uint32_t idx;
 };
 
+using StkId = InstrId;
+
 bool operator<(const InstrId& i1, const InstrId& i2) {
   if (i1.blk != i2.blk) return i1.blk < i2.blk;
   // sort by decreasing idx so that kill_marked_instrs works
   return i1.idx > i2.idx;
 }
 
-using InstrIdSet = std::set<InstrId>;
-using StkId = InstrId;
+enum class DceAction {
+  Kill,
+  PopOutputs
+};
+
+const char* show(DceAction action) {
+  switch (action) {
+    case DceAction::Kill: return "Kill";
+    case DceAction::PopOutputs: return "PopOutputs";
+  };
+  not_reached();
+}
+
+using DceActionMap = std::map<InstrId, DceAction>;
 
 struct UseInfo {
   explicit UseInfo(Use u) : usage(u) {}
-  UseInfo(Use u, InstrIdSet&& ids) : usage(u), toRemove(std::move(ids)) {}
+  UseInfo(Use u, DceActionMap&& ids) : usage(u), actions(std::move(ids)) {}
 
   Use usage;
   /*
    * Set of instructions that should be removed if we decide to
    * discard the corresponding stack slot.
    */
-  InstrIdSet toRemove;
+  DceActionMap actions;
   /*
    * Used for stack slots that are live across blocks to indicate a
    * stack slot that should be considered Used at the entry to blk.
@@ -308,11 +322,11 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> locKillBeforePEI;
 
   /*
-   * Instructions marked in this set are dead.  If any of them are
-   * removed, however, they must all be removed, because of the need
-   * to keep eval stack consumers and producers balanced.
+   * Instructions marked in this set will be processed by dce_perform.
+   * They must all be processed together to keep eval stack consumers
+   * and producers balanced.
    */
-  InstrIdSet markedDead;
+  DceActionMap actionMap;
 
   /*
    * The set of locals and class-ref slots that were ever live in this block.
@@ -328,7 +342,7 @@ struct DceState {
    * slot is removed, all the instructions currently in the set must also be
    * removed.
    */
-  std::vector<InstrIdSet> slotDependentInstrs;
+  std::vector<DceActionMap> slotDependentActions;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -342,16 +356,20 @@ const char* show(Use u) {
   not_reached();
 }
 
-std::string show(const InstrIdSet& set) {
+std::string show(const DceActionMap::value_type& elm) {
+  return folly::sformat("{}@{}", show(elm.first), show(elm.second));
+}
+
+std::string show(const DceActionMap& actions) {
   using namespace folly::gen;
-  return from(set)
-    | map([](const InstrId& id) { return show(id); })
+  return from(actions)
+    | map([](const DceActionMap::value_type& elm) { return show(elm); })
     | unsplit<std::string>(";")
     ;
 }
 
 std::string DEBUG_ONLY show(const UseInfo& ui) {
-  return folly::sformat("{}@{}", show(ui.usage), show(ui.toRemove));
+  return folly::sformat("{}@{}", show(ui.usage), show(ui.actions));
 }
 
 std::string DEBUG_ONLY loc_bits_string(borrowed_ptr<const php::Func> func,
@@ -393,14 +411,14 @@ struct Env {
 
 //////////////////////////////////////////////////////////////////////
 
-void markSetDead(Env& env, const InstrIdSet& set) {
-  env.dceState.markedDead.insert(env.id);
-  FTRACE(2, "     marking {} {}\n", show(env.id), show(set));
-  for (auto& i : set) env.dceState.markedDead.insert(i);
+void markSetDead(Env& env, const DceActionMap& actions) {
+  env.dceState.actionMap.emplace(env.id, DceAction::Kill);
+  FTRACE(2, "     marking {} {}\n", show(env.id), show(actions));
+  for (auto& i : actions) env.dceState.actionMap.insert(i);
 }
 
 void markUisDead(Env& env, const UseInfo& ui) {
-  markSetDead(env, ui.toRemove);
+  markSetDead(env, ui.actions);
 }
 
 template<typename... Args>
@@ -440,7 +458,7 @@ void markUisLive(Env& env, const UseInfo& ui, Args&&... args) {
 }
 
 void markDead(Env& env) {
-  env.dceState.markedDead.insert(env.id);
+  env.dceState.actionMap.emplace(env.id, DceAction::Kill);
   FTRACE(2, "     marking {}\n", show(env.id));
 }
 
@@ -452,11 +470,15 @@ void pop(Env& env, UseInfo&& ui) {
   env.dceState.stack.push_back(std::move(ui));
 }
 
-void pop(Env& env, Use u, InstrIdSet set) {
-  pop(env, {u, std::move(set)});
+void pop(Env& env, Use u, DceActionMap actions) {
+  pop(env, {u, std::move(actions)});
 }
 
-void pop(Env& env) { pop(env, Use::Used, InstrIdSet{}); }
+void pop(Env& env, Use u, InstrId id) {
+  pop(env, {u, {{id, DceAction::Kill}}});
+}
+
+void pop(Env& env) { pop(env, Use::Used, DceActionMap{}); }
 
 Type topT(Env& env, uint32_t idx = 0) {
   assert(idx < env.stateBefore.stack.size());
@@ -470,7 +492,7 @@ Type topC(Env& env, uint32_t idx = 0) {
 }
 
 void discard(Env& env) {
-  pop(env, Use::Not, InstrIdSet{env.id});
+  pop(env, Use::Not, env.id);
 }
 
 bool allUnused() { return true; }
@@ -480,10 +502,17 @@ bool allUnused(const UseInfo& ui, Args&&... args) {
     allUnused(std::forward<Args>(args)...);
 }
 
+bool allUnusedIfNotLastRef() { return true; }
+template<class... Args>
+bool allUnusedIfNotLastRef(const UseInfo& ui, Args&&... args) {
+  return (ui.usage == Use::Not || ui.usage == Use::UsedIfLastRef) &&
+    allUnusedIfNotLastRef(std::forward<Args>(args)...);
+}
+
 void combineSets(UseInfo&) {}
 template<class... Args>
 void combineSets(UseInfo& accum, const UseInfo& ui, Args&&... args) {
-  accum.toRemove.insert(begin(ui.toRemove), end(ui.toRemove));
+  accum.actions.insert(begin(ui.actions), end(ui.actions));
   if (accum.popper.blk == NoBlockId ||
       accum.popper < ui.popper) {
     accum.popper = ui.popper;
@@ -496,7 +525,7 @@ void combineSets(UseInfo& accum, const UseInfo& ui, Args&&... args) {
 // appropriate number of Use::Not pops.
 template<class... Args>
 void passThrough(Env& env, Args&&... args) {
-  UseInfo ui { Use::Not, { env.id } };
+  UseInfo ui { Use::Not, {{ env.id, DceAction::Kill }} };
   combineSets(ui, std::forward<Args>(args)...);
 
   for (auto i = 1; i < env.op.numPop(); ++i) {
@@ -527,7 +556,7 @@ bool popCouldRunDestructor(Env& env) {
  */
 void discardNonDtors(Env& env) {
   if (popCouldRunDestructor(env)) {
-    return pop(env, Use::UsedIfLastRef, InstrIdSet{env.id});
+    return pop(env, Use::UsedIfLastRef, env.id);
   }
   discard(env);
 }
@@ -535,8 +564,47 @@ void discardNonDtors(Env& env) {
 enum class PushFlags {
   MarkLive,
   MarkDead,
-  PassThrough
+  PassThrough,
+  PopOutputs
 };
+
+bool alwaysPop(const UseInfo& ui) {
+  return
+    ui.popper.blk != NoBlockId ||
+    ui.actions.size() > 1;
+}
+
+template<typename... Args>
+bool alwaysPop(const UseInfo& ui, Args&&... args) {
+  return alwaysPop(ui) || alwaysPop(std::forward<Args>(args)...);
+}
+
+bool maybePop(Env& env, const UseInfo& ui) {
+  return
+    (ui.actions.size() == 1 &&
+     ui.actions.begin()->first.idx > env.id.idx + 1);
+}
+
+template<typename... Args>
+bool maybePop(Env& env, const UseInfo& ui, Args&&... args) {
+  return maybePop(env, ui) || maybePop(env, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+bool shouldPopOutputs(Env& env, Args&&... args) {
+  if (alwaysPop(std::forward<Args>(args)...)) return true;
+  return maybePop(env, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
+void popOutputs(Env& env, Args&&... args) {
+  if (shouldPopOutputs(env, std::forward<Args>(args)...)) {
+    markUisDead(env, std::forward<Args>(args)...);
+    env.dceState.actionMap[env.id] = DceAction::PopOutputs;
+    return;
+  }
+  markUisLive(env, std::forward<Args>(args)...);
+}
 
 template<typename... Args>
 void handle_push(Env& env, PushFlags pf, Args&&... uis) {
@@ -550,6 +618,9 @@ void handle_push(Env& env, PushFlags pf, Args&&... uis) {
     case PushFlags::PassThrough:
       passThrough(env, std::move(uis)...);
       return;
+    case PushFlags::PopOutputs:
+      popOutputs(env, std::forward<Args>(uis)...);
+      return;
   }
 }
 
@@ -558,7 +629,7 @@ void push(Env& env, F fun) {
   always_assert(!env.dceState.stack.empty());
   auto ui = std::move(env.dceState.stack.back());
   env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(ui.usage), show(ui.toRemove));
+  FTRACE(2, "      {}@{} = push()\n", show(ui.usage), show(ui.actions));
   auto const f = fun(ui);
   handle_push(env, f, std::move(ui));
 }
@@ -572,10 +643,10 @@ void push2(Env& env, F fun) {
   always_assert(env.dceState.stack.size() >= 2);
   auto u1 = std::move(env.dceState.stack.back());
   env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u1.toRemove));
+  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u1.actions));
   auto u2 = std::move(env.dceState.stack.back());
   env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u2.toRemove));
+  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u2.actions));
   auto const f = fun(u1, u2);
   handle_push(env, f, std::move(u1), std::move(u2));
 }
@@ -679,18 +750,18 @@ void readSlot(Env& env, uint32_t id) {
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 1;
   env.dceState.usedSlots[id] = 1;
-  env.dceState.slotDependentInstrs[id].clear();
+  env.dceState.slotDependentActions[id].clear();
 }
 
 // Read a slot, but in a usage that is discardable. If this read actually is
 // discarded, then also discard the given instructions.
-void readSlotDiscardable(Env& env, uint32_t id, InstrIdSet instrs) {
+void readSlotDiscardable(Env& env, uint32_t id, DceActionMap actions) {
   FTRACE(2, "     read-slot (discardable): {}\n", id);
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 0;
   env.dceState.usedSlots[id] = 1;
-  instrs.insert(env.id);
-  env.dceState.slotDependentInstrs[id] = std::move(instrs);
+  actions.insert({env.id, DceAction::Kill});
+  env.dceState.slotDependentActions[id] = std::move(actions);
 }
 
 void writeSlot(Env& env, uint32_t id) {
@@ -698,7 +769,7 @@ void writeSlot(Env& env, uint32_t id) {
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 0;
   env.dceState.usedSlots[id] = 1;
-  env.dceState.slotDependentInstrs[id].clear();
+  env.dceState.slotDependentActions[id].clear();
 }
 
 bool isSlotLive(Env& env, uint32_t id) {
@@ -706,8 +777,8 @@ bool isSlotLive(Env& env, uint32_t id) {
   return env.dceState.liveSlots[id];
 }
 
-InstrIdSet slotDependentInstrs(Env& env, uint32_t id) {
-  return env.dceState.slotDependentInstrs[id];
+DceActionMap slotDependentActions(Env& env, uint32_t id) {
+  return env.dceState.slotDependentActions[id];
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -751,21 +822,23 @@ void dce(Env& env, const bc::NewMixedArray&) { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
+void dce(Env& env, const bc::UnboxRNop&) {
+  push(env, [&] (const UseInfo& ui) {
+      pop(env);
+      return allUnused(ui) ?
+        PushFlags::PopOutputs : PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the
   // class-ref.
   push(env, [&] (UseInfo& ui) {
-      switch (ui.usage) {
-        case Use::Not:
-          if (ui.popper.blk == NoBlockId) {
-            // we don't yet support cross-block dce of classrefs
-            readSlotDiscardable(env, op.slot, std::move(ui.toRemove));
-            break;
-          }
-        case Use::UsedIfLastRef:
-        case Use::Used:
-          readSlot(env, op.slot);
-          break;
+      if (ui.popper.blk == NoBlockId && allUnused(ui)) {
+        // we don't yet support cross-block dce of classrefs
+        readSlotDiscardable(env, op.slot, std::move(ui.actions));
+      } else {
+        readSlot(env, op.slot);
       }
       return PushFlags::MarkLive;
     });
@@ -775,13 +848,13 @@ void dce(Env& env, const bc::ClsRefGetC& op) {
   // If the usage of this class-ref slot is dead, then it can be potentially be
   // removed if the source is dead as well.
   if (!isSlotLive(env, op.slot)) {
-    auto instrs = slotDependentInstrs(env, op.slot);
-    instrs.insert(env.id);
+    auto actions = slotDependentActions(env, op.slot);
+    actions.insert({env.id, DceAction::Kill});
     writeSlot(env, op.slot);
     return pop(
       env,
       popCouldRunDestructor(env) ? Use::UsedIfLastRef : Use::Not,
-      std::move(instrs)
+      std::move(actions)
     );
   }
   writeSlot(env, op.slot);
@@ -793,9 +866,9 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
   addLocGen(env, op.loc1);
 
   if (!isSlotLive(env, op.slot) && !readCouldHaveSideEffects(ty)) {
-    auto instrs = slotDependentInstrs(env, op.slot);
+    auto actions = slotDependentActions(env, op.slot);
     writeSlot(env, op.slot);
-    markSetDead(env, std::move(instrs));
+    markSetDead(env, std::move(actions));
     return;
   }
 
@@ -803,7 +876,7 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
 }
 
 void dce(Env& env, const bc::DiscardClsRef& op) {
-  readSlotDiscardable(env, op.slot, InstrIdSet{});
+  readSlotDiscardable(env, op.slot, {});
 }
 
 void dce(Env& env, const bc::Dup&) {
@@ -816,33 +889,22 @@ void dce(Env& env, const bc::Dup&) {
   //   - Otherwise, if the original value is unused, kill the dup
   //     and all dependent instructions.
   push(env, [&] (const UseInfo& u1) {
-      push(env, [&] (UseInfo& u2) {
-          switch (u2.usage) {
-            case Use::Not:
-              if (u1.usage == Use::Used) {
-                pop(env);
-                return PushFlags::MarkDead;
-              } else {
-                return PushFlags::PassThrough;
-              }
-            case Use::Used:
-            case Use::UsedIfLastRef:
-              pop(env);
-              return PushFlags::MarkLive;
-          }
-          not_reached();
-        });
       // Dup pushes a cell that is guaranteed to be not the last reference.
       // So, it can be eliminated if the cell it pushes is used as either
       // Use::Not or Use::UsedIfLastRef.
-      switch (u1.usage) {
-        case Use::Not:
-        case Use::UsedIfLastRef:
-          return PushFlags::MarkDead;
-        case Use::Used:
+      auto u1_unused = allUnusedIfNotLastRef(u1);
+      push(env, [&] (UseInfo& u2) {
+          if (allUnused(u2)) {
+            if (u1_unused) {
+              return PushFlags::PassThrough;
+            }
+            pop(env);
+            return PushFlags::MarkDead;
+          }
+          pop(env);
           return PushFlags::MarkLive;
-      }
-      not_reached();
+        });
+      return u1_unused ? PushFlags::MarkDead : PushFlags::MarkLive;
     });
 }
 
@@ -1032,7 +1094,7 @@ dce_visit(const Index& index,
     dceState.stack.resize(states.back().first.stack.size(),
                           UseInfo { Use::Used });
   }
-  dceState.slotDependentInstrs.resize(states.back().first.clsRefSlots.size());
+  dceState.slotDependentActions.resize(states.back().first.clsRefSlots.size());
 
   for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
@@ -1085,9 +1147,9 @@ dce_visit(const Index& index,
       [&]{
         using namespace folly::gen;
         auto i = uint32_t{0};
-        return from(dceState.slotDependentInstrs)
+        return from(dceState.slotDependentActions)
           | mapped(
-            [&] (const InstrIdSet& s) {
+            [&] (const DceActionMap& s) {
               if (s.empty()) return std::string{};
               return folly::sformat("  {}: [{}]\n",
                                     i++, show(s));
@@ -1135,16 +1197,32 @@ DceAnalysis analyze_dce(const Index& index,
   return DceAnalysis {};
 }
 
-void kill_marked_instrs(const php::Func& func, const InstrIdSet& markedDead) {
-  // Replace all dead instructions with nops
-  for (auto const& id : markedDead) {
+/*
+ * Do the actual updates to the bytecodes.
+ */
+void dce_perform(const php::Func& func, const DceActionMap& actionMap) {
+  for (auto const& elm : actionMap) {
+    auto const& id = elm.first;
     auto const b = borrow(func.blocks[id.blk]);
-    FTRACE(1, "Kill: {}:{} {}\n", id.blk, id.idx, show(func, b->hhbcs[id.idx]));
-    if (b->hhbcs.size() == 1) {
-      // we don't allow empty blocks
-      b->hhbcs[0] = bc::Nop {};
-    } else {
-      b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+    FTRACE(1, "{}: {}:{} {}\n", show(elm.second),
+           id.blk, id.idx, show(func, b->hhbcs[id.idx]));
+    switch (elm.second) {
+      case DceAction::Kill:
+        if (b->hhbcs.size() == 1) {
+          // we don't allow empty blocks
+          b->hhbcs[0] = bc::Nop {};
+        } else {
+          b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+        }
+        break;
+      case DceAction::PopOutputs:
+      {
+        auto const numPop = b->hhbcs[id.idx].numPush();
+        b->hhbcs.insert(b->hhbcs.begin() + id.idx + 1,
+                        numPop,
+                        bc::PopC {});
+        break;
+      }
     }
   }
 }
@@ -1152,7 +1230,7 @@ void kill_marked_instrs(const php::Func& func, const InstrIdSet& markedDead) {
 struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
-  InstrIdSet markedDead;
+  DceActionMap actionMap;
 };
 
 DceOptResult
@@ -1179,7 +1257,7 @@ optimize_dce(const Index& index,
   return {
     std::move(dceState->usedLocals),
     std::move(dceState->usedSlots),
-    std::move(dceState->markedDead)
+    std::move(dceState->actionMap)
   };
 }
 
@@ -1311,7 +1389,7 @@ void local_dce(const Index& index,
   auto const ret = optimize_dce(index, ainfo, blk, stateIn,
                                 allLocLive, allLocLive, folly::none);
 
-  kill_marked_instrs(*ainfo.ctx.func, ret.markedDead);
+  dce_perform(*ainfo.ctx.func, ret.actionMap);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1395,7 +1473,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         if (out.popper.blk == NoBlockId) out.popper = { blk, i };
         if (usedStackSlots.count({blk, i})) {
           out.usage = Use::Used;
-          out.toRemove.clear();
+          out.actions.clear();
         }
       }
       return true;
@@ -1411,13 +1489,13 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       if (stkIn[i].usage == Use::Used ||
           usedStackSlots.count({blk, i})) {
         out.usage = Use::Used;
-        out.toRemove.clear();
+        out.actions.clear();
         ret = true;
         continue;
       }
       if (out.usage == stkIn[i].usage) {
-        for (auto const& id : stkIn[i].toRemove) {
-          ret |= out.toRemove.insert(id).second;
+        for (auto const& id : stkIn[i].actions) {
+          ret |= out.actions.insert(id).second;
         }
         auto popper = stkIn[i].popper;
         if (popper.blk == NoBlockId) popper = { blk, i };
@@ -1427,7 +1505,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         }
       } else {
         out.usage = Use::Used;
-        out.toRemove.clear();
+        out.actions.clear();
         ret = true;
       }
     }
@@ -1494,7 +1572,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
           if (!dceStack) continue;
           auto& ui = dceStack.value()[id.idx];
           if (ui.usage != Use::Used) {
-            ui.toRemove = {};
+            ui.actions.clear();
             ui.usage = Use::Used;
             // no need to reprocess *this* block, since this is the
             // one that reported the problem.
@@ -1541,7 +1619,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
-  InstrIdSet markedDead;
+  DceActionMap actionMap;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
     auto ret = optimize_dce(
@@ -1555,18 +1633,18 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     );
     usedLocals |= ret.usedLocals;
     usedSlots  |= ret.usedSlots;
-    if (ret.markedDead.size()) {
-      if (!markedDead.size()) {
-        markedDead = std::move(ret.markedDead);
+    if (ret.actionMap.size()) {
+      if (!actionMap.size()) {
+        actionMap = std::move(ret.actionMap);
       } else {
-        for (auto const& id : ret.markedDead) {
-          markedDead.insert(id);
+        for (auto const& elm : ret.actionMap) {
+          actionMap.insert(elm);
         }
       }
     }
   }
 
-  kill_marked_instrs(*ai.ctx.func, markedDead);
+  dce_perform(*ai.ctx.func, actionMap);
 
   FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);

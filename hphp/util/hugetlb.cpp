@@ -175,6 +175,8 @@ HugePageInfo read_hugepage_info(uint32_t pagesizekb, int node /* = -1 */) {
   constexpr int MAX_NUMA_NODE = 0;
 #endif
   for (int i = 0; i <= MAX_NUMA_NODE; ++i) {
+    // Skip nodes we are not allowed to allocate on.
+    if (!numa_node_allowed(i)) continue;
     auto const info = read_hugepage_info(pagesizekb, i);
     nr_huge += info.nr_hugepages;
     free_huge += info.free_hugepages;
@@ -402,7 +404,7 @@ size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
 #ifdef HAVE_NUMA
     if (maxNode > 0) {
       if (++node > maxNode) node = 0;
-      if (numa_node_set && !(numa_node_set & (1 << node))) {
+      if (!numa_node_allowed(node)) {
         // Numa policy forbids allocation on node
         if (++failed > maxNode) break;
         continue;
@@ -443,15 +445,11 @@ void* mmap_1g(void* addr /* = nullptr */, int node /* = -1 */) {
 #ifdef __linux__
   if (s_num1GPages >= kMaxNum1GPages) return nullptr;
   if (get_huge1g_info(node).free_hugepages <= 0) return nullptr;
+  if (node >= 0 && !numa_node_allowed(node)) return nullptr;
 #ifdef HAVE_NUMA
   bitmask* memMask = nullptr;
   bitmask* interleaveMask = nullptr;
   if (node >= 0 && numa_num_nodes > 1) {
-    assert(numa_node_set != 0);
-    if ((numa_node_set & (1u << node)) == 0) {
-      // Numa policy forbids allocation on the node.
-      return nullptr;
-    }
     memMask = numa_get_membind();
     interleaveMask = numa_get_interleave_mask();
     bitmask* mask = numa_allocate_nodemask();

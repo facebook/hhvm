@@ -386,44 +386,36 @@ static void numa_purge_arena() {}
 
 #ifdef USE_JEMALLOC_CHUNK_HOOKS
 /*
- * Get `pages` (at most 2) 1G huge pages and map to low memory.  We can do
- * either one or two pages here.  Explicit NUMA balancing is performed.
+ * Get `pages` (at most 2) 1G huge pages and map to the low memory that grows
+ * down from 4G.  We can do either one (3G-4G) or two pages (2G-4G).
  */
 void setup_low_1g_arena(int pages) {
   if (pages <= 0) return;
   if (pages > 2) pages = 2;             // At most 2 1G pages in low memory
-  size_t hugeSize = 0;
-  int max_node = 0;
 #ifdef HAVE_NUMA
-  max_node = numa_max_node();
+  const int max_node = numa_max_node();
+#else
+  constexpr int max_node = 0;
 #endif
-  void* base = nullptr;
-  int node = max_node;
-  // Try to get the first page.
-  while (node >= 0) {
-    base = mmap_1g((void*)0xc0000000, node--);
-    if (base != nullptr) {
-      hugeSize += size1g;
-      break;
+  try {
+    ManagedArena* ma = nullptr;
+    if (max_node < 1) {
+      // We either don't have libnuma, or run on a single-node system.  In
+      // either case, no need to worry about NUMA.
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
+                            size1g * pages);
+    } else {
+#ifdef HAVE_NUMA
+      // Tell the arena hook to interleave between all possible nodes, and try
+      // to grab the first page from Node 0 if it is allowed..
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
+                            size1g * pages,
+                            0, numa_node_set);
+#endif
     }
-  }
-  // If first page is obtained, try get a second one if asked.
-  if (base != nullptr && pages >= 2) {
-    // Try the rest of the NUMA nodes, and all nodes (-1) at last.
-    do {
-      auto const newBase = mmap_1g((void*)0x80000000, node--);
-      if (newBase != nullptr) {
-        base = newBase;
-        hugeSize += size1g;
-        break;
-      }
-    } while (node >= -1);
-  }
-  if (base) {
-    try {
-      auto ma = new ManagedArena(base, hugeSize); // leaked
-      if (ma) low_huge1g_arena = ma->getArenaId();
-    } catch (...) { /* unclear what can be done here */ }
+    if (ma) low_huge1g_arena = ma->id();
+  } catch (...) {
+    low_huge1g_arena = 0;
   }
 }
 
@@ -432,34 +424,32 @@ void setup_low_1g_arena(int pages) {
  */
 void setup_high_1g_arena(int pages) {
   if (pages <= 0) return;
-  // Always map to a region starting from `base`.
-  auto const base = reinterpret_cast<char*>(32ull << 30);
-  size_t hugeSize = 0;
+  // We don't need/want a crazy number of pages here.
+  if (pages > 12) pages = 12;
 #ifdef HAVE_NUMA
   const int max_node = numa_max_node();
 #else
   constexpr int max_node = 0;
 #endif
-  int node = 0;
-  int fails = 0;
-  // This loop exits when all the demanded pages are mapped in, or when there
-  // are (max_node + 1) consecutive failures, indicating the lack of reserved 1G
-  // huge pages in all the nodes.
-  while (pages > 0) {
-    if (mmap_1g(base + hugeSize, node++)) {
-      hugeSize += size1g;
-      --pages;
-      fails = 0;
+  try {
+    ManagedArena* ma = nullptr;
+    if (max_node < 1) {
+      // We either don't have libnuma, or run on a single-node system.
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
+                            size1g * pages);
     } else {
-      if (++fails > max_node) break;
+#ifdef HAVE_NUMA
+      // Tell the arena hook to interleave between all possible nodes, and try
+      // to grab the first page from a node other than the one where the first
+      // page for low-1G arena lives.
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
+                            size1g * pages,
+                            max_node / 2 + 1, numa_node_set);
+#endif
     }
-    if (node > max_node) node = 0;
-  }
-  if (hugeSize > 0) {
-    try {
-      auto ma = new ManagedArena(base, hugeSize); // leaked
-      if (ma) high_huge1g_arena = ma->getArenaId();
-    } catch (...) { /* unclear what can be done here */ }
+    if (ma) high_huge1g_arena = ma->id();
+  } catch (...) {
+    high_huge1g_arena = 0;
   }
 }
 
@@ -535,8 +525,24 @@ struct JEMallocInitializer {
       }
     }
 
+    HugePageInfo info = get_huge1g_info();
+    int remaining = info.nr_hugepages;
+    if (remaining == 0) return;         // no pages reverved
+
+    // Do some allocation between low and high 1G arenas
     if (low_1g_pages > 0) {
+      if (low_1g_pages > 2) {
+        low_1g_pages = 2;
+      }
+      if (low_1g_pages + high_1g_pages > remaining) {
+        low_1g_pages = 1;
+      }
+      remaining -= low_1g_pages;
       setup_low_1g_arena(low_1g_pages);
+    }
+
+    if (high_1g_pages > remaining) {
+      high_1g_pages = remaining;
     }
     if (high_1g_pages > 0) {
       setup_high_1g_arena(high_1g_pages);

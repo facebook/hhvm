@@ -26,8 +26,8 @@
 namespace HPHP {
 
 extern uint32_t numa_node_set;
-extern uint32_t numa_num_nodes;
 extern uint32_t numa_node_mask;
+extern uint32_t numa_num_nodes;
 extern std::atomic<uint32_t> numa_cur_node;
 extern std::vector<bitmask*> node_to_cpu_mask;
 extern bool use_numa;
@@ -54,6 +54,11 @@ void numa_local(void* start, size_t size);
  */
 void numa_bind_to(void* start, size_t size, int node);
 
+inline bool numa_node_allowed(int node) {
+  if (numa_node_set == 0) return true;
+  return numa_node_set & (1u << node);
+}
+
 }
 
 #else // HAVE_NUMA undefined
@@ -65,6 +70,7 @@ inline int num_numa_nodes() { return 1; }
 inline void numa_interleave(void* start, size_t size) {}
 inline void numa_local(void* start, size_t size) {}
 inline void numa_bind_to(void* start, size_t size, int node) {}
+inline bool numa_node_allowed(int node) { return true; }
 
 }
 

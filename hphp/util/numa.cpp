@@ -74,12 +74,6 @@ void initNuma() {
   numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
 }
 
-bool numa_node_allowed(int node) {
-  assert(node >= 0);
-  if (numa_node_set == 0) return true;
-  return numa_node_set & (1u << node);
-}
-
 int next_numa_node() {
   if (!use_numa) return 0;
   int node;

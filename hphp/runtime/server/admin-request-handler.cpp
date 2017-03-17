@@ -57,6 +57,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/hphp-config.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/managed-arena.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/build-info.h"
@@ -293,6 +294,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    code          optional, only stats of pages returning this code\n"
 
         "/xenon-snap:      generate a Xenon snapshot, which is logged later\n"
+        "/hugepage:        show stats about hugepage usage\n"
 
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
@@ -572,6 +574,14 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         Xenon::getInstance().surpriseAll();
       }
       transport->sendString("a Xenon sample will be collected\n", 200);
+      break;
+    }
+    if (strncmp(cmd.c_str(), "hugepage", 9) == 0) {
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+      transport->sendString(ManagedArena::reportStats(), 200);
+#else
+      transport->sendString("", 200);
+#endif
       break;
     }
     if (strncmp(cmd.c_str(), "const-ss", 8) == 0 &&

@@ -23,6 +23,7 @@
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cfg.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -102,6 +103,31 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold) {
 
 static std::atomic<bool> s_loggedJitMature{false};
 
+std::map<std::string, ServiceData::ExportedTimeSeries*>
+buildCodeSizeCounters() {
+  std::map<std::string, ServiceData::ExportedTimeSeries*> counters;
+  auto codeCounterInit = [&] (const char* name) {
+    auto counterName = folly::sformat("jit.code.{}.used", name);
+    counters[name] = ServiceData::createTimeSeries(
+        counterName,
+        {ServiceData::StatsType::RATE,
+        ServiceData::StatsType::SUM},
+        {std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds),
+        std::chrono::seconds(0)}
+        );
+  };
+  CodeCache::forEachName(codeCounterInit);
+  return counters;
+}
+
+const auto s_counters = buildCodeSizeCounters();
+
+ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
+  assert(!s_counters.empty());
+  return s_counters.at(name);
+}
+
+
 /*
  * If the jit maturity counter is enabled, update it with the current amount of
  * emitted code.
@@ -148,6 +174,16 @@ void reportJitMaturity(const CodeCache& code) {
     cols.setInt("jit_mature_sec", time(nullptr) - HttpServer::StartTime);
     StructuredLog::log("hhvm_warmup", cols);
   }
+
+  code.forEachBlock([&] (const char* name, const CodeBlock& a) {
+    auto codeUsed = s_counters.at(name);
+    // Add delta
+    codeUsed->addValue(a.used() - codeUsed->getSum());
+  });
+
+  // Manually add code.data.
+  auto codeUsed = s_counters.at("data");
+  codeUsed->addValue(code.data().used() - codeUsed->getSum());
 }
 
 void logTranslation(const TransEnv& env, const TransRange& range) {

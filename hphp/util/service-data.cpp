@@ -99,6 +99,15 @@ int64_t ExportedTimeSeries::getSum() {
   return sum;
 }
 
+int64_t ExportedTimeSeries::getRateByDuration(std::chrono::seconds duration) {
+  int64_t rate = 0;
+  SYNCHRONIZED(m_timeseries) {
+    m_timeseries.update(detail::nowAsSeconds());
+    rate = m_timeseries.rate(duration);
+  }
+  return rate;
+}
+
 ExportedHistogram::ExportedHistogram(
   int64_t bucketSize,
   int64_t min,

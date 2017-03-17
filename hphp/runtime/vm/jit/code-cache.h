@@ -80,6 +80,19 @@ struct CodeCache {
     body("frozen", m_frozen);
   }
 
+  /*
+   * Note: this includes "data", unlike 'forEachBlock' above.
+   */
+  template<typename M>
+  static void forEachName(M body) {
+    body("hot");
+    body("main");
+    body("prof");
+    body("cold");
+    body("frozen");
+    body("data");
+  }
+
   size_t codeSize() const { return m_codeSize; }
 
   /*

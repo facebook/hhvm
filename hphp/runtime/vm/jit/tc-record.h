@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/growable-vector.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 
@@ -60,6 +61,10 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
  */
 void reportJitMaturity(const CodeCache& code);
 
+/*
+ * Get a code size counter for the named code block ("main", "cold", etc.)
+ */
+ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name);
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */

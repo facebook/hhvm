@@ -60,7 +60,7 @@ namespace HPHP {
  * Example Usage:
  * ==============
  * // create a flat counter named foo.
- * auto counter = ServiceData::createCouter("foo");
+ * auto counter = ServiceData::createCounter("foo");
  * counter->increment();
  *
  * // create timeseries data named bar with default setting (avg value for the
@@ -206,6 +206,7 @@ struct ExportedTimeSeries {
   void addValueAggregated(int64_t sum, int64_t nsamples);
 
   int64_t getSum();
+  int64_t getRateByDuration(std::chrono::seconds duration);
 
   void exportAll(const std::string& prefix,
                  std::map<std::string, int64_t>& statsMap);

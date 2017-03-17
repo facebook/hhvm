@@ -39,6 +39,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/type-profile.h"
@@ -61,6 +62,7 @@
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/service-data.h"
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/timer.h"
 
@@ -343,8 +345,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    origin        URL to proxy requests to\n"
         "    percentage    percentage of requests to proxy\n"
         "/load-factor:     get or set load factor\n"
-        "    set           optional, set new load factor (default 1.0,"
+        "    set           optional, set new load factor (default 1.0,\n"
         "                  valid range [-1.0, 10.0])\n"
+        "/warmup-status:   Describes state of JIT warmup.\n"
+        "                  Returns empty string if warmed up.\n"
         ;
 #ifdef USE_TCMALLOC
         if (MallocExtensionInstance) {
@@ -396,7 +400,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
 
     bool needs_password = (cmd != "build-id") && (cmd != "compiler-id") &&
-                          (cmd != "instance-id") && (cmd != "flush-logs")
+                          (cmd != "instance-id") && (cmd != "flush-logs") &&
+                          (cmd != "warmup-status")
 #if defined(ENABLE_HHPROF) && defined(USE_JEMALLOC)
                           && (mallctl == nullptr || (
                                  (cmd != "hhprof/start")
@@ -650,6 +655,36 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         jit::tc::liveRelocate(time);
       }
       transport->sendString("OK\n");
+      break;
+    }
+
+    if (cmd == "warmup-status") {
+      // This function is like a request-agnostic version of
+      // server_warmup_status().
+      // Three conditions necessary for the jit to qualify as "warmed-up":
+      std::string status_str;
+
+      // 1. Has HHVM evaluated enough requests?
+      if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
+        status_str += "PGO profiling translations are still enabled.\n";
+      }
+      // 2. Has retranslateAll happened yet?
+      if (jit::mcgen::retranslateAllPending()) {
+        status_str += "Waiting on retranslateAll().\n";
+      }
+      // 3. Has code size plateaued? Is the rate of new code emission flat?
+      auto codeSize = jit::tc::getCodeSizeCounter("main");
+      auto codeSizeRate = codeSize->getRateByDuration(
+        std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
+      if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
+        folly::format(
+          &status_str,
+          "Code.main is still increasing at a rate of {}\n",
+          codeSizeRate
+        );
+      }
+      // Empty string means "warmed up".
+      transport->sendString(status_str);
       break;
     }
 

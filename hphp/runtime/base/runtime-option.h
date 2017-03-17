@@ -537,6 +537,8 @@ struct RuntimeOption {
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitPseudomain,               true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
+  F(uint32_t, JitWarmupMaxCodeGenRate, 100)                             \
+  F(uint32_t, JitWarmupRateSeconds,    15)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \
   F(bool, HHIRLICM,                    false)                           \

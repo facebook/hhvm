@@ -778,7 +778,7 @@ bool isSlotLive(Env& env, uint32_t id) {
 }
 
 DceActionMap slotDependentActions(Env& env, uint32_t id) {
-  return env.dceState.slotDependentActions[id];
+  return std::move(env.dceState.slotDependentActions[id]);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -863,15 +863,13 @@ void dce(Env& env, const bc::ClsRefGetC& op) {
 
 void dce(Env& env, const bc::ClsRefGetL& op) {
   auto const ty = locRaw(env, op.loc1);
-  addLocGen(env, op.loc1);
 
   if (!isSlotLive(env, op.slot) && !readCouldHaveSideEffects(ty)) {
-    auto actions = slotDependentActions(env, op.slot);
-    writeSlot(env, op.slot);
-    markSetDead(env, std::move(actions));
+    markSetDead(env, slotDependentActions(env, op.slot));
     return;
   }
 
+  addLocGen(env, op.loc1);
   writeSlot(env, op.slot);
 }
 
@@ -909,11 +907,12 @@ void dce(Env& env, const bc::Dup&) {
 }
 
 void dce(Env& env, const bc::CGetL& op) {
-  auto const ty = locRaw(env, op.loc1);
-  addLocGen(env, op.loc1);
   push(env, [&] (const UseInfo& ui) {
-      return readCouldHaveSideEffects(ty) || !allUnused(ui) ?
-        PushFlags::MarkLive : PushFlags::MarkDead;
+      if (allUnused(ui) && !readCouldHaveSideEffects(locRaw(env, op.loc1))) {
+        return PushFlags::MarkDead;
+      }
+      addLocGen(env, op.loc1);
+      return PushFlags::MarkLive;
     });
 }
 

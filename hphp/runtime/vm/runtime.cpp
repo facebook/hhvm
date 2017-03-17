@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -155,20 +156,11 @@ Unit* compile_file(const char* s, size_t sz, const MD5& md5,
   return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
 }
 
-std::string mangleSystemMd5(const std::string& fileMd5) {
-  std::string t = fileMd5 + '\0'
-    + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
-    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
-    + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
-    ;
-  return string_md5(t);
-}
-
 Unit* compile_string(const char* s,
                      size_t sz,
                      const char* fname,
                      Unit** releaseUnit) {
-  auto const md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s, sz}))};
+  auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
   if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
     return u;
   }
@@ -181,7 +173,7 @@ Unit* compile_string(const char* s,
 Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
     String systemName = String("/:") + fname;
-    auto md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s,sz}))};
+    auto md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s,sz}))};
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
                              md5) == RepoStatus::success) {

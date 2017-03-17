@@ -188,13 +188,13 @@ let remove_decls env fast_parsed =
 let remove_failed_parsing fast ~stop_at_errors env failed_parsing =
   if stop_at_errors then Relative_path.Map.filter fast
     ~f:(fun k _ -> not @@ Relative_path.(Set.mem failed_parsing k &&
-                                         Set.mem env.edited_files k))
+                                         Set.mem env.editor_open_files k))
   else fast
 
 let parsing genv env to_check ~stop_at_errors =
 
   let ide_files, disk_files  =
-    Relative_path.Set.partition (Relative_path.Set.mem env.edited_files)
+    Relative_path.Set.partition (Relative_path.Set.mem env.editor_open_files)
       to_check in
 
   File_heap.FileHeap.remove_batch disk_files;
@@ -405,7 +405,7 @@ module FullCheckKind : CheckKindType = struct
       last_command_time = old_env.last_command_time;
       last_notifier_check_time = old_env.last_notifier_check_time;
       last_idle_job_time = old_env.last_idle_job_time;
-      edited_files = old_env.edited_files;
+      editor_open_files = old_env.editor_open_files;
       ide_needs_parsing = Relative_path.Set.empty;
       disk_needs_parsing = Relative_path.Set.empty;
       needs_phase2_redecl = Relative_path.Set.empty;
@@ -434,7 +434,7 @@ module LazyCheckKind : CheckKindType = struct
     | None -> (fun _ -> false)
 
   let is_ide_file env x =
-    Relative_path.Set.mem env.edited_files x || has_errors_in_ide env x
+    Relative_path.Set.mem env.editor_open_files x || has_errors_in_ide env x
 
   let get_to_recheck2_approximation ~to_redecl_phase2_deps ~env =
     (* We didn't do the full fan-out from to_redecl_phase2_deps, so the

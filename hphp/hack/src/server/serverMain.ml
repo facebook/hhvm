@@ -300,7 +300,8 @@ let serve_one_iteration genv env client_provider =
       ~default:env
       ~f:begin fun sub ->
 
-    let sub, errors = Diagnostic_subscription.pop_errors sub env.edited_files in
+    let sub, errors =
+      Diagnostic_subscription.pop_errors sub env.editor_open_files in
 
     if not @@ SMap.is_empty errors then begin
       let id = Diagnostic_subscription.get_id sub in

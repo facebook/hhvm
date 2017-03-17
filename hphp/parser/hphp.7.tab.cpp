@@ -433,15 +433,15 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     // }
     Token parent;  parent.set(T_STRING, "parent");
     Token cls;     _p->onName(cls, parent, Parser::StringName);
-    Token fname;   fname.setText("__xhpAttributeDeclaration");
-    Token param1;  _p->onCall(param1, 0, fname, dummy, &cls);
+    Token fname2;   fname2.setText("__xhpAttributeDeclaration");
+    Token param1;  _p->onCall(param1, 0, fname2, dummy, &cls);
     Token params1; _p->onCallParam(params1, NULL, param1, false, false);
 
     for (unsigned int i = 0; i < classes.size(); i++) {
-      Token parent;  parent.set(T_STRING, classes[i]);
-      Token cls;     _p->onName(cls, parent, Parser::StringName);
-      Token fname;   fname.setText("__xhpAttributeDeclaration");
-      Token param;   _p->onCall(param, 0, fname, dummy, &cls);
+      Token parent2;  parent2.set(T_STRING, classes[i]);
+      Token cls2;     _p->onName(cls2, parent2, Parser::StringName);
+      Token fname3;   fname3.setText("__xhpAttributeDeclaration");
+      Token param;   _p->onCall(param, 0, fname3, dummy, &cls2);
 
       Token params; _p->onCallParam(params, &params1, param, false, false);
       params1 = params;

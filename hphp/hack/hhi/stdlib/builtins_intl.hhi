@@ -199,6 +199,7 @@ function collator_get_attribute($obj, $attr) {}
 function collator_get_error_code($obj) {}
 function collator_get_error_message($obj) {}
 function collator_get_locale($obj, $type = 0) {}
+function collator_get_sort_key($obj, $str) {}
 function collator_get_strength($obj) {}
 function collator_set_attribute($obj, $attr, $val) {}
 function collator_set_strength($obj, $strength) {}
@@ -390,14 +391,15 @@ class Collator {
   public function asort(&$arr, $sort_flag = null) {}
   public function compare($str1, $str2) {}
   static public function create($locale) {}
-  public function getattribute($attr) {}
-  public function geterrorcode() {}
-  public function geterrormessage() {}
-  public function getlocale($type = 0) {}
-  public function getstrength() {}
-  public function setattribute($attr, $val) {}
-  public function setstrength($strength) {}
-  public function sortwithsortkeys(&$arr) {}
+  public function getAttribute($attr) {}
+  public function getErrorCode() {}
+  public function getErrorMessage() {}
+  public function getLocale($type = 0) {}
+  public function getSortKey($str) {}
+  public function getStrength() {}
+  public function setAttribute($attr, $val) {}
+  public function setStrength($strength) {}
+  public function sortWithSortKeys(&$arr) {}
   public function sort(&$arr, $sort_flag = null) {}
 }
 

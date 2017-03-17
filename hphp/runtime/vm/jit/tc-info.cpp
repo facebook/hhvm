@@ -50,7 +50,6 @@ bool dumpTCCode(folly::StringPiece filename) {
   OPEN_FILE(aprofFile,      "_aprof");
   OPEN_FILE(acoldFile,      "_acold");
   OPEN_FILE(afrozenFile,    "_afrozen");
-  OPEN_FILE(helperAddrFile, "_helpers_addrs.txt");
 
 #undef OPEN_FILE
 
@@ -111,12 +110,8 @@ bool dumpTCData() {
     requestInitProfData();
   }
   for (TransID t = 0; t < transdb::getNumTranslations(); t++) {
-    int64_t count = 0;
-    if (auto prof = profData()) {
-      count = prof->transCounter(t);
-    }
     auto const ret = gzputs(
-      tcDataFile, transdb::getTransRec(t)->print(count).c_str()
+      tcDataFile, transdb::getTransRec(t)->print().c_str()
     );
     if (ret == -1) {
       return false;

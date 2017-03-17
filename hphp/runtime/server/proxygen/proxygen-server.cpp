@@ -167,11 +167,11 @@ ProxygenServer::ProxygenServer(
   const std::vector<std::chrono::seconds> levels {
     std::chrono::seconds(10), std::chrono::seconds(120)};
   ProxygenTransport::s_requestErrorCount =
-    ServiceData::createTimeseries("http_response_error",
+    ServiceData::createTimeSeries("http_response_error",
                                   {ServiceData::StatsType::COUNT},
                                   levels, 10);
   ProxygenTransport::s_requestNonErrorCount =
-    ServiceData::createTimeseries("http_response_nonerror",
+    ServiceData::createTimeSeries("http_response_nonerror",
                                   {ServiceData::StatsType::COUNT},
                                   levels, 10);
 }
@@ -401,6 +401,8 @@ void ProxygenServer::stopListening(bool hard) {
 }
 
 void ProxygenServer::returnPartialPosts() {
+  VLOG(2) << "Running returnPartialPosts for "
+          << m_pendingTransports.size() << " pending transports";
   for (auto& transport : m_pendingTransports) {
     if (!transport.getClientComplete()) {
       transport.beginPartialPostEcho();

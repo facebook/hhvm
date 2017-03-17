@@ -172,9 +172,9 @@ bool CacheSaver::rewriteDirectory(uint64_t expected_directory_len) {
       return false;
     }
 
-    ssize_t ret = writeFull(fd_, (void*) &fp.data_ofs, sizeof(fp.data_ofs));
+    ssize_t len = writeFull(fd_, (void*) &fp.data_ofs, sizeof(fp.data_ofs));
 
-    if (ret != sizeof(fp.data_ofs)) {
+    if (len != sizeof(fp.data_ofs)) {
       Logger::Error(format("Unable to update directory entry: {}",
                            folly::errnoStr(errno)).str());
     }

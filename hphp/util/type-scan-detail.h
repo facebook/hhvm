@@ -330,7 +330,7 @@ constexpr const char* const kIgnoreFieldName =
 constexpr const char* const kIgnoreBaseName =
   TYPE_SCAN_STRINGIFY(TYPE_SCAN_IGNORE_BASE_NAME);
 constexpr const char* const kConservativeName =
-  TYPE_SCAN_STRINGIFY(TYPE_SCAN_IGNORE_CONSERVATIVE_NAME);
+  TYPE_SCAN_STRINGIFY(TYPE_SCAN_CONSERVATIVE_NAME);
 constexpr const char* const kConservativeFieldName =
   TYPE_SCAN_STRINGIFY(TYPE_SCAN_CONSERVATIVE_FIELD_NAME);
 constexpr const char* const kFlexibleArrayFieldName =

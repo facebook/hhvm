@@ -15,11 +15,13 @@ open Ide_rpc_protocol_parser_types
 (* Test suite for V0 version of the API responses  *)
 
 let test_response = test_response JSON_RPC2 V0
+let test_request = test_request JSON_RPC2 V0
+let test_notification = test_notification JSON_RPC2 V0
 
 let test_error error expected =
-  let response = Json_rpc_message_printer.response_to_json
+  let response = Json_rpc_message_printer.error_to_json
     ~id:(Some 4)
-    ~result:(`Error error)
+    ~error
   in
   assert_json_equal expected response;
   true
@@ -63,6 +65,7 @@ let test_identify_symbol_response () =
     Some {
       kind = Trait;
       name = "bbb";
+      full_name = "ccc";
       SymbolDefinition.id = None;
       pos = Pos.(to_absolute none);
       span = Pos.(to_absolute none);
@@ -125,6 +128,7 @@ let test_outline_response () =
     {
       kind = Function;
       name = "bbb";
+      full_name = "ccc";
       SymbolDefinition.id = None;
       pos = Pos.(to_absolute none);
       span = Pos.(to_absolute none);
@@ -159,6 +163,52 @@ let test_outline_response () =
         "modifiers": [
 
         ]
+      }
+    ]
+  }|}
+
+let test_coverage_levels_response () =
+  let open Ide_api_types in
+  let response = Coverage_levels_response (Range_coverage_levels_response [
+    (
+      {st = {line = 1; column = 1}; ed = {line = 1; column = 10}},
+      Unchecked
+    );
+    (
+      {st = {line = 2; column = 1}; ed = {line = 2; column = 10}},
+      Checked
+    );
+  ]) in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "level": "unchecked",
+        "range": {
+          "start": {
+            "line": 1,
+            "column": 1
+          },
+          "end": {
+            "line": 1,
+            "column": 10
+          }
+        }
+      },
+      {
+        "level": "checked",
+        "range": {
+          "start": {
+            "line": 2,
+            "column": 1
+          },
+          "end": {
+            "line": 2,
+            "column": 10
+          }
+        }
       }
     ]
   }|}
@@ -213,14 +263,114 @@ let test_infer_type_response () =
     "result": null
   }|}
 
+let test_find_references_response () =
+  let open Ide_api_types in
+  let response = Find_references_response (Some {
+    symbol_name = "aaa";
+    references = [
+      {
+        range_filename = "bbb";
+        file_range = {
+          st = {
+            line = 10;
+            column = 12;
+          };
+          ed = {
+            line = 10;
+            column = 14;
+          }
+        }
+      }
+    ]
+  }) in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": {
+      "name": "aaa",
+      "references": [
+        {
+          "filename": "bbb",
+          "range": {
+            "start": {
+              "line": 10,
+              "column": 12
+            },
+            "end": {
+              "line": 10,
+              "column": 14
+            }
+          }
+        }
+      ]
+    }
+  }|}
+
+let test_highlight_references_response () =
+  let open Ide_api_types in
+  let response = Highlight_references_response [
+    {
+      st = { line = 12; column = 45 };
+      ed = { line = 12; column = 78 };
+    }
+  ] in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "start": {
+          "line": 12,
+          "column": 45
+        },
+        "end": {
+          "line": 12,
+          "column": 78
+        }
+      }
+    ]
+  }|}
+
+let test_format_response () =
+  let response = Format_response "aaaa" in
+  test_response response
+  {|{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": "aaaa"
+  }|}
+
+let test_diagnostics_notification () =
+  let notification = Diagnostics_notification {
+    subscription_id = 4;
+    diagnostics_notification_filename = "foo.php";
+    diagnostics = []
+  } in
+  test_notification notification
+  {|{
+    "jsonrpc": "2.0",
+    "method": "diagnostics",
+    "params": {
+      "filename": "foo.php",
+      "errors": [
+      ]
+    }
+  }|}
 
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_init_response", test_init_response;
   "test_identify_symbol_response", test_identify_symbol_response;
   "test_outline_response", test_outline_response;
+  "test_coverage_levels_response", test_coverage_levels_response;
   "test_autocomplete_response", test_autocomplete_response;
   "test_infer_type_response", test_infer_type_response;
+  "test_find_references_response", test_find_references_response;
+  "test_highlight_references_response", test_highlight_references_response;
+  "test_format_response", test_format_response;
+  "test_diagnostics_notification", test_diagnostics_notification;
 ]
 
 let () =

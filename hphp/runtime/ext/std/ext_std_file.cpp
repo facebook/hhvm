@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/http-stream-wrapper.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/pipe.h"
@@ -45,6 +46,7 @@
 #endif
 #include "hphp/runtime/ext/std/ext_std_options.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
@@ -210,6 +212,9 @@ static int statSyscall(
     auto fullpath = g_context->getCwd() + String::FromChar('/') + path;
     if (!RID().hasSafeFileAccess() && !canUseFileCache) {
       if (strlen(fullpath.data()) != fullpath.size()) return ENOENT;
+      if (!isFileStream && w->isNormalFileStream()) {
+        return w->stat(fullpath.data(), buf);
+      }
       return ::stat(fullpath.data(), buf);
     }
     std::string realpath = StatCache::realpath(fullpath.data());
@@ -220,10 +225,13 @@ static int statSyscall(
     auto translatedPath = canUseFileCache ?
       File::TranslatePathWithFileCache(realpath) :
       File::TranslatePath(realpath);
+    if (!isFileStream && w->isNormalFileStream()) {
+      return w->stat(translatedPath.data(), buf);
+    }
     return ::stat(translatedPath.data(), buf);
   }
 
-  auto properPath = isFileStream ? path.substr(pathIndex) : path;
+  auto properPath = w->isNormalFileStream() ? path.substr(pathIndex) : path;
   if (canUseFileCache) {
     return ::stat(File::TranslatePathWithFileCache(properPath).data(), buf);
   }
@@ -725,9 +733,6 @@ Variant HHVM_FUNCTION(file_put_contents,
       }
       break;
     }
-
-    case KindOfClass:
-      not_reached();
   }
 
   // like fwrite(), fclose() can error when fflush()ing
@@ -837,27 +842,28 @@ bool HHVM_FUNCTION(move_uploaded_file,
   return true;
 }
 
-// Resolves a filename for the `parse_ini_file`, considering
-// CWD, containing file name, and include paths.
-static String resolve_parse_ini_filename(const String& filename) {
-  String resolved = File::TranslatePath(filename);
+namespace {
 
+String resolve_parse_ini_filename(const String& filename) {
+  // Try cleaning up the path. Use file_exists to avoid a warning
+  // that get_contents generates
+  String resolved = File::TranslatePath(filename);
   if (!resolved.empty() && HHVM_FN(file_exists)(resolved)) {
     return resolved;
   }
 
-  // Don't resolve further absolute paths.
-  if (filename[0] == '/') {
+  if (FileUtil::isAbsolutePath(filename.data())) {
     return null_string;
   }
 
-  // Try to infer from containing file name.
+  // Still no go, and not an absolute path, try to resolve based
+  // on containing file name.
   auto const cfd = String::attach(g_context->getContainingFileName());
   if (!cfd.empty()) {
     int npos = cfd.rfind('/');
     if (npos >= 0) {
       resolved = cfd.substr(0, npos + 1) + filename;
-      if (HHVM_FN(file_exists)(resolved)) {
+      if (!resolved.empty() && HHVM_FN(file_exists)(resolved)) {
         return resolved;
       }
     }
@@ -867,13 +873,14 @@ static String resolve_parse_ini_filename(const String& filename) {
   auto const& includePaths = RID().getIncludePaths();
 
   for (auto const& path : includePaths) {
-    resolved = path + '/' + filename;
+    resolved = path + FileUtil::getDirSeparator() + filename;
     if (HHVM_FN(file_exists)(resolved)) {
       return resolved;
     }
   }
 
   return null_string;
+}
 }
 
 Variant HHVM_FUNCTION(parse_ini_file,
@@ -886,14 +893,30 @@ Variant HHVM_FUNCTION(parse_ini_file,
     return false;
   }
 
-  String resolved = resolve_parse_ini_filename(filename);
-  if (resolved == null_string) {
+  // Block ability to load ini files via http (eg., remotely)
+  int oFilename = 0;
+  Stream::Wrapper* w = Stream::getWrapperFromURI(filename, &oFilename);
+  if (nullptr != dynamic_cast<HttpStreamWrapper*>(w)) {
+    raise_warning("remote access to ini files is not allowed");
+    return false;
+  }
+
+  // Extract the (local) filename
+  String wrapperPrefix = filename.substr(0, oFilename);
+  String path = resolve_parse_ini_filename(filename.substr(oFilename));
+
+  if (path.empty()) {
+    // At this point, we were unable to find the file.
     raise_warning("No such file or directory");
     return false;
   }
 
-  Variant content = HHVM_FN(file_get_contents)(resolved);
-  if (same(content, false)) return false;
+  Variant content = HHVM_FN(file_get_contents)(wrapperPrefix + path);
+  if (same(content, false)) {
+    // Don't generate a warning, as they have already been generated.
+    return false;
+  }
+
   return IniSetting::FromString(content.toString(), filename, process_sections,
                                 scanner_mode);
 }
@@ -1289,8 +1312,13 @@ Variant HHVM_FUNCTION(realpath,
   }
   // Zend doesn't support streams in realpath
   Stream::Wrapper* w = Stream::getWrapperFromURI(path);
-  if (!w || !dynamic_cast<FileStreamWrapper*>(w)) {
+  if (!w || !w->isNormalFileStream()) {
     return false;
+  }
+  if (!dynamic_cast<FileStreamWrapper*>(w)) {
+    auto str = w->realpath(translated);
+    if (str.isNull()) return false;
+    return str;
   }
   char resolved_path[PATH_MAX];
   if (!realpath(translated.c_str(), resolved_path)) {
@@ -1399,9 +1427,9 @@ bool HHVM_FUNCTION(chmod,
   CHECK_PATH_FALSE(filename, 1);
   String translated = File::TranslatePath(filename);
 
-  // If filename points to a user file, invoke UserStreamWrapper::chmod(..)
+  // If filename points to a user file, invoke ExtendedWrapper::chmod(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  auto usw = dynamic_cast<Stream::ExtendedWrapper*>(w);
   if (usw != nullptr) {
     return usw->chmod(filename, mode);
   }
@@ -1414,9 +1442,9 @@ static bool do_chown(const String& filename,
                      const Variant& user,
                      bool islChown,
                      const char* funcName) {
-  // If filename points to a user file, invoke UserStreamWrapper::chown(..)
+  // If filename points to a user file, invoke ExtendedWrapper::chown(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  auto usw = dynamic_cast<Stream::ExtendedWrapper*>(w);
   if (usw != nullptr) {
     if (user.isInteger()) {
       return usw->chown(filename, user.toInt64());
@@ -1478,9 +1506,9 @@ static bool do_chgrp(const String& filename,
                      const Variant& group,
                      bool islChgrp,
                      const char* funcName) {
-  // If filename points to a user file, invoke UserStreamWrapper::chgrp(..)
+  // If filename points to a user file, invoke ExtendedWrapper::chgrp(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  auto usw = dynamic_cast<Stream::ExtendedWrapper*>(w);
   if (usw != nullptr) {
     if (group.isInteger()) {
       return usw->chgrp(filename, group.toInt64());
@@ -1548,9 +1576,9 @@ bool HHVM_FUNCTION(touch,
     return false;
   }
 
-  // If filename points to a user file, invoke UserStreamWrapper::touch(..)
+  // If filename points to a user file, invoke ExtendedWrapper::touch(..)
   Stream::Wrapper* w = Stream::getWrapperFromURI(filename);
-  auto usw = dynamic_cast<UserStreamWrapper*>(w);
+  auto usw = dynamic_cast<Stream::ExtendedWrapper*>(w);
   if (usw != nullptr) {
     return usw->touch(filename, mtime, atime);
   }
@@ -1845,14 +1873,18 @@ Variant HHVM_FUNCTION(tempnam,
   }
   String templ = tmpdir + trailing_slash + pbase + "XXXXXX";
   auto buf = templ.get()->mutableData();
-  int fd = mkstemp(buf);
-  if (fd < 0) {
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
-                    folly::errnoStr(errno).c_str());
-    return false;
-  }
+  if (UNLIKELY(is_cli_mode())) {
+    if (!cli_mkstemp(buf)) return false;
+  } else {
+    int fd = mkstemp(buf);
+    if (fd < 0) {
+      Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
+                      folly::errnoStr(errno).c_str());
+      return false;
+    }
 
-  close(fd);
+    close(fd);
+  }
   return templ.setSize(strlen(buf));
 }
 

@@ -40,6 +40,8 @@ let process_expr (k, _) = function
       k (Call ((p, Id (p2, "\\HH\\invariant")), el, uel))
   | Call ((p, Id (p2, "invariant_violation")), el, uel) ->
       k (Call ((p, Id (p2, "\\HH\\invariant_violation")), el, uel))
+  | Id_type_arguments (id, _targs) ->
+      k (Id id)
   | e -> k e
 
 let map =

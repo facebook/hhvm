@@ -1,0 +1,12 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\int" "HH\\int" hh_type extended_hint > test() {
+  Int 42
+  VerifyRetTypeC
+  RetC
+}
+

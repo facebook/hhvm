@@ -56,7 +56,7 @@ void send(int afdt_fd, std::vector<iovec>& iov) {
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
   msg.msg_iovlen = iov.size();
-  ssize_t nwritten = sendmsg(afdt_fd, &msg, 0);
+  ssize_t nwritten = sendmsg(afdt_fd, &msg, MSG_WAITALL);
   if (nwritten < 0) throw std::runtime_error("send failed");
   for (auto& io : iov) {
     nwritten -= io.iov_len;
@@ -69,7 +69,7 @@ void recv(int afdt_fd, std::vector<iovec>& iov) {
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
   msg.msg_iovlen = iov.size();
-  ssize_t nread = recvmsg(afdt_fd, &msg, 0);
+  ssize_t nread = recvmsg(afdt_fd, &msg, MSG_WAITALL);
   if (nread <= 0) throw std::runtime_error("recv failed");
   for (auto& io : iov) {
     nread -= io.iov_len;

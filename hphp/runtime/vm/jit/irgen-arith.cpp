@@ -569,7 +569,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       emitCommutedOp(
         env,
         op,
-        [&](Op op){ return gen(env, toStrIntCmpOpcode(op), right, left); }
+        [&](Op op2){ return gen(env, toStrIntCmpOpcode(op2), right, left); }
       )
     );
   } else if (rightTy.subtypeOfAny(TNull, TBool)) {
@@ -1004,6 +1004,42 @@ void implCmp(IRGS& env, Op op) {
   if (!leftTy.isKnownDataType() || !rightTy.isKnownDataType()) {
     // Can't do much if we don't even know the types.
     PUNT(cmpUnknownDataType);
+  }
+
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
+    // ==, or != between a PHP array and a Hack array. On relational compares,
+    // we'll raise a notice between a PHP array and any other type.
+    switch (op) {
+      case Op::Same:
+      case Op::NSame:
+      case Op::Eq:
+      case Op::Neq:
+        if ((leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
+            (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr)) {
+          gen(
+            env,
+            RaiseHackArrCompatNotice,
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+          );
+        }
+        break;
+      case Op::Lt:
+      case Op::Lte:
+      case Op::Gt:
+      case Op::Gte:
+      case Op::Cmp:
+        if ((leftTy <= TArr) != (rightTy <= TArr)) {
+          gen(
+            env,
+            RaiseHackArrCompatNotice,
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+          );
+        }
+        break;
+      default:
+        always_assert(false);
+    }
   }
 
   // If it's a same-ish comparison and the types don't match (taking into

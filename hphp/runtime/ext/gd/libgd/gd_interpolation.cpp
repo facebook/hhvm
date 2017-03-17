@@ -1187,10 +1187,10 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
       f_a4 = gd_itofx(gdTrueColorGetAlpha(pixel4));
 
       {
-        const char red = (char) gd_fxtoi(gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4));
-        const char green = (char) gd_fxtoi(gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4));
-        const char blue = (char) gd_fxtoi(gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4));
-        const char alpha = (char) gd_fxtoi(gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4));
+        const unsigned char red = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_r1) + gd_mulfx(f_w2, f_r2) + gd_mulfx(f_w3, f_r3) + gd_mulfx(f_w4, f_r4));
+        const unsigned char green = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_g1) + gd_mulfx(f_w2, f_g2) + gd_mulfx(f_w3, f_g3) + gd_mulfx(f_w4, f_g4));
+        const unsigned char blue = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_b1) + gd_mulfx(f_w2, f_b2) + gd_mulfx(f_w3, f_b3) + gd_mulfx(f_w4, f_b4));
+        const unsigned char alpha = (unsigned char) gd_fxtoi(gd_mulfx(f_w1, f_a1) + gd_mulfx(f_w2, f_a2) + gd_mulfx(f_w3, f_a3) + gd_mulfx(f_w4, f_a4));
 
         new_img->tpixels[dst_offset_v][dst_offset_h] = gdTrueColorAlpha(red, green, blue, alpha);
       }
@@ -1343,12 +1343,18 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
     dst_offset_x = 0;
 
     for (j=0; j < new_width; j++) {
-      const gdFixed f_a = gd_mulfx(gd_itofx(i), f_dy);
-      const gdFixed f_b = gd_mulfx(gd_itofx(j), f_dx);
-      const long m = gd_fxtoi(f_a);
-      const long n = gd_fxtoi(f_b);
-      const gdFixed f_f = f_a - gd_itofx(m);
-      const gdFixed f_g = f_b - gd_itofx(n);
+      long m;
+      long n;
+      gdFixed f_f;
+      gdFixed f_g;
+      {
+        const gdFixed f_a = gd_mulfx(gd_itofx(i), f_dy);
+        const gdFixed f_b = gd_mulfx(gd_itofx(j), f_dx);
+        m = gd_fxtoi(f_a);
+        n = gd_fxtoi(f_b);
+        f_f = f_a - gd_itofx(m);
+        f_g = f_b - gd_itofx(n);
+      }
       unsigned int src_offset_x[16], src_offset_y[16];
       long k;
       register gdFixed f_red = 0, f_green = 0, f_blue = 0, f_alpha = 0;
@@ -1478,22 +1484,22 @@ gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, co
       }
 
       for (k = -1; k < 3; k++) {
-        const gdFixed f = gd_itofx(k)-f_f;
-        const gdFixed f_fm1 = f - f_1;
-        const gdFixed f_fp1 = f + f_1;
-        const gdFixed f_fp2 = f + f_2;
-        register gdFixed f_a = 0, f_b = 0, f_d = 0, f_c = 0;
         register gdFixed f_RY;
-        int l;
+        {
+          register gdFixed f_a = 0, f_b = 0, f_d = 0, f_c = 0;
+          const gdFixed f = gd_itofx(k)-f_f;
+          const gdFixed f_fm1 = f - f_1;
+          const gdFixed f_fp1 = f + f_1;
+          const gdFixed f_fp2 = f + f_2;
+          if (f_fp2 > 0) f_a = gd_mulfx(f_fp2, gd_mulfx(f_fp2,f_fp2));
+          if (f_fp1 > 0) f_b = gd_mulfx(f_fp1, gd_mulfx(f_fp1,f_fp1));
+          if (f > 0)     f_c = gd_mulfx(f, gd_mulfx(f,f));
+          if (f_fm1 > 0) f_d = gd_mulfx(f_fm1, gd_mulfx(f_fm1,f_fm1));
 
-        if (f_fp2 > 0) f_a = gd_mulfx(f_fp2, gd_mulfx(f_fp2,f_fp2));
-        if (f_fp1 > 0) f_b = gd_mulfx(f_fp1, gd_mulfx(f_fp1,f_fp1));
-        if (f > 0)     f_c = gd_mulfx(f, gd_mulfx(f,f));
-        if (f_fm1 > 0) f_d = gd_mulfx(f_fm1, gd_mulfx(f_fm1,f_fm1));
+          f_RY = gd_divfx((f_a - gd_mulfx(f_4,f_b) + gd_mulfx(f_6,f_c) - gd_mulfx(f_4,f_d)),f_6);
+        }
 
-        f_RY = gd_divfx((f_a - gd_mulfx(f_4,f_b) + gd_mulfx(f_6,f_c) - gd_mulfx(f_4,f_d)),f_6);
-
-        for (l = -1; l < 3; l++) {
+        for (int l = -1; l < 3; l++) {
           const gdFixed f = gd_itofx(l) - f_g;
           const gdFixed f_fm1 = f - f_1;
           const gdFixed f_fp1 = f + f_1;
@@ -1977,32 +1983,32 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
         }
 
         for (k=-1; k<3; k++) {
-          const gdFixed f = gd_itofx(k)-f_f;
-          const gdFixed f_fm1 = f - f_1;
-          const gdFixed f_fp1 = f + f_1;
-          const gdFixed f_fp2 = f + f_2;
-          gdFixed f_a = 0, f_b = 0,f_c = 0, f_d = 0;
           gdFixed f_RY;
-          int l;
+          {
+            const gdFixed f = gd_itofx(k)-f_f;
+            const gdFixed f_fm1 = f - f_1;
+            const gdFixed f_fp1 = f + f_1;
+            const gdFixed f_fp2 = f + f_2;
+            gdFixed f_a = 0, f_b = 0,f_c = 0, f_d = 0;
+            if (f_fp2 > 0) {
+              f_a = gd_mulfx(f_fp2,gd_mulfx(f_fp2,f_fp2));
+            }
 
-          if (f_fp2 > 0) {
-            f_a = gd_mulfx(f_fp2,gd_mulfx(f_fp2,f_fp2));
+            if (f_fp1 > 0) {
+              f_b = gd_mulfx(f_fp1,gd_mulfx(f_fp1,f_fp1));
+            }
+
+            if (f > 0) {
+              f_c = gd_mulfx(f,gd_mulfx(f,f));
+            }
+
+            if (f_fm1 > 0) {
+              f_d = gd_mulfx(f_fm1,gd_mulfx(f_fm1,f_fm1));
+            }
+            f_RY = gd_divfx((f_a-gd_mulfx(f_4,f_b)+gd_mulfx(f_6,f_c)-gd_mulfx(f_4,f_d)),f_6);
           }
 
-          if (f_fp1 > 0) {
-            f_b = gd_mulfx(f_fp1,gd_mulfx(f_fp1,f_fp1));
-          }
-
-          if (f > 0) {
-            f_c = gd_mulfx(f,gd_mulfx(f,f));
-          }
-
-          if (f_fm1 > 0) {
-            f_d = gd_mulfx(f_fm1,gd_mulfx(f_fm1,f_fm1));
-          }
-          f_RY = gd_divfx((f_a-gd_mulfx(f_4,f_b)+gd_mulfx(f_6,f_c)-gd_mulfx(f_4,f_d)),f_6);
-
-          for (l=-1;  l< 3; l++) {
+          for (int l=-1;  l< 3; l++) {
             const gdFixed f = gd_itofx(l) - f_g;
             const gdFixed f_fm1 = f - f_1;
             const gdFixed f_fp1 = f + f_1;

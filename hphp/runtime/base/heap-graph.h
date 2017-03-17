@@ -17,8 +17,10 @@
 #ifndef incl_HPHP_HEAP_GRAPH_H_
 #define incl_HPHP_HEAP_GRAPH_H_
 
+#include "hphp/util/type-scan.h"
 #include <vector>
 #include <cstdint>
+#include <cstddef>
 
 namespace HPHP {
 
@@ -46,20 +48,28 @@ struct HeapGraph {
     Implicit, // exactly-marked but not counted
     Ambiguous, // any ambiguous pointer into a valid object
   };
+  static constexpr auto NumPtrKinds = 3;
   struct Node {
-    const Header* h;
+    union {
+      const void* ptr;
+      const Header* h;
+    };
+    size_t size;
+    bool is_root;
+    type_scan::Index tyindex;
     int first_out;
     int first_in; // first out-ptr and in-ptr, respectively
   };
   struct Ptr {
     int from, to; // node ids. if root, from == -1
     int next_out, next_in; // from's next out-ptr, to's next in-ptr
+    int offset; // byte offset of ptr within from node. (0 if unknown)
     PtrKind ptr_kind;
-    const char* description;
   };
   std::vector<Node> nodes;
   std::vector<Ptr> ptrs;
-  std::vector<int> roots; // ptr ids. ptr.from = -1, ptr.to = object
+  std::vector<int> root_ptrs; // ptr ids
+  std::vector<int> root_nodes; // node ids
 
   template<class F> void eachSuccNode(int n, F f) const {
     eachOutPtr(n, [&](int p) { f(ptrs[p].to); });
@@ -83,8 +93,8 @@ struct HeapGraph {
     }
   }
 
-  template<class F> void eachRoot(F f) const {
-    for (auto p : roots) f(ptrs[p]);
+  template<class F> void eachRootPtr(F f) const {
+    for (auto p : root_ptrs) f(ptrs[p]);
   }
 };
 

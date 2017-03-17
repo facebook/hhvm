@@ -30,6 +30,8 @@ type t = {
   cpu_priority: int;
   shm_dirs: string list;
   start_with_recorder_on : bool;
+  (** See HhMonitorInformant. *)
+  use_dummy_informant : bool;
   load_script_config: LoadScriptConfig.t;
 }
 
@@ -51,6 +53,7 @@ let default = {
   cpu_priority = 10;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
   start_with_recorder_on = false;
+  use_dummy_informant = true;
   load_script_config = LoadScriptConfig.default;
 }
 
@@ -90,6 +93,8 @@ let load_ fn =
     ~default:default.use_hackfmt config in
   let start_with_recorder_on = bool_ "start_with_recorder_on"
     ~default:default.start_with_recorder_on config in
+  let use_dummy_informant = bool_ "use_dummy_informant"
+    ~default:default.use_dummy_informant config in
   let type_decl_bucket_size = int_ "type_decl_bucket_size"
     ~default:default.type_decl_bucket_size config in
   let watchman_init_timeout = int_ "watchman_init_timeout"
@@ -132,6 +137,7 @@ let load_ fn =
     cpu_priority;
     shm_dirs;
     start_with_recorder_on;
+    use_dummy_informant;
     load_script_config;
   }
 

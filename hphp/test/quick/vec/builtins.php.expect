@@ -71,7 +71,7 @@ vec(2) {
   string(8) "prepend1"
   string(8) "prepend2"
 }
-array_values: vec(0) {
+array_values: array(0) {
 }
 count: int(0)
 empty: bool(true)
@@ -201,11 +201,16 @@ vec(7) {
   int(4)
   int(5)
 }
-array_values: vec(5) {
+array_values: array(5) {
+  [0]=>
   int(1)
+  [1]=>
   int(2)
+  [2]=>
   int(3)
+  [3]=>
   int(4)
+  [4]=>
   int(5)
 }
 count: int(5)
@@ -381,11 +386,16 @@ vec(7) {
   int(2)
   int(1)
 }
-array_values: vec(5) {
+array_values: array(5) {
+  [0]=>
   int(5)
+  [1]=>
   int(4)
+  [2]=>
   int(3)
+  [3]=>
   int(2)
+  [4]=>
   int(1)
 }
 count: int(5)
@@ -547,9 +557,12 @@ vec(5) {
   string(1) "b"
   string(1) "c"
 }
-array_values: vec(3) {
+array_values: array(3) {
+  [0]=>
   string(1) "a"
+  [1]=>
   string(1) "b"
+  [2]=>
   string(1) "c"
 }
 count: int(3)
@@ -700,10 +713,14 @@ vec(6) {
   string(1) "a"
   string(1) "b"
 }
-array_values: vec(4) {
+array_values: array(4) {
+  [0]=>
   string(1) "b"
+  [1]=>
   string(1) "a"
+  [2]=>
   string(1) "a"
+  [3]=>
   string(1) "b"
 }
 count: int(4)
@@ -842,7 +859,8 @@ vec(3) {
   string(8) "prepend2"
   int(100)
 }
-array_values: vec(1) {
+array_values: array(1) {
+  [0]=>
   int(100)
 }
 count: int(1)

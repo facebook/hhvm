@@ -1874,7 +1874,7 @@ void handle_call(Env& env,
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
   auto bset = ALocBits{};
-  if (e.destroys_locals) bset |= env.ainfo.all_frame;
+  if (e.writes_locals) bset |= env.ainfo.all_frame;
   bset |= env.ainfo.may_alias(e.stack);
   bset |= env.ainfo.may_alias(AHeapAny);
   bset &= ~env.ainfo.expand(e.kills);
@@ -2059,7 +2059,8 @@ bool consumes_reference_next_not_taken(const IRInstruction& inst,
  */
 bool observes_reference(const IRInstruction& inst, uint32_t srcID) {
   return consumes_reference_next_not_taken(inst, srcID) ||
-         consumes_reference_taken(inst, srcID);
+         consumes_reference_taken(inst, srcID) ||
+         (inst.op() == CheckArrayCOW && srcID == 0);
 }
 
 //////////////////////////////////////////////////////////////////////

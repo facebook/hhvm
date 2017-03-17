@@ -113,11 +113,13 @@ namespace Trace {
       TM(hfsort)        \
       TM(hhas)          \
       TM(hhbbc)         \
+      TM(hhbbc_cfg)     \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
       TM(hhbbc_index)   \
+      TM(hhbbc_stats)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
       TM(hhir)          \
@@ -136,6 +138,7 @@ namespace Trace {
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \
       TM(hhir_store)    \
+      TM(hhir_unreachable) \
       TM(hhprof)        \
       TM(inlining)      \
       TM(instancebits)  \
@@ -183,6 +186,8 @@ namespace Trace {
       TM(xls)           \
       TM(xls_stats)     \
       TM(pdce_inline)   \
+      TM(clisrv)        \
+      TM(factparse)     \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \

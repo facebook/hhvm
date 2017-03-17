@@ -22,8 +22,8 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/runtime/vm/jit/analysis.h"
-#include "hphp/runtime/vm/jit/func-effects.h"
 #include "hphp/runtime/vm/jit/type-constraint.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
@@ -551,10 +551,24 @@ SSATmp* opt_foldable(IRGS& env,
                      uint32_t numNonDefaultArgs) {
   if (!func->isFoldable()) return nullptr;
 
+  ArrayData* variadicArgs = nullptr;
+  uint32_t numVariadicArgs = 0;
+  if (numNonDefaultArgs > func->numNonVariadicParams()) {
+    assertx(params.size() == func->numParams());
+    auto const variadic = params.info.back().value;
+    if (!variadic->type().hasConstVal()) return nullptr;
+
+    variadicArgs = variadic->variantVal().asCArrRef().get();
+    numVariadicArgs = variadicArgs->size();
+    assertx(variadicArgs->isStatic() &&
+            (!numVariadicArgs || variadicArgs->hasPackedLayout()));
+    numNonDefaultArgs = func->numNonVariadicParams();
+  }
+
   // Don't pop the args yet---if the builtin throws at compile time (because
   // it would raise a warning or something at runtime) we're going to leave
   // the call alone.
-  PackedArrayInit args(params.size());
+  PackedArrayInit args(numNonDefaultArgs + numVariadicArgs);
   for (auto i = 0; i < numNonDefaultArgs; ++i) {
     auto const t = params[i].value->type();
     if (!t.hasConstVal() && !t.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
@@ -563,12 +577,7 @@ SSATmp* opt_foldable(IRGS& env,
       args.append(params[i].value->variantVal());
     }
   }
-  if (params.size() != func->numNonVariadicParams()) {
-    auto const variadic = params.info.back().value;
-    if (!variadic->type().hasConstVal()) return nullptr;
-
-    auto const variadicArgs = variadic->variantVal().asCArrRef().get();
-    auto const numVariadicArgs = variadicArgs->size();
+  if (variadicArgs) {
     for (auto i = 0; i < numVariadicArgs; i++) {
       args.append(variadicArgs->get(i));
     }
@@ -646,9 +655,6 @@ SSATmp* opt_foldable(IRGS& env,
       case KindOfResource:
       case KindOfRef:
         return nullptr;
-      case KindOfClass:
-        always_assert(0);
-        break;
     }
   } catch (...) {
     // If an exception or notice occurred, don't optimize
@@ -858,7 +864,7 @@ struct CatchMaker {
     auto const exit = defBlock(env, Block::Hint::Unlikely);
     BlockPusher bp(*env.irb, makeMarker(env, bcOff(env)), exit);
     gen(env, BeginCatch);
-    decRefForUnwind();
+    decRefParams();
     prepareForCatch();
     gen(env, EndCatch,
         IRSPRelOffsetData { spOffBCFromIRSP(env) },
@@ -881,7 +887,7 @@ struct CatchMaker {
       },
       [&] {
         hint(env, Block::Hint::Unused);
-        decRefForUnwind();
+        decRefParams();
         prepareForCatch();
         gen(env, EndCatch,
           IRSPRelOffsetData { spOffBCFromIRSP(env) },
@@ -900,7 +906,7 @@ struct CatchMaker {
       // We need to push the unwinder value and then side-exit to the next
       // instruction.
       hint(env, Block::Hint::Unlikely);
-      decRefForSideExit();
+      decRefParams();
       if (m_params.thiz && m_params.thiz->type() <= TObj) {
         decRef(env, m_params.thiz);
       }
@@ -913,8 +919,26 @@ struct CatchMaker {
     return exit;
   }
 
-  void decRefByPopping() const {
-    decRefForUnwind();
+  /*
+   * DecRef the params in preparation for an exception or side
+   * exit. Parameters that are not being passed through the stack
+   * still may need to be decref'd, because they may have been a
+   * reference counted type that was going to be converted to a
+   * non-reference counted type that we'd pass in a register.  As we
+   * do the coersions, params.value gets updated so whenever we call
+   * these catch block creation functions it will only decref things
+   * that weren't yet converted.
+   */
+  void decRefParams() const {
+    if (m_params.forNativeImpl) return;
+    for (auto i = m_params.size(); i--; ) {
+      auto const &pi = m_params[i];
+      if (pi.passByAddr) {
+        popDecRef(env);
+      } else {
+        decRef(env, pi.value);
+      }
+    }
   }
 
 private:
@@ -938,48 +962,6 @@ private:
     auto const spOff = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, EagerSyncVMRegs, spOff, fp(env), sp(env));
     updateMarker(env);  // Mark the EndCatch safe, since we're eager syncing.
-  }
-
-  /*
-   * For consistency with the interpreter, we need to decref things in a
-   * different order depending on whether we are unwinding, or planning to side
-   * exit.
-   *
-   * In either case, parameters that are not being passed through the stack
-   * still may need to be decref'd, because they may have been a reference
-   * counted type that was going to be converted to a non-reference counted
-   * type that we'd pass in a register.  As we do the coersions, params.value
-   * gets updated so whenever we call these catch block creation functions it
-   * will only decref things that weren't yet converted.
-   */
-
-  void decRefForUnwind() const {
-    if (m_params.forNativeImpl) return;
-    for (auto i = m_params.size(); i--; ) {
-      auto const &pi = m_params[i];
-      if (pi.passByAddr) {
-        popDecRef(env);
-      } else {
-        decRef(env, pi.value);
-      }
-    }
-  }
-
-  // Same work as above, but opposite order.
-  void decRefForSideExit() const {
-    assertx(!m_params.forNativeImpl);
-    int32_t stackIdx = safe_cast<int32_t>(m_params.numByAddr);
-
-    for (auto i = m_params.size(); i-- > 0;) {
-      if (m_params[i].passByAddr) {
-        --stackIdx;
-        auto const val = top(env, BCSPRelOffset{stackIdx}, DataTypeGeneric);
-        decRef(env, val);
-      } else {
-        decRef(env, m_params[i].value);
-      }
-    }
-    discard(env, m_params.numByAddr);
   }
 
 private:
@@ -1342,8 +1324,8 @@ SSATmp* builtinCall(IRGS& env,
       spOffBCFromIRSP(env),
       callee,
       params.count ? -1 : numNonDefault,
-      funcDestroysLocals(callee),
-      builtinFuncNeedsCallerFrame(callee)
+      funcWritesLocals(callee),
+      funcNeedsCallerFrame(callee)
     },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)
@@ -1353,7 +1335,7 @@ SSATmp* builtinCall(IRGS& env,
     if (params.thiz && params.thiz->type() <= TObj) {
       decRef(env, params.thiz);
     }
-    catchMaker.decRefByPopping();
+    catchMaker.decRefParams();
   }
 
   return ret;
@@ -1758,35 +1740,38 @@ void implMapIdx(IRGS& env) {
   finish(pelem);
 }
 
-void implVecIdx(IRGS& env) {
+void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   auto const def = popC(env);
   auto const key = popC(env);
-  auto const vec = popC(env);
-
-  assertx(vec->isA(TVec));
+  auto const stack_base = popC(env);
 
   auto const finish = [&](SSATmp* elem) {
     pushIncRef(env, elem);
     decRef(env, def);
     decRef(env, key);
-    decRef(env, vec);
+    decRef(env, stack_base);
   };
 
   if (key->isA(TNull | TStr)) return finish(def);
 
   if (!key->isA(TInt)) {
-    gen(env, ThrowInvalidArrayKey, vec, key);
+    gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
+
+  auto const use_base = loaded_collection_vec
+    ? loaded_collection_vec
+    : stack_base;
+  assertx(use_base->isA(TVec));
 
   auto const elem = cond(
     env,
     [&] (Block* taken) {
-      auto const length = gen(env, CountVec, vec);
+      auto const length = gen(env, CountVec, use_base);
       auto const cmp = gen(env, CheckRange, key, length);
       gen(env, JmpZero, taken, cmp);
     },
-    [&] { return gen(env, LdVecElem, vec, key); },
+    [&] { return gen(env, LdVecElem, use_base, key); },
     [&] { return def; }
   );
 
@@ -1849,7 +1834,7 @@ void implGenericIdx(IRGS& env) {
  * Idx bytecode.
  */
 TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
-                                 bool& useCollection, bool& useMap) {
+                                 bool& useArr, bool& useVec, bool& useMap) {
   if (baseType < TObj && baseType.clsSpec()) {
     auto const cls = baseType.clsSpec().cls();
 
@@ -1860,7 +1845,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
     auto const isMapOrSet = isMap ||
                             collections::isType(cls, CollectionType::Set) ||
                             collections::isType(cls, CollectionType::ImmSet);
-    auto const okMapOrSet = [&]() {
+    useArr = [&]() {
       if (!isMapOrSet) return false;
       if (keyType <= TInt) return true;
       if (!keyType.hasConstVal(TStr)) return false;
@@ -1868,21 +1853,21 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
       if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
       return true;
     }();
-    // Similarly, Vector is only usable with int keys, so we can only do this
-    // for Vector if it's an Int.
-    auto const isVector = collections::isType(cls, CollectionType::Vector) ||
-                          collections::isType(cls, CollectionType::ImmVector);
-    auto const okVector = isVector && keyType <= TInt;
 
-    useCollection = okMapOrSet || okVector;
+    // Vector is only usable with int keys, so we can only optimize for
+    // Vector if the key is an Int
+    useVec = (collections::isType(cls, CollectionType::Vector) ||
+              collections::isType(cls, CollectionType::ImmVector)) &&
+             keyType <= TInt;
+
     // If it's a map with a non-static string key, we can do a map-specific
     // optimization.
     useMap = isMap && keyType <= TStr;
 
-    if (useCollection || useMap) return TypeConstraint(cls);
+    if (useArr || useVec || useMap) return TypeConstraint(cls);
   }
 
-  useCollection = useMap = false;
+  useArr = useVec = useMap = false;
   return DataTypeSpecific;
 }
 
@@ -1892,7 +1877,7 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
-  if (arrType <= TVec) return implVecIdx(env);
+  if (arrType <= TVec) return implVecIdx(env, nullptr);
   if (arrType <= TDict) return implDictKeysetIdx(env, true);
   if (arrType <= TKeyset) return implDictKeysetIdx(env, false);
 
@@ -1911,7 +1896,7 @@ void emitIdx(IRGS& env) {
   auto const keyType  = key->type();
   auto const baseType = base->type();
 
-  if (baseType <= TVec) return implVecIdx(env);
+  if (baseType <= TVec) return implVecIdx(env, nullptr);
   if (baseType <= TDict) return implDictKeysetIdx(env, true);
   if (baseType <= TKeyset) return implDictKeysetIdx(env, false);
 
@@ -1938,15 +1923,18 @@ void emitIdx(IRGS& env) {
     return;
   }
 
-  bool useCollection, useMap;
-  auto const tc = idxBaseConstraint(baseType, keyType, useCollection, useMap);
-  if (useCollection || useMap) {
+  bool useArr, useVec, useMap;
+  auto const tc = idxBaseConstraint(baseType, keyType, useArr, useVec, useMap);
+  if (useArr || useVec || useMap) {
     env.irb->constrainValue(base, tc);
     env.irb->constrainValue(key, DataTypeSpecific);
 
-    if (useCollection) {
+    if (useArr) {
       auto const arr = gen(env, LdColArray, base);
       implArrayIdx(env, arr);
+    } else if (useVec) {
+      auto const vec = gen(env, LdColVec, base);
+      implVecIdx(env, vec);
     } else {
       implMapIdx(env);
     }
@@ -2007,6 +1995,19 @@ void emitAKExists(IRGS& env) {
       push(env, cns(env, false));
       decRef(env, arr);
       return;
+    }
+
+    if (RuntimeOption::EvalHackArrCompatNotices) {
+      gen(
+        env,
+        RaiseHackArrCompatNotice,
+        cns(
+          env,
+          makeStaticString(
+            makeHackArrCompatImplicitArrayKeyMsg(uninit_variant.asTypedValue())
+          )
+        )
+      );
     }
 
     key = cns(env, staticEmptyString());

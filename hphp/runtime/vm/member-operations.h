@@ -425,8 +425,14 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raise_hackarr_compat_notice("Cannot index into null");
+      }
       return ElemEmptyish();
     case KindOfBoolean:
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raise_hackarr_compat_notice("Cannot index into a boolean");
+      }
       return ElemBoolean(base);
     case KindOfInt64:
     case KindOfDouble:
@@ -450,7 +456,6 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
     case KindOfObject:
       return ElemObject<mode, keyType>(tvRef, base, key);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -795,7 +800,6 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfObject:
       return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1003,7 +1007,6 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1110,7 +1113,6 @@ inline TypedValue* NewElem(TypedValue& tvRef,
     case KindOfObject:
       return NewElemObject(tvRef, base);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1122,6 +1124,13 @@ inline TypedValue* NewElem(TypedValue& tvRef,
 template <KeyType keyType>
 inline void SetElemEmptyish(TypedValue* base, key_type<keyType> key,
                             Cell* value) {
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    if (base->m_type == KindOfNull) {
+      raise_hackarr_compat_notice("Promoting null to array");
+    } else if (base->m_type == KindOfBoolean) {
+      raise_hackarr_compat_notice("Promoting false to array");
+    }
+  }
   auto const& scratchKey = initScratchKey(key);
   tvAsVariant(base) = Array::Create();
   tvAsVariant(base).asArrRef().set(tvAsCVarRef(&scratchKey),
@@ -1347,6 +1356,9 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
   if (key.m_type == KindOfInt64) {
     return SetElemArrayPre<setResult>(a, key.m_data.num, value, copy);
   }
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatImplicitArrayKey(&key);
+  }
   if (isNullType(key.m_type)) {
     return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
   }
@@ -1527,7 +1539,6 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
       SetElemObject<keyType>(base, key, value);
       return nullptr;
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1724,7 +1735,6 @@ inline void SetNewElem(TypedValue* base, Cell* value) {
     case KindOfObject:
       return SetNewElemObject(base, value);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1838,7 +1848,6 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -1919,7 +1928,6 @@ inline TypedValue* SetOpNewElem(TypedValue& tvRef,
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2077,7 +2085,6 @@ inline Cell IncDecElem(
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2158,7 +2165,6 @@ inline Cell IncDecNewElem(
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2252,7 +2258,7 @@ inline void UnsetElemVec(TypedValue* base, key_type<keyType> key) {
     base->m_data.parr = a2;
     assertx(cellIsPlausible(*base));
     a->decRefAndRelease();
- }
+  }
 }
 
 /**
@@ -2383,7 +2389,6 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
     }
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2570,7 +2575,6 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
       return IssetEmptyElemObj<useEmpty, keyType>(base->m_data.pobj, key);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2717,7 +2721,6 @@ TypedValue* propPre(TypedValue& tvRef, TypedValue* base) {
       return base;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2753,7 +2756,6 @@ inline TypedValue* nullSafeProp(TypedValue& tvRef,
     case KindOfObject:
       return base->m_data.pobj->prop(&tvRef, ctx, key);
     case KindOfRef:
-    case KindOfClass:
       always_assert(false);
   }
   not_reached();
@@ -2890,7 +2892,6 @@ inline void SetProp(Class* ctx, TypedValue* base, key_type<keyType> key,
       return SetPropObj<keyType>(ctx, base->m_data.pobj, key, val);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -2969,7 +2970,6 @@ inline TypedValue* SetOpProp(TypedValue& tvRef,
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);
@@ -3050,7 +3050,6 @@ inline Cell IncDecProp(
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   unknownBaseType(base);

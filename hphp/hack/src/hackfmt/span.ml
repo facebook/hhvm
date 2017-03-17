@@ -9,9 +9,6 @@
  *)
 
 type t = {
-  cost: int;
-}
-
-let make cost = {
-  cost = cost;
+  id: int;
+  cost: Cost.t;
 }

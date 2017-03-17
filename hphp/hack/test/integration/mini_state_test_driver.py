@@ -58,6 +58,7 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
 # some comment
 use_mini_state = true
 use_watchman = true
+watchman_subscribe = true
 """)
 
     def write_hhconfig(self, script_name):
@@ -83,6 +84,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
                 f,
                 {
                     'state': self.saved_state_path(),
+                    'corresponding_base_revision': '1',
                     'is_cached': True,
                     'deptable': self.saved_state_path() + '.sql',
                 })

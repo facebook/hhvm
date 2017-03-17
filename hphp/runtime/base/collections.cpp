@@ -222,8 +222,8 @@ ArrayData* deepCopyDict(ArrayData* arr) {
 ArrayData* deepCopyKeyset(ArrayData* arr) {
   assert(arr->isKeyset());
   KeysetInit ai{arr->size()};
-  MixedArray::IterateV(
-    MixedArray::asMixed(arr),
+  SetArray::Iterate(
+    SetArray::asSet(arr),
     [&](const TypedValue* v) {
       Variant value{tvAsCVarRef(v)};
       deepCopy(value.asTypedValue());
@@ -248,7 +248,6 @@ void deepCopy(TypedValue* tv) {
     case KindOfString:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       return;
 
     case KindOfVec: {
@@ -573,8 +572,7 @@ bool equals(const ObjectData* obj1, const ObjectData* obj2) {
 
   if (isMapCollection(ct1) && isMapCollection(ct2)) {
     // For migration purposes, distinct Map types should compare equal
-    return BaseMap::Equals(
-      BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
+    return BaseMap::Equals(obj1, obj2);
   }
 
   if (isVectorCollection(ct1) && isVectorCollection(ct2)) {

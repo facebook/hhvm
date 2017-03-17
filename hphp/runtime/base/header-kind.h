@@ -60,16 +60,10 @@ inline bool haveCount(HeaderKind k) {
  */
 using RefCount = int32_t;
 
-enum class Counted {
-  Maybe, // objects can be static or uncounted, and support cow
-  Always // objects must be in request-heap with positive refcounts
-};
-
 enum GCBits {
   Unmarked = 0,
   Mark = 1,
-  CMark = 2,
-  DualMark = 3,  // Mark|CMark
+  Pin = 3,
 };
 
 inline GCBits operator|(GCBits a, GCBits b) {
@@ -90,54 +84,72 @@ inline bool operator&(GCBits a, GCBits b) {
  * objects that support being allocated outside the request heap with
  * a count field containing StaticValue or UncountedValue
  */
-template<class T = uint16_t, Counted CNT = Counted::Always>
-struct HeaderWord {
+struct HeapObject {
+protected:
   union {
     struct {
-      mutable RefCount count;
-      HeaderKind kind;
-      mutable bool weak_refed:1;
-      mutable bool partially_inited:1;
-      mutable GCBits marks:6;
-      T aux;
+      mutable RefCount m_count;
+      HeaderKind m_kind;
+      mutable uint8_t m_weak_refed:1;
+      mutable uint8_t m_partially_inited:1;
+      mutable uint8_t m_marks:6;
+      mutable uint16_t m_aux16;
     };
-    struct { uint32_t lo32, hi32; };
-    uint64_t q;
+    struct {
+      uint32_t m_aux32; // usable if the subclass is not refcounted
+      uint32_t m_hi32;
+    };
+    uint64_t m_all64;
   };
 
-  void init(HeaderKind kind, RefCount count) {
-    q = uint64_t(kind) << (8 * offsetof(HeaderWord, kind)) |
-        uint32_t(count) << (8 * offsetof(HeaderWord, count));
+  template<class T> T& aux() const {
+    static_assert(sizeof(T) == 2, "");
+    return reinterpret_cast<T&>(m_aux16);
   }
 
-  void init(T aux, HeaderKind kind, RefCount count) {
-    q = uint64_t(kind)  << (8 * offsetof(HeaderWord, kind)) |
-        uint64_t(uint16_t(aux))   << (8 * offsetof(HeaderWord, aux)) |
-        uint32_t(count) << (8 * offsetof(HeaderWord, count));
+public:
+  void initHeader(HeaderKind kind, RefCount count) {
+    m_all64 = uint64_t(kind) << (8 * offsetof(HeapObject, m_kind)) |
+              uint32_t(count) << (8 * offsetof(HeapObject, m_count));
+  }
+
+  template<class T>
+  void initHeader(T aux, HeaderKind kind, RefCount count) {
+    m_all64 = uint64_t(kind)  << (8 * offsetof(HeapObject, m_kind)) |
+              uint64_t(uint16_t(aux))   << (8 * offsetof(HeapObject, m_aux16)) |
+              uint32_t(count) << (8 * offsetof(HeapObject, m_count));
     static_assert(sizeof(T) == 2, "header layout requres 2-byte aux");
   }
 
-  void init(const HeaderWord<T,CNT>& h, RefCount count) {
-    q = uint64_t(h.hi32) << 32 | uint32_t(count);
+  void initHeader(const HeapObject& h, RefCount count) {
+    m_all64 = uint64_t(h.m_hi32) << 32 | uint32_t(count);
   }
 
-  bool checkCount() const;
-  bool isRefCounted() const;
-  bool hasMultipleRefs() const;
-  bool hasExactlyOneRef() const;
-  bool isStatic() const;
-  bool isUncounted() const;
-  void incRefCount() const;
-  void rawIncRefCount() const;
-  void decRefCount() const;
-  bool decWillRelease() const;
-  bool decReleaseCheck();
-};
+  static constexpr size_t kind_offset() {
+    return offsetof(HeapObject, m_kind);
+  }
+  static constexpr size_t count_offset() {
+    return offsetof(HeapObject, m_count);
+  }
+  static constexpr size_t aux_offset() {
+    return offsetof(HeapObject, m_aux16);
+  }
 
-constexpr auto HeaderOffset = 0;
-constexpr auto HeaderKindOffset = HeaderOffset + offsetof(HeaderWord<>, kind);
-constexpr auto FAST_REFCOUNT_OFFSET = HeaderOffset +
-                                      offsetof(HeaderWord<>, count);
+public:
+  HeaderKind kind() const { return m_kind; }
+  GCBits marks() const { return (GCBits)m_marks; }
+  void clearMarks() const { m_marks = GCBits::Unmarked; }
+  GCBits mark(GCBits m) const {
+    auto const old = (GCBits)m_marks;
+    m_marks = old | m;
+    return old;
+  }
+};
+static_assert(sizeof(HeapObject) == sizeof(uint64_t),
+              "HeapObject is expected to be 8 bytes.");
+
+constexpr auto HeaderKindOffset = HeapObject::kind_offset();
+constexpr auto HeaderAuxOffset = HeapObject::aux_offset();
 
 inline bool isObjectKind(HeaderKind k) {
   return k >= HeaderKind::Object && k <= HeaderKind::ImmSet;

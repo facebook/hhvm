@@ -72,8 +72,8 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                    inst->marker().func()->fullName()->toCppString());
   }
 
-  auto const mc_handler = extra->fatal ? handlePrimeCacheInit<true>
-                                       : handlePrimeCacheInit<false>;
+  auto const mc_handler = extra->fatal ? tc::ustubs().handlePrimeCacheInitFatal
+                                       : tc::ustubs().handlePrimeCacheInit;
 
   /*
    * The `mcprep' instruction here creates a smashable move, which serves as

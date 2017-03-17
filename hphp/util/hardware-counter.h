@@ -29,10 +29,6 @@ namespace HPHP {
 
 #ifndef NO_HARDWARE_COUNTERS
 
-struct InstructionCounter;
-struct LoadCounter;
-struct StoreCounter;
-
 struct PerfTable {
   const char* name;
   uint32_t type;
@@ -57,6 +53,7 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
   static void ClearPerfEvents();
+  static void UpdateServiceData(const timespec& begin);
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,
@@ -74,11 +71,14 @@ private:
   bool addPerfEvent(const char* event);
   bool setPerfEvents(folly::StringPiece events);
   void getPerfEvents(PerfEventCallback f, void* data);
+  template<typename F>
+  void forEachCounter(F func);
   void clearPerfEvents();
+  void updateServiceData();
 
-  std::unique_ptr<InstructionCounter> m_instructionCounter;
-  std::unique_ptr<LoadCounter> m_loadCounter;
-  std::unique_ptr<StoreCounter> m_storeCounter;
+  std::unique_ptr<HardwareCounterImpl> m_instructionCounter;
+  std::unique_ptr<HardwareCounterImpl> m_loadCounter;
+  std::unique_ptr<HardwareCounterImpl> m_storeCounter;
   std::vector<std::unique_ptr<HardwareCounterImpl>> m_counters;
 };
 
@@ -104,6 +104,7 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
+  static void UpdateServiceData(const timespec& begin) { }
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,

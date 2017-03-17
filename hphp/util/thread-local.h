@@ -159,7 +159,7 @@ struct ThreadLocalManager {
     static_assert(sizeof(T) <= 0xffffffffu, "");
     PushTop(&node, sizeof(T), type_scan::getIndexForScan<T>());
   }
-  void scan(type_scan::Scanner&) const;
+  template<class Fn> void iterate(Fn fn) const;
   static ThreadLocalManager& GetManager();
 
 private:

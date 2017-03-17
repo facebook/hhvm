@@ -17,7 +17,7 @@ let all_output = utils.all_output;
 function parse_file_to_json(file, on_parsed, on_error)
 {
   // TODO: Can we provide an API for parsing text, not just a file?
-  let program = 'full_fidelity_parse';
+  let program = 'hh_parse';
   let args = ['--full-fidelity-json', file];
   let on_complete = (code, stdout, stderr) =>
   {

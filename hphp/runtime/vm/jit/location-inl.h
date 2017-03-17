@@ -30,6 +30,11 @@ inline FPInvOffset Location::stackIdx() const {
   return m_stack.stackIdx;
 }
 
+inline uint32_t Location::clsRefSlot() const {
+  assertx(m_tag == LTag::CSlot);
+  return m_clsref.slot;
+}
+
 inline bool Location::operator==(const Location& other) const {
   if (m_tag != other.m_tag) return false;
 
@@ -40,6 +45,8 @@ inline bool Location::operator==(const Location& other) const {
       return stackIdx() == other.stackIdx();
     case LTag::MBase:
       return true;
+    case LTag::CSlot:
+      return clsRefSlot() == other.clsRefSlot();
   }
   not_reached();
   return false;
@@ -59,6 +66,8 @@ inline bool Location::operator<(const Location& other) const {
       return stackIdx() < other.stackIdx();
     case LTag::MBase:
       return false;
+    case LTag::CSlot:
+      return clsRefSlot() < other.clsRefSlot();
   }
   not_reached();
   return false;

@@ -78,7 +78,7 @@ struct MethProfile {
    */
   void reportMeth(const ActRec* ar, const Class* cls) {
     auto const meth = ar->func();
-    if (!cls && meth->cls()) {
+    if (!cls && meth->isMethod()) {
       cls = ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass();
     }
     reportMethHelper(cls, meth);

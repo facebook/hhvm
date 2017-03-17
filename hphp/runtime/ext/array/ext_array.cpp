@@ -241,6 +241,8 @@ TypedValue HHVM_FUNCTION(array_fill,
   if (num < 0) {
     throw_invalid_argument("Number of elements can't be negative");
     return make_tv<KindOfBoolean>(false);
+  } else if (num == 0) {
+    return tvReturn(empty_array());
   }
 
   if (start_index == 0) {
@@ -305,6 +307,9 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
+      if (RuntimeOption::EvalHackArrCompatNotices && ad->useWeakKeys()) {
+        raiseHackArrCompatImplicitArrayKey(cell);
+      }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
 
     case KindOfBoolean:
@@ -320,6 +325,9 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfObject:
     case KindOfResource:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raiseHackArrCompatImplicitArrayKey(cell);
+      }
       raise_warning("Array key should be either a string or an integer");
       return false;
 
@@ -334,7 +342,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfInt64:
       return ad->exists(cell->m_data.num);
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -763,9 +770,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -788,9 +792,6 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1043,9 +1044,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1068,9 +1066,6 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
         continue;
-
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1180,12 +1175,13 @@ TypedValue HHVM_FUNCTION(array_unshift,
 }
 
 Variant array_values(const Variant& input) {
-  if (input.isVecArray()) {
+  auto const cell = *input.asCell();
+  if (isArrayType(cell.m_type) && cell.m_data.parr->isVectorData()) {
     return input;
   }
 
   folly::Optional<PackedArrayInit> ai;
-  auto ok = IterateV(*input.asCell(),
+  auto ok = IterateV(cell,
                      [&](ArrayData* adata) {
                        ai.emplace(adata->size());
                      },
@@ -1372,7 +1368,6 @@ int64_t HHVM_FUNCTION(count,
       return 1;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();

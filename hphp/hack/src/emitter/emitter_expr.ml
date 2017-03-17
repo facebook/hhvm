@@ -39,7 +39,7 @@ let resolve_class_id env = function
   | CIself ->
       Option.value_map env.self_name
         ~default:(RCdynamic `self) ~f:(fun x -> RCstatic x)
-  | CI (_, s) -> RCstatic (fmt_name s)
+  | CI x -> RCstatic (fmt_name (get_instantiated_sid_name x))
   | CIstatic -> RCdynamic `static
   | CIexpr e -> RCdynamic (`var e)
 
@@ -294,7 +294,9 @@ and emit_call_lhs env (_, expr_ as expr) nargs =
     in
 
     (match cid with
-    | CI (_, s) -> emit_FPushClsMethodD env nargs field (fmt_name s)
+    | CI x ->
+      emit_FPushClsMethodD env nargs field
+        (fmt_name (get_instantiated_sid_name x))
     | CIself | CIparent ->
       (* Calls through self:: or parent:: need to be "forwarding"
        * calls that preserve the late static binding "called class".
@@ -629,7 +631,7 @@ and emit_expr env (pos, expr_ as expr) =
 
   (* Transform back into a Class_const *)
   | Typename sid ->
-    emit_expr env (pos, Class_const (CI sid, (pos, "class")))
+    emit_expr env (pos, Class_const (CI (sid, []), (pos, "class")))
 
   (* handle ::class; just emit the name if we have it,
    * otherwise use NameA to get it *)
@@ -687,8 +689,8 @@ and emit_expr env (pos, expr_ as expr) =
   | Shape smap ->
     (* Compile to an array. *)
     let shape_field_to_expr = function
-      | SFlit (pos, _ as s) -> pos, String s
-      | SFclass_const ((pos, _ as id), s) -> pos, Class_const (CI id, s)
+      | Ast.SFlit (pos, _ as s) -> pos, String s
+      | Ast.SFclass_const ((pos, _ as id), s) -> pos, Class_const (CI (id, []), s)
     in
     let shape_fields =
       List.map ~f:(fun (k, v) -> (shape_field_to_expr k, v))

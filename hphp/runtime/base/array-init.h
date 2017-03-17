@@ -303,6 +303,14 @@ private:
 #endif
 };
 
+struct MixedArrayInit : ArrayInit {
+  explicit MixedArrayInit(size_t n) : ArrayInit(n, Map{}) {}
+  MixedArrayInit(size_t n, CheckAllocation c) :
+      ArrayInit(n, Map {}, c) {}
+  MixedArrayInit(MixedArrayInit&& other) noexcept :
+      ArrayInit(std::move(other)) {}
+};
+
 struct DictInit {
   /*
    * For large array allocations, consider passing CheckAllocation, which will

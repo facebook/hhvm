@@ -537,11 +537,11 @@ class CommonTests(object):
 
         self.check_cmd_and_json_cmd(
             [
-                'File "{root}foo_3.php", line 10, characters 17-19: '
-                'Foo::__construct',
+                'Foo',
+                'File "{root}foo_3.php", line 10, characters 17-19:',
                 '1 total results'
             ], [
-                '[{{"name":"Foo::__construct","filename":"{root}foo_3.php",'
+                '[{{"name":"Foo","filename":"{root}foo_3.php",'
                 '"line":10,"char_start":17,"char_end":19}}]'
             ],
             options=['--ide-find-refs', '1:20'],
@@ -556,8 +556,8 @@ class CommonTests(object):
                 'line 1, characters 36-38',
                 '2 total results',
             ], [
-                '[{{"filename":"","line":1,"char_start":20,"char_end":22}},'
-                '{{"filename":"","line":1,"char_start":36,"char_end":38}}]'
+                '[{{"line":1,"char_start":20,"char_end":22}},'
+                '{{"line":1,"char_start":36,"char_end":38}}]'
             ],
             options=['--ide-highlight-refs', '1:20'],
             stdin='<?hh function test(Foo $foo) { new Foo(); }')
@@ -1116,8 +1116,8 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             stdout,
             '{{"jsonrpc":"2.0","id":234,"result":' +
             '{{"server_api_version":0}}}}\n' +
-            '{{"jsonrpc":"2.0","id":null,"result":{{"filename":' +
-            '"{root}a.php","errors":[{{"message":[{{"descr":"Expected }}",' +
-            '"path":"{root}a.php","line":3,"start":1,"end":0,' +
-            '"code":1002}}]}}]}}}}\n'
+            '{{"jsonrpc":"2.0","method":"diagnostics","params":{{"filename":"' +
+            '{root}a.php","errors":[[{{"message":"Expected }}","range":' +
+            '{{"filename":"{root}a.php","range":{{"start":' +
+            '{{"line":3,"column":1}},"end":{{"line":3,"column":1}}}}}}}}]]}}}}\n'
         )

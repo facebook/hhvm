@@ -62,17 +62,16 @@ struct Marker {
   // mark ambiguous pointers in the range [start,start+len)
   void conservativeScan(const void* start, size_t len);
 
-private:
   bool mark(const void*, GCBits = GCBits::Mark);
   void checkedEnqueue(const void* p, GCBits bits);
   void finish_typescan();
 
   void enqueue(const Header* h) {
-    assert(h &&
-           h->kind() <= HeaderKind::BigMalloc &&
-           h->kind() != HeaderKind::AsyncFuncFrame &&
-           h->kind() != HeaderKind::NativeData &&
-           h->kind() != HeaderKind::ClosureHdr);
+    assert(h && h->kind() <= HeaderKind::BigMalloc &&
+           h->kind() != HeaderKind::AsyncFuncWH &&
+           h->kind() != HeaderKind::Closure);
+    assert(!isObjectKind(h->kind()) ||
+           !h->obj_.getAttribute(ObjectData::HasNativeData));
     work_.push_back(h);
     max_worklist_ = std::max(max_worklist_, work_.size());
   }
@@ -83,13 +82,12 @@ private:
     return type_scan::hasNonConservative() &&
       tyindex == type_scan::kIndexUnknown;
   }
-public:
-  Counter allocd_, marked_, ambig_, freed_, unknown_; // bytes
+
+  Counter allocd_, marked_, pinned_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
   size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
   size_t max_worklist_{0}; // max size of work_
-private:
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
@@ -102,17 +100,10 @@ inline bool Marker::mark(const void* p, GCBits marks) {
   auto h = static_cast<const Header*>(p);
   assert(h->kind() <= HeaderKind::BigMalloc &&
          h->kind() != HeaderKind::AsyncFuncWH);
-  auto old_marks = h->hdr_.marks;
-  h->hdr_.marks = old_marks | marks;
-  return old_marks == GCBits::Unmarked;
+  return h->hdr_.mark(marks) == GCBits::Unmarked;
 }
 
-void Marker::checkedEnqueue(const void* p, GCBits bits) {
-  auto h = ptrs_.header(p);
-  if (!h) return;
-  // mark p if it's an interesting kind. since we have metadata for it,
-  // it must have a valid header.
-  if (!mark(h, bits)) return; // skip if already marked.
+DEBUG_ONLY bool checkEnqueuedKind(const Header* h) {
   switch (h->kind()) {
     case HeaderKind::Apc:
     case HeaderKind::Globals:
@@ -127,7 +118,6 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
     case HeaderKind::Empty:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
-      enqueue(h);
       break;
     case HeaderKind::Object:
     case HeaderKind::Vector:
@@ -142,16 +132,11 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
       // Object kinds. None of these should have native-data, because if they
       // do, the mapped header should be for the NativeData prefix.
       assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
-      enqueue(h);
       break;
     case HeaderKind::AsyncFuncFrame:
-      enqueue(reinterpret_cast<const Header*>(h->asyncFuncWH()));
-      break;
     case HeaderKind::NativeData:
-      enqueue(reinterpret_cast<const Header*>(h->nativeObj()));
-      break;
     case HeaderKind::ClosureHdr:
-      enqueue(reinterpret_cast<const Header*>(h->closureObj()));
+      // these have inner objects, but we queued the outer one.
       break;
     case HeaderKind::String:
       // nothing to queue since strings don't have pointers
@@ -166,6 +151,18 @@ void Marker::checkedEnqueue(const void* p, GCBits bits) {
       // shouldn't get these from the pointer map.
       always_assert(false && "bad header kind");
       break;
+  }
+  return true;
+}
+
+void Marker::checkedEnqueue(const void* p, GCBits bits) {
+  if (auto h = ptrs_.header(p)) {
+    // enqueue h the first time. If it's an object with no pointers (eg String),
+    // we'll skip it when we process the queue.
+    if (mark(h, bits)) {
+      enqueue(h);
+      assert(checkEnqueuedKind(h));
+    }
   }
 }
 
@@ -182,7 +179,7 @@ Marker::conservativeScan(const void* start, size_t len) {
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
       (void*)(uintptr_t(*s) & (-1ULL >> 16)),
-      GCBits::CMark
+      GCBits::Pin
     );
   }
 }
@@ -197,83 +194,25 @@ NEVER_INLINE void Marker::init() {
   SCOPE_EXIT { init_us_ = cpu_micros() - t0; };
   MM().initFree();
   initfree_us_ = cpu_micros() - t0;
-  MM().iterate([&](Header* h) {
-    if (h->kind() == HeaderKind::Free) return;
-    h->hdr_.marks = GCBits::Unmarked;
-    allocd_ += h->size();
-    ptrs_.insert(h);
-    switch (h->kind()) {
-      case HeaderKind::Apc:
-      case HeaderKind::Globals:
-      case HeaderKind::Proxy:
-      case HeaderKind::Packed:
-      case HeaderKind::Mixed:
-      case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::VecArray:
-      case HeaderKind::Keyset:
-      case HeaderKind::String:
-      case HeaderKind::Ref:
-        break;
-      case HeaderKind::Resource:
-        if (typeIndexIsUnknown(h->res_.typeIndex())) {
-          unknown_objects_.emplace_back(h);
-        }
-        break;
-      case HeaderKind::Object:
-      case HeaderKind::Vector:
-      case HeaderKind::Map:
-      case HeaderKind::Set:
-      case HeaderKind::Pair:
-      case HeaderKind::ImmVector:
-      case HeaderKind::ImmMap:
-      case HeaderKind::ImmSet:
-      case HeaderKind::AwaitAllWH:
-      case HeaderKind::WaitHandle:
-        assert(!h->obj_.getAttribute(ObjectData::HasNativeData) &&
-               "object with NativeData from forEachHeader");
-        break;
-      case HeaderKind::AsyncFuncFrame: {
-        // Pointers to either the frame or object will be mapped to the frame.
-        auto obj = reinterpret_cast<const Header*>(h->asyncFuncWH());
-        obj->hdr_.marks = GCBits::Unmarked;
-        break;
+  auto tyindex_max = type_scan::Index(
+      type_scan::detail::g_metadata_table_size
+  );
+  MM().iterate([&](Header* h, size_t allocSize) {
+    auto kind = h->kind();
+    if (kind == HeaderKind::Free) return;
+    h->hdr_.clearMarks();
+    allocd_ += allocSize;
+    ptrs_.insert(h, allocSize);
+    if (type_scan::hasNonConservative()) {
+      auto tyindex = kind == HeaderKind::Resource ? h->res_.typeIndex() :
+                     kind == HeaderKind::NativeData ? h->native_.typeIndex() :
+                     kind == HeaderKind::SmallMalloc ? h->malloc_.typeIndex() :
+                     kind == HeaderKind::BigMalloc ? h->malloc_.typeIndex() :
+                     tyindex_max;
+      if (tyindex == type_scan::kIndexUnknown) {
+        unknown_objects_.emplace_back(h);
+        unknown_ += allocSize;
       }
-      case HeaderKind::NativeData: {
-        // Pointers to either the native data or the object will be mapped to
-        // the native data.
-        if (typeIndexIsUnknown(h->native_.typeIndex())) {
-          unknown_objects_.emplace_back(h);
-        }
-        auto obj = reinterpret_cast<const Header*>(h->nativeObj());
-        obj->hdr_.marks = GCBits::Unmarked;
-        break;
-      }
-      case HeaderKind::ClosureHdr: {
-        // Pointers to either the closure header or the closure object will
-        // be mapped to the closure header.
-        auto obj = reinterpret_cast<const Header*>(h->closureObj());
-        obj->hdr_.marks = GCBits::Unmarked;
-        break;
-      }
-      case HeaderKind::SmallMalloc:
-      case HeaderKind::BigMalloc:
-        if (typeIndexIsUnknown(h->malloc_.typeIndex())) {
-          unknown_objects_.emplace_back(h);
-        }
-        break;
-      case HeaderKind::AsyncFuncWH:
-        // AsyncFuncWH should not be encountered on their own while scanning.
-        // They should always be prefixed by an AsyncFuncFrame allocation.
-      case HeaderKind::Closure:
-        // Closure should not be encountered on their own while scanning.
-        // They should always be prefixed by a ClosureHdr.
-      case HeaderKind::Free:
-      case HeaderKind::Hole:
-      case HeaderKind::BigObj:
-        // Hole and BigObj are skipped in ForEachHeader. Free is skipped above.
-        always_assert(false && "skipped by forEachHeader()");
-        break;
     }
   });
   ptrs_.prepare();
@@ -281,12 +220,17 @@ NEVER_INLINE void Marker::init() {
 
 void Marker::finish_typescan() {
   type_scanner_.finish(
-    [this](const void* p, const char*) {
+    [this](const void* p) {
       xscanned_ += sizeof(p);
-      checkedEnqueue(p, GCBits::Mark);
+      checkedEnqueue(p, GCBits::Pin);
     },
-    [this](const void* p, std::size_t size, const char*) {
+    [this](const void* p, std::size_t size) {
+      // we could extract the addresses of ambiguous ptrs, if desired.
       conservativeScan(p, size);
+    },
+    [this](const void** addr) {
+      xscanned_ += sizeof(*addr);
+      checkedEnqueue(*addr, GCBits::Mark);
     }
   );
 }
@@ -294,8 +238,10 @@ void Marker::finish_typescan() {
 NEVER_INLINE void Marker::traceRoots() {
   auto const t0 = cpu_micros();
   SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
-  scanRoots(type_scanner_);
-  finish_typescan();
+  iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
+    type_scanner_.scanByIndex(tyindex, p, size);
+    finish_typescan();
+  });
   cscanned_roots_ = cscanned_;
   xscanned_roots_ = xscanned_;
 }
@@ -336,9 +282,8 @@ NEVER_INLINE void Marker::trace() {
   if (!unknown_objects_.empty()) {
     auto const t0 = cpu_micros();
     SCOPE_EXIT { unknown_us_ = cpu_micros() - t0; };
-    for (const auto* h : unknown_objects_) {
-      if (mark(h, GCBits::CMark)) {
-        unknown_ += h->size();
+    for (const auto h : unknown_objects_) {
+      if (mark(h, GCBits::Pin)) {
         enqueue(h);
       }
     }
@@ -389,7 +334,7 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
       break;
     case HeaderKind::Free:
       // free memory; these should not be marked.
-      assert(!(h->hdr_.marks & GCBits::Mark));
+      assert(!(h->hdr_.marks() & GCBits::Mark));
       break;
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Closure:
@@ -412,13 +357,13 @@ NEVER_INLINE void Marker::sweep() {
   const bool use_quarantine = RuntimeOption::EvalQuarantine;
   if (use_quarantine) mm.beginQuarantine();
   SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
-  std::deque<Header*> defer;
+  std::deque<std::pair<Header*,size_t>> defer;
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
     assert(check_sweep_header(hdr));
-    if (hdr->hdr_.marks != GCBits::Unmarked) {
-      if (hdr->hdr_.marks & GCBits::Mark) marked_ += h_size;
-      else if (hdr->hdr_.marks & GCBits::CMark) ambig_ += h_size;
-      return; // continue foreach loop
+    if (hdr->hdr_.marks() & GCBits::Mark) {
+      marked_ += h_size;
+      if (hdr->hdr_.marks() == GCBits::Pin) pinned_ += h_size;
+      return; // continue iterate loop
     }
     // when freeing objects below, do not run their destructors! we don't
     // want to execute cascading decrefs or anything. the normal release()
@@ -453,7 +398,7 @@ NEVER_INLINE void Marker::sweep() {
       case HeaderKind::NativeData: {
         auto obj = h->obj();
         if (obj->getAttribute(ObjectData::HasDynPropArr)) {
-          defer.push_back(h);
+          defer.push_back({h, h_size});
         } else {
           freed_ += h_size;
           mm.objFree(h, h_size);
@@ -461,7 +406,7 @@ NEVER_INLINE void Marker::sweep() {
         break;
       }
       case HeaderKind::Apc:
-        defer.push_back(h);
+        defer.push_back({h, h_size});
         break;
       case HeaderKind::String:
         freed_ += h_size;
@@ -484,17 +429,18 @@ NEVER_INLINE void Marker::sweep() {
   });
   // deferred items explicitly free auxilary blocks, so it's unsafe to
   // sweep them while iterating over ptrs_.
-  for (auto h : defer) {
+  for (auto& e : defer) {
+    auto h = e.first;
+    auto h_size = e.second;
+    freed_ += h_size;
     if (isObjectKind(h->kind()) || h->kind() == HeaderKind::NativeData ||
         h->kind() == HeaderKind::AsyncFuncFrame) {
       assert(h->obj()->getAttribute(ObjectData::HasDynPropArr));
       auto obj = h->obj();
       // dynPropTable is a req::hash_map, so this will req::free junk
       g_context->dynPropTable.erase(obj);
-      freed_ += h->size();
-      mm.objFree(h, h->size());
+      mm.objFree(h, h_size);
     } else if (h->kind() == HeaderKind::Apc) {
-      freed_ += h->size();
       h->apc_.reap(); // also frees localCache and atomic-dec APCArray
     } else {
       always_assert(false && "what other kinds need deferral?");
@@ -533,6 +479,7 @@ __thread size_t t_req_num; // snapshot thread-local copy of g_req_num;
 __thread size_t t_gc_num; // nth collection in this request.
 __thread bool t_enable_samples;
 __thread size_t t_trigger;
+__thread int64_t t_req_age;
 __thread MemoryUsageStats t_pre_stats;
 
 StructuredLogEntry logCommon() {
@@ -554,16 +501,18 @@ void logCollection(const char* phase, const Marker& mkr) {
   // log stuff
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     Trace::traceRelease(
-      "gc mmUsage %luM trigger %luM init %lums mark %lums "
-      "allocd %luM allocd-count %lu free %.1fM "
+      "gc age %ldms mmUsage %luM trigger %luM init %lums mark %lums "
+      "allocd %luM marked %.1f%% pinned %.1f%% free %.1fM "
       "cscan-heap %.1fM "
       "xscan-heap %.1fM\n",
+      t_req_age,
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
       mkr.init_us_/1000,
       mkr.mark_us_/1000,
       mkr.allocd_.bytes/1024/1024,
-      mkr.allocd_.count,
+      100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
+      100.0 * mkr.pinned_.bytes / mkr.allocd_.bytes,
       mkr.freed_.bytes/1024.0/1024.0,
       (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
       (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
@@ -574,6 +523,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   std::string scanner(type_scan::hasNonConservative() ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
   sample.setInt("gc_num", t_gc_num);
+  sample.setInt("req_age_micros", t_req_age);
   // timers of gc-sub phases
   sample.setInt("init_micros", mkr.init_us_);
   sample.setInt("initfree_micros", mkr.initfree_us_);
@@ -584,8 +534,9 @@ void logCollection(const char* phase, const Marker& mkr) {
   // size metrics gathered during gc
   sample.setInt("allocd_bytes", mkr.allocd_.bytes);
   sample.setInt("allocd_objects", mkr.allocd_.count);
+  sample.setInt("allocd_span", mkr.ptrs_.span().second);
   sample.setInt("marked_bytes", mkr.marked_.bytes);
-  sample.setInt("ambig_bytes", mkr.ambig_.bytes);
+  sample.setInt("pinned_bytes", mkr.pinned_.bytes);
   sample.setInt("unknown_bytes", mkr.unknown_.bytes);
   sample.setInt("freed_bytes", mkr.freed_.bytes);
   sample.setInt("trigger_bytes", t_trigger);
@@ -595,6 +546,10 @@ void logCollection(const char* phase, const Marker& mkr) {
                 mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes);
   sample.setInt("xscanned_heap",
                 mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes);
+  sample.setInt("rds_normal_size", rds::normalSection().size());
+  sample.setInt("rds_normal_count", rds::detail::s_normal_alloc_descs.size());
+  sample.setInt("rds_local_size", rds::localSection().size());
+  sample.setInt("rds_local_count", rds::detail::s_local_alloc_descs.size());
   sample.setInt("max_worklist", mkr.max_worklist_);
   StructuredLog::log("hhvm_gc", sample);
 }
@@ -667,6 +622,7 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
+  t_req_age = cpu_micros() - m_req_start_micros;
   t_trigger = m_nextGc;
   collectImpl(phase);
   updateNextGc();

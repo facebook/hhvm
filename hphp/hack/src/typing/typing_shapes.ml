@@ -89,8 +89,8 @@ let to_array env shape_ty res =
         let keys = ShapeMap.keys fdm in
         let env, keys = List.map_env env keys begin fun env key ->
           let env, ty = match key with
-          | SFlit (p, _) -> env, (Reason.Rwitness p, Tprim Tstring)
-          | SFclass_const ((_, cid), (_, mid)) ->
+          | Ast.SFlit (p, _) -> env, (Reason.Rwitness p, Tprim Tstring)
+          | Ast.SFclass_const ((_, cid), (_, mid)) ->
             begin match Env.get_class env cid with
               | Some class_ -> begin match Env.get_const env class_ mid with
                   | Some const ->

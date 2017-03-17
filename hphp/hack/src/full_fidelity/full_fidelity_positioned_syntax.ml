@@ -163,7 +163,10 @@ let full_text node =
     (source_text node) (leading_start_offset node) (full_width node)
 
 let leading_text node =
-  SourceText.sub (source_text node) (start_offset node) (leading_width node)
+  SourceText.sub
+    (source_text node)
+    (leading_start_offset node)
+    (leading_width node)
 
 let trailing_text node =
   SourceText.sub

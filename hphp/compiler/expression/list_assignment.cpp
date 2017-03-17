@@ -98,6 +98,9 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
       case T_EVAL:
       case T_ARRAY:
       case T_ARRAY_CAST:
+      case T_VEC:
+      case T_DICT:
+      case T_KEYSET:
         return ListAssignment::Regular;
       default:
         return ListAssignment::Null;

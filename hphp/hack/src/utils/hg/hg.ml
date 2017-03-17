@@ -13,35 +13,9 @@
 open Core
 
 exception Malformed_result
-exception Process_failure of Unix.process_status * (** Stderr *) string
 
 type hg_rev = string
 type svn_rev = string
-
-
-(** We shell out hg commands, so its computation is out-of-process, and
- * return a Future for the result. *)
-module Future = struct
-  type 'a promise =
-    | Complete : 'a -> 'a promise
-    | Incomplete of Process_types.t * (string -> 'a)
-  type 'a t = 'a promise ref
-
-  let make process transformer =
-    ref (Incomplete (process, transformer))
-
-  let get : 'a t -> 'a = fun promise -> match !promise with
-    | Complete v -> v
-    | Incomplete (process, transformer) ->
-      let status, result, err = Process.read_and_close_pid process in
-      match status with
-      | Unix.WEXITED 0 ->
-        let result = transformer result in
-        let () = promise := Complete result in
-        result
-      | _ ->
-        raise (Process_failure (status, err))
-end
 
 (** Returns the closest SVN ancestor to the hg revision.
  *
@@ -55,13 +29,13 @@ end
 let get_closest_svn_ancestor hg_rev repo =
   let process = Process.exec "hg" [
     "log";
-    {|-r|};
-    {|reverse(::|} ^ hg_rev ^ {|)|};
-    {|-T|};
-    {|{svnrev}\n|};
-    {|-l|};
-    {|150|};
-    {|--cwd|};
+    "-r";
+    Printf.sprintf "reverse(::%s)" hg_rev;
+    "-T";
+    "{svnrev}\n";
+    "-l";
+    "150";
+    "--cwd";
     repo;
   ]
   in
@@ -85,6 +59,19 @@ let current_working_copy_hg_rev repo =
       else
         result, false
 
+(** hg log -r 'ancestor(master,.)' -T '{svnrev}\n' *)
+let current_working_copy_base_rev repo =
+  let process = Process.exec "hg" [
+    "log";
+    "-r";
+    "ancestor(master,.)";
+    "-T";
+    "{svnrev}\n";
+    "--cwd";
+    repo;
+  ] in
+  Future.make process String.trim
+
 (** Returns the files changed between the hg_rev and the ancestor
  * SVN revision.
  *
@@ -92,11 +79,22 @@ let current_working_copy_hg_rev repo =
 let files_changed_since_svn_rev hg_rev svn_rev repo =
   let process = Process.exec "hg" [
     "status";
-    {|--rev|};
-    ("r" ^ svn_rev);
-    {|--rev|};
+    "--rev";
+    Printf.sprintf "r%s" svn_rev;
+    "--rev";
     hg_rev;
-    {|--cwd|};
+    "--cwd";
     repo;
   ] in
   Future.make process String.trim
+
+(** hg update --rev r<svn_rev> --cwd <repo> *)
+let update_to_base_rev svn_rev repo =
+  let process = Process.exec "hg" [
+    "update";
+    "--rev";
+    Printf.sprintf "r%s" svn_rev;
+    "--cwd";
+    repo;
+  ] in
+  Future.make process ignore

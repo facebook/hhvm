@@ -129,7 +129,6 @@ private:
   std::ostream *m_streams[StreamCount];
   std::ostream *m_out;
   Output m_output;
-  bool m_verbose;
 
   int m_indentation[StreamCount];
   bool m_indentPending[StreamCount];
@@ -139,7 +138,6 @@ private:
   bool m_inExpression[StreamCount];
   bool m_inFileOrClassHeader;
   bool m_inNamespace;
-  int m_localId[StreamCount];
 
   static int s_idLambda;
   std::map<std::string, int> m_idCounters;
@@ -152,8 +150,6 @@ private:
   StringToClassScopePtrVecMap m_classes;
   std::set<const FunctionScope*> m_declaredClosures;
   FileScopeRawPtr m_literalScope;
-
-  int m_phpLineNo;
 
   bool m_translatePredefined; // translate predefined constants in PHP output
   bool m_scalarVariant;

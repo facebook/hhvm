@@ -2306,8 +2306,8 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
       } else {
         string replaced;
         replaced.reserve(array_size.size());
-        for (int i = 0; i < (int)array_size.size(); i++) {
-          char ch = array_size[i];
+        for (int i2 = 0; i2 < (int)array_size.size(); i2++) {
+          char ch = array_size[i2];
           if (ch == ',') {
             replaced += ' ';
           } else {

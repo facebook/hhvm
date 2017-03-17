@@ -1,0 +1,29 @@
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $x;
+  FPushCtorD 0 "MyClass"
+  FCall 0
+  PopR
+  SetL $x
+  PopC
+  Null
+  RetC
+}
+
+.class MyClass {
+  .method [public] <"" N  > __contruct() {
+    Null
+    RetC
+  }
+  .method [public] 86ctor() {
+    Null
+    RetC
+  }
+}
+

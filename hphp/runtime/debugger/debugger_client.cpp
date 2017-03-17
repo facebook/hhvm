@@ -2528,7 +2528,7 @@ void DebuggerClient::saveConfig() {
 
   std::vector<std::string> names;
   get_supported_colors(names);
-  for (unsigned int i = 0; i < names.size(); i++) {
+  for (i = 0; i < names.size(); i++) {
     stream << "hhvm.color.supported_names[" << i+1 << "] = " << names[i]
            << std::endl;
   }

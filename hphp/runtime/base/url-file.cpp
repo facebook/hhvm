@@ -127,9 +127,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
   VMRegAnchor vra;
   ActRec* fp = vmfp();
-  while (fp->skipFrame()) {
-    fp = g_context->getPrevVMState(fp);
-  }
+  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
   auto id = fp->func()->lookupVarId(s_http_response_header.get());
   if (id != kInvalidId) {
     auto tvTo = frame_local(fp, id);

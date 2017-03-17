@@ -140,6 +140,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return IgnoreError::from_json($json, $position, $source);
     case 'fall_through':
       return FallThrough::from_json($json, $position, $source);
+    case 'markup':
+      return Markup::from_json($json, $position, $source);
 
     case 'missing':
       return Missing::missing();
@@ -149,8 +151,6 @@ abstract class EditableSyntax implements ArrayAccess {
       return ScriptHeader::from_json($json, $position, $source);
     case 'script':
       return Script::from_json($json, $position, $source);
-    case 'footer':
-      return ScriptFooter::from_json($json, $position, $source);
     case 'simple_type_specifier':
       return SimpleTypeSpecifier::from_json($json, $position, $source);
     case 'literal':
@@ -185,6 +185,10 @@ abstract class EditableSyntax implements ArrayAccess {
       return FunctionDeclaration::from_json($json, $position, $source);
     case 'function_declaration_header':
       return FunctionDeclarationHeader::from_json($json, $position, $source);
+    case 'where_clause':
+      return WhereClause::from_json($json, $position, $source);
+    case 'where_constraint':
+      return WhereConstraint::from_json($json, $position, $source);
     case 'methodish_declaration':
       return MethodishDeclaration::from_json($json, $position, $source);
     case 'classish_declaration':
@@ -285,6 +289,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return MemberSelectionExpression::from_json($json, $position, $source);
     case 'safe_member_selection_expression':
       return SafeMemberSelectionExpression::from_json($json, $position, $source);
+    case 'embedded_member_selection_expression':
+      return EmbeddedMemberSelectionExpression::from_json($json, $position, $source);
     case 'yield_expression':
       return YieldExpression::from_json($json, $position, $source);
     case 'print_expression':
@@ -313,6 +319,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return ParenthesizedExpression::from_json($json, $position, $source);
     case 'braced_expression':
       return BracedExpression::from_json($json, $position, $source);
+    case 'embedded_braced_expression':
+      return EmbeddedBracedExpression::from_json($json, $position, $source);
     case 'list_expression':
       return ListExpression::from_json($json, $position, $source);
     case 'collection_literal_expression':
@@ -333,6 +341,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return ElementInitializer::from_json($json, $position, $source);
     case 'subscript_expression':
       return SubscriptExpression::from_json($json, $position, $source);
+    case 'embedded_subscript_expression':
+      return EmbeddedSubscriptExpression::from_json($json, $position, $source);
     case 'awaitable_creation_expression':
       return AwaitableCreationExpression::from_json($json, $position, $source);
     case 'xhp_children_declaration':
@@ -908,6 +918,8 @@ abstract class EditableToken extends EditableSyntax {
        return new VecToken($leading, $trailing);
     case 'void':
        return new VoidToken($leading, $trailing);
+    case 'where':
+       return new WhereToken($leading, $trailing);
     case 'while':
        return new WhileToken($leading, $trailing);
     case 'xor':
@@ -928,8 +940,6 @@ abstract class EditableToken extends EditableSyntax {
        return new RightBraceToken($leading, $trailing);
     case '.':
        return new DotToken($leading, $trailing);
-    case '?>':
-       return new QuestionGreaterThanToken($leading, $trailing);
     case '->':
        return new MinusGreaterThanToken($leading, $trailing);
     case '++':
@@ -954,6 +964,8 @@ abstract class EditableToken extends EditableSyntax {
        return new SlashToken($leading, $trailing);
     case '%':
        return new PercentToken($leading, $trailing);
+    case '<>':
+       return new LessThanGreaterThanToken($leading, $trailing);
     case '<=>':
        return new LessThanEqualGreaterThanToken($leading, $trailing);
     case '<<':
@@ -1065,6 +1077,8 @@ abstract class EditableToken extends EditableSyntax {
        return new BinaryLiteralToken($leading, $trailing, $token_text);
     case 'floating_literal':
        return new FloatingLiteralToken($leading, $trailing, $token_text);
+    case 'execution_string':
+       return new ExecutionStringToken($leading, $trailing, $token_text);
     case 'single_quoted_string_literal':
        return new SingleQuotedStringLiteralToken($leading, $trailing, $token_text);
     case 'double_quoted_string_literal':
@@ -2480,6 +2494,21 @@ final class VoidToken extends EditableToken {
     return new VoidToken($this->leading(), $trailing);
   }
 }
+final class WhereToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('where', $leading, $trailing, 'where');
+  }
+
+  public function with_leading(EditableSyntax $leading): WhereToken {
+    return new WhereToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): WhereToken {
+    return new WhereToken($this->leading(), $trailing);
+  }
+}
 final class WhileToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -2628,21 +2657,6 @@ final class DotToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): DotToken {
     return new DotToken($this->leading(), $trailing);
-  }
-}
-final class QuestionGreaterThanToken extends EditableToken {
-  public function __construct(
-    EditableSyntax $leading,
-    EditableSyntax $trailing) {
-    parent::__construct('?>', $leading, $trailing, '?>');
-  }
-
-  public function with_leading(EditableSyntax $leading): QuestionGreaterThanToken {
-    return new QuestionGreaterThanToken($leading, $this->trailing());
-  }
-
-  public function with_trailing(EditableSyntax $trailing): QuestionGreaterThanToken {
-    return new QuestionGreaterThanToken($this->leading(), $trailing);
   }
 }
 final class MinusGreaterThanToken extends EditableToken {
@@ -2823,6 +2837,21 @@ final class PercentToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): PercentToken {
     return new PercentToken($this->leading(), $trailing);
+  }
+}
+final class LessThanGreaterThanToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('<>', $leading, $trailing, '<>');
+  }
+
+  public function with_leading(EditableSyntax $leading): LessThanGreaterThanToken {
+    return new LessThanGreaterThanToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): LessThanGreaterThanToken {
+    return new LessThanGreaterThanToken($this->leading(), $trailing);
   }
 }
 final class LessThanEqualGreaterThanToken extends EditableToken {
@@ -3701,6 +3730,26 @@ final class FloatingLiteralToken extends EditableToken {
     return new FloatingLiteralToken($this->leading(), $trailing, $this->text());
   }
 }
+final class ExecutionStringToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing,
+    string $text) {
+    parent::__construct('execution_string', $leading, $trailing, $text);
+  }
+
+  public function with_text(string $text): ExecutionStringToken {
+    return new ExecutionStringToken($this->leading(), $this->trailing(), $text);
+  }
+
+  public function with_leading(EditableSyntax $leading): ExecutionStringToken {
+    return new ExecutionStringToken($leading, $this->trailing(), $this->text());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): ExecutionStringToken {
+    return new ExecutionStringToken($this->leading(), $trailing, $this->text());
+  }
+}
 final class SingleQuotedStringLiteralToken extends EditableToken {
   public function __construct(
     EditableSyntax $leading,
@@ -4074,6 +4123,8 @@ abstract class EditableTrivia extends EditableSyntax {
         return new IgnoreError($trivia_text);
       case 'fall_through':
         return new FallThrough($trivia_text);
+      case 'markup':
+        return new Markup($trivia_text);
 
       default:
         throw new Exception('unexpected json kind: ' . $json->kind);
@@ -4167,6 +4218,15 @@ class FallThrough extends EditableTrivia {
   }
   public function with_text(string $text): FallThrough {
     return new FallThrough($text);
+  }
+}
+
+class Markup extends EditableTrivia {
+  public function __construct(string $text) {
+    parent::__construct('markup', $text);
+  }
+  public function with_text(string $text): Markup {
+    return new Markup($text);
   }
 }
 
@@ -4404,49 +4464,6 @@ final class Script extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_header;
     yield $this->_declarations;
-    yield break;
-  }
-}
-final class ScriptFooter extends EditableSyntax {
-  private EditableSyntax $_question_greater_than;
-  public function __construct(
-    EditableSyntax $question_greater_than) {
-    parent::__construct('footer');
-    $this->_question_greater_than = $question_greater_than;
-  }
-  public function question_greater_than(): EditableSyntax {
-    return $this->_question_greater_than;
-  }
-  public function with_question_greater_than(EditableSyntax $question_greater_than): ScriptFooter {
-    return new ScriptFooter(
-      $question_greater_than);
-  }
-
-  public function rewrite(
-    ( function
-      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
-    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
-    $new_parents = $parents ?? [];
-    array_push($new_parents, $this);
-    $question_greater_than = $this->question_greater_than()->rewrite($rewriter, $new_parents);
-    if (
-      $question_greater_than === $this->question_greater_than()) {
-      return $rewriter($this, $parents ?? []);
-    } else {
-      return $rewriter(new ScriptFooter(
-        $question_greater_than), $parents ?? []);
-    }
-  }
-
-  public static function from_json(mixed $json, int $position, string $source) {
-    $question_greater_than = EditableSyntax::from_json(
-      $json->footer_question_greater_than, $position, $source);
-    $position += $question_greater_than->width();
-    return new ScriptFooter(
-        $question_greater_than);
-  }
-  public function children(): Generator<string, EditableSyntax, void> {
-    yield $this->_question_greater_than;
     yield break;
   }
 }
@@ -6107,6 +6124,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   private EditableSyntax $_right_paren;
   private EditableSyntax $_colon;
   private EditableSyntax $_type;
+  private EditableSyntax $_where_clause;
   public function __construct(
     EditableSyntax $async,
     EditableSyntax $keyword,
@@ -6117,7 +6135,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     EditableSyntax $parameter_list,
     EditableSyntax $right_paren,
     EditableSyntax $colon,
-    EditableSyntax $type) {
+    EditableSyntax $type,
+    EditableSyntax $where_clause) {
     parent::__construct('function_declaration_header');
     $this->_async = $async;
     $this->_keyword = $keyword;
@@ -6129,6 +6148,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $this->_right_paren = $right_paren;
     $this->_colon = $colon;
     $this->_type = $type;
+    $this->_where_clause = $where_clause;
   }
   public function async(): EditableSyntax {
     return $this->_async;
@@ -6160,6 +6180,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
+  public function where_clause(): EditableSyntax {
+    return $this->_where_clause;
+  }
   public function with_async(EditableSyntax $async): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $async,
@@ -6171,7 +6194,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_keyword(EditableSyntax $keyword): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6184,7 +6208,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_ampersand(EditableSyntax $ampersand): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6197,7 +6222,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_name(EditableSyntax $name): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6210,7 +6236,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_type_parameter_list(EditableSyntax $type_parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6223,7 +6250,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_left_paren(EditableSyntax $left_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6236,7 +6264,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_parameter_list(EditableSyntax $parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6249,7 +6278,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_right_paren(EditableSyntax $right_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6262,7 +6292,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $right_paren,
       $this->_colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_colon(EditableSyntax $colon): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6275,7 +6306,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $colon,
-      $this->_type);
+      $this->_type,
+      $this->_where_clause);
   }
   public function with_type(EditableSyntax $type): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
@@ -6288,7 +6320,22 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $this->_parameter_list,
       $this->_right_paren,
       $this->_colon,
-      $type);
+      $type,
+      $this->_where_clause);
+  }
+  public function with_where_clause(EditableSyntax $where_clause): FunctionDeclarationHeader {
+    return new FunctionDeclarationHeader(
+      $this->_async,
+      $this->_keyword,
+      $this->_ampersand,
+      $this->_name,
+      $this->_type_parameter_list,
+      $this->_left_paren,
+      $this->_parameter_list,
+      $this->_right_paren,
+      $this->_colon,
+      $this->_type,
+      $where_clause);
   }
 
   public function rewrite(
@@ -6307,6 +6354,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     $colon = $this->colon()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
+    $where_clause = $this->where_clause()->rewrite($rewriter, $new_parents);
     if (
       $async === $this->async() &&
       $keyword === $this->keyword() &&
@@ -6317,7 +6365,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
       $parameter_list === $this->parameter_list() &&
       $right_paren === $this->right_paren() &&
       $colon === $this->colon() &&
-      $type === $this->type()) {
+      $type === $this->type() &&
+      $where_clause === $this->where_clause()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FunctionDeclarationHeader(
@@ -6330,7 +6379,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
         $parameter_list,
         $right_paren,
         $colon,
-        $type), $parents ?? []);
+        $type,
+        $where_clause), $parents ?? []);
     }
   }
 
@@ -6365,6 +6415,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $type = EditableSyntax::from_json(
       $json->function_type, $position, $source);
     $position += $type->width();
+    $where_clause = EditableSyntax::from_json(
+      $json->function_where_clause, $position, $source);
+    $position += $where_clause->width();
     return new FunctionDeclarationHeader(
         $async,
         $keyword,
@@ -6375,7 +6428,8 @@ final class FunctionDeclarationHeader extends EditableSyntax {
         $parameter_list,
         $right_paren,
         $colon,
-        $type);
+        $type,
+        $where_clause);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_async;
@@ -6388,6 +6442,155 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     yield $this->_right_paren;
     yield $this->_colon;
     yield $this->_type;
+    yield $this->_where_clause;
+    yield break;
+  }
+}
+final class WhereClause extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_constraints;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $constraints) {
+    parent::__construct('where_clause');
+    $this->_keyword = $keyword;
+    $this->_constraints = $constraints;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function constraints(): EditableSyntax {
+    return $this->_constraints;
+  }
+  public function with_keyword(EditableSyntax $keyword): WhereClause {
+    return new WhereClause(
+      $keyword,
+      $this->_constraints);
+  }
+  public function with_constraints(EditableSyntax $constraints): WhereClause {
+    return new WhereClause(
+      $this->_keyword,
+      $constraints);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $constraints = $this->constraints()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $constraints === $this->constraints()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new WhereClause(
+        $keyword,
+        $constraints), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->where_clause_keyword, $position, $source);
+    $position += $keyword->width();
+    $constraints = EditableSyntax::from_json(
+      $json->where_clause_constraints, $position, $source);
+    $position += $constraints->width();
+    return new WhereClause(
+        $keyword,
+        $constraints);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_constraints;
+    yield break;
+  }
+}
+final class WhereConstraint extends EditableSyntax {
+  private EditableSyntax $_left_type;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_right_type;
+  public function __construct(
+    EditableSyntax $left_type,
+    EditableSyntax $operator,
+    EditableSyntax $right_type) {
+    parent::__construct('where_constraint');
+    $this->_left_type = $left_type;
+    $this->_operator = $operator;
+    $this->_right_type = $right_type;
+  }
+  public function left_type(): EditableSyntax {
+    return $this->_left_type;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function right_type(): EditableSyntax {
+    return $this->_right_type;
+  }
+  public function with_left_type(EditableSyntax $left_type): WhereConstraint {
+    return new WhereConstraint(
+      $left_type,
+      $this->_operator,
+      $this->_right_type);
+  }
+  public function with_operator(EditableSyntax $operator): WhereConstraint {
+    return new WhereConstraint(
+      $this->_left_type,
+      $operator,
+      $this->_right_type);
+  }
+  public function with_right_type(EditableSyntax $right_type): WhereConstraint {
+    return new WhereConstraint(
+      $this->_left_type,
+      $this->_operator,
+      $right_type);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_type = $this->left_type()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $right_type = $this->right_type()->rewrite($rewriter, $new_parents);
+    if (
+      $left_type === $this->left_type() &&
+      $operator === $this->operator() &&
+      $right_type === $this->right_type()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new WhereConstraint(
+        $left_type,
+        $operator,
+        $right_type), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_type = EditableSyntax::from_json(
+      $json->where_constraint_left_type, $position, $source);
+    $position += $left_type->width();
+    $operator = EditableSyntax::from_json(
+      $json->where_constraint_operator, $position, $source);
+    $position += $operator->width();
+    $right_type = EditableSyntax::from_json(
+      $json->where_constraint_right_type, $position, $source);
+    $position += $right_type->width();
+    return new WhereConstraint(
+        $left_type,
+        $operator,
+        $right_type);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_type;
+    yield $this->_operator;
+    yield $this->_right_type;
     yield break;
   }
 }
@@ -12161,6 +12364,91 @@ final class SafeMemberSelectionExpression extends EditableSyntax {
     yield break;
   }
 }
+final class EmbeddedMemberSelectionExpression extends EditableSyntax {
+  private EditableSyntax $_object;
+  private EditableSyntax $_operator;
+  private EditableSyntax $_name;
+  public function __construct(
+    EditableSyntax $object,
+    EditableSyntax $operator,
+    EditableSyntax $name) {
+    parent::__construct('embedded_member_selection_expression');
+    $this->_object = $object;
+    $this->_operator = $operator;
+    $this->_name = $name;
+  }
+  public function object(): EditableSyntax {
+    return $this->_object;
+  }
+  public function operator(): EditableSyntax {
+    return $this->_operator;
+  }
+  public function name(): EditableSyntax {
+    return $this->_name;
+  }
+  public function with_object(EditableSyntax $object): EmbeddedMemberSelectionExpression {
+    return new EmbeddedMemberSelectionExpression(
+      $object,
+      $this->_operator,
+      $this->_name);
+  }
+  public function with_operator(EditableSyntax $operator): EmbeddedMemberSelectionExpression {
+    return new EmbeddedMemberSelectionExpression(
+      $this->_object,
+      $operator,
+      $this->_name);
+  }
+  public function with_name(EditableSyntax $name): EmbeddedMemberSelectionExpression {
+    return new EmbeddedMemberSelectionExpression(
+      $this->_object,
+      $this->_operator,
+      $name);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $object = $this->object()->rewrite($rewriter, $new_parents);
+    $operator = $this->operator()->rewrite($rewriter, $new_parents);
+    $name = $this->name()->rewrite($rewriter, $new_parents);
+    if (
+      $object === $this->object() &&
+      $operator === $this->operator() &&
+      $name === $this->name()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmbeddedMemberSelectionExpression(
+        $object,
+        $operator,
+        $name), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $object = EditableSyntax::from_json(
+      $json->embedded_member_object, $position, $source);
+    $position += $object->width();
+    $operator = EditableSyntax::from_json(
+      $json->embedded_member_operator, $position, $source);
+    $position += $operator->width();
+    $name = EditableSyntax::from_json(
+      $json->embedded_member_name, $position, $source);
+    $position += $name->width();
+    return new EmbeddedMemberSelectionExpression(
+        $object,
+        $operator,
+        $name);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_object;
+    yield $this->_operator;
+    yield $this->_name;
+    yield break;
+  }
+}
 final class YieldExpression extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_operand;
@@ -13433,6 +13721,91 @@ final class BracedExpression extends EditableSyntax {
     yield break;
   }
 }
+final class EmbeddedBracedExpression extends EditableSyntax {
+  private EditableSyntax $_left_brace;
+  private EditableSyntax $_expression;
+  private EditableSyntax $_right_brace;
+  public function __construct(
+    EditableSyntax $left_brace,
+    EditableSyntax $expression,
+    EditableSyntax $right_brace) {
+    parent::__construct('embedded_braced_expression');
+    $this->_left_brace = $left_brace;
+    $this->_expression = $expression;
+    $this->_right_brace = $right_brace;
+  }
+  public function left_brace(): EditableSyntax {
+    return $this->_left_brace;
+  }
+  public function expression(): EditableSyntax {
+    return $this->_expression;
+  }
+  public function right_brace(): EditableSyntax {
+    return $this->_right_brace;
+  }
+  public function with_left_brace(EditableSyntax $left_brace): EmbeddedBracedExpression {
+    return new EmbeddedBracedExpression(
+      $left_brace,
+      $this->_expression,
+      $this->_right_brace);
+  }
+  public function with_expression(EditableSyntax $expression): EmbeddedBracedExpression {
+    return new EmbeddedBracedExpression(
+      $this->_left_brace,
+      $expression,
+      $this->_right_brace);
+  }
+  public function with_right_brace(EditableSyntax $right_brace): EmbeddedBracedExpression {
+    return new EmbeddedBracedExpression(
+      $this->_left_brace,
+      $this->_expression,
+      $right_brace);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_brace = $this->left_brace()->rewrite($rewriter, $new_parents);
+    $expression = $this->expression()->rewrite($rewriter, $new_parents);
+    $right_brace = $this->right_brace()->rewrite($rewriter, $new_parents);
+    if (
+      $left_brace === $this->left_brace() &&
+      $expression === $this->expression() &&
+      $right_brace === $this->right_brace()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmbeddedBracedExpression(
+        $left_brace,
+        $expression,
+        $right_brace), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_brace = EditableSyntax::from_json(
+      $json->embedded_braced_expression_left_brace, $position, $source);
+    $position += $left_brace->width();
+    $expression = EditableSyntax::from_json(
+      $json->embedded_braced_expression_expression, $position, $source);
+    $position += $expression->width();
+    $right_brace = EditableSyntax::from_json(
+      $json->embedded_braced_expression_right_brace, $position, $source);
+    $position += $right_brace->width();
+    return new EmbeddedBracedExpression(
+        $left_brace,
+        $expression,
+        $right_brace);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_brace;
+    yield $this->_expression;
+    yield $this->_right_brace;
+    yield break;
+  }
+}
 final class ListExpression extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_paren;
@@ -14501,6 +14874,115 @@ final class SubscriptExpression extends EditableSyntax {
     yield break;
   }
 }
+final class EmbeddedSubscriptExpression extends EditableSyntax {
+  private EditableSyntax $_receiver;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_index;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $receiver,
+    EditableSyntax $left_bracket,
+    EditableSyntax $index,
+    EditableSyntax $right_bracket) {
+    parent::__construct('embedded_subscript_expression');
+    $this->_receiver = $receiver;
+    $this->_left_bracket = $left_bracket;
+    $this->_index = $index;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function receiver(): EditableSyntax {
+    return $this->_receiver;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function index(): EditableSyntax {
+    return $this->_index;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_receiver(EditableSyntax $receiver): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $receiver,
+      $this->_left_bracket,
+      $this->_index,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $this->_receiver,
+      $left_bracket,
+      $this->_index,
+      $this->_right_bracket);
+  }
+  public function with_index(EditableSyntax $index): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $this->_receiver,
+      $this->_left_bracket,
+      $index,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): EmbeddedSubscriptExpression {
+    return new EmbeddedSubscriptExpression(
+      $this->_receiver,
+      $this->_left_bracket,
+      $this->_index,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $receiver = $this->receiver()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $index = $this->index()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $receiver === $this->receiver() &&
+      $left_bracket === $this->left_bracket() &&
+      $index === $this->index() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new EmbeddedSubscriptExpression(
+        $receiver,
+        $left_bracket,
+        $index,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $receiver = EditableSyntax::from_json(
+      $json->embedded_subscript_receiver, $position, $source);
+    $position += $receiver->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->embedded_subscript_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $index = EditableSyntax::from_json(
+      $json->embedded_subscript_index, $position, $source);
+    $position += $index->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->embedded_subscript_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new EmbeddedSubscriptExpression(
+        $receiver,
+        $left_bracket,
+        $index,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_receiver;
+    yield $this->_left_bracket;
+    yield $this->_index;
+    yield $this->_right_bracket;
+    yield break;
+  }
+}
 final class AwaitableCreationExpression extends EditableSyntax {
   private EditableSyntax $_async;
   private EditableSyntax $_compound_statement;
@@ -15229,17 +15711,23 @@ final class XHPAttribute extends EditableSyntax {
   }
 }
 final class XHPOpen extends EditableSyntax {
+  private EditableSyntax $_left_angle;
   private EditableSyntax $_name;
   private EditableSyntax $_attributes;
   private EditableSyntax $_right_angle;
   public function __construct(
+    EditableSyntax $left_angle,
     EditableSyntax $name,
     EditableSyntax $attributes,
     EditableSyntax $right_angle) {
     parent::__construct('xhp_open');
+    $this->_left_angle = $left_angle;
     $this->_name = $name;
     $this->_attributes = $attributes;
     $this->_right_angle = $right_angle;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
   }
   public function name(): EditableSyntax {
     return $this->_name;
@@ -15250,20 +15738,30 @@ final class XHPOpen extends EditableSyntax {
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
   }
+  public function with_left_angle(EditableSyntax $left_angle): XHPOpen {
+    return new XHPOpen(
+      $left_angle,
+      $this->_name,
+      $this->_attributes,
+      $this->_right_angle);
+  }
   public function with_name(EditableSyntax $name): XHPOpen {
     return new XHPOpen(
+      $this->_left_angle,
       $name,
       $this->_attributes,
       $this->_right_angle);
   }
   public function with_attributes(EditableSyntax $attributes): XHPOpen {
     return new XHPOpen(
+      $this->_left_angle,
       $this->_name,
       $attributes,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): XHPOpen {
     return new XHPOpen(
+      $this->_left_angle,
       $this->_name,
       $this->_attributes,
       $right_angle);
@@ -15275,16 +15773,19 @@ final class XHPOpen extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $attributes = $this->attributes()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
+      $left_angle === $this->left_angle() &&
       $name === $this->name() &&
       $attributes === $this->attributes() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new XHPOpen(
+        $left_angle,
         $name,
         $attributes,
         $right_angle), $parents ?? []);
@@ -15292,6 +15793,9 @@ final class XHPOpen extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $left_angle = EditableSyntax::from_json(
+      $json->xhp_open_left_angle, $position, $source);
+    $position += $left_angle->width();
     $name = EditableSyntax::from_json(
       $json->xhp_open_name, $position, $source);
     $position += $name->width();
@@ -15302,11 +15806,13 @@ final class XHPOpen extends EditableSyntax {
       $json->xhp_open_right_angle, $position, $source);
     $position += $right_angle->width();
     return new XHPOpen(
+        $left_angle,
         $name,
         $attributes,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_angle;
     yield $this->_name;
     yield $this->_attributes;
     yield $this->_right_angle;
@@ -16209,23 +16715,17 @@ final class MapArrayTypeSpecifier extends EditableSyntax {
 final class DictionaryTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
-  private EditableSyntax $_key;
-  private EditableSyntax $_comma;
-  private EditableSyntax $_value;
+  private EditableSyntax $_members;
   private EditableSyntax $_right_angle;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_angle,
-    EditableSyntax $key,
-    EditableSyntax $comma,
-    EditableSyntax $value,
+    EditableSyntax $members,
     EditableSyntax $right_angle) {
     parent::__construct('dictionary_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_angle = $left_angle;
-    $this->_key = $key;
-    $this->_comma = $comma;
-    $this->_value = $value;
+    $this->_members = $members;
     $this->_right_angle = $right_angle;
   }
   public function keyword(): EditableSyntax {
@@ -16234,14 +16734,8 @@ final class DictionaryTypeSpecifier extends EditableSyntax {
   public function left_angle(): EditableSyntax {
     return $this->_left_angle;
   }
-  public function key(): EditableSyntax {
-    return $this->_key;
-  }
-  public function comma(): EditableSyntax {
-    return $this->_comma;
-  }
-  public function value(): EditableSyntax {
-    return $this->_value;
+  public function members(): EditableSyntax {
+    return $this->_members;
   }
   public function right_angle(): EditableSyntax {
     return $this->_right_angle;
@@ -16250,54 +16744,28 @@ final class DictionaryTypeSpecifier extends EditableSyntax {
     return new DictionaryTypeSpecifier(
       $keyword,
       $this->_left_angle,
-      $this->_key,
-      $this->_comma,
-      $this->_value,
+      $this->_members,
       $this->_right_angle);
   }
   public function with_left_angle(EditableSyntax $left_angle): DictionaryTypeSpecifier {
     return new DictionaryTypeSpecifier(
       $this->_keyword,
       $left_angle,
-      $this->_key,
-      $this->_comma,
-      $this->_value,
+      $this->_members,
       $this->_right_angle);
   }
-  public function with_key(EditableSyntax $key): DictionaryTypeSpecifier {
+  public function with_members(EditableSyntax $members): DictionaryTypeSpecifier {
     return new DictionaryTypeSpecifier(
       $this->_keyword,
       $this->_left_angle,
-      $key,
-      $this->_comma,
-      $this->_value,
-      $this->_right_angle);
-  }
-  public function with_comma(EditableSyntax $comma): DictionaryTypeSpecifier {
-    return new DictionaryTypeSpecifier(
-      $this->_keyword,
-      $this->_left_angle,
-      $this->_key,
-      $comma,
-      $this->_value,
-      $this->_right_angle);
-  }
-  public function with_value(EditableSyntax $value): DictionaryTypeSpecifier {
-    return new DictionaryTypeSpecifier(
-      $this->_keyword,
-      $this->_left_angle,
-      $this->_key,
-      $this->_comma,
-      $value,
+      $members,
       $this->_right_angle);
   }
   public function with_right_angle(EditableSyntax $right_angle): DictionaryTypeSpecifier {
     return new DictionaryTypeSpecifier(
       $this->_keyword,
       $this->_left_angle,
-      $this->_key,
-      $this->_comma,
-      $this->_value,
+      $this->_members,
       $right_angle);
   }
 
@@ -16309,25 +16777,19 @@ final class DictionaryTypeSpecifier extends EditableSyntax {
     array_push($new_parents, $this);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
-    $key = $this->key()->rewrite($rewriter, $new_parents);
-    $comma = $this->comma()->rewrite($rewriter, $new_parents);
-    $value = $this->value()->rewrite($rewriter, $new_parents);
+    $members = $this->members()->rewrite($rewriter, $new_parents);
     $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_angle === $this->left_angle() &&
-      $key === $this->key() &&
-      $comma === $this->comma() &&
-      $value === $this->value() &&
+      $members === $this->members() &&
       $right_angle === $this->right_angle()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new DictionaryTypeSpecifier(
         $keyword,
         $left_angle,
-        $key,
-        $comma,
-        $value,
+        $members,
         $right_angle), $parents ?? []);
     }
   }
@@ -16339,32 +16801,22 @@ final class DictionaryTypeSpecifier extends EditableSyntax {
     $left_angle = EditableSyntax::from_json(
       $json->dictionary_type_left_angle, $position, $source);
     $position += $left_angle->width();
-    $key = EditableSyntax::from_json(
-      $json->dictionary_type_key, $position, $source);
-    $position += $key->width();
-    $comma = EditableSyntax::from_json(
-      $json->dictionary_type_comma, $position, $source);
-    $position += $comma->width();
-    $value = EditableSyntax::from_json(
-      $json->dictionary_type_value, $position, $source);
-    $position += $value->width();
+    $members = EditableSyntax::from_json(
+      $json->dictionary_type_members, $position, $source);
+    $position += $members->width();
     $right_angle = EditableSyntax::from_json(
       $json->dictionary_type_right_angle, $position, $source);
     $position += $right_angle->width();
     return new DictionaryTypeSpecifier(
         $keyword,
         $left_angle,
-        $key,
-        $comma,
-        $value,
+        $members,
         $right_angle);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_angle;
-    yield $this->_key;
-    yield $this->_comma;
-    yield $this->_value;
+    yield $this->_members;
     yield $this->_right_angle;
     yield break;
   }

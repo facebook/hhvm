@@ -125,19 +125,17 @@ void checkFaultEntryRec(const php::Func& func,
   assert(faultEntry.section != php::Block::Section::Main);
 
   /*
-   * The fault blocks should all have factored exits to parent
-   * catches/faults, if there are any.
+   * The fault blocks should all have factored exits to the parent
+   * catch/fault, if there is any.
    *
    * Note: for now this is an invariant, but if we start pruning
    * factoredExits this might need to change.
    */
-  for (auto parent = exnNode.parent; parent; parent = parent->parent) {
+  if (auto parent = exnNode.parent) {
     match<void>(
       parent->info,
-      [&] (const TryRegion& tr) {
-        for (DEBUG_ONLY auto& c : tr.catches) {
-          assert(has_edge_linear(faultEntry.factoredExits, c.second));
-        }
+      [&] (const CatchRegion& cr) {
+        assert(has_edge_linear(faultEntry.factoredExits, cr.catchEntry));
       },
       [&] (const FaultRegion& fr) {
         assert(has_edge_linear(faultEntry.factoredExits, fr.faultEntry));
@@ -162,7 +160,7 @@ void checkExnTreeMore(const php::Func& func, borrowed_ptr<const ExnNode> node) {
       boost::dynamic_bitset<> seenBlocks;
       checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
     },
-    [&] (const TryRegion& tr) {}
+    [&] (const CatchRegion& cr) {}
   );
 
   for (auto& c : node->children) checkExnTreeMore(func, borrow(c));
@@ -211,14 +209,14 @@ bool check(const php::Func& f) {
   DEBUG_ONLY Attr pcm = AttrParamCoerceModeNull | AttrParamCoerceModeFalse;
   assert((f.attrs & pcm) != pcm); // not both
 
-  boost::dynamic_bitset<> seenId(f.nextBlockId);
+  boost::dynamic_bitset<> seenId(f.blocks.size());
   for (auto& block : f.blocks) {
     if (block->id == NoBlockId) continue;
     assert(checkBlock(*block));
 
     // All blocks have unique ids in a given function; not necessarily
     // consecutive.
-    assert(block->id < f.nextBlockId);
+    assert(block->id < f.blocks.size());
     assert(!seenId.test(block->id));
     seenId.set(block->id);
   }

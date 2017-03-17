@@ -319,42 +319,20 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
 void BaseVector::addAllImpl(const Variant& t) {
   if (t.isNull()) return;
 
-  bool skip_ref_check = false;
   auto ok = IterateV(
     *t.asTypedValue(),
     [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
-      if (!m_size) {
-
-        // Not isPackedLayout(), we don't want to take ownership of Hack arrays.
-        if (adata->isPacked()) {
-          // Collections can't contains refs, so we need to check for their
-          // presence before taking ownership of this array.
-          bool contains_ref = false;
-          if (!skip_ref_check) {
-            PackedArray::IterateV(
-              adata,
-              [&](const TypedValue* value) {
-                if (value->m_type == KindOfRef) {
-                  contains_ref = true;
-                  return true;
-                }
-                return false;
-              }
-            );
-          }
-
-          if (!contains_ref) {
-            auto* oldAd = arrayData();
-            m_arr = adata;
-            adata->incRefCount();
-            m_capacity = arrayData()->cap();
-            m_size = arrayData()->m_size;
-            decRefArr(oldAd);
-            ++m_version;
-            return true;
-          }
-        }
+      if (!m_size && adata->isVecArray()) {
+        dropImmCopy();
+        auto* oldAd = arrayData();
+        m_arr = adata;
+        adata->incRefCount();
+        m_capacity = arrayData()->cap();
+        m_size = arrayData()->m_size;
+        decRefArr(oldAd);
+        ++m_version;
+        return true;
       }
       reserve(m_size + adata->size());
       mutateAndBump();
@@ -366,10 +344,6 @@ void BaseVector::addAllImpl(const Variant& t) {
     [&, this](ObjectData* coll) {
       if (coll->collectionType() == CollectionType::Pair) {
         mutateAndBump();
-      } else if (coll->collectionType() == CollectionType::Vector) {
-        // If its a vector collection we don't need to worry about refs in the
-        // above fast-path.
-        skip_ref_check = true;
       }
     },
     [this](const TypedValue* item) {
@@ -442,21 +416,7 @@ bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
 bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto bv1 = static_cast<const BaseVector*>(obj1);
   auto bv2 = static_cast<const BaseVector*>(obj2);
-
-  uint32_t sz = bv1->m_size;
-  if (sz != bv2->m_size) {
-    return false;
-  }
-
-  for (uint32_t i = 0; i < sz; ++i) {
-    if (!HPHP::equal(tvAsCVarRef(&bv1->data()[i]),
-                     tvAsCVarRef(&bv2->data()[i]))) {
-
-      return false;
-    }
-  }
-
-  return true;
+  return PackedArray::VecEqual(bv1->arrayData(), bv2->arrayData());
 }
 
 NEVER_INLINE
@@ -500,15 +460,15 @@ Variant BaseVector::popFront() {
 void BaseVector::reserveImpl(uint32_t newCap) {
   auto* oldBuf = data();
   auto* oldAd = arrayData();
-  m_arr = PackedArray::MakeReserve(newCap);
+  m_arr = PackedArray::MakeReserveVec(newCap);
   m_capacity = arrayData()->cap();
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
     std::memcpy(data(), oldBuf, m_size * sizeof(TypedValue));
     // Mark oldAd as having 0 elements so that the array release logic doesn't
     // decRef the elements (since we teleported the elements to a new array)
-    assert(oldAd != staticEmptyArray());
-    assert(oldAd->isPacked());
+    assert(oldAd != staticEmptyVecArray());
+    assert(oldAd->isVecArray());
     oldAd->m_size = 0;
     decRefArr(oldAd);
   } else {
@@ -535,7 +495,7 @@ BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
   : ObjectData(cls, collections::objectFlags, kind)
   , m_size(0)
   , m_versionAndCap(cap)
-  , m_arr(cap == 0 ? staticEmptyArray() : PackedArray::MakeReserve(cap))
+  , m_arr(cap == 0 ? staticEmptyVecArray() : PackedArray::MakeReserveVec(cap))
 {}
 
 /**
@@ -543,9 +503,9 @@ BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
  * if it exists.
  */
 BaseVector::~BaseVector() {
-  // Avoid indirect call, as we know it is a packed array.
-  auto const packed = arrayData();
-  if (packed->decReleaseCheck()) PackedArray::Release(packed);
+  // Avoid indirect call, as we know it is a vec array.
+  auto const vec = arrayData();
+  if (vec->decReleaseCheck()) PackedArray::ReleaseVec(vec);
 }
 
 void BaseVector::mutateImpl() {
@@ -557,12 +517,12 @@ void BaseVector::mutateImpl() {
   assert(arrayData()->cowCheck());
   if (!m_size) {
     arrayData()->decRefCount();
-    m_arr = staticEmptyArray();
+    m_arr = staticEmptyVecArray();
     m_capacity = 0;
     return;
   }
   auto* oldAd = arrayData();
-  m_arr = PackedArray::Copy(oldAd);
+  m_arr = PackedArray::CopyVec(oldAd);
   assert(oldAd->cowCheck());
   oldAd->decRefCount();
 }
@@ -628,7 +588,7 @@ void c_Vector::clear() {
   ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyArray();
+  m_arr = staticEmptyVecArray();
   m_size = 0;
   m_capacity = 0;
 }

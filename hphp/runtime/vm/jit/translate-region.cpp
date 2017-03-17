@@ -221,6 +221,7 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   for (auto const& pred : typePredictions) {
     auto type = pred.type;
     auto loc  = pred.location;
+    assertx(type <= TGen);
     irgen::predictType(irgs, loc, type);
   }
 
@@ -228,13 +229,8 @@ void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
   for (auto const& preCond : typePreConditions) {
     auto type = preCond.type;
     auto loc  = preCond.location;
-    if (type <= TCls) {
-      // Do not generate guards for class; instead assert the type.
-      assertx(loc.tag() == LTag::Stack);
-      irgen::assertTypeLocation(irgs, loc, type);
-    } else {
-      irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
-    }
+    assertx(type <= TGen);
+    irgen::checkType(irgs, loc, type, bcOff, checkOuterTypeOnly);
   }
 
   // Emit reffiness predictions.
@@ -407,14 +403,14 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
 
   auto stringProp = same_string_as(0);
   auto stringCls  = same_string_as(1);
-  auto agetc = Atom(Op::AGetC);
+  auto agetc = Atom(Op::ClsRefGetC);
   auto cgets = Atom(Op::CGetS);
 
   // Look for a class static singleton pattern.
   result = BCPattern {
     Atom(Op::String).capture(),
     Atom(Op::String).capture(),
-    Atom(Op::AGetC),
+    Atom(Op::ClsRefGetC),
     Atom(Op::CGetS),
     Atom(Op::IsTypeC),
     Atom::alt(
@@ -514,10 +510,10 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  // Make sure the FPushOp wasn't interpreted, based on an FPushCuf, or spanned
-  // another call
+  // Make sure the FPushOp wasn't interpreted, based on an FPushCuf, spanned
+  // another call, or marked as not eligible for inlining by frame-state.
   auto const& info = fpiStack.back();
-  if (isFPushCuf(info.fpushOpc) || info.interp || info.spansCall) {
+  if (isFPushCuf(info.fpushOpc) || !info.inlineEligible || info.spansCall) {
     return nullptr;
   }
 
@@ -635,14 +631,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     }
     setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
-    // Emit an ExitPlaceholder at the beginning of the block if any of
-    // the optimizations that can benefit from it are enabled, and only
-    // if we're not inlining. The inlining decision could be smarter
-    // but this is enough for now since we never emit guards in inlined
-    // functions (t7385908).
+    // Emit an ExitPlaceholder at the beginning of the block if any of the
+    // optimizations that can benefit from it are enabled, and only if we're
+    // not inlining. The inlining decision could be smarter but this is enough
+    // for now since we never emit guards in inlined functions (t7385908).
     const bool emitExitPlaceholder = irgs.inlineLevel == 0 &&
-      ((RuntimeOption::EvalHHIRLICM && hasUnprocPred) ||
-       (RuntimeOption::EvalHHIRTypeCheckHoisting));
+      (RuntimeOption::EvalHHIRLICM && hasUnprocPred);
     if (emitExitPlaceholder) irgen::makeExitPlaceholder(irgs);
 
     // Emit the type and reffiness predictions for this region block. If this is
@@ -812,13 +806,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           translateInstr(irgs, inst, checkOuterTypeOnly, firstInstr);
         }
       } catch (const FailedIRGen& exn) {
-        ProfSrcKey psk{irgs.profTransID, sk};
-        always_assert_flog(!retry.toInterp.count(psk),
+        ProfSrcKey psk2{irgs.profTransID, sk};
+        always_assert_flog(!retry.toInterp.count(psk2),
                            "IR generation failed with {}\n",
                            exn.what());
         FTRACE(1, "ir generation for {} failed with {}\n",
           inst.toString(), exn.what());
-        retry.toInterp.insert(psk);
+        retry.toInterp.insert(psk2);
         return TranslateResult::Retry;
       }
 
@@ -909,11 +903,13 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
       if (context.kind == TransKind::Profile &&
           RuntimeOption::EvalJitPGOUsePostConditions) {
         auto const lastSrcKey = region.lastSrcKey();
-        Block* mainExit = findMainExitBlock(irgs.unit, lastSrcKey);
-        FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-               mainExit->id(), show(irgs.unit));
-        assertx(mainExit);
-        pConds = irgs.irb->fs().postConds(mainExit);
+        if (auto const mainExit = findMainExitBlock(irgs.unit, lastSrcKey)) {
+          FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
+                 mainExit->id(), show(irgs.unit));
+          pConds = irgs.irb->fs().postConds(mainExit);
+        } else {
+          FTRACE(2, "translateRegion: no main exit\n");
+        }
       }
     } else {
       // Clear annotations from the failed attempt.

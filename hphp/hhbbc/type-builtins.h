@@ -29,8 +29,8 @@ struct Type;
  * Hardcoded information about builtin functions. Right now this just
  * encodes the behavior of collection methods that return $this.
  */
-bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
-                                         borrowed_ptr<php::Func> func);
+bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
+                                         borrowed_ptr<const php::Func> func);
 
 /*
  * Given an HNI function, figure out the real return type. Thanks to

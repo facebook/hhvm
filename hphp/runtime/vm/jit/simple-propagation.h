@@ -34,7 +34,7 @@ void copyProp(IRInstruction*);
 /*
  * Replace inputs that have known values with constants.
  */
-void constProp(IRUnit&, IRInstruction*, bool typesMightRelax);
+void constProp(IRUnit&, IRInstruction*);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -409,7 +409,7 @@ function openssl_get_publickey(mixed $certificate): mixed {
  * or FALSE on error.
  */
 <<__Native>>
-function openssl_pkey_new(mixed $configargs = null): resource;
+function openssl_pkey_new(mixed $configargs = null): mixed;
 
 /* openssl_private_decrypt() decrypts data that was previous encrypted via
  * openssl_public_encrypt() and stores the result into decrypted.  You can use

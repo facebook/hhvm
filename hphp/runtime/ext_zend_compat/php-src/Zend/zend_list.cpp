@@ -206,7 +206,7 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
   rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type TSRMLS_CC);
 
   if (rsrc_result) {
-    ZVAL_RESOURCE(rsrc_result, rsrc_id);
+    ZVAL_RESOURCE_CC(rsrc_result, rsrc_id);
   }
 
   return rsrc_id;

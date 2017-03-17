@@ -349,6 +349,11 @@ OptView ThreadTCBuffer::view() {
 
 bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
   const auto numTrans = srcRec.translations().size();
+
+  // Optimized translations perform this check at relocation time to avoid
+  // invalidating all of their SrcKeys early.
+  if (kind == TransKind::Optimize) return false;
+
   if ((kind == TransKind::Profile &&
        numTrans != RuntimeOption::EvalJitMaxProfileTranslations) ||
       (kind != TransKind::Profile &&

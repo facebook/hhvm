@@ -178,6 +178,14 @@ inline Attr& operator|=(Attr& a, const Attr& b) {
   return (a = Attr((int)a | (int)b));
 }
 
+inline void attrSetter(Attr& attrs, bool set, Attr what) {
+  if (set) {
+    attrs |= what;
+  } else {
+    attrs = Attr(attrs & ~what);
+  }
+}
+
 inline const char* attrToVisibilityStr(Attr attr) {
   return (attr & AttrPrivate)   ? "private"   :
          (attr & AttrProtected) ? "protected" : "public";

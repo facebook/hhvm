@@ -1,0 +1,38 @@
+(**
+ * Copyright (c) 2017, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the "hack" directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+*)
+
+type type_constraint_flag =
+  | Nullable
+  | HHType
+  | ExtendedHint
+  | TypeVar
+  | Soft
+  | TypeConstant
+
+let string_of_flag f =
+  match f with
+  | Nullable -> "nullable"
+  | HHType -> "hh_type"
+  | ExtendedHint -> "extended_hint"
+  | TypeVar -> "type_var"
+  | Soft -> "soft"
+  | TypeConstant -> "type_constant"
+
+(* A type constraint is just a name and flags *)
+type t = {
+  tc_name : string option;
+  tc_flags : type_constraint_flag list;
+}
+
+let make tc_name tc_flags =
+  { tc_name; tc_flags }
+
+let flags tc = tc.tc_flags
+let name tc = tc.tc_name

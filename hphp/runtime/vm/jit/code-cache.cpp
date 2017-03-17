@@ -25,6 +25,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -99,7 +100,9 @@ CodeCache::CodeCache()
   auto enhugen = [&](void* base, int numMB) {
     if (CodeCache::MapTCHuge) {
       assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
-      hintHuge(base, numMB << 20);
+      hintHugeDeleteData((char*)base, numMB << 20,
+                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                         false /* MAP_SHARED */);
     }
   };
 

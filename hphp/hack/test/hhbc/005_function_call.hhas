@@ -1,0 +1,19 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > callee() {
+  Null
+  RetC
+}
+
+.function <"HH\\void" N  > caller() {
+  FPushFuncD 0 "callee"
+  FCall 0
+  PopR
+  Null
+  RetC
+}
+

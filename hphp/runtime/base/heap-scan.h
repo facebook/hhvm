@@ -34,6 +34,8 @@
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/vm/globals-array.h"
+#include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -109,10 +111,8 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
       scanner.scan(*h->closure_.hdr());
       return h->closure_.scan(scanner); // ObjectData::scan
     case HeaderKind::Object:
-      if (h->obj_.getAttribute(ObjectData::HasNativeData)) {
-        auto ndi = h->obj_.getVMClass()->getNativeDataInfo();
-        scanNative(Native::getNativeNode(&h->obj_, ndi), scanner);
-      }
+      // native objects should hit the NativeData case below.
+      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
       return h->obj_.scan(scanner);
     case HeaderKind::WaitHandle:
     case HeaderKind::AwaitAllWH: {
@@ -174,7 +174,7 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {
   auto props = propVec();
-  if (m_hdr.partially_inited) {
+  if (m_partially_inited) {
     // we don't know which properties are initialized yet
     scanner.conservative(props, m_cls->numDeclProperties() * sizeof(*props));
   } else {
@@ -182,8 +182,10 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
   }
   if (getAttribute(HasDynPropArr)) {
     // nb: dynamic property arrays are in ExecutionContext::dynPropTable,
-    // which is not marked as a root. Mark the array when scanning the object.
-    scanner.scan(g_context->dynPropTable[this]);
+    // which is not marked as a root. Scan the entry pair, so both the key
+    // and value are scanned.
+    auto iter = g_context->dynPropTable.find(this);
+    scanner.scan(*iter); // *iter is pair<ObjectData*,ArrayNoDtor>
   }
 }
 
@@ -221,106 +223,120 @@ inline void ObjectData::scan(type_scan::Scanner& scanner) const {
 //
 // for reference, see vm/unwind.cpp and visitStackElms() in bytecode.h
 
-// scan the whole rds, including the php stack and the rds segment.
-//  * stack: should be exact-scannable.
-//  * rds threadlocal part: conservative scan until we teach the
-//    jit to tell us where the pointers live.
-//  * rds shared part: should not contain heap pointers!
-inline void scanRds(rds::Header* rds, type_scan::Scanner& scanner) {
-  scanner.scan(*rds::header());
+// Descriptive wrapper types to annotate root nodes
+struct PhpStack    { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
+struct CppStack    { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
+struct CppTls      { TYPE_SCAN_CONSERVATIVE_ALL; void* dummy; };
 
-  rds::forEachNormalAlloc(
-    [&](const void* p, std::size_t size, type_scan::Index index) {
-      scanner.scanByIndex(index, p, size);
-    }
-  );
+// call fn(ptr,size,tyindex) for each thing in RDS, including the php stack
+// and the rds local segment. The RDS shared part cannot contain pointers.
+template<class Fn>
+inline void iterateRds(rds::Header* rds, Fn fn) {
+  // header and normal section
+  fn(rds, sizeof(*rds), type_scan::getIndexForScan<rds::Header>());
 
-  // Class stores pointers to request allocated memory in the local
-  // section. Depending on circumstances, this may or may not be valid data,
-  // so scan it conservatively for now. TODO #12203436
-  // Persistent shouldn't contain pointers to any request allocated memory.
-  scanner.where("RdsLocal");
-  auto r = rds::localSection();
-  scanner.conservative(r.begin(), r.size());
+  // Normal section.
+  rds::forEachNormalAlloc(fn);
+
+  // Local section (mainly static properties).
+  // static properties have a per-class, versioned, bool in rds::Normal,
+  // tracked by Class::m_sPropCacheInit, plus one TypedValue in rds::Local
+  // for each property, tracked in Class::m_sPropCache. Just scan the
+  // properties in rds::Local. We ignore the state of the bool, because it
+  // is not initialized until after all sprops are initialized, and it's
+  // necessary to scan static properties *during* initialization.
+  rds::forEachLocalAlloc(fn);
 
   // php stack TODO #6509338 exactly scan the php stack.
-  scanner.where("PhpStack");
   auto stack_end = rds->vmRegs.stack.getStackHighAddress();
   auto sp = rds->vmRegs.stack.top();
-  scanner.conservative(sp, uintptr_t(stack_end) - uintptr_t(sp));
+  fn(sp, uintptr_t(stack_end) - uintptr_t(sp),
+     type_scan::getIndexForScan<PhpStack>());
 }
 
-inline void MemoryManager::scanSweepLists(type_scan::Scanner& scanner) const {
+template<class T> struct EphemeralPtrWrapper {
+  T ptr;
+  TYPE_SCAN_CUSTOM_FIELD(ptr) { scanner.enqueue(ptr); }
+};
+
+template<class Fn>
+void MemoryManager::iterateRoots(Fn fn) const {
+  using Wrapper = EphemeralPtrWrapper<Header*>;
   for (auto s = m_sweepables.next(); s != &m_sweepables; s = s->next()) {
     if (auto h = static_cast<Header*>(s->owner())) {
       assert(h->kind() == HeaderKind::Resource || isObjectKind(h->kind()));
-      scanner.enqueue(h); // used to be mark.implicit
+      auto w = Wrapper{h};
+      fn(&w, sizeof(w), type_scan::getIndexForScan<Wrapper>());
     }
   }
-  for (auto node: m_natives) {
-    scanner.enqueue(node); // used to be mark.implicit(Native::obj(node))
+  for (auto& node: m_natives) {
+    fn(&node, sizeof(node), type_scan::getIndexForScan<NativeNode*>());
+  }
+  for (const auto root : m_root_handles) {
+    root->iterate(fn);
   }
 }
 
-inline void MemoryManager::scanRootMaps(type_scan::Scanner& scanner) const {
-  // these all used to call mark.implicit
-  if (m_objectRoots) scanner.scan(*m_objectRoots);
-  if (m_resourceRoots) scanner.scan(*m_resourceRoots);
-  for (const auto root : m_root_handles) root->scan(scanner);
-}
-
-inline void ThreadLocalManager::scan(type_scan::Scanner& scanner) const {
+template<class Fn> void ThreadLocalManager::iterate(Fn fn) const {
   auto list = getList(pthread_getspecific(m_key));
   if (!list) return;
   for (auto p = list->head; p != nullptr;) {
     auto node = static_cast<ThreadLocalNode<void>*>(p);
     if (node->m_p) {
-      scanner.scanByIndex(node->m_tyindex, node->m_p, node->m_size);
+      fn(node->m_p, node->m_size, node->m_tyindex);
     }
     p = node->m_next;
   }
 }
 
-// Scan request-local roots
-inline void scanRoots(type_scan::Scanner& scanner) {
-  // rds, including php stack
+// Visit request-local roots. Each invocation of fn represents one root
+// instance of a given type and size, containing potentially several
+// pointers.
+template<class Fn> void iterateRoots(Fn fn) {
   if (auto rds = rds::header()) {
-    scanRds(rds, scanner);
+    iterateRds(rds, fn);
   }
-  // C++ stack
-  scanner.where("CppStack");
-  CALLEE_SAVED_BARRIER(); // ensure stack contains callee-saved registers
+
+  // cpp stack. ensure stack contains callee-saved registers.
+  CALLEE_SAVED_BARRIER();
   auto sp = stack_top_ptr();
-  scanner.conservative(sp, s_stackLimit + s_stackSize - uintptr_t(sp));
+  fn(sp, s_stackLimit + s_stackSize - uintptr_t(sp),
+     type_scan::getIndexForScan<CppStack>());
+
   // C++ threadlocal data, but don't scan MemoryManager
-  scanner.where("CppTls");
   auto tdata = getCppTdata(); // tdata = { ptr, size }
   if (tdata.second > 0) {
     auto tm = (char*)tdata.first;
     auto tm_end = tm + tdata.second;
     auto mm = (char*)&MM();
     auto mm_end = mm + sizeof(MemoryManager);
-    assert(mm >= tm && mm_end <= tm_end);
-    scanner.conservative(tm, mm - tm);
-    scanner.conservative(mm_end, tm_end - mm_end);
+    if (mm >= tm && mm_end <= tm_end) {
+      fn(tm, mm - tm, type_scan::getIndexForScan<CppTls>());
+      fn(mm_end, tm_end - mm_end, type_scan::getIndexForScan<CppTls>());
+    } else {
+      fn(tm, tdata.second, type_scan::getIndexForScan<CppTls>());
+    }
   }
+
   // ThreadLocal nodes (but skip MemoryManager)
-  scanner.where("ThreadLocalManager");
-  ThreadLocalManager::GetManager().scan(scanner);
-  // Root maps
-  scanner.where("RootMaps");
-  MM().scanRootMaps(scanner);
-  // treat sweep lists as roots until we are ready to test what happens
-  // when we start calling various sweep() functions early.
-  scanner.where("SweepLists");
-  MM().scanSweepLists(scanner);
+  ThreadLocalManager::GetManager().iterate(fn);
+
+  // Root handles & sweep lists
+  MM().iterateRoots(fn);
+
+  // asio session
   if (auto asio = AsioSession::Get()) {
-    // ThreadLocalProxy<T> instances aren't in ThreadLocalManager
-    scanner.enqueue(asio); // ptr was created with req::make_raw<AsioSession>
+    // ThreadLocalProxy<T> instances aren't in ThreadLocalManager.
+    // asio was created with req::make_raw<AsioSession>, but we dont have
+    // the address of the thread local AsioSession*.
+    using Wrapper = EphemeralPtrWrapper<AsioSession*>;
+    auto w = Wrapper{asio};
+    fn(&w, sizeof(w), type_scan::getIndexForScan<Wrapper>());
   }
+
+  // Zend compat resources
 #ifdef ENABLE_ZEND_COMPAT
-  scanner.where("EzcResources");
-  ts_scan_resources(scanner);
+  ts_iterate_resources(fn);
 #endif
 }
 

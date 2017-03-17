@@ -42,6 +42,16 @@ struct BacktraceArgs {
   }
 
   /**
+   * Skip the top inlined frames of the stack. Used to properly attribute cost
+   * measured by event hooks. If both skipTop and skipInlined are set then
+   * the first frame and all immediately following inlined frames are skipped.
+   */
+  BacktraceArgs& skipInlined(bool skipInlined = true) {
+    m_skipInlined = skipInlined;
+    return *this;
+  }
+
+  /**
    * Include the current frame on top of the stack. If both skipTop and withSelf
    * are set then first frame is skipped and the second is added.
    */
@@ -126,6 +136,7 @@ struct BacktraceArgs {
 
 private:
   bool m_skipTop{false};
+  bool m_skipInlined{false};
   bool m_withSelf{false};
   bool m_withThis{false};
   bool m_withMetadata{false};

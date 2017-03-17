@@ -64,6 +64,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
+  , m_numClsRefSlots(0)
   , m_ehTabSorted(false)
 {}
 
@@ -88,6 +89,7 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
+  , m_numClsRefSlots(0)
   , m_ehTabSorted(false)
 {}
 
@@ -143,8 +145,7 @@ static std::vector<EHEnt> toFixed(const std::vector<EHEntEmitter>& vec) {
     e.m_past = ehe.m_past;
     e.m_iterId = ehe.m_iterId;
     e.m_parentIndex = ehe.m_parentIndex;
-    e.m_fault = ehe.m_fault;
-    e.m_catches = ehe.m_catches;
+    e.m_handler = ehe.m_handler;
     ret.emplace_back(std::move(e));
   }
   return ret;
@@ -203,7 +204,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
-    past - base >= Func::kSmallDeltaLimit;
+    past - base >= Func::kSmallDeltaLimit ||
+    m_numClsRefSlots > 3;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -223,6 +225,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_past = past;
     ex->m_returnByValue = false;
     ex->m_isMemoizeWrapper = false;
+    ex->m_actualNumClsRefSlots = m_numClsRefSlots;
   }
 
   std::vector<Func::ParamInfo> fParams;
@@ -253,6 +256,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
   f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
+  f->shared()->m_numClsRefSlots = m_numClsRefSlots;
 
   if (isNative) {
     auto const ex = f->extShared();
@@ -319,6 +323,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (docComment)
     (m_numLocals)
     (m_numIterators)
+    (m_numClsRefSlots)
     (maxStackCells)
     (isClosureBody)
     (isAsync)
@@ -451,7 +456,7 @@ void FuncEmitter::sortFPITab(bool load) {
     fpitab[i].m_parentIndex = -1;
     fpitab[i].m_fpiDepth = 1;
     for (int j = i - 1; j >= 0; j--) {
-      if (fpitab[j].m_fcallOff > fpitab[i].m_fcallOff) {
+      if (fpitab[j].m_fpiEndOff >= fpitab[i].m_fpiEndOff) {
         fpitab[i].m_parentIndex = j;
         fpitab[i].m_fpiDepth = fpitab[j].m_fpiDepth + 1;
         break;
@@ -462,6 +467,7 @@ void FuncEmitter::sortFPITab(bool load) {
       // the AR itself. Fix it here.
       fpitab[i].m_fpOff += m_numLocals
         + m_numIterators * kNumIterCells
+        + clsRefCountToCells(m_numClsRefSlots)
         + (fpitab[i].m_fpiDepth) * kNumActRecCells;
     }
   }

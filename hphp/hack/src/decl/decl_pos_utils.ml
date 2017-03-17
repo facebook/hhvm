@@ -100,26 +100,46 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
     | Taccess (root_ty, ids) ->
         Taccess (ty root_ty, List.map ids string_id)
     | Tshape (fields_known, fdm) ->
-        Tshape (fields_known, ShapeMap.map ty fdm)
+        Tshape (shape_fields_known fields_known,
+          ShapeMap.map_and_rekey fdm shape_field_name ty)
 
   and ty_opt x = Option.map x ty
+
+  and shape_fields_known = function
+    | FieldsFullyKnown -> FieldsFullyKnown
+    | FieldsPartiallyKnown m ->
+      FieldsPartiallyKnown (ShapeMap.map_and_rekey m shape_field_name pos)
+
+  and shape_field_name = function
+    | Ast.SFlit s -> Ast.SFlit (string_id s)
+    | Ast.SFclass_const (id, s) -> Ast.SFclass_const (string_id id, string_id s)
 
   and constraint_ = List.map ~f:(fun (ck, x) -> (ck, ty x))
 
   and fun_type ft =
     { ft with
       ft_tparams = List.map ft.ft_tparams type_param   ;
+      ft_where_constraints = List.map
+        ft.ft_where_constraints where_constraint       ;
       ft_params  = List.map ft.ft_params fun_param     ;
       ft_ret     = ty ft.ft_ret                        ;
       ft_pos     = pos ft.ft_pos                       ;
+      ft_arity   = fun_arity ft.ft_arity               ;
     }
+
+  and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
+
+  and fun_arity = function
+    | Fstandard _ as x -> x
+    | Fellipsis _ as x -> x
+    | Fvariadic (n, param) -> Fvariadic (n, fun_param param)
 
   and fun_param (x, y) = x, ty y
 
   and class_const cc =
     { cc_synthesized = cc.cc_synthesized;
       cc_abstract = cc.cc_abstract;
-      cc_pos = cc.cc_pos;
+      cc_pos = pos cc.cc_pos;
       cc_type = ty cc.cc_type;
       cc_expr = Option.map cc.cc_expr (Nast_pos_mapper.expr pos);
       cc_origin = cc.cc_origin;
@@ -145,7 +165,8 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       dc_name                  = dc.dc_name                           ;
       dc_pos                   = dc.dc_pos                            ;
       dc_extends               = dc.dc_extends                        ;
-      dc_req_ancestors         = dc.dc_req_ancestors                  ;
+      dc_req_ancestors         = List.map dc.dc_req_ancestors
+        requirement                                                   ;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends          ;
       dc_tparams               = List.map dc.dc_tparams type_param    ;
       dc_substs                = SMap.map begin fun ({ sc_subst; _ } as sc) ->
@@ -162,28 +183,20 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
       dc_enum_type             = Option.map dc.dc_enum_type enum_type ;
     }
 
+  and requirement (p, t) = (pos p, ty t)
+
   and enum_type te =
     { te_base       = ty te.te_base           ;
       te_constraint = ty_opt te.te_constraint ;
     }
 
-  and typedef ({td_tparams; td_constraint; _} as tdef) =
-    let td_tparams = List.map td_tparams type_param in
-    let td_constraint = ty_opt td_constraint in
-    {tdef with td_tparams; td_constraint}
-end
-
-(*****************************************************************************)
-(* Applies a position substitution to a class type *)
-(*****************************************************************************)
-module SubstPos = struct
-  let class_type subst c =
-    let module IPos = struct
-      let pos x =
-        try Hashtbl.find subst x with Not_found -> x
-    end in
-    let module Apply = TraversePos(IPos) in
-    Apply.class_type c
+  and typedef tdef =
+    { td_pos        = pos tdef.td_pos                     ;
+      td_vis        = tdef.td_vis                         ;
+      td_tparams    = List.map tdef.td_tparams type_param ;
+      td_constraint = ty_opt tdef.td_constraint           ;
+      td_type       = ty tdef.td_type                     ;
+    }
 end
 
 (*****************************************************************************)

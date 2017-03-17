@@ -8,6 +8,7 @@
  *
  *)
 
+open Ide_api_types
 open Ide_message
 open Ide_message_parser_test_utils
 open Ide_rpc_protocol_parser_types
@@ -15,6 +16,8 @@ open Ide_rpc_protocol_parser_types
 (* Test suite for Nuclide-rpc version of the API responses  *)
 
 let test_response = test_response Nuclide_rpc V0
+let test_request = test_request Nuclide_rpc V0
+let test_notification = test_notification Nuclide_rpc V0
 
 let test_autocomplete_response () =
   let response = Autocomplete_response [{
@@ -77,13 +80,34 @@ let test_infer_type_response () =
     }
   }|}
 
+let test_coverage_levels_response () =
+  test_response (Coverage_levels_response (
+      Deprecated_text_span_coverage_levels_response [
+      (Some Checked, "foo");
+      (Some Partial, "bar");
+      (Some Unchecked), "baz";
+      (None, "qux");
+    ]
+  ))
+  {|{
+    "protocol": "service_framework3_rpc",
+    "type": "response",
+    "id": 4,
+    "result": [
+      {"color": "checked", "text": "foo"},
+      {"color": "partial", "text": "bar"},
+      {"color": "unchecked", "text": "baz"},
+      {"color": "default", "text": "qux"}
+    ]
+  }|}
+
 let test_diagnostics_notification () =
-  let response = Diagnostics_notification {
+  let notification = Diagnostics_notification {
     subscription_id = 4;
     diagnostics_notification_filename = "foo.php";
     diagnostics = []
   } in
-  test_response response
+  test_notification notification
   {|{
     "protocol": "service_framework3_rpc",
     "type": "next",
@@ -98,6 +122,7 @@ let tests = [
   "test_autocomplete_response", test_autocomplete_response;
   "test_diagnostics_notification", test_diagnostics_notification;
   "test_infer_type_response", test_infer_type_response;
+  "test_coverage_levels_response", test_coverage_levels_response;
 ]
 
 let () =

@@ -586,7 +586,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
            stripped == "objprof_get_paths" ||
-           stripped == "objprof_start" ||
            stripped == "heapgraph_create" ||
            stripped == "heapgraph_stats" ||
            stripped == "heapgraph_foreach_node" ||
@@ -1025,22 +1024,6 @@ void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
 
 void Parser::onEmptyCollection(Token &out) {
   out->exp = NEW_EXP0(ExpressionList);
-}
-
-void
-Parser::onCollectionPair(Token &out, Token *pairs, Token *name, Token &value) {
-  if (!value->exp) return;
-
-  ExpressionPtr expList;
-  if (pairs && pairs->exp) {
-    expList = pairs->exp;
-  } else {
-    expList = NEW_EXP0(ExpressionList);
-  }
-  ExpressionPtr nameExp = name ? name->exp : ExpressionPtr();
-  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, value->exp, false,
-                              true));
-  out->exp = expList;
 }
 
 void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
@@ -1509,7 +1492,6 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
-    std::string name = param->getName();
     std::string type = param->hasUserType() ? param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
@@ -1519,7 +1501,7 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
       BlockScopePtr(), range);
     modifier->add(mod);
     SimpleVariablePtr svar = std::make_shared<SimpleVariable>(
-      BlockScopePtr(), range, name);
+      BlockScopePtr(), range, param->getName());
     ExpressionListPtr expList = std::make_shared<ExpressionList>(
       BlockScopePtr(), range);
     expList->addElement(svar);
@@ -2369,10 +2351,14 @@ void Parser::onClsCnsShapeField(Token& out,
   out.typeAnnotation->setClsCnsShapeField();
 }
 
-void Parser::onShape(Token &out, const Token &shapeFieldsList) {
+void Parser::onShape(
+    Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
     "array", shapeFieldsList.typeAnnotation);
   out.typeAnnotation->setShape();
+  if (terminatedWithEllipsis) {
+    out.typeAnnotation->setAllowsUnknownFields();
+  }
 }
 
 void Parser::onTypeSpecialization(Token& type, char specialization) {
@@ -2397,6 +2383,13 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
       type.typeAnnotation->setTypeAccess();
       break;
     }
+  }
+}
+
+void Parser::onShapeFieldSpecialization(
+    Token& shapeField, char specialization) {
+  if (specialization == '?') {
+    shapeField.typeAnnotation->setOptionalShapeField();
   }
 }
 

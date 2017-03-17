@@ -338,6 +338,8 @@ Variant* VariableUnserializer::getByRef(int id) {
       assert(info.isDictValue());
       throwDictRefValue();
     }
+  } else if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatRefNew();
   }
   Variant* ret = info.var();
   if (!ret) throwColRefKey();
@@ -774,7 +776,10 @@ void VariableUnserializer::unserializeVariant(
         throwVecRefValue();
       } else if (UNLIKELY(mode == UnserializeMode::DictValue)) {
         throwDictRefValue();
+      } else if (RuntimeOption::EvalHackArrCompatNotices) {
+        raiseHackArrCompatRefNew();
       }
+
       int64_t id = readInt();
       Variant *v = getByRef(id);
       if (!v) throwOutOfRange(id);

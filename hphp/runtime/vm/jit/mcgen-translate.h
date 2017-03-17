@@ -48,6 +48,12 @@ folly::Optional<tc::TransMetaInfo> translate(
   folly::Optional<CodeCache::View> optView = folly::none
 );
 
+/*
+ * True iff retranslateAll is enabled and supported by the current server
+ * execution mode.
+ */
+bool retranslateAllEnabled();
+
 }}}
 
 #endif

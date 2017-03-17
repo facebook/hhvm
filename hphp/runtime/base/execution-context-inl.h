@@ -264,6 +264,19 @@ inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
   return nullptr;
 }
 
+inline ActRec*
+ExecutionContext::getPrevVMStateSkipFrame(const ActRec* fp,
+                                          Offset* prevPc /* = NULL */,
+                                          TypedValue** prevSp /* = NULL */,
+                                          bool* fromVMEntry /* = NULL */) {
+  auto prev = getPrevVMState(fp, prevPc, prevSp, fromVMEntry);
+  if (LIKELY(!prev || !prev->skipFrame())) return prev;
+  do {
+    prev = getPrevVMState(prev, prevPc, prevSp, fromVMEntry);
+  } while (prev && prev->skipFrame());
+  return prev;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

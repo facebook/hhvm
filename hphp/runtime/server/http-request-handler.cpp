@@ -121,7 +121,7 @@ AccessLog HttpRequestHandler::s_accessLog(
 
 HttpRequestHandler::HttpRequestHandler(int timeout)
     : RequestHandler(timeout), m_pathTranslation(true)
-    , m_requestTimedOutOnQueue(ServiceData::createTimeseries(
+    , m_requestTimedOutOnQueue(ServiceData::createTimeSeries(
                                  "requests_timed_out_on_queue",
                                  {ServiceData::StatsType::COUNT})) { }
 
@@ -216,7 +216,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   m_sourceRootInfo.clear();
 
   if (is_hphp_session_initialized()) {
-    hphp_session_exit();
+    hphp_session_exit(transport);
   } else {
     // Even though there are no sessions, memory is allocated to perform
     // INI setting bindings when the thread is initialized.

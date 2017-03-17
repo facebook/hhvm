@@ -1161,9 +1161,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
   if (w->stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
     int mflen;
     char mfn[MAXPATHLEN];
-
-    HPHP::Stream::Wrapper* w = HPHP::Stream::getWrapperFromURI(fn);
-    if (!w || !(dir = w->opendir(fn))) {
+    if (!(dir = w->opendir(fn))) {
       errs++;
       goto out;
     }

@@ -16,6 +16,8 @@ module TUtils = Typing_utils
 module Type = Typing_ops
 module Reason = Typing_reason
 module LMap = Local_id.Map
+module CMap = Typing_continuations.Map
+module LEnvC = Typing_lenv_cont
 
 (*****************************************************************************)
 (* Module dealing with local environments. *)
@@ -221,3 +223,88 @@ let env_with_empty_fakes env =
       env.Env.lenv with Env.fake_members = Env.empty_fake_members;
     }
   }
+
+(*****************************************************************************)
+(* Functions dealing with continuation based flow typing of local variables  *)
+(*****************************************************************************)
+
+let env_with_local_types env local_types =
+  { env with Env.lenv = {env.Env.lenv with local_types; } }
+
+(* Unions two locals and adds the result to the continuation given under name *)
+let union_locals env name key (ty1, eid1) (ty2, eid2) =
+  if eid1 = eid2 && ty1 = ty2 then env else
+  let eid = if eid1 = eid2 then eid1 else Ident.tmp() in
+  let env, ty1 = TUtils.unresolved env ty1 in
+  let env, ty2 = TUtils.unresolved env ty2 in
+  let env, ty = Type.unify env.Env.pos Reason.URnone env ty1 ty2 in
+  let local_types =
+    LEnvC.add_to_cont name key (ty, eid) env.Env.lenv.Env.local_types
+  in
+  env_with_local_types env local_types
+
+(* Unions two continuations and puts it under name *)
+let union_continuations env name cont_source =
+  let local_types = env.Env.lenv.Env.local_types in
+  match LEnvC.get_cont_option name local_types with
+  | None ->
+    env_with_local_types env @@ LEnvC.replace_cont name cont_source local_types
+  | Some cont_dest ->
+    LMap.fold begin fun key local env ->
+    match LMap.get key cont_dest with
+    | None ->
+      env_with_local_types env @@
+        LEnvC.add_to_cont name key local env.Env.lenv.Env.local_types
+    | Some local' -> union_locals env name key local' local
+    end cont_source env
+
+(* Unions two local types (group of continuations)
+ * If we don't end up intersecting fake members, we integrate it,
+ * aka keep the newer ones *)
+let union_local_types ?intersect_fake_members env lenv =
+  let fake_members = match intersect_fake_members with
+    | Some true ->
+      intersect_fake env.lenv.fake_members lenv.fake_members
+    | _ -> env.lenv.fake_members
+  in
+  let env = CMap.fold
+    (fun name cont env -> union_continuations env name cont)
+    lenv.Env.local_types
+    env
+  in
+  { env with Env.lenv = {env.Env.lenv with fake_members; } }
+
+(* Appends the given continuations to the env *)
+let append_cont_to_cont env n1 lenv n2 =
+  match LEnvC.get_cont_option n2 lenv.Env.local_types with
+  | None -> env
+  | Some cont -> union_continuations env n1 cont
+
+(* Union the given continuation and the next continuation, drop next cont *)
+let terminate_cont env name =
+  let env =
+    append_cont_to_cont env name env.Env.lenv Typing_continuations.Next
+  in
+  env_with_local_types env @@
+  LEnvC.drop_cont Typing_continuations.Next env.Env.lenv.Env.local_types
+
+(* Replaces the continuation with an empty one *)
+let clear_cont env name =
+  let local_types = env.Env.lenv.Env.local_types in
+  let local_types = LEnvC.replace_cont name LMap.empty local_types in
+  env_with_local_types env local_types
+
+(* Replace the continuation with a different cont from lenv
+ * If n2 cont does not exist in lenv , drops n1 cont from env *)
+let replace_cont_with env n1 lenv n2 =
+  let local_types =
+    match LEnvC.get_cont_option n2 lenv.Env.local_types with
+      | None -> LEnvC.drop_cont n1 env.Env.lenv.Env.local_types
+      | Some cont ->
+        let local_types = env.Env.lenv.Env.local_types in
+        LEnvC.replace_cont n1 cont local_types
+  in
+  env_with_local_types env local_types
+
+(* Replace the continuation with the same cont from lenv *)
+let replace_cont env name lenv = replace_cont_with env name lenv name

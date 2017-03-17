@@ -33,3 +33,36 @@ val fully_integrate :
   Typing_env.local_env -> Typing_env.env
 val env_with_empty_fakes :
   Typing_env.env -> Typing_env.env
+
+(*****************************************************************************)
+(* Functions dealing with continuation based flow typing of local variables  *)
+(*****************************************************************************)
+
+val union_continuations :
+  Typing_env.env ->
+  Typing_continuations.t ->
+  Typing_env.local Local_id.Map.t -> Typing_env.env
+val union_local_types :
+  ?intersect_fake_members:bool ->
+  Typing_env.env ->
+  Typing_env.local_env -> Typing_env.env
+val append_cont_to_cont :
+  Typing_env.env ->
+  Typing_continuations.t ->
+  Typing_env.local_env ->
+  Typing_continuations.t -> Typing_env.env
+val terminate_cont :
+  Typing_env.env ->
+  Typing_continuations.t -> Typing_env.env
+val clear_cont :
+  Typing_env.env ->
+  Typing_continuations.t -> Typing_env.env
+val replace_cont_with :
+  Typing_env.env ->
+  Typing_continuations.t ->
+  Typing_env.local_env ->
+  Typing_continuations.t -> Typing_env.env
+val replace_cont :
+  Typing_env.env ->
+  Typing_continuations.t ->
+  Typing_env.local_env -> Typing_env.env

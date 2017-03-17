@@ -30,6 +30,7 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
+#include "hphp/util/arch.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hdf.h"
@@ -129,6 +130,7 @@ int RuntimeOption::RuntimeErrorReportingLevel =
 int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::string RuntimeOption::ServerUser;
+std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 
 int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
@@ -502,6 +504,11 @@ static inline uint32_t resetProfCountersDefault() {
   return RuntimeOption::EvalJitConcurrently ? 250 : 1000;
 }
 
+static inline int retranslateAllRequestDefault() {
+  return RuntimeOption::ServerExecutionMode() &&
+    arch() != Arch::ARM ? 3000 : 0;
+}
+
 uint64_t ahotDefault() {
   return RuntimeOption::RepoAuthoritative ? 4 << 20 : 0;
 }
@@ -573,6 +580,7 @@ bool RuntimeOption::EnableDebuggerPrompt = true;
 bool RuntimeOption::EnableDebuggerServer = false;
 bool RuntimeOption::EnableDebuggerUsageLog = false;
 bool RuntimeOption::DebuggerDisableIPv6 = false;
+std::string RuntimeOption::DebuggerServerIP;
 int RuntimeOption::DebuggerServerPort = 8089;
 int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
@@ -581,7 +589,7 @@ int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
-std::string RuntimeOption::DebuggerAuthTokenScript;
+std::string RuntimeOption::DebuggerAuthTokenScriptBin;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1177,6 +1185,7 @@ void RuntimeOption::Load(
                    "Eval.Debugger.EnableDebuggerServer");
       Config::Bind(EnableDebuggerUsageLog, ini, config,
                    "Eval.Debugger.EnableDebuggerUsageLog");
+      Config::Bind(DebuggerServerIP, ini, config, "Eval.Debugger.IP");
       Config::Bind(DebuggerServerPort, ini, config, "Eval.Debugger.Port", 8089);
       Config::Bind(DebuggerDisableIPv6, ini, config,
                    "Eval.Debugger.DisableIPv6", false);
@@ -1194,8 +1203,8 @@ void RuntimeOption::Load(
                    "Eval.Debugger.RPC.HostDomain");
       Config::Bind(DebuggerDefaultRpcTimeout, ini, config,
                    "Eval.Debugger.RPC.DefaultTimeout", 30);
-      Config::Bind(DebuggerAuthTokenScript, ini, config,
-                   "Eval.Debugger.Auth.TokenScript");
+      Config::Bind(DebuggerAuthTokenScriptBin, ini, config,
+                   "Eval.Debugger.Auth.TokenScriptBin");
     }
   }
   {
@@ -1853,6 +1862,8 @@ void RuntimeOption::Load(
 
     ++it;
   }
+
+  Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 

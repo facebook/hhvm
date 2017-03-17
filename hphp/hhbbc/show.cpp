@@ -168,39 +168,27 @@ std::string show(const Func& func) {
   X(isPairGenerator);
 #undef X
 
-  ret += folly::format("digraph {} {{\n  node [shape=box];\n{}}}\n",
-    func.name, indent(2, dot_cfg(func))).str();
+  folly::format(&ret,
+                "digraph {} {{\n  node [shape=box];\n{}}}\n",
+                func.name, indent(2, dot_cfg(func)));
 
   for (auto& blk : func.blocks) {
     if (blk->id == NoBlockId) continue;
-    ret += folly::format(
-      "block #{}\n{}",
-      blk->id,
-      indent(2, show(func, *blk))
-    ).str();
+    folly::format(&ret, "block #{}\n{}", blk->id, indent(2, show(func, *blk)));
   }
 
   visitExnLeaves(func, [&] (const php::ExnNode& node) {
-    ret += folly::format("exn node #{} ", node.id).str();
+    folly::format(&ret, "exn node #{} ", node.id);
     if (node.parent) {
-      ret += folly::format("(^{}) ", node.parent->id).str();
+      folly::format(&ret, "(^{}) ", node.parent->id);
     }
     ret += match<std::string>(
       node.info,
       [&] (const FaultRegion& fr) {
         return folly::to<std::string>("fault->", fr.faultEntry);
       },
-      [&] (const TryRegion& tr) {
-        auto ret = std::string{"catch"};
-        using namespace folly::gen;
-        from(tr.catches)
-          | map([&] (CatchEnt ch) {
-              return folly::to<std::string>(ch.first->data(),
-                                            "->", ch.second);
-            })
-          | unsplit(" ", &ret)
-          ;
-        return ret;
+      [&] (const CatchRegion& cr) {
+        return folly::to<std::string>("catch->", cr.catchEntry);
       }
     ) + '\n';
   });
@@ -266,8 +254,9 @@ std::string show(const Program& p) {
 }
 
 std::string show(SrcLoc loc) {
-  return folly::format("{}:{}-{}:{}", loc.start.line, loc.start.col,
-                                      loc.past.line, loc.past.col).str();
+  return folly::sformat("{}:{}-{}:{}",
+                        loc.start.line, loc.start.col,
+                        loc.past.line, loc.past.col);
 }
 
 }
@@ -277,7 +266,7 @@ std::string show(SrcLoc loc) {
 std::string show(const php::Func& func, const Bytecode& bc) {
   std::string ret;
 
-  auto append_vsa = [&] (const CompactVector<SString>& keys) {
+  auto append_vsa = [&] (const CompactVector<LSString>& keys) {
     ret += "<";
     auto delim = "";
     for (auto& s : keys) {
@@ -347,6 +336,8 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #define IMM_I64A(n)    folly::toAppend(" ", data.arg##n, &ret);
 #define IMM_LA(n)      ret += " " + local_string(func, data.loc##n);
 #define IMM_IA(n)      folly::toAppend(" iter:", data.iter##n, &ret);
+#define IMM_CAR(n)     folly::toAppend(" rslot:", data.slot, &ret);
+#define IMM_CAW(n)     folly::toAppend(" wslot:", data.slot, &ret);
 #define IMM_DA(n)      folly::toAppend(" ", data.dbl##n, &ret);
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
@@ -385,6 +376,8 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -406,16 +399,14 @@ std::string show(const php::Func& func, const Bytecode& bc) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string show(Type t) {
+std::string show(const Type& t) {
   std::string ret;
 
   assert(t.checkInvariants());
 
   if (is_specialized_wait_handle(t)) {
-    ret = folly::format("{}WaitH<{}>",
-      is_opt(t) ? "?" : "",
-      show(wait_handle_inner(t))
-    ).str();
+    folly::format(&ret, "{}WaitH<{}>",
+                  is_opt(t) ? "?" : "", show(wait_handle_inner(t)));
     return ret;
   }
 
@@ -543,18 +534,12 @@ std::string show(Type t) {
   case DataTag::Obj:
   case DataTag::Cls:
   case DataTag::RefInner:
-  case DataTag::ArrPacked:
-  case DataTag::ArrPackedN:
-  case DataTag::ArrStruct:
-  case DataTag::ArrMapN:
-  case DataTag::Dict:
-  case DataTag::Vec:
-  case DataTag::Keyset:
+  case DataTag::ArrLikePacked:
+  case DataTag::ArrLikePackedN:
+  case DataTag::ArrLikeMap:
+  case DataTag::ArrLikeMapN:
     break;
-  case DataTag::VecVal:
-  case DataTag::DictVal:
-  case DataTag::ArrVal:
-  case DataTag::KeysetVal:
+  case DataTag::ArrLikeVal:
     folly::toAppend("~", &ret);
     break;
   case DataTag::Str:
@@ -564,14 +549,16 @@ std::string show(Type t) {
     break;
   }
 
+  auto showElem = [&] (const Type& key, const Type& val) -> std::string {
+    if (t.subtypeOf(TOptKeyset)) return show(key);
+    return show(key) + ":" + show(val);
+  };
+
   switch (t.m_dataTag) {
   case DataTag::Int: folly::toAppend(t.m_data.ival, &ret); break;
   case DataTag::Dbl: folly::toAppend(t.m_data.dval, &ret); break;
   case DataTag::Str: ret += escaped_string(t.m_data.sval); break;
-  case DataTag::VecVal:
-  case DataTag::DictVal:
-  case DataTag::KeysetVal:
-  case DataTag::ArrVal:
+  case DataTag::ArrLikeVal:
     ret += array_string(t.m_data.aval);
     break;
   case DataTag::Obj:
@@ -599,64 +586,46 @@ std::string show(Type t) {
     break;
   case DataTag::None:
     break;
-  case DataTag::ArrPacked:
-    ret += folly::format(
+  case DataTag::ArrLikePacked:
+    folly::format(
+      &ret,
       "({})",
       [&] {
         using namespace folly::gen;
-        return from(t.m_data.apacked->elems)
+        return from(t.m_data.packed->elems)
           | map([&] (const Type& t) { return show(t); })
           | unsplit<std::string>(",");
       }()
-    ).str();
+    );
     break;
-  case DataTag::ArrPackedN:
-    ret += folly::format("([{}])", show(t.m_data.apackedn->type)).str();
+  case DataTag::ArrLikePackedN:
+    if (t.m_data.packedn->len) {
+      folly::format(&ret, "([{}]:{})",
+                    show(t.m_data.packedn->type), *t.m_data.packedn->len);
+    } else {
+      folly::format(&ret, "([{}])", show(t.m_data.packedn->type));
+    }
     break;
-  case DataTag::ArrStruct:
-    ret += folly::format(
+  case DataTag::ArrLikeMap:
+    folly::format(
+      &ret,
       "({})",
       [&] {
         using namespace folly::gen;
-        return from(t.m_data.astruct->map)
-          | map([&] (const std::pair<SString,Type>& kv) {
-              return folly::format("{}:{}",
-                kv.first->data(), show(kv.second)).str();
+        return from(t.m_data.map->map)
+          | map([&] (const std::pair<Cell,Type>& kv) {
+              return showElem(from_cell(kv.first), kv.second);
             })
           | unsplit<std::string>(",");
       }()
-    ).str();
+    );
     break;
-  case DataTag::ArrMapN:
-    ret += folly::format(
-      "([{}:{}])",
-      show(t.m_data.amapn->key),
-      show(t.m_data.amapn->val)
-    ).str();
-    break;
-  case DataTag::Dict:
-    ret += folly::format(
-      "([{}:{}])",
-      show(t.m_data.dict->key),
-      show(t.m_data.dict->val)
-    ).str();
-    break;
-  case DataTag::Vec:
-    if (t.m_data.vec->len) {
-      ret += folly::sformat(
-        "([{}]:{})",
-        show(t.m_data.vec->val),
-        *t.m_data.vec->len
-      );
-    } else {
-      ret += folly::sformat("([{}])", show(t.m_data.vec->val));
-    }
-    break;
-  case DataTag::Keyset:
-    ret += folly::format(
+  case DataTag::ArrLikeMapN:
+    folly::format(
+      &ret,
       "([{}])",
-      show(t.m_data.keyset->keyval)
-    ).str();
+      showElem(t.m_data.mapn->key, t.m_data.mapn->val)
+    );
     break;
   }
 

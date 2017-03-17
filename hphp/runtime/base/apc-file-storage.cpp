@@ -18,6 +18,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/timer.h"
 
 #include "hphp/runtime/base/apc-stats.h"

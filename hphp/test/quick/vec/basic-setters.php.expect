@@ -276,19 +276,17 @@ vec(4) {
   int(4)
 }
 Test unset....
-Unset of 0 key value succeeded
+Unset of 0 key value failed: "Vecs do not support unsetting non-end elements"
 vec(4) {
   int(1)
   int(2)
   int(3)
   int(4)
 }
-dict(3) {
-  [1]=>
+vec(4) {
+  int(1)
   int(2)
-  [2]=>
   int(3)
-  [3]=>
   int(4)
 }
 Unset of 3 key value succeeded
@@ -535,7 +533,7 @@ vec(11) {
   string(1) "k"
 }
 Test unset....
-Unset of 0 key value succeeded
+Unset of 0 key value failed: "Vecs do not support unsetting non-end elements"
 vec(11) {
   string(1) "a"
   string(1) "b"
@@ -549,29 +547,6 @@ vec(11) {
   string(1) "j"
   string(1) "k"
 }
-dict(10) {
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-  [3]=>
-  string(1) "d"
-  [4]=>
-  string(1) "e"
-  [5]=>
-  string(1) "f"
-  [6]=>
-  string(1) "g"
-  [7]=>
-  string(1) "h"
-  [8]=>
-  string(1) "i"
-  [9]=>
-  string(1) "j"
-  [10]=>
-  string(1) "k"
-}
-Unset of 3 key value succeeded
 vec(11) {
   string(1) "a"
   string(1) "b"
@@ -585,26 +560,31 @@ vec(11) {
   string(1) "j"
   string(1) "k"
 }
-dict(10) {
-  [0]=>
+Unset of 3 key value failed: "Vecs do not support unsetting non-end elements"
+vec(11) {
   string(1) "a"
-  [1]=>
   string(1) "b"
-  [2]=>
   string(1) "c"
-  [4]=>
+  string(1) "d"
   string(1) "e"
-  [5]=>
   string(1) "f"
-  [6]=>
   string(1) "g"
-  [7]=>
   string(1) "h"
-  [8]=>
   string(1) "i"
-  [9]=>
   string(1) "j"
-  [10]=>
+  string(1) "k"
+}
+vec(11) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
   string(1) "k"
 }
 Unset of 999999999 key value succeeded

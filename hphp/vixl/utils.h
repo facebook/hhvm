@@ -36,7 +36,7 @@ namespace vixl {
 // Check number width.
 inline bool is_intn(unsigned n, int64_t x) {
   assert((0 < n) && (n < 64));
-  int64_t limit = 1L << (n - 1);
+  int64_t limit = 1LL << (n - 1);
   return (-limit <= x) && (x < limit);
 }
 

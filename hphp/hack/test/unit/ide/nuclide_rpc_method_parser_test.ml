@@ -8,7 +8,7 @@
  *
  *)
 
-open File_content
+open Ide_api_types
 open Ide_message
 open Ide_message_parser_test_utils
 open Ide_rpc_protocol_parser_types
@@ -44,6 +44,15 @@ let test_autocomplete_call () =
       position = {line = 9; column = 10};
     }
   )
+
+let test_coverage_levels_call () =
+  let msg = build_call_message "coverageLevels"
+    {|
+      "filename" : "test.php"
+    |}
+  in
+  test msg @@
+  expect_api_message (Coverage_levels "test.php")
 
 let test_did_open_file () =
   let msg = build_call_message "didOpenFile"
@@ -185,6 +194,7 @@ let test_disconnect () =
 let tests = [
   "test_method_not_found", test_method_not_found;
   "test_autocomplete_call", test_autocomplete_call;
+  "test_coverage_levels_call", test_coverage_levels_call;
   "test_did_open_file", test_did_open_file;
   "test_did_close_file", test_did_close_file;
   "test_did_change_file", test_did_change_file;

@@ -32,6 +32,7 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/service-data.h"
 
 #include <map>
 #include <ostream>
@@ -178,6 +179,11 @@ bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 void stashLineTable(const Unit* unit, LineTable table);
 
 const SourceLocTable& getSourceLocTable(const Unit*);
+
+/*
+ * Sum of all Unit::m_bclen
+ */
+extern ServiceData::ExportedTimeSeries* g_hhbc_size;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -549,12 +555,15 @@ public:
   static Class* defClosure(const PreClass* preClass);
 
   /*
-   * Set the NamedEntity for `alias' to refer to the Class `original' in this
+   * Set the NamedEntity for `alias' to refer to the class `original' in this
    * request.
    *
-   * Raises a warning if `alias' already refers to a Class in this request.
+   * Raises a warning and returns false if `alias' already refers to a
+   * Class in this request, or if original is not loaded, and autoload
+   * is false, or it can't be autoloaded. Returns true otherwise.
    */
-  static bool aliasClass(Class* original, const StringData* alias);
+  static bool aliasClass(const StringData* original, const StringData* alias,
+                         bool autoload);
 
   /*
    * Look up the Class in this request with name `name', or with the name

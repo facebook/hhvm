@@ -28,6 +28,14 @@ inline bool Class::isZombie() const {
   return !m_cachedClass.bound();
 }
 
+
+inline void Class::validate() const {
+#ifdef DEBUG
+  assertx(m_magic == kMagic);
+#endif
+  assertx(name()->checkSane());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
@@ -286,9 +294,17 @@ inline rds::Handle Class::sPropInitHandle() const {
 }
 
 inline rds::Handle Class::sPropHandle(Slot index) const {
+  return sPropLink(index).handle();
+}
+
+inline rds::Link<StaticPropData> Class::sPropLink(Slot index) const {
   assert(m_sPropCacheInit.bound());
   assert(numStaticProperties() > index);
-  return m_sPropCache[index].handle();
+  return m_sPropCache[index];
+}
+
+inline rds::Link<bool> Class::sPropInitLink() const {
+  return m_sPropCacheInit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

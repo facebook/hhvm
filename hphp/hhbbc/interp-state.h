@@ -34,6 +34,7 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 struct ClassAnalysis;
+struct FuncAnalysis;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -49,6 +50,8 @@ enum class FPIKind {
   ObjMeth,     // Definitely a method on an object (possibly __call).
   ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
   ObjInvoke,   // Closure invoke or __invoke on an object.
+  Builtin,     // Resolved builtin call; we will convert params and FCall as
+               // we go
 };
 
 /*
@@ -187,6 +190,19 @@ struct StackElem {
 };
 
 /*
+ * Used to track the state of the binding between locals, and their
+ * corresponding static (if any).
+ */
+enum class LocalStaticBinding {
+  // This local is not bound to a local static
+  None,
+  // This local might be bound to its local static
+  Maybe,
+  // This local is known to be bound to its local static
+  Bound
+};
+
+/*
  * A program state at a position in a php::Block.
  *
  * The `initialized' flag indicates whether the state knows anything.  All
@@ -217,10 +233,11 @@ struct State {
   bool initialized = false;
   bool unreachable = false;
   bool thisAvailable = false;
-  std::vector<Type> locals;
-  std::vector<Iter> iters;
-  std::vector<StackElem> stack;
-  std::vector<ActRec> fpiStack;
+  CompactVector<Type> locals;
+  CompactVector<Iter> iters;
+  CompactVector<Type> clsRefSlots;
+  CompactVector<StackElem> stack;
+  CompactVector<ActRec> fpiStack;
 
   /*
    * The current member base. Updated as we move through bytecodes representing
@@ -234,13 +251,18 @@ struct State {
    * used for locals.  This vector tracks the base,key type pair that was used
    * at each stage.  See irgen-minstr.cpp:resolveArrayChain().
    */
-  std::vector<std::pair<Type,Type>> arrayChain;
+  CompactVector<std::pair<Type,Type>> arrayChain;
 
   /*
    * Mapping of a local to another local which is known to have an equivalent
    * value.
    */
-  std::vector<LocalId> equivLocals;
+  CompactVector<LocalId> equivLocals;
+
+  /*
+   * LocalStaticBindings. Only allocated on demand.
+   */
+  CompactVector<LocalStaticBinding> localStaticBindings;
 };
 
 /*
@@ -314,16 +336,18 @@ struct CollectedInfo {
   explicit CollectedInfo(const Index& index,
                          Context ctx,
                          ClassAnalysis* cls,
-                         PublicSPropIndexer* publicStatics)
-    : props{index, ctx, cls}
-    , publicStatics{publicStatics}
-    , mayUseVV{false}
-  {}
+                         PublicSPropIndexer* publicStatics,
+                         bool trackConstantArrays,
+                         const FuncAnalysis* fa = nullptr);
 
   ClosureUseVarMap closureUseTypes;
   PropertiesInfo props;
   PublicSPropIndexer* const publicStatics;
-  bool mayUseVV;
+  ConstantMap cnsMap;
+  bool mayUseVV{false};
+  bool readsUntrackedConstants{false};
+  const bool trackConstantArrays;
+  CompactVector<Type> localStaticTypes;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -350,7 +374,7 @@ bool widen_into(State&, const State&);
  */
 std::string show(const ActRec& a);
 std::string property_state_string(const PropertiesInfo&);
-std::string state_string(const php::Func&, const State&);
+std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 
 //////////////////////////////////////////////////////////////////////
 

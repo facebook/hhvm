@@ -243,6 +243,17 @@ struct LocalId : IRExtraData {
   uint32_t locId;
 };
 
+struct ClsRefSlotData : IRExtraData {
+  explicit ClsRefSlotData(uint32_t slot) : slot{slot} {}
+
+  std::string show() const { return folly::to<std::string>(slot); }
+
+  bool equals(ClsRefSlotData o) const { return slot == o.slot; }
+  size_t hash() const { return std::hash<uint32_t>()(slot); }
+
+  uint32_t slot;
+};
+
 /*
  * Index into, e.g., an array.
  */
@@ -595,13 +606,13 @@ struct CallArrayData : IRExtraData {
                          Offset pcOffset,
                          Offset after,
                          const Func* callee,
-                         bool destroyLocals)
+                         bool writeLocals)
     : spOffset(spOffset)
     , numParams(numParams)
     , pc(pcOffset)
     , after(after)
     , callee(callee)
-    , destroyLocals(destroyLocals)
+    , writeLocals(writeLocals)
   {}
 
   std::string show() const {
@@ -611,7 +622,7 @@ struct CallArrayData : IRExtraData {
       callee
         ? folly::sformat(",{}", callee->fullName())
         : std::string{},
-      destroyLocals ? ",destroyLocals" : "");
+      writeLocals ? ",writeLocals" : "");
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to bottom of call's ActRec+args
@@ -619,19 +630,19 @@ struct CallArrayData : IRExtraData {
   Offset pc;     // XXX why isn't this available in the marker?
   Offset after;  // offset from unit m_bc (unlike m_soff in ActRec)
   const Func* callee; // nullptr if not statically known
-  bool destroyLocals;
+  bool writeLocals;
 };
 
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            const Func* callee,
                            int32_t numNonDefault,
-                           bool destroyLocals,
+                           bool writeLocals,
                            bool needsFrame)
     : spOffset(spOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
-    , destroyLocals{destroyLocals}
+    , writeLocals{writeLocals}
     , needsCallerFrame{needsFrame}
   {}
 
@@ -639,7 +650,7 @@ struct CallBuiltinData : IRExtraData {
     return folly::to<std::string>(
       spOffset.offset, ',',
       callee->fullName()->data(),
-      destroyLocals ? ",destroyLocals" : "",
+      writeLocals ? ",writeLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : ""
     );
   }
@@ -647,7 +658,7 @@ struct CallBuiltinData : IRExtraData {
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
   const Func* callee;
   int32_t numNonDefault;
-  bool destroyLocals;
+  bool writeLocals;
   bool needsCallerFrame;
 };
 
@@ -656,14 +667,14 @@ struct CallData : IRExtraData {
                     uint32_t numParams,
                     Offset after,
                     const Func* callee,
-                    bool destroy,
+                    bool writeLocals,
                     bool needsFrame,
                     bool fcallAwait)
     : spOffset(spOffset)
     , numParams(numParams)
     , after(after)
     , callee(callee)
-    , destroyLocals(destroy)
+    , writeLocals(writeLocals)
     , needsCallerFrame(needsFrame)
     , fcallAwait(fcallAwait)
   {}
@@ -674,7 +685,7 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
-      destroyLocals ? ",destroyLocals" : "",
+      writeLocals ? ",writeLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : "",
       fcallAwait ? ",fcallAwait" : ""
     );
@@ -684,7 +695,7 @@ struct CallData : IRExtraData {
   uint32_t numParams;
   Offset after;        // m_soff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
-  bool destroyLocals;
+  bool writeLocals;
   bool needsCallerFrame;
   bool fcallAwait;
 };
@@ -824,10 +835,22 @@ struct InterpOneData : IRExtraData {
     Type type;
   };
 
+  struct ClsRefSlot {
+    explicit ClsRefSlot(uint32_t id = 0, bool write = false)
+      : id{id}
+      , write{write}
+    {}
+
+    uint32_t id;
+    bool write;
+  };
+
   explicit InterpOneData(IRSPRelOffset spOffset)
     : spOffset(spOffset)
     , nChangedLocals(0)
     , changedLocals(nullptr)
+    , nChangedClsRefSlots(0)
+    , changedClsRefSlots(nullptr)
     , smashesAllLocals(false)
   {}
 
@@ -850,6 +873,9 @@ struct InterpOneData : IRExtraData {
   uint32_t nChangedLocals;
   LocalType* changedLocals;
 
+  uint32_t nChangedClsRefSlots;
+  ClsRefSlot* changedClsRefSlots;
+
   bool smashesAllLocals;
 
   InterpOneData* clone(Arena& arena) const {
@@ -860,8 +886,12 @@ struct InterpOneData : IRExtraData {
     id->opcode = opcode;
     id->nChangedLocals = nChangedLocals;
     id->changedLocals = new (arena) LocalType[nChangedLocals];
+    id->nChangedClsRefSlots = nChangedClsRefSlots;
+    id->changedClsRefSlots = new (arena) ClsRefSlot[nChangedClsRefSlots];
     id->smashesAllLocals = smashesAllLocals;
     std::copy(changedLocals, changedLocals + nChangedLocals, id->changedLocals);
+    std::copy(changedClsRefSlots, changedClsRefSlots + nChangedClsRefSlots,
+              id->changedClsRefSlots);
     return id;
   }
 
@@ -881,6 +911,13 @@ struct InterpOneData : IRExtraData {
         ret += folly::sformat(", Local {} -> {}",
                               changedLocals[i].id,
                               changedLocals[i].type);
+      }
+    }
+    if (nChangedClsRefSlots) {
+      for (auto i = 0; i < nChangedClsRefSlots; ++i) {
+        ret += folly::sformat(", Slot {}{}",
+                              changedClsRefSlots[i].id,
+                              changedClsRefSlots[i].write ? "W" : "R");
       }
     }
 
@@ -1179,6 +1216,9 @@ X(LdLocPseudoMain,              LocalId);
 X(StLoc,                        LocalId);
 X(StLocPseudoMain,              LocalId);
 X(StLocRange,                   LocalIdRange);
+X(LdClsRef,                     ClsRefSlotData);
+X(StClsRef,                     ClsRefSlotData);
+X(KillClsRef,                   ClsRefSlotData);
 X(IterFree,                     IterId);
 X(MIterFree,                    IterId);
 X(CIterFree,                    IterId);
@@ -1307,6 +1347,7 @@ X(StContArState,                GeneratorState);
 X(ContEnter,                    ContEnterData);
 X(DbgAssertARFunc,              IRSPRelOffsetData);
 X(LdARFuncPtr,                  IRSPRelOffsetData);
+X(LdARCtx,                      IRSPRelOffsetData);
 X(EndCatch,                     IRSPRelOffsetData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);
 X(JmpSSwitchDest,               IRSPRelOffsetData);

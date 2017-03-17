@@ -1,3 +1,7 @@
+if (${CMAKE_MAJOR_VERSION} GREATER 2)
+  cmake_policy(SET CMP0026 OLD)
+endif()
+
 include(GNUInstallDirs)
 
 function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)

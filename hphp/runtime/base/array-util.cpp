@@ -81,8 +81,8 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
 
   Array arr = replacement.toArray();
   if (!arr.empty()) {
-    for (ArrayIter iter(arr); iter; ++iter) {
-      const Variant& v = iter.secondRef();
+    for (ArrayIter iterb(arr); iterb; ++iterb) {
+      const Variant& v = iterb.secondRef();
       out_hash.appendWithRef(v);
     }
   }

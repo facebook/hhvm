@@ -371,8 +371,6 @@ void HttpServer::runOrExitProcess() {
   waitForServers();
   m_watchDog.waitForEnd();
   playShutdownRequest(RuntimeOption::ServerCleanupRequest);
-  hphp_process_exit();
-  Logger::Info("all servers stopped");
 }
 
 void HttpServer::waitForServers() {

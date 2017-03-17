@@ -1,4 +1,4 @@
-.function array_filter($arr = no_args, $func = start("""null"""), $flag = start("""null"""), $res = start) {
+.function [skip_frame] array_filter($arr = no_args, $func = start("""null"""), $flag = start("""null"""), $res = start) {
           .numiters 2;
 
 # if we get here, a value was supplied for $res
@@ -28,14 +28,14 @@ start:          IsTypeL $arr Arr
 
                 CGetL $func
                 DecodeCufIter 0 bad_param2
-.try_fault kill_iter_0 {
+.try_catch kill_iter_0 {
                 NewLikeArrayL $arr 0
                 SetL $res
                 PopC
 
                 CGetL $arr
                 WIterInitK 1 endloop_a $v $k
-  .try_fault kill_iter_1 1 {
+  .try_catch kill_iter_1 1 {
                 IssetL $flag
                 JmpZ loop_val
                 Int 1           # ARRAY_FILTER_USE_BOTH
@@ -77,7 +77,20 @@ start:          IsTypeL $arr Arr
                 SetWithRefLML $k $v
     next_key:   WIterNextK 1 loop_key $v $k
   }
+
+            Jmp endloop_a
+
+  kill_iter_1:
+            Catch
+            IterFree 1
+            Throw
 }
+
+kill_iter_0:
+          Catch
+          CIterFree 0
+          Throw
+
 endloop_a:CIterFree 0
 endloop_n:CGetL $res
           RetC
@@ -87,28 +100,34 @@ no_func:  NewLikeArrayL $arr 0
           PopC
           CGetL $arr
           WIterInitK 1 endloop_n $v $k
-.try_fault kill_iter_1_only 1 {
+.try_catch kill_iter_1_only 1 {
 loop_n:   CGetL $v
           JmpZ skip_n
           BaseL $res Define
           SetWithRefLML $k $v
 skip_n:   WIterNextK 1 loop_n $v $k
 }
+
           Jmp endloop_n
+
+kill_iter_1_only:
+          Catch
+          IterFree 1
+          Throw
 
 start_kt:         IssetL $func
                   JmpZ no_func_kt
 
                   CGetL $func
                   DecodeCufIter 0 bad_param2
-.try_fault kill_iter_0_kt {
+.try_catch kill_iter_0_kt {
                   NewLikeArrayL $arr 0
                   SetL $res
                   PopC
 
                   CGetL $arr
                   IterInitK 1 endloop_a_kt $v $k
-  .try_fault kill_iter_1_kt 1 {
+  .try_catch kill_iter_1_kt 1 {
                   IssetL $flag
                   JmpZ loop_val_kt
                   Int 1           # ARRAY_FILTER_USE_BOTH
@@ -156,7 +175,20 @@ start_kt:         IssetL $func
                   PopC
     next_key_kt:  IterNextK 1 loop_key_kt $v $k
   }
+
+               Jmp endloop_a_kt
+
+  kill_iter_1_kt:
+               Catch
+               IterFree 1
+               Throw
 }
+
+kill_iter_0_kt:
+             Catch
+             CIterFree 0
+             Throw
+
 endloop_a_kt:CIterFree 0
 endloop_n_kt:CGetL $res
              RetC
@@ -166,7 +198,7 @@ no_func_kt:  NewLikeArrayL $arr 0
              PopC
              CGetL $arr
              IterInitK 1 endloop_n_kt $v $k
-.try_fault kill_iter_1_only_kt 1 {
+.try_catch kill_iter_1_only_kt 1 {
 loop_n_kt:   CGetL $v
              JmpZ skip_n_kt
              CGetL $v
@@ -175,29 +207,11 @@ loop_n_kt:   CGetL $v
              PopC
 skip_n_kt:   IterNextK 1 loop_n_kt $v $k
 }
+
           Jmp endloop_n_kt
 
-kill_iter_0:
-          CIterFree 0
-          Unwind
-kill_iter_1:
-          IterFree 1
-          Unwind
-# Needed for the verifier. Otherwise it complains
-# because from in one fault region iter 0 is live
-# and in the other its not.
-kill_iter_1_only:
-          IterFree 1
-          Unwind
-
-kill_iter_0_kt:
-          CIterFree 0
-          Unwind
-kill_iter_1_kt:
-          IterFree 1
-          Unwind
 kill_iter_1_only_kt:
+          Catch
           IterFree 1
-          Unwind
-
+          Throw
 }

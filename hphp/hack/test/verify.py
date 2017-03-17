@@ -1,9 +1,6 @@
+#!/usr/bin/env python3
 # @lint-avoid-pyflakes2
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 import argparse
 import os.path
 import subprocess
@@ -12,7 +9,6 @@ import difflib
 import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-from itertools import compress
 
 max_workers = 48
 verbose = False
@@ -33,7 +29,8 @@ def get_test_flags(f):
     with open(path) as f:
         return shlex.split(f.read().strip())
 
-def run_test_program(files, program, expect_ext, get_flags):
+
+def run_test_program(files, program, expect_ext, get_flags, use_stdin):
     """
     Run the program and return a list of Failures.
     """
@@ -41,13 +38,22 @@ def run_test_program(files, program, expect_ext, get_flags):
         test_dir, test_name = os.path.split(f)
         flags = get_flags(test_dir)
         test_flags = get_test_flags(f)
-        cmd = [program, test_name] + flags + test_flags
+        cmd = [program]
+        if not use_stdin:
+            cmd.append(test_name)
+        cmd += flags + test_flags
         if verbose:
             print('Executing', ' '.join(cmd))
         try:
-            output = subprocess.check_output(
+            def go(stdin=None):
+                return subprocess.check_output(
                     cmd, stderr=subprocess.STDOUT, cwd=test_dir,
-                    universal_newlines=True)
+                    universal_newlines=True, stdin=stdin)
+            if use_stdin:
+                with open(f) as stdin:
+                    output = go(stdin)
+            else:
+                output = go()
         except subprocess.CalledProcessError as e:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
@@ -154,6 +160,8 @@ if __name__ == '__main__':
     parser.add_argument('--diff', action='store_true',
                        help='On test failure, show the content of the files and a diff')
     parser.add_argument('--flags', nargs=argparse.REMAINDER)
+    parser.add_argument('--stdin', action='store_true',
+                        help='Pass test input file via stdin')
     parser.epilog = "Unless --flags is passed as an argument, "\
                     "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
@@ -173,6 +181,10 @@ if __name__ == '__main__':
         args.disabled_extension,
         args.in_extension)
 
+    if len(files) == 0:
+        raise Exception(
+            'Could not find any files to test in ' + args.test_path)
+
     flags_cache = {}
 
     def get_flags(test_dir):
@@ -184,7 +196,7 @@ if __name__ == '__main__':
             return flags_cache[test_dir]
 
     failures = run_test_program(
-            files, args.program, args.expect_extension, get_flags)
+        files, args.program, args.expect_extension, get_flags, args.stdin)
     total = len(files)
     if failures == []:
         print("All %d tests passed!" % total)

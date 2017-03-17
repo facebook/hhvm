@@ -278,7 +278,6 @@ constexpr bool ptrSubsetOf(Ptr a, Ptr b) {
   IRTP(PtrToCounted, Ptr,    kCounted)                                  \
   IRT(Gen,                   kCell|kBoxedCell)                          \
   IRT(InitGen,               kGen & ~kUninit)                           \
-  IRT(StkElem,               kGen|kCls)                                 \
   IRTP(PtrToGen,     Ptr,    kGen)                                      \
   IRTP(PtrToInitGen, Ptr,    kInitGen)                                  \
   PTR_TYPES(IRTP_FROM_PTR, PTR_R, Gen)                                  \
@@ -398,7 +397,7 @@ public:
    * Return true iff there exists a DataType in the range [KindOfUninit,
    * KindOfRef] that represents a non-strict supertype of this type.
    *
-   * @requires: *this <= StkElem
+   * @requires: *this <= Gen
    */
   bool isKnownDataType() const;
 
@@ -623,6 +622,13 @@ public:
    */
   Type unspecialize() const;
 
+  /*
+   * Return a copy of this Type with the specialization and staticness
+   * dropped.
+   *
+   * @requires *this <= TInitCell
+   */
+  Type modified() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Specialization introspection.                                      [const]

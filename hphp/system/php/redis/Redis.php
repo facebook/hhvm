@@ -1096,6 +1096,14 @@ class Redis {
           if (!strncmp($line, '-ERR SYNC ', 10)) {
             throw new RedisException("Sync with master in progress");
           }
+          if (!strncmp($line, 'OOM ', 4)) {
+            throw new RedisException(
+              "OOM command not allowed when used memory > 'maxmemory'");
+          }
+          if (!strncmp($line, 'EXECABORT ', 10)) {
+            throw new RedisException(
+              "Transaction discarded because of previous errors");
+          }
           return $line;
         case self::TYPE_INT:
         case self::TYPE_LINE:

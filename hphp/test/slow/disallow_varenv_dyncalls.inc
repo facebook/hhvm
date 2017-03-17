@@ -1,6 +1,12 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+function custom_handler($error, $errmsg, $errfile, $errline, $errcontext) {
+  $file = substr(strrchr($errfile, '/'), 1);
+  echo "$errmsg in $file at line $errline\n";
+}
+set_error_handler('custom_handler');
+
 function test_compact_dyncall() {
   $var1 = 100;
   $var2 = 200;
@@ -432,20 +438,20 @@ function run_tests() {
     'test_extract_cuf',
     'test_extract_cuf_array',
     'test_extract_map',
-    //'test_extract_walk',
+    'test_extract_walk',
     'test_extract_errors',
 
     'test_parse_str_dyncall',
     'test_parse_str_cuf',
     'test_parse_str_cuf_array',
     'test_parse_str_map',
-    //'test_parse_str_walk'
+    'test_parse_str_walk',
     'test_parse_str_errors',
 
     'test_framemeta_dyncall',
     'test_framemeta_cuf',
     'test_framemeta_cuf_array',
-    //'test_framemeta_map',
+    'test_framemeta_map',
     'test_framemeta_errors',
 
     'test_getargs_dyncall',
@@ -465,14 +471,14 @@ function run_tests() {
     'test_assert_cuf_array_pass2',
     'test_assert_cuf_array_fail',
     'test_assert_cuf_array_fail2',
-    // 'test_assert_map_pass',
-    // 'test_assert_map_pass2',
-    // 'test_assert_map_fail',
-    // 'test_assert_map_fail2',
-    // 'test_assert_walk_pass',
-    // 'test_assert_walk_pass2',
-    // 'test_assert_walk_fail',
-    // 'test_assert_walk_fail2',
+    'test_assert_map_pass',
+    'test_assert_map_pass2',
+    'test_assert_map_fail',
+    'test_assert_map_fail2',
+    'test_assert_walk_pass',
+    'test_assert_walk_pass2',
+    'test_assert_walk_fail',
+    'test_assert_walk_fail2',
     'test_assert_chained',
     'test_assert_errors',
   ];

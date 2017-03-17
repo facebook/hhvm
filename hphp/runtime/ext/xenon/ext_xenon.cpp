@@ -288,6 +288,7 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
   time_t now = time(nullptr);
   auto bt = createBacktrace(BacktraceArgs()
                              .skipTop(t == Xenon::EnterSample)
+                             .skipInlined(t == Xenon::EnterSample)
                              .fromWaitHandle(wh)
                              .withMetadata()
                              .ignoreArgs());

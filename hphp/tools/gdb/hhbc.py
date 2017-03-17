@@ -31,7 +31,7 @@ def op_table(name):
 
 @memoized
 def iva_imm_types():
-    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA']]
+    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA', 'CAR', 'CAW']]
 
 @memoized
 def vec_imm_types():
@@ -78,11 +78,11 @@ class HHBC(object):
         encoding."""
 
         pc = pc.cast(T('uint8_t').pointer())
-        raw_val = (~pc.dereference()).cast(T('size_t'))
+        raw_val = (pc.dereference()).cast(T('size_t'))
 
         if (raw_val == 0xff):
             pc += 1
-            byte = ~pc.dereference()
+            byte = pc.dereference()
             raw_val += byte
 
         return [raw_val.cast(T('HPHP::Op')), 2 if raw_val >= 0xff else 1]
@@ -130,14 +130,13 @@ class HHBC(object):
         if immtype in iva_imm_types():
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
 
-            if imm & 0x1:
-                iva_type = T('int32_t')
+            if imm & 0x80:
+                raw = ptr.cast(T('uint32_t').pointer()).dereference()
+                info['value'] = ((raw & 0xffffff00) >> 1) | (raw & 0x7f);
+                info['size'] = 4
             else:
-                iva_type = T('unsigned char')
-
-            imm = ptr.cast(iva_type.pointer()).dereference()
-            info['size'] = iva_type.sizeof
-            info['value'] = imm >> 1
+                info['value'] = imm
+                info['size'] = 1
 
         elif immtype in vec_imm_types():
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]

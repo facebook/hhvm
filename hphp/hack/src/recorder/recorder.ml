@@ -10,6 +10,60 @@
 
 open Recorder_types
 
+module Header = struct
+  (** This should never be changed because we read exactly these many bytes
+   * when opening a file.. *)
+  let header_open_tag size =
+    Printf.sprintf "<hack-recording-header size=%05d>" size
+  let header_close_tag = "</hack-recording-header>"
+
+  let open_tag_width =
+    let example = header_open_tag 1 in
+    String.length example
+
+  let make_header ?for_revision build_id =
+    let for_revision = match for_revision with
+    | None -> ""
+    | Some for_revision ->
+      Printf.sprintf "\"loaded_state_for_base_revision\" : \"%s\"," for_revision
+    in
+    let build_id = Printf.sprintf "\"build_id\" : \"%s\"" build_id in
+    let blob = Printf.sprintf "{ %s %s }" for_revision build_id in
+    Printf.sprintf "%s%s%s\n" (header_open_tag (String.length blob))
+      blob header_close_tag
+
+  exception Invalid_header
+
+  let blob_size open_tag =
+    let re = "<hack-recording-header size=\\([0-9]+\\)>" in
+    let re = Str.regexp re in
+    if Str.string_match re open_tag 0
+    then
+      try int_of_string (Str.matched_group 1 open_tag) with
+      | Not_found -> raise Invalid_header
+    else
+      raise Invalid_header
+
+  let parse_header ic =
+    let open_tag = really_input_string ic open_tag_width in
+    let size = blob_size open_tag in
+    let blob = really_input_string ic size in
+    let close_tag = really_input_string ic (String.length header_close_tag) in
+    if close_tag = header_close_tag
+    then
+      let result = try Hh_json.json_of_string ~strict:true blob with
+      | Hh_json.Syntax_error _ -> raise Invalid_header
+      in
+      let newline = really_input_string ic 1 in
+      if newline = "\n" then
+        result
+      else
+        raise Invalid_header
+    else
+      raise Invalid_header
+
+end
+
 module DE = Debug_event
 
 (** Recorder handles the stream of debug events from hack to
@@ -31,16 +85,29 @@ type env = {
 type instance =
   | Switched_off
   | Active of env
+  (** Hack server loaded a saved state. *)
+  | Active_and_loaded_saved_state of string * env
   | Finished of event list
+  | Finished_and_loaded_saved_state of string * (event list)
 
 let is_finished instance = match instance with
   | Finished _ -> true
+  | Finished_and_loaded_saved_state _ -> true
   | _ -> false
 
 let get_events instance = match instance with
   | Finished events -> events
+  | Finished_and_loaded_saved_state (_, events) -> events
   | Switched_off -> []
+  | Active_and_loaded_saved_state (_, env)
   | Active env -> List.rev env.rev_buffered_recording
+
+let get_header instance = match instance with
+  | Active_and_loaded_saved_state (for_revision, _)
+  | Finished_and_loaded_saved_state (for_revision, _) ->
+    Header.make_header ~for_revision Build_id.build_id_ohai
+  | Switched_off | Active _ | Finished _ ->
+    Header.make_header Build_id.build_id_ohai
 
 let start init_env =
   let start = Unix.gettimeofday () in
@@ -97,7 +164,11 @@ let files_with_contents_opt files =
 
 let convert_event debug_event = match debug_event with
   | DE.Loaded_saved_state (
-    { DE.filename; dirty_files; changed_while_parsing; build_targets; },
+    { DE.filename;
+      corresponding_base_revision;
+      dirty_files;
+      changed_while_parsing;
+      build_targets; },
     global_state) ->
     let dirty_files = files_with_contents dirty_files in
     let changed_while_parsing = files_with_contents changed_while_parsing in
@@ -106,6 +177,7 @@ let convert_event debug_event = match debug_event with
     let build_targets = files_with_contents_opt build_targets in
     Loaded_saved_state (
       { filename;
+      corresponding_base_revision;
       dirty_files;
       changed_while_parsing;
       build_targets; },
@@ -124,12 +196,23 @@ let with_event event env =
     (convert_event event) :: env.rev_buffered_recording; }
 
 let add_event event instance = match instance, event with
+  | Finished_and_loaded_saved_state _, _
   | Finished _, _ ->
     instance
   | Switched_off, _ ->
     instance
   | Active env, DE.Stop_recording ->
     Finished (List.rev env.rev_buffered_recording)
+  | Active_and_loaded_saved_state (for_revision, env), DE.Stop_recording ->
+    Finished_and_loaded_saved_state (for_revision,
+      (List.rev env.rev_buffered_recording))
+  | Active env, (DE.Loaded_saved_state
+    ({ DE.corresponding_base_revision; _ }, _)) ->
+    let env = with_event event env in
+    Active_and_loaded_saved_state (corresponding_base_revision, env)
   | Active env, _ ->
     let env = with_event event env in
     Active env
+  | (Active_and_loaded_saved_state (for_revision, env)), _ ->
+    let env = with_event event env in
+    Active_and_loaded_saved_state (for_revision, env)

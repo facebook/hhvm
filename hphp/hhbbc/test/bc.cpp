@@ -29,7 +29,7 @@ std::vector<Bytecode> samples {
   bc::Int { 52 },
   bc::False {},
   bc::FPassC { 0 },
-  bc::FPushFunc { 2 },
+  bc::FPushFunc { 2, false },
 };
 
 TEST(Bytecode, EqualityComparable) {

@@ -130,8 +130,7 @@ struct c_Pair : ObjectData {
   static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
 
   void scan(type_scan::Scanner& scanner) const {
-    if (m_size >= 1) scanner.scan(elm0);
-    if (m_size >= 2) scanner.scan(elm1);
+    scanner.scan(elm0, m_size * sizeof(elm0));
   }
 
  private:

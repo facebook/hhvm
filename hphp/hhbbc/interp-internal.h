@@ -69,6 +69,8 @@ struct ISS {
   PropagateFn propagate;
 };
 
+void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs);
+
 //////////////////////////////////////////////////////////////////////
 
 namespace interp_step {
@@ -106,40 +108,7 @@ namespace {
 
 template<class... Ts>
 void impl(ISS& env, Ts&&... ts) {
-  std::vector<Bytecode> bcs = { std::forward<Ts>(ts)... };
-
-  folly::Optional<std::vector<Bytecode>> currentReduction;
-
-  for (auto it = begin(bcs); it != end(bcs); ++it) {
-    assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
-           "you can't use impl with branching opcodes before last position");
-
-    auto const wasPEI = env.flags.wasPEI;
-
-    FTRACE(3, "    (impl {}\n", show(env.ctx.func, *it));
-    env.flags.wasPEI          = true;
-    env.flags.canConstProp    = false;
-    env.flags.strengthReduced = folly::none;
-    default_dispatch(env, *it);
-
-    if (env.flags.strengthReduced) {
-      if (!currentReduction) {
-        currentReduction = std::vector<Bytecode>{};
-        currentReduction->assign(begin(bcs), it);
-      }
-      std::copy(begin(*env.flags.strengthReduced),
-                end(*env.flags.strengthReduced),
-                std::back_inserter(*currentReduction));
-    } else if (currentReduction) {
-      currentReduction->push_back(*it);
-    }
-
-    // If any of the opcodes in the impl list said they could throw,
-    // then the whole thing could throw.
-    env.flags.wasPEI = env.flags.wasPEI || wasPEI;
-  }
-
-  env.flags.strengthReduced = currentReduction;
+  impl_vec(env, false, { std::forward<Ts>(ts)... });
 }
 
 /*
@@ -148,12 +117,13 @@ void impl(ISS& env, Ts&&... ts) {
  * sequence.  Ensure that if you call reduce(), it is before any
  * state-affecting operations (like popC()).
  */
+void reduce(ISS& env, std::vector<Bytecode>&& bcs) {
+  impl_vec(env, true, std::move(bcs));
+}
+
 template<class... Bytecodes>
-void reduce(ISS& env, const Bytecodes&... hhbc) {
-  impl(env, hhbc...);
-  if (!env.flags.strengthReduced) {
-    env.flags.strengthReduced = std::vector<Bytecode> { hhbc... };
-  }
+void reduce(ISS& env, Bytecodes&&... hhbc) {
+  reduce(env, { std::forward<Bytecodes>(hhbc)... });
 }
 
 void nothrow(ISS& env) {
@@ -174,9 +144,49 @@ void jmp_nevertaken(ISS& env) {
 void readUnknownLocals(ISS& env) { env.flags.mayReadLocalSet.set(); }
 void readAllLocals(ISS& env)     { env.flags.mayReadLocalSet.set(); }
 
+void modifyLocalStatic(ISS& env, LocalId id, const Type& t) {
+  auto modifyOne = [&] (LocalId lid) {
+    if (is_volatile_local(env.ctx.func, lid)) return;
+    if (env.state.localStaticBindings.size() <= lid) return;
+    if (env.state.localStaticBindings[lid] == LocalStaticBinding::None) return;
+    if (t.subtypeOf(TUninit) && !t.subtypeOf(TBottom)) {
+      // Uninit means we are unbinding.
+      env.state.localStaticBindings[lid] = id == NoLocalId ?
+        LocalStaticBinding::None : LocalStaticBinding::Maybe;
+      return;
+    }
+    if (lid >= env.collect.localStaticTypes.size()) {
+      env.collect.localStaticTypes.resize(lid + 1, TBottom);
+    }
+    env.collect.localStaticTypes[lid] = t.subtypeOf(TCell) ?
+      union_of(std::move(env.collect.localStaticTypes[lid]), t) :
+      TGen;
+  };
+  if (id != NoLocalId) {
+    return modifyOne(id);
+  }
+  for (LocalId i = 0; i < env.state.localStaticBindings.size(); i++) {
+    modifyOne(i);
+  }
+}
+
+void unbindLocalStatic(ISS& env, LocalId id) {
+  modifyLocalStatic(env, id, TUninit);
+}
+
+void bindLocalStatic(ISS& env, LocalId id, const Type& t) {
+  if (is_volatile_local(env.ctx.func, id)) return;
+  if (env.state.localStaticBindings.size() <= id) {
+    env.state.localStaticBindings.resize(id + 1);
+  }
+  env.state.localStaticBindings[id] = LocalStaticBinding::Bound;
+  modifyLocalStatic(env, id, t);
+}
+
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
+  modifyLocalStatic(env, NoLocalId, TGen);
   for (auto& l : env.state.locals) l = TGen;
   for (auto& e : env.state.stack) e.equivLocal = NoLocalId;
   env.state.equivLocals.clear();
@@ -217,7 +227,13 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
     if (options.DisallowDynamicVarEnvFuncs) return;
   }
 
-  if (func.mightWriteCallerFrame()) {
+  /*
+   * Skip-frame functions won't write or read to the caller's frame, but they
+   * might dynamically call a function which can. So, skip-frame functions kill
+   * our locals unless they can't call such functions.
+   */
+  if (func.mightWriteCallerFrame() ||
+      (!options.DisallowDynamicVarEnvFuncs && func.mightBeSkipFrame())) {
     readUnknownLocals(env);
     killLocals(env);
     mayUseVV(env);
@@ -244,6 +260,7 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
       }
       return;
     }
+  case FPIKind::Builtin:
     specialFunctionEffects(env, *ar.func);
     if (ar.fallbackFunc) specialFunctionEffects(env, *ar.fallbackFunc);
     break;
@@ -252,6 +269,18 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
   case FPIKind::ClsMeth:
   case FPIKind::ObjInvoke:
   case FPIKind::CallableArr:
+    /*
+     * Methods cannot read or write to the caller's frame, but they can be
+     * skip-frame (if they're a builtin). So, its possible they'll dynamically
+     * call a function which reads or writes to the caller's frame. If we don't
+     * forbid this, we have to be pessimistic. Imagine something like
+     * Vector::map calling assert.
+     */
+    if (!options.DisallowDynamicVarEnvFuncs) {
+      readUnknownLocals(env);
+      killLocals(env);
+      mayUseVV(env);
+    }
     break;
   }
 }
@@ -261,8 +290,9 @@ void specialFunctionEffects(ISS& env, ActRec ar) {
 
 Type popT(ISS& env) {
   assert(!env.state.stack.empty());
-  auto const ret = env.state.stack.back().type;
+  auto const ret = std::move(env.state.stack.back().type);
   FTRACE(2, "    pop:  {}\n", show(ret));
+  assert(ret.subtypeOf(TGen));
   env.state.stack.pop_back();
   return ret;
 }
@@ -276,12 +306,6 @@ Type popC(ISS& env) {
 Type popV(ISS& env) {
   auto const v = popT(env);
   assert(v.subtypeOf(TRef));
-  return v;
-}
-
-Type popA(ISS& env) {
-  auto const v = popT(env);
-  assert(v.subtypeOf(TCls));
   return v;
 }
 
@@ -307,24 +331,19 @@ void discard(ISS& env, int n) {
   }
 }
 
-Type topT(ISS& env, uint32_t idx = 0) {
+Type& topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1].type;
 }
 
-Type topA(ISS& env, uint32_t i = 0) {
-  assert(topT(env, i).subtypeOf(TCls));
-  return topT(env, i);
-}
-
-Type topC(ISS& env, uint32_t i = 0) {
+Type& topC(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(TInitCell));
   return topT(env, i);
 }
 
-Type topR(ISS& env, uint32_t i = 0) { return topT(env, i); }
+Type& topR(ISS& env, uint32_t i = 0) { return topT(env, i); }
 
-Type topV(ISS& env, uint32_t i = 0) {
+Type& topV(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(TRef));
   return topT(env, i);
 }
@@ -332,7 +351,7 @@ Type topV(ISS& env, uint32_t i = 0) {
 void push(ISS& env, Type t, LocalId l = NoLocalId) {
   FTRACE(2, "    push: {}\n", show(t));
   always_assert(l == NoLocalId || !is_volatile_local(env.ctx.func, l));
-  env.state.stack.push_back(StackElem {t, l});
+  env.state.stack.push_back(StackElem {std::move(t), l});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -359,13 +378,26 @@ ActRec fpiTop(ISS& env) {
 PrepKind prepKind(ISS& env, uint32_t paramId) {
   auto ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
-    return env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+    auto ret = env.index.lookup_param_prep(env.ctx, *ar.func, paramId);
+    assert(ar.kind != FPIKind::Builtin || ret != PrepKind::Unknown);
+    return ret;
   }
+  assert(ar.kind != FPIKind::Builtin);
   return PrepKind::Unknown;
 }
 
 //////////////////////////////////////////////////////////////////////
 // locals
+
+void useLocalStatic(ISS& env, LocalId l) {
+  assert(env.collect.localStaticTypes.size() > l);
+  if (!env.flags.usedLocalStatics) {
+    env.flags.usedLocalStatics = std::make_shared<std::map<LocalId,Type>>();
+  }
+  // Ignore the return value, since we only want the first type used,
+  // as that will be the narrowest.
+  env.flags.usedLocalStatics->emplace(l, env.collect.localStaticTypes[l]);
+}
 
 void mayReadLocal(ISS& env, uint32_t id) {
   if (id < env.flags.mayReadLocalSet.size()) {
@@ -381,29 +413,66 @@ LocalId findLocEquiv(ISS& env, LocalId l) {
   return env.state.equivLocals[l];
 }
 
-// Record an equivalency between two locals.
+// Determine whether two locals are equivalent
+bool locsAreEquiv(ISS& env, LocalId l1, LocalId l2) {
+  if (l1 >= env.state.equivLocals.size() ||
+      l2 >= env.state.equivLocals.size() ||
+      env.state.equivLocals[l1] == NoLocalId ||
+      env.state.equivLocals[l2] == NoLocalId) {
+    return false;
+  }
+
+  auto l = l1;
+  while ((l = env.state.equivLocals[l]) != l1) {
+    if (l == l2) return true;
+  }
+  return false;
+}
+
+void killLocEquiv(State& state, LocalId l) {
+  if (l >= state.equivLocals.size()) return;
+  if (state.equivLocals[l] == NoLocalId) return;
+  auto loc = l;
+  do {
+    loc = state.equivLocals[loc];
+  } while (state.equivLocals[loc] != l);
+  assert(loc != l);
+  if (state.equivLocals[l] == loc) {
+    state.equivLocals[loc] = NoLocalId;
+  } else {
+    state.equivLocals[loc] = state.equivLocals[l];
+  }
+  state.equivLocals[l] = NoLocalId;
+}
+
+void killLocEquiv(ISS& env, LocalId l) {
+  killLocEquiv(env.state, l);
+}
+
+void killAllLocEquiv(ISS& env) {
+  env.state.equivLocals.clear();
+}
+
+// Add from to to's equivalency set.
 void addLocEquiv(ISS& env,
                  LocalId from,
                  LocalId to) {
   always_assert(!is_volatile_local(env.ctx.func, from));
   always_assert(!is_volatile_local(env.ctx.func, to));
-  if (env.state.equivLocals.size() <= from) {
-    env.state.equivLocals.resize(from + 1, NoLocalId);
-  }
-  env.state.equivLocals[from] = to;
-}
+  always_assert(from != to && findLocEquiv(env, from) == NoLocalId);
 
-// Kill all equivalencies involving the given local to other locals
-void killLocEquiv(ISS& env, LocalId l) {
-  for (auto& to : env.state.equivLocals) {
-    if (to == l) to = NoLocalId;
+  auto m = std::max(to, from);
+  if (env.state.equivLocals.size() <= m) {
+    env.state.equivLocals.resize(m + 1, NoLocalId);
   }
-  if (l >= env.state.equivLocals.size()) return;
-  env.state.equivLocals[l] = NoLocalId;
-}
 
-void killAllLocEquiv(ISS& env) {
-  env.state.equivLocals.clear();
+  if (env.state.equivLocals[to] == NoLocalId) {
+    env.state.equivLocals[from] = to;
+    env.state.equivLocals[to] = from;
+  } else {
+    env.state.equivLocals[from] = env.state.equivLocals[to];
+    env.state.equivLocals[to] = from;
+  }
 }
 
 // Obtain a local which is equivalent to the given stack value
@@ -441,22 +510,44 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
     always_assert_flog(current == TGen, "volatile local was not TGen");
     return;
   }
-  env.state.locals[l] = t;
+  modifyLocalStatic(env, l, t);
+  env.state.locals[l] = std::move(t);
+}
+
+folly::Optional<Type> staticLocType(ISS& env, LocalId l, const Type& super) {
+  mayReadLocal(env, l);
+  if (env.state.localStaticBindings.size() > l &&
+      env.state.localStaticBindings[l] == LocalStaticBinding::Bound) {
+    assert(env.collect.localStaticTypes.size() > l);
+    auto t = env.collect.localStaticTypes[l];
+    if (t.subtypeOf(super)) {
+      useLocalStatic(env, l);
+      if (t.subtypeOf(TBottom)) t = TInitNull;
+      return std::move(t);
+    }
+  }
+  return folly::none;
 }
 
 // Read a local type in the sense of CGetL.  (TUninits turn into
 // TInitNull, and potentially reffy types return the "inner" type,
 // which is always a subtype of InitCell.)
 Type locAsCell(ISS& env, LocalId l) {
+  if (auto s = staticLocType(env, l, TInitCell)) {
+    return std::move(*s);
+  }
   auto t = locRaw(env, l);
   return !t.subtypeOf(TCell) ? TInitCell :
           t.subtypeOf(TUninit) ? TInitNull :
-          remove_uninit(t);
+          remove_uninit(std::move(t));
 }
 
 // Read a local type, dereferencing refs, but without converting
 // potential TUninits to TInitNull.
 Type derefLoc(ISS& env, LocalId l) {
+  if (auto s = staticLocType(env, l, TCell)) {
+    return std::move(*s);
+  }
   auto v = locRaw(env, l);
   if (v.subtypeOf(TCell)) return v;
   return v.couldBe(TUninit) ? TCell : TInitCell;
@@ -471,6 +562,20 @@ bool locCouldBeRef(ISS& env, LocalId l) {
 }
 
 /*
+ * Update the known type of a local, based on assertions
+ * (VerifyParamType; or IsType/JmpCC), rather than an actual
+ * modification to the local.
+ */
+void refineLoc(ISS& env, LocalId l, Type t) {
+  auto v = locRaw(env, l);
+  if (is_volatile_local(env.ctx.func, l)) {
+    always_assert_flog(v == TGen, "volatile local was not TGen");
+    return;
+  }
+  if (v.subtypeOf(TCell)) env.state.locals[l] = std::move(t);
+}
+
+/*
  * Set a local type in the sense of tvSet.  If the local is boxed or
  * not known to be not boxed, we can't change the type.  May be used
  * to set locals to types that include Uninit.
@@ -478,12 +583,8 @@ bool locCouldBeRef(ISS& env, LocalId l) {
 void setLoc(ISS& env, LocalId l, Type t) {
   killLocEquiv(env, l);
   killStkEquiv(env, l);
-  auto v = locRaw(env, l);
-  if (is_volatile_local(env.ctx.func, l)) {
-    always_assert_flog(v == TGen, "volatile local was not TGen");
-    return;
-  }
-  if (v.subtypeOf(TCell)) env.state.locals[l] = t;
+  modifyLocalStatic(env, l, t);
+  refineLoc(env, l, std::move(t));
 }
 
 LocalId findLocal(ISS& env, SString name) {
@@ -506,6 +607,7 @@ void loseNonRefLocalTypes(ISS& env) {
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  modifyLocalStatic(env, NoLocalId, TCell);
 }
 
 void boxUnknownLocal(ISS& env) {
@@ -516,14 +618,47 @@ void boxUnknownLocal(ISS& env) {
   }
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  // Don't update the local statics here; this is called both for
+  // boxing and binding, and the effects on local statics are
+  // different.
 }
 
 void unsetUnknownLocal(ISS& env) {
   readUnknownLocals(env);
   FTRACE(2, "  unsetUnknownLocal\n");
-  for (auto& l : env.state.locals) l = union_of(l, TUninit);
+  for (auto& l : env.state.locals) l |= TUninit;
   killAllLocEquiv(env);
   killAllStkEquiv(env);
+  unbindLocalStatic(env, NoLocalId);
+}
+
+//////////////////////////////////////////////////////////////////////
+// class-ref slots
+
+// Read the specified class-ref slot without discarding the stored value.
+const Type& peekClsRefSlot(ISS& env, ClsRefSlotId slot) {
+  assert(slot >= 0);
+  always_assert_flog(env.state.clsRefSlots[slot].subtypeOf(TCls),
+                     "class-ref slot contained non-TCls");
+  return env.state.clsRefSlots[slot];
+}
+
+// Read the specified class-ref slot and discard the stored value.
+Type takeClsRefSlot(ISS& env, ClsRefSlotId slot) {
+  assert(slot >= 0);
+  auto ret = std::move(env.state.clsRefSlots[slot]);
+  FTRACE(2, "    read class-ref: {} -> {}\n", slot, show(ret));
+  always_assert_flog(ret.subtypeOf(TCls), "class-ref slot contained non-TCls");
+  env.state.clsRefSlots[slot] = TCls;
+  return ret;
+}
+
+void putClsRefSlot(ISS& env, ClsRefSlotId slot, Type ty) {
+  assert(slot >= 0);
+  always_assert_flog(ty.subtypeOf(TCls),
+                     "attempted to set class-ref slot to non-TCls");
+  FTRACE(2, "    write class-ref: {} -> {}\n", slot, show(ty));
+  env.state.clsRefSlots[slot] = std::move(ty);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -641,7 +776,7 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
 void mergeThisProp(ISS& env, SString name, Type type) {
   auto const t = thisPropRaw(env, name);
   if (!t) return;
-  *t = union_of(*t, loosen_statics(loosen_values(type)));
+  *t |= loosen_statics(loosen_values(type));
 }
 
 /*
@@ -671,7 +806,7 @@ void unsetUnknownThisProp(ISS& env) {
 void boxThisProp(ISS& env, SString name) {
   auto const t = thisPropRaw(env, name);
   if (!t) return;
-  *t = union_of(*t, TRef);
+  *t |= TRef;
 }
 
 /*
@@ -731,7 +866,7 @@ folly::Optional<Type> selfPropAsCell(ISS& env, SString name) {
 void mergeSelfProp(ISS& env, SString name, Type type) {
   auto const t = selfPropRaw(env, name);
   if (!t) return;
-  *t = union_of(*t, type);
+  *t |= type;
 }
 
 /*

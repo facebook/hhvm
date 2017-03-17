@@ -10,7 +10,6 @@
 
 open Core
 open ServerEnv
-open File_content
 open ServerCommandTypes
 
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
@@ -33,10 +32,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         in
         env, result
     | IDENTIFY_FUNCTION (file_input, line, char) ->
-        let content =
-          ServerFileSync.get_file_content file_input |>
-          File_content.get_content
-        in
+        let content = ServerFileSync.get_file_content file_input in
         env, ServerIdentifyFunction.go_absolute content line char env.tcopt
     | GET_DEFINITION_BY_ID id ->
         env, Option.map (ServerSymbolDefinition.from_symbol_id env.tcopt id)
@@ -52,15 +48,35 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           env, ServerFindRefs.go find_refs_action genv env
         else
           env, Ai.ServerFindRefs.go find_refs_action genv env
-    | IDE_FIND_REFS (content, line, char) ->
+    | IDE_FIND_REFS (input, line, char) ->
+        let content = ServerFileSync.get_file_content input in
         env, ServerFindRefs.go_from_file (content, line, char) genv env
-    | IDE_HIGHLIGHT_REFS (content, line, char) ->
+    | IDE_HIGHLIGHT_REFS (input, line, char) ->
+        let content = ServerFileSync.get_file_content input in
         env, ServerHighlightRefs.go (content, line, char) env.tcopt
     | REFACTOR refactor_action ->
         env, ServerRefactor.go refactor_action genv env
     | REMOVE_DEAD_FIXMES codes ->
       HackEventLogger.check_response (Errors.get_error_list env.errorl);
       env, ServerRefactor.get_fixme_patches codes env
+    | IGNORE_FIXMES files ->
+      let paths = List.map files (Relative_path.concat Relative_path.Root) in
+      let disk_needs_parsing =
+        List.fold_left
+          paths
+          ~init:env.disk_needs_parsing
+          ~f:Relative_path.Set.add
+      in
+      Errors.set_ignored_fixmes (Some paths);
+      let original_env = env in
+      let env = {env with disk_needs_parsing} in
+      (* Everything should happen on the master process *)
+      let genv = {genv with workers = None} in
+      let env, _, _ = ServerTypeCheck.(check genv env Full_check) in
+      let el = Errors.get_sorted_error_list env.errorl in
+      let el = List.map ~f:Errors.to_absolute el in
+      Errors.set_ignored_fixmes None;
+      original_env, el
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | DUMP_AI_INFO file_list ->
@@ -78,6 +94,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | KILL -> env, ()
     | FORMAT (content, from, to_) ->
         env, ServerFormat.go genv content from to_
+    | IDE_FORMAT {Ide_api_types.range_filename; file_range} ->
+        let content = ServerFileSync.get_file_content
+          (ServerUtils.FileName range_filename) in
+        env, ServerFormat.go_ide genv content file_range
     | TRACE_AI action ->
         env, Ai.TraceService.go action Typing_check_utils.check_defs
            (ServerArgs.ai_mode genv.options) env.tcopt
@@ -92,10 +112,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | EDIT_FILE (path, edits) ->
         ServerFileSync.edit_file env path edits, ()
     | IDE_AUTOCOMPLETE (path, pos) ->
+        let open Ide_api_types in
         let fc = ServerFileSync.get_file_content (ServerUtils.FileName path) in
         let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
-        let edited_fc = edit_file_unsafe fc edits in
-        let content = get_content edited_fc in
+        let content = File_content.edit_file_unsafe fc edits in
         env, ServerAutoComplete.auto_complete env.tcopt content
     | DISCONNECT ->
         ServerFileSync.clear_sync_data env, ()
@@ -114,5 +134,4 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | OUTLINE path ->
       env, ServerUtils.FileName path |>
       ServerFileSync.get_file_content |>
-      File_content.get_content |>
       FileOutline.outline env.popt

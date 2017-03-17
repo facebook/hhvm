@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -63,6 +63,14 @@ struct NativePropHandler;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Utility wrapper for static properties. Allows distinguishing them
+ * via type_scan::Index.
+ */
+struct StaticPropData {
+  TypedValue val;
+};
 
 using ClassPtr = AtomicSharedLowPtr<Class>;
 
@@ -708,6 +716,8 @@ public:
    * RDS handle for the static property at `index'.
    */
   rds::Handle sPropHandle(Slot index) const;
+  rds::Link<StaticPropData> sPropLink(Slot index) const;
+  rds::Link<bool> sPropInitLink() const;
 
   /*
    * Get the PropInitVec for the current request.
@@ -977,6 +987,10 @@ public:
 
 
   bool needsInitSProps() const;
+
+  // For assertions:
+  void validate() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -1216,12 +1230,6 @@ private:
   // Static data members.
 
 public:
-  /*
-   * Callback which, if set, runs during setMethods().
-   */
-  static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1230,10 +1238,16 @@ public:
   // The ordering is reverse order of hotness because m_classVec is relatively
   // hot, and must be the last member.
 
-public:
   LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:
+  static constexpr uint32_t kMagic = 0xce7adb33;
+
+#ifdef DEBUG
+  // For asserts only.
+  uint32_t m_magic;
+#endif
+
   default_ptr<ExtraData> m_extra;
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
@@ -1300,7 +1314,7 @@ private:
    * 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
    *    called, and the values are actually initialized.
    */
-  mutable rds::Link<TypedValue>* m_sPropCache{nullptr};
+  mutable rds::Link<StaticPropData>* m_sPropCache{nullptr};
   mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
 
   veclen_t m_classVecLen;

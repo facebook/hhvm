@@ -14,5 +14,5 @@ val to_json:
   id:int option ->
   protocol:protocol ->
   version:version ->
-  response:Ide_message.response ->
+  message:Ide_message.message ->
   Hh_json.json

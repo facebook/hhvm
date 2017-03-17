@@ -156,7 +156,6 @@ let go ?(quick = false) workers files_set ~get_next popt =
       fun fn (acc, errorl, error_files) ->
         let content = File_heap.get_ide_contents_unsafe fn in
         if FindUtils.is_php (Relative_path.suffix fn) then
-          let content = File_content.get_content content in
           parse_sequential ~quick fn content
             (acc, errorl, error_files) popt
         else

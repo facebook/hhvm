@@ -8,48 +8,37 @@
  *
  *)
 
-(**
- * Turntable plays back a recording on a Hack server. Upon finishing playback,
- * it sleeps until manually terminated, keeping the persistent connection
- * alive so that the server state doesn't drop the IDE state (allowing you to
- * to interact with and inspect the server).
- *)
-
-module Args = struct
-
-  type t = {
-    root : Path.t;
-    recording : Path.t;
-  }
-
-  let usage = Printf.sprintf
-    "Usage: %s --recording <recording file> [REPO DIRECTORY]\n"
-    Sys.argv.(0)
-
-  let parse () =
-    let root = ref None in
-    let recording = ref "" in
-    let options = [
-      "--recording", Arg.String (fun x -> recording := x),
-      "Path to the recording file";
-    ] in
-    let () = Arg.parse options (fun s -> root := (Some s)) usage in
-    let root = ClientArgsUtils.get_root !root in
-    if !recording = "" then
-      let () = Printf.eprintf "%s" usage in
-      exit 1
-    else
-    {
-      root = root;
-      recording = Path.make !recording;
-    }
-
-  let root args = args.root
-
-end;;
-
 let not_yet_supported s =
-  Printf.eprintf "Type not yet supported: %s" s
+  failwith @@ Printf.sprintf "Event not yet supported: %s" s
+
+let stop_server root =
+  let status = ClientStop.main { ClientStop.root = root; } in
+  match status with
+  | Exit_status.No_error -> ()
+  | _ ->
+    failwith "Stopping server failed"
+
+let start_server root =
+  let check_env = {
+    ClientEnv.mode = ClientEnv.MODE_STATUS;
+    root = root;
+    from = "";
+    output_json = false;
+    retry_if_init = true;
+    retries = 800;
+    timeout = None;
+    autostart = true;
+    force_dormant_start = false;
+    no_load = false;
+    ai_mode = None;
+  } in
+  match ClientCheck.main check_env with
+  | Exit_status.No_error ->
+    ()
+  | Exit_status.Type_error ->
+    Printf.eprintf "Warning: server started with typecheck errors"
+  | _ ->
+    ()
 
 let playback_server_cmd : type a. Timeout.in_channel * out_channel ->
   a ServerCommandTypes.command -> unit = fun conn cmd ->
@@ -74,47 +63,100 @@ let write_files_contents files =
     write_file_contents filename contents
   )
 
-let rec playback recording conn =
-  let x = Marshal.from_channel recording in
+(** Plays the event. Returns true if this event indicated the
+ * end of recording. *)
+let play_event event conn =
   let open Recorder_types in
-  let () = match x with
-  | Start_recording init_env ->
-    let open Relative_path in
-    set_path_prefix Root init_env.root_path;
-    set_path_prefix Hhi init_env.hhi_path
+  match event with
+  | Start_recording _ ->
+    failwith "unexpected preconnection event Start_recording"
   | Loaded_saved_state _ ->
-    (** TODO *)
-    playback recording conn
+    failwith "unexpected preconnection event Loaded_saved_state"
   | Fresh_vcs_state _ ->
     not_yet_supported "Fresh_vcs_state"
   | Typecheck ->
     not_yet_supported "Typecheck"
   | HandleServerCommand cmd ->
-    playback_server_cmd conn cmd
+    playback_server_cmd conn cmd;
+    false
   | Disk_files_modified files ->
-    write_files_contents files
+    write_files_contents files;
+    false
   | Stop_recording ->
-    not_yet_supported "Stop_recording"
+    true
+
+let rec playback recording conn =
+  let event = Marshal.from_channel recording in
+  let finished = play_event event conn in
+  if finished then
+    ()
+  else
+    playback recording conn
+
+let rec preconnection_playback
+skip_hg_update_on_load_state recording root =
+  let event = Marshal.from_channel recording in
+  let open Recorder_types in
+  match event with
+  | Start_recording _ ->
+    preconnection_playback skip_hg_update_on_load_state recording root
+  | Loaded_saved_state ( {
+      filename = _filename;
+      corresponding_base_revision;
+      dirty_files;
+      changed_while_parsing;
+      build_targets;
+    },
+    _) ->
+      stop_server root;
+      if skip_hg_update_on_load_state then
+        ()
+      else
+        Future.get @@
+          Hg.update_to_base_rev corresponding_base_revision @@
+          Path.to_string root;
+      write_files_contents dirty_files;
+      write_files_contents changed_while_parsing;
+      write_files_contents build_targets;
+      start_server root;
+      let conn = ClientIde.connect_persistent { ClientIde.root = root }
+        ~retries:800 in
+      playback recording conn
+  | Fresh_vcs_state _
+  | Typecheck
+  | HandleServerCommand _
+  | Disk_files_modified _ ->
+    (** Found a real event without loading a saved state. Initiate connection
+     * and continue playback. *)
+    start_server root;
+    let conn = ClientIde.connect_persistent { ClientIde.root = root }
+      ~retries:800 in
+    ignore @@ play_event event conn;
+    playback recording conn
+  | Stop_recording ->
+    ()
+
+let check_build_id json =
+  let open Hh_json.Access in
+  let build_id = (return json)
+    >>= get_string "build_id"
+    |> counit_with @@ (fun e ->
+      Printf.eprintf "%s\n%!" (access_failure_to_string e);
+      exit 1)
   in
-  playback recording conn
+  if build_id = Build_id.build_id_ohai
+  then
+    ()
+  else
+    Printf.eprintf "Warning: Build ID mismatch\n%!"
 
-let rec sleep_and_wait () =
-  let _, _, _ = Unix.select [] [] [] 999999.999 in
-  sleep_and_wait ()
-
-let () =
-  Daemon.check_entry_point (); (* this call might not return *)
-  Sys_utils.set_signal Sys.sigint (Sys.Signal_handle (fun _ ->
-    exit 0));
-  let args = Args.parse () in
-  HackEventLogger.client_init @@ Args.root args;
-  let conn = ClientIde.connect_persistent { ClientIde.root = Args.root args }
-    ~retries:800 in
-  let recording = args.Args.recording |> Path.to_string |> open_in in
-  try playback recording conn with
+let spin_record skip_hg_update_on_load_state recording_path root =
+  Relative_path.set_path_prefix Relative_path.Root root;
+  let recording = recording_path |> Path.to_string |> open_in in
+  let json = Recorder.Header.parse_header recording in
+  let () = check_build_id json in
+  try preconnection_playback skip_hg_update_on_load_state recording root with
   | End_of_file ->
-    Printf.eprintf "End of recording...waiting for termination\n%!";
-    sleep_and_wait ()
+    ()
   | Failure s when s = "input_value: truncated object" ->
-    Printf.eprintf "End of recording...waiting for termination\n%!";
-    sleep_and_wait ()
+    ()

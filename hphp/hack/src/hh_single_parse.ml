@@ -24,7 +24,7 @@ type result =
 
 let exit_code : result -> int = function
   | ParseError   -> 1
-  | Unsupported  -> 2
+  | Unsupported  -> 3
   | CmpDifferent -> 42
 
 type parser_config =
@@ -51,23 +51,8 @@ let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
   handle_errors errorl;
   result
 
-let run_ffp : Relative_path.t -> Parser_hack.parser_return = fun file ->
-  let module Tree = Full_fidelity_syntax_tree in
-  let module Text = Full_fidelity_source_text in
-
-  let source_text = Text.from_file file in
-  let syntax_tree = Tree.make source_text in
-  let mode = match Tree.mode syntax_tree with
-    | "strict" -> FileInfo.Mstrict
-    | "decl"   -> FileInfo.Mdecl
-    | _        -> FileInfo.Mpartial
-  in
-  Parser_hack.(
-    { file_mode = Option.some_if (Tree.language syntax_tree = "hh") mode
-    ; comments  = []
-    ; ast       = Classic_ast_mapper.from_tree file syntax_tree
-    ; content   = Text.text source_text
-    })
+let run_ffp : Relative_path.t -> Parser_hack.parser_return =
+  Full_fidelity_ast.from_file_with_legacy
 
 let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast.Parser_hack.ast)
 
@@ -86,42 +71,43 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
     let open Unix in
     let open Printf in
     let ast_result = run_ast file in
-    let ffp_result = run_ffp file in
     let ast_sexpr = dump_sexpr ast_result in
+    let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
+    (try
+        ignore (Str.search_forward unsupported ast_sexpr 0);
+        eprintf "Warning: Unsupported features found: %s\n"
+          (Str.matched_group 0 ast_sexpr);
+        exit_with Unsupported
+    with Not_found -> ());
+    let ffp_result = run_ffp file in
     let ffp_sexpr = dump_sexpr ffp_result in
     if ast_sexpr = ffp_sexpr
     then printf "%s\n" ast_sexpr
     else begin
-      let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
-      try begin
-        ignore (Str.search_forward unsupported ast_sexpr 0);
-        eprintf "Warning: Unsupported features found: %s\n" "pragma";
-        exit_with Unsupported
-      end with Not_found ->
-        let filename = Relative_path.S.to_string file in
-        let mkTemp (name : string) (content : string) = begin
-          let ic = open_process_in (sprintf "mktemp tmp.%s.XXXXXXXX" name) in
-          let path = input_line ic in
-          ignore (close_process_in ic);
-          let oc = open_out path in
-          fprintf oc "%s\n\n%s\n\n%s\n" filename content filename;
-          close_out oc;
-          path
-        end in
+      let filename = Relative_path.S.to_string file in
+      let mkTemp (name : string) (content : string) = begin
+        let ic = open_process_in (sprintf "mktemp tmp.%s.XXXXXXXX" name) in
+        let path = input_line ic in
+        ignore (close_process_in ic);
+        let oc = open_out path in
+        fprintf oc "%s\n\n%s\n\n%s\n" filename content filename;
+        close_out oc;
+        path
+      end in
 
-        let pathOld = mkTemp "OLD" ast_sexpr in
-        let pathNew = mkTemp "NEW" ffp_sexpr in
-        eprintf "\n\n****** Different\n";
-        eprintf "  Filename:     %s\n" filename;
-        eprintf "  AST output:   %s\n" pathOld;
-        eprintf "  FFP output:   %s\n" pathNew;
-        eprintf "  Diff command: %s\n" diff_cmd;
-        flush Pervasives.stderr;
-        let command = sprintf "%s %s %s" diff_cmd pathOld pathNew in
-        ignore (system command);
-        ignore (unlink pathOld);
-        ignore (unlink pathNew);
-        exit_with CmpDifferent
+      let pathOld = mkTemp "OLD" ast_sexpr in
+      let pathNew = mkTemp "NEW" ffp_sexpr in
+      eprintf "\n\n****** Different\n";
+      eprintf "  Filename:     %s\n" filename;
+      eprintf "  AST output:   %s\n" pathOld;
+      eprintf "  FFP output:   %s\n" pathNew;
+      eprintf "  Diff command: %s\n" diff_cmd;
+      flush Pervasives.stderr;
+      let command = sprintf "%s %s %s" diff_cmd pathOld pathNew in
+      ignore (system command);
+      ignore (unlink pathOld);
+      ignore (unlink pathNew);
+      exit_with CmpDifferent
     end
   | Benchmark ->
     let filename = Relative_path.S.to_string file in

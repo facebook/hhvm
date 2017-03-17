@@ -81,6 +81,18 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
   }
 }
 
+void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size) {
+  if (size == 8) {
+    v << store{reg, mem};
+  } else if (size == 4) {
+    auto const temp = v.makeReg();
+    v << movtql{reg, temp};
+    v << storel{temp, mem};
+  } else {
+    not_implemented();
+  }
+}
+
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
   auto prep = [&] (Vreg r) {
     if (VregDbl::allowable(r)) return r;

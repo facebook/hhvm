@@ -1560,7 +1560,8 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
             VMRegAnchor _;
             // reserve space for "<?php return " + code + ";"
             String prefixedCode(full_len - result_len + 14, ReserveString);
-            prefixedCode += "<?php return ";
+            prefixedCode +=
+              (vmfp()->unit()->isHHFile() ? "<?hh return " : "<?php return ");
             prefixedCode += folly::StringPiece{data, full_len - result_len};
             prefixedCode += ";";
             auto const unit = g_context->compileEvalString(prefixedCode.get());

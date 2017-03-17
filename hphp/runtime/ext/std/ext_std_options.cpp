@@ -48,6 +48,7 @@
 #include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/process.h"
 #include "hphp/util/timer.h"
@@ -140,7 +141,11 @@ static Variant HHVM_FUNCTION(assert_options,
 }
 
 static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
-  String prefixedCode = concat3("<?php return ", codeStr, ";");
+  String prefixedCode = concat3(
+    curFP->unit()->isHHFile() ? "<?hh return " : "<?php return ",
+    codeStr,
+    ";"
+  );
 
   auto const oldErrorLevel =
     s_option_data->assertQuietEval ? HHVM_FN(error_reporting)(Variant(0)) : 0;
@@ -165,18 +170,6 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
     curFP->setVarEnv(VarEnv::createLocal(curFP));
   }
   auto varEnv = curFP->getVarEnv();
-
-  if (curFP != vmfp()) {
-    // If we aren't using FCallBuiltin, the stack frame of the call to assert
-    // will be in middle of the code we are about to eval and our caller, whose
-    // varEnv we want to use. The invokeFunc below will get very confused if
-    // this is the case, since it will be using a varEnv that belongs to the
-    // wrong function on the stack. So, we rebind it here, to match what
-    // invokeFunc will expect.
-    assert(!vmfp()->hasVarEnv());
-    vmfp()->setVarEnv(varEnv);
-    varEnv->enterFP(curFP, vmfp());
-  }
 
   ObjectData* thiz = nullptr;
   Class* cls = nullptr;
@@ -299,7 +292,11 @@ static String HHVM_FUNCTION(get_current_user) {
   SCOPE_EXIT { req::free(pwbuf); };
   struct passwd pw;
   struct passwd *retpwptr = NULL;
-  if (getpwuid_r(getuid(), &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+  auto uid = [] () -> uid_t {
+    if (auto cred = get_cli_ucred()) return cred->uid;
+    return getuid();
+  }();
+  if (getpwuid_r(uid, &pw, pwbuf, pwbuflen, &retpwptr) != 0) {
     return empty_string();
   }
   String ret(pw.pw_name, CopyString);
@@ -350,6 +347,8 @@ static Variant HHVM_FUNCTION(getlastmod) {
 }
 
 static Variant HHVM_FUNCTION(getmygid) {
+  if (auto cred = get_cli_ucred()) return (int64_t)cred->gid;
+
   int64_t gid = getgid();
   if (gid < 0) {
     return false;
@@ -364,6 +363,8 @@ static Variant HHVM_FUNCTION(getmyinode) {
 }
 
 static Variant HHVM_FUNCTION(getmypid) {
+  if (auto cred = get_cli_ucred()) return cred->pid;
+
   int64_t pid = getpid();
   if (pid <= 0) {
     return false;
@@ -372,6 +373,8 @@ static Variant HHVM_FUNCTION(getmypid) {
 }
 
 static Variant HHVM_FUNCTION(getmyuid) {
+  if (auto cred = get_cli_ucred()) return (int64_t)cred->uid;
+
   int64_t uid = getuid();
   if (uid < 0) {
     return false;
@@ -923,7 +926,8 @@ static bool HHVM_FUNCTION(hphp_memory_stop_interval) {
 const StaticString s_srv("srv"), s_cli("cli");
 
 String HHVM_FUNCTION(php_sapi_name) {
-  return RuntimeOption::ServerMode ? s_srv : s_cli;
+  return RuntimeOption::ServerExecutionMode() && !is_cli_mode()
+    ? s_srv : s_cli;
 }
 
 #ifdef _WIN32

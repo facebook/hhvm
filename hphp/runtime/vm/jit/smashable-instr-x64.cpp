@@ -45,10 +45,10 @@ namespace HPHP { namespace jit { namespace x64 {
     align(cb, &fixups,                  \
           Alignment::Smash##Inst,       \
           AlignContext::Live);          \
-    auto const start = cb.frontier();   \
+    auto const theStart = cb.frontier();\
     X64Assembler a { cb };              \
     a.inst(__VA_ARGS__);                \
-    return start;                       \
+    return theStart;                    \
   }())
 
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
@@ -107,8 +107,8 @@ void smashCall(TCA inst, TCA target) {
    * but presently this causes asserts to fire in MCGenerator because of a bug
    * with PGO and relocation.
    */
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
+  CodeBlock cb;
+  cb.init(inst, smashableCallLen(), "Smashable Call");
   X64Assembler a { cb };
   a.call(target);
 }
@@ -116,8 +116,8 @@ void smashCall(TCA inst, TCA target) {
 void smashJmp(TCA inst, TCA target) {
   always_assert(is_aligned(inst, Alignment::SmashJmp));
 
-  auto& cb = tc::code().blockFor(inst);
-  CodeCursor cursor { cb, inst };
+  CodeBlock cb;
+  cb.init(inst, smashableJmpLen(), "Smashable Jmp");
   X64Assembler a { cb };
 
   if (target > inst && target - inst <= smashableJmpLen()) {
@@ -133,8 +133,8 @@ void smashJcc(TCA inst, TCA target, ConditionCode cc) {
   if (cc == CC_None) {
     X64Assembler::patchJcc(inst, inst, target);
   } else {
-    auto& cb = tc::code().blockFor(inst);
-    CodeCursor cursor { cb, inst };
+    CodeBlock cb;
+    cb.init(inst, smashableJccLen(), "Smashable Jcc");
     X64Assembler a { cb };
     a.jcc(cc, target);
   }

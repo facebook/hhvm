@@ -155,7 +155,7 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key);
 Variant HHVM_FUNCTION(openssl_pkey_get_private, const Variant& key,
                                  const String& passphrase = null_string);
 Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate);
-Resource HHVM_FUNCTION(openssl_pkey_new,
+Variant HHVM_FUNCTION(openssl_pkey_new,
                        const Variant& configargs = uninit_variant);
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
                                             VRefParam decrypted,

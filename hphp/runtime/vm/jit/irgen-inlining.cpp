@@ -61,7 +61,7 @@ bool beginInlining(IRGS& env,
 
   always_assert(isFPush(info.fpushOpc) &&
                 !isFPushCuf(info.fpushOpc) &&
-                !info.interp);
+                info.inlineEligible);
 
   auto const prevSP = fpiStack.back().returnSP;
   auto const prevBCSPOff = fpiStack.back().returnSPOff;
@@ -107,13 +107,17 @@ bool beginInlining(IRGS& env,
       if (info.ctx->type().maybe(ty)) {
         return gen(env, AssertType, ty, info.ctx);
       }
-      if (info.ctx->type().maybe(TCctx) && ty <= TCls) {
+      if (info.ctx->type() <= TCctx && ty <= TCls) {
         return gen(env, AssertType, ty, gen(env, LdClsCctx, info.ctx));
       }
     }
-    if (ty.subtypeOfAny(TObj, TCls)) {
-      auto const ctxOff = calleeAROff + AROFF(m_thisUnsafe) / sizeof(Cell);
-      return gen(env, LdStk, ty, IRSPRelOffsetData{ctxOff}, sp(env));
+    if (ty <= TObj) {
+      return gen(env, LdARCtx, ty, IRSPRelOffsetData{calleeAROff}, sp(env));
+    }
+    if (ty <= TCls) {
+      auto const cctx =
+        gen(env, LdARCtx, TCctx, IRSPRelOffsetData{calleeAROff}, sp(env));
+      return gen(env, AssertType, ty, gen(env, LdClsCctx, cctx));
     }
     return nullptr;
   }();
@@ -163,6 +167,13 @@ bool beginInlining(IRGS& env,
     stLocRaw(env, i, calleeFP, params[i]);
   }
   emitPrologueLocals(env, numParams, target, ctx);
+
+  // "Kill" all the class-ref slots initially. This normally won't do anything
+  // (the class-ref slots should be unoccupied at this point), but in debugging
+  // builds it will write poison values to them.
+  for (uint32_t slot = 0; slot < target->numClsRefSlots(); ++slot) {
+    killClsRef(env, slot);
+  }
 
   if (data.ctx && data.ctx->isA(TObj)) {
     assertx(startSk.hasThis());
@@ -306,7 +317,7 @@ void conjureEndInlining(IRGS& env, bool builtin) {
     endInlining(env);
   }
   gen(env, ConjureUse, pop(env));
-  gen(env, Halt);
+  gen(env, EndBlock);
 }
 
 void retFromInlined(IRGS& env) {

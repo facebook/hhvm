@@ -13,16 +13,23 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module Syntax = Full_fidelity_editable_syntax
 module TriviaKind = Full_fidelity_trivia_kind
 module Trivia = Full_fidelity_editable_trivia
+module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 open Syntax
 open Core
+(* open Hackfmt_utils *)
 
 (* TODO: move this to a config file *)
 let __INDENT_WIDTH = 2
 
 type open_span = {
   open_span_start: int;
-  open_span_cost: int;
+  open_span_cost: Cost.t;
 }
+
+type rule_state =
+  | NoRule
+  | RuleKind of Rule.kind
+  | LazyRuleID of int
 
 let open_span start cost = {
   open_span_start = start;
@@ -32,10 +39,13 @@ let open_span start cost = {
 let builder = object (this)
   val open_spans = Stack.create ();
   val mutable rules = [];
+  val mutable lazy_rules = ISet.empty;
 
   val mutable chunks = [];
 
-  val mutable next_split_rule = None;
+  val mutable next_split_rule = NoRule;
+  val mutable next_lazy_rules = ISet.empty;
+  val mutable pending_spans = [];
   val mutable space_if_not_split = false;
   val mutable pending_comma = None;
 
@@ -44,6 +54,7 @@ let builder = object (this)
   val mutable chunk_groups = [];
   val mutable rule_alloc = Rule_allocator.make ();
   val mutable nesting_alloc = Nesting_allocator.make ();
+  val mutable span_alloc = Span_allocator.make ();
   val mutable block_indent = 0;
 
   val mutable in_range = Chunk_group.No;
@@ -57,14 +68,18 @@ let builder = object (this)
   method reset start_c end_c =
     Stack.clear open_spans;
     rules <- [];
+    lazy_rules <- ISet.empty;
     chunks <- [];
-    next_split_rule <- None;
+    next_split_rule <- NoRule;
+    next_lazy_rules <- ISet.empty;
+    pending_spans <- [];
     space_if_not_split <- false;
     pending_comma <- None;
     pending_whitespace <- "";
     chunk_groups <- [];
     rule_alloc <- Rule_allocator.make ();
     nesting_alloc <- Nesting_allocator.make ();
+    span_alloc <- Span_allocator.make ();
     block_indent <- 0;
 
     in_range <- Chunk_group.No;
@@ -73,23 +88,41 @@ let builder = object (this)
     seen_chars <- 0;
     ()
 
-  method add_string s =
+  method add_string ?(is_trivia=false) s =
     chunks <- (match chunks with
       | hd :: tl when hd.Chunk.is_appendable ->
         let text = hd.Chunk.text ^ pending_whitespace ^ s in
         {hd with Chunk.text = text} :: tl
       | _ -> begin
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
+          let handle_started_next_split_rule () =
+            let cs = Chunk.make s (List.hd rules) nesting :: chunks in
+            this#end_rule ();
+            next_split_rule <- NoRule;
+            cs
+          in
           match next_split_rule with
-            | None -> Chunk.make s (List.hd rules) nesting :: chunks
-            | Some rule_type ->
-              this#start_rule ~rule_type ();
-              let cs = Chunk.make s (List.hd rules) nesting :: chunks in
-              this#end_rule ();
-              next_split_rule <- None;
-              cs
+            | NoRule -> Chunk.make s (List.hd rules) nesting :: chunks
+            | LazyRuleID rule_id ->
+              this#start_lazy_rule rule_id;
+              handle_started_next_split_rule ()
+            | RuleKind rule_kind ->
+              this#start_rule_kind ~rule_kind ();
+              handle_started_next_split_rule ()
       end
     );
+
+    if not is_trivia then begin
+      lazy_rules <- ISet.union next_lazy_rules lazy_rules;
+      next_lazy_rules <- ISet.empty;
+
+      let rev_pending_spans_stack = List.rev pending_spans in
+      pending_spans <- [];
+      List.iter rev_pending_spans_stack ~f:(fun cost ->
+        Stack.push (open_span (List.length chunks - 1) cost) open_spans
+      );
+    end;
+
     pending_whitespace <- ""
 
   method set_pending_comma () =
@@ -107,7 +140,8 @@ let builder = object (this)
       | hd :: tl when hd.Chunk.is_appendable ->
         let rule_id = hd.Chunk.rule in
         let rule = match rules with
-          | [] when rule_id = Rule.null_rule_id -> this#add_rule Rule.Simple
+          | [] when rule_id = Rule.null_rule_id ->
+            this#create_rule (Rule.Simple Cost.Base)
           | hd :: _ when rule_id = Rule.null_rule_id -> hd
           | _ -> rule_id
         in
@@ -119,10 +153,15 @@ let builder = object (this)
       | _ -> chunks
     )
 
-  method add_rule rule_kind =
+  method private create_rule rule_kind =
     let ra, rule = Rule_allocator.make_rule rule_alloc rule_kind in
     rule_alloc <- ra;
     rule.Rule.id
+
+  method create_lazy_rule ?(rule_kind=Rule.Simple Cost.Base) () =
+    let id = this#create_rule rule_kind in
+    next_lazy_rules <- ISet.add id next_lazy_rules;
+    id
 
   (* TODO: after unit tests, make this idempotency a property of method split *)
   method simple_space_split_if_unsplit () =
@@ -139,7 +178,7 @@ let builder = object (this)
   method add_always_empty_chunk () =
     let nesting = nesting_alloc.Nesting_allocator.current_nesting in
     let create_empty_chunk () =
-      let rule = this#add_rule Rule.Always in
+      let rule = this#create_rule Rule.Always in
       let chunk = Chunk.make "" (Some rule) nesting in
       Chunk.finalize chunk rule rule_alloc false None
     in
@@ -150,20 +189,26 @@ let builder = object (this)
       (* TODO: this is probably wrong, figure out what this means *)
       | _ -> chunks)
 
-  method simple_space_split () =
+  method simple_space_split ?(cost=Cost.Base) () =
     this#split true;
-    next_split_rule <- Some Rule.Simple;
+    this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
-  method simple_split () =
+  method simple_split ?(cost=Cost.Base) () =
     this#split false;
-    next_split_rule <- Some Rule.Simple;
+    this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
   method hard_split () =
     this#split false;
-    next_split_rule <- Some Rule.Always;
+    this#set_next_split_rule (RuleKind Rule.Always);
     ()
+
+  method set_next_split_rule rule_type =
+    next_split_rule <- (match next_split_rule with
+      | RuleKind Rule.Always -> next_split_rule
+      | _ -> rule_type
+    )
 
   method nest ?(amount=__INDENT_WIDTH) ?(skip_parent=false) () =
     nesting_alloc <- Nesting_allocator.nest nesting_alloc amount skip_parent
@@ -171,15 +216,29 @@ let builder = object (this)
   method unnest () =
     nesting_alloc <- Nesting_allocator.unnest nesting_alloc
 
-  method start_rule ?(rule_type=Rule.Simple) () =
+  method private start_rule_id rule_id =
+    rule_alloc <- Rule_allocator.mark_dependencies
+      rule_alloc lazy_rules rules rule_id;
+    rules <- rule_id :: rules
+
+  method start_rule_kind ?(rule_kind=Rule.Simple Cost.Base) () =
     (* Override next_split_rule unless it's an Always rule *)
     next_split_rule <- (match next_split_rule with
-      | Some kind when kind <> Rule.Always -> None
+      | RuleKind kind when kind <> Rule.Always -> NoRule
       | _ -> next_split_rule
     );
-    let rule = this#add_rule rule_type in
-    rule_alloc <- Rule_allocator.mark_dependencies rule_alloc rules rule;
-    rules <- rule :: rules
+    let rule = this#create_rule rule_kind in
+    this#start_rule_id rule
+
+  method start_lazy_rule lazy_rule_id =
+    if ISet.mem lazy_rule_id next_lazy_rules then begin
+      next_lazy_rules <- ISet.remove lazy_rule_id next_lazy_rules;
+      this#start_rule_id lazy_rule_id
+    end else if ISet.mem lazy_rule_id lazy_rules then begin
+      lazy_rules <- ISet.remove lazy_rule_id lazy_rules;
+      this#start_rule_id lazy_rule_id
+    end else
+      raise (Failure "Called start_lazy_rule with a rule id is not a lazy rule")
 
   method end_rule () =
     rules <- match rules with
@@ -191,41 +250,46 @@ let builder = object (this)
       (Rule_allocator.get_rule_kind rule_alloc id) = kind
     )
 
-  method start_span () =
-    let os = open_span (List.length chunks) 1 in
-    Stack.push os open_spans
+  method start_span ?(cost=Cost.Base) () =
+    pending_spans <- cost :: pending_spans;
 
   method end_span () =
-    let os = Stack.pop open_spans in
-    let span = Span.make os.open_span_cost in
-    let r_chunks = List.rev chunks in
-    chunks <- List.rev_mapi r_chunks ~f:(fun n x ->
-      if n <= os.open_span_start then
-        x
-      else
-        (* TODO: handle required hard splits *)
-        {x with Chunk.spans = span :: x.Chunk.spans}
-    );
-    ()
+    pending_spans <- match pending_spans with
+      | hd :: tl -> tl
+      | [] ->
+        let os = Stack.pop open_spans in
+        let sa, span = Span_allocator.make_span span_alloc os.open_span_cost in
+        span_alloc <- sa;
+        let r_chunks = List.rev chunks in
+        chunks <- List.rev_mapi r_chunks ~f:(fun n x ->
+        if n <= os.open_span_start then
+          x
+        else
+          (* TODO: handle required hard splits *)
+          {x with Chunk.spans = span :: x.Chunk.spans}
+        );
+        []
 
   (*
     TODO: find a better way to represt the rules empty case
     for end chunks and block nesting
   *)
   method start_block_nest () =
-    if List.is_empty rules
+    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
     then block_indent <- block_indent + 2
     else this#nest ()
 
   method end_block_nest () =
-    if List.is_empty rules
+    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
     then block_indent <- block_indent - 2
     else this#unnest ()
 
   method end_chunks () =
     this#hard_split ();
-    if List.is_empty rules && not @@ List.is_empty chunks
-      then this#push_chunk_group ()
+    if List.is_empty rules &&
+      not (List.is_empty chunks) &&
+      not (Nesting_allocator.is_nested nesting_alloc)
+    then this#push_chunk_group ()
 
   method push_chunk_group () =
     let print_range = Chunk_group.(match in_range with
@@ -251,7 +315,8 @@ let builder = object (this)
     );
     chunks <- [];
     rule_alloc <- Rule_allocator.make ();
-    nesting_alloc <- Nesting_allocator.make ()
+    nesting_alloc <- Nesting_allocator.make ();
+    span_alloc <- Span_allocator.make ()
 
   method _end () =
     (*TODO: warn if not empty? *)
@@ -271,7 +336,7 @@ let builder = object (this)
       else begin match chunks with
         | [] -> Chunk_group.All
         | hd :: _ ->
-          next_split_rule <- Some Rule.Always;
+          next_split_rule <- RuleKind Rule.Always;
           this#simple_split_if_unsplit ();
           Chunk_group.StartAt (List.length chunks)
       end;
@@ -299,14 +364,12 @@ let builder = object (this)
       List.split_while rev_leading_trivia ~f:is_not_end_of_line in
 
     this#handle_trivia ~is_leading:true @@
-      this#break_out_delimited @@ List.rev rev_rest_including_last_newline;
+      List.rev rev_rest_including_last_newline;
     this#end_chunks();
     this#end_block_nest ();
-    this#handle_trivia ~is_leading:true @@
-      this#break_out_delimited @@ List.rev rev_after_last_newline;
+    this#handle_trivia ~is_leading:true @@ List.rev rev_after_last_newline;
     this#handle_token x;
-    this#handle_trivia ~is_leading:false @@
-      this#break_out_delimited (EditableToken.trailing x);
+    this#handle_trivia ~is_leading:false @@ EditableToken.trailing x;
     ()
 
   (* TODO: Handle (aka remove) excess whitespace inside of an ast node *)
@@ -323,11 +386,13 @@ let builder = object (this)
       in
 
       this#check_range ();
+      let trivia_list = this#break_out_delimited ~is_leading trivia_list in
       let newlines, only_whitespace  = List.fold trivia_list ~init:(0, true)
         ~f:(fun (newlines, only_whitespace) t ->
           this#advance (Trivia.width t);
           (match Trivia.kind t with
-            | TriviaKind.WhiteSpace -> newlines, only_whitespace
+            | TriviaKind.WhiteSpace ->
+              newlines, only_whitespace
             | TriviaKind.EndOfLine ->
               if only_whitespace && is_leading then
                 this#add_always_empty_chunk ();
@@ -339,9 +404,17 @@ let builder = object (this)
             | TriviaKind.FixMe
             | TriviaKind.IgnoreError
             | TriviaKind.SingleLineComment
+            | TriviaKind.Markup
             | TriviaKind.DelimitedComment ->
               handle_newlines ~is_trivia:true newlines;
-              this#add_string @@ Trivia.text t;
+              this#add_string ~is_trivia:true @@ Trivia.text t;
+              (match Trivia.kind t with
+                | TriviaKind.Unsafe
+                | TriviaKind.FallThrough
+                | TriviaKind.SingleLineComment ->
+                  this#hard_split ();
+                | _ -> ()
+              );
               0, false
         )
       ) in
@@ -355,30 +428,30 @@ let builder = object (this)
     this#advance (EditableToken.width t);
 
   method token x =
-    this#handle_trivia
-      ~is_leading:true (this#break_out_delimited @@ EditableToken.leading x);
+    this#handle_trivia ~is_leading:true @@ EditableToken.leading x;
     this#handle_token x;
-    this#handle_trivia
-      ~is_leading:false (this#break_out_delimited @@ EditableToken.trailing x);
+    this#handle_trivia ~is_leading:false @@ EditableToken.trailing x;
     ()
 
   method token_trivia_only x =
-    this#handle_trivia
-      ~is_leading:true (this#break_out_delimited @@ EditableToken.leading x);
+    this#handle_trivia ~is_leading:true @@ EditableToken.leading x;
     this#check_range ();
     this#advance (EditableToken.width x);
-    this#handle_trivia
-      ~is_leading:false (this#break_out_delimited @@ EditableToken.trailing x);
+    this#handle_trivia ~is_leading:false @@ EditableToken.trailing x;
     ()
 
-  method break_out_delimited trivia =
+  method private break_out_delimited ~is_leading trivia =
     let new_line_regex = Str.regexp "\n" in
+    let indent = ref 0 in
+    let currently_leading = ref is_leading in
     List.concat_map trivia ~f:(fun triv ->
       match Trivia.kind triv with
         | TriviaKind.UnsafeExpression
         | TriviaKind.FixMe
         | TriviaKind.IgnoreError
+        | TriviaKind.Markup
         | TriviaKind.DelimitedComment ->
+          currently_leading := false;
           let delimited_lines =
             Str.split new_line_regex @@ Trivia.text triv in
           let map_tail str =
@@ -391,7 +464,14 @@ let builder = object (this)
               in
               aux 0
             in
-            let start_index = min block_indent (prefix_space_count str) in
+            (* If we're dealing with trailing trivia, then we don't have a good
+               signal for the indent level, so we just cut all leading spaces.
+               Otherwise, we cut a number of spaces equal to the indent before
+               the delimited comment opener. *)
+            let start_index = if is_leading
+              then min !indent (prefix_space_count str)
+              else prefix_space_count str
+            in
             let len = String.length str - start_index in
             let dc = Trivia.make_delimited_comment @@
               String.sub str start_index len in
@@ -403,7 +483,15 @@ let builder = object (this)
 
           Trivia.make_delimited_comment (List.hd_exn delimited_lines) ::
             List.concat_map (List.tl_exn delimited_lines) ~f:map_tail
+        | TriviaKind.EndOfLine ->
+          indent := 0;
+          currently_leading := true;
+          [triv]
+        | TriviaKind.WhiteSpace ->
+          if !currently_leading then indent := Trivia.width triv;
+          [triv]
         | _ ->
+          currently_leading := false;
           [triv]
     )
 
@@ -422,7 +510,7 @@ let pending_space () =
 
 let rec transform node =
   let t = transform in
-  let span = true in
+  let span = Some Cost.Base in
   let nest = true in
   let space = true in
 
@@ -433,8 +521,8 @@ let rec transform node =
     ()
   | SyntaxList _ ->
     raise (Failure (Printf.sprintf
-"Error: SyntaxList should never be handled directly;
-offending text is '%s'." (text node)));
+      "Error: SyntaxList should never be handled directly;
+      offending text is '%s'." (text node)));
   | ScriptHeader x ->
     let (lt, q, lang_kw) = get_script_header_children x in
     t lt;
@@ -448,7 +536,6 @@ offending text is '%s'." (text node)));
     let (header, declarations) = get_script_children x in
     t header;
     handle_possible_list declarations;
-  | ScriptFooter x -> t @@ get_script_footer_children x
   | SimpleTypeSpecifier x -> t @@ get_simple_type_specifier_children x
   | LiteralExpression x ->
     (* Double quoted string literals can create a list *)
@@ -512,7 +599,7 @@ offending text is '%s'." (text node)));
       get_property_declaration_children x in
     handle_possible_list ~after_each:(fun _ -> add_space ()) modifiers;
     t prop_type;
-    tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       handle_possible_list ~before_each:(split ~space) declarators;
     ) ();
     t semi;
@@ -523,14 +610,57 @@ offending text is '%s'." (text node)));
     t name;
     t prop_initializer;
     ()
-  | NamespaceDeclaration _
-  | NamespaceBody _
-  | NamespaceUseDeclaration _
-  | NamespaceGroupUseDeclaration _
-  | NamespaceUseClause _ ->
-    let error = Printf.sprintf "%s not supported - exiting \n"
-      (SyntaxKind.to_string (kind node)) in
-    raise (Failure error);
+  | NamespaceDeclaration x ->
+    let (kw, name, body) = get_namespace_declaration_children x in
+    t kw;
+    pending_space ();
+    t name;
+    t body;
+    builder#end_chunks ();
+    ()
+  | NamespaceBody x ->
+    let (left_b, decls, right_b) = get_namespace_body_children x in
+    pending_space ();
+    t left_b;
+    builder#end_chunks ();
+    builder#start_block_nest ();
+    tl_with ~f:(fun () -> handle_possible_list decls) ();
+    transform_and_unnest_closing_brace right_b;
+    ()
+  | NamespaceUseDeclaration x ->
+    let (kw, use_kind, clauses, semi) =
+      get_namespace_use_declaration_children x in
+    t kw;
+    pending_space ();
+    t use_kind;
+    if not (is_missing use_kind) then pending_space ();
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+      handle_possible_list clauses ~after_each:after_each_argument;
+    ) ();
+    t semi;
+    builder#end_chunks ();
+    ()
+  | NamespaceGroupUseDeclaration x ->
+    let (kw, use_kind, prefix, left_b, clauses, right_b, semi) =
+      get_namespace_group_use_declaration_children x in
+    t kw;
+    pending_space ();
+    t use_kind;
+    if not (is_missing use_kind) then pending_space ();
+    t prefix;
+    transform_argish left_b clauses right_b;
+    t semi;
+    builder#end_chunks ();
+    ()
+  | NamespaceUseClause x ->
+    let (use_kind, name, as_kw, alias) = get_namespace_use_clause_children x in
+    t use_kind;
+    t name;
+    if not (is_missing as_kw) then pending_space ();
+    t as_kw;
+    if not (is_missing alias) then pending_space ();
+    t alias;
+    ()
   | FunctionDeclaration x ->
     let (attr, header, body) = get_function_declaration_children x in
     t attr;
@@ -541,6 +671,20 @@ offending text is '%s'." (text node)));
     ()
   | FunctionDeclarationHeader x ->
     transform_function_declaration_header ~span_started:false x;
+    ()
+  | WhereClause x ->
+    let (where, constraints) = get_where_clause_children x in
+    t where;
+    add_space ();
+    t constraints;
+    ()
+  | WhereConstraint x ->
+    let (left, op, right) = get_where_constraint_children x in
+    t left;
+    add_space ();
+    t op;
+    add_space ();
+    t right;
     ()
   | MethodishDeclaration x ->
     let (attr, modifiers, func_decl, body, semi) =
@@ -578,12 +722,15 @@ offending text is '%s'." (text node)));
       ) ();
     ) ();
 
+    let after_each_ancestor is_last = if is_last then () else split ~space () in
+
     if not (is_missing extends_kw) then begin
       split ~space ();
-      tl_with ~span ~nest ~f:(fun () ->
+      tl_with ~span ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
         t extends_kw;
-        tl_with ~nest ~f:(fun () ->
-          handle_possible_list ~before_each:(split ~space) extends
+        split ~space ();
+        tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+          handle_possible_list ~after_each:after_each_ancestor extends
         ) ();
       ) ();
       ()
@@ -591,10 +738,11 @@ offending text is '%s'." (text node)));
 
     if not (is_missing impl_kw) then begin
       split ~space ();
-      tl_with ~span ~nest ~f:(fun () ->
+      tl_with ~span ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
         t impl_kw;
-        tl_with ~nest ~f:(fun () ->
-          handle_possible_list ~before_each:(split ~space) impls
+        split ~space ();
+        tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+          handle_possible_list ~after_each:after_each_ancestor impls
         ) ();
       ) ();
       ()
@@ -614,7 +762,7 @@ offending text is '%s'." (text node)));
   | TraitUse x ->
     let (kw, elements, semi) = get_trait_use_children x in
     t kw;
-    tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       handle_possible_list ~before_each:(split ~space) elements;
     ) ();
     t semi;
@@ -638,7 +786,7 @@ offending text is '%s'." (text node)));
     t kw;
     if not (is_missing const_type) then add_space ();
     t const_type;
-    tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       handle_possible_list ~before_each:(split ~space) declarators;
     ) ();
     t semi;
@@ -659,14 +807,12 @@ offending text is '%s'." (text node)));
     t type_kw;
     pending_space ();
     t name;
+    pending_space ();
+    t type_constraint;
+    pending_space ();
+    t eq;
     builder#simple_space_split ();
-    tl_with ~nest ~f:(fun () ->
-      t type_constraint;
-      pending_space ();
-      t eq;
-      builder#simple_space_split ();
-      t_with ~nest type_spec;
-    ) ();
+    t_with ~nest type_spec;
     t semi;
     builder#end_chunks ();
     ()
@@ -681,10 +827,14 @@ offending text is '%s'." (text node)));
     in
     t attr;
     t visibility;
+    pending_space ();
     t param_type;
-    if not (is_missing param_type) then add_space ();
-    (* TODO: span and split, figure out attr and vis rules *)
-    t name;
+    if is_missing visibility && is_missing param_type
+    then t name
+    else begin
+      builder#simple_space_split ();
+      t_with ~nest name
+    end;
     t default;
   | VariadicParameter x ->
     let ellipsis = get_variadic_parameter_children x in
@@ -719,12 +869,13 @@ offending text is '%s'." (text node)));
     t kw;
     transform_argish left_p args right_p;
     t semi;
+    builder#end_chunks ();
   | WhileStatement x ->
     t x.while_keyword;
     add_space ();
     t x.while_left_paren;
     split ();
-    tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       t_with ~nest x.while_condition;
       split ();
       t x.while_right_paren;
@@ -752,7 +903,13 @@ offending text is '%s'." (text node)));
     ()
   | ElseClause x ->
     t x.else_keyword;
-    handle_possible_compound_statement x.else_statement;
+    let _ = match syntax x.else_statement with
+      | IfStatement _ ->
+        pending_space ();
+        t x.else_statement;
+        pending_space ();
+        ()
+      | _ -> handle_possible_compound_statement x.else_statement in
     ()
   | TryStatement x ->
     (* TODO: revisit *)
@@ -801,7 +958,7 @@ offending text is '%s'." (text node)));
     t kw;
     add_space ();
     t left_p;
-    tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       split ();
       tl_with ~nest ~f:(fun () ->
         handle_possible_list init;
@@ -847,7 +1004,7 @@ offending text is '%s'." (text node)));
     add_space ();
     t left_p;
     split ();
-    tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       tl_with ~nest ~f:(fun () -> t expr) ();
       t right_p;
     ) ();
@@ -895,7 +1052,7 @@ offending text is '%s'." (text node)));
     let (eq_kw, value) = get_simple_initializer_children x in
     pending_space ();
     t eq_kw;
-    builder#simple_space_split ();
+    builder#simple_space_split ~cost:Cost.Assignment ();
     t_with ~nest value;
   | AnonymousFunction x ->
     let (async_kw, fun_kw, lp, params, rp, colon, ret_type, use, body) =
@@ -906,8 +1063,7 @@ offending text is '%s'." (text node)));
     transform_argish_with_return_type ~in_span:false lp params rp colon
       ret_type;
     t use;
-    handle_possible_compound_statement body;
-    builder#end_chunks ();
+    handle_possible_compound_statement ~space:false body;
     ()
   | AnonymousFunctionUseClause x ->
     (* TODO: Revisit *)
@@ -923,7 +1079,7 @@ offending text is '%s'." (text node)));
     t async;
     if not (is_missing async) then add_space ();
     t signature;
-    add_space ();
+    pending_space ();
     t arrow;
     handle_lambda_body body;
     ()
@@ -938,8 +1094,7 @@ offending text is '%s'." (text node)));
       t lp;
       t cast_type;
       t rp;
-      builder#simple_space_split ();
-      t_with ~nest op;
+      t op;
     ) ();
     ()
   | ScopeResolutionExpression x ->
@@ -956,6 +1111,12 @@ offending text is '%s'." (text node)));
     handle_possible_chaining
       (get_safe_member_selection_expression_children x)
       None
+  | EmbeddedMemberSelectionExpression x ->
+    let (obj, op, name) = get_embedded_member_selection_expression_children x in
+    t obj;
+    t op;
+    t name;
+    ()
   | YieldExpression x ->
     let (kw, operand) = get_yield_expression_children x in
     t kw;
@@ -995,30 +1156,32 @@ offending text is '%s'." (text node)));
   | ConditionalExpression x ->
     let (test_expr, q_kw, true_expr, c_kw, false_expr) =
       get_conditional_expression_children x in
+    let lazy_argument_rule = builder#create_lazy_rule
+      ~rule_kind:(Rule.Argument) () in
     t test_expr;
-    tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
-      builder#simple_space_split ();
+    tl_with ~nest ~rule:(LazyRuleID lazy_argument_rule) ~f:(fun () ->
+      split ~space ();
       t q_kw;
       if not (is_missing true_expr) then begin
-        add_space ();
+        pending_space ();
         t true_expr;
-        builder#simple_space_split ();
+        split ~space ();
       end;
       t c_kw;
-      add_space ();
+      pending_space ();
       t false_expr;
     ) ();
     ()
   | FunctionCallExpression x ->
     handle_function_call_expression x
   | EvalExpression x ->
-    let (kw, left_p, args, right_p) = get_eval_expression_children x in
+    let (kw, left_p, arg, right_p) = get_eval_expression_children x in
     t kw;
-    transform_argish left_p args right_p;
+    transform_braced_item left_p arg right_p;
   | EmptyExpression x ->
-    let (kw, left_p, args, right_p) = get_empty_expression_children x in
+    let (kw, left_p, arg, right_p) = get_empty_expression_children x in
     t kw;
-    transform_argish left_p args right_p;
+    transform_braced_item left_p arg right_p;
   | IssetExpression x ->
     let (kw, left_p, args, right_p) = get_isset_expression_children x in
     t kw;
@@ -1031,7 +1194,7 @@ offending text is '%s'." (text node)));
     let (left_p, expr, right_p) = get_parenthesized_expression_children x in
     t left_p;
     split ();
-    tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       tl_with ~nest ~f:(fun () ->
         (* TODO t14945172: remove this
           This is required due to the xhp children declaration split, th
@@ -1046,11 +1209,23 @@ offending text is '%s'." (text node)));
     let (left_b, expr, right_b) = get_braced_expression_children x in
     t left_b;
     split ();
-    tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       t_with ~nest expr;
       split ();
       t right_b
     ) ();
+    ()
+  | EmbeddedBracedExpression x ->
+    (* TODO: Consider finding a way to avoid treating these expressions as
+    opportunities for line breaks in long strings:
+
+    $sql = "DELETE FROM `foo` WHERE `left` BETWEEN {$res->left} AND {$res
+      ->right} ORDER BY `level` DESC";
+    *)
+    let (left_b, expr, right_b) = get_embedded_braced_expression_children x in
+    t left_b;
+    t_with ~nest expr;
+    t right_b;
     ()
   | ListExpression x ->
     let (kw, lp, members, rp) = get_list_expression_children x in
@@ -1069,7 +1244,7 @@ offending text is '%s'." (text node)));
       ()
     end else begin
       split ~space ();
-      tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+      tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
         tl_with ~nest ~f:(fun () ->
           handle_possible_list ~after_each:after_each_literal initializers
         ) ();
@@ -1123,7 +1298,15 @@ offending text is '%s'." (text node)));
   | SubscriptExpression x ->
     let (receiver, lb, expr, rb) = get_subscript_expression_children x in
     t receiver;
-    transform_argish lb expr rb;
+    transform_braced_item lb expr rb;
+    ()
+  | EmbeddedSubscriptExpression x ->
+    let (receiver, lb, expr, rb) =
+      get_embedded_subscript_expression_children x in
+    t receiver;
+    t lb;
+    t expr;
+    t rb;
     ()
   | AwaitableCreationExpression x ->
     let (kw, body) = get_awaitable_creation_expression_children x in
@@ -1143,7 +1326,7 @@ offending text is '%s'." (text node)));
     let (kw, categories, semi) = get_xhp_category_declaration_children x in
     t kw;
     (* TODO: Eliminate code duplication *)
-    tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       handle_possible_list ~before_each:(split ~space) categories;
     ) ();
     t semi;
@@ -1161,7 +1344,7 @@ offending text is '%s'." (text node)));
     let (kw, xhp_attributes, semi) =
       get_xhp_class_attribute_declaration_children x in
     t kw;
-    tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
+    tl_with ~nest ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
       handle_possible_list ~before_each:(split ~space) xhp_attributes;
     ) ();
     t semi;
@@ -1184,41 +1367,91 @@ offending text is '%s'." (text node)));
     tl_with ~span ~f:(fun () ->
       t name;
       t eq;
-      split ();
+      builder#simple_split ~cost:Cost.Assignment ();
       t_with ~nest expr
     ) ();
     ()
   | XHPOpen x ->
-    let (name, attrs, right_a) = get_xhp_open_children x in
+    let (left_a, name, attrs, right_a) = get_xhp_open_children x in
+    t left_a;
     t name;
     if not (is_missing attrs) then begin
       split ~space ();
-      tl_with ~nest ~rule:(Some Rule.Argument) ~f:(fun () ->
-        handle_possible_list ~after_each:(fun is_last ->
-          if not is_last then split ~space (); ()
-        ) attrs;
-      ) ();
-    end;
-    handle_xhp_open_right_angle_token right_a;
+      tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () -> begin
+        tl_with ~nest ~f:(fun () ->
+          handle_possible_list ~after_each:(fun is_last ->
+            if not is_last then split ~space (); ()
+          ) attrs;
+        ) ();
+        handle_xhp_open_right_angle_token right_a;
+      end) ();
+    end else
+      handle_xhp_open_right_angle_token right_a;
     ()
   | XHPExpression x ->
-    let (op, body, close) = get_xhp_expression_children x in
+    (**
+     * XHP breaks the normal rules of trivia. If there is a newline after the
+     * XHPOpen tag then it becomes leading trivia for the first token in the
+     * XHPBody instead of trailing trivia for the open tag.
+     *
+     * To deal with this we remove the body's leading trivia, split it after the
+     * first newline, and treat the first half as trailing trivia.
+     *)
+    let handle_xhp_body body =
+      match syntax body with
+        | Missing -> ()
+        | SyntaxList (hd :: tl) ->
+          split ();
 
+          let leading, hd = remove_leading_trivia hd in
+          let (up_to_first_newline, after_newline, _) =
+            List.fold leading
+              ~init:([], [], false)
+              ~f:(fun (upto, after, seen) t ->
+                if seen then upto, t :: after, true
+                else t :: upto, after, Trivia.kind t = TriviaKind.EndOfLine
+              )
+          in
+          builder#handle_trivia ~is_leading:false up_to_first_newline;
+          builder#simple_split_if_unsplit ();
+          builder#handle_trivia ~is_leading:true after_newline;
+
+          List.iter (hd :: tl) ~f:(fun node -> begin
+            t node;
+            let has_trailing_whitespace =
+              List.exists (Syntax.trailing_trivia node)
+                ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.WhiteSpace)
+            in
+            match syntax node with
+              | XHPExpression _ -> split ~space:has_trailing_whitespace ()
+              | _ -> if has_trailing_whitespace then pending_space ();
+          end)
+        | _ -> failwith "Expected SyntaxList"
+    in
+
+    let (xhp_open, body, close) = get_xhp_expression_children x in
     let handle_body_close = (fun () ->
       tl_with ~nest ~f:(fun () ->
-        handle_possible_list ~before_each:(fun _ -> split ()) body
+        handle_xhp_body body
       ) ();
-      if not (is_missing close) then split ();
-      t close;
+      if not (is_missing close) then begin
+        split ();
+        let leading, close = remove_leading_trivia close in
+        (* Ignore extra newlines by treating this as trailing trivia *)
+        builder#handle_trivia ~is_leading:false leading;
+        t close;
+      end;
       ()
     ) in
 
     if builder#has_rule_kind Rule.XHPExpression then begin
-      t op;
-      tl_with ~rule:(Some Rule.XHPExpression) ~f:(handle_body_close) ();
+      let expr_rule = builder#create_lazy_rule
+        ~rule_kind:(Rule.XHPExpression) () in
+      t xhp_open;
+      tl_with ~rule:(LazyRuleID expr_rule) ~f:(handle_body_close) ();
     end else begin
-      tl_with ~rule:(Some Rule.XHPExpression) ~f:(fun () ->
-        t op;
+      tl_with ~rule:(RuleKind Rule.XHPExpression) ~f:(fun () ->
+        t xhp_open;
         handle_body_close ();
       ) ();
     end;
@@ -1237,25 +1470,26 @@ offending text is '%s'." (text node)));
     let (kw, left_a, vec_type, right_a) =
       get_vector_array_type_specifier_children x in
     t kw;
-    transform_argish left_a vec_type right_a;
+    transform_braced_item left_a vec_type right_a;
     ()
   | VectorTypeSpecifier x ->
     let (kw, left_a, vec_type, right_a) =
       get_vector_type_specifier_children x in
     t kw;
-    transform_argish left_a vec_type right_a;
+    transform_braced_item left_a vec_type right_a;
     ()
   | KeysetTypeSpecifier x ->
-    let (kw, left_a, vec_type, right_a) =
+    let (kw, left_a, ks_type, right_a) =
       get_keyset_type_specifier_children x in
     t kw;
-    transform_argish left_a vec_type right_a;
+    transform_braced_item left_a ks_type right_a;
     ()
   | TypeParameter x ->
     let (variance, name, constraints) = get_type_parameter_children x in
     t variance;
     t name;
-    pending_space ();
+    if syntax constraints <> Missing then
+      pending_space ();
     handle_possible_list constraints;
   | TypeConstraint x ->
     let (kw, constraint_type) = get_type_constraint_children x in
@@ -1269,15 +1503,13 @@ offending text is '%s'." (text node)));
     let key_list_item = make_list_item key comma_kw in
     let val_list_item = make_list_item value (make_missing ()) in
     let args = make_list [key_list_item; val_list_item] in
-    transform_argish left_a args right_a;
+    transform_argish ~allow_trailing:false left_a args right_a;
   | DictionaryTypeSpecifier x ->
-    let (kw, left_a, key, comma_kw, value, right_a) =
-      get_dictionary_type_specifier_children x in
+    let (kw, left_a, members, right_a) =
+      get_dictionary_type_specifier_children x
+    in
     t kw;
-    let key_list_item = make_list_item key comma_kw in
-    let val_list_item = make_list_item value (make_missing ()) in
-    let args = make_list [key_list_item; val_list_item] in
-    transform_argish left_a args right_a;
+    transform_argish left_a members right_a;
   | ClosureTypeSpecifier x ->
     let (outer_left_p, kw, inner_left_p, param_types, inner_right_p, colon,
       ret_type, outer_right_p) = get_closure_type_specifier_children x in
@@ -1290,7 +1522,7 @@ offending text is '%s'." (text node)));
     let (kw, left_a, class_type, right_a) =
       get_classname_type_specifier_children x in
     t kw;
-    transform_argish left_a class_type right_a;
+    transform_braced_item left_a class_type right_a;
   | FieldSpecifier x ->
     let (name, arrow_kw, field_type) = get_field_specifier_children x in
     transform_mapish_entry name arrow_kw field_type;
@@ -1335,7 +1567,7 @@ offending text is '%s'." (text node)));
     let (left_p, types, right_p) = get_tuple_type_specifier_children x in
     transform_argish left_p types right_p;
   | ErrorSyntax _ ->
-    raise (Failure "Error: Cannot format a syntax tree with an error node");
+    raise Hackfmt_error.InvalidSyntax
   | ListItem x ->
     t x.list_item;
     t x.list_separator
@@ -1351,19 +1583,25 @@ and transform_and_unnest_closing_brace right_b =
   builder#closing_brace_token token;
   ()
 
-and tl_with ?(nest=false) ?(rule=None) ?(span=false) ~f () =
-  Option.iter rule ~f:(fun rule_type -> builder#start_rule ~rule_type ());
+and tl_with ?(nest=false) ?(rule=NoRule) ?(span=None) ~f () =
+  (match rule with
+    | NoRule -> ()
+    | LazyRuleID id -> builder#start_lazy_rule id
+    | RuleKind rule_kind -> builder#start_rule_kind ~rule_kind ()
+  );
   if nest then builder#nest ();
-  if span then builder#start_span ();
+  Option.iter span ~f:(fun cost -> builder#start_span ~cost ());
 
   f ();
 
-  if span then builder#end_span ();
+  Option.iter span ~f:(fun _ -> builder#end_span ());
   if nest then builder#unnest ();
-  Option.iter rule ~f:(fun _ -> builder#end_rule ());
-  ()
+  (match rule with
+    | NoRule -> ()
+    | _ -> builder#end_rule ()
+  )
 
-and t_with ?(nest=false) ?(rule=None) ?(span=false) ?(f=transform) node =
+and t_with ?(nest=false) ?(rule=NoRule) ?(span=None) ?(f=transform) node =
   tl_with ~nest ~rule ~span ~f:(fun () -> f node) ();
   ()
 
@@ -1378,15 +1616,16 @@ and handle_lambda_body node =
     | CompoundStatement x ->
       handle_compound_statement x;
     | _ ->
-      split ~space:true ();
-      t_with ~rule:(Some Rule.Simple) ~nest:true node;
-      ()
+      tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+        split ~space:true ();
+        t_with ~nest:true node;
+      ) ()
 
-and handle_possible_compound_statement node =
+and handle_possible_compound_statement ?space:(space=true) node =
   match syntax node with
     | CompoundStatement x ->
       handle_compound_statement x;
-      pending_space ();
+      if space then pending_space ();
       ()
     | _ ->
       builder#end_chunks ();
@@ -1433,7 +1672,7 @@ and handle_possible_list
 and handle_xhp_open_right_angle_token t =
   match syntax t with
     | Token token ->
-      if EditableToken.text token = "/>" then add_space ();
+      if EditableToken.text token = "/>" then split ~space:true ();
       transform t
     | _ -> raise (Failure "expected xhp_open right_angle token")
 
@@ -1484,7 +1723,6 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
 
   let (obj, chain_list) = handle_chaining obj in
   let chain_list = chain_list @ [(arrow1, member1, argish)] in
-  transform obj;
 
   let transform_chain (arrow, member, argish) =
     transform arrow;
@@ -1493,11 +1731,15 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
   in
   (match chain_list with
     | hd :: [] ->
+      transform obj;
       builder#simple_split ();
       tl_with ~nest:true ~f:(fun () -> transform_chain hd) ();
     | hd :: tl ->
+      let lazy_argument_rule = builder#create_lazy_rule
+        ~rule_kind:(Rule.Argument) () in
+      transform obj;
       split ();
-      tl_with ~nest:true ~rule:(Some Rule.Argument) ~f:(fun () ->
+      tl_with ~nest:true ~rule:(LazyRuleID lazy_argument_rule) ~f:(fun () ->
         transform_chain hd;
         List.iter tl ~f:(fun x -> split (); transform_chain x);
       ) ();
@@ -1565,7 +1807,7 @@ and handle_switch_body left_b sections right_b =
 
 and transform_function_declaration_header ~span_started x =
   let (async, kw, amp, name, type_params, leftp, params, rightp, colon,
-    ret_type) = get_function_declaration_header_children x
+    ret_type, where) = get_function_declaration_header_children x
   in
 
   if not span_started then builder#start_span ();
@@ -1579,6 +1821,7 @@ and transform_function_declaration_header ~span_started x =
   transform type_params;
   transform_argish_with_return_type ~in_span:true leftp params rightp colon
     ret_type;
+  transform where;
 
 and transform_argish_with_return_type ~in_span left_p params right_p colon
     ret_type =
@@ -1586,10 +1829,11 @@ and transform_argish_with_return_type ~in_span left_p params right_p colon
   split ();
   if in_span then builder#end_span ();
 
-  tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+  tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
     tl_with ~nest:true ~f:(fun () ->
       handle_possible_list
-        ~after_each:after_each_argument ~handle_last:transform_last_arg params
+      ~after_each:after_each_argument
+      ~handle_last:(transform_last_arg ~allow_trailing:true) params
     ) ();
     transform right_p;
     transform colon;
@@ -1598,40 +1842,85 @@ and transform_argish_with_return_type ~in_span left_p params right_p colon
   ) ();
   ()
 
-and transform_argish left_p arg_list right_p =
+and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
   transform left_p;
-  split ();
-  tl_with ~span:true ~rule:(Some Rule.Argument) ~f:(fun () ->
-    tl_with ~nest:true ~f:(fun () ->
-      handle_possible_list
-        ~after_each:after_each_argument ~handle_last:transform_last_arg arg_list
-    ) ();
+  if not (is_missing arg_list) then begin
     split ();
-    transform right_p
-  ) ();
+    tl_with ~span:(Some Cost.Base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+      tl_with ~nest:true ~f:(fun () ->
+        handle_possible_list
+          ~after_each:after_each_argument
+          ~handle_last:(transform_last_arg ~allow_trailing) arg_list
+      ) ();
+      split ();
+      transform right_p;
+    ) ();
+  end else transform right_p;
   ()
 
-and transform_last_arg node =
+and transform_braced_item left_p item right_p =
+  transform left_p;
+  split ();
+  tl_with ~span:(Some Cost.Base) ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
+    tl_with ~nest:true ~f:(fun () -> transform item) ();
+    split ();
+    transform right_p;
+  ) ();
+
+and remove_leading_trivia node =
+  let leading_token = match Syntax.leading_token node with
+    | Some t -> t
+    | None -> failwith "Expected leading token"
+  in
+  let rewritten_node, changed = Rewriter.rewrite_pre (fun rewrite_node ->
+    match syntax rewrite_node with
+      | Token t when t == leading_token ->
+        Some (Syntax.make_token {t with EditableToken.leading = []}, true)
+      | _  -> Some (rewrite_node, false)
+  ) node in
+  if not changed then failwith "Leading token not rewritten";
+  EditableToken.leading leading_token, rewritten_node
+
+and remove_trailing_trivia node =
+  let trailing_token = match Syntax.trailing_token node with
+    | Some t -> t
+    | None -> failwith "Expected trailing token"
+  in
+  let rewritten_node, changed = Rewriter.rewrite_pre (fun rewrite_node ->
+    match syntax rewrite_node with
+      | Token t when t == trailing_token ->
+        Some (Syntax.make_token {t with EditableToken.trailing = []}, true)
+      | _  -> Some (rewrite_node, false)
+  ) node in
+  if not changed then failwith "Trailing token not rewritten";
+  rewritten_node, EditableToken.trailing trailing_token
+
+and transform_last_arg ~allow_trailing node =
+  let set_pending_comma () =
+    if allow_trailing then builder#set_pending_comma () in
   match syntax node with
     | ListItem x ->
       let (item, separator) = get_list_item_children x in
-      transform item;
-      builder#set_pending_comma ();
       (match syntax separator with
-        | Token x -> builder#token_trivia_only x;
-        | Missing -> ();
+        | Token x ->
+          transform item;
+          set_pending_comma ();
+          builder#token_trivia_only x;
+        | Missing ->
+          let item, trailing_trivia = remove_trailing_trivia item in
+          transform item;
+          set_pending_comma ();
+          builder#handle_trivia ~is_leading:false trailing_trivia;
         | _ -> raise (Failure "Expected separator to be a token");
       );
     | _ ->
-      (* TODO: handle case where last arg has trivia but no comma) *)
-      transform node;
-      builder#set_pending_comma ();
+      failwith "Expected ListItem"
 
 and transform_mapish_entry key arrow value =
   transform key;
   pending_space ();
   transform arrow;
-  builder#simple_space_split ();
+  builder#simple_space_split ~cost:Cost.Assignment ();
   t_with ~nest:true value;
 
 and transform_keyword_expression_statement kw expr semi =
@@ -1648,7 +1937,7 @@ and transform_keyword_expression_statement kw expr semi =
 
 and transform_keyword_expr_list_statement kw expr_list semi =
   transform kw;
-  tl_with ~nest:true ~rule:(Some Rule.Argument) ~f:(fun () ->
+  tl_with ~nest:true ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
     handle_possible_list ~before_each:(split ~space:true) expr_list;
   ) ();
   transform semi;
@@ -1657,7 +1946,7 @@ and transform_keyword_expr_list_statement kw expr_list semi =
 and transform_condition left_p condition right_p =
   transform left_p;
   split ();
-  tl_with ~rule:(Some Rule.Argument) ~f:(fun () ->
+  tl_with ~rule:(RuleKind Rule.Argument) ~f:(fun () ->
     t_with ~nest:true condition;
     split ();
     transform right_p;
@@ -1670,18 +1959,41 @@ and transform_binary_expression ~is_nested expr =
         (EditableToken.kind t)
       | _ -> raise (Failure "Operator should always be a token")
   in
+  let operator_has_surrounding_spaces op =
+    match op with
+      | None -> failwith "operator_has_surrounding_spaces: Operator expected"
+      | Some op ->
+        match get_operator_type op with
+          | Full_fidelity_operator.ConcatenationOperator -> false
+          | _ -> true
+  in
+  let operator_is_leading op =
+    match op with
+      | None -> failwith "operator_is_leading: Operator expected"
+      | Some op ->
+        match get_operator_type op with
+          | Full_fidelity_operator.PipeOperator -> true
+          | _ -> false
+  in
 
   let (left, operator, right) = get_binary_expression_children expr in
   let operator_t = get_operator_type operator in
 
-  if Full_fidelity_operator.(
-    is_assignment operator_t ||
-    is_comparison operator_t
-  ) then begin
+  if Full_fidelity_operator.is_comparison operator_t then begin
+    let lazy_argument_rule =
+      builder#create_lazy_rule ~rule_kind:(Rule.Argument) () in
     transform left;
-    add_space ();
+    pending_space ();
     transform operator;
-    builder#simple_space_split ();
+    tl_with ~rule:(LazyRuleID lazy_argument_rule) ~f:(fun () ->
+      builder#split true;
+      t_with ~nest:true right;
+    ) ();
+  end else if Full_fidelity_operator.is_assignment operator_t then begin
+    transform left;
+    pending_space ();
+    transform operator;
+    builder#simple_space_split ~cost:Cost.Assignment ();
     t_with ~nest:true right;
   end else begin
     let precedence = Full_fidelity_operator.precedence operator_t in
@@ -1708,13 +2020,34 @@ and transform_binary_expression ~is_nested expr =
       flatten_expression (make_binary_expression left operator right) in
     match binary_expresion_syntax_list with
       | hd :: tl ->
+        let lazy_argument_rule =
+          builder#create_lazy_rule ~rule_kind:(Rule.Argument) () in
         transform_operand hd;
         if not is_nested then builder#nest ~skip_parent:true ();
-        tl_with ~rule:(Some Rule.Argument) ~nest:is_nested ~f:(fun () ->
-          List.iteri tl ~f:(fun i x ->
-            if (i mod 2) = 0 then begin add_space (); transform x end
-            else begin split ~space:true (); transform_operand x end
-          )
+        tl_with ~rule:(LazyRuleID lazy_argument_rule) ~nest:is_nested ~f:(
+          fun () ->
+            ignore @@ List.foldi tl ~init:None ~f:(fun i last_op x ->
+              if (i mod 2) = 0 then begin
+                let op = x in
+                let op_has_spaces = operator_has_surrounding_spaces (Some op) in
+                if operator_is_leading (Some op) then
+                  split ~space:op_has_spaces ()
+                else
+                  if op_has_spaces then pending_space ();
+                transform op;
+                Some op
+              end
+              else begin
+                let operand = x in
+                let op_has_spaces = operator_has_surrounding_spaces last_op in
+                if operator_is_leading last_op then
+                  (if op_has_spaces then pending_space ())
+                else
+                  split ~space:op_has_spaces ();
+                transform_operand operand;
+                None
+              end
+            )
         ) ();
         if not is_nested then builder#unnest ();
       | _ ->
@@ -1730,5 +2063,7 @@ let format_node ?(debug=false) node start_char end_char =
 let format_content content =
   let source_text = SourceText.make content in
   let syntax_tree = SyntaxTree.make source_text in
+  if not @@ List.is_empty @@ SyntaxTree.errors syntax_tree
+    then raise Hackfmt_error.InvalidSyntax;
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
   format_node editable

@@ -221,8 +221,11 @@ Array SourceRootInfo::setServerVariables(Array server) const {
                String(parseSandboxServerVariable(it->second)));
   }
 
-  if (!m_serverVars.empty()) {
-    server += m_serverVars;
+  {
+    SuppressHackArrCompatNotices suppress;
+    if (!m_serverVars.empty()) {
+      server += m_serverVars;
+    }
   }
 
   return server;

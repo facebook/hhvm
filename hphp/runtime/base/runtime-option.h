@@ -60,10 +60,6 @@ struct RuntimeOption {
     return ServerMode;
   }
 
-  static bool ClientExecutionMode() {
-    return !ServerMode;
-  }
-
   static bool GcSamplingEnabled() {
     return EvalGCSampleRate > 0;
   }
@@ -438,6 +434,8 @@ struct RuntimeOption {
   // Namespace aliases for the compiler
   static std::map<std::string, std::string> AliasedNamespaces;
 
+  static std::vector<std::string> TzdataSearchPaths;
+
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \
@@ -459,7 +457,7 @@ struct RuntimeOption {
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
-  F(int, JitWorkerThreads,             0)                               \
+  F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
   F(string, UseExternalEmitter,        "")                              \
@@ -500,10 +498,10 @@ struct RuntimeOption {
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(int32_t, PerfRelocate,             0)                               \
-  F(uint32_t, ThreadTCMainBufferSize,  0)                               \
-  F(uint32_t, ThreadTCColdBufferSize,  0)                               \
-  F(uint32_t, ThreadTCFrozenBufferSize,0)                               \
-  F(uint32_t, ThreadTCDataBufferSize,  0)                               \
+  F(uint32_t, ThreadTCMainBufferSize,  6 << 20)                         \
+  F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
+  F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
+  F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
@@ -523,7 +521,7 @@ struct RuntimeOption {
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
-  F(uint32_t, JitRetranslateAllRequest, 0)                              \
+  F(uint32_t, JitRetranslateAllRequest, retranslateAllRequestDefault()) \
   F(double,   JitLayoutHotThreshold,   0.05)                            \
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \
@@ -555,7 +553,6 @@ struct RuntimeOption {
   F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRGlobalValueNumbering,    true)                            \
-  F(bool, HHIRTypeCheckHoisting,       false) /* Task: 7568599 */       \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, HHIRStorePRE,                true)                            \
@@ -601,6 +598,9 @@ struct RuntimeOption {
   F(bool, MapTgtCacheHuge,             false)                           \
   F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
+  F(bool, LowStaticArrays,             true)                            \
+  F(bool, UncountedMixedArrayHuge,     true)                            \
+  F(bool, UncountedStringHuge,         true)                            \
   F(bool, RandomHotFuncs,              false)                           \
   F(bool, EnableGC,                    eagerGcDefault())                \
   /* Run GC eagerly at each surprise point. */                          \
@@ -635,7 +635,21 @@ struct RuntimeOption {
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
   F(double, InitialLoadFactor, 1.0)                                     \
+  /* Raise notices on various array operations which may present        \
+   * compatibility issues with Hack arrays. */                          \
+  F(bool, HackArrCompatNotices, false)                                  \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
+  F(std::string, UseRemoteUnixServer, "no")                             \
+  F(std::string, UnixServerPath, "")                                    \
+  F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
+  F(bool, UnixServerQuarantineApc, false)                               \
+  F(bool, UnixServerQuarantineUnits, false)                             \
+  F(bool, UnixServerVerifyExeAccess, false)                             \
+  F(bool, UnixServerFailWhenBusy, false)                                \
+  F(std::vector<std::string>, UnixServerAllowedUsers,                   \
+                                            std::vector<std::string>()) \
+  F(std::vector<std::string>, UnixServerAllowedGroups,                  \
+                                            std::vector<std::string>()) \
   /******************                                                   \
    | PPC64 Options. |                                                   \
    *****************/                                                   \
@@ -723,6 +737,7 @@ public:
   static bool EnableDebuggerServer;
   static bool EnableDebuggerUsageLog;
   static bool DebuggerDisableIPv6;
+  static std::string DebuggerServerIP;
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;
@@ -731,7 +746,7 @@ public:
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
   static int DebuggerSignalTimeout;
-  static std::string DebuggerAuthTokenScript;
+  static std::string DebuggerAuthTokenScriptBin;
 
   // Mail options
   static std::string SendmailPath;

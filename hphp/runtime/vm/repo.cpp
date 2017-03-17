@@ -21,8 +21,10 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/server/xbox-server.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/async-func.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
@@ -67,11 +69,11 @@ void Repo::shutdown() {
   t_dh.destroy();
 }
 
-SimpleMutex Repo::s_lock;
-unsigned Repo::s_nRepos = 0;
+static SimpleMutex s_lock;
+static std::atomic<unsigned> s_nRepos;
 
 bool Repo::prefork() {
-  if (num_huge1g_pages() > 0) {
+  if (num_1g_pages() > 0) {
     // We put data on the 1G huge pages, and we don't want to do COW upon
     // fork().  If you need to fork(), configure HHVM not to use 1G pages.
     return true;
@@ -80,7 +82,9 @@ bool Repo::prefork() {
     t_dh.destroy();
   }
   s_lock.lock();
-  if (s_nRepos > 0) {
+  XboxServer::Stop();
+  if (s_nRepos > 0 || AsyncFuncImpl::count()) {
+    XboxServer::Restart();
     s_lock.unlock();
     return true;
   }
@@ -90,6 +94,7 @@ bool Repo::prefork() {
 
 void Repo::postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
+  XboxServer::Restart();
   if (pid == 0) {
     Logger::ResetPid();
     new (&s_lock) SimpleMutex();
@@ -107,19 +112,14 @@ Repo::Repo()
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_frp(*this), m_lsrp(*this) {
-  {
-    SimpleLock lock(s_lock);
-    s_nRepos++;
-  }
+
+  ++s_nRepos;
   connect();
 }
 
 Repo::~Repo() {
   disconnect();
-  {
-    SimpleLock lock(s_lock);
-    s_nRepos--;
-  }
+  --s_nRepos;
 }
 
 std::string Repo::s_cliFile;
@@ -184,13 +184,15 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     // which control Option or RuntimeOption values -- the others are read out
     // in an inconsistent and ad-hoc manner. But I don't understand their uses
     // and interactions well enough to feel comfortable fixing now.
-    RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
-    RuntimeOption::PHP7_ScalarTypes  = s_globalData.PHP7_ScalarTypes;
-    RuntimeOption::PHP7_Substr       = s_globalData.PHP7_Substr;
-    RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
-    HHBBC::options.HardTypeHints = s_globalData.HardTypeHints;
-    HHBBC::options.HardReturnTypeHints = s_globalData.HardReturnTypeHints;
-    HHBBC::options.ElideAutoloadInvokes = s_globalData.ElideAutoloadInvokes;
+    RuntimeOption::EnableHipHopSyntax     = s_globalData.EnableHipHopSyntax;
+    RuntimeOption::PHP7_IntSemantics      = s_globalData.PHP7_IntSemantics;
+    RuntimeOption::PHP7_ScalarTypes       = s_globalData.PHP7_ScalarTypes;
+    RuntimeOption::PHP7_Substr            = s_globalData.PHP7_Substr;
+    RuntimeOption::PHP7_Builtins          = s_globalData.PHP7_Builtins;
+    RuntimeOption::AutoprimeGenerators    = s_globalData.AutoprimeGenerators;
+    HHBBC::options.HardTypeHints          = s_globalData.HardTypeHints;
+    HHBBC::options.HardReturnTypeHints    = s_globalData.HardReturnTypeHints;
+    HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
 
     return;
@@ -844,7 +846,7 @@ void Repo::initLocal() {
     if (!RuntimeOption::RepoLocalPath.empty()) {
       attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable);
     } else if (RuntimeOption::RepoAllowFallbackPath) {
-      if (RuntimeOption::ClientExecutionMode()) {
+      if (!RuntimeOption::ServerExecutionMode()) {
         std::string cliRepo = s_cliFile;
         if (!cliRepo.empty()) {
           cliRepo += ".hhbc";

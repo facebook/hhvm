@@ -1019,19 +1019,30 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_parameter_list_opt parser =
       (* SPEC
+
+        TODO: Update the spec to match this.
+
         parameter-list:
-          ...
+          variadic-parameter
           parameter-declaration-list
           parameter-declaration-list  ,
-          parameter-declaration-list  ,  ...
+          parameter-declaration-list  ,  variadic-parameter
 
         parameter-declaration-list:
           parameter-declaration
           parameter-declaration-list  ,  parameter-declaration
+
+        variadic-parameter:
+          ...
+          attribute-specification-opt visiblity-modifier-opt type-specifier \
+            ...  variable-name
      *)
      (* This function parses the parens as well. *)
-     (* TODO: Add an error checking pass that ensures that the "..." parameter
-              only appears at the end, and is not trailed by a comma. *)
+     (* ERROR RECOVERY: We allow variadic parameters in all positions; a later
+        pass gives an error if a variadic parameter is in an incorrect position
+        or followed by a trailing comma.  *)
+     (* TODO: Add an error checking pass that ensures that a variadic parameter
+     does not have a default value. *)
       parse_parenthesized_comma_list_opt_allow_trailing parser parse_parameter
 
   and parse_parameter parser =
@@ -1043,12 +1054,13 @@ module WithExpressionAndStatementAndTypeParser
       else (parser1, make_variadic_parameter (make_token token))
     | _ -> parse_parameter_declaration parser
 
-  (* SPEC
-    parameter-declaration:
-      attribute-specificationopt  type-specifier  variable-name \
-      default-argument-specifieropt
-  *)
   and parse_parameter_declaration parser =
+    (* SPEC
+    TODO: The specification does not include modifiers. Fix the spec.
+    parameter-declaration:
+      attribute-specification-opt  type-specifier  variable-name \
+      default-argument-specifier-opt
+    *)
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
     let (parser, attrs) = parse_attribute_specification_opt parser in
@@ -1070,7 +1082,14 @@ module WithExpressionAndStatementAndTypeParser
     | Ampersand -> parse_decorated_variable parser
     | _ -> expect_variable parser
 
+  (* TODO: This is wrong. The variable here is not an *expression* that has
+  an optional decoration on it.  It's a declaration. We shouldn't be using the
+  same data structure for a decorated expression as a declaration; one
+  is a *use* and the other is a *definition*. *)
   and parse_decorated_variable parser =
+    (* TODO: We might consider parsing both &...$x and ...&$x and give an
+    appropriate error saying you can't mix ref and variadic.  The original
+    Hack and HHVM parsers do this for &...$x, but not ...&$x. *)
     let (parser, decorator) = next_token parser in
     let (parser, variable) = expect_variable parser in
     let decorator = make_token decorator in
@@ -1098,6 +1117,9 @@ module WithExpressionAndStatementAndTypeParser
       (parser, make_simple_initializer (make_token token) default_value)
     | _ -> (parser, make_missing())
 
+  and parse_function parser =
+    parse_function_declaration parser (make_missing())
+
   and parse_function_declaration parser attribute_specification =
     let (parser, header) =
       parse_function_declaration_header parser in
@@ -1106,11 +1128,71 @@ module WithExpressionAndStatementAndTypeParser
       attribute_specification header body in
     (parser, syntax)
 
+  and parse_constraint_operator parser =
+    (* TODO: Put this in the specification
+      constraint-operator:
+        =
+        as
+        super
+    *)
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Equal
+    | As
+    | Super -> (parser1, (make_token token))
+    | _ -> (* ERROR RECOVERY: don't eat the offending token. *)
+      (* TODO: Give parse error *)
+      (parser, (make_missing()))
+
+  and parse_where_constraint parser =
+    (* TODO: Put this in the specification
+    constraint:
+      type-specifier  constraint-operator  type-specifier
+    *)
+    let (parser, left) = parse_type_specifier parser in
+    let (parser, op) = parse_constraint_operator parser in
+    let (parser, right) = parse_type_specifier parser in
+    let result = make_where_constraint left op right in
+    (parser, result)
+
+  and parse_where_constraint_list_item parser =
+    let (parser, where_constraint) = parse_where_constraint parser in
+    let (parser, comma) = optional_token parser Comma in
+    let result = make_list_item where_constraint comma in
+    (parser, result)
+
+  and parse_where_clause parser =
+    (* TODO: Add this to the specification
+      where-clause:
+        where   constraint-list
+
+      constraint-list:
+        constraint
+        constraint-list , constraint
+
+      Note that a trailing comma is not accepted in a constraint list
+    *)
+    let (parser, keyword) = assert_token parser Where in
+    let (parser, constraints) = parse_list_until_no_comma
+      parser parse_where_constraint_list_item in
+    let result = make_where_clause keyword constraints in
+    (parser, result)
+
+  and parse_where_clause_opt parser =
+    if peek_token_kind parser != Where then
+      (parser, (make_missing()))
+    else
+      parse_where_clause parser
+
   and parse_function_declaration_header parser =
     (* SPEC
       function-definition-header:
-        attribute-specification-opt  asyncopt  function  name  /
-        generic-type-parameter-list-opt  (  parameter-listopt  ) :  return-type
+        attribute-specification-opt  async-opt  function  name  /
+        generic-type-parameter-list-opt  (  parameter-list-opt  ) :  /
+        return-type   where-clause-opt
+
+      TODO: The spec does not specify "where" clauses. Add them.
+
     *)
     (* In strict mode, we require a type specifier. This error is not caught
        at parse time but rather by a later pass. *)
@@ -1128,10 +1210,11 @@ module WithExpressionAndStatementAndTypeParser
       parse_parameter_list_opt parser in
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
+    let (parser, where_clause) = parse_where_clause_opt parser in
     let syntax = make_function_declaration_header async_token
       function_token ampersand_token label generic_type_parameter_list
       left_paren_token parameter_list right_paren_token colon_token
-      return_type in
+      return_type where_clause in
     (parser, syntax)
 
   (* A function label is either a function name, a __construct label, or a
@@ -1266,38 +1349,45 @@ module WithExpressionAndStatementAndTypeParser
       (* TODO figure out what global const differs from class const *)
     | Const -> parse_const_declaration parser1 (make_missing ())
               (make_token token)
-    | QuestionGreaterThan ->
-      (* We do not support this tag in Hack.
-       TODO: Give an error in a later pass if this is found in a Hack file.
-       TODO: Give an error in a later pass if this is not at the end. *)
-       (parser1, make_script_footer (make_token token))
     | _ ->
       parse_statement parser
       (* TODO: What if it's not a legal statement? Do we still make progress
       here? *)
 
   let parse_script_header parser =
-    (* TODO: Detect if there is trivia before or after any token. *)
-    let (parser1, less_than) = next_token parser in
-    let (parser2, question) = next_token parser1 in
-    let (parser3, language) = next_token parser2 in
+    (* The script header is
+      < ? name
+      where the < may have leading trivia, such as a # comment before it,
+      but there must be no trailing trivia of the <.
+
+      The name is optional in PHP, but not in Hack, and the name, if there
+      is one, must appear immediately after the ?, with no intervening trivia.
+
+    *)
+    let original_parser = parser in
+    let (parser, less_than) = next_token parser in
+    (* TODO: Give an error if there is trailing trivia on the < *)
+    let (parser, question) = next_token parser in
+    let (parser, language) = if Token.trailing question = [] then
+    (* TODO: Handle the case where the langauge is not a Name. *)
+      let (parser, language) = next_token parser in
+      (parser, make_token language)
+    else
+      (parser, (make_missing())) in
     let valid = (Token.kind less_than) == LessThan &&
-                (Token.kind question) == Question &&
-                (Token.kind language) == Name in
+                (Token.kind question) == Question in
     if valid then
       let less_than = make_token less_than in
       let question = make_token question in
-      let language = make_token language in
       let script_header = make_script_header less_than question language in
-      (parser3, script_header)
+      (parser, script_header)
     else
-      (* TODO: Report an error *)
       (* ERROR RECOVERY *)
       (* Make no progress; try parsing the file without a header *)
-      let parser = with_error parser SyntaxError.error1001 in
-      let less_than = make_token (Token.make LessThan 0 [] []) in
-      let question = make_token (Token.make Question 0 [] []) in
-      let language = make_token (Token.make Name 0 [] []) in
+      let parser = with_error original_parser SyntaxError.error1001 in
+      let less_than = make_missing() in
+      let question = make_missing() in
+      let language = make_missing() in
       let script_header = make_script_header less_than question language in
       (parser, script_header )
 

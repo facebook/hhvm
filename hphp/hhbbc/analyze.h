@@ -79,6 +79,36 @@ struct FuncAnalysis {
    * declared order.
    */
   ClosureUseVarMap closureUseTypes;
+
+  /*
+   * With HardConstProp enabled, the set of constants that this
+   * function could define.
+   */
+  ConstantMap cnsMap;
+
+  /*
+   * Reads a constant thats not in the index (yet - this can only
+   * happen on the first iteration). We'll need to revisit it.
+   */
+  bool readsUntrackedConstants{false};
+
+  /*
+   * Flag to indicate that we removed builtins during an optimization
+   * pass. This can affect the fpi state stored in bdata, so we need
+   * to recompute it to prevent errors in later passes.
+   */
+  bool builtinsRemoved{false};
+
+  /*
+   * Flag to indicate that the function does something that requires a
+   * variable environment.
+   */
+  bool mayUseVV;
+
+  /*
+   * Known types of local statics.
+   */
+  CompactVector<Type> localStaticTypes;
 };
 
 /*
@@ -114,7 +144,7 @@ struct ClassAnalysis {
  *
  * This routine makes no changes to the php::Func.
  */
-FuncAnalysis analyze_func(const Index&, Context);
+FuncAnalysis analyze_func(const Index&, Context, bool trackConstantArrays);
 
 /*
  * Analyze a function like analyze_func, but exposing gathered CollectedInfo
@@ -160,7 +190,7 @@ ClassAnalysis analyze_class(const Index&, Context);
  */
 std::vector<std::pair<State,StepFlags>>
 locally_propagated_states(const Index&,
-                          Context,
+                          const FuncAnalysis&,
                           borrowed_ptr<const php::Block>,
                           State stateIn);
 

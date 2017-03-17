@@ -87,7 +87,6 @@ static std::string get_include_file_path(const std::string &source,
     // if file cannot be found, resolve it using search paths
     for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
       auto const filename = Option::IncludeSearchPaths[i] + "/" + lit;
-      struct stat sb;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
       }

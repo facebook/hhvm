@@ -76,5 +76,8 @@ string(13) "Hello World 4"
 (cmd) step_over -i 21
 string(13) "Hello World 5"
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="step_over" transaction_id="21"></response>
-(cmd) stop -i 22
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="21"><xdebug:message lineno="35" filename="%s/test/slow/ext_xdebug/remote/step_over.php.test"></xdebug:message></response>
+(cmd) step_over -i 22
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="step_over" transaction_id="22"></response>
+(cmd) stop -i 23

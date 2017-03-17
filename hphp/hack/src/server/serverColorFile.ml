@@ -8,28 +8,14 @@
  *
  *)
 
-open Core
-open Coverage_level
-
-let to_json input =
-  let entries = List.map input begin fun (clr, text) ->
-    let color_string = match clr with
-      | Some lvl -> string_of_level lvl
-      | None -> "default"
-    in Hh_json.JSON_Object [
-      "color", Hh_json.JSON_String color_string;
-      "text",  Hh_json.JSON_String text;
-    ]
-  end in
-  Hh_json.JSON_Array entries
-
 let get_level_list check =
-  let type_acc = Hashtbl.create 0 in
+  let type_acc : (Pos.t, Typing_reason.t * Typing_defs.locl Typing_defs.ty_)
+    Hashtbl.t = Hashtbl.create 0 in
   let fn = Typing.with_expr_hook
     (fun (p, _) ty -> Hashtbl.replace type_acc p ty) check in
   let level_of_type x = snd (Coverage_level.level_of_type_mapper fn x) in
   let result = Hashtbl.fold (fun p ty xs ->
-    (Pos.info_raw p, level_of_type (p, ty)) :: xs) type_acc [] in
+    (p, level_of_type (p, ty)) :: xs) type_acc [] in
   result
 
 let go env f_in =

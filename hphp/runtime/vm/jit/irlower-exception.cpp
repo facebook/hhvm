@@ -84,6 +84,15 @@ void cgRaiseVarEnvDynCall(IRLS& env, const IRInstruction* inst) {
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
 }
 
+static void raiseHackArrCompatNotice(const StringData* msg) {
+  raise_hackarr_compat_notice(msg->toCppString());
+}
+
+void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseHackArrCompatNotice),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(InitThrowableFileAndLine)

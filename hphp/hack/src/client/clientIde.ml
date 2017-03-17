@@ -8,6 +8,7 @@
  *
 *)
 open Core
+open Ide_api_types
 open Ide_message
 open Ide_rpc_protocol_parser_types
 
@@ -27,10 +28,11 @@ let init_protocol = ref Ide_rpc_protocol_parser_types.Nuclide_rpc
 let rec connect_persistent env retries start_time =
   if retries < 0 then raise Exit_status.(Exit_with Out_of_retries);
   let connect_once_start_t = Unix.time () in
-
-  let server_name = HhServerMonitorConfig.Program.hh_server in
-
-  let conn = ServerUtils.connect_to_monitor env.root server_name in
+  let handoff_options = {
+    MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
+    force_dormant_start = false;
+  } in
+  let conn = ServerUtils.connect_to_monitor env.root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Result.Ok (ic, oc) ->
@@ -50,6 +52,7 @@ let rec connect_persistent env retries start_time =
     | SMUtils.Monitor_connection_failure
     | SMUtils.Server_busy ->
       raise Exit_status.(Exit_with IDE_out_of_retries)
+    | SMUtils.Server_dormant
     | SMUtils.Server_died
     | SMUtils.Server_missing
     | SMUtils.Build_id_mismatched ->
@@ -89,7 +92,8 @@ let rpc conn command =
 let read_push_message_from_server fd : ServerCommandTypes.push =
   let open ServerCommandTypes in
   match Marshal_tools.from_fd_with_preamble fd with
-  | Response s -> failwith "unexpected response without a request"
+  | ServerCommandTypes.Response _ ->
+    failwith "unexpected response without a request"
   | Push m -> m
 
 let get_next_push_message fd =
@@ -117,15 +121,18 @@ let get_ready_message server_in_fd =
   else if List.mem readable server_in_fd then `Server
   else `Stdin
 
-let print_response id protocol response =
+let print_message id protocol message =
   Ide_message_printer.to_json
-    ~id ~protocol ~response ~version:!init_version |>
+    ~id ~protocol ~version:!init_version ~message |>
   Hh_json.json_to_string |>
   write_response
 
-let print_push_message =
-  (* Push notifications are responses without ID field *)
-  print_response None
+let print_response id protocol response =
+  print_message id protocol (Response response)
+
+let print_push_message protocol notification =
+  (* Push notifications are requests without ID field *)
+  print_message None protocol (Request (Server_notification notification))
 
 let handle_push_message = function
   | ServerCommandTypes.DIAGNOSTIC (subscription_id, errors) ->
@@ -149,7 +156,7 @@ let handle_error id protocol error =
     Printf.eprintf "%s\n" (Ide_rpc_protocol_parser.error_t_to_string error);
     flush stderr
   | JSON_RPC2 ->
-    Json_rpc_message_printer.response_to_json ~id ~result:(`Error error) |>
+    Json_rpc_message_printer.error_to_json ~id ~error |>
     Hh_json.json_to_string |>
     write_response
 
@@ -159,7 +166,7 @@ let with_id_required id protocol f =
   | None -> handle_error id protocol
       (Internal_error "Id field is required for this request")
 
-let handle_init conn id protocol { client_name; client_api_version; } =
+let handle_init conn id protocol { client_name=_; client_api_version=_; } =
   if !did_init then
     handle_error id protocol (Server_error "init was already called")
   else begin
@@ -177,6 +184,9 @@ let handle_init conn id protocol { client_name; client_api_version; } =
     print_response id protocol
   end
 
+let file_position_to_tuple {filename; position={line; column}} =
+  filename, line, column
+
 let handle_request conn id protocol = function
   | Init init_params ->
     handle_init conn id protocol init_params
@@ -184,21 +194,42 @@ let handle_request conn id protocol = function
     rpc conn (Rpc.IDE_AUTOCOMPLETE (filename, position)) |>
     AutocompleteService.autocomplete_result_to_ide_response |>
     print_response id protocol
-  | Infer_type { filename; position; } ->
+  | Infer_type args ->
+    let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    let { File_content.line; column; } = position in
     rpc conn (Rpc.INFER_TYPE (filename, line, column)) |>
     InferAtPosService.infer_result_to_ide_response |>
     print_response id protocol
-  | Identify_symbol { filename; position; } ->
+  | Identify_symbol args ->
+    let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    let { File_content.line; column; } = position in
     rpc conn (Rpc.IDENTIFY_FUNCTION (filename, line, column)) |>
     IdentifySymbolService.result_to_ide_message |>
     print_response id protocol
   | Outline filename ->
     let result = rpc conn (Rpc.OUTLINE filename) in
     Ide_message.Outline_response result |>
+    print_response id protocol
+  | Find_references args ->
+    let filename, line, column = file_position_to_tuple args in
+    let filename = ServerUtils.FileName filename in
+    rpc conn (Rpc.IDE_FIND_REFS (filename, line, column)) |>
+    FindRefsService.result_to_ide_message |>
+    print_response id protocol
+  | Highlight_references args ->
+    let filename, line, column = file_position_to_tuple args in
+    let filename = ServerUtils.FileName filename in
+    let r = rpc conn (Rpc.IDE_HIGHLIGHT_REFS (filename, line, column)) in
+    print_response id protocol (Highlight_references_response r)
+  | Format args ->
+    begin match rpc conn (Rpc.IDE_FORMAT args) with
+      | Result.Ok r -> print_response id protocol (Format_response r)
+      | Result.Error e -> handle_error id protocol (Server_error e)
+    end
+  | Coverage_levels filename ->
+    let filename = ServerUtils.FileName filename in
+    rpc conn (Rpc.COVERAGE_LEVELS filename) |>
+    Coverage_level.result_to_ide_message |>
     print_response id protocol
   | Did_open_file { did_open_file_filename; did_open_file_text; } ->
     rpc conn (Rpc.OPEN_FILE (did_open_file_filename, did_open_file_text))

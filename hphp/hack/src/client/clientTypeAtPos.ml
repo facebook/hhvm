@@ -8,7 +8,7 @@
  *
  *)
 
-let go pos ty output_json =
+let go ty output_json =
   if output_json
   then begin
     let response = Ide_message.Infer_type_response ty in

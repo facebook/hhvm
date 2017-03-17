@@ -191,7 +191,7 @@ int singleJitRequestCount() {
 
 static inline bool doneProfiling() {
   return requestCount() >= RuntimeOption::EvalJitProfileInterpRequests ||
-    (RuntimeOption::ClientExecutionMode() &&
+    (!RuntimeOption::ServerExecutionMode() &&
      !RuntimeOption::EvalJitProfileRecord);
 }
 

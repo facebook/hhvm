@@ -53,8 +53,6 @@ const StaticString s_86ctor("86ctor");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 
-void (*Class::MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
 Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,8 +123,10 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
     unsigned newCap = folly::nextPowTwo(m_size + 1);
     m_capacity = static_cast<int32_t>(newCap);
     auto newData = malloc_huge(newCap * sizeof(TypedValue));
-    memcpy(newData, m_data, m_size * sizeof(*m_data));
-    if (m_data) free_huge(m_data);
+    if (m_data) {
+      memcpy(newData, m_data, m_size * sizeof(*m_data));
+      free_huge(m_data);
+    }
     m_data = reinterpret_cast<TypedValueAux*>(newData);
     assert(m_data);
   }
@@ -198,7 +198,11 @@ template<size_t sz>
 struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
+#ifdef DEBUG
+  static_assert(sz == (use_lowptr ? 260 : 304), "Change this only on purpose");
+#else
   static_assert(sz == (use_lowptr ? 252 : 296), "Change this only on purpose");
+#endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
 
@@ -427,6 +431,11 @@ Class::~Class() {
   EnumCache::deleteValues(this);
 
   low_free_data(m_vtableVec.get());
+
+#ifdef DEBUG
+  validate();
+  m_magic = ~m_magic;
+#endif
 }
 
 void Class::releaseRefs() {
@@ -734,7 +743,7 @@ void Class::initSProps() const {
     auto const& sProp = m_staticProperties[slot];
 
     if (sProp.cls == this && !m_sPropCache[slot].isPersistent()) {
-      *m_sPropCache[slot] = sProp.val;
+      m_sPropCache[slot]->val = sProp.val;
     }
   }
 
@@ -782,14 +791,14 @@ void Class::initSPropHandles() const {
       if (sProp.cls == this) {
         if (usePersistentHandles && (sProp.attrs & AttrPersistent)) {
           propHandle.bind(rds::Mode::Persistent);
-          *propHandle = sProp.val;
+          propHandle->val = sProp.val;
+          rds::recordRds(propHandle.handle(), sizeof(StaticPropData),
+                         rds::SPropCache{this, slot});
         } else {
-          propHandle.bind(rds::Mode::Local);
+          propHandle = rds::bind<StaticPropData>(
+              rds::SPropCache{this, slot}, rds::Mode::Local
+          );
         }
-
-        auto msg = name()->toCppString() + "::" + sProp.name->toCppString();
-        rds::recordRds(propHandle.handle(),
-                       sizeof(TypedValue), "SPropCache", msg);
       } else {
         auto realSlot = sProp.cls->lookupSProp(sProp.name);
         propHandle = sProp.cls->m_sPropCache[realSlot];
@@ -802,7 +811,7 @@ void Class::initSPropHandles() const {
        * read the property, but sees uninit-null for the value (and asserts
        * in a dbg build)
        */
-      *propHandle = sProp.val;
+      propHandle->val = sProp.val;
     }
     if (!propHandle.isPersistent()) {
       allPersistentHandles = false;
@@ -836,7 +845,8 @@ Class::PropInitVec* Class::getPropData() const {
 
 TypedValue* Class::getSPropData(Slot index) const {
   assert(numStaticProperties() > index);
-  return m_sPropCache[index].bound() ? m_sPropCache[index].get() : nullptr;
+  return m_sPropCache[index].bound() ? &m_sPropCache[index].get()->val :
+         nullptr;
 }
 
 
@@ -1185,7 +1195,6 @@ void Class::setInstanceBitsImpl() {
   m_instanceBits = bits;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Private methods.
 //
@@ -1493,7 +1502,12 @@ void checkDeclarationCompat(const PreClass* preClass,
 Class::Class(PreClass* preClass, Class* parent,
              std::vector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
+#ifdef DEBUG
+  : m_magic{kMagic}
+  , m_parent(parent)
+#else
   : m_parent(parent)
+#endif
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
@@ -1646,11 +1660,11 @@ void Class::setMethods() {
     }
   }
 
-  auto traitsBeginIdx = builder.size();
+  auto const traitsBeginIdx = builder.size();
   if (m_extra->m_usedTraits.size()) {
     importTraitMethods(builder);
   }
-  auto traitsEndIdx = builder.size();
+  auto const traitsEndIdx = builder.size();
 
   // Make copies of Funcs inherited from the parent class that have
   // static locals
@@ -1681,12 +1695,6 @@ void Class::setMethods() {
         }
       }
     }
-  }
-
-  if (Class::MethodCreateHook) {
-    Class::MethodCreateHook(this, builder);
-    // running MethodCreateHook may add methods to builder
-    traitsEndIdx = builder.size();
   }
 
   if (m_extra) {
@@ -2002,10 +2010,10 @@ void Class::setProperties() {
       // those of the parent, and append this class's private properties.
       // Append order doesn't matter here (unlike in setMethods()).
       // Prohibit static-->non-static redeclaration.
-      SPropMap::Builder::iterator it2 = curSPropMap.find(preProp->name());
-      if (it2 != curSPropMap.end()) {
+      SPropMap::Builder::iterator it5 = curSPropMap.find(preProp->name());
+      if (it5 != curSPropMap.end()) {
         raise_error("Cannot redeclare static %s::$%s as non-static %s::$%s",
-                    curSPropMap[it2->second].cls->name()->data(),
+                    curSPropMap[it5->second].cls->name()->data(),
                     preProp->name()->data(), m_preClass->name()->data(),
                     preProp->name()->data());
       }
@@ -2192,10 +2200,10 @@ void Class::setProperties() {
   m_declProperties.create(curPropMap);
   m_staticProperties.create(curSPropMap);
 
-  m_sPropCache = (rds::Link<TypedValue>*)
+  m_sPropCache = (rds::Link<StaticPropData>*)
     malloc_huge(numStaticProperties() * sizeof(*m_sPropCache));
   for (unsigned i = 0, n = numStaticProperties(); i < n; ++i) {
-    new (&m_sPropCache[i]) rds::Link<TypedValue>(rds::kInvalidHandle);
+    new (&m_sPropCache[i]) rds::Link<StaticPropData>(rds::kInvalidHandle);
   }
 
   m_declPropNumAccessible = m_declProperties.size() - numInaccessible;
@@ -2228,9 +2236,6 @@ bool Class::compatibleTraitPropInit(TypedValue& tv1, TypedValue& tv2) {
     case KindOfResource:
     case KindOfRef:
       return false;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }
@@ -2591,7 +2596,7 @@ void Class::setInterfaceVtables() {
     auto const slot = iface->preClass()->ifaceVtableSlot();
     if (slot == kInvalidSlot) continue;
     ITRACE(3, "{} @ slot {}\n", iface->name()->data(), slot);
-    Trace::Indent indent;
+    Trace::Indent indent2;
     always_assert(slot < nVtables);
 
     auto const nMethods = iface->numMethods();

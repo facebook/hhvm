@@ -37,8 +37,6 @@
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 
-#include <folly/MoveWrapper.h>
-
 /*
  * This module implements garbage collection for the translation cache so that
  * unreachable translations may be overridden by new translations.
@@ -201,7 +199,7 @@ void reclaimTranslation(TransLoc loc) {
   // Erase meta-data about these regions of the TC
   {
     ITRACE(1, "Clearing translation meta-data\n");
-    Trace::Indent _i;
+    Trace::Indent _i2;
     clearTCMaps(loc.mainStart(), loc.mainEnd());
     clearTCMaps(loc.coldCodeStart(), loc.coldEnd());
     clearTCMaps(loc.frozenCodeStart(), loc.frozenEnd());
@@ -329,28 +327,27 @@ void reclaimFunction(const Func* func) {
     s_smashedCalls.erase(caller.first);
   }
 
-  auto movedData = folly::makeMoveWrapper(std::move(data));
   auto fname = func->fullName()->data();
   auto fid   = func->getFuncId();
   // We just smashed all of those callers-- treadmill the free to avoid a
   // race (threads executing callers may end up inside the guard even though
   // the function is now unreachable). Once the following block runs the guards
   // should be unreachable.
-  Treadmill::enqueue([fname, fid, movedData] {
+  Treadmill::enqueue([fname, fid, data = std::move(data)] {
     auto codeLock = lockCode();
     auto metaLock = lockMetadata();
 
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
-    Trace::Indent _i;
+    Trace::Indent _i2;
     {
       ITRACE(1, "Reclaiming Prologues\n");
-      Trace::Indent _i;
-      for (auto& loc : movedData->prologues) {
+      Trace::Indent _i3;
+      for (auto& loc : data.prologues) {
         reclaimTranslation(loc);
       }
     }
 
-    for (auto* rec : movedData->srcRecs) {
+    for (auto* rec : data.srcRecs) {
       reclaimSrcRec(rec);
     }
   });
@@ -359,14 +356,13 @@ void reclaimFunction(const Func* func) {
 }
 
 void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
-    auto twrap = folly::makeMoveWrapper(std::move(trans));
-    Treadmill::enqueue([twrap]() mutable {
+    Treadmill::enqueue([trans = std::move(trans)]() mutable {
       auto codeLock = lockCode();
       auto metaLock = lockMetadata();
-      for (auto& loc : *twrap) {
+      for (auto& loc : trans) {
         reclaimTranslation(loc);
       }
-      twrap->clear();
+      trans.clear();
     });
 }
 

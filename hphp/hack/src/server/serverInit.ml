@@ -26,23 +26,35 @@ module LSC = LoadScriptConfig
 exception No_loader
 exception Loader_timeout of string
 
+type load_mini_approach =
+  | Load_mini_script of Path.t
+  | Precomputed of ServerArgs.mini_state_target
 
 module ServerInitCommon = struct
+
+  let lock_and_load_deptable fn =
+    (* The sql deptable must be loaded in the master process *)
+    try
+      (* Take a lock on the info file for the sql *)
+      LoadScriptUtils.lock_saved_state fn;
+      let read_deptable_time =
+        SharedMem.load_dep_table_sqlite fn
+      in
+      Hh_logger.log
+        "Reading the dependency file took (sec): %d" read_deptable_time;
+      HackEventLogger.load_deptable_end read_deptable_time;
+    with SharedMem.Sql_assertion_failure 11 as e -> (* SQL_corrupt *)
+      LoadScriptUtils.delete_corrupted_saved_state fn;
+      raise e
+
+
   (* Return all the files that we need to typecheck *)
   let make_next_files genv : Relative_path.t MultiWorker.nextlist =
     let next_files_root = compose
       (List.map ~f:(Relative_path.(create Root)))
       (genv.indexer ServerEnv.file_filter) in
     let hhi_root = Hhi.get_hhi_root () in
-    let hhi_filter = begin fun s ->
-      (FindUtils.is_php s)
-        (** If experimental disabled, we don't parse hhi files under
-         * the experimental directory. *)
-        && (TypecheckerOptions.experimental_feature_enabled
-            (ServerConfig.typechecker_options genv.config)
-            TypecheckerOptions.experimental_dict
-          || not (FindUtils.has_ancestor s "experimental"))
-    end in
+    let hhi_filter = FindUtils.is_php in
     let next_files_hhi = compose
       (List.map ~f:(Relative_path.(create Hhi)))
       (Find.make_next_files
@@ -88,14 +100,20 @@ module ServerInitCommon = struct
       let kv = Hh_json.get_object_exn json in
       check_json_obj_error kv;
       let state_fn = Hh_json.get_string_exn @@ List.Assoc.find_exn kv "state" in
+      let corresponding_base_revision = Hh_json.get_string_exn @@
+        List.Assoc.find_exn kv "corresponding_base_revision" in
       let is_cached =
         Hh_json.get_bool_exn @@ List.Assoc.find_exn kv "is_cached" in
       let deptable_fn =
         Hh_json.get_string_exn @@ List.Assoc.find_exn kv "deptable" in
       let end_time = Unix.gettimeofday () in
       Daemon.to_channel oc
-        @@ Ok (
-        `Fst (state_fn, is_cached, end_time, deptable_fn));
+        @@ Ok (`Fst (
+          state_fn,
+          corresponding_base_revision,
+          is_cached,
+          end_time,
+          deptable_fn));
       let json = read_json_line ic in
       assert (Unix.close_process_in ic = Unix.WEXITED 0);
       let kv = Hh_json.get_object_exn json in
@@ -131,21 +149,13 @@ module ServerInitCommon = struct
     try
       Daemon.from_channel ic >>= function
       | `Snd _ -> assert false
-      | `Fst (fn, is_cached, end_time, deptable_fn) ->
-        (* The sql deptable must be loaded in the master process *)
-        (try
-          (* Take a lock on the info file for the sql *)
-          LoadScriptUtils.lock_saved_state deptable_fn;
-          let read_deptable_time =
-            SharedMem.load_dep_table_sqlite deptable_fn
-          in
-          Hh_logger.log
-            "Reading the dependency file took (sec): %d" read_deptable_time;
-          HackEventLogger.load_deptable_end read_deptable_time;
-        with SharedMem.Sql_assertion_failure 11 as e -> (* SQL_corrupt *)
-          LoadScriptUtils.delete_corrupted_saved_state deptable_fn;
-          raise e);
-
+      | `Fst (
+        fn,
+        corresponding_base_revision,
+        is_cached,
+        end_time,
+        deptable_fn) ->
+        lock_and_load_deptable deptable_fn;
         HackEventLogger.load_mini_worker_end ~is_cached start_time end_time;
         let time_taken = end_time -. start_time in
         Hh_logger.log "Loading mini-state took %.2fs" time_taken;
@@ -161,9 +171,13 @@ module ServerInitCommon = struct
             let old_saved = Marshal.from_channel chan in
             let dirty_files =
             List.map dirty_files Relative_path.(concat Root) in
-            HackEventLogger.vcs_changed_files_end t;
+            HackEventLogger.vcs_changed_files_end t (List.length dirty_files);
             let _ = Hh_logger.log_duration "Finding changed files" t in
-            Result.Ok (fn, Relative_path.set_of_list dirty_files, old_saved)
+            Result.Ok (
+              fn,
+              corresponding_base_revision,
+              Relative_path.set_of_list dirty_files,
+              old_saved)
         end in
         Result.Ok get_dirty_files
     with e ->
@@ -174,6 +188,23 @@ module ServerInitCommon = struct
        * through *)
       (try Daemon.kill daemon with e -> Hh_logger.exc e);
       raise e
+
+  let invoke_approach root approach = match approach with
+   | Load_mini_script cmd ->
+     mk_state_future root cmd
+   | Precomputed { ServerArgs.saved_state_fn;
+     corresponding_base_revision; deptable_fn; changes } ->
+     lock_and_load_deptable deptable_fn;
+     let changes = Relative_path.set_of_list changes in
+     let chan = open_in saved_state_fn in
+     let old_saved = Marshal.from_channel chan in
+     let get_dirty_files = (fun () -> Result.Ok (
+       saved_state_fn,
+       corresponding_base_revision,
+       changes,
+       old_saved
+     )) in
+     Result.try_with (fun () -> fun () -> Result.Ok get_dirty_files)
 
   let is_check_mode options =
     ServerArgs.check_mode options &&
@@ -313,6 +344,7 @@ module ServerInitCommon = struct
    * are newly created. Then we use the deptable to figure out the files
    * that referred to them. Finally we recheck the lot. *)
   let type_check_dirty genv env old_fast fast dirty_files t =
+    let start_time = Unix.gettimeofday () in
     let fast = get_dirty_fast old_fast fast dirty_files in
     let names = Relative_path.Map.fold fast ~f:begin fun _k v acc ->
       FileInfo.merge_names v acc
@@ -320,7 +352,10 @@ module ServerInitCommon = struct
     let deps = get_all_deps names in
     let to_recheck = Typing_deps.get_files deps in
     let fast = extend_fast fast env.files_info to_recheck in
-    type_check genv env fast t
+    let result = type_check genv env fast t in
+    HackEventLogger.type_check_dirty start_time
+      (Relative_path.Set.cardinal dirty_files);
+    result
 
   let get_build_targets env =
     let untracked, tracked = BuildMain.get_live_targets env in
@@ -333,7 +368,7 @@ module ServerInitCommon = struct
   let get_state_future genv root state_future timeout =
     let state = state_future
     >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun (saved_state_fn, dirty_files, old_saved) ->
+    >>= fun (saved_state_fn, corresponding_base_revision, dirty_files, old_saved) ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -358,15 +393,20 @@ module ServerInitCommon = struct
     let updates = SSet.filter updates (fun p ->
       string_starts_with p root && ServerEnv.file_filter p) in
     let changed_while_parsing = Relative_path.(relativize_set Root updates) in
-    Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved)
-  in
-  state
+    Ok (saved_state_fn,
+      corresponding_base_revision,
+      dirty_files,
+      changed_while_parsing,
+      old_saved)
+    in
+    state
 end
 
 type saved_state_fn = string
+type corresponding_base_rev = string
 
 type state_result =
- (saved_state_fn * Relative_path.Set.t
+ (saved_state_fn * corresponding_base_rev * Relative_path.Set.t
    * Relative_path.Set.t * FileInfo.saved_state_info, exn)
  Result.t
 
@@ -375,7 +415,7 @@ type lazy_level = Off | Decl | Parse | Init
 
 module type InitKind = sig
   val init :
-    load_mini_script:(Path.t, exn) Result.t ->
+    load_mini_approach:(load_mini_approach, exn) Result.t ->
     ServerEnv.genv ->
     lazy_level ->
     ServerEnv.env ->
@@ -408,14 +448,14 @@ end
 *)
 module ServerEagerInit : InitKind = struct
   open ServerInitCommon
-  let init ~load_mini_script genv lazy_level env root =
+  let init ~load_mini_approach genv lazy_level env root =
     (* Spawn this first so that it can run in the background while parsing is
      * going on. The script can fail in a variety of ways, but the resolution
      * is always the same -- we fall back to rechecking everything. Running it
      * in the Result monad provides a convenient way to locate the error
      * handling code in one place. *)
     let state_future =
-     load_mini_script >>= mk_state_future root in
+     load_mini_approach >>= invoke_approach root in
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     let env, t = parsing ~lazy_parse genv env ~get_next t in
@@ -436,7 +476,12 @@ module ServerEagerInit : InitKind = struct
 
     let state = get_state_future genv root state_future timeout in
     match state with
-    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved) ->
+    | Ok (
+      saved_state_fn,
+      corresponding_base_revision,
+      dirty_files,
+      changed_while_parsing,
+      old_saved) ->
       let old_fast = FileInfo.saved_to_fast old_saved in
       (* During eager init, we don't need to worry about tracked targets since
          they we end up parsing everything anyways
@@ -446,6 +491,7 @@ module ServerEagerInit : InitKind = struct
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
+        corresponding_base_revision;
         dirty_files;
         changed_while_parsing;
         build_targets;
@@ -541,10 +587,10 @@ module ServerLazyInit : InitKind = struct
 
 
 
-  let init ~load_mini_script genv lazy_level env root =
+  let init ~load_mini_approach genv lazy_level env root =
     assert (lazy_level = Init);
     let state_future =
-      load_mini_script >>= mk_state_future root in
+      load_mini_approach >>= invoke_approach root in
 
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let state_future = state_future >>= fun f ->
@@ -554,12 +600,15 @@ module ServerLazyInit : InitKind = struct
     let state = get_state_future genv root state_future timeout in
 
     match state with
-    | Ok (saved_state_fn, dirty_files, changed_while_parsing, old_saved) ->
+    | Ok (
+      saved_state_fn, corresponding_base_revision,
+      dirty_files, changed_while_parsing, old_saved) ->
       let build_targets, tracked_targets = get_build_targets env in
       Hh_logger.log "Successfully loaded mini-state";
       let global_state = ServerGlobalState.save () in
       let loaded_event = Debug_event.Loaded_saved_state ({
         Debug_event.filename = saved_state_fn;
+        corresponding_base_revision;
         dirty_files;
         changed_while_parsing;
         build_targets;
@@ -644,21 +693,23 @@ let ai_check genv files_info env t =
   match ServerArgs.ai_mode genv.options with
   | Some ai_opt ->
     let all_passed = List.for_all
-      [env.failed_parsing; env.failed_decl]
+      [env.failed_parsing; env.failed_decl; env.failed_check;]
       (fun m -> Relative_path.Set.is_empty m) in
     if not all_passed then begin
       Hh_logger.log "Cannot run AI because of errors in source";
-      Exit_status.exit Exit_status.CantRunAI
-    end;
-    let check_mode = ServerArgs.check_mode genv.options in
-    let errorl, failed = Ai.go
-      Typing_check_utils.check_defs genv.workers files_info
-        env.tcopt ai_opt check_mode in
-    let env = { env with
-      errorl = Errors.merge errorl env.errorl;
-      failed_check = Relative_path.Set.union failed env.failed_check;
-    } in
-    env, (Hh_logger.log_duration "Ai" t)
+      env, t
+    end
+    else begin
+      let check_mode = ServerArgs.check_mode genv.options in
+      let errorl, failed = Ai.go
+          Typing_check_utils.check_defs genv.workers files_info
+          env.tcopt ai_opt check_mode in
+      let env = { env with
+                  errorl = Errors.merge errorl env.errorl;
+                  failed_check = Relative_path.Set.union failed env.failed_check;
+                } in
+      env, (Hh_logger.log_duration "Ai" t)
+    end
   | None -> env, t
 
 let save_state env fn =
@@ -686,16 +737,17 @@ let get_lazy_level genv =
 
 
 (* entry point *)
-let init ?load_mini_script genv =
+let init ?load_mini_approach genv =
   let lazy_lev = get_lazy_level genv in
-  let load_mini_script = Result.of_option load_mini_script ~error:No_loader in
+  let load_mini_approach = Result.of_option load_mini_approach
+    ~error:No_loader in
   let env = ServerEnvBuild.make_env genv.config in
   let root = ServerArgs.root genv.options in
   let (env, t), state =
     if lazy_lev = Init then
-      ServerLazyInit.init ~load_mini_script genv lazy_lev env root
+      ServerLazyInit.init ~load_mini_approach genv lazy_lev env root
     else
-      ServerEagerInit.init ~load_mini_script genv lazy_lev env root
+      ServerEagerInit.init ~load_mini_approach genv lazy_lev env root
   in
   let env, _t = ai_check genv env.files_info env t in
   SharedMem.init_done ();

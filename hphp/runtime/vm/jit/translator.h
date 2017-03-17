@@ -269,8 +269,8 @@ enum OutTypeConstraints {
   OutVUnknown,          // type is V(unknown)
 
   OutSameAsInput1,      // type is the same as the first stack input
-  OutSameAsInput2,      // type is the same as the second stack input
-  OutSameAsInput3,      // type is the same as the third stack input
+  OutModifiedInput3,    // type is the same as the third stack input, but
+                        // counted and unspecialized
   OutCInput,            // type is C(input)
   OutVInput,            // type is V(input)
   OutCInputL,           // type is C(type) of local input
@@ -284,7 +284,6 @@ enum OutTypeConstraints {
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL
-  OutClassRef,          // KindOfClass
   OutFPushCufSafe,      // FPushCufSafe pushes two values of different
                         // types and an ActRec
 
@@ -307,26 +306,23 @@ enum Operands {
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
   StackIns1       = 1 << 3,  // Insert an element under top of stack
-  StackIns2       = 1 << 4,  // Insert an element under top 2 of stack
-  FuncdRef        = 1 << 5,  // Input to FPass*
-  FStack          = 1 << 6,  // output of FPushFuncD and friends
-  Local           = 1 << 7,  // Writes to a local
-  Iter            = 1 << 9,  // Iterator in imm[0]
-  AllLocals       = 1 << 10, // All locals (used by RetC)
-  DontGuardStack1 = 1 << 11, // Dont force a guard on behalf of stack1 input
-  IgnoreInnerType = 1 << 12, // Instruction doesnt care about the inner types
-  DontGuardAny    = 1 << 13, // Dont force a guard for any input
-  This            = 1 << 14, // Input to CheckThis
-  StackN          = 1 << 15, // pop N cells from stack; n = imm[0].u_IVA
-  BStackN         = 1 << 16, // consume N cells from stack for builtin call;
+  FuncdRef        = 1 << 4,  // Input to FPass*
+  FStack          = 1 << 5,  // output of FPushFuncD and friends
+  Local           = 1 << 6,  // Writes to a local
+  Iter            = 1 << 7,  // Iterator in imm[0]
+  AllLocals       = 1 << 8, // All locals (used by RetC)
+  DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input
+  IgnoreInnerType = 1 << 10, // Instruction doesnt care about the inner types
+  DontGuardAny    = 1 << 11, // Dont force a guard for any input
+  This            = 1 << 12, // Input to CheckThis
+  StackN          = 1 << 13, // pop N cells from stack; n = imm[0].u_IVA
+  BStackN         = 1 << 14, // consume N cells from stack for builtin call;
                              // n = imm[0].u_IVA
-  StackI          = 1 << 17, // consume 1 cell at index imm[0].u_IVA
-  MBase           = 1 << 18, // member operation base
-  IdxA            = 1 << 19, // consume 1 A at idx imm[0].u_IVA, preserving an
-                             // optional C on top of it
-  MKey            = 1 << 20, // member lookup key
-  LocalRange      = 1 << 21, // read range of locals given in imm[1].u_LAR
-  DontGuardBase   = 1 << 22, // Dont force a guard for the base
+  StackI          = 1 << 15, // consume 1 cell at index imm[0].u_IVA
+  MBase           = 1 << 16, // member operation base
+  MKey            = 1 << 17, // member lookup key
+  LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
+  DontGuardBase   = 1 << 19, // Dont force a guard for the base
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };

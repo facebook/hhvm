@@ -247,5 +247,5 @@ function hphp_clear_unflushed(): void;
 <<__Native, __HipHopSpecific>>
 function hphp_debug_caller_info(): array<string, mixed>;
 
-<<__Native, __HipHopSpecific>>
+<<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_debug_backtrace_hash(): int;

@@ -79,8 +79,8 @@ ArgType immType(const Op opcode, int idx) {
 }
 
 static size_t encoded_iva_size(uint8_t lowByte) {
-  // Low order bit set => 4-byte.
-  return (lowByte & 0x1 ? sizeof(int32_t) : sizeof(int8_t));
+  // High order bit set => 4-byte.
+  return int8_t(lowByte) >= 0 ? 1 : 4;
 }
 
 int immSize(PC origPC, int idx) {
@@ -98,7 +98,9 @@ int immSize(PC origPC, int idx) {
 
   if (immType(op, idx) == IVA ||
       immType(op, idx) == LA ||
-      immType(op, idx) == IA) {
+      immType(op, idx) == IA ||
+      immType(op, idx) == CAR ||
+      immType(op, idx) == CAW) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
@@ -187,7 +189,8 @@ ArgUnion getImm(PC const origPC, int idx, const Unit* unit) {
   }
   always_assert(cursor == idx);
   auto const type = immType(op, idx);
-  if (type == IVA || type == LA || type == IA) {
+  if (type == IVA || type == LA || type == IA ||
+      type == CAR || type == CAW) {
     retval.u_IVA = decode_iva(pc);
   } else if (type == KA) {
     assert(unit != nullptr);
@@ -208,6 +211,8 @@ ArgUnion* getImmPtr(PC const origPC, int idx) {
   assert(immType(op, idx) != IVA);
   assert(immType(op, idx) != LA);
   assert(immType(op, idx) != IA);
+  assert(immType(op, idx) != CAR);
+  assert(immType(op, idx) != CAW);
   assert(immType(op, idx) != RATA);
   for (int i = 0; i < idx; i++) {
     pc += immSize(origPC, i);
@@ -225,11 +230,11 @@ T decodeImm(const unsigned char** immPtr) {
 // TODO: merge with emitIVA in unit.h
 size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
   if (LIKELY((n & 0x7f) == n)) {
-    *buf = static_cast<unsigned char>(n) << 1;
+    *buf = static_cast<unsigned char>(n);
     return 1;
   }
   assert((n & 0x7fffffff) == n);
-  *reinterpret_cast<uint32_t*>(buf) = (uint32_t(n) << 1) | 0x1;
+  *reinterpret_cast<uint32_t*>(buf) = (n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f);
   return 4;
 }
 
@@ -258,6 +263,8 @@ Offset* instrJumpOffset(PC const origPC) {
 #define IMM_SLA 0
 #define IMM_LA 0
 #define IMM_IA 0
+#define IMM_CAR 0
+#define IMM_CAW 0
 #define IMM_OA(x) 0
 #define IMM_VSA 0
 #define IMM_KA 0
@@ -277,6 +284,8 @@ Offset* instrJumpOffset(PC const origPC) {
 #undef IMM_RATA
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_ILA
@@ -395,7 +404,6 @@ int instrNumPops(PC pc) {
 #define CVUMANY -3
 #define CMANY -3
 #define SMANY -1
-#define IDX_A -4
 #define O(name, imm, pop, push, flags) pop,
     OPCODES
 #undef NOV
@@ -411,7 +419,6 @@ int instrNumPops(PC pc) {
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
-#undef IDX_A
 #undef O
   };
   auto const op = peek_op(pc);
@@ -419,9 +426,6 @@ int instrNumPops(PC pc) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // BaseSC and BaseSL remove an A that may be on the top of the stack or one
-  // element below the top, depending on the second immediate.
-  if (n == -4) return getImm(pc, 1).u_IVA + 1;
   // FCall, NewPackedArray, and some final member operations specify how many
   // values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
@@ -451,8 +455,6 @@ int instrNumPushes(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define INS_1(...) 0
-#define INS_2(...) 0
-#define IDX_A -1
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -461,18 +463,10 @@ int instrNumPushes(PC pc) {
 #undef THREE
 #undef FOUR
 #undef INS_1
-#undef INS_2
-#undef IDX_A
 #undef O
   };
   auto const op = peek_op(pc);
-  auto const pushes = numberOfPushes[size_t(op)];
-
-  // BaseSC and BaseSL may push back a C or V that was on top of the A they
-  // removed.
-  if (pushes == -1) return getImm(pc, 1).u_IVA;
-
-  return pushes;
+  return numberOfPushes[size_t(op)];
 }
 
 namespace {
@@ -489,11 +483,6 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   return flavor;
 }
 
-FlavorDesc baseSFlavor(PC pc, uint32_t i) {
-  always_assert(i <= 1);
-  auto clsIdx = getImm(pc, 1).u_IVA;
-  return i == clsIdx ? AV : CVV;
-}
 }
 
 /**
@@ -513,7 +502,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
-#define IDX_A return baseSFlavor(op, idx);
 #define O(name, imm, pop, push, flags) case Op::name: pop
   switch (peek_op(op)) {
     OPCODES
@@ -532,7 +520,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef CVUMANY
 #undef CMANY
 #undef SMANY
-#undef IDX_A
 #undef O
 }
 
@@ -543,9 +530,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define TWO(...) StackTransInfo::Kind::PushPop
 #define THREE(...) StackTransInfo::Kind::PushPop
 #define FOUR(...) StackTransInfo::Kind::PushPop
-#define IDX_A StackTransInfo::Kind::PushPop
 #define INS_1(...) StackTransInfo::Kind::InsertMid
-#define INS_2(...) StackTransInfo::Kind::InsertMid
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -554,8 +539,6 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef THREE
 #undef FOUR
 #undef INS_1
-#undef INS_2
-#undef IDX_A
 #undef O
   };
   static const int8_t peekPokeType[] = {
@@ -565,8 +548,6 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #define THREE(...) -1
 #define FOUR(...) -1
 #define INS_1(...) 0
-#define INS_2(...) 1
-#define IDX_A 0
 #define O(name, imm, pop, push, flags) push,
     OPCODES
 #undef NOV
@@ -574,9 +555,7 @@ StackTransInfo instrStackTransInfo(PC opcode) {
 #undef TWO
 #undef THREE
 #undef FOUR
-#undef INS_2
 #undef INS_1
-#undef IDX_A
 #undef O
   };
   StackTransInfo ret;
@@ -693,7 +672,6 @@ void staticArrayStreamer(const ArrayData* ad, std::ostream& out) {
           case KindOfObject:
           case KindOfResource:
           case KindOfRef:
-          case KindOfClass:
             not_reached();
         }
       }();
@@ -734,7 +712,6 @@ void staticStreamer(const TypedValue* tv, std::stringstream& out) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -873,6 +850,8 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_I64A READ(int64_t)
 #define H_LA READLA()
 #define H_IA READV()
+#define H_CAR READV()
+#define H_CAW READV()
 #define H_DA READ(double)
 #define H_BA READOFF()
 #define H_OA(type) READOA(type)
@@ -917,6 +896,8 @@ OPCODES
 #undef H_I64A
 #undef H_LA
 #undef H_IA
+#undef H_CAR
+#undef H_CAW
 #undef H_DA
 #undef H_BA
 #undef H_OA

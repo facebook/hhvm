@@ -58,6 +58,7 @@ private:
 
 // Global registry for wrappers
 static std::map<std::string,Wrapper*> s_wrappers;
+static __thread Wrapper* tl_fileHandler;
 
 // Request local registry for user defined wrappers and disabled builtins
 IMPLEMENT_STATIC_REQUEST_LOCAL(RequestWrappers, s_request_wrappers);
@@ -182,6 +183,10 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 
   String lscheme = HHVM_FN(strtolower)(scheme);
 
+  if (tl_fileHandler && lscheme == s_file) {
+    return tl_fileHandler;
+  }
+
   // Request local wrapper?
   if (have_request_wrappers) {
     auto& wrappers = s_request_wrappers->wrappers();
@@ -193,11 +198,13 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 
   // Global, non-disabled wrapper?
   {
-    auto& disabled = s_request_wrappers->disabled();
+    auto disabledWrappers = [] () -> RequestWrappers::DisabledSet& {
+      return s_request_wrappers->disabled();
+    };
     auto it = s_wrappers.find(lscheme.data());
     if ((it != s_wrappers.end()) &&
         (!have_request_wrappers ||
-        (disabled.find(lscheme) == disabled.end()))) {
+        (disabledWrappers().find(lscheme) == disabledWrappers().end()))) {
       return it->second;
     }
   }
@@ -211,11 +218,13 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   /* Special case for PHP4 Backward Compatibility */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
+    if (pathIndex != nullptr) *pathIndex = sizeof("zlib:") - 1;
     return s_compress_zlib;
   }
 
   // data wrapper can come with or without a double forward slash
   if (!strncasecmp(uri_string, "data:", sizeof("data:") - 1)) {
+    if (pathIndex != nullptr) *pathIndex = sizeof("data:") - 1;
     return s_data;
   }
 
@@ -231,6 +240,7 @@ String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   }
 
   if (!colon) {
+    if (pathIndex != nullptr) *pathIndex = 0;
     return s_file;
   }
 
@@ -258,6 +268,10 @@ void RegisterCoreWrappers() {
   s_http_stream_wrapper.registerAs("https");
   s_data_stream_wrapper.registerAs("data");
   s_glob_stream_wrapper.registerAs("glob");
+}
+
+void setThreadLocalFileHandler(Stream::Wrapper* wrapper) {
+  tl_fileHandler = wrapper;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

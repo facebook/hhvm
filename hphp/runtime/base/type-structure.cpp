@@ -52,7 +52,9 @@ const StaticString
   s_root_name("root_name"),
   s_access_list("access_list"),
   s_fields("fields"),
+  s_allows_unknown_fields("allows_unknown_fields"),
   s_is_cls_cns("is_cls_cns"),
+  s_optional_shape_field("optional_shape_field"),
   s_value("value"),
   s_this("HH\\this"),
   s_self("self"),
@@ -176,6 +178,9 @@ void shapeTypeName(const Array& arr, std::string& name) {
     auto const field = fields->getKey(i);
     auto value = fields->getValue(i).toCArrRef();
     auto quote = "'";
+    if (value.exists(s_optional_shape_field)) {
+      name += "?";
+    }
     if (value.exists(s_value)) {
       // if unresolved, ignore wrapper
       if (value.exists(s_is_cls_cns)) quote = "";
@@ -190,6 +195,10 @@ void shapeTypeName(const Array& arr, std::string& name) {
 
     folly::toAppend("=>", fullName(value), &name);
     sep = ", ";
+  }
+
+  if (arr.exists(s_allows_unknown_fields)) {
+    folly::toAppend(sep, "...", &name);
   }
 
   name += ")";
@@ -449,6 +458,11 @@ Array resolveShape(const Array& arr,
     auto valueArr = wrapper[s_value].toArray();
     auto value =
       resolveTS(valueArr, typeCns, typeCnsCls, generics, persistent);
+
+    if (wrapper.exists(s_optional_shape_field)) {
+      value.add(s_optional_shape_field, true_varNR);
+    }
+
     newfields.add(key, Variant(value));
   }
 
@@ -500,6 +514,10 @@ Array resolveTS(const Array& arr,
   auto newarr = Array::Create();
   if (arr.exists(s_nullable)) newarr.add(s_nullable, true_varNR);
   newarr.add(s_kind, Variant(static_cast<uint8_t>(kind)));
+
+  if (arr.exists(s_allows_unknown_fields)) {
+    newarr.add(s_allows_unknown_fields, true_varNR);
+  }
 
   switch (kind) {
     case TypeStructure::Kind::T_tuple: {
@@ -658,13 +676,6 @@ Array resolveTS(const Array& arr,
 }
 
 } // anonymous namespace
-
-bool TypeStructure::KindOfClass(TypeStructure::Kind kind) {
-  return kind == TypeStructure::Kind::T_class
-    || kind == TypeStructure::Kind::T_interface
-    || kind == TypeStructure::Kind::T_trait
-    || kind == TypeStructure::Kind::T_enum;
-}
 
 String TypeStructure::toString(const Array& arr) {
   if (arr.empty()) return String();

@@ -1,4 +1,4 @@
-# Some tests for fault regions and catch regions.
+# Some tests for catch regions.
 
 .main {
   FPushFuncD 0 "main"
@@ -9,7 +9,7 @@
 }
 
 .function throw_stuff($msg) {
-  .try_fault fault {
+  .try_catch handler {
     String "about to throw: "
     CGetL $msg
     Concat
@@ -25,19 +25,20 @@
     Throw
   }
 
-fault:
-  String "throw_stuff's fault ...\n"
+handler:
+  Catch
+  String "throw_stuff's exception handler ...\n"
   Print
   PopC
-  Unwind
+  Throw
 }
 
 .function foo() {
-  String "testing fault region\n"
+  String "testing catch region\n"
   Print
   PopC
 
-  .try_fault handler {
+  .try_catch handler {
     String "In region\n"
     Print
     PopC
@@ -57,10 +58,11 @@ fault:
   RetC
 
 handler:
-  String "In foo's fault handler\n"
+  Catch
+  String "In foo's exception handler\n"
   Print
   PopC
-  Unwind
+  Throw
 }
 
 .class One extends Exception {}
@@ -73,9 +75,7 @@ handler:
            PopC
 
 repeat:
-           .try_catch (One on_one)
-                      (Two on_two)
-                      (Three on_three) {
+           .try_catch catcher {
              CGetL $counter
              Switch Unbounded 0 <make_one make_two make_three>
 
@@ -95,17 +95,26 @@ make_three:  FPushCtorD 1 "Three"
              Throw
            }
 
+catcher:   Catch
+           Dup
+           InstanceOfD "One"
+           JmpNZ on_one
+           Dup
+           InstanceOfD "Two"
+           JmpNZ on_two
+           Dup
+           InstanceOfD "Three"
+           JmpNZ on_three
+           Throw
 on_one:    String "one\n"
            Print
            PopC
            Int 1
            SetL $counter
-           Catch #weird
            PopC
            PopC
            Jmp repeat
-on_two:    Catch
-           PopC
+on_two:    PopC
            String "two\n"
            Print
            PopC
@@ -116,7 +125,6 @@ on_two:    Catch
 on_three:  String "three\n"
            Print
            PopC
-           Catch
            Throw
 
 }
@@ -126,13 +134,13 @@ on_three:  String "three\n"
          SetL $ever_caught
          PopC
 
-         .try_catch (Exception catcher) {
+         .try_catch catcher {
             FPushFuncD 0 "foo"
             FCall 0
             PopR
          }
 
-resume:  .try_catch (Exception catcher) {
+resume:  .try_catch catcher {
            FPushFuncD 0 "throw_various"
            FCall 0
            PopR

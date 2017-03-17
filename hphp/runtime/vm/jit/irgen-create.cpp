@@ -462,16 +462,18 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
     if (curFunc(env)->isClosureBody()) {
-      auto const box = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+      auto const theBox = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
       ifThen(
         env,
-        [&] (Block* taken) { gen(env, CheckClosureStaticLocInit, taken, box); },
+        [&] (Block* taken) {
+          gen(env, CheckClosureStaticLocInit, taken, theBox);
+        },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          gen(env, InitClosureStaticLoc, box, value);
+          gen(env, InitClosureStaticLoc, theBox, value);
         }
       );
-      return box;
+      return theBox;
     }
 
     return cond(
@@ -484,7 +486,7 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
           taken
         );
       },
-      [&] (SSATmp* box) { return box; },
+      [&] (SSATmp* theBox) { return theBox; },
       [&] {
         hint(env, Block::Hint::Unlikely);
         return gen(
@@ -547,8 +549,8 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
           taken
         );
       },
-      [&] (SSATmp* box) { // Next: the static local is already initialized
-        return std::make_pair(box, cns(env, true));
+      [&] (SSATmp* box2) { // Next: the static local is already initialized
+        return std::make_pair(box2, cns(env, true));
       },
       [&] { // Taken: need to initialize the static local
         hint(env, Block::Hint::Unlikely);

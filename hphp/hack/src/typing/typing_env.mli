@@ -34,7 +34,7 @@ val get_enum : env -> Classes.key -> Classes.t option
 val is_enum : env -> Classes.key -> bool
 val get_enum_constraint : env -> Classes.key -> decl ty option
 val add_wclass : env -> string -> unit
-val fresh_tenv : env -> (env -> unit) -> unit
+val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> Classes.key -> Classes.t option
 val get_typedef : env -> Typedefs.key -> Typedefs.t option
 val get_const : env -> class_type -> string -> class_const option
@@ -49,7 +49,7 @@ val get_construct : env -> class_type -> class_elt option * bool
 val get_todo : env -> tfun list
 val get_return : env -> locl ty
 val set_return : env -> locl ty -> env
-val with_return : env -> (env -> env) -> env
+val with_return : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool
 val get_self : env -> locl ty
 val get_self_id : env -> string
@@ -98,7 +98,6 @@ val get_lower_bounds : env -> string -> tparam_bounds
 val get_upper_bounds : env -> string -> tparam_bounds
 val add_upper_bound : env -> string -> locl ty -> env
 val add_lower_bound : env -> string -> locl ty -> env
-val add_constraint : env -> string -> Ast.constraint_kind -> locl ty -> env
 val env_with_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val is_generic_parameter : env -> string -> bool
@@ -109,7 +108,7 @@ val freeze_local_env : env -> env
 val env_with_locals :
   env -> local_types -> local_history Local_id.Map.t -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
-val in_loop : env -> (env -> env) -> env
+val in_loop : env -> (env -> env * 'a) -> env * 'a
 val merge_locals_and_history : local_env -> old_local Local_id.Map.t
 val seperate_locals_and_history :
   old_local Local_id.Map.t ->

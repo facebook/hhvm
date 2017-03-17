@@ -27,8 +27,6 @@
 
 #include "hphp/util/trace.h"
 
-#include <folly/MoveWrapper.h>
-
 #include <cstdarg>
 #include <cstdint>
 #include <string>

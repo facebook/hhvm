@@ -412,19 +412,20 @@ Flags handle_general_effects(Local& env,
 }
 
 void handle_call_effects(Local& env, CallEffects effects) {
-  if (effects.destroys_locals) {
+  if (effects.writes_locals) {
     clear_everything(env);
     return;
   }
 
   /*
-   * Keep types for stack and frame locations, and throw away the values.  We
-   * are just doing this to avoid extending lifetimes across php calls, which
-   * currently always leads to spilling.
+   * Keep types for stack, locals, and class-ref slots, and throw away the
+   * values.  We are just doing this to avoid extending lifetimes across php
+   * calls, which currently always leads to spilling.
    */
-  auto const stk_and_frame = env.global.ainfo.all_stack |
-                             env.global.ainfo.all_frame;
-  env.state.avail &= stk_and_frame;
+  auto const stk_frame_cslot = env.global.ainfo.all_stack |
+                               env.global.ainfo.all_frame |
+                               env.global.ainfo.all_clsRefSlot;
+  env.state.avail &= stk_frame_cslot;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
       ++aloc) {
@@ -715,23 +716,23 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     flags,
     [&] (FNone) {},
 
-    [&] (FRedundant flags) {
-      auto const resolved = resolve_value(env, inst, flags);
+    [&] (FRedundant redundantFlags) {
+      auto const resolved = resolve_value(env, inst, redundantFlags);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
              inst.dst()->toString(),
-             flags.knownType.toString(),
+             redundantFlags.knownType.toString(),
              resolved->toString());
 
       if (resolved->type().subtypeOfAny(TGen, TCls)) {
-        env.unit.replace(&inst, AssertType, flags.knownType, resolved);
+        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);
       }
     },
 
-    [&] (FReducible flags) { reduce_inst(env, inst, flags); },
+    [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
@@ -745,7 +746,7 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
   );
 
   // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplify(env.unit, &inst);
+  if (inst.is(AssertType)) simplifyInPlace(env.unit, &inst);
 }
 
 void optimize_block(Local& env, Global& genv, Block* blk) {
@@ -755,7 +756,7 @@ void optimize_block(Local& env, Global& genv, Block* blk) {
   }
 
   for (auto& inst : *blk) {
-    simplify(genv.unit, &inst);
+    simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
     optimize_inst(genv, inst, flags);
   }

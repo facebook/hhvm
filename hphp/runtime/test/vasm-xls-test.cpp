@@ -40,14 +40,22 @@ template<class T> uint64_t test_const(T val) {
     .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
   };
-  static uint8_t code[1000];
+
+  constexpr auto blockSize = 4096;
+  auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
+                                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+  SCOPE_EXIT { munmap(code, blockSize); };
+
+  constexpr auto dataSize = 100;
+  constexpr auto codeSize = blockSize - dataSize;
   // None of these tests should use much data.
-  static uint8_t data_buffer[100];
+  auto data_buffer = code + codeSize;
 
   CodeBlock main;
-  main.init(code, sizeof(code), "test");
+  main.init(code, codeSize, "test");
   DataBlock data;
-  data.init(data_buffer, sizeof(data_buffer), "data");
+  data.init(data_buffer, dataSize, "data");
 
   Vunit unit;
   Vasm vasm{unit};

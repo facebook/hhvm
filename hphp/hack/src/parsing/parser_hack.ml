@@ -243,7 +243,7 @@ let rec check_lvalue env = function
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter el (check_lvalue env)
   | pos, (Array _ | Shape _ | Collection _
-  | Null | True | False | Id _ | Clone _
+  | Null | True | False | Id _ | Clone _ | Id_type_arguments _
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break
   | Await _ | Expr_list _ | Cast _ | Unop _
@@ -303,7 +303,7 @@ let priorities = [
   (Left, [Tlp]);
   (NonAssoc, [Tnew; Tclone]);
   (Left, [Tlb]);
-  (Right, [Teq; Tpluseq; Tminuseq; Tstareq;
+  (Right, [Teq; Tpluseq; Tminuseq; Tstareq; Tstarstareq;
            Tslasheq; Tdoteq; Tpercenteq;
            Tampeq; Tbareq; Txoreq; Tlshifteq; Trshifteq]);
   (Left, [Tarrow; Tnsarrow]);
@@ -2604,6 +2604,8 @@ and expr_remain env e1 =
       expr_assign env Tbareq (Eq (Some Bar)) e1
   | Tpluseq ->
       expr_assign env Tpluseq (Eq (Some Plus)) e1
+  | Tstarstareq ->
+      expr_assign env Tstarstareq (Eq (Some Starstar)) e1
   | Tstareq ->
       expr_assign env Tstareq (Eq (Some Star)) e1
   | Tslasheq ->
@@ -3342,12 +3344,17 @@ and expr_new env pos_start =
     let cname =
       let e = expr env in
       match e with
+      | p, Id id ->
+        let typeargs = class_hint_params env in
+        if typeargs == []
+        then e
+        else (p, Id_type_arguments (id, typeargs))
       | _, Lvar _
       | _, Array_get _
       | _, Obj_get _
       | _, Class_get _
-      | _, Call _
-      | _, Id _ -> e
+      | _, Call _ ->
+        e
       | p, _ ->
           error_expect env "class name";
           e
@@ -3802,6 +3809,10 @@ and shape_field_list_remain env =
       | _ -> error_expect env ")"; [fd]
 
 and shape_field env =
+  if L.token env.file env.lb = Tqm then
+    error env "Shape construction should not specify optional types.";
+  L.back env.lb;
+
   let name = shape_field_name env in
   expect env Tsarrow;
   let value = expr { env with priority = 0 } in
@@ -4067,10 +4078,19 @@ and hint_shape_field_list_remain env =
           [fd]
 
 and hint_shape_field env =
-  let name = shape_field_name env in
+  (* Consume the next token to determine if we're creating an optional field. *)
+  let sf_optional =
+    if L.token env.file env.lb = Tqm then
+      true
+    else
+      (* In this case, we did not find an optional type, so we'll back out by a
+         token to parse the shape. *)
+      (L.back env.lb; false)
+  in
+  let sf_name = shape_field_name env in
   expect env Tsarrow;
-  let ty = hint env in
-  name, ty
+  let sf_hint = hint env in
+  { sf_optional; sf_name; sf_hint }
 
 (*****************************************************************************)
 (* Namespaces *)

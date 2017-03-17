@@ -77,8 +77,8 @@ AliasClass pointee(
     auto ret = AEmpty;
     sinst->block()->forEachSrc(
       dstIdx,
-      [&] (const IRInstruction* jmp, const SSATmp* ptr) {
-        ret = ret | pointee(ptr, visited_labels);
+      [&] (const IRInstruction* jmp, const SSATmp* thePtr) {
+        ret = ret | pointee(thePtr, visited_labels);
       }
     );
     return ret;
@@ -397,6 +397,15 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
     }
   }
 
+  for (auto i = uint32_t{0}; i < extra->nChangedClsRefSlots; ++i) {
+    auto const& slot = extra->changedClsRefSlots[i];
+    if (slot.write) {
+      stores = stores | AClsRefSlot { inst.src(1), slot.id };
+    } else {
+      loads = loads | AClsRefSlot { inst.src(1), slot.id };
+    }
+  }
+
   auto kills = AEmpty;
   if (isMemberBaseOp(extra->opcode)) {
     stores = stores | AMIStateAny;
@@ -509,7 +518,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AMIStateAny
+      AStackAny | AFrameAny | AClsRefSlotAny | AMIStateAny
     };
 
   case AsyncRetCtrl:
@@ -587,9 +596,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * stores must not be sunk past DefInlineFP where they could clobber a
        * local.
        */
-      AFrameAny | stack_below(inst.dst(), FPRelOffset{0}) |
+      AFrameAny | AClsRefSlotAny | stack_below(inst.dst(), FPRelOffset{0}) |
                   inline_fp_frame(&inst),
-      AFrameAny | stack_below(inst.dst(), FPRelOffset{0})
+      AFrameAny | AClsRefSlotAny | stack_below(inst.dst(), FPRelOffset{0})
     );
 
   /*
@@ -625,7 +634,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case InlineReturn: {
     auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
-                        AMIStateAny | AFrameAny;
+                        AMIStateAny | AFrameAny | AClsRefSlotAny;
     return may_load_store_kill(AEmpty, callee, callee);
   }
 
@@ -698,7 +707,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CallArray:
     return CallEffects {
-      inst.extra<CallArray>()->destroyLocals,
+      inst.extra<CallArray>()->writeLocals,
       AMIStateAny,
       // The AStackAny on this is more conservative than it could be; see Call
       // and CallBuiltin.
@@ -711,7 +720,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<Call>();
       return CallEffects {
-        extra->destroyLocals,
+        extra->writeLocals,
         // kill
         stack_below(inst.src(0), extra->spOffset - 1) | AMIStateAny,
         // We might side-exit inside the callee, and interpret a return.  So we
@@ -736,7 +745,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      auto const locs = extra->destroyLocals ? AFrameAny : AEmpty;
+      auto const locs = extra->writeLocals ? AFrameAny : AEmpty;
       return may_raise(
         inst, may_load_store_kill(stk | AHeapAny | locs, locs, AMIStateAny));
     }
@@ -746,7 +755,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAFWH:
   case CreateAFWHNoVV:
   case CreateCont:
-    return may_load_store_move(AFrameAny, AHeapAny, AFrameAny);
+    return may_load_store_move(
+      AFrameAny | AClsRefSlotAny,
+      AHeapAny,
+      AFrameAny | AClsRefSlotAny
+    );
 
   // This re-enters to call extension-defined instance constructors.
   case ConstructInstance:
@@ -837,6 +850,26 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdClosureStaticLoc:
     return may_load_store(AFrameAny, AFrameAny);
+
+  //////////////////////////////////////////////////////////////////////
+  // Instructions that manipulate class-ref slots
+
+  case LdClsRef:
+    return PureLoad {
+      AClsRefSlot { inst.src(0), inst.extra<LdClsRef>()->slot }
+    };
+
+  case StClsRef:
+    return PureStore {
+      AClsRefSlot { inst.src(0), inst.extra<StClsRef>()->slot },
+      inst.src(1)
+    };
+
+  case KillClsRef:
+    return may_load_store_kill(
+      AEmpty, AEmpty,
+      AClsRefSlot { inst.src(0), inst.extra<KillClsRef>()->slot }
+    );
 
   //////////////////////////////////////////////////////////////////////
   // Pointer-based loads and stores
@@ -1115,6 +1148,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AHeapAny | all_pointees(inst)
     ));
 
+  case ReservePackedArrayDataNewElem:
+    return may_load_store(AHeapAny, AHeapAny);
+
   /*
    * Intermediate minstr operations. In addition to a base pointer like the
    * operations above, these may take a pointer to MInstrState::tvRef, which
@@ -1238,14 +1274,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case LdARFuncPtr:
-    // This instruction is essentially a PureLoad, but we don't handle non-TV's
-    // in PureLoad so we have to treat it as may_load_store.  We also treat it
-    // as loading an entire ActRec-sized part of the stack, although it only
-    // loads the slot containing the Func.
+  case LdARCtx:
+    // These instructions are essentially PureLoads, but we don't handle
+    // non-TV's in PureLoad so we have to treat it as may_load_store.  We also
+    // treat it as loading an entire ActRec-sized part of the stack, although it
+    // only loads a single value from it.
     return may_load_store(
       AStack {
         inst.src(0),
-        inst.extra<LdARFuncPtr>()->offset + int32_t{kNumActRecCells} - 1,
+        inst.extra<IRSPRelOffsetData>()->offset + int32_t{kNumActRecCells} - 1,
         int32_t{kNumActRecCells}
       },
       AEmpty
@@ -1261,6 +1298,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       },
       AEmpty
     );
+
+  case Unreachable:
+    // Unreachable code kills every memory location.
+    return may_load_store_kill(AEmpty, AEmpty, AUnknown);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
@@ -1282,6 +1323,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case EqCls:
   case EqFunc:
   case EqStrPtr:
+  case EqArrayDataPtr:
   case EqDbl:
   case EqInt:
   case GteBool:
@@ -1337,7 +1379,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case Mod:
   case Conjure:
   case ConjureUse:
-  case Halt:
+  case EndBlock:
   case ConvBoolToInt:
   case ConvBoolToDbl:
   case DefConst:
@@ -1541,6 +1583,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdVectorSize:
   case VectorHasImmCopy:
   case CheckPackedArrayDataBounds:
+  case LdColVec:
   case LdColArray:
   case EnterFrame:
     return may_load_store(AEmpty, AEmpty);
@@ -1626,6 +1669,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseMissingThis:
   case FatalMissingThis:
   case RaiseVarEnvDynCall:
+  case RaiseHackArrCompatNotice:
   case ConvCellToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass
@@ -1824,6 +1868,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
   auto check = [&] (AliasClass a) {
     if (auto const fr = a.frame()) check_fp(fr->fp);
+    if (auto const sl = a.clsRefSlot()) check_fp(sl->fp);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 
@@ -1914,7 +1959,7 @@ MemEffects canonicalize(MemEffects me) {
     },
     [&] (CallEffects x) -> R {
       return CallEffects {
-        x.destroys_locals,
+        x.writes_locals,
         canonicalize(x.kills),
         canonicalize(x.stack)
       };

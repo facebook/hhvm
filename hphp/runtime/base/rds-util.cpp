@@ -22,9 +22,9 @@ namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 
-Link<RefData, true /* normal_only */>
+Link<StaticLocalData, true /* normal_only */>
 bindStaticLocal(const Func* func, const StringData* name) {
-  auto ret = bind<RefData,true>(
+  auto ret = bind<StaticLocalData,true>(
     StaticLocal { func->getFuncId(), name },
     Mode::Normal
   );

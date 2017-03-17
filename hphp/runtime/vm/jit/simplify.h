@@ -62,7 +62,7 @@ struct SimplifyResult {
   jit::vector<IRInstruction*> instrs;
   SSATmp* dst;
 };
-SimplifyResult simplify(IRUnit&, IRInstruction*, bool typesMightRelax);
+SimplifyResult simplify(IRUnit&, const IRInstruction*);
 
 /*
  * Instruction stream modifying simplification routine.
@@ -77,7 +77,7 @@ SimplifyResult simplify(IRUnit&, IRInstruction*, bool typesMightRelax);
  * need to track which blocks are still reachable if you are making simplify()
  * calls.
  */
-void simplify(IRUnit&, IRInstruction*);
+void simplifyInPlace(IRUnit&, IRInstruction*);
 
 /*
  * Perform a simplification pass in the entire unit.
@@ -86,23 +86,6 @@ void simplify(IRUnit&, IRInstruction*);
  * invariants.
  */
 void simplifyPass(IRUnit&);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Return true if the given AssertType-like instruction can be nop'd.
- *
- * This is exposed so that the preOptimizeAssertX() methods can share this
- * logic.
- *
- * WARNING: Under certain (very uncommon) conditions, we may find that external
- * information (e.g., from static analysis) conflicts with the instruction
- * stream we have built.  This function will detect this scenario and will punt
- * the entire trace in this case.
- */
-bool canSimplifyAssertType(const IRInstruction* inst,
-                           Type srcType,
-                           bool srcMightRelax);
 
 //////////////////////////////////////////////////////////////////////
 

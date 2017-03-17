@@ -302,16 +302,20 @@ let env_with_self env =
 let localize_with_self env ty =
   localize env ty ~ety_env:(env_with_self env)
 
+(* Add generic parameters to the environment, localize their bounds, and
+ * transform these into a flat list of constraints of the form (ty1,ck,ty2)
+ * where ck is as, super or =
+ *)
 let localize_generic_parameters_with_bounds
     ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
   let env = Env.add_generic_parameters env tparams in
-  let add_bound env ((_, (_,id), cstrl): Nast.tparam) =
-    List.fold_left cstrl ~init:env ~f:begin fun env (ck, h) ->
+  let localize_bound env ((_var, (pos,name), cstrl): Nast.tparam) =
+    let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
+    List.map_env env cstrl (fun env (ck, h) ->
       let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
-      Env.add_constraint env id ck ty
-    end in
-  List.fold_left tparams ~f:add_bound ~init:env
-
+      env, (tparam_ty, ck, ty)) in
+  let env, cstrss = List.map_env env tparams localize_bound in
+  env, List.concat cstrss
 
 (* Helper functions *)
 

@@ -128,7 +128,7 @@ vec(3) {
 }
 ======= base_prop_get ==============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
 NULL
 ======= base_prop_set ==============================
 vec(3) {
@@ -334,7 +334,7 @@ array(2) {
 }
 ======= dim_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
 NULL
 ======= dim_prop_set ===============================
 array(2) {
@@ -474,6 +474,8 @@ array(2) {
   }
 }
 ======= fini_incdec ================================
+
+Notice: Increment on string 'abc' in %s/test/quick/vec/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL
@@ -566,14 +568,14 @@ array(2) {
 ======= fini_setop_new_elem =======================
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
 ======= fini_unset =================================
+Exception: "Vecs do not support unsetting non-end elements"
 array(2) {
   [0]=>
   NULL
   [1]=>
-  dict(2) {
-    [0]=>
+  vec(3) {
     NULL
-    [2]=>
+    string(3) "abc"
     string(0) ""
   }
 }
@@ -671,11 +673,11 @@ array(2) {
 }
 ======= fini_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
 NULL
 ======= fini_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s on line %d
+Warning: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL

@@ -237,7 +237,11 @@ let add_constraint_with_fail env ck ty_sub ty_super fail =
  * want to produce an error. (For example, if after instantiation a
  * constraint becomes C<string> as C<int>)
  *)
-let add_constraint env ck ty_sub ty_super =
+let add_constraint p env ck ty_sub ty_super =
+  Typing_log.log_types p env
+    [Typing_log.Log_sub ("add_constraint",
+       [Typing_log.Log_type ("ty_sub", ty_sub);
+        Typing_log.Log_type ("ty_super", ty_super)])];
   add_constraint_with_fail env ck ty_sub ty_super (fun env -> env)
 
 let rec subtype_params env subl superl =
@@ -357,12 +361,12 @@ and subtype_funs_generic ~check_return ~contravariant_arguments env
       List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
         let tparam_ty = (Reason.Rwitness pos,
           Tabstract(AKgeneric name, None)) in
-        add_constraint env ck tparam_ty ty) in
+        add_constraint pos env ck tparam_ty ty) in
     List.fold_left tparams ~f:add_bound ~init: env in
 
   let add_where_constraints env (cstrl: locl where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-      add_constraint env ck ty1 ty2) in
+      add_constraint p_sub env ck ty1 ty2) in
 
   let env =
     add_tparams_constraints env ft_super.ft_tparams in
@@ -494,6 +498,10 @@ and sub_type env ty_sub ty_super =
  *      sub_type env int string => error
 *)
 and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+  Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
+    [Typing_log.Log_sub ("sub_type_with_uenv",
+      [Typing_log.Log_type ("ty_sub", ty_sub);
+       Typing_log.Log_type ("ty_super", ty_super)])];
   let env, ety_super =
     Env.expand_type env ty_super in
   let env, ety_sub =
@@ -731,12 +739,16 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Tarraykind _), (_, Tclass ((_, xhp_child), _))
   | (_, Tprim (Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum)), (_, Tclass ((_, xhp_child), _))
     when xhp_child = SN.Classes.cXHPChild -> env
+  | (_, (Tarraykind _)), (_, (Tarraykind AKany)) ->
+      (* An array of any kind is a subtype of an array of Tany. *)
+      env
   | (_, (Tarraykind (AKvec ty_sub))), (_, (Tarraykind (AKvec ty_super))) ->
       sub_type env ty_sub ty_super
   | (_, Tarraykind AKmap (tk_sub, tv_sub)), (_, (Tarraykind (AKmap (tk_super, tv_super)))) ->
       let env = sub_type env tk_sub tk_super in
       sub_type env tv_sub tv_super
-  | (reason, Tarraykind (AKvec elt_ty)), (_, Tarraykind AKmap _) ->
+  | (reason, Tarraykind (AKvec elt_ty)), (_, Tarraykind AKmap _)
+    when not (TypecheckerOptions.safe_vector_array (Env.get_options env)) ->
       let int_reason = Reason.Ridx (Reason.to_pos reason, Reason.Rnone) in
       let int_type = int_reason, Tprim Nast.Tint in
       sub_type env (reason, Tarraykind (AKmap (int_type, elt_ty))) ty_super
@@ -818,12 +830,30 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
           subtype_tparams env name_super variancel tyl_sub tyl_super
         | _ -> env
       end
-  | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some x)), _ ->
-      Errors.try_
-        (fun () ->
-          fst @@ Unify.unify env ty_super ty_sub
-        )
-        (fun _ -> sub_type_with_uenv env (uenv_sub, x) (uenv_super, ty_super))
+
+  (* Supertype is generic parameter *and* subtype is a newtype with bound.
+   * We need to make this a special case because there is a *choice*
+   * of subtyping rule to apply. See details in the case of dependent type
+   * against generic parameter which is similar
+   *)
+  | (_, Tabstract (AKnewtype (_, _), Some ty)),
+    (_, Tabstract (AKgeneric _, _)) ->
+     Errors.try_
+       (fun () -> fst (Unify.unify env ty_super ty_sub))
+       (fun _ ->
+          Errors.try_
+           (fun () ->
+             sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
+           (fun _ ->
+              sub_generic_params SSet.empty env (uenv_sub, ty_sub)
+                (uenv_super, ty_super)))
+
+  | (_, Tabstract ((AKnewtype (_, _) | AKenum _), Some ty)), _ ->
+    Errors.try_
+      (fun () ->
+         fst @@ Unify.unify env ty_super ty_sub
+      )
+      (fun _ ->  sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
 
   (* Supertype is generic parameter *and* subtype is dependent.
    * We need to make this a special case because there is a *choice*
@@ -885,6 +915,10 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
     ) -> fst (Unify.unify env ty_super ty_sub)
 
 and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
+  Typing_log.log_types (Reason.to_pos (fst ty_sub)) env
+    [Typing_log.Log_sub ("sub_generic_params",
+      [Typing_log.Log_type ("ty_sub", ty_sub);
+       Typing_log.Log_type ("ty_super", ty_super)])];
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   match ety_sub, ety_super with

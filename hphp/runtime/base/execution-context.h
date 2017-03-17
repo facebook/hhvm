@@ -223,6 +223,7 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
+  void acceptRequestEventHandlers(bool enable);
   std::size_t registerRequestEventHandler(RequestEventHandler* handler);
   void unregisterRequestEventHandler(RequestEventHandler* handler,
                                      std::size_t index);
@@ -241,6 +242,7 @@ public:
   Variant pushUserExceptionHandler(const Variant& function);
   void popUserErrorHandler();
   void popUserExceptionHandler();
+  void clearUserErrorHandlers();
   bool errorNeedsHandling(int errnum,
                           bool callUserHandler,
                           ErrorThrowMode mode);
@@ -401,7 +403,10 @@ public:
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
                          bool* fromVMEntry = nullptr);
-
+  ActRec* getPrevVMStateSkipFrame(const ActRec* fp,
+                                  Offset* prevPc = nullptr,
+                                  TypedValue** prevSp = nullptr,
+                                  bool* fromVMEntry = nullptr);
   /*
    * Returns the caller of the given frame.
    */
@@ -414,7 +419,8 @@ public:
   void bindVar(StringData* name, TypedValue* v);
   Array getLocalDefinedVariables(int frame);
   const Variant& getEvaledArg(const StringData* val,
-                              const String& namespacedName);
+                              const String& namespacedName,
+                              const Unit* funcUnit);
 
 private:
   template <bool forwarding>
@@ -508,6 +514,7 @@ private:
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
+  bool m_acceptRequestEventHandlers;
 
   // error handling
   req::vector<std::pair<Variant,int>> m_userErrorHandlers;

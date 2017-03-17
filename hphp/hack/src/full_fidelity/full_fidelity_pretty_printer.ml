@@ -164,6 +164,7 @@ let get_doc_from_trivia trivia_lst allow_break =
     | Kind.SingleLineComment ->
       (* no code after comments *)
       (text (Trivia.text trivia), true)
+    | Kind.Markup
     | Kind.FixMe
     | Kind.IgnoreError
     | Kind.UnsafeExpression
@@ -222,8 +223,6 @@ let rec get_doc node =
                       (x.header_language |> get_doc |> add_break)
   | Script x -> group_doc ( get_doc x.script_header
                      ^| get_doc x.script_declarations )
-  | ScriptFooter { footer_question_greater_than } ->
-    get_doc footer_question_greater_than
   | ClassishDeclaration
     { classish_attribute; classish_modifiers; classish_keyword;
       classish_name; classish_type_parameters; classish_extends_keyword;
@@ -454,7 +453,7 @@ let rec get_doc node =
     { function_async; function_keyword; function_ampersand; function_name;
       function_type_parameter_list; function_left_paren;
       function_parameter_list; function_right_paren; function_colon;
-      function_type }
+      function_type; function_where_clause }
    ->
     let preface = group_doc ( get_doc function_async
                               ^| get_doc function_keyword) in
@@ -473,12 +472,23 @@ let rec get_doc node =
     let type_declaration =
       let fun_colon = get_doc function_colon in
       let fun_type = get_doc function_type in
-      group_doc (fun_colon ^| fun_type)
+      let where_clause = get_doc function_where_clause in
+      group_doc (fun_colon ^| fun_type ^| where_clause)
     in
     group_doc (
       group_doc ( group_doc (preface ^| name_and_generics) ^^| parameters )
       ^| type_declaration
     )
+  | WhereClause { where_clause_keyword; where_clause_constraints } ->
+    let w = get_doc where_clause_keyword in
+    let c = get_doc where_clause_constraints in
+    w ^| c
+  | WhereConstraint { where_constraint_left_type; where_constraint_operator ;
+    where_constraint_right_type } ->
+    let l = get_doc where_constraint_left_type in
+    let o = get_doc where_constraint_operator in
+    let r = get_doc where_constraint_right_type in
+    l ^| o ^| r
   | MethodishDeclaration
     { methodish_attribute; methodish_modifiers; methodish_function_decl_header;
       methodish_function_body; methodish_semicolon } ->
@@ -769,6 +779,14 @@ let rec get_doc node =
     let op = get_doc safe_member_operator in
     let nm = get_doc safe_member_name in
     group_doc (ob ^^^ op ^^^ nm)
+  | EmbeddedMemberSelectionExpression
+    { embedded_member_object;
+      embedded_member_operator;
+      embedded_member_name } ->
+    let ob = get_doc embedded_member_object in
+    let op = get_doc embedded_member_operator in
+    let nm = get_doc embedded_member_name in
+    group_doc (ob ^^^ op ^^^ nm)
   | YieldExpression x ->
     let y = get_doc x.yield_keyword in
     let o = get_doc x.yield_operand in
@@ -927,6 +945,14 @@ let rec get_doc node =
     let expr = get_doc braced_expression_expression in
     let right = get_doc braced_expression_right_brace in
     indent_block_no_space left expr right indt
+  | EmbeddedBracedExpression {
+    embedded_braced_expression_left_brace;
+    embedded_braced_expression_expression;
+    embedded_braced_expression_right_brace } ->
+    let left = get_doc embedded_braced_expression_left_brace in
+    let expr = get_doc embedded_braced_expression_expression in
+    let right = get_doc embedded_braced_expression_right_brace in
+    indent_block_no_space left expr right indt
   | ListExpression
     { list_keyword; list_left_paren; list_members; list_right_paren } ->
     let keyword = get_doc list_keyword in
@@ -1036,6 +1062,12 @@ let rec get_doc node =
     let index = get_doc x.subscript_index in
     let right = get_doc x.subscript_right_bracket in
     receiver ^^^ left ^^^ index ^^^ right
+  | EmbeddedSubscriptExpression x ->
+    let receiver = get_doc x.embedded_subscript_receiver in
+    let left = get_doc x.embedded_subscript_left_bracket in
+    let index = get_doc x.embedded_subscript_index in
+    let right = get_doc x.embedded_subscript_right_bracket in
+    receiver ^^^ left ^^^ index ^^^ right
   | AwaitableCreationExpression x ->
     let async = get_doc x.awaitable_async in
     let stmt = x.awaitable_compound_statement in
@@ -1045,12 +1077,16 @@ let rec get_doc node =
     let expr = get_doc x.xhp_body in
     let right = get_doc x.xhp_close in
     left ^^^ expr ^^^ right
-  | XHPOpen
-    { xhp_open_name; xhp_open_attributes; xhp_open_right_angle } ->
+  | XHPOpen {
+    xhp_open_left_angle;
+    xhp_open_name;
+    xhp_open_attributes;
+    xhp_open_right_angle } ->
+    let left = get_doc xhp_open_left_angle in
     let name = get_doc xhp_open_name in
     let attrs = get_doc xhp_open_attributes in
-    let close = get_doc xhp_open_right_angle in
-    group_doc (group_doc (indent_doc name attrs indt) ^| close)
+    let right = get_doc xhp_open_right_angle in
+    group_doc (group_doc (indent_doc (left ^^^ name) attrs indt) ^| right)
   | XHPAttribute
     { xhp_attribute_name; xhp_attribute_equal; xhp_attribute_expression }->
     let name = get_doc xhp_attribute_name in
@@ -1127,18 +1163,14 @@ let rec get_doc node =
   | DictionaryTypeSpecifier {
       dictionary_type_keyword;
       dictionary_type_left_angle;
-      dictionary_type_key;
-      dictionary_type_comma;
-      dictionary_type_value;
+      dictionary_type_members;
       dictionary_type_right_angle
     } ->
     let ar = get_doc dictionary_type_keyword in
     let la = get_doc dictionary_type_left_angle in
-    let kt = get_doc dictionary_type_key in
-    let co = get_doc dictionary_type_comma in
-    let vt = get_doc dictionary_type_value in
+    let ms = get_doc dictionary_type_members in
     let ra = get_doc dictionary_type_right_angle in
-    ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ ra
+    ar ^^^ la ^^^ ms ^^^ ra
   | MapArrayTypeSpecifier {
       map_array_keyword;
       map_array_left_angle;

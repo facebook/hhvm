@@ -102,6 +102,9 @@ private:
   Variant m_stderr;
 };
 
+void clearThreadLocalIO();
+void setThreadLocalIO(FILE* in, FILE* out, FILE* err);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

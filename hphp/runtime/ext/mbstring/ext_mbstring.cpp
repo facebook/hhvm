@@ -1084,12 +1084,12 @@ Variant HHVM_FUNCTION(mb_list_encodings_alias_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
 
         if (encoding->aliases != nullptr) {
           j = 0;
@@ -1136,12 +1136,12 @@ Variant HHVM_FUNCTION(mb_list_mime_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
         if (encoding->mime_name != nullptr) {
           return String(encoding->mime_name, CopyString);
         }
@@ -1321,6 +1321,10 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 
   ret = mbfl_ja_jp_hantozen(&string, &result, opt);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1547,6 +1551,10 @@ static Variant php_mb_numericentity_exec(const String& str,
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
   free(iconvmap);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1685,6 +1693,10 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
   ret = mbfl_mime_header_encode(&string, &result, charsetenc, transenc,
                                 linefeed.data(), indent);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;

@@ -9,6 +9,7 @@
  *)
 
 open Core
+open Ide_api_types
 
 (*****************************************************************************)
 (* Module comparing positions (to sort them later)
@@ -99,7 +100,13 @@ let walk content pos_level_list =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str pos_level_l =
+let go
+    (str : string)
+    (pos_level_l : Coverage_level.result) :
+    (coverage_level option * string) list =
+  let get_pos_info_raw (pos, level) = (Pos.info_raw pos, level) in
+  let pos_level_l = List.map pos_level_l ~f:get_pos_info_raw in
+
   let cmp x y = Compare.pos (fst x) (fst y) in
   let pos_level_l = List.sort cmp pos_level_l in
   let pos_level_l = flatten pos_level_l in

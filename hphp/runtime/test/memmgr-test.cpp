@@ -23,35 +23,6 @@
 
 namespace HPHP {
 
-TEST(MemoryManager, RootMaps) {
-  {
-    ASSERT_EQ(MM().lookupRoot<DummyResource>(0), nullptr);
-    auto dummy = req::make<DummyResource>();
-    auto id = MM().addRoot(dummy);
-    ASSERT_EQ(MM().lookupRoot<DummyResource>(id), dummy);
-    auto removed = MM().removeRoot<DummyResource>(id);
-    ASSERT_EQ(removed, dummy);
-    ASSERT_EQ(MM().lookupRoot<DummyResource>(id), nullptr);
-    ASSERT_FALSE(MM().removeRoot<DummyResource>(id));
-
-    MM().addRoot(dummy);
-    ASSERT_TRUE(MM().removeRoot(dummy));
-  }
-  {
-    ASSERT_EQ(MM().lookupRoot<c_Vector>(0), nullptr);
-    auto vec = req::make<c_Vector>();
-    auto id = MM().addRoot(vec);
-    ASSERT_EQ(MM().lookupRoot<c_Vector>(id), vec);
-    auto removed = MM().removeRoot<c_Vector>(id);
-    ASSERT_EQ(removed, vec);
-    ASSERT_EQ(MM().lookupRoot<c_Vector>(id), nullptr);
-    ASSERT_FALSE(MM().removeRoot<c_Vector>(id));
-
-    MM().addRoot(vec);
-    ASSERT_TRUE(MM().removeRoot(vec));
-  }
-}
-
 static void allocAndJoin(size_t size, bool free) {
   std::thread thread([&]() {
       MemoryManager::TlsWrapper::getCheck();

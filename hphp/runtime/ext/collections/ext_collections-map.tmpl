@@ -16,7 +16,7 @@ function ImplementMapFilter($withKey, $immutable, $filter) {
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try_catch kill_iter_0 {
 
 PART1
 ;
@@ -39,7 +39,7 @@ PART1
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try_catch kill_iter_1 1 {
 
 PART2
 ;
@@ -74,7 +74,20 @@ PART2
             PopC
     next:   IterNextK 1 loop $v $k
   }
+
+           Jmp endloop
+
+  kill_iter_1:
+           Catch
+           IterFree 1
+           Throw
 }
+
+kill_iter_0:
+           Catch
+           CIterFree 0
+           Throw
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
@@ -96,13 +109,6 @@ bad_func: FPushCtorD 1 "InvalidArgumentException"
           FCall 1
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );

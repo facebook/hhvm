@@ -16,6 +16,9 @@ SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
 SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
 
 PROJECT(${PACKAGE_NAME} C CXX ASM)
+
+include(HHVMProject)
+
 if (MSVC)
   enable_language(ASM_MASM)
 endif()
@@ -64,7 +67,7 @@ git submodule update --init --recursive
 ")
 ENDIF()
 
-INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
+INCLUDE(HPHPFunctions)
 INCLUDE(CheckFunctionExists)
 
 SET(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
@@ -72,6 +75,9 @@ SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
 include(MSVCDefaults)
+include(Options)
+include(HPHPCompiler)
+include(HPHPFindLibs)
 
 ADD_SUBDIRECTORY(third-party)
 ADD_SUBDIRECTORY(hphp)

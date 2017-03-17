@@ -161,6 +161,8 @@
 }
 
 .function main {
+  .numclsrefslots 1;
+
   FPushCtorD 0 "Base"
   FCall 0
   PopR
@@ -169,8 +171,8 @@
 
   String "print_it"
   String "Base"
-  AGetC
-  FPushClsMethod 1
+  ClsRefGetC 0
+  FPushClsMethod 1 0
   String "printing this string"
   FPassC 0
   FCall 1

@@ -46,7 +46,7 @@ bool init_member_reflection() {
   if (!get_embedded_data("member_reflection", &desc)) {
     // We might not be embedding the shared object, depending on platform, so
     // don't cry too loudly if we don't find it.
-    Logger::Verbose("init_member_reflection: Unable to find embedded data\n");
+    Logger::Verbose("init_member_reflection: Unable to find embedded data");
     return false;
   }
 
@@ -54,7 +54,7 @@ bool init_member_reflection() {
   auto const handle = dlopen_embedded_data(desc, tmp_filename);
   if (!handle) {
     Logger::Warning("init_member_reflection: "
-                    "Failed to dlopen embedded data\n");
+                    "Failed to dlopen embedded data");
     return false;
   }
 
@@ -63,7 +63,7 @@ bool init_member_reflection() {
       dlsym(handle, detail::kMemberReflectionTableName)
     );
   if (!g_member_reflection_vtable) {
-    Logger::Warning("init_member_reflection: dlsym failed: %s\n", dlerror());
+    Logger::Warning("init_member_reflection: dlsym failed: %s", dlerror());
     return false;
   }
 

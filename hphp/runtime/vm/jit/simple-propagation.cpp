@@ -27,12 +27,10 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void constProp(IRUnit& unit, IRInstruction* inst, bool typesMightRelax) {
+void constProp(IRUnit& unit, IRInstruction* inst) {
   for (auto& src : inst->srcs()) {
     if (!src->inst()->is(DefConst) && src->type().admitsSingleVal()) {
-      if (!typesMightRelax || !irgen::typeMightRelax(src)) {
-        src = unit.cns(src->type());
-      }
+      src = unit.cns(src->type());
     }
   }
 }

@@ -22,7 +22,11 @@ let get_changes_field = get_array_field "changes"
 let parse_autocomplete_params params =
   get_filename_field params >>= fun filename ->
   get_position_field params >>= fun position ->
-  Result.Ok { filename; position; }
+  Result.Ok { Ide_api_types.filename; position; }
+
+let parse_coverage_levels_params params =
+  get_filename_field params >>= fun filename ->
+  Result.Ok filename
 
 let parse_did_open_file_params params =
   get_filename_field params >>= fun did_open_file_filename ->
@@ -33,18 +37,15 @@ let parse_did_close_file_params params =
   get_filename_field params >>= fun did_close_file_filename ->
   Result.Ok { did_close_file_filename; }
 
-let parse_range range =
-  get_start_field range >>= fun st ->
-  get_end_field range >>= fun ed ->
-  Result.Ok (Some { File_content.st; ed; })
-
 let parse_edit edit =
   get_text_field edit >>= fun text ->
   maybe_get_obj_field "range" edit >>= fun range_opt ->
   (match range_opt with
-  | None -> Result.Ok None
-  | Some range -> parse_range range) >>= fun range ->
-  Result.Ok { File_content.text; range; }
+    | None -> Result.Ok None
+    | Some range ->
+      (parse_range_field range >>= (fun r -> Result.Ok (Some r)))
+  ) >>= fun range ->
+  Result.Ok { Ide_api_types.text; range; }
 
 let accumulate_edits edit acc =
   acc >>= fun acc ->
@@ -66,6 +67,11 @@ let parse_autocomplete method_name params =
   parse_autocomplete_params >>= fun params ->
   Result.Ok (Autocomplete params)
 
+let parse_coverage_levels method_name params =
+  assert_params_required method_name params >>=
+  parse_coverage_levels_params >>= fun params ->
+  Result.Ok (Coverage_levels params)
+
 let parse_did_open_file method_name params =
   assert_params_required method_name params >>=
   parse_did_open_file_params >>= fun params ->
@@ -83,6 +89,7 @@ let parse_did_change_file method_name params =
 
 let parse_method method_name params = match method_name with
   | "getCompletions" -> parse_autocomplete method_name params
+  | "coverageLevels" -> parse_coverage_levels method_name params
   | "didOpenFile" -> parse_did_open_file method_name params
   | "didCloseFile" -> parse_did_close_file method_name params
   | "didChangeFile" -> parse_did_change_file method_name params

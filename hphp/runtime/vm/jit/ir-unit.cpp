@@ -131,7 +131,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case ThrowArithmeticError:
     case ThrowDivisionByZeroError:
     case VerifyParamFailHard:
-    case Halt:
+    case Unreachable:
+    case EndBlock:
     case FatalMissingThis:
       return instSk == sk;
 
@@ -144,8 +145,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case AsyncSwitchFast:
       return inst.marker().sk().op() != Op::Await;
 
-    // A ReqBindJmp ends a unit and it jumps to the next instruction
-    // to execute.
+    // A ReqBindJmp ends a unit and it jumps to the next instruction to
+    // execute.
     case ReqBindJmp: {
       auto destOffset = inst.extra<ReqBindJmp>()->target.offset();
       return sk.succOffsets().count(destOffset);
@@ -157,11 +158,15 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
 }
 
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
+  bool unreachable = false;
   Block* mainExit = nullptr;
 
-  FTRACE(5, "findMainExitBlock: starting on unit:\n{}\n", show(unit));
+  FTRACE(5, "findMainExitBlock: looking for exit at {} in unit:\n{}\n",
+         showShort(lastSk), show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
+    if (block->back().is(Unreachable)) unreachable = true;
+
     if (endsUnitAtSrcKey(block, lastSk)) {
       if (mainExit == nullptr) {
         mainExit = block;
@@ -172,14 +177,18 @@ Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
         mainExit->hint() == Block::Hint::Unlikely ||
         block->hint() == Block::Hint::Unlikely,
         "findMainExit: 2 likely exits found: B{} and B{}\nlastSk = {}",
-        mainExit->id(), block->id(), showShort(lastSk));
+        mainExit->id(), block->id(), showShort(lastSk)
+      );
 
       if (mainExit->hint() == Block::Hint::Unlikely) mainExit = block;
     }
   }
 
-  always_assert_flog(mainExit, "findMainExit: no exit found for lastSk = {}",
-                     showShort(lastSk));
+  always_assert_flog(
+    mainExit || unreachable,
+    "findMainExit: no exit found for lastSk = {}",
+    showShort(lastSk)
+  );
 
   FTRACE(5, "findMainExitBlock: mainExit = B{}\n", mainExit->id());
 

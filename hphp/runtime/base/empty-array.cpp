@@ -39,7 +39,7 @@ struct EmptyArray::Initializer {
   Initializer() {
     auto const ad   = reinterpret_cast<ArrayData*>(&s_theEmptyArray);
     ad->m_sizeAndPos = 0;
-    ad->m_hdr.init(HeaderKind::Empty, StaticValue);
+    ad->initHeader(HeaderKind::Empty, StaticValue);
   }
 };
 EmptyArray::Initializer EmptyArray::s_initializer;
@@ -125,7 +125,7 @@ ArrayLval EmptyArray::MakePackedInl(TypedValue tv) {
   );
   assert(cap == CapCode::ceil(cap).code);
   ad->m_sizeAndPos = 1; // size=1, pos=0
-  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
+  ad->initHeader(CapCode::exact(cap), HeaderKind::Packed, 1);
 
   auto const lval = reinterpret_cast<TypedValue*>(ad + 1);
   lval->m_data = tv.m_data;
@@ -229,18 +229,34 @@ ArrayLval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
                 : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
+ArrayLval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  return LvalInt(ad, k, copy);
+}
+
 ArrayLval EmptyArray::LvalStr(ArrayData*, StringData* k, bool) {
   return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
+}
+
+ArrayLval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  return LvalStr(ad, k, copy);
 }
 
 ArrayLval EmptyArray::LvalNew(ArrayData*, bool) {
   return EmptyArray::MakePacked(make_tv<KindOfNull>());
 }
 
+ArrayLval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  return LvalNew(ad, copy);
+}
+
 ArrayData* EmptyArray::SetRefInt(ArrayData*,
                                  int64_t k,
                                  Variant& var,
                                  bool) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto ref = *var.asRef();
   tvIncRef(&ref);
   auto const ret = k == 0 ? EmptyArray::MakePacked(ref)
@@ -252,6 +268,7 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
                                  StringData* k,
                                  Variant& var,
                                  bool) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto ref = *var.asRef();
   tvIncRef(&ref);
   return EmptyArray::MakeMixed(k, ref).array;
@@ -263,12 +280,16 @@ ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool copy) {
 }
 
 ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   auto ref = *v.asRef();
   tvIncRef(&ref);
   return EmptyArray::MakePacked(ref).array;
 }
 
 ArrayData* EmptyArray::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+    raiseHackArrCompatRefNew();
+  }
   auto tv = make_tv<KindOfNull>();
   tvAsVariant(&tv).setWithRef(v);
   return EmptyArray::MakePacked(tv).array;

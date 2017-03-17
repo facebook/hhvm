@@ -291,7 +291,6 @@ Type::bits_t Type::bitsFromDataType(DataType outer, DataType inner) {
     case KindOfArray            : return kArr;
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
-    case KindOfClass            : return kCls;
     case KindOfRef:
       assertx(inner != KindOfUninit);
       return bitsFromDataType(inner, KindOfUninit) << kBoxShift;
@@ -323,7 +322,6 @@ DataType Type::toDataType() const {
   if (*this <= TObj)         return KindOfObject;
   if (*this <= TRes)         return KindOfResource;
   if (*this <= TBoxedCell)   return KindOfRef;
-  if (*this <= TCls)         return KindOfClass;
   always_assert_flog(false,
                      "Bad Type {} in Type::toDataType()", *this);
 }
@@ -348,6 +346,16 @@ Type Type::specialize(TypeSpec spec) const {
 
   assertx(spec.clsSpec() != ClassSpec::Bottom);
   return Type{*this, spec.clsSpec()};
+}
+
+Type Type::modified() const {
+  auto t = unspecialize();
+  if (t.maybe(TArr))    t |= TArr;
+  if (t.maybe(TDict))   t |= TDict;
+  if (t.maybe(TVec))    t |= TVec;
+  if (t.maybe(TKeyset)) t |= TKeyset;
+  if (t.maybe(TStr))    t |= TStr;
+  return t;
 }
 
 // Return true if the array satisfies requirement on the ArraySpec.
@@ -550,7 +558,7 @@ Type Type::operator-(Type rhs) const {
 // Conversions.
 
 Type typeFromTV(const TypedValue* tv, const Class* ctx) {
-  assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+  assertx(tvIsPlausible(*tv));
 
   if (tv->m_type == KindOfObject) {
     auto const cls = tv->m_data.pobj->getVMClass();
@@ -755,7 +763,7 @@ static Type relaxCell(Type t, DataTypeCategory cat) {
 }
 
 Type relaxType(Type t, DataTypeCategory cat) {
-  always_assert_flog(t <= TGen && t != TBottom, "t = {}", t);
+  always_assert_flog(t <= TGen, "t = {}", t);
   if (cat == DataTypeGeneric) return TGen;
   auto const relaxed =
     (t & TCell) <= TBottom ? TBottom : relaxCell(t & TCell, cat);

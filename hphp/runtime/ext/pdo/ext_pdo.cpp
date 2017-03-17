@@ -2526,9 +2526,6 @@ safe:
                   goto clean_up;
                 }
                 continue;
-
-              case KindOfClass:
-                break;
             }
             not_reached();
           } while (0);

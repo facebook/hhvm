@@ -94,8 +94,8 @@ let make_ft p params ret_ty =
   }
 
 let get_shape_field_name = function
-  | SFlit (_, s) -> s
-  | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
+  | Ast.SFlit (_, s) -> s
+  | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
 let empty_bounds = []
 let singleton_bound ty = [ty]
@@ -152,14 +152,6 @@ let add_lower_bound env name ty =
     | _ -> env.lenv.tpenv
     end in
   env_with_tpenv env (add_lower_bound_ tpenv name ty)
-
-let add_constraint env id ck ty =
-  match ck with
-  | Ast.Constraint_super -> add_lower_bound env id ty
-  | Ast.Constraint_eq    ->
-    let env = add_upper_bound env id ty in
-    add_lower_bound env id ty
-  | Ast.Constraint_as    -> add_upper_bound env id ty
 
 (* Add type parameters to environment, initially with no bounds.
  * Existing type parameters with the same name will be overridden. *)
@@ -384,8 +376,8 @@ let set_return env x =
 
 let with_return env f =
   let ret = get_return env in
-  let env = f env in
-  set_return env ret
+  let env, result = f env in
+  set_return env ret, result
 
 let is_static env = env.genv.static
 let get_self env = env.genv.self
@@ -408,8 +400,31 @@ let set_fn_kind env fn_type =
   let genv = { genv with fun_kind = fn_type } in
   { env with genv = genv }
 
-let add_todo env x =
-  { env with todo = x :: env.todo }
+(* Add a function on environments that gets run at some later stage to check
+ * constraints, by which time unresolved type variables may be resolved.
+ * Because the validity of the constraint might depend on tpenv
+ * at the point that the `add_todo` is called, we extend the environment at
+ * the point that the function gets run with `tpenv` captured at the point
+ * that `add_todo` gets called.
+ * Typical examples are `instanceof` tests that introduce bounds on fresh
+ * type parameters (e.g. named T#1) or on existing type parameters, which
+ * are removed after the end of the `instanceof` conditional block. e.g.
+ *   function foo<T as arraykey>(T $x): void { }
+ *   class C<+T> { }
+ *   class D extends C<arraykey> { }
+ *   function test<Tu>(C<Tu> $x, Tu $y): void {
+ *   if ($x instanceof D) {
+ *     // Here we know Tu <: arraykey but the constraint is checked later
+ *     foo($y);
+ *   }
+ *)
+ let add_todo env f =
+  let tpenv_now = env.lenv.tpenv in
+  let f' env =
+    let old_tpenv = env.lenv.tpenv in
+    let env = f (env_with_tpenv env tpenv_now) in
+    env_with_tpenv env old_tpenv in
+  { env with todo = f' :: env.todo }
 
 let add_anonymous env x =
   let genv = env.genv in
@@ -721,8 +736,8 @@ let anon anon_lenv env f =
 let in_loop env f =
   let old_in_loop = env.in_loop in
   let env = { env with in_loop = true } in
-  let env = f env in
-  { env with in_loop = old_in_loop }
+  let env, result = f env in
+  { env with in_loop = old_in_loop }, result
 
 (*****************************************************************************)
 (* Merge and un-merge locals *)

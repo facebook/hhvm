@@ -113,7 +113,7 @@ struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
 /*
  * Calls are somewhat special enough that they get a top-level effect.
  *
- * The `destroys_locals' flag indicates whether the call can change locals in
+ * The `writes_locals' flag indicates whether the call can write to locals in
  * the calling frame (e.g. extract() or parse_str(), when called with FCall).
  *
  * The `kills' set are locations that cannot be read by this instruction unless
@@ -129,7 +129,7 @@ struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
-struct CallEffects    { bool destroys_locals;
+struct CallEffects    { bool writes_locals;
                         AliasClass kills;
                         AliasClass stack; };
 

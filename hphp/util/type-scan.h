@@ -181,6 +181,11 @@ inline bool hasNonConservative() {
   return detail::g_metadata_table_size > 2;
 }
 
+inline bool hasScanner(Index index) {
+  assert(index < detail::g_metadata_table_size);
+  return detail::g_metadata_table[index].m_scan != nullptr;
+}
+
 // Initialize the type scanner infrastructure. Before this is done,
 // getIndexForMalloc() will always return kIndexUnknown and any attempts to scan
 // will use conservative scanning. For this reason, its important to call init()
@@ -212,6 +217,18 @@ struct Scanner {
     // those.
     if (detail::Uninteresting<T*>::value) return;
     m_ptrs.emplace_back(ptr);
+  }
+
+  // Enqueue the address of a pointer
+  template <typename T> void enqAddr(const T** addr) {
+    // Don't allow void**
+    static_assert(!detail::IsVoid<T>::value,
+                  "Trying to enqueue void pointer(s). "
+                  "Please provide a more specific type.");
+    // Certain types are statically uninteresting, so don't enqueue pointers to
+    // those.
+    if (detail::Uninteresting<T*>::value) return;
+    m_addrs.emplace_back((const void**)addr);
   }
 
   /*
@@ -251,11 +268,8 @@ struct Scanner {
     static_assert(!detail::UnboundedArray<T>::value,
                   "Trying to scan unbounded array");
 
-    assert(size % sizeof(T) == 0);
-    const auto raw = reinterpret_cast<std::uintptr_t>(ptr);
-    for (std::size_t i = 0; i < size; i += sizeof(T)) {
-      enqueue(reinterpret_cast<const T>(raw + i));
-    }
+    assert(size == sizeof(T));
+    m_addrs.emplace_back((const void**)&ptr);
   }
 
   // Overload for interesting non-pointer types.
@@ -286,43 +300,33 @@ struct Scanner {
     }
   }
 
-  struct WhereIndex { uint32_t ptr, cons; const char* description; };
-
-  // Called once all the scanning is done. Reports enqueued pointers via the
-  // first passed callback, and conservative ranges via the second passed
-  // callback. Afterwards, all the state is cleared. The Scanner can be re-used
-  // after this.
-  template <typename F1, typename F2> void finish(F1&& f1, F2&& f2) {
-    where(""); // sentinel
-    auto description = "";
-    size_t i = 0, j = 0;
-    for (auto& w : m_where) {
-      for (; i < w.ptr; ++i) {
-        if (auto p = m_ptrs[i]) f1(p, description);
-      }
-      for (; j < w.cons; ++j) {
-        auto& r = m_conservative[j];
-        f2(r.first, r.second, description);
-      }
-      description = w.description;
+  // Called once all the scanning is done. Callbacks report different
+  // pointer types:
+  //   F1 - called to report enqueued raw pointers (no address available)
+  //   F2 - called to report conservative ranges
+  //   F3 - called to report addresses of pointers
+  // Afterwards, all the state is cleared, and the scanner can be re-used.
+  template <typename F1, typename F2, typename F3>
+  void finish(F1&& f1, F2&& f2, F3&& f3) {
+    for (auto ptr : m_ptrs) {
+      f1(ptr);
     }
+    for (auto r : m_conservative) {
+      f2(r.first, r.second);
+    }
+    for (auto addr : m_addrs) {
+      f3(addr);
+    }
+    m_addrs.clear();
     m_ptrs.clear();
     m_conservative.clear();
-    m_where.clear();
-  }
-
-  // record where we are in root scanning now.
-  void where(const char* description) {
-    m_where.push_back(
-      {uint32_t(m_ptrs.size()), uint32_t(m_conservative.size()), description}
-    );
   }
 
   // These are logically private, but they're public so that the generated
   // functions can manipulate them directly.
-  std::vector<const void*> m_ptrs;
+  std::vector<const void**> m_addrs; // pointer locations
+  std::vector<const void*> m_ptrs; // pointer values
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
-  std::vector<WhereIndex> m_where;
 };
 
 /*

@@ -82,17 +82,20 @@ public:
   }
 
   template<class SerDe>
-  void serde(SerDe& sd) {
-    if (SerDe::deserializing) {
-      bool empty;
-      sd(empty);
-      if (empty) return;
-      m_map.reset(new Map);
-      sd(*m_map);
-      return;
-    }
+  typename std::enable_if<SerDe::deserializing, void>::type
+  serde(SerDe& sd) {
+    bool empty;
+    sd(empty);
+    if (empty) return;
+    m_map.emplace();
+    sd(*m_map.mutate());
+    return;
+  }
 
-    bool empty = !m_map.get();
+  template<class SerDe>
+  typename std::enable_if<!SerDe::deserializing, void>::type
+  serde(SerDe& sd) {
+    bool empty = !m_map;
     sd(empty);
     if (empty) return;
     sd(*m_map);
@@ -100,8 +103,8 @@ public:
 
 private:
   Map& map() {
-    if (!m_map) m_map.reset(new Map);
-    return *m_map;
+    if (!m_map) m_map.emplace();
+    return *m_map.mutate();
   }
   const Map& map() const {
     return !m_map ? s_empty_map : *m_map;

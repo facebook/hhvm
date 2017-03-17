@@ -864,7 +864,7 @@ void rfc1867PostHandler(Transport* transport,
 
       /* New Rule: never repair potential malicious user input */
       if (!skip_upload) {
-        char *tmp = param;
+        tmp = param;
         long c = 0;
 
         while (*tmp) {

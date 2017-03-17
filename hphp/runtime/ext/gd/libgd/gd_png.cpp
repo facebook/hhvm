@@ -599,8 +599,6 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
      */
 
     int tc = 0;
-    int i;
-    int j;
     int k;
 
     for (i = 0; (i < im->colorsTotal); i++) {

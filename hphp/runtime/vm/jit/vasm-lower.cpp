@@ -123,16 +123,16 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
     v << pushp{vargs.stkArgs[numArgs - 1], vargs.stkArgs[numArgs - 1]};
     --numArgs;
   }
-  for (auto i = numArgs; i >= 2; i -= 2) {
-    v << pushp{vargs.stkArgs[i - 1], vargs.stkArgs[i - 2]};
+  for (auto i2 = numArgs; i2 >= 2; i2 -= 2) {
+    v << pushp{vargs.stkArgs[i2 - 1], vargs.stkArgs[i2 - 2]};
   }
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
   auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
     VregList argDests;
-    for (size_t i = 0, n = srcs.size(); i < n; ++i) {
-      auto const reg = r(i);
+    for (size_t i2 = 0, n = srcs.size(); i2 < n; ++i2) {
+      auto const reg = r(i2);
       argDests.push_back(reg);
       argRegs |= reg;
     }

@@ -8,28 +8,25 @@
  *
  *)
 
+open Ide_api_types
 (**
  * Main type representing a message sent from editor to server.
  * This message might have different JSON representations based on the version
  * of API established during intialization call.
  *)
 
-type position = File_content.content_pos
-type range = File_content.content_range
-type text_edit = File_content.code_edit
 type error = Pos.absolute Errors.error_
 
-type file_position = {
-  filename : string;
-  position : position;
-}
-
-type request =
+type client_request =
   | Init of init_params
   | Autocomplete of file_position
   | Infer_type of file_position
   | Identify_symbol of file_position
   | Outline of string
+  | Find_references of file_position
+  | Highlight_references of file_position
+  | Format of file_range
+  | Coverage_levels of string
   | Did_open_file of did_open_file_params
   | Did_close_file of did_close_file_params
   | Did_change_file of did_change_file_params
@@ -58,6 +55,19 @@ and did_change_file_params = {
   changes : text_edit list;
 }
 
+type server_notification =
+  | Diagnostics_notification of diagnostics_notification
+
+and diagnostics_notification = {
+  subscription_id : int; (* Nuclide-rpc specific *)
+  diagnostics_notification_filename : string;
+  diagnostics : error list;
+}
+
+type request =
+  | Client_request of client_request
+  | Server_notification of server_notification
+
 type response =
   | Init_response of init_response
   | Autocomplete_response of autocomplete_response
@@ -65,7 +75,10 @@ type response =
   | Identify_symbol_response of identify_symbol_response
   | Symbol_by_id_response of symbol_by_id_response
   | Outline_response of outline_response
-  | Diagnostics_notification of diagnostics_notification
+  | Find_references_response of find_references_response
+  | Highlight_references_response of highlight_references_response
+  | Format_response of format_response
+  | Coverage_levels_response of coverage_levels_response
 
 and init_response = {
   server_api_version : int;
@@ -100,10 +113,34 @@ and identify_symbol_item = {
 
 and outline_response = string SymbolDefinition.t list
 
+and coverage_levels_response =
+  | Range_coverage_levels_response of (range * coverage_level) list
+  | Deprecated_text_span_coverage_levels_response
+      of (coverage_level option * string) list
+
 and symbol_by_id_response = string SymbolDefinition.t option
 
-and diagnostics_notification = {
-  subscription_id : int; (* Nuclide-rpc specific *)
-  diagnostics_notification_filename : string;
-  diagnostics : error list;
+and find_references_response_ = {
+  symbol_name : string;
+  references : file_range list;
 }
+
+and find_references_response = find_references_response_ option
+
+and highlight_references_response = range list
+
+and format_response = string
+
+type message =
+  | Request of request
+  | Response of response
+
+let server_notification_method_name = function
+  | Diagnostics_notification _ -> "diagnostics"
+
+(* There is no use-case for printing client requests for now *)
+let client_request_method_name _ = failwith "not implemented"
+
+let request_method_name = function
+  | Server_notification x -> server_notification_method_name x
+  | Client_request x -> client_request_method_name x

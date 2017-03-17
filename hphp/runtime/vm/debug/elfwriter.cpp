@@ -220,36 +220,38 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
     return nullptr;
   }
 
-  /* 4. register frame base of function */
-  Dwarf_P_Expr locExpr = dwarf_new_expr(m_dwarfProducer, &error);
-  if (locExpr == nullptr) {
-    logError("unable to create new location expression");
-    return nullptr;
-  }
+  {
+    /* 4. register frame base of function */
+    Dwarf_P_Expr locExpr = dwarf_new_expr(m_dwarfProducer, &error);
+    if (locExpr == nullptr) {
+      logError("unable to create new location expression");
+      return nullptr;
+    }
 
-  u = dwarf_add_expr_gen(locExpr, DW_OP_call_frame_cfa, 0, 0, &error);
-  if (u == DW_DLV_NOCOUNT) {
-    logError("unable to add subexpression to location expression");
-    return nullptr;
-  }
+    u = dwarf_add_expr_gen(locExpr, DW_OP_call_frame_cfa, 0, 0, &error);
+    if (u == DW_DLV_NOCOUNT) {
+      logError("unable to add subexpression to location expression");
+      return nullptr;
+    }
 
-  u = dwarf_add_expr_gen(locExpr, DW_OP_const1u, CFA_OFFSET, 0, &error);
-  if (u == DW_DLV_NOCOUNT) {
-    logError("unable to add subexpression to location expression");
-    return nullptr;
-  }
+    u = dwarf_add_expr_gen(locExpr, DW_OP_const1u, CFA_OFFSET, 0, &error);
+    if (u == DW_DLV_NOCOUNT) {
+      logError("unable to add subexpression to location expression");
+      return nullptr;
+    }
 
-  u = dwarf_add_expr_gen(locExpr, DW_OP_minus, 0, 0, &error);
-  if (u == DW_DLV_NOCOUNT) {
-    logError("unable to add subexpression to location expression");
-    return nullptr;
-  }
+    u = dwarf_add_expr_gen(locExpr, DW_OP_minus, 0, 0, &error);
+    if (u == DW_DLV_NOCOUNT) {
+      logError("unable to add subexpression to location expression");
+      return nullptr;
+    }
 
-  Dwarf_P_Attribute frameBaseAttr = dwarf_add_AT_location_expr(m_dwarfProducer,
-    func, DW_AT_frame_base, locExpr, &error);
-  if (reinterpret_cast<Dwarf_Addr>(frameBaseAttr) == DW_DLV_BADADDR) {
-    logError("unable to add frame_base attribute");
-    return nullptr;
+    Dwarf_P_Attribute frameBaseAttr = dwarf_add_AT_location_expr(
+      m_dwarfProducer, func, DW_AT_frame_base, locExpr, &error);
+    if (reinterpret_cast<Dwarf_Addr>(frameBaseAttr) == DW_DLV_BADADDR) {
+      logError("unable to add frame_base attribute");
+      return nullptr;
+    }
   }
 
   /* 5. register all the named locals of function */

@@ -132,6 +132,7 @@ UNSUPPORTED_FILES_UNPARSER = {
         'classname/with_tconst*.php',
         'type_structure/*.php',
         'constraints/class_type_constant*.php',
+        'constraints/constraint_lower_newtype.php',
         'constraints/traits*.php',
         'constraints/constraint_override_super_dependent.php',
         'instantiate_from_unresolved_class_id_type.php',
@@ -432,6 +433,7 @@ OTHER_UNPARSEABLE_FILES = [
     'keyset/is_keyset_fail.php',
     # TODO #10395133 h2tp vec support
     'vec/vec_literal.php',
+    'list_assign_vec.php',
     'dynamic_new1.php',
     'dynamic_new3.php',
     'dynamic_new5.php',

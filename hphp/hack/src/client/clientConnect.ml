@@ -15,6 +15,7 @@ exception Server_hung_up
 type env = {
   root : Path.t;
   autostart : bool;
+  force_dormant_start : bool;
   retries : int option;
   retry_if_init : bool;
   expiry : float option;
@@ -128,8 +129,8 @@ let print_wait_msg ?(first_call=false) start_time tail_env =
 let rec wait_for_server_hello ic env retries start_time tail_env first_call =
   match retries with
   | Some n when n < 0 ->
-      Option.iter tail_env
-        (fun t -> Printf.eprintf "\nError: Ran out of retries, giving up!\n");
+      (if Option.is_some tail_env then
+        Printf.eprintf "\nError: Ran out of retries, giving up!\n");
       raise Exit_status.(Exit_with Out_of_retries)
   | Some _
   | None -> ();
@@ -175,8 +176,11 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
 
   let server_name = HhServerMonitorConfig.Program.
     (if env.to_ide then ide_server else hh_server) in
-
-  let conn = ServerUtils.connect_to_monitor env.root server_name in
+  let handoff_options = {
+    MonitorRpc.server_name = server_name;
+    force_dormant_start = env.force_dormant_start;
+  } in
+  let conn = ServerUtils.connect_to_monitor env.root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;
   let _, tail_msg = open_and_get_tail_msg start_time tail_env in
   match conn with
@@ -220,6 +224,14 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         end;
         raise Exit_status.(Exit_with No_server_running)
       end
+    | SMUtils.Server_dormant ->
+      Printf.eprintf begin
+        "Error: No server running and connection limit reached for waiting"^^
+        " on next server to be started. Please wait patiently. If you really"^^
+        " know what you're doing, maybe try --force-dormant-start\n%!"
+      end;
+      raise Exit_status.(Exit_with No_server_running)
+
     | SMUtils.Server_busy ->
       (** This should only happen during the transition from old-world to
       * new-world.

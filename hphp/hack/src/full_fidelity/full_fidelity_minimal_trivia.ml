@@ -49,6 +49,9 @@ let make_ignore_error width =
 let make_delimited_comment width =
   { kind = DelimitedComment; width }
 
+let make_markup width =
+  { kind = Markup; width }
+
 let width trivia =
   trivia.width
 

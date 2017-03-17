@@ -40,7 +40,7 @@ struct MArrayIter;
  * via APC. It has a pointer to the APCArray that it represents and it may
  * cache values locally depending on the type accessed and/or the operation.
  */
-struct APCLocalArray final : private ArrayData,
+struct APCLocalArray final : ArrayData,
                              type_scan::MarkCountable<APCLocalArray> {
   template<class... Args> static APCLocalArray* Make(Args&&...);
 
@@ -49,11 +49,11 @@ struct APCLocalArray final : private ArrayData,
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
   static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
+  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
+  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static ArrayLval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);

@@ -411,7 +411,7 @@ gdImagePtr gdImageRotate45 (gdImagePtr src, double dAngle, int clrBack, int igno
   }
 
   for (u = 0; u < dst3->sy; u++, dOffset += dTan) {
-    int iShear = (int)floor(dOffset);
+    iShear = (int)floor(dOffset);
     gdImageSkewX(dst3, dst2, u, iShear, (dOffset - iShear), clrBack, ignoretransparent);
   }
 

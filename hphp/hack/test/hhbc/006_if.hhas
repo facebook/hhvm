@@ -1,0 +1,28 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $x;
+  Int 43
+  SetL $x
+  PopC
+  Int 34
+  CGetL2 $x
+  Lt
+  JmpZ L0
+  String "yes"
+  Print
+  PopC
+  Jmp L1
+L0:
+  String "no"
+  Print
+  PopC
+L1:
+  Null
+  RetC
+}
+

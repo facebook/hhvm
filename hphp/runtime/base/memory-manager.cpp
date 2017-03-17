@@ -34,6 +34,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Random.h>
@@ -46,6 +47,7 @@
 namespace HPHP {
 
 const unsigned kInvalidSweepIndex = 0xffffffff;
+__thread bool tl_sweeping;
 
 TRACE_SET_MOD(mm);
 
@@ -188,42 +190,20 @@ MemoryManager::MemoryManager() {
 }
 
 MemoryManager::~MemoryManager() {
-  dropRootMaps();
   if (debug) {
     // Check that every allocation in heap has been freed before destruction.
-    forEachHeader([&](Header* h) {
+    forEachHeader([&](Header* h, size_t) {
       assert(h->kind() == HeaderKind::Free);
     });
   }
   // ~BigHeap releases its slabs/bigs.
 }
 
-void MemoryManager::dropRootMaps() {
-  m_objectRoots = nullptr;
-  m_resourceRoots = nullptr;
-  for (auto r : m_root_handles) r->invalidate();
-  m_root_handles.clear();
-}
-
-void MemoryManager::deleteRootMaps() {
-  if (m_objectRoots) {
-    req::destroy_raw(m_objectRoots);
-    m_objectRoots = nullptr;
-  }
-  if (m_resourceRoots) {
-    req::destroy_raw(m_resourceRoots);
-    m_resourceRoots = nullptr;
-  }
-  for (auto r : m_root_handles) r->invalidate();
-  m_root_handles.clear();
-}
-
 void MemoryManager::resetRuntimeOptions() {
   if (debug) {
-    deleteRootMaps();
     checkHeap("resetRuntimeOptions");
     // check that every allocation in heap has been freed before reset
-    iterate([&](Header* h) {
+    iterate([&](Header* h, size_t) {
       assert(h->kind() == HeaderKind::Free);
     });
   }
@@ -449,7 +429,7 @@ template void MemoryManager::refreshStatsImpl<false>(MemoryUsageStats& stats);
 
 void MemoryManager::sweep() {
   assert(!sweeping());
-  m_sweeping = true;
+  tl_sweeping = true;
   DEBUG_ONLY size_t num_sweepables = 0, num_natives = 0;
 
   // iterate until both sweep lists are empty. Entries can be added or
@@ -494,12 +474,9 @@ void MemoryManager::sweep() {
 }
 
 void MemoryManager::resetAllocator() {
-  assert(m_natives.empty() && m_sweepables.empty() && m_sweeping);
+  assert(m_natives.empty() && m_sweepables.empty() && tl_sweeping);
   // decref apc strings referenced by this request
   DEBUG_ONLY auto nstrings = StringData::sweepAll();
-
-  // cleanup root maps
-  dropRootMaps();
 
   // free the heap
   m_heap.reset();
@@ -507,7 +484,7 @@ void MemoryManager::resetAllocator() {
   // zero out freelists
   for (auto& i : m_freelists) i.head = nullptr;
   m_front = m_limit = 0;
-  m_sweeping = false;
+  tl_sweeping = false;
   m_exiting = false;
   resetStatsImpl(true);
   setGCEnabled(RuntimeOption::EvalEnableGC);
@@ -571,7 +548,7 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-const std::array<char*,NumHeaderKinds> header_names = {
+const std::array<char*,NumHeaderKinds> header_names = {{
   "PackedArray", "MixedArray", "EmptyArray", "ApcArray",
   "GlobalsArray", "ProxyArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "Ref",
@@ -580,13 +557,11 @@ const std::array<char*,NumHeaderKinds> header_names = {
   "AsyncFuncFrame", "NativeData", "ClosureHdr",
   "SmallMalloc", "BigMalloc", "BigObj",
   "Free", "Hole"
-};
+}};
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {
-  auto hdr = static_cast<FreeNode*>(ptr);
-  hdr->hdr.kind = HeaderKind::Hole;
-  hdr->size() = size;
+  FreeNode::InitFrom(ptr, size, HeaderKind::Hole);
 }
 
 void MemoryManager::initHole() {
@@ -601,13 +576,13 @@ void MemoryManager::initFree() {
   for (auto i = 0; i < kNumSmallSizes; i++) {
     auto size = smallIndex2Size(i);
     auto n = m_freelists[i].head;
-    for (; n && n->hdr.kind != HeaderKind::Free; n = n->next) {
-      n->hdr.init(HeaderKind::Free, size);
+    for (; n && n->kind() != HeaderKind::Free; n = n->next) {
+      n->initHeader(HeaderKind::Free, size);
     }
     if (debug) {
       // ensure the freelist tail is already initialized.
       for (; n; n = n->next) {
-        assert(n->hdr.kind == HeaderKind::Free && n->size() == size);
+        assert(n->kind() == HeaderKind::Free && n->size() == size);
       }
     }
   }
@@ -625,7 +600,7 @@ void MemoryManager::endQuarantine() {
     auto size = smallIndex2Size(i);
     while (auto n = m_freelists[i].maybePop()) {
       memset(n, 0x8a, size);
-      static_cast<FreeNode*>(n)->hdr.init(HeaderKind::Hole, size);
+      initHole(n, size);
     }
   }
   std::swap(m_freelists, m_quarantine);
@@ -638,21 +613,22 @@ void MemoryManager::checkHeap(const char* phase) {
   PtrMap free_blocks, apc_arrays, apc_strings;
   size_t counts[NumHeaderKinds];
   for (unsigned i=0; i < NumHeaderKinds; i++) counts[i] = 0;
-  forEachHeader([&](Header* h) {
+  forEachHeader([&](Header* h, size_t alloc_size) {
     hdrs.push_back(&*h);
-    bytes += h->size();
-    counts[(int)h->kind()]++;
-    switch (h->kind()) {
+    bytes += alloc_size;
+    auto kind = h->kind();
+    counts[(int)kind]++;
+    switch (kind) {
       case HeaderKind::Free:
-        free_blocks.insert(h);
+        free_blocks.insert(h, alloc_size);
         break;
       case HeaderKind::Apc:
         if (h->apc_.m_sweep_index != kInvalidSweepIndex) {
-          apc_arrays.insert(h);
+          apc_arrays.insert(h, alloc_size);
         }
         break;
       case HeaderKind::String:
-        if (h->str_.isProxy()) apc_strings.insert(h);
+        if (h->str_.isProxy()) apc_strings.insert(h, alloc_size);
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
@@ -950,7 +926,7 @@ static void* allocate(size_t nbytes, type_scan::Index ty) {
   if (LIKELY(npadded <= kMaxSmallSize)) {
     auto const ptr = static_cast<MallocNode*>(MM().mallocSmallSize(npadded));
     ptr->nbytes = npadded;
-    ptr->hdr.init(ty, HeaderKind::SmallMalloc, 0);
+    ptr->initHeader(ty, HeaderKind::SmallMalloc, 0);
     return zero ? memset(ptr + 1, 0, nbytes) : ptr + 1;
   }
   auto constexpr mode = zero ? MemoryManager::ZeroFreeActual :
@@ -1081,9 +1057,10 @@ bool MemoryManager::triggerProfiling(const std::string& filename) {
 }
 
 void MemoryManager::requestInit() {
-  auto trigger = s_trigger.exchange(nullptr);
+  MM().m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
 
   // If the trigger has already been claimed, do nothing.
+  auto trigger = s_trigger.exchange(nullptr);
   if (trigger == nullptr) return;
 
   always_assert(MM().empty());
@@ -1185,10 +1162,8 @@ MemBlock BigHeap::allocSlab(size_t size) {
 
 void BigHeap::enlist(MallocNode* n, HeaderKind kind,
                      size_t size, type_scan::Index tyindex) {
+  n->initHeader(tyindex, kind, m_bigs.size());
   n->nbytes = size;
-  n->hdr.kind = kind;
-  n->index() = m_bigs.size();
-  n->typeIndex() = tyindex;
   m_bigs.push_back(n);
 }
 
@@ -1330,13 +1305,9 @@ Header* BigHeap::find(const void* p) {
     if (hdr->kind() != HeaderKind::BigObj) {
       // `p' is part of the MallocNode.
       return hdr;
-    } else {
-      auto const sub = reinterpret_cast<Header*>(*big + 1);
-      auto const start = reinterpret_cast<const char*>(sub);
-      return start <= p && p < start + sub->size()
-        ? sub   // `p' is part of the allocated object.
-        : hdr;  // `p' is part of the MallocNode.
     }
+    auto const sub = reinterpret_cast<Header*>(*big + 1);
+    return p >= sub ? sub : hdr;
   }
   return nullptr;
 }

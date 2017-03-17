@@ -182,6 +182,10 @@ public:
   virtual void getHeaders(HeaderMap &headers) = 0;
   virtual void getTransportParams(HeaderMap &serverParams) {};
 
+  /**
+   * Get a description of the type of transport.
+   */
+  virtual String describe() const = 0;
 
   /**
    * Get/set response headers.

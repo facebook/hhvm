@@ -280,6 +280,35 @@ let scan_decimal_or_float lexer =
   | 'e' | 'E' -> (* 123e *) scan_exponent lexer
   | _ -> (* 123 *) (lexer, TokenKind.DecimalLiteral)
 
+
+let scan_execution_string_literal lexer =
+  (* TODO: PHP supports literals of the form `command` where the command
+  is then executed as a shell command.  Hack does not support this.
+  We should give an error if this feature is used in Hack, but we should lex
+  it anyways to give a good error message.
+
+  TODO: Can execution strings have embedded expressions like double-quoted
+  strings?
+
+  TODO: Are there any escape sequences in execution strings?
+
+  TODO: Are there any illegal characters in execution strings?
+  *)
+
+  let rec aux lexer =
+    let ch = peek_char lexer 0 in
+    match ch with
+    | '\000' ->
+      if at_end lexer then
+        let lexer = with_error lexer SyntaxError.error0012 in
+        (lexer, TokenKind.ExecutionString)
+      else
+        let lexer = with_error lexer SyntaxError.error0006 in
+        aux (advance lexer 1)
+    | '`' -> (advance lexer 1, TokenKind.ExecutionString)
+    | _ -> aux (advance lexer 1) in
+  aux (advance lexer 1)
+
 let scan_single_quote_string_literal lexer =
   (* TODO: What about newlines embedded? *)
   (* SPEC:
@@ -505,13 +534,20 @@ let scan_string_literal_in_progress lexer name =
       let lexer = skip_uninteresting_double_quote_string_characters lexer in
       (lexer, TokenKind.StringLiteralBody)
     | ('\\', '{') ->
-      (* Bizarrely, even though { is meaningful inside a
-      double-quoted string literal, it cannot be escaped with a
-      backslash. Rather, the backslash is a normal character and the { is
-      potentially special. *)
-      (* TODO: This seems deeply wrong. Consider fixing that. *)
-      (* Eat the backslash. *)
-      let lexer = advance lexer 1 in
+      (* The rules for escaping open braces in Hack are bizarre. Suppose we have
+      $x = 123;
+      $y = 456;
+      $z = "\{$x,$y\}";
+      What is the value of $z?  Naively you would think that the backslash
+      escapes the braces, and the variables are embedded, so {123,456}. But
+      that's not what happens. Yes, the backslash makes the brace no longer
+      the opening brace of an expression. But the backslash is still part
+      of the string!  This is the string \{123,456\}.
+
+      TODO: We might want to fix this because this is very strange. *)
+      (* Eat the backslash and the brace. *)
+
+      let lexer = advance lexer 2 in
       (lexer, TokenKind.StringLiteralBody)
     | ('\\', _) ->
       (* TODO: A backslash followed by something other than an escape sequence
@@ -709,9 +745,7 @@ let scan_xhp_token lexer =
   | ('}', _) -> (advance lexer 1, TokenKind.RightBrace)
   | ('=', _) -> (advance lexer 1, TokenKind.Equal)
   | ('<', '/') -> (advance lexer 2, TokenKind.LessThanSlash)
-  | ('<', _) ->
-    if is_name_nondigit ch1 then scan_xhp_element_name (advance lexer 1)
-    else (advance lexer 1, TokenKind.LessThan)
+  | ('<', _) -> (advance lexer 1, TokenKind.LessThan)
   | ('"', _) -> scan_xhp_string_literal lexer
   | ('/', '>') -> (advance lexer 2, TokenKind.SlashGreaterThan)
   | ('>', _) -> (advance lexer 1, TokenKind.GreaterThan)
@@ -773,10 +807,48 @@ let scan_xhp_body lexer =
   | ('}', _, _, _) -> (advance lexer 1, TokenKind.RightBrace)
   | ('<', '!', '-', '-') -> (scan_xhp_comment lexer, TokenKind.XHPComment)
   | ('<', '/', _, _) -> (advance lexer 2, TokenKind.LessThanSlash)
-  | ('<', _, _, _) ->
-    if is_name_nondigit ch1 then scan_xhp_element_name (advance lexer 1)
-    else (advance lexer 1, TokenKind.LessThan)
+  | ('<', _, _, _) -> (advance lexer 1, TokenKind.LessThan)
   | _ -> ((aux lexer), TokenKind.XHPBody)
+
+let scan_dollar_token lexer =
+  (*
+    We have a problem here.  We wish to be able to lexically analyze both
+    PHP and Hack, but the introduction of $$ to Hack makes them incompatible.
+    "$$x" and "$$ $x" are legal in PHP, but illegal in Hack.
+    The rule in PHP seems to be that $ is a prefix operator, it is a token,
+    it can be followed by trivia, but the next token has to be another $
+    operator, a variable $x, or a {.
+
+    Here's a reasonable compromise.  (TODO: Review this decision.)
+
+    $$x lexes as $ $x
+    $$$x lexes as $ $ $x
+    and so on.
+
+    $$ followed by anything other than a name or a $ lexes as $$.
+
+    This means that lexing a PHP program which contains "$$ $x" is different
+    will fail at parse time, but I'm willing to live with that.
+
+    This means that lexing a Hack program which contains
+    "$x |> $$instanceof Foo" produces an error as well.
+
+    If these decisions are unacceptable then we will need to make the lexer
+    be aware of whether it is lexing PHP or Hack; thus far we have not had
+    to make this distinction.
+
+     *)
+  (* We are already at $. *)
+  let ch1 = peek_char lexer 1 in
+  let ch2 = peek_char lexer 2 in
+  match ch1 with
+  | '$' ->
+    if is_name_nondigit ch2 then (advance lexer 1, TokenKind.Dollar) (* $$x *)
+    else if ch2 = '$' then (advance lexer 1, TokenKind.Dollar) (* $$$ *)
+    else (advance lexer 2, TokenKind.DollarDollar) (* $$ *)
+  | _ ->
+    if is_name_nondigit ch1 then scan_variable lexer (* $x *)
+    else (advance lexer 1, TokenKind.Dollar) (* $ *)
 
 let scan_token in_type lexer =
   let ch0 = peek_char lexer 0 in
@@ -817,10 +889,7 @@ let scan_token in_type lexer =
   | ('!', '=', '=') -> (advance lexer 3, TokenKind.ExclamationEqualEqual)
   | ('!', '=', _) -> (advance lexer 2, TokenKind.ExclamationEqual)
   | ('!', _, _) -> (advance lexer 1, TokenKind.Exclamation)
-  | ('$', '$', _) -> (advance lexer 2, TokenKind.DollarDollar)
-  | ('$', _, _) ->
-    if is_name_nondigit ch1 then scan_variable lexer
-    else (advance lexer 1, TokenKind.Dollar)
+  | ('$', _, _) -> scan_dollar_token lexer
   | ('/', '=', _) -> (advance lexer 2, TokenKind.SlashEqual)
   | ('/', _, _) -> (advance lexer 1, TokenKind.Slash)
   | ('%', '=', _) -> (advance lexer 2, TokenKind.PercentEqual)
@@ -831,6 +900,7 @@ let scan_token in_type lexer =
      TODO: This is not in the spec at present.  We should either make it an
      TODO: error, or add it to the specification. *)
   | ('<', '=', '>') -> (advance lexer 3, TokenKind.LessThanEqualGreaterThan)
+  | ('<', '>', _) -> (advance lexer 2, TokenKind.LessThanGreaterThan)
   | ('<', '=', _) -> (advance lexer 2, TokenKind.LessThanEqual)
   | ('<', '<', _) -> (advance lexer 2, TokenKind.LessThanLessThan)
   | ('<', _, _) -> (advance lexer 1, TokenKind.LessThan)
@@ -861,7 +931,6 @@ let scan_token in_type lexer =
   | ('&', _, _) -> (advance lexer 1, TokenKind.Ampersand)
   | ('?', '-', '>') -> (advance lexer 3, TokenKind.QuestionMinusGreaterThan)
   | ('?', '?', _) -> (advance lexer 2, TokenKind.QuestionQuestion)
-  | ('?', '>', _) -> (advance lexer 2, TokenKind.QuestionGreaterThan)
   | ('?', _, _) -> (advance lexer 1, TokenKind.Question)
   | (':', ':', _) -> (advance lexer 2, TokenKind.ColonColon)
   | (':', _, _) -> (advance lexer 1, TokenKind.Colon)
@@ -882,6 +951,7 @@ let scan_token in_type lexer =
   | ('7', _, _)
   | ('8', _, _)
   | ('9', _, _) -> scan_decimal_or_float lexer
+  | ('`', _, _) -> scan_execution_string_literal lexer
   | ('\'', _, _) -> scan_single_quote_string_literal lexer
   | ('"', _, _) -> scan_double_quote_string_literal_from_start lexer
   | ('\\', _, _) -> scan_qualified_name lexer
@@ -930,6 +1000,11 @@ let scan_whitespace lexer =
   let lexer = skip_whitespace lexer in
   (lexer, Trivia.make_whitespace (width lexer))
 
+let scan_hash_comment lexer =
+  let lexer = skip_to_end_of_line lexer in
+  let c = Trivia.make_single_line_comment (width lexer) in
+  (lexer, c)
+
 let scan_single_line_comment lexer =
   (* A fallthrough comment is two slashes, any amount of whitespace,
     FALLTHROUGH, and the end of the line.
@@ -950,6 +1025,26 @@ let scan_single_line_comment lexer =
       Trivia.make_unsafe w
     else
       Trivia.make_single_line_comment w in
+  (lexer, c)
+
+let rec skip_to_end_of_markup_comment lexer =
+  let ch0 = peek_char lexer 0 in
+  let ch1 = peek_char lexer 1 in
+  let ch2 = peek_char lexer 2 in
+  let ch3 = peek_char lexer 3 in
+  let ch4 = peek_char lexer 4 in
+  if ch0 = invalid && at_end lexer then
+    (* It's not an error to run off the end of one of these. *)
+    lexer
+  else if ch0 = '<' && ch1 = '?' && ch2 = 'p' && ch3 = 'h' && ch4 = 'p' then
+    advance lexer 5
+  else
+    skip_to_end_of_markup_comment (advance lexer 1)
+
+let scan_markup_comment lexer =
+  let lexer = skip_to_end_of_markup_comment lexer in
+  let w = width lexer in
+  let c = Trivia.make_markup w in
   (lexer, c)
 
 let rec skip_to_end_of_delimited_comment lexer =
@@ -993,11 +1088,30 @@ let scan_delimited_comment lexer =
   (lexer, c)
 
 let scan_php_trivia lexer =
+  (* Hack does not support PHP style embedded markup:
+  <?php
+  if (x) {
+  ?>
+  <foo>bar</foo>
+  <?php
+  } else { ... }
+
+However, ?> is never legal in Hack, so we can treat ?> ... any text ... <?php
+as a comment, and then give an error saying that this feature is not supported
+in Hack.
+
+TODO: Give an error if this appears in a Hack program.
+*)
   let lexer = start_new_lexeme lexer in
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
   match (ch0, ch1) with
-  | ('#', _)
+  | ('?', '>' ) ->
+    let (lexer, c) = scan_markup_comment lexer in
+    (lexer, Some c)
+  | ('#', _) ->
+    let (lexer, c) = scan_hash_comment lexer in
+    (lexer, Some c)
   | ('/', '/') ->
     let (lexer, c) = scan_single_line_comment lexer in
     (lexer, Some c)
@@ -1072,14 +1186,15 @@ let is_next_xhp_class_name lexer =
   is_xhp_class_name lexer
 
 let as_case_insensitive_keyword text =
-  (* Some keywords are case-insensitive in Hack. *)
+  (* Some keywords are case-insensitive in Hack or PHP. *)
   (* TODO: Consider making non-lowercase versions of these keywords errors
      in strict mode. *)
-  (* TODO: Should these be case-insensitive only when we are parsing the
-     interior of an expression? *)
+  (* TODO: Consider making these illegal, period, and code-modding away all
+  non-lower versions in our codebase. *)
   let lower = String.lowercase text in
   match lower with
-  | "eval" | "isset" | "unset" | "empty"
+  | "eval" | "isset" | "unset" | "empty" | "const"
+  | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
   | "true" | "false" | "null" | "array" -> lower
   | _ -> text
 
@@ -1184,21 +1299,16 @@ let next_token_as_name lexer =
 let next_token_in_type lexer =
   scan_next_token_as_keyword scan_token_inside_type lexer
 
-let next_xhp_element_token lexer =
+let next_xhp_element_token ~no_trailing lexer =
   (* XHP elements have whitespace, newlines and Hack comments. *)
   let tokenizer lexer =
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia scan_xhp_token true lexer in
-    (* We do not scan trivia after a > or />. If that is the beginning of
+    (* We do not scan trivia after an XHPOpen's >. If that is the beginning of
        an XHP body then we want any whitespace or newlines to be leading trivia
-       of the body token.
-       TODO: If we are at the outermost > or /> in an XHP expression then the
-       trailing trivia *should* be associated with the token. But we don't know
-       at lex time that we're in the outermost XHP block. We would have to
-       maintain that state in the parser and pass it in to the lexer. *)
+       of the body token. *)
     match kind with
-    | TokenKind.GreaterThan
-    | TokenKind.SlashGreaterThan ->
+    | TokenKind.GreaterThan when no_trailing ->
       (lexer, Token.make kind w leading [])
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in
@@ -1216,7 +1326,16 @@ let next_xhp_body_token lexer =
     let lexer = start_new_lexeme lexer in
     let (lexer, kind) = scan_xhp_body lexer in
     let w = width lexer in
-    let (lexer, trailing) = scan_trailing_xhp_trivia lexer in
+    let (lexer, trailing) =
+      (* Trivia (leading and trailing) is semantically
+         significant for XHPBody tokens. When we find elements or
+         braced expressions inside the body, the trivia should be
+         seen as leading the next token, but we should certainly
+         keep it trailing if this is an XHPBody token. *)
+      if kind = TokenKind.XHPBody
+      then scan_trailing_xhp_trivia lexer
+      else (lexer, [])
+    in
     (lexer, Token.make kind w leading trailing) in
   scan_assert_progress scanner lexer
 

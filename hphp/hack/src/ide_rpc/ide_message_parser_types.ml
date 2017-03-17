@@ -11,4 +11,5 @@
 (**
  * Main return type of the parser - parsed message, or an error
  *)
-type result_t = Ide_message.request Ide_rpc_protocol_parser_types.return_t
+type result_t =
+  Ide_message.client_request Ide_rpc_protocol_parser_types.return_t

@@ -22,6 +22,7 @@
 
 #include "hphp/util/match.h"
 #include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/interp-internal.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -68,6 +69,21 @@ std::string show(const Iter& iter) {
 
 //////////////////////////////////////////////////////////////////////
 
+CollectedInfo::CollectedInfo(const Index& index,
+                             Context ctx,
+                             ClassAnalysis* cls,
+                             PublicSPropIndexer* publicStatics,
+                             bool trackConstantArrays,
+                             const FuncAnalysis* fa)
+    : props{index, ctx, cls}
+    , publicStatics{publicStatics}
+    , trackConstantArrays{trackConstantArrays}
+{
+  if (fa) localStaticTypes = fa->localStaticTypes;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool operator==(const ActRec& a, const ActRec& b) {
   auto const fsame =
     a.func.hasValue() != b.func.hasValue() ? false :
@@ -84,6 +100,7 @@ bool operator==(const State& a, const State& b) {
   return a.initialized == b.initialized &&
     a.thisAvailable == b.thisAvailable &&
     a.locals == b.locals &&
+    a.clsRefSlots == b.clsRefSlots &&
     a.stack == b.stack &&
     a.fpiStack == b.fpiStack;
 }
@@ -114,6 +131,7 @@ State without_stacks(const State& src) {
   }
 
   ret.locals        = src.locals;
+  ret.clsRefSlots   = src.clsRefSlots;
   ret.iters         = src.iters;
   return ret;
 }
@@ -166,7 +184,7 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 
   assert(types.size() == current.size());
   for (auto i = uint32_t{0}; i < current.size(); ++i) {
-    current[i] = union_of(std::move(current[i]), std::move(types[i]));
+    current[i] |= std::move(types[i]);
   }
 }
 
@@ -212,6 +230,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(src.initialized);
   assert(dst.locals.size() == src.locals.size());
   assert(dst.iters.size() == src.iters.size());
+  assert(dst.clsRefSlots.size() == src.clsRefSlots.size());
   assert(dst.stack.size() == src.stack.size());
   assert(dst.fpiStack.size() == src.fpiStack.size());
 
@@ -256,6 +275,15 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     }
   }
 
+  for (auto i = size_t{0}; i < dst.clsRefSlots.size(); ++i) {
+    auto newT = join(dst.clsRefSlots[i], src.clsRefSlots[i]);
+    assert(newT.subtypeOf(TCls));
+    if (dst.clsRefSlots[i] != newT) {
+      changed = true;
+      dst.clsRefSlots[i] = std::move(newT);
+    }
+  }
+
   for (auto i = size_t{0}; i < dst.iters.size(); ++i) {
     if (merge_into(dst.iters[i], src.iters[i], join)) {
       changed = true;
@@ -268,18 +296,78 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     }
   }
 
-  dst.equivLocals.resize(
-    std::max(dst.equivLocals.size(), src.equivLocals.size()), NoLocalId
-  );
-  for (auto i = size_t{0}; i < dst.equivLocals.size(); ++i) {
-    auto const dstLoc = dst.equivLocals[i];
-    auto const srcLoc =
-      (i < src.equivLocals.size()) ? src.equivLocals[i] : NoLocalId;
-    auto const newLoc = (dstLoc == srcLoc) ? dstLoc : NoLocalId;
-    if (newLoc != dstLoc) {
-      changed = true;
-      dst.equivLocals[i] = newLoc;
+  if (src.equivLocals.size() < dst.equivLocals.size()) {
+    for (auto i = src.equivLocals.size(); i < dst.equivLocals.size(); ++i) {
+      if (dst.equivLocals[i] != NoLocalId) killLocEquiv(dst, i);
     }
+    dst.equivLocals.resize(src.equivLocals.size());
+  }
+
+  auto processed = uint64_t{0};
+  for (auto i = LocalId{0}; i < dst.equivLocals.size(); ++i) {
+    if (i < sizeof(uint64_t) * CHAR_BIT && (processed >> i) & 1) continue;
+    auto dstLoc = dst.equivLocals[i];
+    if (dstLoc == NoLocalId) continue;
+    auto srcLoc = i < src.equivLocals.size() ? src.equivLocals[i] : NoLocalId;
+    if (srcLoc != dstLoc) {
+      if (srcLoc != NoLocalId &&
+          dst.equivLocals.size() < sizeof(uint64_t) * CHAR_BIT) {
+
+        auto computeSet = [&] (const State& s, LocalId start) {
+          auto result = uint64_t{0};
+          auto l = start;
+          do {
+            result |= uint64_t{1} << l;
+            l = s.equivLocals[l];
+          } while (l != start);
+          return result;
+        };
+
+        auto dstSet = computeSet(dst, i);
+        auto srcSet = computeSet(src, i);
+
+        auto newSet = dstSet & srcSet;
+        if (!(newSet & (newSet - 1))) {
+          newSet = 0;
+        }
+        auto killSet = dstSet - newSet;
+        if (killSet) {
+          auto l = i;
+          do {
+            processed |= uint64_t{1} << l;
+            auto const next = dst.equivLocals[l];
+            if ((killSet >> l) & 1) {
+              killLocEquiv(dst, l);
+            }
+            l = next;
+          } while (l != i && l != NoLocalId);
+          assert(l == i || killSet == dstSet);
+          changed = true;
+        }
+      } else {
+        killLocEquiv(dst, dstLoc);
+        changed = true;
+      }
+    }
+  }
+
+  auto const sz = std::max(dst.localStaticBindings.size(),
+                           src.localStaticBindings.size());
+  if (sz) {
+    CompactVector<LocalStaticBinding> lsb;
+    for (auto i = size_t{0}; i < sz; i++) {
+      auto b1 = i < dst.localStaticBindings.size() ?
+        dst.localStaticBindings[i] : LocalStaticBinding::None;
+      auto b2 = i < src.localStaticBindings.size() ?
+        src.localStaticBindings[i] : LocalStaticBinding::None;
+
+      if (b1 != LocalStaticBinding::None || b2 != LocalStaticBinding::None) {
+        lsb.resize(i + 1);
+        lsb[i] = b1 == b2 ? b1 : LocalStaticBinding::Maybe;
+        changed |= lsb[i] != b1;
+      }
+    }
+    dst.localStaticBindings = std::move(lsb);
   }
 
   return changed;
@@ -304,6 +392,7 @@ static std::string fpiKindStr(FPIKind k) {
   case FPIKind::ObjMeth:     return "objm";
   case FPIKind::ClsMeth:     return "clsm";
   case FPIKind::ObjInvoke:   return "invoke";
+  case FPIKind::Builtin:     return "builtin";
   }
   not_reached();
 }
@@ -321,7 +410,8 @@ std::string show(const ActRec& a) {
   );
 }
 
-std::string state_string(const php::Func& f, const State& st) {
+std::string state_string(const php::Func& f, const State& st,
+                         const CollectedInfo& collect) {
   std::string ret;
 
   if (!st.initialized) {
@@ -335,14 +425,34 @@ std::string state_string(const php::Func& f, const State& st) {
   }
 
   for (auto i = size_t{0}; i < st.locals.size(); ++i) {
-    folly::format(&ret, "{: <8} :: {}\n",
+    auto staticLocal = [&] () -> std::string {
+      if (i >= st.localStaticBindings.size() ||
+          st.localStaticBindings[i] == LocalStaticBinding::None) {
+        return "";
+      }
+
+      if (i >= collect.localStaticTypes.size()) {
+        return "(!!! unknown static !!!)";
+      }
+
+      return folly::sformat(
+        "({}static: {})",
+        st.localStaticBindings[i] == LocalStaticBinding::Maybe ? "maybe-" : "",
+        show(collect.localStaticTypes[i]));
+    };
+    folly::format(&ret, "{: <8} :: {} {}\n",
                   local_string(f, i),
-                  show(st.locals[i])
-    );
+                  show(st.locals[i]),
+                  staticLocal());
   }
 
   for (auto i = size_t{0}; i < st.iters.size(); ++i) {
     folly::format(&ret, "iter {: <2}   :: {}\n", i, show(st.iters[i]));
+  }
+
+  for (auto i = size_t{0}; i < st.clsRefSlots.size(); ++i) {
+    folly::format(&ret, "class-ref slot {: <2}   :: {}\n",
+                  i, show(st.clsRefSlots[i]));
   }
 
   for (auto i = size_t{0}; i < st.stack.size(); ++i) {

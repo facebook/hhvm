@@ -28,9 +28,7 @@ module WithStatementAndDeclAndTypeParser
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
-  (* This method is unused right now; in the event that we need a type
-  parser for instanceof, cast operator, etc, in the future, it's here. *)
-  let _parse_type_specifier parser =
+  let parse_type_specifier parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
     let lexer = TypeParser.lexer type_parser in
@@ -108,6 +106,8 @@ module WithStatementAndDeclAndTypeParser
   and parse_term parser =
     let (parser1, token) = next_xhp_class_name_or_other parser in
     match (Token.kind token) with
+    | ExecutionString -> (* TODO: Make these an error in Hack *)
+       (parser1, make_literal_expression (make_token token))
     | DecimalLiteral
     | OctalLiteral
     | HexadecimalLiteral
@@ -132,9 +132,10 @@ module WithStatementAndDeclAndTypeParser
     | QualifiedName -> parse_name_or_collection_literal_expression parser1 token
     | Self
     | Parent
-    | Static -> parse_scope_resolution_expression parser1 (make_token token)
+    | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
+    | Dollar
     | Exclamation
     | PlusPlus
     | MinusMinus
@@ -180,12 +181,17 @@ module WithStatementAndDeclAndTypeParser
       * Should this be in the specification?
       * Empty is case-insensitive; should use of non-lowercase be an error?
     *)
-    let (parser, keyword) = assert_token parser Empty in
-    let (parser, left) = expect_left_paren parser in
-    let (parser, arg) = parse_expression_with_reset_precedence parser in
-    let (parser, right) = expect_right_paren parser in
-    let result = make_empty_expression keyword left arg right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "empty" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+    let (parser1, keyword) = assert_token parser Empty in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left) = assert_token parser1 LeftParen in
+      let (parser, arg) = parse_expression_with_reset_precedence parser in
+      let (parser, right) = expect_right_paren parser in
+      let result = make_empty_expression keyword left arg right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_eval_expression parser =
     (* TODO: This is a PHP-ism. Open questions:
@@ -196,12 +202,17 @@ module WithStatementAndDeclAndTypeParser
       * Should this be in the specification?
       * Eval is case-insensitive. Should use of non-lowercase be an error?
     *)
-    let (parser, keyword) = assert_token parser Eval in
-    let (parser, left) = expect_left_paren parser in
-    let (parser, arg) = parse_expression_with_reset_precedence parser in
-    let (parser, right) = expect_right_paren parser in
-    let result = make_eval_expression keyword left arg right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "eval" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+    let (parser1, keyword) = assert_token parser Eval in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left) = assert_token parser1 LeftParen in
+      let (parser, arg) = parse_expression_with_reset_precedence parser in
+      let (parser, right) = expect_right_paren parser in
+      let result = make_eval_expression keyword left arg right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_isset_expression parser =
     (* TODO: This is a PHP-ism. Open questions:
@@ -213,10 +224,16 @@ module WithStatementAndDeclAndTypeParser
         that? if so, should we give the error in the parser or a later pass?
       * Isset is case-insensitive. Should use of non-lowercase be an error?
     *)
-    let (parser, keyword) = assert_token parser Isset in
-    let (parser, left, args, right) = parse_expression_list_opt parser in
-    let result = make_isset_expression keyword left args right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "isset" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+
+    let (parser1, keyword) = assert_token parser Isset in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left, args, right) = parse_expression_list_opt parser1 in
+      let result = make_isset_expression keyword left args right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_define_expression parser =
     (* TODO: This is a PHP-ism. Open questions:
@@ -230,10 +247,15 @@ module WithStatementAndDeclAndTypeParser
         that? if so, should we give the error in the parser or a later pass?
       * is define case-insensitive?
     *)
-    let (parser, keyword) = assert_token parser Define in
-    let (parser, left, args, right) = parse_expression_list_opt parser in
-    let result = make_define_expression keyword left args right in
-    (parser, result)
+    (* TODO: The original Hack and HHVM parsers accept "define" as an
+    identifier, so we do too; consider whether it should be reserved. *)
+    let (parser1, keyword) = assert_token parser Define in
+    if peek_token_kind parser1 = LeftParen then
+      let (parser, left, args, right) = parse_expression_list_opt parser1 in
+      let result = make_define_expression keyword left args right in
+      (parser, result)
+    else
+      parse_as_name_or_error parser
 
   and parse_double_quoted_string parser head =
     parse_string_literal parser head ""
@@ -273,7 +295,7 @@ module WithStatementAndDeclAndTypeParser
         (parser1, make_token token)
       else
         (with_error parser SyntaxError.error1006, (make_missing())) in
-    let node = make_braced_expression left_brace expr right_brace in
+    let node = make_embedded_braced_expression left_brace expr right_brace in
     (parser, node)
 
   and parse_string_literal parser head name =
@@ -389,24 +411,27 @@ module WithStatementAndDeclAndTypeParser
       let (parser3, token3) = next_token_in_string parser2 name in
       match (Token.kind token1, Token.kind token2, Token.kind token3) with
       | (MinusGreaterThan, Name, _) ->
-        let expr = make_member_selection_expression var_expr
+        let expr = make_embedded_member_selection_expression var_expr
           (make_token token1) (make_token token2) in
         (parser2, expr)
       | (LeftBracket, Name, RightBracket) ->
-        let expr = make_subscript_expression var_expr (make_token token1)
+        let expr = make_embedded_subscript_expression var_expr
+          (make_token token1)
           (make_qualified_name_expression (make_token token2))
           (make_token token3) in
         (parser3, expr)
       | (LeftBracket, Variable, RightBracket) ->
-        let expr = make_subscript_expression var_expr (make_token token1)
-          (make_variable_expression (make_token token2)) (make_token token3) in
+        let expr = make_embedded_subscript_expression var_expr
+          (make_token token1) (make_variable_expression (make_token token2))
+          (make_token token3) in
         (parser3, expr)
       | (LeftBracket, DecimalLiteral, RightBracket)
       | (LeftBracket, OctalLiteral, RightBracket)
       | (LeftBracket, HexadecimalLiteral, RightBracket)
       | (LeftBracket, BinaryLiteral, RightBracket) ->
-        let expr = make_subscript_expression var_expr (make_token token1)
-          (make_literal_expression (make_token token2)) (make_token token3) in
+        let expr = make_embedded_subscript_expression var_expr
+          (make_token token1) (make_literal_expression (make_token token2))
+          (make_token token3) in
         (parser3, expr)
       | _ -> (parser, var_expr) in
 
@@ -540,6 +565,7 @@ module WithStatementAndDeclAndTypeParser
     else match peek_token_kind parser with
     (* Binary operators *)
     (* TODO Add an error if PHP and / or / xor are used in Hack.  *)
+    (* TODO Add an error if PHP style <> is used in Hack. *)
     | And
     | Or
     | Xor
@@ -569,6 +595,7 @@ module WithStatementAndDeclAndTypeParser
     | AmpersandAmpersand
     | BarBar
     | ExclamationEqual
+    | LessThanGreaterThan
     | LessThan
     | ExclamationEqualEqual
     | LessThanEqual
@@ -585,9 +612,12 @@ module WithStatementAndDeclAndTypeParser
     | Instanceof ->
       parse_instanceof_expression parser term
     | QuestionMinusGreaterThan
-    | MinusGreaterThan -> parse_member_selection_expression parser term
+    | MinusGreaterThan ->
+      let (parser, result) = parse_member_selection_expression parser term in
+      parse_remaining_expression parser result
     | ColonColon ->
-      parse_scope_resolution_expression parser term
+      let (parser, result) = parse_scope_resolution_expression parser term in
+      parse_remaining_expression parser result
     | PlusPlus
     | MinusMinus -> parse_postfix_unary parser term
     | LeftParen -> parse_function_call parser term
@@ -595,7 +625,8 @@ module WithStatementAndDeclAndTypeParser
     | LeftBrace -> parse_subscript parser term
     | Question ->
       let (parser, token) = assert_token parser Question in
-      parse_conditional_expression parser term token
+      let (parser, result) = parse_conditional_expression parser term token in
+      parse_remaining_expression parser result
     | _ -> (parser, term)
 
   and parse_member_selection_expression parser term =
@@ -609,17 +640,26 @@ module WithStatementAndDeclAndTypeParser
       postfix-expression  ?->  name
       postfix-expression  ?->  variable-name
       postfix-expression  ?->  xhp-class-name (DRAFT XHP SPEC)
+
+    PHP allows $a->{$b}; to be more compatible with PHP, and give
+    good errors, we allow that here as well.
+
+    TODO: Produce an error if the braced syntax is used in Hack.
+
     *)
     let (parser, token) = next_token parser in
     let op = make_token token in
     (* TODO: We are putting the name / variable into the tree as a token
     leaf, rather than as a name or variable expression. Is that right? *)
-    let (parser, name) = expect_xhp_class_name_or_name_or_variable parser in
+    let (parser, name) = if peek_token_kind parser = LeftBrace then
+      parse_braced_expression parser
+    else
+      expect_xhp_class_name_or_name_or_variable parser in
     let result = if (Token.kind token) = MinusGreaterThan then
       make_member_selection_expression term op name
     else
       make_safe_member_selection_expression term op name in
-    parse_remaining_expression parser result
+    (parser, result)
 
   and parse_subscript parser term =
     (* SPEC
@@ -651,6 +691,18 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_expression_list_opt parser =
     (* SPEC
+
+      TODO: This business of allowing ... does not appear in the spec. Add it.
+
+      ERROR RECOVERY: A ... expression can only appear at the end of a
+      formal parameter list. However, we parse it everywhere without error,
+      and detect the error in a later pass.
+
+      Note that it *is* legal for a ... expression be followed by a trailing
+      comma, even though it is not legal for such in a formal parameter list.
+
+      TODO: Can *any* expression appear after the ... ?
+
       argument-expression-list:
         argument-expressions   ,-opt
       argument-expressions:
@@ -684,6 +736,10 @@ module WithStatementAndDeclAndTypeParser
           scope-resolution-expression
           subscript-expression
           variable-name
+
+TODO: Update the spec to allow qualified-name < type arguments >
+TODO: This will need to be fixed to allow situations where the qualified name
+      is also a non-reserved token.
     *)
     let (parser1, token) = next_token parser in
     let kind = peek_token_kind parser1 in
@@ -692,6 +748,11 @@ module WithStatementAndDeclAndTypeParser
     | Self
     | Static when kind = LeftParen ->
       (parser1, make_token token)
+    | Name
+    | QualifiedName when kind = LeftParen || kind = LessThan ->
+      (* We want to parse new C() and new C<int>() as types, but
+      new C::$x() as an expression. *)
+      parse_type_specifier parser
     | _ ->
         parse_expression_with_operator_precedence parser Operator.NewOperator
         (* TODO: We need to verify in a later pass that the expression is a
@@ -863,6 +924,7 @@ module WithStatementAndDeclAndTypeParser
     | Var
     | Vec
     | Void
+    | Where
     | While
     | Yield -> true
     (* Names that imply cast *)
@@ -877,6 +939,7 @@ module WithStatementAndDeclAndTypeParser
     | LeftParen
     | Minus
     | MinusMinus
+    | Dollar
     | Plus
     | PlusPlus
     | Tilde -> true
@@ -888,6 +951,7 @@ module WithStatementAndDeclAndTypeParser
     | DoubleQuotedStringLiteralHead
     | StringLiteralBody
     | DoubleQuotedStringLiteralTail
+    | ExecutionString
     | FloatingLiteral
     | HeredocStringLiteral
     | HeredocStringLiteralHead
@@ -916,7 +980,6 @@ module WithStatementAndDeclAndTypeParser
     | Colon
     | ColonColon
     | Comma
-    | Dollar
     | Dot
     | DotEqual
     | DotDotDot
@@ -926,6 +989,7 @@ module WithStatementAndDeclAndTypeParser
     | EqualEqualGreaterThan
     | EqualGreaterThan
     | ExclamationEqual
+    | LessThanGreaterThan
     | ExclamationEqualEqual
     | GreaterThan
     | GreaterThanEqual
@@ -935,7 +999,6 @@ module WithStatementAndDeclAndTypeParser
     | MinusEqual
     | MinusGreaterThan
     | Question
-    | QuestionGreaterThan
     | QuestionMinusGreaterThan
     | QuestionQuestion
     | RightBrace
@@ -1020,9 +1083,8 @@ module WithStatementAndDeclAndTypeParser
     let (parser, cast_type) = next_token parser in
     let cast_type = make_token cast_type in
     let (parser, right) = assert_token parser RightParen in
-    (* TODO: Do we need to set the precedence of the expression
-    parser here? *)
-    let (parser, operand) = parse_expression parser in
+    let (parser, operand) = parse_expression_with_operator_precedence
+      parser Operator.CastOperator in
     let result = make_cast_expression left cast_type right operand in
     (parser, result)
 
@@ -1323,7 +1385,10 @@ module WithStatementAndDeclAndTypeParser
     else
       with_reset_precedence parser parse_expression in
     let (parser, colon) = expect_colon parser in
-    let (parser, alternative) = with_reset_precedence parser parse_expression in
+    let (parser, term) = parse_term parser in
+    let precedence = Operator.precedence Operator.ConditionalQuestionOperator in
+    let (parser, alternative) = parse_remaining_binary_expression_helper
+      parser term precedence in
     let result = make_conditional_expression
       test question consequence colon alternative in
     (parser, result)
@@ -1372,10 +1437,8 @@ module WithStatementAndDeclAndTypeParser
       list-intrinsic:
         list  (  expression-list-opt  )
       expression-list:
-        expressions  ,-opt
-      expressions:
-        expression
-        expressions , expression
+        expression-opt
+        expression-list , expression-opt
 
       See https://github.com/hhvm/hack-langspec/issues/82
 
@@ -1393,7 +1456,7 @@ module WithStatementAndDeclAndTypeParser
       *)
     let (parser, keyword) = assert_token parser List in
     let (parser, left, items, right) =
-      parse_parenthesized_comma_list_opt_allow_trailing
+      parse_parenthesized_comma_list_opt_items_opt
         parser parse_expression_with_reset_precedence in
     let result = make_list_expression keyword left items right in
     (parser, result)
@@ -1563,13 +1626,15 @@ module WithStatementAndDeclAndTypeParser
       (parser, result)
 
   and parse_anon_or_lambda_or_awaitable parser =
+    (* TODO: The original Hack parser accepts "async" as an identifier, and
+    so we do too. We might consider making it reserved. *)
     let (parser1, _) = assert_token parser Async in
-    if peek_token_kind parser1 = Function then
-      parse_anon parser
-    else if peek_token_kind parser1 = LeftBrace then
-      parse_async_block parser
-    else
-      parse_lambda_expression parser
+    match peek_token_kind parser1 with
+    | Function -> parse_anon parser
+    | LeftBrace -> parse_async_block parser
+    | Variable
+    | LeftParen -> parse_lambda_expression parser
+    | _ -> parse_as_name_or_error parser
 
   and parse_async_block parser =
     (*
@@ -1710,7 +1775,13 @@ module WithStatementAndDeclAndTypeParser
     | LeftBrace ->
       let (parser, expr) = parse_xhp_body_braced_expression parser in
       (parser, Some expr)
-    | XHPElementName ->
+    | RightBrace ->
+      (* If we find a free-floating right-brace in the middle of an XHP body
+      that's just fine. It's part of the text. However, it is also likely
+      to be a mis-edit, so we'll keep it as a right-brace token so that
+      tooling can flag it as suspicious. *)
+      (parser1, Some (make_token token))
+    | LessThan ->
       let (parser, expr) = parse_possible_xhp_expression parser in
       (parser, Some expr)
     | _ -> (parser, None)
@@ -1743,17 +1814,17 @@ module WithStatementAndDeclAndTypeParser
       (parser, make_xhp_close
         (make_token less_than_slash) (make_missing()) (make_missing()))
 
-  and parse_xhp_expression parser name name_text =
+  and parse_xhp_expression parser left_angle name name_text =
     let (parser, attrs) = parse_list_until_none parser parse_xhp_attribute in
-    let (parser1, token, _) = next_xhp_element_token parser in
+    let (parser1, token, _) = next_xhp_element_token ~no_trailing:true parser in
     match (Token.kind token) with
     | SlashGreaterThan ->
-      let xhp_open = make_xhp_open name attrs (make_token token) in
+      let xhp_open = make_xhp_open left_angle name attrs (make_token token) in
       let xhp = make_xhp_expression
         xhp_open (make_missing()) (make_missing()) in
       (parser1, xhp)
     | GreaterThan ->
-      let xhp_open = make_xhp_open name attrs (make_token token) in
+      let xhp_open = make_xhp_open left_angle name attrs (make_token token) in
       let (parser, xhp_body) =
         parse_list_until_none parser1 parse_xhp_body_element in
       let (parser, xhp_close) = parse_xhp_close parser name_text in
@@ -1762,7 +1833,7 @@ module WithStatementAndDeclAndTypeParser
     | _ ->
       (* ERROR RECOVERY: Assume the unexpected token belongs to whatever
          comes next. *)
-      let xhp_open = make_xhp_open name attrs (make_missing()) in
+      let xhp_open = make_xhp_open left_angle name attrs (make_missing()) in
       let xhp = make_xhp_expression
         xhp_open (make_missing()) (make_missing()) in
       let parser = with_error parser SyntaxError.error1013 in
@@ -1770,9 +1841,10 @@ module WithStatementAndDeclAndTypeParser
 
   and parse_possible_xhp_expression parser =
     (* We got a < token where an expression was expected. *)
-    let (parser, token, text) = next_xhp_element_token parser in
-    if (Token.kind token) = XHPElementName then
-      parse_xhp_expression parser (make_token token) text
+    let (parser, less_than) = assert_token parser LessThan in
+    let (parser1, name, text) = next_xhp_element_token parser in
+    if (Token.kind name) = XHPElementName then
+      parse_xhp_expression parser1 less_than (make_token name) text
     else
       (* ERROR RECOVERY
       Hard to say what to do here. We are expecting an expression;
@@ -1780,7 +1852,19 @@ module WithStatementAndDeclAndTypeParser
       expression. Or we could assume the the left side of an inequality is
       missing, give a missing node for the left side, and parse the
       remainder as the right side. We'll go for the former for now. *)
-      (with_error parser SyntaxError.error1015, (make_token token))
+      (with_error parser SyntaxError.error1015, less_than)
+
+  and parse_scope_resolution_or_name parser =
+    (* parent, self and static are legal identifiers.  If the next
+    thing that follows is a scope resolution operator, parse them as
+    ordinary tokens, and then we'll pick them up as the operand to the
+    scope resolution operator when we call parse_remaining_expression.
+    Otherwise, parse them as ordinary names.  *)
+    let (parser1, qualifier) = next_token parser in
+    if peek_token_kind parser1 = ColonColon then
+      (parser1, (make_token qualifier))
+    else
+      parse_as_name_or_error parser
 
   and parse_scope_resolution_expression parser qualifier =
     (* SPEC
@@ -1805,5 +1889,5 @@ module WithStatementAndDeclAndTypeParser
     let (parser, op) = expect_coloncolon parser in
     let (parser, name) = expect_name_variable_or_class parser in
     let result = make_scope_resolution_expression qualifier op name in
-    parse_remaining_expression parser result
+    (parser, result)
 end

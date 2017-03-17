@@ -153,7 +153,7 @@ let autocomplete_hint = autocomplete_token Autocomplete.Actype None
 
 let autocomplete_new cid env _ =
   match cid with
-  | Nast.CI sid -> autocomplete_token Autocomplete.Acnew (Some env) sid
+  | Nast.CI (sid, _) -> autocomplete_token Autocomplete.Acnew (Some env) sid
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =

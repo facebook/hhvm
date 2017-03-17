@@ -49,8 +49,7 @@ struct EHEntEmitter {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  std::vector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
 
   template<class SerDe> void serde(SerDe& sd);
 };
@@ -146,12 +145,14 @@ struct FuncEmitter {
   Id numLocals() const;
   Id numIterators() const;
   Id numLiveIterators() const;
+  Id numClsRefSlots() const;
 
   /*
    * Set things.
    */
   void setNumIterators(Id numIterators);
   void setNumLiveIterators(Id id);
+  void setNumClsRefSlots(Id num);
 
   /*
    * Check existence of, look up, and allocate named locals.
@@ -316,6 +317,7 @@ private:
   int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
+  Id m_numClsRefSlots;
   bool m_ehTabSorted;
 };
 

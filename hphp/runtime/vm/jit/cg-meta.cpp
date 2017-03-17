@@ -79,6 +79,14 @@ void CGMeta::process(
   clear();
 }
 
+void CGMeta::process_literals() {
+  for (auto& pair : literals) {
+    if (s_literals.find(pair.first)) continue;
+    s_literals.insert(pair.first, pair.second);
+  }
+  literals.clear();
+}
+
 void CGMeta::process_only(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
@@ -108,11 +116,7 @@ void CGMeta::process_only(
   }
   jmpTransIDs.clear();
 
-  for (auto& pair : literals) {
-    if (s_literals.find(pair.first)) continue;
-    s_literals.insert(pair.first, pair.second);
-  }
-  literals.clear();
+  process_literals();
 
   if (inProgressTailBranches) {
     inProgressTailJumps.swap(*inProgressTailBranches);

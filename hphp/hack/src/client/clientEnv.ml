@@ -43,6 +43,7 @@ type client_mode =
 | MODE_GET_DEFINITION_BY_ID of string
 | MODE_TRACE_AI of string
 | MODE_REMOVE_DEAD_FIXMES of int list
+| MODE_IGNORE_FIXMES of string list
 | MODE_IDE_FIND_REFS of string
 | MODE_IDE_HIGHLIGHT_REFS of string
 | MODE_AI_QUERY of string
@@ -58,6 +59,7 @@ type client_check_env = {
   retries: int;
   timeout: float option;
   autostart: bool;
+  force_dormant_start: bool;
   no_load: bool;
   ai_mode: string option;
 }
@@ -94,6 +96,7 @@ let mode_to_string = function
   | MODE_FIND_DEPENDENT_FILES _ -> "MODE_FIND_DEPENDENT_FILES"
   | MODE_TRACE_AI _ -> "MODE_TRACE_AI"
   | MODE_REMOVE_DEAD_FIXMES _ -> "MODE_REMOVE_DEAD_FIXMES"
+  | MODE_IGNORE_FIXMES _ -> "MODE_IGNORE_FIXMES"
   | MODE_IDE_FIND_REFS _ -> "MODE_IDE_FIND_REFS"
   | MODE_GET_DEFINITION_BY_ID _ -> "MODE_GET_DEFINITION_BY_ID"
   | MODE_IDE_HIGHLIGHT_REFS _ -> "MODE_IDE_HIGHLIGHT_REFS"

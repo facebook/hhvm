@@ -600,6 +600,10 @@ let rec u_program v = u_of_list_spc u_def v
              and v2 = u_of_list_spc u_shape_field v2
              in StrWords [ v1; v2 ])
     | Haccess _ -> u_todo "Haccess" (fun () -> StrEmpty)
+  and u_shape_field_optional =
+    function
+    | true -> [Str "optional"]
+    | false -> []
   and u_shape_field_name =
     function
     | SFlit v2 ->
@@ -613,13 +617,14 @@ let rec u_program v = u_of_list_spc u_def v
              and v2 = u_id v2
              and v3 = u_pstring v3
              in StrWords [ v1; v2; v3 ])
-  and u_shape_field (v2, v3) =
+  and u_shape_field { sf_optional; sf_name; sf_hint } =
     u_todo "shape_field"
       (fun () ->
-         let v1 = Str "shape_field"
-         and v2 = u_shape_field_name v2
-         and v3 = u_hint v3
-         in StrWords [ v1; v2; v3 ])
+        let word_list =
+          Str "shape_field"
+            :: u_shape_field_optional sf_optional
+            @ [u_shape_field_name sf_name; u_hint sf_hint] in
+        StrWords word_list)
   and u_stmt stmt =
     let stmtStr = match stmt with
       | Unsafe -> StrComment "UNSAFE"
@@ -733,6 +738,7 @@ let rec u_program v = u_of_list_spc u_def v
       | True
       | False
       | Id _
+      | Id_type_arguments _
       | Lvar _
       | Lvarvar _
       | Array_get _
@@ -797,6 +803,9 @@ let rec u_program v = u_of_list_spc u_def v
     | True -> Str "true"
     | False -> Str "false"
     | Id id -> u_id id
+    | Id_type_arguments (id, hintExprs) ->
+      let hintStr = StrAngles (StrCommaList (List.map ~f:u_hint hintExprs)) in
+      StrList [u_id id; hintStr]
     | Lvar lvar -> u_id lvar
     | Lvarvar (n, lvar) -> begin
       let p, var_id = lvar in

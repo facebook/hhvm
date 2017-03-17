@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/srckey.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -279,6 +280,16 @@ struct ProfData {
   ProfData(const ProfData&) = delete;
   ProfData& operator=(const ProfData&) = delete;
 
+  struct Session final {
+    Session() { requestInitProfData(); }
+    ~Session() { requestExitProfData(); }
+    Session(Session&&) = delete;
+    Session& operator=(Session&&) = delete;
+
+  private:
+    Treadmill::Session m_ts;
+  };
+
   /*
    * Allocate a new id for a translation. Depending on the kind of the
    * translation, a TransRec for it may or may not be created later by calling
@@ -433,10 +444,17 @@ struct ProfData {
   }
 
   /*
-   * The maximum FuncId among all the functions that are being profiled.
+   * This returns an upper bound for the FuncIds of all the functions that are
+   * being profiled.  A proper call to profiling(funcId) still needs to be made
+   * to check whether each funcId was indeed profiled.
    */
   FuncId maxProfilingFuncId() const {
-    return m_profilingFuncs.size() - 1;
+    auto const s = m_profilingFuncs.size();
+    // Avoid wrapping around and returning a large integer.
+    if (s == 0) return 0;
+    // Avoid returning obviously invalid FuncIds.
+    if (s >= Func::nextFuncId()) return Func::nextFuncId() - 1;
+    return s - 1;
   }
 
   /*

@@ -101,7 +101,7 @@ let make_attr_decl_method cls xhp_props =
 
   let convert_attr_use = function
     | pos, N.Happly ((_, cls), _) ->
-      make_attr_decl_call pos (N.CI (pos, cls))
+      make_attr_decl_call pos (N.CI ((pos, cls), []))
     | _ -> C.bug "xhp attr use not apply??"
   in
 
@@ -202,5 +202,5 @@ let convert_xml p (id, attrs, children) =
   let line = p, N.Int (p, string_of_int line) in
   p,
   N.New (
-    N.CI id,
+    N.CI (id, []),
     [attrs_array; children_array; filename; line], [])

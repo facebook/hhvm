@@ -187,6 +187,11 @@ size_t localTCSize();
  */
 TCA cachedLocalTCBuffer();
 
+/*
+ * Is still a pending call to retranslateAll()
+ */
+bool retranslateAllPending();
+
 }}}
 
 #endif

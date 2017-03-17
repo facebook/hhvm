@@ -9,75 +9,64 @@
 *)
 
 open Core
+open Ide_api_types
 open File_content
 
 let expect_has_content fc content =
-  let content_fc = get_content fc in
-  content = content_fc
-
-let test_create () =
-  let content = "for test\n" in
-  let fc = of_content ~content in
-  expect_has_content fc content
+  content = fc
 
 let test_basic_edit () =
   let content = "for test\n" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = {line = 1; column = 1};
       ed = {line = 1; column = 1}};
     text = "just "} in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc "just for test\n"
 
 let test_basic_edit2 () =
   let content = "for test\n" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = {line = 1; column = 2};
       ed = {line = 1; column = 4}};
     text = "ree"} in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc "free test\n"
 
 let test_multi_line_edit () =
   let content = "aaaa\ncccc\n" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = {line = 1; column = 4};
       ed = {line = 2; column = 2}};
     text = "b\nbbbb\nb"} in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc "aaab\nbbbb\nbccc\n"
 
 let test_multi_line_edit2 () =
   let content = "aaaa\ncccc\n" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = {line = 1; column = 1};
       ed = {line = 3; column = 1}};
     text = ""} in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc ""
 
 let test_special_edit () =
   let content = "\n\n\n" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = {line = 2; column = 1};
       ed = {line = 3; column = 1}};
     text = "aaa\nbbb\n"} in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc "\naaa\nbbb\n\n"
 
 let test_multiple_edits () =
   let content = "a\nc\n" in
-  let fc = of_content ~content in
   let edit1 = {
     range = Some {
       st = {line = 1; column = 2};
@@ -88,24 +77,22 @@ let test_multiple_edits () =
       st = {line = 1; column = 4};
       ed = {line = 2; column = 2}};
     text = "b\nbbbb\nb"} in
-  let edited_fc = edit_file_unsafe fc [edit1;edit2] in
+  let edited_fc = edit_file_unsafe content [edit1;edit2] in
   expect_has_content edited_fc "aaab\nbbbb\nbccc\n"
 
 let test_invalid_edit () =
   let content = "for test\n" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = {line = 1; column = 15};
       ed = {line = 2; column = 1}};
     text = "just "} in
-  match edit_file fc [edit] with
+  match edit_file content [edit] with
   | Result.Error _ -> true
   | Result.Ok _ -> false
 
 let test_empty_edit () =
   let content = "" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = { line = 1; column = 1};
@@ -113,12 +100,11 @@ let test_empty_edit () =
     };
     text = "lol";
   } in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc "lol"
 
 let test_end_of_line_edit () =
   let content = "a" in
-  let fc = of_content ~content in
   let edit = {
     range = Some {
       st = { line = 1; column = 2};
@@ -126,7 +112,7 @@ let test_end_of_line_edit () =
     };
     text = "a";
   } in
-  let edited_fc = edit_file_unsafe fc [edit] in
+  let edited_fc = edit_file_unsafe content [edit] in
   expect_has_content edited_fc "aa"
 
 let utf8 x =
@@ -150,7 +136,7 @@ let test_utf8 () =
   (* Unicode Han Character 'U+26604' *)
   let c4 = utf8 [0xF0; 0xA6; 0x98; 0x84;] in
 
-  let content = of_content ~content:(c1^c2^c3^c4) in
+  let content = c1^c2^c3^c4 in
 
   let edit = delete_nth 1 in
   let edited_content = edit_file_unsafe content [edit] in
@@ -172,13 +158,12 @@ let test_utf8 () =
 let test_large () =
   let len = 100000000 in
   let content = String.make len 'c' in
-  let fc = of_content ~content:(content ^ "c") in
+  let content_to_edit = content ^ "c" in
   let edit = delete_nth (len/2) in
-  let edited_content = edit_file_unsafe fc [edit] in
+  let edited_content = edit_file_unsafe content_to_edit [edit] in
   expect_has_content edited_content content
 
 let tests = [
-  "test_create", test_create;
   "test_basic_edit", test_basic_edit;
   "test_basic_edit2", test_basic_edit2;
   "test_multi_line_edit", test_multi_line_edit;

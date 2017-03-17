@@ -1,4 +1,4 @@
-%{
+ %{
 
 /* By default this grammar is set up to be used by HPHP's compile parser.
  * However, it can be used to make parsers for different purposes by
@@ -353,15 +353,15 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     // }
     Token parent;  parent.set(T_STRING, "parent");
     Token cls;     _p->onName(cls, parent, Parser::StringName);
-    Token fname;   fname.setText("__xhpAttributeDeclaration");
-    Token param1;  _p->onCall(param1, 0, fname, dummy, &cls);
+    Token fname2;   fname2.setText("__xhpAttributeDeclaration");
+    Token param1;  _p->onCall(param1, 0, fname2, dummy, &cls);
     Token params1; _p->onCallParam(params1, NULL, param1, false, false);
 
     for (unsigned int i = 0; i < classes.size(); i++) {
-      Token parent;  parent.set(T_STRING, classes[i]);
-      Token cls;     _p->onName(cls, parent, Parser::StringName);
-      Token fname;   fname.setText("__xhpAttributeDeclaration");
-      Token param;   _p->onCall(param, 0, fname, dummy, &cls);
+      Token parent2;  parent2.set(T_STRING, classes[i]);
+      Token cls2;     _p->onName(cls2, parent2, Parser::StringName);
+      Token fname3;   fname3.setText("__xhpAttributeDeclaration");
+      Token param;   _p->onCall(param, 0, fname3, dummy, &cls2);
 
       Token params; _p->onCallParam(params, &params1, param, false, false);
       params1 = params;
@@ -2201,10 +2201,6 @@ non_empty_dict_pair_list:
     non_empty_dict_pair_list
     ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
   | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
-  | non_empty_dict_pair_list
-    ',' expr T_DOUBLE_ARROW
-    '&' variable                       { _p->onArrayPair($$,&$1,&$3,$6,1);}
-  | expr T_DOUBLE_ARROW '&' variable   { _p->onArrayPair($$,  0,&$1,$4,1);}
 ;
 
 static_dict_pair_list:
@@ -3153,10 +3149,10 @@ collection_init:
 ;
 non_empty_collection_init:
     non_empty_collection_init
-    ',' expr T_DOUBLE_ARROW expr       { _p->onCollectionPair($$,&$1,&$3,$5);}
-  | non_empty_collection_init ',' expr { _p->onCollectionPair($$,&$1,  0,$3);}
-  | expr T_DOUBLE_ARROW expr           { _p->onCollectionPair($$,  0,&$1,$3);}
-  | expr                               { _p->onCollectionPair($$,  0,  0,$1);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
+  | non_empty_collection_init ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
 
 static_collection_init:
@@ -3167,12 +3163,12 @@ static_collection_init:
 non_empty_static_collection_init:
     non_empty_static_collection_init
     ',' static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCollectionPair($$,&$1,&$3,$5);}
+    static_expr                        { _p->onArrayPair($$,&$1,&$3,$5,0);}
   | non_empty_static_collection_init
-    ',' static_expr                    { _p->onCollectionPair($$,&$1,  0,$3);}
+    ',' static_expr                    { _p->onArrayPair($$,&$1,  0,$3,0);}
   | static_expr T_DOUBLE_ARROW
-    static_expr                        { _p->onCollectionPair($$,  0,&$1,$3);}
-  | static_expr                        { _p->onCollectionPair($$,  0,  0,$1);}
+    static_expr                        { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | static_expr                        { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
 
 encaps_list:
@@ -3392,17 +3388,24 @@ hh_shape_member_type:
       T_CONSTANT_ENCAPSED_STRING
       T_DOUBLE_ARROW
       hh_type                      {
-                                     /* should not reach here as
-                                      * optional shape fields are not
-                                      * supported in strict mode */
                                      validate_shape_keyname($2, _p);
                                      _p->onTypeAnnotation($$, $2, $4);
+                                     _p->onShapeFieldSpecialization($$, '?');
                                    }
  |  class_namespace_string_typeargs
       T_DOUBLE_COLON
       ident_no_semireserved
       T_DOUBLE_ARROW
       hh_type                      { _p->onClsCnsShapeField($$, $1, $3, $5); }
+ |  '?'
+      class_namespace_string_typeargs
+      T_DOUBLE_COLON
+      ident_no_semireserved
+      T_DOUBLE_ARROW
+      hh_type                      {
+                                     _p->onClsCnsShapeField($$, $2, $4, $6);
+                                     _p->onShapeFieldSpecialization($$, '?');
+                                   }
 ;
 
 hh_non_empty_shape_member_list:
@@ -3413,9 +3416,17 @@ hh_non_empty_shape_member_list:
 
 hh_shape_member_list:
     hh_non_empty_shape_member_list
-    possible_comma                     { _p->onShape($$, $1); }
+    ','
+    T_ELLIPSIS                         { _p->onShape($$, $1, true); }
+  | hh_non_empty_shape_member_list
+    possible_comma                     { _p->onShape($$, $1, false); }
+  | T_ELLIPSIS                         {
+                                         Token t;
+                                         t.reset();
+                                         _p->onShape($$, t, true);
+                                       }
   | /* empty */                        { Token t; t.reset();
-                                         _p->onShape($$, t); }
+                                         _p->onShape($$, t, false); }
 ;
 
 hh_shape_type:

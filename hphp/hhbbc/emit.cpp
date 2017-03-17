@@ -50,6 +50,7 @@ namespace {
 
 const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
+const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -140,7 +141,7 @@ std::vector<borrowed_ptr<php::Block>> order_blocks(const php::Func& f) {
 struct EmitBcInfo {
   struct FPI {
     Offset fpushOff;
-    Offset fcallOff;
+    Offset fpiEndOff;
     int32_t fpDelta;
   };
 
@@ -169,6 +170,10 @@ struct EmitBcInfo {
     // currentStackDepth correctly (and we also assert all the jumps
     // have the same depth).
     folly::Optional<uint32_t> expectedStackDepth;
+
+    // Similar to expectedStackDepth, for the fpi stack. Needed to deal with
+    // terminal instructions that end an fpi region.
+    folly::Optional<uint32_t> expectedFPIDepth;
   };
 
   std::vector<borrowed_ptr<php::Block>> blockOrder;
@@ -184,7 +189,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          const php::Func& func) {
   EmitBcInfo ret = {};
   auto& blockInfo = ret.blockInfo;
-  blockInfo.resize(func.nextBlockId);
+  blockInfo.resize(func.blocks.size());
 
   // Track the stack depth while emitting to determine maxStackDepth.
   int32_t currentStackDepth { 0 };
@@ -196,11 +201,35 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   // allocated in the loop.)
   std::vector<uint8_t> immVec;
 
+  // Offset of the last emitted bytecode.
+  Offset lastOff { 0 };
+
   auto map_local = [&] (LocalId id) {
     auto const loc = func.locals[id];
     assert(!loc.killed);
     assert(loc.id <= id);
     return loc.id;
+  };
+
+  auto end_fpi = [&] (Offset off) {
+    auto& fpi = fpiStack.back();
+    fpi.fpiEndOff = off;
+    ret.fpiRegions.push_back(fpi);
+    fpiStack.pop_back();
+  };
+
+  auto set_expected_depth = [&] (EmitBcInfo::BlockInfo& info) {
+    if (info.expectedStackDepth) {
+      assert(*info.expectedStackDepth == currentStackDepth);
+    } else {
+      info.expectedStackDepth = currentStackDepth;
+    }
+
+    if (info.expectedFPIDepth) {
+      assert(*info.expectedFPIDepth == fpiStack.size());
+    } else {
+      info.expectedFPIDepth = fpiStack.size();
+    }
   };
 
   auto make_member_key = [&] (MKey mkey) {
@@ -223,11 +252,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   auto emit_inst = [&] (const Bytecode& inst) {
     auto const startOffset = ue.bcPos();
+    lastOff = startOffset;
 
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(&func, inst),
            show(srcLoc(func, inst.srcLoc)));
 
-    auto emit_vsa = [&] (const CompactVector<SString>& keys) {
+    auto emit_vsa = [&] (const CompactVector<LSString>& keys) {
       auto n = keys.size();
       ue.emitInt32(n);
       for (size_t i = 0; i < n; ++i) {
@@ -238,11 +268,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto emit_branch = [&] (BlockId id) {
       auto& info = blockInfo[id];
 
-      if (info.expectedStackDepth) {
-        assert(*info.expectedStackDepth == currentStackDepth);
-      } else {
-        info.expectedStackDepth = currentStackDepth;
-      }
+      set_expected_depth(info);
 
       if (info.offset != kInvalidOffset) {
         ue.emitInt32(info.offset - startOffset);
@@ -300,10 +326,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto fcall = [&] {
-      auto fpi = fpiStack.back();
-      fpiStack.pop_back();
-      fpi.fcallOff = startOffset;
-      ret.fpiRegions.push_back(fpi);
+      end_fpi(startOffset);
     };
 
     auto ret_assert = [&] { assert(currentStackDepth == 1); };
@@ -335,6 +358,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_I64A(n)    ue.emitInt64(data.arg##n);
 #define IMM_LA(n)      ue.emitIVA(map_local(data.loc##n));
 #define IMM_IA(n)      ue.emitIVA(data.iter##n);
+#define IMM_CAR(n)     ue.emitIVA(data.slot);
+#define IMM_CAW(n)     ue.emitIVA(data.slot);
 #define IMM_DA(n)      ue.emitDouble(data.dbl##n);
 #define IMM_SA(n)      ue.emitInt32(ue.mergeLitstr(data.str##n));
 #define IMM_RATA(n)    encodeRAT(ue, data.rat);
@@ -365,15 +390,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_SMANY      pop(data.keys.size());
 #define POP_FMANY      pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
-#define POP_IDX_A      pop(data.arg2 + 1);
 
 #define PUSH_NOV
 #define PUSH_ONE(x)            push(1);
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
-#define PUSH_INS_2(x)          push(1);
-#define PUSH_IDX_A             push(data.arg2);
 
 #define O(opcode, imms, inputs, outputs, flags)                   \
     auto emit_##opcode = [&] (const bc::opcode& data) {           \
@@ -405,6 +427,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -435,15 +459,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef POP_F_MFINAL
 #undef POP_C_MFINAL
 #undef POP_V_MFINAL
-#undef POP_IDX_A
 
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
 #undef PUSH_THREE
 #undef PUSH_INS_1
-#undef PUSH_INS_2
-#undef PUSH_IDX_A
 
 #define O(opcode, ...)                                        \
     case Op::opcode:                                          \
@@ -466,13 +487,26 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       ue.emitInt32(info.offset - fixup.instrOff, fixup.jmpImmedOff);
     }
 
-    if (info.expectedStackDepth) {
-      currentStackDepth = *info.expectedStackDepth;
+    if (!info.expectedStackDepth) {
+      // unreachable, or entry block
+      info.expectedStackDepth = 0;
     }
+
+    currentStackDepth = *info.expectedStackDepth;
+
+    if (!info.expectedFPIDepth) {
+      // unreachable, or an entry block
+      info.expectedFPIDepth = 0;
+    }
+
+    // deal with fpiRegions that were ended by terminal instructions
+    assert(*info.expectedFPIDepth <= fpiStack.size());
+    while (*info.expectedFPIDepth < fpiStack.size()) end_fpi(lastOff);
 
     for (auto& inst : b->hhbcs) emit_inst(inst);
 
     if (b->fallthrough != NoBlockId) {
+      set_expected_depth(blockInfo[b->fallthrough]);
       if (std::next(blockIt) == endBlockIt ||
           blockIt[1]->id != b->fallthrough) {
         if (b->fallthroughNS) {
@@ -486,6 +520,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     info.past = ue.bcPos();
     FTRACE(2, "      block {} end: {}\n", b->id, info.past);
   }
+
+  while (fpiStack.size()) end_fpi(lastOff);
 
   return ret;
 }
@@ -509,8 +545,9 @@ void emit_locals_and_params(FuncEmitter& fe,
       pinfo.byRef = param.byRef;
       pinfo.variadic = param.isVariadic;
       fe.appendParam(func.locals[id].name, pinfo);
-      if (auto const dv = param.dvEntryPoint) {
-        fe.params[id].funcletOff = info.blockInfo[dv->id].offset;
+      auto const dv = param.dvEntryPoint;
+      if (dv != NoBlockId) {
+        fe.params[id].funcletOff = info.blockInfo[dv].offset;
       }
       ++id;
     } else if (!loc.killed) {
@@ -526,6 +563,7 @@ void emit_locals_and_params(FuncEmitter& fe,
   }
   assert(fe.numLocals() == id);
   fe.setNumIterators(func.numIters);
+  fe.setNumClsRefSlots(func.numClsRefSlots);
 
   for (auto& sv : func.staticLocals) {
     fe.staticVars.push_back(Func::SVInfo {sv.name, sv.phpCode});
@@ -564,21 +602,15 @@ void emit_eh_region(FuncEmitter& fe,
 
   match<void>(
     region->node->info,
-    [&] (const php::TryRegion& tr) {
+    [&] (const php::CatchRegion& cr) {
       eh.m_type = EHEnt::Type::Catch;
-      for (auto& c : tr.catches) {
-        eh.m_catches.emplace_back(
-          fe.ue().mergeLitstr(c.first),
-          blockInfo[c.second].offset
-        );
-      }
-      eh.m_fault = kInvalidOffset;
-      eh.m_iterId = -1;
-      eh.m_itRef = false;
+      eh.m_handler = blockInfo[cr.catchEntry].offset;
+      eh.m_iterId = cr.iterId;
+      eh.m_itRef = cr.itRef;
     },
     [&] (const php::FaultRegion& fr) {
       eh.m_type = EHEnt::Type::Fault;
-      eh.m_fault = blockInfo[fr.faultEntry].offset;
+      eh.m_handler = blockInfo[fr.faultEntry].offset;
       eh.m_iterId = fr.iterId;
       eh.m_itRef = fr.itRef;
     }
@@ -809,7 +841,7 @@ void emit_finish_func(EmitUnitState& state,
   for (auto& fpi : info.fpiRegions) {
     auto& e = fe.addFPIEnt();
     e.m_fpushOff = fpi.fpushOff;
-    e.m_fcallOff = fpi.fcallOff;
+    e.m_fpiEndOff = fpi.fpiEndOff;
     e.m_fpOff    = fpi.fpDelta;
   }
 
@@ -823,9 +855,8 @@ void emit_finish_func(EmitUnitState& state,
   fe.isAsync = func.isAsync;
   fe.isGenerator = func.isGenerator;
   fe.isPairGenerator = func.isPairGenerator;
-  fe.isNative = func.isNative;
+  fe.isNative = func.nativeInfo != nullptr;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
-  fe.dynCallWrapperId = func.dynCallWrapperId;
 
   auto const retTy = state.index.lookup_return_type_raw(&func);
   if (!retTy.subtypeOf(TBottom)) {
@@ -846,15 +877,16 @@ void emit_finish_func(EmitUnitState& state,
     }
   }
 
-  if (func.isNative) {
-    assert(func.nativeInfo);
+  if (func.nativeInfo) {
     fe.hniReturnType = func.nativeInfo->returnType;
+    fe.dynCallWrapperId = func.nativeInfo->dynCallWrapperId;
   }
   fe.retTypeConstraint = func.retTypeConstraint;
 
   fe.maxStackCells = info.maxStackDepth +
                      fe.numLocals() +
                      fe.numIterators() * kNumIterCells +
+                     clsRefCountToCells(fe.numClsRefSlots()) +
                      info.maxFpiDepth * kNumActRecCells;
 
   fe.finish(fe.ue().bcPos(), false /* load */);
@@ -930,7 +962,30 @@ void emit_class(EmitUnitState& state,
 
   pce->setIfaceVtableSlot(state.index.lookup_iface_vtable_slot(&cls));
 
+  bool needs86cinit = false;
+
+  for (auto& cconst : cls.constants) {
+    if (!cconst.val.hasValue()) {
+      pce->addAbstractConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        cconst.isTypeconst
+      );
+    } else {
+      needs86cinit |= cconst.val->m_type == KindOfUninit;
+
+      pce->addConstant(
+        cconst.name,
+        cconst.typeConstraint,
+        &cconst.val.value(),
+        cconst.phpCode,
+        cconst.isTypeconst
+      );
+    }
+  }
+
   for (auto& m : cls.methods) {
+    if (!needs86cinit && m->name == s_86cinit.get()) continue;
     FTRACE(2, "    method: {}\n", m->name->data());
     auto const fe = ue.newMethodEmitter(m->name, pce);
     emit_init_func(*fe, *m);
@@ -989,24 +1044,6 @@ void emit_class(EmitUnitState& state,
     );
   }
   assert(uvIt == useVars.end());
-
-  for (auto& cconst : cls.constants) {
-    if (!cconst.val.hasValue()) {
-      pce->addAbstractConstant(
-        cconst.name,
-        cconst.typeConstraint,
-        cconst.isTypeconst
-      );
-    } else {
-      pce->addConstant(
-        cconst.name,
-        cconst.typeConstraint,
-        &cconst.val.value(),
-        cconst.phpCode,
-        cconst.isTypeconst
-      );
-    }
-  }
 
   pce->setEnumBaseTy(cls.enumBaseTy);
 }

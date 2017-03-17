@@ -26,10 +26,9 @@ using namespace HPHP;
 
 ArrayPairExpression::ArrayPairExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr name, ExpressionPtr value, bool ref,
- bool collection /* = false */)
+ ExpressionPtr name, ExpressionPtr value, bool ref)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayPairExpression)),
-    m_name(name), m_value(value), m_ref(ref), m_collection(collection) {
+    m_name(name), m_value(value), m_ref(ref) {
   if (m_ref) {
     m_value->setContext(Expression::RefValue);
   }

@@ -41,7 +41,12 @@ namespace HPHP { namespace rds {
  * live in RDS.  Note that we don't put closure locals here because
  * they are per-instance.
  */
-Link<RefData, true /* normal_only */>
+
+struct StaticLocalData {
+  RefData ref;
+  static size_t ref_offset() { return offsetof(StaticLocalData, ref); }
+};
+Link<StaticLocalData, true /* normal_only */>
 bindStaticLocal(const Func*, const StringData*);
 
 /*

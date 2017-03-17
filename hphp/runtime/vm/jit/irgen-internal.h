@@ -221,12 +221,25 @@ std::pair<SSATmp*, SSATmp*> condPair(IRGS& env,
  */
 template<class Branch, class Next, class Taken>
 void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
+  auto const next_block  = defBlock(env);
   auto const taken_block = defBlock(env);
   auto const done_block  = defBlock(env);
 
   branch(taken_block);
+  auto const branch_block = env.irb->curBlock();
 
+  if (branch_block->empty() || !branch_block->back().isBlockEnd()) {
+    gen(env, Jmp, next_block);
+  } else if (!branch_block->back().isTerminal()) {
+    branch_block->back().setNext(next_block);
+  }
+  // The above logic ensures that `branch_block' always ends with an
+  // isBlockEnd() instruction, so its out state is meaningful.
+  env.irb->fs().setSaveOutState(branch_block);
+
+  env.irb->appendBlock(next_block);
   next();
+
   // Patch the last block added by the Next lambda to jump to the done block.
   // Note that last might not be taken_block.
   auto const cur = env.irb->curBlock();
@@ -235,7 +248,7 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
   } else if (!cur->back().isTerminal()) {
     cur->back().setNext(done_block);
   }
-  env.irb->appendBlock(taken_block);
+  env.irb->appendBlock(taken_block, branch_block);
 
   taken();
   // Patch the last block added by the Taken lambda to jump to the done block.
@@ -367,7 +380,6 @@ inline SSATmp* popC(IRGS& env, TypeConstraint tc = DataTypeSpecific) {
   return assertType(pop(env, tc), TCell);
 }
 
-inline SSATmp* popA(IRGS& env) { return assertType(pop(env), TCls); }
 inline SSATmp* popV(IRGS& env) { return assertType(pop(env), TBoxedInitCell); }
 inline SSATmp* popR(IRGS& env) { return assertType(pop(env), TGen); }
 inline SSATmp* popF(IRGS& env) { return assertType(pop(env), TGen); }
@@ -436,10 +448,6 @@ inline SSATmp* topV(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
 
 inline SSATmp* topR(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
   return assertType(top(env, i), TGen);
-}
-
-inline SSATmp* topA(IRGS& env, BCSPRelOffset i = BCSPRelOffset{0}) {
-  return assertType(top(env, i), TCls);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -807,6 +815,28 @@ inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->mayHaveThis()) return;
   auto const ctx = ldCtx(env);
   decRef(env, ctx);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Class-ref slots
+
+inline void killClsRef(IRGS& env, uint32_t slot) {
+  gen(env, KillClsRef, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* peekClsRef(IRGS& env, uint32_t slot) {
+  auto const knownType = env.irb->clsRefSlot(slot).type;
+  return gen(env, LdClsRef, knownType, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* takeClsRef(IRGS& env, uint32_t slot) {
+  auto const cls = peekClsRef(env, slot);
+  killClsRef(env, slot);
+  return cls;
+}
+
+inline void putClsRef(IRGS& env, uint32_t slot, SSATmp* cls) {
+  gen(env, StClsRef, ClsRefSlotData{slot}, fp(env), cls);
 }
 
 //////////////////////////////////////////////////////////////////////

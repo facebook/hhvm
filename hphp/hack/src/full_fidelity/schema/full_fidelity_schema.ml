@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-01-18-0002"
+let full_fidelity_schema_version_number = "2017-03-06-0002"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -100,11 +100,6 @@ let schema = List.map from_list [
     "script";
     "header";
     "declarations" ];
-  [ "ScriptFooter";
-    "script_footer";
-    "footer";
-    "footer";
-    "question_greater_than" ];
   [ "SimpleTypeSpecifier";
     "simple_type_specifier";
     "simple_type_specifier";
@@ -239,7 +234,21 @@ let schema = List.map from_list [
     "parameter_list";
     "right_paren";
     "colon";
-    "type" ];
+    "type";
+    "where_clause" ];
+  [ "WhereClause";
+    "where_clause";
+    "where_clause";
+    "where_clause";
+    "keyword";
+    "constraints" ];
+  [ "WhereConstraint";
+    "where_constraint";
+    "where_constraint";
+    "where_constraint";
+    "left_type";
+    "operator";
+    "right_type" ];
   [ "MethodishDeclaration";
     "methodish_declaration";
     "methodish_declaration";
@@ -643,6 +652,13 @@ let schema = List.map from_list [
     "object";
     "operator";
     "name" ];
+  [ "EmbeddedMemberSelectionExpression";
+    "embedded_member_selection_expression";
+    "embedded_member_selection_expression";
+    "embedded_member";
+    "object";
+    "operator";
+    "name" ];
   [ "YieldExpression";
     "yield_expression";
     "yield_expression";
@@ -744,6 +760,13 @@ let schema = List.map from_list [
     "left_brace";
     "expression";
     "right_brace" ];
+  [ "EmbeddedBracedExpression";
+    "embedded_braced_expression";
+    "embedded_braced_expression";
+    "embedded_braced_expression";
+    "left_brace";
+    "expression";
+    "right_brace" ];
   [ "ListExpression";
     "list_expression";
     "list_expression";
@@ -823,6 +846,14 @@ let schema = List.map from_list [
     "left_bracket";
     "index";
     "right_bracket" ];
+  [ "EmbeddedSubscriptExpression";
+    "embedded_subscript_expression";
+    "embedded_subscript_expression";
+    "embedded_subscript";
+    "receiver";
+    "left_bracket";
+    "index";
+    "right_bracket" ];
   [ "AwaitableCreationExpression";
     "awaitable_creation_expression";
     "awaitable_creation_expression";
@@ -888,6 +919,7 @@ let schema = List.map from_list [
     "xhp_open";
     "xhp_open";
     "xhp_open";
+    "left_angle";
     "name";
     "attributes";
     "right_angle" ];
@@ -965,9 +997,7 @@ let schema = List.map from_list [
     "dictionary_type";
     "keyword";
     "left_angle";
-    "key";
-    "comma";
-    "value";
+    "members";
     "right_angle" ];
   [ "ClosureTypeSpecifier";
     "closure_type_specifier";
@@ -1089,6 +1119,7 @@ let variable_text_tokens = List.map token_node_from_list [
   [ "HexadecimalLiteral"; "hexadecimal_literal" ];
   [ "BinaryLiteral"; "binary_literal" ];
   [ "FloatingLiteral"; "floating_literal" ];
+  [ "ExecutionString"; "execution_string" ];
   [ "SingleQuotedStringLiteral"; "single_quoted_string_literal" ];
   [ "DoubleQuotedStringLiteral"; "double_quoted_string_literal" ];
   [ "DoubleQuotedStringLiteralHead"; "double_quoted_string_literal_head" ];
@@ -1197,6 +1228,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Var"; "var" ];
   [ "Vec"; "vec" ];
   [ "Void"; "void" ];
+  [ "Where"; "where" ];
   [ "While"; "while" ];
   [ "Xor"; "xor" ];
   [ "Yield"; "yield" ];
@@ -1207,7 +1239,6 @@ let given_text_tokens = List.map token_node_from_list [
   [ "LeftBrace"; "{" ];
   [ "RightBrace"; "}" ];
   [ "Dot"; "." ];
-  [ "QuestionGreaterThan"; "?>" ];
   [ "MinusGreaterThan"; "->" ];
   [ "PlusPlus"; "++" ];
   [ "MinusMinus"; "--" ];
@@ -1220,6 +1251,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Dollar"; "$" ];
   [ "Slash"; "/" ];
   [ "Percent"; "%" ];
+  [ "LessThanGreaterThan"; "<>"];
   [ "LessThanEqualGreaterThan"; "<=>"];
   [ "LessThanLessThan"; "<<" ];
   [ "GreaterThanGreaterThan"; ">>" ];
@@ -1275,7 +1307,8 @@ let trivia_kinds = List.map trivia_node_from_list [
   [ "UnsafeExpression"; "unsafe_expression" ];
   [ "FixMe"; "fix_me" ];
   [ "IgnoreError"; "ignore_error" ];
-  [ "FallThrough"; "fall_through" ]]
+  [ "FallThrough"; "fall_through" ];
+  [ "Markup"; "markup" ]]
 
 let map_and_concat_separated separator f items =
   String.concat separator (List.map f items)

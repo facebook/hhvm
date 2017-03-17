@@ -26,7 +26,7 @@
 #include <signal.h>
 
 #include <folly/String.h>
-#include <folly/portability/Environment.h>
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
@@ -50,6 +50,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
@@ -732,22 +733,26 @@ Variant HHVM_FUNCTION(proc_open,
   Array enva;
 
   if (env.isNull()) {
-    // Build out an environment that conceptually matches what we'd
-    // see if we were to iterate the environment and call getenv()
-    // for each name.
+    if (is_cli_mode()) {
+      enva = cli_env();
+    } else {
+      // Build out an environment that conceptually matches what we'd
+      // see if we were to iterate the environment and call getenv()
+      // for each name.
 
-    // Env vars defined in the hdf file go in first
-    for (const auto& envvar : RuntimeOption::EnvVariables) {
-      enva.set(String(envvar.first), String(envvar.second));
-    }
+      // Env vars defined in the hdf file go in first
+      for (const auto& envvar : RuntimeOption::EnvVariables) {
+        enva.set(String(envvar.first), String(envvar.second));
+      }
 
-    // global environment overrides the hdf
-    for (char **env = environ; env && *env; env++) {
-      char *p = strchr(*env, '=');
-      if (p) {
-        String name(*env, p - *env, CopyString);
-        String val(p + 1, CopyString);
-        enva.set(name, val);
+      // global environment overrides the hdf
+      for (char **env = environ; env && *env; env++) {
+        char *p = strchr(*env, '=');
+        if (p) {
+          String name(*env, p - *env, CopyString);
+          String val(p + 1, CopyString);
+          enva.set(name, val);
+        }
       }
     }
 
@@ -831,7 +836,7 @@ Variant HHVM_FUNCTION(proc_open,
   }
 
   dwCreateFlags = NORMAL_PRIORITY_CLASS;
-  if (RuntimeOption::ClientExecutionMode()) {
+  if (!RuntimeOption::ServerExecutionMode()) {
     dwCreateFlags |= CREATE_NO_WINDOW;
   }
 

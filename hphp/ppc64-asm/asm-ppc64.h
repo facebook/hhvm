@@ -858,7 +858,7 @@ protected:
     assert(static_cast<uint32_t>(ra) < 32);
     assert(static_cast<uint32_t>(rt) < 32);
 
-    XO_form_t xo_formater {
+    XO_form_t xo_formater {{
                             rc,
                             xop,
                             oe,
@@ -866,7 +866,7 @@ protected:
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
     dword(xo_formater.instruction);
   }
@@ -880,12 +880,12 @@ protected:
     assert(static_cast<uint32_t>(rt) < 32);
     assert(static_cast<uint32_t>(ra) < 32);
 
-    D_form_t d_formater {
+    D_form_t d_formater {{
                           static_cast<uint32_t>(imm),
                           static_cast<uint32_t>(ra),
                           static_cast<uint32_t>(rt),
                           op
-                         };
+                         }};
 
     dword(d_formater.instruction);
   }
@@ -895,12 +895,12 @@ protected:
                  const bool aa = 0,
                  const bool lk = 0) {
 
-      I_form_t i_formater {
+      I_form_t i_formater {{
                             lk,
                             aa,
                             imm >> 2,
                             op
-                          };
+                          }};
 
       dword(i_formater.instruction);
   }
@@ -911,25 +911,25 @@ protected:
                   const uint32_t bd,
                   const bool aa = 0,
                   const bool lk = 0) {
-      B_form_t b_formater {
+      B_form_t b_formater {{
                             lk,
                             aa,
                             bd >> 2,
                             bi,
                             bo,
                             op
-                          };
+                          }};
 
        dword(b_formater.instruction);
    }
 
    void EmitSCForm(const uint8_t op,
                    const uint16_t lev) {
-      SC_form_t sc_formater {
+      SC_form_t sc_formater {{
                               1,
                               lev,
                               op
-                            };
+                            }};
 
       dword(sc_formater.instruction);
    }
@@ -946,14 +946,14 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rt) < 32);
 
-      X_form_t x_formater {
+      X_form_t x_formater {{
                             rc,
                             xop,
                             static_cast<uint32_t>(rb),
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
       dword(x_formater.instruction);
    }
@@ -965,14 +965,14 @@ protected:
                   const uint16_t xop,
                   const bool rc = 0){
 
-      X_form_t x_formater {
+      X_form_t x_formater {{
                             rc,
                             xop,
                             static_cast<uint32_t>(rb),
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
       dword(x_formater.instruction);
    }
@@ -989,13 +989,13 @@ protected:
      assert(static_cast<uint32_t>(rt) < 32);
      assert(static_cast<uint16_t>(imm << 14) == 0);
 
-      DS_form_t ds_formater {
+      DS_form_t ds_formater {{
                              xop,
                              static_cast<uint32_t>(imm) >> 2,
                              static_cast<uint32_t>(ra),
                              static_cast<uint32_t>(rt),
                              op
-                            };
+                            }};
 
       dword(ds_formater.instruction);
    }
@@ -1009,13 +1009,13 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint16_t>(imm << 12) == 0);
 
-      DQ_form_t dq_formater {
+      DQ_form_t dq_formater {{
                              0x0, //Reserved
                              static_cast<uint32_t>(rtp),
                              static_cast<uint32_t>(ra),
                              static_cast<uint32_t>(imm) >> 4,
                              op
-                            };
+                            }};
 
       dword(dq_formater.instruction);
    }
@@ -1028,14 +1028,14 @@ protected:
                    const uint16_t xop,
                    const bool lk = 0) {
 
-      XL_form_t xl_formater {
+      XL_form_t xl_formater {{
                              lk,
                              xop,
                              bb,
                              ba,
                              bt,
                              op
-                            };
+                            }};
 
       dword(xl_formater.instruction);
    }
@@ -1054,7 +1054,7 @@ protected:
      assert(static_cast<uint32_t>(rb) < 32);
      assert(static_cast<uint32_t>(bc) < 32);
 
-      A_form_t a_formater {
+      A_form_t a_formater {{
                            rc,
                            xop,
                            static_cast<uint32_t>(bc),
@@ -1062,7 +1062,7 @@ protected:
                            static_cast<uint32_t>(ra),
                            static_cast<uint32_t>(rt),
                            op
-                          };
+                          }};
 
       dword(a_formater.instruction);
    }
@@ -1080,7 +1080,7 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rb) < 32);
 
-      M_form_t m_formater {
+      M_form_t m_formater {{
                            rc,
                            me,
                            mb,
@@ -1088,7 +1088,7 @@ protected:
                            static_cast<uint32_t>(ra),
                            static_cast<uint32_t>(rs),
                            op
-                          };
+                          }};
 
       dword(m_formater.instruction);
    }
@@ -1105,7 +1105,7 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rs) < 32);
 
-      MD_form_t md_formater {
+      MD_form_t md_formater {{
         rc,
         static_cast<uint32_t>(sh >> 5),                         // sh5
         xop,
@@ -1114,7 +1114,7 @@ protected:
         static_cast<uint32_t>(ra),
         static_cast<uint32_t>(rs),
         op
-      };
+      }};
 
       dword(md_formater.instruction);
    }
@@ -1132,7 +1132,7 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rs) < 32);
 
-      MDS_form_t mds_formater {
+      MDS_form_t mds_formater {{
                                rc,
                                xop,
                                mb,
@@ -1140,7 +1140,7 @@ protected:
                                static_cast<uint32_t>(ra),
                                static_cast<uint32_t>(rs),
                                op
-                              };
+                              }};
 
       dword(mds_formater.instruction);
    }
@@ -1154,14 +1154,14 @@ protected:
     // GP Register cannot be greater than 31
     assert(static_cast<uint32_t>(rs) < 32);
 
-    XFX_form_t xfx_formater {
+    XFX_form_t xfx_formater {{
       rsv,
       xo,
       (static_cast<uint32_t>(spr) >> 5) & 0x1F,
       static_cast<uint32_t>(spr) & 0x1F,
       static_cast<uint32_t>(rs),
       op
-    };
+    }};
 
     dword(xfx_formater.instruction);
   }
@@ -1174,14 +1174,14 @@ protected:
     // GP Register cannot be greater than 31
     assert(static_cast<uint32_t>(rs) < 32);
 
-    XFX_form_t xfx_formater {
+    XFX_form_t xfx_formater {{
       rsv,
       xo,
       static_cast<uint32_t>((mask) & 0x1f),
       static_cast<uint32_t>(((mask) >> 5) & 0x1F),
       static_cast<uint32_t>(rs),
       op
-    };
+    }};
 
     dword(xfx_formater.instruction);
   }
@@ -1193,7 +1193,7 @@ protected:
                    const uint16_t xo,
                    const bool bx,
                    const bool tx)  {
-    XX2_form_t xx2_formater {
+    XX2_form_t xx2_formater {{
       tx,
       bx,
       xo,
@@ -1201,7 +1201,7 @@ protected:
       static_cast<uint32_t>(uim & 0x3),
       static_cast<uint32_t>(t),
       op
-    };
+    }};
     dword(xx2_formater.instruction);
   }
 
@@ -1213,7 +1213,7 @@ protected:
                    const bool ax,
                    const bool bx,
                    const bool tx) {
-    XX3_form_t xx3_formater {
+    XX3_form_t xx3_formater {{
       tx,
       bx,
       ax,
@@ -1222,7 +1222,7 @@ protected:
       static_cast<uint32_t>(a),
       static_cast<uint32_t>(t),
       op
-    };
+    }};
     dword(xx3_formater.instruction);
   }
 
@@ -1238,14 +1238,14 @@ protected:
     assert(static_cast<uint32_t>(ra) < 32);
     assert(static_cast<uint32_t>(rb) < 32);
 
-    XX1_form_t xx1_formater {
+    XX1_form_t xx1_formater {{
       tx,
       xo,
       static_cast<uint32_t>(rb),
       static_cast<uint32_t>(ra),
       static_cast<uint32_t>(s),
       op
-    };
+    }};
 
     dword(xx1_formater.instruction);
   }
@@ -1260,13 +1260,13 @@ protected:
     assert(static_cast<uint32_t>(ra) < 32);
     assert(static_cast<uint32_t>(rb) < 32);
 
-    VX_form_t vx_formater {
+    VX_form_t vx_formater {{
       xo,
       static_cast<uint32_t>(rb),
       static_cast<uint32_t>(ra),
       static_cast<uint32_t>(rt),
       op
-    };
+    }};
 
     dword(vx_formater.instruction);
   }
@@ -1282,7 +1282,7 @@ protected:
      assert(static_cast<uint32_t>(rt) < 32);
      assert(static_cast<uint32_t>(ra) < 32);
 
-      XS_form_t xs_formater {
+      XS_form_t xs_formater {{
                             rc,
                             static_cast<uint32_t>(sh >> 5),
                             xop,
@@ -1290,7 +1290,7 @@ protected:
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
       dword(xs_formater.instruction);
    }

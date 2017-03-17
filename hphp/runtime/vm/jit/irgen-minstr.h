@@ -119,7 +119,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
           }
           return marr;
         },
-        [&] (SSATmp* arr) { return direct(arr, key, *pos); },
+        [&] (SSATmp* tmp) { return direct(tmp, key, *pos); },
         [&] { return generic(key); }
       );
     }
@@ -141,7 +141,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
  */
 template<class Finish>
 SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
-  if (tmp->type() <= TStkElem && tmp->type().isKnownDataType()) {
+  if (tmp->type() <= TGen && tmp->type().isKnownDataType()) {
     return tmp;
   }
 

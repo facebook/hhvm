@@ -829,9 +829,6 @@ static void json_create_zval(Variant &z, UncheckedBuffer &buf, int type,
     case KindOfRef:
       z = uninit_null();
       return;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }

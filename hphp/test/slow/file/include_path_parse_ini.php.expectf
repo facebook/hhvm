@@ -23,3 +23,25 @@ array(1) {
   ["include_path_parse_nested_dir"]=>
   string(1) "1"
 }
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_nested_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+
+Warning: No such file or directory in %s/test/slow/file/include_path_parse_ini.php on line 60
+bool(false)
+
+Warning: remote access to ini files is not allowed in %s/test/slow/file/include_path_parse_ini.php on line 65
+bool(false)

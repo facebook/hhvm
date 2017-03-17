@@ -14,6 +14,7 @@ module type S = sig
   type applied_fixme = Pos.t * int
   type error_flags
 
+  val set_ignored_fixmes : Relative_path.t list option -> unit
   val is_hh_fixme : (Pos.t -> int -> bool) ref
   val to_list : 'a error_ -> ('a * string) list
   val get_code : 'a error_ -> int
@@ -321,7 +322,7 @@ module type S = sig
     -> (Pos.t * string) list -> unit
   val instanceof_always_false : Pos.t -> unit
   val instanceof_always_true : Pos.t -> unit
-  val instanceof_generic_classname : Pos.t -> unit
+  val instanceof_generic_classname : Pos.t -> string -> unit
 
 
   val to_json : Pos.absolute error_ -> Hh_json.json
@@ -351,4 +352,5 @@ module type S = sig
   val from_error_list : error list -> t
   val iter_error_list : (error -> unit) -> t -> unit
   val get_applied_fixmes : t -> applied_fixme list
+  val optional_shape_fields_not_supported : Pos.t -> unit
 end

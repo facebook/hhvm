@@ -37,6 +37,11 @@ struct Repo::GlobalData {
   bool UsedHHBBC = false;
 
   /*
+   * Was the repo compiled with EnableHipHopSyntax.
+   */
+  bool EnableHipHopSyntax = false;
+
+  /*
    * Indicates whether a repo was compiled with HardTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
@@ -96,6 +101,11 @@ struct Repo::GlobalData {
   bool PHP7_ScalarTypes = false;
 
   /*
+   * Indicates whether the repo was compiled with PHP7 builtins enabled.
+   */
+  bool PHP7_Builtins = false;
+
+  /*
    * Indicates whether the repo was compiled with PHP7 substr behavior which
    * returns an empty string if the stringi length is equal to start characters
    * long, instead of PHP5's false.
@@ -122,6 +132,7 @@ struct Repo::GlobalData {
 
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
+      (EnableHipHopSyntax)
       (HardTypeHints)
       (HardPrivatePropInference)
       (arrayTypeTable)
@@ -131,6 +142,7 @@ struct Repo::GlobalData {
       (PHP7_IntSemantics)
       (PHP7_ScalarTypes)
       (PHP7_Substr)
+      (PHP7_Builtins)
       (AutoprimeGenerators)
       (APCProfile)
       (PromoteEmptyObject)

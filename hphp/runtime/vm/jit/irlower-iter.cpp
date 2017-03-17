@@ -173,12 +173,12 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 0).reg();
 
-    auto args = argGroup(env, inst)
+    auto ret = argGroup(env, inst)
       .addr(fp, iterOffset(inst->marker(), extra->iterId))
       .addr(fp, localOffset(extra->valId));
-    if (isNextK) args.addr(fp, localOffset(extra->keyId));
+    if (isNextK) ret.addr(fp, localOffset(extra->keyId));
 
-    return args;
+    return ret;
   }();
 
   auto const helper = isWNext ? (TCA)witer_next_key :
@@ -195,15 +195,15 @@ void implMIterNext(IRLS& env, const IRInstruction* inst) {
   auto const args = [&] {
     auto const fp = srcLoc(env, inst, 0).reg();
 
-    auto args = argGroup(env, inst)
+    auto ret = argGroup(env, inst)
       .addr(fp, iterOffset(inst->marker(), extra->iterId))
       .addr(fp, localOffset(extra->valId));
     if (inst->is(MIterNextK)) {
-      args.addr(fp, localOffset(extra->keyId));
+      ret.addr(fp, localOffset(extra->keyId));
     } else {
-      args.imm(0);
+      ret.imm(0);
     }
-    return args;
+    return ret;
   }();
   cgCallHelper(vmain(env), env, CallSpec::direct(miter_next_key),
                callDest(env, inst), SyncOptions::Sync, args);

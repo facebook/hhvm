@@ -431,6 +431,20 @@ bool simplify(Env& env, const copyargs& inst, Vlabel b, size_t i) {
   });
 }
 
+bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
+  return if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& cm) {
+    // loadb; movzbl; -> loadzbl;
+    if (!(arch() == Arch::ARM &&
+          env.use_counts[inst.d] == 1 &&
+          inst.d == cm.s)) return false;
+
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << loadzbl{inst.s, cm.d};
+      return 2;
+    });
+  });
+}
+
 bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
   auto const def_op = env.def_insts[inst.s];
 

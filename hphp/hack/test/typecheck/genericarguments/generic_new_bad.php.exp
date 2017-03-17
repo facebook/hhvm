@@ -1,0 +1,8 @@
+File "generic_new_bad.php", line 9, characters 19-20:
+Invalid argument (Typing[4110])
+File "generic_new_bad.php", line 9, characters 14-16:
+This is an int
+File "generic_new_bad.php", line 5, characters 39-39:
+  via this generic T
+File "generic_new_bad.php", line 8, characters 15-20:
+It is incompatible with a string

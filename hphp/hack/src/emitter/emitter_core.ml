@@ -587,6 +587,6 @@ let make_kvarray fields =
  * it matches the order it would be in HHVM. Sigh. *)
 let extract_shape_fields smap =
   let get_pos =
-    function Nast.SFlit (p, _) | Nast.SFclass_const ((p, _), _) -> p in
+    function Ast.SFlit (p, _) | Ast.SFclass_const ((p, _), _) -> p in
   List.sort (fun (k1, _) (k2, _) -> Pos.compare (get_pos k1) (get_pos k2))
     (Nast.ShapeMap.elements smap)

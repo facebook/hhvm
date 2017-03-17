@@ -310,6 +310,9 @@ void readPublicStatic(Entry* mce,
   decRefObj(obj);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+}
+
 template<bool fatal>
 void handleSlowPath(rds::Handle mce_handle,
                     ActRec* ar,
@@ -459,9 +462,6 @@ void handleSlowPath(rds::Handle mce_handle,
   return lookup<fatal>(mce, ar, name, cls, ctx);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-}
-
 template<bool fatal>
 void handlePrimeCacheInit(rds::Handle mce_handle,
                           ActRec* ar,
@@ -504,10 +504,6 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
 
   // First fill the request local method cache for this call.
   lookup<fatal>(mce, ar, name, cls, ctx);
-
-  // We are using whether the code is already smashed to determine which thread
-  // should free the SmashLoc.
-  auto codeLock = tc::lockCode();
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);
@@ -560,12 +556,8 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
-  auto hsp = handleSlowPath<fatal>;
-  smashCall(callAddr, reinterpret_cast<TCA>(hsp));
-#else
-  smashCall(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
-#endif
+  smashCall(callAddr, fatal ?
+            tc::ustubs().handleSlowPathFatal : tc::ustubs().handleSlowPath);
 }
 
 template
@@ -575,6 +567,14 @@ void handlePrimeCacheInit<false>(rds::Handle, ActRec*, StringData*,
 template
 void handlePrimeCacheInit<true>(rds::Handle, ActRec*, StringData*,
                                 Class*, Class*, uintptr_t);
+
+template
+void handleSlowPath<false>(rds::Handle, ActRec*, StringData*,
+                           Class*, Class*, uintptr_t);
+
+template
+void handleSlowPath<true>(rds::Handle, ActRec*, StringData*,
+                          Class*, Class*, uintptr_t);
 
 } // namespace MethodCache
 

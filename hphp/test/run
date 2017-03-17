@@ -376,6 +376,7 @@ function get_options($argv) {
     'repo' => 'r',
     'mode:' => 'm:',
     'server' => 's',
+    'cli-server' => 'S',
     'shuffle' => '',
     'help' => 'h',
     'verbose' => 'v',
@@ -602,11 +603,11 @@ function list_tests($files, $options) {
   $mode = idx($options, 'mode', '');
   switch ($mode) {
     case '':
-    case 'jit':
-      $args[] = '-m jit';
       break;
-    case 'interp';
-      $args[] = '-m interp';
+    case 'jit':
+    case 'interp':
+    case 'interp,jit':
+      $args[] = '-m ' . $mode;
       break;
     default:
       throw new Exception("Unsupported mode for listing tests: ".$mode);
@@ -694,8 +695,10 @@ function mode_cmd($options) {
         ' -vEval.JitPGOHotOnly=0';
     case 'interp':
       return "$repo_args -vEval.Jit=0";
+    case 'interp,jit':
+      return array("$repo_args -vEval.Jit=0", $jit_args);
     default:
-      error("-m must be one of jit | pgo | interp. Got: '$mode'");
+      error("-m must be one of jit | pgo | interp | interp,jit. Got: '$mode'");
   }
 }
 
@@ -708,40 +711,45 @@ function hhvm_cmd_impl() {
   $options = array_shift($args);
   $config = array_shift($args);
   $extra_args = $args;
-  $args = array(
-    hhvm_path(),
-    '-c',
-    $config,
-    '-vEval.EnableArgsInBacktraces=true',
-    '-vEval.EnableIntrinsicsExtension=true',
-    mode_cmd($options),
-    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
-    isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
+  $modes = (array)mode_cmd($options);
+  $cmds = array();
+  foreach ($modes as $mode) {
+    $args = array(
+      hhvm_path(),
+      '-c',
+      $config,
+      '-vEval.EnableArgsInBacktraces=true',
+      '-vEval.EnableIntrinsicsExtension=true',
+      $mode,
+      isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
+      isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
-    // load/store counters don't work on Ivy Bridge so disable for tests
-    '-vEval.ProfileHWEnable=false',
+      // load/store counters don't work on Ivy Bridge so disable for tests
+      '-vEval.ProfileHWEnable=false',
 
-    extra_args($options),
-  );
+      extra_args($options),
+    );
 
-  if (isset($options['relocate'])) {
-    $args[] = '--count='.($options['relocate'] * 2);
-    $args[] = '-vEval.JitAHotSize=6000000';
-    $args[] = '-vEval.HotFuncCount=0';
-    $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+    if (isset($options['relocate'])) {
+      $args[] = '--count='.($options['relocate'] * 2);
+      $args[] = '-vEval.JitAHotSize=6000000';
+      $args[] = '-vEval.HotFuncCount=0';
+      $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+    }
+
+    if (isset($options['recycle-tc'])) {
+      $args[] = '--count='.$options['recycle-tc'];
+      $args[] = '-vEval.StressUnitCacheFreq=1';
+      $args[] = '-vEval.EnableReusableTC=true';
+    }
+
+    if (!isset($options['cores'])) {
+      $args[] = '-vResourceLimit.CoreFileSize=0';
+    }
+    $cmds[] = implode(' ', array_merge($args, $extra_args));
   }
-
-  if (isset($options['recycle-tc'])) {
-    $args[] = '--count='.$options['recycle-tc'];
-    $args[] = '-vEval.StressUnitCacheFreq=1';
-    $args[] = '-vEval.EnableReusableTC=true';
-  }
-
-  if (!isset($options['cores'])) {
-    $args[] = '-vResourceLimit.CoreFileSize=0';
-  }
-
-  return implode(' ', array_merge($args, $extra_args));
+  if (count($cmds) != 1) return $cmds;
+  return $cmds[0];
 }
 
 // Return the command and the env to run it in.
@@ -755,7 +763,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
-  $cmd = hhvm_cmd_impl(
+  $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
     $hdf,
@@ -764,6 +772,15 @@ function hhvm_cmd($options, $test, $test_run = null) {
     '--file',
     escapeshellarg($test_run)
   );
+
+  $cmd = "";
+
+  if (isset($options['cli-server']) && can_run_server_test($test)) {
+    $config = find_file_for_dir(dirname($test), 'config.ini');
+    $socket = $options['servers']['configs'][$config]['cli-socket'];
+    $cmd .= ' -vEval.UseRemoteUnixServer=only';
+    $cmd .= ' -vEval.UnixServerPath='.$socket;
+  }
 
   // Special support for tests that require a path to the current
   // test directory for things like prepend_file and append_file
@@ -825,6 +842,15 @@ function hhvm_cmd($options, $test, $test_run = null) {
     // output with control characters, which could change depending on
     // a wide variety of terminal settings.
     $env["TERM"] = "dumb";
+  }
+
+  if (is_array($cmds)) {
+    foreach ($cmds as &$c) {
+      $c .= $cmd;
+    }
+    $cmd = $cmds;
+  } else {
+    $cmd = $cmds . $cmd;
   }
 
   return array($cmd, $env);
@@ -1265,6 +1291,8 @@ function skip_test($options, $test) {
   unset($options_without_repo['repo']);
 
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
+  if (is_array($hhvm)) $hhvm=$hhvm[0];
+
   $descriptorspec = array(
     0 => array("pipe", "r"),
     1 => array("pipe", "w"),
@@ -1686,6 +1714,19 @@ function run_config_post($outputs, $test, $options) {
 }
 
 function run_one_config($options, $test, $cmd, $cmd_env) {
+  if (is_array($cmd)) {
+    $result = 'skip';
+    foreach ($cmd as $c) {
+      $result = run_one_config($options, $test, $c, $cmd_env);
+      if (!$result) return $result;
+    }
+    return $result;
+  }
+  if (is_executable('/usr/bin/timeout')) {
+    $cmd = '/usr/bin/timeout 300 ' . $cmd;
+  } else {
+    $cmd = __DIR__.'/../tools/timeout.sh -t 300 '. $cmd;
+  }
   $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
   if ($outputs === false) return false;
   return run_config_post($outputs, $test, $options);
@@ -1708,11 +1749,6 @@ function run_typechecker_test($options, $test) {
   if (skip_test($options, $test)) return 'skip';
   if (!file_exists($test . ".hhconfig")) return 'skip';
   list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
-  if (is_executable('/usr/bin/timeout')) {
-    $hh_server = '/usr/bin/timeout 300 ' . $hh_server;
-  } else {
-    $hh_server = __DIR__.'/../tools/timeout.sh -t 300 '. $hh_server;
-  }
   $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
   // Remove the temporary directory.
   if (!isset($options['no-clean'])) {
@@ -1727,19 +1763,12 @@ function run_test($options, $test) {
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   if ((isset($options['relocate']) || isset($options['recycle-tc'])) &&
-      preg_match('/ --count[ =].* --count[ =]/', $hhvm)) {
+      preg_grep('/ --count[ =].* --count[ =]/', (array)$hhvm)) {
     return 'skip';
   }
 
-  if (is_executable('/usr/bin/timeout')) {
-    $hhvm = '/usr/bin/timeout 300 '.$hhvm;
-  } else {
-    $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
-  }
-
   if (isset($options['repo'])) {
-    if (strpos($hhvm, '-m debug') !== false ||
-        file_exists($test.'.norepo')) {
+    if (preg_grep('/-m debug/', (array)$hhvm) || file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }
 
@@ -1802,14 +1831,18 @@ function print_commands($tests, $options) {
       list($command, $_) = hhvm_cmd($options, $test);
     }
     if (!isset($options['repo'])) {
-      print "$command\n";
+      foreach ((array)$command as $c) {
+        print "$c\n";
+      }
       continue;
     }
 
     // How to run it with hhbbc:
     $hhbbc_cmds = hphp_cmd($options, $test)."\n";
     $hhbbc_cmds .= hhbbc_cmd($options, $test)."\n";
-    $hhbbc_cmds .= $command."\n";
+    foreach ((array)$command as $c) {
+      $hhbbc_cmds .= $c."\n";
+    }
     print "$hhbbc_cmds\n";
   }
 }
@@ -2119,14 +2152,17 @@ function print_failure($argv, $results, $options) {
 
   $rerun = make_header("Re-run just the failing tests:") . $argv[0];
   foreach ($options as $option => $value) {
+    if ($option === "servers") continue;
     if ($option === "threads") {
       // e.g., For a small number of failed tests, we don't need max threads.
       $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
     } else if ($option === "typechecker" ||
                $option === "verbose" ||
-               $option === "repo") {
+               $option === "repo" ||
+               $option === "server" ||
+               $option === "cli-server") {
       // The escapeshellarg($value) of these is 1, but there is no real value
-      // associated with these two options.
+      // associated with these options.
       $rerun .= " --" . $option;
     } else {
       $rerun .= " --" . $option . ' ' . escapeshellarg($value);
@@ -2151,7 +2187,16 @@ function find_open_port() {
 }
 
 function start_server_proc($options, $config, $port) {
+  if (isset($options['cli-server'])) {
+    $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
+  } else {
+    // still want to test that an unwritable socket works...
+    $cli_sock = '/var/run/hhvm-cli.sock';
+  }
   $threads = $options['threads'];
+  $thread_option = isset($options['cli-server'])
+    ? '-vEval.UnixServerWorkers='.$threads
+    : '-vServer.ThreadCount='.$threads;
   $command = hhvm_cmd_impl(
     $options,
     $config,
@@ -2159,12 +2204,15 @@ function start_server_proc($options, $config, $port) {
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",
     "-vAdminServer.Port=0",
-    "-vServer.ThreadCount=$threads",
+    $thread_option,
     '-vServer.ExitOnBindFail=1',
     '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
     '-vLog.File=/dev/null',
+
+    // The server will unlink the temp file
+    '-vEval.UnixServerPath='.$cli_sock,
 
     // This ensures we actually jit everything:
     '-vEval.JitRequireWriteLease=1',
@@ -2177,6 +2225,9 @@ function start_server_proc($options, $config, $port) {
     // load/store counters don't work on Ivy Bridge so disable for tests
     '-vEval.ProfileHWEnable=false'
   );
+  if (is_array($command)) {
+    error("Can't run multi-mode tests in server mode");
+  }
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";
   }
@@ -2195,6 +2246,7 @@ function start_server_proc($options, $config, $port) {
   $status['proc'] = $proc;
   $status['port'] = $port;
   $status['config'] = $config;
+  $status['cli-socket'] = $cli_sock;
   return $status;
 }
 
@@ -2260,7 +2312,8 @@ function drain_queue($queue) {
 }
 
 function get_num_threads($options, $tests) {
-  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
+  $cpus = isset($options['server']) || isset($options['cli-server'])
+    ? num_cpus() * 2 : num_cpus();
   return min(count($tests), idx($options, 'threads', $cpus));
 }
 
@@ -2356,7 +2409,10 @@ function main($argv) {
   $options['threads'] = get_num_threads($options, $tests);
 
   $servers = null;
-  if (isset($options['server'])) {
+  if (isset($options['server']) || isset($options['cli-server'])) {
+    if (isset($options['server']) && isset($options['cli-server'])) {
+      error("Server mode and CLI Server mode are mutually exclusive");
+    }
     if (isset($options['repo']) || isset($options['typechecker'])) {
       error("Server mode repo tests are not supported");
     }

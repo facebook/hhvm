@@ -35,22 +35,26 @@
 #include <folly/ScopeGuard.h>
 #include <folly/portability/Stdlib.h>
 
-#include "hphp/util/trace.h"
 #include "hphp/runtime/vm/hhbc.h"
 
-#include "hphp/hhbbc/misc.h"
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/parallel.h"
+#include "hphp/util/trace.h"
+
+#include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/interp.h"
-#include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/parallel.h"
+#include "hphp/hhbbc/representation.h"
 
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 namespace {
+
+TRACE_SET_MOD(hhbbc_stats);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -130,6 +134,7 @@ struct Stats {
   std::atomic<uint64_t> uniqueFunctions;
   std::atomic<uint64_t> totalClasses;
   std::atomic<uint64_t> totalFunctions;
+  std::atomic<uint64_t> totalPseudoMains;
   std::atomic<uint64_t> totalMethods;
   std::atomic<uint64_t> persistentSPropsPub;
   std::atomic<uint64_t> persistentSPropsProt;
@@ -206,6 +211,7 @@ std::string show(const Stats& stats) {
   folly::format(
     &ret,
     "       total_methods:  {: >8}\n"
+    "   total_pseudomains:  {: >8}\n"
     "         total_funcs:  {: >8}\n"
     "        unique_funcs:  {: >8}\n"
     "    persistent_funcs:  {: >8}\n"
@@ -218,6 +224,7 @@ std::string show(const Stats& stats) {
     "   persistent_sprops_prot: {: >8}\n"
     "   persistent_sprops_priv: {: >8}\n",
     stats.totalMethods.load(),
+    stats.totalPseudoMains.load(),
     stats.totalFunctions.load(),
     stats.uniqueFunctions.load(),
     stats.persistentFunctions.load(),
@@ -386,12 +393,23 @@ void collect_simple(Stats& stats, const Bytecode& bc) {
 
 void collect_func(Stats& stats, const Index& index, php::Func& func) {
   if (!func.cls) {
-    ++stats.totalFunctions;
-    if (func.attrs & AttrPersistent) {
-      ++stats.persistentFunctions;
-    }
-    if (func.attrs & AttrUnique) {
-      ++stats.uniqueFunctions;
+    if (is_pseudomain(&func)) {
+      ++stats.totalPseudoMains;
+    } else {
+      ++stats.totalFunctions;
+      if (func.attrs & AttrPersistent) {
+        ++stats.persistentFunctions;
+      }
+      if (func.attrs & AttrUnique) {
+        if (!(func.attrs & AttrPersistent)) {
+          FTRACE(1, "Func unique but not persistent: {} : {}\n",
+                 func.name, func.unit->filename);
+        }
+        ++stats.uniqueFunctions;
+      } else {
+        FTRACE(1, "Func not unique: {} : {}\n",
+               func.name, func.unit->filename);
+      }
     }
   }
 
@@ -409,7 +427,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   if (!options.extendedStats) return;
 
   auto const ctx = Context { func.unit, &func, func.cls };
-  auto const fa  = analyze_func(index, ctx);
+  auto const fa  = analyze_func(index, ctx, false);
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
     for (auto& blk : func.blocks) {
@@ -417,7 +435,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       auto state = fa.bdata[blk->id].stateIn;
       if (!state.initialized) continue;
 
-      CollectedInfo collect { index, ctx, nullptr, nullptr };
+      CollectedInfo collect { index, ctx, nullptr, nullptr, false, &fa };
       Interp interp { index, ctx, collect, borrow(blk), state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State&) {};
@@ -436,7 +454,14 @@ void collect_class(Stats& stats, const Index& index, const php::Class& cls) {
     ++stats.persistentClasses;
   }
   if (cls.attrs & AttrUnique) {
+    if (!(cls.attrs & AttrPersistent)) {
+      FTRACE(1, "Class unique but not persistent: {} : {}\n",
+             cls.name, cls.unit->filename);
+    }
     ++stats.uniqueClasses;
+  } else {
+    FTRACE(1, "Class not unique: {} : {}\n",
+           cls.name, cls.unit->filename);
   }
   stats.totalMethods += cls.methods.size();
 

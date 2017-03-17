@@ -52,15 +52,14 @@ namespace HPHP {
 // union of all the possible header types, and some utilities
 struct Header {
   HeaderKind kind() const {
-    assert(unsigned(hdr_.kind) <= NumHeaderKinds);
-    return hdr_.kind;
+    assert(unsigned(hdr_.kind()) <= NumHeaderKinds);
+    return hdr_.kind();
   }
 
-  size_t size() const;
-
+  public:
   size_t allocSize() const {
     auto const sz = size();
-    switch (hdr_.kind) {
+    switch (kind()) {
       case HeaderKind::Hole:
       case HeaderKind::Free:
       case HeaderKind::BigObj:
@@ -139,10 +138,7 @@ struct Header {
 
 public:
   union {
-    struct {
-      HeaderWord<> hdr_;
-      uint64_t q;
-    };
+    MaybeCountable hdr_;
     StringData str_;
     ArrayData arr_;
     MixedArray mixed_;
@@ -163,8 +159,13 @@ public:
     ClosureHdr closure_hdr_;
     c_Closure closure_;
   };
+
+private:
+  size_t size() const;
+
 };
 
+// Return the size (in bytes) without rounding up to MM size class.
 inline size_t Header::size() const {
   // Ordering depends on ext_wait-handle.h.
   static const uint32_t waithandle_sizes[] = {
@@ -336,7 +337,7 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
     }
     do {
       auto size = h->allocSize();
-      fn(h);
+      fn(h, size);
       h = (Header*)((char*)h + size);
     } while (h < end);
     assert(!end || h == end); // otherwise, last object was truncated
@@ -344,15 +345,16 @@ template<class Fn> void BigHeap::iterate(Fn fn) {
 }
 
 template<class Fn> void MemoryManager::iterate(Fn fn) {
-  m_heap.iterate([&](Header* h) {
+  m_heap.iterate([&](Header* h, size_t allocSize) {
     if (h->kind() == HeaderKind::BigObj) {
       // skip MallocNode
       h = reinterpret_cast<Header*>((&h->malloc_) + 1);
+      allocSize -= sizeof(MallocNode);
     } else if (h->kind() == HeaderKind::Hole) {
       // no valid pointer can point here.
       return; // continue iterating
     }
-    fn(h);
+    fn(h, allocSize);
   });
 }
 
@@ -364,7 +366,7 @@ template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   if (debug) checkHeap("MM::forEachObject");
   std::vector<ObjectData*> ptrs;
-  forEachHeader([&](Header* h) {
+  forEachHeader([&](Header* h, size_t) {
     switch (h->kind()) {
       case HeaderKind::Object:
       case HeaderKind::WaitHandle:
@@ -423,25 +425,28 @@ struct PtrMap {
   using Region = std::pair<const Header*, std::size_t>;
   static constexpr auto Mask = 0xffffffffffffULL; // 48 bit address space
 
-  void insert(const Header* h) {
+  void insert(const Header* h, size_t size) {
     sorted_ &= regions_.empty() || h > regions_.back().first;
-    regions_.emplace_back(h, h->size());
+    regions_.emplace_back(h, size);
   }
 
   const Region* region(const void* p) const {
     assert(sorted_);
+    if (uintptr_t(p) - uintptr_t(span_.first) >= span_.second) {
+      return nullptr;
+    }
     // Find the first region which begins beyond p.
     p = reinterpret_cast<void*>(uintptr_t(p) & Mask);
     auto it = std::upper_bound(regions_.begin(), regions_.end(), p,
       [](const void* p, const Region& region) {
         return p < region.first;
       });
-    // If its the first region, p is before any region, so there's no
-    // header. Otherwise, backup to the previous region.
-    if (it == regions_.begin()) return nullptr;
-    --it;
+    // If it == first region, p is before any region, which we already
+    // checked above.
+    assert(it != regions_.begin());
+    --it; // backup to the previous region.
     // p can only potentially point within this previous region, so check that.
-    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ? &*it :
+    return uintptr_t(p) - uintptr_t(it->first) < it->second ? &*it :
            nullptr;
   }
 
@@ -470,6 +475,14 @@ struct PtrMap {
       std::sort(regions_.begin(), regions_.end());
       sorted_ = true;
     }
+    if (!regions_.empty()) {
+      auto& front = regions_.front();
+      auto& back = regions_.back();
+      span_ = Region{
+        front.first,
+        (const char*)back.first + back.second - (const char*)front.first
+      };
+    }
     assert(sanityCheck());
   }
 
@@ -483,6 +496,10 @@ struct PtrMap {
     }
   }
 
+  Region span() const {
+    return span_;
+  }
+
 private:
   bool sanityCheck() const {
     // Verify that all the regions are in increasing and non-overlapping order.
@@ -494,6 +511,7 @@ private:
     return true;
   }
 
+  Region span_{nullptr, 0};
   std::vector<std::pair<const Header*, std::size_t>> regions_;
   bool sorted_{true};
 };

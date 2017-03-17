@@ -44,7 +44,7 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
       end
     | None -> []
   in
-  List.map res Pos.to_absolute
+  List.map res Ide_api_types.pos_to_range
 
 let filter_result symbols result =
   let result = List.fold symbols ~init:result ~f:(fun result symbol ->
@@ -55,13 +55,13 @@ let filter_result symbols result =
   List.filter symbols ~f:(fun symbol ->
     symbol.SymbolOccurrence.pos = result.SymbolOccurrence.pos)
 
-let compare p1 p2 =
-  let line1, start1, _ = Pos.info_pos p1 in
-  let line2, start2, _ = Pos.info_pos p2 in
-  if line1 < line2 then -1
-  else if line1 > line2 then 1
-  else if start1 < start2 then -1
-  else if start1 > start2 then 1
+let compare r1 r2 =
+  let open Ide_api_types in
+  let s1, s2 = r1.st, r2.st in
+  if s1.line < s2.line then -1
+  else if s1.line > s2.line then 1
+  else if s1.column < s2.column then -1
+  else if s1.column > s2.column then 1
   else 0
 
 let rec combine_result l l1 l2 =

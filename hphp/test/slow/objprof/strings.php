@@ -86,9 +86,9 @@ $myClass["root"][] = "one";
 $myClass["root"][] = "one";
 $myClass["root"][$two] = getStr(2);
 $objs = objprof_get_strings(0);
-echo get_path('one', $objs) === "HH\\Map:[\"root\"]:array():[0]" &&
-     get_path('root', $objs) === "HH\\Map" &&
-     get_path('XX', $objs) === "HH\\Map:[\"root\"]:array()" &&
+echo get_path('one', $objs) === "HH\\Map:array():[\"root\"]:array():[0]" &&
+     get_path('root', $objs) === "HH\\Map:array()" &&
+     get_path('XX', $objs) === "HH\\Map:array():[\"root\"]:array()" &&
      get_dups('one', $objs) === 1 &&
      get_dups('root', $objs) === 1 &&
      get_dups('XX', $objs) === 2 &&
@@ -97,4 +97,21 @@ echo get_path('one', $objs) === "HH\\Map:[\"root\"]:array():[0]" &&
      get_srefs('XX', $objs) === 0
   ? "(GOOD) Path (complex) works\n"
   : "(BAD) Path (complex) failed: ".var_export($objs, true)."\n";
+$objs = null;
+
+// TEST: pairs
+$myClass = Pair {'lol', 'whut'};
+$objs = objprof_get_strings(0);
+echo get_path('lol', $objs) === "HH\\Pair" &&
+     get_path('whut', $objs) === "HH\\Pair" &&
+     get_dups('lol', $objs) === 1 &&
+     get_dups('whut', $objs) === 1 &&
+     get_refs('lol', $objs) === 1 &&
+     get_refs('whut', $objs) === 1 &&
+     get_srefs('lol', $objs) === 1 &&
+     get_srefs('whut', $objs) === 1
+  ? "(GOOD) Pairs work\n"
+  : "(BAD) Pairs failed: ".var_export($objs, true)."\n";
+$objs = null;
+
 echo "(GOOD) Got here without crashing\n";

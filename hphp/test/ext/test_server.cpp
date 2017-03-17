@@ -486,6 +486,8 @@ bool TestServer::TestSetCookie() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_test("test");
+
 struct TestTransport final : Transport {
   TestTransport() : m_code(0) {}
 
@@ -504,6 +506,13 @@ struct TestTransport final : Transport {
   void getHeaders(HeaderMap &headers) override {}
   void addHeaderImpl(const char *name, const char *value) override {}
   void removeHeaderImpl(const char *name) override {}
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_test;
+  }
 
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override {
@@ -728,8 +737,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }
@@ -758,8 +767,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }

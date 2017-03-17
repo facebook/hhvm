@@ -32,9 +32,9 @@ namespace HPHP {
 template<class Fn>
 void conservativeScan(const void* start, size_t len, Fn fn) {
   const uintptr_t M{7}; // word size - 1
-  auto s = (char**)((uintptr_t(start) + M) & ~M); // round up
-  auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
-  for (; s < e; s++) fn(*s);
+  auto s = (const void**)((uintptr_t(start) + M) & ~M); // round up
+  auto e = (const void**)((uintptr_t(start) + len) & ~M); // round down
+  for (; s < e; s++) fn(s);
 }
 
 namespace {
@@ -46,26 +46,61 @@ struct PtrFilter: F {
   // end is a partial word, don't scan that word.
 };
 
-void addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind) {
+// When we don't know the offset. 0 is safe since offset 0 in real
+// objects is the header word, which never contains pointers.
+const ptrdiff_t UnknownOffset = 0;
+
+size_t addPtr(HeapGraph& g, int from, int to, HeapGraph::PtrKind kind,
+            ptrdiff_t offset) {
   auto& from_node = g.nodes[from];
   auto& to_node = g.nodes[to];
   auto e = g.ptrs.size();
   g.ptrs.push_back(
-    HeapGraph::Ptr{from, to, from_node.first_out, to_node.first_in, kind, ""}
+    HeapGraph::Ptr{from, to, from_node.first_out, to_node.first_in,
+                   (int)offset, kind}
   );
   from_node.first_out = to_node.first_in = e;
+  return e;
 }
 
-void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
-             const char* description) {
-  auto& to_node = g.nodes[to];
-  auto e = g.ptrs.size();
-  g.ptrs.push_back(
-    HeapGraph::Ptr{-1, to, -1, to_node.first_in, ptr_kind, description}
+void addRootNode(HeapGraph& g, const PtrMap& blocks,
+                 type_scan::Scanner& scanner,
+                 const void* h, size_t size, type_scan::Index ty) {
+  auto from = g.nodes.size();
+  g.nodes.push_back(
+    HeapGraph::Node{h, size, true, ty, -1, -1}
   );
-  to_node.first_in = e;
-  g.roots.push_back(e);
+  g.root_nodes.push_back(from);
+  scanner.scanByIndex(ty, h, size);
+  scanner.finish(
+    [&](const void* p) {
+      if (auto r = blocks.region(p)) {
+        auto e = addPtr(g, from, blocks.index(r), HeapGraph::Implicit,
+               UnknownOffset);
+        g.root_ptrs.push_back(e);
+      }
+    },
+    [&](const void* p, std::size_t size) {
+      conservativeScan(p, size, [&](const void** addr) {
+        if (auto r = blocks.region(*addr)) {
+          auto to = blocks.index(r);
+          auto offset = uintptr_t(addr) - uintptr_t(h);
+          auto e = addPtr(g, from, to, HeapGraph::Ambiguous, offset);
+          g.root_ptrs.push_back(e);
+        }
+      });
+    },
+    [&](const void** addr) {
+      if (auto r = blocks.region(*addr)) {
+        auto to = blocks.index(r);
+        auto offset = uintptr_t(addr) - uintptr_t(h);
+        auto e = addPtr(g, from, to, HeapGraph::Counted, offset);
+        g.root_ptrs.push_back(e);
+      }
+    }
+  );
 }
+
 } // anon namespace
 
 // Run a DFS over the heap, remember the first pointer id to each
@@ -75,7 +110,7 @@ void addRoot(HeapGraph& g, int to, HeapGraph::PtrKind ptr_kind,
 // why the node is reachable. parent[k] == -1 for unreachable nodes.
 std::vector<int> makeParentTree(const HeapGraph& g) {
   std::vector<int> parents(g.nodes.size(), -1);
-  dfs_ptrs(g, g.roots, [&](int node, int ptr) {
+  dfs_ptrs(g, g.root_ptrs, [&](int node, int ptr) {
     parents[node] = ptr;
   });
   return parents;
@@ -90,9 +125,9 @@ HeapGraph makeHeapGraph(bool include_free) {
   // parse the heap once to create a PtrMap for pointer filtering. Create
   // one node for every parsed block, including NativeData and AsyncFuncFrame
   // blocks. Only include free blocks if requested.
-  MM().forEachHeader([&](Header* h) {
+  MM().forEachHeader([&](Header* h, size_t alloc_size) {
     if (h->kind() != HeaderKind::Free || include_free) {
-      blocks.insert(h); // adds interval [h, h+h->size[
+      blocks.insert(h, alloc_size); // adds interval [h, h+alloc_size[
     }
   });
   blocks.prepare();
@@ -100,52 +135,57 @@ HeapGraph makeHeapGraph(bool include_free) {
   // initialize nodes by iterating over PtrMap's regions
   g.nodes.reserve(blocks.size());
   blocks.iterate([&](const Header* h, size_t size) {
-    g.nodes.push_back(HeapGraph::Node{h, -1, -1});
+    g.nodes.push_back(
+      HeapGraph::Node{h, size, false, type_scan::kIndexUnknown, -1, -1}
+    );
   });
-  type_scan::Scanner type_scanner;
 
-  // find roots
-  scanRoots(type_scanner);
-  type_scanner.finish(
-    [&](const void* p, const char* description) {
-      // definitely a ptr, but maybe interior, and maybe not counted
-      if (auto r = blocks.region(p)) {
-        addRoot(g, blocks.index(r), HeapGraph::Implicit, description);
-      }
-    },
-    [&](const void* p, std::size_t size, const char* description) {
-      conservativeScan(p, size, [&](const void* ptr) {
-        if (auto r = blocks.region(ptr)) {
-          addRoot(g, blocks.index(r), HeapGraph::Ambiguous, description);
-        }
-      });
-    }
-  );
+  // find root nodes
+  type_scan::Scanner scanner;
+  iterateRoots([&](const void* h, size_t size, type_scan::Index tyindex) {
+    // it's important that we actually scan each root node before
+    // returning, since at least one will be the C++ stack, and some
+    // nodes will only exist for the duration of the call to this lambda,
+    // for example EphemeralPtrWrapper<T>.
+    addRootNode(g, blocks, scanner, h, size, tyindex);
+  });
 
   // find heap->heap pointers
   for (size_t i = 0, n = g.nodes.size(); i < n; i++) {
+    if (g.nodes[i].is_root) continue;
     auto h = g.nodes[i].h;
-    scanHeader(h, type_scanner);
+    scanHeader(h, scanner);
     auto from = blocks.index(h);
-    type_scanner.finish(
-      [&](const void* p, const char*) {
+    assert(from == i);
+    scanner.finish(
+      [&](const void* p) {
         // definitely a ptr, but maybe interior, and maybe not counted
         if (auto r = blocks.region(p)) {
-          addPtr(g, from, blocks.index(r), HeapGraph::Implicit);
+          addPtr(g, from, blocks.index(r), HeapGraph::Implicit, UnknownOffset);
         }
       },
-      [&](const void* p, std::size_t size, const char*) {
-        conservativeScan(p, size, [&](const void* ptr) {
-          if (auto r = blocks.region(ptr)) {
-            addPtr(g, from, blocks.index(r), HeapGraph::Ambiguous);
+      [&](const void* p, std::size_t size) {
+        conservativeScan(p, size, [&](const void** addr) {
+          if (auto r = blocks.region(*addr)) {
+            auto to = blocks.index(r);
+            auto offset = uintptr_t(addr) - uintptr_t(h);
+            addPtr(g, from, to, HeapGraph::Ambiguous, offset);
           }
         });
+      },
+      [&](const void** addr) {
+        if (auto r = blocks.region(*addr)) {
+          auto to = blocks.index(r);
+          auto offset = uintptr_t(addr) - uintptr_t(h);
+          addPtr(g, from, to, HeapGraph::Counted, offset);
+        }
       }
     );
   }
   g.nodes.shrink_to_fit();
   g.ptrs.shrink_to_fit();
-  g.roots.shrink_to_fit();
+  g.root_ptrs.shrink_to_fit();
+  g.root_nodes.shrink_to_fit();
   return g;
 }
 

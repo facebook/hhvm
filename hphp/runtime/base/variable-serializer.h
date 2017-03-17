@@ -21,7 +21,10 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/vm/class.h"
+
+#include <boost/noncopyable.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,9 +54,7 @@ struct VariableSerializer {
    * Constructor and destructor.
    */
   explicit VariableSerializer(Type type, int option = 0, int maxRecur = 3);
-  ~VariableSerializer() {
-    if (m_arrayIds) req::destroy_raw(m_arrayIds);
-  }
+  ~VariableSerializer();
   VariableSerializer(const VariableSerializer&) = delete;
   VariableSerializer& operator=(const VariableSerializer&) = delete;
 
@@ -80,22 +81,6 @@ struct VariableSerializer {
   enum class ArrayKind { PHP, Dict, Vec, Keyset };
 
 private:
-  // Generic wrapper around pointers to various countable types. Used instead of
-  // void* because it preserves enough type information for the type scanners to
-  // understand it.
-  union PtrWrapper {
-    PtrWrapper(const ArrayData* p): parr{p} {}
-    PtrWrapper(const ObjectData* p): pobj{p} {}
-    PtrWrapper(const ResourceData* p): pres{p} {}
-    PtrWrapper(const Variant* p): pvar{p} {}
-    // So pointer_hash<void> works
-    /* implicit */operator const void*() const { return parr; }
-    const ArrayData* parr;
-    const ObjectData* pobj;
-    const ResourceData* pres;
-    const Variant* pvar;
-  };
-
   /**
    * Type specialized output functions.
    */
@@ -115,7 +100,7 @@ private:
 
   void writeNull();
   // what to write if recursive level is over limit?
-  void writeOverflow(PtrWrapper ptr, bool isObject = false);
+  void writeOverflow(const TypedValue& tv);
   void writeRefCount(); // for DebugDump only
 
   void writeArrayHeader(int size, bool isVectorData, ArrayKind kind);
@@ -137,20 +122,56 @@ private:
   void indent();
   void setReferenced(bool referenced) { m_referenced = referenced;}
   void setRefCount(int count) { m_refCount = count;}
-  bool incNestedLevel(PtrWrapper ptr, bool isObject = false);
-  void decNestedLevel(PtrWrapper ptr);
+  bool incNestedLevel(const TypedValue& tv);
+  void decNestedLevel(const TypedValue& tv);
   void pushObjectInfo(const String& objClass, int objId, char objCode);
   void popObjectInfo();
   void pushResourceInfo(const String& rsrcName, int rsrcId);
   void popResourceInfo();
 
-  using ReqPtrCtrMap = req::hash_map<PtrWrapper, int, pointer_hash<void>>;
+  // Sentinel used to indicate that a member of SavedRefMap has a count but no ID.
+  static constexpr int NO_ID = -1;
+
+  struct SavedRefMap {
+    ~SavedRefMap();
+
+    struct MapData : boost::noncopyable {
+      MapData() : m_count(0), m_id(-1) { }
+      int m_count;
+      int m_id;
+    };
+
+    MapData& operator[](const TypedValue& tv) {
+      auto& elm = m_mapping[tv];
+      if (!elm.m_count) tvRefcountedIncRef(&tv);
+      return elm;
+    }
+
+    const MapData& operator[](const TypedValue& tv) const {
+      return m_mapping.at(tv);
+    }
+
+  private:
+    struct TvHash {
+      std::size_t operator()(const TypedValue& tv) const {
+        return pointer_hash<void>()(tv.m_data.parr);
+      }
+    };
+
+    struct TvEq {
+      bool operator()(const TypedValue& a, const TypedValue& b) const {
+        return a.m_data.parr == b.m_data.parr;
+      }
+    };
+
+    req::hash_map<TypedValue, MapData, TvHash, TvEq> m_mapping;
+  };
+
   Type m_type;
   int m_option;                  // type specific extra options
   StringBuffer *m_buf;
   int m_indent;
-  ReqPtrCtrMap m_counts;         // counting seen arrays for recursive levels
-  ReqPtrCtrMap *m_arrayIds;      // reference ids for objs/arrays
+  SavedRefMap m_refs;            // reference ids and counts for objs/arrays
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count

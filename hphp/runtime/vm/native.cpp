@@ -257,7 +257,6 @@ void callFunc(const Func* func, void *ctx,
     }
 
     case KindOfUninit:
-    case KindOfClass:
       break;
   }
 
@@ -345,7 +344,6 @@ bool coerceFCallArgs(TypedValue* args,
       case KindOfPersistentKeyset:
       case KindOfPersistentArray:
       case KindOfRef:
-      case KindOfClass:
         not_reached();
     }
   }
@@ -442,8 +440,8 @@ TypedValue* methodWrapper(ActRec* ar) {
        (nativeWrapperCheckArgs(ar))) &&
       (coerceFCallArgs(args, numArgs, numNonDefault, func, strict))) {
     // Prepend a context arg for methods
-    // KindOfClass when it's being called statically Foo::bar()
-    // KindOfObject when it's being called on an instance $foo->bar()
+    // Class when it's being called statically Foo::bar()
+    // Object when it's being called on an instance $foo->bar()
     void* ctx;  // ObjectData* or Class*
     if (ar->hasThis()) {
       if (isStatic) {
@@ -577,7 +575,6 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfNull:         return ty == T::Void;
     case KindOfRef:          return ty == T::Mixed    || ty == T::OutputArg;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
-    case KindOfClass:        break;
   }
   not_reached();
 }

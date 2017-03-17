@@ -1,0 +1,21 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test(<"HH\\int" "HH\\int" hh_type > $x, <"HH\\string" "HH\\string" hh_type > $y) {
+  VerifyParamType $x
+  VerifyParamType $y
+  Int 42
+  CGetL2 $x
+  AddO
+  SetL $x
+  PopC
+  CGetL $y
+  Print
+  PopC
+  Null
+  RetC
+}
+

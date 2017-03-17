@@ -164,6 +164,12 @@ struct RequestInjectionData {
   void setJitFolding(bool);
 
   /*
+   * Whether to suppress the emission of Hack array compat notices.
+   */
+  bool getSuppressHackArrayCompatNotices() const;
+  void setSuppressHackArrayCompatNotices(bool);
+
+  /*
    * Whether coverage is being collected.
    */
   bool getCoverage() const;
@@ -267,6 +273,9 @@ struct RequestInjectionData {
 
   const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
 
+  // When safe file access is enabled only whitelisted by setAllowedDirectories
+  // may be modified
+  void setSafeFileAccess(bool b);
   bool hasSafeFileAccess() const;
   bool hasTrackErrors() const;
   bool hasHtmlErrors() const;
@@ -280,6 +289,7 @@ private:
   bool m_jit{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};
+  bool m_suppressHackArrayCompatNotices{false};
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};

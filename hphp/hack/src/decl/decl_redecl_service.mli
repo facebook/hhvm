@@ -35,6 +35,7 @@ val get_dependent_classes :
   SSet.t
 
 val oldify_type_decl :
+  ?collect_garbage:bool ->
   Worker.t list option ->
   FileInfo.t Relative_path.Map.t ->
   bucket_size:int ->

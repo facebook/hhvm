@@ -34,6 +34,9 @@ val get_string_exn : json -> string
 val get_number_exn : json -> string
 val get_bool_exn : json -> bool
 
+val opt_string_to_json : string option -> json
+val opt_int_to_json : int option -> json
+
 val int_ : int -> json
 
 (** Types and functions for monadic API for traversing a JSON object. *)
@@ -88,6 +91,9 @@ module type Access = sig
 
   val (>>=) : 'a m -> (('a * keytrace) -> 'b m) -> 'b m
 
+  (** This is a comonad, but we need a little help to deal with failure *)
+  val counit_with : (access_failure -> 'a) -> 'a m -> 'a
+
   (**
    * The following getters operate on a JSON_Object by accessing keys on it,
    * and asserting the returned value has the given expected type (types
@@ -106,6 +112,7 @@ module type Access = sig
   val get_string : string -> json * keytrace -> string m
   val get_number : string -> json * keytrace -> string m
   val get_array: string -> json * keytrace -> (json list) m
+  val get_val: string -> json * keytrace -> json m (* any expected type *)
 end
 
 module Access : Access

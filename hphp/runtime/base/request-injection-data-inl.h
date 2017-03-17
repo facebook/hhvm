@@ -41,6 +41,14 @@ inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
 }
 
+inline bool RequestInjectionData::getSuppressHackArrayCompatNotices() const {
+  return m_suppressHackArrayCompatNotices;
+}
+
+inline void RequestInjectionData::setSuppressHackArrayCompatNotices(bool flag) {
+  m_suppressHackArrayCompatNotices = flag;
+}
+
 inline bool RequestInjectionData::getCoverage() const {
   return m_coverage;
 }
@@ -202,6 +210,10 @@ inline const std::string& RequestInjectionData::getTimeZone() const {
 
 inline void RequestInjectionData::setTimeZone(const std::string& tz) {
   m_timezone = tz;
+}
+
+inline void RequestInjectionData::setSafeFileAccess(bool b) {
+  m_safeFileAccess = b;
 }
 
 inline bool RequestInjectionData::hasSafeFileAccess() const {

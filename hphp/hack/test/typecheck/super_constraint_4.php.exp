@@ -8,7 +8,7 @@ File "super_constraint_4.php", line 8, characters 49-51:
 'Ty1' is a constrained type
 File "super_constraint_4.php", line 11, characters 4-5:
 'Tx' is a constrained type
-File "super_constraint_4.php", line 8, characters 23-25:
+File "super_constraint_4.php", line 8, characters 14-15:
 'Tx1' is a constrained type
 File "super_constraint_4.php", line 8, characters 38-40:
 This is an object of type Foo

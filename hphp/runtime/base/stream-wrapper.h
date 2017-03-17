@@ -67,6 +67,13 @@ struct Wrapper {
   virtual req::ptr<Directory> opendir(const String& path) {
     return nullptr;
   }
+  virtual String realpath(const String& path) {
+    return null_string;
+  }
+
+  // Normal file streams represent local files and must support all of the
+  // stream operations.
+  virtual bool isNormalFileStream() const { return false; }
 
   virtual ~Wrapper() {}
 
@@ -74,6 +81,21 @@ struct Wrapper {
    * Is there a chance that open() could return a file that is local?
    */
   bool m_isLocal;
+};
+
+/*
+ * ExtendedWrapper allows a Stream::Wrapper to override various other POSIX
+ * functions for manipulating the FileSystem. This is particularly useful for
+ * user-defined wrappers which may wish to override these operations. It is
+ * also required when proxying through a client in remote unix server mode.
+ */
+struct ExtendedWrapper : Wrapper {
+  virtual bool touch(const String& path, int64_t mtime, int64_t atime) = 0;
+  virtual bool chmod(const String& path, int64_t mode) = 0;
+  virtual bool chown(const String& path, int64_t uid) = 0;
+  virtual bool chown(const String& path, const String& uid) = 0;
+  virtual bool chgrp(const String& path, int64_t gid) = 0;
+  virtual bool chgrp(const String& path, const String& gid) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

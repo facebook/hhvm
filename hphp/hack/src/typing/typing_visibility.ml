@@ -48,7 +48,7 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CIparent ->
     Some "You cannot access a private member with parent::"
   | CIself -> None
-  | CI (_, called_ci) ->
+  | CI ((_, called_ci), _) ->
     (if x = self_id then None else
      match Env.get_class env called_ci with
      | Some {tc_kind = Ast.Ctrait; _} ->

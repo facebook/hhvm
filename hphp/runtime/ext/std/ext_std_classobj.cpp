@@ -63,20 +63,12 @@ Array HHVM_FUNCTION(get_declared_traits) {
 
 bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
                                 bool autoload /* = true */) {
-  auto const origClass =
-    autoload ? Unit::loadClass(original.get())
-             : Unit::lookupClass(original.get());
-  if (!origClass) {
-    raise_warning("Class %s not found", original.data());
+  if (RuntimeOption::EvalAuthoritativeMode) {
+    raise_warning("Cannot call class_alias dynamically "
+                  "in repo-authoritative mode");
     return false;
   }
-  if (origClass->isBuiltin()) {
-    raise_warning(
-      "First argument of class_alias() must be a name of user defined class");
-    return false;
-  }
-
-  return Unit::aliasClass(origClass, alias.get());
+  return Unit::aliasClass(original.get(), alias.get(), autoload);
 }
 
 bool HHVM_FUNCTION(class_exists, const String& class_name,

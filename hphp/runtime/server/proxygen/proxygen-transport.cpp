@@ -290,7 +290,9 @@ void ProxygenTransport::onHeadersComplete(
   }
 
   if (m_repost) {
-   beginPartialPostEcho();
+    VLOG(2) << "Reposting transaction's completed receiving header,"
+            << " beginning partial post";
+    beginPartialPostEcho();
   }
   if (!bufferRequest()) {
     m_server->onRequest(shared_from_this());
@@ -304,7 +306,11 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
   if (bufferRequest()) {
     CHECK(!m_enqueued);
     if (m_repost) {
+      VLOG(2) << "Reposting transaction " << *m_clientTxn
+              << " received body bytes";
       if (m_clientTxn && !m_egressError) {
+        VLOG(2) << "Reposting transaction " << *m_clientTxn
+                << " is sending received body bytes";
         m_clientTxn->sendBody(std::move(chain));
       }
     } else {
@@ -326,7 +332,10 @@ void ProxygenTransport::onEOM() noexcept {
   if (bufferRequest()) {
     CHECK(!m_enqueued);
     if (m_repost) {
+      VLOG(2) << "Transaction " << *m_clientTxn << " is reposting";
       if (m_clientTxn && !m_egressError) {
+        VLOG(2) << "Transaction " << *m_clientTxn
+                << " is sending EOM for repost";
         m_clientTxn->sendEOM();
       }
       return;
@@ -776,9 +785,20 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
 }
 
 void ProxygenTransport::beginPartialPostEcho() {
+  VLOG(2) << "Beginning partial post";
   if (!bufferRequest() || m_repost || !m_clientTxn || m_egressError) {
+    VLOG(2) << "beginPartialPostEcho cannot proceed, "
+            << "bufferRequest() = " << bufferRequest()
+            << "m_repost = " << m_repost
+            << "m_clientTxn = " << m_clientTxn
+            << "m_egressError = " << m_egressError;
     return;
   }
+  VLOG(2) << "beginPartialPostEcho is proceeding, "
+          << "bufferRequest() = " << bufferRequest()
+          << "m_repost = " << m_repost
+          << "m_clientTxn = " << m_clientTxn
+          << "m_egressError = " << m_egressError;
   CHECK(!m_enqueued);
   m_repost = true;
   HTTPMessage response;
@@ -794,6 +814,7 @@ void ProxygenTransport::beginPartialPostEcho() {
 
   m_clientTxn->sendHeaders(response);
   if (!m_bodyData.empty()) {
+    VLOG(2) << "Reposting body bytes for client transaction " << *m_clientTxn;
     m_clientTxn->sendBody(m_bodyData.move());
   }
 }
@@ -801,11 +822,7 @@ void ProxygenTransport::beginPartialPostEcho() {
 void ProxygenTransport::abort() {
   unlink();
   if (m_clientTxn) {
-    if (m_repost) {
-      m_clientTxn->sendEOM();
-    } else {
-      m_clientTxn->sendAbort();
-    }
+    m_clientTxn->sendAbort();
   }
   s_requestErrorCount->addValue(1);
 }

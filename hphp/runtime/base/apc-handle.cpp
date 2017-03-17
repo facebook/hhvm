@@ -146,7 +146,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       return APCArray::MakeSharedEmptyArray();
 
     case KindOfRef:
-    case KindOfClass:
       return {nullptr, 0};
   }
   not_reached();

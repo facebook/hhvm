@@ -62,6 +62,7 @@ let main env =
   let ic, oc = ClientConnect.connect { ClientConnect.
     root = env.root;
     autostart = true;
+    force_dormant_start = false;
     retries = if env.wait then None else Some num_build_retries;
     retry_if_init = true;
     expiry = None;

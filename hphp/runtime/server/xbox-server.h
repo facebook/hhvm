@@ -93,6 +93,8 @@ struct XboxServerInfo : SatelliteServerInfo {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_xbox("xbox");
+
 struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(
     const folly::StringPiece message,
@@ -131,6 +133,13 @@ struct XboxTransport final : Transport, Synchronizable {
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override;
   void onSendEndImpl() override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_xbox;
+  }
 
   /**
    * Task interface.

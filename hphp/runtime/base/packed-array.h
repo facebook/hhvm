@@ -47,7 +47,7 @@ struct ArrayLval;
  * php arrays with zero-based contiguous integer keys, and values of mixed
  * types.  The TypedValue's are placed right after the array header.
  */
-struct PackedArray final: type_scan::MarkCountable<PackedArray> {
+struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
   static constexpr uint32_t SmallSize = 3;
 
@@ -68,11 +68,11 @@ struct PackedArray final: type_scan::MarkCountable<PackedArray> {
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData*);
   static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
+  static ArrayLval LvalIntRef(ArrayData*, int64_t k, bool copy);
   static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
+  static ArrayLval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static ArrayLval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);

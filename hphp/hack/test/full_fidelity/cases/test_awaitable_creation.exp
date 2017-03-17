@@ -4,7 +4,7 @@
 (function_declaration_header(missing)
 ((function)(whitespace))(missing)((name)(whitespace))(missing)
 ((lparen))(missing)((rparen)(whitespace))
-(missing)(missing))
+(missing)(missing)(missing))
 (compound_statement
 (({)(end_of_line))
 (list(expression_statement

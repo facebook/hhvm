@@ -51,7 +51,7 @@ void cgLdStaticLoc(IRLS& env, const IRInstruction* inst) {
 
   auto const sf = checkRDSHandleInitialized(v, link.handle());
   fwdJcc(v, env, CC_NE, sf, inst->taken());
-  v << lea{rvmtl()[link.handle()], dst};
+  v << lea{rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()], dst};
 }
 
 void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
@@ -67,7 +67,7 @@ void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
   // We are storing the src value into the static, but we don't need to incref
   // it because it's a bytecode invariant that it's not a reference counted
   // type.
-  v << lea{rvmtl()[link.handle()], dst};
+  v << lea{rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()], dst};
   storeTV(v, dst[RefData::tvOffset()], srcLoc(env, inst, 0), inst->src(0));
   v << storeli{1, dst[FAST_REFCOUNT_OFFSET]};
   v << storebi{0, dst[RefData::cowZOffset()]};

@@ -73,8 +73,6 @@ struct VariantControllerImpl {
       case KindOfRef:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
-      case KindOfClass:
-        break;
     }
     not_reached();
   }

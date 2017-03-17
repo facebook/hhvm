@@ -150,7 +150,7 @@ enum class AnnotAction {
  */
 inline AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
-  assert(dt != KindOfRef && dt != KindOfClass);
+  assert(dt != KindOfRef);
   assert(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);
@@ -226,7 +226,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         return AnnotAction::Fail;
       case KindOfObject:
       case KindOfRef:
-      case KindOfClass:
         not_reached();
         break;
     }

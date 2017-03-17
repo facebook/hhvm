@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/hhbbc/eval-cell.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/interp-internal.h"
@@ -203,6 +204,17 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
+  if (!options.HardConstProp || op.arg1 != 2) return false;
+  if (auto const v = tv(topT(env, 1))) {
+    if (isStringType(v->m_type) &&
+        !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
+      env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;
+    }
+  }
+  return false;
+}
+
 const StaticString
   s_abs("abs"),
   s_ceil("ceil"),
@@ -210,7 +222,8 @@ const StaticString
   s_max2("__SystemLib\\max2"),
   s_min2("__SystemLib\\min2"),
   s_mt_rand("mt_rand"),
-  s_strlen("mt_strlen");
+  s_strlen("mt_strlen"),
+  s_defined("defined");
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
@@ -223,6 +236,7 @@ bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
   X(min2)
   X(mt_rand)
   X(strlen)
+  X(defined)
 
 #undef X
 
@@ -285,6 +299,107 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   push(env, rt);
 }
 
+}
+
+bool can_emit_builtin(borrowed_ptr<const php::Func> func,
+                      int numArgs, bool hasUnpack) {
+  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin) ||
+      func->cls ||
+      !func->nativeInfo ||
+      func->params.size() >= Native::maxFCallBuiltinArgs() ||
+      !RuntimeOption::EvalEnableCallBuiltin) {
+    return false;
+  }
+
+  auto variadic = func->params.size() && func->params.back().isVariadic;
+
+  // Only allowed to overrun the signature if we have somewhere to put it
+  if (numArgs > func->params.size() && !variadic) return false;
+
+  // Don't convert an FCallUnpack or FCallArray unless we're calling
+  // a variadic function with the unpack in the right place to pass
+  // it directly.
+  if (hasUnpack &&
+      (!variadic || numArgs != func->params.size())) {
+    return false;
+  }
+
+  auto const allowDoubleArgs = Native::allowFCallBuiltinDoubles();
+
+  if (!allowDoubleArgs && func->nativeInfo->returnType == KindOfDouble) {
+    return false;
+  }
+
+  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
+
+  for (int i = 0; i < concrete_params; i++) {
+    auto const& pi = func->params[i];
+    if (!allowDoubleArgs && pi.builtinType == KindOfDouble) {
+      return false;
+    }
+    if (i >= numArgs) {
+      if (pi.isVariadic) continue;
+      if (pi.defaultValue.m_type == KindOfUninit) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+void finish_builtin(ISS& env,
+                    borrowed_ptr<const php::Func> func,
+                    int numArgs,
+                    bool unpack) {
+  std::vector<Bytecode> repl;
+  assert(!unpack ||
+         (numArgs &&
+          numArgs == func->params.size() &&
+          func->params.back().isVariadic));
+
+  for (auto i = numArgs; i < func->params.size(); i++) {
+    auto const& pi = func->params[i];
+    if (pi.isVariadic) {
+      repl.emplace_back(bc::NewArray { 0 });
+      continue;
+    }
+    auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
+      make_tv<KindOfUninit>() : pi.defaultValue;
+    repl.emplace_back(gen_constant(cell));
+  }
+  if (!unpack &&
+      func->params.size() &&
+      func->params.back().isVariadic &&
+      numArgs >= func->params.size()) {
+
+    const int32_t numToPack = numArgs - func->params.size() + 1;
+    repl.emplace_back(bc::NewPackedArray { numToPack });
+    numArgs = func->params.size();
+  }
+
+  assert(numArgs <= func->params.size());
+
+  repl.emplace_back(
+    bc::FCallBuiltin {
+      static_cast<int32_t>(func->params.size()), numArgs, func->name }
+  );
+
+  reduce(env, std::move(repl));
+  fpiPop(env);
+}
+
+void reduce_fpass_arg(ISS& env, const Bytecode& bc, int param, bool byRef) {
+  auto ar = fpiTop(env);
+  if (ar.kind == FPIKind::Builtin) {
+    return reduce(env, bc);
+  }
+
+  if (byRef) {
+    return reduce(env, bc, bc::FPassVNop { param });
+  }
+
+  return reduce(env, bc, bc::FPassC { param });
 }
 
 //////////////////////////////////////////////////////////////////////

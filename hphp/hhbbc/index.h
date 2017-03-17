@@ -28,6 +28,7 @@
 #include <folly/Optional.h>
 #include <folly/Hash.h>
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/type-constraint.h"
@@ -42,6 +43,7 @@ namespace HPHP { namespace HHBBC {
 struct Type;
 struct Index;
 struct PublicSPropIndexer;
+struct FuncAnalysis;
 
 namespace php {
 struct Class;
@@ -70,9 +72,18 @@ struct Program;
  * fields may be null in some situations.  Most queries to the Index
  * need a "context", to allow recording dependencies.
  */
-struct Context { borrowed_ptr<php::Unit> unit;
-                 borrowed_ptr<php::Func> func;
-                 borrowed_ptr<php::Class> cls; };
+struct Context {
+  borrowed_ptr<const php::Unit> unit;
+  borrowed_ptr<php::Func> func;
+  borrowed_ptr<const php::Class> cls;
+
+  struct Hash {
+    size_t operator()(const Context& c) const {
+      return pointer_hash<void>{}(c.func ? (void*)c.func :
+                                  c.cls ? (void*)c.cls : (void*)c.unit);
+    }
+  };
+};
 
 inline bool operator==(Context a, Context b) {
   return a.unit == b.unit && a.func == b.func && a.cls == b.cls;
@@ -83,8 +94,11 @@ inline bool operator<(Context a, Context b) {
          std::make_tuple(b.unit, b.func, b.cls);
 }
 
+using ContextSet = std::unordered_set<Context, Context::Hash>;
+
 std::string show(Context);
 
+using ConstantMap = std::unordered_map<SString, Cell>;
 /*
  * Context for a call to a function.  This means the types and number
  * of arguments, and where it is being called from.
@@ -106,7 +120,7 @@ inline bool operator==(const CallContext& a, const CallContext& b) {
  * State of properties on a class.  Map from property name to its
  * Type.
  */
-using PropState = std::map<SString,Type>;
+using PropState = std::map<LSString,Type>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -269,6 +283,11 @@ struct Func {
    */
   bool isFoldable() const;
 
+  /*
+   * Returns whether this resolved function could possibly be skipped when
+   * looking for a caller's frame.
+   */
+  bool mightBeSkipFrame() const;
 private:
   friend struct ::HPHP::HHBBC::Index;
   struct FuncName {
@@ -369,7 +388,7 @@ struct Index {
    * Find all the closures created inside the context of a given
    * php::Class.
    */
-  std::vector<borrowed_ptr<php::Class>>
+  const CompactVector<borrowed_ptr<const php::Class>>*
     lookup_closures(borrowed_ptr<const php::Class>) const;
 
   /*
@@ -473,6 +492,14 @@ struct Index {
   Type lookup_class_constant(Context, res::Class, SString cns) const;
 
   /*
+   * Lookup what the best known Type for a constant would be, using a
+   * given Index and Context, if a constant of that name were defined.
+   *
+   * Returns folly::none if the constant isn't in the index.
+   */
+  folly::Optional<Type> lookup_constant(Context ctx, SString cnsName) const;
+
+  /*
    * Return the best known return type for a resolved function, in a
    * context insensitive way.  Returns TInitGen at worst.
    */
@@ -549,6 +576,18 @@ struct Index {
   Type lookup_public_static(borrowed_ptr<const php::Class>, SString name) const;
 
   /*
+   * If we resolve a public static initializer to a constant, and eliminate the
+   * 86pinit, we need to update the initializer in the index.
+   *
+   * Note that this is called from code that runs in parallel, and
+   * consequently isn't normally allowed to modify the index. Its safe
+   * in this case, because for any given property there can only be
+   * one InitProp which sets it, and all we do is modify an existing
+   * element of a map.
+   */
+  void fixup_public_static(borrowed_ptr<const php::Class>, SString name,
+                           const Type& ty) const;
+  /*
    * Returns whether a public static property is known to be immutable.  This
    * is used to add AttrPersistent flags to static properties, and relies on
    * AnalyzePublicStatics (without this flag it will always return false).
@@ -565,16 +604,51 @@ struct Index {
   Slot lookup_iface_vtable_slot(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Refine the types of the class constants defined by an 86cinit,
+   * based on a round of analysis.
+   *
+   * Constants not defined by a pseudomain are considered unknowable
+   *
+   * No other threads should be calling functions on this Index when
+   * this function is called.
+   *
+   * Merges the set of Contexts that depended on the constants defined
+   * by this 86cinit.
+   */
+  void refine_class_constants(const Context& ctx, ContextSet& deps);
+
+  /*
+   * Refine the types of the constants defined by a function, based on
+   * a round of analysis.
+   *
+   * Constants not defined by a pseudomain are considered unknowable
+   *
+   * No other threads should be calling functions on this Index when
+   * this function is called.
+   *
+   * Merges the set of Contexts that depended on the constants defined
+   * by this php::Func into deps.
+   */
+  void refine_constants(const FuncAnalysis& fa, ContextSet& deps);
+
+  /*
+   * Refine the types of the local statics owned by the function.
+   */
+  void refine_local_static_types(borrowed_ptr<const php::Func> func,
+                                 const CompactVector<Type>& localStaticTypes);
+
+  /*
    * Refine the return type for a function, based on a round of
    * analysis.
    *
    * No other threads should be calling functions on this Index when
    * this function is called.
    *
-   * Returns: the set of Contexts that depended on the return type of
-   * this php::Func.
+   * Merges the set of Contexts that depended on the return type of
+   * this php::Func into deps.
    */
-  std::vector<Context> refine_return_type(borrowed_ptr<const php::Func>, Type);
+  void refine_return_type(borrowed_ptr<const php::Func>, Type,
+                          ContextSet& deps);
 
   /*
    * Refine the used var types for a closure, based on a round of
@@ -616,6 +690,11 @@ struct Index {
    * provided PublicSPropIndexer when this function is called.
    */
   void refine_public_statics(const PublicSPropIndexer&);
+
+  /*
+   * Identify the persistent classes, functions and typeAliases.
+   */
+  void mark_persistent_classes_and_functions(php::Program& program);
 
   /*
    * Return true if the resolved function is an async

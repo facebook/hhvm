@@ -33,6 +33,7 @@
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/synchronizable-multi.h"
 #include "hphp/util/timer.h"
 

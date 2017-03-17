@@ -42,6 +42,7 @@ type action_internal  =
   | IGConst of string
 
 type result = (string * Pos.absolute) list
+type ide_result = (string * Pos.absolute list) option
 
 let process_fun_id results_acc target_fun id =
   if target_fun = (snd id)
@@ -146,12 +147,12 @@ let find_child_classes tcopt target_class_name files_info files =
       acc)
   end
 
-let get_child_classes_files tcopt class_name =
-  match Typing_lazy_heap.get_class tcopt class_name with
-  | Some class_ ->
+let get_child_classes_files class_name =
+  match Naming_heap.TypeIdHeap.get class_name with
+  | Some (_, `Class) ->
     (* Find the files that contain classes that extend class_ *)
     let cid_hash =
-      Typing_deps.Dep.make (Typing_deps.Dep.Class class_.tc_name) in
+      Typing_deps.Dep.make (Typing_deps.Dep.Class class_name) in
     let extend_deps =
       Decl_compare.get_extend_deps cid_hash
         (Typing_deps.DepSet.singleton cid_hash)
@@ -160,15 +161,13 @@ let get_child_classes_files tcopt class_name =
   | _ ->
     Relative_path.Set.empty
 
-let get_deps_set tcopt classes =
-  let get_filename tcopt class_name =
-    Naming_heap.TypeIdHeap.get class_name >>= function
-      (_, `Class) -> Typing_lazy_heap.get_class tcopt class_name >>=
-        fun class_ -> Some(Pos.filename class_.tc_pos)
-    | (_, `Typedef) -> Typing_lazy_heap.get_typedef tcopt class_name >>=
-        fun type_ -> Some(Pos.filename type_.td_pos)
-  in SSet.fold classes ~f:begin fun class_name acc ->
-    match get_filename tcopt class_name with
+let get_deps_set classes =
+  let get_filename class_name =
+    Naming_heap.TypeIdHeap.get class_name >>= fun (pos, _) ->
+    Some (FileInfo.get_pos_filename pos)
+  in
+  SSet.fold classes ~f:begin fun class_name acc ->
+    match get_filename class_name with
     | None -> acc
     | Some fn ->
       let dep = Typing_deps.Dep.Class class_name in
@@ -178,10 +177,10 @@ let get_deps_set tcopt classes =
       Relative_path.Set.union files acc
   end ~init:Relative_path.Set.empty
 
-let get_deps_set_function tcopt f_name =
-  match Typing_lazy_heap.get_fun tcopt f_name with
-  | Some fun_ ->
-    let fn = Pos.filename fun_.ft_pos in
+let get_deps_set_function f_name =
+  match Naming_heap.FunPosHeap.get f_name with
+  | Some pos ->
+    let fn = FileInfo.get_pos_filename pos in
     let dep = Typing_deps.Dep.Fun f_name in
     let bazooka = Typing_deps.get_bazooka dep in
     let files = Typing_deps.get_files bazooka in
@@ -189,10 +188,10 @@ let get_deps_set_function tcopt f_name =
   | None ->
     Relative_path.Set.empty
 
-let get_deps_set_gconst tcopt cst_name =
-  match Typing_lazy_heap.get_gconst tcopt cst_name with
-  | Some cst_ ->
-    let fn = Pos.filename @@ Typing_reason.to_pos @@ fst cst_ in
+let get_deps_set_gconst cst_name =
+  match Naming_heap.ConstPosHeap.get cst_name with
+  | Some pos ->
+    let fn = FileInfo.get_pos_filename pos in
     let dep = Typing_deps.Dep.GConst cst_name in
     let bazooka = Typing_deps.get_bazooka dep in
     let files = Typing_deps.get_files bazooka in
@@ -272,19 +271,24 @@ let find_references tcopt workers target include_defs
   else
     results
 
-let get_dependent_files_function tcopt _workers f_name =
+let get_dependent_files_function _workers f_name =
   (* This is performant enough to not need to go parallel for now *)
-  get_deps_set_function tcopt f_name
+  get_deps_set_function f_name
 
-let get_dependent_files_gconst tcopt _workers cst_name =
+let get_dependent_files_gconst _workers cst_name =
   (* This is performant enough to not need to go parallel for now *)
-  get_deps_set_gconst tcopt cst_name
+  get_deps_set_gconst cst_name
 
-let get_dependent_files tcopt _workers input_set =
+let get_dependent_files _workers input_set =
   (* This is performant enough to not need to go parallel for now *)
-  get_deps_set tcopt input_set
+  get_deps_set input_set
 
-let print results =
-  List.iter (List.rev results) (fun (s, p) ->
-    Printf.printf "%s %s\n" s (Pos.string p)
+let result_to_ide_message x =
+  let open Ide_message in
+  Find_references_response (
+    Option.map x ~f:begin fun (symbol_name, references) ->
+      let references =
+        List.map references ~f:Ide_api_types.pos_to_file_range in
+      {symbol_name; references}
+    end
   )

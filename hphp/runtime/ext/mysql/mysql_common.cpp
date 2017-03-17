@@ -1573,8 +1573,8 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
           preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/is", query);
         if (!same(ret, false)) {
           MYSQL *new_conn = create_new_conn();
-          IOStatusHelper io("mysql::kill", rconn->m_host.c_str(),
-                            rconn->m_port);
+          IOStatusHelper io2("mysql::kill", rconn->m_host.c_str(),
+                             rconn->m_port);
           MYSQL *connected = mysql_real_connect
             (new_conn, rconn->m_host.c_str(), rconn->m_username.c_str(),
              rconn->m_password.c_str(), nullptr, rconn->m_port, nullptr, 0);

@@ -8,7 +8,7 @@
  *
  *)
 
-open Ide_message
+open Ide_api_types
 open Ide_rpc_protocol_parser_types
 open Hh_json
 
@@ -33,8 +33,8 @@ val get_position_field :
 val get_file_position_field :
   json -> (file_position, error_t) Result.t
 
-val get_start_field :
-  json -> (position, error_t) Result.t
+val parse_range_field :
+  json -> (range, error_t) Result.t
 
-val get_end_field :
-  json -> (position, error_t) Result.t
+val get_file_range_field :
+  json -> (file_range, error_t) Result.t

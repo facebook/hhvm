@@ -174,6 +174,43 @@ TEST(Type, Boxes) {
   EXPECT_EQ(TBottom, TBoxedCell & TPtrToGen);
 
   EXPECT_EQ(TInt | TDbl, (TInt | TBoxedDbl).unbox());
+
+  auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
+  auto const array = make_packed_array(1, 2, 3, 4);
+  auto const arrData = ArrayData::GetScalarArray(array.get());
+  auto boxedConstPackedArray = Type::cns(arrData).box();
+  EXPECT_FALSE(boxedConstPackedArray.hasConstVal());
+  EXPECT_TRUE(boxedConstPackedArray.isSpecialized());
+  EXPECT_EQ(TBoxedStaticArr, boxedConstPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, boxedConstPackedArray.arrSpec());
+
+  auto boxedStaticPackedArray = Type::StaticArray(ArrayData::kPackedKind).box();
+  EXPECT_FALSE(boxedStaticPackedArray.hasConstVal());
+  EXPECT_TRUE(boxedStaticPackedArray.isSpecialized());
+  EXPECT_EQ(TBoxedStaticArr, boxedStaticPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, boxedStaticPackedArray.arrSpec());
+
+  auto boxedPackedArray = Type::Array(ArrayData::kPackedKind).box();
+  EXPECT_FALSE(boxedPackedArray.hasConstVal());
+  EXPECT_TRUE(boxedPackedArray.isSpecialized());
+  EXPECT_EQ(TBoxedArr, boxedPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, boxedPackedArray.arrSpec());
+
+  auto boxedExactObj = Type::ExactObj(SystemLib::s_IteratorClass).box();
+  auto exactClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::ExactTag{});
+  EXPECT_FALSE(boxedExactObj.hasConstVal());
+  EXPECT_TRUE(boxedExactObj.isSpecialized());
+  EXPECT_EQ(TBoxedObj, boxedExactObj.unspecialize());
+  EXPECT_EQ(exactClassSpec, boxedExactObj.clsSpec());
+
+  auto boxedSubObj = Type::SubObj(SystemLib::s_IteratorClass).box();
+  auto subClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::SubTag{});
+  EXPECT_FALSE(boxedSubObj.hasConstVal());
+  EXPECT_TRUE(boxedSubObj.isSpecialized());
+  EXPECT_EQ(TBoxedObj, boxedSubObj.unspecialize());
+  EXPECT_EQ(subClassSpec, boxedSubObj.clsSpec());
 }
 
 TEST(Type, Ptr) {
@@ -206,6 +243,44 @@ TEST(Type, Ptr) {
   EXPECT_EQ(TFunc, (TFunc | a1) - a1);
 
   EXPECT_EQ(TBottom, TBottom.deref());
+
+  auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
+  auto const array = make_packed_array(1, 2, 3, 4);
+  auto const arrData = ArrayData::GetScalarArray(array.get());
+  auto ptrToConstPackedArray = Type::cns(arrData).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToConstPackedArray.hasConstVal());
+  EXPECT_TRUE(ptrToConstPackedArray.isSpecialized());
+  EXPECT_EQ(TPtrToStaticArr, ptrToConstPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, ptrToConstPackedArray.arrSpec());
+
+  auto ptrToStaticPackedArray =
+    Type::StaticArray(ArrayData::kPackedKind).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToStaticPackedArray.hasConstVal());
+  EXPECT_TRUE(ptrToStaticPackedArray.isSpecialized());
+  EXPECT_EQ(TPtrToStaticArr, ptrToStaticPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, ptrToStaticPackedArray.arrSpec());
+
+  auto ptrToPackedArray = Type::Array(ArrayData::kPackedKind).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToPackedArray.hasConstVal());
+  EXPECT_TRUE(ptrToPackedArray.isSpecialized());
+  EXPECT_EQ(TPtrToArr, ptrToPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, ptrToPackedArray.arrSpec());
+
+  auto ptrToExactObj = Type::ExactObj(SystemLib::s_IteratorClass).ptr(Ptr::Ptr);
+  auto exactClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::ExactTag{});
+  EXPECT_FALSE(ptrToExactObj.hasConstVal());
+  EXPECT_TRUE(ptrToExactObj.isSpecialized());
+  EXPECT_EQ(TPtrToObj, ptrToExactObj.unspecialize());
+  EXPECT_EQ(exactClassSpec, ptrToExactObj.clsSpec());
+
+  auto ptrToSubObj = Type::SubObj(SystemLib::s_IteratorClass).ptr(Ptr::Ptr);
+  auto subClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::SubTag{});
+  EXPECT_FALSE(ptrToSubObj.hasConstVal());
+  EXPECT_TRUE(ptrToSubObj.isSpecialized());
+  EXPECT_EQ(TPtrToObj, ptrToSubObj.unspecialize());
+  EXPECT_EQ(subClassSpec, ptrToSubObj.clsSpec());
 }
 
 TEST(Type, Subtypes) {

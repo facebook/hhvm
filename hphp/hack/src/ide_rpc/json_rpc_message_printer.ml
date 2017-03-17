@@ -9,23 +9,31 @@
  *)
 
 open Hh_json
+open Ide_message
 open Ide_rpc_protocol_parser
 
-let response_to_json ~id ~result =
-  let id = match id with
-    | Some x -> JSON_Number (string_of_int x)
-    | None -> JSON_Null
-  in
-  let result = match result with
-    | `Result result -> ("result", result)
-    | `Error e ->
-      ("error", JSON_Object [
-        "code", int_ (error_t_to_code e);
-        "message", JSON_String (error_t_to_string e);
-      ])
-  in
-  JSON_Object [
-    "jsonrpc", JSON_String "2.0";
-    "id", id;
-    result;
+let build_message id fields =
+  JSON_Object (
+    ["jsonrpc", JSON_String "2.0"]
+    @ Ide_parser_utils.opt_field id "id" int_
+    @ fields
+  )
+
+let success_to_json id result =
+  build_message id ["result", result]
+
+let error_to_json ~id ~error =
+  build_message id  ["error", JSON_Object [
+    "code", int_ (error_t_to_code error);
+    "message", JSON_String (error_t_to_string error);
+  ]]
+
+let request_to_json r params_as_json =
+  build_message None [
+    "method", JSON_String (request_method_name r);
+    "params", params_as_json;
   ]
+
+let to_json ~id ~message ~message_as_json = match message with
+  | Response _ -> success_to_json id message_as_json
+  | Request r -> request_to_json r message_as_json

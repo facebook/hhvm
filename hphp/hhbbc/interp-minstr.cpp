@@ -185,7 +185,7 @@ bool couldBeInPublicStatic(ISS& env, const Base& b) {
 
 template<typename R, typename B, typename... T>
 typename std::enable_if<
-  !std::is_same<R, Type>::value,
+  std::is_same<R, std::pair<Type,bool>>::value,
   folly::Optional<Type>
 >::type hack_array_op(
   ISS& env,
@@ -218,8 +218,8 @@ typename std::enable_if<
 }
 template<typename R, typename B, typename... T>
 typename std::enable_if<
-  std::is_same<R, Type>::value,
-  folly::Optional<Type>
+  !std::is_same<R, std::pair<Type,bool>>::value,
+  folly::Optional<R>
 >::type hack_array_op(
   ISS& env,
   R opV(B, const T&...),
@@ -389,7 +389,7 @@ void miThrow(ISS& env) {
 void setLocalForBase(ISS& env, Type ty) {
   assert(mustBeInFrame(env.state.base) ||
          env.state.base.loc == BaseLoc::LocalArrChain);
-  if (!env.state.base.local) return loseNonRefLocalTypes(env);
+  if (env.state.base.local == NoLocalId) return loseNonRefLocalTypes(env);
   setLoc(env, env.state.base.local, ty);
   FTRACE(4, "      ${} := {}\n",
     env.state.base.locName ? env.state.base.locName->data() : "$<unnamed>",
@@ -401,8 +401,9 @@ void setLocalForBase(ISS& env, Type ty) {
 // to produce the array type that incorporates the effects of any
 // intermediate defining dims.
 Type currentChainType(ISS& env, Type val) {
-  auto it = env.state.arrayChain.rbegin();
-  for (; it != env.state.arrayChain.rend(); ++it) {
+  auto it = env.state.arrayChain.end();
+  while (it != env.state.arrayChain.begin()) {
+    --it;
     if (it->first.subtypeOf(TArr)) {
       val = array_set(it->first, it->second, val);
     } else if (it->first.subtypeOf(TVec)) {
@@ -505,17 +506,16 @@ void handleBaseElemU(ISS& env) {
   auto& ty = env.state.base.type;
   if (ty.couldBe(TArr)) {
     // We're conservative with unsets on array types for now.
-    ty = union_of(ty, TArr);
+    ty |= TArr;
   }
   if (ty.couldBe(TVec)) {
-    // Unset on a vec might turn it into a dict.
-    ty = union_of(ty, union_of(TVec, TDict));
+    ty |= TVec;
   }
   if (ty.couldBe(TDict)) {
-    ty = union_of(ty, TDict);
+    ty |= TDict;
   }
   if (ty.couldBe(TKeyset)) {
-    ty = union_of(ty, TKeyset);
+    ty |= TKeyset;
   }
   if (ty.couldBe(TSStr)) {
     ty = loosen_statics(env.state.base.type);
@@ -786,8 +786,8 @@ void miElem(ISS& env, MOpMode mode, Type key) {
     if (couldDoChain) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       auto ty = [&] {
-        if (auto ty = hack_array_do(env, elem, key)) {
-          return *ty;
+        if (auto type = hack_array_do(env, elem, key)) {
+          return *type;
         }
         return array_elem(env.state.base.type, key);
       }();
@@ -844,7 +844,7 @@ void miNewElem(ISS& env) {
   if (couldDoChain) {
     auto par = [&] () -> std::pair<Type, Type> {
       auto ty = hack_array_do(env, newelem, TInitNull);
-      if (ty) return {*ty, TInt};
+      if (ty) return std::move(*ty);
       return array_newelem_key(env.state.base.type, TInitNull);
     }();
     env.state.arrayChain.push_back(par);
@@ -1076,8 +1076,8 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key) {
     if (env.state.base.type.subtypeOf(TArr)) {
       return array_elem(env.state.base.type, key);
     }
-    if (auto ty = hack_array_do(env, elem, key)) {
-      return *ty;
+    if (auto type = hack_array_do(env, elem, key)) {
+      return *type;
     }
     return TInitCell;
   }();
@@ -1122,7 +1122,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       // Note here that a string type stays a string (with a changed character,
       // and loss of staticness), unless it was the empty string, where it
       // becomes an array.  Do it conservatively for now:
-      ty = union_of(loosen_statics(ty), counted_aempty());
+      ty = union_of(loosen_statics(std::move(ty)), counted_aempty());
     }
     if (!ty.subtypeOf(TStr)) {
       handleBaseElemD(env);
@@ -1155,9 +1155,9 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
                         !isvec &&
                         !isdict &&
                         !iskeyset);
-  auto isSuitableHackKey = [&](Type key) {
-    if (isvec) return key.couldBe(TInt);
-    if (isdict) return key.couldBe(TInt) || key.couldBe(TStr);
+  auto isSuitableHackKey = [&](Type k) {
+    if (isvec) return k.couldBe(TInt);
+    if (isdict) return k.couldBe(TInt) || k.couldBe(TStr);
     return false;
   };
 
@@ -1284,7 +1284,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       return;
     }
     if (auto res = hack_array_do(env, newelem, ty)) {
-      env.state.base.type = *res;
+      env.state.base.type = std::move(res->first);
       return;
     }
   }
@@ -1294,7 +1294,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       return;
     }
     if (auto res = hack_array_do(env, newelem, ty)) {
-      env.state.base.type = *res;
+      env.state.base.type = std::move(res->first);
       return;
     }
   }
@@ -1333,7 +1333,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       return;
     }
     if (auto ty = hack_array_do(env, newelem, t1)) {
-      env.state.base.type = *ty;
+      env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
     }
@@ -1345,7 +1345,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       return;
     }
     if (auto ty = hack_array_do(env, newelem, t1)) {
-      env.state.base.type = *ty;
+      env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
     }
@@ -1410,15 +1410,6 @@ void miFinalSetWithRef(ISS& env) {
     killThisProps(env);
     killSelfProps(env);
   }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void miBaseSImpl(ISS& env, bool hasRhs, Type prop) {
-  auto rhs = hasRhs ? popT(env) : TTop;
-  auto const cls = popA(env);
-  env.state.base = miBaseSProp(env, cls, prop);
-  if (hasRhs) push(env, rhs);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1498,7 +1489,11 @@ void in(ISS& env, const bc::BaseNC& op) {
   topC(env, op.arg1);
   readUnknownLocals(env);
   mayUseVV(env);
-  env.state.base = Base{TInitCell, BaseLoc::Frame};
+  env.state.base = Base { TInitCell,
+                          BaseLoc::Frame,
+                          TBottom,
+                          SString{},
+                          NoLocalId };
 }
 
 void in(ISS& env, const bc::BaseNL& op) {
@@ -1506,7 +1501,11 @@ void in(ISS& env, const bc::BaseNL& op) {
   locAsCell(env, op.loc1);
   readUnknownLocals(env);
   mayUseVV(env);
-  env.state.base = Base{TInitCell, BaseLoc::Frame};
+  env.state.base = Base { TInitCell,
+                          BaseLoc::Frame,
+                          TBottom,
+                          SString{},
+                          NoLocalId };
 }
 
 void in(ISS& env, const bc::BaseGC& op) {
@@ -1523,14 +1522,16 @@ void in(ISS& env, const bc::BaseGL& op) {
 
 void in(ISS& env, const bc::BaseSC& op) {
   assert(env.state.arrayChain.empty());
-  auto const prop = topC(env, op.arg1);
-  miBaseSImpl(env, op.arg2 == 1, prop);
+  auto prop = topC(env, op.arg1);
+  auto cls = takeClsRefSlot(env, op.slot);
+  env.state.base = miBaseSProp(env, std::move(cls), std::move(prop));
 }
 
 void in(ISS& env, const bc::BaseSL& op) {
   assert(env.state.arrayChain.empty());
-  auto const prop = locAsCell(env, op.loc1);
-  miBaseSImpl(env, op.arg2 == 1, prop);
+  auto prop = locAsCell(env, op.loc1);
+  auto cls = takeClsRefSlot(env, op.slot);
+  env.state.base = miBaseSProp(env, std::move(cls), std::move(prop));
 }
 
 void in(ISS& env, const bc::BaseL& op) {
@@ -1737,8 +1738,8 @@ void in(ISS& env, const bc::FPassM& op) {
   auto const vget = bc::VGetM{op.arg2, op.mkey};
 
   if (auto const mode = fpassMode(env, op.arg1)) {
-    return mode == MOpMode::Warn ? reduce(env, cget, bc::FPassC{op.arg1})
-                                 : reduce(env, vget, bc::FPassVNop{op.arg1});
+    return mode == MOpMode::Warn ? reduce_fpass_arg(env, cget, op.arg1, false)
+                                 : reduce_fpass_arg(env, vget, op.arg1, true);
   }
 
   mergePaths(
@@ -1754,15 +1755,29 @@ namespace {
 // a smaller starting id. Only returns the equivalent first local because the
 // size doesn't change.
 LocalId equivLocalRange(ISS& env, const LocalRange& range) {
-  auto const equivFirst = findLocEquiv(env, range.first);
-  if (equivFirst == NoLocalId || equivFirst >= range.first) return NoLocalId;
+  auto bestRange = range.first;
+  auto equivFirst = findLocEquiv(env, range.first);
+  if (equivFirst == NoLocalId) return bestRange;
+  do {
+    if (equivFirst < bestRange) {
+      auto equivRange = [&] {
 
-  for (uint32_t i = 0; i < range.restCount; ++i) {
-    auto const equiv = findLocEquiv(env, range.first + i + 1);
-    if (equiv == NoLocalId || equiv != equivFirst + i + 1) return NoLocalId;
-  }
+        for (uint32_t i = 1; i <= range.restCount; ++i) {
+          if (!locsAreEquiv(env, equivFirst + i, range.first + i)) return false;
+        }
 
-  return equivFirst;
+        return true;
+      }();
+
+      if (equivRange) {
+        bestRange = equivFirst;
+      }
+    }
+    equivFirst = findLocEquiv(env, equivFirst);
+    assert(equivFirst != NoLocalId);
+  } while (equivFirst != range.first);
+
+  return bestRange;
 }
 
 }
@@ -1775,7 +1790,7 @@ void in(ISS& env, const bc::MemoGet& op) {
 
   // If we can use an equivalent, earlier range, then use that instead.
   auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != NoLocalId) {
+  if (equiv != op.locrange.first) {
     return reduce(
       env,
       bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
@@ -1800,7 +1815,7 @@ void in(ISS& env, const bc::MemoSet& op) {
 
   // If we can use an equivalent, earlier range, then use that instead.
   auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != NoLocalId) {
+  if (equiv != op.locrange.first) {
     return reduce(
       env,
       bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.restCount } }

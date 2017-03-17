@@ -429,6 +429,16 @@ struct UniqueStubs {
    */
   TCA throwSwitchMode;
 
+  /*
+   * Method lookup helpers. Normally point to the corresponding c++
+   * functions, but may be generated stubs if the c++ code is too far
+   * from the translation cache.
+   */
+  TCA handlePrimeCacheInit;
+  TCA handlePrimeCacheInitFatal;
+  TCA handleSlowPath;
+  TCA handleSlowPathFatal;
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*

@@ -15,12 +15,16 @@ open Core
 (*****************************************************************************)
 let check_defs tcopt fn {FileInfo.funs; classes; typedefs; consts; _} =
   let result, _, _ = (Errors.do_ (fun () ->
-    List.iter funs begin fun (_, x) ->
-      Typing_check_service.type_fun tcopt fn x
-    end;
-    List.iter classes begin fun (_, x) ->
-      Typing_check_service.type_class tcopt fn x
-    end;
+    ignore(
+      List.map funs begin fun (_, x) ->
+        Typing_check_service.type_fun tcopt fn x
+      end
+    );
+    ignore(
+      List.map classes begin fun (_, x) ->
+        Typing_check_service.type_class tcopt fn x;
+      end
+    );
     List.iter typedefs begin fun (_, x) ->
       Typing_check_service.check_typedef tcopt fn x
     end;

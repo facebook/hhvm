@@ -45,22 +45,6 @@ void local_dce(const Index&, const FuncAnalysis&, borrowed_ptr<php::Block>,
  */
 void global_dce(const Index&, const FuncAnalysis&);
 
-/*
- * Assist in removing blocks that aren't reachable by removing
- * conditional jumps that are never taken.  Conditional jumps that are
- * always taken are turned into unconditional jumps in first_pass.
- *
- * If options.RemoveDeadBlocks is off, this function just replaces
- * blocks we believe are unreachable with fatal opcodes.
- */
-void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
-
-/*
- * Merge single-succ block goes to single pred block into one
- * where possible.
- */
-bool merge_blocks(const FuncAnalysis&);
-
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_unreachable("static analysis error: supposedly "

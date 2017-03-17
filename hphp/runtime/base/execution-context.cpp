@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
@@ -572,15 +573,24 @@ void ExecutionContext::popUserErrorHandler() {
   }
 }
 
+void ExecutionContext::clearUserErrorHandlers() {
+  while (!m_userErrorHandlers.empty()) m_userErrorHandlers.pop_back();
+}
+
 void ExecutionContext::popUserExceptionHandler() {
   if (!m_userExceptionHandlers.empty()) {
     m_userExceptionHandlers.pop_back();
   }
 }
 
+void ExecutionContext::acceptRequestEventHandlers(bool enable) {
+  m_acceptRequestEventHandlers = enable;
+}
+
 std::size_t ExecutionContext::registerRequestEventHandler(
   RequestEventHandler *handler) {
   assert(handler && handler->getInited());
+  assert(m_acceptRequestEventHandlers);
   m_requestEventHandlers.push_back(handler);
   return m_requestEventHandlers.size()-1;
 }
@@ -860,25 +870,25 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
                 false)) {
         return true;
       }
-    } catch (const RequestTimeoutException& e) {
+    } catch (const RequestTimeoutException&) {
       static auto requestErrorHandlerTimeoutCounter =
-          ServiceData::createTimeseries("requests_timed_out_error_handler",
+          ServiceData::createTimeSeries("requests_timed_out_error_handler",
                                         {ServiceData::StatsType::COUNT});
       requestErrorHandlerTimeoutCounter->addValue(1);
       ServerStats::Log("request.timed_out.error_handler", 1);
 
       if (!swallowExceptions) throw;
-    } catch (const RequestCPUTimeoutException& e) {
+    } catch (const RequestCPUTimeoutException&) {
       static auto requestErrorHandlerCPUTimeoutCounter =
-          ServiceData::createTimeseries("requests_cpu_timed_out_error_handler",
+          ServiceData::createTimeSeries("requests_cpu_timed_out_error_handler",
                                         {ServiceData::StatsType::COUNT});
       requestErrorHandlerCPUTimeoutCounter->addValue(1);
       ServerStats::Log("request.cpu_timed_out.error_handler", 1);
 
       if (!swallowExceptions) throw;
-    } catch (const RequestMemoryExceededException& e) {
+    } catch (const RequestMemoryExceededException&) {
       static auto requestErrorHandlerMemoryExceededCounter =
-          ServiceData::createTimeseries(
+          ServiceData::createTimeSeries(
               "requests_memory_exceeded_error_handler",
               {ServiceData::StatsType::COUNT});
       requestErrorHandlerMemoryExceededCounter->addValue(1);
@@ -887,7 +897,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception &e, int errnum,
       if (!swallowExceptions) throw;
     } catch (...) {
       static auto requestErrorHandlerOtherExceptionCounter =
-          ServiceData::createTimeseries(
+          ServiceData::createTimeSeries(
               "requests_other_exception_error_handler",
               {ServiceData::StatsType::COUNT});
       requestErrorHandlerOtherExceptionCounter->addValue(1);
@@ -991,8 +1001,12 @@ String ExecutionContext::getenv(const String& name) const {
   if (m_envs.exists(name)) {
     return m_envs[name].toString();
   }
-  char *value = ::getenv(name.data());
-  if (value) {
+  if (is_cli_mode()) {
+    auto envs = cli_env();
+    if (envs.exists(name)) return envs[name].toString();
+    return String();
+  }
+  if (auto value = ::getenv(name.data())) {
     return String(value, CopyString);
   }
   if (RuntimeOption::EnvVariables.find(name.c_str()) != RuntimeOption::EnvVariables.end()) {
@@ -1087,11 +1101,8 @@ ActRec* ExecutionContext::getStackFrame() {
 ObjectData* ExecutionContext::getThis() {
   VMRegAnchor _;
   ActRec* fp = vmfp();
-  if (fp->skipFrame()) {
-    fp = getPrevVMState(fp);
-    if (!fp) return nullptr;
-  }
-  if (fp->func()->cls() && fp->hasThis()) {
+  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
+  if (fp && fp->func()->cls() && fp->hasThis()) {
     return fp->getThis();
   }
   return nullptr;
@@ -1101,11 +1112,8 @@ Class* ExecutionContext::getContextClass() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
   assert(ar != nullptr);
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
-    if (!ar) return nullptr;
-  }
-  return ar->m_func->cls();
+  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
+  return ar ? ar->m_func->cls() : nullptr;
 }
 
 Class* ExecutionContext::getParentContextClass() {
@@ -1119,10 +1127,8 @@ StringData* ExecutionContext::getContainingFileName() {
   VMRegAnchor _;
   ActRec* ar = vmfp();
   if (ar == nullptr) return staticEmptyString();
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
-    if (ar == nullptr) return staticEmptyString();
-  }
+  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
+  if (ar == nullptr) return staticEmptyString();
   Unit* unit = ar->m_func->unit();
   assert(unit->filepath()->isStatic());
   // XXX: const StringData* -> Variant(bool) conversion problem makes this ugly
@@ -1135,9 +1141,7 @@ int ExecutionContext::getLine() {
   Unit* unit = ar ? ar->m_func->unit() : nullptr;
   Offset pc = unit ? pcOff() : 0;
   if (ar == nullptr) return -1;
-  if (ar->skipFrame()) {
-    ar = getPrevVMState(ar, &pc);
-  }
+  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar, &pc);
   if (ar == nullptr || (unit = ar->m_func->unit()) == nullptr) return -1;
   return unit->getLineNumber(pc);
 }
@@ -1151,7 +1155,8 @@ Array ExecutionContext::getCallerInfo() {
   VMRegAnchor _;
   auto ar = vmfp();
   if (ar->skipFrame()) {
-    ar = getPrevVMState(ar);
+    ar = getPrevVMStateSkipFrame(ar);
+    if (!ar) return empty_array();
   }
   while (ar->func()->name()->isame(s_call_user_func.get())
          || ar->func()->name()->isame(s_call_user_func_array.get())) {
@@ -1196,14 +1201,17 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   auto fp = vmfp();
   if (UNLIKELY(!fp)) return nullptr;
   auto pc = fp->func()->unit()->offsetOf(vmpc());
-  for (; frame > 0; --frame) {
+  while (frame > 0) {
+    fp = getPrevVMState(fp, &pc);
+    if (UNLIKELY(!fp)) return nullptr;
+    if (UNLIKELY(fp->skipFrame())) continue;
+    --frame;
+  }
+  while (fp->skipFrame()) {
     fp = getPrevVMState(fp, &pc);
     if (UNLIKELY(!fp)) return nullptr;
   }
-  if (fp->skipFrame()) {
-    fp = getPrevVMState(fp, &pc);
-  }
-  if (UNLIKELY(!fp || fp->localsDecRefd())) return nullptr;
+  if (UNLIKELY(fp->localsDecRefd())) return nullptr;
   auto const curOp = fp->func()->unit()->getOp(pc);
   if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV ||
                curOp == Op::CreateCont || curOp == Op::Await)) {
@@ -1228,16 +1236,16 @@ void ExecutionContext::setVar(StringData* name, const TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMState(fp);
-  fp->getVarEnv()->set(name, v);
+  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
+  if (fp) fp->getVarEnv()->set(name, v);
 }
 
 void ExecutionContext::bindVar(StringData* name, TypedValue* v) {
   VMRegAnchor _;
   ActRec *fp = vmfp();
   if (!fp) return;
-  if (fp->skipFrame()) fp = getPrevVMState(fp);
-  fp->getVarEnv()->bind(name, v);
+  if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
+  if (fp) fp->getVarEnv()->bind(name, v);
 }
 
 Array ExecutionContext::getLocalDefinedVariables(int frame) {
@@ -1356,9 +1364,11 @@ static void threadLogger(const char* header, const char* msg,
 
 StaticString
   s_php_namespace("<?php namespace "),
+  s_hh_namespace("<?hh namespace "),
   s_curly_return(" { return "),
   s_semicolon_curly("; }"),
   s_php_return("<?php return "),
+  s_hh_return("<?hh return "),
   s_semicolon(";"),
   s_stdclass("stdclass");
 
@@ -1833,13 +1843,19 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
   ar->initNumArgs(0);
   assert(vmfp());
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  pushLocalsAndIterators(func);
-  assert(vmfp()->func()->attrs() & AttrMayUseVV);
-  if (!vmfp()->hasVarEnv()) {
-    vmfp()->setVarEnv(VarEnv::createLocal(vmfp()));
+  pushFrameSlots(func);
+
+  auto prevFp = vmfp();
+  if (UNLIKELY(prevFp->skipFrame())) {
+    prevFp = g_context->getPrevVMStateSkipFrame(prevFp);
   }
-  ar->m_varEnv = vmfp()->m_varEnv;
-  ar->m_varEnv->enterFP(vmfp(), ar);
+  assertx(prevFp);
+  assertx(prevFp->func()->attrs() & AttrMayUseVV);
+  if (!prevFp->hasVarEnv()) {
+    prevFp->setVarEnv(VarEnv::createLocal(prevFp));
+  }
+  ar->m_varEnv = prevFp->m_varEnv;
+  ar->m_varEnv->enterFP(prevFp, ar);
 
   vmfp() = ar;
   pc = func->getEntry();
@@ -1851,7 +1867,8 @@ bool ExecutionContext::evalUnit(Unit* unit, PC& pc, int funcType) {
 }
 
 const Variant& ExecutionContext::getEvaledArg(const StringData* val,
-                                         const String& namespacedName) {
+                                              const String& namespacedName,
+                                              const Unit* funcUnit) {
   auto key = StrNR(val);
 
   if (m_evaledArgs.get()) {
@@ -1863,9 +1880,11 @@ const Variant& ExecutionContext::getEvaledArg(const StringData* val,
   int pos = namespacedName.rfind('\\');
   if (pos != -1) {
     auto ns = namespacedName.substr(0, pos);
-    code = s_php_namespace + ns + s_curly_return + key + s_semicolon_curly;
+    code = (funcUnit->isHHFile() ? s_hh_namespace : s_php_namespace) +
+      ns + s_curly_return + key + s_semicolon_curly;
   } else {
-    code = s_php_return + key + s_semicolon;
+    code = (funcUnit->isHHFile() ? s_hh_return : s_php_return) +
+      key + s_semicolon;
   }
   Unit* unit = compileEvalString(code.get());
   assert(unit != nullptr);
@@ -1988,7 +2007,8 @@ StrNR ExecutionContext::createFunction(const String& args,
   // user function named __lambda_func when you call create_function. Huzzah!)
   static StringData* oldName = makeStaticString("__lambda_func");
   std::ostringstream codeStr;
-  codeStr << "<?php function " << oldName->data()
+  codeStr << (vmfp()->unit()->isHHFile() ? "<?hh" : "<?php")
+          << " function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";
   std::string evalCode = codeStr.str();

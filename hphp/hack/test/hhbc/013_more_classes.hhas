@@ -1,0 +1,54 @@
+
+.main {
+  DefCls 0
+  DefCls 1
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $b $p;
+  FPushCtorD 0 "B"
+  FCall 0
+  PopR
+  SetL $b
+  PopC
+  CGetL $b
+  FPushObjMethodD 0 "p" NullThrows
+  FCall 0
+  UnboxR
+  SetL $p
+  PopC
+  Null
+  RetC
+}
+
+.class A {
+  .method [protected] <"HH\\int" "HH\\int" hh_type extended_hint > p() {
+    Int 42
+    VerifyRetTypeC
+    RetC
+  }
+  .method [public] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class B extends B {
+  .method [public] <"HH\\int" "HH\\int" hh_type extended_hint > p() {
+    String "p"
+    String "B"
+    AGetC
+    FPushClsMethodF 0
+    FCall 0
+    UnboxR
+    VerifyRetTypeC
+    RetC
+  }
+  .method [public] 86ctor() {
+    Null
+    RetC
+  }
+}
+

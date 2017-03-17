@@ -74,8 +74,7 @@ struct EHEnt {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  FixedVector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
 };
 
 /*
@@ -83,7 +82,7 @@ struct EHEnt {
  */
 struct FPIEnt {
   Offset m_fpushOff;
-  Offset m_fcallOff;
+  Offset m_fpiEndOff;
   Offset m_fpOff; // evaluation stack depth to current frame pointer
   int m_parentIndex;
   int m_fpiDepth;
@@ -159,11 +158,10 @@ struct Func final {
     LowStringPtr phpCode; // Eval'able PHP code.
   };
 
-  typedef FixedVector<ParamInfo> ParamInfoVec;
-  typedef FixedVector<SVInfo> SVInfoVec;
-  typedef FixedVector<EHEnt> EHEntVec;
-  typedef FixedVector<FPIEnt, HugeAllocator<FPIEnt>> FPIEntVec;
-
+  using ParamInfoVec = FixedVector<ParamInfo>;
+  using SVInfoVec = FixedVector<SVInfo>;
+  using EHEntVec = FixedVector<EHEnt>;
+  using FPIEntVec = FixedVector<FPIEnt,HugeAllocator<FPIEnt>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -263,7 +261,6 @@ struct Func final {
    */
   static bool isFuncIdValid(FuncId id);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]
 
@@ -353,7 +350,6 @@ struct Func final {
    */
   const NamedEntity* getNamedEntity() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // File info.                                                         [const]
 
@@ -383,7 +379,6 @@ struct Func final {
    * The system- or user-defined doc comment accompanying the function.
    */
   const StringData* docComment() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
@@ -435,7 +430,6 @@ struct Func final {
    * next parameter that has a DV funclet.
    */
   Offset getEntryForNumArgs(int numArgsPassed) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
@@ -496,7 +490,6 @@ struct Func final {
    */
   const StringData* returnUserType() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -546,15 +539,15 @@ struct Func final {
    */
   bool discardExtraArgs() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
 
   /*
-   * Number of locals, iterators, or named locals.
+   * Number of locals, iterators, class-ref slots, or named locals.
    */
   int numLocals() const;
   int numIterators() const;
+  int numClsRefSlots() const;
   Id numNamedLocals() const;
 
   /*
@@ -602,7 +595,6 @@ struct Func final {
    */
   bool hasForeignThis() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Static locals.                                                     [const]
 
@@ -622,7 +614,6 @@ struct Func final {
    * Number of static locals declared in the function.
    */
   int numStaticLocals() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Definition context.                                                [const]
@@ -810,7 +801,6 @@ struct Func final {
    */
   bool isClosureBody() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Resumables.                                                        [const]
 
@@ -853,7 +843,6 @@ struct Func final {
    */
   bool isResumable() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Methods.                                                           [const]
 
@@ -866,7 +855,6 @@ struct Func final {
    * Whether this function has a private implementation on a parent class.
    */
   bool hasPrivateAncestor() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]
@@ -903,7 +891,6 @@ struct Func final {
    * Is `name' the name of a special initializer function?
    */
   static bool isSpecial(const StringData* name);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Persistence.                                                       [const]
@@ -983,7 +970,6 @@ struct Func final {
    */
   bool isParamCoerceMode() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
 
@@ -996,10 +982,24 @@ struct Func final {
   const EHEnt* findEH(Offset o) const;
 
   /*
+   * Same as non-static findEH(), but takes as an operand any ehtab-like
+   * container.
+   */
+  template<class Container>
+  static const typename Container::value_type*
+  findEH(const Container& ehtab, Offset o);
+
+  /*
    * Locate FPI regions by offset.
    */
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
+
+  /*
+   * Same as non-static findFPI(), but takes as an operand the start and end
+   * iterators of an fpitab.
+   */
+  static const FPIEnt* findFPI(const FPIEnt* b, const FPIEnt* e, Offset o);
 
   bool shouldSampleJit() const { return m_shouldSampleJit; }
 
@@ -1132,7 +1132,7 @@ struct Func final {
   // SharedData.
 
 private:
-  typedef IndexedStringMap<LowStringPtr, true, Id> NamedLocalsMap;
+  using NamedLocalsMap = IndexedStringMap<LowStringPtr, true, Id>;
 
   // Some 16-bit values in SharedData are stored as small deltas if they fit
   // under this limit.  If not, they're set to the limit value and an
@@ -1172,8 +1172,9 @@ private:
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
 
-    // One byte worth of bools right now.  Check what it does to
-    // sizeof(SharedData) if you are trying to add any more ...
+    /*
+     * Up to 32 bits.
+     */
     bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
@@ -1183,24 +1184,34 @@ private:
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
     bool m_isMemoizeWrapper : 1;
+    // Needing more than 2 class ref slots basically doesn't happen, so just use
+    // two bits normally. If we actually need more than that, we'll store the
+    // count in ExtendedSharedData.
+    unsigned int m_numClsRefSlots : 2;
+
+    // 21 bits of padding here in LOWPTR builds
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
-    TypeConstraint m_retTypeConstraint;
+    TypeConstraint m_retTypeConstraint; // NB: sizeof(TypeConstraint) == 12
     LowStringPtr m_originalFilename;
     RepoAuthType m_repoReturnType;
-    RepoAuthType m_repoAwaitedReturnType; // async return type
+    RepoAuthType m_repoAwaitedReturnType;
 
     /*
      * The `past' offset and `line2' are likely to be small, particularly
-     * relative to m_base and m_line1.  So we encode each as a 16-bit
-     * difference.  If the delta doesn't fit, we need to have an
-     * ExtendedSharedData to hold the real values---in that case, the field
-     * here that overflowed is set to kSmallDeltaLimit and the corresponding
-     * field in ExtendedSharedData will be valid.
+     * relative to m_base and m_line1, so we encode each as a 16-bit
+     * difference.
+     *
+     * If the delta doesn't fit, we need to have an ExtendedSharedData to hold
+     * the real values---in that case, the field here that overflowed is set to
+     * kSmallDeltaLimit and the corresponding field in ExtendedSharedData will
+     * be valid.
      */
     uint16_t m_line2Delta;
     uint16_t m_pastDelta;
+
+    // 32 bits free here.
   };
 
   /*
@@ -1226,6 +1237,7 @@ private:
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
     Func* m_dynCallWrapper{nullptr};
     Func* m_dynCallTarget{nullptr};
+    Id m_actualNumClsRefSlots;
   };
 
   /*
@@ -1297,7 +1309,6 @@ private:
     std::atomic<Attr> m_attrs;
   };
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
@@ -1360,19 +1371,25 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class Container>
-const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
-  uint32_t i;
-  uint32_t sz = ehtab.size();
+/*
+ * Whether dynamic calls to builtin functions that touch the caller's frame are
+ * forbidden.
+ */
+bool disallowDynamicVarEnvFuncs();
 
-  const typename Container::value_type* eh = nullptr;
-  for (i = 0; i < sz; i++) {
-    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
-      eh = &ehtab[i];
-    }
-  }
-  return eh;
-}
+/*
+ * Could the function write to the locals in the environment of its caller?
+ *
+ * This occurs, e.g., if `func' is extract().
+ */
+bool funcWritesLocals(const Func*);
+
+/*
+ * Could the function `callee` attempt to read the caller frame?
+ *
+ * This occurs, e.g., if `func' is is_callable().
+ */
+bool funcNeedsCallerFrame(const Func*);
 
 ///////////////////////////////////////////////////////////////////////////////
 

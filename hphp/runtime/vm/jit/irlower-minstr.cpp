@@ -820,6 +820,39 @@ void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
 
 IMPL_OPCODE_CALL(SetNewElemVec);
 
+void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
+  static_assert(ArrayData::sizeofSize() == 4, "");
+
+  auto& v = vmain(env);
+  auto arrayData = srcLoc(env, i, 0).reg();
+  auto const sizePtr = arrayData[ArrayData::offsetofSize()];
+
+  // If the check below succeeds, we'll end up returning the original size
+  // so just use the destination register to hold the orignal size
+  auto const size = dstLoc(env, i, 0).reg();
+  v << loadzlq{sizePtr, size};
+
+  { // Bail out unless size < cap
+    auto const codew = v.makeReg();
+    v << loadw{arrayData[HeaderAuxOffset], codew};
+    auto const code = v.makeReg();
+    v << movzwq{codew, code};
+
+    auto const mant = v.makeReg();
+    v << andqi{CapCode::M, code, mant, v.makeReg()};
+    auto const exp = v.makeReg();
+    v << shrqi{(int)CapCode::B, code, exp, v.makeReg()};
+    auto const cap = v.makeReg();
+    v << shl{exp, mant, cap, v.makeReg()};
+
+    auto const sf = v.makeReg();
+    v << cmpq{size, cap, sf};
+    ifThen(v, CC_BE, sf, label(env, i->taken()));
+  }
+
+  v << inclm{sizePtr, v.makeReg()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dict.
 

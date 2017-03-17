@@ -69,7 +69,7 @@ let mean_kill env =
   in
   let success =
     try
-      List.iter pids ~f:begin fun (pid, reason) ->
+      List.iter pids ~f:begin fun (pid, _reason) ->
         try Sys_utils.terminate_process pid
         with Unix.Unix_error (Unix.ESRCH, "kill", _) ->
           (* no such process *)

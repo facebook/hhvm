@@ -8,4 +8,4 @@
  *
  *)
 
- type result = Pos.absolute list
+ type result = Ide_message.highlight_references_response

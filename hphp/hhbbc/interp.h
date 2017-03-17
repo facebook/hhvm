@@ -38,6 +38,11 @@ namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
 
+constexpr auto kReadOnlyConstant = kInvalidDataType;
+constexpr auto kDynamicConstant = kExtraInvalidDataType;
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * RunFlags are information about running an entire block in the
  * interpreter.
@@ -48,11 +53,19 @@ struct RunFlags {
    * block, with this type.
    */
   folly::Optional<Type> returned;
+
+  /*
+   * Map from the local statics whose types were used by this block,
+   * to the type that was used.  This is used to force re-analysis of
+   * the corresponding blocks when the type of the static changes.
+   */
+  std::shared_ptr<std::map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 constexpr int kMaxTrackedLocals = 512;
+constexpr int kMaxTrackedClsRefSlots = 64;
 
 /*
  * StepFlags are information about the effects of a single opcode.
@@ -126,6 +139,14 @@ struct StepFlags {
    * step, with this type.
    */
   folly::Optional<Type> returned;
+
+  /*
+   * Map from the local statics whose types were used by this
+   * instruction, to the type that was used.  This is used to force
+   * re-analysis of the corresponding blocks when the type of the
+   * static changes.
+   */
+  std::shared_ptr<std::map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -170,6 +191,19 @@ RunFlags run(Interp&, PropagateFn);
  * which a custom interpreter may need to specialize.
  */
 void default_dispatch(ISS&, const Bytecode&);
+
+/*
+ * Can this call be converted to an FCallBuiltin
+ */
+bool can_emit_builtin(borrowed_ptr<const php::Func> func,
+                      int numParams, bool hasUnpack);
+
+void finish_builtin(ISS& env,
+                    borrowed_ptr<const php::Func> func,
+                    int numParams,
+                    bool unpack);
+
+void reduce_fpass_arg(ISS& env, const Bytecode&, int param, bool byRef);
 
 //////////////////////////////////////////////////////////////////////
 

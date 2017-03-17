@@ -282,10 +282,6 @@ private:
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
 
-  // Map names of class aliases to the class names they will alias.
-  // Only in WholeProgram mode.  See markRedeclaringClasses.
-  std::multimap<std::string,std::string> m_classAliases;
-
   // Names of type aliases.
   std::set<std::string> m_typeAliasNames;
 

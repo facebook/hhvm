@@ -21,6 +21,8 @@
 #include <folly/ScopeGuard.h>
 
 #include "hphp/util/logger.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/timer.h"
 
 #define _GNU_SOURCE 1
 #include <stdio.h>
@@ -58,10 +60,33 @@ static inline bool useCounters() {
 #endif
 }
 
+static ServiceData::ExportedTimeSeries*
+createTimeSeries(const std::string& name) {
+  assertx(!name.empty());
+
+  static const std::vector<ServiceData::StatsType> exportTypes{
+    ServiceData::StatsType::AVG,
+    ServiceData::StatsType::RATE,
+  };
+  static const std::vector<std::chrono::seconds> levels{
+    std::chrono::seconds(60),
+    std::chrono::seconds(0),
+  };
+
+  return ServiceData::createTimeSeries(
+    "perf." + name,
+    exportTypes,
+    levels
+  );
+}
+
 struct HardwareCounterImpl {
-  HardwareCounterImpl(int type, unsigned long config,
-                      const char* desc = nullptr)
-    : m_desc(desc ? desc : ""), m_err(0), m_fd(-1), inited(false) {
+  HardwareCounterImpl(int type, unsigned long config, const char* desc)
+    : m_desc(desc ? desc : "")
+    , m_err(0)
+    , m_timeSeries(createTimeSeries(m_desc))
+    , m_fd(-1)
+    , inited(false) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
     pe.type = type;
     pe.size = sizeof (struct perf_event_attr);
@@ -77,6 +102,13 @@ struct HardwareCounterImpl {
 
   ~HardwareCounterImpl() {
     close();
+  }
+
+  void updateServiceData() {
+    if (m_timeSeries == nullptr) return;
+
+    auto const value = read();
+    if (value != 0) m_timeSeries->addValue(value);
   }
 
   void init_if_not() {
@@ -170,6 +202,7 @@ public:
   std::string m_desc;
   int m_err;
 private:
+  ServiceData::ExportedTimeSeries* m_timeSeries;
   int m_fd;
   struct perf_event_attr pe;
   bool inited;
@@ -184,29 +217,22 @@ private:
   }
 };
 
-struct InstructionCounter : HardwareCounterImpl {
-  InstructionCounter() :
-    HardwareCounterImpl(PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS) {}
-};
-
-struct LoadCounter : HardwareCounterImpl {
-  LoadCounter() :
-    HardwareCounterImpl(PERF_TYPE_HW_CACHE,
-        (PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_READ) << 8))) {}
-};
-
-struct StoreCounter : HardwareCounterImpl {
-  StoreCounter() :
-    HardwareCounterImpl(PERF_TYPE_HW_CACHE,
-        PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8)) {}
-};
-
 HardwareCounter::HardwareCounter()
   : m_countersSet(false) {
-  m_instructionCounter.reset(new InstructionCounter());
+  m_instructionCounter = folly::make_unique<HardwareCounterImpl>(
+    PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS, "instructions"
+  );
   if (s_profileHWEvents.empty()) {
-    m_loadCounter.reset(new LoadCounter());
-    m_storeCounter.reset(new StoreCounter());
+    m_loadCounter = folly::make_unique<HardwareCounterImpl>(
+      PERF_TYPE_HW_CACHE,
+      PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_READ) << 8),
+      "loads"
+    );
+    m_storeCounter = folly::make_unique<HardwareCounterImpl>(
+      PERF_TYPE_HW_CACHE,
+      PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8),
+      "stores"
+    );
   } else {
     m_countersSet = true;
     setPerfEvents(s_profileHWEvents);
@@ -458,20 +484,44 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
-const std::string
-  s_instructions("instructions"),
-  s_loads("loads"),
-  s_stores("stores");
+void HardwareCounter::updateServiceData() {
+  forEachCounter([](HardwareCounterImpl& counter) {
+    counter.updateServiceData();
+  });
+}
+
+void HardwareCounter::UpdateServiceData(const timespec& begin) {
+  // The begin timespec should be what was recorded at the beginning of the
+  // request, so we subtract that out from the current measurement. The
+  // perf-based counters owned by this file are reset to 0 at the same time as
+  // the begin timespec is recorded, so there's no subtraction needed for
+  // those.
+  struct timespec now;
+  gettime(CLOCK_THREAD_CPUTIME_ID, &now);
+
+  s_counter->updateServiceData();
+
+  static auto cpuTimeSeries = createTimeSeries("cpu-time-us");
+  auto const cpuTimeUs = gettime_diff_us(begin, now);
+  if (cpuTimeUs > 0) {
+    cpuTimeSeries->addValue(cpuTimeUs);
+  }
+}
 
 void HardwareCounter::getPerfEvents(PerfEventCallback f, void* data) {
-  f(s_instructions, getInstructionCount(), data);
+  forEachCounter([f, data](HardwareCounterImpl& counter) {
+    f(counter.m_desc, counter.read(), data);
+  });
+}
+
+template<typename F>
+void HardwareCounter::forEachCounter(F func) {
+  func(*m_instructionCounter);
   if (!m_countersSet) {
-    f(s_loads, getLoadCount(), data);
-    f(s_stores, getStoreCount(), data);
+    func(*m_loadCounter);
+    func(*m_storeCounter);
   }
-  for (unsigned i = 0; i < m_counters.size(); i++) {
-    f(m_counters[i]->m_desc, m_counters[i]->read(), data);
-  }
+  for (auto& counter : m_counters) func(*counter);
 }
 
 void HardwareCounter::GetPerfEvents(PerfEventCallback f, void* data) {

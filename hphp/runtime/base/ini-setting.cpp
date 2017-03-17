@@ -491,9 +491,23 @@ IniSettingMap& IniSettingMap::operator=(const IniSettingMap& i) {
   return *this;
 }
 
+namespace {
+void mergeSettings(Variant& curval, const Variant& v) {
+  if (v.isArray() && curval.isArray()) {
+    for (auto i = v.toCArrRef().begin(); !i.end(); i.next()) {
+      mergeSettings(curval.toArrRef().lvalAt(i.first()),
+                    i.secondRef());
+    }
+  } else {
+    curval = v;
+  }
+}
+}
+
 void IniSettingMap::set(const String& key, const Variant& v) {
   assert(this->isArray());
-  m_map.toArrRef().set(key, v);
+  auto& curval = m_map.toArrRef().lvalAt(key);
+  mergeSettings(curval, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

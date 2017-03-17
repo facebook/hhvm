@@ -15,23 +15,44 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(WINDOWS TRUE)
 endif()
 
+# Do this until cmake has a define for ARMv8
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __x86_64__
+#error Not x64
+#endif
+int main() { return 0; }" IS_X64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __AARCH64EL__
+#error Not ARMv8
+#endif
+int main() { return 0; }" IS_AARCH64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __powerpc64__
+#error Not PPC64
+#endif
+int main() { return 0; }" IS_PPC64)
+
 # using Clang or GCC
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   # Warnings to disable by name, -Wno-${name}
   set(DISABLED_NAMED_WARNINGS)
   list(APPEND DISABLED_NAMED_WARNINGS
-    "deprecated"
-    "strict-aliasing"
-    "write-strings"
-    "invalid-offsetof"
     "error=array-bounds"
     "error=switch"
-    "unused-result"
-    "sign-compare"
     "attributes"
-    "maybe-uninitialized"
+    "deprecated"
+    "invalid-offsetof"
+    "sign-compare"
+    "strict-aliasing"
+    "unused-function"
+    "unused-local-typedefs"
+    "unused-result"
+    "write-strings"
   )
-  
+
   # Warnings to disable by name when building C code.
   set(DISABLED_C_NAMED_WARNINGS)
   list(APPEND DISABLED_C_NAMED_WARNINGS
@@ -73,31 +94,34 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   endif()
 
   if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") # using Clang
-    list(APPEND GENERAL_OPTIONS
-      # For unclear reasons, our detection for what crc32 intrinsics you have
-      # will cause clang to ICE. Specifying a baseline here works around the
-      # issue. (SSE4.2 has been available on processors for quite some time now.)
-      "msse4.2"
-    )
-    # Also need to pass the right option to ASM files to avoid inconsistencies 
-    # in CRC hash function handling
-    set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
+    if (IS_X64)
+      list(APPEND GENERAL_OPTIONS
+        # For unclear reasons, our detection for what crc32 intrinsics you have
+        # will cause clang to ICE. Specifying a baseline here works around the
+        # issue. (SSE4.2 has been available on processors for quite some time now.)
+        "msse4.2"
+      )
+      # Also need to pass the right option to ASM files to avoid inconsistencies
+      # in CRC hash function handling
+      set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
+    endif()
+
     list(APPEND GENERAL_CXX_OPTIONS
       "Qunused-arguments"
     )
+    list(APPEND DISABLED_C_NAMED_WARNINGS
+      "unused-command-line-argument"
+    )
     list(APPEND DISABLED_NAMED_WARNINGS
-      "unknown-warning-option"
       "return-type-c-linkage"
+      "unknown-warning-option"
+      "unused-command-line-argument"
     )
 
-    execute_process(
-      COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version COMMAND head -1
-      OUTPUT_VARIABLE _clang_version_info)
-    string(REGEX MATCH "(clang version|based on LLVM) ([0-9]\\.[0-9]\\.?[0-9]?)"
-      CLANG_VERSION "${_clang_version_info}")
     # Enabled GCC/LLVM stack-smashing protection
     if(ENABLE_SSP)
-      if(CLANG_VERSION VERSION_GREATER 3.6 OR CLANG_VERSION VERSION_EQUAL 3.6)
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR
+         CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
         list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
       else()
         list(APPEND GENERAL_OPTIONS "fstack-protector")
@@ -111,11 +135,11 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
   else() # using GCC
     list(APPEND DISABLED_NAMED_WARNINGS
-      "unused-local-typedefs"
       "deprecated-declarations"
-      "unused-function"
+      "maybe-uninitialized"
     )
     list(APPEND DISABLED_C_NAMED_WARNINGS
+      "maybe-uninitialized"
       "old-style-declaration"
     )
     list(APPEND GENERAL_CXX_OPTIONS
@@ -130,7 +154,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "-param=inline-unit-growth=200"
       "-param=large-unit-insns=10000"
     )
-    # The params bellow causes problem on GCC 4.8 4.8 and 5.4 on PPC64
+    # The params bellow causes problem on GCC 4.9 and 5.4 on PPC64
     # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=72855
     if(NOT IS_PPC64)
       list(APPEND RELEASE_CXX_OPTIONS
@@ -139,8 +163,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
        )
     endif()
 
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-    if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.8)
       # FIXME: GCC 4.8+ regressions http://git.io/4r7VCQ
       list(APPEND GENERAL_OPTIONS
         "ftrack-macro-expansion=0"
@@ -151,31 +175,37 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
     endif()
 
     # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
-    if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
       list(APPEND GENERAL_OPTIONS "fno-delete-null-pointer-checks")
     endif()
 
-    if(GCC_VERSION VERSION_GREATER 5.0 OR GCC_VERSION VERSION_EQUAL 5.0)
-      message(WARNING "HHVM is primarily tested on GCC 4.8 and GCC 4.9. Using other versions may produce unexpected results, or may not even build at all.")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 6.0)
+     message(WARNING "HHVM is primarily tested on GCC 4.9 and 5. Using other versions may produce unexpected results, or may not even build at all.")
     endif()
 
-    if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 5.1)
       list(APPEND DISABLED_NAMED_WARNINGS "bool-compare")
       list(APPEND GENERAL_OPTIONS "DFOLLY_HAVE_MALLOC_H")
     endif()
-    
-    if(GCC_VERSION VERSION_GREATER 6.0 OR GCC_VERSION VERSION_EQUAL 6.0)
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 6.0)
       list(APPEND GENERAL_CXX_OPTIONS "Wno-misleading-indentation")
     endif()
 
     # Enabled GCC/LLVM stack-smashing protection
     if(ENABLE_SSP)
-      if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 OR
+         CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.8)
         if(LINUX)
           # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
           list(APPEND GENERAL_OPTIONS "Wl,-z,relro,-z,now")
         endif()
-        if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
+           CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
           list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
         endif()
       else()
@@ -197,6 +227,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       set(AARCH64_TARGET_CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
       if(AARCH64_TARGET_CPU)
         list(APPEND GENERAL_OPTIONS "mcpu=${AARCH64_TARGET_CPU}")
+        set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mcpu=${AARCH64_TARGET_CPU}")
 
         # Make sure GCC is not using the fix for errata 843419. This change
         # interferes with the gold linker. Note that GCC applies this fix
@@ -230,6 +261,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # -O0-ggdb was reputed to cause gdb to crash (github #4450)
   set(CMAKE_C_FLAGS_DEBUG            "-O0 -g${GDB_SUBOPTION}")
   set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_C_FLAGS_DEBUGOPT         "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUGOPT       "-O2 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
   set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
@@ -237,12 +270,13 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
   set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration")
-  
+
+  mark_as_advanced(CMAKE_C_FLAGS_DEBUGOPT CMAKE_CXX_FLAGS_DEBUGOPT)
 
   foreach(opt ${DISABLED_NAMED_WARNINGS})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")
   endforeach()
-  
+
   foreach(opt ${DISABLED_C_NAMED_WARNINGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${opt}")
   endforeach()

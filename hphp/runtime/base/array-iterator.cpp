@@ -282,6 +282,7 @@ bool ArrayIter::endHelper() const  {
   if (obj->isCollection()) {
     switch (obj->collectionType()) {
       case CollectionType::Vector:
+      case CollectionType::ImmVector:
         return m_pos >= static_cast<BaseVector*>(obj)->size();
       case CollectionType::Map:
       case CollectionType::ImmMap:
@@ -291,8 +292,6 @@ bool ArrayIter::endHelper() const  {
         return !static_cast<BaseSet*>(obj)->iter_valid(m_pos);
       case CollectionType::Pair:
         return m_pos >= static_cast<c_Pair*>(obj)->size();
-      case CollectionType::ImmVector:
-        return m_pos >= static_cast<c_ImmVector*>(obj)->size();
     }
   } else {
     return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
@@ -1606,6 +1605,7 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
   if (UNLIKELY(ad->isHackArray())) {
     throwRefInvalidArrayValueException(ad);
   }
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefIter();
 
   if (UNLIKELY(ad->empty())) {
     return 0LL;
@@ -1725,16 +1725,16 @@ int64_t iter_next_mixed_impl(Iter* it,
 
 
   if (isRefcountedType(valOut->m_type)) {
-    if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
+    if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*valOut, decRefCount);
+    valOut->m_data.pcnt->decRefCount();
   }
   if (HasKey && isRefcountedType(keyOut->m_type)) {
-    if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
+    if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*keyOut, decRefCount);
+    keyOut->m_data.pcnt->decRefCount();
   }
 
   iter.setPos(pos);
@@ -1760,16 +1760,16 @@ int64_t iter_next_packed_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (isRefcountedType(valOut->m_type)) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
+      if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
+      valOut->m_data.pcnt->decRefCount();
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
+      if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*keyOut, decRefCount);
+      keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
     cellDup(*tvToCell(packedData(ad) + pos), *valOut);

@@ -238,6 +238,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
  * (2) merge the block with its unique successor block, if it is the unique
  *     predecessor of its successor;
  * (3) fold Jmps, if it fits the Jmp -> Jmp|Jcc or Jcc -> Jmp pattern.
+ * (4) convert control flow diamonds to Select instructions
  *
  * The reverse post order is not essential to the transformation; in the current
  * implementation it helps skipping some blocks after a change happens.

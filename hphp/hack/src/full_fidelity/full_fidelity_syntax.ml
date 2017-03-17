@@ -106,9 +106,6 @@ module WithToken(Token: TokenType) = struct
       script_header: t;
       script_declarations: t;
     }
-    and script_footer = {
-      footer_question_greater_than: t;
-    }
     and simple_type_specifier = {
       simple_type_specifier: t;
     }
@@ -208,6 +205,16 @@ module WithToken(Token: TokenType) = struct
       function_right_paren: t;
       function_colon: t;
       function_type: t;
+      function_where_clause: t;
+    }
+    and where_clause = {
+      where_clause_keyword: t;
+      where_clause_constraints: t;
+    }
+    and where_constraint = {
+      where_constraint_left_type: t;
+      where_constraint_operator: t;
+      where_constraint_right_type: t;
     }
     and methodish_declaration = {
       methodish_attribute: t;
@@ -512,6 +519,11 @@ module WithToken(Token: TokenType) = struct
       safe_member_operator: t;
       safe_member_name: t;
     }
+    and embedded_member_selection_expression = {
+      embedded_member_object: t;
+      embedded_member_operator: t;
+      embedded_member_name: t;
+    }
     and yield_expression = {
       yield_keyword: t;
       yield_operand: t;
@@ -585,6 +597,11 @@ module WithToken(Token: TokenType) = struct
       braced_expression_expression: t;
       braced_expression_right_brace: t;
     }
+    and embedded_braced_expression = {
+      embedded_braced_expression_left_brace: t;
+      embedded_braced_expression_expression: t;
+      embedded_braced_expression_right_brace: t;
+    }
     and list_expression = {
       list_keyword: t;
       list_left_paren: t;
@@ -644,6 +661,12 @@ module WithToken(Token: TokenType) = struct
       subscript_index: t;
       subscript_right_bracket: t;
     }
+    and embedded_subscript_expression = {
+      embedded_subscript_receiver: t;
+      embedded_subscript_left_bracket: t;
+      embedded_subscript_index: t;
+      embedded_subscript_right_bracket: t;
+    }
     and awaitable_creation_expression = {
       awaitable_async: t;
       awaitable_compound_statement: t;
@@ -688,6 +711,7 @@ module WithToken(Token: TokenType) = struct
       xhp_attribute_expression: t;
     }
     and xhp_open = {
+      xhp_open_left_angle: t;
       xhp_open_name: t;
       xhp_open_attributes: t;
       xhp_open_right_angle: t;
@@ -745,9 +769,7 @@ module WithToken(Token: TokenType) = struct
     and dictionary_type_specifier = {
       dictionary_type_keyword: t;
       dictionary_type_left_angle: t;
-      dictionary_type_key: t;
-      dictionary_type_comma: t;
-      dictionary_type_value: t;
+      dictionary_type_members: t;
       dictionary_type_right_angle: t;
     }
     and closure_type_specifier = {
@@ -836,7 +858,6 @@ module WithToken(Token: TokenType) = struct
     | EndOfFile of end_of_file
     | ScriptHeader of script_header
     | Script of script
-    | ScriptFooter of script_footer
     | SimpleTypeSpecifier of simple_type_specifier
     | LiteralExpression of literal_expression
     | VariableExpression of variable_expression
@@ -854,6 +875,8 @@ module WithToken(Token: TokenType) = struct
     | NamespaceUseClause of namespace_use_clause
     | FunctionDeclaration of function_declaration
     | FunctionDeclarationHeader of function_declaration_header
+    | WhereClause of where_clause
+    | WhereConstraint of where_constraint
     | MethodishDeclaration of methodish_declaration
     | ClassishDeclaration of classish_declaration
     | ClassishBody of classish_body
@@ -904,6 +927,7 @@ module WithToken(Token: TokenType) = struct
     | ScopeResolutionExpression of scope_resolution_expression
     | MemberSelectionExpression of member_selection_expression
     | SafeMemberSelectionExpression of safe_member_selection_expression
+    | EmbeddedMemberSelectionExpression of embedded_member_selection_expression
     | YieldExpression of yield_expression
     | PrintExpression of print_expression
     | PrefixUnaryExpression of prefix_unary_expression
@@ -918,6 +942,7 @@ module WithToken(Token: TokenType) = struct
     | FunctionCallExpression of function_call_expression
     | ParenthesizedExpression of parenthesized_expression
     | BracedExpression of braced_expression
+    | EmbeddedBracedExpression of embedded_braced_expression
     | ListExpression of list_expression
     | CollectionLiteralExpression of collection_literal_expression
     | ObjectCreationExpression of object_creation_expression
@@ -928,6 +953,7 @@ module WithToken(Token: TokenType) = struct
     | VectorIntrinsicExpression of vector_intrinsic_expression
     | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
+    | EmbeddedSubscriptExpression of embedded_subscript_expression
     | AwaitableCreationExpression of awaitable_creation_expression
     | XHPChildrenDeclaration of xhp_children_declaration
     | XHPCategoryDeclaration of xhp_category_declaration
@@ -991,8 +1017,6 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ScriptHeader
       | Script _ ->
         SyntaxKind.Script
-      | ScriptFooter _ ->
-        SyntaxKind.ScriptFooter
       | SimpleTypeSpecifier _ ->
         SyntaxKind.SimpleTypeSpecifier
       | LiteralExpression _ ->
@@ -1027,6 +1051,10 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.FunctionDeclaration
       | FunctionDeclarationHeader _ ->
         SyntaxKind.FunctionDeclarationHeader
+      | WhereClause _ ->
+        SyntaxKind.WhereClause
+      | WhereConstraint _ ->
+        SyntaxKind.WhereConstraint
       | MethodishDeclaration _ ->
         SyntaxKind.MethodishDeclaration
       | ClassishDeclaration _ ->
@@ -1127,6 +1155,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.MemberSelectionExpression
       | SafeMemberSelectionExpression _ ->
         SyntaxKind.SafeMemberSelectionExpression
+      | EmbeddedMemberSelectionExpression _ ->
+        SyntaxKind.EmbeddedMemberSelectionExpression
       | YieldExpression _ ->
         SyntaxKind.YieldExpression
       | PrintExpression _ ->
@@ -1155,6 +1185,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ParenthesizedExpression
       | BracedExpression _ ->
         SyntaxKind.BracedExpression
+      | EmbeddedBracedExpression _ ->
+        SyntaxKind.EmbeddedBracedExpression
       | ListExpression _ ->
         SyntaxKind.ListExpression
       | CollectionLiteralExpression _ ->
@@ -1175,6 +1207,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ElementInitializer
       | SubscriptExpression _ ->
         SyntaxKind.SubscriptExpression
+      | EmbeddedSubscriptExpression _ ->
+        SyntaxKind.EmbeddedSubscriptExpression
       | AwaitableCreationExpression _ ->
         SyntaxKind.AwaitableCreationExpression
       | XHPChildrenDeclaration _ ->
@@ -1262,8 +1296,6 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ScriptHeader
     let is_script node =
       kind node = SyntaxKind.Script
-    let is_script_footer node =
-      kind node = SyntaxKind.ScriptFooter
     let is_simple_type_specifier node =
       kind node = SyntaxKind.SimpleTypeSpecifier
     let is_literal_expression node =
@@ -1298,6 +1330,10 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.FunctionDeclaration
     let is_function_declaration_header node =
       kind node = SyntaxKind.FunctionDeclarationHeader
+    let is_where_clause node =
+      kind node = SyntaxKind.WhereClause
+    let is_where_constraint node =
+      kind node = SyntaxKind.WhereConstraint
     let is_methodish_declaration node =
       kind node = SyntaxKind.MethodishDeclaration
     let is_classish_declaration node =
@@ -1398,6 +1434,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.MemberSelectionExpression
     let is_safe_member_selection_expression node =
       kind node = SyntaxKind.SafeMemberSelectionExpression
+    let is_embedded_member_selection_expression node =
+      kind node = SyntaxKind.EmbeddedMemberSelectionExpression
     let is_yield_expression node =
       kind node = SyntaxKind.YieldExpression
     let is_print_expression node =
@@ -1426,6 +1464,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ParenthesizedExpression
     let is_braced_expression node =
       kind node = SyntaxKind.BracedExpression
+    let is_embedded_braced_expression node =
+      kind node = SyntaxKind.EmbeddedBracedExpression
     let is_list_expression node =
       kind node = SyntaxKind.ListExpression
     let is_collection_literal_expression node =
@@ -1446,6 +1486,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ElementInitializer
     let is_subscript_expression node =
       kind node = SyntaxKind.SubscriptExpression
+    let is_embedded_subscript_expression node =
+      kind node = SyntaxKind.EmbeddedSubscriptExpression
     let is_awaitable_creation_expression node =
       kind node = SyntaxKind.AwaitableCreationExpression
     let is_xhp_children_declaration node =
@@ -1576,12 +1618,6 @@ module WithToken(Token: TokenType) = struct
     } = (
       script_header,
       script_declarations
-    )
-
-    let get_script_footer_children {
-      footer_question_greater_than;
-    } = (
-      footer_question_greater_than
     )
 
     let get_simple_type_specifier_children {
@@ -1771,6 +1807,7 @@ module WithToken(Token: TokenType) = struct
       function_right_paren;
       function_colon;
       function_type;
+      function_where_clause;
     } = (
       function_async,
       function_keyword,
@@ -1781,7 +1818,26 @@ module WithToken(Token: TokenType) = struct
       function_parameter_list,
       function_right_paren,
       function_colon,
-      function_type
+      function_type,
+      function_where_clause
+    )
+
+    let get_where_clause_children {
+      where_clause_keyword;
+      where_clause_constraints;
+    } = (
+      where_clause_keyword,
+      where_clause_constraints
+    )
+
+    let get_where_constraint_children {
+      where_constraint_left_type;
+      where_constraint_operator;
+      where_constraint_right_type;
+    } = (
+      where_constraint_left_type,
+      where_constraint_operator,
+      where_constraint_right_type
     )
 
     let get_methodish_declaration_children {
@@ -2390,6 +2446,16 @@ module WithToken(Token: TokenType) = struct
       safe_member_name
     )
 
+    let get_embedded_member_selection_expression_children {
+      embedded_member_object;
+      embedded_member_operator;
+      embedded_member_name;
+    } = (
+      embedded_member_object,
+      embedded_member_operator,
+      embedded_member_name
+    )
+
     let get_yield_expression_children {
       yield_keyword;
       yield_operand;
@@ -2536,6 +2602,16 @@ module WithToken(Token: TokenType) = struct
       braced_expression_right_brace
     )
 
+    let get_embedded_braced_expression_children {
+      embedded_braced_expression_left_brace;
+      embedded_braced_expression_expression;
+      embedded_braced_expression_right_brace;
+    } = (
+      embedded_braced_expression_left_brace,
+      embedded_braced_expression_expression,
+      embedded_braced_expression_right_brace
+    )
+
     let get_list_expression_children {
       list_keyword;
       list_left_paren;
@@ -2654,6 +2730,18 @@ module WithToken(Token: TokenType) = struct
       subscript_right_bracket
     )
 
+    let get_embedded_subscript_expression_children {
+      embedded_subscript_receiver;
+      embedded_subscript_left_bracket;
+      embedded_subscript_index;
+      embedded_subscript_right_bracket;
+    } = (
+      embedded_subscript_receiver,
+      embedded_subscript_left_bracket,
+      embedded_subscript_index,
+      embedded_subscript_right_bracket
+    )
+
     let get_awaitable_creation_expression_children {
       awaitable_async;
       awaitable_compound_statement;
@@ -2741,10 +2829,12 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_xhp_open_children {
+      xhp_open_left_angle;
       xhp_open_name;
       xhp_open_attributes;
       xhp_open_right_angle;
     } = (
+      xhp_open_left_angle,
       xhp_open_name,
       xhp_open_attributes,
       xhp_open_right_angle
@@ -2853,16 +2943,12 @@ module WithToken(Token: TokenType) = struct
     let get_dictionary_type_specifier_children {
       dictionary_type_keyword;
       dictionary_type_left_angle;
-      dictionary_type_key;
-      dictionary_type_comma;
-      dictionary_type_value;
+      dictionary_type_members;
       dictionary_type_right_angle;
     } = (
       dictionary_type_keyword,
       dictionary_type_left_angle,
-      dictionary_type_key,
-      dictionary_type_comma,
-      dictionary_type_value,
+      dictionary_type_members,
       dictionary_type_right_angle
     )
 
@@ -3050,11 +3136,6 @@ module WithToken(Token: TokenType) = struct
         script_header;
         script_declarations;
       ]
-      | ScriptFooter {
-        footer_question_greater_than;
-      } -> [
-        footer_question_greater_than;
-      ]
       | SimpleTypeSpecifier {
         simple_type_specifier;
       } -> [
@@ -3226,6 +3307,7 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
       } -> [
         function_async;
         function_keyword;
@@ -3237,6 +3319,23 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
+      ]
+      | WhereClause {
+        where_clause_keyword;
+        where_clause_constraints;
+      } -> [
+        where_clause_keyword;
+        where_clause_constraints;
+      ]
+      | WhereConstraint {
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
+      } -> [
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
       ]
       | MethodishDeclaration {
         methodish_attribute;
@@ -3794,6 +3893,15 @@ module WithToken(Token: TokenType) = struct
         safe_member_operator;
         safe_member_name;
       ]
+      | EmbeddedMemberSelectionExpression {
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      } -> [
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      ]
       | YieldExpression {
         yield_keyword;
         yield_operand;
@@ -3926,6 +4034,15 @@ module WithToken(Token: TokenType) = struct
         braced_expression_expression;
         braced_expression_right_brace;
       ]
+      | EmbeddedBracedExpression {
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
+      } -> [
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
+      ]
       | ListExpression {
         list_keyword;
         list_left_paren;
@@ -4034,6 +4151,17 @@ module WithToken(Token: TokenType) = struct
         subscript_index;
         subscript_right_bracket;
       ]
+      | EmbeddedSubscriptExpression {
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
+      } -> [
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
+      ]
       | AwaitableCreationExpression {
         awaitable_async;
         awaitable_compound_statement;
@@ -4112,10 +4240,12 @@ module WithToken(Token: TokenType) = struct
         xhp_attribute_expression;
       ]
       | XHPOpen {
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
       } -> [
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
@@ -4214,16 +4344,12 @@ module WithToken(Token: TokenType) = struct
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       } -> [
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       ]
       | ClosureTypeSpecifier {
@@ -4394,11 +4520,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "script_header";
         "script_declarations";
-      ]
-      | ScriptFooter {
-        footer_question_greater_than;
-      } -> [
-        "footer_question_greater_than";
       ]
       | SimpleTypeSpecifier {
         simple_type_specifier;
@@ -4571,6 +4692,7 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
       } -> [
         "function_async";
         "function_keyword";
@@ -4582,6 +4704,23 @@ module WithToken(Token: TokenType) = struct
         "function_right_paren";
         "function_colon";
         "function_type";
+        "function_where_clause";
+      ]
+      | WhereClause {
+        where_clause_keyword;
+        where_clause_constraints;
+      } -> [
+        "where_clause_keyword";
+        "where_clause_constraints";
+      ]
+      | WhereConstraint {
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
+      } -> [
+        "where_constraint_left_type";
+        "where_constraint_operator";
+        "where_constraint_right_type";
       ]
       | MethodishDeclaration {
         methodish_attribute;
@@ -5139,6 +5278,15 @@ module WithToken(Token: TokenType) = struct
         "safe_member_operator";
         "safe_member_name";
       ]
+      | EmbeddedMemberSelectionExpression {
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      } -> [
+        "embedded_member_object";
+        "embedded_member_operator";
+        "embedded_member_name";
+      ]
       | YieldExpression {
         yield_keyword;
         yield_operand;
@@ -5271,6 +5419,15 @@ module WithToken(Token: TokenType) = struct
         "braced_expression_expression";
         "braced_expression_right_brace";
       ]
+      | EmbeddedBracedExpression {
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
+      } -> [
+        "embedded_braced_expression_left_brace";
+        "embedded_braced_expression_expression";
+        "embedded_braced_expression_right_brace";
+      ]
       | ListExpression {
         list_keyword;
         list_left_paren;
@@ -5379,6 +5536,17 @@ module WithToken(Token: TokenType) = struct
         "subscript_index";
         "subscript_right_bracket";
       ]
+      | EmbeddedSubscriptExpression {
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
+      } -> [
+        "embedded_subscript_receiver";
+        "embedded_subscript_left_bracket";
+        "embedded_subscript_index";
+        "embedded_subscript_right_bracket";
+      ]
       | AwaitableCreationExpression {
         awaitable_async;
         awaitable_compound_statement;
@@ -5457,10 +5625,12 @@ module WithToken(Token: TokenType) = struct
         "xhp_attribute_expression";
       ]
       | XHPOpen {
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
       } -> [
+        "xhp_open_left_angle";
         "xhp_open_name";
         "xhp_open_attributes";
         "xhp_open_right_angle";
@@ -5559,16 +5729,12 @@ module WithToken(Token: TokenType) = struct
       | DictionaryTypeSpecifier {
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       } -> [
         "dictionary_type_keyword";
         "dictionary_type_left_angle";
-        "dictionary_type_key";
-        "dictionary_type_comma";
-        "dictionary_type_value";
+        "dictionary_type_members";
         "dictionary_type_right_angle";
       ]
       | ClosureTypeSpecifier {
@@ -5797,12 +5963,6 @@ module WithToken(Token: TokenType) = struct
           script_header;
           script_declarations;
         }
-      | (SyntaxKind.ScriptFooter, [
-          footer_question_greater_than;
-        ]) ->
-        ScriptFooter {
-          footer_question_greater_than;
-        }
       | (SyntaxKind.SimpleTypeSpecifier, [
           simple_type_specifier;
         ]) ->
@@ -5990,6 +6150,7 @@ module WithToken(Token: TokenType) = struct
           function_right_paren;
           function_colon;
           function_type;
+          function_where_clause;
         ]) ->
         FunctionDeclarationHeader {
           function_async;
@@ -6002,6 +6163,25 @@ module WithToken(Token: TokenType) = struct
           function_right_paren;
           function_colon;
           function_type;
+          function_where_clause;
+        }
+      | (SyntaxKind.WhereClause, [
+          where_clause_keyword;
+          where_clause_constraints;
+        ]) ->
+        WhereClause {
+          where_clause_keyword;
+          where_clause_constraints;
+        }
+      | (SyntaxKind.WhereConstraint, [
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
+        ]) ->
+        WhereConstraint {
+          where_constraint_left_type;
+          where_constraint_operator;
+          where_constraint_right_type;
         }
       | (SyntaxKind.MethodishDeclaration, [
           methodish_attribute;
@@ -6609,6 +6789,16 @@ module WithToken(Token: TokenType) = struct
           safe_member_operator;
           safe_member_name;
         }
+      | (SyntaxKind.EmbeddedMemberSelectionExpression, [
+          embedded_member_object;
+          embedded_member_operator;
+          embedded_member_name;
+        ]) ->
+        EmbeddedMemberSelectionExpression {
+          embedded_member_object;
+          embedded_member_operator;
+          embedded_member_name;
+        }
       | (SyntaxKind.YieldExpression, [
           yield_keyword;
           yield_operand;
@@ -6755,6 +6945,16 @@ module WithToken(Token: TokenType) = struct
           braced_expression_expression;
           braced_expression_right_brace;
         }
+      | (SyntaxKind.EmbeddedBracedExpression, [
+          embedded_braced_expression_left_brace;
+          embedded_braced_expression_expression;
+          embedded_braced_expression_right_brace;
+        ]) ->
+        EmbeddedBracedExpression {
+          embedded_braced_expression_left_brace;
+          embedded_braced_expression_expression;
+          embedded_braced_expression_right_brace;
+        }
       | (SyntaxKind.ListExpression, [
           list_keyword;
           list_left_paren;
@@ -6873,6 +7073,18 @@ module WithToken(Token: TokenType) = struct
           subscript_index;
           subscript_right_bracket;
         }
+      | (SyntaxKind.EmbeddedSubscriptExpression, [
+          embedded_subscript_receiver;
+          embedded_subscript_left_bracket;
+          embedded_subscript_index;
+          embedded_subscript_right_bracket;
+        ]) ->
+        EmbeddedSubscriptExpression {
+          embedded_subscript_receiver;
+          embedded_subscript_left_bracket;
+          embedded_subscript_index;
+          embedded_subscript_right_bracket;
+        }
       | (SyntaxKind.AwaitableCreationExpression, [
           awaitable_async;
           awaitable_compound_statement;
@@ -6960,11 +7172,13 @@ module WithToken(Token: TokenType) = struct
           xhp_attribute_expression;
         }
       | (SyntaxKind.XHPOpen, [
+          xhp_open_left_angle;
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
         ]) ->
         XHPOpen {
+          xhp_open_left_angle;
           xhp_open_name;
           xhp_open_attributes;
           xhp_open_right_angle;
@@ -7072,17 +7286,13 @@ module WithToken(Token: TokenType) = struct
       | (SyntaxKind.DictionaryTypeSpecifier, [
           dictionary_type_keyword;
           dictionary_type_left_angle;
-          dictionary_type_key;
-          dictionary_type_comma;
-          dictionary_type_value;
+          dictionary_type_members;
           dictionary_type_right_angle;
         ]) ->
         DictionaryTypeSpecifier {
           dictionary_type_keyword;
           dictionary_type_left_angle;
-          dictionary_type_key;
-          dictionary_type_comma;
-          dictionary_type_value;
+          dictionary_type_members;
           dictionary_type_right_angle;
         }
       | (SyntaxKind.ClosureTypeSpecifier, [
@@ -7312,13 +7522,6 @@ module WithToken(Token: TokenType) = struct
         script_declarations;
       ]
 
-    let make_script_footer
-      footer_question_greater_than
-    =
-      from_children SyntaxKind.ScriptFooter [
-        footer_question_greater_than;
-      ]
-
     let make_simple_type_specifier
       simple_type_specifier
     =
@@ -7522,6 +7725,7 @@ module WithToken(Token: TokenType) = struct
       function_right_paren
       function_colon
       function_type
+      function_where_clause
     =
       from_children SyntaxKind.FunctionDeclarationHeader [
         function_async;
@@ -7534,6 +7738,27 @@ module WithToken(Token: TokenType) = struct
         function_right_paren;
         function_colon;
         function_type;
+        function_where_clause;
+      ]
+
+    let make_where_clause
+      where_clause_keyword
+      where_clause_constraints
+    =
+      from_children SyntaxKind.WhereClause [
+        where_clause_keyword;
+        where_clause_constraints;
+      ]
+
+    let make_where_constraint
+      where_constraint_left_type
+      where_constraint_operator
+      where_constraint_right_type
+    =
+      from_children SyntaxKind.WhereConstraint [
+        where_constraint_left_type;
+        where_constraint_operator;
+        where_constraint_right_type;
       ]
 
     let make_methodish_declaration
@@ -8192,6 +8417,17 @@ module WithToken(Token: TokenType) = struct
         safe_member_name;
       ]
 
+    let make_embedded_member_selection_expression
+      embedded_member_object
+      embedded_member_operator
+      embedded_member_name
+    =
+      from_children SyntaxKind.EmbeddedMemberSelectionExpression [
+        embedded_member_object;
+        embedded_member_operator;
+        embedded_member_name;
+      ]
+
     let make_yield_expression
       yield_keyword
       yield_operand
@@ -8352,6 +8588,17 @@ module WithToken(Token: TokenType) = struct
         braced_expression_right_brace;
       ]
 
+    let make_embedded_braced_expression
+      embedded_braced_expression_left_brace
+      embedded_braced_expression_expression
+      embedded_braced_expression_right_brace
+    =
+      from_children SyntaxKind.EmbeddedBracedExpression [
+        embedded_braced_expression_left_brace;
+        embedded_braced_expression_expression;
+        embedded_braced_expression_right_brace;
+      ]
+
     let make_list_expression
       list_keyword
       list_left_paren
@@ -8480,6 +8727,19 @@ module WithToken(Token: TokenType) = struct
         subscript_right_bracket;
       ]
 
+    let make_embedded_subscript_expression
+      embedded_subscript_receiver
+      embedded_subscript_left_bracket
+      embedded_subscript_index
+      embedded_subscript_right_bracket
+    =
+      from_children SyntaxKind.EmbeddedSubscriptExpression [
+        embedded_subscript_receiver;
+        embedded_subscript_left_bracket;
+        embedded_subscript_index;
+        embedded_subscript_right_bracket;
+      ]
+
     let make_awaitable_creation_expression
       awaitable_async
       awaitable_compound_statement
@@ -8576,11 +8836,13 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_xhp_open
+      xhp_open_left_angle
       xhp_open_name
       xhp_open_attributes
       xhp_open_right_angle
     =
       from_children SyntaxKind.XHPOpen [
+        xhp_open_left_angle;
         xhp_open_name;
         xhp_open_attributes;
         xhp_open_right_angle;
@@ -8698,17 +8960,13 @@ module WithToken(Token: TokenType) = struct
     let make_dictionary_type_specifier
       dictionary_type_keyword
       dictionary_type_left_angle
-      dictionary_type_key
-      dictionary_type_comma
-      dictionary_type_value
+      dictionary_type_members
       dictionary_type_right_angle
     =
       from_children SyntaxKind.DictionaryTypeSpecifier [
         dictionary_type_keyword;
         dictionary_type_left_angle;
-        dictionary_type_key;
-        dictionary_type_comma;
-        dictionary_type_value;
+        dictionary_type_members;
         dictionary_type_right_angle;
       ]
 

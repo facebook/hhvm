@@ -187,7 +187,7 @@ let rec to_string prefix r =
   | Rused_as_shape _ ->
       [(p, prefix ^ " because it is used as shape-like array here")]
   | Rpredicated (p, f) ->
-      [(p, prefix ^ " from the condition on the predicate " ^ f)]
+      [(p, prefix ^ " from the argument to this "^ f ^" test")]
   | Rinstanceof (p,s) ->
       [(p, prefix ^ " from this instanceof test matching " ^ s)]
 

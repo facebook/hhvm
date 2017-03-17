@@ -25,7 +25,7 @@ namespace HPHP {
 template<class SerDe>
 void FPIEnt::serde(SerDe& sd) {
   sd(m_fpushOff)
-    (m_fcallOff)
+    (m_fpiEndOff)
     (m_fpOff)
     // These fields are recomputed by sortFPITab:
     // (m_parentIndex)
@@ -301,6 +301,12 @@ inline int Func::numIterators() const {
   return shared()->m_numIterators;
 }
 
+inline int Func::numClsRefSlots() const {
+  auto const ex = extShared();
+  if (LIKELY(!ex)) return shared()->m_numClsRefSlots;
+  return ex->m_actualNumClsRefSlots;
+}
+
 inline Id Func::numNamedLocals() const {
   return shared()->m_localNames.size();
 }
@@ -320,7 +326,8 @@ inline int Func::maxStackCells() const {
 
 inline int Func::numSlotsInFrame() const {
   return shared()->m_numLocals +
-    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell));
+    shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell)) +
+    (numClsRefSlots() * sizeof(Class*) + sizeof(Cell) - 1) / sizeof(Cell);
 }
 
 inline bool Func::hasForeignThis() const {
@@ -577,6 +584,29 @@ inline const Func::EHEntVec& Func::ehtab() const {
 
 inline const Func::FPIEntVec& Func::fpitab() const {
   return shared()->m_fpitab;
+}
+
+inline const EHEnt* Func::findEH(Offset o) const {
+  assert(o >= base() && o < past());
+  return findEH(shared()->m_ehtab, o);
+}
+
+template<class Container>
+const typename Container::value_type*
+Func::findEH(const Container& ehtab, Offset o) {
+  const typename Container::value_type* eh = nullptr;
+
+  for (uint32_t i = 0, sz = ehtab.size(); i < sz; ++i) {
+    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
+      eh = &ehtab[i];
+    }
+  }
+  return eh;
+}
+
+inline const FPIEnt* Func::findFPI(Offset o) const {
+  assertx(o >= base() && o < past());
+  return findFPI(fpitab().begin(), fpitab().end(), o);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

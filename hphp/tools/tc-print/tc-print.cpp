@@ -50,7 +50,7 @@ bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
 bool            verboseStats    = false;
 folly::Optional<MD5> md5Filter;
-PerfEventType   sortBy          = SPECIAL_PROF_COUNTERS;
+PerfEventType   sortBy          = EVENT_CYCLES;
 bool            sortByDensity   = false;
 double          helpersMinPercentage = 0;
 ExtOpcode       filterByOpcode  = 0;
@@ -441,16 +441,6 @@ void loadProfData() {
   if (!profFileName.empty()) {
     loadPerfEvents();
   }
-
-  // The prof-counters are collected independently.
-  for (TransID tid = 0; tid < NTRANS; tid++) {
-    if (!TREC(tid)->isValid()) continue;
-
-    PerfEvent profCounters;
-    profCounters.type  = SPECIAL_PROF_COUNTERS;
-    profCounters.count = g_transData->getTransCounter(tid);
-    transPerfEvents.addEvent(tid, profCounters);
-  }
 }
 
 // Prints the metadata, bytecode, and disassembly for the given translation
@@ -545,15 +535,13 @@ void printCFG() {
 
   printf("digraph CFG {\n");
 
-  uint64_t maxProfCount = g_transData->findFuncTrans(selectedFuncId, &inodes);
+  g_transData->findFuncTrans(selectedFuncId, &inodes);
 
   // Print nodes
   for (uint32_t i = 0; i < inodes.size(); i++) {
     auto tid = inodes[i];
-    uint64_t profCount = g_transData->getTransCounter(tid);
     uint32_t bcStart   = TREC(tid)->src.offset();
     uint32_t bcStop    = TREC(tid)->bcPast();
-    uint32_t coldness  = 255 - (255 * profCount / maxProfCount);
     const auto kind = TREC(tid)->kind;
     bool isPrologue = kind == TransKind::LivePrologue ||
                       kind == TransKind::OptPrologue;
@@ -566,9 +554,8 @@ void printCFG() {
       case TransKind::OptPrologue : shape = "invtrapezium"; break;
       default:                      shape = "box";
     }
-    printf("t%u [shape=%s,label=\"T: %u\\np: %" PRIu64 "\\nbc: [0x%x-0x%x)\","
-           "style=filled,fillcolor=\"#ff%02x%02x\"%s];\n", tid, shape, tid,
-           profCount, bcStart, bcStop, coldness, coldness,
+    printf("t%u [shape=%s,label=\"T: %u\\nbc: [0x%x-0x%x)\","
+           "style=filled%s];\n", tid, shape, tid, bcStart, bcStop,
            (isPrologue ? ",color=blue" : ""));
   }
 

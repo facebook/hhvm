@@ -49,11 +49,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assertx(IMPLIES(t <= TStkElem, t.isKnownDataType()));
+    assertx(IMPLIES(t <= TGen, t.isKnownDataType()));
     return 1;
   }
 
-  assertx(t <= TStkElem);
+  assertx(t <= TGen);
 
   // XXX(t4592459): This will return 2 for TNull, even though it only
   // needs 1 register (one for the type, none for the value). This is to work
@@ -102,7 +102,6 @@ Variant SSATmp::variantVal() const {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   always_assert(false);

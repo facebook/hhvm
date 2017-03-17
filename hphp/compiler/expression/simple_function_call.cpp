@@ -206,27 +206,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
       }
       break;
 
-    // The class_alias builtin can create new names for other classes;
-    // we need to mark some of these classes redeclaring to avoid
-    // making incorrect assumptions during WholeProgram mode.  See
-    // AnalysisResult::collectFunctionsAndClasses.
-    case FunType::ClassAlias:
-      if (m_params &&
-          (m_params->getCount() == 2 || m_params->getCount() == 3) &&
-          Option::WholeProgram) {
-        if (!(*m_params)[0]->isLiteralString() ||
-            !(*m_params)[1]->isLiteralString()) {
-          parseTimeFatal(
-            fs,
-            Compiler::NoError,
-            "class_alias with non-literal parameters is not allowed when "
-            "WholeProgram optimizations are turned on");
-        }
-        fs->addClassAlias((*m_params)[0]->getLiteralString(),
-                          (*m_params)[1]->getLiteralString());
-      }
-      break;
-
     case FunType::VariableArgument:
       /*
         Note:
@@ -643,9 +622,9 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
             auto rep = std::make_shared<ExpressionList>(
               getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
             std::string root_name;
-            int n = arr ? arr->getCount() : 0;
+            int n2 = arr ? arr->getCount() : 0;
             int i, j, k;
-            for (i = j = k = 0; i < n; i++) {
+            for (i = j = k = 0; i < n2; i++) {
               auto ap = dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]);
               always_assert(ap);
               String name;

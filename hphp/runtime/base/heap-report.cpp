@@ -37,7 +37,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
   std::ostringstream out;
   auto h = g.nodes[n].h;
   out << n;
-  if (haveCount(h->kind())) out << "#" << h->hdr_.count;
+  if (haveCount(h->kind())) out << "#" << h->hdr_.count();
   out << ":" << header_names[int(h->kind())];
   switch (h->kind()) {
     case HeaderKind::Packed:
@@ -104,8 +104,9 @@ DEBUG_ONLY
 std::string describePtr(const HeapGraph& g, const HeapGraph::Ptr& ptr) {
   std::ostringstream out;
   out << " " << ptrSym[(unsigned)ptr.ptr_kind];
-  if (ptr.from != -1) out << describe(g, ptr.from);
-  else if (ptr.description) out << ptr.description;
+  auto& from = g.nodes[ptr.from];
+  if (!from.is_root) out << describe(g, ptr.from);
+  else out << type_scan::getName(from.tyindex);
   return out.str();
 }
 
@@ -141,7 +142,7 @@ void printHeapReport(const HeapGraph& g, const char* phase) {
     count(i, allocd, freed);
   }
   std::vector<int> parents(g.nodes.size(), -1);
-  dfs_ptrs(g, g.roots, [&](int node, int ptr) {
+  dfs_ptrs(g, g.root_ptrs, [&](int node, int ptr) {
     parents[node] = ptr;
     count(node, live, undead);
     auto h = g.nodes[node].h;
@@ -218,7 +219,7 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
   for (size_t n = 0; n < g.nodes.size(); ++n) {
     auto& node = g.nodes[n];
     if (!haveCount(node.h->kind())) continue;
-    auto count = node.h->hdr_.count;
+    auto count = node.h->hdr_.count();
     assert(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_implicit{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {

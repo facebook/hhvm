@@ -29,7 +29,7 @@ class LazyInitTestDriver(MiniStateTestDriver):
 # some comment
 use_mini_state = true
 use_watchman = true
-watchman_subscribe = false
+watchman_subscribe = true
 lazy_decl = true
 lazy_parse = true
 lazy_init = true
@@ -95,6 +95,7 @@ class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
             write_echo_json(
                 f, {
                     'state': self.saved_state_path(),
+                    'corresponding_base_revision': '1',
                     'is_cached': True,
                     'deptable': self.saved_state_path() + '.sql',
                 }
@@ -158,4 +159,4 @@ watchman_init_timeout = 1
         self.run_check()
         # Stop the server, ensuring that its logs get flushed
         self.proc_call([hh_client, 'stop', self.repo_dir])
-        self.assertIn('Watchman.Timeout', self.get_server_logs())
+        self.assertIn('Watchman_sig.Types.Timeout', self.get_server_logs())

@@ -1880,9 +1880,7 @@ static struct SessionExtension final : Extension {
   }
 
   void threadInit() override {
-    // TODO: t5226715 We shouldn't need to check s_session here, but right now
-    // this is called for every request.
-    if (!s_session.isNull()) return;
+    assert(s_session.isNull());
     s_session.getCheck();
     Extension* ext = ExtensionRegistry::get(s_session_ext_name);
     assert(ext);

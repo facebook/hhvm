@@ -821,8 +821,7 @@ void xdebug_var_export_text_ansi(
     sb.printf("%*s}", (exporter.level * 2) - 2, "");
     break;
   }
-  case KindOfRef:
-  case KindOfClass: not_reached();
+  case KindOfRef: not_reached();
   }
 
   sb.append('\n');
@@ -1064,7 +1063,6 @@ void xdebug_var_export_fancy(
     }
     break;
   }
-  case KindOfClass:
   case KindOfResource:
   case KindOfRef:
     not_reached();

@@ -1,4 +1,4 @@
-open File_content
+open Ide_api_types
 
 type connection_type =
   | Persistent
@@ -25,12 +25,15 @@ type _ t =
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
-  | IDE_FIND_REFS : string * int * int -> FindRefsService.result t
-  | IDE_HIGHLIGHT_REFS : string * int * int -> ServerHighlightRefsTypes.result t
+  | IDE_FIND_REFS : ServerUtils.file_input * int * int ->
+      FindRefsService.ide_result t
+  | IDE_HIGHLIGHT_REFS : ServerUtils.file_input * int * int ->
+      ServerHighlightRefsTypes.result t
   | REFACTOR : ServerRefactorTypes.action -> ServerRefactorTypes.patch list t
   | DUMP_SYMBOL_INFO : string list -> SymbolInfoServiceTypes.result t
   | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> ServerRefactorTypes.patch list t
+  | IGNORE_FIXMES : string list -> Pos.absolute Errors.error_ list t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t
@@ -40,14 +43,15 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | KILL : unit t
-  | FORMAT : string * int * int -> string Format_hack.return t
+  | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
+  | IDE_FORMAT : ServerFormatTypes.ide_action -> ServerFormatTypes.ide_result t
   | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | OPEN_FILE : string * string -> unit t
   | CLOSE_FILE : string -> unit t
-  | EDIT_FILE : string * (code_edit list) -> unit t
-  | IDE_AUTOCOMPLETE : string * content_pos -> AutocompleteService.result t
+  | EDIT_FILE : string * (text_edit list) -> unit t
+  | IDE_AUTOCOMPLETE : string * position -> AutocompleteService.result t
   | DISCONNECT : unit t
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t

@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_JIT_TC_H_
 #define incl_HPHP_JIT_TC_H_
 
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -32,11 +33,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP {
-
-struct Func;
-
-namespace jit {
+namespace HPHP { namespace jit {
 
 struct AsmInfo;
 struct FPInvOffset;
@@ -97,13 +94,15 @@ private:
 struct FuncMetaInfo {
   FuncMetaInfo() = default;
   FuncMetaInfo(Func* f, ThreadTCBuffer&& buf)
-    : func(f)
+    : fid(f->getFuncId())
+    , func(f)
     , tcBuf(std::move(buf))
   {}
 
   FuncMetaInfo(FuncMetaInfo&&) = default;
   FuncMetaInfo& operator=(FuncMetaInfo&&) = default;
 
+  FuncId fid;
   Func* func;
   ThreadTCBuffer tcBuf;
   std::vector<ProfTransRec*> prologues;
@@ -117,17 +116,6 @@ struct FuncMetaInfo {
  * recorded in srcRec.
  */
 bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec);
-
-/*
- * Invalidate the SrcDB entries for func's SrcKeys that have any
- * Profile translation.
- */
-void invalidateFuncProfSrcKeys(const Func* func);
-
-/*
- * Invalidate the SrcDB entries for sk.
- */
-void invalidateSrcKey(SrcKey sk);
 
 /*
  * Emit machine code for env. Returns folly::none if the global translation
@@ -158,6 +146,12 @@ folly::Optional<TransLoc> publishTranslation(
  * thread buffers and will need to be relocated.
  */
 void publishOptFunction(FuncMetaInfo info);
+
+/*
+ * Acquires the code and metadata locks once and relocates all functions in
+ * sorted list.
+ */
+void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos);
 
 /*
  * Emit a new prologue for func-- returns nullptr if the global translation

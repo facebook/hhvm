@@ -143,11 +143,11 @@ void debug_dump_program(const Index& index, const php::Program& program) {
   std::cout << "debug dump going to " << dir << '\n';
 
   {
-    trace_time tracer("debug dump: representation");
+    trace_time tracer2("debug dump: representation");
     dump_representation(dir / "representation", program);
   }
   {
-    trace_time tracer("debug dump: index");
+    trace_time tracer2("debug dump: index");
     dump_index(dir / "index", index, program);
   }
 

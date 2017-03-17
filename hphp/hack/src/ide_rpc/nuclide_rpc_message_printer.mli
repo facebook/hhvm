@@ -8,17 +8,11 @@
  *
  *)
 
-(* Constructs just the "result" part of the message *)
+
 val to_json :
-  response:Ide_message.response ->
+  message:Ide_message.message ->
   Hh_json.json
 
 val print_json :
   response:Ide_message.response ->
   unit
-
-(* Constructs the entire response message, ready to be sent to client *)
-val to_message_json :
-  id:int option ->
-  response:Ide_message.response ->
-  Hh_json.json

@@ -54,6 +54,7 @@ struct PlainDirectory : Directory {
   DECLARE_RESOURCE_ALLOCATION(PlainDirectory);
 
   explicit PlainDirectory(const String& path);
+  explicit PlainDirectory(int fd);
   ~PlainDirectory();
 
   void close() override;

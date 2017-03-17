@@ -29,3 +29,7 @@ let unnest t =
     | None -> raise (Failure "unnested too far")
   in
   {t with current_nesting}
+
+let is_nested t = match t.current_nesting.Nesting.parent with
+  | Some _ -> true
+  | None -> false

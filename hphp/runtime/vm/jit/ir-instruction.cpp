@@ -438,8 +438,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define D(type)         return type;
 #define DofS(n)         return inst->src(n)->type();
 #define DRefineS(n)     return inst->src(n)->type() & inst->typeParam();
-#define DParamMayRelax  return inst->typeParam();
-#define DParam          return inst->typeParam();
+#define DParamMayRelax(t) return inst->typeParam();
+#define DParam(t)       return inst->typeParam();
 #define DParamPtr(k)    assertx(inst->typeParam() <= TGen.ptr(Ptr::k)); \
                         return inst->typeParam();
 #define DLdObjCls {                                                \

@@ -38,8 +38,8 @@ const StaticString s_setall("setall");
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
-                                         borrowed_ptr<php::Func> func) {
+bool is_collection_method_returning_this(borrowed_ptr<const php::Class> cls,
+                                         borrowed_ptr<const php::Func> func) {
   if (!cls) return false;
 
   if (cls->name->isame(s_Vector.get())) {
@@ -92,7 +92,7 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
   // possibly be null.
   if (t.subtypeOfAny(TStr, TArr, TVec, TDict,
                      TKeyset, TObj, TRes)) {
-    t = union_of(t, TInitNull);
+    t |= TInitNull;
   } else {
     // Otherwise it should be a simple type or possibly everything.
     assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
@@ -102,10 +102,10 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
     // If parameter coercion fails, we can also get null or false depending on
     // the function.
     if (f->attrs & AttrParamCoerceModeNull) {
-      t = union_of(t, TInitNull);
+      t |= TInitNull;
     }
     if (f->attrs & AttrParamCoerceModeFalse) {
-      t = union_of(t, TFalse);
+      t |= TFalse;
     }
   }
 

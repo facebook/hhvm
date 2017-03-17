@@ -310,8 +310,7 @@ struct Variant : private TypedValue {
    * refs and turn uninits to null.
    */
   Variant& operator=(Variant &&rhs) noexcept {
-    assert(this != &rhs); // TODO(#2484130): we end up as null on a
-                          // self move-assign; decide if this is ok.
+    assert(this != &rhs); // we end up as null on a self move-assign.
     if (rhs.m_type == KindOfRef) return *this = *rhs.m_data.pref->var();
 
     Variant& lhs = m_type == KindOfRef ? *m_data.pref->var() : *this;
@@ -633,8 +632,6 @@ struct Variant : private TypedValue {
         return false;
       case KindOfRef:
         return m_data.pref->var()->isIntVal();
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -1430,7 +1427,6 @@ private:
         assert(m_data.pres->checkCount());
         return;
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -1505,7 +1501,7 @@ inline Variant &concat_assign(Variant &v1, const String& s2) {
 
 // Defined here for include order reasons.
 inline RefData::~RefData() {
-  assert(m_hdr.kind == HeaderKind::Ref);
+  assert(m_kind == HeaderKind::Ref);
   tvAsVariant(&m_tv).~Variant();
 }
 
@@ -1567,7 +1563,11 @@ inline VarNR Variant::toKey(const ArrayData* ad) const {
   }
 
   if (!ad->useWeakKeys()) {
-    throwInvalidArrayKeyException(this, ad);
+    throwInvalidArrayKeyException(asTypedValue(), ad);
+  }
+
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    raiseHackArrCompatImplicitArrayKey(asTypedValue());
   }
 
   switch (m_type) {
@@ -1598,7 +1598,6 @@ inline VarNR Variant::toKey(const ArrayData* ad) const {
   case KindOfPersistentString:
   case KindOfString:
   case KindOfInt64:
-  case KindOfClass:
     break;
   }
   not_reached();

@@ -392,7 +392,7 @@ Resource PageletServer::TaskStart(
   PageletServerTaskEvent *event /* = nullptr*/
 ) {
   static auto pageletOverflowCounter =
-    ServiceData::createTimeseries("pagelet_overflow",
+    ServiceData::createTimeSeries("pagelet_overflow",
                                   { ServiceData::StatsType::COUNT });
   {
     Lock l(s_dispatchMutex);

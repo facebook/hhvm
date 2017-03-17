@@ -201,7 +201,7 @@ struct Impl {
     return getOrCreateWithArgs(m_counterMap, name);
   }
 
-  ExportedTimeSeries* createTimeseries(
+  ExportedTimeSeries* createTimeSeries(
       const std::string& name,
       const std::vector<ServiceData::StatsType>& types,
       const std::vector<std::chrono::seconds>& levels,
@@ -306,12 +306,12 @@ ExportedCounter* createCounter(const std::string& name) {
   return getServiceDataInstance().createCounter(name);
 }
 
-ExportedTimeSeries* createTimeseries(
+ExportedTimeSeries* createTimeSeries(
     const std::string& name,
     const std::vector<ServiceData::StatsType>& types,
     const std::vector<std::chrono::seconds>& levels,
     int numBuckets) {
-  return getServiceDataInstance().createTimeseries(
+  return getServiceDataInstance().createTimeSeries(
     name, types, levels, numBuckets);
 }
 

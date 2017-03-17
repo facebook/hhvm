@@ -65,23 +65,18 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
 }
 
 void smashMovq(TCA inst, uint64_t imm) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashMovq, inst, imm);
 }
 void smashCmpq(TCA inst, uint32_t imm) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashCmpq, inst, imm);
 }
 void smashCall(TCA inst, TCA target) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashCall, inst, target);
 }
 void smashJmp(TCA inst, TCA target) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashJmp, inst, target);
 }
 void smashJcc(TCA inst, TCA target, ConditionCode cc) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashJcc, inst, target, cc);
 }
 

@@ -368,12 +368,27 @@ let program_init genv =
       not (ServerArgs.no_load genv.options) &&
       ServerArgs.save_filename genv.options = None &&
       repo_wait_success then
-      match ServerConfig.load_mini_script genv.config with
+      let load_mini_approach = match
+        (ServerConfig.load_mini_script genv.config),
+        (ServerArgs.with_mini_state genv.options) with
+        | None, None ->
+          None
+        | Some load_mini_script, None ->
+          Some (ServerInit.Load_mini_script load_mini_script)
+        | None, Some target ->
+          Some (ServerInit.Precomputed target)
+        | Some _, Some target ->
+          Hh_logger.log "Warning - Both a mini script in the server config %s"
+            "and a mini state target in server args are configured";
+          Hh_logger.log "Ignoring the script and using precomputed target";
+          Some (ServerInit.Precomputed target)
+      in
+      match load_mini_approach with
       | None ->
         let env, _ = ServerInit.init genv in
         env, "fresh"
-      | Some load_mini_script ->
-        let env, did_load = ServerInit.init ~load_mini_script genv in
+      | Some load_mini_approach ->
+        let env, did_load = ServerInit.init ~load_mini_approach genv in
         env, if did_load then "mini_load" else "mini_load_fail"
     else
       let env, _ = ServerInit.init genv in

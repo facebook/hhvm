@@ -44,13 +44,12 @@ extern Link<GenNumber> g_current_gen_link;
 
 struct AllocDescriptor {
   Handle handle;
-  size_t size;
+  uint32_t size;
   type_scan::Index index;
 };
-
 using AllocDescriptorList = tbb::concurrent_vector<AllocDescriptor>;
-
 extern AllocDescriptorList s_normal_alloc_descs;
+extern AllocDescriptorList s_local_alloc_descs;
 
 }
 
@@ -286,6 +285,12 @@ inline void uninitHandle(Handle handle) {
 template <typename F> inline void forEachNormalAlloc(F f) {
   for (const auto& desc : detail::s_normal_alloc_descs) {
     if (!isHandleInit(desc.handle, NormalTag{})) continue;
+    f(static_cast<char*>(tl_base) + desc.handle, desc.size, desc.index);
+  }
+}
+
+template <typename F> inline void forEachLocalAlloc(F f) {
+  for (const auto& desc : detail::s_local_alloc_descs) {
     f(static_cast<char*>(tl_base) + desc.handle, desc.size, desc.index);
   }
 }

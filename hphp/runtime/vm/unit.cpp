@@ -210,6 +210,7 @@ Unit::~Unit() {
       memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
     }
     free(const_cast<unsigned char*>(m_bc));
+    g_hhbc_size->addValue(-int64_t(m_bclen));
   }
 
   if (m_mergeInfo) {
@@ -667,7 +668,7 @@ struct FrameRestore {
       tmp.initNumArgs(0);
       vmfp() = &tmp;
       vmpc() = preClass->unit()->at(preClass->getOffset());
-      pushLocalsAndIterators(tmp.m_func);
+      pushFrameSlots(tmp.m_func);
     } else {
       m_top = nullptr;
       m_fp = nullptr;
@@ -843,11 +844,25 @@ bool isPHP7ReservedType(const StringData* alias) {
 }
 }
 
-bool Unit::aliasClass(Class* original, const StringData* alias) {
+bool Unit::aliasClass(const StringData* original, const StringData* alias,
+                      bool autoload) {
   if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
     raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
                 alias->data());
   }
+  auto const origClass =
+    autoload ? Unit::loadClass(original)
+             : Unit::lookupClass(original);
+  if (!origClass) {
+    raise_warning("Class %s not found", original->data());
+    return false;
+  }
+  if (origClass->isBuiltin()) {
+    raise_warning("First argument of class_alias() must be "
+                  "the name of a user defined class");
+    return false;
+  }
+
   auto const aliasNe = NamedEntity::get(alias);
   aliasNe->m_cachedClass.bind();
 
@@ -856,7 +871,7 @@ bool Unit::aliasClass(Class* original, const StringData* alias) {
     raise_warning("Cannot redeclare class %s", alias->data());
     return false;
   }
-  aliasNe->setCachedClass(original);
+  aliasNe->setCachedClass(origClass);
   return true;
 }
 
@@ -905,12 +920,10 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
              rds::isHandleInit(handle))) {
     auto const& tv = rds::handleToRef<TypedValue>(handle);
 
-    if (LIKELY(rds::isNormalHandle(handle) ||
-               tv.m_type != KindOfUninit)) {
+    if (LIKELY(tv.m_type != KindOfUninit)) {
       assertx(cellIsPlausible(tv));
       return &tv;
     }
-    assertx(rds::isPersistentHandle(handle));
 
     if (UNLIKELY(tv.m_data.pref != nullptr)) {
       auto callback = reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
@@ -920,6 +933,7 @@ const Cell* Unit::lookupCns(const StringData* cnsName) {
         return tvRet;
       }
     }
+    assertx(rds::isPersistentHandle(handle));
   }
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
     return rds::s_constants()->nvGet(cnsName);

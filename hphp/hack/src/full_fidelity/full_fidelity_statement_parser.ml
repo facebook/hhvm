@@ -18,8 +18,9 @@ module SimpleParser = Full_fidelity_simple_parser.WithLexer(Full_fidelity_lexer)
 open TokenKind
 open Full_fidelity_minimal_syntax
 
-module WithExpressionAndTypeParser
+module WithExpressionAndDeclAndTypeParser
   (ExpressionParser : Full_fidelity_expression_parser_type.ExpressionParserType)
+  (DeclParser : Full_fidelity_declaration_parser_type.DeclarationParserType)
   (TypeParser : Full_fidelity_type_parser_type.TypeParserType) :
   Full_fidelity_statement_parser_type.StatementParserType = struct
 
@@ -28,6 +29,12 @@ module WithExpressionAndTypeParser
 
   let rec parse_statement parser =
     match peek_token_kind parser with
+    | Function -> parse_possible_php_function parser
+    | Abstract
+    | Final
+    | Interface
+    | Trait
+    | Class -> parse_php_class parser
     | Fallthrough -> parse_possible_erroneous_fallthrough parser
     | For -> parse_for_statement parser
     | Foreach -> parse_foreach_statement parser
@@ -59,6 +66,44 @@ module WithExpressionAndTypeParser
       let parser = with_error parser SyntaxError.error2004 in
       (parser, result)
     | _ -> parse_expression_statement parser
+
+  and parse_php_function parser =
+    use_decl_parser DeclParser.parse_function parser
+
+  and parse_possible_php_function parser =
+    (* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
+    (Hack only supports anonymous nested functions as expressions.)
+
+    If we have a statement beginning with function left-paren, then parse it
+    as a statement expression beginning with an anonymous function; it will
+    then have to end with a semicolon.
+
+    If it starts with something else, parse it as a function.
+
+    TODO: Give an error for nested nominal functions in a later pass.
+
+    *)
+    if peek_token_kind ~lookahead:1 parser = LeftParen then
+      parse_expression_statement parser
+    else
+      parse_php_function parser
+
+  and parse_php_class parser =
+    (* PHP allows classes nested inside of functions, but hack does not *)
+    (* TODO check for hack error: no classish declarations inside functions *)
+    let f decl_parser =
+      DeclParser.parse_classish_declaration decl_parser (make_missing ()) in
+    use_decl_parser f parser
+
+  and use_decl_parser
+      (f : DeclParser.t -> DeclParser.t * Full_fidelity_minimal_syntax.t)
+      parser =
+    let decl_parser = DeclParser.make parser.lexer parser.errors in
+    let decl_parser, node = f decl_parser in
+    let lexer = DeclParser.lexer decl_parser in
+    let errors = DeclParser.errors decl_parser in
+    let parser = make lexer errors in
+    parser, node
 
   (* Helper: parses ( expr ) *)
   and parse_paren_expr parser =
@@ -635,13 +680,17 @@ module WithExpressionAndTypeParser
       (parser, make_expression_statement expression token)
 
   and parse_compound_statement parser =
-    let (parser, left_brace_token) = expect_left_brace parser in
-    let (parser, statement_list) =
-      parse_terminated_list parser parse_statement RightBrace in
-    let (parser, right_brace_token) = expect_right_brace parser in
-    let syntax = make_compound_statement
-      left_brace_token statement_list right_brace_token in
-    (parser, syntax)
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Semicolon -> (parser1, make_token token)
+    | _ ->
+      let (parser, left_brace_token) = expect_left_brace parser in
+      let (parser, statement_list) =
+        parse_terminated_list parser parse_statement RightBrace in
+      let (parser, right_brace_token) = expect_right_brace parser in
+      let syntax = make_compound_statement
+        left_brace_token statement_list right_brace_token in
+      (parser, syntax)
 
   and parse_expression parser =
     let expression_parser = ExpressionParser.make parser.lexer parser.errors in

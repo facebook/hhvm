@@ -107,6 +107,7 @@ type t =
   | Var
   | Vec
   | Void
+  | Where
   | While
   | Xor
   | Yield
@@ -117,7 +118,6 @@ type t =
   | LeftBrace
   | RightBrace
   | Dot
-  | QuestionGreaterThan
   | MinusGreaterThan
   | PlusPlus
   | MinusMinus
@@ -130,6 +130,7 @@ type t =
   | Dollar
   | Slash
   | Percent
+  | LessThanGreaterThan
   | LessThanEqualGreaterThan
   | LessThanLessThan
   | GreaterThanGreaterThan
@@ -186,6 +187,7 @@ type t =
   | HexadecimalLiteral
   | BinaryLiteral
   | FloatingLiteral
+  | ExecutionString
   | SingleQuotedStringLiteral
   | DoubleQuotedStringLiteral
   | DoubleQuotedStringLiteralHead
@@ -295,6 +297,7 @@ let from_string keyword =
   | "var" -> Some Var
   | "vec" -> Some Vec
   | "void" -> Some Void
+  | "where" -> Some Where
   | "while" -> Some While
   | "xor" -> Some Xor
   | "yield" -> Some Yield
@@ -305,7 +308,6 @@ let from_string keyword =
   | "{" -> Some LeftBrace
   | "}" -> Some RightBrace
   | "." -> Some Dot
-  | "?>" -> Some QuestionGreaterThan
   | "->" -> Some MinusGreaterThan
   | "++" -> Some PlusPlus
   | "--" -> Some MinusMinus
@@ -318,6 +320,7 @@ let from_string keyword =
   | "$" -> Some Dollar
   | "/" -> Some Slash
   | "%" -> Some Percent
+  | "<>" -> Some LessThanGreaterThan
   | "<=>" -> Some LessThanEqualGreaterThan
   | "<<" -> Some LessThanLessThan
   | ">>" -> Some GreaterThanGreaterThan
@@ -456,6 +459,7 @@ match kind with
   | Var -> "var"
   | Vec -> "vec"
   | Void -> "void"
+  | Where -> "where"
   | While -> "while"
   | Xor -> "xor"
   | Yield -> "yield"
@@ -466,7 +470,6 @@ match kind with
   | LeftBrace -> "{"
   | RightBrace -> "}"
   | Dot -> "."
-  | QuestionGreaterThan -> "?>"
   | MinusGreaterThan -> "->"
   | PlusPlus -> "++"
   | MinusMinus -> "--"
@@ -479,6 +482,7 @@ match kind with
   | Dollar -> "$"
   | Slash -> "/"
   | Percent -> "%"
+  | LessThanGreaterThan -> "<>"
   | LessThanEqualGreaterThan -> "<=>"
   | LessThanLessThan -> "<<"
   | GreaterThanGreaterThan -> ">>"
@@ -535,6 +539,7 @@ match kind with
   | HexadecimalLiteral -> "hexadecimal_literal"
   | BinaryLiteral -> "binary_literal"
   | FloatingLiteral -> "floating_literal"
+  | ExecutionString -> "execution_string"
   | SingleQuotedStringLiteral -> "single_quoted_string_literal"
   | DoubleQuotedStringLiteral -> "double_quoted_string_literal"
   | DoubleQuotedStringLiteralHead -> "double_quoted_string_literal_head"

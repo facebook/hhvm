@@ -296,7 +296,7 @@ void CmdList::onClient(DebuggerClient &client) {
             return;
           }
         } else {
-          int line = atoi(arg.c_str());
+          line = atoi(arg.c_str());
           if (line <= 0) {
             client.error("A line number has to be a positive integer.");
             help(client);

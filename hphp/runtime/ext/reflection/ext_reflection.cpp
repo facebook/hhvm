@@ -150,7 +150,8 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
       // We use cls() instead of implCls() because we want the namespace and
       // class context for which the closure is scoped, not that of the Closure
       // subclass (which, among other things, is always globally namespaced).
-      func->cls() ? func->cls()->nameStr() : func->nameStr()
+      func->cls() ? func->cls()->nameStr() : func->nameStr(),
+      func->unit()
     );
   }
 }
@@ -757,12 +758,12 @@ static Array get_function_static_variables(const Func* func) {
 
   for (size_t i = 0; i < staticVars.size(); ++i) {
     const Func::SVInfo &sv = staticVars[i];
-    auto const refData = rds::bindStaticLocal(func, sv.name);
+    auto const staticLocalData = rds::bindStaticLocal(func, sv.name);
     // FIXME: this should not require variant hops
     ai.setUnknownKey(
       VarNR(sv.name),
-      refData.isInit()
-        ? tvAsCVarRef(refData.get()->tv())
+      staticLocalData.isInit()
+        ? tvAsCVarRef(staticLocalData.get()->ref.tv())
         : uninit_variant
     );
   }
@@ -845,7 +846,6 @@ static Array get_function_param_info(const Func* func) {
     if (
       fpi.typeConstraint.isCallable() ||
       (fpi.typeConstraint.underlyingDataType() &&
-       fpi.typeConstraint.underlyingDataType() != KindOfClass &&
        fpi.typeConstraint.underlyingDataType() != KindOfObject
       )
     ) {
@@ -947,7 +947,6 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     if (
       retType.isCallable() || // callable type hint is considered builtin
       (retType.underlyingDataType() &&
-       retType.underlyingDataType() != KindOfClass && // stdclass is not
        retType.underlyingDataType() != KindOfObject
       )
     ) {
@@ -1393,13 +1392,13 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   std::function<void(const Class*)> collect;
   std::function<void(const Class*)> collectInterface;
 
-  collect = [&] (const Class* cls) {
-    if (!cls) return;
+  collect = [&] (const Class* clas) {
+    if (!clas) return;
 
-    auto const methods = cls->preClass()->methods();
-    auto const numMethods = cls->preClass()->numMethods();
+    auto const methods = clas->preClass()->methods();
+    auto const numMethods = clas->preClass()->numMethods();
 
-    auto numDeclMethods = cls->preClass()->numDeclMethods();
+    auto numDeclMethods = clas->preClass()->numDeclMethods();
     if (numDeclMethods == -1) numDeclMethods = numMethods;
 
     // Add declared methods.
@@ -1408,15 +1407,15 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
     }
 
     // Recurse; we need to order the parent's methods before our trait methods.
-    collect(cls->parent());
+    collect(clas->parent());
 
     for (Slot i = numDeclMethods; i < numMethods; ++i) {
       // For repo mode, where trait methods are flattened at compile-time.
       add(methods[i]);
     }
-    for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
+    for (Slot i = clas->traitsBeginIdx(); i < clas->traitsEndIdx(); ++i) {
       // For non-repo mode, where they are added at Class-creation time.
-      add(cls->getMethod(i));
+      add(clas->getMethod(i));
     }
   };
 

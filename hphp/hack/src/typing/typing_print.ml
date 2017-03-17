@@ -82,7 +82,7 @@ module ErrorString = struct
     | Tthis -> "the type 'this'"
 
   and array: type a. a ty option * a ty option -> _ = function
-    | None, None     -> "an array"
+    | None, None     -> "an untyped array"
     | Some _, None   -> "an array (used like a vector)"
     | Some _, Some _ -> "an array (used like a hashtable)"
     | _              -> assert false

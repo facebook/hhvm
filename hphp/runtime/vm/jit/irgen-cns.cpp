@@ -49,7 +49,6 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   always_assert(false);
@@ -179,26 +178,25 @@ void emitClsCnsD(IRGS& env,
   implClsCns(env, Unit::lookupClass(clsNameStr), cnsNameStr, clsNameStr);
 }
 
-void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
-  auto const clsTy = topType(env, BCSPRelOffset{0});
-  if (!(clsTy < TCls) || !clsTy.clsSpec()) {
-    interpOne(env, TUncountedInit, 1);
+void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t slot) {
+  auto const clsTmp = peekClsRef(env, slot);
+  auto const clsTy = clsTmp->type();
+  if (!clsTy.clsSpec()) {
+    interpOne(env, *env.currentNormalizedInstruction);
     return;
   }
-
   auto const cls = clsTy.clsSpec().cls();
-  auto const clsTmp = topA(env);
+
   ifThenElse(
     env,
     [&] (Block* taken) {
       gen(env, CheckType, taken, Type::ExactCls(cls), clsTmp);
     },
     [&] {
-      discard(env, 1);
+      killClsRef(env, slot);
       implClsCns(env, cls, cnsNameStr, cls->name());
     },
     [&] {
-      env.irb->exceptionStackBoundary();
       gen(env, Jmp, makeExitSlow(env));
     }
   );

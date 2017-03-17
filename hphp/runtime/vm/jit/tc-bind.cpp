@@ -46,10 +46,13 @@ namespace HPHP { namespace jit { namespace tc {
 TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
-  auto const tDest = sr->getTopTranslation();
-  if (tDest == nullptr) return nullptr;
+  if (sr->getTopTranslation() == nullptr) return nullptr;
 
   auto codeLock = lockCode();
+
+  // Check again now that we have the lock
+  auto const tDest = sr->getTopTranslation();
+  if (tDest == nullptr) return nullptr;
 
   auto const isJcc = [&] {
     switch (arch()) {
@@ -93,10 +96,13 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
 TCA bindAddr(TCA toSmash, SrcKey destSk, TransFlags trflags, bool& smashed) {
   auto const sr = srcDB().find(destSk);
   always_assert(sr);
-  auto const tDest = sr->getTopTranslation();
-  if (tDest == nullptr) return nullptr;
+  if (sr->getTopTranslation() == nullptr) return nullptr;
 
   auto codeLock = lockCode();
+
+  // Check again now that we have the lock
+  auto const tDest = sr->getTopTranslation();
+  if (tDest == nullptr) return nullptr;
 
   auto addr = reinterpret_cast<TCA*>(toSmash);
   if (*addr == tDest) {

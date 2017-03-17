@@ -67,17 +67,19 @@ module Test_harness = struct
     repo_dir : Path.t;
     test_env : string list;
     hh_client_path : string;
-    hh_server_path : string
+    hh_server_path : string;
   }
 
   (** Invoke a subprocess on the harness's repo with its environment. *)
   let exec_hh_client args harness =
+    Printf.eprintf "executing hh_client. Args: %s\n%!"
+      (String.concat ", " args);
     Process.exec harness.hh_client_path
       ~env:harness.test_env (args @ [Path.to_string harness.repo_dir])
 
   let get_server_logs harness =
     let process = exec_hh_client ["--logname"] harness in
-    let status, log_path, err = Process.read_and_close_pid process in
+    let status, log_path, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED 0 ->
       let log_path = Path.make (String.trim log_path) in
@@ -88,25 +90,32 @@ module Test_harness = struct
     | _ ->
       raise (Process_exited_abnormally (status, err))
 
+  let wait_until_lock_free lock_file _harness =
+    Lock.blocking_grab_then_release lock_file
+
   let get_recording_path harness =
     let recording_re = Str.regexp
       ("^.+ About to spawn recorder daemon\\. " ^
-      "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\.$") in
+      "Output will go to \\(.+\\)\\. Logs to \\(.+\\)\\. " ^
+      "Lock_file to \\(.+\\)\\.$") in
     let open Option in
     let logs = get_server_logs harness in
     logs >>= fun logs ->
     try begin
       let _ = Str.search_forward recording_re logs 0 in
-      Some (Str.matched_group 1 logs)
+      Some (
+        (Path.make (Str.matched_group 1 logs)),
+        (Path.make (Str.matched_group 2 logs)))
     end with
     | Not_found ->
-      Printf.eprintf "recorder path not found\n%!";
+      Printf.eprintf "recorder path or lock file not found\n%!";
       Printf.eprintf "See also server logs: %s\n%!" logs;
       None
 
   let check_cmd harness =
     let process = exec_hh_client ["check"] harness in
-    let status, result, err = Process.read_and_close_pid process in
+    Printf.eprintf "Waiting for process\n%!";
+    let status, result, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED _ ->
       Sys_utils.split_lines result
@@ -115,7 +124,7 @@ module Test_harness = struct
 
   let stop_server harness =
     let process = exec_hh_client ["stop"] harness in
-    let status, result, err = Process.read_and_close_pid process in
+    let status, result, err = Process.read_and_wait_pid process in
     match status with
     | Unix.WEXITED 0 ->
       result
@@ -223,7 +232,8 @@ let rec read_recording_rec ic acc =
     acc
 
 let read_recording recording_path =
-  let ic = Pervasives.open_in recording_path in
+  let ic = Pervasives.open_in (Path.to_string recording_path) in
+  let _ = Recorder.Header.parse_header ic in
   Utils.try_finally ~f:(fun () ->
     let items_rev = read_recording_rec ic [] in
     List.rev items_rev
@@ -245,14 +255,13 @@ let test_server_driver_case_0 harness =
   let () = String_asserter.assert_list_equals ["No errors!"] results
     (see_also_logs harness) in
   let _ = Test_harness.stop_server harness in
-  (** After stopping the server, eventually the recorder daemon will
-   * stop, but it could take some time. *)
-  let _ = Unix.select [] [] [] 4.0 in
   match Test_harness.get_recording_path harness with
   | None ->
     Printf.eprintf "Could not find recording\n%!";
     false
-  | Some recording_path ->
+  | Some (recording_path, recorder_lock_file) ->
+    let () = Test_harness.wait_until_lock_free
+      (Path.to_string recorder_lock_file) harness in
     let recording = read_recording recording_path in
     let expected = [
       "Start_recording";
@@ -264,27 +273,46 @@ let test_server_driver_case_0 harness =
     let () = assert_recording_matches expected recording harness in
     true
 
-let test_server_driver_case_1 harness =
+let test_server_driver_case_1_and_turntable harness =
   let results = Test_harness.check_cmd harness in
   let () = String_asserter.assert_list_equals ["No errors!"] results
     (see_also_logs harness) in
   let () = Printf.eprintf "Finished check on: %s\n%!"
     (Path.to_string harness.Test_harness.repo_dir) in
-  let _ = Server_driver.connect_and_run_case 1 harness.Test_harness.repo_dir in
+  let _conn = Server_driver.connect_and_run_case 1
+    harness.Test_harness.repo_dir in
   let results = Test_harness.check_cmd harness in
   let substitutions = (module struct
     let substitutions = [
       ("repo", (Path.to_string harness.Test_harness.repo_dir));
     ]
   end : Pattern_substitutions) in
+  let expected_error = "{repo}/foo_1.php:3:26,37: " ^
+    "Undefined variable: $missing_var (Naming[2050])" in
   let module MySubstitutions = (val substitutions : Pattern_substitutions) in
   let module MyPatternComparator = Pattern_comparator (MySubstitutions) in
   let module MyAsserter = Make_asserter (MyPatternComparator) in
-  let () = MyAsserter.assert_list_equals [
-    "{repo}/foo_1.php:3:26,37: Undefined variable: $missing_var (Naming[2050])"
-    ] results (see_also_logs harness) in
-  let _ = Test_harness.stop_server harness in
-  true
+  let () = MyAsserter.assert_list_equals [expected_error] results
+    (see_also_logs harness) in
+  match Test_harness.get_recording_path harness with
+  | None ->
+    Printf.eprintf "Could not find recording\n%!";
+    false
+  | Some (recording_path, recorder_lock_file) ->
+    let _ = Test_harness.stop_server harness in
+    let () = Test_harness.wait_until_lock_free
+      (Path.to_string recorder_lock_file) harness in
+    let results = Test_harness.check_cmd harness in
+    (** Fresh server has no errors. *)
+    let () = String_asserter.assert_list_equals ["No errors!"] results
+      (see_also_logs harness) in
+    let () = Turntable.spin_record true recording_path
+      harness.Test_harness.repo_dir in
+    (** After playback, we get the previous errors again. *)
+    let results = Test_harness.check_cmd harness in
+    let () = MyAsserter.assert_list_equals [expected_error] results
+      (see_also_logs harness) in
+    true
 
 let tests args = [
   ("test_check_cmd", fun () -> Test_harness.run_test args (
@@ -297,12 +325,13 @@ let tests args = [
       "use_watchman = true\n" ^
       "start_with_recorder_on = true\n")
     test_server_driver_case_0));
-  ("test_server_driver_case_1", fun () -> Test_harness.run_test args (
+  ("test_server_driver_case_1_and_turntable",
+    fun () -> Test_harness.run_test args (
     Test_harness.with_local_conf
       ("use_mini_state = false\n" ^
       "use_watchman = true\n" ^
       "start_with_recorder_on = true\n")
-    test_server_driver_case_1));
+    test_server_driver_case_1_and_turntable));
 ]
 
 let () =

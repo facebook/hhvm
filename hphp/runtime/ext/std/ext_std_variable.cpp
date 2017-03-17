@@ -298,7 +298,6 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       not_reached();
   }
 

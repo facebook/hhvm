@@ -1,0 +1,12 @@
+resource(%d) of type (OpenSSL key)
+bool(true)
+-----BEGIN EC PRIVATE KEY-----%a-----END EC PRIVATE KEY-----
+bool(true)
+bool(true)
+resource(%d) of type (OpenSSL key)
+array(1) {
+  ["d"]=>
+  string(32) "%a"
+}
+bool(true)
+bool(true)

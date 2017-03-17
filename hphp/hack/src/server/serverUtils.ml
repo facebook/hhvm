@@ -27,7 +27,6 @@ let hh_monitor_config root = ServerMonitorUtils.({
   server_log_file = ServerFiles.log_link root;
   monitor_log_file = ServerFiles.monitor_log_link root;
   load_script_log_file = ServerFiles.load_log root;
-  on_server_exit = fun _ -> ();
 })
 
 let shut_down_server root =

@@ -34,7 +34,7 @@ struct MemoryProfile;
 
 //////////////////////////////////////////////////////////////////////
 
-struct MixedArray final : private ArrayData,
+struct MixedArray final : ArrayData,
                           type_scan::MarkCountable<MixedArray> {
   // Load factor scaler. If S is the # of elements, C is the
   // power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
@@ -116,10 +116,10 @@ struct MixedArray final : private ArrayData,
     }
 
     TYPE_SCAN_CUSTOM() {
-      if (!isTombstone()) {
-        if (hasStrKey()) scanner.scan(skey);
-        scanner.scan(data);
-      }
+      // if data is a Tombstone, the TypedValue scanner will ignore it
+      static_assert(!isRefcountedType(kInvalidDataType), "");
+      if (hasStrKey()) scanner.scan(skey);
+      scanner.scan(data);
     }
 
     static constexpr ptrdiff_t keyOff() {
@@ -294,18 +294,6 @@ private:
   using ArrayData::nvGet;
   using ArrayData::release;
 
-  static const TypedValue* NvTryGetIntHackArr(const ArrayData*, int64_t);
-  static const TypedValue* NvTryGetStrHackArr(const ArrayData*,
-                                              const StringData*);
-
-  static ArrayLval LvalIntRefHackArr(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStrRefHackArr(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNewRefHackArr(ArrayData*, bool);
-  static ArrayData* SetRefIntHackArr(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStrHackArr(ArrayData*, StringData*, Variant&, bool);
-  static ArrayData* AppendRefHackArr(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRefHackArr(ArrayData*, const Variant&, bool);
-
 public:
   static Variant CreateVarForUncountedArray(const Variant& source);
 
@@ -325,11 +313,11 @@ public:
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
   static ArrayLval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
+  static ArrayLval LvalIntRef(ArrayData* ad, int64_t k, bool copy);
   static ArrayLval LvalStr(ArrayData* ad, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
+  static ArrayLval LvalStrRef(ArrayData* ad, StringData* k, bool copy);
   static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static ArrayLval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   // TODO(t4466630) Do we want to raise warnings in zend compatibility mode?
@@ -377,9 +365,9 @@ public:
   static bool Usort(ArrayData*, const Variant& cmp_function);
   static bool Uasort(ArrayData*, const Variant& cmp_function);
 
-  static constexpr auto NvTryGetIntDict = &NvTryGetIntHackArr;
+  static const TypedValue* NvTryGetIntDict(const ArrayData*, int64_t);
   static constexpr auto NvGetIntDict = &NvGetInt;
-  static constexpr auto NvTryGetStrDict = &NvTryGetStrHackArr;
+  static const TypedValue* NvTryGetStrDict(const ArrayData*, const StringData*);
   static constexpr auto NvGetStrDict = &NvGetStr;
   static constexpr auto ReleaseDict = &Release;
   static constexpr auto NvGetKeyDict = &NvGetKey;
@@ -415,13 +403,13 @@ public:
   static constexpr auto CopyWithStrongIteratorsDict = &CopyWithStrongIterators;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
-  static constexpr auto LvalIntRefDict = &LvalIntRefHackArr;
-  static constexpr auto LvalStrRefDict = &LvalStrRefHackArr;
-  static constexpr auto LvalNewRefDict = &LvalNewRefHackArr;
-  static constexpr auto SetRefIntDict = &SetRefIntHackArr;
-  static constexpr auto SetRefStrDict = &SetRefStrHackArr;
-  static constexpr auto AppendRefDict = &AppendRefHackArr;
-  static constexpr auto AppendWithRefDict = &AppendWithRefHackArr;
+  static ArrayLval LvalIntRefDict(ArrayData*, int64_t, bool);
+  static ArrayLval LvalStrRefDict(ArrayData*, StringData*, bool);
+  static ArrayLval LvalNewRefDict(ArrayData*, bool);
+  static ArrayData* SetRefIntDict(ArrayData*, int64_t, Variant&, bool);
+  static ArrayData* SetRefStrDict(ArrayData*, StringData*, Variant&, bool);
+  static ArrayData* AppendRefDict(ArrayData*, Variant&, bool);
+  static ArrayData* AppendWithRefDict(ArrayData*, const Variant&, bool);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -597,10 +585,6 @@ private:
   static ArrayData* ArrayPlusEqGeneric(ArrayData*, MixedArray*,
                                        const ArrayData*, size_t);
   static ArrayData* ArrayMergeGeneric(MixedArray*, const ArrayData*);
-
-  template <class AppendFunc>
-  static ArrayData* AppendWithRefNoRef(ArrayData*, const Variant&,
-                                       bool, AppendFunc);
 
   ssize_t nextElm(Elm* elms, ssize_t ei) const {
     assert(ei >= -1);

@@ -2,13 +2,17 @@ Capturing two snapshots...
 resource(%d) of type (HeapGraphContext)
 resource(%d) of type (HeapGraphContext)
 Stats for first capture:
-array(3) {
+array(5) {
   ["nodes"]=>
   int(%d)
   ["edges"]=>
   int(%d)
   ["roots"]=>
   int(%d)
+  ["root_nodes"]=>
+  int(%d)
+  ["exact"]=>
+  bool(true)
 }
 Getting invalid nodes and edges:
 Invalid nodes and edges work OK.
@@ -42,9 +46,7 @@ Property:children
 Doing DFS from root class on nodes:
 ChildWithClosureMember
 Closure$ParentWithClosureTarget::createClosure;%d
-MixedArray
 ParentWithClosureTarget
 RootClass
-String
 
 Doing DFS from root class on nodes (skipping root):

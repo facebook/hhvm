@@ -31,18 +31,25 @@ extern const StaticString s_Closure;
 
 // native data for closures. Memory layout looks like this:
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
-struct ClosureHdr {
-  HeaderWord<> hdr;
-  void* ctx;
-  uint32_t& size() { return hdr.lo32; }
-  uint32_t size() const { return hdr.lo32; }
+struct ClosureHdr : HeapObject {
+  explicit ClosureHdr(uint32_t size) {
+    initHeader(HeaderKind::ClosureHdr, size);
+  }
+  uint32_t& size() { return m_aux32; }
+  uint32_t size() const { return m_aux32; }
   static constexpr uintptr_t kClassBit = 0x1;
   bool ctxIsClass() const {
-    return reinterpret_cast<uintptr_t>(ctx) & kClassBit;
+    return ctx_bits & kClassBit;
   }
   TYPE_SCAN_CUSTOM_FIELD(ctx) {
-    if (!ctxIsClass()) scanner.scan(static_cast<ObjectData*>(ctx));
+    if (!ctxIsClass()) scanner.scan(ctx_this);
   }
+ public:
+  union {
+    void* ctx;
+    uintptr_t ctx_bits;
+    ObjectData* ctx_this;
+  };
 };
 
 struct c_Closure final : ObjectData {
@@ -115,28 +122,22 @@ struct c_Closure final : ObjectData {
   void setThisOrClass(void* p) { hdr()->ctx = p; }
   ObjectData* getThisUnchecked() const {
     assertx(!hdr()->ctxIsClass());
-    return reinterpret_cast<ObjectData*>(hdr()->ctx);
+    return hdr()->ctx_this;
   }
   ObjectData* getThis() const {
     return UNLIKELY(hdr()->ctxIsClass()) ? nullptr : getThisUnchecked();
   }
-  void setThis(ObjectData* od) { hdr()->ctx = od; }
+  void setThis(ObjectData* od) { hdr()->ctx_this = od; }
   bool hasThis() const { return hdr()->ctx && !hdr()->ctxIsClass(); }
 
   Class* getClass() const {
-    if (LIKELY(hdr()->ctxIsClass())) {
-      return reinterpret_cast<Class*>(
-        reinterpret_cast<uintptr_t>(hdr()->ctx) & ~ClosureHdr::kClassBit
-      );
-    } else {
-      return nullptr;
-    }
+    return LIKELY(hdr()->ctxIsClass()) ?
+      reinterpret_cast<Class*>(hdr()->ctx_bits & ~ClosureHdr::kClassBit) :
+      nullptr;
   }
   void setClass(Class* cls) {
     assertx(cls);
-    hdr()->ctx = reinterpret_cast<void*>(
-      reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit
-    );
+    hdr()->ctx_bits = reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit;
   }
   bool hasClass() const { return hdr()->ctxIsClass(); }
 

@@ -178,6 +178,7 @@ end
 begin library "hh-format"
   requires = [ "hh-typing-base" ]
   files = [
+    "src/diff/parse_diff.ml"
     "src/stubs/formatEventLogger.ml"
     "src/format/format_hack.ml"
     "src/format/format_diff.ml"

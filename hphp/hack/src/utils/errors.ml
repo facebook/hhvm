@@ -312,6 +312,7 @@ end
  * Omitting gratuitous indentation. *)
 module Errors_with_mode(M: Errors_modes) = struct
 
+
 (*****************************************************************************)
 (* Types *)
 (*****************************************************************************)
@@ -328,6 +329,16 @@ type error_flags = Common.error_flags
 
 let applied_fixmes = M.applied_fixmes
 
+let ignored_fixme_files = ref None
+let set_ignored_fixmes files = ignored_fixme_files := files
+
+let is_ignored_fixme pos = match !ignored_fixme_files with
+(* No fixme is ignored *)
+| None -> false
+(* Only the fixmes in gives files are ignored *)
+| Some l ->
+  List.exists l ~f:(fun x -> x = (Pos.filename pos))
+
 let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
 (*****************************************************************************)
@@ -340,8 +351,9 @@ let add_applied_fixme code pos =
 let rec add_error = M.add_error
 
 and add code pos msg =
-  if !is_hh_fixme pos code then add_applied_fixme code pos else
-  add_error (M.make_error code [pos, msg])
+  if not (is_ignored_fixme pos) && !is_hh_fixme pos code
+  then add_applied_fixme code pos
+  else add_error (M.make_error code [pos, msg])
 
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
@@ -505,6 +517,7 @@ module NastCheck                            = struct
   let constructor_required                  = 3030 (* DONT MODIFY!!!! *)
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
+  let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1212,6 +1225,10 @@ let dangerous_method_name pos =
   "if you want to define a constructor, use "^
   "__construct"
 )
+
+let optional_shape_fields_not_supported pos =
+  add NastCheck.optional_shape_fields_not_supported pos
+    "Optional shape fields are not supported."
 
 (*****************************************************************************)
 (* Nast terminality *)
@@ -2015,10 +2032,11 @@ let instanceof_always_true pos =
   add Typing.instanceof_always_true pos
     "This 'instanceof' test will always succeed"
 
-let instanceof_generic_classname pos =
+let instanceof_generic_classname pos name =
   add Typing.instanceof_generic_classname pos
-    "'instanceof' cannot be used on a generic classname because types are erased at runtime"
-
+    ("'instanceof' cannot be used on 'classname<" ^ name ^ ">' because '" ^
+    name ^ "' may be instantiated with a type such as \
+     'C<int>' that cannot be checked at runtime")
 
 (*****************************************************************************)
 (* Typing decl errors *)

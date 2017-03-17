@@ -22,7 +22,7 @@
             (missing)((lparen))
             (missing)((rparen)(whitespace))
             ((:)(whitespace))
-            (simple_type_specifier((void)(whitespace))))
+            (simple_type_specifier((void)(whitespace)))(missing))
           (compound_statement
             (({))(missing)((})(end_of_line)))
           (missing))
@@ -39,7 +39,7 @@
               ((name)(whitespace))
               (missing)((lparen))
               (missing)((rparen)(whitespace))
-              (missing)(missing))
+              (missing)(missing)(missing))
             (missing)
             ((;)(end_of_line)))
           (methodish_declaration
@@ -59,7 +59,7 @@
               ((name)(whitespace))(missing)
               ((lparen))(missing)
               ((rparen)(whitespace))
-              (missing)(missing))
+              (missing)(missing)(missing))
             (compound_statement
               (({))(missing)((})(end_of_line)))
             (missing))
@@ -85,7 +85,7 @@
               ((lparen))(missing)
               ((rparen)(whitespace))
               ((:)(whitespace))
-              (simple_type_specifier((void)(whitespace))))
+              (simple_type_specifier((void)(whitespace)))(missing))
             (compound_statement
               (({))(missing)((})(end_of_line)))
             (missing)))

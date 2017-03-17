@@ -312,6 +312,12 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
     m_multi_op = op;
   }
 
+  AsyncMysqlMultiQueryEvent() : AsioExternalThreadEvent() {}
+
+  void setQueryOp(std::shared_ptr<am::MultiQueryOperation> op) {
+    m_multi_op = std::move(op);
+  }
+
   void opFinished() { markAsFinished(); }
 
   void setClientStats(db::ClientPerfStats stats) {

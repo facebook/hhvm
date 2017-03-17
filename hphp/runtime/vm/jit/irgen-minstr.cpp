@@ -597,9 +597,9 @@ SSATmp* emitVecArrayQuietGet(IRGS& env, SSATmp* base, SSATmp* key,
     [&] { return cns(env, TInitNull); }
   );
 
-  auto finishMe = [&](SSATmp* elem) {
-    gen(env, IncRef, elem);
-    return elem;
+  auto finishMe = [&](SSATmp* element) {
+    gen(env, IncRef, element);
+    return element;
   };
 
   auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
@@ -652,8 +652,8 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
       return gen(env, ArrayGet, base, key);
     }
   );
-  auto finishMe = [&](SSATmp* elem) {
-    auto const cell = unbox(env, elem, nullptr);
+  auto finishMe = [&](SSATmp* element) {
+    auto const cell = unbox(env, element, nullptr);
     gen(env, IncRef, cell);
     return cell;
   };
@@ -1134,20 +1134,11 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   gen(env, StMBase, gblPtr);
 }
 
-void baseSImpl(IRGS& env, SSATmp* name, int32_t clsIdx) {
+void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot) {
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
-
-  auto cls = topA(env, BCSPRelOffset{clsIdx});
-  auto spropPtr = ldClsPropAddr(env, cls, name, true);
+  auto const cls = takeClsRef(env, clsRefSlot);
+  auto const spropPtr = ldClsPropAddr(env, cls, name, true);
   gen(env, StMBase, spropPtr);
-
-  if (clsIdx == 1) {
-    auto rhs = pop(env, DataTypeGeneric);
-    popA(env);
-    push(env, rhs);
-  } else {
-    popA(env);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1653,6 +1644,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
         case LTag::Stack:
           return top(env, offsetFromBCSP(env, baseLoc->stackIdx()));
         case LTag::MBase:
+        case LTag::CSlot:
           always_assert(false);
       }
       not_reached();
@@ -1683,9 +1675,46 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value) {
           sp(env), newArr);
       break;
     case LTag::MBase:
+    case LTag::CSlot:
       always_assert(false);
   }
   return value;
+}
+
+void setNewElemPackedArrayDataImpl(IRGS& env, SSATmp* basePtr, Type baseType,
+                                   SSATmp* value) {
+  ifThen(
+    env,
+    [&](Block* taken) {
+      auto const base = extractBase(env);
+
+      if ((baseType <= TArr && value->type() <= TArr) ||
+          (baseType <= TVec && value->type() <= TVec)) {
+        auto const appendToSelf = gen(env, EqArrayDataPtr, base, value);
+        gen(env, JmpNZero, taken, appendToSelf);
+      }
+      gen(env, CheckArrayCOW, taken, base);
+      auto const offset = gen(env, ReservePackedArrayDataNewElem, taken, base);
+      auto const elemPtr = gen(
+        env,
+        LdPackedArrayDataElemAddr,
+        TPtrToElemUninit,
+        base,
+        offset
+      );
+      gen(env, IncRef, value);
+      gen(env, StMem, elemPtr, value);
+    },
+    [&] {
+      if (baseType <= Type::Array(ArrayData::kPackedKind)) {
+        gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
+      } else if (baseType <= TVec) {
+        gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
+      } else {
+        always_assert(false);
+      }
+    }
+  );
 }
 
 SSATmp* setNewElemImpl(IRGS& env) {
@@ -1697,12 +1726,14 @@ SSATmp* setNewElemImpl(IRGS& env) {
   // mismatched in-states for any catch block edges we emit later on.
   auto const basePtr = ldMBase(env);
 
-  if (baseType <= TArr) {
+  auto const tc = TypeConstraint(DataTypeSpecialized).setWantArrayKind();
+  env.irb->constrainLocation(Location::MBase{}, tc);
+
+  if (baseType <= Type::Array(ArrayData::kPackedKind) || baseType <= TVec) {
+    setNewElemPackedArrayDataImpl(env, basePtr, baseType, value);
+  } else if (baseType <= TArr) {
     constrainBase(env);
     gen(env, SetNewElemArray, makeCatchSet(env), basePtr, value);
-  } else if (baseType <= TVec) {
-    constrainBase(env);
-    gen(env, SetNewElemVec, makeCatchSet(env), basePtr, value);
   } else if (baseType <= TKeyset) {
     constrainBase(env);
     if (!value->isA(TInt | TStr)) {
@@ -1844,17 +1875,17 @@ void emitFPassBaseGL(IRGS& env, int32_t arg, int32_t locId) {
   emitBaseGL(env, locId, fpassFlags(env, arg));
 }
 
-void emitBaseSC(IRGS& env, int32_t propIdx, int32_t clsIdx) {
+void emitBaseSC(IRGS& env, int32_t propIdx, uint32_t slot) {
   initTvRefs(env);
   auto name = top(env, BCSPRelOffset{propIdx});
-  baseSImpl(env, name, clsIdx);
+  baseSImpl(env, name, slot);
 }
 
-void emitBaseSL(IRGS& env, int32_t locId, int32_t clsIdx) {
+void emitBaseSL(IRGS& env, int32_t locId, uint32_t slot) {
   initTvRefs(env);
   auto name = ldLocInner(env, locId, makeExit(env), makePseudoMainExit(env),
                          DataTypeSpecific);
-  baseSImpl(env, name, clsIdx);
+  baseSImpl(env, name, slot);
 }
 
 void emitBaseL(IRGS& env, int32_t locId, MOpMode mode) {
@@ -1943,10 +1974,10 @@ void emitQueryM(IRGS& env, int32_t nDiscard, QueryMOp query, MemberKey mk) {
     }
   }
 
-  auto const maybeExtractBase = [simpleOp] (IRGS& env) {
+  auto const maybeExtractBase = [simpleOp] (IRGS& environment) {
     return simpleOp == SimpleOp::None
-      ? ldMBase(env)
-      : extractBase(env);
+      ? ldMBase(environment)
+      : extractBase(environment);
   };
 
   auto const result = [&]() -> SSATmp* {

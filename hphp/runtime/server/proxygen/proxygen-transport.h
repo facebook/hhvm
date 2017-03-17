@@ -84,6 +84,8 @@ struct ResponseMessage {
 
 struct PushTxnHandler;
 
+const StaticString s_proxygen("proxygen");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -154,6 +156,13 @@ struct ProxygenTransport final
    */
   std::string getHeader(const char *name) override;
   void getHeaders(HeaderMap &headers) override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_proxygen;
+  }
 
   /**
    * Add/remove a response header.

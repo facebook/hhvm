@@ -4,6 +4,7 @@ option(ALWAYS_ASSERT "Enabled asserts in a release build" OFF)
 option(ENABLE_SSP "Enabled GCC/LLVM stack-smashing protection" OFF)
 option(STATIC_CXX_LIB "Statically link libstd++ and libgcc." OFF)
 option(ENABLE_AVX2 "Enable the use of AVX2 instructions" OFF)
+option(ENABLE_AARCH64_CRC "Enable the use of CRC instructions" OFF)
 option(ENABLE_FASTCGI "Enable the FastCGI interface." ON)
 
 option(EXECUTION_PROFILER "Enable the execution profiler" OFF)

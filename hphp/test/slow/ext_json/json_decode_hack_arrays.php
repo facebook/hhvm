@@ -6,6 +6,14 @@ enum IsAssoc: int {
   TRUE = 1;
 }
 
+function make_object($d) {
+  $obj = new stdclass;
+  foreach ($d as $k => $v) {
+    $obj->$k = $v;
+  }
+  return $obj;
+}
+
 function report($msg, $obj1, $obj2) {
   echo "$msg\nShould be\n";
   var_dump($obj1);
@@ -158,7 +166,7 @@ function main() {
       'options' => JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict[],
-        IsAssoc::FALSE => (object)dict[],
+        IsAssoc::FALSE => make_object(dict[]),
       ],
     ],
     dict[
@@ -166,7 +174,7 @@ function main() {
       'options' => JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['0' => 1],
-        IsAssoc::FALSE => (object)dict['0' => 1],
+        IsAssoc::FALSE => make_object(dict['0' => 1]),
       ],
     ],
     dict[
@@ -174,7 +182,7 @@ function main() {
       'options' => JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['0' => 1, 'a' => 'b'],
-        IsAssoc::FALSE => (object)dict['0' => 1, 'a' => 'b'],
+        IsAssoc::FALSE => make_object(dict['0' => 1, 'a' => 'b']),
       ],
     ],
     dict[
@@ -182,7 +190,7 @@ function main() {
       'options' => JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['{' => '}'],
-        IsAssoc::FALSE => (object)dict['{' => '}'],
+        IsAssoc::FALSE => make_object(dict['{' => '}']),
       ],
     ],
     dict[
@@ -190,7 +198,7 @@ function main() {
       'options' => JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['a' => 'b', '0' => 1, '[]' => null, '#' => false],
-        IsAssoc::FALSE => (object)dict['a' => 'b', '0' => 1, '[]' => null, '#' => false],
+        IsAssoc::FALSE => make_object(dict['a' => 'b', '0' => 1, '[]' => null, '#' => false]),
       ],
     ],
 
@@ -210,7 +218,7 @@ function main() {
       'options' => JSON_FB_LOOSE | JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['key' => 'value'],
-        IsAssoc::FALSE => (object) dict['key' => 'value'],
+        IsAssoc::FALSE => make_object(dict['key' => 'value']),
       ],
     ),
     // Boolean keys
@@ -219,7 +227,7 @@ function main() {
       'options' => JSON_FB_LOOSE | JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['true' => 'value'],
-        IsAssoc::FALSE => (object)dict['true' => 'value'],
+        IsAssoc::FALSE => make_object(dict['true' => 'value']),
       ],
     ),
     // Null keys
@@ -228,7 +236,7 @@ function main() {
       'options' => JSON_FB_LOOSE | JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['null' => 'value'],
-        IsAssoc::FALSE => (object)dict['null' => 'value'],
+        IsAssoc::FALSE => make_object(dict['null' => 'value']),
       ],
     ),
 
@@ -238,7 +246,7 @@ function main() {
       'options' => JSON_FB_LOOSE | JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => vec[2, '4', dict['0' => vec[]]],
-        IsAssoc::FALSE => vec[2, '4', (object) dict['0' => vec[]]],
+        IsAssoc::FALSE => vec[2, '4', make_object(dict['0' => vec[]])],
       ],
     ),
     array(
@@ -246,7 +254,7 @@ function main() {
       'options' => JSON_FB_HACK_ARRAYS,
       'expected' => dict[
         IsAssoc::TRUE => dict['vec' => vec[], 'map' => dict[]],
-        IsAssoc::FALSE => (object)dict['vec' => vec[], 'map' => (object)dict[]],
+        IsAssoc::FALSE => make_object(dict['vec' => vec[], 'map' => make_object(dict[])]),
       ],
     ),
     array(
@@ -259,10 +267,10 @@ function main() {
             'map' => dict['a' => dict[']' => '[']]
           ],
         IsAssoc::FALSE =>
-          (object)dict[
-            'vec' => vec[(object)dict['z' => vec[]]],
-            'map' => (object)dict['a' => (object)dict[']' => '[']]
-          ],
+          make_object(dict[
+            'vec' => vec[make_object(dict['z' => vec[]])],
+            'map' => make_object(dict['a' => make_object(dict[']' => '['])])
+          ]),
       ],
     ),
 

@@ -19,7 +19,7 @@ string(3) "foo"
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="0"><stack where="foo" level="0" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test.helper" lineno="6"></stack><stack where="bar" level="1" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test.helper" lineno="13"></stack><stack where="foo" level="2" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test.helper" lineno="8"></stack><stack where="bar" level="3" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test.helper" lineno="13"></stack><stack where="foo" level="4" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test.helper" lineno="8"></stack><stack where="{main}" level="5" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test" lineno="3"></stack></response>
 (cmd) stack_get -i 0 -d 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="0"><stack where="bar" level="1" type="file" filename="file://%s/test/slow/ext_xdebug/remote/stack.php.test.helper" lineno="13"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="0"></response>
 (cmd) run -i 0
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="0"></response>

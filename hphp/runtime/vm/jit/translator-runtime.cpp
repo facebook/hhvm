@@ -174,6 +174,8 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   assertx(a1->isPHPArray());
   assertx(a2->isPHPArray());
 
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+
   if (!a2->empty()) {
     if (a1->empty()) {
       // We consume refs on a2 and also produce references, so there's
@@ -525,7 +527,6 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -579,7 +580,6 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -614,8 +614,7 @@ StringData* convCellToStrHelper(TypedValue tv) {
                               return array_string.get();
     case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
     case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
-    case KindOfRef:
-    case KindOfClass:         break;
+    case KindOfRef:           break;
   }
   not_reached();
 }
@@ -749,11 +748,6 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isPHPArray());
-  return arrayIdxI(a, key, def);
-}
-
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isDict());
   return getDefaultIfNullCell(MixedArray::NvGetIntDict(a, key), def);
@@ -862,7 +856,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -908,7 +901,7 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
       ar->func()->validate();
     },
     [](const TypedValue* tv) {
-      assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+      assertx(tvIsPlausible(*tv));
     }
   );
 }

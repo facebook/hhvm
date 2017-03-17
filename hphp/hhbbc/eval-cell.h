@@ -103,7 +103,6 @@ folly::Optional<Type> eval_cell(Pred p) {
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
-      case KindOfClass:
         always_assert(0 && "Impossible constant evaluation occurred");
       }
     }

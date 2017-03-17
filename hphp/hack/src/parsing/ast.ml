@@ -8,32 +8,11 @@
  *
  *)
 
-(*****************************************************************************)
-(* Constants *)
-(*****************************************************************************)
-
-type cst_kind =
-  (* The constant was introduced with: define('X', ...); *)
-  | Cst_define
-  (* The constant was introduced with: const X = ...; *)
-  | Cst_const
+include Ast_defs
 
 (*****************************************************************************)
 (* The Abstract Syntax Tree *)
 (*****************************************************************************)
-
-type id = Pos.t * string
-type pstring = Pos.t * string
-
-type variance =
-  | Covariant
-  | Contravariant
-  | Invariant
-
-type ns_kind =
-  | NSClass
-  | NSFun
-  | NSConst
 
 type program = def list
 
@@ -64,11 +43,6 @@ and gconst = {
   cst_value: expr;
   cst_namespace: Namespace_env.env;
 }
-
-and constraint_kind =
-  | Constraint_as
-  | Constraint_eq
-  | Constraint_super
 
 and tparam = variance * id * (constraint_kind * hint) list
 
@@ -104,17 +78,6 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
-and class_kind =
-  | Cabstract
-  | Cnormal
-  | Cinterface
-  | Ctrait
-  | Cenum
-
-and trait_req_kind =
-  | MustExtend
-  | MustImplement
-
 and class_elt =
   | Const of hint option * (id * expr) list
   | AbsConst of hint option * id
@@ -143,18 +106,6 @@ and ca_field = {
 and ca_type =
   | CA_hint of hint
   | CA_enum of string list
-
-and kind =
-  | Final
-  | Static
-  | Abstract
-  | Private
-  | Public
-  | Protected
-
-and og_null_flavor =
-  | OG_nullthrows
-  | OG_nullsafe
 
 (* id is stored without the $ *)
 (* Pos is the span of the the variable definition. What does it mean exactly?
@@ -254,16 +205,6 @@ and fun_ = {
   f_span         : Pos.t;
 }
 
-and fun_decl_kind =
-  | FDeclAsync
-  | FDeclSync
-
-and fun_kind =
-  | FSync
-  | FAsync
-  | FGenerator
-  | FAsyncGenerator
-
 and hint = Pos.t * hint_
 and hint_ =
   | Hoption of hint
@@ -286,11 +227,11 @@ and hint_ =
   *)
   | Haccess of id * id * id list
 
-and shape_field_name =
-  | SFlit of pstring
-  | SFclass_const of id * pstring
-
-and shape_field = shape_field_name * hint
+and shape_field = {
+  sf_optional : bool;
+  sf_name : shape_field_name;
+  sf_hint : hint;
+}
 
 and stmt =
   | Unsafe
@@ -326,6 +267,7 @@ and expr_ =
   | True
   | False
   | Id of id
+  | Id_type_arguments of id * hint list
   | Lvar of id
   (**
    * PHP's Variable variable. The int is number of variable indirections
@@ -382,20 +324,6 @@ and afield =
   | AFvalue of expr
   | AFkvalue of expr * expr
 
-and bop =
-| Plus
-| Minus | Star | Slash | Eqeq | EQeqeq | Starstar
-| Diff | Diff2 | AMpamp | BArbar | Lt
-| Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
-| Gtgt | Percent | Xor
-| Eq of bop option
-
-and uop =
-| Utild
-| Unot | Uplus | Uminus | Uincr
-| Udecr | Upincr | Updecr
-| Uref
-
 and case =
 | Default of block
 | Case of expr * block
@@ -416,14 +344,3 @@ type any =
   | AProgram of program
 
  (* with tarzan *)
-
-(*****************************************************************************)
-(* Helpers *)
-(*****************************************************************************)
-
-let string_of_class_kind = function
-  | Cabstract -> "an abstract class"
-  | Cnormal -> "a class"
-  | Cinterface -> "an interface"
-  | Ctrait -> "a trait"
-  | Cenum -> "an enum"

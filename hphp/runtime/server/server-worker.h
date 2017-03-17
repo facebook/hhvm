@@ -67,7 +67,7 @@ struct ServerWorker
     assert(this->m_context);
     m_handler = this->m_context->createRequestHandler();
     m_requestsTimedOutOnQueue =
-      ServiceData::createTimeseries("requests_timed_out_on_queue",
+      ServiceData::createTimeSeries("requests_timed_out_on_queue",
                                     {ServiceData::StatsType::COUNT});
   }
 

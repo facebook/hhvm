@@ -10,7 +10,7 @@
 
 (* Test suite for V0 version of the API methods *)
 
-open File_content
+open Ide_api_types
 open Ide_message
 open Ide_message_parser_test_utils
 
@@ -111,6 +111,82 @@ let test_outline () =
     Outline "test.php"
   )
 
+let test_find_references () =
+  let msg = build_request_message "findReferences"
+    {|
+      "filename" : "bar.php",
+      "position" : {
+        "line" : 5,
+        "column" : 11
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Find_references {
+      filename = "bar.php";
+      position = {line = 5; column = 11};
+    }
+  )
+
+let test_highlight_references () =
+  let msg = build_request_message "highlightReferences"
+    {|
+      "filename" : "baz.php",
+      "position" : {
+        "line" : 2,
+        "column" : 43
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Highlight_references {
+      filename = "baz.php";
+      position = {line = 2; column = 43};
+    }
+  )
+
+let test_format () =
+  let msg = build_request_message "format"
+    {|
+      "filename" : "baz.php",
+      "range" : {
+        "start" : {
+          "line" : 1,
+          "column" : 7
+        },
+        "end" : {
+          "line" : 8,
+          "column" : 1
+        }
+      }
+    |} in
+  test msg @@
+  expect_api_message (
+    Format {
+      range_filename = "baz.php";
+      file_range = {
+        st = {
+          line = 1;
+          column = 7;
+        };
+        ed = {
+          line = 8;
+          column = 1;
+        }
+      }
+    }
+  )
+
+let test_coverage_levels () =
+  let msg = build_request_message "coverageLevels"
+    {|
+      "filename" : "test.php"
+    |} in
+  test msg @@
+  expect_api_message (
+    Coverage_levels "test.php"
+  )
+
 let tests = [
   "test_init", test_init;
   "test_did_open_file", test_did_open_file;
@@ -118,6 +194,10 @@ let tests = [
   "test_infer_type_call", test_infer_type_call;
   "test_identify_symbol", test_identify_symbol;
   "test_outline", test_outline;
+  "test_find_references", test_find_references;
+  "test_highlight_references", test_highlight_references;
+  "test_format", test_format;
+  "test_coverage_levels", test_coverage_levels;
 ]
 
 let () =

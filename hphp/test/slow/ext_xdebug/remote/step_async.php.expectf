@@ -23,6 +23,9 @@ Caught exception in foo()<?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="6"><xdebug:message lineno="26" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
 (cmd) step_over -i 7
 Caught exception in test_async()<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="7"><xdebug:message lineno="28" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="7"><xdebug:message lineno="27" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
 (cmd) step_over -i 8
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_over" transaction_id="8"><xdebug:message lineno="28" filename="%s/hphp/test/slow/ext_xdebug/remote/step_async.php.test"></xdebug:message></response>
+(cmd) step_over -i 9
 Exit test_async

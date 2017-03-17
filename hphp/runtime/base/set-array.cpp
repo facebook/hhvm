@@ -46,7 +46,7 @@ struct SetArray::Initializer {
     InitHash(hash, SetArray::SmallScale);
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = SetArray::SmallScale;
-    ad->m_hdr.init(HeaderKind::Keyset, StaticValue);
+    ad->initHeader(HeaderKind::Keyset, StaticValue);
   }
 };
 SetArray::Initializer SetArray::s_initializer;
@@ -69,7 +69,9 @@ SetArray* keysetReqAllocSet(uint32_t scale) {
 
 SetArray* keysetStaticAllocSet(uint32_t scale) {
   auto const allocBytes = SetArray::ComputeAllocBytes(scale);
-  return static_cast<SetArray*>(low_malloc_data(allocBytes));
+  return static_cast<SetArray*>(RuntimeOption::EvalLowStaticArrays ?
+                                low_malloc_data(allocBytes) :
+                                malloc(allocBytes));
 }
 
 } // namespace
@@ -122,7 +124,7 @@ ArrayData* SetArray::MakeReserveSet(uint32_t size) {
   assert(ClearElms(SetData(ad), Capacity(scale)));
   InitHash(hash, scale);
 
-  ad->m_hdr.init(HeaderKind::Keyset, 1);
+  ad->initHeader(HeaderKind::Keyset, 1);
   ad->m_sizeAndPos   = 0;                   // size = 0, pos = 0
   ad->m_scale_used   = scale;               // scale = scale, used = 0
 
@@ -176,7 +178,7 @@ ArrayData* SetArray::MakeUncounted(ArrayData* array, size_t extra) {
   memcpy16_inline(ad, a, sizeof(SetArray) + sizeof(Elm) * used);
   assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
   CopyHash(SetHashTab(ad, scale), a->hashTab(), scale);
-  ad->m_hdr.count = UncountedValue;
+  ad->m_count = UncountedValue;
 
   // Make sure all strings are uncounted.
   auto const elms = a->data();
@@ -210,7 +212,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
   assert(ClearElms(SetData(ad) + used, Capacity(scale) - used));
   CopyHash(SetHashTab(ad, scale), other.hashTab(), scale);
   RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
-  ad->m_hdr.init(HeaderKind::Keyset, count);
+  ad->initHeader(HeaderKind::Keyset, count);
 
   // Bump refcounts.
   auto const elms = other.data();
@@ -221,7 +223,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     tvRefcountedIncRef(&elm.tv);
   }
 
-  assert(ad->m_hdr.kind == HeaderKind::Keyset);
+  assert(ad->m_kind == HeaderKind::Keyset);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(mode == AllocMode::Request ?
@@ -550,7 +552,7 @@ SetArray* SetArray::grow(uint32_t newScale) {
   auto const oldUsed = m_used;
   ad->m_sizeAndPos   = m_sizeAndPos;
   ad->m_scale_used   = newScale | (uint64_t{oldUsed} << 32);
-  ad->m_hdr.init(m_hdr, 1);
+  ad->initHeader(*this, 1);
   assert(reinterpret_cast<uintptr_t>(SetData(ad)) % 16 == 0);
   assert(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
   memcpy16_inline(SetData(ad), data(), sizeof(Elm) * oldUsed);
@@ -957,33 +959,9 @@ ArrayData* SetArray::AppendRef(ArrayData* ad, Variant&, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData* others) {
-  for (ArrayIter it(others); !it.end(); it.next()) {
-    Variant key = it.first();
-    auto tv = key.asTypedValue();
-    if (!isIntType(tv->m_type) && !isStringType(tv->m_type)) {
-      throwInvalidArrayKeyException(tv, ad);
-    }
-  }
-  auto a = asSet(ad);
-  auto const neededSize = a->size() + others->size();
-  if (a->cowCheck()) {
-    a = CopyReserve(a, neededSize);
-  }
-  for (ArrayIter it(others); !it.end(); it.next()) {
-    if (UNLIKELY(a->isFull())) {
-      assert(a == ad);
-      a = CopyReserve(a, neededSize);
-    }
-    Variant key = it.first();
-    auto tv = key.asTypedValue();
-    if (isIntType(tv->m_type)) {
-      a->insert(tv->m_data.num);
-    } else {
-      a->insert(tv->m_data.pstr);
-    }
-  }
-  return a;
+ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {
+  assertx(asSet(ad)->checkInvariants());
+  throwInvalidAdditionException(ad);
 }
 
 ArrayData* SetArray::Merge(ArrayData*, const ArrayData*) {
@@ -1102,9 +1080,15 @@ ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     if (elm.hasIntKey()) {
-      init.add(elm.intKey(), tvAsCVarRef(&elm.tv), /* keyConverted */ true);
+      init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
-      init.add(elm.strKey(), tvAsCVarRef(&elm.tv), /* keyConverted */ true);
+      auto const key = elm.strKey();
+      int64_t n;
+      if (key->isStrictlyInteger(n)) {
+        init.set(n, VarNR{n});
+      } else {
+        init.set(key, tvAsCVarRef(&elm.tv));
+      }
     }
   }
 

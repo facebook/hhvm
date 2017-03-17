@@ -117,6 +117,7 @@ struct IRBuilder {
    */
   const LocalState& local(uint32_t id, TypeConstraint tc);
   const StackState& stack(IRSPRelOffset offset, TypeConstraint tc);
+  const CSlotState& clsRefSlot(uint32_t slot);
   SSATmp* valueOf(Location l, TypeConstraint tc);
   Type     typeOf(Location l, TypeConstraint tc);
 
@@ -139,6 +140,12 @@ struct IRBuilder {
    * these functions. This happens automatically for most values, when obtained
    * through irgen-internal functions like popC (and friends).
    */
+
+  /*
+   * Enable guard constraining for this IRBuilder. This may disable some
+   * optimizations.
+   */
+  void enableConstrainGuards();
 
   /*
    * All the guards in the managed IRUnit.
@@ -169,13 +176,6 @@ struct IRBuilder {
   bool constrainLocation(Location l, TypeConstraint tc);
   bool constrainLocal(uint32_t id, TypeConstraint tc, const std::string& why);
   bool constrainStack(IRSPRelOffset offset, TypeConstraint tc);
-
-  /*
-   * Whether `val' might have its type relaxed by guard relaxation.
-   *
-   * If `val' is nullptr, only conditions that apply to all values are checked.
-   */
-  bool typeMightRelax(SSATmp* val = nullptr) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode-level control flow helpers.
@@ -283,6 +283,7 @@ private:
    */
   Location loc(uint32_t) const;
   Location stk(IRSPRelOffset) const;
+  Location cslot(uint32_t) const;
 
   /*
    * preOptimize() and helpers.
@@ -314,6 +315,7 @@ private:
   SSATmp* preOptimizeLdLocation(IRInstruction*, Location);
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
+  SSATmp* preOptimizeLdClsRef(IRInstruction*);
   SSATmp* preOptimizeCastStk(IRInstruction*);
   SSATmp* preOptimizeCoerceStk(IRInstruction*);
   SSATmp* preOptimizeLdMBase(IRInstruction*);
@@ -362,6 +364,7 @@ private:
   bool m_enableSimplification{false};
 
   GuardConstraints m_constraints;
+  bool m_constrainGuards{false};
 
   // Keep track of blocks created to support bytecode control flow.
   jit::flat_map<SrcKey,Block*> m_skToBlockMap;
@@ -392,13 +395,6 @@ struct BlockPusher {
  private:
   IRBuilder& m_irb;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-bool typeMightRelax(const SSATmp* tmp);
-
-bool dictElemMightRelax(const IRInstruction* inst);
-bool keysetElemMightRelax(const IRInstruction* inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

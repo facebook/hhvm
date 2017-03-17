@@ -75,6 +75,7 @@ type token =
   | Tbareq
   | Tpluseq
   | Tstareq
+  | Tstarstareq
   | Tslasheq
   | Tdoteq
   | Tminuseq
@@ -191,6 +192,7 @@ let token_to_string = function
   | Teq           -> "="
   | Tbareq        -> "|="
   | Tpluseq       -> "+="
+  | Tstarstareq   -> "**="
   | Tstareq       -> "*="
   | Tslasheq      -> "/="
   | Tdoteq        -> ".="
@@ -358,6 +360,7 @@ rule token file = parse
   | '='                { Teq          }
   | "|="               { Tbareq       }
   | "+="               { Tpluseq      }
+  | "**="              { Tstarstareq  }
   | "*="               { Tstareq      }
   | "/="               { Tslasheq     }
   | ".="               { Tdoteq       }
@@ -690,6 +693,7 @@ and format_token = parse
   | '='                { Teq           }
   | "|="               { Tbareq        }
   | "+="               { Tpluseq       }
+  | "**="              { Tstarstareq   }
   | "*="               { Tstareq       }
   | "/="               { Tslasheq      }
   | ".="               { Tdoteq        }

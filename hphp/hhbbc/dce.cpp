@@ -226,8 +226,8 @@ using UseInfo    = std::pair<Use,InstrIdSet>;
 //////////////////////////////////////////////////////////////////////
 
 struct DceState {
-  borrowed_ptr<const php::Func> func;
-
+  explicit DceState(const FuncAnalysis& ainfo) : ainfo(ainfo) {}
+  const FuncAnalysis& ainfo;
   /*
    * Eval stack use information.  Stacks slots are marked as being
    * needed or not needed.  If they aren't needed, they carry a set of
@@ -350,6 +350,8 @@ struct Env {
   const StepFlags& flags;
 };
 
+//////////////////////////////////////////////////////////////////////
+
 void markSetDead(Env& env, const InstrIdSet& set) {
   env.dceState.markedDead[env.id] = 1;
   FTRACE(2, "     marking {} {}\n", env.id, show(set));
@@ -410,6 +412,14 @@ void popCond(Env& env, Args&&... args) {
   pop(env, Use::Not, accum);
 }
 
+bool popCouldRunDestructor(Env& env) {
+  // If there's an equivLocal, we know that it's not the last
+  // reference, so popping the stack won't run any destructors.
+  return
+    env.stateBefore.stack.back().equivLocal == NoLocalId &&
+    couldRunDestructor(topC(env));
+}
+
 /*
  * It may be ok to remove pops on objects with destructors in some scenarios
  * (where it won't change the observable point at which a destructor runs).  We
@@ -423,8 +433,7 @@ void popCond(Env& env, Args&&... args) {
  * it is a Dup), then Use:UsedIfLastRef is equivalent to Use::Not.
  */
 void discardNonDtors(Env& env) {
-  auto const t = topC(env);
-  if (couldRunDestructor(t)) {
+  if (popCouldRunDestructor(env)) {
     return pop(env, Use::UsedIfLastRef, InstrIdSet{env.id});
   }
   discard(env);
@@ -455,7 +464,7 @@ void pushRemovable(Env& env) {
 
 void addLocGenSet(Env& env, std::bitset<kMaxTrackedLocals> locs) {
   FTRACE(4, "      loc-conservative: {}\n",
-         loc_bits_string(env.dceState.func, locs));
+         loc_bits_string(env.dceState.ainfo.ctx.func, locs));
   env.dceState.liveLocals |= locs;
   env.dceState.locGen |= locs;
   env.dceState.locKill &= ~locs;
@@ -492,9 +501,44 @@ Type locRaw(Env& env, LocalId loc) {
   return env.stateBefore.locals[loc];
 }
 
+bool setLocCouldHaveSideEffects(Env& env, LocalId loc, bool forExit = false) {
+  // Normally, if there's an equivLocal this isn't the last reference,
+  // so overwriting it won't run any destructors. But if we're
+  // destroying all the locals (eg RetC) they can't all protect each
+  // other; in that case we require a lower equivLoc to ensure that
+  // one local from each equivalence set will still be marked as
+  // having effects (choosing lower numbers also means we mark the
+  // params as live, which makes it more likely that we can eliminate
+  // a local).
+  static_assert(NoLocalId == std::numeric_limits<LocalId>::max(),
+                "NoLocalId must be greater than all valid local ids");
+  if (env.stateBefore.equivLocals.size() > loc) {
+    auto l = env.stateBefore.equivLocals[loc];
+    if (l != NoLocalId) {
+      if (!forExit) return false;
+      do {
+        if (l < loc) return false;
+        l = env.stateBefore.equivLocals[l];
+      } while (l != loc);
+    }
+  }
+
+  // If this local is bound to a static, its type will be TRef, but we
+  // may know the type of the static - but statics *are* live out of
+  // the function, so don't do this when forExit is set.
+  if (!forExit &&
+      env.stateBefore.localStaticBindings.size() > loc &&
+      env.stateBefore.localStaticBindings[loc] == LocalStaticBinding::Bound &&
+      !setCouldHaveSideEffects(env.dceState.ainfo.localStaticTypes[loc])) {
+    return false;
+  }
+
+  return setCouldHaveSideEffects(locRaw(env, loc));
+}
+
 void readDtorLocs(Env& env) {
-  for (auto i = size_t{0}; i < env.stateBefore.locals.size(); ++i) {
-    if (couldRunDestructor(env.stateBefore.locals[i])) {
+  for (auto i = LocalId{0}; i < env.stateBefore.locals.size(); ++i) {
+    if (setLocCouldHaveSideEffects(env, i, true)) {
       addLocGen(env, i);
     }
   }
@@ -604,7 +648,7 @@ void dce(Env& env, const bc::ClsRefGetC& op) {
     writeSlot(env, op.slot);
     return pop(
       env,
-      couldRunDestructor(topC(env)) ? Use::UsedIfLastRef : Use::Not,
+      popCouldRunDestructor(env) ? Use::UsedIfLastRef : Use::Not,
       std::move(instrs)
     );
   }
@@ -690,12 +734,16 @@ void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Exit&)  { push(env); pop(env); readDtorLocs(env); }
 
 void dce(Env& env, const bc::SetL& op) {
-  auto const oldTy   = locRaw(env, op.loc1);
-  auto const effects = setCouldHaveSideEffects(oldTy);
-  if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
+  auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
+  if (!isLocLive(env, op.loc1) && !effects) {
+    assert(!locRaw(env, op.loc1).couldBe(TRef) ||
+           env.stateBefore.localStaticBindings[op.loc1] ==
+           LocalStaticBinding::Bound);
+    return markDead(env);
+  }
   push(env);
   pop(env);
-  if (effects) {
+  if (effects || locRaw(env, op.loc1).couldBe(TRef)) {
     addLocGen(env, op.loc1);
   } else {
     addLocKill(env, op.loc1);
@@ -704,8 +752,15 @@ void dce(Env& env, const bc::SetL& op) {
 
 void dce(Env& env, const bc::UnsetL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
-  auto const effects = setCouldHaveSideEffects(oldTy);
   if (oldTy.subtypeOf(TUninit)) return markDead(env);
+
+  // Unsetting a local bound to a static never has side effects
+  // because the static itself has a reference to the value.
+  auto const effects =
+    setLocCouldHaveSideEffects(env, op.loc1) &&
+    (env.stateBefore.localStaticBindings.size() <= op.loc1 ||
+     env.stateBefore.localStaticBindings[op.loc1] != LocalStaticBinding::Bound);
+
   if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
   if (effects) {
     addLocGen(env, op.loc1);
@@ -722,7 +777,7 @@ void dce(Env& env, const bc::UnsetL& op) {
  */
 void dce(Env& env, const bc::IncDecL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
-  auto const effects = setCouldHaveSideEffects(oldTy) ||
+  auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
                          readCouldHaveSideEffects(oldTy);
   auto const u1      = push(env);
   if (!isLocLive(env, op.loc1) && !effects && allUnused(u1)) {
@@ -740,7 +795,7 @@ void dce(Env& env, const bc::IncDecL& op) {
  */
 void dce(Env& env, const bc::SetOpL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
-  auto const effects = setCouldHaveSideEffects(oldTy) ||
+  auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
                          readCouldHaveSideEffects(oldTy);
   if (!isLocLive(env, op.loc1) && !effects) {
     popCond(env, push(env));
@@ -819,8 +874,7 @@ dce_visit(const Index& index,
 
   auto const states = locally_propagated_states(index, fa, blk, stateIn);
 
-  auto dceState = DceState{};
-  dceState.func = fa.ctx.func;
+  auto dceState = DceState{ fa };
   dceState.markedDead.resize(blk->hhbcs.size());
   dceState.liveLocals = locLiveOut;
   dceState.liveSlots.set();
@@ -877,7 +931,7 @@ dce_visit(const Index& index,
     );
 
     FTRACE(4, "    cls-ref slots: {}\n{}\n",
-      slot_bits_string(dceState.func, dceState.liveSlots),
+      slot_bits_string(dceState.ainfo.ctx.func, dceState.liveSlots),
       [&]{
         using namespace folly::gen;
         auto i = uint32_t{0};

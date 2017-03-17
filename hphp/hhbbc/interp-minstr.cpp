@@ -1755,15 +1755,29 @@ namespace {
 // a smaller starting id. Only returns the equivalent first local because the
 // size doesn't change.
 LocalId equivLocalRange(ISS& env, const LocalRange& range) {
-  auto const equivFirst = findLocEquiv(env, range.first);
-  if (equivFirst == NoLocalId || equivFirst >= range.first) return NoLocalId;
+  auto bestRange = range.first;
+  auto equivFirst = findLocEquiv(env, range.first);
+  if (equivFirst == NoLocalId) return bestRange;
+  do {
+    if (equivFirst < bestRange) {
+      auto equivRange = [&] {
 
-  for (uint32_t i = 0; i < range.restCount; ++i) {
-    auto const equiv = findLocEquiv(env, range.first + i + 1);
-    if (equiv == NoLocalId || equiv != equivFirst + i + 1) return NoLocalId;
-  }
+        for (uint32_t i = 1; i <= range.restCount; ++i) {
+          if (!locsAreEquiv(env, equivFirst + i, range.first + i)) return false;
+        }
 
-  return equivFirst;
+        return true;
+      }();
+
+      if (equivRange) {
+        bestRange = equivFirst;
+      }
+    }
+    equivFirst = findLocEquiv(env, equivFirst);
+    assert(equivFirst != NoLocalId);
+  } while (equivFirst != range.first);
+
+  return bestRange;
 }
 
 }
@@ -1776,7 +1790,7 @@ void in(ISS& env, const bc::MemoGet& op) {
 
   // If we can use an equivalent, earlier range, then use that instead.
   auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != NoLocalId) {
+  if (equiv != op.locrange.first) {
     return reduce(
       env,
       bc::MemoGet { op.arg1, LocalRange { equiv, op.locrange.restCount } }
@@ -1801,7 +1815,7 @@ void in(ISS& env, const bc::MemoSet& op) {
 
   // If we can use an equivalent, earlier range, then use that instead.
   auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != NoLocalId) {
+  if (equiv != op.locrange.first) {
     return reduce(
       env,
       bc::MemoSet { op.arg1, LocalRange { equiv, op.locrange.restCount } }

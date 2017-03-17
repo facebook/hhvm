@@ -855,9 +855,9 @@ void group(ISS& env, const bc::IsTypeL& istype, const JmpOp& jmp) {
     return loc;
   }();
 
-  setLoc(env, istype.loc1, negate ? was_true : was_false);
+  refineLoc(env, istype.loc1, negate ? was_true : was_false);
   env.propagate(jmp.target, env.state);
-  setLoc(env, istype.loc1, negate ? was_false : was_true);
+  refineLoc(env, istype.loc1, negate ? was_false : was_true);
 }
 
 namespace {
@@ -1012,9 +1012,9 @@ void group(ISS& env, const bc::CGetL& cgetl, const JmpOp& jmp) {
     return loc;
   }();
 
-  setLoc(env, cgetl.loc1, negate ? converted_true : converted_false);
+  refineLoc(env, cgetl.loc1, negate ? converted_true : converted_false);
   env.propagate(jmp.target, env.state);
-  setLoc(env, cgetl.loc1, negate ? converted_false : converted_true);
+  refineLoc(env, cgetl.loc1, negate ? converted_false : converted_true);
 }
 
 template<class JmpOp>
@@ -1037,9 +1037,9 @@ void group(ISS& env,
   auto const negate    = jmp.op == Op::JmpNZ;
   auto const was_true  = instTy;
   auto const was_false = loc;
-  setLoc(env, cgetl.loc1, negate ? was_true : was_false);
+  refineLoc(env, cgetl.loc1, negate ? was_true : was_false);
   env.propagate(jmp.target, env.state);
-  setLoc(env, cgetl.loc1, negate ? was_false : was_true);
+  refineLoc(env, cgetl.loc1, negate ? was_false : was_true);
 }
 
 void group(ISS& env,
@@ -1048,10 +1048,10 @@ void group(ISS& env,
   auto const obj = locAsCell(env, cgetl.loc1);
   impl(env, cgetl, fpush);
   if (!is_specialized_obj(obj)) {
-    setLoc(env, cgetl.loc1,
-           fpush.subop3 == ObjMethodOp::NullThrows ? TObj : TOptObj);
+    refineLoc(env, cgetl.loc1,
+              fpush.subop3 == ObjMethodOp::NullThrows ? TObj : TOptObj);
   } else if (is_opt(obj) && fpush.subop3 == ObjMethodOp::NullThrows) {
-    setLoc(env, cgetl.loc1, unopt(obj));
+    refineLoc(env, cgetl.loc1, unopt(obj));
   }
 }
 
@@ -1570,14 +1570,23 @@ void in(ISS& env, const bc::InstanceOf& op) {
 
 void in(ISS& env, const bc::SetL& op) {
   nothrow(env);
-  auto const equivLoc = topStkEquiv(env);
-  auto val = popC(env);
-  setLoc(env, op.loc1, val);
+  auto equivLoc = topStkEquiv(env);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
-  if (equivLoc != NoLocalId &&
-      !locCouldBeRef(env, op.loc1) &&
+  if (!locCouldBeRef(env, op.loc1) &&
       !is_volatile_local(env.ctx.func, op.loc1)) {
+    if (equivLoc != NoLocalId) {
+      if (equivLoc == op.loc1 ||
+          locsAreEquiv(env, equivLoc, op.loc1)) {
+        return reduce(env, bc::Nop {});
+      }
+    } else {
+      equivLoc = op.loc1;
+    }
+  }
+  auto val = popC(env);
+  setLoc(env, op.loc1, val);
+  if (equivLoc != op.loc1 && equivLoc != NoLocalId) {
     addLocEquiv(env, op.loc1, equivLoc);
   }
   push(env, std::move(val), equivLoc);

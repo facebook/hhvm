@@ -22,6 +22,7 @@
 
 #include "hphp/util/match.h"
 #include "hphp/hhbbc/analyze.h"
+#include "hphp/hhbbc/interp-internal.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -295,17 +296,58 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     }
   }
 
-  dst.equivLocals.resize(
-    std::max(dst.equivLocals.size(), src.equivLocals.size()), NoLocalId
-  );
-  for (auto i = size_t{0}; i < dst.equivLocals.size(); ++i) {
-    auto const dstLoc = dst.equivLocals[i];
-    auto const srcLoc =
-      (i < src.equivLocals.size()) ? src.equivLocals[i] : NoLocalId;
-    auto const newLoc = (dstLoc == srcLoc) ? dstLoc : NoLocalId;
-    if (newLoc != dstLoc) {
-      changed = true;
-      dst.equivLocals[i] = newLoc;
+  if (src.equivLocals.size() < dst.equivLocals.size()) {
+    for (auto i = src.equivLocals.size(); i < dst.equivLocals.size(); ++i) {
+      if (dst.equivLocals[i] != NoLocalId) killLocEquiv(dst, i);
+    }
+    dst.equivLocals.resize(src.equivLocals.size());
+  }
+
+  auto processed = uint64_t{0};
+  for (auto i = LocalId{0}; i < dst.equivLocals.size(); ++i) {
+    if (i < sizeof(uint64_t) * CHAR_BIT && (processed >> i) & 1) continue;
+    auto dstLoc = dst.equivLocals[i];
+    if (dstLoc == NoLocalId) continue;
+    auto srcLoc = i < src.equivLocals.size() ? src.equivLocals[i] : NoLocalId;
+    if (srcLoc != dstLoc) {
+      if (srcLoc != NoLocalId &&
+          dst.equivLocals.size() < sizeof(uint64_t) * CHAR_BIT) {
+
+        auto computeSet = [&] (const State& s, LocalId start) {
+          auto result = uint64_t{0};
+          auto l = start;
+          do {
+            result |= uint64_t{1} << l;
+            l = s.equivLocals[l];
+          } while (l != start);
+          return result;
+        };
+
+        auto dstSet = computeSet(dst, i);
+        auto srcSet = computeSet(src, i);
+
+        auto newSet = dstSet & srcSet;
+        if (!(newSet & (newSet - 1))) {
+          newSet = 0;
+        }
+        auto killSet = dstSet - newSet;
+        if (killSet) {
+          auto l = i;
+          do {
+            processed |= uint64_t{1} << l;
+            auto const next = dst.equivLocals[l];
+            if ((killSet >> l) & 1) {
+              killLocEquiv(dst, l);
+            }
+            l = next;
+          } while (l != i && l != NoLocalId);
+          assert(l == i || killSet == dstSet);
+          changed = true;
+        }
+      } else {
+        killLocEquiv(dst, dstLoc);
+        changed = true;
+      }
     }
   }
 

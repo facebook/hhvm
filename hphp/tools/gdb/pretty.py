@@ -371,6 +371,59 @@ class HhbbcBytecodePrinter(object):
 
 #------------------------------------------------------------------------------
 # Lookup function.
+class CompactVectorPrinter(object):
+    RECOGNIZE = '^HPHP::CompactVector(<.*>)$'
+
+    class _iterator(_BaseIterator):
+        def __init__(self, begin, end):
+            self.cur = begin
+            self.end = end
+            self.count = 0
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            elt = self.cur
+            key = '%d' % self.count
+
+            try:
+                data = elt.dereference()
+            except gdb.MemoryError:
+                data = '<invalid>'
+
+            self.cur = self.cur + 1
+            self.count = self.count + 1
+            return (key, data)
+
+
+    def __init__(self, val):
+        inner = val.type.template_argument(0)
+        self.inner = inner
+        if val['m_data'] == nullptr():
+            self.len = 0
+            self.cap = 0
+        else:
+            self.len = val['m_data']['m_len']
+            self.cap = val['m_data']['m_capacity']
+            self.elems = (val['m_data'].cast(T('char').pointer()) +
+                          val['elems_offset']).cast(inner.pointer())
+
+    def to_string(self):
+        return "CompactVector<%s>: %d element(s) capacity=%d" % (
+            self.inner.name,
+            self.len,
+            self.cap
+        )
+
+    def children(self):
+        if self.len == 0:
+            return self._iterator(0, 0)
+        else:
+            return self._iterator(self.elems, self.elems + self.len)
+
+#------------------------------------------------------------------------------
+# Lookup function.
 
 printer_classes = [
     TypedValuePrinter,
@@ -385,6 +438,7 @@ printer_classes = [
     ObjectDataPrinter,
     RefDataPrinter,
     HhbbcBytecodePrinter,
+    CompactVectorPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}

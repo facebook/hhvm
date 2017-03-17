@@ -107,6 +107,12 @@ private:
 
   CompactVectorData* m_data;
   static constexpr size_type initial_capacity = 4;
+  /* We mainly want this so pretty.py can figure out the alignment */
+  static constexpr size_type elems_offset =
+    alignof(T) >= sizeof(CompactVectorData) ?
+    alignof(T) : sizeof(CompactVectorData);
+  /* And we need this to prevent gcc from throwing away elems_offset */
+  using elems_offset_type = char[elems_offset];
 };
 
 template <typename T>
@@ -168,13 +174,12 @@ CompactVector<T>::~CompactVector() {
 template <typename T>
 T* CompactVector<T>::elems() const {
   assert(m_data);
-  return alignof(T) >= sizeof(CompactVectorData) ?
-    (T*)((char*)m_data + alignof(T)) : (T*)(m_data + 1);
+  return (T*)((char*)m_data + elems_offset);
 }
 
 template <typename T>
 size_t CompactVector<T>::required_mem(size_type n) {
-  return std::max(alignof(T), sizeof(CompactVectorData)) + sizeof(T) * n;
+  return elems_offset + sizeof(T) * n;
 }
 
 template <typename T>

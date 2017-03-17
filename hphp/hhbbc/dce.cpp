@@ -56,9 +56,7 @@ TRACE_SET_MOD(hhbbc_dce);
  *
  * The global DCE performs a liveness analysis and then uses this
  * information to allow dead stores to locals to be eliminated across
- * blocks.  It does not attempt to remove unnecessary evaluation stack
- * manipulation spanning basic blocks, but it uses the same local DCE
- * code and will eliminate intra-block stack manipulations.
+ * blocks.
  *
  * Both types of DCE here need to be type-aware, but they must visit
  * blocks backward.  They accomplish this by forward-propagating the
@@ -132,8 +130,11 @@ TRACE_SET_MOD(hhbbc_dce);
  *   If the first store to $foo is removed, the type of $foo before
  *   the SetL in the later block is now Uninit, instead of Int.
  *
- *   This means that after calling global_dce on a function, the type
- *   information in the block input states in the associated
+ *   In addition, by killing dead eval stack slots across basic
+ *   blocks, the saved entry stacks in the FuncAnalysis no longer
+ *   match the actual stack depths.
+ *
+ *   This means that after calling global_dce on a function, its
  *   FuncAnalysis can no longer be considered accurate.
  *
  *   Moreover, since global DCE makes use of type information to
@@ -219,15 +220,54 @@ enum class Use {
   UsedIfLastRef,
 };
 
-using InstrId    = size_t;
+struct InstrId {
+  BlockId blk;
+  uint32_t idx;
+};
+
+bool operator<(const InstrId& i1, const InstrId& i2) {
+  if (i1.blk != i2.blk) return i1.blk < i2.blk;
+  // sort by decreasing idx so that kill_marked_instrs works
+  return i1.idx > i2.idx;
+}
+
 using InstrIdSet = std::set<InstrId>;
-using UseInfo    = std::pair<Use,InstrIdSet>;
+using StkId = InstrId;
+
+struct UseInfo {
+  explicit UseInfo(Use u) : usage(u) {}
+  UseInfo(Use u, InstrIdSet&& ids) : usage(u), toRemove(std::move(ids)) {}
+
+  Use usage;
+  /*
+   * Set of instructions that should be removed if we decide to
+   * discard the corresponding stack slot.
+   */
+  InstrIdSet toRemove;
+  /*
+   * Used for stack slots that are live across blocks to indicate a
+   * stack slot that should be considered Used at the entry to blk.
+   *
+   * If its not live across blocks, popper.blk will stay NoBlockId.
+   */
+  StkId popper { NoBlockId, 0 };
+};
+
+std::string show(InstrId id) {
+  return folly::sformat("{}:{}", id.blk, id.idx);
+}
 
 //////////////////////////////////////////////////////////////////////
 
 struct DceState {
   explicit DceState(const FuncAnalysis& ainfo) : ainfo(ainfo) {}
   const FuncAnalysis& ainfo;
+  /*
+   * Used to accumulate a set of blk/stack-slot pairs that
+   * should be marked used
+   */
+  std::set<StkId> usedStackSlots;
+
   /*
    * Eval stack use information.  Stacks slots are marked as being
    * needed or not needed.  If they aren't needed, they carry a set of
@@ -272,7 +312,7 @@ struct DceState {
    * removed, however, they must all be removed, because of the need
    * to keep eval stack consumers and producers balanced.
    */
-  boost::dynamic_bitset<> markedDead{};
+  InstrIdSet markedDead;
 
   /*
    * The set of locals and class-ref slots that were ever live in this block.
@@ -305,13 +345,13 @@ const char* show(Use u) {
 std::string show(const InstrIdSet& set) {
   using namespace folly::gen;
   return from(set)
-    | eachTo<std::string>()
+    | map([](const InstrId& id) { return show(id); })
     | unsplit<std::string>(";")
     ;
 }
 
 std::string DEBUG_ONLY show(const UseInfo& ui) {
-  return folly::format("{}@{}", show(ui.first), show(ui.second)).str();
+  return folly::sformat("{}@{}", show(ui.usage), show(ui.toRemove));
 }
 
 std::string DEBUG_ONLY loc_bits_string(borrowed_ptr<const php::Func> func,
@@ -345,6 +385,7 @@ slot_bits_string(borrowed_ptr<const php::Func> func,
 
 struct Env {
   DceState& dceState;
+  const Bytecode& op;
   InstrId id;
   const State& stateBefore;
   const StepFlags& flags;
@@ -353,23 +394,68 @@ struct Env {
 //////////////////////////////////////////////////////////////////////
 
 void markSetDead(Env& env, const InstrIdSet& set) {
-  env.dceState.markedDead[env.id] = 1;
-  FTRACE(2, "     marking {} {}\n", env.id, show(set));
-  for (auto& i : set) env.dceState.markedDead[i] = 1;
+  env.dceState.markedDead.insert(env.id);
+  FTRACE(2, "     marking {} {}\n", show(env.id), show(set));
+  for (auto& i : set) env.dceState.markedDead.insert(i);
+}
+
+void markUisDead(Env& env, const UseInfo& ui) {
+  markSetDead(env, ui.toRemove);
+}
+
+template<typename... Args>
+void markUisDead(Env& env, const UseInfo& ui, Args&&... args) {
+  markUisDead(env, ui);
+  markUisDead(env, std::forward<Args>(args)...);
+}
+
+/*
+ * During global dce, a particular stack element could be pushed
+ * on multiple paths. eg:
+ *
+ *   $a ? f() : 42
+ *
+ * If f() is known to return a non-counted type, we have UnboxRNop ->
+ * PopC on one path, and Int 42 -> PopC on another, and the PopC marks
+ * its value Use::Not. When we get to the Int 42 it thinkgs both
+ * instructions can be killed; but when we get to the UnboxRNop it
+ * does nothing. So any time we decide to ignore a Use::Not or
+ * Use::UsedIfLastRef, we have to record that fact so we can prevent
+ * the other paths from trying to use that information. We communicate
+ * this via the ui.popper field, and the usedStackSlots set.
+ *
+ * Note that a more sophisticated system would insert a PopC after the
+ * UnboxRNop, and allow the 42/PopC to be removed (work in progress).
+ */
+void markUisLive(Env& env, const UseInfo& ui) {
+  if (ui.usage != Use::Used && ui.popper.blk != NoBlockId) {
+    env.dceState.usedStackSlots.insert(ui.popper);
+  }
+}
+
+template<typename... Args>
+void markUisLive(Env& env, const UseInfo& ui, Args&&... args) {
+  markUisLive(env, ui);
+  markUisLive(env, std::forward<Args>(args)...);
 }
 
 void markDead(Env& env) {
-  env.dceState.markedDead[env.id] = 1;
-  FTRACE(2, "     marking {}\n", env.id);
+  env.dceState.markedDead.insert(env.id);
+  FTRACE(2, "     marking {}\n", show(env.id));
 }
 
 //////////////////////////////////////////////////////////////////////
 // eval stack
 
-void pop(Env& env, Use u, InstrIdSet set) {
-  FTRACE(2, "      pop({})\n", show(u));
-  env.dceState.stack.emplace_back(u, std::move(set));
+void pop(Env& env, UseInfo&& ui) {
+  FTRACE(2, "      pop({})\n", show(ui.usage));
+  env.dceState.stack.push_back(std::move(ui));
 }
+
+void pop(Env& env, Use u, InstrIdSet set) {
+  pop(env, {u, std::move(set)});
+}
+
 void pop(Env& env) { pop(env, Use::Used, InstrIdSet{}); }
 
 Type topT(Env& env, uint32_t idx = 0) {
@@ -390,26 +476,33 @@ void discard(Env& env) {
 bool allUnused() { return true; }
 template<class... Args>
 bool allUnused(const UseInfo& ui, Args&&... args) {
-  return ui.first == Use::Not &&
+  return ui.usage == Use::Not &&
     allUnused(std::forward<Args>(args)...);
 }
 
-void combineSets(InstrIdSet&) {}
+void combineSets(UseInfo&) {}
 template<class... Args>
-void combineSets(InstrIdSet& accum, const UseInfo& ui, Args&&... args) {
-  accum.insert(begin(ui.second), end(ui.second));
+void combineSets(UseInfo& accum, const UseInfo& ui, Args&&... args) {
+  accum.toRemove.insert(begin(ui.toRemove), end(ui.toRemove));
+  if (accum.popper.blk == NoBlockId ||
+      accum.popper < ui.popper) {
+    accum.popper = ui.popper;
+  }
   combineSets(accum, std::forward<Args>(args)...);
 }
 
-// If all the supplied UseInfos represent unused stack slots, make a
-// pop that is considered unused.  Otherwise pop as a Use::Used.
+// The instruction wants to be killed, as long as its inputs can be
+// killed; combine the UseInfo sets from its outputs, and make an
+// appropriate number of Use::Not pops.
 template<class... Args>
-void popCond(Env& env, Args&&... args) {
-  bool unused = allUnused(std::forward<Args>(args)...);
-  if (!unused) return pop(env, Use::Used, InstrIdSet{});
-  auto accum = InstrIdSet{env.id};
-  combineSets(accum, std::forward<Args>(args)...);
-  pop(env, Use::Not, accum);
+void passThrough(Env& env, Args&&... args) {
+  UseInfo ui { Use::Not, { env.id } };
+  combineSets(ui, std::forward<Args>(args)...);
+
+  for (auto i = 1; i < env.op.numPop(); ++i) {
+    pop(env, UseInfo{ui});
+  }
+  pop(env, std::move(ui));
 }
 
 bool popCouldRunDestructor(Env& env) {
@@ -439,24 +532,58 @@ void discardNonDtors(Env& env) {
   discard(env);
 }
 
-UseInfo push(Env& env) {
+enum class PushFlags {
+  MarkLive,
+  MarkDead,
+  PassThrough
+};
+
+template<typename... Args>
+void handle_push(Env& env, PushFlags pf, Args&&... uis) {
+  switch (pf) {
+    case PushFlags::MarkLive:
+      markUisLive(env, std::forward<Args>(uis)...);
+      return;
+    case PushFlags::MarkDead:
+      markUisDead(env, std::forward<Args>(uis)...);
+      return;
+    case PushFlags::PassThrough:
+      passThrough(env, std::move(uis)...);
+      return;
+  }
+}
+
+template<typename F>
+void push(Env& env, F fun) {
   always_assert(!env.dceState.stack.empty());
-  auto ret = env.dceState.stack.back();
+  auto ui = std::move(env.dceState.stack.back());
   env.dceState.stack.pop_back();
-  FTRACE(2, "      {}@{} = push()\n", show(ret.first), show(ret.second));
-  return ret;
+  FTRACE(2, "      {}@{} = push()\n", show(ui.usage), show(ui.toRemove));
+  auto const f = fun(ui);
+  handle_push(env, f, std::move(ui));
+}
+
+void push(Env& env) {
+  push(env, [](const UseInfo&) { return PushFlags::MarkLive; });
+}
+
+template<typename F>
+void push2(Env& env, F fun) {
+  always_assert(env.dceState.stack.size() >= 2);
+  auto u1 = std::move(env.dceState.stack.back());
+  env.dceState.stack.pop_back();
+  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u1.toRemove));
+  auto u2 = std::move(env.dceState.stack.back());
+  env.dceState.stack.pop_back();
+  FTRACE(2, "      {}@{} = push()\n", show(u1.usage), show(u2.toRemove));
+  auto const f = fun(u1, u2);
+  handle_push(env, f, std::move(u1), std::move(u2));
 }
 
 void pushRemovable(Env& env) {
-  auto const ui = push(env);
-  switch (ui.first) {
-  case Use::Not:
-    markSetDead(env, ui.second);
-    break;
-  case Use::Used:
-  case Use::UsedIfLastRef:
-    break;
-  }
+  push(env,[] (const UseInfo& ui) {
+      return ui.usage == Use::Not ? PushFlags::MarkDead : PushFlags::MarkLive;
+    });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -627,16 +754,21 @@ void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the
   // class-ref.
-  auto ui = push(env);
-  switch (ui.first) {
-    case Use::Not:
-      readSlotDiscardable(env, op.slot, std::move(ui.second));
-      break;
-    case Use::UsedIfLastRef:
-    case Use::Used:
-      readSlot(env, op.slot);
-      break;
-  }
+  push(env, [&] (UseInfo& ui) {
+      switch (ui.usage) {
+        case Use::Not:
+          if (ui.popper.blk == NoBlockId) {
+            // we don't yet support cross-block dce of classrefs
+            readSlotDiscardable(env, op.slot, std::move(ui.toRemove));
+            break;
+          }
+        case Use::UsedIfLastRef:
+        case Use::Used:
+          readSlot(env, op.slot);
+          break;
+      }
+      return PushFlags::MarkLive;
+    });
 }
 
 void dce(Env& env, const bc::ClsRefGetC& op) {
@@ -662,7 +794,6 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
 
   if (!isSlotLive(env, op.slot) && !readCouldHaveSideEffects(ty)) {
     auto instrs = slotDependentInstrs(env, op.slot);
-    instrs.insert(env.id);
     writeSlot(env, op.slot);
     markSetDead(env, std::move(instrs));
     return;
@@ -676,56 +807,66 @@ void dce(Env& env, const bc::DiscardClsRef& op) {
 }
 
 void dce(Env& env, const bc::Dup&) {
-  auto const u1 = push(env);
-  auto const u2 = push(env);
-  // Dup pushes a cell that is guaranteed to be not the last reference.
-  // So, it can be eliminated if the cell it pushes is used as either
-  // Use::Not or Use::UsedIfLastRef.
-  // The cell it pops can be marked Use::Not only if Dup itself
-  // can be eliminated.
-  switch (u1.first) {
-  case Use::Not:
-  case Use::UsedIfLastRef:
-    // It is ok to eliminate the Dup even if its second output u2
-    // is used, because eliminating the Dup still leaves the second
-    // output u2 on stack.
-    markSetDead(env, u1.second);
-    switch (u2.first) {
-    case Use::Not:
-      pop(env, Use::Not, u2.second);
-      break;
-    case Use::Used:
-    case Use::UsedIfLastRef:
-      pop(env, Use::Used, InstrIdSet{});
-      break;
-    }
-    break;
-  case Use::Used:
-    pop(env, Use::Used, InstrIdSet{});
-    break;
-  }
+  // Various cases:
+  //   - If the duplicated value is not used, delete the dup and all
+  //     its consumers, then
+  //     o If the original value is unused pass that on to let the
+  //       instruction which pushed it decide whether to kill it
+  //     o Otherwise we're done.
+  //   - Otherwise, if the original value is unused, kill the dup
+  //     and all dependent instructions.
+  push(env, [&] (const UseInfo& u1) {
+      push(env, [&] (UseInfo& u2) {
+          switch (u2.usage) {
+            case Use::Not:
+              if (u1.usage == Use::Used) {
+                pop(env);
+                return PushFlags::MarkDead;
+              } else {
+                return PushFlags::PassThrough;
+              }
+            case Use::Used:
+            case Use::UsedIfLastRef:
+              pop(env);
+              return PushFlags::MarkLive;
+          }
+          not_reached();
+        });
+      // Dup pushes a cell that is guaranteed to be not the last reference.
+      // So, it can be eliminated if the cell it pushes is used as either
+      // Use::Not or Use::UsedIfLastRef.
+      switch (u1.usage) {
+        case Use::Not:
+        case Use::UsedIfLastRef:
+          return PushFlags::MarkDead;
+        case Use::Used:
+          return PushFlags::MarkLive;
+      }
+      not_reached();
+    });
 }
 
 void dce(Env& env, const bc::CGetL& op) {
   auto const ty = locRaw(env, op.loc1);
   addLocGen(env, op.loc1);
-  if (readCouldHaveSideEffects(ty)) {
-    push(env);
-  } else {
-    pushRemovable(env);
-  }
+  push(env, [&] (const UseInfo& ui) {
+      return readCouldHaveSideEffects(ty) || !allUnused(ui) ?
+        PushFlags::MarkLive : PushFlags::MarkDead;
+    });
 }
 
 void dce(Env& env, const bc::CGetL2& op) {
   auto const ty = locRaw(env, op.loc1);
   addLocGen(env, op.loc1);
-  auto const u1 = push(env);
-  auto const u2 = push(env);
-  if (readCouldHaveSideEffects(ty)) {
-    pop(env);
-  } else {
-    popCond(env, u1, u2);
-  }
+
+  push2(env, [&] (const UseInfo& u1, const UseInfo& u2) {
+      if (readCouldHaveSideEffects(ty) || !allUnused(u1, u2)) {
+        pop(env);
+        return PushFlags::MarkLive;
+      } else {
+        return PushFlags::PassThrough;
+      }
+    });
 }
 
 void dce(Env& env, const bc::RetC&)  { pop(env); readDtorLocs(env); }
@@ -779,11 +920,13 @@ void dce(Env& env, const bc::IncDecL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
                          readCouldHaveSideEffects(oldTy);
-  auto const u1      = push(env);
-  if (!isLocLive(env, op.loc1) && !effects && allUnused(u1)) {
-    return markSetDead(env, u1.second);
-  }
-  addLocGen(env, op.loc1);
+  push(env, [&] (const UseInfo& ui) {
+      if (!isLocLive(env, op.loc1) && !effects && allUnused(ui)) {
+        return PushFlags::MarkDead;
+      }
+      addLocGen(env, op.loc1);
+      return PushFlags::MarkLive;
+    });
 }
 
 /*
@@ -797,12 +940,15 @@ void dce(Env& env, const bc::SetOpL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
                          readCouldHaveSideEffects(oldTy);
-  if (!isLocLive(env, op.loc1) && !effects) {
-    popCond(env, push(env));
-  } else {
-    push(env);
-    pop(env);
-  }
+
+  push(env, [&] (const UseInfo& ui) {
+      if (!isLocLive(env, op.loc1) && !effects && allUnused(ui)) {
+        return PushFlags::PassThrough;
+      }
+      pop(env);
+      return PushFlags::MarkLive;
+    });
+
   addLocGen(env, op.loc1);
 }
 
@@ -858,7 +1004,8 @@ dce_visit(const Index& index,
           borrowed_ptr<const php::Block> const blk,
           const State& stateIn,
           std::bitset<kMaxTrackedLocals> locLiveOut,
-          std::bitset<kMaxTrackedLocals> locLiveOutExn) {
+          std::bitset<kMaxTrackedLocals> locLiveOutExn,
+          const folly::Optional<std::vector<UseInfo>>& dceStack) {
   if (!stateIn.initialized) {
     /*
      * Skip unreachable blocks.
@@ -875,24 +1022,27 @@ dce_visit(const Index& index,
   auto const states = locally_propagated_states(index, fa, blk, stateIn);
 
   auto dceState = DceState{ fa };
-  dceState.markedDead.resize(blk->hhbcs.size());
   dceState.liveLocals = locLiveOut;
   dceState.liveSlots.set();
-  dceState.stack.resize(states.back().first.stack.size());
   dceState.usedLocals = locLiveOut;
-  for (auto& s : dceState.stack) {
-    s = UseInfo { Use::Used, InstrIdSet{} };
+
+  if (dceStack) {
+    dceState.stack = *dceStack;
+  } else {
+    dceState.stack.resize(states.back().first.stack.size(),
+                          UseInfo { Use::Used });
   }
   dceState.slotDependentInstrs.resize(states.back().first.clsRefSlots.size());
 
-  for (auto idx = blk->hhbcs.size(); idx-- > 0;) {
+  for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
 
     FTRACE(2, "  == #{} {}\n", idx, show(fa.ctx.func, op));
 
     auto visit_env = Env {
       dceState,
-      idx,
+      op,
+      { blk->id, idx },
       states[idx].first,
       states[idx].second
     };
@@ -958,59 +1108,79 @@ struct DceAnalysis {
   std::bitset<kMaxTrackedLocals> locGen;
   std::bitset<kMaxTrackedLocals> locKill;
   std::bitset<kMaxTrackedLocals> locKillExn;
+  std::vector<UseInfo>           stack;
+  std::set<InstrId>              usedStackSlots;
 };
 
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         borrowed_ptr<php::Block> const blk,
-                        const State& stateIn) {
+                        const State& stateIn,
+                        const folly::Optional<std::vector<UseInfo>>& dceStack) {
   // During this analysis pass, we have to assume everything could be
   // live out, so we set allLive here.  (Later we'll determine the
   // real liveOut sets.)
   auto allLocLive = std::bitset<kMaxTrackedLocals>{};
   allLocLive.set();
   if (auto dceState = dce_visit(index, fa, blk, stateIn,
-                                allLocLive, allLocLive)) {
+                                allLocLive, allLocLive, dceStack)) {
     return DceAnalysis {
       dceState->locGen,
       dceState->locKill,
-      dceState->locKillBeforePEI
+      dceState->locKillBeforePEI,
+      dceState->stack,
+      dceState->usedStackSlots
     };
   }
   return DceAnalysis {};
 }
 
-std::pair<std::bitset<kMaxTrackedLocals>,
-          std::bitset<kMaxTrackedClsRefSlots>>
+void kill_marked_instrs(const php::Func& func, const InstrIdSet& markedDead) {
+  // Replace all dead instructions with nops
+  for (auto const& id : markedDead) {
+    auto const b = borrow(func.blocks[id.blk]);
+    FTRACE(1, "Kill: {}:{} {}\n", id.blk, id.idx, show(func, b->hhbcs[id.idx]));
+    if (b->hhbcs.size() == 1) {
+      // we don't allow empty blocks
+      b->hhbcs[0] = bc::Nop {};
+    } else {
+      b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+    }
+  }
+}
+
+struct DceOptResult {
+  std::bitset<kMaxTrackedLocals> usedLocals;
+  std::bitset<kMaxTrackedClsRefSlots> usedSlots;
+  InstrIdSet markedDead;
+};
+
+DceOptResult
 optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              borrowed_ptr<php::Block> const blk,
              const State& stateIn,
              std::bitset<kMaxTrackedLocals> locLiveOut,
-             std::bitset<kMaxTrackedLocals> locLiveOutExn) {
-  auto const dceState = dce_visit(
+             std::bitset<kMaxTrackedLocals> locLiveOutExn,
+             const folly::Optional<std::vector<UseInfo>>& dceStack) {
+  auto dceState = dce_visit(
     index, fa, blk,
-    stateIn, locLiveOut,
-    locLiveOutExn
+    stateIn,
+    locLiveOut,
+    locLiveOutExn,
+    dceStack
   );
+
   if (!dceState) {
     return {std::bitset<kMaxTrackedLocals>{},
             std::bitset<kMaxTrackedClsRefSlots>{}};
   }
 
-  // Remove all instructions that were marked dead, and replace
-  // instructions that can be replaced with pops but aren't dead.
-  for (auto idx = blk->hhbcs.size(); idx-- > 0;) {
-    if (!dceState->markedDead.test(idx)) continue;
-    blk->hhbcs.erase(begin(blk->hhbcs) + idx);
-  }
-
-  // Blocks must be non-empty.  Make sure we don't change that.
-  if (blk->hhbcs.empty()) {
-    blk->hhbcs.push_back(bc::Nop {});
-  }
-
-  return {dceState->usedLocals, dceState->usedSlots};
+  return {
+    std::move(dceState->usedLocals),
+    std::move(dceState->usedSlots),
+    std::move(dceState->markedDead)
+  };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1138,8 +1308,10 @@ void local_dce(const Index& index,
   // live-out set for the block.
   auto allLocLive = std::bitset<kMaxTrackedLocals>();
   allLocLive.set();
-  optimize_dce(index, ainfo, blk, stateIn,
-               allLocLive, allLocLive);
+  auto const ret = optimize_dce(index, ainfo, blk, stateIn,
+                                allLocLive, allLocLive, folly::none);
+
+  kill_marked_instrs(*ainfo.ctx.func, ret.markedDead);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1166,44 +1338,32 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   }());
 
   /*
-   * Create a DceAnalysis for each block, indexed by rpo id.
-   *
-   * Here we want to pre-compute the transfer function for each block,
-   * so we don't need to visit each instruction repeatedly during the
-   * fixed point computation.  The transfer function is a function of
-   * the set of locals read and killed in the block, and does not
-   * depend on the final live out state, so we can compute it here.
-   */
-  auto blockAnalysis = std::vector<DceAnalysis>{};
-  for (auto& b : ai.rpoBlocks) {
-    FTRACE(2, "block #{}\n", b->id);
-    auto const dinfo = analyze_dce(
-      index,
-      ai,
-      b,
-      ai.bdata[b->id].stateIn
-    );
-    blockAnalysis.push_back(dinfo);
-  }
-
-  /*
-   * States for each block, indexed by RPO id.
+   * States for each block, indexed by block id.
    *
    * The liveOut state is the union of liveIn states of each normal
    * successor, and liveOutExn is the union of liveIn states of each
    * exceptional successor.
+   *
+   * The dceStack is the state of the dceStack at the end of the
+   * block; it contains a UseInfo for each stack slot, which is the
+   * union of the corresponding UseInfo's from the start of the
+   * successor blocks (its folly::none if it has no successor blocks,
+   * or if the successor blocks have not yet been visited).
    */
   struct BlockState {
-    std::bitset<kMaxTrackedLocals> locLiveOut;
-    std::bitset<kMaxTrackedLocals> locLiveOutExn;
+    std::bitset<kMaxTrackedLocals>        locLiveOut;
+    std::bitset<kMaxTrackedLocals>        locLiveOutExn;
+    folly::Optional<std::vector<UseInfo>> dceStack;
   };
-  std::vector<BlockState> blockStates(ai.rpoBlocks.size());
+  std::vector<BlockState> blockStates(ai.ctx.func->blocks.size());
 
   /*
    * Set of block reverse post order ids that still need to be
    * visited.  This is ordered by std::greater, so we'll generally
-   * visit blocks before their predecessors.  (The algorithm doesn't
-   * need this for correctness, but it might make it iterate less.)
+   * visit blocks before their predecessors.  The algorithm does not
+   * depend on this for correctness, but it will reduce iteration, and
+   * the optimality of mergeDceStack depends on visiting at least one
+   * successor prior to visiting any given block.
    *
    * Every block must be visited at least once, so we throw them all
    * in to start.
@@ -1217,6 +1377,65 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   auto const factoredPreds = computeFactoredPreds(ai.rpoBlocks);
 
   /*
+   * Suppose a stack slot isn't used, but it was pushed on two separate
+   * paths, one of which could be killed, but the other can't. We have
+   * to prevent either, so any time we find a non-used stack slot that
+   * can't be killed, we add it to this set (via markUisLive, and the
+   * DceAnalysis).
+   */
+  std::set<StkId> usedStackSlots;
+
+  auto mergeDceStack = [&] (folly::Optional<std::vector<UseInfo>>& stkOut,
+                            const std::vector<UseInfo>& stkIn,
+                            BlockId blk) {
+    if (!stkOut) {
+      stkOut = stkIn;
+      for (uint32_t i = 0; i < stkIn.size(); i++) {
+        auto& out = stkOut.value()[i];
+        if (out.popper.blk == NoBlockId) out.popper = { blk, i };
+        if (usedStackSlots.count({blk, i})) {
+          out.usage = Use::Used;
+          out.toRemove.clear();
+        }
+      }
+      return true;
+    }
+
+    auto ret = false;
+    assert(stkOut->size() == stkIn.size());
+    for (uint32_t i = 0; i < stkIn.size(); i++) {
+      auto& out = stkOut.value()[i];
+      if (out.usage == Use::Used) {
+        continue;
+      }
+      if (stkIn[i].usage == Use::Used ||
+          usedStackSlots.count({blk, i})) {
+        out.usage = Use::Used;
+        out.toRemove.clear();
+        ret = true;
+        continue;
+      }
+      if (out.usage == stkIn[i].usage) {
+        for (auto const& id : stkIn[i].toRemove) {
+          ret |= out.toRemove.insert(id).second;
+        }
+        auto popper = stkIn[i].popper;
+        if (popper.blk == NoBlockId) popper = { blk, i };
+        if (out.popper < stkIn[i].popper) {
+          ret = true;
+          out.popper = stkIn[i].popper;
+        }
+      } else {
+        out.usage = Use::Used;
+        out.toRemove.clear();
+        ret = true;
+      }
+    }
+
+    return ret;
+  };
+
+  /*
    * Iterate on live out states until we reach a fixed point.
    *
    * This algorithm treats the exceptional live-out states differently
@@ -1227,11 +1446,21 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   while (!incompleteQ.empty()) {
     auto const blk = ai.rpoBlocks[incompleteQ.pop()];
 
+    // skip unreachable blocks
+    if (!ai.bdata[blk->id].stateIn.initialized) continue;
+
     FTRACE(2, "block #{}\n", blk->id);
 
-    auto const locLiveOut    = blockStates[rpoId(blk)].locLiveOut;
-    auto const locLiveOutExn = blockStates[rpoId(blk)].locLiveOutExn;
-    auto const transfer      = blockAnalysis[rpoId(blk)];
+    auto const locLiveOut    = blockStates[blk->id].locLiveOut;
+    auto const locLiveOutExn = blockStates[blk->id].locLiveOutExn;
+    auto const transfer      = analyze_dce(
+      index,
+      ai,
+      blk,
+      ai.bdata[blk->id].stateIn,
+      blockStates[blk->id].dceStack
+    );
+
     auto const liveIn        = transfer.locGen |
                                (locLiveOut & ~transfer.locKill) |
                                (locLiveOutExn & ~transfer.locKillExn);
@@ -1249,14 +1478,44 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
               loc_bits_string(ai.ctx.func, transfer.locKillExn),
               loc_bits_string(ai.ctx.func, liveIn));
 
+    /*
+     * If we weren't able to take advantage of any unused entries
+     * on the dceStack that originated from another block, mark
+     * them used to prevent other paths from trying to delete them.
+     *
+     * Also, merge the entries into our global usedStackSlots, to
+     * make sure they always get marked Used.
+     */
+    for (auto const& id : transfer.usedStackSlots) {
+      if (usedStackSlots.insert(id).second) {
+        for (auto& pred : normalPreds[id.blk]) {
+          FTRACE(2, "  {} force-use {}:{}\n", id.blk, pred->id, id.idx);
+          auto& dceStack = blockStates[pred->id].dceStack;
+          if (!dceStack) continue;
+          auto& ui = dceStack.value()[id.idx];
+          if (ui.usage != Use::Used) {
+            ui.toRemove = {};
+            ui.usage = Use::Used;
+            // no need to reprocess *this* block, since this is the
+            // one that reported the problem.
+            if (pred != blk) {
+              incompleteQ.push(rpoId(pred));
+            }
+          }
+        }
+      }
+    }
+
     // Merge the liveIn into the liveOut of each normal predecessor.
     // If the set changes, reschedule that predecessor.
     for (auto& pred : normalPreds[blk->id]) {
       FTRACE(2, "  -> {}\n", pred->id);
-      auto& predState = blockStates[rpoId(pred)].locLiveOut;
+      auto& predState = blockStates[pred->id].locLiveOut;
       auto const oldPredState = predState;
       predState |= liveIn;
-      if (predState != oldPredState) {
+      if (mergeDceStack(blockStates[pred->id].dceStack,
+                        transfer.stack, blk->id) ||
+          predState != oldPredState) {
         incompleteQ.push(rpoId(pred));
       }
     }
@@ -1266,7 +1525,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     // liveOutExn state, so again reschedule if it changes.
     for (auto& pred : factoredPreds[blk->id]) {
       FTRACE(2, "  => {}\n", pred->id);
-      auto& predState = blockStates[rpoId(pred)].locLiveOutExn;
+      auto& predState = blockStates[pred->id].locLiveOutExn;
       auto const oldPredState = predState;
       predState |= liveIn;
       if (predState != oldPredState) {
@@ -1282,19 +1541,32 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
+  InstrIdSet markedDead;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
-    auto const used = optimize_dce(
+    auto ret = optimize_dce(
       index,
       ai,
       b,
       ai.bdata[b->id].stateIn,
-      blockStates[rpoId(b)].locLiveOut,
-      blockStates[rpoId(b)].locLiveOutExn
+      blockStates[b->id].locLiveOut,
+      blockStates[b->id].locLiveOutExn,
+      blockStates[b->id].dceStack
     );
-    usedLocals |= used.first;
-    usedSlots  |= used.second;
+    usedLocals |= ret.usedLocals;
+    usedSlots  |= ret.usedSlots;
+    if (ret.markedDead.size()) {
+      if (!markedDead.size()) {
+        markedDead = std::move(ret.markedDead);
+      } else {
+        for (auto const& id : ret.markedDead) {
+          markedDead.insert(id);
+        }
+      }
+    }
   }
+
+  kill_marked_instrs(*ai.ctx.func, markedDead);
 
   FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);

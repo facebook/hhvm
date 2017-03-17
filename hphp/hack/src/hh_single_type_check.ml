@@ -236,6 +236,7 @@ let parse_options () =
     else mode := x in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let safe_array = ref false in
+  let safe_vector_array = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -311,6 +312,10 @@ let parse_options () =
       Arg.Set safe_array,
       " Enforce array subtyping relationships so that array<T> and array<Tk, \
       Tv> are each subtypes of array but not vice-versa.";
+    "--safe_vector_array",
+      Arg.Set safe_vector_array,
+      " Enforce array subtyping relationships so that array<T> is not a \
+      of array<int, T>.";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -320,6 +325,7 @@ let parse_options () =
   let tcopt = {
     GlobalOptions.default with
       GlobalOptions.tco_safe_array = !safe_array;
+      GlobalOptions.tco_safe_vector_array = !safe_vector_array;
   } in
   { filename = fn;
     mode = !mode;

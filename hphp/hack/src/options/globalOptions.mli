@@ -49,6 +49,19 @@ type t = {
   *)
  tco_safe_array : bool;
 
+ (**
+  * Enforces that a vector-like array may not be used where a hashtable-like
+  * array is required.
+  *
+  * When disabled, Hack assumes the following:
+  *
+  *   array<T> <: array<int, T>
+  *
+  * When enabled, there is no subtyping relationship between array<T> and
+  * array<int, T>.
+  *)
+ tco_safe_vector_array : bool;
+
  (* List of <<UserAttribute>> names expected in the codebase *)
  tco_user_attrs : SSet.t option;
 
@@ -62,12 +75,14 @@ val make :
   tco_assume_php: bool ->
   tco_unsafe_xhp: bool ->
   tco_safe_array: bool ->
+  tco_safe_vector_array: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   po_auto_namespace_map: (string * string) list -> t
 val tco_assume_php : t -> bool
 val tco_unsafe_xhp : t -> bool
 val tco_safe_array : t -> bool
+val tco_safe_vector_array : t -> bool
 val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool

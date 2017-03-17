@@ -12,6 +12,7 @@ type t = {
   tco_assume_php : bool;
   tco_unsafe_xhp : bool;
   tco_safe_array : bool;
+  tco_safe_vector_array : bool;
   tco_user_attrs : SSet.t option;
   tco_experimental_features : SSet.t;
   po_auto_namespace_map : (string * string) list;
@@ -35,6 +36,7 @@ let default = {
  tco_assume_php = true;
  tco_unsafe_xhp = false;
  tco_safe_array = false;
+ tco_safe_vector_array = false;
  tco_user_attrs = None;
  (** Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
@@ -59,12 +61,14 @@ let make_permissive tcopt =
 let make ~tco_assume_php
          ~tco_unsafe_xhp
          ~tco_safe_array
+         ~tco_safe_vector_array
          ~tco_user_attrs
          ~tco_experimental_features
          ~po_auto_namespace_map = {
                    tco_assume_php;
                    tco_unsafe_xhp;
                    tco_safe_array;
+                   tco_safe_vector_array;
                    tco_user_attrs;
                    tco_experimental_features;
                    po_auto_namespace_map;
@@ -72,6 +76,7 @@ let make ~tco_assume_php
 let tco_assume_php t = t.tco_assume_php
 let tco_unsafe_xhp t = t.tco_unsafe_xhp
 let tco_safe_array t = t.tco_safe_array
+let tco_safe_vector_array t = t.tco_safe_vector_array
 let tco_user_attrs t = t.tco_user_attrs
 let tco_allowed_attribute t name = match t.tco_user_attrs with
  | None -> true

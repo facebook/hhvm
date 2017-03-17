@@ -42,6 +42,7 @@ let () =
     ~tco_assume_php: false
     ~tco_unsafe_xhp: false
     ~tco_safe_array: false
+    ~tco_safe_vector_array: false
     ~tco_user_attrs: None
     ~tco_experimental_features: GlobalOptions.tco_experimental_all
     ~po_auto_namespace_map:

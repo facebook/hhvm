@@ -1176,8 +1176,7 @@ TypedValue HHVM_FUNCTION(array_unshift,
 
 Variant array_values(const Variant& input) {
   auto const cell = *input.asCell();
-  if (isArrayLikeType(cell.m_type) &&
-      cell.m_data.parr->hasPackedLayout()) {
+  if (isArrayType(cell.m_type) && cell.m_data.parr->isVectorData()) {
     return input;
   }
 

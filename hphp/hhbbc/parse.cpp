@@ -552,6 +552,10 @@ void populate_block(ParseUnitState& puState,
 #define O(opcode, imms, inputs, outputs, flags)         \
   case Op::opcode:                                      \
     {                                                   \
+      if (Op::opcode == Op::AssertRATL ||               \
+          Op::opcode == Op::AssertRATStk) {             \
+        break;                                          \
+      }                                                 \
       auto b = Bytecode {};                             \
       b.op = Op::opcode;                                \
       b.srcLoc = srcLocIx;                              \

@@ -144,8 +144,15 @@ void in(ISS& env, const bc::Dup& op) {
   push(env, std::move(val));
 }
 
-void in(ISS& env, const bc::AssertRATL&)     { nothrow(env); }
-void in(ISS& env, const bc::AssertRATStk&)   { nothrow(env); }
+void in(ISS& env, const bc::AssertRATL& op) {
+  mayReadLocal(env, op.loc1);
+  nothrow(env);
+}
+
+void in(ISS& env, const bc::AssertRATStk&) {
+  nothrow(env);
+}
+
 void in(ISS& env, const bc::BreakTraceHint&) { nothrow(env); }
 
 void in(ISS& env, const bc::Box&) {

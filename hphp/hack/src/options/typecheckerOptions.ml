@@ -22,4 +22,6 @@ let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_optional_shape_field =
   GlobalOptions.tco_experimental_optional_shape_field
+let experimental_darray_and_varray =
+  GlobalOptions.tco_experimental_darray_and_varray
 let experimental_all = GlobalOptions.tco_experimental_all

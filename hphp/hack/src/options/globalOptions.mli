@@ -91,4 +91,5 @@ val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string
 val tco_experimental_optional_shape_field : string
+val tco_experimental_darray_and_varray : string
 val tco_experimental_all : SSet.t

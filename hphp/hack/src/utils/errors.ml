@@ -399,6 +399,13 @@ let error_code_to_string = Common.error_code_to_string
  *)
 (*****************************************************************************)
 
+(* Errors in the Temporary range are for errors that will disappear in the
+ * future. *)
+module Temporary = struct
+  let darray_not_supported = 1
+  let varray_not_supported = 2
+end
+
 module Parsing = struct
   let fixme_format                          = 1001 (* DONT MODIFY!!!! *)
   let parsing_error                         = 1002 (* DONT MODIFY!!!! *)
@@ -692,6 +699,16 @@ let unimplemented_feature pos msg =
 
 let experimental_feature pos msg =
   add 0 pos ("Cannot use experimental feature: " ^ msg)
+
+(*****************************************************************************)
+(* Temporary errors. *)
+(*****************************************************************************)
+
+let darray_not_supported pos =
+  add Temporary.darray_not_supported pos "darray is not supported."
+
+let varray_not_supported pos =
+  add Temporary.varray_not_supported pos "varray is not supported."
 
 (*****************************************************************************)
 (* Parsing errors. *)

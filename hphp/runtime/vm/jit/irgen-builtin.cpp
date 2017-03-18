@@ -551,6 +551,13 @@ SSATmp* opt_foldable(IRGS& env,
                      uint32_t numNonDefaultArgs) {
   if (!func->isFoldable()) return nullptr;
 
+  const Class* cls = nullptr;
+  if (func->isMethod()) {
+    if (!params.thiz || !func->isStatic()) return nullptr;
+    cls = params.thiz->type().clsSpec().exactCls();
+    if (!cls) return nullptr;
+  }
+
   ArrayData* variadicArgs = nullptr;
   uint32_t numVariadicArgs = 0;
   if (numNonDefaultArgs > func->numNonVariadicParams()) {
@@ -603,9 +610,11 @@ SSATmp* opt_foldable(IRGS& env,
     RID().setJitFolding(true);
     SCOPE_EXIT{ RID().setJitFolding(false); };
 
-    auto retVal = g_context->invokeFunc(func, args.toArray(), nullptr, nullptr,
-                          nullptr, nullptr, ExecutionContext::InvokeNormal,
-                          !func->unit()->useStrictTypes());
+    auto retVal = g_context->invokeFunc(func, args.toArray(),
+                                        nullptr, const_cast<Class*>(cls),
+                                        nullptr, nullptr,
+                                        ExecutionContext::InvokeNormal,
+                                        !func->unit()->useStrictTypes());
     SCOPE_EXIT { tvRefcountedDecRef(retVal); };
     assertx(tvIsPlausible(retVal));
 
@@ -665,9 +674,9 @@ SSATmp* opt_foldable(IRGS& env,
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedFCallBuiltin(IRGS& env,
-                           const Func* func,
-                           const ParamPrep& params,
-                           uint32_t numNonDefault) {
+                              const Func* func,
+                              const ParamPrep& params,
+                              uint32_t numNonDefault) {
   auto const result = [&]() -> SSATmp* {
 
     auto const fname = func->name();

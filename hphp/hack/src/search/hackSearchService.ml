@@ -126,6 +126,35 @@ module WorkerApi = struct
         end in
     SS.WorkerApi.update fn trie fuzzy auto
 
+  (* Update from the full fileInfo object: get all data except class kind *)
+  let update_from_fileinfo fn (info : FileInfo.t) =
+    let { FileInfo.funs; typedefs; consts; classes; _} = info in
+    let fuzzy, trie, auto = List.fold funs
+        ~init:(SS.Fuzzy.TMap.empty, [], [])
+        ~f:begin fun (f, t, a) id ->
+            let f, t = update_defs id Function f t in
+            f, t, add_autocomplete_term id Function a
+        end in
+
+    let fuzzy, trie, auto = List.fold classes
+        ~init:(fuzzy, trie, auto)
+        ~f:begin fun  (f, t, a) id ->
+            let f, t = update_defs id (Class None) f t in
+            f, t, add_autocomplete_term id (Class None) a
+        end in
+    let fuzzy, trie, auto = List.fold typedefs
+        ~init:(fuzzy, trie, auto)
+        ~f:begin fun  (f, t, _a) id  ->
+          let f, t = update_defs id Typedef f t in
+          f, t, _a
+        end in
+    let fuzzy, trie, auto = List.fold consts
+        ~init:(fuzzy, trie, auto)
+        ~f:begin fun (f, t, _a) id ->
+          let f, t = update_defs id Constant f t in
+          f, t, _a
+        end in
+    SS.WorkerApi.update fn trie fuzzy auto
 
   (* Called by a worker after the file is parsed *)
   let update fn ast =

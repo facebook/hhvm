@@ -58,6 +58,8 @@ and hint_ =
   | Hmixed
   | Habstr of string
   | Harray of hint option * hint option
+  | Hdarray of hint * hint
+  | Hvarray of hint
   | Hprim of tprim
   | Hthis
 
@@ -162,6 +164,8 @@ and class_id =
 and expr = Annotation.t * expr_
 and expr_ =
   | Array of afield list
+  | Darray of (expr * expr) list
+  | Varray of expr list
   (* This is more abstract than the AST but forgets evaluation order *)
   | Shape of expr ShapeMap.t
   | ValCollection of vc_kind * expr list
@@ -391,6 +395,8 @@ let expr_to_string expr =
   match expr with
   | Any -> "Any"
   | Array _ -> "Array"
+  | Darray _ -> "Darray"
+  | Varray _ -> "Varray"
   | Shape _ -> "Shape"
   | ValCollection _ -> "ValCollection"
   | KeyValCollection _ -> "KeyValCollection"
@@ -644,6 +650,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     match e with
    | Any         -> acc
    | Array afl   -> this#on_array acc afl
+   | Darray fieldl -> List.fold_left this#on_field acc fieldl
+   | Varray el   -> List.fold_left this#on_expr acc el
    | Shape sh    -> this#on_shape acc sh
    | True        -> this#on_true acc
    | False       -> this#on_false acc

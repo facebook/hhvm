@@ -129,6 +129,12 @@ module CheckFunctionType = struct
     | _, Array afl ->
         List.iter afl (afield f_type);
         ()
+    | _, Darray afl ->
+        List.iter afl (expr2 f_type);
+        ()
+    | _, Varray afl ->
+        List.iter afl (expr f_type);
+        ()
     | _, ValCollection (_, el) ->
         List.iter el (expr f_type);
         ()
@@ -295,6 +301,11 @@ and hint_ env p = function
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
       maybe hint env ty2
+  | Hdarray (ty1, ty2) ->
+      hint env ty1;
+      hint env ty2
+  | Hvarray ty ->
+      hint env ty
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
@@ -517,22 +528,18 @@ and check_class_property_initialization prop =
               rec_assert_static_literal expr1;
               rec_assert_static_literal expr2;
         end
+      | Darray fl -> List.iter fl assert_static_literal_for_field_list
+      | Varray el -> List.iter el rec_assert_static_literal
       | List el
       | Expr_list el
       | String2 el
-      | ValCollection (_, el) ->
-        List.iter el begin function e ->
-          rec_assert_static_literal e;
-        end
+      | ValCollection (_, el) -> List.iter el rec_assert_static_literal
       | Pair (expr1, expr2)
       | Binop (_, expr1, expr2) ->
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
       | KeyValCollection (_, field_list) ->
-        List.iter field_list begin function (expr1, expr2) ->
-          rec_assert_static_literal expr1;
-          rec_assert_static_literal expr2;
-        end
+        List.iter field_list assert_static_literal_for_field_list
       | Cast (_, e)
       | Unop (_, e) ->
         rec_assert_static_literal e;
@@ -549,6 +556,9 @@ and check_class_property_initialization prop =
       | Call _ | Special_func _ | Yield_break | Yield _
       | Await _ | InstanceOf _ | New _ | Efun _ | Xml _ | Assert _ | Clone _ ->
         Errors.class_property_only_static_literal (fst e)
+    and assert_static_literal_for_field_list (expr1, expr2) =
+      rec_assert_static_literal expr1;
+      rec_assert_static_literal expr2
     in
     rec_assert_static_literal e;
   end
@@ -615,6 +625,11 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Harray (ty1, ty2) ->
         maybe_check_tparams ty1;
         maybe_check_tparams ty2
+    | Hdarray (ty1, ty2) ->
+        check_tparams ty1;
+        check_tparams ty2
+    | Hvarray ty ->
+        check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
     | Hoption ty_ -> check_tparams ty_
     | Hfun (tyl, _, ty_) ->
@@ -800,6 +815,12 @@ and expr_ env = function
       ()
   | Array afl ->
       List.iter afl (afield env);
+      ()
+  | Darray fdl ->
+      List.iter fdl (field env);
+      ()
+  | Varray el ->
+      List.iter el (expr env);
       ()
   | ValCollection (_, el) ->
       List.iter el (expr env);

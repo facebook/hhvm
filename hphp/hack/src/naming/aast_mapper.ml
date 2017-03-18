@@ -32,6 +32,8 @@ struct
   let e' =
     match e with
     | S.Array afl -> T.Array (List.map afl map_afield)
+    | S.Darray fl -> T.Darray (List.map fl map_field)
+    | S.Varray el -> T.Varray (map_exprl f el)
     | S.Shape sm -> T.Shape (ShapeMap.map (map_expr f) sm)
     | S.ValCollection (k, el) -> T.ValCollection (k, map_exprl f el)
     | S.KeyValCollection (k, fl) ->

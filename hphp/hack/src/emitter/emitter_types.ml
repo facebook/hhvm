@@ -58,6 +58,8 @@ let rec fmt_hint (_, h) =
   | N.Harray (Some h1, Some h2) ->
     "array<" ^ fmt_hint h1 ^ ", " ^ fmt_hint h2 ^ ">"
   | N.Harray _ -> C.bug "bogus array"
+  | N.Hdarray (h1, h2) -> "darray<" ^ fmt_hint h1 ^ ", " ^ fmt_hint h2 ^ ">"
+  | N.Hvarray h -> "varray<" ^ fmt_hint h ^ ">"
   (* We have to say Nast.Hshape instead of N.Hshape because otherwise
    * OCaml 4.01 reports a type error when trying to call
    * C.extract_shape_fields. asdf. *)
@@ -108,7 +110,11 @@ let rec hint_info ~tparams (_, h) =
       Some (C.fmt_name s), ["hh_type"]
 
   (* shapes and tuples are just arrays *)
-  | N.Harray (_, _) | N.Hshape _ |  N.Htuple _ -> Some "array", ["hh_type"]
+  | N.Harray (_, _)
+  | N.Hdarray (_, _)
+  | N.Hvarray _
+  | N.Hshape _
+  | N.Htuple _ -> Some "array", ["hh_type"]
 
   | N.Hoption t ->
     let name, flags = hint_info ~tparams t in

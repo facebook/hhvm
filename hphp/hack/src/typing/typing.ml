@@ -999,6 +999,16 @@ and expr_
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
           (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
 
+  | Darray l ->
+    (* TODO(tingley): Enforce stricter typing requirements for darray *)
+    let e = Array (List.map ~f:(fun (e1, e2) -> AFkvalue (e1, e2)) l) in
+    expr_ ~in_cond ~valkind env (p, e)
+
+  | Varray el ->
+    (* TODO(tingley): Enforce stricter typing requirements for varray *)
+    let e = Array (List.map ~f:(fun e -> AFvalue e) el) in
+    expr_ ~in_cond ~valkind env (p, e)
+
   | ValCollection (kind, el) ->
       let env, x = Env.fresh_unresolved_type env in
       let env, tel, tyl = exprs env el in

@@ -618,6 +618,14 @@ and emit_expr env (pos, expr_ as expr) =
     in
     List.fold_left ~f:emit_afield ~init:env afields
 
+  | Darray fields ->
+    let expr = Array (List.map ~f:(fun (e1, e2) -> AFkvalue (e1, e2)) fields) in
+    emit_expr env (pos, expr)
+
+  | Varray el ->
+    let expr = Array (List.map ~f:(fun e -> AFvalue e) el) in
+    emit_expr env (pos, expr)
+
   | Clone e ->
     let env = emit_expr env e in
     emit_Clone env

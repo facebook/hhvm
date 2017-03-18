@@ -54,6 +54,8 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Htuple hl             -> this#on_tuple  acc (hl:Nast.hint list)
     | Habstr x              -> this#on_abstr  acc x
     | Harray (hopt1, hopt2) -> this#on_array  acc hopt1 hopt2
+    | Hdarray (h1, h2)      -> this#on_array  acc (Some h1) (Some h2)
+    | Hvarray h             -> this#on_array  acc (Some h) None
     | Hprim p               -> this#on_prim   acc p
     | Hoption h             -> this#on_option acc h
     | Hfun (hl, b, h)       -> this#on_fun    acc hl b h
@@ -111,7 +113,17 @@ module CheckInstantiability = struct
 
   let validate_classname = function
     | _, (Happly _ | Hthis | Hany | Hmixed | Habstr _ | Haccess _) -> ()
-    | p, (Htuple _ | Harray _ | Hprim _ | Hoption _ | Hfun _ | Hshape _) ->
+    | p,
+      (
+        Htuple _
+        | Harray _
+        | Hdarray _
+        | Hvarray _
+        | Hprim _
+        | Hoption _
+        | Hfun _
+        | Hshape _
+      ) ->
         Errors.invalid_classname p
 
   let visitor env = object(this)

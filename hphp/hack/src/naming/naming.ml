@@ -859,6 +859,27 @@ module Make (GetLocals : GetLocals) = struct
             N.Harray (Some (hint env key_), Some (hint env val_))
           | _ -> Errors.too_many_type_arguments p; N.Hany
         )
+      | nm when nm = SN.Typehints.darray ->
+        let darray_and_varray_allowed =
+          TypecheckerOptions.experimental_feature_enabled
+            (fst env).tcopt
+            TypecheckerOptions.experimental_darray_and_varray in
+        if not darray_and_varray_allowed then Errors.darray_not_supported p;
+        Some (match hl with
+          | []
+          | [_] -> Errors.too_few_type_arguments p; N.Hany
+          | [key_; val_] -> N.Hdarray (hint env key_, hint env val_)
+          | _ -> Errors.too_many_type_arguments p; N.Hany)
+      | nm when nm = SN.Typehints.varray ->
+        let darray_and_varray_allowed =
+          TypecheckerOptions.experimental_feature_enabled
+            (fst env).tcopt
+            TypecheckerOptions.experimental_darray_and_varray in
+        if not darray_and_varray_allowed then Errors.varray_not_supported p;
+        Some (match hl with
+          | [] -> Errors.too_few_type_arguments p; N.Hany
+          | [val_] -> N.Hvarray (hint env val_)
+          | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.integer ->
         Errors.primitive_invalid_alias p nm SN.Typehints.int;
         Some (N.Hprim N.Tint)
@@ -1728,13 +1749,8 @@ module Make (GetLocals : GetLocals) = struct
   and expr_ env p = function
     | Array l -> N.Array (List.map l (afield env))
     | Darray l ->
-      (* TODO(tingley): Map this into a Nast version of Darray. *)
-      let afield env (e1, e2) = afield env (AFkvalue (e1, e2)) in
-      N.Array (List.map l (afield env))
-    | Varray l ->
-      (* TODO(tingley): Map this into a Nast version of Varray. *)
-      let afield env e = afield env (AFvalue (e)) in
-      N.Array (List.map l (afield env))
+      N.Darray (List.map l (fun (e1, e2) -> expr env e1, expr env e2))
+    | Varray l -> N.Varray (List.map l (expr env))
     | Collection (id, l) -> begin
       let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
       match cn with

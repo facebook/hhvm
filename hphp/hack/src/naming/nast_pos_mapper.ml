@@ -17,6 +17,8 @@ let rec expr f (p, e) =
 and expr_ f = function
   | Any -> Any
   | Array afl -> Array (List.map afl (afield f))
+  | Darray fl -> Darray (List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
+  | Varray el -> Varray (List.map el (expr f))
   | Shape sh -> Shape (shape f sh)
   | True -> True
   | False -> False
@@ -120,6 +122,9 @@ and hint_ f = function
     Habstr s
   | Harray (h1, h2) ->
     Harray (Option.map h1 (hint f), Option.map h2 (hint f))
+  | Hdarray (h1, h2) ->
+    Hdarray (hint f h1, hint f h2)
+  | Hvarray h -> Hvarray (hint f h)
   | Hprim tprim -> Hprim tprim
   | Hoption h -> Hoption (hint f h)
   | Hfun (hl, b, h) ->

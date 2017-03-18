@@ -348,7 +348,11 @@ void retranslateAll() {
 
     Logger::Info("retranslateAll: finished retranslating all optimized "
                  "translations!");
-    discardProfData();
+    // The ReusableTC mode assumes that ProfData is never freed, so don't
+    // discard ProfData in this mode.
+    if (!RuntimeOption::EvalEnableReusableTC) {
+      discardProfData();
+    }
   }
 }
 

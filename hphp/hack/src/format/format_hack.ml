@@ -2356,9 +2356,9 @@ and rhs_assign env =
         Try.one_line env
           (fun env -> space env; expr env)
           (fun env -> newline env; right env expr)
-    | Tword when
-          !(env.last_str) = "array" || !(env.last_str) = "shape" ||
-          !(env.last_str) = "tuple" ->
+    | Tword when match !(env.last_str) with
+          | "array" | "darray" | "varray" | "shape" | "tuple" -> true
+          | _ -> false ->
         back env;
         space env; expr env
     | Tword when next_token env = Tlcb ->
@@ -2737,7 +2737,7 @@ and expr_atomic env =
 and expr_atomic_word env last_tok = function
   | "true" | "false" | "null" ->
       last_token env
-  | "array" | "shape" | "tuple" as v ->
+  | "array" | "darray" | "varray" | "shape" | "tuple" as v ->
       out v env;
       expect "(" env;
       right env array_body;

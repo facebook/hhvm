@@ -387,6 +387,14 @@ class virtual ['self] iter =
       self#on_Pos_t env c0;
       self#on_expr_ env c1;
     method on_Array = self#on_list self#on_afield
+    method on_Darray env c0 =
+      begin
+        self#on_list
+          (fun env (c0, c1) ->
+               self#on_expr env c0;
+               self#on_expr env c1; ()) env c0
+      end;
+    method on_Varray = self#on_list self#on_expr
     method on_Shape env c0 =
       begin
         self#on_list
@@ -487,6 +495,8 @@ class virtual ['self] iter =
       self#on_expr env c1;
     method on_expr_ env = function
       | Array c0 -> self#on_Array env c0
+      | Darray c0 -> self#on_Darray env c0
+      | Varray c0 -> self#on_Varray env c0
       | Shape c0 -> self#on_Shape env c0
       | Collection (c0, c1) -> self#on_Collection env c0 c1
       | Null -> self#on_Null env

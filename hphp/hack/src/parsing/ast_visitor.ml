@@ -40,6 +40,7 @@ class type ['a] ast_visitor_type = object
   method on_clone : 'a -> expr -> 'a
   method on_collection: 'a -> id -> afield list -> 'a
   method on_continue : 'a -> Pos.t -> 'a
+  method on_darray : 'a -> (expr * expr) list -> 'a
   method on_do : 'a -> block -> expr -> 'a
   method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
@@ -90,6 +91,7 @@ class type ['a] ast_visitor_type = object
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_unop : 'a -> uop -> expr -> 'a
   method on_unsafe: 'a -> 'a
+  method on_varray : 'a -> expr list -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_xml : 'a -> id -> (pstring * expr) list -> expr list -> 'a
   method on_yield : 'a -> afield -> 'a
@@ -251,6 +253,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
    | Lfun f          -> this#on_lfun acc f
    | Import (ifv, e) -> this#on_import acc ifv e
    | Array afl   -> this#on_array acc afl
+   | Darray fl -> this#on_darray acc fl
+   | Varray el -> this#on_varray acc el
    | Shape sh    -> this#on_shape acc sh
    | True        -> this#on_true acc
    | False       -> this#on_false acc
@@ -288,6 +292,15 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_array acc afl =
     List.fold_left this#on_afield acc afl
+
+  method on_darray acc fl =
+    let on_field acc (e1, e2) =
+      let acc = this#on_expr acc e1 in
+      this#on_expr acc e2 in
+    List.fold_left on_field acc fl
+
+  method on_varray acc el =
+    List.fold_left this#on_expr acc el
 
   method on_shape acc sfnel =
     List.fold_left begin fun acc (sfn, e) ->

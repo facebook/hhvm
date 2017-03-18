@@ -139,6 +139,14 @@ object(this)
    | Lfun f          -> Lfun (this#on_fun_ env f)
    | Import (ifv, e) -> Import (ifv, list_to_single this#on_expr env e)
    | Array afl   -> Array (handle_list this#on_afield env afl)
+   | Darray afl ->
+     let on_darray env (e1, e2) =
+       list_to_single this#on_expr env e1,
+       list_to_single this#on_expr env e2 in
+     Darray (handle_list on_darray env afl)
+   | Varray afl ->
+     let on_varray env e = list_to_single this#on_expr env e in
+     Varray (handle_list on_varray env afl)
    | Shape sh    -> Shape (handle_list this#on_shape env sh)
    | True        -> True
    | False       -> False

@@ -18,6 +18,11 @@ class virtual ['b] reduce :
         on_Alias : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_Amp : 'c -> 'd;
         on_Array : 'c -> Ast_visitors_ancestors.afield list -> 'd;
+        on_Darray : 'c ->
+                    (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr)
+                    list ->
+                    'd;
+        on_Varray : 'c -> Ast_visitors_ancestors.expr list -> 'd;
         on_Array_get : 'c ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr option -> 'd;
@@ -314,6 +319,11 @@ class virtual ['b] reduce :
     method on_Alias : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_Amp : 'c -> 'd
     method on_Array : 'c -> Ast_visitors_ancestors.afield list -> 'd
+    method on_Darray :
+      'c ->
+      (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr) list ->
+      'd
+    method on_Varray : 'c -> Ast_visitors_ancestors.expr list -> 'd
     method on_Array_get :
       'c ->
       Ast_visitors_ancestors.expr -> Ast_visitors_ancestors.expr option -> 'd

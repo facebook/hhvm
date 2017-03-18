@@ -164,9 +164,10 @@ let rec is_collection_expr_ = function
   | Cast ((_, Happly ((_, "object"), [])), _) | Eif _ | NullCoalesce _ | Call _
   | Unsafeexpr _ | Expr_list _ | New _ -> None
   | Binop ((Eq None), _, (_, e)) | Unop (Uref, (_, e)) -> is_collection_expr_ e
-  | Array _  | Shape _ | Null | True | False | Class_const _ | Int _
-  | Float _ | String _ | String2 _ | Yield_break | List _  | InstanceOf _
-  | Efun _ | Lfun _ | Xml _ | Import _ | Id _ | Id_type_arguments _
+  | Array _  | Darray _ | Varray _ | Shape _ | Null | True | False
+  | Class_const _ | Int _ | Float _ | String _ | String2 _ | Yield_break
+  | List _  | InstanceOf _ | Efun _ | Lfun _ | Xml _ | Import _ | Id _
+  | Id_type_arguments _
    (* await returns an awaitable *)
   | Await _ | Unop _ | Binop _ | Pipe _ | Dollardollar
   | Cast _ -> Some false

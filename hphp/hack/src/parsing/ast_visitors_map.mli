@@ -32,6 +32,15 @@ class virtual ['c] map :
         on_Array : 'd ->
                    Ast_visitors_ancestors.afield list ->
                    Ast_visitors_ancestors.expr_;
+        on_Darray : 'd ->
+                   (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr)
+                   list ->
+                   Ast_visitors_ancestors.expr_;
+
+        on_Varray : 'd ->
+                   Ast_visitors_ancestors.expr list ->
+                   Ast_visitors_ancestors.expr_;
+
         on_Array_get : 'd ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr option ->
@@ -574,6 +583,13 @@ class virtual ['c] map :
     method on_Array :
       'd ->
       Ast_visitors_ancestors.afield list -> Ast_visitors_ancestors.expr_
+    method on_Darray :
+      'd ->
+      (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr) list ->
+      Ast_visitors_ancestors.expr_
+    method on_Varray :
+      'd ->
+      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
     method on_Array_get :
       'd ->
       Ast_visitors_ancestors.expr ->

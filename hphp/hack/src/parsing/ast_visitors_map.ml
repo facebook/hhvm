@@ -528,6 +528,16 @@ class virtual ['self] map =
       let r1 = self#on_expr_ env c1 in (r0, r1)
     method on_Array env c0 =
       let r0 = self#on_list self#on_afield env c0 in Array r0
+    method on_Darray env c0 =
+      let r0 =
+        self#on_list
+          (fun env (c0, c1) ->
+               let r0 = self#on_expr env c0 in
+               let r1 = self#on_expr env c1 in (r0, r1)) env c0
+      in
+      Darray r0
+    method on_Varray env c0 =
+      let r0 = self#on_list self#on_expr env c0 in Varray r0
     method on_Shape env c0 =
       let r0 =
         self#on_list
@@ -649,6 +659,8 @@ class virtual ['self] map =
     method on_expr_ env this =
       match this with
       | Array c0 -> self#on_Array env c0
+      | Darray c0 -> self#on_Darray env c0
+      | Varray c0 -> self#on_Varray env c0
       | Shape c0 -> self#on_Shape env c0
       | Collection (c0, c1) -> self#on_Collection env c0 c1
       | Null -> self#on_Null env

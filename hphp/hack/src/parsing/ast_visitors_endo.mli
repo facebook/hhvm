@@ -46,6 +46,15 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.expr_ ->
                    Ast_visitors_ancestors.afield list ->
                    Ast_visitors_ancestors.expr_;
+        on_Darray : 'c ->
+                   Ast_visitors_ancestors.expr_ ->
+                   (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr)
+                   list ->
+                   Ast_visitors_ancestors.expr_;
+        on_Varray : 'c ->
+                   Ast_visitors_ancestors.expr_ ->
+                   Ast_visitors_ancestors.expr list ->
+                   Ast_visitors_ancestors.expr_;
         on_Array_get : 'c ->
                        Ast_visitors_ancestors.expr_ ->
                        Ast_visitors_ancestors.expr ->
@@ -784,6 +793,15 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.expr_ ->
       Ast_visitors_ancestors.afield list -> Ast_visitors_ancestors.expr_
+    method on_Darray :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr) list ->
+      Ast_visitors_ancestors.expr_
+    method on_Varray :
+      'c ->
+      Ast_visitors_ancestors.expr_ ->
+      Ast_visitors_ancestors.expr list -> Ast_visitors_ancestors.expr_
     method on_Array_get :
       'c ->
       Ast_visitors_ancestors.expr_ ->

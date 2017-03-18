@@ -734,6 +734,8 @@ let rec u_program v = u_of_list_spc u_def v
     let todo_with s = u_todo ("Parens " ^ s) (fun () -> res) in
     match expr_ with
       | Array _
+      | Darray _
+      | Varray _
       | Null
       | True
       | False
@@ -776,6 +778,9 @@ let rec u_program v = u_of_list_spc u_def v
   and u_expr_ =
     function
     | Array v2 -> StrList [Str "array"; u_of_list_parens_comma u_afield v2]
+    | Darray v2 ->
+      StrList [Str "darray"; u_of_list_parens_comma u_expr_mapping v2]
+    | Varray v2 -> StrList [Str "varray"; u_of_list_parens_comma u_expr v2]
     | Shape v2 ->
         u_todo "Shape"
           (fun () ->
@@ -934,10 +939,12 @@ let rec u_program v = u_of_list_spc u_def v
     let str_id = u_id id
     and str_ref = if is_ref then Str "&" else StrBlank
     in StrList [str_ref; str_id]
+  and u_expr_mapping (kExpr, vExpr) =
+    StrWords [u_expr kExpr; Str "=>"; u_expr vExpr]
   and u_afield =
     function
     | AFvalue v2 -> u_expr v2
-    | AFkvalue (kExpr, vExpr) -> StrWords [u_expr kExpr; Str "=>"; u_expr vExpr]
+    | AFkvalue (kExpr, vExpr) -> u_expr_mapping (kExpr, vExpr)
   and u_bop e1 e2 bop =
       let bop_str = function
         | Plus -> Str "+"

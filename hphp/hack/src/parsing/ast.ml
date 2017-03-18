@@ -261,6 +261,8 @@ and block = stmt list
 and expr = Pos.t * expr_
 and expr_ =
   | Array of afield list
+  | Varray of expr list
+  | Darray of (expr * expr) list
   | Shape of (shape_field_name * expr) list
   | Collection of id * afield list
   | Null

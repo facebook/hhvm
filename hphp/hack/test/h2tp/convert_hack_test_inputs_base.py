@@ -177,6 +177,9 @@ UNSUPPORTED_FILES_CONVERTER = {
     "Unsupported collection type StableMap (Other[0])": [
         "collection_literals.php",
     ],
+    "Unsupported collection types darray or varray (Other[0])": [
+        "array/*.php",
+    ],
     "Pipe operator currently not supported (Other[0])": [
         "pipe_operator.php",
         "pipe_operator_precedence.php",

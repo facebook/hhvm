@@ -242,7 +242,7 @@ let rec check_lvalue env = function
       error_at env pos
         "Tuple cannot be used as an lvalue. Maybe you meant List?"
   | _, List el -> List.iter el (check_lvalue env)
-  | pos, (Array _ | Shape _ | Collection _
+  | pos, (Array _ | Darray _ | Varray _ | Shape _ | Collection _
   | Null | True | False | Id _ | Clone _ | Id_type_arguments _
   | Class_const _ | Call _ | Int _ | Float _
   | String _ | String2 _ | Yield _ | Yield_break
@@ -2949,6 +2949,10 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       pos, Null
   | "array" ->
       expr_array env pos
+  | "darray" ->
+      expr_darray env pos
+  | "varray" ->
+      expr_varray env pos
   | "shape" ->
       expr_shape env pos
   | "new" ->
@@ -3740,6 +3744,21 @@ and heredoc_end (pos, tag_value as tag) env =
 (* Arrays *)
 (*****************************************************************************)
 
+(*  Ideally, we would factor out the common logic in the following functions to
+    take advantage of a function that looks like:
+
+      expr_array_generic
+        (env : env)
+        (pos : Pos.t)
+        (extract_field_function : env -> 'a)
+          : 'a list
+
+    Unfortunately, because we are using imperative operations on the mutable
+    env, this is not possible. Though expr_array_generic looks like it would be
+    polymorphic, it would only be *weakly polymorphic*, which is to say that it
+    can be used with any single type. Read more about Value Restriction from
+    Real World OCaml at https://fburl.com/side-effects-and-weak-polymorphism. *)
+
 and expr_array env pos =
   let fields = array_field_list env in
   pos, Array fields
@@ -3779,6 +3798,69 @@ and array_field env =
   | _ ->
       L.back env.lb;
       AFvalue e1
+
+and expr_darray env pos =
+  let darray_and_varray_allowed =
+    TypecheckerOptions.experimental_feature_enabled
+      env.popt
+      TypecheckerOptions.experimental_darray_and_varray in
+  if not darray_and_varray_allowed then Errors.darray_not_supported pos;
+  expect env Tlp;
+  pos, Darray (darray_field_list_remain env [])
+
+and darray_field_list_remain env acc =
+  match L.token env.file env.lb with
+  | x when x = Trp -> List.rev acc
+  | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let fd = darray_field env in
+      let acc = fd :: acc in
+      match L.token env.file env.lb with
+      | x when x = Trp ->
+          List.rev acc
+      | Tcomma ->
+          if !(env.errors) != error_state
+          then List.rev acc
+          else darray_field_list_remain env acc
+      | _ -> error_expect env ")"; [fd]
+
+and darray_field env =
+  let env = { env with priority = 0 } in
+  let e1 = expr env in
+  expect env Tsarrow;
+  let e2 = expr env in
+  e1, e2
+
+and expr_varray env pos =
+  let darray_and_varray_allowed =
+    TypecheckerOptions.experimental_feature_enabled
+      env.popt
+      TypecheckerOptions.experimental_darray_and_varray in
+  if not darray_and_varray_allowed then Errors.varray_not_supported pos;
+  expect env Tlp;
+  pos, Varray (varray_field_list_remain env [])
+
+and varray_field_list_remain env acc =
+  match L.token env.file env.lb with
+  | x when x = Trp -> List.rev acc
+  | _ ->
+      L.back env.lb;
+      let error_state = !(env.errors) in
+      let fd = varray_field env in
+      let acc = fd :: acc in
+      match L.token env.file env.lb with
+      | x when x = Trp ->
+          List.rev acc
+      | Tcomma ->
+          if !(env.errors) != error_state
+          then List.rev acc
+          else varray_field_list_remain env acc
+      | _ -> error_expect env ")"; [fd]
+
+and varray_field env =
+  let env = { env with priority = 0 } in
+  expr env
 
 (*****************************************************************************)
 (* Shapes *)

@@ -548,6 +548,8 @@ let mk_mapper = fun m_in ->
     let k =
       function
       | Array v1 -> let v1 = map_of_list map_afield v1 in Array ((v1))
+      | Darray v1 -> let v1 = map_of_list map_expr_mapping v1 in Darray ((v1))
+      | Varray v1 -> let v1 = map_of_list map_expr v1 in Varray ((v1))
       | Shape v1 ->
           let v1 =
             map_of_list
@@ -661,11 +663,12 @@ let mk_mapper = fun m_in ->
     | Require -> Require
     | IncludeOnce -> IncludeOnce
     | RequireOnce -> RequireOnce
+  and map_expr_mapping (v1, v2) = map_expr v1, map_expr v2
   and map_afield =
     function
     | AFvalue v1 -> let v1 = map_expr v1 in AFvalue ((v1))
     | AFkvalue ((v1, v2)) ->
-        let v1 = map_expr v1 and v2 = map_expr v2 in AFkvalue ((v1, v2))
+        let v1, v2 = map_expr_mapping (v1, v2) in AFkvalue ((v1, v2))
   and map_bop =
     function
     | Plus -> Plus

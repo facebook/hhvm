@@ -18,6 +18,11 @@ class virtual ['b] iter :
         on_Alias : 'c -> Ast_visitors_ancestors.hint -> unit;
         on_Amp : 'c -> unit;
         on_Array : 'c -> Ast_visitors_ancestors.afield list -> unit;
+        on_Darray : 'c ->
+                    (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr)
+                    list ->
+                    unit;
+        on_Varray : 'c -> Ast_visitors_ancestors.expr list -> unit;
         on_Array_get : 'c ->
                        Ast_visitors_ancestors.expr ->
                        Ast_visitors_ancestors.expr option -> unit;
@@ -318,6 +323,11 @@ class virtual ['b] iter :
     method on_Alias : 'c -> Ast_visitors_ancestors.hint -> unit
     method on_Amp : 'c -> unit
     method on_Array : 'c -> Ast_visitors_ancestors.afield list -> unit
+    method on_Darray :
+      'c ->
+      (Ast_visitors_ancestors.expr * Ast_visitors_ancestors.expr) list ->
+      unit
+    method on_Varray : 'c -> Ast_visitors_ancestors.expr list -> unit
     method on_Array_get :
       'c ->
       Ast_visitors_ancestors.expr ->

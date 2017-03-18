@@ -1727,6 +1727,14 @@ module Make (GetLocals : GetLocals) = struct
   and expr env (p, e) = p, expr_ env p e
   and expr_ env p = function
     | Array l -> N.Array (List.map l (afield env))
+    | Darray l ->
+      (* TODO(tingley): Map this into a Nast version of Darray. *)
+      let afield env (e1, e2) = afield env (AFkvalue (e1, e2)) in
+      N.Array (List.map l (afield env))
+    | Varray l ->
+      (* TODO(tingley): Map this into a Nast version of Varray. *)
+      let afield env e = afield env (AFvalue (e)) in
+      N.Array (List.map l (afield env))
     | Collection (id, l) -> begin
       let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
       match cn with

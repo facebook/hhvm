@@ -714,6 +714,20 @@ class virtual ['self] endo =
     method on_Array env this c0 =
       let r0 = self#on_list self#on_afield env c0 in
       if c0 == r0 then this else Array r0
+    method on_Darray env this c0 =
+      let r0 =
+        self#on_list
+          (fun env ((c0, c1) as this) ->
+               let r0 = self#on_expr env c0 in
+               let r1 = self#on_expr env c1 in
+               if c0 == r0 && c1 == r1
+               then this
+               else (r0, r1)) env c0
+      in
+      if c0 = r0 then this else Darray r0
+    method on_Varray env this c0 =
+      let r0 = self#on_list self#on_expr env c0 in
+      if c0 = r0 then this else Varray r0
     method on_Shape env this c0 =
       let r0 =
         self#on_list
@@ -896,6 +910,8 @@ class virtual ['self] endo =
     method on_expr_ env this =
       match this with
       | Array c0 -> self#on_Array env this c0
+      | Darray c0 -> self#on_Darray env this c0
+      | Varray c0 -> self#on_Varray env this c0
       | Shape c0 -> self#on_Shape env this c0
       | Collection (c0, c1) as this ->
           self#on_Collection env this c0 c1

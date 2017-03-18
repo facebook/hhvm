@@ -462,6 +462,14 @@ and from_expr expr =
   | A.Call _ -> emit_call_expr expr
   | A.New ((_, typename), args, uargs) -> emit_new typename args uargs
   | A.Array es -> emit_collection expr es
+  | A.Darray es ->
+    es
+      |> List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2))
+      |> emit_collection expr
+  | A.Varray es ->
+    es
+      |> List.map ~f:(fun e -> A.AFvalue e)
+      |> emit_collection expr
   | A.Collection ((pos, name), fields) ->
     emit_named_collection expr pos name fields
   | A.Array_get(base_expr, opt_elem_expr) ->

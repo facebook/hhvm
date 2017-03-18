@@ -306,6 +306,10 @@ struct NativeSig {
   explicit NativeSig(ZendFuncType) : ret(Type::Zend) {}
   NativeSig() : ret(Type::Void) {}
 
+  NativeSig(Type _ret, const std::vector<Type>& _args)
+      : ret(_ret), args(_args) {
+  }
+
   template<class Ret>
   explicit NativeSig(Ret (*ptr)());
 
@@ -385,6 +389,10 @@ struct BuiltinFunctionInfo {
     : sig(f)
     , ptr((BuiltinFunction)f)
   {}
+
+  BuiltinFunctionInfo(NativeSig _sig, BuiltinFunction _ptr)
+      : sig(_sig), ptr(_ptr) {
+  }
 
   NativeSig sig;
   BuiltinFunction ptr;

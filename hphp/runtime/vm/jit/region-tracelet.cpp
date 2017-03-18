@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -511,12 +512,15 @@ RegionDescPtr form_region(Env& env) {
                           *env.region, show(env.irgs.irb->unit()));
   };
 
+  env.irgs.irb->setGuardFailBlock(irgen::makeExit(env.irgs));
+
   for (auto const& lt : env.ctx.liveTypes) {
     auto t = lt.type;
     assertx(t <= TGen);
     irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
                      true /* outerOnly */);
   }
+  env.irgs.irb->resetGuardFailBlock();
 
   irgen::gen(env.irgs, EndGuards);
 

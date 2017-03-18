@@ -1236,7 +1236,7 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
     return TInitCell;
   }();
   auto const preTy = typeIncDec(subop, postTy);
-  pessimisticFinalElemD(env, key, typeIncDec(subop, preTy));
+  pessimisticFinalElemD(env, key, preTy);
   push(env, isPre(subop) ? preTy : postTy);
 }
 

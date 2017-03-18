@@ -2388,7 +2388,7 @@ ArrKey disect_array_key(const Type& keyTy) {
     return ret;
   }
   if (keyTy.strictSubtypeOf(TDbl)) {
-    ret.i = static_cast<int64_t>(keyTy.m_data.dval);
+    ret.i = toInt64(keyTy.m_data.dval);
     ret.type = ival(*ret.i);
     return ret;
   }

@@ -78,7 +78,7 @@
 #include "hphp/util/timer.h"
 
 #include <folly/Portability.h>
-#include <folly/experimental/Singleton.h>
+#include <folly/Singleton.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>

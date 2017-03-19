@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/pagelet-server.h"
 
-#include <folly/experimental/Singleton.h>
+#include <folly/Singleton.h>
 
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/http-request-handler.h"

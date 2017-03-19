@@ -990,27 +990,58 @@ void dce(Env& env, const bc::IncDecL& op) {
     });
 }
 
+bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
+  auto const lhsOk = lhs.subtypeOfAny(TUninit, TNull, TBool, TInt, TDbl, TStr);
+  auto const rhsOk = rhs.subtypeOfAny(TNull, TBool, TInt, TDbl, TStr);
+  if (!lhsOk || !rhsOk) return true;
+
+  switch (op.subop2) {
+    case SetOpOp::ConcatEqual:
+      return false;
+
+    case SetOpOp::PlusEqual:
+    case SetOpOp::PlusEqualO:
+    case SetOpOp::MinusEqual:
+    case SetOpOp::MulEqual:
+    case SetOpOp::DivEqual:
+    case SetOpOp::ModEqual:
+    case SetOpOp::PowEqual:
+    case SetOpOp::AndEqual:
+    case SetOpOp::OrEqual:
+    case SetOpOp::XorEqual:
+    case SetOpOp::MinusEqualO:
+    case SetOpOp::MulEqualO:
+    case SetOpOp::SlEqual:
+    case SetOpOp::SrEqual:
+      return RuntimeOption::EnableHipHopSyntax &&
+        (lhs.subtypeOf(TStr) || rhs.subtypeOf(TStr));
+  }
+  not_reached();
+}
+
 /*
- * SetOpL is like IncDecL, but with the complication that we don't know if we
- * can mark it dead when visiting it, because it is going to pop an input but
- * unlike SetL doesn't push the value it popped.  For the current scheme we
- * just add the local to gen even if we're doing a removable push, which is
- * correct but could definitely fail to eliminate some earlier stores.
+ * SetOpL is like IncDecL, but with the complication that we don't
+ * know if we can mark it dead when visiting it, because it is going
+ * to pop an input but unlike SetL doesn't push the value it popped.
+ * However, since we've checked the input types, it *is* ok to just
+ * kill it.
  */
 void dce(Env& env, const bc::SetOpL& op) {
   auto const oldTy   = locRaw(env, op.loc1);
-  auto const effects = setLocCouldHaveSideEffects(env, op.loc1) ||
-                         readCouldHaveSideEffects(oldTy);
 
-  push(env, [&] (const UseInfo& ui) {
-      if (!isLocLive(env, op.loc1) && !effects && allUnused(ui)) {
-        return PushFlags::PassThrough;
+  push(env, [&] (UseInfo& ui) {
+      if (!isLocLive(env, op.loc1) && allUnused(ui)) {
+        if (!setLocCouldHaveSideEffects(env, op.loc1) &&
+            !readCouldHaveSideEffects(oldTy) &&
+            !setOpLSideEffects(op, oldTy, topC(env))) {
+          pop(env, Use::Not, std::move(ui.actions));
+          return PushFlags::MarkDead;
+        }
       }
       pop(env);
+      addLocGen(env, op.loc1);
       return PushFlags::MarkLive;
     });
-
-  addLocGen(env, op.loc1);
 }
 
 /*

@@ -3059,22 +3059,31 @@ StepFlags interpOps(Interp& interp,
 
   auto const numPushed   = iter->numPush();
   interpStep(env, iter, stop);
-  if (flags.wasPEI) {
-    auto outputs_constant = [&] {
-      auto const size = interp.state.stack.size();
-      for (auto i = size_t{0}; i < numPushed; ++i) {
-        if (!tv(interp.state.stack[size - i - 1].type)) return false;
-      }
-      return true;
-    };
 
-    if (flags.canConstProp && outputs_constant()) {
+  auto outputs_constant = [&] {
+    auto elems = &interp.state.stack.back();
+    for (auto i = size_t{0}; i < numPushed; ++i, --elems) {
+      if (!tv(elems->type)) return false;
+    }
+    return true;
+  };
+
+  if (options.ConstantProp && flags.canConstProp && outputs_constant()) {
+    auto elems = &interp.state.stack.back();
+    for (auto i = size_t{0}; i < numPushed; ++i, --elems) {
+      auto& ty = elems->type;
+      ty = from_cell(*tv(ty));
+    }
+    if (flags.wasPEI) {
       FTRACE(2, "   nothrow (due to constprop)\n");
-    } else {
-      FTRACE(2, "   PEI.\n");
-      for (auto factored : interp.blk->factoredExits) {
-        propagate(factored, stateBefore);
-      }
+      flags.wasPEI = false;
+    }
+  }
+
+  if (flags.wasPEI) {
+    FTRACE(2, "   PEI.\n");
+    for (auto factored : interp.blk->factoredExits) {
+      propagate(factored, stateBefore);
     }
   }
   return flags;

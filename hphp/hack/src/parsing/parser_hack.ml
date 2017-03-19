@@ -1356,7 +1356,7 @@ and class_toplevel_word env word =
     on_class_member_word env
   | _ ->
       error_expect env "modifier";
-      []
+      class_member_def env
 
 and on_class_member_word env =
   (* variable | method | type const*)

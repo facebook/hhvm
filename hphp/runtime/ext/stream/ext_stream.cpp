@@ -823,8 +823,10 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
   } else {
     ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
   }
-  if (ret) {
+  if (ret && port.isInteger()) {
     return address.toString() + ":" + port.toString();
+  } else if (ret) {
+    return address.toString();
   }
   return false;
 }

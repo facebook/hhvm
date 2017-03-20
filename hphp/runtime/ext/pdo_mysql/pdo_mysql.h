@@ -21,7 +21,7 @@
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 
 enum {
   PDO_MYSQL_ATTR_USE_BUFFERED_QUERY = PDO_ATTR_DRIVER_SPECIFIC,
@@ -39,6 +39,7 @@ enum {
   PDO_MYSQL_ATTR_SSL_CERT,
   PDO_MYSQL_ATTR_SSL_CIPHER,
   PDO_MYSQL_ATTR_SSL_KEY,
+  PDO_MYSQL_ATTR_MULTI_STATEMENTS,
   HH_PDO_MYSQL_ATTR_READ_TIMEOUT,
   HH_PDO_MYSQL_ATTR_WRITE_TIMEOUT
 };

@@ -2466,7 +2466,18 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
     }
     return { isPhpArray ? TInitNull : TBottom, false };
   }
-  return { TInitCell, false };
+
+  auto couldBeInt = isPhpArray || key.type.couldBe(TInt);
+  auto couldBeStr = key.type.couldBe(TStr);
+  auto ty = isPhpArray ? TInitNull : TBottom;
+  IterateKV(ad, [&] (const TypedValue* k, const TypedValue* v) {
+      if (isStringType(k->m_type) ? couldBeStr : couldBeInt) {
+        ty |= from_cell(*v);
+        return TInitCell.subtypeOf(ty);
+      }
+      return false;
+    });
+  return { ty, false };
 }
 
 /*
@@ -2483,13 +2494,17 @@ std::pair<Type,bool> arr_map_elem(const Type& map, const ArrKey& key) {
     if (r != map.m_data.map->map.end()) return { r->second, true };
     return { isPhpArray ? TInitNull : TBottom, false };
   }
-  if (isPhpArray) {
-    return {
-      union_of(map_key_values(*map.m_data.map).second, TInitNull),
-      false
-    };
+  auto couldBeInt = isPhpArray || key.type.couldBe(TInt);
+  auto couldBeStr = key.type.couldBe(TStr);
+  auto ty = isPhpArray ? TInitNull : TBottom;
+  for (auto& kv : map.m_data.map->map) {
+    if (isStringType(kv.first.m_type) ? couldBeStr : couldBeInt) {
+      ty |= kv.second;
+      if (TInitCell.subtypeOf(ty)) break;
+    }
   }
-  return { TInitCell, false };
+
+  return { ty, false };
 }
 
 /*

@@ -669,6 +669,10 @@ let rec attribute_argument_to_string argument =
     (* Note: no semi *)
     let fields = attribute_arguments_to_string fields in
     Printf.sprintf "D:%d:{%s}" num fields
+  | Array (num, fields) ->
+    (* Note: no semi *)
+    let fields = attribute_arguments_to_string fields in
+    Printf.sprintf "a:%d:{%s}" num fields
   | _ -> failwith "unexpected value in attribute_argument_to_string"
 
 and attribute_arguments_to_string arguments =

@@ -38,18 +38,17 @@ namespace HPHP {
  */
 struct UserAttributeMap {
 private:
-  using Map = hphp_hash_map<
+  using Map = std::map<
     LowStringPtr,
     TypedValue,
-    string_data_hash,
-    string_data_isame
+    string_data_lti
   >;
 
 public:
-  using mapped_type    = TypedValue;
-  using key_type       = LowStringPtr;
-  using value_type     = std::pair<key_type,mapped_type>;
-  using size_type      = std::size_t;
+  using mapped_type    = Map::mapped_type;
+  using key_type       = Map::key_type;
+  using value_type     = Map::value_type;
+  using size_type      = Map::size_type;
   using iterator       = Map::iterator;
   using const_iterator = Map::const_iterator;
 
@@ -60,6 +59,11 @@ public:
   template<class... Args>
   std::pair<iterator,bool> insert(Args&&... args) {
     return map().insert(std::forward<Args>(args)...);
+  }
+
+  template<class... Args>
+  std::pair<iterator,bool> emplace(Args&&... args) {
+    return map().emplace(std::forward<Args>(args)...);
   }
 
   const_iterator find(const key_type& k) const {
@@ -79,26 +83,6 @@ public:
   size_type count(const key_type& k) const {
     if (!m_map) return 0;
     return m_map->count(k);
-  }
-
-  template<class SerDe>
-  typename std::enable_if<SerDe::deserializing, void>::type
-  serde(SerDe& sd) {
-    bool empty;
-    sd(empty);
-    if (empty) return;
-    m_map.emplace();
-    sd(*m_map.mutate());
-    return;
-  }
-
-  template<class SerDe>
-  typename std::enable_if<!SerDe::deserializing, void>::type
-  serde(SerDe& sd) {
-    bool empty = !m_map;
-    sd(empty);
-    if (empty) return;
-    sd(*m_map);
   }
 
 private:

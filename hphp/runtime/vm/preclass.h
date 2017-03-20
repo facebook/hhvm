@@ -48,9 +48,8 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TraitNameSet = std::unordered_set<LowStringPtr,
-                                        string_data_hash,
-                                        string_data_isame>;
+using TraitNameSet = std::set<LowStringPtr,
+                              string_data_lti>;
 
 using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
 using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;

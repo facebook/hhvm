@@ -535,6 +535,8 @@ void decRefStr(StringData* s);
 struct string_data_hash;
 struct string_data_same;
 struct string_data_isame;
+struct string_data_lt;
+struct string_data_lti;
 
 //////////////////////////////////////////////////////////////////////
 

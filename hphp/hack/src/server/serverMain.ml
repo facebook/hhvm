@@ -19,18 +19,19 @@ open String_utils
 
 module MainInit : sig
   val go:
+    genv ->
     ServerArgs.options ->
     string ->
     (unit -> env) ->    (* init function to run while we have init lock *)
     env
 end = struct
   (* This code is only executed when the options --check is NOT present *)
-  let go options init_id init_fun =
+  let go genv options init_id init_fun =
     let root = ServerArgs.root options in
     let t = Unix.gettimeofday () in
     Hh_logger.log "Initializing Server (This might take some time)";
     (* note: we only run periodical tasks on the root, not extras *)
-    ServerIdle.init root;
+    ServerIdle.init genv root;
     Hh_logger.log "Init id: %s" init_id;
     let env = HackEventLogger.with_id ~stage:`Init init_id init_fun in
     Hh_logger.log "Server is READY";
@@ -480,7 +481,7 @@ let daemon_main_exn options (ic, oc) =
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
-  let env = MainInit.go options init_id (fun () -> program_init genv) in
+  let env = MainInit.go genv options init_id (fun () -> program_init genv) in
   serve genv env in_fd out_fd
 
 let daemon_main (state, options) (ic, oc) =

@@ -10,6 +10,7 @@
 
 open Core
 open String_utils
+open SearchServiceRunner
 
 (*****************************************************************************)
 (* Periodically called by the daemon *)
@@ -99,7 +100,7 @@ let exit_if_unused() =
 (*****************************************************************************)
 (* The registered jobs *)
 (*****************************************************************************)
-let init (root : Path.t) =
+let init genv (root : Path.t) =
   let jobs = [
     (* I'm not sure explicitly invoking the Gc here is necessary, but
      * major_slice takes something like ~0.0001s to run, so why not *)
@@ -107,6 +108,7 @@ let init (root : Path.t) =
     Periodical.one_hour *. 3., EventLogger.log_gc_stats;
     Periodical.always   , (fun () -> SharedMem.collect `aggressive);
     Periodical.always   , EventLogger.flush;
+    Periodical.always   , SearchServiceRunner.run genv;
     Periodical.one_day  , exit_if_unused;
     Periodical.one_day  , Hhi.touch;
     (* try_touch wraps Unix.lutimes, which doesn't open/close any fds, so we

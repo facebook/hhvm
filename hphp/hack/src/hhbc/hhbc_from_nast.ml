@@ -923,6 +923,19 @@ and is_literal expr =
   | A.True -> true
   | _ -> false
 
+and collection_literal_fields fields =
+  let mapper field =
+    match field with
+    | A.AFvalue v -> [ literal_from_expr v ]
+    | A.AFkvalue (k, v) -> [ literal_from_expr k; literal_from_expr v ]
+  in
+  Core.List.bind fields mapper
+
+and dictionary_literal fields =
+  let num = List.length fields in
+  let fields = collection_literal_fields fields in
+  Dict (num, fields)
+
 and literal_from_expr expr =
   match snd expr with
   | A.Float (_, litstr) -> Double litstr
@@ -931,10 +944,9 @@ and literal_from_expr expr =
   | A.Null -> Null
   | A.False -> False
   | A.True -> True
-  | A.Collection (_id, _fields) ->
-    Dict (0, [])
-    (* TODO: Dict, Vec, Array, etc. *)
-    (* TODO: Recurse to build fields *)
+  | A.Collection ((_, "dict"), fields) ->
+    dictionary_literal fields
+    (* TODO: Vec, Array, etc. *)
   (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
    this seems reasonable to allow. Right now this will crash if given an
    expression rather than a literal in here.  In particular, see what unary

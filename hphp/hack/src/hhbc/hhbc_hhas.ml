@@ -656,29 +656,25 @@ let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
   B.add_string buf ";\n"
   end
 
-let attribute_argument_to_string argument =
-  let value = match argument with
-  | Null -> "N"
-  | Double f -> Printf.sprintf "d:%s" f
+let rec attribute_argument_to_string argument =
+  match argument with
+  | Null -> "N;"
+  | Double f -> Printf.sprintf "d:%s;" f
   | String s ->
-    Printf.sprintf "s:%d:%s" (String.length s) ("\\" ^ quote_str s ^ "\\")
-  | False -> "i:0"
-  | True -> "i:1"
-  | Int i -> "i:" ^ (Int64.to_string i)
-  | Dict (num, _arguments) ->
-    Printf.sprintf "D:%d:{%s}" num ""
-    (*TODO: arguments *)
-  | _ -> failwith "unexpected value in attribute_argument_to_string" in
-    (*TODO: The original emitter suppresses the trailing ; if the argument
-    is a dictionary; why? This seems like a bug. *)
-    Printf.sprintf "%s;" value
+    Printf.sprintf "s:%d:\\%s\\;" (String.length s) (quote_str s)
+  | False -> "i:0;"
+  | True -> "i:1;"
+  | Int i -> "i:" ^ (Int64.to_string i) ^ ";"
+  | Dict (num, fields) ->
+    (* Note: no semi *)
+    let fields = attribute_arguments_to_string fields in
+    Printf.sprintf "D:%d:{%s}" num fields
+  | _ -> failwith "unexpected value in attribute_argument_to_string"
 
-let attribute_arguments_to_string arguments =
-  let rec aux arguments acc =
-    match arguments with
-    | h :: t -> aux t (acc ^ attribute_argument_to_string h)
-    | _ -> acc in
-  aux arguments ""
+and attribute_arguments_to_string arguments =
+  arguments
+    |> Core.List.map ~f:attribute_argument_to_string
+    |> String.concat ""
 
 let attribute_to_string_helper ~if_class_attribute name args =
   let count = List.length args in

@@ -14,7 +14,8 @@ type t = {
   property_is_public    : bool;
   property_is_static    : bool;
   property_name         : Litstr.id;
-  (* TODO: xhp, initializer *)
+  property_initial_value  : Hhbc_ast.instruct_lit_const option;
+  (* TODO: xhp *)
 }
 
 (* Interestingly, HHAS does not represent the declared types of properties,
@@ -25,12 +26,14 @@ let make
   property_is_protected
   property_is_public
   property_is_static
-  property_name = {
+  property_name
+  property_initial_value = {
     property_is_private;
     property_is_protected;
     property_is_public;
     property_is_static;
-    property_name
+    property_name;
+    property_initial_value;
   }
 
 let name hhas_property = hhas_property.property_name
@@ -38,3 +41,4 @@ let is_private hhas_property = hhas_property.property_is_private
 let is_protected hhas_property = hhas_property.property_is_protected
 let is_public hhas_property = hhas_property.property_is_public
 let is_static hhas_property = hhas_property.property_is_static
+let initial_value hhas_property = hhas_property.property_initial_value

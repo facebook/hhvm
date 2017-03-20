@@ -816,11 +816,17 @@ let add_property class_def buf property =
   B.add_string buf "\n  .property ";
   B.add_string buf (property_attributes property);
   B.add_string buf (Hhas_property.name property);
-  (* TODO: Get the actual initializer when we can codegen it. Properties
-  that lack an initializer get a null. *)
+  B.add_string buf " =\n    ";
   if Hhas_class.is_closure_class class_def
-  then B.add_string buf " =\n    uninit;"
-  else B.add_string buf " =\n    \"\"\"N;\"\"\";"
+  then B.add_string buf "uninit;"
+  else begin
+    B.add_string buf "\"\"\"";
+    let init = match Hhas_property.initial_value property with
+    | None -> "N;"
+    | Some value -> attribute_argument_to_string value in
+    B.add_string buf init;
+    B.add_string buf "\"\"\";"
+  end
 
 let add_constant buf c =
   B.add_string buf "\n  .const ";

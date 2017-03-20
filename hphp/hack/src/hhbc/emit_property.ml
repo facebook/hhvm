@@ -8,7 +8,7 @@
  *
 *)
 
-let from_ast cv_kind_list _type_hint (_, (_, cv_name), _initializer) =
+let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   (* TODO: Deal with type hint *)
   (* TODO: Deal with initializer *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
@@ -18,9 +18,13 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), _initializer) =
   let property_is_protected = Core.List.mem cv_kind_list Ast.Protected in
   let property_is_public = Core.List.mem cv_kind_list Ast.Public in
   let property_is_static = Core.List.mem cv_kind_list Ast.Static in
+  let property_initial_value = match initial_value with
+    | None -> None
+    | Some expr -> Some (Hhbc_from_nast.literal_from_expr expr) in
   Hhas_property.make
     property_is_private
     property_is_protected
     property_is_public
     property_is_static
     property_name
+    property_initial_value

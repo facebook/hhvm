@@ -411,16 +411,17 @@ let add_instance_properties class_ =
   let methods = Hhas_class.methods class_ in
   let (count, zero_params) =
     Core.List.fold_left methods ~init:(0, false) ~f:folder in
+  (* TODO: Initializers *)
   if count = 1 && zero_params then
     let property = Hhas_property.make
-      true false false false shared_single_memoize_cache in
+      true false false false shared_single_memoize_cache None in
     let class_ = Hhas_class.with_property class_ property in
     let property = Hhas_property.make
-      true false false false shared_single_memoize_cache_guard in
+      true false false false shared_single_memoize_cache_guard None in
     Hhas_class.with_property class_ property
   else
     let property = Hhas_property.make
-      true false false false shared_multi_memoize_cache in
+      true false false false shared_multi_memoize_cache None in
     Hhas_class.with_property class_ property
 
 let memoize_instance_methods class_ =
@@ -451,15 +452,17 @@ let add_static_properties class_ =
       let params = Hhas_method.params method_ in
       let original_name = Hhas_method.name method_ in
       if params = [] then
+        (* TODO: Property initializers *)
         let property = Hhas_property.make
-          true false false true (original_name ^ single_memoize_cache) in
+          true false false true (original_name ^ single_memoize_cache) None in
         let class_ = Hhas_class.with_property class_ property in
         let property = Hhas_property.make
-          true false false true (original_name ^ single_memoize_cache_guard) in
+          true false false true (original_name ^ single_memoize_cache_guard)
+          None in
         Hhas_class.with_property class_ property
       else
         let property = Hhas_property.make
-          true false false true (original_name ^ multi_memoize_cache) in
+          true false false true (original_name ^ multi_memoize_cache) None in
         Hhas_class.with_property class_ property
     else
       class_ in

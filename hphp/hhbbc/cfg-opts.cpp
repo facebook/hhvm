@@ -312,6 +312,8 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
     int numSucc = 0;
     if (!reachable(blk->id)) {
       bbi.multiplePreds = true;
+      bbi.multipleSuccs = true;
+      continue;
     } else {
       analyzeSwitch(*blk, blockInfo, nullptr);
     }

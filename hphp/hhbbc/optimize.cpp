@@ -663,6 +663,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
     if (blk.hhbcs.size() == 2 &&
         blk.hhbcs[0].op == Op::Null &&
         blk.hhbcs[1].op == Op::RetC) {
+      FTRACE(2, "Erasing {}::{}\n", func->cls->name, func->name);
       func->cls->methods.erase(
         std::find_if(func->cls->methods.begin(),
                      func->cls->methods.end(),

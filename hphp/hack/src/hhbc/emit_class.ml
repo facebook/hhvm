@@ -62,23 +62,6 @@ let from_extends _tparams extends =
 let from_implements _tparams implements =
   List.map implements hint_to_class
 
-let from_class_var cv_kind_list class_var =
-  let (_, (_, cv_name), _) = class_var in
-  (* TODO: xhp, type, initializer *)
-  (* TODO: Hack allows a property to be marked final, which is nonsensical.
-  HHVM does not allow this.  Fix this in the Hack parser? *)
-  let property_name = Litstr.to_string @@ cv_name in
-  let property_is_private = List.mem cv_kind_list A.Private in
-  let property_is_protected = List.mem cv_kind_list A.Protected in
-  let property_is_public = List.mem cv_kind_list A.Public in
-  let property_is_static = List.mem cv_kind_list A.Static in
-  Hhas_property.make
-    property_is_private
-    property_is_protected
-    property_is_public
-    property_is_static
-    property_name
-
 let from_constant (_hint, name, const_init) =
   (* The type hint is omitted. *)
   match const_init with
@@ -112,8 +95,8 @@ let ast_methods ast_class_body =
 
 let from_class_elt_classvars elt =
   match elt with
-  | A.ClassVars (kind_list, _, cvl) ->
-    List.map cvl (from_class_var kind_list)
+  | A.ClassVars (kind_list, type_hint, cvl) ->
+    List.map cvl (Emit_property.from_ast kind_list type_hint)
   | _ -> []
 
 let from_class_elt_constants elt =

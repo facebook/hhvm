@@ -824,7 +824,7 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
     ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
   }
   if (ret) {
-    return address.toString() + ":" + port.toString();
+    return address.toString() + (port.isNull() ? "" : ":" + port.toString());
   }
   return false;
 }

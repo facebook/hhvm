@@ -22,7 +22,6 @@ let shared_single_memoize_cache = "$shared$guarded_single$memoize_cache"
 let shared_single_memoize_cache_guard =
   "$shared$guarded_single$memoize_cache$guard"
 
-
 let param_code_sets params local =
   let rec aux params local block =
   match params with
@@ -399,10 +398,32 @@ let memoize_static_method class_ method_ =
   let class_name = Hhas_class.name class_ in
   memoize_method method_ (memoize_static_method_body class_name)
 
+let is_memoized_instance method_ =
+  (not (Hhas_method.is_static method_)) &&
+  Hhas_attribute.is_memoized (Hhas_method.attributes method_)
+
+let add_instance_properties class_ =
+  let folder (count, zero_params) method_ =
+    if is_memoized_instance method_ then
+      (count + 1, zero_params || (Hhas_method.params method_ = []) )
+    else
+      (count, zero_params) in
+  let methods = Hhas_class.methods class_ in
+  let (count, zero_params) =
+    Core.List.fold_left methods ~init:(0, false) ~f:folder in
+  if count = 1 && zero_params then
+    let property = Hhas_property.make
+      true false false false shared_single_memoize_cache in
+    let class_ = Hhas_class.with_property class_ property in
+    let property = Hhas_property.make
+      true false false false shared_single_memoize_cache_guard in
+    Hhas_class.with_property class_ property
+  else
+    let property = Hhas_property.make
+      true false false false shared_multi_memoize_cache in
+    Hhas_class.with_property class_ property
+
 let memoize_instance_methods class_ =
-  let is_memoized_instance method_ =
-    (not (Hhas_method.is_static method_)) &&
-    Hhas_attribute.is_memoized (Hhas_method.attributes method_) in
   let methods = Hhas_class.methods class_ in
   let memoized_count = Core.List.count methods is_memoized_instance in
   let folder (count, acc) method_ =
@@ -412,24 +433,49 @@ let memoize_instance_methods class_ =
       (count + 1, memoized :: renamed :: acc)
     else
       (count, method_ :: acc) in
-  (* TODO: properties *)
-  let (_, methods) = Core.List.fold_left methods ~init:(0, []) ~f:folder in
-  let methods = List.rev methods in
-  Hhas_class.with_methods class_ methods
+  let (count, methods) = Core.List.fold_left methods ~init:(0, []) ~f:folder in
+  if count = 0 then
+    class_
+  else
+    let class_ = add_instance_properties class_ in
+    let methods = List.rev methods in
+    Hhas_class.with_methods class_ methods
+
+let is_memoized_static method_ =
+  (Hhas_method.is_static method_) &&
+  Hhas_attribute.is_memoized (Hhas_method.attributes method_)
+
+let add_static_properties class_ =
+  let folder class_ method_ =
+    if is_memoized_static method_ then
+      let params = Hhas_method.params method_ in
+      let original_name = Hhas_method.name method_ in
+      if params = [] then
+        let property = Hhas_property.make
+          true false false true (original_name ^ single_memoize_cache) in
+        let class_ = Hhas_class.with_property class_ property in
+        let property = Hhas_property.make
+          true false false true (original_name ^ single_memoize_cache_guard) in
+        Hhas_class.with_property class_ property
+      else
+        let property = Hhas_property.make
+          true false false true (original_name ^ multi_memoize_cache) in
+        Hhas_class.with_property class_ property
+    else
+      class_ in
+  let methods = Hhas_class.methods class_ in
+  Core.List.fold_left methods ~init:class_ ~f:folder
 
 let memoize_static_methods class_ =
-  let is_memoized_static method_ =
-    (Hhas_method.is_static method_) &&
-    Hhas_attribute.is_memoized (Hhas_method.attributes method_) in
   let mapper method_ =
     if is_memoized_static method_ then
       let (renamed, memoized) = memoize_static_method class_ method_ in
       [ renamed ; memoized ]
     else
       [ method_ ] in
+  let class_ = add_static_properties class_ in
   let methods = Hhas_class.methods class_ in
   let methods = Core.List.bind methods mapper in
-  (* TODO: properties *)
   Hhas_class.with_methods class_ methods
 
 let memoize_class class_ =

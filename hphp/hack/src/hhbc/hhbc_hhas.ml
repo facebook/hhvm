@@ -665,8 +665,13 @@ let attribute_argument_to_string argument =
   | False -> "i:0"
   | True -> "i:1"
   | Int i -> "i:" ^ (Int64.to_string i)
+  | Dict (num, _arguments) ->
+    Printf.sprintf "D:%d:{%s}" num ""
+    (*TODO: arguments *)
   | _ -> failwith "unexpected value in attribute_argument_to_string" in
-  Printf.sprintf "%s;" value
+    (*TODO: The original emitter suppresses the trailing ; if the argument
+    is a dictionary; why? This seems like a bug. *)
+    Printf.sprintf "%s;" value
 
 let attribute_arguments_to_string arguments =
   let rec aux arguments acc =

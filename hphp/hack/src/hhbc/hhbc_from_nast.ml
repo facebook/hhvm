@@ -931,6 +931,10 @@ and literal_from_expr expr =
   | A.Null -> Null
   | A.False -> False
   | A.True -> True
+  | A.Collection (_id, _fields) ->
+    Dict (0, [])
+    (* TODO: Dict, Vec, Array, etc. *)
+    (* TODO: Recurse to build fields *)
   (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
    this seems reasonable to allow. Right now this will crash if given an
    expression rather than a literal in here.  In particular, see what unary

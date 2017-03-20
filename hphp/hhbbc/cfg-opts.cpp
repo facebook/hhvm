@@ -253,10 +253,7 @@ bool buildSwitches(php::Func& func,
     bool ret = false;
     auto const minSize = switchInfo.kind == KindOfInt64 ? 1 : 8;
     if (switchInfo.cases.size() >= minSize && blocks.size()) {
-      while (is_single_nop(*func.blocks[switchInfo.defaultBlock])) {
-        switchInfo.defaultBlock =
-          func.blocks[switchInfo.defaultBlock]->fallthrough;
-      }
+      switchInfo.defaultBlock = next_real_block(func, switchInfo.defaultBlock);
       auto bc = switchInfo.kind == KindOfInt64 ?
         buildIntSwitch(switchInfo) : buildStringSwitch(switchInfo);
       if (bc.op != Op::Nop) {
@@ -327,13 +324,9 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       numSucc++;
     };
     forEachNormalSuccessor(*blk, [&](const BlockId& succId) {
-        auto succ = borrow(func.blocks[succId]);
-        while (succ->id != NoBlockId &&
-               is_single_nop(*succ) &&
-               succId < succ->fallthrough) {
-          always_assert(succ->fallthrough != NoBlockId);
-          const_cast<BlockId&>(succId) = succ->fallthrough;
-          succ = borrow(func.blocks[succId]);
+        auto skip = next_real_block(func, succId);
+        if (skip != succId) {
+          const_cast<BlockId&>(succId) = skip;
           removedAny = true;
         }
         handleSucc(succId);

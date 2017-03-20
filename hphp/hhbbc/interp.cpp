@@ -811,18 +811,8 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     }
     return;
   }
-  auto follow = [&] (BlockId id) {
-    auto& blks = env.ctx.func->blocks;
-    while (is_single_nop(*blks[id]) && blks[id]->fallthrough > id) {
-      id = blks[id]->fallthrough;
-      // If we've determined that the block is unreachable, we could
-      // have replaced it with a nop block with no fallthrough. But in
-      // that case, we should know that the jmp was taken above.
-      always_assert(id != NoBlockId);
-    }
-    return id;
-  };
-  if (follow(env.blk.fallthrough) == follow(op.target)) {
+  if (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
+      next_real_block(*env.ctx.func, op.target)) {
     jmp_nevertaken(env);
     return;
   }

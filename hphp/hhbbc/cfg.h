@@ -81,6 +81,12 @@ inline bool is_single_nop(const php::Block& b) {
 }
 
 /*
+ * Walk through single_nop blocks to the next block that actually does
+ * something.
+ */
+BlockId next_real_block(const php::Func& func, BlockId id);
+
+/*
  * Call a function for every jump target of a given bytecode.  If the
  * bytecode has no targets, the function is not called.
  */

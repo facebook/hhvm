@@ -107,6 +107,32 @@ computeFactoredPreds(const std::vector<borrowed_ptr<php::Block>>& rpoBlocks) {
   return preds;
 }
 
+/*
+ * Walk forward through no-op blocks. To avoid cycles we don't take
+ * "backward" branches unless its to the lowest numbered block seen to
+ * date (this is just a heuristic to avoid having to keep a seen set,
+ * because we don't expect long cyclic chains of no-op blocks).
+ */
+BlockId next_real_block(const php::Func& func, BlockId id) {
+  auto blk = borrow(func.blocks[id]);
+  auto min = id;
+  while (is_single_nop(*blk)) {
+    if (blk->fallthrough == id || blk->fallthrough == NoBlockId) break;
+    if (blk->fallthrough < id) {
+      if (blk->fallthrough >= min) {
+        // we may be in a cycle, but take one more hop anyway,
+        // in case we're not.
+        id = blk->fallthrough;
+        break;
+      }
+      min = blk->fallthrough;
+    }
+    id = blk->fallthrough;
+    blk = borrow(func.blocks[id]);
+  }
+  return id;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

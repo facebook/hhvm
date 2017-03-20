@@ -2862,7 +2862,6 @@ std::pair<Type,bool> array_like_set(Type arr,
     if (maybeEmpty) {
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     } else {
-      arr.m_bits = bits;
       auto const inRange = arr_mapn_set(arr, key, val);
       return { std::move(arr), inRange };
     }

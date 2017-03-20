@@ -189,6 +189,7 @@ typename std::enable_if<
   folly::Optional<Type>
 >::type hack_array_op(
   ISS& env,
+  bool nullOnFailure,
   R opV(B, const T&...),
   R opD(B, const T&...),
   R opK(B, const T&...),
@@ -209,19 +210,19 @@ typename std::enable_if<
   // if (res.first == TBottom) {
   //   unreachable(env);
   // }
-  if (res.second) nothrow(env);
-  if (res.first != TBottom) return res.first;
-  return
-    base.subtypeOf(TVec) ? TVec :
-    base.subtypeOf(TDict) ? TDict :
-    TKeyset;
+  if (res.second || nullOnFailure) nothrow(env);
+  if (res.first == TBottom) return nullOnFailure ? TInitNull : TInitCell;
+  if (nullOnFailure && !res.second) res.first |= TInitNull;
+  return res.first;
 }
+
 template<typename R, typename B, typename... T>
 typename std::enable_if<
   !std::is_same<R, std::pair<Type,bool>>::value,
   folly::Optional<R>
 >::type hack_array_op(
   ISS& env,
+  bool nullOnFailure,
   R opV(B, const T&...),
   R opD(B, const T&...),
   R opK(B, const T&...),
@@ -232,8 +233,9 @@ typename std::enable_if<
   if (base.subtypeOf(TKeyset)) return opK(base, args...);
   return folly::none;
 }
-#define hack_array_do(env, op, ...) \
-  hack_array_op(env, vec_ ## op, dict_ ## op, keyset_ ## op, ##__VA_ARGS__)
+#define hack_array_do(env, nullOnFailure, op, ...)                      \
+  hack_array_op(env, nullOnFailure,                                     \
+                vec_ ## op, dict_ ## op, keyset_ ## op, ##__VA_ARGS__)
 
 //////////////////////////////////////////////////////////////////////
 
@@ -786,7 +788,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
     if (couldDoChain) {
       env.state.arrayChain.emplace_back(env.state.base.type, key);
       auto ty = [&] {
-        if (auto type = hack_array_do(env, elem, key)) {
+        if (auto type = hack_array_do(env, false, elem, key)) {
           return *type;
         }
         return array_elem(env.state.base.type, key);
@@ -806,7 +808,7 @@ void miElem(ISS& env, MOpMode mode, Type key) {
                          env.state.base.type }, updateLocal);
     return;
   }
-  if (auto ty = hack_array_do(env, elem, key)) {
+  if (auto ty = hack_array_do(env, mode == MOpMode::None, elem, key)) {
     moveBase(env, Base { *ty,
                          BaseLoc::PostElem,
                          env.state.base.type }, updateLocal);
@@ -843,7 +845,7 @@ void miNewElem(ISS& env) {
     (env.state.base.type.subtypeOf(TArr) || isvec || isdict || iskeyset);
   if (couldDoChain) {
     auto par = [&] () -> std::pair<Type, Type> {
-      auto ty = hack_array_do(env, newelem, TInitNull);
+      auto ty = hack_array_do(env, false, newelem, TInitNull);
       if (ty) return std::move(*ty);
       return array_newelem_key(env.state.base.type, TInitNull);
     }();
@@ -1055,7 +1057,7 @@ void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
       env.state.base.type = array_set(env.state.base.type, key, ty);
       return;
     }
-    if (auto res = hack_array_do(env, set, key, ty)) {
+    if (auto res = hack_array_do(env, false, set, key, ty)) {
       env.state.base.type = *res;
       return;
     }
@@ -1071,16 +1073,17 @@ void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
   }
 }
 
-void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key) {
+void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key, bool nullOnFailure) {
   auto const ty = [&] {
     if (env.state.base.type.subtypeOf(TArr)) {
       return array_elem(env.state.base.type, key);
     }
-    if (auto type = hack_array_do(env, elem, key)) {
+    if (auto type = hack_array_do(env, nullOnFailure, elem, key)) {
       return *type;
     }
     return TInitCell;
   }();
+  if (nullOnFailure) nothrow(env);
   discard(env, nDiscard);
   push(env, ty);
 }
@@ -1168,7 +1171,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
       return;
     }
     if (isvec || isdict || iskeyset) {
-      auto ty = hack_array_do(env, set, key, t1);
+      auto ty = hack_array_do(env, false, set, key, t1);
       assert(ty);
       env.state.base.type = *ty;
       // Vec, Dict, and Keysets throw on weird keys
@@ -1212,7 +1215,7 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard, SetOpOp subop, Type key) {
     if (env.state.base.type.subtypeOf(TArr) && !keyCouldBeWeird(key)) {
       return array_elem(env.state.base.type, key);
     }
-    if (auto ty = hack_array_do(env, elem, key)) {
+    if (auto ty = hack_array_do(env, false, elem, key)) {
       return *ty;
     }
     return TInitCell;
@@ -1232,7 +1235,7 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
     if (env.state.base.type.subtypeOf(TArr) && !keyCouldBeWeird(key)) {
       return array_elem(env.state.base.type, key);
     }
-    if (auto ty = hack_array_do(env, elem, key)) return *ty;
+    if (auto ty = hack_array_do(env, false, elem, key)) return *ty;
     return TInitCell;
   }();
   auto const preTy = typeIncDec(subop, postTy);
@@ -1283,7 +1286,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       env.state.base.type = array_newelem(env.state.base.type, ty);
       return;
     }
-    if (auto res = hack_array_do(env, newelem, ty)) {
+    if (auto res = hack_array_do(env, false, newelem, ty)) {
       env.state.base.type = std::move(res->first);
       return;
     }
@@ -1293,7 +1296,7 @@ void pessimisticFinalNewElem(ISS& env, Type ty) {
       env.state.base.type = array_newelem(env.state.base.type, ty);
       return;
     }
-    if (auto res = hack_array_do(env, newelem, ty)) {
+    if (auto res = hack_array_do(env, false, newelem, ty)) {
       env.state.base.type = std::move(res->first);
       return;
     }
@@ -1332,7 +1335,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       push(env, t1);
       return;
     }
-    if (auto ty = hack_array_do(env, newelem, t1)) {
+    if (auto ty = hack_array_do(env, false, newelem, t1)) {
       env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
@@ -1344,7 +1347,7 @@ void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
       push(env, t1);
       return;
     }
-    if (auto ty = hack_array_do(env, newelem, t1)) {
+    if (auto ty = hack_array_do(env, false, newelem, t1)) {
       env.state.base.type = std::move(ty->first);
       push(env, t1);
       return;
@@ -1635,8 +1638,9 @@ void in(ISS& env, const bc::QueryM& op) {
   } else if (mcodeIsElem(op.mkey.mcode)) {
     switch (op.subop2) {
       case QueryMOp::CGet:
+        return miFinalCGetElem(env, nDiscard, key, false);
       case QueryMOp::CGetQuiet:
-        return miFinalCGetElem(env, nDiscard, key);
+        return miFinalCGetElem(env, nDiscard, key, true);
       case QueryMOp::Isset:
       case QueryMOp::Empty:
         discard(env, nDiscard);

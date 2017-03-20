@@ -85,6 +85,8 @@ MODULES=\
   typing\
   utils\
   utils/collections\
+  utils/errors\
+  utils/lint\
   utils/disk\
   utils/process\
   utils/hg\

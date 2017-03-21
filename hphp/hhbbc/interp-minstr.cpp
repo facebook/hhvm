@@ -51,30 +51,30 @@ const StaticString s_stdClass("stdClass");
  * (non-static strings with values in the type system) it will need to change.
  */
 
-bool couldBeEmptyish(Type ty) {
+bool couldBeEmptyish(const Type& ty) {
   return ty.couldBe(TNull) ||
          ty.couldBe(sempty()) ||
          ty.couldBe(TFalse);
 }
 
-bool mustBeEmptyish(Type ty) {
+bool mustBeEmptyish(const Type& ty) {
   return ty.subtypeOf(TNull) ||
          ty.subtypeOf(sempty()) ||
          ty.subtypeOf(TFalse);
 }
 
-bool elemCouldPromoteToArr(Type ty) { return couldBeEmptyish(ty); }
-bool elemMustPromoteToArr(Type ty)  { return mustBeEmptyish(ty); }
+bool elemCouldPromoteToArr(const Type& ty) { return couldBeEmptyish(ty); }
+bool elemMustPromoteToArr(const Type& ty)  { return mustBeEmptyish(ty); }
 
-bool propCouldPromoteToObj(Type ty) {
+bool propCouldPromoteToObj(const Type& ty) {
   return RuntimeOption::EvalPromoteEmptyObject && couldBeEmptyish(ty);
 }
 
-bool propMustPromoteToObj(Type ty)  {
+bool propMustPromoteToObj(const Type& ty)  {
   return RuntimeOption::EvalPromoteEmptyObject && mustBeEmptyish(ty);
 }
 
-bool keyCouldBeWeird(Type key) {
+bool keyCouldBeWeird(const Type& key) {
   return key.couldBe(TObj) || key.couldBe(TArr) || key.couldBe(TVec) ||
     key.couldBe(TDict) || key.couldBe(TKeyset);
 }
@@ -255,7 +255,7 @@ void handleInThisPropD(ISS& env, bool isNullsafe) {
   }
 
   if (RuntimeOption::EvalPromoteEmptyObject) {
-    mergeEachThisPropRaw(env, [&] (Type t) {
+    mergeEachThisPropRaw(env, [&] (const Type& t) {
       return propCouldPromoteToObj(t) ? TObj : TBottom;
     });
   }
@@ -307,7 +307,7 @@ void handleInThisElemD(ISS& env) {
     return;
   }
 
-  mergeEachThisPropRaw(env, [&] (Type t) {
+  mergeEachThisPropRaw(env, [&] (const Type& t) {
     return elemCouldPromoteToArr(t) ? TArr : TBottom;
   });
 }
@@ -392,11 +392,11 @@ void setLocalForBase(ISS& env, Type ty) {
   assert(mustBeInFrame(env.state.base) ||
          env.state.base.loc == BaseLoc::LocalArrChain);
   if (env.state.base.local == NoLocalId) return loseNonRefLocalTypes(env);
-  setLoc(env, env.state.base.local, ty);
   FTRACE(4, "      ${} := {}\n",
     env.state.base.locName ? env.state.base.locName->data() : "$<unnamed>",
     show(ty)
   );
+  setLoc(env, env.state.base.local, std::move(ty));
 }
 
 // Run backwards through an array chain doing array_set operations
@@ -593,7 +593,7 @@ void handleBaseNewElem(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 
 // Returns nullptr if it's an unknown key or not a string.
-SString mStringKey(Type key) {
+SString mStringKey(const Type& key) {
   auto const v = tv(key);
   return v && v->m_type == KindOfPersistentString ? v->m_data.pstr : nullptr;
 }
@@ -638,21 +638,23 @@ Base miBaseLoc(ISS& env, LocalId locBase, bool isDefine) {
                 locBase };
 }
 
-Base miBaseSProp(ISS& env, Type cls, Type tprop) {
+Base miBaseSProp(ISS& env, Type cls, const Type& tprop) {
   auto const self = selfCls(env);
   auto const prop = tv(tprop);
   auto const name = prop && prop->m_type == KindOfPersistentString
                       ? prop->m_data.pstr : nullptr;
   if (self && cls.subtypeOf(*self) && name) {
-    if (auto const ty = selfPropAsCell(env, prop->m_data.pstr)) {
-      return Base { *ty, BaseLoc::StaticObjProp, cls, name };
+    if (auto ty = selfPropAsCell(env, prop->m_data.pstr)) {
+      return
+        Base { std::move(*ty), BaseLoc::StaticObjProp, std::move(cls), name };
     }
   }
-  auto const indexTy = env.index.lookup_public_static(cls, tprop);
+  auto indexTy = env.index.lookup_public_static(cls, tprop);
   if (indexTy.subtypeOf(TInitCell)) {
-    return Base { indexTy, BaseLoc::StaticObjProp, cls, name };
+    return
+      Base { std::move(indexTy), BaseLoc::StaticObjProp, std::move(cls), name };
   }
-  return Base { TInitCell, BaseLoc::StaticObjProp, cls, name };
+  return Base { TInitCell, BaseLoc::StaticObjProp, std::move(cls), name };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -687,7 +689,7 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
         mergeThisProp(env, name, TInitNull);
       }
     } else {
-      mergeEachThisPropRaw(env, [&] (Type ty) {
+      mergeEachThisPropRaw(env, [&] (const Type& ty) {
         return ty.couldBe(TUninit) ? TInitNull : TBottom;
       });
     }
@@ -871,7 +873,7 @@ void miNewElem(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // final prop ops
 
-void miFinalIssetProp(ISS& env, int32_t nDiscard, Type key) {
+void miFinalIssetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
   if (name && mustBeThisObj(env, env.state.base)) {
@@ -883,7 +885,7 @@ void miFinalIssetProp(ISS& env, int32_t nDiscard, Type key) {
   push(env, TBool);
 }
 
-void miFinalCGetProp(ISS& env, int32_t nDiscard, Type key) {
+void miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
   if (name && mustBeThisObj(env, env.state.base)) {
@@ -894,7 +896,8 @@ void miFinalCGetProp(ISS& env, int32_t nDiscard, Type key) {
   push(env, TInitCell);
 }
 
-void miFinalVGetProp(ISS& env, int32_t nDiscard, Type key, bool isNullsafe) {
+void miFinalVGetProp(ISS& env, int32_t nDiscard,
+                     const Type& key, bool isNullsafe) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
   handleInThisPropD(env, isNullsafe);
@@ -911,7 +914,7 @@ void miFinalVGetProp(ISS& env, int32_t nDiscard, Type key, bool isNullsafe) {
   push(env, TRef);
 }
 
-void miFinalSetProp(ISS& env, int32_t nDiscard, Type key) {
+void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   auto const t1 = popC(env);
   auto const nullsafe = false;
@@ -943,7 +946,8 @@ void miFinalSetProp(ISS& env, int32_t nDiscard, Type key) {
   push(env, resultTy);
 }
 
-void miFinalSetOpProp(ISS& env, int32_t nDiscard, SetOpOp subop, Type key) {
+void miFinalSetOpProp(ISS& env, int32_t nDiscard,
+                      SetOpOp subop, const Type& key) {
   auto const name = mStringKey(key);
   auto const rhsTy = popC(env);
 
@@ -973,7 +977,8 @@ void miFinalSetOpProp(ISS& env, int32_t nDiscard, SetOpOp subop, Type key) {
   push(env, resultTy);
 }
 
-void miFinalIncDecProp(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
+void miFinalIncDecProp(ISS& env, int32_t nDiscard,
+                       IncDecOp subop, const Type& key) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
   auto const isNullsafe = false;
@@ -1002,7 +1007,7 @@ void miFinalIncDecProp(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
   push(env, isPre(subop) ? prePropTy : postPropTy);
 }
 
-void miFinalBindProp(ISS& env, int32_t nDiscard, Type key) {
+void miFinalBindProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   popV(env);
   discard(env, nDiscard);
@@ -1021,7 +1026,7 @@ void miFinalBindProp(ISS& env, int32_t nDiscard, Type key) {
   push(env, TRef);
 }
 
-void miFinalUnsetProp(ISS& env, int32_t nDiscard, Type key) {
+void miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   discard(env, nDiscard);
 
@@ -1051,7 +1056,7 @@ void miFinalUnsetProp(ISS& env, int32_t nDiscard, Type key) {
 // This is a helper for final defining Elem operations that need to
 // handle array chains and frame effects, but don't yet do anything
 // better than supplying a single type.
-void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
+void pessimisticFinalElemD(ISS& env, const Type& key, const Type& ty) {
   if (mustBeInFrame(env.state.base)) {
     if (env.state.base.type.subtypeOf(TArr)) {
       env.state.base.type = array_set(env.state.base.type, key, ty);
@@ -1073,7 +1078,8 @@ void pessimisticFinalElemD(ISS& env, Type key, Type ty) {
   }
 }
 
-void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key, bool nullOnFailure) {
+void miFinalCGetElem(ISS& env, int32_t nDiscard,
+                     const Type& key, bool nullOnFailure) {
   auto const ty = [&] {
     if (env.state.base.type.subtypeOf(TArr)) {
       return array_elem(env.state.base.type, key);
@@ -1088,7 +1094,7 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard, Type key, bool nullOnFailure) {
   push(env, ty);
 }
 
-void miFinalVGetElem(ISS& env, int32_t nDiscard, Type key) {
+void miFinalVGetElem(ISS& env, int32_t nDiscard, const Type& key) {
   discard(env, nDiscard);
   handleInThisElemD(env);
   handleInSelfElemD(env);
@@ -1106,7 +1112,7 @@ void miFinalVGetElem(ISS& env, int32_t nDiscard, Type key) {
   push(env, TRef);
 }
 
-void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
+void miFinalSetElem(ISS& env, int32_t nDiscard, const Type& key) {
   auto const t1  = popC(env);
   discard(env, nDiscard);
 
@@ -1158,7 +1164,7 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
                         !isvec &&
                         !isdict &&
                         !iskeyset);
-  auto isSuitableHackKey = [&](Type k) {
+  auto isSuitableHackKey = [&](const Type& k) {
     if (isvec) return k.couldBe(TInt);
     if (isdict) return k.couldBe(TInt) || k.couldBe(TStr);
     return false;
@@ -1204,7 +1210,8 @@ void miFinalSetElem(ISS& env, int32_t nDiscard, Type key) {
   push(env, isWeird ? TInitCell : t1);
 }
 
-void miFinalSetOpElem(ISS& env, int32_t nDiscard, SetOpOp subop, Type key) {
+void miFinalSetOpElem(ISS& env, int32_t nDiscard,
+                      SetOpOp subop, const Type& key) {
   auto const rhsTy = popC(env);
   discard(env, nDiscard);
   handleInThisElemD(env);
@@ -1225,7 +1232,8 @@ void miFinalSetOpElem(ISS& env, int32_t nDiscard, SetOpOp subop, Type key) {
   push(env, resultTy);
 }
 
-void miFinalIncDecElem(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
+void miFinalIncDecElem(ISS& env, int32_t nDiscard,
+                       IncDecOp subop, const Type& key) {
   discard(env, nDiscard);
   handleInThisElemD(env);
   handleInSelfElemD(env);
@@ -1243,7 +1251,7 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard, IncDecOp subop, Type key) {
   push(env, isPre(subop) ? preTy : postTy);
 }
 
-void miFinalBindElem(ISS& env, int32_t nDiscard, Type key) {
+void miFinalBindElem(ISS& env, int32_t nDiscard, const Type& key) {
   popV(env);
   discard(env, nDiscard);
   handleInThisElemD(env);
@@ -1262,7 +1270,7 @@ void miFinalBindElem(ISS& env, int32_t nDiscard, Type key) {
   push(env, TRef);
 }
 
-void miFinalUnsetElem(ISS& env, int32_t nDiscard, Type key) {
+void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type& key) {
   discard(env, nDiscard);
   handleInSelfElemU(env);
   handleInPublicStaticElemU(env);
@@ -1280,7 +1288,7 @@ void miFinalUnsetElem(ISS& env, int32_t nDiscard, Type key) {
 // This is a helper for final defining Elem operations that need to handle
 // array chains and frame effects, but don't yet do anything better than
 // supplying a single type.
-void pessimisticFinalNewElem(ISS& env, Type ty) {
+void pessimisticFinalNewElem(ISS& env, const Type& ty) {
   if (mustBeInFrame(env.state.base)) {
     if (env.state.base.type.subtypeOf(TArr)) {
       env.state.base.type = array_newelem(env.state.base.type, ty);
@@ -1527,14 +1535,14 @@ void in(ISS& env, const bc::BaseSC& op) {
   assert(env.state.arrayChain.empty());
   auto prop = topC(env, op.arg1);
   auto cls = takeClsRefSlot(env, op.slot);
-  env.state.base = miBaseSProp(env, std::move(cls), std::move(prop));
+  env.state.base = miBaseSProp(env, std::move(cls), prop);
 }
 
 void in(ISS& env, const bc::BaseSL& op) {
   assert(env.state.arrayChain.empty());
   auto prop = locAsCell(env, op.loc1);
   auto cls = takeClsRefSlot(env, op.slot);
-  env.state.base = miBaseSProp(env, std::move(cls), std::move(prop));
+  env.state.base = miBaseSProp(env, std::move(cls), prop);
 }
 
 void in(ISS& env, const bc::BaseL& op) {
@@ -1841,7 +1849,9 @@ void in(ISS& env, const bc::MemoSet& op) {
     if (auto const name = env.state.base.locName) {
       mergeThisProp(env, name, env.state.base.type);
     } else {
-      mergeEachThisPropRaw(env, [&](Type){ return env.state.base.type; });
+      mergeEachThisPropRaw(env, [&](const Type&) {
+          return env.state.base.type;
+        });
     }
   }
 
@@ -1849,7 +1859,9 @@ void in(ISS& env, const bc::MemoSet& op) {
     if (auto const name = env.state.base.locName) {
       mergeSelfProp(env, name, env.state.base.type);
     } else {
-      mergeEachSelfPropRaw(env, [&](Type){ return env.state.base.type; });
+      mergeEachSelfPropRaw(env, [&](const Type&) {
+          return env.state.base.type;
+        });
     }
   }
 

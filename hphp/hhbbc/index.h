@@ -572,7 +572,7 @@ struct Index {
    * This function will always return TInitGen before refine_public_statics has
    * been called, or if the AnalyzePublicStatics option is off.
    */
-  Type lookup_public_static(Type cls, Type name) const;
+  Type lookup_public_static(const Type& cls, const Type& name) const;
   Type lookup_public_static(borrowed_ptr<const php::Class>, SString name) const;
 
   /*

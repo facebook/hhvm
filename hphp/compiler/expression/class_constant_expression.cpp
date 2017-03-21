@@ -77,6 +77,14 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
       m_depsSet = true;
+      if (auto scope = getScope()) {
+        if (auto clsScope = scope->getContainingClass()) {
+          // Record that this class constant is referenced inside this scope
+          // (which will be associated with another class constant if we're
+          // inside a class constant definition).
+          clsScope->addReferencedClassConstant(cls, m_varName);
+        }
+      }
     }
   }
 }

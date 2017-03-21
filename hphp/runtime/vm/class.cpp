@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
@@ -1005,6 +1006,10 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
+namespace {
+
+}
+
 Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, includeTypeCns);
@@ -1035,14 +1040,41 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   m_nonScalarConstantCache.bind();
   auto& clsCnsData = *m_nonScalarConstantCache;
 
+  /*
+   * We need a special marker value in the non-scalar constant cache to indicate
+   * that we're currently evaluating the value of a constant. If we attempt to
+   * evaluate the value of a constant, and the marker for that constant is
+   * present, that means the constant is recursively defined and we'll raise an
+   * error. We want to only store valid values in the cache to avoid breaking
+   * invariants, so we'll use the globals array for this purpose. We don't allow
+   * storing the globals array in a class constant, so this is unambiguous.
+   */
+
   if (m_nonScalarConstantCache.isInit()) {
-    if (auto cCns = clsCnsData->nvGet(clsCnsName)) return *cCns;
+    if (auto cCns = clsCnsData->nvGet(clsCnsName)) {
+      // There's an entry in the cache for this constant. If its the globals
+      // array, this constant is recursively defined, so raise an
+      // error. Otherwise just return it.
+      if (UNLIKELY(isArrayType(cCns->m_type) &&
+                   cCns->m_data.parr == get_global_variables())) {
+        raise_error(
+          folly::sformat(
+            "Cannot declare self-referencing constant '{}::{}'",
+            name(),
+            clsCnsName
+          )
+        );
+      }
+      return *cCns;
+    }
   }
 
   auto makeCache = [&] {
     if (!m_nonScalarConstantCache.isInit()) {
       clsCnsData.detach();
-      clsCnsData = Array::attach(PackedArray::MakeReserve(m_constants.size()));
+      clsCnsData = Array::attach(
+        MixedArray::MakeReserveMixed(m_constants.size())
+      );
       m_nonScalarConstantCache.markInit();
     }
   };
@@ -1085,6 +1117,12 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     return tv;
   }
 
+  // We're going to run the 86cinit to get the constant's value. Store the
+  // globals array in the constant's cache entry to prevent recursion.
+  makeCache();
+  auto marker = make_tv<KindOfArray>(get_global_variables());
+  clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
+
   // The class constant has not been initialized yet; do so.
   static auto const sd86cinit = makeStaticString("86cinit");
   auto const meth86cinit = cns.cls->lookupMethod(sd86cinit);
@@ -1100,7 +1138,8 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     args
   );
 
-  makeCache();
+  assertx(!isArrayType(ret.m_type) ||
+          ret.m_data.parr != get_global_variables());
   clsCnsData.set(StrNR(clsCnsName), cellAsCVarRef(ret), true /* isKey */);
   return ret;
 }

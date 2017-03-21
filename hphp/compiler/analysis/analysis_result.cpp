@@ -550,8 +550,14 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     }
   }
 
+  // Classes that have constants with non-empty class constant dependencies.
+  std::vector<ClassScopePtr> clsWithCnsDependencies;
+
   // Collect methods
   for (auto cls : classes) {
+    if (cls->getConstants()->hasDependencies()) {
+      clsWithCnsDependencies.emplace_back(cls);
+    }
     StringToFunctionScopePtrMap methods;
     cls->collectMethods(ar, methods, true /* include privates */);
     bool needAbstractMethodImpl =
@@ -572,6 +578,63 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   for (auto& item : m_systemClasses) {
     StringToFunctionScopePtrMap methods;
     item.second->collectMethods(ar, methods, true /* include privates */);
+  }
+
+  /*
+   * Recursive class constant detection:
+   *
+   * Every class constant has had its immediate dependencies on other class
+   * constants recorded. A class constant A is dependent on another class
+   * constant B if B is used in the definition of A's value. These dependencies
+   * will be used below to detect class constants which might be defined
+   * recursively. We need to detect this because trying to expand a recursively
+   * defined class constant's value out in the optimization phase will never
+   * terminate.
+   */
+
+  // Find all the transitive dependencies of every class constant which has a
+  // dependency on another class constant. For every class constant A which has
+  // a dependency on class constant B, expand B's dependencies (if any) into
+  // A. Repeat until no class constant's dependency set expands.
+  bool repeat;
+  do {
+    repeat = false;
+    for (auto cls : clsWithCnsDependencies) {
+      auto const& constants = cls->getConstants();
+      assertx(constants->hasDependencies());
+
+      for (auto const& p : constants->getDependencies()) {
+        auto const sym = p.first;
+        auto const& dependencies = p.second;
+        auto const beforeSize = dependencies.size();
+        ConstantTable::ClassConstantSet expanded;
+        for (auto const& cns : dependencies) {
+          cns.first->getConstants()->lookupDependencies(cns.second, expanded);
+        }
+        constants->recordDependencies(sym, expanded);
+        if (dependencies.size() > beforeSize) repeat = true;
+      }
+    }
+  } while (repeat);
+
+  // If any class constant has itself in its dependency set, then its
+  // recursively defined. Mark any such class constant as dynamic to prevent it
+  // from being expanded in the optimize phase.
+  for (auto cls : clsWithCnsDependencies) {
+    auto const& constants = cls->getConstants();
+    assertx(constants->hasDependencies());
+    for (auto const& p : constants->getDependencies()) {
+      auto sym = p.first;
+      auto const& dependencies = p.second;
+      bool recursive = false;
+      for (auto const& cns : dependencies) {
+        if (cls == cns.first && sym->getName() == cns.second) {
+          recursive = true;
+          break;
+        }
+      }
+      if (recursive) constants->setDynamic(ar, sym);
+    }
   }
 }
 

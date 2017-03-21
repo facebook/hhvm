@@ -4894,7 +4894,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       case T_OBJECT_CAST: e.CastObject(); break;
       case T_BOOL_CAST: e.CastBool(); break;
       case T_UNSET_CAST: emitPop(e); e.Null(); break;
-      case T_EXIT: e.Exit(); break;
+      case T_EXIT: {
+        auto save = m_evalStack;
+        e.Exit();
+        m_evalStackIsUnknown = false;
+        m_evalStack = save;
+        break;
+      }
       case '@': {
         assert(oldErrorLevelLoc >= 0);
         assert(start != InvalidAbsoluteOffset);

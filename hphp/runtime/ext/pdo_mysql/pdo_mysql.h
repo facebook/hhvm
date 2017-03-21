@@ -38,7 +38,9 @@ enum {
   PDO_MYSQL_ATTR_SSL_CAPATH,
   PDO_MYSQL_ATTR_SSL_CERT,
   PDO_MYSQL_ATTR_SSL_CIPHER,
-  PDO_MYSQL_ATTR_SSL_KEY
+  PDO_MYSQL_ATTR_SSL_KEY,
+  HH_PDO_MYSQL_ATTR_READ_TIMEOUT,
+  HH_PDO_MYSQL_ATTR_WRITE_TIMEOUT
 };
 
 ///////////////////////////////////////////////////////////////////////////////

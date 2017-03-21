@@ -1195,7 +1195,7 @@ let as_case_insensitive_keyword text =
   match lower with
   | "eval" | "isset" | "unset" | "empty" | "const"
   | "and"  | "or"    | "xor"  | "as" | "print" | "throw"
-  | "true" | "false" | "null" | "array" -> lower
+  | "true" | "false" | "null" | "array" | "instanceof" -> lower
   | _ -> text
 
 let as_keyword kind lexer =

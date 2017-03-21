@@ -115,7 +115,7 @@ using BuiltinInfo = tbb::concurrent_hash_map<
 struct Builtins {
   std::atomic<uint64_t> totalBuiltins;
   std::atomic<uint64_t> reducibleBuiltins;
-  BuiltinInfo builtinsInfo;
+  BuiltinInfo builtinsInfo{};
 };
 
 #define TAG(x) 1 +

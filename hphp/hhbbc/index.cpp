@@ -277,7 +277,7 @@ struct FuncInfoValue {
    * to know what we determined the last time we were alloewd to do
    * that so we can return it again.
    */
-  ContextRetTyMap contextualReturnTypes;
+  ContextRetTyMap contextualReturnTypes{};
 
   /*
    * Type info for local statics.

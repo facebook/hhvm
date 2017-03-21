@@ -206,7 +206,7 @@ bool PDOMySqlConnection::create(const Array& options) {
     ;
 
   #ifdef CLIENT_MULTI_STATEMENTS
-    if (!options.empty()) {
+    if (options.empty()) {
       connect_opts |= CLIENT_MULTI_STATEMENTS;
     } else if (pdo_attr_lval(options, PDO_MYSQL_ATTR_MULTI_STATEMENTS, 1)) {
       connect_opts |= CLIENT_MULTI_STATEMENTS;

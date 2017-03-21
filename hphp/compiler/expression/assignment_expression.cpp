@@ -72,23 +72,10 @@ ExpressionPtr AssignmentExpression::clone() {
 void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
                                         FileScopeRawPtr fs,
                                         ClassScopePtr scope) {
-  auto isArray = false;
-  if (m_value->is(Expression::KindOfUnaryOpExpression)) {
-    auto uexp = dynamic_pointer_cast<UnaryOpExpression>(m_value);
-    if (uexp->getOp() == T_ARRAY) {
-      isArray = true;
-    }
-  }
-
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     // ...as in ClassConstant statement
     // We are handling this one here, not in ClassConstant, purely because
     // we need "value" to store in constant table.
-    if (isArray) {
-      parseTimeFatal(fs,
-                     Compiler::NoError,
-                     "Arrays are not allowed in class constants");
-    }
     auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
     scope->getConstants()->add(exp->getName(), m_value, ar, m_variable);
   } else if (m_variable->is(Expression::KindOfSimpleVariable)) {

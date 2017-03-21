@@ -330,19 +330,32 @@ bool Variant::isAllowedAsConstantValue() const {
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
       return true;
+
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfArray: {
+      if (m_data.parr->isGlobalsArray()) return false;
+
+      bool allowed = true;
+      IterateV(
+        m_data.parr,
+        [&](const TypedValue* v) {
+          if (!tvAsCVarRef(v).isAllowedAsConstantValue()) allowed = false;
+          return !allowed;
+        }
+      );
+      return allowed;
+    }
 
     case KindOfUninit:
     case KindOfObject:
     case KindOfResource:
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentArray:
-    case KindOfArray:
     case KindOfRef:
       return false;
   }

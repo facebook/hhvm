@@ -466,7 +466,8 @@ Type outputType(const IRInstruction* inst, int dstId) {
 #define DCall           return callReturn(inst);
 #define DSubtract(n, t) return inst->src(n)->type() - t;
 #define DCns            return TUninit | TInitNull | TBool | \
-                               TInt | TDbl | TStr | TRes;
+                               TInt | TDbl | TStr | TArr | \
+                               TVec | TDict | TKeyset | TRes;
 #define DUnion(...)     return unionReturn(inst, IdxSeq<__VA_ARGS__>{});
 #define DMemoKey        return memoKeyReturn(inst);
 

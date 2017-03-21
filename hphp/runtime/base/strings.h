@@ -26,7 +26,7 @@ const char* const ASSIGN_THIS_ERROR = "Cannot re-assign $this";
 const char* const FUNCTION_ALREADY_DEFINED = "Function already defined: %s";
 const char* const CONSTANT_ALREADY_DEFINED = "Constant %s already defined";
 const char* const CONSTANTS_MUST_BE_SCALAR =
-  "Constants may only evaluate to scalar values";
+  "Constants may only evaluate to scalar values or arrays";
 const char* const CONSTANTS_CASE_SENSITIVE =
   "Case insensitive constant names are not supported in HipHop";
 const char* const MODULO_BY_ZERO = "Modulo by zero";

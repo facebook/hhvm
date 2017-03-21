@@ -60,3 +60,9 @@ int(123)
 ================ test22 ===================
 
 Fatal error: Cannot declare self-referencing constant 'J2::FOO' in %s/recursive.php on line 84
+================ test23 ===================
+
+Fatal error: Cannot declare self-referencing constant 'K::FOO' in %s/recursive.php on line 90
+================ test24 ===================
+
+Fatal error: Cannot declare self-referencing constant 'K::BAR' in %s/recursive.php on line 89

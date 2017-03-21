@@ -1,0 +1,140 @@
+"class Cls1 { static public $a = 123; const BADARRAY = [$a]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADARRAY = [&$a]; };" ====>
+Fatal error: syntax error, unexpected '&', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADARRAY = [100 + $a + 200]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADARRAY = [new stdclass]; };" ====>
+Fatal error: syntax error, unexpected T_NEW, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADARRAY = [foobaz()]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADARRAY = [1, [2, new stdclass], 3]; };" ====>
+Fatal error: syntax error, unexpected T_NEW, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADARRAY = [1, [2, foobaz()], 3]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADARRAY = [$GLOBALS]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADARRAY = [1, [2, $a], 3]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADARRAY = [1, [2, &$a], 3]; };" ====>
+Fatal error: syntax error, unexpected '&', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADVEC = vec[$a]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADVEC = vec[100 + $a + 200]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADVEC = vec[new stdclass]; };" ====>
+Fatal error: syntax error, unexpected T_NEW, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADVEC = vec[foobaz()]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADVEC = vec[1, vec[2, new stdclass], 3]; };" ====>
+Fatal error: syntax error, unexpected T_NEW, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADVEC = vec[1, vec[2, foobaz()], 3]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADVEC = vec[$GLOBALS]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADVEC = vec[1, vec[2, $a], 3]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADVEC = vec[1, vec[2, 100 + $a + 200], 3]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADDICT = dict[0 => $a]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADDICT = dict[100 => 100 + $a + 200]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADDICT = dict[1 => new stdclass]; };" ====>
+Fatal error: syntax error, unexpected T_NEW in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADDICT = dict[1 => foobaz()]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => new stdclass], 3 => 3]; };" ====>
+Fatal error: syntax error, unexpected T_NEW in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => foobaz()], 3 => 3]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADDICT = dict[1 => $GLOBALS]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => 100 + $a + 200], 3 => 3]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADKEYSET = keyset[$a]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADKEYSET = keyset[100 + $a + 200]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADKEYSET = keyset[foobaz()]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { const BADKEYSET = keyset[1, keyset[2, foobaz()], 3]; };" ====>
+Fatal error: syntax error, unexpected '(', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADKEYSET = keyset[1, keyset[2, $a], 3]; };" ====>
+Fatal error: syntax error, unexpected T_VARIABLE, expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================
+"class Cls1 { static public $a = 123; const BADKEYSET = keyset[1, ketset[2, 100 + $a + 200], 3]; };" ====>
+Fatal error: syntax error, unexpected '[', expecting ']' in %s/bad-arrays.php(52)(%s) : eval()'d code on line 1
+
+==============================================================

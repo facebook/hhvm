@@ -519,11 +519,9 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
   if (outName) {
     *outName = makeStaticString(v.toCStrRef().get());
   }
-  if (!(*m_params)[1]->getScalarValue(v) || v.isArray()) return false;
+  if (!(*m_params)[1]->getScalarValue(v)) return false;
   if (outValue) {
-    if (v.isString()) {
-      v = makeStaticString(v.toCStrRef().get());
-    }
+    v.setEvalScalar();
     *outValue = *v.asTypedValue();
   }
   return true;

@@ -9769,10 +9769,7 @@ Id EmitterVisitor::emitClass(Emitter& e,
             StringData* constName = makeStaticString(con->getName());
             assert(vNode);
             TypedValue tvVal;
-            if (vNode->isArray()) {
-              throw IncludeTimeFatalException(
-                cc, "Arrays are not allowed in class constants");
-            } else if (vNode->isCollection()) {
+            if (vNode->isCollection()) {
               throw IncludeTimeFatalException(
                 cc, "Collections are not allowed in class constants");
             } else if (vNode->isScalar()) {

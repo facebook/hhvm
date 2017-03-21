@@ -85,6 +85,11 @@ class J2 {
   const BAR = 123;
 }
 
+class K {
+  const FOO = [self::BAR];
+  const BAR = [self::FOO];
+}
+
 function test1() { var_dump(A::FOO); }
 function test2() { var_dump(A::BAR); }
 function test3() { var_dump(A::BAZ); }
@@ -115,41 +120,45 @@ function test20() {
 }
 function test21() { var_dump(J1::FOO); }
 function test22() { var_dump(J2::FOO); }
+function test23() { var_dump(K::FOO); }
+function test24() { var_dump(K::BAR); }
+
+const TESTS = vec[
+  'test1',
+  'test2',
+  'test3',
+  'test4',
+  'test5',
+  'test6',
+  'test7',
+  'test8',
+  'test9',
+  'test10',
+  'test11',
+  'test12',
+  'test13',
+  'test14',
+  'test15',
+  'test16',
+  'test17',
+  'test18',
+  'test19',
+  'test20',
+  'test21',
+  'test22',
+  'test23',
+  'test24'
+];
 
 function main() {
-  $tests = vec[
-    'test1',
-    'test2',
-    'test3',
-    'test4',
-    'test5',
-    'test6',
-    'test7',
-    'test8',
-    'test9',
-    'test10',
-    'test11',
-    'test12',
-    'test13',
-    'test14',
-    'test15',
-    'test16',
-    'test17',
-    'test18',
-    'test19',
-    'test20',
-    'test21',
-    'test22'
-  ];
-
   $count = apc_fetch("count");
   if ($count === false) {
     $count = 0;
   }
 
-  if ($count >= count($tests)) return;
+  if ($count >= count(TESTS)) return;
 
-  $test = $tests[$count];
+  $test = TESTS[$count];
   ++$count;
   apc_store("count", $count);
 

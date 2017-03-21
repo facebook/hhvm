@@ -1171,29 +1171,29 @@ ColAddNewElemC    [C C]  ->  [C:Obj]
   HH\Vector.  This instruction executes $2[] = $1 and then pushes $2 onto the
   stack.
 
-Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
+Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get constant. Pushes the value of the global constant named %1 onto the stack
   as a cell. If there is no constant named %1, this instruction raises a notice
   and pushes the string %1 onto the stack as a cell.
 
-CnsE <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
+CnsE <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get constant. Pushes the value of the global constant named %1 onto the stack
   as a cell. If there is no constant named %1, throws a fatal error.
 
-CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
+CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get constant. Identical to Cns except returns constant named %2 if the
   constant named %1 is undefined.
 
-ClsCns <litstr id> <class-ref slot>  []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
+ClsCns <litstr id> <class-ref slot>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get class constant. This instruction pushes the value of the class constant
   named %1 from class %2 onto the stack. If there is no class constant named %1
   in class %2, this instruction throws a fatal error.
 
-ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Resource]
+ClsCnsD <litstr id> <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get class constant (direct). This instruction first checks if %2 matches the
   name of a defined class. If %2 does not match the name of a defined class,
@@ -3876,9 +3876,9 @@ AliasCls <class-name, alias-name>    [C]  ->  [C:bool]
 DefCns <litstr id>    [C]  ->  [C]
 
   Define constant. If there is already a global constant named %1, raises a
-  notice and pushes false. If $1 is an array or an object, raises a notice, and
-  pushes false. Otherwise defines the constant named %1 to have the value $1,
-  and pushes true.
+  notice and pushes false. If $1 isn't a scalar, array, vec, dict, or keyset,
+  raises a notice, and pushes false. Otherwise defines the constant named %1 to
+  have the value $1, and pushes true.
 
 DefTypeAlias <litstr id>   []  ->  []
 

@@ -35,9 +35,9 @@ function getimagesize($filename, &$imageinfo = null) { }
 function image_type_to_extension($imagetype, $include_dot = true) { }
 function image_type_to_mime_type($imagetype) { }
 function image2wbmp($image, $filename = null, $threshold = -1) { }
-function imageaffine($image, $affine = [], $clip = []) { }
+function imageaffine($image, $affine = array(), $clip = array()) { }
 function imageaffinematrixconcat($m1, $m2) { }
-function imageaffinematrixget($type, $options = []) { }
+function imageaffinematrixget($type, $options = array()) { }
 function imagealphablending($image, $blendmode) { }
 function imageantialias($image, $on) { }
 function imagearc($image, $cx, $cy, $width, $height, $start, $end, $color) { }

@@ -780,6 +780,165 @@ void RuntimeOption::Load(const IniSetting::Map& ini,
     StringOffsetLimit = Config::GetInt64(ini, rlimit["StringOffsetLimit"], 10 * 1024 * 1024);
   }
   {
+    Hdf eval = config["Eval"];
+    EnableHipHopSyntax = Config::GetBool(ini, eval["EnableHipHopSyntax"]);
+    EnableHipHopExperimentalSyntax =
+      Config::GetBool(ini, eval["EnableHipHopExperimentalSyntax"]);
+    EnableShortTags= Config::GetBool(ini, eval["EnableShortTags"], true);
+    EnableAspTags = Config::GetBool(ini, eval["EnableAspTags"]);
+    EnableXHP = Config::GetBool(ini, eval["EnableXHP"], false);
+    IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                     "hhvm.eval.enable_xhp", &EnableXHP);
+    EnableZendCompat = Config::GetBool(ini, eval["EnableZendCompat"], false);
+    EnableZendSorting = Config::GetBool(ini, eval["EnableZendSorting"], false);
+    TimeoutsUseWallTime = Config::GetBool(ini, eval["TimeoutsUseWallTime"], true);
+    CheckFlushOnUserClose = Config::GetBool(ini, eval["CheckFlushOnUserClose"], true);
+
+    if (EnableHipHopSyntax) {
+      // If EnableHipHopSyntax is true, it forces EnableXHP to true
+      // regardless of how it was set in the config
+      EnableXHP = true;
+    }
+
+    EnableObjDestructCall = Config::GetBool(ini, eval["EnableObjDestructCall"], false);
+    MaxUserFunctionId = Config::GetInt32(ini, eval["MaxUserFunctionId"], 2 * 65536);
+    CheckSymLink = Config::GetBool(ini, eval["CheckSymLink"], true);
+
+    EnableAlternative = Config::GetInt32(ini, eval["EnableAlternative"], 0);
+
+#define get_double GetDouble
+#define get_bool GetBool
+#define get_string GetString
+#define get_int16 GetInt16
+#define get_int32 GetInt32
+#define get_int32_t GetInt32
+#define get_int64 GetInt64
+#define get_uint16 GetUInt16
+#define get_uint32 GetUInt32
+#define get_uint32_t GetUInt32
+#define get_uint64 GetUInt64
+#define get_uint64_t GetUInt64
+#define F(type, name, defaultVal) \
+    Eval ## name = Config::get_ ##type(ini, eval[#name], defaultVal);
+    EVALFLAGS()
+#undef F
+#undef get_double
+#undef get_bool
+#undef get_string
+#undef get_int16
+#undef get_int32
+#undef get_int64
+#undef get_uint16
+#undef get_uint32
+#undef get_uint32_t
+#undef get_uint64
+    low_malloc_huge_pages(EvalMaxLowMemHugePages);
+    EnableEmitSwitch = Config::GetBool(ini, eval["EnableEmitSwitch"], true);
+    EnableEmitterStats = Config::GetBool(ini, eval["EnableEmitterStats"], EnableEmitterStats);
+    RecordCodeCoverage = Config::GetBool(ini, eval["RecordCodeCoverage"]);
+    if (EvalJit && RecordCodeCoverage) {
+      throw InvalidArgumentException(
+        "code coverage", "Code coverage is not supported for Eval.Jit=true");
+    }
+    if (RecordCodeCoverage) CheckSymLink = true;
+    CodeCoverageOutputFile = Config::GetString(ini, eval["CodeCoverageOutputFile"]);
+    {
+      Hdf debugger = eval["Debugger"];
+      EnableDebugger = Config::GetBool(ini, debugger["EnableDebugger"]);
+      EnableDebuggerColor = Config::GetBool(ini, debugger["EnableDebuggerColor"], true);
+      EnableDebuggerPrompt = Config::GetBool(ini, debugger["EnableDebuggerPrompt"], true);
+      EnableDebuggerServer = Config::GetBool(ini, debugger["EnableDebuggerServer"]);
+      EnableDebuggerUsageLog = Config::GetBool(ini, debugger["EnableDebuggerUsageLog"]);
+      DebuggerServerPort = Config::GetUInt16(ini, debugger["Port"], 8089);
+      DebuggerDisableIPv6 = Config::GetBool(ini, debugger["DisableIPv6"], false);
+      DebuggerDefaultSandboxPath = Config::GetString(ini, debugger["DefaultSandboxPath"]);
+      DebuggerStartupDocument = Config::GetString(ini, debugger["StartupDocument"]);
+      DebuggerSignalTimeout = Config::GetInt32(ini, debugger["SignalTimeout"], 1);
+
+      DebuggerDefaultRpcPort = Config::GetUInt16(ini, debugger["RPC.DefaultPort"], 8083);
+      DebuggerDefaultRpcAuth = Config::GetString(ini, debugger["RPC.DefaultAuth"]);
+      DebuggerRpcHostDomain = Config::GetString(ini, debugger["RPC.HostDomain"]);
+      DebuggerDefaultRpcTimeout = Config::GetInt32(ini, debugger["RPC.DefaultTimeout"], 30);
+    }
+    {
+      Hdf lang = config["Hack"]["Lang"];
+      IntsOverflowToInts =
+        Config::GetBool(ini, lang["IntsOverflowToInts"], EnableHipHopSyntax);
+      StrictArrayFillKeys =
+        Config::GetHackStrictOption(ini,
+                                    lang["StrictArrayFillKeys"],
+                                    EnableHipHopSyntax);
+      DisallowDynamicVarEnvFuncs =
+        Config::GetHackStrictOption(ini,
+                                    lang["DisallowDynamicVarEnvFuncs"],
+                                    EnableHipHopSyntax);
+    }
+    {
+      Hdf repo = config["Repo"];
+      {
+        Hdf repoLocal = repo["Local"];
+        // Repo.Local.Mode.
+        RepoLocalMode = Config::GetString(ini, repoLocal["Mode"]);
+        if (!empty && RepoLocalMode.empty()) {
+          const char* HHVM_REPO_LOCAL_MODE = getenv("HHVM_REPO_LOCAL_MODE");
+          if (HHVM_REPO_LOCAL_MODE != nullptr) {
+            RepoLocalMode = HHVM_REPO_LOCAL_MODE;
+          }
+        }
+        if (RepoLocalMode.empty()) {
+          RepoLocalMode = "r-";
+        }
+        if (RepoLocalMode.compare("rw")
+            && RepoLocalMode.compare("r-")
+            && RepoLocalMode.compare("--")) {
+          Logger::Error("Bad config setting: Repo.Local.Mode=%s",
+                        RepoLocalMode.c_str());
+          RepoLocalMode = "rw";
+        }
+        // Repo.Local.Path.
+        RepoLocalPath = Config::GetString(ini, repoLocal["Path"]);
+        if (!empty && RepoLocalPath.empty()) {
+          const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
+          if (HHVM_REPO_LOCAL_PATH != nullptr) {
+            RepoLocalPath = HHVM_REPO_LOCAL_PATH;
+          }
+        }
+      }
+      {
+        Hdf repoCentral = repo["Central"];
+        // Repo.Central.Path.
+        RepoCentralPath = Config::GetString(ini, repoCentral["Path"]);
+        IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_SYSTEM,
+                         "hhvm.repo.central.path", &RepoCentralPath);
+      }
+      {
+        Hdf repoEval = repo["Eval"];
+        // Repo.Eval.Mode.
+        RepoEvalMode = Config::GetString(ini, repoEval["Mode"]);
+        if (RepoEvalMode.empty()) {
+          RepoEvalMode = "readonly";
+        } else if (RepoEvalMode.compare("local")
+                   && RepoEvalMode.compare("central")
+                   && RepoEvalMode.compare("readonly")) {
+          Logger::Error("Bad config setting: Repo.Eval.Mode=%s",
+                        RepoEvalMode.c_str());
+          RepoEvalMode = "readonly";
+        }
+      }
+      RepoJournal = Config::GetString(ini, repo["Journal"], "delete");
+      RepoCommit = Config::GetBool(ini, repo["Commit"], true);
+      RepoDebugInfo = Config::GetBool(ini, repo["DebugInfo"], true);
+      RepoAuthoritative = Config::GetBool(ini, repo["Authoritative"], false);
+    }
+
+    // NB: after we know the value of RepoAuthoritative.
+    EnableArgsInBacktraces =
+      Config::GetBool(ini, eval["EnableArgsInBacktraces"], !RepoAuthoritative);
+    EvalAuthoritativeMode =
+      Config::GetBool(ini, eval["AuthoritativeMode"], false) || RepoAuthoritative;
+  }
+  {
+>>>>>>> a73b0f0... allow usage of zend-qsort in user sorts with a runtime option
     Hdf server = config["Server"];
     Host = Config::GetString(ini, server["Host"]);
     DefaultServerNameSuffix = Config::GetString(ini, server["DefaultServerNameSuffix"]);

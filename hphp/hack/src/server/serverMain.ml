@@ -12,7 +12,7 @@ open Core
 open ServerEnv
 open Reordered_argument_collections
 open String_utils
-
+open SearchServiceRunner
 (*****************************************************************************)
 (* Main initialization *)
 (*****************************************************************************)
@@ -46,7 +46,6 @@ module Program =
       (* Warning: Global references inited in this function, should
          be 'restored' in the workers, because they are not 'forked'
          anymore. See `ServerWorker.{save/restore}_state`. *)
-      HackSearchService.attach_hooks ();
 
       Sys_utils.set_signal Sys.sigusr1
         (Sys.Signal_handle Typing.debug_print_last_pos);

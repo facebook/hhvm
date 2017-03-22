@@ -108,7 +108,7 @@ let config_user_attributes config =
       Some (List.fold_left custom_attrs ~f:SSet.add ~init:SSet.empty)
 
 let process_experimental sl =
-  match List.map sl String.lowercase with
+  match List.map sl String.lowercase_ascii with
     | ["false"] -> SSet.empty
     | ["true"] -> TypecheckerOptions.experimental_all
     | features ->

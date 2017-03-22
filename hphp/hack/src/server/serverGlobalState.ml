@@ -18,7 +18,6 @@ let save () =
 
 let restore (saved_root, saved_hhi, trace, fuzzy) =
   Parsing_hooks.fuzzy := fuzzy;
-  HackSearchService.attach_hooks ();
   Relative_path.(set_path_prefix Root saved_root);
   Relative_path.(set_path_prefix Hhi saved_hhi);
   Typing_deps.trace := trace

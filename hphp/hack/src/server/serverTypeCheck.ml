@@ -10,6 +10,7 @@
 
 open Core
 open ServerCheckUtils
+open SearchServiceRunner
 open ServerEnv
 open Reordered_argument_collections
 open Utils
@@ -214,6 +215,12 @@ let parsing genv env to_check ~stop_at_errors =
     genv.workers (Relative_path.Set.elements disk_files) in
   let (fast, errors, failed_parsing) as res =
     Parsing_service.go genv.workers ide_files ~get_next env.popt in
+
+  SearchServiceRunner.update_fileinfo_map fast;
+  (* During integration tests, we want to pretend that search is run
+    synchronously *)
+  if Sys_utils.is_test_mode () then SearchServiceRunner.run_completely genv;
+
   if stop_at_errors then begin
     (* Revert changes and ignore results for IDE files that failed parsing *)
     let ide_failed_parsing =

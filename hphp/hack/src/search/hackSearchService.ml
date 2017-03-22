@@ -285,9 +285,3 @@ module MasterApi = struct
   let update_search_index ~fuzzy files =
     SS.MasterApi.update_search_index ~fuzzy files
 end
-
-let attach_hooks () =
-  let fuzzy = !Parsing_hooks.fuzzy in
-  Parsing_hooks.attach_file_parsed_hook WorkerApi.update;
-  Parsing_hooks.attach_parse_task_completed_hook
-    (MasterApi.update_search_index ~fuzzy)

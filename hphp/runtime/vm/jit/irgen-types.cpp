@@ -411,7 +411,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
    *
    * We're prepared to generate translations for known non-object types, but if
    * it's Gen/Cell we're going to PUNT because it's natural to translate that
-   * case with control flow TODO(#2020251)
+   * case with control flow TODO(#16781576)
    */
   if (TObj < src->type()) {
     PUNT(InstanceOfD_MaybeObj);

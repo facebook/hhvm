@@ -85,7 +85,7 @@ async function vmk<Tk, Tv, Tr>(
  * values is done using `Awaitable`s.
  *
  * This function is called `vf` because we are returning a `v`ector, and
- * we are doing a `f`apping operation.
+ * we are doing a `f`iltering operation.
  *
  * `$callable` must return an `Awaitable` of `bool`.
  *

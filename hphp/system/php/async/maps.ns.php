@@ -85,7 +85,7 @@ async function mmk<Tk, Tv, Tr>(
  * values is done using `Awaitable`s.
  *
  * This function is called `mf` because we are returning a `m`ap, and we are
- * doing a `f`apping operation.
+ * doing a `f`iltering operation.
  *
  * `$callable` must return an `Awaitable` of `bool`.
  *

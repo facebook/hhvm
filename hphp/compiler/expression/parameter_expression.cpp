@@ -195,10 +195,25 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
     }
   }
 
+  const char* hint = getTypeHint().c_str();
+  // type declarations mean that we must accept arbitrary types for
+  // arbitrary strings in HipHopSyntax mode. But we can still enforce
+  // the known types.
+  auto const acceptAny = m_hhType && (strcasecmp(hint, "HH\\bool") &&
+                                      strcasecmp(hint, "HH\\int") &&
+                                      strcasecmp(hint, "HH\\num") &&
+                                      strcasecmp(hint, "HH\\arraykey") &&
+                                      strcasecmp(hint, "HH\\float") &&
+                                      strcasecmp(hint, "HH\\num") &&
+                                      strcasecmp(hint, "HH\\string") &&
+                                      strcasecmp(hint, "HH\\vec") &&
+                                      strcasecmp(hint, "HH\\dict") &&
+                                      strcasecmp(hint, "HH\\keyset") &&
+                                      strcasecmp(hint, "array"));
+
   // Normally a named type like 'int' is compatible with Int but not integer
   // Since the default value's type is inferred from the value itself it is
   // ok to compare against the lower case version of the type hint in hint
-  const char* hint = getTypeHint().c_str();
   [&] {
     switch (defaultType) {
       case KindOfUninit:
@@ -210,54 +225,50 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
         return;
 
       case KindOfBoolean:
-        compat = !strcasecmp(hint, "HH\\bool");
+        compat = acceptAny || !strcasecmp(hint, "HH\\bool");
         return;
 
       case KindOfInt64:
-        compat = (!strcasecmp(hint, "HH\\int") ||
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\int") ||
                   !strcasecmp(hint, "HH\\num") ||
                   !strcasecmp(hint, "HH\\arraykey") ||
                   // PHP 7 allows widening conversions
                   (RuntimeOption::PHP7_ScalarTypes &&
-                   !strcasecmp(hint, "HH\\float")) ||
-                  (m_hhType && interface_supports_int(hint)));
+                   !strcasecmp(hint, "HH\\float")));
         return;
 
       case KindOfDouble:
-        compat = (!strcasecmp(hint, "HH\\float") ||
-                  !strcasecmp(hint, "HH\\num") ||
-                  (m_hhType && interface_supports_double(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\float") ||
+                  !strcasecmp(hint, "HH\\num"));
         return;
 
       case KindOfPersistentString:
       case KindOfString:
-        compat = (!strcasecmp(hint, "HH\\string") ||
-                  !strcasecmp(hint, "HH\\arraykey") ||
-                  (m_hhType && interface_supports_string(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\string") ||
+                  !strcasecmp(hint, "HH\\arraykey"));
         return;
 
       case KindOfPersistentVec:
       case KindOfVec:
-        compat = (!strcasecmp(hint, "HH\\vec") ||
-                  (m_hhType && interface_supports_vec(hint)));
+        compat = (acceptAny || !strcasecmp(hint, "HH\\vec"));
         return;
 
       case KindOfPersistentDict:
       case KindOfDict:
-        compat = (!strcasecmp(hint, "HH\\dict") ||
-                  (m_hhType && interface_supports_dict(hint)));
+        compat = (acceptAny || !strcasecmp(hint, "HH\\dict"));
         return;
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        compat = (!strcasecmp(hint, "HH\\keyset")  ||
-                  (m_hhType && interface_supports_keyset(hint)));
+        compat = (acceptAny || !strcasecmp(hint, "HH\\keyset"));
         return;
 
       case KindOfPersistentArray:
       case KindOfArray:
-        compat = (!strcasecmp(hint, "array") ||
-                  (m_hhType && interface_supports_array(hint)));
+        compat = (acceptAny || !strcasecmp(hint, "array"));
         return;
 
       case KindOfObject:

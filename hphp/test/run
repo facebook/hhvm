@@ -374,6 +374,7 @@ function get_options($argv) {
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     'repo' => 'r',
+    'hhbbc2' => '',
     'mode:' => 'm:',
     'server' => 's',
     'cli-server' => 'S',
@@ -453,6 +454,8 @@ function get_options($argv) {
     echo "relocate and recycle-tc are mutually exclusive options\n";
     exit(1);
   }
+
+  if (isset($options['hhbbc2'])) $options['repo'] = true;
 
   return array($options, $files);
 }
@@ -613,7 +616,9 @@ function list_tests($files, $options) {
       throw new Exception("Unsupported mode for listing tests: ".$mode);
   }
 
-  if (isset($options['repo'])) {
+  if (isset($options['hhbbc2'])) {
+    $args[] = '--hhbbc2';
+  } else if (isset($options['repo'])) {
     $args[] = '-r';
   }
 
@@ -1227,7 +1232,8 @@ function clean_intermediate_files($test, $options) {
   if (isset($options['no-clean'])) {
     return;
   }
-  $exts = array('out', 'diff', 'repo');
+  $exts = array('out', 'diff', 'repo',
+                'after.round_trip.hhas', 'before.round_trip.hhas');
   foreach ($exts as $ext) {
     $file = "$test.$ext";
     if (file_exists($file)) {
@@ -1779,6 +1785,18 @@ function run_test($options, $test) {
     $hhbbc = hhbbc_cmd($options, $test);
     shell_exec("$hphp 2>&1");
     shell_exec("$hhbbc 2>&1");
+    if (isset($options['hhbbc2'])) {
+      $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
+      shell_exec("mv $hhbbc_repo $hphp_repo");
+      shell_exec("$hhbbc 2>&1");
+      $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
+      $one = file_get_contents($hhas_temp1);
+      $two = file_get_contents($hhas_temp2);
+      if (strcmp($one, $two)) {
+        file_put_contents("$test.diff", generate_diff($one, null, $two));
+        return false;
+      }
+    }
 
     return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
@@ -1839,7 +1857,20 @@ function print_commands($tests, $options) {
 
     // How to run it with hhbbc:
     $hhbbc_cmds = hphp_cmd($options, $test)."\n";
-    $hhbbc_cmds .= hhbbc_cmd($options, $test)."\n";
+    $hhbbc_cmd  = hhbbc_cmd($options, $test)."\n";
+    $hhbbc_cmds .= $hhbbc_cmd;
+    if (isset($options['hhbbc2'])) {
+      foreach ((array)$command as $c) {
+        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
+      }
+      $hhbbc_cmds .= "mv $test.repo/hhvm.hhbbc $test.repo/hhvm.hhbc\n";
+      $hhbbc_cmds .= $hhbbc_cmd;
+      foreach ((array)$command as $c) {
+        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
+      }
+      $hhbbc_cmds .=
+        "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
+    }
     foreach ((array)$command as $c) {
       $hhbbc_cmds .= $c."\n";
     }

@@ -41,7 +41,6 @@ let legacy_php_file_info = ref (fun fn ->
 let process_parse_result
   ?(ide = false) ~quick (acc, errorl, error_files) fn res =
   let errorl', {Parser_hack.file_mode; comments; ast; content;}, _ = res in
-  Parsing_hooks.dispatch_file_parsed_hook fn ast;
 
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
@@ -163,6 +162,4 @@ let go ?(quick = false) workers files_set ~get_next popt =
           let acc = Relative_path.Map.add acc ~key:fn ~data:info in
           acc, errorl, error_files
       ) in
-  Parsing_hooks.dispatch_parse_task_completed_hook
-    (Relative_path.Map.keys fast);
   fast, errorl, failed_parsing

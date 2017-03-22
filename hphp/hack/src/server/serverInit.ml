@@ -559,7 +559,7 @@ module ServerLazyInit : InitKind = struct
    * parsing hooks. During lazy init, need to do it manually from the fast
    * instead since we aren't parsing the codebase.
    *)
-  let update_search genv saved t =
+  let update_search saved t =
     (* Only look at Hack files *)
     let fast = FileInfo.saved_to_hack_files saved in
     (* Filter out non php files *)
@@ -660,7 +660,7 @@ module ServerLazyInit : InitKind = struct
       (* Update the fileinfo object's dependencies now that we have full fast *)
       let t = update_files genv env.files_info t in
 
-      let t = update_search genv old_saved t in
+      let t = update_search old_saved t in
       type_check_dirty genv env old_fast fast dirty_files t, state
     | Error err ->
       (* Fall back to type-checking everything *)

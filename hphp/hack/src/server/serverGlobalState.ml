@@ -14,10 +14,10 @@ let save () =
   Path.make (Relative_path.(path_of_prefix Root)),
   Path.make (Relative_path.(path_of_prefix Hhi)),
   !Typing_deps.trace,
-  !Parsing_hooks.fuzzy
+  !HackSearchService.fuzzy
 
 let restore (saved_root, saved_hhi, trace, fuzzy) =
-  Parsing_hooks.fuzzy := fuzzy;
+  HackSearchService.fuzzy := fuzzy;
   Relative_path.(set_path_prefix Root saved_root);
   Relative_path.(set_path_prefix Hhi saved_hhi);
   Typing_deps.trace := trace

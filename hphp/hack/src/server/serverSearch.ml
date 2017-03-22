@@ -58,7 +58,7 @@ let result_to_json res =
     ]
 
 let go popt workers query type_ =
-  let fuzzy = !Parsing_hooks.fuzzy in
+  let fuzzy = !HackSearchService.fuzzy in
   let results =
     HackSearchService.MasterApi.query popt ~fuzzy workers query type_ in
 

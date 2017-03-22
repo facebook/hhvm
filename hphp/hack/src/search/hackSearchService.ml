@@ -12,6 +12,7 @@ open Core
 open Utils
 open Reordered_argument_collections
 
+let fuzzy = ref false
 type search_result_type =
   | Class of Ast.class_kind option
   | Method of bool * string
@@ -85,7 +86,7 @@ module WorkerApi = struct
     SS.WorkerApi.process_autocomplete_term key name pos type_ acc
 
   let update_defs id type_ fuzzy_defs trie_defs =
-    if !Parsing_hooks.fuzzy then
+    if !fuzzy then
     add_fuzzy_term id type_ fuzzy_defs, trie_defs
     else
     fuzzy_defs, add_trie_term id type_ trie_defs

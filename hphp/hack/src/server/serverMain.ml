@@ -12,7 +12,7 @@ open Core
 open ServerEnv
 open Reordered_argument_collections
 open String_utils
-open SearchServiceRunner
+
 (*****************************************************************************)
 (* Main initialization *)
 (*****************************************************************************)

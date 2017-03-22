@@ -217,6 +217,7 @@ interpOutputLocals(IRGS& env,
     locals.emplace_back(id, relaxToGuardable(t));
   };
   auto setImmLocType = [&](uint32_t id, Type t) {
+    assert(id < 4);
     setLocType(inst.imm[id].u_LA, t);
   };
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
@@ -326,8 +327,8 @@ interpOutputLocals(IRGS& env,
     }
 
     case OpSilence:
-      if (static_cast<SilenceOp>(inst.imm[0].u_OA) == SilenceOp::Start) {
-        setImmLocType(inst.imm[0].u_LA, TInt);
+      if (static_cast<SilenceOp>(inst.imm[1].u_OA) == SilenceOp::Start) {
+        setImmLocType(0, TInt);
       }
       break;
 

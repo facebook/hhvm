@@ -136,8 +136,10 @@ int immSize(PC origPC, int idx) {
     if (idx >= 1) pc += immSize(origPC, 0);
     if (idx >= 2) pc += immSize(origPC, 1);
     if (idx >= 3) pc += immSize(origPC, 2);
-    return encoded_iva_size(decode_raw<uint8_t>(pc)) +
-      encoded_iva_size(decode_raw<uint8_t>(pc));
+    auto start = pc;
+    decode_iva(pc); // first
+    decode_iva(pc); // restCount
+    return pc - start;
   }
 
   if (immIsVector(op, idx)) {
@@ -225,17 +227,6 @@ T decodeImm(const unsigned char** immPtr) {
   T val = *(T*)*immPtr;
   *immPtr += sizeof(T);
   return val;
-}
-
-// TODO: merge with emitIVA in unit.h
-size_t encodeVariableSizeImm(int32_t n, unsigned char* buf) {
-  if (LIKELY((n & 0x7f) == n)) {
-    *buf = static_cast<unsigned char>(n);
-    return 1;
-  }
-  assert((n & 0x7fffffff) == n);
-  *reinterpret_cast<uint32_t*>(buf) = (n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f);
-  return 4;
 }
 
 int instrLen(PC const origPC) {

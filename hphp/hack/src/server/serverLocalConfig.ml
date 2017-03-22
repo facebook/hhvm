@@ -26,6 +26,7 @@ type t = {
   enable_fuzzy_search: bool;
   lazy_parse: bool;
   lazy_init: bool;
+  search_chunk_size: int;
   io_priority: int;
   cpu_priority: int;
   shm_dirs: string list;
@@ -49,6 +50,7 @@ let default = {
   enable_fuzzy_search = true;
   lazy_parse = false;
   lazy_init = false;
+  search_chunk_size = 0;
   io_priority = 7;
   cpu_priority = 10;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
@@ -87,6 +89,8 @@ let load_ fn =
     ~default:default.lazy_parse config in
   let lazy_init = bool_ "lazy_init2"
     ~default:default.lazy_init config in
+  let search_chunk_size = int_ "search_chunk_size"
+    ~default:default.search_chunk_size config in
   let load_mini_script_timeout = int_ "load_mini_script_timeout"
     ~default:default.load_mini_script_timeout config in
   let use_hackfmt = bool_ "use_hackfmt"
@@ -133,6 +137,7 @@ let load_ fn =
     enable_fuzzy_search;
     lazy_parse;
     lazy_init;
+    search_chunk_size;
     io_priority;
     cpu_priority;
     shm_dirs;

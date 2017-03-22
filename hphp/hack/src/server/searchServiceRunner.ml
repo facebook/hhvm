@@ -20,7 +20,8 @@ module SearchServiceRunner  = struct
   type t = (HackSearchService.SS.Trie.SearchUpdates.key * info)
 
   (* Chosen so that multiworker takes about ~2.5 seconds *)
-  let chunk_size = 50000
+  let chunk_size genv =
+    genv.local_config.ServerLocalConfig.search_chunk_size
 
   (* Update the search service for this file *)
   let update_single (fn, info) =
@@ -69,15 +70,22 @@ module SearchServiceRunner  = struct
     update_search genv (Queue.length queue)
 
   let run genv () =
-    update_search genv chunk_size
+    let size = if chunk_size genv = 0
+    then Queue.length queue
+    else chunk_size genv in
+    update_search genv size
 
   let update x = Queue.push x queue
 
   let update_full fn ast = Queue.push (fn, Full ast) queue
+
+  let should_run_completely genv =
+   chunk_size genv = 0
 
   let update_fileinfo_map fast =
     Relative_path.Map.iter fast
     ~f: begin fun fn info ->
       update_full fn info
     end
+
 end

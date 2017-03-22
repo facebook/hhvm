@@ -56,6 +56,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
   HackEventLogger.set_lazy_levels
    (local_config.ServerLocalConfig.lazy_parse)
    (local_config.ServerLocalConfig.lazy_init);
+  HackEventLogger.set_search_chunk_size
+    local_config.ServerLocalConfig.search_chunk_size;
 
   HackSearchService.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.check_mode options then

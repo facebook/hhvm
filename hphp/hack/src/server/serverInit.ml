@@ -744,8 +744,8 @@ let init ?load_mini_approach genv =
       ServerEagerInit.init ~load_mini_approach genv lazy_lev env root
   in
   let env, _t = ai_check genv env.files_info env t in
-  if Sys_utils.is_test_mode () then
-    SearchServiceRunner.run_completely genv;
+  if SearchServiceRunner.should_run_completely genv
+    then SearchServiceRunner.run_completely genv;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
   env, Result.is_ok state

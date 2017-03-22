@@ -419,6 +419,7 @@ let setup_server options handle =
     enable_on_nfs;
     lazy_parse;
     lazy_init;
+    search_chunk_size;
     load_script_config;
     _
   } as local_config = local_config in
@@ -435,7 +436,8 @@ let setup_server options handle =
     lazy_parse
     lazy_init
     saved_state_load_type
-    use_sql;
+    use_sql
+    search_chunk_size;
   let root_s = Path.to_string root in
   if Sys_utils.is_nfs root_s && not enable_on_nfs then begin
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;

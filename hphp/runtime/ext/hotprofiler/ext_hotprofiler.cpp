@@ -232,31 +232,14 @@ tv_to_cycles(const struct timeval& tv, int64_t MHz)
 static inline uint64_t
 to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
-  static bool vdso_usable =
-#ifdef CLOCK_THREAD_CPUTIME_ID
-    vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID) >= 0
-#else
-    false
-#endif
-    ;
-
-  if (cpu_time && vdso_usable) {
+  if (cpu_time) {
     return cycles / 1000;
   }
   return (cycles + MHz/2) / MHz;
 }
 
 static inline uint64_t cpuTime(int64_t MHz) {
-#ifdef CLOCK_THREAD_CPUTIME_ID
-  auto const rval = vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
-  if (rval >= 0) {
-    return rval;
-  }
-#endif
-  struct rusage usage;
-  getrusage(RUSAGE_SELF, &usage);
-  return
-    tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
+  return vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
 }
 
 uint64_t

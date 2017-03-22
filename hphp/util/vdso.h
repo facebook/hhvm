@@ -17,19 +17,20 @@
 #ifndef incl_HPHP_UTIL_VDSO_H
 #define incl_HPHP_UTIL_VDSO_H
 
-#include "hphp/util/compatibility.h"
+#include <folly/portability/Time.h>
 
 namespace HPHP { namespace vdso {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Tries to call __vdso_clock_gettime().  Will return -1 on error.
+ * Calls __vdso_clock_gettime() if available, otherwise falls back
+ * to calling clock_gettime().
  */
 int clock_gettime(clockid_t, timespec*);
 
 /*
- * A custom version of vdso::clock_gettime() that returns its result in
- * nanoseconds.  Not usable outside of internal facebook code.
+ * A custom version of clock_gettime() that returns its result in
+ * nanoseconds.
  */
 int64_t clock_gettime_ns(clockid_t);
 

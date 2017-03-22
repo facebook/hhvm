@@ -48,18 +48,6 @@ void HHVM_FUNCTION(xhprof_enable, int64_t flags/* = 0 */,
     return;
   }
 
-  bool missingClockGetTimeNS = true;
-#ifdef CLOCK_THREAD_CPUTIME_ID
-  missingClockGetTimeNS = vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID) == -1;
-#endif
-
-  if (missingClockGetTimeNS) {
-    // Both TrackVtsc and TrackCPU mean "do CPU time profiling".
-    //
-    // TrackVtsc means: require clock_gettime, or else no data.
-    // TrackCPU means: prefer clock_gettime, but fall back to getrusage.
-    flags &= ~TrackVtsc;
-  }
   if (flags & TrackVtsc) {
     flags |= TrackCPU;
   }

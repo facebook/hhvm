@@ -45,6 +45,10 @@ let emit_nyi description =
 let strip_dollar id =
   String.sub id 1 (String.length id - 1)
 
+let make_varray p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
+let make_kvarray p kvs =
+  p, A.Array (List.map kvs ~f:(fun (k, v) -> A.AFkvalue (k, v)))
+
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   let ints_overflow_to_ints =
@@ -443,9 +447,36 @@ and emit_id (p, s) =
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
   | "__LINE__" ->
-    let line, _, _ = Pos.info_pos p in
+    (* If the expression goes on multi lines, we return the last line *)
+    let _, line, _, _ = Pos.info_pos_extended p in
     instr_int line
   | _ -> emit_nyi ("emit_id: " ^ s)
+
+and rename_xhp (p, s) =
+  (* Translates given :name to xhp_name *)
+  if String_utils.string_starts_with s ":"
+  then (p, "xhp_" ^ (String_utils.lstrip s ":"))
+  else failwith "Incorrectly named xhp element"
+
+and emit_xhp p id attributes children =
+  (* Translate into a constructor call. The arguments are:
+   *  1) map-like array of attributes
+   *  2) vec-like array of children
+   *  3) filename, for debugging
+   *  4) line number, for debugging
+   *)
+  let convert_xml_attr ((pos, _) as name, v) = ((pos, A.String name), v) in
+  let attributes = List.map ~f:convert_xml_attr attributes in
+  let attribute_map = make_kvarray p attributes in
+  (* TODO: More AST transtormations to match HHVM *)
+  let children_vec = make_varray p children in
+  let filename = (p, A.Id (p, "__FILE__")) in
+  let line = (p, A.Id (p, "__LINE__")) in
+  from_expr @@
+    (p, A.New (
+      (p, A.Id (rename_xhp id)),
+      [attribute_map ; children_vec ; filename ; line],
+      []))
 
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
@@ -498,11 +529,12 @@ and from_expr expr =
   | A.String2 es -> emit_string2 es
   | A.Unsafeexpr e -> from_expr e
   | A.Id id -> emit_id id
+  | A.Xml (id, attributes, children) ->
+    emit_xhp (fst expr) id attributes children
   (* TODO *)
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
   | A.List _                    -> emit_nyi "list"
-  | A.Xml (_, _, _)             -> emit_nyi "xml"
   | A.Import (_, _)             -> emit_nyi "import"
 
 and emit_static_collection ~transform_to_collection expr es =

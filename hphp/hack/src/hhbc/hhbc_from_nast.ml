@@ -436,6 +436,15 @@ and emit_lambda fundef ids =
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]
 
+and emit_id (p, s) =
+  match s with
+  | "__FILE__" -> instr (ILitConst File)
+  | "__DIR__" -> instr (ILitConst Dir)
+  | "__LINE__" ->
+    let line, _, _ = Pos.info_pos p in
+    instr_int line
+  | _ -> emit_nyi ("emit_id: " ^ s)
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -486,8 +495,8 @@ and from_expr expr =
   | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
   | A.String2 es -> emit_string2 es
   | A.Unsafeexpr e -> from_expr e
+  | A.Id id -> emit_id id
   (* TODO *)
-  | A.Id _                      -> emit_nyi "id"
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
   | A.List _                    -> emit_nyi "list"

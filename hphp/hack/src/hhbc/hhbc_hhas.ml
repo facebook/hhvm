@@ -75,7 +75,8 @@ let string_of_lit_const instruction =
     | ClsCns name -> "ClsCns " ^ quote_str name
     | ClsCnsD (name, class_name) -> "ClsCnsD " ^ quote_str name ^ " "
       ^ string_of_class_id class_name
-
+    | File -> "File"
+    | Dir -> "Dir"
     (* TODO *)
     | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
 

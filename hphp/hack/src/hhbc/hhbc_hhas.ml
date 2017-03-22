@@ -17,6 +17,7 @@ open H
 let sep pieces = String.concat " " pieces
 
 let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
+let quote_str_with_escape s = "\\\"" ^ Php_escaping.escape s ^ "\\\""
 
 let string_of_class_id id = quote_str (Utils.strip_ns id)
 let string_of_function_id id = quote_str id
@@ -661,7 +662,7 @@ let rec attribute_argument_to_string argument =
   | Null -> "N;"
   | Double f -> Printf.sprintf "d:%s;" f
   | String s ->
-    Printf.sprintf "s:%d:\\%s\\;" (String.length s) (quote_str s)
+    Printf.sprintf "s:%d:%s;" (String.length s) (quote_str_with_escape s)
   | False -> "i:0;"
   | True -> "i:1;"
   | Int i -> "i:" ^ (Int64.to_string i) ^ ";"
@@ -680,11 +681,14 @@ and attribute_arguments_to_string arguments =
     |> Core.List.map ~f:attribute_argument_to_string
     |> String.concat ""
 
-let attribute_to_string_helper ~if_class_attribute name args =
+let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
   let count = List.length args in
   let count =
-    if count mod 2 = 0 then count / 2
-    else failwith "attribute string should have even amount of arguments"
+    if not has_keys then count
+    else
+      (if count mod 2 = 0 then count / 2
+      else failwith
+        "attribute string with keys should have even amount of arguments")
   in
   let arguments = attribute_arguments_to_string args in
   let attribute_str = format_of_string @@
@@ -697,7 +701,7 @@ let attribute_to_string_helper ~if_class_attribute name args =
 let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
-  attribute_to_string_helper ~if_class_attribute:true name args
+  attribute_to_string_helper ~has_keys:true ~if_class_attribute:true name args
 
 let function_attributes f =
   let user_attrs = Hhas_function.attributes f in
@@ -861,12 +865,16 @@ let add_defcls buf classes =
     (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
     classes
 
-let add_data_region_element buf name num arguments =
+let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf ".adata A_";
   B.add_string buf @@ string_of_int num;
   B.add_string buf " = ";
   B.add_string buf
-    @@ attribute_to_string_helper ~if_class_attribute:false name arguments;
+    @@ attribute_to_string_helper
+      ~if_class_attribute:false
+      ~has_keys
+      name
+      arguments;
   B.add_string buf ";\n"
 
 let add_data_region buf functions =
@@ -874,13 +882,13 @@ let add_data_region buf functions =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
     | ILitConst (Array (num, arguments)) ->
-      add_data_region_element buf "a" num arguments
+      add_data_region_element ~has_keys:true buf "a" num arguments
     | ILitConst (Dict (num, arguments)) ->
-      add_data_region_element buf "D" num arguments
+      add_data_region_element ~has_keys:true buf "D" num arguments
     | ILitConst (Vec (num, arguments)) ->
-      add_data_region_element buf "v" num arguments
+      add_data_region_element ~has_keys:false buf "v" num arguments
     | ILitConst (Keyset (num, arguments)) ->
-      add_data_region_element buf "k" num arguments
+      add_data_region_element ~has_keys:false buf "k" num arguments
     | _ -> ()
   and iter_aux buf fun_def =
     let function_body = Hhas_function.body fun_def in

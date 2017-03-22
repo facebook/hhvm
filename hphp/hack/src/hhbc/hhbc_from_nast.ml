@@ -306,32 +306,6 @@ and emit_shape expr fl =
       instr_newstructarray keys;
     ]
 
-and emit_named_collection expr pos name fields =
-  match name with
-  | "dict" | "vec" | "keyset" -> emit_collection expr fields
-  | "Set" ->
-    let collection_type = collection_type "Set" in
-    if fields = []
-    then instr_newcol collection_type
-    else
-      emit_collection
-        ~transform_to_collection:collection_type
-        (pos, A.Array fields)
-        fields
-  | "Pair" -> begin
-    let collection_type = collection_type "Pair" in
-    let values = gather @@ List.map
-      fields
-      ~f:(fun x ->
-        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x)
-    in
-    gather [
-      instr_newcol collection_type;
-      values;
-    ]
-  end
-  | _ -> emit_nyi @@ "collection: " ^ name (* TODO: Are there more? *)
-
 and emit_tuple p es =
   (* Did you know that tuples are functions? *)
   let af_list = List.map es ~f:(fun e -> A.AFvalue e) in
@@ -617,6 +591,37 @@ and emit_dynamic_collection ~transform_to_collection expr es =
       (instr @@ ILitConst lit_constructor) :: transform_instr ::
       (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc))
   end
+
+and emit_named_collection expr pos name fields =
+  match name with
+  | "dict" | "vec" | "keyset" -> emit_collection expr fields
+  | "Vector" | "ImmVector" ->
+    let collection_type = collection_type name in
+    gather [
+      emit_collection (pos, A.Collection ((pos, "vec"), fields)) fields;
+      instr_colfromarray collection_type;
+    ]
+  | "Set" | "ImmSet" | "Map" | "ImmMap" ->
+    let collection_type = collection_type name in
+    if fields = []
+    then instr_newcol collection_type
+    else
+      emit_collection
+        ~transform_to_collection:collection_type
+        (pos, A.Array fields)
+        fields
+  | "Pair" ->
+    let collection_type = collection_type name in
+    let values = gather @@ List.map
+      fields
+      ~f:(fun x ->
+        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x)
+    in
+    gather [
+      instr_newcol collection_type;
+      values;
+    ]
+  | _ -> emit_nyi @@ "collection: " ^ name (* TODO: Are there more? *)
 
 and emit_collection ?(transform_to_collection) expr es =
   let all_literal = List.for_all es

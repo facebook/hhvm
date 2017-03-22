@@ -305,24 +305,26 @@ and emit_shape expr fl =
 and emit_named_collection expr pos name fields =
   match name with
   | "dict" | "vec" | "keyset" -> emit_collection expr fields
-  | "Set" -> begin
+  | "Set" ->
     let collection_type = collection_type "Set" in
-    match fields with
-    | [] -> instr_newcol collection_type
-    | _ -> gather [
-      from_expr (pos, A.Array fields);
-      instr_colfromarray collection_type ]
-    end
+    if fields = []
+    then instr_newcol collection_type
+    else
+      emit_collection
+        ~transform_to_collection:collection_type
+        (pos, A.Array fields)
+        fields
   | "Pair" -> begin
     let collection_type = collection_type "Pair" in
-    let values = gather @@ List.fold_right
+    let values = gather @@ List.map
       fields
-      ~f:(fun x acc ->
-        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x::acc)
-      ~init:[] in
+      ~f:(fun x ->
+        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x)
+    in
     gather [
       instr_newcol collection_type;
-      values ]
+      values;
+    ]
   end
   | _ -> emit_nyi @@ "collection: " ^ name (* TODO: Are there more? *)
 
@@ -503,7 +505,7 @@ and from_expr expr =
   | A.Xml (_, _, _)             -> emit_nyi "xml"
   | A.Import (_, _)             -> emit_nyi "import"
 
-and emit_static_collection expr es =
+and emit_static_collection ~transform_to_collection expr es =
   let a_label = Label.get_next_data_label () in
   (* Arrays can either contains values or key/value pairs *)
   let need_index = match snd expr with
@@ -533,14 +535,24 @@ and emit_static_collection expr es =
     | A.Collection ((_, "keyset"), _) -> Keyset (a_label, es)
     | _ -> failwith "impossible"
   in
-  instr (ILitConst lit_constructor)
+  let transform_instr =
+    match transform_to_collection with
+    | Some n -> instr_colfromarray n
+    | None -> empty
+  in
+  gather [
+    instr (ILitConst lit_constructor);
+    transform_instr;
+  ]
 
-and emit_dynamic_collection expr es =
+(* transform_to_collection argument keeps track of
+ * what collection to transform to *)
+and emit_dynamic_collection ~transform_to_collection expr es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
   let count = List.length es in
-  if is_only_values then begin
+  if is_only_values && transform_to_collection = None then begin
     let lit_constructor = match snd expr with
       | A.Array _ -> NewPackedArray count
       | A.Collection ((_, "vec"), _) -> NewVecArray count
@@ -559,20 +571,30 @@ and emit_dynamic_collection expr es =
       | A.Collection ((_, "dict"), _) -> NewDictArray count
       | _ -> failwith "impossible"
     in
+    let transform_instr =
+      match transform_to_collection with
+      | Some n -> instr_colfromarray n
+      | None -> empty
+    in
+    let add_elem_instr =
+      if transform_to_collection = None
+      then instr_add_new_elemc
+      else instr_col_add_new_elemc
+    in
     gather @@
-      (instr @@ ILitConst lit_constructor) ::
-      (List.map es ~f:(expr_and_newc instr_add_new_elemc instr_add_elemc))
+      (instr @@ ILitConst lit_constructor) :: transform_instr ::
+      (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc))
   end
 
-and emit_collection expr es =
+and emit_collection ?(transform_to_collection) expr es =
   let all_literal = List.for_all es
     ~f:(function A.AFvalue e -> is_literal e
                | A.AFkvalue (k,v) -> is_literal k && is_literal v)
   in
   if all_literal then
-    emit_static_collection expr es
+    emit_static_collection ~transform_to_collection expr es
   else
-    emit_dynamic_collection expr es
+    emit_dynamic_collection ~transform_to_collection expr es
 
 and emit_pipe e1 e2 =
   stash_in_local e1

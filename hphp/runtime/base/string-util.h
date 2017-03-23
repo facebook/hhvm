@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_STRING_UTIL_H_
 #define incl_HPHP_STRING_UTIL_H_
 
+#include "hphp/runtime/ext/std/ext_std_misc.h"
+
 #include "hphp/runtime/base/type-string.h"
 
 #include "hphp/util/assertions.h"
@@ -108,7 +110,7 @@ public:
    * Split/joins.
    */
   static Variant Explode(const String& input, const String& delimiter,
-                         int limit = 0x7FFFFFFF);
+                         int64_t limit = k_PHP_INT_MAX);
     static String Implode(const Variant& items, const String& delim,
                           const bool checkIsContainer = true); // == Join()
   static Variant Split(const String& str, int64_t split_length = 1);

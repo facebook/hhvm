@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_STRING_H_
 
 #include "hphp/zend/zend-html.h"
+#include"hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
@@ -108,7 +109,7 @@ String HHVM_FUNCTION(chop,
 Variant HHVM_FUNCTION(explode,
                       const String& delimiter,
                       const String& str,
-                      int limit = 0x7FFFFFFF);
+                      int64_t limit = k_PHP_INT_MAX);
 String HHVM_FUNCTION(implode,
                      const Variant& arg1,
                      const Variant& arg2 = uninit_variant);

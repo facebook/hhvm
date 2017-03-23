@@ -50,7 +50,7 @@ String StringUtil::StripHTMLTags(const String& input,
 // splits/joins
 
 Variant StringUtil::Explode(const String& input, const String& delimiter,
-                            int limit /* = 0x7FFFFFFF */) {
+                            int64_t limit /* = PHP_INT_MAX */) {
   if (delimiter.empty()) {
     throw_invalid_argument("delimiter: (empty)");
     return false;
@@ -88,7 +88,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
       std::vector<int> positions;
       int len = delimiter.size();
       int pos0 = 0;
-      int found = 0;
+      int64_t found = 0;
       do {
         positions.push_back(pos0);
         positions.push_back(pos - pos0);
@@ -102,8 +102,8 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
         positions.push_back(input.size() - pos0);
         found++;
       }
-      unsigned nelems = std::max(found + limit, 0);
-      for (unsigned i = 0; i < nelems * 2; i += 2) {
+      uint64_t nelems = std::max(found + limit, (int64_t)0);
+      for (uint64_t i = 0; i < nelems * 2; i += 2) {
         ret.append(input.substr(positions[i], positions[i+1]));
       }
     } // else we have negative limit and delimiter not found

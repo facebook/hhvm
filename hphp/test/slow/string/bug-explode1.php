@@ -1,4 +1,4 @@
 <?php
 
 $c = str_repeat('*', 769000);
-var_dump(explode($c, $c, 2517759776));
+var_dump(explode($c, $c, PHP_INT_MIN));

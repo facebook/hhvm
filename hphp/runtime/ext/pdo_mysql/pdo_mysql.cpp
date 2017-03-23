@@ -203,10 +203,15 @@ bool PDOMySqlConnection::create(const Array& options) {
 #ifdef CLIENT_MULTI_RESULTS
     |CLIENT_MULTI_RESULTS
 #endif
-#ifdef CLIENT_MULTI_STATEMENTS
-    |CLIENT_MULTI_STATEMENTS
-#endif
     ;
+
+  #ifdef CLIENT_MULTI_STATEMENTS
+    if (options.empty()) {
+      connect_opts |= CLIENT_MULTI_STATEMENTS;
+    } else if (pdo_attr_lval(options, PDO_MYSQL_ATTR_MULTI_STATEMENTS, 1)) {
+      connect_opts |= CLIENT_MULTI_STATEMENTS;
+    }
+  #endif
 
   parseDataSource(data_source.data(), data_source.size(), vars, 5);
 

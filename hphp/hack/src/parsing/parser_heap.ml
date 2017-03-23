@@ -77,6 +77,14 @@ let get_const defs name =
     | _ -> acc
   end
 
+(* Get top-level statements from definitions *)
+let get_statements defs =
+  List.filter_map defs begin fun def ->
+    match def with
+    | Ast.Stmt st -> Some st
+    | _ -> None
+  end
+
 (* Get an AST directly from the parser heap. Will return empty AProgram
    if the file does not exist
 *)
@@ -104,3 +112,6 @@ let find_typedef_in_file ?(full = false) popt file_name name =
 
 let find_const_in_file ?(full = false) popt file_name name =
   get_const (get_from_parser_heap ~full popt file_name) name
+
+let find_statements_in_file ?(full = false) popt file_name =
+  get_statements (get_from_parser_heap ~full popt file_name)

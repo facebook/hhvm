@@ -163,7 +163,10 @@ let do_compile compiler_options opts files_info = begin
     let parsed_classes = List.filter_map classes parse_class in
     let parsed_typedefs = [] in (* TODO typedefs *)
     let parsed_consts = [] in (* TODO consts *)
-    (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts) in
+    let parsed_statements =
+        Parser_heap.find_statements_in_file ~full:true tcopt fn in
+    (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts,
+      parsed_statements) in
   let f_fold fn fileinfo text = begin
     let ast = get_nast_from_fileinfo opts fn fileinfo in
     let options = Hhbc_options.get_options_from_config

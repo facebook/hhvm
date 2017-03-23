@@ -903,12 +903,12 @@ let add_top_level buf hhas_prog =
   let non_closure_classes =
     List.filter (fun c -> not (Hhas_class.is_closure_class c))
     (Hhas_program.classes hhas_prog) in
-  let main_stmts =
-    [ ILitConst (Int Int64.one)
-    ; IContFlow RetC
-    ] in
+  let main = Hhas_program.main hhas_prog in
+  let main_stmts = Hhas_main.body main in
+  let main_decl_vars = Hhas_main.decl_vars main in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
+  add_decl_vars buf 2 main_decl_vars;
   add_defcls buf non_closure_classes;
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"

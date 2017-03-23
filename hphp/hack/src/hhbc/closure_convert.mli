@@ -20,4 +20,5 @@ val get_closure_classes : env -> Ast.class_ list
 (* Convert functions, classes, or an entire program *)
 val convert_fun : env -> Ast.fun_ -> env * Ast.fun_
 val convert_class : env -> Ast.class_ -> env * Ast.class_
+val convert_block : env -> Ast.block -> env * Ast.block
 val convert_prog : env -> Ast.program -> env * Ast.program

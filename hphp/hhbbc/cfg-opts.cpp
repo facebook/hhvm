@@ -486,7 +486,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       } else {
         bsi.hasPred = true;
       }
-      numSucc++;
     };
     forEachNormalSuccessor(*blk, [&](const BlockId& succId) {
         auto skip = next_real_block(func, succId);
@@ -495,6 +494,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
           anyChanges = true;
         }
         handleSucc(succId);
+        numSucc++;
       });
     for (auto& ex : blk->factoredExits) handleSucc(ex);
     if (numSucc > 1) bbi.multipleSuccs = true;
@@ -526,20 +526,9 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
 
       blk->fallthrough = nxt->fallthrough;
       blk->fallthroughNS = nxt->fallthroughNS;
-      if (nxt->factoredExits.size()) {
-        if (blk->factoredExits.size()) {
-          std::set<BlockId> exitSet;
-          std::copy(begin(blk->factoredExits), end(blk->factoredExits),
-                    std::inserter(exitSet, begin(exitSet)));
-          std::copy(nxt->factoredExits.begin(), nxt->factoredExits.end(),
-                    std::inserter(exitSet, begin(exitSet)));
-          blk->factoredExits.resize(exitSet.size());
-          std::copy(begin(exitSet), end(exitSet), blk->factoredExits.begin());
-          nxt->factoredExits = decltype(nxt->factoredExits) {};
-        } else {
-          blk->factoredExits = std::move(nxt->factoredExits);
-        }
-      }
+      // The blocks have the same exnNode, and the same section
+      // so they must have the same factoredExits.
+      assert(blk->factoredExits == nxt->factoredExits);
       std::copy(nxt->hhbcs.begin(), nxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
       nxt->fallthrough = NoBlockId;

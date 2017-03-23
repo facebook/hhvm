@@ -1016,14 +1016,76 @@ and array_literal fields =
   let fields = collection_literal_fields fields in
   Array (num, fields)
 
+and literal_from_bool b =
+  if b then True else False
+
 and literal_from_binop op left right =
   (* TODO: HHVM does not allow 2+2 in an attribute, but does allow it in
   a constant initializer. It seems reasonable to allow this in attributes
   as well. Make sure this decision is documented in the specification. *)
   let left = literal_from_expr left in
   let right = literal_from_expr right in
+  (* TODO: Deal with integer overflow *)
   match (op, left, right) with
+  | (A.Eqeq, Int left, Int right)
+  | (A.EQeqeq, Int left, Int right) ->
+    literal_from_bool (Int64.equal left right)
+  | (A.Diff, Int left, Int right)
+  | (A.Diff2, Int left, Int right) ->
+    literal_from_bool (not (Int64.equal left right))
+  | (A.Lt, Int left, Int right) ->
+    literal_from_bool ((Int64.compare left right) < 0)
+  | (A.Lte, Int left, Int right) ->
+    literal_from_bool ((Int64.compare left right) <= 0)
+  | (A.Gt, Int left, Int right) ->
+    literal_from_bool ((Int64.compare left right) > 0)
+  | (A.Gte, Int left, Int right) ->
+    literal_from_bool ((Int64.compare left right) >= 0)
+
+  | (A.Amp, Int left, Int right) -> Int (Int64.logand left right)
+  | (A.Bar, Int left, Int right) -> Int (Int64.logor left right)
+  | (A.Xor, Int left, Int right) -> Int (Int64.logxor left right)
+  | (A.BArbar, Int left, Int right) ->
+    if Int64.equal left Int64.zero then
+      literal_from_bool (not (Int64.equal right Int64.zero))
+    else
+      True
+  | (A.AMpamp, Int left, Int right) ->
+    if Int64.equal left Int64.zero then
+      False
+    else
+      literal_from_bool (not (Int64.equal right Int64.zero))
+  | (A.Ltlt, Int left, Int right) ->
+    (* TODO: Deal with overflow of shifter *)
+    let right = Int64.to_int right in
+    Int (Int64.shift_left left right)
+  | (A.Gtgt, Int left, Int right) ->
+    (* TODO: Deal with overflow of shifter *)
+    let right = Int64.to_int right in
+    Int (Int64.shift_right left right)
+
+  | (A.Dot, Int left, Int right) ->
+    String ((Int64.to_string left) ^ (Int64.to_string right))
+
   | (A.Plus, Int left, Int right) -> Int (Int64.add left right)
+  | (A.Minus, Int left, Int right) -> Int (Int64.sub left right)
+  | (A.Star, Int left, Int right) -> Int (Int64.mul left right)
+  (* TODO: StarStar has special behaviour *)
+  | (A.Slash, Int left, Int right) ->
+    (* TODO: Deal with div by zero *)
+    if (Int64.rem left right) = Int64.zero then
+      Int (Int64.div left right)
+    else
+      let left = Int64.to_float left in
+      let right = Int64.to_float right in
+      let quotient = left /. right in
+      (* TODO: Consider making double take a float, not a string. *)
+      (* TODO: The original HHVM emitter produces considerably more precision
+      when printing out floats *)
+      Double (string_of_float quotient)
+  | (A.Percent, Int left, Int right) ->
+    (* TODO: Deal with div by zero *)
+    Int (Int64.rem left right)
   | _ -> failwith "Binary operation not yet implemented on literals"
 
 and literal_from_expr expr =
@@ -1038,6 +1100,7 @@ and literal_from_expr expr =
   | A.Collection ((_, "dict"), fields) -> dictionary_literal fields
   (* TODO: Vec, Keyset, etc. *)
   | A.Binop (op, left, right) -> literal_from_binop op left right
+  (* TODO: Unary ops *)
   (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
    this seems reasonable to allow. Right now this will crash if given an
    expression rather than a literal in here.  In particular, see what unary

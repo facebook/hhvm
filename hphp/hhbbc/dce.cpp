@@ -305,23 +305,6 @@ struct DceState {
   std::bitset<kMaxTrackedClsRefSlots> liveSlots;
 
   /*
-   * These variable sets are used to compute the transfer function for
-   * the global liveness analysis in global_dce.
-   *
-   * The gen set accumulates the set of variables in the block with
-   * upward-exposed uses.  The kill set is the set of variables the
-   * block will re-define, ignoring exceptional control flow.
-   *
-   * The killBeforePEI set is the set of variables killed before a
-   * PEI.  Propagation of liveness needs to use this (always more
-   * conservative) set instead of kill when crossing a factored exit
-   * edge.
-   */
-  std::bitset<kMaxTrackedLocals> locGen;
-  std::bitset<kMaxTrackedLocals> locKill;
-  std::bitset<kMaxTrackedLocals> locKillBeforePEI;
-
-  /*
    * Instructions marked in this set will be processed by dce_perform.
    * They must all be processed together to keep eval stack consumers
    * and producers balanced.
@@ -664,27 +647,18 @@ void addLocGenSet(Env& env, std::bitset<kMaxTrackedLocals> locs) {
   FTRACE(4, "      loc-conservative: {}\n",
          loc_bits_string(env.dceState.ainfo.ctx.func, locs));
   env.dceState.liveLocals |= locs;
-  env.dceState.locGen |= locs;
-  env.dceState.locKill &= ~locs;
-  env.dceState.locKillBeforePEI &= ~locs;
 }
 
 void addLocGen(Env& env, uint32_t id) {
   FTRACE(2, "      loc-gen: {}\n", id);
   if (id >= kMaxTrackedLocals) return;
   env.dceState.liveLocals[id] = 1;
-  env.dceState.locGen[id] = 1;
-  env.dceState.locKill[id] = 0;
-  env.dceState.locKillBeforePEI[id] = 0;
 }
 
 void addLocKill(Env& env, uint32_t id) {
   FTRACE(2, "     loc-kill: {}\n", id);
   if (id >= kMaxTrackedLocals) return;
   env.dceState.liveLocals[id] = 0;
-  env.dceState.locGen[id] = 0;
-  env.dceState.locKill[id] = 1;
-  env.dceState.locKillBeforePEI[id] = 1;
 }
 
 bool isLocLive(Env& env, uint32_t id) {
@@ -1150,7 +1124,6 @@ dce_visit(const Index& index,
       FTRACE(2, "    <-- exceptions\n");
       dceState.liveLocals |= locLiveOutExn;
       dceState.liveSlots.set();
-      dceState.locKillBeforePEI.reset();
     }
 
     dceState.usedLocals |= dceState.liveLocals;
@@ -1197,9 +1170,7 @@ dce_visit(const Index& index,
 }
 
 struct DceAnalysis {
-  std::bitset<kMaxTrackedLocals> locGen;
-  std::bitset<kMaxTrackedLocals> locKill;
-  std::bitset<kMaxTrackedLocals> locKillExn;
+  std::bitset<kMaxTrackedLocals> liveIn;
   std::vector<UseInfo>           stack;
   std::set<InstrId>              usedStackSlots;
 };
@@ -1208,18 +1179,13 @@ DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn,
+                        std::bitset<kMaxTrackedLocals> locLiveOut,
+                        std::bitset<kMaxTrackedLocals> locLiveOutExn,
                         const folly::Optional<std::vector<UseInfo>>& dceStack) {
-  // During this analysis pass, we have to assume everything could be
-  // live out, so we set allLive here.  (Later we'll determine the
-  // real liveOut sets.)
-  auto allLocLive = std::bitset<kMaxTrackedLocals>{};
-  allLocLive.set();
   if (auto dceState = dce_visit(index, fa, blk, stateIn,
-                                allLocLive, allLocLive, dceStack)) {
+                                locLiveOut, locLiveOutExn, dceStack)) {
     return DceAnalysis {
-      dceState->locGen,
-      dceState->locKill,
-      dceState->locKillBeforePEI,
+      dceState->liveLocals,
       dceState->stack,
       dceState->usedStackSlots
     };
@@ -1561,30 +1527,22 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     auto const locLiveOut    = blockStates[blk->id].locLiveOut;
     auto const locLiveOutExn = blockStates[blk->id].locLiveOutExn;
-    auto const transfer      = analyze_dce(
+    auto const result = analyze_dce(
       index,
       ai,
       blk,
       ai.bdata[blk->id].stateIn,
+      locLiveOut,
+      locLiveOutExn,
       blockStates[blk->id].dceStack
     );
 
-    auto const liveIn        = transfer.locGen |
-                               (locLiveOut & ~transfer.locKill) |
-                               (locLiveOutExn & ~transfer.locKillExn);
-
     FTRACE(2, "live out : {}\n"
               "out exn  : {}\n"
-              "gen      : {}\n"
-              "kill     : {}\n"
-              "kill exn : {}\n"
               "live in  : {}\n",
               loc_bits_string(ai.ctx.func, locLiveOut),
               loc_bits_string(ai.ctx.func, locLiveOutExn),
-              loc_bits_string(ai.ctx.func, transfer.locGen),
-              loc_bits_string(ai.ctx.func, transfer.locKill),
-              loc_bits_string(ai.ctx.func, transfer.locKillExn),
-              loc_bits_string(ai.ctx.func, liveIn));
+              loc_bits_string(ai.ctx.func, result.liveIn));
 
     /*
      * If we weren't able to take advantage of any unused entries
@@ -1594,7 +1552,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
      * Also, merge the entries into our global usedStackSlots, to
      * make sure they always get marked Used.
      */
-    for (auto const& id : transfer.usedStackSlots) {
+    for (auto const& id : result.usedStackSlots) {
       if (usedStackSlots.insert(id).second) {
         for (auto& pred : normalPreds[id.blk]) {
           FTRACE(2, "  {} force-use {}:{}\n", id.blk, pred->id, id.idx);
@@ -1620,9 +1578,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       FTRACE(2, "  -> {}\n", pred->id);
       auto& predState = blockStates[pred->id].locLiveOut;
       auto const oldPredState = predState;
-      predState |= liveIn;
+      predState |= result.liveIn;
       if (mergeDceStack(blockStates[pred->id].dceStack,
-                        transfer.stack, blk->id) ||
+                        result.stack, blk->id) ||
           predState != oldPredState) {
         incompleteQ.push(rpoId(pred));
       }
@@ -1635,7 +1593,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       FTRACE(2, "  => {}\n", pred->id);
       auto& predState = blockStates[pred->id].locLiveOutExn;
       auto const oldPredState = predState;
-      predState |= liveIn;
+      predState |= result.liveIn;
       if (predState != oldPredState) {
         incompleteQ.push(rpoId(pred));
       }

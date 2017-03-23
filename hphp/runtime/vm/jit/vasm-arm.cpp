@@ -271,19 +271,19 @@ struct Vgen {
   void emit(const lea& i);
   void emit(const leap& i) { a->Mov(X(i.d), i.s.r.disp); }
   void emit(const lead& i) { a->Mov(X(i.d), i.s.get()); }
-  void emit(const loadb& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadsd& i) { a->Ldr(D(i.d), M(i.s)); }
-  void emit(const loadtqb& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadtqb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadtql& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadups& i);
-  void emit(const loadw& i) { a->Ldrsh(W(i.d), M(i.s)); }
+  void emit(const loadw& i) { a->Ldrh(W(i.d), M(i.s)); }
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const movb& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movtqb& i) { a->Sxtb(W(i.d), W(i.s)); }
+  void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movzbw& i) { a->Uxtb(W(i.d), W(i.s)); }

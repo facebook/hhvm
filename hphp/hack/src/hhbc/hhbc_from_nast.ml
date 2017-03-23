@@ -440,18 +440,17 @@ and rename_xhp (p, s) =
 
 and emit_xhp p id attributes children =
   (* Translate into a constructor call. The arguments are:
-   *  1) map-like array of attributes
+   *  1) shape-like array of attributes
    *  2) vec-like array of children
    *  3) filename, for debugging
    *  4) line number, for debugging
    *)
-  let convert_xml_attr ((pos, _) as name, v) = ((pos, A.String name), v) in
+  let convert_xml_attr (name, v) = (A.SFlit name, v) in
   let attributes = List.map ~f:convert_xml_attr attributes in
-  let attribute_map = make_kvarray p attributes in
-  (* TODO: More AST transtormations to match HHVM *)
+  let attribute_map = p, A.Shape attributes in
   let children_vec = make_varray p children in
-  let filename = (p, A.Id (p, "__FILE__")) in
-  let line = (p, A.Id (p, "__LINE__")) in
+  let filename = p, A.Id (p, "__FILE__") in
+  let line = p, A.Id (p, "__LINE__") in
   from_expr @@
     (p, A.New (
       (p, A.Id (rename_xhp id)),

@@ -179,7 +179,7 @@ let type_file filename (funs, classes, typedefs, consts) =
   let named_consts = [] in (* TODO *)
   (named_funs, named_classes, named_typedefs, named_consts)
 
-let handle_file args filename =
+let handle_existing_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
@@ -228,6 +228,12 @@ let handle_file args filename =
     let str = Hh_json.json_to_string json in
     Printf.printf "%s\n" str
   end
+
+let handle_file args filename =
+  if Path.file_exists (Path.make filename) then
+    handle_existing_file args filename
+  else
+    Printf.printf "File %s does not exist.\n" filename
 
 let rec main args files =
   if args.schema then begin

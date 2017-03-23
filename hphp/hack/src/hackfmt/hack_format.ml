@@ -1712,15 +1712,9 @@ and transform_trivia ~is_leading trivia =
         Option.value !last_comment ~default:Nothing;
         ignore_trailing_invisibles (List.rev !trailing_invisibles);
         if !last_comment_was_delimited then begin
-          Fmt [
-            if !newline_followed_last_comment ||
-               !whitespace_followed_last_comment
-              then SpaceSplitIfUnsplit
-              else Nothing;
-            if !newline_followed_last_comment
-              then Newline
-              else Nothing;
-          ]
+          if !whitespace_followed_last_comment then Space
+          else if !newline_followed_last_comment then Newline
+          else Nothing
         end else Nothing;
       ])
       :: !comments;
@@ -1781,7 +1775,7 @@ and transform_trivia ~is_leading trivia =
     | TriviaKind.SingleLineComment ->
       make_comment ();
       last_comment := Some (Fmt [
-        SpaceSplitIfUnsplit;
+        Space;
         Comment ((Trivia.text triv), (Trivia.width triv));
         Newline;
       ]);

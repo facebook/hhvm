@@ -155,11 +155,6 @@ let builder = object (this)
     next_lazy_rules <- ISet.add id next_lazy_rules;
     id
 
-  method private simple_space_split_if_unsplit () =
-    match chunks with
-      | hd :: _ when hd.Chunk.is_appendable -> this#simple_space_split ()
-      | _ -> ()
-
   (* TODO: after unit tests, make this idempotency a property of method split *)
   method private simple_split_if_unsplit () =
     match chunks with
@@ -180,12 +175,6 @@ let builder = object (this)
         create_empty_chunk () :: chunks
       (* TODO: this is probably wrong, figure out what this means *)
       | _ -> chunks)
-
-  method private simple_space_split ?(cost=Cost.Base) () =
-    pending_space <- true;
-    this#split ();
-    this#set_next_split_rule (RuleKind (Rule.Simple cost));
-    ()
 
   method private simple_split ?(cost=Cost.Base) () =
     this#split ();
@@ -425,6 +414,4 @@ let builder = object (this)
       end
     | TrailingComma ->
       this#set_pending_comma ()
-    | SpaceSplitIfUnsplit ->
-      this#simple_space_split_if_unsplit ()
 end

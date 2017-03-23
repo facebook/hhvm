@@ -59,8 +59,6 @@ type t =
   | WithPossibleLazyRule of Rule.kind * t * t
   (* Add a comma only if the next split is broken on *)
   | TrailingComma
-  (* Split with a space, but only if the current chunk is not yet split *)
-  | SpaceSplitIfUnsplit
 
 let space _ = Space
 let space_split _ = Fmt [Space; Split]
@@ -120,8 +118,6 @@ let dump ?(ignored=false) node =
       print "])";
     | TrailingComma ->
       print "TrailingComma"
-    | SpaceSplitIfUnsplit ->
-      print "SpaceSplitIfUnsplit"
   and indent = ref 0
   and print s = eprintf "%s%s\n" (String.make !indent ' ') s
   and dump_list name nodes =

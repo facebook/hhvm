@@ -72,14 +72,15 @@ const StaticString s_trigger_error("trigger_error");
 //////////////////////////////////////////////////////////////////////
 
 void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
-  folly::Optional<std::vector<Bytecode>> currentReduction;
-  if (reduce) currentReduction.emplace();
+  std::vector<Bytecode> currentReduction;
+  if (!options.StrengthReduce) reduce = false;
 
   for (auto it = begin(bcs); it != end(bcs); ++it) {
     assert(env.flags.jmpFlag == StepFlags::JmpFlags::Either &&
            "you can't use impl with branching opcodes before last position");
 
     auto const wasPEI = env.flags.wasPEI;
+    auto const canConstProp = env.flags.canConstProp;
 
     FTRACE(3, "    (impl {}\n", show(env.ctx.func, *it));
     env.flags.wasPEI          = true;
@@ -88,32 +89,42 @@ void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
     default_dispatch(env, *it);
 
     if (env.flags.strengthReduced) {
-      if (!currentReduction) {
-        currentReduction.emplace();
-        std::move(begin(bcs), it, std::back_inserter(*currentReduction));
-      }
-      std::move(begin(*env.flags.strengthReduced),
-                end(*env.flags.strengthReduced),
-                std::back_inserter(*currentReduction));
-      if (instrFlags(currentReduction->back().op) & TF) {
+      if (instrFlags(env.flags.strengthReduced->back().op) & TF) {
         unreachable(env);
+      }
+      if (reduce) {
+        std::move(begin(*env.flags.strengthReduced),
+                  end(*env.flags.strengthReduced),
+                  std::back_inserter(currentReduction));
       }
     } else {
       if (instrFlags(it->op) & TF) {
         unreachable(env);
       }
-      if (currentReduction) {
-        currentReduction->push_back(std::move(*it));
+      if (reduce) {
+        if (env.flags.canConstProp &&
+            env.collect.propagate_constants &&
+            env.collect.propagate_constants(*it, env.state, currentReduction)) {
+          env.flags.canConstProp = false;
+          env.flags.wasPEI = false;
+        } else {
+          currentReduction.push_back(std::move(*it));
+        }
       }
     }
 
     // If any of the opcodes in the impl list said they could throw,
     // then the whole thing could throw.
     env.flags.wasPEI = env.flags.wasPEI || wasPEI;
+    env.flags.canConstProp = env.flags.canConstProp && canConstProp;
     if (env.state.unreachable) break;
   }
 
-  env.flags.strengthReduced = std::move(currentReduction);
+  if (reduce) {
+    env.flags.strengthReduced = std::move(currentReduction);
+  } else {
+    env.flags.strengthReduced = folly::none;
+  }
 }
 
 namespace interp_step {

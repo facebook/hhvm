@@ -101,9 +101,9 @@ namespace {
  * (i.e. the bytecode can be replaced by some other bytecode as an
  * optimization).
  *
- * The chained-to bytecodes should not take branches.  Also, constprop with
- * impl() will only occur on the last thing in the impl list---earlier opcodes
- * may set the canConstProp flag, but it will have no effect.
+ * The chained-to bytecodes should not take branches.  For impl, the
+ * canConstProp flag will only be set if it was set for all the
+ * bytecodes.
  */
 
 template<class... Ts>
@@ -116,6 +116,10 @@ void impl(ISS& env, Ts&&... ts) {
  * a given bytecode could be replaced by some other bytecode
  * sequence.  Ensure that if you call reduce(), it is before any
  * state-affecting operations (like popC()).
+ *
+ * If env.collect.propagate_constants is set, the reduced bytecodes
+ * will have been constant-propagated, and the canConstProp flag will
+ * be clear; otherwise canConstProp will be set as for impl.
  */
 void reduce(ISS& env, std::vector<Bytecode>&& bcs) {
   impl_vec(env, true, std::move(bcs));

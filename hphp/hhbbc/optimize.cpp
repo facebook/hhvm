@@ -424,6 +424,13 @@ bool propagate_constants(const Bytecode& op, const State& state, Gen gen) {
   return true;
 }
 
+bool propagate_constants(const Bytecode& bc, const State& state,
+                         std::vector<Bytecode>& out) {
+  return propagate_constants(bc, state, [&] (const Bytecode& bc) {
+      out.push_back(bc);
+    });
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -464,6 +471,8 @@ void first_pass(const Index& index,
   CollectedInfo collect { index, ctx, nullptr, nullptr, true, &ainfo };
   auto interp = Interp { index, ctx, collect, blk, state };
 
+  if (options.ConstantProp) collect.propagate_constants = propagate_constants;
+
   auto peephole = make_peephole(newBCs, index, ctx);
   std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
 
@@ -496,15 +505,18 @@ void first_pass(const Index& index,
     }
 
     auto genOut = [&] (const Bytecode* op) -> Op {
-      if (options.StrengthReduce && flags.strengthReduced) {
-        for (auto i = 0; i < flags.strengthReduced->size() - 1; i++) {
-          gen(flags.strengthReduced.value()[i]);
+      if (options.ConstantProp && flags.canConstProp) {
+        if (propagate_constants(*op, state, gen)) {
+          assert(!flags.strengthReduced);
+          return Op::Nop;
         }
-        op = &flags.strengthReduced->back();
       }
 
-      if (options.ConstantProp && flags.canConstProp) {
-        if (propagate_constants(*op, state, gen)) return Op::Nop;
+      if (flags.strengthReduced) {
+        for (auto const& bc : *flags.strengthReduced) {
+          gen(bc);
+        }
+        return flags.strengthReduced->back().op;
       }
 
       gen(*op);

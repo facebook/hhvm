@@ -402,6 +402,10 @@ let is_memoized_instance method_ =
   (not (Hhas_method.is_static method_)) &&
   Hhas_attribute.is_memoized (Hhas_method.attributes method_)
 
+let empty_dict_init = Some (Hhbc_ast.Dict (0, []))
+let false_init = Some Hhbc_ast.False
+let null_init = Some Hhbc_ast.Null
+
 let add_instance_properties class_ =
   let folder (count, zero_params) method_ =
     if is_memoized_instance method_ then
@@ -411,17 +415,16 @@ let add_instance_properties class_ =
   let methods = Hhas_class.methods class_ in
   let (count, zero_params) =
     Core.List.fold_left methods ~init:(0, false) ~f:folder in
-  (* TODO: Initializers *)
   if count = 1 && zero_params then
     let property = Hhas_property.make
-      true false false false shared_single_memoize_cache None in
+      true false false false shared_single_memoize_cache empty_dict_init in
     let class_ = Hhas_class.with_property class_ property in
     let property = Hhas_property.make
-      true false false false shared_single_memoize_cache_guard None in
+      true false false false shared_single_memoize_cache_guard false_init in
     Hhas_class.with_property class_ property
   else
     let property = Hhas_property.make
-      true false false false shared_multi_memoize_cache None in
+      true false false false shared_multi_memoize_cache empty_dict_init in
     Hhas_class.with_property class_ property
 
 let memoize_instance_methods class_ =
@@ -452,17 +455,18 @@ let add_static_properties class_ =
       let params = Hhas_method.params method_ in
       let original_name = Hhas_method.name method_ in
       if params = [] then
-        (* TODO: Property initializers *)
         let property = Hhas_property.make
-          true false false true (original_name ^ single_memoize_cache) None in
+          true false false true (original_name ^ single_memoize_cache)
+          null_init in
         let class_ = Hhas_class.with_property class_ property in
         let property = Hhas_property.make
           true false false true (original_name ^ single_memoize_cache_guard)
-          None in
+          false_init in
         Hhas_class.with_property class_ property
       else
         let property = Hhas_property.make
-          true false false true (original_name ^ multi_memoize_cache) None in
+          true false false true (original_name ^ multi_memoize_cache)
+          null_init in
         Hhas_class.with_property class_ property
     else
       class_ in

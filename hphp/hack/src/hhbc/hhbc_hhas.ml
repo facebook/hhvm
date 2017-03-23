@@ -664,6 +664,7 @@ let rec attribute_argument_to_string argument =
   | Double f -> Printf.sprintf "d:%s;" f
   | String s ->
     Printf.sprintf "s:%d:%s;" (String.length s) (quote_str_with_escape s)
+  (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
   | False -> "i:0;"
   | True -> "i:1;"
   | Int i -> "i:" ^ (Int64.to_string i) ^ ";"

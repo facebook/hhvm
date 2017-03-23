@@ -10,7 +10,7 @@
 
 type t = {
   constant_name         : Litstr.id;
-  (* TODO: initializer *)
+  constant_value        : Hhbc_ast.instruct_lit_const;
 }
 
 (* Interestingly, HHAS does not represent the declared types of constants,
@@ -18,7 +18,8 @@ unlike formal parameters and return types. We might consider fixing this. *)
 
 (* Also interestingly, abstract constants are not emitted at all. *)
 
-let make constant_name =
-  { constant_name }
+let make constant_name constant_value =
+  { constant_name; constant_value }
 
 let name hhas_constant = hhas_constant.constant_name
+let value hhas_constant = hhas_constant.constant_value

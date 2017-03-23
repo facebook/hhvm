@@ -835,10 +835,14 @@ let add_property class_def buf property =
   end
 
 let add_constant buf c =
+  let name = Hhas_constant.name c in
+  let value = Hhas_constant.value c in
   B.add_string buf "\n  .const ";
-  B.add_string buf (Hhas_constant.name c);
-  (* TODO: Get the actual initializer when we can codegen it. *)
-  B.add_string buf " = \"\"\"N;\"\"\";"
+  B.add_string buf name;
+  B.add_string buf " = \"\"\"";
+  (* TODO: attribute_argument_to_string could stand to be renamed. *)
+  B.add_string buf (attribute_argument_to_string value);
+  B.add_string buf "\"\"\";"
 
 let add_type_constant buf c =
   B.add_string buf "\n  .const ";

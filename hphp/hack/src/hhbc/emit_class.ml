@@ -66,10 +66,10 @@ let from_constant (_hint, name, const_init) =
   (* The type hint is omitted. *)
   match const_init with
   | None -> None (* Abstract constants are omitted *)
-  | Some _init ->
-    (* TODO: Deal with the initializer *)
+  | Some init ->
     let constant_name = Litstr.to_string @@ snd name in
-    Some (Hhas_constant.make constant_name)
+    let constant_value = literal_from_expr init in
+    Some (Hhas_constant.make constant_name constant_value)
 
 let from_constants ast_constants =
   List.filter_map ast_constants from_constant

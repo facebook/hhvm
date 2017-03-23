@@ -2517,6 +2517,8 @@ static_class_name:
     static_class_name_base             { $$ = $1; }
   | class_method_call                  { _p->onName($$,$1,
                                          Parser::StaticClassExprName);}
+  | simple_function_call               { _p->onName($$, $1,
+                                         Parser::StaticClassExprName);}
   | static_class_name
     T_DOUBLE_COLON
     /* !PHP5_ONLY */

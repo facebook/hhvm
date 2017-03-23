@@ -1330,8 +1330,8 @@ and handle_possible_chaining (obj, arrow1, member1) argish =
   match chain_list with
   | hd :: [] ->
     Fmt [
-      transform obj;
-      SplitWith Cost.Base;
+      Span [transform obj];
+      SplitWith Cost.SimpleMemberSelection;
       Nest [transform_chain hd];
     ]
   | hd :: tl ->

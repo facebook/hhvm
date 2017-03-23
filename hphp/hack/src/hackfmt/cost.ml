@@ -8,9 +8,10 @@
  *
  *)
 
-type t = NoCost | Base | Assignment
+type t = NoCost | Base | Assignment | SimpleMemberSelection
 
 let get_cost t = match t with
   | NoCost -> 0
   | Base -> 1
   | Assignment -> 2
+  | SimpleMemberSelection -> 3

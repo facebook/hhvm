@@ -87,7 +87,8 @@ let dump ?(ignored=false) node =
       print ("SplitWith " ^ match cost with
         | Cost.NoCost -> "Cost.NoCost"
         | Cost.Base -> "Cost.Base"
-        | Cost.Assignment -> "Cost.Assignment")
+        | Cost.Assignment -> "Cost.Assignment"
+        | Cost.SimpleMemberSelection -> "Cost.SimpleMemberSelection")
     | Newline ->
       print "Newline"
     | BlankLine ->

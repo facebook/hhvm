@@ -1690,17 +1690,20 @@ static int execute_program_impl(int argc, char** argv) {
   // Defer the initialization of light processes until the log file handle is
   // created, so that light processes can log to the right place. If we ever
   // lose a light process, stop the server instead of proceeding in an
-  // uncertain state.
-  LightProcess::SetLostChildHandler([](pid_t child) {
-    if (!HttpServer::Server) return;
-    if (!HttpServer::Server->isStopped()) {
-      HttpServer::Server->stopOnSignal(SIGCHLD);
-    }
-  });
-  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                           RuntimeOption::LightProcessCount,
-                           RuntimeOption::EvalRecordSubprocessTimes,
-                           inherited_fds);
+  // uncertain state. Don't start them in DumpHhas mode because
+  // it _Exit()s after loading the first non-systemlib unit.
+  if (!RuntimeOption::EvalDumpHhas) {
+    LightProcess::SetLostChildHandler([](pid_t child) {
+        if (!HttpServer::Server) return;
+        if (!HttpServer::Server->isStopped()) {
+          HttpServer::Server->stopOnSignal(SIGCHLD);
+        }
+      });
+    LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
+                             RuntimeOption::LightProcessCount,
+                             RuntimeOption::EvalRecordSubprocessTimes,
+                             inherited_fds);
+  }
 #endif
 
   // We want to do this as early as possible because any allocations before-hand

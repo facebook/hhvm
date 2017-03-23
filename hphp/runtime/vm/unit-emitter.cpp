@@ -685,16 +685,6 @@ std::unique_ptr<Unit> UnitEmitter::create() {
 
   m_fMap.clear();
 
-  if (RuntimeOption::EvalDumpBytecode) {
-    // Dump human-readable bytecode.
-    Trace::traceRelease("%s", u->toString().c_str());
-  }
-  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
-    std::printf("%s", disassemble(u.get()).c_str());
-    std::fflush(stdout);
-    _Exit(0);
-  }
-
   static const bool kVerify = debug || getenv("HHVM_VERIFY");
   static const bool kVerifyVerboseSystem =
     getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
@@ -716,6 +706,17 @@ std::unique_ptr<Unit> UnitEmitter::create() {
         u->filepath()->data(), isSystemLib ? "_SYSTEM" : ""
       );
     }
+  }
+
+  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
+    std::printf("%s", disassemble(u.get()).c_str());
+    std::fflush(stdout);
+    _Exit(0);
+  }
+
+  if (RuntimeOption::EvalDumpBytecode) {
+    // Dump human-readable bytecode.
+    Trace::traceRelease("%s", u->toString().c_str());
   }
 
   return u;

@@ -818,7 +818,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
   // Command line arguments
   $cli_args = find_test_ext($test, 'cli_args');
   if ($cli_args !== null) {
-    $cmd .= " " . file_get_contents($cli_args);
+    $cmd .= " -- " . trim(file_get_contents($cli_args));
   }
 
   $env = $_ENV;
@@ -1480,8 +1480,10 @@ function generate_diff($wanted, $wanted_re, $output)
 
 function dump_hhas_to_temp($hhvm_cmd, $test) {
   $tmp_file = $test . '.round_trip.hhas';
-  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", $ret);
-  if ($ret) { echo "system failed\n"; exit(1); }
+  $cmd = str_replace(' -- ', ' -vEval.DumpHhas=1 -- ', $hhvm_cmd);
+  if ($cmd == $hhvm_cmd) $cmd .= " -vEval.DumpHhas=1";
+  system("$cmd  > $tmp_file 2> /dev/null", $ret);
+  if ($ret) return false;
   return $tmp_file;
 }
 
@@ -1790,11 +1792,17 @@ function run_test($options, $test) {
       shell_exec("mv $hhbbc_repo $hphp_repo");
       shell_exec("$hhbbc 2>&1");
       $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
-      $one = file_get_contents($hhas_temp1);
-      $two = file_get_contents($hhas_temp2);
-      if (strcmp($one, $two)) {
-        file_put_contents("$test.diff", generate_diff($one, null, $two));
-        return false;
+      if ($hhas_temp1 === false || $hhas_temp2 === false) {
+        if ($hhas_temp1 != $hhas_temp2)  {
+          shell_exec("cat $hhas_temp1$hhas_temp2 > $test.diff");
+          return false;
+        }
+      } else {
+        $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
+        if (trim($diff) != '0') {
+          shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
+          return false;
+        }
       }
     }
 
@@ -1806,6 +1814,10 @@ function run_test($options, $test) {
   }
   if (isset($options['hhas-round-trip'])) {
     $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    if ($hhas_temp === false) {
+      echo "system failed\n";
+      exit(1);
+    }
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
   }
 

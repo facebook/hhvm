@@ -263,7 +263,7 @@ public:
     incLoc(rawText, rawLeng, type);
   }
   void stepPos(const char *rawText, int rawLeng, int type = -1) {
-    if (shortTags()) {
+    if (full()) {
       m_token->setText(rawText, rawLeng);
     }
     incLoc(rawText, rawLeng, type);

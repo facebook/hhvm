@@ -858,7 +858,7 @@ Array HHVM_FUNCTION(token_get_all, const String& source) {
   while ((tokid = scanner.getNextToken(tok, loc))) {
 loop_start: // For after seeing a T_INLINE_HTML, see below
     if (tokid < 256) {
-      res.append(String::FromChar((char)tokid));
+      res.append(String(tok.text()));
     } else {
       String value;
       int tokVal = get_user_token_id(tokid);

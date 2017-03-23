@@ -1016,6 +1016,16 @@ and array_literal fields =
   let fields = collection_literal_fields fields in
   Array (num, fields)
 
+and literal_from_binop op left right =
+  (* TODO: HHVM does not allow 2+2 in an attribute, but does allow it in
+  a constant initializer. It seems reasonable to allow this in attributes
+  as well. Make sure this decision is documented in the specification. *)
+  let left = literal_from_expr left in
+  let right = literal_from_expr right in
+  match (op, left, right) with
+  | (A.Plus, Int left, Int right) -> Int (Int64.add left right)
+  | _ -> failwith "Binary operation not yet implemented on literals"
+
 and literal_from_expr expr =
   match snd expr with
   | A.Float (_, litstr) -> Double litstr
@@ -1027,6 +1037,7 @@ and literal_from_expr expr =
   | A.Array fields -> array_literal fields
   | A.Collection ((_, "dict"), fields) -> dictionary_literal fields
   (* TODO: Vec, Keyset, etc. *)
+  | A.Binop (op, left, right) -> literal_from_binop op left right
   (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
    this seems reasonable to allow. Right now this will crash if given an
    expression rather than a literal in here.  In particular, see what unary

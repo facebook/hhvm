@@ -107,11 +107,6 @@ inline void UnitEmitter::emitDouble(double n, int64_t pos) {
   emitImpl(n, pos);
 }
 
-template<>
-inline void UnitEmitter::emitIVA(bool n) {
-  emitByte(n << 1);
-}
-
 template<typename T>
 void UnitEmitter::emitIVA(T n) {
   if (LIKELY((n & 0x7f) == n)) {

@@ -988,6 +988,18 @@ static const char* MOpMode_names[] = {
 #undef MODE
 };
 
+static const char* ContCheckOp_names[] = {
+#define CONT_CHECK_OP(x) #x,
+  CONT_CHECK_OPS
+#undef CONT_CHECK_OP
+};
+
+static const char* CudOp_names[] = {
+#define CUD_OP(x) #x,
+  CUD_OPS
+#undef CUD_OP
+};
+
 template<class T, size_t Sz>
 const char* subopToNameImpl(const char* (&arr)[Sz], T opcode) {
   static_assert(
@@ -1049,6 +1061,8 @@ X(ObjMethodOp)
 X(SwitchKind)
 X(QueryMOp)
 X(MOpMode)
+X(ContCheckOp)
+X(CudOp)
 
 #undef X
 

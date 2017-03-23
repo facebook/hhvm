@@ -12,8 +12,12 @@
  * TODO (hgo): see within HHVM codebase what those types actually are *)
 type property_name = string
 type iter_vec = int
-type check_started = bool
-type free_iterator = int
+type check_started =
+  | IgnoreStarted
+  | CheckStarted
+type free_iterator =
+  | IgnoreIter
+  | FreeIter
 type repo_auth_type = string (* see see runtime/base/repo-auth-type.h *)
 type local_id = Local.t
 

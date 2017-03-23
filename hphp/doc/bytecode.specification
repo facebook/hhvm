@@ -4247,12 +4247,12 @@ YieldFromDelegate [] -> [C]
 ContUnsetDelegate <free iterator> [] -> []
 
   This instruction may only appear in bodies of non-async generators. Removes
-  the currently assigned delegate of the generator. If <free iterator> is true
-  and the delegate is not another generator then this opcode is responsible for
-  freeing the internal iterator used by this group of opcodes. If false then it
-  is expected that the iterator is freed elsewhere. When the delegate is
-  another generator then it assumes that the iterator was never initialized
-  in the first place.
+  the currently assigned delegate of the generator. If <free iterator> is
+  "FreeIter", and the delegate is not another generator, then this opcode is
+  responsible for freeing the internal iterator used by this group of opcodes.
+  If "IgnoreIter" then it is expected that the iterator is freed elsewhere.
+  When the delegate is another generator then it assumes that the iterator was
+  never initialized in the first place.
 
 15. Async functions
 -------------------

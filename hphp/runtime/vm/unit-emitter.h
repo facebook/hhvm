@@ -341,8 +341,8 @@ struct UnitEmitter {
   void emitInt64(int64_t n, int64_t pos = -1);
   void emitDouble(double n, int64_t pos = -1);
 
-  template<typename T>
-  void emitIVA(T n);
+  void emitIVA(bool) = delete;
+  template<typename T> void emitIVA(T n);
 
 
   /////////////////////////////////////////////////////////////////////////////

@@ -427,14 +427,15 @@ void emitYieldK(IRGS& env) {
   yieldReturnControl(env);
 }
 
-void emitContCheck(IRGS& env, int32_t checkStarted) {
+void emitContCheck(IRGS& env, ContCheckOp subop) {
   assertx(curClass(env));
   assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
           curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
+  auto const checkStarted = subop == ContCheckOp::CheckStarted;
   gen(env, ContPreNext,
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
-    makeExitSlow(env), cont, cns(env, static_cast<bool>(checkStarted)));
+    makeExitSlow(env), cont, cns(env, checkStarted));
 }
 
 void emitContValid(IRGS& env) {

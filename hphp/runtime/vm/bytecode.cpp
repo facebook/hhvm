@@ -5826,7 +5826,7 @@ OPTBLD_INLINE TCA iopYieldFromDelegate(PC& pc, Iter* it, PC resumePc) {
   return yieldFromIterator(pc, gen, it, resumeOffset);
 }
 
-OPTBLD_INLINE void iopContUnsetDelegate(intva_t shouldFreeIter, Iter* iter) {
+OPTBLD_INLINE void iopContUnsetDelegate(CudOp subop, Iter* iter) {
   auto gen = frame_generator(vmfp());
   // The `shouldFreeIter` immediate determines whether we need to call free
   // on our iterator or not. Normally if we finish executing our yield from
@@ -5835,14 +5835,14 @@ OPTBLD_INLINE void iopContUnsetDelegate(intva_t shouldFreeIter, Iter* iter) {
   // then we need to do it manually. We don't use the iterator when the
   // delegate is a generator though, so even if the param tells us to free it
   // we should just ignore it.
-  if (UNLIKELY(shouldFreeIter && !tvIsGenerator(gen->m_delegate))) {
+  if (UNLIKELY(subop == CudOp::FreeIter && !tvIsGenerator(gen->m_delegate))) {
     iter->free();
   }
   cellSetNull(gen->m_delegate);
 }
 
-OPTBLD_INLINE void iopContCheck(intva_t checkStarted) {
-  this_base_generator(vmfp())->preNext(checkStarted);
+OPTBLD_INLINE void iopContCheck(ContCheckOp subop) {
+  this_base_generator(vmfp())->preNext(subop == ContCheckOp::CheckStarted);
 }
 
 OPTBLD_INLINE void iopContValid() {
@@ -6516,6 +6516,13 @@ TCA iopWrapper(Op, void(*fn)(local_var,SilenceOp), PC& pc) {
 }
 
 OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(ContCheckOp), PC& pc) {
+  auto imm = decode_oa<ContCheckOp>(pc);
+  fn(imm);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
 TCA iopWrapper(Op, void(*fn)(const ArrayData*), PC& pc) {
   auto id = decode<Id>(pc);
   auto a = vmfp()->m_func->unit()->lookupArrayId(id);
@@ -6543,6 +6550,14 @@ TCA iopWrapper(Op, void(*fn)(intva_t,Iter*), PC& pc) {
   auto n = decode_intva(pc);
   auto iter = decode_iter(pc);
   fn(n, iter);
+  return nullptr;
+}
+
+OPTBLD_INLINE static
+TCA iopWrapper(Op, void(*fn)(CudOp,Iter*), PC& pc) {
+  auto subop = decode_oa<CudOp>(pc);
+  auto iter = decode_iter(pc);
+  fn(subop, iter);
   return nullptr;
 }
 

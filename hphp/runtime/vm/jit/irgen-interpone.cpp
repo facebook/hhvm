@@ -483,7 +483,7 @@ void emitContAssignDelegate(IRGS& env, int32_t)
 void emitContEnterDelegate(IRGS& env)         { INTERP }
 void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
-void emitContUnsetDelegate(IRGS& env, int32_t, int32_t)
+void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
 void emitHighInvalid(IRGS& env)               { std::abort(); }
 

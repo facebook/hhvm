@@ -395,15 +395,21 @@ and emit_yield_break () =
     instr_retc;
   ]
 
-and emit_string2 = function
+and emit_string2 exprs =
+  match exprs with
+  | [e] ->
+    gather [
+      from_expr e;
+      instr (IOp CastString)
+    ]
   | e1::e2::es ->
-    gather @@
-      List.rev @@
-        List.fold_left
-          es
-          ~init:[instr (IOp Concat); from_expr e2; from_expr e1]
-          ~f:(fun acc e -> instr (IOp Concat) :: from_expr e :: acc)
-  | _ -> failwith "String2 with zero or one arguments is impossible"
+    gather @@ [
+      emit_two_exprs e1 e2;
+      instr (IOp Concat);
+      gather (List.map es (fun e -> gather [from_expr e; instr (IOp Concat)]))
+    ]
+
+  | [] -> failwith "String2 with zero arguments is impossible"
 
 and emit_lambda fundef ids =
   (* Closure conversion puts the class number used for CreateCl in the "name"

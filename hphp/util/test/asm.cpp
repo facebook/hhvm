@@ -96,7 +96,7 @@ void compare(const char* expectedOpName,
     // that affects memory.  We could figure this out and check for
     // it, but it's good enough just to see that the opcode has the
     // prefix we expect.
-    EXPECT_EQ(true, boost::starts_with(opName, expectedOpName))
+    EXPECT_TRUE(boost::starts_with(opName, expectedOpName))
       << "expected " << expectedOpName << ", got " << opName;
 
     if (expectIt == expecteds.end()) {

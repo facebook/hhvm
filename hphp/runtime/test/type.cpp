@@ -546,7 +546,7 @@ TEST(Type, Const) {
   EXPECT_LT(True, TBool);
   EXPECT_NE(True, TBool);
   EXPECT_TRUE(True.hasConstVal());
-  EXPECT_EQ(true, True.boolVal());
+  EXPECT_TRUE(True.boolVal());
   EXPECT_TRUE(TUncounted.maybe(True));
   EXPECT_FALSE(five <= True);
   EXPECT_FALSE(five > True);

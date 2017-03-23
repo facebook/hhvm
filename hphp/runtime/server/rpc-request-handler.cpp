@@ -437,6 +437,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
                      k_PHP_OUTPUT_HANDLER_CLEAN |
                      k_PHP_OUTPUT_HANDLER_END);
   m_context->restoreSession();
+  // Context is long-lived, but cached transport is not, so clear it.
+  m_context->setTransport(nullptr);
   return !error;
 }
 

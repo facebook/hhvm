@@ -88,7 +88,7 @@ constexpr int kSystemLibBump = 10;
  * Functions listed in the --trace functions list get trace level bumped by
  * this amount.
  */
-constexpr int kTraceFuncBump = -2;
+constexpr int kTraceFuncBump = -10;
 
 /*
  * We may run the interpreter collecting stats and when trace is on

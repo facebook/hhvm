@@ -252,8 +252,9 @@ FuncAnalysis do_analyze_collect(const Index& index,
   auto const ctx = adjust_closure_context(inputCtx);
   FuncAnalysis ai{ctx};
 
-  Trace::Bump bumper{Trace::hhbbc, kTraceFuncBump,
-    is_trace_function(ctx.cls, ctx.func)};
+  auto bump = is_trace_function(ctx.cls, ctx.func) ? kTraceFuncBump : 0;
+  Trace::Bump bumper1{Trace::hhbbc, bump};
+  Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
   FTRACE(2, "{:-^70}\n-- {}\n", "Analyze", show(ctx));
 
   /*

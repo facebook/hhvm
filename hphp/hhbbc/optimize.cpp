@@ -38,6 +38,7 @@
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/options-util.h"
 #include "hphp/hhbbc/peephole.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
@@ -766,8 +767,13 @@ Bytecode gen_constant(const Cell& cell) {
 }
 
 void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ainfo.ctx.unit)};
+  auto const bump =
+    (is_systemlib_part(*ainfo.ctx.unit) ? kSystemLibBump : 0) +
+    (is_trace_function(ainfo.ctx.cls, ainfo.ctx.func) ? kTraceFuncBump : 0);
+
+  Trace::Bump bumper1{Trace::hhbbc, bump};
+  Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
+  Trace::Bump bumper3{Trace::hhbbc_dce, bump};
   do_optimize(index, std::move(ainfo));
 }
 

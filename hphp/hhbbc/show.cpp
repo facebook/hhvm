@@ -174,7 +174,9 @@ std::string show(const Func& func) {
 
   for (auto& blk : func.blocks) {
     if (blk->id == NoBlockId) continue;
-    folly::format(&ret, "block #{}\n{}", blk->id, indent(2, show(func, *blk)));
+    folly::format(&ret, "block #{} (section {})\n{}",
+                  blk->id, static_cast<size_t>(blk->section),
+                  indent(2, show(func, *blk)));
   }
 
   visitExnLeaves(func, [&] (const php::ExnNode& node) {

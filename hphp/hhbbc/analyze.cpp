@@ -32,6 +32,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/unit-util.h"
+#include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/class-util.h"
 #include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options-util.h"
@@ -431,6 +432,7 @@ FuncAnalysis do_analyze(const Index& index,
   CollectedInfo collect {
     index, ctx, clsAnalysis, nullptr, trackConstantArrays
   };
+
   return do_analyze_collect(index, ctx, collect, clsAnalysis, knownArgs);
 }
 
@@ -515,7 +517,10 @@ FuncAnalysis analyze_func(const Index& index, Context const ctx,
                           bool trackConstantArrays) {
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
     is_systemlib_part(*ctx.unit)};
-  return do_analyze(index, ctx, nullptr, nullptr, trackConstantArrays);
+  while (true) {
+    auto ret = do_analyze(index, ctx, nullptr, nullptr, trackConstantArrays);
+    if (!rebuild_exn_tree(ret)) return ret;
+  }
 }
 
 FuncAnalysis analyze_func_collect(const Index& index,
@@ -707,9 +712,21 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       }
     }
 
+    auto noExceptionalChanges = [&] {
+      auto changes = false;
+      for (auto& fa : methodResults) {
+        if (rebuild_exn_tree(fa)) changes = true;
+      }
+      for (auto& fa : closureResults) {
+        if (rebuild_exn_tree(fa)) changes = true;
+      }
+      return !changes;
+    };
+
     // Check if we've reached a fixed point yet.
     if (previousProps   == clsAnalysis.privateProperties &&
-        previousStatics == clsAnalysis.privateStatics) {
+        previousStatics == clsAnalysis.privateStatics &&
+        noExceptionalChanges()) {
       clsAnalysis.methods  = std::move(methodResults);
       clsAnalysis.closures = std::move(closureResults);
       break;

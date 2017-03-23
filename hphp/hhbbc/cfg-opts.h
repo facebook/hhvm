@@ -31,12 +31,17 @@ struct FuncAnalysis;
  * If options.RemoveDeadBlocks is off, this function just replaces
  * blocks we believe are unreachable with fatal opcodes.
  */
-void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
+void remove_unreachable_blocks(const FuncAnalysis&);
 
 /*
  * Simplify control flow, and create Switch and SSwitch bytecodes.
  */
 bool control_flow_opts(const FuncAnalysis&);
+
+/*
+ * Simplify the exception tree.
+ */
+bool rebuild_exn_tree(const FuncAnalysis& ainfo);
 
 //////////////////////////////////////////////////////////////////////
 

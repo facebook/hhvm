@@ -518,6 +518,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     }
 
     info.past = ue.bcPos();
+    if (b->factoredExits.size()) {
+      FTRACE(4, "      factored:");
+      for (auto DEBUG_ONLY id : b->factoredExits) FTRACE(4, " {}", id);
+      FTRACE(4, "\n");
+    }
+    if (b->fallthrough != NoBlockId) {
+      FTRACE(4, "      fallthrough: {}\n", b->fallthrough);
+    }
     FTRACE(2, "      block {} end: {}\n", b->id, info.past);
   }
 
@@ -582,8 +590,14 @@ void emit_eh_region(FuncEmitter& fe,
                     borrowed_ptr<const EHRegion> region,
                     const BlockInfo& blockInfo,
                     ParentIndexMap& parentIndexMap) {
+  FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->id);
   // A region on a single empty block.
-  if (region->start == region->past) return;
+  if (region->start == region->past) {
+    FTRACE(2, "    Skipping\n");
+    return;
+  }
+
+  FTRACE(2, "    Process @ {}-{}\n", region->start, region->past);
 
   auto& eh = fe.addEHEnt();
   eh.m_base = region->start;

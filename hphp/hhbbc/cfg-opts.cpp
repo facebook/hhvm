@@ -22,6 +22,7 @@
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/dce.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -29,36 +30,78 @@ TRACE_SET_MOD(hhbbc_cfg);
 
 //////////////////////////////////////////////////////////////////////
 
-void remove_unreachable_blocks(const Index& index, const FuncAnalysis& ainfo) {
-  auto reachable = [&](BlockId id) {
-    return ainfo.bdata[id].stateIn.initialized;
+void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
+  auto& func = *ainfo.ctx.func;
+  Trace::Bump bumper{
+    Trace::hhbbc_cfg, kSystemLibBump, is_systemlib_part(*func.unit)
+  };
+  auto done_header = false;
+  auto header = [&] {
+    if (done_header) return;
+    done_header = true;
+    FTRACE(2, "Remove unreachable blocks: {}\n", func.name);
   };
 
-  for (auto& blk : ainfo.rpoBlocks) {
-    if (reachable(blk->id)) continue;
+  auto make_unreachable = [&](borrowed_ptr<php::Block> blk) {
+    if (blk->id == NoBlockId) return false;
+    auto const& state = ainfo.bdata[blk->id].stateIn;
+    if (!state.initialized) return true;
+    if (!state.unreachable) return false;
+    return blk->hhbcs.size() != 2 ||
+           blk->hhbcs.back().op != Op::Fatal;
+  };
+
+  for (auto const& blk : ainfo.ctx.func->blocks) {
+    if (!make_unreachable(borrow(blk))) continue;
+    header();
+    FTRACE(2, "Marking {} unreachable\n", blk->id);
     auto const srcLoc = blk->hhbcs.front().srcLoc;
     blk->hhbcs = {
       bc_with_loc(srcLoc, bc::String { s_unreachable.get() }),
       bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
     };
     blk->fallthrough = NoBlockId;
+    blk->exnNode = nullptr;
   }
 
   if (!options.RemoveDeadBlocks) return;
 
-  for (auto& blk : ainfo.rpoBlocks) {
-    auto reachableTargets = false;
+  auto reachable = [&](BlockId id) {
+    if (id == NoBlockId) return false;
+    auto const& state = ainfo.bdata[id].stateIn;
+    return state.initialized && !state.unreachable;
+  };
+
+  for (auto const& blk : ainfo.rpoBlocks) {
+    if (!reachable(blk->id)) continue;
+    auto reachableTarget = NoBlockId;
+    auto hasUnreachableTargets = false;
     forEachTakenEdge(blk->hhbcs.back(), [&] (BlockId id) {
-        if (reachable(id)) reachableTargets = true;
+        if (reachable(id)) {
+          reachableTarget = id;
+        } else {
+          hasUnreachableTargets = true;
+        }
       });
-    if (reachableTargets) continue;
+    if (!hasUnreachableTargets) continue;
+    header();
     switch (blk->hhbcs.back().op) {
-    case Op::JmpNZ:
-    case Op::JmpZ:
-      blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
-      break;
-    default:
-      break;
+      case Op::JmpNZ:
+      case Op::JmpZ:
+        FTRACE(2, "blk: {} - jcc -> jmp {}\n", blk->id, reachableTarget);
+        blk->hhbcs.back() = bc_with_loc(blk->hhbcs.back().srcLoc, bc::PopC {});
+        blk->fallthrough = reachableTarget;
+        break;
+      default:
+        FTRACE(2, "blk: {} -", blk->id, reachableTarget);
+        forEachTakenEdge(blk->hhbcs.back(), [&] (const BlockId& id) {
+            if (!reachable(id)) {
+              FTRACE(2, " {}->{}", id, reachableTarget);
+              const_cast<BlockId&>(id) = reachableTarget;
+            }
+          });
+        FTRACE(2, "\n");
+        break;
     }
   }
 }
@@ -287,15 +330,137 @@ bool buildSwitches(php::Func& func,
   }
 }
 
+template<typename S>
+bool strip_exn_tree(const php::Func& func,
+                    CompactVector<std::unique_ptr<php::ExnNode>>& nodes,
+                    const std::set<borrowed_ptr<php::ExnNode>> &seenExnNodes,
+                    uint32_t& nextId,
+                    S& sectionExits) {
+  auto it = std::remove_if(nodes.begin(), nodes.end(),
+                           [&] (const std::unique_ptr<php::ExnNode>& node) {
+                             if (seenExnNodes.count(borrow(node))) return false;
+                             FTRACE(2, "Stripping ExnNode {}\n", node->id);
+                             return true;
+                           });
+  auto ret = false;
+  if (it != nodes.end()) {
+    nodes.erase(it, nodes.end());
+    ret = true;
+  }
+  for (auto& n : nodes) {
+    n->id = nextId++;
+    if (n->parent) {
+      match<void>(
+        n->info,
+        [&] (const php::CatchRegion& cr) {},
+        [&] (const php::FaultRegion& fr) {
+          auto pentry = match<BlockId>(
+            n->parent->info,
+            [&] (const php::CatchRegion& cr2) { return cr2.catchEntry; },
+            [&] (const php::FaultRegion& fr2) { return fr2.faultEntry; }
+          );
+          auto const sectionId =
+            static_cast<size_t>(func.blocks[fr.faultEntry]->section);
+          sectionExits[sectionId].insert(pentry);
+        });
+    }
+    if (strip_exn_tree(func, n->children, seenExnNodes, nextId, sectionExits)) {
+      ret = true;
+    }
+  }
+
+  return ret;
+}
+
+}
+
+bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
+  auto& func = *ainfo.ctx.func;
+  Trace::Bump bumper{
+    Trace::hhbbc_cfg, kSystemLibBump, is_systemlib_part(*func.unit)
+  };
+  FTRACE(4, "Rebuild exn tree: {}\n", func.name);
+
+  auto reachable = [&](BlockId id) {
+    if (id == NoBlockId) return false;
+    auto const& state = ainfo.bdata[id].stateIn;
+    return state.initialized && !state.unreachable;
+  };
+  std::unordered_map<BlockId,std::set<BlockId>> factoredExits;
+  std::unordered_map<size_t, std::set<BlockId>> sectionExits;
+  std::set<borrowed_ptr<php::ExnNode>> seenExnNodes;
+
+  for (auto const& blk : ainfo.rpoBlocks) {
+    if (!reachable(blk->id)) {
+      FTRACE(4, "Unreachable: {}\n", blk->id);
+      continue;
+    }
+    if (auto node = blk->exnNode) {
+      auto entry = match<BlockId>(
+        node->info,
+        [&] (const php::CatchRegion& cr) { return cr.catchEntry; },
+        [&] (const php::FaultRegion& fr) { return fr.faultEntry; }
+      );
+      factoredExits[blk->id].insert(entry);
+      do {
+        if (!seenExnNodes.insert(node).second) break;
+      } while ((node = node->parent) != nullptr);
+    }
+  }
+
+  uint32_t nextId = 0;
+  if (!strip_exn_tree(func, func.exnNodes,
+                      seenExnNodes, nextId, sectionExits)) {
+    return false;
+  }
+
+  for (auto const& blk : func.blocks) {
+    if (!reachable(blk->id)) {
+      blk->exnNode = nullptr;
+      continue;
+    }
+    auto &fe = factoredExits[blk->id];
+    auto it = sectionExits.find(static_cast<size_t>(blk->section));
+    if (it != sectionExits.end()) {
+      fe.insert(it->second.begin(), it->second.end());
+    }
+    auto update = false;
+    if (blk->factoredExits.size() != fe.size()) {
+      update = true;
+      FTRACE(2, "Old factored edges: blk:{} -", blk->id);
+      for (auto DEBUG_ONLY id : blk->factoredExits) FTRACE(2, " {}", id);
+      FTRACE(2, "\n");
+      blk->factoredExits.resize(fe.size());
+    }
+
+    size_t i = 0;
+    for (auto b : fe) {
+      if (blk->factoredExits[i] != b) {
+        assert(update);
+        blk->factoredExits[i] = b;
+      }
+      i++;
+    }
+    if (update) {
+      FTRACE(2, "New factored edges: blk:{} -", blk->id);
+      for (auto DEBUG_ONLY id : blk->factoredExits) FTRACE(2, " {}", id);
+      FTRACE(2, "\n");
+    }
+  }
+
+  return true;
 }
 
 bool control_flow_opts(const FuncAnalysis& ainfo) {
   auto& func = *ainfo.ctx.func;
+  Trace::Bump bumper{
+    Trace::hhbbc_cfg, kSystemLibBump, is_systemlib_part(*func.unit)
+  };
   FTRACE(2, "control_flow_opts: {}\n", func.name);
 
   std::vector<MergeBlockInfo> blockInfo(func.blocks.size(), MergeBlockInfo {});
 
-  bool removedAny = false;
+  bool anyChanges = false;
 
   auto reachable = [&](BlockId id) {
     auto const& state = ainfo.bdata[id].stateIn;
@@ -327,7 +492,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         auto skip = next_real_block(func, succId);
         if (skip != succId) {
           const_cast<BlockId&>(succId) = skip;
-          removedAny = true;
+          anyChanges = true;
         }
         handleSucc(succId);
       });
@@ -380,7 +545,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       nxt->fallthrough = NoBlockId;
       nxt->id = NoBlockId;
       nxt->hhbcs = { bc::Nop {} };
-      removedAny = true;
+      anyChanges = true;
     }
     auto const& bInfo = blockInfo[blk->id];
     if (bInfo.couldBeSwitch &&
@@ -388,12 +553,12 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       // This block looks like it could be part of a switch, and it's
       // not in the middle of a sequence of such blocks.
       if (buildSwitches(func, borrow(blk), blockInfo)) {
-        removedAny = true;
+        anyChanges = true;
       }
     }
   }
 
-  return removedAny;
+  return anyChanges;
 }
 
 //////////////////////////////////////////////////////////////////////

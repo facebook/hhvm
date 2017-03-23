@@ -311,6 +311,9 @@ struct Func {
    * off the func here, with children pointers.  Each block that is
    * within a try or fault region has a pointer to the inner-most
    * ExnNode protecting it.
+   *
+   * Note that this, together with the Blocks' factoredExits are updated
+   * during the concurrent analyze pass.
    */
   CompactVector<std::unique_ptr<ExnNode>> exnNodes;
 

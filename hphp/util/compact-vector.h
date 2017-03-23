@@ -215,6 +215,7 @@ void CompactVector<T>::erase(iterator elm) {
 
 template <typename T>
 void CompactVector<T>::erase(iterator elm1, iterator elm2) {
+  if (elm1 == elm2) return;
   assert(elems() <= elm1 && elm1 <= elm2 && elm2 <= end());
   for (auto elm = elm1; elm < elm2; elm++) {
     elm->~T();

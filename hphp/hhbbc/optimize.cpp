@@ -646,7 +646,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
      * Note: it's useful to do dead block removal before DCE, so it can remove
      * code relating to the branch to the dead block.
      */
-    remove_unreachable_blocks(index, ainfo);
+    remove_unreachable_blocks(ainfo);
 
     if (options.LocalDCE) {
       visit_blocks("local DCE", index, ainfo, local_dce);

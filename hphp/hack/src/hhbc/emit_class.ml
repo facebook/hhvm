@@ -54,7 +54,8 @@ let default_constructor ast_class =
     method_is_pair_generator
     method_is_closure_body
 
-let from_extends _tparams extends =
+let from_extends ~is_enum _tparams extends =
+  if is_enum then Some ("HH\\BuiltinEnum") else
   match extends with
   | [] -> None
   | h :: _ -> Some (hint_to_class h)
@@ -110,21 +111,42 @@ let from_class_elt_typeconsts elt =
   | A.TypeConst tc -> from_type_constant tc
   | _ -> None
 
+let from_enum_type opt =
+  match opt with
+  | Some e ->
+    let type_info_user_type = Some (Emit_type_hint.fmt_hint e.A.e_base) in
+    let type_info_type_constraint =
+      Hhas_type_constraint.make
+        None
+        [Hhas_type_constraint.HHType; Hhas_type_constraint.ExtendedHint]
+    in
+    Some (Hhas_type_info.make type_info_user_type type_info_type_constraint)
+  | _ -> None
+
 let from_ast : A.class_ -> Hhas_class.t =
   fun ast_class ->
   let class_attributes =
     Emit_attribute.from_asts ast_class.Ast.c_user_attributes in
   let class_name = Litstr.to_string @@ snd ast_class.Ast.c_name in
-let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
-  let class_is_enum = ast_class.A.c_kind = Ast.Cenum in
+  let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
+  let class_enum_type =
+    if ast_class.A.c_kind = Ast.Cenum
+    then from_enum_type ast_class.A.c_enum
+    else None
+  in
+
   let class_is_interface = ast_is_interface ast_class in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
-    ast_class.A.c_final || class_is_trait || class_is_enum in
+    ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in
   let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams in
   let class_base =
     if class_is_interface then None
-    else from_extends tparams ast_class.A.c_extends in
+    else from_extends
+          ~is_enum:(class_enum_type <> None)
+          tparams
+          ast_class.A.c_extends
+  in
   let implements =
     if class_is_interface then ast_class.A.c_extends
     else ast_class.A.c_implements in
@@ -155,7 +177,7 @@ let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
     class_is_abstract
     class_is_interface
     class_is_trait
-    class_is_enum
+    class_enum_type
     class_methods
     class_properties
     class_constants

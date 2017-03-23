@@ -552,7 +552,7 @@ let quote_str_option s =
   | None -> "N"
   | Some s -> quote_str s
 
-let string_of_type_info ti =
+let string_of_type_info ?(is_enum = false) ti =
   let user_type = Hhas_type_info.user_type ti in
   let type_constraint = Hhas_type_info.type_constraint ti in
   let flags = Hhas_type_constraint.flags type_constraint in
@@ -560,7 +560,7 @@ let string_of_type_info ti =
   let name = Hhas_type_constraint.name type_constraint in
   let flags_text = String.concat " " flag_strs in
     "<" ^ quote_str_option user_type ^ " "
-        ^ quote_str_option name ^ " "
+        ^ (if not is_enum then quote_str_option name ^ " " else "")
         ^ flags_text
     ^ " >"
 
@@ -780,9 +780,13 @@ let class_special_attributes c =
               then "no_override" :: "unique" :: attrs
               else attrs in
   let attrs = if Hhas_class.is_trait c then "trait" :: attrs else attrs in
-  let attrs = if Hhas_class.is_interface c then "interface" :: attrs else attrs in
+  let attrs =
+    if Hhas_class.is_interface c then "interface" :: attrs else attrs
+  in
   let attrs = if Hhas_class.is_final c then "final" :: attrs else attrs in
-  let attrs = if Hhas_class.is_enum c then "enum" :: attrs else attrs in
+  let attrs =
+    if Hhas_class.enum_type c <> None then "enum" :: attrs else attrs
+  in
   let attrs = if Hhas_class.is_abstract c then "abstract" :: attrs else attrs in
   let text = String.concat " " attrs in
   let text = if text = "" then "" else "[" ^ text ^ "] " in
@@ -850,6 +854,14 @@ let add_type_constant buf c =
   (* TODO: Get the actual initializer when we can codegen it. *)
   B.add_string buf " isType = \"\"\"N;\"\"\";"
 
+let add_enum_ty buf c =
+  match Hhas_class.enum_type c with
+  | Some et ->
+    B.add_string buf "\n  .enum_ty ";
+    B.add_string buf @@ string_of_type_info ~is_enum:true et;
+    B.add_string buf ";"
+  | _ -> ()
+
 let add_class_def buf class_def =
   let class_name = fmt_name (Hhas_class.name class_def) in
   (* TODO: user attributes *)
@@ -859,6 +871,7 @@ let add_class_def buf class_def =
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {";
+  add_enum_ty buf class_def;
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
   List.iter (add_property class_def buf) (Hhas_class.properties class_def);

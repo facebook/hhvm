@@ -562,3 +562,4 @@ type instruct =
   | IComment of string
   | IAsync of async_functions
   | IGenerator of gen_creation_execution
+  | IIncludeEvalDefine of instruct_include_eval_define

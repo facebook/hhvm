@@ -494,6 +494,13 @@ let string_of_generator = function
   | YieldK -> "YieldK"
   | _ -> "### string_of_generator - NYI"
 
+let string_of_include_eval_define = function
+  | Incl -> "Incl"
+  | InclOnce -> "InclOnce"
+  | Req -> "Req"
+  | ReqOnce -> "ReqOnce"
+  | _ -> "### string_of_include_eval_define - NYI"
+
 let string_of_instruction instruction =
   let s = match instruction with
   | IIterator            i -> string_of_iterator i
@@ -513,6 +520,7 @@ let string_of_instruction instruction =
   | IComment             s -> "# " ^ s
   | IAsync               i -> string_of_async i
   | IGenerator           i -> string_of_generator i
+  | IIncludeEvalDefine   i -> string_of_include_eval_define i
   | _ -> failwith "invalid instruction" in
   s ^ "\n"
 

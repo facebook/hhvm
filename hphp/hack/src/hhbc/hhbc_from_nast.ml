@@ -457,6 +457,18 @@ and emit_xhp p id attributes children =
       [attribute_map ; children_vec ; filename ; line],
       []))
 
+and emit_import flavor e =
+  let import_instr = match flavor with
+    | A.Include -> instr @@ IIncludeEvalDefine Incl
+    | A.Require -> instr @@ IIncludeEvalDefine Req
+    | A.IncludeOnce -> instr @@ IIncludeEvalDefine InclOnce
+    | A.RequireOnce -> instr @@ IIncludeEvalDefine ReqOnce
+  in
+  gather [
+    from_expr e;
+    import_instr;
+  ]
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -510,11 +522,11 @@ and from_expr expr =
   | A.Id id -> emit_id id
   | A.Xml (id, attributes, children) ->
     emit_xhp (fst expr) id attributes children
+  | A.Import (flavor, e) -> emit_import flavor e
   (* TODO *)
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
   | A.List _                    -> emit_nyi "list"
-  | A.Import (_, _)             -> emit_nyi "import"
 
 and emit_static_collection ~transform_to_collection expr es =
   let a_label = Label.get_next_data_label () in

@@ -69,7 +69,7 @@ let from_constant (_hint, name, const_init) =
   | None -> None (* Abstract constants are omitted *)
   | Some init ->
     let constant_name = Litstr.to_string @@ snd name in
-    let constant_value = literal_from_expr init in
+    let constant_value = Constant_folder.literal_from_expr init in
     Some (Hhas_constant.make constant_name constant_value)
 
 let from_constants ast_constants =

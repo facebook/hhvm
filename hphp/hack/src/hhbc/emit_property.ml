@@ -20,7 +20,7 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   let property_is_static = Core.List.mem cv_kind_list Ast.Static in
   let property_initial_value = match initial_value with
     | None -> None
-    | Some expr -> Some (Hhbc_from_nast.literal_from_expr expr) in
+    | Some expr -> Some (Constant_folder.literal_from_expr expr) in
   Hhas_property.make
     property_is_private
     property_is_protected

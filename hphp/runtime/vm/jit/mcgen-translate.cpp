@@ -359,7 +359,7 @@ void retranslateAll() {
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-void processExit() {
+void joinWorkerThreads() {
   if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
     dispatcher->stop();
   }
@@ -527,7 +527,6 @@ bool retranslateOpt(FuncId funcId) {
 
 bool retranslateAllEnabled() {
   return
-    RuntimeOption::ServerExecutionMode() &&
     RuntimeOption::EvalJitPGO &&
     RuntimeOption::EvalJitRetranslateAllRequest != 0;
 }
@@ -549,7 +548,9 @@ void checkRetranslateAll() {
   // emitted when retranslateAll() runs, which avoids the need for additional
   // locking on the ProfData. We use a fresh thread to avoid stalling the
   // treadmill, the thread is joined in the processExit handler for mcgen.
-  Logger::Info("Scheduling the retranslation of all profiled translations");
+  if (RuntimeOption::ServerExecutionMode()) {
+    Logger::Info("Scheduling the retranslation of all profiled translations");
+  }
   Treadmill::enqueue([] {
     s_retranslateAllThread = std::thread([] { retranslateAll(); });
   });

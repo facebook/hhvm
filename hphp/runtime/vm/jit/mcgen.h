@@ -154,7 +154,7 @@ void processInit();
  * Called once before process shutdown. May block to wait for any pending JIT
  * worker threads.
  */
-void processExit();
+void joinWorkerThreads();
 
 /*
  * True iff mcgen::processInit() has been called

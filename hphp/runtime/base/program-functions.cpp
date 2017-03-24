@@ -725,6 +725,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (RuntimeOption::EvalDumpTC ||
       RuntimeOption::EvalDumpIR ||
       RuntimeOption::EvalDumpRegion) {
+    jit::mcgen::joinWorkerThreads();
     jit::tc::dump();
   }
   if (xhprof) {
@@ -2444,10 +2445,9 @@ void hphp_process_exit() noexcept {
     Logger::Error("got exception in cleanup step: " #voidexpr); }
   LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
-  LOG_AND_IGNORE(jit::mcgen::processExit())
+  LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())
   LOG_AND_IGNORE(PageletServer::Stop())
   LOG_AND_IGNORE(XboxServer::Stop())
-  LOG_AND_IGNORE(jit::mcgen::processExit())
   // Debugger::Stop() needs an execution context
   LOG_AND_IGNORE(g_context.getCheck())
   LOG_AND_IGNORE(Eval::Debugger::Stop())

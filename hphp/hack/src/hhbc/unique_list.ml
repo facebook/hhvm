@@ -28,4 +28,16 @@ module WithValue(Value: Set.OrderedType) = struct
 
   let items uniq_set =
     uniq_set.unique_list
+
+  let remove item uniq_set =
+    if ValueSet.mem item uniq_set.unique_set then
+      {
+        unique_set = (ValueSet.remove item uniq_set.unique_set);
+        unique_list = List.filter (fun a -> a <> item) uniq_set.unique_list
+      }
+    else
+      uniq_set
+
+  let diff s1 s2 =
+    ValueSet.fold remove s2.unique_set s1
 end

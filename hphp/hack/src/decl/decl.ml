@@ -363,14 +363,11 @@ and class_decl tcopt c =
     else m in
   let ext_strict = List.fold_left c.c_uses
     ~f:(trait_exists env) ~init:ext_strict in
-  let unsafe_xhp = TypecheckerOptions.unsafe_xhp tcopt in
-  let not_strict_because_xhp = unsafe_xhp && c.c_is_xhp in
-  if not ext_strict && not not_strict_because_xhp &&
+  if not ext_strict &&
       (env.Decl_env.mode = FileInfo.Mstrict) then
     let p, name = c.c_name in
     Errors.strict_members_not_known p name
   else ();
-  let ext_strict = if not_strict_because_xhp then false else ext_strict in
   let tparams = List.map (fst c.c_tparams) (type_param env) in
   let enum = match c.c_enum with
     | None -> None

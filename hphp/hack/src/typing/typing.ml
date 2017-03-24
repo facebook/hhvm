@@ -1596,25 +1596,21 @@ and expr_
          (* OK to ignore rest of list; class_info only used for errors, and
           * cid = CI sid cannot produce a union of classes anyhow *)
        | (_, class_info, _)::_ ->
-        if TypecheckerOptions.unsafe_xhp (Env.get_options env) then
-          make_result env T.Any obj
-        else begin
-          let env = List.fold_left attr_ptyl ~f:begin fun env attr ->
-            let namepstr, valpty = attr in
-            let valp, valty = valpty in
-            (* We pretend that XHP attributes are stored as member variables,
-             * prefixed with a colon.
-             *
-             * This converts the member name to an attribute name. *)
-            let name = ":" ^ (snd namepstr) in
-            let env, declty =
-              obj_get ~is_method:false ~nullsafe:None env obj cid
-                (fst namepstr, name) (fun x -> x) in
-            let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
-            Type.sub_type valp ureason env valty declty
-          end ~init:env in
-          make_result env T.Any obj
-        end
+        let env = List.fold_left attr_ptyl ~f:begin fun env attr ->
+          let namepstr, valpty = attr in
+          let valp, valty = valpty in
+          (* We pretend that XHP attributes are stored as member variables,
+           * prefixed with a colon.
+           *
+           * This converts the member name to an attribute name. *)
+          let name = ":" ^ (snd namepstr) in
+          let env, declty =
+            obj_get ~is_method:false ~nullsafe:None env obj cid
+              (fst namepstr, name) (fun x -> x) in
+          let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
+          Type.sub_type valp ureason env valty declty
+        end ~init:env in
+        make_result env T.Any obj
       )
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)

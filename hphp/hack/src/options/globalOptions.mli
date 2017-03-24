@@ -12,17 +12,6 @@ type t = {
  (* When we encounter an unknown class|function|constant name outside
   * of strict mode, is that an error? *)
  tco_assume_php : bool;
- (* For somewhat silly historical reasons having to do with the lack
-  * of .hhi's for fairly core XHP classes, we unfortunately mark all
-  * XHP classes as not having their members fully known at Facebook.
-  *
-  * We've also historically not typechecked attributes, and using string
-  * literals for things that aren't strings (eg colspan="3") is common.
-  *
-  * If set to true, this option disables the new, stricter behavior. Please
-  * don't use for new code, but it's useful for migrating existing XHP
-  * codebases. *)
- tco_unsafe_xhp : bool;
 
  (**
   * Enforces array subtyping relationships.
@@ -73,14 +62,12 @@ type t = {
 }
 val make :
   tco_assume_php: bool ->
-  tco_unsafe_xhp: bool ->
   tco_safe_array: bool ->
   tco_safe_vector_array: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   po_auto_namespace_map: (string * string) list -> t
 val tco_assume_php : t -> bool
-val tco_unsafe_xhp : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
 val tco_user_attrs : t -> SSet.t option

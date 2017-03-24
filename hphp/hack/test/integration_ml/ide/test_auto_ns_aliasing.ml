@@ -40,7 +40,6 @@ let () =
 
   let global_opts = GlobalOptions.make
     ~tco_assume_php: false
-    ~tco_unsafe_xhp: false
     ~tco_safe_array: false
     ~tco_safe_vector_array: false
     ~tco_user_attrs: None

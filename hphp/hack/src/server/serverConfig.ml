@@ -170,7 +170,6 @@ let load config_filename options =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let global_opts = GlobalOptions.make
     (bool_ "assume_php" ~default:true config)
-    (bool_ "unsafe_xhp" ~default:false config)
     (bool_ "safe_array" ~default:false config)
     (bool_ "safe_vector_array" ~default:false config)
     (config_user_attributes config)

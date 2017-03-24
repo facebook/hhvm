@@ -29,6 +29,7 @@ let fmt_name_or_prim x =
   | "noreturn" -> "HH\\noreturn"
   | "mixed" -> "HH\\mixed"
   | "this" -> "HH\\this"
+  | "Awaitable" -> "HH\\Awaitable"
   | _ -> fmt_name x
 
 (* Produce the "userType" bit of the annotation *)

@@ -63,7 +63,9 @@ let from_ast ~self tparams params ret b =
     Emit_param.emit_param_default_value_setter params
   in
   let (is_generator, is_pair_generator) = is_function_generator stmt_instrs in
-  let generator_instr = if is_generator then instr_createcont else empty in
+  let generator_instr =
+    if is_generator then gather [instr_createcont; instr_popc] else empty
+  in
   let body_instrs = gather [
     begin_label;
     emit_method_prolog params;

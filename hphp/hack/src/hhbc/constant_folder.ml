@@ -14,6 +14,9 @@ open Hhbc_ast
 let literal_from_bool b =
   if b then True else False
 
+let int64_to_bool i =
+  not (Int64.equal i Int64.zero)
+
 let literal_from_binop op left right =
   (* TODO: HHVM does not allow 2+2 in an attribute, but does allow it in
   a constant initializer. It seems reasonable to allow this in attributes
@@ -39,15 +42,15 @@ let literal_from_binop op left right =
   | (Ast.Bar, Int left, Int right) -> Int (Int64.logor left right)
   | (Ast.Xor, Int left, Int right) -> Int (Int64.logxor left right)
   | (Ast.BArbar, Int left, Int right) ->
-    if Int64.equal left Int64.zero then
-      literal_from_bool (not (Int64.equal right Int64.zero))
-    else
+    if int64_to_bool left then
       True
-  | (Ast.AMpamp, Int left, Int right) ->
-    if Int64.equal left Int64.zero then
-      False
     else
-      literal_from_bool (not (Int64.equal right Int64.zero))
+      literal_from_bool (int64_to_bool right)
+  | (Ast.AMpamp, Int left, Int right) ->
+    if int64_to_bool left then
+      literal_from_bool (int64_to_bool right)
+    else
+      False
   | (Ast.Ltlt, Int left, Int right) ->
     (* TODO: Deal with overflow of shifter *)
     let right = Int64.to_int right in
@@ -80,6 +83,36 @@ let literal_from_binop op left right =
     (* TODO: Deal with div by zero *)
     Int (Int64.rem left right)
   | _ -> failwith "Binary operation not yet implemented on literals"
+
+let fold_not operand =
+  match operand with
+  | Int operand ->
+    literal_from_bool (not (int64_to_bool operand))
+  | _ -> failwith "Folding of logical not operator not yet implemented"
+
+let fold_binary_not operand =
+  match operand with
+  | _ -> failwith "Folding of binary not operator not yet implemented"
+
+let fold_unary_plus operand =
+  match operand with
+  | _ -> failwith "Folding of unary plus operator not yet implemented"
+
+let fold_unary_minus operand =
+  match operand with
+  | _ -> failwith "Folding of unary minus operator not yet implemented"
+
+let literal_from_unop op operand =
+  match op with
+  | Ast.Unot  -> fold_not operand
+  | Ast.Utild -> fold_binary_not operand
+  | Ast.Uplus -> fold_unary_plus operand
+  | Ast.Uminus -> fold_unary_minus operand
+  | Ast.Upincr
+  | Ast.Uincr -> failwith "unexpected increment on constant"
+  | Ast.Udecr
+  | Ast.Updecr -> failwith "unexpected decrement on constant"
+  | Ast.Uref -> failwith "Unary operation not yet implemented on literals"
 
 let rec collection_literal_fields fields =
   let folder (index, consts) field =
@@ -116,11 +149,9 @@ and literal_from_expr expr =
     let left = literal_from_expr left in
     let right = literal_from_expr right in
     literal_from_binop op left right
-  (* TODO: Unary ops *)
-  (* TODO: HHVM does not allow <<F(2+2)>> in an attribute, but Hack does, and
-   this seems reasonable to allow. Right now this will crash if given an
-   expression rather than a literal in here.  In particular, see what unary
-   minus does; do we allow it on a literal int? We should. *)
+  | Ast.Unop (op, operand) ->
+    let operand = literal_from_expr operand in
+    literal_from_unop op operand
    | _ -> failwith "Expected a literal expression"
 
 let literals_from_exprs_with_index exprs =

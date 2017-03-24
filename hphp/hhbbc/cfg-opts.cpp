@@ -310,9 +310,11 @@ bool buildSwitches(php::Func& func,
         } else {
           it -= 2;
         }
+        bc.srcLoc = it->srcLoc;
         blkInfos[switchInfo.defaultBlock].multiplePreds = true;
         blk->hhbcs.erase(it, blk->hhbcs.end());
         blk->hhbcs.emplace_back(bc::CGetL { switchInfo.switchLoc });
+        blk->hhbcs.back().srcLoc = bc.srcLoc;
         blk->hhbcs.push_back(std::move(bc));
         blk->fallthrough = NoBlockId;
         for (auto id : blocks) {

@@ -54,7 +54,6 @@ public:
   bool isCast() const;
   bool getFront() const { return m_front; }
 
-  ExpressionPtr unneededHelper() override;
   void setDefinedScope(BlockScopeRawPtr scope);
 protected:
   ExpressionPtr m_exp;

@@ -168,54 +168,6 @@ void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
   assert(false);
 }
 
-ExpressionPtr Expression::unneededHelper() {
-  ExpressionListPtr elist = ExpressionListPtr
-    (new ExpressionList(getScope(), getRange(),
-                        ExpressionList::ListKindWrapped));
-
-  bool change = false;
-  for (int i=0, n = getKidCount(); i < n; i++) {
-    ExpressionPtr kid = getNthExpr(i);
-    if (kid && kid->getContainedEffects()) {
-      ExpressionPtr rep = kid->unneeded();
-      if (rep != kid) change = true;
-      if (rep->is(Expression::KindOfExpressionList)) {
-        for (int j=0, m = rep->getKidCount(); j < m; j++) {
-          elist->addElement(rep->getNthExpr(j));
-        }
-      } else {
-        elist->addElement(rep);
-      }
-    }
-  }
-
-  if (change) {
-    getScope()->addUpdates(BlockScope::UseKindCaller);
-  }
-
-  int n = elist->getCount();
-  assert(n);
-  if (n == 1) {
-    return elist->getNthExpr(0);
-  } else {
-    return elist;
-  }
-}
-
-ExpressionPtr Expression::unneeded() {
-  if (getLocalEffects() || is(KindOfScalarExpression)) {
-    return static_pointer_cast<Expression>(shared_from_this());
-  }
-  if (!getContainedEffects()) {
-    getScope()->addUpdates(BlockScope::UseKindCaller);
-    return ScalarExpressionPtr
-      (new ScalarExpression(getScope(), getRange(),
-                            T_LNUMBER, std::string("0")));
-  }
-
-  return unneededHelper();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 bool Expression::IsIdentifier(const std::string &value) {

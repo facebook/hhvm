@@ -46,8 +46,6 @@ struct BinaryOpExpression : Expression {
   ExpressionPtr foldConst(AnalysisResultConstPtr ar);
   ExpressionPtr foldRightAssoc(AnalysisResultConstPtr ar);
 
-  ExpressionPtr unneededHelper() override;
-
   static int getConcatList(std::vector<ExpressionPtr>& ev, ExpressionPtr exp,
                            bool &hasVoid);
   bool isAssignmentOp() const { return m_assign; }

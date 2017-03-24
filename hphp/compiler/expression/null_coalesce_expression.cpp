@@ -89,16 +89,6 @@ ExpressionPtr NullCoalesceExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr NullCoalesceExpression::unneededHelper() {
-  if (!m_expFirst->getContainedEffects() &&
-      !m_expSecond->getContainedEffects()) {
-    return Expression::unneededHelper();
-  }
-  m_expFirst = m_expFirst->unneeded();
-  m_expSecond = m_expSecond->unneeded();
-  return static_pointer_cast<Expression>(shared_from_this());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

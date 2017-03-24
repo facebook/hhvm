@@ -247,13 +247,6 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
  * encaps ${T_STRING[expr]}
  */
 
-ExpressionPtr ArrayElementExpression::unneeded() {
-  if (m_global) {
-    if (m_offset) return m_offset->unneeded();
-  }
-  return Expression::unneeded();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

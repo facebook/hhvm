@@ -83,7 +83,6 @@ void ExpStatement::setNthKid(int n, ConstructPtr cp) {
 
 StatementPtr ExpStatement::preOptimize(AnalysisResultConstPtr ar) {
   assert (ar->getPhase() > AnalysisResult::AnalyzeAll);
-  m_exp = m_exp->unneeded();
   return StatementPtr();
 }
 

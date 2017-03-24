@@ -105,24 +105,6 @@ ExpressionPtr QOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr QOpExpression::unneededHelper() {
-  bool yesEffect = false;
-  if (m_expYes) {
-    yesEffect = m_expYes->getContainedEffects();
-  }
-  bool noEffect = m_expNo->getContainedEffects();
-
-  if (!yesEffect && !noEffect) {
-    return Expression::unneededHelper();
-  }
-
-  m_expNo = m_expNo->unneeded();
-  if (m_expYes) {
-    m_expYes = m_expYes->unneeded();
-  }
-  return static_pointer_cast<Expression>(shared_from_this());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 

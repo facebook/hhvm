@@ -182,8 +182,6 @@ public:
     return false;
   }
   void deepCopy(ExpressionPtr exp);
-  virtual ExpressionPtr unneeded();
-  virtual ExpressionPtr unneededHelper();
 
   /**
    * This is to avoid dynamic casting to ExpressionList in Parser.

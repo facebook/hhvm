@@ -341,9 +341,6 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
             insertElement((*el)[j], i);
           }
           changed = true;
-        } else if (e->getLocalEffects() == NoEffect) {
-          e = e->unneeded();
-          // changed already handled by unneeded
         }
       }
     }

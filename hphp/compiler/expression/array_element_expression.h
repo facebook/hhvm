@@ -43,7 +43,6 @@ struct ArrayElementExpression : Expression, LocalEffectsContainer {
   bool isSuperGlobal() const { return m_global;}
   bool isDynamicGlobal() const { return m_dynamicGlobal;}
   const std::string &getGlobalName() const { return m_globalName;}
-  ExpressionPtr unneeded() override;
 
   /**
    * This is purely for resolving a nasty case of interpreting

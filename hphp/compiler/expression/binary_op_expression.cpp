@@ -134,19 +134,6 @@ bool BinaryOpExpression::isLogicalOrOperator() const {
   return false;
 }
 
-ExpressionPtr BinaryOpExpression::unneededHelper() {
-  bool shortCircuit = isShortCircuitOperator();
-  if (!m_exp2->getContainedEffects() ||
-      (!shortCircuit && !m_exp1->getContainedEffects())) {
-    return Expression::unneededHelper();
-  }
-
-  if (shortCircuit) {
-    m_exp2 = m_exp2->unneeded();
-  }
-  return static_pointer_cast<Expression>(shared_from_this());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 

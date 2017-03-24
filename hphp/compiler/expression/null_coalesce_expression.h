@@ -33,7 +33,6 @@ struct NullCoalesceExpression : Expression {
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
-  ExpressionPtr unneededHelper() override;
   ExpressionPtr getFirst() const { return m_expFirst; }
   ExpressionPtr getSecond() const { return m_expSecond; }
 private:

@@ -47,7 +47,6 @@ namespace HPHP {
 typedef am::ClientPool<am::AsyncMysqlClient, am::AsyncMysqlClientFactory>
     AsyncMysqlClientPool;
 
-
 namespace {
 int HdfAsyncMysqlClientPoolSize = -1;
 
@@ -465,6 +464,13 @@ HHVM_METHOD(AsyncMysqlConnectionPool, __construct, const Array& options) {
   }
   data->m_async_pool =
       am::AsyncConnectionPool::makePool(getClient(), pool_options);
+}
+
+void AsyncMysqlConnectionPool::sweep() {
+  if (m_async_pool) {
+    m_async_pool->shutdown();
+    m_async_pool.reset();
+  }
 }
 
 // `created_pool_connections` - Number of connections created by the pool
@@ -1689,7 +1695,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnectionPool, connect);
     HHVM_ME(AsyncMysqlConnectionPool, connectWithOpts);
     Native::registerNativeDataInfo<AsyncMysqlConnectionPool>(
-        AsyncMysqlConnectionPool::s_className.get(), DISABLE_COPY_AND_SWEEP);
+        AsyncMysqlConnectionPool::s_className.get(), Native::NDIFlags::NO_COPY);
 
     HHVM_ME(AsyncMysqlClientStats, ioEventLoopMicrosAvg);
     HHVM_ME(AsyncMysqlClientStats, callbackDelayMicrosAvg);

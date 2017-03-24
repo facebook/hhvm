@@ -47,6 +47,8 @@ namespace db = facebook::db;
 
 struct AsyncMysqlConnectionPool {
   AsyncMysqlConnectionPool() = default;
+  void sweep();
+
   std::shared_ptr<am::AsyncConnectionPool> m_async_pool;
   static const StaticString s_className;
 

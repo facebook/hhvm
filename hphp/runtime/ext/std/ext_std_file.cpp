@@ -1624,7 +1624,7 @@ bool HHVM_FUNCTION(copy,
   CHECK_PATH_FALSE(source, 1);
   CHECK_PATH_FALSE(dest, 2);
   if (!context.isNull() || !File::IsPlainFilePath(source) ||
-      !File::IsPlainFilePath(dest)) {
+      !File::IsPlainFilePath(dest) || is_cli_mode()) {
     Variant sfile = HHVM_FN(fopen)(source, "r", false, context);
     if (same(sfile, false)) {
       return false;

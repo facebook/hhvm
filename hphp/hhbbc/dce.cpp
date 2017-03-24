@@ -847,6 +847,28 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
   writeSlot(env, op.slot);
 }
 
+void discardableWriteSlot(Env& env, ClsRefSlotId slot, bool safe) {
+  if (safe && !isSlotLive(env, slot)) {
+    markSetDead(env, slotDependentActions(env, slot));
+    return;
+  }
+  writeSlot(env, slot);
+}
+
+void dce(Env& env, const bc::LateBoundCls& op) {
+  discardableWriteSlot(env, op.slot, env.dceState.ainfo.ctx.cls != nullptr);
+}
+
+void dce(Env& env, const bc::Self& op) {
+  discardableWriteSlot(env, op.slot, env.dceState.ainfo.ctx.cls != nullptr);
+}
+
+void dce(Env& env, const bc::Parent& op) {
+  discardableWriteSlot(env, op.slot,
+                       env.dceState.ainfo.ctx.cls != nullptr &&
+                       env.dceState.ainfo.ctx.cls->parentName != nullptr);
+}
+
 void dce(Env& env, const bc::DiscardClsRef& op) {
   readSlotDiscardable(env, op.slot, {});
 }

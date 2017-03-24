@@ -1129,7 +1129,7 @@ To string conversions:
   Lookup the cached-class RDS handle for a given class name. Dereference that
   handle and return the associated Class, or null if not present.
 
-| LdCns, DCns, CStr, B|PRc
+| LdCns, DCns, CStr, B
 
   Load the constant named S0, branching to B if isn't present.
 

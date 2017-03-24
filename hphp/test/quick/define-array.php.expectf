@@ -345,72 +345,48 @@ keyset(3) {
 }
 ====================== test_bad_array ========================
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 66
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 65
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 67
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 66
 
 Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 68
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 70
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 69
 
 Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 71
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 72
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 74
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 73
 
 Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 75
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 77
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 78
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 80
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 81
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 76
 ====================== test_bad_vec ==========================
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 116
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 108
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 110
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 112
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 113
+
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 115
 
 Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 117
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 119
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 120
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 122
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 123
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 124
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 126
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 127
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 129
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 130
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 118
 ====================== test_bad_dict =========================
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 178
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 163
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 179
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 165
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 181
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 167
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 182
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 168
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 184
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 170
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 185
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 172
 
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 186
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 188
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 189
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 191
-
-Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 192
+Warning: Constants may only evaluate to scalar values or arrays in %s/define-array.php on line 173

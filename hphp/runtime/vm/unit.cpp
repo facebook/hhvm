@@ -981,12 +981,17 @@ static bool defCnsHelper(rds::Handle ch,
     raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
   } else if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
     raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
+  } else if (LIKELY(rds::isNormalHandle(ch))) {
+    cellDup(*value, *cns);
+    rds::initHandle(ch);
+    return true;
   } else {
+    assertx(rds::isPersistentHandle(ch));
     Variant v = tvAsCVarRef(value);
+    assertx(!v.isResource());
     v.setEvalScalar();
     cns->m_data = v.asTypedValue()->m_data;
     cns->m_type = v.asTypedValue()->m_type;
-    if (rds::isNormalHandle(ch)) rds::initHandle(ch);
     return true;
   }
   return false;

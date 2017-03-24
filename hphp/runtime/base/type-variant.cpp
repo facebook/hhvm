@@ -335,6 +335,7 @@ bool Variant::isAllowedAsConstantValue() const {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
     case KindOfPersistentArray:
+    case KindOfResource:
       return true;
 
     case KindOfVec:
@@ -355,7 +356,6 @@ bool Variant::isAllowedAsConstantValue() const {
 
     case KindOfUninit:
     case KindOfObject:
-    case KindOfResource:
     case KindOfRef:
       return false;
   }

@@ -61,26 +61,19 @@ function test_bad_array() {
   echo "====================== test_bad_array ========================\n";
 
   $a = 123;
-  $r = imagecreate(1,1);
 
   define('BADARRAY1', [new stdclass]);
   define('BADARRAY2', [&$a]);
-  define('BADARRAY3', [$r]);
 
-  define('BADARRAY4', [1, [new stdclass], 3]);
-  define('BADARRAY5', [1, [&$a], 3]);
-  define('BADARRAY6', [1, [$r], 3]);
+  define('BADARRAY3', [1, [new stdclass], 3]);
+  define('BADARRAY4', [1, [&$a], 3]);
 
-  define('BADARRAY7', [1, vec[new stdclass], 3]);
-  define('BADARRAY8', [1, vec[$r], 3]);
+  define('BADARRAY5', [1, vec[new stdclass], 3]);
 
-  define('BADARRAY9', [1, dict['a' => new stdclass], 3]);
-  define('BADARRAY10', [1, dict['a' => $r], 3]);
+  define('BADARRAY6', [1, dict['a' => new stdclass], 3]);
 
-  define('BADARRAY11', [$GLOBALS]);
-  define('BADARRAY12', [1, [$GLOBALS]]);
-
-  imagedestroy($r);
+  define('BADARRAY7', [$GLOBALS]);
+  define('BADARRAY8', [1, [$GLOBALS]]);
 }
 
 function test_vec() {
@@ -111,25 +104,18 @@ function test_bad_vec() {
   echo "====================== test_bad_vec ==========================\n";
 
   $a = 123;
-  $r = imagecreate(1,1);
 
   define('BADVEC1', vec[new stdclass]);
-  define('BADVEC2', vec[$r]);
 
-  define('BADVEC3', vec[1, vec[new stdclass], 3]);
-  define('BADVEC4', vec[1, vec[$r], 3]);
+  define('BADVEC2', vec[1, vec[new stdclass], 3]);
 
-  define('BADVEC5', vec[1, [new stdclass], 3]);
-  define('BADVEC6', vec[1, [&$a], 3]);
-  define('BADVEC7', vec[1, [$r], 3]);
+  define('BADVEC3', vec[1, [new stdclass], 3]);
+  define('BADVEC4', vec[1, [&$a], 3]);
 
-  define('BADVEC8', vec[1, dict['a' => new stdclass], 3]);
-  define('BADVEC9', vec[1, dict['a' => $r], 3]);
+  define('BADVEC5', vec[1, dict['a' => new stdclass], 3]);
 
-  define('BADVEC10', vec[$GLOBALS]);
-  define('BADVEC11', vec[1, vec[$GLOBALS]]);
-
-  imagedestroy($r);
+  define('BADVEC6', vec[$GLOBALS]);
+  define('BADVEC7', vec[1, vec[$GLOBALS]]);
 }
 
 function test_dict() {
@@ -173,25 +159,18 @@ function test_bad_dict() {
   echo "====================== test_bad_dict =========================\n";
 
   $a = 123;
-  $r = imagecreate(1,1);
 
   define('BADDICT1', dict[100 => new stdclass]);
-  define('BADDICT2', dict[100 => $r]);
 
-  define('BADDICT3', dict[100 => 1, 200 => dict[1 => new stdclass], 300 => 3]);
-  define('BADDICT4', dict[100 => 1, 200 => dict[1 => $r], 300 => 3]);
+  define('BADDICT2', dict[100 => 1, 200 => dict[1 => new stdclass], 300 => 3]);
 
-  define('BADDICT5', dict[100 => 1, 200 => [new stdclass], 300 => 3]);
-  define('BADDICT6', dict[100 => 1, 200 => [&$a], 300 => 3]);
-  define('BADDICT7', dict[100 => 1, 200 => [$r], 300 => 3]);
+  define('BADDICT3', dict[100 => 1, 200 => [new stdclass], 300 => 3]);
+  define('BADDICT4', dict[100 => 1, 200 => [&$a], 300 => 3]);
 
-  define('BADDICT8', dict[100 => 1, 200 => vec[new stdclass], 300 => 3]);
-  define('BADDICT9', dict[100 => 1, 200 => vec[$r], 300 => 3]);
+  define('BADDICT5', dict[100 => 1, 200 => vec[new stdclass], 300 => 3]);
 
-  define('BADDICT10', dict[100 => $GLOBALS]);
-  define('BADDICT11', [100 => 1, dict['abc' => $GLOBALS]]);
-
-  imagedestroy($r);
+  define('BADDICT6', dict[100 => $GLOBALS]);
+  define('BADDICT7', [100 => 1, dict['abc' => $GLOBALS]]);
 }
 
 function test_keyset() {

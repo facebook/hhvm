@@ -87,6 +87,7 @@ void implCns(IRGS& env,
         return gen(env, LdCns, taken, cnsNameTmp);
       },
       [&] (SSATmp* cns) { // Next: LdCns hit in TC
+        gen(env, IncRef, cns);
         return cns;
       },
       [&] { // Taken: miss in TC, do lookup & init

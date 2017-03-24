@@ -1006,10 +1006,6 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
-namespace {
-
-}
-
 Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, includeTypeCns);
@@ -1138,9 +1134,12 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
     args
   );
 
-  assertx(!isArrayType(ret.m_type) ||
-          ret.m_data.parr != get_global_variables());
+  assertx(tvAsCVarRef(&ret).isAllowedAsConstantValue());
   clsCnsData.set(StrNR(clsCnsName), cellAsCVarRef(ret), true /* isKey */);
+
+  // The caller will inc-ref the returned value, so undo the inc-ref caused by
+  // storing it in the cache.
+  tvDecRefOnly(&ret);
   return ret;
 }
 

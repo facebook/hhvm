@@ -896,7 +896,7 @@ let add_data_region_element ~has_keys buf name num arguments =
       arguments;
   B.add_string buf ";\n"
 
-let add_data_region buf functions =
+let add_data_region buf top_level_body functions =
   let rec add_data_region_list buf instr =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
@@ -913,6 +913,7 @@ let add_data_region buf functions =
     let function_body = Hhas_function.body fun_def in
     add_data_region_list buf function_body
   in
+  add_data_region_list buf top_level_body;
   List.iter (iter_aux buf) functions;
   B.add_string buf "\n"
 
@@ -933,7 +934,8 @@ let add_top_level buf hhas_prog =
 let add_program buf hhas_prog =
   B.add_string buf "#starts here\n";
   let functions = Hhas_program.functions hhas_prog in
-  add_data_region buf functions;
+  let top_level_body = Hhas_main.body @@ Hhas_program.main hhas_prog in
+  add_data_region buf top_level_body functions;
   add_top_level buf hhas_prog;
   List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) (Hhas_program.classes hhas_prog);

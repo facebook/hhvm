@@ -225,12 +225,26 @@ struct InstrId {
   uint32_t idx;
 };
 
-using StkId = InstrId;
-
 bool operator<(const InstrId& i1, const InstrId& i2) {
   if (i1.blk != i2.blk) return i1.blk < i2.blk;
   // sort by decreasing idx so that kill_marked_instrs works
   return i1.idx > i2.idx;
+}
+
+bool operator==(const InstrId& i1, const InstrId& i2) {
+  return i1.blk == i2.blk && i1.idx == i2.idx;
+}
+
+struct LocationId {
+  BlockId  blk;
+  uint32_t id;
+  bool     isSlot;
+};
+
+bool operator<(const LocationId& i1, const LocationId& i2) {
+  if (i1.blk != i2.blk) return i1.blk < i2.blk;
+  if (i1.id != i2.id)   return i1.id < i2.id;
+  return i2.isSlot && !i1.isSlot;
 }
 
 enum class DceAction {
@@ -262,9 +276,9 @@ struct UseInfo {
    * Used for stack slots that are live across blocks to indicate a
    * stack slot that should be considered Used at the entry to blk.
    *
-   * If its not live across blocks, popper.blk will stay NoBlockId.
+   * If its not live across blocks, location.blk will stay NoBlockId.
    */
-  StkId popper { NoBlockId, 0 };
+  LocationId location { NoBlockId, 0, false };
 };
 
 std::string show(InstrId id) {
@@ -274,13 +288,15 @@ std::string show(InstrId id) {
 //////////////////////////////////////////////////////////////////////
 
 struct DceState {
-  explicit DceState(const FuncAnalysis& ainfo) : ainfo(ainfo) {}
+  explicit DceState(const Index& index, const FuncAnalysis& ainfo) :
+      index(index), ainfo(ainfo) {}
+  const Index& index;
   const FuncAnalysis& ainfo;
   /*
    * Used to accumulate a set of blk/stack-slot pairs that
    * should be marked used
    */
-  std::set<StkId> usedStackSlots;
+  std::set<LocationId> forcedLiveLocations;
 
   /*
    * Eval stack use information.  Stacks slots are marked as being
@@ -321,11 +337,10 @@ struct DceState {
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
 
   /*
-   * Mapping of class-ref slots to instruction sets. If the usage of a class-ref
-   * slot is removed, all the instructions currently in the set must also be
-   * removed.
+   * Mapping of class-ref slots to their usage. If the currently live usage
+   * of the slot is removed, the corresponding actions must be taken.
    */
-  std::vector<DceActionMap> slotDependentActions;
+  std::vector<UseInfo> slotUsage;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -418,19 +433,19 @@ void markUisDead(Env& env, const UseInfo& ui, Args&&... args) {
  *
  * If f() is known to return a non-counted type, we have UnboxRNop ->
  * PopC on one path, and Int 42 -> PopC on another, and the PopC marks
- * its value Use::Not. When we get to the Int 42 it thinkgs both
+ * its value Use::Not. When we get to the Int 42 it thinks both
  * instructions can be killed; but when we get to the UnboxRNop it
  * does nothing. So any time we decide to ignore a Use::Not or
  * Use::UsedIfLastRef, we have to record that fact so we can prevent
  * the other paths from trying to use that information. We communicate
- * this via the ui.popper field, and the usedStackSlots set.
+ * this via the ui.location field, and the forcedLiveLocations set.
  *
  * Note that a more sophisticated system would insert a PopC after the
  * UnboxRNop, and allow the 42/PopC to be removed (work in progress).
  */
 void markUisLive(Env& env, const UseInfo& ui) {
-  if (ui.usage != Use::Used && ui.popper.blk != NoBlockId) {
-    env.dceState.usedStackSlots.insert(ui.popper);
+  if (ui.usage != Use::Used && ui.location.blk != NoBlockId) {
+    env.dceState.forcedLiveLocations.insert(ui.location);
   }
 }
 
@@ -496,9 +511,9 @@ void combineSets(UseInfo&) {}
 template<class... Args>
 void combineSets(UseInfo& accum, const UseInfo& ui, Args&&... args) {
   accum.actions.insert(begin(ui.actions), end(ui.actions));
-  if (accum.popper.blk == NoBlockId ||
-      accum.popper < ui.popper) {
-    accum.popper = ui.popper;
+  if (accum.location.blk == NoBlockId ||
+      accum.location < ui.location) {
+    accum.location = ui.location;
   }
   combineSets(accum, std::forward<Args>(args)...);
 }
@@ -553,7 +568,7 @@ enum class PushFlags {
 
 bool alwaysPop(const UseInfo& ui) {
   return
-    ui.popper.blk != NoBlockId ||
+    ui.location.blk != NoBlockId ||
     ui.actions.size() > 1;
 }
 
@@ -723,8 +738,7 @@ void readSlot(Env& env, uint32_t id) {
   FTRACE(2, "     read-slot: {}\n", id);
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 1;
-  env.dceState.usedSlots[id] = 1;
-  env.dceState.slotDependentActions[id].clear();
+  env.dceState.slotUsage[id] = UseInfo { Use::Used };
 }
 
 // Read a slot, but in a usage that is discardable. If this read actually is
@@ -733,9 +747,8 @@ void readSlotDiscardable(Env& env, uint32_t id, DceActionMap actions) {
   FTRACE(2, "     read-slot (discardable): {}\n", id);
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 0;
-  env.dceState.usedSlots[id] = 1;
-  actions.insert({env.id, DceAction::Kill});
-  env.dceState.slotDependentActions[id] = std::move(actions);
+  actions.emplace(env.id, DceAction::Kill);
+  env.dceState.slotUsage[id] = { Use::Not, std::move(actions) };
 }
 
 void writeSlot(Env& env, uint32_t id) {
@@ -743,7 +756,13 @@ void writeSlot(Env& env, uint32_t id) {
   if (id >= kMaxTrackedClsRefSlots) return;
   env.dceState.liveSlots[id] = 0;
   env.dceState.usedSlots[id] = 1;
-  env.dceState.slotDependentActions[id].clear();
+  auto& ui = env.dceState.slotUsage[id];
+  if (ui.usage != Use::Used &&
+      ui.actions.size() &&
+      ui.location.blk != NoBlockId) {
+    env.dceState.forcedLiveLocations.insert(ui.location);
+  }
+  env.dceState.slotUsage[id] = UseInfo { Use::Not };
 }
 
 bool isSlotLive(Env& env, uint32_t id) {
@@ -751,8 +770,8 @@ bool isSlotLive(Env& env, uint32_t id) {
   return env.dceState.liveSlots[id];
 }
 
-DceActionMap slotDependentActions(Env& env, uint32_t id) {
-  return std::move(env.dceState.slotDependentActions[id]);
+UseInfo slotUsage(Env& env, uint32_t id) {
+  return std::move(env.dceState.slotUsage[id]);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -808,8 +827,7 @@ void dce(Env& env, const bc::ClsRefName& op) {
   // If the usage of the name is discardable, then so is this read of the
   // class-ref.
   push(env, [&] (UseInfo& ui) {
-      if (ui.popper.blk == NoBlockId && allUnused(ui)) {
-        // we don't yet support cross-block dce of classrefs
+      if (allUnused(ui)) {
         readSlotDiscardable(env, op.slot, std::move(ui.actions));
       } else {
         readSlot(env, op.slot);
@@ -818,17 +836,27 @@ void dce(Env& env, const bc::ClsRefName& op) {
     });
 }
 
+bool clsRefGetHelper(Env& env, const Type& ty, ClsRefSlotId slot) {
+  if (!ty.strictSubtypeOf(TStr)) return false;
+  auto v = tv(ty);
+  if (!v) return false;
+  auto res = env.dceState.index.resolve_class(
+    env.dceState.ainfo.ctx, v->m_data.pstr);
+  if (!res || !res->resolved()) return false;
+  return !isSlotLive(env, slot);
+}
+
 void dce(Env& env, const bc::ClsRefGetC& op) {
   // If the usage of this class-ref slot is dead, then it can be potentially be
   // removed if the source is dead as well.
-  if (!isSlotLive(env, op.slot)) {
-    auto actions = slotDependentActions(env, op.slot);
-    actions.insert({env.id, DceAction::Kill});
+  if (clsRefGetHelper(env, topC(env), op.slot)) {
+    auto ui = slotUsage(env, op.slot);
+    ui.actions.emplace(env.id, DceAction::Kill);
     writeSlot(env, op.slot);
     return pop(
       env,
       popCouldRunDestructor(env) ? Use::UsedIfLastRef : Use::Not,
-      std::move(actions)
+      std::move(ui.actions)
     );
   }
   writeSlot(env, op.slot);
@@ -837,9 +865,9 @@ void dce(Env& env, const bc::ClsRefGetC& op) {
 
 void dce(Env& env, const bc::ClsRefGetL& op) {
   auto const ty = locRaw(env, op.loc1);
-
-  if (!isSlotLive(env, op.slot) && !readCouldHaveSideEffects(ty)) {
-    markSetDead(env, slotDependentActions(env, op.slot));
+  if (clsRefGetHelper(env, ty, op.slot)) {
+    assert(!readCouldHaveSideEffects(ty));
+    markUisDead(env, slotUsage(env, op.slot));
     return;
   }
 
@@ -849,7 +877,7 @@ void dce(Env& env, const bc::ClsRefGetL& op) {
 
 void discardableWriteSlot(Env& env, ClsRefSlotId slot, bool safe) {
   if (safe && !isSlotLive(env, slot)) {
-    markSetDead(env, slotDependentActions(env, slot));
+    markUisDead(env, slotUsage(env, slot));
     return;
   }
   writeSlot(env, slot);
@@ -1067,7 +1095,6 @@ dce_slot_default(Env& env, const Op& op) {}
 template<class Op>
 void dce(Env& env, const Op& op) {
   addLocGenSet(env, env.flags.mayReadLocalSet);
-  env.dceState.liveLocals |= env.flags.mayReadLocalSet;
   for (auto i = uint32_t{0}; i < op.numPush(); ++i) {
     push(env);
   }
@@ -1086,14 +1113,48 @@ void dispatch_dce(Env& env, const Bytecode& op) {
 
 //////////////////////////////////////////////////////////////////////
 
+struct DceOutState {
+  DceOutState() = default;
+  enum Local {};
+  explicit DceOutState(Local) {
+    locLive.set();
+    locLiveExn.set();
+    slotLive.set();
+    slotLiveExn.set();
+  }
+
+  /*
+   * The union of the liveIn states of each normal successor for
+   * locals and stack slots respectively.
+   */
+  std::bitset<kMaxTrackedLocals>             locLive;
+  std::bitset<kMaxTrackedClsRefSlots>        slotLive;
+
+  /*
+   * The union of the liveIn states of each exceptional successor for
+   * locals and stack slots respectively.
+   */
+  std::bitset<kMaxTrackedLocals>             locLiveExn;
+  std::bitset<kMaxTrackedClsRefSlots>        slotLiveExn;
+
+  /*
+   * The union of the dceStacks from the start of the normal successors.
+   */
+  folly::Optional<std::vector<UseInfo>>      dceStack;
+
+  /*
+   * The union of the slotUsage from the start of the normal
+   * successors.
+   */
+  folly::Optional<std::vector<UseInfo>>       slotUsage;
+};
+
 folly::Optional<DceState>
 dce_visit(const Index& index,
           const FuncAnalysis& fa,
           borrowed_ptr<const php::Block> const blk,
           const State& stateIn,
-          std::bitset<kMaxTrackedLocals> locLiveOut,
-          std::bitset<kMaxTrackedLocals> locLiveOutExn,
-          const folly::Optional<std::vector<UseInfo>>& dceStack) {
+          const DceOutState& dceOutState) {
   if (!stateIn.initialized) {
     /*
      * Skip unreachable blocks.
@@ -1109,18 +1170,28 @@ dce_visit(const Index& index,
 
   auto const states = locally_propagated_states(index, fa, blk, stateIn);
 
-  auto dceState = DceState{ fa };
-  dceState.liveLocals = locLiveOut;
-  dceState.liveSlots.set();
-  dceState.usedLocals = locLiveOut;
+  auto dceState = DceState{ index, fa };
+  dceState.liveLocals = dceOutState.locLive;
+  dceState.usedLocals = dceOutState.locLive;
+  dceState.liveSlots  = dceOutState.slotLive;
+  dceState.usedSlots  = dceOutState.slotLive;
 
-  if (dceStack) {
-    dceState.stack = *dceStack;
+  if (dceOutState.dceStack) {
+    dceState.stack = *dceOutState.dceStack;
+    assert(dceState.stack.size() == states.back().first.stack.size());
   } else {
     dceState.stack.resize(states.back().first.stack.size(),
                           UseInfo { Use::Used });
   }
-  dceState.slotDependentActions.resize(states.back().first.clsRefSlots.size());
+
+  if (dceOutState.slotUsage) {
+    dceState.slotUsage = *dceOutState.slotUsage;
+    assert(dceState.slotUsage.size() ==
+           states.back().first.clsRefSlots.size());
+  } else {
+    dceState.slotUsage.resize(
+      states.back().first.clsRefSlots.size(), UseInfo { Use::Used });
+  }
 
   for (uint32_t idx = blk->hhbcs.size(); idx-- > 0;) {
     auto const& op = blk->hhbcs[idx];
@@ -1137,18 +1208,18 @@ dce_visit(const Index& index,
     dispatch_dce(visit_env, op);
 
     /*
-     * When we see a PEI, we need to start over on the killBeforePEI
-     * set, and the local-liveness must take into account the fact
+     * When we see a PEI, liveness must take into account the fact
      * that we could take an exception edge here (or'ing in the
-     * liveOutExn set).
+     * liveExn sets).
      */
     if (states[idx].second.wasPEI) {
       FTRACE(2, "    <-- exceptions\n");
-      dceState.liveLocals |= locLiveOutExn;
-      dceState.liveSlots.set();
+      dceState.liveLocals |= dceOutState.locLiveExn;
+      dceState.liveSlots  |= dceOutState.slotLiveExn;
     }
 
     dceState.usedLocals |= dceState.liveLocals;
+    dceState.usedSlots  |= dceState.liveSlots;
 
     FTRACE(4, "    dce stack: {}\n",
       [&] {
@@ -1172,12 +1243,12 @@ dce_visit(const Index& index,
       [&]{
         using namespace folly::gen;
         auto i = uint32_t{0};
-        return from(dceState.slotDependentActions)
+        return from(dceState.slotUsage)
           | mapped(
-            [&] (const DceActionMap& s) {
-              if (s.empty()) return std::string{};
+            [&] (const UseInfo& ui) {
+              if (ui.actions.empty()) return std::string{};
               return folly::sformat("  {}: [{}]\n",
-                                    i++, show(s));
+                                    i++, show(ui.actions));
             })
           | unsplit<std::string>("");
       }()
@@ -1192,24 +1263,25 @@ dce_visit(const Index& index,
 }
 
 struct DceAnalysis {
-  std::bitset<kMaxTrackedLocals> liveIn;
-  std::vector<UseInfo>           stack;
-  std::set<InstrId>              usedStackSlots;
+  std::bitset<kMaxTrackedLocals>      locLiveIn;
+  std::bitset<kMaxTrackedClsRefSlots> slotLiveIn;
+  std::vector<UseInfo>                stack;
+  std::vector<UseInfo>                slotUsage;
+  std::set<LocationId>                forcedLiveLocations;
 };
 
 DceAnalysis analyze_dce(const Index& index,
                         const FuncAnalysis& fa,
                         borrowed_ptr<php::Block> const blk,
                         const State& stateIn,
-                        std::bitset<kMaxTrackedLocals> locLiveOut,
-                        std::bitset<kMaxTrackedLocals> locLiveOutExn,
-                        const folly::Optional<std::vector<UseInfo>>& dceStack) {
-  if (auto dceState = dce_visit(index, fa, blk, stateIn,
-                                locLiveOut, locLiveOutExn, dceStack)) {
+                        const DceOutState& dceOutState) {
+  if (auto dceState = dce_visit(index, fa, blk, stateIn, dceOutState)) {
     return DceAnalysis {
       dceState->liveLocals,
+      dceState->liveSlots,
       dceState->stack,
-      dceState->usedStackSlots
+      dceState->slotUsage,
+      dceState->forcedLiveLocations
     };
   }
   return DceAnalysis {};
@@ -1256,16 +1328,8 @@ optimize_dce(const Index& index,
              const FuncAnalysis& fa,
              borrowed_ptr<php::Block> const blk,
              const State& stateIn,
-             std::bitset<kMaxTrackedLocals> locLiveOut,
-             std::bitset<kMaxTrackedLocals> locLiveOutExn,
-             const folly::Optional<std::vector<UseInfo>>& dceStack) {
-  auto dceState = dce_visit(
-    index, fa, blk,
-    stateIn,
-    locLiveOut,
-    locLiveOutExn,
-    dceStack
-  );
+             const DceOutState& dceOutState) {
+  auto dceState = dce_visit(index, fa, blk, stateIn, dceOutState);
 
   if (!dceState) {
     return {std::bitset<kMaxTrackedLocals>{},
@@ -1402,10 +1466,8 @@ void local_dce(const Index& index,
 
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
-  auto allLocLive = std::bitset<kMaxTrackedLocals>();
-  allLocLive.set();
   auto const ret = optimize_dce(index, ainfo, blk, stateIn,
-                                allLocLive, allLocLive, folly::none);
+                                DceOutState{DceOutState::Local{}});
 
   dce_perform(*ainfo.ctx.func, ret.actionMap);
 }
@@ -1435,23 +1497,8 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
   /*
    * States for each block, indexed by block id.
-   *
-   * The liveOut state is the union of liveIn states of each normal
-   * successor, and liveOutExn is the union of liveIn states of each
-   * exceptional successor.
-   *
-   * The dceStack is the state of the dceStack at the end of the
-   * block; it contains a UseInfo for each stack slot, which is the
-   * union of the corresponding UseInfo's from the start of the
-   * successor blocks (its folly::none if it has no successor blocks,
-   * or if the successor blocks have not yet been visited).
    */
-  struct BlockState {
-    std::bitset<kMaxTrackedLocals>        locLiveOut;
-    std::bitset<kMaxTrackedLocals>        locLiveOutExn;
-    folly::Optional<std::vector<UseInfo>> dceStack;
-  };
-  std::vector<BlockState> blockStates(ai.ctx.func->blocks.size());
+  std::vector<DceOutState> blockStates(ai.ctx.func->blocks.size());
 
   /*
    * Set of block reverse post order ids that still need to be
@@ -1479,55 +1526,67 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
    * can't be killed, we add it to this set (via markUisLive, and the
    * DceAnalysis).
    */
-  std::set<StkId> usedStackSlots;
+  std::set<LocationId> forcedLiveLocations;
 
-  auto mergeDceStack = [&] (folly::Optional<std::vector<UseInfo>>& stkOut,
-                            const std::vector<UseInfo>& stkIn,
-                            BlockId blk) {
+  auto fixupUseInfo = [&] (std::vector<UseInfo>& uis,
+                           BlockId blk,
+                           bool isSlot) {
+    for (uint32_t i = 0; i < uis.size(); i++) {
+      auto& out = uis[i];
+      if (out.location.blk == NoBlockId) out.location = { blk, i, isSlot };
+      if (forcedLiveLocations.count(out.location)) {
+        out.usage = Use::Used;
+        out.actions.clear();
+      }
+    }
+  };
+
+  auto mergeUIs = [&] (UseInfo& out, const UseInfo& in,
+                       uint32_t i, BlockId blk, bool isSlot) {
+    if (out.usage == Use::Used) {
+      return false;
+    }
+    auto location = in.location;
+    if (location.blk == NoBlockId) location = { blk, i, isSlot };
+    if (in.usage == Use::Used ||
+        forcedLiveLocations.count(location)) {
+      out.usage = Use::Used;
+      out.actions.clear();
+      return true;
+    }
+    if (out.usage != in.usage) {
+      out.usage = Use::Used;
+      out.actions.clear();
+      return true;
+    }
+    auto ret = false;
+    for (auto const& id : in.actions) {
+      ret |= out.actions.insert(id).second;
+    }
+    assert(out.location.blk != NoBlockId);
+    if (out.location < location) {
+      // It doesn't matter which one we choose, but it should be
+      // independent of the visiting order.
+      out.location = location;
+      ret = true;
+    }
+    return ret;
+  };
+
+  auto mergeUIVecs = [&] (folly::Optional<std::vector<UseInfo>>& stkOut,
+                          const std::vector<UseInfo>& stkIn,
+                          BlockId blk, bool isSlot) {
     if (!stkOut) {
       stkOut = stkIn;
-      for (uint32_t i = 0; i < stkIn.size(); i++) {
-        auto& out = stkOut.value()[i];
-        if (out.popper.blk == NoBlockId) out.popper = { blk, i };
-        if (usedStackSlots.count({blk, i})) {
-          out.usage = Use::Used;
-          out.actions.clear();
-        }
-      }
+      fixupUseInfo(*stkOut, blk, isSlot);
       return true;
     }
 
     auto ret = false;
     assert(stkOut->size() == stkIn.size());
     for (uint32_t i = 0; i < stkIn.size(); i++) {
-      auto& out = stkOut.value()[i];
-      if (out.usage == Use::Used) {
-        continue;
-      }
-      if (stkIn[i].usage == Use::Used ||
-          usedStackSlots.count({blk, i})) {
-        out.usage = Use::Used;
-        out.actions.clear();
-        ret = true;
-        continue;
-      }
-      if (out.usage == stkIn[i].usage) {
-        for (auto const& id : stkIn[i].actions) {
-          ret |= out.actions.insert(id).second;
-        }
-        auto popper = stkIn[i].popper;
-        if (popper.blk == NoBlockId) popper = { blk, i };
-        if (out.popper < stkIn[i].popper) {
-          ret = true;
-          out.popper = stkIn[i].popper;
-        }
-      } else {
-        out.usage = Use::Used;
-        out.actions.clear();
-        ret = true;
-      }
+      mergeUIs(stkOut.value()[i], stkIn[i], i, blk, isSlot);
     }
-
     return ret;
   };
 
@@ -1547,40 +1606,54 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
     FTRACE(2, "block #{}\n", blk->id);
 
-    auto const locLiveOut    = blockStates[blk->id].locLiveOut;
-    auto const locLiveOutExn = blockStates[blk->id].locLiveOutExn;
+    auto& blockState = blockStates[blk->id];
     auto const result = analyze_dce(
       index,
       ai,
       blk,
       ai.bdata[blk->id].stateIn,
-      locLiveOut,
-      locLiveOutExn,
-      blockStates[blk->id].dceStack
+      blockState
     );
 
-    FTRACE(2, "live out : {}\n"
-              "out exn  : {}\n"
-              "live in  : {}\n",
-              loc_bits_string(ai.ctx.func, locLiveOut),
-              loc_bits_string(ai.ctx.func, locLiveOutExn),
-              loc_bits_string(ai.ctx.func, result.liveIn));
+    FTRACE(2, "loc live out  : {}\n"
+              "loc out exn   : {}\n"
+              "loc live in   : {}\n"
+              "slot live out : {}\n"
+              "slot out exn  : {}\n"
+              "slot live in  : {}\n",
+              loc_bits_string(ai.ctx.func, blockState.locLive),
+              loc_bits_string(ai.ctx.func, blockState.locLiveExn),
+              loc_bits_string(ai.ctx.func, result.locLiveIn),
+              slot_bits_string(ai.ctx.func, blockState.slotLive),
+              slot_bits_string(ai.ctx.func, blockState.slotLiveExn),
+              slot_bits_string(ai.ctx.func, result.slotLiveIn));
 
     /*
      * If we weren't able to take advantage of any unused entries
      * on the dceStack that originated from another block, mark
      * them used to prevent other paths from trying to delete them.
      *
-     * Also, merge the entries into our global usedStackSlots, to
+     * Also, merge the entries into our global forcedLiveLocations, to
      * make sure they always get marked Used.
      */
-    for (auto const& id : result.usedStackSlots) {
-      if (usedStackSlots.insert(id).second) {
+    for (auto const& id : result.forcedLiveLocations) {
+      if (forcedLiveLocations.insert(id).second) {
         for (auto& pred : normalPreds[id.blk]) {
-          FTRACE(2, "  {} force-use {}:{}\n", id.blk, pred->id, id.idx);
-          auto& dceStack = blockStates[pred->id].dceStack;
+          FTRACE(2, "  {} force-live {}:{}{}\n",
+                 id.blk, pred->id, id.id, id.isSlot ? "S" : "");
+          auto& pbs = blockStates[pred->id];
+          if (id.isSlot) {
+            if (!pbs.slotLive[id.id]) {
+              pbs.slotLive[id.id] = true;
+              if (pred != blk) {
+                incompleteQ.push(rpoId(pred));
+              }
+            }
+            continue;
+          }
+          auto& dceStack = pbs.dceStack;
           if (!dceStack) continue;
-          auto& ui = dceStack.value()[id.idx];
+          auto& ui = dceStack.value()[id.id];
           if (ui.usage != Use::Used) {
             ui.actions.clear();
             ui.usage = Use::Used;
@@ -1598,12 +1671,17 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     // If the set changes, reschedule that predecessor.
     for (auto& pred : normalPreds[blk->id]) {
       FTRACE(2, "  -> {}\n", pred->id);
-      auto& predState = blockStates[pred->id].locLiveOut;
-      auto const oldPredState = predState;
-      predState |= result.liveIn;
-      if (mergeDceStack(blockStates[pred->id].dceStack,
-                        result.stack, blk->id) ||
-          predState != oldPredState) {
+      auto& pbs = blockStates[pred->id];
+      auto const oldPredLocLive = pbs.locLive;
+      pbs.locLive |= result.locLiveIn;
+      auto const oldPredSlotLive = pbs.slotLive;
+      pbs.slotLive |= result.slotLiveIn;
+      auto changed = mergeUIVecs(pbs.slotUsage, result.slotUsage,
+                                 blk->id, true);
+      if (mergeUIVecs(pbs.dceStack, result.stack, blk->id, false) ||
+          changed ||
+          pbs.locLive != oldPredLocLive ||
+          pbs.slotLive != oldPredSlotLive) {
         incompleteQ.push(rpoId(pred));
       }
     }
@@ -1613,10 +1691,13 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     // liveOutExn state, so again reschedule if it changes.
     for (auto& pred : factoredPreds[blk->id]) {
       FTRACE(2, "  => {}\n", pred->id);
-      auto& predState = blockStates[pred->id].locLiveOutExn;
-      auto const oldPredState = predState;
-      predState |= result.liveIn;
-      if (predState != oldPredState) {
+      auto& pbs = blockStates[pred->id];
+      auto const oldPredLocLiveExn = pbs.locLiveExn;
+      pbs.locLiveExn |= result.locLiveIn;
+      auto const oldPredSlotLiveExn = pbs.slotLiveExn;
+      pbs.slotLiveExn |= result.slotLiveIn;
+      if (pbs.locLiveExn != oldPredLocLiveExn ||
+          pbs.slotLiveExn != oldPredSlotLiveExn) {
         incompleteQ.push(rpoId(pred));
       }
     }
@@ -1637,9 +1718,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       ai,
       b,
       ai.bdata[b->id].stateIn,
-      blockStates[b->id].locLiveOut,
-      blockStates[b->id].locLiveOutExn,
-      blockStates[b->id].dceStack
+      blockStates[b->id]
     );
     usedLocals |= ret.usedLocals;
     usedSlots  |= ret.usedSlots;

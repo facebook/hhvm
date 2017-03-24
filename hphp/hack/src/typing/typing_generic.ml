@@ -36,7 +36,9 @@ end = struct
       begin match akind with
         | AKany -> ()
         | AKempty -> ()
+        | AKvarray tv
         | AKvec tv -> ty tv
+        | AKdarray (tk, tv)
         | AKmap (tk, tv) -> ty tk; ty tv
         | AKshape fdm ->
             ShapeMap.iter (fun _ (tk, tv) -> ty tk; ty tv) fdm

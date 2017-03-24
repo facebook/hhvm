@@ -68,7 +68,9 @@ and occurs_ak env n ak =
 and occurs_array env n ak =
   match ak with
   | AKany -> false
+  | AKvarray t
   | AKvec t -> occurs env n t
+  | AKdarray (t1, t2)
   | AKmap(t1,t2) -> occurs env n t1 || occurs env n t2
   | AKempty -> false
   | AKshape sm -> Nast.ShapeMap.exists

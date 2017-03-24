@@ -87,7 +87,9 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     match array_kind with
     | AKany -> acc
     | AKempty -> acc
+    | AKvarray ty
     | AKvec ty -> this#on_type acc ty
+    | AKdarray (tk, tv)
     | AKmap (tk, tv) ->
       let acc = this#on_type acc tk in
       this#on_type acc tv
@@ -108,6 +110,10 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     | Tthis -> this#on_tthis acc r
     | Tarray (ty1_opt, ty2_opt) ->
       this#on_tarray acc r ty1_opt ty2_opt
+    | Tdarray (ty1, ty2) ->
+      this#on_type acc (r, Tarray (Some ty1, Some ty2))
+    | Tvarray ty ->
+      this#on_type acc (r, Tarray (Some ty, None))
     | Tgeneric s -> this#on_tgeneric acc r s
     | Toption ty -> this#on_toption acc r ty
     | Tprim prim -> this#on_tprim acc r prim

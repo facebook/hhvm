@@ -90,8 +90,9 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tprim p -> this#on_tprim env r p
     | Tarraykind AKany -> this#on_tarraykind_akany env r
     | Tarraykind AKempty -> this#on_tarraykind_akempty env r
-    | Tarraykind (AKvec tv) -> this#on_tarraykind_akvec env r tv
-    | Tarraykind (AKmap (tk, tv)) -> this#on_tarraykind_akmap env r tk tv
+    | Tarraykind (AKvarray tv | AKvec tv) -> this#on_tarraykind_akvec env r tv
+    | Tarraykind (AKdarray (tk, tv) | AKmap (tk, tv)) ->
+      this#on_tarraykind_akmap env r tk tv
     | Tarraykind (AKshape fdm) -> this#on_tarraykind_akshape env r fdm
     | Tarraykind (AKtuple fields) -> this#on_tarraykind_aktuple env r fields
     | Ttuple tyl -> this#on_ttuple env r tyl

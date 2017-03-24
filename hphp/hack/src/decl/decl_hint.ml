@@ -36,11 +36,9 @@ and hint_ p env = function
     let h2 = Option.map h2 (hint env) in
     Tarray (h1, h2)
   | Hdarray (h1, h2) ->
-    (* TODO(tingley): Introduce Tdarray and translate to that instead. *)
-    Tarray (Some (hint env h1), Some (hint env h2))
+    Tdarray (hint env h1, hint env h2)
   | Hvarray (h) ->
-    (* TODO(tingley): Introduce Tvarray and translate to that instead. *)
-    Tarray (Some (hint env h), None)
+    Tvarray (hint env h)
   | Hprim p -> Tprim p
   | Habstr x ->
     Tgeneric x

@@ -56,6 +56,12 @@ and _ ty_ =
    *)
   | Tarray : decl ty option * decl ty option -> decl ty_
 
+  (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
+  | Tdarray : decl ty * decl ty -> decl ty_
+
+  (* Tvarray (ty) => "varray<ty>" *)
+  | Tvarray : decl ty -> decl ty_
+
   (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
@@ -214,7 +220,11 @@ and array_kind =
   (* Those three types directly correspond to their decl level counterparts:
    * array, array<_> and array<_, _> *)
   | AKany
+  (* An array declared as a varray. *)
+  | AKvarray of locl ty
   | AKvec of locl ty
+  (* An array declared as a darray. *)
+  | AKdarray of locl ty * locl ty
   | AKmap of locl ty * locl ty
   (* This is a type created when we see array() literal *)
   | AKempty

@@ -358,9 +358,24 @@ let unwrap_class_hint = function
 
 let unwrap_class_type = function
   | r, Tapply (name, tparaml) -> r, name, tparaml
-  | _, (Terr | Tany | Tmixed | Tarray (_, _) | Tgeneric _ | Toption _ | Tprim _
-  | Tfun _ | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis) ->
-    raise @@ Invalid_argument "unwrap_class_type got non-class"
+  | _,
+    (
+      Terr
+      | Tany
+      | Tmixed
+      | Tarray (_, _)
+      | Tdarray (_, _)
+      | Tvarray _
+      | Tgeneric _
+      | Toption _
+      | Tprim _
+      | Tfun _
+      | Ttuple _
+      | Tshape _
+      | Taccess (_, _)
+      | Tthis
+    ) ->
+      raise @@ Invalid_argument "unwrap_class_type got non-class"
 
 let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
@@ -399,7 +414,9 @@ end = struct
         match akind with
         | AKany -> Some r
         | AKempty -> acc
+        | AKvarray ty
         | AKvec ty -> this#on_type acc ty
+        | AKdarray (tk, tv)
         | AKmap (tk, tv) -> merge
             (this#on_type acc tk)
             (this#on_type acc tv)

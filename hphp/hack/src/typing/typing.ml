@@ -204,8 +204,7 @@ let rec check_memoizable env param ty =
   | _, Tarraykind AKany
   | _, Tarraykind AKempty ->
       ()
-  | _, Tarraykind (AKvec ty)
-  | _, Tarraykind (AKmap(_, ty)) ->
+  | _, Tarraykind (AKvarray ty | AKvec ty | AKdarray(_, ty) | AKmap(_, ty)) ->
       check_memoizable env param ty
   | _, Tarraykind (AKshape fdm) ->
       ShapeMap.iter begin fun _ (_, tv) ->
@@ -939,6 +938,36 @@ and expr_
   env (p, e) =
   let make_result env te ty =
     env, T.make_typed_expr p ty te, ty in
+
+  (**
+   * Given a list of types, computes their supertype. If any of the types are
+   * unknown (e.g., comes from PHP), the supertype will be Tany.
+   *)
+  let compute_supertype env tys =
+    let env, supertype = Env.fresh_unresolved_type env in
+    let has_unknown = List.exists tys (fun (_, ty) -> ty = Tany) in
+    let env, tys = List.rev_map_env env tys TUtils.unresolved in
+    let subtype_value env ty =
+      Type.sub_type p Reason.URarray_value env ty supertype in
+    if has_unknown then
+      (* If one of the values comes from PHP land, we have to be conservative
+       * and consider that we don't know what the type of the values are. *)
+      env, (Reason.Rnone, Tany)
+    else
+      let env = List.fold_left tys ~init:env ~f:subtype_value in
+      env, supertype in
+
+  (**
+   * Given a 'a list and a method to extract an expr and its ty from a 'a, this
+   * function extracts a list of exprs from the list, and computes the supertype
+   * of all of the expressions' tys.
+   *)
+  let compute_exprs_and_supertype env l extract_expr_and_ty =
+    let env, exprs_and_tys = List.map_env env l extract_expr_and_ty in
+    let exprs, tys = List.unzip exprs_and_tys in
+    let env, supertype = compute_supertype env tys in
+    env, exprs, supertype in
+
   match e with
   | Any -> expr_error env (Reason.Rwitness p)
   | Array [] ->
@@ -968,46 +997,41 @@ and expr_
            (T.Array (List.map (List.rev tel) (fun e -> T.AFvalue e)))
            (Reason.Rwitness p, Tarraykind (AKtuple fields))
       else
-      let env, value = Env.fresh_unresolved_type env in
-      let env, pairs = List.rev_map_env env l array_field_value in
-      let (tvl, tyl) = List.unzip pairs in
-      let has_unknown = List.exists tyl (fun (_, ty) -> ty = Tany) in
-      let env, tyl = List.rev_map_env env tyl TUtils.unresolved in
-      let subtype_value env ty =
-        Type.sub_type p Reason.URarray_value env ty value in
-      let env, value =
-        if has_unknown (* If one of the values comes from PHP land,
-                        * we have to be conservative and consider that
-                        * we don't know what the type of the values are.
-                        *)
-        then env, (Reason.Rnone, Tany)
-        else List.fold_left tyl ~init:env ~f:subtype_value, value in
+      let env, value_exprs_and_tys = List.rev_map_env env l array_field_value in
+      let tvl, value_tys = List.unzip value_exprs_and_tys in
+      let env, value = compute_supertype env value_tys in
       (* TODO TAST: produce a typed expression here *)
       if is_vec then
         make_result env T.Any
           (Reason.Rwitness p, Tarraykind (AKvec value))
       else
-        let env, key = Env.fresh_unresolved_type env in
-        let env, pairs = List.rev_map_env env l array_field_key in
-        let (tkl, keys) = List.unzip pairs in
-        let env, keys = List.rev_map_env env keys TUtils.unresolved in
-        let subtype_key env ty =
-          Type.sub_type p Reason.URarray_key env ty key in
-        let env = List.fold_left keys ~init:env ~f:subtype_key in
+        let env, key_exprs_and_tys = List.rev_map_env env l array_field_key in
+        let tkl, key_tys = List.unzip key_exprs_and_tys in
+        let env, key = compute_supertype env key_tys in
         make_result env
           (T.Array (List.map (List.rev (List.zip_exn tkl tvl))
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
           (Reason.Rwitness p, Tarraykind (AKmap (key, value)))
 
   | Darray l ->
-    (* TODO(tingley): Enforce stricter typing requirements for darray *)
-    let e = Array (List.map ~f:(fun (e1, e2) -> AFkvalue (e1, e2)) l) in
-    expr_ ~in_cond ~valkind env (p, e)
+      let keys, values = List.unzip l in
 
-  | Varray el ->
-    (* TODO(tingley): Enforce stricter typing requirements for varray *)
-    let e = Array (List.map ~f:(fun e -> AFvalue e) el) in
-    expr_ ~in_cond ~valkind env (p, e)
+      let env, value_exprs, value_ty =
+        compute_exprs_and_supertype env values array_value in
+      let env, key_exprs, key_ty =
+        compute_exprs_and_supertype env keys array_value in
+
+      let field_exprs = List.zip_exn key_exprs value_exprs in
+      make_result env
+        (T.Darray field_exprs)
+        (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
+
+  | Varray values ->
+      let env, value_exprs, value_ty =
+        compute_exprs_and_supertype env values array_value in
+      make_result env
+        (T.Varray value_exprs)
+        (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
 
   | ValCollection (kind, el) ->
       let env, x = Env.fresh_unresolved_type env in
@@ -2142,12 +2166,15 @@ and array_field env = function
       let env, tv = Typing_env.unbind env tv in
       env, (T.AFkvalue (tke, tve), Some tk, tv)
 
+and array_value env x =
+  let env, te, ty = expr env x in
+  let env, ty = Typing_env.unbind env ty in
+  env, (te, ty)
+
 and array_field_value env = function
   | Nast.AFvalue x
   | Nast.AFkvalue (_, x) ->
-      let env, te, ty = expr env x in
-      let env, ty = Typing_env.unbind env ty in
-      env, (te, ty)
+      array_value env x
 
 and array_field_key env = function
   (* This shouldn't happen *)
@@ -2155,9 +2182,7 @@ and array_field_key env = function
       env, (T.make_implicitly_typed_expr p T.Any,
         (Reason.Rwitness p, Tprim Tint))
   | Nast.AFkvalue (x, _) ->
-      let env, tk, ty = expr env x in
-      let env, ty = Typing_env.unbind env ty in
-      env, (tk, ty)
+      array_value env x
 
 and akshape_field env = function
   | Nast.AFkvalue (k, v) ->
@@ -2176,12 +2201,14 @@ and akshape_field env = function
   | Nast.AFvalue _ -> assert false (* Typing_arrays.is_shape_like_array
                                     * should have prevented this *)
 
+and aktuple_afvalue env v =
+  let env, tev, tv = expr env v in
+  let env, tv = Typing_env.unbind env tv in
+  let env, ty = TUtils.unresolved env tv in
+  env, tev, ty
+
 and aktuple_field env = function
-  | Nast.AFvalue v ->
-      let env, tev, tv = expr env v in
-      let env, tv = Typing_env.unbind env tv in
-      let env, ty = TUtils.unresolved env tv in
-      env, tev, ty
+  | Nast.AFvalue v -> aktuple_afvalue env v
   | Nast.AFkvalue _ -> assert false (* check_consistent_fields
                                      * should have prevented this *)
 and check_parent_construct pos env el uel env_parent =
@@ -2197,9 +2224,23 @@ and call_parent_construct pos env el uel =
   match parent with
     | _, Tapply _ ->
       check_parent_construct pos env el uel parent
-    | _, ( Tany | Tmixed | Tarray (_, _) | Tgeneric _ | Toption _ | Tprim _
-          | Terr | Tfun _ | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis
-         ) -> (* continue here *)
+    | _,
+      (
+        Tany
+        | Tmixed
+        | Tarray (_, _)
+        | Tdarray (_, _)
+        | Tvarray _
+        | Tgeneric _
+        | Toption _
+        | Tprim _
+        | Terr
+        | Tfun _
+        | Ttuple _
+        | Tshape _
+        | Taccess (_, _)
+        | Tthis
+      ) -> (* continue here *)
       let default = env, [], [], (Reason.Rnone, Tany) in
       match Env.get_self env with
         | _, Tclass ((_, self), _) ->
@@ -2766,7 +2807,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
         array_get is_lvalue p env ty1 e2 ty2
       end in
       env, (fst ety1, Tunresolved tyl)
-  | Tarraykind (AKvec ty) ->
+  | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
       let env = Type.sub_type p Reason.index_array env ty2 ty1 in
       env, ty
@@ -2835,7 +2876,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
       when is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env p ety1
-  | Tarraykind (AKmap (k, v)) ->
+  | Tarraykind (AKdarray (k, v) | AKmap (k, v)) ->
       let env, ty2 = TUtils.unresolved env ty2 in
       let env = Type.sub_type p Reason.index_array env ty2 k in
       env, v
@@ -4634,9 +4675,24 @@ and check_extend_abstract_const ~is_final p smap =
     match cc.cc_type with
     | r, _ when cc.cc_abstract && not cc.cc_synthesized ->
       Errors.implement_abstract ~is_final p (Reason.to_pos r) "constant" x
-    | _, (Terr | Tany | Tmixed | Tarray (_, _) | Toption _ | Tprim _ | Tfun _
-          | Tapply (_, _) | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis
-          | Tgeneric _) -> ()
+    | _,
+      (
+        Terr
+        | Tany
+        | Tmixed
+        | Tarray (_, _)
+        | Tdarray (_, _)
+        | Tvarray _
+        | Toption _
+        | Tprim _
+        | Tfun _
+        | Tapply (_, _)
+        | Ttuple _
+        | Tshape _
+        | Taccess (_, _)
+        | Tthis
+        | Tgeneric _
+      ) -> ()
   end smap
 
 and typeconst_def env {

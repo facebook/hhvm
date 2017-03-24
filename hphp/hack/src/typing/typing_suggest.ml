@@ -125,10 +125,25 @@ let get_implements tcopt (_, x) =
       SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
-        | _, (Tany | Terr | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric _
-          | Tfun _ | Toption _ | Tapply (_, _) | Ttuple _ | Tshape _
-          | Taccess (_, _) | Tthis) ->
-          raise Exit
+        | _,
+          (
+            Tany
+            | Terr
+            | Tmixed
+            | Tarray (_, _)
+            | Tdarray (_, _)
+            | Tvarray _
+            | Tprim _
+            | Tgeneric _
+            | Tfun _
+            | Toption _
+            | Tapply (_, _)
+            | Ttuple _
+            | Tshape _
+            | Taccess (_, _)
+            | Tthis
+          ) ->
+            raise Exit
       end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
@@ -181,7 +196,9 @@ and normalize_ tcopt = function
       Tarraykind (match akind with
         | AKany -> AKany
         | AKempty -> AKempty
+        | AKvarray tk -> AKvarray (normalize tcopt tk)
         | AKvec tk -> AKvec (normalize tcopt tk)
+        | AKdarray (tk, tv) -> AKdarray (normalize tcopt tk, normalize tcopt tv)
         | AKmap (tk, tv) -> AKmap (normalize tcopt tk, normalize tcopt tv)
         (* fully_expand_tvars_downcast_aktypes should have removed those *)
         | AKshape _ | AKtuple _ -> raise Exit

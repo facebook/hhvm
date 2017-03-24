@@ -455,6 +455,10 @@ and type_ tcopt root variance env (reason, ty) =
     let env = type_option tcopt root variance env ty1 in
     let env = type_option tcopt root variance env ty2 in
     env
+  | Tdarray (ty1, ty2) ->
+    type_ tcopt root variance env (reason, Tarray (Some ty1, Some ty2))
+  | Tvarray ty ->
+    type_ tcopt root variance env (reason, Tarray (Some ty, None))
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant
      * position.

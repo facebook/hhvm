@@ -17,58 +17,34 @@ let literal_from_bool b =
 let int64_to_bool i =
   not (Int64.equal i Int64.zero)
 
-let literal_from_binop op left right =
-  (* TODO: HHVM does not allow 2+2 in an attribute, but does allow it in
-  a constant initializer. It seems reasonable to allow this in attributes
-  as well. Make sure this decision is documented in the specification. *)
+let handle_integer_overflow i =
   (* TODO: Deal with integer overflow *)
-  match (op, left, right) with
-  | (Ast.Eqeq, Int left, Int right)
-  | (Ast.EQeqeq, Int left, Int right) ->
-    literal_from_bool (Int64.equal left right)
-  | (Ast.Diff, Int left, Int right)
-  | (Ast.Diff2, Int left, Int right) ->
-    literal_from_bool (not (Int64.equal left right))
-  | (Ast.Lt, Int left, Int right) ->
-    literal_from_bool ((Int64.compare left right) < 0)
-  | (Ast.Lte, Int left, Int right) ->
-    literal_from_bool ((Int64.compare left right) <= 0)
-  | (Ast.Gt, Int left, Int right) ->
-    literal_from_bool ((Int64.compare left right) > 0)
-  | (Ast.Gte, Int left, Int right) ->
-    literal_from_bool ((Int64.compare left right) >= 0)
+  Int i
 
-  | (Ast.Amp, Int left, Int right) -> Int (Int64.logand left right)
-  | (Ast.Bar, Int left, Int right) -> Int (Int64.logor left right)
-  | (Ast.Xor, Int left, Int right) -> Int (Int64.logxor left right)
-  | (Ast.BArbar, Int left, Int right) ->
-    if int64_to_bool left then
-      True
-    else
-      literal_from_bool (int64_to_bool right)
-  | (Ast.AMpamp, Int left, Int right) ->
-    if int64_to_bool left then
-      literal_from_bool (int64_to_bool right)
-    else
-      False
-  | (Ast.Ltlt, Int left, Int right) ->
-    (* TODO: Deal with overflow of shifter *)
-    let right = Int64.to_int right in
-    Int (Int64.shift_left left right)
-  | (Ast.Gtgt, Int left, Int right) ->
-    (* TODO: Deal with overflow of shifter *)
-    let right = Int64.to_int right in
-    Int (Int64.shift_right left right)
+let fold_addition left right =
+  match (left, right) with
+  | (Int left, Int right) -> handle_integer_overflow (Int64.add left right)
+  | _ -> failwith "Folding + not yet implemented"
 
-  | (Ast.Dot, Int left, Int right) ->
-    String ((Int64.to_string left) ^ (Int64.to_string right))
+let fold_subtraction left right =
+  match (left, right) with
+  | (Int left, Int right) -> handle_integer_overflow (Int64.sub left right)
+  | _ -> failwith "Folding - not yet implemented"
 
-  | (Ast.Plus, Int left, Int right) -> Int (Int64.add left right)
-  | (Ast.Minus, Int left, Int right) -> Int (Int64.sub left right)
-  | (Ast.Star, Int left, Int right) -> Int (Int64.mul left right)
-  (* TODO: StarStar has special behaviour *)
-  | (Ast.Slash, Int left, Int right) ->
-    (* TODO: Deal with div by zero *)
+let fold_multiplication left right =
+  match (left, right) with
+  | (Int left, Int right) -> handle_integer_overflow (Int64.mul left right)
+  | _ -> failwith "Folding * not yet implemented"
+
+let fold_exponentiation left right =
+  match (left, right) with
+  | _ -> failwith "Folding ** not yet implemented"
+
+let fold_division left right =
+  (* TODO: Deal with div by zero *)
+  (* TODO: Deal with int.minval / -1 *)
+  match (left, right) with
+  | (Int left, Int right) ->
     if (Int64.rem left right) = Int64.zero then
       Int (Int64.div left right)
     else
@@ -79,28 +55,156 @@ let literal_from_binop op left right =
       (* TODO: The original HHVM emitter produces considerably more precision
       when printing out floats *)
       Double (string_of_float quotient)
-  | (Ast.Percent, Int left, Int right) ->
-    (* TODO: Deal with div by zero *)
+  | _ -> failwith "Folding / not yet implemented"
+
+let fold_remainder left right =
+  (* TODO: Deal with div by zero *)
+  match (left, right) with
+  | (Int left, Int right) ->
     Int (Int64.rem left right)
-  | _ -> failwith "Binary operation not yet implemented on literals"
+  | _ -> failwith "Folding % not yet implemented"
+
+let fold_concatenation left right =
+  match (left, right) with
+  | (Int left, Int right) ->
+    String ((Int64.to_string left) ^ (Int64.to_string right))
+  | _ -> failwith "Folding . not yet implemented"
+
+let fold_right_shift left right =
+  match (left, right) with
+  | (Int left, Int right) ->
+    (* TODO: Deal with overflow of shifter *)
+    let right = Int64.to_int right in
+    Int (Int64.shift_right left right)
+  | _ -> failwith "Folding >> not yet implemented"
+
+let fold_left_shift left right =
+  match (left, right) with
+  | (Int left, Int right) ->
+    (* TODO: Deal with overflow of shifter *)
+    let right = Int64.to_int right in
+    Int (Int64.shift_left left right)
+  | _ -> failwith "Folding << not yet implemented"
+
+let fold_logical_and left right =
+  match (left, right) with
+  | (Int left, Int right) ->
+    if int64_to_bool left then
+      literal_from_bool (int64_to_bool right)
+    else
+      False
+  | _ -> failwith "Folding && not yet implemented"
+
+let fold_logical_or left right =
+  match (left, right) with
+  | (Int left, Int right) ->
+    if int64_to_bool left then
+      True
+    else
+      literal_from_bool (int64_to_bool right)
+  | _ -> failwith "Folding || not yet implemented"
+
+let fold_and left right =
+  match (left, right) with
+  | (Int left, Int right) -> Int (Int64.logand left right)
+  | _ -> failwith "Folding & not yet implemented"
+
+let fold_or left right =
+  match (left, right) with
+  | (Int left, Int right) -> Int (Int64.logor left right)
+  | _ -> failwith "Folding | not yet implemented"
+
+let fold_xor left right =
+  match (left, right) with
+  | (Int left, Int right) -> Int (Int64.logxor left right)
+  | _ -> failwith "Folding ^ not yet implemented"
+
+let fold_loose_equality left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool (Int64.equal left right)
+  | _ -> failwith "Folding == not yet implemented"
+
+let fold_strict_equality left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool (Int64.equal left right)
+  | _ -> failwith "Folding === not yet implemented"
+
+let fold_loose_inequality left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool (not (Int64.equal left right))
+  | _ -> failwith "Folding != not yet implemented"
+
+let fold_strict_inequality left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool (not (Int64.equal left right))
+  | _ -> failwith "Folding !== not yet implemented"
+
+let fold_less_than left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) < 0)
+  | _ -> failwith "Folding < not yet implemented"
+
+let fold_less_than_equal left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) <= 0)
+  | _ -> failwith "Folding <= not yet implemented"
+
+let fold_greater_than left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) > 0)
+  | _ -> failwith "Folding > not yet implemented"
+
+let fold_greater_than_equal left right =
+  match (left, right) with
+  | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) >= 0)
+  | _ -> failwith "Folding >= not yet implemented"
+
+let literal_from_binop op left right =
+  (* TODO: HHVM does not allow 2+2 in an attribute, but does allow it in
+  a constant initializer. It seems reasonable to allow this in attributes
+  as well. Make sure this decision is documented in the specification. *)
+  match op with
+  | Ast.Eqeq -> fold_loose_equality left right
+  | Ast.EQeqeq -> fold_strict_equality left right
+  | Ast.Diff -> fold_loose_inequality left right
+  | Ast.Diff2 -> fold_strict_inequality left right
+  | Ast.Lt -> fold_less_than left right
+  | Ast.Lte -> fold_less_than_equal left right
+  | Ast.Gt -> fold_greater_than left right
+  | Ast.Gte -> fold_greater_than_equal left right
+  | Ast.Amp -> fold_and left right
+  | Ast.Bar -> fold_or left right
+  | Ast.Xor -> fold_xor left right
+  | Ast.BArbar -> fold_logical_or left right
+  | Ast.AMpamp -> fold_logical_and left right
+  | Ast.Ltlt -> fold_left_shift left right
+  | Ast.Gtgt -> fold_right_shift left right
+  | Ast.Dot -> fold_concatenation left right
+  | Ast.Plus -> fold_addition left right
+  | Ast.Minus -> fold_subtraction left right
+  | Ast.Star -> fold_multiplication left right
+  | Ast.Starstar -> fold_exponentiation left right
+  | Ast.Slash -> fold_division left right
+  | Ast.Percent -> fold_remainder left right
+  | Ast.Eq _ -> failwith "Unexpected assignment on constant"
 
 let fold_not operand =
   match operand with
   | Int operand ->
     literal_from_bool (not (int64_to_bool operand))
-  | _ -> failwith "Folding of logical not operator not yet implemented"
+  | _ -> failwith "Folding of ! not yet implemented"
 
 let fold_binary_not operand =
   match operand with
-  | _ -> failwith "Folding of binary not operator not yet implemented"
+  | _ -> failwith "Folding of ~ not yet implemented"
 
 let fold_unary_plus operand =
   match operand with
-  | _ -> failwith "Folding of unary plus operator not yet implemented"
+  | _ -> failwith "Folding of unary + not yet implemented"
 
 let fold_unary_minus operand =
   match operand with
-  | _ -> failwith "Folding of unary minus operator not yet implemented"
+  | _ -> failwith "Folding of unary - not yet implemented"
 
 let literal_from_unop op operand =
   match op with
@@ -152,6 +256,7 @@ and literal_from_expr expr =
   | Ast.Unop (op, operand) ->
     let operand = literal_from_expr operand in
     literal_from_unop op operand
+   (* TODO: ??, ?:, others? *)
    | _ -> failwith "Expected a literal expression"
 
 let literals_from_exprs_with_index exprs =

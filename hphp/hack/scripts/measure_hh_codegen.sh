@@ -28,7 +28,7 @@ NUM_LINES_COMMON=0
 for FILE in $PHP_FILES; do
   HHVM_TMP=$(mktemp /tmp/measure_hh_codegen.hhvm.XXXXXX)
   HH_TMP=$(mktemp /tmp/measure_hh_codegen.hh.XXXXXX)
-  "$HHVM" -v Eval.DumpHhas=1 "$FILE" >"$HHVM_TMP"
+  "$HHVM" -v Eval.DumpHhas=1  -v Eval.EnableHipHopSyntax=1  "$FILE" >"$HHVM_TMP"
   $BUCK run //hphp/hack/src:hh_single_compile -- "$FILE" >"$HH_TMP"
   NUM_LINES_HHVM=$((NUM_LINES_HHVM + $(wc -l < "$HHVM_TMP")))
   NUM_LINES_HH=$((NUM_LINES_HH + $(wc -l < "$HH_TMP")))

@@ -261,15 +261,32 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
     auto el = std::make_shared<ExpressionList>(
       scope, r, ExpressionList::ListKindParam);
 
-    for (ArrayIter iter(value.toArray()); iter; ++iter) {
-      ExpressionPtr k(MakeScalarExpression(ar, scope, r, iter.first()));
-      ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
-      if (!k || !v) return ExpressionPtr();
-      auto ap = std::make_shared<ArrayPairExpression>(scope, r, k, v, false);
-      el->addElement(ap);
+    if (value.isVecArray() || value.isKeyset()) {
+      for (ArrayIter iter(value.toArray()); iter; ++iter) {
+        ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
+        if (!v) return ExpressionPtr();
+        el->addElement(v);
+      }
+    } else {
+      for (ArrayIter iter(value.toArray()); iter; ++iter) {
+        ExpressionPtr k(MakeScalarExpression(ar, scope, r, iter.first()));
+        ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
+        if (!k || !v) return ExpressionPtr();
+        auto ap = std::make_shared<ArrayPairExpression>(scope, r, k, v, false);
+        el->addElement(ap);
+      }
     }
+
     if (!el->getCount()) el.reset();
-    return std::make_shared<UnaryOpExpression>(scope, r, el, T_ARRAY, true);
+
+    auto const token = [&]{
+      if (value.isPHPArray()) return T_ARRAY;
+      if (value.isVecArray()) return T_VEC;
+      if (value.isDict()) return T_DICT;
+      if (value.isKeyset()) return T_KEYSET;
+      always_assert(false);
+    }();
+    return std::make_shared<UnaryOpExpression>(scope, r, el, token, true);
   } else if (value.isNull()) {
     return MakeConstant(ar, scope, r, "null");
   } else if (value.isBoolean()) {

@@ -96,6 +96,8 @@
 #include "hphp/util/timer.h"
 #include "hphp/util/type-scan.h"
 
+#include "hphp/zend/zend-string.h"
+
 #include <folly/Random.h>
 #include <folly/Range.h>
 #include <folly/Portability.h>
@@ -872,7 +874,8 @@ static bool set_execution_mode(folly::StringPiece mode) {
     RuntimeOption::ServerMode = true;
     Logger::Escape = true;
     return true;
-  } else if (mode == "run" || mode == "debug" || mode == "translate") {
+  } else if (mode == "run" || mode == "debug" || mode == "translate" ||
+             mode == "dumphhas") {
     // We don't run PHP in "translate" mode, so just treat it like cli mode.
     RuntimeOption::ServerMode = false;
     Logger::Escape = false;
@@ -1653,6 +1656,48 @@ static int execute_program_impl(int argc, char** argv) {
   std::vector<int> inherited_fds;
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
+
+  // Do this as early as possible to avoid creating temp files and spawing
+  // light processes. Correct compilation still requires loading all of the
+  // ini/hdf/cli options.
+  if (po.mode == "dumphhas") {
+    if (po.file.empty() && po.args.empty()) {
+      std::cerr << "Nothing to do. Pass a php file to compile.\n";
+      return 1;
+    }
+    auto const file = po.file.empty() ? po.args[0].c_str() : po.file.c_str();
+    RuntimeOption::RepoCommit = false; // avoid initializing a repo
+
+    std::fstream fs(file, std::ios::in);
+    if (!fs) {
+      std::cerr << "Unable to open \"" << file << "\"\n";
+      return 1;
+    }
+    std::stringstream contents;
+    contents << fs.rdbuf();
+
+    auto const str = contents.str();
+    auto const md5 = MD5{mangleUnitMd5(string_md5(str))};
+
+    hphp_thread_init();
+    g_context.getCheck();
+    SCOPE_EXIT { hphp_thread_exit(); };
+
+    // Initialize compiler state
+    compile_file(0, 0, MD5(), 0);
+
+    RuntimeOption::EvalDumpHhas = true;
+    SystemLib::s_inited = true;
+
+    // This will dump the hhas for file as EvalDumpHhas was set
+    if (!compile_file(str.c_str(), str.size(), md5, file, nullptr)) {
+      std::cerr << "Unable to compile \"" << file << "\"\n";
+      return 1;
+    }
+
+    return 0;
+  }
+
   if (po.port != -1) {
     RuntimeOption::ServerPort = po.port;
   }

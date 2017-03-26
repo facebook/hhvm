@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cinttypes>
 #include <string>
+#include <unordered_map>
 #include <boost/variant.hpp>
 #include <folly/Range.h>
 
@@ -392,6 +393,8 @@ Link<T,N> alloc(Mode mode = Mode::Normal);
  */
 size_t allocBit();
 bool testAndSetBit(size_t bit);
+
+std::unordered_map<Handle,Symbol> reverseLinkTable();
 
 //////////////////////////////////////////////////////////////////////
 

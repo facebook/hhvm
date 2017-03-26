@@ -135,8 +135,24 @@ HeapGraph makeHeapGraph(bool include_free) {
   // initialize nodes by iterating over PtrMap's regions
   g.nodes.reserve(blocks.size());
   blocks.iterate([&](const Header* h, size_t size) {
+    type_scan::Index ty;
+    switch (h->kind()) {
+      case HeaderKind::NativeData:
+        ty = h->native_.typeIndex();
+        break;
+      case HeaderKind::Resource:
+        ty = h->res_.typeIndex();
+        break;
+      case HeaderKind::SmallMalloc:
+      case HeaderKind::BigMalloc:
+        ty = h->malloc_.typeIndex();
+        break;
+      default:
+        ty = type_scan::kIndexUnknown;
+        break;
+    }
     g.nodes.push_back(
-      HeapGraph::Node{h, size, false, type_scan::kIndexUnknown, -1, -1}
+      HeapGraph::Node{h, size, false, ty, -1, -1}
     );
   });
 

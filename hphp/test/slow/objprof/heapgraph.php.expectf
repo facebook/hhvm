@@ -12,7 +12,7 @@ array(5) {
   ["root_nodes"]=>
   int(%d)
   ["exact"]=>
-  bool(true)
+  int(1)
 }
 Getting invalid nodes and edges:
 Invalid nodes and edges work OK.
@@ -37,8 +37,8 @@ Property:somestring
 Traversing roots for first capture:
 
 Getting in edges of root class:
+StaticProperty:RootClass::getinstance$guarded_single$memoize_cache
 onsome-stack
-rds-local
 
 Getting out edges of root class:
 Property:children

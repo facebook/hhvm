@@ -754,6 +754,14 @@ std::vector<void*> allTLBases() {
   return s_tlBaseList;
 }
 
+std::unordered_map<Handle,Symbol> reverseLinkTable() {
+  std::unordered_map<Handle,Symbol> reversed;
+  for (auto& e : s_linkTable) {
+    reversed.insert(std::make_pair(e.second, e.first));
+  }
+  return reversed;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

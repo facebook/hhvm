@@ -911,7 +911,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     if (ENABLE_ASYNC_MYSQL)
       set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
       set(MYSQL_CLIENT_LIBS
-        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
+        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
       )
 
       if (${addPaths})

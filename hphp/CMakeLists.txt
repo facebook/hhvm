@@ -28,6 +28,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/facebook/CMake"
                         "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
                         ${CMAKE_MODULE_PATH})
+  include(HPHPCompiler)
 endif()
 
 include(HHVMProject)

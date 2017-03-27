@@ -843,8 +843,12 @@ let rec transform node =
       transform_argish left_p members right_p;
     ]
   | DarrayIntrinsicExpression x ->
-    (* TODO(tingley): Implement this *)
-    Fmt []
+    let (kw, left_p, members, right_p) =
+      get_darray_intrinsic_expression_children x in
+    Fmt [
+      t kw;
+      transform_argish left_p members right_p;
+    ]
   | DictionaryIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_dictionary_intrinsic_expression_children x
@@ -862,8 +866,12 @@ let rec transform node =
       transform_argish left_p members right_p;
     ]
   | VarrayIntrinsicExpression x ->
-    (* TODO(tingley): Implement this *)
-    Fmt []
+    let (kw, left_p, members, right_p) =
+      get_varray_intrinsic_expression_children x in
+    Fmt [
+      t kw;
+      transform_argish left_p members right_p;
+    ]
   | VectorIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_vector_intrinsic_expression_children x
@@ -1041,7 +1049,15 @@ let rec transform node =
           t close;
         ]
       ]);
-    ])  | VectorArrayTypeSpecifier x ->
+    ])
+  | VarrayTypeSpecifier x ->
+    let (kw, left_a, varray_type, _, right_a) =
+      get_varray_type_specifier_children x in
+    Fmt [
+      t kw;
+      transform_braced_item left_a varray_type right_a;
+    ]
+  | VectorArrayTypeSpecifier x ->
     let (kw, left_a, vec_type, right_a) =
       get_vector_array_type_specifier_children x in
     Fmt [
@@ -1077,12 +1093,16 @@ let rec transform node =
       Space;
       t constraint_type;
     ]
-  | DarrayTypeSpecifier _ ->
-    (* TODO(tingley): Implement this *)
-    Fmt []
-  | VarrayTypeSpecifier _ ->
-    (* TODO(tingley): Implement this *)
-    Fmt []
+  | DarrayTypeSpecifier x ->
+    let (kw, left_a, key, comma_kw, value, _, right_a) =
+      get_darray_type_specifier_children x in
+    let key_list_item = make_list_item key comma_kw in
+    let val_list_item = make_list_item value (make_missing ()) in
+    let args = make_list [key_list_item; val_list_item] in
+    Fmt [
+      t kw;
+      transform_argish ~allow_trailing:true left_a args right_a;
+    ]
   | MapArrayTypeSpecifier x ->
     let (kw, left_a, key, comma_kw, value, right_a) =
       get_map_array_type_specifier_children x in

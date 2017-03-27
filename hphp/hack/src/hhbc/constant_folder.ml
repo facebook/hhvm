@@ -196,14 +196,17 @@ let fold_not operand =
 
 let fold_binary_not operand =
   match operand with
+  | Int operand -> Int (Int64.lognot operand)
   | _ -> failwith "Folding of ~ not yet implemented"
 
 let fold_unary_plus operand =
   match operand with
+  | Int _ -> operand
   | _ -> failwith "Folding of unary + not yet implemented"
 
 let fold_unary_minus operand =
   match operand with
+  | Int operand -> handle_integer_overflow (Int64.neg operand)
   | _ -> failwith "Folding of unary - not yet implemented"
 
 let literal_from_unop op operand =
@@ -216,7 +219,7 @@ let literal_from_unop op operand =
   | Ast.Uincr -> failwith "unexpected increment on constant"
   | Ast.Udecr
   | Ast.Updecr -> failwith "unexpected decrement on constant"
-  | Ast.Uref -> failwith "Unary operation not yet implemented on literals"
+  | Ast.Uref -> failwith "unexpected reference on constant"
 
 let rec collection_literal_fields fields =
   let folder (index, consts) field =

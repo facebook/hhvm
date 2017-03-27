@@ -15,6 +15,7 @@
  *)
 
 module SyntaxTree = Full_fidelity_syntax_tree
+module SyntaxKind = Full_fidelity_syntax_kind
 module EditableToken = Full_fidelity_editable_token
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module SyntaxWithEditableToken = Full_fidelity_syntax.WithToken(EditableToken)
@@ -59,6 +60,22 @@ let rec from_minimal text minimal_node offset =
     let editables = List.rev editables in
     let syntax = syntax_from_children kind editables in
     make syntax EditableSyntaxValue.NoValue
+
+let rec to_json node =
+  let open Hh_json in
+  let ch = match node.syntax with
+  | Token t -> [ "token", EditableToken.to_json t ]
+  | SyntaxList x -> [ ("elements", JSON_Array (List.map to_json x)) ]
+  | _ ->
+    let rec aux acc c n =
+      match c, n with
+      | ([], []) -> acc
+      | ((hc :: tc), (hn :: tn)) ->
+        aux ((hn, to_json hc) :: acc) tc tn
+      | _ -> failwith "mismatch between children and names" in
+    List.rev (aux [] (children node) (children_names node)) in
+  let k = ("kind", JSON_String (SyntaxKind.to_string (kind node))) in
+  JSON_Object (k :: ch)
 
 let from_tree tree =
   from_minimal (SyntaxTree.text tree) (SyntaxTree.root tree) 0

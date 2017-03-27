@@ -23,7 +23,7 @@ let lit_to_int lit =
   | True -> Int Int64.one
   | Null
   | False -> Int Int64.zero
-  | _ -> failwith "conversion from literal to integer not yet implemented"
+  | _ -> NYI "conversion from literal to integer not yet implemented"
 
 let handle_integer_overflow i =
   (* TODO: Deal with integer overflow *)
@@ -32,21 +32,21 @@ let handle_integer_overflow i =
 let fold_addition left right =
   match (left, right) with
   | (Int left, Int right) -> handle_integer_overflow (Int64.add left right)
-  | _ -> failwith "Folding + not yet implemented"
+  | _ -> NYI "Folding + not yet implemented"
 
 let fold_subtraction left right =
   match (left, right) with
   | (Int left, Int right) -> handle_integer_overflow (Int64.sub left right)
-  | _ -> failwith "Folding - not yet implemented"
+  | _ -> NYI "Folding - not yet implemented"
 
 let fold_multiplication left right =
   match (left, right) with
   | (Int left, Int right) -> handle_integer_overflow (Int64.mul left right)
-  | _ -> failwith "Folding * not yet implemented"
+  | _ -> NYI "Folding * not yet implemented"
 
 let fold_exponentiation left right =
   match (left, right) with
-  | _ -> failwith "Folding ** not yet implemented"
+  | _ -> NYI "Folding ** not yet implemented"
 
 let fold_division left right =
   (* TODO: Deal with div by zero *)
@@ -63,20 +63,20 @@ let fold_division left right =
       (* TODO: The original HHVM emitter produces considerably more precision
       when printing out floats *)
       Double (string_of_float quotient)
-  | _ -> failwith "Folding / not yet implemented"
+  | _ -> NYI "Folding / not yet implemented"
 
 let fold_remainder left right =
   (* TODO: Deal with div by zero *)
   match (left, right) with
   | (Int left, Int right) ->
     Int (Int64.rem left right)
-  | _ -> failwith "Folding % not yet implemented"
+  | _ -> NYI "Folding % not yet implemented"
 
 let fold_concatenation left right =
   match (left, right) with
   | (Int left, Int right) ->
     String ((Int64.to_string left) ^ (Int64.to_string right))
-  | _ -> failwith "Folding . not yet implemented"
+  | _ -> NYI "Folding . not yet implemented"
 
 let fold_right_shift left right =
   match (left, right) with
@@ -84,7 +84,7 @@ let fold_right_shift left right =
     (* TODO: Deal with overflow of shifter *)
     let right = Int64.to_int right in
     Int (Int64.shift_right left right)
-  | _ -> failwith "Folding >> not yet implemented"
+  | _ -> NYI "Folding >> not yet implemented"
 
 let fold_left_shift left right =
   match (left, right) with
@@ -92,7 +92,7 @@ let fold_left_shift left right =
     (* TODO: Deal with overflow of shifter *)
     let right = Int64.to_int right in
     Int (Int64.shift_left left right)
-  | _ -> failwith "Folding << not yet implemented"
+  | _ -> NYI "Folding << not yet implemented"
 
 let fold_logical_and left right =
   match (left, right) with
@@ -101,7 +101,7 @@ let fold_logical_and left right =
       literal_from_bool (int64_to_bool right)
     else
       False
-  | _ -> failwith "Folding && not yet implemented"
+  | _ -> NYI "Folding && not yet implemented"
 
 let fold_logical_or left right =
   match (left, right) with
@@ -110,7 +110,7 @@ let fold_logical_or left right =
       True
     else
       literal_from_bool (int64_to_bool right)
-  | _ -> failwith "Folding || not yet implemented"
+  | _ -> NYI "Folding || not yet implemented"
 
 let rec fold_and left right =
   match (left, right) with
@@ -121,7 +121,7 @@ let rec fold_and left right =
   | (_, Null)
   | (_ , False)
   | (_, True) -> fold_and left (lit_to_int right)
-  | _ -> failwith "Folding & not yet implemented"
+  | _ -> NYI "Folding & not yet implemented"
 
 let rec fold_or left right =
   match (left, right) with
@@ -132,52 +132,52 @@ let rec fold_or left right =
   | (_, Null)
   | (_ , False)
   | (_, True) -> fold_or left (lit_to_int right)
-  | _ -> failwith "Folding | not yet implemented"
+  | _ -> NYI "Folding | not yet implemented"
 
 let fold_xor left right =
   match (left, right) with
   | (Int left, Int right) -> Int (Int64.logxor left right)
-  | _ -> failwith "Folding ^ not yet implemented"
+  | _ -> NYI "Folding ^ not yet implemented"
 
 let fold_loose_equality left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool (Int64.equal left right)
-  | _ -> failwith "Folding == not yet implemented"
+  | _ -> NYI "Folding == not yet implemented"
 
 let fold_strict_equality left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool (Int64.equal left right)
-  | _ -> failwith "Folding === not yet implemented"
+  | _ -> NYI "Folding === not yet implemented"
 
 let fold_loose_inequality left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool (not (Int64.equal left right))
-  | _ -> failwith "Folding != not yet implemented"
+  | _ -> NYI "Folding != not yet implemented"
 
 let fold_strict_inequality left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool (not (Int64.equal left right))
-  | _ -> failwith "Folding !== not yet implemented"
+  | _ -> NYI "Folding !== not yet implemented"
 
 let fold_less_than left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) < 0)
-  | _ -> failwith "Folding < not yet implemented"
+  | _ -> NYI "Folding < not yet implemented"
 
 let fold_less_than_equal left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) <= 0)
-  | _ -> failwith "Folding <= not yet implemented"
+  | _ -> NYI "Folding <= not yet implemented"
 
 let fold_greater_than left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) > 0)
-  | _ -> failwith "Folding > not yet implemented"
+  | _ -> NYI "Folding > not yet implemented"
 
 let fold_greater_than_equal left right =
   match (left, right) with
   | (Int left, Int right) -> literal_from_bool ((Int64.compare left right) >= 0)
-  | _ -> failwith "Folding >= not yet implemented"
+  | _ -> NYI "Folding >= not yet implemented"
 
 let literal_from_binop op left right =
   (* TODO: HHVM does not allow 2+2 in an attribute, but does allow it in
@@ -212,22 +212,22 @@ let fold_not operand =
   match operand with
   | Int operand ->
     literal_from_bool (not (int64_to_bool operand))
-  | _ -> failwith "Folding of ! not yet implemented"
+  | _ -> NYI "Folding of ! not yet implemented"
 
 let fold_binary_not operand =
   match operand with
   | Int operand -> Int (Int64.lognot operand)
-  | _ -> failwith "Folding of ~ not yet implemented"
+  | _ -> NYI "Folding of ~ not yet implemented"
 
 let fold_unary_plus operand =
   match operand with
   | Int _ -> operand
-  | _ -> failwith "Folding of unary + not yet implemented"
+  | _ -> NYI "Folding of unary + not yet implemented"
 
 let fold_unary_minus operand =
   match operand with
   | Int operand -> handle_integer_overflow (Int64.neg operand)
-  | _ -> failwith "Folding of unary - not yet implemented"
+  | _ -> NYI "Folding of unary - not yet implemented"
 
 let literal_from_unop op operand =
   match op with
@@ -280,7 +280,7 @@ and literal_from_expr expr =
     let operand = literal_from_expr operand in
     literal_from_unop op operand
   (* TODO: ??, ?:, others? *)
-  | _ -> failwith "Expected a literal expression"
+  | _ -> NYI "Expected a literal expression in literal_from_expr"
 
 let literals_from_exprs_with_index exprs =
  List.rev @@ snd @@

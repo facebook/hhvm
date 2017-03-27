@@ -80,8 +80,11 @@ let string_of_lit_const instruction =
       sep ["ClsCnsD"; quote_str name; string_of_class_id class_name]
     | File -> "File"
     | Dir -> "Dir"
-    (* TODO *)
-    | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
+    | NYI text -> "NYI: " ^ text
+    | NullUninit | AddElemV | AddNewElemV | MapAddElemC | Method | NameA
+    | NewArray _ | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _)
+    | Cns _ |CnsE _ | CnsU (_, _) ->
+      "\r# NYI: unexpected literal kind in string_of_lit_const"
 
 let string_of_operator instruction =
   match instruction with
@@ -715,7 +718,15 @@ let rec attribute_argument_to_string argument =
     (* Note: no semi *)
     let fields = attribute_arguments_to_string fields in
     Printf.sprintf "a:%d:{%s}" num fields
-  | _ -> failwith "unexpected value in attribute_argument_to_string"
+    | NYI text -> "NYI: " ^ text
+  | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
+  | MapAddElemC | ColAddNewElemC | File | Dir | Method | NameA |Vec (_, _)
+  | Keyset (_, _) | NewArray _ | NewMixedArray _ | NewDictArray _
+  | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _) | NewPackedArray _
+  | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _
+  | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
+  | ClsCnsD (_, _) ->
+    "\r# NYI: unexpected literal kind in attribute_argument_to_string"
 
 and attribute_arguments_to_string arguments =
   arguments

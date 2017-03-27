@@ -103,6 +103,7 @@ type instruct_basic =
   | RGetCNop
 
 type instruct_lit_const =
+  | NYI of string
   | Null
   | True
   | False

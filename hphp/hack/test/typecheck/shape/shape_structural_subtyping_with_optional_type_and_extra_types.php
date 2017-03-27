@@ -8,8 +8,8 @@ type ShapeWithOptionalField = shape(
   ?'b' => int,
 );
 
-function foo(ShapeWithOptionalField $argument) : void {}
+function foo(ShapeWithOptionalField $argument): void {}
 
-function bar() : void {
+function bar(): void {
   foo(shape('a' => 42, 'c' => "Hello"));
 }

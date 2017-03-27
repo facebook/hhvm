@@ -1276,6 +1276,10 @@ and name_loop env =
 (*****************************************************************************)
 
 and shape_type_elt env =
+  skip_spaces_and_nl env;
+  let next_token = token env in
+  back env;
+  if next_token = Tqm then seq env [expect "?"];
   if has_consumed env expr
   then seq env [space; expect "=>"; space; hint]
 

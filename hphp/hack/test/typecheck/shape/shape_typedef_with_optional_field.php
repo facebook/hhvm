@@ -1,5 +1,2 @@
 <?hh // strict
-
-type ShapeWithOptionalField = shape(
-  ?'a' => int
-);
+type ShapeWithOptionalField = shape(?'a' => int);

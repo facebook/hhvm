@@ -55,29 +55,36 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
       if is_unbound then (env, shape) else
       let is_generic =
         match snd ety with Tabstract (AKgeneric _, _) -> true | _ -> false in
-      ShapeMap.fold begin fun field field_ty (env, shape) ->
+      let transform_shape_field field { sft_ty; _ } (env, shape) =
         let open Ast in
-        match field, field_ty, TUtils.get_base_type env ety with
+
+        (* Accumulates the provided type for this iteration of the fold, adding
+           it to the accumulation ShapeMap for the current field. Since the
+           field must have been explicitly set, we set sft_optional to true. *)
+        let acc_field_with_type sft_ty =
+          ShapeMap.add field { sft_optional = false; sft_ty } shape in
+
+        match field, sft_ty, TUtils.get_base_type env ety with
         | SFlit (_, "nullable"), (_, Toption (fty)), _ when nullable ->
-            env, ShapeMap.add field fty shape
+            env, acc_field_with_type fty
         | SFlit (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->
-            env, ShapeMap.add field fty shape
+            env, acc_field_with_type fty
         | SFlit (_, "classname"), (_, Toption (fty)),
           (_, (Tclass _ | Tabstract (AKenum _, _))) ->
-            env, ShapeMap.add field fty shape
+            env, acc_field_with_type fty
         | SFlit (_, "elem_types"), _, (r, Ttuple tyl) ->
             let env, tyl = List.map_env env tyl make_ts in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
+            env, acc_field_with_type (r, Ttuple tyl)
         | SFlit (_, "param_types"), _, (r, (Tfun funty)) ->
             let tyl = List.map ~f:snd funty.ft_params in
             let env, tyl = List.map_env env tyl make_ts in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
+            env, acc_field_with_type (r, Ttuple tyl)
         | SFlit (_, "return_type"), _, (r, Tfun funty) ->
             let env, ty = make_ts env funty.ft_ret in
-            env, ShapeMap.add field (r, Ttuple [ty]) shape
+            env, acc_field_with_type (r, Ttuple [ty])
         | SFlit (_, "fields"), _, (r, Tshape (fk, fields)) ->
-            let env, fields = ShapeMap.map_env make_ts env fields in
-            env, ShapeMap.add field (r, Tshape (fk, fields)) shape
+            let env, fields = ShapeFieldMap.map_env make_ts env fields in
+            env, acc_field_with_type (r, Tshape (fk, fields))
         (* For generics we cannot specialize the generic_types field. Consider:
          *
          *  class C<T> {}
@@ -90,23 +97,23 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
          * For test(TypeStructure<D>) there will not be a generic_types field
          *)
         | SFlit (_, "generic_types"), _, _ when is_generic ->
-            env, ShapeMap.add field field_ty shape
+            env, acc_field_with_type sft_ty
         | SFlit (_, "generic_types"), _, (r, Tarraykind (AKvec ty))
               when not is_generic ->
             let env, ty = make_ts env ty in
-            env, ShapeMap.add field (r, Ttuple [ty]) shape
+            env, acc_field_with_type (r, Ttuple [ty])
         | SFlit (_, "generic_types"), _,
           (r, Tarraykind (AKmap (ty1, ty2)))
               when not is_generic ->
             let tyl = [ty1; ty2] in
             let env, tyl = List.map_env env tyl make_ts in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
+            env, acc_field_with_type (r, Ttuple tyl)
         | SFlit (_, "generic_types"), _, (r, Tclass (_, tyl))
               when List.length tyl > 0 ->
             let env, tyl = List.map_env env tyl make_ts in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
+            env, acc_field_with_type (r, Ttuple tyl)
         | SFlit (_, ("kind" | "name" | "alias")), _, _ ->
-            env, ShapeMap.add field field_ty shape
+            env, acc_field_with_type sft_ty
         | _, _, _ ->
-            env, shape
-      end shape (env, ShapeMap.empty)
+            env, shape in
+      ShapeMap.fold transform_shape_field shape (env, ShapeMap.empty)

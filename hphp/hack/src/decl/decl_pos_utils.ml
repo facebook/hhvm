@@ -1,12 +1,12 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- *)
+* Copyright (c) 2015, Facebook, Inc.
+* All rights reserved.
+*
+* This source code is licensed under the BSD-style license found in the
+* LICENSE file in the "hack" directory of this source tree. An additional grant
+* of patent rights can be found in the PATENTS file in the same directory.
+*
+*)
 
 open Core
 open Decl_defs
@@ -16,74 +16,74 @@ module ShapeMap = Nast.ShapeMap
 
 (*****************************************************************************)
 (* Functor traversing a type, but applies a user defined function for
- * positions.
- *)
+* positions.
+*)
 (*****************************************************************************)
 module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
-  open Typing_reason
+open Typing_reason
 
-  let pos = ImplementPos.pos
+let pos = ImplementPos.pos
 
-  let rec reason = function
-    | Rnone                  -> Rnone
-    | Rwitness p             -> Rwitness (pos p)
-    | Ridx (p, r)            -> Ridx (pos p, reason r)
-    | Ridx_vector p          -> Ridx_vector (pos p)
-    | Rappend p              -> Rappend (pos p)
-    | Rfield p               -> Rfield (pos p)
-    | Rforeach p             -> Rforeach (pos p)
-    | Rasyncforeach p        -> Rasyncforeach (pos p)
-    | Raccess p              -> Raccess (pos p)
-    | Rarith p               -> Rarith (pos p)
-    | Rarith_ret p           -> Rarith_ret (pos p)
-    | Rarray_plus_ret p      -> Rarray_plus_ret (pos p)
-    | Rstring2 p             -> Rstring2 (pos p)
-    | Rcomp p                -> Rcomp (pos p)
-    | Rconcat p              -> Rconcat (pos p)
-    | Rconcat_ret p          -> Rconcat_ret (pos p)
-    | Rlogic p               -> Rlogic (pos p)
-    | Rlogic_ret p           -> Rlogic_ret (pos p)
-    | Rbitwise p             -> Rbitwise (pos p)
-    | Rbitwise_ret p         -> Rbitwise_ret (pos p)
-    | Rstmt p                -> Rstmt (pos p)
-    | Rno_return p           -> Rno_return (pos p)
-    | Rno_return_async p     -> Rno_return_async (pos p)
-    | Rret_fun_kind (p, k)   -> Rret_fun_kind (pos p, k)
-    | Rhint p                -> Rhint (pos p)
-    | Rnull_check p          -> Rnull_check (pos p)
-    | Rnot_in_cstr p         -> Rnot_in_cstr (pos p)
-    | Rthrow p               -> Rthrow (pos p)
-    | Rplaceholder p         -> Rplaceholder (pos p)
-    | Rattr p                -> Rattr (pos p)
-    | Rxhp p                 -> Rxhp (pos p)
-    | Rret_div p             -> Rret_div (pos p)
-    | Ryield_gen p           -> Ryield_gen (pos p)
-    | Ryield_asyncgen p      -> Ryield_asyncgen (pos p)
-    | Ryield_asyncnull p     -> Ryield_asyncnull (pos p)
-    | Ryield_send p          -> Ryield_send (pos p)
-    | Rlost_info (s, r1, p2) -> Rlost_info (s, reason r1, pos p2)
-    | Rcoerced (p1, p2, x)   -> Rcoerced (pos p1, pos p2, x)
-    | Rformat (p1, s, r)     -> Rformat (pos p1, s, reason r)
-    | Rclass_class (p, s)    -> Rclass_class (pos p, s)
-    | Runknown_class p       -> Runknown_class (pos p)
-    | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield(pos p1, pos p2, s1, s2)
-    | Rmap_append p          -> Rmap_append (pos p)
-    | Rvar_param p           -> Rvar_param (pos p)
-    | Runpack_param p        -> Runpack_param (pos p)
-    | Rinstantiate (r1,x,r2) -> Rinstantiate (reason r1, x, reason r2)
-    | Rarray_filter (p, r)   -> Rarray_filter (pos p, reason r)
-    | Rtype_access (r1, x, r2) -> Rtype_access (reason r1, x, reason r2)
-    | Rexpr_dep_type (r, p, n) -> Rexpr_dep_type (reason r, pos p, n)
-    | Rnullsafe_op p           -> Rnullsafe_op (pos p)
-    | Rtconst_no_cstr (p, s)   -> Rtconst_no_cstr (pos p, s)
-    | Rused_as_map p           -> Rused_as_map (pos p)
-    | Rused_as_shape p         -> Rused_as_shape (pos p)
-    | Rpredicated (p, f)       -> Rpredicated (pos p, f)
-    | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
-  let string_id (p, x) = pos p, x
+let rec reason = function
+  | Rnone                  -> Rnone
+  | Rwitness p             -> Rwitness (pos p)
+  | Ridx (p, r)            -> Ridx (pos p, reason r)
+  | Ridx_vector p          -> Ridx_vector (pos p)
+  | Rappend p              -> Rappend (pos p)
+  | Rfield p               -> Rfield (pos p)
+  | Rforeach p             -> Rforeach (pos p)
+  | Rasyncforeach p        -> Rasyncforeach (pos p)
+  | Raccess p              -> Raccess (pos p)
+  | Rarith p               -> Rarith (pos p)
+  | Rarith_ret p           -> Rarith_ret (pos p)
+  | Rarray_plus_ret p      -> Rarray_plus_ret (pos p)
+  | Rstring2 p             -> Rstring2 (pos p)
+  | Rcomp p                -> Rcomp (pos p)
+  | Rconcat p              -> Rconcat (pos p)
+  | Rconcat_ret p          -> Rconcat_ret (pos p)
+  | Rlogic p               -> Rlogic (pos p)
+  | Rlogic_ret p           -> Rlogic_ret (pos p)
+  | Rbitwise p             -> Rbitwise (pos p)
+  | Rbitwise_ret p         -> Rbitwise_ret (pos p)
+  | Rstmt p                -> Rstmt (pos p)
+  | Rno_return p           -> Rno_return (pos p)
+  | Rno_return_async p     -> Rno_return_async (pos p)
+  | Rret_fun_kind (p, k)   -> Rret_fun_kind (pos p, k)
+  | Rhint p                -> Rhint (pos p)
+  | Rnull_check p          -> Rnull_check (pos p)
+  | Rnot_in_cstr p         -> Rnot_in_cstr (pos p)
+  | Rthrow p               -> Rthrow (pos p)
+  | Rplaceholder p         -> Rplaceholder (pos p)
+  | Rattr p                -> Rattr (pos p)
+  | Rxhp p                 -> Rxhp (pos p)
+  | Rret_div p             -> Rret_div (pos p)
+  | Ryield_gen p           -> Ryield_gen (pos p)
+  | Ryield_asyncgen p      -> Ryield_asyncgen (pos p)
+  | Ryield_asyncnull p     -> Ryield_asyncnull (pos p)
+  | Ryield_send p          -> Ryield_send (pos p)
+  | Rlost_info (s, r1, p2) -> Rlost_info (s, reason r1, pos p2)
+  | Rcoerced (p1, p2, x)   -> Rcoerced (pos p1, pos p2, x)
+  | Rformat (p1, s, r)     -> Rformat (pos p1, s, reason r)
+  | Rclass_class (p, s)    -> Rclass_class (pos p, s)
+  | Runknown_class p       -> Runknown_class (pos p)
+  | Rdynamic_yield (p1, p2, s1, s2) -> Rdynamic_yield(pos p1, pos p2, s1, s2)
+  | Rmap_append p          -> Rmap_append (pos p)
+  | Rvar_param p           -> Rvar_param (pos p)
+  | Runpack_param p        -> Runpack_param (pos p)
+  | Rinstantiate (r1,x,r2) -> Rinstantiate (reason r1, x, reason r2)
+  | Rarray_filter (p, r)   -> Rarray_filter (pos p, reason r)
+  | Rtype_access (r1, x, r2) -> Rtype_access (reason r1, x, reason r2)
+  | Rexpr_dep_type (r, p, n) -> Rexpr_dep_type (reason r, pos p, n)
+  | Rnullsafe_op p           -> Rnullsafe_op (pos p)
+  | Rtconst_no_cstr (p, s)   -> Rtconst_no_cstr (pos p, s)
+  | Rused_as_map p           -> Rused_as_map (pos p)
+  | Rused_as_shape p         -> Rused_as_shape (pos p)
+  | Rpredicated (p, f)       -> Rpredicated (pos p, f)
+  | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
+let string_id (p, x) = pos p, x
 
-  let rec ty (p, x) =
-    reason p, ty_ x
+let rec ty (p, x) =
+  reason p, ty_ x
 
   and ty_: decl ty_ -> decl ty_ = function
     | Tany
@@ -103,7 +103,7 @@ module TraversePos(ImplementPos: sig val pos: Pos.t -> Pos.t end) = struct
         Taccess (ty root_ty, List.map ids string_id)
     | Tshape (fields_known, fdm) ->
         Tshape (shape_fields_known fields_known,
-          ShapeMap.map_and_rekey fdm shape_field_name ty)
+          ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
 
   and ty_opt x = Option.map x ty
 

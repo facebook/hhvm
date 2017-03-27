@@ -356,4 +356,5 @@ module type S = sig
   val darray_not_supported : Pos.t -> unit
   val varray_not_supported : Pos.t -> unit
   val too_few_type_arguments : Pos.t -> unit
+  val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
 end

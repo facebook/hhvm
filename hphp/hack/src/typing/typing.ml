@@ -163,7 +163,7 @@ let rec check_memoizable env param ty =
   | _, Tshape (_, fdm) ->
     ShapeMap.iter begin fun name _ ->
       match ShapeMap.get name fdm with
-        | Some ty -> check_memoizable env param ty
+        | Some { sft_ty; _ } -> check_memoizable env param sft_ty
         | None ->
             let ty_str = Typing_print.error (snd ty) in
             let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
@@ -1621,9 +1621,12 @@ and expr_
           (fun env e -> let env, te, ty = expr env e in env, (te,ty))
           env fdm in
       let env, fdm =
-        ShapeMap.map_env
-          (fun env (_,ty) -> TUtils.unresolved env ty)
-          env tfdm in
+        let convert_expr_and_type_to_shape_field_type env (_, ty) =
+          let env, sft_ty = TUtils.unresolved env ty in
+          (* An expression evaluation always corresponds to a shape_field_type
+             with sft_optional = false. *)
+          env, { sft_optional = false; sft_ty } in
+        ShapeMap.map_env convert_expr_and_type_to_shape_field_type env tfdm in
       let env = check_shape_keys_validity env p (ShapeMap.keys fdm) in
       (* Fields are fully known, because this shape is constructed
        * using shape keyword and we know exactly what fields are set. *)
@@ -2962,7 +2965,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
           Errors.undefined_field
             p (TUtils.get_printable_shape_field_name field);
           env, (Reason.Rwitness p, Terr)
-        | Some ty -> env, ty)
+        | Some { sft_ty; _ } -> env, sft_ty)
     )
   | Toption _ ->
       Errors.null_container p

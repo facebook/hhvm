@@ -49,7 +49,11 @@ class type type_mapper_type = object
   method on_tclass : env -> Reason.t -> Nast.sid -> locl ty list -> result
   method on_tobject : env -> Reason.t -> result
   method on_tshape :
-    env -> Reason.t -> shape_fields_known -> locl ty Nast.ShapeMap.t -> result
+    env
+      -> Reason.t
+      -> shape_fields_known
+      -> locl shape_field_type Nast.ShapeMap.t
+      -> result
 
   method on_type : env -> locl ty -> result
 end
@@ -179,7 +183,7 @@ class deep_type_mapper = object(this)
     let env, tyl = List.map_env env tyl this#on_type in
     env, (r, Tclass (x, tyl))
   method! on_tshape env r fields_known fdm =
-    let env, fdm = Nast.ShapeMap.map_env this#on_type env fdm in
+    let env, fdm = ShapeFieldMap.map_env this#on_type env fdm in
     env, (r, Tshape (fields_known, fdm))
 
   method private on_opt_type env x = match x with

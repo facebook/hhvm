@@ -203,7 +203,13 @@ let update_array_type p access_type ~lvar_assignment env ty =
     method! on_tshape env r fields_known fdm =
       match access_type with
         | AKshape_key field_name when lvar_assignment ->
-          let env, tv = Env.fresh_unresolved_type env in
+          let env, sft_ty = Env.fresh_unresolved_type env in
+          (* When we assign to a shape, like:
+           *
+           *   $shape['field'] = // some type
+           *
+           * We want to infer the shape field as non-optional. *)
+          let tv = { sft_optional = false; sft_ty } in
           let fdm = ShapeMap.add field_name tv fdm in
           env, (Reason.Rwitness p, Tshape (fields_known, fdm))
         | _ ->

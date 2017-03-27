@@ -827,8 +827,27 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
       )
   | (r_sub, Tshape (fields_known_sub, fdm_sub)),
     (r_super, Tshape (fields_known_super, fdm_super)) ->
+      (**
+       * shape_field_type A <: shape_field_type B iff:
+       *   1. A is no more optional than B
+       *   2. A's type <: B.type
+       *)
+      let on_common_field
+          (env, acc)
+          name
+          { sft_optional = optional_super; sft_ty = ty_super }
+          { sft_optional = optional_sub; sft_ty = ty_sub } =
+        match optional_super, optional_sub with
+          | true, _ | false, false ->
+            sub_type env ty_sub ty_super, acc
+          | false, true ->
+            Errors.required_field_is_optional
+              (Reason.to_pos r_sub)
+              (Reason.to_pos r_super)
+              (Env.get_shape_field_name name);
+            env, acc in
       fst (TUtils.apply_shape
-        ~on_common_field:(fun (env, acc) _ x y -> sub_type env y x, acc)
+        ~on_common_field
         ~on_missing_optional_field:(fun acc _ _ -> acc)
         (env, None)
         (r_super, fields_known_super, fdm_super)

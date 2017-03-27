@@ -21,9 +21,8 @@ let rec hint env (p, h) =
   let h = hint_ p env h in
   Typing_reason.Rhint p, h
 
-(* TODO(tingley): Record the optional status and use this to reconcile types. *)
-and shape_field_info_to_shape_field_type env { sfi_optional=_; sfi_hint } =
-  hint env sfi_hint
+and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint } =
+  { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
 and hint_ p env = function
   | Hany -> Tany

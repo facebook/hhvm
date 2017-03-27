@@ -245,13 +245,10 @@ module Full = struct
     | [x] -> f x
     | x :: rl -> f x; o s; list_sep o s f rl
 
-  let shape_map o fdm f =
+  let shape_map o fdm o_field =
   let cmp = (fun (k1, _) (k2, _) ->
      compare (Env.get_shape_field_name k1) (Env.get_shape_field_name k2)) in
   let fields = List.sort ~cmp (Nast.ShapeMap.elements fdm) in
-  let o_field = (fun (k, v) ->
-     o (Env.get_shape_field_name k); o " => "; f v;)
-  in
   (match fields with
   | [] -> ()
   | f::l ->
@@ -283,8 +280,14 @@ module Full = struct
     | Tarray (Some x, Some y) -> o "array<"; k x; o ", "; k y; o ">"
     | Tarraykind AKdarray (x, y) -> o "darray<"; k x; o ", "; k y; o ">"
     | Tarraykind (AKmap (x, y)) -> o "array<"; k x; o ", "; k y; o ">"
-    | Tarraykind (AKshape fdm) -> o "shape-like-array(";
-      shape_map o fdm (fun (_tk, tv) -> k tv); o ")"
+    | Tarraykind (AKshape fdm) ->
+      let o_field (shape_map_key, (_tk, tv)) =
+        o (Env.get_shape_field_name shape_map_key);
+        o " => ";
+        k tv in
+      o "shape-like-array(";
+      shape_map o fdm o_field;
+      o ")"
     | Tarraykind (AKtuple fields) ->
       o "tuple-like-array("; list k (List.rev (IMap.values fields)); o ")"
     | Tarray (None, Some _) -> assert false
@@ -342,7 +345,27 @@ module Full = struct
         end
       end;
       o "(";
-      shape_map o fdm (fun t -> k t);
+      let optional_shape_field_enabled =
+        TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env)
+          TypecheckerOptions.experimental_optional_shape_field in
+      let o_field (shape_map_key, { sft_optional; sft_ty }) =
+        if optional_shape_field_enabled then
+          begin
+            o (Env.get_shape_field_name shape_map_key);
+            o " => shape(";
+            if sft_optional then o "optional => true, ";
+            o "type => ";
+            k sft_ty;
+            o ")"
+          end
+        else
+          begin
+            o (Env.get_shape_field_name shape_map_key);
+            o " => ";
+            k sft_ty
+          end in
+      shape_map o fdm o_field;
       o ")"
 
   and prim o x =

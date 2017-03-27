@@ -689,6 +689,7 @@ module Typing                               = struct
   let instanceof_always_true                = 4160 (* DONT MODIFY!!!! *)
   let ambiguous_member                      = 4161 (* DONT MODIFY!!!! *)
   let instanceof_generic_classname          = 4162 (* DONT MODIFY!!!! *)
+  let required_field_is_optional            = 4163 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -2059,6 +2060,13 @@ let instanceof_generic_classname pos name =
     ("'instanceof' cannot be used on 'classname<" ^ name ^ ">' because '" ^
     name ^ "' may be instantiated with a type such as \
      'C<int>' that cannot be checked at runtime")
+
+let required_field_is_optional pos1 pos2 name =
+  add_list Typing.required_field_is_optional
+    [
+      pos1, "The field '"^name^"' is optional";
+      pos2, "The field '"^name^"' is defined as required"
+    ]
 
 (*****************************************************************************)
 (* Typing decl errors *)

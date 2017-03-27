@@ -8,7 +8,7 @@ type s = shape('x' => int);
 
 type t = shape(
   'x' => int,
-  'z' => ?bool,
+  ?'z' => bool,
 );
 
 // Error: s declares only 'x', but at runtime it can also have a 'z' that

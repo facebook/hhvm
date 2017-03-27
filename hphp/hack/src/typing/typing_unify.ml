@@ -315,11 +315,33 @@ and unify_ ?follow_bounds:(follow_bounds=true) env r1 ty1 r2 ty2 =
   | Tobject, Tclass _
   | Tclass _, Tobject -> env, Tobject
   | Tshape (fields_known1, fdm1), Tshape (fields_known2, fdm2)  ->
-      let on_common_field (env, acc) name ty1 ty2 =
-        let env, ty = unify env ty1 ty2 in
-        env, Nast.ShapeMap.add name ty acc in
-      let on_missing_optional_field (env, acc) name ty =
-        env, Nast.ShapeMap.add name ty acc in
+      (**
+       * shape_field_type A and shape_field_type B are unifiable iff:
+       *   1. A and B have the same optionality
+       *   2. A's type and B's type are unifiable
+       *)
+      let on_common_field
+          (env, acc)
+          name
+          { sft_optional = sft_optional1; sft_ty = ty1 }
+          { sft_optional = sft_optional2; sft_ty = ty2 } =
+        if sft_optional1 = sft_optional2
+        then
+          let env, sft_ty = unify env ty1 ty2 in
+          let common_shape_field_type = {
+            sft_optional = sft_optional1;
+            sft_ty;
+          } in
+          env, Nast.ShapeMap.add name common_shape_field_type acc
+        else
+          let optional, required = if sft_optional1 then r1, r2 else r2, r1 in
+          Errors.required_field_is_optional
+            (Reason.to_pos optional)
+            (Reason.to_pos required)
+            (Env.get_shape_field_name name);
+          env, acc in
+      let on_missing_optional_field (env, acc) name missing_shape_field_type =
+        env, Nast.ShapeMap.add name missing_shape_field_type acc in
       (* We do it both directions to verify that no field is missing *)
       let res = Nast.ShapeMap.empty in
       let env, res = TUtils.apply_shape

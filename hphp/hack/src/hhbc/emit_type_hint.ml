@@ -22,7 +22,7 @@ let fmt_name_or_prim x =
   | "int" -> "HH\\int"
   | "bool" -> "HH\\bool"
   | "float" -> "HH\\float"
-  | "string" -> "HH\\string"
+  | "string" | "classname"-> "HH\\string"
   | "num" -> "HH\\num"
   | "resource" -> "HH\\resource"
   | "arraykey" -> "HH\\arraykey"

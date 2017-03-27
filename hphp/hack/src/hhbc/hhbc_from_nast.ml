@@ -266,18 +266,33 @@ and emit_conditional_expression etest etrue efalse =
       instr_label end_label;
     ]
 
-and emit_new_id id args uargs =
-  let nargs = List.length args + List.length uargs in
-  gather [
-    instr_fpushctord nargs id;
-    emit_args_and_call args uargs;
-    instr_popr;
-  ]
+and emit_aget class_expr =
+  match class_expr with
+  | _, A.Lvar (_, id) ->
+    instr (IGet (ClsRefGetL (Local.Named id, 0)))
 
-and emit_new typename args uargs =
-  match typename with
-  | A.Id (_, id) -> emit_new_id id args uargs
-  | _ -> emit_nyi "new" (* TODO *)
+  | _ ->
+    gather [
+      from_expr class_expr;
+      instr (IGet (ClsRefGetC 0))
+    ]
+
+and emit_new class_expr args uargs =
+  let nargs = List.length args + List.length uargs in
+  match class_expr with
+  | _, A.Id (_, id) ->
+    gather [
+      instr_fpushctord nargs id;
+      emit_args_and_call args uargs;
+      instr_popr
+    ]
+  | _ ->
+    gather [
+      emit_aget class_expr;
+      instr_fpushctor nargs 0;
+      emit_args_and_call args uargs;
+      instr_popr
+    ]
 
 and emit_clone expr =
   gather [
@@ -322,12 +337,12 @@ and emit_call_expr expr =
 and emit_known_class_id cid =
   gather [
     instr_string (Utils.strip_ns cid);
-    instr (IGet AGetC)
+    instr (IGet (ClsRefGetC 0))
   ]
 
 and emit_class_id cid =
   if cid = SN.Classes.cStatic
-  then instr (IMisc LateBoundCls)
+  then instr (IMisc (LateBoundCls 0))
   else
   if cid = SN.Classes.cSelf
   then match !self_name with
@@ -341,8 +356,8 @@ and emit_class_get param_num_opt cid id =
       instr_string (strip_dollar id);
       emit_class_id cid;
       match param_num_opt with
-      | None -> instr (IGet CGetS)
-      | Some i -> instr (ICall (FPassS i))
+      | None -> instr (IGet (CGetS 0))
+      | Some i -> instr (ICall (FPassS (i, 0)))
     ]
 
 and emit_class_const cid id =
@@ -350,8 +365,8 @@ and emit_class_const cid id =
   else if cid = SN.Classes.cStatic
   then
     instrs [
-      IMisc LateBoundCls;
-      ILitConst (ClsCns id);
+      IMisc (LateBoundCls 0);
+      ILitConst (ClsCns (id, 0));
     ]
   else if cid = SN.Classes.cSelf
   then
@@ -359,7 +374,7 @@ and emit_class_const cid id =
     | None ->
       instrs [
         IMisc Self;
-        ILitConst (ClsCns id);
+        ILitConst (ClsCns (id, 0));
       ]
     | Some cid -> instr (ILitConst (ClsCnsD (id, cid)))
   else
@@ -493,7 +508,7 @@ and from_expr expr =
   | A.Expr_list es -> gather @@ List.map es ~f:from_expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) -> emit_tuple p es
   | A.Call _ -> emit_call_expr expr
-  | A.New ((_, typename), args, uargs) -> emit_new typename args uargs
+  | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
   | A.Array es -> emit_collection expr es
   | A.Darray es ->
     es
@@ -885,7 +900,7 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        emit_class_id cid
      ],
      gather [
-       instr (IBase (BaseSC (base_offset + 1, base_offset)))
+       instr (IBase (BaseSC (base_offset, 0)))
      ],
      1
 
@@ -955,11 +970,18 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
     gather [
       instr_string id;
-      instr (IMisc LateBoundCls);
-      instr (ICall (FPushClsMethod nargs));
+      instr (IMisc (LateBoundCls 0));
+      instr (ICall (FPushClsMethod (nargs, 0)));
     ]
 
-  | A.Class_const ((_, cid), (_, id)) ->
+  | A.Class_const ((_, cid), (_, id)) when cid.[0] = '$' ->
+    gather [
+      instr_string id;
+      instr (IGet (ClsRefGetL (Local.Named cid, 0)));
+      instr (ICall (FPushClsMethod (nargs, 0)))
+    ]
+
+  | A.Class_const ((_, cid),  (_, id)) ->
     instr (ICall (FPushClsMethodD (nargs, id, cid)))
 
   | A.Id (_, id) ->
@@ -1023,9 +1045,9 @@ and emit_final_local_op op lid =
 
 and emit_final_static_op op =
   match op with
-  | LValOp.Set -> instr (IMutator SetS)
-  | LValOp.SetOp op -> instr (IMutator (SetOpS op))
-  | LValOp.IncDec op -> instr (IMutator (IncDecS op))
+  | LValOp.Set -> instr (IMutator (SetS 0))
+  | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
+  | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:

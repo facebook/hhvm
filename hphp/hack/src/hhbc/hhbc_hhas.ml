@@ -20,7 +20,7 @@ let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 let quote_str_with_escape s = "\\\"" ^ Php_escaping.escape s ^ "\\\""
 
 let string_of_class_id id = quote_str (Utils.strip_ns id)
-let string_of_function_id id = quote_str id
+let string_of_function_id id = quote_str (Utils.strip_ns id)
 
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
@@ -48,33 +48,36 @@ let string_of_list_of_shape_fields sl =
 
 let string_of_stack_index si = string_of_int si
 
+let string_of_classref id = string_of_int id
+
 let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
-    | Int i       -> "Int " ^ Int64.to_string i
-    | String str  -> "String \"" ^ str ^ "\""
+    | Int i       -> sep ["Int"; Int64.to_string i]
+    | String str  -> sep ["String"; quote_str str]
     | True        -> "True"
     | False       -> "False"
-    | Double d    -> "Double " ^ d
+    | Double d    -> sep ["Double"; d]
     | AddElemC          -> "AddElemC"
     | AddNewElemC       -> "AddNewElemC"
-    | Array (i, _)      -> "Array @A_" ^ string_of_int i
+    | Array (i, _)      -> sep ["Array"; "@A_" ^ string_of_int i]
     | ColAddNewElemC    -> "ColAddNewElemC"
-    | ColFromArray i    -> "ColFromArray " ^ string_of_int i
-    | Dict (i, _)       -> "Dict @A_" ^ string_of_int i
-    | Keyset (i, _)     -> "Keyset @A_" ^ string_of_int i
-    | NewCol i          -> "NewCol " ^ string_of_int i
-    | NewDictArray i    -> "NewDictArray " ^ string_of_int i
-    | NewKeysetArray i  -> "NewKeysetArray " ^ string_of_int i
-    | NewVecArray i     -> "NewVecArray " ^ string_of_int i
-    | NewMixedArray i   -> "NewMixedArray " ^ string_of_int i
-    | NewPackedArray i  -> "NewPackedArray " ^ string_of_int i
+    | ColFromArray i    -> sep ["ColFromArray"; string_of_int i]
+    | Dict (i, _)       -> sep ["Dict"; "@A_" ^ string_of_int i]
+    | Keyset (i, _)     -> sep ["Keyset"; "@A_" ^ string_of_int i]
+    | NewCol i          -> sep ["NewCol"; string_of_int i]
+    | NewDictArray i    -> sep ["NewDictArray"; string_of_int i]
+    | NewKeysetArray i  -> sep ["NewKeysetArray"; string_of_int i]
+    | NewVecArray i     -> sep ["NewVecArray"; string_of_int i]
+    | NewMixedArray i   -> sep ["NewMixedArray"; string_of_int i]
+    | NewPackedArray i  -> sep ["NewPackedArray"; string_of_int i]
     | NewStructArray l  ->
-      "NewStructArray <" ^ string_of_list_of_shape_fields l ^ ">"
-    | Vec (i, _)        -> "Vec @A_" ^ string_of_int i
-    | ClsCns name -> "ClsCns " ^ quote_str name
-    | ClsCnsD (name, class_name) -> "ClsCnsD " ^ quote_str name ^ " "
-      ^ string_of_class_id class_name
+      sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
+    | Vec (i, _)        -> sep ["Vec"; "@A_" ^ string_of_int i]
+    | ClsCns (name, id) ->
+      sep ["ClsCns"; quote_str name; string_of_classref id]
+    | ClsCnsD (name, class_name) ->
+      sep ["ClsCnsD"; quote_str name; string_of_class_id class_name]
     | File -> "File"
     | Dir -> "Dir"
     (* TODO *)
@@ -144,22 +147,26 @@ let string_of_local_id x =
 
 let string_of_get x =
   match x with
-  | CGetL id -> "CGetL " ^ string_of_local_id id
-  | CGetQuietL id -> "CGetQuietL " ^ string_of_local_id id
-  | CGetL2 id -> "CGetL2 " ^ string_of_local_id id
-  | CGetL3 id -> "CGetL3 " ^ string_of_local_id id
-  | CUGetL id -> "CUGetL " ^ string_of_local_id id
-  | PushL id -> "PushL " ^ string_of_local_id id
+  | CGetL id -> sep ["CGetL"; string_of_local_id id]
+  | CGetQuietL id -> sep ["CGetQuietL"; string_of_local_id id]
+  | CGetL2 id -> sep ["CGetL2"; string_of_local_id id]
+  | CGetL3 id -> sep ["CGetL3"; string_of_local_id id]
+  | CUGetL id -> sep ["CUGetL"; string_of_local_id id]
+  | PushL id -> sep ["PushL"; string_of_local_id id]
   | CGetN -> "CGetN"
   | CGetQuietN -> "CGetQuietN"
   | CGetG -> "CGetG"
   | CGetQuietG -> "CGetQuietG"
-  | CGetS -> "CGetS"
+  | CGetS id -> sep ["CGetS"; string_of_classref id]
   | VGetN -> "VGetN"
   | VGetG -> "VGetG"
-  | VGetS -> "VGetS"
+  | VGetS id -> sep ["VGetS"; string_of_classref id]
   | AGetC -> "AGetC"
-  | AGetL id -> "AGetL " ^ string_of_local_id id
+  | AGetL id -> sep ["AGetL"; string_of_local_id id]
+  | ClsRefGetL (id, cr) ->
+    sep ["ClsRefGetL"; string_of_local_id id; string_of_int cr]
+  | ClsRefGetC cr ->
+    sep ["ClsRefGetC"; string_of_int cr]
 
 let string_of_member_key mk =
   let open MemberKey in
@@ -218,25 +225,26 @@ let string_of_istype_op op =
 
 let string_of_mutator x =
   match x with
-  | SetL id -> "SetL " ^ string_of_local_id id
+  | SetL id -> sep ["SetL"; string_of_local_id id]
   | SetN -> "SetN"
   | SetG -> "SetG"
-  | SetS -> "SetS"
+  | SetS id -> sep ["SetS"; string_of_classref id]
   | SetOpL (id, op) ->
-    "SetOpL " ^ string_of_local_id id ^ " " ^ string_of_eq_op op
-  | SetOpN op -> "SetOpN " ^ string_of_eq_op op
-  | SetOpG op -> "SetOpG " ^ string_of_eq_op op
-  | SetOpS op -> "SetOpS " ^ string_of_eq_op op
+    sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
+  | SetOpN op -> sep ["SetOpN"; string_of_eq_op op]
+  | SetOpG op -> sep ["SetOpG"; string_of_eq_op op]
+  | SetOpS (op, id) -> sep ["SetOpS"; string_of_eq_op op; string_of_classref id]
   | IncDecL (id, op) ->
-    "IncDecL " ^ string_of_local_id id ^ " " ^ string_of_incdec_op op
-  | IncDecN op -> "IncDecN " ^ string_of_incdec_op op
-  | IncDecG op -> "IncDecG " ^ string_of_incdec_op op
-  | IncDecS op -> "IncDecS " ^ string_of_incdec_op op
-  | BindL id -> "BindL " ^ string_of_local_id id
+    sep ["IncDecL"; string_of_local_id id; string_of_incdec_op op]
+  | IncDecN op -> sep ["IncDecN"; string_of_incdec_op op]
+  | IncDecG op -> sep ["IncDecG"; string_of_incdec_op op]
+  | IncDecS (op, id) ->
+    sep ["IncDecS"; string_of_incdec_op op; string_of_classref id]
+  | BindL id -> sep ["BindL"; string_of_local_id id]
   | BindN -> "BindN"
   | BindG -> "BindG"
-  | BindS -> "BindS"
-  | UnsetL id -> "UnsetL " ^ string_of_local_id id
+  | BindS id -> sep ["BindS"; string_of_classref id]
+  | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
   | UnsetN -> "UnsetN"
   | UnsetG -> "UnsetG"
   | CheckProp _ -> failwith "NYI"
@@ -367,61 +375,83 @@ let string_of_final instruction =
 
 let string_of_call instruction =
   match instruction with
-  | FPushFunc n -> "FPushFunc " ^ string_of_int n
-  | FPushFuncD (n, id) -> "FPushFuncD " ^ string_of_int n ^ " " ^ quote_str id
+  | FPushFunc n ->
+    sep ["FPushFunc"; string_of_int n]
+  | FPushFuncD (n, id) ->
+    sep ["FPushFuncD"; string_of_int n; quote_str id]
   | FPushFuncU (n, id1, id2) ->
-    "FPushFuncU " ^ string_of_int n ^ " " ^ quote_str id1 ^ " " ^ quote_str id2
-  | FPushObjMethod n -> "FPushObjMethod " ^ string_of_int n
+    sep ["FPushFuncU"; string_of_int n; quote_str id1; quote_str id2]
+  | FPushObjMethod n ->
+    sep ["FPushObjMethod"; string_of_int n]
   | FPushObjMethodD (n, id, nf) ->
-    "FPushObjMethodD " ^ string_of_int n ^ " " ^ quote_str id
-    ^ " " ^ string_of_null_flavor nf
-  | FPushClsMethod n -> "FPushClsMethod " ^ string_of_int n
-  | FPushClsMethodF n -> "FPushClsMethodF " ^ string_of_int n
-  | FPushClsMethodD (n, id1, id2) -> "FPushClsMethodD " ^ string_of_int n
-    ^ " " ^ string_of_class_id id1 ^ " " ^  string_of_function_id id2
-  | FPushCtor n -> "FPushCtor " ^ string_of_int n
-  | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ quote_str id
-  | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ quote_str id
+    sep ["FPushObjMethodD";
+      string_of_int n; quote_str id; string_of_null_flavor nf]
+  | FPushClsMethod (n, id) ->
+    sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
+  | FPushClsMethodF n ->
+    sep ["FPushClsMethodF"; string_of_int n]
+  | FPushClsMethodD (n, id1, id2) ->
+    sep ["FPushClsMethodD";
+      string_of_int n; string_of_class_id id1; string_of_function_id id2]
+  | FPushCtor (n, id) ->
+    sep ["FPushCtor"; string_of_int n; string_of_int id]
+  | FPushCtorD (n, id) ->
+    sep ["FPushCtorD"; string_of_int n; quote_str id]
+  | FPushCtorI (n, id) ->
+    sep ["FPushCtorI"; string_of_int n; quote_str id]
   | DecodeCufIter (n, l) ->
-    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_label l
+    sep ["DecodeCufIter"; string_of_int n; string_of_label l]
   | FPushCufIter (n, id) ->
-    "FPushCufIter " ^ string_of_int n ^ " " ^ string_of_iterator_id id
-  | FPushCuf n -> "FPushCuf " ^ string_of_int n
-  | FPushCufF n -> "FPushCufF " ^  string_of_int n
-  | FPushCufSafe n -> "FPushCufSafe " ^ string_of_int n
+    sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
+  | FPushCuf n ->
+    sep ["FPushCuf"; string_of_int n]
+  | FPushCufF n ->
+    sep ["FPushCufF"; string_of_int n]
+  | FPushCufSafe n ->
+    sep ["FPushCufSafe"; string_of_int n]
   | CufSafeArray -> "CufSafeArray"
   | CufSafeReturn -> "CufSafeReturn"
-  | FPassC i -> "FPassC " ^ string_of_param_num i
-  | FPassCW i -> "FPassCW " ^ string_of_param_num i
-  | FPassCE i -> "FPassCE " ^ string_of_param_num i
-  | FPassV i -> "FPassV " ^ string_of_param_num i
-  | FPassVNop i -> "FPassVNop " ^ string_of_param_num i
-  | FPassR i -> "FPassR " ^ string_of_param_num i
+  | FPassC i ->
+    sep ["FPassC"; string_of_param_num i]
+  | FPassCW i ->
+    sep ["FPassCW"; string_of_param_num i]
+  | FPassCE i ->
+    sep ["FPassCE"; string_of_param_num i]
+  | FPassV i ->
+    sep ["FPassV"; string_of_param_num i]
+  | FPassVNop i ->
+    sep ["FPassVNop"; string_of_param_num i]
+  | FPassR i ->
+    sep ["FPassR"; string_of_param_num i]
   | FPassL (i, lid) ->
-    "FPassL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
-  | FPassN i -> "FPassN " ^ string_of_param_num i
-  | FPassG i -> "FPassG " ^ string_of_param_num i
-  | FPassS i -> "FPassS " ^ string_of_param_num i
-  | FCall n -> "FCall " ^ string_of_int n
+    sep ["FPassL"; string_of_param_num i; string_of_local_id lid]
+  | FPassN i ->
+    sep ["FPassN"; string_of_param_num i]
+  | FPassG i ->
+    sep ["FPassG"; string_of_param_num i]
+  | FPassS (i, id) ->
+    sep ["FPassS"; string_of_param_num i; string_of_classref id]
+  | FCall n ->
+    sep ["FCall"; string_of_int n]
   | FCallD (n, c, f) ->
-    "FCallD " ^ string_of_int n ^ " " ^
-    string_of_class_id c ^ " " ^ string_of_function_id f
+    sep ["FCallD";
+      string_of_int n; string_of_class_id c; string_of_function_id f]
   | FCallArray -> "FCallArray"
   | FCallAwait (n, c, f) ->
-    "FCallAwait " ^ string_of_int n ^ " " ^
-    string_of_class_id c ^ " " ^ string_of_function_id f
-  | FCallUnpack n -> "FCallUnpack " ^ string_of_int n
+    sep ["FCallAwait";
+      string_of_int n; string_of_class_id c; string_of_function_id f]
+  | FCallUnpack n ->
+    sep ["FCallUnpack"; string_of_int n]
   | FCallBuiltin (n1, n2, id) ->
-    "FCallBuiltin " ^ string_of_int n1 ^ " " ^ string_of_int n2 ^ " " ^
-    quote_str id
+    sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; quote_str id]
 
 let string_of_misc instruction =
   match instruction with
     | This -> "This"
     | Self -> "Self"
     | Parent -> "Parent"
-    | LateBoundCls -> "LateBoundCls"
-    | VerifyParamType id -> "VerifyParamType " ^ string_of_param_id id
+    | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
+    | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"
     | CheckThis -> "CheckThis"
@@ -429,9 +459,9 @@ let string_of_misc instruction =
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
     | StaticLoc (local, text) ->
-      "StaticLoc " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
-    | StaticLocInit (local, text) -> (* TODO: The $ is unnecessarily escaped. *)
-      "StaticLocInit " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
+      sep ["StaticLoc"; string_of_local_id local; quote_str text]
+    | StaticLocInit (local, text) ->
+      sep ["StaticLocInit"; string_of_local_id local; quote_str text]
     | MemoGet (count, Local.Unnamed first, local_count) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
         (string_of_int count) first (local_count - 1)
@@ -440,7 +470,8 @@ let string_of_misc instruction =
       Printf.sprintf "MemoSet %s L:%d+%d"
         (string_of_int count) first (local_count - 1)
     | MemoSet _ -> failwith "MemoSet needs an unnamed local"
-    | GetMemoKeyL local -> "GetMemoKeyL " ^ (string_of_local_id local)
+    | GetMemoKeyL local ->
+      sep ["GetMemoKeyL"; string_of_local_id local]
     | IsMemoType -> "IsMemoType"
     | MaybeMemoType -> "MaybeMemoType"
     | CreateCl (n, cid) ->

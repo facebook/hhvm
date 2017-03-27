@@ -30,7 +30,7 @@ type class_id = string
 type class_num = int
 type function_id = string
 type num_params = int
-
+type classref_id = int
 type collection_type = int
 
 (* These are the three flavors of value that can live on the stack:
@@ -135,7 +135,7 @@ type instruct_lit_const =
   | Cns of Litstr.id
   | CnsE of Litstr.id
   | CnsU of int * Litstr.id (* litstr fallback *)
-  | ClsCns of Litstr.id
+  | ClsCns of Litstr.id * classref_id
   | ClsCnsD of Litstr.id * Litstr.id
   | File
   | Dir
@@ -223,12 +223,14 @@ type instruct_get =
   | CGetQuietN
   | CGetG
   | CGetQuietG
-  | CGetS
+  | CGetS of classref_id
   | VGetN
   | VGetG
-  | VGetS
+  | VGetS of classref_id
   | AGetC
   | AGetL of local_id
+  | ClsRefGetL of local_id * classref_id
+  | ClsRefGetC of classref_id
 
 type istype_op =
   | OpNull
@@ -288,19 +290,19 @@ type instruct_mutator =
   | SetL of local_id
   | SetN
   | SetG
-  | SetS
+  | SetS of classref_id
   | SetOpL of local_id * eq_op
   | SetOpN of eq_op
   | SetOpG of eq_op
-  | SetOpS of eq_op
+  | SetOpS of eq_op * classref_id
   | IncDecL of local_id * incdec_op
   | IncDecN of incdec_op
   | IncDecG of incdec_op
-  | IncDecS of incdec_op
+  | IncDecS of incdec_op * classref_id
   | BindL of local_id
   | BindN
   | BindG
-  | BindS
+  | BindS of classref_id
   | UnsetL of local_id
   | UnsetN
   | UnsetG
@@ -313,10 +315,10 @@ type instruct_call =
   | FPushFuncU of num_params * Litstr.id * Litstr.id
   | FPushObjMethod of num_params
   | FPushObjMethodD of num_params * Litstr.id * Ast.og_null_flavor
-  | FPushClsMethod of num_params
+  | FPushClsMethod of num_params * classref_id
   | FPushClsMethodF of num_params
   | FPushClsMethodD of num_params * Litstr.id * Litstr.id
-  | FPushCtor of num_params
+  | FPushCtor of num_params * classref_id
   | FPushCtorD of num_params * Litstr.id
   | FPushCtorI of num_params * class_id
   | DecodeCufIter of num_params * Label.t
@@ -335,7 +337,7 @@ type instruct_call =
   | FPassL of param_num * local_id
   | FPassN of param_num
   | FPassG of param_num
-  | FPassS of param_num
+  | FPassS of param_num * classref_id
   | FCall of num_params
   | FCallD of num_params * class_id * function_id
   | FCallArray
@@ -494,7 +496,7 @@ type instruct_misc =
   | VerifyRetTypeV
   | Self
   | Parent
-  | LateBoundCls
+  | LateBoundCls of classref_id
   | NativeImpl
   | IncStat of int * int (* counter id, value *)
   | AKExists

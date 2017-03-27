@@ -1139,9 +1139,12 @@ let rec transform node =
       transform_braced_item left_a class_type right_a;
     ]
   | FieldSpecifier x ->
-    (* TODO(tingley): Consider optionality of a field when formatting. *)
-    let (_, name, arrow_kw, field_type) = get_field_specifier_children x in
-    transform_mapish_entry name arrow_kw field_type
+    let (question, name, arrow_kw, field_type) =
+      get_field_specifier_children x in
+    Fmt [
+      t question;
+      transform_mapish_entry name arrow_kw field_type;
+    ]
   | FieldInitializer x ->
     let (name, arrow_kw, value) = get_field_initializer_children x in
     transform_mapish_entry name arrow_kw value

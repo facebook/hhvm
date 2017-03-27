@@ -117,6 +117,18 @@ let collection_type = function
   | "ImmSet"    -> 23
   | x -> failwith ("unknown collection type '" ^ x ^ "'")
 
+let istype_op id =
+  match id with
+  | "is_int" | "is_integer" -> Some OpInt
+  | "is_bool" -> Some OpBool
+  | "is_float" | "is_real" | "is_double" -> Some OpDbl
+  | "is_string" -> Some OpStr
+  | "is_array" -> Some OpArr
+  | "is_object" -> Some OpObj
+  | "is_null" -> Some OpNull
+  | "is_scalar" -> Some OpScalar
+  | _ -> None
+
 (* See EmitterVisitor::getPassByRefKind in emitter.cpp *)
 let get_passByRefKind expr =
   let open PassByRefKind in
@@ -995,6 +1007,11 @@ and emit_call_lhs (_, expr_ as expr) nargs =
 
 and emit_call (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
+  let default () =
+    gather [
+      emit_call_lhs expr nargs;
+      emit_args_and_call args uargs;
+    ], Flavor.Ref in
   match expr_ with
   | A.Id (_, id) when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->
@@ -1005,11 +1022,20 @@ and emit_call (_, expr_ as expr) args uargs =
          ] end in
     instrs, Flavor.Cell
 
-  | A.Obj_get _ | A.Class_const _ | A.Id _ | _ ->
-    gather [
-      emit_call_lhs expr nargs;
-      emit_args_and_call args uargs;
-    ], Flavor.Ref
+  | A.Id (_, id) ->
+    begin match args, istype_op id with
+    | [(_, A.Lvar (_, arg_id))], Some i ->
+      instr (IIsset (IsTypeL (Local.Named arg_id, i))),
+      Flavor.Cell
+    | [arg_expr], Some i ->
+      gather [
+        from_expr arg_expr;
+        instr (IIsset (IsTypeC i))
+      ], Flavor.Cell
+    | _ -> default ()
+    end
+  | _ -> default ()
+
 
 (* Emit code for an expression that might leave a cell or reference on the
  * stack. Return which flavor it left.
@@ -1202,7 +1228,7 @@ and from_stmt st =
     ]
   | A.Block b -> from_stmts b
   | A.If (condition, consequence, alternative) ->
-    from_if condition (A.Block consequence) (A.Block alternative)
+    emit_if condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
     from_while e (A.Block b)
   | A.Break _ ->
@@ -1238,18 +1264,29 @@ and from_stmt st =
   | A.Fallthrough
   | A.Noop -> empty
 
-and from_if condition consequence alternative =
-  let alternative_label = Label.next_regular () in
-  let done_label = Label.next_regular () in
-  gather [
-    from_expr condition;
-    instr_jmpz alternative_label;
-    from_stmt consequence;
-    instr_jmp done_label;
-    instr_label alternative_label;
-    from_stmt alternative;
-    instr_label done_label;
-  ]
+and emit_if condition consequence alternative =
+  match alternative with
+  | A.Block []
+  | A.Block [A.Noop] ->
+    let done_label = Label.next_regular () in
+    gather [
+      from_expr condition;
+      instr_jmpz done_label;
+      from_stmt consequence;
+      instr_label done_label;
+    ]
+  | _ ->
+    let alternative_label = Label.next_regular () in
+    let done_label = Label.next_regular () in
+    gather [
+      from_expr condition;
+      instr_jmpz alternative_label;
+      from_stmt consequence;
+      instr_jmp done_label;
+      instr_label alternative_label;
+      from_stmt alternative;
+      instr_label done_label;
+    ]
 
 and from_while e b =
   let break_label = Label.next_regular () in

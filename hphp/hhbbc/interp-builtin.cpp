@@ -311,6 +311,15 @@ bool can_emit_builtin(borrowed_ptr<const php::Func> func,
     return false;
   }
 
+  // We rely on strength reduction to convert builtins, but if we do
+  // the analysis on the assumption that builtins will be created, but
+  // don't actually create them, all sorts of things can go wrong (eg
+  // attempting to constprop the result will fail, because we have a
+  // bunch of FPass results on the stack).
+  if (!options.StrengthReduce) {
+    return false;
+  }
+
   auto variadic = func->params.size() && func->params.back().isVariadic;
 
   // Only allowed to overrun the signature if we have somewhere to put it

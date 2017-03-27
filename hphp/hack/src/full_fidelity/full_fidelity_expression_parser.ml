@@ -151,7 +151,9 @@ module WithStatementAndDeclAndTypeParser
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
+    | Varray -> parse_varray_intrinsic_expression parser
     | Vec -> parse_vector_intrinsic_expression parser
+    | Darray -> parse_darray_intrinsic_expression parser
     | Dict -> parse_dictionary_intrinsic_expression parser
     | Keyset -> parse_keyset_intrinsic_expression parser
     | LeftBracket -> parse_array_creation_expression parser
@@ -859,6 +861,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Const
     | Construct
     | Continue
+    | Darray
     | Dict
     | Default
     | Define
@@ -922,6 +925,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Unset
     | Use
     | Var
+    | Varray
     | Vec
     | Void
     | Where
@@ -1473,58 +1477,70 @@ TODO: This will need to be fixed to allow situations where the qualified name
       members right_paren in
     (parser, syntax)
 
-  and parse_dictionary_intrinsic_expression parser =
-    (* TODO: Create the grammar and add it to the spec. *)
-    (* TODO: Can the list have a trailing comma? *)
-    let (parser1, dict_keyword) = assert_token parser Dict in
+  and parse_bracketed_collection_intrinsic_expression
+      parser
+      keyword_token
+      parse_element_function
+      make_intrinsinc_function =
+    let (parser1, keyword) = assert_token parser keyword_token in
     let (parser1, left_bracket) = optional_token parser1 LeftBracket in
     if is_missing left_bracket then
       (* Fall back to dict being an ordinary name. Perhaps we're calling a
-         function dict() for example. *)
+         function whose name is indicated by the keyword_token, for example. *)
       parse_as_name_or_error parser
     else
-      let (parser, members) = parse_comma_list_opt_allow_trailing parser1
-        RightBracket SyntaxError.error1015 parse_keyed_element_initializer in
+      let (parser, members) =
+        parse_comma_list_opt_allow_trailing
+          parser1
+          RightBracket
+          SyntaxError.error1015
+          parse_element_function in
       let (parser, right_bracket) = expect_right_bracket parser in
-      let result = make_dictionary_intrinsic_expression dict_keyword
-        left_bracket members right_bracket in
+      let result =
+        make_intrinsinc_function keyword left_bracket members right_bracket in
       (parser, result)
 
-  and parse_keyset_intrinsic_expression parser =
+
+  and parse_darray_intrinsic_expression parser =
+    (* TODO: Create the grammar and add it to the spec. *)
+    parse_bracketed_collection_intrinsic_expression
+      parser
+      Darray
+      parse_keyed_element_initializer
+      make_darray_intrinsic_expression
+
+  and parse_dictionary_intrinsic_expression parser =
     (* TODO: Create the grammar and add it to the spec. *)
     (* TODO: Can the list have a trailing comma? *)
-    let (parser1, keyset_keyword) = assert_token parser Keyset in
-    let (parser1, left_bracket) = optional_token parser1 LeftBracket in
-    if is_missing left_bracket then
-      (* Fall back to keyset being an ordinary name. Perhaps we're calling a
-         function keyset() for example. *)
-      parse_as_name_or_error parser
-    else
-      let (parser, members) = parse_comma_list_opt_allow_trailing parser1
-        RightBracket SyntaxError.error1015
-        parse_expression_with_reset_precedence in
-      let (parser, right_bracket) = expect_right_bracket parser in
-      let result = make_keyset_intrinsic_expression keyset_keyword left_bracket
-        members right_bracket in
-      (parser, result)
+    parse_bracketed_collection_intrinsic_expression
+      parser
+      Dict
+      parse_keyed_element_initializer
+      make_dictionary_intrinsic_expression
+
+  and parse_keyset_intrinsic_expression parser =
+    parse_bracketed_collection_intrinsic_expression
+      parser
+      Keyset
+      parse_expression_with_reset_precedence
+      make_keyset_intrinsic_expression
+
+  and parse_varray_intrinsic_expression parser =
+    (* TODO: Create the grammar and add it to the spec. *)
+    parse_bracketed_collection_intrinsic_expression
+      parser
+      Varray
+      parse_expression_with_reset_precedence
+      make_varray_intrinsic_expression
 
   and parse_vector_intrinsic_expression parser =
     (* TODO: Create the grammar and add it to the spec. *)
     (* TODO: Can the list have a trailing comma? *)
-    let (parser1, vec_keyword) = assert_token parser Vec in
-    let (parser1, left_bracket) = optional_token parser1 LeftBracket in
-    if is_missing left_bracket then
-      (* Fall back to vec being an ordinary name. Perhaps we're calling a
-         function vec() for example. *)
-      parse_as_name_or_error parser
-    else
-      let (parser, members) =
-        parse_comma_list_opt_allow_trailing parser1 RightBracket
-        SyntaxError.error1015 parse_expression_with_reset_precedence in
-      let (parser, right_bracket) = expect_right_bracket parser in
-      let result = make_vector_intrinsic_expression vec_keyword left_bracket
-        members right_bracket in
-      (parser, result)
+    parse_bracketed_collection_intrinsic_expression
+      parser
+      Vec
+      parse_expression_with_reset_precedence
+      make_vector_intrinsic_expression
 
   (* array_creation_expression :=
        [ array-initializer-opt ]

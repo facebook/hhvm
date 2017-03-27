@@ -1018,6 +1018,17 @@ let rec get_doc node =
     let right = get_doc array_intrinsic_right_paren in
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
+  | DarrayIntrinsicExpression {
+    darray_intrinsic_keyword;
+    darray_intrinsic_left_bracket;
+    darray_intrinsic_members;
+    darray_intrinsic_right_bracket } ->
+    let keyword = get_doc darray_intrinsic_keyword in
+    let left = get_doc darray_intrinsic_left_bracket in
+    let members = get_doc darray_intrinsic_members in
+    let right = get_doc darray_intrinsic_right_bracket in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
   | DictionaryIntrinsicExpression {
     dictionary_intrinsic_keyword;
     dictionary_intrinsic_left_bracket;
@@ -1038,6 +1049,17 @@ let rec get_doc node =
     let left = get_doc keyset_intrinsic_left_bracket in
     let members = get_doc keyset_intrinsic_members in
     let right = get_doc keyset_intrinsic_right_bracket in
+    let left_part = group_doc (keyword ^^| left) in
+    indent_block_no_space left_part members right indt
+  | VarrayIntrinsicExpression {
+    varray_intrinsic_keyword;
+    varray_intrinsic_left_bracket;
+    varray_intrinsic_members;
+    varray_intrinsic_right_bracket } ->
+    let keyword = get_doc varray_intrinsic_keyword in
+    let left = get_doc varray_intrinsic_left_bracket in
+    let members = get_doc varray_intrinsic_members in
+    let right = get_doc varray_intrinsic_right_bracket in
     let left_part = group_doc (keyword ^^| left) in
     indent_block_no_space left_part members right indt
   | VectorIntrinsicExpression {
@@ -1127,6 +1149,19 @@ let rec get_doc node =
     let name = get_doc generic_class_type in
     let argument = get_doc generic_argument_list in
     group_doc (indent_doc_no_space name argument indt)
+  | VarrayTypeSpecifier {
+      varray_keyword;
+      varray_left_angle;
+      varray_type;
+      varray_optional_comma;
+      varray_right_angle
+    } ->
+    let ar = get_doc varray_keyword in
+    let la = get_doc varray_left_angle in
+    let ty = get_doc varray_type in
+    let oc = get_doc varray_optional_comma in
+    let ra = get_doc varray_right_angle in
+    ar ^^^ la ^^^ ty ^^^ oc ^^^ ra
   | VectorArrayTypeSpecifier {
       vector_array_keyword;
       vector_array_left_angle;
@@ -1171,6 +1206,23 @@ let rec get_doc node =
     let ms = get_doc dictionary_type_members in
     let ra = get_doc dictionary_type_right_angle in
     ar ^^^ la ^^^ ms ^^^ ra
+  | DarrayTypeSpecifier {
+      darray_keyword;
+      darray_left_angle;
+      darray_key;
+      darray_comma;
+      darray_value;
+      darray_optional_comma;
+      darray_right_angle
+    } ->
+    let ar = get_doc darray_keyword in
+    let la = get_doc darray_left_angle in
+    let kt = get_doc darray_key in
+    let co = get_doc darray_comma in
+    let vt = get_doc darray_value in
+    let oc = get_doc darray_optional_comma in
+    let ra = get_doc darray_right_angle in
+    ar ^^^ la ^^^ kt ^^^ co ^| vt ^^^ oc ^^^ ra
   | MapArrayTypeSpecifier {
       map_array_keyword;
       map_array_left_angle;

@@ -113,8 +113,10 @@ type t =
 | ObjectCreationExpression
 | ArrayCreationExpression
 | ArrayIntrinsicExpression
+| DarrayIntrinsicExpression
 | DictionaryIntrinsicExpression
 | KeysetIntrinsicExpression
+| VarrayIntrinsicExpression
 | VectorIntrinsicExpression
 | ElementInitializer
 | SubscriptExpression
@@ -134,9 +136,11 @@ type t =
 | TypeConstant
 | VectorTypeSpecifier
 | KeysetTypeSpecifier
+| VarrayTypeSpecifier
 | VectorArrayTypeSpecifier
 | TypeParameter
 | TypeConstraint
+| DarrayTypeSpecifier
 | MapArrayTypeSpecifier
 | DictionaryTypeSpecifier
 | ClosureTypeSpecifier
@@ -254,8 +258,10 @@ let to_string kind =
   | ObjectCreationExpression -> "object_creation_expression"
   | ArrayCreationExpression -> "array_creation_expression"
   | ArrayIntrinsicExpression -> "array_intrinsic_expression"
+  | DarrayIntrinsicExpression -> "darray_intrinsic_expression"
   | DictionaryIntrinsicExpression -> "dictionary_intrinsic_expression"
   | KeysetIntrinsicExpression -> "keyset_intrinsic_expression"
+  | VarrayIntrinsicExpression -> "varray_intrinsic_expression"
   | VectorIntrinsicExpression -> "vector_intrinsic_expression"
   | ElementInitializer -> "element_initializer"
   | SubscriptExpression -> "subscript_expression"
@@ -275,9 +281,11 @@ let to_string kind =
   | TypeConstant -> "type_constant"
   | VectorTypeSpecifier -> "vector_type_specifier"
   | KeysetTypeSpecifier -> "keyset_type_specifier"
+  | VarrayTypeSpecifier -> "varray_type_specifier"
   | VectorArrayTypeSpecifier -> "vector_array_type_specifier"
   | TypeParameter -> "type_parameter"
   | TypeConstraint -> "type_constraint"
+  | DarrayTypeSpecifier -> "darray_type_specifier"
   | MapArrayTypeSpecifier -> "map_array_type_specifier"
   | DictionaryTypeSpecifier -> "dictionary_type_specifier"
   | ClosureTypeSpecifier -> "closure_type_specifier"

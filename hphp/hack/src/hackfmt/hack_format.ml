@@ -842,6 +842,9 @@ let rec transform node =
       t kw;
       transform_argish left_p members right_p;
     ]
+  | DarrayIntrinsicExpression x ->
+    (* TODO(tingley): Implement this *)
+    Fmt []
   | DictionaryIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_dictionary_intrinsic_expression_children x
@@ -858,6 +861,9 @@ let rec transform node =
       t kw;
       transform_argish left_p members right_p;
     ]
+  | VarrayIntrinsicExpression x ->
+    (* TODO(tingley): Implement this *)
+    Fmt []
   | VectorIntrinsicExpression x ->
     let (kw, left_p, members, right_p) =
       get_vector_intrinsic_expression_children x
@@ -1035,8 +1041,7 @@ let rec transform node =
           t close;
         ]
       ]);
-    ])
-  | VectorArrayTypeSpecifier x ->
+    ])  | VectorArrayTypeSpecifier x ->
     let (kw, left_a, vec_type, right_a) =
       get_vector_array_type_specifier_children x in
     Fmt [
@@ -1072,6 +1077,12 @@ let rec transform node =
       Space;
       t constraint_type;
     ]
+  | DarrayTypeSpecifier _ ->
+    (* TODO(tingley): Implement this *)
+    Fmt []
+  | VarrayTypeSpecifier _ ->
+    (* TODO(tingley): Implement this *)
+    Fmt []
   | MapArrayTypeSpecifier x ->
     let (kw, left_a, key, comma_kw, value, right_a) =
       get_map_array_type_specifier_children x in

@@ -331,10 +331,14 @@ abstract class EditableSyntax implements ArrayAccess {
       return ArrayCreationExpression::from_json($json, $position, $source);
     case 'array_intrinsic_expression':
       return ArrayIntrinsicExpression::from_json($json, $position, $source);
+    case 'darray_intrinsic_expression':
+      return DarrayIntrinsicExpression::from_json($json, $position, $source);
     case 'dictionary_intrinsic_expression':
       return DictionaryIntrinsicExpression::from_json($json, $position, $source);
     case 'keyset_intrinsic_expression':
       return KeysetIntrinsicExpression::from_json($json, $position, $source);
+    case 'varray_intrinsic_expression':
+      return VarrayIntrinsicExpression::from_json($json, $position, $source);
     case 'vector_intrinsic_expression':
       return VectorIntrinsicExpression::from_json($json, $position, $source);
     case 'element_initializer':
@@ -373,12 +377,16 @@ abstract class EditableSyntax implements ArrayAccess {
       return VectorTypeSpecifier::from_json($json, $position, $source);
     case 'keyset_type_specifier':
       return KeysetTypeSpecifier::from_json($json, $position, $source);
+    case 'varray_type_specifier':
+      return VarrayTypeSpecifier::from_json($json, $position, $source);
     case 'vector_array_type_specifier':
       return VectorArrayTypeSpecifier::from_json($json, $position, $source);
     case 'type_parameter':
       return TypeParameter::from_json($json, $position, $source);
     case 'type_constraint':
       return TypeConstraint::from_json($json, $position, $source);
+    case 'darray_type_specifier':
+      return DarrayTypeSpecifier::from_json($json, $position, $source);
     case 'map_array_type_specifier':
       return MapArrayTypeSpecifier::from_json($json, $position, $source);
     case 'dictionary_type_specifier':
@@ -784,6 +792,8 @@ abstract class EditableToken extends EditableSyntax {
        return new ConstructToken($leading, $trailing);
     case 'continue':
        return new ContinueToken($leading, $trailing);
+    case 'darray':
+       return new DarrayToken($leading, $trailing);
     case 'default':
        return new DefaultToken($leading, $trailing);
     case 'define':
@@ -914,6 +924,8 @@ abstract class EditableToken extends EditableSyntax {
        return new UseToken($leading, $trailing);
     case 'var':
        return new VarToken($leading, $trailing);
+    case 'varray':
+       return new VarrayToken($leading, $trailing);
     case 'vec':
        return new VecToken($leading, $trailing);
     case 'void':
@@ -1487,6 +1499,21 @@ final class ContinueToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): ContinueToken {
     return new ContinueToken($this->leading(), $trailing);
+  }
+}
+final class DarrayToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('darray', $leading, $trailing, 'darray');
+  }
+
+  public function with_leading(EditableSyntax $leading): DarrayToken {
+    return new DarrayToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): DarrayToken {
+    return new DarrayToken($this->leading(), $trailing);
   }
 }
 final class DefaultToken extends EditableToken {
@@ -2462,6 +2489,21 @@ final class VarToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): VarToken {
     return new VarToken($this->leading(), $trailing);
+  }
+}
+final class VarrayToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('varray', $leading, $trailing, 'varray');
+  }
+
+  public function with_leading(EditableSyntax $leading): VarrayToken {
+    return new VarrayToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): VarrayToken {
+    return new VarrayToken($this->leading(), $trailing);
   }
 }
 final class VecToken extends EditableToken {
@@ -14353,6 +14395,115 @@ final class ArrayIntrinsicExpression extends EditableSyntax {
     yield break;
   }
 }
+final class DarrayIntrinsicExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_members;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_bracket,
+    EditableSyntax $members,
+    EditableSyntax $right_bracket) {
+    parent::__construct('darray_intrinsic_expression');
+    $this->_keyword = $keyword;
+    $this->_left_bracket = $left_bracket;
+    $this->_members = $members;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function members(): EditableSyntax {
+    return $this->_members;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_keyword(EditableSyntax $keyword): DarrayIntrinsicExpression {
+    return new DarrayIntrinsicExpression(
+      $keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): DarrayIntrinsicExpression {
+    return new DarrayIntrinsicExpression(
+      $this->_keyword,
+      $left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_members(EditableSyntax $members): DarrayIntrinsicExpression {
+    return new DarrayIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $members,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): DarrayIntrinsicExpression {
+    return new DarrayIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $members = $this->members()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_bracket === $this->left_bracket() &&
+      $members === $this->members() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new DarrayIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->darray_intrinsic_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->darray_intrinsic_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $members = EditableSyntax::from_json(
+      $json->darray_intrinsic_members, $position, $source);
+    $position += $members->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->darray_intrinsic_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new DarrayIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_bracket;
+    yield $this->_members;
+    yield $this->_right_bracket;
+    yield break;
+  }
+}
 final class DictionaryIntrinsicExpression extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_bracket;
@@ -14558,6 +14709,115 @@ final class KeysetIntrinsicExpression extends EditableSyntax {
       $json->keyset_intrinsic_right_bracket, $position, $source);
     $position += $right_bracket->width();
     return new KeysetIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_bracket;
+    yield $this->_members;
+    yield $this->_right_bracket;
+    yield break;
+  }
+}
+final class VarrayIntrinsicExpression extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_bracket;
+  private EditableSyntax $_members;
+  private EditableSyntax $_right_bracket;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_bracket,
+    EditableSyntax $members,
+    EditableSyntax $right_bracket) {
+    parent::__construct('varray_intrinsic_expression');
+    $this->_keyword = $keyword;
+    $this->_left_bracket = $left_bracket;
+    $this->_members = $members;
+    $this->_right_bracket = $right_bracket;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_bracket(): EditableSyntax {
+    return $this->_left_bracket;
+  }
+  public function members(): EditableSyntax {
+    return $this->_members;
+  }
+  public function right_bracket(): EditableSyntax {
+    return $this->_right_bracket;
+  }
+  public function with_keyword(EditableSyntax $keyword): VarrayIntrinsicExpression {
+    return new VarrayIntrinsicExpression(
+      $keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_left_bracket(EditableSyntax $left_bracket): VarrayIntrinsicExpression {
+    return new VarrayIntrinsicExpression(
+      $this->_keyword,
+      $left_bracket,
+      $this->_members,
+      $this->_right_bracket);
+  }
+  public function with_members(EditableSyntax $members): VarrayIntrinsicExpression {
+    return new VarrayIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $members,
+      $this->_right_bracket);
+  }
+  public function with_right_bracket(EditableSyntax $right_bracket): VarrayIntrinsicExpression {
+    return new VarrayIntrinsicExpression(
+      $this->_keyword,
+      $this->_left_bracket,
+      $this->_members,
+      $right_bracket);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_bracket = $this->left_bracket()->rewrite($rewriter, $new_parents);
+    $members = $this->members()->rewrite($rewriter, $new_parents);
+    $right_bracket = $this->right_bracket()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_bracket === $this->left_bracket() &&
+      $members === $this->members() &&
+      $right_bracket === $this->right_bracket()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new VarrayIntrinsicExpression(
+        $keyword,
+        $left_bracket,
+        $members,
+        $right_bracket), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->varray_intrinsic_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_bracket = EditableSyntax::from_json(
+      $json->varray_intrinsic_left_bracket, $position, $source);
+    $position += $left_bracket->width();
+    $members = EditableSyntax::from_json(
+      $json->varray_intrinsic_members, $position, $source);
+    $position += $members->width();
+    $right_bracket = EditableSyntax::from_json(
+      $json->varray_intrinsic_right_bracket, $position, $source);
+    $position += $right_bracket->width();
+    return new VarrayIntrinsicExpression(
         $keyword,
         $left_bracket,
         $members,
@@ -16292,6 +16552,141 @@ final class KeysetTypeSpecifier extends EditableSyntax {
     yield break;
   }
 }
+final class VarrayTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_angle;
+  private EditableSyntax $_type;
+  private EditableSyntax $_optional_comma;
+  private EditableSyntax $_right_angle;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_angle,
+    EditableSyntax $type,
+    EditableSyntax $optional_comma,
+    EditableSyntax $right_angle) {
+    parent::__construct('varray_type_specifier');
+    $this->_keyword = $keyword;
+    $this->_left_angle = $left_angle;
+    $this->_type = $type;
+    $this->_optional_comma = $optional_comma;
+    $this->_right_angle = $right_angle;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
+  }
+  public function type(): EditableSyntax {
+    return $this->_type;
+  }
+  public function optional_comma(): EditableSyntax {
+    return $this->_optional_comma;
+  }
+  public function right_angle(): EditableSyntax {
+    return $this->_right_angle;
+  }
+  public function with_keyword(EditableSyntax $keyword): VarrayTypeSpecifier {
+    return new VarrayTypeSpecifier(
+      $keyword,
+      $this->_left_angle,
+      $this->_type,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_left_angle(EditableSyntax $left_angle): VarrayTypeSpecifier {
+    return new VarrayTypeSpecifier(
+      $this->_keyword,
+      $left_angle,
+      $this->_type,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_type(EditableSyntax $type): VarrayTypeSpecifier {
+    return new VarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $type,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_optional_comma(EditableSyntax $optional_comma): VarrayTypeSpecifier {
+    return new VarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $optional_comma,
+      $this->_right_angle);
+  }
+  public function with_right_angle(EditableSyntax $right_angle): VarrayTypeSpecifier {
+    return new VarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_type,
+      $this->_optional_comma,
+      $right_angle);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
+    $type = $this->type()->rewrite($rewriter, $new_parents);
+    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
+    $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $type === $this->type() &&
+      $optional_comma === $this->optional_comma() &&
+      $right_angle === $this->right_angle()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new VarrayTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $type,
+        $optional_comma,
+        $right_angle), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->varray_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_angle = EditableSyntax::from_json(
+      $json->varray_left_angle, $position, $source);
+    $position += $left_angle->width();
+    $type = EditableSyntax::from_json(
+      $json->varray_type, $position, $source);
+    $position += $type->width();
+    $optional_comma = EditableSyntax::from_json(
+      $json->varray_optional_comma, $position, $source);
+    $position += $optional_comma->width();
+    $right_angle = EditableSyntax::from_json(
+      $json->varray_right_angle, $position, $source);
+    $position += $right_angle->width();
+    return new VarrayTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $type,
+        $optional_comma,
+        $right_angle);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_angle;
+    yield $this->_type;
+    yield $this->_optional_comma;
+    yield $this->_right_angle;
+    yield break;
+  }
+}
 final class VectorArrayTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_angle;
@@ -16546,6 +16941,199 @@ final class TypeConstraint extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_type;
+    yield break;
+  }
+}
+final class DarrayTypeSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_angle;
+  private EditableSyntax $_key;
+  private EditableSyntax $_comma;
+  private EditableSyntax $_value;
+  private EditableSyntax $_optional_comma;
+  private EditableSyntax $_right_angle;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_angle,
+    EditableSyntax $key,
+    EditableSyntax $comma,
+    EditableSyntax $value,
+    EditableSyntax $optional_comma,
+    EditableSyntax $right_angle) {
+    parent::__construct('darray_type_specifier');
+    $this->_keyword = $keyword;
+    $this->_left_angle = $left_angle;
+    $this->_key = $key;
+    $this->_comma = $comma;
+    $this->_value = $value;
+    $this->_optional_comma = $optional_comma;
+    $this->_right_angle = $right_angle;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
+  }
+  public function key(): EditableSyntax {
+    return $this->_key;
+  }
+  public function comma(): EditableSyntax {
+    return $this->_comma;
+  }
+  public function value(): EditableSyntax {
+    return $this->_value;
+  }
+  public function optional_comma(): EditableSyntax {
+    return $this->_optional_comma;
+  }
+  public function right_angle(): EditableSyntax {
+    return $this->_right_angle;
+  }
+  public function with_keyword(EditableSyntax $keyword): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_left_angle(EditableSyntax $left_angle): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $this->_keyword,
+      $left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_key(EditableSyntax $key): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $key,
+      $this->_comma,
+      $this->_value,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_comma(EditableSyntax $comma): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $comma,
+      $this->_value,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_value(EditableSyntax $value): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $value,
+      $this->_optional_comma,
+      $this->_right_angle);
+  }
+  public function with_optional_comma(EditableSyntax $optional_comma): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $optional_comma,
+      $this->_right_angle);
+  }
+  public function with_right_angle(EditableSyntax $right_angle): DarrayTypeSpecifier {
+    return new DarrayTypeSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_key,
+      $this->_comma,
+      $this->_value,
+      $this->_optional_comma,
+      $right_angle);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
+    $key = $this->key()->rewrite($rewriter, $new_parents);
+    $comma = $this->comma()->rewrite($rewriter, $new_parents);
+    $value = $this->value()->rewrite($rewriter, $new_parents);
+    $optional_comma = $this->optional_comma()->rewrite($rewriter, $new_parents);
+    $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $key === $this->key() &&
+      $comma === $this->comma() &&
+      $value === $this->value() &&
+      $optional_comma === $this->optional_comma() &&
+      $right_angle === $this->right_angle()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new DarrayTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $key,
+        $comma,
+        $value,
+        $optional_comma,
+        $right_angle), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->darray_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_angle = EditableSyntax::from_json(
+      $json->darray_left_angle, $position, $source);
+    $position += $left_angle->width();
+    $key = EditableSyntax::from_json(
+      $json->darray_key, $position, $source);
+    $position += $key->width();
+    $comma = EditableSyntax::from_json(
+      $json->darray_comma, $position, $source);
+    $position += $comma->width();
+    $value = EditableSyntax::from_json(
+      $json->darray_value, $position, $source);
+    $position += $value->width();
+    $optional_comma = EditableSyntax::from_json(
+      $json->darray_optional_comma, $position, $source);
+    $position += $optional_comma->width();
+    $right_angle = EditableSyntax::from_json(
+      $json->darray_right_angle, $position, $source);
+    $position += $right_angle->width();
+    return new DarrayTypeSpecifier(
+        $keyword,
+        $left_angle,
+        $key,
+        $comma,
+        $value,
+        $optional_comma,
+        $right_angle);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_angle;
+    yield $this->_key;
+    yield $this->_comma;
+    yield $this->_value;
+    yield $this->_optional_comma;
+    yield $this->_right_angle;
     yield break;
   }
 }

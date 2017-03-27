@@ -40,6 +40,7 @@ type t =
   | Const
   | Construct
   | Continue
+  | Darray
   | Default
   | Define
   | Destruct
@@ -105,6 +106,7 @@ type t =
   | Unset
   | Use
   | Var
+  | Varray
   | Vec
   | Void
   | Where
@@ -230,6 +232,7 @@ let from_string keyword =
   | "const" -> Some Const
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
+  | "darray" -> Some Darray
   | "default" -> Some Default
   | "define" -> Some Define
   | "__destruct" -> Some Destruct
@@ -295,6 +298,7 @@ let from_string keyword =
   | "unset" -> Some Unset
   | "use" -> Some Use
   | "var" -> Some Var
+  | "varray" -> Some Varray
   | "vec" -> Some Vec
   | "void" -> Some Void
   | "where" -> Some Where
@@ -392,6 +396,7 @@ match kind with
   | Const -> "const"
   | Construct -> "__construct"
   | Continue -> "continue"
+  | Darray -> "darray"
   | Default -> "default"
   | Define -> "define"
   | Destruct -> "__destruct"
@@ -457,6 +462,7 @@ match kind with
   | Unset -> "unset"
   | Use -> "use"
   | Var -> "var"
+  | Varray -> "varray"
   | Vec -> "vec"
   | Void -> "void"
   | Where -> "where"

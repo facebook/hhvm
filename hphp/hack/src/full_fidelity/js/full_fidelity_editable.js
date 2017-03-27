@@ -268,10 +268,14 @@ class EditableSyntax
       return ArrayCreationExpression.from_json(json, position, source);
     case 'array_intrinsic_expression':
       return ArrayIntrinsicExpression.from_json(json, position, source);
+    case 'darray_intrinsic_expression':
+      return DarrayIntrinsicExpression.from_json(json, position, source);
     case 'dictionary_intrinsic_expression':
       return DictionaryIntrinsicExpression.from_json(json, position, source);
     case 'keyset_intrinsic_expression':
       return KeysetIntrinsicExpression.from_json(json, position, source);
+    case 'varray_intrinsic_expression':
+      return VarrayIntrinsicExpression.from_json(json, position, source);
     case 'vector_intrinsic_expression':
       return VectorIntrinsicExpression.from_json(json, position, source);
     case 'element_initializer':
@@ -310,12 +314,16 @@ class EditableSyntax
       return VectorTypeSpecifier.from_json(json, position, source);
     case 'keyset_type_specifier':
       return KeysetTypeSpecifier.from_json(json, position, source);
+    case 'varray_type_specifier':
+      return VarrayTypeSpecifier.from_json(json, position, source);
     case 'vector_array_type_specifier':
       return VectorArrayTypeSpecifier.from_json(json, position, source);
     case 'type_parameter':
       return TypeParameter.from_json(json, position, source);
     case 'type_constraint':
       return TypeConstraint.from_json(json, position, source);
+    case 'darray_type_specifier':
+      return DarrayTypeSpecifier.from_json(json, position, source);
     case 'map_array_type_specifier':
       return MapArrayTypeSpecifier.from_json(json, position, source);
     case 'dictionary_type_specifier':
@@ -679,6 +687,8 @@ class EditableToken extends EditableSyntax
        return new ConstructToken(leading, trailing);
     case 'continue':
        return new ContinueToken(leading, trailing);
+    case 'darray':
+       return new DarrayToken(leading, trailing);
     case 'default':
        return new DefaultToken(leading, trailing);
     case 'define':
@@ -809,6 +819,8 @@ class EditableToken extends EditableSyntax
        return new UseToken(leading, trailing);
     case 'var':
        return new VarToken(leading, trailing);
+    case 'varray':
+       return new VarrayToken(leading, trailing);
     case 'vec':
        return new VecToken(leading, trailing);
     case 'void':
@@ -1208,6 +1220,13 @@ class ContinueToken extends EditableToken
   constructor(leading, trailing)
   {
     super('continue', leading, trailing, 'continue');
+  }
+}
+class DarrayToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('darray', leading, trailing, 'darray');
   }
 }
 class DefaultToken extends EditableToken
@@ -1663,6 +1682,13 @@ class VarToken extends EditableToken
   constructor(leading, trailing)
   {
     super('var', leading, trailing, 'var');
+  }
+}
+class VarrayToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('varray', leading, trailing, 'varray');
   }
 }
 class VecToken extends EditableToken
@@ -12328,6 +12354,110 @@ class ArrayIntrinsicExpression extends EditableSyntax
     return ArrayIntrinsicExpression._children_keys;
   }
 }
+class DarrayIntrinsicExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_bracket,
+    members,
+    right_bracket)
+  {
+    super('darray_intrinsic_expression', {
+      keyword: keyword,
+      left_bracket: left_bracket,
+      members: members,
+      right_bracket: right_bracket });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_bracket() { return this.children.left_bracket; }
+  get members() { return this.children.members; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_keyword(keyword){
+    return new DarrayIntrinsicExpression(
+      keyword,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new DarrayIntrinsicExpression(
+      this.keyword,
+      left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_members(members){
+    return new DarrayIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      members,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new DarrayIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      this.members,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_bracket === this.left_bracket &&
+      members === this.members &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new DarrayIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.darray_intrinsic_keyword, position, source);
+    position += keyword.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.darray_intrinsic_left_bracket, position, source);
+    position += left_bracket.width;
+    let members = EditableSyntax.from_json(
+      json.darray_intrinsic_members, position, source);
+    position += members.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.darray_intrinsic_right_bracket, position, source);
+    position += right_bracket.width;
+    return new DarrayIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (DarrayIntrinsicExpression._children_keys == null)
+      DarrayIntrinsicExpression._children_keys = [
+        'keyword',
+        'left_bracket',
+        'members',
+        'right_bracket'];
+    return DarrayIntrinsicExpression._children_keys;
+  }
+}
 class DictionaryIntrinsicExpression extends EditableSyntax
 {
   constructor(
@@ -12534,6 +12664,110 @@ class KeysetIntrinsicExpression extends EditableSyntax
         'members',
         'right_bracket'];
     return KeysetIntrinsicExpression._children_keys;
+  }
+}
+class VarrayIntrinsicExpression extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_bracket,
+    members,
+    right_bracket)
+  {
+    super('varray_intrinsic_expression', {
+      keyword: keyword,
+      left_bracket: left_bracket,
+      members: members,
+      right_bracket: right_bracket });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_bracket() { return this.children.left_bracket; }
+  get members() { return this.children.members; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_keyword(keyword){
+    return new VarrayIntrinsicExpression(
+      keyword,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new VarrayIntrinsicExpression(
+      this.keyword,
+      left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_members(members){
+    return new VarrayIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      members,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new VarrayIntrinsicExpression(
+      this.keyword,
+      this.left_bracket,
+      this.members,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_bracket === this.left_bracket &&
+      members === this.members &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new VarrayIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.varray_intrinsic_keyword, position, source);
+    position += keyword.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.varray_intrinsic_left_bracket, position, source);
+    position += left_bracket.width;
+    let members = EditableSyntax.from_json(
+      json.varray_intrinsic_members, position, source);
+    position += members.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.varray_intrinsic_right_bracket, position, source);
+    position += right_bracket.width;
+    return new VarrayIntrinsicExpression(
+        keyword,
+        left_bracket,
+        members,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (VarrayIntrinsicExpression._children_keys == null)
+      VarrayIntrinsicExpression._children_keys = [
+        'keyword',
+        'left_bracket',
+        'members',
+        'right_bracket'];
+    return VarrayIntrinsicExpression._children_keys;
   }
 }
 class VectorIntrinsicExpression extends EditableSyntax
@@ -14207,6 +14441,133 @@ class KeysetTypeSpecifier extends EditableSyntax
     return KeysetTypeSpecifier._children_keys;
   }
 }
+class VarrayTypeSpecifier extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_angle,
+    type,
+    optional_comma,
+    right_angle)
+  {
+    super('varray_type_specifier', {
+      keyword: keyword,
+      left_angle: left_angle,
+      type: type,
+      optional_comma: optional_comma,
+      right_angle: right_angle });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_angle() { return this.children.left_angle; }
+  get type() { return this.children.type; }
+  get optional_comma() { return this.children.optional_comma; }
+  get right_angle() { return this.children.right_angle; }
+  with_keyword(keyword){
+    return new VarrayTypeSpecifier(
+      keyword,
+      this.left_angle,
+      this.type,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_left_angle(left_angle){
+    return new VarrayTypeSpecifier(
+      this.keyword,
+      left_angle,
+      this.type,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_type(type){
+    return new VarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      type,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_optional_comma(optional_comma){
+    return new VarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.type,
+      optional_comma,
+      this.right_angle);
+  }
+  with_right_angle(right_angle){
+    return new VarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.type,
+      this.optional_comma,
+      right_angle);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var optional_comma = this.optional_comma.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_angle === this.left_angle &&
+      type === this.type &&
+      optional_comma === this.optional_comma &&
+      right_angle === this.right_angle)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new VarrayTypeSpecifier(
+        keyword,
+        left_angle,
+        type,
+        optional_comma,
+        right_angle), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.varray_keyword, position, source);
+    position += keyword.width;
+    let left_angle = EditableSyntax.from_json(
+      json.varray_left_angle, position, source);
+    position += left_angle.width;
+    let type = EditableSyntax.from_json(
+      json.varray_type, position, source);
+    position += type.width;
+    let optional_comma = EditableSyntax.from_json(
+      json.varray_optional_comma, position, source);
+    position += optional_comma.width;
+    let right_angle = EditableSyntax.from_json(
+      json.varray_right_angle, position, source);
+    position += right_angle.width;
+    return new VarrayTypeSpecifier(
+        keyword,
+        left_angle,
+        type,
+        optional_comma,
+        right_angle);
+  }
+  get children_keys()
+  {
+    if (VarrayTypeSpecifier._children_keys == null)
+      VarrayTypeSpecifier._children_keys = [
+        'keyword',
+        'left_angle',
+        'type',
+        'optional_comma',
+        'right_angle'];
+    return VarrayTypeSpecifier._children_keys;
+  }
+}
 class VectorArrayTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -14456,6 +14817,185 @@ class TypeConstraint extends EditableSyntax
         'keyword',
         'type'];
     return TypeConstraint._children_keys;
+  }
+}
+class DarrayTypeSpecifier extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_angle,
+    key,
+    comma,
+    value,
+    optional_comma,
+    right_angle)
+  {
+    super('darray_type_specifier', {
+      keyword: keyword,
+      left_angle: left_angle,
+      key: key,
+      comma: comma,
+      value: value,
+      optional_comma: optional_comma,
+      right_angle: right_angle });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_angle() { return this.children.left_angle; }
+  get key() { return this.children.key; }
+  get comma() { return this.children.comma; }
+  get value() { return this.children.value; }
+  get optional_comma() { return this.children.optional_comma; }
+  get right_angle() { return this.children.right_angle; }
+  with_keyword(keyword){
+    return new DarrayTypeSpecifier(
+      keyword,
+      this.left_angle,
+      this.key,
+      this.comma,
+      this.value,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_left_angle(left_angle){
+    return new DarrayTypeSpecifier(
+      this.keyword,
+      left_angle,
+      this.key,
+      this.comma,
+      this.value,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_key(key){
+    return new DarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      key,
+      this.comma,
+      this.value,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_comma(comma){
+    return new DarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.key,
+      comma,
+      this.value,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_value(value){
+    return new DarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.key,
+      this.comma,
+      value,
+      this.optional_comma,
+      this.right_angle);
+  }
+  with_optional_comma(optional_comma){
+    return new DarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.key,
+      this.comma,
+      this.value,
+      optional_comma,
+      this.right_angle);
+  }
+  with_right_angle(right_angle){
+    return new DarrayTypeSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.key,
+      this.comma,
+      this.value,
+      this.optional_comma,
+      right_angle);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var key = this.key.rewrite(rewriter, new_parents);
+    var comma = this.comma.rewrite(rewriter, new_parents);
+    var value = this.value.rewrite(rewriter, new_parents);
+    var optional_comma = this.optional_comma.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_angle === this.left_angle &&
+      key === this.key &&
+      comma === this.comma &&
+      value === this.value &&
+      optional_comma === this.optional_comma &&
+      right_angle === this.right_angle)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new DarrayTypeSpecifier(
+        keyword,
+        left_angle,
+        key,
+        comma,
+        value,
+        optional_comma,
+        right_angle), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.darray_keyword, position, source);
+    position += keyword.width;
+    let left_angle = EditableSyntax.from_json(
+      json.darray_left_angle, position, source);
+    position += left_angle.width;
+    let key = EditableSyntax.from_json(
+      json.darray_key, position, source);
+    position += key.width;
+    let comma = EditableSyntax.from_json(
+      json.darray_comma, position, source);
+    position += comma.width;
+    let value = EditableSyntax.from_json(
+      json.darray_value, position, source);
+    position += value.width;
+    let optional_comma = EditableSyntax.from_json(
+      json.darray_optional_comma, position, source);
+    position += optional_comma.width;
+    let right_angle = EditableSyntax.from_json(
+      json.darray_right_angle, position, source);
+    position += right_angle.width;
+    return new DarrayTypeSpecifier(
+        keyword,
+        left_angle,
+        key,
+        comma,
+        value,
+        optional_comma,
+        right_angle);
+  }
+  get children_keys()
+  {
+    if (DarrayTypeSpecifier._children_keys == null)
+      DarrayTypeSpecifier._children_keys = [
+        'keyword',
+        'left_angle',
+        'key',
+        'comma',
+        'value',
+        'optional_comma',
+        'right_angle'];
+    return DarrayTypeSpecifier._children_keys;
   }
 }
 class MapArrayTypeSpecifier extends EditableSyntax
@@ -16089,6 +16629,7 @@ exports.CloneToken = CloneToken;
 exports.ConstToken = ConstToken;
 exports.ConstructToken = ConstructToken;
 exports.ContinueToken = ContinueToken;
+exports.DarrayToken = DarrayToken;
 exports.DefaultToken = DefaultToken;
 exports.DefineToken = DefineToken;
 exports.DestructToken = DestructToken;
@@ -16154,6 +16695,7 @@ exports.TypeToken = TypeToken;
 exports.UnsetToken = UnsetToken;
 exports.UseToken = UseToken;
 exports.VarToken = VarToken;
+exports.VarrayToken = VarrayToken;
 exports.VecToken = VecToken;
 exports.VoidToken = VoidToken;
 exports.WhereToken = WhereToken;
@@ -16359,8 +16901,10 @@ exports.CollectionLiteralExpression = CollectionLiteralExpression;
 exports.ObjectCreationExpression = ObjectCreationExpression;
 exports.ArrayCreationExpression = ArrayCreationExpression;
 exports.ArrayIntrinsicExpression = ArrayIntrinsicExpression;
+exports.DarrayIntrinsicExpression = DarrayIntrinsicExpression;
 exports.DictionaryIntrinsicExpression = DictionaryIntrinsicExpression;
 exports.KeysetIntrinsicExpression = KeysetIntrinsicExpression;
+exports.VarrayIntrinsicExpression = VarrayIntrinsicExpression;
 exports.VectorIntrinsicExpression = VectorIntrinsicExpression;
 exports.ElementInitializer = ElementInitializer;
 exports.SubscriptExpression = SubscriptExpression;
@@ -16380,9 +16924,11 @@ exports.XHPClose = XHPClose;
 exports.TypeConstant = TypeConstant;
 exports.VectorTypeSpecifier = VectorTypeSpecifier;
 exports.KeysetTypeSpecifier = KeysetTypeSpecifier;
+exports.VarrayTypeSpecifier = VarrayTypeSpecifier;
 exports.VectorArrayTypeSpecifier = VectorArrayTypeSpecifier;
 exports.TypeParameter = TypeParameter;
 exports.TypeConstraint = TypeConstraint;
+exports.DarrayTypeSpecifier = DarrayTypeSpecifier;
 exports.MapArrayTypeSpecifier = MapArrayTypeSpecifier;
 exports.DictionaryTypeSpecifier = DictionaryTypeSpecifier;
 exports.ClosureTypeSpecifier = ClosureTypeSpecifier;

@@ -58,6 +58,8 @@ let rec parse_type_specifier parser =
   | XHPClassName
   | QualifiedName -> parse_possible_generic_specifier parser
   | Array -> parse_array_type_specifier parser
+  | Darray -> parse_darray_type_specifier parser
+  | Varray -> parse_varray_type_specifier parser
   | Vec -> parse_vec_type_specifier parser
   | Dict -> parse_dictionary_type_specifier parser
   | Keyset -> parse_keyset_type_specifier parser
@@ -305,6 +307,45 @@ and parse_array_type_specifier parser =
         left_angle key_type right_angle in
       (parser, result)
     end
+
+
+  and parse_darray_type_specifier parser =
+    (* darray<type, type> *)
+    let parser, array_token = assert_token parser Darray in
+    let parser, left_angle = assert_token parser LessThan in
+    let parser, key_type = parse_type_specifier parser in
+    let parser, comma = next_token parser in
+    let comma = make_token comma in
+    let parser, value_type = parse_type_specifier parser in
+    let parser, optional_comma = optional_token parser Comma in
+    let parser, right_angle = expect_right_angle parser in
+    let result =
+      make_darray_type_specifier
+        array_token
+        left_angle
+        key_type
+        comma
+        value_type
+        optional_comma
+        right_angle in
+    parser, result
+
+  and parse_varray_type_specifier parser =
+    (* varray<type> *)
+    let parser, array_token = assert_token parser Varray in
+    let parser, left_angle = assert_token parser LessThan in
+    let parser, value_type = parse_type_specifier parser in
+    let parser, optional_comma = optional_token parser Comma in
+    let parser, right_angle = next_token parser in
+    let right_angle = make_token right_angle in
+    let result =
+      make_varray_type_specifier
+        array_token
+        left_angle
+        value_type
+        optional_comma
+        right_angle in
+    parser, result
 
   and parse_vec_type_specifier parser =
     (*

@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-03-06-0002"
+let full_fidelity_schema_version_number = "2017-03-20-0002"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -807,6 +807,14 @@ let schema = List.map from_list [
     "left_paren";
     "members";
     "right_paren" ];
+  [ "DarrayIntrinsicExpression";
+    "darray_intrinsic_expression";
+    "darray_intrinsic_expression";
+    "darray_intrinsic";
+    "keyword";
+    "left_bracket";
+    "members";
+    "right_bracket" ];
   [ "DictionaryIntrinsicExpression";
     "dictionary_intrinsic_expression";
     "dictionary_intrinsic_expression";
@@ -819,6 +827,14 @@ let schema = List.map from_list [
     "keyset_intrinsic_expression";
     "keyset_intrinsic_expression";
     "keyset_intrinsic";
+    "keyword";
+    "left_bracket";
+    "members";
+    "right_bracket" ];
+  [ "VarrayIntrinsicExpression";
+    "varray_intrinsic_expression";
+    "varray_intrinsic_expression";
+    "varray_intrinsic";
     "keyword";
     "left_bracket";
     "members";
@@ -960,6 +976,15 @@ let schema = List.map from_list [
     "left_angle";
     "type";
     "right_angle" ];
+  [ "VarrayTypeSpecifier";
+    "varray_type_specifier";
+    "varray_type_specifier";
+    "varray";
+    "keyword";
+    "left_angle";
+    "type";
+    "optional_comma";
+    "right_angle" ];
   [ "VectorArrayTypeSpecifier";
     "vector_array_type_specifier";
     "vector_array_type_specifier";
@@ -981,6 +1006,17 @@ let schema = List.map from_list [
     "constraint";
     "keyword";
     "type" ];
+  [ "DarrayTypeSpecifier";
+    "darray_type_specifier";
+    "darray_type_specifier";
+    "darray";
+    "keyword";
+    "left_angle";
+    "key";
+    "comma";
+    "value";
+    "optional_comma";
+    "right_angle" ];
   [ "MapArrayTypeSpecifier";
     "map_array_type_specifier";
     "map_array_type_specifier";
@@ -1161,6 +1197,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Const"; "const" ];
   [ "Construct"; "__construct" ];
   [ "Continue"; "continue" ];
+  [ "Darray"; "darray" ];
   [ "Default"; "default" ];
   [ "Define"; "define"];
   [ "Destruct"; "__destruct" ];
@@ -1226,6 +1263,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Unset"; "unset" ];
   [ "Use"; "use" ];
   [ "Var"; "var" ];
+  [ "Varray"; "varray" ];
   [ "Vec"; "vec" ];
   [ "Void"; "void" ];
   [ "Where"; "where" ];

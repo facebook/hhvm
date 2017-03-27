@@ -632,6 +632,12 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_members: t;
       array_intrinsic_right_paren: t;
     }
+    and darray_intrinsic_expression = {
+      darray_intrinsic_keyword: t;
+      darray_intrinsic_left_bracket: t;
+      darray_intrinsic_members: t;
+      darray_intrinsic_right_bracket: t;
+    }
     and dictionary_intrinsic_expression = {
       dictionary_intrinsic_keyword: t;
       dictionary_intrinsic_left_bracket: t;
@@ -643,6 +649,12 @@ module WithToken(Token: TokenType) = struct
       keyset_intrinsic_left_bracket: t;
       keyset_intrinsic_members: t;
       keyset_intrinsic_right_bracket: t;
+    }
+    and varray_intrinsic_expression = {
+      varray_intrinsic_keyword: t;
+      varray_intrinsic_left_bracket: t;
+      varray_intrinsic_members: t;
+      varray_intrinsic_right_bracket: t;
     }
     and vector_intrinsic_expression = {
       vector_intrinsic_keyword: t;
@@ -743,6 +755,13 @@ module WithToken(Token: TokenType) = struct
       keyset_type_type: t;
       keyset_type_right_angle: t;
     }
+    and varray_type_specifier = {
+      varray_keyword: t;
+      varray_left_angle: t;
+      varray_type: t;
+      varray_optional_comma: t;
+      varray_right_angle: t;
+    }
     and vector_array_type_specifier = {
       vector_array_keyword: t;
       vector_array_left_angle: t;
@@ -757,6 +776,15 @@ module WithToken(Token: TokenType) = struct
     and type_constraint = {
       constraint_keyword: t;
       constraint_type: t;
+    }
+    and darray_type_specifier = {
+      darray_keyword: t;
+      darray_left_angle: t;
+      darray_key: t;
+      darray_comma: t;
+      darray_value: t;
+      darray_optional_comma: t;
+      darray_right_angle: t;
     }
     and map_array_type_specifier = {
       map_array_keyword: t;
@@ -948,8 +976,10 @@ module WithToken(Token: TokenType) = struct
     | ObjectCreationExpression of object_creation_expression
     | ArrayCreationExpression of array_creation_expression
     | ArrayIntrinsicExpression of array_intrinsic_expression
+    | DarrayIntrinsicExpression of darray_intrinsic_expression
     | DictionaryIntrinsicExpression of dictionary_intrinsic_expression
     | KeysetIntrinsicExpression of keyset_intrinsic_expression
+    | VarrayIntrinsicExpression of varray_intrinsic_expression
     | VectorIntrinsicExpression of vector_intrinsic_expression
     | ElementInitializer of element_initializer
     | SubscriptExpression of subscript_expression
@@ -969,9 +999,11 @@ module WithToken(Token: TokenType) = struct
     | TypeConstant of type_constant
     | VectorTypeSpecifier of vector_type_specifier
     | KeysetTypeSpecifier of keyset_type_specifier
+    | VarrayTypeSpecifier of varray_type_specifier
     | VectorArrayTypeSpecifier of vector_array_type_specifier
     | TypeParameter of type_parameter
     | TypeConstraint of type_constraint
+    | DarrayTypeSpecifier of darray_type_specifier
     | MapArrayTypeSpecifier of map_array_type_specifier
     | DictionaryTypeSpecifier of dictionary_type_specifier
     | ClosureTypeSpecifier of closure_type_specifier
@@ -1197,10 +1229,14 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression _ ->
         SyntaxKind.ArrayIntrinsicExpression
+      | DarrayIntrinsicExpression _ ->
+        SyntaxKind.DarrayIntrinsicExpression
       | DictionaryIntrinsicExpression _ ->
         SyntaxKind.DictionaryIntrinsicExpression
       | KeysetIntrinsicExpression _ ->
         SyntaxKind.KeysetIntrinsicExpression
+      | VarrayIntrinsicExpression _ ->
+        SyntaxKind.VarrayIntrinsicExpression
       | VectorIntrinsicExpression _ ->
         SyntaxKind.VectorIntrinsicExpression
       | ElementInitializer _ ->
@@ -1239,12 +1275,16 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.VectorTypeSpecifier
       | KeysetTypeSpecifier _ ->
         SyntaxKind.KeysetTypeSpecifier
+      | VarrayTypeSpecifier _ ->
+        SyntaxKind.VarrayTypeSpecifier
       | VectorArrayTypeSpecifier _ ->
         SyntaxKind.VectorArrayTypeSpecifier
       | TypeParameter _ ->
         SyntaxKind.TypeParameter
       | TypeConstraint _ ->
         SyntaxKind.TypeConstraint
+      | DarrayTypeSpecifier _ ->
+        SyntaxKind.DarrayTypeSpecifier
       | MapArrayTypeSpecifier _ ->
         SyntaxKind.MapArrayTypeSpecifier
       | DictionaryTypeSpecifier _ ->
@@ -1476,10 +1516,14 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression node =
       kind node = SyntaxKind.ArrayIntrinsicExpression
+    let is_darray_intrinsic_expression node =
+      kind node = SyntaxKind.DarrayIntrinsicExpression
     let is_dictionary_intrinsic_expression node =
       kind node = SyntaxKind.DictionaryIntrinsicExpression
     let is_keyset_intrinsic_expression node =
       kind node = SyntaxKind.KeysetIntrinsicExpression
+    let is_varray_intrinsic_expression node =
+      kind node = SyntaxKind.VarrayIntrinsicExpression
     let is_vector_intrinsic_expression node =
       kind node = SyntaxKind.VectorIntrinsicExpression
     let is_element_initializer node =
@@ -1518,12 +1562,16 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.VectorTypeSpecifier
     let is_keyset_type_specifier node =
       kind node = SyntaxKind.KeysetTypeSpecifier
+    let is_varray_type_specifier node =
+      kind node = SyntaxKind.VarrayTypeSpecifier
     let is_vector_array_type_specifier node =
       kind node = SyntaxKind.VectorArrayTypeSpecifier
     let is_type_parameter node =
       kind node = SyntaxKind.TypeParameter
     let is_type_constraint node =
       kind node = SyntaxKind.TypeConstraint
+    let is_darray_type_specifier node =
+      kind node = SyntaxKind.DarrayTypeSpecifier
     let is_map_array_type_specifier node =
       kind node = SyntaxKind.MapArrayTypeSpecifier
     let is_dictionary_type_specifier node =
@@ -2672,6 +2720,18 @@ module WithToken(Token: TokenType) = struct
       array_intrinsic_right_paren
     )
 
+    let get_darray_intrinsic_expression_children {
+      darray_intrinsic_keyword;
+      darray_intrinsic_left_bracket;
+      darray_intrinsic_members;
+      darray_intrinsic_right_bracket;
+    } = (
+      darray_intrinsic_keyword,
+      darray_intrinsic_left_bracket,
+      darray_intrinsic_members,
+      darray_intrinsic_right_bracket
+    )
+
     let get_dictionary_intrinsic_expression_children {
       dictionary_intrinsic_keyword;
       dictionary_intrinsic_left_bracket;
@@ -2694,6 +2754,18 @@ module WithToken(Token: TokenType) = struct
       keyset_intrinsic_left_bracket,
       keyset_intrinsic_members,
       keyset_intrinsic_right_bracket
+    )
+
+    let get_varray_intrinsic_expression_children {
+      varray_intrinsic_keyword;
+      varray_intrinsic_left_bracket;
+      varray_intrinsic_members;
+      varray_intrinsic_right_bracket;
+    } = (
+      varray_intrinsic_keyword,
+      varray_intrinsic_left_bracket,
+      varray_intrinsic_members,
+      varray_intrinsic_right_bracket
     )
 
     let get_vector_intrinsic_expression_children {
@@ -2894,6 +2966,20 @@ module WithToken(Token: TokenType) = struct
       keyset_type_right_angle
     )
 
+    let get_varray_type_specifier_children {
+      varray_keyword;
+      varray_left_angle;
+      varray_type;
+      varray_optional_comma;
+      varray_right_angle;
+    } = (
+      varray_keyword,
+      varray_left_angle,
+      varray_type,
+      varray_optional_comma,
+      varray_right_angle
+    )
+
     let get_vector_array_type_specifier_children {
       vector_array_keyword;
       vector_array_left_angle;
@@ -2922,6 +3008,24 @@ module WithToken(Token: TokenType) = struct
     } = (
       constraint_keyword,
       constraint_type
+    )
+
+    let get_darray_type_specifier_children {
+      darray_keyword;
+      darray_left_angle;
+      darray_key;
+      darray_comma;
+      darray_value;
+      darray_optional_comma;
+      darray_right_angle;
+    } = (
+      darray_keyword,
+      darray_left_angle,
+      darray_key,
+      darray_comma,
+      darray_value,
+      darray_optional_comma,
+      darray_right_angle
     )
 
     let get_map_array_type_specifier_children {
@@ -4098,6 +4202,17 @@ module WithToken(Token: TokenType) = struct
         array_intrinsic_members;
         array_intrinsic_right_paren;
       ]
+      | DarrayIntrinsicExpression {
+        darray_intrinsic_keyword;
+        darray_intrinsic_left_bracket;
+        darray_intrinsic_members;
+        darray_intrinsic_right_bracket;
+      } -> [
+        darray_intrinsic_keyword;
+        darray_intrinsic_left_bracket;
+        darray_intrinsic_members;
+        darray_intrinsic_right_bracket;
+      ]
       | DictionaryIntrinsicExpression {
         dictionary_intrinsic_keyword;
         dictionary_intrinsic_left_bracket;
@@ -4119,6 +4234,17 @@ module WithToken(Token: TokenType) = struct
         keyset_intrinsic_left_bracket;
         keyset_intrinsic_members;
         keyset_intrinsic_right_bracket;
+      ]
+      | VarrayIntrinsicExpression {
+        varray_intrinsic_keyword;
+        varray_intrinsic_left_bracket;
+        varray_intrinsic_members;
+        varray_intrinsic_right_bracket;
+      } -> [
+        varray_intrinsic_keyword;
+        varray_intrinsic_left_bracket;
+        varray_intrinsic_members;
+        varray_intrinsic_right_bracket;
       ]
       | VectorIntrinsicExpression {
         vector_intrinsic_keyword;
@@ -4299,6 +4425,19 @@ module WithToken(Token: TokenType) = struct
         keyset_type_type;
         keyset_type_right_angle;
       ]
+      | VarrayTypeSpecifier {
+        varray_keyword;
+        varray_left_angle;
+        varray_type;
+        varray_optional_comma;
+        varray_right_angle;
+      } -> [
+        varray_keyword;
+        varray_left_angle;
+        varray_type;
+        varray_optional_comma;
+        varray_right_angle;
+      ]
       | VectorArrayTypeSpecifier {
         vector_array_keyword;
         vector_array_left_angle;
@@ -4325,6 +4464,23 @@ module WithToken(Token: TokenType) = struct
       } -> [
         constraint_keyword;
         constraint_type;
+      ]
+      | DarrayTypeSpecifier {
+        darray_keyword;
+        darray_left_angle;
+        darray_key;
+        darray_comma;
+        darray_value;
+        darray_optional_comma;
+        darray_right_angle;
+      } -> [
+        darray_keyword;
+        darray_left_angle;
+        darray_key;
+        darray_comma;
+        darray_value;
+        darray_optional_comma;
+        darray_right_angle;
       ]
       | MapArrayTypeSpecifier {
         map_array_keyword;
@@ -5483,6 +5639,17 @@ module WithToken(Token: TokenType) = struct
         "array_intrinsic_members";
         "array_intrinsic_right_paren";
       ]
+      | DarrayIntrinsicExpression {
+        darray_intrinsic_keyword;
+        darray_intrinsic_left_bracket;
+        darray_intrinsic_members;
+        darray_intrinsic_right_bracket;
+      } -> [
+        "darray_intrinsic_keyword";
+        "darray_intrinsic_left_bracket";
+        "darray_intrinsic_members";
+        "darray_intrinsic_right_bracket";
+      ]
       | DictionaryIntrinsicExpression {
         dictionary_intrinsic_keyword;
         dictionary_intrinsic_left_bracket;
@@ -5504,6 +5671,17 @@ module WithToken(Token: TokenType) = struct
         "keyset_intrinsic_left_bracket";
         "keyset_intrinsic_members";
         "keyset_intrinsic_right_bracket";
+      ]
+      | VarrayIntrinsicExpression {
+        varray_intrinsic_keyword;
+        varray_intrinsic_left_bracket;
+        varray_intrinsic_members;
+        varray_intrinsic_right_bracket;
+      } -> [
+        "varray_intrinsic_keyword";
+        "varray_intrinsic_left_bracket";
+        "varray_intrinsic_members";
+        "varray_intrinsic_right_bracket";
       ]
       | VectorIntrinsicExpression {
         vector_intrinsic_keyword;
@@ -5684,6 +5862,19 @@ module WithToken(Token: TokenType) = struct
         "keyset_type_type";
         "keyset_type_right_angle";
       ]
+      | VarrayTypeSpecifier {
+        varray_keyword;
+        varray_left_angle;
+        varray_type;
+        varray_optional_comma;
+        varray_right_angle;
+      } -> [
+        "varray_keyword";
+        "varray_left_angle";
+        "varray_type";
+        "varray_optional_comma";
+        "varray_right_angle";
+      ]
       | VectorArrayTypeSpecifier {
         vector_array_keyword;
         vector_array_left_angle;
@@ -5710,6 +5901,23 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "constraint_keyword";
         "constraint_type";
+      ]
+      | DarrayTypeSpecifier {
+        darray_keyword;
+        darray_left_angle;
+        darray_key;
+        darray_comma;
+        darray_value;
+        darray_optional_comma;
+        darray_right_angle;
+      } -> [
+        "darray_keyword";
+        "darray_left_angle";
+        "darray_key";
+        "darray_comma";
+        "darray_value";
+        "darray_optional_comma";
+        "darray_right_angle";
       ]
       | MapArrayTypeSpecifier {
         map_array_keyword;
@@ -7015,6 +7223,18 @@ module WithToken(Token: TokenType) = struct
           array_intrinsic_members;
           array_intrinsic_right_paren;
         }
+      | (SyntaxKind.DarrayIntrinsicExpression, [
+          darray_intrinsic_keyword;
+          darray_intrinsic_left_bracket;
+          darray_intrinsic_members;
+          darray_intrinsic_right_bracket;
+        ]) ->
+        DarrayIntrinsicExpression {
+          darray_intrinsic_keyword;
+          darray_intrinsic_left_bracket;
+          darray_intrinsic_members;
+          darray_intrinsic_right_bracket;
+        }
       | (SyntaxKind.DictionaryIntrinsicExpression, [
           dictionary_intrinsic_keyword;
           dictionary_intrinsic_left_bracket;
@@ -7038,6 +7258,18 @@ module WithToken(Token: TokenType) = struct
           keyset_intrinsic_left_bracket;
           keyset_intrinsic_members;
           keyset_intrinsic_right_bracket;
+        }
+      | (SyntaxKind.VarrayIntrinsicExpression, [
+          varray_intrinsic_keyword;
+          varray_intrinsic_left_bracket;
+          varray_intrinsic_members;
+          varray_intrinsic_right_bracket;
+        ]) ->
+        VarrayIntrinsicExpression {
+          varray_intrinsic_keyword;
+          varray_intrinsic_left_bracket;
+          varray_intrinsic_members;
+          varray_intrinsic_right_bracket;
         }
       | (SyntaxKind.VectorIntrinsicExpression, [
           vector_intrinsic_keyword;
@@ -7237,6 +7469,20 @@ module WithToken(Token: TokenType) = struct
           keyset_type_type;
           keyset_type_right_angle;
         }
+      | (SyntaxKind.VarrayTypeSpecifier, [
+          varray_keyword;
+          varray_left_angle;
+          varray_type;
+          varray_optional_comma;
+          varray_right_angle;
+        ]) ->
+        VarrayTypeSpecifier {
+          varray_keyword;
+          varray_left_angle;
+          varray_type;
+          varray_optional_comma;
+          varray_right_angle;
+        }
       | (SyntaxKind.VectorArrayTypeSpecifier, [
           vector_array_keyword;
           vector_array_left_angle;
@@ -7266,6 +7512,24 @@ module WithToken(Token: TokenType) = struct
         TypeConstraint {
           constraint_keyword;
           constraint_type;
+        }
+      | (SyntaxKind.DarrayTypeSpecifier, [
+          darray_keyword;
+          darray_left_angle;
+          darray_key;
+          darray_comma;
+          darray_value;
+          darray_optional_comma;
+          darray_right_angle;
+        ]) ->
+        DarrayTypeSpecifier {
+          darray_keyword;
+          darray_left_angle;
+          darray_key;
+          darray_comma;
+          darray_value;
+          darray_optional_comma;
+          darray_right_angle;
         }
       | (SyntaxKind.MapArrayTypeSpecifier, [
           map_array_keyword;
@@ -8664,6 +8928,19 @@ module WithToken(Token: TokenType) = struct
         array_intrinsic_right_paren;
       ]
 
+    let make_darray_intrinsic_expression
+      darray_intrinsic_keyword
+      darray_intrinsic_left_bracket
+      darray_intrinsic_members
+      darray_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.DarrayIntrinsicExpression [
+        darray_intrinsic_keyword;
+        darray_intrinsic_left_bracket;
+        darray_intrinsic_members;
+        darray_intrinsic_right_bracket;
+      ]
+
     let make_dictionary_intrinsic_expression
       dictionary_intrinsic_keyword
       dictionary_intrinsic_left_bracket
@@ -8688,6 +8965,19 @@ module WithToken(Token: TokenType) = struct
         keyset_intrinsic_left_bracket;
         keyset_intrinsic_members;
         keyset_intrinsic_right_bracket;
+      ]
+
+    let make_varray_intrinsic_expression
+      varray_intrinsic_keyword
+      varray_intrinsic_left_bracket
+      varray_intrinsic_members
+      varray_intrinsic_right_bracket
+    =
+      from_children SyntaxKind.VarrayIntrinsicExpression [
+        varray_intrinsic_keyword;
+        varray_intrinsic_left_bracket;
+        varray_intrinsic_members;
+        varray_intrinsic_right_bracket;
       ]
 
     let make_vector_intrinsic_expression
@@ -8907,6 +9197,21 @@ module WithToken(Token: TokenType) = struct
         keyset_type_right_angle;
       ]
 
+    let make_varray_type_specifier
+      varray_keyword
+      varray_left_angle
+      varray_type
+      varray_optional_comma
+      varray_right_angle
+    =
+      from_children SyntaxKind.VarrayTypeSpecifier [
+        varray_keyword;
+        varray_left_angle;
+        varray_type;
+        varray_optional_comma;
+        varray_right_angle;
+      ]
+
     let make_vector_array_type_specifier
       vector_array_keyword
       vector_array_left_angle
@@ -8938,6 +9243,25 @@ module WithToken(Token: TokenType) = struct
       from_children SyntaxKind.TypeConstraint [
         constraint_keyword;
         constraint_type;
+      ]
+
+    let make_darray_type_specifier
+      darray_keyword
+      darray_left_angle
+      darray_key
+      darray_comma
+      darray_value
+      darray_optional_comma
+      darray_right_angle
+    =
+      from_children SyntaxKind.DarrayTypeSpecifier [
+        darray_keyword;
+        darray_left_angle;
+        darray_key;
+        darray_comma;
+        darray_value;
+        darray_optional_comma;
+        darray_right_angle;
       ]
 
     let make_map_array_type_specifier

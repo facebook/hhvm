@@ -199,6 +199,7 @@ let colon = make_simple (text ":")
 let comma = make_simple (text ",")
 let l_square = make_simple (text "[")
 let r_square = make_simple (text "]")
+let question = make_simple (text "?")
 
 let rec get_doc node =
   match syntax node with
@@ -1263,10 +1264,11 @@ let rec get_doc node =
     let ra = get_doc x.classname_right_angle in
     cn ^^^ la ^^^ ty ^^^ ra
   | FieldSpecifier x ->
+    let q = get_doc x.field_question in
     let n = get_doc x.field_name in
     let a = get_doc x.field_arrow in
     let t = get_doc x.field_type in
-    n ^| a ^| t
+    q ^| n ^| a ^| t
   | ShapeTypeSpecifier
     { shape_type_keyword; shape_type_left_paren;
       shape_type_fields; shape_type_right_paren } ->

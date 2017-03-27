@@ -817,6 +817,7 @@ module WithToken(Token: TokenType) = struct
       classname_right_angle: t;
     }
     and field_specifier = {
+      field_question: t;
       field_name: t;
       field_arrow: t;
       field_type: t;
@@ -3089,10 +3090,12 @@ module WithToken(Token: TokenType) = struct
     )
 
     let get_field_specifier_children {
+      field_question;
       field_name;
       field_arrow;
       field_type;
     } = (
+      field_question,
       field_name,
       field_arrow,
       field_type
@@ -4539,10 +4542,12 @@ module WithToken(Token: TokenType) = struct
         classname_right_angle;
       ]
       | FieldSpecifier {
+        field_question;
         field_name;
         field_arrow;
         field_type;
       } -> [
+        field_question;
         field_name;
         field_arrow;
         field_type;
@@ -5976,10 +5981,12 @@ module WithToken(Token: TokenType) = struct
         "classname_right_angle";
       ]
       | FieldSpecifier {
+        field_question;
         field_name;
         field_arrow;
         field_type;
       } -> [
+        "field_question";
         "field_name";
         "field_arrow";
         "field_type";
@@ -7592,11 +7599,13 @@ module WithToken(Token: TokenType) = struct
           classname_right_angle;
         }
       | (SyntaxKind.FieldSpecifier, [
+          field_question;
           field_name;
           field_arrow;
           field_type;
         ]) ->
         FieldSpecifier {
+          field_question;
           field_name;
           field_arrow;
           field_type;
@@ -9329,11 +9338,13 @@ module WithToken(Token: TokenType) = struct
       ]
 
     let make_field_specifier
+      field_question
       field_name
       field_arrow
       field_type
     =
       from_children SyntaxKind.FieldSpecifier [
+        field_question;
         field_name;
         field_arrow;
         field_type;

@@ -542,6 +542,8 @@ and parse_classname_type_specifier parser =
 and parse_field_specifier parser =
   (* SPEC
     field-specifier:
+      ?-opt present-field-specifier
+    present-field-specifier:
       single-quoted-string-literal  =>  type-specifier
       qualified-name  =>  type-specifier
       scope-resolution-expression  =>  type-specifier
@@ -553,10 +555,14 @@ and parse_field_specifier parser =
   (* ERROR RECOVERY: We allow any expression for the left-hand side.
      TODO: Make an error-detecting pass that gives an error if the left-hand
      side is not a literal or name. *)
+  let (parser, question) =
+    if peek_token_kind parser = Question
+    then assert_token parser Question
+    else (parser, (make_missing())) in
   let (parser, name) = parse_expression parser in
   let (parser, arrow) = expect_arrow parser in
   let (parser, field_type) = parse_type_specifier parser in
-  let result = make_field_specifier name arrow field_type in
+  let result = make_field_specifier question name arrow field_type in
   (parser, result)
 
 and parse_shape_specifier parser =

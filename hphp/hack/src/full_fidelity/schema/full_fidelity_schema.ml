@@ -1059,6 +1059,7 @@ let schema = List.map from_list [
     "field_specifier";
     "field_specifier";
     "field";
+    "question";
     "name";
     "arrow";
     "type" ];

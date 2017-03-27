@@ -1625,6 +1625,7 @@
       "description" : "field_specifier",
       "prefix" : "field",
       "fields" : [
+        { "field_name" : "question" },
         { "field_name" : "name" },
         { "field_name" : "arrow" },
         { "field_name" : "type" }

@@ -15569,32 +15569,45 @@ class ClassnameTypeSpecifier extends EditableSyntax
 class FieldSpecifier extends EditableSyntax
 {
   constructor(
+    question,
     name,
     arrow,
     type)
   {
     super('field_specifier', {
+      question: question,
       name: name,
       arrow: arrow,
       type: type });
   }
+  get question() { return this.children.question; }
   get name() { return this.children.name; }
   get arrow() { return this.children.arrow; }
   get type() { return this.children.type; }
+  with_question(question){
+    return new FieldSpecifier(
+      question,
+      this.name,
+      this.arrow,
+      this.type);
+  }
   with_name(name){
     return new FieldSpecifier(
+      this.question,
       name,
       this.arrow,
       this.type);
   }
   with_arrow(arrow){
     return new FieldSpecifier(
+      this.question,
       this.name,
       arrow,
       this.type);
   }
   with_type(type){
     return new FieldSpecifier(
+      this.question,
       this.name,
       this.arrow,
       type);
@@ -15605,10 +15618,12 @@ class FieldSpecifier extends EditableSyntax
       parents = [];
     let new_parents = parents.slice();
     new_parents.push(this);
+    var question = this.question.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
     var arrow = this.arrow.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
     if (
+      question === this.question &&
       name === this.name &&
       arrow === this.arrow &&
       type === this.type)
@@ -15618,6 +15633,7 @@ class FieldSpecifier extends EditableSyntax
     else
     {
       return rewriter(new FieldSpecifier(
+        question,
         name,
         arrow,
         type), parents);
@@ -15625,6 +15641,9 @@ class FieldSpecifier extends EditableSyntax
   }
   static from_json(json, position, source)
   {
+    let question = EditableSyntax.from_json(
+      json.field_question, position, source);
+    position += question.width;
     let name = EditableSyntax.from_json(
       json.field_name, position, source);
     position += name.width;
@@ -15635,6 +15654,7 @@ class FieldSpecifier extends EditableSyntax
       json.field_type, position, source);
     position += type.width;
     return new FieldSpecifier(
+        question,
         name,
         arrow,
         type);
@@ -15643,6 +15663,7 @@ class FieldSpecifier extends EditableSyntax
   {
     if (FieldSpecifier._children_keys == null)
       FieldSpecifier._children_keys = [
+        'question',
         'name',
         'arrow',
         'type'];

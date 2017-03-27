@@ -17744,17 +17744,23 @@ final class ClassnameTypeSpecifier extends EditableSyntax {
   }
 }
 final class FieldSpecifier extends EditableSyntax {
+  private EditableSyntax $_question;
   private EditableSyntax $_name;
   private EditableSyntax $_arrow;
   private EditableSyntax $_type;
   public function __construct(
+    EditableSyntax $question,
     EditableSyntax $name,
     EditableSyntax $arrow,
     EditableSyntax $type) {
     parent::__construct('field_specifier');
+    $this->_question = $question;
     $this->_name = $name;
     $this->_arrow = $arrow;
     $this->_type = $type;
+  }
+  public function question(): EditableSyntax {
+    return $this->_question;
   }
   public function name(): EditableSyntax {
     return $this->_name;
@@ -17765,20 +17771,30 @@ final class FieldSpecifier extends EditableSyntax {
   public function type(): EditableSyntax {
     return $this->_type;
   }
+  public function with_question(EditableSyntax $question): FieldSpecifier {
+    return new FieldSpecifier(
+      $question,
+      $this->_name,
+      $this->_arrow,
+      $this->_type);
+  }
   public function with_name(EditableSyntax $name): FieldSpecifier {
     return new FieldSpecifier(
+      $this->_question,
       $name,
       $this->_arrow,
       $this->_type);
   }
   public function with_arrow(EditableSyntax $arrow): FieldSpecifier {
     return new FieldSpecifier(
+      $this->_question,
       $this->_name,
       $arrow,
       $this->_type);
   }
   public function with_type(EditableSyntax $type): FieldSpecifier {
     return new FieldSpecifier(
+      $this->_question,
       $this->_name,
       $this->_arrow,
       $type);
@@ -17790,16 +17806,19 @@ final class FieldSpecifier extends EditableSyntax {
     ?array<EditableSyntax> $parents = null): ?EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
+    $question = $this->question()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
     $arrow = $this->arrow()->rewrite($rewriter, $new_parents);
     $type = $this->type()->rewrite($rewriter, $new_parents);
     if (
+      $question === $this->question() &&
       $name === $this->name() &&
       $arrow === $this->arrow() &&
       $type === $this->type()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new FieldSpecifier(
+        $question,
         $name,
         $arrow,
         $type), $parents ?? []);
@@ -17807,6 +17826,9 @@ final class FieldSpecifier extends EditableSyntax {
   }
 
   public static function from_json(mixed $json, int $position, string $source) {
+    $question = EditableSyntax::from_json(
+      $json->field_question, $position, $source);
+    $position += $question->width();
     $name = EditableSyntax::from_json(
       $json->field_name, $position, $source);
     $position += $name->width();
@@ -17817,11 +17839,13 @@ final class FieldSpecifier extends EditableSyntax {
       $json->field_type, $position, $source);
     $position += $type->width();
     return new FieldSpecifier(
+        $question,
         $name,
         $arrow,
         $type);
   }
   public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_question;
     yield $this->_name;
     yield $this->_arrow;
     yield $this->_type;

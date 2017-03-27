@@ -66,6 +66,17 @@ let offset_to_position source_text offset =
 let position_to_offset source_text position =
   OffsetMap.position_to_offset source_text.offset_map position
 
+(* Create a Pos.t from two offsets in a source_text (given a path) *)
+let relative_pos pos_file source_text start_offset end_offset =
+  let offset_to_file_pos offset =
+    let line, column = offset_to_position source_text offset in
+    File_pos.of_line_column_offset ~line ~column ~offset
+  in
+  Pos.make_from_file_pos
+    ~pos_file
+    ~pos_start:(offset_to_file_pos start_offset)
+    ~pos_end:(  offset_to_file_pos   end_offset)
+
 let is_newline source_text offset =
   let c = get source_text offset in
   c = '\r' || c = '\n'

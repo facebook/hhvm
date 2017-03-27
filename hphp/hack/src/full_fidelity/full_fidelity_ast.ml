@@ -17,6 +17,7 @@
 module SyntaxKind = Full_fidelity_syntax_kind
 module TK = Full_fidelity_token_kind
 module PT = Full_fidelity_positioned_token
+module SourceText = Full_fidelity_source_text
 
 
 
@@ -46,18 +47,29 @@ type env =
 type +'a parser = node -> env -> 'a
 type ('a, 'b) metaparser = 'a parser -> 'b parser
 
-let get_pos : node -> Pos.t = fun node ->
-  let text = source_text node in
-  let mk_pos offset =
-    let line, column =
-      Full_fidelity_source_text.offset_to_position text offset
-    in
-    File_pos.of_line_column_offset ~line ~column ~offset
+let mk_pos pos_file text start_offset end_offset =
+  let s_line, s_column = SourceText.offset_to_position text start_offset in
+  let e_line, e_column = SourceText.offset_to_position text end_offset in
+  let pos_start =
+    File_pos.of_line_column_offset
+      ~line:s_line
+      ~column:s_column
+      ~offset:start_offset
   in
-  Pos.make_from_file_pos
-    ~pos_file:Relative_path.(create Dummy !(lowerer_state.filePath))
-    ~pos_start:(start_offset node |> mk_pos)
-    ~pos_end:(end_offset node |> mk_pos)
+  let pos_end =
+    File_pos.of_line_column_offset
+      ~line:e_line
+      ~column:e_column
+      ~offset:end_offset
+  in
+  Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+
+let get_pos : node -> Pos.t = fun node ->
+  mk_pos
+    Relative_path.(create Dummy !(lowerer_state.filePath))
+    (source_text node)
+    (start_offset node)
+    (end_offset node)
 
 exception Lowerer_invariant_failure of string * string
 let invariant_failure where what =
@@ -1506,15 +1518,94 @@ let pScript node env =
  * Inlining the scrape for comments in the lowering code would be prohibitively
  * complicated, but a separate pass is fine.
  *)
-let rec scour_line_comments (node : node)
-  : (Pos.t * string) list * Pos.t IMap.t IMap.t =
-    let comments, fixmes =
-      List.split @@ List.map scour_line_comments (children node)
+
+exception Malformed_trivia of int
+
+type scoured_comment = Pos.t * string
+type scoured_comments = scoured_comment list
+
+let scour_comments
+  (path        : Relative_path.t)
+  (source_text : Full_fidelity_source_text.t)
+  (tree        : node)
+  : scoured_comments =
+    let pos_of_offset =
+      Full_fidelity_source_text.relative_pos path source_text
     in
-    (* TODO: Actually add comments for 'this' node. *)
-    ( List.concat comments
-    , IMap.empty (* TODO: Correctly combine fixmes-s *)
-    )
+    let parse
+      (acc : scoured_comments)
+      (offset : int)
+      (str : string)
+      : scoured_comments =
+        let fail state n =
+          let state =
+            match state with
+            | `Free        -> "Free"
+            | `LineCmt     -> "LineCmt"
+            | `SawSlash    -> "SawSlash"
+            | `EmbeddedCmt -> "EmbeddedCmt"
+            | `EndEmbedded -> "EndEmbedded"
+          in
+          Printf.eprintf "Error parsing trivia in state %s: '%s'\n" state str;
+          raise (Malformed_trivia n)
+        in
+        let length = String.length str in
+        let mk tag (start : int) (end_plus_one : int) acc : scoured_comments =
+          match tag with
+          | `Line  -> acc
+          | `Block ->
+            (* Correct for the offset of the comment in the file *)
+            let start = offset + start in
+            let end_ = offset + end_plus_one - 1 in
+            let (p, c) as result =
+              Full_fidelity_source_text.
+              (* Should be 'start end_', but keeping broken for fidelity. *)
+              ( pos_of_offset (end_) (end_ + 1)
+              , sub source_text start (end_ - start)
+              )
+            in
+            result :: acc
+        in
+        let rec go start state idx : scoured_comments =
+          if idx = length (* finished? *)
+          then begin
+            match state with
+            | `Free    -> acc
+            | `LineCmt -> mk `Line start length acc
+            | _        -> fail state start
+          end else begin
+            let next = idx + 1 in
+            match state, str.[idx] with
+            (* Ending comments produces the comment just scanned *)
+            | `LineCmt,     '\n' -> mk `Line  start idx @@ go next `Free next
+            | `EndEmbedded, '/'  -> mk `Block start idx @@ go next `Free next
+            (* Whitespace skips everywhere else *)
+            | _, (' ' | '\t' | '\n')      -> go start state        next
+            (* All comments start with a / *)
+            | `Free,     '/'              -> go start `SawSlash    next
+            (* After a / in trivia, we must see either another / or a * *)
+            | `SawSlash, '/'              -> go next  `LineCmt     next
+            | `SawSlash, '*'              -> go next  `EmbeddedCmt next
+            (* A * without a / does not end an embedded comment *)
+            | `EmbeddedCmt, '*'           -> go start `EndEmbedded next
+            | `EndEmbedded,  _            -> go start `EmbeddedCmt next
+            (* When scanning comments, anything else is accepted *)
+            | `LineCmt,     _             -> go start state        next
+            | `EmbeddedCmt, _             -> go start state        next
+            (* Anything else; bail *)
+            | _ -> fail state start
+          end
+        in
+        go 0 `Free 0
+    in (* Now that we have a parser *)
+    let rec aux (acc : scoured_comments) node : scoured_comments =
+      match syntax node with
+      | Token _ ->
+        let acc = parse acc (leading_start_offset node) (leading_text node) in
+        parse acc (trailing_start_offset node) (trailing_text node)
+      | _ -> List.fold_left aux acc (children node)
+    in
+    aux [] tree
 
 (*****************************************************************************(
  * Front-end matter
@@ -1562,8 +1653,14 @@ let from_text
       else ast
     in
     let content = Full_fidelity_source_text.text source_text in
-    let comments, fixmes = scour_line_comments script in
-    let comments = if include_line_comments then comments else [] in
+    let comments, fixmes =
+      if not include_line_comments
+      then [], IMap.empty
+      else
+        let comments = scour_comments file source_text script in
+        let fixmes = IMap.empty (*TODO*) in
+        comments, fixmes
+    in
     if keep_errors then begin
       Fixmes.HH_FIXMES.add file fixmes;
       Option.iter (Core.List.last !errors) Errors.parsing_error

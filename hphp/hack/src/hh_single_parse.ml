@@ -8,6 +8,8 @@
  *
  *)
 
+module Lowerer = Full_fidelity_ast
+
 let purpose = "Read a single Hack file and produce the resulting S-Expression."
 let extra   = "(Options for development / parser selection and comparisson.)"
 let usage   = Printf.sprintf
@@ -51,10 +53,10 @@ let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
   handle_errors errorl;
   result
 
-let run_ffp : Relative_path.t -> Parser_hack.parser_return =
-  Full_fidelity_ast.from_file_with_legacy
+let run_ffp : Relative_path.t -> Lowerer.result =
+  Lowerer.from_file ~include_line_comments:true
 
-let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast.Parser_hack.ast)
+let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast)
 
 
 let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
@@ -63,15 +65,32 @@ let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
   let stop = Unix.gettimeofday () in
   res, stop -. start
 
+let diff_comments : (Pos.t * string) list -> (Pos.t * string) list -> string
+  = fun exp act ->
+    let open Printf in
+    let f (p, x) =
+      sprintf "'%s' (%s)" (String.escaped x) (Pos.string_no_file p)
+    in
+    let exp_comments = String.concat "\n    -> " @@ List.map f exp in
+    let act_comments = String.concat "\n    -> " @@ List.map f act in
+    sprintf "
+>> %d elements expected, found %d elements.
+  Expected:
+    -> %s
+  Actual:
+    -> %s
+" (List.length exp) (List.length act) exp_comments act_comments
+
 let run_parsers (file : Relative_path.t) (conf : parser_config)
   = match conf with
-  | AST -> Printf.printf "%s" (dump_sexpr @@ run_ast file)
-  | FFP -> Printf.printf "%s" (dump_sexpr @@ run_ffp file)
+  | AST -> Printf.printf "%s" (dump_sexpr (run_ast file).Parser_hack.ast)
+  | FFP -> Printf.printf "%s" (dump_sexpr (run_ffp file).Lowerer.ast)
   | Compare diff_cmd ->
     let open Unix in
     let open Printf in
+    let filename = Relative_path.S.to_string file in
     let ast_result = run_ast file in
-    let ast_sexpr = dump_sexpr ast_result in
+    let ast_sexpr = dump_sexpr ast_result.Parser_hack.ast in
     let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
     (try
         ignore (Str.search_forward unsupported ast_sexpr 0);
@@ -80,11 +99,8 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
         exit_with Unsupported
     with Not_found -> ());
     let ffp_result = run_ffp file in
-    let ffp_sexpr = dump_sexpr ffp_result in
-    if ast_sexpr = ffp_sexpr
-    then printf "%s\n" ast_sexpr
-    else begin
-      let filename = Relative_path.S.to_string file in
+    let ffp_sexpr = dump_sexpr ffp_result.Lowerer.ast in
+    if ast_sexpr <> ffp_sexpr then begin
       let mkTemp (name : string) (content : string) = begin
         let ic = open_process_in (sprintf "mktemp tmp.%s.XXXXXXXX" name) in
         let path = input_line ic in
@@ -97,18 +113,64 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
 
       let pathOld = mkTemp "OLD" ast_sexpr in
       let pathNew = mkTemp "NEW" ffp_sexpr in
-      eprintf "\n\n****** Different\n";
-      eprintf "  Filename:     %s\n" filename;
-      eprintf "  AST output:   %s\n" pathOld;
-      eprintf "  FFP output:   %s\n" pathNew;
-      eprintf "  Diff command: %s\n" diff_cmd;
+      eprintf "
+
+****** Different
+  Filename:     %s
+  AST output:   %s
+  FFP output:   %s
+  Diff command: %s
+" filename pathOld pathNew diff_cmd;
       flush Pervasives.stderr;
       let command = sprintf "%s %s %s" diff_cmd pathOld pathNew in
       ignore (system command);
       ignore (unlink pathOld);
       ignore (unlink pathNew);
       exit_with CmpDifferent
-    end
+    end;
+
+    let ast_comments = ast_result.Parser_hack.comments in
+    let ffp_comments = ffp_result.Lowerer.comments in
+    let only_exp (p,s) =
+      sprintf "  - Only in expected: '%s' (%s)\n" s (Pos.string_no_file p)
+    in
+    let only_act (p,s) =
+      sprintf "  - Only in actual: '%s' (%s)\n" s (Pos.string_no_file p)
+    in
+    let rec comments_diff
+      (xs : (Pos.t * string) list)
+      (ys : (Pos.t * string) list)
+    : string list
+    = match xs, ys with
+    | [], [] -> []
+    | xs, [] -> List.map only_exp xs
+    | [], ys -> List.map only_act ys
+    | (px,sx)::xs, (py,sy)::ys
+      when sx = sy
+        && Pos.line px = Pos.line py
+        && Pos.end_line px = Pos.end_line py
+        && Pos.start_cnum px = Pos.start_cnum py
+      -> comments_diff xs ys
+    | x::xs, ys ->
+      let diff, ys = skip x ys in
+      diff @ comments_diff xs ys
+    and skip x ys = match ys with
+    | [] -> [only_exp x], []
+    | y::ys when x = y -> [], ys
+    | y::ys ->
+      let diff, ys' = skip x ys in
+      diff, y :: ys'
+    in
+    let diff = comments_diff ast_comments ffp_comments in
+    if diff <> [] then begin
+      eprintf "
+****** Different (comments)
+  Filename:     %s
+  Difference:
+%s
+" filename (String.concat "" diff);
+    end;
+    printf "%s\n" ast_sexpr
   | Benchmark ->
     let filename = Relative_path.S.to_string file in
     let (ast_result, ast_duration), (ffp_result, ffp_duration) =
@@ -119,7 +181,7 @@ let run_parsers (file : Relative_path.t) (conf : parser_config)
       end
     in
     let ast_sexpr = Debug.dump_ast (Ast.AProgram ast_result.Parser_hack.ast) in
-    let ffp_sexpr = Debug.dump_ast (Ast.AProgram ffp_result.Parser_hack.ast) in
+    let ffp_sexpr = Debug.dump_ast (Ast.AProgram ffp_result.Lowerer.ast) in
     if ast_sexpr = ffp_sexpr
     then
       Printf.printf

@@ -44,6 +44,45 @@ let full_fidelity_to_classic source =
   let str = Debug.dump_ast (Ast.AProgram classic_ast.Parser_hack.ast) in
   str
 
+let comment_compare source =
+  let errorl, legacy, _ =
+    Errors.do_ begin fun () ->
+      Parser_hack.program_with_default_popt
+        (Relative_path.default)
+        source
+    end
+  in
+  if not (Errors.is_empty errorl) then begin
+    let errors = Errors.get_error_list errorl in
+    let errors = List.fold_left errors ~init:"" ~f:begin fun acc e ->
+        acc ^ (Errors.to_string (Errors.to_absolute e)) ^ "\n"
+      end
+    in
+    Printf.eprintf ("Legacy parser gave errors:\n%s") errors;
+    exit (-1);
+  end;
+
+  let errorl, result, _ =
+    Errors.do_ @@ fun () ->
+      Full_fidelity_ast.from_text
+        ~include_line_comments:true
+        Relative_path.default
+        (Full_fidelity_source_text.make source)
+  in
+  if not (Errors.is_empty errorl) then begin
+    let errors = Errors.get_error_list errorl in
+    let errors = List.fold_left errors ~init:"" ~f:begin fun acc e ->
+        acc ^ (Errors.to_string (Errors.to_absolute e)) ^ "\n"
+      end
+    in
+    Printf.eprintf ("Full fidelity parser gave errors:\n%s") errors;
+    exit (-1);
+  end;
+
+  Debug.dump_ast (Ast.AProgram legacy.Parser_hack.ast) ^
+    Debug.dump_ast (Ast.AProgram result.Full_fidelity_ast.ast)
+
+
 let simple_source_1 =
 "<?hh
 function foo(int $a, int $b): int {
@@ -94,6 +133,35 @@ let simple_expected_2 = "(AProgram
       (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
+let comment_scraper_1 =
+"<?hh // strict
+function foo(): void {
+  // UNSAFE
+  bar();
+  /* This does something bad */
+}"
+
+let comment_scraper_expected =
+"(AProgram
+ ((Fun
+   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
+    (f_body: (Unsafe (Expr (p (Call (p (Id (p bar))) () ())))))
+    (f_user_attributes: ()) (f_fun_kind: FSync)
+    (f_namespace:
+     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
+      (ns_const_uses: (SMap ()))))
+    (f_span: p)))))(AProgram
+ ((Fun
+   ((f_mode: Mstrict) (f_tparams: ()) (f_ret_by_ref: false)
+    (f_ret: ((p (Happly (p void) ())))) (f_name: (p \"\\\\foo\")) (f_params: ())
+    (f_body: ((Expr (p (Call (p (Id (p bar))) () ())))))
+    (f_user_attributes: ()) (f_fun_kind: FSync)
+    (f_namespace:
+     ((ns_name: \"\") (ns_class_uses: (SMap ())) (ns_fun_uses: (SMap ()))
+      (ns_const_uses: (SMap ()))))
+    (f_span: p)))))"
+
 let test_data = [
   {
     name = "sanity_test_classic_parser";
@@ -107,6 +175,11 @@ let test_data = [
     expected = simple_expected_2;
     test_function = full_fidelity_to_classic;
   };
+  { name = "Comment scraper test"
+  ; source = comment_scraper_1
+  ; expected = comment_scraper_expected
+  ; test_function = comment_compare
+  }
 ]
 
 let driver test () =
@@ -126,5 +199,4 @@ let main () =
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
   run_test_tt_main test_suite
-
 let _ = main ()

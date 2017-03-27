@@ -20,10 +20,11 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/hhbbc/eval-cell.h"
+#include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/interp-internal.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -87,8 +88,6 @@ folly::Optional<Type> const_fold(ISS& env,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-const StaticString s_get_class("get_class");
 
 bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
@@ -215,29 +214,29 @@ bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
   return false;
 }
 
-const StaticString
-  s_abs("abs"),
-  s_ceil("ceil"),
-  s_floor("floor"),
-  s_max2("__SystemLib\\max2"),
-  s_min2("__SystemLib\\min2"),
-  s_mt_rand("mt_rand"),
-  s_strlen("mt_strlen"),
-  s_defined("defined");
+bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_function_exists(env, op.arg1, true);
+}
+
+#define SPECIAL_BUILTINS                        \
+  X(abs)                                        \
+  X(ceil)                                       \
+  X(floor)                                      \
+  X(get_class)                                  \
+  X(max2)                                       \
+  X(min2)                                       \
+  X(mt_rand)                                    \
+  X(strlen)                                     \
+  X(defined)                                    \
+  X(function_exists)                            \
+
+#define X(x) const StaticString s_##x(#x);
+  SPECIAL_BUILTINS
+#undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
 #define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
-
-  X(abs)
-  X(ceil)
-  X(floor)
-  X(get_class)
-  X(max2)
-  X(min2)
-  X(mt_rand)
-  X(strlen)
-  X(defined)
-
+  SPECIAL_BUILTINS
 #undef X
 
   return false;
@@ -409,6 +408,26 @@ void reduce_fpass_arg(ISS& env, const Bytecode& bc, int param, bool byRef) {
   }
 
   return reduce(env, bc, bc::FPassC { param });
+}
+
+bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
+  if (numArgs < 1 || numArgs > 2) return false;
+  auto const& name = topT(env, numArgs - 1);
+  if (!name.strictSubtypeOf(TStr)) return false;
+  auto const v = tv(name);
+  if (!v) return false;
+  auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
+  if (auto const func = rfunc.exactFunc()) {
+    if (is_systemlib_part(*func->unit)) {
+      if (!allowConstProp) return false;
+      constprop(env);
+      for (int i = 0; i < numArgs; i++) popC(env);
+      push(env, TTrue);
+      return true;
+    }
+    func->unit->persistent.store(false, std::memory_order_relaxed);
+  }
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -205,6 +205,8 @@ void finish_builtin(ISS& env,
 
 void reduce_fpass_arg(ISS& env, const Bytecode&, int param, bool byRef);
 
+bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

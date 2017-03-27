@@ -217,6 +217,12 @@ struct Class {
     return val.right() != nullptr;
   }
 
+  /*
+   * Returns the php::Class for this Class if there is one, or
+   * nullptr.
+   */
+  borrowed_ptr<const php::Class> cls() const;
+
 private:
   Class(borrowed_ptr<const Index>, Either<SString,borrowed_ptr<ClassInfo>>);
 

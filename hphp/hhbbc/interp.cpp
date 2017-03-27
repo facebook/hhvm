@@ -2221,17 +2221,23 @@ void pushCallReturnType(ISS& env, Type&& ty) {
   return push(env, std::move(ty));
 }
 
-StaticString s_defined { "defined" };
+const StaticString s_defined { "defined" };
+const StaticString s_function_exists { "function_exists" };
 
 void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   auto const ar = fpiPop(env);
   always_assert(ar.func.hasValue());
   specialFunctionEffects(env, ar);
 
+  if (ar.func->name()->isame(s_function_exists.get())) {
+    handle_function_exists(env, numArgs, false);
+  }
+
   std::vector<Type> args(numArgs);
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     args[numArgs - i - 1] = popF(env);
   }
+
   if (options.HardConstProp &&
       numArgs == 1 &&
       ar.func->name()->isame(s_defined.get())) {
@@ -2659,18 +2665,48 @@ void in(ISS& env, const bc::StaticLocInit& op) {
 }
 
 /*
- * This can't trivially check that the class/trait/interface exists
- * (e.g. via resolve_class) without knowing either:
- *
- *  a) autoload is guaranteed to load it and t1 == true, or
- *  b) it's already defined in this unit.
- *
- * op.subop (OODeclExistsOp) would be useful with resolution of the class
+ * Amongst other things, we use this to mark units non-persistent.
  */
 void in(ISS& env, const bc::OODeclExists& op) {
-  popC(env);
-  popC(env);
-  push(env, TBool);
+  auto flag = popC(env);
+  auto name = popC(env);
+  push(env, [&] {
+      if (!name.strictSubtypeOf(TStr)) return TBool;
+      auto const v = tv(name);
+      if (!v) return TBool;
+      auto rcls = env.index.resolve_class(env.ctx, v->m_data.pstr);
+      if (!rcls || !rcls->cls()) return TBool;
+      auto const mayExist = [&] () -> bool {
+        switch (op.subop1) {
+          case OODeclExistsOp::Class:
+            return !(rcls->cls()->attrs & (AttrInterface | AttrTrait));
+          case OODeclExistsOp::Interface:
+            return rcls->cls()->attrs & AttrInterface;
+          case OODeclExistsOp::Trait:
+            return rcls->cls()->attrs & AttrTrait;
+        }
+        not_reached();
+      }();
+      auto unit = rcls->cls()->unit;
+      auto canConstProp = [&] {
+        // Its generally not safe to constprop this, because of
+        // autoload. We're safe if its part of systemlib, or a
+        // superclass of the current context.
+        if (is_systemlib_part(*unit)) return true;
+        if (!env.ctx.cls) return false;
+        auto thisClass = env.index.resolve_class(env.ctx, env.ctx.cls->name);
+        return thisClass && thisClass->subtypeOf(*rcls);
+      };
+      if (canConstProp()) {
+        constprop(env);
+        return mayExist ? TTrue : TFalse;
+      }
+      unit->persistent.store(false, std::memory_order_relaxed);
+      // At this point, if it mayExist, we still don't know that it
+      // *does* exist, but if not we know that it either doesn't
+      // exist, or it doesn't have the right type.
+      return mayExist ? TBool : TFalse;
+    } ());
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {

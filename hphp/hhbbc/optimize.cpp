@@ -693,7 +693,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
                  ainfo.mayUseVV) ?
     Attr(func->attrs | AttrMayUseVV) : Attr(func->attrs & ~AttrMayUseVV);
 
-  if (pseudomain) {
+  if (pseudomain && func->unit->persistent.load(std::memory_order_relaxed)) {
     auto persistent = true;
     visit_blocks("persistence check", index, ainfo,
                  [&] (const Index&,
@@ -702,7 +702,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
                       const State&) {
                    if (!persistence_check(blk)) persistent = false;
                  });
-    func->unit->persistent = persistent;
+    if (!persistent) {
+      func->unit->persistent.store(persistent, std::memory_order_relaxed);
+    }
   }
 
   if (options.InsertAssertions) {

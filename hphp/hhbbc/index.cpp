@@ -575,6 +575,10 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   return res::Class { index, ancestor };
 }
 
+borrowed_ptr<const php::Class> Class::cls() const {
+  return val.right() ? val.right()->cls : nullptr;
+}
+
 std::string show(const Class& c) {
   return c.val.match(
     [] (SString s) -> std::string {

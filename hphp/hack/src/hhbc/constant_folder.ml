@@ -123,9 +123,15 @@ let rec fold_and left right =
   | (_, True) -> fold_and left (lit_to_int right)
   | _ -> failwith "Folding & not yet implemented"
 
-let fold_or left right =
+let rec fold_or left right =
   match (left, right) with
   | (Int left, Int right) -> Int (Int64.logor left right)
+  | (Null, _)
+  | (False, _)
+  | (True, _) -> fold_or (lit_to_int left) right
+  | (_, Null)
+  | (_ , False)
+  | (_, True) -> fold_or left (lit_to_int right)
   | _ -> failwith "Folding | not yet implemented"
 
 let fold_xor left right =

@@ -13,5 +13,5 @@
  */
 
 function test(): varray<string> {
-  return darray(0 => "tingley");
+  return darray[0 => "tingley"];
 }

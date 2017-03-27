@@ -1,5 +1,5 @@
 <?hh
 
 function test(): void {
-  darray("tingley" => 0);
+  darray["tingley" => 0];
 }

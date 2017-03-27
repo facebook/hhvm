@@ -3805,25 +3805,25 @@ and expr_darray env pos =
       env.popt
       TypecheckerOptions.experimental_darray_and_varray in
   if not darray_and_varray_allowed then Errors.darray_not_supported pos;
-  expect env Tlp;
+  expect env Tlb;
   pos, Darray (darray_field_list_remain env [])
 
 and darray_field_list_remain env acc =
   match L.token env.file env.lb with
-  | x when x = Trp -> List.rev acc
+  | x when x = Trb -> List.rev acc
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
       let fd = darray_field env in
       let acc = fd :: acc in
       match L.token env.file env.lb with
-      | x when x = Trp ->
+      | x when x = Trb ->
           List.rev acc
       | Tcomma ->
           if !(env.errors) != error_state
           then List.rev acc
           else darray_field_list_remain env acc
-      | _ -> error_expect env ")"; [fd]
+      | _ -> error_expect env "]"; [fd]
 
 and darray_field env =
   let env = { env with priority = 0 } in
@@ -3838,25 +3838,25 @@ and expr_varray env pos =
       env.popt
       TypecheckerOptions.experimental_darray_and_varray in
   if not darray_and_varray_allowed then Errors.varray_not_supported pos;
-  expect env Tlp;
+  expect env Tlb;
   pos, Varray (varray_field_list_remain env [])
 
 and varray_field_list_remain env acc =
   match L.token env.file env.lb with
-  | x when x = Trp -> List.rev acc
+  | x when x = Trb -> List.rev acc
   | _ ->
       L.back env.lb;
       let error_state = !(env.errors) in
       let fd = varray_field env in
       let acc = fd :: acc in
       match L.token env.file env.lb with
-      | x when x = Trp ->
+      | x when x = Trb ->
           List.rev acc
       | Tcomma ->
           if !(env.errors) != error_state
           then List.rev acc
           else varray_field_list_remain env acc
-      | _ -> error_expect env ")"; [fd]
+      | _ -> error_expect env "]"; [fd]
 
 and varray_field env =
   let env = { env with priority = 0 } in

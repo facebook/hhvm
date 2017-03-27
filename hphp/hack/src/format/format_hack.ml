@@ -2737,18 +2737,18 @@ and expr_atomic env =
 and expr_atomic_word env last_tok = function
   | "true" | "false" | "null" ->
       last_token env
-  | "array" | "darray" | "varray" | "shape" | "tuple" as v ->
+  | "array" | "shape" | "tuple" as v ->
       out v env;
       expect "(" env;
       right env array_body;
       expect ")" env
-  | "dict" when next_token env == Tlb ->
-      out "dict" env;
+  | "darray" | "dict" as v when next_token env == Tlb ->
+      out v env;
       expect (token_to_string Tlb) env;
       (** Dict body looks exactly like an array body. *)
       right env array_body;
       expect (token_to_string Trb) env;
-  | "keyset" | "vec" as v when next_token env == Tlb ->
+  | "keyset" | "varray" | "vec" as v when next_token env == Tlb ->
       out v env;
       expect (token_to_string Tlb) env;
       right env (list_comma_nl ~trailing:true expr);

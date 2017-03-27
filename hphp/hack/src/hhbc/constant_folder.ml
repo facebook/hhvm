@@ -17,6 +17,14 @@ let literal_from_bool b =
 let int64_to_bool i =
   not (Int64.equal i Int64.zero)
 
+let lit_to_int lit =
+  match lit with
+  | Int _ -> lit
+  | True -> Int Int64.one
+  | Null
+  | False -> Int Int64.zero
+  | _ -> failwith "conversion from literal to integer not yet implemented"
+
 let handle_integer_overflow i =
   (* TODO: Deal with integer overflow *)
   Int i
@@ -104,9 +112,15 @@ let fold_logical_or left right =
       literal_from_bool (int64_to_bool right)
   | _ -> failwith "Folding || not yet implemented"
 
-let fold_and left right =
+let rec fold_and left right =
   match (left, right) with
   | (Int left, Int right) -> Int (Int64.logand left right)
+  | (Null, _)
+  | (False, _)
+  | (True, _) -> fold_and (lit_to_int left) right
+  | (_, Null)
+  | (_ , False)
+  | (_, True) -> fold_and left (lit_to_int right)
   | _ -> failwith "Folding & not yet implemented"
 
 let fold_or left right =
@@ -259,8 +273,8 @@ and literal_from_expr expr =
   | Ast.Unop (op, operand) ->
     let operand = literal_from_expr operand in
     literal_from_unop op operand
-   (* TODO: ??, ?:, others? *)
-   | _ -> failwith "Expected a literal expression"
+  (* TODO: ??, ?:, others? *)
+  | _ -> failwith "Expected a literal expression"
 
 let literals_from_exprs_with_index exprs =
  List.rev @@ snd @@

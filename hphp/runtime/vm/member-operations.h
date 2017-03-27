@@ -1825,6 +1825,12 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
 
     case KindOfPersistentArray:
     case KindOfArray: {
+      if (UNLIKELY(
+            RuntimeOption::EvalHackArrCompatNotices &&
+            !ArrNR{base->m_data.parr}.asArray().exists(tvAsCVarRef(&key))
+          )) {
+        raiseHackArrCompatMissingSetOp();
+      }
       TypedValue* result;
       auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
       result = ElemDArray<mode, false, KeyType::Any>(base, key);
@@ -2062,6 +2068,12 @@ inline Cell IncDecElem(
 
     case KindOfPersistentArray:
     case KindOfArray: {
+      if (UNLIKELY(
+            RuntimeOption::EvalHackArrCompatNotices &&
+            !ArrNR{base->m_data.parr}.asArray().exists(tvAsCVarRef(&key))
+          )) {
+        raiseHackArrCompatMissingIncDec();
+      }
       auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
       auto result = ElemDArray<mode, false, KeyType::Any>(base, key);
       return IncDecBody(op, tvToCell(result));

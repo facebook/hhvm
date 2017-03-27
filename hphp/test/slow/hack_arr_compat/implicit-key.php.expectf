@@ -69,9 +69,17 @@ Notice: Hack Array Compat: Implicit conversion of double to array key in %s on l
 
 Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
 
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
 Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
 
 Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
 
 Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
 ======================== unset ===============================
@@ -220,9 +228,17 @@ Notice: Hack Array Compat: Implicit conversion of double to array key in %s on l
 
 Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
 
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
 Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
 
 Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
 
 Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
 ======================== fini-unset ==========================

@@ -715,6 +715,9 @@ void raiseHackArrCompatAdd();
 
 void raiseHackArrCompatArrMixedCmp();
 
+void raiseHackArrCompatMissingIncDec();
+void raiseHackArrCompatMissingSetOp();
+
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 

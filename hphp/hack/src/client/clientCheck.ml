@@ -382,12 +382,12 @@ let main args =
       print_string schema;
       Exit_status.No_error
     | MODE_FULL_FIDELITY_EDITABLE_PARSE file ->
-    	let file = Relateive_path.create Relative_path.Dummy file in
-    	let source_text = Full_fidelity_source_text.from_file file in
-    	let syntax_tree = Full_fidelity_syntax_tree.make source_text in
-    	let editable_syntax = Full_fidelity_editable_syntax.from_tree syntax_tree in
-    	let json = Full_fidelity_syntax_tree.to_json editable_syntax in
-    	Hh_json.json_to_string json in
+      let file = Relative_path.create Relative_path.Dummy file in
+      let source_text = Full_fidelity_source_text.from_file file in
+      let syntax_tree = Full_fidelity_syntax_tree.make source_text in
+      let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
+      let json = Full_fidelity_editable_syntax.to_json editable in
+      let results = Hh_json.json_to_string json in
     	ClientFullFidelityParse.go results;
     	Exit_status.No_error
   in

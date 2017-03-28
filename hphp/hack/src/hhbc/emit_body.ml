@@ -36,7 +36,7 @@ let verify_returns body =
     | _ -> [ i ] in
   InstrSeq.flat_map body ~f:rewriter
 
-let from_ast ~self tparams params ret b =
+let from_ast ~self tparams params ret body default_instrs =
   let tparams = tparams_to_strings tparams in
   Label.reset_label ();
   Local.reset_local ();
@@ -48,16 +48,17 @@ let from_ast ~self tparams params ret b =
     | None ->
       Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
     | Some h -> Some (hint_to_type_info ~always_extended:true tparams h) in
-  let stmt_instrs = Emit_statement.from_stmts b in
+  let stmt_instrs = Emit_statement.from_stmts body in
   let stmt_instrs =
     if has_type_constraint return_type_info then
       verify_returns stmt_instrs
     else
       stmt_instrs in
   let ret_instrs =
-    match List.last b with Some (A.Return _) -> empty | _ ->
-    gather [instr_null; instr_retc]
-  in
+    match List.last body with
+    | Some (A.Return _) -> empty
+    | Some _ -> gather [instr_null; instr_retc]
+    | None -> default_instrs in
   let fault_instrs = extract_fault_instructions stmt_instrs in
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter params

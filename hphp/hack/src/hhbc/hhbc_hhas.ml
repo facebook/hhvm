@@ -152,11 +152,11 @@ let string_of_operator instruction =
     | CastDict -> "CastDict"
     | CastKeyset -> "CastKeyset"
     | InstanceOf -> "InstanceOf"
-    | InstanceOfD id -> "InstanceOfD " ^ quote_str id
+    | InstanceOfD id -> sep ["InstanceOfD"; quote_str id]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
-    | Fatal -> "Fatal Runtime"
+    | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =
   match x with
@@ -401,8 +401,8 @@ let string_of_call instruction =
       string_of_int n; quote_str id; string_of_null_flavor nf]
   | FPushClsMethod (n, id) ->
     sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
-  | FPushClsMethodF n ->
-    sep ["FPushClsMethodF"; string_of_int n]
+  | FPushClsMethodF (n, id) ->
+    sep ["FPushClsMethodF"; string_of_int n; string_of_classref id]
   | FPushClsMethodD (n, id1, id2) ->
     sep ["FPushClsMethodD";
       string_of_int n; string_of_class_id id1; string_of_function_id id2]
@@ -462,7 +462,7 @@ let string_of_misc instruction =
   match instruction with
     | This -> "This"
     | Self -> "Self"
-    | Parent -> "Parent"
+    | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
@@ -798,9 +798,9 @@ let add_fun_def buf fun_def =
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = List.map attribute_to_string user_attrs in
+  let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
-  let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_public m then "public" :: attrs else attrs in
   let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in

@@ -124,7 +124,7 @@ let rewrite_in_finally instrseq =
         original (plural original) in
       [
         (ILitConst (String message));
-        (IOp Fatal)
+        (IOp (Fatal FatalOp.Runtime))
       ]
     | _ -> [ instruction ] in
   InstrSeq.flat_map instrseq ~f:rewriter

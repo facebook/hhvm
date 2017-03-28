@@ -13,6 +13,7 @@ open Instruction_sequence
 let from_ast : Ast.fun_ -> Hhas_function.t =
   fun ast_fun ->
   let function_name = Litstr.to_string @@ snd ast_fun.Ast.f_name in
+  let default_instrs = gather [instr_null; instr_retc] in
   let body_instrs,
       function_decl_vars,
       function_params,
@@ -25,7 +26,7 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
       ast_fun.Ast.f_body
-  in
+      default_instrs in
   let function_body = instr_seq_to_list body_instrs in
   let function_attributes =
     Emit_attribute.from_asts ast_fun.Ast.f_user_attributes in

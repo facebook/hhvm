@@ -73,6 +73,20 @@ module QueryOp = struct
 
 end (* of QueryOp *)
 
+module FatalOp = struct
+  type t =
+  | Parse
+  | Runtime
+  | RuntimeOmitFrame
+
+  let to_string op =
+  match op with
+  | Parse -> "Parse"
+  | Runtime -> "Runtime"
+  | RuntimeOmitFrame -> "RuntimeOmitFrame"
+
+end (* of FatalOp *)
+
 module MemberKey = struct
   type t =
   | EC of stack_index
@@ -189,7 +203,7 @@ type instruct_operator =
   | Print
   | Clone
   | Exit
-  | Fatal
+  | Fatal of FatalOp.t
 
 type switchkind =
   | Bounded
@@ -317,7 +331,7 @@ type instruct_call =
   | FPushObjMethod of num_params
   | FPushObjMethodD of num_params * Litstr.id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id
-  | FPushClsMethodF of num_params
+  | FPushClsMethodF of num_params * classref_id
   | FPushClsMethodD of num_params * Litstr.id * Litstr.id
   | FPushCtor of num_params * classref_id
   | FPushCtorD of num_params * Litstr.id
@@ -496,7 +510,7 @@ type instruct_misc =
   | VerifyRetTypeC
   | VerifyRetTypeV
   | Self
-  | Parent
+  | Parent of classref_id
   | LateBoundCls of classref_id
   | NativeImpl
   | IncStat of int * int (* counter id, value *)

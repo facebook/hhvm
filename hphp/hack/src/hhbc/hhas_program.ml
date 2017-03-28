@@ -30,7 +30,7 @@ let main hhas_prog =
 
 let emit_main block =
   let body_instrs, decl_vars, _, _, _, _ =
-    Emit_body.from_ast ~self:None [] [] None block in
+    Emit_body.from_ast ~self:None [] [] None block Instruction_sequence.empty in
   Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs) decl_vars
 
 let from_ast

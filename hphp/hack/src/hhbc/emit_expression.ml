@@ -981,12 +981,26 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushObjMethodD (nargs, id, null_flavor)));
     ]
 
+  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cSelf ->
+    gather [
+      instr_string id;
+      emit_class_id cid;
+      instr (ICall (FPushClsMethodF (nargs, 0)));
+    ]
+
   | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
     gather [
       instr_string id;
       instr (IMisc (LateBoundCls 0));
       instr (ICall (FPushClsMethod (nargs, 0)));
-    ]
+      ]
+
+  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cParent ->
+    gather [
+      instr_string id;
+      instr (IMisc (Parent 0));
+      instr (ICall (FPushClsMethodF (nargs, 0)));
+      ]
 
   | A.Class_const ((_, cid), (_, id)) when cid.[0] = '$' ->
     gather [

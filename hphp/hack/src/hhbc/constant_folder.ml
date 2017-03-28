@@ -241,25 +241,32 @@ let literal_from_unop op operand =
   | Ast.Updecr -> failwith "unexpected decrement on constant"
   | Ast.Uref -> failwith "unexpected reference on constant"
 
-let rec collection_literal_fields fields =
+let rec collection_literal_fields expr fields =
+  let need_index = match snd expr with
+    | Ast.Collection ((_, "vec"), _)
+    | Ast.Collection ((_, "keyset"), _) -> false
+    | _ -> true
+  in
   let folder (index, consts) field =
     match field with
-    | Ast.AFvalue v ->
+    | Ast.AFvalue v when need_index ->
       (index + 1, literal_from_expr v :: Int (Int64.of_int index) :: consts)
+    | Ast.AFvalue v ->
+      (index, literal_from_expr v :: consts)
     | Ast.AFkvalue (k, v) ->
-      (index, literal_from_expr k :: literal_from_expr v :: consts )
+      (index, literal_from_expr v :: literal_from_expr k :: consts )
   in
   List.rev @@ snd @@ List.fold_left fields ~init:(0, []) ~f:folder
 
-and dictionary_literal fields =
+and collection_literal expr fields =
   let num = List.length fields in
-  let fields = collection_literal_fields fields in
-  Dict (num, fields)
-
-and array_literal fields =
-  let num = List.length fields in
-  let fields = collection_literal_fields fields in
-  Array (num, fields)
+  let fields = collection_literal_fields expr fields in
+  match snd expr with
+  | Ast.Array _ -> Array (num, fields)
+  | Ast.Collection ((_, "vec"), _) -> Vec (num, fields)
+  | Ast.Collection ((_, "keyset"), _) -> Keyset (num, fields)
+  | Ast.Collection ((_, "dict"), _) -> Dict (num, fields)
+  | _ -> NYI "collection_literal in constant folder"
 
 and literal_from_expr expr =
   match snd expr with
@@ -269,9 +276,8 @@ and literal_from_expr expr =
   | Ast.Null -> Null
   | Ast.False -> False
   | Ast.True -> True
-  | Ast.Array fields -> array_literal fields
-  | Ast.Collection ((_, "dict"), fields) -> dictionary_literal fields
-  (* TODO: Vec, Keyset, etc. *)
+  | Ast.Array fields
+  | Ast.Collection (_, fields) -> collection_literal expr fields
   | Ast.Binop (op, left, right) ->
     let left = literal_from_expr left in
     let right = literal_from_expr right in

@@ -710,23 +710,25 @@ let rec attribute_argument_to_string argument =
   | False -> "i:0;"
   | True -> "i:1;"
   | Int i -> "i:" ^ (Int64.to_string i) ^ ";"
-  | Dict (num, fields) ->
-    (* Note: no semi *)
-    let fields = attribute_arguments_to_string fields in
-    Printf.sprintf "D:%d:{%s}" num fields
   | Array (num, fields) ->
-    (* Note: no semi *)
-    let fields = attribute_arguments_to_string fields in
-    Printf.sprintf "a:%d:{%s}" num fields
-    | NYI text -> "NYI: " ^ text
+    attribute_collection_argument_to_string "a" num fields
+  | Vec (num, fields) -> attribute_collection_argument_to_string "v" num fields
+  | Dict (num, fields) -> attribute_collection_argument_to_string "D" num fields
+  | Keyset (num, fields) ->
+    attribute_collection_argument_to_string "k" num fields
+  | NYI text -> "NYI: " ^ text
   | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
-  | MapAddElemC | ColAddNewElemC | File | Dir | Method | NameA |Vec (_, _)
-  | Keyset (_, _) | NewArray _ | NewMixedArray _ | NewDictArray _
+  | MapAddElemC | ColAddNewElemC | File | Dir | Method | NameA
+  | NewArray _ | NewMixedArray _ | NewDictArray _
   | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _) | NewPackedArray _
   | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _
   | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
   | ClsCnsD (_, _) ->
     "\r# NYI: unexpected literal kind in attribute_argument_to_string"
+
+and attribute_collection_argument_to_string col_type num fields =
+  let fields = attribute_arguments_to_string fields in
+  Printf.sprintf "%s:%d:{%s}" col_type num fields
 
 and attribute_arguments_to_string arguments =
   arguments

@@ -666,14 +666,10 @@ and emit_named_collection expr pos name fields =
       instr_newcol collection_type;
       values;
     ]
-  | _ -> emit_nyi @@ "collection: " ^ name (* TODO: Are there more? *)
+  | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
 and emit_collection ?(transform_to_collection) expr es =
-  let all_literal = List.for_all es
-    ~f:(function A.AFvalue e -> is_literal e
-               | A.AFkvalue (k,v) -> is_literal k && is_literal v)
-  in
-  if all_literal then
+  if is_literal_afield_list es then
     emit_static_collection ~transform_to_collection expr es
   else
     emit_dynamic_collection ~transform_to_collection expr es
@@ -1049,6 +1045,10 @@ and emit_flavored_expr (_, expr_ as expr) =
 
 and is_literal expr =
   match snd expr with
+  | A.Array afl
+  | A.Collection ((_, "vec"), afl)
+  | A.Collection ((_, "keyset"), afl)
+  | A.Collection ((_, "dict"), afl) -> is_literal_afield_list afl
   | A.Float _
   | A.String _
   | A.Int _
@@ -1056,6 +1056,11 @@ and is_literal expr =
   | A.False
   | A.True -> true
   | _ -> false
+
+and is_literal_afield_list afl =
+  List.for_all afl
+    ~f:(function A.AFvalue e -> is_literal e
+               | A.AFkvalue (k,v) -> is_literal k && is_literal v)
 
 and emit_final_member_op stack_index op mk =
   match op with

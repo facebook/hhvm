@@ -52,8 +52,6 @@ MODULES=\
   debug\
   find\
   format\
-	full_fidelity\
-	full_fidelity/schema\
   hackfmt/debug\
   hackfmt/line_splitter\
   hackfmt\
@@ -73,7 +71,8 @@ MODULES=\
   libancillary\
   naming\
   options\
-  parsing\
+  parser\
+	parser/schema\
   procs\
   recorder\
   search\

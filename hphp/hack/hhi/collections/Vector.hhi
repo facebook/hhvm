@@ -443,8 +443,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
    *
-   * @return - A shallow copy of the current `Vector` with the updated the value
-   *           set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function set(int $k, Tv $v): Vector<Tv>;
 
@@ -463,8 +462,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $k - The `Traversable` with the new values to set. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Vector` with the updated the
-   *           values set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function setAll(?KeyedTraversable<int, Tv> $it): Vector<Tv>;
 
@@ -474,8 +472,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * Future changes made to the current `Vector` ARE reflected in the
    * returned `Vector`, and vice-versa.
    *
-   * @return - A shallow, empty copy of the current `Vector`. The current
-   *           `Vector` is also empty.
+   * @return - Returns itself.
    */
   public function clear(): Vector<Tv>;
 
@@ -503,8 +500,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $v - The value to set to the newly appended key
    *
-   * @return - A shallow copy of the current `Vector` with the added the value
-   *           set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function add(Tv $value): Vector<Tv>;
 
@@ -520,8 +516,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $k - The `Traversable` with the new values to set. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Vector` with the added the values
-   *           set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Tv> $it): Vector<Tv>;
 
@@ -537,8 +532,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $container - The container with the new keys to add.
    *
-   * @return - A shallow copy of the current `Vector` with the new keys added;
-   *           the current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function addAllKeysOf<Tv2>(
     ?KeyedContainer<Tv,Tv2> $container,
@@ -555,8 +549,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current `Vector` with the key removed; the
-   *           current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function removeKey(int $k): Vector<Tv>;
 

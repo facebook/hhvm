@@ -267,7 +267,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * supplied condition on each value.
    *
    * This method is like `filter()`, but mutates the current `Set` too in
-   * addition to returning a shallow copy of the current `Set`.
+   * addition to returning the current `Set`.
    *
    * Future changes made to the current `Set` ARE reflected in the returned
    * `Set`, and vice-versa.
@@ -275,8 +275,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @param $callback - The callback containing the condition to apply to the
    *                    current `Set` values.
    *
-   * @return - a shallow copy of the current `Set` containing the values after
-   *           a user-specified condition is applied.
+   * @return - Returns itself.
    */
   public function retain((function(Tv): bool) $callback): Set<Tv>;
 
@@ -288,7 +287,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * callback.
    *
    * This method is like `filterWithKey()`, but mutates the current `Set` too
-   * in addition to returning a shallow copy of the current `Set`.
+   * in addition to returning the current `Set`.
    *
    * Future changes made to the current `Set` ARE reflected in the returned
    * `Set`, and vice-versa.
@@ -296,8 +295,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @param $callback - The callback containing the condition to apply to the
    *                    current `Set` values.
    *
-   * @return - a shallow copy of the current `Set` containing the values after
-   *           a user-specified condition is applied.
+   * @return - Returns itself.
    */
   public function retainWithKey((function(mixed, Tv): bool) $callback): Set<Tv>;
 
@@ -472,8 +470,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * Future changes made to the current `Set` ARE reflected in the returned
    * `Set`, and vice-versa.
    *
-   * @return - A shallow, empty copy of the current `Set`. The current `Set` is
-   *           also empty.
+   * @return - Returns itself.
    */
   public function clear(): Set<Tv>;
 
@@ -497,8 +494,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @param $v - The value to add to the current `Set`
    *
-   * @return - A shallow copy of the current `Set` with the added the value
-   *           set. The current `Set` is also updated.
+   * @return - Returns itself.
    */
   public function add(Tv $v): Set<Tv>;
 
@@ -512,8 +508,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @param $k - The `Traversable` with the new values to add. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Set` with the added the values
-   *           set. The current `Set` is also updated.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Tv> $it): Set<Tv>;
 
@@ -526,8 +521,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @param $container - The container with the new keys to add.
    *
-   * @return - A shallow copy of the current `Set` with the new keys added; the
-   *           current `Set` is also updated.
+   * @return - Returns itself.
    */
   public function addAllKeysOf<Tv2>(
     ?KeyedContainer<Tv,Tv2> $container,
@@ -551,8 +545,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @param $v - The value to remove.
    *
-   * @return - A shallow copy of the current `Set` with the value removed; the
-   *           current `Set` is also updated.
+   * @return - Returns itself.
    */
   public function remove(Tv $v): Set<Tv>;
 
@@ -568,8 +561,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @param $other - The `Traversable` containing values that will be removed
    *                 from the `Set`.
    *
-   * @return - A shallow copy of the current `Set` with the values removed; the
-   *           current `Set` is also updated.
+   * @return - Returns itself.
    */
   public function removeAll(Traversable<Tv> $other): Set<Tv>;
 

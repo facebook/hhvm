@@ -44,28 +44,25 @@ interface OutputCollection<-Te> {
   /**
    * Add a value to the collection and return the collection itself.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It returns the current collection, meaning changes made to the current
+   * collection will be reflected in the returned collection.
    *
    * @param $e - The value to add.
    *
-   * @return - A shallow copy of the updated current collection itself.
+   * @return - The updated collection itself.
    */
   public function add(Te $e): this;
   /**
    * For every element in the provided `Traversable`, append a value into the
    * current collection.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It returns the current collection, meaning changes made to the current
+   * collection will be reflected in the returned collection.
    *
    * @param $traversable - The `Traversable` with the new values to set. If
    *                       `null` is provided, no changes are made.
    *
-   * @return - A shallow copy of the current collection with the added the
-   *           values.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Te> $traversable): this;
 }
@@ -117,13 +114,12 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
    *
    * If the value is not in the current `Set`, the `Set` is unchanged.
    *
-   * It returns a shallow copy of the current `Set`, meaning changes
-   * made to the current `Set` will be reflected in the returned
-   * `Set`.
+   * It the current `Set`, meaning changes  made to the current `Set` will be
+   * reflected in the returned `Set`.
    *
    * @param $m - The value to remove.
    *
-   * @return - A shallow copy of the current `Set`.
+   * @return - Returns itself.
    */
   public function remove(Tm $m): this;
 }
@@ -190,15 +186,13 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * `$coll->set($k,$v)` is semantically equivalent to `$coll[$k] = $v`
    * (except that `set()` returns the current collection).
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It returns the current collection, meaning changes made to the current
+   * collection will be reflected in the returned collection.
    *
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
    *
-   * @return - A shallow copy of the current collection with the updated the
-   *           value set.
+   * @return - Returns itself.
    */
   public function set(Tk $k, Tv $v): this;
   /**
@@ -210,15 +204,13 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * `Traversable`, an exception is thrown. If you want to add a value even if a
    * key is not present, use `addAll()`.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It the current collection, meaning changes made to the current collection
+   * will be reflected in the returned collection.
    *
    * @param $traversable - The `Traversable` with the new values to set. If
    *                       `null` is provided, no changes are made.
    *
-   * @return - A shallow copy of the current collection with the updated the
-   *           values set.
+   * @return - Returns itself.
    */
   public function setAll(?KeyedTraversable<Tk, Tv> $traversable): this;
   /**
@@ -228,14 +220,12 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * If the key is not in the current collection, the current collection is
    * unchanged.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It the current collection, meaning changes made to the current collection
+   * will be reflected in the returned collection.
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current collection with the key removed;
-   *           the current collection is also updated.
+   * @return - Returns itself.
    */
   public function removeKey(Tk $k): this;
 }

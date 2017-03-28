@@ -41,14 +41,14 @@ let from_ast ~self tparams params ret b =
   Label.reset_label ();
   Local.reset_local ();
   Iterator.reset_iterator ();
-  Hhbc_from_nast.set_self self;
+  Emit_expression.set_self self;
   let params = Emit_param.from_asts tparams params in
   let return_type_info =
     match ret with
     | None ->
       Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
     | Some h -> Some (hint_to_type_info ~always_extended:true tparams h) in
-  let stmt_instrs = Hhbc_from_nast.from_stmts b in
+  let stmt_instrs = Emit_statement.from_stmts b in
   let stmt_instrs =
     if has_type_constraint return_type_info then
       verify_returns stmt_instrs

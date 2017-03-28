@@ -11,7 +11,7 @@
 open Core
 open Instruction_sequence
 open Emit_type_hint
-open Hhbc_from_nast
+open Emit_expression
 
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface

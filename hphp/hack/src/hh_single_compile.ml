@@ -171,7 +171,7 @@ let do_compile compiler_options opts files_info = begin
     let ast = get_nast_from_fileinfo opts fn fileinfo in
     let options = Hhbc_options.get_options_from_config
       compiler_options.config in
-    Hhbc_from_nast.set_compiler_options options;
+    Emit_expression.set_compiler_options options;
     let hhas_prog = Hhas_program.from_ast ast in
     let hhas_text = Hhbc_hhas.to_string hhas_prog in
     if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0

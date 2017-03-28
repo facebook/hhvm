@@ -31,7 +31,7 @@ let emit_param_default_value_setter params =
     Option.map dvo (fun (l, e) ->
       gather [
         instr_label l;
-        Hhbc_from_nast.from_expr e;
+        Emit_expression.from_expr e;
         instr_setl (Local.Named param_name);
         instr_popc;
       ]) )

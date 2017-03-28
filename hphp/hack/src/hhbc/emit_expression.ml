@@ -178,6 +178,16 @@ and emit_two_exprs e1 e2 =
       from_expr e2;
     ]
 
+and emit_is_null e =
+  match e with
+  | (_, A.Lvar (_, id)) ->
+    instr_istypel (Local.Named id) OpNull
+  | _ ->
+    gather [
+      from_expr e;
+      instr_istypec OpNull
+    ]
+
 and emit_binop op e1 e2 =
   match op with
   | A.AMpamp -> emit_logical_and e1 e2
@@ -188,6 +198,20 @@ and emit_binop op e1 e2 =
     | None -> emit_nyi "illegal eq op"
     | Some op -> emit_lval_op (LValOp.SetOp op) e1 (Some e2)
     end
+  | A.EQeqeq when snd e2 = A.Null ->
+    emit_is_null e1
+  | A.EQeqeq when snd e1 = A.Null ->
+    emit_is_null e2
+  | A.Diff2 when snd e2 = A.Null ->
+    gather [
+      emit_is_null e1;
+      instr_not
+    ]
+  | A.Diff2 when snd e1 = A.Null ->
+    gather [
+      emit_is_null e2;
+      instr_not
+    ]
   | _ ->
     gather [
       emit_two_exprs e1 e2;

@@ -75,6 +75,10 @@ match h with
   let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
   TC.make tc_name tc_flags
 
+  (* Elide the Awaitable class for Awaitable<void> only *)
+| A.Happly ((_, "Awaitable"), [(_, A.Happly((_, "void"), []))]) ->
+  TC.make None []
+
 (* Need to differentiate between type params and classes *)
 | A.Happly ((_, s), _) ->
   if List.mem tparams s then

@@ -1800,7 +1800,7 @@ and transform_trivia ~is_leading trivia =
       let hd = Comment (hd, (String.length hd)) in
 
       last_comment := Some (Fmt [
-        Space;
+        if !currently_leading then Newline else Space;
         Fmt (hd :: List.map tl ~f:map_tail);
       ]);
       last_comment_was_delimited := true;
@@ -1810,7 +1810,7 @@ and transform_trivia ~is_leading trivia =
     | TriviaKind.SingleLineComment ->
       make_comment ();
       last_comment := Some (Fmt [
-        Space;
+        if !currently_leading then Newline else Space;
         Comment ((Trivia.text triv), (Trivia.width triv));
         Newline;
       ]);

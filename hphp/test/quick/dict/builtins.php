@@ -91,6 +91,12 @@ function main($v) {
   $copy_v = $v;
   var_dump(krsort($copy_v));
   var_dump($copy_v);
+
+  echo "array_slice (0): ";
+  var_dump(array_slice($v, 0));
+
+  echo "array_slice (1): ";
+  var_dump(array_slice($v, 1));
 }
 
 main(dict[]);

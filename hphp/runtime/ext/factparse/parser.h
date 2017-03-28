@@ -248,6 +248,8 @@ struct Parser : ParserBase {
   void onDict(Token &out, Token &pairs);
   void onVec(Token& out, Token& exprs);
   void onKeyset(Token& out, Token& exprs);
+  void onVArray(Token& out, Token& exprs);
+  void onDArray(Token& out, Token& exprs);
   void onEmptyCollection(Token &out);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);

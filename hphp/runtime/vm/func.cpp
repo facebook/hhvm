@@ -957,6 +957,7 @@ FuncSet s_ignores_frame = {
   "HH\\is_vec",
   "HH\\is_dict",
   "HH\\is_keyset",
+  "HH\\is_varray_or_darray",
   "is_object",
   "is_resource",
   "boolval",
@@ -1064,6 +1065,11 @@ FuncSet s_ignores_frame = {
   "rawurlencode",
   "urldecode",
   "urlencode",
+  "HH\\vec",
+  "HH\\dict",
+  "HH\\keyset",
+  "HH\\varray",
+  "HH\\darray"
 };
 
 const StaticString s_assert("assert");

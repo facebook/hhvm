@@ -170,6 +170,8 @@ static int getNextTokenType(int t) {
     case T_DICT:
     case T_VEC:
     case T_KEYSET:
+    case T_VARRAY:
+    case T_DARRAY:
     case T_WHERE:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
@@ -489,6 +491,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
 <ST_IN_SCRIPTING>"vec"                { HH_ONLY_KEYWORD(T_VEC);}
+<ST_IN_SCRIPTING>"varray"             { HH_ONLY_KEYWORD(T_VARRAY);}
+<ST_IN_SCRIPTING>"darray"             { HH_ONLY_KEYWORD(T_DARRAY);}
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }

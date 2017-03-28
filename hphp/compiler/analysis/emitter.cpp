@@ -5521,6 +5521,22 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitConvertToCell(e);
       e.CastKeyset();
       return true;
+    } else if (((call->isCallToFunction("varray") &&
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\varray")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastArray();
+      return true;
+    } else if (((call->isCallToFunction("darray") &&
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\darray")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastArray();
+      return true;
     } else if (((call->isCallToFunction("is_vec") &&
                  (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\is_vec")) &&
@@ -5541,6 +5557,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                params && params->getCount() == 1) {
       visit((*call->getParams())[0]);
       emitIsType(e, IsTypeOp::Keyset);
+      return true;
+    } else if (((call->isCallToFunction("is_varray_or_darray") &&
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\is_varray_or_darray")) &&
+               params && params->getCount() == 1) {
+      visit((*call->getParams())[0]);
+      emitIsType(e, IsTypeOp::Arr);
       return true;
     }
   #define TYPE_CONVERT_INSTR(what, What)                             \

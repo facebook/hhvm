@@ -1370,12 +1370,18 @@ namespace __SystemLib {
 }
 
 namespace HH {
-  <<__Native>>
+  <<__Native, __IsFoldable>>
   function dict(mixed $arr): dict;
 
-  <<__Native>>
+  <<__Native, __IsFoldable>>
   function vec(mixed $arr): vec;
 
-  <<__Native>>
+  <<__Native, __IsFoldable>>
   function keyset(mixed $arr): keyset;
+
+  <<__Native, __IsFoldable>>
+  function varray(mixed $arr): varray;
+
+  <<__Native, __IsFoldable>>
+  function darray(mixed $arr): darray;
 }

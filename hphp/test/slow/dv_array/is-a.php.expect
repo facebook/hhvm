@@ -1,0 +1,378 @@
+============= direct_test_dv_arrays ================
+value => NULL
+is_varray_or_darray => FALSE
+gettype => NULL
+============= direct_test_dv_arrays ================
+value => bool(false)
+is_varray_or_darray => FALSE
+gettype => boolean
+============= direct_test_dv_arrays ================
+value => bool(true)
+is_varray_or_darray => FALSE
+gettype => boolean
+============= direct_test_dv_arrays ================
+value => int(123)
+is_varray_or_darray => FALSE
+gettype => integer
+============= direct_test_dv_arrays ================
+value => string(3) "abc"
+is_varray_or_darray => FALSE
+gettype => string
+============= direct_test_dv_arrays ================
+value => float(3.14)
+is_varray_or_darray => FALSE
+gettype => double
+============= direct_test_dv_arrays ================
+value => object(stdClass)#1 (0) {
+}
+is_varray_or_darray => FALSE
+gettype => object
+============= direct_test_dv_arrays ================
+value => resource(4) of type (xml)
+is_varray_or_darray => FALSE
+gettype => resource
+============= direct_test_dv_arrays ================
+value => vec(0) {
+}
+is_varray_or_darray => FALSE
+gettype => vec
+============= direct_test_dv_arrays ================
+value => vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+is_varray_or_darray => FALSE
+gettype => vec
+============= direct_test_dv_arrays ================
+value => dict(0) {
+}
+is_varray_or_darray => FALSE
+gettype => dict
+============= direct_test_dv_arrays ================
+value => dict(2) {
+  ["abc"]=>
+  int(100)
+  [200]=>
+  string(3) "def"
+}
+is_varray_or_darray => FALSE
+gettype => dict
+============= direct_test_dv_arrays ================
+value => keyset(0) {
+}
+is_varray_or_darray => FALSE
+gettype => keyset
+============= direct_test_dv_arrays ================
+value => keyset(3) {
+  string(1) "a"
+  int(100)
+  string(1) "b"
+}
+is_varray_or_darray => FALSE
+gettype => keyset
+============= direct_test_dv_arrays ================
+value => array(0) {
+}
+is_varray_or_darray => TRUE
+gettype => array
+============= direct_test_dv_arrays ================
+value => array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+is_varray_or_darray => TRUE
+gettype => array
+============= direct_test_dv_arrays ================
+value => array(0) {
+}
+is_varray_or_darray => TRUE
+gettype => array
+============= direct_test_dv_arrays ================
+value => array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+is_varray_or_darray => TRUE
+gettype => array
+============= direct_test_dv_arrays ================
+value => array(0) {
+}
+is_varray_or_darray => TRUE
+gettype => array
+============= direct_test_dv_arrays ================
+value => array(2) {
+  [100]=>
+  string(3) "abc"
+  ["def"]=>
+  int(200)
+}
+is_varray_or_darray => TRUE
+gettype => array
+============= indirect_test_dv_arrays ==============
+value => NULL
+HH\is_varray_or_darray => FALSE
+gettype => NULL
+============= indirect_test_dv_arrays ==============
+value => bool(false)
+HH\is_varray_or_darray => FALSE
+gettype => boolean
+============= indirect_test_dv_arrays ==============
+value => bool(true)
+HH\is_varray_or_darray => FALSE
+gettype => boolean
+============= indirect_test_dv_arrays ==============
+value => int(123)
+HH\is_varray_or_darray => FALSE
+gettype => integer
+============= indirect_test_dv_arrays ==============
+value => string(3) "abc"
+HH\is_varray_or_darray => FALSE
+gettype => string
+============= indirect_test_dv_arrays ==============
+value => float(3.14)
+HH\is_varray_or_darray => FALSE
+gettype => double
+============= indirect_test_dv_arrays ==============
+value => object(stdClass)#1 (0) {
+}
+HH\is_varray_or_darray => FALSE
+gettype => object
+============= indirect_test_dv_arrays ==============
+value => resource(4) of type (xml)
+HH\is_varray_or_darray => FALSE
+gettype => resource
+============= indirect_test_dv_arrays ==============
+value => vec(0) {
+}
+HH\is_varray_or_darray => FALSE
+gettype => vec
+============= indirect_test_dv_arrays ==============
+value => vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+HH\is_varray_or_darray => FALSE
+gettype => vec
+============= indirect_test_dv_arrays ==============
+value => dict(0) {
+}
+HH\is_varray_or_darray => FALSE
+gettype => dict
+============= indirect_test_dv_arrays ==============
+value => dict(2) {
+  ["abc"]=>
+  int(100)
+  [200]=>
+  string(3) "def"
+}
+HH\is_varray_or_darray => FALSE
+gettype => dict
+============= indirect_test_dv_arrays ==============
+value => keyset(0) {
+}
+HH\is_varray_or_darray => FALSE
+gettype => keyset
+============= indirect_test_dv_arrays ==============
+value => keyset(3) {
+  string(1) "a"
+  int(100)
+  string(1) "b"
+}
+HH\is_varray_or_darray => FALSE
+gettype => keyset
+============= indirect_test_dv_arrays ==============
+value => array(0) {
+}
+HH\is_varray_or_darray => TRUE
+gettype => array
+============= indirect_test_dv_arrays ==============
+value => array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+HH\is_varray_or_darray => TRUE
+gettype => array
+============= indirect_test_dv_arrays ==============
+value => array(0) {
+}
+HH\is_varray_or_darray => TRUE
+gettype => array
+============= indirect_test_dv_arrays ==============
+value => array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+HH\is_varray_or_darray => TRUE
+gettype => array
+============= indirect_test_dv_arrays ==============
+value => array(0) {
+}
+HH\is_varray_or_darray => TRUE
+gettype => array
+============= indirect_test_dv_arrays ==============
+value => array(2) {
+  [100]=>
+  string(3) "abc"
+  ["def"]=>
+  int(200)
+}
+HH\is_varray_or_darray => TRUE
+gettype => array
+============= direct_test_others ===================
+value => array(0) {
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+is_vec => FALSE
+is_dict => FALSE
+is_keyset => FALSE
+is_scalar => FALSE
+============= direct_test_others ===================
+value => array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+is_vec => FALSE
+is_dict => FALSE
+is_keyset => FALSE
+is_scalar => FALSE
+============= direct_test_others ===================
+value => array(0) {
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+is_vec => FALSE
+is_dict => FALSE
+is_keyset => FALSE
+is_scalar => FALSE
+============= direct_test_others ===================
+value => array(2) {
+  [100]=>
+  string(3) "abc"
+  ["def"]=>
+  int(200)
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+is_vec => FALSE
+is_dict => FALSE
+is_keyset => FALSE
+is_scalar => FALSE
+============= indirect_test_others =================
+value => array(0) {
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+HH\is_vec => FALSE
+HH\is_dict => FALSE
+HH\is_keyset => FALSE
+is_scalar => FALSE
+============= indirect_test_others =================
+value => array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+HH\is_vec => FALSE
+HH\is_dict => FALSE
+HH\is_keyset => FALSE
+is_scalar => FALSE
+============= indirect_test_others =================
+value => array(0) {
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+HH\is_vec => FALSE
+HH\is_dict => FALSE
+HH\is_keyset => FALSE
+is_scalar => FALSE
+============= indirect_test_others =================
+value => array(2) {
+  [100]=>
+  string(3) "abc"
+  ["def"]=>
+  int(200)
+}
+is_null => FALSE
+is_bool => FALSE
+is_int => FALSE
+is_string => FALSE
+is_float => FALSE
+is_resource => FALSE
+is_object => FALSE
+is_array => TRUE
+HH\is_vec => FALSE
+HH\is_dict => FALSE
+HH\is_keyset => FALSE
+is_scalar => FALSE

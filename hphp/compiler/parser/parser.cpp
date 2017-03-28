@@ -601,9 +601,12 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "dict" ||
            stripped == "vec" ||
            stripped == "keyset" ||
+           stripped == "varray" ||
+           stripped == "darray" ||
            stripped == "is_vec" ||
            stripped == "is_dict" ||
-           stripped == "is_keyset"
+           stripped == "is_keyset" ||
+           stripped == "is_varray_or_darray"
           )) {
         funcName = "HH\\" + stripped;
       }
@@ -1005,6 +1008,23 @@ void Parser::onVec(Token& out, Token& exprs) {
 
 void Parser::onKeyset(Token& out, Token& exprs) {
   onUnaryOpExp(out, exprs, T_KEYSET, true);
+}
+
+void Parser::onVArray(Token& out, Token& exprs) {
+  if (exprs->exp) {
+    // varray uses the same grammar as vec, which produces Expressions instead
+    // of ArrayPairExpressions, so wrap the Expressions in ArrayPairExpressions.
+    auto& el = *static_pointer_cast<ExpressionList>(exprs->exp);
+    auto const count = el.getCount();
+    for (int i = 0; i < count; ++i) {
+      el[i] = NEW_EXP(ArrayPairExpression, nullptr, el[i], false);
+    }
+  }
+  onUnaryOpExp(out, exprs, T_ARRAY, true);
+}
+
+void Parser::onDArray(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_ARRAY, true);
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
@@ -2567,6 +2587,8 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(dict),
     HH_ONLY_TYPE(vec),
     HH_ONLY_TYPE(keyset),
+    HH_ONLY_TYPE(varray),
+    HH_ONLY_TYPE(darray),
 
     HH_ONLY_TYPE(Awaitable),
     HH_ONLY_TYPE(AsyncGenerator),
@@ -2597,6 +2619,7 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(noreturn),
     HH_ONLY_TYPE(void),
     HH_ONLY_TYPE(this),
+    HH_ONLY_TYPE(varray_or_darray),
     HH_ALIAS(classname, string),
     HH_ALIAS(typename, string),
 

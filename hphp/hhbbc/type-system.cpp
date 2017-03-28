@@ -2096,6 +2096,10 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\string"))   return union_of(ret, TStr);
   if (!strcasecmp(p, "HH\\dict"))     return union_of(ret, TDict);
   if (!strcasecmp(p, "HH\\vec"))      return union_of(ret, TVec);
+  if (!strcasecmp(p, "HH\\keyset"))   return union_of(ret, TKeyset);
+  if (!strcasecmp(p, "HH\\varray"))   return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\darray"))   return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\varray_or_darray"))   return union_of(ret, TArr);
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
 

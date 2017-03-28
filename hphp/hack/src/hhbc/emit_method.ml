@@ -14,11 +14,15 @@ open Instruction_sequence
 let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   fun ast_class ast_method ->
   let method_name = Litstr.to_string @@ snd ast_method.Ast.m_name in
-  let method_is_abstract = List.mem ast_method.Ast.m_kind Ast.Abstract in
+  let method_is_abstract =
+    List.mem ast_method.Ast.m_kind Ast.Abstract ||
+    ast_class.Ast.c_kind = Ast.Cinterface in
   let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
   let method_is_private = List.mem ast_method.Ast.m_kind Ast.Private in
   let method_is_protected = List.mem ast_method.Ast.m_kind Ast.Protected in
-  let method_is_public = List.mem ast_method.Ast.m_kind Ast.Public in
+  let method_is_public =
+    List.mem ast_method.Ast.m_kind Ast.Public ||
+    ast_class.Ast.c_kind = Ast.Cinterface in
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes =
     Emit_attribute.from_asts ast_method.Ast.m_user_attributes in

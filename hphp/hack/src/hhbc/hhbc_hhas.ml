@@ -50,6 +50,19 @@ let string_of_stack_index si = string_of_int si
 
 let string_of_classref id = string_of_int id
 
+let string_of_param_id x =
+  match x with
+  | Param_unnamed i -> string_of_int i
+  | Param_named s -> s
+
+let string_of_param_num i = string_of_int i
+
+let string_of_local_id x =
+  match x with
+  | Local.Unnamed i -> "_" ^ (string_of_int i)
+  | Local.Named s -> s
+  | Local.Pipe -> failwith "$$ should not have survived to codegen"
+
 let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
@@ -81,10 +94,20 @@ let string_of_lit_const instruction =
     | File -> "File"
     | Dir -> "Dir"
     | NYI text -> "NYI: " ^ text
-    | NullUninit | AddElemV | AddNewElemV | MapAddElemC | Method | NameA
-    | NewArray _ | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _)
-    | Cns _ |CnsE _ | CnsU (_, _) ->
-      "\r# NYI: unexpected literal kind in string_of_lit_const"
+    | NullUninit -> "NullUninit"
+    | AddElemV -> "AddElemV"
+    | AddNewElemV -> "AddNewElemV"
+    | MapAddElemC -> "MapAddElemC"
+    | Method -> "Method"
+    | NameA -> "NameA"
+    | NewArray n -> sep ["NewArray"; string_of_int n]
+    | NewMIArray n -> sep ["NewMIArray"; string_of_int n]
+    | NewMSArray n -> sep ["NewMSArray"; string_of_int n]
+    | NewLikeArrayL (id, n) ->
+      sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
+    | Cns s -> sep ["Cns"; s]
+    | CnsE s -> sep ["CnsE"; s]
+    | CnsU (s1, s2) -> sep ["CnsU"; s1; s2]
 
 let string_of_operator instruction =
   match instruction with
@@ -134,19 +157,6 @@ let string_of_operator instruction =
     | Clone -> "Clone"
     | H.Exit -> "Exit"
     | Fatal -> "Fatal Runtime"
-
-let string_of_param_id x =
-  match x with
-  | Param_unnamed i -> string_of_int i
-  | Param_named s -> s
-
-let string_of_param_num i = string_of_int i
-
-let string_of_local_id x =
-  match x with
-  | Local.Unnamed i -> "_" ^ (string_of_int i)
-  | Local.Named s -> s
-  | Local.Pipe -> failwith "$$ should not have survived to codegen"
 
 let string_of_get x =
   match x with

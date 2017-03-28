@@ -135,7 +135,7 @@ type instruct_lit_const =
   | ColAddNewElemC
   | Cns of Litstr.id
   | CnsE of Litstr.id
-  | CnsU of int * Litstr.id (* litstr fallback *)
+  | CnsU of Litstr.id * Litstr.id
   | ClsCns of Litstr.id * classref_id
   | ClsCnsD of Litstr.id * Litstr.id
   | File

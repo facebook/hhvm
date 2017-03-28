@@ -457,7 +457,7 @@ and emit_id (p, s) =
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in
     instr_int line
-  | _ -> emit_nyi ("emit_id: " ^ s)
+  | _ -> instr (ILitConst (Cns s))
 
 and rename_xhp (p, s) =
   (* Translates given :name to xhp_name *)

@@ -496,6 +496,12 @@ and emit_import flavor e =
     import_instr;
   ]
 
+and emit_lvarvar n (_, id) =
+  gather [
+    instr_cgetl (Local.Named id);
+    gather @@ List.replicate ~num:n instr_cgetn;
+  ]
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -550,9 +556,9 @@ and from_expr expr =
   | A.Xml (id, attributes, children) ->
     emit_xhp (fst expr) id attributes children
   | A.Import (flavor, e) -> emit_import flavor e
+  | A.Lvarvar (n, id) -> emit_lvarvar n id
   (* TODO *)
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
-  | A.Lvarvar (_, _)            -> emit_nyi "lvarvar"
   | A.List _                    -> emit_nyi "list"
 
 and emit_static_collection ~transform_to_collection expr es =

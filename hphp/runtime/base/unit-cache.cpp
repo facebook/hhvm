@@ -602,11 +602,11 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   auto it = eContext->m_evaledFiles.find(spath.get());
   if (it != end(eContext->m_evaledFiles)) {
     // In RepoAuthoritative mode we assume that the files are unchanged.
+    initial = false;
     if (RuntimeOption::RepoAuthoritative ||
         (it->second.ts_sec > s.st_mtime) ||
         ((it->second.ts_sec == s.st_mtime) &&
          (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
-      initial = false;
       return it->second.unit;
     }
   }

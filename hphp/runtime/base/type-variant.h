@@ -788,9 +788,16 @@ struct Variant : private TypedValue {
     return toStringHelper();
   }
 
+  // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
+  // arrays unchanged. Use toPHPArray() if you want the result to always be a
+  // PHP array.
   Array toArray() const {
-    if (isArrayType(m_type)) return Array(m_data.parr);
+    if (isArrayLikeType(m_type)) return Array(m_data.parr);
     return toArrayHelper();
+  }
+  Array toPHPArray() const {
+    if (isArrayType(m_type)) return Array(m_data.parr);
+    return toPHPArrayHelper();
   }
   Object toObject() const {
     if (m_type == KindOfObject) return Object{m_data.pobj};
@@ -1254,6 +1261,7 @@ private:
   double toDoubleHelper() const;
   String toStringHelper() const;
   Array  toArrayHelper() const;
+  Array  toPHPArrayHelper() const;
   Object toObjectHelper() const;
   Resource toResourceHelper() const;
 

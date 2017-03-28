@@ -214,16 +214,19 @@ namespace HH {
 
   /* Finds whether the given variable is a vec.
    */
-  <<__Native, __ParamCoerceModeFalse>>
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_vec(mixed $var): bool;
 
   /* Finds whether the given variable is a dict.
    */
-  <<__Native, __ParamCoerceModeFalse>>
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_dict(mixed $var): bool;
 
   /* Finds whether the given variable is a keyset.
    */
-  <<__Native, __ParamCoerceModeFalse>>
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
   function is_keyset(mixed $var): bool;
+
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable>>
+  function is_varray_or_darray(mixed $var): bool;
 }

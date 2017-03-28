@@ -2955,6 +2955,16 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
   }
 }
 
+// HH\\varray
+Array HHVM_FUNCTION(HH_varray, const Variant& input) {
+  return input.toPHPArray();
+}
+
+// HH\\darray
+Array HHVM_FUNCTION(HH_darray, const Variant& input) {
+  return input.toPHPArray();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayExtension final : Extension {
@@ -3088,6 +3098,8 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\dict, HH_dict);
     HHVM_FALIAS(HH\\vec, HH_vec);
     HHVM_FALIAS(HH\\keyset, HH_keyset);
+    HHVM_FALIAS(HH\\varray, HH_varray);
+    HHVM_FALIAS(HH\\darray, HH_darray);
 
     loadSystemlib();
   }

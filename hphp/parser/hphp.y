@@ -681,6 +681,8 @@ static int yylex(YYSTYPE* token, HPHP::Location* loc, Parser* _p) {
 %token T_ARRAY
 %token T_DICT
 %token T_VEC
+%token T_VARRAY
+%token T_DARRAY
 %token T_KEYSET
 %token T_CALLABLE
 %token T_CLASS_C
@@ -811,6 +813,8 @@ ident_no_semireserved:
   | T_DICT                             { $$ = $1;}
   | T_VEC                              { $$ = $1;}
   | T_KEYSET                           { $$ = $1;}
+  | T_VARRAY                           { $$ = $1;}
+  | T_DARRAY                           { $$ = $1;}
 ;
 
 ident_for_class_const:
@@ -2006,6 +2010,8 @@ expr_no_variable:
   | dict_literal                       { $$ = $1; }
   | vec_literal                        { $$ = $1; }
   | keyset_literal                     { $$ = $1; }
+  | varray_literal                     { $$ = $1; }
+  | darray_literal                     { $$ = $1; }
   | shape_literal                      { $$ = $1; }
   | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
@@ -2267,6 +2273,30 @@ static_keyset_literal_ae:
     T_KEYSET '[' static_vec_ks_expr_list_ae ']' { _p->onKeyset($$, $3); }
 ;
 
+varray_literal:
+    T_VARRAY '[' vec_ks_expr_list ']'           { _p->onVArray($$,$3); }
+;
+
+static_varray_literal:
+    T_VARRAY '[' static_vec_ks_expr_list ']'    { _p->onVArray($$,$3); }
+;
+
+static_varray_literal_ae:
+    T_VARRAY '[' static_vec_ks_expr_list_ae ']' { _p->onVArray($$,$3); }
+;
+
+darray_literal:
+    T_DARRAY '[' dict_pair_list ']'           { _p->onDArray($$,$3); }
+;
+
+static_darray_literal:
+    T_DARRAY '[' static_dict_pair_list ']'    { _p->onDArray($$,$3); }
+;
+
+static_darray_literal_ae:
+    T_DARRAY '[' static_dict_pair_list_ae ']' { _p->onDArray($$,$3); }
+;
+
 vec_ks_expr_list:
     expr_list
     possible_comma                     { $$ = $1;}
@@ -2311,6 +2341,8 @@ dim_expr_base:
   | dict_literal                       { $$ = $1;}
   | vec_literal                        { $$ = $1;}
   | keyset_literal                     { $$ = $1;}
+  | varray_literal                     { $$ = $1;}
+  | darray_literal                     { $$ = $1;}
   | class_constant                     { $$ = $1;}
   | lambda_or_closure_with_parens      { $$ = $1;}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
@@ -2586,6 +2618,8 @@ static_expr:
   | static_dict_literal                { $$ = $1;}
   | static_vec_literal                 { $$ = $1;}
   | static_keyset_literal              { $$ = $1;}
+  | static_varray_literal              { $$ = $1;}
+  | static_darray_literal              { $$ = $1;}
   | static_class_constant              { $$ = $1;}
   | static_collection_literal          { $$ = $1;}
   | '(' static_expr ')'                { $$ = $2;}
@@ -2742,6 +2776,8 @@ static_scalar_ae:
   | static_dict_literal_ae             { $$ = $1;}
   | static_vec_literal_ae              { $$ = $1;}
   | static_keyset_literal_ae           { $$ = $1;}
+  | static_varray_literal_ae           { $$ = $1;}
+  | static_darray_literal_ae           { $$ = $1;}
 ;
 
 static_scalar_ae_list:

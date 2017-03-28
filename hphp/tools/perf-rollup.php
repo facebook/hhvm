@@ -13,10 +13,6 @@ perf script -f comm,ip,sym | $script_name
 EOT;
 }
 
-function starts_with($str, $prefix) {
-  return strncmp($str, $prefix, strlen($prefix)) === 0;
-}
-
 # If $stack has any frames in the translation cache, return the C++ frame
 # directly called by the deepest translation cache frame. If $stack has no TC
 # frames, return null.
@@ -90,6 +86,7 @@ function categorize_helper($func) {
     'Async' => Vector {
       '/WaitHandle/',
       '/AsioBlockableChain/',
+      '/^HPHP::f_join/',
     },
     'CacheClient' => Vector {
       '/c_CacheClient2/',
@@ -114,7 +111,7 @@ function categorize_helper($func) {
     'Strings' => Vector {
       '/::concat/',
       '/::StringData::/',
-      '/^HPHP::f_(explode|join|str|mb_strtolower|substr|preg_)/',
+      '/^HPHP::f_(explode|str|mb_strtolower|substr|preg_)/',
       '/^HPHP::conv_10/',
     },
     'OBC' => Vector {

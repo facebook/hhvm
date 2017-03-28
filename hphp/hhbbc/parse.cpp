@@ -36,14 +36,16 @@
 
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
@@ -848,13 +850,33 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
     ret->nativeInfo                   = folly::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType       = fe.hniReturnType;
     ret->nativeInfo->dynCallWrapperId = fe.dynCallWrapperId;
-    if (f && !ret->cls && ret->params.size()) {
-      // There are a handful of functions whose first parameter is by
-      // ref, but which don't require a reference.  There is also
-      // array_multisort, which has this property for all its
-      // parameters; but that
-      if (ret->params[0].byRef && !f->mustBeRef(0)) {
-        ret->params[0].mustBeRef = false;
+    if (f && ret->params.size()) {
+      if (!f->cls()) {
+        // There are a handful of functions whose first parameter is by
+        // ref, but which don't require a reference.  There is also
+        // array_multisort, which has this property for all its
+        // parameters; but that
+        if (ret->params[0].byRef && !f->mustBeRef(0)) {
+          ret->params[0].mustBeRef = false;
+        }
+      }
+      for (auto i = 0; i < ret->params.size(); i++) {
+        auto& pi = ret->params[i];
+        if (pi.isVariadic || !f->params()[i].hasDefaultValue()) continue;
+        if (pi.defaultValue.m_type == KindOfUninit &&
+            pi.phpCode != nullptr) {
+          auto res = eval_cell_value([&] {
+              auto val = f_constant(StrNR(pi.phpCode));
+              val.setEvalScalar();
+              return *val.asTypedValue();
+            });
+          if (!res) {
+            FTRACE(4, "Argument {} to {}: Failed to evaluate {}\n",
+                   i, f->fullName(), pi.phpCode);
+            continue;
+          }
+          pi.defaultValue = *res;
+        }
       }
     }
     if (!f || !f->nativeFuncPtr() ||

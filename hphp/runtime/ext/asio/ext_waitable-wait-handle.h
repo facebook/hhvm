@@ -38,8 +38,7 @@ struct c_WaitableWaitHandle : c_WaitHandle {
   WAITHANDLE_CLASSOF(WaitableWaitHandle);
   WAITHANDLE_DTOR(WaitableWaitHandle);
 
-  explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof(),
-                           HeaderKind kind = HeaderKind::WaitHandle) noexcept;
+  explicit c_WaitableWaitHandle(Class*, HeaderKind, type_scan::Index) noexcept;
   ~c_WaitableWaitHandle();
 
  public:

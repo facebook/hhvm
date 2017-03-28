@@ -71,6 +71,13 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   // valid if STATE_READY || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_child) {
+    auto state = getState();
+    if (state == STATE_BLOCKED || state == STATE_READY) {
+      scanner.scan(m_child);
+    }
+  }
 };
 
 inline c_AsyncGeneratorWaitHandle* c_WaitHandle::asAsyncGenerator() {

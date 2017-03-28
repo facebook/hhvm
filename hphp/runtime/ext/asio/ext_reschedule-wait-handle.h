@@ -35,9 +35,9 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(RescheduleWaitHandle);
   WAITHANDLE_DTOR(RescheduleWaitHandle);
 
-  explicit c_RescheduleWaitHandle(Class* cls =
-      c_RescheduleWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_RescheduleWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+                     type_scan::getIndexForMalloc<c_RescheduleWaitHandle>()) {}
   ~c_RescheduleWaitHandle() {}
 
  public:

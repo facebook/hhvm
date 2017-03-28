@@ -42,13 +42,9 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     MM().objFree(obj, sz);
   }
 
-  explicit c_AwaitAllWaitHandle(Class* cls = c_AwaitAllWaitHandle::classof())
-    : c_AwaitAllWaitHandle(0, cls)
-  {}
-
-  explicit c_AwaitAllWaitHandle(unsigned cap,
-                                Class* cls = c_AwaitAllWaitHandle::classof())
-    : c_WaitableWaitHandle(cls, HeaderKind::AwaitAllWH)
+  explicit c_AwaitAllWaitHandle(unsigned cap = 0)
+    : c_WaitableWaitHandle(classof(), HeaderKind::AwaitAllWH,
+                         type_scan::getIndexForMalloc<c_AwaitAllWaitHandle>())
     , m_cap(cap)
     , m_unfinished(cap - 1)
   {}
@@ -59,8 +55,7 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   }
 
  public:
-  class Node final {
-   public:
+  struct Node final {
     static constexpr ptrdiff_t blockableOff() {
       return offsetof(Node, m_blockable);
     }
@@ -129,7 +124,9 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
   Node m_children[0]; // allocated off the end
-  TYPE_SCAN_FLEXIBLE_ARRAY_FIELD(m_children);
+  TYPE_SCAN_CUSTOM_FIELD(m_children) {
+    scanner.scan(m_children[0], m_cap * sizeof(Node));
+  }
 
  public:
   static const int8_t STATE_BLOCKED = 2;

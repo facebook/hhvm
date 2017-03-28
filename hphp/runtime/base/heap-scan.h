@@ -73,20 +73,13 @@ inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {
   }
 }
 
-inline void scanResumable(const Resumable* r, type_scan::Scanner& scanner) {
+inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
+  assert(!wh->getAttribute(ObjectData::HasNativeData));
+  // scan ResumableHeader before object
+  auto r = Resumable::FromObj(wh);
   scanFrameSlots(r->actRec(), scanner);
   scanner.scan(*r);
-}
-
-inline void scanAFWH(const ObjectData* obj, type_scan::Scanner& scanner) {
-  assert(!obj->getAttribute(ObjectData::HasNativeData));
-  // scan ResumableHeader before object
-  scanResumable(Resumable::FromObj(obj), scanner);
-  // scan C++ properties after [ObjectData] header. should pick up
-  // unioned and bit-packed fields
-  scanner.conservative(obj + 1,
-                       sizeof(c_AsyncFunctionWaitHandle) - sizeof(*obj));
-  return obj->scan(scanner);
+  return wh->scan(scanner);
 }
 
 inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
@@ -118,13 +111,12 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
     case HeaderKind::AwaitAllWH: {
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
-      auto obj = &h->obj_;
-      assert(!obj->getAttribute(ObjectData::HasNativeData));
-      scanner.conservative(obj + 1, asio_object_size(obj) - sizeof(*obj));
-      return obj->scan(scanner);
+      auto wh = &h->wh_;
+      assert(!wh->getAttribute(ObjectData::HasNativeData));
+      return wh->scan(scanner);
     }
     case HeaderKind::AsyncFuncWH:
-      return scanAFWH(&h->obj_, scanner);
+      return scanAFWH(&h->wh_, scanner);
     case HeaderKind::NativeData:
       scanNative(&h->native_, scanner);
       return Native::obj(&h->native_)->scan(scanner);
@@ -170,6 +162,17 @@ inline void scanHeader(const Header* h, type_scan::Scanner& scanner) {
       break;
   }
   always_assert(false && "corrupt header in worklist");
+}
+
+inline void c_WaitHandle::scan(type_scan::Scanner& scanner) const {
+  // for the purposes of scanning, we just want the ordinary sizeof.
+  auto size = kind() == HeaderKind::AsyncFuncWH ?
+                sizeof(c_AsyncFunctionWaitHandle) :
+              kind() == HeaderKind::AwaitAllWH ?
+                sizeof(c_AwaitAllWaitHandle) :
+              asio_object_size(this);
+  scanner.scanByIndex(m_tyindex, this, size);
+  ObjectData::scan(scanner);
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

@@ -62,8 +62,6 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   const size_t frameSize = Resumable::getFrameSize(numSlots);
   const size_t totalSize = sizeof(NativeNode) + frameSize + sizeof(Resumable) +
                            sizeof(c_AsyncFunctionWaitHandle);
-  // ensure AFWH* ptrs are scanned when found in other types.
-  (void)type_scan::getIndexForMalloc<c_AsyncFunctionWaitHandle>();
   auto const resumable = Resumable::Create(frameSize, totalSize);
   resumable->initialize<false, mayUseVV>(fp,
                                          resumeAddr,

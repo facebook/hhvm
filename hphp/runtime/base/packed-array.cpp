@@ -1381,6 +1381,7 @@ bool PackedArray::VecEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   assert(ad1->isVecArray());
   assert(ad2->isVecArray());
 
+  if (ad1 == ad2) return true;
   if (ad1->m_size != ad2->m_size) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.

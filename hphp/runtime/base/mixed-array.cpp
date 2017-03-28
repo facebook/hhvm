@@ -2056,7 +2056,7 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   assert(ad1->isDict());
   assert(ad2->isDict());
 
-  if (strict && ad1 == ad2) return true;
+  if (ad1 == ad2) return true;
   if (ad1->size() != ad2->size()) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.

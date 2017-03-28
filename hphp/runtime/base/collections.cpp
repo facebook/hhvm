@@ -570,22 +570,18 @@ bool equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto ct1 = obj1->collectionType();
   auto ct2 = obj2->collectionType();
 
-  if (isMapCollection(ct1) && isMapCollection(ct2)) {
-    // For migration purposes, distinct Map types should compare equal
-    return BaseMap::Equals(obj1, obj2);
+  // we intentionally allow mutable/immutable versions of the same collection
+  // type to compare equal
+  if (isMapCollection(ct1)) {
+    return isMapCollection(ct2) && BaseMap::Equals(obj1, obj2);
+  } else if (isVectorCollection(ct1)) {
+    return isVectorCollection(ct2) && BaseVector::Equals(obj1, obj2);
+  } else if (isSetCollection(ct1)) {
+    return isSetCollection(ct2) && BaseSet::Equals(obj1, obj2);
+  } else {
+    assertx(ct1 == CollectionType::Pair);
+    return (ct2 == CollectionType::Pair) && c_Pair::Equals(obj1, obj2);
   }
-
-  if (isVectorCollection(ct1) && isVectorCollection(ct2)) {
-    return BaseVector::Equals(obj1, obj2);
-  }
-
-  if (isSetCollection(ct1) && isSetCollection(ct2)) {
-    return BaseSet::Equals(obj1, obj2);
-  }
-
-  if (ct1 != ct2) return false;
-  assert(ct1 == CollectionType::Pair);
-  return c_Pair::Equals(obj1, obj2);
 }
 
 Variant pop(ObjectData* obj) {

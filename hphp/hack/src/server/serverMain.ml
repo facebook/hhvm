@@ -188,7 +188,7 @@ let recheck genv old_env check_kind =
  * right after one rechecking round finishes to be part of the same
  * rebase, and we don't log the recheck_end event until the update list
  * is no longer getting populated. *)
-let rec recheck_loop acc genv env new_client has_persistent =
+let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   let open ServerNotifierTypes in
   let t = Unix.gettimeofday () in
   (** When a new client connects, we use the synchronous notifier.
@@ -197,15 +197,20 @@ let rec recheck_loop acc genv env new_client has_persistent =
    *
    * NB: This also uses synchronous notify on establishing a persistent
    * connection. This is harmless, but could maybe be filtered away. *)
-  let env, raw_updates = match new_client with
-  | Some _ -> begin
-    env, try Notifier_synchronous_changes (genv.notifier ()) with
-    | Watchman.Timeout -> Notifier_unavailable
-    end
-  | None when t -. env.last_notifier_check_time > 0.5 ->
-    { env with last_notifier_check_time = t; }, genv.notifier_async ()
-  | None ->
-    env, Notifier_async_changes SSet.empty
+  let env, raw_updates =
+    match new_client, has_persistent_connection_request with
+    | Some _, false -> begin
+      env, try Notifier_synchronous_changes (genv.notifier ()) with
+      | Watchman.Timeout -> Notifier_unavailable
+      end
+    | None, false when t -. env.last_notifier_check_time > 0.5 ->
+      { env with last_notifier_check_time = t; }, genv.notifier_async ()
+      (* Do not process any disk changes when there are pending persistent
+       * client requests - some of them might be edits, and we don't want to
+       * do analysis on mid-edit state of the world *)
+    | _, true
+    | None , _->
+      env, Notifier_async_changes SSet.empty
   in
   let genv, acc, raw_updates = match raw_updates with
   | Notifier_unavailable ->
@@ -223,7 +228,8 @@ let rec recheck_loop acc genv env new_client has_persistent =
   in
   let updates = Program.process_updates genv env raw_updates in
 
-  let is_idle = (not has_persistent) && t -. env.last_command_time > 0.1 in
+  let is_idle = (not has_persistent_connection_request) &&
+    t -. env.last_command_time > 0.1 in
 
   let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
@@ -248,12 +254,12 @@ let rec recheck_loop acc genv env new_client has_persistent =
       rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
     } in
-    recheck_loop acc genv env new_client has_persistent
+    recheck_loop acc genv env new_client has_persistent_connection_request
   end
 
-let recheck_loop genv env client has_persistent =
-  let stats, env =
-    recheck_loop empty_recheck_loop_stats genv env client has_persistent in
+let recheck_loop genv env client has_persistent_connection_request =
+  let stats, env = recheck_loop empty_recheck_loop_stats genv env client
+    has_persistent_connection_request in
   { env with recent_recheck_loop_stats = stats }
 
 let new_serve_iteration_id () =
@@ -262,10 +268,11 @@ let new_serve_iteration_id () =
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
-  let client, has_persistent =
+  let client, has_persistent_connection_request =
     ClientProvider.sleep_and_check client_provider env.persistent_client in
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
-  let env = if not has_persistent && client = None && not has_parsing_hook
+  let env = if not has_persistent_connection_request &&
+    client = None && not has_parsing_hook
   then begin
     let last_stats = env.recent_recheck_loop_stats in
     (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
@@ -286,7 +293,7 @@ let serve_one_iteration genv env client_provider =
   end else env in
   let start_t = Unix.gettimeofday () in
   HackEventLogger.with_id ~stage:`Recheck recheck_id @@ fun () ->
-  let env = recheck_loop genv env client has_persistent in
+  let env = recheck_loop genv env client has_persistent_connection_request in
   let stats = env.recent_recheck_loop_stats in
   if stats.rechecked_count > 0 then begin
     HackEventLogger.recheck_end start_t has_parsing_hook
@@ -329,7 +336,7 @@ let serve_one_iteration genv env client_provider =
       Hh_logger.log "Handling client failed. Ignoring.";
       env
   end in
-  if has_persistent then
+  if has_persistent_connection_request then
     let client = Utils.unsafe_opt env.persistent_client in
     HackEventLogger.got_persistent_client_channels start_t;
     (try

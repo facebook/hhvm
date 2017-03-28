@@ -109,7 +109,6 @@ NATIVE_C_FILES=\
   utils/priorities.c\
   utils/realpath.c\
   utils/sysinfo.c\
-  utils/win32_support.c\
   $(INOTIFY)/$(notdir $(INOTIFY))_stubs.c
 
 OCAML_LIBRARIES=\

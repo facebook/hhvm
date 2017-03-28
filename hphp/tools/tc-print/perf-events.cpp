@@ -81,12 +81,11 @@ const char* validArguments[] = {
   "LLC-store-misses",
   "iTLB-misses",
   "dTLB-misses",
-  "prof-counters"
 };
 
 PerfEventType commandLineArgumentToEventType(const char* argument) {
-  size_t numEle = sizeof validArguments / sizeof (*validArguments);
-  always_assert(numEle == NUM_EVENT_TYPES);
+  constexpr size_t numEle = sizeof validArguments / sizeof (*validArguments);
+  static_assert(numEle == NUM_EVENT_TYPES, "need to update validArguments[]");
 
   for (size_t i = 0; i < numEle; i++) {
     if (!strcmp(validArguments[i], argument)) return (PerfEventType)i;

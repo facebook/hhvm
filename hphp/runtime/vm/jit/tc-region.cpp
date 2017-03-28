@@ -228,13 +228,16 @@ publishTranslationInternal(TransMetaInfo info, OptView optSrcView) {
   recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),
                        loc.coldEnd(), false, false);
 
-  if (tr.isValid()) {
+  // If we relocated the code, the machine-code addresses in the `tr' TransRec
+  // need to be updated.
+  if (tr.isValid() && needsRelocate) {
     tr.aStart = loc.mainStart();
     tr.acoldStart = loc.coldCodeStart();
     tr.afrozenStart = loc.frozenCodeStart();
     tr.aLen = loc.mainSize();
     tr.acoldLen = loc.coldCodeSize();
     tr.afrozenLen = loc.frozenCodeSize();
+    tr.bcMapping = fixups.bcMap;
   }
 
   transdb::addTranslation(tr);

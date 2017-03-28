@@ -84,6 +84,12 @@ function main($k) {
   $copy_k = $k;
   var_dump(krsort($copy_k));
   var_dump($copy_k);
+
+  echo "array_slice (0): ";
+  var_dump(array_slice($k, 0));
+
+  echo "array_slice (1): ";
+  var_dump(array_slice($k, 1));
 }
 
 main(keyset[]);

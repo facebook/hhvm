@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-relocate.h"
 
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -121,13 +122,12 @@ TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
       adjustMetaDataForRelocation(rel, nullptr, fixups);
       adjustCodeForRelocation(rel, fixups);
     } catch (const DataBlockFull& dbFull) {
+      tlm.rollback();
       if (dbFull.name == "hot") {
         code().disableHot();
-        tlm.rollback();
         return folly::none;
       }
-      always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
+      throw;
     }
     return tlm;
   };
@@ -184,14 +184,21 @@ publishTranslationInternal(TransMetaInfo info, OptView optSrcView) {
   // only useful in production environments where we may want to emit optimize
   // translations in parallel, while reusable TC is only meaningful in sandboxes
   // where translations may be invalidates by source modifications.
-  auto view = [&] {
-    if (!needsRelocate) return info.emitView;
 
-    auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
-                                        fixups);
-    range = tlm.markEnd();
-    return tlm.view();
+  auto optDstView = [&] () -> folly::Optional<CodeCache::View> {
+    if (!needsRelocate) return info.emitView;
+    try {
+      auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
+                                          fixups);
+      range = tlm.markEnd();
+      return tlm.view();
+    } catch (const DataBlockFull& dbFull) {
+      return folly::none;
+    }
   }();
+
+  if (!optDstView) return folly::none;
+  auto view = *optDstView;
 
   auto loc = range.loc();
   tryRelocateNewTranslation(sk, loc, view, fixups);
@@ -286,8 +293,32 @@ void invalidateFuncProfSrcKeys(const Func* func) {
   }
 }
 
-void publishOptFunctionInternal(FuncMetaInfo info) {
+size_t infoSize(const FuncMetaInfo& info) {
+  size_t sz = 0;
+  for (auto& trans : info.translations) {
+    auto& range = trans.range;
+    sz += range.main.size() + range.cold.size() + range.frozen.size();
+  }
+  return sz;
+}
+
+bool checkTCLimits() {
+  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
+  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
+
+  if (main_under && cold_under && froz_under) return true;
+  return cold_under && froz_under && code().hotEnabled();
+}
+
+void publishOptFunctionInternal(FuncMetaInfo info,
+                                size_t* failedBytes = nullptr) {
   auto const func = info.func;
+
+  if (!checkTCLimits()) {
+    *failedBytes += infoSize(info);
+    return;
+  }
 
   for (auto const rec : info.prologues) {
     emitFuncPrologueOptInternal(rec);
@@ -298,6 +329,8 @@ void publishOptFunctionInternal(FuncMetaInfo info) {
   mcgen::ReadThreadLocalTC localTC(info.tcBuf);
   for (auto& trans : info.translations) {
     auto const regionSk = trans.sk;
+    auto& range = trans.range;
+    auto bytes = range.main.size() + range.cold.size() + range.frozen.size();
     auto const loc = publishTranslationInternal(
       std::move(trans), info.tcBuf.view()
     );
@@ -306,6 +339,8 @@ void publishOptFunctionInternal(FuncMetaInfo info) {
         !func->hasThisVaries() &&
         func->getDVFunclets().size() == 0) {
       func->setFuncBody(loc->mainStart());
+    } else if (!loc && failedBytes) {
+      *failedBytes += bytes;
     }
   }
 }
@@ -490,13 +525,20 @@ void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos) {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
+  size_t failedBytes = 0;
   ProfData::Session pds;
 
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) {
       continue;
     }
-    publishOptFunctionInternal(std::move(finfo));
+    publishOptFunctionInternal(std::move(finfo), &failedBytes);
+  }
+
+  if (failedBytes) {
+    logPerfWarning("opt_translation_overflow", 1, [&] (StructuredLogEntry& e) {
+      e.setInt("bytes_dropped", failedBytes);
+    });
   }
 }
 

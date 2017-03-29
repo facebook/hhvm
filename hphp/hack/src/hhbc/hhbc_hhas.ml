@@ -11,6 +11,7 @@
 module B = Buffer
 module H = Hhbc_ast
 module A = Ast
+module SS = String_sequence
 open H
 
 (* Generic helpers *)
@@ -712,38 +713,42 @@ let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
 
 let rec attribute_argument_to_string argument =
   match argument with
-  | Null -> "N;"
-  | Double f -> Printf.sprintf "d:%s;" f
-  | String s ->
+  | Null -> SS.str "N;"
+  | Double f -> SS.str @@ Printf.sprintf "d:%s;" f
+  | String s -> SS.str @@
     Printf.sprintf "s:%d:%s;" (String.length s) (quote_str_with_escape s)
   (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
-  | False -> "i:0;"
-  | True -> "i:1;"
-  | Int i -> "i:" ^ (Int64.to_string i) ^ ";"
+  | False -> SS.str "i:0;"
+  | True -> SS.str "i:1;"
+  | Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
   | Array (num, fields) ->
     attribute_collection_argument_to_string "a" num fields
   | Vec (num, fields) -> attribute_collection_argument_to_string "v" num fields
   | Dict (num, fields) -> attribute_collection_argument_to_string "D" num fields
   | Keyset (num, fields) ->
     attribute_collection_argument_to_string "k" num fields
-  | NYI text -> "NYI: " ^ text
+  | NYI text -> SS.str @@ "NYI: " ^ text
   | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
   | MapAddElemC | ColAddNewElemC | File | Dir | Method | NameA
   | NewArray _ | NewMixedArray _ | NewDictArray _
   | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _) | NewPackedArray _
   | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _
   | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
-  | ClsCnsD (_, _) ->
+  | ClsCnsD (_, _) -> SS.str
     "\r# NYI: unexpected literal kind in attribute_argument_to_string"
 
 and attribute_collection_argument_to_string col_type num fields =
   let fields = attribute_arguments_to_string fields in
-  Printf.sprintf "%s:%d:{%s}" col_type num fields
+  SS.gather [
+    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
+    fields;
+    SS.str "}"
+  ]
 
 and attribute_arguments_to_string arguments =
   arguments
     |> Core.List.map ~f:attribute_argument_to_string
-    |> String.concat ""
+    |> SS.gather
 
 let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
   let count = List.length args in
@@ -757,14 +762,25 @@ let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
   let arguments = attribute_arguments_to_string args in
   let attribute_str = format_of_string @@
     if if_class_attribute
-    then "\"%s\"(\"\"\"a:%n:{%s}\"\"\")"
-    else "\"\"\"%s:%n:{%s}\"\"\""
+    then "\"%s\"(\"\"\"a:%n:{"
+    else "\"\"\"%s:%n:{"
   in
-  Printf.sprintf attribute_str name count arguments
+  let attribute_begin = Printf.sprintf attribute_str name count in
+  let attribute_end =
+    if if_class_attribute
+    then "}\"\"\")"
+    else "}\"\"\""
+  in
+  SS.gather [
+    SS.str attribute_begin;
+    arguments;
+    SS.str attribute_end;
+  ]
 
 let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
+  SS.seq_to_string @@
   attribute_to_string_helper ~has_keys:true ~if_class_attribute:true name args
 
 let function_attributes f =
@@ -894,9 +910,10 @@ let add_property class_def buf property =
   else begin
     B.add_string buf "\"\"\"";
     let init = match Hhas_property.initial_value property with
-    | None -> "N;"
-    | Some value -> attribute_argument_to_string value in
-    B.add_string buf init;
+      | None -> SS.str "N;"
+      | Some value -> attribute_argument_to_string value
+    in
+    SS.add_string_from_seq buf init;
     B.add_string buf "\"\"\";"
   end
 
@@ -907,7 +924,7 @@ let add_constant buf c =
   B.add_string buf name;
   B.add_string buf " = \"\"\"";
   (* TODO: attribute_argument_to_string could stand to be renamed. *)
-  B.add_string buf (attribute_argument_to_string value);
+  SS.add_string_from_seq buf @@ attribute_argument_to_string value;
   B.add_string buf "\"\"\";"
 
 let add_type_constant buf c =
@@ -950,7 +967,7 @@ let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf ".adata A_";
   B.add_string buf @@ string_of_int num;
   B.add_string buf " = ";
-  B.add_string buf
+  SS.add_string_from_seq buf
     @@ attribute_to_string_helper
       ~if_class_attribute:false
       ~has_keys

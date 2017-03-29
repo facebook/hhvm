@@ -18,9 +18,8 @@ EOT;
 # frames, return null.
 function tc_callee($stack) {
   for ($i = 0; $i < count($stack); ++$i) {
-    // Normal translations starts with PHP::. Unique stubs start with HHVM::.
-    if (!starts_with($stack[$i], 'PHP::') &&
-        !starts_with($stack[$i], 'HHVM::')) {
+    // Normal translations starts with PHP::.
+    if (!starts_with($stack[$i], 'PHP::')) {
       continue;
     }
 
@@ -132,6 +131,9 @@ function categorize_helper($func) {
       '/ImmSet/',
       '/HashCollection/',
     },
+    'UniqueStubs' => Vector {
+      '/^HHVM::/',
+    }
   };
 
   foreach ($categories as $cat => $regexes) {

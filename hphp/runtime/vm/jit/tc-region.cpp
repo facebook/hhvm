@@ -316,7 +316,7 @@ void publishOptFunctionInternal(FuncMetaInfo info,
   auto const func = info.func;
 
   if (!checkTCLimits()) {
-    *failedBytes += infoSize(info);
+    if (failedBytes) *failedBytes += infoSize(info);
     return;
   }
 

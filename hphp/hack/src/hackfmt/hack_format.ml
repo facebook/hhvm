@@ -687,12 +687,10 @@ let rec transform node =
     let (operator, operand) = get_prefix_unary_expression_children x in
     Fmt [
       t operator;
-      (* TODO: should this just live in transform's Token case?
-        long term is to make await it's own syntax kind *)
       (match syntax operator with
         | Token x ->
-          if EditableToken.kind x = EditableToken.TokenKind.Await then
-            Space
+          let open EditableToken in
+          if kind x = TokenKind.Await || kind x = TokenKind.Clone then Space
           else Nothing
         | _ -> Nothing
       );

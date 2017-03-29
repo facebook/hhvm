@@ -15,12 +15,16 @@ open Sys_utils
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
+type parser =
+  | Legacy
+  | FFP
 
 type options = {
   filename    : string;
   fallback    : bool;
   config      : string list;
   debug_time  : bool;
+  parser      : parser;
 }
 
 (*****************************************************************************)
@@ -45,6 +49,7 @@ let parse_options () =
   let fn_ref = ref None in
   let fallback = ref false in
   let debug_time = ref false in
+  let parser = ref FFP in
   let config = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
@@ -59,6 +64,13 @@ let parse_options () =
       ("-v"
       , Arg.String (fun str -> config := str :: !config)
       , " Configuration: Eval.EnableHipHopSyntax=<value> or Hack.Lang.IntsOverflowToInts=<value>"
+      );
+      ("--parser"
+      , Arg.String
+        (function "ffp" -> parser := FFP
+                | "legacy" -> parser := Legacy
+                | p -> failwith @@ p ^ " is an invalid parser")
+      , " Parser: ffp or legacy [def: ffp]"
       )
     ] in
   let options = Arg.align ~limit:25 options in
@@ -70,6 +82,7 @@ let parse_options () =
   ; fallback = !fallback
   ; config = !config
   ; debug_time = !debug_time
+  ; parser = !parser
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -126,10 +139,15 @@ let file_to_files file =
   else
     Relative_path.Map.singleton file content
 
-let parse_name popt files_contents =
+let parse_name compiler_options popt files_contents =
   Errors.do_ begin fun () ->
-    let parser = Full_fidelity_ast.from_text_with_legacy ~parser_options:popt in
-    let parsed_files = Relative_path.Map.mapi parser files_contents in
+    let parsed_files =
+      if compiler_options.parser = FFP
+      then Relative_path.Map.mapi
+            (Full_fidelity_ast.from_text_with_legacy ~parser_options:popt)
+            files_contents
+      else Relative_path.Map.mapi (Parser_hack.program popt) files_contents
+    in
 
     let files_info =
       Relative_path.Map.mapi begin fun fn parsed_file ->
@@ -227,7 +245,7 @@ let decl_and_run_mode compiler_options popt tcopt =
   let filename =
     Relative_path.create Relative_path.Dummy compiler_options.filename in
   let files_contents = file_to_files filename in
-  let _, files_info, _ = parse_name popt files_contents in
+  let _, files_info, _ = parse_name compiler_options popt files_contents in
   ignore @@ add_to_time_ref parsing_t t;
   do_compile compiler_options tcopt files_info
 

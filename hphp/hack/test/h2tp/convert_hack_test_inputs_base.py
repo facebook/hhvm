@@ -496,6 +496,7 @@ OTHER_UNPARSEABLE_FILES = [
     'array_get_newtype.php',
     'references/call_time_reference1.php',
     'references/call_time_reference3.php',
+    'final_property.php'
 ]
 
 UNPARSEABLE_OUTPUT = set([

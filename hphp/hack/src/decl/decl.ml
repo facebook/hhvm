@@ -580,6 +580,7 @@ and class_var_decl env c acc cv =
   } in
   Decl_heap.Props.add (elt.elt_origin, id) ty;
   let acc = SMap.add id elt acc in
+  if cv.cv_final then Errors.final_property (fst cv.cv_id);
   acc
 
 and static_class_var_decl env c acc cv =

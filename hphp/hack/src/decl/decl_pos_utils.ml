@@ -80,6 +80,7 @@ let rec reason = function
   | Rused_as_shape p         -> Rused_as_shape (pos p)
   | Rpredicated (p, f)       -> Rpredicated (pos p, f)
   | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
+  | Rfinal_property p        -> Rfinal_property (pos p)
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =

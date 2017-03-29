@@ -690,6 +690,7 @@ module Typing                               = struct
   let ambiguous_member                      = 4161 (* DONT MODIFY!!!! *)
   let instanceof_generic_classname          = 4162 (* DONT MODIFY!!!! *)
   let required_field_is_optional            = 4163 (* DONT MODIFY!!!! *)
+  let final_property                        = 4164 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1842,6 +1843,9 @@ let interface_final pos =
 let trait_final pos =
   add Typing.trait_final pos
     "Traits cannot be final"
+
+let final_property pos =
+  add Typing.final_property pos "Properties cannot be declared final"
 
 let implement_abstract ~is_final pos1 pos2 kind x =
   let name = "abstract "^kind^" '"^x^"'" in

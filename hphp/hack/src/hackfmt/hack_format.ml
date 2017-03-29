@@ -1763,6 +1763,11 @@ and transform_trivia ~is_leading trivia =
     | TriviaKind.IgnoreError
     | TriviaKind.Markup
     | TriviaKind.DelimitedComment ->
+      let preceded_by_whitespace =
+        if !currently_leading
+          then has_whitespace !leading_invisibles
+          else has_whitespace !trailing_invisibles
+      in
       make_comment ();
       let delimited_lines = Str.split new_line_regex (Trivia.text triv) in
       let map_tail str =
@@ -1799,7 +1804,9 @@ and transform_trivia ~is_leading trivia =
       let hd = Comment (hd, (String.length hd)) in
 
       last_comment := Some (Fmt [
-        if !currently_leading then Newline else Space;
+        if !currently_leading then Newline
+        else if preceded_by_whitespace then Space
+        else Nothing;
         Fmt (hd :: List.map tl ~f:map_tail);
       ]);
       last_comment_was_delimited := true;
@@ -1813,6 +1820,7 @@ and transform_trivia ~is_leading trivia =
         Comment ((Trivia.text triv), (Trivia.width triv));
         Newline;
       ]);
+      last_comment_was_delimited := false;
       currently_leading := false;
     | TriviaKind.EndOfLine ->
       indent := 0;

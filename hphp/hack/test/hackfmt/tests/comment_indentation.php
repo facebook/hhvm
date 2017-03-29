@@ -21,6 +21,12 @@ get_electric_mixer(/* plug in */
 
 mixer_settings($minutes, $speed /* nullable */);
 
+mixer_settings(/* mins */ $minutes /* nullable */, /* spd */ $speed);
+
+mixer_settings(/*mins*/$minutes/*null*/,/*spd*/$speed/*null*/);
+
+mixer_settings(  /*mins*/  $minutes  /*null*/  ,  /*spd*/  $speed  /*null*/  );
+
 mix_dough(
   $flour,
   $butter,

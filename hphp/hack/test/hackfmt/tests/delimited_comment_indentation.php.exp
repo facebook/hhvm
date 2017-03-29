@@ -71,7 +71,7 @@ abstract final class ErrorDescriptions {
       ErrorCode::FATAL => 'Fatal',
       /*
             ErrorCode::DISABLED => 'disabled',
-      */ /**
+      *//**
              * Foo Errors
              */
       ErrorCode::FOO_PARSE_FAILED => 'Foo could not be parsed',

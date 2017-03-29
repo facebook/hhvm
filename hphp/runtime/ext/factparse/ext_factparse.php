@@ -79,7 +79,7 @@ function facts_parse(
  * 3 => support requireExtends/requireImplements constraints
  */
 function ext_factparse_version(): int {
-  return (int)phpversion("factparse");
+  return (int)\phpversion("factparse");
 }
 
 } // namespace HH

@@ -1538,8 +1538,14 @@ and transform_last_arg ~allow_trailing node =
     let (item, separator) = get_list_item_children x in
     Fmt (match syntax separator with
       | Token x -> [
-          transform item;
-          if allow_trailing then TrailingComma else Nothing;
+          begin
+            let item, trailing = remove_trailing_trivia item in
+            Fmt [
+              transform item;
+              if allow_trailing then TrailingComma else Nothing;
+              transform_trailing_trivia trailing;
+            ];
+          end;
           let leading = EditableToken.leading x in
           let trailing = EditableToken.trailing x in
           Fmt [

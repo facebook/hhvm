@@ -217,7 +217,7 @@ let rec transform node =
     Fmt [
       t where;
       Space;
-      t constraints;
+      handle_possible_list constraints ~after_each:space;
     ]
   | WhereConstraint x ->
     let (left, op, right) = get_where_constraint_children x in
@@ -379,7 +379,7 @@ let rec transform node =
     Fmt [
       t attr;
       t visibility;
-      Space;
+      when_present visibility space;
       t param_type;
       if is_missing visibility && is_missing param_type
       then t name
@@ -1445,6 +1445,7 @@ and transform_fn_decl_args params rightp colon ret_type where =
     transform colon;
     when_present colon space;
     transform ret_type;
+    when_present where space;
     transform where;
   ])
 

@@ -83,8 +83,11 @@ let builder = object (this)
     chunks <- (match chunks with
       | hd :: tl when hd.Chunk.is_appendable ->
         let text = hd.Chunk.text ^ (if pending_space then " " else "") ^ s in
+        pending_space <- false;
         {hd with Chunk.text = text} :: tl
       | _ -> begin
+          space_if_not_split <- pending_space;
+          pending_space <- false;
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
           let handle_started_next_split_rule () =
             let cs = Chunk.make s (List.hd rules) nesting :: chunks in
@@ -113,8 +116,6 @@ let builder = object (this)
         Stack.push (open_span (List.length chunks - 1) cost) open_spans
       );
     end;
-
-    pending_space <- false
 
   method private set_pending_comma () =
     chunks <- (match chunks with

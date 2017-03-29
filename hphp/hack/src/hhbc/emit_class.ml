@@ -129,6 +129,13 @@ let from_ast : A.class_ -> Hhas_class.t =
     Emit_attribute.from_asts ast_class.Ast.c_user_attributes in
   let class_name = Litstr.to_string @@ snd ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
+  let class_uses =
+    List.filter_map
+      ast_class.A.c_body
+      (fun x ->
+        match x with
+        | A.ClassUse (_, (A.Happly ((_, name), _))) -> Some name
+        | _ -> None) in
   let class_enum_type =
     if ast_class.A.c_kind = Ast.Cenum
     then from_enum_type ast_class.A.c_enum
@@ -177,6 +184,7 @@ let from_ast : A.class_ -> Hhas_class.t =
     class_is_abstract
     class_is_interface
     class_is_trait
+    class_uses
     class_enum_type
     class_methods
     class_properties

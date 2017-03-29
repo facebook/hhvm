@@ -941,6 +941,14 @@ let add_enum_ty buf c =
     B.add_string buf ";"
   | _ -> ()
 
+let add_uses buf c =
+  let use_l = Hhas_class.class_uses c in
+  match use_l with
+  | [] -> ()
+  | _  ->
+    B.add_string buf @@ Printf.sprintf "\n  .use %s;"
+      @@ String.concat " " @@ List.map Utils.strip_ns use_l
+
 let add_class_def buf class_def =
   let class_name = fmt_name (Hhas_class.name class_def) in
   (* TODO: user attributes *)
@@ -950,6 +958,7 @@ let add_class_def buf class_def =
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {";
+  add_uses buf class_def;
   add_enum_ty buf class_def;
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);

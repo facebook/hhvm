@@ -1195,34 +1195,21 @@ and braced_block_nest open_b close_b nodes =
     | Token open_b -> ()
     | _ -> failwith "Expected Token"
   in
-  let close_b = match syntax close_b with
-    | Token close_b -> close_b
+  let () = match syntax close_b with
+    | Token close_b -> ()
     | _ -> failwith "Expected Token"
   in
-
-  (* Remove the closing brace's leading trivia (before its final newline) and
-     handle it inside the BlockNest, so that comments will be indented
-     correctly. *)
-  let close_leading = EditableToken.leading close_b in
-  let close_b = Syntax.make_token {close_b with EditableToken.leading = []} in
-
-  let rev_leading_trivia = List.rev close_leading in
-  let (after_last_newline, up_to_last_newline) =
-    List.split_while rev_leading_trivia
-      ~f:(fun t -> Trivia.kind t <> TriviaKind.EndOfLine)
-  in
-  let after_last_newline = List.rev after_last_newline in
-  let up_to_last_newline = List.rev up_to_last_newline in
-
+  (* Remove the closing brace's leading trivia and handle it inside the
+   * BlockNest, so that comments will be indented correctly. *)
+  let leading, close_b = remove_leading_trivia close_b in
   Fmt [
     transform open_b;
     Newline;
     BlockNest [
       Fmt nodes;
-      transform_leading_trivia up_to_last_newline;
+      transform_leading_trivia leading;
       Newline;
     ];
-    transform_leading_trivia after_last_newline;
     transform close_b;
   ]
 
@@ -1454,8 +1441,7 @@ and transform_fn_decl_name async kw amp name type_params leftp =
 
 and transform_fn_decl_args params rightp colon ret_type where =
   WithRule (Rule.Argument, Fmt [
-    transform_possible_comma_list params;
-    transform rightp;
+    transform_possible_comma_list params rightp;
     transform colon;
     when_present colon space;
     transform ret_type;
@@ -1465,12 +1451,9 @@ and transform_fn_decl_args params rightp colon ret_type where =
 and transform_argish_with_return_type left_p params right_p colon ret_type =
   Fmt [
     transform left_p;
-    Split;
-
+    when_present params split;
     WithRule (Rule.Argument, Fmt [
-      transform_possible_comma_list params;
-      Split;
-      transform right_p;
+      transform_possible_comma_list params right_p;
       transform colon;
       when_present colon space;
       transform ret_type;
@@ -1480,35 +1463,45 @@ and transform_argish_with_return_type left_p params right_p colon ret_type =
 and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
   Fmt [
     transform left_p;
-    match syntax arg_list with
-    | Missing -> transform right_p
-    | _ ->
-      Fmt [
-        Split;
-        WithRule (Rule.Argument, Span [
-          transform_possible_comma_list arg_list ~allow_trailing;
-          Split;
-          transform right_p;
-        ])
-      ]
+    when_present arg_list split;
+    WithRule (Rule.Argument, Span [
+      transform_possible_comma_list ~allow_trailing arg_list right_p
+    ])
   ]
 
 and transform_braced_item left_p item right_p =
+  (* Remove the right paren's leading trivia and handle it inside the Nest, so
+   * that comments will be indented correctly. *)
+  let leading, right_p = remove_leading_trivia right_p in
   Fmt [
     transform left_p;
     Split;
     WithRule (Rule.Argument, Span [
-      Nest [transform item];
+      Nest [
+        transform item;
+        transform_leading_trivia leading;
+      ];
       Split;
       transform right_p;
     ]);
   ]
 
-and transform_possible_comma_list ?(allow_trailing=true) items =
-  Nest [
-    handle_possible_list items
-      ~after_each:after_each_argument
-      ~handle_last:(transform_last_arg ~allow_trailing)
+and transform_possible_comma_list ?(allow_trailing=true) items right_p =
+  (* Remove the right paren's leading trivia and handle it inside the Nest, so
+   * that comments will be indented correctly. *)
+  let leading, right_p = match syntax right_p with
+    | Missing -> [], right_p
+    | _ -> remove_leading_trivia right_p
+  in
+  Fmt [
+    Nest [
+      handle_possible_list items
+        ~after_each:after_each_argument
+        ~handle_last:(transform_last_arg ~allow_trailing);
+      transform_leading_trivia leading;
+    ];
+    when_present items split;
+    transform right_p;
   ]
 
 and remove_leading_trivia node =

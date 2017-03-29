@@ -61,6 +61,7 @@ type t =
   | TrailingComma
 
 let space _ = Space
+let split _ = Split
 let space_split _ = Fmt [Space; Split]
 let newline _ = Newline
 

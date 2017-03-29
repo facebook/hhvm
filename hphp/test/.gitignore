@@ -10,6 +10,8 @@
 *.tmp
 *.log
 *.log.old
+*.hhcodegen_output.hhas
+*.hhcodegen_messages
 /frameworks/composer.json.md5
 /frameworks/composer.phar
 /frameworks/framework_downloads

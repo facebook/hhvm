@@ -108,12 +108,16 @@ void conservative_stub(type_scan::Scanner& scanner,
   scanner.conservative(ptr, size);
 }
 
+void noptrs_stub(type_scan::Scanner& scanner, const void* ptr,
+                 std::size_t size) {
+}
+
 // Initialize metadata table, used before init() is called. Since before this,
 // the only type-indices that can be present are "kIndexUnknown" and
 // "kIndexUnknownNoPtrs".
 const Metadata stub_metadata_table[] = {
   {"(UNKNOWN)", conservative_stub},
-  {"(UNKNOWN NO-PTRS)", nullptr}
+  {"(UNKNOWN NO-PTRS)", noptrs_stub}
 };
 const Metadata* g_metadata_table = stub_metadata_table;
 std::size_t g_metadata_table_size = 2;

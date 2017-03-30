@@ -85,8 +85,15 @@ struct ActRec {
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
   };
 
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_thisUnsafe);
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_varEnv);
+  TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
+    // skip if "this" is a class
+    if (checkThisOrNull(m_thisUnsafe)) scanner.scan(m_thisUnsafe);
+  }
+  TYPE_SCAN_CUSTOM_FIELD(m_varEnv) {
+    // All three union members could be heap pointers, but we don't care
+    // which kind; PtrMap will resolve things.
+    scanner.scan(m_varEnv);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 

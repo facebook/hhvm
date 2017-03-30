@@ -36,6 +36,7 @@
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -58,9 +59,17 @@
 namespace HPHP {
 
 inline void scanFrameSlots(const ActRec* ar, type_scan::Scanner& scanner) {
-  auto num_slots = ar->func()->numSlotsInFrame();
-  auto slots = reinterpret_cast<const TypedValue*>(ar) - num_slots;
-  scanner.conservative(slots, num_slots * sizeof(TypedValue));
+  // layout: [clsrefs][iters][locals][ActRec]
+  //                                 ^ar
+  auto num_locals = ar->func()->numLocals();
+  auto locals = frame_local(ar, num_locals - 1);
+  scanner.scan(*locals, num_locals * sizeof(TypedValue));
+  auto num_iters = ar->func()->numIterators();
+  if (num_iters > 0) {
+    // Conservatively scan iterators: we don't know their liveness or type
+    auto iters = frame_iter(ar, num_iters - 1);
+    scanner.conservative(iters, num_iters * sizeof(Iter));
+  }
 }
 
 inline void scanNative(const NativeNode* node, type_scan::Scanner& scanner) {

@@ -13,7 +13,7 @@ open Instruction_sequence
 let from_ast : Ast.fun_ -> Hhas_function.t =
   fun ast_fun ->
   let function_name = Litstr.to_string @@ snd ast_fun.Ast.f_name in
-  let default_instrs = gather [instr_null; instr_retc] in
+  let default_instrs _ = gather [instr_null; instr_retc] in
   let body_instrs,
       function_decl_vars,
       function_params,

@@ -32,17 +32,29 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   let ret =
     if method_name = Naming_special_names.Members.__construct
     then None else ast_method.Ast.m_ret in
-  let default_instrs =
+  let default_instrs return_type =
       if List.mem ast_method.Ast.m_kind Ast.Abstract
       then gather [
         instr_string ("Cannot call abstract method " ^ Utils.strip_ns name
           ^ "::" ^ snd (ast_method.Ast.m_name) ^ "()");
         instr (IOp (Fatal FatalOp.RuntimeOmitFrame))
       ]
-      else gather [
-        instr_null;
-        instr_retc
-      ] in
+      else let default_seq =
+        gather [
+          instr_null;
+          instr_retc
+        ] in
+        (* TODO: the following cannot use Emit_body.has_type_constraint
+         *       because it would not follow the current HHVM behaviour *)
+        match return_type with
+        | None -> default_seq
+        | Some x when x. Hhas_type_info.type_info_user_type = Some "" ->
+          default_seq
+        | _ -> gather [
+            instr_null;
+            instr_verifyRetTypeC;
+            instr_retc
+          ] in
   let body_instrs,
       method_decl_vars,
       method_params,

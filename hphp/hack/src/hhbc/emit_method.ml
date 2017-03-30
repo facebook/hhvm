@@ -57,6 +57,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
           ] in
   let body_instrs,
       method_decl_vars,
+      method_num_iters,
       method_params,
       method_return_type,
       method_is_generator,
@@ -88,6 +89,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     method_return_type
     method_body
     method_decl_vars
+    method_num_iters
     method_is_async
     method_is_generator
     method_is_pair_generator

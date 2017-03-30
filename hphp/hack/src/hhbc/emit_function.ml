@@ -16,6 +16,7 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
   let default_instrs _ = gather [instr_null; instr_retc] in
   let body_instrs,
       function_decl_vars,
+      function_num_iters,
       function_params,
       function_return_type,
       function_is_generator,
@@ -41,6 +42,7 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
     function_return_type
     function_body
     function_decl_vars
+    function_num_iters
     function_is_async
     function_is_generator
     function_is_pair_generator

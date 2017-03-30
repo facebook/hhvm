@@ -21,10 +21,10 @@ module ContBreak = struct
     | (Break _, Continue _) -> -1
     | (Continue (l1, _), Continue (l2, _)) when (l1 <> l2) ->
       compare_ints l1 l2
-    | (Break (l1, _), Break (l2, _)) when (l1 <> l2) ->
+    | (Break (l1, _, _), Break (l2, _, _)) when (l1 <> l2) ->
       compare_ints l1 l2
     | (Continue (_, o1), Continue (_, o2))
-    | (Break (_, o1), Break (_, o2)) ->
+    | (Break (_, o1, _), Break (_, o2, _)) ->
       compare_ints o1 o2
 end
 

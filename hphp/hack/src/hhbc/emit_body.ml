@@ -83,8 +83,10 @@ let from_ast ~self tparams params ret body default_instrs =
     (List.map params Hhas_param.name @ function_decl_vars)
     body_instrs
   in
+  let num_iters = !Iterator.num_iterators in
   body_instrs,
   function_decl_vars,
+  num_iters,
   params,
   return_type_info,
   is_generator,

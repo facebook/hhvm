@@ -27,7 +27,6 @@ quick/Isset.php
 quick/IssetM.php
 quick/PropU.php
 quick/ReadVar.php
-quick/ReflectionClass.php
 quick/SPropW.php
 quick/SetM.php
 quick/SetOp.php
@@ -69,9 +68,6 @@ quick/autoload7.php
 quick/autoload_case.php
 quick/backtick.php
 quick/backtrace-after-unset.php
-quick/bad_setm.php
-quick/bad_setm_nopt.php
-quick/bitwise.php
 quick/bitwise_not.php
 quick/bitwise_string.php
 quick/bool_types.php
@@ -158,7 +154,6 @@ quick/closure_recursive_bad.php
 quick/closure_static.php
 quick/closure_use_immediately.php
 quick/closure_use_this.php
-quick/clsmethod-trait.php
 quick/clsmethodf.php
 quick/cmp.php
 quick/cnsu.php
@@ -298,9 +293,6 @@ quick/fib_gen.php
 quick/file_read.php
 quick/final_class.php
 quick/final_method.php
-quick/final_method2.php
-quick/final_method3.php
-quick/final_method4.php
 quick/float-overflow-literals.php
 quick/float-overflow.php
 quick/floatcmp.php
@@ -326,7 +318,6 @@ quick/generator_vars.php
 quick/get_called_class.php
 quick/get_class.php
 quick/get_class_constants.php
-quick/get_class_methods1.php
 quick/get_class_methods2.php
 quick/get_class_methods3.php
 quick/get_class_methods4.php
@@ -467,8 +458,6 @@ quick/is_callable.php
 quick/jitarray.php
 quick/jmpfuse.php
 quick/json_bigint.php
-quick/json_escaped_string.php
-quick/json_last_error_scalar.php
 quick/keyset/apc.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-init.php
@@ -526,7 +515,6 @@ quick/negjump.php
 quick/nested__destruct.php
 quick/nested_vm_exceptions.php
 quick/nested_vm_exceptions2.php
-quick/nl2br.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
 quick/non-special-this.php
@@ -548,7 +536,6 @@ quick/ns_use_func.php
 quick/null_constant.php
 quick/obj-string-throw.php
 quick/obj-sweep.php
-quick/objmethod.php
 quick/open_tag_with_echo.php
 quick/ops.php
 quick/packed-array-bounds.php
@@ -574,7 +561,6 @@ quick/profile/Setprofile.php
 quick/profile/Setprofile_async.php
 quick/profile/Setprofile_generic.php
 quick/profile/setprofile_throw.php
-quick/prop_ctx.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/propagate-array.php
@@ -699,12 +685,6 @@ quick/trailing_comma_bad3.php
 quick/trailing_comma_bad4.php
 quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
-quick/trait_method_modif1.php
-quick/trait_method_modif10.php
-quick/trait_method_modif3.php
-quick/trait_method_modif4.php
-quick/trait_method_modif7.php
-quick/trait_method_modif8.php
 quick/trait_property_init.php
 quick/trait_self.php
 quick/trait_two_use_closure.php
@@ -762,7 +742,6 @@ quick/xhp_comment.php
 quick/xhp_file_line.php
 quick/xml_entity_loader.php
 quick/xmm-spill1.php
-quick/yield_final.php
 quick/yield_pair.php
 quick/zend_bug54265.php
 quick/zend_closure_005.php

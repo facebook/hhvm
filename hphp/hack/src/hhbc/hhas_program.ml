@@ -30,9 +30,10 @@ let main hhas_prog =
 
 let emit_main block =
   let return_seq _ = Instruction_sequence.empty in
-  let body_instrs, decl_vars, _, _, _, _ =
+  let body_instrs, decl_vars, num_iters, _, _, _, _ =
     Emit_body.from_ast ~self:None [] [] None block return_seq in
-  Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs) decl_vars
+  Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs)
+    decl_vars num_iters
 
 let from_ast
   (parsed_functions,

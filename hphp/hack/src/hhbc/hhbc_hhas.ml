@@ -518,6 +518,14 @@ let string_of_iterator instruction =
     (string_of_local_id value)
   | IterFree id ->
     "IterFree " ^ (string_of_iterator_id id)
+  | IterBreak (label, iterlist) ->
+      "IterBreak " ^
+      (string_of_label label) ^
+      "<" ^
+      (let list_item = (fun id -> "(Iter) " ^ (string_of_iterator_id id)) in
+      let mapped_list = List.map list_item iterlist in
+        String.concat ", " mapped_list) ^
+      ">"
   | _ -> "### string_of_iterator instruction not implemented"
 
 let string_of_try instruction =
@@ -711,6 +719,13 @@ let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
   B.add_string buf ";\n"
   end
 
+let add_num_iters buf indent num_iters = if num_iters = 0 then () else begin
+  B.add_string buf (String.make indent ' ');
+  B.add_string buf ".numiters ";
+  B.add_string buf (Printf.sprintf "%d" num_iters);
+  B.add_string buf ";\n"
+  end
+
 let rec attribute_argument_to_string argument =
   match argument with
   | Null -> SS.str "N;"
@@ -795,6 +810,7 @@ let add_fun_def buf fun_def =
   let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in
   let function_decl_vars = Hhas_function.decl_vars fun_def in
+  let function_num_iters = Hhas_function.num_iters fun_def in
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
@@ -808,6 +824,7 @@ let add_fun_def buf fun_def =
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
   add_decl_vars buf 2 function_decl_vars;
+  add_num_iters buf 2 function_num_iters;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
@@ -833,6 +850,7 @@ let add_method_def buf method_def =
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
   let method_decl_vars = Hhas_method.decl_vars method_def in
+  let method_num_iters = Hhas_method.num_iters method_def in
   let method_is_async = Hhas_method.is_async method_def in
   let method_is_generator = Hhas_method.is_generator method_def in
   let method_is_pair_generator = Hhas_method.is_pair_generator method_def in
@@ -848,6 +866,7 @@ let add_method_def buf method_def =
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
   add_decl_vars buf 4 method_decl_vars;
+  add_num_iters buf 4 method_num_iters;
   add_instruction_list buf 4 method_body;
   B.add_string buf "  }"
 
@@ -1012,9 +1031,11 @@ let add_top_level buf hhas_prog =
   let main = Hhas_program.main hhas_prog in
   let main_stmts = Hhas_main.body main in
   let main_decl_vars = Hhas_main.decl_vars main in
+  let main_num_iters = Hhas_main.num_iters main in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
   add_decl_vars buf 2 main_decl_vars;
+  add_num_iters buf 2 main_num_iters;
   add_defcls buf non_closure_classes;
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"

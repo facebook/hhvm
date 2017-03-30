@@ -11,7 +11,7 @@
 open Hhbc_ast
 open Instruction_sequence
 
-let rewrite_in_loop instrseq cont_label break_label =
+let rewrite_in_loop instrseq cont_label break_label opt_iterator =
   (* PHP supports multi-level continue and break; the level must be a compile-
   time constant.
 
@@ -94,21 +94,33 @@ L6:
 And we're done. We've rewritten all the multi-level break and continues into
 unconditional jumps to the right place. *)
 
+  let add_iterator lst =
+    match opt_iterator with
+      | Some it -> it :: lst
+      | None -> lst in
+  let wrap_return ret =
+    match opt_iterator with
+      | Some it -> instrs [(IIterator (IterFree it)); ret]
+      | _ -> instr ret in
   let rewriter i =
     match i with
-    | ISpecialFlow (Continue (level, original)) when level > 1 ->
-      ISpecialFlow (Continue ((level - 1), original))
-    | ISpecialFlow (Continue _) ->
-      IContFlow (Jmp cont_label)
-    | ISpecialFlow (Break (level, original)) when level > 1 ->
-      ISpecialFlow (Break ((level - 1), original))
-    | ISpecialFlow (Break _) ->
-      IContFlow (Jmp break_label)
-    | _ -> i in
-  InstrSeq.map instrseq ~f:rewriter
+      | ISpecialFlow (Continue (level, original)) when level > 1 ->
+        instr (ISpecialFlow (Continue ((level - 1), original)))
+      | ISpecialFlow (Continue _) ->
+        instr (IContFlow (Jmp cont_label))
+      | ISpecialFlow (Break (level, original, itrs)) when level > 1 ->
+        instr (ISpecialFlow (Break ((level - 1), original, add_iterator itrs)))
+      | ISpecialFlow (Break (_, _, itrs)) ->
+        (match itrs with
+        | [] -> instr (IContFlow (Jmp break_label))
+        | itrs -> instr (IIterator (IterBreak (break_label, itrs))))
+      | IContFlow (RetC) -> wrap_return (IContFlow (RetC))
+      | IContFlow (RetV) -> wrap_return (IContFlow (RetV))
+      | _ -> instr i in
+  InstrSeq.flat_map_seq instrseq ~f:rewriter
 
 let rewrite_in_switch instrseq end_label =
-  rewrite_in_loop instrseq end_label end_label
+  rewrite_in_loop instrseq end_label end_label None
 
 let rewrite_in_finally instrseq =
   (* TODO: continue and break that would branch out of a finally is
@@ -119,7 +131,7 @@ let rewrite_in_finally instrseq =
   let rewriter instruction =
     match instruction with
     | ISpecialFlow (Continue (_, original))
-    | ISpecialFlow (Break (_, original))  ->
+    | ISpecialFlow (Break (_, original, _))  ->
       let message = Printf.sprintf "Cannot break/continue %d level%s"
         original (plural original) in
       [

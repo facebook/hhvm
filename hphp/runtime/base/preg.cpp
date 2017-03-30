@@ -1558,14 +1558,14 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
           auto data = result.data() + result_len;
           if (eval) {
             VMRegAnchor _;
+            auto const ar = GetCallerFrame();
             // reserve space for "<?php return " + code + ";"
             String prefixedCode(full_len - result_len + 14, ReserveString);
             prefixedCode +=
-              (vmfp()->unit()->isHHFile() ? "<?hh return " : "<?php return ");
+              (ar->unit()->isHHFile() ? "<?hh return " : "<?php return ");
             prefixedCode += folly::StringPiece{data, full_len - result_len};
             prefixedCode += ";";
             auto const unit = g_context->compileEvalString(prefixedCode.get());
-            auto const ar = GetCallerFrame();
             auto const ctx = ar->func()->cls();
             auto const func = unit->getMain(ctx);
             ObjectData* thiz;

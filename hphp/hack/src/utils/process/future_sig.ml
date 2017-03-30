@@ -10,6 +10,10 @@
 
 (** Fully-defined types go outside the module type. *)
 exception Process_failure of Unix.process_status * (** Stderr *) string
+
+(** string is stderr output received so far. *)
+exception Timed_out of string
+
 (** Deserializes the byte sequence. *)
 type 'a deserializer = string -> 'a
 

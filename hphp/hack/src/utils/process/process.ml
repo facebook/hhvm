@@ -13,8 +13,24 @@ open Stack_utils
 
 let chunk_size = 65536
 
+(** In the blocking read_and_wait_pid call, we alternate between
+ * non-blocking consuming of output and a nonblocking waitpid.
+ * To avoid pegging the CPU at 100%, sleep for a short time between
+ * those. *)
+let sleep_seconds_per_retry = 0.1
+
 (** Reuse the buffer for reading. Just an allocation optimization. *)
 let buffer = String.create chunk_size
+
+let make_result status stdout stderr =
+  let open Process_types in
+  match status with
+  | Unix.WEXITED 0 ->
+    Result.Ok (stdout, stderr)
+  | Unix.WEXITED _
+  | Unix.WSIGNALED _
+  | Unix.WSTOPPED _ ->
+    Result.Error (Process_exited_abnormally (status, stdout, stderr))
 
 (** Read from the FD if there is something to be read. FD is a reference
  * so when EOF is read from it, it is set to None. *)
@@ -94,7 +110,7 @@ let is_ready process =
  *
  * We must do some weird alternating between them.
  *)
-let rec read_and_wait_pid process =
+let rec read_and_wait_pid ~retries process =
   let open Process_types in
   let {
   stdin_fd = _stdin_fd;
@@ -106,7 +122,7 @@ let rec read_and_wait_pid process =
   read_and_wait_pid_nonblocking process;
   match !process_status with
   | Process_exited status ->
-    status, (Stack.merge_bytes acc), (Stack.merge_bytes acc_err)
+    make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
   | Process_running pid ->
   let fds = filter_none [stdout_fd; stderr_fd;] in
   if fds = []
@@ -114,7 +130,7 @@ let rec read_and_wait_pid process =
     (** EOF reached for all FDs. Blocking wait. *)
     let _, status = Unix.waitpid [] pid in
     let () = process_status := Process_exited status in
-    status, (Stack.merge_bytes acc), (Stack.merge_bytes acc_err)
+    make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
   else
     (** EOF hasn't been reached for all FDs. Here's where we switch from
      * reading the pipes to attempting a non-blocking waitpid. *)
@@ -123,15 +139,24 @@ let rec read_and_wait_pid process =
       (** Process hasn't exited. We want to avoid a spin-loop
        * alternating between non-blocking read from pipes and
        * non-blocking waitpid, so we insert a select here. *)
-      let _, _, _ = Unix.select fds [] [] 0.1 in
-      (** And here we switch from waitpid back to reading. *)
-      read_and_wait_pid process
+      let _, _, _ = Unix.select fds [] [] sleep_seconds_per_retry in
+      if retries <= 0 then
+        Result.Error (Timed_out
+          ((Stack.merge_bytes acc), (Stack.merge_bytes acc_err)))
+      else
+        (** And here we switch from waitpid back to reading. *)
+        read_and_wait_pid ~retries:(retries - 1) process
     | _, status ->
       (** Process has exited. Non-blockingly consume residual output. *)
       let () = maybe_consume stdout_fd acc in
       let () = maybe_consume stderr_fd acc_err in
       let () = process_status := Process_exited status in
-      status, (Stack.merge_bytes acc), (Stack.merge_bytes acc_err)
+      make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
+
+let read_and_wait_pid ~timeout process =
+  let retries = int_of_float @@
+    (float_of_int timeout) /. sleep_seconds_per_retry in
+  read_and_wait_pid ~retries process
 
 let exec prog ?env args =
   let args = Array.of_list (prog :: args) in

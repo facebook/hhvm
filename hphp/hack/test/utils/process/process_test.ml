@@ -2,28 +2,54 @@ open Asserter
 
 let test_echo () =
   let process = Process.exec "echo" [ "hello world"; ] in
-  let status, result, _err = Process.read_and_wait_pid process in
-  let () = Process_status_asserter.assert_equals (Unix.WEXITED 0) status "" in
-  let () = String_asserter.assert_equals "hello world\n" result "" in
-  true
+  match Process.read_and_wait_pid ~timeout:2 process with
+  | Result.Ok (result, _err) ->
+    let () = String_asserter.assert_equals "hello world\n" result "" in
+    true
+  | _ ->
+    false
 
 let test_process_read_idempotent () =
   let process = Process.exec "echo" [ "hello world"; ] in
-  let status, result, _err = Process.read_and_wait_pid process in
-  let () = Process_status_asserter.assert_equals (Unix.WEXITED 0) status "" in
-  let () = String_asserter.assert_equals "hello world\n" result "" in
-  (** Can read_and_wait_pid again. *)
-  let status, result, _err = Process.read_and_wait_pid process in
-  let () = Process_status_asserter.assert_equals (Unix.WEXITED 0) status "" in
-  let () = String_asserter.assert_equals "hello world\n" result "" in
-  true
+  let result = Process.read_and_wait_pid ~timeout:2 process in
+  let () = match result with
+    | Result.Ok (result, _err) ->
+      String_asserter.assert_equals "hello world\n" result ""
+    | _ ->
+      ()
+  in
+  let result = Process.read_and_wait_pid ~timeout:2 process in
+  match result with
+  | Result.Ok (result, _err) ->
+    String_asserter.assert_equals "hello world\n" result "";
+    true
+  | _ ->
+    false
 
 let test_env_variable () =
   let process = Process.exec "printenv" ~env:[ "NAME=world" ] [ ] in
-  let status, result, _err = Process.read_and_wait_pid process in
-  let () = Process_status_asserter.assert_equals (Unix.WEXITED 0) status "" in
-  let () = String_asserter.assert_equals "NAME=world\n" result "" in
-  true
+  match Process.read_and_wait_pid ~timeout:2 process with
+  | Result.Ok (result, _stderr) ->
+    let () = String_asserter.assert_equals "NAME=world\n" result "" in
+    true
+  | _ ->
+    false
+
+let test_process_timeout () =
+  let process = Process.exec "sleep" [ "2"; ] in
+  match Process.read_and_wait_pid ~timeout:1 process with
+  | Result.Error (Process_types.Timed_out _) ->
+    true
+  | _ ->
+    false
+
+let test_process_finishes_within_timeout () =
+  let process = Process.exec "sleep" [ "1"; ] in
+  match Process.read_and_wait_pid ~timeout:2 process with
+  | Result.Ok _ ->
+    true
+  | _ ->
+    false
 
 let test_future () =
   let future = Future.make (Process.exec "sleep" [ "1" ]) String.trim in
@@ -48,6 +74,9 @@ let tests = [
   ("test_echo", test_echo);
   ("test_process_read_idempotent", test_process_read_idempotent);
   ("test_env_variable", test_env_variable);
+  ("test_process_timeout", test_process_timeout);
+  ("test_process_finishes_within_timeout",
+    test_process_finishes_within_timeout);
   ("test_future", test_future);
   ("test_future_is_ready", test_future_is_ready);
 ]

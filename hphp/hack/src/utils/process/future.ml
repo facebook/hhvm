@@ -8,8 +8,12 @@
  *
  *)
 
-(** We shell out hg commands, so its computation is out-of-process, and
- * return a Future for the result. *)
+(**
+ * We shell out hg commands, so its computation is out-of-process, and
+ * return a Future for the result.
+ *
+ * A promise is a strongly-typed wrapper around Process
+ *)
 
 type 'a promise =
   | Complete : 'a -> 'a promise
@@ -22,14 +26,18 @@ let make process transformer =
 let get : 'a t -> 'a = fun promise -> match !promise with
   | Complete v -> v
   | Incomplete (process, transformer) ->
-    let status, result, err = Process.read_and_wait_pid process in
-    match status with
-    | Unix.WEXITED 0 ->
-      let result = transformer result in
+    match Process.read_and_wait_pid ~timeout:30 process with
+    | Result.Ok (stdout, _stderr) ->
+      let result = transformer stdout in
       let () = promise := Complete result in
       result
-    | _ ->
-      raise (Future_sig.Process_failure (status, err))
+    | Result.Error (Process_types.Process_exited_abnormally
+        (status, _, stderr)) ->
+      (** TODO: Prefer monad over exceptions. *)
+      raise (Future_sig.Process_failure (status, stderr))
+    | Result.Error (Process_types.Timed_out (_, stderr)) ->
+      (** TODO: Prefer monad over exceptions. *)
+      raise (Future_sig.Timed_out stderr)
 
 let is_ready promise = match !promise with
   | Complete _ -> true

@@ -84,9 +84,9 @@ empty(
 function isKitchenEmpty(): bool {
   return
     // check oven first
-    $this->oven_contents === '' &&
-    $this->tin_contents === null &&
-    $this->mixer_contents === null &&
-    $this->items_on_counter === 0;
+    $this->oven_contents === ''
+    && $this->tin_contents === null
+    && $this->mixer_contents === null
+    && $this->items_on_counter === 0;
   // now we've checked everything
 }

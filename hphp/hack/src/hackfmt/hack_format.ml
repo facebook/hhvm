@@ -387,13 +387,15 @@ let rec transform node =
       t type_kw;
       Space;
       t name;
-      Space;
+      when_present type_constraint space;
       t type_constraint;
-      Space;
+      when_present eq space;
       t eq;
-      Space;
-      SplitWith Cost.Base;
-      Nest [t type_spec];
+      when_present type_spec (fun _ -> Fmt [
+        Space;
+        SplitWith Cost.Base;
+        Nest [t type_spec];
+      ]);
       t semi;
       Newline;
     ]

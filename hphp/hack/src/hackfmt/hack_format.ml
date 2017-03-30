@@ -49,7 +49,27 @@ let rec transform node =
     ]
   | LiteralExpression x ->
     (* Double quoted string literals can create a list *)
-    handle_possible_list @@ get_literal_expression_children x
+    let children = get_literal_expression_children x in
+    let open EditableToken in
+    let wrap_with_literal_type token transformed =
+      let open TokenKind in
+      match kind token with
+      | HeredocStringLiteral
+      | HeredocStringLiteralHead
+      | HeredocStringLiteralTail
+      | NowdocStringLiteral -> DocLiteral transformed
+      | _ -> transformed
+    in
+    begin match syntax children with
+      | Token tok -> wrap_with_literal_type tok (t children)
+      | SyntaxList l ->
+        let last = trailing_token children in
+        begin match last with
+          | Some tok -> wrap_with_literal_type tok (Fmt (List.map l transform))
+          | _ -> failwith "Expected Token"
+        end
+      | _ -> failwith "Expected Token or SyntaxList"
+    end
   | SimpleTypeSpecifier _
   | VariableExpression _
   | QualifiedNameExpression _

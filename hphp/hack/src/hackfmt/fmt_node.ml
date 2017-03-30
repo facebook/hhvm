@@ -52,6 +52,11 @@ type t =
 
   (*** Special cases ***)
 
+  (* Heredoc and Nowdoc literals end with a closing identifier, which must be
+   * the only characters on their line (other than a semicolon). Chunk_builder
+   * needs to know if the last string was a docstring close in order to ensure a
+   * newline after it (except if the next token is a semicolon). *)
+  | DocLiteral of t
   (* Set Nesting.skip_parent_if_nested on this nesting *)
   | ConditionalNest of t list
   (* Enable this lazy rule only if we are within another region with the same
@@ -82,6 +87,8 @@ let dump ?(ignored=false) node =
         print (sprintf "Ignored \"%s\""
           (String.concat "\\n"
             (Str.split_delim (Str.regexp "\n") text)))
+    | DocLiteral node ->
+      dump_list "DocLiteral" [node]
     | Split ->
       print "Split"
     | SplitWith cost ->

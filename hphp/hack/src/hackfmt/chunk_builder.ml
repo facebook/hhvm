@@ -53,6 +53,8 @@ let builder = object (this)
   val mutable end_char = max_int;
   val mutable seen_chars = 0;
 
+  val mutable last_string_was_doc_close = false;
+
   (* TODO: Make builder into an instantiable class instead of
    * having this reset method
    *)
@@ -77,6 +79,8 @@ let builder = object (this)
     start_char <- start_c;
     end_char <- end_c;
     seen_chars <- 0;
+
+    last_string_was_doc_close <- false;
     ()
 
   method private add_string ?(is_trivia=false) s =
@@ -118,11 +122,12 @@ let builder = object (this)
     end;
 
   method private set_pending_comma () =
-    chunks <- (match chunks with
-      | hd :: tl when not hd.Chunk.is_appendable ->
-        {hd with Chunk.comma_rule = Some (List.hd_exn rules)} :: tl;
-      | _ -> pending_comma <- Some (List.hd_exn rules); chunks;
-    );
+    if not last_string_was_doc_close then
+      chunks <- (match chunks with
+        | hd :: tl when not hd.Chunk.is_appendable ->
+          {hd with Chunk.comma_rule = Some (List.hd_exn rules)} :: tl;
+        | _ -> pending_comma <- Some (List.hd_exn rules); chunks;
+      );
 
   method private add_space () =
     pending_space <- true;
@@ -332,18 +337,25 @@ let builder = object (this)
       end
 
   method private text text width =
+    if last_string_was_doc_close && text <> ";" then this#hard_split ();
     this#check_range ();
     this#add_string text;
     this#advance width;
+    if last_string_was_doc_close && text = ";" then this#hard_split ();
+    last_string_was_doc_close <- false;
 
   method private comment text width =
+    if last_string_was_doc_close then this#hard_split ();
     this#check_range ();
     this#add_string ~is_trivia:true text;
     this#advance width;
+    last_string_was_doc_close <- false;
 
   method private ignore width =
+    if last_string_was_doc_close then this#hard_split ();
     this#check_range ();
     this#advance width;
+    last_string_was_doc_close <- false;
 
   method build_chunk_groups node start_char end_char =
     this#reset start_char end_char;
@@ -363,6 +375,9 @@ let builder = object (this)
       this#comment text width
     | Ignore (_, width) ->
       this#ignore width
+    | DocLiteral node ->
+      this#consume_fmt_node node;
+      last_string_was_doc_close <- true;
     | Split ->
       this#split ()
     | SplitWith cost ->

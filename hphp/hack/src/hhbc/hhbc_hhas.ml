@@ -186,12 +186,10 @@ let string_of_member_key mk =
   let open MemberKey in
   match mk with
   | EC i -> "EC:" ^ string_of_stack_index i
-  (* hhas doesn't yet support this syntax *)
   | EL id -> "EL:" ^ string_of_local_id id
   | ET str -> "ET:" ^ quote_str str
   | EI i -> "EI:" ^ Int64.to_string i
   | PC i -> "PC:" ^ string_of_stack_index i
-  (* hhas doesn't yet support this syntax *)
   | PL id -> "PL:" ^ string_of_local_id id
   | PT str -> "PT:" ^ quote_str str
   | QT str -> "QT:" ^ quote_str str

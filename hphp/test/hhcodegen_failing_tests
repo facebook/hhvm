@@ -564,7 +564,6 @@ quick/profile/setprofile_throw.php
 quick/prop_order.php
 quick/prop_order_parens.php
 quick/propagate-array.php
-quick/properties-dynamic.php
 quick/properties2.php
 quick/properties3.php
 quick/properties4.php
@@ -617,7 +616,6 @@ quick/setelemloc2.php
 quick/setg-dtor.php
 quick/setmcrash.php
 quick/setmstr.php
-quick/setmstr2.php
 quick/setop-magic.php
 quick/setop-magic2.php
 quick/setop-magic3.php

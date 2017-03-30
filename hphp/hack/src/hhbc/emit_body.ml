@@ -79,10 +79,6 @@ let from_ast ~self tparams params ret body default_instrs =
   let params, body_instrs =
     Label_rewriter.relabel_function params body_instrs in
   let function_decl_vars = extract_decl_vars params body_instrs in
-  let body_instrs = Local_id_rewriter.unname_instrseq
-    (List.map params Hhas_param.name @ function_decl_vars)
-    body_instrs
-  in
   let num_iters = !Iterator.num_iterators in
   body_instrs,
   function_decl_vars,

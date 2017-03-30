@@ -295,6 +295,15 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     out.fmt(">");
   };
 
+  auto print_mk = [&] (MemberKey m) {
+    if (m.mcode == MEL || m.mcode == MPL) {
+      std::string ret = memberCodeString(m.mcode);
+      folly::toAppend(':', loc_name(finfo, m.iva), &ret);
+      return ret;
+    }
+    return show(m);
+  };
+
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
@@ -313,7 +322,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_OA(ty) out.fmt(" {}", \
                      subopToName(static_cast<ty>(decode<uint8_t>(pc))));
 #define IMM_VSA    print_stringvec();
-#define IMM_KA     out.fmt(" {}", show(decode_member_key(pc, finfo.unit)));
+#define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
 
 #define IMM_NA

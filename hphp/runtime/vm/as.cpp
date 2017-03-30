@@ -1167,14 +1167,11 @@ MemberKey read_member_key(AsmState& as) {
     case MW:
       return MemberKey{};
     case MEL: case MPL: {
-      if (as.in.getc() != '$') {
-        as.error("*L member code must be followed by a local variable name");
-      }
       std::string name;
       if (!as.in.readword(name)) {
         as.error("couldn't read name for local variable in member key");
       }
-      return MemberKey{mcode, as.getLocalId("$" + name)};
+      return MemberKey{mcode, as.getLocalId(name)};
     }
     case MEC: case MPC:
       return MemberKey{mcode, read_opcode_arg<int32_t>(as)};

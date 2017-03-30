@@ -28,6 +28,12 @@ let open_span start cost = {
   open_span_cost = cost;
 }
 
+type string_type =
+  | DocStringClose
+  | Number
+  | Concat
+  | Other
+
 let builder = object (this)
   val open_spans = Stack.create ();
   val mutable rules = [];
@@ -53,7 +59,7 @@ let builder = object (this)
   val mutable end_char = max_int;
   val mutable seen_chars = 0;
 
-  val mutable last_string_was_doc_close = false;
+  val mutable last_string_type = Other;
 
   (* TODO: Make builder into an instantiable class instead of
    * having this reset method
@@ -80,10 +86,13 @@ let builder = object (this)
     end_char <- end_c;
     seen_chars <- 0;
 
-    last_string_was_doc_close <- false;
+    last_string_type <- Other;
     ()
 
   method private add_string ?(is_trivia=false) s =
+    if last_string_type = DocStringClose && (is_trivia || s <> ";")
+      then this#hard_split ();
+
     chunks <- (match chunks with
       | hd :: tl when hd.Chunk.is_appendable ->
         let text = hd.Chunk.text ^ (if pending_space then " " else "") ^ s in
@@ -119,10 +128,15 @@ let builder = object (this)
       List.iter rev_pending_spans_stack ~f:(fun cost ->
         Stack.push (open_span (List.length chunks - 1) cost) open_spans
       );
+
+      if last_string_type = DocStringClose && s = ";"
+        then this#hard_split ();
     end;
 
+    last_string_type <- Other;
+
   method private set_pending_comma () =
-    if not last_string_was_doc_close then
+    if last_string_type <> DocStringClose then
       chunks <- (match chunks with
         | hd :: tl when not hd.Chunk.is_appendable ->
           {hd with Chunk.comma_rule = Some (List.hd_exn rules)} :: tl;
@@ -337,25 +351,18 @@ let builder = object (this)
       end
 
   method private text text width =
-    if last_string_was_doc_close && text <> ";" then this#hard_split ();
     this#check_range ();
     this#add_string text;
     this#advance width;
-    if last_string_was_doc_close && text = ";" then this#hard_split ();
-    last_string_was_doc_close <- false;
 
   method private comment text width =
-    if last_string_was_doc_close then this#hard_split ();
     this#check_range ();
     this#add_string ~is_trivia:true text;
     this#advance width;
-    last_string_was_doc_close <- false;
 
   method private ignore width =
-    if last_string_was_doc_close then this#hard_split ();
     this#check_range ();
     this#advance width;
-    last_string_was_doc_close <- false;
 
   method build_chunk_groups node start_char end_char =
     this#reset start_char end_char;
@@ -377,7 +384,15 @@ let builder = object (this)
       this#ignore width
     | DocLiteral node ->
       this#consume_fmt_node node;
-      last_string_was_doc_close <- true;
+      last_string_type <- DocStringClose;
+    | NumericLiteral node ->
+      if last_string_type = Concat then this#add_space ();
+      this#consume_fmt_node node;
+      last_string_type <- Number;
+    | ConcatOperator node ->
+      if last_string_type = Number then this#add_space ();
+      this#consume_fmt_node node;
+      last_string_type <- Concat;
     | Split ->
       this#split ()
     | SplitWith cost ->

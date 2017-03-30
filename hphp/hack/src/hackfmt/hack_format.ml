@@ -58,6 +58,11 @@ let rec transform node =
       | HeredocStringLiteralHead
       | HeredocStringLiteralTail
       | NowdocStringLiteral -> DocLiteral transformed
+      | DecimalLiteral
+      | OctalLiteral
+      | HexadecimalLiteral
+      | BinaryLiteral
+      | FloatingLiteral -> NumericLiteral transformed
       | _ -> transformed
     in
     begin match syntax children with
@@ -1634,11 +1639,9 @@ and transform_binary_expression ~is_nested expr =
       (EditableToken.kind t)
     | _ -> failwith "Operator should always be a token"
   in
-  let operator_has_surrounding_spaces op =
-    match get_operator_type op with
-    | Full_fidelity_operator.ConcatenationOperator -> false
-    | _ -> true
-  in
+  let is_concat op =
+    get_operator_type op = Full_fidelity_operator.ConcatenationOperator in
+  let operator_has_surrounding_spaces op = not (is_concat op) in
 
   let (left, operator, right) = get_binary_expression_children expr in
   let operator_t = get_operator_type operator in
@@ -1701,7 +1704,9 @@ and transform_binary_expression ~is_nested expr =
                 let op_has_spaces = operator_has_surrounding_spaces op in
                 Fmt [
                   if op_has_spaces then space_split () else Split;
-                  transform op;
+                  if is_concat op
+                    then ConcatOperator (transform op)
+                    else transform op;
                 ]
               end
               else begin

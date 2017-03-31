@@ -43,15 +43,18 @@ let lsp_file_position_to_hack (params: Lsp.Text_document_position_params.t)
   in
   (filename, line, column)
 
-let hack_pos_to_lsp_location_singleline (pos: string Pos.pos) : Lsp.Location.t =
+let hack_pos_to_lsp_range (pos: 'a Pos.pos) : Lsp.range =
+  let line1, col1, line2, col2 = Pos.destruct_range pos in
+  {
+    start = {line = line1 - 1; character = col1 - 1;};
+    end_ = {line = line2 - 1; character = col2 - 1;};
+  }
+
+let hack_pos_to_lsp_location (pos: string Pos.pos) : Lsp.Location.t =
   let open Lsp.Location in
-  let line, start, end_ = Pos.info_pos pos in
   {
     uri = Pos.filename pos;
-    range = {
-      start = {line = line - 1; character = start - 1;};
-      end_ = {line = line - 1; character = end_ - 1;};
-    }
+    range = hack_pos_to_lsp_range pos;
   }
 
 let lsp_range_to_ide (range: Lsp.range) : Ide_api_types.range =
@@ -65,7 +68,7 @@ let hack_symbol_definition_to_lsp_location
   (symbol: string SymbolDefinition.t)
   : Lsp.Location.t =
   let open SymbolDefinition in
-  hack_pos_to_lsp_location_singleline symbol.pos
+  hack_pos_to_lsp_location symbol.pos
 
 let hack_errors_to_lsp_diagnostic (filename: string)
   (errors: Pos.absolute Errors.error_ list)
@@ -76,7 +79,7 @@ let hack_errors_to_lsp_diagnostic (filename: string)
     let pos, message = List.hd_exn all_locations in
     (* TODO: investigate whether Hack ever gives multiline locations *)
     (* TODO: add to LSP protocol for multiple error locations *)
-    let {uri = _; range;} = hack_pos_to_lsp_location_singleline pos in
+    let {uri = _; range;} = hack_pos_to_lsp_location pos in
     { Lsp.Publish_diagnostics.
       range = range;
       severity = Some Publish_diagnostics.Error;

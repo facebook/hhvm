@@ -1758,7 +1758,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdSSwitchDestSlow:
   case ConvObjToDbl:
   case ConvObjToInt:
-  case MapAddElemC:
   case ColAddNewElemC:
   case CoerceStrToInt:
   case CoerceStrToDbl:

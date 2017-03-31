@@ -923,15 +923,6 @@ ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
   return coll;
 }
 
-ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
-                              TypedValue value) {
-  collections::initMapElem(coll, &key, &value);
-  // consume the input value. the collection setter either threw or created a
-  // reference to value, so we can use a cheaper decref.
-  tvRefcountedDecRefNZ(value);
-  return coll;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void raiseMissingArgument(const Func* func, int got) {

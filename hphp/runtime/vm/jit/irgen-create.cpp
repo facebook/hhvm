@@ -424,23 +424,6 @@ void emitColFromArray(IRGS& env, int type) {
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }
 
-void emitMapAddElemC(IRGS& env) {
-  if (!topC(env, BCSPRelOffset{2})->isA(TObj)) {
-    return interpOne(env, TObj, 3);
-  }
-  if (!topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type().
-      subtypeOfAny(TInt, TStr)) {
-    interpOne(env, TObj, 3);
-    return;
-  }
-
-  auto const val = popC(env);
-  auto const key = popC(env);
-  auto const coll = popC(env);
-  push(env, gen(env, MapAddElemC, coll, key, val));
-  decRef(env, key);
-}
-
 void emitColAddNewElemC(IRGS& env) {
   if (!topC(env, BCSPRelOffset{1})->isA(TObj)) {
     return interpOne(env, TObj, 2);

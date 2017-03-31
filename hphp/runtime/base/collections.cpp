@@ -76,15 +76,6 @@ COLLECTIONS_ALL_TYPES(X)
   }
 }
 
-void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  assertx(obj->isCollection());
-  assertx(isMapCollection(obj->collectionType()));
-  assertx(key->m_type != KindOfRef);
-  assertx(val->m_type != KindOfRef);
-  assertx(val->m_type != KindOfUninit);
-  BaseMap::OffsetSet(obj, key, val);
-}
-
 void initElem(ObjectData* obj, TypedValue* val) {
   assertx(obj->isCollection());
   assertx(!isMapCollection(obj->collectionType()));

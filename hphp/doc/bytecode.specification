@@ -1159,12 +1159,6 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
   not in collections; thus not all collections can be created using this
   instruction.
 
-MapAddElemC    [C C C]  ->  [C:Obj]
-
-  Collection add key/value pair. $3 must be an instance of HH\Map or
-  HH\ImmMap. This instruction executes $3[$2] = $1 and then pushes $3 onto the
-  stack.
-
 ColAddNewElemC    [C C]  ->  [C:Obj]
 
   Collection add value. $2 must be an instance of HH\Pair, HH\Set, or

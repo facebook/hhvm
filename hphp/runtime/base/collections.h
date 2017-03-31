@@ -82,8 +82,6 @@ inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
 /* Preallocate room for {sz} elements in the Collection */
 void reserve(ObjectData* obj, int64_t sz);
 
-/* Used by Collections Literals syntax for Maps */
-void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val);
 /* Used by Collections Literals syntax for non-Maps */
 void initElem(ObjectData* obj, TypedValue* val);
 

@@ -2104,16 +2104,6 @@ OPTBLD_INLINE void iopColAddNewElemC() {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopMapAddElemC() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  Cell* c3 = vmStack().indC(2);
-  assert(c3->m_type == KindOfObject && c3->m_data.pobj->isCollection());
-  collections::initMapElem(c3->m_data.pobj, c2, c1);
-  vmStack().popC();
-  vmStack().popC();
-}
-
 OPTBLD_INLINE void iopCns(const StringData* s) {
   auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {

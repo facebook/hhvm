@@ -2957,11 +2957,6 @@ fields of that struct for holding intermediate values.
   Adds item S0 to the end of collection S0. Throws a fatal error if S0 is not a
   collection. Returns S0.
 
-| MapAddElemC, DofS(0), S(Obj) S(Cell) S(Cell), Er|CRc|P
-
-  Adds item to a Map or ImmMap. Inserts item S2 into collection S0 at key S1.
-  Throws a fatal error if S0 is not a collection. Returns S0.
-
 | ColIsEmpty, D(Bool), S(Obj), NF
 
 | ColIsNEmpty, D(Bool), S(Obj), NF

@@ -10,15 +10,46 @@
 
 include HhMonitorInformant_sig.Types
 
-(** Prefetcher downloads saved states for us. *)
 module Prefetcher = struct
   type t = Path.t option
-
+  type svn_rev = int
   let dummy = None
+  let of_script script = Some script
 
-  (** TODO: fill this out. *)
-  let run _ _ = ()
+  let run_and_log (script, svn_rev) _ic_oc =
+    HackEventLogger.init_informant_prefetcher_runner (Unix.time ());
+    let start_t = Unix.time () in
+    let process = Process.exec
+      (Path.to_string script) [(string_of_int svn_rev)] in
+    (** We can block since this is already daemonized in a separate process. *)
+    match Process.read_and_wait_pid ~timeout:30 process with
+    | Result.Ok _ ->
+      Hh_logger.log "Prefetcher finished successfully.";
+      HackEventLogger.informant_prefetcher_success start_t;
+      exit 0
+    | Result.Error (Process_types.Process_exited_abnormally (es, _, stderr)) ->
+      let exit_kind, exit_code = Exit_status.unpack es in
+      let msg = Printf.sprintf "%s %d. stderr: %s" exit_kind exit_code stderr in
+      Hh_logger.log "Prefetcher failed. %s" msg;
+      HackEventLogger.informant_prefetcher_failed start_t msg;
+      exit exit_code
+    | Result.Error (Process_types.Timed_out (_, stderr)) ->
+      let msg = Printf.sprintf "Timed out. stderr: %s" stderr in
+      Hh_logger.log "Prefetcher timed out. %s" msg;
+      HackEventLogger.informant_prefetcher_failed start_t msg;
+      exit 1
+
+  let run_and_log_entry = Daemon.register_entry_point
+    "Prefetcher_run_and_log" run_and_log
+
+  let run svn_rev t  = match t with
+    | None -> Process_types.dummy
+    | Some script ->
+      Process.run_daemon run_and_log_entry
+        (script, svn_rev)
+
 end
+
 
 
 (**
@@ -198,9 +229,9 @@ module Revision_tracker = struct
       | None ->
         acc
       | Some (significant, svn_rev) ->
-        (** We already peeked the value above. Can ignore ehere. *)
+        (** We already peeked the value above. Can ignore here. *)
         let _ = Queue.pop env.state_changes in
-        Prefetcher.run env.prefetcher svn_rev;
+        let _ = Prefetcher.run svn_rev env.prefetcher in
         if transition = State_leave
           (** Repo has been moved to a new SVN Rev, so we set this mutable
            * reference. This must be done after computing distance. *)
@@ -288,7 +319,7 @@ module Revision_tracker = struct
       None
     | Some (significant, svn_rev) ->
       if significant
-      then Prefetcher.run env.prefetcher svn_rev;
+        then ignore @@ Prefetcher.run svn_rev env.prefetcher;
       let decision = form_decision significant transition server_state in
       Some (decision, svn_rev)
 

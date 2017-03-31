@@ -37,3 +37,12 @@ type t = {
   acc_err : string Stack.t;
   process_status : process_status ref;
 }
+
+let dummy = {
+  stdin_fd = ref None;
+  stdout_fd = ref None;
+  stderr_fd = ref None;
+  acc = Stack.create ();
+  acc_err = Stack.create ();
+  process_status = ref @@ Process_exited (Unix.WEXITED 0);
+}

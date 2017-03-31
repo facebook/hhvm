@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-03-20-0002"
+let full_fidelity_schema_version_number = "2017-03-30-0002"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -883,6 +883,13 @@ let schema = List.map from_list [
     "keyword";
     "expression";
     "semicolon" ];
+  [ "XHPChildrenParenthesizedList";
+    "xhp_children_parenthesized_list";
+    "xhp_children_parenthesized_list";
+    "xhp_children_list";
+    "left_paren";
+    "xhp_children";
+    "right_paren"];
   [ "XHPCategoryDeclaration";
     "xhp_category_declaration";
     "xhp_category_declaration";

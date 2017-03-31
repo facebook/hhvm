@@ -688,6 +688,11 @@ module WithToken(Token: TokenType) = struct
       xhp_children_expression: t;
       xhp_children_semicolon: t;
     }
+    and xhp_children_parenthesized_list = {
+      xhp_children_list_left_paren: t;
+      xhp_children_list_xhp_children: t;
+      xhp_children_list_right_paren: t;
+    }
     and xhp_category_declaration = {
       xhp_category_keyword: t;
       xhp_category_categories: t;
@@ -987,6 +992,7 @@ module WithToken(Token: TokenType) = struct
     | EmbeddedSubscriptExpression of embedded_subscript_expression
     | AwaitableCreationExpression of awaitable_creation_expression
     | XHPChildrenDeclaration of xhp_children_declaration
+    | XHPChildrenParenthesizedList of xhp_children_parenthesized_list
     | XHPCategoryDeclaration of xhp_category_declaration
     | XHPEnumType of xhp_enum_type
     | XHPRequired of xhp_required
@@ -1250,6 +1256,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.AwaitableCreationExpression
       | XHPChildrenDeclaration _ ->
         SyntaxKind.XHPChildrenDeclaration
+      | XHPChildrenParenthesizedList _ ->
+        SyntaxKind.XHPChildrenParenthesizedList
       | XHPCategoryDeclaration _ ->
         SyntaxKind.XHPCategoryDeclaration
       | XHPEnumType _ ->
@@ -1537,6 +1545,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.AwaitableCreationExpression
     let is_xhp_children_declaration node =
       kind node = SyntaxKind.XHPChildrenDeclaration
+    let is_xhp_children_parenthesized_list node =
+      kind node = SyntaxKind.XHPChildrenParenthesizedList
     let is_xhp_category_declaration node =
       kind node = SyntaxKind.XHPCategoryDeclaration
     let is_xhp_enum_type node =
@@ -2831,6 +2841,16 @@ module WithToken(Token: TokenType) = struct
       xhp_children_keyword,
       xhp_children_expression,
       xhp_children_semicolon
+    )
+
+    let get_xhp_children_parenthesized_list_children {
+      xhp_children_list_left_paren;
+      xhp_children_list_xhp_children;
+      xhp_children_list_right_paren;
+    } = (
+      xhp_children_list_left_paren,
+      xhp_children_list_xhp_children,
+      xhp_children_list_right_paren
     )
 
     let get_xhp_category_declaration_children {
@@ -4307,6 +4327,15 @@ module WithToken(Token: TokenType) = struct
         xhp_children_expression;
         xhp_children_semicolon;
       ]
+      | XHPChildrenParenthesizedList {
+        xhp_children_list_left_paren;
+        xhp_children_list_xhp_children;
+        xhp_children_list_right_paren;
+      } -> [
+        xhp_children_list_left_paren;
+        xhp_children_list_xhp_children;
+        xhp_children_list_right_paren;
+      ]
       | XHPCategoryDeclaration {
         xhp_category_keyword;
         xhp_category_categories;
@@ -5745,6 +5774,15 @@ module WithToken(Token: TokenType) = struct
         "xhp_children_keyword";
         "xhp_children_expression";
         "xhp_children_semicolon";
+      ]
+      | XHPChildrenParenthesizedList {
+        xhp_children_list_left_paren;
+        xhp_children_list_xhp_children;
+        xhp_children_list_right_paren;
+      } -> [
+        "xhp_children_list_left_paren";
+        "xhp_children_list_xhp_children";
+        "xhp_children_list_right_paren";
       ]
       | XHPCategoryDeclaration {
         xhp_category_keyword;
@@ -7341,6 +7379,16 @@ module WithToken(Token: TokenType) = struct
           xhp_children_keyword;
           xhp_children_expression;
           xhp_children_semicolon;
+        }
+      | (SyntaxKind.XHPChildrenParenthesizedList, [
+          xhp_children_list_left_paren;
+          xhp_children_list_xhp_children;
+          xhp_children_list_right_paren;
+        ]) ->
+        XHPChildrenParenthesizedList {
+          xhp_children_list_left_paren;
+          xhp_children_list_xhp_children;
+          xhp_children_list_right_paren;
         }
       | (SyntaxKind.XHPCategoryDeclaration, [
           xhp_category_keyword;
@@ -9057,6 +9105,17 @@ module WithToken(Token: TokenType) = struct
         xhp_children_keyword;
         xhp_children_expression;
         xhp_children_semicolon;
+      ]
+
+    let make_xhp_children_parenthesized_list
+      xhp_children_list_left_paren
+      xhp_children_list_xhp_children
+      xhp_children_list_right_paren
+    =
+      from_children SyntaxKind.XHPChildrenParenthesizedList [
+        xhp_children_list_left_paren;
+        xhp_children_list_xhp_children;
+        xhp_children_list_right_paren;
       ]
 
     let make_xhp_category_declaration

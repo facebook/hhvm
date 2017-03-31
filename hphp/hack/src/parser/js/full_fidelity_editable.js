@@ -288,6 +288,8 @@ class EditableSyntax
       return AwaitableCreationExpression.from_json(json, position, source);
     case 'xhp_children_declaration':
       return XHPChildrenDeclaration.from_json(json, position, source);
+    case 'xhp_children_parenthesized_list':
+      return XHPChildrenParenthesizedList.from_json(json, position, source);
     case 'xhp_category_declaration':
       return XHPCategoryDeclaration.from_json(json, position, source);
     case 'xhp_enum_type':
@@ -13312,6 +13314,89 @@ class XHPChildrenDeclaration extends EditableSyntax
     return XHPChildrenDeclaration._children_keys;
   }
 }
+class XHPChildrenParenthesizedList extends EditableSyntax
+{
+  constructor(
+    left_paren,
+    xhp_children,
+    right_paren)
+  {
+    super('xhp_children_parenthesized_list', {
+      left_paren: left_paren,
+      xhp_children: xhp_children,
+      right_paren: right_paren });
+  }
+  get left_paren() { return this.children.left_paren; }
+  get xhp_children() { return this.children.xhp_children; }
+  get right_paren() { return this.children.right_paren; }
+  with_left_paren(left_paren){
+    return new XHPChildrenParenthesizedList(
+      left_paren,
+      this.xhp_children,
+      this.right_paren);
+  }
+  with_xhp_children(xhp_children){
+    return new XHPChildrenParenthesizedList(
+      this.left_paren,
+      xhp_children,
+      this.right_paren);
+  }
+  with_right_paren(right_paren){
+    return new XHPChildrenParenthesizedList(
+      this.left_paren,
+      this.xhp_children,
+      right_paren);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
+    var xhp_children = this.xhp_children.rewrite(rewriter, new_parents);
+    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
+    if (
+      left_paren === this.left_paren &&
+      xhp_children === this.xhp_children &&
+      right_paren === this.right_paren)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new XHPChildrenParenthesizedList(
+        left_paren,
+        xhp_children,
+        right_paren), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let left_paren = EditableSyntax.from_json(
+      json.xhp_children_list_left_paren, position, source);
+    position += left_paren.width;
+    let xhp_children = EditableSyntax.from_json(
+      json.xhp_children_list_xhp_children, position, source);
+    position += xhp_children.width;
+    let right_paren = EditableSyntax.from_json(
+      json.xhp_children_list_right_paren, position, source);
+    position += right_paren.width;
+    return new XHPChildrenParenthesizedList(
+        left_paren,
+        xhp_children,
+        right_paren);
+  }
+  get children_keys()
+  {
+    if (XHPChildrenParenthesizedList._children_keys == null)
+      XHPChildrenParenthesizedList._children_keys = [
+        'left_paren',
+        'xhp_children',
+        'right_paren'];
+    return XHPChildrenParenthesizedList._children_keys;
+  }
+}
 class XHPCategoryDeclaration extends EditableSyntax
 {
   constructor(
@@ -16932,6 +17017,7 @@ exports.SubscriptExpression = SubscriptExpression;
 exports.EmbeddedSubscriptExpression = EmbeddedSubscriptExpression;
 exports.AwaitableCreationExpression = AwaitableCreationExpression;
 exports.XHPChildrenDeclaration = XHPChildrenDeclaration;
+exports.XHPChildrenParenthesizedList = XHPChildrenParenthesizedList;
 exports.XHPCategoryDeclaration = XHPCategoryDeclaration;
 exports.XHPEnumType = XHPEnumType;
 exports.XHPRequired = XHPRequired;

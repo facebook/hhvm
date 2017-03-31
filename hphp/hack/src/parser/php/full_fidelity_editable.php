@@ -351,6 +351,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return AwaitableCreationExpression::from_json($json, $position, $source);
     case 'xhp_children_declaration':
       return XHPChildrenDeclaration::from_json($json, $position, $source);
+    case 'xhp_children_parenthesized_list':
+      return XHPChildrenParenthesizedList::from_json($json, $position, $source);
     case 'xhp_category_declaration':
       return XHPCategoryDeclaration::from_json($json, $position, $source);
     case 'xhp_enum_type':
@@ -15388,6 +15390,91 @@ final class XHPChildrenDeclaration extends EditableSyntax {
     yield $this->_keyword;
     yield $this->_expression;
     yield $this->_semicolon;
+    yield break;
+  }
+}
+final class XHPChildrenParenthesizedList extends EditableSyntax {
+  private EditableSyntax $_left_paren;
+  private EditableSyntax $_xhp_children;
+  private EditableSyntax $_right_paren;
+  public function __construct(
+    EditableSyntax $left_paren,
+    EditableSyntax $xhp_children,
+    EditableSyntax $right_paren) {
+    parent::__construct('xhp_children_parenthesized_list');
+    $this->_left_paren = $left_paren;
+    $this->_xhp_children = $xhp_children;
+    $this->_right_paren = $right_paren;
+  }
+  public function left_paren(): EditableSyntax {
+    return $this->_left_paren;
+  }
+  public function xhp_children(): EditableSyntax {
+    return $this->_xhp_children;
+  }
+  public function right_paren(): EditableSyntax {
+    return $this->_right_paren;
+  }
+  public function with_left_paren(EditableSyntax $left_paren): XHPChildrenParenthesizedList {
+    return new XHPChildrenParenthesizedList(
+      $left_paren,
+      $this->_xhp_children,
+      $this->_right_paren);
+  }
+  public function with_xhp_children(EditableSyntax $xhp_children): XHPChildrenParenthesizedList {
+    return new XHPChildrenParenthesizedList(
+      $this->_left_paren,
+      $xhp_children,
+      $this->_right_paren);
+  }
+  public function with_right_paren(EditableSyntax $right_paren): XHPChildrenParenthesizedList {
+    return new XHPChildrenParenthesizedList(
+      $this->_left_paren,
+      $this->_xhp_children,
+      $right_paren);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
+    $xhp_children = $this->xhp_children()->rewrite($rewriter, $new_parents);
+    $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
+    if (
+      $left_paren === $this->left_paren() &&
+      $xhp_children === $this->xhp_children() &&
+      $right_paren === $this->right_paren()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new XHPChildrenParenthesizedList(
+        $left_paren,
+        $xhp_children,
+        $right_paren), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $left_paren = EditableSyntax::from_json(
+      $json->xhp_children_list_left_paren, $position, $source);
+    $position += $left_paren->width();
+    $xhp_children = EditableSyntax::from_json(
+      $json->xhp_children_list_xhp_children, $position, $source);
+    $position += $xhp_children->width();
+    $right_paren = EditableSyntax::from_json(
+      $json->xhp_children_list_right_paren, $position, $source);
+    $position += $right_paren->width();
+    return new XHPChildrenParenthesizedList(
+        $left_paren,
+        $xhp_children,
+        $right_paren);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_left_paren;
+    yield $this->_xhp_children;
+    yield $this->_right_paren;
     yield break;
   }
 }

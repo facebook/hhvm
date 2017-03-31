@@ -562,3 +562,4 @@ match kind with
   | XHPStringLiteral -> "XHP_string_literal"
   | XHPBody -> "XHP_body"
   | XHPComment -> "XHP_comment"
+

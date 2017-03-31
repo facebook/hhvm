@@ -285,6 +285,14 @@ let rec get_doc node =
     let e = get_doc xhp_children_expression in
     let s = get_doc xhp_children_semicolon in
     c ^| e ^^^ s
+  | XHPChildrenParenthesizedList {
+      xhp_children_list_left_paren;
+      xhp_children_list_xhp_children;
+      xhp_children_list_right_paren } ->
+    let l = get_doc xhp_children_list_left_paren in
+    let c = get_doc xhp_children_list_xhp_children in
+    let r = get_doc xhp_children_list_right_paren in
+    l ^| c ^| r
   | XHPCategoryDeclaration {
     xhp_category_keyword;
     xhp_category_categories;

@@ -579,18 +579,8 @@ module WithExpressionAndStatementAndTypeParser
     parse_terminated_list parser parse_classish_element RightBrace
 
   and parse_xhp_children_paren parser =
-    let (parser, left, exprs, right) =
-      parse_parenthesized_comma_list parser parse_xhp_children_expression in
-    let result = make_parenthesized_expression left exprs right in
-    (parser, result)
-
-  and parse_xhp_children_term parser =
     (* SPEC (Draft)
-    xhp-children-term:
-      name
-      xhp-class-name
-      xhp-category-name
-      ( xhp-children-expressions )
+    ( xhp-children-expressions )
 
     xhp-children-expressions:
       xhp-children-expression
@@ -600,6 +590,18 @@ module WithExpressionAndStatementAndTypeParser
     to be comma-terminated. Is this intentional? It is inconsistent with
     practice throughout the rest of Hack. There is no syntactic difficulty
     in allowing a comma before the close paren. Consider allowing it.
+    *)
+    let (parser, left, exprs, right) =
+      parse_parenthesized_comma_list parser parse_xhp_children_expression in
+    let result = make_xhp_children_parenthesized_list left exprs right in
+    (parser, result)
+
+  and parse_xhp_children_term parser =
+    (* SPEC (Draft)
+    xhp-children-term:
+      name
+      xhp-class-name
+      xhp-category-name
     *)
     let (parser1, token) = next_xhp_children_name_or_other parser in
     let name = make_token token in

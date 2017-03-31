@@ -786,12 +786,8 @@ let rec transform node =
       t left_p;
       Split;
       WithRule (Rule.Argument, Fmt [
-        Nest [
-          (* TODO t14945172: remove this
-            This is required due to the xhp children declaration split, th
-          *)
-          handle_possible_list ~after_each:after_each_argument expr;
-        ];
+        Nest [ t expr; ];
+        Split;
         t right_p
       ]);
     ]
@@ -931,6 +927,12 @@ let rec transform node =
       t expr;
       t semi;
       Newline;
+    ]
+  | XHPChildrenParenthesizedList x ->
+    let (left_p, expressions, right_p) =
+      get_xhp_children_parenthesized_list_children x in
+    Fmt [
+      transform_argish left_p expressions right_p;
     ]
   | XHPCategoryDeclaration x ->
     let (kw, categories, semi) = get_xhp_category_declaration_children x in

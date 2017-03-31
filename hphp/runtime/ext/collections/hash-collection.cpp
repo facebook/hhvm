@@ -11,37 +11,11 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // HashCollection
 
-/**
- * The HashCollection implementation makes use of s_theEmptyMixedArray, a
- * special static empty array that has all of MixedArray's fields initialized
- * to convenient values.  This "static empty mixed array" is only used
- * internally within the HashCollection implementation and it's never exposed
- * outside of the HashCollection implementation.  hashTab()[0] is set to Empty
- * so that the find() method won't find anything, and m_cap is set to 0 so that
- * any attempt to add an element will trigger a grow operation.
- *
- * Using this static empty mixed array allows us to always assume data() is
- * non-null, and it is better than calling MakeReserveMixed because it avoids
- * doing any allocation.
- */
-
-EmptyMixedArrayStorage s_theEmptyMixedArray;
-
-struct HashCollection::EmptyMixedInitializer {
-  EmptyMixedInitializer() {
-    auto a = reinterpret_cast<MixedArray*>(&s_theEmptyMixedArray);
-    MixedArray::InitSmall(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
-  }
-};
-
-HashCollection::EmptyMixedInitializer
-HashCollection::s_empty_mixed_initializer;
-
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
   : ObjectData(cls, collections::objectFlags, kind)
   , m_versionAndSize(0)
-  , m_arr(cap == 0 ? staticEmptyMixedArray() :
-          MixedArray::asMixed(MixedArray::MakeReserveMixed(cap)))
+  , m_arr(cap == 0 ? staticEmptyDictArrayAsMixed() :
+          MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))
 {}
 
 NEVER_INLINE
@@ -128,34 +102,11 @@ Array HashCollection::toArray() {
   if (!m_size) {
     return empty_array();
   }
-  if (UNLIKELY(intLikeStrKeys())) {
-    // In the rare case where this collection contains integer-like string
-    // keys, instead of exposing this collection's buffer we return a copy
-    // of the buffer with the int-like string keys converted to integers.
-    // This is important because int-like string keys cannot be accessed by
-    // user code via the brackets operator (i.e. "$c[$k]").
-    ArrayInit ai(m_size, ArrayInit::Mixed{});
-    auto* eLimit = elmLimit();
-    for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-      if (e->hasIntKey()) {
-        ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
-      } else {
-        assert(e->hasStrKey());
-        ai.set(VarNR::MakeKey(String(StrNR(e->skey))), tvAsCVarRef(&e->data));
-      }
-    }
-    Array arr = ai.toArray();
-    // If both a given integer x and its equivalent string presentation
-    // were both keys in the collection, we better warn the user.
-    if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
-    return arr;
-  }
-  auto ad = const_cast<ArrayData*>(
-    reinterpret_cast<const ArrayData*>(arrayData())
-  );
+  auto ad = arrayData()->toPHPArray(true);
+  if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
   assert(m_size);
-  assert(ad->m_pos == nthElmPos(0));
-  return Array(ad);
+  assert(ad->m_pos == 0);
+  return Array::attach(ad);
 }
 
 Array HashCollection::toKeysArray() {
@@ -273,8 +224,8 @@ void HashCollection::resizeHelper(uint32_t newCap) {
   assert(m_immCopy.isNull());
   // Allocate a new ArrayData with the specified capacity and dup
   // all the elements (without copying over tombstones).
-  auto ad = arrayData() == staticEmptyMixedArray() ?
-    MixedArray::asMixed(MixedArray::MakeReserveMixed(newCap)) :
+  auto ad = arrayData() == staticEmptyDictArrayAsMixed() ?
+    MixedArray::asMixed(MixedArray::MakeReserveDict(newCap)) :
     MixedArray::CopyReserve(m_arr, newCap);
   decRefArr(m_arr);
   m_arr = ad;
@@ -335,7 +286,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
   } else {
     if (m_size == 0 && nextKI() == 0) {
       decRefArr(m_arr);
-      m_arr = staticEmptyMixedArray();
+      m_arr = staticEmptyDictArrayAsMixed();
       return;
     }
     // If no old capacity was provided, we compute the largest capacity
@@ -353,7 +304,7 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldBuf = data();
     auto oldUsed = posLimit();
     auto oldNextKI = nextKI();
-    auto arr = MixedArray::asMixed(MixedArray::MakeReserveMixed(newCap));
+    auto arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
     auto data = mixedData(arr);
     m_arr = arr;
     auto table = (int32_t*)(data + size_t(newCap));
@@ -610,9 +561,6 @@ void HashCollection::mutateImpl() {
   dropImmCopy();
   if (canMutateBuffer()) {
     return;
-  }
-  if (!m_size) {
-    setIntLikeStrKeys(false);
   }
   auto* oldAd = arrayData();
   m_arr = MixedArray::asMixed(MixedArray::Copy(oldAd));

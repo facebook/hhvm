@@ -1675,11 +1675,7 @@ Type builtinReturnType(const Func* builtin) {
 
 namespace {
 
-// Helper for doing array-style Idx translations, even if we're dealing with a
-// collection.  The stack will still contain the collection in that case, and
-// loaded_collection_array will be non-nullptr.  If we're really doing
-// ArrayIdx, it's nullptr.
-void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
+void implArrayIdx(IRGS& env) {
   // These types are just used to decide what to do; once we know what we're
   // actually doing we constrain the values with the popC()s later on in this
   // function.
@@ -1688,11 +1684,11 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
   if (keyType <= TNull) {
     auto const def = popC(env, DataTypeGeneric);
     auto const key = popC(env);
-    auto const stack_base = popC(env);
+    auto const base = popC(env);
 
     // if the key is null it will not be found so just return the default
     push(env, def);
-    decRef(env, stack_base);
+    decRef(env, base);
     decRef(env, key);
     return;
   }
@@ -1705,47 +1701,26 @@ void implArrayIdx(IRGS& env, SSATmp* loaded_collection_array) {
                                                // the translated code doesn't
                                                // care about the type
   auto const key = popC(env);
-  auto const stack_base = popC(env);
-  auto const use_base = loaded_collection_array
-    ? loaded_collection_array
-    : stack_base;
+  auto const base = popC(env);
 
-  auto const elem = profiledArrayAccess(env, use_base, key,
+  auto const elem = profiledArrayAccess(env, base, key,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
     [&] (SSATmp* key) {
-      return gen(env, ArrayIdx, use_base, key, def);
+      return gen(env, ArrayIdx, base, key, def);
     }
   );
 
   auto finish = [&](SSATmp* tmp) {
     auto const value = unbox(env, tmp, nullptr);
     pushIncRef(env, value);
-    decRef(env, stack_base);
+    decRef(env, base);
     decRef(env, key);
     decRef(env, def);
   };
 
   auto const pelem = profiledType(env, elem, [&] { finish(elem); });
-  finish(pelem);
-}
-
-void implMapIdx(IRGS& env) {
-  auto const def = popC(env);
-  auto const key = popC(env);
-  auto const map = popC(env);
-
-  auto finish = [&](SSATmp* elem) {
-    auto const val = unbox(env, elem, nullptr);
-    pushIncRef(env, val);
-    decRef(env, map);
-    decRef(env, key);
-    decRef(env, def);
-  };
-
-  auto const elem = gen(env, MapIdx, map, key, def);
-  auto const pelem = profiledType(env, elem, [&] { finish(elem); } );
   finish(pelem);
 }
 
@@ -1788,34 +1763,40 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   finish(pelem);
 }
 
-void implDictKeysetIdx(IRGS& env, bool is_dict) {
+void implDictKeysetIdx(IRGS& env,
+                       bool is_dict,
+                       SSATmp* loaded_collection_dict) {
   auto const def = popC(env);
   auto const key = popC(env);
-  auto const base = popC(env);
-
-  assertx(base->isA(is_dict ? TDict : TKeyset));
+  auto const stack_base = popC(env);
 
   auto const finish = [&](SSATmp* elem) {
     pushIncRef(env, elem);
     decRef(env, def);
     decRef(env, key);
-    decRef(env, base);
+    decRef(env, stack_base);
   };
 
   if (key->isA(TNull)) return finish(def);
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
-    gen(env, ThrowInvalidArrayKey, base, key);
+    gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
 
-  auto const elem = profiledArrayAccess(env, base, key,
+  assertx(is_dict || !loaded_collection_dict);
+  auto const use_base = loaded_collection_dict
+    ? loaded_collection_dict
+    : stack_base;
+  assertx(use_base->isA(is_dict ? TDict : TKeyset));
+
+  auto const elem = profiledArrayAccess(env, use_base, key,
     [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
     },
     [&] (SSATmp* key) {
-      return gen(env, is_dict ? DictIdx : KeysetIdx, base, key, def);
+      return gen(env, is_dict ? DictIdx : KeysetIdx, use_base, key, def);
     }
   );
 
@@ -1843,25 +1824,9 @@ void implGenericIdx(IRGS& env) {
  * Idx bytecode.
  */
 TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
-                                 bool& useArr, bool& useVec, bool& useMap) {
+                                 bool& useVec, bool& useDict) {
   if (baseType < TObj && baseType.clsSpec()) {
     auto const cls = baseType.clsSpec().cls();
-
-    // To use ArrayIdx, we require either constant non-int keys or known
-    // integer keys for Map, because integer-like strings behave differently.
-    auto const isMap      = collections::isType(cls, CollectionType::Map) ||
-                            collections::isType(cls, CollectionType::ImmMap);
-    auto const isMapOrSet = isMap ||
-                            collections::isType(cls, CollectionType::Set) ||
-                            collections::isType(cls, CollectionType::ImmSet);
-    useArr = [&]() {
-      if (!isMapOrSet) return false;
-      if (keyType <= TInt) return true;
-      if (!keyType.hasConstVal(TStr)) return false;
-      int64_t dummy;
-      if (keyType.strVal()->isStrictlyInteger(dummy)) return false;
-      return true;
-    }();
 
     // Vector is only usable with int keys, so we can only optimize for
     // Vector if the key is an Int
@@ -1869,14 +1834,15 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
               collections::isType(cls, CollectionType::ImmVector)) &&
              keyType <= TInt;
 
-    // If it's a map with a non-static string key, we can do a map-specific
-    // optimization.
-    useMap = isMap && keyType <= TStr;
+    useDict = collections::isType(cls, CollectionType::Map) ||
+              collections::isType(cls, CollectionType::ImmMap) ||
+              collections::isType(cls, CollectionType::Set) ||
+              collections::isType(cls, CollectionType::ImmSet);
 
-    if (useArr || useVec || useMap) return TypeConstraint(cls);
+    if (useVec || useDict) return TypeConstraint(cls);
   }
 
-  useArr = useVec = useMap = false;
+  useVec = useDict = false;
   return DataTypeSpecific;
 }
 
@@ -1887,8 +1853,8 @@ TypeConstraint idxBaseConstraint(Type baseType, Type keyType,
 void emitArrayIdx(IRGS& env) {
   auto const arrType = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
   if (arrType <= TVec) return implVecIdx(env, nullptr);
-  if (arrType <= TDict) return implDictKeysetIdx(env, true);
-  if (arrType <= TKeyset) return implDictKeysetIdx(env, false);
+  if (arrType <= TDict) return implDictKeysetIdx(env, true, nullptr);
+  if (arrType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
 
   if (!(arrType <= TArr)) {
     // raise fatal
@@ -1896,7 +1862,7 @@ void emitArrayIdx(IRGS& env) {
     return;
   }
 
-  implArrayIdx(env, nullptr);
+  implArrayIdx(env);
 }
 
 void emitIdx(IRGS& env) {
@@ -1906,8 +1872,8 @@ void emitIdx(IRGS& env) {
   auto const baseType = base->type();
 
   if (baseType <= TVec) return implVecIdx(env, nullptr);
-  if (baseType <= TDict) return implDictKeysetIdx(env, true);
-  if (baseType <= TKeyset) return implDictKeysetIdx(env, false);
+  if (baseType <= TDict) return implDictKeysetIdx(env, true, nullptr);
+  if (baseType <= TKeyset) return implDictKeysetIdx(env, false, nullptr);
 
   if (keyType <= TNull || !baseType.maybe(TArr | TObj | TStr)) {
     auto const def = popC(env, DataTypeGeneric);
@@ -1928,24 +1894,22 @@ void emitIdx(IRGS& env) {
   }
 
   if (baseType <= TArr) {
-    emitArrayIdx(env);
+    implArrayIdx(env);
     return;
   }
 
-  bool useArr, useVec, useMap;
-  auto const tc = idxBaseConstraint(baseType, keyType, useArr, useVec, useMap);
-  if (useArr || useVec || useMap) {
+  bool useVec, useDict;
+  auto const tc = idxBaseConstraint(baseType, keyType, useVec, useDict);
+  if (useVec || useDict) {
     env.irb->constrainValue(base, tc);
     env.irb->constrainValue(key, DataTypeSpecific);
 
-    if (useArr) {
-      auto const arr = gen(env, LdColArray, base);
-      implArrayIdx(env, arr);
-    } else if (useVec) {
+    if (useVec) {
       auto const vec = gen(env, LdColVec, base);
       implVecIdx(env, vec);
     } else {
-      implMapIdx(env);
+      auto const dict = gen(env, LdColDict, base);
+      implDictKeysetIdx(env, true, dict);
     }
     return;
   }

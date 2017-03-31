@@ -34,7 +34,7 @@ void BaseMap::throwBadKeyType() {
 BaseMap::~BaseMap() {
   auto const mixed = MixedArray::asMixed(arrayData());
   // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
+  if (mixed->decReleaseCheck()) MixedArray::ReleaseDict(mixed);
 }
 
 template<typename TMap>
@@ -49,7 +49,6 @@ BaseMap::Clone(ObjectData* obj) {
   thiz->arrayData()->incRefCount();
   target->m_size = thiz->m_size;
   target->m_arr = thiz->m_arr;
-  target->setIntLikeStrKeys(thiz->intLikeStrKeys());
   return target;
 }
 
@@ -72,39 +71,29 @@ void BaseMap::addAllImpl(const Variant& iterable) {
     [&](ArrayData* adata) {
       auto sz = adata->size();
       if (!sz) return true;
-      if (!m_size) {
-
-        if (adata->isMixed()) {
-          // Collections can't contain refs, so check for any refs in the input
-          // array and look for int-like string keys at the same time.
-          bool int_like_str_keys = intLikeStrKeys();
-          bool contains_ref = false;
-          MixedArray::IterateKV(
-            MixedArray::asMixed(adata),
-            [&](const TypedValue* key, const TypedValue* value) {
-              int64_t ignored;
-              if (!int_like_str_keys &&
-                  isStringType(key->m_type) &&
-                  key->m_data.pstr->isStrictlyInteger(ignored)) {
-                int_like_str_keys = true;
-              }
-              if (value->m_type == KindOfRef) contains_ref = true;
-              return int_like_str_keys && contains_ref;
-            }
-          );
-          if (!contains_ref) {
-            replaceArray(adata);
-            if (int_like_str_keys) setIntLikeStrKeys(true);
-            return true;
-          }
-        }
-
-      } else {
+      if (m_size) {
         oldCap = cap(); // assume minimal collisions
+        reserve(m_size + sz);
+        mutateAndBump();
+        return false;
+      } else if (adata->isDict()) {
+        replaceArray(adata);
+        return true;
+      } else {
+        ArrayData* dict;
+        try {
+          dict = adata->toDict(adata->cowCheck());
+        } catch (Object& e) {
+          // the array contained references, can't be turned into a dict as is
+          // we'll have to proceed one element at a time, unboxing as we go
+          reserve(sz);
+          mutateAndBump();
+          return false;
+        }
+        replaceArray(dict);
+        if (dict != adata) dict->decRefCount();
+        return true;
       }
-      reserve(m_size + sz);
-      mutateAndBump();
-      return false;
     },
     [this](const TypedValue* key, const TypedValue* value) {
       setRaw(tvAsCVarRef(key), tvAsCVarRef(value));
@@ -117,7 +106,6 @@ void BaseMap::addAllImpl(const Variant& iterable) {
           if (m_size) break;
           auto hc = static_cast<HashCollection*>(coll);
           replaceArray(hc->arrayData());
-          setIntLikeStrKeys(BaseMap::intLikeStrKeys(hc));
           return true;
         }
         case CollectionType::Pair:
@@ -316,7 +304,6 @@ retry:
   auto& e = allocElm(p);
   cellDup(*val, e.data);
   e.setStrKey(key, h);
-  updateIntLikeStrKeys(key);
 }
 
 void BaseMap::setRaw(int64_t k, const TypedValue* val) {
@@ -337,9 +324,7 @@ void BaseMap::set(StringData* key, const TypedValue* val) {
 
 Array BaseMap::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return const_cast<BaseMap*>(
-    static_cast<const BaseMap*>(obj)
-  )->toArray();
+  return const_cast<BaseMap*>(static_cast<const BaseMap*>(obj))->toArray();
 }
 
 bool BaseMap::ToBool(const ObjectData* obj) {
@@ -410,7 +395,7 @@ void BaseMap::OffsetUnset(ObjectData* obj, const TypedValue* key) {
 bool BaseMap::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto map1 = static_cast<const BaseMap*>(obj1);
   auto map2 = static_cast<const BaseMap*>(obj2);
-  return ArrayData::Equal(map1->arrayData(), map2->arrayData());
+  return MixedArray::DictEqual(map1->arrayData(), map2->arrayData());
 }
 
 template<typename TMap>
@@ -571,7 +556,6 @@ BaseMap::php_take(const Variant& n) {
       map->updateNextKI(toE.ikey);
     } else {
       assert(toE.hasStrKey());
-      map->updateIntLikeStrKeys(toE.skey);
     }
   }
   return Object{std::move(map)};
@@ -615,7 +599,6 @@ BaseMap::php_skip(const Variant& n) {
       map->updateNextKI(toE.ikey);
     } else {
       assert(toE.hasStrKey());
-      map->updateIntLikeStrKeys(toE.skey);
     }
   }
   return Object{std::move(map)};
@@ -697,7 +680,6 @@ BaseMap::php_slice(const Variant& start, const Variant& len) {
       map->updateNextKI(toE.ikey);
     } else {
       assert(toE.hasStrKey());
-      map->updateIntLikeStrKeys(toE.skey);
     }
   }
   return Object{std::move(map)};
@@ -789,9 +771,8 @@ void c_Map::clear() {
   ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyMixedArray();
+  m_arr = staticEmptyDictArrayAsMixed();
   m_size = 0;
-  setIntLikeStrKeys(false);
 }
 
 // This function will create a immutable copy of this Map (if it doesn't
@@ -802,7 +783,6 @@ Object c_Map::getImmutableCopy() {
     map->m_size = m_size;
     map->m_version = m_version;
     map->m_arr = m_arr;
-    map->setIntLikeStrKeys(intLikeStrKeys());
     m_immCopy = std::move(map);
     arrayData()->incRefCount();
   }

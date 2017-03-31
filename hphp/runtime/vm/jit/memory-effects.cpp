@@ -1095,8 +1095,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case ArrayIdx:
     return may_load_store(AElemAny | ARefAny, AEmpty);
-  case MapIdx:
-    return may_load_store(AHeapAny, AEmpty);
   case AKExistsObj:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
@@ -1592,7 +1590,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VectorHasImmCopy:
   case CheckPackedArrayDataBounds:
   case LdColVec:
-  case LdColArray:
+  case LdColDict:
   case EnterFrame:
     return may_load_store(AEmpty, AEmpty);
 

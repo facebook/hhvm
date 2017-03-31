@@ -768,12 +768,6 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(SetArray::NvGetStr(a, key), def);
 }
 
-TypedValue mapIdx(ObjectData* mapOD, StringData* key, TypedValue def) {
-  assert(collections::isType(mapOD->getVMClass(), CollectionType::Map) ||
-         collections::isType(mapOD->getVMClass(), CollectionType::ImmMap));
-  return getDefaultIfNullCell(static_cast<BaseMap*>(mapOD)->get(key), def);
-}
-
 int32_t arrayVsize(ArrayData* ad) {
   return ad->vsize();
 }

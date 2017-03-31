@@ -316,8 +316,6 @@ static CallMap s_callMap {
     {LdClosureStaticLoc,
                          ldClosureStaticLoc, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
-    {MapIdx,             mapIdx, DTV, SSync,
-                          {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,
                           DNone, SSync, {{SSA, 0}}},
     {ThrowArithmeticError, throw_arithmetic_error,

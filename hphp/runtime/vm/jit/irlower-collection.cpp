@@ -132,7 +132,7 @@ void cgLdColVec(IRLS& env, const IRInstruction* inst) {
   v << load{src[BaseVector::arrOffset()], dst};
 }
 
-void cgLdColArray(IRLS& env, const IRInstruction* inst) {
+void cgLdColDict(IRLS& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
   auto const cls = ty.clsSpec().cls();
 
@@ -145,7 +145,7 @@ void cgLdColArray(IRLS& env, const IRInstruction* inst) {
     collections::isType(cls,
                         CollectionType::Map, CollectionType::ImmMap,
                         CollectionType::Set, CollectionType::ImmSet),
-    "LdColArray received an unsupported type: {}\n",
+    "LdColDict received an unsupported type: {}\n",
     ty.toString()
   );
 

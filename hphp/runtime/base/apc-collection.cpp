@@ -107,7 +107,7 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
         if (isVectorCollection(obj->collectionType())) {
           return APCArray::MakeUncountedVec(const_cast<ArrayData*>(array));
         }
-        return APCArray::MakeUncountedArray(const_cast<ArrayData*>(array));
+        return APCArray::MakeUncountedDict(const_cast<ArrayData*>(array));
       };
       return WrapArray(
         { makeUncounted(), getMemSize(array) + sizeof(APCTypedValue) },
@@ -122,9 +122,9 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
                                      level,
                                      unserializeObj);
     }
-    return APCArray::MakeSharedArray(const_cast<ArrayData*>(array),
-                                     level,
-                                     unserializeObj);
+    return APCArray::MakeSharedDict(const_cast<ArrayData*>(array),
+                                    level,
+                                    unserializeObj);
   };
   return WrapArray(makeShared(), obj->collectionType());
 }
@@ -162,7 +162,7 @@ Object APCCollection::createObject() const {
   }
 
   if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedVec ||
-               m_arrayHandle->kind() == APCKind::SerializedArray)) {
+               m_arrayHandle->kind() == APCKind::SerializedDict)) {
     return createFromSerialized(m_colType, m_arrayHandle);
   }
 

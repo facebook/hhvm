@@ -61,6 +61,7 @@ struct ExpressionList : Expression {
   std::string getLiteralString() const override;
 
   bool isScalarArrayPairs() const;
+  bool isSetCollectionScalar() const;
 
   int getCount() const { return m_exps.size();}
   ExpressionPtr &operator[](int index);

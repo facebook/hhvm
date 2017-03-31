@@ -51,7 +51,6 @@ void BaseSet::addAllKeysOf(const Cell container) {
       if (!m_size && coll->collectionType() == CollectionType::Set) {
         auto hc = static_cast<HashCollection*>(coll);
         replaceArray(hc->arrayData());
-        setIntLikeStrKeys(BaseSet::intLikeStrKeys(hc));
         return true;
       }
       if (coll->collectionType() == CollectionType::Pair) {
@@ -90,7 +89,6 @@ void BaseSet::addAll(const Variant& t) {
       if (!m_size && coll->collectionType() == CollectionType::Set) {
         auto hc = static_cast<HashCollection*>(coll);
         replaceArray(hc->arrayData());
-        setIntLikeStrKeys(BaseSet::intLikeStrKeys(hc));
         return true;
       }
       if (coll->collectionType() == CollectionType::Pair) {
@@ -161,7 +159,6 @@ void BaseSet::addImpl(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   cellDup(make_tv<KindOfString>(key), e.data);
-  updateIntLikeStrKeys(key);
   if (!raw) {
     ++m_version;
   }
@@ -225,7 +222,6 @@ void BaseSet::addFront(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   cellDup(make_tv<KindOfString>(key), e.data);
-  updateIntLikeStrKeys(key);
   ++m_version;
 }
 
@@ -293,9 +289,7 @@ void BaseSet::throwNoMutableIndexAccess() {
 
 Array BaseSet::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
-  return const_cast<BaseSet*>(
-    static_cast<const BaseSet*>(obj)
-  )->toArray();
+  return const_cast<BaseSet*>(static_cast<const BaseSet*>(obj))->toArray();
 }
 
 bool BaseSet::ToBool(const ObjectData* obj) {
@@ -310,7 +304,6 @@ Object c_Set::getImmutableCopy() {
     set->m_size = m_size;
     set->m_version = m_version;
     set->m_arr = m_arr;
-    set->setIntLikeStrKeys(intLikeStrKeys());
     m_immCopy = std::move(set);
     arrayData()->incRefCount();
   }
@@ -323,13 +316,13 @@ Object c_Set::getImmutableCopy() {
 bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st1 = static_cast<const BaseSet*>(obj1);
   auto st2 = static_cast<const BaseSet*>(obj2);
-  return ArrayData::Equal(st1->arrayData(), st2->arrayData());
+  return MixedArray::DictEqual(st1->arrayData(), st2->arrayData());
 }
 
 BaseSet::~BaseSet() {
   auto const mixed = MixedArray::asMixed(arrayData());
   // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
+  if (mixed->decReleaseCheck()) MixedArray::ReleaseDict(mixed);
 }
 
 void BaseSet::throwBadValueType() {
@@ -349,7 +342,6 @@ BaseSet::Clone(ObjectData* obj) {
   thiz->arrayData()->incRefCount();
   target->m_size = thiz->m_size;
   target->m_arr = thiz->m_arr;
-  target->setIntLikeStrKeys(thiz->intLikeStrKeys());
   return target;
 }
 
@@ -421,7 +413,7 @@ BaseSet::php_map(const Variant& callback) {
   if (!m_size) return Object{std::move(set)};
   assert(posLimit() != 0);
   assert(hashSize() > 0);
-  assert(set->arrayData() == staticEmptyMixedArray());
+  assert(set->arrayData() == staticEmptyDictArrayAsMixed());
   auto oldCap = set->cap();
   set->reserve(posLimit()); // presume minimum collisions ...
   assert(set->canMutateBuffer());
@@ -575,7 +567,6 @@ BaseSet::php_take(const Variant& n) {
       set->updateNextKI(toE.ikey);
     } else {
       assert(toE.hasStrKey());
-      set->updateIntLikeStrKeys(toE.skey);
     }
   }
   return Object{std::move(set)};
@@ -660,7 +651,6 @@ BaseSet::php_skip(const Variant& n) {
       set->updateNextKI(toE.ikey);
     } else {
       assert(toE.hasStrKey());
-      set->updateIntLikeStrKeys(toE.skey);
     }
   }
   return Object{std::move(set)};
@@ -742,7 +732,6 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
       set->updateNextKI(toE.ikey);
     } else {
       assert(toE.hasStrKey());
-      set->updateIntLikeStrKeys(toE.skey);
     }
   }
   return Object{std::move(set)};
@@ -787,9 +776,8 @@ void c_Set::clear() {
   ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyMixedArray();
+  m_arr = staticEmptyDictArrayAsMixed();
   m_size = 0;
-  setIntLikeStrKeys(false);
 }
 
 c_Set* c_Set::Clone(ObjectData* obj) {

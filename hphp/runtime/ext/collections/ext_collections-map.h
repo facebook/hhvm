@@ -325,9 +325,6 @@ struct c_Map : BaseMap {
   explicit c_Map(uint32_t cap, Class* cls = c_Map::classof())
     : c_Map(cls, cap) { }
 
-  void addAll(const Variant& t) {
-    addAllImpl(t);
-  }
   void setAll(const Variant& t) {
     setAllImpl(t);
   }

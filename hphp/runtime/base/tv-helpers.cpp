@@ -842,8 +842,11 @@ void tvCastToDictInPlace(TypedValue* tv) {
           raise_warning("Non-iterable object conversion to dict");
           a = staticEmptyDictArray();
         }
+        tv->m_data.parr = a;
+        tv->m_type = KindOfDict;
+        assert(cellIsPlausible(*tv));
         decRefObj(obj);
-        continue;
+        return;
       }
 
       case KindOfRef:

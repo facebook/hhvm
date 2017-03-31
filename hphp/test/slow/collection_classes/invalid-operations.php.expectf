@@ -10,14 +10,14 @@ object(HH\ImmVector)#3 (2) {
     int(2)
   }
 }
-object(HH\ImmMap)#4 (2) {
+object(HH\ImmMap)#6 (2) {
   [0]=>
-  object(HH\Vector)#5 (1) {
+  object(HH\Vector)#4 (1) {
     [0]=>
     int(1)
   }
   [1]=>
-  object(HH\Vector)#6 (1) {
+  object(HH\Vector)#5 (1) {
     [0]=>
     int(2)
   }
@@ -53,11 +53,11 @@ object(HH\ImmVector)#13 (2) {
     }
   }
 }
-object(HH\ImmMap)#14 (2) {
+object(HH\ImmMap)#16 (2) {
   [0]=>
   array(1) {
     [0]=>
-    object(HH\Vector)#15 (1) {
+    object(HH\Vector)#14 (1) {
       [0]=>
       int(1)
     }
@@ -65,7 +65,7 @@ object(HH\ImmMap)#14 (2) {
   [1]=>
   array(1) {
     [0]=>
-    object(HH\Vector)#16 (1) {
+    object(HH\Vector)#15 (1) {
       [0]=>
       int(2)
     }

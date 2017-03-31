@@ -499,6 +499,7 @@ quick/locals.php
 quick/magic-get-dtors.php
 quick/magic-get-set.php
 quick/many-clsrefs.php
+quick/map_toarray_warn.php
 quick/merge_globals.php
 quick/method-non-object2.php
 quick/method-undefined.php

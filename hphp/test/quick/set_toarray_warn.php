@@ -1,6 +1,6 @@
 <?hh
 
-// Test that Set::toArray() raises a warning on a int/string collition.
+// Test that Set::toArray() raises a warning on a int/string collision.
 
 function should_warn() {
   var_dump((Set {1, 42, 13, '1', 'hello', 'world'})->toArray());

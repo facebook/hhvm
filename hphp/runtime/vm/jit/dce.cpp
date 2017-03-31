@@ -248,7 +248,7 @@ bool canDCE(IRInstruction* inst) {
   case ColIsNEmpty:
   case LdUnwinderValue:
   case LdColVec:
-  case LdColArray:
+  case LdColDict:
   case OrdStr:
   case ChrInt:
   case CheckRange:
@@ -642,7 +642,6 @@ bool canDCE(IRInstruction* inst) {
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
-  case MapIdx:
   case StMBase:
   case FinishMemberOp:
   case InlineReturnNoFrame:

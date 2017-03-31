@@ -1151,8 +1151,6 @@ void cgMapIsset(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, args);
 }
 
-IMPL_OPCODE_CALL(MapIdx);
-
 IMPL_OPCODE_CALL(MapAddElemC);
 IMPL_OPCODE_CALL(ColAddNewElemC);
 

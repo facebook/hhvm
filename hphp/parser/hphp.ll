@@ -263,7 +263,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from" { RETTOKEN(T_YIELD_FROM);}
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_YIELD_FROM);
+}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}

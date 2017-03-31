@@ -1,0 +1,27 @@
+diff --git a/Makefile.shared b/Makefile.shared
+index f79b632..7edfce0 100644
+--- a/third-party/ocaml/src/Makefile.shared
++++ b/third-party/ocaml/src/Makefile.shared
+@@ -228,17 +228,17 @@ partialclean::
+ ocamltools: ocamlc ocamlyacc ocamllex asmcomp/cmx_format.cmi \
+             asmcomp/printclambda.cmo compilerlibs/ocamlmiddleend.cma \
+             asmcomp/export_info.cmo
+-	cd tools ; $(MAKEREC) all
++	+cd tools ; $(MAKEREC) all
+ 
+ ocamltoolsopt: ocamlopt
+-	cd tools; $(MAKEREC) opt
++	+cd tools; $(MAKEREC) opt
+ 
+ ocamltoolsopt.opt: ocamlc.opt ocamlyacc ocamllex asmcomp/cmx_format.cmi \
+                    asmcomp/printclambda.cmx
+-	cd tools; $(MAKEREC) opt.opt
++	+cd tools; $(MAKEREC) opt.opt
+ 
+ partialclean::
+-	cd tools; $(MAKEREC) clean
++	+cd tools; $(MAKEREC) clean
+ 
+ alldepend::
+-	cd tools; $(MAKEREC) depend
++	+cd tools; $(MAKEREC) depend

@@ -30,15 +30,27 @@ if (PATCHES)
   foreach(PATCH ${PATCHES})
     message(STATUS "Applying ${PATCH}")
     execute_process(
-      COMMAND patch -p1
+      COMMAND patch -p1 --forward
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
       INPUT_FILE "${PATCH}"
+      OUTPUT_VARIABLE OUTPUT
       RESULT_VARIABLE RESULT)
     if (RESULT EQUAL 0)
       message(STATUS "Patch applied: ${PATCH}")
-      file(REMOVE ${PATCH})
     else()
-      message(FATAL_ERROR "Error applying patch ${PATCH}")
+      # Unfortunately although patch will recognise that a patch is already
+      # applied it will still return an error.
+      execute_process(
+        COMMAND patch -p1 -R --dry-run
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        INPUT_FILE "${PATCH}"
+        OUTPUT_VARIABLE OUTPUT
+        RESULT_VARIABLE RESULT2)
+      if (RESULT2 EQUAL 0)
+        message(STATUS "Patch was already applied: ${PATCH}")
+      else()
+        message(FATAL_ERROR "Error applying patch ${PATCH}")
+      endif()
     endif()
   endforeach(PATCH)
 endif()

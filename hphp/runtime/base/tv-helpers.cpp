@@ -139,7 +139,7 @@ bool refIsPlausible(const Ref ref) {
   return tvIsPlausible(ref);
 }
 
-bool tvDecRefWillRelease(TypedValue* tv) {
+bool tvDecRefWillRelease(const TypedValue* tv) {
   if (!isRefcountedType(tv->m_type)) {
     return false;
   }
@@ -353,7 +353,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
   cellCastToInt64InPlace(tv);
 }
 
-double tvCastToDouble(TypedValue* tv) {
+double tvCastToDouble(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
@@ -1103,7 +1103,7 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
   not_reached();
 }
 
-bool tvCanBeCoercedToNumber(TypedValue* tv) {
+bool tvCanBeCoercedToNumber(const TypedValue* tv) {
   switch (tv->m_type) {
     case KindOfUninit:
     case KindOfBoolean:

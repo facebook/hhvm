@@ -27,15 +27,17 @@ let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
 
 (* Context of the file being parsed, as global state. *)
 type state_variables =
-  { language : string ref
-  ; filePath : string ref
-  ; mode     : FileInfo.mode ref
+  { language  : string ref
+  ; filePath  : string ref
+  ; mode      : FileInfo.mode ref
+  ; ignorePos : bool ref
   }
 
 let lowerer_state =
-  { language = ref "UNINITIALIZED"
-  ; filePath = ref "UNINITIALIZED"
-  ; mode     = ref FileInfo.Mstrict
+  { language  = ref "UNINITIALIZED"
+  ; filePath  = ref "UNINITIALIZED"
+  ; mode      = ref FileInfo.Mstrict
+  ; ignorePos = ref false
   }
 
 let php_file () = !(lowerer_state.mode) == FileInfo.Mphp
@@ -49,29 +51,30 @@ type env =
 type +'a parser = node -> env -> 'a
 type ('a, 'b) metaparser = 'a parser -> 'b parser
 
-let mk_pos pos_file text start_offset end_offset =
-  let s_line, s_column = SourceText.offset_to_position text start_offset in
-  let e_line, e_column = SourceText.offset_to_position text end_offset in
-  let pos_start =
-    File_pos.of_line_column_offset
-      ~line:s_line
-      ~column:s_column
-      ~offset:start_offset
-  in
-  let pos_end =
-    File_pos.of_line_column_offset
-      ~line:e_line
-      ~column:e_column
-      ~offset:end_offset
-  in
-  Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
-
 let get_pos : node -> Pos.t = fun node ->
-  mk_pos
-    Relative_path.(create Dummy !(lowerer_state.filePath))
-    (source_text node)
-    (start_offset node)
-    (end_offset node)
+  if !(lowerer_state.ignorePos)
+  then Pos.none
+  else begin
+    let pos_file = Relative_path.(create Dummy !(lowerer_state.filePath)) in
+    let text = source_text node in
+    let start_offset = start_offset node in
+    let end_offset = end_offset node in
+    let s_line, s_column = SourceText.offset_to_position text start_offset in
+    let e_line, e_column = SourceText.offset_to_position text end_offset in
+    let pos_start =
+      File_pos.of_line_column_offset
+        ~line:s_line
+        ~column:s_column
+        ~offset:start_offset
+    in
+    let pos_end =
+      File_pos.of_line_column_offset
+        ~line:e_line
+        ~column:e_column
+        ~offset:end_offset
+    in
+    Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+  end
 
 exception Lowerer_invariant_failure of string * string
 let invariant_failure where what =
@@ -120,7 +123,14 @@ let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
 
 
 
-let pos_name node = get_pos node, text node
+let pos_name node =
+  let name = text node in
+  let local_ignore_pos = !(lowerer_state.ignorePos) in
+  (* Special case for __LINE__; never ignore position for that special name *)
+  if name = "__LINE__" then lowerer_state.ignorePos := false;
+  let p = get_pos node in
+  lowerer_state.ignorePos := local_ignore_pos;
+  p, name
 
 let couldMap : 'a . f:'a parser -> 'a list parser = fun ~f -> fun node env ->
   let rec synmap : 'a . 'a parser -> 'a list parser = fun f node env ->
@@ -786,6 +796,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         { syntax = XHPOpen { xhp_open_name; xhp_open_attributes; _ }; _ }
       ; xhp_body = body
       ; _ } ->
+      lowerer_state.ignorePos := false;
       let name =
         let pos, name = pos_name xhp_open_name in
         (pos, ":" ^ name)
@@ -830,7 +841,18 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     (* FIXME; should this include Missing? ; "| Missing -> Null" *)
     | _ -> missing_syntax "expression" node env
   in
-  get_pos node, pExpr_ node env
+  (* Since we need positions in XHP, regardless of the ignorePos flag, we
+   * parenthesise the call to pExpr_ so that the XHP expression case can flip
+   * the switch. The key part is that `get_pos node` happens before the old
+   * setting is restored.
+   *
+   * Evaluation order matters here!
+   *)
+  let local_ignore_pos = !(lowerer_state.ignorePos) in
+  let expr_ = pExpr_ node env in
+  let p = get_pos node in
+  lowerer_state.ignorePos := local_ignore_pos;
+  p, expr_
 and pBlock : block parser = fun node env ->
    match pStmt node env with
    | Block block -> List.filter (fun x -> x <> Noop) block
@@ -1634,6 +1656,7 @@ let from_text
   ?(elaborate_namespaces  = true)
   ?(include_line_comments = false)
   ?(keep_errors           = true)
+  ?(ignore_pos            = false)
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
   (source_text : Full_fidelity_source_text.t)
@@ -1650,9 +1673,10 @@ let from_text
       | s                  -> unknown_hh_mode s
       )
     in
-    lowerer_state.language := language tree;
-    lowerer_state.filePath := Relative_path.suffix file;
-    lowerer_state.mode     := fi_mode;
+    lowerer_state.language  := language tree;
+    lowerer_state.filePath  := Relative_path.suffix file;
+    lowerer_state.mode      := fi_mode;
+    lowerer_state.ignorePos := ignore_pos;
     let errors = ref [] in (* The top-level error list. *)
     let ast = runP pScript script { saw_yield = ref false; errors } in
     let ast =
@@ -1679,6 +1703,7 @@ let from_file
   ?(elaborate_namespaces  = true)
   ?(include_line_comments = false)
   ?(keep_errors           = true)
+  ?(ignore_pos            = false)
   ?(parser_options        = ParserOptions.default)
   (path : Relative_path.t)
   : result =
@@ -1686,6 +1711,7 @@ let from_file
       ~elaborate_namespaces
       ~include_line_comments
       ~keep_errors
+      ~ignore_pos
       ~parser_options
       path
       (Full_fidelity_source_text.from_file path)
@@ -1705,6 +1731,7 @@ let from_text_with_legacy
   ?(elaborate_namespaces  = true)
   ?(include_line_comments = false)
   ?(keep_errors           = true)
+  ?(ignore_pos            = false)
   ?(parser_options        = ParserOptions.default)
   (file    : Relative_path.t)
   (content : string)
@@ -1713,6 +1740,7 @@ let from_text_with_legacy
       ~elaborate_namespaces
       ~include_line_comments
       ~keep_errors
+      ~ignore_pos
       ~parser_options
       file
       (Full_fidelity_source_text.make content)
@@ -1721,6 +1749,7 @@ let from_file_with_legacy
   ?(elaborate_namespaces  = true)
   ?(include_line_comments = false)
   ?(keep_errors           = true)
+  ?(ignore_pos            = false)
   ?(parser_options        = ParserOptions.default)
   (file : Relative_path.t)
   : Parser_hack.parser_return =
@@ -1728,5 +1757,6 @@ let from_file_with_legacy
       ~elaborate_namespaces
       ~include_line_comments
       ~keep_errors
+      ~ignore_pos
       ~parser_options
       file

@@ -144,8 +144,11 @@ let parse_name compiler_options popt files_contents =
     let parsed_files =
       if compiler_options.parser = FFP
       then Relative_path.Map.mapi
-            (Full_fidelity_ast.from_text_with_legacy ~parser_options:popt)
-            files_contents
+        ( Full_fidelity_ast.from_text_with_legacy
+            ~parser_options:popt
+            ~ignore_pos:true
+        )
+        files_contents
       else Relative_path.Map.mapi (Parser_hack.program popt) files_contents
     in
 

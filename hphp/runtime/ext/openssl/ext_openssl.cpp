@@ -2982,7 +2982,7 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
   }
 
   // OpenSSL before 0.9.8i asserts with size < 0
-  if (data.size() > 0) {
+  if (data.size() >= 0) {
     EVP_EncryptUpdate(cipher_ctx, outbuf, &result_len,
                       (unsigned char *)data.data(), data.size());
   }

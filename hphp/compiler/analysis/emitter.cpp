@@ -10528,11 +10528,13 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  auto const scalar =
-    isDictForSetCollection ? el->isSetCollectionScalar() :
-    isDict ? isDictScalar(el) :
-    isKeyset ? isKeysetScalar(el) :
-    el->isScalar();
+  auto const scalar = [&]{
+    if (isDictForSetCollection) el->isSetCollectionScalar();
+    if (isVec) return el->isScalar();
+    if (isDict) return isDictScalar(el);
+    if (isKeyset) return isKeysetScalar(el);
+    return isArrayScalar(el);
+  }();
   if (scalar) {
     TypedValue tv;
     tvWriteUninit(&tv);
@@ -11161,6 +11163,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HardPrivatePropInference = true;
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

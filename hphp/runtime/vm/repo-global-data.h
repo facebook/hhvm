@@ -128,6 +128,12 @@ struct Repo::GlobalData {
    */
   bool EnableRenameFunction = false;
 
+  /*
+   * Are Hack array compatibility notices enabled? If so, certain optimizations
+   * may be disabled.
+   */
+  bool HackArrCompatNotices = false;
+
   std::vector<const StringData*> APCProfile;
 
   template<class SerDe> void serde(SerDe& sd) {
@@ -147,6 +153,7 @@ struct Repo::GlobalData {
       (APCProfile)
       (PromoteEmptyObject)
       (EnableRenameFunction)
+      (HackArrCompatNotices)
       ;
   }
 };

@@ -218,6 +218,9 @@ std::vector<std::unique_ptr<UnitEmitter>> load_input() {
   RuntimeOption::EvalJitEnableRenameFunction =
     Repo::get().global().EnableRenameFunction;
 
+  RuntimeOption::EvalHackArrCompatNotices =
+    Repo().get().global().HackArrCompatNotices;
+
   return parallel::map(
     Repo::get().enumerateUnits(RepoIdCentral, false, true),
     [&] (const std::pair<std::string,MD5>& kv) {
@@ -249,6 +252,7 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
 
   gd.arrayTypeTable.repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.

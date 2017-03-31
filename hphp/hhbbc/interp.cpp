@@ -347,6 +347,9 @@ void in(ISS& env, const bc::AddElemC& op) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
+      if (RuntimeOption::EvalHackArrCompatNotices &&
+          !k.subtypeOf(TInt) &&
+          !k.subtypeOf(TStr)) return TArr;
       return env.collect.trackConstantArrays ?
         array_set(std::move(ty), k, v) : TArr;
     }
@@ -575,16 +578,23 @@ void sameImpl(ISS& env) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
 
-  // EvalHackArrCompatNotices will notice on === and !== between PHP arrays and
-  // Hack arrays.
-  if (!(t1.couldBe(TArr) && couldBeHackArr(t2)) &&
-      !(couldBeHackArr(t1) && t2.couldBe(TArr))) {
+  auto const mightWarn = [&]{
+    // EvalHackArrCompatNotices will notice on === and !== between PHP arrays
+    // and Hack arrays.
+    if (!RuntimeOption::EvalHackArrCompatNotices) return false;
+    if (t1.couldBe(TArr) && couldBeHackArr(t2)) return true;
+    if (couldBeHackArr(t1) && t2.couldBe(TArr)) return true;
+    return false;
+  }();
+  if (!mightWarn) {
     nothrow(env);
     constprop(env);
   }
 
   if (v1 && v2) {
-    return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
+    if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
+      return push(env, r != Negate ? TTrue : TFalse);
+    }
   }
   push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
 }
@@ -593,28 +603,14 @@ void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
 void in(ISS& env, const bc::NSame&) { sameImpl<true>(env); }
 
 template<class Fun>
-void binOpBoolImpl(ISS& env, Fun fun, Op op) {
+void binOpBoolImpl(ISS& env, Fun fun) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
     if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
-      // EvalHackArrCompatNotices will notice on == and != between PHP arrays
-      // and Hack arrays. It will notice on relational comparisons between PHP
-      // arrays and any other type.
-      auto const can_const_prop = [&]{
-        if (op == Op::Eq || op == Op::Neq) {
-          return !(t1.couldBe(TArr) && couldBeHackArr(t2)) &&
-                 !(couldBeHackArr(t1) && t2.couldBe(TArr));
-        } else if (op == Op::Lt || op == Op::Lte ||
-                   op == Op::Gt || op == Op::Gte) {
-          return (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) ||
-                 !(t1.couldBe(TArr) || t2.couldBe(TArr));
-        }
-        return true;
-      }();
-      if (can_const_prop) constprop(env);
+      constprop(env);
       return push(env, *r ? TTrue : TFalse);
     }
   }
@@ -623,18 +619,14 @@ void binOpBoolImpl(ISS& env, Fun fun, Op op) {
 }
 
 template<class Fun>
-void binOpInt64Impl(ISS& env, Fun fun, Op op) {
+void binOpInt64Impl(ISS& env, Fun fun) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
     if (auto r = eval_cell_value([&]{ return ival(fun(*v2, *v1)); })) {
-      if (op != Op::Cmp ||
-          (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) ||
-          !(t1.couldBe(TArr) || t2.couldBe(TArr))) {
-        constprop(env);
-      }
+      constprop(env);
       return push(env, std::move(*r));
     }
   }
@@ -643,56 +635,28 @@ void binOpInt64Impl(ISS& env, Fun fun, Op op) {
 }
 
 void in(ISS& env, const bc::Eq&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); },
-    Op::Eq
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Neq&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return !cellEqual(c1, c2); },
-    Op::Neq
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return !cellEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Lt&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellLess(c1, c2); },
-    Op::Lt
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellLess(c1, c2); });
 }
 void in(ISS& env, const bc::Gt&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellGreater(c1, c2); },
-    Op::Gt
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellGreater(c1, c2); });
 }
-void in(ISS& env, const bc::Lte&) {
-  binOpBoolImpl(env, cellLessOrEqual, Op::Lte);
-}
-void in(ISS& env, const bc::Gte&) {
-  binOpBoolImpl(env, cellGreaterOrEqual, Op::Gte);
-}
+void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, cellLessOrEqual); }
+void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, cellGreaterOrEqual); }
 
 void in(ISS& env, const bc::Cmp&) {
-  binOpInt64Impl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellCompare(c1, c2); },
-    Op::Cmp
-  );
+  binOpInt64Impl(env, [&] (Cell c1, Cell c2) { return cellCompare(c1, c2); });
 }
 
 void in(ISS& env, const bc::Xor&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) {
-      return cellToBool(c1) ^ cellToBool(c2);
-    },
-    Op::Xor
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) {
+    return cellToBool(c1) ^ cellToBool(c2);
+  });
 }
 
 void castBoolImpl(ISS& env, bool negate) {

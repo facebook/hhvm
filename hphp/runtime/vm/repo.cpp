@@ -195,6 +195,16 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
 
+    if (RuntimeOption::ServerExecutionMode() &&
+        RuntimeOption::EvalHackArrCompatNotices) {
+      // Temporary until we verify Makefile changes work in prod
+      Logger::Info(
+        folly::sformat(
+          "HackArrCompatNotices is {} in repo",
+          s_globalData.HackArrCompatNotices ? "enabled" : "disabled")
+      );
+    }
+
     return;
   }
 

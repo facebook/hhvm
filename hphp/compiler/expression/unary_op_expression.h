@@ -82,6 +82,15 @@ bool isDictScalar(ExpressionPtr exp);
  */
 bool isKeysetScalar(ExpressionPtr exp);
 
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for an array.
+ *
+ * If the list contains keys or values, it cannot statically initialize an
+ * array. In addition, if EvalHackArrCompatNotices is set, the keys must either
+ * be strings or integers.
+ */
+bool isArrayScalar(ExpressionPtr exp);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

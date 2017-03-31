@@ -162,9 +162,22 @@ let rec transform node =
     Fmt [
       handle_possible_list ~after_each:space modifiers;
       t prop_type;
-      WithRule (Rule.Argument, Nest [
-        handle_possible_list ~before_each:space_split declarators;
-      ]);
+      begin match syntax declarators with
+        | Missing -> Nothing
+        | SyntaxList [declarator] ->
+          Nest [
+            Space;
+            SplitWith Cost.Assignment;
+            t declarator;
+          ];
+        | SyntaxList xs ->
+          WithRule (Rule.Argument, Nest (List.map xs (fun declarator -> Fmt [
+            Space;
+            Split;
+            t declarator;
+          ])));
+        | _ -> failwith "SyntaxList expected"
+      end;
       t semi;
       Newline;
     ]

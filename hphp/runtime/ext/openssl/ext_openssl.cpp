@@ -1366,37 +1366,42 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, VRefParam certs,
       SCOPE_EXIT {
         certs.assignIfRef(vcerts);
       };
-      BIO *bio_out = BIO_new(BIO_s_mem());
-      if (PEM_write_bio_X509(bio_out, cert)) {
-        BUF_MEM *bio_buf;
-        BIO_get_mem_ptr(bio_out, &bio_buf);
-        vcerts.toArrRef().set(s_cert,
-          String((char*)bio_buf->data, bio_buf->length, CopyString));
-      }
-      BIO_free(bio_out);
-
-      bio_out = BIO_new(BIO_s_mem());
-      if (PEM_write_bio_PrivateKey(bio_out, pkey, nullptr, nullptr, 0, 0, nullptr)) {
-        BUF_MEM *bio_buf;
-        BIO_get_mem_ptr(bio_out, &bio_buf);
-        vcerts.toArrRef().set(s_pkey,
-          String((char*)bio_buf->data, bio_buf->length, CopyString));
-      }
-      BIO_free(bio_out);
-
-      Array extracerts;
-      for (X509 *aCA = sk_X509_pop(ca); aCA; aCA = sk_X509_pop(ca)) {
+      BIO *bio_out = nullptr;
+      if (cert) {
         bio_out = BIO_new(BIO_s_mem());
-        if (PEM_write_bio_X509(bio_out, aCA)) {
+        if (PEM_write_bio_X509(bio_out, cert)) {
           BUF_MEM *bio_buf;
           BIO_get_mem_ptr(bio_out, &bio_buf);
-          extracerts.append(String((char*)bio_buf->data, bio_buf->length,
-                                   CopyString));
+          vcerts.toArrRef().set(s_cert,
+            String((char*)bio_buf->data, bio_buf->length, CopyString));
         }
         BIO_free(bio_out);
-        X509_free(aCA);
       }
+
+      if (pkey) {
+        bio_out = BIO_new(BIO_s_mem());
+        if (PEM_write_bio_PrivateKey(bio_out, pkey, nullptr, nullptr, 0, 0, nullptr)) {
+          BUF_MEM *bio_buf;
+          BIO_get_mem_ptr(bio_out, &bio_buf);
+          vcerts.toArrRef().set(s_pkey,
+            String((char*)bio_buf->data, bio_buf->length, CopyString));
+        }
+        BIO_free(bio_out);
+      }
+
       if (ca) {
+        Array extracerts;
+        for (X509 *aCA = sk_X509_pop(ca); aCA; aCA = sk_X509_pop(ca)) {
+          bio_out = BIO_new(BIO_s_mem());
+          if (PEM_write_bio_X509(bio_out, aCA)) {
+            BUF_MEM *bio_buf;
+            BIO_get_mem_ptr(bio_out, &bio_buf);
+            extracerts.append(String((char*)bio_buf->data, bio_buf->length,
+                                     CopyString));
+          }
+          BIO_free(bio_out);
+          X509_free(aCA);
+        }
         sk_X509_free(ca);
         vcerts.toArrRef().set(s_extracerts, extracerts);
       }

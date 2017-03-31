@@ -61,7 +61,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -571,6 +570,32 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
 ///////////////////////////////////////////////////////////////////////////////
 // Func lookup.
 
+void Unit::defFunc(Func* func, bool debugger) {
+  assert(!func->isMethod());
+  auto const handle = func->funcHandle();
+  auto& funcAddr = rds::handleToRef<LowPtr<Func>>(handle);
+
+  if (rds::isPersistentHandle(handle)) {
+    auto const oldFunc = funcAddr.get();
+    if (oldFunc == func) return;
+    if (UNLIKELY(oldFunc != nullptr)) {
+      assertx(oldFunc->isBuiltin() && !func->isBuiltin());
+      raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
+    }
+  } else {
+    assertx(rds::isNormalHandle(handle));
+    if (!rds::isHandleInit(handle, rds::NormalTag{})) {
+      rds::initHandle(handle);
+    } else {
+      if (funcAddr.get() == func) return;
+      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
+    }
+  }
+  funcAddr = func;
+
+  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
+}
+
 Func* Unit::lookupFunc(const NamedEntity* ne) {
   return ne->getCachedFunc();
 }
@@ -734,8 +759,8 @@ Class* Unit::defClass(const PreClass* preClass,
     return nullptr;
   }
 
-  // If there was already a class declared with DefClass, check if
-  // it's compatible.
+  // If there was already a class declared with DefClass, check if it's
+  // compatible.
   if (Class* cls = nameList->getCachedClass()) {
     if (cls->preClass() != preClass) {
       if (failIsFatal) {
@@ -1528,7 +1553,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       do {
         Func* func = *it;
         assert(func->top());
-        setCachedFunc(func, debugger);
+        defFunc(func, debugger);
       } while (++it != fend);
     }
   }

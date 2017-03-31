@@ -90,7 +90,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -5268,7 +5267,7 @@ OPTBLD_INLINE void iopEval(PC& pc) {
 
 OPTBLD_INLINE void iopDefFunc(intva_t fid) {
   Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
-  setCachedFunc(f, isDebuggerAttached());
+  Unit::defFunc(f, isDebuggerAttached());
 }
 
 OPTBLD_INLINE void iopDefCls(intva_t cid) {

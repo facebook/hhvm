@@ -348,7 +348,7 @@ void in(ISS& env, const bc::AddElemC& op) {
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
       return env.collect.trackConstantArrays ?
-        array_set(std::move(ty), k, v) : TArrN;
+        array_set(std::move(ty), k, v) : TArr;
     }
     if (ty.subtypeOf(TDict)) {
       return env.collect.trackConstantArrays ?

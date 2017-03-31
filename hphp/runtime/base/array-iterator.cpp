@@ -49,8 +49,6 @@ const StaticString
   s_key("key"),
   s_current("current");
 
-__thread MIterTable tl_miter_table;
-
 //////////////////////////////////////////////////////////////////////
 
 ArrayIter::ArrayIter(const ArrayData* data) {
@@ -587,30 +585,43 @@ Variant ArrayIter::iterValue(VersionableSparse) {
 
 //////////////////////////////////////////////////////////////////////
 
+void MIterTable::Create(void* storage) {
+  new (storage) MIterTable();
+}
+
+void MIterTable::clear() {
+  if (TlsWrapper::isNull()) return;
+  auto t = TlsWrapper::getNoCheck();
+  t->ents.fill({nullptr, nullptr});
+  if (!t->extras.empty()) {
+    t->extras.release_if([] (const MIterTable::Ent& e) { return true; });
+  }
+}
+
 namespace {
 
 // Handle the cases where we didn't have enough preallocated Ents in
-// tl_miter_table, and we need to allocate from `extras'.
+// MIterTable, and we need to allocate from `extras'.
 NEVER_INLINE
-MIterTable::Ent* find_empty_strong_iter_slower() {
-  return tl_miter_table.extras.find_unpopulated();
+MIterTable::Ent* find_empty_strong_iter_slower(MIterTable& table) {
+  return table.extras.find_unpopulated();
 }
 
 // Handle finding an empty strong iterator slot when the first slot
 // was already in use.
 NEVER_INLINE
-MIterTable::Ent* find_empty_strong_iter_slow() {
+MIterTable::Ent* find_empty_strong_iter_slow(MIterTable& table) {
 #define X(i) \
-  if (LIKELY(!tl_miter_table.ents[i].array)) return &tl_miter_table.ents[i];
+  if (LIKELY(!table.ents[i].array)) return &table.ents[i];
 X(1);
 X(2);
 X(3);
 X(4);
 X(5);
 X(6);
-  static_assert(tl_miter_table.ents_size == 7, "");
+  static_assert(MIterTable::ents_size == 7, "");
 #undef X
-  return find_empty_strong_iter_slower();
+  return find_empty_strong_iter_slower(table);
 }
 
 // Find a strong iterator slot that is empty.  Almost always the first
@@ -618,10 +629,11 @@ X(6);
 // delegates to slow.
 ALWAYS_INLINE
 MIterTable::Ent* find_empty_strong_iter() {
-  if (LIKELY(!tl_miter_table.ents[0].array)) {
-    return &tl_miter_table.ents[0];
+  auto& table = *MIterTable::TlsWrapper::getCheck();
+  if (LIKELY(!table.ents[0].array)) {
+    return &table.ents[0];
   }
-  return find_empty_strong_iter_slow();
+  return find_empty_strong_iter_slow(table);
 }
 
 void newMArrayIter(MArrayIter* marr, ArrayData* ad) {
@@ -658,27 +670,28 @@ void free_strong_iterator_impl(Cond cond) {
     }
   };
 
-  if (cond(tl_miter_table.ents[0])) {
-    tl_miter_table.ents[0].iter->setContainer(nullptr);
-    tl_miter_table.ents[0].array = nullptr;
-    tl_miter_table.ents[0].iter = nullptr;
+  auto& table = miter_table();
+  if (cond(table.ents[0])) {
+    table.ents[0].iter->setContainer(nullptr);
+    table.ents[0].array = nullptr;
+    table.ents[0].iter = nullptr;
     alreadyValid = false;
   }
-  rm(tl_miter_table.ents[1]);
-  rm(tl_miter_table.ents[2]);
-  rm(tl_miter_table.ents[3]);
-  rm(tl_miter_table.ents[4]);
-  rm(tl_miter_table.ents[5]);
-  rm(tl_miter_table.ents[6]);
-  static_assert(tl_miter_table.ents_size == 7, "");
+  rm(table.ents[1]);
+  rm(table.ents[2]);
+  rm(table.ents[3]);
+  rm(table.ents[4]);
+  rm(table.ents[5]);
+  rm(table.ents[6]);
+  static_assert(MIterTable::ents_size == 7, "");
 
   if (UNLIKELY(pvalid != nullptr)) {
-    std::swap(*pvalid, tl_miter_table.ents[0]);
+    std::swap(*pvalid, table.ents[0]);
     alreadyValid = true;
   }
-  if (LIKELY(tl_miter_table.extras.empty())) return;
+  if (LIKELY(table.extras.empty())) return;
 
-  tl_miter_table.extras.release_if([&] (const MIterTable::Ent& e) {
+  table.extras.release_if([&] (const MIterTable::Ent& e) {
     if (cond(e)) {
       e.iter->setContainer(nullptr);
       return true;
@@ -689,10 +702,10 @@ void free_strong_iterator_impl(Cond cond) {
   // If we didn't manage to keep something in the first non-extra
   // slot, scan extras again to swap something over.
   if (LIKELY(alreadyValid)) return;
-  if (!tl_miter_table.extras.empty()) {
-    tl_miter_table.extras.visit_to_remove(
+  if (!table.extras.empty()) {
+    table.extras.visit_to_remove(
       [&] (const MIterTable::Ent& ent) {
-        tl_miter_table.ents[0] = ent;
+        table.ents[0] = ent;
       }
     );
   }

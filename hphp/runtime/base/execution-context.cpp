@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -1442,7 +1443,7 @@ void ExecutionContext::requestExit() {
   EventHook::Disable();
   zend_rand_unseed();
   clearBlackHole();
-  tl_miter_table.clear();
+  MIterTable::clear();
 
   if (m_globalVarEnv) {
     req::destroy_raw(m_globalVarEnv);

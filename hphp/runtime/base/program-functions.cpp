@@ -2120,6 +2120,11 @@ void hphp_process_init() {
 
   HHProf::Init();
 
+  {
+    (void)type_scan::getIndexForMalloc<MArrayIter>();
+    MIterTable::TlsWrapper tls;
+  }
+
   // initialize the tzinfo cache.
   timezone_init();
   BootStats::mark("timezone_init");

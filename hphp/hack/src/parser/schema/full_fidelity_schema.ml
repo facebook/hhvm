@@ -1463,7 +1463,7 @@ AST_NODES
 
   let full_fidelity_json_schema =
   {
-    filename = "hphp/hack/src/full_fidelity/js/full_fidelity_schema.json";
+    filename = "hphp/hack/src/parser/js/full_fidelity_schema.json";
     template = full_fidelity_json_schema_template;
     transformations = [
       { pattern = "AST_NODES"; func = to_json_ast_nodes }

@@ -144,6 +144,7 @@ function heapgraph_dfs_edges(
  * if the node is a static local (kind == HPHP::rds::StaticLocalData)
  *   func     PHP function name
  *   local    name of the static local variable
+ *   class    (optional) a method's class, or closure's context class
  *
  * if the node is a static property (kind == HPHP::StaticPropData)
  *   class    PHP classname owning the static property

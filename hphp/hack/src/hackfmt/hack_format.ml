@@ -450,7 +450,7 @@ let rec transform node =
     let (kw, left_p, args, right_p, semi) = get_unset_statement_children x in
     Fmt [
       t kw;
-      transform_argish left_p args right_p;
+      transform_argish ~allow_trailing:false left_p args right_p;
       t semi;
       Newline;
     ]
@@ -772,7 +772,7 @@ let rec transform node =
     let (kw, left_p, args, right_p) = get_isset_expression_children x in
     Fmt [
       t kw;
-      transform_argish left_p args right_p;
+      transform_argish ~allow_trailing:false left_p args right_p;
     ]
   | DefineExpression x ->
     let (kw, left_p, args, right_p) = get_define_expression_children x in

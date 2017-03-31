@@ -38,6 +38,8 @@ let lowerer_state =
   ; mode     = ref FileInfo.Mstrict
   }
 
+let php_file () = !(lowerer_state.mode) == FileInfo.Mphp
+
 (* "Local" context. *)
 type env =
   { saw_yield : bool ref
@@ -1437,6 +1439,12 @@ and pDef : def parser = fun node env ->
    * so we have to "step back" and look at node.
    *)
   | ExpressionStatement _ -> Stmt (pStmt node env)
+  (* For PHP support; top-level statements are allowed for scripts. In
+   * particular, there is the case of "if(defined(Foo))". However, the AST does
+   * not have facilities for these. Therefore, do not reject the input, just
+   * drop that top-level if.
+   *)
+  | IfStatement _ when php_file () -> Stmt Noop
   | _ -> missing_syntax "definition" node env
 let pProgram : program parser = fun node env ->
   let rec post_process program =
@@ -1635,7 +1643,7 @@ let from_text
     let script = Full_fidelity_positioned_syntax.from_tree tree in
     let fi_mode =
       (match mode tree with
-      | _ when is_php tree -> FileInfo.Mdecl
+      | _ when is_php tree -> FileInfo.Mphp
       | "decl"             -> FileInfo.Mdecl
       | "strict"           -> FileInfo.Mstrict
       | "partial" | ""     -> FileInfo.Mpartial

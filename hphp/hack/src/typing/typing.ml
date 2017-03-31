@@ -111,7 +111,7 @@ let unbound_name env (pos, name) =
     (Errors.unbound_name_typing pos name;
     expr_error env Reason.Rnone)
 
-  | FileInfo.Mdecl | FileInfo.Mpartial ->
+  | FileInfo.Mdecl | FileInfo.Mpartial | FileInfo.Mphp ->
     expr_any env Reason.Rnone
 
 (* Try running function on each concrete supertype in turn. Return all

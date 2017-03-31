@@ -101,7 +101,7 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
         match Relative_path.prefix fn with
         | Relative_path.Root ->
           let mode = match fileinfo.FileInfo.file_mode with
-            | None -> "php"
+            | None | Some FileInfo.Mphp -> "php"
             | Some FileInfo.Mdecl -> "decl"
             | Some FileInfo.Mpartial -> "partial"
             | Some FileInfo.Mstrict -> "strict" in

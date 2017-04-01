@@ -252,9 +252,19 @@ FuncAnalysis do_analyze_collect(const Index& index,
   auto const ctx = adjust_closure_context(inputCtx);
   FuncAnalysis ai{ctx};
 
-  auto bump = is_trace_function(ctx.cls, ctx.func) ? kTraceFuncBump : 0;
+  auto const bump = trace_bump_for(ctx.cls, ctx.func);
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};
+
+  if (knownArgs) {
+    FTRACE(2, "{:.^70}\n", "Inline Interp");
+  }
+  SCOPE_EXIT {
+    if (knownArgs) {
+      FTRACE(2, "{:.^70}\n", "End Inline Interp");
+    }
+  };
+
   FTRACE(2, "{:-^70}\n-- {}\n", "Analyze", show(ctx));
 
   /*
@@ -516,8 +526,6 @@ FuncAnalysis::FuncAnalysis(Context ctx)
 
 FuncAnalysis analyze_func(const Index& index, Context const ctx,
                           bool trackConstantArrays) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
   while (true) {
     auto ret = do_analyze(index, ctx, nullptr, nullptr, trackConstantArrays);
     if (!rebuild_exn_tree(ret)) return ret;
@@ -527,25 +535,24 @@ FuncAnalysis analyze_func(const Index& index, Context const ctx,
 FuncAnalysis analyze_func_collect(const Index& index,
                                   Context const ctx,
                                   CollectedInfo& collect) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
   return do_analyze_collect(index, ctx, collect, nullptr, nullptr);
 }
 
 FuncAnalysis analyze_func_inline(const Index& index,
                                  Context const ctx,
                                  std::vector<Type> args) {
-  FTRACE(2, "{:.^70}\n", "Inline Interp");
-  SCOPE_EXIT { FTRACE(2, "{:.^70}\n", "End Inline Interp"); };
   assert(!ctx.func->isClosureBody);
   return do_analyze(index, ctx, nullptr, &args, true);
 }
 
 ClassAnalysis analyze_class(const Index& index, Context const ctx) {
-  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
-    is_systemlib_part(*ctx.unit)};
+
   assert(ctx.cls && !ctx.func);
-  FTRACE(2, "{:#^70}\n", "Class");
+  {
+    Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
+        is_systemlib_part(*ctx.unit)};
+    FTRACE(2, "{:#^70}\n", "Class");
+  }
 
   ClassAnalysis clsAnalysis(ctx, index.any_interceptable_functions());
   auto const associatedClosures = index.lookup_closures(ctx.cls);
@@ -742,6 +749,9 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   }
 
   if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
+
+  Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
+      is_systemlib_part(*ctx.unit)};
 
   // For debugging, print the final state of the class analysis.
   FTRACE(2, "{}", [&] {

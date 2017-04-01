@@ -1461,9 +1461,6 @@ void local_dce(const Index& index,
                const FuncAnalysis& ainfo,
                borrowed_ptr<php::Block> const blk,
                const State& stateIn) {
-  Trace::Bump bumper{Trace::hhbbc_dce, kSystemLibBump,
-    is_systemlib_part(*ainfo.ctx.unit)};
-
   // For local DCE, we have to assume all variables are in the
   // live-out set for the block.
   auto const ret = optimize_dce(index, ainfo, blk, stateIn,
@@ -1475,9 +1472,6 @@ void local_dce(const Index& index,
 //////////////////////////////////////////////////////////////////////
 
 void global_dce(const Index& index, const FuncAnalysis& ai) {
-  Trace::Bump bumper{Trace::hhbbc_dce, kSystemLibBump,
-    is_systemlib_part(*ai.ctx.unit)};
-
   auto rpoId = [&] (borrowed_ptr<php::Block> blk) {
     return ai.bdata[blk->id].rpoId;
   };

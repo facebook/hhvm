@@ -32,6 +32,9 @@ bool method_map_contains(const MethodMap&,
 bool is_trace_function(borrowed_ptr<const php::Class>,
                        borrowed_ptr<const php::Func>);
 
+int trace_bump_for(borrowed_ptr<const php::Class>,
+                   borrowed_ptr<const php::Func>);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

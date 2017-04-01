@@ -770,7 +770,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   int old_error_reporting = 0;
   if (recover) {
     old_error_reporting = HHVM_FN(error_reporting)();
-    HHVM_FN(error_reporting)(old_error_reporting | k_E_WARNING);
+    HHVM_FN(error_reporting)(old_error_reporting | (int)ErrorMode::WARNING);
   }
 
   xmlParseDocument(ctxt);

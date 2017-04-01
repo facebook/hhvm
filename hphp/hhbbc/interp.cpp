@@ -2146,7 +2146,7 @@ void fpassCXHelper(ISS& env, int param, bool error) {
           } else {
             return reduce(env,
                           bc::String { s_byRefWarn.get() },
-                          bc::Int { k_E_STRICT },
+                          bc::Int { (int)ErrorMode::STRICT },
                           bc::FCallBuiltin { 2, 2, s_trigger_error.get() },
                           bc::PopC {});
           }

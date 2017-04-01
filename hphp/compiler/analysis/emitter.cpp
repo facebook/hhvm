@@ -8550,7 +8550,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
 
   e.Int(rate);
   e.Int((funcScope->isSystem() || funcScope->isNative())
-        ? k_E_DEPRECATED : k_E_USER_DEPRECATED);
+        ? (int)ErrorMode::PHP_DEPRECATED : (int)ErrorMode::USER_DEPRECATED);
   e.FCallBuiltin(3, 3, s_trigger_sampled_error.get());
   emitPop(e);
 }

@@ -40,7 +40,7 @@ We'd love to have your help in making HHVM better. If you're interested, please 
 
 HHVM is licensed under the PHP and Zend licenses except as otherwise noted.
 
-The Hack typechecker (`hphp/hack`) is licensed under the BSD license (`hphp/hack/LICENSE`) with an additional grant of patent rights (`hphp/hack/PATENTS`) except as otherwise noted.
+The Hack typechecker [(`hphp/hack`)](https://github.com/facebook/hhvm/tree/master/hphp/hack) is licensed under the BSD license [(`hphp/hack/LICENSE`)](https://github.com/facebook/hhvm/blob/master/hphp/hack/LICENSE) with an additional grant of patent rights [(`hphp/hack/PATENTS`)](https://github.com/facebook/hhvm/blob/master/hphp/hack/PATENTS) except as otherwise noted.
 
 ## Reporting Crashes
 

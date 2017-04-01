@@ -196,6 +196,35 @@ let parse_command (json: json option) : Command.t =
     arguments = Jget.array_d json "arguments" ~default:[] |> List.filter_opt;
   }
 
+let print_symbol_information (info: Symbol_information.t) : json =
+  let open Symbol_information in
+  let print_symbol_kind = function
+    | File -> int_ 1
+    | Module -> int_ 2
+    | Namespace -> int_ 3
+    | Package -> int_ 4
+    | Class -> int_ 5
+    | Method -> int_ 6
+    | Property -> int_ 7
+    | Field -> int_ 8
+    | Constructor -> int_ 9
+    | Enum -> int_ 10
+    | Interface -> int_ 11
+    | Function -> int_ 12
+    | Variable -> int_ 13
+    | Constant -> int_ 14
+    | String -> int_ 15
+    | Number -> int_ 16
+    | Boolean -> int_ 17
+    | Array -> int_ 18
+  in
+  Jprint.object_opt [
+    "name", Some (JSON_String info.name);
+    "kind", Some (print_symbol_kind info.kind);
+    "location", Some (print_location info.location);
+    "containerName", Option.map info.container_name string_;
+  ]
+
 
 (************************************************************************)
 (** shutdown request                                                   **)
@@ -358,6 +387,20 @@ let print_completion (r: Completion.result) : json =
     "items", JSON_Array (List.map r.items ~f:print_completion_item);
   ]
 
+
+(************************************************************************)
+(** workspace/symbol request                                           **)
+(************************************************************************)
+
+
+let parse_workspace_symbol (params: json option) : Workspace_symbol.params =
+  let open Workspace_symbol in
+  {
+    query = Jget.string_exn params "query";
+  }
+
+let print_workspace_symbol (r: Workspace_symbol.result) : json =
+  JSON_Array (List.map r ~f:print_symbol_information)
 
 
 (************************************************************************)

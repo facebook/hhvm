@@ -164,6 +164,38 @@ module Document_selector = struct
   type t = Document_filter.t list
 end
 
+
+(* Represents information about programming constructs like variables etc. *)
+module Symbol_information = struct
+  type t = {
+    name: string;
+    kind: symbol_kind;
+    location: Location.t;  (* the location of the symbol token itself *)
+    container_name: string option;  (* the symbol containing this symbol *)
+  }
+
+  and symbol_kind =
+    | File  (* 1 *)
+    | Module  (* 2 *)
+    | Namespace  (* 3 *)
+    | Package  (* 4 *)
+    | Class  (* 5 *)
+    | Method  (* 6 *)
+    | Property  (* 7 *)
+    | Field  (* 8 *)
+    | Constructor  (* 9 *)
+    | Enum  (* 10 *)
+    | Interface  (* 11 *)
+    | Function  (* 12 *)
+    | Variable  (* 13 *)
+    | Constant  (* 14 *)
+    | String  (* 15 *)
+    | Number  (* 16 *)
+    | Boolean  (* 17 *)
+    | Array  (* 18 *)
+end
+
+
 (* Cancellation notification, method="$/cancelRequest" *)
 module CancelRequest = struct
   type params = cancel_params
@@ -449,6 +481,19 @@ module Completion_item_resolve = struct
 end
 
 
+(* Workspace Symbols request, method="workspace/symbol" *)
+module Workspace_symbol = struct
+  type params = workspace_symbol_params
+
+  and result = Symbol_information.t list
+
+  and workspace_symbol_params = {
+    query: string;  (* a non-empty query string *)
+  }
+end
+
+
+(* ErrorResponse *)
 module Error = struct
   exception Parse of string (* -32700 *)
   exception Invalid_request of string (* -32600 *)

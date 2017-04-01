@@ -209,6 +209,46 @@ let do_completion (conn: conn option) (params: Completion.params)
     items = List.map results ~f:hack_completion_to_lsp;
   }
 
+let do_workspace_symbol (conn: conn option) (params: Workspace_symbol.params)
+  : Workspace_symbol.result =
+  let open Workspace_symbol in
+  let open SearchUtils in
+
+  let query = params.query in
+  let query_type = "" in
+  let command = ServerCommandTypes.SEARCH (query, query_type) in
+  let results = rpc conn command in
+
+  let hack_to_lsp_kind = function
+    | HackSearchService.Class (Some Ast.Cabstract) -> Symbol_information.Class
+    | HackSearchService.Class (Some Ast.Cnormal) -> Symbol_information.Class
+    | HackSearchService.Class (Some Ast.Cinterface) ->
+        Symbol_information.Interface
+    | HackSearchService.Class (Some Ast.Ctrait) -> Symbol_information.Interface
+        (* LSP doesn't have traits, so we approximate with interface *)
+    | HackSearchService.Class (Some Ast.Cenum) -> Symbol_information.Enum
+    | HackSearchService.Class (None) -> assert false (* should never happen *)
+    | HackSearchService.Method _ -> Symbol_information.Method
+    | HackSearchService.ClassVar _ -> Symbol_information.Property
+    | HackSearchService.Function -> Symbol_information.Function
+    | HackSearchService.Typedef -> Symbol_information.Class
+        (* LSP doesn't have typedef, so we approximate with class *)
+    | HackSearchService.Constant -> Symbol_information.Constant
+  in
+  let hack_to_lsp_container = function
+    | HackSearchService.Method (_, scope) -> Some scope
+    | HackSearchService.ClassVar (_, scope) -> Some scope
+    | _ -> None
+  in
+  let hack_symbol_to_lsp (symbol: HackSearchService.symbol) =
+    { Symbol_information.
+      name = (Utils.strip_ns symbol.name);
+      kind = hack_to_lsp_kind symbol.result_type;
+      location = hack_pos_to_lsp_location symbol.pos;
+      container_name = hack_to_lsp_container symbol.result_type;
+    }
+  in
+  List.map results ~f:hack_symbol_to_lsp
 
 let do_initialize (params: Initialize.params)
   : (conn option * Initialize.result) =
@@ -237,7 +277,7 @@ let do_initialize (params: Initialize.params)
         references_provider = false;
         document_highlight_provider = false;
         document_symbol_provider = false;
-        workspace_symbol_provider = false;
+        workspace_symbol_provider = true;
         code_action_provider = false;
         code_lens_provider = None;
         document_formatting_provider = false;
@@ -384,6 +424,11 @@ let main () : unit =
       | Main_loop, Client c when c.method_ = "textDocument/completion" ->
         parse_completion c.params |> do_completion !conn |> print_completion
           |> respond stdout c
+
+      (* workspace/symbol request *)
+      | Main_loop, Client c when c.method_ = "workspace/symbol" ->
+        parse_workspace_symbol c.params |> do_workspace_symbol !conn
+          |> print_workspace_symbol |> respond stdout c
 
       (* textDocument/didOpen notification *)
       | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->

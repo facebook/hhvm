@@ -2375,11 +2375,14 @@ Type remove_uninit(Type t) {
 ArrKey disect_array_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (keyTy.strictSubtypeOf(TInt)) {
-    ret.i = keyTy.m_data.ival;
+  if (keyTy.subtypeOf(TInt)) {
+    if (keyTy.strictSubtypeOf(TInt)) {
+      ret.i = keyTy.m_data.ival;
+    }
     ret.type = keyTy;
     return ret;
   }
+
   if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
     int64_t i;
     if (keyTy.m_data.sval->isStrictlyInteger(i)) {
@@ -2391,39 +2394,42 @@ ArrKey disect_array_key(const Type& keyTy) {
     }
     return ret;
   }
-  if (keyTy.strictSubtypeOf(TDbl)) {
-    ret.i = toInt64(keyTy.m_data.dval);
-    ret.type = ival(*ret.i);
-    return ret;
-  }
-  if (keyTy.subtypeOf(TNum)) {
-    ret.type = TInt;
-    return ret;
-  }
 
-  if (keyTy.subtypeOf(TNull)) {
-    ret.s = s_empty.get();
-    ret.type = sempty();
-    return ret;
-  }
-  if (keyTy.subtypeOf(TRes)) {
-    ret.type = TInt;
-    return ret;
-  }
+  if (!RuntimeOption::EvalHackArrCompatNotices) {
+    if (keyTy.strictSubtypeOf(TDbl)) {
+      ret.i = toInt64(keyTy.m_data.dval);
+      ret.type = ival(*ret.i);
+      return ret;
+    }
+    if (keyTy.subtypeOf(TNum)) {
+      ret.type = TInt;
+      return ret;
+    }
 
-  if (keyTy.subtypeOf(TTrue)) {
-    ret.i = 1;
-    ret.type = TInt;
-    return ret;
-  }
-  if (keyTy.subtypeOf(TFalse)) {
-    ret.i = 0;
-    ret.type = TInt;
-    return ret;
-  }
-  if (keyTy.subtypeOf(TBool)) {
-    ret.type = TInt;
-    return ret;
+    if (keyTy.subtypeOf(TNull)) {
+      ret.s = s_empty.get();
+      ret.type = sempty();
+      return ret;
+    }
+    if (keyTy.subtypeOf(TRes)) {
+      ret.type = TInt;
+      return ret;
+    }
+
+    if (keyTy.subtypeOf(TTrue)) {
+      ret.i = 1;
+      ret.type = TInt;
+      return ret;
+    }
+    if (keyTy.subtypeOf(TFalse)) {
+      ret.i = 0;
+      ret.type = TInt;
+      return ret;
+    }
+    if (keyTy.subtypeOf(TBool)) {
+      ret.type = TInt;
+      return ret;
+    }
   }
 
   // If we have an OptStr with a value, we can at least exclude the

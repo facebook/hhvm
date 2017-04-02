@@ -347,9 +347,6 @@ void in(ISS& env, const bc::AddElemC& op) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      if (RuntimeOption::EvalHackArrCompatNotices &&
-          !k.subtypeOf(TInt) &&
-          !k.subtypeOf(TStr)) return TArr;
       return env.collect.trackConstantArrays ?
         array_set(std::move(ty), k, v) : TArr;
     }

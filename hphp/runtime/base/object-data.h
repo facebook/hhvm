@@ -82,7 +82,6 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
-    HasCall       = 0x0080, // defines __call
     HasClone      = 0x0100, // if IsCppBuiltin, has custom clone logic
                             // if not IsCppBuiltin, defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl

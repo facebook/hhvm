@@ -627,6 +627,12 @@ const Func* Class::getCachedInvoke() const {
   return m_invoke;
 }
 
+const StaticString s_call("__call");
+
+bool Class::hasCall() const {
+  return this->lookupMethod(s_call.get()) ? true : false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Builtin classes.
 
@@ -1306,8 +1312,6 @@ const StaticString
   s_set("__set"),
   s_isset("__isset"),
   s_unset("__unset"),
-  s_call("__call"),
-  s_callStatic("__callStatic"),
   s_debugInfo("__debugInfo"),
   s_clone("__clone");
 
@@ -1781,9 +1785,9 @@ void Class::setODAttributes() {
   if (markNonStatic(this, s_set      )) { m_ODAttrs |= ObjectData::UseSet;   }
   if (markNonStatic(this, s_isset    )) { m_ODAttrs |= ObjectData::UseIsset; }
   if (markNonStatic(this, s_unset    )) { m_ODAttrs |= ObjectData::UseUnset; }
-  if (markNonStatic(this, s_call     )) { m_ODAttrs |= ObjectData::HasCall;  }
   if (markNonStatic(this, s_clone    )) { m_ODAttrs |= ObjectData::HasClone; }
 
+  markNonStatic(this, s_call);
   markNonStatic(this, s_debugInfo);
   markNonStatic(m_ctor);
 

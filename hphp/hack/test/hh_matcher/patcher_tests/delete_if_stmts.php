@@ -49,11 +49,6 @@ class Foo {
     "__SKIPANY";
     {
       "__KSTAR";
-      /*DELETE STMTS*/
-
-
-
-      /*end delete*/
     }
     return;
   }

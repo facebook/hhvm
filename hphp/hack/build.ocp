@@ -199,7 +199,7 @@ begin program "hh_single_type_check"
 end
 
 begin library "hh-match"
-  requires = [ "hh-parsing" "hh-typing-base" "h2tp-unparser"]
+  requires = [ "hh-parsing" "hh-typing-base" ]
   files = [
     "src/hh_matcher/astConstructor.ml"
     "src/hh_matcher/ast_code_extent.ml"

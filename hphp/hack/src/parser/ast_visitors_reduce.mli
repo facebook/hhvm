@@ -645,5 +645,4 @@ class virtual ['b] reduce :
     method on_user_attribute :
       'c -> Ast_visitors_ancestors.user_attribute -> 'd
     method on_variance : 'c -> Ast_visitors_ancestors.variance -> 'd
-    method private sum : 'd list -> 'd
   end

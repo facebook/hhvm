@@ -30,6 +30,7 @@ type state_variables =
   { language  : string ref
   ; filePath  : string ref
   ; mode      : FileInfo.mode ref
+  ; popt      : ParserOptions.t ref
   ; ignorePos : bool ref
   }
 
@@ -37,6 +38,7 @@ let lowerer_state =
   { language  = ref "UNINITIALIZED"
   ; filePath  = ref "UNINITIALIZED"
   ; mode      = ref FileInfo.Mstrict
+  ; popt      = ref ParserOptions.default
   ; ignorePos = ref false
   }
 
@@ -359,7 +361,7 @@ let fun_template yielding node is_sync =
   ; f_body            = []
   ; f_user_attributes = []
   ; f_fun_kind        = mk_fun_kind is_sync yielding
-  ; f_namespace       = Namespace_env.empty_with_default_popt
+  ; f_namespace       = Namespace_env.empty !(lowerer_state.popt)
   ; f_span            = p
   }
 
@@ -1324,7 +1326,7 @@ and pDef : def parser = fun node env ->
       ; c_extends         = couldMap ~f:pHint exts env
       ; c_implements      = couldMap ~f:pHint impls env
       ; c_body            = List.concat (couldMap ~f:pClassElt elts env)
-      ; c_namespace       = Namespace_env.empty_with_default_popt
+      ; c_namespace       = Namespace_env.empty !(lowerer_state.popt)
       ; c_enum            = None
       ; c_span            = get_pos node
       ; c_kind            =
@@ -1352,7 +1354,7 @@ and pDef : def parser = fun node env ->
           ; cst_name      = pos_name name
           ; cst_type      = mpOptional pHint ty env
           ; cst_value     = pSimpleInitializer init env
-          ; cst_namespace = Namespace_env.empty_with_default_popt
+          ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
           }
       | _ -> missing_syntax "constant declaration" decls env
       )
@@ -1370,7 +1372,7 @@ and pDef : def parser = fun node env ->
           mpOptional pTConstraint constr env
       ; t_user_attributes = List.flatten @@
           List.map (fun x -> pUserAttribute x env) (as_list attr)
-      ; t_namespace       = Namespace_env.empty_with_default_popt
+      ; t_namespace       = Namespace_env.empty !(lowerer_state.popt)
       ; t_mode            = !(lowerer_state.mode)
       ; t_kind            =
         match token_kind kw with
@@ -1402,7 +1404,7 @@ and pDef : def parser = fun node env ->
       ; c_extends         = []
       ; c_implements      = []
       ; c_body            = couldMap enums env ~f:pEnumerator
-      ; c_namespace       = Namespace_env.empty_with_default_popt
+      ; c_namespace       = Namespace_env.empty !(lowerer_state.popt)
       ; c_span            = get_pos node
       ; c_enum            = Some
         { e_base       = pHint base env
@@ -1501,7 +1503,7 @@ let pProgram : program parser = fun node env ->
         ; cst_name      = name
         ; cst_type      = None
         ; cst_value     = value
-        ; cst_namespace = Namespace_env.empty_with_default_popt
+        ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
         } :: post_process el
     | (e::el) -> e :: post_process el
   in
@@ -1527,7 +1529,7 @@ let pProgram : program parser = fun node env ->
         ; cst_name      = name
         ; cst_type      = None
         ; cst_value     = e
-        ; cst_namespace = Namespace_env.empty_with_default_popt
+        ; cst_namespace = Namespace_env.empty !(lowerer_state.popt)
         }
       | _ -> missing_syntax "DefineExpression:inner" args env
       ) :: aux env nodel
@@ -1676,6 +1678,7 @@ let from_text
     lowerer_state.language  := language tree;
     lowerer_state.filePath  := Relative_path.suffix file;
     lowerer_state.mode      := fi_mode;
+    lowerer_state.popt      := parser_options;
     lowerer_state.ignorePos := ignore_pos;
     let errors = ref [] in (* The top-level error list. *)
     let ast = runP pScript script { saw_yield = ref false; errors } in

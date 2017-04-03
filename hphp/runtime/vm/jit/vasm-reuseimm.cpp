@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <cstdlib>
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
@@ -27,14 +26,19 @@
 
 #include "hphp/util/assertions.h"
 
+#include <cstdlib>
+
 TRACE_SET_MOD(vasm);
 
 namespace HPHP { namespace jit {
 
+namespace {
+
+// track ldimmq values
 struct qTrack {
   Immed64 val;
   Vreg base;
-  int  ttl;
+  int ttl;
 };
 
 struct Env {
@@ -43,26 +47,32 @@ struct Env {
   std::deque<qTrack> qdeque; // leaky bucket of recent immediates
 };
 
-static bool isMultiword(int64_t imm) {
-  uint64_t val = abs(imm);
-  if (val > (1 << 16)) return true;
+bool isMultiword(int64_t imm) {
+  switch(arch()) {
+  case Arch::X64:
+    break;
+  case Arch::ARM:
+    uint64_t val = std::abs(imm);
+    if (val > (1 << 16)) return true;
+    break;
+  case Arch::PPC64:
+    break;
+  }
   return false;
 }
 
 // candidate around +/- uimm12
-static bool reuseCandidate(Env& env, int64_t p, Vreg& reg, int& delta)
-{
+bool reuseCandidate(Env& env, int64_t p, Vreg& reg, int& delta) {
   delta = 0;
-  for (const auto& itr : env.qdeque) {
+  for (auto const& itr : env.qdeque) {
     int64_t q = itr.val.q();
-    if ((p >= q) && (p < (q+4095))) {
+    if ((p >= q) && (p < (q + 4095))) {
       delta = safe_cast<int>(p-q);
       reg = itr.base;
       return true;
     }
-    if ((p < q) && (q < (p+4095))) {
-      delta = safe_cast<int>(q-p);
-      delta = -delta;
+    if ((p < q) && (q < (p + 4095))) {
+      delta = -safe_cast<int>(q-p);
       reg = itr.base;
       return true;
     }
@@ -73,7 +83,7 @@ static bool reuseCandidate(Env& env, int64_t p, Vreg& reg, int& delta)
 template <typename Inst>
 void reuseImmq(Env& env, const Inst& inst, Vlabel b, size_t i) { return; }
 
-// purge table across any instruction with RegSet or flow change
+// purge table across any instruction with RegSet or control flow change
 #define Y(vasm_opc) \
 void reuseImmq(Env& env, const vasm_opc& c, Vlabel b, size_t i) { \
   env.qdeque.clear(); \
@@ -120,11 +130,11 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
      if (off >= 0 ) {
        reuseImm_impl(env.unit, b, i, [&] (Vout& v) {
          v << addqi{off, base, ld.d, v.makeReg()};
-        });
+       });
      } else {
        reuseImm_impl(env.unit, b, i, [&] (Vout& v) {
          v << subqi{-off, base, ld.d, v.makeReg()};
-        });
+       });
       }
     return;
     }
@@ -150,12 +160,13 @@ void reuseImmq(Env& env, Vlabel b, size_t i) {
   not_reached();
 }
 
+}
 // Opportunistically reuse immediate q values
 void reuseImmq(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
 
-  Env env {unit};
+  Env env { unit };
 
   auto const labels = sortBlocks(unit);
 

@@ -56,7 +56,7 @@ let from_ast ~self tparams params ret body default_instrs =
       stmt_instrs in
   let ret_instrs =
     match List.last body with
-    | Some (A.Return _) -> empty
+    | Some (A.Return _) | Some (A.Throw _) -> empty
     | Some _ -> gather [instr_null; instr_retc]
     | None -> default_instrs return_type_info in
   let fault_instrs = extract_fault_instructions stmt_instrs in

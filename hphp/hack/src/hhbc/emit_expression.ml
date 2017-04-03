@@ -143,6 +143,16 @@ let get_passByRefKind expr =
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
+let get_queryMOpMode op =
+  match op with
+  | QueryOp.CGet -> MemberOpMode.Warn
+  | _ -> MemberOpMode.ModeNone
+
+let is_special_function e =
+  match e with
+  | (_, A.Id(_, x)) when x = "isset" || x = "empty" || x = "tuple" -> true
+  | _ -> false
+
 let extract_shape_field_name_pstring = function
   | A.SFlit p
   | A.SFclass_const (_, p) ->  p
@@ -526,6 +536,69 @@ and emit_lvarvar n (_, id) =
     gather @@ List.replicate ~num:n instr_cgetn;
   ]
 
+and emit_call_isset_expr (_, expr_ as expr) =
+  match expr_ with
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    gather [
+      from_expr e;
+      instr (IIsset IssetG)
+    ]
+  | A.Array_get(base_expr, opt_elem_expr) ->
+    emit_array_get None QueryOp.Isset base_expr opt_elem_expr
+  | A.Obj_get (expr, prop, nullflavor) ->
+    emit_obj_get None QueryOp.Isset expr prop nullflavor
+  | A.Lvar(_, id) ->
+    instr (IIsset (IssetL (Local.Named id)))
+  | _ ->
+    gather [
+      from_expr expr;
+      instr_istypec OpNull;
+      instr_not
+    ]
+
+and emit_call_empty_expr (_, expr_ as expr) =
+  match expr_ with
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    gather [
+      from_expr e;
+      instr (IIsset EmptyG)
+    ]
+  | A.Array_get(base_expr, opt_elem_expr) ->
+    emit_array_get None QueryOp.Empty base_expr opt_elem_expr
+  | A.Obj_get (expr, prop, nullflavor) ->
+    emit_obj_get None QueryOp.Empty expr prop nullflavor
+  | A.Lvar(_, id) ->
+    instr (IIsset (EmptyL (Local.Named id)))
+  | _ ->
+    gather [
+      from_expr expr;
+      instr_not
+    ]
+
+and emit_call_isset_exprs exprs =
+  match exprs with
+  | [] -> emit_nyi "isset()"
+  | [expr] -> emit_call_isset_expr expr
+  | _ ->
+    let n = List.length exprs in
+    let its_done = Label.next_regular () in
+      gather [
+        gather @@
+        List.mapi exprs
+        begin fun i expr ->
+          gather [
+            emit_call_isset_expr expr;
+            if i < n-1 then
+            gather [
+              instr_dup;
+              instr_jmpz its_done;
+              instr_popc
+            ] else empty
+          ]
+        end;
+        instr_label its_done
+      ]
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -548,6 +621,19 @@ and from_expr expr =
   | A.Eif (etest, etrue, efalse) ->
     emit_conditional_expression etest etrue efalse
   | A.Expr_list es -> gather @@ List.map es ~f:from_expr
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    gather [
+      from_expr e;
+      instr (IGet CGetG)
+    ]
+  | A.Array_get(base_expr, opt_elem_expr) ->
+    emit_array_get None QueryOp.CGet base_expr opt_elem_expr
+  | A.Obj_get (expr, prop, nullflavor) ->
+    emit_obj_get None QueryOp.CGet expr prop nullflavor
+  | A.Call ((_, A.Id (_, "isset")), exprs, []) ->
+    emit_call_isset_exprs exprs
+  | A.Call ((_, A.Id (_, "empty")), [expr], []) ->
+    emit_call_empty_expr expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) -> emit_tuple p es
   | A.Call _ -> emit_call_expr expr
   | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
@@ -562,11 +648,8 @@ and from_expr expr =
       |> emit_collection expr
   | A.Collection ((pos, name), fields) ->
     emit_named_collection expr pos name fields
-  | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get None base_expr opt_elem_expr
   | A.Clone e -> emit_clone e
   | A.Shape fl -> emit_shape expr fl
-  | A.Obj_get (expr, prop, nullflavor) -> emit_obj_get None expr prop nullflavor
   | A.Await e -> emit_await e
   | A.Yield e -> emit_yield e
   | A.Yield_break -> emit_yield_break ()
@@ -754,20 +837,21 @@ and emit_quiet_expr (_, expr_ as expr) =
   | _ ->
     from_expr expr
 
-(* Emit code for e1[e2].
+(* Emit code for e1[e2] or isset(e1[e2]).
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_array_get param_num_opt base_expr opt_elem_expr =
+and emit_array_get param_num_opt qop base_expr opt_elem_expr =
+  let mode = get_queryMOpMode qop in
   let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base MemberOpMode.Warn elem_stack_size param_num_opt base_expr in
+    emit_base mode elem_stack_size param_num_opt base_expr in
   let mk = get_elem_member_key 0 opt_elem_expr in
   let total_stack_size = elem_stack_size + base_stack_size in
   let final_instr =
     instr (IFinal (
       match param_num_opt with
-      | None -> QueryM (total_stack_size, QueryOp.CGet, mk)
+      | None -> QueryM (total_stack_size, qop, mk)
       | Some i -> FPassM (i, total_stack_size, mk)
     )) in
   gather [
@@ -777,20 +861,21 @@ and emit_array_get param_num_opt base_expr opt_elem_expr =
     final_instr
   ]
 
-(* Emit code for e1->e2 or e1?->e2.
+(* Emit code for e1->e2 or e1?->e2 or isset(e1->e2).
  * If param_num_opt = Some i
  * then this is the i'th parameter to a function
  *)
-and emit_obj_get param_num_opt expr prop null_flavor =
+and emit_obj_get param_num_opt qop expr prop null_flavor =
+  let mode = get_queryMOpMode qop in
   let prop_expr_instrs, prop_stack_size = emit_prop_instrs prop in
   let base_expr_instrs, base_setup_instrs, base_stack_size =
-    emit_base MemberOpMode.Warn prop_stack_size param_num_opt expr in
+    emit_base mode prop_stack_size param_num_opt expr in
   let mk = get_prop_member_key null_flavor 0 prop in
   let total_stack_size = prop_stack_size + base_stack_size in
   let final_instr =
     instr (IFinal (
       match param_num_opt with
-      | None -> QueryM (total_stack_size, QueryOp.CGet, mk)
+      | None -> QueryM (total_stack_size, qop, mk)
       | Some i -> FPassM (i, total_stack_size, mk)
     )) in
   gather [
@@ -839,7 +924,6 @@ and get_prop_member_key null_flavor stack_index prop_expr =
     | Ast.OG_nullthrows -> MemberKey.PT str
     | Ast.OG_nullsafe -> MemberKey.QT str
     end
-  (* Special case for local *)
   | (_, A.Lvar (_, x)) -> MemberKey.PL (Local.Named x)
   (* General case *)
   | _ -> MemberKey.PC stack_index
@@ -875,6 +959,11 @@ and get_prop_member_key null_flavor stack_index prop_expr =
  *)
 and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
    match expr_ with
+   | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
+     instr_string (strip_dollar x),
+     instr (IBase (BaseGC (base_offset, mode))),
+     1
+
    | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
      instr (IMisc CheckThis),
      instr (IBase BaseH),
@@ -888,6 +977,16 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        | Some i -> FPassBaseL (i, Local.Named x)
        )),
      0
+
+   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+     let elem_expr_instrs = from_expr e in
+     elem_expr_instrs,
+     instr (IBase (
+       match param_num_opt with
+       | None -> BaseGC (base_offset, mode)
+       | Some i -> FPassBaseGC (i, base_offset)
+       )),
+     1
 
    | A.Array_get(base_expr, opt_elem_expr) ->
      let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
@@ -961,11 +1060,17 @@ and emit_arg i ((_, expr_) as e) =
   match expr_ with
   | A.Lvar (_, x) -> instr_fpassl i (Local.Named x)
 
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    gather [
+      from_expr e;
+      instr (ICall (FPassG i))
+    ]
+
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get (Some i) base_expr opt_elem_expr
+    emit_array_get (Some i) QueryOp.CGet base_expr opt_elem_expr
 
   | A.Obj_get(e1, e2, nullflavor) ->
-    emit_obj_get (Some i) e1 e2 nullflavor
+    emit_obj_get (Some i) QueryOp.CGet e1 e2 nullflavor
 
   | A.Class_get((_, cid), (_, id)) ->
     emit_class_get (Some i) cid id
@@ -1082,7 +1187,7 @@ and emit_call (_, expr_ as expr) args uargs =
  *)
 and emit_flavored_expr (_, expr_ as expr) =
   match expr_ with
-  | A.Call (e, args, uargs) ->
+  | A.Call (e, args, uargs) when not (is_special_function e) ->
     emit_call e args uargs
   | _ ->
     from_expr expr, Flavor.Cell
@@ -1117,6 +1222,12 @@ and emit_final_local_op op lid =
   | LValOp.Set -> instr (IMutator (SetL lid))
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
+
+and emit_final_global_op op =
+  match op with
+  | LValOp.Set -> instr (IMutator SetG)
+  | LValOp.SetOp op -> instr (IMutator (SetOpG op))
+  | LValOp.IncDec op -> instr (IMutator (IncDecG op))
 
 and emit_final_static_op op =
   match op with
@@ -1179,15 +1290,22 @@ and emit_lval_op op expr1 opt_expr2 =
       | Some e -> from_expr e, 1 in
       emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
 
-and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
-  match expr1 with
-  | (_, A.Lvar (_, id)) ->
+and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
+  match expr_ with
+  | A.Lvar (_, id) ->
     gather [
       rhs_instrs;
       emit_final_local_op op (Local.Named id)
     ]
 
-  | (_, A.Array_get(base_expr, opt_elem_expr)) ->
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+    gather [
+      from_expr e;
+      rhs_instrs;
+      emit_final_global_op op
+    ]
+
+  | A.Array_get(base_expr, opt_elem_expr) ->
     let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
     let base_offset = elem_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
@@ -1203,7 +1321,7 @@ and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | (_, A.Obj_get(e1, e2, null_flavor)) ->
+  | A.Obj_get(e1, e2, null_flavor) ->
     let prop_expr_instrs, prop_stack_size = emit_prop_instrs e2 in
     let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
@@ -1219,7 +1337,7 @@ and emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | (_, A.Class_get((_, cid), (_, id))) ->
+  | A.Class_get((_, cid), (_, id)) ->
     let prop_expr_instrs = instr_string (strip_dollar id) in
     let final_instr = emit_final_static_op op in
     gather [

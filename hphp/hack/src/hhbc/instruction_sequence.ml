@@ -234,6 +234,7 @@ let extract_decl_vars params instrseq =
   let folder uniq_list instruction =
     match instruction with
     | IMutator (SetL (Local.Named s))
+    | IBase (BaseL (Local.Named s, MemberOpMode.Define))
     | IGet (CGetL (Local.Named s))
     | IGet (CGetQuietL (Local.Named s))
     | IGet (CGetL2 (Local.Named s))

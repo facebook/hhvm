@@ -106,9 +106,9 @@ let string_of_lit_const instruction =
     | NewMSArray n -> sep ["NewMSArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
-    | Cns s -> sep ["Cns"; s]
-    | CnsE s -> sep ["CnsE"; s]
-    | CnsU (s1, s2) -> sep ["CnsU"; s1; s2]
+    | Cns s -> sep ["Cns"; quote_str s]
+    | CnsE s -> sep ["CnsE"; quote_str s]
+    | CnsU (s1, s2) -> sep ["CnsU"; quote_str s1; quote_str s2]
 
 let string_of_operator instruction =
   match instruction with
@@ -694,6 +694,7 @@ let string_of_param p =
   let param_name = Hhas_param.name p in
   let param_default_value = Hhas_param.default_value p in
   string_of_type_info_option param_type_info
+  ^ (if Hhas_param.is_reference p then "&" else "")
   ^ param_name
   ^ string_of_param_default_value_option param_default_value
 
@@ -731,8 +732,8 @@ let rec attribute_argument_to_string argument =
   | String s -> SS.str @@
     Printf.sprintf "s:%d:%s;" (String.length s) (quote_str_with_escape s)
   (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
-  | False -> SS.str "i:0;"
-  | True -> SS.str "i:1;"
+  | False -> SS.str "b:0;"
+  | True -> SS.str "b:1;"
   | Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
   | Array (num, fields) ->
     attribute_collection_argument_to_string "a" num fields

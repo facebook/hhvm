@@ -258,7 +258,9 @@ function hhvm_path() {
 function hh_codegen_cmd($options) {
   // Right now hh_single_compile doesn't understand any of HHVM's options, to
   // get 100% test coverage this will need to be fixed
-  return hh_codegen_path();
+  $cmd = hh_codegen_path();
+  $cmd .= ' -v Eval.EnableHipHopSyntax=1';
+  return $cmd;
 }
 
 function bin_root() {

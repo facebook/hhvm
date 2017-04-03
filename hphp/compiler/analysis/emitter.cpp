@@ -723,12 +723,14 @@ public:
   void restoreJumpTargetEvalStack();
   void recordCall();
   bool isJumpTarget(Offset target);
-  void setPrevOpcode(Op op) { m_prevOpcode = op; }
-  Op getPrevOpcode() const { return m_prevOpcode; }
+  void setPrevOpcode(Op op) {
+    m_prevOpcode.emplace(op);
+  }
   bool currentPositionIsReachable() {
-    return (m_ue.bcPos() == m_curFunc->base
-            || isJumpTarget(m_ue.bcPos())
-            || (instrFlags(getPrevOpcode()) & TF) == 0);
+    return m_ue.bcPos() == m_curFunc->base ||
+           isJumpTarget(m_ue.bcPos()) ||
+           (m_prevOpcode.hasValue() &&
+            (instrFlags(m_prevOpcode.value()) & TF) == 0);
   }
   FuncEmitter* getFuncEmitter() { return m_curFunc; }
   Id getStateLocal() {
@@ -867,7 +869,7 @@ private:
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
 
-  Op m_prevOpcode;
+  folly::Optional<Op> m_prevOpcode;
 
   std::deque<PostponedMeth> m_postponedMeths;
   std::deque<PostponedCtor> m_postponedCtors;
@@ -3089,7 +3091,6 @@ EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
     m_evalStackIsUnknown(false),
     m_stateLocal(-1),
     m_retLocal(-1) {
-  m_prevOpcode = OpLowInvalid;
   m_evalStack.m_actualStackHighWaterPtr = &m_curFunc->maxStackCells;
 }
 

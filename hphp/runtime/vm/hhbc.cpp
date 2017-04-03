@@ -908,7 +908,7 @@ const char* opcodeToName(Op op) {
     OPCODES
 #undef O
   };
-  if (op >= Op::LowInvalid && op <= Op::HighInvalid) {
+  if (size_t(op) < Op_count) {
     return namesArr[size_t(op)];
   }
   return "Invalid";

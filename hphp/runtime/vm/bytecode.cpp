@@ -1797,16 +1797,6 @@ static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
  * details.
  */
 
-OPTBLD_INLINE void iopLowInvalid() {
-  fprintf(stderr, "invalid bytecode executed\n");
-  abort();
-}
-
-OPTBLD_INLINE void iopHighInvalid() {
-  fprintf(stderr, "invalid bytecode executed\n");
-  abort();
-}
-
 OPTBLD_INLINE void iopNop() {
 }
 

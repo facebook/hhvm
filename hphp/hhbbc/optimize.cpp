@@ -477,7 +477,7 @@ void first_pass(const Index& index,
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
 
   auto peephole = make_peephole(newBCs, index, ctx);
-  std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
+  std::vector<Op> srcStack(state.stack.size(), Op::Nop);
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));

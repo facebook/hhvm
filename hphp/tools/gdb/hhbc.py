@@ -213,7 +213,7 @@ class HHBC(object):
     def instr_info(bc):
         op, instrlen = HHBC.decode_op(bc)
 
-        if op <= V('HPHP::OpLowInvalid') or op >= V('HPHP::OpHighInvalid'):
+        if op <= 0 or op >= V('HPHP::Op_count'):
             print('hhx: Invalid Op %d @ 0x%x' % (op, bc))
             return None
 

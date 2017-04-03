@@ -2927,9 +2927,6 @@ void in(ISS& env, const bc::Silence& op) {
 
 void in(ISS& emv, const bc::VarEnvDynCall&) {}
 
-void in(ISS& env, const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
-void in(ISS& env, const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
-
 }
 
 //////////////////////////////////////////////////////////////////////

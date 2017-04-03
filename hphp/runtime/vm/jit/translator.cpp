@@ -1049,7 +1049,6 @@ bool dontGuardAnyInputs(Op op) {
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
-  case Op::LowInvalid:
   case Op::Nop:
   case Op::EntryNop:
   case Op::Box:
@@ -1097,7 +1096,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::DefClsNop:
   case Op::DefTypeAlias:
   case Op::Catch:
-  case Op::HighInvalid:
   case Op::ContAssignDelegate:
   case Op::ContEnterDelegate:
   case Op::YieldFromDelegate:

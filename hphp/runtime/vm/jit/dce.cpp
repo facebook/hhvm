@@ -214,6 +214,7 @@ bool canDCE(IRInstruction* inst) {
   case NewDictArray:
   case NewLikeArray:
   case NewCol:
+  case NewPair:
   case FreeActRec:
   case DefInlineFP:
   case LdRetVal:

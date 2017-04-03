@@ -305,9 +305,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto pair = req::make<c_Pair>();
-    pair->initAdd(&data()[i]);
-    pair->initAdd(v);
+    auto pair = req::make<c_Pair>(data()[i], *v.asCell());
     bvec->data()[i].m_data.pobj = pair.detach();
     bvec->data()[i].m_type = KindOfObject;
     bvec->incSize();

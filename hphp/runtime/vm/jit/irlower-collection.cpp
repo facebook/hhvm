@@ -104,6 +104,8 @@ void cgNewCol(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, argGroup(env, inst));
 }
 
+IMPL_OPCODE_CALL(NewPair)
+
 void cgNewColFromArray(IRLS& env, const IRInstruction* inst) {
   auto const target = [&] {
     auto const col_type = inst->extra<NewColFromArray>()->type;

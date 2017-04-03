@@ -79,6 +79,11 @@ inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
   return allocFromArrayFunc(ctype)(arr);
 }
 
+/*
+ * Creates a Pair. Takes ownership of the TypedValues passed in.
+ */
+ObjectData* allocPair(TypedValue c1, TypedValue c2);
+
 /* Preallocate room for {sz} elements in the Collection */
 void reserve(ObjectData* obj, int64_t sz);
 

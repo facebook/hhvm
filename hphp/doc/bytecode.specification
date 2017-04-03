@@ -1145,7 +1145,14 @@ AddNewElemV    [C V]  ->  [C:Arr]
 NewCol <coll type>    []  ->  [C:Obj]
 
   New collection. Creates a empty new collection of type %1, and pushes it
-  onto the stack.
+  onto the stack. %1 cannot be Pair.
+
+NewPair    [C C] -> [C:Obj]
+
+  New Pair collection. Creates a Pair from the top 2 cells on the stack, and
+  pushes it onto the stack. Values were pushed onto the stack in the order
+  they exist in the pair, so are added to it in reverse order (the top value
+  on the stack will become the second element of the pair).
 
 ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
 
@@ -1161,9 +1168,8 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
 
 ColAddNewElemC    [C C]  ->  [C:Obj]
 
-  Collection add value. $2 must be an instance of HH\Pair, HH\Set, or
-  HH\Vector.  This instruction executes $2[] = $1 and then pushes $2 onto the
-  stack.
+  Collection add value. $2 must be an instance of HH\Set, or HH\Vector. This
+  instruction executes $2[] = $1 and then pushes $2 onto the stack.
 
 Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 

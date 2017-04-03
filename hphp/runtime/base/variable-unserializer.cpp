@@ -953,10 +953,16 @@ void VariableUnserializer::unserializeVariant(
           assert(obj.isNull());
           throw_null_pointer_exception();
         } else {
-          obj = Object{cls};
-          if (UNLIKELY(collections::isType(cls, CollectionType::Pair) &&
-                       (size != 2))) {
-            throwInvalidPair();
+          if (UNLIKELY(collections::isType(cls, CollectionType::Pair))) {
+            if (UNLIKELY(size != 2)) {
+              throwInvalidPair();
+            }
+            // pairs can't be constructed without elements
+            obj = Object{req::make<c_Pair>(make_tv<KindOfNull>(),
+                                           make_tv<KindOfNull>(),
+                                           c_Pair::NoIncRef{})};
+          } else {
+            obj = Object{cls};
           }
         }
       } else {
@@ -1505,9 +1511,8 @@ void VariableUnserializer::unserializePair(ObjectData* obj, int64_t sz,
   assert(sz == 2);
   if (type != 'V') throwBadFormat(obj, type);
   auto pair = static_cast<c_Pair*>(obj);
-  auto elms = pair->initForUnserialize();
-  unserializeVariant(tvAsVariant(&elms[0]), UnserializeMode::ColValue);
-  unserializeVariant(tvAsVariant(&elms[1]), UnserializeMode::ColValue);
+  unserializeVariant(tvAsVariant(pair->at(0)), UnserializeMode::ColValue);
+  unserializeVariant(tvAsVariant(pair->at(1)), UnserializeMode::ColValue);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

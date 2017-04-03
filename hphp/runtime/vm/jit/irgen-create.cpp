@@ -416,10 +416,20 @@ void emitAddNewElemC(IRGS& env) {
 }
 
 void emitNewCol(IRGS& env, int type) {
+  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   push(env, gen(env, NewCol, NewColData{type}));
 }
 
+void emitNewPair(IRGS& env) {
+  auto const c1 = popC(env, DataTypeGeneric);
+  auto const c2 = popC(env, DataTypeGeneric);
+  // elements were pushed onto the stack in the order they should appear
+  // in the pair, so the top of the stack should become the second element
+  push(env, gen(env, NewPair, c2, c1));
+}
+
 void emitColFromArray(IRGS& env, int type) {
+  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   auto const arr = popC(env);
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }

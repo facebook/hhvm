@@ -1456,7 +1456,12 @@ To string conversions:
 
 | NewCol<type>, DCol, NA, PRc
 
-  Create an empty new collection of `type'.
+  Create an empty new collection of `type'. `type' cannot be Pair.
+
+| NewPair<offset>, DCol, S(Cell) S(Cell), PRc|CRc
+
+  Allocate a new Pair and fill it with the given cells. Ownership of the cells
+  is transferred from $1 and $2 to the pair without manipulating the refcounts.
 
 | NewColFromArray<type>, DCol, S(Vec|Dict), PRc|CRc
 

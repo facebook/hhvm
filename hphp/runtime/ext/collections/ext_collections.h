@@ -19,7 +19,7 @@ extern const StaticString
   s_HH_Pair, s_HH_Vector, s_HH_ImmVector,
   s_HH_Map, s_HH_ImmMap, s_HH_Set, s_HH_ImmSet;
 
-#define DECLARE_COLLECTIONS_CLASS(name)                     \
+#define DECLARE_COLLECTIONS_CLASS_NOCTOR(name)              \
   static Class* s_cls;                                      \
                                                             \
   static Class* classof() {                                 \
@@ -27,16 +27,18 @@ extern const StaticString
     return s_cls;                                           \
   }                                                         \
                                                             \
-  static ObjectData* instanceCtor(Class* cls) {             \
-    assertx(cls == classof());                              \
-    return req::make<c_##name>().detach();                  \
-  }                                                         \
-                                                            \
   static void instanceDtor(ObjectData* obj, const Class*) { \
     assertx(obj->getVMClass() == c_##name::classof());      \
     auto coll = static_cast<c_##name*>(obj);                \
     coll->~c_##name();                                      \
     MM().objFree(obj, sizeof(c_##name));                    \
+  }
+
+#define DECLARE_COLLECTIONS_CLASS(name)                     \
+  DECLARE_COLLECTIONS_CLASS_NOCTOR(name)                    \
+  static ObjectData* instanceCtor(Class* cls) {             \
+    assertx(cls == classof());                              \
+    return req::make<c_##name>().detach();                  \
   }
 
 constexpr ObjectData::Attribute objectFlags =

@@ -19,32 +19,39 @@ struct PairIterator;
 }
 
 struct c_Pair : ObjectData {
-  DECLARE_COLLECTIONS_CLASS(Pair);
+  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
 
-  explicit c_Pair()
+  static ObjectData* instanceCtor(Class* cls) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "Pairs cannot be created using the new operator"
+    );
+  }
+
+  c_Pair() = delete;
+  explicit c_Pair(const TypedValue& e0, const TypedValue& e1)
     : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair)
-    , m_size(0) {}
+    , m_size(2)
+  {
+    cellDup(e0, elm0);
+    cellDup(e1, elm1);
+  }
+  enum class NoIncRef {};
+  explicit c_Pair(const TypedValue& e0, const TypedValue& e1, NoIncRef)
+    : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair)
+    , m_size(2)
+  {
+    cellCopy(e0, elm0);
+    cellCopy(e1, elm1);
+  }
   ~c_Pair();
 
   int64_t size() const {
-    assertx(isFullyConstructed());
     return 2;
   }
 
   void reserve(int64_t sz) const { assertx(sz == 2); }
 
-  /**
-   * Most methods that operate on Pairs can safely assume that all Pairs have
-   * two elements that have been initialized. However, methods that deal with
-   * initializing and destructing Pairs needs to handle intermediate states
-   * where one or both of the elements is uninitialized.
-   */
-  bool isFullyConstructed() const {
-    return m_size == 2;
-  }
-
   TypedValue* at(int64_t key) const {
-    assertx(isFullyConstructed());
     if (UNLIKELY(uint64_t(key) >= uint64_t(2))) {
       collections::throwOOB(key);
       return nullptr;
@@ -53,7 +60,6 @@ struct c_Pair : ObjectData {
   }
 
   TypedValue* get(int64_t key) const {
-    assertx(isFullyConstructed());
     if (uint64_t(key) >= uint64_t(2)) {
       return nullptr;
     }
@@ -61,7 +67,6 @@ struct c_Pair : ObjectData {
   }
 
   bool contains(int64_t key) const {
-    assertx(isFullyConstructed());
     return (uint64_t(key) < uint64_t(2));
   }
 
@@ -72,7 +77,6 @@ struct c_Pair : ObjectData {
   static c_Pair* Clone(ObjectData* obj);
   static bool ToBool(const ObjectData* obj) {
     assertx(obj->getVMClass() == c_Pair::classof());
-    assertx(static_cast<const c_Pair*>(obj)->isFullyConstructed());
     return true;
   }
   static Array ToArray(const ObjectData* obj);
@@ -80,7 +84,6 @@ struct c_Pair : ObjectData {
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(key->m_type != KindOfRef);
     auto pair = static_cast<c_Pair*>(obj);
-    assertx(pair->isFullyConstructed());
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? pair->at(key->m_data.num)
                          : pair->get(key->m_data.num);
@@ -93,31 +96,14 @@ struct c_Pair : ObjectData {
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
-  TypedValue* initForUnserialize() {
-    m_size = 2;
-    elm0.m_type = KindOfNull;
-    elm1.m_type = KindOfNull;
-    return getElms();
-  }
-  void initAdd(const TypedValue* val) {
-    assertx(!isFullyConstructed());
-    assertx(val->m_type != KindOfRef);
-    cellDup(*val, getElms()[m_size]);
-    ++m_size;
-  }
-  void initAdd(const Variant& val) {
-    initAdd(val.asCell());
-  }
-
   static constexpr uint32_t dataOffset() { return offsetof(c_Pair, elm0); }
 
   void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(elm0, m_size * sizeof(elm0));
+    scanner.scan(elm0, 2 * sizeof(elm0));
   }
 
  private:
   Variant php_at(const Variant& key) const {
-    assertx(isFullyConstructed());
     auto* k = key.asCell();
     if (k->m_type == KindOfInt64) {
       return Variant(tvAsCVarRef(at(k->m_data.num)), Variant::CellDup());
@@ -125,7 +111,6 @@ struct c_Pair : ObjectData {
     throwBadKeyType();
   }
   Variant php_get(const Variant& key) const {
-    assertx(isFullyConstructed());
     auto* k = key.asCell();
     if (k->m_type == KindOfInt64) {
       if (auto tv = get(k->m_data.num)) {

@@ -2079,13 +2079,26 @@ OPTBLD_INLINE void iopAddNewElemV() {
 
 OPTBLD_INLINE void iopNewCol(intva_t type) {
   auto cType = static_cast<CollectionType>(type.n);
+  assertx(cType != CollectionType::Pair);
   // Incref the collection object during construction.
   auto obj = collections::alloc(cType);
   vmStack().pushObjectNoRc(obj);
 }
 
+OPTBLD_INLINE void iopNewPair() {
+  Cell* c1 = vmStack().topC();
+  Cell* c2 = vmStack().indC(1);
+  // elements were pushed onto the stack in the order they should appear
+  // in the pair, so the top of the stack should become the second element
+  auto pair = collections::allocPair(*c2, *c1);
+  // This constructor moves values, no inc/decref is necessary.
+  vmStack().ndiscard(2);
+  vmStack().pushObjectNoRc(pair);
+}
+
 OPTBLD_INLINE void iopColFromArray(intva_t type) {
   auto const cType = static_cast<CollectionType>(type.n);
+  assertx(cType != CollectionType::Pair);
   auto const c1 = vmStack().topC();
   // This constructor reassociates the ArrayData with the collection, so no
   // inc/decref is needed for the array. The collection object itself is
@@ -2098,7 +2111,9 @@ OPTBLD_INLINE void iopColFromArray(intva_t type) {
 OPTBLD_INLINE void iopColAddNewElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
-  assert(c2->m_type == KindOfObject && c2->m_data.pobj->isCollection());
+  assert(c2->m_type == KindOfObject &&
+         c2->m_data.pobj->isCollection() &&
+         c2->m_data.pobj->collectionType() != CollectionType::Pair);
   collections::initElem(c2->m_data.pobj, c1);
   vmStack().popC();
 }

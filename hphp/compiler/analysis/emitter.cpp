@@ -10635,7 +10635,6 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
     throw IncludeTimeFatalException(el,
       "Pair objects must have exactly 2 elements");
   }
-  e.NewCol(static_cast<int>(CollectionType::Pair));
   for (int i = 0; i < 2; i++) {
     auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     if (ap->getName() != nullptr) {
@@ -10644,8 +10643,8 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
     }
     visit(ap->getValue());
     emitConvertToCell(e);
-    e.ColAddNewElemC();
   }
+  e.NewPair();
 }
 
 void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,

@@ -44,18 +44,11 @@ static void HHVM_METHOD(PairIterator, rewind) {
 Class* c_Pair::s_cls;
 
 c_Pair::~c_Pair() {
-  if (LIKELY(m_size == 2)) {
-    tvRefcountedDecRef(&elm0);
-    tvRefcountedDecRef(&elm1);
-    return;
-  }
-  if (m_size == 1) {
-    tvRefcountedDecRef(&elm0);
-  }
+  tvRefcountedDecRef(&elm0);
+  tvRefcountedDecRef(&elm1);
 }
 
 int64_t c_Pair::linearSearch(const Variant& value) const {
-  assertx(isFullyConstructed());
   for (uint64_t i = 0; i < 2; ++i) {
     if (same(value, tvAsCVarRef(&getElms()[i]))) {
       return i;
@@ -65,19 +58,12 @@ int64_t c_Pair::linearSearch(const Variant& value) const {
 }
 
 Array c_Pair::toArrayImpl() const {
-  // Parsing/scanning the heap (e.g., objprof) can cause us to get here before
-  // we've initialized the elms.
-  if (!isFullyConstructed()) return empty_array();
   return make_packed_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
-  assertx(thiz->isFullyConstructed());
-  auto pair = req::make<c_Pair>();
-  pair->m_size = 2;
-  cellDup(thiz->elm0, pair->elm0);
-  cellDup(thiz->elm1, pair->elm1);
+  auto pair = req::make<c_Pair>(thiz->elm0, thiz->elm1);
   return pair.detach();
 }
 
@@ -95,7 +81,6 @@ Array c_Pair::ToArray(const ObjectData* obj) {
 bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   assertx(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
-  assertx(pair->isFullyConstructed());
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = pair->get(key->m_data.num);
@@ -109,7 +94,6 @@ bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   assertx(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
-  assertx(pair->isFullyConstructed());
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = pair->get(key->m_data.num);
@@ -123,7 +107,6 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
   assertx(key->m_type != KindOfRef);
   auto pair = static_cast<c_Pair*>(obj);
-  assertx(pair->isFullyConstructed());
   if (key->m_type == KindOfInt64) {
     return pair->contains(key->m_data.num);
   } else {
@@ -135,14 +118,11 @@ bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
 bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto pair1 = static_cast<const c_Pair*>(obj1);
   auto pair2 = static_cast<const c_Pair*>(obj2);
-  assertx(pair1->isFullyConstructed());
-  assertx(pair2->isFullyConstructed());
   return HPHP::equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
          HPHP::equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
 
 Object c_Pair::getIterator() {
-  assertx(isFullyConstructed());
   auto iter = collections::PairIterator::newInstance();
   Native::data<collections::PairIterator>(iter)->setPair(this);
   return iter;

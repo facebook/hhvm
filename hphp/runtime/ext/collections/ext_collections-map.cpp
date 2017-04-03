@@ -503,9 +503,7 @@ BaseMap::php_zip(const Variant& iterable) {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto pair = req::make<c_Pair>();
-    pair->initAdd(&e.data);
-    pair->initAdd(v);
+    auto pair = req::make<c_Pair>(e.data, *v.asCell());
     TypedValue tv;
     tv.m_data.pobj = pair.detach();
     tv.m_type = KindOfObject;

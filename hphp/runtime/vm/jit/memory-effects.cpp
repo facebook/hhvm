@@ -1192,6 +1192,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case NewArray:
   case NewCol:
+  case NewPair:
   case NewInstanceRaw:
   case NewMixedArray:
   case NewDictArray:

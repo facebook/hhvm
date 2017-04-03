@@ -263,6 +263,8 @@ static CallMap s_callMap {
                            {{extra(&PackedArrayData::size)}}},
     {AllocVecArray,      PackedArray::MakeUninitializedVec, DSSA, SNone,
                            {{extra(&PackedArrayData::size)}}},
+    {NewPair,            collections::allocPair, DSSA, SNone,
+                           {{TV, 0}, {TV, 1}}},
     {ColAddNewElemC,     colAddNewElemCHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
     {AllocObj,           newInstance, DSSA, SSync,

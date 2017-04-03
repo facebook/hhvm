@@ -33,8 +33,8 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Constructor/Initializer
 
-ObjectData* allocEmptyPair() {
-  return req::make<c_Pair>().detach();
+ObjectData* allocPair(TypedValue c1, TypedValue c2) {
+  return req::make<c_Pair>(c1, c2, c_Pair::NoIncRef{}).detach();
 }
 
 #define X(type)                                    \
@@ -60,8 +60,9 @@ COLLECTIONS_PAIRED_TYPES(X)
 newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype) {
   switch (ctype) {
 #define X(type) case CollectionType::type: return allocEmpty##type;
-COLLECTIONS_ALL_TYPES(X)
+COLLECTIONS_PAIRED_TYPES(X)
 #undef X
+    case CollectionType::Pair: not_reached();
   }
   not_reached();
 }
@@ -91,8 +92,6 @@ void initElem(ObjectData* obj, TypedValue* val) {
       static_cast<BaseSet*>(obj)->add(val);
       break;
     case CollectionType::Pair:
-      static_cast<c_Pair*>(obj)->initAdd(val);
-      break;
     case CollectionType::Map:
     case CollectionType::ImmMap:
       assertx(false);

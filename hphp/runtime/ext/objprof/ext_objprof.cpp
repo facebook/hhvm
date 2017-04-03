@@ -746,32 +746,30 @@ std::pair<int, double> getObjSize(
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
       auto pair = static_cast<c_Pair*>(obj);
-      if (pair->isFullyConstructed()) {
-        auto elm_size_pair = tvGetSize(
-          pair->get(0),
-          0, /* ref_adjust */
-          source,
-          stack,
-          paths,
-          val_stack,
-          exclude_classes,
-          flags
-        );
-        size += elm_size_pair.first;
-        sized += elm_size_pair.second;
-        elm_size_pair = tvGetSize(
-          pair->get(1),
-          0, /* ref_adjust */
-          source,
-          stack,
-          paths,
-          val_stack,
-          exclude_classes,
-          flags
-        );
-        size += elm_size_pair.first;
-        sized += elm_size_pair.second;
-      }
+      auto elm_size_pair = tvGetSize(
+        pair->get(0),
+        0, /* ref_adjust */
+        source,
+        stack,
+        paths,
+        val_stack,
+        exclude_classes,
+        flags
+      );
+      size += elm_size_pair.first;
+      sized += elm_size_pair.second;
+      elm_size_pair = tvGetSize(
+        pair->get(1),
+        0, /* ref_adjust */
+        source,
+        stack,
+        paths,
+        val_stack,
+        exclude_classes,
+        flags
+      );
+      size += elm_size_pair.first;
+      sized += elm_size_pair.second;
     }
 
     if (stack) stack->pop_back();
@@ -898,10 +896,8 @@ void getObjStrings(
     } else {
       assertx(collections::isType(cls, CollectionType::Pair));
       auto pair = static_cast<c_Pair*>(obj);
-      if (pair->isFullyConstructed()) {
-        tvGetStrings(pair->get(0), metrics, path, pointers);
-        tvGetStrings(pair->get(1), metrics, path, pointers);
-      }
+      tvGetStrings(pair->get(0), metrics, path, pointers);
+      tvGetStrings(pair->get(1), metrics, path, pointers);
     }
     path->pop_back();
     return;

@@ -212,6 +212,8 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
   case Op::NewKeysetArray:
   case Op::AddNewElemC:
   case Op::AddNewElemV:
+  case Op::NewCol:
+  case Op::NewPair:
   case Op::ClsRefName:
   case Op::File:
   case Op::Dir:

@@ -48,7 +48,6 @@ MODULES=\
   deps\
   dfind\
   diff\
-  emitter\
   debug\
   find\
   format\
@@ -116,7 +115,7 @@ NATIVE_LIBRARIES=\
   $(RT)
 
 TARGETS_BASE=_build/hh_server _build/hh_client \
-	_build/hh_single_type_check _build/hh_emitter \
+	_build/hh_single_type_check \
 	_build/hh_format \
 	_build/hackfmt
 
@@ -206,7 +205,6 @@ else
 endif
 	cp _build/hh_client.$(TARGET_EXT) ../bin/hh_client
 	cp _build/hh_single_type_check.$(TARGET_EXT) ../bin/hh_single_type_check
-	cp _build/hh_emitter.$(TARGET_EXT) ../bin/hh_emitter
 	cp _build/hackfmt.$(TARGET_EXT) ../bin/hackfmt
 	cp _build/hh_format.$(TARGET_EXT) ../bin/hh_format
 

@@ -1892,7 +1892,7 @@ module Make (GetLocals : GetLocals) = struct
                * It's sufficient for typechecking purposes (we require
                * subclass to be compatible with the trait member/method
                * declarations).
-               * It *is* a problem for hh_emitter, though. *)
+               *)
               (match (fst env).current_cls with
                 | Some (cid, _) -> N.Smethod_id (cid, meth)
                 | None -> Errors.illegal_class_meth p; N.Any)

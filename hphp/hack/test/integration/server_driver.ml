@@ -90,7 +90,7 @@ let response_to_string : type a. a SCT.t -> a -> string = begin
     | SCT.INFER_TYPE _, response ->
       let to_string = function
         | None -> "None"
-        | Some ty -> Printf.sprintf "%s" ty
+        | Some (ty, _) -> Printf.sprintf "%s" ty
       in
       let response = to_string response in
       response

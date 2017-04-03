@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-import glob
 import json
 import os
 import re
@@ -649,7 +648,8 @@ class CommonTests(object):
             'string'
             ], [
             '{{"type":"string",' +
-            '"pos":{{"filename":"","line":0,"char_start":0,"char_end":-1}}}}'
+            '"pos":{{"filename":"","line":0,"char_start":0,"char_end":-1}},' +
+            '"full_type":{{"kind":"primitive","name":"string"}}}}'
             ], options=['--type-at-pos', '{root}foo_3.php:11:13'])
 
     def test_ide_get_definition(self):

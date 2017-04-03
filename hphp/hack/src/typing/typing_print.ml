@@ -446,6 +446,132 @@ module Full = struct
 
 end
 
+module Json =
+struct
+
+open Hh_json
+
+let prim = function
+  | Nast.Tvoid   -> "void"
+  | Nast.Tint    -> "int"
+  | Nast.Tbool   -> "bool"
+  | Nast.Tfloat  -> "float"
+  | Nast.Tstring -> "string"
+  | Nast.Tnum    -> "num"
+  | Nast.Tresource -> "resource"
+  | Nast.Tarraykey -> "arraykey"
+  | Nast.Tnoreturn -> "noreturn"
+
+let rec from_type: type a. Typing_env.env -> a ty -> json =
+  function env -> function ty ->
+  (* Helpers to construct fields that appear in JSON rendering of type *)
+  let kind k = ["kind", JSON_String k] in
+  let args tys = ["args", JSON_Array (List.map tys (from_type env))] in
+  let typ ty = ["type", from_type env ty] in
+  let result ty = ["result", from_type env ty] in
+  let obj x = JSON_Object x in
+  let name x = ["name", JSON_String x] in
+  let make_field (k, v) =
+    obj @@
+    name (Typing_env.get_shape_field_name k) @
+    typ v.sft_ty in
+  let fields fl =
+    ["fields", JSON_Array (List.map fl make_field)] in
+  let shape_like_array_field (k, (_, v)) =
+    obj @@
+    name (Typing_env.get_shape_field_name k) @
+    typ v in
+  let shape_like_array_fields fl =
+    ["fields", JSON_Array (List.map fl shape_like_array_field)] in
+  let path ids =
+    ["path", JSON_Array (List.map ids (fun id -> JSON_String id))] in
+  let as_type opt_ty =
+    match opt_ty with
+    | None -> []
+    | Some ty -> ["as", from_type env ty] in
+  match snd ty with
+  | Tvar _ ->
+    let _, ty = Typing_env.expand_type env ty in
+    from_type env ty
+  | Tarray(opt_ty1, opt_ty2) ->
+    obj @@ kind "array" @ args (Option.to_list opt_ty1 @ Option.to_list opt_ty2)
+  | Tthis ->
+    obj @@ kind "this"
+  | Ttuple tys ->
+    obj @@ kind "tuple" @ args tys
+  | Tany | Terr ->
+    obj @@ kind "any"
+  | Tmixed ->
+    obj @@ kind "mixed"
+  | Tgeneric s ->
+    obj @@ kind "generic" @ name s
+  | Tabstract (AKgeneric s, _) ->
+    obj @@ kind "generic" @ name s
+  | Tabstract (AKenum s, opt_ty) ->
+    obj @@ kind "enum" @ name s @ as_type opt_ty
+  | Tabstract (AKnewtype (s, tys), opt_ty) ->
+    obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
+  | Tabstract (AKdependent (`cls c, ids), opt_ty) ->
+    obj @@ kind "path" @ ["type", obj @@ kind "class" @ name c @ args []]
+      @ path ids @ as_type opt_ty
+  | Tabstract (AKdependent (`expr _, ids), opt_ty) ->
+    obj @@ kind "path" @ ["type", obj @@ kind "expr"]
+      @ path ids @ as_type opt_ty
+  | Tabstract (AKdependent (`this, ids), opt_ty) ->
+    obj @@ kind "path" @ ["type", obj @@ kind "this"]
+      @ path ids @ as_type opt_ty
+  | Tabstract (AKdependent (`static, ids), opt_ty) ->
+    obj @@ kind "path" @ ["type", obj @@ kind "static"]
+      @ path ids @ as_type opt_ty
+  | Toption ty ->
+    obj @@ kind "nullable" @ args [ty]
+  | Tprim tp ->
+    obj @@ kind "primitive" @ name (prim tp)
+  | Tapply ((_, cid), tys) ->
+    obj @@ kind "class" @ name cid @ args tys
+  | Tclass ((_, cid), tys) ->
+    obj @@ kind "class" @ name cid @ args tys
+  | Tobject ->
+    obj @@ kind "object"
+  | Tshape (_, fl) ->
+    obj @@ kind "shape" @ fields (Nast.ShapeMap.elements fl)
+  | Tunresolved [ty] ->
+    from_type env ty
+  | Tunresolved tyl ->
+    obj @@ kind "union" @ args tyl
+  | Taccess (ty, ids) ->
+    obj @@ kind "path" @ typ ty @ path (List.map ids snd)
+  | Tfun ft ->
+    let arg_tys = List.map ft.ft_params snd in
+    obj @@ kind "function" @ args arg_tys @ result ft.ft_ret
+  | Tanon _ ->
+    obj @@ kind "anon"
+  | Tdarray (ty1, ty2) ->
+    obj @@ kind "darray" @ args [ty1; ty2]
+  | Tvarray ty ->
+    obj @@ kind "varray" @ args [ty]
+    (* Is it worth distinguishing these X-like arrays from X? *)
+  | Tarraykind AKany ->
+    obj @@ kind "array" @ args []
+  | Tarraykind (AKdarray(ty1, ty2)) ->
+    obj @@ kind "darray" @ args [ty1; ty2]
+  | Tarraykind (AKvarray ty) ->
+    obj @@ kind "varray" @ args [ty]
+  | Tarraykind (AKvec ty) ->
+    obj @@ kind "array" @ args [ty]
+  | Tarraykind (AKmap (ty1, ty2)) ->
+    obj @@ kind "array" @ args [ty1; ty2]
+  | Tarraykind (AKtuple fields) ->
+    obj @@ kind "tuple" @ args (List.rev (IMap.values fields))
+  | Tarraykind (AKshape fl) ->
+    obj @@ kind "shape" @ shape_like_array_fields (Nast.ShapeMap.elements fl)
+  | Tarraykind AKempty ->
+    obj @@ kind "array" @ args []
+
+end
+
+let to_json = Json.from_type
+
 (*****************************************************************************)
 (* Prints the internal type of a class, this code is meant to be used for
  * debugging purposes only.

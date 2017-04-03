@@ -51,10 +51,15 @@ let autocomplete_response_to_json x =
   JSON_Array (List.map x ~f:autocomplete_response_to_json)
 
 let infer_type_response_to_json x =
-  Hh_json.JSON_Object [
-    ("type", opt_string_to_json x);
-    ("pos", deprecated_pos_field);
-  ]
+  Hh_json.JSON_Object (
+    [
+      ("type", opt_string_to_json x.type_string);
+      ("pos", deprecated_pos_field)
+    ] @
+    (match x.type_json with
+    | Some json -> [("full_type", json_of_string json)]
+    | _ -> [])
+  )
 
 let identify_symbol_response_to_json results =
 

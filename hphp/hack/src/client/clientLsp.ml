@@ -150,7 +150,7 @@ let do_hover (conn: conn option) (params: Hover.params) : Hover.result =
       contents = [Marked_string "nothing found"];
       range = None;
     }
-  | Some s -> { Hover.
+  | Some (s, _) -> { Hover.
       contents = [Marked_string s];
       range = None;
     }

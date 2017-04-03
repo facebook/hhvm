@@ -58,7 +58,7 @@ let autocomplete_response_to_json x =
 
   JSON_Array (List.map x ~f:autocomplete_response_to_json)
 
-let infer_type_response = opt_string_to_json
+let infer_type_response x = opt_string_to_json x.type_string
 
 let rec symbol_definition_to_json ?include_filename def =
   let open SymbolDefinition in

@@ -250,6 +250,51 @@ let do_workspace_symbol (conn: conn option) (params: Workspace_symbol.params)
   in
   List.map results ~f:hack_symbol_to_lsp
 
+let do_document_symbol (conn: conn option) (params: Document_symbol.params)
+  : Document_symbol.result =
+  let open Document_symbol in
+  let open Text_document_identifier in
+  let open SymbolDefinition in
+
+  let filename = params.text_document.uri in
+  let command = ServerCommandTypes.OUTLINE filename in
+  let results = rpc conn command in
+
+  let hack_to_lsp_kind = function
+    | SymbolDefinition.Function -> Symbol_information.Function
+    | SymbolDefinition.Class -> Symbol_information.Class
+    | SymbolDefinition.Method -> Symbol_information.Method
+    | SymbolDefinition.Property -> Symbol_information.Property
+    | SymbolDefinition.Const -> Symbol_information.Constant
+    | SymbolDefinition.Enum -> Symbol_information.Enum
+    | SymbolDefinition.Interface -> Symbol_information.Interface
+    | SymbolDefinition.Trait -> Symbol_information.Interface
+        (* LSP doesn't have traits, so we approximate with interface *)
+    | SymbolDefinition.LocalVar -> Symbol_information.Variable
+    | SymbolDefinition.Typeconst -> Symbol_information.Class
+        (* e.g. "const type Ta = string;" -- absent from LSP *)
+    | SymbolDefinition.Param -> Symbol_information.Variable
+        (* We never return a param from a document-symbol-search *)
+  in
+  let hack_symbol_to_lsp def container_name =
+    { Symbol_information.
+      name = def.name;
+      kind = hack_to_lsp_kind def.kind;
+      location = hack_symbol_definition_to_lsp_location def;
+      container_name;
+    }
+  in
+  let rec hack_symbol_tree_to_lsp ~accu ~container_name = function
+    (* Flattens the recursive list of symbols *)
+    | [] -> List.rev accu
+    | def :: defs ->
+        let children = Option.value def.children ~default:[] in
+        let accu = (hack_symbol_to_lsp def container_name) :: accu in
+        let accu = hack_symbol_tree_to_lsp accu (Some def.name) children in
+        hack_symbol_tree_to_lsp accu container_name defs
+  in
+  hack_symbol_tree_to_lsp ~accu:[] ~container_name:None results
+
 let do_initialize (params: Initialize.params)
   : (conn option * Initialize.result) =
   let open Initialize in
@@ -276,7 +321,7 @@ let do_initialize (params: Initialize.params)
         definition_provider = false;
         references_provider = false;
         document_highlight_provider = false;
-        document_symbol_provider = false;
+        document_symbol_provider = true;
         workspace_symbol_provider = true;
         code_action_provider = false;
         code_lens_provider = None;
@@ -429,6 +474,11 @@ let main () : unit =
       | Main_loop, Client c when c.method_ = "workspace/symbol" ->
         parse_workspace_symbol c.params |> do_workspace_symbol !conn
           |> print_workspace_symbol |> respond stdout c
+
+      (* textDocument/documentSymbol request *)
+      | Main_loop, Client c when c.method_ = "textDocument/documentSymbol" ->
+        parse_document_symbol c.params |> do_document_symbol !conn
+          |> print_document_symbol |> respond stdout c
 
       (* textDocument/didOpen notification *)
       | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->

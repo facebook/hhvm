@@ -404,6 +404,21 @@ let print_workspace_symbol (r: Workspace_symbol.result) : json =
 
 
 (************************************************************************)
+(** textDocument/documentSymbol request                                **)
+(************************************************************************)
+
+let parse_document_symbol (params: json option) : Document_symbol.params =
+  let open Document_symbol in
+  {
+    text_document = Jget.obj_exn params "textDocument"
+                    |> parse_text_document_identifier;
+  }
+
+let print_document_symbol (r: Document_symbol.result) : json =
+  JSON_Array (List.map r ~f:print_symbol_information)
+
+
+(************************************************************************)
 (** initialize request                                                 **)
 (************************************************************************)
 

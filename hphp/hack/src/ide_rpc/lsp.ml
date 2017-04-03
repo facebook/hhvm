@@ -493,6 +493,18 @@ module Workspace_symbol = struct
 end
 
 
+(* Document Symbols request, method="textDocument/documentSymbols" *)
+module Document_symbol = struct
+  type params = document_symbol_params
+
+  and result = Symbol_information.t list
+
+  and document_symbol_params = {
+    text_document: Text_document_identifier.t;
+  }
+end
+
+
 (* ErrorResponse *)
 module Error = struct
   exception Parse of string (* -32700 *)

@@ -240,8 +240,6 @@ struct BaseSet : HashCollection {
   [[noreturn]] static void throwNoMutableIndexAccess();
   [[noreturn]] static void throwBadValueType();
 
-  static bool instanceof(const ObjectData*);
-
  protected:
   // BaseSet is an abstract class with no additional member needing
   // initialization.
@@ -274,14 +272,12 @@ struct c_Set : BaseSet {
 
  public:
   // PHP-land methods.
-  explicit c_Set(Class* cls = c_Set::classof())
-    : BaseSet(cls, HeaderKind::Set) { }
-  explicit c_Set(Class* cls, ArrayData* arr)
-    : BaseSet(cls, HeaderKind::Set, arr) { }
-  explicit c_Set(Class* cls, uint32_t cap)
-    : BaseSet(cls, HeaderKind::Set, cap) { }
-  explicit c_Set(uint32_t cap, Class* cls = c_Set::classof())
-    : c_Set(cls, cap) { }
+  explicit c_Set()
+    : BaseSet(c_Set::classof(), HeaderKind::Set) { }
+  explicit c_Set(ArrayData* arr)
+    : BaseSet(c_Set::classof(), HeaderKind::Set, arr) { }
+  explicit c_Set(uint32_t cap)
+    : BaseSet(c_Set::classof(), HeaderKind::Set, cap) { }
 
   void clear();
   static c_Set* Clone(ObjectData* obj);
@@ -351,22 +347,15 @@ struct c_Set : BaseSet {
 struct c_ImmSet : BaseSet {
   DECLARE_COLLECTIONS_CLASS(ImmSet)
 
-  explicit c_ImmSet(Class* cls = c_ImmSet::classof())
-    : BaseSet(cls, HeaderKind::ImmSet) { }
-  explicit c_ImmSet(Class* cls, ArrayData* arr)
-    : BaseSet(cls, HeaderKind::ImmSet, arr) { }
-  explicit c_ImmSet(Class* cls, uint32_t cap)
-    : BaseSet(cls, HeaderKind::ImmSet, cap) { }
-  explicit c_ImmSet(uint32_t cap, Class* cls = c_ImmSet::classof())
-    : c_ImmSet(cls, cap) { }
+  explicit c_ImmSet()
+    : BaseSet(c_ImmSet::classof(), HeaderKind::ImmSet) { }
+  explicit c_ImmSet(ArrayData* arr)
+    : BaseSet(c_ImmSet::classof(), HeaderKind::ImmSet, arr) { }
+  explicit c_ImmSet(uint32_t cap)
+    : BaseSet(c_ImmSet::classof(), HeaderKind::ImmSet, cap) { }
 
   static c_ImmSet* Clone(ObjectData* obj);
 };
-
-inline bool BaseSet::instanceof(const ObjectData* obj) {
-  return c_Set::instanceof(obj) ||
-         c_ImmSet::instanceof(obj);
-}
 
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////

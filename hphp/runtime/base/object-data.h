@@ -87,7 +87,8 @@ struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
-    IsCppBuiltin  = 0x1000, // has custom C++ subclass
+    IsCppBuiltin  = 0x1000, // has a custom instanceCtor and instanceDtor
+                            // if you subclass ObjectData, you need this
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic

@@ -335,14 +335,14 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, TSet*>::type
 BaseSet::Clone(ObjectData* obj) {
   auto thiz = static_cast<TSet*>(obj);
-  auto target = static_cast<TSet*>(TSet::instanceCtor(TSet::classof()));
+  auto target = req::make<TSet>();
   if (!thiz->m_size) {
-    return target;
+    return target.detach();
   }
   thiz->arrayData()->incRefCount();
   target->m_size = thiz->m_size;
   target->m_arr = thiz->m_arr;
-  return target;
+  return target.detach();
 }
 
 bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {

@@ -34,15 +34,15 @@ COLLECTIONS_ALL_TYPES(X)
 // Constructor/Initializer
 
 ObjectData* allocEmptyPair() {
-  return newCollectionObj<c_Pair>(c_Pair::NoInit{});
+  return req::make<c_Pair>().detach();
 }
 
-#define X(type) \
-ObjectData* allocEmpty##type() {                                        \
-  return newCollectionObj<c_##type>(c_##type::classof());               \
-}                                                                       \
-ObjectData* allocFromArray##type(ArrayData* arr) {                      \
-  return newCollectionObj<c_##type>(c_##type::classof(), arr);          \
+#define X(type)                                    \
+ObjectData* allocEmpty##type() {                   \
+  return req::make<c_##type>().detach();           \
+}                                                  \
+ObjectData* allocFromArray##type(ArrayData* arr) { \
+  return req::make<c_##type>(arr).detach();        \
 }
 COLLECTIONS_PAIRED_TYPES(X)
 #undef X

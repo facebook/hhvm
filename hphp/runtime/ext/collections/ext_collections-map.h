@@ -109,8 +109,6 @@ struct BaseMap : HashCollection {
 
   [[noreturn]] static void throwBadKeyType();
 
-  static bool instanceof(const ObjectData*);
-
  protected:
   Variant php_at(const Variant& key) const {
     if (key.isInteger()) {
@@ -316,14 +314,12 @@ struct BaseMap : HashCollection {
 struct c_Map : BaseMap {
   DECLARE_COLLECTIONS_CLASS(Map);
 
-  explicit c_Map(Class* cls = c_Map::classof())
-    : BaseMap(cls, HeaderKind::Map) { }
-  explicit c_Map(Class* cls, ArrayData* arr)
-    : BaseMap(cls, HeaderKind::Map, arr) { }
-  explicit c_Map(Class* cls, uint32_t cap)
-    : BaseMap(cls, HeaderKind::Map, cap) { }
-  explicit c_Map(uint32_t cap, Class* cls = c_Map::classof())
-    : c_Map(cls, cap) { }
+  explicit c_Map()
+    : BaseMap(c_Map::classof(), HeaderKind::Map) { }
+  explicit c_Map(ArrayData* arr)
+    : BaseMap(c_Map::classof(), HeaderKind::Map, arr) { }
+  explicit c_Map(uint32_t cap)
+    : BaseMap(c_Map::classof(), HeaderKind::Map, cap) { }
 
   void setAll(const Variant& t) {
     setAllImpl(t);
@@ -381,14 +377,12 @@ struct c_ImmMap : BaseMap {
   DECLARE_COLLECTIONS_CLASS(ImmMap)
 
  public:
-  explicit c_ImmMap(Class* cls = c_ImmMap::classof())
-    : BaseMap(cls, HeaderKind::ImmMap) { }
-  explicit c_ImmMap(Class* cls, ArrayData* arr)
-    : BaseMap(cls, HeaderKind::ImmMap, arr) { }
-  explicit c_ImmMap(Class* cls, uint32_t cap)
-    : BaseMap(cls, HeaderKind::ImmMap, cap) { }
-  explicit c_ImmMap(uint32_t cap, Class* cls = c_ImmMap::classof())
-    : c_ImmMap(cls, cap) { }
+  explicit c_ImmMap()
+    : BaseMap(c_ImmMap::classof(), HeaderKind::ImmMap) { }
+  explicit c_ImmMap(ArrayData* arr)
+    : BaseMap(c_ImmMap::classof(), HeaderKind::ImmMap, arr) { }
+  explicit c_ImmMap(uint32_t cap)
+    : BaseMap(c_ImmMap::classof(), HeaderKind::ImmMap, cap) { }
 
   static c_ImmMap* Clone(ObjectData* obj);
 
@@ -396,11 +390,6 @@ struct c_ImmMap : BaseMap {
   friend struct BaseMap;
   friend struct c_Map;
 };
-
-inline bool BaseMap::instanceof(const ObjectData* obj) {
-  return c_Map::instanceof(obj) ||
-         c_ImmMap::instanceof(obj);
-}
 
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////

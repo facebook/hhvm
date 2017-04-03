@@ -89,12 +89,14 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   if (auto const ctor = cls->instanceCtor()) {
     obj = ctor(cls);
     assert(obj->checkCount());
+    assertx(obj->hasInstanceDtor());
   } else {
     size_t nProps = cls->numDeclProperties();
     size_t size = sizeForNProps(nProps);
     auto& mm = MM();
     obj = new (mm.objMalloc(size)) ObjectData(cls);
     assert(obj->hasExactlyOneRef());
+    assertx(!obj->hasInstanceDtor());
   }
 
   if (UNLIKELY(cls->needsInitThrowable())) {

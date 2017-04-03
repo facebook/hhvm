@@ -669,8 +669,6 @@ struct HashCollection : ObjectData {
    */
   void warnOnStrIntDup() const;
 
-  static bool instanceof(const ObjectData*);
-
   void scan(type_scan::Scanner& scanner) const {
     scanner.scan(m_arr);
     scanner.scan(m_immCopy);

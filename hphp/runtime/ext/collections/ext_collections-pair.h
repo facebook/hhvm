@@ -19,28 +19,10 @@ struct PairIterator;
 }
 
 struct c_Pair : ObjectData {
-  DECLARE_COLLECTIONS_CLASS_NOCTOR(Pair);
+  DECLARE_COLLECTIONS_CLASS(Pair);
 
-  enum class NoInit {};
-  static ObjectData* instanceCtor(Class* cls) {
-    assert(cls);
-    assert(cls->isCollectionClass());
-    assert(cls->classof(c_Pair::classof()));
-    assert(cls->attrs() & AttrFinal);
-    // ensure c_Pair* ptrs are scanned inside other types
-    (void)type_scan::getIndexForMalloc<c_Pair>();
-    return new (MM().objMalloc(sizeof(c_Pair))) c_Pair(NoInit{}, cls);
-  }
-
-  explicit c_Pair(Class* cls = c_Pair::classof())
-    : ObjectData(cls, collections::objectFlags, HeaderKind::Pair)
-    , m_size(2)
-  {
-    tvWriteNull(&elm0);
-    tvWriteNull(&elm1);
-  }
-  explicit c_Pair(NoInit, Class* cls = c_Pair::classof())
-    : ObjectData(cls, collections::objectFlags, HeaderKind::Pair)
+  explicit c_Pair()
+    : ObjectData(c_Pair::classof(), collections::objectFlags, HeaderKind::Pair)
     , m_size(0) {}
   ~c_Pair();
 

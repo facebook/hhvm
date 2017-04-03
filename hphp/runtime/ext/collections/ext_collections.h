@@ -8,9 +8,6 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-struct HashCollection;
-struct BaseVector;
-struct c_Pair;
 struct c_Vector;
 void triggerCow(c_Vector* vec);
 ArrayIter getArrayIterHelper(const Variant& v, size_t& sz);
@@ -22,7 +19,7 @@ extern const StaticString
   s_HH_Pair, s_HH_Vector, s_HH_ImmVector,
   s_HH_Map, s_HH_ImmMap, s_HH_Set, s_HH_ImmSet;
 
-#define DECLARE_COLLECTIONS_CLASS_NOCTOR(name)              \
+#define DECLARE_COLLECTIONS_CLASS(name)                     \
   static Class* s_cls;                                      \
                                                             \
   static Class* classof() {                                 \
@@ -30,27 +27,16 @@ extern const StaticString
     return s_cls;                                           \
   }                                                         \
                                                             \
-  static bool instanceof(const ObjectData* obj) {           \
-    return obj->instanceof(classof());                      \
+  static ObjectData* instanceCtor(Class* cls) {             \
+    assertx(cls == classof());                              \
+    return req::make<c_##name>().detach();                  \
   }                                                         \
                                                             \
   static void instanceDtor(ObjectData* obj, const Class*) { \
-    auto coll = collections::coll_cast<c_##name>(obj);      \
+    assertx(obj->getVMClass() == c_##name::classof());      \
+    auto coll = static_cast<c_##name*>(obj);                \
     coll->~c_##name();                                      \
     MM().objFree(obj, sizeof(c_##name));                    \
-  }
-
-// c_Pair uses a slightly different constructor invocation
-#define DECLARE_COLLECTIONS_CLASS(name)                           \
-  DECLARE_COLLECTIONS_CLASS_NOCTOR(name)                          \
-  static ObjectData* instanceCtor(Class* cls) {                   \
-    assertx(cls);                                                 \
-    assertx(cls->isCollectionClass());                            \
-    assertx(cls->classof(c_##name::classof()));                   \
-    assertx(cls->attrs() & AttrFinal);                            \
-    /* ensure c_##name* ptrs are scanned inside other types */    \
-    (void)type_scan::getIndexForMalloc<c_##name>();               \
-    return new (MM().objMalloc(sizeof(c_##name))) c_##name(cls);  \
   }
 
 constexpr ObjectData::Attribute objectFlags =
@@ -65,13 +51,6 @@ constexpr ObjectData::Attribute objectFlags =
     ObjectData::UseUnset |
     ObjectData::IsCppBuiltin
   );
-
-template<class T>
-T* coll_cast(ObjectData* obj) {
-  assertx(obj->isCollection());
-  assertx(T::instanceof(obj));
-  return static_cast<T*>(obj);
-}
 
 /**
  * The "materialization" methods have the form "to[CollectionName]()" and
@@ -95,20 +74,6 @@ inline size_t getSize(const ObjectData* od) {
   return *reinterpret_cast<const uint32_t*>(
     reinterpret_cast<const char*>(od) + FAST_SIZE_OFFSET
   );
-}
-
-// Collection constructors do not throw exceptions, let's not try to catch
-// exceptions here.
-template<class T, class... Args> T* newCollectionObj(Args&&... args) {
-  static_assert(std::is_convertible<T*,BaseVector*>::value ||
-                std::is_convertible<T*,HashCollection*>::value ||
-                std::is_convertible<T*,c_Pair*>::value, "");
-  auto const mem = MM().mallocSmallSize(sizeof(T));
-  // ensure T* ptrs are scanned inside other types
-  (void)type_scan::getIndexForMalloc<T>();
-  auto col = new (mem) T(std::forward<Args>(args)...);
-  assert(col->hasExactlyOneRef());
-  return col;
 }
 
 [[noreturn]] void throwOOB(int64_t key);

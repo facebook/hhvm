@@ -568,10 +568,5 @@ void HashCollection::mutateImpl() {
   oldAd->decRefCount();
 }
 
-bool HashCollection::instanceof(const ObjectData* obj) {
-  return BaseMap::instanceof(obj) ||
-         BaseSet::instanceof(obj);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 }

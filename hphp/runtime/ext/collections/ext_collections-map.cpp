@@ -42,14 +42,14 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, TMap*>::type
 BaseMap::Clone(ObjectData* obj) {
   auto thiz = static_cast<TMap*>(obj);
-  auto target = static_cast<TMap*>(TMap::instanceCtor(TMap::classof()));
+  auto target = req::make<TMap>();
   if (!thiz->m_size) {
-    return target;
+    return target.detach();
   }
   thiz->arrayData()->incRefCount();
   target->m_size = thiz->m_size;
   target->m_arr = thiz->m_arr;
-  return target;
+  return target.detach();
 }
 
 void BaseMap::setAllImpl(const Variant& iterable) {
@@ -503,7 +503,7 @@ BaseMap::php_zip(const Variant& iterable) {
     if (isTombstone(i)) continue;
     const Elm& e = data()[i];
     Variant v = iter.second();
-    auto pair = req::make<c_Pair>(c_Pair::NoInit{});
+    auto pair = req::make<c_Pair>();
     pair->initAdd(&e.data);
     pair->initAdd(v);
     TypedValue tv;

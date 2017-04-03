@@ -73,12 +73,12 @@ Array c_Pair::toArrayImpl() const {
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
-  auto pair = static_cast<c_Pair*>(c_Pair::instanceCtor(c_Pair::classof()));
   assertx(thiz->isFullyConstructed());
+  auto pair = req::make<c_Pair>();
   pair->m_size = 2;
   cellDup(thiz->elm0, pair->elm0);
   cellDup(thiz->elm1, pair->elm1);
-  return pair;
+  return pair.detach();
 }
 
 void c_Pair::throwBadKeyType() {

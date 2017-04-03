@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/assertions.h"
 
 #include <cstdlib>
@@ -50,12 +51,11 @@ struct Env {
 bool isMultiword(int64_t imm) {
   switch(arch()) {
   case Arch::X64:
+  case Arch::PPC64:
     break;
   case Arch::ARM:
     uint64_t val = std::abs(imm);
     if (val > (1 << 16)) return true;
-    break;
-  case Arch::PPC64:
     break;
   }
   return false;

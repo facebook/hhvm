@@ -913,18 +913,6 @@ const Func* loadClassCtor(Class* cls, ActRec* fp) {
 
 //////////////////////////////////////////////////////////////////////
 
-ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
-  collections::initElem(coll, &value);
-  // If we specialized this on Vector we could use a DecRefNZ here (since we
-  // could assume that initElem has incref'd the value).  Right now, HH\Set
-  // goes through this code path also, though, and it might fail to add the new
-  // element.
-  tvRefcountedDecRef(value);
-  return coll;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void raiseMissingArgument(const Func* func, int got) {
   const auto total = func->numNonVariadicParams();
   const auto variadic = func->hasVariadicCaptureParam();

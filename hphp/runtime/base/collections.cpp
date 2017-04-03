@@ -77,28 +77,6 @@ COLLECTIONS_ALL_TYPES(X)
   }
 }
 
-void initElem(ObjectData* obj, TypedValue* val) {
-  assertx(obj->isCollection());
-  assertx(!isMapCollection(obj->collectionType()));
-  assertx(val->m_type != KindOfRef);
-  assertx(val->m_type != KindOfUninit);
-  switch (obj->collectionType()) {
-    case CollectionType::Vector:
-    case CollectionType::ImmVector:
-      static_cast<BaseVector*>(obj)->add(val);
-      break;
-    case CollectionType::Set:
-    case CollectionType::ImmSet:
-      static_cast<BaseSet*>(obj)->add(val);
-      break;
-    case CollectionType::Pair:
-    case CollectionType::Map:
-    case CollectionType::ImmMap:
-      assertx(false);
-      break;
-  }
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Misc
 

@@ -183,8 +183,6 @@ void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
 
-ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
-
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
 void trimExtraArgs(ActRec* ar);

@@ -619,7 +619,6 @@ bool canDCE(IRInstruction* inst) {
   case LdVectorSize:
   case VectorDoCow:
   case VectorHasImmCopy:
-  case ColAddNewElemC:
   case BeginCatch:
   case EndCatch:
   case UnwindCheckSideExit:

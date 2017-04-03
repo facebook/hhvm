@@ -87,9 +87,6 @@ ObjectData* allocPair(TypedValue c1, TypedValue c2);
 /* Preallocate room for {sz} elements in the Collection */
 void reserve(ObjectData* obj, int64_t sz);
 
-/* Used by Collections Literals syntax for non-Maps */
-void initElem(ObjectData* obj, TypedValue* val);
-
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Cloing
 

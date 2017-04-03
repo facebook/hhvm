@@ -1166,11 +1166,6 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
   not in collections; thus not all collections can be created using this
   instruction.
 
-ColAddNewElemC    [C C]  ->  [C:Obj]
-
-  Collection add value. $2 must be an instance of HH\Set, or HH\Vector. This
-  instruction executes $2[] = $1 and then pushes $2 onto the stack.
-
 Cns <litstr id>    []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get constant. Pushes the value of the global constant named %1 onto the stack

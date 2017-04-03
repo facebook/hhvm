@@ -434,17 +434,6 @@ void emitColFromArray(IRGS& env, int type) {
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
 }
 
-void emitColAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPRelOffset{1})->isA(TObj)) {
-    return interpOne(env, TObj, 2);
-  }
-
-  auto const val = popC(env);
-  auto const coll = popC(env);
-  // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(env, gen(env, ColAddNewElemC, coll, val));
-}
-
 void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   if (curFunc(env)->isPseudoMain()) PUNT(StaticLocInit);
 

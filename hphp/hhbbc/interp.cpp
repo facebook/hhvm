@@ -427,11 +427,6 @@ void in(ISS& env, const bc::ColFromArray& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
-void in(ISS& env, const bc::ColAddNewElemC&) {
-  popC(env);
-  push(env, popC(env));
-}
-
 void in(ISS& env, const bc::Cns& op)  {
   auto t = env.index.lookup_constant(env.ctx, op.str1);
   if (!t) {

@@ -131,7 +131,6 @@ static const struct {
   { OpNewCol,      {None,             Stack1,       OutObject       }},
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
-  { OpColAddNewElemC, {StackTop2,     Stack1,       OutObject       }},
   { OpCns,         {None,             Stack1,       OutCns          }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpCnsU,        {None,             Stack1,       OutCns          }},
@@ -925,7 +924,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Cns:
   case Op::CnsE:
   case Op::CnsU:
-  case Op::ColAddNewElemC:
   case Op::ColFromArray:
   case Op::ConcatN:
   case Op::Concat:

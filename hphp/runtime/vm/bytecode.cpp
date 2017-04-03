@@ -2108,16 +2108,6 @@ OPTBLD_INLINE void iopColFromArray(intva_t type) {
   vmStack().pushObjectNoRc(obj);
 }
 
-OPTBLD_INLINE void iopColAddNewElemC() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  assert(c2->m_type == KindOfObject &&
-         c2->m_data.pobj->isCollection() &&
-         c2->m_data.pobj->collectionType() != CollectionType::Pair);
-  collections::initElem(c2->m_data.pobj, c1);
-  vmStack().popC();
-}
-
 OPTBLD_INLINE void iopCns(const StringData* s) {
   auto const cns = Unit::loadCns(s);
   if (cns == nullptr) {

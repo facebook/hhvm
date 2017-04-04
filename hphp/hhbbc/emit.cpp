@@ -204,6 +204,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   // Offset of the last emitted bytecode.
   Offset lastOff { 0 };
 
+  bool traceBc = false;
+
   auto map_local = [&] (LocalId id) {
     auto const loc = func.locals[id];
     assert(!loc.killed);
@@ -256,6 +258,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(&func, inst),
            show(srcLoc(func, inst.srcLoc)));
+
+    if (options.TraceBytecodes.count(inst.op)) traceBc = true;
 
     auto emit_vsa = [&] (const CompactVector<LSString>& keys) {
       auto n = keys.size();
@@ -530,6 +534,12 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   }
 
   while (fpiStack.size()) end_fpi(lastOff);
+
+  if (traceBc) {
+    FTRACE(0, "TraceBytecode (emit): {}::{} in {}\n",
+           func.cls ? func.cls->name->data() : "",
+           func.name, func.unit->filename);
+  }
 
   return ret;
 }

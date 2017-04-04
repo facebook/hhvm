@@ -146,6 +146,8 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
   // The main entry point is also a basic block start.
   markBlock(fe.base);
 
+  bool traceBc = false;
+
   /*
    * For each instruction, add it to the set if it must be the start
    * of a block.  It is the start of a block if it is:
@@ -163,6 +165,8 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const atLast = nextOff == fe.past;
     auto const op = peek_op(pc);
     auto const breaksBB = instrIsNonCallControlFlow(op) || instrFlags(op) & TF;
+
+    if (options.TraceBytecodes.count(op)) traceBc = true;
 
     if (breaksBB && !atLast) {
       markBlock(nextOff);
@@ -199,6 +203,13 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
 
   // Now, each interval in blockStarts delinates a basic block.
   blockStarts.insert(fe.past);
+
+  if (traceBc) {
+    FTRACE(0, "TraceBytecode (parse): {}::{} in {}\n",
+           fe.pce() ? fe.pce()->name()->data() : "",
+           fe.name, fe.ue().m_filepath);
+  }
+
   return blockStarts;
 }
 

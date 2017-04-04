@@ -57,6 +57,36 @@ bool logging = true;
 
 //////////////////////////////////////////////////////////////////////
 
+template<class SinglePassReadableRange>
+MethodMap make_method_map(SinglePassReadableRange& range) {
+  auto ret = MethodMap{};
+  for (auto& str : range) {
+    std::vector<std::string> parts;
+    folly::split("::", str, parts);
+    if (parts.size() != 2) {
+      ret[""].insert(str);
+      continue;
+    }
+    ret[parts[0]].insert(parts[1]);
+  }
+  return ret;
+}
+
+template<class SinglePassReadableRange>
+OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs) {
+  if (bcs.empty()) return {};
+  std::map<std::string,Op> bcmap;
+  for (auto i = 0; i < Op_count; i++) {
+    auto const op = static_cast<Op>(i);
+    bcmap[opcodeToName(op)] = op;
+  }
+  OpcodeSet oset;
+  for (auto& n : bcs) {
+    if (bcmap.count(n)) oset.insert(bcmap[n]);
+  }
+  return oset;
+}
+
 void parse_options(int argc, char** argv) {
   namespace po = boost::program_options;
 
@@ -65,6 +95,7 @@ void parse_options(int argc, char** argv) {
 
   std::vector<std::string> interceptable_fns;
   std::vector<std::string> trace_fns;
+  std::vector<std::string> trace_bcs;
   bool no_logging = false;
 
   po::options_description basic("Options");
@@ -97,6 +128,9 @@ void parse_options(int argc, char** argv) {
     ("trace",
       po::value(&trace_fns)->composing(),
       "Add a function to increase tracing level on (for debugging)")
+    ("trace-bytecode",
+      po::value(&trace_bcs)->composing(),
+      "Add a bytecode to trace (for debugging)")
     ;
 
   // Some extra esoteric options that aren't exposed in --help for
@@ -169,6 +203,7 @@ void parse_options(int argc, char** argv) {
   }
 
   options.TraceFunctions         = make_method_map(trace_fns);
+  options.TraceBytecodes         = make_bytecode_map(trace_bcs);
   logging = !no_logging;
 }
 

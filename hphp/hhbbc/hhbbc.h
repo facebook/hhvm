@@ -41,6 +41,9 @@ namespace HPHP { namespace HHBBC {
 template<class SinglePassReadableRange>
 MethodMap make_method_map(SinglePassReadableRange&);
 
+template<class SinglePassReadableRange>
+OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs);
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -66,7 +69,5 @@ int main(int argc, char** argv);
 //////////////////////////////////////////////////////////////////////
 
 }}
-
-#include "hphp/hhbbc/hhbbc-inl.h"
 
 #endif

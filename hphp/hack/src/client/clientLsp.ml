@@ -385,6 +385,31 @@ let do_type_coverage (conn: conn option) (params: Type_coverage.params)
   }
 
 
+let do_document_range_formatting
+  (conn: conn option)
+  (params: Document_range_formatting.params)
+  : Document_range_formatting.result =
+  let open Document_range_formatting in
+  let open Text_document_identifier in
+
+  let args = { Ide_api_types.
+    range_filename = params.text_document.uri;
+    file_range = lsp_range_to_ide params.range;
+  } in
+  let command = ServerCommandTypes.IDE_FORMAT args in
+  let response: ServerFormatTypes.ide_result = rpc conn command in
+  match response with
+    | Result.Error message -> raise (Error.Internal_error message)
+    | Result.Ok new_text -> [{Text_edit.range = params.range; new_text}]
+
+
+let do_document_formatting
+  (_conn: conn option)
+  (_params: Document_formatting.params)
+  : Document_formatting.result =
+  raise (Error.Method_not_found "textDocument/documentFormatting")
+
+
 let do_initialize (params: Initialize.params)
   : (conn option * Initialize.result) =
   let open Initialize in
@@ -416,7 +441,7 @@ let do_initialize (params: Initialize.params)
         code_action_provider = false;
         code_lens_provider = None;
         document_formatting_provider = false;
-        document_range_formatting_provider = false;
+        document_range_formatting_provider = true;
         document_on_type_formatting_provider = None;
         rename_provider = false;
         document_link_provider = None;
@@ -585,6 +610,17 @@ let main () : unit =
       | Main_loop, Client c when c.method_ = "textDocument/typeCoverage" ->
         parse_type_coverage c.params |> do_type_coverage !conn
           |> print_type_coverage |> respond stdout c
+
+      (* textDocument/formatting *)
+      | Main_loop, Client c when c.method_ = "textDocument/formatting" ->
+        parse_document_formatting c.params |> do_document_formatting !conn
+          |> print_document_formatting |> respond stdout c
+
+      (* textDocument/formatting *)
+      | Main_loop, Client c when c.method_ = "textDocument/rangeFormatting" ->
+        parse_document_range_formatting c.params
+          |> do_document_range_formatting !conn
+          |> print_document_range_formatting |> respond stdout c
 
       (* textDocument/didOpen notification *)
       | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->

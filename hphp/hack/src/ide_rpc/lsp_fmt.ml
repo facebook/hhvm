@@ -125,12 +125,15 @@ let print_location (location: Location.t) : json =
     "range", print_range location.range;
   ]
 
-let parse_range_opt (json: json option) : range option =
-  Option.map json ~f:(fun _ ->
+let parse_range_exn (json: json option) : range =
   {
     start = Jget.obj_exn json "start" |> parse_position;
     end_ = Jget.obj_exn json "end" |> parse_position;
-  })
+  }
+
+let parse_range_opt (json: json option) : range option =
+  if json = None then None
+  else Some (parse_range_exn json)
 
 let parse_text_document_identifier (json: json option)
   : Text_document_identifier.t =
@@ -194,6 +197,13 @@ let parse_command (json: json option) : Command.t =
     title = Jget.string_d json "title" "";
     command = Jget.string_d json "command" "";
     arguments = Jget.array_d json "arguments" ~default:[] |> List.filter_opt;
+  }
+
+let parse_formatting_options (json: json option)
+  : Document_formatting.formatting_options =
+  { Document_formatting.
+    tab_size = Jget.int_d json "tabSize" 2;
+    insert_spaces = Jget.bool_d json "insertSpaces" false;
   }
 
 let print_symbol_information (info: Symbol_information.t) : json =
@@ -485,6 +495,60 @@ let print_type_coverage (r: Type_coverage.result) : json =
     "coveredPercent", int_ r.covered_percent;
     "uncoveredRanges", JSON_Array (List.map r.uncovered_ranges ~f:print_uncov)
   ]
+
+
+(************************************************************************)
+(** textDocument/formatting request                                    **)
+(************************************************************************)
+
+let parse_document_formatting (params: json option)
+  : Document_formatting.params =
+  { Document_formatting.
+    text_document = Jget.obj_exn params "textDocument"
+                      |> parse_text_document_identifier;
+    options = Jget.obj_opt params "options" |> parse_formatting_options;
+  }
+
+let print_document_formatting (r: Document_formatting.result)
+  : json =
+  JSON_Array (List.map r ~f:print_text_edit)
+
+
+(************************************************************************)
+(** textDocument/rangeFormatting request                               **)
+(************************************************************************)
+
+let parse_document_range_formatting (params: json option)
+  : Document_range_formatting.params =
+  { Document_range_formatting.
+    text_document = Jget.obj_exn params "textDocument"
+                      |> parse_text_document_identifier;
+    range = Jget.obj_exn params "range" |> parse_range_exn;
+    options = Jget.obj_opt params "options" |> parse_formatting_options;
+  }
+
+let print_document_range_formatting (r: Document_range_formatting.result)
+  : json =
+  JSON_Array (List.map r ~f:print_text_edit)
+
+
+(************************************************************************)
+(** textDocument/onTypeFormatting request                              **)
+(************************************************************************)
+
+let parse_document_on_type_formatting (params: json option)
+  : Document_on_type_formatting.params =
+  { Document_on_type_formatting.
+    text_document = Jget.obj_exn params "textDocument"
+                      |> parse_text_document_identifier;
+    position = Jget.obj_exn params "position" |> parse_position;
+    ch = Jget.string_exn params "ch";
+    options = Jget.obj_opt params "options" |> parse_formatting_options;
+  }
+
+let print_document_on_type_formatting (r: Document_on_type_formatting.result)
+  : json =
+  JSON_Array (List.map r ~f:print_text_edit)
 
 
 (************************************************************************)

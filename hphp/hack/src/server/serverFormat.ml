@@ -66,6 +66,7 @@ let go_hh_format _ content from to_ =
     hh_format_result_to_response @@
       Format_hack.region modes Path.dummy_path from to_ content
 
+(* This function takes 1-based offsets, and 'to_' is exclusive. *)
 let go genv content from to_ =
   if genv.ServerEnv.local_config.ServerLocalConfig.use_hackfmt
   then go_hackfmt genv content from to_
@@ -74,4 +75,5 @@ let go genv content from to_ =
 let go_ide genv content range =
   let open Ide_api_types in
   let from, to_ = File_content.get_offsets content (range.st, range.ed) in
-  go genv content from to_
+  (* get_offsets returns 0-based offsets, but we need 1-based. *)
+  go genv content (from + 1) (to_ + 1)

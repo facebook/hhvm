@@ -565,6 +565,54 @@ module Type_coverage = struct
 end
 
 
+(* Document Formatting request, method="textDocument/formatting" *)
+module Document_formatting = struct
+  type params = document_formatting_params
+
+  and result = Text_edit.t list
+
+  and document_formatting_params = {
+    text_document: Text_document_identifier.t;
+    options: formatting_options;
+  }
+
+  and formatting_options = {
+    tab_size: int;  (* size of a tab in spaces *)
+    insert_spaces: bool;  (* prefer spaces over tabs *)
+    (* omitted: signature for further properties *)
+  }
+end
+
+
+(* Document Range Formatting request, method="textDocument/rangeFormatting" *)
+module Document_range_formatting = struct
+  type params = document_range_formatting_params
+
+  and result = Text_edit.t list
+
+  and document_range_formatting_params = {
+    text_document: Text_document_identifier.t;
+    range: range;
+    options: Document_formatting.formatting_options;
+  }
+end
+
+
+(* Document On Type Formatting req., method="textDocument/onTypeFormatting" *)
+module Document_on_type_formatting = struct
+  type params = document_on_type_formatting_params
+
+  and result = Text_edit.t list
+
+  and document_on_type_formatting_params = {
+    text_document: Text_document_identifier.t;
+    position: position;  (* the position at which this request was sent *)
+    ch: string;  (* the character that has been typed *)
+    options: Document_formatting.formatting_options;
+  }
+end
+
+
 (* ErrorResponse *)
 module Error = struct
   exception Parse of string (* -32700 *)

@@ -125,17 +125,16 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
   int calleeNumParams = callee->numNonVariadicParams();
   int calledPrologNumArgs = (nArgs <= calleeNumParams ?
                              nArgs :  calleeNumParams + 1);
-
   auto const profData = jit::profData();
-  bool is_profiled = profData && code().prof().contains(start);
 
   // Ensure that the smash is performed while holding the lock, this way if
   // the list of prologue callers is resmashed/cleared there won't be a race.
   // Right now we never reset non-profiled prologues so we only need the lock
   // if the prologue being smashed is in Aprof.
+  ProfTransRec* rec{nullptr};
   std::unique_lock<Mutex> recLock;
-  if (is_profiled) {
-    auto rec = profData->prologueTransRec(callee, calledPrologNumArgs);
+  if (profData && code().prof().contains(start)) {
+    rec = profData->prologueTransRec(callee, calledPrologNumArgs);
     recLock = rec->lockCallerList();
 
     // It's possible that the callee prologue was reset before we acquired the
@@ -153,7 +152,7 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
         rec->addGuardCaller(toSmash);
       }
     } else {
-      is_profiled = false;
+      rec = nullptr;
       recLock.unlock();
     }
   }
@@ -169,11 +168,8 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs, bool immutable) {
   // Additionally for profiled calls we need to remove them from the main
   // and guard caller maps.
   if (RuntimeOption::EvalEnableReusableTC) {
-    if (debug || is_profiled || !immutable) {
-      auto codeLock = lockCode();
-      auto metaLock = lockMetadata();
-      recordFuncCaller(callee, toSmash, immutable, is_profiled,
-                       calledPrologNumArgs);
+    if (debug || rec || !immutable) {
+      recordFuncCaller(callee, toSmash, immutable, rec);
     }
   }
 }

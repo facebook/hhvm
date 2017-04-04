@@ -32,10 +32,14 @@
 
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
+
+
+#include <condition_variable>
 
 /*
  * This module implements garbage collection for the translation cache so that
@@ -83,23 +87,27 @@ namespace HPHP { namespace jit { namespace tc {
 TRACE_SET_MOD(reusetc);
 
 namespace {
-struct PrologueCaller {
-  bool isGuard;
-  bool isProfiled;
-  int  numArgs;
-};
-
 struct FuncInfo {
+  FuncInfo() = default;
+  FuncInfo(FuncInfo&&) = default;
+  FuncInfo& operator=(FuncInfo&&) = default;
+
   std::vector<TransLoc> prologues;
   std::vector<SrcRec*>  srcRecs;
-  std::unordered_map<TCA /* toSmash */, PrologueCaller> callers;
+  std::unordered_set<TCA> callers;
+};
+
+struct SmashedCall {
+  FuncId fid;
+  bool isGuard;
+  ProfTransRec* rec;
 };
 
 std::mutex s_dataLock;
 
 std::unordered_map<
   TCA /* toSmash */,
-  const Func* /* target */
+  SmashedCall /* target */
 > s_smashedCalls;
 
 std::unordered_map<
@@ -107,7 +115,40 @@ std::unordered_map<
   SrcRec* /* dest */
 > s_smashedBranches;
 
-std::unordered_map<const Func*, FuncInfo> s_funcTCData;
+// Keyed on FuncId as these are never reused
+std::unordered_map<FuncId, FuncInfo> s_funcTCData;
+
+struct FuncJob {
+  const StringData* fname;
+  FuncId fid;
+};
+
+using Job = boost::variant<FuncJob, const SrcRec*, TransLoc>;
+std::atomic<bool> s_running{false};
+std::queue<Job> s_jobq;
+std::condition_variable s_qcv;
+std::mutex s_qlock;
+std::thread s_reaper;
+
+void enqueueJob(Job j) {
+  std::unique_lock<std::mutex> l{s_qlock};
+  s_jobq.emplace(j);
+  l.unlock();
+  s_qcv.notify_all();
+}
+
+folly::Optional<Job> dequeueJob() {
+  std::unique_lock<std::mutex> l{s_qlock};
+  s_qcv.wait(l, [] {
+    return !s_running.load(std::memory_order_acquire) || !s_jobq.empty();
+  });
+
+  if (!s_running.load(std::memory_order_relaxed)) return folly::none;
+  assertx(!s_jobq.empty());
+  auto ret = s_jobq.front();
+  s_jobq.pop();
+  return ret;
+}
 
 std::unique_lock<std::mutex> lockData() {
   return std::unique_lock<std::mutex>(s_dataLock);
@@ -117,22 +158,33 @@ std::unique_lock<std::mutex> lockData() {
  * Removes meta-data about a caller to a proflogue from prof-data to ensure that
  * a call to an optimized translation isn't wrongly smashed later.
  */
-void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
-                     bool isGuard) {
-  auto data = jit::profData();
-  assertx(data);
-  auto const tid = data->proflogueTransId(func, numArgs);
-  if (tid == kInvalidTransID) return;
-
-  auto rec = data->transRec(tid);
+void clearProfCaller(TCA toSmash, bool isGuard, ProfTransRec* rec) {
   if (!rec || !rec->isProflogue()) return;
 
   auto lock = rec->lockCallerList();
   if (isGuard) {
     rec->removeGuardCaller(toSmash);
-    return;
+  } else {
+    rec->removeMainCaller(toSmash);
   }
-  rec->removeMainCaller(toSmash);
+}
+
+/*
+ * Erase any metadata referencing a call at address start and return the
+ * SmashedCall record if the call referenced a ProfTransRec.
+ */
+folly::Optional<SmashedCall> eraseSmashedCall(TCA start) {
+  auto dataLock = lockData();
+  auto it = s_smashedCalls.find(start);
+  if (it != s_smashedCalls.end()) {
+    auto scall = std::move(it->second);
+    ITRACE(1, "Erasing smashed call mapping @ {} to ProfTransRec {}\n",
+           start, scall.rec);
+    s_funcTCData[scall.fid].callers.erase(start);
+    s_smashedCalls.erase(it);
+    if (scall.rec) return scall;
+  }
+  return folly::none;
 }
 
 /*
@@ -152,32 +204,25 @@ void clearTCMaps(TCA start, TCA end) {
     if (profData && (di.isBranch() || di.isNop() || di.isCall())) {
       auto const id = profData->clearJmpTransID(start);
       if (id != kInvalidTransID) {
-        ITRACE(1, "Erasing jmpTransID @ {} to {}\n",
-               start, id);
+        ITRACE(1, "Erasing jmpTransID @ {} to {}\n", start, id);
       }
     }
     eraseCatchTrace(start);
     if (di.isCall()) {
-      auto dataLock = lockData();
-      auto it = s_smashedCalls.find(start);
-      if (it != s_smashedCalls.end()) {
-        auto func = it->second;
-        ITRACE(1, "Erasing smashed call mapping @ {} to func {} (id = {})\n",
-               start, func->fullName(), func->getFuncId());
-        auto dataIt = s_funcTCData[func].callers.find(start);
-        if (dataIt->second.isProfiled) {
-          clearProfCaller(start, func, dataIt->second.numArgs,
-                          dataIt->second.isGuard);
-        }
-        s_funcTCData[func].callers.erase(dataIt);
-        s_smashedCalls.erase(it);
+      if (auto call = eraseSmashedCall(start)) {
+        clearProfCaller(start, call->isGuard, call->rec);
       }
     }
     start += di.size();
   }
 }
 
-std::vector<std::pair<TCA, SrcRec*>> findIncomingBranches(TransLoc loc) {
+/*
+ * Erase all metadata associated with branches to loc. This does not update the
+ * associated IB records on the SrcRec for loc. Returns a vector of the erased
+ * records.
+ */
+std::vector<std::pair<TCA, SrcRec*>> eraseSmashedBranches(TransLoc loc) {
   auto dataLock = lockData();
   std::vector<std::pair<TCA, SrcRec*>> ibRecs;
   for (auto it = s_smashedBranches.begin(); it != s_smashedBranches.end();) {
@@ -193,6 +238,9 @@ std::vector<std::pair<TCA, SrcRec*>> findIncomingBranches(TransLoc loc) {
   return ibRecs;
 }
 
+/*
+ * Erase any metadata associated with loc from the TC.
+ */
 void clearTransLocMaps(TransLoc loc) {
   ITRACE(1, "Clearing translation meta-data\n");
   Trace::Indent _i2;
@@ -201,6 +249,26 @@ void clearTransLocMaps(TransLoc loc) {
   clearTCMaps(loc.frozenCodeStart(), loc.frozenEnd());
 }
 
+/*
+ * DEBUG_ONLY: write ud2/int3 over a region of the TC beginning at start and
+ * extending length bytes. Use info as the name of the associated CodeBlock.
+ */
+void clearRange(TCA start, size_t len, const char* info) {
+  CodeBlock cb;
+  cb.init(start, len, info);
+
+  CGMeta fixups;
+  SCOPE_EXIT { assert(fixups.empty()); };
+
+  DataBlock db;
+  Vauto vasm { cb, cb, db, fixups };
+  vasm.unit().padding = true;
+}
+
+/*
+ * Free loc from the TC. It will be made available for reuse immediately, all
+ * associated metadata must be cleared prior to calling this function.
+ */
 void freeTransLoc(TransLoc loc) {
   auto codeLock = lockCode();
   auto& cache = code();
@@ -212,28 +280,15 @@ void freeTransLoc(TransLoc loc) {
 
   if (debug) {
     // Ensure no one calls into the function
-    ITRACE(1, "Overwriting function\n");
-    auto clearBlock = [] (CodeBlock& cb) {
-      CGMeta fixups;
-      SCOPE_EXIT { assert(fixups.empty()); };
-
-      DataBlock db;
-      Vauto vasm { cb, cb, db, fixups };
-      vasm.unit().padding = true;
-    };
-
-    CodeBlock main, cold, frozen;
-    main.init(loc.mainStart(), loc.mainSize(), "Dead Main");
-    cold.init(loc.coldStart(), loc.coldSize(), "Dead Cold");
-    frozen.init(loc.frozenStart(), loc.frozenSize(), "Dead Frozen");
-
-    clearBlock(main);
-    clearBlock(cold);
-    clearBlock(frozen);
+    clearRange(loc.mainStart(), loc.mainSize(), "Dead Main");
+    clearRange(loc.coldStart(), loc.coldSize(), "Dead Cold");
+    if (loc.coldStart() != loc.frozenStart()) {
+      clearRange(loc.frozenStart(), loc.frozenSize(), "Dead Frozen");
+    }
   }
 }
 
-void reclaimTranslation(TransLoc loc, const SrcRec* freedSr = nullptr) {
+void reclaimTranslationSync(TransLoc loc, const SrcRec* freedSr = nullptr) {
   ITRACE(1, "Reclaiming translation M[{}, {}] C[{}, {}] F[{}, {}]\n",
          loc.mainStart(), loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
          loc.frozenStart(), loc.frozenEnd());
@@ -242,7 +297,7 @@ void reclaimTranslation(TransLoc loc, const SrcRec* freedSr = nullptr) {
 
   // Extract the SrcRecs with smashed branches first to avoid a rank violation
   // between the data lock and SrcRec lock.
-  auto ibRecs = findIncomingBranches(loc);
+  auto ibRecs = eraseSmashedBranches(loc);
 
   for (auto sr : ibRecs) {
     // When called from reclaimSrcRec freedSr is the SrcRec being freed
@@ -260,7 +315,7 @@ void reclaimTranslation(TransLoc loc, const SrcRec* freedSr = nullptr) {
  * Reclaim all translations associated with a SrcRec including the anchor
  * translation.
  */
-void reclaimSrcRec(const SrcRec* rec) {
+void reclaimSrcRecSync(const SrcRec* rec) {
   auto srLock = rec->readlock();
   ITRACE(1, "Reclaiming SrcRec addr={} anchor={}\n", (void*)rec,
          rec->getFallbackTranslation());
@@ -270,7 +325,7 @@ void reclaimSrcRec(const SrcRec* rec) {
   auto anchor = rec->getFallbackTranslation();
 
   for (auto& loc : rec->translations()) {
-    reclaimTranslation(loc, rec);
+    reclaimTranslationSync(loc, rec);
   }
 
   // Grabbing the code lock here without releasing the SrcRec lock would be a
@@ -278,94 +333,47 @@ void reclaimSrcRec(const SrcRec* rec) {
   srLock.unlock();
   auto codeLock = lockCode();
   code().blockFor(anchor).free(anchor, svcreq::stub_size());
+  clearRange(anchor, svcreq::stub_size(), "Dead SrcRec Anchor");
 }
-}
 
-////////////////////////////////////////////////////////////////////////////////
+void reclaimTranslation(TransLoc loc) { enqueueJob(loc); }
+void reclaimSrcRec(const SrcRec* sr) { enqueueJob(sr); }
 
-int smashedCalls()    { return s_smashedCalls.size(); }
-int smashedBranches() { return s_smashedBranches.size(); }
-int recordedFuncs()   { return s_funcTCData.size(); }
-
-////////////////////////////////////////////////////////////////////////////////
-
-void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      bool profiled, int numArgs) {
+folly::Optional<FuncInfo> eraseFuncInfo(FuncId fid) {
   auto dataLock = lockData();
 
-  FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
-         toSmash, func->fullName()->data(), func->getFuncId());
-
-  PrologueCaller pc {!immutable, profiled, numArgs};
-  s_funcTCData[func].callers.emplace(toSmash, pc);
-  s_smashedCalls[toSmash] = func;
-}
-
-void recordFuncSrcRec(const Func* func, SrcRec* rec) {
-  auto dataLock = lockData();
-
-  FTRACE(1, "Recording SrcRec for func {} (id = {}) addr = {}\n",
-         func->fullName()->data(), func->getFuncId(), (void*)rec);
-  s_funcTCData[func].srcRecs.emplace_back(rec);
-}
-
-void recordFuncPrologue(const Func* func, TransLoc loc) {
-  auto dataLock = lockData();
-
-  FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
-         func->fullName()->data(), func->getFuncId(), loc.mainStart());
-  s_funcTCData[func].prologues.emplace_back(loc);
-}
-
-void recordJump(TCA toSmash, SrcRec* sr) {
-  auto dataLock = lockData();
-
-  FTRACE(1, "Recording smashed branch @ {} to SrcRec addr={}\n",
-         toSmash, (void*)sr);
-  s_smashedBranches[toSmash] = sr;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void reclaimFunction(const Func* func) {
-  auto dataLock = lockData();
-
-  auto it = s_funcTCData.find(func);
-  if (it == s_funcTCData.end()) return;
-
-  ITRACE(1, "Tearing down func {} (id={})\n",
-         func->fullName()->data(), func->getFuncId());
-
-  Trace::Indent _i;
+  auto it = s_funcTCData.find(fid);
+  if (it == s_funcTCData.end()) return folly::none;
 
   auto data = std::move(it->second);
   s_funcTCData.erase(it);
 
-  auto& us = ustubs();
-
-  ITRACE(1, "Smashing prologues\n");
-  clobberFuncGuards(func);
-
   for (auto& caller : data.callers) {
-    ITRACE(1, "Unsmashing call @ {} (guard = {})\n",
-           caller.first, caller.second.isGuard);
-
-    // It should be impossible to reach a prologue that has been reclaimed
-    // through an immutable stub, as this would imply the function is still
-    // reachable.
-    auto addr = caller.second.isGuard ? us.bindCallStub
-                                      : caller.first;
-    smashCall(caller.first, addr);
-    s_smashedCalls.erase(caller.first);
+    s_smashedCalls.erase(caller);
   }
 
-  auto fname = func->fullName()->data();
-  auto fid   = func->getFuncId();
+  return std::move(data);
+}
+
+void reclaimFunctionSync(const StringData* fname, FuncId fid) {
+  ITRACE(1, "Tearing down func {} (id={})\n", fname->data(), fid);
+  Trace::Indent _i;
+
+  auto data = eraseFuncInfo(fid);
+  auto& us = ustubs();
+
+  if (!data) return;
+
+  for (auto& caller : data->callers) {
+    ITRACE(1, "Unsmashing call @ {}\n", caller);
+    smashCall(caller, us.bindCallStub);
+  }
+
   // We just smashed all of those callers-- treadmill the free to avoid a
   // race (threads executing callers may end up inside the guard even though
   // the function is now unreachable). Once the following block runs the guards
   // should be unreachable.
-  Treadmill::enqueue([fname, fid, data = std::move(data)] {
+  Treadmill::enqueue([fname, fid, data = std::move(*data)] {
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
     Trace::Indent _i2;
     {
@@ -381,6 +389,57 @@ void reclaimFunction(const Func* func) {
     }
   });
 }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+int smashedCalls()    { return s_smashedCalls.size(); }
+int smashedBranches() { return s_smashedBranches.size(); }
+int recordedFuncs()   { return s_funcTCData.size(); }
+
+////////////////////////////////////////////////////////////////////////////////
+
+void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
+                      ProfTransRec* rec) {
+  auto dataLock = lockData();
+
+  FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
+         toSmash, func->fullName()->data(), func->getFuncId());
+
+  s_funcTCData[func->getFuncId()].callers.emplace(toSmash);
+  s_smashedCalls[toSmash] = SmashedCall{func->getFuncId(), !immutable, rec};
+}
+
+void recordFuncSrcRec(const Func* func, SrcRec* rec) {
+  auto dataLock = lockData();
+
+  FTRACE(1, "Recording SrcRec for func {} (id = {}) addr = {}\n",
+         func->fullName()->data(), func->getFuncId(), (void*)rec);
+  s_funcTCData[func->getFuncId()].srcRecs.emplace_back(rec);
+}
+
+void recordFuncPrologue(const Func* func, TransLoc loc) {
+  auto dataLock = lockData();
+
+  FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
+         func->fullName()->data(), func->getFuncId(), loc.mainStart());
+  s_funcTCData[func->getFuncId()].prologues.emplace_back(loc);
+}
+
+void recordJump(TCA toSmash, SrcRec* sr) {
+  auto dataLock = lockData();
+
+  FTRACE(1, "Recording smashed branch @ {} to SrcRec addr={}\n",
+         toSmash, (void*)sr);
+  s_smashedBranches[toSmash] = sr;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void reclaimFunction(const Func* func) {
+  clobberFuncGuards(func); // do this before func is freed
+  enqueueJob(FuncJob {func->fullName(), func->getFuncId()});
+}
 
 void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
   Treadmill::enqueue([trans = std::move(trans)]() mutable {
@@ -388,6 +447,31 @@ void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
       reclaimTranslation(loc);
     }
   });
+}
+
+
+void recycleInit() {
+  if (!RuntimeOption::EvalEnableReusableTC) return;
+
+  s_running.store(true, std::memory_order_release);
+  s_reaper = std::thread([] {
+    while (auto j = dequeueJob()) {
+      ProfData::Session pds;
+      match<void>(
+        *j,
+        [] (TransLoc loc) { reclaimTranslationSync(loc); },
+        [] (const SrcRec* sr) { reclaimSrcRecSync(sr); },
+        [] (FuncJob j) { reclaimFunctionSync(j.fname, j.fid); }
+      );
+    }
+  });
+}
+
+void recycleStop() {
+  if (!s_running.load(std::memory_order_acquire)) return;
+  s_running.store(false, std::memory_order_release);
+  s_qcv.notify_all();
+  s_reaper.join();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

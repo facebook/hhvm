@@ -228,6 +228,12 @@ void processInit() {
   // Write an .eh_frame section that covers the whole TC.
   initUnwinder(g_code->base(), g_code->codeSize());
   Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
+
+  recycleInit();
+}
+
+void processExit() {
+  recycleStop();
 }
 
 bool isValidCodeAddress(TCA addr) {

@@ -493,6 +493,7 @@ and emit_id (p, s) =
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in
     instr_int line
+  | "exit" -> emit_exit (p, A.Int (p, "0"))
   | _ -> instr (ILitConst (Cns s))
 
 and rename_xhp (p, s) =
@@ -603,6 +604,12 @@ and emit_call_isset_exprs exprs =
         end;
         instr_label its_done
       ]
+
+and emit_exit expr =
+  gather [
+    from_expr expr;
+    instr_exit;
+  ]
 
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
@@ -1175,6 +1182,10 @@ and emit_call (_, expr_ as expr) args uargs =
            if i = nargs-1 then empty else instr_popc
          ] end in
     instrs, Flavor.Cell
+
+  | A.Id (_, "exit") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    emit_exit e, Flavor.Cell
 
   | A.Id (_, id) ->
     begin match args, istype_op id with

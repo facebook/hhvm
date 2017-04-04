@@ -144,6 +144,8 @@ let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 
+let instr_exit = instr (IOp Hhbc_ast.Exit)
+
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct
 

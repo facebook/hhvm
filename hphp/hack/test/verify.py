@@ -20,6 +20,7 @@ Failure = namedtuple('Failure', ['fname', 'expected', 'output'])
 Per-test flags passed to test executable. Expected to be in a file with
 same name as test, but with .flags extension.
 """
+
 def get_test_flags(f):
     prefix, _ext = os.path.splitext(f)
     path = prefix + '.flags'
@@ -93,7 +94,7 @@ def dump_failures(failures):
         print(expected)
         print("\n=====   Actual output   ======\n")
         print(actual)
-        print("\n<<<<< End Actual output <<<<<<<")
+        print("\n<<<<< End Actual output <<<<<<<\n")
         print("\n>>>>>       Diff        >>>>>>>\n")
         print(''.join(diff))
         print("\n<<<<<     End Diff      <<<<<<<\n")
@@ -199,11 +200,11 @@ if __name__ == '__main__':
         files, args.program, args.expect_extension, get_flags, args.stdin)
     total = len(files)
     if failures == []:
-        print("All %d tests passed!" % total)
+        print("All %d tests passed!\n" % total)
     else:
         record_failures(failures, args.out_extension)
         fnames = [failure.fname for failure in failures]
-        print("To review the failures, use the following command:")
+        print("To review the failures, use the following command: ")
         print("OUT_EXT=%s EXP_EXT=%s ./hphp/hack/test/review.sh %s" %
                 (args.out_extension, args.expect_extension, " ".join(fnames)))
         if dump_on_failure:

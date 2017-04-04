@@ -24,6 +24,8 @@
 #include <vector>
 #include <sstream>
 
+#include <folly/Singleton.h>
+
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -720,6 +722,8 @@ void printTopBytecodes(const OfflineTransData* tdata,
 }
 
 int main(int argc, char *argv[]) {
+  folly::SingletonVault::singleton()->registrationComplete();
+
   pcre_init();
 
   parseOptions(argc, argv);

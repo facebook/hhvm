@@ -24,6 +24,7 @@
 #include <folly/Format.h>
 #include <folly/Hash.h>
 #include <folly/Memory.h>
+#include <folly/Singleton.h>
 #include <folly/String.h>
 
 #include <boost/program_options.hpp>
@@ -3285,6 +3286,8 @@ const std::string kProgramDescription =
 }
 
 int main(int argc, char** argv) {
+  folly::SingletonVault::singleton()->registrationComplete();
+
   namespace po = boost::program_options;
 
   po::options_description desc{"Allowed options"};

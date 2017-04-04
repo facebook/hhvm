@@ -295,6 +295,20 @@ let do_document_symbol (conn: conn option) (params: Document_symbol.params)
   in
   hack_symbol_tree_to_lsp ~accu:[] ~container_name:None results
 
+let do_find_references (conn: conn option) (params: Find_references.params)
+  : Find_references.result =
+  let open Find_references in
+
+  let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
+  let filename = lsp_text_document_identifier_to_hack params.text_document in
+  let command = ServerCommandTypes.IDE_FIND_REFS (filename, line, column) in
+  let results = rpc conn command in
+  (* TODO: respect params.context.include_declaration *)
+  match results with
+  | None -> []
+  | Some (_name, positions) -> List.map positions ~f:hack_pos_to_lsp_location
+
+
 let do_initialize (params: Initialize.params)
   : (conn option * Initialize.result) =
   let open Initialize in
@@ -319,7 +333,7 @@ let do_initialize (params: Initialize.params)
         completion_provider = None;
         signature_help_provider = None;
         definition_provider = false;
-        references_provider = false;
+        references_provider = true;
         document_highlight_provider = false;
         document_symbol_provider = true;
         workspace_symbol_provider = true;
@@ -479,6 +493,11 @@ let main () : unit =
       | Main_loop, Client c when c.method_ = "textDocument/documentSymbol" ->
         parse_document_symbol c.params |> do_document_symbol !conn
           |> print_document_symbol |> respond stdout c
+
+      (* textDocument/references requeset *)
+      | Main_loop, Client c when c.method_ = "textDocument/references" ->
+        parse_find_references c.params |> do_find_references !conn
+          |> print_find_references |> respond stdout c
 
       (* textDocument/didOpen notification *)
       | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->

@@ -505,6 +505,26 @@ module Document_symbol = struct
 end
 
 
+(* Find References request, method="textDocument/references" *)
+module Find_references = struct
+  type params = reference_params
+
+  and result = Location.t list
+
+  (* Following structure is an extension of Text_document_position_params.t *)
+  (* but we don't have nice inherantice in OCaml so we duplicate fields *)
+  and reference_params = {
+    text_document: Text_document_identifier.t;  (* the text document *)
+    position: position;  (* the position inside the text document *)
+    context: reference_context;
+  }
+
+  and reference_context = {
+    include_declaration: bool;  (* include declaration of current symbol *)
+  }
+end
+
+
 (* ErrorResponse *)
 module Error = struct
   exception Parse of string (* -32700 *)

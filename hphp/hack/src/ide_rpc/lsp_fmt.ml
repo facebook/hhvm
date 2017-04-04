@@ -419,6 +419,25 @@ let print_document_symbol (r: Document_symbol.result) : json =
 
 
 (************************************************************************)
+(** textDocument/references request                                    **)
+(************************************************************************)
+
+let parse_find_references (params: json option) : Find_references.params =
+  let open Text_document_position_params in
+  let as_position_params = parse_text_document_position_params params in
+  let context = Jget.obj_opt params "context" in
+  { Find_references.
+    text_document = as_position_params.text_document;
+    position = as_position_params.position;
+    context = { Find_references.
+      include_declaration = Jget.bool_d context "includeDeclaration" true;
+    }
+  }
+
+let print_find_references (r: Location.t list) : json =
+  JSON_Array (List.map r ~f:print_location)
+
+(************************************************************************)
 (** initialize request                                                 **)
 (************************************************************************)
 

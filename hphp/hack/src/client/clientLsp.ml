@@ -342,6 +342,49 @@ let do_document_highlights
   List.map results ~f:hack_range_to_lsp_highlight
 
 
+let do_type_coverage (conn: conn option) (params: Type_coverage.params)
+  : Type_coverage.result =
+  let open Type_coverage in
+
+  let filename = lsp_text_document_identifier_to_hack params.text_document in
+  let command = ServerCommandTypes.COVERAGE_LEVELS filename in
+  let results: Coverage_level.result = rpc conn command in
+  let results = Coverage_level.merge_adjacent_results results in
+
+  (* We want to get a percentage-covered number. We could do that with an *)
+  (* additional server round trip to ServerCommandTypes.COVERAGE_COUNTS. *)
+  (* But to avoid that, we'll instead use this rough approximation: *)
+  (* Count how many checked/unchecked/partial "regions" there are, where *)
+  (* a "region" is like results_merged, but counting each line separately. *)
+  let count_region (nchecked, nunchecked, npartial) (pos, level) =
+    let nlines = (Pos.end_line pos) - (Pos.line pos) + 1 in
+    match level with
+    | Ide_api_types.Checked -> (nchecked + nlines, nunchecked, npartial)
+    | Ide_api_types.Unchecked -> (nchecked, nunchecked + nlines, npartial)
+    | Ide_api_types.Partial -> (nchecked, nunchecked, npartial + nlines)
+  in
+  let (nchecked, nunchecked, npartial) =
+    List.fold results ~init:(0,0,0) ~f:count_region in
+
+  let ntotal = nchecked + nunchecked + npartial in
+  let covered_percent = if ntotal = 0 then 100
+    else ((nchecked * 100) + (npartial * 50)) / ntotal in
+
+  let hack_coverage_to_lsp (pos, level) =
+    let range = hack_pos_to_lsp_range pos in
+    match level with
+    | Ide_api_types.Checked -> None
+    | Ide_api_types.Unchecked -> Some {range; message =
+        "Un-type checked code. Consider adding type annotations.";}
+    | Ide_api_types.Partial -> Some {range; message =
+        "Partially type checked code. Consider adding type annotations.";}
+  in
+  {
+    covered_percent;
+    uncovered_ranges = List.filter_map results ~f:hack_coverage_to_lsp;
+  }
+
+
 let do_initialize (params: Initialize.params)
   : (conn option * Initialize.result) =
   let open Initialize in
@@ -378,6 +421,7 @@ let do_initialize (params: Initialize.params)
         rename_provider = false;
         document_link_provider = None;
         execute_command_provider = None;
+        type_coverage_provider = true;
       }
     }
     in
@@ -536,6 +580,11 @@ let main () : unit =
       | Main_loop, Client c when c.method_ = "textDocument/documentHighlight" ->
         parse_document_highlights c.params |> do_document_highlights !conn
           |> print_document_highlights |> respond stdout c
+
+      (* textDocument/typeCoverage *)
+      | Main_loop, Client c when c.method_ = "textDocument/typeCoverage" ->
+        parse_type_coverage c.params |> do_type_coverage !conn
+          |> print_type_coverage |> respond stdout c
 
       (* textDocument/didOpen notification *)
       | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->

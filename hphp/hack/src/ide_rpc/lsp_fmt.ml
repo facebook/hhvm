@@ -463,6 +463,31 @@ let print_document_highlights (r: Document_highlights.result) : json =
 
 
 (************************************************************************)
+(** textDocument/typeCoverage request                                  **)
+(************************************************************************)
+
+let parse_type_coverage (params: json option)
+  : Type_coverage.params =
+  { Type_coverage.
+    text_document = Jget.obj_exn params "textDocument"
+                      |> parse_text_document_identifier;
+  }
+
+let print_type_coverage (r: Type_coverage.result) : json =
+  let open Type_coverage in
+  let print_uncov (uncov: uncovered_range) : json =
+    JSON_Object [
+      "range", print_range uncov.range;
+      "message", string_ uncov.message;
+    ]
+  in
+  JSON_Object [
+    "coveredPercent", int_ r.covered_percent;
+    "uncoveredRanges", JSON_Array (List.map r.uncovered_ranges ~f:print_uncov)
+  ]
+
+
+(************************************************************************)
 (** initialize request                                                 **)
 (************************************************************************)
 
@@ -588,6 +613,7 @@ let print_initialize (r: Initialize.result) : json =
         Option.map cap.execute_command_provider ~f:(fun p -> JSON_Object [
           "commands", Jprint.string_array p.commands;
         ]);
+      "typeCoverageProvider", Some (JSON_Bool cap.type_coverage_provider);
     ];
   ]
 

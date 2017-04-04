@@ -230,3 +230,37 @@ let result_to_ide_message x =
   let open Ide_message in
   Coverage_levels_response
     (Range_coverage_levels_response (List.map x ~f:offsets_to_range))
+
+(* Coverage analysis will return multiple overlapping ranges, e.g. for *)
+(* "$user = $vc->getUserID()" it can report three uncovered ranges:    *)
+(* "$vc" and "$vc->getUserID()" and "$user = $vc->getUserID()".        *)
+(* That's why we sometimes want to merge adjacent/overlapping results. *)
+let merge_adjacent_results (results: result) : result =
+  let does_pos_end_after_apos_starts ~pos ~apos =
+    let comparison = File_pos.compare (Pos.pos_end pos) (Pos.pos_start apos) in
+    (comparison > 0)
+  in
+  let merge_adjacent_pos ~pos ~apos =
+    let pos_file = Pos.filename pos in
+    let pos_start = Pos.pos_start pos in
+    let pos_end = Pos.pos_end apos in
+    Pos.make_from_file_pos ~pos_file ~pos_start ~pos_end
+  in
+  let maybe_merge_accu (pos, level) = function
+    | [] ->
+        [(pos, level)]
+    | (apos, _) :: accu when does_pos_end_after_apos_starts ~pos ~apos ->
+        (merge_adjacent_pos ~pos ~apos, level) :: accu
+    | (apos, _) :: accu ->
+        (pos, level) :: (apos, level) :: accu
+  in
+  let pos_compare (pos1, _) (pos2, _) = Pos.compare pos1 pos2 in
+  let filter_sort_merge (filter: coverage_level) (results: result) : result =
+    let filtered = List.filter results ~f:(fun (_, level) -> level = filter) in
+    let sorted = List.sort pos_compare filtered in
+    let merged = List.fold_right sorted ~init:[] ~f:maybe_merge_accu in
+    merged
+  in
+  (filter_sort_merge Checked results)
+  @ (filter_sort_merge Unchecked results)
+  @ (filter_sort_merge Partial results)

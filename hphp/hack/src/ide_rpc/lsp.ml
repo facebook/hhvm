@@ -288,6 +288,7 @@ module Initialize = struct
     rename_provider: bool;
     document_link_provider: document_link_options option;
     execute_command_provider: execute_command_options option;
+    type_coverage_provider: bool;  (* Nuclide-specific feature *)
     (* omitted: experimental *)
   }
 
@@ -540,6 +541,27 @@ module Document_highlights = struct
     | Text (* 1 *)  (* a textual occurrence *)
     | Read (* 2 *)  (* read-access of a symbol, like reading a variable *)
     | Write (* 3 *)  (* write-access of a symbol, like writing a variable *)
+end
+
+
+(* Type Coverage request, method="textDocument/typeCoverage" *)
+(* THIS IS A NUCLIDE-SPECIFIC EXTENSION TO LSP.              *)
+module Type_coverage = struct
+  type params = type_coverage_params
+
+  and result = {
+    covered_percent: int;
+    uncovered_ranges: uncovered_range list;
+  }
+
+  and type_coverage_params = {
+    text_document: Text_document_identifier.t;
+  }
+
+  and uncovered_range = {
+    range: range;
+    message: string;
+  }
 end
 
 

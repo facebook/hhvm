@@ -427,15 +427,15 @@ void in(ISS& env, const bc::ColFromArray& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
-void in(ISS& env, const bc::Cns& op)  {
-  auto t = env.index.lookup_constant(env.ctx, op.str1);
+void doCns(ISS& env, SString str)  {
+  auto t = env.index.lookup_constant(env.ctx, str);
   if (!t) {
     // There's no entry for this constant in the index. It must be
     // the first iteration, so we'll add a dummy entry to make sure
     // there /is/ something next time around.
     Cell val;
     val.m_type = kReadOnlyConstant;
-    env.collect.cnsMap.emplace(op.str1, val);
+    env.collect.cnsMap.emplace(str, val);
     t = TInitCell;
     // make sure we're re-analyzed
     env.collect.readsUntrackedConstants = true;
@@ -446,8 +446,9 @@ void in(ISS& env, const bc::Cns& op)  {
   push(env, std::move(*t));
 }
 
-void in(ISS& env, const bc::CnsE&) { push(env, TInitCell); }
-void in(ISS& env, const bc::CnsU&) { push(env, TInitCell); }
+void in(ISS& env, const bc::Cns& op)  { doCns(env, op.str1); }
+void in(ISS& env, const bc::CnsE& op) { doCns(env, op.str1); }
+void in(ISS& env, const bc::CnsU&)    { push(env, TInitCell); }
 
 void in(ISS& env, const bc::ClsCns& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);

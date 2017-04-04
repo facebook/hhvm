@@ -173,14 +173,7 @@ quick/ctor_param_promotion_trait.php
 quick/cuf-byref.php
 quick/cuf-call10.php
 quick/cuf-call11.php
-quick/cuf-warning.php
 quick/cuf01.php
-quick/cuf02.php
-quick/cuf03.php
-quick/cuf04.php
-quick/cuf06.php
-quick/cuf07.php
-quick/cuf08.php
 quick/cuf__callStatic1.php
 quick/cuf__callStatic2.php
 quick/cuf__callStatic3.php
@@ -269,7 +262,6 @@ quick/fc_enum_6.php
 quick/fib_gen.php
 quick/final_class.php
 quick/final_method.php
-quick/finally_break.php
 quick/float-overflow-literals.php
 quick/float-overflow.php
 quick/floatcmp.php
@@ -398,7 +390,6 @@ quick/init-basic.php
 quick/instanceofInterface.php
 quick/intercept.php
 quick/intercept2.php
-quick/intercept3.php
 quick/interface-bad-methodbody.php
 quick/interface10.php
 quick/interface11.php
@@ -471,7 +462,6 @@ quick/non-special-this.php
 quick/nonstatic_invname.php
 quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
-quick/ns_alias_in_type.php
 quick/ns_existing_names.php
 quick/ns_existing_names_class.php
 quick/ns_gen_func_get_args.php
@@ -497,8 +487,6 @@ quick/parse_fail_type_constraint.php
 quick/parse_shapes.php
 quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
-quick/parser_massive_add_exp.php
-quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
 quick/pinit.php
 quick/post_try_error.php
@@ -519,7 +507,6 @@ quick/pseudomain1.php
 quick/qop2.php
 quick/reassign_this2.php
 quick/reassign_this3.php
-quick/recurse-reentry.php
 quick/recursive-getter.php
 quick/recursive-isset.php
 quick/recursive-magic-call.php
@@ -628,7 +615,6 @@ quick/unpack.php
 quick/unset_static.php
 quick/unset_varenv.php
 quick/unwind_backtrace.php
-quick/user_func.php
 quick/varenv_extra_args.php
 quick/vec/apc.php
 quick/vec/basic-getters.php

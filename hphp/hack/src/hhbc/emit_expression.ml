@@ -1166,6 +1166,73 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushFunc nargs))
     ]
 
+(* Retuns whether the function is a call_user_func function,
+  min args, max args *)
+and get_call_user_func_info = function
+  | "call_user_func" -> (true, 1, max_int)
+  | "call_user_func_array" -> (true, 2, 2)
+  | "forward_static_call" -> (true, 1, max_int)
+  | "forward_static_call_array"  -> (true, 2, 2)
+  | "fb_call_user_func_safe" -> (true, 1, max_int)
+  | "fb_call_user_func_array_safe" -> (true, 2, 2)
+  | "fb_call_user_func_safe_return" -> (true, 2, max_int)
+  | _ -> (false, 0, 0)
+
+and is_call_user_func id num_args =
+  let (is_fn, min_args, max_args) = get_call_user_func_info id in
+  is_fn && num_args >= min_args && num_args <= max_args
+
+and emit_call_user_func_args i expr =
+  gather [
+    from_expr expr;
+    instr_fpass PassByRefKind.AllowCell i;
+  ]
+
+and emit_call_user_func id arg args =
+  let return_default, args = match id with
+    | "fb_call_user_func_safe_return" ->
+      begin match args with
+        | [] -> failwith "fb_call_user_func_safe_return - requires default arg"
+        | a :: args -> from_expr a, args
+      end
+    | _ -> empty, args
+  in
+  let num_params = List.length args in
+  let begin_instr = match id with
+    | "forward_static_call"
+    | "forward_static_call_array" -> instr_fpushcuff num_params
+    | "fb_call_user_func_safe"
+    | "fb_call_user_func_array_safe" ->
+      gather [instr_null; instr_fpushcuf_safe num_params]
+    | "fb_call_user_func_safe_return" ->
+      gather [return_default; instr_fpushcuf_safe num_params]
+    | _ -> instr_fpushcuf num_params
+  in
+  let call_instr = match id with
+    | "call_user_func_array"
+    | "forward_static_call_array"
+    | "fb_call_user_func_array_safe" -> instr (ICall FCallArray)
+    | _ -> instr (ICall (FCall num_params))
+  in
+  let end_instr = match id with
+    | "fb_call_user_func_safe_return" -> instr (ICall CufSafeReturn)
+    | "fb_call_user_func_safe"
+    | "fb_call_user_func_array_safe" -> instr (ICall CufSafeArray)
+    | _ -> empty
+  in
+  let flavor = match id with
+    | "fb_call_user_func_safe"
+    | "fb_call_user_func_array_safe" -> Flavor.Cell
+    | _ -> Flavor.Ref
+  in
+  gather [
+    from_expr arg;
+    begin_instr;
+    gather (List.mapi args emit_call_user_func_args);
+    call_instr;
+    end_instr;
+  ], flavor
+
 and emit_call (_, expr_ as expr) args uargs =
   let nargs = List.length args + List.length uargs in
   let default () =
@@ -1182,6 +1249,15 @@ and emit_call (_, expr_ as expr) args uargs =
            if i = nargs-1 then empty else instr_popc
          ] end in
     instrs, Flavor.Cell
+
+  | A.Id (_, id) when is_call_user_func id (List.length args)->
+    if List.length uargs != 0 then
+    failwith "Using argument unpacking for a call_user_func is not supported";
+    begin match args with
+      | [] -> failwith "call_user_func - needs a name"
+      | arg :: args ->
+        emit_call_user_func id arg args
+    end
 
   | A.Id (_, "exit") when List.length args = 1 ->
     let e = List.hd_exn args in

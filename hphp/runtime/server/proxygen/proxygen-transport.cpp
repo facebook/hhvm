@@ -289,7 +289,7 @@ void ProxygenTransport::onHeadersComplete(
     }
   }
 
-  if (m_repost) {
+  if (m_shouldRepost) {
     VLOG(2) << "Reposting transaction's completed receiving header,"
             << " beginning partial post";
     beginPartialPostEcho();
@@ -305,7 +305,7 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
   m_requestBodyLength += chain->computeChainDataLength();
   if (bufferRequest()) {
     CHECK(!m_enqueued);
-    if (m_repost) {
+    if (m_reposting) {
       VLOG(2) << "Reposting transaction " << *m_clientTxn
               << " received body bytes";
       if (m_clientTxn && !m_egressError) {
@@ -331,7 +331,7 @@ void ProxygenTransport::onEOM() noexcept {
   VLOG(4) << *m_clientTxn << "received eom";
   if (bufferRequest()) {
     CHECK(!m_enqueued);
-    if (m_repost) {
+    if (m_reposting) {
       VLOG(2) << "Transaction " << *m_clientTxn << " is reposting";
       if (m_clientTxn && !m_egressError) {
         VLOG(2) << "Transaction " << *m_clientTxn
@@ -786,21 +786,26 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
 
 void ProxygenTransport::beginPartialPostEcho() {
   VLOG(2) << "Beginning partial post";
-  if (!bufferRequest() || m_repost || !m_clientTxn || m_egressError) {
+  if (!bufferRequest() || m_reposting || !m_clientTxn || m_egressError
+      || getClientComplete() || !m_clientTxn->canSendHeaders()) {
     VLOG(2) << "beginPartialPostEcho cannot proceed, "
             << "bufferRequest() = " << bufferRequest()
-            << "m_repost = " << m_repost
+            << "m_reposting = " << m_reposting
             << "m_clientTxn = " << m_clientTxn
-            << "m_egressError = " << m_egressError;
+            << "m_egressError = " << m_egressError
+            << "getClientComplete() = " << getClientComplete()
+            << "canSendHeaders() = " << m_clientTxn->canSendHeaders();
     return;
   }
   VLOG(2) << "beginPartialPostEcho is proceeding, "
           << "bufferRequest() = " << bufferRequest()
-          << "m_repost = " << m_repost
+          << "m_reposting = " << m_reposting
           << "m_clientTxn = " << m_clientTxn
-          << "m_egressError = " << m_egressError;
+          << "m_egressError = " << m_egressError
+          << "getClientComplete() = " << getClientComplete()
+          << "canSendHeaders() = " << m_clientTxn->canSendHeaders();
   CHECK(!m_enqueued);
-  m_repost = true;
+  m_reposting = true;
   HTTPMessage response;
   response.setHTTPVersion(1,1);
   response.setIsChunked(true);

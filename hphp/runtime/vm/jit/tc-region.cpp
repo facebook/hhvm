@@ -144,7 +144,7 @@ bool checkLimit(const TransMetaInfo& info, const SrcRec* srcRec) {
     ? RuntimeOption::EvalJitMaxProfileTranslations
     : RuntimeOption::EvalJitMaxTranslations;
 
-  auto const numTrans = srcRec->translations().size();
+  auto const numTrans = srcRec->numTrans();
 
   // Once numTrans has reached limit + 1 we know that an interp translation
   // has already been emitted. Prior to that if numTrans == limit only allow
@@ -394,12 +394,10 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
 
   auto metaLock = lockMetadata();
   always_assert(srcDB().find(sk) == nullptr);
-  auto const sr = srcDB().insert(sk);
+  auto const sr = srcDB().insert(sk, req);
   if (RuntimeOption::EvalEnableReusableTC) {
     recordFuncSrcRec(sk.func(), sr);
   }
-  sr->setFuncInfo(sk.func());
-  sr->setAnchorTranslation(req);
 
   if (srcRecSPOff) always_assert(sr->nonResumedSPOff() == *srcRecSPOff);
 

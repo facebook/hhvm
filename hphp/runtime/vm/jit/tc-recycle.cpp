@@ -95,6 +95,8 @@ struct FuncInfo {
   std::unordered_map<TCA /* toSmash */, PrologueCaller> callers;
 };
 
+std::mutex s_dataLock;
+
 std::unordered_map<
   TCA /* toSmash */,
   const Func* /* target */
@@ -106,6 +108,10 @@ std::unordered_map<
 > s_smashedBranches;
 
 std::unordered_map<const Func*, FuncInfo> s_funcTCData;
+
+std::unique_lock<std::mutex> lockData() {
+  return std::unique_lock<std::mutex>(s_dataLock);
+}
 
 /*
  * Removes meta-data about a caller to a proflogue from prof-data to ensure that
@@ -121,6 +127,7 @@ void clearProfCaller(TCA toSmash, const Func* func, int numArgs,
   auto rec = data->transRec(tid);
   if (!rec || !rec->isProflogue()) return;
 
+  auto lock = rec->lockCallerList();
   if (isGuard) {
     rec->removeGuardCaller(toSmash);
     return;
@@ -151,6 +158,7 @@ void clearTCMaps(TCA start, TCA end) {
     }
     eraseCatchTrace(start);
     if (di.isCall()) {
+      auto dataLock = lockData();
       auto it = s_smashedCalls.find(start);
       if (it != s_smashedCalls.end()) {
         auto func = it->second;
@@ -169,40 +177,37 @@ void clearTCMaps(TCA start, TCA end) {
   }
 }
 
-void reclaimTranslation(TransLoc loc) {
-  assertOwnsCodeLock();
-  assertOwnsMetadataLock();
-
-  ITRACE(1, "Reclaiming translation M[{}, {}] C[{}, {}] F[{}, {}]\n",
-         loc.mainStart(), loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
-         loc.frozenStart(), loc.frozenEnd());
-
-  Trace::Indent _i;
-
-  auto& cache = code();
-  cache.blockFor(loc.mainStart()).free(loc.mainStart(), loc.mainSize());
-  cache.blockFor(loc.coldStart()).free(loc.coldStart(), loc.coldSize());
-  if (loc.coldStart() != loc.frozenStart()) {
-    cache.blockFor(loc.frozenStart()).free(loc.frozenStart(), loc.frozenSize());
-  }
-
+std::vector<std::pair<TCA, SrcRec*>> findIncomingBranches(TransLoc loc) {
+  auto dataLock = lockData();
+  std::vector<std::pair<TCA, SrcRec*>> ibRecs;
   for (auto it = s_smashedBranches.begin(); it != s_smashedBranches.end();) {
     auto br = it++;
     if (loc.contains(br->first)) {
       ITRACE(1, "Erasing smashed branch @ {} from SrcRec addr={}\n",
              br->first, (void*)br->second);
-      br->second->removeIncomingBranch(br->first);
+      ibRecs.emplace_back(*br);
       s_smashedBranches.erase(br);
     }
   }
 
-  // Erase meta-data about these regions of the TC
-  {
-    ITRACE(1, "Clearing translation meta-data\n");
-    Trace::Indent _i2;
-    clearTCMaps(loc.mainStart(), loc.mainEnd());
-    clearTCMaps(loc.coldCodeStart(), loc.coldEnd());
-    clearTCMaps(loc.frozenCodeStart(), loc.frozenEnd());
+  return ibRecs;
+}
+
+void clearTransLocMaps(TransLoc loc) {
+  ITRACE(1, "Clearing translation meta-data\n");
+  Trace::Indent _i2;
+  clearTCMaps(loc.mainStart(), loc.mainEnd());
+  clearTCMaps(loc.coldCodeStart(), loc.coldEnd());
+  clearTCMaps(loc.frozenCodeStart(), loc.frozenEnd());
+}
+
+void freeTransLoc(TransLoc loc) {
+  auto codeLock = lockCode();
+  auto& cache = code();
+  cache.blockFor(loc.mainStart()).free(loc.mainStart(), loc.mainSize());
+  cache.blockFor(loc.coldStart()).free(loc.coldStart(), loc.coldSize());
+  if (loc.coldStart() != loc.frozenStart()) {
+    cache.blockFor(loc.frozenStart()).free(loc.frozenStart(), loc.frozenSize());
   }
 
   if (debug) {
@@ -228,25 +233,51 @@ void reclaimTranslation(TransLoc loc) {
   }
 }
 
+void reclaimTranslation(TransLoc loc, const SrcRec* freedSr = nullptr) {
+  ITRACE(1, "Reclaiming translation M[{}, {}] C[{}, {}] F[{}, {}]\n",
+         loc.mainStart(), loc.mainEnd(), loc.coldStart(), loc.coldEnd(),
+         loc.frozenStart(), loc.frozenEnd());
+
+  Trace::Indent _i;
+
+  // Extract the SrcRecs with smashed branches first to avoid a rank violation
+  // between the data lock and SrcRec lock.
+  auto ibRecs = findIncomingBranches(loc);
+
+  for (auto sr : ibRecs) {
+    // When called from reclaimSrcRec freedSr is the SrcRec being freed
+    if (sr.second == freedSr) continue;
+    sr.second->removeIncomingBranch(sr.first);
+  }
+
+  clearTransLocMaps(loc);
+
+  // Do this last, it will make the TransLoc available for reuse.
+  freeTransLoc(loc);
+}
+
 /*
  * Reclaim all translations associated with a SrcRec including the anchor
  * translation.
  */
 void reclaimSrcRec(const SrcRec* rec) {
-  assertOwnsCodeLock();
-  assertOwnsMetadataLock();
-
+  auto srLock = rec->readlock();
   ITRACE(1, "Reclaiming SrcRec addr={} anchor={}\n", (void*)rec,
          rec->getFallbackTranslation());
 
   Trace::Indent _i;
 
   auto anchor = rec->getFallbackTranslation();
-  code().blockFor(anchor).free(anchor, svcreq::stub_size());
 
   for (auto& loc : rec->translations()) {
-    reclaimTranslation(loc);
+    reclaimTranslation(loc, rec);
   }
+
+  // Grabbing the code lock here without releasing the SrcRec lock would be a
+  // rank violation
+  srLock.unlock();
+  auto codeLock = lockCode();
+  code().blockFor(anchor).free(anchor, svcreq::stub_size());
 }
 }
 
@@ -260,7 +291,7 @@ int recordedFuncs()   { return s_funcTCData.size(); }
 
 void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
                       bool profiled, int numArgs) {
-  assertOwnsCodeLock();
+  auto dataLock = lockData();
 
   FTRACE(1, "Recording smashed call @ {} to func {} (id = {})\n",
          toSmash, func->fullName()->data(), func->getFuncId());
@@ -271,7 +302,7 @@ void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
 }
 
 void recordFuncSrcRec(const Func* func, SrcRec* rec) {
-  assertOwnsCodeLock();
+  auto dataLock = lockData();
 
   FTRACE(1, "Recording SrcRec for func {} (id = {}) addr = {}\n",
          func->fullName()->data(), func->getFuncId(), (void*)rec);
@@ -279,7 +310,7 @@ void recordFuncSrcRec(const Func* func, SrcRec* rec) {
 }
 
 void recordFuncPrologue(const Func* func, TransLoc loc) {
-  assertOwnsCodeLock();
+  auto dataLock = lockData();
 
   FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
          func->fullName()->data(), func->getFuncId(), loc.mainStart());
@@ -287,7 +318,7 @@ void recordFuncPrologue(const Func* func, TransLoc loc) {
 }
 
 void recordJump(TCA toSmash, SrcRec* sr) {
- assertOwnsCodeLock();
+  auto dataLock = lockData();
 
   FTRACE(1, "Recording smashed branch @ {} to SrcRec addr={}\n",
          toSmash, (void*)sr);
@@ -297,8 +328,7 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void reclaimFunction(const Func* func) {
-  auto codeLock = lockCode();
-  auto metaLock = lockMetadata();
+  auto dataLock = lockData();
 
   auto it = s_funcTCData.find(func);
   if (it == s_funcTCData.end()) return;
@@ -308,7 +338,9 @@ void reclaimFunction(const Func* func) {
 
   Trace::Indent _i;
 
-  auto& data = it->second;
+  auto data = std::move(it->second);
+  s_funcTCData.erase(it);
+
   auto& us = ustubs();
 
   ITRACE(1, "Smashing prologues\n");
@@ -334,9 +366,6 @@ void reclaimFunction(const Func* func) {
   // the function is now unreachable). Once the following block runs the guards
   // should be unreachable.
   Treadmill::enqueue([fname, fid, data = std::move(data)] {
-    auto codeLock = lockCode();
-    auto metaLock = lockMetadata();
-
     ITRACE(1, "Reclaiming func {} (id={})\n", fname, fid);
     Trace::Indent _i2;
     {
@@ -351,19 +380,14 @@ void reclaimFunction(const Func* func) {
       reclaimSrcRec(rec);
     }
   });
-
-  s_funcTCData.erase(it);
 }
 
 void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
-    Treadmill::enqueue([trans = std::move(trans)]() mutable {
-      auto codeLock = lockCode();
-      auto metaLock = lockMetadata();
-      for (auto& loc : trans) {
-        reclaimTranslation(loc);
-      }
-      trans.clear();
-    });
+  Treadmill::enqueue([trans = std::move(trans)]() mutable {
+    for (auto& loc : trans) {
+      reclaimTranslation(loc);
+    }
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2753,8 +2753,15 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
 
 // These only occur in traits, so we don't need to do better than
 // this.
-void in(ISS& env, const bc::Self& op) { putClsRefSlot(env, op.slot, TCls); }
-void in(ISS& env, const bc::Parent& op) { putClsRefSlot(env, op.slot, TCls); }
+void in(ISS& env, const bc::Self& op) {
+  auto self = selfClsExact(env);
+  putClsRefSlot(env, op.slot, self ? *self : TCls);
+}
+
+void in(ISS& env, const bc::Parent& op) {
+  auto parent = parentClsExact(env);
+  putClsRefSlot(env, op.slot, parent ? *parent : TCls);
+}
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;

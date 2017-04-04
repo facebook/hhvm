@@ -712,6 +712,16 @@ folly::Optional<Type> selfClsExact(ISS& env) {
   return folly::none;
 }
 
+folly::Optional<Type> parentClsExact(ISS& env) {
+  if (!env.ctx.cls) return folly::none;
+  if (auto const rcls = env.index.resolve_class(env.ctx, env.ctx.cls->name)) {
+    if (auto const parent = rcls->parent()) {
+      return clsExact(*parent);
+    }
+  }
+  return folly::none;
+}
+
 //////////////////////////////////////////////////////////////////////
 // properties on $this
 

@@ -211,6 +211,12 @@ struct Class {
   folly::Optional<Class> commonAncestor(const Class& o) const;
 
   /*
+   * Returns the res::Class for this Class's parent if there is one,
+   * or nullptr.
+   */
+  folly::Optional<Class> parent() const;
+
+  /*
    * Returns true if we have a ClassInfo for this Class.
    */
   bool resolved() const {

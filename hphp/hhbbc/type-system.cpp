@@ -2672,9 +2672,9 @@ bool arr_packed_set(Type& pack,
   }
 
   if (!isVecArray) {
-    if (key.s) {
+    if (auto const v = key.tv()) {
       auto m = toDArrLikeMap(pack.m_data.packed->elems);
-      m.map.emplace_back(make_tv<KindOfPersistentString>(*key.s), val);
+      m.map.emplace_back(*v, val);
       pack = map_impl(pack.m_bits, std::move(m.map));
       return true;
     }

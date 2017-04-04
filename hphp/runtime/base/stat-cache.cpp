@@ -688,11 +688,15 @@ int StatCache::statImpl(const std::string& path, struct stat* buf) {
     return statSyscall(path, buf);
   }
 
+  NodePtr p;
   {
     NameNodeMap::const_accessor acc;
     if (m_path2Node.find(acc, path)) {
-      return acc->second->stat(path, buf);
+      p = acc->second;
     }
+  }
+  if (p) {
+    return p->stat(path, buf);
   }
   {
     SimpleLock lock(m_lock);
@@ -715,11 +719,15 @@ int StatCache::lstatImpl(const std::string& path, struct stat* buf) {
     return statSyscall(path, buf);
   }
 
+  NodePtr p;
   {
     NameNodeMap::const_accessor acc;
     if (m_lpath2Node.find(acc, path)) {
-      return acc->second->lstat(path, buf);
+      p = acc->second;
     }
+  }
+  if (p) {
+    return p->lstat(path, buf);
   }
   {
     SimpleLock lock(m_lock);
@@ -742,11 +750,15 @@ std::string StatCache::readlinkImpl(const std::string& path) {
     return readlinkSyscall(path);
   }
 
+  NodePtr p;
   {
     NameNodeMap::const_accessor acc;
     if (m_lpath2Node.find(acc, path)) {
-      return acc->second->readlink(path);
+      p = acc->second;
     }
+  }
+  if (p) {
+    return p->readlink(path);
   }
   {
     SimpleLock lock(m_lock);

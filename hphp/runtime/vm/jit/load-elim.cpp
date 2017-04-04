@@ -380,12 +380,16 @@ Flags handle_general_effects(Local& env,
   case CastStk:
   case CoerceStk:
     {
-      // We only care about the stack component, since we only optimize the case
-      // where we don't need to reenter.
-      assert(m.loads.stack());
-      AliasClass const stk = *m.loads.stack();
+      auto const stkOffset = [&]{
+        if (inst.is(CastStk)) return inst.extra<CastStk>()->offset;
+        if (inst.is(CoerceStk)) return inst.extra<CoerceStk>()->offset;
+        always_assert(false);
+      }();
+      auto const stk =
+        canonicalize(AliasClass { AStack { inst.src(0), stkOffset, 1 } });
+      always_assert(stk <= canonicalize(m.loads));
 
-      auto const meta = env.global.ainfo.find(canonicalize(stk));
+      auto const meta = env.global.ainfo.find(stk);
       auto const tloc = find_tracked(env, meta);
       if (!tloc) break;
       if (inst.op() == CastStk &&

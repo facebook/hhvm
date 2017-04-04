@@ -124,12 +124,16 @@ struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
  * well as stack locations it may read or write via other means. Locations in
  * any intersection between `stack' and `kills' may be assumed to be killed.
  *
+ * The `locals` set contains frame locations that the call might read. (If the
+ * call might write *any* local, then writes_local will be true).
+ *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
 struct CallEffects    { bool writes_locals;
                         AliasClass kills;
-                        AliasClass stack; };
+                        AliasClass stack;
+                        AliasClass locals; };
 
 /*
  * ReturnEffects is a return, either from the php function or an inlined

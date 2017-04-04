@@ -1334,6 +1334,7 @@ SSATmp* builtinCall(IRGS& env,
       callee,
       params.count ? -1 : numNonDefault,
       funcWritesLocals(callee),
+      funcReadsLocals(callee),
       funcNeedsCallerFrame(callee)
     },
     catchMaker.makeUnusualCatch(),

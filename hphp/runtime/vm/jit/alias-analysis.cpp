@@ -49,7 +49,9 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (IrrelevantEffects)   {},
         [&] (UnknownEffects)      {},
         [&] (ReturnEffects x)     { visit(x.kills); },
-        [&] (CallEffects x)       { visit(x.kills); visit(x.stack); },
+        [&] (CallEffects x)       { visit(x.kills);
+                                    visit(x.stack);
+                                    visit(x.locals); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
                                     visit(x.moves);

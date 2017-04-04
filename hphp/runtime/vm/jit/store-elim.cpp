@@ -562,17 +562,17 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     /*
-     * Call instructions potentially throw, even though we don't (yet) have
-     * explicit catch traces for them, which means it counts as possibly
-     * reading any local, on any frame---if it enters the unwinder it could
-     * read them.
+     * Call instructions can potentially read any heap location, but we can be
+     * more precise about everything else.
      */
     [&] (CallEffects l) {
       env.containsCall = true;
 
       load(env, AHeapAny);
-      load(env, AFrameAny);  // Not necessary for some builtin calls, but it
-                             // depends which builtin...
+
+      load(env, l.locals);
+      if (l.writes_locals) mayStore(env, AFrameAny);
+
       load(env, l.stack);
       kill(env, l.kills);
     },

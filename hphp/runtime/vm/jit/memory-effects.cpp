@@ -20,9 +20,10 @@
 #include "hphp/util/assertions.h"
 
 #include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/analysis.h"
 
 #include <folly/Optional.h>
 
@@ -232,6 +233,50 @@ AliasClass stack_below(SSATmp* base, Off offset) {
   return AStack { base, offset, std::numeric_limits<int32_t>::max() };
 }
 
+//////////////////////////////////////////////////////////////////////
+
+// Determine an AliasClass representing any locals in the instruction's frame
+// which might be accessed via debug_backtrace().
+
+const StaticString s_86metadata("86metadata");
+
+AliasClass backtrace_locals(const IRInstruction& inst) {
+  auto const func = [&]() -> const Func* {
+    auto fp = inst.marker().fp();
+    if (!fp) return nullptr;
+    fp = canonical(fp);
+    auto fpInst = fp->inst();
+    if (UNLIKELY(fpInst->is(DefLabel))) {
+      fpInst = resolveFpDefLabel(fp);
+      assertx(fpInst);
+    }
+    if (fpInst->is(DefFP)) return fpInst->marker().func();
+    if (fpInst->is(DefInlineFP)) return fpInst->extra<DefInlineFP>()->target;
+    always_assert(false);
+  }();
+
+  // Either there's no func or no frame-pointer. Either way, be conservative and
+  // assume anything can be read. This can happen in test code, for instance.
+  if (!func) return AFrameAny;
+
+  auto const add86meta = [&] (AliasClass ac) {
+    // The 86metadata variable can also exist in a VarEnv, but accessing that is
+    // considered a heap effect, so we can ignore it.
+    auto const local = func->lookupVarId(s_86metadata.get());
+    if (local == kInvalidId) return ac;
+    return ac | AFrame { inst.marker().fp(), local };
+  };
+
+  if (!RuntimeOption::EnableArgsInBacktraces || !func->numParams()) {
+    return add86meta(AEmpty);
+  }
+
+  AliasIdSet params{ AliasIdSet::IdRange{0, func->numParams()} };
+  return add86meta(AFrame { inst.marker().fp(), params });
+}
+
+/////////////////////////////////////////////////////////////////////
+
 /*
  * Modify a GeneralEffects to take potential VM re-entry into account.  This
  * affects may-load, may-store, and kills information for the instruction.  The
@@ -239,11 +284,8 @@ AliasClass stack_below(SSATmp* base, Off offset) {
  * it affects those locations for reasons other than re-entry, but does not
  * need to if it doesn't.
  *
- * For loads, we need to take into account EnableArgsInBacktraces: if this flag
- * is on, any instruction that could re-enter could call debug_backtrace, which
- * could read the argument locals of any activation record in the callstack.
- * We don't try to limit the load effects to argument locals here, though, and
- * just union in all the locals.
+ * For loads, we need to take into account any locals potentially accessed by
+ * debug_backtrace().
  *
  * For kills, locations on the eval stack below the re-entry depth should all
  * be added.
@@ -302,8 +344,7 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   }();
 
   return GeneralEffects {
-    x.loads | AHeapAny
-            | (RuntimeOption::EnableArgsInBacktraces ? AFrameAny : AEmpty),
+    x.loads | AHeapAny | backtrace_locals(inst),
     x.stores | AHeapAny,
     x.moves,
     new_kills
@@ -441,7 +482,6 @@ MemEffects minstr_with_tvref(const IRInstruction& inst) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
 MemEffects memory_effects_impl(const IRInstruction& inst) {
   switch (inst.op()) {
 
@@ -716,12 +756,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         stack_below(
           inst.src(0),
           extra->spOffset + extra->numParams + kNumActRecCells - 1
-        )
+        ),
+        (extra->writeLocals || extra->readLocals)
+          ? AFrameAny : backtrace_locals(inst)
       };
     }
 
   case ContEnter:
-    return CallEffects { false, AMIStateAny, AStackAny };
+    return CallEffects { false, AMIStateAny, AStackAny, AFrameAny };
 
   case Call:
     {
@@ -734,7 +776,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         stack_below(
           inst.src(0),
           extra->spOffset + extra->numParams + kNumActRecCells - 1
-        )
+        ),
+        (extra->writeLocals || extra->readLocals)
+          ? AFrameAny : backtrace_locals(inst)
       };
     }
 
@@ -753,9 +797,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      auto const locs = extra->writeLocals ? AFrameAny : AEmpty;
+      auto const writeLocs = extra->writeLocals ? AFrameAny : AEmpty;
+      auto const readLocs =
+        (extra->readLocals || extra->writeLocals) ? AFrameAny : AEmpty;
       return may_raise(
-        inst, may_load_store_kill(stk | AHeapAny | locs, locs, AMIStateAny));
+        inst,
+        may_load_store_kill(stk | AHeapAny | readLocs, writeLocs, AMIStateAny)
+      );
     }
 
   // Resumable suspension takes everything from the frame and moves it into the
@@ -1915,7 +1963,9 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     [&] (ExitEffects x)      { check(x.live); check(x.kills); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
-    [&] (CallEffects x)      { check(x.kills); check(x.stack); },
+    [&] (CallEffects x)      { check(x.kills);
+                               check(x.stack);
+                               check(x.locals); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -1966,7 +2016,8 @@ MemEffects canonicalize(MemEffects me) {
       return CallEffects {
         x.writes_locals,
         canonicalize(x.kills),
-        canonicalize(x.stack)
+        canonicalize(x.stack),
+        canonicalize(x.locals)
       };
     },
     [&] (ReturnEffects x) -> R {
@@ -1995,7 +2046,11 @@ std::string show(MemEffects effects) {
       return sformat("exit({} ; {})", show(x.live), show(x.kills));
     },
     [&] (CallEffects x) {
-      return sformat("call({} ; {})", show(x.kills), show(x.stack));
+      return sformat("call({} ; {} ; {})",
+        show(x.kills),
+        show(x.stack),
+        show(x.locals)
+      );
     },
     [&] (PureSpillFrame x) {
       return sformat("stFrame({} ; {})", show(x.stk), show(x.ctx));

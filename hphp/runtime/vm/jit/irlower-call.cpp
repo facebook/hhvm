@@ -477,17 +477,25 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       auto const bits = v.makeReg();
       v << load{bitsPtr[bitsOff], bits};
 
-      auto const truncBits = v.makeReg();
+      /*
+       * When the mask is gt/eq to the value,
+       * then no truncation of bits is needed.
+       */
+      assertx(mask64 >= vals64);
+
+      /* maskedBits = and(bits, mask64) */
       auto const maskedBits = v.makeReg();
 
-      if (mask64 <= 0xff && vals64 <= 0xff) {
-        v << movtqb{bits, truncBits};
-        v << andbi{(int8_t)mask64, truncBits, maskedBits, v.makeReg()};
+      if (mask64 < 0xff && vals64 <= 0xff) {
+        v << andbi{(int8_t)mask64, bits, maskedBits, v.makeReg()};
         v << cmpbi{(int8_t)vals64, maskedBits, sf};
-      } else if (mask64 <= 0xffffffff && vals64 <= 0xffffffff) {
-        v << movtql{bits, truncBits};
-        v << andli{(int32_t)mask64, truncBits, maskedBits, v.makeReg()};
+      } else if (mask64 == 0xff && vals64 <= 0xff) {
+        v << cmpbi{(int8_t)vals64, bits, sf};
+      } else if (mask64 < 0xffffffff && vals64 <= 0xffffffff) {
+        v << andli{(int32_t)mask64, bits, maskedBits, v.makeReg()};
         v << cmpli{(int32_t)vals64, maskedBits, sf};
+      } else if (mask64 == 0xffffffff && vals64 <= 0xffffffff) {
+        v << cmpli{(int32_t)vals64, bits, sf};
       } else {
         v << andq{v.cns(mask64), bits, maskedBits, v.makeReg()};
         v << cmpq{v.cns(vals64), maskedBits, sf};

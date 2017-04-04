@@ -213,7 +213,8 @@ let handle_request conn id protocol = function
   | Find_references args ->
     let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    rpc conn (Rpc.IDE_FIND_REFS (filename, line, column)) |>
+    let include_defs = false in
+    rpc conn (Rpc.IDE_FIND_REFS (filename, line, column, include_defs)) |>
     FindRefsService.result_to_ide_message |>
     print_response id protocol
   | Highlight_references args ->

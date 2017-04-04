@@ -12,10 +12,10 @@ open FindRefsService
 
 val to_json: result -> Hh_json.json
 
-val get_refs_with_defs : action -> ServerEnv.genv ->
+val get_refs : action -> bool -> ServerEnv.genv ->
   ServerEnv.env -> (string * Pos.t) list
 
-val go : action -> ServerEnv.genv -> ServerEnv.env -> result
+val go : action -> bool -> ServerEnv.genv -> ServerEnv.env -> result
 
 val go_from_file :
-  (string * int * int) -> ServerEnv.genv -> ServerEnv.env -> ide_result
+  (string * int * int * bool) -> ServerEnv.genv -> ServerEnv.env -> ide_result

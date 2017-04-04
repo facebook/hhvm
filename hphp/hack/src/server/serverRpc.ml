@@ -47,12 +47,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           (ServerArgs.ai_mode genv.options)
     | FIND_REFS find_refs_action ->
         if ServerArgs.ai_mode genv.options = None then
-          env, ServerFindRefs.go find_refs_action genv env
+          let include_defs = false in
+          env, ServerFindRefs.go find_refs_action include_defs genv env
         else
           env, Ai.ServerFindRefs.go find_refs_action genv env
-    | IDE_FIND_REFS (input, line, char) ->
+    | IDE_FIND_REFS (input, line, char, include_defs) ->
         let content = ServerFileSync.get_file_content input in
-        env, ServerFindRefs.go_from_file (content, line, char) genv env
+        let args = (content, line, char, include_defs) in
+        let results = ServerFindRefs.go_from_file args genv env in
+        env, results
     | IDE_HIGHLIGHT_REFS (input, line, char) ->
         let content = ServerFileSync.get_file_content input in
         env, ServerHighlightRefs.go (content, line, char) env.tcopt

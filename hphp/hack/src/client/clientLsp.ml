@@ -313,7 +313,9 @@ let do_find_references (conn: conn option) (params: Find_references.params)
 
   let {Ide_api_types.line; column;} = lsp_position_to_ide params.position in
   let filename = lsp_text_document_identifier_to_hack params.text_document in
-  let command = ServerCommandTypes.IDE_FIND_REFS (filename, line, column) in
+  let include_defs = params.context.include_declaration in
+  let command = ServerCommandTypes.IDE_FIND_REFS
+    (filename, line, column, include_defs) in
   let results = rpc conn command in
   (* TODO: respect params.context.include_declaration *)
   match results with

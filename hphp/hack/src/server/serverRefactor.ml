@@ -26,7 +26,8 @@ let go action genv env =
           new_name
     | FunctionRename (old_name, new_name) ->
       FindRefsService.Function old_name, new_name in
-  let refs = ServerFindRefs.get_refs_with_defs find_refs_action genv env in
+  let include_defs = true in
+  let refs = ServerFindRefs.get_refs find_refs_action include_defs genv env in
   let changes = List.fold_left refs ~f:begin fun acc x ->
     let replacement = {
       pos  = Pos.to_absolute (snd x);

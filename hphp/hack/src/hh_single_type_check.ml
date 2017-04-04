@@ -679,7 +679,9 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       ServerEnv.tcopt = opts;
     } in
     let file = cat (Relative_path.to_absolute filename) in
-    let results = ServerFindRefs.go_from_file (file, line, column) genv env in
+    let include_defs = false in
+    let results = ServerFindRefs.go_from_file
+      (file, line, column, include_defs) genv env in
     ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in

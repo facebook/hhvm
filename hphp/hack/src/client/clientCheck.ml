@@ -151,10 +151,11 @@ let main args =
       Exit_status.No_error
     | MODE_IDE_FIND_REFS arg ->
       let line, char = parse_position_string arg in
+      let include_defs = false in
       let content =
         ServerUtils.FileContent (Sys_utils.read_stdin_to_string ()) in
       let results =
-        rpc args @@ Rpc.IDE_FIND_REFS (content, line, char) in
+        rpc args @@ Rpc.IDE_FIND_REFS (content, line, char, include_defs) in
       ClientFindRefs.go_ide results args.output_json;
       Exit_status.No_error
     | MODE_IDE_HIGHLIGHT_REFS arg ->

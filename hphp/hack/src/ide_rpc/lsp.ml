@@ -525,6 +525,24 @@ module Find_references = struct
 end
 
 
+(* Document Highlights request, method="textDocument/documentHighlight" *)
+module Document_highlights = struct
+  type params = Text_document_position_params.t
+
+  and result = document_highlight list
+
+  and document_highlight = {
+    range: range;  (* the range this highlight applies to *)
+    kind: document_highlight_kind option;
+  }
+
+  and document_highlight_kind =
+    | Text (* 1 *)  (* a textual occurrence *)
+    | Read (* 2 *)  (* read-access of a symbol, like reading a variable *)
+    | Write (* 3 *)  (* write-access of a symbol, like writing a variable *)
+end
+
+
 (* ErrorResponse *)
 module Error = struct
   exception Parse of string (* -32700 *)

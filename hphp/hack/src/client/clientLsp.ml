@@ -57,6 +57,18 @@ let hack_pos_to_lsp_location (pos: string Pos.pos) : Lsp.Location.t =
     range = hack_pos_to_lsp_range pos;
   }
 
+let ide_range_to_lsp (range: Ide_api_types.range) : Lsp.range =
+  { Lsp.
+    start = { Lsp.
+      line = range.Ide_api_types.st.Ide_api_types.line - 1;
+      character = range.Ide_api_types.st.Ide_api_types.column - 1;
+    };
+    end_ = { Lsp.
+      line = range.Ide_api_types.ed.Ide_api_types.line - 1;
+      character = range.Ide_api_types.ed.Ide_api_types.column - 1;
+    };
+  }
+
 let lsp_range_to_ide (range: Lsp.range) : Ide_api_types.range =
   let open Ide_api_types in
   {
@@ -309,6 +321,25 @@ let do_find_references (conn: conn option) (params: Find_references.params)
   | Some (_name, positions) -> List.map positions ~f:hack_pos_to_lsp_location
 
 
+let do_document_highlights
+  (conn: conn option)
+  (params: Document_highlights.params)
+  : Document_highlights.result =
+  let open Document_highlights in
+
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command = ServerCommandTypes.IDE_HIGHLIGHT_REFS (file, line, column) in
+  let results = rpc conn command in
+
+  let hack_range_to_lsp_highlight range =
+    {
+      range = ide_range_to_lsp range;
+      kind = None;
+    }
+  in
+  List.map results ~f:hack_range_to_lsp_highlight
+
+
 let do_initialize (params: Initialize.params)
   : (conn option * Initialize.result) =
   let open Initialize in
@@ -334,7 +365,7 @@ let do_initialize (params: Initialize.params)
         signature_help_provider = None;
         definition_provider = false;
         references_provider = true;
-        document_highlight_provider = false;
+        document_highlight_provider = true;
         document_symbol_provider = true;
         workspace_symbol_provider = true;
         code_action_provider = false;
@@ -498,6 +529,11 @@ let main () : unit =
       | Main_loop, Client c when c.method_ = "textDocument/references" ->
         parse_find_references c.params |> do_find_references !conn
           |> print_find_references |> respond stdout c
+
+      (* textDocument/documentHighlight *)
+      | Main_loop, Client c when c.method_ = "textDocument/documentHighlight" ->
+        parse_document_highlights c.params |> do_document_highlights !conn
+          |> print_document_highlights |> respond stdout c
 
       (* textDocument/didOpen notification *)
       | Main_loop, Client c when c.method_ = "textDocument/didOpen" ->

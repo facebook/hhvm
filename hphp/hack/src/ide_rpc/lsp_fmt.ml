@@ -437,6 +437,31 @@ let parse_find_references (params: json option) : Find_references.params =
 let print_find_references (r: Location.t list) : json =
   JSON_Array (List.map r ~f:print_location)
 
+
+(************************************************************************)
+(** textDocument/documentHighlights request                            **)
+(************************************************************************)
+
+let parse_document_highlights (params: json option)
+  : Document_highlights.params =
+  parse_text_document_position_params params
+
+let print_document_highlights (r: Document_highlights.result) : json =
+  let open Document_highlights in
+  let print_highlight_kind kind = match kind with
+    | Text -> int_ 1
+    | Read -> int_ 2
+    | Write -> int_ 3
+  in
+  let print_highlight highlight =
+    Jprint.object_opt [
+      "range", Some (print_range highlight.range);
+      "kind", Option.map highlight.kind ~f:print_highlight_kind
+    ]
+  in
+  JSON_Array (List.map r ~f:print_highlight)
+
+
 (************************************************************************)
 (** initialize request                                                 **)
 (************************************************************************)

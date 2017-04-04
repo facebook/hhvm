@@ -382,7 +382,7 @@ let do_initialize (params: Initialize.params)
     (Some conn, result)
   with
   | e ->
-    let message = (Printexc.to_string e) ^ ": " ^ (Printexc.get_backtrace ()) in
+    let message = Printexc.to_string e in
     raise (Error.Server_error_start (message, {retry = false;}))
 
 

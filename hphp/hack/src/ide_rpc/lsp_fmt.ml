@@ -609,8 +609,14 @@ let print_error (e: exn) : json =
     | Error.Server_error_end message -> (-32000, message, None)
     | Error.Server_not_initialized message -> (-32002, message, None)
     | Error.Unknown message -> (-32001, message, None)
-    | _ -> (-32001, Printexc.to_string e, None)
+    | _ -> (-32001, "Internal error", None)
   in
+  (* TODO: move the backtrace into "data" once Nuclide can log it there. *)
+  let message = Printf.sprintf "%s - %s - %s"
+    message
+    (Printexc.to_string e)
+    (Printexc.get_backtrace ())
+    in
   Jprint.object_opt [
     "code", Some (int_ code);
     "message", Some (string_ message);

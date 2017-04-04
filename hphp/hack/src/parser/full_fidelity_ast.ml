@@ -1430,6 +1430,8 @@ and pDef : def parser = fun node env ->
       ( pos_name name
       , List.map (fun x -> pDefStmt x env) (as_list decls)
       )
+  | NamespaceDeclaration { namespace_name = name; _ } ->
+    Namespace (pos_name name, [])
   | NamespaceUseDeclaration
     { namespace_use_kind    = kind
     ; namespace_use_clauses = clauses

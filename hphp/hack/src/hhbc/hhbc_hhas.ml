@@ -359,7 +359,7 @@ let string_of_final instruction =
     sep ["VGetM";
       string_of_int n; string_of_member_key mk]
   | UnsetM (n, mk) ->
-    sep ["SetM";
+    sep ["UnsetM";
       string_of_int n; string_of_member_key mk]
   | BindM (n, mk) ->
     sep ["BindM";

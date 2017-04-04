@@ -30,6 +30,7 @@ module LValOp = struct
   | Set
   | SetOp of eq_op
   | IncDec of incdec_op
+  | Unset
 end
 
 let self_name = ref (None : string option)
@@ -150,7 +151,8 @@ let get_queryMOpMode op =
 
 let is_special_function e =
   match e with
-  | (_, A.Id(_, x)) when x = "isset" || x = "empty" || x = "tuple" -> true
+  | (_, A.Id(_, x))
+    when x = "isset" || x = "empty" || x = "tuple" -> true
   | _ -> false
 
 let extract_shape_field_name_pstring = function
@@ -575,6 +577,9 @@ and emit_call_empty_expr (_, expr_ as expr) =
       instr_not
     ]
 
+and emit_unset_expr expr =
+  emit_lval_op_nonlist LValOp.Unset expr empty 0
+
 and emit_call_isset_exprs exprs =
   match exprs with
   | [] -> emit_nyi "isset()"
@@ -958,10 +963,14 @@ and get_prop_member_key null_flavor stack_index prop_expr =
  *   QueryM 1 CGet EC:0
  *)
 and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
+   let base_mode =
+     match mode with
+     | MemberOpMode.Unset -> MemberOpMode.ModeNone
+     | _ -> mode in
    match expr_ with
    | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
      instr_string (strip_dollar x),
-     instr (IBase (BaseGC (base_offset, mode))),
+     instr (IBase (BaseGC (base_offset, base_mode))),
      1
 
    | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
@@ -973,7 +982,7 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      empty,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseL (Local.Named x, mode)
+       | None -> BaseL (Local.Named x, base_mode)
        | Some i -> FPassBaseL (i, Local.Named x)
        )),
      0
@@ -983,7 +992,7 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      elem_expr_instrs,
      instr (IBase (
        match param_num_opt with
-       | None -> BaseGC (base_offset, mode)
+       | None -> BaseGC (base_offset, base_mode)
        | Some i -> FPassBaseGC (i, base_offset)
        )),
      1
@@ -1216,24 +1225,32 @@ and emit_final_member_op stack_index op mk =
   | LValOp.Set -> instr (IFinal (SetM (stack_index, mk)))
   | LValOp.SetOp op -> instr (IFinal (SetOpM (stack_index, op, mk)))
   | LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
+  | LValOp.Unset -> instr (IFinal (UnsetM (stack_index, mk)))
 
 and emit_final_local_op op lid =
   match op with
   | LValOp.Set -> instr (IMutator (SetL lid))
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
+  | LValOp.Unset -> instr (IMutator (UnsetL lid))
 
 and emit_final_global_op op =
   match op with
   | LValOp.Set -> instr (IMutator SetG)
   | LValOp.SetOp op -> instr (IMutator (SetOpG op))
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
+  | LValOp.Unset -> instr (IMutator UnsetG)
 
-and emit_final_static_op op =
+and emit_final_static_op cid id op =
   match op with
   | LValOp.Set -> instr (IMutator (SetS 0))
   | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
+  | LValOp.Unset ->
+    gather [
+      instr_string ("Attempt to unset static property " ^ cid ^ "::" ^ id);
+      instr (IOp (Fatal FatalOp.Runtime))
+    ]
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:
@@ -1306,10 +1323,14 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Array_get(base_expr, opt_elem_expr) ->
+    let mode =
+      match op with
+      | LValOp.Unset -> MemberOpMode.Unset
+      | _ -> MemberOpMode.Define in
     let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in
     let base_offset = elem_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
-      emit_base MemberOpMode.Define base_offset None base_expr in
+      emit_base mode base_offset None base_expr in
     let mk = get_elem_member_key rhs_stack_size opt_elem_expr in
     let total_stack_size = elem_stack_size + base_stack_size in
     let final_instr = emit_final_member_op total_stack_size op mk in
@@ -1322,10 +1343,14 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Obj_get(e1, e2, null_flavor) ->
+    let mode =
+      match op with
+      | LValOp.Unset -> MemberOpMode.Unset
+      | _ -> MemberOpMode.Define in
     let prop_expr_instrs, prop_stack_size = emit_prop_instrs e2 in
-    let base_offset = prop_stack_size + rhs_stack_size in
+      let base_offset = prop_stack_size + rhs_stack_size in
     let base_expr_instrs, base_setup_instrs, base_stack_size =
-      emit_base MemberOpMode.Define base_offset None e1 in
+      emit_base mode base_offset None e1 in
     let mk = get_prop_member_key null_flavor rhs_stack_size e2 in
     let total_stack_size = prop_stack_size + base_stack_size in
     let final_instr = emit_final_member_op total_stack_size op mk in
@@ -1339,7 +1364,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
 
   | A.Class_get((_, cid), (_, id)) ->
     let prop_expr_instrs = instr_string (strip_dollar id) in
-    let final_instr = emit_final_static_op op in
+    let final_instr = emit_final_static_op cid id op in
     gather [
       prop_expr_instrs;
       emit_class_id cid;

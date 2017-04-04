@@ -19,7 +19,6 @@ quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
 quick/IssetM.php
-quick/PropU.php
 quick/ReadVar.php
 quick/SPropW.php
 quick/SetM.php
@@ -40,14 +39,11 @@ quick/allbranches.php
 quick/apc-sleep.php
 quick/apc.php
 quick/args-test.php
-quick/array-compact.php
-quick/array-cursor-bugs.php
 quick/array_access.php
 quick/array_callbacks.php
 quick/array_helper_reenter.php
 quick/array_packed.php
 quick/array_plus_eq_dtor.php
-quick/array_string_key.php
 quick/arrayidx.php
 quick/async_suspend_stack.php
 quick/autoload.php
@@ -57,7 +53,6 @@ quick/autoload6.php
 quick/autoload7.php
 quick/autoload_case.php
 quick/backtick.php
-quick/backtrace-after-unset.php
 quick/bitwise_not.php
 quick/bitwise_string.php
 quick/bool_types.php
@@ -262,7 +257,6 @@ quick/exceptions6.php
 quick/exceptions7.php
 quick/exceptions8.php
 quick/exit.php
-quick/ext_pdo_queryString.php
 quick/fail_86pinit.php
 quick/fail_86sinit.php
 quick/fail_self.php
@@ -275,6 +269,7 @@ quick/fc_enum_6.php
 quick/fib_gen.php
 quick/final_class.php
 quick/final_method.php
+quick/finally_break.php
 quick/float-overflow-literals.php
 quick/float-overflow.php
 quick/floatcmp.php
@@ -429,7 +424,6 @@ quick/keyset/reflect.php
 quick/keyset/serialize.php
 quick/keyset/static.php
 quick/keyset/type-hint.php
-quick/keyset/unset.php
 quick/lambda1.php
 quick/lambda2.php
 quick/lambda3.php
@@ -503,6 +497,8 @@ quick/parse_fail_type_constraint.php
 quick/parse_shapes.php
 quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
+quick/parser_massive_add_exp.php
+quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
 quick/pinit.php
 quick/post_try_error.php
@@ -541,7 +537,6 @@ quick/reflection_isclosure.php
 quick/regpressure.php
 quick/regpressure2.php
 quick/regpressure_bug.php
-quick/rename_dynamic.php
 quick/reqonce.php
 quick/reserved_class1.php
 quick/reserved_class2.php
@@ -550,7 +545,6 @@ quick/resurrect.php
 quick/retc-destruct.php
 quick/retval_backtrace.php
 quick/retype.php
-quick/rm-packed.php
 quick/rounding.php
 quick/sb_overflow.php
 quick/selfparent.php
@@ -631,10 +625,7 @@ quick/undefined-global.php
 quick/undefined-vgetg.php
 quick/undefined_is_type.php
 quick/unpack.php
-quick/unset-decl-prop.php
-quick/unset_badbase.php
 quick/unset_static.php
-quick/unset_undef_g.php
 quick/unset_varenv.php
 quick/unwind_backtrace.php
 quick/user_func.php

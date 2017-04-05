@@ -247,7 +247,8 @@ let test_autocomplete_response () =
   }|}
 
 let test_infer_type_response () =
-  let response = Infer_type_response (Some "foo") in
+  let response =
+    Infer_type_response { type_string = Some "foo"; type_json = None } in
   test_response response
   {|{
     "jsonrpc": "2.0",
@@ -255,7 +256,7 @@ let test_infer_type_response () =
     "result": "foo"
   }|}
   &&
-  let response = Infer_type_response None in
+  let response = Infer_type_response { type_string = None; type_json = None } in
   test_response response
   {|{
     "jsonrpc": "2.0",

@@ -31,15 +31,11 @@ TRACE_SET_MOD(hhbbc_cfg);
 //////////////////////////////////////////////////////////////////////
 
 void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
-  auto& func = *ainfo.ctx.func;
-  Trace::Bump bumper{
-    Trace::hhbbc_cfg, kSystemLibBump, is_systemlib_part(*func.unit)
-  };
   auto done_header = false;
   auto header = [&] {
     if (done_header) return;
     done_header = true;
-    FTRACE(2, "Remove unreachable blocks: {}\n", func.name);
+    FTRACE(2, "Remove unreachable blocks: {}\n", ainfo.ctx.func->name);
   };
 
   auto make_unreachable = [&](borrowed_ptr<php::Block> blk) {
@@ -455,9 +451,6 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
 
 bool control_flow_opts(const FuncAnalysis& ainfo) {
   auto& func = *ainfo.ctx.func;
-  Trace::Bump bumper{
-    Trace::hhbbc_cfg, kSystemLibBump, is_systemlib_part(*func.unit)
-  };
   FTRACE(2, "control_flow_opts: {}\n", func.name);
 
   std::vector<MergeBlockInfo> blockInfo(func.blocks.size(), MergeBlockInfo {});

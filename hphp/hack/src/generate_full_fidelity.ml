@@ -10,6 +10,8 @@
 
 open Full_fidelity_schema
 
+let full_fidelity_path_prefix = "hphp/hack/src/parser/"
+
 module GenerateFFSyntax = struct
 
   let to_parse_tree x =
@@ -376,7 +378,7 @@ end (* WithToken *)
 
   let full_fidelity_syntax =
   {
-    filename = "hphp/hack/src/full_fidelity/full_fidelity_syntax.ml";
+    filename = full_fidelity_path_prefix ^ "full_fidelity_syntax.ml";
     template = full_fidelity_syntax_template;
     transformations = [
       { pattern = "PARSE_TREE"; func = to_parse_tree };
@@ -432,7 +434,7 @@ TO_STRING"
 
 let full_fidelity_trivia_kind =
 {
-  filename = "hphp/hack/src/full_fidelity/full_fidelity_trivia_kind.ml";
+  filename = full_fidelity_path_prefix ^ "/full_fidelity_trivia_kind.ml";
   template = full_fidelity_trivia_kind_template;
   transformations = [];
   token_no_text_transformations = [];
@@ -489,7 +491,7 @@ TO_STRING"
 
 let full_fidelity_syntax_kind =
 {
-  filename = "hphp/hack/src/full_fidelity/full_fidelity_syntax_kind.ml";
+  filename = full_fidelity_path_prefix ^ "full_fidelity_syntax_kind.ml";
   template = full_fidelity_syntax_kind_template;
   transformations = [
     { pattern = "TOKENS"; func = to_tokens };
@@ -1161,7 +1163,7 @@ EXPORTS_SYNTAX"
 
   let full_fidelity_javascript =
   {
-    filename = "hphp/hack/src/full_fidelity/js/full_fidelity_editable.js";
+    filename = full_fidelity_path_prefix ^ "js/full_fidelity_editable.js";
     template = full_fidelity_javascript_template;
     transformations = [
       { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
@@ -2023,7 +2025,7 @@ function from_json(mixed $json): EditableSyntax {
 
   let full_fidelity_hack =
   {
-    filename = "hphp/hack/src/full_fidelity/php/full_fidelity_editable.php";
+    filename = full_fidelity_path_prefix ^ "php/full_fidelity_editable.php";
     template = full_fidelity_hack_template;
     transformations = [
       { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
@@ -2106,7 +2108,7 @@ TO_STRING_VARIABLE_TEXT
 "
   let full_fidelity_token_kind =
   {
-    filename = "hphp/hack/src/full_fidelity/full_fidelity_token_kind.ml";
+    filename = full_fidelity_path_prefix ^ "full_fidelity_token_kind.ml";
     template = full_fidelity_token_kind_template;
     transformations = [];
     token_no_text_transformations = [

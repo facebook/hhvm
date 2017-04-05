@@ -348,7 +348,7 @@ void in(ISS& env, const bc::AddElemC& op) {
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
       return env.collect.trackConstantArrays ?
-        array_set(std::move(ty), k, v) : TArrN;
+        array_set(std::move(ty), k, v) : TArr;
     }
     if (ty.subtypeOf(TDict)) {
       return env.collect.trackConstantArrays ?
@@ -414,6 +414,12 @@ void in(ISS& env, const bc::NewCol& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
+void in(ISS& env, const bc::NewPair& op) {
+  popC(env); popC(env);
+  auto const name = collections::typeToString(CollectionType::Pair);
+  push(env, objExact(env.index.builtin_class(name)));
+}
+
 void in(ISS& env, const bc::ColFromArray& op) {
   popC(env);
   auto const type = static_cast<CollectionType>(op.arg1);
@@ -421,24 +427,15 @@ void in(ISS& env, const bc::ColFromArray& op) {
   push(env, objExact(env.index.builtin_class(name)));
 }
 
-void in(ISS& env, const bc::MapAddElemC&) {
-  popC(env); popC(env);
-  push(env, popC(env));
-}
-void in(ISS& env, const bc::ColAddNewElemC&) {
-  popC(env);
-  push(env, popC(env));
-}
-
-void in(ISS& env, const bc::Cns& op)  {
-  auto t = env.index.lookup_constant(env.ctx, op.str1);
+void doCns(ISS& env, SString str)  {
+  auto t = env.index.lookup_constant(env.ctx, str);
   if (!t) {
     // There's no entry for this constant in the index. It must be
     // the first iteration, so we'll add a dummy entry to make sure
     // there /is/ something next time around.
     Cell val;
     val.m_type = kReadOnlyConstant;
-    env.collect.cnsMap.emplace(op.str1, val);
+    env.collect.cnsMap.emplace(str, val);
     t = TInitCell;
     // make sure we're re-analyzed
     env.collect.readsUntrackedConstants = true;
@@ -449,8 +446,9 @@ void in(ISS& env, const bc::Cns& op)  {
   push(env, std::move(*t));
 }
 
-void in(ISS& env, const bc::CnsE&) { push(env, TInitCell); }
-void in(ISS& env, const bc::CnsU&) { push(env, TInitCell); }
+void in(ISS& env, const bc::Cns& op)  { doCns(env, op.str1); }
+void in(ISS& env, const bc::CnsE& op) { doCns(env, op.str1); }
+void in(ISS& env, const bc::CnsU&)    { push(env, TInitCell); }
 
 void in(ISS& env, const bc::ClsCns& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);
@@ -579,16 +577,23 @@ void sameImpl(ISS& env) {
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
 
-  // EvalHackArrCompatNotices will notice on === and !== between PHP arrays and
-  // Hack arrays.
-  if (!(t1.couldBe(TArr) && couldBeHackArr(t2)) &&
-      !(couldBeHackArr(t1) && t2.couldBe(TArr))) {
+  auto const mightWarn = [&]{
+    // EvalHackArrCompatNotices will notice on === and !== between PHP arrays
+    // and Hack arrays.
+    if (!RuntimeOption::EvalHackArrCompatNotices) return false;
+    if (t1.couldBe(TArr) && couldBeHackArr(t2)) return true;
+    if (couldBeHackArr(t1) && t2.couldBe(TArr)) return true;
+    return false;
+  }();
+  if (!mightWarn) {
     nothrow(env);
     constprop(env);
   }
 
   if (v1 && v2) {
-    return push(env, cellSame(*v2, *v1) != Negate ? TTrue : TFalse);
+    if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
+      return push(env, r != Negate ? TTrue : TFalse);
+    }
   }
   push(env, Negate ? typeNSame(t1, t2) : typeSame(t1, t2));
 }
@@ -597,28 +602,14 @@ void in(ISS& env, const bc::Same&)  { sameImpl<false>(env); }
 void in(ISS& env, const bc::NSame&) { sameImpl<true>(env); }
 
 template<class Fun>
-void binOpBoolImpl(ISS& env, Fun fun, Op op) {
+void binOpBoolImpl(ISS& env, Fun fun) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
     if (auto r = eval_cell_value([&]{ return fun(*v2, *v1); })) {
-      // EvalHackArrCompatNotices will notice on == and != between PHP arrays
-      // and Hack arrays. It will notice on relational comparisons between PHP
-      // arrays and any other type.
-      auto const can_const_prop = [&]{
-        if (op == Op::Eq || op == Op::Neq) {
-          return !(t1.couldBe(TArr) && couldBeHackArr(t2)) &&
-                 !(couldBeHackArr(t1) && t2.couldBe(TArr));
-        } else if (op == Op::Lt || op == Op::Lte ||
-                   op == Op::Gt || op == Op::Gte) {
-          return (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) ||
-                 !(t1.couldBe(TArr) || t2.couldBe(TArr));
-        }
-        return true;
-      }();
-      if (can_const_prop) constprop(env);
+      constprop(env);
       return push(env, *r ? TTrue : TFalse);
     }
   }
@@ -627,18 +618,14 @@ void binOpBoolImpl(ISS& env, Fun fun, Op op) {
 }
 
 template<class Fun>
-void binOpInt64Impl(ISS& env, Fun fun, Op op) {
+void binOpInt64Impl(ISS& env, Fun fun) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const v1 = tv(t1);
   auto const v2 = tv(t2);
   if (v1 && v2) {
     if (auto r = eval_cell_value([&]{ return ival(fun(*v2, *v1)); })) {
-      if (op != Op::Cmp ||
-          (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) ||
-          !(t1.couldBe(TArr) || t2.couldBe(TArr))) {
-        constprop(env);
-      }
+      constprop(env);
       return push(env, std::move(*r));
     }
   }
@@ -647,56 +634,28 @@ void binOpInt64Impl(ISS& env, Fun fun, Op op) {
 }
 
 void in(ISS& env, const bc::Eq&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); },
-    Op::Eq
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Neq&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return !cellEqual(c1, c2); },
-    Op::Neq
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return !cellEqual(c1, c2); });
 }
 void in(ISS& env, const bc::Lt&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellLess(c1, c2); },
-    Op::Lt
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellLess(c1, c2); });
 }
 void in(ISS& env, const bc::Gt&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellGreater(c1, c2); },
-    Op::Gt
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) { return cellGreater(c1, c2); });
 }
-void in(ISS& env, const bc::Lte&) {
-  binOpBoolImpl(env, cellLessOrEqual, Op::Lte);
-}
-void in(ISS& env, const bc::Gte&) {
-  binOpBoolImpl(env, cellGreaterOrEqual, Op::Gte);
-}
+void in(ISS& env, const bc::Lte&) { binOpBoolImpl(env, cellLessOrEqual); }
+void in(ISS& env, const bc::Gte&) { binOpBoolImpl(env, cellGreaterOrEqual); }
 
 void in(ISS& env, const bc::Cmp&) {
-  binOpInt64Impl(
-    env,
-    [&] (Cell c1, Cell c2) { return cellCompare(c1, c2); },
-    Op::Cmp
-  );
+  binOpInt64Impl(env, [&] (Cell c1, Cell c2) { return cellCompare(c1, c2); });
 }
 
 void in(ISS& env, const bc::Xor&) {
-  binOpBoolImpl(
-    env,
-    [&] (Cell c1, Cell c2) {
-      return cellToBool(c1) ^ cellToBool(c2);
-    },
-    Op::Xor
-  );
+  binOpBoolImpl(env, [&] (Cell c1, Cell c2) {
+    return cellToBool(c1) ^ cellToBool(c2);
+  });
 }
 
 void castBoolImpl(ISS& env, bool negate) {
@@ -2186,7 +2145,7 @@ void fpassCXHelper(ISS& env, int param, bool error) {
           } else {
             return reduce(env,
                           bc::String { s_byRefWarn.get() },
-                          bc::Int { k_E_STRICT },
+                          bc::Int { (int)ErrorMode::STRICT },
                           bc::FCallBuiltin { 2, 2, s_trigger_error.get() },
                           bc::PopC {});
           }
@@ -2221,17 +2180,23 @@ void pushCallReturnType(ISS& env, Type&& ty) {
   return push(env, std::move(ty));
 }
 
-StaticString s_defined { "defined" };
+const StaticString s_defined { "defined" };
+const StaticString s_function_exists { "function_exists" };
 
 void fcallKnownImpl(ISS& env, uint32_t numArgs) {
   auto const ar = fpiPop(env);
   always_assert(ar.func.hasValue());
   specialFunctionEffects(env, ar);
 
+  if (ar.func->name()->isame(s_function_exists.get())) {
+    handle_function_exists(env, numArgs, false);
+  }
+
   std::vector<Type> args(numArgs);
   for (auto i = uint32_t{0}; i < numArgs; ++i) {
     args[numArgs - i - 1] = popF(env);
   }
+
   if (options.HardConstProp &&
       numArgs == 1 &&
       ar.func->name()->isame(s_defined.get())) {
@@ -2659,18 +2624,48 @@ void in(ISS& env, const bc::StaticLocInit& op) {
 }
 
 /*
- * This can't trivially check that the class/trait/interface exists
- * (e.g. via resolve_class) without knowing either:
- *
- *  a) autoload is guaranteed to load it and t1 == true, or
- *  b) it's already defined in this unit.
- *
- * op.subop (OODeclExistsOp) would be useful with resolution of the class
+ * Amongst other things, we use this to mark units non-persistent.
  */
 void in(ISS& env, const bc::OODeclExists& op) {
-  popC(env);
-  popC(env);
-  push(env, TBool);
+  auto flag = popC(env);
+  auto name = popC(env);
+  push(env, [&] {
+      if (!name.strictSubtypeOf(TStr)) return TBool;
+      auto const v = tv(name);
+      if (!v) return TBool;
+      auto rcls = env.index.resolve_class(env.ctx, v->m_data.pstr);
+      if (!rcls || !rcls->cls()) return TBool;
+      auto const mayExist = [&] () -> bool {
+        switch (op.subop1) {
+          case OODeclExistsOp::Class:
+            return !(rcls->cls()->attrs & (AttrInterface | AttrTrait));
+          case OODeclExistsOp::Interface:
+            return rcls->cls()->attrs & AttrInterface;
+          case OODeclExistsOp::Trait:
+            return rcls->cls()->attrs & AttrTrait;
+        }
+        not_reached();
+      }();
+      auto unit = rcls->cls()->unit;
+      auto canConstProp = [&] {
+        // Its generally not safe to constprop this, because of
+        // autoload. We're safe if its part of systemlib, or a
+        // superclass of the current context.
+        if (is_systemlib_part(*unit)) return true;
+        if (!env.ctx.cls) return false;
+        auto thisClass = env.index.resolve_class(env.ctx, env.ctx.cls->name);
+        return thisClass && thisClass->subtypeOf(*rcls);
+      };
+      if (canConstProp()) {
+        constprop(env);
+        return mayExist ? TTrue : TFalse;
+      }
+      unit->persistent.store(false, std::memory_order_relaxed);
+      // At this point, if it mayExist, we still don't know that it
+      // *does* exist, but if not we know that it either doesn't
+      // exist, or it doesn't have the right type.
+      return mayExist ? TBool : TFalse;
+    } ());
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
@@ -2758,8 +2753,15 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
 
 // These only occur in traits, so we don't need to do better than
 // this.
-void in(ISS& env, const bc::Self& op) { putClsRefSlot(env, op.slot, TCls); }
-void in(ISS& env, const bc::Parent& op) { putClsRefSlot(env, op.slot, TCls); }
+void in(ISS& env, const bc::Self& op) {
+  auto self = selfClsExact(env);
+  putClsRefSlot(env, op.slot, self ? *self : TCls);
+}
+
+void in(ISS& env, const bc::Parent& op) {
+  auto parent = parentClsExact(env);
+  putClsRefSlot(env, op.slot, parent ? *parent : TCls);
+}
 
 void in(ISS& env, const bc::CreateCl& op) {
   auto const nargs   = op.arg1;
@@ -2932,9 +2934,6 @@ void in(ISS& env, const bc::Silence& op) {
 }
 
 void in(ISS& emv, const bc::VarEnvDynCall&) {}
-
-void in(ISS& env, const bc::LowInvalid&)  { always_assert(!"LowInvalid"); }
-void in(ISS& env, const bc::HighInvalid&) { always_assert(!"HighInvalid"); }
 
 }
 

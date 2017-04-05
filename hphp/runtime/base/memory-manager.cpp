@@ -208,7 +208,7 @@ void MemoryManager::resetRuntimeOptions() {
     });
   }
   MemoryManager::TlsWrapper::destroy(); // ~MemoryManager()
-  MemoryManager::TlsWrapper::getCheck(); // new MemeoryManager()
+  MemoryManager::TlsWrapper::getCheck(); // new MemoryManager()
 }
 
 void MemoryManager::resetStatsImpl(bool isInternalCall) {

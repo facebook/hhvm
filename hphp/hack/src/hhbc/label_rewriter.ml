@@ -156,7 +156,9 @@ let rewrite_params_and_body defs used refs params body =
       match dv with
       | None -> param
       | Some (l, e) ->
-        Hhas_param.make (Hhas_param.name param) (Hhas_param.type_info param)
+        Hhas_param.make (Hhas_param.name param)
+          (Hhas_param.is_reference param)
+          (Hhas_param.type_info param)
           (Some (relabel l, e)) in
     let params = List.map params rewrite_param in
     let body = InstrSeq.filter_map body ~f:rewrite_instr in

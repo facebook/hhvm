@@ -22,11 +22,13 @@
 (* Parsing modes *)
 (*****************************************************************************)
 
+(* TODO(t16719394): kill off file_type *)
 type file_type =
   | PhpFile
   | HhFile
 
 type mode =
+  | Mphp     (* Do the best you can to support legacy PHP *)
   | Mdecl    (* just declare signatures, don't check anything *)
   | Mstrict  (* check everthing! *)
   | Mpartial (* Don't fail if you see a function/class you don't know *)

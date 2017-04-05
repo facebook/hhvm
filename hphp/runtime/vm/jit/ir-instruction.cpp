@@ -161,14 +161,6 @@ bool IRInstruction::consumesReference(int srcNo) const {
       // Consumes the $this/Class field of the ActRec
       return srcNo == 2;
 
-    case MapAddElemC:
-      // value at index 2
-      return srcNo == 2;
-
-    case ColAddNewElemC:
-      // value at index 1
-      return srcNo == 1;
-
     case CheckNullptr:
       return srcNo == 0;
 
@@ -374,7 +366,7 @@ Type setElemReturn(const IRInstruction* inst) {
 }
 
 Type newColReturn(const IRInstruction* inst) {
-  assertx(inst->is(NewCol, NewColFromArray));
+  assertx(inst->is(NewCol, NewPair, NewColFromArray));
   auto getColClassType = [&](CollectionType ct) -> Type {
     auto name = collections::typeToString(ct);
     auto cls = Unit::lookupUniqueClassInContext(name, inst->ctx());
@@ -384,6 +376,8 @@ Type newColReturn(const IRInstruction* inst) {
 
   if (inst->is(NewCol)) {
     return getColClassType(inst->extra<NewCol>()->type);
+  } else if (inst->is(NewPair)) {
+    return getColClassType(CollectionType::Pair);
   }
   return getColClassType(inst->extra<NewColFromArray>()->type);
 }

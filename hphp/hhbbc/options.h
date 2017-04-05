@@ -23,13 +23,19 @@
 
 #include "hphp/util/functional.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP {
+
+enum class Op : uint16_t;
+
+namespace HHBBC {
 
 using MethodMap = std::map<
   std::string,
   std::set<std::string,stdltistr>,
   stdltistr
 >;
+
+using OpcodeSet = std::set<Op>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,6 +48,12 @@ struct Options {
    * at a higher level than the rest of the program.
    */
   MethodMap TraceFunctions;
+
+  /*
+   * When debugging, it can be useful to ask for a list of functions
+   * that use particular bytecodes.
+   */
+  OpcodeSet TraceBytecodes;
 
   //////////////////////////////////////////////////////////////////////
 

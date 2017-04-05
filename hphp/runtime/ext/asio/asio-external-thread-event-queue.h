@@ -49,10 +49,6 @@ struct AsioExternalThreadEventQueue final {
   void receiveSome();
   void send(c_ExternalThreadEventWaitHandle* wait_handle);
 
-  // TODO: t7930461 if other threads have ptrs to our heap stashed in their
-  // thread-local or stack, we need to also scan them, or track them
-  // as roots somewhere.
-
 private:
   c_ExternalThreadEventWaitHandle* m_received;
   std::atomic<c_ExternalThreadEventWaitHandle*> m_queue;

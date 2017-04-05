@@ -109,14 +109,18 @@ struct c_WaitHandle : ObjectData {
     ExternalThreadEvent,
   };
 
-  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
-                        HeaderKind kind = HeaderKind::WaitHandle) noexcept
+  explicit c_WaitHandle(Class* cls, HeaderKind kind,
+                        type_scan::Index tyindex) noexcept
     : ObjectData(cls,
                  ObjectData::IsWaitHandle | ObjectData::NoDestructor |
                  ObjectData::IsCppBuiltin,
                  kind,
-                 NoInit{}) {}
-  ~c_WaitHandle() {}
+                 NoInit{}),
+      m_tyindex(tyindex)
+  {}
+
+  ~c_WaitHandle()
+  {}
 
  public:
   static constexpr ptrdiff_t stateOff() {
@@ -176,10 +180,12 @@ struct c_WaitHandle : ObjectData {
   static const int8_t STATE_SUCCEEDED = 0; // completed with result
   static const int8_t STATE_FAILED    = 1; // completed with exception
 
+  void scan(type_scan::Scanner&) const;
+
  private: // layout, ignoring ObjectData fields.
-  // 0                           8             9             10 12
-  // [m_parentChain             ][m_contextIdx][m_kind_state][ ][m_ctxVecIndex]
-  // [m_resultOrException.m_data][m_type]                       [m_aux]
+  // 0                         8           9           10       12
+  // [parentChain             ][contextIdx][kind_state][tyindex][ctxVecIndex]
+  // [resultOrException.m_data][m_type]                         [aux]
   static void checkLayout() {
     constexpr auto data = offsetof(c_WaitHandle, m_resultOrException);
     constexpr auto type = data + offsetof(TypedValue, m_type);
@@ -190,10 +196,7 @@ struct c_WaitHandle : ObjectData {
     static_assert(offsetof(c_WaitHandle, m_ctxVecIndex) == aux, "");
   }
 
-  // TODO: t7925088 switch on kind and handle subclasses
-
  protected:
-  TYPE_SCAN_IGNORE_ALL;
   union {
     // STATE_SUCCEEDED || STATE_FAILED
     Cell m_resultOrException;
@@ -209,6 +212,9 @@ struct c_WaitHandle : ObjectData {
       // valid in any WaitHandle state. doesn't overlap Cell fields.
       uint8_t m_kind_state;
 
+      // type index of concrete waithandle for gc-scanning
+      type_scan::Index m_tyindex;
+
       union {
         // ExternalThreadEventWaitHandle: STATE_WAITING
         // SleepWaitHandle: STATE_WAITING
@@ -216,6 +222,14 @@ struct c_WaitHandle : ObjectData {
       };
     };
   };
+
+  TYPE_SCAN_CUSTOM() {
+    if (isFinished()) {
+      scanner.scan(m_resultOrException);
+    } else {
+      scanner.scan(m_parentChain);
+    }
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

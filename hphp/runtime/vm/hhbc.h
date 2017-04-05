@@ -349,7 +349,6 @@ constexpr int32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
-  O(LowInvalid,      NA,               NOV,             NOV,        NF) \
   O(Nop,             NA,               NOV,             NOV,        NF) \
   O(EntryNop,        NA,               NOV,             NOV,        NF) \
   O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
@@ -392,9 +391,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(AddNewElemV,     NA,               TWO(VV,CV),      ONE(CV),    NF) \
   O(NewCol,          ONE(IVA),         NOV,             ONE(CV),    NF) \
+  O(NewPair,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(ColFromArray,    ONE(IVA),         ONE(CV),         ONE(CV),    NF) \
-  O(MapAddElemC,     NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
-  O(ColAddNewElemC,  NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Cns,             ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
@@ -670,15 +668,17 @@ constexpr int32_t kMaxConcatN = 4;
   O(MemoSet,         TWO(IVA, LAR),    C_MFINAL,        ONE(CV),    NF) \
   O(MaybeMemoType,   NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsMemoType,      NA,               ONE(CV),         ONE(CV),    NF) \
-  O(VarEnvDynCall,   NA,               NOV,             NOV,        NF) \
-  O(HighInvalid,     NA,               NOV,             NOV,        NF)
+  O(VarEnvDynCall,   NA,               NOV,             NOV,        NF)
 
 enum class Op : uint16_t {
 #define O(name, ...) name,
   OPCODES
 #undef O
 };
-auto constexpr Op_count = size_t(Op::HighInvalid) + 1;
+
+#define O(...) + 1
+constexpr size_t Op_count = 0 OPCODES;
+#undef O
 
 /*
  * Also put Op* in the enclosing namespace, to avoid having to change every
@@ -701,7 +701,7 @@ inline constexpr bool operator>=(Op a, Op b) {
 #endif
 
 constexpr bool isValidOpcode(Op op) {
-  return op > OpLowInvalid && op < OpHighInvalid;
+  return size_t(op) < Op_count;
 }
 
 inline MOpMode getQueryMOpMode(QueryMOp op) {

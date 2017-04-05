@@ -161,7 +161,7 @@ function hhvm_binary_routes() {
 }
 
 function hh_server_binary_routes() {
-  return array(
+  $routes = array(
     "fbbuild" => "/_bin/hphp/hack/src",
     "buck"    => "/buck-out/gen/hphp/hack/src/hh_server",
     "cmake"   => "/hphp/hack/bin"
@@ -171,6 +171,13 @@ function hh_server_binary_routes() {
     $routes["fbbuild"] = "/" . $env_root . "/hphp/hack/src";
   }
   return $routes;
+}
+
+function hh_codegen_binary_routes() {
+  return array(
+    "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
+    "cmake"   => "/hphp/hack/bin"
+  );
 }
 
 // For Facebook: We have several build systems, and we can use any of them in
@@ -248,6 +255,14 @@ function hhvm_path() {
   return rel_path($file);
 }
 
+function hh_codegen_cmd($options) {
+  // Right now hh_single_compile doesn't understand any of HHVM's options, to
+  // get 100% test coverage this will need to be fixed
+  $cmd = hh_codegen_path();
+  $cmd .= ' -v Eval.EnableHipHopSyntax=1';
+  return $cmd;
+}
+
 function bin_root() {
   if (getenv("HHVM_BIN") !== false) {
     return dirname(realpath(getenv("HHVM_BIN")));
@@ -292,6 +307,38 @@ function hh_server_bin_root() {
   $home = hphp_home();
   $env_tool = getenv("FBCODE_BUILD_TOOL");
   $routes = hh_server_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
+  }
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
+}
+
+function hh_codegen_path() {
+  $file = "";
+  if (getenv("HH_CODEGEN_BIN") !== false) {
+    $file = realpath(getenv("HH_CODEGEN_BIN"));
+  } else {
+    $file = hh_codegen_bin_root().'/hh_single_compile.opt';
+  }
+  if (!is_file($file)) {
+    error("$file doesn't exist. Did you forget to build first?");
+  }
+  return rel_path($file);
+}
+
+function hh_codegen_bin_root() {
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hh_codegen_binary_routes();
 
   if ($env_tool !== false) {
     return $home . $routes[$env_tool];
@@ -371,6 +418,7 @@ function get_options($argv) {
   $parameters = array(
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
+    'exclude-recorded-failures:' => 'x:',
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     'repo' => 'r',
@@ -400,6 +448,9 @@ function get_options($argv) {
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
     'hhserver-binary-path:' => '',
+    'compare-hh-codegen' => '',
+    'run-hh-codegen' => '',
+    'record-failures:' => '',
   );
   $options = array();
   $files = array();
@@ -458,6 +509,27 @@ function get_options($argv) {
   if (isset($options['hhbbc2'])) $options['repo'] = true;
 
   return array($options, $files);
+}
+
+/*
+ * Return the path to $test relative to __DIR__, or false if __DIR__ does not
+ * contain test.
+ */
+function canonical_path($test) {
+  $full = realpath($test);
+  if (substr($full, 0, strlen(__DIR__)) === __DIR__) {
+    return substr($full, strlen(__DIR__) + 1);
+  }
+  $dirstat = stat(__DIR__);
+  if (!is_array($dirstat)) return false;
+  for ($p = dirname($full); $p && $p !== "/"; $p = dirname($p)) {
+    $s = stat($p);
+    if (!is_array($s)) continue;
+    if ($s['ino'] === $dirstat['ino'] && $s['dev'] === $dirstat['dev']) {
+      return substr($full, strlen($p) + 1);
+    }
+  }
+  return false;
 }
 
 /*
@@ -584,6 +656,13 @@ function find_tests($files, array $options = null) {
     $exclude = $options['exclude-pattern'];
     $tests = array_filter($tests, function($test) use ($exclude) {
       return !preg_match($exclude, $test);
+    });
+  }
+  if (!empty($options['exclude-recorded-failures'])) {
+    $exclude_file = $options['exclude-recorded-failures'];
+    $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
+    $tests = array_filter($tests, function($test) use ($exclude) {
+      return (false === in_array(canonical_path($test), $exclude));
     });
   }
   if (!empty($options['include'])) {
@@ -746,6 +825,10 @@ function hhvm_cmd_impl() {
       $args[] = '--count='.$options['recycle-tc'];
       $args[] = '-vEval.StressUnitCacheFreq=1';
       $args[] = '-vEval.EnableReusableTC=true';
+    }
+
+    if (isset($options['run-hh-codegen'])) {
+      $args[] = '-vEval.AllowHhas=1';
     }
 
     if (!isset($options['cores'])) {
@@ -939,6 +1022,7 @@ class Status {
   const MODE_VERBOSE = 1;
   const MODE_FBMAKE = 2;
   const MODE_TESTPILOT = 3;
+  const MODE_RECORD_FAILURES = 4;
 
   const MSG_STARTED = 7;
   const MSG_FINISHED = 1;
@@ -1232,8 +1316,8 @@ function clean_intermediate_files($test, $options) {
   if (isset($options['no-clean'])) {
     return;
   }
-  $exts = array('out', 'diff', 'repo',
-                'after.round_trip.hhas', 'before.round_trip.hhas');
+  $exts = array('out', 'diff', 'repo', 'round_trip.hhas',
+                'hhcodegen_output.hhas', 'hhcodegen_messages');
   foreach ($exts as $ext) {
     $file = "$test.$ext";
     if (file_exists($file)) {
@@ -1480,11 +1564,64 @@ function generate_diff($wanted, $wanted_re, $output)
 
 function dump_hhas_to_temp($hhvm_cmd, $test) {
   $tmp_file = $test . '.round_trip.hhas';
-  $cmd = str_replace(' -- ', ' -vEval.DumpHhas=1 -- ', $hhvm_cmd);
-  if ($cmd == $hhvm_cmd) $cmd .= " -vEval.DumpHhas=1";
+  $cmd = str_replace(
+    ' -- ', ' -m dumphhas -vEval.AllowHhas=1 -- ', $hhvm_cmd
+  );
+  if ($cmd == $hhvm_cmd) $cmd .= " -m dumphhas -vEval.AllowHhas=1";
   system("$cmd  > $tmp_file 2> /dev/null", $ret);
   if ($ret) return false;
   return $tmp_file;
+}
+
+function dump_hh_codegen($options, $test) {
+  $temp_file = $test.'.hhcodegen_output.hhas';
+  $msgs_file = $test.'.hhcodegen_messages';
+  $cmd = hh_codegen_cmd($options);
+  $ret = false;
+  system("/usr/bin/timeout 300 $cmd $test > $temp_file 2> $msgs_file", $ret);
+  return $ret === 0 ? $temp_file : false;
+}
+
+function strip_hhas_file($file) {
+  $h = fopen($file, "r");
+  $buf = "";
+  while (($s = fgets($h)) !== false) {
+    if (substr($s, 0, 6) === "# NYI:") {
+      fclose($h);
+      return false;
+    }
+    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath ") {
+      continue;
+    }
+    $buf .= $s;
+  }
+  fclose($h);
+  file_put_contents($file, $buf);
+}
+
+function contains_nyi_line($file) {
+  $h = fopen($file, "r");
+  while (($s = fgets($h)) !== false) {
+    if (substr($s, 0, 6) === "# NYI:") {
+      fclose($h);
+      return true;
+    }
+  }
+  fclose($h);
+  return false;
+}
+
+const ASM_ERROR = "  String \"Assembler Error: ";
+function is_assembler_fail($file) {
+  $h = fopen($file, "r");
+  while (($s = fgets($h)) !== false) {
+    if (substr($s, 0, strlen(ASM_ERROR)) === ASM_ERROR) {
+      fclose($h);
+      return true;
+    }
+  }
+  fclose($h);
+  return false;
 }
 
 const HHAS_EXT = '.hhas';
@@ -1812,13 +1949,62 @@ function run_test($options, $test) {
   if (file_exists($test.'.onlyrepo')) {
     return 'skip-onlyrepo';
   }
+
   if (isset($options['hhas-round-trip'])) {
+    if (substr($test, -5) === ".hhas") return 'skip';
     $hhas_temp = dump_hhas_to_temp($hhvm, $test);
     if ($hhas_temp === false) {
       echo "system failed\n";
       exit(1);
     }
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
+  if (isset($options['run-hh-codegen'])) {
+    if (substr($test, -5) === ".hhas") return 'skip';
+
+    $hhas_temp = dump_hh_codegen($options, $test);
+    if (!$hhas_temp || file_get_contents($hhas_temp) === "") {
+      file_put_contents($test.'.diff', "CODEGEN FAILED");
+      return false;
+    }
+    if (contains_nyi_line($hhas_temp) === true) return 'skip';
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
+  if (isset($options['compare-hh-codegen'])) {
+    $diff = $test.'.diff';
+
+    if (substr($test, -5) === ".hhas") return 'skip';
+    $hhas = dump_hhas_to_temp($hhvm, $test);
+    if (!$hhas) return 'skip';
+    $hhcg = dump_hh_codegen($options, $test);
+    if (!$hhcg || file_get_contents($hhcg) === "") {
+      file_put_contents($diff, "CODEGEN FAILED");
+      return false;
+    }
+    if (contains_nyi_line($hhcg) === true) return 'skip';
+    list($hhvm2, $hhvm2_env) = hhvm_cmd($options, $hhcg);
+    $hhcg2 = dump_hhas_to_temp($hhvm2, $hhcg);
+    $rv = true;
+    if (
+      !$hhcg2 ||
+      file_get_contents($hhcg2) === "" ||
+      is_assembler_fail($hhcg2)
+    ) {
+      $rv = false;
+      $hhcg2 = $hhcg;
+    }
+
+    strip_hhas_file($hhas);
+    strip_hhas_file($hhcg2);
+
+    system("diff $hhcg2 $hhas > $diff", $ret);
+    if ($ret === 0) {
+      if ($rv) unlink($diff);
+      return $rv;
+    }
+    return false;
   }
 
   if ($outputs = run_config_server($options, $test)) {
@@ -1873,12 +2059,12 @@ function print_commands($tests, $options) {
     $hhbbc_cmds .= $hhbbc_cmd;
     if (isset($options['hhbbc2'])) {
       foreach ((array)$command as $c) {
-        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
+        $hhbbc_cmds .= $c." -m dumphhas > $test.before.round_trip.hhas\n";
       }
       $hhbbc_cmds .= "mv $test.repo/hhvm.hhbbc $test.repo/hhvm.hhbc\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       foreach ((array)$command as $c) {
-        $hhbbc_cmds .= $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
+        $hhbbc_cmds .= $c." -m dumphhas > $test.after.round_trip.hhas\n";
       }
       $hhbbc_cmds .=
         "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
@@ -1895,8 +2081,13 @@ function msg_loop($num_tests, $queue) {
   $skipped = 0;
   $failed = 0;
 
-  $do_progress = Status::getMode() == Status::MODE_NORMAL &&
+  $do_progress =
+    (
+      Status::getMode() === Status::MODE_NORMAL ||
+      Status::getMode() === Status::MODE_RECORD_FAILURES
+    ) &&
     Status::hasCursorControl();
+
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
     preg_match_all("/columns ([0-9]+);/", $stty, $output);
@@ -1941,6 +2132,9 @@ function msg_loop($num_tests, $queue) {
 
           case Status::MODE_TESTPILOT:
             break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
         }
 
       case Status::MSG_TEST_PASS:
@@ -1969,6 +2163,9 @@ function msg_loop($num_tests, $queue) {
 
           case Status::MODE_TESTPILOT:
             Status::sayFBMake($test, 'passed', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
             break;
         }
         break;
@@ -2000,6 +2197,9 @@ function msg_loop($num_tests, $queue) {
           case Status::MODE_TESTPILOT:
             Status::sayFBMake($test, 'not_relevant', $stime, $etime);
             break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
         }
         break;
 
@@ -2027,6 +2227,9 @@ function msg_loop($num_tests, $queue) {
 
           case Status::MODE_TESTPILOT:
             Status::sayFBMake($test, 'failed', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
             break;
         }
         break;
@@ -2551,6 +2754,9 @@ function main($argv) {
   if (isset($options['testpilot'])) {
     Status::setMode(Status::MODE_TESTPILOT);
   }
+  if (isset($options['record-failures'])) {
+    Status::setMode(Status::MODE_RECORD_FAILURES);
+  }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
 
   Status::$key = rand();
@@ -2644,7 +2850,36 @@ function main($argv) {
     unlink($bad_test_file);
   }
 
-  if (isset($options['fbmake']) || isset($options['testpilot'])) {
+  if (isset($options['record-failures'])) {
+    $fail_file = $options['record-failures'];
+    $failed_tests = array();
+    $prev_failing = array();
+    if (file_exists($fail_file)) {
+      $prev_failing = explode("\n", file_get_contents($fail_file));
+    }
+
+    $new_fails = 0;
+    $new_passes = 0;
+    foreach ($results as $r) {
+      if (!isset($r['name']) || !isset($r['status'])) continue;
+      $test = canonical_path($r['name']);
+      $status = $r['status'];
+      if ($status === 'passed' && in_array($test, $prev_failing)) {
+        $new_passes++;
+        continue;
+      }
+      if ($status !== 'failed') continue;
+      if (!in_array($test, $prev_failing)) $new_fails++;
+      $failed_tests[] = $test;
+    }
+    printf(
+      "Recording %d tests as failing.\n".
+      "There are %d new failing tests, and %d new passing tests.\n",
+      count($failed_tests), $new_fails, $new_passes
+    );
+    sort($failed_tests);
+    file_put_contents($fail_file, implode("\n", $failed_tests));
+  } else if (isset($options['fbmake']) || isset($options['testpilot'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));
   } else if (!$return_value) {
     print_success($tests, $results, $options);

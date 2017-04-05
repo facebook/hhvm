@@ -19,7 +19,8 @@ let from_ast tparams p =
   let param_default_value = Option.map p.Ast.param_expr
     ~f:(fun e -> Label.next_default_arg (), e)
   in
-  Hhas_param.make param_name param_type_info param_default_value
+  Hhas_param.make param_name p.A.param_is_reference
+    param_type_info param_default_value
 
 let from_asts tparams params =
   List.map params (from_ast tparams)
@@ -31,7 +32,7 @@ let emit_param_default_value_setter params =
     Option.map dvo (fun (l, e) ->
       gather [
         instr_label l;
-        Hhbc_from_nast.from_expr e;
+        Emit_expression.from_expr e;
         instr_setl (Local.Named param_name);
         instr_popc;
       ]) )

@@ -33,8 +33,9 @@ struct c_SleepWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(SleepWaitHandle);
   WAITHANDLE_DTOR(SleepWaitHandle);
 
-  explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_SleepWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+                           type_scan::getIndexForMalloc<c_SleepWaitHandle>()) {}
   ~c_SleepWaitHandle() {}
 
  public:

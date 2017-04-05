@@ -94,12 +94,13 @@ macro that you don’t need can just be ignored by your macro.
 ```
 //  name             immediates        inputs           outputs     flags
 #define OPCODES \
-  O(LowInvalid,      NA,               NOV,             NOV,        NF) \
   O(Nop,             NA,               NOV,             NOV,        NF) \
+  O(EntryNop,        NA,               NOV,             NOV,        NF) \
+  O(BreakTraceHint,  NA,               NOV,             NOV,        NF) \
+  O(DiscardClsRef,   ONE(CAR),         NOV,             NOV,        NF) \
+  O(PopC,            NA,               ONE(CV),         NOV,        NF) \
+  O(PopV,            NA,               ONE(VV),         NOV,        NF) \
   ...
-  O(Silence,         TWO(LA,OA(SilenceOp)),                          \
-                                       NOV,             NOV,        NF) \
-  O(HighInvalid,     NA,               NOV,             NOV,        NF)
 ```
 
 

@@ -133,8 +133,9 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
 }
 
 void AsioBlockableChain::unblock() {
-  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
-    next = cur->getNextParent();
+  while (auto cur = m_firstParent) {
+    m_firstParent = cur->getNextParent();
+    cur->updateNextParent(nullptr);
     // the onUnblocked handler may free cur
     switch (cur->getKind()) {
       case Kind::AsyncFunctionWaitHandleNode:
@@ -180,11 +181,12 @@ void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
     if (ab == cur) {
       // Found the AAWH we need to remove
       assert(cur->getKind() == Kind::AwaitAllWaitHandleNode);
-      if (prev == nullptr) {
+      if (!prev) {
         m_firstParent = next;
       } else {
         prev->updateNextParent(next);
       }
+      cur->updateNextParent(nullptr);
       return;
     }
     prev = cur;

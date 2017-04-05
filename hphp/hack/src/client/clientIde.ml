@@ -213,7 +213,8 @@ let handle_request conn id protocol = function
   | Find_references args ->
     let filename, line, column = file_position_to_tuple args in
     let filename = ServerUtils.FileName filename in
-    rpc conn (Rpc.IDE_FIND_REFS (filename, line, column)) |>
+    let include_defs = false in
+    rpc conn (Rpc.IDE_FIND_REFS (filename, line, column, include_defs)) |>
     FindRefsService.result_to_ide_message |>
     print_response id protocol
   | Highlight_references args ->
@@ -222,8 +223,9 @@ let handle_request conn id protocol = function
     let r = rpc conn (Rpc.IDE_HIGHLIGHT_REFS (filename, line, column)) in
     print_response id protocol (Highlight_references_response r)
   | Format args ->
-    begin match rpc conn (Rpc.IDE_FORMAT args) with
-      | Result.Ok r -> print_response id protocol (Format_response r)
+    begin match rpc conn (Rpc.IDE_FORMAT (ServerFormatTypes.Range args)) with
+      | Result.Ok r -> print_response id protocol
+                         (Format_response r.ServerFormatTypes.new_text)
       | Result.Error e -> handle_error id protocol (Server_error e)
     end
   | Coverage_levels filename ->

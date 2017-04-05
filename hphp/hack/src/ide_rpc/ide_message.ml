@@ -92,7 +92,12 @@ and autocomplete_item = {
   callable_details : callable_details option;
 }
 
-and infer_type_response = string option
+and infer_type_response = {
+  (* Pretty-printed type, None if not available *)
+  type_string : string option;
+  (* JSON representation of type *)
+  type_json : string option;
+  }
 
 and callable_details = {
   return_type : string;

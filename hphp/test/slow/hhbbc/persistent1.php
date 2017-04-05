@@ -1,0 +1,14 @@
+<?php
+
+function main($x, $y) {
+  var_dump(class_exists($x, false));
+  var_dump(class_exists($y, false));
+  if (!class_exists('X')) {
+    echo "Loading...\n";
+    require_once('persistent.inc');
+  }
+
+  var_dump(new X, new Y);
+}
+
+main('X', 'Y');

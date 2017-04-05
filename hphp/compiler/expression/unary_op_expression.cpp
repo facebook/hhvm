@@ -154,6 +154,41 @@ bool isKeysetScalar(ExpressionPtr exp) {
   return true;
 }
 
+bool isArrayScalar(ExpressionPtr exp) {
+  if (!exp) return true;
+  assertx(exp->is(Expression::KindOfExpressionList));
+
+  auto list = static_pointer_cast<ExpressionList>(exp);
+  assertx(list->getListKind() == ExpressionList::ListKindParam);
+
+  if (!list->isScalar()) return false;
+
+  // If HackArrCompatNotices is enabled, we'll raise a notice on using anything
+  // other than an int or string as an array key. So, anything using those keys
+  // can't be scalar.
+  if (!RuntimeOption::EvalHackArrCompatNotices) return true;
+
+  for (int i = 0; i < list->getCount(); ++i) {
+    auto& itemExp = (*list)[i];
+    if (!itemExp) continue;
+    assertx(itemExp->is(Expression::KindOfArrayPairExpression));
+
+    auto pair = static_pointer_cast<ArrayPairExpression>(itemExp);
+    auto name = pair->getName();
+
+    if (!name) continue;
+
+    Variant val;
+    auto const DEBUG_ONLY nameIsScalar = name->getScalarValue(val);
+    assertx(nameIsScalar);
+    assertx(pair->getValue() && pair->getValue()->isScalar());
+
+    if (!val.isString() && !val.isInteger()) return false;
+  }
+
+  return true;
+}
+
 bool UnaryOpExpression::isScalar() const {
   switch (m_op) {
   case '!':
@@ -163,6 +198,7 @@ bool UnaryOpExpression::isScalar() const {
   case '@':
     return m_exp->isScalar();
   case T_ARRAY:
+    return isArrayScalar(m_exp);
   case T_VEC:
     return (!m_exp || m_exp->isScalar());
   case T_KEYSET:
@@ -218,6 +254,28 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
 bool UnaryOpExpression::getScalarValue(Variant &value) {
   if (m_exp) {
     if (m_op == T_ARRAY) {
+      // If HackArrCompatNotices is enabled, we'll notice on trying to use
+      // anything other than an int or string as a key, so don't create static
+      // arrays with such keys.
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        auto exp_list = dynamic_pointer_cast<ExpressionList>(m_exp);
+        if (!exp_list) return false;
+        ArrayInit init(exp_list->getCount(), ArrayInit::Mixed{});
+        auto const result = exp_list->getListScalars(
+          [&](const Variant& n, const Variant& v) {
+            if (n.isInitialized()) {
+              if (!n.isInteger() && !n.isString()) return false;
+              init.setValidKey(n, v);
+            } else {
+              init.append(v);
+            }
+            return true;
+          }
+        );
+        if (!result) return false;
+        value = init.toVariant();
+        return true;
+      }
       return m_exp->getScalarValue(value);
     }
     if (m_op == T_DICT) {

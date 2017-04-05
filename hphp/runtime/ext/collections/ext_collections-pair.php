@@ -52,31 +52,25 @@ namespace HH {
  * simply provided for the typechecker and for developer reference.
  *
  * Like all objects in PHP, `Pair`s have reference-like semantics. The elements
- * or a `Pair` cannot be mutated (i.e. you can assign to the elements of a
+ * or a `Pair` cannot be mutated (i.e. you can't assign to the elements of a
  * `Pair`) though `Pair`s may contain mutable objects.
  *
  * `Pair`s only support integer keys. If a non-integer key is used, an
- * exception will be thrown.
+ * exception will be thrown. Only keys 0 and 1 will ever exist in a `Pair`,
+ * and these keys will always exist.
  *
- * `Pair`s support `$m[$k]` style syntax for getting and setting values by
- * key. `Pair`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and
- * they provide similar semantics as arrays. Elements can be added to a `Pair`
- * using `$m[] = ..` syntax.
+ * `Pair`s support `$m[$k]` style syntax for getting values by key. `Pair`s
+ * also support `isset($m[$k])` and `empty($m[$k])` syntax, and they provide
+ * similar semantics to arrays.
  *
  * `Pair`s do not support taking elements by reference. If binding assignment
  * (`=&`) is used with an element of a `Pair`, or if an element of a `Pair` is
- * passed by reference, of if a `Pair` is used with foreach by reference, an
+ * passed by reference, or if a `Pair` is used with foreach by reference, an
  * exception will be thrown.
- *
- * `Pair` keys are always 0 and 1, repsectively.
- *
- * You may notice that many methods affecting the instace of `Pair` return an
- * `ImmVector` -- `Pair`s are essentially backed by 2-element `ImmVector`s.
  *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
-<<__Collection>>
 final class Pair implements \ConstVector {
 
   /**

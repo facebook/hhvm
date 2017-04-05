@@ -416,40 +416,22 @@ void emitAddNewElemC(IRGS& env) {
 }
 
 void emitNewCol(IRGS& env, int type) {
+  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   push(env, gen(env, NewCol, NewColData{type}));
 }
 
+void emitNewPair(IRGS& env) {
+  auto const c1 = popC(env, DataTypeGeneric);
+  auto const c2 = popC(env, DataTypeGeneric);
+  // elements were pushed onto the stack in the order they should appear
+  // in the pair, so the top of the stack should become the second element
+  push(env, gen(env, NewPair, c2, c1));
+}
+
 void emitColFromArray(IRGS& env, int type) {
+  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   auto const arr = popC(env);
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
-}
-
-void emitMapAddElemC(IRGS& env) {
-  if (!topC(env, BCSPRelOffset{2})->isA(TObj)) {
-    return interpOne(env, TObj, 3);
-  }
-  if (!topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type().
-      subtypeOfAny(TInt, TStr)) {
-    interpOne(env, TObj, 3);
-    return;
-  }
-
-  auto const val = popC(env);
-  auto const key = popC(env);
-  auto const coll = popC(env);
-  push(env, gen(env, MapAddElemC, coll, key, val));
-  decRef(env, key);
-}
-
-void emitColAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPRelOffset{1})->isA(TObj)) {
-    return interpOne(env, TObj, 2);
-  }
-
-  auto const val = popC(env);
-  auto const coll = popC(env);
-  // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(env, gen(env, ColAddNewElemC, coll, val));
 }
 
 void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {

@@ -1243,6 +1243,14 @@ void raiseHackArrCompatArrMixedCmp() {
   raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
 }
 
+void raiseHackArrCompatMissingIncDec() {
+  raise_hackarr_compat_notice("Inc/dec on missing array element");
+}
+
+void raiseHackArrCompatMissingSetOp() {
+  raise_hackarr_compat_notice("Set-op on missing array element");
+}
+
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
   return folly::sformat(
     "Implicit conversion of {} to array key",

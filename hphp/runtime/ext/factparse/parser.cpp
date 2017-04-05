@@ -538,6 +538,12 @@ void Parser::onVec(Token& out, Token& exprs) {
 void Parser::onKeyset(Token& out, Token& exprs) {
 }
 
+void Parser::onVArray(Token& out, Token& exprs) {
+}
+
+void Parser::onDArray(Token& out, Token& exprs) {
+}
+
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
 }

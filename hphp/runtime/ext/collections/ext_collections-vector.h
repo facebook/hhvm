@@ -289,8 +289,6 @@ struct BaseVector : ObjectData {
     return PackedArray::MaxSize;
   }
 
-  static bool instanceof(const ObjectData*);
-
   void scan(type_scan::Scanner& scanner) const {
     scanner.scan(m_arr);
     scanner.scan(m_immCopy);
@@ -453,14 +451,12 @@ struct BaseVector : ObjectData {
 struct c_Vector : BaseVector {
   DECLARE_COLLECTIONS_CLASS(Vector);
 
-  explicit c_Vector(Class* cls = c_Vector::classof())
-    : BaseVector(cls, HeaderKind::Vector) { }
-  explicit c_Vector(Class* cls, ArrayData* arr)
-    : BaseVector(cls, HeaderKind::Vector, arr) { }
-  explicit c_Vector(Class* cls, uint32_t cap)
-    : BaseVector(cls, HeaderKind::Vector, cap) { }
-  explicit c_Vector(uint32_t cap, Class* cls = c_Vector::classof())
-    : c_Vector(cls, cap) { }
+  explicit c_Vector()
+    : BaseVector(c_Vector::classof(), HeaderKind::Vector) { }
+  explicit c_Vector(ArrayData* arr)
+    : BaseVector(c_Vector::classof(), HeaderKind::Vector, arr) { }
+  explicit c_Vector(uint32_t cap)
+    : BaseVector(c_Vector::classof(), HeaderKind::Vector, cap) { }
 
   void addAll(const Variant& it) {
     addAllImpl(it);
@@ -571,22 +567,15 @@ private:
 struct c_ImmVector : BaseVector {
   DECLARE_COLLECTIONS_CLASS(ImmVector)
 
-  explicit c_ImmVector(Class* cls = c_ImmVector::classof())
-    : BaseVector(cls, HeaderKind::ImmVector) { }
-  explicit c_ImmVector(Class* cls, ArrayData* arr)
-    : BaseVector(cls, HeaderKind::ImmVector, arr) { }
-  explicit c_ImmVector(Class* cls, uint32_t cap)
-    : BaseVector(cls, HeaderKind::ImmVector, cap) { }
-  explicit c_ImmVector(uint32_t cap, Class* cls = c_ImmVector::classof())
-    : c_ImmVector(cls, cap) { }
+  explicit c_ImmVector()
+    : BaseVector(c_ImmVector::classof(), HeaderKind::ImmVector) { }
+  explicit c_ImmVector(ArrayData* arr)
+    : BaseVector(c_ImmVector::classof(), HeaderKind::ImmVector, arr) { }
+  explicit c_ImmVector(uint32_t cap)
+    : BaseVector(c_ImmVector::classof(), HeaderKind::ImmVector, cap) { }
 
   static c_ImmVector* Clone(ObjectData* obj);
 };
-
-inline bool BaseVector::instanceof(const ObjectData* obj) {
-  return c_Vector::instanceof(obj) ||
-         c_ImmVector::instanceof(obj);
-}
 
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////

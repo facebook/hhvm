@@ -36,9 +36,9 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
   void sweep();
 
-  explicit c_ExternalThreadEventWaitHandle(Class* cls =
-      c_ExternalThreadEventWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_ExternalThreadEventWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+        type_scan::getIndexForMalloc<c_ExternalThreadEventWaitHandle>()) {}
   ~c_ExternalThreadEventWaitHandle() {}
 
  public:
@@ -69,9 +69,18 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   void destroyEvent(bool sweeping = false);
 
  private:
+  // Manipulated by other threads; logically part of the linked list
+  // owned by AsioExternalThreadEventQueue::m_received.
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
+
+  // The i/o thread-lowned event object, one per ETEWH
   AsioExternalThreadEvent* m_event;
+
   Object m_privData;
+
+  // Register for sweep, making this ETEWH also a root. AETE's could
+  // also be tracked as roots but its more complicated since they
+  // are malloc'd and accessed by other threads.
   SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
 
  public:

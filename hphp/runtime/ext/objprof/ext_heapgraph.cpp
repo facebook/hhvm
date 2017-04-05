@@ -339,9 +339,9 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
   }
 
   auto node_arr = make_map_array(
-    s_index, Variant(index),
+    s_index, VarNR(index),
     s_kind, VarNR(kind_str),
-    s_size, Variant(int64_t(node.size))
+    s_size, VarNR(int64_t(node.size))
   );
   if (type_scan::hasNonConservative()) {
     auto ty = node.tyindex;
@@ -358,6 +358,9 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
     auto func = Func::fromFuncId(cnode.static_local.funcId);
     node_arr.set(s_func, VarNR(func->nameStr()));
     node_arr.set(s_local, VarNR(cnode.static_local.name));
+    if (auto cls = func->cls()) {
+      node_arr.set(s_class, VarNR(cls->nameStr()));
+    }
   } else if (isStaticProp(node)) {
     auto cls = cnode.sprop_cache.cls;
     auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
@@ -373,17 +376,17 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
   const auto& cfrom = hgptr->cnodes[ptr.from];
 
   auto ptr_arr = make_map_array(
-    s_index, Variant(index),
+    s_index, VarNR(index),
     s_kind, VarNR(edgeKindName(ptr.ptr_kind)),
-    s_from, Variant(ptr.from),
-    s_to, Variant(ptr.to)
+    s_from, VarNR(ptr.from),
+    s_to, VarNR(ptr.to)
   );
   switch (cptr.index_kind) {
     case CapturedPtr::Key:
-      ptr_arr.set(s_key, Variant(int64_t(cptr.index)));
+      ptr_arr.set(s_key, VarNR(int64_t(cptr.index)));
       break;
     case CapturedPtr::Value:
-      ptr_arr.set(s_value, Variant(int64_t(cptr.index)));
+      ptr_arr.set(s_value, VarNR(int64_t(cptr.index)));
       break;
     case CapturedPtr::Property: {
       auto& prop = cfrom.heap_object.cls->declProperties()[cptr.index];
@@ -391,7 +394,7 @@ Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
       break;
     }
     case CapturedPtr::Offset:
-      if (cptr.index) ptr_arr.set(s_offset, Variant(int64_t(cptr.index)));
+      if (cptr.index) ptr_arr.set(s_offset, VarNR(int64_t(cptr.index)));
       break;
   }
 
@@ -601,11 +604,11 @@ Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
   auto result = make_map_array(
-    s_nodes, Variant(hgptr->hg.nodes.size()),
-    s_edges, Variant(hgptr->hg.ptrs.size()),
-    s_roots, Variant(hgptr->hg.root_ptrs.size()),
-    s_root_nodes, Variant(hgptr->hg.root_nodes.size()),
-    s_exact, Variant(type_scan::hasNonConservative() ? 1 : 0)
+    s_nodes, VarNR(int64_t(hgptr->hg.nodes.size())),
+    s_edges, VarNR(int64_t(hgptr->hg.ptrs.size())),
+    s_roots, VarNR(int64_t(hgptr->hg.root_ptrs.size())),
+    s_root_nodes, VarNR(int64_t(hgptr->hg.root_nodes.size())),
+    s_exact, VarNR(type_scan::hasNonConservative() ? 1 : 0)
   );
   return result;
 }

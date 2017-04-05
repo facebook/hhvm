@@ -1,0 +1,2 @@
+File "shape_structural_subtyping_disallows_indexing_for_unknown_field.php", line 6, characters 10-12:
+The field b is undefined (Typing[4108])

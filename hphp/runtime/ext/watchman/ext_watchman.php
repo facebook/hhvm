@@ -121,10 +121,10 @@ function watchman_unsubscribe(string $sub_name): Awaitable<string>;
  * 1 => first version
  */
 function ext_watchman_version(): int {
-  return (int)phpversion("watchman");
+  return (int)\phpversion("watchman");
 }
 
-} // namespace
+} // namespace HH
 
 
 namespace __SystemLib {

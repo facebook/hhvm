@@ -49,13 +49,22 @@ let idx env fty shape_ty field default =
   match TUtils.shape_field_name env (fst field) (snd field) with
   | None -> env, (Reason.Rwitness (fst field), Tany)
   | Some field_name ->
+    let optional_shape_field_enabled =
+      TypecheckerOptions.experimental_feature_enabled
+        (Env.get_options env)
+        TypecheckerOptions.experimental_optional_shape_field in
+    let fake_shape_field =
+      if optional_shape_field_enabled then
+        { sft_optional = true; sft_ty = res }
+      else
+        { sft_optional = false; sft_ty = (Reason.Rnone, Toption res) } in
     let fake_shape = (
       (* Rnone because we don't want the fake shape to show up in messages about
        * field non existing. Errors.missing_optional_field filters them out *)
       Reason.Rnone,
       Tshape (
         FieldsPartiallyKnown Nast.ShapeMap.empty,
-        Nast.ShapeMap.singleton field_name (Reason.Rnone, Toption res)
+        Nast.ShapeMap.singleton field_name fake_shape_field
       )
     ) in
     let env =
@@ -85,7 +94,8 @@ let to_array env shape_ty res =
       match fields_known with
       | FieldsFullyKnown ->
         let env, values =
-          List.map_env env (ShapeMap.values fdm) (Typing_utils.unresolved) in
+          ShapeFieldList.map_env
+            env (ShapeMap.values fdm) (Typing_utils.unresolved) in
         let keys = ShapeMap.keys fdm in
         let env, keys = List.map_env env keys begin fun env key ->
           let env, ty = match key with
@@ -103,6 +113,7 @@ let to_array env shape_ty res =
         end in
         let env, key =
           Typing_arrays.array_type_list_to_single_type env keys in
+        let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
         let env, value =
           Typing_arrays.array_type_list_to_single_type env values in
         env, (r, Tarraykind (AKmap (key, value)))

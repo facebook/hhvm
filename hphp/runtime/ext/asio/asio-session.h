@@ -163,7 +163,6 @@ private:
   req::vector<AsioContext*> m_contexts;
   req::vector<c_SleepWaitHandle*> m_sleepEvents;
   AsioExternalThreadEventQueue m_externalThreadEventQueue;
-  // TODO: #7930461 add list of externalThreadEvents that aren't in any context
 
   Object m_abruptInterruptException;
   Object m_onIOWaitEnter;

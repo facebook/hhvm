@@ -10,19 +10,8 @@ namespace HPHP {
 
 struct Header;
 
-// Align to 16-byte boundaries.
-using EmptyMixedArrayStorage = std::aligned_storage<
-  computeAllocBytes(MixedArray::SmallScale), 16>::type;
-extern EmptyMixedArrayStorage s_theEmptyMixedArray;
-
-/*
- * This returns a static empty MixedArray. This gets used internally
- * within the BaseMap implementation but it is not exposed outside of
- * BaseMap.
- */
-ALWAYS_INLINE MixedArray* staticEmptyMixedArray() {
-  void* vp = &s_theEmptyMixedArray;
-  return reinterpret_cast<MixedArray*>(vp);
+ALWAYS_INLINE MixedArray* staticEmptyDictArrayAsMixed() {
+  return static_cast<MixedArray*>(staticEmptyDictArray());
 }
 
 // Common base class for BaseMap/BaseSet collections
@@ -30,7 +19,7 @@ struct HashCollection : ObjectData {
   explicit HashCollection(Class* cls, HeaderKind kind)
     : ObjectData(cls, collections::objectFlags, kind)
     , m_versionAndSize(0)
-    , m_arr(staticEmptyMixedArray())
+    , m_arr(staticEmptyDictArrayAsMixed())
   {}
   explicit HashCollection(Class* cls, HeaderKind kind, ArrayData* arr)
     : ObjectData(cls, collections::objectFlags, kind)
@@ -87,7 +76,9 @@ struct HashCollection : ObjectData {
   bool isFull() { return posLimit() == cap(); }
   bool isDensityTooLow() const {
     bool b = (m_size < posLimit() / 2);
-    assert(IMPLIES(data() == mixedData(staticEmptyMixedArray()), !b));
+    assert(IMPLIES(
+      data() == mixedData(staticEmptyDictArrayAsMixed()),
+      !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
   }
@@ -97,7 +88,9 @@ struct HashCollection : ObjectData {
     // if current capacity is at least 8x greater than the minimum capacity
     bool b = ((uint64_t(cap()) >= uint64_t(m_size) * 8) &&
               (cap() >= HashCollection::SmallSize * 8));
-    assert(IMPLIES(data() == mixedData(staticEmptyMixedArray()), !b));
+    assert(IMPLIES(
+      data() == mixedData(staticEmptyDictArrayAsMixed()),
+      !b));
     assert(IMPLIES(cap() == 0, !b));
     return b;
   }
@@ -296,7 +289,6 @@ struct HashCollection : ObjectData {
     if (UNLIKELY(validPos(*p))) return nullptr;
     auto e = &allocElm(p);
     e->setStrKey(key, h);
-    updateIntLikeStrKeys(key);
     return &e->data;
   }
 
@@ -318,7 +310,6 @@ struct HashCollection : ObjectData {
     int32_t unusedPos = -1;
     auto e = &allocElm(&unusedPos);
     e->setStrKey(key, h);
-    updateIntLikeStrKeys(key);
     return &e->data;
   }
   /*
@@ -525,7 +516,7 @@ struct HashCollection : ObjectData {
 
   void setSize(uint32_t sz) {
     assert(sz <= cap());
-    if (m_arr == staticEmptyMixedArray()) {
+    if (m_arr == staticEmptyDictArrayAsMixed()) {
       assert(sz == 0);
       return;
     }
@@ -564,7 +555,7 @@ struct HashCollection : ObjectData {
   }
   void setPosLimit(uint32_t limit) {
     auto* a = arrayData();
-    if (a == staticEmptyMixedArray()) {
+    if (a == staticEmptyDictArrayAsMixed()) {
       assert(limit == 0);
       return;
     }
@@ -584,26 +575,6 @@ struct HashCollection : ObjectData {
     auto* a = arrayData();
     if (ki >= a->m_nextKI && a->m_nextKI >= 0) {
       a->m_nextKI = ki + 1;
-    }
-  }
-  void updateIntLikeStrKeys(const StringData* s) {
-    int64_t ignore;
-    if (UNLIKELY(s->isStrictlyInteger(ignore))) {
-      setIntLikeStrKeys(true);
-    }
-  }
-
-  void updateIntLikeStrKeys() {
-    int64_t ignore;
-    if (intLikeStrKeys()) return;
-    const Elm* e = data();
-    const Elm* eLimit = elmLimit();
-    for (; e != eLimit; ++e) {
-      if (!isTombstone(e) && e->hasStrKey() &&
-          e->skey->isStrictlyInteger(ignore)) {
-        setIntLikeStrKeys(true);
-        return;
-      }
     }
   }
 
@@ -698,8 +669,6 @@ struct HashCollection : ObjectData {
    */
   void warnOnStrIntDup() const;
 
-  static bool instanceof(const ObjectData*);
-
   void scan(type_scan::Scanner& scanner) const {
     scanner.scan(m_arr);
     scanner.scan(m_immCopy);
@@ -708,7 +677,7 @@ struct HashCollection : ObjectData {
  protected:
 
   // Replace the m_arr field with a new MixedArray. The array must be known to
-  // *not* contain any references.  WARNING: does not update intLikeStrKeys
+  // *not* contain any references.
   void replaceArray(ArrayData* adata) {
     auto* oldAd = m_arr;
     dropImmCopy();
@@ -722,8 +691,8 @@ struct HashCollection : ObjectData {
   union {
     struct {
       uint32_t m_size;    // Number of values
-      int32_t m_version;  // Version number (high bit used to indicate if this
-    };                    //   collection might contain int-like string keys)
+      int32_t m_version;  // Version number
+    };
     int64_t m_versionAndSize;
   };
 
@@ -733,29 +702,7 @@ struct HashCollection : ObjectData {
   // this collection.
   Object m_immCopy;
 
-  // Read the high bit of m_version to tell if this collection might contain
-  // int-like string keys. If this method returns false it is safe to assume
-  // that no int-like strings keys are present. If this method returns true
-  // that means there _might_ be int-like string keys, but there might not be.
-  bool intLikeStrKeys() const { return (bool)(m_version & 0x80000000UL); }
-  // So that BaseMap can call intLikeStrKeys on a HashCollection
-  static bool intLikeStrKeys(const HashCollection* hc) {
-    return hc->intLikeStrKeys();
-  }
-  // Beware: calling this method can invalidate iterators, so use with
-  // caution
-  void setIntLikeStrKeys(bool b) {
-    if (b) {
-      m_version |= 0x80000000UL;
-    } else {
-      m_version &= ~0x80000000UL;
-    }
-  }
-
  private:
-  struct EmptyMixedInitializer;
-  static EmptyMixedInitializer s_empty_mixed_initializer;
-
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
   void postSort();

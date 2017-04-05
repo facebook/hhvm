@@ -26,22 +26,6 @@ namespace HPHP {
 extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
 extern const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS;
 extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA;
-extern const int64_t k_E_ERROR;
-extern const int64_t k_E_WARNING;
-extern const int64_t k_E_PARSE;
-extern const int64_t k_E_NOTICE;
-extern const int64_t k_E_CORE_ERROR;
-extern const int64_t k_E_CORE_WARNING;
-extern const int64_t k_E_COMPILE_ERROR;
-extern const int64_t k_E_COMPILE_WARNING;
-extern const int64_t k_E_USER_ERROR;
-extern const int64_t k_E_USER_WARNING;
-extern const int64_t k_E_USER_NOTICE;
-extern const int64_t k_E_STRICT;
-extern const int64_t k_E_RECOVERABLE_ERROR;
-extern const int64_t k_E_DEPRECATED;
-extern const int64_t k_E_USER_DEPRECATED;
-extern const int64_t k_E_ALL;
 
 Array HHVM_FUNCTION(debug_backtrace,
                     int64_t options = k_DEBUG_BACKTRACE_PROVIDE_OBJECT,
@@ -58,18 +42,19 @@ int64_t HHVM_FUNCTION(error_reporting, const Variant& level = uninit_variant);
 bool HHVM_FUNCTION(restore_error_handler);
 bool HHVM_FUNCTION(restore_exception_handler);
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
-                                         int error_types = k_E_ALL);
+                      int error_types = ((int)ErrorMode::PHP_ALL |
+                                         (int)ErrorMode::STRICT));
 Variant HHVM_FUNCTION(set_exception_handler, const Variant& exception_handler);
 void HHVM_FUNCTION(hphp_set_error_page, const String& page);
 void HHVM_FUNCTION(hphp_throw_fatal_error, const String& error_msg);
 void HHVM_FUNCTION(hphp_clear_unflushed);
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
-                                  int error_type = k_E_USER_NOTICE);
+                                  int error_type = (int)ErrorMode::USER_NOTICE);
 bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
-                                          int sample_rate,
-                                          int error_type = k_E_USER_NOTICE);
+                   int sample_rate,
+                   int error_type = (int)ErrorMode::USER_NOTICE);
 bool HHVM_FUNCTION(user_error, const String& error_msg,
-                               int error_type = k_E_USER_NOTICE);
+                               int error_type = (int)ErrorMode::USER_NOTICE);
 
 ArrayData* debug_backtrace_jit(int64_t options);
 String debug_string_backtrace(bool skip, bool ignore_args = false,

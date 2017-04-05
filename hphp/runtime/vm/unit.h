@@ -504,6 +504,11 @@ public:
   // Func lookup.                                                      [static]
 
   /*
+   * Define `func' for this request by initializing its RDS handle.
+   */
+  static void defFunc(Func* func, bool debugger);
+
+  /*
    * Look up the defined Func in this request with name `name', or with the name
    * mapped to the NamedEntity `ne'. The `DynCall` variants are used in dynamic
    * call contexts. They behave the same as the normal functions, but return the

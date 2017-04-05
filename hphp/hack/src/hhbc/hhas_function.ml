@@ -15,6 +15,7 @@ type t = {
   function_return_type   : Hhas_type_info.t option;
   function_body          : Hhbc_ast.instruct list;
   function_decl_vars     : string list; (* Actually local_id list *)
+  function_num_iters     : int;
   function_is_async      : bool;
   function_is_generator  : bool;
   function_is_pair_generator : bool;
@@ -27,6 +28,7 @@ let make
   function_return_type
   function_body
   function_decl_vars
+  function_num_iters
   function_is_async
   function_is_generator
   function_is_pair_generator =
@@ -37,6 +39,7 @@ let make
     function_return_type;
     function_body;
     function_decl_vars;
+    function_num_iters;
     function_is_async;
     function_is_generator;
     function_is_pair_generator;
@@ -48,6 +51,7 @@ let params f = f.function_params
 let return_type f = f.function_return_type
 let body f = f.function_body
 let decl_vars f = f.function_decl_vars
+let num_iters f = f.function_num_iters
 let is_async f = f.function_is_async
 let is_generator f = f.function_is_generator
 let is_pair_generator f = f.function_is_pair_generator

@@ -305,9 +305,7 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
     if (bvec->m_capacity <= bvec->m_size) {
       bvec->grow();
     }
-    auto pair = req::make<c_Pair>(c_Pair::NoInit{});
-    pair->initAdd(&data()[i]);
-    pair->initAdd(v);
+    auto pair = req::make<c_Pair>(data()[i], *v.asCell());
     bvec->data()[i].m_data.pobj = pair.detach();
     bvec->data()[i].m_type = KindOfObject;
     bvec->incSize();
@@ -532,16 +530,15 @@ ALWAYS_INLINE typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, TVector*>::type
 BaseVector::Clone(ObjectData* obj) {
   auto thiz = static_cast<TVector*>(obj);
-  auto target = static_cast<TVector*>(
-    TVector::instanceCtor(TVector::classof()));
+  auto target = req::make<TVector>();
   if (!thiz->m_size) {
-    return target;
+    return target.detach();
   }
   thiz->arrayData()->incRefCount();
   target->m_arr = thiz->m_arr;
   target->m_size = thiz->m_size;
   target->m_capacity = thiz->m_capacity;
-  return target;
+  return target.detach();
 }
 
 template<class TVector> typename

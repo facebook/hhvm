@@ -83,11 +83,8 @@ let get_refs action include_defs genv env =
   | FindRefsService.GConst cst_name ->
       search_gconst cst_name include_defs genv env
 
-let get_refs_with_defs action genv env =
-  get_refs action true genv env
-
-let go action genv env =
-  let res = get_refs action false genv env in
+let go action include_defs genv env =
+  let res = get_refs action include_defs genv env in
   let res = List.map res (fun (r, pos) -> (r, Pos.to_absolute pos)) in
   res
 
@@ -112,7 +109,7 @@ let get_action symbol =
     | _ -> None
   end
 
-let go_from_file (content, line, char) genv env =
+let go_from_file (content, line, char, include_defs) genv env =
   (* Find the symbol at given position *)
   ServerIdentifyFunction.go content line char env.ServerEnv.tcopt |>
   (* If there are few, arbitrarily pick the first *)
@@ -120,5 +117,5 @@ let go_from_file (content, line, char) genv env =
   (* Ignore symbols that lack definitions *)
   definition >>= fun definition ->
   get_action occurrence >>= fun action ->
-  let results = go action genv env |> List.map ~f:snd in
+  let results = go action include_defs genv env |> List.map ~f:snd in
   Some (definition.SymbolDefinition.full_name, results)

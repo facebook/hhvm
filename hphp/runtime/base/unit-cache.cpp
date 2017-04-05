@@ -557,6 +557,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalExternalEmitterFallback ? '1' : '0')
     + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0')
     + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces();
   return string_md5(t);
@@ -602,11 +603,11 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
   auto it = eContext->m_evaledFiles.find(spath.get());
   if (it != end(eContext->m_evaledFiles)) {
     // In RepoAuthoritative mode we assume that the files are unchanged.
+    initial = false;
     if (RuntimeOption::RepoAuthoritative ||
         (it->second.ts_sec > s.st_mtime) ||
         ((it->second.ts_sec == s.st_mtime) &&
          (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
-      initial = false;
       return it->second.unit;
     }
   }

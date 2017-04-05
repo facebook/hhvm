@@ -52,17 +52,6 @@ folly::Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
   return folly::none;
 }
 
-// As eval_const, but don't divide/mod by zero at compile time.
-template<class Fun>
-folly::Optional<Type> eval_const_divmod(Type t1, Type t2, Fun fun) {
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-  if (v1 && v2 && cellToInt(*v2) != 0 && cellToDouble(*v2) != 0.0) {
-    return eval_cell([&] { return fun(*v1, *v2); });
-  }
-  return folly::none;
-}
-
 template<class Fun>
 Type bitwise_impl(Type t1, Type t2, Fun op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
@@ -134,12 +123,12 @@ Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellSubO); }
 Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
 
 Type typeDiv(Type t1, Type t2) {
-  if (auto t = eval_const_divmod(t1, t2, cellDiv)) return *t;
+  if (auto t = eval_const(t1, t2, cellDiv)) return *t;
   return TInitPrim;
 }
 
 Type typeMod(Type t1, Type t2) {
-  if (auto t = eval_const_divmod(t1, t2, cellMod)) return *t;
+  if (auto t = eval_const(t1, t2, cellMod)) return *t;
   return TInitPrim;
 }
 

@@ -4,6 +4,23 @@ open Asserter
 (** The exit status and stderr from the process. *)
 exception Process_exited_abnormally of Unix.process_status * string
 
+(** Includes the stderr received so far. *)
+exception Process_timed_out of string
+
+let boxed_string content =
+  Printf.sprintf "%s%s%s"
+  "\n============================\n"
+  content
+  "\n============================\n"
+
+let process_status_to_string = function
+  | Unix.WEXITED i ->
+    Printf.sprintf "Unix.WEXITED %d" i
+  | Unix.WSIGNALED i ->
+    Printf.sprintf "Unix.WSIGNALED %d" i
+  | Unix.WSTOPPED i ->
+    Printf.sprintf "Unix.WSTOPPED %d" i
+
 module Args = struct
 
   type t = {
@@ -79,16 +96,18 @@ module Test_harness = struct
 
   let get_server_logs harness =
     let process = exec_hh_client ["--logname"] harness in
-    let status, log_path, err = Process.read_and_wait_pid process in
-    match status with
-    | Unix.WEXITED 0 ->
+    match Process.read_and_wait_pid ~timeout:5 process with
+    | Result.Ok (log_path, _) ->
       let log_path = Path.make (String.trim log_path) in
       (try Some (Sys_utils.cat (Path.to_string log_path)) with
       | Sys_error(m)
         when Sys_utils.string_contains m "No such file or directory" ->
         None)
-    | _ ->
+    | Result.Error (Process_types.Process_exited_abnormally
+        (status, _out, err)) ->
       raise (Process_exited_abnormally (status, err))
+    | Result.Error (Process_types.Timed_out (_out, err)) ->
+      raise (Process_timed_out err)
 
   let wait_until_lock_free lock_file _harness =
     Lock.blocking_grab_then_release lock_file
@@ -115,22 +134,29 @@ module Test_harness = struct
   let check_cmd harness =
     let process = exec_hh_client ["check"] harness in
     Printf.eprintf "Waiting for process\n%!";
-    let status, result, err = Process.read_and_wait_pid process in
-    match status with
-    | Unix.WEXITED _ ->
+    match Process.read_and_wait_pid ~timeout:30 process with
+    | Result.Ok (result, _) ->
       Sys_utils.split_lines result
-    | _ ->
+    | Result.Error (Process_types.Process_exited_abnormally
+        (Unix.WEXITED i, result, _))
+        when i = Exit_status.(exit_code Type_error) ->
+      Sys_utils.split_lines result
+    | Result.Error (Process_types.Process_exited_abnormally
+        (status, _out, err)) ->
       raise (Process_exited_abnormally (status, err))
+    | Result.Error (Process_types.Timed_out (_out, err)) ->
+      raise (Process_timed_out err)
 
   let stop_server harness =
     let process = exec_hh_client ["stop"] harness in
-    let status, result, err = Process.read_and_wait_pid process in
-    match status with
-    | Unix.WEXITED 0 ->
+    match Process.read_and_wait_pid ~timeout:30 process with
+    | Result.Ok (result, _) ->
       result
-    | _ ->
-      Printf.eprintf "Stop server failed\n%!";
+    | Result.Error (Process_types.Process_exited_abnormally
+        (status, _out, err)) ->
       raise (Process_exited_abnormally (status, err))
+    | Result.Error (Process_types.Timed_out (_out, err)) ->
+      raise (Process_timed_out err)
 
   let run_test args test_case =
     let base_tmp_dir = Tempfile.mkdtemp () in
@@ -191,7 +217,18 @@ module Test_harness = struct
         let () = Sys_utils.rm_dir_tree (Path.to_string base_tmp_dir) in
         ()
       in
-      Utils.try_finally ~f:(fun () -> test_case harness) ~finally:tear_down
+      let with_exception_printing test_case harness =
+        let result = try test_case harness with
+        | Process_exited_abnormally(status, stderr) as e ->
+          Printf.eprintf "Process exited abnormally (%s). See also Stderr: %s\n"
+            (process_status_to_string status)
+            (boxed_string stderr);
+          raise e
+        in
+        result
+      in
+      Utils.try_finally ~f:(fun () -> with_exception_printing test_case harness)
+        ~finally:tear_down
 
   let with_local_conf local_conf_str test_case harness =
     let conf_file = Path.concat harness.repo_dir "hh.conf" in
@@ -201,12 +238,6 @@ module Test_harness = struct
     test_case harness
 
 end;;
-
-let boxed_string content =
-  Printf.sprintf "%s%s%s"
-  "\n============================\n"
-  content
-  "\n============================\n"
 
 let see_also_logs harness =
   let logs = Test_harness.get_server_logs harness in
@@ -279,8 +310,10 @@ let test_server_driver_case_1_and_turntable harness =
     (see_also_logs harness) in
   let () = Printf.eprintf "Finished check on: %s\n%!"
     (Path.to_string harness.Test_harness.repo_dir) in
+  Printf.eprintf "Playing server driver case 1\n";
   let _conn = Server_driver.connect_and_run_case 1
     harness.Test_harness.repo_dir in
+  Printf.eprintf "Finished Playing server driver case 1\n";
   let results = Test_harness.check_cmd harness in
   let substitutions = (module struct
     let substitutions = [

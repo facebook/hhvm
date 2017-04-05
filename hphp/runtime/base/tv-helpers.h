@@ -64,23 +64,23 @@ extern RawDestructor g_destructors[kDestrTableSize];
  * Returns true if decreffing the specified TypedValue will free heap-allocated
  * data. Note that this function always returns false for non-refcounted types.
  */
-bool tvDecRefWillRelease(TypedValue* tv);
+bool tvDecRefWillRelease(const TypedValue* tv);
 
 /*
  * Returns true iff decreffing the specified TypedValue will cause any kind of
  * helper to be called. Note that there are cases where this function returns
  * true but tvDecRefWillRelease() will return false.
  */
-ALWAYS_INLINE bool tvDecRefWillCallHelper(TypedValue* tv) {
+ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue* tv) {
   return isRefcountedType(tv->m_type) && tv->m_data.pcnt->decWillRelease();
 }
 
-ALWAYS_INLINE void tvDecRefStr(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefStr(const TypedValue* tv) {
   assert(tv->m_type == KindOfString);
   decRefStr(tv->m_data.pstr);
 }
 
-ALWAYS_INLINE void tvDecRefArr(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
   assert(tv->m_type == KindOfArray ||
          tv->m_type == KindOfVec ||
          tv->m_type == KindOfDict ||
@@ -88,12 +88,12 @@ ALWAYS_INLINE void tvDecRefArr(TypedValue* tv) {
   decRefArr(tv->m_data.parr);
 }
 
-ALWAYS_INLINE void tvDecRefObj(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefObj(const TypedValue* tv) {
   assert(tv->m_type == KindOfObject);
   decRefObj(tv->m_data.pobj);
 }
 
-ALWAYS_INLINE void tvDecRefRes(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefRes(const TypedValue* tv) {
   assert(tv->m_type == KindOfResource);
   decRefRes(tv->m_data.pres);
 }
@@ -105,7 +105,7 @@ ALWAYS_INLINE void tvDecRefRefInternal(RefData* r) {
 }
 
 // Assumes 'tv' is live
-ALWAYS_INLINE void tvDecRefRef(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
   assert(tv->m_type == KindOfRef);
   tvDecRefRefInternal(tv->m_data.pref);
 }
@@ -151,7 +151,7 @@ ALWAYS_INLINE void tvRefcountedDecRefNZ(TypedValue tv) {
 
 // Assumes 'tv' is live
 // Assumes 'isRefcountedType(tv->m_type)'
-ALWAYS_INLINE void tvDecRef(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRef(const TypedValue* tv) {
   tvDecRefHelper(tv->m_type, tv->m_data.num);
 }
 
@@ -166,7 +166,7 @@ ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
 }
 
 // decref when the count is known not to reach zero
-ALWAYS_INLINE void tvDecRefOnly(TypedValue* tv) {
+ALWAYS_INLINE void tvDecRefOnly(const TypedValue* tv) {
   assert(!tvDecRefWillCallHelper(tv));
   tvRefcountedDecRefNZ(*tv);
 }
@@ -198,7 +198,7 @@ ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
 // Assumes 'tv' is live
 // Assumes 'isRefcountedType(tv->m_type)'
 // Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
-ALWAYS_INLINE void tvIncRefNotShared(TypedValue* tv) {
+ALWAYS_INLINE void tvIncRefNotShared(const TypedValue* tv) {
   assert(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
   tv->m_type == KindOfObject ?
     tv->m_data.pobj->incRefCount() :
@@ -683,9 +683,9 @@ ALWAYS_INLINE TypedValue make_array_like_tv(ArrayData* a) {
  *   both raise a warning and throw a TVCoercionException on failure
  */
 void cellCastToInt64InPlace(Cell*);
-double tvCastToDouble(TypedValue* tv);
+double tvCastToDouble(const TypedValue* tv);
 StringData* tvCastToString(const TypedValue* tv);
-bool tvCanBeCoercedToNumber(TypedValue* tv);
+bool tvCanBeCoercedToNumber(const TypedValue* tv);
 
 /*
  * If the current function (func, a builtin) was called in a strict context then
@@ -716,7 +716,7 @@ X(NullableObject)
 X(Resource)
 #undef X
 
-ALWAYS_INLINE void tvCastInPlace(TypedValue *tv, DataType DType) {
+ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
 #define X(kind) \
   if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
   X(Boolean)

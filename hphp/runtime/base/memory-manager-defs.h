@@ -78,28 +78,32 @@ struct Header {
       (const char*)this + native_.obj_offset - sizeof(Resumable)
     );
   }
+
   Resumable* resumable() {
     assert(kind() == HeaderKind::AsyncFuncFrame);
     return reinterpret_cast<Resumable*>(
       (char*)this + native_.obj_offset - sizeof(Resumable)
     );
   }
-  const ObjectData* asyncFuncWH() const {
+
+  const c_WaitHandle* asyncFuncWH() const {
     assert(resumable()->actRec()->func()->isAsyncFunction());
-    auto obj = reinterpret_cast<const ObjectData*>(
+    auto obj = reinterpret_cast<const c_WaitHandle*>(
       (const char*)this + native_.obj_offset
     );
     assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
     return obj;
   }
-  ObjectData* asyncFuncWH() {
+
+  c_WaitHandle* asyncFuncWH() {
     assert(resumable()->actRec()->func()->isAsyncFunction());
-    auto obj = reinterpret_cast<ObjectData*>(
+    auto obj = reinterpret_cast<c_WaitHandle*>(
       (char*)this + native_.obj_offset
     );
     assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
     return obj;
   }
+
   const ObjectData* nativeObj() const {
     assert(kind() == HeaderKind::NativeData);
     auto obj = Native::obj(&native_);
@@ -107,18 +111,21 @@ struct Header {
     assert(obj->getAttribute(ObjectData::HasNativeData));
     return obj;
   }
+
   ObjectData* nativeObj() {
     assert(kind() == HeaderKind::NativeData);
     auto obj = Native::obj(&native_);
     assert(isObjectKind(obj->headerKind()));
     return obj;
   }
+
   const ObjectData* closureObj() const {
     assert(kind() == HeaderKind::ClosureHdr);
     auto obj = reinterpret_cast<const ObjectData*>(&closure_hdr_ + 1);
     assert(obj->headerKind() == HeaderKind::Closure);
     return obj;
   }
+
   ObjectData* closureObj() {
     assert(kind() == HeaderKind::ClosureHdr);
     auto obj = reinterpret_cast<ObjectData*>(&closure_hdr_ + 1);
@@ -155,6 +162,7 @@ public:
     MallocNode malloc_;
     FreeNode free_;
     NativeNode native_;
+    c_WaitHandle wh_;
     c_AwaitAllWaitHandle awaitall_;
     ClosureHdr closure_hdr_;
     c_Closure closure_;

@@ -34,6 +34,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -1442,7 +1443,7 @@ void ExecutionContext::requestExit() {
   EventHook::Disable();
   zend_rand_unseed();
   clearBlackHole();
-  tl_miter_table.clear();
+  MIterTable::clear();
 
   if (m_globalVarEnv) {
     req::destroy_raw(m_globalVarEnv);
@@ -1999,6 +2000,7 @@ StrNR ExecutionContext::createFunction(const String& args,
   }
 
   VMRegAnchor _;
+  auto const ar = GetCallerFrame();
   // It doesn't matter if there's a user function named __lambda_func; we only
   // use this name during parsing, and then change it to an impossible name
   // with a NUL byte before we merge it into the request's func map.  This also
@@ -2007,7 +2009,7 @@ StrNR ExecutionContext::createFunction(const String& args,
   // user function named __lambda_func when you call create_function. Huzzah!)
   static StringData* oldName = makeStaticString("__lambda_func");
   std::ostringstream codeStr;
-  codeStr << (vmfp()->unit()->isHHFile() ? "<?hh" : "<?php")
+  codeStr << (ar->unit()->isHHFile() ? "<?hh" : "<?php")
           << " function " << oldName->data()
           << "(" << args.data() << ") {"
           << code.data() << "}\n";

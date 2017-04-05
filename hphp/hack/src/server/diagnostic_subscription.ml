@@ -14,12 +14,14 @@ open Reordered_argument_collections
  * that many files. Resume when user fixes some of them. *)
 let errors_limit = 50
 
+type errors = Errors.error list
+
 type t = {
   id : int;
   (* Most recent diagnostics pushed to client for those files had errors *)
-  pushed_errors : Relative_path.Set.t;
+  pushed_errors : errors Relative_path.Map.t;
   (* Push diagnostics not yet sent to client *)
-  pending_errors : (Errors.error list) Relative_path.Map.t;
+  pending_errors : errors Relative_path.Map.t;
 }
 
 let errors_to_map errors =
@@ -35,7 +37,7 @@ let errors_to_map errors =
 
 let of_id ~id ~init = {
   id;
-  pushed_errors = Relative_path.Set.empty;
+  pushed_errors = Relative_path.Map.empty;
   pending_errors = errors_to_map init;
 }
 
@@ -46,8 +48,8 @@ let mark_as_pushed ds path errors =
     - in that case we can completely remove the file from both lists. *)
   let pending_errors = Relative_path.Map.remove ds.pending_errors path in
   let pushed_errors = match errors with
-    | [] -> Relative_path.Set.remove ds.pushed_errors path
-    | _ -> Relative_path.Set.add ds.pushed_errors path
+    | [] -> Relative_path.Map.remove ds.pushed_errors path
+    | _ -> Relative_path.Map.add ds.pushed_errors path errors
   in
   { ds with pushed_errors; pending_errors }
 
@@ -59,8 +61,21 @@ let pop_key k (ds, acc) =
 let pop_if_in_set set acc =
   Relative_path.Set.fold set ~init:acc ~f:(fun k acc -> pop_key k acc)
 
+let pop_if_new previous_pushed_errors (ds, acc) =
+  Relative_path.Map.fold previous_pushed_errors
+    ~init:(ds, acc)
+    ~f:begin fun path previous_pushed_errors (ds, acc) ->
+    (* If the errors that were recomputed (and are now pending) are the
+     * same as the errors already sent to editor (pushed), do not re-send them
+     * again *)
+    if (Relative_path.Map.get ds.pending_errors path) =
+        (Some previous_pushed_errors)
+      then (ds, acc)
+      else pop_key path (ds, acc)
+  end
+
 let rec pop_while_less_than_limit (ds, acc) =
-  if Relative_path.Set.cardinal ds.pushed_errors < errors_limit then begin
+  if Relative_path.Map.cardinal ds.pushed_errors < errors_limit then begin
     match Relative_path.Map.choose ds.pending_errors with
     | Some (k, v) ->
       let ds, acc = (mark_as_pushed ds k v), (Relative_path.Map.add acc k v) in
@@ -73,7 +88,7 @@ let pop_errors ds edited_files =
     (* Always push errors for files open in editor...*)
     pop_if_in_set edited_files (ds, Relative_path.Map.empty)
     (* ... and for files which editor is aware of having errors. *)
-    |> pop_if_in_set ds.pushed_errors
+    |> pop_if_new ds.pushed_errors
     (* Push the remaining errors as long as editor doesn't have to display too
      * many of them *)
     |> pop_while_less_than_limit
@@ -86,13 +101,13 @@ let pop_errors ds edited_files =
   end
 
 let file_has_errors_in_ide ds path =
-  (Relative_path.Set.mem ds.pushed_errors path) ||
+  (Relative_path.Map.mem ds.pushed_errors path) ||
   (Relative_path.Map.mem ds.pending_errors path)
 
 let update ds errors =
-  let pending_errors = Relative_path.Set.fold ds.pushed_errors
+  let pending_errors = Relative_path.Map.fold ds.pushed_errors
     ~init:(errors_to_map errors)
-    ~f:begin fun k acc ->
+    ~f:begin fun k _ acc ->
       if Relative_path.Map.mem acc k then acc
       (* We already pushed errors for this file - we need to push a
        * "clear errors" update too *)

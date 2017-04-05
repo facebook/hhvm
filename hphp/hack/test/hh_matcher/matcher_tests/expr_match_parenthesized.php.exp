@@ -1,3 +1,0 @@
-4: class Foo {
-5:   public function bar(): void {
-7:     $bar = ((true && false) && true || false);

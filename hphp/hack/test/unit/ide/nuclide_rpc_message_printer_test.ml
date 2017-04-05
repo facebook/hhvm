@@ -58,7 +58,8 @@ let test_autocomplete_response () =
   }|}
 
 let test_infer_type_response () =
-  test_response (Infer_type_response (Some "hello"))
+  test_response (
+    Infer_type_response { type_string = Some "hello"; type_json = None })
   {|{
     "protocol": "service_framework3_rpc",
     "type": "response",
@@ -69,7 +70,7 @@ let test_infer_type_response () =
     }
   }|}
   &&
-  test_response (Infer_type_response None)
+  test_response (Infer_type_response { type_string = None; type_json = None })
   {|{
     "protocol": "service_framework3_rpc",
     "type": "response",

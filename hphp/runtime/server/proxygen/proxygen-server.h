@@ -150,6 +150,11 @@ struct ProxygenServer : Server,
   virtual void onRequestError(Transport* transport);
 
   void addPendingTransport(ProxygenTransport& transport) {
+    if (partialPostEnabled()) {
+      const auto status = getStatus();
+      transport.setShouldRepost(status == RunStatus::STOPPING
+                                || status == RunStatus::STOPPED);
+    }
     m_pendingTransports.push_back(transport);
   }
 
@@ -179,6 +184,8 @@ struct ProxygenServer : Server,
 
   // These functions can only be called from the m_worker thread
   void stopListening(bool hard = false);
+
+  virtual bool partialPostEnabled() { return false; }
 
   void returnPartialPosts();
 

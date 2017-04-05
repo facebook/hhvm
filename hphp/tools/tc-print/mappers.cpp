@@ -63,8 +63,8 @@ std::string extOpcodeToString(ExtOpcode eOpcode) {
 
 std::vector<std::pair<std::string,ExtOpcode>> getValidOpcodeNames() {
   std::vector<std::pair<std::string,ExtOpcode>> ret;
-  for (auto i = (ExtOp)OpLowInvalid + 1; i < (ExtOp)OpHighInvalid; i++) {
-    ret.push_back(make_pair(extOpcodeToString(i), i));
+  for (size_t i = 0; i < Op_count; i++) {
+    ret.push_back(make_pair(extOpcodeToString(ExtOp(i)), i));
   }
   for (ExtOpcode i = ExtOpStart + 1; i < ExtOpEnd; i++) {
     ret.push_back(make_pair(extOpcodeToString(i), i));
@@ -104,17 +104,19 @@ bool isTraceletGuard(TCA addr, const TransRec* trec) {
   return false;
 }
 
-ExtOpcode getExtOpcode(TCA addr,
-                       const TransRec* trec) {
+struct ExtOpcodeResult { bool valid; ExtOpcode opcode; };
+ExtOpcodeResult getExtOpcode(TCA addr, const TransRec* trec) {
 
   always_assert(trec);
 
   if (trec->kind == TransKind::LivePrologue ||
       trec->kind == TransKind::ProfPrologue ||
       trec->kind == TransKind::OptPrologue) {
-    return ExtOpFuncPrologue;
+    return {true, ExtOpFuncPrologue};
   }
-  if (isTraceletGuard(addr, trec)) return ExtOpTraceletGuard;
+  if (isTraceletGuard(addr, trec)) {
+    return {true, ExtOpTraceletGuard};
+  }
 
   const std::vector<TransBCMapping>& bcMap = trec->bcMapping;
   always_assert(!bcMap.empty());
@@ -126,15 +128,13 @@ ExtOpcode getExtOpcode(TCA addr,
         (bcMap[i].afrozenStart <= addr && bcMap[i+1].afrozenStart > addr)) {
       auto* unit = g_repo->getUnit(bcMap[i].md5);
       always_assert(unit);
-      return (ExtOpcode)unit->getOp(bcMap[i].bcStart);
+      return {true, (ExtOpcode)unit->getOp(bcMap[i].bcStart)};
     }
   }
 
   snprintf(errBuff, kMaxErrStrLen, "getExtOpcode: no opcode for %p", addr);
   error(std::string(errBuff));
-  static_assert(static_cast<ExtOpcode>(HPHP::Op::LowInvalid) == 0,
-                "HPHP::Op(0) must be an invalid bytecode");
-  return 0; // Since the function is non-void, we need to return something.
+  return {false};
 }
 
 folly::Optional<ExtOpcode>
@@ -146,10 +146,9 @@ AddrToBcMapper::operator()(const TCA& addr) {
   Unit* unit = g_repo->getUnit(trec->md5);
   if (!unit) return folly::none;
 
-  ExtOpcode opcode = getExtOpcode(addr, trec);
-  always_assert(opcode);
-
-  return folly::make_optional(opcode);
+  auto r = getExtOpcode(addr, trec);
+  always_assert(r.valid);
+  return folly::make_optional(r.opcode);
 }
 
 /* AddrToTransFragmentMapper */

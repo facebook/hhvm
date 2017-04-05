@@ -1022,11 +1022,11 @@ To string conversions:
   Vector or ImmVector, and that specific object type must be known at compile
   time.
 
-| LdColArray, D(Arr), S(Obj), NF
+| LdColDict, D(Dict), S(Obj), NF
 
-  Load the array backing a collection instance in S0, which must be a Map, Set,
-  ImmMap, or ImmSet, and that specific object type must be known at compile
-  time.
+  Load the dict array backing a collection instance in S0, which must be a
+  Map, Set, ImmMap, or ImmSet, and that specific object type must be known at
+  compile time.
 
 | CheckRefInner<T>, ND, S(BoxedCell), B
 
@@ -1456,16 +1456,21 @@ To string conversions:
 
 | NewCol<type>, DCol, NA, PRc
 
-  Create an empty new collection of `type'.
+  Create an empty new collection of `type'. `type' cannot be Pair.
 
-| NewColFromArray<type>, DCol, S(Arr|Vec), PRc|CRc
+| NewPair<offset>, DCol, S(Cell) S(Cell), PRc|CRc
 
-  Create a collection of `type` from an array. `type` cannot be Pair. The array
-  will be used to back the new collection without duplication or conversion.
-  Thus it should not contain references. In addition, the array must be in
-  packed mode when `type` is Vector or ImmVector, and must be in mixed mode
-  otherwise. Ownership of the array is transferred from $1 to the collection,
-  without manipulating the refcount.
+  Allocate a new Pair and fill it with the given cells. Ownership of the cells
+  is transferred from $1 and $2 to the pair without manipulating the refcounts.
+
+| NewColFromArray<type>, DCol, S(Vec|Dict), PRc|CRc
+
+  Create a collection of `type` from an array with vec or dict kind. `type`
+  cannot be Pair. The array will be used to back the new collection without
+  duplication or conversion, so it must not contain references. In addition,
+  the array must be vec kind when `type` is Vector or ImmVector, and must be
+  dict kind otherwise. Ownership of the array is transferred from $1 to the
+  collection, without manipulating the refcount.
 
 | Clone, DofS(0), S(Obj), PRc|Er
 
@@ -2029,11 +2034,6 @@ To string conversions:
 
   Checks if S0 contains the key S1 and returns the result if found. Otherwise
   S2 is returned.
-
-| MapIdx, D(Gen), S(Obj) S(Str) S(Cell), NF
-
-  Checks if S0, which must be an HH\Map or an HH\ImmMap, contains the key S1,
-  and returns the result if found. Otherwise S2 is returned.
 
 | MethodExists, D(Bool), S(Cls) S(Str), NF
 
@@ -2956,16 +2956,6 @@ fields of that struct for holding intermediate values.
 
   Given a vector, check if it has a immutable copy and jump to the taken branch
   if so.
-
-| ColAddNewElemC, DofS(0), S(Obj) S(Cell), Er|CRc|P
-
-  Adds item S0 to the end of collection S0. Throws a fatal error if S0 is not a
-  collection. Returns S0.
-
-| MapAddElemC, DofS(0), S(Obj) S(Cell) S(Cell), Er|CRc|P
-
-  Adds item to a Map or ImmMap. Inserts item S2 into collection S0 at key S1.
-  Throws a fatal error if S0 is not a collection. Returns S0.
 
 | ColIsEmpty, D(Bool), S(Obj), NF
 

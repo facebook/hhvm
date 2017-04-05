@@ -425,12 +425,12 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
   switch (base->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (RuntimeOption::EvalHackArrCompatNotices) {
+      if (mode != MOpMode::None && RuntimeOption::EvalHackArrCompatNotices) {
         raise_hackarr_compat_notice("Cannot index into null");
       }
       return ElemEmptyish();
     case KindOfBoolean:
-      if (RuntimeOption::EvalHackArrCompatNotices) {
+      if (mode != MOpMode::None && RuntimeOption::EvalHackArrCompatNotices) {
         raise_hackarr_compat_notice("Cannot index into a boolean");
       }
       return ElemBoolean(base);
@@ -1825,6 +1825,12 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
 
     case KindOfPersistentArray:
     case KindOfArray: {
+      if (UNLIKELY(
+            RuntimeOption::EvalHackArrCompatNotices &&
+            !ArrNR{base->m_data.parr}.asArray().exists(tvAsCVarRef(&key))
+          )) {
+        raiseHackArrCompatMissingSetOp();
+      }
       TypedValue* result;
       auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
       result = ElemDArray<mode, false, KeyType::Any>(base, key);
@@ -2062,6 +2068,12 @@ inline Cell IncDecElem(
 
     case KindOfPersistentArray:
     case KindOfArray: {
+      if (UNLIKELY(
+            RuntimeOption::EvalHackArrCompatNotices &&
+            !ArrNR{base->m_data.parr}.asArray().exists(tvAsCVarRef(&key))
+          )) {
+        raiseHackArrCompatMissingIncDec();
+      }
       auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
       auto result = ElemDArray<mode, false, KeyType::Any>(base, key);
       return IncDecBody(op, tvToCell(result));

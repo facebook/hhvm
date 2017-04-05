@@ -24,6 +24,7 @@
 #include <folly/Format.h>
 #include <folly/Hash.h>
 #include <folly/Memory.h>
+#include <folly/Singleton.h>
 #include <folly/String.h>
 
 #include <boost/program_options.hpp>
@@ -2923,10 +2924,10 @@ void Generator::genForwardDecls(std::ostream& os) const {
 void Generator::genDataTable(std::ostream& os) const {
   os << "const HPHP::type_scan::detail::Metadata g_table[] = {\n";
   os << "  {\"(UNKNOWN)\", scanner_conservative},\n";
-  os << "  {\"(UNKNOWN NO-PTRS)\", nullptr},\n";
+  os << "  {\"(UNKNOWN NO-PTRS)\", scanner_noptrs},\n";
   for (const auto& indexed : m_indexed_types) {
     const auto get_scanner_name = [&]() -> std::string {
-      if (indexed.ignore) return "nullptr";
+      if (indexed.ignore) return "scanner_noptrs";
       if (indexed.conservative) return "scanner_conservative";
       return folly::sformat("scanner_{}", indexed.layout_index);
     };
@@ -2968,6 +2969,9 @@ void Generator::genBuiltinScannerFuncs(std::ostream& os) const {
   os << "void scanner_conservative(Scanner& scanner, "
      << "const void* ptr, size_t size) {\n"
      << "  scanner.m_conservative.emplace_back(ptr, size);\n"
+     << "}\n\n";
+  os << "void scanner_noptrs(Scanner& scanner, "
+     << "const void* ptr, size_t size) {\n"
      << "}\n\n";
 }
 
@@ -3282,6 +3286,8 @@ const std::string kProgramDescription =
 }
 
 int main(int argc, char** argv) {
+  folly::SingletonVault::singleton()->registrationComplete();
+
   namespace po = boost::program_options;
 
   po::options_description desc{"Allowed options"};

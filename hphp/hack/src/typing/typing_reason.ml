@@ -70,6 +70,7 @@ type t =
   | Rused_as_shape   of Pos.t
   | Rpredicated      of Pos.t * string
   | Rinstanceof      of Pos.t * string
+  | Rfinal_property  of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -190,6 +191,8 @@ let rec to_string prefix r =
       [(p, prefix ^ " from the argument to this "^ f ^" test")]
   | Rinstanceof (p,s) ->
       [(p, prefix ^ " from this instanceof test matching " ^ s)]
+  | Rfinal_property _ ->
+      [(p, prefix ^ " because properties cannot be declared final")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -247,6 +250,7 @@ and to_pos = function
   | Rused_as_shape p -> p
   | Rpredicated (p, _) -> p
   | Rinstanceof (p, _) -> p
+  | Rfinal_property p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -306,6 +310,7 @@ type ureason =
   | URtypeconst_cstr
   | URsubsume_tconst_cstr
   | URsubsume_tconst_assign
+  | URfinal_property
 
 let index_array = URindex "array"
 let index_tuple = URindex "tuple"
@@ -350,6 +355,8 @@ let string_of_ureason = function
      "The constraint on this type constant is inconsistent with its parent"
   | URsubsume_tconst_assign ->
      "The assigned type of this type constant is inconsistent with its parent"
+  | URfinal_property ->
+      "Property cannot be declared final"
 
 let compare r1 r2 =
   let get_pri = function

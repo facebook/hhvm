@@ -129,9 +129,8 @@ static const struct {
   { OpAddNewElemC, {StackTop2,        Stack1,       OutArray        }},
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray        }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
+  { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
-  { OpMapAddElemC, {StackTop3,        Stack1,       OutObject       }},
-  { OpColAddNewElemC, {StackTop2,     Stack1,       OutObject       }},
   { OpCns,         {None,             Stack1,       OutCns          }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpCnsU,        {None,             Stack1,       OutCns          }},
@@ -925,8 +924,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::Cns:
   case Op::CnsE:
   case Op::CnsU:
-  case Op::MapAddElemC:
-  case Op::ColAddNewElemC:
   case Op::ColFromArray:
   case Op::ConcatN:
   case Op::Concat:
@@ -977,6 +974,7 @@ bool dontGuardAnyInputs(Op op) {
   case Op::NativeImpl:
   case Op::NewArray:
   case Op::NewCol:
+  case Op::NewPair:
   case Op::NewLikeArrayL:
   case Op::NewMixedArray:
   case Op::NewDictArray:
@@ -1051,7 +1049,6 @@ bool dontGuardAnyInputs(Op op) {
     return false;
 
   // These are instructions that are always interp-one'd, or are always no-ops.
-  case Op::LowInvalid:
   case Op::Nop:
   case Op::EntryNop:
   case Op::Box:
@@ -1099,7 +1096,6 @@ bool dontGuardAnyInputs(Op op) {
   case Op::DefClsNop:
   case Op::DefTypeAlias:
   case Op::Catch:
-  case Op::HighInvalid:
   case Op::ContAssignDelegate:
   case Op::ContEnterDelegate:
   case Op::YieldFromDelegate:

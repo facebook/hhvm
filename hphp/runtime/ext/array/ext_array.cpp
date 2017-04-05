@@ -939,8 +939,11 @@ TypedValue HHVM_FUNCTION(array_slice,
   // preserve_keys is true, or when preserve_keys is false but the container
   // is packed so we know the keys already map to [0,N].
   if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
+    if (isArrayType(cell_input.m_type)) {
+      return tvReturn(Variant{cell_input.m_data.parr});
+    }
     if (isArrayLikeType(cell_input.m_type)) {
-      return tvReturn(Variant(cell_input.m_data.parr));
+      return tvReturn(ArrNR{cell_input.m_data.parr}.asArray().toPHPArray());
     }
     return tvReturn(cell_input.m_data.pobj->toArray());
   }
@@ -2955,6 +2958,16 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
   }
 }
 
+// HH\\varray
+Array HHVM_FUNCTION(HH_varray, const Variant& input) {
+  return input.toPHPArray();
+}
+
+// HH\\darray
+Array HHVM_FUNCTION(HH_darray, const Variant& input) {
+  return input.toPHPArray();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayExtension final : Extension {
@@ -3088,6 +3101,8 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\dict, HH_dict);
     HHVM_FALIAS(HH\\vec, HH_vec);
     HHVM_FALIAS(HH\\keyset, HH_keyset);
+    HHVM_FALIAS(HH\\varray, HH_varray);
+    HHVM_FALIAS(HH\\darray, HH_darray);
 
     loadSystemlib();
   }

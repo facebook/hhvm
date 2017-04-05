@@ -1378,11 +1378,13 @@ private:
 bool disallowDynamicVarEnvFuncs();
 
 /*
- * Could the function write to the locals in the environment of its caller?
+ * Could the function write or read to the locals in the environment of
+ * its caller?
  *
  * This occurs, e.g., if `func' is extract().
  */
 bool funcWritesLocals(const Func*);
+bool funcReadsLocals(const Func*);
 
 /*
  * Could the function `callee` attempt to read the caller frame?

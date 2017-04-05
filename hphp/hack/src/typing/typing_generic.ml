@@ -60,7 +60,7 @@ end = struct
     | Tunresolved tyl -> List.iter tyl ty
     | Tobject -> ()
     | Tshape (_, fdm) ->
-        ShapeMap.iter (fun _ v -> ty v) fdm
+        ShapeFieldMap.iter (fun _ v -> ty v) fdm
 
   and ty_opt = function None -> () | Some x -> ty x
 

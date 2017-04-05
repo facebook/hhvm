@@ -162,8 +162,6 @@ TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 
-TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
-
 int32_t arrayVsize(ArrayData*);
 
 TypedValue* ldGblAddrDefHelper(StringData* name);
@@ -184,10 +182,6 @@ void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
-
-ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
-ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
-                              TypedValue value);
 
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs

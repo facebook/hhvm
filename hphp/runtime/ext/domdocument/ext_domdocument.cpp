@@ -770,7 +770,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   int old_error_reporting = 0;
   if (recover) {
     old_error_reporting = HHVM_FN(error_reporting)();
-    HHVM_FN(error_reporting)(old_error_reporting | k_E_WARNING);
+    HHVM_FN(error_reporting)(old_error_reporting | (int)ErrorMode::WARNING);
   }
 
   xmlParseDocument(ctxt);
@@ -849,14 +849,14 @@ static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
   if (!ctxt) {
     return false;
   }
-  if (options) {
-    htmlCtxtUseOptions(ctxt, options);
-  }
   ctxt->vctxt.error = php_libxml_ctx_error;
   ctxt->vctxt.warning = php_libxml_ctx_warning;
   if (ctxt->sax != nullptr) {
     ctxt->sax->error = php_libxml_ctx_error;
     ctxt->sax->warning = php_libxml_ctx_warning;
+  }
+  if (options) {
+    htmlCtxtUseOptions(ctxt, options);
   }
   htmlParseDocument(ctxt);
   xmlDocPtr newdoc = ctxt->myDoc;

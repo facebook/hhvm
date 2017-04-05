@@ -1,6 +1,6 @@
 <?hh // strict
 
-function concrete(TypeStructure<shape()> $ts): void {
+function concrete(TypeStructure<shape(...)> $ts): void {
   hh_show($ts['kind']);
   hh_show($ts['alias']);
   hh_show($ts['name']);
@@ -18,7 +18,7 @@ function concrete(TypeStructure<shape()> $ts): void {
   hh_show($ts['kind']);
 }
 
-function generic<T as shape()>(TypeStructure<T> $ts): void {
+function generic<T as shape(...)>(TypeStructure<T> $ts): void {
   hh_show($ts['kind']);
   hh_show($ts['alias']);
   hh_show($ts['name']);

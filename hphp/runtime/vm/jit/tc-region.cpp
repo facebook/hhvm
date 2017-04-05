@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/tc-relocate.h"
 
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
@@ -121,13 +122,12 @@ TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
       adjustMetaDataForRelocation(rel, nullptr, fixups);
       adjustCodeForRelocation(rel, fixups);
     } catch (const DataBlockFull& dbFull) {
+      tlm.rollback();
       if (dbFull.name == "hot") {
         code().disableHot();
-        tlm.rollback();
         return folly::none;
       }
-      always_assert_flog(0, "data block = {}\nmessage: {}\n",
-                         dbFull.name, dbFull.what());
+      throw;
     }
     return tlm;
   };
@@ -144,7 +144,7 @@ bool checkLimit(const TransMetaInfo& info, const SrcRec* srcRec) {
     ? RuntimeOption::EvalJitMaxProfileTranslations
     : RuntimeOption::EvalJitMaxTranslations;
 
-  auto const numTrans = srcRec->translations().size();
+  auto const numTrans = srcRec->numTrans();
 
   // Once numTrans has reached limit + 1 we know that an interp translation
   // has already been emitted. Prior to that if numTrans == limit only allow
@@ -184,14 +184,21 @@ publishTranslationInternal(TransMetaInfo info, OptView optSrcView) {
   // only useful in production environments where we may want to emit optimize
   // translations in parallel, while reusable TC is only meaningful in sandboxes
   // where translations may be invalidates by source modifications.
-  auto view = [&] {
-    if (!needsRelocate) return info.emitView;
 
-    auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
-                                        fixups);
-    range = tlm.markEnd();
-    return tlm.view();
+  auto optDstView = [&] () -> folly::Optional<CodeCache::View> {
+    if (!needsRelocate) return info.emitView;
+    try {
+      auto tlm = relocateLocalTranslation(range, info.viewKind, *optSrcView,
+                                          fixups);
+      range = tlm.markEnd();
+      return tlm.view();
+    } catch (const DataBlockFull& dbFull) {
+      return folly::none;
+    }
   }();
+
+  if (!optDstView) return folly::none;
+  auto view = *optDstView;
 
   auto loc = range.loc();
   tryRelocateNewTranslation(sk, loc, view, fixups);
@@ -221,13 +228,16 @@ publishTranslationInternal(TransMetaInfo info, OptView optSrcView) {
   recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),
                        loc.coldEnd(), false, false);
 
-  if (tr.isValid()) {
+  // If we relocated the code, the machine-code addresses in the `tr' TransRec
+  // need to be updated.
+  if (tr.isValid() && needsRelocate) {
     tr.aStart = loc.mainStart();
     tr.acoldStart = loc.coldCodeStart();
     tr.afrozenStart = loc.frozenCodeStart();
     tr.aLen = loc.mainSize();
     tr.acoldLen = loc.coldCodeSize();
     tr.afrozenLen = loc.frozenCodeSize();
+    tr.bcMapping = fixups.bcMap;
   }
 
   transdb::addTranslation(tr);
@@ -283,7 +293,26 @@ void invalidateFuncProfSrcKeys(const Func* func) {
   }
 }
 
-void publishOptFunctionInternal(FuncMetaInfo info) {
+size_t infoSize(const FuncMetaInfo& info) {
+  size_t sz = 0;
+  for (auto& trans : info.translations) {
+    auto& range = trans.range;
+    sz += range.main.size() + range.cold.size() + range.frozen.size();
+  }
+  return sz;
+}
+
+bool checkTCLimits() {
+  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
+  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
+
+  if (main_under && cold_under && froz_under) return true;
+  return cold_under && froz_under && code().hotEnabled();
+}
+
+void publishOptFunctionInternal(FuncMetaInfo info,
+                                size_t* failedBytes = nullptr) {
   auto const func = info.func;
 
   for (auto const rec : info.prologues) {
@@ -295,6 +324,8 @@ void publishOptFunctionInternal(FuncMetaInfo info) {
   mcgen::ReadThreadLocalTC localTC(info.tcBuf);
   for (auto& trans : info.translations) {
     auto const regionSk = trans.sk;
+    auto& range = trans.range;
+    auto bytes = range.main.size() + range.cold.size() + range.frozen.size();
     auto const loc = publishTranslationInternal(
       std::move(trans), info.tcBuf.view()
     );
@@ -303,6 +334,8 @@ void publishOptFunctionInternal(FuncMetaInfo info) {
         !func->hasThisVaries() &&
         func->getDVFunclets().size() == 0) {
       func->setFuncBody(loc->mainStart());
+    } else if (!loc && failedBytes) {
+      *failedBytes += bytes;
     }
   }
 }
@@ -356,12 +389,10 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
 
   auto metaLock = lockMetadata();
   always_assert(srcDB().find(sk) == nullptr);
-  auto const sr = srcDB().insert(sk);
+  auto const sr = srcDB().insert(sk, req);
   if (RuntimeOption::EvalEnableReusableTC) {
     recordFuncSrcRec(sk.func(), sr);
   }
-  sr->setFuncInfo(sk.func());
-  sr->setAnchorTranslation(req);
 
   if (srcRecSPOff) always_assert(sr->nonResumedSPOff() == *srcRecSPOff);
 
@@ -487,13 +518,28 @@ void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos) {
   auto codeLock = lockCode();
   auto metaLock = lockMetadata();
 
+  size_t failedBytes = 0;
+  bool hasSpace = checkTCLimits();
   ProfData::Session pds;
 
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) {
       continue;
     }
-    publishOptFunctionInternal(std::move(finfo));
+
+    if (!hasSpace) {
+      failedBytes += infoSize(finfo);
+      continue;
+    }
+
+    publishOptFunctionInternal(std::move(finfo), &failedBytes);
+    hasSpace = checkTCLimits();
+  }
+
+  if (failedBytes) {
+    logPerfWarning("opt_translation_overflow", 1, [&] (StructuredLogEntry& e) {
+      e.setInt("bytes_dropped", failedBytes);
+    });
   }
 }
 

@@ -10,15 +10,22 @@
 
 open Ide_message
 
-type result = string option
+(* The first string is the pretty-printed type, the second is the JSON *)
+type result = (string * string) option
 
-let infer_result_to_ide_response typename = Infer_type_response typename
+let infer_result_to_ide_response typename =
+  match typename with
+  | None ->
+    Infer_type_response { type_string = None; type_json = None }
+  | Some (str, _json) ->
+    Infer_type_response { type_string = Some str; type_json = None }
 
 (* Remember (when we care) the type found at a position *)
 let save_infer result_ty target_line target_column ty pos env =
   if Pos.inside pos target_line target_column && !result_ty = None
   then begin
-    result_ty := Some (Typing_print.full_strip_ns env ty);
+    result_ty := Some (Typing_print.full_strip_ns env ty,
+      Hh_json.json_to_string (Typing_print.to_json env ty))
   end
 
 let attach_hooks line column =

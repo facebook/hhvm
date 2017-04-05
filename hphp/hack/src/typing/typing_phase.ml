@@ -173,7 +173,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, root_ty = localize ~ety_env env root_ty in
       TUtils.expand_typeconst ety_env env r root_ty ids
   | r, Tshape (fields_known, tym) ->
-      let env, tym = ShapeMap.map_env (localize ~ety_env) env tym in
+      let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (ety_env, (r, Tshape (fields_known, tym)))
 
 and localize ~ety_env env ty =

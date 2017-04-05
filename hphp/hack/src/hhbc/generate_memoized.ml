@@ -286,9 +286,9 @@ let memoize_static_method_no_params original_name class_name =
     instr_ismemotype;
     instr_jmpnz label_0;
     instr_string (original_name ^ single_memoize_cache);
-    instr_string class_name;
+    instr_string (Utils.strip_ns class_name);
     instr_agetc;
-    instr_cgets;
+    instr_cgets 0;
     instr_dup;
     instr_istypec Hhbc_ast.OpNull;
     instr_jmpnz label_1;
@@ -300,9 +300,9 @@ let memoize_static_method_no_params original_name class_name =
     instr_maybememotype;
     instr_jmpz label_2;
     instr_string (original_name ^ single_memoize_cache_guard);
-    instr_string class_name;
-    instr_agetc;
-    instr_cgets;
+    instr_string (Utils.strip_ns class_name);
+    instr_clsrefgetc 0;
+    instr_cgets 0;
     instr_jmpz label_2;
     instr_null;
     instr_retc;
@@ -311,12 +311,12 @@ let memoize_static_method_no_params original_name class_name =
     instr_ismemotype;
     instr_jmpnz label_3;
     instr_string (original_name ^ single_memoize_cache);
-    instr_string class_name;
-    instr_agetc;
+    instr_string (Utils.strip_ns class_name);
+    instr_clsrefgetc 0;
     instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
     instr_fcall 0;
     instr_unboxr;
-    instr_sets;
+    instr_sets 0;
     instr_jmp label_4;
     instr_label label_3;
     instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
@@ -327,10 +327,10 @@ let memoize_static_method_no_params original_name class_name =
     instr_maybememotype;
     instr_jmpz label_5;
     instr_string (original_name ^ single_memoize_cache_guard);
-    instr_string class_name;
-    instr_agetc;
+    instr_string (Utils.strip_ns class_name);
+    instr_clsrefgetc 0;
     instr_true;
-    instr_sets;
+    instr_sets 0;
     instr_popc;
     instr_label label_5;
     instr_retc ]
@@ -345,10 +345,10 @@ let memoize_static_method_with_params params original_name class_name =
     Emit_body.emit_method_prolog params;
     param_code_sets params param_count;
     instr_string (original_name ^ multi_memoize_cache);
-    instr_string class_name;
-    instr_agetc;
-    instr_basesc 1 0;
-    instr_memoget 0 first_local param_count;
+    instr_string (Utils.strip_ns class_name);
+    instr_clsrefgetc 0;
+    instr_basesc 0 0;
+    instr_memoget 1 first_local param_count;
     instr_isuninit;
     instr_jmpnz label;
     instr_cgetcunop;
@@ -358,13 +358,13 @@ let memoize_static_method_with_params params original_name class_name =
     instr_popu;
     (* TODO: The strings have extra leading slashes unnecessarily *)
     instr_string (original_name ^ multi_memoize_cache);
-    instr_string class_name;
-    instr_agetc;
+    instr_string (Utils.strip_ns class_name);
+    instr_clsrefgetc 0;
     instr_fpushclsmethodd param_count renamed_name class_name;
     param_code_gets params;
     instr_fcall param_count;
     instr_unboxr;
-    instr_basesc 2 1;
+    instr_basesc 1 0;
     instr_memoset 1 first_local param_count;
     instr_retc ]
 

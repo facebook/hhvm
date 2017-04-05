@@ -1,0 +1,50 @@
+<?hh
+
+$str = <<<EOT
+foo
+EOT;
+
+function_call(
+  <<<EOTA
+foo
+EOTA
+);
+
+function_call(
+  <<<EOTB
+foo
+EOTB
+  ,
+  <<<EOTC
+bar
+EOTC
+);
+
+$str = <<<'EOTD'
+foo
+EOTD;
+
+function_call(
+  <<<'EOTE'
+foo
+EOTE
+);
+
+function_call(
+  <<<'EOTF'
+foo
+EOTF
+  ,
+  <<<'EOTG'
+bar
+EOTG
+);
+
+function foo() {
+  $bar = "bar";
+  return JSON::decode(
+    <<<JSON
+  { "foo": "{$bar}" }
+JSON
+  );
+}

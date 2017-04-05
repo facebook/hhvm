@@ -11,6 +11,7 @@
 module B = Buffer
 module H = Hhbc_ast
 module A = Ast
+module SS = String_sequence
 open H
 
 (* Generic helpers *)
@@ -20,7 +21,7 @@ let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
 let quote_str_with_escape s = "\\\"" ^ Php_escaping.escape s ^ "\\\""
 
 let string_of_class_id id = quote_str (Utils.strip_ns id)
-let string_of_function_id id = quote_str id
+let string_of_function_id id = quote_str (Utils.strip_ns id)
 
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
@@ -48,37 +49,66 @@ let string_of_list_of_shape_fields sl =
 
 let string_of_stack_index si = string_of_int si
 
+let string_of_classref id = string_of_int id
+
+let string_of_param_id x =
+  match x with
+  | Param_unnamed i -> string_of_int i
+  | Param_named s -> s
+
+let string_of_param_num i = string_of_int i
+
+let string_of_local_id x =
+  match x with
+  | Local.Unnamed i -> "_" ^ (string_of_int i)
+  | Local.Named s -> s
+  | Local.Pipe -> failwith "$$ should not have survived to codegen"
+
 let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
-    | Int i       -> "Int " ^ Int64.to_string i
-    | String str  -> "String \"" ^ str ^ "\""
+    | Int i       -> sep ["Int"; Int64.to_string i]
+    | String str  -> sep ["String"; quote_str str]
     | True        -> "True"
     | False       -> "False"
-    | Double d    -> "Double " ^ d
+    | Double d    -> sep ["Double"; d]
     | AddElemC          -> "AddElemC"
     | AddNewElemC       -> "AddNewElemC"
-    | Array (i, _)      -> "Array @A_" ^ string_of_int i
+    | Array (i, _)      -> sep ["Array"; "@A_" ^ string_of_int i]
     | ColAddNewElemC    -> "ColAddNewElemC"
-    | ColFromArray i    -> "ColFromArray " ^ string_of_int i
-    | Dict (i, _)       -> "Dict @A_" ^ string_of_int i
-    | Keyset (i, _)     -> "Keyset @A_" ^ string_of_int i
-    | NewCol i          -> "NewCol " ^ string_of_int i
-    | NewDictArray i    -> "NewDictArray " ^ string_of_int i
-    | NewKeysetArray i  -> "NewKeysetArray " ^ string_of_int i
-    | NewVecArray i     -> "NewVecArray " ^ string_of_int i
-    | NewMixedArray i   -> "NewMixedArray " ^ string_of_int i
-    | NewPackedArray i  -> "NewPackedArray " ^ string_of_int i
+    | ColFromArray i    -> sep ["ColFromArray"; string_of_int i]
+    | Dict (i, _)       -> sep ["Dict"; "@A_" ^ string_of_int i]
+    | Keyset (i, _)     -> sep ["Keyset"; "@A_" ^ string_of_int i]
+    | NewCol i          -> sep ["NewCol"; string_of_int i]
+    | NewDictArray i    -> sep ["NewDictArray"; string_of_int i]
+    | NewKeysetArray i  -> sep ["NewKeysetArray"; string_of_int i]
+    | NewVecArray i     -> sep ["NewVecArray"; string_of_int i]
+    | NewMixedArray i   -> sep ["NewMixedArray"; string_of_int i]
+    | NewPackedArray i  -> sep ["NewPackedArray"; string_of_int i]
     | NewStructArray l  ->
-      "NewStructArray <" ^ string_of_list_of_shape_fields l ^ ">"
-    | Vec (i, _)        -> "Vec @A_" ^ string_of_int i
-    | ClsCns name -> "ClsCns " ^ quote_str name
-    | ClsCnsD (name, class_name) -> "ClsCnsD " ^ quote_str name ^ " "
-      ^ string_of_class_id class_name
+      sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
+    | Vec (i, _)        -> sep ["Vec"; "@A_" ^ string_of_int i]
+    | ClsCns (name, id) ->
+      sep ["ClsCns"; quote_str name; string_of_classref id]
+    | ClsCnsD (name, class_name) ->
+      sep ["ClsCnsD"; quote_str name; string_of_class_id class_name]
     | File -> "File"
     | Dir -> "Dir"
-    (* TODO *)
-    | _ -> "\r# NYI: unexpected literal kind in string_of_lit_const"
+    | NYI text -> "NYI: " ^ text
+    | NullUninit -> "NullUninit"
+    | AddElemV -> "AddElemV"
+    | AddNewElemV -> "AddNewElemV"
+    | MapAddElemC -> "MapAddElemC"
+    | Method -> "Method"
+    | NameA -> "NameA"
+    | NewArray n -> sep ["NewArray"; string_of_int n]
+    | NewMIArray n -> sep ["NewMIArray"; string_of_int n]
+    | NewMSArray n -> sep ["NewMSArray"; string_of_int n]
+    | NewLikeArrayL (id, n) ->
+      sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
+    | Cns s -> sep ["Cns"; quote_str s]
+    | CnsE s -> sep ["CnsE"; quote_str s]
+    | CnsU (s1, s2) -> sep ["CnsU"; quote_str s1; quote_str s2]
 
 let string_of_operator instruction =
   match instruction with
@@ -123,54 +153,43 @@ let string_of_operator instruction =
     | CastDict -> "CastDict"
     | CastKeyset -> "CastKeyset"
     | InstanceOf -> "InstanceOf"
-    | InstanceOfD id -> "InstanceOfD " ^ quote_str id
+    | InstanceOfD id -> sep ["InstanceOfD"; quote_str id]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
-    | Fatal -> "Fatal Runtime"
-
-let string_of_param_id x =
-  match x with
-  | Param_unnamed i -> string_of_int i
-  | Param_named s -> s
-
-let string_of_param_num i = string_of_int i
-
-let string_of_local_id x =
-  match x with
-  | Local.Unnamed i -> "_" ^ (string_of_int i)
-  | Local.Named s -> s
-  | Local.Pipe -> failwith "$$ should not have survived to codegen"
+    | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =
   match x with
-  | CGetL id -> "CGetL " ^ string_of_local_id id
-  | CGetQuietL id -> "CGetQuietL " ^ string_of_local_id id
-  | CGetL2 id -> "CGetL2 " ^ string_of_local_id id
-  | CGetL3 id -> "CGetL3 " ^ string_of_local_id id
-  | CUGetL id -> "CUGetL " ^ string_of_local_id id
-  | PushL id -> "PushL " ^ string_of_local_id id
+  | CGetL id -> sep ["CGetL"; string_of_local_id id]
+  | CGetQuietL id -> sep ["CGetQuietL"; string_of_local_id id]
+  | CGetL2 id -> sep ["CGetL2"; string_of_local_id id]
+  | CGetL3 id -> sep ["CGetL3"; string_of_local_id id]
+  | CUGetL id -> sep ["CUGetL"; string_of_local_id id]
+  | PushL id -> sep ["PushL"; string_of_local_id id]
   | CGetN -> "CGetN"
   | CGetQuietN -> "CGetQuietN"
   | CGetG -> "CGetG"
   | CGetQuietG -> "CGetQuietG"
-  | CGetS -> "CGetS"
+  | CGetS id -> sep ["CGetS"; string_of_classref id]
   | VGetN -> "VGetN"
   | VGetG -> "VGetG"
-  | VGetS -> "VGetS"
+  | VGetS id -> sep ["VGetS"; string_of_classref id]
   | AGetC -> "AGetC"
-  | AGetL id -> "AGetL " ^ string_of_local_id id
+  | AGetL id -> sep ["AGetL"; string_of_local_id id]
+  | ClsRefGetL (id, cr) ->
+    sep ["ClsRefGetL"; string_of_local_id id; string_of_int cr]
+  | ClsRefGetC cr ->
+    sep ["ClsRefGetC"; string_of_int cr]
 
 let string_of_member_key mk =
   let open MemberKey in
   match mk with
   | EC i -> "EC:" ^ string_of_stack_index i
-  (* hhas doesn't yet support this syntax *)
   | EL id -> "EL:" ^ string_of_local_id id
   | ET str -> "ET:" ^ quote_str str
   | EI i -> "EI:" ^ Int64.to_string i
   | PC i -> "PC:" ^ string_of_stack_index i
-  (* hhas doesn't yet support this syntax *)
   | PL id -> "PL:" ^ string_of_local_id id
   | PT str -> "PT:" ^ quote_str str
   | QT str -> "QT:" ^ quote_str str
@@ -218,25 +237,26 @@ let string_of_istype_op op =
 
 let string_of_mutator x =
   match x with
-  | SetL id -> "SetL " ^ string_of_local_id id
+  | SetL id -> sep ["SetL"; string_of_local_id id]
   | SetN -> "SetN"
   | SetG -> "SetG"
-  | SetS -> "SetS"
+  | SetS id -> sep ["SetS"; string_of_classref id]
   | SetOpL (id, op) ->
-    "SetOpL " ^ string_of_local_id id ^ " " ^ string_of_eq_op op
-  | SetOpN op -> "SetOpN " ^ string_of_eq_op op
-  | SetOpG op -> "SetOpG " ^ string_of_eq_op op
-  | SetOpS op -> "SetOpS " ^ string_of_eq_op op
+    sep ["SetOpL"; string_of_local_id id; string_of_eq_op op]
+  | SetOpN op -> sep ["SetOpN"; string_of_eq_op op]
+  | SetOpG op -> sep ["SetOpG"; string_of_eq_op op]
+  | SetOpS (op, id) -> sep ["SetOpS"; string_of_eq_op op; string_of_classref id]
   | IncDecL (id, op) ->
-    "IncDecL " ^ string_of_local_id id ^ " " ^ string_of_incdec_op op
-  | IncDecN op -> "IncDecN " ^ string_of_incdec_op op
-  | IncDecG op -> "IncDecG " ^ string_of_incdec_op op
-  | IncDecS op -> "IncDecS " ^ string_of_incdec_op op
-  | BindL id -> "BindL " ^ string_of_local_id id
+    sep ["IncDecL"; string_of_local_id id; string_of_incdec_op op]
+  | IncDecN op -> sep ["IncDecN"; string_of_incdec_op op]
+  | IncDecG op -> sep ["IncDecG"; string_of_incdec_op op]
+  | IncDecS (op, id) ->
+    sep ["IncDecS"; string_of_incdec_op op; string_of_classref id]
+  | BindL id -> sep ["BindL"; string_of_local_id id]
   | BindN -> "BindN"
   | BindG -> "BindG"
-  | BindS -> "BindS"
-  | UnsetL id -> "UnsetL " ^ string_of_local_id id
+  | BindS id -> sep ["BindS"; string_of_classref id]
+  | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
   | UnsetN -> "UnsetN"
   | UnsetG -> "UnsetG"
   | CheckProp _ -> failwith "NYI"
@@ -339,7 +359,7 @@ let string_of_final instruction =
     sep ["VGetM";
       string_of_int n; string_of_member_key mk]
   | UnsetM (n, mk) ->
-    sep ["SetM";
+    sep ["UnsetM";
       string_of_int n; string_of_member_key mk]
   | BindM (n, mk) ->
     sep ["BindM";
@@ -367,61 +387,83 @@ let string_of_final instruction =
 
 let string_of_call instruction =
   match instruction with
-  | FPushFunc n -> "FPushFunc " ^ string_of_int n
-  | FPushFuncD (n, id) -> "FPushFuncD " ^ string_of_int n ^ " " ^ quote_str id
+  | FPushFunc n ->
+    sep ["FPushFunc"; string_of_int n]
+  | FPushFuncD (n, id) ->
+    sep ["FPushFuncD"; string_of_int n; quote_str id]
   | FPushFuncU (n, id1, id2) ->
-    "FPushFuncU " ^ string_of_int n ^ " " ^ quote_str id1 ^ " " ^ quote_str id2
-  | FPushObjMethod n -> "FPushObjMethod " ^ string_of_int n
+    sep ["FPushFuncU"; string_of_int n; quote_str id1; quote_str id2]
+  | FPushObjMethod n ->
+    sep ["FPushObjMethod"; string_of_int n]
   | FPushObjMethodD (n, id, nf) ->
-    "FPushObjMethodD " ^ string_of_int n ^ " " ^ quote_str id
-    ^ " " ^ string_of_null_flavor nf
-  | FPushClsMethod n -> "FPushClsMethod " ^ string_of_int n
-  | FPushClsMethodF n -> "FPushClsMethodF " ^ string_of_int n
-  | FPushClsMethodD (n, id1, id2) -> "FPushClsMethodD " ^ string_of_int n
-    ^ " " ^ string_of_class_id id1 ^ " " ^  string_of_function_id id2
-  | FPushCtor n -> "FPushCtor " ^ string_of_int n
-  | FPushCtorD (n, id) -> "FPushCtorD " ^ string_of_int n ^ " " ^ quote_str id
-  | FPushCtorI (n, id) -> "FPushCtorI " ^ string_of_int n ^ " " ^ quote_str id
+    sep ["FPushObjMethodD";
+      string_of_int n; quote_str id; string_of_null_flavor nf]
+  | FPushClsMethod (n, id) ->
+    sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
+  | FPushClsMethodF (n, id) ->
+    sep ["FPushClsMethodF"; string_of_int n; string_of_classref id]
+  | FPushClsMethodD (n, id1, id2) ->
+    sep ["FPushClsMethodD";
+      string_of_int n; string_of_class_id id1; string_of_function_id id2]
+  | FPushCtor (n, id) ->
+    sep ["FPushCtor"; string_of_int n; string_of_int id]
+  | FPushCtorD (n, id) ->
+    sep ["FPushCtorD"; string_of_int n; quote_str id]
+  | FPushCtorI (n, id) ->
+    sep ["FPushCtorI"; string_of_int n; quote_str id]
   | DecodeCufIter (n, l) ->
-    "DecodeCufIter " ^ string_of_int n ^ " " ^ string_of_label l
+    sep ["DecodeCufIter"; string_of_int n; string_of_label l]
   | FPushCufIter (n, id) ->
-    "FPushCufIter " ^ string_of_int n ^ " " ^ string_of_iterator_id id
-  | FPushCuf n -> "FPushCuf " ^ string_of_int n
-  | FPushCufF n -> "FPushCufF " ^  string_of_int n
-  | FPushCufSafe n -> "FPushCufSafe " ^ string_of_int n
+    sep ["FPushCufIter"; string_of_int n; string_of_iterator_id id]
+  | FPushCuf n ->
+    sep ["FPushCuf"; string_of_int n]
+  | FPushCufF n ->
+    sep ["FPushCufF"; string_of_int n]
+  | FPushCufSafe n ->
+    sep ["FPushCufSafe"; string_of_int n]
   | CufSafeArray -> "CufSafeArray"
   | CufSafeReturn -> "CufSafeReturn"
-  | FPassC i -> "FPassC " ^ string_of_param_num i
-  | FPassCW i -> "FPassCW " ^ string_of_param_num i
-  | FPassCE i -> "FPassCE " ^ string_of_param_num i
-  | FPassV i -> "FPassV " ^ string_of_param_num i
-  | FPassVNop i -> "FPassVNop " ^ string_of_param_num i
-  | FPassR i -> "FPassR " ^ string_of_param_num i
+  | FPassC i ->
+    sep ["FPassC"; string_of_param_num i]
+  | FPassCW i ->
+    sep ["FPassCW"; string_of_param_num i]
+  | FPassCE i ->
+    sep ["FPassCE"; string_of_param_num i]
+  | FPassV i ->
+    sep ["FPassV"; string_of_param_num i]
+  | FPassVNop i ->
+    sep ["FPassVNop"; string_of_param_num i]
+  | FPassR i ->
+    sep ["FPassR"; string_of_param_num i]
   | FPassL (i, lid) ->
-    "FPassL " ^ string_of_param_num i ^ " " ^ string_of_local_id lid
-  | FPassN i -> "FPassN " ^ string_of_param_num i
-  | FPassG i -> "FPassG " ^ string_of_param_num i
-  | FPassS i -> "FPassS " ^ string_of_param_num i
-  | FCall n -> "FCall " ^ string_of_int n
+    sep ["FPassL"; string_of_param_num i; string_of_local_id lid]
+  | FPassN i ->
+    sep ["FPassN"; string_of_param_num i]
+  | FPassG i ->
+    sep ["FPassG"; string_of_param_num i]
+  | FPassS (i, id) ->
+    sep ["FPassS"; string_of_param_num i; string_of_classref id]
+  | FCall n ->
+    sep ["FCall"; string_of_int n]
   | FCallD (n, c, f) ->
-    "FCallD " ^ string_of_int n ^ " " ^
-    string_of_class_id c ^ " " ^ string_of_function_id f
+    sep ["FCallD";
+      string_of_int n; string_of_class_id c; string_of_function_id f]
   | FCallArray -> "FCallArray"
   | FCallAwait (n, c, f) ->
-    "FCallAwait " ^ string_of_int n ^ " " ^
-    string_of_class_id c ^ " " ^ string_of_function_id f
-  | FCallUnpack n -> "FCallUnpack " ^ string_of_int n
+    sep ["FCallAwait";
+      string_of_int n; string_of_class_id c; string_of_function_id f]
+  | FCallUnpack n ->
+    sep ["FCallUnpack"; string_of_int n]
   | FCallBuiltin (n1, n2, id) ->
-    "FCallBuiltin " ^ string_of_int n1 ^ " " ^ string_of_int n2 ^ " " ^
-    quote_str id
+    sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; quote_str id]
 
 let string_of_misc instruction =
   match instruction with
     | This -> "This"
     | Self -> "Self"
-    | Parent -> "Parent"
-    | LateBoundCls -> "LateBoundCls"
-    | VerifyParamType id -> "VerifyParamType " ^ string_of_param_id id
+    | Parent id -> sep ["Parent"; string_of_classref id]
+    | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
+    | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"
     | CheckThis -> "CheckThis"
@@ -429,9 +471,9 @@ let string_of_misc instruction =
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
     | StaticLoc (local, text) ->
-      "StaticLoc " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
-    | StaticLocInit (local, text) -> (* TODO: The $ is unnecessarily escaped. *)
-      "StaticLocInit " ^ (string_of_local_id local) ^ " " ^ (quote_str text)
+      sep ["StaticLoc"; string_of_local_id local; quote_str text]
+    | StaticLocInit (local, text) ->
+      sep ["StaticLocInit"; string_of_local_id local; quote_str text]
     | MemoGet (count, Local.Unnamed first, local_count) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
         (string_of_int count) first (local_count - 1)
@@ -440,7 +482,8 @@ let string_of_misc instruction =
       Printf.sprintf "MemoSet %s L:%d+%d"
         (string_of_int count) first (local_count - 1)
     | MemoSet _ -> failwith "MemoSet needs an unnamed local"
-    | GetMemoKeyL local -> "GetMemoKeyL " ^ (string_of_local_id local)
+    | GetMemoKeyL local ->
+      sep ["GetMemoKeyL"; string_of_local_id local]
     | IsMemoType -> "IsMemoType"
     | MaybeMemoType -> "MaybeMemoType"
     | CreateCl (n, cid) ->
@@ -473,6 +516,14 @@ let string_of_iterator instruction =
     (string_of_local_id value)
   | IterFree id ->
     "IterFree " ^ (string_of_iterator_id id)
+  | IterBreak (label, iterlist) ->
+      "IterBreak " ^
+      (string_of_label label) ^
+      "<" ^
+      (let list_item = (fun id -> "(Iter) " ^ (string_of_iterator_id id)) in
+      let mapped_list = List.map list_item iterlist in
+        String.concat ", " mapped_list) ^
+      ">"
   | _ -> "### string_of_iterator instruction not implemented"
 
 let string_of_try instruction =
@@ -643,6 +694,7 @@ let string_of_param p =
   let param_name = Hhas_param.name p in
   let param_default_value = Hhas_param.default_value p in
   string_of_type_info_option param_type_info
+  ^ (if Hhas_param.is_reference p then "&" else "")
   ^ param_name
   ^ string_of_param_default_value_option param_default_value
 
@@ -666,30 +718,51 @@ let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
   B.add_string buf ";\n"
   end
 
+let add_num_iters buf indent num_iters = if num_iters = 0 then () else begin
+  B.add_string buf (String.make indent ' ');
+  B.add_string buf ".numiters ";
+  B.add_string buf (Printf.sprintf "%d" num_iters);
+  B.add_string buf ";\n"
+  end
+
 let rec attribute_argument_to_string argument =
   match argument with
-  | Null -> "N;"
-  | Double f -> Printf.sprintf "d:%s;" f
-  | String s ->
+  | Null -> SS.str "N;"
+  | Double f -> SS.str @@ Printf.sprintf "d:%s;" f
+  | String s -> SS.str @@
     Printf.sprintf "s:%d:%s;" (String.length s) (quote_str_with_escape s)
   (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
-  | False -> "i:0;"
-  | True -> "i:1;"
-  | Int i -> "i:" ^ (Int64.to_string i) ^ ";"
-  | Dict (num, fields) ->
-    (* Note: no semi *)
-    let fields = attribute_arguments_to_string fields in
-    Printf.sprintf "D:%d:{%s}" num fields
+  | False -> SS.str "b:0;"
+  | True -> SS.str "b:1;"
+  | Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
   | Array (num, fields) ->
-    (* Note: no semi *)
-    let fields = attribute_arguments_to_string fields in
-    Printf.sprintf "a:%d:{%s}" num fields
-  | _ -> failwith "unexpected value in attribute_argument_to_string"
+    attribute_collection_argument_to_string "a" num fields
+  | Vec (num, fields) -> attribute_collection_argument_to_string "v" num fields
+  | Dict (num, fields) -> attribute_collection_argument_to_string "D" num fields
+  | Keyset (num, fields) ->
+    attribute_collection_argument_to_string "k" num fields
+  | NYI text -> SS.str @@ "NYI: " ^ text
+  | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
+  | MapAddElemC | ColAddNewElemC | File | Dir | Method | NameA
+  | NewArray _ | NewMixedArray _ | NewDictArray _
+  | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _) | NewPackedArray _
+  | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _
+  | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
+  | ClsCnsD (_, _) -> SS.str
+    "\r# NYI: unexpected literal kind in attribute_argument_to_string"
+
+and attribute_collection_argument_to_string col_type num fields =
+  let fields = attribute_arguments_to_string fields in
+  SS.gather [
+    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
+    fields;
+    SS.str "}"
+  ]
 
 and attribute_arguments_to_string arguments =
   arguments
     |> Core.List.map ~f:attribute_argument_to_string
-    |> String.concat ""
+    |> SS.gather
 
 let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
   let count = List.length args in
@@ -703,14 +776,25 @@ let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
   let arguments = attribute_arguments_to_string args in
   let attribute_str = format_of_string @@
     if if_class_attribute
-    then "\"%s\"(\"\"\"a:%n:{%s}\"\"\")"
-    else "\"\"\"%s:%n:{%s}\"\"\""
+    then "\"%s\"(\"\"\"a:%n:{"
+    else "\"\"\"%s:%n:{"
   in
-  Printf.sprintf attribute_str name count arguments
+  let attribute_begin = Printf.sprintf attribute_str name count in
+  let attribute_end =
+    if if_class_attribute
+    then "}\"\"\")"
+    else "}\"\"\""
+  in
+  SS.gather [
+    SS.str attribute_begin;
+    arguments;
+    SS.str attribute_end;
+  ]
 
 let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
+  SS.seq_to_string @@
   attribute_to_string_helper ~has_keys:true ~if_class_attribute:true name args
 
 let function_attributes f =
@@ -725,6 +809,7 @@ let add_fun_def buf fun_def =
   let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in
   let function_decl_vars = Hhas_function.decl_vars fun_def in
+  let function_num_iters = Hhas_function.num_iters fun_def in
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
@@ -738,15 +823,16 @@ let add_fun_def buf fun_def =
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
   add_decl_vars buf 2 function_decl_vars;
+  add_num_iters buf 2 function_num_iters;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = List.map attribute_to_string user_attrs in
+  let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
-  let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_public m then "public" :: attrs else attrs in
   let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
@@ -763,6 +849,7 @@ let add_method_def buf method_def =
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
   let method_decl_vars = Hhas_method.decl_vars method_def in
+  let method_num_iters = Hhas_method.num_iters method_def in
   let method_is_async = Hhas_method.is_async method_def in
   let method_is_generator = Hhas_method.is_generator method_def in
   let method_is_pair_generator = Hhas_method.is_pair_generator method_def in
@@ -778,6 +865,7 @@ let add_method_def buf method_def =
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
   add_decl_vars buf 4 method_decl_vars;
+  add_num_iters buf 4 method_num_iters;
   add_instruction_list buf 4 method_body;
   B.add_string buf "  }"
 
@@ -840,9 +928,10 @@ let add_property class_def buf property =
   else begin
     B.add_string buf "\"\"\"";
     let init = match Hhas_property.initial_value property with
-    | None -> "N;"
-    | Some value -> attribute_argument_to_string value in
-    B.add_string buf init;
+      | None -> SS.str "N;"
+      | Some value -> attribute_argument_to_string value
+    in
+    SS.add_string_from_seq buf init;
     B.add_string buf "\"\"\";"
   end
 
@@ -853,7 +942,7 @@ let add_constant buf c =
   B.add_string buf name;
   B.add_string buf " = \"\"\"";
   (* TODO: attribute_argument_to_string could stand to be renamed. *)
-  B.add_string buf (attribute_argument_to_string value);
+  SS.add_string_from_seq buf @@ attribute_argument_to_string value;
   B.add_string buf "\"\"\";"
 
 let add_type_constant buf c =
@@ -870,6 +959,14 @@ let add_enum_ty buf c =
     B.add_string buf ";"
   | _ -> ()
 
+let add_uses buf c =
+  let use_l = Hhas_class.class_uses c in
+  match use_l with
+  | [] -> ()
+  | _  ->
+    B.add_string buf @@ Printf.sprintf "\n  .use %s;"
+      @@ String.concat " " @@ List.map Utils.strip_ns use_l
+
 let add_class_def buf class_def =
   let class_name = fmt_name (Hhas_class.name class_def) in
   (* TODO: user attributes *)
@@ -879,6 +976,7 @@ let add_class_def buf class_def =
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {";
+  add_uses buf class_def;
   add_enum_ty buf class_def;
   List.iter (add_constant buf) (Hhas_class.constants class_def);
   List.iter (add_type_constant buf) (Hhas_class.type_constants class_def);
@@ -896,7 +994,7 @@ let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf ".adata A_";
   B.add_string buf @@ string_of_int num;
   B.add_string buf " = ";
-  B.add_string buf
+  SS.add_string_from_seq buf
     @@ attribute_to_string_helper
       ~if_class_attribute:false
       ~has_keys
@@ -932,9 +1030,11 @@ let add_top_level buf hhas_prog =
   let main = Hhas_program.main hhas_prog in
   let main_stmts = Hhas_main.body main in
   let main_decl_vars = Hhas_main.decl_vars main in
+  let main_num_iters = Hhas_main.num_iters main in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
   add_decl_vars buf 2 main_decl_vars;
+  add_num_iters buf 2 main_num_iters;
   add_defcls buf non_closure_classes;
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"

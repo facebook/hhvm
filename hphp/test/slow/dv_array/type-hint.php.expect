@@ -1,0 +1,832 @@
+================ takes_array ============================
+string(75) "Argument 1 passed to takes_array() must be an instance of array, null given"
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+string(80) "Argument 1 passed to takes_varray() must be an instance of HH\varray, null given"
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+string(80) "Argument 1 passed to takes_darray() must be an instance of HH\darray, null given"
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+string(100) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, null given"
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, null given"
+================ takes_darray2 ============================
+string(81) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, null given"
+================ returns_array ============================
+string(78) "Value returned from function returns_array() must be of type array, null given"
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+string(83) "Value returned from function returns_varray() must be of type HH\varray, null given"
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+string(83) "Value returned from function returns_darray() must be of type HH\darray, null given"
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+string(103) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, null given"
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_array ============================
+string(75) "Argument 1 passed to takes_array() must be an instance of array, bool given"
+================ takes_nullable_array ============================
+string(71) "Argument 1 to takes_nullable_array() must be of type ?array, bool given"
+================ takes_varray ============================
+string(80) "Argument 1 passed to takes_varray() must be an instance of HH\varray, bool given"
+================ takes_nullable_varray ============================
+string(76) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, bool given"
+================ takes_darray ============================
+string(80) "Argument 1 passed to takes_darray() must be an instance of HH\darray, bool given"
+================ takes_nullable_darray ============================
+string(76) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, bool given"
+================ takes_varray_or_darray ============================
+string(100) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, bool given"
+================ takes_nullable_varray_or_darray ============================
+string(96) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ takes_varray2 ============================
+string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, bool given"
+================ takes_darray2 ============================
+string(81) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, bool given"
+================ returns_array ============================
+string(78) "Value returned from function returns_array() must be of type array, bool given"
+================ returns_nullable_array ============================
+string(88) "Value returned from function returns_nullable_array() must be of type ?array, bool given"
+================ returns_varray ============================
+string(83) "Value returned from function returns_varray() must be of type HH\varray, bool given"
+================ returns_nullable_varray ============================
+string(93) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, bool given"
+================ returns_darray ============================
+string(83) "Value returned from function returns_darray() must be of type HH\darray, bool given"
+================ returns_nullable_darray ============================
+string(93) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, bool given"
+================ returns_varray_or_darray ============================
+string(103) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, bool given"
+================ returns_nullable_varray_or_darray ============================
+string(113) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ takes_array ============================
+string(75) "Argument 1 passed to takes_array() must be an instance of array, bool given"
+================ takes_nullable_array ============================
+string(71) "Argument 1 to takes_nullable_array() must be of type ?array, bool given"
+================ takes_varray ============================
+string(80) "Argument 1 passed to takes_varray() must be an instance of HH\varray, bool given"
+================ takes_nullable_varray ============================
+string(76) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, bool given"
+================ takes_darray ============================
+string(80) "Argument 1 passed to takes_darray() must be an instance of HH\darray, bool given"
+================ takes_nullable_darray ============================
+string(76) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, bool given"
+================ takes_varray_or_darray ============================
+string(100) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, bool given"
+================ takes_nullable_varray_or_darray ============================
+string(96) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ takes_varray2 ============================
+string(81) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, bool given"
+================ takes_darray2 ============================
+string(81) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, bool given"
+================ returns_array ============================
+string(78) "Value returned from function returns_array() must be of type array, bool given"
+================ returns_nullable_array ============================
+string(88) "Value returned from function returns_nullable_array() must be of type ?array, bool given"
+================ returns_varray ============================
+string(83) "Value returned from function returns_varray() must be of type HH\varray, bool given"
+================ returns_nullable_varray ============================
+string(93) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, bool given"
+================ returns_darray ============================
+string(83) "Value returned from function returns_darray() must be of type HH\darray, bool given"
+================ returns_nullable_darray ============================
+string(93) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, bool given"
+================ returns_varray_or_darray ============================
+string(103) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, bool given"
+================ returns_nullable_varray_or_darray ============================
+string(113) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, bool given"
+================ takes_array ============================
+string(77) "Argument 1 passed to takes_array() must be an instance of array, string given"
+================ takes_nullable_array ============================
+string(73) "Argument 1 to takes_nullable_array() must be of type ?array, string given"
+================ takes_varray ============================
+string(82) "Argument 1 passed to takes_varray() must be an instance of HH\varray, string given"
+================ takes_nullable_varray ============================
+string(78) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, string given"
+================ takes_darray ============================
+string(82) "Argument 1 passed to takes_darray() must be an instance of HH\darray, string given"
+================ takes_nullable_darray ============================
+string(78) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, string given"
+================ takes_varray_or_darray ============================
+string(102) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, string given"
+================ takes_nullable_varray_or_darray ============================
+string(98) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, string given"
+================ takes_varray2 ============================
+string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, string given"
+================ takes_darray2 ============================
+string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, string given"
+================ returns_array ============================
+string(80) "Value returned from function returns_array() must be of type array, string given"
+================ returns_nullable_array ============================
+string(90) "Value returned from function returns_nullable_array() must be of type ?array, string given"
+================ returns_varray ============================
+string(85) "Value returned from function returns_varray() must be of type HH\varray, string given"
+================ returns_nullable_varray ============================
+string(95) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, string given"
+================ returns_darray ============================
+string(85) "Value returned from function returns_darray() must be of type HH\darray, string given"
+================ returns_nullable_darray ============================
+string(95) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, string given"
+================ returns_varray_or_darray ============================
+string(105) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, string given"
+================ returns_nullable_varray_or_darray ============================
+string(115) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, string given"
+================ takes_array ============================
+string(74) "Argument 1 passed to takes_array() must be an instance of array, int given"
+================ takes_nullable_array ============================
+string(70) "Argument 1 to takes_nullable_array() must be of type ?array, int given"
+================ takes_varray ============================
+string(79) "Argument 1 passed to takes_varray() must be an instance of HH\varray, int given"
+================ takes_nullable_varray ============================
+string(75) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, int given"
+================ takes_darray ============================
+string(79) "Argument 1 passed to takes_darray() must be an instance of HH\darray, int given"
+================ takes_nullable_darray ============================
+string(75) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, int given"
+================ takes_varray_or_darray ============================
+string(99) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, int given"
+================ takes_nullable_varray_or_darray ============================
+string(95) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, int given"
+================ takes_varray2 ============================
+string(80) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, int given"
+================ takes_darray2 ============================
+string(80) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, int given"
+================ returns_array ============================
+string(77) "Value returned from function returns_array() must be of type array, int given"
+================ returns_nullable_array ============================
+string(87) "Value returned from function returns_nullable_array() must be of type ?array, int given"
+================ returns_varray ============================
+string(82) "Value returned from function returns_varray() must be of type HH\varray, int given"
+================ returns_nullable_varray ============================
+string(92) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, int given"
+================ returns_darray ============================
+string(82) "Value returned from function returns_darray() must be of type HH\darray, int given"
+================ returns_nullable_darray ============================
+string(92) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, int given"
+================ returns_varray_or_darray ============================
+string(102) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, int given"
+================ returns_nullable_varray_or_darray ============================
+string(112) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, int given"
+================ takes_array ============================
+string(76) "Argument 1 passed to takes_array() must be an instance of array, float given"
+================ takes_nullable_array ============================
+string(72) "Argument 1 to takes_nullable_array() must be of type ?array, float given"
+================ takes_varray ============================
+string(81) "Argument 1 passed to takes_varray() must be an instance of HH\varray, float given"
+================ takes_nullable_varray ============================
+string(77) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, float given"
+================ takes_darray ============================
+string(81) "Argument 1 passed to takes_darray() must be an instance of HH\darray, float given"
+================ takes_nullable_darray ============================
+string(77) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, float given"
+================ takes_varray_or_darray ============================
+string(101) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, float given"
+================ takes_nullable_varray_or_darray ============================
+string(97) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, float given"
+================ takes_varray2 ============================
+string(82) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, float given"
+================ takes_darray2 ============================
+string(82) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, float given"
+================ returns_array ============================
+string(79) "Value returned from function returns_array() must be of type array, float given"
+================ returns_nullable_array ============================
+string(89) "Value returned from function returns_nullable_array() must be of type ?array, float given"
+================ returns_varray ============================
+string(84) "Value returned from function returns_varray() must be of type HH\varray, float given"
+================ returns_nullable_varray ============================
+string(94) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, float given"
+================ returns_darray ============================
+string(84) "Value returned from function returns_darray() must be of type HH\darray, float given"
+================ returns_nullable_darray ============================
+string(94) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, float given"
+================ returns_varray_or_darray ============================
+string(104) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, float given"
+================ returns_nullable_varray_or_darray ============================
+string(114) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, float given"
+================ takes_array ============================
+string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
+================ takes_nullable_array ============================
+string(73) "Argument 1 to takes_nullable_array() must be of type ?array, HH\vec given"
+================ takes_varray ============================
+string(82) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\vec given"
+================ takes_nullable_varray ============================
+string(78) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, HH\vec given"
+================ takes_darray ============================
+string(82) "Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\vec given"
+================ takes_nullable_darray ============================
+string(78) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH\vec given"
+================ takes_varray_or_darray ============================
+string(102) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\vec given"
+================ takes_nullable_varray_or_darray ============================
+string(98) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ takes_varray2 ============================
+string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\vec given"
+================ takes_darray2 ============================
+string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\vec given"
+================ returns_array ============================
+string(80) "Value returned from function returns_array() must be of type array, HH\vec given"
+================ returns_nullable_array ============================
+string(90) "Value returned from function returns_nullable_array() must be of type ?array, HH\vec given"
+================ returns_varray ============================
+string(85) "Value returned from function returns_varray() must be of type HH\varray, HH\vec given"
+================ returns_nullable_varray ============================
+string(95) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, HH\vec given"
+================ returns_darray ============================
+string(85) "Value returned from function returns_darray() must be of type HH\darray, HH\vec given"
+================ returns_nullable_darray ============================
+string(95) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, HH\vec given"
+================ returns_varray_or_darray ============================
+string(105) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\vec given"
+================ returns_nullable_varray_or_darray ============================
+string(115) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ takes_array ============================
+string(77) "Argument 1 passed to takes_array() must be an instance of array, HH\vec given"
+================ takes_nullable_array ============================
+string(73) "Argument 1 to takes_nullable_array() must be of type ?array, HH\vec given"
+================ takes_varray ============================
+string(82) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\vec given"
+================ takes_nullable_varray ============================
+string(78) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, HH\vec given"
+================ takes_darray ============================
+string(82) "Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\vec given"
+================ takes_nullable_darray ============================
+string(78) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH\vec given"
+================ takes_varray_or_darray ============================
+string(102) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\vec given"
+================ takes_nullable_varray_or_darray ============================
+string(98) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ takes_varray2 ============================
+string(83) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\vec given"
+================ takes_darray2 ============================
+string(83) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\vec given"
+================ returns_array ============================
+string(80) "Value returned from function returns_array() must be of type array, HH\vec given"
+================ returns_nullable_array ============================
+string(90) "Value returned from function returns_nullable_array() must be of type ?array, HH\vec given"
+================ returns_varray ============================
+string(85) "Value returned from function returns_varray() must be of type HH\varray, HH\vec given"
+================ returns_nullable_varray ============================
+string(95) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, HH\vec given"
+================ returns_darray ============================
+string(85) "Value returned from function returns_darray() must be of type HH\darray, HH\vec given"
+================ returns_nullable_darray ============================
+string(95) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, HH\vec given"
+================ returns_varray_or_darray ============================
+string(105) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\vec given"
+================ returns_nullable_varray_or_darray ============================
+string(115) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\vec given"
+================ takes_array ============================
+string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
+================ takes_nullable_array ============================
+string(74) "Argument 1 to takes_nullable_array() must be of type ?array, HH\dict given"
+================ takes_varray ============================
+string(83) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given"
+================ takes_nullable_varray ============================
+string(79) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, HH\dict given"
+================ takes_darray ============================
+string(83) "Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\dict given"
+================ takes_nullable_darray ============================
+string(79) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH\dict given"
+================ takes_varray_or_darray ============================
+string(103) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\dict given"
+================ takes_nullable_varray_or_darray ============================
+string(99) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ takes_varray2 ============================
+string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
+================ takes_darray2 ============================
+string(84) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\dict given"
+================ returns_array ============================
+string(81) "Value returned from function returns_array() must be of type array, HH\dict given"
+================ returns_nullable_array ============================
+string(91) "Value returned from function returns_nullable_array() must be of type ?array, HH\dict given"
+================ returns_varray ============================
+string(86) "Value returned from function returns_varray() must be of type HH\varray, HH\dict given"
+================ returns_nullable_varray ============================
+string(96) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, HH\dict given"
+================ returns_darray ============================
+string(86) "Value returned from function returns_darray() must be of type HH\darray, HH\dict given"
+================ returns_nullable_darray ============================
+string(96) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, HH\dict given"
+================ returns_varray_or_darray ============================
+string(106) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\dict given"
+================ returns_nullable_varray_or_darray ============================
+string(116) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ takes_array ============================
+string(78) "Argument 1 passed to takes_array() must be an instance of array, HH\dict given"
+================ takes_nullable_array ============================
+string(74) "Argument 1 to takes_nullable_array() must be of type ?array, HH\dict given"
+================ takes_varray ============================
+string(83) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\dict given"
+================ takes_nullable_varray ============================
+string(79) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, HH\dict given"
+================ takes_darray ============================
+string(83) "Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\dict given"
+================ takes_nullable_darray ============================
+string(79) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH\dict given"
+================ takes_varray_or_darray ============================
+string(103) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\dict given"
+================ takes_nullable_varray_or_darray ============================
+string(99) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ takes_varray2 ============================
+string(84) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\dict given"
+================ takes_darray2 ============================
+string(84) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\dict given"
+================ returns_array ============================
+string(81) "Value returned from function returns_array() must be of type array, HH\dict given"
+================ returns_nullable_array ============================
+string(91) "Value returned from function returns_nullable_array() must be of type ?array, HH\dict given"
+================ returns_varray ============================
+string(86) "Value returned from function returns_varray() must be of type HH\varray, HH\dict given"
+================ returns_nullable_varray ============================
+string(96) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, HH\dict given"
+================ returns_darray ============================
+string(86) "Value returned from function returns_darray() must be of type HH\darray, HH\dict given"
+================ returns_nullable_darray ============================
+string(96) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, HH\dict given"
+================ returns_varray_or_darray ============================
+string(106) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\dict given"
+================ returns_nullable_varray_or_darray ============================
+string(116) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\dict given"
+================ takes_array ============================
+string(80) "Argument 1 passed to takes_array() must be an instance of array, HH\keyset given"
+================ takes_nullable_array ============================
+string(76) "Argument 1 to takes_nullable_array() must be of type ?array, HH\keyset given"
+================ takes_varray ============================
+string(85) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\keyset given"
+================ takes_nullable_varray ============================
+string(81) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, HH\keyset given"
+================ takes_darray ============================
+string(85) "Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\keyset given"
+================ takes_nullable_darray ============================
+string(81) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH\keyset given"
+================ takes_varray_or_darray ============================
+string(105) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\keyset given"
+================ takes_nullable_varray_or_darray ============================
+string(101) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ takes_varray2 ============================
+string(86) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\keyset given"
+================ takes_darray2 ============================
+string(86) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\keyset given"
+================ returns_array ============================
+string(83) "Value returned from function returns_array() must be of type array, HH\keyset given"
+================ returns_nullable_array ============================
+string(93) "Value returned from function returns_nullable_array() must be of type ?array, HH\keyset given"
+================ returns_varray ============================
+string(88) "Value returned from function returns_varray() must be of type HH\varray, HH\keyset given"
+================ returns_nullable_varray ============================
+string(98) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, HH\keyset given"
+================ returns_darray ============================
+string(88) "Value returned from function returns_darray() must be of type HH\darray, HH\keyset given"
+================ returns_nullable_darray ============================
+string(98) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, HH\keyset given"
+================ returns_varray_or_darray ============================
+string(108) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\keyset given"
+================ returns_nullable_varray_or_darray ============================
+string(118) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ takes_array ============================
+string(80) "Argument 1 passed to takes_array() must be an instance of array, HH\keyset given"
+================ takes_nullable_array ============================
+string(76) "Argument 1 to takes_nullable_array() must be of type ?array, HH\keyset given"
+================ takes_varray ============================
+string(85) "Argument 1 passed to takes_varray() must be an instance of HH\varray, HH\keyset given"
+================ takes_nullable_varray ============================
+string(81) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, HH\keyset given"
+================ takes_darray ============================
+string(85) "Argument 1 passed to takes_darray() must be an instance of HH\darray, HH\keyset given"
+================ takes_nullable_darray ============================
+string(81) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, HH\keyset given"
+================ takes_varray_or_darray ============================
+string(105) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, HH\keyset given"
+================ takes_nullable_varray_or_darray ============================
+string(101) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ takes_varray2 ============================
+string(86) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, HH\keyset given"
+================ takes_darray2 ============================
+string(86) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, HH\keyset given"
+================ returns_array ============================
+string(83) "Value returned from function returns_array() must be of type array, HH\keyset given"
+================ returns_nullable_array ============================
+string(93) "Value returned from function returns_nullable_array() must be of type ?array, HH\keyset given"
+================ returns_varray ============================
+string(88) "Value returned from function returns_varray() must be of type HH\varray, HH\keyset given"
+================ returns_nullable_varray ============================
+string(98) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, HH\keyset given"
+================ returns_darray ============================
+string(88) "Value returned from function returns_darray() must be of type HH\darray, HH\keyset given"
+================ returns_nullable_darray ============================
+string(98) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, HH\keyset given"
+================ returns_varray_or_darray ============================
+string(108) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, HH\keyset given"
+================ returns_nullable_varray_or_darray ============================
+string(118) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, HH\keyset given"
+================ takes_array ============================
+string(74) "Argument 1 passed to takes_array() must be an instance of array, xml given"
+================ takes_nullable_array ============================
+string(70) "Argument 1 to takes_nullable_array() must be of type ?array, xml given"
+================ takes_varray ============================
+string(79) "Argument 1 passed to takes_varray() must be an instance of HH\varray, xml given"
+================ takes_nullable_varray ============================
+string(75) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, xml given"
+================ takes_darray ============================
+string(79) "Argument 1 passed to takes_darray() must be an instance of HH\darray, xml given"
+================ takes_nullable_darray ============================
+string(75) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, xml given"
+================ takes_varray_or_darray ============================
+string(99) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, xml given"
+================ takes_nullable_varray_or_darray ============================
+string(95) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, xml given"
+================ takes_varray2 ============================
+string(80) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, xml given"
+================ takes_darray2 ============================
+string(80) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, xml given"
+================ returns_array ============================
+string(77) "Value returned from function returns_array() must be of type array, xml given"
+================ returns_nullable_array ============================
+string(87) "Value returned from function returns_nullable_array() must be of type ?array, xml given"
+================ returns_varray ============================
+string(82) "Value returned from function returns_varray() must be of type HH\varray, xml given"
+================ returns_nullable_varray ============================
+string(92) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, xml given"
+================ returns_darray ============================
+string(82) "Value returned from function returns_darray() must be of type HH\darray, xml given"
+================ returns_nullable_darray ============================
+string(92) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, xml given"
+================ returns_varray_or_darray ============================
+string(102) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, xml given"
+================ returns_nullable_varray_or_darray ============================
+string(112) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, xml given"
+================ takes_array ============================
+string(79) "Argument 1 passed to takes_array() must be an instance of array, stdClass given"
+================ takes_nullable_array ============================
+string(75) "Argument 1 to takes_nullable_array() must be of type ?array, stdClass given"
+================ takes_varray ============================
+string(84) "Argument 1 passed to takes_varray() must be an instance of HH\varray, stdClass given"
+================ takes_nullable_varray ============================
+string(80) "Argument 1 to takes_nullable_varray() must be of type ?HH\varray, stdClass given"
+================ takes_darray ============================
+string(84) "Argument 1 passed to takes_darray() must be an instance of HH\darray, stdClass given"
+================ takes_nullable_darray ============================
+string(80) "Argument 1 to takes_nullable_darray() must be of type ?HH\darray, stdClass given"
+================ takes_varray_or_darray ============================
+string(104) "Argument 1 passed to takes_varray_or_darray() must be an instance of HH\varray_or_darray, stdClass given"
+================ takes_nullable_varray_or_darray ============================
+string(100) "Argument 1 to takes_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, stdClass given"
+================ takes_varray2 ============================
+string(85) "Argument 1 passed to takes_varray2() must be an instance of HH\varray, stdClass given"
+================ takes_darray2 ============================
+string(85) "Argument 1 passed to takes_darray2() must be an instance of HH\darray, stdClass given"
+================ returns_array ============================
+string(82) "Value returned from function returns_array() must be of type array, stdClass given"
+================ returns_nullable_array ============================
+string(92) "Value returned from function returns_nullable_array() must be of type ?array, stdClass given"
+================ returns_varray ============================
+string(87) "Value returned from function returns_varray() must be of type HH\varray, stdClass given"
+================ returns_nullable_varray ============================
+string(97) "Value returned from function returns_nullable_varray() must be of type ?HH\varray, stdClass given"
+================ returns_darray ============================
+string(87) "Value returned from function returns_darray() must be of type HH\darray, stdClass given"
+================ returns_nullable_darray ============================
+string(97) "Value returned from function returns_nullable_darray() must be of type ?HH\darray, stdClass given"
+================ returns_varray_or_darray ============================
+string(107) "Value returned from function returns_varray_or_darray() must be of type HH\varray_or_darray, stdClass given"
+================ returns_nullable_varray_or_darray ============================
+string(117) "Value returned from function returns_nullable_varray_or_darray() must be of type ?HH\varray_or_darray, stdClass given"
+================ takes_array ============================
+PASSES
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+PASSES
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+PASSES
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+PASSES
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+PASSES
+================ takes_darray2 ============================
+PASSES
+================ returns_array ============================
+PASSES
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+PASSES
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+PASSES
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+PASSES
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_array ============================
+PASSES
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+PASSES
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+PASSES
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+PASSES
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+PASSES
+================ takes_darray2 ============================
+PASSES
+================ returns_array ============================
+PASSES
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+PASSES
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+PASSES
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+PASSES
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_array ============================
+PASSES
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+PASSES
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+PASSES
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+PASSES
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+PASSES
+================ takes_darray2 ============================
+PASSES
+================ returns_array ============================
+PASSES
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+PASSES
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+PASSES
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+PASSES
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_array ============================
+PASSES
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+PASSES
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+PASSES
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+PASSES
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+PASSES
+================ takes_darray2 ============================
+PASSES
+================ returns_array ============================
+PASSES
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+PASSES
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+PASSES
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+PASSES
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_array ============================
+PASSES
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+PASSES
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+PASSES
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+PASSES
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+PASSES
+================ takes_darray2 ============================
+PASSES
+================ returns_array ============================
+PASSES
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+PASSES
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+PASSES
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+PASSES
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_array ============================
+PASSES
+================ takes_nullable_array ============================
+PASSES
+================ takes_varray ============================
+PASSES
+================ takes_nullable_varray ============================
+PASSES
+================ takes_darray ============================
+PASSES
+================ takes_nullable_darray ============================
+PASSES
+================ takes_varray_or_darray ============================
+PASSES
+================ takes_nullable_varray_or_darray ============================
+PASSES
+================ takes_varray2 ============================
+PASSES
+================ takes_darray2 ============================
+PASSES
+================ returns_array ============================
+PASSES
+================ returns_nullable_array ============================
+PASSES
+================ returns_varray ============================
+PASSES
+================ returns_nullable_varray ============================
+PASSES
+================ returns_darray ============================
+PASSES
+================ returns_nullable_darray ============================
+PASSES
+================ returns_varray_or_darray ============================
+PASSES
+================ returns_nullable_varray_or_darray ============================
+PASSES
+================ takes_bool ============================
+string(74) "Argument 1 passed to takes_bool() must be an instance of bool, array given"
+================ takes_int ============================
+string(72) "Argument 1 passed to takes_int() must be an instance of int, array given"
+================ takes_str ============================
+string(75) "Argument 1 passed to takes_str() must be an instance of string, array given"
+================ takes_vec ============================
+string(75) "Argument 1 passed to takes_vec() must be an instance of HH\vec, array given"
+================ takes_dict ============================
+string(77) "Argument 1 passed to takes_dict() must be an instance of HH\dict, array given"
+================ takes_keyset ============================
+string(81) "Argument 1 passed to takes_keyset() must be an instance of HH\keyset, array given"
+================ takes_resource ============================
+string(82) "Argument 1 passed to takes_resource() must be an instance of resource, array given"
+================ takes_obj ============================
+string(75) "Argument 1 passed to takes_obj() must be an instance of object, array given"
+================ takes_foo ============================
+string(72) "Argument 1 passed to takes_foo() must be an instance of Foo, array given"
+================ takes_vector ============================
+string(81) "Argument 1 passed to takes_vector() must be an instance of HH\Vector, array given"
+================ takes_map ============================
+string(75) "Argument 1 passed to takes_map() must be an instance of HH\Map, array given"
+================ takes_mixed ============================
+PASSES
+================ takes_traversable ============================
+PASSES
+================ takes_indexish ============================
+PASSES
+================ returns_bool ============================
+string(77) "Value returned from function returns_bool() must be of type bool, array given"
+================ returns_int ============================
+string(75) "Value returned from function returns_int() must be of type int, array given"
+================ returns_str ============================
+string(78) "Value returned from function returns_str() must be of type string, array given"
+================ returns_vec ============================
+string(78) "Value returned from function returns_vec() must be of type HH\vec, array given"
+================ returns_dict ============================
+string(80) "Value returned from function returns_dict() must be of type HH\dict, array given"
+================ returns_keyset ============================
+string(84) "Value returned from function returns_keyset() must be of type HH\keyset, array given"
+================ returns_resource ============================
+string(85) "Value returned from function returns_resource() must be of type resource, array given"
+================ returns_obj ============================
+string(78) "Value returned from function returns_obj() must be of type object, array given"
+================ returns_foo ============================
+string(75) "Value returned from function returns_foo() must be of type Foo, array given"
+================ returns_vector ============================
+string(84) "Value returned from function returns_vector() must be of type HH\Vector, array given"
+================ returns_map ============================
+string(78) "Value returned from function returns_map() must be of type HH\Map, array given"
+================ returns_mixed ============================
+PASSES
+================ returns_traversable ============================
+PASSES
+================ returns_indexish ============================
+PASSES
+================ takes_bool ============================
+string(74) "Argument 1 passed to takes_bool() must be an instance of bool, array given"
+================ takes_int ============================
+string(72) "Argument 1 passed to takes_int() must be an instance of int, array given"
+================ takes_str ============================
+string(75) "Argument 1 passed to takes_str() must be an instance of string, array given"
+================ takes_vec ============================
+string(75) "Argument 1 passed to takes_vec() must be an instance of HH\vec, array given"
+================ takes_dict ============================
+string(77) "Argument 1 passed to takes_dict() must be an instance of HH\dict, array given"
+================ takes_keyset ============================
+string(81) "Argument 1 passed to takes_keyset() must be an instance of HH\keyset, array given"
+================ takes_resource ============================
+string(82) "Argument 1 passed to takes_resource() must be an instance of resource, array given"
+================ takes_obj ============================
+string(75) "Argument 1 passed to takes_obj() must be an instance of object, array given"
+================ takes_foo ============================
+string(72) "Argument 1 passed to takes_foo() must be an instance of Foo, array given"
+================ takes_vector ============================
+string(81) "Argument 1 passed to takes_vector() must be an instance of HH\Vector, array given"
+================ takes_map ============================
+string(75) "Argument 1 passed to takes_map() must be an instance of HH\Map, array given"
+================ takes_mixed ============================
+PASSES
+================ takes_traversable ============================
+PASSES
+================ takes_indexish ============================
+PASSES
+================ returns_bool ============================
+string(77) "Value returned from function returns_bool() must be of type bool, array given"
+================ returns_int ============================
+string(75) "Value returned from function returns_int() must be of type int, array given"
+================ returns_str ============================
+string(78) "Value returned from function returns_str() must be of type string, array given"
+================ returns_vec ============================
+string(78) "Value returned from function returns_vec() must be of type HH\vec, array given"
+================ returns_dict ============================
+string(80) "Value returned from function returns_dict() must be of type HH\dict, array given"
+================ returns_keyset ============================
+string(84) "Value returned from function returns_keyset() must be of type HH\keyset, array given"
+================ returns_resource ============================
+string(85) "Value returned from function returns_resource() must be of type resource, array given"
+================ returns_obj ============================
+string(78) "Value returned from function returns_obj() must be of type object, array given"
+================ returns_foo ============================
+string(75) "Value returned from function returns_foo() must be of type Foo, array given"
+================ returns_vector ============================
+string(84) "Value returned from function returns_vector() must be of type HH\Vector, array given"
+================ returns_map ============================
+string(78) "Value returned from function returns_map() must be of type HH\Map, array given"
+================ returns_mixed ============================
+PASSES
+================ returns_traversable ============================
+PASSES
+================ returns_indexish ============================
+PASSES

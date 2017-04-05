@@ -31,6 +31,7 @@ do
 
   ocamlbuild -use-ocamlfind "ast_visitors_$flavour.inferred.mli"
   sed -e 's/Ast_visitors_ancestors.Pos.t/Ast_visitors_ancestors.pos_t/g' \
+      -e '/method private sum : .*/d' \
     "_build/ast_visitors_$flavour.inferred.mli" > "ast_visitors_$flavour.mli"
 
   echo "include Ast_visitors_$flavour" >> $output

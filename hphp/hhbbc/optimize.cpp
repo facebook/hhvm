@@ -212,6 +212,8 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
   case Op::NewKeysetArray:
   case Op::AddNewElemC:
   case Op::AddNewElemV:
+  case Op::NewCol:
+  case Op::NewPair:
   case Op::ClsRefName:
   case Op::File:
   case Op::Dir:
@@ -475,7 +477,7 @@ void first_pass(const Index& index,
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
 
   auto peephole = make_peephole(newBCs, index, ctx);
-  std::vector<Op> srcStack(state.stack.size(), Op::LowInvalid);
+  std::vector<Op> srcStack(state.stack.size(), Op::Nop);
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -693,7 +695,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
                  ainfo.mayUseVV) ?
     Attr(func->attrs | AttrMayUseVV) : Attr(func->attrs & ~AttrMayUseVV);
 
-  if (pseudomain) {
+  if (pseudomain && func->unit->persistent.load(std::memory_order_relaxed)) {
     auto persistent = true;
     visit_blocks("persistence check", index, ainfo,
                  [&] (const Index&,
@@ -702,7 +704,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
                       const State&) {
                    if (!persistence_check(blk)) persistent = false;
                  });
-    func->unit->persistent = persistent;
+    if (!persistent) {
+      func->unit->persistent.store(persistent, std::memory_order_relaxed);
+    }
   }
 
   if (options.InsertAssertions) {
@@ -767,9 +771,7 @@ Bytecode gen_constant(const Cell& cell) {
 }
 
 void optimize_func(const Index& index, FuncAnalysis&& ainfo) {
-  auto const bump =
-    (is_systemlib_part(*ainfo.ctx.unit) ? kSystemLibBump : 0) +
-    (is_trace_function(ainfo.ctx.cls, ainfo.ctx.func) ? kTraceFuncBump : 0);
+  auto const bump = trace_bump_for(ainfo.ctx.cls, ainfo.ctx.func);
 
   Trace::Bump bumper1{Trace::hhbbc, bump};
   Trace::Bump bumper2{Trace::hhbbc_cfg, bump};

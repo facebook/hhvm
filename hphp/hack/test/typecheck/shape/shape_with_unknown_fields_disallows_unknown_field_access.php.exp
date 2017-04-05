@@ -1,0 +1,4 @@
+File "shape_with_unknown_fields_disallows_unknown_field_access.php", line 6, characters 23-25:
+Invalid argument (Typing[4140])
+File "shape_with_unknown_fields_disallows_unknown_field_access.php", line 5, characters 12-33:
+The field 'x' is missing

@@ -150,6 +150,20 @@ bool ExpressionList::isScalarArrayPairs() const {
   return true;
 }
 
+bool ExpressionList::isSetCollectionScalar() const {
+  assertx(getListKind() == ExpressionList::ListKindParam);
+
+  for (const auto& ape : m_exps) {
+    Variant val;
+    auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
+    if (!exp || !exp->getValue() || !exp->getValue()->getScalarValue(val)) {
+      return false;
+    }
+    if (!val.isString() && !val.isInteger()) return false;
+  }
+  return true;
+}
+
 void ExpressionList::getStrings(std::vector<std::string> &strings) {
   for (const auto& exp : m_exps) {
     auto s = dynamic_pointer_cast<ScalarExpression>(exp);

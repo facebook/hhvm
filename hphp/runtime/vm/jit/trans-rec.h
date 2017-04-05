@@ -82,6 +82,7 @@ struct TransRec {
            bool                        _hasLoop = false);
 
   bool isValid() const { return id != kInvalidTransID; }
+  bool isConsistent() const;
   std::string print() const;
   Offset bcPast() const;
   void optimizeForMemory();

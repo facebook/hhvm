@@ -90,7 +90,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
-#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -1798,16 +1797,6 @@ static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
  * details.
  */
 
-OPTBLD_INLINE void iopLowInvalid() {
-  fprintf(stderr, "invalid bytecode executed\n");
-  abort();
-}
-
-OPTBLD_INLINE void iopHighInvalid() {
-  fprintf(stderr, "invalid bytecode executed\n");
-  abort();
-}
-
 OPTBLD_INLINE void iopNop() {
 }
 
@@ -2080,13 +2069,26 @@ OPTBLD_INLINE void iopAddNewElemV() {
 
 OPTBLD_INLINE void iopNewCol(intva_t type) {
   auto cType = static_cast<CollectionType>(type.n);
+  assertx(cType != CollectionType::Pair);
   // Incref the collection object during construction.
   auto obj = collections::alloc(cType);
   vmStack().pushObjectNoRc(obj);
 }
 
+OPTBLD_INLINE void iopNewPair() {
+  Cell* c1 = vmStack().topC();
+  Cell* c2 = vmStack().indC(1);
+  // elements were pushed onto the stack in the order they should appear
+  // in the pair, so the top of the stack should become the second element
+  auto pair = collections::allocPair(*c2, *c1);
+  // This constructor moves values, no inc/decref is necessary.
+  vmStack().ndiscard(2);
+  vmStack().pushObjectNoRc(pair);
+}
+
 OPTBLD_INLINE void iopColFromArray(intva_t type) {
   auto const cType = static_cast<CollectionType>(type.n);
+  assertx(cType != CollectionType::Pair);
   auto const c1 = vmStack().topC();
   // This constructor reassociates the ArrayData with the collection, so no
   // inc/decref is needed for the array. The collection object itself is
@@ -2094,24 +2096,6 @@ OPTBLD_INLINE void iopColFromArray(intva_t type) {
   auto obj = collections::alloc(cType, c1->m_data.parr);
   vmStack().discard();
   vmStack().pushObjectNoRc(obj);
-}
-
-OPTBLD_INLINE void iopColAddNewElemC() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  assert(c2->m_type == KindOfObject && c2->m_data.pobj->isCollection());
-  collections::initElem(c2->m_data.pobj, c1);
-  vmStack().popC();
-}
-
-OPTBLD_INLINE void iopMapAddElemC() {
-  Cell* c1 = vmStack().topC();
-  Cell* c2 = vmStack().indC(1);
-  Cell* c3 = vmStack().indC(2);
-  assert(c3->m_type == KindOfObject && c3->m_data.pobj->isCollection());
-  collections::initMapElem(c3->m_data.pobj, c2, c1);
-  vmStack().popC();
-  vmStack().popC();
 }
 
 OPTBLD_INLINE void iopCns(const StringData* s) {
@@ -5278,7 +5262,7 @@ OPTBLD_INLINE void iopEval(PC& pc) {
 
 OPTBLD_INLINE void iopDefFunc(intva_t fid) {
   Func* f = vmfp()->m_func->unit()->lookupFuncId(fid);
-  setCachedFunc(f, isDebuggerAttached());
+  Unit::defFunc(f, isDebuggerAttached());
 }
 
 OPTBLD_INLINE void iopDefCls(intva_t cid) {

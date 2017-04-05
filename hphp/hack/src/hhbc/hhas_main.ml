@@ -11,15 +11,19 @@
 type t = {
   main_body          : Hhbc_ast.instruct list;
   main_decl_vars     : string list; (* Actually local_id list *)
+  main_num_iters     : int;
 }
 
 let make
   main_body
-  main_decl_vars =
+  main_decl_vars
+  main_num_iters =
   {
     main_body;
     main_decl_vars;
+    main_num_iters;
   }
 
 let body m = m.main_body
 let decl_vars m = m.main_decl_vars
+let num_iters m = m.main_num_iters

@@ -1,3 +1,0 @@
-5: class Foo {
-12:   public function bar(): void { }
-14:   public function baz(): void { }

@@ -723,12 +723,14 @@ public:
   void restoreJumpTargetEvalStack();
   void recordCall();
   bool isJumpTarget(Offset target);
-  void setPrevOpcode(Op op) { m_prevOpcode = op; }
-  Op getPrevOpcode() const { return m_prevOpcode; }
+  void setPrevOpcode(Op op) {
+    m_prevOpcode.emplace(op);
+  }
   bool currentPositionIsReachable() {
-    return (m_ue.bcPos() == m_curFunc->base
-            || isJumpTarget(m_ue.bcPos())
-            || (instrFlags(getPrevOpcode()) & TF) == 0);
+    return m_ue.bcPos() == m_curFunc->base ||
+           isJumpTarget(m_ue.bcPos()) ||
+           (m_prevOpcode.hasValue() &&
+            (instrFlags(m_prevOpcode.value()) & TF) == 0);
   }
   FuncEmitter* getFuncEmitter() { return m_curFunc; }
   Id getStateLocal() {
@@ -867,7 +869,7 @@ private:
   FuncEmitter* m_curFunc;
   FileScopePtr m_file;
 
-  Op m_prevOpcode;
+  folly::Optional<Op> m_prevOpcode;
 
   std::deque<PostponedMeth> m_postponedMeths;
   std::deque<PostponedCtor> m_postponedCtors;
@@ -986,7 +988,8 @@ public:
   void emitFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitPushAndFreeUnnamedL(Emitter& e, Id tempLocal, Offset start);
   void emitArrayInit(Emitter& e, ExpressionListPtr el,
-                     folly::Optional<HeaderKind> ct = folly::none);
+                     folly::Optional<HeaderKind> ct = folly::none,
+                     bool isDictForSetCollection = false);
   void emitPairInit(Emitter&e, ExpressionListPtr el);
   void emitVectorInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
   void emitMapInit(Emitter&e, CollectionType ct, ExpressionListPtr el);
@@ -3088,7 +3091,6 @@ EmitterVisitor::EmitterVisitor(UnitEmitter& ue)
     m_evalStackIsUnknown(false),
     m_stateLocal(-1),
     m_retLocal(-1) {
-  m_prevOpcode = OpLowInvalid;
   m_evalStack.m_actualStackHighWaterPtr = &m_curFunc->maxStackCells;
 }
 
@@ -5521,6 +5523,22 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       emitConvertToCell(e);
       e.CastKeyset();
       return true;
+    } else if (((call->isCallToFunction("varray") &&
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\varray")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastArray();
+      return true;
+    } else if (((call->isCallToFunction("darray") &&
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\darray")) &&
+               params && params->getCount() == 1) {
+      visit((*params)[0]);
+      emitConvertToCell(e);
+      e.CastArray();
+      return true;
     } else if (((call->isCallToFunction("is_vec") &&
                  (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
                 call->isCallToFunction("HH\\is_vec")) &&
@@ -5541,6 +5559,13 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                params && params->getCount() == 1) {
       visit((*call->getParams())[0]);
       emitIsType(e, IsTypeOp::Keyset);
+      return true;
+    } else if (((call->isCallToFunction("is_varray_or_darray") &&
+                 (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
+                call->isCallToFunction("HH\\is_varray_or_darray")) &&
+               params && params->getCount() == 1) {
+      visit((*call->getParams())[0]);
+      emitIsType(e, IsTypeOp::Arr);
       return true;
     }
   #define TYPE_CONVERT_INSTR(what, What)                             \
@@ -5968,9 +5993,9 @@ bool EmitterVisitor::visit(ConstructPtr node) {
         m_staticArrays.back().set(tvAsCVarRef(&tvKey),
                                   tvAsVariant(&tvVal));
       } else {
-        // Set/ImmSet, val is the key
-        if (m_staticColType.back() == HeaderKind::Set ||
-            m_staticColType.back() == HeaderKind::ImmSet) {
+        // If we're building a static dict for the contents of a Set/ImmSet
+        // we only have a val but need to store it in both the key and the val
+        if (m_staticColType.back() == HeaderKind::Dict) {
           m_staticArrays.back().set(tvAsVariant(&tvVal),
                                     tvAsVariant(&tvVal));
         } else {
@@ -8526,7 +8551,7 @@ void EmitterVisitor::emitDeprecationWarning(Emitter& e,
 
   e.Int(rate);
   e.Int((funcScope->isSystem() || funcScope->isNative())
-        ? k_E_DEPRECATED : k_E_USER_DEPRECATED);
+        ? (int)ErrorMode::PHP_DEPRECATED : (int)ErrorMode::USER_DEPRECATED);
   e.FCallBuiltin(3, 3, s_trigger_sampled_error.get());
   emitPop(e);
 }
@@ -10478,9 +10503,11 @@ void EmitterVisitor::initScalar(TypedValue& tvVal, ExpressionPtr val,
 }
 
 void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
-                                   folly::Optional<HeaderKind> kind) {
+                                   folly::Optional<HeaderKind> kind,
+                                   bool isDictForSetCollection) {
   assert(m_staticArrays.empty());
-  assertx(!kind || !isVectorCollection((CollectionType)*kind));
+  assertx(!kind || isHackArrayKind(*kind));
+  assertx(!isDictForSetCollection || (kind && *kind == HeaderKind::Dict));
   auto const isDict = kind == HeaderKind::Dict;
   auto const isVec = kind == HeaderKind::VecArray;
   auto const isKeyset = kind == HeaderKind::Keyset;
@@ -10502,10 +10529,13 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  auto const scalar =
-    isDict ? isDictScalar(el) :
-    isKeyset ? isKeysetScalar(el) :
-    el->isScalar();
+  auto const scalar = [&]{
+    if (isDictForSetCollection) el->isSetCollectionScalar();
+    if (isVec) return el->isScalar();
+    if (isDict) return isDictScalar(el);
+    if (isKeyset) return isKeysetScalar(el);
+    return isArrayScalar(el);
+  }();
   if (scalar) {
     TypedValue tv;
     tvWriteUninit(&tv);
@@ -10545,10 +10575,34 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  auto const allowPacked = !kind; // PHP arrays only
+  auto capacityHint = MixedArray::SmallSize;
+  auto const capacity = el->getCount();
+  if (capacity > 0) capacityHint = capacity;
+
+  if (isDictForSetCollection) {
+    e.NewDictArray(capacityHint);
+    auto const count = el->getCount();
+    for (int i = 0; i < count; i++) {
+      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
+      visit(ap->getValue());
+      emitConvertToCell(e);
+      e.Dup();
+      e.AddElemC();
+    }
+    return;
+  }
+
+  if (isDict) {
+    e.NewDictArray(capacityHint);
+    visit(el);
+    return;
+  }
+
+  // from here on, we're dealing with PHP arrays only
+  assertx(!kind);
 
   int nElms;
-  if (allowPacked && isPackedInit(el, &nElms)) {
+  if (isPackedInit(el, &nElms)) {
     for (int i = 0; i < nElms; ++i) {
       auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
       visit(ap->getValue());
@@ -10558,9 +10612,8 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  auto const allowStruct = !kind;
   std::vector<std::string> keys;
-  if (allowStruct && isStructInit(el, keys)) {
+  if (isStructInit(el, keys)) {
     for (int i = 0, n = keys.size(); i < n; i++) {
       auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
       visit(ap->getValue());
@@ -10570,13 +10623,8 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  auto capacityHint = MixedArray::SmallSize;
-  auto const capacity = el->getCount();
-  if (capacity > 0) capacityHint = capacity;
-  if (allowPacked && isPackedInit(el, &nElms, false /* ignore size */)) {
+  if (isPackedInit(el, &nElms, false /* ignore size */)) {
     e.NewArray(capacityHint);
-  } else if (isDict) {
-    e.NewDictArray(capacityHint);
   } else {
     e.NewMixedArray(capacityHint);
   }
@@ -10588,7 +10636,6 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
     throw IncludeTimeFatalException(el,
       "Pair objects must have exactly 2 elements");
   }
-  e.NewCol(static_cast<int>(CollectionType::Pair));
   for (int i = 0; i < 2; i++) {
     auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
     if (ap->getName() != nullptr) {
@@ -10597,8 +10644,8 @@ void EmitterVisitor::emitPairInit(Emitter& e, ExpressionListPtr el) {
     }
     visit(ap->getValue());
     emitConvertToCell(e);
-    e.ColAddNewElemC();
   }
+  e.NewPair();
 }
 
 void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
@@ -10627,131 +10674,34 @@ void EmitterVisitor::emitVectorInit(Emitter&e, CollectionType ct,
 
 void EmitterVisitor::emitSetInit(Emitter&e, CollectionType ct,
                                  ExpressionListPtr el) {
-  /*
-   * Use an array to initialize the Set only if all the following conditional
-   * are met:
-   * 1. non-empty initializer;
-   * 2. no integer-like string values (keys are the same as values for Set);
-   * 3. !arr->isVectorData() to guarantee that we have a MixedArray.
-   *
-   * Effectively, we use array for Set initialization only when it is a static
-   * array for now.
-   */
-  auto const nElms = el->getCount();
-  auto useArray = !!nElms;
-  auto hasVectorData = true;
-  for (int i = 0; i < nElms; i++) {
-    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-    auto key = ap->getName();
-    if ((bool)key) {
-      throw IncludeTimeFatalException(ap,
+  // Do not allow keys; it doesn't make sense to specify keys for Sets.
+  for (int i = 0; i < el->getCount(); i++) {
+    auto const expr = (*el)[i];
+    assertx(expr->getKindOf() == Expression::KindOfArrayPairExpression);
+    auto const ap = static_pointer_cast<ArrayPairExpression>(expr);
+    if (ap->getName() != nullptr) {
+      throw EmitterVisitor::IncludeTimeFatalException(ap,
         "Keys may not be specified for Set initialization");
     }
-    if (!useArray) continue;
-    auto val = ap->getValue();
-    Variant v;
-    if (val->getScalarValue(v)) {
-      if (v.isString()) {
-        hasVectorData = false;
-        int64_t intVal;
-        if (v.getStringData()->isStrictlyInteger(intVal)) {
-          useArray = false;
-        }
-      } else if (v.isInteger()) {
-        if (v.asInt64Val() != i) hasVectorData = false;
-      } else {
-        useArray = false;
-      }
-    } else {
-      useArray = false;
-    }
   }
-  if (hasVectorData) useArray = false;
-
-  if (useArray) {
-    emitArrayInit(e, el, (HeaderKind)ct);
-    e.ColFromArray(static_cast<int>(ct));
-  } else {
-    if (nElms == 0) {
-      // Will use the static empty mixed array to avoid allocation.
-      e.NewCol(static_cast<int>(ct));
-      return;
-    }
-    e.NewMixedArray(nElms);
-    e.ColFromArray(static_cast<int>(ct));
-    for (int i = 0; i < nElms; i++) {
-      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-      visit(ap->getValue());
-      emitConvertToCell(e);
-      e.ColAddNewElemC();
-    }
-  }
+  emitArrayInit(e, el, HeaderKind::Dict, true);
+  e.ColFromArray(static_cast<int>(ct));
 }
 
 void EmitterVisitor::emitMapInit(Emitter&e, CollectionType ct,
                                  ExpressionListPtr el) {
-  /*
-   * Use an array to initialize the Map only when all the following conditional
-   * are met:
-   * 1. non-empty initializer;
-   * 2. no integer-like string keys;
-   * 3. !arr->isVectorData() to guarantee that we have a MixedArray.
-   */
-  auto nElms = el->getCount();
-  auto useArray = !!nElms;
-  auto hasVectorData = true;
-  int64_t max = 0;
-  for (int i = 0; i < nElms; i++) {
-    auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-    auto key = ap->getName();
-    if (key == nullptr) {
-      throw IncludeTimeFatalException(ap,
+  // Make sure all the ArrayPairExpressions have keys.
+  for (int i = 0; i < el->getCount(); i++) {
+    auto const expr = (*el)[i];
+    assertx(expr->getKindOf() == Expression::KindOfArrayPairExpression);
+    auto const ap = static_pointer_cast<ArrayPairExpression>(expr);
+    if (ap->getName() == nullptr) {
+      throw EmitterVisitor::IncludeTimeFatalException(ap,
         "Keys must be specified for Map initialization");
     }
-    if (!useArray) continue;
-    Variant vkey;
-    if (key->getScalarValue(vkey)) {
-      if (vkey.isString()) {
-        hasVectorData = false;
-        int64_t intKey;
-        if (vkey.getStringData()->isStrictlyInteger(intKey)) {
-          useArray = false;
-        }
-      } else if (vkey.isInteger()) {
-        auto val = vkey.asInt64Val();
-        if (val > max || val < 0) {
-          hasVectorData = false;
-        } else if (val == max) {
-          ++max;
-        }
-      } else {
-        useArray = false;
-      }
-    } else {
-      useArray = false;
-    }
   }
-  if (hasVectorData) useArray = false;
-
-  if (useArray) {
-    emitArrayInit(e, el, (HeaderKind)ct);
-    e.ColFromArray(static_cast<int>(ct));
-  } else {
-    if (nElms == 0) {
-      e.NewCol(static_cast<int>(ct));
-      return;
-    }
-    e.NewMixedArray(nElms);
-    e.ColFromArray(static_cast<int>(ct));
-    for (int i = 0; i < nElms; i++) {
-      auto ap = static_pointer_cast<ArrayPairExpression>((*el)[i]);
-      visit(ap->getName());
-      emitConvertToCell(e);
-      visit(ap->getValue());
-      emitConvertToCell(e);
-      e.MapAddElemC();
-    }
-  }
+  emitArrayInit(e, el, HeaderKind::Dict);
+  e.ColFromArray(static_cast<int>(ct));
 }
 
 void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
@@ -10764,10 +10714,8 @@ void EmitterVisitor::emitCollectionInit(Emitter& e, BinaryOpExpressionPtr b) {
       "Cannot use collection initialization for non-collection class");
   }
 
-  ExpressionListPtr el = nullptr;
-  if (b->getExp2()) {
-    el = static_pointer_cast<ExpressionList>(b->getExp2());
-  } else {
+  ExpressionListPtr el = static_pointer_cast<ExpressionList>(b->getExp2());
+  if (!el || el->getCount() == 0) {
     if (ct == CollectionType::Pair) {
       throw IncludeTimeFatalException(b, "Initializer needed for Pair object");
     }
@@ -11215,6 +11163,7 @@ commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HardPrivatePropInference = true;
   gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

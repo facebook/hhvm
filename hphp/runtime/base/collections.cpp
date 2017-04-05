@@ -33,16 +33,16 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Constructor/Initializer
 
-ObjectData* allocEmptyPair() {
-  return newCollectionObj<c_Pair>(c_Pair::NoInit{});
+ObjectData* allocPair(TypedValue c1, TypedValue c2) {
+  return req::make<c_Pair>(c1, c2, c_Pair::NoIncRef{}).detach();
 }
 
-#define X(type) \
-ObjectData* allocEmpty##type() {                                        \
-  return newCollectionObj<c_##type>(c_##type::classof());               \
-}                                                                       \
-ObjectData* allocFromArray##type(ArrayData* arr) {                      \
-  return newCollectionObj<c_##type>(c_##type::classof(), arr);          \
+#define X(type)                                    \
+ObjectData* allocEmpty##type() {                   \
+  return req::make<c_##type>().detach();           \
+}                                                  \
+ObjectData* allocFromArray##type(ArrayData* arr) { \
+  return req::make<c_##type>(arr).detach();        \
 }
 COLLECTIONS_PAIRED_TYPES(X)
 #undef X
@@ -60,8 +60,9 @@ COLLECTIONS_PAIRED_TYPES(X)
 newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype) {
   switch (ctype) {
 #define X(type) case CollectionType::type: return allocEmpty##type;
-COLLECTIONS_ALL_TYPES(X)
+COLLECTIONS_PAIRED_TYPES(X)
 #undef X
+    case CollectionType::Pair: not_reached();
   }
   not_reached();
 }
@@ -73,39 +74,6 @@ void reserve(ObjectData* obj, int64_t sz) {
                   break;
 COLLECTIONS_ALL_TYPES(X)
 #undef X
-  }
-}
-
-void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  assertx(obj->isCollection());
-  assertx(isMapCollection(obj->collectionType()));
-  assertx(key->m_type != KindOfRef);
-  assertx(val->m_type != KindOfRef);
-  assertx(val->m_type != KindOfUninit);
-  BaseMap::OffsetSet(obj, key, val);
-}
-
-void initElem(ObjectData* obj, TypedValue* val) {
-  assertx(obj->isCollection());
-  assertx(!isMapCollection(obj->collectionType()));
-  assertx(val->m_type != KindOfRef);
-  assertx(val->m_type != KindOfUninit);
-  switch (obj->collectionType()) {
-    case CollectionType::Vector:
-    case CollectionType::ImmVector:
-      static_cast<BaseVector*>(obj)->add(val);
-      break;
-    case CollectionType::Set:
-    case CollectionType::ImmSet:
-      static_cast<BaseSet*>(obj)->add(val);
-      break;
-    case CollectionType::Pair:
-      static_cast<c_Pair*>(obj)->initAdd(val);
-      break;
-    case CollectionType::Map:
-    case CollectionType::ImmMap:
-      assertx(false);
-      break;
   }
 }
 
@@ -570,22 +538,18 @@ bool equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto ct1 = obj1->collectionType();
   auto ct2 = obj2->collectionType();
 
-  if (isMapCollection(ct1) && isMapCollection(ct2)) {
-    // For migration purposes, distinct Map types should compare equal
-    return BaseMap::Equals(obj1, obj2);
+  // we intentionally allow mutable/immutable versions of the same collection
+  // type to compare equal
+  if (isMapCollection(ct1)) {
+    return isMapCollection(ct2) && BaseMap::Equals(obj1, obj2);
+  } else if (isVectorCollection(ct1)) {
+    return isVectorCollection(ct2) && BaseVector::Equals(obj1, obj2);
+  } else if (isSetCollection(ct1)) {
+    return isSetCollection(ct2) && BaseSet::Equals(obj1, obj2);
+  } else {
+    assertx(ct1 == CollectionType::Pair);
+    return (ct2 == CollectionType::Pair) && c_Pair::Equals(obj1, obj2);
   }
-
-  if (isVectorCollection(ct1) && isVectorCollection(ct2)) {
-    return BaseVector::Equals(obj1, obj2);
-  }
-
-  if (isSetCollection(ct1) && isSetCollection(ct2)) {
-    return BaseSet::Equals(obj1, obj2);
-  }
-
-  if (ct1 != ct2) return false;
-  assert(ct1 == CollectionType::Pair);
-  return c_Pair::Equals(obj1, obj2);
 }
 
 Variant pop(ObjectData* obj) {

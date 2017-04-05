@@ -35,7 +35,7 @@ class type ['a] hint_visitor_type = object
   method on_option : 'a -> Nast.hint -> 'a
   method on_fun    : 'a -> Nast.hint list -> bool -> Nast.hint -> 'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
-  method on_shape  : 'a -> shape_field_info ShapeMap.t -> 'a
+  method on_shape  : 'a -> nast_shape_info -> 'a
   method on_access : 'a -> Nast.hint -> Nast.sid list -> 'a
 end
 
@@ -95,11 +95,11 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     let acc = List.fold_left ~f:this#on_hint ~init:acc hl in
     acc
 
-  method on_shape acc hm =
+  method on_shape acc { nsi_allows_unknown_fields=_; nsi_field_map } =
     ShapeMap.fold begin fun _ shape_field_info acc ->
       let acc = this#on_hint acc shape_field_info.sfi_hint in
       acc
-    end hm acc
+    end nsi_field_map acc
 
   method on_access acc h _ =
     this#on_hint acc h

@@ -30,7 +30,6 @@ copy _obuild\hh_client\hh_client.asm.exe bin\hh_client.exe
 copy _obuild\hh_single_type_check\hh_single_type_check.asm.exe bin\hh_single_type_check.exe
 copy _obuild\hh_format\hh_format.asm.exe bin\hh_format.exe
 copy _obuild\hackfmt\hackfmt.asm.exe bin\hackfmt.exe
-copy _obuild\h2tp\h2tp.asm.exe bin\h2tp.exe
 
 goto end
 
@@ -42,7 +41,6 @@ del bin\hh_client.exe 2>NUL
 del bin\hh_single_type_check.exe 2>NUL
 del bin\hh_format.exe 2>NUL
 del bin\hackfmt.exe 2>NUL
-del bin\h2tp.exe 2>NUL
 goto end
 
 REM execute the Hack testsuite

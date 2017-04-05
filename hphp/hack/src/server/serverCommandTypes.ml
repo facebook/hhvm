@@ -40,7 +40,7 @@ type _ t =
   | METHOD_JUMP : (string * bool) -> MethodJumps.result list t
   | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : FindRefsService.action -> FindRefsService.result t
-  | IDE_FIND_REFS : ServerUtils.file_input * int * int ->
+  | IDE_FIND_REFS : ServerUtils.file_input * int * int * bool ->
       FindRefsService.ide_result t
   | IDE_HIGHLIGHT_REFS : ServerUtils.file_input * int * int ->
       ServerHighlightRefsTypes.result t

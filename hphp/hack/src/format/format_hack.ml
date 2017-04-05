@@ -1164,10 +1164,14 @@ let list_comma_multi ~trailing element env =
   let f acc env = ignore (element env); acc in
   list_comma_multi_maybe_trail ~trailing f env
 
-let list_comma_multi_nl ~trailing element env =
+let list_comma_multi_nl_maybe_trail ~trailing element env =
   newline env;
-  list_comma_multi ~trailing element env;
+  list_comma_multi_maybe_trail ~trailing element env;
   newline env
+
+let list_comma_multi_nl ~trailing element env =
+  let element acc env = ignore (element env); acc in
+  list_comma_multi_nl_maybe_trail ~trailing element env
 
 let list_comma ?(trailing=true) element env =
   Try.one_line env
@@ -1275,9 +1279,25 @@ and name_loop env =
 (* Shapes *)
 (*****************************************************************************)
 
-and shape_type_elt env =
-  if has_consumed env expr
-  then seq env [space; expect "=>"; space; hint]
+(**
+ * Formats the shape element. Returns true if the element should be followed by
+ * a comma, and false otherwise.
+ *)
+and shape_type_elt_comma_aware env =
+  skip_spaces_and_nl env;
+  let next_token = token env in
+  back env;
+  match next_token with
+    | Tellipsis ->
+      seq env [expect "..."];
+      false
+    | _ ->
+      if next_token = Tqm then seq env [expect "?"];
+      if has_consumed env expr
+      then seq env [space; expect "=>"; space; hint];
+      true
+
+and shape_type_elt env = ignore (shape_type_elt_comma_aware env)
 
 (*****************************************************************************)
 (* Constants *)
@@ -1384,7 +1404,15 @@ and hint env = wrap env begin function
       end then
         list_comma_single shape_type_elt env
       else
-        right env (list_comma_multi_nl ~trailing:true shape_type_elt);
+        (
+          let maybe_trail_fold_function trailing env =
+            trailing && shape_type_elt_comma_aware env in
+          let shape_field_list =
+            list_comma_multi_nl_maybe_trail
+              ~trailing:true
+              maybe_trail_fold_function in
+          right env shape_field_list
+        );
       expect ")" env
   | Tword ->
       last_token env;
@@ -2737,18 +2765,18 @@ and expr_atomic env =
 and expr_atomic_word env last_tok = function
   | "true" | "false" | "null" ->
       last_token env
-  | "array" | "darray" | "varray" | "shape" | "tuple" as v ->
+  | "array" | "shape" | "tuple" as v ->
       out v env;
       expect "(" env;
       right env array_body;
       expect ")" env
-  | "dict" when next_token env == Tlb ->
-      out "dict" env;
+  | "darray" | "dict" as v when next_token env == Tlb ->
+      out v env;
       expect (token_to_string Tlb) env;
       (** Dict body looks exactly like an array body. *)
       right env array_body;
       expect (token_to_string Trb) env;
-  | "keyset" | "vec" as v when next_token env == Tlb ->
+  | "keyset" | "varray" | "vec" as v when next_token env == Tlb ->
       out v env;
       expect (token_to_string Tlb) env;
       right env (list_comma_nl ~trailing:true expr);

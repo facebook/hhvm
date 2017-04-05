@@ -381,7 +381,7 @@ private:
  *
  * MArrayIter works by "registering" itself with the array being
  * iterated over, in a way that any array can find out all active
- * MArrayIters associated with it (if any).  See tl_miter_table below.
+ * MArrayIters associated with it (if any).  See MIterTable below.
  *
  * Using this association, when an array mutation occurs, if there are
  * active MArrayIters the array will update them to ensure they behave
@@ -574,22 +574,23 @@ private:
  *     valid ways to check if a slot is empty.
  */
 struct MIterTable {
-  struct Ent { ArrayData* array; MArrayIter* iter; };
+  using TlsWrapper = ThreadLocalSingleton<MIterTable>;
+  static void Create(void* storage);
+  static void OnThreadExit(void*) {}
+  struct Ent {
+    ArrayData* array;
+    MArrayIter* iter;
+  };
 
-  void clear() {
-    ents.fill({nullptr, nullptr});
-    if (!extras.empty()) {
-      extras.release_if([] (const MIterTable::Ent& e) { return true; });
-    }
-  }
+  static void clear();
 
   static constexpr int ents_size = 7;
   std::array<Ent, ents_size> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };
-static_assert(sizeof(MIterTable) == 2*64, "");
-extern __thread MIterTable tl_miter_table;
+static_assert(sizeof(MIterTable) == 2*64, "want multiple of cache line size");
+MIterTable& miter_table();
 
 void free_strong_iterators(ArrayData*);
 ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);

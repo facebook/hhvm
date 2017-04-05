@@ -58,7 +58,8 @@ c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
 
 c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child)
-  : c_ResumableWaitHandle(classof())
+  : c_ResumableWaitHandle(classof(), HeaderKind::WaitHandle,
+                type_scan::getIndexForMalloc<c_AsyncGeneratorWaitHandle>())
   , m_generator(gen->toObject())
 {
   setState(STATE_BLOCKED);

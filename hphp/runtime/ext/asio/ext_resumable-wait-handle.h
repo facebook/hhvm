@@ -37,10 +37,13 @@ struct c_ResumableWaitHandle : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(ResumableWaitHandle);
   WAITHANDLE_DTOR(ResumableWaitHandle);
 
-  explicit c_ResumableWaitHandle(Class* cls = c_ResumableWaitHandle::classof(),
-                                 HeaderKind kind = HeaderKind::WaitHandle)
-  noexcept : c_WaitableWaitHandle(cls, kind) {}
-  ~c_ResumableWaitHandle() {}
+  explicit c_ResumableWaitHandle(Class* cls, HeaderKind kind,
+                                 type_scan::Index tyindex) noexcept
+    : c_WaitableWaitHandle(cls, kind, tyindex)
+  {}
+
+  ~c_ResumableWaitHandle()
+  {}
 
  public:
   static c_ResumableWaitHandle* getRunning(ActRec* fp);

@@ -957,6 +957,7 @@ FuncSet s_ignores_frame = {
   "HH\\is_vec",
   "HH\\is_dict",
   "HH\\is_keyset",
+  "HH\\is_varray_or_darray",
   "is_object",
   "is_resource",
   "boolval",
@@ -1064,6 +1065,11 @@ FuncSet s_ignores_frame = {
   "rawurlencode",
   "urldecode",
   "urlencode",
+  "HH\\vec",
+  "HH\\dict",
+  "HH\\keyset",
+  "HH\\varray",
+  "HH\\darray"
 };
 
 const StaticString s_assert("assert");
@@ -1104,11 +1110,44 @@ bool funcWritesLocals(const Func* callee) {
   return true;
 }
 
+bool funcReadsLocals(const Func* callee) {
+  assertx(callee != nullptr);
+
+  // Any function which can write locals is assumed to read them as well.
+  if (funcWritesLocals(callee)) return true;
+
+  // A skip-frame function can dynamically call a function which reads from the
+  // caller's frame. If we don't forbid such dynamic calls, we have to be
+  // pessimistic.
+  if (callee->isSkipFrame() && !disallowDynamicVarEnvFuncs()) {
+    return true;
+  }
+
+  if (!callee->readsCallerFrame()) return false;
+
+  if (callee->fullName()->isame(s_assert.get())) {
+    /*
+     * Assert is somewhat special.  If RepoAuthoritative isn't set and the first
+     * parameter is a string, it will be evaled and can have arbitrary effects.
+     * If the assert fails, it may execute an arbitrary pre-registered callback
+     * which still might try to read from the assert caller's frame.
+     *
+     * This can't happen if calling such frame accessing functions dynamically
+     * is forbidden.
+     */
+    return !RuntimeOption::RepoAuthoritative || !disallowDynamicVarEnvFuncs();
+  }
+  return true;
+}
+
 bool funcNeedsCallerFrame(const Func* callee) {
   assertx(callee != nullptr);
 
-  return callee->isCPPBuiltin() &&
-         s_ignores_frame.count(callee->name()->data()) == 0;
+  return
+    (callee->isCPPBuiltin() &&
+     s_ignores_frame.count(callee->name()->data()) == 0) ||
+    funcReadsLocals(callee) ||
+    funcWritesLocals(callee);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

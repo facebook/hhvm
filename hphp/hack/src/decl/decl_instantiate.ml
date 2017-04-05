@@ -100,7 +100,7 @@ and instantiate_ subst x =
       let tyl = List.map tyl (instantiate subst) in
       Tapply (x, tyl)
   | Tshape (fields_known, fdm) ->
-      let fdm = Nast.ShapeMap.map (instantiate subst) fdm in
+      let fdm = ShapeFieldMap.map (instantiate subst) fdm in
       Tshape (fields_known, fdm)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =

@@ -299,6 +299,8 @@ struct ProxygenTransport final
     unlink();
   }
 
+  void setShouldRepost(bool shouldRepost) { m_shouldRepost = shouldRepost; }
+
  private:
   bool bufferRequest() const;
 
@@ -343,7 +345,8 @@ struct ProxygenTransport final
   bool m_enqueued{false};
   // Set to true when sending a partial post back to
   // the slb due to impending server death
-  bool m_repost{false};
+  bool m_reposting{false};
+  bool m_shouldRepost{false};
   std::unique_ptr<folly::IOBuf> m_currentBodyBuf;
   proxygen::HTTPMessage m_response;
   bool m_sendStarted{false};

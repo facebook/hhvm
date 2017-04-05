@@ -211,11 +211,23 @@ struct Class {
   folly::Optional<Class> commonAncestor(const Class& o) const;
 
   /*
+   * Returns the res::Class for this Class's parent if there is one,
+   * or nullptr.
+   */
+  folly::Optional<Class> parent() const;
+
+  /*
    * Returns true if we have a ClassInfo for this Class.
    */
   bool resolved() const {
     return val.right() != nullptr;
   }
+
+  /*
+   * Returns the php::Class for this Class if there is one, or
+   * nullptr.
+   */
+  borrowed_ptr<const php::Class> cls() const;
 
 private:
   Class(borrowed_ptr<const Index>, Either<SString,borrowed_ptr<ClassInfo>>);

@@ -159,6 +159,19 @@ inline bool isArrayKind(HeaderKind k) {
   return k >= HeaderKind::Packed && k <= HeaderKind::Keyset;
 }
 
+inline bool isHackArrayKind(HeaderKind k) {
+  return
+    k == HeaderKind::Dict     ||
+    k == HeaderKind::VecArray ||
+    k == HeaderKind::Keyset;
+}
+
+inline bool isWaithandleKind(HeaderKind k) {
+  return k == HeaderKind::WaitHandle ||
+         k == HeaderKind::AwaitAllWH ||
+         k == HeaderKind::AsyncFuncWH;
+}
+
 enum class CollectionType : uint8_t { // Subset of possible HeaderKind values
   // Values must be contiguous integers (for ArrayIter::initFuncTable).
   Vector = uint8_t(HeaderKind::Vector),

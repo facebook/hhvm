@@ -69,8 +69,7 @@ TransRec::TransRec(SrcKey                      _src,
   }
 }
 
-void
-TransRec::optimizeForMemory() {
+void TransRec::optimizeForMemory() {
   // Dump large annotations to disk.
   for (int i = 0 ; i < annotations.size(); ++i) {
     auto& annotation = annotations[i];
@@ -140,8 +139,24 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   return saved;
 }
 
-std::string
-TransRec::print() const {
+bool TransRec::isConsistent() const {
+  if (!isValid()) return true;
+
+  const auto aEnd       = aStart       + aLen;
+  const auto acoldEnd   = acoldStart   + acoldLen;
+  const auto afrozenEnd = afrozenStart + afrozenLen;
+
+  for (const auto& b : bcMapping) {
+    if (b.aStart < aStart             || b.aStart > aEnd         ||
+        b.acoldStart < acoldStart     || b.acoldStart > acoldEnd ||
+        b.afrozenStart < afrozenStart || b.afrozenStart > afrozenEnd) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::string TransRec::print() const {
   if (!isValid()) return "Translation -1 {\n}\n\n";
 
   std::string ret;

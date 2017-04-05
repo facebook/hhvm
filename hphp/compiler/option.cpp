@@ -241,6 +241,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(EnableHipHopExperimentalSyntax, ini,
                config, "EnableHipHopExperimentalSyntax");
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
+  Config::Bind(RuntimeOption::EvalHackArrCompatNotices,
+               ini, config, "HackArrCompatNotices",
+               RuntimeOption::EvalHackArrCompatNotices);
 
   {
     // Hack

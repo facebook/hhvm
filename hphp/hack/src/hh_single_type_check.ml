@@ -144,10 +144,10 @@ let builtins =
   "function invariant_violation(...): noreturn;\n" ^
   "function get_called_class(): string;\n" ^
   "abstract final class Shapes {\n" ^
-  "  public static function idx(shape() $shape, arraykey $index, $default = null) {}\n" ^
-  "  public static function keyExists(shape() $shape, arraykey $index): bool {}\n" ^
-  "  public static function removeKey(shape() $shape, arraykey $index): void {}\n" ^
-  "  public static function toArray(shape() $shape): array<arraykey, mixed> {}\n" ^
+  "  public static function idx(shape(...) $shape, arraykey $index, $default = null) {}\n" ^
+  "  public static function keyExists(shape(...) $shape, arraykey $index): bool {}\n" ^
+  "  public static function removeKey(shape(...) $shape, arraykey $index): void {}\n" ^
+  "  public static function toArray(shape(...) $shape): array<arraykey, mixed> {}\n" ^
   "}\n" ^
   "newtype typename<+T> as string = string;\n"^
   "newtype classname<+T> as typename<T> = typename<T>;\n" ^
@@ -679,7 +679,9 @@ let handle_mode mode filename opts popt files_contents files_info errors =
       ServerEnv.tcopt = opts;
     } in
     let file = cat (Relative_path.to_absolute filename) in
-    let results = ServerFindRefs.go_from_file (file, line, column) genv env in
+    let include_defs = false in
+    let results = ServerFindRefs.go_from_file
+      (file, line, column, include_defs) genv env in
     ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
     let file = cat (Relative_path.to_absolute filename) in

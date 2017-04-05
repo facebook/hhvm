@@ -340,6 +340,10 @@ struct Global {
 
 // Block-local environment.
 struct Local {
+  explicit Local(Global& global)
+    : global(global)
+  {}
+
   Global& global;
 
   ALocBits antLoc;     // Copied to BlockAnalysis::antLoc
@@ -349,6 +353,8 @@ struct Local {
   ALocBits delLoc;     // Copied to BlockAnalysis::delLoc
 
   ALocBits reStores;
+
+  bool containsCall{false}; // If there's a Call instruction in this block
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -360,6 +366,16 @@ std::string show(TrackedStore ts) {
   if (auto i = ts.instruction()) return folly::sformat("I{}", i->id());
   if (auto b = ts.block()) return folly::sformat("P{}", b->id());
   not_reached();
+}
+
+bool srcsCanSpanCall(const IRInstruction& inst) {
+  for (auto i = inst.numSrcs(); i--; ) {
+    auto const src = inst.src(i);
+    if (!src->isA(TStkPtr) &&
+        !src->isA(TFramePtr) &&
+        !src->inst()->is(DefConst)) return false;
+  }
+  return true;
 }
 
 const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
@@ -546,15 +562,17 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     /*
-     * Call instructions potentially throw, even though we don't (yet) have
-     * explicit catch traces for them, which means it counts as possibly
-     * reading any local, on any frame---if it enters the unwinder it could
-     * read them.
+     * Call instructions can potentially read any heap location, but we can be
+     * more precise about everything else.
      */
     [&] (CallEffects l) {
+      env.containsCall = true;
+
       load(env, AHeapAny);
-      load(env, AFrameAny);  // Not necessary for some builtin calls, but it
-                             // depends which builtin...
+
+      load(env, l.locals);
+      if (l.writes_locals) mayStore(env, AFrameAny);
+
       load(env, l.stack);
       kill(env, l.kills);
     },
@@ -570,7 +588,9 @@ void visit(Local& env, IRInstruction& inst) {
         }
         if (!env.antLoc[*bit] &&
             !env.mayLoad[*bit] &&
-            !env.mayStore[*bit]) {
+            !env.mayStore[*bit] &&
+            (!env.containsCall ||
+             srcsCanSpanCall(inst))) {
           env.avlLoc[*bit] = 1;
           set_movable_store(env, *bit, inst);
         }
@@ -608,7 +628,9 @@ void visit(Local& env, IRInstruction& inst) {
         } else {
           auto avlLoc = it->second & ~(env.antLoc | env.mayLoad |
                                        env.mayStore);
-          if (avlLoc == it->second) {
+          if (avlLoc == it->second &&
+              (!env.containsCall ||
+               srcsCanSpanCall(inst))) {
             set_movable_spill_frame(env, avlLoc, inst);
             env.avlLoc |= avlLoc;
           }
@@ -647,6 +669,7 @@ struct BlockAnalysis {
   ALocBits alteredAvl;
   ALocBits avlLoc;
   ALocBits delLoc;
+  bool containsCall;
 };
 
 BlockAnalysis analyze_block(Global& genv, Block* block) {
@@ -663,7 +686,8 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
     // env.antLoc and env.delLoc is required for correctness here.
     env.mayLoad | env.mayStore | env.antLoc | env.delLoc,
     env.avlLoc,
-    env.delLoc
+    env.delLoc,
+    env.containsCall
   };
 }
 
@@ -1126,10 +1150,20 @@ void compute_available_stores(
             genv.trackedStoreMap[StoreKey { blk, StoreKey::In, i }];
           auto& tsOut =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          assert(!tsIn.isUnseen());
-          tsOut = tsIn;
+          assertx(!tsIn.isUnseen());
+
+          // Prevent tmps from spanning calls by not propagating tracked stores
+          // thru any block which contains a call. The exception is if the store
+          // only uses constants as those do not create a problem.
+          if (transfer.containsCall &&
+              (!tsIn.instruction() || !srcsCanSpanCall(*tsIn.instruction()))) {
+            tsOut.setBad();
+          } else {
+            tsOut = tsIn;
+          }
+
           if (tsOut.isBad()) {
-            state.ppOut[i] = 0;
+            state.ppOut[i] = false;
           } else if (auto sf = findSpillFrame(genv, tsIn)) {
             if ((propagate & *sf) != *sf) {
               state.ppOut &= ~*sf;

@@ -133,6 +133,8 @@ let parse filename =
       SourceText.make @@ read_stdin ()
   in
   let syntax_tree = SyntaxTree.make source_text in
+  if not (List.is_empty (SyntaxTree.all_errors syntax_tree)) then
+    raise Hackfmt_error.InvalidSyntax;
   let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
   source_text, syntax_tree, editable
 

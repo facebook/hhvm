@@ -97,6 +97,10 @@ vec(0) {
 krsort: bool(true)
 dict(0) {
 }
+array_slice (0): array(0) {
+}
+array_slice (1): array(0) {
+}
 Testing: vec(5) {
   int(1)
   int(2)
@@ -281,6 +285,28 @@ dict(5) {
   int(2)
   [0]=>
   int(1)
+}
+array_slice (0): array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+  [4]=>
+  int(5)
+}
+array_slice (1): array(4) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+  [2]=>
+  int(4)
+  [3]=>
+  int(5)
 }
 Testing: vec(5) {
   int(5)
@@ -467,6 +493,28 @@ dict(5) {
   [0]=>
   int(5)
 }
+array_slice (0): array(5) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(4)
+  [2]=>
+  int(3)
+  [3]=>
+  int(2)
+  [4]=>
+  int(1)
+}
+array_slice (1): array(4) {
+  [0]=>
+  int(4)
+  [1]=>
+  int(3)
+  [2]=>
+  int(2)
+  [3]=>
+  int(1)
+}
 Testing: vec(3) {
   string(1) "a"
   string(1) "b"
@@ -615,6 +663,20 @@ dict(3) {
   string(1) "b"
   [0]=>
   string(1) "a"
+}
+array_slice (0): array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array_slice (1): array(2) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "c"
 }
 Testing: vec(4) {
   string(1) "b"
@@ -783,6 +845,24 @@ dict(4) {
   [0]=>
   string(1) "b"
 }
+array_slice (0): array(4) {
+  [0]=>
+  string(1) "b"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "a"
+  [3]=>
+  string(1) "b"
+}
+array_slice (1): array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}
 Testing: vec(1) {
   int(100)
 }
@@ -895,4 +975,10 @@ krsort: bool(true)
 dict(1) {
   [0]=>
   int(100)
+}
+array_slice (0): array(1) {
+  [0]=>
+  int(100)
+}
+array_slice (1): array(0) {
 }

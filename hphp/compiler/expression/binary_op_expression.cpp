@@ -177,12 +177,13 @@ int BinaryOpExpression::getLocalEffects() const {
   case T_SPACESHIP:
   case T_IS_IDENTICAL:
   case T_IS_NOT_IDENTICAL: {
-    // Normally === and !== cannot have effects, but with
-    // EvalHackArrCompatNotices they can.
     Variant v1;
     Variant v2;
+    // With HackArrCompatNotices enabled, we'll emit a notice if we compare an
+    // array with something other than an array.
     if (!m_exp1->getScalarValue(v1) || !m_exp2->getScalarValue(v2) ||
-        v1.isPHPArray() != v2.isPHPArray()) {
+        (RuntimeOption::EvalHackArrCompatNotices &&
+         v1.isPHPArray() != v2.isPHPArray())) {
       effect = UnknownEffect;
       m_canThrow = true;
     }
@@ -349,6 +350,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
+      ThrowAllErrorsSetter taes;
       auto scalar1 = dynamic_pointer_cast<ScalarExpression>(m_exp1);
       auto scalar2 = dynamic_pointer_cast<ScalarExpression>(m_exp2);
       // Some data, like the values of __CLASS__ and friends, are not available

@@ -9,7 +9,7 @@
 *)
 
 open Core
-open Hhbc_from_nast
+open Emit_expression
 
 let ast_attribute_name: A.user_attribute -> Litstr.id =
   fun ast_attr ->

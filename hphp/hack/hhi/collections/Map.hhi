@@ -458,8 +458,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
    *
-   * @return - A shallow copy of the current `Map` with the updated the value
-   *           set. The current `Map` is also updated.
+   * @return - Returns itself.
    */
   public function set(Tk $k, Tv $v): Map<Tk, Tv>;
 
@@ -479,8 +478,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @param $k - The `Traversable` with the new values to set. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Map` with the updated the values
-   *           set. The current `Map` is also updated.
+   * @return - Returns itself.
    */
   public function setAll(?KeyedTraversable<Tk, Tv> $it): Map<Tk, Tv>;
 
@@ -490,8 +488,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
    *
-   * @return - A shallow copy of the current empty `Map`. The current `Map` is
-   *           also empty.
+   * @return - Returns itself.
    */
   public function clear(): Map<Tk, Tv>;
 
@@ -537,8 +534,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @param $p - The key/value Pair to add to the current `Map`.
    *
-   * @return - A shallow copy of the current `Map` with the added key/value
-   *           pair set. This `Map` is also updated.
+   * @return - Returns itself.
    */
   public function add(Pair<Tk, Tv> $p): Map<Tk, Tv>;
 
@@ -556,8 +552,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @param $k - The `Traversable` with the new key/value `Pair` to set. If
    *             `null` is provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Map` with the added key/value
-   *           pair set. This `Map` is also updated.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
 
@@ -581,8 +576,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current `Map` with the key removed; the
-   *           current `Map` is also updated with the key removed.
+   * @return - Returns itself.
    */
   public function remove(Tk $k): Map<Tk, Tv>;
 
@@ -596,8 +590,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current `Map` with the key removed; the
-   *           current `Map` is also updated with the key removed.
+   * @return - Returns itself.
    */
   public function removeKey(Tk $k): Map<Tk, Tv>;
 

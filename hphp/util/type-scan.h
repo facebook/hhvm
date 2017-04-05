@@ -183,7 +183,8 @@ inline bool hasNonConservative() {
 
 inline bool hasScanner(Index index) {
   assert(index < detail::g_metadata_table_size);
-  return detail::g_metadata_table[index].m_scan != nullptr;
+  return detail::g_metadata_table[index].m_scan !=
+         detail::g_metadata_table[kIndexUnknownNoPtrs].m_scan;
 }
 
 // Initialize the type scanner infrastructure. Before this is done,
@@ -295,9 +296,7 @@ struct Scanner {
   // Scan a region of memory using the given type-index.
   void scanByIndex(Index index, const void* ptr, std::size_t size) {
     assert(index < detail::g_metadata_table_size);
-    if (auto scan = detail::g_metadata_table[index].m_scan) {
-      scan(*this, ptr, size);
-    }
+    detail::g_metadata_table[index].m_scan(*this, ptr, size);
   }
 
   // Called once all the scanning is done. Callbacks report different

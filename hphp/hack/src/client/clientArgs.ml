@@ -23,6 +23,7 @@ let parse_command () =
   | "restart" -> CKRestart
   | "build" -> CKBuild
   | "ide" -> CKIde
+  | "lsp" -> CKLsp
   | "debug" -> CKDebug
   | _ -> CKNone
 
@@ -84,6 +85,8 @@ let parse_check_args cmd =
           \t\tStops a Hack server\n\
         \trestart\
           \t\tRestarts a Hack server\n\
+        \tlsp\
+          \t\t[experimental] runs a persistent language service\n\
         \tdebug\
           \t\tDebug mode\n\
       \n\
@@ -542,6 +545,14 @@ let parse_ide_args () =
     root = root
   }
 
+let parse_lsp_args () =
+  let usage = Printf.sprintf "Usage: %s lsp\n" Sys.argv.(0) in
+  let options = [] in
+  let args = parse_without_command options usage "lsp" in
+  match args with
+  | [] -> CLsp
+  | _ -> Printf.printf "%s\n" usage; exit 2
+
 let parse_debug_args () =
   let usage =
     Printf.sprintf "Usage: %s debug [WWW-ROOT]\n" Sys.argv.(0) in
@@ -566,6 +577,7 @@ let parse_args () =
     | CKBuild -> parse_build_args ()
     | CKDebug -> parse_debug_args ()
     | CKIde -> parse_ide_args ()
+    | CKLsp -> parse_lsp_args ()
 
 let root = function
   | CBuild { ClientBuild.root; _ }
@@ -575,3 +587,4 @@ let root = function
   | CStop { ClientStop.root; _ }
   | CIde { ClientIde.root; _}
   | CDebug { ClientDebug.root } -> root
+  | CLsp -> Path.dummy_path

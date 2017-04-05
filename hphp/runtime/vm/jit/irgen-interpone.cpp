@@ -439,7 +439,6 @@ void interpOne(IRGS& env,
 
 void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
 
-void emitLowInvalid(IRGS& env)                { std::abort(); }
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
@@ -485,7 +484,6 @@ void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
 void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
-void emitHighInvalid(IRGS& env)               { std::abort(); }
 
 //////////////////////////////////////////////////////////////////////
 

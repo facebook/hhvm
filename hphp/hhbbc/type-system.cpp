@@ -2096,6 +2096,10 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\string"))   return union_of(ret, TStr);
   if (!strcasecmp(p, "HH\\dict"))     return union_of(ret, TDict);
   if (!strcasecmp(p, "HH\\vec"))      return union_of(ret, TVec);
+  if (!strcasecmp(p, "HH\\keyset"))   return union_of(ret, TKeyset);
+  if (!strcasecmp(p, "HH\\varray"))   return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\darray"))   return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\varray_or_darray"))   return union_of(ret, TArr);
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
 
@@ -2371,11 +2375,14 @@ Type remove_uninit(Type t) {
 ArrKey disect_array_key(const Type& keyTy) {
   auto ret = ArrKey{};
 
-  if (keyTy.strictSubtypeOf(TInt)) {
-    ret.i = keyTy.m_data.ival;
+  if (keyTy.subtypeOf(TInt)) {
+    if (keyTy.strictSubtypeOf(TInt)) {
+      ret.i = keyTy.m_data.ival;
+    }
     ret.type = keyTy;
     return ret;
   }
+
   if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
     int64_t i;
     if (keyTy.m_data.sval->isStrictlyInteger(i)) {
@@ -2387,39 +2394,42 @@ ArrKey disect_array_key(const Type& keyTy) {
     }
     return ret;
   }
-  if (keyTy.strictSubtypeOf(TDbl)) {
-    ret.i = toInt64(keyTy.m_data.dval);
-    ret.type = ival(*ret.i);
-    return ret;
-  }
-  if (keyTy.subtypeOf(TNum)) {
-    ret.type = TInt;
-    return ret;
-  }
 
-  if (keyTy.subtypeOf(TNull)) {
-    ret.s = s_empty.get();
-    ret.type = sempty();
-    return ret;
-  }
-  if (keyTy.subtypeOf(TRes)) {
-    ret.type = TInt;
-    return ret;
-  }
+  if (!RuntimeOption::EvalHackArrCompatNotices) {
+    if (keyTy.strictSubtypeOf(TDbl)) {
+      ret.i = toInt64(keyTy.m_data.dval);
+      ret.type = ival(*ret.i);
+      return ret;
+    }
+    if (keyTy.subtypeOf(TNum)) {
+      ret.type = TInt;
+      return ret;
+    }
 
-  if (keyTy.subtypeOf(TTrue)) {
-    ret.i = 1;
-    ret.type = TInt;
-    return ret;
-  }
-  if (keyTy.subtypeOf(TFalse)) {
-    ret.i = 0;
-    ret.type = TInt;
-    return ret;
-  }
-  if (keyTy.subtypeOf(TBool)) {
-    ret.type = TInt;
-    return ret;
+    if (keyTy.subtypeOf(TNull)) {
+      ret.s = s_empty.get();
+      ret.type = sempty();
+      return ret;
+    }
+    if (keyTy.subtypeOf(TRes)) {
+      ret.type = TInt;
+      return ret;
+    }
+
+    if (keyTy.subtypeOf(TTrue)) {
+      ret.i = 1;
+      ret.type = TInt;
+      return ret;
+    }
+    if (keyTy.subtypeOf(TFalse)) {
+      ret.i = 0;
+      ret.type = TInt;
+      return ret;
+    }
+    if (keyTy.subtypeOf(TBool)) {
+      ret.type = TInt;
+      return ret;
+    }
   }
 
   // If we have an OptStr with a value, we can at least exclude the
@@ -2662,9 +2672,9 @@ bool arr_packed_set(Type& pack,
   }
 
   if (!isVecArray) {
-    if (key.s) {
+    if (auto const v = key.tv()) {
       auto m = toDArrLikeMap(pack.m_data.packed->elems);
-      m.map.emplace_back(make_tv<KindOfPersistentString>(*key.s), val);
+      m.map.emplace_back(*v, val);
       pack = map_impl(pack.m_bits, std::move(m.map));
       return true;
     }

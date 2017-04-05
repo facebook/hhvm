@@ -739,12 +739,13 @@ const StaticString
   s_php_errormsg("php_errormsg");
 
 /*
- * Could `inst' write to the locals in the environment of `caller'?
- *
- * This occurs, e.g., if `inst' is a call to extract().
+ * Could `inst' access the locals in the environment of `caller' according to
+ * the given predicate?
  */
-bool callWritesLocals(const NormalizedInstruction& inst,
-                      const Func* caller) {
+template <typename P>
+bool callAccessesLocals(const NormalizedInstruction& inst,
+                        const Func* caller,
+                        P predicate) {
   // We don't handle these two cases, because we don't compile functions
   // containing them:
   assertx(caller->lookupVarId(s_php_errormsg.get()) == -1);
@@ -754,10 +755,10 @@ bool callWritesLocals(const NormalizedInstruction& inst,
 
   auto const checkTaintId = [&](Id id) {
     auto const str = unit->lookupLitstrId(id);
-    // Only builtins can write to a caller's locals or be skip-frame and if we
+    // Only builtins can access a caller's locals or be skip-frame and if we
     // can't lookup the function, we know its not a builtin.
     auto const callee = Unit::lookupFunc(str);
-    return callee && funcWritesLocals(callee);
+    return callee && predicate(callee);
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
@@ -775,7 +776,7 @@ bool callWritesLocals(const NormalizedInstruction& inst,
     case OpFPushCufF:
     case OpFPushCufSafe:
       // Dynamic calls.  If we've forbidden dynamic calls to functions which
-      // touch the caller's frame, we know this can't be one.
+      // access the caller's frame, we know this can't be one.
       return !disallowDynamicVarEnvFuncs();
 
     case OpFPushFuncD:
@@ -793,16 +794,36 @@ bool callWritesLocals(const NormalizedInstruction& inst,
     case OpFPushCtor:
     case OpFPushCtorD:
     case OpFPushCtorI:
-      // None of these touch the caller's frame because they all call methods,
-      // not top-level functions. However, they might still be might marked as
+      // None of these access the caller's frame because they all call methods,
+      // not top-level functions. However, they might still be marked as
       // skip-frame and therefore something they call can affect our frame. We
       // don't have to worry about this if they're not allowed to call such
       // functions dynamically.
       return !disallowDynamicVarEnvFuncs();
 
     default:
-      always_assert("Unhandled FPush type in callWritesLocals" && 0);
+      always_assert("Unhandled FPush type in callAccessesLocals" && 0);
   }
+}
+
+/*
+ * Could `inst' write to the locals in the environment of `caller'?
+ *
+ * This occurs, e.g., if `inst' is a call to extract().
+ */
+bool callWritesLocals(const NormalizedInstruction& inst,
+                      const Func* caller) {
+  return callAccessesLocals(inst, caller, funcWritesLocals);
+}
+
+/*
+ * Could `inst' read from the locals in the environment of `caller'?
+ *
+ * This occurs, e.g., if `inst' is a call to compact().
+ */
+bool callReadsLocals(const NormalizedInstruction& inst,
+                     const Func* caller) {
+  return callAccessesLocals(inst, caller, funcReadsLocals);
 }
 
 /*
@@ -1302,6 +1323,9 @@ void emitFCallArray(IRGS& env) {
   auto const writeLocals = callee
     ? funcWritesLocals(callee)
     : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
+  auto const readLocals = callee
+    ? funcReadsLocals(callee)
+    : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
@@ -1309,7 +1333,8 @@ void emitFCallArray(IRGS& env) {
     bcOff(env),
     nextBcOff(env),
     callee,
-    writeLocals
+    writeLocals,
+    readLocals
   };
   auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
   push(env, retVal);
@@ -1321,6 +1346,9 @@ void emitFCallUnpack(IRGS& env, int32_t numParams) {
   auto const writeLocals = callee
     ? funcWritesLocals(callee)
     : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
+  auto const readLocals = callee
+    ? funcReadsLocals(callee)
+    : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
   auto const data = CallArrayData {
     spOffBCFromIRSP(env),
@@ -1328,7 +1356,8 @@ void emitFCallUnpack(IRGS& env, int32_t numParams) {
     bcOff(env),
     nextBcOff(env),
     callee,
-    writeLocals
+    writeLocals,
+    readLocals
   };
   auto const retVal = gen(env, CallArray, data, sp(env), fp(env));
   push(env, retVal);
@@ -1348,6 +1377,9 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
   auto const writeLocals = callee
     ? funcWritesLocals(callee)
     : callWritesLocals(*env.currentNormalizedInstruction, curFunc(env));
+  auto const readLocals = callee
+    ? funcReadsLocals(callee)
+    : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
   auto const needsCallerFrame = callee
     ? funcNeedsCallerFrame(callee)
     : callNeedsCallerFrame(
@@ -1365,6 +1397,7 @@ SSATmp* implFCall(IRGS& env, int32_t numParams) {
       returnBcOffset,
       callee,
       writeLocals,
+      readLocals,
       needsCallerFrame,
       op == Op::FCallAwait
     },
@@ -1403,6 +1436,7 @@ void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
       returnBcOffset,
       callee,
       funcWritesLocals(callee),
+      funcReadsLocals(callee),
       funcNeedsCallerFrame(callee),
       false
     },

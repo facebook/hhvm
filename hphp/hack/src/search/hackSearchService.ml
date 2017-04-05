@@ -21,8 +21,8 @@ type search_result_type =
   | Typedef
   | Constant
 
-type result =
-  (Pos.absolute, search_result_type) SearchUtils.term list
+type symbol = (Pos.absolute, search_result_type) SearchUtils.term
+type result = symbol list
 
 module SS = SearchService.Make(struct
   type t = search_result_type

@@ -30,6 +30,20 @@ type decl = private DeclPhase
 type locl = private LoclPhase
 
 type 'phase ty = Reason.t * 'phase ty_
+
+(* A shape may specify whether or not fields are required. For example, consider
+   this typedef:
+
+     type ShapeWithOptionalField = shape(?'a' => ?int);
+
+   With this definition, the field 'a' may be unprovided in a shape. In this
+   case, the field 'a' would have sf_optional set to true.
+   *)
+and 'phase shape_field_type = {
+  sft_optional : bool;
+  sft_ty : 'phase ty;
+}
+
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
   (* The late static bound type of a class *)
@@ -108,7 +122,9 @@ and _ ty_ =
   (* Whether all fields of this shape are known, types of each of the
    * known arms.
    *)
-  | Tshape : shape_fields_known * ('phase ty Nast.ShapeMap.t) -> 'phase ty_
+  | Tshape
+    : shape_fields_known * ('phase shape_field_type Nast.ShapeMap.t)
+      -> 'phase ty_
 
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
@@ -491,6 +507,43 @@ module AbstractKind = struct
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
        String.concat "::" (dt::ids)
+end
+
+module ShapeFieldMap = struct
+  include Nast.ShapeMap
+
+  let map_and_rekey shape_map key_f value_f =
+    let f_over_shape_field_type ({ sft_ty; _ } as shape_field_type) =
+      { shape_field_type with sft_ty = value_f sft_ty } in
+    Nast.ShapeMap.map_and_rekey
+      shape_map
+      key_f
+      f_over_shape_field_type
+
+  let map_env f env shape_map =
+    let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
+      let env, sft_ty = f env sft_ty in
+      env, { shape_field_type with sft_ty } in
+    Nast.ShapeMap.map_env f_over_shape_field_type env shape_map
+
+  let map f shape_map = map_and_rekey shape_map (fun x -> x) f
+
+  let iter f shape_map =
+    let f_over_shape_field_type shape_map_key { sft_ty; _ } =
+      f shape_map_key sft_ty in
+    Nast.ShapeMap.iter f_over_shape_field_type shape_map
+
+  let iter_values f = iter (fun _ -> f)
+end
+
+module ShapeFieldList = struct
+  include Core.List
+
+  let map_env env xs ~f =
+    let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
+      let env, sft_ty = f env sft_ty in
+      env, { shape_field_type with sft_ty } in
+    Core.List.map_env env xs ~f:f_over_shape_field_type
 end
 
 (*****************************************************************************)

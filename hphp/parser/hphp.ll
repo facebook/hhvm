@@ -170,6 +170,8 @@ static int getNextTokenType(int t) {
     case T_DICT:
     case T_VEC:
     case T_KEYSET:
+    case T_VARRAY:
+    case T_DARRAY:
     case T_WHERE:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
@@ -261,7 +263,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from" { RETTOKEN(T_YIELD_FROM);}
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_YIELD_FROM);
+}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
@@ -489,6 +494,8 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
 <ST_IN_SCRIPTING>"vec"                { HH_ONLY_KEYWORD(T_VEC);}
+<ST_IN_SCRIPTING>"varray"             { HH_ONLY_KEYWORD(T_VARRAY);}
+<ST_IN_SCRIPTING>"darray"             { HH_ONLY_KEYWORD(T_DARRAY);}
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }

@@ -15,12 +15,25 @@ open Sys_utils
 (*****************************************************************************)
 (* Types, constants *)
 (*****************************************************************************)
+type parser =
+  | Legacy
+  | FFP
 
 type options = {
   filename    : string;
   fallback    : bool;
   config      : string list;
+  debug_time  : bool;
+  parser      : parser;
 }
+
+(*****************************************************************************)
+(* Debug info refs *)
+(*****************************************************************************)
+
+let parsing_t = ref 0.0
+let codegen_t = ref 0.0
+let printing_t = ref 0.0
 
 (*****************************************************************************)
 (* Helpers *)
@@ -35,6 +48,8 @@ let die str =
 let parse_options () =
   let fn_ref = ref None in
   let fallback = ref false in
+  let debug_time = ref false in
+  let parser = ref FFP in
   let config = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
@@ -42,9 +57,20 @@ let parse_options () =
       , Arg.Set fallback
       , " Enables fallback compilation"
       );
+      ("--debug-time"
+      , Arg.Set debug_time
+      , " Enables debugging logging for elapsed time"
+      );
       ("-v"
       , Arg.String (fun str -> config := str :: !config)
       , " Configuration: Eval.EnableHipHopSyntax=<value> or Hack.Lang.IntsOverflowToInts=<value>"
+      );
+      ("--parser"
+      , Arg.String
+        (function "ffp" -> parser := FFP
+                | "legacy" -> parser := Legacy
+                | p -> failwith @@ p ^ " is an invalid parser")
+      , " Parser: ffp or legacy [def: ffp]"
       )
     ] in
   let options = Arg.align ~limit:25 options in
@@ -55,6 +81,8 @@ let parse_options () =
   { filename = fn
   ; fallback = !fallback
   ; config = !config
+  ; debug_time = !debug_time
+  ; parser = !parser
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -111,10 +139,18 @@ let file_to_files file =
   else
     Relative_path.Map.singleton file content
 
-let parse_name popt files_contents =
+let parse_name compiler_options popt files_contents =
   Errors.do_ begin fun () ->
-    let parser = Full_fidelity_ast.from_text_with_legacy ~parser_options:popt in
-    let parsed_files = Relative_path.Map.mapi parser files_contents in
+    let parsed_files =
+      if compiler_options.parser = FFP
+      then Relative_path.Map.mapi
+        ( Full_fidelity_ast.from_text_with_legacy
+            ~parser_options:popt
+            ~ignore_pos:true
+        )
+        files_contents
+      else Relative_path.Map.mapi (Parser_hack.program popt) files_contents
+    in
 
     let files_info =
       Relative_path.Map.mapi begin fun fn parsed_file ->
@@ -150,6 +186,16 @@ let hhvm_unix_call config filename =
   Unix.close readme;
   result
 
+let add_to_time_ref r t0 =
+  let t = Unix.gettimeofday () in
+  r := !r +. (t -. t0);
+  t
+
+let print_debug_time_info () =
+  Printf.fprintf stderr "Parsing: %0.3f s\n" !parsing_t;
+  Printf.fprintf stderr "Codegen: %0.3f s\n" !codegen_t;
+  Printf.fprintf stderr "Printing: %0.3f s\n" !printing_t
+
 let do_compile compiler_options opts files_info = begin
   let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
   let get_nast_from_fileinfo tcopt fn fileinfo =
@@ -168,18 +214,26 @@ let do_compile compiler_options opts files_info = begin
     (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts,
       parsed_statements) in
   let f_fold fn fileinfo text = begin
+    let t = Unix.gettimeofday () in
     let ast = get_nast_from_fileinfo opts fn fileinfo in
+    let t = add_to_time_ref parsing_t t in
     let options = Hhbc_options.get_options_from_config
       compiler_options.config in
-    Hhbc_from_nast.set_compiler_options options;
+    Emit_expression.set_compiler_options options;
     let hhas_prog = Hhas_program.from_ast ast in
+    let t = add_to_time_ref codegen_t t in
     let hhas_text = Hhbc_hhas.to_string hhas_prog in
-    if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
-    then text ^
-      hhvm_unix_call compiler_options.config (Relative_path.to_absolute fn)
-    else text ^ hhas_text
+    let text =
+      if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
+      then text ^
+        hhvm_unix_call compiler_options.config (Relative_path.to_absolute fn)
+      else text ^ hhas_text
+    in
+    ignore @@ add_to_time_ref printing_t t;
+    text
   end in
   let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in
+  if compiler_options.debug_time then print_debug_time_info ();
   Printf.printf "%s" hhas_text
 end
 
@@ -190,10 +244,12 @@ end
 let decl_and_run_mode compiler_options popt tcopt =
   Local_id.track_names := true;
   Ident.track_names := true;
+  let t = Unix.gettimeofday () in
   let filename =
     Relative_path.create Relative_path.Dummy compiler_options.filename in
   let files_contents = file_to_files filename in
-  let _, files_info, _ = parse_name popt files_contents in
+  let _, files_info, _ = parse_name compiler_options popt files_contents in
+  ignore @@ add_to_time_ref parsing_t t;
   do_compile compiler_options tcopt files_info
 
 let main_hack opts =

@@ -323,6 +323,7 @@ module type S = sig
   val instanceof_always_false : Pos.t -> unit
   val instanceof_always_true : Pos.t -> unit
   val instanceof_generic_classname : Pos.t -> string -> unit
+  val final_property : Pos.t -> unit
 
 
   val to_json : Pos.absolute error_ -> Hh_json.json
@@ -356,4 +357,7 @@ module type S = sig
   val darray_not_supported : Pos.t -> unit
   val varray_not_supported : Pos.t -> unit
   val too_few_type_arguments : Pos.t -> unit
+  val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
+  val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
+  val unknown_fields_not_supported : Pos.t -> unit
 end

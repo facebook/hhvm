@@ -21,9 +21,8 @@ let rec hint env (p, h) =
   let h = hint_ p env h in
   Typing_reason.Rhint p, h
 
-(* TODO(tingley): Record the optional status and use this to reconcile types. *)
-and shape_field_info_to_shape_field_type env { sfi_optional=_; sfi_hint } =
-  hint env sfi_hint
+and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint } =
+  { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
 and hint_ p env = function
   | Hany -> Tany
@@ -88,10 +87,27 @@ and hint_ p env = function
   | Htuple hl ->
     let tyl = List.map hl (hint env) in
     Ttuple tyl
-  | Hshape fdm ->
-    let fdm = ShapeMap.map (shape_field_info_to_shape_field_type env) fdm in
-    (* Fields are only partially known, because this shape type comes from
-     * type hint - shapes that contain listed fields can be passed here, but
-     * due to structural subtyping they can also contain other fields, that we
-     * don't know about. *)
-    Tshape (FieldsPartiallyKnown ShapeMap.empty, fdm)
+  | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
+    let optional_shape_fields_enabled =
+      TypecheckerOptions.experimental_feature_enabled
+        env.Decl_env.decl_tcopt
+        TypecheckerOptions.experimental_optional_shape_field in
+    let shape_fields_known =
+      match optional_shape_fields_enabled, nsi_allows_unknown_fields with
+        | true, true
+        | false, false ->
+          (* Fields are only partially known, because this shape type comes from
+           * type hint - shapes that contain listed fields can be passed here,
+           * but due to structural subtyping they can also contain other fields,
+           * that we don't know about. *)
+          FieldsPartiallyKnown ShapeMap.empty
+        | true, false ->
+          FieldsFullyKnown
+        | false, true ->
+          (* The user is using the unknown types syntax but is not in the
+             experiment. *)
+          Errors.unknown_fields_not_supported p;
+          FieldsPartiallyKnown ShapeMap.empty in
+    let fdm =
+      ShapeMap.map (shape_field_info_to_shape_field_type env) nsi_field_map in
+    Tshape (shape_fields_known, fdm)

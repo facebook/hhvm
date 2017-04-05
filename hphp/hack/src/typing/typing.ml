@@ -4928,8 +4928,8 @@ and typedef_def tcopt typedef  =
     | _ -> ()
   end;
   match hint with
-  | pos, Hshape fdm ->
-    ignore (check_shape_keys_validity env pos (ShapeMap.keys fdm))
+  | pos, Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
+    ignore (check_shape_keys_validity env pos (ShapeMap.keys nsi_field_map))
   | _ -> ()
 
 and gconst_def cst tcopt =

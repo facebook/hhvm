@@ -359,4 +359,5 @@ module type S = sig
   val too_few_type_arguments : Pos.t -> unit
   val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
   val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
+  val unknown_fields_not_supported : Pos.t -> unit
 end

@@ -87,8 +87,12 @@ and hint_ p env = function
   | Htuple hl ->
     let tyl = List.map hl (hint env) in
     Ttuple tyl
-  | Hshape fdm ->
-    let fdm = ShapeMap.map (shape_field_info_to_shape_field_type env) fdm in
+  | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
+    let fdm =
+      ShapeMap.map (shape_field_info_to_shape_field_type env) nsi_field_map in
+    (* TODO(tingley): Set FieldsPartiallyKnown on FieldsFullyKnown based on the
+       value of experimental_optional_shape_field and nsi_allows_unknown_fields
+       *)
     (* Fields are only partially known, because this shape type comes from
      * type hint - shapes that contain listed fields can be passed here, but
      * due to structural subtyping they can also contain other fields, that we

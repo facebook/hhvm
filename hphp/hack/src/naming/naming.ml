@@ -693,6 +693,22 @@ module Make (GetLocals : GetLocals) = struct
       sfi_hint=hint env sf_hint;
     }
 
+  and ast_shape_info_to_nast_shape_info
+      env
+      { si_allows_unknown_fields; si_shape_field_list } =
+    let f fdm shape_field =
+      let pos, name = convert_shape_name env shape_field.sf_name in
+      if ShapeMap.mem name fdm
+      then Errors.fd_name_already_bound pos;
+      ShapeMap.add
+        name (shape_field_to_shape_field_info env shape_field) fdm in
+    let nsi_field_map =
+      List.fold_left si_shape_field_list ~init:ShapeMap.empty ~f in
+    N.{
+      nsi_allows_unknown_fields=si_allows_unknown_fields;
+      nsi_field_map
+    }
+
   and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
         is_static_var env x =
     let hint =
@@ -740,18 +756,8 @@ module Make (GetLocals : GetLocals) = struct
           )
       in
       N.Haccess ((pos, root_ty), id :: ids)
-    | Hshape { si_allows_unknown_fields=_; si_shape_field_list } ->
-      (* TODO(tingley): Propagate si_allows_unknown_fields through the naming
-         phase. *)
-      let f fdm shape_field =
-        let pos, name = convert_shape_name env shape_field.sf_name in
-        if ShapeMap.mem name fdm
-        then Errors.fd_name_already_bound pos;
-        ShapeMap.add
-          name (shape_field_to_shape_field_info env shape_field) fdm in
-      let shape_field_info_map =
-        List.fold_left si_shape_field_list ~init:ShapeMap.empty ~f in
-      N.Hshape shape_field_info_map
+    | Hshape ast_shape_info ->
+      N.Hshape (ast_shape_info_to_nast_shape_info env ast_shape_info)
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
     env is_static_var (p, x as id) hl =

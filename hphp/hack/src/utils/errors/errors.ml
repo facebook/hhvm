@@ -404,6 +404,7 @@ let error_code_to_string = Common.error_code_to_string
 module Temporary = struct
   let darray_not_supported = 1
   let varray_not_supported = 2
+  let unknown_fields_not_supported = 3
 end
 
 module Parsing = struct
@@ -713,6 +714,10 @@ let darray_not_supported pos =
 
 let varray_not_supported pos =
   add Temporary.varray_not_supported pos "varray is not supported."
+
+let unknown_fields_not_supported pos =
+  add Temporary.unknown_fields_not_supported pos
+    "The Unknown shape fields feature (i.e., \"shape(...)\") is not supported."
 
 (*****************************************************************************)
 (* Parsing errors. *)

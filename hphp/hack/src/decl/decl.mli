@@ -31,11 +31,11 @@ val make_env: TypecheckerOptions.t -> Relative_path.t -> unit
 val class_decl:
   TypecheckerOptions.t -> Nast.class_ -> unit
 
-val fun_decl : Nast.fun_ -> unit
+val fun_decl : Nast.fun_ -> TypecheckerOptions.t -> unit
 
-val typedef_decl : Nast.typedef -> unit
+val typedef_decl : Nast.typedef -> TypecheckerOptions.t -> unit
 
-val const_decl : Nast.gconst -> unit
+val const_decl : Nast.gconst -> TypecheckerOptions.t -> unit
 
 val fun_decl_in_env:
   Decl_env.env -> Nast.fun_ -> Typing_defs.decl Typing_defs.fun_type

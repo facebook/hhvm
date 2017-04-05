@@ -135,7 +135,7 @@ let get_class_parents_and_traits env class_nast =
 
 let rec ifun_decl tcopt (f: Ast.fun_) =
   let f = Naming.fun_ tcopt f in
-  fun_decl f;
+  fun_decl f tcopt;
   ()
 
 and make_param_ty env param =
@@ -156,9 +156,13 @@ and make_param_ty env param =
   in
   Some param.param_name, ty
 
-and fun_decl f =
+and fun_decl f decl_tcopt =
   let dep = Dep.Fun (snd f.f_name) in
-  let env = {Decl_env.mode = f.f_mode; droot = Some dep} in
+  let env = {
+    Decl_env.mode = f.f_mode;
+    droot = Some dep;
+    decl_tcopt;
+  } in
   let ft = fun_decl_in_env env f in
   Decl_heap.Funs.add (snd f.f_name) ft;
   ()
@@ -309,14 +313,18 @@ and class_decl tcopt c =
   let is_abstract = class_is_abstract c in
   let _p, cls_name = c.c_name in
   let class_dep = Dep.Class cls_name in
-  let env = {Decl_env.mode = c.c_mode; droot = Some class_dep} in
+  let env = {
+    Decl_env.mode = c.c_mode;
+    droot = Some class_dep;
+    decl_tcopt = tcopt;
+  } in
   let inherited = Decl_inherit.make env c in
   let props = inherited.Decl_inherit.ih_props in
   let props =
     List.fold_left ~f:(class_var_decl env c) ~init:props c.c_vars in
   let m = inherited.Decl_inherit.ih_methods in
   let m = List.fold_left
-      ~f:(method_decl_acc tcopt ~is_static:false env c )
+      ~f:(method_decl_acc ~is_static:false env c )
       ~init:m c.c_methods in
   let consts = inherited.Decl_inherit.ih_consts in
   let consts = List.fold_left ~f:(class_const_decl env c)
@@ -330,7 +338,7 @@ and class_decl tcopt c =
   let sprops = List.fold_left c.c_static_vars ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
   let sm = List.fold_left c.c_static_methods
-      ~f:(method_decl_acc tcopt ~is_static:true env c )
+      ~f:(method_decl_acc ~is_static:true env c )
       ~init:sm in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl env parent_cstr c in
@@ -705,8 +713,9 @@ and method_check_override opt ~is_static c m acc  =
     false
   | None -> false
 
-and method_decl_acc opt ~is_static env c acc m  =
-  let check_override = method_check_override opt ~is_static c m acc  in
+and method_decl_acc ~is_static env c acc m  =
+  let check_override =
+    method_check_override env.Decl_env.decl_tcopt ~is_static c m acc in
   let ft = method_decl env m in
   let _, id = m.m_name in
   let vis =
@@ -787,7 +796,7 @@ let rec type_typedef_decl_if_missing tcopt typedef =
   else
     type_typedef_naming_and_decl tcopt typedef
 
-and typedef_decl tdef =
+and typedef_decl tdef decl_tcopt =
   let {
     t_name = td_pos, tid;
     t_tparams = params;
@@ -798,7 +807,7 @@ and typedef_decl tdef =
     t_vis = td_vis;
   } = tdef in
   let dep = Typing_deps.Dep.Class tid in
-  let env = {Decl_env.mode = mode; droot = Some dep} in
+  let env = {Decl_env.mode = mode; droot = Some dep; decl_tcopt} in
   let td_tparams = List.map params (type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
   let td_constraint = Option.map tcstr (Decl_hint.hint env) in
@@ -809,18 +818,18 @@ and typedef_decl tdef =
 
 and type_typedef_naming_and_decl tcopt tdef =
   let tdef = Naming.typedef tcopt tdef in
-  typedef_decl tdef;
+  typedef_decl tdef tcopt;
   ()
 
 (*****************************************************************************)
 (* Global constants *)
 (*****************************************************************************)
 
-let const_decl cst =
+let const_decl cst decl_tcopt =
   let open Option.Monad_infix in
   let cst_pos, cst_name = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
-  let env = {Decl_env.mode = cst.cst_mode; droot = Some dep} in
+  let env = {Decl_env.mode = cst.cst_mode; droot = Some dep; decl_tcopt} in
   let hint_ty =
     match cst.cst_type with
     | Some h -> Decl_hint.hint env h
@@ -838,7 +847,7 @@ let const_decl cst =
 
 let iconst_decl tcopt cst =
   let cst = Naming.global_const tcopt cst in
-  const_decl cst;
+  const_decl cst tcopt;
   ()
 
 (*****************************************************************************)

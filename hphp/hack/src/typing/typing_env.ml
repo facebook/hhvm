@@ -217,6 +217,7 @@ let empty tcopt file ~droot = {
   decl_env = {
     mode = FileInfo.Mstrict;
     droot;
+    decl_tcopt = tcopt;
   };
   genv    = {
     tcopt   = tcopt;

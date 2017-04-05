@@ -557,8 +557,16 @@ class virtual ['self] endo =
       then this
       else Happly (r0, r1)
     method on_Hshape env this c0 =
-      let r0 = self#on_list self#on_shape_field env c0 in
-      if c0 == r0 then this else Hshape r0
+      let r0 = self#on_bool env c0.si_allows_unknown_fields in
+      let r1 = self#on_list self#on_shape_field env c0.si_shape_field_list in
+      if   c0.si_allows_unknown_fields == r0
+        && c0.si_shape_field_list == r1
+      then this
+      else
+        Hshape {
+          si_allows_unknown_fields = r0;
+          si_shape_field_list = r1
+        }
     method on_Haccess env this c0 c1 c2 =
       let r0 = self#on_id env c0 in
       let r1 = self#on_id env c1 in

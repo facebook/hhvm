@@ -216,7 +216,7 @@ class virtual ['c] map :
                      Ast_visitors_ancestors.hint ->
                      Ast_visitors_ancestors.hint_;
         on_Hshape : 'd ->
-                    Ast_visitors_ancestors.shape_field list ->
+                    Ast_visitors_ancestors.shape_info ->
                     Ast_visitors_ancestors.hint_;
         on_Htuple : 'd ->
                     Ast_visitors_ancestors.hint list ->
@@ -761,7 +761,7 @@ class virtual ['c] map :
       'd -> Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Hshape :
       'd ->
-      Ast_visitors_ancestors.shape_field list -> Ast_visitors_ancestors.hint_
+      Ast_visitors_ancestors.shape_info -> Ast_visitors_ancestors.hint_
     method on_Htuple :
       'd -> Ast_visitors_ancestors.hint list -> Ast_visitors_ancestors.hint_
     method on_Id :

@@ -135,7 +135,7 @@ class virtual ['b] iter :
                   Ast_visitors_ancestors.is_reference ->
                   Ast_visitors_ancestors.hint -> unit;
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit;
-        on_Hshape : 'c -> Ast_visitors_ancestors.shape_field list -> unit;
+        on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit;
         on_Htuple : 'c -> Ast_visitors_ancestors.hint list -> unit;
         on_Id : 'c -> Ast_visitors_ancestors.id -> unit;
         on_Id_type_arguments : 'c ->
@@ -461,7 +461,7 @@ class virtual ['b] iter :
       Ast_visitors_ancestors.is_reference ->
       Ast_visitors_ancestors.hint -> unit
     method on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit
-    method on_Hshape : 'c -> Ast_visitors_ancestors.shape_field list -> unit
+    method on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit
     method on_Htuple : 'c -> Ast_visitors_ancestors.hint list -> unit
     method on_Id : 'c -> Ast_visitors_ancestors.id -> unit
     method on_Id_type_arguments :

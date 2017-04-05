@@ -295,7 +295,9 @@ class virtual ['self] iter =
     method on_Happly env c0 c1 =
       self#on_id env c0;
       self#on_list self#on_hint env c1;
-    method on_Hshape = self#on_list self#on_shape_field
+    method on_Hshape env c0 =
+      self#on_bool env c0.si_allows_unknown_fields;
+      self#on_list self#on_shape_field env c0.si_shape_field_list
     method on_Haccess env c0 c1 c2 =
       self#on_id env c0;
       self#on_id env c1;

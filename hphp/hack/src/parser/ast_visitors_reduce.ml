@@ -322,7 +322,10 @@ class virtual ['self] reduce =
       let r0 = self#on_id env c0 in
       let r1 = self#on_list self#on_hint env c1 in
       self#add r0 r1
-    method on_Hshape = self#on_list self#on_shape_field
+    method on_Hshape env c0 =
+      let r0 = self#on_bool env c0.si_allows_unknown_fields in
+      let r1 =self#on_list self#on_shape_field env c0.si_shape_field_list in
+      self#add r0 r1
     method on_Haccess env c0 c1 c2 =
       let r0 = self#on_id env c0 in
       let r1 = self#on_id env c1 in

@@ -211,7 +211,7 @@ and hint_ =
   | Hfun of hint list * bool * hint
   | Htuple of hint list
   | Happly of id * hint list
-  | Hshape of shape_field list
+  | Hshape of shape_info
  (* This represents the use of a type const. Type consts are accessed like
   * regular consts in Hack, i.e.
   *
@@ -226,6 +226,11 @@ and hint_ =
   * Haccess ("Class", "TC1", ["TC2", "TC3"])
   *)
   | Haccess of id * id * id list
+
+and shape_info = {
+  si_allows_unknown_fields : bool;
+  si_shape_field_list : shape_field list;
+}
 
 and shape_field = {
   sf_optional : bool;

@@ -740,16 +740,18 @@ module Make (GetLocals : GetLocals) = struct
           )
       in
       N.Haccess ((pos, root_ty), id :: ids)
-    | Hshape fdl -> N.Hshape
-      begin
-        List.fold_left fdl ~init:ShapeMap.empty ~f:begin fun fdm shape_field ->
-          let pos, name = convert_shape_name env shape_field.sf_name in
-          if ShapeMap.mem name fdm
-          then Errors.fd_name_already_bound pos;
-          ShapeMap.add
-            name (shape_field_to_shape_field_info env shape_field) fdm
-        end
-    end
+    | Hshape { si_allows_unknown_fields=_; si_shape_field_list } ->
+      (* TODO(tingley): Propagate si_allows_unknown_fields through the naming
+         phase. *)
+      let f fdm shape_field =
+        let pos, name = convert_shape_name env shape_field.sf_name in
+        if ShapeMap.mem name fdm
+        then Errors.fd_name_already_bound pos;
+        ShapeMap.add
+          name (shape_field_to_shape_field_info env shape_field) fdm in
+      let shape_field_info_map =
+        List.fold_left si_shape_field_list ~init:ShapeMap.empty ~f in
+      N.Hshape shape_field_info_map
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
     env is_static_var (p, x as id) hl =

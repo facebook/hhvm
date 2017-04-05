@@ -51,7 +51,7 @@ let rec fmt_hint (_, h) =
 
   | A.Hoption t -> "?" ^ fmt_hint t
 
-  | A.Hshape smap ->
+  | A.Hshape { A.si_allows_unknown_fields; si_shape_field_list } ->
     let fmt_field = function
       | A.SFlit (_, s) -> "'" ^ s ^ "'"
       | A.SFclass_const ((_, s1), (_, s2)) -> fmt_name s1 ^ "::" ^ s2
@@ -59,8 +59,10 @@ let rec fmt_hint (_, h) =
     let format_shape_field ({ A.sf_name; A.sf_hint; _ }) =
       fmt_field sf_name ^ "=>" ^ fmt_hint sf_hint in
     let shape_fields =
-      List.map ~f:format_shape_field smap in
-    "HH\\shape(" ^ String.concat ", " shape_fields ^ ")"
+      List.map ~f:format_shape_field si_shape_field_list in
+    let shape_suffix = if si_allows_unknown_fields then ["..."] else [] in
+    let formatted_shape_entries = shape_fields @ shape_suffix in
+    "HH\\shape(" ^ String.concat ", " formatted_shape_entries ^ ")"
 
 let rec hint_to_type_constraint tparams (_, h) =
 match h with

@@ -322,7 +322,7 @@ class virtual ['b] endo :
                      Ast_visitors_ancestors.hint_;
         on_Hshape : 'c ->
                     Ast_visitors_ancestors.hint_ ->
-                    Ast_visitors_ancestors.shape_field list ->
+                    Ast_visitors_ancestors.shape_info ->
                     Ast_visitors_ancestors.hint_;
         on_Htuple : 'c ->
                     Ast_visitors_ancestors.hint_ ->
@@ -1084,7 +1084,7 @@ class virtual ['b] endo :
     method on_Hshape :
       'c ->
       Ast_visitors_ancestors.hint_ ->
-      Ast_visitors_ancestors.shape_field list -> Ast_visitors_ancestors.hint_
+      Ast_visitors_ancestors.shape_info -> Ast_visitors_ancestors.hint_
     method on_Htuple :
       'c ->
       Ast_visitors_ancestors.hint_ ->

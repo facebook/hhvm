@@ -403,11 +403,18 @@ let rec pHint : hint parser = fun node env ->
     | SimpleTypeSpecifier _
       -> Happly (pos_name node, [])
     | ShapeTypeSpecifier { shape_type_fields; _ } ->
+      (* TODO(tingley): There is neither a mapping here for optional shape
+         fields nor for unknown shape fields. These will need to be written
+         before optional shape fields can be supported. They both default to
+         false for now. *)
       let pShapeField node env =
         let sf_name, sf_hint = mpShapeField pHint node env in
         { sf_optional = false; sf_name; sf_hint }
       in
-      Hshape (couldMap ~f:pShapeField shape_type_fields env)
+      let si_shape_field_list = couldMap ~f:pShapeField shape_type_fields env in
+      let shape_info =
+        { si_allows_unknown_fields=false; si_shape_field_list } in
+      Hshape shape_info
     | TupleTypeSpecifier { tuple_types; _ } ->
       Htuple (couldMap ~f:pHint tuple_types env)
 

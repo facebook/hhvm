@@ -1,3 +1,6 @@
 <?hh
 
-type ShapeWithKnownAndUnknownFields = shape('a' => int, ...);
+type ShapeWithKnownAndUnknownFields = shape(
+  'a' => int,
+  ...
+);

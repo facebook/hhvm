@@ -1189,12 +1189,21 @@ let rec transform node =
     let (name, arrow_kw, value) = get_field_initializer_children x in
     transform_mapish_entry name arrow_kw value
   | ShapeTypeSpecifier x ->
-    (* Consider '...' for a shape when formatting.  *)
-    let (shape_kw, left_p, type_fields, _, right_p) =
+    let (shape_kw, left_p, type_fields, ellipsis, right_p) =
       get_shape_type_specifier_children x in
+    let fields = if is_missing ellipsis
+      then type_fields
+      else
+        let missing_separator = make_missing () in
+        let ellipsis_list = [make_list_item ellipsis missing_separator] in
+        make_list (children type_fields @ ellipsis_list) in
     Fmt [
       t shape_kw;
-      transform_argish left_p type_fields right_p;
+      transform_argish
+        ~allow_trailing:(is_missing ellipsis)
+        left_p
+        fields
+        right_p;
     ]
   | ShapeExpression x ->
     let (shape_kw, left_p, fields, right_p) = get_shape_expression_children x in

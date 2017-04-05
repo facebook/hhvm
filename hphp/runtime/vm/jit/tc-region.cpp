@@ -315,11 +315,6 @@ void publishOptFunctionInternal(FuncMetaInfo info,
                                 size_t* failedBytes = nullptr) {
   auto const func = info.func;
 
-  if (!checkTCLimits()) {
-    if (failedBytes) *failedBytes += infoSize(info);
-    return;
-  }
-
   for (auto const rec : info.prologues) {
     emitFuncPrologueOptInternal(rec);
   }
@@ -524,13 +519,21 @@ void publishSortedOptFunctions(std::vector<FuncMetaInfo> infos) {
   auto metaLock = lockMetadata();
 
   size_t failedBytes = 0;
+  bool hasSpace = checkTCLimits();
   ProfData::Session pds;
 
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) {
       continue;
     }
+
+    if (!hasSpace) {
+      failedBytes += infoSize(finfo);
+      continue;
+    }
+
     publishOptFunctionInternal(std::move(finfo), &failedBytes);
+    hasSpace = checkTCLimits();
   }
 
   if (failedBytes) {

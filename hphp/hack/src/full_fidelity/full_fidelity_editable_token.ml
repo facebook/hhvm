@@ -22,7 +22,8 @@ type t = {
   kind: TokenKind.t;
   text: string;
   leading: EditableTrivia.t list;
-  trailing: EditableTrivia.t list
+  trailing: EditableTrivia.t list;
+  line: int;
 }
 
 let make kind text leading trailing =

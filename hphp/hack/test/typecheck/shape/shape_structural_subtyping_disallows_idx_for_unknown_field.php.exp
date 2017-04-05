@@ -1,4 +1,0 @@
-File "shape_structural_subtyping_disallows_idx_for_unknown_field.php", line 6, characters 23-25:
-Invalid argument (Typing[4140])
-File "shape_structural_subtyping_disallows_idx_for_unknown_field.php", line 5, characters 14-35:
-The field 'b' is missing

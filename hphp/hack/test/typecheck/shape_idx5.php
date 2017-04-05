@@ -1,6 +1,9 @@
 <?hh // strict
 
-type s = shape('x' => int);
+type s = shape(
+  'x' => int,
+  ...
+);
 
 /**
  * Field not listed in declared shape - error to access it

@@ -223,8 +223,9 @@ let handle_request conn id protocol = function
     let r = rpc conn (Rpc.IDE_HIGHLIGHT_REFS (filename, line, column)) in
     print_response id protocol (Highlight_references_response r)
   | Format args ->
-    begin match rpc conn (Rpc.IDE_FORMAT args) with
-      | Result.Ok r -> print_response id protocol (Format_response r)
+    begin match rpc conn (Rpc.IDE_FORMAT (ServerFormatTypes.Range args)) with
+      | Result.Ok r -> print_response id protocol
+                         (Format_response r.ServerFormatTypes.new_text)
       | Result.Error e -> handle_error id protocol (Server_error e)
     end
   | Coverage_levels filename ->

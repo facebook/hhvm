@@ -385,29 +385,44 @@ let do_type_coverage (conn: conn option) (params: Type_coverage.params)
   }
 
 
+let do_formatting_common
+  (conn: conn option)
+  (args: ServerFormatTypes.ide_action)
+  : Text_edit.t list =
+  let open ServerFormatTypes in
+  let command = ServerCommandTypes.IDE_FORMAT args in
+  let response: ServerFormatTypes.ide_result = rpc conn command in
+  match response with
+  | Result.Error message ->
+      raise (Error.Internal_error message)
+  | Result.Ok r ->
+      let range = ide_range_to_lsp r.range in
+      let new_text = r.new_text in
+      [{Text_edit.range; new_text;}]
+
+
 let do_document_range_formatting
   (conn: conn option)
   (params: Document_range_formatting.params)
   : Document_range_formatting.result =
   let open Document_range_formatting in
   let open Text_document_identifier in
-
-  let args = { Ide_api_types.
+  let action = ServerFormatTypes.Range { Ide_api_types.
     range_filename = params.text_document.uri;
     file_range = lsp_range_to_ide params.range;
-  } in
-  let command = ServerCommandTypes.IDE_FORMAT args in
-  let response: ServerFormatTypes.ide_result = rpc conn command in
-  match response with
-    | Result.Error message -> raise (Error.Internal_error message)
-    | Result.Ok new_text -> [{Text_edit.range = params.range; new_text}]
+  }
+  in
+  do_formatting_common conn action
 
 
 let do_document_formatting
-  (_conn: conn option)
-  (_params: Document_formatting.params)
+  (conn: conn option)
+  (params: Document_formatting.params)
   : Document_formatting.result =
-  raise (Error.Method_not_found "textDocument/documentFormatting")
+  let open Document_formatting in
+  let open Text_document_identifier in
+  let action = ServerFormatTypes.Document params.text_document.uri in
+  do_formatting_common conn action
 
 
 let do_initialize (params: Initialize.params)
@@ -440,7 +455,7 @@ let do_initialize (params: Initialize.params)
         workspace_symbol_provider = true;
         code_action_provider = false;
         code_lens_provider = None;
-        document_formatting_provider = false;
+        document_formatting_provider = true;
         document_range_formatting_provider = true;
         document_on_type_formatting_provider = None;
         rename_provider = false;

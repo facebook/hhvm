@@ -12,5 +12,15 @@
 type action = string * int * int (* file contents, offset start, offset end *)
 type result = (Ide_message.format_response, string) Result.t
 
-type ide_action = Ide_api_types.file_range
-type ide_result = (Ide_message.format_response, string) Result.t
+
+type ide_action =
+  | Document of string  (* filename *)
+  | Range of Ide_api_types.file_range
+  | Position of Ide_api_types.file_position
+
+type ide_response = {
+  new_text: Ide_message.format_response;
+  range: Ide_api_types.range; (* what range was actually replaced? *)
+}
+
+type ide_result = (ide_response, string) Result.t

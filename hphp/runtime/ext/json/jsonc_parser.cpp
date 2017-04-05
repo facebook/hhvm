@@ -177,7 +177,7 @@ Variant json_object_to_variant(json_object *new_obj, const bool assoc,
         if (!(i64==INT64_MAX || i64==INT64_MIN)) {
           return Variant(i64);
         }
-        FOLLY_FALLTRHOUGH
+        FOLLY_FALLTHROUGH
 
     case json_type_double:
         return Variant(json_object_get_double(new_obj));

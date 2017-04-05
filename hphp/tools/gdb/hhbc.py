@@ -38,6 +38,14 @@ def vec_imm_types():
     return [V('HPHP::' + t) for t in ['BLA', 'ILA', 'VSA', 'SLA']]
 
 @memoized
+def cell_loc_mcodes():
+    return [V('HPHP::' + t) for t in ['MEC', 'MPC', 'MEL', 'MPL']]
+
+@memoized
+def str_imm_mcodes():
+    return [V('HPHP::' + t) for t in ['MET', 'MPT', 'MQT']]
+
+@memoized
 def vec_elm_sizes():
     return [T(t).sizeof for t in [
         'uint8_t',
@@ -88,12 +96,42 @@ class HHBC(object):
         return [raw_val.cast(T('HPHP::Op')), 2 if raw_val >= 0xff else 1]
 
     @staticmethod
+    def decode_iva(pc):
+        """Decode the IVA immediate at `pc', returning a dict with 'value' and
+        'size' keys."""
+
+        info = {}
+
+        small = pc.cast(T('unsigned char').pointer()).dereference()
+
+        if small & 0x80:
+            large = pc.cast(T('uint32_t').pointer()).dereference()
+            info['value'] = ((large & 0xffffff00) >> 1) | (large & 0x7f);
+            info['size'] = 4
+        else:
+            info['value'] = small
+            info['size'] = 1
+
+        return info
+
+    @staticmethod
     def op_name(op):
         """Return the name of HPHP::Op `op'."""
 
         table_name = 'HPHP::opcodeToName(HPHP::Op)::namesArr'
         table_type = T('char').pointer().pointer()
         return op_table(table_name).cast(table_type)[as_idx(op)]
+
+    @staticmethod
+    def try_lookup_litstr(imm):
+        """Return the literal string corresponding to the litstr ID `imm'.  If
+        we can't resolve it, just return `imm'."""
+
+        if unit.curunit is None:
+            return imm
+
+        litstr = lookup_litstr(imm, unit.curunit)
+        return string_data_val(rawptr(litstr))
 
     ##
     # Opcode immediate info.
@@ -128,15 +166,7 @@ class HHBC(object):
         info = {}
 
         if immtype in iva_imm_types():
-            imm = ptr.cast(T('unsigned char').pointer()).dereference()
-
-            if imm & 0x80:
-                raw = ptr.cast(T('uint32_t').pointer()).dereference()
-                info['value'] = ((raw & 0xffffff00) >> 1) | (raw & 0x7f);
-                info['size'] = 4
-            else:
-                info['value'] = imm
-                info['size'] = 1
+            info = HHBC.decode_iva(ptr)
 
         elif immtype in vec_imm_types():
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
@@ -145,6 +175,43 @@ class HHBC(object):
 
             info['size'] = T('int32_t').sizeof + elm_size * num_elms
             info['value'] = '<vector>'
+
+        elif immtype == V('HPHP::KA'):
+            ptr = ptr.cast(T('unsigned char').pointer())
+
+            mcode = ptr.dereference().cast(T('HPHP::MemberCode'))
+            ptr += 1
+
+            imm_info = {}
+
+            if mcode in cell_loc_mcodes():
+                imm_info = HHBC.decode_iva(ptr)
+                imm_info['kind'] = 'iva'
+
+            elif mcode == V('HPHP::MEI'):
+                t = T('int64_t')
+                imm_info['size'] = t.sizeof
+                imm_info['kind'] = 'int64'
+                imm_info['value'] = ptr.cast(t.pointer()).dereference()
+
+            elif mcode in str_imm_mcodes():
+                t = T('HPHP::Id')
+                imm_info['size'] = t.sizeof
+                imm_info['kind'] = 'litstr'
+                raw = ptr.cast(t.pointer()).dereference()
+                imm_info['value'] = HHBC.try_lookup_litstr(raw)
+
+            elif mcode == V('HPHP::MW'):
+                imm_info['size'] = 0
+                imm_info['kind'] = 'iva'
+                imm_info['value'] = 0
+
+            info['size'] = 1 + imm_info['size']
+            info['value'] = '%s:%s=%s' % (
+                str(mcode)[len('HPHP::'):],
+                imm_info['kind'],
+                str(imm_info['value'])
+            )
 
         elif immtype == V('HPHP::RATA'):
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
@@ -197,9 +264,8 @@ class HHBC(object):
                 info['value'] = au['u_' + str(immtype)[6:]]
 
                 # Try to print out literal strings.
-                if immtype == V('HPHP::SA') and unit.curunit is not None:
-                    litstr = lookup_litstr(info['value'], unit.curunit)
-                    info['value'] = string_data_val(rawptr(litstr))
+                if immtype == V('HPHP::SA'):
+                    info['value'] = HHBC.try_lookup_litstr(info['value'])
             else:
                 info['size'] = 0
                 info['value'] = None

@@ -24,7 +24,6 @@ quick/SPropW.php
 quick/SetM.php
 quick/SetOp.php
 quick/SetOpProp.php
-quick/Unset.php
 quick/UnsetM.php
 quick/UnsetProp.php
 quick/Xhp.php
@@ -110,7 +109,6 @@ quick/cgetm_ne.php
 quick/chdir_posix.php
 quick/class_abstract_final1.php
 quick/class_abstract_final2.php
-quick/class_abstract_final3.php
 quick/class_abstract_final4.php
 quick/class_abstract_final5.php
 quick/class_class_constant.php
@@ -283,7 +281,6 @@ quick/generator_cond_func.php
 quick/generator_method.php
 quick/generator_varargs.php
 quick/generator_vars.php
-quick/get_called_class.php
 quick/get_class.php
 quick/get_class_constants.php
 quick/get_class_methods2.php
@@ -315,13 +312,9 @@ quick/hh_functions.php
 quick/hh_functions2.php
 quick/hh_functions3.php
 quick/hh_numbers.php
-quick/hh_softtype1.php
-quick/hh_softtype2.php
 quick/hh_softtype3.php
-quick/hh_softtype4.php
 quick/hh_type_args2.php
 quick/hh_type_args3.php
-quick/hh_type_var.php
 quick/hh_typehint3.php
 quick/hhir_cgetm_exceptions.php
 quick/hhir_eq_stack.php
@@ -337,7 +330,6 @@ quick/hopt-cjump.php
 quick/hopt-eq.php
 quick/hopt-exit-ref1.php
 quick/hopt-exitslow.php
-quick/hopt-isset.php
 quick/hopt-mul-simp.php
 quick/hopt-mul1.php
 quick/hopt-mul2.php
@@ -388,8 +380,7 @@ quick/include2.php
 quick/include3.php
 quick/init-basic.php
 quick/instanceofInterface.php
-quick/intercept.php
-quick/intercept2.php
+quick/intercept3.php
 quick/interface-bad-methodbody.php
 quick/interface10.php
 quick/interface11.php
@@ -442,7 +433,6 @@ quick/magic-get-set.php
 quick/many-clsrefs.php
 quick/map_toarray_warn.php
 quick/merge_globals.php
-quick/method-non-object2.php
 quick/method-undefined.php
 quick/method_param_promotion_error.php
 quick/methodcache_direct_magic.php
@@ -450,7 +440,6 @@ quick/methodcache_magic.php
 quick/methodcache_static.php
 quick/mod.php
 quick/mod_min_negone.php
-quick/multidim_props.php
 quick/multiple_closures.php
 quick/negjump.php
 quick/nested__destruct.php

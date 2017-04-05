@@ -226,6 +226,7 @@ and hint_ =
   * Haccess ("Class", "TC1", ["TC2", "TC3"])
   *)
   | Haccess of id * id * id list
+  | Hsoft of hint
 
 and shape_info = {
   si_allows_unknown_fields : bool;

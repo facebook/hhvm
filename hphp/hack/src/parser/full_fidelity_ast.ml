@@ -450,7 +450,8 @@ let rec pHint : hint parser = fun node env ->
       )
     | NullableTypeSpecifier { nullable_type; _ } ->
       Hoption (pHint nullable_type env)
-    | SoftTypeSpecifier { soft_type; _ } -> pHint_ soft_type env
+    | SoftTypeSpecifier { soft_type; _ } ->
+      Hsoft (pHint soft_type env)
     | ClosureTypeSpecifier { closure_parameter_types; closure_return_type; _ }
       -> Hfun
       ( couldMap ~f:pHint closure_parameter_types env

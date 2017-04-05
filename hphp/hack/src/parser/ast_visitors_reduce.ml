@@ -331,6 +331,7 @@ class virtual ['self] reduce =
       let r1 = self#on_id env c1 in
       let r2 = self#on_list self#on_id env c2 in
       self#add (self#add r0 r1) r2
+    method on_Hsoft = self#on_hint
     method on_hint_ env = function
       | Hoption c0 -> self#on_Hoption env c0
       | Hfun (c0, c1, c2) -> self#on_Hfun env c0 c1 c2
@@ -338,6 +339,7 @@ class virtual ['self] reduce =
       | Happly (c0, c1) -> self#on_Happly env c0 c1
       | Hshape c0 -> self#on_Hshape env c0
       | Haccess (c0, c1, c2) -> self#on_Haccess env c0 c1 c2
+      | Hsoft c0 -> self#on_Hsoft env c0
     method on_SFlit = self#on_pstring
     method on_SFclass_const env c0 c1 =
       let r0 = self#on_id env c0 in

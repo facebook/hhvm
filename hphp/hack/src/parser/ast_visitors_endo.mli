@@ -328,6 +328,10 @@ class virtual ['b] endo :
                     Ast_visitors_ancestors.hint_ ->
                     Ast_visitors_ancestors.hint list ->
                     Ast_visitors_ancestors.hint_;
+        on_Hsoft : 'c ->
+                     Ast_visitors_ancestors.hint_ ->
+                     Ast_visitors_ancestors.hint ->
+                     Ast_visitors_ancestors.hint_;
         on_Id : 'c ->
                 Ast_visitors_ancestors.expr_ ->
                 Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_;
@@ -1089,6 +1093,10 @@ class virtual ['b] endo :
       'c ->
       Ast_visitors_ancestors.hint_ ->
       Ast_visitors_ancestors.hint list -> Ast_visitors_ancestors.hint_
+    method on_Hsoft :
+      'c ->
+      Ast_visitors_ancestors.hint_ ->
+      Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Id :
       'c ->
       Ast_visitors_ancestors.expr_ ->

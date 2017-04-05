@@ -33,8 +33,17 @@ module LValOp = struct
   | Unset
 end
 
-let self_name = ref (None : string option)
-let set_self n = self_name := n
+(* Context for a complete method body. It would be more elegant to pass this
+ * around in an environment parameter *)
+let class_name = ref (None : string option)
+let method_name = ref (None : string option)
+let method_has_this = ref false
+let set_class_name n = class_name := n
+let get_class_name () = !class_name
+let set_method_name n = method_name := n
+let get_method_name () = !method_name
+let set_method_has_this b = method_has_this := b
+let get_method_has_this () = !method_has_this
 
 let compiler_options = ref Hhbc_options.default
 let set_compiler_options o = compiler_options := o
@@ -155,6 +164,9 @@ let is_special_function e =
     when x = "isset" || x = "empty" || x = "tuple" -> true
   | _ -> false
 
+let is_local_this id =
+  id = SN.SpecialIdents.this && get_method_has_this ()
+
 let extract_shape_field_name_pstring = function
   | A.SFlit p
   | A.SFclass_const (_, p) ->  p
@@ -172,14 +184,15 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
       instr_to_add
     ]
 
-and from_local x =
-  if x = SN.SpecialIdents.this then instr_this
+and emit_local x =
+  if x = SN.SpecialIdents.this && get_method_has_this ()
+  then instr (IMisc (BareThis Notice))
   else instr_cgetl (Local.Named x)
 
 and emit_two_exprs e1 e2 =
   (* Special case to make use of CGetL2 *)
   match e1 with
-  | (_, A.Lvar (_, local)) ->
+  | (_, A.Lvar (_, local)) when not (is_local_this local) ->
     gather [
       from_expr e2;
       instr_cgetl2 (Local.Named local);
@@ -192,7 +205,7 @@ and emit_two_exprs e1 e2 =
 
 and emit_is_null e =
   match e with
-  | (_, A.Lvar (_, id)) ->
+  | (_, A.Lvar (_, id)) when not (is_local_this id) ->
     instr_istypel (Local.Named id) OpNull
   | _ ->
     gather [
@@ -316,7 +329,7 @@ and emit_conditional_expression etest etrue efalse =
 
 and emit_aget class_expr =
   match class_expr with
-  | _, A.Lvar (_, id) ->
+  | _, A.Lvar (_, id) when not (is_local_this id) ->
     instr (IGet (ClsRefGetL (Local.Named id, 0)))
 
   | _ ->
@@ -393,7 +406,7 @@ and emit_class_id cid =
   then instr (IMisc (LateBoundCls 0))
   else
   if cid = SN.Classes.cSelf
-  then match !self_name with
+  then match get_class_name () with
   | None -> instr (IMisc Self)
   | Some cid -> emit_known_class_id cid
   else emit_known_class_id cid
@@ -418,7 +431,7 @@ and emit_class_const cid id =
     ]
   else if cid = SN.Classes.cSelf
   then
-    match !self_name with
+    match get_class_name () with
     | None ->
       instrs [
         IMisc Self;
@@ -489,6 +502,19 @@ and emit_id (p, s) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
+  | "__CLASS__" ->
+    instr_string (
+      match get_class_name () with None -> "" | Some s -> Utils.strip_ns s
+    )
+  | "__METHOD__" ->
+    instr_string (
+      (match get_class_name () with
+      | None -> ""
+      | Some s -> Utils.strip_ns s ^ "::") ^
+      (match get_method_name () with
+      | None -> ""
+      | Some s -> Utils.strip_ns s)
+    )
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in
@@ -550,6 +576,12 @@ and emit_call_isset_expr (_, expr_ as expr) =
     emit_array_get None QueryOp.Isset base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Isset expr prop nullflavor
+  | A.Lvar(_, id) when is_local_this id ->
+    gather [
+      instr (IMisc (BareThis NoNotice));
+      instr_istypec OpNull;
+      instr_not
+    ]
   | A.Lvar(_, id) ->
     instr (IIsset (IssetL (Local.Named id)))
   | _ ->
@@ -570,7 +602,7 @@ and emit_call_empty_expr (_, expr_ as expr) =
     emit_array_get None QueryOp.Empty base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Empty expr prop nullflavor
-  | A.Lvar(_, id) ->
+  | A.Lvar(_, id) when not (is_local_this id) ->
     instr (IIsset (EmptyL (Local.Named id)))
   | _ ->
     gather [
@@ -621,7 +653,7 @@ and from_expr expr =
   | A.Null -> instr_null
   | A.False -> instr_false
   | A.True -> instr_true
-  | A.Lvar (_, x) -> from_local x
+  | A.Lvar (_, x) -> emit_local x
   | A.Class_const ((_, cid), (_, id)) -> emit_class_const cid id
   | A.Unop (op, e) -> emit_unop op e
   | A.Binop (op, e1, e2) -> emit_binop op e1 e2
@@ -844,7 +876,7 @@ and emit_logical_or e1 e2 =
 
 and emit_quiet_expr (_, expr_ as expr) =
   match expr_ with
-  | A.Lvar (_, x) ->
+  | A.Lvar (_, x) when not (is_local_this x) ->
     instr_cgetquietl (Local.Named x)
   | _ ->
     from_expr expr
@@ -900,14 +932,16 @@ and emit_obj_get param_num_opt qop expr prop null_flavor =
 and emit_elem_instrs opt_elem_expr =
   match opt_elem_expr with
   (* These all have special inline versions of member keys *)
-  | Some (_, (A.Lvar _ | A.Int _ | A.String _)) -> empty, 0
+  | Some (_, (A.Int _ | A.String _)) -> empty, 0
+  | Some (_, (A.Lvar (_, id))) when not (is_local_this id) -> empty, 0
   | Some expr -> from_expr expr, 1
   | None -> empty, 0
 
 and emit_prop_instrs (_, expr_ as expr) =
   match expr_ with
   (* These all have special inline versions of member keys *)
-  | A.Lvar _ | A.Id _ -> empty, 0
+  | A.Lvar (_, id) when not (is_local_this id) -> empty, 0
+  | A.Id _ -> empty, 0
   | _ -> from_expr expr, 1
 
 (* Get the member key for an array element expression: the `elem` in
@@ -917,7 +951,8 @@ and emit_prop_instrs (_, expr_ as expr) =
 and get_elem_member_key stack_index opt_expr =
   match opt_expr with
   (* Special case for local *)
-  | Some (_, A.Lvar (_, x)) -> MemberKey.EL (Local.Named x)
+  | Some (_, A.Lvar (_, x)) when not (is_local_this x) ->
+    MemberKey.EL (Local.Named x)
   (* Special case for literal integer *)
   | Some (_, A.Int (_, str)) -> MemberKey.EI (Int64.of_string str)
   (* Special case for literal string *)
@@ -936,7 +971,8 @@ and get_prop_member_key null_flavor stack_index prop_expr =
     | Ast.OG_nullthrows -> MemberKey.PT str
     | Ast.OG_nullsafe -> MemberKey.QT str
     end
-  | (_, A.Lvar (_, x)) -> MemberKey.PL (Local.Named x)
+  | (_, A.Lvar (_, x)) when not (is_local_this x) ->
+    MemberKey.PL (Local.Named x)
   (* General case *)
   | _ -> MemberKey.PC stack_index
 
@@ -1074,7 +1110,7 @@ and instr_fpassr i = instr (ICall (FPassR i))
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
-  | A.Lvar (_, x) -> instr_fpassl i (Local.Named x)
+  | A.Lvar (_, x) when not (is_local_this x) -> instr_fpassl i (Local.Named x)
 
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
@@ -1118,12 +1154,26 @@ and emit_args_and_call args uargs =
     else instr (ICall (FCallUnpack nargs))
   ]
 
+(* Expression that appears in an object context, such as expr->meth(...) *)
+and emit_object_expr (_, expr_ as expr) =
+  match expr_ with
+  | A.Lvar(_, x) when is_local_this x ->
+    instr_this
+  | _ -> from_expr expr
+
 and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
-      from_expr obj;
+      emit_object_expr obj;
       instr (ICall (FPushObjMethodD (nargs, id, null_flavor)));
+    ]
+
+  | A.Obj_get(obj, method_expr, null_flavor) ->
+    gather [
+      emit_object_expr obj;
+      from_expr method_expr;
+      instr (ICall (FPushObjMethod (nargs, null_flavor)));
     ]
 
   | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cSelf ->
@@ -1265,7 +1315,7 @@ and emit_call (_, expr_ as expr) args uargs =
 
   | A.Id (_, id) ->
     begin match args, istype_op id with
-    | [(_, A.Lvar (_, arg_id))], Some i ->
+    | [(_, A.Lvar (_, arg_id))], Some i when not (is_local_this arg_id) ->
       instr (IIsset (IsTypeL (Local.Named arg_id, i))),
       Flavor.Cell
     | [arg_expr], Some i ->
@@ -1396,7 +1446,7 @@ and emit_lval_op op expr1 opt_expr2 =
 
 and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
   match expr_ with
-  | A.Lvar (_, id) ->
+  | A.Lvar (_, id) when not (is_local_this id) ->
     gather [
       rhs_instrs;
       emit_final_local_op op (Local.Named id)
@@ -1494,7 +1544,7 @@ and from_exprs exprs =
 and stash_in_local ?(leave_on_stack=false) e f =
   let break_label = Label.next_regular () in
   match e with
-  | (_, A.Lvar (_, id)) ->
+  | (_, A.Lvar (_, id)) when not (is_local_this id) ->
     gather [
       f (Local.Named id) break_label;
       instr_label break_label;

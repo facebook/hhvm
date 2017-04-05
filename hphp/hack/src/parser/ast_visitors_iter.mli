@@ -137,6 +137,7 @@ class virtual ['b] iter :
         on_Hoption : 'c -> Ast_visitors_ancestors.hint -> unit;
         on_Hshape : 'c -> Ast_visitors_ancestors.shape_info -> unit;
         on_Htuple : 'c -> Ast_visitors_ancestors.hint list -> unit;
+        on_Hsoft : 'c -> Ast_visitors_ancestors.hint -> unit;
         on_Id : 'c -> Ast_visitors_ancestors.id -> unit;
         on_Id_type_arguments : 'c ->
                                Ast_visitors_ancestors.id ->

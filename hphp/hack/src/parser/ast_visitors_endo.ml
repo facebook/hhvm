@@ -574,8 +574,11 @@ class virtual ['self] endo =
       if c0 == r0 && c1 == r1 && c2 == r2
       then this
       else Haccess (r0, r1, r2)
+    method on_Hsoft env this c0 =
+      let r0 = self#on_hint env c0 in
+      if c0 == r0 then this else Hsoft r0
     method on_hint_ env this =
-      match this with
+    match this with
       | Hoption c0 -> self#on_Hoption env this c0
       | Hfun (c0, c1, c2) -> self#on_Hfun env this c0 c1 c2
       | Htuple c0 -> self#on_Htuple env this c0
@@ -583,6 +586,7 @@ class virtual ['self] endo =
       | Hshape c0 -> self#on_Hshape env this c0
       | Haccess (c0, c1, c2) as this ->
           self#on_Haccess env this c0 c1 c2
+      | Hsoft c0 -> self#on_Hsoft env this c0
     method on_SFlit env this c0 =
       let r0 = self#on_pstring env c0 in
       if c0 == r0 then this else SFlit r0

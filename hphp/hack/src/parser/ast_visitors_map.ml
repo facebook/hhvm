@@ -426,6 +426,8 @@ class virtual ['self] map =
       let r1 = self#on_id env c1 in
       let r2 = self#on_list self#on_id env c2 in
       Haccess (r0, r1, r2)
+    method on_Hsoft env c0 =
+      let r0 = self#on_hint env c0 in Hsoft r0
     method on_hint_ env this =
       match this with
       | Hoption c0 -> self#on_Hoption env c0
@@ -434,6 +436,7 @@ class virtual ['self] map =
       | Happly (c0, c1) -> self#on_Happly env c0 c1
       | Hshape c0 -> self#on_Hshape env c0
       | Haccess (c0, c1, c2) -> self#on_Haccess env c0 c1 c2
+      | Hsoft c0 -> self#on_Hsoft env c0
     method on_SFlit env c0 =
       let r0 = self#on_pstring env c0 in SFlit r0
     method on_SFclass_const env c0 c1 =

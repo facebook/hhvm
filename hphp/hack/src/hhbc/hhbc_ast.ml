@@ -327,7 +327,7 @@ type instruct_call =
   | FPushFunc of num_params
   | FPushFuncD of num_params * Litstr.id
   | FPushFuncU of num_params * Litstr.id * Litstr.id
-  | FPushObjMethod of num_params
+  | FPushObjMethod of num_params * Ast.og_null_flavor
   | FPushObjMethodD of num_params * Litstr.id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id
   | FPushClsMethodF of num_params * classref_id
@@ -485,7 +485,7 @@ type instruct_include_eval_define =
 
 type bare_this_op =
   | Notice
-  | NeverNull
+  | NoNotice
 
 type class_kind =
   | KClass

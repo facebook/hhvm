@@ -1089,7 +1089,7 @@ and hint env =
   | Tat ->
       let start = Pos.make env.file env.lb in
       let h = hint env in
-      Pos.btw start (fst h), snd h
+      Pos.btw start (fst h), Hsoft h
   | _ ->
       error_expect env "type";
       let pos = Pos.make env.file env.lb in

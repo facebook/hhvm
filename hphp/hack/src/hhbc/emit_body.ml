@@ -36,12 +36,15 @@ let verify_returns body =
     | _ -> [ i ] in
   InstrSeq.flat_map body ~f:rewriter
 
-let from_ast ~self tparams params ret body default_instrs =
+let from_ast ~class_name ~method_name ~has_this
+  tparams params ret body default_instrs =
   let tparams = tparams_to_strings tparams in
   Label.reset_label ();
   Local.reset_local ();
   Iterator.reset_iterator ();
-  Emit_expression.set_self self;
+  Emit_expression.set_class_name class_name;
+  Emit_expression.set_method_name method_name;
+  Emit_expression.set_method_has_this has_this;
   let params = Emit_param.from_asts tparams params in
   let return_type_info =
     match ret with

@@ -221,8 +221,11 @@ class virtual ['c] map :
         on_Htuple : 'd ->
                     Ast_visitors_ancestors.hint list ->
                     Ast_visitors_ancestors.hint_;
+        on_Hsoft : 'd ->
+                     Ast_visitors_ancestors.hint ->
+                     Ast_visitors_ancestors.hint_;
         on_Id : 'd ->
-                Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_;
+                     Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_;
         on_Id_type_arguments : 'd ->
                                Ast_visitors_ancestors.id ->
                                Ast_visitors_ancestors.hint list ->
@@ -764,6 +767,8 @@ class virtual ['c] map :
       Ast_visitors_ancestors.shape_info -> Ast_visitors_ancestors.hint_
     method on_Htuple :
       'd -> Ast_visitors_ancestors.hint list -> Ast_visitors_ancestors.hint_
+    method on_Hsoft :
+      'd -> Ast_visitors_ancestors.hint -> Ast_visitors_ancestors.hint_
     method on_Id :
       'd -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.expr_
     method on_Id_type_arguments :

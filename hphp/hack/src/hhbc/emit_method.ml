@@ -14,7 +14,6 @@ open Hhbc_ast
 
 let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   fun ast_class ast_method ->
-  let method_name = Litstr.to_string @@ snd ast_method.Ast.m_name in
   let method_is_abstract =
     List.mem ast_method.Ast.m_kind Ast.Abstract ||
     ast_class.Ast.c_kind = Ast.Cinterface in
@@ -28,15 +27,16 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   let method_attributes =
     Emit_attribute.from_asts ast_method.Ast.m_user_attributes in
   let tparams = ast_class.Ast.c_tparams @ ast_method.Ast.m_tparams in
-  let (_,name) = ast_class.Ast.c_name in
+  let (_,class_name) = ast_class.Ast.c_name in
+  let (_,method_name) = ast_method.Ast.m_name in
   let ret =
     if method_name = Naming_special_names.Members.__construct
     then None else ast_method.Ast.m_ret in
   let default_instrs return_type =
       if List.mem ast_method.Ast.m_kind Ast.Abstract
       then gather [
-        instr_string ("Cannot call abstract method " ^ Utils.strip_ns name
-          ^ "::" ^ snd (ast_method.Ast.m_name) ^ "()");
+        instr_string ("Cannot call abstract method " ^ Utils.strip_ns class_name
+          ^ "::" ^ method_name ^ "()");
         instr (IOp (Fatal FatalOp.RuntimeOmitFrame))
       ]
       else let default_seq =
@@ -63,7 +63,9 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       method_is_generator,
       method_is_pair_generator =
     Emit_body.from_ast
-      ~self:(Some name)
+      ~class_name:(Some class_name)
+      ~method_name:(Some method_name)
+      ~has_this:(not method_is_static)
       tparams
       ast_method.Ast.m_params
       ret

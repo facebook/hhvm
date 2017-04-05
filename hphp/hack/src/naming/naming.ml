@@ -719,6 +719,9 @@ module Make (GetLocals : GetLocals) = struct
     | Hoption h ->
       (* void/noreturn are permitted for Typing.option_return_only_typehint *)
       N.Hoption (hint ~allow_retonly env h)
+    | Hsoft h ->
+      let h = hint ~allow_retonly env h
+      in snd h
     | Hfun (hl, opt, h) ->
       N.Hfun (List.map hl (hint env), opt,
               hint ~allow_retonly:true env h)

@@ -393,8 +393,8 @@ let string_of_call instruction =
     sep ["FPushFuncD"; string_of_int n; quote_str id]
   | FPushFuncU (n, id1, id2) ->
     sep ["FPushFuncU"; string_of_int n; quote_str id1; quote_str id2]
-  | FPushObjMethod n ->
-    sep ["FPushObjMethod"; string_of_int n]
+  | FPushObjMethod (n, nf) ->
+    sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf]
   | FPushObjMethodD (n, id, nf) ->
     sep ["FPushObjMethodD";
       string_of_int n; quote_str id; string_of_null_flavor nf]
@@ -457,9 +457,15 @@ let string_of_call instruction =
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; quote_str id]
 
+let string_of_barethis_op i =
+  match i with
+  | Notice -> "Notice"
+  | NoNotice -> "NoNotice"
+
 let string_of_misc instruction =
   match instruction with
     | This -> "This"
+    | BareThis op -> sep ["BareThis"; string_of_barethis_op op]
     | Self -> "Self"
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]

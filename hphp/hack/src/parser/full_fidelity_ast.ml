@@ -1675,13 +1675,17 @@ let from_text
     let open Full_fidelity_syntax_tree in
     let tree   = make source_text in
     let script = Full_fidelity_positioned_syntax.from_tree tree in
-    let fi_mode =
-      (match mode tree with
-      | _ when is_php tree -> FileInfo.Mphp
-      | "decl"             -> FileInfo.Mdecl
-      | "strict"           -> FileInfo.Mstrict
-      | "partial" | ""     -> FileInfo.Mpartial
-      | s                  -> unknown_hh_mode s
+    let fi_mode = if is_php tree then FileInfo.Mphp else
+      let mode_string = String.trim (mode tree) in
+      let mode_word =
+        try Some (List.hd (Str.split (Str.regexp " +") mode_string)) with
+        | _ -> None
+      in
+      Option.value_map mode_word ~default:FileInfo.Mpartial ~f:(function
+        | "decl"           -> FileInfo.Mdecl
+        | "strict"         -> FileInfo.Mstrict
+        | ("partial" | "") -> FileInfo.Mpartial
+        | s                -> unknown_hh_mode s
       )
     in
     lowerer_state.language  := language tree;

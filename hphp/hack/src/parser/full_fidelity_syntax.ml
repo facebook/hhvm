@@ -836,6 +836,7 @@ module WithToken(Token: TokenType) = struct
       shape_type_keyword: t;
       shape_type_left_paren: t;
       shape_type_fields: t;
+      shape_type_ellipsis: t;
       shape_type_right_paren: t;
     }
     and shape_expression = {
@@ -3135,11 +3136,13 @@ module WithToken(Token: TokenType) = struct
       shape_type_keyword;
       shape_type_left_paren;
       shape_type_fields;
+      shape_type_ellipsis;
       shape_type_right_paren;
     } = (
       shape_type_keyword,
       shape_type_left_paren,
       shape_type_fields,
+      shape_type_ellipsis,
       shape_type_right_paren
     )
 
@@ -4594,11 +4597,13 @@ module WithToken(Token: TokenType) = struct
         shape_type_keyword;
         shape_type_left_paren;
         shape_type_fields;
+        shape_type_ellipsis;
         shape_type_right_paren;
       } -> [
         shape_type_keyword;
         shape_type_left_paren;
         shape_type_fields;
+        shape_type_ellipsis;
         shape_type_right_paren;
       ]
       | ShapeExpression {
@@ -6042,11 +6047,13 @@ module WithToken(Token: TokenType) = struct
         shape_type_keyword;
         shape_type_left_paren;
         shape_type_fields;
+        shape_type_ellipsis;
         shape_type_right_paren;
       } -> [
         "shape_type_keyword";
         "shape_type_left_paren";
         "shape_type_fields";
+        "shape_type_ellipsis";
         "shape_type_right_paren";
       ]
       | ShapeExpression {
@@ -7672,12 +7679,14 @@ module WithToken(Token: TokenType) = struct
           shape_type_keyword;
           shape_type_left_paren;
           shape_type_fields;
+          shape_type_ellipsis;
           shape_type_right_paren;
         ]) ->
         ShapeTypeSpecifier {
           shape_type_keyword;
           shape_type_left_paren;
           shape_type_fields;
+          shape_type_ellipsis;
           shape_type_right_paren;
         }
       | (SyntaxKind.ShapeExpression, [
@@ -9424,12 +9433,14 @@ module WithToken(Token: TokenType) = struct
       shape_type_keyword
       shape_type_left_paren
       shape_type_fields
+      shape_type_ellipsis
       shape_type_right_paren
     =
       from_children SyntaxKind.ShapeTypeSpecifier [
         shape_type_keyword;
         shape_type_left_paren;
         shape_type_fields;
+        shape_type_ellipsis;
         shape_type_right_paren;
       ]
 

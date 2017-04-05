@@ -18028,16 +18028,19 @@ final class ShapeTypeSpecifier extends EditableSyntax {
   private EditableSyntax $_keyword;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_fields;
+  private EditableSyntax $_ellipsis;
   private EditableSyntax $_right_paren;
   public function __construct(
     EditableSyntax $keyword,
     EditableSyntax $left_paren,
     EditableSyntax $fields,
+    EditableSyntax $ellipsis,
     EditableSyntax $right_paren) {
     parent::__construct('shape_type_specifier');
     $this->_keyword = $keyword;
     $this->_left_paren = $left_paren;
     $this->_fields = $fields;
+    $this->_ellipsis = $ellipsis;
     $this->_right_paren = $right_paren;
   }
   public function keyword(): EditableSyntax {
@@ -18049,6 +18052,9 @@ final class ShapeTypeSpecifier extends EditableSyntax {
   public function fields(): EditableSyntax {
     return $this->_fields;
   }
+  public function ellipsis(): EditableSyntax {
+    return $this->_ellipsis;
+  }
   public function right_paren(): EditableSyntax {
     return $this->_right_paren;
   }
@@ -18057,6 +18063,7 @@ final class ShapeTypeSpecifier extends EditableSyntax {
       $keyword,
       $this->_left_paren,
       $this->_fields,
+      $this->_ellipsis,
       $this->_right_paren);
   }
   public function with_left_paren(EditableSyntax $left_paren): ShapeTypeSpecifier {
@@ -18064,6 +18071,7 @@ final class ShapeTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $left_paren,
       $this->_fields,
+      $this->_ellipsis,
       $this->_right_paren);
   }
   public function with_fields(EditableSyntax $fields): ShapeTypeSpecifier {
@@ -18071,6 +18079,15 @@ final class ShapeTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_paren,
       $fields,
+      $this->_ellipsis,
+      $this->_right_paren);
+  }
+  public function with_ellipsis(EditableSyntax $ellipsis): ShapeTypeSpecifier {
+    return new ShapeTypeSpecifier(
+      $this->_keyword,
+      $this->_left_paren,
+      $this->_fields,
+      $ellipsis,
       $this->_right_paren);
   }
   public function with_right_paren(EditableSyntax $right_paren): ShapeTypeSpecifier {
@@ -18078,6 +18095,7 @@ final class ShapeTypeSpecifier extends EditableSyntax {
       $this->_keyword,
       $this->_left_paren,
       $this->_fields,
+      $this->_ellipsis,
       $right_paren);
   }
 
@@ -18090,11 +18108,13 @@ final class ShapeTypeSpecifier extends EditableSyntax {
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
     $fields = $this->fields()->rewrite($rewriter, $new_parents);
+    $ellipsis = $this->ellipsis()->rewrite($rewriter, $new_parents);
     $right_paren = $this->right_paren()->rewrite($rewriter, $new_parents);
     if (
       $keyword === $this->keyword() &&
       $left_paren === $this->left_paren() &&
       $fields === $this->fields() &&
+      $ellipsis === $this->ellipsis() &&
       $right_paren === $this->right_paren()) {
       return $rewriter($this, $parents ?? []);
     } else {
@@ -18102,6 +18122,7 @@ final class ShapeTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_paren,
         $fields,
+        $ellipsis,
         $right_paren), $parents ?? []);
     }
   }
@@ -18116,6 +18137,9 @@ final class ShapeTypeSpecifier extends EditableSyntax {
     $fields = EditableSyntax::from_json(
       $json->shape_type_fields, $position, $source);
     $position += $fields->width();
+    $ellipsis = EditableSyntax::from_json(
+      $json->shape_type_ellipsis, $position, $source);
+    $position += $ellipsis->width();
     $right_paren = EditableSyntax::from_json(
       $json->shape_type_right_paren, $position, $source);
     $position += $right_paren->width();
@@ -18123,12 +18147,14 @@ final class ShapeTypeSpecifier extends EditableSyntax {
         $keyword,
         $left_paren,
         $fields,
+        $ellipsis,
         $right_paren);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_keyword;
     yield $this->_left_paren;
     yield $this->_fields;
+    yield $this->_ellipsis;
     yield $this->_right_paren;
     yield break;
   }

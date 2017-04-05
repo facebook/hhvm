@@ -15844,23 +15844,27 @@ class ShapeTypeSpecifier extends EditableSyntax
     keyword,
     left_paren,
     fields,
+    ellipsis,
     right_paren)
   {
     super('shape_type_specifier', {
       keyword: keyword,
       left_paren: left_paren,
       fields: fields,
+      ellipsis: ellipsis,
       right_paren: right_paren });
   }
   get keyword() { return this.children.keyword; }
   get left_paren() { return this.children.left_paren; }
   get fields() { return this.children.fields; }
+  get ellipsis() { return this.children.ellipsis; }
   get right_paren() { return this.children.right_paren; }
   with_keyword(keyword){
     return new ShapeTypeSpecifier(
       keyword,
       this.left_paren,
       this.fields,
+      this.ellipsis,
       this.right_paren);
   }
   with_left_paren(left_paren){
@@ -15868,6 +15872,7 @@ class ShapeTypeSpecifier extends EditableSyntax
       this.keyword,
       left_paren,
       this.fields,
+      this.ellipsis,
       this.right_paren);
   }
   with_fields(fields){
@@ -15875,6 +15880,15 @@ class ShapeTypeSpecifier extends EditableSyntax
       this.keyword,
       this.left_paren,
       fields,
+      this.ellipsis,
+      this.right_paren);
+  }
+  with_ellipsis(ellipsis){
+    return new ShapeTypeSpecifier(
+      this.keyword,
+      this.left_paren,
+      this.fields,
+      ellipsis,
       this.right_paren);
   }
   with_right_paren(right_paren){
@@ -15882,6 +15896,7 @@ class ShapeTypeSpecifier extends EditableSyntax
       this.keyword,
       this.left_paren,
       this.fields,
+      this.ellipsis,
       right_paren);
   }
   rewrite(rewriter, parents)
@@ -15893,11 +15908,13 @@ class ShapeTypeSpecifier extends EditableSyntax
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var fields = this.fields.rewrite(rewriter, new_parents);
+    var ellipsis = this.ellipsis.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     if (
       keyword === this.keyword &&
       left_paren === this.left_paren &&
       fields === this.fields &&
+      ellipsis === this.ellipsis &&
       right_paren === this.right_paren)
     {
       return rewriter(this, parents);
@@ -15908,6 +15925,7 @@ class ShapeTypeSpecifier extends EditableSyntax
         keyword,
         left_paren,
         fields,
+        ellipsis,
         right_paren), parents);
     }
   }
@@ -15922,6 +15940,9 @@ class ShapeTypeSpecifier extends EditableSyntax
     let fields = EditableSyntax.from_json(
       json.shape_type_fields, position, source);
     position += fields.width;
+    let ellipsis = EditableSyntax.from_json(
+      json.shape_type_ellipsis, position, source);
+    position += ellipsis.width;
     let right_paren = EditableSyntax.from_json(
       json.shape_type_right_paren, position, source);
     position += right_paren.width;
@@ -15929,6 +15950,7 @@ class ShapeTypeSpecifier extends EditableSyntax
         keyword,
         left_paren,
         fields,
+        ellipsis,
         right_paren);
   }
   get children_keys()
@@ -15938,6 +15960,7 @@ class ShapeTypeSpecifier extends EditableSyntax
         'keyword',
         'left_paren',
         'fields',
+        'ellipsis',
         'right_paren'];
     return ShapeTypeSpecifier._children_keys;
   }

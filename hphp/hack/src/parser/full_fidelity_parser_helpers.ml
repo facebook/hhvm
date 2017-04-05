@@ -328,14 +328,14 @@ module WithParser(Parser : ParserType) = struct
     * Otherwise, a list of the form (item, separator) ... item is returned.
 *)
 
-  let parse_separated_list parser separator_kind list_kind
-      close_kind error parse_item =
+  let parse_separated_list_predicate parser separator_kind list_kind
+      close_predicate error parse_item =
     let rec aux parser acc =
       (* At this point we are expecting an item followed by a separator,
          a close, or, if trailing separators are allowed, both *)
       let (parser1, token) = next_token parser in
       let kind = Token.kind token in
-      if kind = close_kind || kind = TokenKind.EndOfFile then
+      if close_predicate kind || kind = TokenKind.EndOfFile then
         (* ERROR RECOVERY: We expected an item but we found a close or
            the end of the file. Make the item and separator both
            "missing" and give an error.
@@ -377,7 +377,7 @@ module WithParser(Parser : ParserType) = struct
         let (parser, item) = parse_item parser in
         let (parser1, token) = next_token parser in
         let kind = Token.kind token in
-        if kind = close_kind then
+        if close_predicate kind then
           let separator = make_missing() in
           let list_item = make_list_item item separator in
           (parser, (list_item :: acc))
@@ -388,7 +388,7 @@ module WithParser(Parser : ParserType) = struct
           let allow_trailing = list_kind <> NoTrailing in
           (* We got an item followed by a separator; what if the thing
              that comes next is a close? *)
-          if allow_trailing && (peek_token_kind parser1) = close_kind then
+          if allow_trailing && close_predicate (peek_token_kind parser1) then
             (parser1, acc)
           else
             aux parser1 acc
@@ -401,15 +401,35 @@ module WithParser(Parser : ParserType) = struct
     let (parser, items) = aux parser [] in
     (parser, make_list (List.rev items))
 
-  let parse_separated_list_opt
-      parser separator_kind allow_trailing close_kind error parse_item =
+  let parse_separated_list parser separator_kind list_kind
+      close_kind error parse_item =
+    parse_separated_list_predicate
+      parser
+      separator_kind
+      list_kind
+      ((=) close_kind)
+      error
+      parse_item
+
+  let parse_separated_list_opt_predicate
+      parser separator_kind allow_trailing close_predicate error parse_item =
     let token = peek_token parser in
     let kind = Token.kind token in
-    if kind = close_kind then
+    if close_predicate kind then
       (parser, make_missing())
     else
-      parse_separated_list
-        parser separator_kind allow_trailing close_kind error parse_item
+      parse_separated_list_predicate
+        parser separator_kind allow_trailing close_predicate error parse_item
+
+  let parse_separated_list_opt
+      parser separator_kind allow_trailing close_kind error parse_item =
+    parse_separated_list_opt_predicate
+      parser
+      separator_kind
+      allow_trailing
+      ((=) close_kind)
+      error
+      parse_item
 
   let parse_comma_list parser =
     parse_separated_list parser TokenKind.Comma NoTrailing
@@ -419,6 +439,9 @@ module WithParser(Parser : ParserType) = struct
 
   let parse_comma_list_opt parser =
     parse_separated_list_opt parser TokenKind.Comma NoTrailing
+
+  let parse_comma_list_opt_allow_trailing_predicate parser =
+    parse_separated_list_opt_predicate parser TokenKind.Comma TrailingAllowed
 
   let parse_comma_list_opt_allow_trailing parser =
     parse_separated_list_opt parser TokenKind.Comma TrailingAllowed

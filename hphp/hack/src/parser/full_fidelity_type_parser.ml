@@ -571,6 +571,7 @@ and parse_shape_specifier parser =
     shape-specifier:
       shape ( field-specifier-list-opt )
     field-specifier-list:
+      field-specifiers  ,  ...
       field-specifiers  ,-opt
     field-specifiers:
       field-specifier
@@ -580,10 +581,17 @@ and parse_shape_specifier parser =
   let (parser, shape) = next_token parser in
   let shape = make_token shape in
   let (parser, lparen) = expect_left_paren parser in
-  let (parser, fields) = parse_comma_list_opt_allow_trailing
-    parser RightParen SyntaxError.error1025 parse_field_specifier in
+  let is_closing_token = function
+    | RightParen | DotDotDot -> true
+    | _ -> false in
+  let (parser, fields) = parse_comma_list_opt_allow_trailing_predicate
+    parser is_closing_token SyntaxError.error1025 parse_field_specifier in
+  let (parser, ellipsis) =
+    if peek_token_kind parser = DotDotDot
+    then assert_token parser DotDotDot
+    else (parser, (make_missing())) in
   let (parser, rparen) = expect_right_paren parser in
-  let result = make_shape_type_specifier shape lparen fields rparen in
+  let result = make_shape_type_specifier shape lparen fields ellipsis rparen in
   (parser, result)
 
 and parse_type_constraint_opt parser =

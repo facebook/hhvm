@@ -1189,7 +1189,8 @@ let rec transform node =
     let (name, arrow_kw, value) = get_field_initializer_children x in
     transform_mapish_entry name arrow_kw value
   | ShapeTypeSpecifier x ->
-    let (shape_kw, left_p, type_fields, right_p) =
+    (* Consider '...' for a shape when formatting.  *)
+    let (shape_kw, left_p, type_fields, _, right_p) =
       get_shape_type_specifier_children x in
     Fmt [
       t shape_kw;

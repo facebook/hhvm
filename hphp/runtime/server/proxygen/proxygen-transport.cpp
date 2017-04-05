@@ -593,7 +593,7 @@ HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
                                             newPushOk && !m_egressError);
 }
 
-void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
+void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
   if (!m_clientTxn) {
     return;
   }

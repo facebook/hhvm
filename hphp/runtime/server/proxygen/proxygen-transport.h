@@ -278,7 +278,7 @@ struct ProxygenTransport final
 
   void onEgressResumed() noexcept override { }
 
-  void messageAvailable(ResponseMessage&& message);
+  void messageAvailable(ResponseMessage&& message) noexcept;
 
   void beginPartialPostEcho();
   /**

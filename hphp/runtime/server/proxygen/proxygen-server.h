@@ -122,7 +122,7 @@ struct ProxygenServer : Server,
     return m_eventBaseManager.getEventBase();
   }
 
-  void messageAvailable(ResponseMessage&& message) override {
+  void messageAvailable(ResponseMessage&& message) noexcept override {
     auto m_transport = message.m_transport;
     m_transport->messageAvailable(std::move(message));
   }

@@ -22,11 +22,12 @@ type t = {
   kind: TokenKind.t;
   width: int;
   leading: MinimalTrivia.t list;
-  trailing: MinimalTrivia.t list
+  trailing: MinimalTrivia.t list;
+  line: int
 }
 
-let make kind width leading trailing =
-  { kind; width; leading; trailing }
+let make kind width leading trailing line =
+  { kind; width; leading; trailing; line }
 
 let leading_width token =
   let folder sum t = sum + (MinimalTrivia.width t) in
@@ -54,10 +55,14 @@ let leading token =
 let trailing token =
   token.trailing
 
+let line token =
+	token.line
+
 let to_json token =
   let open Hh_json in
   JSON_Object [
     ("kind", JSON_String (TokenKind.to_string token.kind));
     ("width", int_ token.width);
     ("leading", JSON_Array (List.map MinimalTrivia.to_json token.leading));
-    ("trailing", JSON_Array (List.map MinimalTrivia.to_json token.trailing)) ]
+    ("trailing", JSON_Array (List.map MinimalTrivia.to_json token.trailing));
+    ("line", int_ token.line) ]

@@ -19,13 +19,14 @@ type t = {
   text : SourceText.t;
   start : int;  (* Both start and offset are absolute offsets in the text. *)
   offset : int;
-  errors : SyntaxError.t list
+  errors : SyntaxError.t list;
+  line : int;
 }
 
 let invalid = '\000'
 
 let make text =
-  { text; start = 0; offset = 0; errors = [] }
+  { text; start = 0; offset = 0; errors = []; line = 1 }
 
 let errors lexer =
   lexer.errors
@@ -52,6 +53,9 @@ let peek_string lexer size =
 
 let match_string lexer s =
   s = peek_string lexer (String.length s)
+
+let advance_line lexer index =
+	{ lexer with line = lexer.line + index }
 
 let advance lexer index =
   { lexer with offset = lexer.offset + index }
@@ -114,9 +118,14 @@ let rec skip_whitespace lexer =
 
 let rec skip_to_end_of_line lexer =
   let ch = peek_char lexer 0 in
-  if is_newline ch then lexer
-  else if ch = invalid && at_end lexer then lexer
-  else skip_to_end_of_line (advance lexer 1)
+  if is_newline ch then
+  	lexer
+  else if ch = invalid && at_end lexer then
+  	lexer
+  else
+  	let lexer = advance_line lexer 1 in
+  	skip_to_end_of_line (advance lexer 1)
+
 
 let rec skip_name_end lexer =
   if is_name_letter (peek_char lexer 0) then
@@ -128,9 +137,13 @@ let skip_end_of_line lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
   match (ch0, ch1) with
-  | ('\r', '\n') -> advance lexer 2
+  | ('\r', '\n') ->
+  	let lexer = advance_line lexer 1 in
+  	advance lexer 2
   | ('\r', _)
-  | ('\n', _) -> advance lexer 1
+  | ('\n', _) ->
+  	let lexer = advance_line lexer 1 in
+  	advance lexer 1
   | _ -> lexer
 
 (* A qualified name which ends with a backslash is a namespace prefix; this is
@@ -991,9 +1004,13 @@ let scan_end_of_line lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
   match (ch0, ch1) with
-  | ('\r', '\n') ->  (advance lexer 2, Trivia.make_eol 2)
+  | ('\r', '\n') ->
+  	let lexer = advance_line lexer 1 in
+  	(advance lexer 2, Trivia.make_eol 2)
   | ('\r', _)
-  | ('\n', _) ->  (advance lexer 1, Trivia.make_eol 1)
+  | ('\n', _) ->
+  	let lexer = advance_line lexer 1 in
+  	(advance lexer 1, Trivia.make_eol 1)
   | _ -> failwith "scan_end_of_line called while not on end of line!"
 
 let scan_whitespace lexer =
@@ -1230,7 +1247,7 @@ let scan_token_and_trivia scanner as_name lexer  =
   let (lexer, trailing) =
     if suppress_trailing_trivia kind then (lexer, [])
     else scan_trailing_php_trivia lexer in
-  (lexer, Token.make kind w leading trailing)
+  (lexer, Token.make kind w leading trailing lexer.line)
 
 (* tokenizer takes a lexer, returns a lexer and a token *)
 let scan_assert_progress tokenizer lexer  =
@@ -1266,7 +1283,7 @@ let next_token_no_trailing lexer =
   let tokenizer lexer =
     let (lexer, kind, w, leading) =
       scan_token_and_leading_trivia scan_token_outside_type false lexer in
-    (lexer, Token.make kind w leading []) in
+    (lexer, Token.make kind w leading [] lexer.line) in
   scan_assert_progress tokenizer lexer
 
 let next_token_in_string lexer name =
@@ -1280,7 +1297,7 @@ let next_token_in_string lexer name =
     | TokenKind.DoubleQuotedStringLiteralTail
     | TokenKind.HeredocStringLiteralTail -> scan_trailing_php_trivia lexer
     | _ -> (lexer, []) in
-  let token = Token.make kind w [] trailing in
+  let token = Token.make kind w [] trailing lexer.line in
   (lexer, token)
 
 let next_docstring_header lexer =
@@ -1290,7 +1307,7 @@ let next_docstring_header lexer =
   let lexer = start_new_lexeme lexer in
   let (lexer, name, _) = scan_docstring_header lexer in
   let w = width lexer in
-  let token = Token.make TokenKind.HeredocStringLiteralHead w leading [] in
+  let token = Token.make TokenKind.HeredocStringLiteralHead w leading [] lexer.line in
   (lexer, token, name)
 
 let next_token_as_name lexer =
@@ -1309,10 +1326,10 @@ let next_xhp_element_token ~no_trailing lexer =
        of the body token. *)
     match kind with
     | TokenKind.GreaterThan when no_trailing ->
-      (lexer, Token.make kind w leading [])
+      (lexer, Token.make kind w leading [] lexer.line)
     | _ ->
       let (lexer, trailing) = scan_trailing_php_trivia lexer in
-      (lexer, Token.make kind w leading trailing) in
+      (lexer, Token.make kind w leading trailing lexer.line) in
   let (lexer, token) = scan_assert_progress tokenizer lexer in
   let token_width = Token.width token in
   let trailing_width = Token.trailing_width token in
@@ -1336,7 +1353,7 @@ let next_xhp_body_token lexer =
       then scan_trailing_xhp_trivia lexer
       else (lexer, [])
     in
-    (lexer, Token.make kind w leading trailing) in
+    (lexer, Token.make kind w leading trailing lexer.line) in
   scan_assert_progress scanner lexer
 
 let next_xhp_class_name lexer =

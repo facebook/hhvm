@@ -26,8 +26,8 @@ type t = {
   line: int
 }
 
-let make kind width leading trailing =
-  { kind; width; leading; trailing }
+let make kind width leading trailing line =
+  { kind; width; leading; trailing; line }
 
 let leading_width token =
   let folder sum t = sum + (MinimalTrivia.width t) in

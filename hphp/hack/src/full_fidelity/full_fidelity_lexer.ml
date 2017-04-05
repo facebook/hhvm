@@ -26,7 +26,7 @@ type t = {
 let invalid = '\000'
 
 let make text =
-  { text; start = 0; offset = 0; errors = []; line = 0 }
+  { text; start = 0; offset = 0; errors = []; line = 1 }
 
 let errors lexer =
   lexer.errors
@@ -123,7 +123,7 @@ let rec skip_to_end_of_line lexer =
   else if ch = invalid && at_end lexer then
   	lexer
   else
-  	let lext = advance_line lexer 1 in
+  	let lexer = advance_line lexer 1 in
   	skip_to_end_of_line (advance lexer 1)
 
 
@@ -1004,9 +1004,13 @@ let scan_end_of_line lexer =
   let ch0 = peek_char lexer 0 in
   let ch1 = peek_char lexer 1 in
   match (ch0, ch1) with
-  | ('\r', '\n') ->  (advance lexer 2, Trivia.make_eol 2)
+  | ('\r', '\n') ->
+  	let lexer = advance_line lexer 1 in
+  	(advance lexer 2, Trivia.make_eol 2)
   | ('\r', _)
-  | ('\n', _) ->  (advance lexer 1, Trivia.make_eol 1)
+  | ('\n', _) ->
+  	let lexer = advance_line lexer 1 in
+  	(advance lexer 1, Trivia.make_eol 1)
   | _ -> failwith "scan_end_of_line called while not on end of line!"
 
 let scan_whitespace lexer =

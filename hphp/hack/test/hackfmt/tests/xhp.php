@@ -94,3 +94,11 @@ function v() {
   return
     <aaaaaaaaaaaa href="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" name="watttttt"/>;
 }
+
+function w() {
+  return
+    <p>
+      <my:example:tag />
+      <my:exampel:tag:param param={"Hello, World!"} />
+    </p>;
+}

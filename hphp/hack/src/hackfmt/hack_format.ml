@@ -1019,7 +1019,7 @@ let rec transform node =
       t left_a;
       t name;
       match syntax attrs with
-      | Missing -> handle_xhp_open_right_angle_token right_a
+      | Missing -> handle_xhp_open_right_angle_token attrs right_a
       | _ ->
         Fmt [
           Space;
@@ -1030,7 +1030,7 @@ let rec transform node =
                 if not is_last then space_split () else Nothing
               ) attrs;
             ];
-            handle_xhp_open_right_angle_token right_a;
+            handle_xhp_open_right_angle_token attrs right_a;
           ])
         ]
     ]
@@ -1357,12 +1357,12 @@ and handle_possible_list
   | SyntaxList x -> aux x
   | _ -> aux [node]
 
-and handle_xhp_open_right_angle_token t =
+and handle_xhp_open_right_angle_token attrs t =
   match syntax t with
   | Token token ->
     Fmt [
       if EditableToken.text token = "/>"
-        then space_split ()
+        then Fmt [Space; when_present attrs split]
         else Nothing;
       transform t
     ]

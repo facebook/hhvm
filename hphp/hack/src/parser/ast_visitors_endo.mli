@@ -298,6 +298,10 @@ class virtual ['b] endo :
                 Ast_visitors_ancestors.stmt ->
                 Ast_visitors_ancestors.pstring ->
                 Ast_visitors_ancestors.stmt;
+        on_Goto : 'c ->
+                Ast_visitors_ancestors.stmt ->
+                Ast_visitors_ancestors.pstring ->
+                Ast_visitors_ancestors.stmt;
         on_Gt : 'c ->
                 Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
         on_Gte : 'c ->

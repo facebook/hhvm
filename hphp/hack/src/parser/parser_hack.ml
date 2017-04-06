@@ -2035,6 +2035,7 @@ and statement_word env = function
   | "switch"   -> statement_switch env
   | "foreach"  -> statement_foreach env
   | "try"      -> statement_try env
+  | "goto"     -> statement_goto env
   | "function" | "class" | "trait" | "interface" | "const"
   | "async" | "abstract" | "final" ->
       error env
@@ -2113,6 +2114,22 @@ and statement_goto_label env label =
   if not goto_allowed then Errors.goto_not_supported pos;
   expect env Tcolon;
   GotoLabel (pos, label)
+
+and statement_goto env =
+  let pos = Pos.make env.file env.lb in
+  let goto_allowed =
+    TypecheckerOptions.experimental_feature_enabled
+      env.popt
+      TypecheckerOptions.experimental_goto in
+  if not goto_allowed then Errors.goto_not_supported pos;
+  match L.token env.file env.lb with
+    | Tword ->
+      let word = Lexing.lexeme env.lb in
+      expect env Tsc;
+      Goto (pos, word)
+    | _ ->
+      error env "goto must use a label.";
+      Noop
 
 (*****************************************************************************)
 (* Static variables *)

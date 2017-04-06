@@ -121,6 +121,7 @@ class virtual ['b] reduce :
                      Ast_visitors_ancestors.block -> 'd;
         on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> 'd; on_Gt : 'c -> 'd;
         on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> 'd;
+        on_Goto : 'c -> Ast_visitors_ancestors.pstring -> 'd;
         on_Gte : 'c -> 'd; on_Gtgt : 'c -> 'd;
         on_Haccess : 'c ->
                      Ast_visitors_ancestors.id ->
@@ -435,6 +436,7 @@ class virtual ['b] reduce :
       Ast_visitors_ancestors.as_expr -> Ast_visitors_ancestors.block -> 'd
     method on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> 'd
     method on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> 'd
+    method on_Goto : 'c -> Ast_visitors_ancestors.pstring -> 'd
     method on_Gt : 'c -> 'd
     method on_Gte : 'c -> 'd
     method on_Gtgt : 'c -> 'd

@@ -199,6 +199,9 @@ class virtual ['c] map :
         on_GotoLabel : 'd ->
                        Ast_visitors_ancestors.pstring ->
                        Ast_visitors_ancestors.stmt;
+        on_Goto : 'd ->
+                  Ast_visitors_ancestors.pstring ->
+                  Ast_visitors_ancestors.stmt;
         on_Gt : 'd -> Ast_visitors_ancestors.bop;
         on_Gte : 'd -> Ast_visitors_ancestors.bop;
         on_Gtgt : 'd -> Ast_visitors_ancestors.bop;

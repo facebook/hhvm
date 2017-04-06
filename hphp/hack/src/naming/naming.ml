@@ -1581,7 +1581,8 @@ module Make (GetLocals : GetLocals) = struct
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
     | Return (p, e)        -> N.Return (p, oexpr env e)
-    | GotoLabel _ ->
+    | GotoLabel _
+    | Goto _ ->
       (* TODO(t17085086): Name the goto's label *)
       N.Noop
     | Static_var el        -> N.Static_var (static_varl env el)

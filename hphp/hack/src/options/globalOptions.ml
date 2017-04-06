@@ -26,6 +26,8 @@ let tco_experimental_optional_shape_field = "optional_shape_field"
 (* Whether darray and varray are enabled. *)
 let tco_experimental_darray_and_varray = "darray_and_varray"
 
+let tco_experimental_goto = "goto"
+
 let tco_experimental_all =
  List.fold_left
    (fun acc x -> SSet.add x acc) SSet.empty
@@ -33,6 +35,7 @@ let tco_experimental_all =
      tco_experimental_instanceof;
      tco_experimental_optional_shape_field;
      tco_experimental_darray_and_varray;
+     tco_experimental_goto;
    ]
 
 let default = {

@@ -23,4 +23,5 @@ let experimental_optional_shape_field =
   GlobalOptions.tco_experimental_optional_shape_field
 let experimental_darray_and_varray =
   GlobalOptions.tco_experimental_darray_and_varray
+let experimental_goto = GlobalOptions.tco_experimental_goto
 let experimental_all = GlobalOptions.tco_experimental_all

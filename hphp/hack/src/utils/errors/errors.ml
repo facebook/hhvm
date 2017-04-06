@@ -405,6 +405,7 @@ module Temporary = struct
   let darray_not_supported = 1
   let varray_not_supported = 2
   let unknown_fields_not_supported = 3
+  let goto_not_supported = 4
 end
 
 module Parsing = struct
@@ -718,6 +719,9 @@ let varray_not_supported pos =
 let unknown_fields_not_supported pos =
   add Temporary.unknown_fields_not_supported pos
     "The Unknown shape fields feature (i.e., \"shape(...)\") is not supported."
+
+let goto_not_supported pos =
+  add Temporary.goto_not_supported pos "goto is not supported."
 
 (*****************************************************************************)
 (* Parsing errors. *)

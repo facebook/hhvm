@@ -1001,6 +1001,10 @@ and pStmt : stmt parser = fun node env ->
       ( get_pos return_expression
       , mpOptional pExpr return_expression env
       )
+  | Full_fidelity_positioned_syntax.GotoLabel { goto_label_name; _ } ->
+    let pos = get_pos goto_label_name in
+    let label_name = text goto_label_name in
+    Ast.GotoLabel (pos, label_name)
   | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }
     -> Expr

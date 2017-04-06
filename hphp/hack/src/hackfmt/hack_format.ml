@@ -635,6 +635,12 @@ let rec transform node =
   | ReturnStatement x ->
     let (kw, expr, semi) = get_return_statement_children x in
     transform_keyword_expression_statement kw expr semi
+  | GotoLabel { goto_label_name; goto_label_colon } ->
+    Fmt [
+      t goto_label_name;
+      t goto_label_colon;
+      Newline;
+    ]
   | ThrowStatement x ->
     let (kw, expr, semi) = get_throw_statement_children x in
     transform_keyword_expression_statement kw expr semi

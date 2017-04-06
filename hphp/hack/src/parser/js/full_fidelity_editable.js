@@ -194,6 +194,8 @@ class EditableSyntax
       return DefaultLabel.from_json(json, position, source);
     case 'return_statement':
       return ReturnStatement.from_json(json, position, source);
+    case 'goto_label':
+      return GotoLabel.from_json(json, position, source);
     case 'throw_statement':
       return ThrowStatement.from_json(json, position, source);
     case 'break_statement':
@@ -8880,6 +8882,70 @@ class ReturnStatement extends EditableSyntax
     return ReturnStatement._children_keys;
   }
 }
+class GotoLabel extends EditableSyntax
+{
+  constructor(
+    name,
+    colon)
+  {
+    super('goto_label', {
+      name: name,
+      colon: colon });
+  }
+  get name() { return this.children.name; }
+  get colon() { return this.children.colon; }
+  with_name(name){
+    return new GotoLabel(
+      name,
+      this.colon);
+  }
+  with_colon(colon){
+    return new GotoLabel(
+      this.name,
+      colon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var colon = this.colon.rewrite(rewriter, new_parents);
+    if (
+      name === this.name &&
+      colon === this.colon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new GotoLabel(
+        name,
+        colon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let name = EditableSyntax.from_json(
+      json.goto_label_name, position, source);
+    position += name.width;
+    let colon = EditableSyntax.from_json(
+      json.goto_label_colon, position, source);
+    position += colon.width;
+    return new GotoLabel(
+        name,
+        colon);
+  }
+  get children_keys()
+  {
+    if (GotoLabel._children_keys == null)
+      GotoLabel._children_keys = [
+        'name',
+        'colon'];
+    return GotoLabel._children_keys;
+  }
+}
 class ThrowStatement extends EditableSyntax
 {
   constructor(
@@ -16993,6 +17059,7 @@ exports.SwitchFallthrough = SwitchFallthrough;
 exports.CaseLabel = CaseLabel;
 exports.DefaultLabel = DefaultLabel;
 exports.ReturnStatement = ReturnStatement;
+exports.GotoLabel = GotoLabel;
 exports.ThrowStatement = ThrowStatement;
 exports.BreakStatement = BreakStatement;
 exports.ContinueStatement = ContinueStatement;

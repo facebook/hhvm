@@ -430,6 +430,10 @@ module WithToken(Token: TokenType) = struct
       return_expression: t;
       return_semicolon: t;
     }
+    and goto_label = {
+      goto_label_name: t;
+      goto_label_colon: t;
+    }
     and throw_statement = {
       throw_keyword: t;
       throw_expression: t;
@@ -946,6 +950,7 @@ module WithToken(Token: TokenType) = struct
     | CaseLabel of case_label
     | DefaultLabel of default_label
     | ReturnStatement of return_statement
+    | GotoLabel of goto_label
     | ThrowStatement of throw_statement
     | BreakStatement of break_statement
     | ContinueStatement of continue_statement
@@ -1163,6 +1168,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.DefaultLabel
       | ReturnStatement _ ->
         SyntaxKind.ReturnStatement
+      | GotoLabel _ ->
+        SyntaxKind.GotoLabel
       | ThrowStatement _ ->
         SyntaxKind.ThrowStatement
       | BreakStatement _ ->
@@ -1452,6 +1459,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.DefaultLabel
     let is_return_statement node =
       kind node = SyntaxKind.ReturnStatement
+    let is_goto_label node =
+      kind node = SyntaxKind.GotoLabel
     let is_throw_statement node =
       kind node = SyntaxKind.ThrowStatement
     let is_break_statement node =
@@ -2326,6 +2335,14 @@ module WithToken(Token: TokenType) = struct
       return_keyword,
       return_expression,
       return_semicolon
+    )
+
+    let get_goto_label_children {
+      goto_label_name;
+      goto_label_colon;
+    } = (
+      goto_label_name,
+      goto_label_colon
     )
 
     let get_throw_statement_children {
@@ -3861,6 +3878,13 @@ module WithToken(Token: TokenType) = struct
         return_expression;
         return_semicolon;
       ]
+      | GotoLabel {
+        goto_label_name;
+        goto_label_colon;
+      } -> [
+        goto_label_name;
+        goto_label_colon;
+      ]
       | ThrowStatement {
         throw_keyword;
         throw_expression;
@@ -5310,6 +5334,13 @@ module WithToken(Token: TokenType) = struct
         "return_keyword";
         "return_expression";
         "return_semicolon";
+      ]
+      | GotoLabel {
+        goto_label_name;
+        goto_label_colon;
+      } -> [
+        "goto_label_name";
+        "goto_label_colon";
       ]
       | ThrowStatement {
         throw_keyword;
@@ -6870,6 +6901,14 @@ module WithToken(Token: TokenType) = struct
           return_keyword;
           return_expression;
           return_semicolon;
+        }
+      | (SyntaxKind.GotoLabel, [
+          goto_label_name;
+          goto_label_colon;
+        ]) ->
+        GotoLabel {
+          goto_label_name;
+          goto_label_colon;
         }
       | (SyntaxKind.ThrowStatement, [
           throw_keyword;
@@ -8551,6 +8590,15 @@ module WithToken(Token: TokenType) = struct
         return_keyword;
         return_expression;
         return_semicolon;
+      ]
+
+    let make_goto_label
+      goto_label_name
+      goto_label_colon
+    =
+      from_children SyntaxKind.GotoLabel [
+        goto_label_name;
+        goto_label_colon;
       ]
 
     let make_throw_statement

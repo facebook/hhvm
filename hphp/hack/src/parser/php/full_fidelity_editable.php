@@ -257,6 +257,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return DefaultLabel::from_json($json, $position, $source);
     case 'return_statement':
       return ReturnStatement::from_json($json, $position, $source);
+    case 'goto_label':
+      return GotoLabel::from_json($json, $position, $source);
     case 'throw_statement':
       return ThrowStatement::from_json($json, $position, $source);
     case 'break_statement':
@@ -10793,6 +10795,69 @@ final class ReturnStatement extends EditableSyntax {
     yield $this->_keyword;
     yield $this->_expression;
     yield $this->_semicolon;
+    yield break;
+  }
+}
+final class GotoLabel extends EditableSyntax {
+  private EditableSyntax $_name;
+  private EditableSyntax $_colon;
+  public function __construct(
+    EditableSyntax $name,
+    EditableSyntax $colon) {
+    parent::__construct('goto_label');
+    $this->_name = $name;
+    $this->_colon = $colon;
+  }
+  public function name(): EditableSyntax {
+    return $this->_name;
+  }
+  public function colon(): EditableSyntax {
+    return $this->_colon;
+  }
+  public function with_name(EditableSyntax $name): GotoLabel {
+    return new GotoLabel(
+      $name,
+      $this->_colon);
+  }
+  public function with_colon(EditableSyntax $colon): GotoLabel {
+    return new GotoLabel(
+      $this->_name,
+      $colon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $name = $this->name()->rewrite($rewriter, $new_parents);
+    $colon = $this->colon()->rewrite($rewriter, $new_parents);
+    if (
+      $name === $this->name() &&
+      $colon === $this->colon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new GotoLabel(
+        $name,
+        $colon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $name = EditableSyntax::from_json(
+      $json->goto_label_name, $position, $source);
+    $position += $name->width();
+    $colon = EditableSyntax::from_json(
+      $json->goto_label_colon, $position, $source);
+    $position += $colon->width();
+    return new GotoLabel(
+        $name,
+        $colon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_name;
+    yield $this->_colon;
     yield break;
   }
 }

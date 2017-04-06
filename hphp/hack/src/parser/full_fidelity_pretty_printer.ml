@@ -1329,6 +1329,12 @@ let rec get_doc node =
     let semicolon = get_doc x.return_semicolon in
     let back_part = expr ^^^ semicolon in
     group_doc (indent_doc keyword back_part indt)
+  | GotoLabel {
+      goto_label_name;
+      goto_label_colon; } ->
+    let goto_label_name = get_doc goto_label_name in
+    let goto_label_colon = get_doc goto_label_colon in
+    goto_label_name ^^^ goto_label_colon
   | ThrowStatement x ->
     let keyword = get_doc x.throw_keyword in
     let expr = get_doc x.throw_expression in

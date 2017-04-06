@@ -962,7 +962,7 @@ let rec transform node =
     let (left_p, expressions, right_p) =
       get_xhp_children_parenthesized_list_children x in
     Fmt [
-      transform_argish left_p expressions right_p;
+      transform_argish ~allow_trailing:false left_p expressions right_p;
     ]
   | XHPCategoryDeclaration x ->
     let (kw, categories, semi) = get_xhp_category_declaration_children x in

@@ -1335,6 +1335,14 @@ let rec get_doc node =
     let goto_label_name = get_doc goto_label_name in
     let goto_label_colon = get_doc goto_label_colon in
     goto_label_name ^^^ goto_label_colon
+  | GotoStatement {
+      goto_statement_keyword;
+      goto_statement_label_name;
+      goto_statement_semicolon; } ->
+    let keyword = get_doc goto_statement_keyword in
+    let label_name = get_doc goto_statement_label_name in
+    let semicolon = get_doc goto_statement_semicolon in
+    keyword ^| label_name ^^^ semicolon
   | ThrowStatement x ->
     let keyword = get_doc x.throw_keyword in
     let expr = get_doc x.throw_expression in

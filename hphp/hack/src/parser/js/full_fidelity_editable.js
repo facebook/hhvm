@@ -196,6 +196,8 @@ class EditableSyntax
       return ReturnStatement.from_json(json, position, source);
     case 'goto_label':
       return GotoLabel.from_json(json, position, source);
+    case 'goto_statement':
+      return GotoStatement.from_json(json, position, source);
     case 'throw_statement':
       return ThrowStatement.from_json(json, position, source);
     case 'break_statement':
@@ -735,6 +737,8 @@ class EditableToken extends EditableSyntax
        return new FunctionToken(leading, trailing);
     case 'global':
        return new GlobalToken(leading, trailing);
+    case 'goto':
+       return new GotoToken(leading, trailing);
     case 'if':
        return new IfToken(leading, trailing);
     case 'implements':
@@ -1378,6 +1382,13 @@ class GlobalToken extends EditableToken
   constructor(leading, trailing)
   {
     super('global', leading, trailing, 'global');
+  }
+}
+class GotoToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('goto', leading, trailing, 'goto');
   }
 }
 class IfToken extends EditableToken
@@ -8944,6 +8955,89 @@ class GotoLabel extends EditableSyntax
         'name',
         'colon'];
     return GotoLabel._children_keys;
+  }
+}
+class GotoStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    label_name,
+    semicolon)
+  {
+    super('goto_statement', {
+      keyword: keyword,
+      label_name: label_name,
+      semicolon: semicolon });
+  }
+  get keyword() { return this.children.keyword; }
+  get label_name() { return this.children.label_name; }
+  get semicolon() { return this.children.semicolon; }
+  with_keyword(keyword){
+    return new GotoStatement(
+      keyword,
+      this.label_name,
+      this.semicolon);
+  }
+  with_label_name(label_name){
+    return new GotoStatement(
+      this.keyword,
+      label_name,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new GotoStatement(
+      this.keyword,
+      this.label_name,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var label_name = this.label_name.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      label_name === this.label_name &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new GotoStatement(
+        keyword,
+        label_name,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.goto_statement_keyword, position, source);
+    position += keyword.width;
+    let label_name = EditableSyntax.from_json(
+      json.goto_statement_label_name, position, source);
+    position += label_name.width;
+    let semicolon = EditableSyntax.from_json(
+      json.goto_statement_semicolon, position, source);
+    position += semicolon.width;
+    return new GotoStatement(
+        keyword,
+        label_name,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (GotoStatement._children_keys == null)
+      GotoStatement._children_keys = [
+        'keyword',
+        'label_name',
+        'semicolon'];
+    return GotoStatement._children_keys;
   }
 }
 class ThrowStatement extends EditableSyntax
@@ -16846,6 +16940,7 @@ exports.ForToken = ForToken;
 exports.ForeachToken = ForeachToken;
 exports.FunctionToken = FunctionToken;
 exports.GlobalToken = GlobalToken;
+exports.GotoToken = GotoToken;
 exports.IfToken = IfToken;
 exports.ImplementsToken = ImplementsToken;
 exports.IncludeToken = IncludeToken;
@@ -17060,6 +17155,7 @@ exports.CaseLabel = CaseLabel;
 exports.DefaultLabel = DefaultLabel;
 exports.ReturnStatement = ReturnStatement;
 exports.GotoLabel = GotoLabel;
+exports.GotoStatement = GotoStatement;
 exports.ThrowStatement = ThrowStatement;
 exports.BreakStatement = BreakStatement;
 exports.ContinueStatement = ContinueStatement;

@@ -77,6 +77,7 @@ type t =
 | DefaultLabel
 | ReturnStatement
 | GotoLabel
+| GotoStatement
 | ThrowStatement
 | BreakStatement
 | ContinueStatement
@@ -224,6 +225,7 @@ let to_string kind =
   | DefaultLabel -> "default_label"
   | ReturnStatement -> "return_statement"
   | GotoLabel -> "goto_label"
+  | GotoStatement -> "goto_statement"
   | ThrowStatement -> "throw_statement"
   | BreakStatement -> "break_statement"
   | ContinueStatement -> "continue_statement"

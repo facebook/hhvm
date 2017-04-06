@@ -62,6 +62,7 @@ type t =
   | Foreach
   | Function
   | Global
+  | Goto
   | If
   | Implements
   | Include
@@ -254,6 +255,7 @@ let from_string keyword =
   | "foreach" -> Some Foreach
   | "function" -> Some Function
   | "global" -> Some Global
+  | "goto" -> Some Goto
   | "if" -> Some If
   | "implements" -> Some Implements
   | "include" -> Some Include
@@ -418,6 +420,7 @@ match kind with
   | Foreach -> "foreach"
   | Function -> "function"
   | Global -> "global"
+  | Goto -> "goto"
   | If -> "if"
   | Implements -> "implements"
   | Include -> "include"

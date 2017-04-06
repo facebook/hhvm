@@ -883,6 +883,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Foreach
     | Function
     | Global
+    | Goto
     | If
     | Implements
     | Include

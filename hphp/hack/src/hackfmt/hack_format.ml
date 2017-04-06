@@ -641,6 +641,17 @@ let rec transform node =
       t goto_label_colon;
       Newline;
     ]
+  | GotoStatement {
+      goto_statement_keyword;
+      goto_statement_label_name;
+      goto_statement_semicolon; } ->
+    Fmt [
+      t goto_statement_keyword;
+      Space;
+      t goto_statement_label_name;
+      t goto_statement_semicolon;
+      Newline;
+    ]
   | ThrowStatement x ->
     let (kw, expr, semi) = get_throw_statement_children x in
     transform_keyword_expression_statement kw expr semi

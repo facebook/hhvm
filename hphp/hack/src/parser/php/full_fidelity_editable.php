@@ -259,6 +259,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return ReturnStatement::from_json($json, $position, $source);
     case 'goto_label':
       return GotoLabel::from_json($json, $position, $source);
+    case 'goto_statement':
+      return GotoStatement::from_json($json, $position, $source);
     case 'throw_statement':
       return ThrowStatement::from_json($json, $position, $source);
     case 'break_statement':
@@ -840,6 +842,8 @@ abstract class EditableToken extends EditableSyntax {
        return new FunctionToken($leading, $trailing);
     case 'global':
        return new GlobalToken($leading, $trailing);
+    case 'goto':
+       return new GotoToken($leading, $trailing);
     case 'if':
        return new IfToken($leading, $trailing);
     case 'implements':
@@ -1833,6 +1837,21 @@ final class GlobalToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): GlobalToken {
     return new GlobalToken($this->leading(), $trailing);
+  }
+}
+final class GotoToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('goto', $leading, $trailing, 'goto');
+  }
+
+  public function with_leading(EditableSyntax $leading): GotoToken {
+    return new GotoToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): GotoToken {
+    return new GotoToken($this->leading(), $trailing);
   }
 }
 final class IfToken extends EditableToken {
@@ -10858,6 +10877,91 @@ final class GotoLabel extends EditableSyntax {
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_name;
     yield $this->_colon;
+    yield break;
+  }
+}
+final class GotoStatement extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_label_name;
+  private EditableSyntax $_semicolon;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $label_name,
+    EditableSyntax $semicolon) {
+    parent::__construct('goto_statement');
+    $this->_keyword = $keyword;
+    $this->_label_name = $label_name;
+    $this->_semicolon = $semicolon;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function label_name(): EditableSyntax {
+    return $this->_label_name;
+  }
+  public function semicolon(): EditableSyntax {
+    return $this->_semicolon;
+  }
+  public function with_keyword(EditableSyntax $keyword): GotoStatement {
+    return new GotoStatement(
+      $keyword,
+      $this->_label_name,
+      $this->_semicolon);
+  }
+  public function with_label_name(EditableSyntax $label_name): GotoStatement {
+    return new GotoStatement(
+      $this->_keyword,
+      $label_name,
+      $this->_semicolon);
+  }
+  public function with_semicolon(EditableSyntax $semicolon): GotoStatement {
+    return new GotoStatement(
+      $this->_keyword,
+      $this->_label_name,
+      $semicolon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $label_name = $this->label_name()->rewrite($rewriter, $new_parents);
+    $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $label_name === $this->label_name() &&
+      $semicolon === $this->semicolon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new GotoStatement(
+        $keyword,
+        $label_name,
+        $semicolon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->goto_statement_keyword, $position, $source);
+    $position += $keyword->width();
+    $label_name = EditableSyntax::from_json(
+      $json->goto_statement_label_name, $position, $source);
+    $position += $label_name->width();
+    $semicolon = EditableSyntax::from_json(
+      $json->goto_statement_semicolon, $position, $source);
+    $position += $semicolon->width();
+    return new GotoStatement(
+        $keyword,
+        $label_name,
+        $semicolon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_label_name;
+    yield $this->_semicolon;
     yield break;
   }
 }

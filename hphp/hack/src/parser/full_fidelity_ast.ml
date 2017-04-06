@@ -1005,6 +1005,8 @@ and pStmt : stmt parser = fun node env ->
     let pos = get_pos goto_label_name in
     let label_name = text goto_label_name in
     Ast.GotoLabel (pos, label_name)
+  | GotoStatement { goto_statement_label_name; _ } ->
+    Goto  (pos_name goto_statement_label_name)
   | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }
     -> Expr

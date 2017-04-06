@@ -1050,21 +1050,24 @@ let rec transform node =
           transform_trailing_trivia up_to_first_newline;
           Split;
           transform_leading_trivia after_newline;
-          let last_node_was_xhp_expression = ref false in
+          let prev_token_had_trailing_trivia = ref false in
           Fmt (List.map (hd :: tl) ~f:(fun node -> Fmt [
             begin
               let leading, node = remove_leading_trivia node in
               let result = Fmt [
-                if !last_node_was_xhp_expression
+                if !prev_token_had_trailing_trivia
                   then transform_leading_trivia leading
                   else transform_xhp_leading_trivia leading;
                 t node;
               ] in
               begin match syntax node with
                 | XHPExpression _ ->
-                  last_node_was_xhp_expression := true
+                  prev_token_had_trailing_trivia := true
+                | Token t ->
+                  prev_token_had_trailing_trivia :=
+                    EditableToken.kind t = EditableToken.TokenKind.XHPBody
                 | _ ->
-                  last_node_was_xhp_expression := false
+                  prev_token_had_trailing_trivia := false
               end;
               result
             end;
@@ -1072,11 +1075,18 @@ let rec transform node =
               List.exists (Syntax.trailing_trivia node)
                 ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.WhiteSpace)
             in
+            let has_trailing_newline =
+              List.exists (Syntax.trailing_trivia node)
+                ~f:(fun trivia -> Trivia.kind trivia = TriviaKind.EndOfLine)
+            in
             match syntax node with
             | XHPExpression _ ->
               if has_trailing_whitespace then space_split () else Split
+            | Token _ ->
+              if has_trailing_newline then Newline
+              else if has_trailing_whitespace then Space else Nothing
             | _ ->
-              if has_trailing_whitespace then Space else Nothing;
+              if has_trailing_whitespace then Space else Nothing
           ]))
         ]
       | _ -> failwith "Expected SyntaxList"

@@ -59,7 +59,10 @@ function n() {
 }
 
 function o() {
-  return <a>1 1 1</a>;
+  return
+    <a>
+      1 1 1
+    </a>;
 }
 
 function p() {

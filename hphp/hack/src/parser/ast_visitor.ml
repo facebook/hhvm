@@ -54,6 +54,7 @@ class type ['a] ast_visitor_type = object
   method on_float : 'a -> pstring -> 'a
   method on_for : 'a -> expr -> expr -> expr -> block -> 'a
   method on_foreach : 'a -> expr -> Pos.t option -> as_expr -> block -> 'a
+  method on_goto_label : 'a -> pstring -> 'a
   method on_hint: 'a -> hint -> 'a
   method on_id : 'a -> id -> 'a
   method on_id_type_arguments : 'a -> id -> hint list -> 'a
@@ -232,6 +233,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Continue p              -> this#on_continue acc p
     | Throw   (e)             -> this#on_throw acc e
     | Return  (p, eopt)       -> this#on_return acc p eopt
+    | GotoLabel label         -> this#on_goto_label acc label
     | If      (e, b1, b2)     -> this#on_if acc e b1 b2
     | Do      (b, e)          -> this#on_do acc b e
     | While   (e, b)          -> this#on_while acc e b
@@ -430,6 +432,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     end acc attrl in
     let acc = List.fold_left this#on_expr acc el in
     acc
+
+  method on_goto_label = this#on_pstring
 
   method on_clone acc e = this#on_expr acc e
 

@@ -122,6 +122,7 @@ class virtual ['b] iter :
                      Ast_visitors_ancestors.as_expr ->
                      Ast_visitors_ancestors.block -> unit;
         on_Fun : 'c -> Ast_visitors_ancestors.fun_ -> unit;
+        on_GotoLabel : 'c -> Ast_visitors_ancestors.pstring -> unit;
         on_Gt : 'c -> unit; on_Gte : 'c -> unit; on_Gtgt : 'c -> unit;
         on_Haccess : 'c ->
                      Ast_visitors_ancestors.id ->

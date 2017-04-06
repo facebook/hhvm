@@ -294,6 +294,10 @@ class virtual ['b] endo :
         on_Fun : 'c ->
                  Ast_visitors_ancestors.def ->
                  Ast_visitors_ancestors.fun_ -> Ast_visitors_ancestors.def;
+        on_GotoLabel : 'c ->
+                Ast_visitors_ancestors.stmt ->
+                Ast_visitors_ancestors.pstring ->
+                Ast_visitors_ancestors.stmt;
         on_Gt : 'c ->
                 Ast_visitors_ancestors.bop -> Ast_visitors_ancestors.bop;
         on_Gte : 'c ->

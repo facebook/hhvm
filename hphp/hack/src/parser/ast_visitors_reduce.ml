@@ -409,6 +409,7 @@ class virtual ['self] reduce =
       | Continue c0 -> self#on_Continue env c0
       | Throw c0 -> self#on_Throw env c0
       | Return (c0, c1) -> self#on_Return env c0 c1
+      | GotoLabel c0 -> self#on_GotoLabel env c0
       | Static_var c0 -> self#on_Static_var env c0
       | If (c0, c1, c2) -> self#on_If env c0 c1 c2
       | Do (c0, c1) -> self#on_Do env c0 c1
@@ -563,6 +564,7 @@ class virtual ['self] reduce =
       let r0 = self#on_import_flavor env c0 in
       let r1 = self#on_expr env c1 in
       self#add r0 r1
+    method on_GotoLabel = self#on_pstring
     method on_expr_ env = function
       | Array c0 -> self#on_Array env c0
       | Darray c0 -> self#on_Darray env c0

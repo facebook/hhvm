@@ -35,6 +35,9 @@ let rec from_stmt st =
       from_expr expr;
       instr_retc;
     ]
+  | A.GotoLabel _ ->
+    (* TODO(t17085086): Implement goto labels. *)
+    emit_nyi "goto label"
   | A.Block b -> from_stmts b
   | A.If (condition, consequence, alternative) ->
     emit_if condition (A.Block consequence) (A.Block alternative)

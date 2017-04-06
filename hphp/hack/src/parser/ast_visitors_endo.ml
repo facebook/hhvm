@@ -695,6 +695,7 @@ class virtual ['self] endo =
       | Continue c0 -> self#on_Continue env this c0
       | Throw c0 -> self#on_Throw env this c0
       | Return (c0, c1) -> self#on_Return env this c0 c1
+      | GotoLabel c0 -> self#on_GotoLabel env this c0
       | Static_var c0 -> self#on_Static_var env this c0
       | If (c0, c1, c2) -> self#on_If env this c0 c1 c2
       | Do (c0, c1) -> self#on_Do env this c0 c1
@@ -919,6 +920,9 @@ class virtual ['self] endo =
       let r1 = self#on_expr env c1 in if c0 == r0 && c1 == r1
       then this
       else Import (r0, r1)
+    method on_GotoLabel env this c0 =
+      let r0 = self#on_pstring env c0 in
+      if c0 == r0 then this else GotoLabel r0
     method on_expr_ env this =
       match this with
       | Array c0 -> self#on_Array env this c0

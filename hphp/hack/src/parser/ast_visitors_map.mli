@@ -196,6 +196,9 @@ class virtual ['c] map :
                      Ast_visitors_ancestors.stmt;
         on_Fun : 'd ->
                  Ast_visitors_ancestors.fun_ -> Ast_visitors_ancestors.def;
+        on_GotoLabel : 'd ->
+                       Ast_visitors_ancestors.pstring ->
+                       Ast_visitors_ancestors.stmt;
         on_Gt : 'd -> Ast_visitors_ancestors.bop;
         on_Gte : 'd -> Ast_visitors_ancestors.bop;
         on_Gtgt : 'd -> Ast_visitors_ancestors.bop;

@@ -304,3 +304,13 @@ let is_function_generator instrseq =
     ~f:(fun (b, b_p) i ->
       ((b || i = IGenerator Yield || i = IGenerator YieldK),
       b_p || i = IGenerator YieldK))
+
+let get_num_cls_ref_slots instrseq =
+  InstrSeq.fold_left
+    instrseq
+    ~init:0
+    ~f:(fun num i ->
+        match i with
+        | IGet (ClsRefGetL (_, id))
+        | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
+        | _ -> num)

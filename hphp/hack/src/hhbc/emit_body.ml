@@ -83,9 +83,11 @@ let from_ast ~class_name ~method_name ~has_this
     Label_rewriter.relabel_function params body_instrs in
   let function_decl_vars = extract_decl_vars params body_instrs in
   let num_iters = !Iterator.num_iterators in
+  let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
   body_instrs,
   function_decl_vars,
   num_iters,
+  num_cls_ref_slots,
   params,
   return_type_info,
   is_generator,

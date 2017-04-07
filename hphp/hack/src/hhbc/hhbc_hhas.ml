@@ -718,6 +718,14 @@ let fix_xhp_name s =
 
 let fmt_name s = fix_xhp_name (Utils.strip_ns s)
 
+let add_num_cls_ref_slots buf indent num_cls_ref_slots =
+  if num_cls_ref_slots = 0 then () else begin
+  B.add_string buf (String.make indent ' ');
+  B.add_string buf ".numclsrefslots ";
+  B.add_string buf (Printf.sprintf "%d" num_cls_ref_slots);
+  B.add_string buf ";\n"
+  end
+
 let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
   B.add_string buf (String.make indent ' ');
   B.add_string buf ".declvars ";
@@ -817,6 +825,7 @@ let add_fun_def buf fun_def =
   let function_body = Hhas_function.body fun_def in
   let function_decl_vars = Hhas_function.decl_vars fun_def in
   let function_num_iters = Hhas_function.num_iters fun_def in
+  let function_num_cls_ref_slots = Hhas_function.num_cls_ref_slots fun_def in
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
@@ -829,6 +838,7 @@ let add_fun_def buf fun_def =
   if function_is_async then B.add_string buf " isAsync";
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
+  add_num_cls_ref_slots buf 4 function_num_cls_ref_slots;
   add_decl_vars buf 2 function_decl_vars;
   add_num_iters buf 2 function_num_iters;
   add_instruction_list buf 2 function_body;
@@ -855,6 +865,7 @@ let add_method_def buf method_def =
   let method_return_type = Hhas_method.return_type method_def in
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
+  let method_num_cls_ref_slots = Hhas_method.num_cls_ref_slots method_def in
   let method_decl_vars = Hhas_method.decl_vars method_def in
   let method_num_iters = Hhas_method.num_iters method_def in
   let method_is_async = Hhas_method.is_async method_def in
@@ -871,6 +882,7 @@ let add_method_def buf method_def =
   if method_is_pair_generator then B.add_string buf " isPairGenerator";
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
+  add_num_cls_ref_slots buf 4 method_num_cls_ref_slots;
   add_decl_vars buf 4 method_decl_vars;
   add_num_iters buf 4 method_num_iters;
   add_instruction_list buf 4 method_body;

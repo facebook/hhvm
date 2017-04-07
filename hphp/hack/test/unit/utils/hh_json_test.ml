@@ -149,6 +149,76 @@ let test_access_object_error_in_middle () =
   | _ ->
     false
 
+type fbz_record = {
+  foo : bool;
+  bar : string;
+  baz : int;
+}
+
+let test_access_3_keys_one_object () =
+  let json = Hh_json.json_of_string (
+    "{\n"^
+    "  \"foo\" : true,\n"^
+    "  \"bar\" : \"hello\",\n"^
+    "  \"baz\" : 5\n"^
+    "}"
+  ) in
+  let open Hh_json.Access in
+  let accessor = return json in
+  let result =
+    accessor >>= get_bool "foo" >>= fun (foo, _) ->
+    accessor >>= get_string "bar" >>= fun (bar, _) ->
+    accessor >>= get_number_int "baz" >>= fun (baz, _) ->
+    return {
+      foo;
+      bar;
+      baz;
+    }
+  in
+  match result with
+  | Result.Error access_failure ->
+    Printf.eprintf "Error failed to parse. See: %s\n"
+      (access_failure_to_string access_failure);
+    false
+  | Result.Ok (v, _) ->
+    Asserter.Bool_asserter.assert_equals v.foo true "foo value mismatch";
+    Asserter.String_asserter.assert_equals v.bar "hello" "bar value mismatch";
+    Asserter.Int_asserter.assert_equals v.baz 5 "baz value mismatch";
+    true
+
+(** We access exactly as we do above, but "bar" actually is an array instead
+ * of a string, so we should expect to get a Result.Error. *)
+let test_access_3_keys_one_object_wrong_type_middle () =
+  let json = Hh_json.json_of_string (
+    "{\n"^
+    "  \"foo\" : true,\n"^
+    "  \"bar\" : [],\n"^
+    "  \"baz\" : 5\n"^
+    "}"
+  ) in
+  let open Hh_json.Access in
+  let accessor = return json in
+  let result =
+    accessor >>= get_bool "foo" >>= fun (foo, _) ->
+    accessor >>= get_string "bar" >>= fun (bar, _) ->
+    accessor >>= get_number_int "baz" >>= fun (baz, _) ->
+    return {
+      foo;
+      bar;
+      baz;
+    }
+  in
+  match result with
+  | Result.Error access_failure ->
+    Asserter.String_asserter.assert_equals
+      "Value expected to be String (at field [bar])"
+      (access_failure_to_string access_failure)
+      "Not the access failure we expected";
+    true
+  | Result.Ok (v, _) ->
+    Printf.eprintf "Expected failure, but successfully traversed json.\n";
+    false
+
 let tests = [
   "test_escape_unescape", test_escape_unescape;
   "test_empty_string", test_empty_string;
@@ -160,6 +230,9 @@ let tests = [
   "test_access_object_key_doesnt_exit", test_access_object_key_doesnt_exist;
   "test_access_object_type_invalid", test_access_object_type_invalid;
   "test_access_object_error_in_middle", test_access_object_error_in_middle;
+  "test_access_3_keys_on_object", test_access_3_keys_one_object;
+  "test_access_3_keys_one_object_wrong_type_middle",
+    test_access_3_keys_one_object_wrong_type_middle;
 ]
 
 let () =

@@ -478,9 +478,9 @@ let string_of_misc instruction =
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
     | StaticLoc (local, text) ->
-      sep ["StaticLoc"; string_of_local_id local; quote_str text]
+      sep ["StaticLoc"; string_of_local_id local; "\"" ^ text ^ "\""]
     | StaticLocInit (local, text) ->
-      sep ["StaticLocInit"; string_of_local_id local; quote_str text]
+      sep ["StaticLocInit"; string_of_local_id local; "\"" ^ text ^ "\""]
     | MemoGet (count, Local.Unnamed first, local_count) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
         (string_of_int count) first (local_count - 1)

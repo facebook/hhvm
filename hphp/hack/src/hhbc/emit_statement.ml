@@ -72,8 +72,8 @@ let rec from_stmt st =
   | A.Foreach (collection, await_pos, iterator, block) ->
     from_foreach (await_pos <> None) collection iterator
       (A.Block block)
-  | A.Static_var _ ->
-    emit_nyi "statement"
+  | A.Static_var es ->
+    emit_static_var es
   (* TODO: What do we do with unsafe? *)
   | A.Unsafe
   | A.Fallthrough
@@ -102,6 +102,34 @@ and emit_if condition consequence alternative =
       from_stmt alternative;
       instr_label done_label;
     ]
+
+and emit_static_var es =
+  let emit_static_var_single e =
+    match snd e with
+    | A.Lvar (_, name) ->
+      gather [
+        instr_null;
+        instr_static_loc_init name;
+      ]
+    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), (_, A.Id (_, _) as e))
+    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), (_, A.Class_const (_, _) as e)) ->
+      let l = Label.next_regular () in
+      gather [
+        instr_static_loc name;
+        instr_jmpnz l;
+        from_expr e;
+        instr_setl @@ Local.Named name;
+        instr_popc;
+        instr_label l;
+      ]
+    | A.Binop (A.Eq _, (_, A.Lvar (_, name)), e) ->
+      gather [
+        from_expr e;
+        instr_static_loc_init name;
+      ]
+    | _ -> failwith "Static var - impossible"
+  in
+  gather @@ List.map es ~f:emit_static_var_single
 
 and from_while e b =
   let break_label = Label.next_regular () in

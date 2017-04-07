@@ -149,6 +149,15 @@ let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 
+let strip_dollar id =
+  String.sub id 1 (String.length id - 1)
+
+let instr_static_loc name =
+  instr (IMisc (StaticLoc (Local.Named name, strip_dollar name)))
+
+let instr_static_loc_init name =
+  instr (IMisc (StaticLocInit (Local.Named name, strip_dollar name)))
+
 let instr_exit = instr (IOp Hhbc_ast.Exit)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
@@ -240,6 +249,8 @@ let extract_decl_vars params instrseq =
    * $x = $y needs to go on the list in this order: $x $y *)
   let folder uniq_list instruction =
     match instruction with
+    | IMisc (StaticLoc (Local.Named s, _))
+    | IMisc (StaticLocInit (Local.Named s, _))
     | IMutator (SetL (Local.Named s))
     | IBase (BaseL (Local.Named s, MemberOpMode.Define))
     | IGet (CGetL (Local.Named s))

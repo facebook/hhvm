@@ -1782,7 +1782,9 @@ and transform_binary_expression ~is_nested expr =
                 let operand = x in
                 let op_has_spaces = operator_has_surrounding_spaces !last_op in
                 Fmt [
-                  if op_has_spaces then Space else Nothing;
+                  if op_has_spaces
+                    then Fmt [Space; SplitWith Cost.Assignment]
+                    else SplitWith Cost.Assignment;
                   transform_operand operand;
                 ]
               end

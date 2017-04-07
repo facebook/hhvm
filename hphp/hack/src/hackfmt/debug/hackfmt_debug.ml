@@ -61,49 +61,42 @@ let debug_nesting chunk_group =
 let debug_rule_deps chunk_group =
   Printf.printf "%s\n" (Chunk_group.dependency_map_to_string chunk_group)
 
-let debug_chunk_groups chunk_groups =
-  let get_range cg =
-    let chunks = cg.Chunk_group.chunks in
-    let a, b, c = Chunk_group.(match cg.print_range with
-      | No -> "No", -1, -1
-      | All -> "All", 0, List.length chunks
-      | Range (s, e) ->  "Range", s, e
-      | StartAt s -> "StartAt", s, List.length chunks
-      | EndAt e -> "EndAt", 0, e
-    ) in
-    Printf.sprintf "%s %d %d" a b c
-  in
-
+let debug_chunk_groups ~range chunk_groups =
   let print_chunk = match !debug_config.chunk_ids with
     | None -> (fun id c -> Some (id, c))
     | Some id_list -> (fun id c ->
         if List.exists id_list (fun x -> x = id) then Some (id, c) else None
       )
   in
-
-  let chunk_groups = List.filter_mapi chunk_groups ~f:print_chunk in
-  List.iter chunk_groups ~f:(fun (i, cg) ->
+  chunk_groups
+  |> List.filter_mapi ~f:print_chunk
+  |> List.filter ~f:(fun (i, cg) ->
+    let group_range = Chunk_group.get_char_range cg in
+    Interval.intervals_overlap range group_range
+  )
+  |> List.iter ~f:(fun (i, cg) ->
     Printf.printf "Group Id: %d\n" i;
     Printf.printf "Indentation: %d\n" cg.Chunk_group.block_indentation;
     Printf.printf "Chunk count: %d\n" (List.length cg.Chunk_group.chunks);
-    Printf.printf "%s\n" @@ get_range cg;
     List.iteri cg.Chunk_group.chunks ~f:(fun i c ->
-      Printf.printf "\t%d - %s - Nesting:%d Pending:%d\n"
-        i (Chunk.to_string c) (Chunk.get_nesting_id c)
-        (Option.value ~default:(-1) c.Chunk.comma_rule)
+      Printf.printf "%8d rule_id:%d [%d,%d)\t%s\n"
+        i
+        c.Chunk.rule
+        c.Chunk.start_char
+        c.Chunk.end_char
+        c.Chunk.text
     );
     Printf.printf "Rule count %d\n"
       (IMap.cardinal cg.Chunk_group.rule_map);
     IMap.iter (fun k v ->
-      Printf.printf "\t%d - %s\n" k (Rule.to_string v);
+      Printf.printf "%8d - %s\n" k (Rule.to_string v);
     ) cg.Chunk_group.rule_map;
 
     if !debug_config.print_rule_dependencies then debug_rule_deps cg;
     if !debug_config.print_nesting_graph then debug_nesting cg;
 
-    Printf.printf "%s" @@ Line_splitter.solve [cg];
-  );
-  ()
+    Printf.printf "%s\n" @@ Line_splitter.solve ~range [cg];
+  )
 
 let debug_full_text source_text =
   Printf.printf "%s\n" (SourceText.get_text source_text)
@@ -115,6 +108,9 @@ let debug_text_range source_text start_char end_char =
   Printf.printf "Subrange passed:\n%s\n" @@
     String.sub source_text.SourceText.text start_char (end_char - start_char)
 
-let debug _source_text syntax_tree chunk_groups =
+let debug ~range source_text syntax_tree chunk_groups =
   if !debug_config.print_ast then debug_ast syntax_tree;
-  debug_chunk_groups chunk_groups
+  let range = Option.value range
+    ~default:(0, Full_fidelity_source_text.length source_text)
+  in
+  debug_chunk_groups ~range chunk_groups

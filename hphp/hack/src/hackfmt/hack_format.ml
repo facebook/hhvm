@@ -1948,16 +1948,3 @@ and transform_xhp_leading_trivia triv =
       ]
     | _ -> ignored;
   ))
-
-let format_node ?(debug=false) node start_char end_char =
-  let open Chunk_builder in
-  builder#build_chunk_groups (transform node) start_char end_char
-
-let format_content content =
-  let module SourceText = Full_fidelity_source_text in
-  let source_text = SourceText.make content in
-  let syntax_tree = SyntaxTree.make source_text in
-  if not @@ List.is_empty @@ SyntaxTree.errors syntax_tree
-    then raise Hackfmt_error.InvalidSyntax;
-  let editable = Full_fidelity_editable_syntax.from_tree syntax_tree in
-  format_node editable

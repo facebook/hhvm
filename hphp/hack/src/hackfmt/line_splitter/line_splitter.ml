@@ -58,14 +58,28 @@ let find_best_state queue =
   in
   aux 0 best queue
 
-let solve chunk_groups =
-  let best_states = List.map chunk_groups ~f:(fun chunk_group ->
-    let rvm = Chunk_group.get_initial_rule_value_map chunk_group in
-    let init_state = Solve_state.make chunk_group rvm in
-    let state_queue = State_queue.make init_state in
-    find_best_state state_queue
-  ) in
-  let strings = List.map best_states ~f:(fun ss ->
-    Printf.sprintf "%s" (State_printer.print_state ss)
-  ) in
-  String.concat "\n" strings ^ "\n"
+let solve ?range chunk_groups =
+  let chunk_groups = match range with
+    | None -> chunk_groups
+    | Some range ->
+      List.filter chunk_groups ~f:(fun chunk_group ->
+        let group_range = Chunk_group.get_char_range chunk_group in
+        Interval.intervals_overlap range group_range
+      )
+  in
+  let formatted = chunk_groups
+    |> List.map ~f:(fun chunk_group ->
+      let rvm = Chunk_group.get_initial_rule_value_map chunk_group in
+      let init_state = Solve_state.make chunk_group rvm in
+      let state_queue = State_queue.make init_state in
+      find_best_state state_queue
+    )
+    |> List.map ~f:(State_printer.print_state ?range)
+    |> String.concat ""
+  in
+  match range with
+    | None -> formatted
+    (* Because chunks are associated with the split preceding them, printing a
+     * range of chunks produces a newline before and not after. We want a
+     * newline after, but not before. *)
+    | Some _ -> (String_utils.lstrip formatted "\n") ^ "\n"

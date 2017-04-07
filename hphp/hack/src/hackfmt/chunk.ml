@@ -15,7 +15,9 @@ type t = {
   space_if_not_split: bool;
   comma_rule: int option;
   rule: int;
-  nesting: Nesting.t
+  nesting: Nesting.t;
+  start_char: int;
+  end_char: int;
 }
 
 let default_chunk = {
@@ -26,16 +28,19 @@ let default_chunk = {
   comma_rule = None;
   rule = Rule.null_rule_id;
   nesting = Nesting.dummy;
+  start_char = -1;
+  end_char = -1;
 }
 
-let make text rule nesting =
+let make text rule nesting start_char =
   let c = match rule with
-    | None -> default_chunk
-    | Some r -> {default_chunk with rule = r}
+    | None -> {default_chunk with start_char}
+    | Some rule -> {default_chunk with rule; start_char}
   in
   {c with text; nesting;}
 
-let finalize chunk rule ra space comma =
+let finalize chunk rule ra space comma end_char =
+  let end_char = max chunk.start_char end_char in
   let rule = if Rule_allocator.get_rule_kind ra rule = Rule.Always
     || chunk.rule = Rule.null_rule_id
     then rule
@@ -46,10 +51,8 @@ let finalize chunk rule ra space comma =
     rule;
     space_if_not_split = space;
     comma_rule = comma;
+    end_char;
   }
 
 let get_nesting_id chunk =
   chunk.nesting.Nesting.id
-
-let to_string chunk =
-  Printf.sprintf "rule_id:%d\t text:%s" chunk.rule chunk.text

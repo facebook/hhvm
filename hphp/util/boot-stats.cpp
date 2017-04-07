@@ -129,7 +129,7 @@ std::unique_ptr<BootStats::Impl> BootStats::s_instance;
 void BootStats::start() {
   BootStats::s_started = true;
   BootStats::s_start = ResourceUsage::sinceEpoch();
-  BootStats::s_instance = folly::make_unique<BootStats::Impl>();
+  BootStats::s_instance = std::make_unique<BootStats::Impl>();
 }
 
 void BootStats::done() {

@@ -432,7 +432,7 @@ struct ActiveSubscription {
       m_syncPromises.clear();
     } else {
       m_callbackInProgress = true;
-      m_callbackExecThread = folly::make_unique<AsyncFunc<ActiveSubscription>>(
+      m_callbackExecThread = std::make_unique<AsyncFunc<ActiveSubscription>>(
         this,
         &ActiveSubscription::runCallback);
       m_callbackExecThread->start();

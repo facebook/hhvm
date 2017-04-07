@@ -119,7 +119,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
   Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
-  auto vunit = folly::make_unique<Vunit>();
+  auto vunit = std::make_unique<Vunit>();
   vunit->context = unit.context();
   vunit->log_entry = unit.logEntry().get_pointer();
   vunit->profiling = true;

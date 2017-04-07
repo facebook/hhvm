@@ -928,7 +928,7 @@ StringHolder Transport::compressGzip(const void *data, int size,
     compressionLevel = level;
   }
   if (m_compressor == nullptr) {
-    m_compressor = folly::make_unique<StreamCompressor>(
+    m_compressor = std::make_unique<StreamCompressor>(
         compressionLevel, CODING_GZIP, true);
   }
   int len = size;
@@ -972,7 +972,7 @@ StringHolder Transport::compressBrotli(const void *data, int size,
           folly::findLastSet(static_cast<unsigned int>(size) - 1));
     }
 
-    m_brotliCompressor = folly::make_unique<brotli::BrotliCompressor>(params);
+    m_brotliCompressor = std::make_unique<brotli::BrotliCompressor>(params);
   }
 
   size_t len = size;

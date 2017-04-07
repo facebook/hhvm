@@ -219,16 +219,16 @@ private:
 
 HardwareCounter::HardwareCounter()
   : m_countersSet(false) {
-  m_instructionCounter = folly::make_unique<HardwareCounterImpl>(
+  m_instructionCounter = std::make_unique<HardwareCounterImpl>(
     PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS, "instructions"
   );
   if (s_profileHWEvents.empty()) {
-    m_loadCounter = folly::make_unique<HardwareCounterImpl>(
+    m_loadCounter = std::make_unique<HardwareCounterImpl>(
       PERF_TYPE_HW_CACHE,
       PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_READ) << 8),
       "loads"
     );
-    m_storeCounter = folly::make_unique<HardwareCounterImpl>(
+    m_storeCounter = std::make_unique<HardwareCounterImpl>(
       PERF_TYPE_HW_CACHE,
       PERF_COUNT_HW_CACHE_L1D | ((PERF_COUNT_HW_CACHE_OP_WRITE) << 8),
       "stores"
@@ -427,7 +427,7 @@ bool HardwareCounter::addPerfEvent(const char* event) {
     Logger::Warning("failed to find perf event: %s", event);
     return false;
   }
-  auto hwc = folly::make_unique<HardwareCounterImpl>(type, config, event);
+  auto hwc = std::make_unique<HardwareCounterImpl>(type, config, event);
   if (hwc->m_err) {
     Logger::Warning("failed to set perf event: %s", event);
     return false;

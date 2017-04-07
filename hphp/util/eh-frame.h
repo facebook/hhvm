@@ -112,7 +112,7 @@ struct EHFrameWriter {
    * provided `buf'.
    */
   EHFrameWriter()
-    : m_buf(folly::make_unique<std::vector<uint8_t>>())
+    : m_buf(std::make_unique<std::vector<uint8_t>>())
   {}
   explicit EHFrameWriter(std::unique_ptr<std::vector<uint8_t>>&& buf)
     : m_buf(std::move(buf))

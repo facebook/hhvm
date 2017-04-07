@@ -445,7 +445,7 @@ borrowed_ptr<php::Block> make_block(FuncAnalysis& ainfo,
   FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
   assert(ainfo.bdata.size() == ainfo.ctx.func->blocks.size());
 
-  auto newBlk           = folly::make_unique<php::Block>();
+  auto newBlk           = std::make_unique<php::Block>();
   newBlk->id            = ainfo.ctx.func->blocks.size();
   newBlk->section       = srcBlk->section;
   newBlk->exnNode       = srcBlk->exnNode;

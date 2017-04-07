@@ -11,10 +11,19 @@
 module SyntaxError = Full_fidelity_syntax_error
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
+module Logger = HackfmtEventLogger
 
 open Core
 open Printf
 open Hackfmt_error
+
+type env = {
+  debug: bool;
+  test: bool;
+  mutable mode: string option;
+  mutable file: string option;
+  mutable root: string;
+}
 
 let usage = sprintf
   "Usage: %s [--range s e] [filename or read from stdin]\n" Sys.argv.(0)
@@ -28,6 +37,7 @@ let parse_options () =
   let root = ref None in
   let diff_dry = ref false in
   let debug = ref false in
+  let test = ref false in
 
   let rec options = ref [
     "--range",
@@ -56,6 +66,8 @@ let parse_options () =
         debug := true;
         options := Hackfmt_debug.init_with_options (); ),
       " Print debug statements";
+
+    "--test", Arg.Set test, " Disable logging";
   ] in
   Arg.parse_dynamic options (fun file -> files := file :: !files) usage;
   let range =
@@ -63,7 +75,7 @@ let parse_options () =
     | Some s, Some e -> Some (s - 1, e - 1)
     | _ -> None
   in
-  !files, range, !inplace, !diff, !root, !diff_dry, !debug
+  (!files, range, !inplace, !diff, !root, !diff_dry), (!debug, !test)
 
 let file_exists path = Option.is_some (Sys_utils.realpath path)
 
@@ -71,14 +83,23 @@ type range = int * int
 type root = string
 type dry = bool
 type filename = string
-type debug = bool
 
-type format_mode =
-  | Print of filename option * range option * debug
+type format_options =
+  | Print of filename option * range option
   | InPlace of filename
   | Diff of root option * dry
 
-let validate_options (files, range, inplace, diff, root, diff_dry, debug) =
+let mode_string format_options =
+  match format_options with
+  | Print (Some _, None) -> "FILE"
+  | Print (Some _, Some _) -> "RANGE"
+  | Print (None, None) -> "STDIN"
+  | Print (None, Some _) -> "STDIN_RANGE"
+  | InPlace _ -> "IN_PLACE"
+  | Diff (_, false) -> "DIFF"
+  | Diff (_, true) -> "DIFF_DRY"
+
+let validate_options env (files, range, inplace, diff, root, diff_dry) =
   let fail msg = raise (InvalidCliArg msg) in
   let filename =
     match files with
@@ -99,8 +120,7 @@ let validate_options (files, range, inplace, diff, root, diff_dry, debug) =
   let diff = diff || diff_dry in
 
   match diff, inplace, filename, range with
-  | _ when debug && diff -> fail "Can't format diff in debug mode"
-  | _ when debug && inplace -> fail "Can't format in-place in debug mode"
+  | _ when env.debug && diff -> fail "Can't format diff in debug mode"
 
   | true, _, Some _, _ -> fail "--diff mode expects no files"
   | true, _, _, Some _ -> fail "--diff mode expects no range"
@@ -109,7 +129,7 @@ let validate_options (files, range, inplace, diff, root, diff_dry, debug) =
   | _, true, _, Some _ -> fail "Can't format a range in-place"
   | _, true, None, _ -> fail "Provide a filename to format in-place"
 
-  | false, false, _, _ -> Print (filename, range, debug)
+  | false, false, _, _ -> Print (filename, range)
   | false, true, Some filename, None -> InPlace filename
   | true, _, None, None -> Diff (root, diff_dry)
 
@@ -247,44 +267,71 @@ let format_diff_intervals intervals parsed_file =
   try format_intervals intervals parsed_file with
   | Invalid_argument s -> raise (InvalidDiff s)
 
-let main = function
-  | Print (filename, range, debug) ->
-    if debug then
-      let source_text, syntax_tree, editable = parse filename in
-      let fmt_node = Hack_format.transform editable in
-      let chunk_groups = Chunk_builder.build fmt_node in
-      Hackfmt_debug.debug ~range source_text syntax_tree chunk_groups
+let debug_print ?range filename =
+  let source_text, syntax_tree, editable = parse filename in
+  let fmt_node = Hack_format.transform editable in
+  let chunk_groups = Chunk_builder.build fmt_node in
+  Hackfmt_debug.debug ~range source_text syntax_tree chunk_groups
+
+let main (env: env) (options: format_options) =
+  env.mode <- Some (mode_string options);
+  match options with
+  | Print (filename, range) ->
+    env.file <- filename;
+    if env.debug then
+      debug_print ?range filename
     else
-      parse filename
-      |> format ?range
-      |> output
+      filename
+        |> parse
+        |> format ?range
+        |> output
   | InPlace filename ->
-    parse (Some filename)
-    |> format
-    |> output ~filename
+    let filename = Some filename in
+    env.file <- filename;
+    if env.debug then debug_print filename;
+    filename
+      |> parse
+      |> format
+      |> output ?filename
   | Diff (root, dry) ->
     let root = get_root root in
-    let diff = read_stdin () in
-    let parsed_diff = Parse_diff.go diff in
-    let formatted_files = List.map parsed_diff (fun (rel_path, intervals) ->
-      let filename = Path.concat root rel_path |> Path.to_string in
-      if not (file_exists filename) then
-        raise (InvalidDiff ("No such file or directory: " ^ rel_path));
-      let contents = parse (Some filename) |> format_diff_intervals intervals in
-      rel_path, filename, contents
-    ) in
-    List.iter formatted_files (fun (rel_path, filename, contents) ->
-      if dry then printf "*** %s\n" rel_path;
-      let filename = if dry then None else Some filename in
-      output ?filename contents
-    )
+    env.root <- Path.to_string root;
+    read_stdin ()
+      |> Parse_diff.go
+      |> List.map ~f:(fun (rel_path, intervals) ->
+        env.file <- Some rel_path;
+        let filename = Path.to_string (Path.concat root rel_path) in
+        if not (file_exists filename) then
+          raise (InvalidDiff ("No such file or directory: " ^ rel_path));
+        let contents = Some filename
+          |> parse
+          |> format_diff_intervals intervals
+        in
+        rel_path, filename, contents
+      )
+      |> List.iter ~f:(fun (rel_path, filename, contents) ->
+        env.file <- Some rel_path;
+        if dry then printf "*** %s\n" rel_path;
+        let filename = if dry then None else Some filename in
+        output ?filename contents
+      )
 
 let () =
+  let options, (debug, test) = parse_options () in
+  let env = {debug; test; mode = None; file = None; root = Sys.getcwd ()} in
+
+  let start_time = Unix.gettimeofday () in
+  if not env.test then Logger.init start_time;
+
   try
-    parse_options ()
-    |> validate_options
-    |> main
+    let options = validate_options env options in
+    main env options;
+
+    let time_taken = Unix.gettimeofday () -. start_time in
+    if not env.test then
+      Logger.exit time_taken None None env.mode env.file env.root;
   with exn ->
+    Printexc.print_backtrace stderr;
     let exit_code = get_exception_exit_value exn in
     let err_str = get_error_string_from_exn exn in
     let msg = match exn with
@@ -296,6 +343,9 @@ let () =
       | _ ->
         err_str ^ ": " ^ (Printexc.to_string exn)
     in
-    Printexc.print_backtrace stderr;
+    let time_taken = Unix.gettimeofday () -. start_time in
+    if not env.test then
+      Logger.exit time_taken (Some msg) (Some exit_code)
+        env.mode env.file env.root;
     eprintf "%s\n" msg;
     exit exit_code

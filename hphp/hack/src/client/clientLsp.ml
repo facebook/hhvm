@@ -445,10 +445,13 @@ let do_initialize (params: Initialize.params)
           want_will_save_wait_until = false;
           want_did_save = { include_text = false }
         };
-        hover_provider = false;
-        completion_provider = None;
+        hover_provider = true;
+        completion_provider = Some {
+          resolve_provider = true;
+          completion_trigger_characters = ["-"; ">"; "\\"];
+        };
         signature_help_provider = None;
-        definition_provider = false;
+        definition_provider = true;
         references_provider = true;
         document_highlight_provider = true;
         document_symbol_provider = true;

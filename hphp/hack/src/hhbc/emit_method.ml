@@ -74,9 +74,14 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   in
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
-    || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator
-  in
+    || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
   let method_is_closure_body = snd ast_method.Ast.m_name = "__invoke" in
+  let method_decl_vars =
+    if method_is_closure_body
+    then
+      let vars = "$0Closure" :: method_decl_vars in
+      if method_is_static then vars else vars @ ["$this"]
+    else method_decl_vars in
   let method_body = instr_seq_to_list body_instrs in
   Hhas_method.make
     method_attributes

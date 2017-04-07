@@ -487,14 +487,22 @@ and emit_string2 exprs =
 
   | [] -> failwith "String2 with zero arguments is impossible"
 
+
 and emit_lambda fundef ids =
   (* Closure conversion puts the class number used for CreateCl in the "name"
    * of the function definition *)
   let class_num = int_of_string (snd fundef.A.f_name) in
+  (* Horrid hack: use empty body for implicit closed vars, [Noop] otherwise *)
+  let explicit_use = match fundef.A.f_body with [] -> false | _ -> true in
   gather [
-    (* TODO: deal with explicit use (...) capture variables *)
     gather @@ List.map ids
-      (fun (x, _isref) -> instr (IGet (CUGetL (Local.Named (snd x)))));
+      (fun (x, isref) ->
+        instr (IGet (
+          let lid = Local.Named (snd x) in
+          if explicit_use
+          then
+            if isref then VGetL lid else CGetL lid
+          else CUGetL lid)));
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]
 

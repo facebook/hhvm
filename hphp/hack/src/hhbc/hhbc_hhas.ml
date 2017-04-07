@@ -175,6 +175,7 @@ let string_of_get x =
   | VGetN -> "VGetN"
   | VGetG -> "VGetG"
   | VGetS id -> sep ["VGetS"; string_of_classref id]
+  | VGetL id -> sep ["VGetL"; string_of_local_id id]
   | AGetC -> "AGetC"
   | AGetL id -> sep ["AGetL"; string_of_local_id id]
   | ClsRefGetL (id, cr) ->

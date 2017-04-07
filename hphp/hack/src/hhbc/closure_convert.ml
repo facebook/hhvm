@@ -45,7 +45,7 @@ type env = {
 let initial_env initial_class_num =
 {
   prefix = "Closure$";
-  outer_is_static = true;
+  outer_is_static = false;
   per_function_count = 0;
   captured_vars = ULS.empty;
   defined_vars = SSet.empty;
@@ -101,10 +101,9 @@ let make_closure_name total_count env =
   let name = if env.per_function_count = 1
                then env.prefix
                else env.prefix ^ "#" ^ string_of_int env.per_function_count in
-  name ^ ";" ^ string_of_int (total_count + 1)
+  name ^ ";" ^ string_of_int total_count
 
-let make_closure p total_count class_num env fd body =
-  let unique_var_names = ULS.items env.captured_vars in
+let make_closure ~explicit_use p total_count class_num env lambda_vars fd body =
   let md = {
     m_kind = [Public] @ (if env.outer_is_static then [Static] else []);
     m_tparams = fd.f_tparams;
@@ -119,7 +118,7 @@ let make_closure p total_count class_num env fd body =
     m_span = fd.f_span;
   } in
   let cvl =
-    List.map unique_var_names (fun name -> (p, (p, strip_dollar name), None)) in
+    List.map lambda_vars (fun name -> (p, (p, strip_dollar name), None)) in
   let cd = {
     c_mode = fd.f_mode;
     c_user_attributes = [];
@@ -135,10 +134,11 @@ let make_closure p total_count class_num env fd body =
     c_enum = None;
     c_span = p;
   } in
+  (* Horrid hack: use empty body for implicit closed vars, [Noop] otherwise *)
   let inline_fundef =
-    { fd with f_body = [];
+    { fd with f_body = if explicit_use then [Noop] else [];
               f_name = (p, string_of_int class_num) } in
-  inline_fundef, unique_var_names, cd
+  inline_fundef, cd
 
 let rec convert_expr env (p, expr_ as expr) =
   match expr_ with
@@ -249,21 +249,17 @@ and convert_lambda env p fd use_vars_opt =
   (* Remember the current capture and defined set across the lambda *)
   let captured_vars = env.captured_vars in
   let defined_vars = env.defined_vars in
-  let total_count = env.total_count + 1 in
+  let total_count = env.total_count in
   let class_num = env.class_num in
   let closures_until_now = env.closures in
   let env = { env with
-    total_count = total_count;
+    total_count = total_count + 1;
     closures = [];
     class_num = env.class_num + 1 } in
   let env = enter_lambda env fd in
   let env, block = convert_block env fd.f_body in
   let env = { env with per_function_count = env.per_function_count + 1 } in
-  let inline_fundef, lambda_vars, cd =
-    make_closure p total_count class_num env fd block in
-  (* Restore capture and defined set *)
-  let env = { env with captured_vars = captured_vars;
-                       defined_vars = defined_vars } in
+  let lambda_vars = ULS.items env.captured_vars in
   (* For lambdas without  explicit `use` variables, we ignore the computed
    * capture set and instead use the explicit set *)
   let lambda_vars, use_vars =
@@ -272,6 +268,12 @@ and convert_lambda env p fd use_vars_opt =
       lambda_vars, List.map lambda_vars (fun var -> (p, var), false)
     | Some use_vars ->
       List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
+  let inline_fundef, cd =
+    make_closure ~explicit_use:(Option.is_some use_vars_opt)
+      p total_count class_num env lambda_vars fd block in
+  (* Restore capture and defined set *)
+  let env = { env with captured_vars = captured_vars;
+                       defined_vars = defined_vars } in
   (* Add lambda captured vars to current captured vars *)
   let env = List.fold_left lambda_vars ~init:env ~f:add_var in
   let env = { env with closures = env.closures @ cd :: closures_until_now } in
@@ -346,15 +348,16 @@ and convert_block env stmts =
 (* Special case for definitely assigned locals in straight-line code *)
 and convert_sequential_stmt env stmt =
   match stmt with
-  | Expr (p1, Binop (Ast.Eq None, (p2, Lvar id), e2)) ->
+  | Expr (p1, Binop (Ast.Eq None, e1, e2)) ->
     let env, e2 = convert_expr env e2 in
-    let env = add_defined_var env (snd id) in
-    env, Expr (p1, Binop (Ast.Eq None, (p2, Lvar id), e2))
+    let env, e1 = convert_lvalue_expr env e1 in
+    env, Expr (p1, Binop (Ast.Eq None, e1, e2))
 
   | _ ->
     convert_stmt env stmt
 
 and convert_catch env (id1, id2, b) =
+  let env = add_defined_var env (snd id2) in
   let env, b = convert_block env b in
   env, (id1, id2, b)
 
@@ -368,14 +371,23 @@ and convert_case env case =
     let env, b = convert_block env b in
     env, Case (e, b)
 
+and convert_lvalue_expr env (_, expr_ as expr) =
+  match expr_ with
+  | Lvar id ->
+    let env = add_defined_var env (snd id) in
+    env, expr
+  | _ ->
+    convert_expr env expr
+
+(* Everything here is an l-value *)
 and convert_as_expr env aexpr =
   match aexpr with
   | As_v e ->
-    let env, e = convert_expr env e in
+    let env, e = convert_lvalue_expr env e in
     env, As_v e
   | As_kv (e1, e2) ->
-    let env, e1 = convert_expr env e1 in
-    let env, e2 = convert_expr env e2 in
+    let env, e1 = convert_lvalue_expr env e1 in
+    let env, e2 = convert_lvalue_expr env e2 in
     env, As_kv (e1, e2)
 
 and convert_afield env afield =

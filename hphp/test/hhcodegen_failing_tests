@@ -121,14 +121,11 @@ quick/clone.php
 quick/closure.php
 quick/closure_class.php
 quick/closure_clone.php
-quick/closure_clone_2.php
 quick/closure_func_get_arg.php
 quick/closure_gen.php
 quick/closure_gen_scope.php
 quick/closure_get_class.php
 quick/closure_get_declared_classes.php
-quick/closure_in_generator.php
-quick/closure_in_generator2.php
 quick/closure_lifetime.php
 quick/closure_private.php
 quick/closure_recursive.php
@@ -171,7 +168,6 @@ quick/ctor_param_promotion_trait.php
 quick/cuf-byref.php
 quick/cuf-call10.php
 quick/cuf-call11.php
-quick/cuf01.php
 quick/cuf__callStatic1.php
 quick/cuf__callStatic2.php
 quick/cuf__callStatic3.php
@@ -260,6 +256,7 @@ quick/fc_enum_6.php
 quick/fib_gen.php
 quick/final_class.php
 quick/final_method.php
+quick/finally_break.php
 quick/float-overflow-literals.php
 quick/float-overflow.php
 quick/floatcmp.php
@@ -380,7 +377,6 @@ quick/include2.php
 quick/include3.php
 quick/init-basic.php
 quick/instanceofInterface.php
-quick/intercept3.php
 quick/interface-bad-methodbody.php
 quick/interface10.php
 quick/interface11.php
@@ -411,7 +407,6 @@ quick/lambda2.php
 quick/lambda3.php
 quick/lambda4.php
 quick/lambda5.php
-quick/lambda6.php
 quick/lambda7.php
 quick/lexer_heredoc_buffer_boundary_65492.php
 quick/lexer_heredoc_buffer_boundary_65493.php
@@ -476,6 +471,8 @@ quick/parse_fail_type_constraint.php
 quick/parse_shapes.php
 quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
+quick/parser_massive_add_exp.php
+quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
 quick/pinit.php
 quick/post_try_error.php
@@ -551,7 +548,6 @@ quick/sqrt.php
 quick/squishdefval.php
 quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
-quick/static-closure-ctx.php
 quick/static_array.php
 quick/static_closure.php
 quick/static_clscns.php

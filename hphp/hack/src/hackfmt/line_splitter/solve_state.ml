@@ -56,7 +56,7 @@ let build_lines chunk_group rvm nesting_set =
     comma_len + String.length chunk.Chunk.text
   in
   let get_prefix_whitespace_length chunk ~is_split =
-    if is_split
+    if is_split && chunk.Chunk.indentable
     then block_indentation + Nesting.get_indent chunk.Chunk.nesting nesting_set
     else if chunk.Chunk.space_if_not_split then 1 else 0
   in

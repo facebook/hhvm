@@ -218,26 +218,29 @@ let line_interval_to_char_range char_ranges (start_line, end_line) =
   start_char, end_char
 
 let format_intervals intervals parsed_file =
-  let source_text, _, _ = parsed_file in
-  let lines = SourceText.text source_text |> String_utils.split_on_newlines in
-  let ranges = get_char_ranges lines in
-  let formatted_intervals = ref (List.map intervals (fun interval ->
-    let range = line_interval_to_char_range ranges interval in
-    interval, format ~range ~ranges parsed_file
-  )) in
-  let buf = Buffer.create @@ SourceText.length source_text + 256 in
-  let add_line line = Buffer.add_string buf line; Buffer.add_char buf '\n' in
-  List.iteri lines (fun idx line ->
-    match !formatted_intervals with
-    | [] -> add_line line
-    | ((st, ed), str) :: tl ->
-      if idx < st - 1 then
-        add_line line
-      else if idx = ed - 1 then begin
-        formatted_intervals := tl;
-        Buffer.add_string buf str
-      end
+  let source_text, _, editable = parsed_file in
+  let text = SourceText.text source_text in
+  let lines = String_utils.split_on_newlines text in
+  let chunk_groups = Hack_format.transform editable |> Chunk_builder.build in
+  let line_ranges = get_char_ranges lines in
+  let ranges = intervals
+    |> List.map ~f:(line_interval_to_char_range line_ranges)
+    |> List.map ~f:(expand_to_line_boundaries ~ranges:line_ranges source_text)
+    |> Interval.union_list
+    |> List.sort ~cmp:Interval.comparator
+  in
+  let formatted_intervals = List.map ranges (fun range ->
+    range, Line_splitter.solve ~range chunk_groups
+  ) in
+  let length = SourceText.length source_text in
+  let buf = Buffer.create (length + 256) in
+  let chars_seen = ref 0 in
+  List.iter formatted_intervals (fun ((st, ed), formatted) ->
+    Buffer.add_string buf (String.sub text !chars_seen (st - !chars_seen));
+    Buffer.add_string buf formatted;
+    chars_seen := ed;
   );
+  Buffer.add_string buf (String.sub text !chars_seen (length - !chars_seen));
   Buffer.contents buf
 
 let format_diff_intervals intervals parsed_file =

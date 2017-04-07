@@ -18,6 +18,7 @@ type t = {
   nesting: Nesting.t;
   start_char: int;
   end_char: int;
+  indentable: bool;
 }
 
 let default_chunk = {
@@ -30,6 +31,7 @@ let default_chunk = {
   nesting = Nesting.dummy;
   start_char = -1;
   end_char = -1;
+  indentable = true;
 }
 
 let make text rule nesting start_char =

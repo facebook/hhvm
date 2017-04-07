@@ -25,14 +25,29 @@ let rec transform node =
   | Missing ->
     Nothing
   | Token x ->
-    let leading = EditableToken.leading x in
-    let trailing = EditableToken.trailing x in
-    let text = EditableToken.text x in
-    let width = EditableToken.width x in
+    let open EditableToken in
     Fmt [
-      transform_leading_trivia leading;
-      Text (text, width);
-      transform_trailing_trivia trailing;
+      transform_leading_trivia (leading x);
+      begin
+        let open TokenKind in
+        match kind x with
+        | SingleQuotedStringLiteral
+        | DoubleQuotedStringLiteral
+        | DoubleQuotedStringLiteralHead
+        | StringLiteralBody
+        | DoubleQuotedStringLiteralTail
+        | HeredocStringLiteral
+        | HeredocStringLiteralHead
+        | HeredocStringLiteralTail
+        | NowdocStringLiteral ->
+          let split_text = (Str.split_delim (Str.regexp "\n") (text x)) in
+          begin match split_text with
+            | [s] -> Text (text x, width x)
+            | _ -> MultilineString (split_text, width x)
+          end
+        | _ -> Text (text x, width x)
+      end;
+      transform_trailing_trivia (trailing x);
     ]
   | SyntaxList _ ->
     failwith (Printf.sprintf

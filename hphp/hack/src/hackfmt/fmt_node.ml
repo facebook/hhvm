@@ -52,6 +52,10 @@ type t =
 
   (*** Special cases ***)
 
+  (* Tokens representing part of a string literal spanning multiple lines are
+   * split on newlines and passed as a MultilineString. These strings are not
+   * indented (since indenting would insert whitespace into the literal). *)
+  | MultilineString of string list * int
   (* Heredoc and Nowdoc literals end with a closing identifier, which must be
    * the only characters on their line (other than a semicolon). Chunk_builder
    * needs to know if the last string was a docstring close in order to ensure a
@@ -95,6 +99,12 @@ let dump ?(ignored=false) node =
         print (sprintf "Ignored \"%s\""
           (String.concat "\\n"
             (Str.split_delim (Str.regexp "\n") text)))
+    | MultilineString (strings, width) ->
+      print "MultilineString [";
+      indent := !indent + 2;
+      List.iter strings (fun s -> print (sprintf "\"%s\"" s));
+      indent := !indent - 2;
+      print "]";
     | DocLiteral node ->
       dump_list "DocLiteral" [node]
     | NumericLiteral node ->

@@ -27,7 +27,8 @@ let print_state ?range state =
       Buffer.add_string b "\n";
       let indent = Nesting.get_indent c.Chunk.nesting nesting_set in
       let indent = indent + block_indentation in
-      if c.Chunk.text <> "" then Buffer.add_string b (String.make indent ' ');
+      if c.Chunk.text <> "" && c.Chunk.indentable then
+        Buffer.add_string b (String.make indent ' ');
     end else if c.Chunk.space_if_not_split then Buffer.add_string b " ";
     Buffer.add_string b c.Chunk.text;
     if Solve_state.has_comma_after_chunk c rvm then Buffer.add_string b ",";

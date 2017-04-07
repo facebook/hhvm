@@ -85,7 +85,7 @@ let builder = object (this)
     last_string_type <- Other;
     ()
 
-  method private add_string ?(is_trivia=false) s width =
+  method private add_string ?(is_trivia=false) ?(multiline=false) s width =
     if last_string_type = DocStringClose && (is_trivia || s <> ";")
       then this#hard_split ();
 
@@ -93,21 +93,26 @@ let builder = object (this)
       | hd :: tl when hd.Chunk.is_appendable ->
         let text = hd.Chunk.text ^ (if pending_space then " " else "") ^ s in
         pending_space <- false;
-        {hd with Chunk.text = text} :: tl
+        let indentable = hd.Chunk.indentable && not multiline in
+        let hd = {hd with Chunk.text = text; Chunk.indentable = indentable} in
+        hd :: tl
       | _ -> begin
           space_if_not_split <- pending_space;
           pending_space <- false;
           let nesting = nesting_alloc.Nesting_allocator.current_nesting in
           let handle_started_next_split_rule () =
-            let cs =
-              Chunk.make s (List.hd rules) nesting last_chunk_end :: chunks in
+            let chunk = Chunk.make s (List.hd rules) nesting last_chunk_end in
+            let chunk = {chunk with Chunk.indentable = not multiline} in
+            let cs = chunk :: chunks in
             this#end_rule ();
             next_split_rule <- NoRule;
             cs
           in
           match next_split_rule with
             | NoRule ->
-              Chunk.make s (List.hd rules) nesting last_chunk_end :: chunks
+              let chunk = Chunk.make s (List.hd rules) nesting last_chunk_end in
+              let chunk = {chunk with Chunk.indentable = not multiline} in
+              chunk :: chunks
             | LazyRuleID rule_id ->
               this#start_lazy_rule rule_id;
               handle_started_next_split_rule ()
@@ -129,8 +134,15 @@ let builder = object (this)
         Stack.push (open_span (List.length chunks - 1) cost) open_spans
       );
 
-      if last_string_type = DocStringClose && s = ";"
-        then this#hard_split ();
+      if last_string_type = DocStringClose && s = ";" then begin
+        (* Normally, we'd have already counted the newline in the semicolon's
+         * trailing trivia before splitting. Since here we're splitting before
+         * getting the chance to handle that trailing trivia, we temporarily
+         * advance to make sure the new chunk has the correct start_char. *)
+        this#advance 1;
+        this#hard_split ();
+        this#advance (-1);
+      end
     end;
 
     last_string_type <- Other;
@@ -346,7 +358,22 @@ let builder = object (this)
       this#add_string ~is_trivia:true text width;
     | Ignore (_, width) ->
       this#advance width;
+    | MultilineString (strings, width) ->
+      let prev_seen = seen_chars in
+      begin match strings with
+      | hd :: tl ->
+        this#simple_split_if_unsplit ();
+        this#add_string hd (String.length hd);
+        List.iter tl (fun s -> begin
+          this#advance 1;
+          this#hard_split ();
+          this#add_string ~multiline:true s (String.length s);
+        end);
+      | [] -> ()
+      end;
+      seen_chars <- prev_seen + width;
     | DocLiteral node ->
+      this#set_next_split_rule (RuleKind (Rule.Simple Cost.Assignment));
       this#consume_fmt_node node;
       last_string_type <- DocStringClose;
     | NumericLiteral node ->

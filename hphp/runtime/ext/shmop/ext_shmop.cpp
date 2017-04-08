@@ -219,7 +219,7 @@ Variant HHVM_FUNCTION(shmop_open,
                              int64_t mode,
                              int64_t size) {
 
-  auto shminfo = std::make_unique<ShmRec>();
+  auto shminfo = folly::make_unique<ShmRec>();
   if (!shminfo->open(key, flags.get(), mode, size)) {
     return Variant(false);
   }

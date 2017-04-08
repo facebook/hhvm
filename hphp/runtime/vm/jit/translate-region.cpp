@@ -867,7 +867,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   auto result = TranslateResult::Retry;
 
   while (result == TranslateResult::Retry) {
-    unit = std::make_unique<IRUnit>(context);
+    unit = folly::make_unique<IRUnit>(context);
     unit->initLogEntry(context.func);
     irgen::IRGS irgs{*unit, &region};
 
@@ -942,7 +942,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   auto caller = ctx.srcKey().func();
 
   while (result == TranslateResult::Retry) {
-    unit = std::make_unique<IRUnit>(ctx);
+    unit = folly::make_unique<IRUnit>(ctx);
     irgen::IRGS irgs{*unit, &region};
     auto& irb = *irgs.irb;
     InliningDecider inl{caller};

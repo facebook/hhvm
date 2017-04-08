@@ -227,7 +227,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     attrs = Attr(attrs & ~AttrPersistent);
   }
 
-  auto pc = std::make_unique<PreClass>(
+  auto pc = folly::make_unique<PreClass>(
     &unit, m_line1, m_line2, m_offset, m_name,
     attrs, m_parent, m_docComment, m_id,
     m_hoistable);

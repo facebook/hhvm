@@ -698,7 +698,7 @@ void emit_ehent_tree(FuncEmitter& fe,
       ? nullptr
       : borrow(exnMap[activeList.back()].back());
     exnMap[p].push_back(
-      std::make_unique<EHRegion>(
+      folly::make_unique<EHRegion>(
         EHRegion { p, parent, start, kInvalidOffset }
       )
     );
@@ -1086,7 +1086,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   auto const is_systemlib = is_systemlib_part(unit);
   Trace::Bump bumper{Trace::hhbbc_emit, kSystemLibBump, is_systemlib};
 
-  auto ue = std::make_unique<UnitEmitter>(unit.md5);
+  auto ue = folly::make_unique<UnitEmitter>(unit.md5);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
   ue->m_preloadPriority = unit.preloadPriority;

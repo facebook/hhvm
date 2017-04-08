@@ -412,7 +412,7 @@ void final_pass(Index& index, php::Program& program) {
 template<class Container>
 std::unique_ptr<php::Program> parse_program(Container units) {
   trace_time tracer("parse");
-  auto ret = std::make_unique<php::Program>(units.size());
+  auto ret = folly::make_unique<php::Program>(units.size());
   ret->units = parallel::map(
     units,
     [&] (std::unique_ptr<UnitEmitter>& ue) {

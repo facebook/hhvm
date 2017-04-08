@@ -501,7 +501,7 @@ struct Generator::Layout {
   }
 
   void setSuffix(Layout other) {
-    suffix = std::make_unique<Layout>(std::move(other));
+    suffix = folly::make_unique<Layout>(std::move(other));
   }
 
   void merge(const Layout& other, size_t offset);
@@ -3169,7 +3169,7 @@ Generator::Layout::Layout(const Layout& other)
   , ptrs{other.ptrs}
   , conservative{other.conservative}
   , custom{other.custom}
-  , suffix{other.suffix ? std::make_unique<Layout>(*other.suffix) : nullptr}
+  , suffix{other.suffix ? folly::make_unique<Layout>(*other.suffix) : nullptr}
   , suffix_begin{other.suffix_begin}
 {
 }
@@ -3179,7 +3179,7 @@ Generator::Layout& Generator::Layout::operator=(const Layout& other) {
   ptrs = other.ptrs;
   conservative = other.conservative;
   custom = other.custom;
-  suffix = other.suffix ? std::make_unique<Layout>(*other.suffix) : nullptr;
+  suffix = other.suffix ? folly::make_unique<Layout>(*other.suffix) : nullptr;
   suffix_begin = other.suffix_begin;
   return *this;
 }

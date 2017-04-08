@@ -216,7 +216,7 @@ void hardwareCounterWrapperHelper(pid_t (*func)(int), int afdt_fd) {
     return;
   }
 
-  auto arg = std::make_unique<HardwareCounterWrapperArg>();
+  auto arg = folly::make_unique<HardwareCounterWrapperArg>();
   arg->afdt_fd = afdt_fd;
   arg->func = func;
   if (pthread_create(&arg->thr, nullptr, hardwareCounterWrapper, arg.get())) {

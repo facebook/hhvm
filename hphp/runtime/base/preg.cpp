@@ -883,7 +883,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
   new_entry->extra = extra;
   if (literal_data.isLiteral()) {
     new_entry->literal_data =
-      std::make_unique<pcre_literal_data>(std::move(literal_data));
+      folly::make_unique<pcre_literal_data>(std::move(literal_data));
   }
 
   assert((poptions & ~0x1) == 0);

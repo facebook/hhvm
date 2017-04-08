@@ -25,7 +25,7 @@ struct FastCGIServerFactory : ServerFactory {
     // We currently do not support FastCGIServer with less-than-maximum
     // initial threads.
     assert(options.m_maxThreads == options.m_initThreads);
-    return std::make_unique<FastCGIServer>(options.m_address,
+    return folly::make_unique<FastCGIServer>(options.m_address,
                                              options.m_port,
                                              options.m_maxThreads,
                                              options.m_useFileSocket);

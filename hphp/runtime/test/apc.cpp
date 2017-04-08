@@ -80,7 +80,7 @@ std::vector<PrimePair> primable_objs(Store& store) {
  * Just an empty table.
  */
 std::unique_ptr<Store> new_store() {
-  return std::make_unique<Store>();
+  return folly::make_unique<Store>();
 }
 
 /*
@@ -89,7 +89,7 @@ std::unique_ptr<Store> new_store() {
 std::unique_ptr<Store> new_primed_store() {
   s_apc_file_storage.enable("/tmp/apc_unit_test", 1ul << 20);
 
-  auto ret = std::make_unique<Store>();
+  auto ret = folly::make_unique<Store>();
   ret->prime(primable_ints(*ret));
   ret->prime(primable_objs(*ret));
   ret->primeDone();

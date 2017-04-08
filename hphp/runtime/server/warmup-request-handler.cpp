@@ -21,7 +21,7 @@
 
 #include <folly/Memory.h>
 
-using std::make_unique;
+using folly::make_unique;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ void WarmupRequestHandler::logToAccessLog(Transport *transport) {
 
 std::unique_ptr<RequestHandler> WarmupRequestHandlerFactory::createHandler() {
   return
-    std::make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
+    folly::make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
 }
 
 void WarmupRequestHandlerFactory::bumpReqCount() {

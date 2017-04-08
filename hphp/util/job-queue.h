@@ -738,8 +738,8 @@ private:
   std::unique_ptr<AsyncFunc<TWorker>> m_reaperFunc;
 
   int addReaper() {
-    m_reaper = std::make_unique<TWorker>();
-    m_reaperFunc = std::make_unique<AsyncFunc<TWorker>>(m_reaper.get(),
+    m_reaper = folly::make_unique<TWorker>();
+    m_reaperFunc = folly::make_unique<AsyncFunc<TWorker>>(m_reaper.get(),
                                                           &TWorker::start);
     m_reaper->create(m_maxThreadCount, &m_queue, m_reaperFunc.get(), m_context);
     m_reaperFunc->start();

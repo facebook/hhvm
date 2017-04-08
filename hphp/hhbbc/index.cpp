@@ -1184,7 +1184,7 @@ void resolve_combinations(IndexData& index,
   // Everything is defined in the naming environment here.  (We
   // returned early if something didn't exist.)
 
-  auto cinfo = std::make_unique<ClassInfo>();
+  auto cinfo = folly::make_unique<ClassInfo>();
   cinfo->cls = cls;
   if (cls->parentName) {
     cinfo->parent   = env.lookup(cls->parentName);
@@ -1236,7 +1236,7 @@ void define_func_family(IndexData& index,
                         borrowed_ptr<ClassInfo> cinfo,
                         SString name,
                         borrowed_ptr<const php::Func> func) {
-  index.funcFamilies.push_back(std::make_unique<FuncFamily>());
+  index.funcFamilies.push_back(folly::make_unique<FuncFamily>());
   auto const family = borrow(index.funcFamilies.back());
 
   for (auto& cleaf : cinfo->subclassList) {
@@ -1903,7 +1903,7 @@ PublicSPropEntry lookup_public_static_impl(
 //////////////////////////////////////////////////////////////////////
 
 Index::Index(borrowed_ptr<php::Program> program)
-  : m_data(std::make_unique<IndexData>())
+  : m_data(folly::make_unique<IndexData>())
 {
   trace_time tracer("create index");
 

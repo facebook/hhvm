@@ -158,7 +158,7 @@ std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
 }
 
 std::unique_ptr<php::Program> make_program() {
-  auto program = std::make_unique<php::Program>(1);
+  auto program = folly::make_unique<php::Program>(1);
   program->units.push_back(make_test_unit(*program));
   return program;
 }

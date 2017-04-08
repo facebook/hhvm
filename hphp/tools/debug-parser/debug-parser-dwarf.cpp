@@ -2249,11 +2249,11 @@ private:
 
 std::unique_ptr<TypeParser>
 make_dwarf_type_parser(const std::string& filename) {
-  return std::make_unique<TypeParserImpl>(filename);
+  return folly::make_unique<TypeParserImpl>(filename);
 }
 
 std::unique_ptr<Printer> make_dwarf_printer(const std::string& filename) {
-  return std::make_unique<PrinterImpl>(filename);
+  return folly::make_unique<PrinterImpl>(filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

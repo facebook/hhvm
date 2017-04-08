@@ -527,7 +527,7 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
 
 std::unique_ptr<Unit> UnitEmitter::create() {
   INC_TPC(unit_load);
-  auto u = std::make_unique<Unit>();
+  auto u = folly::make_unique<Unit>();
   u->m_repoId = m_repoId;
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
@@ -832,7 +832,7 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
 
 std::unique_ptr<UnitEmitter>
 UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
-  auto ue = std::make_unique<UnitEmitter>(md5);
+  auto ue = folly::make_unique<UnitEmitter>(md5);
   if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
   return ue;
 }

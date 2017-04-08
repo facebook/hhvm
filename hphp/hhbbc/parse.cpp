@@ -265,7 +265,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
   auto nextExnNode = uint32_t{0};
 
   for (auto& eh : fe.ehtab) {
-    auto node = std::make_unique<php::ExnNode>();
+    auto node = folly::make_unique<php::ExnNode>();
     node->id = nextExnNode++;
     node->parent = nullptr;
 
@@ -740,7 +740,7 @@ void build_cfg(ParseUnitState& puState,
   auto findBlock = [&] (Offset off) {
     auto& ptr = blockMap[off];
     if (!ptr) {
-      ptr               = std::make_unique<php::Block>();
+      ptr               = folly::make_unique<php::Block>();
       ptr->id           = blockMap.size() - 1;
       ptr->section      = php::Block::Section::Main;
       ptr->exnNode      = nullptr;
@@ -821,7 +821,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   FTRACE(2, "  func: {}\n",
     fe.name->data() && *fe.name->data() ? fe.name->data() : "pseudomain");
 
-  auto ret             = std::make_unique<php::Func>();
+  auto ret             = folly::make_unique<php::Func>();
   ret->name            = fe.name;
   ret->srcInfo         = php::SrcInfo { fe.getLocation(),
                                         fe.docComment };
@@ -858,7 +858,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       }
     }();
 
-    ret->nativeInfo                   = std::make_unique<php::NativeInfo>();
+    ret->nativeInfo                   = folly::make_unique<php::NativeInfo>();
     ret->nativeInfo->returnType       = fe.hniReturnType;
     ret->nativeInfo->dynCallWrapperId = fe.dynCallWrapperId;
     if (f && ret->params.size()) {
@@ -947,7 +947,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
                                         const PreClassEmitter& pce) {
   FTRACE(2, "  class: {}\n", pce.name()->data());
 
-  auto ret               = std::make_unique<php::Class>();
+  auto ret               = folly::make_unique<php::Class>();
   ret->name              = pce.name();
   ret->srcInfo           = php::SrcInfo { pce.getLocation(),
                                           pce.docComment() };
@@ -1080,7 +1080,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
 
   auto const& ue = *uep;
 
-  auto ret      = std::make_unique<php::Unit>();
+  auto ret      = folly::make_unique<php::Unit>();
   ret->md5      = ue.md5();
   ret->filename = ue.m_filepath;
   ret->preloadPriority = ue.m_preloadPriority;
@@ -1117,7 +1117,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
 
   for (auto& ta : ue.typeAliases()) {
     ret->typeAliases.push_back(
-      std::make_unique<php::TypeAlias>(ta)
+      folly::make_unique<php::TypeAlias>(ta)
     );
   }
 

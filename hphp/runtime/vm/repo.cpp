@@ -682,7 +682,7 @@ struct PasswdBuffer {
     : size{sysconf(name)}
   {
     if (size == -1) size = 1024;
-    data = std::make_unique<char[]>(size);
+    data = folly::make_unique<char[]>(size);
   }
 
   long size;

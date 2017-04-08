@@ -56,7 +56,7 @@ folly::Singleton<AsyncMysqlClientPool> clientPool([]() {
     HdfAsyncMysqlClientPoolSize = 2;
   }
   return new AsyncMysqlClientPool(
-      std::make_unique<am::AsyncMysqlClientFactory>(),
+      folly::make_unique<am::AsyncMysqlClientFactory>(),
       HdfAsyncMysqlClientPoolSize);
 });
 }
@@ -1098,7 +1098,7 @@ void AsyncMysqlQueryResult::create(std::shared_ptr<am::Operation> op,
                                    db::ClientPerfStats stats,
                                    am::QueryResult query_result) {
   AsyncMysqlResult::create(std::move(op), std::move(stats));
-  m_query_result = std::make_unique<am::QueryResult>(std::move(query_result));
+  m_query_result = folly::make_unique<am::QueryResult>(std::move(query_result));
   m_field_index = req::make_shared<FieldIndex>(m_query_result->getRowFields());
 }
 

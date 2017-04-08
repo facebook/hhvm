@@ -66,7 +66,7 @@ void ClassicWriter::init(const std::string& username,
   m_threadDataFn = fn;
   if (m_channel == LogChannel::CRONOLOG) {
     assert(!m_logdata.file.empty());
-    m_cronolog = std::make_unique<Cronolog>();
+    m_cronolog = folly::make_unique<Cronolog>();
     if (m_logdata.file.find('%') != std::string::npos) {
       m_cronolog->m_template = m_logdata.file;
       m_cronolog->setPeriodicity();
@@ -191,7 +191,7 @@ static InitFiniNode registerClassicWriter(
   []() { AccessLogFileData::registerWriter(
       ClassicWriter::handle,
       [](const AccessLogFileData& alfd, LogChannel chan) {
-        return std::make_unique<ClassicWriter>(alfd, chan);
+        return folly::make_unique<ClassicWriter>(alfd, chan);
       }
   );},
   InitFiniNode::When::ServerPreInit

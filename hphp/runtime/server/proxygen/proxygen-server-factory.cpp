@@ -22,7 +22,7 @@ struct ProxygenServerFactory : ServerFactory {
   ProxygenServerFactory() {}
 
   virtual ServerPtr createServer(const ServerOptions& options) override {
-    return std::make_unique<ProxygenServer>(options);
+    return folly::make_unique<ProxygenServer>(options);
   }
 };
 

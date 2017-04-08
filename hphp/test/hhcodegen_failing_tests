@@ -131,6 +131,7 @@ quick/closure_private.php
 quick/closure_recursive.php
 quick/closure_recursive_bad.php
 quick/closure_static.php
+quick/closure_static_vars.php
 quick/closure_use_immediately.php
 quick/closure_use_this.php
 quick/clsmethodf.php
@@ -248,6 +249,7 @@ quick/fail_86pinit.php
 quick/fail_86sinit.php
 quick/fail_self.php
 quick/fatality.php
+quick/fb_dbt.php
 quick/fb_intercept.php
 quick/fc_enum_1.php
 quick/fc_enum_2.php
@@ -272,6 +274,7 @@ quick/func3.php
 quick/func_get_args.php
 quick/func_get_args_namespace.php
 quick/func_slice_args.php
+quick/function-static-init.php
 quick/function_varargs.php
 quick/fwd.php
 quick/generator_cond_func.php
@@ -375,6 +378,7 @@ quick/incdec-string.php
 quick/include.php
 quick/include2.php
 quick/include3.php
+quick/inherit-static-local.php
 quick/init-basic.php
 quick/instanceofInterface.php
 quick/interface-bad-methodbody.php
@@ -408,6 +412,7 @@ quick/lambda3.php
 quick/lambda4.php
 quick/lambda5.php
 quick/lambda7.php
+quick/lambda8.php
 quick/lexer_heredoc_buffer_boundary_65492.php
 quick/lexer_heredoc_buffer_boundary_65493.php
 quick/lexer_heredoc_buffer_boundary_65494.php
@@ -474,7 +479,9 @@ quick/parse_type_not_typedef.php
 quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
+quick/pgo1.php
 quick/pinit.php
+quick/poly-torture.php
 quick/post_try_error.php
 quick/priv1.php
 quick/priv4.php
@@ -482,6 +489,7 @@ quick/priv5.php
 quick/priv6.php
 quick/profile/Setprofile_async.php
 quick/profile/Setprofile_generic.php
+quick/profile/setprofile-this.php
 quick/profile/setprofile_throw.php
 quick/prop_order.php
 quick/prop_order_parens.php
@@ -507,9 +515,11 @@ quick/reflection2.php
 quick/reflection_get_closure.php
 quick/reflection_is_async.php
 quick/reflection_isclosure.php
+quick/reflection_static_vars.php
 quick/regpressure.php
 quick/regpressure2.php
 quick/regpressure_bug.php
+quick/rename_function.php
 quick/reqonce.php
 quick/reserved_class1.php
 quick/reserved_class2.php
@@ -550,6 +560,8 @@ quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
 quick/static_array.php
 quick/static_closure.php
+quick/static_closure_gen.php
+quick/static_closure_params.php
 quick/static_clscns.php
 quick/static_clsmethod.php
 quick/static_fatal.php
@@ -557,6 +569,7 @@ quick/static_new.php
 quick/static_prop_eval_order.php
 quick/static_sprop.php
 quick/static_sprop2.php
+quick/static_vars.php
 quick/strToInt.php
 quick/strict_hashbang_start.php
 quick/string-cse.php
@@ -569,6 +582,7 @@ quick/switch.php
 quick/switchRef.php
 quick/switch_special_cases.php
 quick/syntax-error.php
+quick/temparray.php
 quick/test_remat.php
 quick/this-type.php
 quick/tmpfile.php

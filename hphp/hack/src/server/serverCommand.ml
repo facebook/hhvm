@@ -40,6 +40,7 @@ let rpc_command_needs_full_check : type a. a t -> bool = function
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x
   | Stream BUILD _ -> true (* Build doesn't fully support lazy decl *)
+  | Stream LIST_FILES -> true (* Same as Rpc STATUS *)
   | _ -> false
 
 let full_recheck_if_needed genv env msg =

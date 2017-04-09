@@ -2972,8 +2972,9 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
       arr.m_bits = bits;
+      auto len = arr.m_data.packed->elems.size();
       arr.m_data.packed.mutate()->elems.push_back(val);
-      return { std::move(arr), ival(arr.m_data.packed->elems.size() - 1) };
+      return { std::move(arr), ival(len) };
     }
 
   case DataTag::ArrLikePackedN:

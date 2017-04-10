@@ -1450,7 +1450,7 @@ void emitFCallBuiltin(IRGS& env,
                       int32_t numArgs,
                       int32_t numNonDefault,
                       const StringData* funcName) {
-  auto const callee = Unit::lookupFunc(funcName);
+  auto const callee = Unit::lookupBuiltin(funcName);
 
   if (!callee) PUNT(Missing-builtin);
 
@@ -1814,7 +1814,7 @@ void implGenericIdx(IRGS& env) {
 
   SSATmp* const args[] = { base, key, def };
 
-  static auto func = Unit::lookupFunc(s_idx.get());
+  static auto func = Unit::lookupBuiltin(s_idx.get());
   assert(func && func->numParams() == 3);
 
   emitDirectCall(env, func, 3, args);

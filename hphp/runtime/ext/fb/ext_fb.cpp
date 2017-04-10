@@ -1009,9 +1009,8 @@ bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
 }
 
 bool is_dangerous_varenv_function(const StringData* name) {
-  auto const f = Unit::lookupFunc(name);
-  // Functions can which can access the caller's frame are always builtin, so if
-  // its not already defined, we know it can't be one.
+  auto const f = Unit::lookupBuiltin(name);
+  // Functions can which can access the caller's frame are always builtin.
   return f && f->accessesCallerFrame();
 }
 

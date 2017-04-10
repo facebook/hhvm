@@ -47,7 +47,7 @@ folly::Optional<Type> const_fold(ISS& env,
     args[op.arg1 - i - 1] = *val;
   }
 
-  auto const func = Unit::lookupFunc(rfunc.name());
+  auto const func = Unit::lookupBuiltin(rfunc.name());
   always_assert_flog(
     func,
     "func not found for builtin {}\n",

@@ -46,9 +46,11 @@ const Func* findCuf(Op op,
                     const Func* ctxFunc,
                     const Class*& cls,
                     StringData*& invName,
-                    bool& forward) {
+                    bool& forward,
+                    bool& needsUnitLoad) {
   cls = nullptr;
   invName = nullptr;
+  needsUnitLoad = false;
 
   const StringData* str =
     callable->hasConstVal(TStr) ? callable->strVal() : nullptr;
@@ -58,7 +60,12 @@ const Func* findCuf(Op op,
   StringData* sclass = nullptr;
   StringData* sname = nullptr;
   if (str) {
-    if (auto f = Unit::lookupDynCallFunc(str)) return f;
+    auto const lookup = lookupImmutableFunc(ctxFunc->unit(), str);
+    if (lookup.func) {
+      needsUnitLoad = lookup.needsUnitLoad;
+      auto wrapper = lookup.func->dynCallWrapper();
+      return LIKELY(!wrapper) ? lookup.func : wrapper;
+    }
     String name(const_cast<StringData*>(str));
     int pos = name.find("::");
     if (pos <= 0 || pos + 2 >= name.size() ||
@@ -650,8 +657,9 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
 
   const Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool needsUnitLoad = false;
   auto const callee = findCuf(op, callable, curFunc(env), cls, invName,
-                              forward);
+                              forward, needsUnitLoad);
   if (!callee) return fpushCufUnknown(env, op, numArgs);
 
   SSATmp* ctx;
@@ -674,13 +682,15 @@ void implFPushCufOp(IRGS& env, Op op, int32_t numArgs) {
     }
   } else {
     ctx = cns(env, TNullptr);
-    auto const handle = callee->funcHandle();
-    if (handle == rds::kInvalidHandle ||
-        !rds::isPersistentHandle(handle)) {
-      // The miss path is complicated and rare. Punt for now.
-      func = gen(env, LdFuncCachedSafe,
-                 LdFuncCachedData { callee->name() },
-                 makeExitSlow(env));
+    if (needsUnitLoad) {
+      // Ensure the function's unit is loaded. The miss path is complicated and
+      // rare. Punt for now.
+      gen(
+        env,
+        LdFuncCachedSafe,
+        LdFuncCachedData { callee->name() },
+        makeExitSlow(env)
+      );
     }
   }
 
@@ -698,15 +708,18 @@ void fpushFuncCommon(IRGS& env,
                      int32_t numParams,
                      const StringData* name,
                      const StringData* fallback) {
-  if (auto const func = Unit::lookupFunc(name)) {
-    if (func->isNameBindingImmutable(curUnit(env))) {
-      fpushActRec(env,
-                  cns(env, func),
-                  cns(env, TNullptr),
-                  numParams,
-                  nullptr);
-      return;
-    }
+
+  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  if (lookup.func) {
+    // We know the function, but we have to ensure its unit is loaded. Use
+    // LdFuncCached, ignoring the result to ensure this.
+    if (lookup.needsUnitLoad) gen(env, LdFuncCached, LdFuncCachedData { name });
+    fpushActRec(env,
+                cns(env, lookup.func),
+                cns(env, TNullptr),
+                numParams,
+                nullptr);
+    return;
   }
 
   auto const ssaFunc = fallback
@@ -755,9 +768,8 @@ bool callAccessesLocals(const NormalizedInstruction& inst,
 
   auto const checkTaintId = [&](Id id) {
     auto const str = unit->lookupLitstrId(id);
-    // Only builtins can access a caller's locals or be skip-frame and if we
-    // can't lookup the function, we know its not a builtin.
-    auto const callee = Unit::lookupFunc(str);
+    // Only builtins can access a caller's locals or be skip-frame.
+    auto const callee = Unit::lookupBuiltin(str);
     return callee && predicate(callee);
   };
 
@@ -840,12 +852,10 @@ bool callNeedsCallerFrame(const NormalizedInstruction& inst,
     // If the function was invoked dynamically, we can't be sure.
     if (!str) return true;
 
-    // Only C++ functions can inspect the caller frame; we know these are all
+    // Only builtins can inspect the caller frame; we know these are all
     // loaded ahead of time and unique/persistent.
-    if (auto const f = Unit::lookupFunc(str)) {
-      return funcNeedsCallerFrame(f);
-    }
-    return false;
+    auto const f = Unit::lookupBuiltin(str);
+    return f && funcNeedsCallerFrame(f);
   };
 
   if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);

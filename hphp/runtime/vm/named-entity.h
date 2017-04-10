@@ -158,6 +158,21 @@ struct NamedEntity {
   void pushClass(Class* cls);
   void removeClass(Class* goner);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Unique func.
+
+  /*
+   * Return the unique func corresponding to this name, or nullptr if there is
+   * none registered.
+   */
+  Func* uniqueFunc() const;
+
+  /*
+   * Register the unique func corresponding to this name.
+   *
+   * Precondition: func->isUnique()
+   */
+  void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
@@ -200,6 +215,8 @@ public:
 private:
   AtomicLowPtr<Class, std::memory_order_acquire,
                std::memory_order_release> m_clsList{nullptr};
+  AtomicLowPtr<Func, std::memory_order_acquire,
+               std::memory_order_release> m_uniqueFunc{nullptr};
 };
 
 /*

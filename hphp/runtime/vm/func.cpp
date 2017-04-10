@@ -520,26 +520,6 @@ Id Func::lookupVarId(const StringData* name) const {
 ///////////////////////////////////////////////////////////////////////////////
 // Persistence.
 
-bool Func::isNameBindingImmutable(const Unit* fromUnit) const {
-  if (RuntimeOption::EvalJitEnableRenameFunction ||
-      m_attrs & AttrInterceptable) {
-    return false;
-  }
-
-  if (isBuiltin()) {
-    return true;
-  }
-
-  if (isUnique()) {
-    return true;
-  }
-
-  // Defined at top level, in the same unit as the caller. This precludes
-  // conditionally defined functions and cross-module calls -- both phenomena
-  // can change name->Func mappings during the lifetime of a TC.
-  return top() && (fromUnit == m_unit);
-}
-
 bool Func::isImmutableFrom(const Class* cls) const {
   if (!RuntimeOption::RepoAuthoritative) return false;
   assert(cls && cls->lookupMethod(name()) == this);

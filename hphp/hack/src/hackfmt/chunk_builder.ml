@@ -215,6 +215,11 @@ let builder = object (this)
     this#set_next_split_rule (RuleKind (Rule.Simple cost));
     ()
 
+  method private is_at_chunk_group_boundry () =
+    List.is_empty rules &&
+      ISet.is_empty lazy_rules &&
+      not (Nesting_allocator.is_nested nesting_alloc)
+
   method private hard_split () =
     begin match chunks with
       | [] -> ()
@@ -222,9 +227,7 @@ let builder = object (this)
         this#split ();
         this#set_next_split_rule (RuleKind Rule.Always);
     end;
-    if List.is_empty rules &&
-      not (List.is_empty chunks) &&
-      not (Nesting_allocator.is_nested nesting_alloc)
+    if this#is_at_chunk_group_boundry () && not (List.is_empty chunks)
     then this#push_chunk_group ()
 
   method private set_next_split_rule rule_type =
@@ -298,12 +301,12 @@ let builder = object (this)
     for end chunks and block nesting
   *)
   method private start_block_nest () =
-    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
+    if this#is_at_chunk_group_boundry ()
     then block_indent <- block_indent + 2
     else this#nest ()
 
   method private end_block_nest () =
-    if List.is_empty rules && not (Nesting_allocator.is_nested nesting_alloc)
+    if this#is_at_chunk_group_boundry ()
     then block_indent <- block_indent - 2
     else this#unnest ()
 

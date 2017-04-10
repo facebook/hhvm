@@ -962,7 +962,7 @@ let rec transform node =
       Space;
       (* TODO: rethink possible one line bodies *)
       (* TODO: correctly handle spacing after the closing brace *)
-      handle_possible_compound_statement body;
+      handle_possible_compound_statement ~space:false body;
     ]
   | XHPChildrenDeclaration x ->
     let (kw, expr, semi) = get_xhp_children_declaration_children x in

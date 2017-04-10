@@ -113,9 +113,14 @@ and expand_ env (root_reason, root_ty as root) =
       | Tunresolved tyl ->
           let env, tyl = List.map_env env tyl begin fun prev_env ty ->
             let env, ty = expand_ env ty in
+            (* If ty here involves a type access, we have to use
+              the current environment's dependent types. Otherwise,
+              we throw away type access information.
+            *)
+            let ty = ExprDepTy.apply env.tenv env.dep_tys ty in
             { prev_env with tenv = env.tenv }, ty
           end in
-          env, (root_reason, Tunresolved tyl)
+          { env with dep_tys = [] } , (root_reason, Tunresolved tyl)
       | Tvar _ ->
           let tenv, ty =
             Env.expand_type env.tenv root in

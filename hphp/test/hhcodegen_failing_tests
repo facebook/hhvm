@@ -8,7 +8,6 @@ quick/Empty.php
 quick/FPassC-eval.php
 quick/FPassC.php
 quick/FPassR.php
-quick/FPassS.php
 quick/FPushClsMethodF.php
 quick/FPushCtor.php
 quick/FPushObjMethod.php
@@ -30,7 +29,6 @@ quick/Xhp.php
 quick/__call.php
 quick/__isset.php
 quick/abs_codegen.php
-quick/abstract_static_2.php
 quick/actrec.php
 quick/alias_torture.php
 quick/all_type_comparison_test.php
@@ -39,7 +37,6 @@ quick/apc-sleep.php
 quick/apc.php
 quick/args-test.php
 quick/array_access.php
-quick/array_callbacks.php
 quick/array_helper_reenter.php
 quick/array_packed.php
 quick/array_plus_eq_dtor.php
@@ -214,7 +211,6 @@ quick/dv_if.php
 quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
-quick/end_bb_on_popc.php
 quick/enormous-string.php
 quick/eq_int_str.php
 quick/eval.php
@@ -245,7 +241,6 @@ quick/fb_intercept.php
 quick/fc_enum_1.php
 quick/fc_enum_2.php
 quick/fc_enum_4.php
-quick/fc_enum_6.php
 quick/fib_gen.php
 quick/final_class.php
 quick/final_method.php
@@ -334,7 +329,6 @@ quick/hopt-ret8.php
 quick/hopt-ret9.php
 quick/hopt-same-simp.php
 quick/hopt-simp.php
-quick/hopt-static.php
 quick/hopt-sub-simp.php
 quick/hopt-true3.php
 quick/hopt-true4.php
@@ -403,11 +397,6 @@ quick/lambda3.php
 quick/lambda4.php
 quick/lambda7.php
 quick/lambda8.php
-quick/lexer_heredoc_buffer_boundary_65492.php
-quick/lexer_heredoc_buffer_boundary_65493.php
-quick/lexer_heredoc_buffer_boundary_65494.php
-quick/lexer_heredoc_label_cornercases.php
-quick/lexer_heredoc_many_buffers.php
 quick/lexer_heredoc_var_newlines.php
 quick/lexer_nowdoc_buffer_boundary_65492.php
 quick/lexer_nowdoc_buffer_boundary_65493.php
@@ -420,14 +409,12 @@ quick/list-assignment.php
 quick/locals.php
 quick/magic-get-dtors.php
 quick/magic-get-set.php
-quick/many-clsrefs.php
 quick/map_toarray_warn.php
 quick/merge_globals.php
 quick/method-undefined.php
 quick/method_param_promotion_error.php
 quick/methodcache_direct_magic.php
 quick/methodcache_magic.php
-quick/methodcache_static.php
 quick/mod.php
 quick/mod_min_negone.php
 quick/negjump.php
@@ -552,8 +539,6 @@ quick/static_closure.php
 quick/static_closure_gen.php
 quick/static_closure_params.php
 quick/static_clscns.php
-quick/static_clsmethod.php
-quick/static_fatal.php
 quick/static_new.php
 quick/static_prop_eval_order.php
 quick/static_sprop.php

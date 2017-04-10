@@ -13,14 +13,17 @@ class C {
     // FPushClsMethod
     $cls = 'C';
     $cls::foo("a", "b", "c", "d");
+
     $fn = 'foo';
     C::$fn("a", "b", "c", "d");
+    /*
     $fn = 'foo';
     $cls::$fn("a", "b", "c", "d");
 
     // FPushClsMethodF
     self::foo("a", "b", "c", "d");
-  }
+*/
+    }
 }
 
 function main() {
@@ -29,4 +32,3 @@ function main() {
 }
 
 main();
-

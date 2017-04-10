@@ -199,16 +199,24 @@ let print_debug_time_info () =
 let do_compile compiler_options opts files_info = begin
   let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
   let get_nast_from_fileinfo tcopt fn fileinfo =
+    (* Functions *)
     let funs = fileinfo.FileInfo.funs in
     let parse_function (_, fun_) =
         Parser_heap.find_fun_in_file ~full:true tcopt fn fun_ in
     let parsed_functions = List.filter_map funs parse_function in
+    (* Classes *)
     let classes = fileinfo.FileInfo.classes in
     let parse_class (_, class_) =
         Parser_heap.find_class_in_file ~full:true tcopt fn class_ in
     let parsed_classes = List.filter_map classes parse_class in
-    let parsed_typedefs = [] in (* TODO typedefs *)
+    (* Typedefs *)
+    let typedefs = fileinfo.FileInfo.typedefs in
+    let parse_typedef (_, typedef_) =
+        Parser_heap.find_typedef_in_file ~full:true tcopt fn typedef_ in
+    let parsed_typedefs = List.filter_map typedefs parse_typedef in
+    (* Consts *)
     let parsed_consts = [] in (* TODO consts *)
+    (* Statements *)
     let parsed_statements =
         Parser_heap.find_statements_in_file ~full:true tcopt fn in
     (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts,

@@ -628,6 +628,11 @@ let string_of_type_info ?(is_enum = false) ti =
         ^ flags_text
     ^ " >"
 
+let string_of_typedef_info ti =
+  let type_constraint = Hhas_type_info.type_constraint ti in
+  let name = Hhas_type_constraint.name type_constraint in
+    "<" ^ quote_str_option name ^ "  >"
+
 let string_of_type_infos type_infos =
   let strs = List.map string_of_type_info type_infos in
   String.concat " " strs
@@ -1007,6 +1012,12 @@ let add_defcls buf classes =
     (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
     classes
 
+let add_deftypealias buf typedefs =
+  List.iteri
+    (fun count _ ->
+      B.add_string buf (Printf.sprintf "  DefTypeAlias %n\n" count))
+    typedefs
+
 let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf ".adata A_";
   B.add_string buf @@ string_of_int num;
@@ -1053,8 +1064,16 @@ let add_top_level buf hhas_prog =
   add_decl_vars buf 2 main_decl_vars;
   add_num_iters buf 2 main_num_iters;
   add_defcls buf non_closure_classes;
+  add_deftypealias buf (Hhas_program.typedefs hhas_prog);
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"
+
+let add_typedef buf typedef =
+  let name = fmt_name (Hhas_typedef.name typedef) in
+  let type_info = Hhas_typedef.type_info typedef in
+  B.add_string buf "\n.alias ";
+  B.add_string buf name;
+  B.add_string buf (" = " ^ string_of_typedef_info type_info ^ ";")
 
 let add_program buf hhas_prog =
   B.add_string buf "#starts here\n";
@@ -1064,6 +1083,7 @@ let add_program buf hhas_prog =
   add_top_level buf hhas_prog;
   List.iter (add_fun_def buf) functions;
   List.iter (add_class_def buf) (Hhas_program.classes hhas_prog);
+  List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
   B.add_string buf "\n#ends here\n"
 
 let to_string hhas_prog =

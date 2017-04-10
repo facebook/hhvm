@@ -2795,37 +2795,42 @@ Type array_elem(const Type& arr, const Type& undisectedKey) {
 
 std::pair<Type,bool> array_like_set(Type arr,
                                     const ArrKey& key,
-                                    const Type& val) {
+                                    const Type& valIn) {
 
   const bool maybeEmpty = arr.m_bits & BArrLikeE;
-  const bool isVector = arr.m_bits & BOptVec;
-  const bool isKeyset = arr.m_bits & BOptKeyset;
-  const bool validKey =
+  const bool isVector   = arr.m_bits & BOptVec;
+  const bool isKeyset   = arr.m_bits & BOptKeyset;
+  const bool isPhpArray = arr.m_bits & BOptArr;
+  const bool validKey   =
     key.type.subtypeOf(TInt) ||
     (!isVector && key.type.subtypeOf(TStr));
 
   trep bits = combine_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits = static_cast<trep>(bits & ~BArrLikeE);
 
+  auto const fixRef  = !isPhpArray && valIn.couldBe(TRef);
+  auto const noThrow = !fixRef && validKey;
+  auto const& val    = fixRef ? TInitCell : valIn;
+
   if (!(arr.m_bits & BArrLikeN)) {
     assert(maybeEmpty);
     if (isVector) return { TBottom, false };
     if (key.i && !*key.i && !isKeyset) {
-      return { packed_impl(bits, { val }), validKey };
+      return { packed_impl(bits, { val }), noThrow };
     }
     if (auto const k = key.tv()) {
       MapElems m;
       m.emplace_back(*k, val);
-      return { map_impl(bits, std::move(m)), validKey };
+      return { map_impl(bits, std::move(m)), noThrow };
     }
-    return { mapn_impl(bits, key.type, val), validKey };
+    return { mapn_impl(bits, key.type, val), noThrow };
   }
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,bool> {
     return { mapn_impl(bits,
                        union_of(inKey, key.type),
-                       union_of(inVal, val)), validKey };
+                       union_of(inVal, val)), noThrow };
   };
 
   arr.m_bits = bits;
@@ -2848,11 +2853,13 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(mapn.key, mapn.val);
     } else {
       if (auto d = toDArrLikePacked(arr.m_data.aval)) {
-        return array_like_set(packed_impl(bits, std::move(d->elems)), key, val);
+        return array_like_set(packed_impl(bits, std::move(d->elems)),
+                              key, valIn);
       }
       assert(!isVector);
       auto d = toDArrLikeMap(arr.m_data.aval);
-      return array_like_set(map_impl(bits, std::move(d.map)), key, val);
+      return array_like_set(map_impl(bits, std::move(d.map)),
+                            key, valIn);
     }
 
   case DataTag::ArrLikePacked:
@@ -2861,7 +2868,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(TInt, packed_values(*arr.m_data.packed));
     } else {
       auto const inRange = arr_packed_set(arr, key, val);
-      return { std::move(arr), inRange };
+      return { std::move(arr), inRange && noThrow };
     }
 
   case DataTag::ArrLikePackedN:
@@ -2869,7 +2876,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(TInt, arr.m_data.packedn->type);
     } else {
       auto const inRange = arr_packedn_set(arr, key, val, false);
-      return { std::move(arr), inRange };
+      return { std::move(arr), inRange && noThrow };
     }
 
   case DataTag::ArrLikeMap:
@@ -2879,7 +2886,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(std::move(mkv.first), std::move(mkv.second));
     } else {
       auto const inRange = arr_map_set(arr, key, val);
-      return { std::move(arr), inRange };
+      return { std::move(arr), inRange && noThrow };
     }
 
   case DataTag::ArrLikeMapN:
@@ -2888,7 +2895,7 @@ std::pair<Type,bool> array_like_set(Type arr,
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     } else {
       auto const inRange = arr_mapn_set(arr, key, val);
-      return { std::move(arr), inRange };
+      return { std::move(arr), inRange && noThrow };
     }
   }
 
@@ -3097,8 +3104,7 @@ vec_set(Type vec, const Type& undisectedKey, const Type& val) {
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, false};
 
-  return array_like_set(std::move(vec), key,
-                        val.subtypeOf(TInitCell) ? val : TInitCell);
+  return array_like_set(std::move(vec), key, val);
 }
 
 std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
@@ -3148,8 +3154,7 @@ dict_set(Type dict, const Type& undisectedKey, const Type& val) {
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, false};
 
-  return array_like_set(std::move(dict), key,
-                        val.subtypeOf(TInitCell) ? val : TInitCell);
+  return array_like_set(std::move(dict), key, val);
 }
 
 std::pair<Type,Type> dict_newelem(Type dict, const Type& val) {

@@ -848,7 +848,8 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
     }
 
     int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime || !limit_ttl);
-    if (check_noTTL(key.data(), key.size())) {
+    if (adjustedTtl > apcExtension::TTLMaxFinite ||
+        check_noTTL(key.data(), key.size())) {
       adjustedTtl = 0;
     }
 

@@ -85,6 +85,7 @@ struct HardwareCounterImpl {
     : m_desc(desc ? desc : "")
     , m_err(0)
     , m_timeSeries(createTimeSeries(m_desc))
+    , m_timeSeriesNonPsp(createTimeSeries(m_desc + "-nonpsp"))
     , m_fd(-1)
     , inited(false) {
     memset (&pe, 0, sizeof (struct perf_event_attr));
@@ -104,11 +105,12 @@ struct HardwareCounterImpl {
     close();
   }
 
-  void updateServiceData() {
-    if (m_timeSeries == nullptr) return;
+  void updateServiceData(bool includingPsp = true) {
+    auto& timeSeries = includingPsp ? m_timeSeries : m_timeSeriesNonPsp;
+    if (timeSeries == nullptr) return;
 
     auto const value = read();
-    if (value != 0) m_timeSeries->addValue(value);
+    if (value != 0) timeSeries->addValue(value);
   }
 
   void init_if_not() {
@@ -203,6 +205,7 @@ public:
   int m_err;
 private:
   ServiceData::ExportedTimeSeries* m_timeSeries;
+  ServiceData::ExportedTimeSeries* m_timeSeriesNonPsp;
   int m_fd;
   struct perf_event_attr pe;
   bool inited;
@@ -484,13 +487,14 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
-void HardwareCounter::updateServiceData() {
-  forEachCounter([](HardwareCounterImpl& counter) {
-    counter.updateServiceData();
+void HardwareCounter::updateServiceData(bool includingPsp) {
+  forEachCounter([includingPsp](HardwareCounterImpl& counter) {
+    counter.updateServiceData(includingPsp);
   });
 }
 
-void HardwareCounter::UpdateServiceData(const timespec& begin) {
+void HardwareCounter::UpdateServiceData(const timespec& begin,
+                                        bool includingPsp) {
   // The begin timespec should be what was recorded at the beginning of the
   // request, so we subtract that out from the current measurement. The
   // perf-based counters owned by this file are reset to 0 at the same time as
@@ -499,12 +503,15 @@ void HardwareCounter::UpdateServiceData(const timespec& begin) {
   struct timespec now;
   gettime(CLOCK_THREAD_CPUTIME_ID, &now);
 
-  s_counter->updateServiceData();
+  s_counter->updateServiceData(includingPsp);
 
   static auto cpuTimeSeries = createTimeSeries("cpu-time-us");
+  static auto cpuTimeNonPspSeries = createTimeSeries("cpu-time-us-nonpsp");
+  auto& series = includingPsp ? cpuTimeSeries : cpuTimeNonPspSeries;
+
   auto const cpuTimeUs = gettime_diff_us(begin, now);
   if (cpuTimeUs > 0) {
-    cpuTimeSeries->addValue(cpuTimeUs);
+    series->addValue(cpuTimeUs);
   }
 }
 

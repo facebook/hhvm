@@ -53,7 +53,7 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
   static void ClearPerfEvents();
-  static void UpdateServiceData(const timespec& begin);
+  static void UpdateServiceData(const timespec& begin, bool includingPsp);
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,
@@ -74,7 +74,7 @@ private:
   template<typename F>
   void forEachCounter(F func);
   void clearPerfEvents();
-  void updateServiceData();
+  void updateServiceData(bool includingPsp);
 
   std::unique_ptr<HardwareCounterImpl> m_instructionCounter;
   std::unique_ptr<HardwareCounterImpl> m_loadCounter;
@@ -104,7 +104,7 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
-  static void UpdateServiceData(const timespec& begin) { }
+  static void UpdateServiceData(const timespec& begin, bool includingPsp) { }
   static void Init(bool enable,
                    const std::string& events,
                    bool subProc,

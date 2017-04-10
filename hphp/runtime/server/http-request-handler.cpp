@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/network.h"
@@ -520,6 +521,9 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   if (RuntimeOption::EnableDebugger) {
     Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
+
+  // Update non-PSP performance counters.
+  HardwareCounter::UpdateServiceData(transport->getCpuTime(), false /*psp*/);
 
   // If we have registered post-send shutdown functions, end the request before
   // executing them. If we don't, be compatible with Zend by allowing usercode

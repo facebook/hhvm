@@ -2468,7 +2468,7 @@ void hphp_session_exit(const Transport* transport) {
   TI().onSessionExit();
 
   if (transport) {
-    HardwareCounter::UpdateServiceData(transport->getCpuTime());
+    HardwareCounter::UpdateServiceData(transport->getCpuTime(), true /*psp*/);
   }
 
   // We might have events from after the final surprise flag check of the

@@ -60,7 +60,7 @@ let rec expand_with_env ety_env env reason root ids =
     Reason.Rtype_access(reason, trail, r) in
   let ty = reason_func root_r, root_ty in
   let deps = List.map env.dep_tys (fun (x, y) -> reason_func x, y) in
-  let ty = ExprDepTy.apply deps ty in
+  let ty = ExprDepTy.apply env.tenv deps ty in
   env.tenv, (env.ety_env, ty)
 
 and expand env r (root, ids) =
@@ -150,7 +150,7 @@ and create_root_from_type_constant env class_pos class_name root_ty (pos, tconst
        *)
       let ety_env =
         { env.ety_env with
-          this_ty = ExprDepTy.apply env.dep_tys root_ty;
+          this_ty = ExprDepTy.apply env.tenv env.dep_tys root_ty;
           from_class = None; } in
       begin
         match typeconst with

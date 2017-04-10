@@ -68,18 +68,18 @@ let instr_this = instr (IMisc This)
 let instr_istypec op = instr (IIsset (IsTypeC op))
 let instr_istypel id op = instr (IIsset (IsTypeL (id, op)))
 let instr_not = instr (IOp Not)
-let instr_sets () =
+let instr_sets =
   instr (IMutator (SetS class_ref_rewrite_sentinel))
 let instr_setl local = instr (IMutator (SetL local))
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
-let instr_cgets () =
+let instr_cgets =
   instr (IGet (CGetS class_ref_rewrite_sentinel))
 let instr_cgetn = instr (IGet CGetN)
 let instr_cgetl local = instr (IGet (CGetL local))
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
-let instr_clsrefgetc () =
+let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
 let instr_fpassl param local = instr (ICall (FPassL (param, local)))
 let instr_popu = instr (IBasic PopU)
@@ -116,7 +116,7 @@ let instr_entrynop = instr (IBasic EntryNop)
 let instr_dict x xs = instr (ILitConst (Dict(x, xs)))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))
-let instr_basesc () y =
+let instr_basesc y =
   instr (IBase(BaseSC(class_ref_rewrite_sentinel, y)))
 let instr_baseh = instr (IBase BaseH)
 let instr_fpushfuncd count text = instr (ICall(FPushFuncD(count, text)))

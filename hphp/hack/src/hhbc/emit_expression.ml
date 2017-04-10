@@ -335,7 +335,7 @@ and emit_aget class_expr =
   | _ ->
     gather [
       from_expr class_expr;
-      instr_clsrefgetc ();
+      instr_clsrefgetc;
     ]
 
 and emit_new class_expr args uargs =
@@ -398,7 +398,7 @@ and emit_call_expr expr =
 and emit_known_class_id cid =
   gather [
     instr_string (Utils.strip_ns cid);
-    instr_clsrefgetc ();
+    instr_clsrefgetc;
   ]
 
 and emit_class_id cid =
@@ -417,7 +417,7 @@ and emit_class_get param_num_opt cid id =
       instr_string (strip_dollar id);
       emit_class_id cid;
       match param_num_opt with
-      | None -> instr (IGet (CGetS 0))
+      | None -> instr_cgets
       | Some i -> instr (ICall (FPassS (i, 0)))
     ]
 

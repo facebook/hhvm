@@ -362,7 +362,6 @@ let builder = object (this)
       let prev_seen = seen_chars in
       begin match strings with
       | hd :: tl ->
-        this#simple_split_if_unsplit ();
         this#add_string hd (String.length hd);
         List.iter tl (fun s -> begin
           this#advance 1;

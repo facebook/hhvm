@@ -36,20 +36,36 @@ namespace HPHP { namespace jit {
 namespace {
 
 // track ldimmq values
-struct qTrack {
+struct ImmState {
+  ImmState() : val{0}, base{} {}
+  ImmState(Immed64 a, Vreg b) : val{a}, base{b} {}
+
   Immed64 val;
   Vreg base;
-  int ttl;
 };
+
+struct ImmStateAry {
+  void clear();
+  ImmState& operator[](size_t i) { return immState_ary[i % size]; }
+
+  int size;
+  enum { max_history = 16};
+  ImmState immState_ary[max_history];
+};
+
+void ImmStateAry::clear() {
+  for (int i=0; i < size; i++) {
+    immState_ary[i].base = Vreg{};
+  }
+}
 
 struct Env {
   Vunit& unit;
-  int tick;
-  std::deque<qTrack> qdeque; // leaky bucket of recent immediates
+  ImmStateAry& immStateAry;
 };
 
 bool isMultiword(int64_t imm) {
-  switch(arch()) {
+  switch (arch()) {
   case Arch::X64:
   case Arch::PPC64:
     break;
@@ -64,16 +80,18 @@ bool isMultiword(int64_t imm) {
 // candidate around +/- uimm12
 bool reuseCandidate(Env& env, int64_t p, Vreg& reg, int& delta) {
   delta = 0;
-  for (auto const& itr : env.qdeque) {
-    int64_t q = itr.val.q();
+  for (int i = 0; i < env.immStateAry.size; i++) {
+    ImmState elem = env.immStateAry[i];
+    if (!elem.base.isValid()) continue;
+    int64_t q = elem.val.q();
     if ((p >= q) && (p < (q + 4095))) {
-      delta = safe_cast<int>(p-q);
-      reg = itr.base;
+      delta = safe_cast<int>(p - q);
+      reg = elem.base;
       return true;
     }
     if ((p < q) && (q < (p + 4095))) {
-      delta = -safe_cast<int>(q-p);
-      reg = itr.base;
+      delta = -safe_cast<int>(q - p);
+      reg = elem.base;
       return true;
     }
   }
@@ -81,12 +99,15 @@ bool reuseCandidate(Env& env, int64_t p, Vreg& reg, int& delta) {
 }
 
 template <typename Inst>
-void reuseImmq(Env& env, const Inst& inst, Vlabel b, size_t i) { return; }
+void reuseImmq(Env& env, const Inst& inst, Vlabel b, size_t i) { 
+  env.immStateAry[i] = ImmState{};
+  return;
+}
 
 // purge table across any instruction with RegSet or control flow change
 #define Y(vasm_opc) \
 void reuseImmq(Env& env, const vasm_opc& c, Vlabel b, size_t i) { \
-  env.qdeque.clear(); \
+  env.immStateAry.clear(); \
   return; \
 } 
 
@@ -118,7 +139,7 @@ Y(unwind)
 
 
 template<typename ReuseImm>
-void reuseImm_impl(Vunit& unit, Vlabel b, size_t i, ReuseImm reuse) {
+void reuseimm_impl(Vunit& unit, Vlabel b, size_t i, ReuseImm reuse) {
   vmodify(unit, b, i, [&] (Vout& v) { reuse(v); return 1; });
 }
 
@@ -128,20 +149,18 @@ void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
     Vreg base;
     if (reuseCandidate(env, ld.s.q(), base, off)) {
      if (off >= 0 ) {
-       reuseImm_impl(env.unit, b, i, [&] (Vout& v) {
+       reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
          v << addqi{off, base, ld.d, v.makeReg()};
        });
      } else {
-       reuseImm_impl(env.unit, b, i, [&] (Vout& v) {
+       reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
          v << subqi{-off, base, ld.d, v.makeReg()};
        });
       }
     return;
     }
   }
-  env.qdeque.push_front(
-      qTrack{ld.s, ld.d, (env.tick + RuntimeOption::EvalJitLdimmqSpan)}
-    ); 
+  env.immStateAry[i] = ImmState{ld.s, ld.d};
 }
 
 void reuseImmq(Env& env, Vlabel b, size_t i) {
@@ -161,28 +180,28 @@ void reuseImmq(Env& env, Vlabel b, size_t i) {
 }
 
 }
+
 // Opportunistically reuse immediate q values
 void reuseImmq(Vunit& unit) {
   assertx(check(unit));
   auto& blocks = unit.blocks;
 
-  Env env { unit };
+  if (RuntimeOption::EvalJitLdimmqSpan <= 0) {
+    return;
+  }
+
+  ImmStateAry immStateAry;
+  Env env { unit, immStateAry };
 
   auto const labels = sortBlocks(unit);
+  env.immStateAry.size =
+    std::min<int>(RuntimeOption::EvalJitLdimmqSpan, ImmStateAry::max_history);
 
   for (auto const b : labels) {
-    env.tick = 0;
-    env.qdeque.clear();
+    env.immStateAry.clear();
 
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {
       reuseImmq(env, b, i);
-      env.tick++;
-      if (!env.qdeque.empty()) {
-        auto& p = env.qdeque.back();
-        if (p.ttl < env.tick) {
-          env.qdeque.pop_back(); 
-        }
-      }
     }
   }
 

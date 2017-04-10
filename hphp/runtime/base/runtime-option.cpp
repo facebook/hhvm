@@ -505,8 +505,7 @@ static inline uint32_t resetProfCountersDefault() {
 }
 
 static inline int retranslateAllRequestDefault() {
-  return RuntimeOption::ServerExecutionMode() &&
-    arch() != Arch::ARM ? 3000 : 0;
+  return 0;
 }
 
 uint64_t ahotDefault() {

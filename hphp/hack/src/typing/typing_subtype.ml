@@ -11,7 +11,6 @@
 open Core
 open Utils
 open Typing_defs
-open Typing_dependent_type
 
 module Reason = Typing_reason
 module Unify = Typing_unify
@@ -575,15 +574,11 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   (* This case is for when Tany comes from expanding an empty Tvar - it will
    * result in binding the type variable to the other type. *)
   | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
-  | (r_sub,   Tabstract (AKdependent d_sub, Some ty_sub)),
-    (r_super, Tabstract (AKdependent d_super, Some ty_super))
+  | (_,   Tabstract (AKdependent d_sub, Some ty_sub)),
+    (_, Tabstract (AKdependent d_super, Some ty_super))
         when d_sub = d_super ->
-      let uenv_sub =
-        { uenv_sub with
-          TUEnv.dep_tys = (r_sub, d_sub)::uenv_sub.TUEnv.dep_tys } in
-      let uenv_super =
-        { uenv_super with
-          TUEnv.dep_tys = (r_super, d_super)::uenv_super.TUEnv.dep_tys } in
+      let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
+      let uenv_super = TUEnv.update_this_if_unset uenv_super ety_super in
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
   (* This is sort of a hack because our handling of Toption is highly
@@ -591,17 +586,13 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
    * dependent type we strip it off at this point since it shouldn't be
    * relevant to subtyping any more.
    *)
-  | (r, Tabstract (AKdependent (`expr _, [] as d), Some ty_sub)), _ ->
-      let uenv_sub =
-        { uenv_sub with
-          TUEnv.dep_tys = (r, d)::uenv_sub.TUEnv.dep_tys } in
+  | (_, Tabstract (AKdependent (`expr _, []), Some ty_sub)), _ ->
+      let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub  in
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
 
-  | (r_sub, Tabstract (AKdependent d_sub, Some sub)),
+  | (_, Tabstract (AKdependent d_sub, Some sub)),
     (_,     Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
-      let uenv_sub =
-        { uenv_sub with
-          TUEnv.dep_tys = (r_sub, d_sub)::uenv_sub.TUEnv.dep_tys } in
+      let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
       (* If an error occurred while subtyping, we produce a unification error
        * so we get the full information on how the dependent type was
        * generated
@@ -657,7 +648,7 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
             {
               type_expansions = [];
               substs = Subst.make class_.tc_tparams tyl_sub;
-              this_ty = ExprDepTy.apply uenv_sub.TUEnv.dep_tys ty_sub;
+              this_ty = Option.value uenv_sub.TUEnv.this_ty ~default:ty_sub;
               from_class = None;
             } in
           let subtype_req_ancestor =
@@ -791,17 +782,17 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
   | (_, Toption ty_sub), (_, Toption ty_super) ->
       let uenv_super = {
         TUEnv.non_null = true;
-        TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
+        TUEnv.this_ty = uenv_super.TUEnv.this_ty;
       } in
       let uenv_sub = {
         TUEnv.non_null = true;
-        TUEnv.dep_tys = uenv_sub.TUEnv.dep_tys;
+        TUEnv.this_ty = uenv_sub.TUEnv.this_ty;
       } in
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super)
   | _, (_, Toption ty_opt) ->
       let uenv_super = {
         TUEnv.non_null = true;
-        TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
+        TUEnv.this_ty = uenv_super.TUEnv.this_ty;
       } in
       sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_opt)
   | (_, Ttuple tyl_sub), (_, Ttuple tyl_super)
@@ -912,27 +903,23 @@ and sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super) =
    *    but if we also try sub_generic_params then we succeed, because
    *    we end up checking this::TC <: this::TC.
   *)
-  | (r, Tabstract (AKdependent d, Some ty)), (_, Tabstract (AKgeneric _, _)) ->
+  | (_, Tabstract (AKdependent _, Some ty)), (_, Tabstract (AKgeneric _, _)) ->
     Errors.try_
       (fun () -> fst (Unify.unify env ty_super ty_sub))
       (fun _ ->
          Errors.try_
           (fun () ->
-            let uenv_sub =
-              { uenv_sub with
-                TUEnv.dep_tys = (r, d)::uenv_sub.TUEnv.dep_tys } in
+            let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
             sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
           (fun _ ->
              sub_generic_params SSet.empty env (uenv_sub, ty_sub)
                (uenv_super, ty_super)))
 
-  | (r, Tabstract (AKdependent d, Some ty)), _ ->
+  | (_, Tabstract (AKdependent _, Some ty)), _ ->
       Errors.try_
         (fun () -> fst (Unify.unify env ty_super ty_sub))
         (fun _ ->
-          let uenv_sub =
-            { uenv_sub with
-              TUEnv.dep_tys = (r, d)::uenv_sub.TUEnv.dep_tys } in
+          let uenv_sub = TUEnv.update_this_if_unset uenv_sub ety_sub in
           sub_type_with_uenv env (uenv_sub, ty) (uenv_super, ty_super))
 
   (* Supertype is generic parameter
@@ -1003,7 +990,7 @@ and sub_generic_params seen env (uenv_sub, ty_sub) (uenv_super, ty_super) =
           (fun () ->
           let uenv_super = {
             TUEnv.non_null = true;
-            TUEnv.dep_tys = uenv_super.TUEnv.dep_tys;
+            TUEnv.this_ty = uenv_super.TUEnv.this_ty;
           } in
           sub_type_with_uenv env (uenv_sub, ty_sub) (uenv_super, ty_super))
           (fun _ ->

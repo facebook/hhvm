@@ -21,10 +21,18 @@ type uenv = {
    * Toption[Tunresolved[Toption]] or similar. *)
   non_null: bool;
 
-  (* The list of expression dependent types we have visited thus far. This is
+  (* The first expression dependent type we've seen while subtyping. This is
    * used in Typing_subtype to properly handle the 'this' type for inheritance.
    *)
-  dep_tys: (Typing_reason.t * Typing_defs.dependent_type) list;
+  this_ty: Typing_defs.locl Typing_defs.ty option;
+
 }
 
-let empty = { non_null = false; dep_tys = []; }
+let empty = { non_null = false; this_ty = None; }
+
+let update_this_if_unset uenv ty =
+  match uenv.this_ty with
+  | Some _ ->
+    uenv
+  | None ->
+    { uenv with this_ty=(Some ty) }

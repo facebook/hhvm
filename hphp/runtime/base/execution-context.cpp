@@ -2056,8 +2056,6 @@ ExecutionContext::evalPHPDebugger(StringData* code, int frame) {
     return {true, init_null_variant, "Syntax error"};
   }
 
-  // Do not JIT this unit, we are using it exactly once.
-  unit->setInterpretOnly();
   return evalPHPDebugger(unit, frame);
 }
 
@@ -2065,12 +2063,16 @@ ExecutionContext::EvaluationResult
 ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   always_assert(!RuntimeOption::RepoAuthoritative);
 
+  // Do not JIT this unit, we are using it exactly once.
+  unit->setInterpretOnly();
+
   VMRegAnchor _;
 
   auto fp = vmfp();
   if (fp) {
+    if (fp->skipFrame()) fp = getPrevVMStateSkipFrame(fp);
     for (; frame > 0; --frame) {
-      auto prevFp = getPrevVMState(fp);
+      auto prevFp = getPrevVMStateSkipFrame(fp);
       if (!prevFp) {
         // To be safe in case we failed to get prevFp. This would mean we've
         // been asked to eval in a frame which is beyond the top of the stack.
@@ -2111,16 +2113,41 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   std::ostringstream errorString;
   std::string stack;
 
+  // Find a suitable PC to use when switching to the target frame. If the target
+  // is the current frame, this is just vmpc(). For other cases, this will
+  // generally be the return address from a call from that frame's function. If
+  // we can't find the target frame (because it lies deeper in the stack), then
+  // just use the target frame's func's entry point.
+  auto const findSuitablePC = [this](const ActRec* target){
+    if (auto fp = vmfp()) {
+      if (fp == target) return vmpc();
+      while (true) {
+        auto prevFp = getPrevVMState(fp);
+        if (!prevFp) break;
+        if (prevFp == target) return prevFp->func()->getEntry() + fp->m_soff;
+        fp = prevFp;
+      }
+    }
+    return target->func()->getEntry();
+  };
+
   try {
     // Start with the correct parent FP so that VarEnv can properly exitFP().
     // Note that if the same VarEnv is used across multiple frames, the most
     // recent FP must be used. This can happen if we are trying to debug
     // an eval() call or a call issued by debugger itself.
+    //
+    // We also need to change vmpc() to match, since we assert in a few places
+    // that the vmpc() lies within vmfp()'s code.
     auto savedFP = vmfp();
+    auto savedPC = vmpc();
     if (fp) {
-      vmfp() = fp->m_varEnv->getFP();
+      auto newFp = fp->m_varEnv->getFP();
+      assertx(!newFp->skipFrame());
+      vmpc() = findSuitablePC(newFp);
+      vmfp() = newFp;
     }
-    SCOPE_EXIT { vmfp() = savedFP; };
+    SCOPE_EXIT { vmpc() = savedPC; vmfp() = savedFP; };
 
     // Invoke the given PHP, possibly specialized to match the type of the
     // current function on the stack, optionally passing a this pointer or

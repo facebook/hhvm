@@ -31,7 +31,9 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   let (_,method_name) = ast_method.Ast.m_name in
   let ret =
     if method_name = Naming_special_names.Members.__construct
-    then None else ast_method.Ast.m_ret in
+    || method_name = Naming_special_names.Members.__destruct
+    then None
+    else ast_method.Ast.m_ret in
   let default_instrs return_type =
       if List.mem ast_method.Ast.m_kind Ast.Abstract
       then gather [

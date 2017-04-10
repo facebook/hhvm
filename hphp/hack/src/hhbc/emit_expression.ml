@@ -187,6 +187,12 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
 and emit_local x =
   if x = SN.SpecialIdents.this && get_method_has_this ()
   then instr (IMisc (BareThis Notice))
+  else
+  if x = SN.Superglobals.globals
+  then gather [
+    instr_string (strip_dollar x);
+    instr (IGet CGetG)
+  ]
   else instr_cgetl (Local.Named x)
 
 and emit_two_exprs e1 e2 =

@@ -335,7 +335,7 @@ and emit_aget class_expr =
   | _ ->
     gather [
       from_expr class_expr;
-      instr (IGet (ClsRefGetC 0))
+      instr_clsrefgetc ();
     ]
 
 and emit_new class_expr args uargs =
@@ -398,7 +398,7 @@ and emit_call_expr expr =
 and emit_known_class_id cid =
   gather [
     instr_string (Utils.strip_ns cid);
-    instr (IGet (ClsRefGetC 0))
+    instr_clsrefgetc ();
   ]
 
 and emit_class_id cid =

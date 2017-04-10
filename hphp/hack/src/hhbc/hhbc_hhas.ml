@@ -176,8 +176,6 @@ let string_of_get x =
   | VGetG -> "VGetG"
   | VGetS id -> sep ["VGetS"; string_of_classref id]
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
-  | AGetC -> "AGetC"
-  | AGetL id -> sep ["AGetL"; string_of_local_id id]
   | ClsRefGetL (id, cr) ->
     sep ["ClsRefGetL"; string_of_local_id id; string_of_int cr]
   | ClsRefGetC cr ->
@@ -838,7 +836,7 @@ let add_fun_def buf fun_def =
   if function_is_async then B.add_string buf " isAsync";
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
-  add_num_cls_ref_slots buf 4 function_num_cls_ref_slots;
+  add_num_cls_ref_slots buf 2 function_num_cls_ref_slots;
   add_decl_vars buf 2 function_decl_vars;
   add_num_iters buf 2 function_num_iters;
   add_instruction_list buf 2 function_body;

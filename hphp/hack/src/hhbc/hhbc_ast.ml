@@ -242,8 +242,6 @@ type instruct_get =
   | VGetN
   | VGetG
   | VGetS of classref_id
-  | AGetC
-  | AGetL of local_id
   | ClsRefGetL of local_id * classref_id
   | ClsRefGetC of classref_id
 
@@ -431,7 +429,7 @@ type instruct_base =
   | BaseGL of local_id * MemberOpMode.t
   | FPassBaseGC of param_num * stack_index
   | FPassBaseGL of param_num * local_id
-  | BaseSC of stack_index * stack_index
+  | BaseSC of classref_id * stack_index
   | BaseSL of local_id * stack_index
   | BaseL of local_id * MemberOpMode.t
   | FPassBaseL of param_num * local_id

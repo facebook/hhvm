@@ -287,8 +287,8 @@ let memoize_static_method_no_params original_name class_name =
     instr_jmpnz label_0;
     instr_string (original_name ^ single_memoize_cache);
     instr_string (Utils.strip_ns class_name);
-    instr_agetc;
-    instr_cgets 0;
+    instr_clsrefgetc ();
+    instr_cgets ();
     instr_dup;
     instr_istypec Hhbc_ast.OpNull;
     instr_jmpnz label_1;
@@ -301,8 +301,8 @@ let memoize_static_method_no_params original_name class_name =
     instr_jmpz label_2;
     instr_string (original_name ^ single_memoize_cache_guard);
     instr_string (Utils.strip_ns class_name);
-    instr_clsrefgetc 0;
-    instr_cgets 0;
+    instr_clsrefgetc ();
+    instr_cgets ();
     instr_jmpz label_2;
     instr_null;
     instr_retc;
@@ -312,11 +312,11 @@ let memoize_static_method_no_params original_name class_name =
     instr_jmpnz label_3;
     instr_string (original_name ^ single_memoize_cache);
     instr_string (Utils.strip_ns class_name);
-    instr_clsrefgetc 0;
+    instr_clsrefgetc ();
     instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
     instr_fcall 0;
     instr_unboxr;
-    instr_sets 0;
+    instr_sets ();
     instr_jmp label_4;
     instr_label label_3;
     instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
@@ -328,9 +328,9 @@ let memoize_static_method_no_params original_name class_name =
     instr_jmpz label_5;
     instr_string (original_name ^ single_memoize_cache_guard);
     instr_string (Utils.strip_ns class_name);
-    instr_clsrefgetc 0;
+    instr_clsrefgetc ();
     instr_true;
-    instr_sets 0;
+    instr_sets ();
     instr_popc;
     instr_label label_5;
     instr_retc ]
@@ -346,8 +346,8 @@ let memoize_static_method_with_params params original_name class_name =
     param_code_sets params param_count;
     instr_string (original_name ^ multi_memoize_cache);
     instr_string (Utils.strip_ns class_name);
-    instr_clsrefgetc 0;
-    instr_basesc 0 0;
+    instr_clsrefgetc ();
+    instr_basesc () 0;
     instr_memoget 1 first_local param_count;
     instr_isuninit;
     instr_jmpnz label;
@@ -359,12 +359,12 @@ let memoize_static_method_with_params params original_name class_name =
     (* TODO: The strings have extra leading slashes unnecessarily *)
     instr_string (original_name ^ multi_memoize_cache);
     instr_string (Utils.strip_ns class_name);
-    instr_clsrefgetc 0;
+    instr_clsrefgetc ();
     instr_fpushclsmethodd param_count renamed_name class_name;
     param_code_gets params;
     instr_fcall param_count;
     instr_unboxr;
-    instr_basesc 1 0;
+    instr_basesc () 0;
     instr_memoset 1 first_local param_count;
     instr_retc ]
 
@@ -387,8 +387,13 @@ let memoize_method method_ memoizer =
   let renamed = Hhas_method.make_private renamed in
   let params = Hhas_method.params method_ in
   let body = memoizer params original_name in
+  let body = rewrite_class_refs body in
+  let num_cls_ref_slots = get_num_cls_ref_slots body in
   let body = instr_seq_to_list body in
   let memoized = Hhas_method.with_body method_ body in
+  let memoized =
+    Hhas_method.with_num_cls_ref_slots memoized num_cls_ref_slots
+  in
   (renamed, memoized)
 
 let memoize_instance_method method_ total_count index =

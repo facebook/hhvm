@@ -93,3 +93,5 @@ let is_generator method_def = method_def.method_is_generator
 let is_pair_generator method_def = method_def.method_is_pair_generator
 let is_closure_body method_def = method_def.method_is_closure_body
 let with_body method_def method_body = { method_def with method_body }
+let with_num_cls_ref_slots method_def method_num_cls_ref_slots =
+  { method_def with method_num_cls_ref_slots }

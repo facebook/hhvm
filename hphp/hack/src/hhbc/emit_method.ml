@@ -77,11 +77,25 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
   let method_is_closure_body = snd ast_method.Ast.m_name = "__invoke" in
+  (* Horrible hack to get decl_vars in the same order as HHVM *)
+  let captured_vars =
+    if method_is_closure_body
+    then List.concat_map ast_class.Ast.c_body (fun item ->
+      match item with
+      | Ast.ClassVars(_, _, cvl) ->
+        List.map cvl (fun (_, (_,id), _) -> "$" ^ id)
+      | _ -> []
+      )
+    else [] in
+  let has_this = List.mem method_decl_vars "$this" in
+  let method_decl_vars =
+    if method_is_static then method_decl_vars
+    else List.filter method_decl_vars (fun s -> s <> "$this") in
   let method_decl_vars =
     if method_is_closure_body
-    then
-      let vars = "$0Closure" :: method_decl_vars in
-      if method_is_static then vars else vars @ ["$this"]
+    then "$0Closure" :: captured_vars @
+      List.filter method_decl_vars (fun v -> not (List.mem captured_vars v)) @
+      (if has_this then ["$this"] else [])
     else method_decl_vars in
   let method_body = instr_seq_to_list body_instrs in
   Hhas_method.make

@@ -248,31 +248,6 @@ let instr_try_fault fault_label try_body fault_body =
 let instr_try_catch_begin catch_label = instr (ITry (TryCatchBegin catch_label))
 let instr_try_catch_end = instr (ITry TryCatchEnd)
 
-let extract_decl_vars params instrseq =
-  let module ULS = Unique_list_string in
-  (* TODO: This needs to happen at the AST level since
-   * $x = $y needs to go on the list in this order: $x $y *)
-  let folder uniq_list instruction =
-    match instruction with
-    | IMisc (StaticLoc (Local.Named s, _))
-    | IMisc (StaticLocInit (Local.Named s, _))
-    | IMutator (SetL (Local.Named s))
-    | IBase (BaseL (Local.Named s, MemberOpMode.Define))
-    | IGet (CGetL (Local.Named s))
-    | IGet (CGetQuietL (Local.Named s))
-    | IGet (CGetL2 (Local.Named s))
-    | IGet (CGetL3 (Local.Named s)) -> ULS.add uniq_list s
-    | _ -> uniq_list in
-  let decl_vars = InstrSeq.fold_left instrseq ~init:ULS.empty ~f:folder in
-  let param_names =
-    List.fold_left
-      params
-        ~init:ULS.empty
-        ~f:(fun l p -> ULS.add l @@ Hhas_param.name p)
-  in
-  let decl_vars = ULS.diff decl_vars param_names in
-  List.rev (ULS.items decl_vars)
-
 (*  Note that at this time we do NOT want to recurse on the instruction
     sequence in the fault block. Why not?  Consider:
     try { x } finally { try { y } finally { z } }

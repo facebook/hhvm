@@ -30,8 +30,8 @@ type env = {
   per_function_count : int;
   (* Free variables computed so far *)
   captured_vars : ULS.t;
-  (* Variables that are *defined* in current scope (e.g. lambda parameters)
-   * and so should not be added to capture set
+  (* Variables that are *defined* in current scope (e.g. lambda parameters,
+   * locals) and so should not be added to capture set
    *)
   defined_vars : SSet.t;
   (* Total number of closures created *)
@@ -81,7 +81,8 @@ let set_function env fd =
   { env with
     prefix = "Closure$" ^ Utils.strip_ns (snd fd.f_name);
     outer_is_static = true;
-    per_function_count = 0; }
+    per_function_count = 0;
+  }
 
 (* Set the prefix name, upon entering a top-level function *)
 let set_method env cd md =
@@ -91,7 +92,8 @@ let set_method env cd md =
       "::" ^
       Utils.strip_ns (snd md.m_name);
     outer_is_static = List.mem md.m_kind Static;
-    per_function_count = 0; }
+    per_function_count = 0;
+  }
 
 (* Retrieve the closure classes in the order that they were generated *)
 let get_closure_classes env =
@@ -129,7 +131,7 @@ let make_closure ~explicit_use p total_count class_num env lambda_vars fd body =
     c_tparams = [];
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];
-    c_body = [Method md; ClassVars ([Private], None, cvl)];
+    c_body = [ClassVars ([Private], None, cvl); Method md];
     c_namespace = Namespace_env.empty_with_default_popt;
     c_enum = None;
     c_span = p;
@@ -371,11 +373,14 @@ and convert_case env case =
     let env, b = convert_block env b in
     env, Case (e, b)
 
-and convert_lvalue_expr env (_, expr_ as expr) =
+and convert_lvalue_expr env (p, expr_ as expr) =
   match expr_ with
   | Lvar id ->
     let env = add_defined_var env (snd id) in
     env, expr
+  | List exprs ->
+    let env, exprs = List.map_env env exprs convert_lvalue_expr in
+    env, (p, List exprs)
   | _ ->
     convert_expr env expr
 

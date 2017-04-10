@@ -85,7 +85,6 @@ quick/builtin_extension_SQLite3Result.php
 quick/builtin_extension_SQLite3Stmt.php
 quick/builtin_extension_SimpleXMLElement.php
 quick/builtin_extension_SimpleXMLElementIterator.php
-quick/builtin_extension_SimpleXMLIterator.php
 quick/builtin_extension_SoapClient.php
 quick/builtin_extension_SoapHeader.php
 quick/builtin_extension_SoapParam.php
@@ -120,15 +119,9 @@ quick/class_interface_trait_exists.php
 quick/clone.php
 quick/closure.php
 quick/closure_class.php
-quick/closure_clone.php
-quick/closure_func_get_arg.php
 quick/closure_gen.php
-quick/closure_gen_scope.php
 quick/closure_get_class.php
-quick/closure_get_declared_classes.php
 quick/closure_lifetime.php
-quick/closure_private.php
-quick/closure_recursive.php
 quick/closure_recursive_bad.php
 quick/closure_static.php
 quick/closure_static_vars.php
@@ -226,9 +219,7 @@ quick/enormous-string.php
 quick/eq_int_str.php
 quick/eval.php
 quick/eval_noreturn.php
-quick/exception_bug_1351681.php
 quick/exception_bug_2080454.php
-quick/exception_bug_more.php
 quick/exception_destructor_1.php
 quick/exception_destructor_2.php
 quick/exception_destructor_3.php
@@ -410,7 +401,6 @@ quick/lambda1.php
 quick/lambda2.php
 quick/lambda3.php
 quick/lambda4.php
-quick/lambda5.php
 quick/lambda7.php
 quick/lambda8.php
 quick/lexer_heredoc_buffer_boundary_65492.php
@@ -440,7 +430,6 @@ quick/methodcache_magic.php
 quick/methodcache_static.php
 quick/mod.php
 quick/mod_min_negone.php
-quick/multiple_closures.php
 quick/negjump.php
 quick/nested__destruct.php
 quick/nested_vm_exceptions.php
@@ -509,6 +498,7 @@ quick/recursive-unset.php
 quick/recursive_iterator_iterator_empty.php
 quick/redeclared_function.php
 quick/redeclared_method.php
+quick/refcount-static.php
 quick/reflect-default.php
 quick/reflect.php
 quick/reflection2.php
@@ -533,7 +523,6 @@ quick/sb_overflow.php
 quick/selfparent.php
 quick/serialize.php
 quick/set_toarray_warn.php
-quick/setelemloc2.php
 quick/setg-dtor.php
 quick/setop-magic2.php
 quick/setop-magic3.php
@@ -574,7 +563,6 @@ quick/strToInt.php
 quick/strict_hashbang_start.php
 quick/string-cse.php
 quick/string-util.php
-quick/string_copy.php
 quick/strlen_non_integer.php
 quick/strrpos.php
 quick/surprise_throw.php
@@ -596,7 +584,6 @@ quick/trailing_comma_bad5.php
 quick/trailing_comma_bad6.php
 quick/trait_property_init.php
 quick/trait_self.php
-quick/trait_two_use_closure.php
 quick/traits.php
 quick/traits2.php
 quick/trim_dtor.php
@@ -640,7 +627,6 @@ quick/xhp-malformed.php
 quick/xhp_attribute_type_mixed.php
 quick/xhp_comment.php
 quick/xhp_file_line.php
-quick/yield_pair.php
 quick/zend_bug54265.php
 quick/zend_closure_005.php
 quick/zend_indirect_method_call_005.php

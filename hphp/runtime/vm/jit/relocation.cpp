@@ -18,6 +18,7 @@
 #include "hphp/runtime/vm/jit/relocation-arm.h"
 #include "hphp/runtime/vm/jit/relocation-ppc64.h"
 #include "hphp/runtime/vm/jit/relocation-x64.h"
+#include "hphp/runtime/vm/jit/asm-info.h"
 
 #include "hphp/util/arch.h"
 
@@ -33,6 +34,39 @@ void RelocationInfo::recordRange(TCA start, TCA end,
 
 void RelocationInfo::recordAddress(TCA src, TCA dest, int range) {
   m_adjustedAddresses.emplace(src, std::make_pair(dest, dest + range));
+}
+
+TcaRange RelocationInfo::fixupRange(const TcaRange& rng) {
+  /*
+   * We have to be careful with before/after here.
+   * If we relocate two consecutive regions of memory,
+   * but relocate them to two different destinations, then
+   * the end address of the first region is also the start
+   * address of the second region; so adjustedAddressBefore(end)
+   * gives us the relocated address of the end of the first
+   * region, while adjustedAddressAfter(end) gives us the
+   * relocated address of the start of the second region.
+   */
+  auto s = adjustedAddressAfter(rng.begin());
+  auto e = adjustedAddressBefore(rng.end());
+  if (s && e) {
+    return TcaRange(s, e);
+  }
+  if (s && !e) {
+    return TcaRange(s, s + rng.size());
+  }
+  if (!s && e) {
+    return TcaRange(e - rng.size(), e);
+  }
+  return rng;
+}
+
+void RelocationInfo::fixupRanges(AsmInfo* asmInfo, AreaIndex area) {
+  asmInfo->clearBlockRangesForArea(area);
+  for (auto& ii : asmInfo->instRangesForArea(area)) {
+    ii.second = fixupRange(ii.second);
+    asmInfo->updateForBlock(area, ii.first, ii.second);
+  }
 }
 
 TCA RelocationInfo::adjustedAddressAfter(TCA addr) const {
@@ -95,6 +129,129 @@ void RelocationInfo::rewind(TCA start, TCA end) {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Adjusts the addresses in asmInfo and fixups to match the new
+ * location of the code.
+ * This will not "hook up" the relocated code in any way, so is safe
+ * to call before the relocated code is ready to run.
+ */
+void adjustMetaDataForRelocation(RelocationInfo& rel,
+                                 AsmInfo* asmInfo,
+                                 CGMeta& meta  ) {
+  auto& ip = meta.inProgressTailJumps;
+  for (size_t i = 0; i < ip.size(); ++i) {
+    IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
+    if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {
+      ib.adjust(adjusted);
+    }
+  }
+
+  for (auto watch : meta.watchpoints) {
+    if (auto const adjusted = rel.adjustedAddressBefore(*watch)) {
+      *watch = adjusted;
+    }
+  }
+
+  for (auto& fixup : meta.fixups) {
+    /*
+     * Pending fixups always point after the call instruction,
+     * so use the "before" address, since there may be nops
+     * before the next actual instruction.
+     */
+    if (TCA adjusted = rel.adjustedAddressBefore(fixup.first)) {
+      fixup.first = adjusted;
+    }
+  }
+
+  for (auto& ct : meta.catches) {
+    /*
+     * Similar to fixups - this is a return address so get
+     * the address returned to.
+     */
+    if (auto const adjusted = rel.adjustedAddressBefore(ct.first)) {
+      ct.first = adjusted;
+    }
+    /*
+     * But the target is an instruction, so skip over any nops
+     * that might have been inserted (eg for alignment).
+     */
+    if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
+      ct.second = adjusted;
+    }
+  }
+
+  for (auto& jt : meta.jmpTransIDs) {
+    if (auto const adjusted = rel.adjustedAddressAfter(jt.first)) {
+      jt.first = adjusted;
+    }
+  }
+
+  if (!meta.bcMap.empty()) {
+    /*
+     * Most of the time we want to adjust to a corresponding "before" address
+     * with the exception of the start of the range where "before" can point to
+     * the end of a previous range.
+     */
+    auto const aStart = meta.bcMap[0].aStart;
+    auto const acoldStart = meta.bcMap[0].acoldStart;
+    auto const afrozenStart = meta.bcMap[0].afrozenStart;
+    auto adjustAddress = [&](TCA& address, TCA blockStart) {
+      if (TCA adjusted = (address == blockStart
+                            ? rel.adjustedAddressAfter(blockStart)
+                            : rel.adjustedAddressBefore(address))) {
+        address = adjusted;
+      }
+    };
+    for (auto& tbc : meta.bcMap) {
+      adjustAddress(tbc.aStart, aStart);
+      adjustAddress(tbc.acoldStart, acoldStart);
+      adjustAddress(tbc.afrozenStart, afrozenStart);
+    }
+  }
+
+  decltype(meta.addressImmediates) updatedAI;
+  for (auto addrImm : meta.addressImmediates) {
+    if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
+      updatedAI.insert(adjusted);
+    } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
+      // just for cgLdObjMethod
+      updatedAI.insert((TCA)~uintptr_t(odd));
+    } else {
+      updatedAI.insert(addrImm);
+    }
+  }
+  updatedAI.swap(meta.addressImmediates);
+
+  decltype(meta.alignments) updatedAF;
+  for (auto af : meta.alignments) {
+    if (TCA adjusted = rel.adjustedAddressAfter(af.first)) {
+      updatedAF.emplace(adjusted, af.second);
+    } else {
+      updatedAF.emplace(af);
+    }
+  }
+  updatedAF.swap(meta.alignments);
+
+  for (auto& af : meta.reusedStubs) {
+    if (TCA adjusted = rel.adjustedAddressAfter(af)) {
+      af = adjusted;
+    }
+  }
+
+  // Perform the platform-specific metadata adjustments
+  ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, meta);
+
+  if (asmInfo) {
+    assert(asmInfo->validate());
+    rel.fixupRanges(asmInfo, AreaIndex::Main);
+    rel.fixupRanges(asmInfo, AreaIndex::Cold);
+    rel.fixupRanges(asmInfo, AreaIndex::Frozen);
+    assert(asmInfo->validate());
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
  * Wrappers.
  */
 
@@ -106,11 +263,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
 }
 void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
   return ARCH_SWITCH_CALL(adjustCodeForRelocation, rel, fixups);
-}
-void adjustMetaDataForRelocation(RelocationInfo& rel,
-                                 AsmInfo* asmInfo,
-                                 CGMeta& fixups) {
-  return ARCH_SWITCH_CALL(adjustMetaDataForRelocation, rel, asmInfo, fixups);
 }
 void findFixups(TCA start, TCA end, CGMeta& fixups) {
   return ARCH_SWITCH_CALL(findFixups, start, end, fixups);

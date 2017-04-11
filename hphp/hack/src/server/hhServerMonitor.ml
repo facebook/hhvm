@@ -24,7 +24,6 @@ module SP = ServerProcess
 module SM = ServerMonitor.Make_monitor
   (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;
 
-
 (** Main method of the server monitor daemon. The daemon is responsible for
  * listening to socket requests from hh_client, checking Build ID, and relaying
  * requests to the typechecker process. *)
@@ -97,9 +96,10 @@ let start_daemon options =
   let log_link = ServerFiles.monitor_log_link root in
   (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
   let log_file_path = Sys_utils.make_link_of_timestamped log_link in
-  let fd = Daemon.fd_of_path log_file_path in
+  let in_fd = Daemon.null_fd () in
+  let out_fd = Daemon.fd_of_path log_file_path in
   let {Daemon.pid; _} =
-    Daemon.spawn (fd, fd) daemon_entry options in
+    Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry options in
   Printf.eprintf "Spawned %s (child pid=%d)\n" Program.hh_server pid;
   Printf.eprintf "Logs will go to %s\n%!"
     (if Sys.win32 then log_file_path else log_link);

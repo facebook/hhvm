@@ -183,9 +183,10 @@ let exec prog ?env args =
   }
 
 let run_daemon entry params =
+  let stdin = Daemon.null_fd () in
   let stdout_parent, stdout_child = Unix.pipe () in
   let stderr_parent, stderr_child = Unix.pipe () in
-  let handle = Daemon.spawn (stdout_child, stderr_child) entry params in
+  let handle = Daemon.spawn (stdin, stdout_child, stderr_child) entry params in
   {
     Process_types.stdin_fd = ref @@ Some (Daemon.descr_of_in_channel
       (fst handle.Daemon.channels));

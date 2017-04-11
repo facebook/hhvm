@@ -48,7 +48,7 @@ let data_producer_entry =
  * 1 second. *)
 let test_input_within_timeout () =
   let handle = Daemon.spawn
-      ~channel_mode:`socket (Unix.stdout, Unix.stderr)
+      ~channel_mode:`socket (Daemon.null_fd (), Unix.stdout, Unix.stderr)
       data_producer_entry 0.5 in
   let ic, _ = handle.Daemon.channels in
   Timeout.with_timeout
@@ -64,7 +64,7 @@ let test_input_within_timeout () =
  * 2 seconds. *)
 let test_input_exceeds_timeout () =
   let handle = Daemon.spawn ~channel_mode:`socket
-    (Unix.stdout, Unix.stderr) data_producer_entry 3.0 in
+    (Daemon.null_fd (), Unix.stdout, Unix.stderr) data_producer_entry 3.0 in
   let ic, _ = handle.Daemon.channels in
   try
     Timeout.with_timeout
@@ -126,7 +126,7 @@ let slow_computation_with_timeout_entry =
 (** Forks a child that should exit after 2 seconds. *)
 let test_timeout_no_input () =
   let handle = Daemon.spawn
-    ~channel_mode:`socket Daemon.(null_fd (), null_fd ())
+    ~channel_mode:`socket Daemon.(null_fd (), null_fd (), null_fd ())
     slow_computation_with_timeout_entry 2 in
   (** In case machine is very slow to spawn process, give it 2 extra seconds. *)
   let _ = Unix.select [] [] [] 4.0 in
@@ -182,7 +182,7 @@ let slow_computation_after_io_entry =
 let test_timeout_after_input () =
   (** This process times out after 2 seconds and exits. *)
   let handle = Daemon.spawn
-      ~channel_mode:`socket (Unix.stdout, Unix.stderr)
+      ~channel_mode:`socket (Daemon.null_fd (), Unix.stdout, Unix.stderr)
       slow_computation_after_io_entry 2 in
   let (_ic, oc) = handle.Daemon.channels in
   (** Wait 1.1 seconds before sending data on the in channel. *)

@@ -86,8 +86,10 @@ inline void scanAFWH(const c_WaitHandle* wh, type_scan::Scanner& scanner) {
   assert(!wh->getAttribute(ObjectData::HasNativeData));
   // scan ResumableHeader before object
   auto r = Resumable::FromObj(wh);
-  scanFrameSlots(r->actRec(), scanner);
-  scanner.scan(*r);
+  if (!wh->isFinished()) {
+    scanFrameSlots(r->actRec(), scanner);
+    scanner.scan(*r);
+  }
   return wh->scan(scanner);
 }
 

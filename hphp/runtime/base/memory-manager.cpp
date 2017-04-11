@@ -482,7 +482,10 @@ void MemoryManager::resetAllocator() {
   m_heap.reset();
 
   // zero out freelists
-  for (auto& i : m_freelists) i.head = nullptr;
+  for (auto& list : m_freelists) list.head = nullptr;
+  if (RuntimeOption::EvalQuarantine) {
+    for (auto& list : m_quarantine) list.head = nullptr;
+  }
   m_front = m_limit = 0;
   tl_sweeping = false;
   m_exiting = false;

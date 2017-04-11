@@ -126,7 +126,13 @@ let print_wait_msg ?(first_call=false) start_time tail_env =
 
 (** Sleeps until the server says hello. While waiting, prints out spinner and
  * useful messages by tailing the server logs. *)
-let rec wait_for_server_hello ic env retries start_time tail_env first_call =
+let rec wait_for_server_hello
+  ~ic
+  ~env
+  ~retries
+  ~start_time
+  ~tail_env
+  ~first_call =
   match retries with
   | Some n when n < 0 ->
       (if Option.is_some tail_env then
@@ -138,8 +144,13 @@ let rec wait_for_server_hello ic env retries start_time tail_env first_call =
     [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
   if readable = [] then (
     Option.iter tail_env (fun t -> print_wait_msg ~first_call start_time t);
-    wait_for_server_hello ic env (Option.map retries (fun x -> x - 1))
-      start_time tail_env false
+    wait_for_server_hello
+      ~ic
+      ~env
+      ~retries:(Option.map retries (fun x -> x - 1))
+      ~start_time
+      ~tail_env
+      ~first_call:false
   ) else
     try
       let fd = Timeout.descr_of_in_channel ic in

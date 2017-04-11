@@ -24,7 +24,7 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
       function_is_pair_generator =
     Emit_body.from_ast
       ~class_name:None
-      ~method_name:(Some (snd ast_fun.Ast.f_name))
+      ~function_name:(Some (snd ast_fun.Ast.f_name))
       ~has_this:false
       ast_fun.Ast.f_tparams
       ast_fun.Ast.f_params

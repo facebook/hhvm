@@ -163,14 +163,19 @@ let from_ast : A.class_ -> Hhas_class.t =
     else ast_class.A.c_implements in
   let class_implements = from_implements tparams implements in
   let class_body = ast_class.A.c_body in
+  (* TODO: communicate this without looking at the name *)
+  let is_closure_class =
+    String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
   let has_constructor_or_invoke = List.exists class_body
     (fun elt -> match elt with
                 | A.Method { A.m_name; _} ->
                   snd m_name = SN.Members.__construct ||
-                  snd m_name = "__invoke"
+                  snd m_name = "__invoke" && is_closure_class
                 | _ -> false) in
   let additional_methods =
-    if has_constructor_or_invoke then [] else [default_constructor ast_class] in
+    if has_constructor_or_invoke
+    then []
+    else [default_constructor ast_class] in
   let class_methods =
     Emit_method.from_asts ast_class (ast_methods class_body) in
   let class_methods = class_methods @ additional_methods in

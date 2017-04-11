@@ -36,12 +36,12 @@ end
 (* Context for a complete method body. It would be more elegant to pass this
  * around in an environment parameter *)
 let class_name = ref (None : string option)
-let method_name = ref (None : string option)
+let function_name = ref (None : string option)
 let method_has_this = ref false
 let set_class_name n = class_name := n
 let get_class_name () = !class_name
-let set_method_name n = method_name := n
-let get_method_name () = !method_name
+let set_function_name n = function_name := n
+let get_function_name () = !function_name
 let set_method_has_this b = method_has_this := b
 let get_method_has_this () = !method_has_this
 
@@ -129,7 +129,7 @@ let collection_type = function
 
 let istype_op id =
   match id with
-  | "is_int" | "is_integer" -> Some OpInt
+  | "is_int" | "is_integer" | "is_long" -> Some OpInt
   | "is_bool" -> Some OpBool
   | "is_float" | "is_real" | "is_double" -> Some OpDbl
   | "is_string" -> Some OpStr
@@ -347,6 +347,13 @@ and emit_aget class_expr =
 and emit_new class_expr args uargs =
   let nargs = List.length args + List.length uargs in
   match class_expr with
+  | _, A.Id (_, id) when id = SN.Classes.cStatic ->
+    gather [
+      emit_class_id id;
+      instr_fpushctor nargs 0;
+      emit_args_and_call args uargs;
+      instr_popr
+    ]
   | _, A.Id (_, id) ->
     gather [
       instr_fpushctord nargs id;
@@ -399,10 +406,16 @@ and emit_class_id cid =
   if cid = SN.Classes.cStatic
   then instr (IMisc (LateBoundCls 0))
   else
+  (* TODO: emit statically-known base class if possible *)
+  if  cid = SN.Classes.cParent
+  then instr (IMisc (Parent 0))
+  else
   if cid = SN.Classes.cSelf
   then match get_class_name () with
   | None -> instr (IMisc Self)
   | Some cid -> emit_known_class_id cid
+  else if cid.[0] = '$' then
+    instr (IGet (ClsRefGetL (Local.Named cid, 0)))
   else emit_known_class_id cid
 
 and emit_class_get param_num_opt cid id =
@@ -513,9 +526,15 @@ and emit_id (p, s) =
       (match get_class_name () with
       | None -> ""
       | Some s -> Utils.strip_ns s ^ "::") ^
-      (match get_method_name () with
+      (match get_function_name () with
       | None -> ""
       | Some s -> Utils.strip_ns s)
+    )
+  | "__FUNCTION__" ->
+    instr_string (
+      match get_function_name () with
+      | None -> ""
+      | Some s -> Utils.strip_ns s
     )
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
@@ -1127,6 +1146,12 @@ and instr_fpassr i = instr (ICall (FPassR i))
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
+  | A.Lvar (_, x) when x = SN.Superglobals.globals ->
+    gather [
+      instr_string (strip_dollar x);
+      instr (ICall (FPassG i))
+    ]
+
   | A.Lvar (_, x) when not (is_local_this x) -> instr_fpassl i (Local.Named x)
 
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
@@ -1193,7 +1218,8 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushObjMethod (nargs, null_flavor)));
     ]
 
-  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cSelf ->
+  | A.Class_const ((_, cid), (_, id))
+    when cid = SN.Classes.cSelf || cid = SN.Classes.cParent ->
     gather [
       instr_string id;
       emit_class_id cid;
@@ -1203,15 +1229,8 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cStatic ->
     gather [
       instr_string id;
-      instr (IMisc (LateBoundCls 0));
+      emit_class_id cid;
       instr (ICall (FPushClsMethod (nargs, 0)));
-      ]
-
-  | A.Class_const ((_, cid), (_, id)) when cid = SN.Classes.cParent ->
-    gather [
-      instr_string id;
-      instr (IMisc (Parent 0));
-      instr (ICall (FPushClsMethodF (nargs, 0)));
       ]
 
   | A.Class_const ((_, cid), (_, id)) when cid.[0] = '$' ->
@@ -1223,6 +1242,13 @@ and emit_call_lhs (_, expr_ as expr) nargs =
 
   | A.Class_const ((_, cid),  (_, id)) ->
     instr (ICall (FPushClsMethodD (nargs, id, cid)))
+
+  | A.Class_get ((_, cid), (_, id)) when id.[0] = '$' ->
+    gather [
+      emit_local id;
+      emit_class_id cid;
+      instr (ICall (FPushClsMethod (nargs, 0)))
+    ]
 
   | A.Id (_, id) ->
     instr (ICall (FPushFuncD (nargs, id)))
@@ -1329,6 +1355,34 @@ and emit_call (_, expr_ as expr) args uargs =
   | A.Id (_, "exit") when List.length args = 1 ->
     let e = List.hd_exn args in
     emit_exit e, Flavor.Cell
+
+  | A.Id(_, "intval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastInt)
+    ], Flavor.Cell
+
+  | A.Id(_, "strval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastString)
+    ], Flavor.Cell
+
+  | A.Id(_, "boolval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastBool)
+    ], Flavor.Cell
+
+  | A.Id(_, "floatval") when List.length args = 1 ->
+    let e = List.hd_exn args in
+    gather [
+      from_expr e;
+      instr (IOp CastDouble)
+    ], Flavor.Cell
 
   | A.Id (_, id) ->
     begin match args, istype_op id with

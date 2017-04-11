@@ -68,14 +68,14 @@ let decl_vars_from_ast params b =
   let decl_vars = ULS.diff decl_vars param_names in
   List.rev (ULS.items decl_vars)
 
-let from_ast ~class_name ~method_name ~has_this
+let from_ast ~class_name ~function_name ~has_this
   tparams params ret body default_instrs =
   let tparams = tparams_to_strings tparams in
   Label.reset_label ();
   Local.reset_local ();
   Iterator.reset_iterator ();
   Emit_expression.set_class_name class_name;
-  Emit_expression.set_method_name method_name;
+  Emit_expression.set_function_name function_name;
   Emit_expression.set_method_has_this has_this;
   let params = Emit_param.from_asts tparams params in
   let return_type_info =

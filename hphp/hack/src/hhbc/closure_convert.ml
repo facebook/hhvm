@@ -16,6 +16,16 @@ module ULS = Unique_list_string
 let strip_dollar id =
   String.sub id 1 (String.length id - 1)
 
+(* Types of enclosing contexts for lambdas *)
+module Enclosing =
+struct
+  type t =
+  | Toplevel
+  | Function
+  | StaticMethod
+  | Method
+end
+
 type env = {
   (* Prefix used to name closure classes in form
    *   Closure$ (top-level statements)
@@ -23,9 +33,8 @@ type env = {
    *   Closure$cls::meth (method)
    *)
   prefix : string;
-  (* Are we in a static or top-level function or statement?
-   *)
-  outer_is_static : bool;
+  (* In what context does the lambda appear? *)
+  enclosing : Enclosing.t;
   (* Number of closures created in the current function *)
   per_function_count : int;
   (* Free variables computed so far *)
@@ -45,7 +54,7 @@ type env = {
 let initial_env initial_class_num =
 {
   prefix = "Closure$";
-  outer_is_static = false;
+  enclosing = Enclosing.Toplevel;
   per_function_count = 0;
   captured_vars = ULS.empty;
   defined_vars = SSet.empty;
@@ -80,7 +89,7 @@ let add_defined_var env var =
 let set_function env fd =
   { env with
     prefix = "Closure$" ^ Utils.strip_ns (snd fd.f_name);
-    outer_is_static = true;
+    enclosing = Enclosing.Function;
     per_function_count = 0;
   }
 
@@ -91,7 +100,10 @@ let set_method env cd md =
       Utils.strip_ns (snd cd.c_name) ^
       "::" ^
       Utils.strip_ns (snd md.m_name);
-    outer_is_static = List.mem md.m_kind Static;
+    enclosing =
+      if List.mem md.m_kind Static
+      then Enclosing.StaticMethod
+      else Enclosing.Method;
     per_function_count = 0;
   }
 
@@ -106,8 +118,14 @@ let make_closure_name total_count env =
   name ^ ";" ^ string_of_int total_count
 
 let make_closure ~explicit_use p total_count class_num env lambda_vars fd body =
+  let kindstatic =
+    match env.enclosing with
+    | Enclosing.Toplevel -> []
+    | Enclosing.StaticMethod -> [Static]
+    | Enclosing.Method -> []
+    | Enclosing.Function -> if explicit_use then [] else [Static] in
   let md = {
-    m_kind = [Public] @ (if env.outer_is_static then [Static] else []);
+    m_kind = [Public] @ kindstatic;
     m_tparams = fd.f_tparams;
     m_constrs = [];
     m_name = (fst fd.f_name, "__invoke");

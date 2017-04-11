@@ -842,8 +842,8 @@ let add_fun_def buf fun_def =
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
   add_num_cls_ref_slots buf 2 function_num_cls_ref_slots;
-  add_decl_vars buf 2 function_decl_vars;
   add_num_iters buf 2 function_num_iters;
+  add_decl_vars buf 2 function_decl_vars;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
@@ -886,8 +886,8 @@ let add_method_def buf method_def =
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
   add_num_cls_ref_slots buf 4 method_num_cls_ref_slots;
-  add_decl_vars buf 4 method_decl_vars;
   add_num_iters buf 4 method_num_iters;
+  add_decl_vars buf 4 method_decl_vars;
   add_instruction_list buf 4 method_body;
   B.add_string buf "  }"
 
@@ -1061,8 +1061,8 @@ let add_top_level buf hhas_prog =
   let main_num_iters = Hhas_main.num_iters main in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
-  add_decl_vars buf 2 main_decl_vars;
   add_num_iters buf 2 main_num_iters;
+  add_decl_vars buf 2 main_decl_vars;
   add_defcls buf non_closure_classes;
   add_deftypealias buf (Hhas_program.typedefs hhas_prog);
   add_instruction_list buf 2 main_stmts;

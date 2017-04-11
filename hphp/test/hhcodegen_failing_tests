@@ -17,7 +17,6 @@ quick/GetVar.php
 quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
-quick/IssetM.php
 quick/ReadVar.php
 quick/SPropW.php
 quick/SetM.php
@@ -90,12 +89,10 @@ quick/builtin_extension_XMLWriter.php
 quick/builtin_recurse.php
 quick/byref.php
 quick/call10.php
-quick/call11.php
 quick/call14.php
 quick/call_callable.php
 quick/call_nonstatic_this.php
 quick/callable-namespace.php
-quick/callable.php
 quick/castDbl.php
 quick/catch-order.php
 quick/cgetm_ge.php
@@ -119,7 +116,6 @@ quick/closure_get_class.php
 quick/closure_recursive_bad.php
 quick/closure_static.php
 quick/closure_static_vars.php
-quick/closure_use_immediately.php
 quick/closure_use_this.php
 quick/clsmethodf.php
 quick/cmp.php
@@ -497,7 +493,6 @@ quick/setop-magic5.php
 quick/setopl.php
 quick/setter-magic.php
 quick/setter-magic2.php
-quick/shapes_class_constant.php
 quick/short_array_syntax.php
 quick/silencer.php
 quick/simp-add-dbl.php
@@ -515,7 +510,6 @@ quick/static_closure.php
 quick/static_closure_gen.php
 quick/static_closure_params.php
 quick/static_clscns.php
-quick/static_new.php
 quick/static_prop_eval_order.php
 quick/static_sprop.php
 quick/static_sprop2.php
@@ -533,7 +527,6 @@ quick/switch_special_cases.php
 quick/syntax-error.php
 quick/temparray.php
 quick/test_remat.php
-quick/this-type.php
 quick/tmpfile.php
 quick/trailing_comma.php
 quick/trailing_comma_bad1.php
@@ -555,7 +548,6 @@ quick/typehint_lsb_self.php
 quick/undefined-bases.php
 quick/undefined-global.php
 quick/undefined-vgetg.php
-quick/undefined_is_type.php
 quick/unpack.php
 quick/unset_static.php
 quick/unset_varenv.php

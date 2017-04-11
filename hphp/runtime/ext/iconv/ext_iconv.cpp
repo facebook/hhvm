@@ -671,9 +671,9 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 
 #define _php_iconv_memequal(a, b, c)            \
   ((c) == sizeof(uint64_t)                      \
-   ? (x).buf_64 == *((uint64_t *)(b))           \
+   ? (a).buf_64 == *((uint64_t *)(b))           \
    : ((c) == sizeof(uint32_t)                   \
-      ? (x).buf_32 == *((uint32_t *)(b))        \
+      ? (a).buf_32 == *((uint32_t *)(b))        \
       : memcmp((a).buf, b, c) == 0))
 
   union gsnb_t {

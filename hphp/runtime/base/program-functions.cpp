@@ -2456,14 +2456,11 @@ void hphp_session_exit(const Transport* transport) {
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();
+  jit::tc::requestExit();
   // Similarly, apc strings could be in the ServerNote array, and
-  // its possible they are scheduled to be destroyed after this request
+  // it's possible they are scheduled to be destroyed after this request
   // finishes.
   Treadmill::finishRequest();
-
-  // The treadmill must be flushed before profData is reset as the data may
-  // be read during cleanup if EvalEnableReuseTC = true
-  jit::tc::requestExit();
 
   TI().onSessionExit();
 

@@ -375,25 +375,38 @@ let param_template node =
   ; param_user_attributes = []
   }
 
-let mpShapeField : ('a, (shape_field_name * 'a)) metaparser = fun pThing ->
-  fun node env ->
+let pShapeFieldName : shape_field_name parser = fun name _env ->
+  match syntax name with
+  | ScopeResolutionExpression
+    { scope_resolution_qualifier; scope_resolution_name; _ } ->
+      SFclass_const
+      ( pos_name scope_resolution_qualifier
+      , pos_name scope_resolution_name
+      )
+  | _ -> let p, n = pos_name name in SFlit (p, mkStr unesc_dbl n)
+
+let mpShapeExpressionField : ('a, (shape_field_name * 'a)) metaparser =
+  fun hintParser node env ->
     match syntax node with
-    | FieldSpecifier { field_name = name; field_type = thing; _ }
     | FieldInitializer
-      { field_initializer_name = name; field_initializer_value = thing; _ }
-      ->
-        ( (match syntax name with
-          | ScopeResolutionExpression
-            { scope_resolution_qualifier; scope_resolution_name; _ } ->
-              SFclass_const
-              ( pos_name scope_resolution_qualifier
-              , pos_name scope_resolution_name
-              )
-          | _ -> let p, n = pos_name name in SFlit (p, mkStr unesc_dbl n)
-          )
-        , pThing thing env
-        )
+      { field_initializer_name = name; field_initializer_value = ty; _ } ->
+        let name = pShapeFieldName name env in
+        let ty = hintParser ty env in
+        name, ty
     | _ -> missing_syntax "shape field" node env
+
+let mpShapeField : ('a, shape_field) metaparser =
+  fun hintParser node env ->
+    match syntax node with
+    | FieldSpecifier { field_question; field_name; field_type; _ } ->
+        let sf_optional = not (is_missing field_question) in
+        let sf_name = pShapeFieldName field_name env in
+        let sf_hint = hintParser field_type env in
+        { sf_optional; sf_name; sf_hint }
+    | _ ->
+        let sf_name, sf_hint = mpShapeExpressionField hintParser node env in
+        (* Shape expressions can never have optional fields. *)
+        { sf_optional = false; sf_name; sf_hint }
 
 let rec pHint : hint parser = fun node env ->
   let rec pHint_ : hint_ parser = fun node env ->
@@ -402,19 +415,11 @@ let rec pHint : hint parser = fun node env ->
     | Token _
     | SimpleTypeSpecifier _
       -> Happly (pos_name node, [])
-    | ShapeTypeSpecifier { shape_type_fields; _ } ->
-      (* TODO(tingley): There is neither a mapping here for optional shape
-         fields nor for unknown shape fields. These will need to be written
-         before optional shape fields can be supported. They both default to
-         false for now. *)
-      let pShapeField node env =
-        let sf_name, sf_hint = mpShapeField pHint node env in
-        { sf_optional = false; sf_name; sf_hint }
-      in
-      let si_shape_field_list = couldMap ~f:pShapeField shape_type_fields env in
-      let shape_info =
-        { si_allows_unknown_fields=false; si_shape_field_list } in
-      Hshape shape_info
+    | ShapeTypeSpecifier { shape_type_fields; shape_type_ellipsis; _ } ->
+      let si_allows_unknown_fields = not (is_missing shape_type_ellipsis) in
+      let si_shape_field_list =
+        couldMap ~f:(mpShapeField pHint) shape_type_fields env in
+      Hshape { si_allows_unknown_fields; si_shape_field_list }
     | TupleTypeSpecifier { tuple_types; _ } ->
       Htuple (couldMap ~f:pHint tuple_types env)
 
@@ -705,7 +710,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       , mpOptional pExpr embedded_subscript_index env
       )
     | ShapeExpression { shape_expression_fields; _ } ->
-      Shape (couldMap ~f:(mpShapeField pExpr) shape_expression_fields env)
+      Shape (
+        couldMap ~f:(mpShapeExpressionField pExpr) shape_expression_fields env
+      )
     | ObjectCreationExpression
       { object_creation_type; object_creation_argument_list; _ } ->
       New

@@ -168,8 +168,8 @@ let is_local_this id =
   id = SN.SpecialIdents.this && get_method_has_this ()
 
 let extract_shape_field_name_pstring = function
-  | A.SFlit p
-  | A.SFclass_const (_, p) ->  p
+  | A.SFlit p -> A.String p
+  | A.SFclass_const (id, p) -> A.Class_const (id, p)
 
 let extract_shape_field_name = function
   | A.SFlit (_, s)
@@ -368,25 +368,13 @@ and emit_clone expr =
   ]
 
 and emit_shape expr fl =
-  let are_values_all_literals =
-    List.for_all fl ~f:(fun (_, e) -> is_literal e)
-  in
   let p = fst expr in
-  if are_values_all_literals then
-    let fl =
-      List.map fl
-        ~f:(fun (fn, e) ->
-              A.AFkvalue ((p,
-                A.String (extract_shape_field_name_pstring fn)), e))
-    in
-    from_expr (fst expr, A.Array fl)
-  else
-    let es = List.map fl ~f:(fun (_, e) -> from_expr e) in
-    let keys = List.map fl ~f:(fun (fn, _) -> extract_shape_field_name fn) in
-    gather [
-      gather es;
-      instr_newstructarray keys;
-    ]
+  let fl =
+    List.map fl
+      ~f:(fun (fn, e) ->
+            A.AFkvalue ((p, extract_shape_field_name_pstring fn), e))
+  in
+  from_expr (p, A.Array fl)
 
 and emit_tuple p es =
   (* Did you know that tuples are functions? *)
@@ -773,6 +761,11 @@ and emit_dynamic_collection ~transform_to_collection expr es =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
+  let are_all_keys_strings =
+    List.for_all es ~f:(function A.AFkvalue ((_, A.String (_, _)), _) -> true
+                               | _ -> false)
+  in
+  let is_array = match snd expr with A.Array _ -> true | _ -> false in
   let count = List.length es in
   if is_only_values && transform_to_collection = None then begin
     let lit_constructor = match snd expr with
@@ -786,6 +779,16 @@ and emit_dynamic_collection ~transform_to_collection expr es =
       List.map es
         ~f:(function A.AFvalue e -> from_expr e | _ -> failwith "impossible");
       instr @@ ILitConst lit_constructor;
+    ]
+  end else if are_all_keys_strings && is_array then begin
+    let es =
+      List.map es
+        ~f:(function A.AFkvalue ((_, A.String (_, s)), v) -> s, from_expr v
+                   | _ -> failwith "impossible")
+    in
+    gather [
+      gather @@ List.map es ~f:snd;
+      instr_newstructarray @@ List.map es ~f:fst;
     ]
   end else begin
     let lit_constructor = match snd expr with

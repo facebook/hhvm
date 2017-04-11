@@ -2042,8 +2042,9 @@ and statement_word env = function
           "Parse error: declarations are not supported outside global scope";
       ignore (ignore_toplevel None ~attr:[] [] env (fun _ -> true));
       Noop
-  | x when peek env = Tcolon ->
-      statement_goto_label env x
+  (* TODO(t17085086): Prevent this from breaking www and uncomment it. *)
+  (* | x when peek env = Tcolon ->
+      statement_goto_label env x *)
   | x ->
       L.back env.lb;
       let e = expr env in
@@ -2105,7 +2106,7 @@ and return_value env =
 (* Goto statement *)
 (*****************************************************************************)
 
-and statement_goto_label env label =
+and _statement_goto_label env label =
   let pos = Pos.make env.file env.lb in
   let goto_allowed =
     TypecheckerOptions.experimental_feature_enabled

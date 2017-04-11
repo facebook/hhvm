@@ -472,12 +472,6 @@ and emit_yield = function
       instr_yieldk;
     ]
 
-and emit_yield_break () =
-  gather [
-    instr_null;
-    instr_retc;
-  ]
-
 and emit_string2 exprs =
   match exprs with
   | [e] ->
@@ -717,7 +711,8 @@ and from_expr expr =
   | A.Shape fl -> emit_shape expr fl
   | A.Await e -> emit_await e
   | A.Yield e -> emit_yield e
-  | A.Yield_break -> emit_yield_break ()
+  | A.Yield_break ->
+    failwith "yield break should be in statement position"
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda fundef ids

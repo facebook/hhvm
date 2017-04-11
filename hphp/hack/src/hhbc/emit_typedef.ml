@@ -14,7 +14,8 @@ open Emit_type_hint
 let kind_to_type_info tparams k =
   match k with
   | Ast.Alias h | Ast.NewType h ->
-    Emit_type_hint.hint_to_type_info ~always_extended:false tparams h
+    Emit_type_hint.hint_to_type_info
+      ~skipawaitable:false ~always_extended:false ~tparams h
 
 let from_ast : A.typedef -> Hhas_typedef.t =
   fun ast_typedef ->

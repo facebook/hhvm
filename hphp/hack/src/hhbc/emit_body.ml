@@ -68,7 +68,7 @@ let decl_vars_from_ast params b =
   let decl_vars = ULS.diff decl_vars param_names in
   List.rev (ULS.items decl_vars)
 
-let from_ast ~class_name ~function_name ~has_this
+let from_ast ~class_name ~function_name ~has_this ~skipawaitable
   tparams params ret body default_instrs =
   let tparams = tparams_to_strings tparams in
   Label.reset_label ();
@@ -82,7 +82,9 @@ let from_ast ~class_name ~function_name ~has_this
     match ret with
     | None ->
       Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
-    | Some h -> Some (hint_to_type_info ~always_extended:true tparams h) in
+    | Some h ->
+      Some (hint_to_type_info
+        ~skipawaitable ~always_extended:true ~tparams h) in
   let stmt_instrs = Emit_statement.from_stmts body in
   let stmt_instrs =
     if has_type_constraint return_type_info then

@@ -21,6 +21,11 @@ module CBR = Continue_break_rewriter
 
 let rec from_stmt st =
   match st with
+  | A.Expr (_, A.Yield_break) ->
+    gather [
+      instr_null;
+      instr_retc;
+    ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
     gather (List.map exprl emit_unset_expr)
   | A.Expr expr ->

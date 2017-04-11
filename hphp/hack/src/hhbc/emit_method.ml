@@ -57,7 +57,10 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
             instr_verifyRetTypeC;
             instr_retc
           ] in
-  let body_instrs,
+    let method_is_async =
+      ast_method.Ast.m_fun_kind = Ast_defs.FAsync
+      || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
+    let body_instrs,
       method_decl_vars,
       method_num_iters,
       method_num_cls_ref_slots,
@@ -69,15 +72,13 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       ~class_name:(Some class_name)
       ~function_name:(Some method_name)
       ~has_this:(not method_is_static)
+      ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       tparams
       ast_method.Ast.m_params
       ret
       ast_method.Ast.m_body
       default_instrs
   in
-  let method_is_async =
-    ast_method.Ast.m_fun_kind = Ast_defs.FAsync
-    || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
   (* TODO: use something that can't be faked in user code *)
   let method_is_closure_body =
     snd ast_method.Ast.m_name = "__invoke"

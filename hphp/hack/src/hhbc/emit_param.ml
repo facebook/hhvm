@@ -15,7 +15,7 @@ open Instruction_sequence
 let from_ast tparams p = if p.Ast.param_is_variadic then None else
   let param_name = snd p.A.param_id in
   let param_type_info = Option.map p.Ast.param_hint
-    (hint_to_type_info ~always_extended:false tparams) in
+    (hint_to_type_info ~skipawaitable:false ~always_extended:false ~tparams) in
   let param_default_value = Option.map p.Ast.param_expr
     ~f:(fun e -> Label.next_default_arg (), e)
   in

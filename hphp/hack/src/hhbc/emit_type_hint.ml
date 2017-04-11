@@ -66,7 +66,7 @@ let rec fmt_hint (_, h) =
     let formatted_shape_entries = shape_fields @ shape_suffix in
     "HH\\shape(" ^ String.concat ", " formatted_shape_entries ^ ")"
 
-let rec hint_to_type_constraint tparams (_, h) =
+let rec hint_to_type_constraint ~tparams ~skipawaitable (_, h) =
 match h with
 | A.Happly ((_, ("mixed" | "this" | "void")), []) ->
   TC.make None []
@@ -79,9 +79,15 @@ match h with
   let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeConstant] in
   TC.make tc_name tc_flags
 
-  (* Elide the Awaitable class for Awaitable<void> only *)
-| A.Happly ((_, "Awaitable"), [(_, A.Happly((_, "void"), []))]) ->
+  (* Elide the Awaitable class for async return types only *)
+| A.Happly ((_, "Awaitable"), [(_, A.Happly((_, "void"), []))])
+  when skipawaitable ->
   TC.make None []
+
+| A.Happly ((_, "Awaitable"), [h])
+| A.Hoption (_, A.Happly ((_, "Awaitable"), [h]))
+  when skipawaitable ->
+  hint_to_type_constraint ~tparams ~skipawaitable:false h
 
 (* Need to differentiate between type params and classes *)
 | A.Happly ((_, s), _) ->
@@ -101,7 +107,7 @@ match h with
   TC.make tc_name tc_flags
 
 | A.Hoption t ->
-  let tc = hint_to_type_constraint tparams t in
+  let tc = hint_to_type_constraint ~tparams ~skipawaitable t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags = List.dedup
@@ -109,15 +115,15 @@ match h with
   TC.make tc_name tc_flags
 
 | A.Hsoft t ->
-  let tc = hint_to_type_constraint tparams t in
+  let tc = hint_to_type_constraint ~tparams ~skipawaitable t in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags = List.dedup
     ([TC.Soft; TC.HHType; TC.ExtendedHint] @ tc_flags) in
   TC.make tc_name tc_flags
 
-let hint_to_type_info ~always_extended tparams h =
-  let tc = hint_to_type_constraint tparams h in
+let hint_to_type_info ~skipawaitable ~always_extended ~tparams h =
+  let tc = hint_to_type_constraint ~tparams ~skipawaitable h in
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags =
@@ -127,10 +133,6 @@ let hint_to_type_info ~always_extended tparams h =
   let type_info_user_type = Some (fmt_hint h) in
   let type_info_type_constraint = TC.make tc_name tc_flags in
   Hhas_type_info.make type_info_user_type type_info_type_constraint
-
-let hints_to_type_infos ~always_extended tparams hints =
-  let mapper hint = hint_to_type_info always_extended tparams hint in
-  List.map hints mapper
 
 let hint_to_class h =
   match h with

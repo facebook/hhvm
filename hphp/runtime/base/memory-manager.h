@@ -302,7 +302,7 @@ constexpr uint32_t kMaxSmallSize = kSmallIndex2Size[kNumSmallSizes-1];
 static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
               "Too few size classes");
 static_assert(kMaxSmallSize < kSlabSize, "fix kNumSmallSizes or kLgSlabSize");
-static_assert(kNumSmallSizes <= sizeof(kSmallSize2Index),
+static_assert(kNumSmallSizes <= (sizeof(kSmallIndex2Size) / sizeof(uint32_t)),
               "Extend SMALL_SIZES table");
 
 /*

@@ -1711,6 +1711,8 @@ and transform_binary_expression ~is_nested expr =
   let is_concat op =
     get_operator_type op = Full_fidelity_operator.ConcatenationOperator in
   let operator_has_surrounding_spaces op = not (is_concat op) in
+  let operator_is_leading op =
+    get_operator_type op = Full_fidelity_operator.PipeOperator in
 
   let (left, operator, right) = get_binary_expression_children expr in
   let operator_t = get_operator_type operator in
@@ -1771,8 +1773,11 @@ and transform_binary_expression ~is_nested expr =
                 let op = x in
                 last_op := op;
                 let op_has_spaces = operator_has_surrounding_spaces op in
+                let op_is_leading = operator_is_leading op in
                 Fmt [
-                  if op_has_spaces then space_split () else Split;
+                  if op_is_leading
+                    then (if op_has_spaces then space_split () else Split)
+                    else (if op_has_spaces then Space else Nothing);
                   if is_concat op
                     then ConcatOperator (transform op)
                     else transform op;
@@ -1781,10 +1786,18 @@ and transform_binary_expression ~is_nested expr =
               else begin
                 let operand = x in
                 let op_has_spaces = operator_has_surrounding_spaces !last_op in
+                let op_is_leading = operator_is_leading !last_op in
                 Fmt [
-                  if op_has_spaces
-                    then Fmt [Space; SplitWith Cost.Assignment]
-                    else SplitWith Cost.Assignment;
+                  if op_is_leading then begin
+                    (* TODO: We only have this split to ensure that range
+                     * formatting works when it starts or ends here. We should
+                     * remove it once we can return an expanded formatting
+                     * range. *)
+                    if op_has_spaces
+                      then Fmt [Space; SplitWith Cost.Assignment]
+                      else SplitWith Cost.Assignment
+                  end
+                  else (if op_has_spaces then space_split () else Split);
                   transform_operand operand;
                 ]
               end

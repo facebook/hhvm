@@ -1,8 +1,8 @@
 <?hh
 
 $foo = 'bar
-baz'
-  .' qux';
+baz'.
+  ' qux';
 
 $sql = 'SELECT *
         FROM table

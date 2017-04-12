@@ -22,7 +22,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
@@ -119,7 +119,7 @@ ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
  * already be incref'd).
  */
 ALWAYS_INLINE
-ArrayLval EmptyArray::MakePackedInl(TypedValue tv) {
+member_lval EmptyArray::MakePackedInl(TypedValue tv) {
   auto const cap = kPackedSmallSize;
   auto const ad = static_cast<ArrayData*>(
     MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
@@ -137,11 +137,11 @@ ArrayLval EmptyArray::MakePackedInl(TypedValue tv) {
   assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
   assert(PackedArray::checkInvariants(ad));
-  return ArrayLval { ad, elem };
+  return member_lval { ad, elem };
 }
 
 NEVER_INLINE
-ArrayLval EmptyArray::MakePacked(TypedValue tv) {
+member_lval EmptyArray::MakePacked(TypedValue tv) {
   return MakePackedInl(tv);
 }
 
@@ -151,7 +151,7 @@ ArrayLval EmptyArray::MakePacked(TypedValue tv) {
  * Note: the key is not already incref'd, but the value must be.
  */
 NEVER_INLINE
-ArrayLval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
+member_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   auto const ad = reqAllocArray(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
@@ -172,14 +172,14 @@ ArrayLval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   assert(ad->hasExactlyOneRef());
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
-  return ArrayLval { ad, &elem };
+  return member_lval { ad, &elem };
 }
 
 /*
  * Creating a single-element mixed array with a integer key.  The
  * value is already incref'd.
  */
-ArrayLval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
+member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   auto const ad = reqAllocArray(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*count*/, 1/*size*/, (key >= 0) ? key + 1 : 0);
   auto const data = ad->data();
@@ -201,7 +201,7 @@ ArrayLval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   assert(ad->m_scale == MixedArray::SmallScale);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
-  return ArrayLval { ad, &elem };
+  return member_lval { ad, &elem };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -225,30 +225,30 @@ ArrayData* EmptyArray::SetStr(ArrayData*,
   return EmptyArray::MakeMixed(k, val).arr_base();
 }
 
-ArrayLval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
+member_lval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
   return k == 0 ? EmptyArray::MakePacked(make_tv<KindOfNull>())
                 : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-ArrayLval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+member_lval EmptyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   return LvalInt(ad, k, copy);
 }
 
-ArrayLval EmptyArray::LvalStr(ArrayData*, StringData* k, bool) {
+member_lval EmptyArray::LvalStr(ArrayData*, StringData* k, bool) {
   return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
 }
 
-ArrayLval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+member_lval EmptyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   return LvalStr(ad, k, copy);
 }
 
-ArrayLval EmptyArray::LvalNew(ArrayData*, bool) {
+member_lval EmptyArray::LvalNew(ArrayData*, bool) {
   return EmptyArray::MakePacked(make_tv<KindOfNull>());
 }
 
-ArrayLval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
+member_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   return LvalNew(ad, copy);
 }

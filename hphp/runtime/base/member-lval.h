@@ -36,14 +36,14 @@ union Value;
  * Encapsulated minstr lval reference to a container and the value and type tag
  * of one of its members.
  */
-struct ArrayLval {
-  ArrayLval();
+struct member_lval {
+  member_lval();
 
   /*
    * Opaque union of element pointer types.
    */
   union ptr_union {
-    friend ArrayLval;
+    friend member_lval;
 
     ptr_union(TypedValue* tv) : tv{tv} {}
     ptr_union(Value* val) : val{val} {}
@@ -54,8 +54,8 @@ struct ArrayLval {
     Value* val;
   };
 
-  ArrayLval(HeapObject* base, ptr_union ptr);
-  ArrayLval(HeapObject* base, TypedValue* elem);
+  member_lval(HeapObject* base, ptr_union ptr);
+  member_lval(HeapObject* base, TypedValue* elem);
 
   /*
    * The base type which logically contains the referenced value and type.
@@ -64,7 +64,7 @@ struct ArrayLval {
   ArrayData* arr_base() const;
 
   /*
-   * Whether this ArrayLval contains a valid reference to a value and type.
+   * Whether this member_lval contains a valid reference to a value and type.
    */
   bool has_ref() const;
 
@@ -86,7 +86,7 @@ struct ArrayLval {
   /*
    * Opaque element pointer.
    *
-   * This should only be used for constructing new ArrayLval objects from
+   * This should only be used for constructing new member_lval objects from
    * existing ones.
    */
   ptr_union elem() const;
@@ -103,6 +103,6 @@ private:
 
 }
 
-#include "hphp/runtime/base/memb-lval-inl.h"
+#include "hphp/runtime/base/member-lval-inl.h"
 
 #endif

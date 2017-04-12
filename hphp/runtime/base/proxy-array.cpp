@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-custom-element.h"
 #include "hphp/util/hphp-config.h"
@@ -132,58 +132,58 @@ const TypedValue* ProxyArray::NvTryGetInt(const ArrayData* ad, int64_t k) {
   return innerArr(ad)->nvTryGet(k);
 }
 
-ArrayLval ProxyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+member_lval ProxyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, true);
   }
   auto const lval = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
   reseatable(ad, lval.arr_base());
-  return ArrayLval { ad, lval.elem() };
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+member_lval ProxyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalRef(k, true);
   }
   auto const lval = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
   reseatable(ad, lval.arr_base());
-  return ArrayLval { ad, lval.elem() };
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+member_lval ProxyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   if (copy) {
     return innerArr(ad)->lval(k, true);
   }
   auto const lval = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
   reseatable(ad, lval.arr_base());
-  return ArrayLval { ad, lval.elem() };
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+member_lval ProxyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalRef(k, true);
   }
   auto const lval = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
   reseatable(ad, lval.arr_base());
-  return ArrayLval { ad, lval.elem() };
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalNew(ArrayData* ad, bool copy) {
+member_lval ProxyArray::LvalNew(ArrayData* ad, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalNew(true);
   }
   auto const lval = innerArr(ad)->lvalNew(innerArr(ad)->cowCheck());
   reseatable(ad, lval.arr_base());
-  return ArrayLval { ad, lval.elem() };
+  return member_lval { ad, lval.elem() };
 }
 
-ArrayLval ProxyArray::LvalNewRef(ArrayData* ad, bool copy) {
+member_lval ProxyArray::LvalNewRef(ArrayData* ad, bool copy) {
   if (copy) {
     return innerArr(ad)->lvalNewRef(true);
   }
   auto const lval = innerArr(ad)->lvalNewRef(innerArr(ad)->cowCheck());
   reseatable(ad, lval.arr_base());
-  return ArrayLval { ad, lval.elem() };
+  return member_lval { ad, lval.elem() };
 }
 
 ArrayData* ProxyArray::SetInt(ArrayData* ad,

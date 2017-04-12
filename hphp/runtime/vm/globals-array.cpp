@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -122,11 +122,11 @@ GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayLval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+member_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return LvalStr(ad, String(k).get(), copy);
 }
 
-ArrayLval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
@@ -134,11 +134,11 @@ ArrayLval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
     tvWriteNull(&nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  return ArrayLval { a, tv };
+  return member_lval { a, tv };
 }
 
-ArrayLval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
-  return ArrayLval { ad, lvalBlackHole().asTypedValue() };
+member_lval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
+  return member_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,

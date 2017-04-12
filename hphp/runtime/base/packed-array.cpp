@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -723,13 +723,13 @@ bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* s) {
   return false;
 }
 
-ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isPacked());
 
   if (LIKELY(size_t(k) < adIn->m_size)) {
     auto const ad = copy ? Copy(adIn) : adIn;
-    return ArrayLval { ad, &packedData(ad)[k] };
+    return member_lval { ad, &packedData(ad)[k] };
   }
 
   // We can stay packed if the index is m_size, and the operation does
@@ -742,27 +742,27 @@ ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
   return mixed->addLvalImpl(k);
 }
 
-ArrayLval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalIntRef(ArrayData* adIn, int64_t k, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   return LvalInt(adIn, k, copy);
 }
 
-ArrayLval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   auto const ad = copy ? Copy(adIn) : adIn;
-  return ArrayLval { ad, &packedData(ad)[k] };
+  return member_lval { ad, &packedData(ad)[k] };
 }
 
-ArrayLval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
+member_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return {adIn, nullptr};
   auto const ad = copy ? Copy(adIn) : adIn;
-  return ArrayLval { ad, &packedData(ad)[k] };
+  return member_lval { ad, &packedData(ad)[k] };
 }
 
-ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
+member_lval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   // We have to promote.  We know the key doesn't exist, but aren't
   // making use of that fact yet.  TODO(#2606310).
   assert(checkInvariants(adIn));
@@ -771,44 +771,48 @@ ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
   return mixed->addLvalImpl(key);
 }
 
-ArrayLval PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
+member_lval
+PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
   return LvalStr(adIn, key, copy);
 }
 
-ArrayLval PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
+member_lval
+PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayLval PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
+member_lval
+PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayLval PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
+member_lval
+PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayLval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
+member_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   assert(checkInvariants(adIn));
   auto const ad = copy ? CopyAndResizeIfNeeded(adIn)
                        : ResizeIfNeeded(adIn);
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
-  return ArrayLval { ad, &tv };
+  return member_lval { ad, &tv };
 }
 
-ArrayLval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
+member_lval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   return LvalNew(adIn, copy);
 }
 
-ArrayLval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
+member_lval PackedArray::LvalNewRefVec(ArrayData* adIn, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);

@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -486,12 +486,12 @@ public:
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static ArrayLval LvalInt(ArrayData*, int64_t, bool);
-  static ArrayLval LvalIntRef(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStr(ArrayData*, StringData*, bool);
-  static ArrayLval LvalStrRef(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNew(ArrayData*, bool);
-  static ArrayLval LvalNewRef(ArrayData*, bool);
+  static member_lval LvalInt(ArrayData*, int64_t, bool);
+  static member_lval LvalIntRef(ArrayData*, int64_t, bool);
+  static member_lval LvalStr(ArrayData*, StringData*, bool);
+  static member_lval LvalStrRef(ArrayData*, StringData*, bool);
+  static member_lval LvalNew(ArrayData*, bool);
+  static member_lval LvalNewRef(ArrayData*, bool);
   static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
   static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);

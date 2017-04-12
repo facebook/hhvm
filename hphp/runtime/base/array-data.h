@@ -24,7 +24,7 @@
 
 #include "hphp/runtime/base/cap-code.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -265,10 +265,10 @@ public:
    * Getting l-value (that Variant pointer) at specified key. Return this if
    * escalation is not needed, or an escalated array data.
    */
-  ArrayLval lval(int64_t k, bool copy);
-  ArrayLval lval(StringData* k, bool copy);
-  ArrayLval lvalRef(int64_t k, bool copy);
-  ArrayLval lvalRef(StringData* k, bool copy);
+  member_lval lval(int64_t k, bool copy);
+  member_lval lval(StringData* k, bool copy);
+  member_lval lvalRef(int64_t k, bool copy);
+  member_lval lvalRef(StringData* k, bool copy);
 
   /**
    * Getting l-value (that Variant pointer) of a new element with the next
@@ -277,8 +277,8 @@ public:
    * available integer key may fail, in which case ret is set to point to
    * the lval blackhole (see lvalBlackHole() for details).
    */
-  ArrayLval lvalNew(bool copy);
-  ArrayLval lvalNewRef(bool copy);
+  member_lval lvalNew(bool copy);
+  member_lval lvalNewRef(bool copy);
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
@@ -324,10 +324,10 @@ public:
   const Variant& get(const StringData* k, bool error = false) const;
   const Variant& get(const String& k, bool error = false) const;
   const Variant& get(const Variant& k, bool error = false) const;
-  ArrayLval lval(const String& k, bool copy);
-  ArrayLval lval(const Variant& k, bool copy);
-  ArrayLval lvalRef(const String& k, bool copy);
-  ArrayLval lvalRef(const Variant& k, bool copy);
+  member_lval lval(const String& k, bool copy);
+  member_lval lval(const Variant& k, bool copy);
+  member_lval lvalRef(const String& k, bool copy);
+  member_lval lvalRef(const Variant& k, bool copy);
   ArrayData *set(const String& k, const Variant& v, bool copy);
   ArrayData *set(const Variant& k, const Variant& v, bool copy);
   ArrayData *set(const StringData*, const Variant&, bool) = delete;
@@ -629,12 +629,12 @@ struct ArrayFunctions {
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
-  ArrayLval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
-  ArrayLval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
-  ArrayLval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
-  ArrayLval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
-  ArrayLval (*lvalNew[NK])(ArrayData*, bool copy);
-  ArrayLval (*lvalNewRef[NK])(ArrayData*, bool copy);
+  member_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
+  member_lval (*lvalIntRef[NK])(ArrayData*, int64_t k, bool copy);
+  member_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
+  member_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
+  member_lval (*lvalNew[NK])(ArrayData*, bool copy);
+  member_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
   ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, Variant& v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, Variant& v, bool copy);
   ArrayData* (*addInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);

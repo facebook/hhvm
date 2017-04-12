@@ -21,53 +21,53 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline ArrayLval::ArrayLval()
+inline member_lval::member_lval()
   : m_base(nullptr)
   , m_ptr(nullptr)
 {}
 
-inline ArrayLval::ArrayLval(HeapObject* base, ArrayLval::ptr_union ptr)
+inline member_lval::member_lval(HeapObject* base, member_lval::ptr_union ptr)
   : m_base(base)
   , m_ptr(ptr)
 {}
 
-inline ArrayLval::ArrayLval(HeapObject* base, TypedValue* elem)
+inline member_lval::member_lval(HeapObject* base, TypedValue* elem)
   : m_base(base)
   , m_ptr(elem)
 {}
 
-inline HeapObject* ArrayLval::base() const {
+inline HeapObject* member_lval::base() const {
   return m_base;
 }
 
-inline ArrayData* ArrayLval::arr_base() const {
+inline ArrayData* member_lval::arr_base() const {
   assertx(isArrayKind(m_base->kind()));
   return m_arr;
 }
 
-inline bool ArrayLval::has_ref() const {
+inline bool member_lval::has_ref() const {
   return m_ptr.val != nullptr;
 }
 
-inline const Value& ArrayLval::val() const {
+inline const Value& member_lval::val() const {
   return *m_ptr.val;
 }
-inline Value& ArrayLval::val() {
+inline Value& member_lval::val() {
   return *m_ptr.val;
 }
 
-inline const DataType& ArrayLval::type() const {
+inline const DataType& member_lval::type() const {
   return m_ptr.tv->m_type;
 }
-inline DataType& ArrayLval::type() {
+inline DataType& member_lval::type() {
   return m_ptr.tv->m_type;
 }
 
-inline TypedValue* ArrayLval::tv() const {
+inline TypedValue* member_lval::tv() const {
   return m_ptr.tv;
 }
 
-inline ArrayLval::ptr_union ArrayLval::elem() const {
+inline member_lval::ptr_union member_lval::elem() const {
   return m_ptr;
 }
 

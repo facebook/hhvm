@@ -21,7 +21,7 @@
 
 #include <algorithm>
 
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-variant.h"
 
@@ -78,26 +78,24 @@ inline const Variant& ArrayData::get(const StringData* k, bool error) const {
   return tv ? tvAsCVarRef(tv) : getNotFound(k, error);
 }
 
-inline ArrayLval ArrayData::lval(const String& k, bool copy) {
+inline member_lval ArrayData::lval(const String& k, bool copy) {
   assert(IsValidKey(k));
   return lval(k.get(), copy);
 }
 
-inline ArrayLval ArrayData::lval(const Variant& k, bool copy) {
+inline member_lval ArrayData::lval(const Variant& k, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? lval(getIntKey(cell), copy)
                         : lval(getStringKey(cell), copy);
 }
 
-inline ArrayLval
-ArrayData::lvalRef(const String& k, bool copy) {
+inline member_lval ArrayData::lvalRef(const String& k, bool copy) {
   assert(IsValidKey(k));
   return lvalRef(k.get(), copy);
 }
 
-inline ArrayLval
-ArrayData::lvalRef(const Variant& k, bool copy) {
+inline member_lval ArrayData::lvalRef(const Variant& k, bool copy) {
   assert(IsValidKey(k));
   auto const cell = k.asCell();
   return isIntKey(cell) ? lvalRef(getIntKey(cell), copy)
@@ -255,27 +253,27 @@ inline bool ArrayData::exists(const StringData* k) const {
   return g_array_funcs.existsStr[kind()](this, k);
 }
 
-inline ArrayLval ArrayData::lval(int64_t k, bool copy) {
+inline member_lval ArrayData::lval(int64_t k, bool copy) {
   return g_array_funcs.lvalInt[kind()](this, k, copy);
 }
 
-inline ArrayLval ArrayData::lvalRef(int64_t k, bool copy) {
+inline member_lval ArrayData::lvalRef(int64_t k, bool copy) {
   return g_array_funcs.lvalIntRef[kind()](this, k, copy);
 }
 
-inline ArrayLval ArrayData::lval(StringData* k, bool copy) {
+inline member_lval ArrayData::lval(StringData* k, bool copy) {
   return g_array_funcs.lvalStr[kind()](this, k, copy);
 }
 
-inline ArrayLval ArrayData::lvalRef(StringData* k, bool copy) {
+inline member_lval ArrayData::lvalRef(StringData* k, bool copy) {
   return g_array_funcs.lvalStrRef[kind()](this, k, copy);
 }
 
-inline ArrayLval ArrayData::lvalNew(bool copy) {
+inline member_lval ArrayData::lvalNew(bool copy) {
   return g_array_funcs.lvalNew[kind()](this, copy);
 }
 
-inline ArrayLval ArrayData::lvalNewRef(bool copy) {
+inline member_lval ArrayData::lvalNewRef(bool copy) {
   return g_array_funcs.lvalNewRef[kind()](this, copy);
 }
 

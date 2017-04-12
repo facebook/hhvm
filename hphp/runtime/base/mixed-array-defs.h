@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
-#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -333,11 +333,11 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
 }
 
 template <class K>
-ArrayLval MixedArray::addLvalImpl(K k) {
+member_lval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
   if (!p.found) tvWriteNull(&p.tv);
-  return ArrayLval { this, &p.tv };
+  return member_lval { this, &p.tv };
 }
 
 //////////////////////////////////////////////////////////////////////

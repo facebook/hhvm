@@ -1030,7 +1030,7 @@ let add_data_region_element ~has_keys buf name num arguments =
       arguments;
   B.add_string buf ";\n"
 
-let add_data_region buf top_level_body functions =
+let add_data_region buf top_level_body functions classes =
   let rec add_data_region_list buf instr =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
@@ -1043,12 +1043,19 @@ let add_data_region buf top_level_body functions =
     | ILitConst (Keyset (num, arguments)) ->
       add_data_region_element ~has_keys:false buf "k" num arguments
     | _ -> ()
-  and iter_aux buf fun_def =
+  and iter_aux_fun buf fun_def =
     let function_body = Hhas_function.body fun_def in
     add_data_region_list buf function_body
+  and iter_aux_class buf class_def =
+    let methods = Hhas_class.methods class_def in
+    List.iter (iter_aux_method buf) methods
+  and iter_aux_method buf method_def =
+    let method_body = Hhas_method.body method_def in
+    add_data_region_list buf method_body
   in
   add_data_region_list buf top_level_body;
-  List.iter (iter_aux buf) functions;
+  List.iter (iter_aux_fun buf) functions;
+  List.iter (iter_aux_class buf) classes;
   B.add_string buf "\n"
 
 let add_top_level buf hhas_prog =
@@ -1079,10 +1086,11 @@ let add_program buf hhas_prog =
   B.add_string buf "#starts here\n";
   let functions = Hhas_program.functions hhas_prog in
   let top_level_body = Hhas_main.body @@ Hhas_program.main hhas_prog in
-  add_data_region buf top_level_body functions;
+  let classes = Hhas_program.classes hhas_prog in
+  add_data_region buf top_level_body functions classes;
   add_top_level buf hhas_prog;
   List.iter (add_fun_def buf) functions;
-  List.iter (add_class_def buf) (Hhas_program.classes hhas_prog);
+  List.iter (add_class_def buf) classes;
   List.iter (add_typedef buf) (Hhas_program.typedefs hhas_prog);
   B.add_string buf "\n#ends here\n"
 

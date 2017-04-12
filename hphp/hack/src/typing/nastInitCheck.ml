@@ -146,6 +146,10 @@ and constructor env cstr =
   match cstr with
     | None -> SSet.empty
     | Some cstr ->
+      let check_param_initializer = fun e -> ignore(expr env SSet.empty e) in
+      List.iter cstr.m_params (fun p ->
+        Option.iter p.param_expr check_param_initializer
+      );
       let b = Nast.assert_named_body cstr.m_body in
       toplevel env SSet.empty b.fnb_nast
 

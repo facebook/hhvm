@@ -63,9 +63,9 @@ let from_ast
   let compiled_typedefs = Emit_typedef.from_asts parsed_typedefs in
   let _compiled_consts = [] in (* TODO *)
   let pos = Pos.none in
-  (* Main method returns 1 by default? *)
-  let parsed_statements =
-    parsed_statements @
-    [Ast.Return (pos, Some (pos, Ast.Int(pos, "1"))) ] in
+  let parsed_statements = match List.last parsed_statements with
+    | Some (Ast.Return _) -> parsed_statements
+    | _ -> parsed_statements @ [Ast.Return (pos, Some (pos, Ast.Int(pos, "1")))]
+  in
   let compiled_statements = emit_main parsed_statements in
   make compiled_funs compiled_classes compiled_typedefs compiled_statements

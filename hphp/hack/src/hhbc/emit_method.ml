@@ -69,8 +69,6 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       method_is_generator,
       method_is_pair_generator =
     Emit_body.from_ast
-      ~class_name:(Some class_name)
-      ~function_name:(Some method_name)
       ~has_this:(not method_is_static)
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       tparams

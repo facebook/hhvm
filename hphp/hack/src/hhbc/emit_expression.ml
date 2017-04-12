@@ -34,14 +34,9 @@ module LValOp = struct
 end
 
 (* Context for a complete method body. It would be more elegant to pass this
- * around in an environment parameter *)
-let class_name = ref (None : string option)
-let function_name = ref (None : string option)
+ * around in an environment parameter. Alternatively, transform the AST before
+ * codegen in order to resolve $this properly. *)
 let method_has_this = ref false
-let set_class_name n = class_name := n
-let get_class_name () = !class_name
-let set_function_name n = function_name := n
-let get_function_name () = !function_name
 let set_method_has_this b = method_has_this := b
 let get_method_has_this () = !method_has_this
 
@@ -406,16 +401,17 @@ and emit_class_id cid =
   if cid = SN.Classes.cStatic
   then instr (IMisc (LateBoundCls 0))
   else
-  (* TODO: emit statically-known base class if possible *)
+  (* We assume that if these were statically resolvable then it would have
+   * been done during closure conversion
+   *)
   if  cid = SN.Classes.cParent
   then instr (IMisc (Parent 0))
   else
   if cid = SN.Classes.cSelf
-  then match get_class_name () with
-  | None -> instr (IMisc Self)
-  | Some cid -> emit_known_class_id cid
-  else if cid.[0] = '$' then
-    instr (IGet (ClsRefGetL (Local.Named cid, 0)))
+  then instr (IMisc Self)
+  else
+  if cid.[0] = '$'
+  then instr (IGet (ClsRefGetL (Local.Named cid, 0)))
   else emit_known_class_id cid
 
 and emit_class_get param_num_opt cid id =
@@ -436,15 +432,15 @@ and emit_class_const cid id =
       IMisc (LateBoundCls 0);
       ILitConst (ClsCns (id, 0));
     ]
+  (* We assume that if this was statically resolvable it would have been
+   * transformed during closure conversion
+   *)
   else if cid = SN.Classes.cSelf
   then
-    match get_class_name () with
-    | None ->
-      instrs [
-        IMisc Self;
-        ILitConst (ClsCns (id, 0));
-      ]
-    | Some cid -> instr (ILitConst (ClsCnsD (id, cid)))
+    instrs [
+      IMisc Self;
+      ILitConst (ClsCns (id, 0));
+    ]
   else
     instr (ILitConst (ClsCnsD (id, cid)))
 
@@ -511,25 +507,6 @@ and emit_id (p, s) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
-  | "__CLASS__" ->
-    instr_string (
-      match get_class_name () with None -> "" | Some s -> Utils.strip_ns s
-    )
-  | "__METHOD__" ->
-    instr_string (
-      (match get_class_name () with
-      | None -> ""
-      | Some s -> Utils.strip_ns s ^ "::") ^
-      (match get_function_name () with
-      | None -> ""
-      | Some s -> Utils.strip_ns s)
-    )
-  | "__FUNCTION__" ->
-    instr_string (
-      match get_function_name () with
-      | None -> ""
-      | Some s -> Utils.strip_ns s
-    )
   | "__LINE__" ->
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in

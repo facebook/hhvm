@@ -36,10 +36,12 @@ let emit_main block =
   let return_seq _ = Instruction_sequence.empty in
   let body_instrs, decl_vars, num_iters, _, _, _, _, _ =
     Emit_body.from_ast
-      ~skipawaitable:false ~class_name:None ~function_name:None ~has_this:false
+      ~skipawaitable:false ~has_this:false
       [] [] None block return_seq in
   Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs)
     decl_vars num_iters
+
+open Closure_convert
 
 let from_ast
   (parsed_functions,
@@ -47,14 +49,12 @@ let from_ast
   parsed_typedefs,
   _parsed_consts,
   parsed_statements) =
-  let env = Closure_convert.initial_env (List.length parsed_classes) in
-  let env, parsed_functions =
-    List.map_env env parsed_functions Closure_convert.convert_fun in
-  let env, parsed_classes =
-    List.map_env env parsed_classes Closure_convert.convert_class in
-  let env, parsed_statements =
-    Closure_convert.convert_block env parsed_statements in
-  let closure_classes = Closure_convert.get_closure_classes env in
+  let st = initial_state (List.length parsed_classes) in
+  let st, parsed_statements =
+    List.map_env st parsed_statements convert_toplevel in
+  let st, parsed_functions = List.map_env st parsed_functions convert_fun in
+  let st, parsed_classes = List.map_env st parsed_classes convert_class in
+  let closure_classes = Closure_convert.get_closure_classes st in
   let all_classes = parsed_classes @ closure_classes in
   let compiled_funs = Emit_function.from_asts parsed_functions in
   let compiled_funs = Generate_memoized.memoize_functions compiled_funs in

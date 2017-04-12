@@ -28,11 +28,11 @@ quick/Xhp.php
 quick/__call.php
 quick/__isset.php
 quick/abs_codegen.php
+quick/abstract_static_2.php
 quick/actrec.php
 quick/alias_torture.php
 quick/all_type_comparison_test.php
 quick/allbranches.php
-quick/apc-sleep.php
 quick/apc.php
 quick/args-test.php
 quick/array_access.php
@@ -89,6 +89,7 @@ quick/builtin_extension_XMLWriter.php
 quick/builtin_recurse.php
 quick/byref.php
 quick/call10.php
+quick/call11.php
 quick/call14.php
 quick/call_callable.php
 quick/call_nonstatic_this.php
@@ -152,7 +153,6 @@ quick/ctor_param_promotion_trait.php
 quick/cuf-byref.php
 quick/cuf-call10.php
 quick/cuf-call11.php
-quick/cuf__callStatic1.php
 quick/cuf__callStatic2.php
 quick/cuf__callStatic3.php
 quick/cuf__callStatic4.php
@@ -281,8 +281,6 @@ quick/hh_closure_return_type_2.php
 quick/hh_closure_return_type_3.php
 quick/hh_const_type.php
 quick/hh_extends.php
-quick/hh_functions.php
-quick/hh_functions2.php
 quick/hh_functions3.php
 quick/hh_numbers.php
 quick/hh_softtype3.php
@@ -466,9 +464,6 @@ quick/refcount-static.php
 quick/reflect-default.php
 quick/reflect.php
 quick/reflection2.php
-quick/reflection_get_closure.php
-quick/reflection_is_async.php
-quick/reflection_isclosure.php
 quick/reflection_static_vars.php
 quick/regpressure.php
 quick/regpressure2.php
@@ -505,6 +500,7 @@ quick/sqrt.php
 quick/squishdefval.php
 quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
+quick/static-closure-ctx.php
 quick/static_array.php
 quick/static_closure.php
 quick/static_closure_gen.php
@@ -528,7 +524,6 @@ quick/syntax-error.php
 quick/temparray.php
 quick/test_remat.php
 quick/tmpfile.php
-quick/trailing_comma.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php
 quick/trailing_comma_bad3.php
@@ -542,7 +537,6 @@ quick/traits2.php
 quick/type_cycle.php
 quick/typechecks-dv.php
 quick/typechecks-obj.php
-quick/typehint_callable.php
 quick/typehint_lsb_parent.php
 quick/typehint_lsb_self.php
 quick/undefined-bases.php

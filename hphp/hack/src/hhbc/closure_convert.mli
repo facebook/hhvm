@@ -8,17 +8,17 @@
  *
 *)
 
-(* Environment used for closure conversion *)
-type env
+(* State used for closure conversion *)
+type state
 
-(* Initial environment, given total number of ordinary classes in the program *)
-val initial_env : int -> env
+(* Initial state, given total number of ordinary classes in the program *)
+val initial_state : int -> state
 
 (* Get the closure classes at the end of closure conversion *)
-val get_closure_classes : env -> Ast.class_ list
+val get_closure_classes : state -> Ast.class_ list
 
 (* Convert functions, classes, or an entire program *)
-val convert_fun : env -> Ast.fun_ -> env * Ast.fun_
-val convert_class : env -> Ast.class_ -> env * Ast.class_
-val convert_block : env -> Ast.block -> env * Ast.block
-val convert_prog : env -> Ast.program -> env * Ast.program
+val convert_fun : state -> Ast.fun_ -> state * Ast.fun_
+val convert_class : state -> Ast.class_ -> state * Ast.class_
+val convert_toplevel : state -> Ast.stmt -> state * Ast.stmt
+val convert_prog : state -> Ast.program -> state * Ast.program

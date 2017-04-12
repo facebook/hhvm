@@ -331,8 +331,8 @@ let () =
     if not env.test then
       Logger.exit time_taken None None env.mode env.file env.root;
   with exn ->
-    Printexc.print_backtrace stderr;
     let exit_code = get_exception_exit_value exn in
+    if exit_code = 255 then Printexc.print_backtrace stderr;
     let err_str = get_error_string_from_exn exn in
     let msg = match exn with
       | InvalidSyntax ->

@@ -218,6 +218,7 @@ let builder = object (this)
   method private is_at_chunk_group_boundry () =
     List.is_empty rules &&
       ISet.is_empty lazy_rules &&
+      ISet.is_empty next_lazy_rules &&
       not (Nesting_allocator.is_nested nesting_alloc)
 
   method private hard_split () =

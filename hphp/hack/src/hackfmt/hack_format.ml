@@ -18,6 +18,9 @@ open Core
 open Syntax
 open Fmt_node
 
+(* TODO: move this to a config file *)
+let __INDENT_WIDTH = 2
+
 let rec transform node =
   let t = transform in
 
@@ -791,13 +794,17 @@ let rec transform node =
         t q_kw;
         when_present true_expr (fun () -> Fmt [
           Space;
-          t true_expr;
+          if __INDENT_WIDTH = 2
+            then Nest [t true_expr]
+            else t true_expr;
           Space;
           Split;
         ]);
         t c_kw;
         Space;
-        t false_expr;
+        if not (is_missing true_expr) && __INDENT_WIDTH = 2
+          then Nest [t false_expr]
+          else t false_expr;
       ])
   | FunctionCallExpression x ->
     handle_function_call_expression x

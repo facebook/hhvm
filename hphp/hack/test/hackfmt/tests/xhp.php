@@ -102,3 +102,13 @@ function w() {
       <my:exampel:tag:param param={"Hello, World!"} />
     </p>;
 }
+
+function x() {
+  return $this->:is-active
+    ? <span class={cx('myComponent/root', 'myComponent/active')}>
+      {$this->getChildren()}
+    </span>
+    : <a class={cx('myComponent/root')} href={$this->:href}>
+      {$this->getChildren()}
+    </a>;
+}

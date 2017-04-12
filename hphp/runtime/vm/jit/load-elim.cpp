@@ -915,14 +915,27 @@ void analyze(Global& genv) {
       auto const oldState = targetInfo.stateIn;
       targetInfo.stateIn.initialized = false; // re-merge of all pred states
       target->forEachPred([&] (Block* pred) {
+        auto const merge = [&](const State& predState) {
+          if (predState.initialized) {
+            FTRACE(7, "pulling state from pred B{}:\n{}\n",
+                   pred->id(), show(predState));
+            merge_into(genv, target, targetInfo.stateIn, predState);
+          }
+        };
+
         auto const& predInfo = genv.blockInfo[pred];
-        auto const& predState = pred->next() == target
-          ? predInfo.stateOutNext
-          : predInfo.stateOutTaken;
-        if (predState.initialized) {
-          FTRACE(7, "pulling state from pred B{}:\n{}\n",
-                 pred->id(), show(predState));
-          merge_into(genv, target, targetInfo.stateIn, predState);
+        if (pred->next() != pred->taken()) {
+          auto const& predState = pred->next() == target
+            ? predInfo.stateOutNext
+            : predInfo.stateOutTaken;
+          merge(predState);
+        } else {
+          // The predecessor jumps to this block along both its next and taken
+          // branches. We can't distinguish the two paths, so just merge both
+          // in.
+          assertx(pred->next() == target);
+          merge(predInfo.stateOutNext);
+          merge(predInfo.stateOutTaken);
         }
       });
       if (oldState != targetInfo.stateIn) {

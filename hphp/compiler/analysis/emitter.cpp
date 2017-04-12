@@ -11335,7 +11335,7 @@ UnitEmitter* useExternalEmitter(const char* code, int codeLen,
   try {
     std::vector<std::string> cmd({
         RuntimeOption::EvalUseExternalEmitter, "--stdin", filename});
-    auto options = folly::Subprocess::pipeStdin().pipeStdout().pipeStderr();
+    auto options = folly::Subprocess::Options().pipeStdin().pipeStdout().pipeStderr();
 
     // Run the external emitter, sending the code to its stdin
     folly::Subprocess proc(cmd, options);

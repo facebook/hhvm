@@ -16,6 +16,7 @@ module TC = Hhas_type_constraint
 (* TODO *)
 let fmt_name s = s
 
+(* TODO: This list needs to be exhaustive *)
 let fmt_name_or_prim x =
   match x with
   | "void" -> "HH\\void"
@@ -30,6 +31,14 @@ let fmt_name_or_prim x =
   | "mixed" -> "HH\\mixed"
   | "this" -> "HH\\this"
   | "Awaitable" -> "HH\\Awaitable"
+  | "Vector" -> "HH\\Vector"
+  | "ImmVector" -> "HH\\ImmVector"
+  | "Set" -> "HH\\Set"
+  | "ImmSet" -> "HH\\ImmSet"
+  | "Map" -> "HH\\Map"
+  | "ImmMap" -> "HH\\ImmMap"
+  | "Pair" -> "HH\\Pair"
+  | "shape" -> "HH\\shape"
   | _ -> fmt_name x
 
 (* Produce the "userType" bit of the annotation *)

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -182,38 +183,38 @@ ArrayData* APCLocalArray::loadElems() const {
 
 ArrayLval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lval(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lval(k, false);
+  return ArrayLval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayLval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalRef(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalRef(k, false);
+  return ArrayLval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayLval APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lval(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lval(k, false);
+  return ArrayLval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayLval APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalRef(k, false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalRef(k, false);
+  return ArrayLval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayLval APCLocalArray::LvalNew(ArrayData* ad, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalNew(false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalNew(false);
+  return ArrayLval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayLval APCLocalArray::LvalNewRef(ArrayData* ad, bool copy) {
   EscalateHelper helper{ad};
-  auto const r = helper.escalated->lvalNewRef(false);
-  return {helper.release(r.array), r.val};
+  auto const lval = helper.escalated->lvalNewRef(false);
+  return ArrayLval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayData*

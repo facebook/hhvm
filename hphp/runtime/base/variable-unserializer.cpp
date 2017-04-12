@@ -1212,16 +1212,18 @@ Array VariableUnserializer::unserializeDict() {
     assert(type() != VariableUnserializer::Type::APCSerialize ||
            !arr.exists(key, true));
 
-    auto const r = key.isInteger()
+    auto const lval = key.isInteger()
       ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), false)
       : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), false);
-    assertx(r.array == arr.get());
+    assertx(lval.arr_base() == arr.get());
 
-    if (UNLIKELY(isRefcountedType(r.val->getRawType()))) {
-      putInOverwrittenList(*r.val);
+    auto& val = tvAsVariant(lval.tv());
+
+    if (UNLIKELY(isRefcountedType(val.getRawType()))) {
+      putInOverwrittenList(val);
     }
-    unserializeVariant(*r.val, UnserializeMode::DictValue);
-    assertx(r.val->getRawType() != KindOfRef);
+    unserializeVariant(val, UnserializeMode::DictValue);
+    assertx(val.getRawType() != KindOfRef);
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();
@@ -1259,10 +1261,11 @@ Array VariableUnserializer::unserializeVec() {
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    auto const r = PackedArray::LvalNewVec(arr.get(), false);
-    assertx(r.array == arr.get());
-    unserializeVariant(*r.val, UnserializeMode::VecValue);
-    assertx(r.val->getRawType() != KindOfRef);
+    auto const lval = PackedArray::LvalNewVec(arr.get(), false);
+    assertx(lval.arr_base() == arr.get());
+    auto& val = tvAsVariant(lval.tv());
+    unserializeVariant(val, UnserializeMode::VecValue);
+    assertx(val.getRawType() != KindOfRef);
 
     if (i < (size - 1)) {
       auto lastChar = peekBack();

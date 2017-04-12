@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
@@ -1265,18 +1266,18 @@ ArrayLval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
 ArrayLval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, hash_int64(k));
-  if (UNLIKELY(!validPos(pos))) return {a, nullptr};
+  if (UNLIKELY(!validPos(pos))) return ArrayLval { a, nullptr };
   if (copy) a = a->copyMixed();
-  return {a, &tvAsVariant(&a->data()[pos].data)};
+  return ArrayLval { a, &a->data()[pos].data };
 }
 
 ArrayLval MixedArray::LvalSilentStr(ArrayData* ad, const StringData* k,
-                                     bool copy) {
+                                  bool copy) {
   auto a = asMixed(ad);
   auto const pos = a->find(k, k->hash());
-  if (UNLIKELY(!validPos(pos))) return {a, nullptr};
+  if (UNLIKELY(!validPos(pos))) return ArrayLval { a, nullptr };
   if (copy) a = a->copyMixed();
-  return {a, &tvAsVariant(&a->data()[pos].data)};
+  return ArrayLval { a, &a->data()[pos].data };
 }
 
 ArrayLval MixedArray::LvalNew(ArrayData* ad, bool copy) {
@@ -1284,17 +1285,17 @@ ArrayLval MixedArray::LvalNew(ArrayData* ad, bool copy) {
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
-    return {a, &lvalBlackHole()};
+    return ArrayLval { a, lvalBlackHole().asTypedValue() };
   }
 
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
   if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
-    return {a, &lvalBlackHole()};
+    return ArrayLval { a, lvalBlackHole().asTypedValue() };
   }
 
-  return {a, &tvAsVariant(&a->data()[a->m_used - 1].data)};
+  return ArrayLval { a, &a->data()[a->m_used - 1].data };
 }
 
 ArrayLval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
@@ -1718,8 +1719,8 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
       ret->nextInsertWithRef(value);
     } else {
       StringData* sd = key.getStringData();
-      auto const r = ret->addLvalImpl(sd);
-      r.val->setWithRef(value);
+      auto const lval = ret->addLvalImpl(sd);
+      tvAsVariant(lval.tv()).setWithRef(value);
     }
   }
   return ret;
@@ -1742,8 +1743,8 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (srcElem->hasIntKey()) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
-        auto const r = ret->addLvalImpl(srcElem->skey);
-        r.val->setWithRef(tvAsCVarRef(&srcElem->data));
+        auto const lval = ret->addLvalImpl(srcElem->skey);
+        tvAsVariant(lval.tv()).setWithRef(tvAsCVarRef(&srcElem->data));
       }
     }
     return ret;
@@ -1996,15 +1997,13 @@ const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
   return tv;
 }
 
-ArrayLval
-MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {
+ArrayLval MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayLval
-MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, bool) {
+ArrayLval MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, bool) {
   assert(asMixed(adIn)->checkInvariants());
   assert(adIn->isDict());
   throwRefInvalidArrayValueException(adIn);

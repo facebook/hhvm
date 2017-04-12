@@ -20,10 +20,11 @@
 #include <cstdint>
 #include <sys/types.h>
 
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
 
@@ -38,7 +39,6 @@ struct StringData;
 struct MArrayIter;
 struct MixedArray;
 struct APCArray;
-struct ArrayLval;
 
 //////////////////////////////////////////////////////////////////////
 

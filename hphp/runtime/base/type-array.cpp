@@ -752,18 +752,18 @@ Variant Array::rvalAt(const Variant& key, AccessFlags flags) const {
 
 Variant &Array::lvalAt() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const r = m_arr->lvalNew(m_arr->cowCheck());
-  if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-  assert(r.val);
-  return *r.val;
+  auto const lval = m_arr->lvalNew(m_arr->cowCheck());
+  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+  assert(lval.tv());
+  return tvAsVariant(lval.tv());
 }
 
 Variant &Array::lvalAtRef() {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const r = m_arr->lvalNewRef(m_arr->cowCheck());
-  if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-  assert(r.val);
-  return *r.val;
+  auto const lval = m_arr->lvalNewRef(m_arr->cowCheck());
+  if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+  assert(lval.tv());
+  return tvAsVariant(lval.tv());
 }
 
 Variant &Array::lvalAt(const String& key, AccessFlags flags) {

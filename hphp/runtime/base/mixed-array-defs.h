@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -336,7 +337,7 @@ ArrayLval MixedArray::addLvalImpl(K k) {
   assert(!isFull());
   auto p = insert(k);
   if (!p.found) tvWriteNull(&p.tv);
-  return {this, &tvAsVariant(&p.tv)};
+  return ArrayLval { this, &p.tv };
 }
 
 //////////////////////////////////////////////////////////////////////

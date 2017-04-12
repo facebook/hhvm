@@ -22,11 +22,12 @@
 
 #include <folly/Likely.h>
 
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/cap-code.h"
+#include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/util/md5.h"
 
 namespace HPHP {
@@ -37,12 +38,6 @@ struct String;
 struct TypedValue;
 struct MArrayIter;
 struct VariableSerializer;
-
-// tuple-pod result of lval-style apis.
-struct ArrayLval {
-  ArrayData* array; // new array, if cow happened.
-  Variant* val;     // pointer to lval within new array
-};
 
 struct ArrayData : MaybeCountable {
   // Runtime type tag of possible array types.  This is intentionally

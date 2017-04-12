@@ -16,6 +16,11 @@
 #ifndef incl_HPHP_CAP_CODE_H_
 #define incl_HPHP_CAP_CODE_H_
 
+#include "hphp/util/assertions.h"
+#include "hphp/util/portability.h"
+
+#include <cstdint>
+
 namespace HPHP {
 
 // 16-bit Floating-point capacity encoding:

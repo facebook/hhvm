@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/memb-lval.h"
 
 namespace HPHP {
 

@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
 

@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -728,7 +729,7 @@ ArrayLval PackedArray::LvalInt(ArrayData* adIn, int64_t k, bool copy) {
 
   if (LIKELY(size_t(k) < adIn->m_size)) {
     auto const ad = copy ? Copy(adIn) : adIn;
-    return {ad, &tvAsVariant(&packedData(ad)[k])};
+    return ArrayLval { ad, &packedData(ad)[k] };
   }
 
   // We can stay packed if the index is m_size, and the operation does
@@ -751,14 +752,14 @@ ArrayLval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k, bool copy) {
   assert(adIn->isVecArray());
   if (UNLIKELY(size_t(k) >= adIn->m_size)) throwOOBArrayKeyException(k, adIn);
   auto const ad = copy ? Copy(adIn) : adIn;
-  return {ad, &tvAsVariant(&packedData(ad)[k])};
+  return ArrayLval { ad, &packedData(ad)[k] };
 }
 
 ArrayLval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   assert(checkInvariants(adIn));
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return {adIn, nullptr};
   auto const ad = copy ? Copy(adIn) : adIn;
-  return {ad, &tvAsVariant(&packedData(ad)[k])};
+  return ArrayLval { ad, &packedData(ad)[k] };
 }
 
 ArrayLval PackedArray::LvalStr(ArrayData* adIn, StringData* key, bool copy) {
@@ -775,22 +776,19 @@ ArrayLval PackedArray::LvalStrRef(ArrayData* adIn, StringData* key, bool copy) {
   return LvalStr(adIn, key, copy);
 }
 
-ArrayLval
-PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
+ArrayLval PackedArray::LvalStrVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
 }
 
-ArrayLval
-PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
+ArrayLval PackedArray::LvalIntRefVec(ArrayData* adIn, int64_t k, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayLval
-PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
+ArrayLval PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
   assert(checkInvariants(adIn));
   assert(adIn->isVecArray());
   throwInvalidArrayKeyException(key, adIn);
@@ -802,7 +800,7 @@ ArrayLval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
                        : ResizeIfNeeded(adIn);
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;
-  return {ad, &tvAsVariant(&tv)};
+  return ArrayLval { ad, &tv };
 }
 
 ArrayLval PackedArray::LvalNewRef(ArrayData* adIn, bool copy) {

@@ -506,19 +506,19 @@ public:
   template<typename T>
   Variant& lvalAtImpl(const T& key, Flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const r = m_arr->lval(key, m_arr->cowCheck());
-    if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-    assert(r.val);
-    return *r.val;
+    auto const lval = m_arr->lval(key, m_arr->cowCheck());
+    if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+    assert(lval.tv());
+    return reinterpret_cast<Variant&>(*lval.tv());
   }
 
   template<typename T>
   Variant& lvalAtRefImpl(const T& key, Flags = Flags::None) {
     if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const r = m_arr->lvalRef(key, m_arr->cowCheck());
-    if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-    assert(r.val);
-    return *r.val;
+    auto const lval = m_arr->lvalRef(key, m_arr->cowCheck());
+    if (lval.arr_base() != m_arr) m_arr = Ptr::attach(lval.arr_base());
+    assert(lval.tv());
+    return reinterpret_cast<Variant&>(*lval.tv());
   }
 
   static void compileTimeAssertions();

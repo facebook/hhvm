@@ -16,9 +16,10 @@
 #ifndef incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 #define incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 
-#include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/memb-lval.h"
+#include "hphp/runtime/vm/name-value-table.h"
 
 namespace HPHP {
 

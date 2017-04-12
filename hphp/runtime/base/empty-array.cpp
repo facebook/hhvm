@@ -20,14 +20,15 @@
 
 #include "hphp/util/assertions.h"
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/tv-helpers.h"
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-variant.h"
 
 namespace HPHP {
 
@@ -127,16 +128,16 @@ ArrayLval EmptyArray::MakePackedInl(TypedValue tv) {
   ad->m_sizeAndPos = 1; // size=1, pos=0
   ad->initHeader(CapCode::exact(cap), HeaderKind::Packed, 1);
 
-  auto const lval = reinterpret_cast<TypedValue*>(ad + 1);
-  lval->m_data = tv.m_data;
-  lval->m_type = tv.m_type;
+  auto const elem = reinterpret_cast<TypedValue*>(ad + 1);
+  elem->m_data = tv.m_data;
+  elem->m_type = tv.m_type;
 
   assert(ad->kind() == ArrayData::kPackedKind);
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
   assert(PackedArray::checkInvariants(ad));
-  return { ad, &tvAsVariant(lval) };
+  return ArrayLval { ad, elem };
 }
 
 NEVER_INLINE
@@ -160,9 +161,9 @@ ArrayLval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   hash[khash & mask] = 0;
   data[0].setStrKey(key, khash);
 
-  auto& lval  = data[0].data;
-  lval.m_data = val.m_data;
-  lval.m_type = val.m_type;
+  auto& elem  = data[0].data;
+  elem.m_data = val.m_data;
+  elem.m_type = val.m_type;
 
   assert(ad->m_size == 1);
   assert(ad->m_pos == 0);
@@ -171,7 +172,7 @@ ArrayLval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
   assert(ad->hasExactlyOneRef());
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
-  return { ad, &tvAsVariant(&lval) };
+  return ArrayLval { ad, &elem };
 }
 
 /*
@@ -189,9 +190,9 @@ ArrayLval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   hash[h & mask] = 0;
   data[0].setIntKey(key, h);
 
-  auto& lval  = data[0].data;
-  lval.m_data = val.m_data;
-  lval.m_type = val.m_type;
+  auto& elem  = data[0].data;
+  elem.m_data = val.m_data;
+  elem.m_type = val.m_type;
 
   assert(ad->kind() == ArrayData::kMixedKind);
   assert(ad->m_size == 1);
@@ -200,7 +201,7 @@ ArrayLval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
   assert(ad->m_scale == MixedArray::SmallScale);
   assert(ad->m_used == 1);
   assert(ad->checkInvariants());
-  return { ad, &tvAsVariant(&lval) };
+  return ArrayLval { ad, &elem };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -209,9 +210,9 @@ ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell c, bool) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (c.m_type == KindOfUninit) c.m_type = KindOfNull;
   tvRefcountedIncRef(&c);
-  auto const ret = k == 0 ? EmptyArray::MakePacked(c)
-                          : EmptyArray::MakeMixed(k, c);
-  return ret.array;
+  auto const lval = k == 0 ? EmptyArray::MakePacked(c)
+                           : EmptyArray::MakeMixed(k, c);
+  return lval.arr_base();
 }
 
 ArrayData* EmptyArray::SetStr(ArrayData*,
@@ -221,7 +222,7 @@ ArrayData* EmptyArray::SetStr(ArrayData*,
   tvRefcountedIncRef(&val);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (val.m_type == KindOfUninit) val.m_type = KindOfNull;
-  return EmptyArray::MakeMixed(k, val).array;
+  return EmptyArray::MakeMixed(k, val).arr_base();
 }
 
 ArrayLval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
@@ -259,9 +260,9 @@ ArrayData* EmptyArray::SetRefInt(ArrayData*,
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto ref = *var.asRef();
   tvIncRef(&ref);
-  auto const ret = k == 0 ? EmptyArray::MakePacked(ref)
-                          : EmptyArray::MakeMixed(k, ref);
-  return ret.array;
+  auto const lval = k == 0 ? EmptyArray::MakePacked(ref)
+                           : EmptyArray::MakeMixed(k, ref);
+  return lval.arr_base();
 }
 
 ArrayData* EmptyArray::SetRefStr(ArrayData*,
@@ -271,19 +272,19 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto ref = *var.asRef();
   tvIncRef(&ref);
-  return EmptyArray::MakeMixed(k, ref).array;
+  return EmptyArray::MakeMixed(k, ref).arr_base();
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool copy) {
   tvRefcountedIncRef(&v);
-  return EmptyArray::MakePackedInl(v).array;
+  return EmptyArray::MakePackedInl(v).arr_base();
 }
 
 ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   auto ref = *v.asRef();
   tvIncRef(&ref);
-  return EmptyArray::MakePacked(ref).array;
+  return EmptyArray::MakePacked(ref).arr_base();
 }
 
 ArrayData* EmptyArray::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
@@ -292,7 +293,7 @@ ArrayData* EmptyArray::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
   }
   auto tv = make_tv<KindOfNull>();
   tvAsVariant(&tv).setWithRef(v);
-  return EmptyArray::MakePacked(tv).array;
+  return EmptyArray::MakePacked(tv).arr_base();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -330,7 +331,7 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
 
 ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
   tvRefcountedIncRef(&v);
-  return EmptyArray::MakePacked(v).array;
+  return EmptyArray::MakePacked(v).arr_base();
 }
 
 ArrayData* EmptyArray::ToDict(ArrayData*, bool) {

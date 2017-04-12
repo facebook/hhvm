@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -133,11 +134,11 @@ ArrayLval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
     tvWriteNull(&nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  return {a, &tvAsVariant(tv)};
+  return ArrayLval { a, tv };
 }
 
 ArrayLval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
-  return {ad, &lvalBlackHole()};
+  return ArrayLval { ad, lvalBlackHole().asTypedValue() };
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,

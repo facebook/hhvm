@@ -17,6 +17,7 @@
 #define incl_HPHP_PROXY_ARRAY_H
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/memb-lval.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/native.h"

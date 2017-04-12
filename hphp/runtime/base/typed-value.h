@@ -30,11 +30,11 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct ArrayData;
-struct StringData;
+struct MaybeCountable;
 struct ObjectData;
 struct RefData;
 struct ResourceHdr;
-struct MaybeCountable;
+struct StringData;
 
 //////////////////////////////////////////////////////////////////////
 

@@ -393,6 +393,7 @@ struct Vgen {
   void emit(const loadtqb& i) { X(lbz, Reg64(i.d),  i.s); }
   void emit(const loadzbl& i) { X(lbz,  Reg64(i.d), i.s); }
   void emit(const loadzbq& i) { X(lbz,  i.d,        i.s); }
+  void emit(const loadtql& i) { X(lwz, Reg64(i.d),  i.s); }
   void emit(const loadzlq& i) { X(lwz,  i.d,        i.s); }
   void emit(const storeb& i)  { X(stb,  Reg64(i.s), i.m); }
   void emit(const storel& i)  { X(stw,  Reg64(i.s), i.m); }

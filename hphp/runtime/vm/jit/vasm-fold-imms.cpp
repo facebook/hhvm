@@ -322,6 +322,7 @@ struct ImmFolder {
   void fold(loadzbl& in , Vinstr& out) { foldVptr(in.s); }
   void fold(loadzlq& in , Vinstr& out) { foldVptr(in.s); }
   void fold(loadtqb& in , Vinstr& out) { foldVptr(in.s); }
+  void fold(loadtql& in , Vinstr& out) { foldVptr(in.s); }
 };
 } // namespace x64
 

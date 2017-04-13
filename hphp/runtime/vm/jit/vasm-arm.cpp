@@ -272,6 +272,7 @@ struct Vgen {
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadsd& i) { a->Ldr(D(i.d), M(i.s)); }
   void emit(const loadtqb& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadtql& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadups& i);
   void emit(const loadw& i) { a->Ldrsh(W(i.d), M(i.s)); }
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
@@ -1175,6 +1176,7 @@ Y(loadb, s)
 Y(loadl, s)
 Y(loadsd, s)
 Y(loadtqb, s)
+Y(loadtql, s)
 Y(loadups, s)
 Y(loadw, s)
 Y(loadzbl, s)

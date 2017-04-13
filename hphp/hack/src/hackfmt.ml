@@ -269,9 +269,10 @@ let format_diff_intervals intervals parsed_file =
 
 let debug_print ?range filename =
   let source_text, syntax_tree, editable = parse filename in
+  let range = Option.map range (expand_to_line_boundaries source_text) in
   let fmt_node = Hack_format.transform editable in
   let chunk_groups = Chunk_builder.build fmt_node in
-  Hackfmt_debug.debug ~range source_text syntax_tree chunk_groups
+  Hackfmt_debug.debug ~range source_text syntax_tree fmt_node chunk_groups
 
 let main (env: env) (options: format_options) =
   env.mode <- Some (mode_string options);

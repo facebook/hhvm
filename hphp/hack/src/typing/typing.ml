@@ -2661,9 +2661,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
     end
 
   (* Special function `parent::__construct` *)
-  | Class_const (CIparent, ((_, construct) as id))
+  | Class_const (CIparent, ((callee_pos, construct) as id))
     when construct = SN.Members.__construct ->
-      Typing_hooks.dispatch_parent_construct_hook env p;
+      Typing_hooks.dispatch_parent_construct_hook env callee_pos;
       let env, tel, tuel, ty = call_parent_construct p env el uel in
       make_call env (T.make_implicitly_typed_expr fpos
         (T.Class_const (T.CIparent, id))) tel tuel ty

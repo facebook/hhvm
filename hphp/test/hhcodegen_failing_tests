@@ -28,6 +28,7 @@ quick/Xhp.php
 quick/__call.php
 quick/__isset.php
 quick/abs_codegen.php
+quick/abstract_static_2.php
 quick/actrec.php
 quick/alias_torture.php
 quick/all_type_comparison_test.php
@@ -88,7 +89,9 @@ quick/builtin_extension_XMLWriter.php
 quick/builtin_recurse.php
 quick/byref.php
 quick/call10.php
+quick/call11.php
 quick/call14.php
+quick/call_callable.php
 quick/call_nonstatic_this.php
 quick/callable-namespace.php
 quick/castDbl.php
@@ -498,6 +501,7 @@ quick/sqrt.php
 quick/squishdefval.php
 quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
+quick/static-closure-ctx.php
 quick/static_array.php
 quick/static_closure.php
 quick/static_closure_gen.php

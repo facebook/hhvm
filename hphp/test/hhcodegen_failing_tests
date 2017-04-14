@@ -19,7 +19,6 @@ quick/IncDecProp_nopt.php
 quick/Isset.php
 quick/ReadVar.php
 quick/SPropW.php
-quick/SetM.php
 quick/SetOp.php
 quick/SetOpProp.php
 quick/UnsetM.php
@@ -129,7 +128,6 @@ quick/cnvObj.php
 quick/cnvStr.php
 quick/collection-exceptions.php
 quick/collection-initializer.php
-quick/concat.php
 quick/constIntToString.php
 quick/const_cflow.php
 quick/const_exprs.php
@@ -150,7 +148,6 @@ quick/ctor_param_promotion_genericgood.php
 quick/ctor_param_promotion_interface.php
 quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
-quick/cuf-byref.php
 quick/cuf-call10.php
 quick/cuf-call11.php
 quick/cuf__callStatic2.php
@@ -170,7 +167,6 @@ quick/dict/apc.php
 quick/dict/basic-getters.php
 quick/dict/basic-init.php
 quick/dict/basic-setters.php
-quick/dict/builtins.php
 quick/dict/comparisons.php
 quick/dict/convert.php
 quick/dict/dtor.php
@@ -182,7 +178,6 @@ quick/dict/reflect.php
 quick/dict/serialize.php
 quick/dict/static.php
 quick/dict/type-hint.php
-quick/div_fpe.php
 quick/do-while-continue.php
 quick/dv.php
 quick/dv_ab.php
@@ -232,6 +227,7 @@ quick/fc_enum_4.php
 quick/fib_gen.php
 quick/final_class.php
 quick/final_method.php
+quick/finally_break.php
 quick/float-overflow-literals.php
 quick/float-overflow.php
 quick/floatcmp.php
@@ -280,7 +276,6 @@ quick/hh_closure_return_type_2.php
 quick/hh_closure_return_type_3.php
 quick/hh_const_type.php
 quick/hh_extends.php
-quick/hh_functions.php
 quick/hh_functions3.php
 quick/hh_numbers.php
 quick/hh_softtype3.php
@@ -295,21 +290,13 @@ quick/hoistable_e.php
 quick/hopt-add1.php
 quick/hopt-add2.php
 quick/hopt-add3.php
-quick/hopt-and-simp.php
-quick/hopt-cjump.php
-quick/hopt-eq.php
 quick/hopt-exitslow.php
 quick/hopt-mul-simp.php
-quick/hopt-mul1.php
-quick/hopt-mul2.php
-quick/hopt-mul3.php
-quick/hopt-or-simp.php
 quick/hopt-partial-dse.php
 quick/hopt-pre-coloring.php
 quick/hopt-ret9.php
 quick/hopt-same-simp.php
 quick/hopt-simp.php
-quick/hopt-sub-simp.php
 quick/hopt-true3.php
 quick/hopt-true4.php
 quick/hopt-xor-simp.php
@@ -334,7 +321,6 @@ quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_sa.php
 quick/impl_abstract_dv_si.php
 quick/impl_abstract_dv_so.php
-quick/incdec-1.php
 quick/incdec-magic2.php
 quick/incdec-magic4.php
 quick/incdec-magic5.php
@@ -359,7 +345,6 @@ quick/keyset/apc.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-init.php
 quick/keyset/basic-setters.php
-quick/keyset/builtins.php
 quick/keyset/comparisons.php
 quick/keyset/convert.php
 quick/keyset/invalid-scalar.php
@@ -393,8 +378,6 @@ quick/method-undefined.php
 quick/method_param_promotion_error.php
 quick/methodcache_direct_magic.php
 quick/methodcache_magic.php
-quick/mod.php
-quick/mod_min_negone.php
 quick/negjump.php
 quick/nested__destruct.php
 quick/nested_vm_exceptions.php
@@ -428,6 +411,8 @@ quick/parse_fail_type_constraint.php
 quick/parse_shapes.php
 quick/parse_type_constraint_where_clauses.php
 quick/parse_type_not_typedef.php
+quick/parser_massive_add_exp.php
+quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
 quick/pgo1.php
 quick/pinit.php
@@ -462,9 +447,6 @@ quick/refcount-static.php
 quick/reflect-default.php
 quick/reflect.php
 quick/reflection2.php
-quick/reflection_get_closure.php
-quick/reflection_is_async.php
-quick/reflection_isclosure.php
 quick/reflection_static_vars.php
 quick/regpressure.php
 quick/regpressure2.php
@@ -479,7 +461,6 @@ quick/retc-destruct.php
 quick/retval_backtrace.php
 quick/retype.php
 quick/rounding.php
-quick/sb_overflow.php
 quick/selfparent.php
 quick/serialize.php
 quick/set_toarray_warn.php
@@ -498,7 +479,6 @@ quick/simp-sub-dbl.php
 quick/some_cmp_tests.php
 quick/sp.php
 quick/sqrt.php
-quick/squishdefval.php
 quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
 quick/static-closure-ctx.php
@@ -516,7 +496,6 @@ quick/strict_hashbang_start.php
 quick/string-cse.php
 quick/string-util.php
 quick/strlen_non_integer.php
-quick/strrpos.php
 quick/surprise_throw.php
 quick/switch.php
 quick/switchRef.php
@@ -525,7 +504,6 @@ quick/syntax-error.php
 quick/temparray.php
 quick/test_remat.php
 quick/tmpfile.php
-quick/trailing_comma.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php
 quick/trailing_comma_bad3.php
@@ -539,13 +517,11 @@ quick/traits2.php
 quick/type_cycle.php
 quick/typechecks-dv.php
 quick/typechecks-obj.php
-quick/typehint_callable.php
 quick/typehint_lsb_parent.php
 quick/typehint_lsb_self.php
 quick/undefined-bases.php
 quick/undefined-global.php
 quick/undefined-vgetg.php
-quick/unpack.php
 quick/unset_static.php
 quick/unset_varenv.php
 quick/varenv_extra_args.php
@@ -553,7 +529,6 @@ quick/vec/apc.php
 quick/vec/basic-getters.php
 quick/vec/basic-init.php
 quick/vec/basic-setters.php
-quick/vec/builtins.php
 quick/vec/comparisons.php
 quick/vec/convert.php
 quick/vec/dtor.php

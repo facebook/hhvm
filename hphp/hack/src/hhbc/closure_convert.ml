@@ -508,6 +508,7 @@ and convert_afield env st afield =
     st, AFkvalue (e1, e2)
 
 let convert_fun st fd =
+  let fd = Ast_constant_folder.fold_function fd in
   let env = env_with_function env_toplevel fd in
   let st = reset_function_count st in
   let st, block = convert_block env st fd.f_body in
@@ -522,6 +523,7 @@ let rec convert_class st cd =
 and convert_class_elt cd env st ce =
   match ce with
   | Method md ->
+    let md = Ast_constant_folder.fold_method md in
     let env = env_with_method env cd md in
     let st = reset_function_count st in
     let st, block = convert_block env st md.m_body in
@@ -532,6 +534,7 @@ and convert_class_elt cd env st ce =
     st, ce
 
 let convert_toplevel st stmt =
+  let stmt = Ast_constant_folder.fold_stmt stmt in
   convert_stmt env_toplevel st stmt
 
 let rec convert_def st d =

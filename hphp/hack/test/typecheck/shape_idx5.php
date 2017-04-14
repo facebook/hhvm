@@ -6,7 +6,7 @@ type s = shape(
 );
 
 /**
- * Field not listed in declared shape - error to access it
+ * Field not listed in declared shape - lint warning to access it
  */
 function test(s $s): void {
   Shapes::idx($s, 'y');

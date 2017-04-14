@@ -28,6 +28,11 @@ let tco_experimental_darray_and_varray = "darray_and_varray"
 
 let tco_experimental_goto = "goto"
 
+(* Whether Shapes::idx should allow accessing a field that does not exist in
+  a partial shape and is not explicitly unset. *)
+let tco_experimental_shape_idx_relaxed =
+  "shape_idx_relaxed"
+
 let tco_experimental_all =
  List.fold_left
    (fun acc x -> SSet.add x acc) SSet.empty
@@ -36,6 +41,7 @@ let tco_experimental_all =
      tco_experimental_optional_shape_field;
      tco_experimental_darray_and_varray;
      tco_experimental_goto;
+     tco_experimental_shape_idx_relaxed;
    ]
 
 let default = {

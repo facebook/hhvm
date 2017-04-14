@@ -66,6 +66,9 @@ using Assembler = ppc64_asm::Assembler;
 
 namespace {
 
+static_assert(folly::kIsLittleEndian == true,
+  "Code contains little-endian specific optimizations.");
+
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)

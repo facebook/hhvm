@@ -49,6 +49,9 @@ namespace arm { struct ImmFolder; }
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
+static_assert(folly::kIsLittleEndian == true,
+  "Code contains little-endian specific optimizations.");
+
 vixl::Register X(Vreg64 r) {
   PhysReg pr(r.asReg());
   return x2a(pr);

@@ -937,6 +937,10 @@ bool build_cls_info_rec(borrowed_ptr<ClassInfo> rleaf,
     for (auto& m : rparent->cls->methods) {
       auto& ent = rleaf->methods[m->name];
       if (ent.func) {
+        if (m->attrs & AttrTrait && m->attrs & AttrAbstract) {
+          // abstract methods from traits never override anything.
+          continue;
+        }
         if (ent.func->attrs & AttrFinal) {
           if (!is_mock_class(rleaf->cls)) return false;
         }

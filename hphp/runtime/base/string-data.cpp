@@ -888,7 +888,10 @@ DataType StringData::isNumericWithVal(int64_t &lval, double &dval,
       allow_errors,
       overflow
     );
-    if (ret == KindOfNull && !isProxy() && allow_errors) {
+    if (ret == KindOfNull && allow_errors) {
+      // a proxy string has its hash precomputed - so it can't
+      // suddenly go from being numeric to not-numeric
+      assert(!isProxy());
       m_hash |= STRHASH_MSB;
     }
   }

@@ -88,7 +88,8 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
   (* Always pick up disk changes in tests immediately *)
   let env = ServerEnv.({ env with last_notifier_check_time = 0.0 }) in
 
-  let env = ServerMain.serve_one_iteration genv env client_provider in
+  let env, _needs_flush = ServerMain.serve_one_iteration
+    ~force_flush:false genv env client_provider in
   SearchServiceRunner.run_completely genv;
   env, {
     did_read_disk_changes = !did_read_disk_changes_ref;

@@ -18,6 +18,8 @@ let num_build_retries = 800
 type env = {
   root : Path.t;
   wait : bool;
+  (** Force the monitor to start a server if one isn't running. *)
+  force_dormant_start : bool;
   build_opts : ServerBuild.build_opts;
 }
 
@@ -62,7 +64,14 @@ let main env =
   let ic, oc = ClientConnect.connect { ClientConnect.
     root = env.root;
     autostart = true;
-    force_dormant_start = false;
+    (** When running Hack Build, we want to force the monitor to start
+     * a Hack server if one isn't running. This is for the case where
+     * Hack was not running, a 3-way merge occurs triggering Mercurial's
+     * merge driver, the merge driver calls Hack build. During Hack startup,
+     * it won't start a server because it is waiting for repo settling (for
+     * the update/rebase to complete); but since need Hack to finish the
+     * update/rebase, we need to force it to be started. *)
+    force_dormant_start = env.force_dormant_start;
     retries = if env.wait then None else Some num_build_retries;
     retry_if_init = true;
     expiry = None;

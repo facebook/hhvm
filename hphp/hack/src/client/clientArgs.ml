@@ -13,6 +13,16 @@ open ClientCommand
 open ClientEnv
 open Utils
 
+(** Arg specs shared across more than 1 arg parser. *)
+module Common_argspecs = struct
+  let force_dormant_start value_ref =
+    ("--force-dormant-start",
+      Arg.Bool (fun x -> value_ref := x),
+      " If server is dormant, force start a new one instead of waiting for"^
+      " the next one to start up automatically (default: false)")
+end
+
+
 let parse_command () =
   if Array.length Sys.argv < 2
   then CKNone
@@ -309,10 +319,7 @@ let parse_check_args cmd =
     "--autostart-server",
       Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";
-    "--force-dormant-start",
-      Arg.Bool (fun x -> force_dormant_start := x),
-      " If server is dormant, force start a new one instead of waiting for"^
-      " the next one to start up automatically (default: false)";
+    Common_argspecs.force_dormant_start force_dormant_start;
     "--ai",
       Arg.String (fun s -> ai_mode :=
          Some (ignore (Ai_options.prepare ~server:true s); s)),
@@ -448,6 +455,7 @@ let parse_build_args () =
       "Usage: %s build [WWW-ROOT]\n\
       Generates build files\n"
       Sys.argv.(0) in
+  let force_dormant_start = ref false in
   let steps = ref None in
   let ignore_killswitch = ref false in
   let no_steps = ref None in
@@ -478,6 +486,7 @@ let parse_build_args () =
     " don't run unported arc build scripts";
     "--serial", Arg.Set serial,
     " run without parallel worker processes";
+    Common_argspecs.force_dormant_start force_dormant_start;
     "--test-dir", Arg.String (fun x -> test_dir := Some x),
     " <dir> generates into <dir> and compares with root";
     "--no-grade", Arg.Clear grade,
@@ -506,6 +515,7 @@ let parse_build_args () =
   CBuild { ClientBuild.
     root = root;
     wait = !wait;
+    force_dormant_start = !force_dormant_start;
     build_opts = { ServerBuild.
       steps = !steps;
       ignore_killswitch = !ignore_killswitch;

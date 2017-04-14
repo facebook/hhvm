@@ -83,7 +83,7 @@ let from_type_constant ast_type_constant =
   match ast_type_constant.A.tconst_type with
   | None -> None (* Abstract type constants are omitted *)
   | Some init ->
-    (* TODO: Deal with the initializer *)
+    (* TODO: Deal with the constraint *)
     let type_constant_name = Litstr.to_string @@
       snd ast_type_constant.A.tconst_name
     in

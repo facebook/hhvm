@@ -30,8 +30,7 @@ class MergeDriverTests(common_tests.CommonTestDriver, unittest.TestCase):
 # some comment
 use_mini_state = true
 use_watchman = true
-# Can't use subscriptions yet due to deadlock. Fix is coming
-watchman_subscribe = false
+watchman_subscribe = true
 lazy_decl = true
 lazy_parse = true
 lazy_init = true

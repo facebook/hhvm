@@ -17,7 +17,8 @@ val entry: (ServerGlobalState.t * ServerArgs.options, unit, unit) Daemon.entry
 val run_once: ServerArgs.options -> SharedMem.handle -> 'a
 
 val serve_one_iteration:
+  force_flush:bool ->
   ServerEnv.genv ->
   ServerEnv.env ->
   ClientProvider.t ->
-  ServerEnv.env
+  ServerEnv.env * bool

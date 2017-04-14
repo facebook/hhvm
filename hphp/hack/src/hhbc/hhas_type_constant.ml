@@ -10,11 +10,12 @@
 
 type t = {
   type_constant_name         : Litstr.id;
-  (* TODO: initializer *)
+  type_constant_initializer  : Hhbc_ast.instruct_lit_const;
   (* TODO: constraint? *)
 }
 
-let make type_constant_name =
-  { type_constant_name }
+let make type_constant_name type_constant_initializer =
+  { type_constant_name; type_constant_initializer}
 
 let name c = c.type_constant_name
+let initializer_t c = c.type_constant_initializer

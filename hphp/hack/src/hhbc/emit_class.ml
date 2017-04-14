@@ -82,11 +82,15 @@ let from_constants ast_constants =
 let from_type_constant ast_type_constant =
   match ast_type_constant.A.tconst_type with
   | None -> None (* Abstract type constants are omitted *)
-  | Some _init ->
+  | Some init ->
     (* TODO: Deal with the initializer *)
     let type_constant_name = Litstr.to_string @@
-      snd ast_type_constant.A.tconst_name in
-    Some (Hhas_type_constant.make type_constant_name)
+      snd ast_type_constant.A.tconst_name
+    in
+    let type_constant_initializer =
+      Emit_type_constant.hint_to_type_constant init
+    in
+    Some (Hhas_type_constant.make type_constant_name type_constant_initializer)
 
 let from_type_constants ast_type_constants =
   List.filter_map ast_type_constants from_type_constant

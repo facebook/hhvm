@@ -970,8 +970,11 @@ let add_constant buf c =
 let add_type_constant buf c =
   B.add_string buf "\n  .const ";
   B.add_string buf (Hhas_type_constant.name c);
-  (* TODO: Get the actual initializer when we can codegen it. *)
-  B.add_string buf " isType = \"\"\"N;\"\"\";"
+  let initializer_t = Hhas_type_constant.initializer_t c in
+  B.add_string buf " isType = \"\"\"";
+  B.add_string buf @@ SS.seq_to_string @@
+    attribute_argument_to_string initializer_t;
+  B.add_string buf "\"\"\";"
 
 let add_enum_ty buf c =
   match Hhas_class.enum_type c with

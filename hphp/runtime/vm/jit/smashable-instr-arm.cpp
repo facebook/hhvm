@@ -203,7 +203,7 @@ uint64_t smashableMovqImm(TCA inst) {
   Instruction* ldr = Instruction::Cast(inst);
   Instruction* b = ldr->NextInstruction();
   Instruction* target = b->NextInstruction();
-  Instruction* after = target->NextInstruction()->NextInstruction();
+  DEBUG_ONLY Instruction* after = target->NextInstruction()->NextInstruction();
 
   assertx(ldr->IsLoadLiteral() &&
           ldr->Mask(LoadLiteralMask) == LDR_x_lit &&
@@ -288,8 +288,8 @@ ConditionCode smashableJccCond(TCA inst) {
   Instruction* ldr = b->NextInstruction();;
   Instruction* br = ldr->NextInstruction();
   Instruction* target = br->NextInstruction();
-  Instruction* after = target->NextInstruction()->NextInstruction();
-  const auto rd = ldr->Rd();
+  DEBUG_ONLY Instruction* after = target->NextInstruction()->NextInstruction();
+  DEBUG_ONLY const auto rd = ldr->Rd();
 
   assertx(b->IsCondBranchImm() &&
           b->ImmPCOffsetTarget() == after &&

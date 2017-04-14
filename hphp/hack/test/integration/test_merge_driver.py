@@ -23,20 +23,25 @@ class MergeDriverTests(common_tests.CommonTestDriver, unittest.TestCase):
     def tearDownClass(cls):
         super().tearDownClass()
 
-    def write_local_conf(self):
+    def write_local_conf(self, watchman_subscribe=True):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            if watchman_subscribe:
+                watchman_subscribe_str = "watchman_subscribe = true"
+            else:
+                watchman_subscribe_str = "watchman_subscribe = false"
             f.write(
                 r"""
 # some comment
 use_mini_state = true
 use_watchman = true
-watchman_subscribe = true
 lazy_decl = true
 lazy_parse = true
 lazy_init = true
 enable_fuzzy_search = false
 """
             )
+            f.write(watchman_subscribe_str)
+            f.write("\n")
 
     # Write our custom merge driver.
     # In order for the hh_client launched by mercurial to
@@ -71,8 +76,13 @@ mergedriver = python:scripts/mergedriver.py
 """
             )
 
-    def check_call(self, cmd):
-        subprocess.check_call(cmd, cwd=self.repo_dir, env=self.test_env)
+    def check_call(self, cmd, timeout=None):
+        subprocess.check_call(
+            cmd,
+            cwd=self.repo_dir,
+            env=self.test_env,
+            timeout=timeout,
+        )
 
     def init_hg_repo(self):
         cmd = ['hg', 'init']
@@ -111,7 +121,8 @@ mergedriver = python:scripts/mergedriver.py
             f.write(content)
         self.hg_commit(commit_msg)
 
-    def test_mergedriver_finishes_quickly(self):
+    # Merge driver runs Hack build, hack server is already running
+    def test_mergedriver_finishes_quickly_hack_already_running(self):
         self.write_local_conf()
         self.init_hg_repo()
         self.write_foo_1_and_commit(self.foo_1_start, "starting")
@@ -120,8 +131,27 @@ mergedriver = python:scripts/mergedriver.py
         self.write_foo_1_and_commit(
             self.foo_1_start + self.foo_1_first_append + self.foo_1_second_append,
             "second append")
+        # Start a Hack server before triggering the mergedriver
         self.check_cmd(['No errors!'])
         # Backing out the first append will trigger 3-way merge logic, firing
         # the merge driver, which calls Hack build
         cmd = ['hg', 'backout', '.^', '--no-commit']
-        self.check_call(cmd)
+        self.check_call(cmd, timeout=20)
+
+    # Hack is launched by the merge driver. Test setup is same as before, except
+    # we don't start a Hack server.
+    def test_mergedriver_finishes_quickly_hack_not_running(self):
+        self.write_local_conf(watchman_subscribe=False)
+        self.init_hg_repo()
+        self.write_foo_1_and_commit(self.foo_1_start, "starting")
+        self.write_foo_1_and_commit(
+            self.foo_1_start + self.foo_1_first_append, "first append")
+        self.write_foo_1_and_commit(
+            self.foo_1_start + self.foo_1_first_append + self.foo_1_second_append,
+            "second append")
+        # Backing out the first append will trigger 3-way merge logic, firing
+        # the merge driver, which calls Hack build
+        cmd = ['hg', 'backout', '.^', '--no-commit']
+        # Settling inside the server is allotted up to 3 minutes.
+        # Give it another 30 seconds for startup time.
+        self.check_call(cmd, timeout=210)

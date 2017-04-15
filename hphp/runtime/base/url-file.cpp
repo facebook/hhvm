@@ -57,6 +57,12 @@ void UrlFile::sweep() {
   MemFile::sweep();
 }
 
+void UrlFile::sweep() {
+  using std::string;
+  m_error.~string();
+  MemFile::sweep();
+}
+
 const StaticString
   s_remove_user_pass_pattern("#://[^@]+@#"),
   s_remove_user_pass_replace("://");

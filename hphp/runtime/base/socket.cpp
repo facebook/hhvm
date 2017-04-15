@@ -112,6 +112,7 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
 Socket::~Socket() { }
 
 void Socket::sweep() {
+  m_address.~string();
   Socket::closeImpl();
   File::sweep();
   m_data = nullptr;

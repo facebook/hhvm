@@ -70,6 +70,9 @@ int main(int argc, char** argv) {
     argv[1] = argv[0];
     return HPHP::emulate_zend(argc - 1, argv + 1);
   }
+  if (argc == 1) {
+    return HPHP::emulate_zend(argc, argv);
+  }
 
   if (argc > 1 && !strcmp(argv[1], "--info")) {
     // prepare a command line of "<command> --php -r 'phpinfo();'"

@@ -237,18 +237,18 @@ Object APCObject::createObject() const {
   auto const apcProp = persistentProps();
 
   if (m_fast_init) {
-    obj->setPartiallyInited(true);
+    // re-entry is possible while we're executing toLocal() on each
+    // property, so heap inspectors may see partially initid objects
+    // not yet exposed to PHP.
     unsigned i = 0;
     try {
       for (; i < numProps; ++i) {
         new (objProp + i) Variant(apcProp[i]->toLocal());
       }
-      obj->setPartiallyInited(false);
     } catch (...) {
       for (; i < numProps; ++i) {
         new (objProp + i) Variant();
       }
-      obj->setPartiallyInited(false);
       throw;
     }
   } else {

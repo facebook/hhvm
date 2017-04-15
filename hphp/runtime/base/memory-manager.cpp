@@ -410,9 +410,8 @@ void MemoryManager::refreshStatsImpl(MemoryUsageStats& stats) {
       refreshStatsHelperStop();
     }
 #endif
-    if (live &&
-        stats.usage() > m_memThresholdCallbackPeakUsage &&
-        stats.peakUsage <= m_memThresholdCallbackPeakUsage) {
+    if (live && stats.usage() > m_memThresholdCallbackPeakUsage) {
+      m_memThresholdCallbackPeakUsage = SIZE_MAX;
       setSurpriseFlag(MemThresholdFlag);
     }
 

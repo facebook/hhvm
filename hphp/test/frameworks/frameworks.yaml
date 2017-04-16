@@ -49,6 +49,139 @@
       - assetic/tests/Assetic/Test/Factory/AssetFactoryTest.php
       # depends on http://ajax.googleapis.com
       - assetic/tests/Assetic/Test/Asset/HttpAssetTest.php
+  # v2.0.0-beta1. See https://github.com/auraphp/Aura.Autoload/releases
+  Aura.Autoload:
+    url: https://github.com/auraphp/Aura.Autoload.git
+    branch: develop-2
+    commit: a5632d660db696f3b0f8994fa034073f31bc1b0c
+    install_root: Aura.Autoload
+    test_root: tests
+  # v2.0.0-beta1. See https://github.com/auraphp/Aura.Cli/releases
+  Aura.Cli:
+    url: https://github.com/auraphp/Aura.Cli.git
+    branch: develop-2
+    commit: 95bb57d6232f9790767b318cb6b4b215b194f93f
+    install_root: Aura.Cli
+    test_root: tests
+  # v2.0.0-beta1. See https://github.com/auraphp/Aura.Di/releases
+  Aura.Di:
+    url: https://github.com/auraphp/Aura.Di.git
+    branch: develop-2
+    commit: 8c7536d352dfbef11c5ed1308a4afdf194a595cc
+    install_root: Aura.Di
+    test_root: tests
+  # v2.0.0-beta1. See https://github.com/auraphp/Aura.Dispatcher/releases
+  Aura.Dispatcher:
+    url: https://github.com/auraphp/Aura.Dispatcher.git
+    branch: develop-2
+    commit: 3d88cef221302a86b5929f870618e4b4d6220e88
+    install_root: Aura.Dispatcher
+    test_root: tests
+  # v1.0.1 See https://github.com/auraphp/Aura.Filter/releases
+  Aura.Filter:
+    url: https://github.com/auraphp/Aura.Filter.git
+    branch: develop-2
+    commit: f5610ef59a543b71dc9fa2bf63b698204f6843c8
+    install_root: Aura.Filter
+    test_root: tests
+  # v2.0.0-beta1. See https://github.com/auraphp/Aura.Html/releases
+  Aura.Html:
+    url: https://github.com/auraphp/Aura.Html.git
+    branch: develop-2
+    commit: 0df6b1ca7b6faadb38775976bee048ea469c3d85
+    install_root: Aura.Html
+    test_root: tests
+  # v1.0.3 . See https://github.com/auraphp/Aura.Http/releases
+  Aura.Http:
+    url: https://github.com/auraphp/Aura.Http.git
+    branch: develop
+    commit: 6e7e71e81e4bcc93430b1b8b93f505230e4c37f6
+    install_root: Aura.Http
+    test_root: tests
+  # v1.1.1 . See https://github.com/auraphp/Aura.Input/releases
+  Aura.Input:
+    url: https://github.com/auraphp/Aura.Input.git
+    branch: develop
+    commit: 5b6f0843492094c8e4d65fae354a96d62fccea12
+    install_root: Aura.Input
+    test_root: tests
+  # v1.0.1 . See https://github.com/auraphp/Aura.Intl/releases
+  Aura.Intl:
+    url: https://github.com/auraphp/Aura.Intl.git
+    branch: develop
+    commit: 5b759e6808414573008af7e09cb29491ab540f4c
+    install_root: Aura.Intl
+    test_root: tests
+  # v1.2.1 . See https://github.com/auraphp/Aura.Marshal/releases
+  Aura.Marshal:
+    url: https://github.com/auraphp/Aura.Marshal.git
+    branch: develop
+    commit: e4983420e34052a158bd238927fbb6c963d1ad2b
+    install_root: Aura.Marshal
+    test_root: tests
+  # Beta-1 release for v2 of Aura. See https://github.com/auraphp/Aura.Router/releases
+  Aura.Router:
+    url: https://github.com/auraphp/Aura.Router.git
+    branch: develop-2
+    commit: c20cb8579f0d06ee02b79350b43f76e36e5d7e1a
+    install_root: Aura.Router
+    test_root: tests
+  # v1.0.2 . See https://github.com/auraphp/Aura.Session/releases
+  Aura.Session:
+    url: https://github.com/auraphp/Aura.Session.git
+    branch: develop-2
+    commit: 8f817ec812eb21d083d76167b7ec4d80a6fca6b0
+    install_root: Aura.Session
+    test_root: tests
+  # v1.0.3 . See https://github.com/auraphp/Aura.Signal/releases
+  Aura.Signal:
+    url: https://github.com/auraphp/Aura.Signal.git
+    branch: develop
+    commit: 01280bb119df3933f2669a607636c143d838afea
+    install_root: Aura.Signal
+    test_root: tests
+  # v2.0.1 . See https://github.com/auraphp/Aura.Sql/releases
+  Aura.Sql:
+    url: https://github.com/auraphp/Aura.Sql.git
+    branch: develop-2
+    commit: 92fefa64dcfb5c2acf168e5632d4af5746e3637e
+    install_root: Aura.Sql
+    test_root: tests
+  # v2.0.0 . See https://github.com/auraphp/Aura.SqlQuery/releases
+  Aura.SqlQuery:
+    url: https://github.com/auraphp/Aura.SqlQuery.git
+    branch: develop-2
+    commit: f5edf56d233ed8721a48970df880a79e5853d59e
+    install_root: Aura.SqlQuery
+    test_root: tests
+  # v2.0.0-beta1. See https://github.com/auraphp/Aura.SqlSchema/releases
+  Aura.SqlSchema:
+    url: https://github.com/auraphp/Aura.SqlSchema.git
+    branch: develop-2
+    commit: 60baa07aea48c45570655b480be0cf5a843c64fa
+    install_root: Aura.SqlSchema
+    test_root: tests
+  # v1.2.0 . See https://github.com/auraphp/Aura.Uri/releases
+  Aura.Uri:
+    url: https://github.com/auraphp/Aura.Uri.git
+    branch: develop
+    commit: 298abdf98f64e06928a159abc61c227b2814c065
+    install_root: Aura.Uri
+    test_root: tests
+  # v2.0.0-beta2 . See https://github.com/auraphp/Aura.View/releases
+  Aura.View:
+    url: https://github.com/auraphp/Aura.View.git
+    branch: develop-2
+    commit: bdd58cf7e254ebe17480a788ce6b3275a7f1b726
+    install_root: Aura.View
+    test_root: tests
+  # v2.0.0-beta1 . See https://github.com/auraphp/Aura.Web/releases
+  Aura.Web:
+    url: https://github.com/auraphp/Aura.Web.git
+    branch: develop-2
+    commit: 9682a9fad71d86447c71cce4dca9f1924fb92d2d
+    install_root: Aura.Web
+    test_root: tests
   # Stable (2.x) doesn't use phpunit, so targetting the next major release
   cakephp3:
     url: https://github.com/cakephp/cakephp.git

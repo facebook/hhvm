@@ -139,6 +139,13 @@
     commit: 7dc9a43cb856debc22fe158a1144018e16f7a637
     install_root: fastroute
     test_root: fastroute
+  flow:
+    url: https://git.typo3.org/Flow/Distributions/Base.git
+    branch: '3.0'
+    commit: 300f50f02bf41c25677111bd0c8962643b16bff8
+    install_root: flow
+    test_root: flow/Build/BuildEssentials/PhpUnit
+    config_file: flow/Build/BuildEssentials/PhpUnit/UnitTests.xml
   guzzle:
     url: https://github.com/guzzle/guzzle3.git
     branch: v3.9.2

@@ -1625,9 +1625,8 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
   if (!mysql_result) {
     if (mysql_field_count(conn) > 0) {
       raise_warning("Unable to save result set");
-      return false;
     }
-    return true;
+    return false;
   }
 
   auto r = req::make<MySQLResult>(mysql_result);

@@ -42,6 +42,8 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 
+#include "hphp/runtime/base/mixed-array.h"
+
 namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc_dce);
@@ -232,6 +234,15 @@ enum class Use {
   UsedIfLastRef = 2,
 
   /*
+   * Indicates that the stack slot contains what appears to be a
+   * StructArray being constructed via AddElemCs. What we actually
+   * know is that the final array is Struct-like, and that there are
+   * AddElemCs involved; as long as every element was added via
+   * AddElemC, we'll make a NewStructArray.
+   */
+  AddElemC = 3,
+
+  /*
    * Modifier or-ed into the above to indicate that this use is linked
    * to the stack slot below it (in stack order - the bottom of the
    * stack is below the top); either they are both optimized, or
@@ -285,9 +296,12 @@ enum class DceAction {
   Kill,
   PopInputs,
   PopOutputs,
+  Replace,
+  PopAndReplace
 };
 
 using DceActionMap = std::map<InstrId, DceAction>;
+using DceReplaceMap = std::map<InstrId, CompactVector<Bytecode>>;
 
 struct UseInfo {
   explicit UseInfo(Use u) : usage(u) {}
@@ -351,6 +365,12 @@ struct DceState {
   DceActionMap actionMap;
 
   /*
+   * Actions of type Replace in the actionMap have an entry here with
+   * the replacement bytecodes.
+   */
+  DceReplaceMap replaceMap;
+
+  /*
    * The set of locals and class-ref slots that were ever live in this block.
    * (This includes ones that were live going out of this block.)  This set is
    * used by global DCE to remove locals and class-ref slots that are completely
@@ -364,6 +384,11 @@ struct DceState {
    * of the slot is removed, the corresponding actions must be taken.
    */
   std::vector<UseInfo> slotUsage;
+
+  /*
+   * Flag to indicate local vs global dce.
+   */
+  bool isLocal{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -374,6 +399,8 @@ const char* show(DceAction action) {
     case DceAction::Kill:          return "Kill";
     case DceAction::PopInputs:     return "PopInputs";
     case DceAction::PopOutputs:    return "PopOutputs";
+    case DceAction::Replace:       return "Replace";
+    case DceAction::PopAndReplace: return "PopAndReplace";
   };
   not_reached();
 }
@@ -392,9 +419,10 @@ const char* show(Use u) {
   validate(u);
   auto ret = [&] {
     switch (mask_use(u)) {
-      case Use::Used:              return "*U";
-      case Use::Not:               return "*0";
-      case Use::UsedIfLastRef:     return "*UL";
+      case Use::Used:          return "*U";
+      case Use::Not:           return "*0";
+      case Use::UsedIfLastRef: return "*UL";
+      case Use::AddElemC:      return "*AE";
       case Use::Linked: not_reached();
     }
     not_reached();
@@ -455,6 +483,7 @@ struct Env {
   LocalId loc;
   const State& stateBefore;
   const StepFlags& flags;
+  const State& stateAfter;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -756,7 +785,9 @@ DceActionMap& commitActions(Env& env, bool linked, const DceActionMap& am) {
     auto ret = dst.insert(i);
     if (!ret.second && i.second != ret.first->second) {
       assert(i.second == DceAction::Kill);
-      if (ret.first->second == DceAction::PopInputs) {
+      if (ret.first->second == DceAction::PopAndReplace) {
+        ret.first->second = DceAction::Replace;
+      } else if (ret.first->second == DceAction::PopInputs) {
         ret.first->second = DceAction::Kill;
       } else {
         always_assert(false);
@@ -878,7 +909,8 @@ enum class PushFlags {
   MarkLive,
   MarkDead,
   MarkUnused,
-  PopOutputs
+  PopOutputs,
+  AddElemC
 };
 
 template<typename... Args>
@@ -917,6 +949,25 @@ void handle_push(Env& env, PushFlags pf, Args&... uis) {
     case PushFlags::PopOutputs:
       popOutputs(env, linked, uis...);
       break;
+
+    case PushFlags::AddElemC: {
+      assert(!linked);
+      auto& ui = combineUis(uis...);
+      ui.usage = Use::AddElemC;
+      // For the last AddElemC, we will already have added a Replace
+      // action for env.id - so the following emplace will silently
+      // fail; for the rest, we just want to kill the AddElemC
+      ui.actions.emplace(env.id, DceAction::Kill);
+      pop(env, std::move(ui));
+
+      // The key is known; we must drop it if we convert to
+      // NewStructArray.
+      pop(env, Use::Not | Use::Linked, DceActionMap {});
+
+      // The value going into the array is a normal use.
+      pop(env);
+      return;
+    }
   }
   pop_inputs(env, numPop(env.op));
 }
@@ -1003,7 +1054,6 @@ void dce(Env& env, const bc::File&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Dir&)           { pushRemovable(env); }
 void dce(Env& env, const bc::NewArray&)      { pushRemovable(env); }
 void dce(Env& env, const bc::NewDictArray&)  { pushRemovable(env); }
-void dce(Env& env, const bc::NewMixedArray&) { pushRemovable(env); }
 void dce(Env& env, const bc::NewCol&)        { pushRemovable(env); }
 void dce(Env& env, const bc::CheckProp&)     { pushRemovable(env); }
 
@@ -1156,9 +1206,69 @@ void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Exit&)  { stack_ops(env); readDtorLocs(env); }
 
+void dce(Env& env, const bc::NewMixedArray&) {
+  stack_ops(env,[] (const UseInfo& ui) {
+      if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+
+      return PushFlags::MarkLive;
+    });
+}
+
 void dce(Env& env, const bc::AddElemC& op) {
   stack_ops(env, [&] (UseInfo& ui) {
-      return allUnused(ui) ? PushFlags::MarkUnused : PushFlags::MarkLive;
+      if (allUnused(ui)) {
+        return PushFlags::MarkUnused;
+      }
+
+      if (env.dceState.isLocal) {
+        // Converting to NewStructArray changes the stack layout,
+        // which can invalidate the FuncAnalysis; only do it in global
+        // dce, since we're going to recompute the FuncAnalysis anyway.
+        return PushFlags::MarkLive;
+      }
+
+      auto const& arrPost = env.stateAfter.stack.back().type;
+      auto const& arrPre = topC(env, 2);
+      auto postSize = arr_size(arrPost);
+      if (postSize == arr_size(arrPre)) {
+        // either the AddElemC is known to not add an element, or we
+        // don't know the sizes; either way, we have nothing more to
+        // do.
+        return PushFlags::MarkLive;
+      }
+      if (ui.usage == Use::AddElemC) {
+        return PushFlags::AddElemC;
+      }
+      auto const cat = categorize_array(arrPost);
+      if (cat.hasValue) {
+        if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
+        auto v = tv(arrPost);
+        CompactVector<Bytecode> bcs;
+        if (arrPost.subtypeOf(TArrN)) {
+          bcs.emplace_back(bc::Array { v->m_data.parr });
+        } else {
+          assert(arrPost.subtypeOf(TDictN));
+          bcs.emplace_back(bc::Dict { v->m_data.parr });
+        }
+        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        ui.actions[env.id] = DceAction::PopAndReplace;
+        return PushFlags::MarkUnused;
+      }
+
+      if (isLinked(ui) ||
+          cat.cat != Type::ArrayCat::Struct ||
+          !arrPost.strictSubtypeOf(TArrN) ||
+          *postSize > MixedArray::MaxStructMakeSize) {
+        return PushFlags::MarkLive;
+      }
+
+      CompactVector<Bytecode> bcs;
+      bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
+      env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+      ui.actions[env.id] = DceAction::Replace;
+      return PushFlags::AddElemC;
     });
 }
 
@@ -1312,7 +1422,7 @@ void dispatch_dce(Env& env, const Bytecode& op) {
 struct DceOutState {
   DceOutState() = default;
   enum Local {};
-  explicit DceOutState(Local) {
+  explicit DceOutState(Local) : isLocal(true) {
     locLive.set();
     locLiveExn.set();
     slotLive.set();
@@ -1343,6 +1453,11 @@ struct DceOutState {
    * successors.
    */
   folly::Optional<std::vector<UseInfo>>       slotUsage;
+
+  /*
+   * Whether this is for local_dce
+   */
+  bool                                        isLocal{false};
 };
 
 folly::Optional<DceState>
@@ -1371,6 +1486,7 @@ dce_visit(const Index& index,
   dceState.usedLocals = dceOutState.locLive;
   dceState.liveSlots  = dceOutState.slotLive;
   dceState.usedSlots  = dceOutState.slotLive;
+  dceState.isLocal    = dceOutState.isLocal;
 
   if (dceOutState.dceStack) {
     dceState.stack = *dceOutState.dceStack;
@@ -1401,6 +1517,7 @@ dce_visit(const Index& index,
       NoLocalId,
       states[idx].first,
       states[idx].second,
+      states[idx+1].first,
     };
     dispatch_dce(visit_env, op);
 
@@ -1488,7 +1605,8 @@ DceAnalysis analyze_dce(const Index& index,
  * Do the actual updates to the bytecodes.
  */
 void dce_perform(const php::Func& func,
-                 const DceActionMap& actionMap) {
+                 const DceActionMap& actionMap,
+                 const DceReplaceMap& replaceMap) {
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
     auto const b = borrow(func.blocks[id.blk]);
@@ -1521,6 +1639,30 @@ void dce_perform(const php::Func& func,
                         bc::PopC {});
         break;
       }
+      case DceAction::Replace:
+      {
+        auto it = replaceMap.find(id);
+        always_assert(it != end(replaceMap) && !it->second.empty());
+        b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+        b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                        begin(it->second), end(it->second));
+        break;
+      }
+      case DceAction::PopAndReplace:
+      {
+        auto it = replaceMap.find(id);
+        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const numToPop = numPop(b->hhbcs[id.idx]);
+        b->hhbcs.erase(b->hhbcs.begin() + id.idx);
+        b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                        begin(it->second), end(it->second));
+        if (numToPop) {
+          b->hhbcs.insert(b->hhbcs.begin() + id.idx,
+                          numToPop,
+                          bc::PopC {});
+        }
+        break;
+      }
     }
   }
 }
@@ -1529,6 +1671,7 @@ struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
+  DceReplaceMap replaceMap;
 };
 
 DceOptResult
@@ -1547,7 +1690,8 @@ optimize_dce(const Index& index,
   return {
     std::move(dceState->usedLocals),
     std::move(dceState->usedSlots),
-    std::move(dceState->actionMap)
+    std::move(dceState->actionMap),
+    std::move(dceState->replaceMap)
   };
 }
 
@@ -1674,7 +1818,7 @@ void local_dce(const Index& index,
   auto const ret = optimize_dce(index, ainfo, blk, stateIn,
                                 DceOutState{DceOutState::Local{}});
 
-  dce_perform(*ainfo.ctx.func, ret.actionMap);
+  dce_perform(*ainfo.ctx.func, ret.actionMap, ret.replaceMap);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1916,6 +2060,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   std::bitset<kMaxTrackedLocals> usedLocals;
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
+  DceReplaceMap replaceMap;
   for (auto& b : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", b->id);
     auto ret = optimize_dce(
@@ -1936,9 +2081,18 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         }
       }
     }
+    if (ret.replaceMap.size()) {
+      if (!replaceMap.size()) {
+        replaceMap = std::move(ret.replaceMap);
+      } else {
+        for (auto& elm : ret.replaceMap) {
+          replaceMap.insert(std::move(elm));
+        }
+      }
+    }
   }
 
-  dce_perform(*ai.ctx.func, actionMap);
+  dce_perform(*ai.ctx.func, actionMap, replaceMap);
 
   FTRACE(1, "  used locals: {}\n", loc_bits_string(ai.ctx.func, usedLocals));
   remove_unused_locals(ai.ctx, usedLocals);

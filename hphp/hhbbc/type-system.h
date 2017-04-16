@@ -443,7 +443,15 @@ struct Type {
    */
   bool couldBe(const Type& o) const;
 
+  struct ArrayCat {
+    enum { None, Empty, Packed, Struct, Mixed } cat;
+    bool hasValue;
+  };
+
 private:
+  friend folly::Optional<int64_t> arr_size(const Type& t);
+  friend ArrayCat categorize_array(const Type& t);
+  friend CompactVector<LSString> get_string_keys(const Type& t);
   friend Type wait_handle(const Index&, Type);
   friend bool is_specialized_wait_handle(const Type&);
   friend bool is_specialized_array_like(const Type& t);
@@ -915,21 +923,6 @@ Type objcls(const Type& t);
  * The returned Cell can only contain non-reference-counted types.
  */
 folly::Optional<Cell> tv(const Type& t);
-
-/*
- * Produce a packed-array like cell from a vector of types.
- * AInit can be PackedArrayInit to produce a PackedArray, or
- * VecArrayInit to produce a Vec.
- */
-template<typename AInit>
-folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems);
-
-/*
- * Produce a mixed-array like cell from an ArrayLikeMap of types.
- * AInit can be MixedArrayInit, or DictInit
- */
-template<typename AInit, typename Key>
-folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

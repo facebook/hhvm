@@ -347,12 +347,10 @@ void in(ISS& env, const bc::AddElemC& op) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return env.collect.trackConstantArrays ?
-        array_set(std::move(ty), k, v) : TArr;
+      return array_set(std::move(ty), k, v);
     }
     if (ty.subtypeOf(TDict)) {
-      return env.collect.trackConstantArrays ?
-        dict_set(std::move(ty), k, v).first : TDictN;
+      return dict_set(std::move(ty), k, v).first;
     }
     return folly::none;
   }(popC(env));
@@ -384,8 +382,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(TArr)) {
-      return env.collect.trackConstantArrays ?
-        array_newelem(std::move(ty), std::move(v)) : TArrN;
+      return array_newelem(std::move(ty), std::move(v));
     }
     return folly::none;
   }(popC(env));

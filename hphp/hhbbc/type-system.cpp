@@ -994,10 +994,6 @@ using DualDispatchCouldBe = Commute<DualDispatchCouldBeImpl>;
 using DualDispatchUnion   = Commute<DualDispatchUnionImpl>;
 
 //////////////////////////////////////////////////////////////////////
-
-}
-
-//////////////////////////////////////////////////////////////////////
 // Helpers for creating literal array-like types
 
 template<typename AInit>
@@ -1013,13 +1009,6 @@ folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems) {
   return *var.asTypedValue();
 }
 
-template folly::Optional<Cell>
-fromTypeVec<PackedArrayInit>(const std::vector<Type> &elems);
-
-template folly::Optional<Cell>
-fromTypeVec<VecArrayInit>(const std::vector<Type> &elems);
-
-namespace {
 Variant keyHelper(SString key) {
   return Variant{ key, Variant::PersistentStrInit{} };
 }
@@ -1033,7 +1022,6 @@ void add(AInit& ai, const Variant& key, const Variant& value) {
 void add(KeysetInit& ai, const Variant& key, const Variant& value) {
   assert(cellSame(*key.asTypedValue(), *value.asTypedValue()));
   ai.add(key);
-}
 }
 
 template<typename AInit, typename Key>
@@ -1051,6 +1039,10 @@ folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems) {
   });
   if (val && val->m_type == KindOfUninit) val.clear();
   return val;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1894,6 +1886,128 @@ Type objcls(const Type& t) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+folly::Optional<int64_t> arr_size(const Type& t) {
+  switch (t.m_dataTag) {
+    case DataTag::ArrLikeVal:
+      return t.m_data.aval->size();
+
+    case DataTag::ArrLikeMap:
+      return t.m_data.map->map.size();
+
+    case DataTag::ArrLikePacked:
+      return t.m_data.packed->elems.size();
+
+    case DataTag::ArrLikePackedN:
+      return t.m_data.packedn->len;
+
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::RefInner:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      return folly::none;
+  }
+  not_reached();
+}
+
+Type::ArrayCat categorize_array(const Type& t) {
+  auto hasInts = false;
+  auto hasStrs = false;
+  auto isPacked = true;
+  auto val = true;
+  size_t idx = 0;
+  auto checkKey = [&] (const Cell& key) {
+    if (isStringType(key.m_type)) {
+      hasStrs = true;
+      isPacked = false;
+      return hasInts;
+    } else {
+      hasInts = true;
+      if (key.m_data.num != idx++) isPacked = false;
+      return hasStrs && !isPacked;
+    }
+  };
+
+  switch (t.m_dataTag) {
+    case DataTag::ArrLikeVal:
+      IterateKV(t.m_data.aval,
+                [&] (const Cell* key, const TypedValue*) {
+                  return checkKey(*key);
+                });
+      break;
+
+    case DataTag::ArrLikeMap:
+      for (auto const& elem : t.m_data.map->map) {
+        if (checkKey(elem.first) && !val) break;
+        val = val && tv(elem.second);
+      }
+      break;
+
+    case DataTag::ArrLikePacked:
+      for (auto const& elem : t.m_data.packed->elems) {
+        hasInts = true;
+        val = val && tv(elem);
+        if (!val) break;
+      }
+      break;
+
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::RefInner:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      return {};
+  }
+
+  auto cat =
+    hasInts ? (isPacked ? Type::ArrayCat::Packed : Type::ArrayCat::Mixed) :
+    hasStrs ? Type::ArrayCat::Struct : Type::ArrayCat::Empty;
+
+  return { cat , val };
+}
+
+CompactVector<LSString> get_string_keys(const Type& t) {
+  CompactVector<LSString> strs;
+
+  switch (t.m_dataTag) {
+    case DataTag::ArrLikeVal:
+      IterateKV(t.m_data.aval,
+                [&] (const Cell* key, const TypedValue*) {
+                  assert(isStringType(key->m_type));
+                  strs.push_back(key->m_data.pstr);
+                });
+      break;
+
+    case DataTag::ArrLikeMap:
+      for (auto const& elem : t.m_data.map->map) {
+        assert(isStringType(elem.first.m_type));
+        strs.push_back(elem.first.m_data.pstr);
+      }
+      break;
+
+    case DataTag::ArrLikePacked:
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::RefInner:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      always_assert(false);
+  }
+
+  return strs;
+}
 
 folly::Optional<Cell> tv(const Type& t) {
   assert(t.checkInvariants());

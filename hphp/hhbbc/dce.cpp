@@ -29,6 +29,8 @@
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
+#include "hphp/runtime/base/array-iterator.h"
+
 #include "hphp/util/bitops.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/trace.h"
@@ -38,6 +40,7 @@
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -234,11 +237,9 @@ enum class Use {
   UsedIfLastRef = 2,
 
   /*
-   * Indicates that the stack slot contains what appears to be a
-   * StructArray being constructed via AddElemCs. What we actually
-   * know is that the final array is Struct-like, and that there are
-   * AddElemCs involved; as long as every element was added via
-   * AddElemC, we'll make a NewStructArray.
+   * Indicates that the stack slot contains an array-like being
+   * constructed by AddElemCs, which looks like it can be optimized to
+   * a NewStructArray, NewPackedArray, or NewVecArray.
    */
   AddElemC = 3,
 
@@ -960,8 +961,7 @@ void handle_push(Env& env, PushFlags pf, Args&... uis) {
       ui.actions.emplace(env.id, DceAction::Kill);
       pop(env, std::move(ui));
 
-      // The key is known; we must drop it if we convert to
-      // NewStructArray.
+      // The key is known; we must drop it if we convert to New*Array.
       pop(env, Use::Not | Use::Linked, DceActionMap {});
 
       // The value going into the array is a normal use.
@@ -1041,7 +1041,6 @@ void dce(Env& env, const bc::PopC&)          { discardNonDtors(env); }
 void dce(Env& env, const bc::PopU&)          { discard(env); }
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
-void dce(Env& env, const bc::Array&)         { pushRemovable(env); }
 void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }
 void dce(Env& env, const bc::Vec&)           { pushRemovable(env); }
 void dce(Env& env, const bc::Keyset&)        { pushRemovable(env); }
@@ -1206,6 +1205,24 @@ void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Exit&)  { stack_ops(env); readDtorLocs(env); }
 
+void dce(Env& env, const bc::Array& op) {
+  stack_ops(env, [&] (UseInfo& ui) {
+      if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
+
+      if (ui.usage != Use::AddElemC) return PushFlags::MarkLive;
+
+      assert(!env.dceState.isLocal);
+
+      CompactVector<Bytecode> bcs;
+      IterateV(op.arr1, [&] (const TypedValue* tv) {
+          bcs.push_back(gen_constant(*tv));
+        });
+      env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+      ui.actions[env.id] = DceAction::Replace;
+      return PushFlags::MarkUnused;
+    });
+}
+
 void dce(Env& env, const bc::NewMixedArray&) {
   stack_ops(env,[] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
@@ -1223,7 +1240,7 @@ void dce(Env& env, const bc::AddElemC& op) {
       }
 
       if (env.dceState.isLocal) {
-        // Converting to NewStructArray changes the stack layout,
+        // Converting to New*Array changes the stack layout,
         // which can invalidate the FuncAnalysis; only do it in global
         // dce, since we're going to recompute the FuncAnalysis anyway.
         return PushFlags::MarkLive;
@@ -1231,11 +1248,11 @@ void dce(Env& env, const bc::AddElemC& op) {
 
       auto const& arrPost = env.stateAfter.stack.back().type;
       auto const& arrPre = topC(env, 2);
-      auto postSize = arr_size(arrPost);
-      if (postSize == arr_size(arrPre)) {
-        // either the AddElemC is known to not add an element, or we
-        // don't know the sizes; either way, we have nothing more to
-        // do.
+      auto const postSize = arr_size(arrPost);
+      if (!postSize || postSize == arr_size(arrPre)) {
+        // if postSize is known, and equal to preSize, the AddElemC
+        // didn't add an element (duplicate key) so we have to give up.
+        // if its not known, we also have nothing to do.
         return PushFlags::MarkLive;
       }
       if (ui.usage == Use::AddElemC) {
@@ -1257,18 +1274,26 @@ void dce(Env& env, const bc::AddElemC& op) {
         return PushFlags::MarkUnused;
       }
 
-      if (isLinked(ui) ||
-          cat.cat != Type::ArrayCat::Struct ||
-          !arrPost.strictSubtypeOf(TArrN) ||
-          *postSize > MixedArray::MaxStructMakeSize) {
-        return PushFlags::MarkLive;
+      if (isLinked(ui)) return PushFlags::MarkLive;
+
+      if (arrPost.strictSubtypeOf(TArrN)) {
+        CompactVector<Bytecode> bcs;
+        if (cat.cat == Type::ArrayCat::Struct &&
+            *postSize <= MixedArray::MaxStructMakeSize) {
+          bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
+        } else if (cat.cat == Type::ArrayCat::Packed) {
+          bcs.emplace_back(
+            bc::NewPackedArray { static_cast<int32_t>(*postSize) }
+          );
+        } else {
+          return PushFlags::MarkLive;
+        }
+        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
+        ui.actions[env.id] = DceAction::Replace;
+        return PushFlags::AddElemC;
       }
 
-      CompactVector<Bytecode> bcs;
-      bcs.emplace_back(bc::NewStructArray { get_string_keys(arrPost) });
-      env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-      ui.actions[env.id] = DceAction::Replace;
-      return PushFlags::AddElemC;
+      return PushFlags::MarkLive;
     });
 }
 

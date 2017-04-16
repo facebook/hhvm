@@ -14,11 +14,9 @@ INFILE=hphp.ll
 
 if [ -z "${INSTALL_DIR}" ]; then
   INSTALL_DIR="${DIR}"
-  FLEX=$(which flex)
-else
-  FLEX=$(readlink -f $(ls -t "${FBCODE_DIR}"/third-party2/flex/2.5.39/centos6-native/*/bin/flex | head -1))
 fi
 
+FLEX=$(which flex)
 if [ ! -x "${FLEX}" ]; then
   echo "flex not found" 1>&2
   exit 1

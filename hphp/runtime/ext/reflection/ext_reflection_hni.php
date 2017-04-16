@@ -337,6 +337,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       $ret = array();
       foreach ($this->getParamInfo() as $name => $info) {
         $param = new ReflectionParameter(null, null);
+        $info['type'] = self::stripHHPrefix($info['type']);
+        $info['type_hint'] = self::stripHHPrefix($info['type_hint']);
         $param->info = $info;
         $param->name = $info['name'];
         $param->paramTypeInfo = array();

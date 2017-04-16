@@ -373,6 +373,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
               "/jemalloc-prof-dump:\n"
               "                  dump heap profile\n"
               "    file          optional, filesystem path\n"
+              "/jemalloc-prof-status:\n"
+              "                  report heap profiling status\n"
               "/jemalloc-prof-request:\n"
               "                  dump thread-local heap profile in\n"
               "                  the next request that runs\n"
@@ -850,6 +852,24 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
           transport->sendString(estr.str());
         } else {
           transport->sendString("OK\n");
+        }
+        break;
+      }
+      if (cmd == "jemalloc-prof-status") {
+        bool active = false;
+        size_t activeSize = sizeof(active);
+        int err = 0;
+        err = mallctl("opt.prof", &active, &activeSize, nullptr, 0);
+        if (active && err == 0) {
+            err = mallctl("prof.active", &active, &activeSize, nullptr, 0);
+        }
+        if (err != 0) {
+          std::ostringstream estr;
+          estr << "Error " << err << " in mallctl(...)"
+            << endl;
+          transport->sendString(estr.str());
+        } else {
+          transport->sendString(active ? "ACTIVE\n" : "DISABLED\n");
         }
         break;
       }

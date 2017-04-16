@@ -46,7 +46,9 @@ const char* ringbufferName(RingBufferType t) {
   not_reached();
 }
 
+#ifndef __APPLE__
 KEEP_SECTION
+#endif
 void vtraceRingbuffer(const char* fmt, va_list ap) {
   char buf[4096];
   char* bufP = &buf[0];

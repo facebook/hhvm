@@ -335,8 +335,18 @@ abstract class ReflectionFunctionAbstract implements Reflector {
     // relevant Func::ParamInfo data structure
     if (null === $this->params) {
       $ret = array();
+      $scalarTypes = array(
+        'HH\bool' => 1,
+        'HH\int' => 1,
+        'HH\float' => 1,
+        'HH\string' => 1,
+      );
       foreach ($this->getParamInfo() as $name => $info) {
         $param = new ReflectionParameter(null, null);
+        if (!hphp_scalar_typehints_enabled() && isset($scalarTypes[$info['type']])) {
+          unset($info['type']);
+          unset($info['type_hint']);
+        }
         $param->info = $info;
         $param->name = $info['name'];
         $param->paramTypeInfo = array();

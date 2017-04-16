@@ -287,7 +287,7 @@ const StaticString
   s_date("date"),
   s_timezone_type("timezone_type"),
   s_timezone("timezone"),
-  s_ISOformat("Y-m-d H:i:s.u");
+  s_ISOformat("Y-m-d H:i:s");
 
 Array HHVM_METHOD(DateTime, __sleep) {
   DateTimeData* data = Native::data<DateTimeData>(this_);

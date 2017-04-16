@@ -1,6 +1,6 @@
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(26) "1955-05-23 00:00:00.000000"
+  string(19) "1955-05-23 00:00:00"
   ["timezone_type"]=>
   int(1)
   ["timezone"]=>
@@ -11,7 +11,7 @@ object(DateTime)#%d (3) {
 
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(26) "1955-05-22 23:00:00.000000"
+  string(19) "1955-05-22 23:00:00"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

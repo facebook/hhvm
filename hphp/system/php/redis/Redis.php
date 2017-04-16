@@ -946,7 +946,7 @@ class Redis {
     'sinterstore' => [ 'vararg' => self::VAR_KEY_ALL, 'return' => 'Long' ],
     'sismember' => [ 'format' => 'kv', 'return' => '1' ],
     'scontains' => [ 'alias' => 'sismember' ],
-    'smembers' => [ 'format' => 'k', 'return' => 'Vector' ],
+    'smembers' => [ 'format' => 'kv', 'return' => 'Vector' ],
     'sgetmembers' => [ 'alias' => 'smembers' ],
     'smove' => [ 'format' => 'kkv', 'return' => '1' ],
     'spop' => [ 'format' => 'k', 'return' => 'Serialized' ],

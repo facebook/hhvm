@@ -99,5 +99,6 @@ int main(int argc, char** argv) {
   if (argc > 1) {
     args.insert(args.end(), argv + 1, argv + argc);
   }
+
   return HPHP::execute_program(args.size(), &args[0]);
 }

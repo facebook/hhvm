@@ -79,6 +79,8 @@ hphp/system/php/phar/Phar.php
 hphp/system/php/phar/PharFileInfo.php
 hphp/system/php/phar/PharData.php
 
+hphp/system/php/json/JsonSerializableInterface.php
+
 hphp/system/php/date/datetimeinterface.php
 hphp/system/php/date/datetimeimmutable.php
 

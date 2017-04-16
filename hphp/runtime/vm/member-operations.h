@@ -181,7 +181,8 @@ template<MOpMode mode>
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   auto constexpr warn = mode == MOpMode::Warn;
   int64_t n;
-  return base->convertKey(key, n)
+  assert(base->isPHPArray());
+  return key->isStrictlyInteger(n)
     ? (warn ? base->nvTryGet(n) : base->nvGet(n))
     : (warn ? base->nvTryGet(key) : base->nvGet(key));
 }
@@ -1350,7 +1351,8 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   Cell* value,
                                   bool copy) {
   int64_t n;
-  return a->convertKey(key, n)
+  assert(a->isPHPArray());
+  return key->isStrictlyInteger(n)
     ? a->set(n, cellAsCVarRef(*value), copy)
     : a->set(StrNR(key), cellAsCVarRef(*value), copy);
 }
@@ -2206,7 +2208,8 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
                                     bool copy) {
   int64_t n;
-  return !a->convertKey(key, n)
+  assert(a->isPHPArray());
+  return !key->isStrictlyInteger(n)
     ? a->remove(StrNR(key), copy)
     : a->remove(n, copy);
 }

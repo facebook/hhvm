@@ -486,7 +486,8 @@ ELEM_HELPER_TABLE(X)
 template<bool warn>
 inline const TypedValue* checkedGet(ArrayData* a, StringData* key) {
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ?
+  assert(a->isPHPArray());
+  return UNLIKELY(key->isStrictlyInteger(i)) ?
     (warn ? a->nvTryGet(i) : a->nvGet(i)) :
     (warn ? a->nvTryGet(key) : a->nvGet(key));
 }
@@ -756,7 +757,8 @@ inline ArrayData* checkedSet(ArrayData* a,
                              Cell value,
                              bool copy) {
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ? a->set(i, value, copy) :
+  assert(a->isPHPArray());
+  return UNLIKELY(key->isStrictlyInteger(i)) ? a->set(i, value, copy) :
          a->set(key, value, copy);
 }
 

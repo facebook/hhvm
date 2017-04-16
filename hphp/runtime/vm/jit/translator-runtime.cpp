@@ -128,7 +128,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // set will decRef any old value that may have been overwritten
   // if appropriate
   int64_t intkey;
-  ArrayData* retval = UNLIKELY(ad->convertKey(key, intkey)) ?
+  ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
                   ad->set(intkey, tvAsCVarRef(&value), copy) :
                   ad->set(key, tvAsCVarRef(&value), copy);
   // TODO Task #1970153: It would be great if there were set()
@@ -728,19 +728,35 @@ ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
   return UNLIKELY(tv == nullptr) ? def : *tv;
 }
+NEVER_INLINE
+TypedValue arrayIdxSiSlow(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  int64_t i;
+  return getDefaultIfNullCell(
+    UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key), def);
 }
 
-TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
+NEVER_INLINE
+TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
+}
+
+TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSSlow(a, key, def);
+  return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
+}
+
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow(a, key, def);
   int64_t i;
-  return UNLIKELY(a->convertKey(key, i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
-         getDefaultIfNullCell(a->nvGet(key), def);
+  return getDefaultIfNullCell(
+    UNLIKELY(key->isStrictlyInteger(i)) ?
+    MixedArray::NvGetInt(a, i) : MixedArray::NvGetStr(a, key), def);
 }
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {

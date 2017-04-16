@@ -1410,6 +1410,29 @@ void dce(Env& env, const Op& op) {
   dce_slot_default(env, op);
 }
 
+/*
+ * There's a set of Base instructions that read a cell from the stack
+ * without popping it. For correctness, we need to mark the cell as
+ * used.
+ */
+template<class Op>
+void touch(Env& env, const Op& op, int32_t ix) {
+  addLocGenSet(env, env.flags.mayReadLocalSet);
+  push_outputs(env, op.numPush());
+  pop_inputs(env, op.numPop());
+  dce_slot_default(env, op);
+  use(env.dceState.forcedLiveLocations,
+      env.dceState.stack, env.dceState.stack.size() - 1 - ix);
+}
+
+void dce(Env& env, const bc::BaseC& op)       { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseNC& op)      { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseGC& op)      { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseSC& op)      { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::BaseR& op)       { touch(env, op, op.arg1); }
+void dce(Env& env, const bc::FPassBaseNC& op) { touch(env, op, op.arg2); }
+void dce(Env& env, const bc::FPassBaseGC& op) { touch(env, op, op.arg2); }
+
 void dispatch_dce(Env& env, const Bytecode& op) {
 #define O(opcode, ...) case Op::opcode: dce(env, op.opcode); return;
   switch (op.op) { OPCODES }

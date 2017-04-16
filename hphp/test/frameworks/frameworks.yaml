@@ -256,8 +256,8 @@
     test_root: mockery
   monolog:
     url: https://github.com/Seldaek/monolog.git
-    branch: "1.7.0"
-    commit: 6225b22de9dcf36546be3a0b2fa8e3d986153f57
+    branch: "1.10.0"
+    commit: 25b16e801979098cb2f120e697bfce454b18bf23
     install_root: monolog
     test_root: monolog
     flakey:

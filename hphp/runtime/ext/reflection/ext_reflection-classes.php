@@ -939,6 +939,10 @@ class ReflectionProperty implements Reflector {
   private function isAccessible() {
     return ($this->isPublic() || $this->forceAccessible);
   }
+
+  private function isAccessible() {
+    return ($this->isPublic() || $this->forceAccessible);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

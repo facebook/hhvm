@@ -13,7 +13,6 @@ $inputs = 'find . -name "*.cpp" -o -name "*.c" -o -name "*.h"';
 
 // do not touch these files
 $excluded = array(
-  'runtime/base/compiler_id.h',
   'runtime/ext/bcmath/',
   'runtime/ext_zend_compat/',
   'runtime/ext/fileinfo/libmagic/',

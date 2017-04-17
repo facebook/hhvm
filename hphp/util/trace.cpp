@@ -164,8 +164,13 @@ void vtrace(const char *fmt, va_list ap) {
     vtraceRingbuffer(fmt, ap);
   } else {
     ONTRACE(1, pthread_mutex_lock(&mtx));
+#ifdef _MSC_VER
+    ONTRACE(1, fprintf(out, "t%#08x: ",
+      int((int64_t)pthread_getw32threadid_np(pthread_self()) & 0xFFFFFFFF)));
+#else
     ONTRACE(1, fprintf(out, "t%#08x: ",
       int((int64_t)pthread_self() & 0xFFFFFFFF)));
+#endif
     vfprintf(out, fmt, ap);
     ONTRACE(1, pthread_mutex_unlock(&mtx));
     flush();

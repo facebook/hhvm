@@ -149,6 +149,14 @@
   always_assert(false);            \
   register ActRec* fp = nullptr;
 
+#elif defined(_M_X64)
+
+// TODO: FIXME! Without this implemented properly, the JIT
+// will fail "pretty spectacularly".
+# define DECLARE_FRAME_POINTER(fp) \
+  always_assert(false);            \
+  register ActRec* fp = nullptr;
+
 #elif defined(__AARCH64EL__)
 
 # if defined(__clang__)

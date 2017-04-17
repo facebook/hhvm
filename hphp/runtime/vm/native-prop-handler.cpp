@@ -105,7 +105,8 @@ Variant setProp(const Object& obj, const String& name, const Variant& value) {
   auto nph = obj->getVMClass()->getNativePropHandler();
   assert(nph);
   assert(nph->set);
-  return nph->set(obj, name, value);
+  Variant val = value;
+  return nph->set(obj, name, val);
 }
 
 Variant issetProp(const Object& obj, const String& name) {

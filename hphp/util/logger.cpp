@@ -242,7 +242,7 @@ std::string Logger::GetHeader() {
   snprintf(header, sizeof(header), "[%s] [hphp] [%lld:%llx:%d:%06d%s] ",
            snow,
            (unsigned long long)s_pid,
-           (unsigned long long)Process::GetThreadId(),
+           (unsigned long long)Process::GetThreadIdForTrace(),
            threadData->request,
            (threadData->message == -1 ? 0 : threadData->message),
            ExtraHeader.c_str());

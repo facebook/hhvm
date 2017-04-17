@@ -112,3 +112,14 @@ function x() {
       {$this->getChildren()}
     </a>;
 }
+
+function y() {
+  return
+    <div class={cx(Map {
+      'linkWrap' => true,
+      'hasCount' => $has_count,
+      'noCount' => !$has_count,
+    })}>
+      foo
+    </div>;
+}

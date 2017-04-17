@@ -849,7 +849,13 @@ let rec transform node =
     Fmt [
       t left_b;
       Split;
-      WithRule (Rule.Argument, Fmt [
+      let rule =
+        if List.is_empty (trailing_trivia left_b)
+        && List.is_empty (trailing_trivia expr)
+          then Rule.Simple Cost.Base
+          else Rule.Argument
+      in
+      WithRule (rule, Fmt [
         Nest [t expr];
         Split;
         t right_b
@@ -1564,7 +1570,14 @@ and transform_argish ?(allow_trailing=true) left_p arg_list right_p =
   Fmt [
     transform left_p;
     when_present arg_list split;
-    WithRule (Rule.Argument, Span [
+    let rule = match syntax arg_list with
+      | SyntaxList [x]
+        when List.is_empty (trailing_trivia left_p)
+          && List.is_empty (trailing_trivia x)
+        -> Rule.Simple Cost.Base
+      | _ -> Rule.Argument
+    in
+    WithRule (rule, Span [
       transform_possible_comma_list ~allow_trailing arg_list right_p
     ])
   ]

@@ -513,8 +513,8 @@
     test_root: html5php
   twital:
     url: https://github.com/goetas/twital.git
-    branch: "0.1.6"
-    commit: bd5751425e1c267c0b2b9dbf6f705b1f436439a4
+    branch: "0.1.7"
+    commit: ddfdacdb952db10a47e5fc93d81bf52a1171d1f8
     install_root: twital
     test_root: twital
     test_find_mode: token

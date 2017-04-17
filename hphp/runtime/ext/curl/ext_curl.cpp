@@ -444,6 +444,15 @@ Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
   }
 }
 
+Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code) {
+  const char *str = curl_multi_strerror((CURLMcode)code);
+  if (str) {
+    return str;
+  } else {
+    return init_null();
+  }
+}
+
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch) {
   CHECK_MULTI_RESOURCE(curlm);
   auto curle = cast<CurlResource>(ch);

@@ -42,7 +42,7 @@ void IntlDateFormatter::setDateFormatter(const String& locale,
                                          int64_t datetype, int64_t timetype,
                                          const Variant& timezone, const Variant& calendar,
                                          const String& pattern) {
-  auto loc = icu::Locale::createFromName(locale.c_str());
+  auto loc = icu::Locale::createFromName(localeOrDefault(locale).c_str());
   int64_t calType = UCAL_GREGORIAN;
   bool calOwned = false;
   const icu::Calendar *cal = IntlCalendar::ParseArg(calendar, loc,

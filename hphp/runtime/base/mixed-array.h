@@ -94,6 +94,10 @@ struct MixedArray final : ArrayData,
 
     void setStaticKey(StringData* k, strhash_t h) {
       assert(k->isStatic());
+      setStrKeyNoIncRef(k, h);
+    }
+
+    void setStrKeyNoIncRef(StringData* k, strhash_t h) {
       skey = k;
       data.hash() = h;
     }

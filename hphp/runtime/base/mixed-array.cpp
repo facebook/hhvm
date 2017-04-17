@@ -210,7 +210,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
-  // Append values by moving -- Caller assumes we update refcount.
+  // Append values by moving -- no refcounts are updated.
   for (uint32_t i = 0; i < size; i++) {
     auto& kTv = keysAndValues[i * 2];
     if (kTv.m_type == KindOfString) {
@@ -218,7 +218,7 @@ MixedArray* MixedArray::MakeMixed(uint32_t size,
       auto h = k->hash();
       auto ei = ad->findForInsert(k, h);
       if (validPos(*ei)) return nullptr;
-      data[i].setStrKey(k, h);
+      data[i].setStrKeyNoIncRef(k, h);
       *ei = i;
     } else {
       assert(kTv.m_type == KindOfInt64);

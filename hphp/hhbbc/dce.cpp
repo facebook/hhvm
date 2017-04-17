@@ -432,6 +432,10 @@ const char* show(Use u) {
   return !any(u & Use::Linked) ? ret + 1 : ret;
 }
 
+std::string show(const LocationId& id) {
+  return folly::sformat("{}:{}{}", id.blk, id.id, id.isSlot ? "(slot)" : "");
+}
+
 std::string show(const DceActionMap::value_type& elm) {
   return folly::sformat("{}={}", show(elm.first), show(elm.second));
 }
@@ -1992,7 +1996,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto ret = false;
     assert(stkOut->size() == stkIn.size());
     for (uint32_t i = 0; i < stkIn.size(); i++) {
-      mergeUIs(*stkOut, stkIn[i], i, blk, isSlot);
+      if (mergeUIs(*stkOut, stkIn[i], i, blk, isSlot)) ret = true;
     }
     return ret;
   };
@@ -2013,6 +2017,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
         // reprocessing the affected predecessors of id.blk; but this
         // is much simpler, and less error prone. We can revisit if it
         // turns out to be a performance issue.
+        FTRACE(5, "Forcing {} live\n", show(id));
         incompleteQ.push(rpoId(id.blk));
       }
     }

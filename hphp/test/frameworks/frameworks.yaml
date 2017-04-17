@@ -528,3 +528,9 @@
     commit: 8c5e86eb97f3eee633729b22e950082fb5591328
     install_root: silex
     test_root: silex
+  wordpress:
+    url: git://develop.git.wordpress.org/
+    branch: "master"
+    commit: 433f6600c0de8ca32e7af74c6fb1b626cdc87be6
+    install_root: develop.git.wordpress.org
+    test_root: develop.git.wordpress.org

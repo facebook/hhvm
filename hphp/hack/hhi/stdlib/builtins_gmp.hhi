@@ -31,7 +31,7 @@ function gmp_clrbit(mixed &$a,
                     int $index): void;
 
 function gmp_cmp(mixed $a,
-                 mixed $b): mixed;
+                 mixed $b): int;
 
 function gmp_com(mixed $a): mixed;
 

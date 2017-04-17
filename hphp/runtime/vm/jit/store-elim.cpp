@@ -1336,6 +1336,56 @@ void compute_placement_possible(
     });
 }
 
+// Remove the store operation after loading from the same location.
+void load_store_optimize_block(Block* block) {
+  FTRACE(2, "  load-store-elim visiting B{}\n", block->id());
+  auto it = block->instrs().begin();
+
+  while (it != block->instrs().end()) {
+    auto const effect1 = memory_effects(*it);
+    auto prev = it;
+    ++it;
+
+    match<void>(
+      effect1,
+      [&] (PureLoad pureLoad) {
+        if (it != block->instrs().end()) {
+          auto const effect2 = memory_effects(*it);
+          match<void>(
+            effect2,
+            [&] (PureStore pureStore) {
+              if (pureLoad.src == pureStore.dst &&
+                  prev->dst() == pureStore.value) {
+                FTRACE(2, "    {}\n      {}\n"
+                          "    {}\n      {}\n",
+                          prev->toString(), show(effect1),
+                          it->toString(), show(effect2));
+                it = block->erase(&(*it));
+              }
+            },
+            [&] (IrrelevantEffects) {},
+            [&] (UnknownEffects)    {},
+            [&] (PureLoad l)        {},
+            [&] (GeneralEffects l)  {},
+            [&] (ReturnEffects l)   {},
+            [&] (ExitEffects l)     {},
+            [&] (CallEffects l)     {},
+            [&] (PureSpillFrame l)  {}
+          );
+        }
+      },
+      [&] (IrrelevantEffects) {},
+      [&] (UnknownEffects)    {},
+      [&] (GeneralEffects l)  {},
+      [&] (ReturnEffects l)   {},
+      [&] (ExitEffects l)     {},
+      [&] (CallEffects l)     {},
+      [&] (PureStore l)       {},
+      [&] (PureSpillFrame l)  {}
+    );
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1440,6 +1490,10 @@ void optimizeStores(IRUnit& unit) {
   }
   if (genv.needsReflow) {
     reflowTypes(genv.unit);
+  }
+
+  for (auto& block : poBlockList) {
+    load_store_optimize_block(block);
   }
 }
 

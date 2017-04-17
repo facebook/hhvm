@@ -76,6 +76,9 @@ struct Variant : private TypedValue {
   explicit Variant(NullInit) noexcept { m_type = KindOfNull; }
   explicit Variant(NoInit) noexcept {}
 
+  /* implicit */ Variant(nullptr_t) noexcept {
+    m_type = KindOfNull;
+  }
   /* implicit */ Variant(bool    v) noexcept {
     m_type = KindOfBoolean; m_data.num = v;
   }

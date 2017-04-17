@@ -1719,7 +1719,7 @@ class Redis {
         E_WARNING);
       return false;
     }
-    stream_set_blocking($this->connection, true);
+    stream_set_blocking($this->connection, 1);
     $this->setOption(Redis::OPT_READ_TIMEOUT, $timeout);
 
     return true;

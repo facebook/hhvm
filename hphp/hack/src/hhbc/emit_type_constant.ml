@@ -13,7 +13,7 @@ open Core
 module A = Ast
 module H = Hhbc_ast
 
-(* TODO: This list needs to be exhaustive *)
+(* Taken from: hphp/runtime/base/type-structure.h *)
 let get_kind p = Int64.of_int @@
   match p with
   | "void" -> 0
@@ -26,18 +26,22 @@ let get_kind p = Int64.of_int @@
   | "noreturn" -> 8
   | "arraykey" -> 7
   | "mixed" -> 9
+  | "tuple" -> 10
+  | "fun" -> 11
   | "array" -> 12
+  | "typevar" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
+  | "class" -> 15
+  | "interface" -> 16
+  | "trait" -> 17
+  | "enum" -> 18
   | "dict" -> 19
   | "vec" -> 20
   | "keyset" -> 21
-  | "Vector" | "ImmVector"
-  | "Set" | "ImmSet"
-  | "Map" | "ImmMap"
-  | "Pair"
-  | "tuple" -> 101
-  | "class_type_constant" -> 102
-  | _ -> 99999999 (* umm? *)
+  | "unresolved" -> 101
+  | "typeaccess" -> 102
+  | "xhp" -> 103
+  | s -> failwith @@ "Type constant: No such kind exists for: " ^ s
 
 let shape_field_name = function
   | A.SFlit ((_, s)) -> s, false
@@ -75,7 +79,7 @@ and hint_to_type_constant_list h =
     [H.String "kind"; H.Int (get_kind "shape");
      H.String "fields"; shape_info_to_instr_lit si]
   | A.Haccess ((_, s0), s1, sl) ->
-    [H.String "kind"; H.Int (get_kind "class_type_constant");
+    [H.String "kind"; H.Int (get_kind "typeaccess");
     H.String "root_name"; H.String s0;
     H.String "access_list"; type_constant_access_list @@ s1::sl]
   | _ -> [H.String "kind"; H.NYI "type_constants"]

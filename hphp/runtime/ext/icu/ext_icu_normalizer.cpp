@@ -43,7 +43,7 @@ static bool HHVM_STATIC_METHOD(Normalizer, isNormalized,
     return false;
   }
 
-  return ret;
+  return (ret == 1);
 }
 
 static Variant HHVM_STATIC_METHOD(Normalizer, normalize,

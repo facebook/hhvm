@@ -25,7 +25,7 @@ class Normalizer {
    * @param string $input - The input string to normalize
    * @param int $form - One of the normalization forms.
    *
-   * @return bool - TRUE if normalized, FALSE otherwise or if there an
+   * @return bool - TRUE if normalized, FALSE otherwise or if there is an
    *   error
    */
   <<__Native>>
@@ -55,7 +55,7 @@ class Normalizer {
  * @param string $input - The input string to normalize
  * @param int $form - One of the normalization forms.
  *
- * @return bool - TRUE if normalized, FALSE otherwise or if there an
+ * @return bool - TRUE if normalized, FALSE otherwise or if there is an
  *   error
  */
 function normalizer_is_normalized(string $input,

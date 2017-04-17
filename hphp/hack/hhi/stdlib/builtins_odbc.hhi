@@ -32,6 +32,6 @@ function odbc_fetch_array(resource $result, ?int $rownumber=0);
 
 function odbc_num_rows(?resource $result): int;
 
-function odbc_prepare(resource $connection_id, string $query_string): mixed;
+function odbc_prepare(resource $connection_id, string $query_string); // type ommitted, returns false on error
 
 function odbc_rollback(resource $connection_id): bool;

@@ -108,7 +108,11 @@ allocEntry(RingBufferType t) {
                                             std::memory_order_acq_rel));
   rb->m_seq = g_seqnum.fetch_add(1, std::memory_order_relaxed);
   rb->m_type = t;
+#ifdef _MSC_VER
+  rb->m_threadId = (uint32_t)((int64_t)pthread_getw32threadid_np(pthread_self()) & 0xFFFFFFFF);
+#else
   rb->m_threadId = (uint32_t)((int64_t)pthread_self() & 0xFFFFFFFF);
+#endif
   return rb;
 }
 

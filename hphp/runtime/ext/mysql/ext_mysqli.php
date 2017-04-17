@@ -882,7 +882,7 @@ class mysqli_driver {
  *          5.4.0  Iterator support was added, as mysqli_result now implements
  * Traversable.
  */
-class mysqli_result {
+class mysqli_result implements \Traversable {
 
   // Not typing this since we are setting it as a mixed to comply with
   // GitHub issue 2082. As it is, even with invariants and various ifs

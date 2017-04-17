@@ -52,6 +52,8 @@ if (ENABLE_ASYNC_MYSQL)
   set(MYSQL_CLIENT_LIBS
     ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
   )
+
+  add_definitions("-DENABLE_ASYNC_MYSQL=1")
 else()
   find_package(MySQL REQUIRED)
   link_directories(${MYSQL_LIB_DIR})

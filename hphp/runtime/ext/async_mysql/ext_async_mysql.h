@@ -17,6 +17,8 @@
 #ifndef incl_EXT_ASYNC_MYSQL_H_
 #define incl_EXT_ASYNC_MYSQL_H_
 
+#ifdef ENABLE_ASYNC_MYSQL
+
 #include <algorithm>
 #include <memory>
 
@@ -413,5 +415,7 @@ struct AsyncMysqlRowIterator {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif
 
 #endif // incl_EXT_ASYNC_MYSQL_H_

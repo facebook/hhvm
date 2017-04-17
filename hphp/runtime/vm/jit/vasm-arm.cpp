@@ -386,6 +386,7 @@ void Vgen::patch(Venv& env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const copy& i) {
+  if (i.s == i.d) return;
   if (i.s.isGP() && i.d.isGP()) {
     a->Mov(X(i.d), X(i.s));
   } else if (i.s.isSIMD() && i.d.isGP()) {

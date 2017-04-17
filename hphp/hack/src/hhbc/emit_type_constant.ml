@@ -14,7 +14,7 @@ module A = Ast
 module H = Hhbc_ast
 
 (* Taken from: hphp/runtime/base/type-structure.h *)
-let get_kind p = Int64.of_int @@
+let get_kind_num p = Int64.of_int @@
   match p with
   | "void" -> 0
   | "int" -> 1
@@ -101,21 +101,34 @@ and get_generic_types = function
   | [] -> []
   | l -> [H.String "generic_types"; hints_to_type_constant l]
 
+and get_kind s = [H.String "kind"; H.Int (get_kind_num s)]
+
 and hint_to_type_constant_list h =
   match snd h with
   | A.Happly ((_, s), l) ->
-    let kind = [H.String "kind"; H.Int (get_kind s)] in
+    let kind = get_kind s in
     let classname = resolve_classname s in
     let generic_types = get_generic_types l in
     kind @ classname @ generic_types
   | A.Hshape (si) ->
-    [H.String "kind"; H.Int (get_kind "shape");
-     H.String "fields"; shape_info_to_instr_lit si]
+    get_kind "shape" @ [H.String "fields"; shape_info_to_instr_lit si]
   | A.Haccess ((_, s0), s1, sl) ->
-    [H.String "kind"; H.Int (get_kind "typeaccess");
-     H.String "root_name"; H.String s0;
+    get_kind "typeaccess" @
+     [H.String "root_name"; H.String s0;
      H.String "access_list"; type_constant_access_list @@ s1::sl]
-  | _ -> [H.String "kind"; H.NYI "type_constants"]
+  | A.Hfun (hl, _b, h) ->
+    (* TODO: Bool indicates variadic argument. What to do? *)
+    let kind = get_kind "fun" in
+    let return_type = [H.String "return_type"; hint_to_type_constant h] in
+    let param_types = [H.String "param_types"; hints_to_type_constant hl] in
+    kind @ return_type @ param_types
+  | A.Hoption h ->
+    [H.String "nullable"; H.True] @ hint_to_type_constant_list h
+  | A.Htuple hl ->
+    let kind = get_kind "tuple" in
+    let elem_types = [H.String "elem_types"; hints_to_type_constant hl] in
+    kind @ elem_types
+  | A.Hsoft h -> hint_to_type_constant_list h
 
 and hint_to_type_constant h =
   let l = hint_to_type_constant_list h in

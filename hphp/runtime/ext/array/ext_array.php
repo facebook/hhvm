@@ -1282,7 +1282,7 @@ function uksort(mixed &$array, mixed $cmp_function): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
@@ -1296,7 +1296,7 @@ function natsort(mixed &$array): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>

@@ -294,13 +294,13 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     TypedValueAux tvaux;
     if (const_.isAbstract()) {
       tvWriteUninit(&tvaux);
-      tvaux.constModifiers().m_isAbstract = true;
+      tvaux.constModifiers().isAbstract = true;
     } else {
       tvCopy(const_.val(), tvaux);
-      tvaux.constModifiers().m_isAbstract = false;
+      tvaux.constModifiers().isAbstract = false;
     }
 
-    tvaux.constModifiers().m_isType = const_.isTypeconst();
+    tvaux.constModifiers().isType = const_.isTypeconst();
 
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,

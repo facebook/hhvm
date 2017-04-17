@@ -169,8 +169,8 @@ struct Class : AtomicCountable {
     LowStringPtr name;
     TypedValueAux val;
 
-    bool isAbstract() const { return val.constModifiers().m_isAbstract; }
-    bool isType()     const { return val.constModifiers().m_isType; }
+    bool isAbstract() const { return val.constModifiers().isAbstract; }
+    bool isType()     const { return val.constModifiers().isType; }
   };
 
   /*

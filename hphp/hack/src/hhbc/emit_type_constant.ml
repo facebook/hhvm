@@ -38,10 +38,30 @@ let get_kind p = Int64.of_int @@
   | "dict" -> 19
   | "vec" -> 20
   | "keyset" -> 21
-  | "unresolved" -> 101
   | "typeaccess" -> 102
   | "xhp" -> 103
-  | s -> failwith @@ "Type constant: No such kind exists for: " ^ s
+  | "unresolved"
+  | _ -> 101
+
+and in_HH_namespace = function
+  | "Vector" | "ImmVector"
+  | "Set" | "ImmSet"
+  | "Map" | "ImmMap"
+  | "Pair" -> true
+  | _ -> false
+
+and is_prim = function
+  | "void" | "int"
+  | "bool" | "float"
+  | "string" | "resource"
+  | "num" | "noreturn"
+  | "arraykey" | "mixed" -> true
+  | _ -> false
+
+and is_resolved_classname = function
+  | "array" | "vec"
+  | "dict" | "keyset" -> true
+  | _ -> false
 
 let shape_field_name = function
   | A.SFlit ((_, s)) -> s, false
@@ -71,17 +91,30 @@ and type_constant_access_list sl =
   in
   H.Array (List.length sl, List.concat l)
 
+and resolve_classname s =
+  if is_prim s || is_resolved_classname s then []
+  else
+    let classname = if in_HH_namespace s then "HH\\" ^ s else s in
+     [H.String "classname"; H.String classname]
+
+and get_generic_types = function
+  | [] -> []
+  | l -> [H.String "generic_types"; hints_to_type_constant l]
+
 and hint_to_type_constant_list h =
   match snd h with
-  | A.Happly ((_, s), []) ->
-    [H.String "kind"; H.Int (get_kind s)]
+  | A.Happly ((_, s), l) ->
+    let kind = [H.String "kind"; H.Int (get_kind s)] in
+    let classname = resolve_classname s in
+    let generic_types = get_generic_types l in
+    kind @ classname @ generic_types
   | A.Hshape (si) ->
     [H.String "kind"; H.Int (get_kind "shape");
      H.String "fields"; shape_info_to_instr_lit si]
   | A.Haccess ((_, s0), s1, sl) ->
     [H.String "kind"; H.Int (get_kind "typeaccess");
-    H.String "root_name"; H.String s0;
-    H.String "access_list"; type_constant_access_list @@ s1::sl]
+     H.String "root_name"; H.String s0;
+     H.String "access_list"; type_constant_access_list @@ s1::sl]
   | _ -> [H.String "kind"; H.NYI "type_constants"]
 
 and hint_to_type_constant h =
@@ -93,3 +126,10 @@ and hint_to_type_constant h =
     else failwith "hint_to_type_constant - odd length"
   in
   H.Array (count, l)
+
+and hints_to_type_constant l =
+  let l =
+    List.mapi l
+      ~f:(fun i h -> [H.Int (Int64.of_int i); hint_to_type_constant h])
+  in
+  H.Array (List.length l, List.concat l)

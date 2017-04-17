@@ -115,8 +115,14 @@ namespace fs = boost::filesystem;
 
 #define CHECK_SYSTEM_SILENT(exp)                          \
   if ((exp) != 0) {                                       \
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
-                    folly::errnoStr(errno).c_str());      \
+    std::string msg = folly::errnoStr(errno).c_str();     \
+    auto const ee = ExtendedException(msg);               \
+    auto fileAndLine = ee.getFileAndLine();               \
+    std::ostringstream os;                                \
+    os << __FUNCTION__ << ": " << msg                     \
+      << " in " << fileAndLine.first.c_str()              \
+      << " on line " << fileAndLine.second;               \
+    Logger::Verbose(os.str());                            \
     return false;                                         \
   }                                                       \
 
@@ -1052,28 +1058,6 @@ bool HHVM_FUNCTION(is_writable,
   }
   CHECK_SYSTEM_SILENT(accessSyscall(filename, W_OK));
   return true;
-  /*
-  int mask = S_IWOTH;
-  if (sb.st_uid == getuid()) {
-    mask = S_IWUSR;
-  } else if (sb.st_gid == getgid()) {
-    mask = S_IWGRP;
-  } else {
-    int groups = getgroups(0, NULL);
-    if (groups > 0) {
-      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
-      int n = getgroups(groups, gids);
-      for (int i = 0; i < n; i++) {
-        if (sb.st_gid == gids[i]) {
-          mask = S_IWGRP;
-          break;
-        }
-      }
-      free(gids);
-    }
-  }
-  return sb.st_mode & mask;
-  */
 }
 
 bool HHVM_FUNCTION(is_writeable,
@@ -1090,28 +1074,6 @@ bool HHVM_FUNCTION(is_readable,
   }
   CHECK_SYSTEM_SILENT(accessSyscall(filename, R_OK, true));
   return true;
-  /*
-  int mask = S_IROTH;
-  if (sb.st_uid == getuid()) {
-    mask = S_IRUSR;
-  } else if (sb.st_gid == getgid()) {
-    mask = S_IRGRP;
-  } else {
-    int groups = getgroups(0, NULL);
-    if (groups > 0) {
-      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
-      int n = getgroups(groups, gids);
-      for (int i = 0; i < n; i++) {
-        if (sb.st_gid == gids[i]) {
-          mask = S_IRGRP;
-          break;
-        }
-      }
-      free(gids);
-    }
-  }
-  return sb.st_mode & mask;
-  */
 }
 
 bool HHVM_FUNCTION(is_executable,
@@ -1122,28 +1084,6 @@ bool HHVM_FUNCTION(is_executable,
   }
   CHECK_SYSTEM_SILENT(accessSyscall(filename, X_OK));
   return true;
-  /*
-  int mask = S_IXOTH;
-  if (sb.st_uid == getuid()) {
-    mask = S_IXUSR;
-  } else if (sb.st_gid == getgid()) {
-    mask = S_IXGRP;
-  } else {
-    int groups = getgroups(0, NULL);
-    if (groups > 0) {
-      gid_t *gids = (gid_t *)malloc(groups * sizeof(gid_t));
-      int n = getgroups(groups, gids);
-      for (int i = 0; i < n; i++) {
-        if (sb.st_gid == gids[i]) {
-          mask = S_IXGRP;
-          break;
-        }
-      }
-      free(gids);
-    }
-  }
-  return (sb.st_mode & mask) && (sb.st_mode & S_IFMT) != S_IFDIR;
-  */
 }
 
 static VFileType lookupVirtualFile(const String& filename) {

@@ -1,6 +1,6 @@
 <?php
 
-date_default_timezone_set("America/Los_Angeles");
+date_default_timezone_set("PST8PDT");
 
 function format($dt) {
   var_dump(date_format($dt, "Y-m-d H:i:s"));

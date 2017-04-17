@@ -40,6 +40,7 @@ struct UrlFile : MemFile {
 
   void setProxy(const String& proxy_host, int proxy_port,
                 const String& proxy_user, const String& proxy_pass);
+  void setTimeout(int timeout) { m_timeout = timeout; }
   bool open(const String& filename, const String& mode) override;
   int64_t writeImpl(const char *buffer, int64_t length) override;
   bool seekable() override { return false; }

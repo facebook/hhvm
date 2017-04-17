@@ -79,7 +79,12 @@ struct member_lval {
         DataType& type();
 
   /*
-   * Get a pointer to the
+   * Get a pointer to the referenced TypedValue.
+   *
+   * The behavior is undefined if the base() does not actually store the value
+   * and type as a TypedValue.  Currently, this never happens.
+   *
+   * TODO(#9077255): Make it happen for monomorphic arrays.
    */
   TypedValue* tv() const;
 

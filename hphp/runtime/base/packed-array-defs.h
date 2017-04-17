@@ -17,7 +17,12 @@
 #define incl_HPHP_PACKED_ARRAY_DEFS_H_
 
 #include "hphp/runtime/base/packed-array.h"
+
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/cap-code.h"
+#include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
@@ -34,13 +39,6 @@ ALWAYS_INLINE
 TypedValue* packedData(const ArrayData* arr) {
   return const_cast<TypedValue*>(
     reinterpret_cast<const TypedValue*>(arr + 1)
-  );
-}
-
-ALWAYS_INLINE
-ArrayData* getArrayFromPackedData(const TypedValue* tv) {
-  return const_cast<ArrayData*>(
-    reinterpret_cast<const ArrayData*>(tv) - 1
   );
 }
 

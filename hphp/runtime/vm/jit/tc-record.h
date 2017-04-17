@@ -33,7 +33,6 @@ namespace jit {
 
 struct CGMeta;
 struct CodeCache;
-struct ProfTransRec;
 struct TransEnv;
 
 namespace tc {
@@ -78,7 +77,7 @@ void logTranslation(const TransEnv& env, const TransRange& range);
  * reclaimed.
  */
 void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      ProfTransRec* rec);
+                      bool profiled, int numArgs);
 
 /*
  * When a function is treadmilled its bytecode may no longer be available,

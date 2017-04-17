@@ -228,12 +228,6 @@ void processInit() {
   // Write an .eh_frame section that covers the whole TC.
   initUnwinder(g_code->base(), g_code->codeSize());
   Disasm::ExcludedAddressRange(g_code->base(), g_code->codeSize());
-
-  recycleInit();
-}
-
-void processExit() {
-  recycleStop();
 }
 
 bool isValidCodeAddress(TCA addr) {
@@ -354,7 +348,7 @@ OptView ThreadTCBuffer::view() {
 }
 
 bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
-  const auto numTrans = srcRec.numTrans();
+  const auto numTrans = srcRec.translations().size();
 
   // Optimized translations perform this check at relocation time to avoid
   // invalidating all of their SrcKeys early.
@@ -369,7 +363,6 @@ bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
   INC_TPC(max_trans);
 
   if (debug && Trace::moduleEnabled(Trace::mcg, 2)) {
-    auto srLock = srcRec.readlock();
     const auto& tns = srcRec.translations();
     TRACE(1, "Too many (%zd) translations: %s, BC offset %d\n",
           tns.size(), sk.unit()->filepath()->data(),

@@ -203,7 +203,6 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       FTRACE(3, "  - processing ProfPrologue w/ transId = {}\n", transId);
       const auto trec = pd->transRec(transId);
       assertx(trec->kind() == TransKind::ProfPrologue);
-      auto lock = trec->lockCallerList();
       addCallersCount(calleeTargetId, trec->mainCallers(),  totalCalls);
       addCallersCount(calleeTargetId, trec->guardCallers(), totalCalls);
       profCount += pd->transCounter(transId);
@@ -414,6 +413,10 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
 
   auto sr = tc::findSrcRec(args.sk);
   always_assert(sr);
+  bool locked = sr->tryLock();
+  SCOPE_EXIT {
+    if (locked) sr->freeLock();
+  };
   if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
@@ -458,7 +461,14 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
     return nullptr;
   }
 
-  const auto numTrans = sr->numTrans();
+  if (!locked) {
+    // Even though we knew above that we were going to skip doing another
+    // translation, we wait until we get the write lease, to avoid spinning
+    // through the tracelet guards again and again while another thread is
+    // writing to it.
+    return sr->getTopTranslation();
+  }
+  const auto numTrans = sr->translations().size();
   if (args.kind == TransKind::Profile) {
     if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
       always_assert(numTrans ==

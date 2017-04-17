@@ -107,7 +107,6 @@ bool addDbgGuards(const Unit* unit) {
       // race with deleting a Func. See task #2826313.
       if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = pair.second;
-      auto srLock = sr->writelock();
       if (sr->unitMd5() == unit->md5() &&
           !sr->hasDebuggerGuard() &&
           isSrcKeyInDbgBL(sk)) {

@@ -153,10 +153,12 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
 /*
  * SrcRec: record of translator output for a given source location.
  */
-struct SrcRec final {
-  SrcRec(TCA anchor, const Func* func)
-    : m_anchorTranslation(anchor)
-    , m_unitMd5(func->unit()->md5())
+struct SrcRec {
+  SrcRec()
+    : m_topTranslation(nullptr)
+    , m_anchorTranslation(nullptr)
+    , m_dbgBranchGuardSrc(nullptr)
+    , m_guard(0)
   {}
 
   /*
@@ -172,70 +174,71 @@ struct SrcRec final {
   }
 
   /*
-   * Returns the VM stack offset the translations in the SrcRec have, in
-   * situations where we need to and can know.
-   *
-   * Pre: this SrcRec is for a non-resumed SrcKey
-   */
-  FPInvOffset nonResumedSPOff() const;
-
-  /*
-   * Get the anchor translation for this SrcRec. If another thread holds the
-   * code lock it may update this address via relocate().
-   */
-  TCA getFallbackTranslation() const;
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  /*
    * The following functions are used during creation of new
    * translations or when inserting debug guards.  May only be called
-   * when holding the lock for this SrcRec.
+   * when holding the translator write lease.
    */
+  void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
+  TCA getFallbackTranslation() const;
+  void newTranslation(TransLoc newStart,
+                      GrowableVector<IncomingBranch>& inProgressTailBranches);
+  void replaceOldTranslations();
   void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
   bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
   const MD5& unitMd5() const { return m_unitMd5; }
-
-  const GrowableVector<IncomingBranch>& incomingBranches() const {
-    return m_incomingBranches;
-  }
 
   const GrowableVector<TransLoc>& translations() const {
     return m_translations;
   }
 
-  const GrowableVector<IncomingBranch>& tailFallbackJumps() const {
+  const GrowableVector<IncomingBranch>& tailFallbackJumps() {
     return m_tailFallbackJumps;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
   /*
-   * The following functions will implicitly acquire the lock for this SrcRec
+   * The anchor translation is a retranslate request for the current
+   * SrcKey that will continue the tracelet chain.
    */
-  void removeIncomingBranch(TCA toSmash);
-  void newTranslation(TransLoc newStart,
-                      GrowableVector<IncomingBranch>& inProgressTailBranches);
-  void replaceOldTranslations();
-  size_t numTrans() const {
-    auto srLock = readlock();
-    return translations().size();
+  void setAnchorTranslation(TCA anc) {
+    assertx(!m_anchorTranslation);
+    assertx(m_tailFallbackJumps.empty());
+    m_anchorTranslation = anc;
   }
 
   /*
-   * Relocate may override the anchor so the code lock must also be acquired
+   * Returns the VM stack offset the translations in the SrcRec have, in
+   * situations where we need to and can know.
+   *
+   * Pre: this SrcRec is for a non-resumed SrcKey
+   * Pre: setAnchorTranslation has been called
    */
+  FPInvOffset nonResumedSPOff() const;
+
+  const GrowableVector<IncomingBranch>& incomingBranches() const {
+    return m_incomingBranches;
+  }
+
   void relocate(RelocationInfo& rel);
 
-  //////////////////////////////////////////////////////////////////////////////
+  void removeIncomingBranch(TCA toSmash);
 
-  folly::SharedMutex::WriteHolder writelock() const {
-    return folly::SharedMutex::WriteHolder(m_lock);
+  /*
+   * There is an unlikely race in retranslate, where two threads
+   * could simultaneously generate the same translation for a
+   * tracelet. In practice it's almost impossible to hit this, unless
+   * Eval.JitRequireWriteLease is set. But when it is set, we hit
+   * it a lot.
+   * m_guard doesn't quite solve it, but its as good as things were
+   * before.
+   */
+  bool tryLock() {
+    uint32_t val = 0;
+    return m_guard.compare_exchange_strong(val, 1);
   }
 
-  folly::SharedMutex::ReadHolder readlock() const {
-    return folly::SharedMutex::ReadHolder(m_lock);
+  void freeLock() {
+    m_guard = 0;
   }
 
 private:
@@ -245,11 +248,11 @@ private:
   // This either points to the most recent translation in the
   // translations vector, or if hasDebuggerGuard() it points to the
   // debug guard.
-  AtomicLowTCA m_topTranslation{nullptr};
+  AtomicLowTCA m_topTranslation;
 
   /*
-   * The following members are all protected by the m_lock SharedMutex.
-   * They can only be read or written when the lock is held.
+   * The following members are all protected by the translator write
+   * lease.  They can only be read when the lease is held.
    */
 
   // We chain new translations onto the end of the list, so we need to
@@ -262,9 +265,8 @@ private:
   GrowableVector<IncomingBranch> m_incomingBranches;
   MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
-  LowTCA m_dbgBranchGuardSrc{nullptr};
-
-  mutable folly::SharedMutex m_lock;
+  LowTCA m_dbgBranchGuardSrc;
+  std::atomic<uint32_t> m_guard;
 };
 
 struct SrcDB {
@@ -299,10 +301,8 @@ struct SrcDB {
     return p ? *p : 0;
   }
 
-  SrcRec* insert(SrcKey sk, TCA anchor) {
-    return *m_map.insert(
-      sk.toAtomicInt(), new SrcRec(anchor, sk.func())
-    );
+  SrcRec* insert(SrcKey sk) {
+    return *m_map.insert(sk.toAtomicInt(), new SrcRec);
   }
 
 private:

@@ -33,7 +33,6 @@ static TransIDSet findPredTrans(TransID dstID, const ProfData* profData) {
   assertx(dstSR);
   TransIDSet predSet;
 
-  auto srLock = dstSR->readlock();
   for (auto& inBr : dstSR->incomingBranches()) {
     auto const srcID = profData->jmpTransID(inBr.toSmash());
     if (srcID == kInvalidTransID) continue;

@@ -202,41 +202,29 @@ struct ProfTransRec {
   /*
    * All calls in the TC which target this proflogue (directly|via the guard).
    *
-   * The vector can only be used while the caller list is locked.
-   *
    * Precondition: kind() == TransKind::ProfPrologue
    */
   const std::vector<TCA>& mainCallers() const {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
     return m_callers.main;
   }
   const std::vector<TCA>& guardCallers() const {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
     return m_callers.guard;
-  }
-  std::unique_lock<Mutex> lockCallerList() const {
-    assertx(m_kind == TransKind::ProfPrologue);
-    return std::unique_lock<Mutex>{m_callers.lock};
   }
 
   /*
    * (Record|Erase) a call at address caller (directly|via the guard) to this
    * proflogue.
    *
-   * These functions may only be called when the caller list is locked.
-   *
    * Precondition: kind() == TransKind::ProfPrologue
    */
   void addMainCaller(TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
     m_callers.main.emplace_back(caller);
   }
   void addGuardCaller(TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
     m_callers.guard.emplace_back(caller);
   }
   void removeMainCaller(TCA caller) { removeCaller(m_callers.main, caller); }
@@ -245,13 +233,10 @@ struct ProfTransRec {
   /*
    * Erase the record of all calls to this proflogue.
    *
-   * This function may only be called when the caller list is locked.
-   *
    * Precondition: kind() == TransKind::ProfPrologue
    */
   void clearAllCallers() {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
     m_callers.main.clear();
     m_callers.guard.clear();
   }
@@ -259,12 +244,10 @@ private:
   struct CallerRec {
     std::vector<TCA> main;
     std::vector<TCA> guard;
-    mutable Mutex lock;
   };
 
   void removeCaller(std::vector<TCA>& v, TCA caller) {
     assertx(m_kind == TransKind::ProfPrologue);
-    m_callers.lock.assertOwnedBySelf();
     auto pos = std::find(v.begin(), v.end(), caller);
     if (pos != v.end()) v.erase(pos);
   }

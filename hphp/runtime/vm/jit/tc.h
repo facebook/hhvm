@@ -247,12 +247,6 @@ ALWAYS_INLINE const UniqueStubs& ustubs() {
  */
 void processInit();
 
-/*
- * Perform process shutdown functions for the TC including joining any
- * outstanding background threads.
- */
-void processExit();
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

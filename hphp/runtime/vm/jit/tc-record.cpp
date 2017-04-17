@@ -60,7 +60,6 @@ void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
                               CGMeta& fixups) {
   if (!RuntimeOption::EvalPerfRelocate) return;
 
-  auto srLock = srcRec.readlock();
   recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
                      loc.coldCodeStart(), loc.coldEnd(),
                      sk, -1,

@@ -440,8 +440,6 @@ void HHVM_FUNCTION(srand, const Variant& seed /* = uninit_variant */) {
   }
   if (seed.isNumeric(true)) {
     randinit(seed.toInt32());
-  } else {
-    raise_warning("srand() expects parameter 1 to be long");
   }
 }
 
@@ -482,8 +480,6 @@ void HHVM_FUNCTION(mt_srand,
   }
   if (seed.isNumeric(true)) {
     math_mt_srand(seed.toInt32());
-  } else {
-    raise_warning("mt_srand() expects parameter 1 to be long");
   }
 }
 

@@ -1012,6 +1012,55 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBVPX_LIBRARIES})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBVPX")
     endif()
+  elseif (${libraryName} STREQUAL "mysql")
+    # mysql checks - if we're using async mysql, we use webscalesqlclient from
+    # third-party/ instead
+    if (ENABLE_ASYNC_MYSQL)
+      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
+      # Unlike the .so, the static library intentionally does not link against
+      # yassl, despite building it :/
+      set(MYSQL_CLIENT_LIBS
+        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
+        ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/libyassl.a
+        ${MYSQL_CLIENT_LIB_DIR}/extra/yassl/taocrypt/libtaocrypt.a
+      )
+
+      if (${addPaths})
+        include_directories(
+          ${TP_DIR}/re2/src/
+          ${TP_DIR}/squangle/src/
+          ${TP_DIR}/webscalesqlclient/src/include/
+        )
+        add_definitions("-DENABLE_ASYNC_MYSQL=1")
+      endif()
+    else()
+      find_package(MySQL ${requiredVersion})
+      if (NOT MYSQL_LIB_DIR OR NOT MYSQL_INCLUDE_DIR OR NOT MYSQL_CLIENT_LIBS)
+        HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+        return()
+      endif()
+
+      if (${addPaths})
+        link_directories(${MYSQL_LIB_DIR})
+        include_directories(${MYSQL_INCLUDE_DIR})
+      endif()
+    endif()
+
+    MYSQL_SOCKET_SEARCH()
+    if (MYSQL_UNIX_SOCK_ADDR)
+      if (${addPaths})
+        add_definitions("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
+      endif()
+    elseif (NOT ${addPaths})
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    else()
+      message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
+    endif()
+
+    if (${addPaths})
+      link_libraries(${MYSQL_CLIENT_LIBS})
+    endif()
   elseif (${libraryName} STREQUAL "xml2")
     find_package(LibXml2 ${requiredVersion})
     if (NOT LIBXML2_INCLUDE_DIR OR NOT LIBXML2_LIBRARIES)

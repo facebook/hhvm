@@ -1069,7 +1069,14 @@ let rec transform node =
      * XHPBody instead of trailing trivia for the open tag.
      *
      * To deal with this we remove the body's leading trivia, split it after the
-     * first newline, and treat the first half as trailing trivia.
+     * first newline, and treat the first half as trailing trivia. We don't use
+     * transform_xhp_leading_trivia because we want the split after the
+     * XHPOpen's trailing trivia to be optional, so that small XHPExpressions
+     * can be joined onto one line.
+     *
+     * BracedExpressions and XHPComments don't have trailing trivia either, so
+     * we keep track of whether the previous token had trailing trivia so we can
+     * handle the next token's leading trivia appropriately.
      *)
     let handle_xhp_body body =
       match syntax body with
@@ -1085,7 +1092,6 @@ let rec transform node =
             )
         in
         Fmt [
-          Split;
           transform_trailing_trivia up_to_first_newline;
           Split;
           transform_leading_trivia after_newline;
@@ -1099,14 +1105,11 @@ let rec transform node =
                   else transform_xhp_leading_trivia leading;
                 t node;
               ] in
-              begin match syntax node with
-                | XHPExpression _ ->
-                  prev_token_had_trailing_trivia := true
-                | Token t ->
-                  prev_token_had_trailing_trivia :=
-                    EditableToken.kind t = EditableToken.TokenKind.XHPBody
-                | _ ->
-                  prev_token_had_trailing_trivia := false
+              let open EditableToken in
+              prev_token_had_trailing_trivia := begin match syntax node with
+                | BracedExpression _ -> false
+                | Token t when kind t = TokenKind.XHPComment -> false
+                | _ -> true
               end;
               result
             end;
@@ -1121,9 +1124,8 @@ let rec transform node =
             match syntax node with
             | XHPExpression _ ->
               if has_trailing_whitespace then space_split () else Split
-            | Token _ ->
-              if has_trailing_newline then Newline
-              else if has_trailing_whitespace then Space else Nothing
+            | Token _ when has_trailing_newline ->
+              Newline
             | _ ->
               if has_trailing_whitespace then Space else Nothing
           ]))
@@ -1136,14 +1138,14 @@ let rec transform node =
       Nest [
         handle_xhp_body body
       ];
-      when_present close (fun () -> Fmt [
-        Split;
+      when_present close (fun () ->
         let leading, close = remove_leading_trivia close in Fmt [
           (* Ignore extra newlines by treating this as trailing trivia *)
           ignore_trailing_invisibles leading;
+          Split;
           t close;
         ]
-      ]);
+      );
     ])
   | VarrayTypeSpecifier x ->
     let (kw, left_a, varray_type, _, right_a) =

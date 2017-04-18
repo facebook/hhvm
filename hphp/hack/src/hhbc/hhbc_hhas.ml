@@ -664,7 +664,34 @@ and shape_field_name_to_expr = function
   | A.SFlit (pos, s)
   | A.SFclass_const (_, (pos, s)) -> (pos, A.String (pos, s))
 
+and string_of_bop = function
+  | A.Plus -> "+"
+  | A.Minus -> "-"
+  | A.Star -> "*"
+  | A.Slash -> "/"
+  | A.Eqeq -> "=="
+  | A.EQeqeq -> "==="
+  | A.Starstar -> "**"
+  | A.Eq None -> "="
+  | A.Eq (Some bop) -> "=" ^ string_of_bop bop
+  | A.AMpamp -> "&&"
+  | A.BArbar -> "||"
+  | A.Lt -> "<"
+  | A.Lte -> "<="
+  | A.Gt -> ">"
+  | A.Gte -> ">="
+  | A.Dot -> "."
+  | A.Amp -> "&"
+  | A.Bar -> "|"
+  | A.Ltlt -> "<<"
+  | A.Gtgt -> ">>"
+  | A.Percent -> "%"
+  | A.Xor -> "^"
+  | A.Diff -> "!="
+  | A.Diff2 -> "!=="
+
 and string_of_param_default_value expr =
+  let expr = Ast_constant_folder.fold_expr expr in
   match snd expr with
   | A.Lvar (_, litstr)
   | A.Float (_, litstr)
@@ -689,6 +716,11 @@ and string_of_param_default_value expr =
         fl
     in
     string_of_param_default_value (fst expr, A.Array fl)
+  | A.Binop (bop, e1, e2) ->
+    let bop = string_of_bop bop in
+    let e1 = string_of_param_default_value e1 in
+    let e2 = string_of_param_default_value e2 in
+    e1 ^ " " ^ bop ^ " " ^ e2
   (* TODO: printing for other expressions *)
   | _ -> "string_of_param_default_value - NYI"
 

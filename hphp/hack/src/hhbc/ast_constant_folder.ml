@@ -93,6 +93,8 @@ object (self)
   method on_GotoLabel _ parent _ = parent
 end
 
+let fold_expr e =
+  folder_visitor#on_expr () e
 let fold_function fd =
   folder_visitor#on_fun_ () fd
 let fold_method md =

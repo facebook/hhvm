@@ -606,7 +606,7 @@ function str_repeat(string $input, int $multiplier): string;
  */
 <<__Native>>
 function html_entity_decode(string $str,
-                            int $quote_style = ENT_COMPAT,
+                            int $quote_style = ENT_COMPAT | ENT_HTML401,
                             string $charset = "UTF-8"): string;
 
 /**

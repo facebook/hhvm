@@ -11,6 +11,7 @@ $tests = array(
     "&#x0E;",
     "&#x1F;",
     "&#x20;", //allowed always
+    "&#x27;", //single quote, depends on flags
     "&#x7F;", //DEL
     "&#x80;", //C1
     "&#x9F;",
@@ -66,6 +67,17 @@ echo "\n*** XML 1.0  ***\n";
 
 foreach ($tests as $t) {
     $dec = html_entity_decode($t, ENT_QUOTES | ENT_XML1, "UTF-8");
+    if ($t == $dec) {
+        echo "$t\tNOT DECODED\n";
+    } else {
+        echo "$t\tDECODED\n";
+    }
+}
+
+echo "\n*** Default options ***\n";
+
+foreach ($tests as $t) {
+    $dec = html_entity_decode($t);
     if ($t == $dec) {
         echo "$t\tNOT DECODED\n";
     } else {

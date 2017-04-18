@@ -31,9 +31,18 @@ type options = {
 (* Debug info refs *)
 (*****************************************************************************)
 
-let parsing_t = ref 0.0
-let codegen_t = ref 0.0
-let printing_t = ref 0.0
+type debug_time = {
+  parsing_t: float ref;
+  codegen_t: float ref;
+  printing_t: float ref;
+}
+
+let new_debug_time () =
+{
+  parsing_t = ref 0.0;
+  codegen_t = ref 0.0;
+  printing_t = ref 0.0;
+}
 
 (*****************************************************************************)
 (* Helpers *)
@@ -191,12 +200,13 @@ let add_to_time_ref r t0 =
   r := !r +. (t -. t0);
   t
 
-let print_debug_time_info () =
-  Printf.fprintf stderr "Parsing: %0.3f s\n" !parsing_t;
-  Printf.fprintf stderr "Codegen: %0.3f s\n" !codegen_t;
-  Printf.fprintf stderr "Printing: %0.3f s\n" !printing_t
+let print_debug_time_info filename debug_time =
+  Printf.fprintf stderr "File %s:\n" (Relative_path.to_absolute filename);
+  Printf.fprintf stderr "Parsing: %0.3f s\n" !(debug_time.parsing_t);
+  Printf.fprintf stderr "Codegen: %0.3f s\n" !(debug_time.codegen_t);
+  Printf.fprintf stderr "Printing: %0.3f s\n" !(debug_time.printing_t)
 
-let do_compile compiler_options opts files_info = begin
+let do_compile filename compiler_options opts files_info debug_time = begin
   let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
   let get_nast_from_fileinfo tcopt fn fileinfo =
     (* Functions *)
@@ -224,12 +234,12 @@ let do_compile compiler_options opts files_info = begin
   let f_fold fn fileinfo text = begin
     let t = Unix.gettimeofday () in
     let ast = get_nast_from_fileinfo opts fn fileinfo in
-    let t = add_to_time_ref parsing_t t in
+    let t = add_to_time_ref debug_time.parsing_t t in
     let options = Hhbc_options.get_options_from_config
       compiler_options.config in
     Emit_expression.set_compiler_options options;
     let hhas_prog = Hhas_program.from_ast ast in
-    let t = add_to_time_ref codegen_t t in
+    let t = add_to_time_ref debug_time.codegen_t t in
     let hhas_text = Hhbc_hhas.to_string hhas_prog in
     let text =
       if compiler_options.fallback && Str.string_match nyi_regexp hhas_text 0
@@ -237,28 +247,72 @@ let do_compile compiler_options opts files_info = begin
         hhvm_unix_call compiler_options.config (Relative_path.to_absolute fn)
       else text ^ hhas_text
     in
-    ignore @@ add_to_time_ref printing_t t;
+    ignore @@ add_to_time_ref debug_time.printing_t t;
     text
   end in
   let hhas_text = Relative_path.Map.fold files_info ~f:f_fold ~init:"" in
-  if compiler_options.debug_time then print_debug_time_info ();
-  Printf.printf "%s" hhas_text
+  if compiler_options.debug_time then print_debug_time_info filename debug_time;
+  hhas_text
 end
 
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
+let process_single_file compiler_options popt tcopt filename outputfile =
+  try
+    let t = Unix.gettimeofday () in
+    let files_contents = file_to_files filename in
+    let _, files_info, _ = parse_name compiler_options popt files_contents in
+    let debug_time = new_debug_time() in
+    ignore @@ add_to_time_ref debug_time.parsing_t t;
+    let text =
+      do_compile filename compiler_options tcopt files_info debug_time in
+    match outputfile with
+    | None -> Printf.printf "%s" text
+    | Some outputfile -> Sys_utils.write_file ~file:outputfile text
+  with e ->
+    let f = Relative_path.to_absolute filename in
+    Printf.fprintf stderr "Error in file %s: %s\n" f (Printexc.to_string e)
+
+let compile_files_recursively dir f =
+  let rec loop dirs = begin
+    match dirs with
+    | [] -> ()
+    | dir::dirs ->
+      let compile_file = fun p ->
+        if Filename.check_suffix p ".php" then
+          let outputfile =
+            let f = Filename.chop_suffix p ".php" in
+            f ^ ".hhas"
+          in
+          if Sys.file_exists outputfile then
+            Printf.fprintf stderr "Output file %s already exists\n" outputfile
+          else begin
+            f (Relative_path.create Relative_path.Dummy p) (Some outputfile)
+          end
+      in
+      let ds, fs =
+        Sys.readdir dir
+        |> Array.map (Filename.concat dir)
+        |> Array.to_list
+        |> List.partition_tf ~f: Sys.is_directory
+      in
+      List.iter fs compile_file;
+      loop (ds @ dirs)
+  end
+  in loop [dir]
+
 let decl_and_run_mode compiler_options popt tcopt =
   Local_id.track_names := true;
   Ident.track_names := true;
-  let t = Unix.gettimeofday () in
-  let filename =
-    Relative_path.create Relative_path.Dummy compiler_options.filename in
-  let files_contents = file_to_files filename in
-  let _, files_info, _ = parse_name compiler_options popt files_contents in
-  ignore @@ add_to_time_ref parsing_t t;
-  do_compile compiler_options tcopt files_info
+  let process_single_file = process_single_file compiler_options popt tcopt in
+  if Sys.is_directory compiler_options.filename then
+    compile_files_recursively compiler_options.filename process_single_file
+  else
+    let filename =
+      Relative_path.create Relative_path.Dummy compiler_options.filename in
+    process_single_file filename None
 
 let main_hack opts =
   let popt = ParserOptions.default in

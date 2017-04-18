@@ -39,14 +39,31 @@ struct default_ptr {
   /* implicit */ default_ptr(T* p) : m_p{p ? p : fallback()} {}
 
   /*
+   * Thread-safe allocation.
+   */
+  T* ensureAllocated() {
+    if (auto p = raw()) return p;
+    auto ptr = new T();
+    T* expected = fallback();
+    if (!m_p.compare_exchange_strong(
+          expected, ptr, std::memory_order_relaxed)) {
+      // Already set by someone else, use theirs.
+      delete ptr;
+      return expected;
+    } else {
+      return ptr;
+    }
+  }
+
+  /*
    * Assignments.
    */
   default_ptr& operator=(std::nullptr_t p) {
-    m_p = fallback();
+    m_p.store(fallback(), std::memory_order_relaxed);
     return *this;
   }
   default_ptr& operator=(T* p) {
-    m_p = p ? p : fallback();
+    m_p.store(p ? p : fallback(), std::memory_order_relaxed);
     return *this;
   }
 
@@ -54,7 +71,7 @@ struct default_ptr {
    * Observers.
    */
   const T* get() const {
-    return m_p;
+    return m_p.load(std::memory_order_relaxed);
   }
   const T& operator*() const {
     return *get();
@@ -64,7 +81,8 @@ struct default_ptr {
   }
 
   T* raw() const {
-    return m_p == &s_default ? nullptr : m_p;
+    auto p = m_p.load(std::memory_order_relaxed);
+    return p == &s_default ? nullptr : p;
   }
   explicit operator bool() const {
     return raw();
@@ -86,7 +104,7 @@ private:
   }
 
 private:
-  T* m_p{const_cast<T*>(&s_default)};
+  std::atomic<T*> m_p{const_cast<T*>(&s_default)};
   static const T s_default;
 };
 

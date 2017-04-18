@@ -25,6 +25,15 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+// Values in the TBB map that contain the enum static arrays
+struct EnumValues {
+  // array from 'enum name' to 'enum value'
+  // e.g. [ 'RED' => 1, 'BLUE' =>2, ...]
+  Array values;
+  // array from 'enum value' to 'enum name'
+  // e.g. [ 1 => 'RED', 2 => 'BLUE', ...]
+  Array names;
+};
 
 struct EnumCache {
   EnumCache() {}
@@ -43,16 +52,6 @@ struct EnumCache {
       assert(key);
       return static_cast<size_t>(hash_int64(key));
     }
-  };
-
-  // Values in the TBB map that contain the enum static arrays
-  struct EnumValues {
-    // array from 'enum name' to 'enum value'
-    // e.g. [ 'RED' => 1, 'BLUE' =>2, ...]
-    Array values;
-    // array from 'enum value' to 'enum name'
-    // e.g. [ 1 => 'RED', 2 => 'BLUE', ...]
-    Array names;
   };
 
   // if the class provided derives from Enum the name/value and value/name
@@ -110,7 +109,9 @@ private:
     intptr_t,
     const EnumValues*>;
 
+  // Persistent values, recursive case. Non-recursive are cached in Class.
   EnumValuesMap m_enumValuesMap;
+
   rds::Link<ReqEnumValuesMap*,true /* normal_only */>
     m_nonScalarEnumValuesMap{rds::kInvalidHandle};
 };

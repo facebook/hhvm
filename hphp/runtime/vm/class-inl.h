@@ -428,6 +428,10 @@ inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;
 }
 
+inline EnumValues* Class::getEnumValues() const {
+  return m_extra->m_enumValues.load(std::memory_order_relaxed);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ExtraData.
 

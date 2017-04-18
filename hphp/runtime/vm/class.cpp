@@ -365,6 +365,23 @@ Class* Class::rescope(Class* ctx, Attr attrs /* = AttrNone */) {
   return fermeture.get();
 }
 
+EnumValues* Class::setEnumValues(EnumValues* values) {
+  auto extra = m_extra.ensureAllocated();
+  EnumValues* expected = nullptr;
+  if (!extra->m_enumValues.compare_exchange_strong(
+        expected, values, std::memory_order_relaxed)) {
+    // Already set by someone else, use theirs.
+    delete values;
+    return expected;
+  } else {
+    return values;
+  }
+}
+
+Class::ExtraData::~ExtraData() {
+  delete m_enumValues.load(std::memory_order_relaxed);
+}
+
 void Class::destroy() {
   /*
    * If we were never put on NamedEntity::classList, or

@@ -40,11 +40,12 @@ struct String;
 
 /*
  * StringData* comparison for AtomicHashMap entries, where -1, -2, and -3 are
- * used as magic values.
+ * used as magic values. Optimized for comparisons between static strings.
  */
 struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return int64_t(s1) > 0 && s1->isame(s2);
+    assert(int64_t(s2) > 0);  // RHS is never a magic value.
+    return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };
 

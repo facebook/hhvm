@@ -947,13 +947,11 @@ struct Variant : private TypedValue {
    * KindOfUninit into KindOfNull.
    */
   Cell asInitCellTmp() const {
-    TypedValue tv = *this;
-    if (UNLIKELY(tv.m_type == KindOfRef)) {
-      tv.m_data = tv.m_data.pref->tv()->m_data;
-      return tv;
+    if (UNLIKELY(m_type == KindOfRef)) {
+      return *m_data.pref->tv();
     }
-    if (tv.m_type == KindOfUninit) tv.m_type = KindOfNull;
-    return tv;
+    if (m_type == KindOfUninit) return make_tv<KindOfNull>();
+    return *this;
   }
 
   /*

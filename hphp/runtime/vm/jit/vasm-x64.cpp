@@ -184,6 +184,7 @@ struct Vgen {
   void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
   void emit(const loadb& i) { a.loadb(i.s, i.d); }
   void emit(const loadw& i) { a.loadw(i.s, i.d); }
+  void emit(const loadtql& i) { a.loadl(i.s, i.d); }
   void emit(const loadl& i) { a.loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
   void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }

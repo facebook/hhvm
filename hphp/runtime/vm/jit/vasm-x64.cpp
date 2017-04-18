@@ -54,6 +54,9 @@ namespace x64 { struct ImmFolder; }
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
+static_assert(folly::kIsLittleEndian,
+  "Code contains little-endian specific optimizations.");
+
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)

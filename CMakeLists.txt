@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12 FATAL_ERROR)
 
 # This needs to be done before any languages are enabled or
 # projects are created.

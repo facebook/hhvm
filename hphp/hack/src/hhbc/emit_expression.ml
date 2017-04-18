@@ -33,6 +33,9 @@ module LValOp = struct
   | Unset
 end
 
+let special_functions =
+  ["isset"; "empty"; "tuple"; "idx"; "hphp_array_idx"]
+
 (* Context for a complete method body. It would be more elegant to pass this
  * around in an environment parameter. Alternatively, transform the AST before
  * codegen in order to resolve $this properly. *)
@@ -156,7 +159,7 @@ let get_queryMOpMode op =
 let is_special_function e =
   match e with
   | (_, A.Id(_, x))
-    when x = "isset" || x = "empty" || x = "tuple" -> true
+    when List.mem special_functions x -> true
   | _ -> false
 
 let is_local_this id =
@@ -635,6 +638,18 @@ and emit_exit expr =
     instr_exit;
   ]
 
+and is_valid_idx ~is_array es =
+  let n = List.length es in
+  if is_array then n = 3 else n = 2 || n = 3
+
+and emit_idx ~is_array es =
+  let default = if List.length es = 2 then instr_null else empty in
+  gather [
+    from_exprs es;
+    default;
+    if is_array then instr_array_idx else instr_idx;
+  ]
+
 and from_expr expr =
   (* Note that this takes an Ast.expr, not a Nast.expr. *)
   match snd expr with
@@ -671,6 +686,10 @@ and from_expr expr =
   | A.Call ((_, A.Id (_, "empty")), [expr], []) ->
     emit_call_empty_expr expr
   | A.Call ((p, A.Id (_, "tuple")), es, _) -> emit_tuple p es
+  | A.Call ((_, A.Id (_, "idx")), es, _) when is_valid_idx ~is_array:false es ->
+    emit_idx ~is_array:false es
+  | A.Call ((_, A.Id (_, "hphp_array_idx")), es, _)
+    when is_valid_idx ~is_array:true es -> emit_idx ~is_array:true es
   | A.Call _ -> emit_call_expr expr
   | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
   | A.Array es -> emit_collection expr es

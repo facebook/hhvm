@@ -164,6 +164,8 @@ let instr_static_loc_init name =
   instr (IMisc (StaticLocInit (Local.Named name, strip_dollar name)))
 
 let instr_exit = instr (IOp Hhbc_ast.Exit)
+let instr_idx = instr (IMisc Idx)
+let instr_array_idx = instr (IMisc ArrayIdx)
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

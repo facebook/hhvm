@@ -493,6 +493,8 @@ let string_of_misc instruction =
     | MaybeMemoType -> "MaybeMemoType"
     | CreateCl (n, cid) ->
       sep ["CreateCl"; string_of_int n; string_of_int cid]
+    | Idx -> "Idx"
+    | ArrayIdx -> "ArrayIdx"
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =

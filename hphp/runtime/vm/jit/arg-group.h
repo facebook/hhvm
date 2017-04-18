@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_JIT_ARG_GROUP_H
 #define incl_HPHP_JIT_ARG_GROUP_H
 
+#include "hphp/runtime/base/arch.h"
+
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"

@@ -32,7 +32,7 @@ struct default_ptr {
   /*
    * Constructors.
    */
-  default_ptr() = default;
+  default_ptr() : m_p{fallback()} {}
 
   /* implicit */ default_ptr(std::nullptr_t) {}
 

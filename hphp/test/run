@@ -1852,8 +1852,14 @@ function run_config_post($outputs, $test, $options) {
     return 'skip';
   }
   if (!$passed) {
-    file_put_contents("$test.diff",
-                      generate_diff($wanted_re, $wanted_re, $output));
+    $diff = generate_diff($wanted_re, $wanted_re, $output);
+    if ($passed === false && $diff === "") {
+      // the preg match failed, probably because the regex was too complex,
+      // but since the line by line diff came up empty, we're fine
+      $passed = 1;
+    } else {
+      file_put_contents("$test.diff", $diff);
+    }
   }
   return $passed;
 }

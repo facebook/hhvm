@@ -11149,21 +11149,22 @@ static void addEmitterWorker(AnalysisResultPtr ar, StatementPtr sp,
 
 static void
 commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
-  auto gd                     = Repo::GlobalData{};
-  gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
-  gd.HardTypeHints            = HHBBC::options.HardTypeHints;
-  gd.HardReturnTypeHints      = HHBBC::options.HardReturnTypeHints;
-  gd.ElideAutoloadInvokes     = HHBBC::options.ElideAutoloadInvokes;
-  gd.UsedHHBBC                = Option::UseHHBBC;
-  gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
-  gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
-  gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
-  gd.PHP7_Builtins            = RuntimeOption::PHP7_Builtins;
-  gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
-  gd.HardPrivatePropInference = true;
-  gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
-  gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
-  gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
+  auto gd                       = Repo::GlobalData{};
+  gd.UsedHHBBC                  = Option::UseHHBBC;
+  gd.EnableHipHopSyntax         = RuntimeOption::EnableHipHopSyntax;
+  gd.HardTypeHints              = HHBBC::options.HardTypeHints;
+  gd.HardReturnTypeHints        = HHBBC::options.HardReturnTypeHints;
+  gd.HardPrivatePropInference   = true;
+  gd.DisallowDynamicVarEnvFuncs = HHBBC::options.DisallowDynamicVarEnvFuncs;
+  gd.ElideAutoloadInvokes       = HHBBC::options.ElideAutoloadInvokes;
+  gd.PHP7_IntSemantics          = RuntimeOption::PHP7_IntSemantics;
+  gd.PHP7_ScalarTypes           = RuntimeOption::PHP7_ScalarTypes;
+  gd.PHP7_Substr                = RuntimeOption::PHP7_Substr;
+  gd.PHP7_Builtins              = RuntimeOption::PHP7_Builtins;
+  gd.AutoprimeGenerators        = RuntimeOption::AutoprimeGenerators;
+  gd.PromoteEmptyObject         = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction       = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices       = RuntimeOption::EvalHackArrCompatNotices;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

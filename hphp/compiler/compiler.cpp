@@ -494,7 +494,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Option::ParseTimeOpts = false;
   }
 
-  initialize_hhbbc_options();
+  HHBBC::options.DisallowDynamicVarEnvFuncs =
+    (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 
   return 0;
 }

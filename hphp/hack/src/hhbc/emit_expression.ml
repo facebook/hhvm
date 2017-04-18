@@ -342,6 +342,21 @@ and emit_aget class_expr =
       instr_clsrefgetc;
     ]
 
+and rename_id_if_namespaced s = match String.lowercase_ascii s with
+  | "vector" -> "HH\\Vector"
+  | "immvector" -> "HH\\ImmVector"
+  | "set" -> "HH\\Set"
+  | "immset" -> "HH\\ImmSet"
+  | "map" -> "HH\\Map"
+  | "immmap" -> "HH\\ImmMap"
+  | "pair" -> "HH\\Pair"
+  | "vec" -> "HH\\vec"
+  | "keyset" -> "HH\\keyset"
+  | "dict" -> "HH\\dict"
+  | "varray" -> "HH\\varray"
+  | "darray" -> "HH\\darray"
+  | _ -> s
+
 and emit_new class_expr args uargs =
   let nargs = List.length args + List.length uargs in
   match class_expr with
@@ -353,6 +368,7 @@ and emit_new class_expr args uargs =
       instr_popr
     ]
   | _, A.Id (_, id) ->
+    let id = rename_id_if_namespaced id in
     gather [
       instr_fpushctord nargs id;
       emit_args_and_call args uargs;

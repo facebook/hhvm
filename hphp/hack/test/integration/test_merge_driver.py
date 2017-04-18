@@ -25,10 +25,11 @@ class MergeDriverTests(common_tests.CommonTestDriver, unittest.TestCase):
 
     def write_local_conf(self, watchman_subscribe=True):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
+            watchman_subscribe_str = "watchman_subscribe_v2 = "
             if watchman_subscribe:
-                watchman_subscribe_str = "watchman_subscribe = true"
+                watchman_subscribe_str += "true"
             else:
-                watchman_subscribe_str = "watchman_subscribe = false"
+                watchman_subscribe_str += "false"
             f.write(
                 r"""
 # some comment

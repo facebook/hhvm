@@ -13,7 +13,7 @@ import unittest
 import common_tests
 import hierarchy_tests
 
-from hh_paths import hh_server, hh_client
+from hh_paths import hh_client
 
 from mini_state_test_driver import MiniStateTestDriver
 
@@ -29,7 +29,7 @@ class LazyInitTestDriver(MiniStateTestDriver):
 # some comment
 use_mini_state = true
 use_watchman = true
-watchman_subscribe = true
+watchman_subscribe_v2 = true
 lazy_decl = true
 lazy_parse = true
 lazy_init = true

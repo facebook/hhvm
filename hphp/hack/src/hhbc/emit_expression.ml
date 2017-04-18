@@ -250,6 +250,7 @@ and emit_binop op e1 e2 =
 and emit_instanceof e1 e2 =
   match (e1, e2) with
   | (_, (_, A.Id (_, id))) ->
+    let id = rename_id_if_namespaced id in
     gather [
       from_expr e1;
       instr_instanceofd id ]

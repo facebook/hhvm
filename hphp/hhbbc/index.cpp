@@ -2023,9 +2023,33 @@ Index::lookup_closures(borrowed_ptr<const php::Class> cls) const {
 
 //////////////////////////////////////////////////////////////////////
 
+res::Class Index::resolve_class(borrowed_ptr<const php::Class> cls) const {
+
+  ClassInfo* result = nullptr;
+
+  auto const classes = find_range(m_data->classInfo, cls->name);
+  for (auto it = begin(classes); it != end(classes); ++it) {
+    auto const cinfo = it->second;
+    if (cinfo->cls == cls) {
+      if (result) {
+        result = nullptr;
+        break;
+      }
+      result = cinfo;
+    }
+  }
+  if (result) return res::Class { this, result };
+
+  // We know its a class, not an enum or type alias, so return
+  // by name
+  return res::Class { this, cls->name.get() };
+}
+
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
                                                  SString clsName) const {
   clsName = normalizeNS(clsName);
+
+  if (ctx.cls && ctx.cls->name->isame(clsName)) return resolve_class(ctx.cls);
 
   // We know it has to name a class only if there's no type alias with this
   // name.
@@ -2075,21 +2099,18 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
 
 std::pair<res::Class,borrowed_ptr<php::Class>>
 Index::resolve_closure_class(Context ctx, int32_t idx) const {
-  auto const name = ctx.unit->classes[idx]->name;
-  auto const rcls = resolve_class(ctx, name);
+  auto const cls = borrow(ctx.unit->classes[idx]);
+  auto const rcls = resolve_class(cls);
 
   // Closure classes must be unique and defined in the unit that uses
   // the CreateCl opcode, so resolution must succeed.
   always_assert_flog(
-    rcls.hasValue() && rcls->val.right(),
+    rcls.resolved(),
     "A Closure class ({}) failed to resolve",
-    name->data()
+    cls->name
   );
 
-  return {
-    *rcls,
-    const_cast<borrowed_ptr<php::Class>>(rcls->val.right()->cls)
-  };
+  return { rcls, cls };
 }
 
 res::Class Index::builtin_class(SString name) const {
@@ -2323,24 +2344,42 @@ Index::resolve_func_fallback(Context ctx,
     : std::make_pair(resolve_func_helper(r2, fallbackName), folly::none);
 }
 
-Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
+/*
+ * Gets a type for the constraint.
+ *
+ * If getSuperType is true, the type could be a super-type of the
+ * actual type constraint (eg TCell). Otherwise its guaranteed that
+ * for any t, t.subtypeOf(get_type_for_constraint<false>(ctx, tc, t)
+ * implies t would pass the constraint.
+ *
+ * The candidate type is used to disambiguate; if we're applying a
+ * Traversable constraint to a TObj, we should return
+ * subObj(Traversable).  If we're applying it to an Array, we should
+ * return Array.
+ */
+template<bool getSuperType>
+Type Index::get_type_for_constraint(Context ctx,
+                                    const TypeConstraint& tc,
+                                    const Type& candidate) const {
   assert(IMPLIES(
     !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
     tc.isMixed()));
 
-  /*
-   * Soft hints (@Foo) are not checked.
-   */
-  if (tc.isSoft()) return TCell;
+  if (getSuperType) {
+    /*
+     * Soft hints (@Foo) are not checked.
+     */
+    if (tc.isSoft()) return TCell;
+  }
 
   switch (tc.metaType()) {
     case AnnotMetaType::Precise: {
-      auto const mainType = [&]() -> const Type {
+      auto const mainType = [&]() -> const folly::Optional<Type> {
         auto const dt = tc.underlyingDataType();
         assert(dt.hasValue());
 
         switch (*dt) {
-        case KindOfUninit:       return TCell;
+        case KindOfUninit:       return TBottom;
         case KindOfNull:         return TNull;
         case KindOfBoolean:      return TBool;
         case KindOfInt64:        return TInt;
@@ -2367,116 +2406,83 @@ Type Index::lookup_constraint(Context ctx, const TypeConstraint& tc) const {
           if (auto const rcls = resolve_class(ctx, tc.typeName())) {
             if (auto const cinfo = rcls->val.right()) {
               if (cinfo->cls->attrs & AttrEnum) {
-                return lookup_constraint(ctx, cinfo->cls->enumBaseTy);
+                return get_type_for_constraint<getSuperType>(
+                  ctx, cinfo->cls->enumBaseTy, candidate);
               }
             }
-            return interface_supports_non_objects(rcls->name())
-              ? TInitCell // none of these interfaces support Uninits
-              : subObj(*rcls);
+            if (!interface_supports_non_objects(rcls->name()) ||
+                candidate.subtypeOf(TObj)) {
+              return subObj(*rcls);
+            } else if (getSuperType) {
+              if (candidate.subtypeOf(TOptArr)) {
+                if (interface_supports_array(rcls->name())) return TArr;
+              } else if (candidate.subtypeOf(TOptVec)) {
+                if (interface_supports_vec(rcls->name())) return TVec;
+              } else if (candidate.subtypeOf(TOptDict)) {
+                if (interface_supports_dict(rcls->name())) return TDict;
+              } else if (candidate.subtypeOf(TOptKeyset)) {
+                if (interface_supports_keyset(rcls->name())) return TKeyset;
+              } else if (candidate.subtypeOf(TOptStr)) {
+                if (interface_supports_string(rcls->name())) return TStr;
+              } else if (candidate.subtypeOf(TOptInt)) {
+                if (interface_supports_int(rcls->name())) return TInt;
+              } else if (candidate.subtypeOf(TOptDbl)) {
+                if (interface_supports_double(rcls->name())) return TDbl;
+              }
+            }
           }
-          return TInitCell;
+          break;
         case KindOfRef:
           always_assert_flog(false, "Unexpected DataType");
           break;
         }
-        return TInitCell;
+        return folly::none;
       }();
 
-      return (mainType == TInitCell || !tc.isNullable())
-        ? mainType
-        : opt(mainType);
+      if (!mainType) {
+        return getSuperType ? TInitCell :
+          tc.isNullable() ? TInitNull : TBottom;
+      }
+      return !tc.isNullable() ? *mainType : opt(*mainType);
     }
     case AnnotMetaType::Mixed:
       /*
        * Here we handle "mixed", typevars, and some other ignored
        * typehints (ex. "(function(..): ..)" typehints).
        */
-      return TCell;
+      return getSuperType ? TCell : TGen;
     case AnnotMetaType::Self:
+      if (!ctx.cls) break;
+      return subObj(resolve_class(ctx.cls));
     case AnnotMetaType::Parent:
+      if (ctx.cls && ctx.cls->parentName) {
+        auto p = resolve_class(ctx.cls).parent();
+        if (!p) p = resolve_class(ctx, ctx.cls->parentName);
+        if (p) return subObj(*p);
+      }
+      return getSuperType ? TObj : TBottom;
     case AnnotMetaType::Callable:
       break;
     case AnnotMetaType::Number:
       return tc.isNullable() ? TOptNum : TNum;
     case AnnotMetaType::ArrayKey:
+      if (candidate.subtypeOf(TInt)) return TInt;
+      if (candidate.subtypeOf(TStr)) return TStr;
       // TODO(3774082): Support TInt | TStr type constraint
-      return TInitCell;
+      return getSuperType ? TInitCell : TBottom;
   }
 
-  return TCell;
+  return getSuperType ? TCell : TBottom;
 }
 
-bool Index::satisfies_constraint(Context ctx, const Type t,
+Type Index::lookup_constraint(Context ctx,
+                              const TypeConstraint& tc) const {
+  return get_type_for_constraint<true>(ctx, tc, TTop);
+}
+
+bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
-  return t.subtypeOf(satisfies_constraint_helper(ctx, tc));
-}
-
-Type Index::satisfies_constraint_helper(Context ctx,
-                                        const TypeConstraint& tc) const {
-  assert(IMPLIES(
-    !tc.hasConstraint() || tc.isTypeVar() || tc.isTypeConstant(),
-    tc.isMixed()));
-
-  switch (tc.metaType()) {
-    case AnnotMetaType::Precise: {
-      auto const mainType = [&]() -> const Type {
-        auto const dt = tc.underlyingDataType();
-        assert(dt.hasValue());
-        switch (*dt) {
-        case KindOfUninit:       return TBottom;
-        case KindOfNull:         return TNull;
-        case KindOfBoolean:      return TBool;
-        case KindOfInt64:        return TInt;
-        case KindOfDouble:       return TDbl;
-        case KindOfPersistentString:
-        case KindOfString:       return TStr;
-        case KindOfPersistentVec:
-        case KindOfVec:          return TVec;
-        case KindOfPersistentDict:
-        case KindOfDict:         return TDict;
-        case KindOfPersistentKeyset:
-        case KindOfKeyset:       return TKeyset;
-        case KindOfPersistentArray:
-        case KindOfArray:        return TArr;
-        case KindOfResource:     return TRes;
-        case KindOfObject:
-          if (auto const rcls = resolve_class(ctx, tc.typeName())) {
-            if (auto const cinfo = rcls->val.right()) {
-              if (cinfo->cls->attrs & AttrEnum) {
-                return
-                  satisfies_constraint_helper(ctx, cinfo->cls->enumBaseTy);
-              }
-            }
-            return subObj(*rcls);
-          }
-          return TBottom;
-        case KindOfRef:
-          always_assert_flog(false, "Unexpected DataType");
-          break;
-        }
-        return TBottom;
-      }();
-      return (mainType == TBottom || !tc.isNullable()) ? mainType
-        : opt(mainType);
-    }
-    case AnnotMetaType::Mixed:
-      /*
-       * Here we handle "mixed", typevars, and some other ignored
-       * typehints (ex. "(function(..): ..)" typehints).
-       */
-      return TGen;
-    case AnnotMetaType::Self:
-    case AnnotMetaType::Parent:
-    case AnnotMetaType::Callable:
-      break;
-    case AnnotMetaType::Number:
-      return tc.isNullable() ? TOptNum : TNum;
-    case AnnotMetaType::ArrayKey:
-      // TODO(3774082): Support TInt | TStr type constraint
-      break;
-  }
-
-  return TBottom;
+  return t.subtypeOf(get_type_for_constraint<false>(ctx, tc, t));
 }
 
 bool Index::is_async_func(res::Func rfunc) const {

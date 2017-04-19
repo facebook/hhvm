@@ -404,6 +404,18 @@ struct Index {
     lookup_closures(borrowed_ptr<const php::Class>) const;
 
   /*
+   * Try to find a res::Class for a given php::Class.
+   *
+   * Note, the returned class may or may not be *defined* at the
+   * program point you care about (it could be non-hoistable, even
+   * though it's unique, for example).
+   *
+   * Returns a name-only resolution if there are no legal
+   * instantiations of the class, or if there is more than one.
+   */
+  res::Class resolve_class(borrowed_ptr<const php::Class>) const;
+
+  /*
    * Try to resolve which class will be the class named `name' from a
    * given context, if we can resolve it to a single class.
    *
@@ -494,7 +506,8 @@ struct Index {
    * If this function returns true, it is safe to assume that Type t
    * will always satisfy TypeConstraint tc at run time.
    */
-  bool satisfies_constraint(Context, Type t, const TypeConstraint& tc) const;
+  bool satisfies_constraint(Context, const Type& t,
+                            const TypeConstraint& tc) const;
 
   /*
    * Lookup what the best known Type for a class constant would be,
@@ -730,7 +743,11 @@ private:
                             borrowed_ptr<const php::Class>) const;
   bool could_be_related(borrowed_ptr<const php::Class>,
                         borrowed_ptr<const php::Class>) const;
-  Type satisfies_constraint_helper(Context, const TypeConstraint&) const;
+
+  template<bool getSuperType>
+  Type get_type_for_constraint(Context,
+                               const TypeConstraint&,
+                               const Type&) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

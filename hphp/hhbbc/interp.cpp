@@ -2650,8 +2650,8 @@ void in(ISS& env, const bc::OODeclExists& op) {
         // superclass of the current context.
         if (is_systemlib_part(*unit)) return true;
         if (!env.ctx.cls) return false;
-        auto thisClass = env.index.resolve_class(env.ctx, env.ctx.cls->name);
-        return thisClass && thisClass->subtypeOf(*rcls);
+        auto thisClass = env.index.resolve_class(env.ctx.cls);
+        return thisClass.subtypeOf(*rcls);
       };
       if (canConstProp()) {
         constprop(env);
@@ -2685,7 +2685,9 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
     FTRACE(2, "     {}\n", constraint.fullName());
-    setLoc(env, op.loc1, env.index.lookup_constraint(env.ctx, constraint));
+    auto t = env.index.lookup_constraint(env.ctx, constraint);
+    if (t.subtypeOf(TBottom)) unreachable(env);
+    setLoc(env, op.loc1, std::move(t));
   }
 }
 
@@ -2716,6 +2718,11 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   // return type constraint.
   auto tcT =
     remove_uninit(env.index.lookup_constraint(env.ctx, constraint));
+
+  if (tcT.subtypeOf(TBottom)) {
+    unreachable(env);
+    return;
+  }
 
   // Below we compute retT, which is a rough conservative approximate of the
   // intersection of stackT and tcT.

@@ -17,6 +17,7 @@ module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module CBR = Continue_break_rewriter
+module SU = Hhbc_string_utils
 
 (* When using the PassX instructions we need to emit the right kind *)
 module PassByRefKind = struct
@@ -48,9 +49,6 @@ let set_compiler_options o = compiler_options := o
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
-
-let strip_dollar id =
-  String.sub id 1 (String.length id - 1)
 
 let make_varray p es = p, A.Array (List.map es ~f:(fun e -> A.AFvalue e))
 let make_kvarray p kvs =
@@ -189,7 +187,7 @@ and emit_local x =
   else
   if x = SN.Superglobals.globals
   then gather [
-    instr_string (strip_dollar x);
+    instr_string (SU.Locals.strip_dollar x);
     instr (IGet CGetG)
   ]
   else instr_cgetl (Local.Named x)
@@ -344,20 +342,7 @@ and emit_aget class_expr =
       instr_clsrefgetc;
     ]
 
-and rename_id_if_namespaced s = match String.lowercase_ascii s with
-  | "vector" -> "HH\\Vector"
-  | "immvector" -> "HH\\ImmVector"
-  | "set" -> "HH\\Set"
-  | "immset" -> "HH\\ImmSet"
-  | "map" -> "HH\\Map"
-  | "immmap" -> "HH\\ImmMap"
-  | "pair" -> "HH\\Pair"
-  | "vec" -> "HH\\vec"
-  | "keyset" -> "HH\\keyset"
-  | "dict" -> "HH\\dict"
-  | "varray" -> "HH\\varray"
-  | "darray" -> "HH\\darray"
-  | _ -> s
+and rename_id_if_namespaced s = Hhbc_alias.normalize s
 
 and emit_new class_expr args uargs =
   let nargs = List.length args + List.length uargs in
@@ -454,7 +439,7 @@ and emit_class_id cid =
 and emit_class_get param_num_opt cid id =
     gather [
       (* We need to strip off the initial dollar *)
-      instr_string (strip_dollar id);
+      instr_string (SU.Locals.strip_dollar id);
       emit_class_id cid;
       match param_num_opt with
       | None -> instr_cgets
@@ -577,11 +562,7 @@ and emit_id (p, s) =
   | "exit" -> emit_exit (p, A.Int (p, "0"))
   | _ -> instr (ILitConst (Cns s))
 
-and rename_xhp (p, s) =
-  (* Translates given :name to xhp_name *)
-  if String_utils.string_starts_with s ":"
-  then (p, "xhp_" ^ (String_utils.lstrip s ":"))
-  else failwith "Incorrectly named xhp element"
+and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 
 and emit_xhp p id attributes children =
   (* Translate into a constructor call. The arguments are:
@@ -1099,7 +1080,7 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      | _ -> mode in
    match expr_ with
    | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
-     instr_string (strip_dollar x),
+     instr_string (SU.Locals.strip_dollar x),
      instr (IBase (BaseGC (base_offset, base_mode))),
      1
 
@@ -1170,7 +1151,8 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
      total_stack_size
 
    | A.Class_get((_, cid), (_, id)) ->
-     let prop_expr_instrs = instr_string (strip_dollar id) in
+     let prop_expr_instrs =
+       instr_string (SU.Locals.strip_dollar id) in
      gather [
        prop_expr_instrs;
        emit_class_id cid
@@ -1199,7 +1181,7 @@ and emit_arg i ((_, expr_) as e) =
   match expr_ with
   | A.Lvar (_, x) when x = SN.Superglobals.globals ->
     gather [
-      instr_string (strip_dollar x);
+      instr_string (SU.Locals.strip_dollar x);
       instr (ICall (FPassG i))
     ]
 
@@ -1622,7 +1604,8 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Class_get((_, cid), (_, id)) ->
-    let prop_expr_instrs = instr_string (strip_dollar id) in
+    let prop_expr_instrs =
+      instr_string (SU.Locals.strip_dollar id) in
     let final_instr = emit_final_static_op cid id op in
     gather [
       prop_expr_instrs;

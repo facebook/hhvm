@@ -311,7 +311,6 @@ quick/impl_abstract_dv_b_boolean.php
 quick/impl_abstract_dv_i_Int.php
 quick/impl_abstract_dv_i_integer.php
 quick/impl_abstract_dv_ia.php
-quick/impl_abstract_dv_id.php
 quick/impl_abstract_dv_io.php
 quick/impl_abstract_dv_sa.php
 quick/impl_abstract_dv_si.php
@@ -449,7 +448,6 @@ quick/rename_function.php
 quick/reqonce.php
 quick/reserved_class1.php
 quick/reserved_class2.php
-quick/resource.php
 quick/resurrect.php
 quick/retc-destruct.php
 quick/retval_backtrace.php
@@ -532,7 +530,6 @@ quick/vec/serialize.php
 quick/vec/static.php
 quick/vec/type-hint.php
 quick/vector-unwind-decref.php
-quick/verify-param-type.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php
 quick/xenon/xenon_frame_metadata.php

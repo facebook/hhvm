@@ -12,16 +12,14 @@ module B = Buffer
 module H = Hhbc_ast
 module A = Ast
 module SS = String_sequence
+module SU = Hhbc_string_utils
 open H
 
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
 
-let quote_str s = "\"" ^ Php_escaping.escape s ^ "\""
-let quote_str_with_escape s = "\\\"" ^ Php_escaping.escape s ^ "\\\""
-
-let string_of_class_id id = quote_str (Utils.strip_ns id)
-let string_of_function_id id = quote_str (Utils.strip_ns id)
+let string_of_class_id id = SU.quote_string (Utils.strip_ns id)
+let string_of_function_id id = SU.quote_string (Utils.strip_ns id)
 
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
@@ -45,7 +43,7 @@ let string_of_basic instruction =
     | RGetCNop    -> "RGetCNop"
 
 let string_of_list_of_shape_fields sl =
-  String.concat " " @@ List.map quote_str sl
+  String.concat " " @@ List.map SU.quote_string sl
 
 let string_of_stack_index si = string_of_int si
 
@@ -68,7 +66,7 @@ let string_of_lit_const instruction =
   match instruction with
     | Null        -> "Null"
     | Int i       -> sep ["Int"; Int64.to_string i]
-    | String str  -> sep ["String"; quote_str str]
+    | String str  -> sep ["String"; SU.quote_string str]
     | True        -> "True"
     | False       -> "False"
     | Double d    -> sep ["Double"; d]
@@ -89,9 +87,9 @@ let string_of_lit_const instruction =
       sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | Vec (i, _)        -> sep ["Vec"; "@A_" ^ string_of_int i]
     | ClsCns (name, id) ->
-      sep ["ClsCns"; quote_str name; string_of_classref id]
+      sep ["ClsCns"; SU.quote_string name; string_of_classref id]
     | ClsCnsD (name, class_name) ->
-      sep ["ClsCnsD"; quote_str name; string_of_class_id class_name]
+      sep ["ClsCnsD"; SU.quote_string name; string_of_class_id class_name]
     | File -> "File"
     | Dir -> "Dir"
     | NYI text -> "NYI: " ^ text
@@ -106,9 +104,9 @@ let string_of_lit_const instruction =
     | NewMSArray n -> sep ["NewMSArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
-    | Cns s -> sep ["Cns"; quote_str s]
-    | CnsE s -> sep ["CnsE"; quote_str s]
-    | CnsU (s1, s2) -> sep ["CnsU"; quote_str s1; quote_str s2]
+    | Cns s -> sep ["Cns"; SU.quote_string s]
+    | CnsE s -> sep ["CnsE"; SU.quote_string s]
+    | CnsU (s1, s2) -> sep ["CnsU"; SU.quote_string s1; SU.quote_string s2]
 
 let string_of_operator instruction =
   match instruction with
@@ -153,7 +151,7 @@ let string_of_operator instruction =
     | CastDict -> "CastDict"
     | CastKeyset -> "CastKeyset"
     | InstanceOf -> "InstanceOf"
-    | InstanceOfD id -> sep ["InstanceOfD"; quote_str id]
+    | InstanceOfD id -> sep ["InstanceOfD"; SU.quote_string id]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
@@ -186,12 +184,12 @@ let string_of_member_key mk =
   match mk with
   | EC i -> "EC:" ^ string_of_stack_index i
   | EL id -> "EL:" ^ string_of_local_id id
-  | ET str -> "ET:" ^ quote_str str
+  | ET str -> "ET:" ^ SU.quote_string str
   | EI i -> "EI:" ^ Int64.to_string i
   | PC i -> "PC:" ^ string_of_stack_index i
   | PL id -> "PL:" ^ string_of_local_id id
-  | PT str -> "PT:" ^ quote_str str
-  | QT str -> "QT:" ^ quote_str str
+  | PT str -> "PT:" ^ SU.quote_string str
+  | QT str -> "QT:" ^ SU.quote_string str
   | W -> "W"
 
 let string_of_eq_op op =
@@ -389,14 +387,14 @@ let string_of_call instruction =
   | FPushFunc n ->
     sep ["FPushFunc"; string_of_int n]
   | FPushFuncD (n, id) ->
-    sep ["FPushFuncD"; string_of_int n; quote_str id]
+    sep ["FPushFuncD"; string_of_int n; SU.quote_string id]
   | FPushFuncU (n, id1, id2) ->
-    sep ["FPushFuncU"; string_of_int n; quote_str id1; quote_str id2]
+    sep ["FPushFuncU"; string_of_int n; SU.quote_string id1; SU.quote_string id2]
   | FPushObjMethod (n, nf) ->
     sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf]
   | FPushObjMethodD (n, id, nf) ->
     sep ["FPushObjMethodD";
-      string_of_int n; quote_str id; string_of_null_flavor nf]
+      string_of_int n; SU.quote_string id; string_of_null_flavor nf]
   | FPushClsMethod (n, id) ->
     sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
   | FPushClsMethodF (n, id) ->
@@ -407,9 +405,9 @@ let string_of_call instruction =
   | FPushCtor (n, id) ->
     sep ["FPushCtor"; string_of_int n; string_of_int id]
   | FPushCtorD (n, id) ->
-    sep ["FPushCtorD"; string_of_int n; quote_str id]
+    sep ["FPushCtorD"; string_of_int n; SU.quote_string id]
   | FPushCtorI (n, id) ->
-    sep ["FPushCtorI"; string_of_int n; quote_str id]
+    sep ["FPushCtorI"; string_of_int n; SU.quote_string id]
   | DecodeCufIter (n, l) ->
     sep ["DecodeCufIter"; string_of_int n; string_of_label l]
   | FPushCufIter (n, id) ->
@@ -454,7 +452,7 @@ let string_of_call instruction =
   | FCallUnpack n ->
     sep ["FCallUnpack"; string_of_int n]
   | FCallBuiltin (n1, n2, id) ->
-    sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; quote_str id]
+    sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
 
 let string_of_barethis_op i =
   match i with
@@ -617,7 +615,7 @@ let add_instruction_list buffer indent instructions =
 let quote_str_option s =
   match s with
   | None -> "N"
-  | Some s -> quote_str s
+  | Some s -> SU.quote_string s
 
 let string_of_type_info ?(is_enum = false) ti =
   let user_type = Hhas_type_info.user_type ti in
@@ -746,15 +744,7 @@ let string_of_param p =
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
-(* Taken from emitter/emitter_core.ml *)
-let fix_xhp_name s =
-    if String.length s = 0 || s.[0] <> ':' then s else
-      "xhp_" ^
-        String_utils.lstrip s ":" |>
-        Str.global_replace (Str.regexp ":") "__" |>
-        Str.global_replace (Str.regexp "-") "_"
-
-let fmt_name s = fix_xhp_name (Utils.strip_ns s)
+let fmt_name s = Hhbc_string_utils.Xhp.mangle (Utils.strip_ns s)
 
 let add_num_cls_ref_slots buf indent num_cls_ref_slots =
   if num_cls_ref_slots = 0 then () else begin
@@ -783,7 +773,7 @@ let rec attribute_argument_to_string argument =
   | Null -> SS.str "N;"
   | Double f -> SS.str @@ Printf.sprintf "d:%s;" f
   | String s -> SS.str @@
-    Printf.sprintf "s:%d:%s;" (String.length s) (quote_str_with_escape s)
+    Printf.sprintf "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
   (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
   | False -> SS.str "b:0;"
   | True -> SS.str "b:1;"

@@ -9,6 +9,7 @@
 *)
 
 open Core
+open Hhbc_string_utils
 
 module A = Ast
 module H = Hhbc_ast
@@ -94,7 +95,7 @@ and type_constant_access_list sl =
 and resolve_classname s =
   if is_prim s || is_resolved_classname s then []
   else
-    let classname = if in_HH_namespace s then "HH\\" ^ s else s in
+    let classname = if in_HH_namespace s then prefix_namespace "HH" s else s in
      [H.String "classname"; H.String classname]
 
 and get_generic_types = function
@@ -102,6 +103,10 @@ and get_generic_types = function
   | l -> [H.String "generic_types"; hints_to_type_constant l]
 
 and get_kind s = [H.String "kind"; H.Int (get_kind_num s)]
+
+and root_to_string s =
+  if s = "this" then prefix_namespace "HH" s
+  else s
 
 and hint_to_type_constant_list h =
   match snd h with
@@ -114,7 +119,7 @@ and hint_to_type_constant_list h =
     get_kind "shape" @ [H.String "fields"; shape_info_to_instr_lit si]
   | A.Haccess ((_, s0), s1, sl) ->
     get_kind "typeaccess" @
-     [H.String "root_name"; H.String s0;
+     [H.String "root_name"; H.String (root_to_string s0);
      H.String "access_list"; type_constant_access_list @@ s1::sl]
   | A.Hfun (hl, _b, h) ->
     (* TODO: Bool indicates variadic argument. What to do? *)

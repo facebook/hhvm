@@ -154,14 +154,13 @@ let instr_yield = instr (IGenerator Yield)
 let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 
-let strip_dollar id =
-  String.sub id 1 (String.length id - 1)
-
 let instr_static_loc name =
-  instr (IMisc (StaticLoc (Local.Named name, strip_dollar name)))
+  instr (IMisc (StaticLoc (Local.Named name,
+    Hhbc_string_utils.Locals.strip_dollar name)))
 
 let instr_static_loc_init name =
-  instr (IMisc (StaticLocInit (Local.Named name, strip_dollar name)))
+  instr (IMisc (StaticLocInit (Local.Named name,
+    Hhbc_string_utils.Locals.strip_dollar name)))
 
 let instr_exit = instr (IOp Hhbc_ast.Exit)
 let instr_idx = instr (IMisc Idx)

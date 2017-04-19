@@ -9,6 +9,7 @@
 *)
 
 open Core
+open Hhbc_string_utils
 
 module A = Ast
 module TC = Hhas_type_constraint
@@ -17,29 +18,7 @@ module TC = Hhas_type_constraint
 let fmt_name s = s
 
 (* TODO: This list needs to be exhaustive *)
-let fmt_name_or_prim x =
-  match x with
-  | "void" -> "HH\\void"
-  | "int" -> "HH\\int"
-  | "bool" -> "HH\\bool"
-  | "float" -> "HH\\float"
-  | "string" | "classname"-> "HH\\string"
-  | "num" -> "HH\\num"
-  | "resource" -> "HH\\resource"
-  | "arraykey" -> "HH\\arraykey"
-  | "noreturn" -> "HH\\noreturn"
-  | "mixed" -> "HH\\mixed"
-  | "this" -> "HH\\this"
-  | "Awaitable" -> "HH\\Awaitable"
-  | "Vector" -> "HH\\Vector"
-  | "ImmVector" -> "HH\\ImmVector"
-  | "Set" -> "HH\\Set"
-  | "ImmSet" -> "HH\\ImmSet"
-  | "Map" -> "HH\\Map"
-  | "ImmMap" -> "HH\\ImmMap"
-  | "Pair" -> "HH\\Pair"
-  | "shape" -> "HH\\shape"
-  | _ -> fmt_name x
+let fmt_name_or_prim x = Hhbc_alias.normalize x
 
 (* Produce the "userType" bit of the annotation *)
 let rec fmt_hint (_, h) =
@@ -56,7 +35,8 @@ let rec fmt_hint (_, h) =
     "(" ^ String.concat ", " (List.map hs fmt_hint) ^ ")"
 
   | A.Haccess (h1, h2, accesses) ->
-    String.concat "::" (List.map (h1::h2::accesses) snd)
+    fmt_name_or_prim (snd h1) ^ "::" ^
+      String.concat "::" (List.map (h2::accesses) snd)
 
   | A.Hoption t -> "?" ^ fmt_hint t
 
@@ -73,7 +53,8 @@ let rec fmt_hint (_, h) =
       List.map ~f:format_shape_field si_shape_field_list in
     let shape_suffix = if si_allows_unknown_fields then ["..."] else [] in
     let formatted_shape_entries = shape_fields @ shape_suffix in
-    "HH\\shape(" ^ String.concat ", " formatted_shape_entries ^ ")"
+    prefix_namespace "HH" "shape(" ^
+      String.concat ", " formatted_shape_entries ^ ")"
 
 let rec hint_to_type_constraint ~tparams ~skipawaitable (_, h) =
 match h with
@@ -105,7 +86,7 @@ match h with
     let tc_flags = [TC.HHType; TC.ExtendedHint; TC.TypeVar] in
     TC.make tc_name tc_flags
   else
-    let tc_name = Some (fmt_name_or_prim s) in
+    let tc_name = Some (Hhbc_string_utils.Xhp.mangle (fmt_name_or_prim s)) in
     let tc_flags = [TC.HHType] in
     TC.make tc_name tc_flags
 
@@ -136,7 +117,7 @@ let hint_to_type_info ~skipawaitable ~always_extended ~tparams h =
   let tc_name = TC.name tc in
   let tc_flags = TC.flags tc in
   let tc_flags =
-    if always_extended && tc_name != None
+    if always_extended && tc_name <> None
     then List.dedup (TC.ExtendedHint :: tc_flags)
     else tc_flags in
   let type_info_user_type = Some (fmt_hint h) in

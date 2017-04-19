@@ -15,9 +15,6 @@ open Ast_scope
 module ULS = Unique_list_string
 module SN = Naming_special_names
 
-let strip_dollar id =
-  String.sub id 1 (String.length id - 1)
-
 type env = {
   (* What is the current context? *)
   scope : Scope.t;
@@ -148,7 +145,8 @@ let make_closure ~explicit_use
     m_span = fd.f_span;
   } in
   let cvl =
-    List.map lambda_vars (fun name -> (p, (p, strip_dollar name), None)) in
+    List.map lambda_vars
+    (fun name -> (p, (p, Hhbc_string_utils.Locals.strip_dollar name), None)) in
   let cd = {
     c_mode = fd.f_mode;
     c_user_attributes = [];

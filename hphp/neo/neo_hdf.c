@@ -270,7 +270,7 @@ static int _walk_hdf (HDF *hdf, const char *name, HDF **node)
 
   n = name;
   s = strchr (n, '.');
-  x = (s == NULL) ? strlen(n) : s - n;
+  x = (s == NULL) ? (int)strlen(n) : s - n;
 
   while (1)
   {
@@ -316,7 +316,7 @@ static int _walk_hdf (HDF *hdf, const char *name, HDF **node)
     }
     n = s + 1;
     s = strchr (n, '.');
-    x = (s == NULL) ? strlen(n) : s - n;
+    x = (s == NULL) ? (int)strlen(n) : s - n;
   }
   if (hp->link)
   {
@@ -519,7 +519,7 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
 
   n = name;
   s = strchr (n, '.');
-  x = (s != NULL) ? s - n : strlen(n);
+  x = (s != NULL) ? s - n : (int)strlen(n);
   if (x == 0)
   {
     return nerr_raise(NERR_ASSERT, "Unable to set Empty component %s", name);
@@ -692,7 +692,7 @@ skip_search:
     /* Otherwise, we need to find the next part of the namespace */
     n = s + 1;
     s = strchr (n, '.');
-    x = (s != NULL) ? s - n : strlen(n);
+    x = (s != NULL) ? s - n : (int)strlen(n);
     if (x == 0)
     {
       return nerr_raise(NERR_ASSERT, "Unable to set Empty component %s", name);
@@ -739,7 +739,7 @@ NEOERR* hdf_remove_tree (HDF *hdf, const char *name)
 
   n = name;
   s = strchr (n, '.');
-  x = (s == NULL) ? strlen(n) : s - n;
+  x = (s == NULL) ? (int)strlen(n) : s - n;
 
   while (1)
   {
@@ -766,7 +766,7 @@ NEOERR* hdf_remove_tree (HDF *hdf, const char *name)
     hp = hp->child;
     n = s + 1;
     s = strchr (n, '.');
-    x = (s == NULL) ? strlen(n) : s - n;
+    x = (s == NULL) ? (int)strlen(n) : s - n;
   }
 
   if (lp->hash != NULL)
@@ -1105,7 +1105,7 @@ static int _copy_line (const char **s, char *buf, size_t buf_len)
   int x = 0;
   const char *st = *s;
 
-  while (*st && x < buf_len-1)
+  while (*st && x < (int)buf_len-1)
   {
     buf[x++] = *st;
     if (*st++ == '\n') break;
@@ -1351,7 +1351,8 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
           if (p == NULL) {
             char pwd[PATH_MAX];
             memset(pwd, 0, PATH_MAX);
-            getcwd(pwd, PATH_MAX);
+            if (getcwd(pwd, PATH_MAX) == NULL)
+              return nerr_raise(NERR_ASSERT, "Can't get current working dir");
             snprintf(fullpath, PATH_MAX, "%s/%s", pwd, name);
           } else {
             int dir_len = p - path + 1;

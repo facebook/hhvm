@@ -57,7 +57,7 @@ void ne_hash_destroy (NE_HASH **hash)
 
   my_hash = *hash;
 
-  for (x = 0; x < my_hash->size; x++)
+  for (x = 0; x < (int)my_hash->size; x++)
   {
     node = my_hash->nodes[x];
     while (node)
@@ -176,7 +176,7 @@ static NEOERR *_hash_resize(NE_HASH *hash)
   hash->size = hash->size*2;
 
   /* Initialize new parts */
-  for (x = orig_size; x < hash->size; x++)
+  for (x = orig_size; x < (int)hash->size; x++)
   {
     hash->nodes[x] = NULL;
   }
@@ -191,7 +191,7 @@ static NEOERR *_hash_resize(NE_HASH *hash)
 	 entry;
 	 entry = prev ? prev->next : hash->nodes[x])
     {
-      if ((entry->hashv & hash_mask) != x)
+      if ((int)(entry->hashv & hash_mask) != x)
       {
 	if (prev)
 	{

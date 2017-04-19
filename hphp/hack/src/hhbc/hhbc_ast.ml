@@ -507,9 +507,10 @@ type instruct_misc =
   | VerifyParamType of param_id
   | VerifyRetTypeC
   | VerifyRetTypeV
-  | Self
+  | Self of classref_id
   | Parent of classref_id
   | LateBoundCls of classref_id
+  | ClsRefName of classref_id
   | NativeImpl
   | IncStat of int * int (* counter id, value *)
   | AKExists

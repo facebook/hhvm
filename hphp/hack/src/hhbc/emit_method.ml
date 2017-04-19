@@ -26,7 +26,6 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
   let method_attributes =
     Emit_attribute.from_asts ast_method.Ast.m_user_attributes in
-  let tparams = ast_class.Ast.c_tparams @ ast_method.Ast.m_tparams in
   let (_,class_name) = ast_class.Ast.c_name in
   let (_,method_name) = ast_method.Ast.m_name in
   let ret =
@@ -69,9 +68,9 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       method_is_generator,
       method_is_pair_generator =
     Emit_body.from_ast
-      ~has_this:(not method_is_static)
+      ~scope:[Ast_scope.ScopeItem.Method ast_method;
+              Ast_scope.ScopeItem.Class ast_class]
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
-      tparams
       ast_method.Ast.m_params
       ret
       ast_method.Ast.m_body

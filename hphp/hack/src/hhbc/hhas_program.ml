@@ -36,8 +36,8 @@ let emit_main block =
   let return_seq _ = Instruction_sequence.empty in
   let body_instrs, decl_vars, num_iters, _, _, _, _, _ =
     Emit_body.from_ast
-      ~skipawaitable:false ~has_this:false
-      [] [] None block return_seq in
+      ~skipawaitable:false ~scope:Ast_scope.Scope.toplevel
+      [] None block return_seq in
   Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs)
     decl_vars num_iters
 

@@ -296,6 +296,8 @@ let get_num_cls_ref_slots instrseq =
         | ILitConst (ClsCns (_, id))
         | IMisc (Parent id)
         | IMisc (LateBoundCls id)
+        | IMisc (Self id)
+        | IMisc (ClsRefName id)
         | IGet (ClsRefGetL (_, id))
         | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
         | _ -> num)
@@ -307,6 +309,8 @@ let rewrite_class_refs_instr num = function
 | IGet (ClsRefGetC _) -> (num + 1, IGet (ClsRefGetC (num + 1)))
 | IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
 | IMisc (LateBoundCls _) -> (num + 1, IMisc (LateBoundCls (num + 1)))
+| IMisc (Self _) -> (num + 1, IMisc (Self (num + 1)))
+| IMisc (ClsRefName _) -> (num + 1, IMisc (ClsRefName (num + 1)))
 | IGet (CGetS _) -> (num - 1, IGet (CGetS num))
 | IGet (VGetS _) -> (num - 1, IGet (VGetS num))
 | IMutator (SetS _) -> (num - 1, IMutator (SetS num))

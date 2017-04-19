@@ -36,12 +36,11 @@ end
 let special_functions =
   ["isset"; "empty"; "tuple"; "idx"; "hphp_array_idx"]
 
-(* Context for a complete method body. It would be more elegant to pass this
- * around in an environment parameter. Alternatively, transform the AST before
- * codegen in order to resolve $this properly. *)
-let method_has_this = ref false
-let set_method_has_this b = method_has_this := b
-let get_method_has_this () = !method_has_this
+(* Context for code generation. It would be more elegant to pass this
+ * around in an environment parameter. *)
+let scope = ref Ast_scope.Scope.toplevel
+let set_scope s = scope := s
+let get_scope () = !scope
 
 let compiler_options = ref Hhbc_options.default
 let set_compiler_options o = compiler_options := o
@@ -163,7 +162,8 @@ let is_special_function e =
   | _ -> false
 
 let is_local_this id =
-  id = SN.SpecialIdents.this && get_method_has_this ()
+  let scope = get_scope () in
+  id = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
 
 let extract_shape_field_name_pstring = function
   | A.SFlit p -> A.String p
@@ -183,7 +183,8 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
     ]
 
 and emit_local x =
-  if x = SN.SpecialIdents.this && get_method_has_this ()
+  let scope = get_scope () in
+  if x = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
   then instr (IMisc (BareThis Notice))
   else
   if x = SN.Superglobals.globals
@@ -417,22 +418,38 @@ and emit_known_class_id cid =
     instr_clsrefgetc;
   ]
 
+(* Transform `self` into enclosing class and `parent` into parent of enclosing
+ * class, if they exist *)
+and resolve_class cid =
+  let scope = get_scope () in
+  match Ast_scope.Scope.get_class scope with
+  | None -> cid
+  | Some cd ->
+    if cid = SN.Classes.cSelf then snd cd.A.c_name
+    else
+    if cid = SN.Classes.cParent
+    then
+      match cd.A.c_extends with
+      | [(_, A.Happly((_, parent_cid), _))] ->
+        parent_cid
+      | _ -> cid
+    else cid
+
 and emit_class_id cid =
   if cid = SN.Classes.cStatic
   then instr (IMisc (LateBoundCls 0))
   else
-  (* We assume that if these were statically resolvable then it would have
-   * been done during closure conversion
-   *)
-  if  cid = SN.Classes.cParent
+  let cid = resolve_class cid in
+  if cid = SN.Classes.cParent
   then instr (IMisc (Parent 0))
   else
   if cid = SN.Classes.cSelf
-  then instr (IMisc Self)
+  then instr (IMisc (Self 0))
   else
   if cid.[0] = '$'
   then instr (IGet (ClsRefGetL (Local.Named cid, 0)))
   else emit_known_class_id cid
+
 
 and emit_class_get param_num_opt cid id =
     gather [
@@ -444,25 +461,51 @@ and emit_class_get param_num_opt cid id =
       | Some i -> instr (ICall (FPassS (i, 0)))
     ]
 
+(* Class constant <cid>::<id>.
+ * We follow the logic for the Construct::KindOfClassConstantExpression
+ * case in emitter.cpp
+ *)
 and emit_class_const cid id =
-  if id = SN.Members.mClass then instr_string cid
-  else if cid = SN.Classes.cStatic
+  let scope = get_scope () in
+  let clscns () =
+    if id = SN.Members.mClass
+    then IMisc (ClsRefName 0)
+    else ILitConst (ClsCns (id, 0)) in
+  let get_original_name cd =
+    if cid = SN.Classes.cSelf
+    then snd cd.A.c_name
+    else cid in
+
+  if cid = SN.Classes.cStatic
   then
     instrs [
       IMisc (LateBoundCls 0);
-      ILitConst (ClsCns (id, 0));
-    ]
-  (* We assume that if this was statically resolvable it would have been
-   * transformed during closure conversion
-   *)
-  else if cid = SN.Classes.cSelf
-  then
-    instrs [
-      IMisc Self;
-      ILitConst (ClsCns (id, 0));
+      clscns ();
     ]
   else
-    instr (ILitConst (ClsCnsD (id, cid)))
+  match Ast_scope.Scope.get_class scope with
+  | Some cd when cd.Ast.c_kind <> A.Ctrait ->
+    let cid = get_original_name cd in
+    if id = SN.Members.mClass
+    then instr_string (Utils.strip_ns cid)
+    else instr (ILitConst (ClsCnsD (id, cid)))
+  | _ ->
+    if cid = SN.Classes.cSelf
+    then
+      instrs [
+        IMisc (Self 0);
+        clscns ();
+      ]
+    else if cid = SN.Classes.cParent
+    then
+      instrs [
+        IMisc (Parent 0);
+        clscns ()
+      ]
+    else
+      if id = SN.Members.mClass
+      then instr_string (Utils.strip_ns cid)
+      else instr (ILitConst (ClsCnsD (id, cid)))
 
 and emit_await e =
   let after_await = Label.next_regular () in

@@ -68,13 +68,14 @@ let decl_vars_from_ast params b =
   let decl_vars = ULS.diff decl_vars param_names in
   List.rev (ULS.items decl_vars)
 
-let from_ast ~has_this ~skipawaitable
-  tparams params ret body default_instrs =
-  let tparams = tparams_to_strings tparams in
+let from_ast ~scope ~skipawaitable
+  params ret body default_instrs =
+  let tparams =
+    List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();
   Local.reset_local ();
   Iterator.reset_iterator ();
-  Emit_expression.set_method_has_this has_this;
+  Emit_expression.set_scope scope;
   let params = Emit_param.from_asts tparams params in
   let return_type_info =
     match ret with

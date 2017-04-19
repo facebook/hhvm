@@ -465,9 +465,10 @@ let string_of_misc instruction =
   match instruction with
     | This -> "This"
     | BareThis op -> sep ["BareThis"; string_of_barethis_op op]
-    | Self -> "Self"
+    | Self id -> sep ["Self"; string_of_classref id]
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
+    | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | Catch -> "Catch"

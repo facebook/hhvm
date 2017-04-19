@@ -10,43 +10,13 @@
 
 open Core
 open Ast
+open Ast_scope
 
 module ULS = Unique_list_string
 module SN = Naming_special_names
 
 let strip_dollar id =
   String.sub id 1 (String.length id - 1)
-
-module ScopeItem =
-struct
-  type is_static = bool
-  type t =
-  (* Named class *)
-  | Class of string * tparam list
-  (* Named function *)
-  | Function of string * is_static * tparam list
-  (* PHP-style closure *)
-  | LongLambda of is_static
-  (* Short lambda *)
-  | Lambda
-end
-
-module Scope =
-struct
-  type t = ScopeItem.t list
-  let toplevel:t = []
-  let rec get_class scope =
-    match scope with
-    | [] -> None
-    | ScopeItem.Class (c, _) :: _ -> Some c
-    | _ :: scope -> get_class scope
-  let rec get_tparams scope =
-    match scope with
-    | [] -> []
-    | ScopeItem.Class (_, tparams) :: scope -> tparams @ get_tparams scope
-    | ScopeItem.Function (_, _, tparams) :: scope -> tparams @ get_tparams scope
-    | _ :: scope -> get_tparams scope
-end
 
 type env = {
   (* What is the current context? *)
@@ -106,7 +76,7 @@ let env_with_longlambda env is_static =
 let env_with_function env fd =
   let name = Utils.strip_ns (snd fd.f_name) in
   { prefix = "Closure$" ^ name;
-    scope = ScopeItem.Function (name, true, fd.f_tparams) :: env.scope;
+    scope = ScopeItem.Function fd :: env.scope;
   }
 
 let env_toplevel =
@@ -118,14 +88,13 @@ let env_with_method env cd md =
   let name = Utils.strip_ns (snd md.m_name) in
   let class_name = Utils.strip_ns (snd cd.c_name) in
   { prefix = "Closure$" ^ class_name ^ "::" ^ name;
-    scope = ScopeItem.Function (name, List.mem md.m_kind Static, md.m_tparams)
-      :: env.scope;
+    scope = ScopeItem.Method md :: env.scope;
   }
 
 let env_with_class cd =
   let name = Utils.strip_ns (snd cd.c_name) in
   { prefix = "Closure$" ^ name;
-    scope = [ScopeItem.Class (name, cd.c_tparams)];
+    scope = [ScopeItem.Class cd];
   }
 
 (* Clear the variables, upon entering a lambda *)
@@ -160,7 +129,8 @@ let make_closure ~explicit_use
   let rec is_scope_static scope =
     match scope with
     | ScopeItem.LongLambda is_static :: _ -> is_static
-    | ScopeItem.Function(_, is_static, _) :: _ -> is_static
+    | ScopeItem.Function _ :: _ -> true
+    | ScopeItem.Method md :: _ -> List.mem md.m_kind Static
     | ScopeItem.Lambda :: scope -> is_scope_static scope
     | [] -> true
     | _ -> false in
@@ -205,37 +175,35 @@ let make_closure ~explicit_use
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
   let return newstr = (p, String (pid, newstr)) in
+  let strip_id id = Utils.strip_ns (snd id) in
+  let get_class_name () =
+    match Scope.get_class env.scope with
+    | None -> ""
+    | Some cd -> strip_id cd.c_name in
   match str with
   | "__CLASS__" ->
-    return (match Scope.get_class env.scope with None -> "" | Some s -> s)
+    return (get_class_name ())
   | "__METHOD__" ->
     let prefix =
-      match Scope.get_class env.scope with None -> "" | Some s -> s ^ "::" in
+      match Scope.get_class env.scope with
+      | None -> ""
+      | Some cd -> strip_id cd.c_name ^ "::" in
     begin match env.scope with
-      | ScopeItem.Function(name, _, _) :: _ -> return (prefix ^ name)
+      | ScopeItem.Function fd :: _ -> return (prefix ^ strip_id fd.f_name)
+      | ScopeItem.Method md :: _ -> return (prefix ^ strip_id md.m_name)
       | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ ->
         return (prefix ^ "{closure}")
       | _ -> return ""
     end
   | "__FUNCTION__" ->
     begin match env.scope with
-    | ScopeItem.Function(name, _, _)::_ -> return name
+    | ScopeItem.Function fd :: _ -> return (strip_id fd.f_name)
+    | ScopeItem.Method md :: _ -> return (strip_id md.m_name)
     | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ -> return "{closure}"
     | _ -> return ""
     end
   | _ ->
     (p, Id id)
-
-(* Statically resolve the `self` class identifier if the enclosing class is
- * known. After closure conversion this would be incorrect.
- * TODO: do the same for `parent` *)
-let convert_class_id env (p, str as id) =
-  match Scope.get_class env.scope with
-  | None -> id
-  | Some class_name ->
-    if str = SN.Classes.cSelf
-    then (p, class_name)
-    else id
 
 let rec convert_expr env st (p, expr_ as expr) =
   match expr_ with
@@ -335,10 +303,6 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, Import(flavor, e))
   | Id id ->
     st, convert_id env p id
-  | Class_get(class_id, id) ->
-    st, (p, Class_get(convert_class_id env class_id, id))
-  | Class_const(class_id, id) ->
-    st, (p, Class_const(convert_class_id env class_id, id))
   | _ ->
     st, expr
 

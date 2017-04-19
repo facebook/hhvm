@@ -26,9 +26,8 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
       function_is_generator,
       function_is_pair_generator =
     Emit_body.from_ast
-      ~has_this:false
+      ~scope:[Ast_scope.ScopeItem.Function ast_fun]
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
-      ast_fun.Ast.f_tparams
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
       ast_fun.Ast.f_body

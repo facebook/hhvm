@@ -457,10 +457,14 @@ let rec pHint : hint parser = fun node env ->
       Hoption (pHint nullable_type env)
     | SoftTypeSpecifier { soft_type; _ } ->
       Hsoft (pHint soft_type env)
-    | ClosureTypeSpecifier { closure_parameter_types; closure_return_type; _ }
-      -> Hfun
-      ( couldMap ~f:pHint closure_parameter_types env
-      , false
+    | ClosureTypeSpecifier { closure_parameter_types; closure_return_type; _} ->
+      let param_types =
+        List.map (fun x -> pHint x env) (as_list closure_parameter_types)
+      in
+      let is_variadic_param x = snd x = Htuple [] in
+      Hfun
+      ( List.filter (fun x -> not (is_variadic_param x)) param_types
+      , List.exists is_variadic_param param_types
       , pHint closure_return_type env
       )
     | TypeConstant { type_constant_left_type; type_constant_right_type; _ } ->
@@ -470,6 +474,9 @@ let rec pHint : hint parser = fun node env ->
       | Happly (b, []) -> Haccess (b, child, [])
       | _ -> missing_syntax "type constant base" node env
       )
+    | VariadicParameter _ ->
+      (* Clever trick warning: empty tuple types indicating variadic params *)
+      Htuple []
     | _ -> missing_syntax "type hint" node env
   in
   get_pos node, pHint_ node env

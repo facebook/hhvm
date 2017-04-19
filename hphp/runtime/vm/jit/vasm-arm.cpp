@@ -259,9 +259,9 @@ struct Vgen {
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const imul& i);
+  void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); a->Uxtw(W(i.d), W(i.s)); }
   void emit(const incl& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, UF(i.fl)); }
-  void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
@@ -317,8 +317,8 @@ struct Vgen {
   void emit(const storesd& i) { emit(store{i.s, i.m}); }
   void emit(const storeups& i);
   void emit(const storew& i) { a->Strh(W(i.s), M(i.m)); }
-  void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
+  void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); a->Uxtb(W(i.d), W(i.d)); }
+  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); a->Uxtb(W(i.d), W(i.d)); }
   void emit(const subl& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }

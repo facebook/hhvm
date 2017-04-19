@@ -162,7 +162,7 @@
 #  error Clang implementation not done for PPC64
 # endif
 # define DECLARE_FRAME_POINTER(fp) \
-  auto const fp = (ActRec*) __builtin_frame_address(0)
+  auto const fp = ((ActRec*) __builtin_frame_address(0))->m_sfp
 # define FRAME_POINTER_IS_ACCURATE
 
 #else

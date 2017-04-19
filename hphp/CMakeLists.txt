@@ -126,6 +126,13 @@ add_subdirectory(parser)
 
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)
+
+# The runtime/test binary require GTest and GMock to be installed globally
+option(RUNTIME_TEST_BIN "Create the HHVM runtime/test binary" OFF)
+if (RUNTIME_TEST_BIN)
+  add_subdirectory(runtime/test)
+endif ()
+
 if (ENABLE_ZEND_COMPAT)
   add_subdirectory(runtime/ext_zend_compat)
 endif()

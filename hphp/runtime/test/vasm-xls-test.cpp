@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -33,12 +34,21 @@ using namespace reg;
 template<class T> uint64_t test_const(T val) {
   using testfunc = double (*)();
   static const Abi test_abi = {
+#ifdef __aarch64__
+    .gpUnreserved = RegSet{},
+    .gpReserved = arm::abi().gp(),
+    .simdUnreserved = RegSet{vixl::d0},
+    .simdReserved = arm::abi().simd() - RegSet{vixl::d0},
+    .calleeSaved = arm::abi().calleeSaved,
+    .sf = arm::abi().sf
+#else
     .gpUnreserved = RegSet{},
     .gpReserved = x64::abi().gp(),
     .simdUnreserved = RegSet{xmm0},
     .simdReserved = x64::abi().simd() - RegSet{xmm0},
     .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
+#endif
   };
 
   constexpr auto blockSize = 4096;
@@ -67,13 +77,17 @@ template<class T> uint64_t test_const(T val) {
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
 
+  CGMeta meta;
+#ifdef __aarch64__
+  optimizeARM(vasm.unit(), test_abi, true /* regalloc */);
+  emitARM(unit, text, meta, nullptr);
+#else
   optimizeX64(vasm.unit(), test_abi, true /* regalloc */);
-  CGMeta fixups;
-
-  emitX64(unit, text, fixups, nullptr);
-  // The above code might use fixups.literals but shouldn't use anything else.
-  fixups.literals.clear();
-  EXPECT_TRUE(fixups.empty());
+  emitX64(unit, text, meta, nullptr);
+#endif
+  // The above code might use meta.literals but shouldn't use anything else.
+  meta.literals.clear();
+  EXPECT_TRUE(meta.empty());
 
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();

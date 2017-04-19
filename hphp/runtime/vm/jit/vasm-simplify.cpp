@@ -156,6 +156,29 @@ bool simplify(Env& env, const andqi& vandqi, Vlabel b, size_t i) {
     });
 }
 
+/*
+ * Simplify masking values with -1 in andXi{}:
+ * andbi{0xff, s, d} -> copy{s, d}
+ * andli{0xffffffff, s, d} -> copy{s, d}
+ */
+template<typename andi>
+bool simplify_andi(Env& env, const andi& inst, Vlabel b, size_t i) {
+  if (inst.s0.l() != -1 ||
+      env.use_counts[inst.sf] != 0) return false;
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    v << copy{inst.s1, inst.d};
+    return 1;
+  });
+}
+
+bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
+  return simplify_andi(env, andbi, b, i);
+}
+
+bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
+  return simplify_andi(env, andli, b, i);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
@@ -445,6 +468,32 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
   });
 }
 
+/*
+ * Simplify load followed by truncation.
+ * loadq{s, tmp} ; movtqb{tmp, d} -> loadtqb{s, d}
+ * loadq{s, tmp} ; movtql{tmp, d} -> loadtql{s, d}
+ */
+template<Vinstr::Opcode mov_op, typename loadt>
+bool simplify_load_truncate(Env& env, const load& load, Vlabel b, size_t i) {
+  if (env.use_counts[load.d] != 1) return false;
+  auto const& code = env.unit.blocks[b].code;
+  if (i + 1 >= code.size()) return false;
+
+  return if_inst<mov_op>(env, b, i + 1, [&] (const op_type<mov_op>& mov) {
+    if (load.d != mov.s) return false;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << loadt{load.s, mov.d};
+      return 2;
+    });
+  });
+}
+
+bool simplify(Env& env, const load& load, Vlabel b, size_t i) {
+  return
+    simplify_load_truncate<Vinstr::movtqb, loadtqb>(env, load, b, i) ||
+    simplify_load_truncate<Vinstr::movtql, loadtql>(env, load, b, i);
+}
+
 bool simplify(Env& env, const movzlq& inst, Vlabel b, size_t i) {
   auto const def_op = env.def_insts[inst.s];
 
@@ -471,29 +520,6 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
     v << lea{reg::rsp[8], reg::rsp};
     return 1;
   });
-}
-
-/*
- * Eliminate masking values with -1 in andXi.
- * andbi s0=0xff s1=val0 d=val1 -> copy s=val0 d=val1
- * andli s0=0xffffffff s1=val0 d=val1 -> copy s=val0 d=val1
- */
-template<typename andi>
-bool simplify_andi(Env& env, const andi& inst, Vlabel b, size_t i) {
-  if (inst.s0.l() != -1 ||
-      env.use_counts[inst.sf] != 0) return false;
-  return simplify_impl(env, b, i, [&] (Vout& v) {
-    v << copy{inst.s1, inst.d};
-    return 1;
-  });
-}
-
-bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
-  return simplify_andi(env, andbi, b, i);
-}
-
-bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
-  return simplify_andi(env, andli, b, i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

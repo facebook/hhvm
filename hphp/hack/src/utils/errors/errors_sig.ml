@@ -360,4 +360,8 @@ module type S = sig
   val required_field_is_optional : Pos.t -> Pos.t -> string -> unit
   val array_get_with_optional_field : Pos.t -> Pos.t -> string -> unit
   val unknown_fields_not_supported : Pos.t -> unit
+  val goto_label_already_defined : string -> Pos.t -> Pos.t -> unit
+  val goto_label_undefined : Pos.t -> string -> unit
+  val goto_label_defined_in_finally : Pos.t -> string -> unit
+  val goto_invoked_in_finally : Pos.t -> string -> unit
 end

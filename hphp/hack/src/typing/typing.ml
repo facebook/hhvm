@@ -452,6 +452,8 @@ and block env stl =
 and stmt env = function
   | Fallthrough ->
       env, T.Fallthrough
+  | GotoLabel _
+  | Goto _
   | Noop ->
       env, T.Noop
   | Expr e ->

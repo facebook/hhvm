@@ -490,6 +490,10 @@ module Naming                               = struct
   let dollardollar_unused                   = 2069 (* DONT MODIFY!!!! *)
   let illegal_member_variable_class         = 2070 (* DONT MODIFY!!!! *)
   let too_few_type_arguments                = 2071 (* DONT MODIFY!!!! *)
+  let goto_label_already_defined            = 2072 (* DONT MODIFY!!!! *)
+  let goto_label_undefined                  = 2073 (* DONT MODIFY!!!! *)
+  let goto_label_defined_in_finally         = 2074 (* DONT MODIFY!!!! *)
+  let goto_invoked_in_finally               = 2075 (* DONT MODIFY!!!! *)
 
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
@@ -1089,6 +1093,31 @@ let using_internal_class pos name =
  let too_few_type_arguments p =
    add Naming.too_few_type_arguments p
      ("Too few type arguments for this type")
+
+let goto_label_already_defined
+    label_name
+    redeclaration_pos
+    original_delcaration_pos =
+  add_list
+    Naming.goto_label_already_defined
+    [
+      redeclaration_pos, "Cannot redeclare the goto label '" ^ label_name ^ "'";
+      original_delcaration_pos, "Declaration is here";
+    ]
+
+let goto_label_undefined pos label_name =
+  add Naming.goto_label_undefined pos ("Undefined goto label: " ^ label_name)
+
+let goto_label_defined_in_finally pos label_name =
+  add Naming.goto_label_defined_in_finally
+    pos
+    "It is illegal to define a goto label within a finally block."
+
+let goto_invoked_in_finally pos label_name =
+  add Naming.goto_invoked_in_finally
+    pos
+    "It is illegal to invoke goto within a finally block."
+
 
 (*****************************************************************************)
 (* Init check errors *)

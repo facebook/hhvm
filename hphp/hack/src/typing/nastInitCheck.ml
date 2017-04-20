@@ -175,6 +175,8 @@ and stmt env acc st =
       let acc = List.fold_left ~f:expr ~init:acc el in
       assign env acc DICheck.parent_init_prop
     | Expr e -> expr acc e
+    | GotoLabel _
+    | Goto _
     | Break _ -> acc
     | Continue _ -> acc
     | Throw (_, e) -> expr acc e

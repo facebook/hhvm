@@ -47,6 +47,7 @@ end = struct
     | Continue _
     | Throw _
     | Return _
+    | Goto _
     | Expr (_, Yield_break)
     | Expr (_, Assert (AE_assert (_, False)))
       -> raise Exit
@@ -82,6 +83,7 @@ end = struct
     | Foreach _
     | Noop
     | Fallthrough
+    | GotoLabel _
     | Expr _
     | Static_var _ -> ()
 
@@ -137,6 +139,7 @@ end = struct
     | Continue _
     | Throw _
     | Return _
+    | Goto _
     | Expr (_, Yield_break)
     | Expr (_, Assert (AE_assert (_, False))) -> raise Exit
     | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _)) ->
@@ -160,6 +163,7 @@ end = struct
     | For _
     | Foreach _
     | Noop
+    | GotoLabel _
     | Expr _
     | Static_var _ -> ()
 

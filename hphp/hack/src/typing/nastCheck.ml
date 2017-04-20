@@ -57,6 +57,7 @@ module CheckFunctionType = struct
         ()
     | _, Noop
     | _, Fallthrough
+    | _, (GotoLabel _ | Goto _)
     | _, Break _ | _, Continue _ -> ()
     | _, Static_var _ -> ()
     | _, If (_, b1, b2) ->
@@ -715,6 +716,8 @@ and stmt env = function
   | Return (p, _) when env.t_is_finally ->
     Errors.return_in_finally p; ()
   | Return (_, None)
+  | GotoLabel _
+  | Goto _
   | Noop
   | Fallthrough -> ()
   | Break p -> begin

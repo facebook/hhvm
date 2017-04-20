@@ -144,6 +144,8 @@ struct
     | S.Continue p -> T.Continue p
     | S.Throw (b, e) -> T.Throw (b, map_expr f e)
     | S.Return (p, oe) -> T.Return (p, Option.map oe (map_expr f))
+    | S.GotoLabel label -> T.GotoLabel label
+    | S.Goto label -> T.Goto label
     | S.Static_var el -> T.Static_var (map_exprl f el)
     | S.If(e, b1, b2) -> T.If (map_expr f e, map_block f b1, map_block f b2)
     | S.Do(b, e) -> T.Do(map_block f b, map_expr f e)

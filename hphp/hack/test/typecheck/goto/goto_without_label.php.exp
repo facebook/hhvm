@@ -1,1 +1,2 @@
-No errors
+File "goto_without_label.php", line 4, characters 3-6:
+Undefined goto label: L0 (Naming[2073])

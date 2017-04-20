@@ -1,0 +1,4 @@
+File "goto_label_redeclaration.php", line 6, characters 3-4:
+Cannot redeclare the goto label 'L0' (Naming[2072])
+File "goto_label_redeclaration.php", line 4, characters 3-4:
+Declaration is here

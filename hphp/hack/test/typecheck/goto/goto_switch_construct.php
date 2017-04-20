@@ -4,10 +4,8 @@ function gotoSwitchConstruct(int $x): void {
   switch ($x) {
     case 1:
       goto L1;
-      break;
     case 2:
       goto L2;
-      break;
   }
 
   L0:

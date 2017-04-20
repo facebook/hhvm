@@ -48,6 +48,9 @@ type genv = {
   (* are we in the body of a try statement? *)
   in_try: bool;
 
+  (* are we in the body of a finally statement? *)
+  in_finally: bool;
+
   (* In function foo<T1, ..., Tn> or class<T1, ..., Tn>, the field
    * type_params knows T1 .. Tn. It is able to find out about the
    * constraint on these parameters. *)
@@ -120,6 +123,10 @@ module Env : sig
   val fun_id : genv * lenv -> Ast.id -> Ast.id
   val bind_class_const : genv * lenv -> Ast.id -> unit
   val bind_prop : genv * lenv -> Ast.id -> unit
+  val goto_label : genv * lenv -> string -> Pos.t option
+  val new_goto_label : genv * lenv -> pstring -> unit
+  val new_goto_target : genv * lenv -> pstring -> unit
+  val check_goto_references : genv * lenv -> unit
 
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val scope_all : genv * lenv -> (genv * lenv -> 'a) -> all_locals * 'a
@@ -180,6 +187,17 @@ end = struct
     (** Allows us to ban $$ appearances outside of pipe expressions and
      * equals expressions within pipes.  *)
     inside_pipe: bool ref;
+
+    (**
+     * A map from goto label strings to named labels.
+     *)
+    goto_labels: Pos.t SMap.t ref;
+
+    (**
+     * A map from goto label used in a goto statement to the position of that
+     * goto label usage.
+     *)
+    goto_targets: Pos.t SMap.t ref;
   }
 
   let empty_local unbound_mode = {
@@ -189,6 +207,8 @@ end = struct
     unbound_mode;
     has_unsafe = ref false;
     inside_pipe = ref false;
+    goto_labels = ref SMap.empty;
+    goto_targets = ref SMap.empty;
   }
 
   let make_class_genv tcopt tparams mode (cid, ckind) namespace = {
@@ -196,6 +216,7 @@ end = struct
       (if !Autocomplete.auto_complete then FileInfo.Mpartial else mode);
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = tparams;
     current_cls   = Some (cid, ckind);
     class_consts = Hashtbl.create 0;
@@ -215,6 +236,7 @@ end = struct
     in_mode       = FileInfo.(if !Ide.is_ide_mode then Mpartial else Mstrict);
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = cstrs;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -233,6 +255,7 @@ end = struct
     in_mode       = f_mode;
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = params;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -248,6 +271,7 @@ end = struct
     in_mode       = cst.cst_mode;
     tcopt;
     in_try        = false;
+    in_finally    = false;
     type_params   = SMap.empty;
     current_cls   = None;
     class_consts = Hashtbl.create 0;
@@ -523,6 +547,34 @@ end = struct
 
   let bind_prop (genv, _env) x =
     bind_class_member genv.class_props x
+
+  (**
+   * Returns the position of the goto label declaration, if it exists.
+   *)
+  let goto_label (_, { goto_labels; _ }) label =
+    SMap.get label !goto_labels
+
+  (**
+   * Adds a goto label and the position of its declaration to the known labels.
+   *)
+  let new_goto_label (_, { goto_labels; _ }) (pos, label) =
+    goto_labels := SMap.add label pos !goto_labels
+
+  (**
+   * Adds a goto target and its reference position to the known targets.
+   *)
+  let new_goto_target (_, { goto_targets; _ }) (pos, label) =
+    goto_targets := SMap.add label pos !goto_targets
+
+  (**
+   * Ensures that goto statements do not reference goto labels that are not
+   * known within the current lenv.
+   *)
+  let check_goto_references (_, { goto_labels; goto_targets; _ }) =
+    let check_label referenced_label referenced_label_pos =
+      if not (SMap.mem referenced_label !goto_labels) then
+        Errors.goto_label_undefined referenced_label_pos referenced_label in
+    SMap.iter check_label !goto_targets
 
   (* Scope, keep the locals, go and name the body, and leave the
    * local environment intact
@@ -1581,10 +1633,8 @@ module Make (GetLocals : GetLocals) = struct
     | Throw e              -> let terminal = not (fst env).in_try in
                               N.Throw (terminal, expr env e)
     | Return (p, e)        -> N.Return (p, oexpr env e)
-    | GotoLabel _
-    | Goto _ ->
-      (* TODO(t17085086): Name the goto's label *)
-      N.Noop
+    | GotoLabel label      -> name_goto_label env label
+    | Goto label           -> name_goto env label
     | Static_var el        -> N.Static_var (static_varl env el)
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
@@ -1718,7 +1768,7 @@ module Make (GetLocals : GetLocals) = struct
       (* isolate finally from the rest of the try-catch: if the first
        * statement of the try is an uncaught exception, finally will
        * still be executed *)
-      let _all_finally, fb = branch env fb in
+      let _all_finally, fb = branch ({genv with in_finally = true}, lenv) fb in
       let all_locals_b, b = branch ({genv with in_try = true}, lenv) b in
       let all_locals_cl, cl = catchl env cl in
       List.iter all_locals_cl (Env.extend_all_locals env);
@@ -1742,6 +1792,40 @@ module Make (GetLocals : GetLocals) = struct
     Env.scope_all env begin fun env ->
       List.map stmt_l (stmt env)
     end
+
+  (**
+   * Names a goto label.
+   *
+   * The goto label is added to the local labels if it is not already there.
+   * Otherwise, an error is produced.
+   *
+   * An error is produced if this is called within a finally block.
+   *)
+  and name_goto_label
+      ({ in_finally; _ }, _ as env) (label_pos, label_name as label) =
+    (match Env.goto_label env label_name with
+      | Some original_declaration_pos ->
+        Errors.goto_label_already_defined
+          label_name
+          label_pos
+          original_declaration_pos
+      | None -> Env.new_goto_label env label);
+    if in_finally then
+      Errors.goto_label_defined_in_finally label_pos label_name;
+    N.GotoLabel label
+
+  (**
+   * Names a goto target.
+   *
+   * The goto statement's target label is added to the local goto targets.
+   *
+   * An error is produced if this is called within a finally block.
+   *)
+  and name_goto
+      ({ in_finally; _ }, _ as env) (label_pos, label_name as label) =
+    Env.new_goto_target env label;
+    if in_finally then Errors.goto_invoked_in_finally label_pos label_name;
+    N.Goto label
 
   and static_varl env l = List.map l (static_var env)
   and static_var env = function
@@ -2263,7 +2347,9 @@ module Make (GetLocals : GetLocals) = struct
           | N.FVvariadicArg param -> Env.add_param env param
         in
         let body = block env fub_ast in
-        let unsafe = func_body_had_unsafe env in {
+        let unsafe = func_body_had_unsafe env in
+        Env.check_goto_references env;
+        {
           N.fnb_nast = body;
           fnb_unsafe = unsafe;
         }
@@ -2283,6 +2369,7 @@ module Make (GetLocals : GetLocals) = struct
         in
         let body = block env fub_ast in
         let unsafe = func_body_had_unsafe env in
+        Env.check_goto_references env;
         N.NamedBody {
           N.fnb_nast = body;
           fnb_unsafe = unsafe;

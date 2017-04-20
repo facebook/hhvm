@@ -28,6 +28,35 @@ let zero = Int Int64.zero
 let null = Null
 let one = Int Int64.one
 
+module StringOps = struct
+  let make_with op s1 s2 =
+    if String.length s1 = 0 || String.length s2 = 0 then ""
+    else begin
+      let len = min (String.length s1) (String.length s2) in
+      let result = Bytes.create len in
+      for i = 0 to len - 1 do
+        let i1 = int_of_char (String.get s1 i) in
+        let i2 = int_of_char (String.get s2 i) in
+        Bytes.set result i (char_of_int (op i1 i2))
+      done;
+      Bytes.to_string result
+    end
+
+  let bitwise_and = make_with (land)
+  let bitwise_or = make_with (lor)
+  let bitwise_xor = make_with (lxor)
+
+  let bitwise_not s =
+    let result = Bytes.create (String.length s) in
+    String.iteri (fun i c ->
+      (* keep only last byte *)
+      let b = lnot (int_of_char c) land 0xFF in
+      Bytes.set result i (char_of_int b);
+    ) s;
+    Bytes.to_string result
+end
+
+
 (* Cast to a boolean: the (bool) operator in PHP *)
 let to_bool v =
   match v with
@@ -47,10 +76,33 @@ let to_int v =
   | Bool true -> Some Int64.one
   | Null -> Some Int64.zero
   | String s ->
-    (* TODO: deal with strings whose initial prefix is digits *)
-    (try Some (Int64.of_string s) with Failure _ -> None)
+    begin
+    (*https://github.com/php/php-langspec/blob/master/spec/08-conversions.md
+      If the source is a numeric string or leading-numeric string having
+      integer format, if the precision can be preserved the result value
+      is that string's integer value; otherwise, the result is undefined.
+      If the source is a numeric string or leading-numeric string having
+      floating-point format, the string's floating-point value is treated as
+      described above for a conversion from float. The trailing non-numeric
+      characters in leading-numeric strings are ignored. For any other string,
+      the result value is 0.
+    *)
+      (* TODO: deal with strings whose initial prefix is digits *)
+      match (try Some (Int64.of_string s) with Failure _ -> None) with
+      | None ->
+        begin
+          try Some (Int64.of_float (float_of_string s))
+          with Failure _ -> Some Int64.zero
+        end
+      | x -> x
+    end
   | Int i -> Some i
   | Float f ->
+    (*If the source type is float, for the values INF, -INF, and NAN,
+    the result value is zero*)
+    let fpClass = classify_float f in
+    if fpClass = FP_nan || fpClass = FP_infinite then Some Int64.zero
+    else
     (* TODO: get this right. It's unlikely that Caml and PHP semantics match up *)
     (try Some (Int64.of_float f) with Failure _ -> None)
 
@@ -62,7 +114,14 @@ let to_float v =
   | Bool true -> Some 1.0
   | Null -> Some 0.0
   | String s ->
-    (try Some (float_of_string s) with Failure _ -> None)
+    (*If the source is a numeric string or leading-numeric string having
+    integer format, the string's integer value is treated as described above
+    for a conversion from int. If the source is a numeric string or
+    leading-numeric string having floating-point format, the result value
+    is the closest approximation to the string's floating-point value.
+    The trailing non-numeric characters in leading-numeric strings are ignored.
+    For any other string, the result value is 0.*)
+    (try Some (float_of_string s) with Failure _ -> Some 0.0)
   | Int i ->
     (try Some (Int64.to_float i) with Failure _ -> None)
   | Float f -> Some f
@@ -131,6 +190,16 @@ let div v1 v2 =
   | Float f1, Float f2 -> Some (Float (f1 /. f2))
   | _, _ -> None
 
+let shift f v1 v2 =
+  match Option.both (to_int v1) (to_int v2) with
+  | Some (l, r) when r > 0L ->
+    Some (Int (f l (Int64.to_int r)))
+  | _ -> None
+
+let shift_left v1 v2 = shift Int64.shift_left v1 v2
+
+let shift_right v1 v2 = shift Int64.shift_right v1 v2
+
 (* String concatenation *)
 let concat v1 v2 =
   Some (String (to_string v1 ^ to_string v2))
@@ -143,19 +212,176 @@ let not v =
 let bitwise_not v =
   match v with
   | Int i -> Some (Int (Int64.lognot i))
+  | String s -> Some (String (StringOps.bitwise_not s))
   | _ -> None
 
 let bitwise_and v1 v2 =
   match v1, v2 with
   | Int i1, Int i2 -> Some (Int (Int64.logand i1 i2))
+  | String s1, String s2 -> Some (String (StringOps.bitwise_and s1 s2))
   | _ -> None
 
 let bitwise_or v1 v2 =
   match v1, v2 with
   | Int i1, Int i2 -> Some (Int (Int64.logor i1 i2))
+  | String s1, String s2 -> Some (String (StringOps.bitwise_or s1 s2))
   | _ -> None
 
 let bitwise_xor v1 v2 =
   match v1, v2 with
   | Int i1, Int i2 -> Some (Int (Int64.logxor i1 i2))
+  | String s1, String s2 -> Some (String (StringOps.bitwise_xor s1 s2))
   | _ -> None
+
+(*
+  returns (t * t) option option
+  None - one of operands was not literal
+  Some(None) - both operands were literal but with incompatible types
+  Some (Some (l, r)) - both operands were converted successfully
+*)
+let convert_literals_for_relational_ops v1 v2 =
+  let rec convert v1 v2 can_flip =
+    match v1, v2 with
+    | Null, Null
+    | Bool _, Bool _
+    | Int _ , Int _
+    | Float _, Float _
+    | String _, String _ -> Some (Some(v1, v2))
+    (*  bool op null *)
+    | Bool _, Null -> Some (Some (v1, Bool (to_bool v2)))
+    (* int op null *)
+    | Int _, Null -> Some (Option.map(to_int v2) (fun v -> v1, Int v))
+    (* int op bool *)
+    | Int _, Bool _ -> Some (Some (Bool (to_bool v1), v2))
+    (* float op null *)
+    | Float _, Null -> Some (Option.map(to_float v2) (fun v -> v1, Float v))
+    (* float op bool *)
+    | Float _, Bool _ -> Some (Some (Bool (to_bool v1), v2))
+    (* float op int *)
+    | Float _, Int _ -> Some (Option.map(to_float v2)(fun v -> v1, Float v))
+    (* string op null *)
+    | String _, Null -> Some (Some (v1, String (to_string v2)))
+    (* string op bool*)
+    | String _, Bool _ -> Some (Some (Bool (to_bool v1), v2))
+    (* string op int *)
+    | String _, Int _ -> Some (Option.map(to_int v1) (fun v -> Int v, v2))
+    (* string op float*)
+    | String _, Float _ -> Some (Option.map(to_float v1) (fun v -> Float v, v2))
+    | _ ->
+      if can_flip then
+        match convert v2 v1 false with
+        | Some (Some (r, l)) -> Some (Some (l, r))
+        | x -> x
+      else None
+  in
+  convert v1 v2 true
+
+(*https://github.com/php/php-langspec/blob/master/spec/10-expressions.md#grammar-unary-op-expression*)
+let eqeqeq v1 v2 =
+  (*Operator === represents same type and value equality, or identity,
+    comparison, and operator !== represents the opposite of ===.
+    The values are considered identical if they have the same type and
+    compare as equal*)
+  let v =
+    match v1, v2 with
+    | Null, Null -> Some true
+    | Bool v1, Bool v2 -> Some (v1 = v2)
+    | Int v1, Int v2 -> Some (v1 = v2)
+    | Float v1, Float v2 -> Some (v1 = v2)
+    (*Strings are identical if they contain the same characters,
+      unlike value comparison operators no conversions
+      are performed for numeric strings*)
+    | String v1, String v2 -> Some (v1 = v2)
+    | _ -> Some false
+  in
+  Option.map v (fun v -> Bool v)
+
+let compare_strings op_int op_float v1 v2 =
+  (* handle numeric strings first
+  If one of the operands has arithmetic type, is a resource,
+  or a numeric string, which can be represented as int or float without
+  loss of precision, the operands are converted to the corresponding
+  arithmetic type, with float taking precedence over int*)
+  match Option.both (to_int v1) (to_int v2) with
+  | Some (l, r) -> Some (Bool (op_int l r))
+  | _ ->
+  match Option.both (to_float v1) (to_float v2) with
+  | Some (l, r) -> Some (Bool (op_float l r))
+  | _ -> None
+
+let eqeq v1 v2 =
+  let compare v1 v2 =
+    match v1, v2 with
+    | String _, String _ ->
+      begin
+        match compare_strings (=) (=) v1 v2 with
+        | None -> eqeqeq v1 v2
+        | x -> x
+      end
+    | _ -> eqeqeq v1 v2
+  in
+  (*For operators ==, !=, and <>, the operands of different types are converted
+  and compared according to the same rules as in relational operators*)
+  Option.bind (convert_literals_for_relational_ops v1 v2) (function
+    | Some (l, r) ->
+      compare l r
+    (*Two objects of different types are always not equal.*)
+    | None ->
+      Some (Bool false)
+  )
+
+let diff v1 v2 = Option.bind (eqeq v1 v2) not
+
+let diff2 v1 v2 = Option.bind (eqeqeq v1 v2) not
+
+let less_than v1 v2 =
+  let compare v1 v2 =
+    match v1, v2 with
+    | Null, Null -> Some (Bool false)
+    | Float l, Float r -> Some (Bool (l < r))
+    | Int l, Int r -> Some (Bool (l < r))
+    | String l, String r ->
+      begin
+        match compare_strings (<) (<) v1 v2 with
+        | None -> Some( Bool (l < r))
+        | x ->x
+      end
+    | Bool l, Bool r -> Some (Bool (l < r))
+    | _ -> None
+  in
+  Option.bind (convert_literals_for_relational_ops v1 v2) (function
+    | Some (l, r) -> compare l r
+    | None -> None
+  )
+
+let less_than_equals v1 v2 =
+  let compare v1 v2 =
+    match v1, v2 with
+    | Null, Null -> Some (Bool true)
+    | Float l, Float r -> Some (Bool (l <= r))
+    | Int l, Int r -> Some (Bool (l <= r))
+    | String l, String r ->
+      begin
+        match compare_strings (<=) (<=) v1 v2 with
+        | None -> Some (Bool (l <= r))
+        | x -> x
+      end
+    | Bool l, Bool r -> Some (Bool (l <= r))
+    | _ -> None
+  in
+  Option.bind (convert_literals_for_relational_ops v1 v2) (function
+    | Some (l, r) -> compare l r
+    | None -> None
+  )
+
+let greater_than v1 v2 = less_than v2 v1
+
+let greater_than_equals v1 v2 = less_than_equals v2 v1
+
+let cast_to_string v = Some (String (to_string v))
+
+let cast_to_int v = Option.map (to_int v) (fun x -> Int x)
+
+let cast_to_bool v = Some (Bool (to_bool v))
+
+let cast_to_float v = Option.map (to_float v) (fun x -> Float x)

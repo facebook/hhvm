@@ -45,7 +45,6 @@ quick/autoload7.php
 quick/autoload_case.php
 quick/backtick.php
 quick/bitwise_not.php
-quick/bitwise_string.php
 quick/bool_types.php
 quick/builtin_extension_DOMAttr.php
 quick/builtin_extension_DOMCDATASection.php

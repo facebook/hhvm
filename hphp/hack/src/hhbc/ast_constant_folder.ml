@@ -9,6 +9,7 @@
 *)
 module A = Ast
 module TV = Typed_value
+module SN = Naming_special_names
 
 (* Literal expressions can be converted into values *)
 let expr_to_typed_value (_, expr_) =
@@ -19,6 +20,8 @@ let expr_to_typed_value (_, expr_) =
   | A.Null -> Some TV.null
   | A.String (_, s) -> Some (TV.String s)
   | A.Float (_, s) -> Some (TV.Float (float_of_string s))
+  | A.Id (_, id) when id = "NAN" -> Some (TV.Float nan)
+  | A.Id (_, id) when id = "INF" -> Some (TV.Float infinity)
   | _ -> None
 
 (* Any value can be converted into a literal expression *)
@@ -52,6 +55,33 @@ let binop_on_values binop v1 v2 =
   | A.Amp -> TV.bitwise_and v1 v2
   | A.Bar -> TV.bitwise_or v1 v2
   | A.Xor -> TV.bitwise_xor v1 v2
+  | A.Eqeq -> TV.eqeq v1 v2
+  | A.EQeqeq -> TV.eqeqeq v1 v2
+  | A.Diff -> TV.diff v1 v2
+  | A.Diff2 -> TV.diff2 v1 v2
+  | A.Gtgt -> TV.shift_right v1 v2
+  | A.Ltlt -> TV.shift_left v1 v2
+  | A.Gt -> TV.greater_than v1 v2
+  | A.Gte -> TV.greater_than_equals v1 v2
+  | A.Lt -> TV.less_than v1 v2
+  | A.Lte -> TV.less_than_equals v1 v2
+  | _ -> None
+
+(* try to apply type cast to a value *)
+let cast_value hint v =
+  match hint with
+  | A.Happly((_, id), []) ->
+    if id = SN.Typehints.int || id = SN.Typehints.integer then
+      TV.cast_to_int v
+    else if id = SN.Typehints.bool || id = SN.Typehints.boolean then
+      TV.cast_to_bool v
+    else if id = SN.Typehints.string then
+      TV.cast_to_string v
+    else if id = SN.Typehints.real ||
+            id = SN.Typehints.double ||
+            id = SN.Typehints.float then
+      TV.cast_to_float v
+    else None
   | _ -> None
 
 (* We build a visitor over the syntax tree that recursively transforms unary and
@@ -64,6 +94,17 @@ let binop_on_values binop v1 v2 =
 let folder_visitor =
 object (self)
   inherit [_] Ast_visitors.endo as super
+
+  (* Type casts *)
+  method! on_Cast env _this hint e =
+    let e = self#on_expr env e in
+    let default () = super#on_Cast env (A.Cast(hint, e)) hint e in
+    match expr_to_typed_value e with
+    | None -> default ()
+    | Some v ->
+      match cast_value (snd hint) v with
+      | None -> default ()
+      | Some v -> value_to_expr (fst e) v
 
   (* Unary operations. `this` is the parent expression. We don't use `env` *)
   method! on_Unop env _this unop e =

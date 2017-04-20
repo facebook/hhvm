@@ -943,7 +943,7 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateKeyset();
           for (ArrayIter iter(obj); iter; ++iter) {
-            arr.append(iter.first());
+            arr.append(iter.second());
           }
           a = arr.detach();
         } else {

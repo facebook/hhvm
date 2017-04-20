@@ -2921,7 +2921,7 @@ Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
              inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
     auto arr = Array::CreateKeyset();
     for (ArrayIter iter(input.toObject()); iter; ++iter) {
-      arr.append(iter.first());
+      arr.append(iter.second());
     }
     return arr;
   } else {

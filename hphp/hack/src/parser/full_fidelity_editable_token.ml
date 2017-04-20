@@ -51,6 +51,18 @@ let leading token =
 let trailing token =
   token.trailing
 
+let append_leading token trivia =
+  { token with leading = token.leading @ [ trivia ]}
+
+let prepend_leading token trivia =
+  { token with leading = trivia :: token.leading }
+
+let append_trailing token trivia =
+  { token with trailing = token.trailing @ [ trivia ]}
+
+let prepend_trailing token trivia =
+  { token with trailing = trivia :: token.trailing }
+
 let text token =
   token.text
 

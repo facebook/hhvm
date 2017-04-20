@@ -17,7 +17,7 @@ end
 
 module WithSyntax(Syntax: RewritableType) = struct
 
-  (* The rewriter takes a function f that is [node] -> node -> (node, bool),
+  (* The rewriter takes a function f that is [node] -> node -> (node, bool) opt,
      where the bool indicates whether something changed. The rewriter
      itself returns (node, bool).  The list of nodes passed in to f
      is the parent chain of the node. First the children are rewritten,
@@ -65,7 +65,7 @@ module WithSyntax(Syntax: RewritableType) = struct
 
   (* These are simpler versions of the rewriter, for cases where the caller
      does not need the parent context.
-     The rewriter takes a function f that is node -> (node, bool), where
+     The rewriter takes a function f that is node -> (node, bool) opt, where
      the bool indicates whether something changed.  *)
 
   let rewrite_post f node =

@@ -138,6 +138,7 @@ type instruct_lit_const =
   | NewStructArray of Litstr.id list
   | NewVecArray of int
   | NewKeysetArray of int
+  | NewPair
   | AddElemC
   | AddElemV
   | AddNewElemC
@@ -145,7 +146,6 @@ type instruct_lit_const =
   | NewCol of collection_type
   | ColFromArray of collection_type
   | MapAddElemC
-  | ColAddNewElemC
   | Cns of Litstr.id
   | CnsE of Litstr.id
   | CnsU of Litstr.id * Litstr.id

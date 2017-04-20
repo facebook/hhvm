@@ -73,7 +73,6 @@ let string_of_lit_const instruction =
     | AddElemC          -> "AddElemC"
     | AddNewElemC       -> "AddNewElemC"
     | Array (i, _)      -> sep ["Array"; "@A_" ^ string_of_int i]
-    | ColAddNewElemC    -> "ColAddNewElemC"
     | ColFromArray i    -> sep ["ColFromArray"; string_of_int i]
     | Dict (i, _)       -> sep ["Dict"; "@A_" ^ string_of_int i]
     | Keyset (i, _)     -> sep ["Keyset"; "@A_" ^ string_of_int i]
@@ -85,6 +84,7 @@ let string_of_lit_const instruction =
     | NewPackedArray i  -> sep ["NewPackedArray"; string_of_int i]
     | NewStructArray l  ->
       sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
+    | NewPair -> "NewPair"
     | Vec (i, _)        -> sep ["Vec"; "@A_" ^ string_of_int i]
     | ClsCns (name, id) ->
       sep ["ClsCns"; SU.quote_string name; string_of_classref id]
@@ -787,10 +787,10 @@ let rec attribute_argument_to_string argument =
     attribute_collection_argument_to_string "k" num fields
   | NYI text -> SS.str @@ "NYI: " ^ text
   | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
-  | MapAddElemC | ColAddNewElemC | File | Dir | Method | NameA
+  | MapAddElemC | File | Dir | Method | NameA
   | NewArray _ | NewMixedArray _ | NewDictArray _
   | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _) | NewPackedArray _
-  | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _
+  | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _ | NewPair
   | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
   | ClsCnsD (_, _) -> SS.str
     "\r# NYI: unexpected literal kind in attribute_argument_to_string"

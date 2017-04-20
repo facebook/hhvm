@@ -97,7 +97,6 @@ let instr_throw = instr (IContFlow Throw)
 
 let instr_add_elemc = instr (ILitConst (AddElemC))
 let instr_add_new_elemc = instr (ILitConst (AddNewElemC))
-let instr_col_add_new_elemc = instr (ILitConst (ColAddNewElemC))
 let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
 let instr_fpushctord nargs id = instr (ICall (FPushCtorD (nargs, id)))
 let instr_fpushctor nargs id = instr (ICall (FPushCtor (nargs, id)))

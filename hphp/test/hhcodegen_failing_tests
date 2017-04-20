@@ -121,7 +121,6 @@ quick/cnvDbl.php
 quick/cnvInt.php
 quick/cnvObj.php
 quick/cnvStr.php
-quick/collection-exceptions.php
 quick/collection-initializer.php
 quick/constIntToString.php
 quick/const_cflow.php
@@ -149,7 +148,6 @@ quick/cuf__callStatic2.php
 quick/cuf__callStatic3.php
 quick/cuf__callStatic4.php
 quick/cuf__callStatic5.php
-quick/debug_backtrace.php
 quick/debug_backtrace_continuation.php
 quick/debug_backtrace_trait.php
 quick/dec-minint.php
@@ -369,7 +367,6 @@ quick/list-assign-ref-param.php
 quick/list-assignment.php
 quick/locals.php
 quick/magic-get-set.php
-quick/map_toarray_warn.php
 quick/merge_globals.php
 quick/method-undefined.php
 quick/method_param_promotion_error.php
@@ -459,7 +456,6 @@ quick/retype.php
 quick/rounding.php
 quick/selfparent.php
 quick/serialize.php
-quick/set_toarray_warn.php
 quick/setop-magic2.php
 quick/setop-magic4.php
 quick/setop-magic5.php

@@ -791,10 +791,10 @@ and emit_static_collection ~transform_to_collection expr es =
   let es = List.rev es in
   let lit_constructor = match snd expr with
     | A.Array _ -> Array (a_label, es)
-    | A.Collection ((_, "dict"), _) -> Dict (a_label, es)
+    | A.Collection ((_, ("dict" | "Map" | "ImmMap")), _) -> Dict (a_label, es)
     | A.Collection ((_, "vec"), _) -> Vec (a_label, es)
     | A.Collection ((_, "keyset"), _) -> Keyset (a_label, es)
-    | _ -> failwith "impossible"
+    | _ -> failwith "emit_static_collection: unexpected collection type"
   in
   let transform_instr =
     match transform_to_collection with
@@ -823,7 +823,8 @@ and emit_dynamic_collection ~transform_to_collection expr es =
       | A.Array _ -> NewPackedArray count
       | A.Collection ((_, "vec"), _) -> NewVecArray count
       | A.Collection ((_, "keyset"), _) -> NewKeysetArray count
-      | _ -> failwith "impossible"
+      | _ ->
+        failwith "emit_dynamic_collection (values only): unexpected expression"
     in
     gather [
       gather @@
@@ -844,8 +845,9 @@ and emit_dynamic_collection ~transform_to_collection expr es =
   end else begin
     let lit_constructor = match snd expr with
       | A.Array _ -> NewMixedArray count
-      | A.Collection ((_, "dict"), _) -> NewDictArray count
-      | _ -> failwith "impossible"
+      | A.Collection ((_, ("dict" | "Set" | "ImmSet" | "Map" | "ImmMap")), _) ->
+        NewDictArray count
+      | _ -> failwith "emit_dynamic_collection: unexpected expression"
     in
     let transform_instr =
       match transform_to_collection with
@@ -855,11 +857,13 @@ and emit_dynamic_collection ~transform_to_collection expr es =
     let add_elem_instr =
       if transform_to_collection = None
       then instr_add_new_elemc
-      else instr_col_add_new_elemc
+      else gather [instr_dup; instr_add_elemc]
     in
-    gather @@
-      (instr @@ ILitConst lit_constructor) :: transform_instr ::
-      (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc))
+    gather [
+      instr (ILitConst lit_constructor);
+      gather (List.map es ~f:(expr_and_newc add_elem_instr instr_add_elemc));
+      transform_instr;
+    ]
   end
 
 and emit_named_collection expr pos name fields =
@@ -867,29 +871,36 @@ and emit_named_collection expr pos name fields =
   | "dict" | "vec" | "keyset" -> emit_collection expr fields
   | "Vector" | "ImmVector" ->
     let collection_type = collection_type name in
+    if fields = []
+    then instr_newcol collection_type
+    else
     gather [
       emit_collection (pos, A.Collection ((pos, "vec"), fields)) fields;
       instr_colfromarray collection_type;
     ]
-  | "Set" | "ImmSet" | "Map" | "ImmMap" ->
+  | "Set" | "ImmSet" ->
+    let collection_type = collection_type name in
+    if fields = []
+    then instr_newcol collection_type
+    else
+      emit_dynamic_collection
+        ~transform_to_collection:(Some collection_type)
+        expr
+        fields
+  | "Map" | "ImmMap" ->
     let collection_type = collection_type name in
     if fields = []
     then instr_newcol collection_type
     else
       emit_collection
         ~transform_to_collection:collection_type
-        (pos, A.Array fields)
+        expr
         fields
   | "Pair" ->
-    let collection_type = collection_type name in
-    let values = gather @@ List.map
-      fields
-      ~f:(fun x ->
-        expr_and_newc instr_col_add_new_elemc instr_col_add_new_elemc x)
-    in
     gather [
-      instr_newcol collection_type;
-      values;
+      gather (List.map fields (function A.AFvalue e -> from_expr e
+                                | _ -> failwith "impossible Pair argument"));
+      instr (ILitConst NewPair);
     ]
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 

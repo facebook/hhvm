@@ -301,6 +301,55 @@ let get_num_cls_ref_slots instrseq =
         | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
         | _ -> num)
 
+let get_or_put_label name_label_map name =
+  match SMap.get name name_label_map with
+  | Some label -> label, name_label_map
+  | None ->
+      let label = Label.next_regular () in
+      label, SMap.add name label name_label_map
+
+let rewrite_user_labels_instr name_label_map instruction =
+  let get_result = get_or_put_label name_label_map in
+  match instruction with
+  | IContFlow (Jmp (Label.Named name)) ->
+      let label, name_label_map = get_result name in
+      IContFlow (Jmp label), name_label_map
+  | IContFlow (JmpNS (Label.Named name)) ->
+      let label, name_label_map = get_result name in
+      IContFlow (JmpNS label), name_label_map
+  | IContFlow (JmpZ (Label.Named name)) ->
+      let label, name_label_map = get_result name in
+      IContFlow (JmpZ label), name_label_map
+  | IContFlow (JmpNZ (Label.Named name)) ->
+      let label, name_label_map = get_result name in
+      IContFlow (JmpNZ label), name_label_map
+  | ILabel (Label.Named name) ->
+      let label, name_label_map = get_result name in
+      ILabel label, name_label_map
+  | i -> i, name_label_map
+
+let rewrite_user_labels instrseq =
+  let rec aux instrseq name_label_map =
+    match instrseq with
+    | Instr_try_fault (try_body, fault_body) ->
+      let try_body, name_label_map = aux try_body name_label_map in
+      let fault_body, name_label_map = aux fault_body name_label_map in
+      Instr_try_fault (try_body, fault_body), name_label_map
+    | Instr_concat l ->
+      let l, name_label_map = List.fold_left l
+        ~f:(fun (acc, map) s -> let l, map = aux s map in l :: acc, map)
+        ~init:([], name_label_map)
+      in
+      Instr_concat (List.rev l), name_label_map
+    | Instr_list l ->
+      let l, name_label_map = List.fold_left l
+        ~f:(fun (acc, map) i ->
+            let i, map = rewrite_user_labels_instr map i in i :: acc, map)
+        ~init:([], name_label_map)
+      in
+      Instr_list (List.rev l), name_label_map in
+  fst @@ aux instrseq SMap.empty
+
 (* TODO: What other instructions manipulate the class ref stack *)
 let rewrite_class_refs_instr num = function
 | ILitConst (ClsCns (id, _)) -> (num + 1, ILitConst (ClsCns (id, num + 1)))

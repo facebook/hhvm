@@ -353,6 +353,11 @@ quick/lambda3.php
 quick/lambda4.php
 quick/lambda7.php
 quick/lambda8.php
+quick/lexer_heredoc_buffer_boundary_65492.php
+quick/lexer_heredoc_buffer_boundary_65493.php
+quick/lexer_heredoc_buffer_boundary_65494.php
+quick/lexer_heredoc_label_cornercases.php
+quick/lexer_heredoc_many_buffers.php
 quick/lexer_heredoc_var_newlines.php
 quick/lexer_nowdoc_buffer_boundary_65492.php
 quick/lexer_nowdoc_buffer_boundary_65493.php

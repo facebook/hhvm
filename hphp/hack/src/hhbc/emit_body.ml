@@ -112,6 +112,7 @@ let from_ast ~scope ~skipawaitable
     default_value_setters;
     fault_instrs;
   ] in
+  let body_instrs = rewrite_user_labels body_instrs in
   let body_instrs = rewrite_class_refs body_instrs in
   let params, body_instrs =
     Label_rewriter.relabel_function params body_instrs in

@@ -123,6 +123,12 @@ type lsp_state_machine =
   | Main_loop
   | Post_shutdown
 
+type state = {
+  mutable lsp_state : lsp_state_machine;
+  client : ClientMessageQueue.t;
+  mutable server_conn : server_conn option;
+}
+
 type event =
   | Server_message of ServerCommandTypes.push
   | Server_exit of Exit_status.t
@@ -255,10 +261,7 @@ let get_next_message (server: server_conn) =
    from either client or server, we block until that message is completely
    received. Note: if server is None (meaning we haven't yet established
    connection with server) then we'll just block waiting for client. *)
-let get_next_event
-  ~(server: server_conn option)
-  ~(client: ClientMessageQueue.t)
-  : event =
+let get_next_event (state: state) : event =
   let from_server (server: server_conn) =
     try Server_message (get_next_message server)
     with _ -> Server_exit Exit_status.No_error (* TODO: failure? *)
@@ -278,9 +281,9 @@ let get_next_event
     | From_server -> from_server server
   in
 
-  match server with
-  | Some server -> from_either server client
-  | None -> from_client client
+  match state.server_conn with
+  | Some server -> from_either server state.client
+  | None -> from_client state.client
 
 (* respond: produces either a Response or an Error message, according
    to whether the json has an error-code or not. Note that JsonRPC and LSP
@@ -687,147 +690,150 @@ let do_initialize (params: Initialize.params)
     let message = (Printexc.to_string e) ^ ": " ^ (Printexc.get_backtrace ()) in
     raise (Error.Server_error_start (message, {retry = false;}))
 
+let handle_event (state: state) (event: event) : unit =
+  let open ClientMessageQueue in
+  let exit () = exit (if state.lsp_state = Post_shutdown then 0 else 1) in
+  match state.lsp_state, event with
+  (* exit notification *)
+  | _, Client_message c when c.method_ = "exit" -> exit ()
+  | _, Client_exit -> exit ()
+
+  (* initialize request*)
+  | Pre_init, Client_message c when c.method_ = "initialize" -> begin
+    let (server_conn', result) =
+      parse_initialize c.params |> do_initialize in
+    print_initialize result |> respond stdout c;
+    state.lsp_state <- Main_loop;
+    state.server_conn <- server_conn'
+    end
+
+  (* any request/notification if we haven't yet initialized *)
+  | Pre_init, Client_message _c ->
+    raise (Error.Server_not_initialized "init");
+
+  (* textDocument/hover request *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/hover" ->
+    parse_hover c.params |> do_hover state.server_conn |> print_hover
+      |> respond stdout c;
+
+  (* textDocument/definition request *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/definition" ->
+    parse_definition c.params |> do_definition state.server_conn
+      |> print_definition |> respond stdout c
+
+  (* textDocument/completion request *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/completion" ->
+    parse_completion c.params |> do_completion state.server_conn
+      |> print_completion |> respond stdout c
+
+  (* workspace/symbol request *)
+  | Main_loop, Client_message c when c.method_ = "workspace/symbol" ->
+    parse_workspace_symbol c.params |> do_workspace_symbol state.server_conn
+      |> print_workspace_symbol |> respond stdout c
+
+  (* textDocument/documentSymbol request *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/documentSymbol" ->
+    parse_document_symbol c.params |> do_document_symbol state.server_conn
+      |> print_document_symbol |> respond stdout c
+
+  (* textDocument/references requeset *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/references" ->
+    parse_find_references c.params |> do_find_references state.server_conn
+      |> print_find_references |> respond stdout c
+
+  (* textDocument/documentHighlight *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/documentHighlight" ->
+    parse_document_highlights c.params
+      |> do_document_highlights state.server_conn |> print_document_highlights
+      |> respond stdout c
+
+  (* textDocument/typeCoverage *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/typeCoverage" ->
+    parse_type_coverage c.params |> do_type_coverage state.server_conn
+      |> print_type_coverage |> respond stdout c
+
+  (* textDocument/formatting *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/formatting" ->
+    parse_document_formatting c.params
+      |> do_document_formatting state.server_conn |> print_document_formatting
+      |> respond stdout c
+
+  (* textDocument/formatting *)
+  | Main_loop, Client_message c
+    when c.method_ = "textDocument/rangeFormatting" ->
+    parse_document_range_formatting c.params
+      |> do_document_range_formatting state.server_conn
+      |> print_document_range_formatting |> respond stdout c
+
+  (* textDocument/didOpen notification *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/didOpen" ->
+    parse_did_open c.params |> do_did_open state.server_conn;
+
+  (* textDocument/didClose notification *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/didClose" ->
+    parse_did_close c.params |> do_did_close state.server_conn;
+
+  (* textDocument/didChange notification *)
+  | Main_loop, Client_message c when c.method_ = "textDocument/didChange" ->
+    parse_did_change c.params |> do_did_change state.server_conn;
+
+  (* shutdown request *)
+  | Main_loop, Client_message c when c.method_ = "shutdown" ->
+    do_shutdown state.server_conn |> print_shutdown |> respond stdout c;
+    state.lsp_state <- Post_shutdown;
+    state.server_conn <- None;
+
+  (* textDocument/publishDiagnostics notification *)
+  | Main_loop, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
+    let per_file uri errors = hack_errors_to_lsp_diagnostic uri errors
+        |> print_diagnostics
+        |> notify stdout "textDocument/publishDiagnostics"
+    in
+    SMap.iter per_file errors
+
+  (* any server diagnostics that come after we've shut down *)
+  | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
+    ()
+
+  (* ignore parsing errors *)
+  | _, Client_error -> ()
+
+  (* catch-all for client reqs/notifications we haven't yet implemented *)
+  | Main_loop, Client_message _c ->
+    raise (Error.Method_not_found "not implemented")
+
+  (* catch-all for requests/notifications after shutdown request *)
+  | Post_shutdown, Client_message _c ->
+    raise (Error.Invalid_request "already received shutdown request")
+
+  (* TODO message from server *)
+  | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
+    () (* todo *)
+  | _, Server_exit _ -> () (* todo *)
+
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. *)
 let main () : unit =
-  let open ClientMessageQueue in
   Printexc.record_backtrace true;
-  let state: lsp_state_machine ref = ref Pre_init in
-  let client: ClientMessageQueue.t = ClientMessageQueue.make () in
-  let server_conn: server_conn option ref = ref None in
-  let exit () = exit (if !state = Post_shutdown then 0 else 1) in
+  let state = {
+    lsp_state = Pre_init;
+    client = ClientMessageQueue.make ();
+    server_conn = None;
+  } in
   while true do
-    let event = get_next_event ~server:!server_conn ~client in
+    let event = get_next_event state in
     try
-      match !state, event with
-
-      (* exit notification *)
-      | _, Client_message c when c.method_ = "exit" -> exit ()
-      | _, Client_exit -> exit ()
-
-      (* initialize request*)
-      | Pre_init, Client_message c when c.method_ = "initialize" -> begin
-        let (server_conn', result) =
-          parse_initialize c.params |> do_initialize in
-        print_initialize result |> respond stdout c;
-        state := Main_loop;
-        server_conn := server_conn'
-        end
-
-      (* any request/notification if we haven't yet initialized *)
-      | Pre_init, Client_message _c ->
-        raise (Error.Server_not_initialized "init");
-
-      (* textDocument/hover request *)
-      | Main_loop, Client_message c when c.method_ = "textDocument/hover" ->
-        parse_hover c.params |> do_hover !server_conn |> print_hover
-          |> respond stdout c;
-
-      (* textDocument/definition request *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/definition" ->
-        parse_definition c.params |> do_definition !server_conn
-          |> print_definition |> respond stdout c
-
-      (* textDocument/completion request *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/completion" ->
-        parse_completion c.params |> do_completion !server_conn
-          |> print_completion |> respond stdout c
-
-      (* workspace/symbol request *)
-      | Main_loop, Client_message c when c.method_ = "workspace/symbol" ->
-        parse_workspace_symbol c.params |> do_workspace_symbol !server_conn
-          |> print_workspace_symbol |> respond stdout c
-
-      (* textDocument/documentSymbol request *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/documentSymbol" ->
-        parse_document_symbol c.params |> do_document_symbol !server_conn
-          |> print_document_symbol |> respond stdout c
-
-      (* textDocument/references requeset *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/references" ->
-        parse_find_references c.params |> do_find_references !server_conn
-          |> print_find_references |> respond stdout c
-
-      (* textDocument/documentHighlight *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/documentHighlight" ->
-        parse_document_highlights c.params
-          |> do_document_highlights !server_conn |> print_document_highlights
-          |> respond stdout c
-
-      (* textDocument/typeCoverage *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/typeCoverage" ->
-        parse_type_coverage c.params |> do_type_coverage !server_conn
-          |> print_type_coverage |> respond stdout c
-
-      (* textDocument/formatting *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/formatting" ->
-        parse_document_formatting c.params
-          |> do_document_formatting !server_conn |> print_document_formatting
-          |> respond stdout c
-
-      (* textDocument/formatting *)
-      | Main_loop, Client_message c
-        when c.method_ = "textDocument/rangeFormatting" ->
-        parse_document_range_formatting c.params
-          |> do_document_range_formatting !server_conn
-          |> print_document_range_formatting |> respond stdout c
-
-      (* textDocument/didOpen notification *)
-      | Main_loop, Client_message c when c.method_ = "textDocument/didOpen" ->
-        parse_did_open c.params |> do_did_open !server_conn;
-
-      (* textDocument/didClose notification *)
-      | Main_loop, Client_message c when c.method_ = "textDocument/didClose" ->
-        parse_did_close c.params |> do_did_close !server_conn;
-
-      (* textDocument/didChange notification *)
-      | Main_loop, Client_message c when c.method_ = "textDocument/didChange" ->
-        parse_did_change c.params |> do_did_change !server_conn;
-
-      (* shutdown request *)
-      | Main_loop, Client_message c when c.method_ = "shutdown" ->
-        do_shutdown !server_conn |> print_shutdown |> respond stdout c;
-        state := Post_shutdown;
-        server_conn := None;
-
-      (* textDocument/publishDiagnostics notification *)
-      | Main_loop, Server_message ServerCommandTypes.DIAGNOSTIC (_, errors) ->
-        let per_file uri errors = hack_errors_to_lsp_diagnostic uri errors
-            |> print_diagnostics
-            |> notify stdout "textDocument/publishDiagnostics"
-        in
-        SMap.iter per_file errors
-
-      (* any server diagnostics that come after we've shut down *)
-      | _, Server_message ServerCommandTypes.DIAGNOSTIC _ ->
-        ()
-
-      (* ignore parsing errors *)
-      | _, Client_error -> ()
-
-      (* catch-all for client reqs/notifications we haven't yet implemented *)
-      | Main_loop, Client_message _c ->
-        raise (Error.Method_not_found "not implemented")
-
-      (* catch-all for requests/notifications after shutdown request *)
-      | Post_shutdown, Client_message _c ->
-        raise (Error.Invalid_request "already received shutdown request")
-
-      (* TODO message from server *)
-      | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-        () (* todo *)
-      | _, Server_exit _ -> () (* todo *)
-
+      handle_event state event
     with
     | e -> match event with
-           | Client_message c when c.is_request ->
+           | Client_message c when c.ClientMessageQueue.is_request ->
              print_error e |> respond stdout c
            | _ -> () (* todo: log this? *)
   done

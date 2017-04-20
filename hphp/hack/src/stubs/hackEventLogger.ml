@@ -42,6 +42,7 @@ let client_build_begin_work _ _ = ()
 let client_build_finish
   ~rev_changed:_ ~build_type:_ ~request_id:_ ~exit_status:_ = ()
 let client_check_finish _ = ()
+let client_handled_command ~command:_ ~start_t:_ ~is_request:_ = ()
 let client_bad_exit _ = ()
 let monitor_dead_but_typechecker_alive () = ()
 let client_connect_to_monitor_timeout () = ()

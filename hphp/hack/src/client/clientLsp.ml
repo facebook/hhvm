@@ -690,6 +690,12 @@ let do_initialize (params: Initialize.params)
     let message = (Printexc.to_string e) ^ ": " ^ (Printexc.get_backtrace ()) in
     raise (Error.Server_error_start (message, {retry = false;}))
 
+(************************************************************************)
+(** Message handling                                                   **)
+(************************************************************************)
+
+(* handle_event: Process and respond to a message, and update the LSP state
+   machine accordingly. *)
 let handle_event (state: state) (event: event) : unit =
   let open ClientMessageQueue in
   let exit () = exit (if state.lsp_state = Post_shutdown then 0 else 1) in
@@ -830,7 +836,15 @@ let main () : unit =
   while true do
     let event = get_next_event state in
     try
-      handle_event state event
+      handle_event state event;
+      match event with
+      | Client_message c ->
+        let open ClientMessageQueue in
+        HackEventLogger.client_handled_command
+          ~command:c.method_
+          ~start_t:c.timestamp
+          ~is_request:c.is_request
+      | _ -> ()
     with
     | e -> match event with
            | Client_message c when c.ClientMessageQueue.is_request ->

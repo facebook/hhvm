@@ -40,6 +40,7 @@ type t =
   | Const
   | Construct
   | Continue
+  | Coroutine
   | Darray
   | Default
   | Define
@@ -233,6 +234,7 @@ let from_string keyword =
   | "const" -> Some Const
   | "__construct" -> Some Construct
   | "continue" -> Some Continue
+  | "coroutine" -> Some Coroutine
   | "darray" -> Some Darray
   | "default" -> Some Default
   | "define" -> Some Define
@@ -398,6 +400,7 @@ match kind with
   | Const -> "const"
   | Construct -> "__construct"
   | Continue -> "continue"
+  | Coroutine -> "coroutine"
   | Darray -> "darray"
   | Default -> "default"
   | Define -> "define"

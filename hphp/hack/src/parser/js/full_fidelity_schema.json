@@ -1,6 +1,6 @@
 { "description" :
   "Auto-generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2017-04-06-0002",
+  "version" : "2017-04-17-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -63,6 +63,8 @@
       "token_text" : "__construct" },
     { "token_kind" : "Continue",
       "token_text" : "continue" },
+    { "token_kind" : "Coroutine",
+      "token_text" : "coroutine" },
     { "token_kind" : "Darray",
       "token_text" : "darray" },
     { "token_kind" : "Default",
@@ -582,6 +584,7 @@
       "prefix" : "function",
       "fields" : [
         { "field_name" : "async" },
+        { "field_name" : "coroutine" },
         { "field_name" : "keyword" },
         { "field_name" : "ampersand" },
         { "field_name" : "name" },
@@ -1053,6 +1056,7 @@
       "prefix" : "anonymous",
       "fields" : [
         { "field_name" : "async_keyword" },
+        { "field_name" : "coroutine_keyword" },
         { "field_name" : "function_keyword" },
         { "field_name" : "left_paren" },
         { "field_name" : "parameters" },
@@ -1078,6 +1082,7 @@
       "prefix" : "lambda",
       "fields" : [
         { "field_name" : "async" },
+        { "field_name" : "coroutine" },
         { "field_name" : "signature" },
         { "field_name" : "arrow" },
         { "field_name" : "body" }
@@ -1412,6 +1417,7 @@
       "prefix" : "awaitable",
       "fields" : [
         { "field_name" : "async" },
+        { "field_name" : "coroutine" },
         { "field_name" : "compound_statement" }
       ] },
     { "kind_name" : "XHPChildrenDeclaration",

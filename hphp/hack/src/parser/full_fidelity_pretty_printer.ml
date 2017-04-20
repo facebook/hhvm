@@ -460,13 +460,24 @@ let rec get_doc node =
       let after_attr = handle_compound_inline_brace header body missing in
       group_doc (attr ^| after_attr)
   | FunctionDeclarationHeader
-    { function_async; function_keyword; function_ampersand; function_name;
-      function_type_parameter_list; function_left_paren;
-      function_parameter_list; function_right_paren; function_colon;
-      function_type; function_where_clause }
+    { function_async;
+      function_coroutine;
+      function_keyword;
+      function_ampersand;
+      function_name;
+      function_type_parameter_list;
+      function_left_paren;
+      function_parameter_list;
+      function_right_paren;
+      function_colon;
+      function_type;
+      function_where_clause }
    ->
-    let preface = group_doc ( get_doc function_async
-                              ^| get_doc function_keyword) in
+    let preface = group_doc (
+      get_doc function_async
+        ^| get_doc function_coroutine
+        ^| get_doc function_keyword
+    ) in
     let name_and_generics =
       let type_params = get_doc function_type_parameter_list in
       let ampersand = get_doc function_ampersand in
@@ -813,12 +824,19 @@ let rec get_doc node =
     let r = get_doc x.cast_right_paren in
     let o = get_doc x.cast_operand in
     group_doc (l ^^^ t ^^^ r ^^^ o)
-  | LambdaExpression x ->
-    let async = get_doc x.lambda_async in
-    let signature = get_doc x.lambda_signature in
-    let arrow = get_doc x.lambda_arrow in
-    let body = get_doc x.lambda_body in
-    group_doc (async ^| signature ^| arrow ^| body)
+  | LambdaExpression {
+      lambda_async;
+      lambda_coroutine;
+      lambda_signature;
+      lambda_arrow;
+      lambda_body;
+    } ->
+    let async = get_doc lambda_async in
+    let coroutine = get_doc lambda_coroutine in
+    let signature = get_doc lambda_signature in
+    let arrow = get_doc lambda_arrow in
+    let body = get_doc lambda_body in
+    group_doc (async ^| coroutine ^| signature ^| arrow ^| body)
   | LambdaSignature
     { lambda_left_paren; lambda_parameters; lambda_right_paren;
       lambda_colon; lambda_type } ->
@@ -830,6 +848,7 @@ let rec get_doc node =
     group_doc (left ^| params ^| right ^| colon ^| ty)
   | AnonymousFunction
     { anonymous_async_keyword;
+      anonymous_coroutine_keyword;
       anonymous_function_keyword;
       anonymous_left_paren;
       anonymous_parameters;
@@ -839,13 +858,14 @@ let rec get_doc node =
       anonymous_use;
       anonymous_body } ->
     let async = get_doc anonymous_async_keyword in
+    let coroutine = get_doc anonymous_coroutine_keyword in
     let fn = get_doc anonymous_function_keyword in
     let left = get_doc anonymous_left_paren in
     let params = get_doc anonymous_parameters in
     let right = get_doc anonymous_right_paren in
     let colon = get_doc anonymous_colon in
     let return_type = get_doc anonymous_type in
-    let preface = group_doc ( async ^| fn ) in
+    let preface = group_doc ( async ^| coroutine ^| fn ) in
     let parameters = indent_block_no_space left params right indt in
     let type_declaration = group_doc (colon ^| return_type) in
     let uses = get_doc anonymous_use in
@@ -1102,8 +1122,9 @@ let rec get_doc node =
     receiver ^^^ left ^^^ index ^^^ right
   | AwaitableCreationExpression x ->
     let async = get_doc x.awaitable_async in
+    let coroutine = get_doc x.awaitable_coroutine in
     let stmt = x.awaitable_compound_statement in
-    handle_compound_brace_prefix_indent async stmt indt
+    handle_compound_brace_prefix_indent (async ^| coroutine) stmt indt
   | XHPExpression x ->
     let left = get_doc x.xhp_open in
     let expr = get_doc x.xhp_body in

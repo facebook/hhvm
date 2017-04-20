@@ -798,6 +798,8 @@ abstract class EditableToken extends EditableSyntax {
        return new ConstructToken($leading, $trailing);
     case 'continue':
        return new ContinueToken($leading, $trailing);
+    case 'coroutine':
+       return new CoroutineToken($leading, $trailing);
     case 'darray':
        return new DarrayToken($leading, $trailing);
     case 'default':
@@ -1507,6 +1509,21 @@ final class ContinueToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): ContinueToken {
     return new ContinueToken($this->leading(), $trailing);
+  }
+}
+final class CoroutineToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('coroutine', $leading, $trailing, 'coroutine');
+  }
+
+  public function with_leading(EditableSyntax $leading): CoroutineToken {
+    return new CoroutineToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): CoroutineToken {
+    return new CoroutineToken($this->leading(), $trailing);
   }
 }
 final class DarrayToken extends EditableToken {
@@ -6180,6 +6197,7 @@ final class FunctionDeclaration extends EditableSyntax {
 }
 final class FunctionDeclarationHeader extends EditableSyntax {
   private EditableSyntax $_async;
+  private EditableSyntax $_coroutine;
   private EditableSyntax $_keyword;
   private EditableSyntax $_ampersand;
   private EditableSyntax $_name;
@@ -6192,6 +6210,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   private EditableSyntax $_where_clause;
   public function __construct(
     EditableSyntax $async,
+    EditableSyntax $coroutine,
     EditableSyntax $keyword,
     EditableSyntax $ampersand,
     EditableSyntax $name,
@@ -6204,6 +6223,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     EditableSyntax $where_clause) {
     parent::__construct('function_declaration_header');
     $this->_async = $async;
+    $this->_coroutine = $coroutine;
     $this->_keyword = $keyword;
     $this->_ampersand = $ampersand;
     $this->_name = $name;
@@ -6217,6 +6237,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function async(): EditableSyntax {
     return $this->_async;
+  }
+  public function coroutine(): EditableSyntax {
+    return $this->_coroutine;
   }
   public function keyword(): EditableSyntax {
     return $this->_keyword;
@@ -6251,6 +6274,22 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_async(EditableSyntax $async): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $async,
+      $this->_coroutine,
+      $this->_keyword,
+      $this->_ampersand,
+      $this->_name,
+      $this->_type_parameter_list,
+      $this->_left_paren,
+      $this->_parameter_list,
+      $this->_right_paren,
+      $this->_colon,
+      $this->_type,
+      $this->_where_clause);
+  }
+  public function with_coroutine(EditableSyntax $coroutine): FunctionDeclarationHeader {
+    return new FunctionDeclarationHeader(
+      $this->_async,
+      $coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6265,6 +6304,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_keyword(EditableSyntax $keyword): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $keyword,
       $this->_ampersand,
       $this->_name,
@@ -6279,6 +6319,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_ampersand(EditableSyntax $ampersand): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $ampersand,
       $this->_name,
@@ -6293,6 +6334,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_name(EditableSyntax $name): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $name,
@@ -6307,6 +6349,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_type_parameter_list(EditableSyntax $type_parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6321,6 +6364,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_left_paren(EditableSyntax $left_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6335,6 +6379,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_parameter_list(EditableSyntax $parameter_list): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6349,6 +6394,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_right_paren(EditableSyntax $right_paren): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6363,6 +6409,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_colon(EditableSyntax $colon): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6377,6 +6424,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_type(EditableSyntax $type): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6391,6 +6439,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   public function with_where_clause(EditableSyntax $where_clause): FunctionDeclarationHeader {
     return new FunctionDeclarationHeader(
       $this->_async,
+      $this->_coroutine,
       $this->_keyword,
       $this->_ampersand,
       $this->_name,
@@ -6410,6 +6459,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $async = $this->async()->rewrite($rewriter, $new_parents);
+    $coroutine = $this->coroutine()->rewrite($rewriter, $new_parents);
     $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
     $ampersand = $this->ampersand()->rewrite($rewriter, $new_parents);
     $name = $this->name()->rewrite($rewriter, $new_parents);
@@ -6422,6 +6472,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $where_clause = $this->where_clause()->rewrite($rewriter, $new_parents);
     if (
       $async === $this->async() &&
+      $coroutine === $this->coroutine() &&
       $keyword === $this->keyword() &&
       $ampersand === $this->ampersand() &&
       $name === $this->name() &&
@@ -6436,6 +6487,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     } else {
       return $rewriter(new FunctionDeclarationHeader(
         $async,
+        $coroutine,
         $keyword,
         $ampersand,
         $name,
@@ -6453,6 +6505,9 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $async = EditableSyntax::from_json(
       $json->function_async, $position, $source);
     $position += $async->width();
+    $coroutine = EditableSyntax::from_json(
+      $json->function_coroutine, $position, $source);
+    $position += $coroutine->width();
     $keyword = EditableSyntax::from_json(
       $json->function_keyword, $position, $source);
     $position += $keyword->width();
@@ -6485,6 +6540,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
     $position += $where_clause->width();
     return new FunctionDeclarationHeader(
         $async,
+        $coroutine,
         $keyword,
         $ampersand,
         $name,
@@ -6498,6 +6554,7 @@ final class FunctionDeclarationHeader extends EditableSyntax {
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_async;
+    yield $this->_coroutine;
     yield $this->_keyword;
     yield $this->_ampersand;
     yield $this->_name;
@@ -11603,6 +11660,7 @@ final class SimpleInitializer extends EditableSyntax {
 }
 final class AnonymousFunction extends EditableSyntax {
   private EditableSyntax $_async_keyword;
+  private EditableSyntax $_coroutine_keyword;
   private EditableSyntax $_function_keyword;
   private EditableSyntax $_left_paren;
   private EditableSyntax $_parameters;
@@ -11613,6 +11671,7 @@ final class AnonymousFunction extends EditableSyntax {
   private EditableSyntax $_body;
   public function __construct(
     EditableSyntax $async_keyword,
+    EditableSyntax $coroutine_keyword,
     EditableSyntax $function_keyword,
     EditableSyntax $left_paren,
     EditableSyntax $parameters,
@@ -11623,6 +11682,7 @@ final class AnonymousFunction extends EditableSyntax {
     EditableSyntax $body) {
     parent::__construct('anonymous_function');
     $this->_async_keyword = $async_keyword;
+    $this->_coroutine_keyword = $coroutine_keyword;
     $this->_function_keyword = $function_keyword;
     $this->_left_paren = $left_paren;
     $this->_parameters = $parameters;
@@ -11634,6 +11694,9 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function async_keyword(): EditableSyntax {
     return $this->_async_keyword;
+  }
+  public function coroutine_keyword(): EditableSyntax {
+    return $this->_coroutine_keyword;
   }
   public function function_keyword(): EditableSyntax {
     return $this->_function_keyword;
@@ -11662,6 +11725,20 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_async_keyword(EditableSyntax $async_keyword): AnonymousFunction {
     return new AnonymousFunction(
       $async_keyword,
+      $this->_coroutine_keyword,
+      $this->_function_keyword,
+      $this->_left_paren,
+      $this->_parameters,
+      $this->_right_paren,
+      $this->_colon,
+      $this->_type,
+      $this->_use,
+      $this->_body);
+  }
+  public function with_coroutine_keyword(EditableSyntax $coroutine_keyword): AnonymousFunction {
+    return new AnonymousFunction(
+      $this->_async_keyword,
+      $coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11674,6 +11751,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_function_keyword(EditableSyntax $function_keyword): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11686,6 +11764,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_left_paren(EditableSyntax $left_paren): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $left_paren,
       $this->_parameters,
@@ -11698,6 +11777,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_parameters(EditableSyntax $parameters): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $parameters,
@@ -11710,6 +11790,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_right_paren(EditableSyntax $right_paren): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11722,6 +11803,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_colon(EditableSyntax $colon): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11734,6 +11816,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_type(EditableSyntax $type): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11746,6 +11829,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_use(EditableSyntax $use): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11758,6 +11842,7 @@ final class AnonymousFunction extends EditableSyntax {
   public function with_body(EditableSyntax $body): AnonymousFunction {
     return new AnonymousFunction(
       $this->_async_keyword,
+      $this->_coroutine_keyword,
       $this->_function_keyword,
       $this->_left_paren,
       $this->_parameters,
@@ -11775,6 +11860,7 @@ final class AnonymousFunction extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $async_keyword = $this->async_keyword()->rewrite($rewriter, $new_parents);
+    $coroutine_keyword = $this->coroutine_keyword()->rewrite($rewriter, $new_parents);
     $function_keyword = $this->function_keyword()->rewrite($rewriter, $new_parents);
     $left_paren = $this->left_paren()->rewrite($rewriter, $new_parents);
     $parameters = $this->parameters()->rewrite($rewriter, $new_parents);
@@ -11785,6 +11871,7 @@ final class AnonymousFunction extends EditableSyntax {
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
       $async_keyword === $this->async_keyword() &&
+      $coroutine_keyword === $this->coroutine_keyword() &&
       $function_keyword === $this->function_keyword() &&
       $left_paren === $this->left_paren() &&
       $parameters === $this->parameters() &&
@@ -11797,6 +11884,7 @@ final class AnonymousFunction extends EditableSyntax {
     } else {
       return $rewriter(new AnonymousFunction(
         $async_keyword,
+        $coroutine_keyword,
         $function_keyword,
         $left_paren,
         $parameters,
@@ -11812,6 +11900,9 @@ final class AnonymousFunction extends EditableSyntax {
     $async_keyword = EditableSyntax::from_json(
       $json->anonymous_async_keyword, $position, $source);
     $position += $async_keyword->width();
+    $coroutine_keyword = EditableSyntax::from_json(
+      $json->anonymous_coroutine_keyword, $position, $source);
+    $position += $coroutine_keyword->width();
     $function_keyword = EditableSyntax::from_json(
       $json->anonymous_function_keyword, $position, $source);
     $position += $function_keyword->width();
@@ -11838,6 +11929,7 @@ final class AnonymousFunction extends EditableSyntax {
     $position += $body->width();
     return new AnonymousFunction(
         $async_keyword,
+        $coroutine_keyword,
         $function_keyword,
         $left_paren,
         $parameters,
@@ -11849,6 +11941,7 @@ final class AnonymousFunction extends EditableSyntax {
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_async_keyword;
+    yield $this->_coroutine_keyword;
     yield $this->_function_keyword;
     yield $this->_left_paren;
     yield $this->_parameters;
@@ -11971,22 +12064,28 @@ final class AnonymousFunctionUseClause extends EditableSyntax {
 }
 final class LambdaExpression extends EditableSyntax {
   private EditableSyntax $_async;
+  private EditableSyntax $_coroutine;
   private EditableSyntax $_signature;
   private EditableSyntax $_arrow;
   private EditableSyntax $_body;
   public function __construct(
     EditableSyntax $async,
+    EditableSyntax $coroutine,
     EditableSyntax $signature,
     EditableSyntax $arrow,
     EditableSyntax $body) {
     parent::__construct('lambda_expression');
     $this->_async = $async;
+    $this->_coroutine = $coroutine;
     $this->_signature = $signature;
     $this->_arrow = $arrow;
     $this->_body = $body;
   }
   public function async(): EditableSyntax {
     return $this->_async;
+  }
+  public function coroutine(): EditableSyntax {
+    return $this->_coroutine;
   }
   public function signature(): EditableSyntax {
     return $this->_signature;
@@ -12000,6 +12099,15 @@ final class LambdaExpression extends EditableSyntax {
   public function with_async(EditableSyntax $async): LambdaExpression {
     return new LambdaExpression(
       $async,
+      $this->_coroutine,
+      $this->_signature,
+      $this->_arrow,
+      $this->_body);
+  }
+  public function with_coroutine(EditableSyntax $coroutine): LambdaExpression {
+    return new LambdaExpression(
+      $this->_async,
+      $coroutine,
       $this->_signature,
       $this->_arrow,
       $this->_body);
@@ -12007,6 +12115,7 @@ final class LambdaExpression extends EditableSyntax {
   public function with_signature(EditableSyntax $signature): LambdaExpression {
     return new LambdaExpression(
       $this->_async,
+      $this->_coroutine,
       $signature,
       $this->_arrow,
       $this->_body);
@@ -12014,6 +12123,7 @@ final class LambdaExpression extends EditableSyntax {
   public function with_arrow(EditableSyntax $arrow): LambdaExpression {
     return new LambdaExpression(
       $this->_async,
+      $this->_coroutine,
       $this->_signature,
       $arrow,
       $this->_body);
@@ -12021,6 +12131,7 @@ final class LambdaExpression extends EditableSyntax {
   public function with_body(EditableSyntax $body): LambdaExpression {
     return new LambdaExpression(
       $this->_async,
+      $this->_coroutine,
       $this->_signature,
       $this->_arrow,
       $body);
@@ -12033,11 +12144,13 @@ final class LambdaExpression extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $async = $this->async()->rewrite($rewriter, $new_parents);
+    $coroutine = $this->coroutine()->rewrite($rewriter, $new_parents);
     $signature = $this->signature()->rewrite($rewriter, $new_parents);
     $arrow = $this->arrow()->rewrite($rewriter, $new_parents);
     $body = $this->body()->rewrite($rewriter, $new_parents);
     if (
       $async === $this->async() &&
+      $coroutine === $this->coroutine() &&
       $signature === $this->signature() &&
       $arrow === $this->arrow() &&
       $body === $this->body()) {
@@ -12045,6 +12158,7 @@ final class LambdaExpression extends EditableSyntax {
     } else {
       return $rewriter(new LambdaExpression(
         $async,
+        $coroutine,
         $signature,
         $arrow,
         $body), $parents ?? []);
@@ -12055,6 +12169,9 @@ final class LambdaExpression extends EditableSyntax {
     $async = EditableSyntax::from_json(
       $json->lambda_async, $position, $source);
     $position += $async->width();
+    $coroutine = EditableSyntax::from_json(
+      $json->lambda_coroutine, $position, $source);
+    $position += $coroutine->width();
     $signature = EditableSyntax::from_json(
       $json->lambda_signature, $position, $source);
     $position += $signature->width();
@@ -12066,12 +12183,14 @@ final class LambdaExpression extends EditableSyntax {
     $position += $body->width();
     return new LambdaExpression(
         $async,
+        $coroutine,
         $signature,
         $arrow,
         $body);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_async;
+    yield $this->_coroutine;
     yield $this->_signature;
     yield $this->_arrow;
     yield $this->_body;
@@ -15416,16 +15535,22 @@ final class EmbeddedSubscriptExpression extends EditableSyntax {
 }
 final class AwaitableCreationExpression extends EditableSyntax {
   private EditableSyntax $_async;
+  private EditableSyntax $_coroutine;
   private EditableSyntax $_compound_statement;
   public function __construct(
     EditableSyntax $async,
+    EditableSyntax $coroutine,
     EditableSyntax $compound_statement) {
     parent::__construct('awaitable_creation_expression');
     $this->_async = $async;
+    $this->_coroutine = $coroutine;
     $this->_compound_statement = $compound_statement;
   }
   public function async(): EditableSyntax {
     return $this->_async;
+  }
+  public function coroutine(): EditableSyntax {
+    return $this->_coroutine;
   }
   public function compound_statement(): EditableSyntax {
     return $this->_compound_statement;
@@ -15433,11 +15558,19 @@ final class AwaitableCreationExpression extends EditableSyntax {
   public function with_async(EditableSyntax $async): AwaitableCreationExpression {
     return new AwaitableCreationExpression(
       $async,
+      $this->_coroutine,
+      $this->_compound_statement);
+  }
+  public function with_coroutine(EditableSyntax $coroutine): AwaitableCreationExpression {
+    return new AwaitableCreationExpression(
+      $this->_async,
+      $coroutine,
       $this->_compound_statement);
   }
   public function with_compound_statement(EditableSyntax $compound_statement): AwaitableCreationExpression {
     return new AwaitableCreationExpression(
       $this->_async,
+      $this->_coroutine,
       $compound_statement);
   }
 
@@ -15448,14 +15581,17 @@ final class AwaitableCreationExpression extends EditableSyntax {
     $new_parents = $parents ?? [];
     array_push($new_parents, $this);
     $async = $this->async()->rewrite($rewriter, $new_parents);
+    $coroutine = $this->coroutine()->rewrite($rewriter, $new_parents);
     $compound_statement = $this->compound_statement()->rewrite($rewriter, $new_parents);
     if (
       $async === $this->async() &&
+      $coroutine === $this->coroutine() &&
       $compound_statement === $this->compound_statement()) {
       return $rewriter($this, $parents ?? []);
     } else {
       return $rewriter(new AwaitableCreationExpression(
         $async,
+        $coroutine,
         $compound_statement), $parents ?? []);
     }
   }
@@ -15464,15 +15600,20 @@ final class AwaitableCreationExpression extends EditableSyntax {
     $async = EditableSyntax::from_json(
       $json->awaitable_async, $position, $source);
     $position += $async->width();
+    $coroutine = EditableSyntax::from_json(
+      $json->awaitable_coroutine, $position, $source);
+    $position += $coroutine->width();
     $compound_statement = EditableSyntax::from_json(
       $json->awaitable_compound_statement, $position, $source);
     $position += $compound_statement->width();
     return new AwaitableCreationExpression(
         $async,
+        $coroutine,
         $compound_statement);
   }
   public function children(): Generator<string, EditableSyntax, void> {
     yield $this->_async;
+    yield $this->_coroutine;
     yield $this->_compound_statement;
     yield break;
   }

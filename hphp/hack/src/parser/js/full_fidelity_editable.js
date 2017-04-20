@@ -693,6 +693,8 @@ class EditableToken extends EditableSyntax
        return new ConstructToken(leading, trailing);
     case 'continue':
        return new ContinueToken(leading, trailing);
+    case 'coroutine':
+       return new CoroutineToken(leading, trailing);
     case 'darray':
        return new DarrayToken(leading, trailing);
     case 'default':
@@ -1228,6 +1230,13 @@ class ContinueToken extends EditableToken
   constructor(leading, trailing)
   {
     super('continue', leading, trailing, 'continue');
+  }
+}
+class CoroutineToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('coroutine', leading, trailing, 'coroutine');
   }
 }
 class DarrayToken extends EditableToken
@@ -4485,6 +4494,7 @@ class FunctionDeclarationHeader extends EditableSyntax
 {
   constructor(
     async,
+    coroutine,
     keyword,
     ampersand,
     name,
@@ -4498,6 +4508,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   {
     super('function_declaration_header', {
       async: async,
+      coroutine: coroutine,
       keyword: keyword,
       ampersand: ampersand,
       name: name,
@@ -4510,6 +4521,7 @@ class FunctionDeclarationHeader extends EditableSyntax
       where_clause: where_clause });
   }
   get async() { return this.children.async; }
+  get coroutine() { return this.children.coroutine; }
   get keyword() { return this.children.keyword; }
   get ampersand() { return this.children.ampersand; }
   get name() { return this.children.name; }
@@ -4523,6 +4535,22 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_async(async){
     return new FunctionDeclarationHeader(
       async,
+      this.coroutine,
+      this.keyword,
+      this.ampersand,
+      this.name,
+      this.type_parameter_list,
+      this.left_paren,
+      this.parameter_list,
+      this.right_paren,
+      this.colon,
+      this.type,
+      this.where_clause);
+  }
+  with_coroutine(coroutine){
+    return new FunctionDeclarationHeader(
+      this.async,
+      coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4537,6 +4565,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_keyword(keyword){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       keyword,
       this.ampersand,
       this.name,
@@ -4551,6 +4580,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_ampersand(ampersand){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       ampersand,
       this.name,
@@ -4565,6 +4595,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_name(name){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       name,
@@ -4579,6 +4610,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_type_parameter_list(type_parameter_list){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4593,6 +4625,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_left_paren(left_paren){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4607,6 +4640,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_parameter_list(parameter_list){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4621,6 +4655,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_right_paren(right_paren){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4635,6 +4670,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_colon(colon){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4649,6 +4685,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_type(type){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4663,6 +4700,7 @@ class FunctionDeclarationHeader extends EditableSyntax
   with_where_clause(where_clause){
     return new FunctionDeclarationHeader(
       this.async,
+      this.coroutine,
       this.keyword,
       this.ampersand,
       this.name,
@@ -4681,6 +4719,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var async = this.async.rewrite(rewriter, new_parents);
+    var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var keyword = this.keyword.rewrite(rewriter, new_parents);
     var ampersand = this.ampersand.rewrite(rewriter, new_parents);
     var name = this.name.rewrite(rewriter, new_parents);
@@ -4693,6 +4732,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     var where_clause = this.where_clause.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
+      coroutine === this.coroutine &&
       keyword === this.keyword &&
       ampersand === this.ampersand &&
       name === this.name &&
@@ -4710,6 +4750,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     {
       return rewriter(new FunctionDeclarationHeader(
         async,
+        coroutine,
         keyword,
         ampersand,
         name,
@@ -4727,6 +4768,9 @@ class FunctionDeclarationHeader extends EditableSyntax
     let async = EditableSyntax.from_json(
       json.function_async, position, source);
     position += async.width;
+    let coroutine = EditableSyntax.from_json(
+      json.function_coroutine, position, source);
+    position += coroutine.width;
     let keyword = EditableSyntax.from_json(
       json.function_keyword, position, source);
     position += keyword.width;
@@ -4759,6 +4803,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     position += where_clause.width;
     return new FunctionDeclarationHeader(
         async,
+        coroutine,
         keyword,
         ampersand,
         name,
@@ -4775,6 +4820,7 @@ class FunctionDeclarationHeader extends EditableSyntax
     if (FunctionDeclarationHeader._children_keys == null)
       FunctionDeclarationHeader._children_keys = [
         'async',
+        'coroutine',
         'keyword',
         'ampersand',
         'name',
@@ -9670,6 +9716,7 @@ class AnonymousFunction extends EditableSyntax
 {
   constructor(
     async_keyword,
+    coroutine_keyword,
     function_keyword,
     left_paren,
     parameters,
@@ -9681,6 +9728,7 @@ class AnonymousFunction extends EditableSyntax
   {
     super('anonymous_function', {
       async_keyword: async_keyword,
+      coroutine_keyword: coroutine_keyword,
       function_keyword: function_keyword,
       left_paren: left_paren,
       parameters: parameters,
@@ -9691,6 +9739,7 @@ class AnonymousFunction extends EditableSyntax
       body: body });
   }
   get async_keyword() { return this.children.async_keyword; }
+  get coroutine_keyword() { return this.children.coroutine_keyword; }
   get function_keyword() { return this.children.function_keyword; }
   get left_paren() { return this.children.left_paren; }
   get parameters() { return this.children.parameters; }
@@ -9702,6 +9751,20 @@ class AnonymousFunction extends EditableSyntax
   with_async_keyword(async_keyword){
     return new AnonymousFunction(
       async_keyword,
+      this.coroutine_keyword,
+      this.function_keyword,
+      this.left_paren,
+      this.parameters,
+      this.right_paren,
+      this.colon,
+      this.type,
+      this.use,
+      this.body);
+  }
+  with_coroutine_keyword(coroutine_keyword){
+    return new AnonymousFunction(
+      this.async_keyword,
+      coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       this.parameters,
@@ -9714,6 +9777,7 @@ class AnonymousFunction extends EditableSyntax
   with_function_keyword(function_keyword){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       function_keyword,
       this.left_paren,
       this.parameters,
@@ -9726,6 +9790,7 @@ class AnonymousFunction extends EditableSyntax
   with_left_paren(left_paren){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       left_paren,
       this.parameters,
@@ -9738,6 +9803,7 @@ class AnonymousFunction extends EditableSyntax
   with_parameters(parameters){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       parameters,
@@ -9750,6 +9816,7 @@ class AnonymousFunction extends EditableSyntax
   with_right_paren(right_paren){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       this.parameters,
@@ -9762,6 +9829,7 @@ class AnonymousFunction extends EditableSyntax
   with_colon(colon){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       this.parameters,
@@ -9774,6 +9842,7 @@ class AnonymousFunction extends EditableSyntax
   with_type(type){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       this.parameters,
@@ -9786,6 +9855,7 @@ class AnonymousFunction extends EditableSyntax
   with_use(use){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       this.parameters,
@@ -9798,6 +9868,7 @@ class AnonymousFunction extends EditableSyntax
   with_body(body){
     return new AnonymousFunction(
       this.async_keyword,
+      this.coroutine_keyword,
       this.function_keyword,
       this.left_paren,
       this.parameters,
@@ -9814,6 +9885,7 @@ class AnonymousFunction extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var async_keyword = this.async_keyword.rewrite(rewriter, new_parents);
+    var coroutine_keyword = this.coroutine_keyword.rewrite(rewriter, new_parents);
     var function_keyword = this.function_keyword.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var parameters = this.parameters.rewrite(rewriter, new_parents);
@@ -9824,6 +9896,7 @@ class AnonymousFunction extends EditableSyntax
     var body = this.body.rewrite(rewriter, new_parents);
     if (
       async_keyword === this.async_keyword &&
+      coroutine_keyword === this.coroutine_keyword &&
       function_keyword === this.function_keyword &&
       left_paren === this.left_paren &&
       parameters === this.parameters &&
@@ -9839,6 +9912,7 @@ class AnonymousFunction extends EditableSyntax
     {
       return rewriter(new AnonymousFunction(
         async_keyword,
+        coroutine_keyword,
         function_keyword,
         left_paren,
         parameters,
@@ -9854,6 +9928,9 @@ class AnonymousFunction extends EditableSyntax
     let async_keyword = EditableSyntax.from_json(
       json.anonymous_async_keyword, position, source);
     position += async_keyword.width;
+    let coroutine_keyword = EditableSyntax.from_json(
+      json.anonymous_coroutine_keyword, position, source);
+    position += coroutine_keyword.width;
     let function_keyword = EditableSyntax.from_json(
       json.anonymous_function_keyword, position, source);
     position += function_keyword.width;
@@ -9880,6 +9957,7 @@ class AnonymousFunction extends EditableSyntax
     position += body.width;
     return new AnonymousFunction(
         async_keyword,
+        coroutine_keyword,
         function_keyword,
         left_paren,
         parameters,
@@ -9894,6 +9972,7 @@ class AnonymousFunction extends EditableSyntax
     if (AnonymousFunction._children_keys == null)
       AnonymousFunction._children_keys = [
         'async_keyword',
+        'coroutine_keyword',
         'function_keyword',
         'left_paren',
         'parameters',
@@ -10013,23 +10092,35 @@ class LambdaExpression extends EditableSyntax
 {
   constructor(
     async,
+    coroutine,
     signature,
     arrow,
     body)
   {
     super('lambda_expression', {
       async: async,
+      coroutine: coroutine,
       signature: signature,
       arrow: arrow,
       body: body });
   }
   get async() { return this.children.async; }
+  get coroutine() { return this.children.coroutine; }
   get signature() { return this.children.signature; }
   get arrow() { return this.children.arrow; }
   get body() { return this.children.body; }
   with_async(async){
     return new LambdaExpression(
       async,
+      this.coroutine,
+      this.signature,
+      this.arrow,
+      this.body);
+  }
+  with_coroutine(coroutine){
+    return new LambdaExpression(
+      this.async,
+      coroutine,
       this.signature,
       this.arrow,
       this.body);
@@ -10037,6 +10128,7 @@ class LambdaExpression extends EditableSyntax
   with_signature(signature){
     return new LambdaExpression(
       this.async,
+      this.coroutine,
       signature,
       this.arrow,
       this.body);
@@ -10044,6 +10136,7 @@ class LambdaExpression extends EditableSyntax
   with_arrow(arrow){
     return new LambdaExpression(
       this.async,
+      this.coroutine,
       this.signature,
       arrow,
       this.body);
@@ -10051,6 +10144,7 @@ class LambdaExpression extends EditableSyntax
   with_body(body){
     return new LambdaExpression(
       this.async,
+      this.coroutine,
       this.signature,
       this.arrow,
       body);
@@ -10062,11 +10156,13 @@ class LambdaExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var async = this.async.rewrite(rewriter, new_parents);
+    var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var signature = this.signature.rewrite(rewriter, new_parents);
     var arrow = this.arrow.rewrite(rewriter, new_parents);
     var body = this.body.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
+      coroutine === this.coroutine &&
       signature === this.signature &&
       arrow === this.arrow &&
       body === this.body)
@@ -10077,6 +10173,7 @@ class LambdaExpression extends EditableSyntax
     {
       return rewriter(new LambdaExpression(
         async,
+        coroutine,
         signature,
         arrow,
         body), parents);
@@ -10087,6 +10184,9 @@ class LambdaExpression extends EditableSyntax
     let async = EditableSyntax.from_json(
       json.lambda_async, position, source);
     position += async.width;
+    let coroutine = EditableSyntax.from_json(
+      json.lambda_coroutine, position, source);
+    position += coroutine.width;
     let signature = EditableSyntax.from_json(
       json.lambda_signature, position, source);
     position += signature.width;
@@ -10098,6 +10198,7 @@ class LambdaExpression extends EditableSyntax
     position += body.width;
     return new LambdaExpression(
         async,
+        coroutine,
         signature,
         arrow,
         body);
@@ -10107,6 +10208,7 @@ class LambdaExpression extends EditableSyntax
     if (LambdaExpression._children_keys == null)
       LambdaExpression._children_keys = [
         'async',
+        'coroutine',
         'signature',
         'arrow',
         'body'];
@@ -13331,22 +13433,33 @@ class AwaitableCreationExpression extends EditableSyntax
 {
   constructor(
     async,
+    coroutine,
     compound_statement)
   {
     super('awaitable_creation_expression', {
       async: async,
+      coroutine: coroutine,
       compound_statement: compound_statement });
   }
   get async() { return this.children.async; }
+  get coroutine() { return this.children.coroutine; }
   get compound_statement() { return this.children.compound_statement; }
   with_async(async){
     return new AwaitableCreationExpression(
       async,
+      this.coroutine,
+      this.compound_statement);
+  }
+  with_coroutine(coroutine){
+    return new AwaitableCreationExpression(
+      this.async,
+      coroutine,
       this.compound_statement);
   }
   with_compound_statement(compound_statement){
     return new AwaitableCreationExpression(
       this.async,
+      this.coroutine,
       compound_statement);
   }
   rewrite(rewriter, parents)
@@ -13356,9 +13469,11 @@ class AwaitableCreationExpression extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var async = this.async.rewrite(rewriter, new_parents);
+    var coroutine = this.coroutine.rewrite(rewriter, new_parents);
     var compound_statement = this.compound_statement.rewrite(rewriter, new_parents);
     if (
       async === this.async &&
+      coroutine === this.coroutine &&
       compound_statement === this.compound_statement)
     {
       return rewriter(this, parents);
@@ -13367,6 +13482,7 @@ class AwaitableCreationExpression extends EditableSyntax
     {
       return rewriter(new AwaitableCreationExpression(
         async,
+        coroutine,
         compound_statement), parents);
     }
   }
@@ -13375,11 +13491,15 @@ class AwaitableCreationExpression extends EditableSyntax
     let async = EditableSyntax.from_json(
       json.awaitable_async, position, source);
     position += async.width;
+    let coroutine = EditableSyntax.from_json(
+      json.awaitable_coroutine, position, source);
+    position += coroutine.width;
     let compound_statement = EditableSyntax.from_json(
       json.awaitable_compound_statement, position, source);
     position += compound_statement.width;
     return new AwaitableCreationExpression(
         async,
+        coroutine,
         compound_statement);
   }
   get children_keys()
@@ -13387,6 +13507,7 @@ class AwaitableCreationExpression extends EditableSyntax
     if (AwaitableCreationExpression._children_keys == null)
       AwaitableCreationExpression._children_keys = [
         'async',
+        'coroutine',
         'compound_statement'];
     return AwaitableCreationExpression._children_keys;
   }
@@ -16918,6 +17039,7 @@ exports.CloneToken = CloneToken;
 exports.ConstToken = ConstToken;
 exports.ConstructToken = ConstructToken;
 exports.ContinueToken = ContinueToken;
+exports.CoroutineToken = CoroutineToken;
 exports.DarrayToken = DarrayToken;
 exports.DefaultToken = DefaultToken;
 exports.DefineToken = DefineToken;

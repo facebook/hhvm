@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-04-06-0002"
+let full_fidelity_schema_version_number = "2017-04-17-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -226,6 +226,7 @@ let schema = List.map from_list [
     "function_declaration_header";
     "function";
     "async";
+    "coroutine";
     "keyword";
     "ampersand";
     "name";
@@ -603,6 +604,7 @@ let schema = List.map from_list [
     "anonymous_function";
     "anonymous";
     "async_keyword";
+    "coroutine_keyword";
     "function_keyword";
     "left_paren";
     "parameters";
@@ -624,6 +626,7 @@ let schema = List.map from_list [
     "lambda_expression";
     "lambda";
     "async";
+    "coroutine";
     "signature";
     "arrow";
     "body" ];
@@ -888,6 +891,7 @@ let schema = List.map from_list [
     "awaitable_creation_expression";
     "awaitable";
     "async";
+    "coroutine";
     "compound_statement" ];
   [ "XHPChildrenDeclaration";
     "xhp_children_declaration";
@@ -1219,6 +1223,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Const"; "const" ];
   [ "Construct"; "__construct" ];
   [ "Continue"; "continue" ];
+  [ "Coroutine"; "coroutine" ];
   [ "Darray"; "darray" ];
   [ "Default"; "default" ];
   [ "Define"; "define"];

@@ -261,11 +261,24 @@ let rec transform node =
       Newline;
     ]
   | FunctionDeclarationHeader x ->
-    let (async, kw, amp, name, type_params, leftp, params, rightp, colon,
-      ret_type, where) = get_function_declaration_header_children x
+    let (
+      async,
+      coroutine,
+      kw,
+      amp,
+      name,
+      type_params,
+      leftp,
+      params,
+      rightp,
+      colon,
+      ret_type,
+      where
+    ) = get_function_declaration_header_children x
     in
     Fmt [
-      Span (transform_fn_decl_name async kw amp name type_params leftp);
+      Span (
+        transform_fn_decl_name async coroutine kw amp name type_params leftp);
       transform_fn_decl_args params rightp colon ret_type where;
     ]
   | WhereClause x ->
@@ -297,11 +310,31 @@ let rec transform node =
         in
         let fn_name, args_and_where = match syntax func_decl with
           | FunctionDeclarationHeader x ->
-            let (async, kw, amp, name, type_params, leftp, params, rightp,
-                 colon, ret_type, where) =
-              get_function_declaration_header_children x
+            let (
+              async,
+              coroutine,
+              kw,
+              amp,
+              name,
+              type_params,
+              leftp,
+              params,
+              rightp,
+              colon,
+              ret_type,
+              where
+            ) = get_function_declaration_header_children x
             in
-            Fmt (transform_fn_decl_name async kw amp name type_params leftp),
+            Fmt (
+              transform_fn_decl_name
+                async
+                coroutine
+                kw
+                amp
+                name
+                type_params
+                leftp
+            ),
             transform_fn_decl_args params rightp colon ret_type where
           | _ -> failwith "Expected FunctionDeclarationHeader"
         in
@@ -699,11 +732,23 @@ let rec transform node =
       Nest [t value];
     ]
   | AnonymousFunction x ->
-    let (async_kw, fun_kw, lp, params, rp, colon, ret_type, use, body) =
-      get_anonymous_function_children x in
+    let (
+      async_kw,
+      coroutine_kw,
+      fun_kw,
+      lp,
+      params,
+      rp,
+      colon,
+      ret_type,
+      use,
+      body
+    ) = get_anonymous_function_children x in
     Fmt [
       t async_kw;
       when_present async_kw space;
+      t coroutine_kw;
+      when_present coroutine_kw space;
       t fun_kw;
       transform_argish_with_return_type lp params rp colon ret_type;
       t use;
@@ -720,10 +765,13 @@ let rec transform node =
       transform_argish left_p vars right_p;
     ]
   | LambdaExpression x ->
-    let (async, signature, arrow, body) = get_lambda_expression_children x in
+    let (async, coroutine, signature, arrow, body) =
+      get_lambda_expression_children x in
     Fmt [
       t async;
       when_present async space;
+      t coroutine;
+      when_present coroutine space;
       t signature;
       Space;
       t arrow;
@@ -969,10 +1017,13 @@ let rec transform node =
       transform_braced_item lb expr rb;
     ]
   | AwaitableCreationExpression x ->
-    let (kw, body) = get_awaitable_creation_expression_children x in
+    let (async_kw, coroutine_kw, body) =
+      get_awaitable_creation_expression_children x in
     Fmt [
-      t kw;
-      Space;
+      t async_kw;
+      when_present async_kw space;
+      t coroutine_kw;
+      when_present coroutine_kw space;
       (* TODO: rethink possible one line bodies *)
       (* TODO: correctly handle spacing after the closing brace *)
       handle_possible_compound_statement ~space:false body;
@@ -1533,10 +1584,12 @@ and handle_switch_body left_b sections right_b =
     )
   ]
 
-and transform_fn_decl_name async kw amp name type_params leftp =
+and transform_fn_decl_name async coroutine kw amp name type_params leftp =
   [
     transform async;
     when_present async space;
+    transform coroutine;
+    when_present coroutine space;
     transform kw;
     Space;
     transform amp;

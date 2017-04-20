@@ -343,14 +343,29 @@ let unesc_xhp_attr s =
     then matched_group 1 s
     else s
 
-let mk_fun_kind sync yield =
-  match sync, yield with
-  | true,  true  -> FGenerator
-  | false, true  -> FAsyncGenerator
-  | true,  false -> FSync
-  | false, false -> FAsync
+type suspension_kind =
+  | SKSync
+  | SKAsync
+  | SKCoroutine
 
-let fun_template yielding node is_sync =
+let mk_suspension_kind async_node coroutine_node =
+  match is_missing async_node, is_missing coroutine_node with
+  | true, true -> SKSync
+  | false, true -> SKAsync
+  | true, false -> SKCoroutine
+  | false, false -> raise (Failure "Couroutine functions may not be async")
+
+let mk_fun_kind suspension_kind yield =
+  match suspension_kind, yield with
+  | SKSync,  true  -> FGenerator
+  | SKAsync, true  -> FAsyncGenerator
+  | SKSync,  false -> FSync
+  | SKAsync, false -> FAsync
+  (* TODO(t17335630): Implement an FCoroutine fun_kind *)
+  | SKCoroutine, false -> assert false
+  | SKCoroutine, true -> raise (Failure "Couroutine functions may not yield")
+
+let fun_template yielding node suspension_kind =
   let p = get_pos node in
   { f_mode            = !(lowerer_state.mode)
   ; f_tparams         = []
@@ -360,7 +375,7 @@ let fun_template yielding node is_sync =
   ; f_params          = []
   ; f_body            = []
   ; f_user_attributes = []
-  ; f_fun_kind        = mk_fun_kind is_sync yielding
+  ; f_fun_kind        = mk_fun_kind suspension_kind yielding
   ; f_namespace       = Namespace_env.empty !(lowerer_state.popt)
   ; f_span            = p
   }
@@ -547,8 +562,10 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
   let rec pExpr_ : expr_ parser = fun node env ->
     let pos = get_pos node in
     match syntax node with
-    | LambdaExpression { lambda_async; lambda_signature; lambda_body; _ } ->
-      let is_sync = is_missing lambda_async in
+    | LambdaExpression {
+        lambda_async; lambda_coroutine; lambda_signature; lambda_body; _ } ->
+      let suspension_kind =
+        mk_suspension_kind lambda_async lambda_coroutine in
       let f_params, f_ret =
         match syntax lambda_signature with
         | LambdaSignature { lambda_parameters; lambda_type; _ } ->
@@ -566,7 +583,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       in
       let f_body, yield = mpYielding pBody lambda_body env in
       Lfun
-      { (fun_template yield node is_sync) with f_ret; f_params; f_body }
+      { (fun_template yield node suspension_kind) with f_ret; f_params; f_body }
 
     | BracedExpression        { braced_expression_expression        = expr; _ }
     | EmbeddedBracedExpression
@@ -777,6 +794,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       *)
     | AnonymousFunction
       { anonymous_async_keyword
+      ; anonymous_coroutine_keyword
       ; anonymous_parameters
       ; anonymous_type
       ; anonymous_use
@@ -796,10 +814,13 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
             couldMap ~f:pArg anonymous_use_variables
           | _ -> fun _env -> []
         in
-        let is_sync = is_missing anonymous_async_keyword in
+        let suspension_kind =
+          mk_suspension_kind
+            anonymous_async_keyword
+            anonymous_coroutine_keyword in
         let body, yield = mpYielding pBlock anonymous_body env in
         Efun
-        ( { (fun_template yield node is_sync) with
+        ( { (fun_template yield node suspension_kind) with
             f_ret    = mpOptional pHint anonymous_type env
           ; f_params = couldMap ~f:pFunParam anonymous_parameters env
           ; f_body   = mk_noop body
@@ -808,11 +829,12 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         )
 
     | AwaitableCreationExpression
-      { awaitable_async; awaitable_compound_statement } ->
-      let is_sync = is_missing awaitable_async in
+      { awaitable_async; awaitable_coroutine; awaitable_compound_statement } ->
+      let suspension_kind =
+        mk_suspension_kind awaitable_async awaitable_coroutine in
       let blk, yld = mpYielding pBlock awaitable_compound_statement env in
       let body =
-        { (fun_template yld node is_sync) with f_body = mk_noop blk }
+        { (fun_template yld node suspension_kind) with f_body = mk_noop blk }
       in
       Call ((get_pos node, Lfun body), [], [])
     | XHPExpression
@@ -1079,7 +1101,7 @@ let pTParaml : tparam list parser = fun node env ->
   | _ -> missing_syntax "type parameter list" node env
 
 type fun_hdr =
-  { fh_is_sync         : bool
+  { fh_suspension_kind : suspension_kind
   ; fh_name            : pstring
   ; fh_type_parameters : tparam list
   ; fh_parameters      : fun_param list
@@ -1089,7 +1111,7 @@ type fun_hdr =
   }
 
 let empty_fun_hdr =
-  { fh_is_sync         = false
+  { fh_suspension_kind = SKSync
   ; fh_name            = Pos.none, "<ANONYMOUS>"
   ; fh_type_parameters = []
   ; fh_parameters      = []
@@ -1103,6 +1125,7 @@ let pFunHdr : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
     { function_async
+    ; function_coroutine
     ; function_name
     ; function_type_parameter_list
     ; function_parameter_list
@@ -1119,7 +1142,9 @@ let pFunHdr : fun_hdr parser = fun node env ->
             | "__destruct" -> Some (pos, Happly ((pos, "void"), [])), true
             | _            -> None, false
       in
-      { fh_is_sync         = is_missing function_async
+      let fh_suspension_kind =
+        mk_suspension_kind function_async function_coroutine in
+      { fh_suspension_kind
       ; fh_name            = pos_name function_name
       ; fh_type_parameters = pTParaml function_type_parameter_list env
       ; fh_parameters
@@ -1251,7 +1276,7 @@ let pClassElt : class_elt list parser = fun node env ->
       ; m_ret             = hdr.fh_return_type
       ; m_ret_by_ref      = false
       ; m_span            = get_pos node
-      ; m_fun_kind        = mk_fun_kind hdr.fh_is_sync body_has_yield
+      ; m_fun_kind        = mk_fun_kind hdr.fh_suspension_kind body_has_yield
       }]
   | TraitUse { trait_use_names; _ } ->
     couldMap ~f:(fun n e -> ClassUse (pHint n e)) trait_use_names env
@@ -1313,7 +1338,7 @@ and pDef : def parser = fun node env ->
       let hdr = pFunHdr function_declaration_header env in
       let block, yield = mpYielding (mpOptional pBlock) function_body env in
       Fun
-      { (fun_template yield node hdr.fh_is_sync) with
+      { (fun_template yield node hdr.fh_suspension_kind) with
         f_tparams         = hdr.fh_type_parameters
       ; f_ret             = hdr.fh_return_type
       ; f_name            = hdr.fh_name

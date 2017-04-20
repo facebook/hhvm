@@ -196,6 +196,7 @@ module WithToken(Token: TokenType) = struct
     }
     and function_declaration_header = {
       function_async: t;
+      function_coroutine: t;
       function_keyword: t;
       function_ampersand: t;
       function_name: t;
@@ -479,6 +480,7 @@ module WithToken(Token: TokenType) = struct
     }
     and anonymous_function = {
       anonymous_async_keyword: t;
+      anonymous_coroutine_keyword: t;
       anonymous_function_keyword: t;
       anonymous_left_paren: t;
       anonymous_parameters: t;
@@ -496,6 +498,7 @@ module WithToken(Token: TokenType) = struct
     }
     and lambda_expression = {
       lambda_async: t;
+      lambda_coroutine: t;
       lambda_signature: t;
       lambda_arrow: t;
       lambda_body: t;
@@ -690,6 +693,7 @@ module WithToken(Token: TokenType) = struct
     }
     and awaitable_creation_expression = {
       awaitable_async: t;
+      awaitable_coroutine: t;
       awaitable_compound_statement: t;
     }
     and xhp_children_declaration = {
@@ -1877,6 +1881,7 @@ module WithToken(Token: TokenType) = struct
 
     let get_function_declaration_header_children {
       function_async;
+      function_coroutine;
       function_keyword;
       function_ampersand;
       function_name;
@@ -1889,6 +1894,7 @@ module WithToken(Token: TokenType) = struct
       function_where_clause;
     } = (
       function_async,
+      function_coroutine,
       function_keyword,
       function_ampersand,
       function_name,
@@ -2443,6 +2449,7 @@ module WithToken(Token: TokenType) = struct
 
     let get_anonymous_function_children {
       anonymous_async_keyword;
+      anonymous_coroutine_keyword;
       anonymous_function_keyword;
       anonymous_left_paren;
       anonymous_parameters;
@@ -2453,6 +2460,7 @@ module WithToken(Token: TokenType) = struct
       anonymous_body;
     } = (
       anonymous_async_keyword,
+      anonymous_coroutine_keyword,
       anonymous_function_keyword,
       anonymous_left_paren,
       anonymous_parameters,
@@ -2477,11 +2485,13 @@ module WithToken(Token: TokenType) = struct
 
     let get_lambda_expression_children {
       lambda_async;
+      lambda_coroutine;
       lambda_signature;
       lambda_arrow;
       lambda_body;
     } = (
       lambda_async,
+      lambda_coroutine,
       lambda_signature,
       lambda_arrow,
       lambda_body
@@ -2865,9 +2875,11 @@ module WithToken(Token: TokenType) = struct
 
     let get_awaitable_creation_expression_children {
       awaitable_async;
+      awaitable_coroutine;
       awaitable_compound_statement;
     } = (
       awaitable_async,
+      awaitable_coroutine,
       awaitable_compound_statement
     )
 
@@ -3465,6 +3477,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | FunctionDeclarationHeader {
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -3477,6 +3490,7 @@ module WithToken(Token: TokenType) = struct
         function_where_clause;
       } -> [
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -3984,6 +3998,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | AnonymousFunction {
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -3994,6 +4009,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_body;
       } -> [
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -4016,11 +4032,13 @@ module WithToken(Token: TokenType) = struct
       ]
       | LambdaExpression {
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
@@ -4369,9 +4387,11 @@ module WithToken(Token: TokenType) = struct
       ]
       | AwaitableCreationExpression {
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       ]
       | XHPChildrenDeclaration {
@@ -4931,6 +4951,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | FunctionDeclarationHeader {
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -4943,6 +4964,7 @@ module WithToken(Token: TokenType) = struct
         function_where_clause;
       } -> [
         "function_async";
+        "function_coroutine";
         "function_keyword";
         "function_ampersand";
         "function_name";
@@ -5450,6 +5472,7 @@ module WithToken(Token: TokenType) = struct
       ]
       | AnonymousFunction {
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -5460,6 +5483,7 @@ module WithToken(Token: TokenType) = struct
         anonymous_body;
       } -> [
         "anonymous_async_keyword";
+        "anonymous_coroutine_keyword";
         "anonymous_function_keyword";
         "anonymous_left_paren";
         "anonymous_parameters";
@@ -5482,11 +5506,13 @@ module WithToken(Token: TokenType) = struct
       ]
       | LambdaExpression {
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
       } -> [
         "lambda_async";
+        "lambda_coroutine";
         "lambda_signature";
         "lambda_arrow";
         "lambda_body";
@@ -5835,9 +5861,11 @@ module WithToken(Token: TokenType) = struct
       ]
       | AwaitableCreationExpression {
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       } -> [
         "awaitable_async";
+        "awaitable_coroutine";
         "awaitable_compound_statement";
       ]
       | XHPChildrenDeclaration {
@@ -6470,6 +6498,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.FunctionDeclarationHeader, [
           function_async;
+          function_coroutine;
           function_keyword;
           function_ampersand;
           function_name;
@@ -6483,6 +6512,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         FunctionDeclarationHeader {
           function_async;
+          function_coroutine;
           function_keyword;
           function_ampersand;
           function_name;
@@ -7036,6 +7066,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.AnonymousFunction, [
           anonymous_async_keyword;
+          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -7047,6 +7078,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         AnonymousFunction {
           anonymous_async_keyword;
+          anonymous_coroutine_keyword;
           anonymous_function_keyword;
           anonymous_left_paren;
           anonymous_parameters;
@@ -7070,12 +7102,14 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.LambdaExpression, [
           lambda_async;
+          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
         ]) ->
         LambdaExpression {
           lambda_async;
+          lambda_coroutine;
           lambda_signature;
           lambda_arrow;
           lambda_body;
@@ -7458,10 +7492,12 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.AwaitableCreationExpression, [
           awaitable_async;
+          awaitable_coroutine;
           awaitable_compound_statement;
         ]) ->
         AwaitableCreationExpression {
           awaitable_async;
+          awaitable_coroutine;
           awaitable_compound_statement;
         }
       | (SyntaxKind.XHPChildrenDeclaration, [
@@ -8133,6 +8169,7 @@ module WithToken(Token: TokenType) = struct
 
     let make_function_declaration_header
       function_async
+      function_coroutine
       function_keyword
       function_ampersand
       function_name
@@ -8146,6 +8183,7 @@ module WithToken(Token: TokenType) = struct
     =
       from_children SyntaxKind.FunctionDeclarationHeader [
         function_async;
+        function_coroutine;
         function_keyword;
         function_ampersand;
         function_name;
@@ -8746,6 +8784,7 @@ module WithToken(Token: TokenType) = struct
 
     let make_anonymous_function
       anonymous_async_keyword
+      anonymous_coroutine_keyword
       anonymous_function_keyword
       anonymous_left_paren
       anonymous_parameters
@@ -8757,6 +8796,7 @@ module WithToken(Token: TokenType) = struct
     =
       from_children SyntaxKind.AnonymousFunction [
         anonymous_async_keyword;
+        anonymous_coroutine_keyword;
         anonymous_function_keyword;
         anonymous_left_paren;
         anonymous_parameters;
@@ -8782,12 +8822,14 @@ module WithToken(Token: TokenType) = struct
 
     let make_lambda_expression
       lambda_async
+      lambda_coroutine
       lambda_signature
       lambda_arrow
       lambda_body
     =
       from_children SyntaxKind.LambdaExpression [
         lambda_async;
+        lambda_coroutine;
         lambda_signature;
         lambda_arrow;
         lambda_body;
@@ -9205,10 +9247,12 @@ module WithToken(Token: TokenType) = struct
 
     let make_awaitable_creation_expression
       awaitable_async
+      awaitable_coroutine
       awaitable_compound_statement
     =
       from_children SyntaxKind.AwaitableCreationExpression [
         awaitable_async;
+        awaitable_coroutine;
         awaitable_compound_statement;
       ]
 

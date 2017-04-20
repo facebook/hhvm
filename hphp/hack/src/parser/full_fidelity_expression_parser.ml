@@ -162,7 +162,8 @@ module WithStatementAndDeclAndTypeParser
     | Function -> parse_anon parser
     | DollarDollar ->
       (parser1, make_pipe_variable_expression (make_token token))
-    | Async -> parse_anon_or_lambda_or_awaitable parser
+    | Async
+    | Coroutine -> parse_anon_or_lambda_or_awaitable parser
     | Include
     | Include_once
     | Require
@@ -861,6 +862,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Const
     | Construct
     | Continue
+    | Coroutine
     | Darray
     | Dict
     | Default
@@ -1128,10 +1130,11 @@ TODO: This will need to be fixed to allow situations where the qualified name
         async-opt  lambda-function-signature  ==>  lambda-body
     *)
     let (parser, async) = optional_token parser Async in
+    let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, signature) = parse_lambda_signature parser in
     let (parser, arrow) = expect_lambda_arrow parser in
     let (parser, body) = parse_lambda_body parser in
-    let result = make_lambda_expression async signature arrow body in
+    let result = make_lambda_expression async coroutine signature arrow body in
     (parser, result)
 
   and parse_lambda_signature parser =
@@ -1645,7 +1648,11 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_anon_or_lambda_or_awaitable parser =
     (* TODO: The original Hack parser accepts "async" as an identifier, and
     so we do too. We might consider making it reserved. *)
-    let (parser1, _) = assert_token parser Async in
+    (* Skip any async or coroutine declarations that may be present. When we
+       feed the original parser into the syntax parsers. they will take care of
+       them as appropriate. *)
+    let (parser1, _) = optional_token parser Async in
+    let (parser1, _) = optional_token parser1 Coroutine in
     match peek_token_kind parser1 with
     | Function -> parse_anon parser
     | LeftBrace -> parse_async_block parser
@@ -1657,13 +1664,14 @@ TODO: This will need to be fixed to allow situations where the qualified name
     (*
      * grammar:
      *  awaitable-creation-expression :
-     *    async compound-statement
+     *    async-opt  coroutine-opt  compound-statement
      * TODO awaitable-creation-expression must not be used as the
      *      anonymous-function-body in a lambda-expression
      *)
-    let parser, async = assert_token parser Async in
+    let parser, async = optional_token parser Async in
+    let parser, coroutine = optional_token parser Coroutine in
     let parser, stmt = parse_compound_statement parser in
-    parser, make_awaitable_creation_expression async stmt
+    parser, make_awaitable_creation_expression async coroutine stmt
 
   and parse_anon_use_opt parser =
     (* SPEC:
@@ -1703,7 +1711,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
   and parse_anon parser =
     (* SPEC
       anonymous-function-creation-expression:
-        async-opt  function
+        async-opt  coroutine-opt  function
         ( anonymous-function-parameter-list-opt  )
         anonymous-function-return-opt
         anonymous-function-use-clauseopt
@@ -1715,14 +1723,25 @@ TODO: This will need to be fixed to allow situations where the qualified name
        parse an optional parameter list; it already takes care of making the
        type annotations optional. *)
     let (parser, async) = optional_token parser Async in
+    let (parser, coroutine) = optional_token parser Coroutine in
     let (parser, fn) = assert_token parser Function in
     let (parser, left_paren, params, right_paren) =
       parse_parameter_list_opt parser in
     let (parser, colon, return_type) = parse_optional_return parser in
     let (parser, use_clause) = parse_anon_use_opt parser in
     let (parser, body) = parse_compound_statement parser in
-    let result = make_anonymous_function async fn left_paren params
-      right_paren colon return_type use_clause body in
+    let result =
+      make_anonymous_function
+        async
+        coroutine
+        fn
+        left_paren
+        params
+        right_paren
+        colon
+        return_type
+        use_clause
+        body in
     (parser, result)
 
   and parse_braced_expression parser =

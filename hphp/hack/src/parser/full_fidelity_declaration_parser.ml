@@ -834,6 +834,7 @@ module WithExpressionAndStatementAndTypeParser
     if is_missing attribute_spec then
       match peek_token_kind parser with
       | Async
+      | Coroutine
       | Function -> parse_methodish parser attribute_spec modifiers
       | _ -> parse_property_declaration parser modifiers
     else
@@ -1189,7 +1190,7 @@ module WithExpressionAndStatementAndTypeParser
   and parse_function_declaration_header parser =
     (* SPEC
       function-definition-header:
-        attribute-specification-opt  async-opt  function  name  /
+        attribute-specification-opt  async-opt  coroutine-opt  function  name  /
         generic-type-parameter-list-opt  (  parameter-list-opt  ) :  /
         return-type   where-clause-opt
 
@@ -1202,6 +1203,7 @@ module WithExpressionAndStatementAndTypeParser
       TODO: Produce an error if this occurs in strict mode, or if it
       TODO: appears before a special name like __construct, and so on. *)
     let (parser, async_token) = optional_token parser Async in
+    let (parser, coroutine_token) = optional_token parser Coroutine in
     let (parser, function_token) = expect_function parser in
     let (parser, ampersand_token) = optional_token parser Ampersand in
     let (parser, label) =
@@ -1213,10 +1215,20 @@ module WithExpressionAndStatementAndTypeParser
     let (parser, colon_token, return_type) =
       parse_return_type_hint_opt parser in
     let (parser, where_clause) = parse_where_clause_opt parser in
-    let syntax = make_function_declaration_header async_token
-      function_token ampersand_token label generic_type_parameter_list
-      left_paren_token parameter_list right_paren_token colon_token
-      return_type where_clause in
+    let syntax =
+      make_function_declaration_header
+        async_token
+        coroutine_token
+        function_token
+        ampersand_token
+        label
+        generic_type_parameter_list
+        left_paren_token
+        parameter_list
+        right_paren_token
+        colon_token
+        return_type
+        where_clause in
     (parser, syntax)
 
   (* A function label is either a function name, a __construct label, or a
@@ -1313,7 +1325,7 @@ module WithExpressionAndStatementAndTypeParser
     | Enum -> parse_enum_declaration parser attribute_specification
     | Type | Newtype ->
       parse_alias_declaration parser attribute_specification
-    | Async | Function ->
+    | Async | Coroutine | Function ->
       parse_function_declaration parser attribute_specification
     | Abstract
     | Final
@@ -1345,6 +1357,7 @@ module WithExpressionAndStatementAndTypeParser
     | Final
     | Class -> parse_classish_declaration parser(make_missing())
     | Async
+    | Coroutine
     | Function -> parse_function_declaration parser (make_missing())
     | LessThanLessThan ->
       parse_enum_or_classish_or_function_declaration parser

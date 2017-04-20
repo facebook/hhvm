@@ -123,6 +123,25 @@ static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 bool shouldTranslate(const Func* func, TransKind kind) {
   if (!shouldTranslateNoSizeLimit(func)) return false;
 
+  const auto serverMode = RuntimeOption::ServerExecutionMode();
+  const auto maxTransTime = RuntimeOption::EvalJitMaxRequestTranslationTime;
+  const auto transCounter = Timer::CounterValue(Timer::mcg_translate);
+
+  if (serverMode && maxTransTime >= 0 &&
+      transCounter.wall_time_elapsed >= maxTransTime) {
+
+      if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
+        Trace::traceRelease("Skipping translation. "
+                            "Time budget of %" PRId64 " exceeded. "
+                            "%" PRId64 "us elapsed. "
+                            "%" PRId64 " translations completed\n",
+                            maxTransTime,
+                            transCounter.wall_time_elapsed,
+                            transCounter.count);
+      }
+      return false;
+  }
+
   auto const main_under = code().main().used() < CodeCache::AMaxUsage;
   auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;

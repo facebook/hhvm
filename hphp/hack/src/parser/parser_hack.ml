@@ -114,6 +114,20 @@ let try_parse (env : env) (f : env -> 'a option) : 'a option =
   | Some x -> Some x
   | None   -> (restore_lexbuf_state env.lb saved; None)
 
+(* Same as try_parse, but returns None if parsing produced errors. *)
+let try_parse_with_errors (env : env) (f : env -> 'a) : 'a option =
+  let parse env =
+    let error_state = !(env.errors) in
+    let result = f env in
+    if !(env.errors) == error_state then
+        Some result
+    else
+      (
+        env.errors := error_state;
+        None
+      ) in
+  try_parse env parse
+
 (* Return the next token without updating lexer state *)
 let peek env =
   let saved = save_lexbuf_state env.lb in
@@ -2020,6 +2034,12 @@ and ignore_statement env =
   ignore (statement env);
   env.errors := error_state
 
+and parse_expr env =
+  L.back env.lb;
+  let e = expr env in
+  expect env Tsc;
+  Expr e
+
 and statement_word env = function
   | "break"    -> statement_break env
   | "continue" -> statement_continue env
@@ -2042,14 +2062,28 @@ and statement_word env = function
           "Parse error: declarations are not supported outside global scope";
       ignore (ignore_toplevel None ~attr:[] [] env (fun _ -> true));
       Noop
-  (* TODO(t17085086): Prevent this from breaking www and uncomment it. *)
-  (* | x when peek env = Tcolon ->
-      statement_goto_label env x *)
-  | x ->
-      L.back env.lb;
-      let e = expr env in
-      expect env Tsc;
-      Expr e
+  | x when peek env = Tcolon ->
+    (* Unfortunately, some XHP elements allow for expressions to look like goto
+     * label declarations. For example,
+     *
+     *   await :intern:roadmap:project::genUpdateOnClient($project);
+     *
+     * Looks like it is declaring a label whose name is await. To preserve
+     * compatibility with PHP while working around this issue, we use the
+     * following heuristic:
+     *
+     * When we encounter a statement that is a word followed by a colon:
+     *   1) Attempt to parse it as an expression. If there are no additional
+     *      errors, the result is used as the expression.
+     *   2) If there are additional errors, then revert the error and lexer
+     *      state, and parse the statement as a goto label.
+     *)
+    (
+      match try_parse_with_errors env parse_expr with
+      | Some expr -> expr
+      | None -> statement_goto_label env x
+    )
+  | x -> parse_expr env
 
 (*****************************************************************************)
 (* Break statement *)
@@ -2106,13 +2140,13 @@ and return_value env =
 (* Goto statement *)
 (*****************************************************************************)
 
-and _statement_goto_label env label =
+and statement_goto_label env label =
   let pos = Pos.make env.file env.lb in
   let goto_allowed =
     TypecheckerOptions.experimental_feature_enabled
       env.popt
       TypecheckerOptions.experimental_goto in
-  if not goto_allowed then Errors.goto_not_supported pos;
+  if not goto_allowed then error env "goto is not supported.";
   expect env Tcolon;
   GotoLabel (pos, label)
 
@@ -2122,7 +2156,7 @@ and statement_goto env =
     TypecheckerOptions.experimental_feature_enabled
       env.popt
       TypecheckerOptions.experimental_goto in
-  if not goto_allowed then Errors.goto_not_supported pos;
+  if not goto_allowed then error env "goto labels are not supported.";
   match L.token env.file env.lb with
     | Tword ->
       let word = Lexing.lexeme env.lb in

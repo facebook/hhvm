@@ -8,16 +8,19 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function hash($algo, $data, $raw_output = false) { }
-function hash_algos() { }
-function hash_init($algo, $options = 0, $key = null) { }
-function hash_file($algo, $filename, $raw_output = false) { }
-function hash_final($context, $raw_output = false) { }
-function hash_hmac_file($algo, $filename, $key, $raw_output = false) { }
-function hash_hmac($algo, $data, $key, $raw_output = false) { }
-function hash_update_file($init_context, $filename, $stream_context = null) { }
-function hash_update_stream($context, $handle, $length = -1) { }
-function hash_update($context, $data) { }
+function hash(string $algo, string $data, bool $raw_output = false) { }
+function hash_copy(resource $context) { }
+function hash_equals(string $known_string, string $user_string): bool { }
+function hash_algos(): array { }
+function hash_init(string $algo, int $options = 0, string $key = null) { }
+function hash_file(string $algo, string $filename, bool $raw_output = false) { }
+function hash_final(resource $context, bool $raw_output = false) { }
+function hash_hmac_file(string $algo, string $filename, string $key, bool $raw_output = false) { }
+function hash_hmac(string $algo, string $data, string $key, bool $raw_output = false) { }
+function hash_update_file(resource $init_context, string $filename, resource $stream_context = null) { }
+function hash_update_stream(resource $context, resource $handle, int $length = -1) { }
+function hash_update(resource $context, string $data) { }
 function furchash_hphp_ext($key, $len, $nPart) { }
 function furchash_hphp_ext_supported() { }
 function hphp_murmurhash($key, $len, $seed) { }
+function hash_pbkdf2(string $algo, string $password, string $salt, int $iterations, int $length = 0, bool $raw_output = false) { }

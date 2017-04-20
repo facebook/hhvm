@@ -204,7 +204,6 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::notb:
     case Vinstr::orbim:
     case Vinstr::subb:
-    case Vinstr::subbi:
     case Vinstr::xorb:
     case Vinstr::xorbi:
     case Vinstr::cmpb:

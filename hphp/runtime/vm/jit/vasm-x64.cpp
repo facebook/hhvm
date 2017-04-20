@@ -238,7 +238,6 @@ struct Vgen {
   void emit(const storesd& i) { a.movsd(i.s, i.m); }
   void emit(const storew& i) { a.storew(i.s, i.m); }
   void emit(const storewi& i) { a.storew(i.s, i.m); }
-  void emit(subbi i) { binary(i); a.subb(i.s0, i.d); }
   void emit(subl i) { noncommute(i); a.subl(i.s0, i.d); }
   void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
   void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }

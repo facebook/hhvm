@@ -319,7 +319,6 @@ struct Vgen {
   void emit(const storeups& i);
   void emit(const storew& i) { a->Strh(W(i.s), M(i.m)); }
   void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const subl& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
@@ -1220,7 +1219,6 @@ Y(andqi, andq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
 Y(cmpli, cmpl, ldimml, ISAR, i.s0, i.s1)
 Y(cmpqi, cmpq, ldimmq, ISAR, Immed64(value), i.s1)
 Y(orqi, orq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
-Y(subbi, subb, ldimmb, ISAR, i.s0, U2(i.s1, i.d))
 Y(subli, subl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
 Y(subqi, subq, ldimmq, ISAR, Immed64(value), U2(i.s1, i.d))
 Y(testli, testl, ldimml, ISLG(32), i.s0, i.s1)

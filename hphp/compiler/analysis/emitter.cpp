@@ -4117,7 +4117,7 @@ void EmitterVisitor::emitCall(Emitter& e,
   auto const unpack = func->hasUnpack();
   if (!func->checkUnpackParams()) {
     throw IncludeTimeFatalException(
-      func, "Only the last parameter in a function call is allowed to use ...");
+      func, "Cannot use positional argument after argument unpacking");
   }
   {
     FPIRegionRecorder fpi(this, m_ue, m_evalStack, fpiStart);

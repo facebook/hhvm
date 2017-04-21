@@ -95,6 +95,7 @@ struct ProfCounters {
   ProfCounters& operator=(const ProfCounters&) = delete;
 
   T get(uint32_t id) const {
+    assertx(kCountersPerChunk % 11);
     return id / kCountersPerChunk >= m_chunks.size()
       ? m_initVal
       : m_chunks[id / kCountersPerChunk][(id * 11) % kCountersPerChunk];
@@ -109,6 +110,7 @@ struct ProfCounters {
       m_chunks.emplace_back(chunk);
     }
     assertx(id / kCountersPerChunk < m_chunks.size());
+    assertx(kCountersPerChunk % 11);
     return &(m_chunks[id / kCountersPerChunk][(id * 11) % kCountersPerChunk]);
   }
 

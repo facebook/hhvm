@@ -497,7 +497,7 @@ macro(hphp_link target)
     target_link_libraries(${target} sqlite3)
   endif()
 
-  if (DOUBLE_CONVERSION_LIBRARY)
+  if (DOUBLE_CONVERSION_FOUND)
     target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
   else()
     target_link_libraries(${target} double-conversion)

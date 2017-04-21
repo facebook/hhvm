@@ -56,6 +56,10 @@ end
 (* XHP name mangling *)
 module Xhp = struct
 
+  let clean s =
+    if String.length s = 0 || s.[0] <> ':'
+    then s else String_utils.lstrip s ":"
+
   let mangle s =
     if String.length s = 0 || s.[0] <> ':' then s else
       "xhp_" ^

@@ -25,6 +25,7 @@ type t = {
   class_is_abstract  : bool;
   class_is_interface : bool;
   class_is_trait     : bool;
+  class_is_xhp       : bool;
   class_uses         : Litstr.id list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;
@@ -42,6 +43,7 @@ let make
   class_is_abstract
   class_is_interface
   class_is_trait
+  class_is_xhp
   class_uses
   class_enum_type
   class_methods
@@ -57,6 +59,7 @@ let make
     class_is_abstract;
     class_is_interface;
     class_is_trait;
+    class_is_xhp;
     class_uses;
     class_enum_type;
     class_methods;
@@ -73,6 +76,7 @@ let is_final hhas_class = hhas_class.class_is_final
 let is_abstract hhas_class = hhas_class.class_is_abstract
 let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
+let is_xhp hhas_class = hhas_class.class_is_xhp
 let class_uses hhas_class = hhas_class.class_uses
 let enum_type hhas_class = hhas_class.class_enum_type
 let methods hhas_class = hhas_class.class_methods

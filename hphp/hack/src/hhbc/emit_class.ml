@@ -13,6 +13,8 @@ open Instruction_sequence
 open Emit_type_hint
 open Emit_expression
 
+module SU = Hhbc_string_utils
+
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface
 
@@ -57,6 +59,85 @@ let default_constructor ast_class =
     method_is_generator
     method_is_pair_generator
     method_is_closure_body
+
+let xhp_attribute_declaration_method body =
+  {
+    A.m_kind = [A.Protected; A.Static];
+    A.m_tparams = [];
+    A.m_constrs = [];
+    A.m_name = Pos.none, "__xhpAttributeDeclaration";
+    A.m_params = [];
+    A.m_body = body;
+    A.m_user_attributes = [];
+    A.m_ret = None;
+    A.m_ret_by_ref = false;
+    A.m_fun_kind = A.FSync;
+    A.m_span = Pos.none
+  }
+
+let emit_xhp_attribute_array xal =
+  let p = Pos.none in
+  (* TODO: exhaust over all possibilities *)
+  let hint_to_num = function
+    | "string" -> 1
+    | "bool" -> 2
+    | "int" -> 3
+    | "float" | "double" -> 8
+    | _ -> 99999
+  in
+  let inner_array ho eo =
+    let e = match eo with None -> (p, A.Null) | Some e -> e in
+    let hint = match ho with
+      | None -> failwith "Xhp attribute must have a type"
+      | Some (_, A.Happly ((_, id), [])) ->
+        (p, A.Int (p, string_of_int @@ hint_to_num id))
+      | _ -> (p, A.String (p, "NYI - Xhp attribute hint"))
+    in
+    (* TODO: What is index 1 and 3? *)
+    [A.AFkvalue ((p, A.Int (p, "0")), hint);
+     A.AFkvalue ((p, A.Int (p, "1")), (p, A.Null));
+     A.AFkvalue ((p, A.Int (p, "2")), e);
+     A.AFkvalue ((p, A.Int (p, "3")), (p, A.Int (p, "0")))]
+  in
+  let aux xa =
+    let ho = Hhas_xhp_attribute.type_ xa in
+    let _, (_, name), eo = Hhas_xhp_attribute.class_var xa in
+    let k = p, A.String (p, SU.Xhp.clean name) in
+    let v = p, A.Array (inner_array ho eo) in
+    A.AFkvalue (k, v)
+  in
+  p, A.Array (List.map ~f:aux xal)
+
+(* AST transformations taken from hphp/parser/hphp.y *)
+let emit_xhp_attribute_declaration ast_class xal =
+  let p = Pos.none in
+  let var_dollar_ = p, A.Lvar (p, "$_") in
+  let neg_one = p, A.Int (p, "-1") in
+  (* static $_ = -1; *)
+  let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, neg_one)] in
+  (* if ($_ === -1) {
+   *   $_ = array_merge(parent::__xhpAttributeDeclaration(),
+   *                    attributes);
+   * }
+   *)
+  let cond = p, A.Binop (A.EQeqeq, var_dollar_, neg_one) in
+  let arg1 =
+    p, A.Call (
+      (p, A.Class_const ((p, "parent"), (p, "__xhpAttributeDeclaration"))),
+      [],
+      [])
+  in
+  let args = [arg1; emit_xhp_attribute_array xal] in
+  let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), args, []) in
+  let true_branch =
+    [A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
+  in
+  let token2 = A.If (cond, true_branch, []) in
+  (* return $_; *)
+  let token3 = A.Return (p, Some var_dollar_) in
+  let body = [token1; token2; token3] in
+  let m = xhp_attribute_declaration_method body in
+  Emit_method.from_ast ast_class m
 
 let from_extends ~is_enum _tparams extends =
   if is_enum then Some ("HH\\BuiltinEnum") else
@@ -140,16 +221,23 @@ let from_ast : A.class_ -> Hhas_class.t =
   let class_uses =
     List.filter_map
       ast_class.A.c_body
-      (fun x ->
-        match x with
+      (function
         | A.ClassUse (_, (A.Happly ((_, name), _))) -> Some name
-        | _ -> None) in
+        | _ -> None)
+  in
   let class_enum_type =
     if ast_class.A.c_kind = Ast.Cenum
     then from_enum_type ast_class.A.c_enum
     else None
   in
-
+  let class_is_xhp = ast_class.A.c_is_xhp in
+  let class_xhp_attributes =
+    List.filter_map
+      ast_class.A.c_body
+      (function
+        | A.XhpAttr (ho, cv, b, eo) -> Some (Hhas_xhp_attribute.make ho cv b eo)
+        | _ -> None)
+  in
   let class_is_interface = ast_is_interface ast_class in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
@@ -177,9 +265,15 @@ let from_ast : A.class_ -> Hhas_class.t =
                   snd m_name = "__invoke" && is_closure_class
                 | _ -> false) in
   let additional_methods =
-    if has_constructor_or_invoke
+    if not class_is_xhp || class_xhp_attributes = []
     then []
-    else [default_constructor ast_class] in
+    else [emit_xhp_attribute_declaration ast_class class_xhp_attributes]
+  in
+  let additional_methods =
+    if has_constructor_or_invoke
+    then additional_methods
+    else additional_methods @ [default_constructor ast_class]
+  in
   let class_methods =
     Emit_method.from_asts ast_class (ast_methods class_body) in
   let class_methods = class_methods @ additional_methods in
@@ -187,7 +281,7 @@ let from_ast : A.class_ -> Hhas_class.t =
   let class_constants = List.concat_map class_body from_class_elt_constants in
   let class_type_constants =
     List.filter_map class_body from_class_elt_typeconsts in
-  (* TODO: uses, xhp attr uses, xhp category *)
+  (* TODO: xhp attr uses, xhp category *)
   Hhas_class.make
     class_attributes
     class_base
@@ -197,6 +291,7 @@ let from_ast : A.class_ -> Hhas_class.t =
     class_is_abstract
     class_is_interface
     class_is_trait
+    class_is_xhp
     class_uses
     class_enum_type
     class_methods

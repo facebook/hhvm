@@ -1475,6 +1475,10 @@ and emit_flavored_expr (_, expr_ as expr) =
   | _ ->
     from_expr expr, Flavor.Cell
 
+and is_unop_literal e = function
+  | A.Utild | A.Unot | A.Uplus | A.Uminus -> is_literal e
+  | _ -> false
+
 and is_literal expr =
   match snd expr with
   | A.Array afl
@@ -1487,6 +1491,7 @@ and is_literal expr =
   | A.Null
   | A.False
   | A.True -> true
+  | A.Unop (uop, e) -> is_unop_literal e uop
   | _ -> false
 
 and is_literal_afield_list afl =

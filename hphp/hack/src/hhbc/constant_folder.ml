@@ -29,6 +29,14 @@ let handle_integer_overflow i =
   (* TODO: Deal with integer overflow *)
   Int i
 
+let negate_double d =
+  let result =
+    if String_utils.string_starts_with d "-"
+    then String_utils.lstrip d "-"
+    else "-" ^ d
+  in
+  Double result
+
 let fold_addition left right =
   match (left, right) with
   | (Int left, Int right) -> handle_integer_overflow (Int64.add left right)
@@ -221,12 +229,14 @@ let fold_binary_not operand =
 
 let fold_unary_plus operand =
   match operand with
-  | Int _ -> operand
+  | Int _
+  | Double _ -> operand
   | _ -> NYI "Folding of unary + not yet implemented"
 
 let fold_unary_minus operand =
   match operand with
   | Int operand -> handle_integer_overflow (Int64.neg operand)
+  | Double str -> negate_double str
   | _ -> NYI "Folding of unary - not yet implemented"
 
 let literal_from_unop op operand =

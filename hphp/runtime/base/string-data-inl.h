@@ -70,8 +70,8 @@ inline void StringData::invalidateHash() {
 }
 
 inline void StringData::setSize(int len) {
-  assert(len >= 0 && len <= capacity() && !isImmutable());
-  assert(!hasMultipleRefs());
+  assert(!isImmutable() && !hasMultipleRefs());
+  assert(len >= 0 && len <= capacity());
   mutableData()[len] = 0;
   m_lenAndHash = len;
   assert(m_hash == 0);
@@ -104,8 +104,11 @@ inline uint32_t StringData::capacity() const {
 }
 
 inline size_t StringData::heapSize() const {
-  return isFlat() ? sizeof(StringData) + 1 + capacity() :
-         sizeof(StringData) + sizeof(Proxy);
+  return isFlat()
+    ? isRefCounted()
+      ? sizeof(StringData) + 1 + capacity()
+      : sizeof(StringData) + 1 + size()
+    : sizeof(StringData) + sizeof(Proxy);
 }
 
 inline bool StringData::isStrictlyInteger(int64_t& res) const {

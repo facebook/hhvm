@@ -313,7 +313,7 @@ struct StringData final : MaybeCountable,
 
   /*
    * Return the capacity of this string's buffer, not including the space
-   * for the null terminator.
+   * for the null terminator. Always 0 for static/uncounted strings.
    */
   uint32_t capacity() const;
 

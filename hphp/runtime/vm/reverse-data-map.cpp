@@ -124,9 +124,8 @@ bool contains(const NamedEntity* ne, const void* addr) {
 }
 
 bool contains(const StringData* sd, const void* addr) {
-  return (sd <= addr && addr < sd + 1) ||
-         // Count all in-capacity memory in the StringData's data allocation.
-         (sd->data() <= addr && addr < sd->data() + sd->capacity() + 1);
+  auto const start = reinterpret_cast<const char*>(sd);
+  return (start <= addr && addr < start + sd->heapSize());
 }
 
 bool contains(const Unit* unit, const void* addr) {

@@ -182,8 +182,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
     throw_string_too_large(sl.size());
   }
 
-  auto const cc = CapCode::ceil(sl.size());
-  auto const allocSize = cc.decode() + kCapOverhead;
+  auto const allocSize = sl.size() + kCapOverhead;
   StringData* sd = reinterpret_cast<StringData*>(
     trueStatic ? low_malloc_data(allocSize)
                : UncountedStringOnHugePage() ? malloc_huge(allocSize)
@@ -194,7 +193,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
   sd->m_data = data;
 #endif
   auto const count = trueStatic ? StaticValue : UncountedValue;
-  sd->initHeader(cc, HeaderKind::String, count);
+  sd->initHeader(HeaderKind::String, count);
   sd->m_len = sl.size(); // m_hash is computed soon.
 
   data[sl.size()] = 0;
@@ -510,6 +509,7 @@ void StringData::releaseDataSlowPath() {
 }
 
 void StringData::release() noexcept {
+  assert(isRefCounted());
   assert(checkSane());
   if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
   // In CapCode encoding, we always minimize the exponent.  Thus if the
@@ -540,7 +540,7 @@ void StringData::release() noexcept {
   assert(ptr != data() || len <= m_len);
 
 StringData* StringData::append(folly::StringPiece range) {
-  assert(!hasMultipleRefs());
+  assert(!isImmutable() && !hasMultipleRefs());
 
   auto s = range.data();
   auto const len = range.size();
@@ -569,7 +569,7 @@ StringData* StringData::append(folly::StringPiece range) {
 }
 
 StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
-  assert(!hasMultipleRefs());
+  assert(!isImmutable() && !hasMultipleRefs());
 
   auto const len = r1.size() + r2.size();
 
@@ -609,7 +609,7 @@ StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
 StringData* StringData::append(folly::StringPiece r1,
                                folly::StringPiece r2,
                                folly::StringPiece r3) {
-  assert(!hasMultipleRefs());
+  assert(!isImmutable() && !hasMultipleRefs());
 
   auto const len = r1.size() + r2.size() + r3.size();
 
@@ -702,6 +702,7 @@ StringData* StringData::shrinkImpl(size_t len) {
 }
 
 StringData* StringData::shrink(size_t len) {
+  assert(!isImmutable() && !hasMultipleRefs());
   if (capacity() - len > kMinShrinkThreshold) {
     return shrinkImpl(len);
   }
@@ -753,7 +754,7 @@ StringData* StringData::getChar(int offset) const {
 }
 
 StringData* StringData::increment() {
-  assert(!isStatic());
+  assert(!isImmutable() && !hasMultipleRefs());
   assert(!empty());
 
   auto const sd = UNLIKELY(isProxy())
@@ -1079,9 +1080,13 @@ bool StringData::checkSane() const {
 #endif
   assert(kindIsValid());
   assert(uint32_t(size()) <= MaxSize);
-  assert(capacity() <= MaxSize);
   assert(size() >= 0);
-  assert(size() <= capacity());
+  if (isImmutable()) {
+    assert(capacity() == 0);
+  } else {
+    assert(size() <= capacity());
+    assert(capacity() <= MaxSize);
+  }
   // isFlat() and isProxy() both check whether m_data == payload(),
   // which guarantees by definition that isFlat() != isProxy()
   return true;

@@ -372,6 +372,39 @@ SYNTAX_FROM_CHILDREN      | (SyntaxKind.Missing, []) -> Missing
 CONSTRUCTOR_METHODS
 
       (* Takes a node and a function from token to token and returns a node with
+      the function applied to the leading token, if there is one. *)
+      let modify_leading_token node f =
+        let rec aux nodes =
+          match nodes with
+          | [] -> (nodes, false)
+          | h :: t ->
+            begin
+            match get_token h with
+            | Some token ->
+              let new_token = f token in
+              let new_token = make_token new_token in
+              ((new_token :: t), true)
+            | None ->
+              let (new_children, success) = aux (children h) in
+              if success then
+                let new_head = from_children (kind h) new_children in
+                ((new_head :: t), true)
+              else
+                let (new_tail, success) = aux t in
+                if success then
+                  ((h :: new_tail), true)
+                else
+                  (nodes, false)
+              end in
+        let (results, _) = aux [node] in
+        match results with
+        | [] -> failwith
+          \"how did we get a smaller list out than we started with?\"
+        | h :: [] -> h
+        | _ -> failwith
+          \"how did we get a larger list out than we started with?\"
+
+      (* Takes a node and a function from token to token and returns a node with
       the function applied to the trailing token, if there is one. *)
       let modify_trailing_token node f =
         (* We have a list of nodes, reversed, so the rightmost node is first. *)

@@ -34,12 +34,12 @@ let main hhas_prog =
 
 let emit_main block =
   let return_seq _ = Instruction_sequence.empty in
-  let body_instrs, decl_vars, num_iters, _, _, _, _, _ =
+  let body_instrs, decl_vars, num_iters, num_cls_ref_slots, _, _, _, _ =
     Emit_body.from_ast
       ~skipawaitable:false ~scope:Ast_scope.Scope.toplevel
       [] None block return_seq in
   Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs)
-    decl_vars num_iters
+    decl_vars num_iters num_cls_ref_slots
 
 open Closure_convert
 

@@ -483,6 +483,13 @@ and emit_class_const cid id =
     then  Option.value ~default:cid (get_original_class_name ())
     else cid in
 
+  if cid.[0] = '$'
+  then
+    instrs [
+      IGet (ClsRefGetL (Local.Named cid, 0));
+      clscns ();
+    ]
+  else
   if cid = SN.Classes.cStatic
   then
     instrs [
@@ -1191,7 +1198,7 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        emit_class_id cid
      ],
      gather [
-       instr (IBase (BaseSC (base_offset, 0)))
+       instr_basesc base_offset
      ],
      1
 

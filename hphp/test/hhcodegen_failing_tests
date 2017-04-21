@@ -17,7 +17,6 @@ quick/IncDecProp.php
 quick/IncDecProp_nopt.php
 quick/Isset.php
 quick/ReadVar.php
-quick/SPropW.php
 quick/SetOp.php
 quick/SetOpProp.php
 quick/UnsetM.php

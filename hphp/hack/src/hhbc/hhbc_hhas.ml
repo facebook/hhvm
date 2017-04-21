@@ -329,8 +329,8 @@ let string_of_base x =
     sep ["FPassBaseGC"; string_of_param_num i; string_of_stack_index si]
   | FPassBaseGL (i, lid) ->
     sep ["FPassBaseGL"; string_of_param_num i; string_of_local_id lid]
-  | BaseSC (si1, si2) ->
-    sep ["BaseSC"; string_of_stack_index si1; string_of_stack_index si2]
+  | BaseSC (si, id) ->
+    sep ["BaseSC"; string_of_stack_index si; string_of_classref id]
   | BaseSL (lid, si) ->
     sep ["BaseSL"; string_of_local_id lid; string_of_stack_index si]
   | BaseL (lid, m) ->
@@ -769,6 +769,13 @@ let add_num_iters buf indent num_iters = if num_iters = 0 then () else begin
   B.add_string buf ";\n"
   end
 
+let add_code_info buf indent num_cls_ref_slots num_iters decl_vars =
+  begin
+    add_num_cls_ref_slots buf indent num_cls_ref_slots;
+    add_num_iters buf indent num_iters;
+    add_decl_vars buf indent decl_vars;
+  end
+
 let rec attribute_argument_to_string argument =
   match argument with
   | Null -> SS.str "N;"
@@ -867,9 +874,8 @@ let add_fun_def buf fun_def =
   if function_is_async then B.add_string buf " isAsync";
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
-  add_num_cls_ref_slots buf 2 function_num_cls_ref_slots;
-  add_num_iters buf 2 function_num_iters;
-  add_decl_vars buf 2 function_decl_vars;
+  add_code_info buf 2
+    function_num_cls_ref_slots function_num_iters function_decl_vars;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
@@ -911,9 +917,8 @@ let add_method_def buf method_def =
   if method_is_pair_generator then B.add_string buf " isPairGenerator";
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
-  add_num_cls_ref_slots buf 4 method_num_cls_ref_slots;
-  add_num_iters buf 4 method_num_iters;
-  add_decl_vars buf 4 method_decl_vars;
+  add_code_info buf 4
+    method_num_cls_ref_slots method_num_iters method_decl_vars;
   add_instruction_list buf 4 method_body;
   B.add_string buf "  }"
 
@@ -1095,10 +1100,10 @@ let add_top_level buf hhas_prog =
   let main_stmts = Hhas_main.body main in
   let main_decl_vars = Hhas_main.decl_vars main in
   let main_num_iters = Hhas_main.num_iters main in
+  let main_num_cls_ref_slots = Hhas_main.num_cls_ref_slots main in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
-  add_num_iters buf 2 main_num_iters;
-  add_decl_vars buf 2 main_decl_vars;
+  add_code_info buf 2 main_num_cls_ref_slots main_num_iters main_decl_vars;
   add_defcls buf non_closure_classes;
   add_deftypealias buf (Hhas_program.typedefs hhas_prog);
   add_instruction_list buf 2 main_stmts;

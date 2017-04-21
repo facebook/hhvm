@@ -429,7 +429,7 @@ type instruct_base =
   | BaseGL of local_id * MemberOpMode.t
   | FPassBaseGC of param_num * stack_index
   | FPassBaseGL of param_num * local_id
-  | BaseSC of classref_id * stack_index
+  | BaseSC of stack_index * classref_id
   | BaseSL of local_id * stack_index
   | BaseL of local_id * MemberOpMode.t
   | FPassBaseL of param_num * local_id

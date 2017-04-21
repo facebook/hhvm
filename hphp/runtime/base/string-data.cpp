@@ -64,7 +64,7 @@ static_assert(kMaxStringSimpleLen <= CapCode::Threshold, "");
 auto constexpr maxSimpleAlloc = kMaxStringSimpleLen + kCapOverhead;
 auto constexpr sizeClass =
   kSmallSize2Index[(maxSimpleAlloc - 1) >> kLgSmallSizeQuantum];
-static_assert(kSmallIndex2Size[sizeClass] == maxSimpleAlloc,
+static_assert(kSizeIndex2Size[sizeClass] == maxSimpleAlloc,
               "kMaxStringSimpleLen should be maximized");
 
 }
@@ -77,7 +77,7 @@ ALWAYS_INLINE StringData* allocFlatSmallImpl(size_t len) {
 
   auto const requestSize = len + kCapOverhead;
   auto const sizeClass = MemoryManager::lookupSmallSize2Index(requestSize);
-  auto const allocSize = kSmallIndex2Size[sizeClass];
+  auto const allocSize = kSizeIndex2Size[sizeClass];
   auto sd = static_cast<StringData*>(
     MM().mallocSmallIndex(sizeClass, allocSize)
   );
@@ -104,11 +104,11 @@ ALWAYS_INLINE StringData* allocFlatSlowImpl(size_t len) {
   StringData* sd;
   CapCode cc;
   size_t sizeClass = 0;
-  static_assert(kSmallIndex2Size[0] < kCapOverhead,
+  static_assert(kSizeIndex2Size[0] < kCapOverhead,
                 "Size class 0 indicates shared or big allocations");
   if (LIKELY(need <= kMaxSmallSize)) {
-    sizeClass = MemoryManager::computeSmallSize2Index(need);
-    auto const sz = MemoryManager::smallIndex2Size(sizeClass);
+    sizeClass = MemoryManager::computeSize2Index(need);
+    auto const sz = MemoryManager::sizeIndex2Size(sizeClass);
     cc = CapCode::floor(sz - kCapOverhead);
     sd = static_cast<StringData*>(MM().mallocSmallIndex(sizeClass, sz));
   } else {
@@ -524,8 +524,8 @@ void StringData::release() noexcept {
 
   auto const size = capacity() + kCapOverhead;
   if (size <= kMaxSmallSize) {
-    auto const sizeClass = MemoryManager::computeSmallSize2Index(size);
-    auto const sz = MemoryManager::smallIndex2Size(sizeClass);
+    auto const sizeClass = MemoryManager::computeSize2Index(size);
+    auto const sz = MemoryManager::sizeIndex2Size(sizeClass);
     MM().freeSmallIndex(this, sizeClass, sz);
     return;
   }

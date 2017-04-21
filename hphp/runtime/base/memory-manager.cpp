@@ -576,7 +576,7 @@ void MemoryManager::initHole() {
 void MemoryManager::initFree() {
   initHole();
   for (auto i = 0; i < kNumSmallSizes; i++) {
-    auto size = smallIndex2Size(i);
+    auto size = sizeIndex2Size(i);
     auto n = m_freelists[i].head;
     for (; n && n->kind() != HeaderKind::Free; n = n->next) {
       n->initHeader(HeaderKind::Free, size);
@@ -599,7 +599,7 @@ void MemoryManager::beginQuarantine() {
 // turn free blocks into holes, restore original freelists
 void MemoryManager::endQuarantine() {
   for (auto i = 0; i < kNumSmallSizes; i++) {
-    auto size = smallIndex2Size(i);
+    auto size = sizeIndex2Size(i);
     while (auto n = m_freelists[i].maybePop()) {
       memset(n, 0x8a, size);
       initHole(n, size);
@@ -717,7 +717,7 @@ inline void MemoryManager::storeTail(void* tail, uint32_t tailBytes) {
     assert(fragBytes >= kSmallSizeAlign);
     assert((fragBytes & kSmallSizeAlignMask) == 0);
     unsigned fragInd = smallSize2Index(fragBytes + 1) - 1;
-    uint32_t fragUsable = smallIndex2Size(fragInd);
+    uint32_t fragUsable = sizeIndex2Size(fragInd);
     auto frag = FreeNode::InitFrom((char*)rem + remBytes - fragUsable,
                                    fragUsable, HeaderKind::Hole);
     FTRACE(4, "MemoryManager::storeTail({}, {}): rem={}, remBytes={}, "
@@ -740,7 +740,7 @@ inline void MemoryManager::splitTail(void* tail, uint32_t tailBytes,
   assert((tailBytes & kSmallSizeAlignMask) == 0);
   assert((splitUsable & kSmallSizeAlignMask) == 0);
   assert(nSplit * splitUsable <= tailBytes);
-  assert(splitUsable == smallIndex2Size(splitInd));
+  assert(splitUsable == sizeIndex2Size(splitInd));
   for (uint32_t i = nSplit; i--;) {
     auto split = FreeNode::InitFrom((char*)tail + i * splitUsable,
                                     splitUsable, HeaderKind::Hole);
@@ -784,7 +784,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
 inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
             m_front, m_limit);
-  uint32_t nbytes = smallIndex2Size(index);
+  uint32_t nbytes = sizeIndex2Size(index);
 
   assert(bytes <= nbytes);
   assert(nbytes <= kSlabSize);
@@ -824,7 +824,7 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
 }
 
 void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, unsigned index) {
-  size_t nbytes = smallIndex2Size(index);
+  size_t nbytes = sizeIndex2Size(index);
   unsigned nContig = kNContigTab[index];
   size_t contigMin = nContig * nbytes;
   unsigned contigInd = smallSize2Index(contigMin);
@@ -836,10 +836,10 @@ void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, unsigned index) {
     if (p != nullptr) {
       FTRACE(4, "MemoryManager::mallocSmallSizeSlow({}-->{}, {}): "
                 "contigMin={}, contigInd={}, use i={}, size={}, p={}\n", bytes,
-                nbytes, index, contigMin, contigInd, i, smallIndex2Size(i),
+                nbytes, index, contigMin, contigInd, i, sizeIndex2Size(i),
                 p);
       // Split tail into preallocations and store them back into freelists.
-      uint32_t availBytes = smallIndex2Size(i);
+      uint32_t availBytes = sizeIndex2Size(i);
       uint32_t tailBytes = availBytes - nbytes;
       if (tailBytes > 0) {
         void* tail = (void*)(uintptr_t(p) + nbytes);

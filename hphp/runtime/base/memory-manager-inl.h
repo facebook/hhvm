@@ -170,7 +170,7 @@ inline uint32_t MemoryManager::bsr(uint32_t x) {
 #endif
 }
 
-inline size_t MemoryManager::computeSmallSize2Index(uint32_t size) {
+inline size_t MemoryManager::computeSize2Index(uint32_t size) {
   uint32_t x = bsr((size<<1)-1);
   uint32_t shift = (x < kLgSizeClassesPerDoubling + kLgSmallSizeQuantum)
                    ? 0 : x - (kLgSizeClassesPerDoubling + kLgSmallSizeQuantum);
@@ -185,13 +185,13 @@ inline size_t MemoryManager::computeSmallSize2Index(uint32_t size) {
   uint32_t mod = ((((size-1) & deltaInverseMask) >> lgDelta)) & kModMask;
 
   auto const index = grp + mod;
-  assert(index < kNumSmallSizes);
+  assert(index < kNumSizeClasses);
   return index;
 }
 
 inline size_t MemoryManager::lookupSmallSize2Index(uint32_t size) {
   auto const index = kSmallSize2Index[(size-1) >> kLgSmallSizeQuantum];
-  assert(index == computeSmallSize2Index(size));
+  assert(index == computeSize2Index(size));
   return index;
 }
 
@@ -201,11 +201,20 @@ inline size_t MemoryManager::smallSize2Index(uint32_t size) {
   if (LIKELY(size <= kMaxSmallSizeLookup)) {
     return lookupSmallSize2Index(size);
   }
-  return computeSmallSize2Index(size);
+  return computeSize2Index(size);
 }
 
-inline uint32_t MemoryManager::smallIndex2Size(size_t index) {
-  return kSmallIndex2Size[index];
+inline size_t MemoryManager::size2Index(uint32_t size) {
+  assert(size > 0);
+  assert(size <= kMaxSizeClass);
+  if (LIKELY(size <= kMaxSmallSizeLookup)) {
+    return lookupSmallSize2Index(size);
+  }
+  return computeSize2Index(size);
+}
+
+inline uint32_t MemoryManager::sizeIndex2Size(size_t index) {
+  return kSizeIndex2Size[index];
 }
 
 inline uint32_t MemoryManager::smallSizeClass(uint32_t reqBytes) {
@@ -223,7 +232,7 @@ inline uint32_t MemoryManager::smallSizeClass(uint32_t reqBytes) {
 
 inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
   assert(index < kNumSmallSizes);
-  assert(bytes <= kSmallIndex2Size[index]);
+  assert(bytes <= kSizeIndex2Size[index]);
 
   if (debug) requestEagerGC();
 
@@ -249,7 +258,7 @@ inline void MemoryManager::freeSmallIndex(void* ptr, size_t index,
                                           uint32_t bytes) {
   assert(index < kNumSmallSizes);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-  assert(bytes <= kSmallIndex2Size[index]);
+  assert(bytes <= kSizeIndex2Size[index]);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
     return freeBigSize(ptr, bytes);

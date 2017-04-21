@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,22 +22,19 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline IRInstruction::IRInstruction(Opcode op,
-                                    BCMarker marker,
+                                    BCContext bcctx,
                                     Edge* edges,
                                     uint32_t numSrcs,
                                     SSATmp** srcs)
-  : m_typeParam{}
-  , m_op(op)
+  : m_op(op)
+  , m_iroff(bcctx.iroff)
   , m_numSrcs(numSrcs)
   , m_numDsts(0)
   , m_hasTypeParam{false}
-  , m_marker(marker)
-  , m_id(kTransient)
+  , m_marker(bcctx.marker)
   , m_srcs(srcs)
   , m_dest(nullptr)
-  , m_block(nullptr)
   , m_edges(edges)
-  , m_extra(nullptr)
 {
   if (op != DefConst) {
     // DefConst is the only opcode that's allowed to not have a marker, since
@@ -84,8 +81,6 @@ inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
   assertx(is(IncRef,
              CheckType, AssertType, AssertNonNull,
-             MapAddElemC, ColAddNewElemC,
-             CastCtxThis,
              Mov));
   return src(0);
 }
@@ -99,6 +94,10 @@ inline uint32_t IRInstruction::id() const {
 
 inline bool IRInstruction::isTransient() const {
   return m_id == kTransient;
+}
+
+inline uint16_t IRInstruction::iroff() const {
+  return m_iroff;
 }
 
 template<typename... Args>
@@ -120,6 +119,18 @@ inline const BCMarker& IRInstruction::marker() const {
 
 inline BCMarker& IRInstruction::marker() {
   return m_marker;
+}
+
+inline BCContext IRInstruction::bcctx() const {
+  return BCContext { m_marker, m_iroff };
+}
+
+inline const Func* IRInstruction::func() const {
+  return m_marker.hasFunc() ? m_marker.func() : nullptr;
+}
+
+inline const Class* IRInstruction::ctx() const {
+  return m_marker.hasFunc() ?  m_marker.func()->cls() : nullptr;
 }
 
 inline bool IRInstruction::hasTypeParam() const { return m_hasTypeParam; }

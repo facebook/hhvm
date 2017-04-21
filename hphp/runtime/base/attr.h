@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,8 +68,8 @@ enum Attr {
   // using FCallBuiltin.                //       |          |         //
   AttrPhpLeafFn            = (1 <<  7), //       |          |    X    //
                                         //       |          |         //
-  // Is this class a trait?  On methods, this indicates that the method is NOT
-  // a constructor, even though it may look like one.  FIXME: This is insane.
+  // Is this class a trait?  On methods, this indicates that the method was
+  // imported from a trait.
   AttrTrait                = (1 <<  8), //    X  |          |    X    //
                                         //       |          |         //
   // Indicates that this function should be ignored in backtraces.    //
@@ -130,19 +130,27 @@ enum Attr {
   // Set on functions to mark them as hot during PGO profiling.       //
   AttrHot                  = (1 << 19), //       |          |    X    //
                                         //       |          |         //
-  // Set on all builtin functions, whether PHP or C++. For properties, it
-  // is set on internal properties (e.g. <<__memoize>> caching)
-  AttrBuiltin              = (1 << 20), //    X  |    X     |    X    //
+  // Set on all builtin functions, whether PHP or C++.
+  AttrBuiltin              = (1 << 20), //    X  |          |    X    //
                                         //       |          |         //
-  // Set on builtin functions that can be replaced by user implementations.
-  AttrAllowOverride        = (1 << 21), //       |          |    X    //
+  // Set on all properties that should not be serialized (e.g.
+  // <<__Memoize> caches).  Reuses the AttrBuiltin bit.
+  AttrNoSerialize          = (1 << 20), //       |    X     |         //
                                         //       |          |         //
   // Indicates that the frame should be ignored when searching for context
   // (e.g., array_map evalutates its callback in the context of the caller).
   AttrSkipFrame            = (1 << 22), //       |          |    X    //
                                         //       |          |         //
-  // Is this an HNI builtin?            //       |          |         //
-  AttrNative               = (1 << 23), //       |          |    X    //
+  // Indicates that the function might read from the caller's frame. Only
+  // allowed for builtins.
+  AttrReadsCallerFrame     = (1 << 23), //       |          |    X    //
+                                        //       |          |         //
+  // Indicates that the function might write to the caller's frame. Only allowed
+  // for builtins.
+  AttrWritesCallerFrame    = (1 << 24), //       |          |    X    //
+                                        //       |          |         //
+  // Is this a (non-static) method that *must* have a non-null this?  //
+  AttrRequiresThis         = (1 << 25), //       |          |    X    //
                                         //       |          |         //
   // Indicates that this function can be constant-folded if it is called with
   // all constant arguments.            //       |          |         //
@@ -164,10 +172,18 @@ enum Attr {
   AttrParamCoerceModeNull  = (1 << 30), //       |          |    X    //
 };
 
-inline Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
+constexpr Attr operator|(Attr a, Attr b) { return Attr((int)a | (int)b); }
 
 inline Attr& operator|=(Attr& a, const Attr& b) {
   return (a = Attr((int)a | (int)b));
+}
+
+inline void attrSetter(Attr& attrs, bool set, Attr what) {
+  if (set) {
+    attrs |= what;
+  } else {
+    attrs = Attr(attrs & ~what);
+  }
 }
 
 inline const char* attrToVisibilityStr(Attr attr) {

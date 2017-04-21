@@ -13,7 +13,7 @@
 function gzclose(resource $zp): bool;
 
 /**
- * ( excerpt from http://docs.hhvm.com/manual/en/function.zlib-encode.php )
+ * ( excerpt from http://php.net/manual/en/function.zlib-encode.php )
  *
  * Compress data with the specified encoding. Warning: This function is
  * currently not documented; only its argument list is available.
@@ -22,11 +22,11 @@ function gzclose(resource $zp): bool;
  * @encoding   mixed
  * @level      mixed
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
 
 /**
- * ( excerpt from http://docs.hhvm.com/manual/en/function.zlib-decode.php )
+ * ( excerpt from http://php.net/manual/en/function.zlib-decode.php )
  *
  * Uncompress any raw/gzip/zlib encoded data. Warning: This function is
  * currently not documented; only its argument list is available.
@@ -35,7 +35,7 @@ function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
  * @max_decoded_len
  *             mixed
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function zlib_decode(string $data, int $max_len = 0): mixed;
 
 /**
@@ -48,7 +48,7 @@ function zlib_decode(string $data, int $max_len = 0): mixed;
  *
  * @return string - The compressed string or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function gzcompress(string $data, int $level = -1): mixed;
 
 /**
@@ -59,7 +59,7 @@ function gzcompress(string $data, int $level = -1): mixed;
  *
  * @return string - The decoded string, or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function gzdecode(string $data,
                   int $length = 0): mixed;
 
@@ -74,7 +74,7 @@ function gzdecode(string $data,
  *
  * @return string - The deflated string or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function gzdeflate(string $data, int $level = -1): mixed;
 
 /**
@@ -95,7 +95,7 @@ function gzdeflate(string $data, int $level = -1): mixed;
  *
  * @return string - The encoded string, or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function gzencode(string $data,
                   int $level = -1,
                   int $encoding_mode = FORCE_GZIP): mixed;
@@ -148,7 +148,7 @@ function gzgetc(resource $zp): mixed;
  */
 <<__Native, __ParamCoerceModeFalse>>
 function gzgets(resource $zp,
-                int $length = 1024): mixed;
+                int $length = 0): mixed;
 
 /**
  * Get line from gz-file pointer and strip HTML tags
@@ -179,7 +179,7 @@ function gzgetss(resource $zp,
  *   than 32768 times the length of the compressed input data or more than
  *   the optional parameter length.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function gzinflate(string $data, int $length = 0): mixed;
 
 /**
@@ -337,7 +337,7 @@ function readgzfile(string $filename,
  *
  * @return string - The compressed data, or FALSE on error
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function nzcompress(string $uncompressed): mixed;
 
 /**
@@ -349,54 +349,21 @@ function nzcompress(string $uncompressed): mixed;
  *
  * @return string - The uncompressed data or FALSE on error
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function nzuncompress(string $compressed): mixed;
-
-/**
- * This function compresses the given string using the lz4lib data format, which
- * is primarily used for compressing and uncompressing memcache values.
- *
- * @param string $uncompressed - The uncompressed data
- *
- * @return string - The compressed data, or FALSE on error
- */
-<<__Native>>
-function lz4_compress(string $uncompressed, bool $high = false): mixed;
-
-/**
- * This function compresses the given string using the lz4lib data format, which
- * is primarily used for compressing and uncompressing memcache values.
- *
- * @param string $uncompressed - The uncompressed data
- *
- * @return string - The compressed data, or FALSE on error
- */
-<<__Native, __HipHopSpecific>>
-function lz4_hccompress(string $uncompressed): mixed;
-
-/**
- * This function uncompresses the given string given that it is in the lz4lib
- * data format, which is primarily used for compressing and uncompressing
- * memcache values
- *
- * @param string $compressed - The data compressed by lz4compress().
- *
- * @return string - The uncompressed data or FALSE on error
- */
-<<__Native>>
-function lz4_uncompress(string $compressed): mixed;
 
 /**
  * Implementation detail for zlib.inflate stream filter.
  *
- * Not a public API - ideally this would be in namespace __SystemLib, but that
- * isn't currently supported.
+ * Not a public API
  */
-<<__NativeData("__SystemLib_ChunkedInflator")>>
-class __SystemLib_ChunkedInflator {
+namespace __SystemLib {
+<<__NativeData("__SystemLib\\ChunkedInflator")>>
+class ChunkedInflator {
   <<__Native>>
   function eof(): bool;
 
   <<__Native>>
   function inflateChunk(string $chunk): string;
+}
 }

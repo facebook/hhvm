@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,12 +45,10 @@ struct BuiltinObjExtents {
   ptrdiff_t odOffsetBytes;
 };
 
-class PreClassEmitter {
- public:
+struct PreClassEmitter {
   typedef std::vector<FuncEmitter*> MethodVec;
 
-  class Prop {
-   public:
+  struct Prop {
     Prop()
       : m_name(nullptr)
       , m_mangledName(nullptr)
@@ -98,8 +96,7 @@ class PreClassEmitter {
     RepoAuthType m_repoAuthType;
   };
 
-  class Const {
-   public:
+  struct Const {
     Const()
       : m_name(nullptr)
       , m_typeConstraint(nullptr)
@@ -146,10 +143,13 @@ class PreClassEmitter {
   typedef IndexedStringMap<Prop, true, Slot> PropMap;
   typedef IndexedStringMap<Const, true, Slot> ConstMap;
 
-  PreClassEmitter(UnitEmitter& ue, Id id, const StringData* n,
+  PreClassEmitter(UnitEmitter& ue, Id id, const std::string& name,
                   PreClass::Hoistable hoistable);
   ~PreClassEmitter();
 
+
+
+  void setClosurePreClass();
   void init(int line1, int line2, Offset offset, Attr attrs,
             const StringData* parent, const StringData* docComment);
 
@@ -189,7 +189,7 @@ class PreClassEmitter {
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
                    const bool typeConst = false,
-                   const Array typeStructure = Array::Create());
+                   const Array& typeStructure = Array{});
   bool addAbstractConstant(const StringData* n,
                            const StringData* typeConstraint,
                            const bool typeConst = false);
@@ -218,12 +218,7 @@ class PreClassEmitter {
   }
   UserAttributeMap userAttributes() const { return m_userAttributes; }
 
-  void commit(RepoTxn& txn) const;
-
-  void setBuiltinClassInfo(const ClassInfo* info,
-                           BuiltinCtorFunction ctorFunc,
-                           BuiltinDtorFunction dtorFunc,
-                           BuiltinObjExtents extents);
+  void commit(RepoTxn& txn) const; // throws(RepoExc)
 
   PreClass* create(Unit& unit) const;
 
@@ -233,6 +228,9 @@ class PreClassEmitter {
     return std::make_pair(m_line1, m_line2);
   }
 
+  bool areMemoizeCacheKeysAllocated() const {
+    return m_memoizeInstanceSerial > 0;
+  }
   int getNextMemoizeCacheKey() {
     return m_memoizeInstanceSerial++;
   }
@@ -256,8 +254,6 @@ class PreClassEmitter {
   PreClass::Hoistable m_hoistable;
   BuiltinCtorFunction m_instanceCtor{nullptr};
   BuiltinDtorFunction m_instanceDtor{nullptr};
-  uint32_t m_builtinObjSize{0};
-  int32_t m_builtinODOffset{0};
   int32_t m_numDeclMethods{-1};
   Slot m_ifaceVtableSlot{kInvalidSlot};
   int m_memoizeInstanceSerial{0};
@@ -274,24 +270,24 @@ class PreClassEmitter {
   ConstMap::Builder m_constMap;
 };
 
-class PreClassRepoProxy : public RepoProxy {
-  friend class PreClass;
-  friend class PreClassEmitter;
- public:
+struct PreClassRepoProxy : RepoProxy {
+  friend struct PreClass;
+  friend struct PreClassEmitter;
+
   explicit PreClassRepoProxy(Repo& repo);
   ~PreClassRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
 
   struct InsertPreClassStmt : public RepoProxy::Stmt {
     InsertPreClassStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const PreClassEmitter& pce, RepoTxn& txn, int64_t unitSn,
                 Id preClassId, const StringData* name,
-                PreClass::Hoistable hoistable);
+                PreClass::Hoistable hoistable); // throws(RepoExc)
   };
 
   struct GetPreClassesStmt : public RepoProxy::Stmt {
     GetPreClassesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
   InsertPreClassStmt insertPreClass[RepoIdCount];

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/version.h"
 #include "hphp/util/hdf.h"
-#include "hphp/runtime/base/imarker.h"
 
 #include <set>
 #include <string>
@@ -55,8 +54,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class Extension : public IDebuggable {
-public:
+struct Extension : IDebuggable {
   static bool IsSystemlibPath(const std::string& path);
 
   // Look for "ext.{namehash}" in the binary and compile/merge it
@@ -81,7 +79,6 @@ public:
   virtual void threadShutdown() {}
   virtual void requestInit() {}
   virtual void requestShutdown() {}
-  virtual void vscan(IMarker&) const {} // TODO 6495061 pure virtual
 
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const { return true; }
@@ -101,10 +98,20 @@ public:
     return m_name;
   }
 
+  void registerExtensionFunction(const String& name) {
+    assert(name.get()->isStatic());
+    m_functions.push_back(name.get());
+  }
+
+  const std::vector<StringData*>& getExtensionFunctions() const {
+    return m_functions;
+  }
+
 private:
   std::string m_name;
   std::string m_version;
   std::string m_dsoName;
+  std::vector<StringData*> m_functions;
 };
 
 struct ExtensionBuildInfo {
@@ -131,9 +138,6 @@ extern "C" Extension* getModule() { \
 #else
 #define HHVM_GET_MODULE(name)
 #endif
-
-// Deprecated: Use HHVM_VERSION_BRANCH for source compat checks
-#define HHVM_API_VERSION 20150212L
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

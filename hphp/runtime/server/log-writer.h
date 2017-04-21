@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,12 +33,10 @@
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/timer.h"
 
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassicWriter final : public LogWriter {
-public:
+struct ClassicWriter final : LogWriter {
   ClassicWriter(const AccessLogFileData& alfd, LogChannel chan)
     : LogWriter(chan)
     , m_logdata(alfd)
@@ -55,8 +53,7 @@ private:
   static void skipField(const char*& fmt);
 };
 
-class FieldGenerator {
-public:
+struct FieldGenerator {
   FieldGenerator(Transport* t, const VirtualHost* vh,
                  AccessLog::ThreadData* tdata)
     : transport(t)
@@ -83,6 +80,14 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
     // Fall through
   case 'B':
     out = folly::to<T>(responseSize);
+    break;
+  case 'c':
+    {
+      if (arg.empty()) return false;
+      std::string config = IniSetting::Get(arg);
+      if (config.empty()) return false;
+      out = folly::to<T>(config);
+    }
     break;
   case 'C':
     {
@@ -116,6 +121,10 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
        if (host.empty()) host = transport->getRemoteAddr();
        out = folly::to<T>(host);
     }
+    break;
+  case 'H':
+    if (arg.empty()) return false;
+    out = folly::to<T>(ServerStats::Get(arg));
     break;
   case 'i':
     {
@@ -199,7 +208,8 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
       out = folly::to<T>(b.c_str());
     }
     break;
-  case 'u':
+  case 'w':
+    // server uptime
     out = folly::to<T>(TimeStamp::Current() - HttpServer::StartTime);
     break;
   case 'v':

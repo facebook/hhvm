@@ -1,3 +1,5 @@
-App \classname<App \C<>, >
-App \classname<App \Foo\D<>, >
+File "type_structure9.php", line 9, characters 3-26:
+  classname<C>
+File "type_structure9.php", line 20, characters 3-26:
+  classname<Foo\D>
 No errors

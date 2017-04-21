@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,8 +47,9 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
 
-class AnalysisResult : public BlockScope, public FunctionContainer {
-public:
+struct UnitEmitter;
+
+struct AnalysisResult : BlockScope, FunctionContainer {
   /**
    * There are multiple passes over our syntax trees. This lists all of them.
    */
@@ -82,8 +83,7 @@ public:
     GlobalSymbolTypeCount
   };
 
-  class Locker {
-  public:
+  struct Locker {
     explicit Locker(const AnalysisResult *ar) :
         m_ar(const_cast<AnalysisResult*>(ar)),
         m_mutex(m_ar->getMutex()) {
@@ -259,6 +259,8 @@ public:
   StringToClassScopePtrVecMap getExtensionClasses();
   void addInteger(int64_t n);
 
+  void addHhasFile(std::unique_ptr<UnitEmitter>&& ue);
+  std::vector<std::unique_ptr<UnitEmitter>> getHhasFiles();
 private:
   std::function<void(AnalysisResultPtr)> m_finish;
   Package *m_package;
@@ -268,6 +270,7 @@ private:
   Phase m_phase;
   StringToFileScopePtrMap m_files;
   std::vector<FileScopePtr> m_fileScopes;
+  std::vector<std::unique_ptr<UnitEmitter>> m_hhasFiles;
 
   StringBag m_extraCodeFileNames;
   std::map<std::string, std::string> m_extraCodes;
@@ -278,10 +281,6 @@ private:
   StringToClassScopePtrVecMap m_classDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
-
-  // Map names of class aliases to the class names they will alias.
-  // Only in WholeProgram mode.  See markRedeclaringClasses.
-  std::multimap<std::string,std::string> m_classAliases;
 
   // Names of type aliases.
   std::set<std::string> m_typeAliasNames;
@@ -345,19 +344,7 @@ public:
                               s_changedScopesMapThreadLocal);
 
 private:
-  template <typename Visitor>
-  void processScopesParallel(const char *id, void *opaque = nullptr);
-
-  template <typename Visitor>
-  void preWaitCallback(bool first,
-                       const BlockScopeRawPtrQueue &scopes,
-                       void *opaque);
-
-  template <typename Visitor>
-  bool postWaitCallback(bool first,
-                        bool again,
-                        const BlockScopeRawPtrQueue &scopes,
-                        void *opaque);
+  void processScopesParallel(const char* id, void* context = nullptr);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

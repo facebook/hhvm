@@ -1,3 +1,5 @@
-array<[1]intersect(App \typename<App \I<>, >, Tstring, App \classname<[\C1]App \C1<>, >)>
-array<[2]intersect(Tstring), [3]intersect(App \classname<[\C2]App \C2<>, >, App \typename<App \I<>, >, array<[4]intersect(Tstring), [5]intersect(App \classname<[\C1]App \C1<>, >, App \typename<App \I<>, >, App \classname<[\I]App \I<>, >)>)>
+File "array_literal.php", line 12, characters 3-15:
+  array<^(typename<I> | string | classname<C1 as C1>)>
+File "array_literal.php", line 18, characters 3-30:
+  array<^(string), ^(classname<C2 as C2> | typename<I> | array<^(string), ^(classname<C1 as C1> | typename<I> | classname<I as I>)>)>
 No errors

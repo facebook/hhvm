@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,7 @@ namespace HPHP {
 /**
  * A file system file that's nothing but ordinary. A simple FILE* wrapper.
  */
-class PlainFile : public File {
-public:
+struct PlainFile : File {
   DECLARE_RESOURCE_ALLOCATION(PlainFile);
 
   explicit PlainFile(FILE *stream = nullptr,
@@ -96,17 +95,15 @@ struct BuiltinFiles final : RequestEventHandler {
 
   void requestInit() override;
   void requestShutdown() override;
-  void vscan(IMarker& mark) const override {
-    mark(m_stdin);
-    mark(m_stdout);
-    mark(m_stderr);
-  }
 
 private:
   Variant m_stdin;
   Variant m_stdout;
   Variant m_stderr;
 };
+
+void clearThreadLocalIO();
+void setThreadLocalIO(FILE* in, FILE* out, FILE* err);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

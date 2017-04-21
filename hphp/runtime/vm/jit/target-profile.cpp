@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,25 +16,26 @@
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
+#include "hphp/runtime/base/rds.h"
+
+#include "hphp/runtime/vm/jit/prof-data.h"
+
+#include <string>
+
 namespace HPHP { namespace jit {
 
-std::vector<SwitchCaseCount> sortedSwitchProfile(
-  TargetProfile<SwitchProfile>& profile,
-  int32_t nCases
-) {
-  // SwitchProfile is variable-sized so we have to manually allocate it and
-  // pass the buffer to TargetProfile::data().
-  auto& data = *static_cast<SwitchProfile*>(
-    calloc(nCases, sizeof(SwitchProfile::cases[0])));
-  SCOPE_EXIT { free(&data); };
-  profile.data(data, SwitchProfile::reduce, nCases);
+namespace detail {
 
-  std::vector<SwitchCaseCount> values;
-  for (int i = 0; i < nCases; ++i) {
-    values.emplace_back(SwitchCaseCount{i, data.cases[i]});
+///////////////////////////////////////////////////////////////////////////////
+
+void addTargetProfileInfo(const rds::Profile& key,
+                          const std::string& dbgInfo) {
+  if (auto profD = profData()) {
+    ProfData::TargetProfileInfo info{key, dbgInfo};
+    profD->addTargetProfile(info);
   }
-  std::sort(values.begin(), values.end());
-  return values;
 }
 
-}}
+///////////////////////////////////////////////////////////////////////////////
+
+}}}

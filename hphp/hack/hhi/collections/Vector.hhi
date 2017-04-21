@@ -42,7 +42,7 @@
  * is passed by reference, of if a `Vector` is used with `foreach` by
  * reference, an exception will be thrown.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 
@@ -83,14 +83,14 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function toKeysArray(): array<int>;
 
   /**
-   * Returns a deep copy of the current `Vector`.
+   * Returns a copy of the current `Vector`.
    *
    * @return - a `Vector` that is a copy of the current `Vector`.
    */
   public function toVector(): Vector<Tv>;
 
   /**
-   * Returns a deep, immutable copy (`ImmVector`) of the current `Vector`.
+   * Returns an immutable copy (`ImmVector`) of the current `Vector`.
    *
    * @return - a `Vector` that is an immutable copy of the current `Vector`.
    */
@@ -129,7 +129,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
   public function toImmSet(): ImmSet<Tv>;
 
   /**
-   * Returns a deep, immutable copy (`ImmVector`) of the current `Vector`.
+   * Returns an immutable copy (`ImmVector`) of the current `Vector`.
    *
    * This method is interchangeable with `toImmVector()`.
    *
@@ -239,19 +239,19 @@ final class Vector<Tv> implements MutableVector<Tv> {
     Vector<Tv>;
 
   /**
-   *  Returns a `Vector` where each element is a `Pair` that combines the
-   *  element of the current `Vector` and the provided `Traversable`.
+   * Returns a `Vector` where each element is a `Pair` that combines the
+   * element of the current `Vector` and the provided `Traversable`.
    *
-   *  If the number of elements of the `Vector` are not equal to the number of
-   *  elements in the `Traversable`, then only the combined elements up to and
-   *  including the final element of the one with the least number of elements
-   *  is included.
+   * If the number of elements of the `Vector` are not equal to the number of
+   * elements in the `Traversable`, then only the combined elements up to and
+   * including the final element of the one with the least number of elements
+   * is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of this `Vector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of this `Vector`.
    *
-   *  @return - The `Vector` that combines the values of the current `Vector`
-   *            with the provided `Traversable`.
+   * @return - The `Vector` that combines the values of the current `Vector`
+   *           with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Vector<Pair<Tv, Tu>>;
 
@@ -443,8 +443,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
    *
-   * @return - A shallow copy of the current `Vector` with the updated the value
-   *           set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function set(int $k, Tv $v): Vector<Tv>;
 
@@ -463,8 +462,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $k - The `Traversable` with the new values to set. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Vector` with the updated the
-   *           values set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function setAll(?KeyedTraversable<int, Tv> $it): Vector<Tv>;
 
@@ -474,8 +472,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * Future changes made to the current `Vector` ARE reflected in the
    * returned `Vector`, and vice-versa.
    *
-   * @return - A shallow, empty copy of the current `Vector`. The current
-   *           `Vector` is also empty.
+   * @return - Returns itself.
    */
   public function clear(): Vector<Tv>;
 
@@ -503,8 +500,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $v - The value to set to the newly appended key
    *
-   * @return - A shallow copy of the current `Vector` with the added the value
-   *           set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function add(Tv $value): Vector<Tv>;
 
@@ -520,8 +516,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @param $k - The `Traversable` with the new values to set. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Vector` with the added the values
-   *           set. The current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Tv> $it): Vector<Tv>;
 
@@ -537,8 +532,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $container - The container with the new keys to add.
    *
-   * @return - A shallow copy of the current `Vector` with the new keys added;
-   *           the current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function addAllKeysOf<Tv2>(
     ?KeyedContainer<Tv,Tv2> $container,
@@ -555,8 +549,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current `Vector` with the key removed; the
-   *           current `Vector` is also updated.
+   * @return - Returns itself.
    */
   public function removeKey(int $k): Vector<Tv>;
 

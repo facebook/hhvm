@@ -10,7 +10,7 @@
  * @return string - Returns the original data or FALSE on failure. The returned
  *                  data may be binary.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function base64_decode(string $data, bool $strict = false): mixed;
 
 /**
@@ -20,7 +20,7 @@ function base64_decode(string $data, bool $strict = false): mixed;
  *
  * @return string - The encoded data, as a string or FALSE on failure.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function base64_encode(string $data): mixed;
 
 /**
@@ -78,10 +78,10 @@ function get_meta_tags(string $filename,
  *
  * @return string - Returns a URL-encoded string.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function http_build_query(
   mixed $query_data,
-  string $numeric_prefix = "",
+  ?string $numeric_prefix = "",
   string $arg_separator = "",
   int $enc_type = PHP_QUERY_RFC1738): mixed;
 
@@ -112,7 +112,7 @@ function parse_url(string $url, int $component = -1): mixed;
  *
  * @return string - Returns the decoded URL, as a string.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function rawurldecode(string $str): string;
 
 /**
@@ -124,7 +124,7 @@ function rawurldecode(string $str): string;
  *                  except -_.~ have been replaced with a percent (%) sign
  *                  followed by two hex digits.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function rawurlencode(string $str): string;
 
 /**
@@ -134,7 +134,7 @@ function rawurlencode(string $str): string;
  *
  * @return string - Returns the decoded URL, as a string.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function urldecode(string $str): string;
 
 /**
@@ -147,5 +147,5 @@ function urldecode(string $str): string;
  *                  followed by two hex digits and spaces encoded as plus (+)
  *                  signs.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function urlencode(string $str): string;

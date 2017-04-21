@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,18 +35,28 @@ namespace HPHP {
  * cheap, although they may be convenient.
  */
 
+#if (defined(__GNUC__) && __GNUC__ >= 5) ||\
+    (defined(__clang) && (__clang_major__ > 3 ||\
+                           __clang_major__ == 3 && __clang_minor__ >= 4))
+// default constructors of unordered containers do not allocate
+#define GOOD_UNORDERED_CTOR ()
+#else
+// minimize allocation when default constructed
+#define GOOD_UNORDERED_CTOR (0)
+#endif
+
 template <class T, class U,
           class V = std::hash<T>,
           class W = std::equal_to<T> >
 struct hphp_hash_map : std::unordered_map<T,U,V,W> {
-  hphp_hash_map() : std::unordered_map<T,U,V,W>(0) {}
+  hphp_hash_map() : std::unordered_map<T,U,V,W> GOOD_UNORDERED_CTOR {}
 };
 
 template <class T,
           class V = std::hash<T>,
           class W = std::equal_to<T> >
 struct hphp_hash_set : std::unordered_set<T,V,W> {
-  hphp_hash_set() : std::unordered_set<T,V,W>(0) {}
+  hphp_hash_set() : std::unordered_set<T,V,W> GOOD_UNORDERED_CTOR {}
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -59,9 +69,7 @@ template<class T> using hphp_const_char_map =
   hphp_hash_map<const char*,T,cstr_hash,eqstr>;
 
 template<typename T>
-class hphp_string_map :
-    public hphp_hash_map<std::string, T, string_hash> {
-};
+using hphp_string_map = hphp_hash_map<std::string, T, string_hash>;
 
 typedef hphp_hash_set<std::string, string_hash> hphp_string_set;
 
@@ -70,22 +78,16 @@ typedef hphp_hash_map<void*, int, pointer_hash<void> > PointerCounterMap;
 typedef hphp_hash_set<void*, pointer_hash<void> > PointerSet;
 
 template<typename T>
-class hphp_const_char_imap :
-      public hphp_hash_map<const char *, T, hashi, eqstri> {
-};
+using hphp_const_char_imap = hphp_hash_map<const char *, T, hashi, eqstri>;
 
-class hphp_const_char_iset :
-      public hphp_hash_set<const char *, hashi, eqstri> {
-};
+using hphp_const_char_iset = hphp_hash_set<const char *, hashi, eqstri>;
 
 template<typename T>
-class hphp_string_imap :
-      public hphp_hash_map<std::string, T, string_hashi, string_eqstri> {
-};
+using hphp_string_imap =
+  hphp_hash_map<std::string, T, string_hashi, string_eqstri>;
 
-class hphp_string_iset :
-      public hphp_hash_set<std::string, string_hashi, string_eqstri> {
-};
+using hphp_string_iset =
+  hphp_hash_set<std::string, string_hashi, string_eqstri>;
 
 //////////////////////////////////////////////////////////////////////
 

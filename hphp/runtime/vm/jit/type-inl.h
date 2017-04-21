@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ namespace HPHP { namespace jit {
 
 constexpr inline Type::Type(bits_t bits, Ptr kind)
   : m_bits(bits)
-  , m_ptrKind(static_cast<ptr_t>(kind))
+  , m_ptrKind(kind)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
@@ -104,7 +104,11 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  return Type::StaticArray(ad->kind());
+  if (ad->isPHPArray()) return Type::StaticArray(ad->kind());
+  if (ad->isVecArray()) return TStaticVec;
+  if (ad->isDict()) return TStaticDict;
+  if (ad->isKeyset()) return TStaticKeyset;
+  not_reached();
 }
 inline Type for_const(double)        { return TDbl; }
 inline Type for_const(const Func*)   { return TFunc; }
@@ -120,28 +124,33 @@ inline Type for_const(TCA)           { return TTCA; }
 
 inline Type::Type()
   : m_bits(kBottom)
-  , m_ptrKind(static_cast<ptr_t>(Ptr::Bottom))
+  , m_ptrKind(Ptr::Bottom)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline Type::Type(DataType outer, DataType inner)
   : m_bits(bitsFromDataType(outer, inner))
-  , m_ptrKind(static_cast<ptr_t>(outer == KindOfClass ? Ptr::Bottom
-                                                      : Ptr::NotPtr))
+  , m_ptrKind(Ptr::NotPtr)
   , m_hasConstVal(false)
   , m_extra(0)
 {}
 
 inline size_t Type::hash() const {
-  return hash_int64_pair(m_raw, m_extra);
+  return hash_int64_pair(
+    hash_int64_pair(m_bits, static_cast<ptr_t>(m_ptrKind)) ^ m_hasConstVal,
+    m_extra
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Comparison.
 
 inline bool Type::operator==(Type rhs) const {
-  return m_raw == rhs.m_raw && m_extra == rhs.m_extra;
+  return m_bits == rhs.m_bits &&
+    m_ptrKind == rhs.m_ptrKind &&
+    m_hasConstVal == rhs.m_hasConstVal &&
+    m_extra == rhs.m_extra;
 }
 
 inline bool Type::operator!=(Type rhs) const {
@@ -181,14 +190,15 @@ inline bool Type::isUnion() const {
 }
 
 inline bool Type::isKnownDataType() const {
-  assertx(*this <= TStkElem);
+  assertx(*this <= TGen);
 
   // Some unions correspond to single KindOfs.
-  return subtypeOfAny(TStr, TArr, TBoxedCell) || !isUnion();
+  return subtypeOfAny(TStr, TArr, TVec, TDict,
+                      TKeyset, TBoxedCell) || !isUnion();
 }
 
 inline bool Type::needsReg() const {
-  return *this <= TStkElem && !isKnownDataType();
+  return *this <= TGen && !isKnownDataType();
 }
 
 inline bool Type::isSimpleType() const {
@@ -196,7 +206,7 @@ inline bool Type::isSimpleType() const {
 }
 
 inline bool Type::isReferenceType() const {
-  return subtypeOfAny(TStr, TArr, TObj, TRes);
+  return subtypeOfAny(TStr, TArrLike, TObj, TRes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -239,17 +249,33 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfNull:
         not_reached();
 
-      case KindOfClass:
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
         return Type(tv.m_type);
 
+      case KindOfPersistentString:
       case KindOfString:
         return type_detail::for_const(tv.m_data.pstr);
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+        assertx(tv.m_data.parr->isVecArray());
+        return type_detail::for_const(tv.m_data.parr);
+
+      case KindOfPersistentDict:
+      case KindOfDict:
+        assertx(tv.m_data.parr->isDict());
+        return type_detail::for_const(tv.m_data.parr);
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        assertx(tv.m_data.parr->isKeyset());
+        return type_detail::for_const(tv.m_data.parr);
+
+      case KindOfPersistentArray:
       case KindOfArray:
+        assertx(tv.m_data.parr->isPHPArray());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfObject:
@@ -290,6 +316,10 @@ bool Type::hasConstVal(T val) const {
   return hasConstVal(cns(val));
 }
 
+inline bool Type::admitsSingleVal() const {
+  return hasConstVal() || subtypeOfAny(TNullptr, TInitNull, TUninit);
+}
+
 inline uint64_t Type::rawVal() const {
   assertx(hasConstVal());
   return m_extra;
@@ -306,6 +336,9 @@ IMPLEMENT_CNS_VAL(TInt,        int,  int64_t)
 IMPLEMENT_CNS_VAL(TDbl,        dbl,  double)
 IMPLEMENT_CNS_VAL(TStaticStr,  str,  const StringData*)
 IMPLEMENT_CNS_VAL(TStaticArr,  arr,  const ArrayData*)
+IMPLEMENT_CNS_VAL(TStaticVec,  vec,  const ArrayData*)
+IMPLEMENT_CNS_VAL(TStaticDict, dict, const ArrayData*)
+IMPLEMENT_CNS_VAL(TStaticKeyset, keyset, const ArrayData*)
 IMPLEMENT_CNS_VAL(TFunc,       func, const HPHP::Func*)
 IMPLEMENT_CNS_VAL(TCls,        cls,  const Class*)
 IMPLEMENT_CNS_VAL(TCctx,       cctx, ConstCctx)
@@ -318,6 +351,9 @@ IMPLEMENT_CNS_VAL(TRDSHandle,  rdsHandle,  rds::Handle)
 // Specialized type creation.
 
 inline Type Type::Array(ArrayData::ArrayKind kind) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
   return Type(TArr, ArraySpec(kind));
 }
 
@@ -325,20 +361,15 @@ inline Type Type::Array(const RepoAuthType::Array* rat) {
   return Type(TArr, ArraySpec(rat));
 }
 
-inline Type Type::Array(const Shape* shape) {
-  return Type(TArr, ArraySpec(shape));
-}
-
 inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
+  assertx(kind != ArrayData::kVecKind &&
+          kind != ArrayData::kDictKind &&
+          kind != ArrayData::kKeysetKind);
   return Type(TStaticArr, ArraySpec(kind));
 }
 
 inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
   return Type(TStaticArr, ArraySpec(rat));
-}
-
-inline Type Type::StaticArray(const Shape* shape) {
-  return Type(TStaticArr, ArraySpec(shape));
 }
 
 inline Type Type::SubObj(const Class* cls) {
@@ -425,9 +456,7 @@ inline Type Type::box() const {
   assertx(*this <= TCell);
   // Boxing Uninit returns InitNull but that logic doesn't belong here.
   assertx(!maybe(TUninit) || *this == TCell);
-  return Type(m_bits << kBoxShift,
-              ptrKind(),
-              isSpecialized() && !m_hasConstVal ? m_extra : 0);
+  return Type(m_bits << kBoxShift, ptrKind()).specialize(spec());
 }
 
 inline Type Type::inner() const {
@@ -442,12 +471,10 @@ inline Type Type::unbox() const {
 
 inline Type Type::ptr(Ptr kind) const {
   assertx(*this <= TGen);
-  assertx(kind <= Ptr::Ptr);
+  assertx(ptrSubsetOf(kind, Ptr::Ptr));
   // Enforce a canonical representation for Bottom.
   if (m_bits == kBottom) return TBottom;
-  return Type(m_bits,
-              kind,
-              isSpecialized() && !m_hasConstVal ? m_extra : 0);
+  return Type(m_bits, kind).specialize(spec());
 }
 
 inline Type Type::deref() const {
@@ -468,7 +495,7 @@ inline Type Type::strip() const {
 }
 
 inline Ptr Type::ptrKind() const {
-  return static_cast<Ptr>(m_ptrKind);
+  return m_ptrKind;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -476,7 +503,7 @@ inline Ptr Type::ptrKind() const {
 
 inline Type::Type(bits_t bits, Ptr kind, uintptr_t extra)
   : m_bits(bits)
-  , m_ptrKind(static_cast<ptr_t>(kind))
+  , m_ptrKind(kind)
   , m_hasConstVal(false)
   , m_extra(extra)
 {

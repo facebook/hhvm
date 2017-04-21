@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,7 +22,6 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/zend-string.h"
 #include <vector>
 
@@ -54,9 +53,9 @@ static __thread MEMCACHEGlobals* s_memcache_globals;
 
 const StaticString s_MemcacheData("MemcacheData");
 
-class MemcacheData {
- public:
+struct MemcacheData {
   memcached_st m_memcache;
+  TYPE_SCAN_IGNORE_FIELD(m_memcache);
   int m_compress_threshold;
   double m_min_compress_savings;
 
@@ -155,16 +154,20 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
 
     case KindOfUninit:
     case KindOfNull:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
       return MMC_TYPE_STRING;
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }
@@ -378,7 +381,7 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
     return false;
   }
 
-  if (key.is(KindOfArray)) {
+  if (key.isArray()) {
     std::vector<const char *> real_keys;
     std::vector<size_t> key_len;
     Array keyArr = key.toArray();
@@ -390,7 +393,7 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
       auto key = iter.second().toString();
       String serializedKey = memcache_prepare_key(key);
       char *k = new char[serializedKey.length()+1];
-      std::strcpy(k, serializedKey.c_str());
+      memcpy(k, serializedKey.c_str(), serializedKey.length() + 1);
       real_keys.push_back(k);
       key_len.push_back(serializedKey.length());
     }
@@ -718,7 +721,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
                         bool persistent /* = false */,
                         int weight /* = 0 */, int timeout /* = 0 */,
                         int retry_interval /* = 0 */, bool status /* = true */,
-                        const Variant& failure_callback /* = null_variant */,
+                        const Variant& failure_callback /* = uninit_variant */,
                         int timeoutms /* = 0 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
@@ -741,16 +744,11 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-const StaticString s_MEMCACHE_COMPRESSED("MEMCACHE_COMPRESSED");
-const StaticString s_MEMCACHE_HAVE_SESSION("MEMCACHE_HAVE_SESSION");
 
-class MemcacheExtension final : public Extension {
-  public:
+struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
-      // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
-      // but right now this is called for every request.
-      if (s_memcache_globals) return;
+      assert(!s_memcache_globals);
       s_memcache_globals = new MEMCACHEGlobals;
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",
@@ -773,12 +771,8 @@ class MemcacheExtension final : public Extension {
     }
 
     void moduleInit() override {
-      Native::registerConstant<KindOfInt64>(
-        s_MEMCACHE_COMPRESSED.get(), k_MEMCACHE_COMPRESSED
-      );
-      Native::registerConstant<KindOfBoolean>(
-        s_MEMCACHE_HAVE_SESSION.get(), true
-      );
+      HHVM_RC_INT(MEMCACHE_COMPRESSED, k_MEMCACHE_COMPRESSED);
+      HHVM_RC_BOOL(MEMCACHE_HAVE_SESSION, true);
       HHVM_ME(Memcache, connect);
       HHVM_ME(Memcache, add);
       HHVM_ME(Memcache, set);

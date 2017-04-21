@@ -2,6 +2,7 @@
 
 # Order matters here. Put parent classes in this list before child classes
 hphp/system/php/lang/stdClass.php
+hphp/system/php/lang/Closure.php
 hphp/system/php/lang/pinitSentinel.php
 hphp/system/php/lang/string.php
 hphp/system/php/lang/resource.php
@@ -13,6 +14,9 @@ hphp/system/php/lang/Iterator.ns.php
 hphp/system/php/lang/IteratorAggregate.ns.php
 hphp/system/php/lang/KeyedIterator.ns.php
 hphp/system/php/lang/KeyedIterable.ns.php
+hphp/system/php/lang/Throwable.ns.php
+hphp/system/php/lang/BaseException.ns.php
+hphp/system/php/lang/Error.ns.php
 hphp/system/php/lang/Exception.php
 hphp/system/php/spl/exceptions/exceptions.php
 hphp/system/php/spl/interfaces/Countable.php
@@ -67,6 +71,7 @@ hphp/system/php/redis/RedisException.php
 
 hphp/system/php/archive_handler/ArchiveHandler.ns.php
 hphp/system/php/archive_handler/TarArchiveHandler.ns.php
+hphp/system/php/archive_handler/PharArchiveHandler.ns.php
 hphp/system/php/archive_handler/ZipArchiveHandler.ns.php
 
 hphp/system/php/phar/PharException.php
@@ -104,6 +109,7 @@ hphp/system/php/file_system/Directory.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/fun.ns.php
 hphp/system/php/lang/invariant.ns.php
+hphp/system/php/lang/null.ns.php
 hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/highlight.php
 hphp/system/php/misc/idx.php

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,14 +21,15 @@
 #include <string>
 #include <iostream>
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <unistd.h>
+#include <folly/portability/SysTime.h>
+#include <folly/portability/SysResource.h>
+#include <folly/portability/Unistd.h>
 #include <fcntl.h>
 #include <signal.h>
 
 #include <folly/String.h>
 
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -36,17 +37,18 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/base/request-event-handler.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
@@ -122,65 +124,7 @@ static bool check_cmd(const char *cmd) {
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
-#define DEFINE_CONSTANT(name, value) \
-  static const int64_t k_##name = value; \
-  static const StaticString s_##name(#name)
-
-DEFINE_CONSTANT(SIGABRT, SIGABRT);
-DEFINE_CONSTANT(SIGALRM, SIGALRM);
-DEFINE_CONSTANT(SIGBUS, SIGBUS);
-DEFINE_CONSTANT(SIGCHLD, SIGCHLD);
-DEFINE_CONSTANT(SIGCONT, SIGCONT);
-DEFINE_CONSTANT(SIGFPE, SIGFPE);
-DEFINE_CONSTANT(SIGHUP, SIGHUP);
-DEFINE_CONSTANT(SIGILL, SIGILL);
-DEFINE_CONSTANT(SIGINT, SIGINT);
-DEFINE_CONSTANT(SIGIO, SIGIO);
-DEFINE_CONSTANT(SIGIOT, SIGIOT);
-DEFINE_CONSTANT(SIGKILL, SIGKILL);
-DEFINE_CONSTANT(SIGPIPE, SIGPIPE);
-DEFINE_CONSTANT(SIGPROF, SIGPROF);
-DEFINE_CONSTANT(SIGQUIT, SIGQUIT);
-DEFINE_CONSTANT(SIGSEGV, SIGSEGV);
-DEFINE_CONSTANT(SIGSTOP, SIGSTOP);
-DEFINE_CONSTANT(SIGSYS, SIGSYS);
-DEFINE_CONSTANT(SIGTERM, SIGTERM);
-DEFINE_CONSTANT(SIGTRAP, SIGTRAP);
-DEFINE_CONSTANT(SIGTSTP, SIGTSTP);
-DEFINE_CONSTANT(SIGTTIN, SIGTTIN);
-DEFINE_CONSTANT(SIGTTOU, SIGTTOU);
-DEFINE_CONSTANT(SIGURG, SIGURG);
-DEFINE_CONSTANT(SIGUSR1, SIGUSR1);
-DEFINE_CONSTANT(SIGUSR2, SIGUSR2);
-DEFINE_CONSTANT(SIGVTALRM, SIGVTALRM);
-DEFINE_CONSTANT(SIGWINCH, SIGWINCH);
-DEFINE_CONSTANT(SIGXCPU, SIGXCPU);
-DEFINE_CONSTANT(SIGXFSZ, SIGXFSZ);
-DEFINE_CONSTANT(SIG_BLOCK, SIG_BLOCK);
-DEFINE_CONSTANT(SIG_UNBLOCK, SIG_UNBLOCK);
-DEFINE_CONSTANT(SIG_SETMASK, SIG_SETMASK);
-
-DEFINE_CONSTANT(SIG_DFL, (int64_t)SIG_DFL);
-DEFINE_CONSTANT(SIG_ERR, (int64_t)SIG_ERR);
-DEFINE_CONSTANT(SIG_IGN, (int64_t)SIG_IGN);
-
-// http://marc.info/?l=php-cvs&m=100289252314474&w=2
-DEFINE_CONSTANT(SIGBABY, SIGSYS);
-DEFINE_CONSTANT(SIGCLD, SIGCHLD);
-DEFINE_CONSTANT(SIGPOLL, SIGIO);
-
-#ifdef __linux__
-DEFINE_CONSTANT(SIGPWR, SIGPWR);
-DEFINE_CONSTANT(SIGSTKFLT, SIGSTKFLT);
-#endif
-
-#undef DEFINE_CONSTANT
-
-#define REGISTER_CONSTANT(name) \
-  Native::registerConstant<KindOfInt64>(s_##name.get(), k_##name)
-
-static class ProcessExtension final : public Extension {
-public:
+static struct ProcessExtension final : Extension {
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(pcntl_alarm);
@@ -200,56 +144,57 @@ public:
     HHVM_FE(pcntl_wstopsig);
     HHVM_FE(pcntl_wtermsig);
 
-    REGISTER_CONSTANT(SIGABRT);
-    REGISTER_CONSTANT(SIGALRM);
-    REGISTER_CONSTANT(SIGBABY);
-    REGISTER_CONSTANT(SIGBUS);
-    REGISTER_CONSTANT(SIGCHLD);
-    REGISTER_CONSTANT(SIGCLD);
-    REGISTER_CONSTANT(SIGCONT);
-    REGISTER_CONSTANT(SIGFPE);
-    REGISTER_CONSTANT(SIGHUP);
-    REGISTER_CONSTANT(SIGILL);
-    REGISTER_CONSTANT(SIGINT);
-    REGISTER_CONSTANT(SIGIO);
-    REGISTER_CONSTANT(SIGIOT);
-    REGISTER_CONSTANT(SIGKILL);
-    REGISTER_CONSTANT(SIGPIPE);
-    REGISTER_CONSTANT(SIGPOLL);
-    REGISTER_CONSTANT(SIGPROF);
-    REGISTER_CONSTANT(SIGQUIT);
-    REGISTER_CONSTANT(SIGSEGV);
-    REGISTER_CONSTANT(SIGSTOP);
-    REGISTER_CONSTANT(SIGSYS);
-    REGISTER_CONSTANT(SIGTERM);
-    REGISTER_CONSTANT(SIGTRAP);
-    REGISTER_CONSTANT(SIGTSTP);
-    REGISTER_CONSTANT(SIGTTIN);
-    REGISTER_CONSTANT(SIGTTOU);
-    REGISTER_CONSTANT(SIGURG);
-    REGISTER_CONSTANT(SIGUSR1);
-    REGISTER_CONSTANT(SIGUSR2);
-    REGISTER_CONSTANT(SIGVTALRM);
-    REGISTER_CONSTANT(SIGWINCH);
-    REGISTER_CONSTANT(SIGXCPU);
-    REGISTER_CONSTANT(SIGXFSZ);
-    REGISTER_CONSTANT(SIG_DFL);
-    REGISTER_CONSTANT(SIG_ERR);
-    REGISTER_CONSTANT(SIG_IGN);
-    REGISTER_CONSTANT(SIG_BLOCK);
-    REGISTER_CONSTANT(SIG_UNBLOCK);
-    REGISTER_CONSTANT(SIG_SETMASK);
+    HHVM_RC_INT_SAME(SIGABRT);
+    HHVM_RC_INT_SAME(SIGALRM);
+    HHVM_RC_INT_SAME(SIGBUS);
+    HHVM_RC_INT_SAME(SIGCHLD);
+    HHVM_RC_INT_SAME(SIGCONT);
+    HHVM_RC_INT_SAME(SIGFPE);
+    HHVM_RC_INT_SAME(SIGHUP);
+    HHVM_RC_INT_SAME(SIGILL);
+    HHVM_RC_INT_SAME(SIGINT);
+    HHVM_RC_INT_SAME(SIGIO);
+    HHVM_RC_INT_SAME(SIGIOT);
+    HHVM_RC_INT_SAME(SIGKILL);
+    HHVM_RC_INT_SAME(SIGPIPE);
+    HHVM_RC_INT_SAME(SIGPROF);
+    HHVM_RC_INT_SAME(SIGQUIT);
+    HHVM_RC_INT_SAME(SIGSEGV);
+    HHVM_RC_INT_SAME(SIGSTOP);
+    HHVM_RC_INT_SAME(SIGSYS);
+    HHVM_RC_INT_SAME(SIGTERM);
+    HHVM_RC_INT_SAME(SIGTRAP);
+    HHVM_RC_INT_SAME(SIGTSTP);
+    HHVM_RC_INT_SAME(SIGTTIN);
+    HHVM_RC_INT_SAME(SIGTTOU);
+    HHVM_RC_INT_SAME(SIGURG);
+    HHVM_RC_INT_SAME(SIGUSR1);
+    HHVM_RC_INT_SAME(SIGUSR2);
+    HHVM_RC_INT_SAME(SIGVTALRM);
+    HHVM_RC_INT_SAME(SIGWINCH);
+    HHVM_RC_INT_SAME(SIGXCPU);
+    HHVM_RC_INT_SAME(SIGXFSZ);
+    HHVM_RC_INT_SAME(SIG_BLOCK);
+    HHVM_RC_INT_SAME(SIG_UNBLOCK);
+    HHVM_RC_INT_SAME(SIG_SETMASK);
+
+    HHVM_RC_INT(SIG_DFL, (int64_t)SIG_DFL);
+    HHVM_RC_INT(SIG_ERR, (int64_t)SIG_ERR);
+    HHVM_RC_INT(SIG_IGN, (int64_t)SIG_IGN);
+
+    // http://marc.info/?l=php-cvs&m=100289252314474&w=2
+    HHVM_RC_INT(SIGBABY, SIGSYS);
+    HHVM_RC_INT(SIGCLD, SIGCHLD);
+    HHVM_RC_INT(SIGPOLL, SIGIO);
 
 #ifdef __linux__
-    REGISTER_CONSTANT(SIGPWR);
-    REGISTER_CONSTANT(SIGSTKFLT);
+    HHVM_RC_INT_SAME(SIGPWR);
+    HHVM_RC_INT_SAME(SIGSTKFLT);
 #endif
 
     loadSystemlib("process");
   }
 } s_process_extension;
-
-#undef REGISTER_CONSTANT
 
 int64_t HHVM_FUNCTION(pcntl_alarm,
                       int seconds) {
@@ -297,6 +242,10 @@ void HHVM_FUNCTION(pcntl_exec,
 }
 
 int64_t HHVM_FUNCTION(pcntl_fork) {
+  if (is_cli_mode()) {
+    raise_error("forking not available via server CLI execution");
+    return -1;
+  }
   if (RuntimeOption::ServerExecutionMode()) {
     raise_error("forking is disallowed in server mode");
     return -1;
@@ -421,13 +370,13 @@ struct SignalHandlers final : RequestEventHandler {
     // block all signals
     sigset_t set;
     sigfillset(&set);
+    if (RuntimeOption::EvalPerfMemEventRequestFreq != 0) {
+      sigdelset(&set, SIGIO);
+    }
     pthread_sigmask(SIG_BLOCK, &set, NULL);
 
     handlers.reset();
     inited.store(false);
-  }
-  void vscan(IMarker& mark) const override {
-    mark(handlers);
   }
 
   Array handlers;
@@ -448,8 +397,7 @@ static void pcntl_signal_handler(int signo) {
   }
 }
 
-class SignalHandlersStaticInitializer {
-public:
+struct SignalHandlersStaticInitializer {
   SignalHandlersStaticInitializer() {
     signal(SIGALRM, pcntl_signal_handler);
     signal(SIGUSR1, pcntl_signal_handler);
@@ -509,44 +457,43 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
                    int how,
                    const Array& set,
                    VRefParam oldset) {
+  auto const invalid_argument = [&] {
+    raise_warning("pcntl_sigprocmask(): Invalid argument");
+    return false;
+  };
+
   if (how != SIG_BLOCK && how != SIG_UNBLOCK && how != SIG_SETMASK) {
-    goto invalid_argument;
+    return invalid_argument();
   }
 
-  { // Variable scope so that goto doesn't cross definitions
-    sigset_t cset;
-    sigset_t coldset;
+  sigset_t cset;
+  sigset_t coldset;
 
-    sigemptyset(&cset);
-    for (ArrayIter iter(set); iter; ++iter) {
-      auto value = iter.second().toInt64();
-      if (sigaddset(&cset, value) == -1) {
-        goto invalid_argument;
-      }
+  sigemptyset(&cset);
+  for (ArrayIter iter(set); iter; ++iter) {
+    auto value = iter.second().toInt64();
+    if (sigaddset(&cset, value) == -1) {
+      return invalid_argument();
     }
-
-    int result = pthread_sigmask(how, &cset, &coldset);
-    if (result != 0) {
-      return false;
-    }
-    Array aoldset;
-    for (int signum = 1; signum < NSIG; ++signum) {
-      result = sigismember(&coldset, signum);
-      if (result == 1) {
-        aoldset.append(signum);
-      } else if (result == -1) {
-        // invalid signal number
-        break;
-      }
-    }
-    oldset.assignIfRef(aoldset);
-
-    return true;
   }
 
-invalid_argument:
-  raise_warning("pcntl_sigprocmask(): Invalid argument");
-  return false;
+  if (pthread_sigmask(how, &cset, &coldset)) {
+    return false;
+  }
+
+  auto aoldset = Array::Create();
+  for (int signum = 1; signum < NSIG; ++signum) {
+    auto const result = sigismember(&coldset, signum);
+    if (result == 1) {
+      aoldset.append(signum);
+    } else if (result == -1) {
+      // Invalid signal number.
+      break;
+    }
+  }
+
+  oldset.assignIfRef(aoldset);
+  return true;
 }
 
 int64_t HHVM_FUNCTION(pcntl_wait,

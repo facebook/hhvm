@@ -1,0 +1,2 @@
+<?hh
+<< kUvuqLPZK ( function ( ) : array < ( function ( classname < hMGT > ) : array < mixed > ) > use ( $qJHFSImBK , $nSGJczWk , $sNnvWAGoU , $jNPyc ) { for ( ; ; ( int ) $bVMTKYB = new zIUWe ( ) ) continue ; } , 12 ) , sFFQGt ( ) , uH , yLHxpl >> abstract class gPSLd { use xQIiC ; use nTHSmKDrf , pZaUgC , jLpkL < hWAcLjgbF > , aUHuFCoX < aICuVm , ( function ( arraykey ) : this ) , ( function ( array < float > ) : string ) , pOth , resource , pAYo , iBZe , num > , sSAkaGL < int , tLeLX > ; }

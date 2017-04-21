@@ -1,0 +1,35 @@
+<?hh
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+function exception_thrower($arg): void {
+  throw new \Exception("Throw exception:" + $arg);
+}
+
+async function foo(): Awaitable<void> {
+  await RescheduleWaitHandle::create(0, 0);
+  try {
+    exception_thrower("not-break");   // This exception should not be caught by async stepper.
+  } catch(Exception $e) {
+    echo 'Caught exception in foo()';
+  }
+  exception_thrower("break");  // This exception should be caught by async stepper.
+  echo 'Exit foo()';
+}
+
+async function test_async(): Awaitable<void> {
+  await non_blocking_async();
+  await RescheduleWaitHandle::create(0, 0);
+  echo 'Before calling foo()';
+  try {
+    await foo();
+  } catch(Exception $e) {
+    echo 'Caught exception in test_async()';
+  }
+  echo 'Exit test_async';
+}
+
+async function non_blocking_async(): Awaitable<void> {
+  echo 'non_blocking_async';
+}
+
+\HH\Asio\join(test_async());

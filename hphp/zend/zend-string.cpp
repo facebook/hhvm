@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -16,10 +16,22 @@
 */
 
 #include "hphp/zend/zend-string.h"
+
 #include <cinttypes>
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/lock.h"
+#include "hphp/zend/crypt-blowfish.h"
+
+#include <folly/portability/Unistd.h>
+
+#if defined(_MSC_VER) || defined(__APPLE__)
+# include "hphp/zend/php-crypt_r.h"
+# define USE_PHP_CRYPT_R 1
+#else
+# include <crypt.h>
+#endif
 
 namespace HPHP {
 
@@ -155,11 +167,9 @@ int string_crc32(const char *p, int len) {
 ///////////////////////////////////////////////////////////////////////////////
 // crypt
 
-#ifdef _MSC_VER
-#define PHP_CRYPT_R_MSVC 1
-#include "hphp/zend/php-crypt_r.h"
+#ifdef USE_PHP_CRYPT_R
 
-char* php_crypt_r_msvc(const char* key, const char* salt) {
+char* php_crypt_r(const char* key, const char* salt) {
   if (salt[0] == '$' && salt[1] == '1' && salt[2] == '$') {
     char output[MD5_HASH_MAX_LEN], *out;
 
@@ -170,11 +180,11 @@ char* php_crypt_r_msvc(const char* key, const char* salt) {
 
     char* crypt_res = php_sha512_crypt_r(key, salt, output, PHP_MAX_SALT_LEN);
     if (!crypt_res) {
-      SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+      SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
       return nullptr;
     } else {
       char* result = strdup(output);
-      SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+      SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
       return result;
     }
   } else if (salt[0] == '$' && salt[1] == '5' && salt[2] == '$') {
@@ -182,11 +192,11 @@ char* php_crypt_r_msvc(const char* key, const char* salt) {
 
     char* crypt_res = php_sha256_crypt_r(key, salt, output, PHP_MAX_SALT_LEN);
     if (!crypt_res) {
-      SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+      SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
       return nullptr;
     } else {
       char* result = strdup(output);
-      SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+      SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
       return result;
     }
   } else if (
@@ -199,11 +209,11 @@ char* php_crypt_r_msvc(const char* key, const char* salt) {
 
     char* crypt_res = php_crypt_blowfish_rn(key, salt, output, sizeof(output));
     if (!crypt_res) {
-      SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+      SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
       return nullptr;
     } else {
       char* result = strdup(output);
-      SecureZeroMemory(output, PHP_MAX_SALT_LEN + 1);
+      SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
       return result;
     }
   } else if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
@@ -223,13 +233,7 @@ char* php_crypt_r_msvc(const char* key, const char* salt) {
   }
 }
 
-#else
-#include <unistd.h>
-#if !defined(__APPLE__) && !defined(__FreeBSD__)
-# include <crypt.h>
 #endif
-#endif
-#include "hphp/zend/crypt-blowfish.h"
 
 static unsigned char itoa64[] =
   "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -268,25 +272,13 @@ char *string_crypt(const char *key, const char *salt) {
 
   } else {
     // System crypt() function
-#ifdef HAVE_CRYPT_R
-# if defined(CRYPT_R_STRUCT_CRYPT_DATA)
-    struct crypt_data buffer;
-    memset(&buffer, 0, sizeof(buffer));
-# elif defined(CRYPT_R_CRYPTD)
-    CRYPTD buffer;
-# else
-#  error "Data struct used by crypt_r() is unknown. Please report."
-# endif
-    char *crypt_res = crypt_r(key, salt, &buffer);
-#elif defined(PHP_CRYPT_R_MSVC)
-    return php_crypt_r_msvc(key, salt);
+#ifdef USE_PHP_CRYPT_R
+    return php_crypt_r(key, salt);
 #else
     static Mutex mutex;
     Lock lock(mutex);
     char *crypt_res = crypt(key,salt);
-#endif
 
-#ifndef PHP_CRYPT_R_MSVC
     if (crypt_res) {
       return strdup(crypt_res);
     }
@@ -313,7 +305,6 @@ char *string_bin2hex(const char *input, int len, char* result) {
     result[j++] = hexconvtab[(unsigned char)input[i] & 15];
   }
   result[j] = '\0';
-  len = j;
   return result;
 }
 

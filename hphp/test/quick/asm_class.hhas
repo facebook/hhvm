@@ -97,7 +97,8 @@
     PopC
 
     This
-    CGetM <C PL:$name>
+    BaseC 0
+    QueryM 1 CGet PL:$name
     String "\n"
     Concat
     Print
@@ -110,14 +111,16 @@
 
   .method [public] print_defaulted {
     This
-    CGetM <C PT:"defaulted">
+    BaseC 0
+    QueryM 1 CGet PT:"defaulted"
     String "\n"
     Concat
     Print
     PopC
 
     This
-    CGetM <C PT:"badstring">
+    BaseC 0
+    QueryM 1 CGet PT:"badstring"
     String "bad string\"\"\"has triple quotes"
     Eq
     JmpZ broken
@@ -139,7 +142,8 @@
 
   String "funk"
   String "value of funk"
-  SetM <L:$obj PC>
+  BaseL $obj Define
+  SetM 1 PC:1
   PopC
 
   CGetL $obj
@@ -157,6 +161,8 @@
 }
 
 .function main {
+  .numclsrefslots 1;
+
   FPushCtorD 0 "Base"
   FCall 0
   PopR
@@ -165,8 +171,8 @@
 
   String "print_it"
   String "Base"
-  AGetC
-  FPushClsMethod 1
+  ClsRefGetC 0
+  FPushClsMethod 1 0
   String "printing this string"
   FPassC 0
   FCall 1

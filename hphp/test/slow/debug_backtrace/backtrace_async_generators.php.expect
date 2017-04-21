@@ -1,0 +1,28 @@
+=== gen1 ===
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+yield 1
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+yield 2
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+=== gen2 ===
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

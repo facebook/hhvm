@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,10 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
@@ -30,16 +33,16 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Constructor/Initializer
 
-ObjectData* allocEmptyPair() {
-  return newCollectionObj<c_Pair>(c_Pair::NoInit{});
+ObjectData* allocPair(TypedValue c1, TypedValue c2) {
+  return req::make<c_Pair>(c1, c2, c_Pair::NoIncRef{}).detach();
 }
 
-#define X(type) \
-ObjectData* allocEmpty##type() {                                        \
-  return newCollectionObj<c_##type>(c_##type::classof());               \
-}                                                                       \
-ObjectData* allocFromArray##type(ArrayData* arr) {                      \
-  return newCollectionObj<c_##type>(c_##type::classof(), arr);          \
+#define X(type)                                    \
+ObjectData* allocEmpty##type() {                   \
+  return req::make<c_##type>().detach();           \
+}                                                  \
+ObjectData* allocFromArray##type(ArrayData* arr) { \
+  return req::make<c_##type>(arr).detach();        \
 }
 COLLECTIONS_PAIRED_TYPES(X)
 #undef X
@@ -57,8 +60,9 @@ COLLECTIONS_PAIRED_TYPES(X)
 newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype) {
   switch (ctype) {
 #define X(type) case CollectionType::type: return allocEmpty##type;
-COLLECTIONS_ALL_TYPES(X)
+COLLECTIONS_PAIRED_TYPES(X)
 #undef X
+    case CollectionType::Pair: not_reached();
   }
   not_reached();
 }
@@ -70,39 +74,6 @@ void reserve(ObjectData* obj, int64_t sz) {
                   break;
 COLLECTIONS_ALL_TYPES(X)
 #undef X
-  }
-}
-
-void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val) {
-  assertx(obj->isCollection());
-  assertx(isMapCollection(obj->collectionType()));
-  assertx(key->m_type != KindOfRef);
-  assertx(val->m_type != KindOfRef);
-  assertx(val->m_type != KindOfUninit);
-  BaseMap::OffsetSet(obj, key, val);
-}
-
-void initElem(ObjectData* obj, TypedValue* val) {
-  assertx(obj->isCollection());
-  assertx(!isMapCollection(obj->collectionType()));
-  assertx(val->m_type != KindOfRef);
-  assertx(val->m_type != KindOfUninit);
-  switch (obj->collectionType()) {
-    case CollectionType::Vector:
-    case CollectionType::ImmVector:
-      static_cast<BaseVector*>(obj)->add(val);
-      break;
-    case CollectionType::Set:
-    case CollectionType::ImmSet:
-      static_cast<BaseSet*>(obj)->add(val);
-      break;
-    case CollectionType::Pair:
-      static_cast<c_Pair*>(obj)->initAdd(val);
-      break;
-    case CollectionType::Map:
-    case CollectionType::ImmMap:
-      assertx(false);
-      break;
   }
 }
 
@@ -172,13 +143,63 @@ ArrayData* asArray(ObjectData* obj) {
 // Deep Copy
 
 ArrayData* deepCopyArray(ArrayData* arr) {
+  assert(arr->isPHPArray());
   ArrayInit ai(arr->size(), ArrayInit::Mixed{});
-  for (ArrayIter iter(arr); iter; ++iter) {
-    Variant v = iter.secondRef();
-    deepCopy(v.asTypedValue());
-    ai.setValidKey(iter.first(), std::move(v));
-  }
-  return ai.toArray().detach();
+  IterateKV(
+    arr,
+    [&](const TypedValue* k, const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.setValidKey(tvAsCVarRef(k), value);
+      return false;
+    }
+  );
+  return ai.create();
+}
+
+ArrayData* deepCopyVecArray(ArrayData* arr) {
+  assert(arr->isVecArray());
+  VecArrayInit ai{arr->size()};
+  PackedArray::IterateV(
+    arr,
+    [&](const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.append(value);
+      return false;
+    }
+  );
+  return ai.create();
+}
+
+ArrayData* deepCopyDict(ArrayData* arr) {
+  assert(arr->isDict());
+  DictInit ai{arr->size()};
+  MixedArray::IterateKV(
+    MixedArray::asMixed(arr),
+    [&](const TypedValue* k, const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.setValidKey(tvAsCVarRef(k), value);
+      return false;
+    }
+  );
+  return ai.create();
+}
+
+ArrayData* deepCopyKeyset(ArrayData* arr) {
+  assert(arr->isKeyset());
+  KeysetInit ai{arr->size()};
+  SetArray::Iterate(
+    SetArray::asSet(arr),
+    [&](const TypedValue* v) {
+      Variant value{tvAsCVarRef(v)};
+      deepCopy(value.asTypedValue());
+      ai.add(value);
+      return false;
+    }
+  );
+  return ai.create();
 }
 
 ObjectData* deepCopySet(c_Set* st) {
@@ -195,8 +216,28 @@ void deepCopy(TypedValue* tv) {
     case KindOfString:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       return;
+
+    case KindOfVec: {
+      auto arr = deepCopyVecArray(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
+
+    case KindOfDict: {
+      auto arr = deepCopyDict(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
+
+    case KindOfKeyset: {
+      auto arr = deepCopyKeyset(tv->m_data.parr);
+      decRefArr(tv->m_data.parr);
+      tv->m_data.parr = arr;
+      return;
+    }
 
     case KindOfArray: {
       auto arr = deepCopyArray(tv->m_data.parr);
@@ -259,6 +300,7 @@ void deepCopy(TypedValue* tv) {
         default:
           assertx(false);
       }
+      assert(obj != tv->m_data.pobj || tv->m_data.pobj->hasMultipleRefs());
       decRefObj(tv->m_data.pobj);
       tv->m_data.pobj = obj;
       return;
@@ -496,23 +538,18 @@ bool equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto ct1 = obj1->collectionType();
   auto ct2 = obj2->collectionType();
 
-  if (isMapCollection(ct1) && isMapCollection(ct2)) {
-    // For migration purposes, distinct Map types should compare equal
-    return BaseMap::Equals(
-      BaseMap::EqualityFlavor::OrderIrrelevant, obj1, obj2);
+  // we intentionally allow mutable/immutable versions of the same collection
+  // type to compare equal
+  if (isMapCollection(ct1)) {
+    return isMapCollection(ct2) && BaseMap::Equals(obj1, obj2);
+  } else if (isVectorCollection(ct1)) {
+    return isVectorCollection(ct2) && BaseVector::Equals(obj1, obj2);
+  } else if (isSetCollection(ct1)) {
+    return isSetCollection(ct2) && BaseSet::Equals(obj1, obj2);
+  } else {
+    assertx(ct1 == CollectionType::Pair);
+    return (ct2 == CollectionType::Pair) && c_Pair::Equals(obj1, obj2);
   }
-
-  if (isVectorCollection(ct1) && isVectorCollection(ct2)) {
-    return BaseVector::Equals(obj1, obj2);
-  }
-
-  if (isSetCollection(ct1) && isSetCollection(ct2)) {
-    return BaseSet::Equals(obj1, obj2);
-  }
-
-  if (ct1 != ct2) return false;
-  assert(ct1 == CollectionType::Pair);
-  return c_Pair::Equals(obj1, obj2);
 }
 
 Variant pop(ObjectData* obj) {
@@ -520,7 +557,7 @@ Variant pop(ObjectData* obj) {
   assertx(isMutableCollection(obj->collectionType()));
   switch (obj->collectionType()) {
     case CollectionType::Vector:
-      return static_cast<c_Vector*>(obj)->t_pop();
+      return static_cast<c_Vector*>(obj)->pop();
     case CollectionType::Map:
       return static_cast<c_Map*>(obj)->pop();
     case CollectionType::Set:

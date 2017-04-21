@@ -1,0 +1,5 @@
+
+Warning: SQLite3::loadExtension() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_sqlite3/sqlite3_null_byte.php on line %d
+bool(false)
+
+Fatal error: SQLite3::__construct() expects parameter 1 to be a valid path, string given in %s/test/slow/ext_sqlite3/sqlite3_null_byte.php on line %d

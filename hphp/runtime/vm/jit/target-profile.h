@@ -13,25 +13,35 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_TARGET_PROFILE_H_
-#define incl_HPHP_TARGET_PROFILE_H_
 
-#include <folly/Optional.h>
+#ifndef incl_HPHP_JIT_TARGET_PROFILE_H_
+#define incl_HPHP_JIT_TARGET_PROFILE_H_
 
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/ir-instruction.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/types.h"
+
+#include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
+
+#include "hphp/util/assertions.h"
+
+#include <utility>
 
 namespace HPHP {
+
 struct Func;
 struct Class;
+
+namespace jit {
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail {
+  void addTargetProfileInfo(const rds::Profile& key,
+                            const std::string& dbgInfo);
 }
-
-namespace HPHP { namespace jit {
-
-//////////////////////////////////////////////////////////////////////
 
 /*
  * This is a utility for creating or querying a 'target profiling'
@@ -61,21 +71,29 @@ namespace HPHP { namespace jit {
  *      gen(ProfMyTarget, RDSHandleData { prof.handle() }, ...);
  *    }
  *
+ * The type must have a toString(...) method returning a std::string with a
+ * single human-readable line representing the state of the profile, taking
+ * the same set of extra arguments as the reduce function passed to 'data'.
  */
 template<class T>
 struct TargetProfile {
   TargetProfile(TransID profTransID,
+                TransKind kind,
                 Offset bcOff,
                 const StringData* name,
                 size_t extraSize = 0)
-    : m_link(createLink(profTransID, bcOff, name, extraSize))
+    : m_link(createLink(profTransID, kind, bcOff, name, extraSize))
+    , m_kind(kind)
+    , m_key{profTransID, bcOff, name}
   {}
 
   TargetProfile(const TransContext& context,
                 BCMarker marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(profiling() ? context.transID : marker.profTransID(),
+    : TargetProfile(context.kind == TransKind::Profile ? context.transID
+                                                       : marker.profTransID(),
+                    context.kind,
                     marker.bcOff(),
                     name,
                     extraSize)
@@ -104,6 +122,12 @@ struct TargetProfile {
       reduce(out, rds::handleToRef<T>(base, hand),
              std::forward<Args>(extraArgs)...);
     }
+    if (RuntimeOption::EvalDumpTargetProfiles) {
+      detail::addTargetProfileInfo(
+        m_key,
+        out.toString(std::forward<Args>(extraArgs)...)
+      );
+    }
   }
 
   template<class ReduceFn, class... Args>
@@ -120,10 +144,10 @@ struct TargetProfile {
    * attached for some reason.).
    */
   bool profiling() const {
-    return mcg->tx().mode() == TransKind::Profile;
+    return m_kind == TransKind::Profile;
   }
   bool optimizing() const {
-    return mcg->tx().mode() == TransKind::Optimize && m_link.bound();
+    return m_kind == TransKind::Optimize && m_link.bound();
   }
 
   /*
@@ -134,12 +158,13 @@ struct TargetProfile {
 
 private:
   static rds::Link<T> createLink(TransID profTransID,
+                                 TransKind kind,
                                  Offset bcOff,
                                  const StringData* name,
                                  size_t extraSize) {
     auto const rdsKey = rds::Profile{profTransID, bcOff, name};
 
-    switch (mcg->tx().mode()) {
+    switch (kind) {
     case TransKind::Profile:
       return rds::bind<T>(rdsKey, rds::Mode::Local, extraSize);
 
@@ -148,220 +173,27 @@ private:
 
       // fallthrough
     case TransKind::Anchor:
-    case TransKind::Prologue:
     case TransKind::Interp:
     case TransKind::Live:
-    case TransKind::Proflogue:
+    case TransKind::LivePrologue:
+    case TransKind::ProfPrologue:
+    case TransKind::OptPrologue:
     case TransKind::Invalid:
       return rds::Link<T>(rds::kInvalidHandle);
     }
     not_reached();
   }
 
+  static void addDebugInfo(const rds::Profile& key,
+                           const std::string& dbgInfo);
+
 private:
   rds::Link<T> const m_link;
+  TransKind const m_kind;
+  rds::Profile const m_key;
 };
 
-struct ClassProfile {
-  static const size_t kClassProfileSampleSize = 4;
-
-  const Class* sampledClasses[kClassProfileSampleSize];
-
-  bool isMonomorphic() const {
-    return size() == 1;
-  }
-
-  const Class* getClass(size_t i) const {
-    if (i >= kClassProfileSampleSize) return nullptr;
-    return sampledClasses[i];
-  }
-
-  size_t size() const {
-    for (auto i = 0; i < kClassProfileSampleSize; ++i) {
-      auto const cls = sampledClasses[i];
-      if (!cls) return i;
-    }
-    return kClassProfileSampleSize;
-  }
-
-  void reportClass(const Class* cls) {
-    for (auto& myCls : sampledClasses) {
-      // If the current slot is empty, store the class here.
-      if (!myCls) {
-        myCls = cls;
-        break;
-      }
-
-      // If the current slot matches the requested class, give up.
-      if (cls == myCls) {
-        break;
-      }
-    }
-  }
-
-  static void reduce(ClassProfile& a, const ClassProfile& b) {
-    // Racy, but who cares?
-    for (auto const cls : b.sampledClasses) {
-      if (!cls) return;
-      a.reportClass(cls);
-    }
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-
-struct IncRefProfile {
-  /* The number of times this IncRef made it at least as far as the static
-   * check (meaning it was given a refcounted DataType. */
-  uint16_t tryinc;
-
-  std::string toString() const {
-    return folly::sformat("tryinc: {:4}", tryinc);
-  }
-
-  static void reduce(IncRefProfile& a, const IncRefProfile& b) {
-    a.tryinc += b.tryinc;
-  }
-};
-
-/*
- * DecRefProfile is used to track which types go through DecRef instructions,
- * and which ones arelikely go to zero.
- */
-struct DecRefProfile {
-  /* The number of times this DecRef was executed. */
-  uint16_t hits;
-
-  /* The number of times this DecRef made it at least as far as the static
-   * check (meaning it was given a refcounted DataType. */
-  uint16_t trydec;
-
-  /* The number of times this DecRef went to zero and called destroy(). */
-  uint16_t destroy;
-
-  float destroyRate() const {
-    return hits ? float(destroy) / hits : 0.0;
-  }
-
-  std::string toString() const {
-    return folly::sformat("hits: {:4} trydec: {:4}, destroy: {:4} ({:.2%}%)",
-                          hits, trydec, destroy, destroyRate());
-  }
-
-  static void reduce(DecRefProfile& a, const DecRefProfile& b) {
-    a.hits    += b.hits;
-    a.trydec  += b.trydec;
-    a.destroy += b.destroy;
-  }
-};
-typedef folly::Optional<TargetProfile<DecRefProfile>> OptDecRefProfile;
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Record profiling information about non-packed arrays. This counts the
- * number of times a non-packed array was used as the base of a CGetElem
- * operation.
- */
-struct NonPackedArrayProfile {
-  int32_t count;
-  static void reduce(NonPackedArrayProfile& a, const NonPackedArrayProfile& b) {
-    a.count += b.count;
-  }
-};
-
-struct StructArrayProfile {
-  int32_t nonStructCount;
-  int32_t numShapesSeen;
-  Shape* shape{nullptr}; // Never access this directly. Use getShape instead.
-
-  bool isEmpty() const {
-    return !numShapesSeen;
-  }
-
-  bool isMonomorphic() const {
-    return numShapesSeen == 1;
-  }
-
-  bool isPolymorphic() const {
-    return numShapesSeen > 1;
-  }
-
-  void makePolymorphic() {
-    numShapesSeen = INT_MAX;
-    shape = nullptr;
-  }
-
-  Shape* getShape() const {
-    assertx(isMonomorphic());
-    return shape;
-  }
-
-  static void reduce(StructArrayProfile& a, const StructArrayProfile& b) {
-    a.nonStructCount += b.nonStructCount;
-    if (a.isPolymorphic()) return;
-
-    if (a.isEmpty()) {
-      a.shape = b.shape;
-      a.numShapesSeen = b.numShapesSeen;
-      return;
-    }
-
-    assertx(a.isMonomorphic());
-    if (b.isEmpty()) return;
-    if (b.isMonomorphic() && a.getShape() == b.getShape()) return;
-    a.makePolymorphic();
-    return;
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-
-struct ReleaseVVProfile {
-  uint16_t executed;
-  uint16_t released;
-
-  int percentReleased() const {
-    return executed ? (100 * released / executed) : 0;
-  };
-
-  static void reduce(ReleaseVVProfile& a, const ReleaseVVProfile& b) {
-    // Racy but OK -- just used for profiling to trigger optimization.
-    a.executed += b.executed;
-    a.released += b.released;
-  }
-};
-
-//////////////////////////////////////////////////////////////////////
-
-struct SwitchProfile {
-  SwitchProfile(const SwitchProfile&) = delete;
-  SwitchProfile& operator=(const SwitchProfile&) = delete;
-
-  uint32_t cases[0]; // dynamically sized
-
-  static void reduce(SwitchProfile& a, const SwitchProfile& b, int nCases) {
-    for (uint32_t i = 0; i < nCases; ++i) {
-      a.cases[i] += b.cases[i];
-    }
-  }
-};
-
-struct SwitchCaseCount {
-  int32_t caseIdx;
-  uint32_t count;
-
-  bool operator<(const SwitchCaseCount& b) const { return count > b.count; }
-};
-
-/*
- * Collect the data for the given SwitchProfile, and return a vector of case
- * indexes and hit count, sorted in descending order of hit count.
- */
-std::vector<SwitchCaseCount> sortedSwitchProfile(
-  TargetProfile<SwitchProfile>& profile,
-  int32_t nCases
-);
+///////////////////////////////////////////////////////////////////////////////
 
 }}
 

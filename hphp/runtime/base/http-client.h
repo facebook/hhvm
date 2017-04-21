@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,12 +22,12 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/server/transport.h"
+#include <curl/curl.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpClient {
-public:
+struct HttpClient {
   explicit HttpClient(int timeout = 5 /* seconds */, int maxRedirect = 1,
                       bool use11 = true, bool decompress = false);
 
@@ -49,6 +49,24 @@ public:
   void setStreamContextOptions(const Array &opts) {
     m_stream_context_options = opts;
   }
+  /**
+   * require SLS/TLS
+   * (default) CURLUSESSL_NONE, CURLUSESSL_TRY, CURLUSESSL_CONTROL,
+   *           CURLUSESSL_ALL
+   */
+
+  void setUseSSL(const long level) {
+    m_use_ssl = level;
+  }
+
+  /**
+   * set preferred TLS/SSL version
+   * (default) CURL_SSLVERSION_DEFAULT, CURL_SSLVERSION_TLSv1,
+   *           CURL_SSLVERSION_SSLv3
+   */
+  void setSSLVersion (const long version) {
+    m_sslversion = version;
+  }
 
   /**
    * GET an URL and returns its response code.
@@ -60,12 +78,13 @@ public:
   /**
    * POST data to an URL and returns its response code.
    */
-  int post(const char *url, const char *data, int size, StringBuffer &response,
+  int post(const char *url, const char *data, size_t size,
+           StringBuffer &response,
            const HeaderMap *requestHeaders = nullptr,
            std::vector<String> *responseHeaders = nullptr);
 
   int request(const char* method,
-              const char *url, const char *data, int size,
+              const char *url, const char *data, size_t size,
               StringBuffer &response, const HeaderMap *requestHeaders,
               std::vector<String> *responseHeaders);
 
@@ -94,8 +113,10 @@ private:
   std::string m_proxyUsername;
   std::string m_proxyPassword;
 
-  Array       m_stream_context_options;
+  long m_use_ssl = CURLUSESSL_NONE;
+  long m_sslversion = CURL_SSLVERSION_DEFAULT;  //try to match remote SSL
 
+  Array       m_stream_context_options;
 
   static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx);
   static size_t curl_header(char *data, size_t size, size_t nmemb, void *ctx);

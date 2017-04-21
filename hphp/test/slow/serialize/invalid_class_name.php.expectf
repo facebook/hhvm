@@ -1,0 +1,5 @@
+Notice: Unable to unserialize: %s. Provided class name is invalid. in %s on line 4
+bool(false)
+
+Notice: Unable to unserialize: %s. Provided class name is invalid. in %s on line 8
+bool(false)

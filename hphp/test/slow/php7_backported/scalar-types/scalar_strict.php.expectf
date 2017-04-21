@@ -1,0 +1,213 @@
+Testing 'int' typehint:
+
+*** Trying int(1)
+int(1)
+
+*** Trying string(1) "1"
+*** Caught %s
+
+*** Trying float(1)
+*** Caught %s
+
+*** Trying float(1.5)
+*** Caught %s
+
+*** Trying string(2) "1a"
+*** Caught %s
+
+*** Trying string(1) "a"
+*** Caught %s
+
+*** Trying string(0) ""
+*** Caught %s
+
+*** Trying int(9223372036854775807)
+int(9223372036854775807)
+
+*** Trying float(NAN)
+*** Caught %s
+
+*** Trying bool(true)
+*** Caught %s
+
+*** Trying bool(false)
+*** Caught %s
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#6 (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#7 (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Testing 'float' typehint:
+
+*** Trying int(1)
+float(1)
+
+*** Trying string(1) "1"
+*** Caught %s
+
+*** Trying float(1)
+float(1)
+
+*** Trying float(1.5)
+float(1.5)
+
+*** Trying string(2) "1a"
+*** Caught %s
+
+*** Trying string(1) "a"
+*** Caught %s
+
+*** Trying string(0) ""
+*** Caught %s
+
+*** Trying int(9223372036854775807)
+float(9.2233720368548E+18)
+
+*** Trying float(NAN)
+float(NAN)
+
+*** Trying bool(true)
+*** Caught %s
+
+*** Trying bool(false)
+*** Caught %s
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#6 (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#7 (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Testing 'string' typehint:
+
+*** Trying int(1)
+*** Caught %s
+
+*** Trying string(1) "1"
+string(1) "1"
+
+*** Trying float(1)
+*** Caught %s
+
+*** Trying float(1.5)
+*** Caught %s
+
+*** Trying string(2) "1a"
+string(2) "1a"
+
+*** Trying string(1) "a"
+string(1) "a"
+
+*** Trying string(0) ""
+string(0) ""
+
+*** Trying int(9223372036854775807)
+*** Caught %s
+
+*** Trying float(NAN)
+*** Caught %s
+
+*** Trying bool(true)
+*** Caught %s
+
+*** Trying bool(false)
+*** Caught %s
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#6 (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#7 (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Testing 'bool' typehint:
+
+*** Trying int(1)
+*** Caught %s
+
+*** Trying string(1) "1"
+*** Caught %s
+
+*** Trying float(1)
+*** Caught %s
+
+*** Trying float(1.5)
+*** Caught %s
+
+*** Trying string(2) "1a"
+*** Caught %s
+
+*** Trying string(1) "a"
+*** Caught %s
+
+*** Trying string(0) ""
+*** Caught %s
+
+*** Trying int(9223372036854775807)
+*** Caught %s
+
+*** Trying float(NAN)
+*** Caught %s
+
+*** Trying bool(true)
+bool(true)
+
+*** Trying bool(false)
+bool(false)
+
+*** Trying NULL
+*** Caught %s
+
+*** Trying array(0) {
+}
+*** Caught %s
+
+*** Trying object(stdClass)#6 (0) {
+}
+*** Caught %s
+
+*** Trying object(Stringable)#7 (0) {
+}
+*** Caught %s
+
+*** Trying resource(%d) of type (stream)
+*** Caught %s
+
+Done

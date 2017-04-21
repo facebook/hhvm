@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,11 +27,11 @@
 
 namespace HPHP {
 
-class SourceRootInfo;
-class RequestURI;
+struct SourceRootInfo;
+struct RequestURI;
 
 namespace ServiceData {
-class ExportedTimeSeries;
+struct ExportedTimeSeries;
 }
 
 /*
@@ -42,8 +42,7 @@ void setProxyOriginPercentage(const std::string& origin, int percentage);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class HttpRequestHandler : public RequestHandler {
-public:
+struct HttpRequestHandler : RequestHandler {
   static AccessLog &GetAccessLog() { return s_accessLog; }
 
 public:
@@ -70,8 +69,7 @@ private:
                          const std::string &cmd,
                          const char *ext);
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
-                         SourceRootInfo &sourceRootInfo,
-                         bool cacheableDynamicContent);
+                         SourceRootInfo &sourceRootInfo);
 
   static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;

@@ -1472,15 +1472,6 @@ array(177) {
     ["access"]=>
     int(4)
   }
-  ["hhvm.jit_llvm"]=>
-  array(3) {
-    ["global_value"]=>
-    string(1) "0"
-    ["local_value"]=>
-    string(1) "0"
-    ["access"]=>
-    int(4)
-  }
   ["hhvm.jit_loops"]=>
   array(3) {
     ["global_value"]=>

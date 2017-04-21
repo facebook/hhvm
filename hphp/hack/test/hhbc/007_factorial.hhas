@@ -1,0 +1,29 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\int" "HH\\int" hh_type extended_hint > fact(<"HH\\int" "HH\\int" hh_type > $x) {
+  VerifyParamType $x
+  Int 2
+  CGetL2 $x
+  Lt
+  JmpZ L0
+  Int 1
+  VerifyRetTypeC
+  RetC
+L0:
+  FPushFuncD 1 "fact"
+  Int 1
+  CGetL2 $x
+  SubO
+  FPassCE 0
+  FCall 1
+  UnboxR
+  CGetL2 $x
+  MulO
+  VerifyRetTypeC
+  RetC
+}
+

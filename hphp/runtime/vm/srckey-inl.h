@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,31 +23,35 @@ namespace HPHP {
 inline SrcKey::SrcKey()
   : m_funcID{InvalidFuncId}
   , m_offset{0}
+  , m_hasThis{false}
   , m_prologue{false}
   , m_resumed{false}
 {}
 
-inline SrcKey::SrcKey(const Func* f, Offset off, bool resumed)
+inline SrcKey::SrcKey(const Func* f, Offset off, bool resumed, bool hasThis)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)off}
+  , m_hasThis{hasThis}
   , m_prologue{false}
   , m_resumed{resumed}
 {
   assert((uint32_t)off >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(const Func* f, PC pc, bool resumed)
+inline SrcKey::SrcKey(const Func* f, PC pc, bool resumed, bool hasThis)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
+  , m_hasThis{hasThis}
   , m_prologue{false}
   , m_resumed{resumed}
 {
   assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
 }
 
-inline SrcKey::SrcKey(FuncId funcId, Offset off, bool resumed)
+inline SrcKey::SrcKey(FuncId funcId, Offset off, bool resumed, bool hasThis)
   : m_funcID{funcId}
   , m_offset{(uint32_t)off}
+  , m_hasThis{hasThis}
   , m_prologue{false}
   , m_resumed{resumed}
 {
@@ -57,6 +61,7 @@ inline SrcKey::SrcKey(FuncId funcId, Offset off, bool resumed)
 inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)off}
+  , m_hasThis{false}
   , m_prologue{true}
   , m_resumed{false}
 {
@@ -66,15 +71,27 @@ inline SrcKey::SrcKey(const Func* f, Offset off, PrologueTag)
 inline SrcKey::SrcKey(const Func* f, PC pc, PrologueTag)
   : m_funcID{f->getFuncId()}
   , m_offset{(uint32_t)f->unit()->offsetOf(pc)}
+  , m_hasThis{false}
   , m_prologue{true}
   , m_resumed{false}
 {
   assert((uint32_t)f->unit()->offsetOf(pc) >> 31 == 0);
 }
 
+inline SrcKey::SrcKey(FuncId funcId, Offset off, PrologueTag)
+  : m_funcID{funcId}
+  , m_offset{(uint32_t)off}
+  , m_hasThis{false}
+  , m_prologue{true}
+  , m_resumed{false}
+{
+  assert((uint32_t)off >> 31 == 0);
+}
+
 inline SrcKey::SrcKey(SrcKey other, Offset off)
   : m_funcID{other.funcID()}
   , m_offset{(uint32_t)off}
+  , m_hasThis{other.hasThis()}
   , m_prologue{other.prologue()}
   , m_resumed{other.resumed()}
 {
@@ -106,6 +123,10 @@ inline FuncId SrcKey::funcID() const {
 
 inline int SrcKey::offset() const {
   return m_offset;
+}
+
+inline bool SrcKey::hasThis() const {
+  return m_hasThis;
 }
 
 inline bool SrcKey::prologue() const {

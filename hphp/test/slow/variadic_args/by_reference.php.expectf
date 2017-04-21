@@ -1,2 +1,2 @@
-
-Fatal error: Parameter $args is both variadic and by reference; this is unsupported in %s/variadic_args/by_reference.php on line 3
+int(11)
+int(21)

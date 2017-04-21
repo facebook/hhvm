@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -18,6 +18,8 @@
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/string-util.h"
+
+#include <folly/portability/String.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +43,7 @@ static void replace_controlchars(String& output, const char *str, int len) {
   output.setSize(len);
 }
 
-bool url_parse(Url &output, const char *str, int length) {
+bool url_parse(Url &output, const char *str, size_t length) {
   char port_buf[6];
   const char *s, *e, *p, *pp, *ue;
 
@@ -134,6 +136,9 @@ bool url_parse(Url &output, const char *str, int length) {
       auto port = atoi(port_buf);
       if (port > 0 && port <= 65535) {
         output.port = port;
+        if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+          s += 2;
+        }
       } else {
         return false;
       }
@@ -311,7 +316,7 @@ static int php_htoi(char *s) {
 
 static unsigned char hexchars[] = "0123456789ABCDEF";
 
-String url_encode(const char *s, int len) {
+String url_encode(const char *s, size_t len) {
   String retString(safe_address(len, 3, 1), ReserveString);
   register unsigned char c;
   unsigned char *to, *start;
@@ -342,7 +347,7 @@ String url_encode(const char *s, int len) {
   return retString;
 }
 
-String url_decode(const char *s, int len) {
+String url_decode(const char *s, size_t len) {
   String retString(s, len, CopyString);
   char *str = retString.mutableData();
   char *dest = str;
@@ -367,38 +372,11 @@ String url_decode(const char *s, int len) {
   return retString;
 }
 
-// copied and re-factored from clearsilver-0.10.5/cgi/cgi.c
-int url_decode(char *value) {
+size_t url_decode_ex(char *value, size_t len) {
   assert(value && *value); // check before calling this function
+  if (len == 0) return 0;
 
-  int i = 0, o = 0;
-  unsigned char *s = (unsigned char *)value;
-
-  while (s[i]) {
-    if (s[i] == '+') {
-      s[o++] = ' ';
-      i++;
-    } else if (s[i] == '%' && isxdigit(s[i+1]) && isxdigit(s[i+2])) {
-      char num;
-      num = (s[i+1] >= 'A') ? ((s[i+1] & 0xdf) - 'A') + 10 : (s[i+1] - '0');
-      num *= 16;
-      num += (s[i+2] >= 'A') ? ((s[i+2] & 0xdf) - 'A') + 10 : (s[i+2] - '0');
-      s[o++] = num;
-      i+=3;
-    } else {
-      s[o++] = s[i++];
-    }
-  }
-  if (i && o) s[o] = '\0';
-  return o;
-}
-
-int url_decode_ex(char *value, int len) {
-  assert(value && *value); // check before calling this function
-  assert(len >= 0);
-  if (len <= 0) return 0;
-
-  int i = 0, o = 0;
+  size_t i = 0, o = 0;
   unsigned char *s = (unsigned char *)value;
   unsigned char *end = s + len;
   while (s + i < end) {
@@ -420,9 +398,9 @@ int url_decode_ex(char *value, int len) {
   return o;
 }
 
-String url_raw_encode(const char *s, int len) {
+String url_raw_encode(const char *s, size_t len) {
   String retString(safe_address(len, 3, 1), ReserveString);
-  register int x, y;
+  size_t x, y;
   unsigned char *str = (unsigned char *)retString.mutableData();
 
   for (x = 0, y = 0; len--; x++, y++) {
@@ -440,7 +418,7 @@ String url_raw_encode(const char *s, int len) {
   return retString;
 }
 
-String url_raw_decode(const char *s, int len) {
+String url_raw_decode(const char *s, size_t len) {
   String retString(s, len, CopyString);
   char *str = retString.mutableData();
   char *dest = str;

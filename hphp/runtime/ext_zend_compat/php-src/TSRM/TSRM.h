@@ -122,13 +122,24 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 #endif
 
 #include "hphp/util/thread-local.h"
-#include "hphp/runtime/base/imarker.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
+struct tsrm_resource_type {
+  tsrm_resource_type() {}
+  size_t size;
+  ts_allocate_ctor ctor;
+  ts_allocate_dtor dtor;
+  int done;
+};
+struct EzcResource {
+  TYPE_SCAN_CONSERVATIVE_ALL;
+  void* dummy;
+};
+extern std::vector<tsrm_resource_type> resource_types_table;
 using TSRMStorageVector = std::vector<void*>;
 extern DECLARE_THREAD_LOCAL(TSRMStorageVector, tsrm_thread_resources);
 void * ts_init_resource(int id);
-void ts_scan_resources(IMarker&);
 
 static inline
 void* ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
@@ -141,6 +152,20 @@ void* ts_resource_from_vector(const TSRMStorageVector & vec, ts_rsrc_id id) {
     return ts_init_resource(id);
   }
   return ret;
+}
+
+template<class Fn> void ts_iterate_resources(Fn fn) {
+  auto& vec = *HPHP::tsrm_thread_resources;
+  auto ntypes = resource_types_table.size();
+  auto nres = vec.size();
+  auto tyindex = type_scan::getIndexForScan<EzcResource>();
+  for (size_t i = 0, n = std::min(ntypes, nres); i < n; ++i) {
+    if (auto data = vec[i]) {
+      fn(data, resource_types_table[i].size, tyindex);
+      // maybe add type_scan::Index to tsrm_resource_type in addition to
+      // ctor/dtor, then we could scan exactly.
+    }
+  }
 }
 } // HPHP
 

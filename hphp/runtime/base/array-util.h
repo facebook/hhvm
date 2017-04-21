@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,13 +24,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 
 /**
  * Utility array functions.
  */
-class ArrayUtil final {
-public:
+struct ArrayUtil final {
   /////////////////////////////////////////////////////////////////////////////
   // Compositions.
 
@@ -39,14 +38,16 @@ public:
    * with supplied array.
    */
   static Variant Splice(const Array& input, int offset, int64_t length = 0,
-                        const Variant& replacement = null_variant,
+                        const Variant& replacement = uninit_variant,
                         Array *removed = nullptr);
 
   /**
    * Returns a copy of input array padded with pad_value to size pad_size.
    */
-  static Variant Pad(const Array& input, const Variant& pad_value, int pad_size,
-                     bool pad_right = true);
+  static Variant PadLeft(const Array& input, const Variant& pad_value,
+                         int pad_size);
+  static Variant PadRight(const Array& input, const Variant& pad_value,
+                          int pad_size);
 
   /**
    * Create an array containing the range of integers or characters from low
@@ -54,7 +55,7 @@ public:
    */
   static Variant Range(unsigned char low, unsigned char high, int64_t step = 1);
   static Variant Range(double low, double high, double step = 1.0);
-  static Variant Range(double low, double high, int64_t step = 1);
+  static Variant Range(int64_t low, int64_t high, int64_t step = 1);
 
   /////////////////////////////////////////////////////////////////////////////
   // Information and calculations.
@@ -115,7 +116,7 @@ public:
                              const Variant& userdata, const void *data);
   static void Walk(Variant &input, PFUNC_WALK walk_function, const void *data,
                    bool recursive = false, PointerSet *seen = nullptr,
-                   const Variant& userdata = null_variant);
+                   const Variant& userdata = uninit_variant);
 
   /**
    * Iteratively reduce the array to a single value via the callback.
@@ -123,7 +124,7 @@ public:
   typedef Variant (*PFUNC_REDUCE)(const Variant& result, const Variant& operand,
                                   const void *data);
   static Variant Reduce(const Array& input, PFUNC_REDUCE reduce_function,
-                        const void *data, const Variant& initial = null_variant);
+                    const void *data, const Variant& initial = uninit_variant);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

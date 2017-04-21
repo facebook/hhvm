@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,20 +29,7 @@ std::vector<Bytecode> samples {
   bc::Int { 52 },
   bc::False {},
   bc::FPassC { 0 },
-  bc::FPushFunc { 2 },
-  bc::CGetM {
-    MVector { LocationCode::LC,
-              nullptr,
-              { MElem { MemberCode::MPC } }
-            }
-  },
-  bc::CGetM {
-    MVector { LocationCode::LH,
-              nullptr,
-              { MElem { MemberCode::MPC },
-                MElem { MemberCode::MEC } }
-            }
-  },
+  bc::FPushFunc { 2, false },
 };
 
 TEST(Bytecode, EqualityComparable) {

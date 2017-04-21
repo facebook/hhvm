@@ -1,7 +1,13 @@
-[\C]App \C<>
-[\C]App \C<>
-[1]intersect([\C]App \C<>, [\D]App \D<>)
-[2]intersect(option([3]tvar_3), [\D]App \D<>, [\C]App \C<>)
-[\C]App \C<>
-[\D]App \D<>
+File "new_expr_dependent2.php", line 21, characters 5-15:
+  C as C
+File "new_expr_dependent2.php", line 36, characters 5-15:
+  C as C
+File "new_expr_dependent2.php", line 59, characters 5-15:
+  ^(C as C | D as D)
+File "new_expr_dependent2.php", line 73, characters 5-15:
+  ^(?^_ | D as D | C as C)
+File "new_expr_dependent2.php", line 81, characters 5-20:
+  C as C
+File "new_expr_dependent2.php", line 88, characters 5-15:
+  D as D
 No errors

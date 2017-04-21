@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/util/lock.h"
 
 #ifdef USE_EDITLINE
@@ -30,7 +29,6 @@
 
 namespace HPHP {
 
-namespace {
 struct ReadlineVars {
   Variant completion;
   Array array;
@@ -38,10 +36,10 @@ struct ReadlineVars {
 
 IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
 
-}
-
-static Variant HHVM_FUNCTION(readline, const String& prompt) {
-  auto result = readline(prompt.data());
+static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
+  auto result = readline(
+    prompt.isString() ? prompt.toString().data() : nullptr
+  );
   if (result == nullptr) {
     return false;
   } else {
@@ -252,7 +250,7 @@ Variant HHVM_FUNCTION(readline_info, const Variant& varnameMixed /* = null */,
       return oldval;
     }
   }
-  return null_variant;
+  return uninit_variant;
 }
 
 
@@ -266,8 +264,7 @@ static bool HHVM_FUNCTION(readline_write_history,
   }
 }
 
-static class ReadlineExtension final : public Extension {
-  public:
+static struct ReadlineExtension final : Extension {
     ReadlineExtension() : Extension("readline") {}
     void moduleInit() override {
 #ifdef USE_EDITLINE

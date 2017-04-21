@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,8 +32,7 @@ namespace HPHP {
  * A callback to be informed when a server is shutting down because its socket
  * has been taken over by a new process.
  */
-class TakeoverListener {
-public:
+struct TakeoverListener {
   virtual ~TakeoverListener();
   virtual void takeoverShutdown() = 0;
 };
@@ -43,15 +42,13 @@ public:
  * Agent with the ability to take over an accept socket
  * from another process, and give its accept socket up.
  */
-class TakeoverAgent {
-public:
+struct TakeoverAgent {
   enum class RequestType {
     LISTEN_SOCKET,
     TERMINATE,
    };
 
-  class Callback {
-   public:
+  struct Callback {
     virtual ~Callback() {}
     // Called by the TakeoverAgent when it receives a request for takeover
     // Returns non zero on error, which terminates the takeover action

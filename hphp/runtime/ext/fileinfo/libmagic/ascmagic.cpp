@@ -43,9 +43,8 @@ FILE_RCSID("@(#)$File: ascmagic.c,v 1.85 2012/08/09 16:33:15 christos Exp $")
 #include <memory.h>
 #include <ctype.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
+#include <folly/portability/Unistd.h>
 
 #define MAXLINELEN 300  /* longest sane line length */
 #define ISSPC(x) ((x) == ' ' || (x) == '\t' || (x) == '\r' || (x) == '\n' \

@@ -23,23 +23,23 @@ class Normalizer {
    *
    *
    * @param string $input - The input string to normalize
-   * @param string $form - One of the normalization forms.
+   * @param int $form - One of the normalization forms.
    *
    * @return bool - TRUE if normalized, FALSE otherwise or if there an
    *   error
    */
   <<__Native>>
   public static function isNormalized(string $input,
-                                      int $form = Normalizer::FORM_C): mixed;
+                                      int $form = Normalizer::FORM_C): bool;
 
   /**
    * Normalizes the input provided and returns the normalized string
    *
    *
    * @param string $input - The input string to normalize
-   * @param string $form - One of the normalization forms.
+   * @param int $form - One of the normalization forms.
    *
-   * @return string - The normalized string or NULL if an error occurred.
+   * @return string - The normalized string or FALSE if an error occurred.
    */
   <<__Native>>
   public static function normalize(string $input,
@@ -53,13 +53,13 @@ class Normalizer {
  *
  *
  * @param string $input - The input string to normalize
- * @param string $form - One of the normalization forms.
+ * @param int $form - One of the normalization forms.
  *
  * @return bool - TRUE if normalized, FALSE otherwise or if there an
  *   error
  */
 function normalizer_is_normalized(string $input,
-                                  int $form = Normalizer::FORM_C): mixed {
+                                  int $form = Normalizer::FORM_C): bool {
   return Normalizer::isNormalized($input, $form);
 }
 
@@ -68,9 +68,9 @@ function normalizer_is_normalized(string $input,
  *
  *
  * @param string $input - The input string to normalize
- * @param string $form - One of the normalization forms.
+ * @param int $form - One of the normalization forms.
  *
- * @return string - The normalized string or NULL if an error occurred.
+ * @return string - The normalized string or FALSE if an error occurred.
  */
 function normalizer_normalize(string $input,
                               int $form = Normalizer::FORM_C): mixed {

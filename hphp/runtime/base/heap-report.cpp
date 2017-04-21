@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,13 +37,15 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
   std::ostringstream out;
   auto h = g.nodes[n].h;
   out << n;
-  if (haveCount(h->kind())) out << "#" << h->hdr_.count;
+  if (haveCount(h->kind())) out << "#" << h->hdr_.count();
   out << ":" << header_names[int(h->kind())];
   switch (h->kind()) {
     case HeaderKind::Packed:
-    case HeaderKind::Struct:
     case HeaderKind::Mixed:
+    case HeaderKind::Dict:
     case HeaderKind::Empty:
+    case HeaderKind::VecArray:
+    case HeaderKind::Keyset:
     case HeaderKind::Apc:
     case HeaderKind::Globals:
     case HeaderKind::Proxy:
@@ -56,8 +58,9 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Ref:
       break;
     case HeaderKind::Object:
+    case HeaderKind::Closure:
     case HeaderKind::WaitHandle:
-    case HeaderKind::ResumableObj:
+    case HeaderKind::AsyncFuncWH:
     case HeaderKind::AwaitAllWH:
       out << ":" << h->obj_.classname_cstr();
       break;
@@ -73,13 +76,12 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       break;
     }
     case HeaderKind::BigMalloc:
-      out << "[" << h->big_.nbytes << "]";
-      break;
     case HeaderKind::SmallMalloc:
-      out << "[" << h->small_.padbytes << "]";
+      out << "[" << h->malloc_.nbytes << "]";
       break;
-    case HeaderKind::ResumableFrame:
+    case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
+    case HeaderKind::ClosureHdr:
       break;
     case HeaderKind::Free:
       out << "[" << h->free_.size() << "]";
@@ -101,9 +103,10 @@ const char* ptrSym[] = {
 DEBUG_ONLY
 std::string describePtr(const HeapGraph& g, const HeapGraph::Ptr& ptr) {
   std::ostringstream out;
-  out << " " << ptrSym[(int)ptr.kind];
-  if (ptr.from != -1) out << describe(g, ptr.from);
-  else out << (ptr.seat ? ptr.seat : "?");
+  out << " " << ptrSym[(unsigned)ptr.ptr_kind];
+  auto& from = g.nodes[ptr.from];
+  if (!from.is_root) out << describe(g, ptr.from);
+  else out << type_scan::getName(from.tyindex);
   return out.str();
 }
 
@@ -139,7 +142,7 @@ void printHeapReport(const HeapGraph& g, const char* phase) {
     count(i, allocd, freed);
   }
   std::vector<int> parents(g.nodes.size(), -1);
-  dfs_ptrs(g, g.roots, [&](int node, int ptr) {
+  dfs_ptrs(g, g.root_ptrs, [&](int node, int ptr) {
     parents[node] = ptr;
     count(node, live, undead);
     auto h = g.nodes[node].h;
@@ -202,7 +205,7 @@ static void traceToRoot(const HeapGraph& g, int n, const std::string& ind) {
   g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
     TRACE(1, "%s%s\n", indent.c_str(), describePtr(g, ptr).c_str());
     if (ptr.from == -1) return;
-    if (ptr.kind != HeapGraph::Counted) {
+    if (ptr.ptr_kind != HeapGraph::Counted) {
       TRACE(1, "%s   ## only tracing ref-counted references ##\n",
             indent.c_str());
     } else {
@@ -216,11 +219,11 @@ bool checkPointers(const HeapGraph& g, const char* phase) {
   for (size_t n = 0; n < g.nodes.size(); ++n) {
     auto& node = g.nodes[n];
     if (!haveCount(node.h->kind())) continue;
-    auto count = node.h->hdr_.count;
+    auto count = node.h->hdr_.count();
     assert(count >= 0); // static things shouldn't be in the heap.
     unsigned num_counted{0}, num_implicit{0}, num_ambig{0};
     g.eachPred(n, [&](const HeapGraph::Ptr& ptr) {
-      switch (ptr.kind) {
+      switch (ptr.ptr_kind) {
         case HeapGraph::Counted: num_counted++; break;
         case HeapGraph::Implicit: num_implicit++; break;
         case HeapGraph::Ambiguous: num_ambig++; break;

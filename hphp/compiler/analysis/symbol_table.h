@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,9 +30,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class BlockScope;
-class CodeGenerator;
-class Variant;
+struct BlockScope;
+struct CodeGenerator;
+struct Variant;
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
@@ -46,12 +46,11 @@ DECLARE_BOOST_TYPES(BlockScope);
 typedef std::set<std::string> SymbolSet;
 typedef std::map<std::string, std::set<std::string> > Type2SymbolSetMap;
 
-class Symbol;
+struct Symbol;
 typedef hphp_string_map<Symbol*> StringToSymbolMap;
 typedef std::vector<Symbol*>     SymbolVec;
 
-class Symbol {
-public:
+struct Symbol {
   Symbol() : m_hash(0), m_parameter(-1) { m_flags_val = 0; }
 
   void import(BlockScopeRawPtr scope, const Symbol &src_sym);
@@ -230,8 +229,7 @@ private:
   ConstructPtr        m_initVal;
 };
 
-class SymParamWrapper : public JSON::DocTarget::ISerializable {
-public:
+struct SymParamWrapper : JSON::DocTarget::ISerializable {
   explicit SymParamWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
@@ -242,8 +240,7 @@ private:
   const Symbol *m_sym;
 };
 
-class SymClassVarWrapper : public JSON::DocTarget::ISerializable {
-public:
+struct SymClassVarWrapper : JSON::DocTarget::ISerializable {
   explicit SymClassVarWrapper(const Symbol* sym) : m_sym(sym) {
     assert(sym);
   }
@@ -257,9 +254,8 @@ private:
 /**
  * Base class of VariableTable and ConstantTable.
  */
-class SymbolTable : public std::enable_shared_from_this<SymbolTable>,
-                    public JSON::CodeError::ISerializable {
-public:
+struct SymbolTable : std::enable_shared_from_this<SymbolTable>,
+                     JSON::CodeError::ISerializable {
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() const {
     return BlockScopeRawPtr(&m_blockScope);

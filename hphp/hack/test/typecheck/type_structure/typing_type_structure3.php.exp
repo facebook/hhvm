@@ -1,4 +1,7 @@
-App \classname<[enum E], >
-App \classname<App \I<>, >
-App \classname<[enum E], >
+File "typing_type_structure3.php", line 15, characters 3-26:
+  classname<enum E>
+File "typing_type_structure3.php", line 16, characters 3-26:
+  classname<I>
+File "typing_type_structure3.php", line 17, characters 3-26:
+  classname<enum E>
 No errors

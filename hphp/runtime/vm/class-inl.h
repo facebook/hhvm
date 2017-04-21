@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,21 @@ inline bool Class::isZombie() const {
   return !m_cachedClass.bound();
 }
 
+
+inline void Class::validate() const {
+#ifdef DEBUG
+  assertx(m_magic == kMagic);
+#endif
+  assertx(name()->checkSane());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
+
+inline Class::PropInitVec::PropInitVec() : m_data(nullptr),
+                                           m_size(0),
+                                           m_capacity(0) {
+}
 
 inline Class::PropInitVec::iterator Class::PropInitVec::begin() {
   return m_data;
@@ -53,8 +66,31 @@ inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
   return m_data[i];
 }
 
+inline bool Class::PropInitVec::reqAllocated() const {
+  return m_capacity < 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Pre- and post-allocations.
+
+inline LowPtr<Func>* Class::funcVec() const {
+  return reinterpret_cast<LowPtr<Func>*>(
+    reinterpret_cast<uintptr_t>(this) -
+    m_funcVecLen * sizeof(LowPtr<Func>)
+  );
+}
+
+inline void* Class::mallocPtr() const {
+  return reinterpret_cast<void*>(
+    reinterpret_cast<uintptr_t>(funcVec()) & ~(alignof(Class) - 1)
+  );
+}
+
+inline const void* Class::mallocEnd() const {
+  return reinterpret_cast<const char*>(this)
+         + Class::classVecOff()
+         + classVecLen() * sizeof(*classVec());
+}
 
 inline const LowPtr<Class>* Class::classVec() const {
   return m_classVec;
@@ -153,20 +189,12 @@ inline bool Class::isBuiltin() const {
   return attrs() & AttrBuiltin;
 }
 
-inline const ClassInfo* Class::clsInfo() const {
-  return m_extra->m_clsInfo;
-}
-
 inline BuiltinCtorFunction Class::instanceCtor() const {
   return m_extra->m_instanceCtor;
 }
 
 inline BuiltinDtorFunction Class::instanceDtor() const {
   return m_extra->m_instanceDtor;
-}
-
-inline int32_t Class::builtinODTailSize() const {
-  return m_extra->m_builtinODTailSize;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -266,9 +294,17 @@ inline rds::Handle Class::sPropInitHandle() const {
 }
 
 inline rds::Handle Class::sPropHandle(Slot index) const {
+  return sPropLink(index).handle();
+}
+
+inline rds::Link<StaticPropData> Class::sPropLink(Slot index) const {
   assert(m_sPropCacheInit.bound());
   assert(numStaticProperties() > index);
-  return m_sPropCache[index].handle();
+  return m_sPropCache[index];
+}
+
+inline rds::Link<bool> Class::sPropInitLink() const {
+  return m_sPropCacheInit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -333,10 +369,18 @@ inline const Class::RequirementMap& Class::allRequirements() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Objects.
+// Instance bits.
 
-inline bool Class::callsCustomInstanceInit() const {
-  return m_callsCustomInstanceInit;
+inline bool Class::checkInstanceBit(unsigned int bit) const {
+  assertx(bit > 0);
+  return m_instanceBits[bit];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Throwable initialization.
+
+inline bool Class::needsInitThrowable() const {
+  return m_needsInitThrowable;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -346,17 +390,17 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(rds::Link<Class*> link) const {
+inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
   assert(!m_cachedClass.bound());
   m_cachedClass = link;
 }
 
 inline Class* Class::getCached() const {
-  return *m_cachedClass;
+  return m_cachedClass.isInit() ? *m_cachedClass : nullptr;
 }
 
 inline void Class::setCached() {
-  *m_cachedClass = this;
+  m_cachedClass.initWith(this);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -382,6 +426,10 @@ inline const Class::ScopedClonesMap& Class::scopedClones() const {
 
 inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;
+}
+
+inline EnumValues* Class::getEnumValues() const {
+  return m_extra->m_enumValues.load(std::memory_order_relaxed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -487,6 +535,13 @@ Class::TMIOps::errorDuplicateMethod(const Class* cls,
   raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
 }
 
+inline void
+Class::TMIOps::errorInconsistentInsteadOf(const Class* cls,
+                                          const StringData* methName) {
+  raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
+              cls->name()->data(), cls->name()->data());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Non-member functions.
 
@@ -515,7 +570,19 @@ inline bool isAbstract(const Class* cls) {
 }
 
 inline bool classHasPersistentRDS(const Class* cls) {
-  return cls && rds::isPersistentHandle(cls->classHandle());
+  return cls != nullptr &&
+    cls->classHandle() != rds::kInvalidHandle &&
+    rds::isPersistentHandle(cls->classHandle());
+}
+
+inline bool classMayHaveMagicPropMethods(const Class* cls) {
+  auto constexpr no_overrides =
+    AttrNoOverrideMagicGet |
+    AttrNoOverrideMagicSet |
+    AttrNoOverrideMagicIsset |
+    AttrNoOverrideMagicUnset;
+
+  return (cls->attrs() & no_overrides) != no_overrides;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

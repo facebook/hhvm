@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,9 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/base/collections.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/data-walker.h"
 
 namespace HPHP {
@@ -53,15 +55,15 @@ Object createFromSerialized(CollectionType colType, APCHandle* handle) {
   switch (colType) {
   case CollectionType::ImmVector:
   case CollectionType::Vector:
-    static_cast<BaseVector*>(col.get())->t___construct(arr);
+    static_cast<BaseVector*>(col.get())->init(arr);
     break;
   case CollectionType::ImmSet:
   case CollectionType::Set:
-    static_cast<BaseSet*>(col.get())->t___construct(arr);
+    static_cast<BaseSet*>(col.get())->init(arr);
     break;
   case CollectionType::ImmMap:
   case CollectionType::Map:
-    static_cast<BaseMap*>(col.get())->t___construct(arr);
+    static_cast<BaseMap*>(col.get())->init(arr);
     break;
   case CollectionType::Pair:
     not_reached();
@@ -101,20 +103,30 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
     auto const features = walker.traverseData(const_cast<ArrayData*>(array));
     assert(!features.isCircular);
     if (!features.hasObjectOrResource) {
+      auto const makeUncounted = [&] () {
+        if (isVectorCollection(obj->collectionType())) {
+          return APCArray::MakeUncountedVec(const_cast<ArrayData*>(array));
+        }
+        return APCArray::MakeUncountedDict(const_cast<ArrayData*>(array));
+      };
       return WrapArray(
-        { APCArray::MakeUncountedArray(const_cast<ArrayData*>(array)),
-          getMemSize(array) + sizeof(APCTypedValue) },
+        { makeUncounted(), getMemSize(array) + sizeof(APCTypedValue) },
         obj->collectionType()
       );
     }
   }
 
-  return WrapArray(
-    APCArray::MakeSharedArray(const_cast<ArrayData*>(array),
-                              level,
-                              unserializeObj),
-    obj->collectionType()
-  );
+  auto const makeShared = [&] () {
+    if (isVectorCollection(obj->collectionType())) {
+      return APCArray::MakeSharedVec(const_cast<ArrayData*>(array),
+                                     level,
+                                     unserializeObj);
+    }
+    return APCArray::MakeSharedDict(const_cast<ArrayData*>(array),
+                                    level,
+                                    unserializeObj);
+  };
+  return WrapArray(makeShared(), obj->collectionType());
 }
 
 void APCCollection::Delete(APCHandle* h) {
@@ -123,10 +135,8 @@ void APCCollection::Delete(APCHandle* h) {
 }
 
 APCCollection::APCCollection()
-  : m_handle(KindOfObject)
-{
-  m_handle.setAPCCollection();
-}
+  : m_handle(APCKind::SharedCollection)
+{}
 
 APCCollection::~APCCollection() {
   // Zero for size is correct, because when this APCCollection was unreferenced
@@ -145,13 +155,14 @@ APCHandle::Pair APCCollection::WrapArray(APCHandle::Pair inner,
 Object APCCollection::createObject() const {
   if (m_arrayHandle->isUncounted()) {
     Variant local(m_arrayHandle->toLocal());
-    assert(local.is(KindOfArray));
+    assert(local.isArray());
     return Object::attach(
       collections::alloc(m_colType, local.getArrayData())
     );
   }
 
-  if (UNLIKELY(m_arrayHandle->isSerializedArray())) {
+  if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedVec ||
+               m_arrayHandle->kind() == APCKind::SerializedDict)) {
     return createFromSerialized(m_colType, m_arrayHandle);
   }
 

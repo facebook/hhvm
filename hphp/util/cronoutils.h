@@ -83,27 +83,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#ifndef _WIN32
-#include <unistd.h>
-#else
-#include <io.h>
-#include <direct.h>
-#endif
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <time.h>
 
-
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
+#include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 /* Some operating systems don't declare getopt() */
 

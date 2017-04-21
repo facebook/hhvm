@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,17 +63,9 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
 
     FunctionTypeMap["extract"]              = FunType::Extract;
     FunctionTypeMap["parse_str"]            = FunType::Extract;
-    FunctionTypeMap["__systemlib\\extract"] = FunType::Extract;
-    FunctionTypeMap["__systemlib\\parse_str"]
-                                            = FunType::Extract;
-    FunctionTypeMap["__systemlib\\compact_sl"]
-                                            = FunType::Compact;
     FunctionTypeMap["compact"]              = FunType::Compact;
 
     FunctionTypeMap["assert"]               = FunType::Assert;
-    FunctionTypeMap["__systemlib\\assert"]  = FunType::Assert;
-    FunctionTypeMap["__systemlib\\assert_sl"]
-                                            = FunType::Assert;
 
     FunctionTypeMap["shell_exec"]           = FunType::ShellExec;
     FunctionTypeMap["exec"]                 = FunType::ShellExec;
@@ -89,8 +81,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["unserialize"]          = FunType::Unserialize;
     FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
 
-    FunctionTypeMap["__systemlib\\get_defined_vars"]
-                                            = FunType::GetDefinedVars;
     FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
 
     FunctionTypeMap["fb_call_user_func_safe"] = FunType::FBCallUserFuncSafe;
@@ -101,8 +91,7 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
   }
 }
 
-static class FunctionTypeMapInitializer {
-public:
+static struct FunctionTypeMapInitializer {
   FunctionTypeMapInitializer() {
     SimpleFunctionCall::InitFunctionTypeMap();
   }
@@ -127,8 +116,8 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_safe(0)
 {
   if (!m_class && !hasStaticClass()) {
-    m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_origName) !=
-      Option::DynamicInvokeFunctions.end();
+    m_dynamicInvoke =
+      RuntimeOption::DynamicInvokeFunctions.count(m_origName) != 0;
     auto iter = FunctionTypeMap.find(m_origName);
     if (iter != FunctionTypeMap.end()) {
       m_type = iter->second;
@@ -217,27 +206,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
       }
       break;
 
-    // The class_alias builtin can create new names for other classes;
-    // we need to mark some of these classes redeclaring to avoid
-    // making incorrect assumptions during WholeProgram mode.  See
-    // AnalysisResult::collectFunctionsAndClasses.
-    case FunType::ClassAlias:
-      if (m_params &&
-          (m_params->getCount() == 2 || m_params->getCount() == 3) &&
-          Option::WholeProgram) {
-        if (!(*m_params)[0]->isLiteralString() ||
-            !(*m_params)[1]->isLiteralString()) {
-          parseTimeFatal(
-            fs,
-            Compiler::NoError,
-            "class_alias with non-literal parameters is not allowed when "
-            "WholeProgram optimizations are turned on");
-        }
-        fs->addClassAlias((*m_params)[0]->getLiteralString(),
-                          (*m_params)[1]->getLiteralString());
-      }
-      break;
-
     case FunType::VariableArgument:
       /*
         Note:
@@ -253,35 +221,18 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
 
     case FunType::Extract:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      fs->setAttribute(FileScope::ContainsExtract);
       break;
 
     case FunType::Assert:
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      fs->setAttribute(FileScope::ContainsAssert);
       break;
 
-    case FunType::Compact: {
-      // If all the parameters in the compact() call are statically known,
-      // there is no need to create a variable table.
-      std::vector<ExpressionPtr> literals;
-      if (false && m_params->flattenLiteralStrings(literals)) {
-        m_type = FunType::StaticCompact;
-        m_params->clearElements();
-        for (unsigned i = 0; i < literals.size(); i++) {
-          m_params->addElement(literals[i]);
-        }
-      } else {
-        fs->setAttribute(FileScope::ContainsDynamicVariable);
-      }
-      fs->setAttribute(FileScope::ContainsCompact);
+    case FunType::Compact:
+      fs->setAttribute(FileScope::ContainsDynamicVariable);
       break;
-    }
 
     case FunType::GetDefinedVars:
       fs->setAttribute(FileScope::ContainsDynamicVariable);
-      fs->setAttribute(FileScope::ContainsGetDefinedVars);
-      fs->setAttribute(FileScope::ContainsCompact);
       break;
 
     case FunType::Unknown:
@@ -305,6 +256,7 @@ void SimpleFunctionCall::resolveNSFallbackFunc(
   assert(iter != FunctionTypeMap.end());
   m_type = iter->second;
   mungeIfSpecialFunction(ar, fs);
+  updateVtFlags();
 }
 
 
@@ -462,48 +414,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
 
-    if (m_type == FunType::StaticCompact) {
-      FunctionScopePtr fs = getFunctionScope();
-      VariableTablePtr vt = fs->getVariables();
-      if (vt->isPseudoMainTable() ||
-          vt->getAttribute(VariableTable::ContainsDynamicVariable)) {
-        // When there is a variable table already, we will keep the ordinary
-        // compact() call.
-        m_type = FunType::Compact;
-      } else {
-        // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c)
-        std::vector<ExpressionPtr> new_params;
-        std::vector<std::string> strs;
-        for (int i = 0; i < m_params->getCount(); i++) {
-          ExpressionPtr e = (*m_params)[i];
-          always_assert(e->isLiteralString());
-          auto const name = e->getLiteralString();
-
-          // no need to record duplicate names
-          bool found = false;
-          for (unsigned j = 0; j < strs.size(); j++) {
-            if (strcasecmp(name.data(), strs[j].data()) == 0) {
-              found = true;
-              break;
-            }
-          }
-          if (found) continue;
-          strs.push_back(name);
-
-          SimpleVariablePtr var(new SimpleVariable(
-                                  e->getScope(), e->getRange(), name));
-          var->copyContext(e);
-          var->updateSymbol(SimpleVariablePtr());
-          new_params.push_back(e);
-          new_params.push_back(var);
-        }
-        m_params->clearElements();
-        for (unsigned i = 0; i < new_params.size(); i++) {
-          m_params->addElement(new_params[i]);
-        }
-      }
-    }
-
     if (m_params) {
       markRefParams(m_funcScope, m_origName);
     }
@@ -569,20 +479,14 @@ void SimpleFunctionCall::updateVtFlags() {
     switch (m_type) {
       case FunType::Extract:
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
-        vt->setAttribute(VariableTable::ContainsExtract);
         break;
       case FunType::Assert:
         vt->setAttribute(VariableTable::ContainsLDynamicVariable);
-        vt->setAttribute(VariableTable::ContainsAssert);
       case FunType::Compact:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
-      case FunType::StaticCompact:
-        vt->setAttribute(VariableTable::ContainsCompact);
         break;
       case FunType::GetDefinedVars:
         vt->setAttribute(VariableTable::ContainsDynamicVariable);
-        vt->setAttribute(VariableTable::ContainsGetDefinedVars);
-        vt->setAttribute(VariableTable::ContainsCompact);
         break;
       default:
         break;
@@ -590,8 +494,20 @@ void SimpleFunctionCall::updateVtFlags() {
   }
 }
 
-bool SimpleFunctionCall::isCallToFunction(const char *name) const {
+bool SimpleFunctionCall::isCallToFunction(folly::StringPiece name) const {
   return isNamed(name) && !getClass() && !hasStaticClass();
+}
+
+std::string SimpleFunctionCall::getFullName() const {
+  std::string name;
+  if (isStatic()) {
+    name = "static::";
+  } else if (hasStaticClass()) {
+    name += getOriginalClassName() + "::";
+  }
+  name += getOriginalName();
+
+  return name;
 }
 
 bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
@@ -603,11 +519,9 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
   if (outName) {
     *outName = makeStaticString(v.toCStrRef().get());
   }
-  if (!(*m_params)[1]->getScalarValue(v) || v.isArray()) return false;
+  if (!(*m_params)[1]->getScalarValue(v)) return false;
   if (outValue) {
-    if (v.isString()) {
-      v = makeStaticString(v.toCStrRef().get());
-    }
+    v.setEvalScalar();
     *outValue = *v.asTypedValue();
   }
   return true;
@@ -703,13 +617,12 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
           case EXTR_OVERWRITE: {
             auto arr = static_pointer_cast<ExpressionList>(
               static_pointer_cast<UnaryOpExpression>(vars)->getExpression());
-            ExpressionListPtr rep(
-              new ExpressionList(getScope(), getRange(),
-                                 ExpressionList::ListKindWrapped));
+            auto rep = std::make_shared<ExpressionList>(
+              getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
             std::string root_name;
-            int n = arr ? arr->getCount() : 0;
+            int n2 = arr ? arr->getCount() : 0;
             int i, j, k;
-            for (i = j = k = 0; i < n; i++) {
+            for (i = j = k = 0; i < n2; i++) {
               auto ap = dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]);
               always_assert(ap);
               String name;
@@ -803,33 +716,33 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
 
   if (!m_classScope) {
     if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
-      Array arr;
-      if (m_params) {
-        if (!m_params->isScalar()) return ExpressionPtr();
-        for (int i = 0, n = m_params->getCount(); i < n; ++i) {
-          Variant v;
-          if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
-          arr.set(i, v);
-        }
-        if (m_arrayParams) {
-          arr = arr[0];
-        }
-      }
       try {
-        g_context->setThrowAllErrors(true);
-        Variant v = invoke(m_funcScope->getScopeName().c_str(),
-                           arr, -1, true, true);
-        g_context->setThrowAllErrors(false);
-        return makeScalarExpression(ar, v);
+        ThrowAllErrorsSetter taes;
+        Array arr;
+        if (m_params) {
+          if (!m_params->isScalar()) return ExpressionPtr();
+          for (int i = 0, n = m_params->getCount(); i < n; ++i) {
+            Variant v;
+            if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
+            arr.set(i, v);
+          }
+          if (m_arrayParams) {
+            arr = arr[0];
+          }
+        }
+        auto const v = invoke(m_funcScope->getScopeName().c_str(),
+                              arr, -1, true, true,
+                              !getFileScope()->useStrictTypes());
+        return replaceValue(makeScalarExpression(ar, v), true);
       } catch (...) {
-        g_context->setThrowAllErrors(false);
       }
       return ExpressionPtr();
     }
     if (m_funcScope->getOptFunction()) {
-      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
-      ExpressionPtr e = (m_funcScope->getOptFunction())(0, ar, self, 0);
-      if (e) return e;
+      auto const self =
+        static_pointer_cast<SimpleFunctionCall>(shared_from_this());
+      auto const e = (m_funcScope->getOptFunction())(0, ar, self, 0);
+      if (e) return replaceValue(e, true);
     }
   }
 
@@ -935,8 +848,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           }
           case FunType::FunctionExists: {
             const std::string &lname = toLower(symbol);
-            if (Option::DynamicInvokeFunctions.find(lname) ==
-                Option::DynamicInvokeFunctions.end()) {
+            if (!RuntimeOption::DynamicInvokeFunctions.count(lname)) {
               FunctionScopePtr func = ar->findFunction(lname);
               if (!func) {
                 if (Option::WholeProgram) {
@@ -1024,42 +936,7 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     StaticClassName::outputPHP(cg, ar);
     cg_printf("::%s(", m_origName.c_str());
   } else {
-
-    if (cg.getOutput() == CodeGenerator::InlinedPHP ||
-        cg.getOutput() == CodeGenerator::TrimmedPHP) {
-
-      if (cg.getOutput() == CodeGenerator::TrimmedPHP &&
-          cg.usingStream(CodeGenerator::PrimaryStream) &&
-          Option::DynamicFunctionCalls.find(m_origName) !=
-          Option::DynamicFunctionCalls.end()) {
-        int funcNamePos = Option::DynamicFunctionCalls[m_origName];
-        if (m_params && m_params->getCount() &&
-            m_params->getCount() >= funcNamePos + 1) {
-          if (funcNamePos == -1) funcNamePos = m_params->getCount() - 1;
-          ExpressionPtr funcName = (*m_params)[funcNamePos];
-          if (!funcName->is(Expression::KindOfScalarExpression)) {
-
-            cg_printf("%s(", m_origName.c_str());
-            for (int i = 0; i < m_params->getCount(); i++) {
-              if (i > 0) cg_printf(", ");
-              if (i == funcNamePos) {
-                cg_printf("%sdynamic_load(", Option::IdPrefix.c_str());
-                funcName->outputPHP(cg, ar);
-                cg_printf(")");
-              } else {
-                ExpressionPtr param = (*m_params)[i];
-                if (param) param->outputPHP(cg, ar);
-              }
-            }
-            cg_printf(")");
-            return;
-          }
-        }
-      }
-      cg_printf("%s(", m_origName.c_str());
-    } else {
-      cg_printf("%s(", m_origName.c_str());
-    }
+    cg_printf("%s(", m_origName.c_str());
   }
 
   if (m_params) m_params->outputPHP(cg, ar);
@@ -1112,7 +989,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
       if (v.isString()) {
         Variant t = StringUtil::Explode(v.toString(), "::", 3);
         if (!t.isArray() || t.toArray().size() != 2) {
-          std::string name = toLower(v.toString().data());
+          auto name = toLower(v.toString().slice());
           FunctionScopePtr func = ar->findFunction(name);
           if (!func || func->isDynamicInvoke()) {
             error = !func;
@@ -1154,7 +1031,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           return SimpleFunctionCallPtr();
         }
         std::string sclass = classname.toString().data();
-        std::string smethod = toLower(methodname.toString().data());
+        auto smethod = toLower(methodname.toString().slice());
 
         ClassScopePtr cls;
         if (sclass == "self") {

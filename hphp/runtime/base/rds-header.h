@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,6 +57,15 @@ struct VMRegs {
    * one active call to handleResume() in each VM nesting level, which is why
    * this is just a single pointer. */
   ActRec* jitCalledFrame;
+
+  TYPE_SCAN_CUSTOM() {
+    // ActRecs are always interior pointers so the type-scanner won't
+    // automatically enqueue them.
+    scanner.scan(fp);
+    scanner.scan(mInstrState);
+    scanner.scan(firstAR);
+    scanner.scan(jitCalledFrame);
+  };
 };
 
 namespace rds {
@@ -87,6 +96,22 @@ struct Header {
    */
   std::atomic<size_t> stackLimitAndSurprise;
 
+#ifndef NDEBUG
+  /*
+   * In builds with assertions enabled, we write-protect non-persistent RDS
+   * while in certain parts of the jit. We still want to allow jit threads to
+   * write to the surprise flags, so we don't write-protect the first page and
+   * push the rest of Header to the next page.
+   *
+   * If the Header ends up on a page that is larger than 4096 bytes, vmRegs
+   * might not be write-protected when we want it to be, but this is just a
+   * debugging aid and isn't necessary for correctness. We use 4096 bytes of
+   * padding rather than 4096 - sizeof(size_t) to not disturb the relative
+   * alignment of vmRegs.
+   */
+  const char padding[4096];
+#endif
+
   VMRegs vmRegs;
 };
 
@@ -110,8 +135,6 @@ constexpr ptrdiff_t kVmMInstrStateOff  = kVmRegsOff +
 
 static_assert((kVmMInstrStateOff % 16) == 0,
               "MInstrState should be 16-byte aligned in rds::Header");
-static_assert(kVmspOff == 16, "Eager vm-reg save in translator-asm-helpers.S");
-static_assert(kVmfpOff == 32, "Eager vm-reg save in translator-asm-helpers.S");
 
 } }
 

@@ -5,7 +5,7 @@
  * such as count and its items are available. Every concrete class indirectly
  * implements this interface.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  *
  */
@@ -36,7 +36,7 @@ interface ConstCollection<+Te> extends Countable {
  * The interface implemented for a mutable collection type so that values can
  * be added to it.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  *
  */
@@ -44,28 +44,25 @@ interface OutputCollection<-Te> {
   /**
    * Add a value to the collection and return the collection itself.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It returns the current collection, meaning changes made to the current
+   * collection will be reflected in the returned collection.
    *
    * @param $e - The value to add.
    *
-   * @return - A shallow copy of the updated current collection itself.
+   * @return - The updated collection itself.
    */
   public function add(Te $e): this;
   /**
    * For every element in the provided `Traversable`, append a value into the
    * current collection.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It returns the current collection, meaning changes made to the current
+   * collection will be reflected in the returned collection.
    *
    * @param $traversable - The `Traversable` with the new values to set. If
    *                       `null` is provided, no changes are made.
    *
-   * @return - A shallow copy of the current collection with the added the
-   *           values.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Te> $traversable): this;
 }
@@ -78,7 +75,7 @@ interface OutputCollection<-Te> {
  * `OutputCollection` only. If your collection to be immutable, implement
  * `ConstCollection` only instead.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface Collection<Te> extends ConstCollection<Te>,
@@ -92,7 +89,7 @@ interface Collection<Te> extends ConstCollection<Te>,
 /**
  * The interface for all `Set`s to enable access its values.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstSetAccess<+Tm> {
@@ -108,7 +105,7 @@ interface ConstSetAccess<+Tm> {
  *
  * The interface for mutable `Set`s to enable removal of its values.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface SetAccess<Tm> extends ConstSetAccess<Tm> {
@@ -117,13 +114,12 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
    *
    * If the value is not in the current `Set`, the `Set` is unchanged.
    *
-   * It returns a shallow copy of the current `Set`, meaning changes
-   * made to the current `Set` will be reflected in the returned
-   * `Set`.
+   * It the current `Set`, meaning changes  made to the current `Set` will be
+   * reflected in the returned `Set`.
    *
    * @param $m - The value to remove.
    *
-   * @return - A shallow copy of the current `Set`.
+   * @return - Returns itself.
    */
   public function remove(Tm $m): this;
 }
@@ -131,7 +127,7 @@ interface SetAccess<Tm> extends ConstSetAccess<Tm> {
 /**
  * The interface for all keyed collections to enable access its values.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstIndexAccess<Tk, +Tv> {
@@ -176,7 +172,7 @@ interface ConstIndexAccess<Tk, +Tv> {
  * The interface for mutable, keyed collections to enable setting and removing
  * keys.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
@@ -190,15 +186,13 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * `$coll->set($k,$v)` is semantically equivalent to `$coll[$k] = $v`
    * (except that `set()` returns the current collection).
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It returns the current collection, meaning changes made to the current
+   * collection will be reflected in the returned collection.
    *
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
    *
-   * @return - A shallow copy of the current collection with the updated the
-   *           value set.
+   * @return - Returns itself.
    */
   public function set(Tk $k, Tv $v): this;
   /**
@@ -210,15 +204,13 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * `Traversable`, an exception is thrown. If you want to add a value even if a
    * key is not present, use `addAll()`.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It the current collection, meaning changes made to the current collection
+   * will be reflected in the returned collection.
    *
    * @param $traversable - The `Traversable` with the new values to set. If
    *                       `null` is provided, no changes are made.
    *
-   * @return - A shallow copy of the current collection with the updated the
-   *           values set.
+   * @return - Returns itself.
    */
   public function setAll(?KeyedTraversable<Tk, Tv> $traversable): this;
   /**
@@ -228,14 +220,12 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    * If the key is not in the current collection, the current collection is
    * unchanged.
    *
-   * It returns a shallow copy of the current collection, meaning changes
-   * made to the current collection will be reflected in the returned
-   * collection.
+   * It the current collection, meaning changes made to the current collection
+   * will be reflected in the returned collection.
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current collection with the key removed;
-   *           the current collection is also updated.
+   * @return - Returns itself.
    */
   public function removeKey(Tk $k): this;
 }
@@ -247,7 +237,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
  * defined in its parent interfaces. But you could theoretically use this
  * interface for parameter and return type annotations.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
@@ -261,7 +251,7 @@ interface ConstMapAccess<Tk, +Tv> extends ConstSetAccess<Tk>,
  * defined in its parent interfaces. But you could theoretically use this
  * interface for parameter and return type annotations.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
@@ -273,7 +263,7 @@ interface MapAccess<Tk, Tv> extends ConstMapAccess<Tk, Tv>,
  * Represents a read-only (immutable) sequence of values, indexed by integers
  * (i.e., a vector).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstVector<+Tv> extends ConstCollection<Tv>,
@@ -355,29 +345,28 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * `mapWithKey()`.
    *
    * @param $fn - The callback containing the condition to apply to the
-   *               `ConstVector` keys and values.
+   *              `ConstVector` keys and values.
    *
    * @return - a `ConstVector` containing the values after a user-specified
    *           condition is applied to the keys and values of the current
    *           `ConstVector`.
-   *
    */
   public function filterWithKey((function(int, Tv): bool) $fn):
     ConstVector<Tv>;
   /**
-   *  Returns a `ConstVector` where each element is a `Pair` that combines the
-   *  element of the current `ConstVector` and the provided `Traversable`.
+   * Returns a `ConstVector` where each element is a `Pair` that combines the
+   * element of the current `ConstVector` and the provided `Traversable`.
    *
-   *  If the number of elements of the `ConstVector` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of elements of the `ConstVector` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of this `ConstVector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of this `ConstVector`.
    *
-   *  @return - The `ConstVector` that combines the values of the current
-   *            `ConstVector` with the provided `Traversable`.
+   * @return - The `ConstVector` that combines the values of the current
+   *           `ConstVector` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ConstVector<Pair<Tv, Tu>>;
@@ -527,7 +516,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
  * Represents a write-enabled (mutable) sequence of values, indexed by integers
  * (i.e., a vector).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MutableVector<Tv> extends ConstVector<Tv>,
@@ -620,19 +609,19 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
   public function filterWithKey((function(int, Tv): bool) $fn):
     MutableVector<Tv>;
   /**
-   *  Returns a `MutableVector` where each element is a `Pair` that combines the
-   *  element of the current `MutableVector` and the provided `Traversable`.
+   * Returns a `MutableVector` where each element is a `Pair` that combines the
+   * element of the current `MutableVector` and the provided `Traversable`.
    *
-   *  If the number of elements of the `MutableVector` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of elements of the `MutableVector` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of this `MutableVector`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of this `MutableVector`.
    *
-   *  @return - The `MutableVector` that combines the values of the current
-   *            `MutableVector` with the provided `Traversable`.
+   * @return - The `MutableVector` that combines the values of the current
+   *           `MutableVector` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableVector<Pair<Tv, Tu>>;
@@ -781,7 +770,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
 /**
  * Represents a read-only (immutable) sequence of key/value pairs, (i.e. a map).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
@@ -881,22 +870,22 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
   public function filterWithKey((function(Tk, Tv): bool) $fn):
     ConstMap<Tk, Tv>;
   /**
-   *  Returns a `ConstMap` where each value is a `Pair` that combines the value
-   *  of the current `ConstMap` and the provided `Traversable`.
+   * Returns a `ConstMap` where each value is a `Pair` that combines the value
+   * of the current `ConstMap` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ConstMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ConstMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `ConstMap` remain unchanged in the
-   *  returned `ConstMap`.
+   * The keys associated with the current `ConstMap` remain unchanged in the
+   * returned `ConstMap`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ConstMap`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ConstMap`.
    *
-   *  @return - The `ConstMap` that combines the values of the current
-   *            `ConstMap` with the provided `Traversable`.
+   * @return - The `ConstMap` that combines the values of the current
+   *           `ConstMap` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ConstMap<Tk, Pair<Tv, Tu>>;
@@ -1031,7 +1020,7 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
  * Represents a write-enabled (mutable) sequence of key/value pairs
  * (i.e. a map).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
@@ -1134,22 +1123,22 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
   public function filterWithKey((function(Tk, Tv): bool) $fn):
     MutableMap<Tk, Tv>;
   /**
-   *  Returns a `MutableMap` where each value is a `Pair` that combines the
-   *  value of the current `MutableMap` and the provided `Traversable`.
+   * Returns a `MutableMap` where each value is a `Pair` that combines the
+   * value of the current `MutableMap` and the provided `Traversable`.
    *
-   *  If the number of values of the current `MutableMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `MutableMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `MutableMap` remain unchanged in the
-   *  returned `MutableMap`.
+   * The keys associated with the current `MutableMap` remain unchanged in the
+   * returned `MutableMap`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `MutableMap`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `MutableMap`.
    *
-   *  @return - The `MutableMap` that combines the values of the current
-   *            `MutableMap` with the provided `Traversable`.
+   * @return - The `MutableMap` that combines the values of the current
+   *           `MutableMap` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableMap<Tk, Pair<Tv, Tu>>;
@@ -1285,7 +1274,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
  * Represents a read-only (immutable) set of values, with no keys
  * (i.e., a set).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface ConstSet<+Tv> extends ConstCollection<Tv>,
@@ -1382,23 +1371,23 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    */
   public function filterWithKey((function(mixed, Tv): bool) $fn): ConstSet<Tv>;
   /**
-   *  Returns a `ConstSet` where each value is a `Pair` that combines the value
-   *  of the current `ConstSet` and the provided `Traversable`.
+   * Returns a `ConstSet` where each value is a `Pair` that combines the value
+   * of the current `ConstSet` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ConstMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ConstMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  Note that some implementations of sets only support certain types of keys
-   *  (e.g., only `int` or `string` values allowed). In that case, this method
-   *  could thrown an exception since a `Pair` wouldn't be supported/
+   * Note that some implementations of sets only support certain types of keys
+   * (e.g., only `int` or `string` values allowed). In that case, this method
+   * could thrown an exception since a `Pair` wouldn't be supported/
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ConstSet`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ConstSet`.
    *
-   *  @return - The `ConstSet` that combines the values of the current
-   *            `ConstSet` with the provided `Traversable`.
+   * @return - The `ConstSet` that combines the values of the current
+   *           `ConstSet` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): ConstSet<Pair<Tv, Tu>>;
   /**
@@ -1539,7 +1528,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
  * Represents a write-enabled (mutable) set of values, not indexed by keys
  * (i.e. a set).
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
 interface MutableSet<Tv> extends ConstSet<Tv>,
@@ -1638,23 +1627,23 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
   public function filterWithKey((function(mixed, Tv): bool) $fn):
     MutableSet<Tv>;
   /**
-   *  Returns a `MutableSet` where each value is a `Pair` that combines the
-   *  value of the current `MutableSet` and the provided `Traversable`.
+   * Returns a `MutableSet` where each value is a `Pair` that combines the
+   * value of the current `MutableSet` and the provided `Traversable`.
    *
-   *  If the number of values of the current `ConstMap` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `ConstMap` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  Note that some implementations of sets only support certain types of keys
-   *  (e.g., only `int` or `string` values allowed). In that case, this method
-   *  could thrown an exception since a `Pair` wouldn't be supported/
+   * Note that some implementations of sets only support certain types of keys
+   * (e.g., only `int` or `string` values allowed). In that case, this method
+   * could thrown an exception since a `Pair` wouldn't be supported/
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `MutableSet`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `MutableSet`.
    *
-   *  @return - The `MutableSet` that combines the values of the current
-   *            `MutableSet` with the provided `Traversable`.
+   * @return - The `MutableSet` that combines the values of the current
+   *           `MutableSet` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     MutableSet<Pair<Tv, Tu>>;

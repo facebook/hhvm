@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +22,7 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -84,11 +85,14 @@ XMLReader::~XMLReader() {
   close();
 }
 
+void XMLReader::sweep() {
+  close();
+}
+
 void XMLReader::close() {
   SYNC_VM_REGS_SCOPED();
   if (m_stream) {
     m_stream->close();
-    m_stream = nullptr;
   }
   if (m_ptr) {
     xmlFreeTextReader(m_ptr);
@@ -104,9 +108,9 @@ void XMLReader::close() {
   }
 }
 
-bool HHVM_METHOD(XMLReader, open,
+Variant HHVM_METHOD(XMLReader, open,
                  const String& uri,
-                 const Variant& encoding /*= null_variant*/,
+                 const Variant& encoding /*= uninit_variant*/,
                  int64_t options /*= 0*/) {
   auto* data = Native::data<XMLReader>(this_);
   const String& str_encoding = encoding.isNull()
@@ -120,6 +124,8 @@ bool HHVM_METHOD(XMLReader, open,
   if (uri.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
+  } else if (!FileUtil::checkPathAndWarn(uri, "XMLReader::open", 1)) {
+    return init_null();
   }
 
   String valid_file = libxml_get_valid_file_path(uri.c_str());
@@ -154,7 +160,7 @@ bool HHVM_METHOD(XMLReader, open,
 
 bool HHVM_METHOD(XMLReader, XML,
                  const String& source,
-                 const Variant& encoding /*= null_variant*/,
+                 const Variant& encoding /*= uninit_variant*/,
                  int64_t options /*= 0*/) {
   auto* data = Native::data<XMLReader>(this_);
   const String& str_encoding = encoding.isNull()
@@ -229,7 +235,7 @@ bool HHVM_METHOD(XMLReader, read) {
 }
 
 bool HHVM_METHOD(XMLReader, next,
-                 const Variant& localname /*= null_variant*/) {
+                 const Variant& localname /*= uninit_variant*/) {
   auto* data = Native::data<XMLReader>(this_);
   const String& str_localname = localname.isNull()
                               ? null_string
@@ -525,8 +531,12 @@ bool XMLReader::set_relaxng_schema(String source, int type) {
   return false;
 }
 
-bool HHVM_METHOD(XMLReader, setRelaxNGSchema,
+Variant HHVM_METHOD(XMLReader, setRelaxNGSchema,
                  const String& filename) {
+  if (!FileUtil::checkPathAndWarn(filename, "XMLReader::setRelaxNGSchema", 1)) {
+    return init_null();
+  }
+
   auto* data = Native::data<XMLReader>(this_);
   return data->set_relaxng_schema(filename, XMLREADER_LOAD_FILE);
 }
@@ -546,9 +556,9 @@ struct XMLPropertyAccessor {
   int return_type;
 };
 
-class XMLPropertyAccessorMap :
-      private hphp_const_char_map<XMLPropertyAccessor*> {
-public:
+struct XMLPropertyAccessorMap
+  : private hphp_const_char_map<XMLPropertyAccessor*>
+{
   explicit XMLPropertyAccessorMap(XMLPropertyAccessor* props,
                                   XMLPropertyAccessorMap *base = nullptr) {
     if (base) {
@@ -625,7 +635,7 @@ Variant HHVM_METHOD(XMLReader, __get,
     }
   }
 
-  switch (propertyMap->return_type) {
+  switch (DataType(propertyMap->return_type)) {
     case KindOfBoolean:
       return retint ? true : false;
     case KindOfInt64:
@@ -639,15 +649,19 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfUninit:
     case KindOfNull:
     case KindOfDouble:
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfArray:
+    case KindOfPersistentArray:
+    case KindOfVec:
+    case KindOfPersistentVec:
+    case KindOfDict:
+    case KindOfPersistentDict:
+    case KindOfKeyset:
+    case KindOfPersistentKeyset:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
       return init_null();
-
-    case KindOfClass:
-      break;
   }
   not_reached();
 }
@@ -692,8 +706,7 @@ Variant HHVM_METHOD(XMLReader, expand,
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_XMLReader("XMLReader");
-static class XMLReaderExtension final : public Extension {
-public:
+static struct XMLReaderExtension final : Extension {
   XMLReaderExtension() : Extension("xmlreader", "0.1") {}
   void moduleInit() override {
     HHVM_RCC_INT(XMLReader, NONE, XML_READER_TYPE_NONE);

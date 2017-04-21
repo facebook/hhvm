@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,52 +30,27 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Very simple peephole rules based on 1-token of lookahead.  This runs behind
+ * Very simple peephole rules based on last few tokens.  This runs behind
  * the ConcatPeephole.
  */
 struct BasicPeephole {
-  explicit BasicPeephole(std::vector<Bytecode>& stream)
-    : m_next(stream)
+  explicit BasicPeephole(std::vector<Bytecode>& stream,
+                         const Index& index, const Context& ctx)
+      : m_index(index), m_ctx(ctx), m_next(stream)
   {}
 
-  void finalize() { if (m_pending) flush(); }
-
-  void push_back(const Bytecode& op) {
-    if (!m_pending) {
-      m_pending = op;
-      return;
-    }
-
-    auto const peeped = peep(op);
-    flush();
-    if (!peeped) {
-      m_pending = op;
+  void finalize() {
+    if (!m_next.size()) {
+      m_next.emplace_back(bc::Nop {});
     }
   }
 
+  void push_back(const Bytecode& op);
+  std::string show(const Bytecode& op);
 private:
-  bool peep(const Bytecode& next) {
-    auto nop = [&] (Op a, Op b) -> bool {
-      if (m_pending->op == a && next.op == b) {
-        m_pending = bc::Nop {};
-        return true;
-      }
-      return false;
-    };
-
-    return false
-      || nop(Op::RGetCNop, Op::UnboxRNop)
-      ;
-  }
-
-  void flush() {
-    m_next.push_back(*m_pending);
-    m_pending = folly::none;
-  }
-
-private:
+  const Index& m_index;
+  const Context& m_ctx;
   std::vector<Bytecode>& m_next;
-  folly::Optional<Bytecode> m_pending;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -136,8 +111,9 @@ using Peephole = ConcatPeephole;
  * Create the chain of peephole objects.  The interface to all the Peepholes is
  * the same as the interface to ConcatPeephole, above.
  */
-inline Peephole make_peephole(std::vector<Bytecode>& sink) {
-  return ConcatPeephole(BasicPeephole(sink));
+inline Peephole make_peephole(std::vector<Bytecode>& sink,
+                              const Index& index, const Context& ctx) {
+  return ConcatPeephole(BasicPeephole(sink, index, ctx));
 }
 
 //////////////////////////////////////////////////////////////////////

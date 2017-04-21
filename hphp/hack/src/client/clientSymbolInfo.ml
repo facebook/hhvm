@@ -37,9 +37,10 @@ let symbol_type_to_json symbol_type_results =
   end
 
 let to_json result =
-  let fun_call_json = fun_call_to_json result.SymbolInfoService.fun_calls in
+  let fun_call_json =
+    fun_call_to_json result.SymbolInfoServiceTypes.fun_calls in
   let symbol_type_json =
-    symbol_type_to_json result.SymbolInfoService.symbol_types in
+    symbol_type_to_json result.SymbolInfoServiceTypes.symbol_types in
   JSON_Object [
     "function_calls",   JSON_Array fun_call_json;
     "symbol_types",     JSON_Array symbol_type_json;
@@ -57,7 +58,8 @@ let go conn (files:string) expand_path =
     List.rev_map file_list begin fun file_path ->
       expand_path file_path
     end in
-  let command = ServerRpc.DUMP_SYMBOL_INFO (expand_path_list file_list) in
+  let command =
+    ServerCommandTypes.DUMP_SYMBOL_INFO (expand_path_list file_list) in
   let result = ServerCommand.rpc conn command in
   let result_json = to_json result in
   print_endline (Hh_json.json_to_string result_json)

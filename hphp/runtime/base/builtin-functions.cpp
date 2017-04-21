@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,39 +16,45 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 
-#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/unit-cache.h"
+
 #include "hphp/runtime/debugger/debugger.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
+
 #include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+
+#include "hphp/runtime/vm/event-hook.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/vm/unit.h"
+
+#include "hphp/system/systemlib.h"
+
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
-#include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/event-hook.h"
-#include "hphp/system/systemlib.h"
-#include <folly/Format.h>
-#include "hphp/util/text-util.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/backtrace.h"
+#include "hphp/util/text-util.h"
+
+#include <folly/Format.h>
 
 #include <boost/format.hpp>
-#include <limits>
+
 #include <algorithm>
 
 namespace HPHP {
@@ -68,8 +74,20 @@ const StaticString
   s_static("static");
 
 const StaticString s_cmpWithCollection(
-  "Cannot use relational comparison operators (<, <=, >, >=) to compare "
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a collection with an integer, double, string, array, or object"
+);
+const StaticString s_cmpWithVec(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a vec with a non-vec"
+);
+const StaticString s_cmpWithDict(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "dicts"
+);
+const StaticString s_cmpWithKeyset(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "keysets"
 );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -95,12 +113,11 @@ const StaticString
   s_colon2("::");
 
 bool is_callable(const Variant& v) {
-  CallerFrame cf;
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
-  const HPHP::Func* f = vm_decode_function(v, cf(), false, obj, cls,
-                                           invName, false);
+  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
+                                           invName, DecodeFlags::LookupOnly);
   if (invName != nullptr) {
     decRefStr(invName);
   }
@@ -120,12 +137,12 @@ bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
     return ret;
   }
 
-  if (tv_func->m_type == KindOfArray) {
+  if (isArrayType(tv_func->m_type)) {
     const Array& arr = Array(tv_func->m_data.parr);
     const Variant& clsname = arr.rvalAtRef(int64_t(0));
     const Variant& mthname = arr.rvalAtRef(int64_t(1));
     if (arr.size() != 2 ||
-        &clsname == &null_variant ||
+        &clsname == &uninit_variant ||
         !mthname.isString()) {
       if (name) *name->var() = array_string;
       return false;
@@ -175,7 +192,7 @@ vm_decode_function(const Variant& function,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
-                   bool warn /* = true */) {
+                   DecodeFlags flags /* = DecodeFlags::Warn */) {
   invName = nullptr;
   if (function.isString() || function.isArray()) {
     HPHP::Class* ctx = nullptr;
@@ -202,7 +219,7 @@ vm_decode_function(const Variant& function,
       assert(function.isArray());
       Array arr = function.toArray();
       if (!array_is_valid_callback(arr)) {
-        if (warn) {
+        if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: not a valid callback array");
         }
         return nullptr;
@@ -230,15 +247,15 @@ vm_decode_function(const Variant& function,
             forwarding = true;
           }
         } else if (sclass.get()->isame(s_static.get())) {
-          if (ar) {
+          if (ar && ar->func()->cls()) {
             if (ar->hasThis()) {
               cls = ar->getThis()->getVMClass();
-            } else if (ar->hasClass()) {
+            } else {
               cls = ar->getClass();
             }
           }
         } else {
-          if (warn && nameContainsClass) {
+          if (flags == DecodeFlags::Warn && nameContainsClass) {
             String nameClass = name.substr(0, pos);
             if (nameClass.get()->isame(s_self.get())   ||
                 nameClass.get()->isame(s_static.get())) {
@@ -249,7 +266,7 @@ vm_decode_function(const Variant& function,
           cls = Unit::loadClass(sclass.get());
         }
         if (!cls) {
-          if (warn) {
+          if (flags == DecodeFlags::Warn) {
             throw_invalid_argument("function: class not found");
           }
           return nullptr;
@@ -284,10 +301,10 @@ vm_decode_function(const Variant& function,
           forwarding = true;
         }
       } else if (c.get()->isame(s_static.get())) {
-        if (ar) {
+        if (ar && ar->func()->cls()) {
           if (ar->hasThis()) {
             cc = ar->getThis()->getVMClass();
-          } else if (ar->hasClass()) {
+          } else {
             cc = ar->getClass();
           }
         }
@@ -295,14 +312,14 @@ vm_decode_function(const Variant& function,
         cc = Unit::loadClass(c.get());
       }
       if (!cc) {
-        if (warn) {
+        if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: class not found");
         }
         return nullptr;
       }
       if (cls) {
         if (!cls->classof(cc)) {
-          if (warn) {
+          if (flags == DecodeFlags::Warn) {
             raise_warning("call_user_func expects parameter 1 to be a valid "
                           "callback, class '%s' is not a subclass of '%s'",
                           cls->preClass()->name()->data(),
@@ -316,10 +333,11 @@ vm_decode_function(const Variant& function,
         cls = cc;
       }
     }
+
     if (!cls) {
-      HPHP::Func* f = HPHP::Unit::loadFunc(name.get());
+      HPHP::Func* f = HPHP::Unit::loadDynCallFunc(name.get());
       if (!f) {
-        if (warn) {
+        if (flags == DecodeFlags::Warn) {
           throw_invalid_argument("function: method '%s' not found",
                                  name.data());
         }
@@ -330,17 +348,16 @@ vm_decode_function(const Variant& function,
     }
     assert(cls);
     CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
-    const HPHP::Func* f =
-      g_context->lookupMethodCtx(cc, name.get(), ctx, lookupType);
+    auto f = lookupMethodCtx(cc, name.get(), ctx, lookupType);
     if (f && (f->attrs() & AttrStatic)) {
       // If we found a method and its static, null out this_
       this_ = nullptr;
     } else {
-      if (!this_ && ar) {
+      if (!this_ && ar && ar->func()->cls() && ar->hasThis()) {
         // If we did not find a static method AND this_ is null AND there is a
         // frame ar, check if the current instance from ar is compatible
-        ObjectData* obj = ar->hasThis() ? ar->getThis() : nullptr;
-        if (obj && obj->instanceof(cls)) {
+        auto const obj = ar->getThis();
+        if (obj->instanceof(cls)) {
           this_ = obj;
           cls = obj->getVMClass();
         }
@@ -364,7 +381,7 @@ vm_decode_function(const Variant& function,
           invName->incRefCount();
         } else {
           // Bail out if we couldn't find the method or __call
-          if (warn) {
+          if (flags == DecodeFlags::Warn) {
             throw_invalid_argument("function: method '%s' not found",
                                    name.data());
           }
@@ -373,11 +390,11 @@ vm_decode_function(const Variant& function,
       }
     }
 
-    if (f->isClosureBody() && !this_) {
-      if (warn) {
-        raise_warning("cannot invoke closure body without closure object");
+    if (!this_ && !f->isStaticInPrologue()) {
+      if (flags == DecodeFlags::Warn) raise_missing_this(f);
+      if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
+        return nullptr;
       }
-      return nullptr;
     }
 
     assert(f && f->preClass());
@@ -386,40 +403,37 @@ vm_decode_function(const Variant& function,
     assert(!this_ || this_->getVMClass() == cls);
     // If we are doing a forwarding call and this_ is null, set cls
     // appropriately to propagate the current late bound class.
-    if (!this_ && forwarding && ar) {
-      HPHP::Class* fwdCls = nullptr;
-      ObjectData* obj = ar->hasThis() ? ar->getThis() : nullptr;
-      if (obj) {
-        fwdCls = obj->getVMClass();
-      } else if (ar->hasClass()) {
-        fwdCls = ar->getClass();
-      }
+    if (!this_ && forwarding && ar && ar->func()->cls()) {
+      auto const fwdCls = ar->hasThis() ?
+        ar->getThis()->getVMClass() : ar->getClass();
+
       // Only forward the current late bound class if it is the same or
       // a descendent of cls
-      if (fwdCls && fwdCls->classof(cls)) {
+      if (fwdCls->classof(cls)) {
         cls = fwdCls;
       }
     }
+
+    assertx(!f->dynCallWrapper());
     return f;
   }
   if (function.isObject()) {
     this_ = function.asCObjRef().get();
     cls = nullptr;
     const HPHP::Func *f = this_->getVMClass()->lookupMethod(s___invoke.get());
-    if (f != nullptr &&
-        ((f->attrs() & AttrStatic) && !f->isClosureBody())) {
+    if (f != nullptr && f->isStaticInPrologue()) {
       // If __invoke is static, invoke it as such
       cls = this_->getVMClass();
       this_ = nullptr;
     }
-    if (warn && f == nullptr) {
+    if (flags == DecodeFlags::Warn && f == nullptr) {
       raise_warning("call_user_func() expects parameter 1 to be a valid "
                     "callback, object of class %s given (no __invoke "
                     "method found)", this_->getVMClass()->name()->data());
     }
     return f;
   }
-  if (warn) {
+  if (flags == DecodeFlags::Warn) {
     throw_invalid_argument("function: not string, closure, or array");
   }
   return nullptr;
@@ -436,9 +450,10 @@ Variant vm_call_user_func(const Variant& function, const Variant& params,
   if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf);
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, params, obj, cls,
+                          nullptr, invName, ExecutionContext::InvokeCuf)
+  );
   if (UNLIKELY(ret.getRawType()) == KindOfRef) {
     tvUnbox(ret.asTypedValue());
   }
@@ -460,11 +475,14 @@ static Variant invoke_failed(const char *func,
 
 static Variant invoke(const String& function, const Variant& params,
                       strhash_t hash, bool tryInterp,
-                      bool fatal) {
+                      bool fatal, bool useWeakTypes = false) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
-    Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, params);
+    auto ret = Variant::attach(
+      g_context->invokeFunc(func, params, nullptr, nullptr,
+                            nullptr, nullptr, ExecutionContext::InvokeNormal,
+                            useWeakTypes)
+    );
     if (UNLIKELY(ret.getRawType()) == KindOfRef) {
       tvUnbox(ret.asTypedValue());
     }
@@ -476,9 +494,10 @@ static Variant invoke(const String& function, const Variant& params,
 // Declared in externals.h.  If you're considering calling this
 // function for some new code, please reconsider.
 Variant invoke(const char *function, const Variant& params, strhash_t hash /* = -1 */,
-               bool tryInterp /* = true */, bool fatal /* = true */) {
+               bool tryInterp /* = true */, bool fatal /* = true */,
+               bool useWeakTypes /* = false */) {
   String funcName(function, CopyString);
-  return invoke(funcName, params, hash, tryInterp, fatal);
+  return invoke(funcName, params, hash, tryInterp, fatal, useWeakTypes);
 }
 
 Variant invoke_static_method(const String& s, const String& method,
@@ -494,8 +513,9 @@ Variant invoke_static_method(const String& s, const String& method,
     o_invoke_failed(s.data(), method.data(), fatal);
     return uninit_null();
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, nullptr, class_);
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, params, nullptr, class_)
+  );
   if (UNLIKELY(ret.getRawType()) == KindOfRef) {
     tvUnbox(ret.asTypedValue());
   }
@@ -509,11 +529,53 @@ Variant o_invoke_failed(const char *cls, const char *meth,
     msg += cls;
     msg += "::";
     msg += meth;
-    throw FatalErrorException(msg.c_str());
+    raise_fatal_error(msg.c_str());
   } else {
     raise_warning("call_user_func to non-existent method %s::%s", cls, meth);
     return false;
   }
+}
+
+template<class EF, class NF>
+void missing_this_check_helper(const Func* f, EF ef, NF nf) {
+  if (f->attrs() & AttrRequiresThis) {
+    ef();
+    return;
+  }
+
+  if (RuntimeOption::EvalRaiseMissingThis && !f->isStatic()) {
+    nf();
+    return;
+  }
+}
+
+void raise_missing_this(const Func* f) {
+  missing_this_check_helper(
+    f,
+    [&] {
+      raise_error("Non-static method %s() cannot be called statically",
+                  f->fullName()->data());
+    },
+    [&] {
+      auto constexpr msg =
+        "Non-static method %s() should not be called statically";
+
+      if (RuntimeOption::PHP7_DeprecationWarnings) {
+        raise_deprecated(msg, f->fullName()->data());
+      } else {
+        raise_strict_warning(msg, f->fullName()->data());
+      }
+    });
+}
+
+bool needs_missing_this_check(const Func* f) {
+  bool ret = false;
+  missing_this_check_helper(
+    f,
+    [&] { ret = true; },
+    [&] { ret = true; }
+  );
+  return ret;
 }
 
 void NEVER_INLINE raise_null_object_prop() {
@@ -552,12 +614,37 @@ void throw_collection_property_exception() {
     "Cannot access a property on a collection");
 }
 
+void throw_invalid_collection_parameter() {
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Parameter must be an array or an instance of Traversable");
+}
+
 void throw_invalid_operation_exception(StringData* str) {
   SystemLib::throwInvalidOperationExceptionObject(Variant{str});
 }
 
+void throw_arithmetic_error(StringData* str) {
+  SystemLib::throwArithmeticErrorObject(Variant{str});
+}
+
+void throw_division_by_zero_error(StringData *str) {
+  SystemLib::throwDivisionByZeroErrorObject(Variant{str});
+}
+
 void throw_collection_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithCollection);
+}
+
+void throw_vec_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithVec);
+}
+
+void throw_dict_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithDict);
+}
+
+void throw_keyset_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithKeyset);
 }
 
 void throw_param_is_not_container() {
@@ -600,9 +687,20 @@ Object init_object(const String& s, const Array& params, ObjectData* o) {
   return Object{g_context->initObject(s.get(), params, o)};
 }
 
-Object create_object(const String& s, const Array& params, bool init /* = true */) {
+Object
+create_object(const String& s, const Array& params, bool init /* = true */) {
   return Object::attach(g_context->createObject(s.get(), params, init));
 }
+
+void throw_object(const Object& e) {
+  throw req::root<Object>(e);
+}
+
+#if ((__GNUC__ != 4) || (__GNUC_MINOR__ != 8))
+void throw_object(Object&& e) {
+  throw req::root<Object>(std::move(e));
+}
+#endif
 
 /*
  * This function is used when another thread is segfaulting---we just
@@ -752,6 +850,11 @@ Variant unserialize_ex(const char* str, int len,
     v = vu.unserialize();
   } catch (FatalErrorException &e) {
     throw;
+  } catch (InvalidAllowedClassesException &e) {
+    raise_warning(
+      "unserialize(): allowed_classes option should be array or boolean"
+    );
+    return false;
   } catch (Exception &e) {
     raise_notice("Unable to unserialize: [%.1000s]. %s.", str,
                  e.getMessage().c_str());
@@ -803,7 +906,7 @@ static bool invoke_file_impl(Variant& res, const String& path, bool once,
   auto const u = lookupUnit(path.get(), currentDir, &initial);
   if (u == nullptr) return false;
   if (!once || initial) {
-    g_context->invokeUnit(res.asTypedValue(), u);
+    *res.asTypedValue() = g_context->invokeUnit(u);
   }
   return true;
 }
@@ -905,8 +1008,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    auto const& includePaths = ThreadInfo::s_threadInfo.getNoCheck()->
-      m_reqInjectionData.getIncludePaths();
+    auto const& includePaths = RID().getIncludePaths();
 
     for (auto const& includePath : includePaths) {
       String path("");
@@ -974,7 +1076,7 @@ static Variant include_impl(const String& file, bool once,
     if (required) {
       String ms = "Required file that does not exist: ";
       ms += file;
-      throw FatalErrorException(ms.data());
+      raise_fatal_error(ms.data());
     }
     return false;
   }
@@ -999,12 +1101,11 @@ bool function_exists(const String& function_name) {
 // debugger and code coverage instrumentation
 
 void throw_exception(const Object& e) {
-  if (!e.instanceof(SystemLib::s_ExceptionClass)) {
-    raise_error("Exceptions must be valid objects derived from the "
-                "Exception base class");
+  if (!e.instanceof(SystemLib::s_ThrowableClass)) {
+    raise_error("Exceptions must implement the Throwable interface.");
   }
   DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionThrownHook(e.get()));
-  throw e;
+  throw req::root<Object>(e);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

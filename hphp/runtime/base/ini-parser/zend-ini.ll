@@ -147,6 +147,7 @@ restart:
 %option noyywrap
 %option stack
 %option nodefault
+%option prefix="zend_ini_yy"
 
 LNUM [0-9]+
 DNUM ([0-9]*[\.][0-9]+)|([0-9]+[\.][0-9]*)

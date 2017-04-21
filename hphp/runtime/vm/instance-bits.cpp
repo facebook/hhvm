@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/class.h"
-#include "hphp/runtime/vm/iterators.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -49,21 +49,31 @@ InstanceCounts s_instanceCounts;
 ReadWriteMutex s_instanceCountsLock(RankInstanceCounts);
 InstanceBitsMap s_instanceBitsMap;
 
-const size_t kNumInstanceBits = sizeof(BitSet) * CHAR_BIT;
+Mutex s_initLock(RankInstanceBitsInit);
+
+constexpr size_t kNumInstanceBits = sizeof(BitSet) * CHAR_BIT;
 
 // Tracked just for an assertion in lookup().
-std::atomic<bool> s_currentlyInitializing{false};
+std::atomic<pthread_t> s_initThread;
 
 }
 
 //////////////////////////////////////////////////////////////////////
 
-ReadWriteMutex lock(RankInstanceBits);
-std::atomic<bool> initFlag{false};
+ReadWriteMutex g_clsInitLock(RankInstanceBitsClsInit);
+// True if initialization has been finished
+std::atomic<bool> g_initFlag{false};
+// True if profiling should no longer be done
+std::atomic<bool> g_profileDoneFlag{false};
 
 //////////////////////////////////////////////////////////////////////
 
 void profile(const StringData* name) {
+  if (g_profileDoneFlag.load(std::memory_order_acquire) ||
+      !RuntimeOption::RepoAuthoritative) {
+    return;
+  }
+
   assert(name->isStatic());
   unsigned inc = 1;
   Class* c = Unit::lookupClass(name);
@@ -82,11 +92,26 @@ void profile(const StringData* name) {
 }
 
 void init() {
-  assert(jit::Translator::WriteLease().amOwner());
-  if (initFlag.load(std::memory_order_acquire)) return;
+  if (g_initFlag.load(std::memory_order_acquire)) return;
 
-  s_currentlyInitializing = true;
-  SCOPE_EXIT { s_currentlyInitializing = false; };
+  Lock l(s_initLock);
+  if (g_initFlag.load(std::memory_order_acquire)) return;
+
+  // Stop profiling before attempting to acquire the instance-counts lock. The
+  // reason for having two flags is because ReadWriteLock can in certain
+  // implementations favor readers over writers. Thus if there's a steady stream
+  // of calls to profile(), we'll block indefinitely waiting to acquire the
+  // instance-counts lock. Since this function is called from JITing threads,
+  // this can eventually lead to starvation. So, set this flag to stop other
+  // threads from attempting to acquire the instance-counts lock, and avoid
+  // starvation.
+  g_profileDoneFlag.store(true, std::memory_order_release);
+
+  if (!RuntimeOption::RepoAuthoritative) {
+    g_initFlag.store(true, std::memory_order_release);
+    return;
+  }
+  if (do_assert) s_initThread.store(pthread_self(), std::memory_order_release);
 
   // First, grab a write lock on s_instanceCounts and grab the current set of
   // counts as quickly as possible to minimize blocking other threads still
@@ -116,12 +141,12 @@ void init() {
   uint64_t accum = 0;
   for (auto& item : counts) {
     if (i >= kNumInstanceBits) break;
-    if (Class* cls = Unit::lookupClassOrUniqueClass(item.first)) {
-      if (cls->attrs() & AttrUnique) {
-        s_instanceBitsMap[item.first] = i;
-        accum += item.second;
-        ++i;
-      }
+    auto const cls = Unit::lookupUniqueClassInContext(item.first, nullptr);
+    if (cls) {
+      assertx(cls->attrs() & AttrUnique);
+      s_instanceBitsMap[item.first] = i;
+      accum += item.second;
+      ++i;
     }
   }
 
@@ -151,18 +176,28 @@ void init() {
   // Finally, update m_instanceBits on every Class that currently exists. This
   // must be done while holding a lock that blocks insertion of new Classes
   // into their class lists, but in practice most Classes will already be
-  // created by now and this process takes at most 10ms.
-  WriteLock l(InstanceBits::lock);
-  for (auto it = all_classes().begin();
-       it != all_classes().end(); ++it) {
-    it->setInstanceBitsAndParents();
-  }
+  // created by now and this process is very fast.
+  WriteLock clsLocker(g_clsInitLock);
+  NamedEntity::foreach_class([&](Class* cls) {
+    cls->setInstanceBitsAndParents();
+  });
 
-  initFlag.store(true, std::memory_order_release);
+  if (do_assert) {
+    // There isn't a canonical invalid pthread_t, but this is only used for the
+    // assert in lookup() and it's ok to have false negatives.
+    s_initThread.store(pthread_t{}, std::memory_order_release);
+  }
+  g_initFlag.store(true, std::memory_order_release);
+}
+
+bool initted() {
+  return g_initFlag.load(std::memory_order_acquire);
 }
 
 unsigned lookup(const StringData* name) {
-  assert(s_currentlyInitializing || initFlag.load(std::memory_order_acquire));
+  assert(g_initFlag.load(std::memory_order_acquire) ||
+         pthread_equal(s_initThread.load(std::memory_order_acquire),
+                       pthread_self()));
 
   if (auto const ptr = folly::get_ptr(s_instanceBitsMap, name)) {
     assert(*ptr >= 1 && *ptr < kNumInstanceBits);
@@ -172,7 +207,7 @@ unsigned lookup(const StringData* name) {
 }
 
 bool getMask(const StringData* name, int& offset, uint8_t& mask) {
-  assert(initFlag.load(std::memory_order_acquire));
+  assert(g_initFlag.load(std::memory_order_acquire));
 
   unsigned bit = lookup(name);
   if (!bit) return false;

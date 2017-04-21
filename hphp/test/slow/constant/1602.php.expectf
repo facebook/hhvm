@@ -1,19 +1,19 @@
-
-Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 3
-bool(false)
-
-Notice: Use of undefined constant KONST - assumed 'KONST' in %s/test/slow/constant/1602.php on line 4
-string(5) "KONST"
+bool(true)
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(2) "bc"
+}
 bool(true)
 
 Notice: Constant FLUB already defined in %s/test/slow/constant/1602.php on line 6
 bool(false)
 int(1230)
-
-Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 8
-bool(false)
-
-Notice: Use of undefined constant BLAH - assumed 'BLAH' in %s/test/slow/constant/1602.php on line 9
-string(4) "BLAH"
-
-Warning: Constants may only evaluate to scalar values in %s/test/slow/constant/1602.php on line 10
+bool(true)
+array(2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}

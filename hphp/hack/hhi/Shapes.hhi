@@ -49,4 +49,7 @@ abstract final class Shapes {
   public static function removeKey(shape() $shape, arraykey $index): void {}
 
   public static function toArray(shape() $shape): array<arraykey, mixed>;
+
+  public static function toDict(shape() $shape): dict<arraykey, mixed>;
+
 }

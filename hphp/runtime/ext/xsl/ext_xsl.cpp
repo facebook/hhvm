@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,12 +17,12 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/domdocument/ext_domdocument.h"
-#include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -313,6 +313,10 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   for (int i = nargs - 2; i >= 0; i--) {
     Variant arg;
     obj = valuePop(ctxt);
+    if (obj == nullptr) {
+      args.prepend(init_null());
+      continue;
+    }
     switch (obj->type) {
     case XPATH_STRING:
       arg = String((char*)obj->stringval, CopyString);
@@ -368,7 +372,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
   }
 
   obj = valuePop(ctxt);
-  if (obj->stringval == nullptr) {
+  if ((obj == nullptr) || (obj->stringval == nullptr)) {
     raise_warning("Handler name must be a string");
     xmlXPathFreeObject(obj);
     // Push an empty string to get an xslt result.
@@ -512,7 +516,7 @@ static bool HHVM_METHOD(XSLTProcessor, removeParameter,
 }
 
 static void HHVM_METHOD(XSLTProcessor, registerPHPFunctions,
-                        const Variant& funcs /*= null_variant*/) {
+                        const Variant& funcs /*= uninit_variant*/) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   if (funcs.isNull()) {
@@ -541,7 +545,7 @@ static void HHVM_METHOD(XSLTProcessor, registerPHPFunctions,
 static bool HHVM_METHOD(XSLTProcessor, setParameter,
                         const Variant& namespaceURI,
                         const Variant& localName,
-                        const Variant& value /*= null_variant*/) {
+                        const Variant& value /*= uninit_variant*/) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
@@ -597,6 +601,10 @@ static bool HHVM_METHOD(XSLTProcessor, setProfiling,
                         const String& filename) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
+  if (!FileUtil::checkPathAndWarn(filename, "XSLTProcessor::setProfiling", 1)) {
+    return false;
+  }
+
   if (filename.length() > 0) {
     String translated = File::TranslatePath(filename);
     Stream::Wrapper* w = Stream::getWrapperFromURI(translated);
@@ -634,6 +642,10 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToURI,
                            const Object& doc,
                            const String& uri) {
   auto data = Native::data<XSLTProcessorData>(this_);
+
+  if (!FileUtil::checkPathAndWarn(uri, "XSLTProcessor::transformToUri", 2)) {
+    return false;
+  }
 
   if (doc.instanceof(s_DOMDocument)) {
     auto domdoc = Native::data<DOMNode>(doc);
@@ -703,8 +715,7 @@ static Variant HHVM_METHOD(XSLTProcessor, transformToXML,
 ///////////////////////////////////////////////////////////////////////////////
 // extension
 
-class XSLExtension final : public Extension {
-  public:
+struct XSLExtension final : Extension {
     XSLExtension() : Extension("xsl", "0.1") {};
 
     void moduleInit() override {

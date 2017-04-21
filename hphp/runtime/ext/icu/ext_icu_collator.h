@@ -10,8 +10,7 @@ namespace HPHP { namespace Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_Collator;
 
-class Collator : public IntlError {
- public:
+struct Collator : IntlError {
   Collator() {}
   Collator(const Collator&) = delete;
   Collator& operator=(const Collator& src) {
@@ -21,8 +20,8 @@ class Collator : public IntlError {
     UErrorCode error = U_ZERO_ERROR;
     m_collator = ucol_safeClone(src.m_collator, stack, &stack_size, &error);
     if (U_FAILURE(error)) {
-      throw getException("Something went wrong cloning Collator: %d",
-                         (int)error);
+      throwException("Something went wrong cloning Collator: %d",
+                     (int)error);
     }
     return *this;
   }

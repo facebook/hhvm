@@ -18,6 +18,7 @@ type env =
 let open_in_opt filename =
   let open Unix in
   try
+    Sys_utils.mkdir_no_fail (Filename.dirname filename);
     let fd = openfile filename [O_RDONLY;O_NONBLOCK;O_CREAT] 0o777 in
     let ic = in_channel_of_descr fd in
     begin set_binary_mode_in ic false; Some(ic) end
@@ -26,7 +27,7 @@ let open_in_opt filename =
      None)
 
 let create_env filename =
- { filename; ic_opt=None; lines=[]; last_line=None }
+  { filename; ic_opt=None; lines=[]; last_line=None }
 
 let open_env env =
   match env.ic_opt with
@@ -78,3 +79,15 @@ let last_line env =
 let get_lines env = env.lines
 
 let set_lines env l = env.lines <- l
+
+(* Sometimes the tailed file is overwritten with a new file. Tail will still be
+ * connected to the old file and we won't notice. One way to notice is to
+ * compare the ctime of the file we have open and ctime of the file on disk *)
+let is_tailing_current_file env =
+  match env.ic_opt with
+  | Some ic ->
+      let open Unix in
+      let stats_for_tailed_file = fstat (descr_of_in_channel ic) in
+      let stats_for_current_file = stat env.filename in
+      stats_for_tailed_file.st_ctime = stats_for_current_file.st_ctime
+  | None -> false

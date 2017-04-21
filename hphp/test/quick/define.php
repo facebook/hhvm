@@ -16,6 +16,7 @@ function main() {
 
   var_dump(FOO);
   var_dump(BAR);
+  var_dump(BIZ);
 
   foo();
   var_dump(BAZ);

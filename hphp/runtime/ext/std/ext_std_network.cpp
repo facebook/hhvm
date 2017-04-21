@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,13 +17,9 @@
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/std/ext_std_network-internal.h"
 
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-
 #include <folly/IPAddress.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
@@ -340,13 +336,12 @@ bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,
 }
 
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
-  Transport *transport = g_context->getTransport();
-
   if (!is_callable(callback)) {
     raise_warning("First argument is expected to be a valid callback");
     return init_null();
   }
 
+  auto transport = g_context->getTransport();
   if (!transport) {
     // fail if there is no transport
     return false;
@@ -355,7 +350,7 @@ Variant HHVM_FUNCTION(header_register_callback, const Variant& callback) {
     // fail if headers have already been sent
     return false;
   }
-  return transport->setHeaderCallback(callback);
+  return g_context->setHeaderCallback(callback);
 }
 
 void HHVM_FUNCTION(header_remove, const Variant& name /* = null_string */) {
@@ -494,23 +489,20 @@ void StandardExtension::initNetwork() {
   HHVM_FE(fsockopen);
   HHVM_FE(pfsockopen);
 
-#define PHP_DNS_RC_INT(cns) Native::registerConstant<KindOfInt64> \
-  (makeStaticString("DNS_" #cns), PHP_DNS_ ## cns);
-  PHP_DNS_RC_INT(A);
-  PHP_DNS_RC_INT(A6);
-  PHP_DNS_RC_INT(AAAA);
-  PHP_DNS_RC_INT(ALL);
-  PHP_DNS_RC_INT(ANY);
-  PHP_DNS_RC_INT(CNAME);
-  PHP_DNS_RC_INT(HINFO);
-  PHP_DNS_RC_INT(MX);
-  PHP_DNS_RC_INT(NAPTR);
-  PHP_DNS_RC_INT(NS);
-  PHP_DNS_RC_INT(PTR);
-  PHP_DNS_RC_INT(SOA);
-  PHP_DNS_RC_INT(SRV);
-  PHP_DNS_RC_INT(TXT);
-#undef PHP_DNS_RC_INT
+  HHVM_RC_INT(DNS_A, PHP_DNS_A);
+  HHVM_RC_INT(DNS_A6, PHP_DNS_A6);
+  HHVM_RC_INT(DNS_AAAA, PHP_DNS_AAAA);
+  HHVM_RC_INT(DNS_ALL, PHP_DNS_ALL);
+  HHVM_RC_INT(DNS_ANY, PHP_DNS_ANY);
+  HHVM_RC_INT(DNS_CNAME, PHP_DNS_CNAME);
+  HHVM_RC_INT(DNS_HINFO, PHP_DNS_HINFO);
+  HHVM_RC_INT(DNS_MX, PHP_DNS_MX);
+  HHVM_RC_INT(DNS_NAPTR, PHP_DNS_NAPTR);
+  HHVM_RC_INT(DNS_NS, PHP_DNS_NS);
+  HHVM_RC_INT(DNS_PTR, PHP_DNS_PTR);
+  HHVM_RC_INT(DNS_SOA, PHP_DNS_SOA);
+  HHVM_RC_INT(DNS_SRV, PHP_DNS_SRV);
+  HHVM_RC_INT(DNS_TXT, PHP_DNS_TXT);
 
   HHVM_RC_INT_SAME(LOG_EMERG);
   HHVM_RC_INT_SAME(LOG_ALERT);

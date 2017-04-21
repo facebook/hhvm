@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,10 +17,10 @@
 #include <zip.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/pcre/ext_pcre.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 
 namespace HPHP {
@@ -38,11 +38,11 @@ static zip* _zip_open(const String& filename, int _flags, int* zep) {
   return zip_open(to_full_path(filename).c_str(), _flags, zep);
 }
 
-class ZipStream : public File {
- public:
+struct ZipStream : File {
   DECLARE_RESOURCE_ALLOCATION(ZipStream);
 
-  ZipStream(zip* z, const String& name) : m_zipFile(nullptr) {
+  ZipStream(zip* z, const String& name)
+  : File(false), m_zipFile(nullptr) {
     if (name.empty()) {
       return;
     }
@@ -96,12 +96,9 @@ void ZipStream::sweep() {
   File::sweep();
 }
 
-class ZipStreamWrapper : public Stream::Wrapper {
- public:
-  virtual req::ptr<File> open(const String& filename,
-                              const String& mode,
-                              int options,
-                              const req::ptr<StreamContext>& context) {
+struct ZipStreamWrapper final : Stream::Wrapper {
+  req::ptr<File> open(const String& filename, const String& mode, int options,
+                      const req::ptr<StreamContext>& context) override {
     std::string url(filename.c_str());
     auto pound = url.find('#');
     if (pound == std::string::npos) {
@@ -126,8 +123,7 @@ class ZipStreamWrapper : public Stream::Wrapper {
   }
 };
 
-class ZipEntry : public SweepableResourceData {
- public:
+struct ZipEntry : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ZipEntry);
 
   CLASSNAME_IS("ZipEntry");
@@ -214,8 +210,7 @@ class ZipEntry : public SweepableResourceData {
 };
 IMPLEMENT_RESOURCE_ALLOCATION(ZipEntry);
 
-class ZipDirectory: public SweepableResourceData {
- public:
+struct ZipDirectory : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ZipDirectory);
 
   CLASSNAME_IS("ZipDirectory");
@@ -548,7 +543,7 @@ static bool addPattern(zip* zipStruct, const String& pattern, const Array& optio
     }
 
     if (!glob) {
-      auto var = preg_match(pattern, source);
+      auto var = preg_match(pattern.get(), source.get());
       if (var.isInteger()) {
         if (var.asInt64Val() == 0) {
           continue;
@@ -654,25 +649,103 @@ static bool HHVM_METHOD(ZipArchive, deleteName, const String& name) {
   return true;
 }
 
+// Make the path relative to "." by flattening.
+// This function is named the same and similar in implementation to that in
+// php-src:php_zip.c
+// One difference is that we canonicalize here whereas php-src is already
+// assumed passed a canonicalized path.
+static std::string make_relative_path(const std::string& path) {
+  if (path.empty()) {
+    return path;
+  }
+
+  // First get the path to a state where we don't have .. in the middle of it
+  // etc. canonicalize handles Windows paths too.
+  std::string canonical(FileUtil::canonicalize(path));
+
+  // If we have a slash at the beginning, then just remove it and we are
+  // relative. This check will hold because we have canonicalized the
+  // path above to remove .. from the path, so we know we can be sure
+  // we are at a good place for this check.
+  if (FileUtil::isDirSeparator(canonical[0])) {
+    return canonical.substr(1);
+  }
+
+  // If we get here, canonical looks something like:
+  //   a/b/c
+
+  // Search through the path and if we find a place where we have a slash
+  // and a "." just before that slash, then cut the path off right there
+  // and just take everything after the slash.
+  std::string relative(canonical);
+  int idx = canonical.length() - 1;
+  while (1) {
+    while (idx > 0 && !(FileUtil::isDirSeparator(canonical[idx]))) {
+      idx--;
+    }
+    // If we ever get to idx == 0, then there were no other slashes to deal with
+    if (idx == 0) {
+      return canonical;
+    }
+    if (idx >= 1 && (canonical[idx - 1] == '.' || canonical[idx - 1] == ':')) {
+      relative = canonical.substr(idx + 1);
+      break;
+    }
+    idx--;
+  }
+  return relative;
+}
+
 static bool extractFileTo(zip* zip, const std::string &file, std::string& to,
                           char* buf, size_t len) {
-  auto sep = file.rfind('/');
+
+  struct zip_stat zipStat;
+  // Verify the file to be extracted is actually in the zip file
+  if (zip_stat(zip, file.c_str(), 0, &zipStat) != 0) {
+    return false;
+  }
+
+  auto clean_file = file;
+  auto sep = std::string::npos;
+  // Normally would just use std::string::rfind here, but if we want to be
+  // consistent between Windows and Linux, even if techincally Linux won't use
+  // backslash for a separator, we are checking for both types.
+  int idx = file.length() - 1;
+  while (idx >= 0) {
+    if (FileUtil::isDirSeparator(file[idx])) {
+      sep = idx;
+      break;
+    }
+    idx--;
+  }
   if (sep != std::string::npos) {
-    auto path = to + file.substr(0, sep);
+    // make_relative_path so we do not try to put files or dirs in bad
+    // places. This securely "cleans" the file.
+    clean_file = make_relative_path(file);
+    std::string path = to + clean_file;
+    bool is_dir_only = true;
+    if (sep < file.length() - 1) { // not just a directory
+      auto clean_file_dir = HHVM_FN(dirname)(clean_file);
+      path = to + clean_file_dir.toCppString();
+      is_dir_only = false;
+    }
+
+    // Make sure the directory path to extract to exists or can be created
     if (!HHVM_FN(is_dir)(path) && !HHVM_FN(mkdir)(path, 0777, true)) {
       return false;
     }
 
-    if (sep == file.length() - 1) {
+    // If we have a good directory to extract to above, we now check whether
+    // the "file" parameter passed in is a directory or actually a file.
+    if (is_dir_only) { // directory, like /usr/bin/
       return true;
     }
+    // otherwise file is actually a file, so we actually extract.
   }
 
-  to.append(file);
-  struct zip_stat zipStat;
-  if (zip_stat(zip, file.c_str(), 0, &zipStat) != 0) {
-    return false;
-  }
+  // We have ensured that clean_file will be added to a relative path by the
+  // time we get here.
+  to.append(clean_file);
 
   auto zipFile = zip_fopen_index(zip, zipStat.index, 0);
   FAIL_IF_INVALID_PTR(zipFile);
@@ -747,7 +820,8 @@ static bool HHVM_METHOD(ZipArchive, extractTo, const String& destination,
     // extract all files
     for (decltype(fileCount) index = 0; index < fileCount; ++index) {
       auto file = zip_get_name(zipDir->getZip(), index, ZIP_FL_UNCHANGED);
-      if (!extractFileTo(zipDir->getZip(), file, to, buf, sizeof(buf))) {
+      if (file == nullptr ||
+          !extractFileTo(zipDir->getZip(), file, to, buf, sizeof(buf))) {
         return false;
       }
       to.resize(toSize);
@@ -840,6 +914,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromIndex, int64_t index,
   StringBuffer sb(length);
   auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
+  zip_fclose(zipFile);
   if (n > 0) {
     sb.resize(n);
     return sb.detach();
@@ -877,6 +952,7 @@ static Variant HHVM_METHOD(ZipArchive, getFromName, const String& name,
   StringBuffer sb(length);
   auto buf = sb.appendCursor(length);
   auto n   = zip_fread(zipFile, buf, length);
+  zip_fclose(zipFile);
   if (n > 0) {
     sb.resize(n);
     return sb.detach();
@@ -1038,6 +1114,45 @@ static bool HHVM_METHOD(ZipArchive, setCommentName, const String& name,
 
   if (zip_set_file_comment(zipDir->getZip(), index, comment.c_str(),
                            comment.length()) != 0 ) {
+    return false;
+  }
+
+  zip_error_clear(zipDir->getZip());
+  return true;
+}
+
+static bool HHVM_METHOD(ZipArchive, setCompressionIndex, int64_t index,
+                        int64_t comp_method, int64_t comp_flags) {
+  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+
+  FAIL_IF_INVALID_ZIPARCHIVE(setCompressionIndex, zipDir);
+
+  struct zip_stat zipStat;
+  if (zip_stat_index(zipDir->getZip(), index, 0, &zipStat) != 0) {
+    return false;
+  }
+
+  if (zip_set_file_compression(zipDir->getZip(), index, comp_method,
+                           comp_flags) != 0 ) {
+    return false;
+  }
+
+  zip_error_clear(zipDir->getZip());
+  return true;
+}
+
+static bool HHVM_METHOD(ZipArchive, setCompressionName, const String& name,
+                        int64_t comp_method, int64_t comp_flags) {
+  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+
+  FAIL_IF_INVALID_ZIPARCHIVE(setCompressionName, zipDir);
+  FAIL_IF_EMPTY_STRING_ZIPARCHIVE(setCompressionName, name);
+
+  int index = zip_name_locate(zipDir->getZip(), name.c_str(), 0);
+  FAIL_IF_INVALID_INDEX(index);
+
+  if (zip_set_file_compression(zipDir->getZip(), index, comp_method,
+                           comp_flags) != 0 ) {
     return false;
   }
 
@@ -1255,8 +1370,7 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-class zipExtension final : public Extension {
- public:
+struct zipExtension final : Extension {
   zipExtension() : Extension("zip", "1.12.4-dev") {}
   void moduleInit() override {
     HHVM_ME(ZipArchive, getProperty);
@@ -1284,6 +1398,8 @@ class zipExtension final : public Extension {
     HHVM_ME(ZipArchive, setArchiveComment);
     HHVM_ME(ZipArchive, setCommentIndex);
     HHVM_ME(ZipArchive, setCommentName);
+    HHVM_ME(ZipArchive, setCompressionIndex);
+    HHVM_ME(ZipArchive, setCompressionName);
     HHVM_ME(ZipArchive, statIndex);
     HHVM_ME(ZipArchive, statName);
     HHVM_ME(ZipArchive, unchangeAll);

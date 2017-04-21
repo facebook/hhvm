@@ -16,6 +16,7 @@ function test(
   typename<shape(
     'x' => ?int,
     'y' => (string, bool),
+    ...
   )> $t2,
 ): void {
   $ts1 = ts($t1);

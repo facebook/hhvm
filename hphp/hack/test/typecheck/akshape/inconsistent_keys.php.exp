@@ -1,3 +1,5 @@
-array<[1]intersect(Tstring), [2]intersect(Tint, Tstring)>
-array<[3]intersect(Tstring), [4]intersect(Tint, Tstring)>
+File "inconsistent_keys.php", line 17, characters 3-13:
+  array<^(string), ^(int | string)>
+File "inconsistent_keys.php", line 20, characters 3-13:
+  array<^(string), ^(int | string)>
 No errors

@@ -1,6 +1,10 @@
-File "meth_caller4.php", line 22, characters 10-16:
+File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
-File "meth_caller4.php", line 16, characters 36-38:
+File "meth_caller4.php", line 12, characters 9-9:
 This is an int
-File "meth_caller4.php", line 19, characters 30-33:
+File "meth_caller4.php", line 18, characters 34-34:
+It was implicitly typed as an int during this operation
+File "meth_caller4.php", line 20, characters 30-33:
 It is incompatible with a bool
+File "meth_caller4.php", line 12, characters 9-9:
+Considering that this type argument is invariant with respect to X

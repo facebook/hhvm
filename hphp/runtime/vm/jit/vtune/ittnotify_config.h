@@ -90,7 +90,8 @@
 #  if ITT_PLATFORM==ITT_PLATFORM_WIN
 #    define CDECL __cdecl
 #  else /* ITT_PLATFORM==ITT_PLATFORM_WIN */
-#    if defined _M_X64 || defined _M_AMD64 || defined __x86_64__
+#    if defined _M_X64 || defined _M_AMD64 || defined __x86_64__ \
+        || defined __powerpc64__ || defined __aarch64__
 #      define CDECL /* not actual on x86_64 platform */
 #    else  /* _M_X64 || _M_AMD64 || __x86_64__ */
 #      define CDECL __attribute__ ((__cdecl__))

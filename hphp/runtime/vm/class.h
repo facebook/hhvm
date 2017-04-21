@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/rds-util.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -34,6 +34,7 @@
 #include "hphp/util/default-ptr.h"
 #include "hphp/util/hash-map-typedefs.h"
 
+#include <folly/Hash.h>
 #include <folly/Range.h>
 
 #include <list>
@@ -48,10 +49,14 @@ namespace HPHP {
 
 struct Class;
 struct ClassInfo;
+struct EnumValues;
 struct Func;
-struct HhbcExtClassInfo;
 struct StringData;
-class c_WaitHandle;
+struct c_WaitHandle;
+
+namespace collections {
+struct CollectionsExtension;
+}
 
 namespace Native {
 struct NativeDataInfo;
@@ -59,6 +64,14 @@ struct NativePropHandler;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Utility wrapper for static properties. Allows distinguishing them
+ * via type_scan::Index.
+ */
+struct StaticPropData {
+  TypedValue val;
+};
 
 using ClassPtr = AtomicSharedLowPtr<Class>;
 
@@ -157,8 +170,8 @@ struct Class : AtomicCountable {
     LowStringPtr name;
     TypedValueAux val;
 
-    bool isAbstract() const { return val.constModifiers().m_isAbstract; }
-    bool isType()     const { return val.constModifiers().m_isType; }
+    bool isAbstract() const { return val.constModifiers().isAbstract; }
+    bool isType()     const { return val.constModifiers().isType; }
   };
 
   /*
@@ -197,10 +210,16 @@ struct Class : AtomicCountable {
   private:
     PropInitVec(const PropInitVec&);
 
+    bool reqAllocated() const;
+
     TypedValueAux* m_data;
-    unsigned m_size;
-    bool m_req_allocated;
+    uint32_t m_size;
+    // m_capacity > 0, allocated on global huge heap
+    // m_capacity = 0, not request allocated, m_data is nullptr
+    // m_capacity < 0, request allocated, with '~m_capacity' slots
+    int32_t m_capacity;
   };
+  static_assert(sizeof(PropInitVec) <= 16, "");
 
   /*
    * A slot in a Class vtable vector, pointing to the vtable for an interface
@@ -222,7 +241,45 @@ struct Class : AtomicCountable {
                               const PreClass::ClassRequirement*, true, int>;
 
   using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
-  using ScopedClonesMap = hphp_hash_map<uintptr_t,ClassPtr>;
+
+  /*
+   * Scope context for a Closure subclass.
+   */
+  struct CloneScope {
+    LowPtr<Class> ctx;
+    Attr attrs;
+
+    bool operator==(CloneScope o) const { return ctx == o.ctx &&
+                                                 attrs == o.attrs; }
+    bool operator!=(CloneScope o) const { return !(*this == o); }
+
+    struct hash {
+      size_t operator()(CloneScope cs) const {
+        return folly::hash::hash_combine(
+          cs.ctx.get(),
+          static_cast<uint32_t>(cs.attrs)
+        );
+      }
+    };
+  };
+
+  /*
+   * Map from a Closure subclass C's scope context to the appropriately scoped
+   * clone of C.
+   *
+   * @see: Class::ExtraData::m_scopedClones
+   */
+  using ScopedClonesMap = hphp_hash_map<CloneScope,ClassPtr,CloneScope::hash>;
+
+  /*
+   * A reference to a scoped clone of a Closure subclass.  We omit the Class
+   * ctx, since we only use this struct when the ctx is `this'.
+   */
+  struct ScopedCloneBackref {
+    ClassPtr template_cls;
+    /* LowPtr<Class> ctx_cls = this; */
+    Attr ctx_attrs;
+  };
 
   /*
    * We store the length of vectors of methods, parent classes and interfaces.
@@ -360,6 +417,11 @@ public:
   void* mallocPtr() const;
 
   /*
+   * Address of the end of the Class's variable-length memory allocation.
+   */
+  const void* mallocEnd() const;
+
+  /*
    * Pointer to the array of Class pointers, allocated immediately after
    * `this', which contain this class's inheritance hierarchy (including `this'
    * as the last element).
@@ -394,6 +456,11 @@ public:
    */
   const Class* commonAncestor(const Class* cls) const;
 
+  /*
+   * Given that this class exists, return a class named "name" that is
+   * also guaranteed to exist, or nullptr if there is none.
+   */
+  const Class* getClassDependency(const StringData* name) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]
@@ -456,6 +523,11 @@ public:
    */
   const Func* getCachedInvoke() const;
 
+  /*
+   * Does this class have a __call method?
+   */
+  bool hasCall() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtin classes.                                                   [const]
@@ -466,24 +538,12 @@ public:
   bool isBuiltin() const;
 
   /*
-   * Return the ClassInfo for a C++ extension class.
-   */
-  const ClassInfo* clsInfo() const;
-
-  /*
    * Custom initialization and destruction routines for C++ extension classes.
    *
    * instanceCtor() returns true iff the class is a C++ extension class.
    */
   BuiltinCtorFunction instanceCtor() const;
   BuiltinDtorFunction instanceDtor() const;
-
-  /*
-   * This value is the pointer adjustment from an ObjectData* to get to the
-   * property vector, for a builtin class.  In other words, it's the number of
-   * bytes of subclass data following the ObjectData subobject.
-   */
-  int32_t builtinODTailSize() const;
 
   /*
    * Whether this C++ extension class has opted into serialization.
@@ -662,6 +722,8 @@ public:
    * RDS handle for the static property at `index'.
    */
   rds::Handle sPropHandle(Slot index) const;
+  rds::Link<StaticPropData> sPropLink(Slot index) const;
+  rds::Link<bool> sPropInitLink() const;
 
   /*
    * Get the PropInitVec for the current request.
@@ -822,6 +884,11 @@ public:
    */
   const RequirementMap& allRequirements() const;
 
+  /*
+   * Store a cache of enum values. Takes ownership of 'values'.
+   */
+  EnumValues* setEnumValues(EnumValues* values);
+  EnumValues* getEnumValues() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Objects.                                                           [const]
@@ -833,10 +900,10 @@ public:
   size_t declPropOffset(Slot index) const;
 
   /*
-   * Whether instances of this class need to call a custom __init__ when
-   * created.
+   * Whether instances of this class implement Throwable interface, which
+   * requires additional initialization on construction.
    */
-  bool callsCustomInstanceInit() const;
+  bool needsInitThrowable() const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -849,7 +916,7 @@ public:
    * only a single name-to-class mapping will exist per request.
    */
   rds::Handle classHandle() const;
-  void setClassHandle(rds::Link<Class*> link) const;
+  void setClassHandle(rds::Link<LowPtr<Class>> link) const;
 
   /*
    * Get and set the RDS-cached class with this class's name.
@@ -920,6 +987,7 @@ public:
    */
   void setInstanceBits();
   void setInstanceBitsAndParents();
+  bool checkInstanceBit(unsigned int bit) const;
 
   /*
    * Get the underlying enum base type if this is an enum.
@@ -930,6 +998,10 @@ public:
 
 
   bool needsInitSProps() const;
+
+  // For assertions:
+  void validate() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
 
@@ -945,6 +1017,7 @@ public:
   OFF(propDataCache)
   OFF(vtableVecLen)
   OFF(vtableVec)
+  OFF(funcVecLen)
 #undef OFF
 
 
@@ -954,6 +1027,7 @@ public:
 private:
   struct ExtraData {
     ExtraData() {}
+    ~ExtraData();
 
     /*
      * Vector of (new name, original name) pairs, representing trait aliases.
@@ -979,26 +1053,35 @@ private:
      */
     BuiltinCtorFunction m_instanceCtor{nullptr};
     BuiltinDtorFunction m_instanceDtor{nullptr};
-    const ClassInfo* m_clsInfo{nullptr};
-    uint32_t m_builtinODTailSize{0};
 
     /*
      * Cache for Closure subclass scopings.
      *
-     * Only meaningful when `this' is an unscoped subclass of Closure.  When we
-     * need to create a closure in the scope of a Class C (and with attrs A),
-     * we clone `this', rescope its __invoke() appropriately, and then cache
-     * the (C,A) => clone binding here.
+     * Only meaningful when `this' is the "template" for a family of Closure
+     * subclasses.  When we need to create a closure in the scope of a Class C
+     * (and with attrs A), we clone `this', rescope its __invoke()
+     * appropriately, and then cache the (C,A) => clone binding here.
      *
      * @see: rescope()
      */
     ScopedClonesMap m_scopedClones;
 
     /*
+     * List of references to Closure subclasses whose scoped Class context is
+     * `this'.
+     */
+    std::vector<ScopedCloneBackref> m_clonesWithThisScope;
+
+    /*
      * Objects with the <<__NativeData("T")>> UA are allocated with extra space
      * prior to the ObjectData structure itself.
      */
     const Native::NativeDataInfo *m_nativeDataInfo{nullptr};
+
+    /*
+     * Cache of persistent enum values, managed by EnumCache.
+     */
+    std::atomic<EnumValues*> m_enumValues{nullptr};
   };
 
   /*
@@ -1086,9 +1169,11 @@ private:
                                   const StringData* traitName);
     static void errorDuplicateMethod(const Class* cls,
                                      const StringData* methName);
+    static void errorInconsistentInsteadOf(const Class* cls,
+                                           const StringData* methName);
   };
 
-  friend class TMIOps;
+  friend struct TMIOps;
 
   using TMIData = TraitMethodImportData<TraitMethod,
                                         TMIOps,
@@ -1162,21 +1247,6 @@ private:
   // Static data members.
 
 public:
-  /*
-   * A hashtable that maps class names to structures containing C++ function
-   * pointers for the class's methods and constructors.
-   */
-  static hphp_hash_map<const StringData*,
-                       const HhbcExtClassInfo*,
-                       string_data_hash,
-                       string_data_isame> s_extClassHash;
-
-  /*
-   * Callback which, if set, runs during setMethods().
-   */
-  static void (*MethodCreateHook)(Class* cls, MethodMapBuilder& builder);
-
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1185,19 +1255,28 @@ public:
   // The ordering is reverse order of hotness because m_classVec is relatively
   // hot, and must be the last member.
 
-public:
   LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:
+  static constexpr uint32_t kMagic = 0xce7adb33;
+
+#ifdef DEBUG
+  // For asserts only.
+  uint32_t m_magic;
+#endif
+
   default_ptr<ExtraData> m_extra;
   template<class T> friend typename
     std::enable_if<std::is_base_of<c_WaitHandle, T>::value, void>::type
   finish_class();
 
+  friend struct collections::CollectionsExtension;
+
   RequirementMap m_requirements;
   std::unique_ptr<ClassPtr[]> m_declInterfaces;
   uint32_t m_numDeclInterfaces{0};
-  mutable rds::Link<Array> m_nonScalarConstantCache{rds::kInvalidHandle};
+  mutable rds::Link<Array, true /* normal_only */>
+    m_nonScalarConstantCache{rds::kInvalidHandle};
 
   LowPtr<Func> m_toString;
   LowPtr<Func> m_invoke; // __invoke, iff non-static (or closure)
@@ -1206,7 +1285,7 @@ private:
 
   ClassPtr m_parent;
   int32_t m_declPropNumAccessible;
-  mutable rds::Link<Class*> m_cachedClass{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Class>> m_cachedClass{rds::kInvalidHandle};
 
   /*
    * Whether this is a subclass of Closure whose m_invoke->m_cls has been set
@@ -1252,7 +1331,7 @@ private:
    * 3. The RDS value at m_sPropCacheInit is set to true when initSProps() is
    *    called, and the values are actually initialized.
    */
-  mutable rds::Link<TypedValue>* m_sPropCache{nullptr};
+  mutable rds::Link<StaticPropData>* m_sPropCache{nullptr};
   mutable rds::Link<bool> m_sPropCacheInit{rds::kInvalidHandle};
 
   veclen_t m_classVecLen;
@@ -1274,7 +1353,8 @@ private:
 
   MaybeDataType m_enumBaseTy;
   uint16_t m_ODAttrs;
-  mutable rds::Link<PropInitVec*> m_propDataCache{rds::kInvalidHandle};
+  mutable rds::Link<PropInitVec*, true /* normal_only */>
+    m_propDataCache{rds::kInvalidHandle};
 
   /*
    * Whether the Class requires initialization, because it has either
@@ -1282,7 +1362,7 @@ private:
    */
   bool m_needInitialization : 1;
 
-  bool m_callsCustomInstanceInit : 1;
+  bool m_needsInitThrowable : 1;
   bool m_hasDeepInitProps : 1;
 
   /*
@@ -1335,6 +1415,11 @@ bool isNormalClass(const Class* cls);
  * allocate the handle before we loaded the class.
  */
 bool classHasPersistentRDS(const Class* cls);
+
+/*
+ * Returns whether cls or any of its children may have magic property methods.
+ */
+bool classMayHaveMagicPropMethods(const Class* cls);
 
 /*
  * Return the class that "owns" f.  This will normally be f->cls(), but for

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,9 +20,9 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/trace.h"
@@ -36,8 +36,6 @@ namespace HPHP {
 TRACE_SET_MOD(runtime);
 
 CompileStringFn g_hphp_compiler_parse;
-BuildNativeFuncUnitFn g_hphp_build_native_func_unit;
-BuildNativeClassUnitFn g_hphp_build_native_class_unit;
 
 /**
  * print_string will decRef the string
@@ -50,15 +48,15 @@ void print_string(StringData* s) {
 }
 
 void print_int(int64_t i) {
-  char buf[256];
-  snprintf(buf, 256, "%" PRId64, i);
-  g_context->write(buf);
-  TRACE(1, "t-x64 output(int): %" PRId64 "\n", i);
+  char intbuf[21];
+  auto const s = conv_10(i, intbuf + sizeof(intbuf));
+
+  g_context->write(s.data(), s.size());
 }
 
 void print_boolean(bool val) {
   if (val) {
-    g_context->write("1");
+    g_context->write("1", 1);
   }
 }
 
@@ -154,55 +152,31 @@ StringData* concat_s4(StringData* v1, StringData* v2,
 }
 
 Unit* compile_file(const char* s, size_t sz, const MD5& md5,
-                   const char* fname) {
-  return g_hphp_compiler_parse(s, sz, md5, fname);
-}
-
-Unit* build_native_func_unit(const HhbcExtFuncInfo* builtinFuncs,
-                             ssize_t numBuiltinFuncs) {
-  return g_hphp_build_native_func_unit(builtinFuncs, numBuiltinFuncs);
-}
-
-Unit* build_native_class_unit(const HhbcExtClassInfo* builtinClasses,
-                              ssize_t numBuiltinClasses) {
-  return g_hphp_build_native_class_unit(builtinClasses, numBuiltinClasses);
-}
-
-std::string mangleSystemMd5(const std::string& fileMd5) {
-  // This resembles mangleUnitMd5(...), however, only settings that HHBBC is
-  // aware of may be used here or it will be unable to load systemlib!
-  std::string t = fileMd5 + '\0'
-    + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
-    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
-    ;
-  return string_md5(t.c_str(), t.size());
+                   const char* fname, Unit** releaseUnit) {
+  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
 }
 
 Unit* compile_string(const char* s,
                      size_t sz,
-                     const char* fname /* = nullptr */) {
-  auto md5string = mangleSystemMd5(string_md5(s, sz));
-  MD5 md5(md5string.c_str());
-  Unit* u = Repo::get().loadUnit(fname ? fname : "", md5).release();
-  if (u != nullptr) {
+                     const char* fname,
+                     Unit** releaseUnit) {
+  auto const md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s, sz}))};
+  if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
     return u;
   }
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname);
+  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
 }
 
-Unit* compile_systemlib_string(const char* s, size_t sz,
-                               const char* fname) {
+Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
   if (RuntimeOption::RepoAuthoritative) {
-    String systemName = String("/:") + String(fname);
-    MD5 md5 {
-      mangleSystemMd5(string_md5(s, sz)).c_str()
-    };
+    String systemName = String("/:") + fname;
+    auto md5 = MD5{mangleUnitMd5(string_md5(folly::StringPiece{s,sz}))};
     if (Repo::get().findFile(systemName.data(),
                              SourceRootInfo::GetCurrentSourceRoot(),
-                             md5)) {
+                             md5) == RepoStatus::success) {
       if (auto u = Repo::get().loadUnit(fname, md5)) {
         return u.release();
       }
@@ -211,23 +185,23 @@ Unit* compile_systemlib_string(const char* s, size_t sz,
   return compile_string(s, sz, fname);
 }
 
-void assertTv(const TypedValue* tv) {
-  always_assert(tvIsPlausible(*tv));
-}
-
 int init_closure(ActRec* ar, TypedValue* sp) {
-  c_Closure* closure = static_cast<c_Closure*>(ar->getThis());
-
-  // Swap in the $this or late bound class or null if it is ony from a plain
-  // function or pseudomain
-  ar->setThisOrClassAllowNull(closure->getThisOrClass());
-
-  if (ar->hasThis()) {
-    ar->getThis()->incRefCount();
-  }
+  auto closure = c_Closure::fromObject(ar->getThis());
 
   // Put in the correct context
   ar->m_func = closure->getInvokeFunc();
+
+  if (ar->func()->cls()) {
+    // Swap in the $this or late bound class or null if it is ony from a plain
+    // function or pseudomain
+    ar->setThisOrClass(closure->getThisOrClass());
+
+    if (ar->hasThis()) {
+      ar->getThis()->incRefCount();
+    }
+  } else {
+    ar->trashThis();
+  }
 
   // The closure is the first local.
   // Similar to tvWriteObject() but we don't incref because it used to be $this
@@ -259,7 +233,7 @@ void raiseArrayIndexNotice(const int64_t index) {
 }
 
 void raiseArrayKeyNotice(const StringData* key) {
-  raise_notice("Undefined key: %s", key->data());
+  raise_notice("Undefined index: %s", key->data());
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,8 @@ void ThreadLocalManager::OnThreadExit(void* p) {
   }
 }
 
-void ThreadLocalManager::PushTop(void* nodePtr, size_t nodeSize) {
+void ThreadLocalManager::PushTop(void* nodePtr, uint32_t nodeSize,
+                                 type_scan::Index tyindex) {
   auto& node = *static_cast<ThreadLocalNode<void>*>(nodePtr);
   auto key = GetManager().m_key;
   auto list = getList(pthread_getspecific(key));
@@ -55,6 +56,7 @@ void ThreadLocalManager::PushTop(void* nodePtr, size_t nodeSize) {
   }
   node.m_next = list->head;
   node.m_size = nodeSize;
+  node.m_tyindex = tyindex;
   list->head = &node;
 }
 

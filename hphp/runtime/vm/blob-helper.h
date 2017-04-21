@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,7 +81,8 @@ namespace HPHP {
  */
 
 template<class T, class SerDe>
-class IsNontrivialSerializable {
+struct IsNontrivialSerializable {
+private:
   template<class U, void (U::*)(SerDe&)> struct Checker;
   template<class U> static char test(Checker<U,&U::template serde<SerDe> >*);
   template<class>   static long test(...);
@@ -179,18 +180,22 @@ struct BlobEncoder {
     encodeContainer(vec, "vector");
   }
 
-  template<class K, class V, class H, class C>
-  void encode(const hphp_hash_map<K,V,H,C>& map) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::value_type,
+                 std::pair<typename T::key_type const,
+                           typename T::mapped_type>>::value &&
+    !IsNontrivialSerializable<T,BlobEncoder>::value
+  >::type encode(const T& map) {
     encodeContainer(map, "map");
   }
 
-  template<class V, class H, class C>
-  void encode(const hphp_hash_set<V,H,C>& set) {
-    encodeContainer(set, "set");
-  }
-
-  template<class V, class H, class C>
-  void encode(const std::unordered_set<V,H,C>& set) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::key_type,
+                 typename T::value_type>::value &&
+    !IsNontrivialSerializable<T,BlobEncoder>::value
+  >::type encode(const T& set) {
     encodeContainer(set, "set");
   }
 
@@ -250,7 +255,7 @@ struct BlobDecoder {
 
   template<class T>
   typename std::enable_if<
-    IsNontrivialSerializable<T,BlobEncoder>::value
+    IsNontrivialSerializable<T,BlobDecoder>::value
   >::type decode(T& t) {
     t.serde(*this);
   }
@@ -324,34 +329,34 @@ struct BlobDecoder {
     }
   }
 
-  template<class K, class V, class H, class C>
-  void decode(hphp_hash_map<K,V,H,C>& map) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::value_type,
+                 std::pair<typename T::key_type const,
+                           typename T::mapped_type>>::value &&
+    !IsNontrivialSerializable<T,BlobDecoder>::value
+  >::type decode(T& map) {
     uint32_t size;
     decode(size);
     for (uint32_t i = 0; i < size; ++i) {
-      std::pair<K,V> val;
+      typename T::key_type key;
+      decode(key);
+      typename T::mapped_type val;
       decode(val);
-      map.insert(val);
+      map.emplace(key, val);
     }
   }
 
-  template<class V, class H, class C>
-  void decode(hphp_hash_set<V,H,C>& set) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::key_type,
+                 typename T::value_type>::value &&
+    !IsNontrivialSerializable<T,BlobDecoder>::value
+  >::type decode(T& set) {
     uint32_t size;
     decode(size);
     for (uint32_t i = 0; i < size; ++i) {
-      V val;
-      decode(val);
-      set.insert(val);
-    }
-  }
-
-  template<class V, class H, class C>
-  void decode(std::unordered_set<V,H,C>& set) {
-    uint32_t size;
-    decode(size);
-    for (uint32_t i = 0; i < size; ++i) {
-      V val;
+      typename T::value_type val;
       decode(val);
       set.insert(val);
     }

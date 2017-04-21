@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,15 +17,14 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/param.h>
 #include <vector>
 
 #include <folly/MapUtil.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/util/logger.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/jit/hooks.h"
 #include "hphp/util/text-util.h"
@@ -516,7 +515,7 @@ StatCache::NodePtr StatCache::getNode(const std::string& path, bool follow) {
 bool StatCache::mergePath(const std::string& path, bool follow) {
   String canonicalPath = FileUtil::canonicalize(path);
   std::vector<std::string> pvec;
-  split('/', canonicalPath.data(), pvec);
+  folly::split('/', canonicalPath.slice(), pvec);
   assert((pvec[0].size() == 0)); // path should be absolute.
   // Lazily initialize so that if StatCache never gets used, no kernel
   // resources are consumed.
@@ -689,11 +688,15 @@ int StatCache::statImpl(const std::string& path, struct stat* buf) {
     return statSyscall(path, buf);
   }
 
+  NodePtr p;
   {
     NameNodeMap::const_accessor acc;
     if (m_path2Node.find(acc, path)) {
-      return acc->second->stat(path, buf);
+      p = acc->second;
     }
+  }
+  if (p) {
+    return p->stat(path, buf);
   }
   {
     SimpleLock lock(m_lock);
@@ -716,11 +719,15 @@ int StatCache::lstatImpl(const std::string& path, struct stat* buf) {
     return statSyscall(path, buf);
   }
 
+  NodePtr p;
   {
     NameNodeMap::const_accessor acc;
     if (m_lpath2Node.find(acc, path)) {
-      return acc->second->lstat(path, buf);
+      p = acc->second;
     }
+  }
+  if (p) {
+    return p->lstat(path, buf);
   }
   {
     SimpleLock lock(m_lock);
@@ -743,11 +750,15 @@ std::string StatCache::readlinkImpl(const std::string& path) {
     return readlinkSyscall(path);
   }
 
+  NodePtr p;
   {
     NameNodeMap::const_accessor acc;
     if (m_lpath2Node.find(acc, path)) {
-      return acc->second->readlink(path);
+      p = acc->second;
     }
+  }
+  if (p) {
+    return p->readlink(path);
   }
   {
     SimpleLock lock(m_lock);

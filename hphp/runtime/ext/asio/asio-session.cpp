@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,13 +23,11 @@
 #include <folly/String.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -63,10 +61,10 @@ namespace {
     assert(function.get());
     try {
       vm_call_user_func(function, params);
-    } catch (const Object& exception) {
+    } catch (const Object&) {
       try {
         raise_warning("[asio] Ignoring exception thrown by %s callback", name);
-      } catch (const Object& exception) {
+      } catch (const Object&) {
         // Swallow the exception. Callers are not designed to deal with
         // PHP exceptions.
       }
@@ -75,7 +73,7 @@ namespace {
 }
 
 void AsioSession::Init() {
-  s_current.set(new AsioSession());
+  s_current.set(req::make_raw<AsioSession>());
 }
 
 AsioSession::AsioSession()
@@ -88,7 +86,7 @@ void AsioSession::enterContext(ActRec* savedFP) {
       "Unable to enter asio context: too many contexts open");
   }
 
-  m_contexts.push_back(new AsioContext(savedFP));
+  m_contexts.push_back(req::make_raw<AsioContext>(savedFP));
 
   assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
   assert(isInContext());
@@ -98,7 +96,7 @@ void AsioSession::exitContext() {
   assert(isInContext());
 
   m_contexts.back()->exit(m_contexts.size());
-  delete m_contexts.back();
+  req::destroy_raw(m_contexts.back());
   m_contexts.pop_back();
 }
 
@@ -222,50 +220,6 @@ void AsioSession::onAwaitAllCreate(
     m_onAwaitAllCreate,
     make_packed_array(waitHandle, dependencies),
     "AwaitAllWaitHandle::onCreate"
-  );
-}
-
-void AsioSession::setOnGenArrayCreate(const Variant& callback) {
-  m_onGenArrayCreate = checkCallback(callback, "GenArrayWaitHandle::onCreate");
-}
-
-void AsioSession::onGenArrayCreate(
-  c_GenArrayWaitHandle* waitHandle,
-  const Variant& dependencies
-) {
-  runCallback(
-    m_onGenArrayCreate,
-    make_packed_array(waitHandle, dependencies),
-    "GenArrayWaitHandle::onCreate"
-  );
-}
-
-void AsioSession::setOnGenMapCreate(const Variant& callback) {
-  m_onGenMapCreate = checkCallback(callback, "GenMapWaitHandle::onCreate");
-}
-
-void AsioSession::onGenMapCreate(
-  c_GenMapWaitHandle* waitHandle,
-  const Variant& dependencies
-) {
-  runCallback(m_onGenMapCreate,
-    make_packed_array(waitHandle, dependencies),
-    "GenMapWaitHandle::onCreate"
-  );
-}
-
-void AsioSession::setOnGenVectorCreate(const Variant& callback) {
-  m_onGenVectorCreate= checkCallback(callback, "GenVectorWaitHandle::onCreate");
-}
-
-void AsioSession::onGenVectorCreate(
-  c_GenVectorWaitHandle* waitHandle,
-  const Variant& dependencies
-) {
-  runCallback(
-    m_onGenVectorCreate,
-    make_packed_array(waitHandle, dependencies),
-    "GenVectorWaitHandle::onCreate"
   );
 }
 
@@ -396,8 +350,9 @@ bool AsioSession::processSleepEvents() {
     if (wh->getWakeTime() > now) {
       break;
     }
-    woken = true;
-    wh->process();
+    if (wh->process()) {
+      woken = true;
+    }
     decRefObj(wh);
     std::pop_heap(m_sleepEvents.begin(), m_sleepEvents.end(), sleep_compare);
     m_sleepEvents.pop_back();
@@ -407,8 +362,16 @@ bool AsioSession::processSleepEvents() {
 }
 
 AsioSession::TimePoint AsioSession::sleepWakeTime() {
-  return m_sleepEvents.empty() ? getLatestWakeTime() :
-         m_sleepEvents.front()->getWakeTime();
+  auto const timeout = getLatestWakeTime();
+  return m_sleepEvents.empty() ? timeout :
+         min(timeout, m_sleepEvents.front()->getWakeTime());
+}
+
+c_SleepWaitHandle* AsioSession::nextSleepEvent() {
+  if (m_sleepEvents.empty()) {
+    return nullptr;
+  }
+  return m_sleepEvents.front();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

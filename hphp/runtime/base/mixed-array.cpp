@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,16 +16,18 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 
+#include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -35,6 +37,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/trace.h"
 
+#include <folly/portability/Constexpr.h>
+
 #include <algorithm>
 #include <utility>
 
@@ -42,13 +46,40 @@
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 
+#if defined(__x86_64__) && defined(FACEBOOK) && !defined(NO_SSE42) &&\
+    defined(NO_M_DATA)
+#include "hphp/runtime/base/mixed-array-x64.h"
+#endif
+
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
+static_assert(computeAllocBytes(MixedArray::SmallScale) ==
+              kEmptyMixedArraySize, "");
+
+std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
+
+struct MixedArray::Initializer {
+  Initializer() {
+    auto const ad = reinterpret_cast<MixedArray*>(&s_theEmptyDictArray);
+    auto const data = mixedData(ad);
+    auto const hash = mixedHash(data, 1);
+    ad->initHash(hash, 1);
+    ad->m_sizeAndPos = 0;
+    ad->m_scale_used = 1;
+    ad->m_nextKI = 0;
+    ad->initHeader(HeaderKind::Dict, StaticValue);
+  }
+};
+MixedArray::Initializer MixedArray::s_initializer;
+
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
+ALWAYS_INLINE
+ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
+  assert(hk == HeaderKind::Mixed || hk == HeaderKind::Dict);
+
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAllocArray(scale);
 
@@ -59,11 +90,11 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   ad->initHash(hash, scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
-  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->initHeader(hk, 1);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
-  assert(ad->kind() == kMixedKind);
+  assert(ad->kind() == kMixedKind || ad->kind() == kDictKind);
   assert(ad->m_size == 0);
   assert(ad->m_pos == 0);
   assert(ad->hasExactlyOneRef());
@@ -74,84 +105,53 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
   return ad;
 }
 
+ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
+  auto ad = MakeReserveImpl(size, HeaderKind::Mixed);
+  assert(ad->isMixed());
+  return ad;
+}
+
+ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
+  auto ad = MakeReserveImpl(size, HeaderKind::Dict);
+  assert(ad->isDict());
+  return ad;
+}
+
+ArrayData* MixedArray::MakeReserveSame(const ArrayData* other,
+                                       uint32_t capacity) {
+  capacity = (capacity ? capacity : other->size());
+
+  if (other->isPacked()) {
+    return PackedArray::MakeReserve(capacity);
+  }
+
+  if (other->isVecArray()) {
+    return PackedArray::MakeReserveVec(capacity);
+  }
+
+  if (other->isDict()) {
+    return MixedArray::MakeReserveDict(capacity);
+  }
+
+  if (other->isKeyset()) {
+    return SetArray::MakeReserveSet(capacity);
+  }
+
+  return MixedArray::MakeReserveMixed(capacity);
+}
+
 ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
                                        uint32_t capacity) {
   capacity = (capacity ? capacity : other->size());
 
-  return other->kind() == kPackedKind ? MixedArray::MakeReserve(capacity)
-                                      : MixedArray::MakeReserveMixed(capacity);
-}
-
-ArrayData* MixedArray::MakePacked(uint32_t size, const TypedValue* values) {
-  assert(size > 0);
-  ArrayData* ad;
-  if (LIKELY(size <= CapCode::Threshold)) {
-    auto cap = size;
-    if (auto const newCap = PackedArray::getMaxCapInPlaceFast(cap)) {
-      cap = newCap;
-    }
-    assert(cap > 0);
-    ad = static_cast<ArrayData*>(
-      MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-    );
-    assert(cap == CapCode::ceil(cap).code);
-    ad->m_sizeAndPos = size; // pos=0
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
-    assert(ad->m_size == size);
-    assert(ad->kind() == kPackedKind);
-    assert(ad->cap() == cap);
+  if (other->hasPackedLayout()) {
+    return PackedArray::MakeReserve(capacity);
   } else {
-    ad = MakePackedHelper(size, values);
+    return MixedArray::MakeReserveMixed(capacity);
   }
-
-  // Append values by moving -- Caller assumes we update refcount.
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
-  auto ptr = reinterpret_cast<TypedValue*>(ad + 1);
-  for (auto i = uint32_t{0}; i < size; ++i) {
-    auto const& src = values[size - i - 1];
-    ptr->m_type = src.m_type;
-    ptr->m_data = src.m_data;
-    ++ptr;
-  }
-
-  assert(ad->m_pos == 0);
-  assert(ad->hasExactlyOneRef());
-  assert(PackedArray::checkInvariants(ad));
-  return ad;
 }
 
-NEVER_INLINE ArrayData*
-MixedArray::MakePackedHelper(uint32_t size, const TypedValue* values) {
-  auto const ad = MakeReserveSlow(size); // size=pos=kind=0
-  assert(ad->kind() == kPackedKind);
-  assert(ad->m_size == size);
-  assert(ad->cap() >= size);
-  assert(ad->hasExactlyOneRef());
-  return ad;
-}
-
-ArrayData* MixedArray::MakePackedUninitialized(uint32_t size) {
-  assert(size > 0);
-  ArrayData* ad;
-  assert(size <= CapCode::Threshold);
-  auto const cap = size;
-  ad = static_cast<ArrayData*>(
-    MM().objMalloc(sizeof(ArrayData) + sizeof(TypedValue) * cap)
-  );
-  assert(cap == CapCode::ceil(cap).code);
-  ad->m_sizeAndPos = size; // pos=0
-  ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, 1);
-  assert(ad->m_size == size);
-  assert(ad->m_pos == 0);
-  assert(ad->kind() == kPackedKind);
-  assert(ad->cap() == cap);
-  assert(ad->hasExactlyOneRef());
-  assert(PackedArray::checkInvariants(ad));
-  return ad;
-}
-
-MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
+MixedArray* MixedArray::MakeStruct(uint32_t size, const StringData* const* keys,
                                    const TypedValue* values) {
   assert(size > 0);
 
@@ -163,7 +163,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   ad->initHash(hash, scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->m_hdr.init(HeaderKind::Mixed, 1);
+  ad->initHeader(HeaderKind::Mixed, 1);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -175,7 +175,7 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
     assert(keys[i]->isStatic());
     auto k = keys[i];
     auto h = k->hash();
-    data[i].setStaticKey(k, h);
+    data[i].setStaticKey(const_cast<StringData*>(k), h);
     const auto& tv = values[size - i - 1];
     data[i].data.m_data = tv.m_data;
     data[i].data.m_type = tv.m_type;
@@ -194,30 +194,65 @@ MixedArray* MixedArray::MakeStruct(uint32_t size, StringData** keys,
   return ad;
 }
 
-StructArray* MixedArray::MakeStructArray(
-  uint32_t size,
-  const TypedValue* values,
-  Shape* shape
-) {
+MixedArray* MixedArray::MakeMixed(uint32_t size,
+                                  const TypedValue* keysAndValues) {
   assert(size > 0);
-  assert(size <= CapCode::Threshold);
-  assert(shape);
 
-  // Append values by moving -- Caller assumes we update refcount.
-  // Values are in reverse order since they come from the stack, which
-  // grows down.
-  auto ret = StructArray::createReversedValues(shape, values, size);
-  assert(ret->hasExactlyOneRef());
-  return ret;
+  auto const scale = computeScaleFromSize(size);
+  auto const ad    = reqAllocArray(scale);
+
+  auto const data = mixedData(ad);
+  auto const hash = mixedHash(data, scale);
+  ad->initHash(hash, scale);
+
+  ad->m_sizeAndPos       = size; // pos=0
+  ad->initHeader(HeaderKind::Mixed, 1);
+  ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
+  ad->m_nextKI           = 0;
+
+  // Append values by moving -- no refcounts are updated.
+  for (uint32_t i = 0; i < size; i++) {
+    auto& kTv = keysAndValues[i * 2];
+    if (kTv.m_type == KindOfString) {
+      auto k = kTv.m_data.pstr;
+      auto h = k->hash();
+      auto ei = ad->findForInsert(k, h);
+      if (validPos(*ei)) return nullptr;
+      data[i].setStrKeyNoIncRef(k, h);
+      *ei = i;
+    } else {
+      assert(kTv.m_type == KindOfInt64);
+      auto k = kTv.m_data.num;
+      auto h = hash_int64(k);
+      auto ei = ad->findForInsert(k, h);
+      if (validPos(*ei)) return nullptr;
+      data[i].setIntKey(k, h);
+      *ei = i;
+    }
+    const auto& tv = keysAndValues[(i * 2) + 1];
+    data[i].data.m_data = tv.m_data;
+    data[i].data.m_type = tv.m_type;
+  }
+
+  assert(ad->m_size == size);
+  assert(ad->m_pos == 0);
+  assert(ad->kind() == kMixedKind);
+  assert(ad->m_scale == scale);
+  assert(ad->hasExactlyOneRef());
+  assert(ad->m_used == size);
+  assert(ad->m_nextKI == 0);
+  assert(ad->checkInvariants());
+  return ad;
 }
 
 // for internal use by copyStatic() and copyMixed()
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
-                                  AllocMode mode) {
+                                  AllocMode mode, HeaderKind dest_hk) {
+  assert(dest_hk == HeaderKind::Mixed || dest_hk == HeaderKind::Dict);
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request ? reqAllocArray(scale)
-                                           : staticAllocArray(scale);
+                                             : staticAllocArray(scale);
 
   // Copy everything including tombstones.  We want to copy the elements and
   // the hash separately, because the array may not be very full.
@@ -229,7 +264,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   bcopy32_inline(ad, &other,
                  sizeof(MixedArray) + sizeof(Elm) * other.m_used + 24);
   RefCount count = mode == AllocMode::Request ? 1 : StaticValue;
-  ad->m_hdr.init(other.m_hdr, count);
+  ad->initHeader(dest_hk, count);
   copyHash(ad->hashTab(), other.hashTab(), scale);
 
   // Bump up refcounts as needed.
@@ -244,6 +279,13 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
       if (!ref->isReferenced() && ref->tv()->m_data.parr != &other) {
         cellDup(*ref->tv(), *reinterpret_cast<Cell*>(&e.data));
         continue;
+      } else if (dest_hk == HeaderKind::Dict) {
+        ad->m_used = i;
+        ad->m_size = i;
+        ad->m_pos = 0;
+        if (ad->isRefCounted()) Release(ad);
+        else if (ad->isUncounted()) ReleaseUncounted(ad);
+        throwRefInvalidArrayValueException(staticEmptyDictArray());
       }
     }
     tvRefcountedIncRef(&e.data);
@@ -259,7 +301,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     ad->compact(false);
   }
 
-  assert(ad->kind() == other.kind());
+  assert(ad->m_kind == dest_hk);
   assert(ad->m_size == other.m_size);
   assert(ad->m_pos == other.m_pos);
   assert(mode == AllocMode::Request ? ad->hasExactlyOneRef() :
@@ -272,12 +314,12 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
 NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto a = asMixed(in);
   assert(a->checkInvariants());
-  return CopyMixed(*a, AllocMode::Static);
+  return CopyMixed(*a, AllocMode::Static, in->m_kind);
 }
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assert(checkInvariants());
-  return CopyMixed(*this, AllocMode::Request);
+  return CopyMixed(*this, AllocMode::Request, this->m_kind);
 }
 
 ALWAYS_INLINE
@@ -322,82 +364,89 @@ Variant MixedArray::CreateVarForUncountedArray(const Variant& source) {
       return source.getInt64();
     case KindOfDouble:
       return source.getDouble();
-    case KindOfStaticString:
-      return Variant{source.getStringData()};
+    case KindOfPersistentString:
+      return Variant{source.getStringData(), Variant::PersistentStrInit{}};
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
+    case KindOfPersistentArray:
+      return Variant{source.getArrayData()};
 
     case KindOfString: {
       auto src = source.getStringData();
-      if (src->isStatic()) return Variant{src};
-      if (auto s = lookupStaticString(src)) return Variant{s};
-      return Variant{StringData::MakeUncounted(src->slice())};
+      if (!src->isRefCounted()) {
+        return Variant{src, Variant::PersistentStrInit{}};
+      }
+      if (auto s = lookupStaticString(src)) {
+        return Variant{s, Variant::PersistentStrInit{}};
+      }
+      return Variant{StringData::MakeUncounted(src->slice()),
+                     Variant::PersistentStrInit{}};
+    }
+
+    case KindOfVec: {
+      auto const ad = source.getArrayData();
+      assert(ad->isVecArray());
+      if (ad->empty()) return Variant{staticEmptyVecArray()};
+      return Variant{PackedArray::MakeUncounted(ad)};
+    }
+
+    case KindOfDict: {
+      auto const ad = source.getArrayData();
+      assert(ad->isDict());
+      if (ad->empty()) return Variant{staticEmptyDictArray()};
+      return Variant{MixedArray::MakeUncounted(ad)};
+    }
+
+    case KindOfKeyset: {
+      auto const ad = source.getArrayData();
+      assert(ad->isKeyset());
+      if (ad->empty()) return Variant{staticEmptyKeysetArray()};
+      return Variant{SetArray::MakeUncounted(ad)};
     }
 
     case KindOfArray: {
       auto const ad = source.getArrayData();
-      if (ad->empty())    return Variant{staticEmptyArray()};
-      if (ad->isPacked()) return Variant{MixedArray::MakeUncountedPacked(ad)};
-      if (ad->isStruct()) return Variant{StructArray::MakeUncounted(ad)};
+      assert(ad->isPHPArray());
+      if (ad->empty()) return Variant{staticEmptyArray()};
+      if (ad->hasPackedLayout()) return Variant{PackedArray::MakeUncounted(ad)};
       return Variant{MixedArray::MakeUncounted(ad)};
     }
 
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
 }
 
-// This function helps converting a TypedValue `source' to its uncounted form,
-// so that its lifetime can go beyond the current request.  It is used after
-// doing a raw copy of the array elements (without manipulating refcounts, as
-// an uncounted won't hold any reference to refcounted values.
-ALWAYS_INLINE
-void MixedArray::ConvertTvToUncounted(TypedValue* source) {
-  if (source->m_type == KindOfRef) { // unbox
-    auto const inner = source->m_data.pref->tv();
-    tvCopy(*inner, *source);
-  }
-  auto& type = source->m_type;
-  // `source' cannot be Ref here as we already did an unbox.  It won't be
-  // Object or Resource, as these should never appear in an uncounted array.
-  // Thus we only need to deal with strings/arrays.  Note that even if the
-  // string/array is already uncounted but not static, we still have to make a
-  // copy, as we have no idea about the lifetime of the other uncounted item
-  // here.
-  if (!tvIsStatic(source)) {
-    if (type == KindOfString) {
-      auto& str = source->m_data.pstr;
-      if (str->empty()) str = staticEmptyString();
-      else if (auto const st = lookupStaticString(str)) str = st;
-      else str = StringData::MakeUncounted(str->slice());
-    } else {
-      assertx(type == KindOfArray);
-      auto& ad = source->m_data.parr;
-      if (ad->empty()) ad = staticEmptyArray();
-      else if (ad->isPacked()) ad = MixedArray::MakeUncountedPacked(ad);
-      else if (ad->isStruct()) ad = StructArray::MakeUncounted(ad);
-      else ad = MixedArray::MakeUncounted(ad);
-    }
-  } else if (type == KindOfUninit) {
-    type = KindOfNull;
-  }
+ALWAYS_INLINE static bool UncountedMixedArrayOnHugePage() {
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+  return high_huge1g_arena && RuntimeOption::EvalUncountedMixedArrayHuge;
+#else
+  return false;
+#endif
 }
 
-ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
+ArrayData* MixedArray::MakeUncounted(ArrayData* array, size_t extra) {
   auto a = asMixed(array);
   assertx(!a->empty());
   auto const scale = a->scale();
-  auto const ad = staticAllocArray(scale);
+  auto const allocSize = extra + computeAllocBytes(scale);
+  auto const mem = static_cast<char*>(
+    UncountedMixedArrayOnHugePage() ? malloc_huge(allocSize) : malloc(allocSize)
+  );
+  auto const ad = reinterpret_cast<MixedArray*>(mem + extra);
   auto const used = a->m_used;
   // Do a raw copy first, without worrying about counted types or refcount
   // manipulation.  To copy in 32-byte chunks, we add 24 bytes to the length.
   // This might overwrite the hash table, but won't go beyond the space
   // allocated for the MixedArray, assuming `malloc()' always allocates
-  // multiple of 16 bytes.
+  // multiple of 16 bytes and extra is also a multiple of 16.
+  assert((extra & 0xf) == 0);
   bcopy32_inline(ad, a, sizeof(MixedArray) + sizeof(Elm) * used + 24);
-  ad->m_hdr.count = UncountedValue; // after bcopy, update count
+  ad->m_count = UncountedValue; // after bcopy, update count
   copyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.
@@ -416,57 +465,14 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array) {
   return ad;
 }
 
-ArrayData* MixedArray::MakeUncountedPacked(ArrayData* array) {
-  assert(PackedArray::checkInvariants(array));
-  assert(!array->empty());
-  ArrayData* ad;
-  auto const size = array->m_size;
-  if (LIKELY(size <= CapCode::Threshold)) {
-    // We don't need to copy the full capacity, since the array won't change
-    // once it's uncounted.
-    auto const cap = size;
-    ad = static_cast<ArrayData*>(
-      std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
-    );
-    assert(cap == CapCode::ceil(cap).code);
-    ad->m_sizeAndPos = array->m_sizeAndPos;
-    ad->m_hdr.init(CapCode::exact(cap), HeaderKind::Packed, UncountedValue);
-    assert(ad->kind() == ArrayData::kPackedKind);
-    assert(ad->cap() == cap);
-    assert(ad->m_size == size);
-  } else {
-    ad = MakeUncountedPackedHelper(array);
+ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
+  assert(apc->isDict());
+  auto const apcSize = apc->size();
+  DictInit init{apcSize};
+  for (uint32_t i = 0; i < apcSize; ++i) {
+    init.setValidKey(apc->getKey(i), apc->getValue(i)->toLocal());
   }
-  auto const srcData = packedData(array);
-  auto targetData = reinterpret_cast<TypedValue*>(ad + 1);
-  // Do a raw copy without worrying about refcounts, and convert the values to
-  // uncounted later.
-  memcpy16_inline(targetData, srcData, sizeof(TypedValue) * size);
-  for (uint32_t i = 0; i < size; ++i) {
-    ConvertTvToUncounted(targetData + i);
-  }
-
-  assert(ad->m_pos == array->m_pos);
-  assert(ad->isUncounted());
-  assert(PackedArray::checkInvariants(ad));
-  return ad;
-}
-
-NEVER_INLINE
-ArrayData* MixedArray::MakeUncountedPackedHelper(ArrayData* array) {
-  auto const fpcap = CapCode::ceil(array->m_size);
-  auto const cap = fpcap.decode();
-  auto const ad = static_cast<ArrayData*>(
-    std::malloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
-  );
-  ad->m_sizeAndPos = array->m_sizeAndPos;
-  ad->m_hdr.init(fpcap, HeaderKind::Packed, UncountedValue);
-  assert(ad->kind() == ArrayData::kPackedKind);
-  assert(ad->cap() == cap);
-  assert(ad->m_size == array->m_size);
-  assert(ad->m_pos == array->m_pos);
-  assert(ad->isUncounted());
-  return ad;
+  return init.create();
 }
 
 //=============================================================================
@@ -500,34 +506,8 @@ void MixedArray::Release(ArrayData* in) {
   MM().objFree(ad, ad->heapSize());
 }
 
-void MixedArray::ReleaseUncountedTypedValue(TypedValue& tv) {
-  if (tv.m_type == KindOfString) {
-    assert(!tv.m_data.pstr->isRefCounted());
-    if (tv.m_data.pstr->isUncounted()) {
-      tv.m_data.pstr->destructUncounted();
-    }
-    return;
-  }
-
-  if (tv.m_type == KindOfArray) {
-    assert(!tv.m_data.parr->isRefCounted());
-    if (!tv.m_data.parr->isStatic()) {
-      if (tv.m_data.parr->isPacked()) {
-        MixedArray::ReleaseUncountedPacked(tv.m_data.parr);
-      } else if (tv.m_data.parr->isStruct()) {
-        StructArray::ReleaseUncounted(tv.m_data.parr);
-      } else {
-        MixedArray::ReleaseUncounted(tv.m_data.parr);
-      }
-    }
-    return;
-  }
-
-  assert(!isRefcountedType(tv.m_type));
-}
-
 NEVER_INLINE
-void MixedArray::ReleaseUncounted(ArrayData* in) {
+void MixedArray::ReleaseUncounted(ArrayData* in, size_t extra) {
   auto const ad = asMixed(in);
   assert(ad->isUncounted());
 
@@ -543,8 +523,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
           ptr->skey->destructUncounted();
         }
       }
-
-      ReleaseUncountedTypedValue(ptr->data);
+      ReleaseUncountedTv(ptr->data);
     }
 
     // We better not have strong iterators associated with uncounted
@@ -555,30 +534,11 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
       });
     }
   }
-
-  std::free(ad);
-}
-
-NEVER_INLINE
-void MixedArray::ReleaseUncountedPacked(ArrayData* ad) {
-  assert(PackedArray::checkInvariants(ad));
-  assert(ad->isUncounted());
-
-  auto const data = packedData(ad);
-  auto const stop = data + ad->m_size;
-  for (auto ptr = data; ptr != stop; ++ptr) {
-    ReleaseUncountedTypedValue(*ptr);
+  if (UncountedMixedArrayOnHugePage()) {
+    free_huge(reinterpret_cast<char*>(ad) - extra);
+  } else {
+    free(reinterpret_cast<char*>(ad) - extra);
   }
-
-  // We better not have strong iterators associated with uncounted
-  // arrays.
-  if (debug && UNLIKELY(strong_iterators_exist())) {
-    for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
-      assert(miEnt.array != ad);
-    });
-  }
-
-  std::free(ad);
 }
 
 //=============================================================================
@@ -632,6 +592,7 @@ bool MixedArray::checkInvariants() const {
   );
 
   // All arrays:
+  assert(hasMixedLayout());
   assert(checkCount());
   assert(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
   assert(MixedArray::HashSize(m_scale) ==
@@ -749,7 +710,7 @@ bool MixedArray::IsVectorData(const ArrayData* ad) {
 // Lookup.
 
 ALWAYS_INLINE bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
-                                int32_t hash) {
+                                strhash_t hash) {
   // hitStringKey() should only be called on an Elm that is referenced by a
   // hash table entry. MixedArray guarantees that when it adds a hash table
   // entry that it always sets it to refer to a valid element. Likewise when
@@ -778,7 +739,7 @@ static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
 // table elements exactly once.
 
 template <class Hit> ALWAYS_INLINE
-ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
+ssize_t MixedArray::findImpl(hash_t h0, Hit hit) const {
   uint32_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
@@ -796,8 +757,8 @@ ssize_t MixedArray::findImpl(size_t h0, Hit hit) const {
   }
 }
 
-ssize_t MixedArray::find(int64_t ki) const {
-  return findImpl(ki, [ki] (const Elm& e) {
+ssize_t MixedArray::find(int64_t ki, inthash_t h) const {
+  return findImpl(h, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
@@ -818,8 +779,8 @@ int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
 }
 
 template <class Hit> ALWAYS_INLINE
-int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
-  size_t mask = this->mask();
+int32_t* MixedArray::findForInsertImpl(hash_t h0, Hit hit) const {
+  uint32_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
   for (uint32_t probeIndex = h0, i = 1;; ++i) {
@@ -839,17 +800,13 @@ int32_t* MixedArray::findForInsertImpl(size_t h0, Hit hit) const {
   }
 }
 
-int32_t* MixedArray::findForInsert(int64_t ki) const {
-  // all vector methods should work w/out touching the hashtable
-  assert(!isPacked());
-  return findForInsertImpl(ki, [ki] (const Elm& e) {
+int32_t* MixedArray::findForInsert(int64_t ki, inthash_t h) const {
+  return findForInsertImpl(h, [ki] (const Elm& e) {
     return hitIntKey(e, ki);
   });
 }
 
 int32_t* MixedArray::findForInsert(const StringData* s, strhash_t h) const {
-  // all vector methods should work w/out touching the hashtable
-  assert(!isPacked());
   return findForInsertImpl(h, [s, h] (const Elm& e) {
     return hitStringKey(e, s, h);
   });
@@ -857,13 +814,14 @@ int32_t* MixedArray::findForInsert(const StringData* s, strhash_t h) const {
 
 MixedArray::InsertPos MixedArray::insert(int64_t k) {
   assert(!isFull());
-  auto ei = findForInsert(k);
+  auto h = hash_int64(k);
+  auto ei = findForInsert(k, h);
   if (validPos(*ei)) {
     return InsertPos(true, data()[*ei].data);
   }
   if (k >= m_nextKI && m_nextKI >= 0) m_nextKI = k + 1;
   auto& e = allocElm(ei);
-  e.setIntKey(k);
+  e.setIntKey(k, h);
   return InsertPos(false, e.data);
 }
 
@@ -880,7 +838,7 @@ MixedArray::InsertPos MixedArray::insert(StringData* k) {
 }
 
 template <class Hit, class Remove> ALWAYS_INLINE
-ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
+ssize_t MixedArray::findForRemoveImpl(hash_t h0, Hit hit, Remove remove) const {
   size_t mask = this->mask();
   auto elms = data();
   auto hashtable = hashTab();
@@ -904,10 +862,9 @@ ssize_t MixedArray::findForRemoveImpl(size_t h0, Hit hit, Remove remove) const {
 }
 
 NEVER_INLINE
-ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
+ssize_t MixedArray::findForRemove(int64_t ki, inthash_t h, bool updateNext) {
   // all vector methods should work w/out touching the hashtable
-  assert(!isPacked());
-  return findForRemoveImpl(ki,
+  return findForRemoveImpl(h,
       [&] (const Elm& e) {
         return hitIntKey(e, ki);
       },
@@ -926,24 +883,21 @@ ssize_t MixedArray::findForRemove(int64_t ki, bool updateNext) {
   );
 }
 
-ssize_t
-MixedArray::findForRemove(const StringData* s, strhash_t h) {
-  // all vector methods should work w/out touching the hashtable
-  assert(!isPacked());
+ssize_t MixedArray::findForRemove(const StringData* s, strhash_t h) {
   return findForRemoveImpl(h,
       [&] (const Elm& e) {
         return hitStringKey(e, s, h);
       },
       [] (Elm& e) {
         decRefStr(e.skey);
-        e.setIntKey(0);
+        e.setIntKey(0, hash_int64(0));
       }
     );
 }
 
 bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
   auto a = asMixed(ad);
-  return validPos(a->find(k));
+  return validPos(a->find(k, hash_int64(k)));
 }
 
 bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
@@ -953,17 +907,6 @@ bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 
 //=============================================================================
 // Append/insert/update.
-
-ALWAYS_INLINE
-MixedArray* MixedArray::initVal(TypedValue& tv, Cell v) {
-  cellDup(v, tv);
-  // TODO(#3888164): we should restructure things so we don't have to
-  // check KindOfUninit here.
-  if (UNLIKELY(tv.m_type == KindOfUninit)) {
-    tv.m_type = KindOfNull;
-  }
-  return this;
-}
 
 ALWAYS_INLINE
 ArrayData* MixedArray::zInitVal(TypedValue& tv, RefData* v) {
@@ -979,34 +922,9 @@ MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
 }
 
 ALWAYS_INLINE
-MixedArray* MixedArray::getLval(TypedValue& tv, Variant*& ret) {
-  ret = &tvAsVariant(&tv);
-  return this;
-}
-
-ALWAYS_INLINE
-MixedArray* MixedArray::initLval(TypedValue& tv, Variant*& ret) {
-  tvWriteNull(&tv);
-  ret = &tvAsVariant(&tv);
-  return this;
-}
-
-ALWAYS_INLINE
 MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
   tvWriteNull(&tv);
   tvAsVariant(&tv).setWithRef(v);
-  return this;
-}
-
-ALWAYS_INLINE
-MixedArray* MixedArray::setVal(TypedValue& tv, Cell src) {
-  auto const dst = tvToCell(&tv);
-  // TODO(#3888164): we should restructure things so we don't have to
-  // check KindOfUninit here.
-  if (UNLIKELY(src.m_type == KindOfUninit)) {
-    src = make_tv<KindOfNull>();
-  }
-  cellSet(src, *dst);
   return this;
 }
 
@@ -1066,7 +984,6 @@ MixedArray::InsertCheckUnbalanced(MixedArray* ad,
 
 MixedArray*
 MixedArray::Grow(MixedArray* old, uint32_t newScale) {
-  assert(!old->isPacked());
   assert(old->m_size > 0);
   assert(MixedArray::Capacity(newScale) >= old->m_size);
   assert(newScale >= 1 && (newScale & (newScale - 1)) == 0);
@@ -1074,7 +991,7 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   auto ad            = reqAllocArray(newScale);
   auto const oldUsed = old->m_used;
   ad->m_sizeAndPos   = old->m_sizeAndPos;
-  ad->m_hdr.init(old->m_hdr, 1);
+  ad->initHeader(*old, 1);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
 
   copyElmsNextUnsafe(ad, old, oldUsed);
@@ -1114,27 +1031,11 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale) {
   return ad;
 }
 
-namespace {
-struct ElmKey {
-  ElmKey() {}
-  ElmKey(int32_t hash, StringData* key)
-    : skey(key), hash(hash)
-  {}
-  union {
-    StringData* skey;
-    int64_t ikey;
-  };
-  int32_t hash;
-};
-}
-
 void MixedArray::compact(bool renumber /* = false */) {
-  assert(!isPacked());
-
   bool updatePosAfterCompact = false;
   ElmKey mPos;
   bool hasStrongIters;
-  TinyVector<ElmKey,3> siKeys;
+  req::TinyVector<ElmKey,3> siKeys;
 
   // Prep work before beginning the compaction process
   if (LIKELY(!renumber)) {
@@ -1194,7 +1095,8 @@ void MixedArray::compact(bool renumber /* = false */) {
       toE = elms[frPos];
     }
     if (UNLIKELY(renumber && toE.hasIntKey())) {
-      toE.setIntKey(m_nextKI++);
+      toE.setIntKey(m_nextKI, hash_int64(m_nextKI));
+      m_nextKI++;
     }
     *findForNewInsert(table, mask, toE.probe()) = toPos;
   }
@@ -1202,7 +1104,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   if (updatePosAfterCompact) {
     // Update m_pos, now that compaction is complete
     m_pos = mPos.hash >= 0 ? ssize_t(find(mPos.skey, mPos.hash))
-                           : ssize_t(find(mPos.ikey));
+                           : ssize_t(find(mPos.ikey, mPos.hash));
     assert(m_pos >= 0 && m_pos < m_size);
   }
 
@@ -1233,7 +1135,7 @@ void MixedArray::compact(bool renumber /* = false */) {
       auto& k = siKeys[key];
       key++;
       iter->m_pos = k.hash >= 0 ? ssize_t(find(k.skey, k.hash))
-                                : ssize_t(find(k.ikey));
+                                : ssize_t(find(k.ikey, k.hash));
       assert(iter->m_pos >= 0 && iter->m_pos < m_size);
     }
   );
@@ -1241,37 +1143,37 @@ void MixedArray::compact(bool renumber /* = false */) {
   m_used = m_size;
 }
 
-bool MixedArray::nextInsert(const Variant& data) {
+bool MixedArray::nextInsert(Cell v) {
   assert(m_nextKI >= 0);
-  assert(!isPacked());
   assert(!isFull());
 
   int64_t ki = m_nextKI;
+  auto h = hash_int64(ki);
   // The check above enforces an invariant that allows us to always
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
-  auto ei = findForNewInsert(ki);
+  auto ei = findForNewInsert(h);
   assert(!validPos(*ei));
   // Allocate and initialize a new element.
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
-  initVal(e.data, *data.asCell());
+  cellDup(v, e.data);
   return true;
 }
 
 ArrayData* MixedArray::nextInsertRef(Variant& data) {
-  assert(!isPacked());
   assert(!isFull());
   assert(m_nextKI >= 0);
 
   int64_t ki = m_nextKI;
+  auto h = hash_int64(ki);
   // The check above enforces an invariant that allows us to always
   // know that m_nextKI is not present in the array, so it is safe
   // to use findForNewInsert()
-  auto ei = findForNewInsert(ki);
+  auto ei = findForNewInsert(h);
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
   return initRef(e.data, data);
 }
@@ -1280,25 +1182,31 @@ ArrayData* MixedArray::nextInsertWithRef(const Variant& data) {
   assert(!isFull());
 
   int64_t ki = m_nextKI;
-  auto ei = findForNewInsert(ki);
+  auto h = hash_int64(ki);
+  auto ei = findForNewInsert(h);
   assert(!validPos(*ei));
 
   // Allocate a new element.
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1; // Update next free element.
   return initWithRef(e.data, data);
 }
 
 template <class K> ALWAYS_INLINE
 ArrayData* MixedArray::update(K k, Cell data) {
-  assert(!isPacked());
   assert(!isFull());
   auto p = insert(k);
   if (p.found) {
-    return setVal(p.tv, data);
+    // TODO(#3888164): we should restructure things so we don't have
+    // to check KindOfUninit here.
+    setVal(p.tv, data);
+    return this;
   }
-  return initVal(p.tv, data);
+  // TODO(#3888164): we should restructure things so we don't have to
+  // check KindOfUninit here.
+  initVal(p.tv, data);
+  return this;
 }
 
 template <class K> ALWAYS_INLINE
@@ -1318,53 +1226,81 @@ ArrayData* MixedArray::zAppendImpl(RefData* data, int64_t* key_ptr) {
     return this;
   }
   int64_t ki = m_nextKI;
-  auto ei = findForNewInsert(ki);
+  auto h = hash_int64(ki);
+  auto ei = findForNewInsert(h);
   assert(!validPos(*ei));
   auto& e = allocElm(ei);
-  e.setIntKey(ki);
+  e.setIntKey(ki, h);
   m_nextKI = ki + 1;
   *key_ptr = ki;
   return zInitVal(e.data, data);
 }
 
-ArrayData* MixedArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                              bool copy) {
+member_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) {
     a = a->copyMixedAndResizeIfNeeded();
   } else {
     a = a->resizeIfNeeded();
   }
-  return a->addLvalImpl(k, ret);
+  return a->addLvalImpl(k);
 }
 
-ArrayData* MixedArray::LvalStr(ArrayData* ad, StringData* key, Variant*& ret,
-                               bool copy) {
+member_lval MixedArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
+  return LvalInt(ad, k, copy);
+}
+
+member_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
   auto a = asMixed(ad);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
-  return a->addLvalImpl(key, ret);
+  return a->addLvalImpl(key);
 }
 
-ArrayData* MixedArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
+member_lval MixedArray::LvalStrRef(ArrayData* ad, StringData* key, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(key);
+  return LvalStr(ad, key, copy);
+}
+
+member_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k, bool copy) {
+  auto a = asMixed(ad);
+  auto const pos = a->find(k, hash_int64(k));
+  if (UNLIKELY(!validPos(pos))) return member_lval { a, nullptr };
+  if (copy) a = a->copyMixed();
+  return member_lval { a, &a->data()[pos].data };
+}
+
+member_lval MixedArray::LvalSilentStr(ArrayData* ad, const StringData* k,
+                                  bool copy) {
+  auto a = asMixed(ad);
+  auto const pos = a->find(k, k->hash());
+  if (UNLIKELY(!validPos(pos))) return member_lval { a, nullptr };
+  if (copy) a = a->copyMixed();
+  return member_lval { a, &a->data()[pos].data };
+}
+
+member_lval MixedArray::LvalNew(ArrayData* ad, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
                   "already occupied");
-    ret = &lvalBlackHole();
-    return a;
+    return member_lval { a, lvalBlackHole().asTypedValue() };
   }
 
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
-  if (UNLIKELY(!a->nextInsert(uninit_null()))) {
-    ret = &lvalBlackHole();
-    return a;
+  if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
+    return member_lval { a, lvalBlackHole().asTypedValue() };
   }
 
-  ret = &tvAsVariant(&a->data()[a->m_used - 1].data);
-  return a;
+  return member_lval { a, &a->data()[a->m_used - 1].data };
+}
+
+member_lval MixedArray::LvalNewRef(ArrayData* ad, bool copy) {
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+  return LvalNew(ad, copy);
 }
 
 ArrayData* MixedArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
@@ -1385,6 +1321,8 @@ MixedArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
 ArrayData*
 MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->updateRef(k, v);
@@ -1393,6 +1331,8 @@ MixedArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
 ArrayData*
 MixedArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->updateRef(k, v);
@@ -1493,7 +1433,7 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
 ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  auto pos = a->findForRemove(k, false);
+  auto pos = a->findForRemove(k, hash_int64(k), false);
   if (validPos(pos)) a->erase(pos);
   return a;
 }
@@ -1525,10 +1465,13 @@ ArrayData* MixedArray::CopyWithStrongIterators(const ArrayData* ad) {
 
 const TypedValue* MixedArray::NvGetInt(const ArrayData* ad, int64_t ki) {
   auto a = asMixed(ad);
-  auto i = a->find(ki);
+  auto i = a->find(ki, hash_int64(ki));
   return LIKELY(validPos(i)) ? &a->data()[i].data : nullptr;
 }
 
+#if !defined(__SSE4_2__) || defined(NO_HWCRC) || !defined(NO_M_DATA) || \
+  defined(_MSC_VER)
+// This function is implemented directly in ASM in mixed-array-x64.S otherwise.
 const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
                                        const StringData* k) {
   auto a = asMixed(ad);
@@ -1538,15 +1481,27 @@ const TypedValue* MixedArray::NvGetStr(const ArrayData* ad,
   }
   return nullptr;
 }
+#else
+  // mixed-array-x64.S depends on StringData and MixedArray layout.
+  // If these fail, update the constants
+  static_assert(sizeof(StringData) == SD_DATA, "");
+  static_assert(StringData::sizeOff() == SD_LEN, "");
+  static_assert(StringData::hashOff() == SD_HASH, "");
+  static_assert(MixedArray::dataOff() == MA_DATA, "");
+  static_assert(MixedArray::scaleOff() == MA_SCALE, "");
+  static_assert(MixedArray::Elm::keyOff() == ELM_KEY, "");
+  static_assert(MixedArray::Elm::hashOff() == ELM_HASH, "");
+  static_assert(MixedArray::Elm::dataOff() == ELM_DATA, "");
+#endif
 
-void MixedArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
+Cell MixedArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asMixed(ad);
   assert(pos != a->m_used);
   assert(!isTombstone(a->data()[pos].data.m_type));
-  getElmKey(a->data()[pos], out);
+  return getElmKey(a->data()[pos]);
 }
 
-ArrayData* MixedArray::Append(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
     raise_warning("Cannot add element to the array as the next element is "
@@ -1561,6 +1516,10 @@ ArrayData* MixedArray::Append(ArrayData* ad, const Variant& v, bool copy) {
 
 ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
+
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
+
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
 
@@ -1579,6 +1538,12 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
 ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
                                      bool copy) {
   auto a = asMixed(ad);
+  assert(a->isMixed());
+
+  if (RuntimeOption::EvalHackArrCompatNotices && v.isReferenced()) {
+    raiseHackArrCompatRefNew();
+  }
+
   a = copy ? a->copyMixedAndResizeIfNeeded()
            : a->resizeIfNeeded();
   return a->nextInsertWithRef(v);
@@ -1591,13 +1556,12 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, const Variant& v,
 NEVER_INLINE
 MixedArray* MixedArray::CopyReserve(const MixedArray* src,
                                     size_t expectedSize) {
-  assert(!src->isPacked());
   auto const scale = computeScaleFromSize(expectedSize);
   auto const ad    = reqAllocArray(scale);
   auto const oldUsed = src->m_used;
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
-  ad->m_hdr.init(src->m_hdr, 1);
+  ad->initHeader(*src, 1);
   ad->m_scale           = scale; // don't set m_used yet
   ad->m_nextKI          = src->m_nextKI;
 
@@ -1628,9 +1592,9 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   for (; srcElm != srcStop; ++srcElm) {
     if (srcElm->isTombstone()) continue;
     tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
-    auto const hash = srcElm->probe();
+    auto const hash = static_cast<int32_t>(srcElm->probe());
     if (hash < 0) {
-      dstElm->setIntKey(srcElm->ikey);
+      dstElm->setIntKey(srcElm->ikey, hash);
     } else {
       dstElm->setStrKey(srcElm->skey, hash);
     }
@@ -1642,7 +1606,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   // Now that we have finished copying the elements, update ad->m_pos
   if (updatePosAfterCopy) {
     ad->m_pos = mPos.hash >= 0 ? ssize_t(ad->find(mPos.skey, mPos.hash))
-      : ssize_t(ad->find(mPos.ikey));
+      : ssize_t(ad->find(mPos.ikey, mPos.hash));
     assert(ad->m_pos >=0 && ad->m_pos < ad->m_size);
   } else {
     // If src->m_pos is equal to src's canonical invalid position, then
@@ -1671,6 +1635,10 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
                                           MixedArray* ret,
                                           const ArrayData* elems,
                                           size_t neededSize) {
+  assert(ad->isPHPArray());
+  assert(elems->isPHPArray());
+  assert(ret->isMixed());
+
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     const Variant& value = it.secondRef();
@@ -1695,13 +1663,18 @@ ArrayData* MixedArray::ArrayPlusEqGeneric(ArrayData* ad,
 // Note: the logic relating to how to grow in this function is coupled
 // to PackedArray::PlusEq.
 ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
+  assertx(asMixed(ad)->checkInvariants());
+
+  if (!ad->isPHPArray()) throwInvalidAdditionException(ad);
+  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
+
   auto const neededSize = ad->size() + elems->size();
 
   auto ret =
     ad->cowCheck() ? CopyReserve(asMixed(ad), neededSize) :
     asMixed(ad);
 
-  if (UNLIKELY(!elems->isMixed())) {
+  if (UNLIKELY(!elems->hasMixedLayout())) {
     return ArrayPlusEqGeneric(ad, ret, elems, neededSize);
   }
 
@@ -1724,14 +1697,13 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
       auto& e = ret->allocElm(ei);
       e.setStrKey(srcElem->skey, hash);
       ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
-      continue;
+    } else {
+      auto const ei = ret->findForInsert(srcElem->ikey, hash);
+      if (validPos(*ei)) continue;
+      auto& e = ret->allocElm(ei);
+      e.setIntKey(srcElem->ikey, hash);
+      ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
     }
-
-    auto const ei = ret->findForInsert(srcElem->ikey);
-    if (validPos(*ei)) continue;
-    auto& e = ret->allocElm(ei);
-    e.setIntKey(srcElem->ikey);
-    ret->initWithRef(e.data, tvAsCVarRef(&srcElem->data));
   }
 
   return ret;
@@ -1739,44 +1711,46 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
-                                        const ArrayData* elems) {
+                                         const ArrayData* elems) {
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
     const Variant& value = it.secondRef();
     if (key.asTypedValue()->m_type == KindOfInt64) {
       ret->nextInsertWithRef(value);
     } else {
-      Variant* p;
       StringData* sd = key.getStringData();
-      ret->addLvalImpl(sd, p);
-      p->setWithRef(value);
+      auto const lval = ret->addLvalImpl(sd);
+      tvAsVariant(lval.tv()).setWithRef(value);
     }
   }
   return ret;
 }
 
 ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
+  assert(asMixed(ad)->checkInvariants());
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
+  assert(ret->hasExactlyOneRef());
+  ret->initHeader(HeaderKind::Mixed, 1);
 
-  if (elems->isMixed()) {
+  if (elems->hasMixedLayout()) {
     auto const rhs = asMixed(elems);
     auto srcElem = rhs->data();
     auto const srcStop = rhs->data() + rhs->m_used;
+
     for (; srcElem != srcStop; ++srcElem) {
       if (isTombstone(srcElem->data.m_type)) continue;
 
       if (srcElem->hasIntKey()) {
         ret->nextInsertWithRef(tvAsCVarRef(&srcElem->data));
       } else {
-        Variant* p;
-        ret->addLvalImpl(srcElem->skey, p);
-        p->setWithRef(tvAsCVarRef(&srcElem->data));
+        auto const lval = ret->addLvalImpl(srcElem->skey);
+        tvAsVariant(lval.tv()).setWithRef(tvAsCVarRef(&srcElem->data));
       }
     }
     return ret;
   }
 
-  if (UNLIKELY(!elems->isPacked())) {
+  if (UNLIKELY(!elems->hasPackedLayout())) {
     return ArrayMergeGeneric(ret, elems);
   }
 
@@ -1805,7 +1779,7 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, true);
+                              : a->findForRemove(e.ikey, e.hash(), true);
     assert(pos2 == pos);
     a->erase(pos2);
   } else {
@@ -1828,7 +1802,7 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
     assert(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, false);
+                              : a->findForRemove(e.ikey, e.hash(), false);
     assert(pos2 == pos);
     a->erase(pos2);
   } else {
@@ -1840,9 +1814,7 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
   return a;
 }
 
-ArrayData* MixedArray::Prepend(ArrayData* adInput,
-                              const Variant& v,
-                              bool copy) {
+ArrayData* MixedArray::Prepend(ArrayData* adInput, Cell v, bool copy) {
   auto a = asMixed(adInput);
   if (a->cowCheck()) a = a->copyMixedAndResizeIfNeeded();
 
@@ -1860,12 +1832,110 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput,
   // Prepend.
   ++a->m_size;
   auto& e = elms[0];
-  e.setIntKey(0);
-  a->initVal(e.data, *v.asCell());
+  e.setIntKey(0, hash_int64(0));
+  cellDup(v, e.data);
 
   // Renumber.
   a->compact(true);
   return a;
+}
+
+ArrayData* MixedArray::ToPHPArray(ArrayData* ad, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isPHPArray());
+  return ad;
+}
+
+ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
+  assertx(adIn->isDict());
+
+  auto a = asMixed(adIn);
+  assertx(a->checkInvariants());
+
+  auto const size = a->size();
+  auto const elms = a->data();
+
+  if (!size) return staticEmptyArray();
+
+  // If we don't necessarily have to make a copy, first scan the dict looking
+  // for any int-like string keys. If we don't find any, we can transform the
+  // dict in place.
+  if (!copy) {
+    for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
+      auto& e = elms[i];
+      if (e.isTombstone()) continue;
+      if (e.hasStrKey()) {
+        int64_t ignore;
+        if (e.skey->isStrictlyInteger(ignore)) {
+          copy = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!copy) {
+    // No int-like string keys, so transform in place.
+    a->m_kind = HeaderKind::Mixed;
+    assertx(a->checkInvariants());
+    return a;
+  }
+
+  // Either we need to make a copy anyways, or we don't, but there are int-like
+  // string keys. In either case, create the array from scratch, inserting each
+  // element one-by-one, doing key conversion as necessary.
+  auto newAd = asMixed(MakeReserveMixed(size));
+  for (uint32_t i = 0, limit = a->m_used; i < limit; ++i) {
+    auto& e = elms[i];
+    if (e.isTombstone()) continue;
+    if (e.hasIntKey()) {
+      newAd->update(e.ikey, *tvAssertCell(&e.data));
+    } else {
+      int64_t n;
+      if (e.skey->isStrictlyInteger(n)) {
+        newAd->update(n, *tvAssertCell(&e.data));
+      } else {
+        newAd->update(e.skey, *tvAssertCell(&e.data));
+      }
+    }
+  }
+
+  assertx(newAd->checkInvariants());
+  assertx(newAd->hasExactlyOneRef());
+  return newAd;
+}
+
+MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
+  auto a = asMixed(ad);
+  assert(a->isMixed());
+  assert(!a->cowCheck());
+  a->m_kind = HeaderKind::Dict;
+  return a;
+}
+
+ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
+  auto a = asMixed(ad);
+  assert(a->isMixed());
+
+  if (copy) {
+    return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
+  } else {
+    auto const result = ArrayCommon::CheckForRefs(a);
+    if (LIKELY(result == ArrayCommon::RefCheckResult::Pass)) {
+      return ToDictInPlace(a);
+    } else if (result == ArrayCommon::RefCheckResult::Collapse) {
+      // Remove unreferenced refs
+      return CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
+    } else {
+      throwRefInvalidArrayValueException(staticEmptyDictArray());
+    }
+  }
+}
+
+ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict());
+  return ad;
 }
 
 void MixedArray::Renumber(ArrayData* ad) {
@@ -1909,5 +1979,286 @@ bool MixedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+const TypedValue* MixedArray::NvTryGetIntDict(const ArrayData* ad, int64_t ki) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict());
+  auto const tv = MixedArray::NvGetInt(ad, ki);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(ki, ad);
+  return tv;
+}
+
+const TypedValue* MixedArray::NvTryGetStrDict(const ArrayData* ad,
+                                              const StringData* k) {
+  assert(asMixed(ad)->checkInvariants());
+  assert(ad->isDict());
+  auto const tv = MixedArray::NvGetStr(ad, k);
+  if (UNLIKELY(!tv)) throwOOBArrayKeyException(k, ad);
+  return tv;
+}
+
+member_lval MixedArray::LvalIntRefDict(ArrayData* adIn, int64_t, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+member_lval MixedArray::LvalStrRefDict(ArrayData* adIn, StringData*, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+member_lval MixedArray::LvalNewRefDict(ArrayData* adIn, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData* MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData*
+MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, Variant&, bool) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  throwRefInvalidArrayValueException(adIn);
+}
+
+ArrayData*
+MixedArray::AppendWithRefDict(ArrayData* adIn, const Variant& v, bool copy) {
+  assert(asMixed(adIn)->checkInvariants());
+  assert(adIn->isDict());
+  if (v.isReferenced()) throwRefInvalidArrayValueException(adIn);
+  auto const cell = LIKELY(v.getType() != KindOfUninit)
+    ? *v.asCell()
+    : make_tv<KindOfNull>();
+  return Append(adIn, cell, copy);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
+                                 bool strict) {
+  assert(asMixed(ad1)->checkInvariants());
+  assert(asMixed(ad2)->checkInvariants());
+  assert(ad1->isDict());
+  assert(ad2->isDict());
+
+  if (ad1 == ad2) return true;
+  if (ad1->size() != ad2->size()) return false;
+
+  // Prevent circular referenced objects/arrays or deep ones.
+  check_recursion_error();
+
+  if (strict) {
+    auto const arr1 = asMixed(ad1);
+    auto const arr2 = asMixed(ad2);
+    auto elm1 = arr1->data();
+    auto elm2 = arr2->data();
+    auto i1 = arr1->m_used;
+    auto i2 = arr2->m_used;
+    while (i1 > 0 && i2 > 0) {
+      if (UNLIKELY(elm1->isTombstone())) {
+        ++elm1;
+        --i1;
+        continue;
+      }
+      if (UNLIKELY(elm2->isTombstone())) {
+        ++elm2;
+        --i2;
+        continue;
+      }
+      if (elm1->hasIntKey()) {
+        if (!elm2->hasIntKey()) return false;
+        if (elm1->ikey != elm2->ikey) return false;
+      } else {
+        assertx(elm1->hasStrKey());
+        if (!elm2->hasStrKey()) return false;
+        if (!same(elm1->skey, elm2->skey)) return false;
+      }
+      if (!cellSame(*tvAssertCell(&elm1->data), *tvAssertCell(&elm2->data))) {
+        return false;
+      }
+      ++elm1;
+      ++elm2;
+      --i1;
+      --i2;
+    }
+
+    if (!i1) {
+      while (i2 > 0) {
+        if (UNLIKELY(!elm2->isTombstone())) return false;
+        ++elm2;
+        --i2;
+      }
+    } else {
+      assertx(!i2);
+      while (i1 > 0) {
+        if (UNLIKELY(!elm1->isTombstone())) return false;
+        ++elm1;
+        --i1;
+      }
+    }
+  } else {
+    auto const arr1 = asMixed(ad1);
+    auto elm = arr1->data();
+    for (auto i = arr1->m_used; i--; elm++) {
+      if (UNLIKELY(elm->isTombstone())) continue;
+      const TypedValue* other;
+      if (elm->hasIntKey()) {
+        other = NvGetIntDict(ad2, elm->ikey);
+      } else {
+        assertx(elm->hasStrKey());
+        other = NvGetStrDict(ad2, elm->skey);
+      }
+      if (!other ||
+          !cellEqual(*tvAssertCell(&elm->data), *tvAssertCell(other))) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool MixedArray::DictEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return DictEqualHelper(ad1, ad2, false);
+}
+
+bool MixedArray::DictNotEqual(const ArrayData* ad1, const ArrayData* ad2) {
+  return !DictEqualHelper(ad1, ad2, false);
+}
+
+bool MixedArray::DictSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return DictEqualHelper(ad1, ad2, true);
+}
+
+bool MixedArray::DictNotSame(const ArrayData* ad1, const ArrayData* ad2) {
+  return !DictEqualHelper(ad1, ad2, true);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Cell MixedArray::MemoGet(const TypedValue* base,
+                         const TypedValue* keys,
+                         uint32_t nkeys) {
+  assertx(nkeys > 0);
+
+  auto const getPos = [&](const Cell& key, const MixedArray* a) {
+    if (key.m_type == KindOfInt64) {
+      auto const idx = key.m_data.num;
+      return a->find(idx, hash_int64(idx));
+    } else {
+      assertx(tvIsString(&key));
+      auto const str = key.m_data.pstr;
+      return a->find(str, str->hash());
+    }
+  };
+
+  auto const arr = tvToCell(base);
+  assertx(cellIsPlausible(*arr));
+  assertx(tvIsDict(arr));
+
+  // Consume all but the last key, walking through the chain of nested
+  // dictionaries.
+  auto current = asMixed(arr->m_data.parr);
+  assertx(current->isDict());
+  for (auto i = uint32_t{0}; i < nkeys - 1; ++i) {
+    auto const pos = getPos(*tvAssertCell(keys - i), current);
+    if (UNLIKELY(!validPos(pos))) return make_tv<KindOfUninit>();
+    auto const& tv = current->data()[pos].data;
+    assertx(cellIsPlausible(tv));
+    assertx(tvIsDict(&tv));
+    current = asMixed(tv.m_data.parr);
+    assertx(current->isDict());
+  }
+
+  // Consume the last key, which should result in the actual value (or Uninit if
+  // not present).
+  auto const pos = getPos(*tvAssertCell(keys - nkeys + 1), current);
+  if (UNLIKELY(!validPos(pos))) return make_tv<KindOfUninit>();
+  Cell out;
+  cellDup(current->data()[pos].data, out);
+  assertx(cellIsPlausible(out));
+  return out;
+}
+
+void MixedArray::MemoSet(TypedValue* startBase,
+                         const Cell* keys, uint32_t nkeys,
+                         Cell val) {
+  assertx(nkeys > 0);
+  assertx(cellIsPlausible(val));
+
+  auto const getInsert = [](const Cell& key, MixedArray* a) {
+    if (key.m_type == KindOfInt64) {
+      return a->insert(key.m_data.num);
+    } else {
+      assertx(tvIsString(&key));
+      return a->insert(key.m_data.pstr);
+    }
+  };
+
+  // If the given dict can't be updated in place, create a new copy, store it in
+  // the base, and return that. For the vast majority of cases, the dict can be
+  // updated in place because the only reference to it will be the memo
+  // cache. However reflection can get copies of it, so its not guaranteed to
+  // always have a ref-count of 1.
+  auto const cow = [](bool copy, MixedArray* a, Cell& base) {
+    auto copied = copy
+      ? a->copyMixedAndResizeIfNeeded()
+      : a->resizeIfNeeded();
+    if (a != copied) {
+      a = copied;
+      cellMove(make_tv<KindOfDict>(a), base);
+    }
+    return a;
+  };
+
+  auto base = tvToCell(startBase);
+  assertx(cellIsPlausible(*base));
+  assertx(tvIsDict(base));
+
+  // Consume all but the last key, walking through the chain of nested
+  // dictionaries, cowing them as necessary.
+  auto current = asMixed(base->m_data.parr);
+  assertx(current->isDict());
+  for (auto i = uint32_t{0}; i < nkeys - 1; ++i) {
+    current = cow(current->cowCheck(), current, *base);
+    auto const p = getInsert(*tvAssertCell(keys - i), current);
+    if (!p.found) {
+      // Extend the chain
+      p.tv.m_type = KindOfDict;
+      p.tv.m_data.parr = MakeReserveDict(0);
+    }
+    assertx(cellIsPlausible(p.tv));
+    assertx(tvIsDict(&p.tv));
+    current = asMixed(p.tv.m_data.parr);
+    assertx(current->isDict());
+    base = tvAssertCell(&p.tv);
+  }
+
+  current = cow(
+    current->cowCheck() || (tvIsDict(&val) && val.m_data.parr == current),
+    current,
+    *base
+  );
+  // Consume the last key, storing the actual value (and overwriting a previous
+  // value if present).
+  auto const p = getInsert(*tvAssertCell(keys - nkeys + 1), current);
+  p.found ? cellSet(val, *tvAssertCell(&p.tv)) : cellDup(val, p.tv);
+}
+
+/////////////////////////////////////////////////////////////////////
 
 }

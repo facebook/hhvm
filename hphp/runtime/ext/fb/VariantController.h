@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,17 +17,24 @@
 #ifndef VARIANTCONTROLLER_H
 #define VARIANTCONTROLLER_H
 
+#include <algorithm>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/extension.h"
-#include <algorithm>
+#include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 
 namespace HPHP {
+
+enum VariantControllerHackArraysMode {
+  OFF,
+  ON,
+};
 
 /**
  * Hphp datatype conforming to datatype requirements in FBSerialize.h
  */
-struct VariantController {
+template <VariantControllerHackArraysMode HackArraysMode>
+struct VariantControllerImpl {
   typedef Variant VariantType;
   typedef Array MapType;
   typedef Array VectorType;
@@ -41,16 +48,32 @@ struct VariantController {
       case KindOfBoolean:    return HPHP::serialize::Type::BOOL;
       case KindOfDouble:     return HPHP::serialize::Type::DOUBLE;
       case KindOfInt64:      return HPHP::serialize::Type::INT64;
-      case KindOfArray:      return HPHP::serialize::Type::MAP;
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
+      case KindOfPersistentArray:
+      case KindOfArray:      return HPHP::serialize::Type::MAP;
+      case KindOfPersistentDict:
+      case KindOfDict: {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+          return HPHP::serialize::Type::MAP;
+        }
+        throw HPHP::serialize::HackArraySerializeError{};
+      }
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        if (HackArraysMode == VariantControllerHackArraysMode::ON) {
+          return HPHP::serialize::Type::LIST;
+        }
+        throw HPHP::serialize::HackArraySerializeError{};
+      }
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        throw HPHP::serialize::KeysetSerializeError{};
       case KindOfResource:
       case KindOfRef:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
@@ -73,7 +96,10 @@ struct VariantController {
   static VariantType fromVector(const VectorType& vec) { return vec; }
 
   // map methods
-  static MapType createMap() { return empty_array(); }
+  static MapType createMap() {
+    return HackArraysMode == VariantControllerHackArraysMode::ON
+      ? empty_dict_array() : empty_array();
+  }
   static MapType createMap(ArrayInit&& map) {
     return map.toArray();
   }
@@ -111,7 +137,13 @@ struct VariantController {
   static const VariantType& mapValue(ArrayIter& it) { return it.secondRef(); }
 
   // vector methods
-  static VectorType createVector() { return empty_array(); }
+  static VectorType createVector() {
+    return HackArraysMode == VariantControllerHackArraysMode::ON
+      ? empty_vec_array() : empty_array();
+  }
+  static int64_t vectorSize(const VectorType& vec) {
+    return vec.size();
+  }
   static void vectorAppend(VectorType& vec, const VariantType& v) {
     vec.append(v);
   }
@@ -157,6 +189,11 @@ struct VariantController {
   }
 };
 
+using VariantController =
+  VariantControllerImpl<VariantControllerHackArraysMode::OFF>;
+using VariantControllerUsingHackArrays =
+  VariantControllerImpl<VariantControllerHackArraysMode::ON>;
 }
+
 
 #endif

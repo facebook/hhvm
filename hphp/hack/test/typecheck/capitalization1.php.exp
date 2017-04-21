@@ -1,5 +1,7 @@
-App \CamelCase<>
-App \CamelCase<>
+File "capitalization1.php", line 16, characters 3-15:
+  CamelCase
+File "capitalization1.php", line 18, characters 3-13:
+  CamelCase
 File "capitalization1.php", line 7, characters 21-29:
 Could not find CAMELCASE (Naming[2006])
 File "capitalization1.php", line 3, characters 7-15:

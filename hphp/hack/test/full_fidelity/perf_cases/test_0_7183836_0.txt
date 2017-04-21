@@ -1,0 +1,2 @@
+<?hh
+type bKwBJjdYI = this :: eSem :: eXdzVHr ;

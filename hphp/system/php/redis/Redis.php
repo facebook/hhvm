@@ -42,6 +42,7 @@ class Redis {
   const OPT_SERIALIZER   = 1;
   const OPT_PREFIX       = 2;
   const OPT_READ_TIMEOUT = 3;
+  const OPT_SCAN         = 4;
 
   /* Type of serialization to use with values stored in redis */
   const SERIALIZER_NONE     = 0;
@@ -50,6 +51,11 @@ class Redis {
   /* Options used by lInsert and similar methods */
   const AFTER  = 'after';
   const BEFORE = 'before';
+
+  /* Scan retry settings. We essentially always retry, so this is
+     just for PHP 5 compatibility. */
+  const SCAN_RETRY = 0;
+  const SCAN_NORETRY = 1;
 
   /* Connection ---------------------------------------------------------- */
 
@@ -78,7 +84,6 @@ class Redis {
   }
 
   public function close() {
-    $this->processCommand('QUIT');
     fclose($this->connection);
     $this->connection = null;
   }
@@ -509,35 +514,79 @@ class Redis {
 
   /* Scan --------------------------------------------------------------- */
 
-  protected function scanImpl($cmd, $key, $cursor, $pattern, $count) {
-    $args = [];
-    if ($key !== null) {
-      $args[] = $this->_prefix($key);
+  protected function scanImpl($cmd, $key, &$cursor, $pattern, $count) {
+    if ($this->mode != self::ATOMIC) {
+      throw new RedisException("Can't call SCAN commands in multi or pipeline mode!");
     }
-    $args[] = (int)$cursor;
-    if ($pattern !== null) {
-      $args[] = 'MATCH';
-      if ($cmd === 'SCAN') {
-        $args[] = (string)$this->_prefix($pattern);
+
+    $results = false;
+    do {
+      if ($cursor === 0) return $results;
+
+      $args = [];
+      if ($cmd !== 'SCAN') {
+        $args[] = $this->_prefix($key);
       }
-      else {
+      $args[] = (int)$cursor;
+      if ($pattern !== null) {
+        $args[] = 'MATCH';
         $args[] = (string)$pattern;
       }
-    }
-    if ($count !== null) {
-      $args[] = 'COUNT';
-      $args[] = (int)$count;
-    }
-    $this->processArrayCommand($cmd, $args);
-    return $this->processVariantResponse();
+      if ($count !== null) {
+        $args[] = 'COUNT';
+        $args[] = (int)$count;
+      }
+      $this->processArrayCommand($cmd, $args);
+      $resp = $this->processVariantResponse();
+      if (!is_array($resp) || count($resp) != 2 || !is_array($resp[1])) {
+        throw new RedisException(
+          sprintf("Invalid %s response: %s", $cmd, print_r($resp, true)));
+      }
+      $cursor = (int)$resp[0];
+      $results = $resp[1];
+      // Provide SCAN_RETRY semantics by default. If iteration is done and
+      // there were no results, $cursor === 0 check at the top of the loop
+      // will pop us out.
+    } while(count($results) == 0);
+    return $results;
   }
 
-  public function scan($cursor, $pattern = null, $count = null) {
+  public function scan(&$cursor, $pattern = null, $count = null) {
     return $this->scanImpl('SCAN', null, $cursor, $pattern, $count);
-}
+  }
 
-  public function sScan($key, $cursor, $pattern = null, $count = null) {
+  public function sScan($key, &$cursor, $pattern = null, $count = null) {
     return $this->scanImpl('SSCAN', $key, $cursor, $pattern, $count);
+  }
+
+  public function hScan($key, &$cursor, $pattern = null, $count = null) {
+    $flat = $this->scanImpl('HSCAN', $key, $cursor, $pattern, $count);
+    /*
+     * HScan behaves differently from the other *scan functions. The wire
+     * protocol returns names in even slots s, and the corresponding value
+     * in odd slot s + 1. The PHP client returns these as an array mapping
+     * keys to values.
+     */
+    if ($flat === false) return $flat;
+    assert(count($flat) % 2 == 0);
+    $ret = array();
+    for ($i = 0; $i < count($flat); $i += 2) $ret[$flat[$i]] = $flat[$i + 1];
+    return $ret;
+  }
+
+  public function zScan($key, &$cursor, $pattern = null, $count = null) {
+    $flat = $this->scanImpl('ZSCAN', $key, $cursor, $pattern, $count);
+    if ($flat === false) return $flat;
+    /*
+     * ZScan behaves differently from the other *scan functions. The wire
+     * protocol returns names in even slots s, and the corresponding value
+     * in odd slot s + 1. The PHP client returns these as an array mapping
+     * keys to values.
+     */
+    assert(count($flat) % 2 == 0);
+    $ret = array();
+    for ($i = 0; $i < count($flat); $i += 2) $ret[$flat[$i]] = $flat[$i + 1];
+    return $ret;
   }
 
   /* Multi --------------------------------------------------------------- */
@@ -785,6 +834,7 @@ class Redis {
     'popen' => [ 'alias' => 'pconnect' ],
     'ping' => [ 'return' => 'Raw' ],
     'echo' => [ 'format' => 's', 'return' => 'String' ],
+    'quit' => [ 'return' => 'Boolean' ],
 
     // Server
     'bgrewriteaof' => [ 'return' => 'Boolean' ],
@@ -834,6 +884,14 @@ class Redis {
     'ttl' => [ 'format' => 'k', 'return' => 'Long' ],
     'pttl' => [ 'format' => 'k', 'return' => 'Long' ],
     'restore' => [ 'format' => 'kls', 'return' => 'Boolean' ],
+
+    //Geospatial
+    'geoadd' => [ 'format' => 'kdds', 'return' => 'Long' ],
+    'geodist' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'String' ],
+    'geohash' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Vector' ],
+    'geopos' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'georadius' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
+    'georadiusbymember' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Variant' ],
 
     // Hashes
     'hdel' => [ 'vararg' => self::VAR_KEY_FIRST, 'return' => 'Long' ],
@@ -1038,6 +1096,14 @@ class Redis {
           if (!strncmp($line, '-ERR SYNC ', 10)) {
             throw new RedisException("Sync with master in progress");
           }
+          if (!strncmp($line, 'OOM ', 4)) {
+            throw new RedisException(
+              "OOM command not allowed when used memory > 'maxmemory'");
+          }
+          if (!strncmp($line, 'EXECABORT ', 10)) {
+            throw new RedisException(
+              "Transaction discarded because of previous errors");
+          }
           return $line;
         case self::TYPE_INT:
         case self::TYPE_LINE:
@@ -1231,6 +1297,9 @@ class Redis {
     }
 
     if ($type === self::TYPE_MULTIBULK) {
+      if ($resp === '-1') {
+          return '';
+      }
       $ret = [];
       $lineNo = 0;
       $count = (int) $resp;

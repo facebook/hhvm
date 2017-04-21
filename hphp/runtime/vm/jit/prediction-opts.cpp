@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,18 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <iterator>
-
-#include <folly/Lazy.h>
-#include <folly/Optional.h>
+#include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
-#include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/timer.h"
+
+#include <folly/Lazy.h>
+#include <folly/Optional.h>
+
+#include <iterator>
 
 namespace HPHP { namespace jit {
 
@@ -69,7 +71,7 @@ bool typeSufficientlyGeneric(Type t) {
  * specialize code earlier and avoid generic operations.
  */
 void optimizePredictions(IRUnit& unit) {
-  Timer timer(Timer::optimize_predictionOpts);
+  Timer timer(Timer::optimize_predictionOpts, unit.logEntry().get_pointer());
 
   FTRACE(5, "PredOpts:vvvvvvvvvvvvvvvvvvvvv\n");
   SCOPE_EXIT { FTRACE(5, "PredOpts:^^^^^^^^^^^^^^^^^^^^^\n"); };
@@ -118,11 +120,10 @@ void optimizePredictions(IRUnit& unit) {
      * fallthrough block (specialized).
      */
     auto const newCheckType = unit.gen(CheckTypeMem,
-                                       checkType->marker(),
+                                       checkType->bcctx(),
                                        checkType->typeParam(),
                                        exit,
-                                       load->src(0)
-                                      );
+                                       load->src(0));
     newCheckType->setNext(specialized);
     mainBlock->insert(mainBlock->iteratorTo(load), newCheckType);
 

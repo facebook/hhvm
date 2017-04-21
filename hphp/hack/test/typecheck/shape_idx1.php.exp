@@ -1,5 +1,9 @@
-option([1]intersect(App \A<>))
-[2]intersect(App \A<>)
-option([3]intersect(App \A<>, App \B<>))
-[4]intersect(App \AB<>, App \B<>, App \A<>)
+File "shape_idx1.php", line 19, characters 3-31:
+  ?^(A)
+File "shape_idx1.php", line 20, characters 3-35:
+  ^(A)
+File "shape_idx1.php", line 21, characters 3-32:
+  ?^(A | B)
+File "shape_idx1.php", line 22, characters 3-37:
+  ^(AB | B | A)
 No errors

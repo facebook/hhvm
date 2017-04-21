@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,24 +16,43 @@
 
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/object-data.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/zend-functions.h"
-#include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/unwind-x64.h"
+
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
-#include "hphp/runtime/vm/minstr-state.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unwind.h"
+
+#include "hphp/runtime/vm/jit/minstr-helpers.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/unwind-itanium.h"
+
+#include "hphp/util/portability.h"
 
 namespace HPHP {
 
@@ -45,7 +64,7 @@ const StaticString s_staticPrefix("86static_");
 
 // Defined here so it can be inlined below.
 RefData* lookupStaticFromClosure(ObjectData* closure,
-                                 StringData* name,
+                                 const StringData* name,
                                  bool& inited) {
   assertx(closure->instanceof(c_Closure::classof()));
   auto str = String::attach(
@@ -54,7 +73,7 @@ RefData* lookupStaticFromClosure(ObjectData* closure,
   auto const cls = closure->getVMClass();
   auto const slot = cls->lookupDeclProp(str.get());
   assertx(slot != kInvalidSlot);
-  auto const val = static_cast<c_Closure*>(closure)->getStaticVar(slot);
+  auto const val = c_Closure::fromObject(closure)->getStaticVar(slot);
 
   if (val->m_type == KindOfUninit) {
     inited = false;
@@ -72,7 +91,9 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
-  ArrayData* r = a->append(tvAsCVarRef(&value), a->hasMultipleRefs());
+  assertx(a->isPHPArray());
+
+  auto r = a->append(*tvAssertCell(&value), a->hasMultipleRefs());
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }
@@ -83,6 +104,8 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
 ArrayData* addElemIntKeyHelper(ArrayData* ad,
                                int64_t key,
                                TypedValue value) {
+  assertx(ad->isPHPArray());
+  assertx(cellIsPlausible(value));
   // this does not re-enter
   // set will decRef any old value that may have been overwritten
   // if appropriate
@@ -92,12 +115,14 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   tvRefcountedDecRef(&value);
-  return arrayRefShuffle<false>(ad, retval, nullptr);
+  return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
+  assertx(ad->isPHPArray());
+  assertx(cellIsPlausible(value));
   // this does not re-enter
   bool copy = ad->cowCheck();
   // set will decRef any old value that may have been overwritten
@@ -111,10 +136,46 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // have to decrement it here
   decRefStr(key);
   tvRefcountedDecRef(&value);
-  return arrayRefShuffle<false>(ad, retval, nullptr);
+  return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
+}
+
+ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
+                                   int64_t key,
+                                   TypedValue value) {
+  assertx(ad->isDict());
+  // set will decRef any old value that may have been overwritten
+  // if appropriate
+  ArrayData* retval =
+    MixedArray::SetIntDict(ad, key, *tvAssertCell(&value), ad->cowCheck());
+  // TODO Task #1970153: It would be great if there were set()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
+  tvRefcountedDecRef(&value);
+  return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
+}
+
+ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
+                                      StringData* key,
+                                      TypedValue value) {
+  assertx(ad->isDict());
+  // set will decRef any old value that may have been overwritten
+  // if appropriate
+  ArrayData* retval =
+    MixedArray::SetStrDict(ad, key, *tvAssertCell(&value), ad->cowCheck());
+  // TODO Task #1970153: It would be great if there were set()
+  // methods that didn't bump up the refcount so that we didn't
+  // have to decrement it here
+  decRefStr(key);
+  tvRefcountedDecRef(&value);
+  return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
 }
 
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
+  assertx(a1->isPHPArray());
+  assertx(a2->isPHPArray());
+
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatAdd();
+
   if (!a2->empty()) {
     if (a1->empty()) {
       // We consume refs on a2 and also produce references, so there's
@@ -143,30 +204,8 @@ void setNewElemArray(TypedValue* base, Cell val) {
   HPHP::SetNewElemArray(base, &val);
 }
 
-TypedValue setOpElem(TypedValue* base, TypedValue key,
-                     Cell val, MInstrState* mis, SetOpOp op) {
-  auto result = HPHP::SetOpElem(mis->tvRef, op, base, key, &val);
-
-  Cell ret;
-  cellDup(*tvToCell(result), ret);
-  return ret;
-}
-
-TypedValue incDecElem(
-  TypedValue* base,
-  TypedValue key,
-  MInstrState* mis,
-  IncDecOp op
-) {
-  TypedValue result;
-  HPHP::IncDecElem(mis->tvRef, op, base, key, result);
-  assertx(result.m_type != KindOfRef);
-  return result;
-}
-
-void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis) {
-  auto elem = HPHP::NewElem<true>(mis->tvRef, base);
-  tvBindRef(val, elem);
+void setNewElemVec(TypedValue* base, Cell val) {
+  HPHP::SetNewElemVec(base, &val);
 }
 
 RefData* boxValue(TypedValue tv) {
@@ -206,6 +245,164 @@ ArrayData* convCellToArrHelper(TypedValue tv) {
   return tv.m_data.parr;
 }
 
+ArrayData* convVecToArrHelper(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convDictToArrHelper(ArrayData* adIn) {
+  assertx(adIn->isDict());
+  auto a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convKeysetToArrHelper(ArrayData* adIn) {
+  assertx(adIn->isKeyset());
+  auto a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convArrToVecHelper(ArrayData* adIn) {
+  assert(adIn->isPHPArray());
+  auto a = adIn->toVec(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convDictToVecHelper(ArrayData* adIn) {
+  assert(adIn->isDict());
+  auto a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
+  assert(adIn->isKeyset());
+  auto a = SetArray::ToVec(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+static Array arrayFromCollection(ObjectData* obj) {
+  if (auto ad = collections::asArray(obj)) {
+    return ArrNR{ad}.asArray();
+  }
+  return collections::toArray(obj);
+}
+
+ArrayData* convObjToVecHelper(ObjectData* obj) {
+  if (obj->isCollection()) {
+    auto a = arrayFromCollection(obj).toVec();
+    decRefObj(obj);
+    return a.detach();
+  }
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateVec();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.append(iter.second());
+    }
+    decRefObj(obj);
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to vec");
+  decRefObj(obj);
+  return staticEmptyVecArray();
+}
+
+ArrayData* convArrToDictHelper(ArrayData* adIn) {
+  assert(adIn->isPHPArray());
+  auto a = adIn->toDict(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convVecToDictHelper(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convKeysetToDictHelper(ArrayData* adIn) {
+  assertx(adIn->isKeyset());
+  auto a = SetArray::ToDict(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convObjToDictHelper(ObjectData* obj) {
+  if (obj->isCollection()) {
+    auto a = arrayFromCollection(obj).toDict();
+    decRefObj(obj);
+    return a.detach();
+  }
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateDict();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.set(iter.first(), iter.second());
+    }
+    decRefObj(obj);
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to dict");
+  decRefObj(obj);
+  return staticEmptyDictArray();
+}
+
+ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
+  assert(adIn->isPHPArray());
+  auto a = adIn->toKeyset(adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
+  assertx(adIn->isVecArray());
+  auto a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
+  assert(a != adIn);
+  decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convDictToKeysetHelper(ArrayData* adIn) {
+  assert(adIn->isDict());
+  auto a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
+  if (a != adIn) decRefArr(adIn);
+  return a;
+}
+
+ArrayData* convObjToKeysetHelper(ObjectData* obj) {
+  if (obj->isCollection()) {
+    auto a = arrayFromCollection(obj).toKeyset();
+    decRefObj(obj);
+    return a.detach();
+  }
+
+  if (obj->instanceof(SystemLib::s_IteratorClass)) {
+    auto arr = Array::CreateKeyset();
+    for (ArrayIter iter(obj); iter; ++iter) {
+      arr.append(iter.second());
+    }
+    decRefObj(obj);
+    return arr.detach();
+  }
+
+  raise_warning("Non-iterable object conversion to keyset");
+  decRefObj(obj);
+  return staticEmptyKeysetArray();
+}
+
 int64_t convObjToDblHelper(const ObjectData* o) {
   return reinterpretDblAsInt(o->toDouble());
 }
@@ -224,10 +421,6 @@ int64_t convResToDblHelper(const ResourceHdr* r) {
 
 int64_t convCellToDblHelper(TypedValue tv) {
   return reinterpretDblAsInt(tvCastToDouble(&tv));
-}
-
-int64_t convArrToIntHelper(ArrayData* a) {
-  return a->empty() ? 0 : 1;
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {
@@ -264,16 +457,10 @@ StringData* convResToStrHelper(ResourceHdr* r) {
   return r->data()->o_toString().detach();
 }
 
-TypedValue getMemoKeyHelper(TypedValue tv) {
-  auto var = HHVM_FN(serialize_memoize_param)(tvAsCVarRef(&tv));
-  auto res = var.asTypedValue();
-  tvRefcountedIncRef(res);
-  return *res;
-}
-
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
                            const Func* func) {
-  raise_param_type_warning(func->name()->data(), argNum, expected, actual);
+  raise_param_type_warning(func->displayName()->data(),
+                           argNum, expected, actual);
 
   throw TVCoercionException(func, argNum, actual, expected);
 }
@@ -281,8 +468,10 @@ inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
+  tvCoerceIfStrict(tv, argNum, func);
+
   DataType type = tv.m_type;
-  if (type == KindOfArray || type == KindOfObject || type == KindOfResource) {
+  if (isArrayLikeType(type) || type == KindOfObject || type == KindOfResource) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
     not_reached();
   }
@@ -293,6 +482,12 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
 int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
+    auto tv = make_tv<KindOfString>(sd);
+
+    // In strict mode this will always fail, in weak mode it will be a noop
+    tvCoerceIfStrict(tv, argNum, func);
+  }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfDouble, KindOfString, argNum, func);
     not_reached();
@@ -304,6 +499,8 @@ int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
 int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
+  tvCoerceIfStrict(tv, argNum, func);
+
   switch (tv.m_type) {
     case KindOfNull:
     case KindOfBoolean:
@@ -311,11 +508,18 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
     case KindOfDouble:
       return convCellToDblHelper(tv);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -323,7 +527,6 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -332,6 +535,12 @@ int64_t coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
   DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
 
+  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
+    auto tv = make_tv<KindOfString>(sd);
+
+    // In strict mode this will always fail, in weak mode it will be a noop
+    tvCoerceIfStrict(tv, argNum, func);
+  }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfInt64, KindOfString, argNum, func);
     not_reached();
@@ -343,6 +552,8 @@ int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
 
+  tvCoerceIfStrict(tv, argNum, func);
+
   switch (tv.m_type) {
     case KindOfNull:
     case KindOfBoolean:
@@ -350,11 +561,18 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
     case KindOfDouble:
       return cellToInt(tv);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
 
     case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
@@ -362,7 +580,6 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
       break;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -381,14 +598,23 @@ StringData* convCellToStrHelper(TypedValue tv) {
     case KindOfDouble:        return convDblToStrHelper(tv.m_data.num);
     case KindOfString:        tv.m_data.pstr->incRefCount();
                               /* fallthrough */
-    case KindOfStaticString:
+    case KindOfPersistentString:
                               return tv.m_data.pstr;
+    case KindOfPersistentVec:
+    case KindOfVec:           raise_notice("Vec to string conversion");
+                              return vec_string.get();
+    case KindOfPersistentDict:
+    case KindOfDict:          raise_notice("Dict to string conversion");
+                              return dict_string.get();
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:        raise_notice("Keyset to string conversion");
+                              return keyset_string.get();
+    case KindOfPersistentArray:
     case KindOfArray:         raise_notice("Array to string conversion");
                               return array_string.get();
     case KindOfObject:        return convObjToStrHelper(tv.m_data.pobj);
     case KindOfResource:      return convResToStrHelper(tv.m_data.pres);
-    case KindOfRef:
-    case KindOfClass:         break;
+    case KindOfRef:           break;
   }
   not_reached();
 }
@@ -449,35 +675,43 @@ void VerifyParamTypeFail(int paramNum) {
   const Func* func = ar->m_func;
   auto const& tc = func->params()[paramNum].typeConstraint;
   TypedValue* tv = frame_local(ar, paramNum);
+  auto unit = func->unit();
+  bool useStrictTypes =
+    unit->isHHFile() || RuntimeOption::EnableHipHopSyntax ||
+    !ar->useWeakTypes();
   assertx(!tc.check(tv, func));
-  tc.verifyParamFail(func, tv, paramNum);
+  tc.verifyParamFail(func, tv, paramNum, useStrictTypes);
 }
 
 void VerifyRetTypeSlow(const Class* cls,
                        const Class* constraint,
                        const HPHP::TypeConstraint* expected,
-                       const TypedValue tv) {
+                       TypedValue tv) {
   if (!VerifyTypeSlowImpl(cls, constraint, expected)) {
-    VerifyRetTypeFail(tv);
+    VerifyRetTypeFail(&tv);
   }
 }
 
 void VerifyRetTypeCallable(TypedValue value) {
   if (UNLIKELY(!is_callable(tvAsCVarRef(&value)))) {
-    VerifyRetTypeFail(value);
+    VerifyRetTypeFail(&value);
   }
 }
 
-void VerifyRetTypeFail(TypedValue tv) {
+void VerifyRetTypeFail(TypedValue* tv) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
   const HPHP::TypeConstraint& tc = func->returnTypeConstraint();
-  assertx(!tc.check(&tv, func));
-  tc.verifyReturnFail(func, &tv);
+  auto unit = func->unit();
+  bool useStrictTypes =
+    RuntimeOption::EnableHipHopSyntax || func->isBuiltin() ||
+    unit->useStrictTypes();
+  assertx(!tc.check(tv, func));
+  tc.verifyReturnFail(func, tv, useStrictTypes);
 }
 
-RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
+RefData* ldClosureStaticLoc(StringData* name, ActRec* fp) {
   auto const func = fp->m_func;
   assertx(func->isClosureBody());
   auto const closureLoc = frame_local(fp, func->numParams());
@@ -485,96 +719,69 @@ RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val) {
   bool inited;
   auto const refData = lookupStaticFromClosure(
     closureLoc->m_data.pobj, name, inited);
-  if (!inited) {
-    cellCopy(val, *refData->tv());
-  }
+  if (!inited) tvWriteUninit(refData->tv());
   return refData;
-}
-
-ALWAYS_INLINE
-static bool ak_exist_string_impl(ArrayData* arr, StringData* key) {
-  int64_t n;
-  if (key->isStrictlyInteger(n)) {
-    return arr->exists(n);
-  }
-  return arr->exists(key);
-}
-
-bool ak_exist_string(ArrayData* arr, StringData* key) {
-  return ak_exist_string_impl(arr, key);
-}
-
-bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
-  if (obj->isCollection()) {
-    return collections::contains(obj, Variant{key});
-  }
-  auto arr = obj->toArray();
-  return ak_exist_string_impl(arr.get(), key);
-}
-
-bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
-  if (obj->isCollection()) {
-    return collections::contains(obj, key);
-  }
-  auto arr = obj->toArray();
-  return arr.get()->exists(key);
 }
 
 namespace {
 ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
-  if (UNLIKELY(nullptr == tv)) {
-    // DecRef of def is done unconditionally by the IR, since there's
-    // a good chance it will be paired with an IncRef and optimized
-    // away.  So we need to IncRef here if it is being returned.
-    tvRefcountedIncRef(&def);
-    return def;
-  }
-  auto const ret = tvToCell(tv);
-  tvRefcountedIncRef(ret);
-  return *ret;
+  return UNLIKELY(tv == nullptr) ? def : *tv;
 }
+NEVER_INLINE
+TypedValue arrayIdxSiSlow(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  int64_t i;
+  return getDefaultIfNullCell(
+    UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key), def);
+}
+
+NEVER_INLINE
+TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  return getDefaultIfNullCell(a->nvGet(key), def);
+}
+
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  return getDefaultIfNullCell(a->nvGet(key), def);
+  assertx(a->isPHPArray());
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSSlow(a, key, def);
+  return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
 }
 
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isPHPArray());
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow(a, key, def);
   int64_t i;
-  return UNLIKELY(key->isStrictlyInteger(i)) ?
-         getDefaultIfNullCell(a->nvGet(i), def) :
-         getDefaultIfNullCell(a->nvGet(key), def);
+  return getDefaultIfNullCell(
+    UNLIKELY(key->isStrictlyInteger(i)) ?
+    MixedArray::NvGetInt(a, i) : MixedArray::NvGetStr(a, key), def);
 }
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isPHPArray());
   return getDefaultIfNullCell(a->nvGet(key), def);
 }
 
-TypedValue arrayIdxIc(ArrayData* a, int64_t key, TypedValue def) {
-  return arrayIdxI(a, key, def);
+TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isDict());
+  return getDefaultIfNullCell(MixedArray::NvGetIntDict(a, key), def);
 }
 
-const StaticString s_idx("hh\\idx");
-
-TypedValue genericIdx(TypedValue obj, TypedValue key, TypedValue def) {
-  EagerVMRegAnchor _;
-  static auto func = Unit::loadFunc(s_idx.get());
-  assertx(func != nullptr);
-  TypedValue args[] = {
-    obj,
-    key,
-    def
-  };
-  TypedValue ret;
-  g_context->invokeFuncFew(&ret, func, nullptr, nullptr, 3, &args[0]);
-  return ret;
+TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isDict());
+  return getDefaultIfNullCell(MixedArray::NvGetStrDict(a, key), def);
 }
 
-TypedValue mapIdx(ObjectData* mapOD, StringData* key, TypedValue def) {
-  assert(collections::isType(mapOD->getVMClass(), CollectionType::Map) ||
-         collections::isType(mapOD->getVMClass(), CollectionType::ImmMap));
-  return getDefaultIfNullCell(static_cast<BaseMap*>(mapOD)->get(key), def);
+TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
+  assertx(a->isKeyset());
+  return getDefaultIfNullCell(SetArray::NvGetInt(a, key), def);
+}
+
+TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
+  assertx(a->isKeyset());
+  return getDefaultIfNullCell(SetArray::NvGetStr(a, key), def);
 }
 
 int32_t arrayVsize(ArrayData* ad) {
@@ -600,10 +807,6 @@ TypedValue* getSPropOrRaise(const Class* cls,
                 cls->name()->data(), name->data());
   }
   return sprop;
-}
-
-TypedValue* ldGblAddrHelper(StringData* name) {
-  return g_context->m_globalVarEnv->lookup(name);
 }
 
 TypedValue* ldGblAddrDefHelper(StringData* name) {
@@ -650,13 +853,19 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
 
       case KindOfUninit:
       case KindOfBoolean:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+      case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -670,140 +879,6 @@ int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets) {
   auto const ival = o->toInt64();
   decRefObj(o);
   return switchBoundsCheck(ival, base, nTargets);
-}
-
-TCA sswitchHelperFast(const StringData* val,
-                      const SSwitchMap* table,
-                      TCA* def) {
-  TCA* dest = table->find(val);
-  return dest ? *dest : *def;
-}
-
-// TODO(#2031980): clear these out
-void tv_release_generic(TypedValue* tv) {
-  assertx(vmRegStateIsDirty());
-  assertx(tv->m_type == KindOfString || tv->m_type == KindOfArray ||
-         tv->m_type == KindOfObject || tv->m_type == KindOfResource ||
-         tv->m_type == KindOfRef);
-  g_destructors[typeToDestrIdx(tv->m_type)](tv->m_data.pref);
-}
-
-Cell lookupCnsHelper(const TypedValue* tv,
-                     StringData* nm,
-                     bool error) {
-  assertx(tv->m_type == KindOfUninit);
-
-  // Deferred constants such as SID
-  if (UNLIKELY(tv->m_data.pref != nullptr)) {
-    auto callback = (Unit::SystemConstantCallback)(tv->m_data.pref);
-    const Cell* cns = callback().asTypedValue();
-    if (LIKELY(cns->m_type != KindOfUninit)) {
-      Cell c1;
-      cellDup(*cns, c1);
-      return c1;
-    }
-  }
-
-  const Cell* cns = nullptr;
-  if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    cns = rds::s_constants()->nvGet(nm);
-  }
-  if (!cns) {
-    cns = Unit::loadCns(const_cast<StringData*>(nm));
-  }
-  if (LIKELY(cns != nullptr)) {
-    Cell c1;
-    cellDup(*cns, c1);
-    return c1;
-  }
-
-  // Undefined constants
-  if (error) {
-    raise_error("Undefined constant '%s'", nm->data());
-  } else {
-    raise_notice(Strings::UNDEFINED_CONSTANT, nm->data(), nm->data());
-    Cell c1;
-    c1.m_data.pstr = const_cast<StringData*>(nm);
-    c1.m_type = KindOfStaticString;
-    return c1;
-  }
-  not_reached();
-}
-
-void lookupClsMethodHelper(Class* cls,
-                           StringData* meth,
-                           ActRec* ar,
-                           ActRec* fp) {
-  try {
-    const Func* f;
-    ObjectData* obj = fp->hasThis() ? fp->getThis() : nullptr;
-    Class* ctx = fp->m_func->cls();
-    LookupResult res =
-      g_context->lookupClsMethod(f, cls, meth, obj, ctx, true);
-    if (res == LookupResult::MethodFoundNoThis ||
-        res == LookupResult::MagicCallStaticFound) {
-      ar->setClass(cls);
-    } else {
-      assertx(obj);
-      assertx(res == LookupResult::MethodFoundWithThis ||
-             res == LookupResult::MagicCallFound);
-      obj->incRefCount();
-      ar->setThis(obj);
-    }
-    ar->m_func = f;
-    if (res == LookupResult::MagicCallFound ||
-        res == LookupResult::MagicCallStaticFound) {
-      ar->setMagicDispatch(meth);
-      meth->incRefCount();
-    }
-  } catch (...) {
-    *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
-    throw;
-  }
-}
-
-void profileObjClassHelper(ClassProfile* profile, ObjectData* obj) {
-  profile->reportClass(obj->getVMClass());
-}
-
-Cell lookupCnsUHelper(const TypedValue* tv,
-                      StringData* nm,
-                      StringData* fallback) {
-  const Cell* cns = nullptr;
-  Cell c1;
-
-  // lookup qualified name in thread-local constants
-  bool cacheConsts = rds::s_constants().get() != nullptr;
-  if (UNLIKELY(cacheConsts)) {
-    cns = rds::s_constants()->nvGet(nm);
-  }
-  if (!cns) {
-    cns = Unit::loadCns(const_cast<StringData*>(nm));
-  }
-
-  // try cache handle for unqualified name
-  if (UNLIKELY(!cns && tv->m_type != KindOfUninit)) {
-    cns = const_cast<Cell*>(tv);
-  }
-
-  // lookup unqualified name in thread-local constants
-  if (UNLIKELY(!cns)) {
-    if (UNLIKELY(cacheConsts)) {
-      cns = rds::s_constants()->nvGet(fallback);
-    }
-    if (!cns) {
-      cns = Unit::loadCns(const_cast<StringData*>(fallback));
-    }
-    if (UNLIKELY(!cns)) {
-      raise_notice(Strings::UNDEFINED_CONSTANT,
-                   fallback->data(), fallback->data());
-      c1.m_data.pstr = const_cast<StringData*>(fallback);
-      c1.m_type = KindOfStaticString;
-      return c1;
-    }
-  }
-  tvDup(*cns, c1);
-  return c1;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -836,369 +911,23 @@ void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff) {
       ar->func()->validate();
     },
     [](const TypedValue* tv) {
-      assertx(tv->m_type == KindOfClass || tvIsPlausible(*tv));
+      assertx(tvIsPlausible(*tv));
     }
   );
 }
 
-void traceCallback(ActRec* fp, Cell* sp, Offset pcOff) {
-  if (Trace::moduleEnabled(Trace::hhirTracelets)) {
-    FTRACE(0, "{} {} {} {} {}\n",
-           fp->m_func->fullName()->data(), pcOff, fp, sp,
-           __builtin_return_address(0));
-  }
-  checkFrame(fp, sp, /*fullCheck*/true, pcOff);
-}
-
-enum class OnFail { Warn, Fatal };
-
-template<OnFail FailBehavior, class FooNR>
-void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
-  static_assert(
-    std::is_same<FooNR,ArrNR>::value ||
-      std::is_same<FooNR,StrNR>::value,
-    "check loadFuncContextImpl for a new FooNR"
-  );
-
-  ObjectData* inst = nullptr;
-  Class* cls = nullptr;
-  StringData* invName = nullptr;
-
-  auto func = vm_decode_function(
-    VarNR(callableNR),
-    fp,
-    false, // forward
-    inst,
-    cls,
-    invName,
-    FailBehavior == OnFail::Warn
-  );
-  if (UNLIKELY(func == nullptr)) {
-    if (FailBehavior == OnFail::Fatal) {
-      raise_error("Invalid callable (array)");
-    }
-    func = SystemLib::s_nullFunc;
-  }
-
-  preLiveAR->m_func = func;
-  if (inst) {
-    inst->incRefCount();
-    preLiveAR->setThis(inst);
-  } else {
-    preLiveAR->setClass(cls);
-  }
-  if (UNLIKELY(invName != nullptr)) {
-    preLiveAR->setMagicDispatch(invName);
-  }
-}
-
-void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
-    throw;
-  }
-}
-
-NEVER_INLINE
-static void fpushCufHelperArraySlowPath(ArrayData* arr,
-                                        ActRec* preLiveAR,
-                                        ActRec* fp) {
-  loadFuncContextImpl<OnFail::Warn>(ArrNR(arr), preLiveAR, fp);
-}
-
-ALWAYS_INLINE
-static bool strHasColon(StringData* sd) {
-  auto const sl = sd->slice();
-  auto const e = sl.end();
-  for (auto p = sl.begin(); p != e; ++p) {
-    if (*p == ':') return true;
-  }
-  return false;
-}
-
-void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    if (UNLIKELY(!arr->isPacked() || arr->getSize() != 2)) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    auto const elem0 = tvToCell(PackedArray::NvGetInt(arr, 0));
-    auto const elem1 = tvToCell(PackedArray::NvGetInt(arr, 1));
-
-    if (UNLIKELY(elem0->m_type != KindOfObject ||
-                 !isStringType(elem1->m_type))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    // If the string contains a class name (e.g. Foo::bar), all kinds
-    // of weird junk happens (wrt forwarding class contexts and
-    // things).  We just do a quick loop to try to bail out of this
-    // case.
-    if (UNLIKELY(strHasColon(elem1->m_data.pstr))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    auto const inst = elem0->m_data.pobj;
-    auto const func = g_context->lookupMethodCtx(
-      inst->getVMClass(),
-      elem1->m_data.pstr,
-      fp->m_func->cls(),
-      CallType::ObjMethod
-    );
-    if (UNLIKELY(!func || (func->attrs() & AttrStatic))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    preLiveAR->m_func = func;
-    inst->incRefCount();
-    preLiveAR->setThis(inst);
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
-    throw;
-  }
-}
-
-NEVER_INLINE
-static void fpushCufHelperStringSlowPath(StringData* sd,
-                                         ActRec* preLiveAR,
-                                         ActRec* fp) {
-  loadFuncContextImpl<OnFail::Warn>(StrNR(sd), preLiveAR, fp);
-}
-
-NEVER_INLINE
-static void fpushStringFail(const StringData* sd, ActRec* preLiveAR) {
-  throw_invalid_argument("function: method '%s' not found", sd->data());
-  preLiveAR->m_func = SystemLib::s_nullFunc;
-}
-
-void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    if (UNLIKELY(strHasColon(sd))) {
-      return fpushCufHelperStringSlowPath(sd, preLiveAR, fp);
-    }
-
-    auto const func = Unit::loadFunc(sd);
-    preLiveAR->m_func = func;
-    if (UNLIKELY(!func)) {
-      return fpushStringFail(sd, preLiveAR);
-    }
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
-    throw;
-  }
-}
-
-const Func* loadClassCtor(Class* cls) {
+const Func* loadClassCtor(Class* cls, ActRec* fp) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    VMRegAnchor _;
-    UNUSED LookupResult res =
-      g_context->lookupCtorMethod(f, cls, true /*raise*/);
-    assertx(res == LookupResult::MethodFoundWithThis);
+    auto const ctx = arGetContextClass(fp);
+    UNUSED auto func =
+      lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
+    assertx(func == f);
   }
   return f;
 }
 
-const Func* lookupUnknownFunc(const StringData* name) {
-  VMRegAnchor _;
-  auto const func = Unit::loadFunc(name);
-  if (UNLIKELY(!func)) {
-    raise_error("Call to undefined function %s()", name->data());
-  }
-  return func;
-}
-
-const Func* lookupFallbackFunc(const StringData* name,
-                               const StringData* fallback) {
-  VMRegAnchor _;
-  // Try to load the first function
-  auto func = Unit::loadFunc(name);
-  if (LIKELY(!func)) {
-    // Then try to load the fallback function
-    func = Unit::loadFunc(fallback);
-    if (UNLIKELY(!func)) {
-        raise_error("Call to undefined function %s()", name->data());
-    }
-  }
-  return func;
-}
-
-Class* lookupKnownClass(Class** cache, const StringData* clsName) {
-  Class* cls = *cache;
-  assertx(!cls); // the caller should already have checked
-
-  AutoloadHandler::s_instance->autoloadClass(
-    StrNR(const_cast<StringData*>(clsName)));
-  cls = *cache;
-
-  if (UNLIKELY(!cls)) raise_error(Strings::UNKNOWN_CLASS, clsName->data());
-  return cls;
-}
-
-Cell lookupClassConstantTv(TypedValue* cache,
-                           const NamedEntity* ne,
-                           const StringData* cls,
-                           const StringData* cns) {
-  Cell clsCns = g_context->lookupClsCns(ne, cls, cns);
-  cellDup(clsCns, *cache);
-  return clsCns;
-}
-
 //////////////////////////////////////////////////////////////////////
-
-ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value) {
-  collections::initElem(coll, &value);
-  // If we specialized this on Vector we could use a DecRefNZ here (since we
-  // could assume that initElem has incref'd the value).  Right now, HH\Set
-  // goes through this code path also, though, and it might fail to add the new
-  // element.
-  tvRefcountedDecRef(value);
-  return coll;
-}
-
-ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
-                              TypedValue value) {
-  collections::initMapElem(coll, &key, &value);
-  // consume the input value. the collection setter either threw or created a
-  // reference to value, so we can use a cheaper decref.
-  tvRefcountedDecRefNZ(value);
-  return coll;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * The standard VMRegAnchor treatment won't work for some cases called
- * during function preludes.
- *
- * The fp sync machinery is fundamentally based on the notion that
- * instruction pointers in the TC are uniquely associated with source
- * HHBC instructions, and that source HHBC instructions are in turn
- * uniquely associated with SP->FP deltas.
- *
- * trimExtraArgs is called from the prologue of the callee.
- * The prologue is 1) still in the caller frame for now,
- * and 2) shared across multiple call sites. 1 means that we have the
- * fp from the caller's frame, and 2 means that this fp is not enough
- * to figure out sp.
- *
- * However, the prologue passes us the callee actRec, whose predecessor
- * has to be the caller. So we can sync sp and fp by ourselves here.
- * Geronimo!
- */
-static void sync_regstate_to_caller(ActRec* preLive) {
-  assertx(tl_regState == VMRegState::DIRTY);
-  auto const ec = g_context.getNoCheck();
-  auto& regs = vmRegsUnsafe();
-  regs.stack.top() = (TypedValue*)preLive - preLive->numArgs();
-  ActRec* fp = preLive == vmFirstAR() ?
-    ec->m_nestedVMs.back().fp : preLive->m_sfp;
-  regs.fp = fp;
-  regs.pc = fp->m_func->unit()->at(fp->m_func->base() + preLive->m_soff);
-  tl_regState = VMRegState::CLEAN;
-}
-
-#define SHUFFLE_EXTRA_ARGS_PRELUDE()                                    \
-  const Func* f = ar->m_func;                                           \
-  int numParams = f->numNonVariadicParams();                            \
-  int numArgs = ar->numArgs();                                          \
-  assertx(numArgs > numParams);                                         \
-  int numExtra = numArgs - numParams;                                   \
-  TRACE(1, "extra args: %d args, function %s takes only %d, ar %p\n",   \
-        numArgs, f->name()->data(), numParams, ar);                     \
-  auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;            \
-  /* end SHUFFLE_EXTRA_ARGS_PRELUDE */
-
-NEVER_INLINE
-static void trimExtraArgsMayReenter(ActRec* ar,
-                                    TypedValue* tvArgs,
-                                    TypedValue* limit
-                                   ) {
-  sync_regstate_to_caller(ar);
-  do {
-    tvRefcountedDecRef(tvArgs); // may reenter for __destruct
-    ++tvArgs;
-  } while (tvArgs != limit);
-  ar->setNumArgs(ar->m_func->numParams());
-
-  // go back to dirty (see the comments of sync_regstate_to_caller)
-  tl_regState = VMRegState::DIRTY;
-}
-
-void trimExtraArgs(ActRec* ar) {
-  SHUFFLE_EXTRA_ARGS_PRELUDE()
-  assertx(!f->hasVariadicCaptureParam());
-  assertx(!(f->attrs() & AttrMayUseVV));
-
-  TypedValue* limit = tvArgs + numExtra;
-  do {
-    if (UNLIKELY(tvDecRefWillCallHelper(tvArgs))) {
-      trimExtraArgsMayReenter(ar, tvArgs, limit);
-      return;
-    }
-    tvDecRefOnly(tvArgs);
-    ++tvArgs;
-  } while (tvArgs != limit);
-
-  assertx(f->numParams() == (numArgs - numExtra));
-  assertx(f->numParams() == numParams);
-  ar->setNumArgs(numParams);
-}
-
-void shuffleExtraArgsMayUseVV(ActRec* ar) {
-  SHUFFLE_EXTRA_ARGS_PRELUDE()
-  assertx(!f->hasVariadicCaptureParam());
-  assertx(f->attrs() & AttrMayUseVV);
-
-  ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-}
-
-void shuffleExtraArgsVariadic(ActRec* ar) {
-  SHUFFLE_EXTRA_ARGS_PRELUDE()
-  assertx(f->hasVariadicCaptureParam());
-  assertx(!(f->attrs() & AttrMayUseVV));
-
-  {
-    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
-    // write into the last (variadic) param
-    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    tv->m_type = KindOfArray;
-    tv->m_data.parr = varArgsArray.detach();
-    assertx(tv->m_data.parr->hasExactlyOneRef());
-
-    // no incref is needed, since extra values are being transferred
-    // from the stack to the last local
-    assertx(f->numParams() == (numArgs - numExtra + 1));
-    assertx(f->numParams() == (numParams + 1));
-    ar->setNumArgs(numParams + 1);
-  }
-}
-
-void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
-  SHUFFLE_EXTRA_ARGS_PRELUDE()
-  assertx(f->hasVariadicCaptureParam());
-  assertx(f->attrs() & AttrMayUseVV);
-
-  {
-    ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-
-    auto varArgsArray = Array::attach(MixedArray::MakePacked(numExtra, tvArgs));
-    auto tvIncr = tvArgs; uint32_t i = 0;
-    // an incref is needed to compensate for discarding from the stack
-    for (; i < numExtra; ++i, ++tvIncr) { tvRefcountedIncRef(tvIncr); }
-    // write into the last (variadic) param
-    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-    tv->m_type = KindOfArray;
-    tv->m_data.parr = varArgsArray.detach();
-    assertx(tv->m_data.parr->hasExactlyOneRef());
-    // Before, for each arg: refcount = n + 1 (stack)
-    // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray)
-  }
-}
-
-#undef SHUFFLE_EXTRA_ARGS_PRELUDE
 
 void raiseMissingArgument(const Func* func, int got) {
   const auto total = func->numNonVariadicParams();
@@ -1214,16 +943,22 @@ void raiseMissingArgument(const Func* func, int got) {
   }
   bool lessNeeded = (variadic || expected < total);
   if (expected == 1) {
-    raise_warning(Strings::MISSING_ARGUMENT, func->name()->data(),
+    raise_warning(Strings::MISSING_ARGUMENT, func->displayName()->data(),
                   lessNeeded ? "at least" : "exactly", got);
   } else {
-    raise_warning(Strings::MISSING_ARGUMENTS, func->name()->data(),
+    raise_warning(Strings::MISSING_ARGUMENTS, func->displayName()->data(),
                   lessNeeded ? "at least" : "exactly", expected, got);
   }
 }
 
-rds::Handle lookupClsRDSHandle(const StringData* name) {
-  return NamedEntity::get(name)->getClassHandle();
+//////////////////////////////////////////////////////////////////////
+
+Class* lookupClsRDS(const StringData* name) {
+  auto const handle = NamedEntity::get(name)->getClassHandle();
+  assertx(handle != rds::kInvalidHandle);
+  return rds::isHandleInit(handle)
+    ? &*rds::handleToRef<LowPtr<Class>>(handle)
+    : nullptr;
 }
 
 void registerLiveObj(ObjectData* obj) {
@@ -1243,15 +978,36 @@ bool methodExistsHelper(Class* cls, StringData* meth) {
   return cls->lookupMethod(meth) != nullptr;
 }
 
+void throwOOBException(TypedValue base, TypedValue key) {
+  if (isArrayLikeType(base.m_type)) {
+    throwOOBArrayKeyException(key, base.m_data.parr);
+  } else if (base.m_type == KindOfObject) {
+    assertx(isIntType(key.m_type));
+    collections::throwOOB(key.m_data.num);
+  }
+  not_reached();
+}
+
+void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
+  throwInvalidArrayKeyException(&key, ad);
+}
+
 namespace MInstrHelpers {
+
+TypedValue setOpElem(TypedValue* base, TypedValue key,
+                     Cell val, SetOpOp op) {
+  TypedValue localTvRef;
+  auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val);
+
+  return cGetRefShuffle(localTvRef, result);
+}
 
 StringData* stringGetI(StringData* base, uint64_t x) {
   if (LIKELY(x < base->size())) {
     return base->getChar(x);
   }
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_warning("Out of bounds");
-  }
+  raise_notice("Uninitialized string offset: %" PRId64,
+               static_cast<int64_t>(x));
   return staticEmptyString();
 }
 
@@ -1265,22 +1021,65 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return result ? !cellIsNull(result) : false;
 }
 
-void bindElemC(TypedValue* base, TypedValue key, RefData* val,
-               MInstrState* mis) {
-  auto elem = HPHP::ElemD<false, true>(mis->tvRef, base, key);
+void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
+  TypedValue localTvRef;
+  auto elem = HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, key);
+
+  if (UNLIKELY(elem == &localTvRef)) {
+    // Skip binding a TypedValue that's about to be destroyed and just destroy
+    // it now.
+    tvRefcountedDecRef(localTvRef);
+    return;
+  }
+
   tvBindRef(val, elem);
 }
 
-void setWithRefElemC(TypedValue* base, TypedValue keyTV, TypedValue val,
-                     MInstrState* mis) {
+void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
+  TypedValue localTvRef;
   auto const keyC = tvToCell(&keyTV);
-  auto elem = HPHP::ElemD<false, false>(mis->tvRef, base, *keyC);
+  auto elem = UNLIKELY(val.m_type == KindOfRef)
+    ? HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, *keyC)
+    : HPHP::ElemD<MOpMode::Define, false>(localTvRef, base, *keyC);
+  // Intentionally leak the old value pointed to by elem, including from magic
+  // methods.
   tvDup(val, *elem);
 }
 
-void setWithRefNewElem(TypedValue* base, TypedValue val, MInstrState* mis) {
-  auto elem = NewElem<false>(mis->tvRef, base);
-  tvDup(val, *elem);
+TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
+  auto const result = HPHP::IncDecElem(op, base, key);
+  assertx(result.m_type != KindOfRef);
+  return result;
+}
+
+void bindNewElem(TypedValue* base, RefData* val) {
+  if (UNLIKELY(isHackArrayType(base->m_type))) {
+    throwRefInvalidArrayValueException(base->m_data.parr);
+  }
+
+  TypedValue localTvRef;
+  auto elem = HPHP::NewElem<true>(localTvRef, base);
+
+  if (UNLIKELY(elem == &localTvRef)) {
+    // Skip binding a TypedValue that's about to be destroyed and just destroy
+    // it now.
+    tvRefcountedDecRef(localTvRef);
+    return;
+  }
+
+  tvBindRef(val, elem);
+}
+
+TypedValue* elemVecID(TypedValue* base, int64_t key) {
+  auto cbase = tvToCell(base);
+  assertx(isVecType(cbase->m_type));
+  return ElemDVec<false, KeyType::Int>(cbase, key);
+}
+
+TypedValue* elemVecIU(TypedValue* base, int64_t key) {
+  auto cbase = tvToCell(base);
+  assertx(isVecType(cbase->m_type));
+  return ElemUVec<KeyType::Int>(cbase, key);
 }
 
 }

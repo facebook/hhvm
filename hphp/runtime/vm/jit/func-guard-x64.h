@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,11 @@ namespace HPHP {
 
 struct Func;
 
-namespace jit { namespace x64 {
+namespace jit {
+
+struct CGMeta;
+
+namespace x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +37,7 @@ namespace jit { namespace x64 {
  * Mirrors the API of func-guard.h.
  */
 
-void emitFuncGuard(const Func* func, CodeBlock& cb);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
 TCA funcGuardFromPrologue(TCA prologue, const Func* func);
 bool funcGuardMatches(TCA guard, const Func* func);
 void clobberFuncGuard(TCA guard, const Func* func);

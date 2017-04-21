@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 #include "hphp/runtime/server/server.h"
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 #include <proxygen/lib/services/WorkerThread.h>
-#include <proxygen/lib/ssl/SSLContextConfig.h>
+#include <wangle/ssl/SSLContextConfig.h>
 #include <folly/io/async/NotificationQueue.h>
 
 #include <algorithm>
@@ -33,8 +33,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class ProxygenJob : public ServerJob {
-public:
+struct ProxygenJob : ServerJob {
   explicit ProxygenJob(std::shared_ptr<ProxygenTransport> transport);
 
   virtual void getRequestStart(struct timespec *reqStart);
@@ -43,14 +42,13 @@ public:
   struct timespec reqStart;
 };
 
-class ProxygenTransportTraits;
-typedef ServerWorker<std::shared_ptr<ProxygenJob>,
-  ProxygenTransportTraits> ProxygenWorker;
+struct ProxygenTransportTraits;
+using ProxygenWorker = ServerWorker<std::shared_ptr<ProxygenJob>,
+                                    ProxygenTransportTraits>;
 
-class ProxygenServer;
+struct ProxygenServer;
 
-class HPHPSessionAcceptor : public proxygen::HTTPSessionAcceptor {
- public:
+struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
     ProxygenServer *server);
@@ -67,15 +65,23 @@ class HPHPSessionAcceptor : public proxygen::HTTPSessionAcceptor {
   void onIngressError(const proxygen::HTTPSession&,
                       proxygen::ProxygenError error) override;
 
+  proxygen::HTTPSessionController* getController() override {
+    return m_controllerPtr;
+  }
+
+  void setController(proxygen::HTTPSessionController* controller) {
+    m_controllerPtr = controller;
+  }
+
  private:
   ProxygenServer *m_server;
+  proxygen::SimpleController m_simpleController{this};
+  proxygen::HTTPSessionController* m_controllerPtr{&m_simpleController};
 };
 
-typedef folly::NotificationQueue<ResponseMessage>
-  ResponseMessageQueue;
+using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
 
-class HPHPWorkerThread : public proxygen::WorkerThread {
- public:
+struct HPHPWorkerThread : proxygen::WorkerThread {
   explicit HPHPWorkerThread(folly::EventBaseManager* ebm)
       : WorkerThread(ebm) {}
   virtual ~HPHPWorkerThread() {}
@@ -83,11 +89,10 @@ class HPHPWorkerThread : public proxygen::WorkerThread {
   virtual void cleanup() override;
 };
 
-class ProxygenServer : public Server,
-                       public ResponseMessageQueue::Consumer,
-                       public folly::AsyncTimeout,
-                       public TakeoverAgent::Callback {
- public:
+struct ProxygenServer : Server,
+                        ResponseMessageQueue::Consumer,
+                        folly::AsyncTimeout,
+                        TakeoverAgent::Callback {
   explicit ProxygenServer(const ServerOptions& options);
 
   ~ProxygenServer() {
@@ -117,8 +122,9 @@ class ProxygenServer : public Server,
     return m_eventBaseManager.getEventBase();
   }
 
-  void messageAvailable(ResponseMessage&& message) override {
-    message.m_transport->messageAvailable(std::move(message));
+  void messageAvailable(ResponseMessage&& message) noexcept override {
+    auto m_transport = message.m_transport;
+    m_transport->messageAvailable(std::move(message));
   }
 
   bool canAccept();
@@ -143,8 +149,16 @@ class ProxygenServer : public Server,
 
   virtual void onRequestError(Transport* transport);
 
+  void addPendingTransport(ProxygenTransport& transport) {
+    if (partialPostEchoEnabled()) {
+      const auto status = getStatus();
+      transport.setShouldRepost(status == RunStatus::STOPPING
+                                || status == RunStatus::STOPPED);
+    }
+    m_pendingTransports.push_back(transport);
+  }
+
  protected:
-  // TODO: Share with LibEventServer?
   enum RequestPriority {
     PRIORITY_NORMAL = 0,
     PRIORITY_HIGH,
@@ -152,6 +166,9 @@ class ProxygenServer : public Server,
   };
   RequestPriority getRequestPriority(const char *uri);
 
+  // Ordering of shutdown states corresponds to the phases in time,
+  // and we rely on the ordering.  State transition graph is linear
+  // here.
   enum class ShutdownState {
     SHUTDOWN_NONE,
     DRAINING_READS,
@@ -168,6 +185,12 @@ class ProxygenServer : public Server,
   // These functions can only be called from the m_worker thread
   void stopListening(bool hard = false);
 
+  virtual bool partialPostEchoEnabled() { return false; }
+
+  void returnPartialPosts();
+
+  void abortPendingTransports();
+
   void doShutdown();
 
   void stopVM();
@@ -175,6 +198,8 @@ class ProxygenServer : public Server,
   void vmStopped();
 
   void forceStop();
+
+  void reportShutdownStatus();
 
   bool initialCertHandler(const std::string& server_name,
                           const std::string& key_file,
@@ -203,17 +228,17 @@ class ProxygenServer : public Server,
   HPHPWorkerThread m_worker;
   proxygen::AcceptorConfiguration m_httpConfig;
   proxygen::AcceptorConfiguration m_httpsConfig;
-  proxygen::SSLContextConfig m_sslCtxConfig;
+  wangle::SSLContextConfig m_sslCtxConfig;
   std::unique_ptr<HPHPSessionAcceptor> m_httpAcceptor;
   std::unique_ptr<HPHPSessionAcceptor> m_httpsAcceptor;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;
   ResponseMessageQueue m_responseQueue;
   std::unique_ptr<TakeoverAgent> m_takeover_agent;
+  ProxygenTransportList m_pendingTransports;
 };
 
-class ProxygenTransportTraits {
- public:
+struct ProxygenTransportTraits {
   ProxygenTransportTraits(std::shared_ptr<ProxygenJob> job,
     void *opaque, int id);
   ~ProxygenTransportTraits();

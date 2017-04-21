@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,8 +23,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
-class String;
+struct Array;
+struct String;
 
 /**
  * Using an integer to represent time: the value of time in seconds since 0
@@ -32,8 +32,7 @@ class String;
  * without including leap seconds. Therefore, this integer is by definition
  * non timezone specific and thus not shifted by DST.
  */
-class TimeStamp {
-public:
+struct TimeStamp {
   static int64_t Current();
   static double CurrentSecond();
   static Array CurrentTime();

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/weakref-data.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -36,20 +37,20 @@ struct TypedValue;
 
 #define INVOKE_FEW_ARGS_COUNT 6
 #define INVOKE_FEW_ARGS_DECL3                        \
-  const Variant& a0 = null_variant,                  \
-  const Variant& a1 = null_variant,                  \
-  const Variant& a2 = null_variant
+  const Variant& a0 = uninit_variant,                \
+  const Variant& a1 = uninit_variant,                \
+  const Variant& a2 = uninit_variant
 #define INVOKE_FEW_ARGS_DECL6                        \
   INVOKE_FEW_ARGS_DECL3,                             \
-  const Variant& a3 = null_variant,                  \
-  const Variant& a4 = null_variant,                  \
-  const Variant& a5 = null_variant
+  const Variant& a3 = uninit_variant,                \
+  const Variant& a4 = uninit_variant,                \
+  const Variant& a5 = uninit_variant
 #define INVOKE_FEW_ARGS_DECL10                       \
   INVOKE_FEW_ARGS_DECL6,                             \
-  const Variant& a6 = null_variant,                  \
-  const Variant& a7 = null_variant,                  \
-  const Variant& a8 = null_variant,                  \
-  const Variant& a9 = null_variant
+  const Variant& a6 = uninit_variant,                \
+  const Variant& a7 = uninit_variant,                \
+  const Variant& a8 = uninit_variant,                \
+  const Variant& a9 = uninit_variant
 #define INVOKE_FEW_ARGS_HELPER(kind,num) kind##num
 #define INVOKE_FEW_ARGS(kind,num) \
   INVOKE_FEW_ARGS_HELPER(INVOKE_FEW_ARGS_##kind,num)
@@ -58,10 +59,21 @@ struct TypedValue;
 void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
                     size_t nProps);
 
+struct InvokeResult {
+  TypedValue val;
+  InvokeResult() {}
+  InvokeResult(bool ok, TypedValue v) : val(v) {
+    val.m_aux.u_ok = ok;
+  }
+  InvokeResult(bool ok, Variant&& v);
+  bool ok() const { return val.m_aux.u_ok; }
+  explicit operator bool() const { return ok(); }
+};
+
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
-struct ObjectData {
+struct ObjectData : Countable, type_scan::MarkCountable<ObjectData> {
   enum Attribute : uint16_t {
     NoDestructor  = 0x0001, // __destruct()
     HasSleep      = 0x0002, // __sleep()
@@ -70,19 +82,18 @@ struct ObjectData {
     UseIsset      = 0x0010, // __isset()
     UseUnset      = 0x0020, // __unset()
     IsWaitHandle  = 0x0040, // This is a c_WaitHandle or derived
-    HasCall       = 0x0080, // defines __call
     HasClone      = 0x0100, // if IsCppBuiltin, has custom clone logic
                             // if not IsCppBuiltin, defines __clone PHP method
     CallToImpl    = 0x0200, // call o_to{Boolean,Int64,Double}Impl
     HasNativeData = 0x0400, // HNI Class with <<__NativeData("T")>>
     HasDynPropArr = 0x0800, // has a dynamic properties array
-    IsCppBuiltin  = 0x1000, // has custom C++ subclass
+    IsCppBuiltin  = 0x1000, // has a custom instanceCtor and instanceDtor
+                            // if you subclass ObjectData, you need this
     IsCollection  = 0x2000, // it's a collection (and the specific type is
                             // one of the CollectionType HeaderKind values
     HasPropEmpty  = 0x4000, // has custom propEmpty logic
     HasNativePropHandler    // class has native magic props handler
-                  = 0x8000,
-    InstanceDtor  = 0x1400, // HasNativeData | IsCppBuiltin
+                  = 0x8000
   };
 
   enum {
@@ -92,13 +103,13 @@ struct ObjectData {
   };
 
  private:
-  static __thread int os_max_id;
+  static __thread uint32_t os_max_id;
 
  public:
   static void resetMaxId();
 
-  explicit ObjectData(Class*);
-  explicit ObjectData(Class*, uint16_t flags, HeaderKind = HeaderKind::Object);
+  explicit ObjectData(Class*, uint16_t flags = 0,
+                      HeaderKind = HeaderKind::Object);
   ~ObjectData();
 
   // Disallow copy construction and assignemt
@@ -115,20 +126,43 @@ struct ObjectData {
                       NoInit) noexcept;
 
  public:
-  IMPLEMENT_COUNTABLE_METHODS
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
   bool kindIsValid() const { return isObjectKind(headerKind()); }
 
-  template<class F> void scan(F&) const;
+  void scan(type_scan::Scanner&) const;
 
   size_t heapSize() const;
 
+  // WeakRef control methods.
+  inline void invalidateWeakRef() const {
+    if (UNLIKELY(m_weak_refed)) {
+      WeakRefData::invalidateWeakRef((uintptr_t)this);
+    }
+  }
+
+  inline void setWeakRefed(bool flag) const {
+    m_weak_refed = flag;
+  }
+
  public:
 
-  // Call newInstance() to instantiate a PHP object. The initial ref-count will
-  // be greater than zero. Since this gives you a raw pointer, it is your
-  // responsibility to manage the ref-count yourself. Whenever possible, prefer
-  // using the Object class instead, which takes care of this for you.
+  /*
+   * Call newInstance() to instantiate a PHP object. The initial ref-count will
+   * be greater than zero. Since this gives you a raw pointer, it is your
+   * responsibility to manage the ref-count yourself. Whenever possible, prefer
+   * using the Object class instead, which takes care of this for you.
+   */
   static ObjectData* newInstance(Class*);
+
+  /*
+   * Instantiate a new object without initializing its declared properties. The
+   * given Class must be a concrete, regular Class, without an instanceCtor or
+   * customInit.
+   */
+  static ObjectData* newInstanceNoPropInit(Class*);
 
   /*
    * Given a Class that is assumed to be a concrete, regular (not a trait or
@@ -150,7 +184,7 @@ struct ObjectData {
   Class* getVMClass() const;
   void setVMClass(Class* cls);
   StrNR getClassName() const;
-  int getId() const;
+  uint32_t getId() const;
 
   // instanceof() can be used for both classes and interfaces.
   bool instanceof(const String&) const;
@@ -179,9 +213,8 @@ struct ObjectData {
   HeaderKind headerKind() const;
 
   bool getAttribute(Attribute) const;
-  uint16_t getAttributes() const;
   void setAttribute(Attribute);
-
+  bool hasInstanceDtor() const;
   bool noDestruct() const;
   void setNoDestruct();
   void clearNoDestruct();
@@ -292,28 +325,26 @@ struct ObjectData {
    */
   Array& reserveProperties(int nProp = 2);
 
+  /*
+   * Use the given array for this object's dynamic properties. HasDynPropArry
+   * must not already be set. Returns a reference to the Array in its final
+   * location.
+   */
+  Array& setDynPropArray(const Array&);
+
   // accessors for the declared properties area
   TypedValue* propVec();
   const TypedValue* propVec() const;
 
  public:
-  ObjectData* callCustomInstanceInit();
-
-  //============================================================================
-  // Miscellaneous.
-
-  void cloneSet(ObjectData*);
-  ObjectData* cloneImpl();
-
   const Func* methodNamed(const StringData*) const;
-
   static size_t sizeForNProps(Slot);
 
   //============================================================================
   // Properties.
  private:
   void initDynProps(int numDynamic = 0);
-  Slot declPropInd(TypedValue* prop) const;
+  Slot declPropInd(const TypedValue* prop) const;
 
   inline Variant o_getImpl(const String& propName, int flags, bool error = true,
                            const String& context = null_string);
@@ -333,23 +364,38 @@ struct ObjectData {
   PropLookup<TypedValue*> getPropImpl(const Class*, const StringData*,
                                       bool copyDynArray);
 
+  struct PropAccessInfo {
+    struct Hash;
+
+    bool operator==(const PropAccessInfo& o) const {
+      return obj == o.obj && attr == o.attr && key->same(o.key);
+    }
+
+    ObjectData* obj;
+    const StringData* key;      // note: not necessarily static
+    ObjectData::Attribute attr;
+  };
+
+  struct PropRecurInfo {
+    using RecurSet = req::hash_set<PropAccessInfo, PropAccessInfo::Hash>;
+    const PropAccessInfo* activePropInfo;
+    RecurSet* activeSet;
+  };
+
  private:
-  template <bool warn, bool define>
-  TypedValue* propImpl(
-    TypedValue* tvRef,
-    Class* ctx,
-    const StringData* key
-  );
+  template<MOpMode mode>
+  TypedValue* propImpl(TypedValue* tvRef, const Class* ctx,
+                       const StringData* key);
 
   bool propEmptyImpl(const Class* ctx, const StringData* key);
 
-  bool invokeSet(const StringData* key, TypedValue* val);
-  bool invokeGet(TypedValue* retval, const StringData* key);
-  bool invokeIsset(TypedValue* retval, const StringData* key);
+  bool invokeSet(const StringData* key, const TypedValue* val);
+  InvokeResult invokeGet(const StringData* key);
+  InvokeResult invokeIsset(const StringData* key);
   bool invokeUnset(const StringData* key);
-  bool invokeNativeGetProp(TypedValue* retval, const StringData* key);
+  InvokeResult invokeNativeGetProp(const StringData* key);
   bool invokeNativeSetProp(const StringData* key, TypedValue* val);
-  bool invokeNativeIssetProp(TypedValue* retval, const StringData* key);
+  InvokeResult invokeNativeIssetProp(const StringData* key);
   bool invokeNativeUnsetProp(const StringData* key);
 
   void getProp(const Class* klass, bool pubOnly, const PreClass::Prop* prop,
@@ -362,25 +408,19 @@ struct ObjectData {
  public:
   TypedValue* prop(
     TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 
   TypedValue* propD(
     TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 
   TypedValue* propW(
     TypedValue* tvRef,
-    Class* ctx,
-    const StringData* key
-  );
-
-  TypedValue* propWD(
-    TypedValue* tvRef,
-    Class* ctx,
+    const Class* ctx,
     const StringData* key
   );
 
@@ -392,12 +432,12 @@ struct ObjectData {
   TypedValue* setOpProp(TypedValue& tvRef, Class* ctx, SetOpOp op,
                         const StringData* key, Cell* val);
 
-  void incDecProp(Class* ctx, IncDecOp op, const StringData* key,
-                  TypedValue& dest);
+  Cell incDecProp(Class* ctx, IncDecOp op, const StringData* key);
 
   void unsetProp(Class* ctx, const StringData* key);
 
   static void raiseObjToIntNotice(const char*);
+  static void raiseObjToDoubleNotice(const char*);
   static void raiseAbstractClassError(Class*);
   void raiseUndefProp(const StringData*);
 
@@ -405,49 +445,40 @@ struct ObjectData {
     return offsetof(ObjectData, m_cls);
   }
   static constexpr ptrdiff_t attributeOff() {
-    return offsetof(ObjectData, m_hdr) +
-           offsetof(HeaderWord<uint16_t>, aux);
+    return offsetof(ObjectData, m_aux16);
   }
   const char* classname_cstr() const;
 
 private:
   friend struct MemoryProfile;
 
-  static void compileTimeAssertions();
-
   bool toBooleanImpl() const noexcept;
   int64_t toInt64Impl() const noexcept;
   double toDoubleImpl() const noexcept;
 
-// offset:  0    4   8       12     16   20          32
-// 64bit:   cls      header  count  id   [subclass]  [props...]
-// lowptr:  cls  id  header  count  [subclass][props...]
+// offset:  0        8       12   16   20          32
+// 64bit:   header   cls          id   [subclass]  [props...]
+// lowptr:  header   cls     id   [subclass][props...]
 
 private:
-#ifdef USE_LOWPTR
   LowPtr<Class> m_cls;
-  int o_id; // Numeric identifier of this object (used for var_dump())
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-#else
-  LowPtr<Class> m_cls;
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores Attributes
-  int o_id; // Numeric identifier of this object (used for var_dump())
-#endif
+  uint32_t o_id; // id of this object (used for var_dump(), and WeakRefs)
 };
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif
 
-struct GlobalsArray;
-typedef GlobalsArray GlobalVariables;
-
-struct CountableHelper : private boost::noncopyable {
+struct CountableHelper {
   explicit CountableHelper(ObjectData* object) : m_object(object) {
     object->incRefCount();
   }
   ~CountableHelper() {
     m_object->decRefCount();
   }
+
+  CountableHelper(const CountableHelper&) = delete;
+  CountableHelper& operator=(const CountableHelper&) = delete;
+
 private:
   ObjectData *m_object;
 };
@@ -465,29 +496,6 @@ inline ObjectData* instanceFromTv(TypedValue* tv) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-template<uint16_t Flags>
-struct ExtObjectDataFlags : ObjectData {
-  explicit ExtObjectDataFlags(HPHP::Class* cb,
-                              HeaderKind kind = HeaderKind::Object)
-    : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind)
-  {
-    assert(!getVMClass()->callsCustomInstanceInit());
-  }
-
-protected:
-  explicit ExtObjectDataFlags(HPHP::Class* cb,
-                              HeaderKind kind,
-                              NoInit ni) noexcept
-  : ObjectData(cb, Flags | ObjectData::IsCppBuiltin, kind, ni)
-  {
-    assert(!getVMClass()->callsCustomInstanceInit());
-  }
-
-  ~ExtObjectDataFlags() {}
-};
-
-using ExtObjectData = ExtObjectDataFlags<ObjectData::IsCppBuiltin>;
 
 #define DECLARE_CLASS_NO_SWEEP(originalName)                           \
   public:                                                              \
@@ -510,6 +518,7 @@ typename std::enable_if<
   req::ptr<T>
 >::type make(Args&&... args) {
   auto const mem = MM().mallocSmallSize(sizeof(T));
+  (void)type_scan::getIndexForMalloc<T>(); // ensure T* ptrs are interesting
   try {
     auto t = new (mem) T(std::forward<Args>(args)...);
     assert(t->hasExactlyOneRef());

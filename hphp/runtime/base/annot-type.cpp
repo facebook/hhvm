@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,7 +58,7 @@ MaybeDataType nameToMaybeDataType(const std::string& typeName) {
  */
 static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
   static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair = []() {
-    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mapPair;
+    std::pair<HhvmStrToTypeMap, StdStrToTypeMap> mappedPairs;
     const struct Pair {
       const char* name;
       AnnotType type;
@@ -77,12 +77,18 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "self",         AnnotType::Self },
       { "parent",       AnnotType::Parent },
       { "callable",     AnnotType::Callable },
+      { "HH\\dict",     AnnotType::Dict },
+      { "HH\\vec",      AnnotType::Vec },
+      { "HH\\keyset",   AnnotType::Keyset },
+      { "HH\\varray",   AnnotType::Array },
+      { "HH\\darray",   AnnotType::Array },
+      { "HH\\varray_or_darray", AnnotType::Array },
     };
     for (unsigned i = 0; i < sizeof(pairs) / sizeof(Pair); ++i) {
-      mapPair.first[makeStaticString(pairs[i].name)] = pairs[i].type;
-      mapPair.second[pairs[i].name] = pairs[i].type;
+      mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
+      mappedPairs.second[pairs[i].name] = pairs[i].type;
     }
-    return mapPair;
+    return mappedPairs;
   }();
   return mapPair;
 }
@@ -120,6 +126,63 @@ bool interface_supports_array(const StringData* s) {
 }
 
 bool interface_supports_array(const std::string& n) {
+  const char* s = n.c_str();
+  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
+          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
+          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
+          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+}
+
+bool interface_supports_vec(const StringData* s) {
+  return (s->isame(s_HH_Traversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_Container.get()) ||
+          s->isame(s_HH_KeyedContainer.get()) ||
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_vec(const std::string& n) {
+  const char* s = n.c_str();
+  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
+          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
+          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
+          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+}
+
+bool interface_supports_dict(const StringData* s) {
+  return (s->isame(s_HH_Traversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_Container.get()) ||
+          s->isame(s_HH_KeyedContainer.get()) ||
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_dict(const std::string& n) {
+  const char* s = n.c_str();
+  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
+          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
+          (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
+          (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
+          (n.size() == 8 && !strcasecmp(s, "Indexish")) ||
+          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+}
+
+bool interface_supports_keyset(const StringData* s) {
+  return (s->isame(s_HH_Traversable.get()) ||
+          s->isame(s_HH_KeyedTraversable.get()) ||
+          s->isame(s_HH_Container.get()) ||
+          s->isame(s_HH_KeyedContainer.get()) ||
+          s->isame(s_Indexish.get()) ||
+          s->isame(s_XHPChild.get()));
+}
+
+bool interface_supports_keyset(const std::string& n) {
   const char* s = n.c_str();
   return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
           (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,8 @@
 
 #include "hphp/util/asm-x64.h"
 
+#include <vector>
+
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -37,14 +39,14 @@ struct VscaledDisp;
  * XMM, or virtual register.
  */
 struct Vreg {
-  static const unsigned kNumGP{PhysReg::kSIMDOffset}; // 33
-  static const unsigned kNumXMM{30};
-  static const unsigned kNumSF{1};
-  static const unsigned G0{0};
-  static const unsigned X0{kNumGP};
-  static const unsigned S0{X0+kNumXMM};
-  static const unsigned V0{S0+kNumSF};
-  static const unsigned kInvalidReg{0xffffffffU};
+  static constexpr unsigned kNumGP = PhysReg::kNumGP;
+  static constexpr unsigned kNumXMM = PhysReg::kNumSIMD;
+  static constexpr unsigned kNumSF = PhysReg::kNumSF;
+  static constexpr unsigned G0 = PhysReg::kGPOffset;
+  static constexpr unsigned X0 = PhysReg::kSIMDOffset;
+  static constexpr unsigned S0 = PhysReg::kSFOffset;
+  static constexpr unsigned V0 = PhysReg::kMaxRegs;
+  static constexpr unsigned kInvalidReg = 0xffffffffU;
 
   /*
    * Constructors.
@@ -53,6 +55,7 @@ struct Vreg {
   explicit Vreg(size_t r) : rn(r) {}
   /* implicit */ Vreg(Reg64 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg32 r)  : rn(int(r)) {}
+  /* implicit */ Vreg(Reg16 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg8 r)   : rn(int(r)) {}
   /* implicit */ Vreg(RegXMM r) : rn(X0+int(r)) {}
   /* implicit */ Vreg(RegSF r)  : rn(S0+int(r)) {}
@@ -110,6 +113,11 @@ struct Vreg {
 private:
   unsigned rn{kInvalidReg};
 };
+
+/*
+ * Vector of Vregs, for Vtuples and VcallArgs (see vasm-unit.h).
+ */
+using VregList = jit::vector<Vreg>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -175,6 +183,8 @@ private:
   unsigned rn;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 using Vreg64  = Vr<Reg64>;
 using Vreg32  = Vr<Reg32>;
 using Vreg16  = Vr<Reg16>;
@@ -196,6 +206,51 @@ struct Vreg128 : Vr<RegXMM> {
 };
 
 inline Reg64 r64(Vreg64 r) { return r; }
+
+/*
+ * Vreg width constraint (or flags).
+ *
+ * Guaranteed to be a bitfield, which users of Width can do with as they
+ * please.
+ */
+enum class Width : uint8_t {
+  None  = 0,
+  Byte  = 1,
+  Word  = 1 << 1,
+  Long  = 1 << 2,
+  Quad  = 1 << 3,
+  Octa  = 1 << 4,
+  Dbl   = 1 << 5,
+  Flags = 1 << 6,
+  Wide  = Octa | Dbl,
+  // X-or-narrower widths.
+  WordN = Byte | Word,
+  LongN = Byte | Word | Long,
+  QuadN = Byte | Word | Long | Quad,
+  // Any non-flags register.
+  AnyNF = Byte | Word | Long | Quad | Octa | Dbl,
+  Any   = Byte | Word | Long | Quad | Octa | Dbl | Flags,
+};
+
+inline Width operator&(Width w1, Width w2) {
+  return static_cast<Width>(
+    static_cast<uint8_t>(w1) & static_cast<uint8_t>(w2)
+  );
+}
+inline Width& operator&=(Width& w1, Width w2) {
+  return w1 = w1 & w2;
+}
+
+inline Width width(Vreg)    { return Width::AnyNF; }
+inline Width width(Vreg8)   { return Width::Byte; }
+inline Width width(Vreg16)  { return Width::Word; }
+inline Width width(Vreg32)  { return Width::Long; }
+inline Width width(Vreg64)  { return Width::Quad; }
+inline Width width(Vreg128) { return Width::Octa; }
+inline Width width(VregDbl) { return Width::Dbl; }
+inline Width width(VregSF)  { return Width::Flags; }
+
+std::string show(Width w);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -239,7 +294,9 @@ struct Vptr {
     , index(i)
     , scale(s)
     , disp(d)
-  {}
+  {
+    validate();
+  }
 
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
     : base(m.r.base)
@@ -247,7 +304,9 @@ struct Vptr {
     , scale(m.r.scale)
     , seg(s)
     , disp(m.r.disp)
-  {}
+  {
+    validate();
+  }
 
   Vptr(const Vptr& o) = default;
   Vptr& operator=(const Vptr& o) = default;
@@ -257,6 +316,11 @@ struct Vptr {
 
   bool operator==(const Vptr&) const;
   bool operator!=(const Vptr&) const;
+
+  void validate() {
+    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+           "Invalid index register scaling (must be 1,2,4 or 8).");
+  }
 
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional
@@ -292,6 +356,7 @@ struct Vloc {
    */
   bool hasReg(int i = 0) const;
   Vreg reg(int i = 0) const;
+  VregList regs() const;
   int numAllocated() const;
   int numWords() const;
   bool isFullSIMD() const;

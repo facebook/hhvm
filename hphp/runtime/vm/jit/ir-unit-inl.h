@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,19 +39,19 @@ struct InstructionBuilder {
   /*
    * Create an IRInstruction, and then recursively chew on the Args list to
    * populate its fields.  Every instruction must have at least an Opcode and a
-   * BCMarker.
+   * BCContext.
    *
    * The IRInstruction is stack allocated, and should not escape the lambda, so
    * we fill it with 0xc0 in debug builds after we're done.
    */
   template<class... Args>
-  Ret go(Opcode op, BCMarker marker, Args&&... args) {
+  Ret go(Opcode op, BCContext bcctx, Args&&... args) {
     std::aligned_storage<sizeof(IRInstruction)>::type buffer;
     void* const vpBuffer = &buffer;
     SCOPE_EXIT { if (debug) memset(&buffer, 0xc0, sizeof(buffer)); };
     Edge edges[2];
 
-    new (vpBuffer) IRInstruction(op, marker, hasEdges(op) ? edges : nullptr);
+    new (vpBuffer) IRInstruction(op, bcctx, hasEdges(op) ? edges : nullptr);
     auto const inst = static_cast<IRInstruction*>(vpBuffer);
 
     SCOPE_EXIT { inst->clearExtra(); };
@@ -189,7 +189,7 @@ void IRUnit::replace(IRInstruction* old, Opcode op, Args... args) {
   makeInstruction(
     [&] (IRInstruction* replacement) { old->become(*this, replacement); },
     op,
-    old->marker(),
+    old->bcctx(),
     std::forward<Args>(args)...
   );
 }
@@ -273,6 +273,21 @@ inline SSATmp* IRUnit::findSSATmp(uint32_t id) const {
 inline SSATmp* IRUnit::mainFP() const {
   assertx(!entry()->empty() && entry()->begin()->is(DefFP));
   return entry()->begin()->dst();
+}
+
+inline SSATmp* IRUnit::mainSP() const {
+  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
+  auto it = ++entry()->begin();
+  assertx(it != entry()->end() && it->is(DefSP));
+  return it->dst();
+}
+
+inline int64_t IRUnit::startNanos() const {
+  return m_startNanos;
+}
+
+inline folly::Optional<StructuredLogEntry>& IRUnit::logEntry() const {
+  return m_logEntry;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

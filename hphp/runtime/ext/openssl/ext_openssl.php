@@ -134,6 +134,8 @@ function openssl_error_string(): mixed;
  * @param string $env_key
  * @param mixed $priv_key_id
  * @param string $method
+ * @param string $iv Initialization Vector, only required if the encryption
+ * requires one
  * @return bool - Returns TRUE on success or FALSE on failure.
  */
 <<__Native>>
@@ -141,7 +143,8 @@ function openssl_open(string $sealed_data,
                       mixed &$open_data,
                       string $env_key,
                       mixed $priv_key_id,
-                      string $method = ""): bool;
+                      string $method = "",
+                      string $iv = ""): bool;
 
 /* openssl_pkcs12_export_to_file() stores x509 into a file named by filename
  * in a PKCS#12 file format.
@@ -406,7 +409,7 @@ function openssl_get_publickey(mixed $certificate): mixed {
  * or FALSE on error.
  */
 <<__Native>>
-function openssl_pkey_new(mixed $configargs = null): resource;
+function openssl_pkey_new(mixed $configargs = null): mixed;
 
 /* openssl_private_decrypt() decrypts data that was previous encrypted via
  * openssl_public_encrypt() and stores the result into decrypted.  You can use
@@ -490,16 +493,19 @@ function openssl_public_encrypt(string $data,
  * @param mixed $env_keys
  * @param array $pub_key_ids
  * @param string $method
+ * @param string $iv
  * @return mixed - Returns the length of the sealed data on success, or FALSE
  * on error. If successful the sealed data is returned in sealed_data, and the
- * envelope keys in env_keys.
+ * envelope keys in env_keys. If an IV was used during encryption, it is
+ * returned via iv.
  */
 <<__Native>>
 function openssl_seal(string $data,
                       mixed &$sealed_data,
                       mixed &$env_keys,
                       array $pub_key_ids,
-                      string $method = ""): mixed;
+                      string $method = "",
+                      mixed &$iv = null): mixed;
 
 /* openssl_sign() computes a signature for the specified data by using SHA1
  * for hashing followed by encryption using the private key associated with
@@ -663,14 +669,24 @@ function openssl_random_pseudo_bytes(int $length,
 function openssl_cipher_iv_length(string $method): mixed;
 
 /* Encrypts given data with given method and key, returns a raw or base64
- * encoded string WarningThis function is currently not documented; only its
- * argument list is available.
+ * encoded string.
  * @param string $data - The data.
  * @param string $method - The cipher method.
  * @param string $password - The password.
  * @param int $options - Setting to TRUE will return as raw output data,
  * otherwise the return value is base64 encoded.
  * @param string $iv - The initialisation vector.
+ * @param string $tag_out - The authentication tag will be saved to the variable
+ * passed as a reference on successful encryption. If the encryption fails, then
+ * the variable is unchanged. The resulted tag length is the same as the length
+ * supplied in the $tag_length parameter which default to 16. For authenticated
+ * encryption modes only.
+ * @param string $aad - Additional authentication data. For authenticated
+ * encryption modes only.
+ * @param int $tag_length - The tag length can be set before the encryption and
+ * can be between 4 and 16 for GCM mode where it is the same like trimming the
+ * tag. On the other side the CCM has no such limits and also the resulted tag
+ * is different for each length. For authenticated encryption modes only.
  * @return mixed - Returns the encrypted string on success or FALSE on
  * failure.
  */
@@ -679,7 +695,10 @@ function openssl_encrypt(string $data,
                          string $method,
                          string $password,
                          int $options = 0,
-                         string $iv = ""): mixed;
+                         string $iv = "",
+                         mixed &$tag_out = null,
+                         string $aad = "",
+                         int $tag_length = 16): mixed;
 
 /* Takes a raw or base64 encoded string and decrypts it using a given method
  * and key.
@@ -689,6 +708,11 @@ function openssl_encrypt(string $data,
  * @param int $options - Setting to TRUE will take a raw encoded string,
  * otherwise a base64 string is assumed for the data parameter.
  * @param string $iv - The initialisation vector.
+ * @param string $tag - The authentication tag that will be authenticated. If
+ * it's incorrect, then the authentication fails and the function returns FALSE.
+ * For authenticated encryption modes only.
+ * @param string $aad - Additional authentication data. For authenticated
+ * encryption modes only.
  * @return mixed - The decrypted string on success or FALSE on failure.
  */
 <<__Native>>
@@ -696,7 +720,9 @@ function openssl_decrypt(string $data,
                          string $method,
                          string $password,
                          int $options = 0,
-                         string $iv = ""): mixed;
+                         string $iv = "",
+                         string $tag = "",
+                         string $aad = ""): mixed;
 
 /* Computes digest hash value for given data using given method, returns raw
  * or binhex encoded string.
@@ -719,6 +745,12 @@ function openssl_digest(string $data,
  */
 <<__Native>>
 function openssl_get_cipher_methods(bool $aliases = false): array<string>;
+
+/**
+ * Return array of available elliptic curves or FALSE on failure.
+ */
+<<__Native>>
+function openssl_get_curve_names(): mixed;
 
 /* Gets a list of available digest methods.
  * @param bool $aliases - Set to TRUE if digest aliases should be included

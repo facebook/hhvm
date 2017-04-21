@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,6 @@ struct TypeConstraint {
   // Specialization.
 
   static constexpr uint8_t kWantArrayKind = 0x1;
-  static constexpr uint8_t kWantArrayShape = 0x2;
 
   /*
    * Is this TypeConstraint for a specialized type?
@@ -87,15 +86,6 @@ struct TypeConstraint {
    */
   TypeConstraint& setWantArrayKind();
   bool wantArrayKind() const;
-
-  /*
-   * Set or check the kWantArrayShape bit in 'm_specialized'.  kWantArrayShape
-   * implies kWantArrayKind.
-   *
-   * @requires: isSpecialized()
-   */
-  TypeConstraint& setWantArrayShape();
-  bool wantArrayShape() const;
 
   /*
    * Set, check, or return the specialized Class.
@@ -150,19 +140,19 @@ bool typeFitsConstraint(Type t, TypeConstraint tc);
 /*
  * relaxConstraint returns the least specific TypeConstraint 'tc' that doesn't
  * prevent the intersection of knownType and relaxType(toRelax, tc.category)
- * from satisfying origTc. It is used in IRBuilder::constrainValue and
- * IRBuilder::constrainStack to determine how to constrain the typeParam and
- * src values of CheckType/CheckStk instructions, and the src values of
- * AssertType/AssertStk instructions.
+ * from satisfying origTc. It is used in IRBuilder::constrain*() functions to
+ * determine how to constrain the typeParam and src values of Check
+ * instructions, and the src values of Assert instructions.
  *
  * AssertType example:
  * t24:Obj<C> = AssertType<{Obj<C>|InitNull}> t4:Obj
  *
  * If constrainValue is called with (t24, DataTypeSpecialized), relaxConstraint
  * will be called with (DataTypeSpecialized, Obj<C>|InitNull, Obj). After a few
- * iterations it will determine that constraining Obj with DataTypeCountness
- * will still allow the result type of the AssertType instruction to satisfy
- * DataTypeSpecialized, because relaxType(Obj, DataTypeCountness) == Obj.
+ * iterations it will determine that constraining Obj with
+ * DataTypeBoxAndCountness will still allow the result type of the AssertType
+ * instruction to satisfy DataTypeSpecialized, because relaxType(Obj,
+ * DataTypeBoxAndCountness) == Obj.
  */
 TypeConstraint relaxConstraint(const TypeConstraint origTc,
                                const Type knownType, const Type toRelax);

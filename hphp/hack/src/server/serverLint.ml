@@ -14,8 +14,6 @@ open Utils
 
 module RP = Relative_path
 
-type result = string Lint.t list
-
 let output_json oc el =
   let errors_json = List.map el Lint.to_json in
   let res =
@@ -39,44 +37,47 @@ let output_text oc el =
   end;
   flush oc
 
-let lint _acc fnl =
+let lint tcopt _acc fnl =
   List.fold_left fnl ~f:begin fun acc fn ->
     let errs, () =
       Lint.do_ begin fun () ->
         Errors.ignore_ begin fun () ->
-          Linting_service.lint fn (Sys_utils.cat (Relative_path.to_absolute fn))
+          Linting_service.lint tcopt fn
+            (Sys_utils.cat (Relative_path.to_absolute fn))
         end
       end in
     errs @ acc
   end ~init:[]
 
-let lint_all genv code =
+let lint_and_filter tcopt code acc fnl =
+  let lint_errs = lint tcopt acc fnl in
+  List.filter lint_errs (fun err -> Lint.get_code err = code)
+
+let lint_all genv env code =
   let next = compose
-    (List.map ~f:(RP.create RP.Root))
+    (fun lst -> lst |> List.map ~f:(RP.create RP.Root) |> Bucket.of_list)
     (genv.indexer FindUtils.is_php) in
   let errs = MultiWorker.call
     genv.workers
-    ~job:(fun acc fnl ->
-      let lint_errs = lint acc fnl in
-      List.filter lint_errs (fun err -> Lint.get_code err = code))
+    ~job:(lint_and_filter env.tcopt code)
     ~merge:List.rev_append
     ~neutral:[]
     ~next in
   List.map errs Lint.to_absolute
 
-let go genv fnl =
+let go genv env fnl =
   let fnl = List.map fnl (Relative_path.create Relative_path.Root) in
   let errs =
     if List.length fnl > 10
     then
       MultiWorker.call
         genv.workers
-        ~job:lint
+        ~job:(lint env.tcopt)
         ~merge:List.rev_append
         ~neutral:[]
-        ~next:(Bucket.make fnl)
+        ~next:(MultiWorker.next genv.workers fnl)
     else
-      lint [] fnl in
+      lint env.tcopt [] fnl in
   let errs = List.sort begin fun x y ->
     Pos.compare (Lint.get_pos x) (Lint.get_pos y)
   end errs in

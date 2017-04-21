@@ -16,7 +16,7 @@ function test_exception() {
   throw new Exception('test');
 }
 
-function profiler() {
+function profiler(string $op, string $fn) {
   // Calling functions from within the profiler function should note
   // use the profile (it would cause an infinite loop)
   pure_function_no_profile();

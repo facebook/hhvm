@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,31 +18,33 @@
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include <limits>
 
-#include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/zend-pack.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/type-profile.h"
+
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+
+#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/type-profile.h"
-#include "hphp/system/constants.h"
+
+#include "hphp/parser/scanner.h"
+
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
-#ifndef _MSC_VER
-#include <sys/param.h> // MAXPATHLEN is here
-#endif
-#include "hphp/runtime/base/comparisons.h"
 
 namespace HPHP {
 
@@ -61,19 +63,21 @@ const int64_t k_CONNECTION_NORMAL = 0;
 const int64_t k_CONNECTION_ABORTED = 1;
 const int64_t k_CONNECTION_TIMEOUT = 2;
 
-static String HHVM_FUNCTION(server_warmup_status) {
-  // Fail if we jitted more than 25kb of code.
+namespace {
+
+String HHVM_FUNCTION(server_warmup_status) {
+  // Fail if we jitted at least Eval.JitWarmupStatusBytes of code.
   size_t begin, end;
-  jit::mcg->codeEmittedThisRequest(begin, end);
+  jit::tc::codeEmittedThisRequest(begin, end);
   auto const diff = end - begin;
-  auto constexpr kMaxTCBytes = 25 << 10;
-  if (diff > kMaxTCBytes) {
+  if (diff >= RuntimeOption::EvalJitWarmupStatusBytes) {
+    // TODO(13274666) Mismatch between 'to' and 'begin' below.
     return folly::format("Translation cache grew by {} bytes to {} bytes.",
                          diff, begin).str();
   }
 
   // Fail if we spent more than 0.5ms in the JIT.
-  auto const jittime = jit::Timer::CounterValue(jit::Timer::translate);
+  auto const jittime = jit::Timer::CounterValue(jit::Timer::mcg_translate);
   auto constexpr kMaxJitTimeNS = 500000;
   if (jittime.total > kMaxJitTimeNS) {
     return folly::format("Spent {}us in the JIT.", jittime.total / 1000).str();
@@ -87,8 +91,12 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "PGO profiling translations are still enabled.";
   }
 
-  auto tpc_diff = jit::s_perfCounters[jit::tpc_interp_bb] -
-    jit::s_perfCounters[jit::tpc_interp_bb_force];
+  if (jit::mcgen::retranslateAllPending()) {
+    return "Waiting on retranslateAll()";
+  }
+
+  auto tpc_diff = jit::tl_perf_counters[jit::tpc_interp_bb] -
+                  jit::tl_perf_counters[jit::tpc_interp_bb_force];
   if (tpc_diff) {
     return folly::sformat("Interpreted {} non-forced basic blocks.", tpc_diff);
   }
@@ -96,6 +104,22 @@ static String HHVM_FUNCTION(server_warmup_status) {
   return empty_string();
 }
 
+const StaticString
+  s_clisrv("clisrv"),
+  s_cli("cli"),
+  s_worker("worker");
+
+String HHVM_FUNCTION(execution_context) {
+  if (is_cli_mode()) return s_clisrv;
+
+  if (auto t = g_context->getTransport()) {
+    return t->describe();
+  }
+
+  return RuntimeOption::ServerExecutionMode() ? s_worker : s_cli;
+}
+
+}
 
 void StandardExtension::threadInitMisc() {
     IniSetting::Bind(
@@ -128,12 +152,14 @@ void StandardExtension::threadInitMisc() {
       "display_errors", RuntimeOption::EnableHipHopSyntax ? "stderr" : "1",
       IniSetting::SetAndGet<std::string>(
         [](const std::string& value) {
+          *s_misc_display_errors = value;
+
           if (value == s_1 || value == s_stdout) {
-            Logger::SetStandardOut(stdout);
+            Logger::SetStandardOut(Logger::DEFAULT, stdout);
             return true;
           }
           if (value == s_2 || value == s_stderr) {
-            Logger::SetStandardOut(stderr);
+            Logger::SetStandardOut(Logger::DEFAULT, stderr);
             return true;
           }
           return false;
@@ -146,19 +172,29 @@ void StandardExtension::threadInitMisc() {
 
 static void bindTokenConstants();
 static int get_user_token_id(int internal_id);
-const StaticString s_T_PAAMAYIM_NEKUDOTAYIM("T_PAAMAYIM_NEKUDOTAYIM");
 
-#define PHP_MAJOR_VERSION 5
-#define PHP_MINOR_VERSION 6
+#define PHP_MAJOR_VERSION_5 5
+#define PHP_MINOR_VERSION_5 6
+#define PHP_VERSION_5 "5.6.99-hhvm"
+#define PHP_VERSION_ID_5 50699
+
+#define PHP_MAJOR_VERSION_7 7
+#define PHP_MINOR_VERSION_7 0
+#define PHP_VERSION_7 "7.0.99-hhvm"
+#define PHP_VERSION_ID_7 70099
+
 #define PHP_RELEASE_VERSION 99
 #define PHP_EXTRA_VERSION "hhvm"
-#define PHP_VERSION "5.6.99-hhvm"
-#define PHP_VERSION_ID 50699
 
-const StaticString k_PHP_VERSION(PHP_VERSION);
+StaticString get_PHP_VERSION() {
+  static StaticString v5(PHP_VERSION_5);
+  static StaticString v7(PHP_VERSION_7);
+  return RuntimeOption::PHP7_Builtins ? v7 : v5;
+}
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    HHVM_FALIAS(HH\\execution_context, execution_context);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);
     HHVM_FE(connection_timeout);
@@ -180,32 +216,25 @@ void StandardExtension::initMisc() {
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 
-    Native::registerConstant<KindOfBoolean>(makeStaticString("TRUE"), true);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("true"), true);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("FALSE"), false);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("false"), false);
+    HHVM_RC_BOOL(TRUE, true);
+    HHVM_RC_BOOL(true, true);
+    HHVM_RC_BOOL(FALSE, false);
+    HHVM_RC_BOOL(false, false);
     Native::registerConstant<KindOfNull>(makeStaticString("NULL"));
     Native::registerConstant<KindOfNull>(makeStaticString("null"));
 
-    Native::registerConstant<KindOfBoolean>(
-      makeStaticString("ZEND_THREAD_SAFE"),
-      true
-    );
+    HHVM_RC_BOOL(ZEND_THREAD_SAFE, true);
 
-    Native::registerConstant<KindOfDouble>(makeStaticString("INF"), k_INF);
-    Native::registerConstant<KindOfDouble>(makeStaticString("NAN"), k_NAN);
-    Native::registerConstant<KindOfInt64>(
-        makeStaticString("PHP_MAXPATHLEN"), MAXPATHLEN);
-    Native::registerConstant<KindOfBoolean>(makeStaticString("PHP_DEBUG"),
-      #if DEBUG
-        true
-      #else
-        false
-      #endif
-     );
+    HHVM_RC_DBL(INF, k_INF);
+    HHVM_RC_DBL(NAN, k_NAN);
+    HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
+#if DEBUG
+    HHVM_RC_BOOL(PHP_DEBUG, true);
+#else
+    HHVM_RC_BOOL(PHP_DEBUG, false);
+#endif
     bindTokenConstants();
-    Native::registerConstant<KindOfInt64>(s_T_PAAMAYIM_NEKUDOTAYIM.get(),
-                                          get_user_token_id(T_DOUBLE_COLON));
+    HHVM_RC_INT(T_PAAMAYIM_NEKUDOTAYIM, get_user_token_id(T_DOUBLE_COLON));
 
     HHVM_RC_INT(UPLOAD_ERR_OK,         0);
     HHVM_RC_INT(UPLOAD_ERR_INI_SIZE,   1);
@@ -234,19 +263,27 @@ void StandardExtension::initMisc() {
 
     HHVM_RC_STR(PHP_BINARY, current_executable_path());
     HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
-    HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString().toCppString());
-    HHVM_RC_STR(PHP_SAPI, RuntimeOption::ExecutionMode);
+    HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
+    HHVM_RC_STR(PHP_SAPI, HHVM_FN(php_sapi_name()));
 
     HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);
     HHVM_RC_INT(PHP_INT_MAX, k_PHP_INT_MAX);
 
-    HHVM_RC_INT_SAME(PHP_MAJOR_VERSION);
-    HHVM_RC_INT_SAME(PHP_MINOR_VERSION);
+    if (RuntimeOption::PHP7_Builtins) {
+      HHVM_RC_INT(PHP_MAJOR_VERSION, PHP_MAJOR_VERSION_7);
+      HHVM_RC_INT(PHP_MINOR_VERSION, PHP_MINOR_VERSION_7);
+      HHVM_RC_STR(PHP_VERSION, PHP_VERSION_7);
+      HHVM_RC_INT(PHP_VERSION_ID, PHP_VERSION_ID_7);
+    } else {
+      HHVM_RC_INT(PHP_MAJOR_VERSION, PHP_MAJOR_VERSION_5);
+      HHVM_RC_INT(PHP_MINOR_VERSION, PHP_MINOR_VERSION_5);
+      HHVM_RC_STR(PHP_VERSION, PHP_VERSION_5);
+      HHVM_RC_INT(PHP_VERSION_ID, PHP_VERSION_ID_5);
+    }
+
     HHVM_RC_INT_SAME(PHP_RELEASE_VERSION);
     HHVM_RC_STR_SAME(PHP_EXTRA_VERSION);
-    HHVM_RC_STR_SAME(PHP_VERSION);
-    HHVM_RC_INT_SAME(PHP_VERSION_ID);
 
     HHVM_RC_INT(CONNECTION_NORMAL,  k_CONNECTION_NORMAL);
     HHVM_RC_INT(CONNECTION_ABORTED, k_CONNECTION_ABORTED);
@@ -313,26 +350,25 @@ static Class* getClassByName(const char* name, int len) {
   if (len == 4 && !memcmp(name, "self", 4)) {
     cls = g_context->getContextClass();
     if (!cls) {
-      throw FatalErrorException("Cannot access self:: "
+      raise_fatal_error("Cannot access self:: "
                                 "when no class scope is active");
     }
   } else if (len == 6 && !memcmp(name, "parent", 6)) {
     cls = g_context->getParentContextClass();
     if (!cls) {
-      throw FatalErrorException("Cannot access parent");
+      raise_fatal_error("Cannot access parent");
     }
   } else if (len == 6 && !memcmp(name, "static", 6)) {
-    CallerFrame cf;
-    auto ar = cf();
-    if (ar) {
+    auto const ar = GetCallerFrame();
+    if (ar && ar->func()->cls()) {
       if (ar->hasThis()) {
         cls = ar->getThis()->getVMClass();
-      } else if (ar->hasClass()) {
+      } else {
         cls = ar->getClass();
       }
     }
     if (!cls) {
-      throw FatalErrorException("Cannot access static:: "
+      raise_fatal_error("Cannot access static:: "
                                 "when no class scope is active");
     }
   } else {
@@ -553,13 +589,9 @@ Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
 }
 
 Array HHVM_FUNCTION(sys_getloadavg) {
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  return make_packed_array(0, 0, 0);
-#else
   double load[3];
   getloadavg(load, 3);
   return make_packed_array(load[0], load[1], load[2]);
-#endif
 }
 
 // We want token IDs to remain stable regardless of how we change the
@@ -733,7 +765,16 @@ const int UserTokenId_T_HASHBANG = 435;
 const int UserTokenId_T_SUPER = 436;
 const int UserTokenId_T_SPACESHIP = 437;
 const int UserTokenId_T_COALESCE = 438;
-const int MaxUserTokenId = 439; // Marker, not a real user token ID
+const int UserTokenId_T_YIELD_FROM = 439;
+const int UserTokenId_T_PIPE = 440;
+const int UserTokenId_T_PIPE_VAR = 441;
+const int UserTokenId_T_DICT = 442;
+const int UserTokenId_T_VEC = 443;
+const int UserTokenId_T_KEYSET = 444;
+const int UserTokenId_T_WHERE = 445;
+const int UserTokenId_T_VARRAY = 446;
+const int UserTokenId_T_DARRAY = 447;
+const int MaxUserTokenId = 448; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
@@ -819,7 +860,7 @@ Array HHVM_FUNCTION(token_get_all, const String& source) {
   while ((tokid = scanner.getNextToken(tok, loc))) {
 loop_start: // For after seeing a T_INLINE_HTML, see below
     if (tokid < 256) {
-      res.append(String::FromChar((char)tokid));
+      res.append(String(tok.text()));
     } else {
       String value;
       int tokVal = get_user_token_id(tokid);
@@ -929,8 +970,7 @@ Variant HHVM_FUNCTION(SystemLib_min2, const Variant& value1,
 #undef YYTOKEN_MAP
 #undef YYTOKEN
 #define YYTOKEN_MAP static void bindTokenConstants()
-#define YYTOKEN(num, name) Native::registerConstant<KindOfInt64> \
-  (makeStaticString(#name), get_user_token_id(num));
+#define YYTOKEN(num, name) HHVM_RC_INT(name, get_user_token_id(num));
 
 #include "hphp/parser/hphp.tab.hpp" // nolint
 

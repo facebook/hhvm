@@ -1,0 +1,2 @@
+<?hh
+<< uVjLg ( ( ( int ) list ( ) ) ) , nBycvJIG >> class kSNSnHUN { use fA < string , aQVmm , eQRThxoAM , xEWG , lIwQVFeNV , this :: tY > , hMpHxwe < this :: aB > , vZ < xVTuKjDLC < aDTHrMJu , dHRSWJtGG , bHBY , ( function ( ) : void ) , wXCrDDg , kScNyCK :: lO > > ; const type sYmS as num = pMqj ; abstract const type tW as this ; }

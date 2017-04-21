@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,8 +19,11 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/zend-custom-element.h"
+#include "hphp/util/hphp-config.h"
+
 #include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 // FIXME: get this from the proper header.
@@ -68,7 +71,7 @@ ProxyArray* ProxyArray::Make(ArrayData* ad) {
   auto ret = static_cast<ProxyArray*>(MM().objMalloc(sizeof(ProxyArray)));
   ret->m_size            = -1;
   ret->m_pos             = 0;
-  ret->m_hdr.init(HeaderKind::Proxy, 1);
+  ret->initHeader(HeaderKind::Proxy, 1);
   ret->m_destructor      = ZvalPtrDtor;
   ret->m_ref             = RefData::Make(make_tv<KindOfArray>(ad));
   return ret;
@@ -82,7 +85,9 @@ void ProxyArray::Release(ArrayData*ad) {
 void ProxyArray::reseatable(const ArrayData* oldArr, ArrayData* newArr) {
   if (innerArr(oldArr) != newArr) {
     auto old = innerArr(oldArr);
-    asProxyArray(oldArr)->m_ref->tv()->m_data.parr = newArr;
+    auto tv = asProxyArray(oldArr)->m_ref->tv();
+    tv->m_data.parr = newArr;
+    tv->m_type = KindOfArray;
     decRefArr(old);
   }
 }
@@ -91,8 +96,8 @@ size_t ProxyArray::Vsize(const ArrayData* ad) {
   return innerArr(ad)->size();
 }
 
-void ProxyArray::NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos) {
-  return innerArr(ad)->nvGetKey(out, pos);
+Cell ProxyArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
+  return innerArr(ad)->nvGetKey(pos);
 }
 
 const Variant& ProxyArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
@@ -118,37 +123,67 @@ const TypedValue* ProxyArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return innerArr(ad)->nvGet(k);
 }
 
-ArrayData*
-ProxyArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret, bool copy) {
-  if (copy) {
-    return innerArr(ad)->lval(k, ret, true);
-  } else {
-    auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
-  }
+const TypedValue*
+ProxyArray::NvTryGetStr(const ArrayData* ad, const StringData* k) {
+  return innerArr(ad)->nvTryGet(k);
 }
 
-ArrayData*
-ProxyArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret, bool copy) {
-  if (copy) {
-    return innerArr(ad)->lval(k, ret, true);
-  } else {
-    auto r = innerArr(ad)->lval(k, ret, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
-  }
+const TypedValue* ProxyArray::NvTryGetInt(const ArrayData* ad, int64_t k) {
+  return innerArr(ad)->nvTryGet(k);
 }
 
-ArrayData*
-ProxyArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
+member_lval ProxyArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
-    return innerArr(ad)->lvalNew(ret, true);
-  } else {
-    auto r = innerArr(ad)->lvalNew(ret, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
+    return innerArr(ad)->lval(k, true);
   }
+  auto const lval = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
+}
+
+member_lval ProxyArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalRef(k, true);
+  }
+  auto const lval = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
+}
+
+member_lval ProxyArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lval(k, true);
+  }
+  auto const lval = innerArr(ad)->lval(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
+}
+
+member_lval ProxyArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalRef(k, true);
+  }
+  auto const lval = innerArr(ad)->lvalRef(k, innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
+}
+
+member_lval ProxyArray::LvalNew(ArrayData* ad, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalNew(true);
+  }
+  auto const lval = innerArr(ad)->lvalNew(innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
+}
+
+member_lval ProxyArray::LvalNewRef(ArrayData* ad, bool copy) {
+  if (copy) {
+    return innerArr(ad)->lvalNewRef(true);
+  }
+  auto const lval = innerArr(ad)->lvalNewRef(innerArr(ad)->cowCheck());
+  reseatable(ad, lval.arr_base());
+  return member_lval { ad, lval.elem() };
 }
 
 ArrayData* ProxyArray::SetInt(ArrayData* ad,
@@ -157,12 +192,12 @@ ArrayData* ProxyArray::SetInt(ArrayData* ad,
                               bool copy) {
   if (copy) {
     return innerArr(ad)->set(k, tvAsCVarRef(&v), true);
-  } else {
-    auto r = innerArr(ad)->set(k,
-        tvAsCVarRef(&v), innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->set(
+    k, tvAsCVarRef(&v), innerArr(ad)->cowCheck()
+  );
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData* ProxyArray::SetStr(ArrayData* ad,
@@ -171,12 +206,12 @@ ArrayData* ProxyArray::SetStr(ArrayData* ad,
                               bool copy) {
   if (copy) {
     return innerArr(ad)->set(k, tvAsCVarRef(&v), copy);
-  } else {
-    auto r = innerArr(ad)->set(k,
-        tvAsCVarRef(&v), innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->set(
+    k, tvAsCVarRef(&v), innerArr(ad)->cowCheck()
+  );
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData* ProxyArray::SetRefInt(ArrayData* ad,
@@ -185,11 +220,10 @@ ArrayData* ProxyArray::SetRefInt(ArrayData* ad,
                                  bool copy) {
   if (copy) {
     return innerArr(ad)->setRef(k, v, true);
-  } else {
-    auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData* ProxyArray::SetRefStr(ArrayData* ad,
@@ -198,22 +232,20 @@ ArrayData* ProxyArray::SetRefStr(ArrayData* ad,
                                  bool copy) {
   if (copy) {
     return innerArr(ad)->setRef(k, v, true);
-  } else {
-    auto r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->setRef(k, v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData*
 ProxyArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   if (copy) {
     return innerArr(ad)->remove(k, true);
-  } else {
-    auto r = innerArr(ad)->remove(k, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto r = innerArr(ad)->remove(k, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData*
@@ -221,11 +253,10 @@ ProxyArray::RemoveStr(ArrayData* ad, const StringData* k,
                                  bool copy) {
   if (copy) {
     return innerArr(ad)->remove(k, true);
-  } else {
-    auto r = innerArr(ad)->remove(k, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->remove(k, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData*
@@ -234,72 +265,87 @@ ProxyArray::Copy(const ArrayData* ad) {
 }
 
 ArrayData*
-ProxyArray::Append(ArrayData* ad, const Variant& v, bool copy) {
+ProxyArray::Append(ArrayData* ad, Cell v, bool copy) {
   if (copy) {
     return innerArr(ad)->append(v, true);
-  } else {
-    auto r = innerArr(ad)->append(v, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->append(v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData*
 ProxyArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
   if (copy) {
     return innerArr(ad)->appendRef(v, true);
-  } else {
-    auto r = innerArr(ad)->appendRef(v, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->appendRef(v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData*
 ProxyArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
   if (copy) {
     return innerArr(ad)->appendWithRef(v, true);
-  } else {
-    auto r = innerArr(ad)->appendWithRef(v, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->appendWithRef(v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
 }
 
 ArrayData*
 ProxyArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
-  auto r = innerArr(ad)->plusEq(elems);
+  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
+  auto const r = innerArr(ad)->plusEq(elems);
   reseatable(ad, r);
   return ad;
 }
 
 ArrayData*
 ProxyArray::Merge(ArrayData* ad, const ArrayData* elems) {
-  auto r = innerArr(ad)->merge(elems);
+  auto const r = innerArr(ad)->merge(elems);
   reseatable(ad, r);
   return ad;
 }
 
 ArrayData* ProxyArray::Pop(ArrayData* ad, Variant &value) {
-  auto r = innerArr(ad)->pop(value);
+  auto const r = innerArr(ad)->pop(value);
   reseatable(ad, r);
   return ad;
 }
 
 ArrayData* ProxyArray::Dequeue(ArrayData* ad, Variant &value) {
-  auto r = innerArr(ad)->dequeue(value);
+  auto const r = innerArr(ad)->dequeue(value);
   reseatable(ad, r);
   return ad;
 }
 
-ArrayData* ProxyArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
+ArrayData* ProxyArray::Prepend(ArrayData* ad, Cell v, bool copy) {
   if (copy) {
     return innerArr(ad)->prepend(v, true);
-  } else {
-    auto r = innerArr(ad)->prepend(v, innerArr(ad)->cowCheck());
-    reseatable(ad, r);
-    return ad;
   }
+  auto const r = innerArr(ad)->prepend(v, innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
+}
+
+ArrayData* ProxyArray::ToDict(ArrayData* ad, bool copy) {
+  auto const r = innerArr(ad)->toDict(innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
+}
+
+ArrayData* ProxyArray::ToVec(ArrayData* ad, bool copy) {
+  auto const r = innerArr(ad)->toVec(innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return ad;
+}
+
+ArrayData* ProxyArray::ToKeyset(ArrayData* ad, bool copy) {
+  auto const r = innerArr(ad)->toKeyset(innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return const_cast<ArrayData*>(ad);
 }
 
 void ProxyArray::Renumber(ArrayData* ad) {
@@ -311,7 +357,7 @@ void ProxyArray::OnSetEvalScalar(ArrayData* ad) {
 }
 
 ArrayData* ProxyArray::Escalate(const ArrayData* ad) {
-  auto r = innerArr(ad)->escalate();
+  auto const r = innerArr(ad)->escalate();
   reseatable(ad, r);
   return const_cast<ArrayData*>(ad);
 }
@@ -346,7 +392,7 @@ bool ProxyArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
 }
 
 ArrayData* ProxyArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto r = innerArr(ad)->escalateForSort(sf);
+  auto const r = innerArr(ad)->escalateForSort(sf);
   reseatable(ad, r);
   return ad;
 }
@@ -389,7 +435,7 @@ bool ProxyArray::IsVectorData(const ArrayData* ad) {
 }
 
 ArrayData* ProxyArray::ZSetInt(ArrayData* ad, int64_t k, RefData* v) {
-  auto r = innerArr(ad)->zSet(k, v);
+  auto const r = innerArr(ad)->zSet(k, v);
   reseatable(ad, r);
   return ad;
 }
@@ -424,8 +470,8 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
       *dest = (void*)(&r->nvGet(k)->m_data.pref);
     }
   } else {
-    auto elt = makeElementResource(data, data_size, dest);
-    r = innerArr(this)->append(Variant(std::move(elt)), false);
+    auto v = Variant(makeElementResource(data, data_size, dest));
+    r = innerArr(this)->append(*v.asTypedValue(), false);
   }
   reseatable(this, r);
 }
@@ -433,11 +479,11 @@ void ProxyArray::proxyAppend(void* data, uint32_t data_size, void** dest) {
 void ProxyArray::proxyInit(uint32_t nSize,
     DtorFunc pDestructor, bool persistent) {
   if (persistent) {
-    throw FatalErrorException("zend_hash_init: \"persistent\" is \
+    raise_fatal_error("zend_hash_init: \"persistent\" is \
                               unimplemented");
   }
   if (nSize) {
-    reseatable(this, MixedArray::MakeReserve(nSize));
+    reseatable(this, PackedArray::MakeReserve(nSize));
   }
   m_destructor = pDestructor;
 }
@@ -450,8 +496,7 @@ ProxyArray::makeElementResource(void* pData, uint32_t nDataSize,
   return elt;
 }
 
-void * ProxyArray::proxyGet(StringData * str) const {
-  Variant * v = nullptr;
+void* ProxyArray::proxyGet(StringData * str) const {
   // elementToData() may need to modify the value. The zend_hash_find()
   // interface itself is theoretically non-const and callers may write directly
   // to the value. So lval() is appropriate here, to force escalation of
@@ -459,26 +504,27 @@ void * ProxyArray::proxyGet(StringData * str) const {
   if (!innerArr(this)->exists(str)) {
     return nullptr;
   }
-  reseatable(this, innerArr(this)->lval(str, v, false));
-  return elementToData(v);
+  auto lval = innerArr(this)->lval(str, false);
+  reseatable(this, lval.arr_base());
+  return elementToData(&tvAsVariant(lval.tv()));
 }
 
-void * ProxyArray::proxyGet(int64_t k) const {
-  Variant * v = nullptr;
+void* ProxyArray::proxyGet(int64_t k) const {
   if (!innerArr(this)->exists(k)) {
     return nullptr;
   }
-  reseatable(this, innerArr(this)->lval(k, v, false));
-  return elementToData(v);
+  auto lval = innerArr(this)->lval(k, false);
+  reseatable(this, lval.arr_base());
+  return elementToData(&tvAsVariant(lval.tv()));
 }
 
-void * ProxyArray::proxyGet(const Variant & k) const {
-  Variant * v = nullptr;
+void* ProxyArray::proxyGet(const Variant & k) const {
   if (!innerArr(this)->exists(k)) {
     return nullptr;
   }
-  reseatable(this, innerArr(this)->lval(k, v, false));
-  return elementToData(v);
+  auto lval = innerArr(this)->lval(k, false);
+  reseatable(this, lval.arr_base());
+  return elementToData(&tvAsVariant(lval.tv()));
 }
 
 void * ProxyArray::proxyGet(MArrayIter & pos) const {

@@ -1,0 +1,44 @@
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(2) {
+  int(1)
+  int(2)
+}
+====================================================
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+string(46) "Vecs do not support unsetting non-end elements"
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+====================================================
+vec(3) {
+  bool(true)
+  bool(false)
+  NULL
+}
+vec(3) {
+  bool(true)
+  bool(false)
+  NULL
+}
+====================================================
+vec(3) {
+  int(1)
+  string(3) "abc"
+  object(Dtor)#1 (0) {
+  }
+}
+Dtor::__destruct
+vec(2) {
+  int(1)
+  string(3) "abc"
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
 
 #include "hphp/test/ext/test_logger.h"
 #include <pwd.h>
-#include <unistd.h>
 #include <sys/param.h>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/http-client.h"
@@ -24,6 +23,8 @@
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/url/ext_url.h"
+
+#include <folly/portability/Unistd.h>
 
 using namespace HPHP;
 
@@ -106,14 +107,18 @@ Array TestLogger::postData(Array arr) {
   HttpClient client;
   StringBuffer response;
 
-  Array data = make_map_array("method", "recordTestResults", "args",
-                              HHVM_FN(json_encode)(make_packed_array(arr)));
+  Array data = make_map_array(
+    "method", "recordTestResults", "args",
+    Variant::attach(HHVM_FN(json_encode)(make_packed_array(arr)))
+  );
 
-  String str = HHVM_FN(http_build_query)(data, "", "");
+  auto const str = HHVM_FN(http_build_query)(data, "", "").toString();
 
   client.post(log_url, str.c_str(), str.length(), response);
 
-  return HHVM_FN(json_decode)(response.detach(), true).toArray();
+  return Variant::attach(
+    HHVM_FN(json_decode)(response.detach(), true)
+  ).toArray();
 }
 
 std::string TestLogger::getRepoRoot() {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,11 +16,10 @@
 
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
+#include "hphp/ppc64-asm/asm-ppc64.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
@@ -53,7 +52,9 @@ std::string show(PhysReg r) {
       );
 
     case Arch::PPC64:
-      not_implemented();
+      return r.type() == PhysReg::GP   ? ppc64_asm::reg::regname(Reg64(r)) :
+             r.type() == PhysReg::SIMD ? ppc64_asm::reg::regname(RegXMM(r)) :
+          /* r.type() == PhysReg::SF)  ? */ ppc64_asm::reg::regname(RegSF(r));
   }
   not_reached();
 }

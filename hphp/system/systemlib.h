@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,11 +21,11 @@
 #include "hphp/util/portability.h"
 
 namespace HPHP {
-class ObjectData;
-class Unit;
-class Class;
-class Func;
-class Object;
+struct ObjectData;
+struct Unit;
+struct Class;
+struct Func;
+struct Object;
 } //namespace HPHP
 
 namespace HPHP { namespace SystemLib {
@@ -49,7 +49,6 @@ namespace HPHP { namespace SystemLib {
   x(DOMException)                               \
   x(PDOException)                               \
   x(SoapFault)                                  \
-  x(Closure)                                    \
   x(Serializable)                               \
   x(ArrayAccess)                                \
   x(ArrayObject)                                \
@@ -80,9 +79,23 @@ extern Class* s_ ## cls ## Class;
   SYSTEMLIB_CLASSES(DECLARE_SYSTEMLIB_CLASS)
 #undef DECLARE_SYSTEMLIB_CLASS
 
+extern Class* s_ThrowableClass;
+extern Class* s_BaseExceptionClass;
+extern Class* s_ErrorClass;
+extern Class* s_ArithmeticErrorClass;
+extern Class* s_AssertionErrorClass;
+extern Class* s_DivisionByZeroErrorClass;
+extern Class* s_ParseErrorClass;
+extern Class* s_TypeErrorClass;
+
 Object AllocStdClassObject();
 Object AllocPinitSentinel();
 Object AllocExceptionObject(const Variant& message);
+Object AllocErrorObject(const Variant& message);
+Object AllocArithmeticErrorObject(const Variant& message);
+Object AllocDivisionByZeroErrorObject(const Variant& message);
+Object AllocParseErrorObject(const Variant& message);
+Object AllocTypeErrorObject(const Variant& message);
 Object AllocBadMethodCallExceptionObject(const Variant& message);
 Object AllocInvalidArgumentExceptionObject(const Variant& message);
 Object AllocRuntimeExceptionObject(const Variant& message);
@@ -94,34 +107,39 @@ Object AllocDirectoryObject();
 Object AllocPDOExceptionObject();
 Object AllocSoapFaultObject(const Variant& code,
                             const Variant& message,
-                            const Variant& actor = null_variant,
-                            const Variant& detail = null_variant,
-                            const Variant& name = null_variant,
-                            const Variant& header = null_variant);
+                            const Variant& actor = uninit_variant,
+                            const Variant& detail = uninit_variant,
+                            const Variant& name = uninit_variant,
+                            const Variant& header = uninit_variant);
 Object AllocLazyKVZipIterableObject(const Variant& mp);
 
 Object AllocLazyIterableViewObject(const Variant& iterable);
 Object AllocLazyKeyedIterableViewObject(const Variant& iterable);
 
-ATTRIBUTE_NORETURN void throwExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]] void throwExceptionObject(const Variant& message);
+[[noreturn]] void throwErrorObject(const Variant& message);
+[[noreturn]] void throwArithmeticErrorObject(const Variant& message);
+[[noreturn]] void throwDivisionByZeroErrorObject(const Variant& message);
+[[noreturn]] void throwParseErrorObject(const Variant& message);
+[[noreturn]] void throwTypeErrorObject(const Variant& message);
+[[noreturn]]
 void throwBadMethodCallExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throwInvalidArgumentExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN void throwRuntimeExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN void throwOutOfBoundsExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]] void throwRuntimeExceptionObject(const Variant& message);
+[[noreturn]] void throwOutOfBoundsExceptionObject(const Variant& message);
+[[noreturn]]
 void throwInvalidOperationExceptionObject(const Variant& message);
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throwDOMExceptionObject(const Variant& message,
                              const Variant& code);
-ATTRIBUTE_NORETURN
+[[noreturn]]
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,
-                          const Variant& actor = null_variant,
-                          const Variant& detail = null_variant,
-                          const Variant& name = null_variant,
-                          const Variant& header = null_variant);
+                          const Variant& actor = uninit_variant,
+                          const Variant& detail = uninit_variant,
+                          const Variant& name = uninit_variant,
+                          const Variant& header = uninit_variant);
 
 
 /**

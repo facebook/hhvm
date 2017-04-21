@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,9 @@
 #ifndef _MSC_VER
 #include <pwd.h>
 #endif
+
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/SysStat.h>
 
 /* Default permissions for files and directories that are created */
 
@@ -123,7 +126,7 @@ FILE *Cronolog::getOutputFile() {
 
   /* We need to open a new file under a mutex. */
   {
-    Lock lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     if ((time_now >= m_nextPeriod)) {
       /* the current period has finished */
 

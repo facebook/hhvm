@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_multiline.php.test" language="PHP" protocol_version="" appid=""><engine version=""><![CDATA[xdebug]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+(cmd) breakpoint_set -i 0 -t line -f breakpoint_multiline.php.test -n 3
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="0" id="0" state="enabled"></response>
+(cmd) breakpoint_set -i 1 -t line -f breakpoint_multiline.php.test -n 12
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="1" state="enabled"></response>
+(cmd) breakpoint_set -i 2 -t line -f breakpoint_multiline.php.test -n 14
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id="2" state="enabled"></response>
+(cmd) run -i 3
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="3"><xdebug:message lineno="13" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_multiline.php.test"></xdebug:message></response>
+(cmd) status -i 4
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="status" transaction_id="4" status="break" reason="ok"></response>
+(cmd) run -i 5
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="5"><xdebug:message lineno="14" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_multiline.php.test"></xdebug:message></response>
+(cmd) run -i 6
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="6"><xdebug:message lineno="4" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_multiline.php.test"></xdebug:message></response>
+(cmd) run -i 7
+int(13)
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="7"></response>
+(cmd) run -i 8

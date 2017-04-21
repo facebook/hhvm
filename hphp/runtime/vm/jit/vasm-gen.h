@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,11 +17,12 @@
 #ifndef incl_HPHP_JIT_VASM_GEN_H_
 #define incl_HPHP_JIT_VASM_GEN_H_
 
-#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/containers.h"
-#include "hphp/runtime/vm/jit/vasm.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/util/data-block.h"
 
@@ -40,10 +41,12 @@ struct Vreg;
  * Writer stream for adding instructions to a Vblock.
  */
 struct Vout {
-  Vout(Vunit& u, Vlabel b, const IRInstruction* origin = nullptr)
+  Vout(Vunit& u, Vlabel b,
+       folly::Optional<Vinstr::ir_context> irctx = folly::none)
     : m_unit(u)
     , m_block(b)
-    , m_origin(origin)
+    , m_irctx ( irctx ? *irctx
+                      : Vinstr::ir_context { nullptr, Vinstr::kInvalidVoff } )
   {}
 
   Vout(Vout&&) = default;
@@ -90,7 +93,7 @@ struct Vout {
    * Set the current block and Vinstr origin.
    */
   void use(Vlabel b)                     { m_block = b; }
-  void setOrigin(const IRInstruction* i) { m_origin = i; }
+  void setOrigin(const IRInstruction* i) { m_irctx.origin = i; }
 
   /*
    * Vunit delegations.
@@ -100,11 +103,12 @@ struct Vout {
   Vtuple makeTuple(VregList&& regs) const;
   VcallArgsId makeVcallArgs(VcallArgs&& args) const;
   template<class T> Vreg cns(T v);
+  template<class T, class... Args> T* allocData(Args&&... args);
 
 private:
   Vunit& m_unit;
   Vlabel m_block;
-  const IRInstruction* m_origin;
+  Vinstr::ir_context m_irctx;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -115,7 +119,7 @@ private:
  * A Vasm manages Vout streams for a Vunit.
  */
 struct Vasm {
-  Vasm() { m_outs.reserve(kNumAreas); }
+  explicit Vasm(Vunit& unit) : m_unit(unit) { m_outs.reserve(kNumAreas); }
 
   /*
    * Obtain the managed Vunit.
@@ -133,7 +137,7 @@ private:
   Vout& out(AreaIndex i);
 
 private:
-  Vunit m_unit;
+  Vunit& m_unit;
   jit::vector<Vout> m_outs; // one for each AreaIndex
 };
 
@@ -146,13 +150,15 @@ private:
  * it will finalize and emit any code it contains.
  */
 struct Vauto {
-  explicit Vauto(CodeBlock& code, CodeKind kind = CodeKind::Helper)
-    : m_kind{kind}
-    , m_text{code, code}
+  explicit Vauto(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+                 CGMeta& fixups, CodeKind kind = CodeKind::Helper)
+    : m_text{main, cold, data}
+    , m_fixups(fixups)
     , m_main{m_unit, m_unit.makeBlock(AreaIndex::Main)}
     , m_cold{m_unit, m_unit.makeBlock(AreaIndex::Cold)}
+    , m_kind{kind}
   {
-    m_unit.entry = Vlabel(main());
+    m_unit.entry = Vlabel(this->main());
   }
 
   Vunit& unit() { return m_unit; }
@@ -162,31 +168,43 @@ struct Vauto {
   ~Vauto();
 
 private:
-  CodeKind m_kind;
   Vunit m_unit;
   Vtext m_text;
+  CGMeta& m_fixups;
   Vout m_main;
   Vout m_cold;
+  CodeKind m_kind;
 };
 
+namespace detail {
+  template<class GenFunc>
+  TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+                 CGMeta* meta, GenFunc gen,
+                 CodeKind kind = CodeKind::CrossTrace);
+}
+
 /*
- * Convenience wrappers around Vauto for cross-trace code.
+ * Convenience wrappers around Vauto for cross-trace or helper code.
  */
 template<class GenFunc>
-TCA vwrap(CodeBlock& cb, GenFunc gen,
+TCA vwrap(CodeBlock& cb, DataBlock& data, CGMeta& meta, GenFunc gen,
           CodeKind kind = CodeKind::CrossTrace) {
-  auto const start = cb.frontier();
-  Vauto vauto { cb, kind };
-  gen(vauto.main());
-  return start;
+  return detail::vwrap_impl(cb, cb, data, &meta,
+                            [&] (Vout& v, Vout&) { gen(v); }, kind);
 }
 template<class GenFunc>
-TCA vwrap2(CodeBlock& cb, GenFunc gen,
-           CodeKind kind = CodeKind::CrossTrace) {
-  auto const start = cb.frontier();
-  Vauto vauto { cb, kind };
-  gen(vauto.main(), vauto.cold());
-  return start;
+TCA vwrap(CodeBlock& cb, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(cb, cb, data, nullptr,
+                            [&] (Vout& v, Vout&) { gen(v); });
+}
+template<class GenFunc>
+TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data,
+           CGMeta& meta, GenFunc gen) {
+  return detail::vwrap_impl(main, cold, data, &meta, gen);
+}
+template<class GenFunc>
+TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen) {
+  return detail::vwrap_impl(main, cold, data, nullptr, gen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

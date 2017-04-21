@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,16 +33,23 @@ namespace {
 
 // If edge is critical, split it by inserting an intermediate block.
 // A critical edge is an edge from a block with multiple successors to
-// a block with multiple predecessors.
-void splitCriticalEdge(IRUnit& unit, Edge* edge) {
-  if (!edge) return;
+// a block with multiple predecessors. Returns the new intermediate block if
+// one was inserted, and nullptr otherwise.
+Block* splitCriticalEdge(IRUnit& unit, Edge* edge) {
+  if (!edge) return nullptr;
 
   auto* to = edge->to();
   auto* branch = edge->inst();
   auto* from = branch->block();
-  if (to->numPreds() <= 1 || from->numSuccs() <= 1) return;
 
-  splitEdge(unit, from, to);
+  // While not necessarily critical, if we had to split any of the edges into
+  // the catch we need to split all of them as we will be hoisting the
+  // BeginCatch instructions and we cannot hoist them into the preds
+  if (to->numPreds() <= 1 || (!to->isCatch() && from->numSuccs() <= 1)) {
+    return nullptr;
+  }
+
+  return splitEdge(unit, from, to);
 }
 
 /*
@@ -108,11 +115,21 @@ Block* splitEdge(IRUnit& unit, Block* from, Block* to) {
     branch.setNext(middle);
   }
 
-  middle->prepend(unit.gen(Jmp, branch.marker(), to));
+  middle->prepend(unit.gen(Jmp, branch.bcctx(), to));
   auto const unlikely = Block::Hint::Unlikely;
   if (from->hint() == unlikely || to->hint() == unlikely) {
     middle->setHint(unlikely);
   }
+
+  // The branch may not be a Jmp, in which case there won't be a label
+  if (branch.numSrcs() > 0 && to->front().is(DefLabel)) {
+    auto& jmp = middle->back();
+    for (auto src : branch.srcs()) {
+      unit.expandJmp(&jmp, src);
+    }
+    branch.setSrcs(0, nullptr);
+  }
+
   return middle;
 }
 
@@ -122,12 +139,33 @@ bool splitCriticalEdges(IRUnit& unit) {
   if (modified) reflowTypes(unit);
   auto const startBlocks = unit.numBlocks();
 
+  std::unordered_set<Block*> newCatches;
+  std::unordered_set<Block*> oldCatches;
+
   // Try to split outgoing edges of each reachable block.  This is safe in
   // a postorder walk since we visit blocks after visiting successors.
   postorderWalk(unit, [&](Block* b) {
-    splitCriticalEdge(unit, b->takenEdge());
+    auto bnew = splitCriticalEdge(unit, b->takenEdge());
     splitCriticalEdge(unit, b->nextEdge());
+
+    assertx(!b->next() || !b->next()->isCatch());
+    if (bnew && b->taken()->isCatch()) {
+      newCatches.emplace(bnew);
+      oldCatches.emplace(b->taken());
+    }
   });
+
+  for (auto b : newCatches) {
+    auto bc = b->next()->begin();
+    assertx(bc->is(BeginCatch));
+    b->prepend(unit.gen(BeginCatch, bc->bcctx()));
+  }
+
+  for (auto b : oldCatches) {
+    auto bc = b->begin();
+    assertx(bc->is(BeginCatch));
+    b->erase(bc);
+  }
 
   return modified || unit.numBlocks() != startBlocks;
 }
@@ -160,23 +198,24 @@ bool removeUnreachable(IRUnit& unit) {
 
   // Walk through the reachable blocks and erase any preds that weren't
   // found.
-  bool modified = false;
-  for (auto* block: blocks) {
-    auto& preds = block->preds();
-    for (auto it = preds.begin(); it != preds.end(); ) {
-      auto* inst = it->inst();
-      ++it;
-
+  jit::vector<IRInstruction*> deadInsts;
+  for (auto* block : blocks) {
+    for (auto &edge : block->preds()) {
+      auto* inst = edge.inst();
+      always_assert(!inst->isTransient());
       if (!visited.test(inst->block()->id())) {
-        ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
-        inst->setNext(nullptr);
-        inst->setTaken(nullptr);
-        modified = true;
+        deadInsts.push_back(inst);
       }
     }
   }
 
-  return modified;
+  for (auto* inst : deadInsts) {
+    ITRACE(3, "removing unreachable B{}\n", inst->block()->id());
+    inst->setNext(nullptr);
+    inst->setTaken(nullptr);
+  }
+
+  return !deadInsts.empty();
 }
 
 /*

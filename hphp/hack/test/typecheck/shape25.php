@@ -5,7 +5,7 @@
  */
 type t = shape(
   'x' => int,
-  'z' => ?bool,
+  ?'z' => bool,
 );
 
 // No error: we are sure that there is no field 'z' in returned shape

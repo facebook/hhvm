@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Class;
-struct Shape;
 
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +35,7 @@ namespace jit {
 /*
  * Array type specialization.
  *
- * May contain an ArrayKind and/or a pointer to a RAT or a Shape.
+ * May contain an ArrayKind and/or a pointer to a RAT.
  */
 struct ArraySpec {
   /*
@@ -46,7 +45,6 @@ struct ArraySpec {
   explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
-  explicit ArraySpec(const Shape* shape);
 
   /*
    * Accessors.
@@ -59,7 +57,6 @@ struct ArraySpec {
   uintptr_t bits() const;
   folly::Optional<ArrayData::ArrayKind> kind() const;
   const RepoAuthType::Array* type() const;
-  const Shape* shape() const;
 
   /*
    * Casts.
@@ -106,7 +103,6 @@ private:
     IsBottom  = 1 << 0,
     HasKind   = 1 << 1,
     HasType   = 1 << 2,
-    HasShape  = 1 << 3,
   };
   friend SortOf operator|(SortOf, SortOf);
   friend SortOf operator&(SortOf, SortOf);
@@ -116,8 +112,8 @@ private:
    */
   union {
     struct {
-      SortOf m_sort : 8;
-      ArrayData::ArrayKind m_kind : 8;
+      uintptr_t m_sort : 8;
+      uintptr_t m_kind : 8;
       uintptr_t m_ptr : 48;
     };
     uintptr_t m_bits;
@@ -194,14 +190,19 @@ private:
   /*
    * Sort tag.
    */
-  enum SortOf : uint8_t { IsTop, IsBottom, IsSub, IsExact, };
+  enum SortOf : uint8_t {
+    IsTop,
+    IsBottom,
+    IsSub,
+    IsExact,
+  };
 
   /*
    * Data members.
    */
   union {
     struct {
-      SortOf m_sort : 8;
+      uintptr_t m_sort : 8;
       uintptr_t m_ptr : 56;
     };
     uintptr_t m_bits;

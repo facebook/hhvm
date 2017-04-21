@@ -37,10 +37,10 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.67 2013/03/17 15:43:20 christos Exp $")
 
 #include "magic.h"
 #include <string.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <stdlib.h>
+
+#include <folly/portability/Unistd.h>
+
 /* Since major is a function on SVR4, we cannot use `ifndef major'.  */
 #ifdef MAJOR_IN_MKDEV
 # include <sys/mkdev.h>

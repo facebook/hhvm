@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,8 @@
 #define incl_HPHP_CONTAINER_FUNCTIONS_H_
 
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/ext/collections/ext_collections.h"
 
 namespace HPHP {
 
@@ -25,7 +26,7 @@ namespace HPHP {
 
 inline bool isContainer(const Cell c) {
   assert(cellIsPlausible(c));
-  return c.m_type == KindOfArray ||
+  return isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 
@@ -35,7 +36,7 @@ inline bool isContainer(const Variant& v) {
 
 inline bool isContainerOrNull(const Cell c) {
   assert(cellIsPlausible(c));
-  return isNullType(c.m_type) || c.m_type == KindOfArray ||
+  return isNullType(c.m_type) || isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isCollection());
 }
 
@@ -45,7 +46,7 @@ inline bool isContainerOrNull(const Variant& v) {
 
 inline bool isMutableContainer(const Cell c) {
   assert(cellIsPlausible(c));
-  return c.m_type == KindOfArray ||
+  return isArrayLikeType(c.m_type) ||
          (c.m_type == KindOfObject && c.m_data.pobj->isMutableCollection());
 }
 
@@ -55,11 +56,11 @@ inline bool isMutableContainer(const Variant& v) {
 
 inline size_t getContainerSize(const Cell c) {
   assert(isContainer(c));
-  if (c.m_type == KindOfArray) {
+  if (isArrayLikeType(c.m_type)) {
     return c.m_data.parr->size();
   }
   assert(c.m_type == KindOfObject && c.m_data.pobj->isCollection());
-  return getCollectionSize(c.m_data.pobj);
+  return collections::getSize(c.m_data.pobj);
 }
 
 inline size_t getContainerSize(const Variant& v) {
@@ -68,11 +69,21 @@ inline size_t getContainerSize(const Variant& v) {
 
 inline bool isPackedContainer(const Cell c) {
   assert(isContainer(c));
-  if (c.m_type == KindOfArray) {
-    return c.m_data.parr->isPacked();
+  if (isArrayLikeType(c.m_type)) {
+    return c.m_data.parr->hasPackedLayout();
   }
 
   return isVectorCollection(c.m_data.pobj->collectionType());
+}
+
+ALWAYS_INLINE
+const Cell container_as_cell(const Variant& container) {
+  const auto& cellContainer = *container.asCell();
+  if (UNLIKELY(!isContainer(cellContainer))) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter must be a container (array or collection)");
+  }
+  return cellContainer;
 }
 
 //////////////////////////////////////////////////////////////////////

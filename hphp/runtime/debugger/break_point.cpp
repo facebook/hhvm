@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,6 @@
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -96,7 +95,7 @@ InterruptSite::InterruptSite(bool hardBreakPoint, const Variant& error)
   if (hardBreakPoint && fp->skipFrame()) {
     // for hard breakpoint, the fp is for an extension function,
     // so we need to construct the site on the caller
-    fp = context->getPrevVMState(fp, &m_offset);
+    fp = context->getPrevVMStateSkipFrame(fp, &m_offset);
   } else {
     auto const *pc = vmpc();
     auto f = fp->m_func;
@@ -1078,11 +1077,10 @@ bool BreakPointInfo::checkClause(DebuggerProxy &proxy) {
       // Don't hit more breakpoints while attempting to decide if we should stop
       // at this breakpoint.
       EvalBreakControl eval(true);
-      bool failed;
-      Variant ret = proxy.ExecutePHP(m_php, output, 0, failed,
-                                     DebuggerProxy::ExecutePHPFlagsNone);
+      auto const ret = proxy.ExecutePHP(m_php, output, 0,
+                                        DebuggerProxy::ExecutePHPFlagsNone);
       if (m_check) {
-        return ret.toBoolean();
+        return ret.second.toBoolean();
       }
     }
     m_output = std::string(output.data(), output.size());

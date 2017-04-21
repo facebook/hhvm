@@ -1,4 +1,5 @@
-App \Foo<[1][<expr#1>]App \Bar<>, >
+File "this_ret_bad2.php", line 35, characters 3-46:
+  Foo<^<expr#1> as Bar>
 File "this_ret_bad2.php", line 41, characters 16-34:
 Invalid argument (Typing[4110])
 File "this_ret_bad2.php", line 33, characters 15-17:

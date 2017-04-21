@@ -1,0 +1,5 @@
+string(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
+bool(false)
+===DONE===

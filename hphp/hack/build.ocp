@@ -12,6 +12,8 @@ begin library "ROOTPROJECT"
   files = []
 end
 
+ccopt = "-I%{ROOTPROJECT_FULL_SRC_DIR}%/../.."
+
 begin library "hh-hhi"
   requires = [ "hh-globals" "hh-utils" "hh-find" "bigarray" ]
   files = [
@@ -54,8 +56,8 @@ begin library "hh-server-base"
                 "hh-stubs" "hh-stubs-ai"  "hh-socket" "hh-dfind" "hh-hhi" ]
   files = [
     "src/server/serverFiles.ml"
-    "src/server/serverConfig.ml"
     "src/server/serverArgs.ml"
+    "src/server/serverConfig.ml"
     "src/server/serverEnv.ml"
     "src/server/serverUtils.ml"
     "src/server/argumentInfoService.ml"
@@ -63,6 +65,7 @@ begin library "hh-server-base"
     "src/server/fileOutline.ml"
     "src/server/serverIdeUtils.ml"
     "src/server/findRefsService.ml"
+    "src/server/fullFidelityParseService.ml"
     "src/server/identifySymbolService.ml"
     "src/server/inferAtPosService.ml"
     "src/server/methodJumps.ml"
@@ -78,7 +81,7 @@ begin library "hh-server-base"
     "src/server/serverInferType.ml"
     "src/server/serverLocalConfig.ml"
     "src/server/serverLint.ml"
-    "src/server/serverMonitor.ml"
+    "src/server/serverProcessTools.ml"
     "src/server/serverRefactor.ml"
     "src/server/serverSearch.ml"
     "src/server/symbolUtils.ml"
@@ -100,11 +103,13 @@ begin library "hh-server"
     "hh-third-party" "hh-utils" "hh-typing"
     "hh-search"  "hh-stubs"  "hh-stubs-ai"
     "hh-socket"  "hh-dfind" "hh-watchman" "hh-server-base"
+    "libancillary"
   ]
   files = [
     "src/server/serverEnvBuild.ml"
     "src/server/serverInit.ml"
     "src/server/serverMain.ml"
+    "src/server/serverMonitor.ml"
   ]
 end
 
@@ -138,6 +143,7 @@ begin library "hh-client"
     "src/client/clientSearch.ml"
     "src/client/clientAiInfo.ml"
     "src/client/clientSymbolInfo.ml"
+    "src/client/clientFullFidelityParse.ml"
     "src/client/clientTypeAtPos.ml"
     "src/client/clientCheck.ml"
     "src/client/clientRestart.ml"
@@ -172,6 +178,7 @@ end
 begin library "hh-format"
   requires = [ "hh-typing-base" ]
   files = [
+    "src/diff/parse_diff.ml"
     "src/stubs/formatEventLogger.ml"
     "src/format/format_hack.ml"
     "src/format/format_diff.ml"
@@ -192,7 +199,7 @@ begin program "hh_single_type_check"
 end
 
 begin library "hh-match"
-  requires = [ "hh-parsing" "hh-typing-base" "h2tp-unparser"]
+  requires = [ "hh-parsing" "hh-typing-base" ]
   files = [
     "src/hh_matcher/astConstructor.ml"
     "src/hh_matcher/ast_code_extent.ml"

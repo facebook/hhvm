@@ -1,0 +1,6 @@
+File "fake_members13.php", line 14, characters 17-21:
+Invalid argument (Typing[4110])
+File "fake_members13.php", line 18, characters 22-27:
+This is a string
+File "fake_members13.php", line 13, characters 24-24:
+It is incompatible with an object of type D

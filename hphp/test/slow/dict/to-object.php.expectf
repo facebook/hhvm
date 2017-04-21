@@ -1,0 +1,13 @@
+object(stdClass)#1 (3) {
+  ["abc"]=>
+  int(100)
+  ["foobar"]=>
+  int(200)
+  ["def"]=>
+  int(300)
+}
+int(200)
+
+Notice: Undefined property: stdClass::$notthere in %s on line %d
+NULL
+int(100)

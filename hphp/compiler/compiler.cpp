@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,31 +15,36 @@
 */
 
 #include "hphp/compiler/compiler.h"
-#include "hphp/compiler/package.h"
+
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
 #include "hphp/compiler/analysis/symbol_table.h"
-#include "hphp/compiler/option.h"
-#include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/json.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/exception.h"
-#include "hphp/util/process.h"
-#include "hphp/util/text-util.h"
-#include "hphp/util/timer.h"
-#include "hphp/util/hdf.h"
-#include "hphp/util/async-func.h"
-#include "hphp/util/current-executable.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/externals.h"
+#include "hphp/compiler/option.h"
+#include "hphp/compiler/package.h"
+#include "hphp/compiler/parser/parser.h"
+
+#include "hphp/hhbbc/hhbbc.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/system/systemlib.h"
-#include "hphp/util/repo-schema.h"
+
+#include "hphp/util/async-func.h"
+#include "hphp/util/build-info.h"
+#include "hphp/util/current-executable.h"
+#include "hphp/util/exception.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
+#include "hphp/util/text-util.h"
+#include "hphp/util/timer.h"
 
 #include "hphp/hhvm/process-init.h"
 
@@ -57,6 +62,8 @@
 #include <boost/filesystem.hpp>
 
 #include <exception>
+
+#include <folly/portability/SysStat.h>
 
 using namespace boost::program_options;
 using std::cout;
@@ -95,7 +102,6 @@ struct CompilerOptions {
   int revision;
   bool genStats;
   bool keepTempDir;
-  bool noTypeInference;
   int logLevel;
   bool force;
   int optimizeLevel;
@@ -107,8 +113,7 @@ struct CompilerOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class AsyncFileCacheSaver : public AsyncFunc<AsyncFileCacheSaver> {
-public:
+struct AsyncFileCacheSaver : AsyncFunc<AsyncFileCacheSaver> {
   AsyncFileCacheSaver(Package *package, const char *name)
       : AsyncFunc<AsyncFileCacheSaver>(this, &AsyncFileCacheSaver::saveCache),
         m_package(package), m_name(name) {
@@ -186,10 +191,6 @@ int compiler_main(int argc, char **argv) {
     return ret;
   } catch (Exception &e) {
     Logger::Error("Exception: %s\n", e.getMessage().c_str());
-  } catch (const FailedAssertion& fa) {
-    fa.print();
-    StackTraceNoHeap::AddExtraLogging("Assertion failure", fa.summary);
-    abort();
   } catch (std::exception &e) {
     Logger::Error("std::exception: %s\n", e.what());
   } catch (...) {
@@ -223,7 +224,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("program", value<std::string>(&po.program)->default_value("program"),
      "final program name to use")
     ("args", value<std::string>(&po.programArgs), "program arguments")
-    ("inputs,i", value<std::vector<std::string>>(&po.inputs), "input file names")
+    ("inputs,i", value<std::vector<std::string>>(&po.inputs),
+     "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
     ("include-path",
@@ -360,18 +362,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     cout << "HipHop Repo Compiler";
     cout << " " << HHVM_VERSION;
     cout << " (" << (debug ? "dbg" : "rel") << ")\n";
-    cout << "Compiler: " << kCompilerId << "\n";
-    cout << "Repo schema: " << kRepoSchemaId << "\n";
+    cout << "Compiler: " << compilerId() << "\n";
+    cout << "Repo schema: " << repoSchemaId() << "\n";
     return 1;
   }
 
   if (vm.count("compiler-id")) {
-    cout << kCompilerId << "\n";
+    cout << compilerId() << "\n";
     return 1;
   }
 
   if (vm.count("repo-schema")) {
-    cout << kRepoSchemaId << "\n";
+    cout << repoSchemaId() << "\n";
     return 1;
   }
 
@@ -415,12 +417,11 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   for (unsigned int i = 0; i < po.confStrings.size(); i++) {
     Config::ParseHdfString(po.confStrings[i].c_str(), config);
   }
-  Option::Load(ini, config);
-  IniSetting::Map iniR = IniSetting::Map::object;
   Hdf runtime = config["Runtime"];
   // The configuration command line strings were already processed above
   // Don't process them again.
-  RuntimeOption::Load(iniR, runtime);
+  RuntimeOption::Load(ini, runtime);
+  Option::Load(ini, config);
   RuntimeOption::EvalJit = false;
 
   initialize_repo();
@@ -488,13 +489,13 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   // we always do pre/post opt no matter the opt level
   Option::PreOptimization = true;
-  Option::PostOptimization = true;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     Option::ParseTimeOpts = false;
   }
 
-  initialize_hhbbc_options();
+  HHBBC::options.DisallowDynamicVarEnvFuncs =
+    (RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON);
 
   return 0;
 }
@@ -503,15 +504,12 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
 int process(const CompilerOptions &po) {
   if (po.coredump) {
-#if defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 /**
  * Windows actually does core dump size and control at a system, not an app
- * level.  So we do nothing here and are at the mercy of Dr. Watson
- *
- * Cygwin has a compat layer in place and does its own core dumping, so we
- * still call setrlimit for core dumps
+ * level.  So we do nothing here and are at the mercy of Dr. Watson.
  */
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__CYGWIN__)
+#elif defined(__APPLE__) || defined(__FreeBSD__)
     struct rlimit rl;
     getrlimit(RLIMIT_CORE, &rl);
     rl.rlim_cur = 80000000LL;
@@ -546,7 +544,13 @@ int process(const CompilerOptions &po) {
 
   // one time initialization
   BuiltinSymbols::LoadSuperGlobals();
-  ClassInfo::Load();
+
+  bool processInitRan = false;
+  SCOPE_EXIT {
+    if (processInitRan) {
+      hphp_process_exit();
+    }
+  };
 
   bool isPickledPHP = (po.target == "php" && po.format == "pickled");
   if (!isPickledPHP) {
@@ -554,6 +558,7 @@ int process(const CompilerOptions &po) {
     Option::WholeProgram = false;
     BuiltinSymbols::s_systemAr = ar;
     hphp_process_init();
+    processInitRan = true;
     BuiltinSymbols::s_systemAr.reset();
     Option::WholeProgram = wp;
     if (po.target == "hhbc" && !Option::WholeProgram) {
@@ -566,10 +571,11 @@ int process(const CompilerOptions &po) {
     }
   } else {
     hphp_process_init();
+    processInitRan = true;
   }
 
   {
-    Timer timer(Timer::WallTime, "parsing inputs");
+    Timer timer2(Timer::WallTime, "parsing inputs");
     if (!po.inputs.empty() && isPickledPHP) {
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
         package.addSourceFile(po.inputs[i].c_str());
@@ -612,7 +618,7 @@ int process(const CompilerOptions &po) {
         return 1;
       }
       if (Option::WholeProgram) {
-        Timer timer(Timer::WallTime, "analyzeProgram");
+        Timer timer3(Timer::WallTime, "analyzeProgram");
         ar->analyzeProgram();
       }
     }
@@ -628,9 +634,9 @@ int process(const CompilerOptions &po) {
     ar->dump();
   }
 
-  ar->setFinish([&po,&timer,&package](AnalysisResultPtr ar) {
+  ar->setFinish([&po,&timer,&package](AnalysisResultPtr res) {
       if (Option::DumpAst) {
-        ar->dump();
+        res->dump();
       }
 
       // saving stats
@@ -673,7 +679,7 @@ int lintTarget(const CompilerOptions &po) {
     try {
       Scanner scanner(filename, Option::GetScannerType());
       Compiler::Parser parser(scanner, filename.c_str(),
-                              AnalysisResultPtr(new AnalysisResult()));
+                              std::make_shared<AnalysisResult>());
       if (!parser.parse()) {
         Logger::Error("Unable to parse file %s: %s", filename.c_str(),
                       parser.getMessage().c_str());
@@ -771,16 +777,9 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
   RuntimeOption::RepoJournal = "memory";
-  RuntimeOption::EnableHipHopSyntax = Option::EnableHipHopSyntax;
-  if (Option::HardReturnTypeHints) {
+  if (HHBBC::options.HardReturnTypeHints) {
     RuntimeOption::EvalCheckReturnTypeHints = 3;
   }
-  RuntimeOption::EnableZendCompat = Option::EnableZendCompat;
-  RuntimeOption::EvalJitEnableRenameFunction = Option::JitEnableRenameFunction;
-  RuntimeOption::IntsOverflowToInts = Option::IntsOverflowToInts;
-  RuntimeOption::StrictArrayFillKeys = Option::StrictArrayFillKeys;
-  RuntimeOption::DisallowDynamicVarEnvFuncs =
-    Option::DisallowDynamicVarEnvFuncs;
 
   // Turn off commits, because we don't want systemlib to get included
   RuntimeOption::RepoCommit = false;
@@ -824,6 +823,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   }
 
   Timer timer(Timer::WallTime, type);
+  // NOTE: Repo errors are ignored!
   Compiler::emitAllHHBC(std::move(ar));
 
   if (!po.syncDir.empty()) {
@@ -849,7 +849,7 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     const char *argv[] = { "objcopy", "--add-section", repo.c_str(),
                            buf.c_str(), exe.c_str(), 0 };
     std::string out;
-    ret = Process::Exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
+    ret = proc::exec(argv[0], argv, nullptr, out, nullptr) ? 0 : 1;
   }
 
   return ret;

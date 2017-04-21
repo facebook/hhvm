@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,10 +22,13 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -50,14 +53,14 @@ void TypeConstraint::init() {
   auto const mptr = nameToAnnotType(m_typeName);
   if (mptr) {
     m_type = *mptr;
-    assert(getAnnotDataType(m_type) != KindOfStaticString);
+    assert(getAnnotDataType(m_type) != KindOfPersistentString);
     return;
   }
   TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
         this, m_typeName->data());
   m_type = Type::Object;
   m_namedEntity = NamedEntity::get(m_typeName);
-  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity);
+  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity.get());
 }
 
 std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
@@ -327,7 +330,6 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
     const Class *c = nullptr;
     if (isObject()) {
       if (m_typeName->isame(tv->m_data.pobj->getVMClass()->name())) {
-        if (isProfileRequest()) InstanceBits::profile(m_typeName);
         return true;
       }
       // We can't save the Class* since it moves around from request
@@ -353,9 +355,6 @@ bool TypeConstraint::check(TypedValue* tv, const Func* func) const {
           // metatype cannot be Mixed
           not_reached();
       }
-    }
-    if (isProfileRequest() && c) {
-      InstanceBits::profile(c->preClass()->name());
     }
     if (c && tv->m_data.pobj->instanceof(c)) {
       return true;
@@ -384,25 +383,73 @@ static const char* describe_actual_type(const TypedValue* tv, bool isHHType) {
     case KindOfBoolean:       return "bool";
     case KindOfInt64:         return "int";
     case KindOfDouble:        return isHHType ? "float" : "double";
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:        return "string";
+    case KindOfPersistentVec:
+    case KindOfVec:           return "HH\\vec";
+    case KindOfPersistentDict:
+    case KindOfDict:          return "HH\\dict";
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:        return "HH\\keyset";
+    case KindOfPersistentArray:
     case KindOfArray:         return "array";
     case KindOfObject:        return tv->m_data.pobj->getClassName().c_str();
     case KindOfResource:
       return tv->m_data.pres->data()->o_getClassName().c_str();
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
 }
 
+void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
+                                     int paramNum, bool useStrictTypes) const {
+  verifyFail(func, tv, paramNum, useStrictTypes);
+  assertx(isSoft() ||
+          !RuntimeOption::RepoAuthoritative || !Repo::global().HardTypeHints ||
+          check(tv, func));
+}
+
 void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
-                                int id) const {
+                                int id, bool useStrictTypes) const {
   VMRegAnchor _;
   std::string name = displayName(func);
   auto const givenType = describe_actual_type(tv, isHHType());
+
+  if (UNLIKELY(!useStrictTypes)) {
+    if (auto dt = underlyingDataType()) {
+      // In non-strict mode we may be able to coerce a type failure. For object
+      // typehints there is no possible coercion in the failure case, but HNI
+      // builtins currently only guard on kind not class so the following wil
+      // generate false positives for objects.
+      if (*dt != KindOfObject) {
+        // HNI conversions implicitly unbox references, this behavior is wrong,
+        // in particular it breaks the way type conversion works for PHP 7
+        // scalar type hints
+        if (tv->m_type == KindOfRef) {
+          auto inner = tv->m_data.pref->var()->asTypedValue();
+          if (tvCoerceParamInPlace(inner, *dt)) {
+            tvAsVariant(tv) = tvAsVariant(inner);
+            return;
+          }
+        } else {
+          if (tvCoerceParamInPlace(tv, *dt)) return;
+        }
+      }
+    }
+  } else if (UNLIKELY(!func->unit()->isHHFile() &&
+                      !RuntimeOption::EnableHipHopSyntax)) {
+    // PHP 7 allows for a widening conversion from Int to Float. We still ban
+    // this in HH files.
+    if (auto dt = underlyingDataType()) {
+      if (*dt == KindOfDouble && tv->m_type == KindOfInt64 &&
+          tvCoerceParamToDoubleInPlace(tv)) {
+        return;
+      }
+    }
+  }
+
   // Handle return type constraint failures
   if (id == ReturnId) {
     std::string msg;
@@ -432,6 +479,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
     return;
   }
+
   // Handle implicit collection->array conversion for array parameter type
   // constraints
   auto c = tvToCell(tv);
@@ -452,6 +500,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     tvCastToArrayInPlace(tv);
     return;
   }
+
   // Handle parameter type constraint failures
   if (isExtended() && isSoft()) {
     // Soft extended type hints raise warnings instead of recoverable
@@ -523,4 +572,58 @@ void TypeConstraint::parentToTypeName(const Func* func,
 
 //////////////////////////////////////////////////////////////////////
 
+MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
+  using MK = MemoKeyConstraint;
+
+  // Soft constraints aren't useful because they're not enforced.
+  if (!tc.hasConstraint() || tc.isTypeVar() ||
+      tc.isTypeConstant() || tc.isSoft()) {
+    return MK::None;
+  }
+
+  // Only a subset of possible type-constraints are useful to use. Namely,
+  // single types which might be nullable, and int/string combination.
+  switch (tc.metaType()) {
+    case AnnotMetaType::Precise: {
+      auto const dt = tc.underlyingDataType();
+      assert(dt.hasValue());
+      switch (*dt) {
+        case KindOfNull:         return MK::Null;
+        case KindOfBoolean:
+          return tc.isNullable() ? MK::BoolOrNull : MK::Bool;
+        case KindOfInt64:
+          return tc.isNullable() ? MK::IntOrNull : MK::Int;
+        case KindOfPersistentString:
+        case KindOfString:
+          return tc.isNullable() ? MK::StrOrNull : MK::Str;
+        case KindOfDouble:
+        case KindOfPersistentVec:
+        case KindOfVec:
+        case KindOfPersistentDict:
+        case KindOfDict:
+        case KindOfPersistentKeyset:
+        case KindOfKeyset:
+        case KindOfPersistentArray:
+        case KindOfArray:
+        case KindOfResource:
+        case KindOfObject:       return MK::None;
+        case KindOfUninit:
+        case KindOfRef:
+          always_assert_flog(false, "Unexpected DataType");
+      }
+      not_reached();
+    }
+    case AnnotMetaType::ArrayKey:
+      return tc.isNullable() ? MK::None : MK::IntOrStr;
+    case AnnotMetaType::Mixed:
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+    case AnnotMetaType::Callable:
+    case AnnotMetaType::Number:
+      return MK::None;
+  }
+  not_reached();
+}
+
+//////////////////////////////////////////////////////////////////////
 }

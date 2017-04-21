@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,15 +30,15 @@ namespace HPHP {
  *
  * See asio-external-thread-event.h for more details.
  */
-class AsioExternalThreadEvent;
+struct AsioExternalThreadEvent;
 struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(ExternalThreadEventWaitHandle);
   WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
   void sweep();
 
-  explicit c_ExternalThreadEventWaitHandle(Class* cls =
-      c_ExternalThreadEventWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_ExternalThreadEventWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+        type_scan::getIndexForMalloc<c_ExternalThreadEventWaitHandle>()) {}
   ~c_ExternalThreadEventWaitHandle() {}
 
  public:
@@ -56,6 +56,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   ObjectData* getPrivData() { return m_privData.get(); }
 
   void abandon(bool sweeping);
+  bool cancel(const Object& exception);
   void process();
   String getName();
   void exitContext(context_idx_t ctx_idx);
@@ -68,9 +69,18 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   void destroyEvent(bool sweeping = false);
 
  private:
+  // Manipulated by other threads; logically part of the linked list
+  // owned by AsioExternalThreadEventQueue::m_received.
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
+
+  // The i/o thread-lowned event object, one per ETEWH
   AsioExternalThreadEvent* m_event;
+
   Object m_privData;
+
+  // Register for sweep, making this ETEWH also a root. AETE's could
+  // also be tracked as roots but its more complicated since they
+  // are malloc'd and accessed by other threads.
   SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
 
  public:

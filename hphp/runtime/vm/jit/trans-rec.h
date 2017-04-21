@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,9 +33,6 @@ struct TransBCMapping {
   TCA    afrozenStart;
 };
 
-using Annotation = std::pair<std::string, std::string>;
-using Annotations = std::vector<Annotation>;
-
 /*
  * A record with various information about a translation.
  */
@@ -62,14 +59,14 @@ struct TransRec {
   uint32_t               acoldLen;
   uint32_t               afrozenLen;
   Offset                 bcStart;
-  TransID                id;
+  TransID                id{kInvalidTransID};
   TransKind              kind;
-  bool                   isLLVM;
   bool                   hasLoop;
 
   TransRec() {}
 
   TransRec(SrcKey                      s,
+           TransID                     transID,
            TransKind                   _kind,
            TCA                         _aStart,
            uint32_t                    _aLen,
@@ -82,10 +79,11 @@ struct TransRec {
              std::vector<TransBCMapping>(),
            Annotations&&               _annotations =
              Annotations(),
-           bool                        _isLLVM = false,
            bool                        _hasLoop = false);
 
-  std::string print(uint64_t profCount) const;
+  bool isValid() const { return id != kInvalidTransID; }
+  bool isConsistent() const;
+  std::string print() const;
   Offset bcPast() const;
   void optimizeForMemory();
 

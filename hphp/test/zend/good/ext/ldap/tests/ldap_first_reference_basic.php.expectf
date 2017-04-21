@@ -1,0 +1,6 @@
+resource(%d) of type (ldap result entry)
+array(1) {
+  [0]=>
+  string(%d) "cn=userA,%s"
+}
+===DONE===

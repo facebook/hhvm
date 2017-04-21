@@ -57,18 +57,81 @@ let rec is_option env ty =
       List.exists tyl (is_option env)
   | _ -> false
 
+let is_shape_field_optional env { sft_optional; sft_ty } =
+  let optional_shape_field_enabled =
+    TypecheckerOptions.experimental_feature_enabled
+      (Env.get_options env)
+      TypecheckerOptions.experimental_optional_shape_field in
+
+  if optional_shape_field_enabled then
+    sft_optional
+  else
+    is_option env sft_ty
+
 let is_class ty = match snd ty with
   | Tclass _ -> true
   | _ -> false
 
 (*****************************************************************************)
+(* Get upper bounds of an abstract type *)
+(*****************************************************************************)
+
+let get_as_constraints env ak tyopt =
+    match tyopt with
+    | Some ty -> Some ty
+    | None ->
+      (match ak with
+       | AKgeneric n ->
+         (match Env.get_upper_bounds env n with ty::_ -> Some ty | _ -> None)
+       | _ -> None)
+
+(*****************************************************************************
+ * Get the "as" constraints from an abstract type or generic parameter, or
+ * return the type itself if there is no "as" constraint.
+ * In the case of a generic parameter whose "as" constraint is another
+ * generic parameter, repeat the process until a type is reached that is not
+ * a generic parameter. Don't loop on cycles.
+ * (For example, functon foo<Tu as Tv, Tv as Tu>(...))
+ *****************************************************************************)
+let get_concrete_supertypes env ty =
+  let rec iter seen env acc tyl =
+    match tyl with
+    | [] -> env, acc
+    | ty::tyl ->
+      let env, ty = Env.expand_type env ty in
+      match snd ty with
+      (* Don't expand enums or newtype; just return the type itself *)
+      | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty) ->
+        iter seen env (ty::acc) tyl
+
+      | Tabstract (_, Some ty) ->
+        iter seen env acc (ty::tyl)
+
+      | Tabstract (AKgeneric n, _) ->
+        if SSet.mem n seen
+        then iter seen env acc tyl
+        else iter (SSet.add n seen) env acc (Env.get_upper_bounds env n @ tyl)
+
+      | Tabstract (_, None) ->
+        iter seen env acc tyl
+
+      | _ ->
+        iter seen env (ty::acc) tyl
+  in iter SSet.empty env [] [ty]
+
+(*****************************************************************************)
 (* Gets the base type of an abstract type *)
 (*****************************************************************************)
 
-let rec get_base_type ty = match snd ty with
+let rec get_base_type env ty =
+  match snd ty with
   | Tabstract (AKnewtype (classname, _), _) when
       classname = SN.Classes.cClassname -> ty
-  | Tabstract (_, Some ty) -> get_base_type ty
+  | Tabstract _ ->
+    begin match get_concrete_supertypes env ty with
+    | _, ty::_ -> get_base_type env ty
+    | _, [] -> ty
+    end
   | _ -> ty
 
 (*****************************************************************************)
@@ -97,15 +160,21 @@ let simplified_uerror env ty1 ty2 =
    *)
   if simplify then
     Errors.must_error
-      (fun _ -> ignore @@ unify env (get_base_type ty1) (get_base_type ty2))
+      (fun _ -> ignore @@ unify env (get_base_type env ty1)
+                                    (get_base_type env ty2))
       (fun _ -> uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2))
   else
     uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)
 
+let process_class_id = function
+  | Nast.CI (c, _) ->
+    Decl_hooks.dispatch_class_id_hook c None;
+  | _ -> ()
+
 let process_static_find_ref cid mid =
   match cid with
-  | Nast.CI c ->
-    Typing_hooks.dispatch_class_id_hook c (Some mid);
+  | Nast.CI (c, _) ->
+    Decl_hooks.dispatch_class_id_hook c (Some mid);
   | _ -> ()
 
 (* Find the first defined position in a list of types *)
@@ -126,7 +195,33 @@ let rec find_pos p_default tyl =
 
 let get_printable_shape_field_name = Env.get_shape_field_name
 
-(* This is used in subtyping and unification. *)
+(* Traverses two shapes structurally, parameterized by functions to run on
+  common fields (on_common_field) and when the first shape has an optional
+  field that is missing in the second (on_missing_optional_field).
+
+  The unset fields of the first shape (empty if it is fully known) must be a
+  subset of the unset fields of the second shape. An error will be reported
+  otherwise.
+
+  If the first shape has an optional field that is not present and not
+  explicitly unset in the second shape (i.e. the second shape is partially known
+  and the field is not listed in its unset_fields), then
+  Error.missing_optional_field will be emitted.
+
+  This is used in subtyping and unification. When subtyping, the first and
+  second fields are respectively the supertype and subtype.
+
+  Example of Error.missing_optional_field for subtyping:
+    s = shape('x' => int, ...)
+    t = shape('x' => int, ?'z' => bool)
+    $s = shape('x' => 1, 'z' => 2)
+    $s is a subtype of s
+    $s is not a subtype of t
+    If s is a subtype of t, then by transitivity, $s is a subtype of t
+      --> contradiction
+    We prevent this by making sure that (apply_changes ... t s) fails because
+    t has an optional field 'z' that is not unset by s.
+*)
 let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
   (r1, fields_known1, fdm1) (r2, fields_known2, fdm2) =
   begin match fields_known1, fields_known2 with
@@ -146,39 +241,39 @@ let apply_shape ~on_common_field ~on_missing_optional_field (env, acc)
         end unset_fields1
     | _ -> ()
   end;
-  ShapeMap.fold begin fun name ty1 (env, acc) ->
+  ShapeMap.fold begin fun name shape_field_type_1 (env, acc) ->
     match ShapeMap.get name fdm2 with
-    | None when is_option env ty1 ->
+    | None when is_shape_field_optional env shape_field_type_1 ->
         let can_omit = match fields_known2 with
           | FieldsFullyKnown -> true
           | FieldsPartiallyKnown unset_fields ->
               ShapeMap.mem name unset_fields in
         if can_omit then
-          on_missing_optional_field (env, acc) name ty1
+          on_missing_optional_field (env, acc) name shape_field_type_1
         else
           let pos1 = Reason.to_pos r1 in
           let pos2 = Reason.to_pos r2 in
           Errors.missing_optional_field pos2 pos1
             (get_printable_shape_field_name name);
-          (env, acc)
+        (env, acc)
     | None ->
         let pos1 = Reason.to_pos r1 in
         let pos2 = Reason.to_pos r2 in
         Errors.missing_field pos2 pos1 (get_printable_shape_field_name name);
         (env, acc)
-    | Some ty2 ->
-        on_common_field (env, acc) name ty1 ty2
+    | Some shape_field_type_2 ->
+        on_common_field (env, acc) name shape_field_type_1 shape_field_type_2
   end fdm1 (env, acc)
 
 let shape_field_name_ env field =
   let open Nast in match field with
-    | String name -> Result.Ok (SFlit name)
-    | Class_const (CI x, y) -> Result.Ok (SFclass_const (x, y))
+    | String name -> Result.Ok (Ast.SFlit name)
+    | Class_const (CI (x, _), y) -> Result.Ok (Ast.SFclass_const (x, y))
     | Class_const (CIself, y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
       | Tclass (sid, _) ->
-        Result.Ok (SFclass_const(sid, y))
+        Result.Ok (Ast.SFclass_const(sid, y))
       | _ ->
         Result.Error `Expected_class)
     | _ -> Result.Error `Invalid_shape_field_name
@@ -288,72 +383,47 @@ let unresolved env ty =
   | _, Tunresolved _ -> in_var env ety
   | _ -> in_var env (fst ty, Tunresolved [ty])
 
-let unwrap_class_or_interface_hint = function
+let unwrap_class_hint = function
   | (_, N.Happly ((pos, class_name), type_parameters)) ->
       pos, class_name, type_parameters
-  | p, N.Habstr(_, _) ->
-      Errors.expected_class ~suffix:"or interface but got a generic" p;
+  | p, N.Habstr _ ->
+      Errors.expected_class ~suffix:" or interface but got a generic" p;
       Pos.none, "", []
   | p, _ ->
-      Errors.expected_class ~suffix:"or interface" p;
+      Errors.expected_class ~suffix:" or interface" p;
       Pos.none, "", []
 
-(*****************************************************************************)
-(* Function checking if an array is used as a tuple *)
-(*****************************************************************************)
+let unwrap_class_type = function
+  | r, Tapply (name, tparaml) -> r, name, tparaml
+  | _,
+    (
+      Terr
+      | Tany
+      | Tmixed
+      | Tarray (_, _)
+      | Tdarray (_, _)
+      | Tvarray _
+      | Tgeneric _
+      | Toption _
+      | Tprim _
+      | Tfun _
+      | Ttuple _
+      | Tshape _
+      | Taccess (_, _)
+      | Tthis
+    ) ->
+      raise @@ Invalid_argument "unwrap_class_type got non-class"
 
-let is_array_as_tuple env ty =
-  let env, ety = Env.expand_type env ty in
-  let env, ety = fold_unresolved env ety in
-  match ety with
-  | _, Tarraykind AKvec elt_type ->
-      let env, normalized_elt_ty = Env.expand_type env elt_type in
-      let _env, normalized_elt_ty = fold_unresolved env normalized_elt_ty in
-      (match normalized_elt_ty with
-      | _, Tunresolved _ -> true
-      | _ -> false
-      )
-  | _, (Tany | Tmixed | Tarraykind _ |  Tprim _ | Toption _
-    | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-    | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> false
+let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
-(* While converting code from PHP to Hack, some arrays are used
- * as tuples. Example: array('', 0). Since the elements have
- * incompatible types, it should be a tuple. However, while migrating
- * code, it is more flexible to allow it in partial.
- *
- * This probably isn't a good idea and should just use ty2 in all cases, but
- * FB www has about 50 errors if you just use ty2 -- not impossible to clean
- * up but more work right now than I want to do. Also it probably affects open
- * source code too, so this may be a nice small test case for our upcoming
- * migration/upgrade strategy.
- *)
-let convert_array_as_tuple env ty2 =
-  let r2 = fst ty2 in
-  if not (Env.is_strict env) && is_array_as_tuple env ty2
-  then env, (r2, Tany)
-  else env, ty2
-
-(*****************************************************************************)
-(* Keep the most restrictive visibility (private < protected < public).
- * This is useful when dealing with unresolved types.
- * When there are several candidates for a given visibility we need to be
- * conservative and consider the most restrictive one.
- *)
-(*****************************************************************************)
-
-let min_vis vis1 vis2 =
-  match vis1, vis2 with
-  | x, Vpublic | Vpublic, x -> x
-  | Vprotected _, x | x, Vprotected _ -> x
-  | Vprivate _ as vis, Vprivate _ -> vis
-
-let min_vis_opt vis_opt1 vis_opt2 =
-  match vis_opt1, vis_opt2 with
-  | None, x | x, None -> x
-  | Some (pos1, x), Some (pos2, y) ->
-      let pos = if pos1 = Pos.none then pos2 else pos1 in
-      Some (pos, min_vis x y)
+let class_is_final_and_not_contravariant class_ty =
+  class_ty.tc_final &&
+    List.for_all
+      class_ty.tc_tparams
+      ~f:(begin function
+          (Ast.Invariant | Ast.Covariant), _, _ -> true
+          | _, _, _ -> false
+          end)
 
 (*****************************************************************************)
 (* Check if a type is not fully constrained *)
@@ -361,29 +431,41 @@ let min_vis_opt vis_opt1 vis_opt2 =
 
 module HasTany : sig
   val check: locl ty -> bool
+  val check_why: locl ty -> Reason.t option
 end = struct
+
+  let merge x y = Option.merge x y (fun x _ -> x)
+
   let visitor =
     object(this)
-      inherit [bool] TypeVisitor.type_visitor
-      method! on_tany _ = true
-      method! on_tarray acc ty1_opt ty2_opt =
+      inherit [Reason.t option] Type_visitor.type_visitor
+      method! on_tany _ r = Some r
+      method! on_tarray acc r ty1_opt ty2_opt =
         (* Check for array without its type parameters specified *)
         match ty1_opt, ty2_opt with
-        | None, None -> true
-        | _ ->
-          (Option.fold ~f:this#on_type ~init:acc ty1_opt) ||
-          (Option.fold ~f:this#on_type ~init:acc ty2_opt)
-      method! on_tarraykind acc akind =
+        | None, None -> Some r
+        | _ -> merge
+            (Option.fold ~f:this#on_type ~init:acc ty1_opt)
+            (Option.fold ~f:this#on_type ~init:acc ty2_opt)
+      method! on_tarraykind acc r akind =
         match akind with
-        | AKany -> true
-        | AKempty -> false
+        | AKany -> Some r
+        | AKempty -> acc
+        | AKvarray ty
         | AKvec ty -> this#on_type acc ty
-        | AKmap (tk, tv) ->
-          (this#on_type acc tk) || (this#on_type acc tv)
-        | AKshape fdm -> ShapeMap.exists (fun _ (tk, tv) ->
-          (this#on_type acc tk) || (this#on_type acc tv)) fdm
+        | AKdarray (tk, tv)
+        | AKmap (tk, tv) -> merge
+            (this#on_type acc tk)
+            (this#on_type acc tv)
+        | AKshape fdm -> ShapeMap.fold (fun _ (tk, tv) acc ->
+            merge
+              (this#on_type acc tk)
+              (this#on_type acc tv)
+          ) fdm acc
         | AKtuple fields ->
-          Utils.IMap.exists (fun _ ty -> this#on_type acc ty) fields
+          IMap.fold (fun _ ty acc -> this#on_type acc ty) fields acc
     end
-  let check ty = visitor#on_type false ty
+  let check_why ty = visitor#on_type None ty
+
+  let check ty = Option.is_some (check_why ty)
 end

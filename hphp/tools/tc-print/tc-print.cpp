@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,8 @@
 #include <vector>
 #include <sstream>
 
+#include <folly/Singleton.h>
+
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
@@ -44,13 +46,14 @@ std::string     configFile;
 std::string     profFileName;
 uint32_t        nTopTrans       = 0;
 uint32_t        nTopFuncs       = 0;
-bool            srcOrder        = false;
+bool            creationOrder   = false;
 bool            transCFG        = false;
 bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
 bool            verboseStats    = false;
 folly::Optional<MD5> md5Filter;
-PerfEventType   sortBy          = SPECIAL_PROF_COUNTERS;
+PerfEventType   sortBy          = EVENT_CYCLES;
+bool            sortByDensity   = false;
 double          helpersMinPercentage = 0;
 ExtOpcode       filterByOpcode  = 0;
 std::string     kindFilter      = "all";
@@ -59,7 +62,7 @@ TCA             minAddr         = 0;
 TCA             maxAddr         = (TCA)-1;
 uint32_t        annotationsVerbosity = 2;
 
-std::vector<uint32_t>    transSortSrc;
+std::vector<uint32_t> transPrintOrder;
 
 RepoWrapper*      g_repo;
 OfflineTransData* g_transData;
@@ -74,11 +77,6 @@ PerfEventsMap<TransID> transPerfEvents;
 #define NTRANS        (g_transData->getNumTrans())
 #define NFUNCS        (g_transData->getNumFuncs())
 #define TREC(TID)     (g_transData->getTransRec(TID))
-
-void error(const std::string& msg) {
-  fprintf(stderr, "Error: %s\n", msg.c_str());
-  exit(1);
-}
 
 void warnTooFew(const std::string& name,
                 uint32_t requested,
@@ -101,6 +99,8 @@ void usage() {
   printf("Usage: tc-print [OPTIONS]\n"
          "  Options:\n"
          "    -c <FILE>       : uses the given config file\n"
+         "    -D              : used along with -t, this option sorts the top "
+         "translations by density (count / size) of the selected perf event\n"
          "    -d <DIRECTORY>  : looks for dump file in <DIRECTORY> "
          "(default: /tmp)\n"
          "    -f <FUNC_ID>    : prints the translations for the given "
@@ -108,8 +108,8 @@ void usage() {
          "    -g <FUNC_ID>    : prints the CFG among the translations for the "
          "given <FUNC_ID>\n"
          "    -p <FILE>       : uses raw profile data from <FILE>\n"
-         "    -s              : prints all translations sorted by source key "
-         "(md5, startOffset)\n"
+         "    -s              : prints all translations sorted by creation "
+         "order\n"
          "    -u <MD5>        : prints all translations from the specified "
          "unit\n"
          "    -t <NUMBER>     : prints top <NUMBER> translations according to "
@@ -159,7 +159,7 @@ void printValidEventTypes() {
 void parseOptions(int argc, char *argv[]) {
   int c;
   opterr = 0;
-  while ((c = getopt (argc, argv, "hc:d:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
+  while ((c = getopt (argc, argv, "hc:Dd:f:g:ip:st:u:T:o:e:bB:v:k:a:A:n:"))
          != -1) {
     switch (c) {
       case 'A':
@@ -184,7 +184,7 @@ void parseOptions(int argc, char *argv[]) {
         dumpDir = optarg;
         break;
       case 'f':
-        srcOrder = true;
+        creationOrder = true;
         if (sscanf(optarg, "%u", &selectedFuncId) != 1) {
           usage();
           exit(1);
@@ -201,7 +201,7 @@ void parseOptions(int argc, char *argv[]) {
         profFileName = optarg;
         break;
       case 's':
-        srcOrder = true;
+        creationOrder = true;
         break;
       case 't':
         if (sscanf(optarg, "%u", &nTopTrans) != 1) {
@@ -225,6 +225,9 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'k':
         kindFilter = optarg;
+        break;
+      case 'D':
+        sortByDensity = true;
         break;
       case 'e':
         if (!strcmp(optarg, kListKeyword)) {
@@ -280,23 +283,14 @@ void parseOptions(int argc, char *argv[]) {
   }
 }
 
-int compTransSrc(int i, int j) {
-  int cmp = strcmp(TREC(i)->md5.toString().c_str(),
-                   TREC(j)->md5.toString().c_str());
-  if (cmp) return cmp < 0;
-  cmp = TREC(i)->src.offset() - TREC(j)->src.offset();
-  if (cmp) return cmp < 0;
-  return TREC(i)->id < TREC(j)->id;
-}
-
-void sortSrc() {
+void sortTrans() {
   for (uint32_t tid = 0; tid < NTRANS; tid++) {
-    if (selectedFuncId == INVALID_ID ||
-        (selectedFuncId == TREC(tid)->src.funcID())) {
-      transSortSrc.push_back(tid);
+    if (TREC(tid)->isValid() &&
+        (selectedFuncId == INVALID_ID ||
+         selectedFuncId == TREC(tid)->src.funcID())) {
+      transPrintOrder.push_back(tid);
     }
   }
-  sort(transSortSrc.begin(), transSortSrc.end(), compTransSrc);
 }
 
 void loadPerfEvents() {
@@ -316,8 +310,8 @@ void loadPerfEvents() {
   uint32_t hhvmSamples[NUM_EVENT_TYPES];
   size_t numEntries = 0;
   PerfEventType eventType = NUM_EVENT_TYPES;
-  // samplesPerKind[event][kind][isLLVM]
-  uint32_t samplesPerKind[NUM_EVENT_TYPES][NumTransKinds][2];
+  // samplesPerKind[event][kind]
+  uint32_t samplesPerKind[NUM_EVENT_TYPES][NumTransKinds];
   uint32_t samplesPerTCRegion[NUM_EVENT_TYPES][TCRCount];
 
   memset(tcSamples  , 0, sizeof(tcSamples));
@@ -370,7 +364,7 @@ void loadPerfEvents() {
 
       const TransRec* trec = g_transData->getTransRec(transId);
       TransKind kind = trec->kind;
-      samplesPerKind[eventType][static_cast<uint32_t>(kind)][trec->isLLVM]++;
+      samplesPerKind[eventType][static_cast<uint32_t>(kind)]++;
       TCRegion region = transCode->findTCRegionContaining(addr);
       always_assert(region != TCRCount);
       samplesPerTCRegion[eventType][region]++;
@@ -412,14 +406,11 @@ void loadPerfEvents() {
            100.0 * tcSamples[i] / hhvmSamples[i]);
 
     for (size_t j = 0; j < NumTransKinds; ++j) {
-      for (size_t llvm = 0; llvm <= 1; ++llvm) {
-        auto ct = samplesPerKind[i][j][llvm];
-        if (!ct) continue;
-        std::string kind = show(static_cast<TransKind>(j));
-        if (llvm) kind = "LLVM " + kind;
-        printf("# %26s:             %-8u (%5.2lf%%)\n",
-               kind.c_str(), ct, 100.0 * ct / tcSamples[i]);
-      }
+      auto ct = samplesPerKind[i][j];
+      if (!ct) continue;
+      std::string kind = show(static_cast<TransKind>(j));
+      printf("# %26s:             %-8u (%5.2lf%%)\n",
+             kind.c_str(), ct, 100.0 * ct / tcSamples[i]);
     }
     printf("#\n");
   }
@@ -452,14 +443,6 @@ void loadProfData() {
   if (!profFileName.empty()) {
     loadPerfEvents();
   }
-
-  // The prof-counters are collected independently.
-  for (TransID tid = 0; tid < NTRANS; tid++) {
-    PerfEvent profCounters;
-    profCounters.type  = SPECIAL_PROF_COUNTERS;
-    profCounters.count = g_transData->getTransCounter(tid);
-    transPerfEvents.addEvent(tid, profCounters);
-  }
 }
 
 // Prints the metadata, bytecode, and disassembly for the given translation
@@ -470,6 +453,7 @@ void printTrans(TransID transId) {
   g_transData->printTransRec(transId, transPerfEvents);
 
   const TransRec* tRec = TREC(transId);
+  if (!tRec->isValid()) return;
 
   if (!tRec->blocks.empty()) {
     printf("----------\nbytecode:\n----------\n");
@@ -502,8 +486,12 @@ void printTrans(TransID transId) {
                          tRec->bcMapping, tcaPerfEvents);
 
   printf("----------\nx64: cold\n----------\n");
-  transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
-                         tRec->bcMapping, tcaPerfEvents);
+  // Sometimes acoldStart is the same as afrozenStart.  Avoid printing the code
+  // twice in such cases.
+  if (tRec->acoldStart != tRec->afrozenStart) {
+    transCode->printDisasm(tRec->acoldStart, tRec->acoldLen,
+                           tRec->bcMapping, tcaPerfEvents);
+  }
 
   printf("----------\nx64: frozen\n----------\n");
   transCode->printDisasm(tRec->afrozenStart, tRec->afrozenLen,
@@ -549,27 +537,27 @@ void printCFG() {
 
   printf("digraph CFG {\n");
 
-  uint64_t maxProfCount = g_transData->findFuncTrans(selectedFuncId, &inodes);
+  g_transData->findFuncTrans(selectedFuncId, &inodes);
 
   // Print nodes
   for (uint32_t i = 0; i < inodes.size(); i++) {
     auto tid = inodes[i];
-    uint64_t profCount = g_transData->getTransCounter(tid);
     uint32_t bcStart   = TREC(tid)->src.offset();
     uint32_t bcStop    = TREC(tid)->bcPast();
-    uint32_t coldness  = 255 - (255 * profCount / maxProfCount);
-    bool isPrologue = TREC(tid)->kind == TransKind::Prologue;
+    const auto kind = TREC(tid)->kind;
+    bool isPrologue = kind == TransKind::LivePrologue ||
+                      kind == TransKind::OptPrologue;
     const char* shape = "box";
     switch (TREC(tid)->kind) {
-      case TransKind::Optimize: shape = "oval";         break;
-      case TransKind::Profile:  shape = "hexagon";      break;
-      case TransKind::Proflogue:
-      case TransKind::Prologue: shape = "invtrapezium"; break;
-      default:                  shape = "box";
+      case TransKind::Optimize:     shape = "oval";         break;
+      case TransKind::Profile:      shape = "hexagon";      break;
+      case TransKind::LivePrologue:
+      case TransKind::ProfPrologue:
+      case TransKind::OptPrologue : shape = "invtrapezium"; break;
+      default:                      shape = "box";
     }
-    printf("t%u [shape=%s,label=\"T: %u\\np: %" PRIu64 "\\nbc: [0x%x-0x%x)\","
-           "style=filled,fillcolor=\"#ff%02x%02x\"%s];\n", tid, shape, tid,
-           profCount, bcStart, bcStop, coldness, coldness,
+    printf("t%u [shape=%s,label=\"T: %u\\nbc: [0x%x-0x%x)\","
+           "style=filled%s];\n", tid, shape, tid, bcStart, bcStop,
            (isPrologue ? ",color=blue" : ""));
   }
 
@@ -593,7 +581,8 @@ void printTopFuncs() {
                                     helpersMinPercentage);
 }
 
-class CompTrans {
+struct CompTrans {
+private:
   const PerfEventsMap<TransID>& transPerfEvents;
   const PerfEventType           etype;
 
@@ -603,8 +592,14 @@ public:
     transPerfEvents(_transPerfEvents), etype(_etype) {}
 
   bool operator()(TransID t1, TransID t2) const {
-    return transPerfEvents.getEventCount(t1, etype) >
-           transPerfEvents.getEventCount(t2, etype);
+    const auto count1 = transPerfEvents.getEventCount(t1, etype);
+    const auto count2 = transPerfEvents.getEventCount(t2, etype);
+    if (sortByDensity) {
+      const auto size1 = TREC(t1)->aLen;
+      const auto size2 = TREC(t2)->aLen;
+      return count1 * size2 > count2 * size1;
+    }
+    return count1 > count2;
   }
 };
 
@@ -613,7 +608,9 @@ void printTopTrans() {
 
   // The summary currently includes all translations, so it's misleading
   // if we're filtering a specific kind of translations or address range.
-  if (kindFilter == "all" && minAddr == 0 && maxAddr == (TCA)-1) {
+  // It also doesn't sort by density, so do print it if sortByDensity is set.
+  if (kindFilter == "all" && minAddr == 0 && maxAddr == (TCA)-1 &&
+      !sortByDensity) {
     transPerfEvents.printEventsSummary(sortBy,
                                        "TransId",
                                        nTopTrans,
@@ -625,11 +622,10 @@ void printTopTrans() {
   std::vector<TransID> transIds;
 
   for (TransID t = 0; t < NTRANS; t++) {
-    if ((kindFilter == "all" || kindFilter == show(TREC(t)->kind).c_str())
-        &&
-        ((minAddr <= TREC(t)->aStart      && TREC(t)->aStart      <= maxAddr) ||
-         (minAddr <= TREC(t)->acoldStart && TREC(t)->acoldStart <= maxAddr)))
-    {
+    if (TREC(t)->isValid() &&
+        (kindFilter == "all" || kindFilter == show(TREC(t)->kind).c_str()) &&
+        ((minAddr <= TREC(t)->aStart     && TREC(t)->aStart      <= maxAddr) ||
+         (minAddr <= TREC(t)->acoldStart && TREC(t)->acoldStart <= maxAddr))) {
       transIds.push_back(t);
     }
   }
@@ -726,6 +722,8 @@ void printTopBytecodes(const OfflineTransData* tdata,
 }
 
 int main(int argc, char *argv[]) {
+  folly::SingletonVault::singleton()->registrationComplete();
+
   pcre_init();
 
   parseOptions(argc, argv);
@@ -757,11 +755,12 @@ int main(int argc, char *argv[]) {
     printTopTrans();
   } else if (transCFG) {
     printCFG();
-  } else if (srcOrder) {
-    // Print translations (all or for a given funcId) in source order
-    sortSrc();
-    for (uint32_t i=0; i < transSortSrc.size(); i++) {
-      printTrans(transSortSrc[i]);
+  } else if (creationOrder) {
+    // Print translations (all or for a given funcId) in the order
+    // they were created.
+    sortTrans();
+    for (uint32_t i=0; i < transPrintOrder.size(); i++) {
+      printTrans(transPrintOrder[i]);
     }
   } else if (collectBCStats) {
     printBytecodeStats(g_transData, tcaPerfEvents, sortBy);
@@ -775,6 +774,7 @@ int main(int argc, char *argv[]) {
     // Print all translations in original order, filtered by unit if desired.
     for (uint32_t t = 0; t < NTRANS; t++) {
       auto tRec = TREC(t);
+      if (!tRec->isValid()) continue;
       if (tRec->kind == TransKind::Anchor) continue;
       if (md5Filter && tRec->md5 != *md5Filter) continue;
 

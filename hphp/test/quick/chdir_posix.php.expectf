@@ -1,0 +1,4 @@
+bool(true)
+
+Warning: chdir(): Permission denied (errno 13) in %s/test/quick/chdir_posix.php on line 13
+bool(false)

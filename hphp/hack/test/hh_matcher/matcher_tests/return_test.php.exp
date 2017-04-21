@@ -1,3 +1,0 @@
-4: class Foo {
-5:   public function foo() : int {
-6:     return 5;

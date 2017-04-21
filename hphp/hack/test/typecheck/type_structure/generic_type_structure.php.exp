@@ -1,4 +1,7 @@
-App \TypeStructure<[1]intersect(Tint), >
-App \TypeStructure<[2]intersect(shape<FieldsPartiallyKnown(unset fields:)>(x => option(Tint), y => tuple(Tstring, Tbool))), >
-tuple(App \TypeStructure<[3]Tbool, >, App \TypeStructure<[4]Tstring, >)
+File "generic_type_structure.php", line 24, characters 3-15:
+  TypeStructure<^(int)>
+File "generic_type_structure.php", line 25, characters 3-15:
+  TypeStructure<^(shape(unset fields:)(x => shape(type => ?int), y => shape(type => (string, bool))))>
+File "generic_type_structure.php", line 26, characters 3-36:
+  (TypeStructure<^bool>, TypeStructure<^string>)
 No errors

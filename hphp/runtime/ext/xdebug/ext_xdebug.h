@@ -107,7 +107,6 @@ struct XDebugServer;
   XDEBUG_OPT(std::string, "remote_host", RemoteHost, "localhost") \
   XDEBUG_OPT(std::string, "remote_log", RemoteLog, "") \
   XDEBUG_OPT(std::string, "remote_mode", RemoteMode, "req") \
-  XDEBUG_OPT(int, "remote_port", RemotePort, 9000) \
   XDEBUG_OPT(double, "remote_timeout", RemoteTimeout, 0.2) \
   XDEBUG_OPT(bool, "show_exception_trace", ShowExcptionTrace, false) \
   XDEBUG_OPT(bool, "show_local_vars", ShowLocalVars, false) \
@@ -136,6 +135,7 @@ struct XDebugServer;
   XDEBUG_OPT(int, "overload_var_dump", OverloadVarDump, 1) \
   XDEBUG_OPT(bool, "remote_autostart", RemoteAutostart, false) \
   XDEBUG_OPT(bool, "remote_enable", RemoteEnable, false) \
+  XDEBUG_OPT(int, "remote_port", RemotePort, 9000) \
 
 // xdebug.dump.* settings
 #define XDEBUG_DUMP_CFG \
@@ -170,7 +170,7 @@ struct XDebugServer;
   XDEBUG_OPT(folly::Optional<bool>, nullptr, OutputIsTTY, folly::none)
 
 // Retrieves the value of the given xdebug global
-#define XDEBUG_GLOBAL(name) (*XDebugExtension::name)
+#define XDEBUG_GLOBAL(name) XDebugExtension::name
 
 // Returns the ini name for the given hhvm configuration option.
 #define XDEBUG_INI(name) ((XDEBUG_NAME ".") + std::string(name))
@@ -197,7 +197,7 @@ struct XDebugExtension final : Extension {
   void requestShutdown() override;
 
   // Standard config options
-  #define XDEBUG_OPT(T, name, sym, val) static DECLARE_THREAD_LOCAL(T, sym);
+  #define XDEBUG_OPT(T, name, sym, val) static thread_local T sym;
   XDEBUG_CFG
   XDEBUG_MAPPED_CFG
   XDEBUG_HDF_CFG

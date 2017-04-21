@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
 
-#include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -31,7 +30,6 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-state.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -44,6 +42,35 @@ namespace HPHP { namespace jit { namespace irgen {
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
+template <class Body>
+void prologDispatch(IRGS& env, const Func* func, Body body) {
+  assertx(env.irb->curMarker().prologue());
+
+  if (!func->mayHaveThis()) {
+    body(false);
+    return;
+  }
+
+  if (func->requiresThisInBody()) {
+    body(true);
+    return;
+  }
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const ctx = gen(env, LdCtx, fp(env));
+      gen(env, CheckCtxThis, taken, ctx);
+    },
+    [&] {
+      body(true);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      body(false);
+    }
+  );
+}
 
 /*
  * Initialize parameters.
@@ -51,18 +78,17 @@ namespace {
  * Set un-passed parameters to Uninit (or the empty array, for the variadic
  * capture parameter) and set up the ExtraArgs on the ActRec as needed.
  */
-void init_params(IRGS& env, uint32_t argc) {
+void init_params(IRGS& env, const Func* func, uint32_t argc) {
   /*
    * Maximum number of default-value parameter initializations to unroll.
    */
   constexpr auto kMaxParamsInitUnroll = 5;
 
-  auto const func = env.context.func;
   auto const nparams = func->numNonVariadicParams();
 
   if (argc < nparams) {
     // Too few arguments; set everything else to Uninit.
-    if (nparams - argc <= kMaxParamsInitUnroll) {
+    if (nparams - argc <= kMaxParamsInitUnroll || env.inlineLevel) {
       for (auto i = argc; i < nparams; ++i) {
         gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
       }
@@ -78,8 +104,10 @@ void init_params(IRGS& env, uint32_t argc) {
         cns(env, staticEmptyArray()));
   }
 
-  // Null out or initialize the frame's ExtraArgs.
-  gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
+  if (!env.inlineLevel) {
+    // Null out or initialize the frame's ExtraArgs.
+    gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
+  }
 }
 
 /*
@@ -89,18 +117,28 @@ void init_params(IRGS& env, uint32_t argc) {
  * closure's bound Ctx, which may be either an object or a class context.  We
  * then teleport the object onto the stack as the first local after the params.
  */
-SSATmp* juggle_closure_ctx(IRGS& env) {
-  auto const func = env.context.func;
-
+SSATmp* juggle_closure_ctx(IRGS& env, const Func* func, SSATmp* closureOpt) {
   assertx(func->isClosureBody());
 
   auto const closure_type = Type::ExactObj(func->implCls());
-  auto const closure = gen(env, LdClosure, closure_type, fp(env));
+  auto const closure = [&] {
+    if (!closureOpt) {
+      return gen(env, LdClosure, closure_type, fp(env));
+    }
+    if (closureOpt->hasConstVal() || closureOpt->isA(closure_type)) {
+      return closureOpt;
+    }
+    return gen(env, AssertType, closure_type, closureOpt);
+  }();
 
-  auto const ctx = gen(env, LdClosureCtx, closure);
+  auto const ctx = func->cls() ?
+    gen(env, LdClosureCtx, closure) : cns(env, nullptr);
+
   gen(env, InitCtx, fp(env), ctx);
   // We can skip the incref for static closures, which have a Cctx.
-  if (!func->isStatic()) gen(env, IncRefCtx, ctx);
+  if (func->cls() && !func->isStatic()) {
+    gen(env, IncRef, ctx);
+  }
 
   // Teleport the closure to the next local.  There's no need to incref since
   // it came from m_this.
@@ -112,8 +150,7 @@ SSATmp* juggle_closure_ctx(IRGS& env) {
  * Copy the closure's use variables from the closure object's properties onto
  * the stack.
  */
-void init_use_vars(IRGS& env, SSATmp* closure) {
-  auto const func = env.context.func;
+void init_use_vars(IRGS& env, const Func* func, SSATmp* closure) {
   auto const cls = func->implCls();
   auto const nparams = func->numParams();
 
@@ -122,15 +159,14 @@ void init_use_vars(IRGS& env, SSATmp* closure) {
   // Closure object properties are the use vars followed by the static locals
   // (which are per-instance).
   auto const nuse = cls->numDeclProperties() - func->numStaticLocals();
-
-  int use_var_off = sizeof(ObjectData) + cls->builtinODTailSize();
+  ptrdiff_t use_var_off = sizeof(ObjectData);
 
   for (auto i = 0; i < nuse; ++i, use_var_off += sizeof(Cell)) {
-    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i));
+    auto const ty = typeFromRAT(cls->declPropRepoAuthType(i), func->cls());
     auto const addr = gen(
       env,
       LdPropAddr,
-      PropOffset { use_var_off },
+      ByteOffsetData { use_var_off },
       ty.ptr(Ptr::Prop),
       closure
     );
@@ -143,7 +179,7 @@ void init_use_vars(IRGS& env, SSATmp* closure) {
 /*
  * Set locals to Uninit.
  */
-void init_locals(IRGS& env) {
+void init_locals(IRGS& env, const Func* func) {
   /*
    * Maximum number of local initializations to unroll.
    *
@@ -153,7 +189,6 @@ void init_locals(IRGS& env) {
    */
   constexpr auto kMaxLocalsInitUnroll = 9;
 
-  auto const func = env.context.func;
   auto const nlocals = func->numLocals();
 
   auto num_inited = func->numParams();
@@ -253,9 +288,6 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
     auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
     gen(env, RBTraceMsg, msg);
   }
-  if (RuntimeOption::EvalJitTransCounters) {
-    gen(env, IncTransCounter);
-  }
 
   gen(env, EnterFrame, fp(env));
 
@@ -270,22 +302,20 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
   auto const func = env.context.func;
 
   // Increment profiling counter.
-  if (mcg->tx().mode() == TransKind::Proflogue) {
-    assertx(shouldPGOFunc(*func));
-    auto profData = mcg->tx().profData();
-
+  if (env.context.kind == TransKind::ProfPrologue) {
     gen(env, IncProfCounter, TransIDData{transID});
-    profData->setProfiling(func->getFuncId());
+    profData()->setProfiling(func->getFuncId());
   }
 
   // Initialize params, locals, and---if we have a closure---the closure's
   // bound class context and use vars.
-  init_params(env, argc);
-  if (func->isClosureBody()) {
-    auto const closure = juggle_closure_ctx(env);
-    init_use_vars(env, closure);
+  emitPrologueLocals(env, argc, func, nullptr);
+  // "Kill" all the class-ref slots initially. This normally won't do anything
+  // (the class-ref slots should be unoccupied at this point), but in debugging
+  // builds it will write poison values to them.
+  for (uint32_t slot = 0; slot < func->numClsRefSlots(); ++slot) {
+    killClsRef(env, slot);
   }
-  init_locals(env);
   warn_missing_args(env, argc);
 
   // Check surprise flags in the same place as the interpreter: after setting
@@ -297,18 +327,23 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
 
-  // Emit the bindjmp for the function body.
-  gen(
-    env,
-    ReqBindJmp,
-    ReqBindJmpData {
-      SrcKey { func, func->getEntryForNumArgs(argc), false },
-      FPInvOffset { func->numSlotsInFrame() },
-      offsetFromIRSP(env, BCSPOffset{0}),
-      TransFlags{}
-    },
-    sp(env),
-    fp(env)
+  prologDispatch(
+    env, func,
+    [&] (bool hasThis) {
+      // Emit the bindjmp for the function body.
+      gen(
+        env,
+        ReqBindJmp,
+        ReqBindJmpData {
+          SrcKey { func, func->getEntryForNumArgs(argc), false, hasThis },
+          FPInvOffset { func->numSlotsInFrame() },
+          spOffBCFromIRSP(env),
+          TransFlags{}
+        },
+        sp(env),
+        fp(env)
+      );
+    }
   );
 }
 
@@ -367,6 +402,16 @@ void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void emitPrologueLocals(IRGS& env, uint32_t argc,
+                        const Func* func, SSATmp* closureOpt) {
+  init_params(env, func, argc);
+  if (func->isClosureBody()) {
+    auto const closure = juggle_closure_ctx(env, func, closureOpt);
+    init_use_vars(env, func, closure);
+  }
+  init_locals(env, func);
+}
+
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   if (env.context.func->isMagic()) {
     return emitMagicFuncPrologue(env, argc, transID);
@@ -377,45 +422,48 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
   auto const func = env.context.func;
+  auto const num_args = gen(env, LdARNumParams, fp(env));
 
-  // TODO(#8060661): Why don't we need to mask out the flags?
-  auto const num_args = gen(env, LdARNumArgsAndFlags, fp(env));
-
-  for (auto const& dv : dvs) {
-    ifThen(
-      env,
-      [&] (Block* taken) {
-        auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
-        gen(env, JmpNZero, taken, lte);
-      },
-      [&] {
-        gen(
+  prologDispatch(
+    env, func,
+    [&] (bool hasThis) {
+      for (auto const& dv : dvs) {
+        ifThen(
           env,
-          ReqBindJmp,
-          ReqBindJmpData {
-            SrcKey { func, dv.second, false },
-            FPInvOffset { func->numSlotsInFrame() },
-            offsetFromIRSP(env, BCSPOffset{0}),
-            TransFlags{}
+          [&] (Block* taken) {
+            auto const lte = gen(env, LteInt, num_args, cns(env, dv.first));
+            gen(env, JmpNZero, taken, lte);
           },
-          sp(env),
-          fp(env)
+          [&] {
+            gen(
+              env,
+              ReqBindJmp,
+              ReqBindJmpData {
+                SrcKey { func, dv.second, false, hasThis },
+                FPInvOffset { func->numSlotsInFrame() },
+                spOffBCFromIRSP(env),
+                TransFlags{}
+              },
+              sp(env),
+              fp(env)
+            );
+          }
         );
       }
-    );
-  }
 
-  gen(
-    env,
-    ReqBindJmp,
-    ReqBindJmpData {
-      SrcKey { func, func->base(), false },
-      FPInvOffset { func->numSlotsInFrame() },
-      offsetFromIRSP(env, BCSPOffset{0}),
-      TransFlags{}
-    },
-    sp(env),
-    fp(env)
+      gen(
+        env,
+        ReqBindJmp,
+        ReqBindJmpData {
+          SrcKey { func, func->base(), false, hasThis },
+          FPInvOffset { func->numSlotsInFrame() },
+          spOffBCFromIRSP(env),
+          TransFlags{}
+        },
+        sp(env),
+        fp(env)
+      );
+    }
   );
 }
 

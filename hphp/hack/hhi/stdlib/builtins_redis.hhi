@@ -32,10 +32,10 @@ class Redis {
   public function __construct() {}
   public function connect($host, $port = 6379, $timeout = 0.0) {}
   public function psetex($key, $ttl, $value) {}
-  public function sScan($key, $iterator, $pattern = '', $count = 0) {}
-  public function scan($iterator, $pattern = '', $count = 0) {}
-  public function zScan($key, $iterator, $pattern = '', $count = 0) {}
-  public function hScan($key, $iterator, $pattern = '', $count = 0) {}
+  public function sScan($key, &$iterator, $pattern = '', $count = 0) {}
+  public function scan(&$iterator, $pattern = '', $count = 0) {}
+  public function zScan($key, &$iterator, $pattern = '', $count = 0) {}
+  public function hScan($key, &$iterator, $pattern = '', $count = 0) {}
   public function client($command, $arg = '') {}
   public function slowlog($command) {}
   public function open($host, $port = 6379, $timeout = 0.0) {}
@@ -166,8 +166,8 @@ class Redis {
   public function zRank($key, $member) {}
   public function zRevRank($key, $member) {}
   public function zIncrBy($key, $value, $member) {}
-  public function zUnion($Output, $ZSetKeys, array $Weights = [], $aggregateFunction = 'SUM') {}
-  public function zInter($Output, $ZSetKeys, array $Weights = [], $aggregateFunction = 'SUM') {}
+  public function zUnion($Output, $ZSetKeys, array $Weights = array(), $aggregateFunction = 'SUM') {}
+  public function zInter($Output, $ZSetKeys, array $Weights = array(), $aggregateFunction = 'SUM') {}
   public function hSet($key, $hashKey, $value) {}
   public function hSetNx($key, $hashKey, $value) {}
   public function hGet($key, $hashKey) {}
@@ -201,7 +201,7 @@ class RedisException extends RuntimeException {
 
 class RedisArray {
   public function __call($function_name, $arguments) {}
-  public function __construct($name = '', array $hosts = [], array $opts = []) {}
+  public function __construct($name = '', array $hosts = array(), array $opts = array()) {}
   public function _distributor() {}
   public function _function() {}
   public function _hosts() {}

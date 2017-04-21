@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,17 +23,18 @@
 #include "hphp/util/md5.h"
 #include "hphp/util/portability.h"
 
-#include <boost/noncopyable.hpp>
 #include <sqlite3.h>
+
+#include <folly/portability/Stdio.h>
 
 namespace HPHP {
 
 // Forward declaration.
-class BlobDecoder;
-class BlobEncoder;
+struct BlobDecoder;
+struct BlobEncoder;
 struct StringData;
 struct TypedValue;
-class Repo;
+struct Repo;
 
 enum RepoId {
   RepoIdInvalid = -1,
@@ -64,15 +65,14 @@ struct RepoExc : std::exception {
   std::string m_msg;
 };
 
-class RepoStmt {
- public:
+struct RepoStmt {
   explicit RepoStmt(Repo& repo);
   ~RepoStmt();
  private:
   void finalize();
  public:
   bool prepared() const { return (m_stmt != nullptr); }
-  void prepare(const std::string& sql);
+  void prepare(const std::string& sql); // throws(RepoExc)
   void reset();
   Repo& repo() const { return m_repo; }
   sqlite3_stmt*& get() { return m_stmt; }
@@ -86,8 +86,7 @@ class RepoStmt {
 
 // Under most circumstances RepoTxnQuery should be used instead of RepoQuery;
 // queries outside of transactions are fraught with peril.
-class RepoQuery {
- public:
+struct RepoQuery {
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
     assert(m_stmt.prepared());
@@ -104,6 +103,7 @@ class RepoQuery {
                 bool isStatic=false);
   void bindStaticString(const char* paramName, const StringData* sd);
   void bindStdString(const char* paramName, const std::string& s);
+  void bindStringPiece(const char* paramName, const folly::StringPiece s);
   void bindDouble(const char* paramName, double val);
   void bindInt(const char* paramName, int val);
   void bindId(const char* paramName, Id id);
@@ -113,11 +113,11 @@ class RepoQuery {
   void bindInt64(const char* paramName, int64_t val);
   void bindNull(const char* paramName);
 
-  void step();
+  void step(); // throws(RepoExc)
   bool row() const { return m_row; }
   bool done() const { return m_done; }
   void reset();
-  void exec();
+  void exec(); // throws(RepoExc)
 
   // rowid() returns the row id associated with the most recent successful
   // insert.  Thus the rowid is irrelevant for non-insert queries.
@@ -127,21 +127,24 @@ class RepoQuery {
   bool isDouble(int iCol);
   bool isInt(int iCol);
   bool isNull(int iCol);
-  void getBlob(int iCol, const void*& blob, size_t& size);
-  BlobDecoder getBlob(int iCol);
-  void getMd5(int iCol, MD5& md5);
-  void getTypedValue(int iCol, TypedValue& tv);
-  void getText(int iCol, const char*& text);
-  void getText(int iCol, const char*& text, size_t& size);
-  void getStaticString(int iCol, StringData*& s);
-  void getStdString(int iCol, std::string& s);
-  void getDouble(int iCol, double& val);
-  void getInt(int iCol, int& val);
-  void getId(int iCol, Id& id);
-  void getOffset(int iCol, Offset& offset);
-  void getAttr(int iCol, Attr& attrs);
-  void getBool(int iCol, bool& b);
-  void getInt64(int iCol, int64_t& val);
+
+  // Get the column value as the named type. If the value cannot be converted
+  // into the named type then an error is thrown.
+  void getBlob(int iCol, const void*& blob, size_t& size); // throws(RepoExc)
+  BlobDecoder getBlob(int iCol); // throws(RepoExc)
+  void getMd5(int iCol, MD5& md5); // throws(RepoExc)
+  void getTypedValue(int iCol, TypedValue& tv); // throws(RepoExc)
+  void getText(int iCol, const char*& text); // throws(RepoExc)
+  void getText(int iCol, const char*& text, size_t& size); // throws(RepoExc)
+  void getStaticString(int iCol, StringData*& s); // throws(RepoExc)
+  void getStdString(int iCol, std::string& s); // throws(RepoExc)
+  void getDouble(int iCol, double& val); // throws(RepoExc)
+  void getInt(int iCol, int& val); // throws(RepoExc)
+  void getId(int iCol, Id& id); // throws(RepoExc)
+  void getOffset(int iCol, Offset& offset); // throws(RepoExc)
+  void getAttr(int iCol, Attr& attrs); // throws(RepoExc)
+  void getBool(int iCol, bool& b); // throws(RepoExc)
+  void getInt64(int iCol, int64_t& val); // throws(RepoExc)
 
  protected:
   RepoStmt& m_stmt;
@@ -155,10 +158,12 @@ class RepoQuery {
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
-class RepoTxn : boost::noncopyable {
- public:
-  explicit RepoTxn(Repo& repo);
+struct RepoTxn {
+  explicit RepoTxn(Repo& repo); // throws(RepoExc)
   ~RepoTxn();
+
+  RepoTxn(const RepoTxn&) = delete;
+  RepoTxn& operator=(const RepoTxn&) = delete;
 
   /*
    * All these routines may throw if there is an error accessing the
@@ -167,44 +172,43 @@ class RepoTxn : boost::noncopyable {
    * basic exception safety guarantee, even though the whole point is
    * to behave transactionally. ;)
    */
-  void prepare(RepoStmt& stmt, const std::string& sql);
-  void exec(const std::string& sQuery);
-  void commit();
+  void prepare(RepoStmt& stmt, const std::string& sql); // throws(RepoExc)
+  void exec(const std::string& sQuery); // throws(RepoExc)
+  void commit(); // throws(RepoExc)
 
   bool error() const { return m_error; }
 
  private:
-  friend class RepoTxnQuery;
-  void step(RepoQuery& query);
-  void exec(RepoQuery& query);
+  friend struct RepoTxnQuery;
+  void step(RepoQuery& query); // throws(RepoExc)
+  void exec(RepoQuery& query); // throws(RepoExc)
   void rollback(); // nothrow
 
   Repo& m_repo;
   bool m_pending;
   bool m_error;
+
+  template<class F> void rollback_guard(const char* func, F f);
 };
 
-class RepoTxnQuery : public RepoQuery {
- public:
+struct RepoTxnQuery : RepoQuery {
   RepoTxnQuery(RepoTxn& txn, RepoStmt& stmt)
     : RepoQuery(stmt), m_txn(txn) {
   }
 
-  void step();
-  void exec();
+  void step(); // throws(RepoExc)
+  void exec(); // throws(RepoExc)
 
  private:
   RepoTxn& m_txn;
 };
 
-class RepoProxy {
- public:
+struct RepoProxy {
   explicit RepoProxy(Repo& repo) : m_repo(repo) {}
   ~RepoProxy() {}
 
  protected:
-  class Stmt : public RepoStmt {
-   public:
+  struct Stmt : RepoStmt {
     Stmt(Repo& repo, int repoId) : RepoStmt(repo), m_repoId(repoId) {}
    protected:
     int m_repoId;

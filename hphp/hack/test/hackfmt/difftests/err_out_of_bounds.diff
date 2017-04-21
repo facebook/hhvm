@@ -1,0 +1,12 @@
+diff --git a/chaining.php b/chaining.php
+--- a/chaining.php
++++ b/chaining.php
+@@ -31,7 +31,7 @@
+
+   $my_object?->getASubObjectFromMyObject
+             ->getSomeOtherObject()
+-            ->directObject
++            ->changed
+             ?->field
+             ->subField
+             ->method();

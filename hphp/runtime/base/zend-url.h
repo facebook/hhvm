@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -37,17 +37,16 @@ struct Url {
   String fragment;
 };
 
-bool url_parse(Url &output, const char *str, int length);
+bool url_parse(Url &output, const char *str, size_t length);
 
 /**
  * raw_ versions ignore "+" or " ".
  */
-String url_encode(const char *s, int len);
-String url_decode(const char *s, int len);
-int url_decode(char *value); // in-place version, also assuming C-string
-int url_decode_ex(char *value, int len);
-String url_raw_encode(const char *s, int len);
-String url_raw_decode(const char *s, int len);
+String url_encode(const char *s, size_t len);
+String url_decode(const char *s, size_t len);
+size_t url_decode_ex(char *value, size_t len);
+String url_raw_encode(const char *s, size_t len);
+String url_raw_decode(const char *s, size_t len);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

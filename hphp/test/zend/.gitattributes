@@ -355,6 +355,7 @@ good/ext/date/tests/bug65371.php binary
 good/ext/date/tests/bug65371.php.expectf binary
 good/ext/exif/tests/bug34704.jpg binary
 good/ext/exif/tests/bug48378.jpeg binary
+good/ext/exif/tests/bug50845.jpg binary
 good/ext/exif/tests/bug60150.jpg binary
 good/ext/exif/tests/bug62523_2.jpg binary
 good/ext/exif/tests/exif_encoding_crash.jpg binary
@@ -543,6 +544,7 @@ good/ext/standard/tests/general_functions/parse_ini_basic.data binary
 good/ext/standard/tests/image/246x247.png binary
 good/ext/standard/tests/image/384x385.png binary
 good/ext/standard/tests/image/bug13213.jpg binary
+good/ext/standard/tests/image/bug72278.jpg binary
 good/ext/standard/tests/image/test-1pix.bmp binary
 good/ext/standard/tests/image/test13pix.swf binary
 good/ext/standard/tests/image/test1pix.jpg binary

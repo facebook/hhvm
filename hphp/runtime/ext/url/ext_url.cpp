@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -114,7 +114,7 @@ static String normalize_variable_name(const String& name) {
 
 Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */) {
-  String f = HHVM_FN(file_get_contents)(filename);
+  auto const f = HHVM_FN(file_get_contents)(filename).toString();
 
   Variant matches;
   preg_match_all("/<meta\\s+name=\"(.*?)\"\\s+content=\"(.*?)\".*?>/s",
@@ -135,7 +135,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
                              const String& num_prefix, const String& key_prefix,
                              const String& key_suffix, const String& arg_sep,
                              bool encode_plus = true) {
-  void *id = varr.is(KindOfArray) ?
+  void *id = varr.isArray() ?
     (void*)varr.getArrayData() : (void*)varr.getObjectData();
   if (!seen_arrs.insert(id).second) {
     return; // recursive
@@ -158,10 +158,10 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
     Variant data = iter.second();
     if (data.isNull() || data.isResource()) continue;
 
-    String key = iter.first();
+    auto const key = iter.first().toString();
     bool numeric = key.isNumeric();
 
-    if (data.is(KindOfArray) || data.is(KindOfObject)) {
+    if (data.isArray() || data.is(KindOfObject)) {
       String encoded;
       if (numeric) {
         encoded = key;
@@ -177,7 +177,7 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
       new_prefix.append("%5B");
       url_encode_array(ret, data, seen_arrs, String(),
                        new_prefix.detach(), String("%5D", CopyString),
-                       arg_sep);
+                       arg_sep, encode_plus);
     } else {
       if (!ret.empty()) {
         ret.append(arg_sep);
@@ -205,25 +205,30 @@ static void url_encode_array(StringBuffer &ret, const Variant& varr,
 const StaticString s_arg_separator_output("arg_separator.output");
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
-                           const String& numeric_prefix /* = null_string */,
+                           const Variant& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
                            int enc_type /* = k_PHP_QUERY_RFC1738 */) {
-  if (!formdata.is(KindOfArray) && !formdata.is(KindOfObject)) {
+  if (!formdata.isArray() && !formdata.is(KindOfObject)) {
     throw_invalid_argument("formdata: (need Array or Object)");
     return false;
   }
 
   String arg_sep;
   if (arg_separator.empty()) {
-    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output);
+    arg_sep = HHVM_FN(ini_get)(s_arg_separator_output).toString();
   } else {
     arg_sep = arg_separator;
   }
 
   StringBuffer ret(1024);
   std::set<void*> seen_arrs;
+
+  String num_prefix;
+  if (!numeric_prefix.isNull()) {
+    num_prefix = numeric_prefix.toCStrRef();
+  }
   url_encode_array(ret, formdata, seen_arrs,
-                   numeric_prefix, String(), String(), arg_sep,
+                   num_prefix, String(), String(), arg_sep,
                    enc_type != k_PHP_QUERY_RFC3986);
   return ret.detach();
 }
@@ -311,8 +316,7 @@ String HHVM_FUNCTION(urlencode, const String& str) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StandardURLExtension final : public Extension {
- public:
+struct StandardURLExtension final : Extension {
   StandardURLExtension() : Extension("url") {}
   void moduleInit() override {
     HHVM_RC_INT(PHP_URL_SCHEME, k_PHP_URL_SCHEME);

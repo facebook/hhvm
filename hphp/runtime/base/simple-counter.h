@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@
 
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/util/stack-trace.h"
 
 // #define ENABLE_SIMPLE_COUNTER 1
 
@@ -34,7 +33,6 @@ struct SimpleCounter final : RequestEventHandler {
 
   void requestInit() override;
   void requestShutdown() override;
-  void vscan(IMarker&) const override {}
 
   static void Count(const std::string &name);
 

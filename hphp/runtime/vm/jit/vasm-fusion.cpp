@@ -27,17 +27,6 @@ TRACE_SET_MOD(vasm);
 namespace HPHP { namespace jit {
 
 namespace {
-struct DefVisitor {
-  Vreg flags;
-  template<class T> void imm(T&) {}
-  template<class T> void use(T&) {}
-  template<class T> void across(T&) {}
-  template<class T, class H> void useHint(T&, H&) {}
-  template<class T> void def(T&) {}
-  template<class T, class H> void defHint(T&, H&) {}
-  template<class H> void defHint(VregSF f, H&) { flags = f; }
-  void def(VregSF f) { flags = f; }
-};
 
 // if inst is testb{r,r,d}, return true,d
 bool match_testb(Vinstr& inst, Vreg r) {
@@ -51,7 +40,18 @@ bool match_jcc(Vinstr& inst, Vreg flags) {
          (inst.jcc_.cc == CC_E || inst.jcc_.cc == CC_NE);
 }
 
-bool sets_flags(Vinstr& inst) {
+#define CMOV_MATCH(type)                                                \
+  bool match_##type(Vinstr& inst, Vreg flags) {                         \
+    return inst.op == Vinstr::type && inst.type##_.sf == flags &&       \
+      (inst.type##_.cc == CC_E || inst.type##_.cc == CC_NE);            \
+  }
+CMOV_MATCH(cmovb)
+CMOV_MATCH(cmovw)
+CMOV_MATCH(cmovl)
+CMOV_MATCH(cmovq)
+#undef CMOV_MATCH
+
+bool sets_flags(const Vunit& unit, const Vinstr& inst) {
   // Some special cases that also clobber flags:
   switch (inst.op) {
   case Vinstr::vcall:
@@ -70,9 +70,11 @@ bool sets_flags(Vinstr& inst) {
     break;
   }
 
-  DefVisitor dv;
-  visitOperands(inst, dv);
-  return dv.flags.isValid();
+  Vreg flags;
+  visitDefs(unit, inst, [&] (Vreg r, Width w) {
+    if (w == Width::Flags) flags = r;
+  });
+  return flags.isValid();
 }
 }
 
@@ -84,7 +86,7 @@ bool sets_flags(Vinstr& inst) {
  *   ...
  *   testb b, b => f2
  *   ...
- *   jcc E|NE, f2
+ *   jcc E|NE, f2 (OR cmov E|NE, f, t, d)
  *
  * If found, and f2 is only used by the jcc, then change the code to:
  *
@@ -92,7 +94,7 @@ bool sets_flags(Vinstr& inst) {
  *   ...
  *   nop
  *   ...
- *   jcc !cc|cc, f1
+ *   jcc !cc|cc, f1 (OR cmov !cc|cc, f, t, d)
  *
  * Later, vasm-dead will clean up the nop, and the setcc if b became dead.
  *
@@ -107,9 +109,7 @@ void fuseBranches(Vunit& unit) {
   jit::vector<unsigned> uses(unit.next_vr);
   for (auto b : blocks) {
     for (auto& inst : unit.blocks[b].code) {
-      visitUses(unit, inst, [&](Vreg r) {
-        uses[r]++;
-      });
+      visitUses(unit, inst, [&] (Vreg r) { uses[r]++; });
     }
   }
   bool should_print = false;
@@ -140,7 +140,24 @@ void fuseBranches(Vunit& unit) {
         should_print = true;
         continue;
       }
-      if (setcc_flags.isValid() && sets_flags(code[i])) {
+
+      // Check for different cmov flavors
+#define CMOV_IMPL(type)                                 \
+      if (match_##type(code[i], testb_flags)) {         \
+        code[testb_index] = nop{};                      \
+        auto& cmov = code[i].type##_;                   \
+        cmov.cc = cmov.cc == CC_NE ? cc : ccNegate(cc); \
+        cmov.sf = setcc_flags;                          \
+        should_print = true;                            \
+        continue;                                       \
+      }
+      CMOV_IMPL(cmovb);
+      CMOV_IMPL(cmovw);
+      CMOV_IMPL(cmovl);
+      CMOV_IMPL(cmovq);
+#undef CMOV_IMPL
+
+      if (setcc_flags.isValid() && sets_flags(unit, code[i])) {
         setcc_flags = testb_flags = Vreg{};
       }
     }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,23 +22,34 @@
 #include <memory>
 #include <algorithm>
 
-#include <sys/time.h>
-
 #include <stdlib.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <signal.h>
 
+#include <folly/portability/SysTime.h>
+
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/rank.h"
 #include "hphp/util/service-data.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 namespace HPHP {  namespace Treadmill {
 
 TRACE_SET_MOD(treadmill);
+
+/*
+ * We assign local, unique indexes to each thread, with hopes that
+ * they are densely packed.
+ *
+ * The plan here is that each thread starts with s_thisThreadIdx as
+ * kInvalidThreadIdx.  And the first time a thread starts using the Treadmill
+ * it allocates a new thread id from s_nextThreadIdx with fetch_add.
+ */
+std::atomic<int64_t> g_nextThreadIdx{0};
+__thread int64_t tl_thisThreadIdx{kInvalidThreadIdx};
 
 namespace {
 
@@ -56,17 +67,6 @@ const GenCount kIdleGenCount = 0; // not processing any requests.
 std::vector<RequestInfo> s_inflightRequests;
 GenCount s_latestCount = 0;
 std::atomic<GenCount> s_oldestRequestInFlight(0);
-
-/*
- * We assign local, unique indexes to each thread, with hopes that
- * they are densely packed.
- *
- * The plan here is that each thread starts with s_thisThreadIdx as
- * -1.  And the first time a thread starts using the Treadmill it
- * allocates a new thread id from s_nextThreadIdx with fetch_add.
- */
-std::atomic<int64_t> s_nextThreadIdx{0};
-__thread int64_t s_thisThreadIdx{-1};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -168,10 +168,7 @@ void enqueueInternal(std::unique_ptr<WorkItem> gt) {
 }
 
 void startRequest() {
-  if (UNLIKELY(s_thisThreadIdx == -1)) {
-    s_thisThreadIdx = s_nextThreadIdx.fetch_add(1);
-  }
-  auto const threadIdx = s_thisThreadIdx;
+  auto const threadIdx = Treadmill::threadIdx();
 
   GenCount startTime = getTime();
   {
@@ -195,7 +192,7 @@ void startRequest() {
 }
 
 void finishRequest() {
-  auto const threadIdx = s_thisThreadIdx;
+  auto const threadIdx = Treadmill::threadIdx();
   assert(threadIdx != -1);
   FTRACE(1, "tid {} finish\n", threadIdx);
   std::vector<std::unique_ptr<WorkItem>> toFire;
@@ -249,7 +246,7 @@ void finishRequest() {
  */
 int64_t getOldestStartTime() {
   int64_t time = s_oldestRequestInFlight.load(std::memory_order_relaxed);
-  return (time - s_nextThreadIdx)/ ONE_SEC_IN_MICROSEC + 1;
+  return (time - g_nextThreadIdx)/ ONE_SEC_IN_MICROSEC + 1;
 }
 
 int64_t getAgeOldestRequest() {

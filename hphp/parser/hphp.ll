@@ -9,6 +9,7 @@
 #endif
 
 // macros for flex
+#define yyguts_t hphpguts_t
 #define YYSTYPE HPHP::ScannerToken
 #define YYLTYPE HPHP::Location
 #define YY_EXTRA_TYPE HPHP::Scanner*
@@ -51,7 +52,7 @@
 
 #define IS_LABEL_START(c) \
   (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || \
-   (c) == '_' || (c) >= 0x7F)
+   (c) == '_' || ((unsigned char) c) >= 0x7F)
 
 /**
  * "Next token types" tell us how to interpret the next characters in the
@@ -121,6 +122,7 @@ static int getNextTokenType(int t) {
     case T_EXIT:
     case T_RETURN:
     case T_YIELD:
+    case T_YIELD_FROM:
     case T_AWAIT:
     case T_ASYNC:
     case T_NEW:
@@ -165,6 +167,12 @@ static int getNextTokenType(int t) {
     case T_XHP_REQUIRED:
     case T_ENUM:
     case T_ARRAY:
+    case T_DICT:
+    case T_VEC:
+    case T_KEYSET:
+    case T_VARRAY:
+    case T_DARRAY:
+    case T_WHERE:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
     case T_XHP_ATTRIBUTE:
@@ -255,12 +263,19 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_YIELD_FROM);
+}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
 <ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
 <ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
-<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if" {RETTOKEN(T_ELSEIF);}
+<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_ELSEIF);
+}
 <ST_IN_SCRIPTING>"endif"                { RETTOKEN(T_ENDIF);}
 <ST_IN_SCRIPTING>"else"                 { RETTOKEN(T_ELSE);}
 <ST_IN_SCRIPTING>"while"                { RETTOKEN(T_WHILE);}
@@ -473,10 +488,17 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"XOR"                { RETTOKEN(T_LOGICAL_XOR);}
 <ST_IN_SCRIPTING>"<<"                 { RETSTEP(T_SL);}
 
+<ST_IN_SCRIPTING>"|>"                 { HH_ONLY_KEYWORD(T_PIPE); }
+<ST_IN_SCRIPTING>"dict"               { HH_ONLY_KEYWORD(T_DICT); }
+<ST_IN_SCRIPTING>"keyset"             { HH_ONLY_KEYWORD(T_KEYSET); }
 <ST_IN_SCRIPTING>"shape"              { HH_ONLY_KEYWORD(T_SHAPE); }
 <ST_IN_SCRIPTING>"type"               { HH_ONLY_KEYWORD(T_UNRESOLVED_TYPE); }
 <ST_IN_SCRIPTING>"newtype"            { HH_ONLY_KEYWORD(T_UNRESOLVED_NEWTYPE); }
+<ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
+<ST_IN_SCRIPTING>"vec"                { HH_ONLY_KEYWORD(T_VEC);}
+<ST_IN_SCRIPTING>"varray"             { HH_ONLY_KEYWORD(T_VARRAY);}
+<ST_IN_SCRIPTING>"darray"             { HH_ONLY_KEYWORD(T_DARRAY);}
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
@@ -618,7 +640,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
-        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (yyg->yy_start_stack_ptr) {
           yy_pop_state(yyscanner);
           if (YY_START == ST_IN_SCRIPTING) {
@@ -636,7 +657,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
-        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (yyg->yy_start_stack_ptr) yy_pop_state(yyscanner);
         return '}';
 }
@@ -890,6 +910,16 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         return T_OPEN_TAG;
 }
 
+<ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$$"/[^a-zA-Z_\x7f-\xff${] {
+  if (_scanner->isXHPSyntaxEnabled()) {
+    RETTOKEN(T_PIPE_VAR);
+  }
+  unput('$');
+  return '$';
+}
+
+
+
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1, T_VARIABLE);
         return T_VARIABLE;
@@ -911,13 +941,13 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_VAR_OFFSET>"]" {
         yy_pop_state(yyscanner);
-        return ']';
+        RETSTEP(']');
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[({}\"`] {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
-        return yytext[0];
+        RETSTEP(yytext[0]);
 }
 
 <ST_VAR_OFFSET>[ \n\r\t\\\'#] {
@@ -938,14 +968,18 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_IN_SCRIPTING,ST_XHP_IN_TAG>("#"|"//")[^\r\n]*{NEWLINE}? {
         const char* asptag = nullptr;
+        const auto searchTwoChars = [](const char* str, size_t len, char d) {
+                for (auto t = str; t + 1 < str + len; t++) {
+                        if (t[0] == d && t[1] == '>') {
+                                return t;
+                        }
+                }
+                return (const char*)nullptr;
+        };
         if (_scanner->aspTags()) {
-                asptag = static_cast<const char*>(
-                  memmem(yytext, yyleng, "%>", 2)
-                );
+                asptag = searchTwoChars(yytext, yyleng, '%');
         }
-        auto phptag = static_cast<const char*>(
-          memmem(yytext, yyleng, "?>", 2)
-        );
+        auto phptag = searchTwoChars(yytext, yyleng, '?');
         if (asptag && (!phptag || (asptag < phptag))) {
                 if (_scanner->isHHFile()) {
                         _scanner->error("HH mode: %%> not allowed");
@@ -1074,7 +1108,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         _scanner->setToken(yytext, yyleng, yytext + bprefix, yyleng - bprefix);
         BEGIN(ST_DOUBLE_QUOTES);
-        return '\"';
+        RETSTEP('\"');
 }
 
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|[']{LABEL}[']|["]{LABEL}["]){NEWLINE} {
@@ -1135,7 +1169,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_XHP_IN_TAG>"/>" {
   BEGIN(ST_XHP_END_SINGLETON_TAG);
   yyless(1);
-  return '/';
+  RETSTEP('/');
 }
 
 <ST_XHP_IN_TAG>{ANY_CHAR} {
@@ -1405,12 +1439,12 @@ doc_scan_done:
 
 <ST_DOUBLE_QUOTES>[\"] {
         BEGIN(ST_IN_SCRIPTING);
-        return '"';
+        RETSTEP('"');
 }
 
 <ST_BACKQUOTE>[\`] {
         BEGIN(ST_IN_SCRIPTING);
-        return '`';
+        RETSTEP('`');
 }
 
 <ST_COMMENT,ST_DOC_COMMENT><<EOF>> {

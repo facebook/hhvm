@@ -14,6 +14,19 @@ namespace HH {
 <<__Native>>
 function server_warmup_status(): string;
 
+/**
+ * Returns a description of the context in which the request is executing.
+ *
+ * @return string - If the request was initiated via the proxygen, xbox,
+ * pagelet, fastcgi, or replay servers those values are returned. In client
+ * mode the string cli is returned, when executing in client mode on a server
+ * (via the unix socket interface) clisrv is returned. On the server with an
+ * unknown context the string "worker" is returned indicating the job was run
+ * on an unnamed JobQueue within the server.
+ */
+<<__Native>>
+function execution_context(): string;
+
 }
 
 namespace {
@@ -117,7 +130,7 @@ function ignore_user_abort(bool $setting = false): int;
  * byte X Back up one byte @ NUL-fill to absolute position
  * @return mixed - Returns a binary string containing data.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function pack(string $format, ...$args): mixed;
 
 /* @param int $seconds - Halt time in seconds.
@@ -179,7 +192,7 @@ function uniqid(string $prefix = "",
  * @return mixed - Returns an associative array containing unpacked elements
  * of binary string.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function unpack(string $format,
                 string $data): mixed;
 
@@ -218,7 +231,7 @@ function token_name(int $token): string;
  * @param mixed $v - The value being casted to a string.
  * @return string - The result of the string cast.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function hphp_to_string(mixed $v): string;
 
 }
@@ -230,7 +243,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /* min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -238,7 +251,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __HipHopSpecific>>
+<<__Native, __HipHopSpecific, __IsFoldable>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

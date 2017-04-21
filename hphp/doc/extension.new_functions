@@ -15,6 +15,7 @@ testing and some alternative PHP implementation.
 - hphp_thread_set_warmup_enabled
 - hphp_get_thread_id
 
+- hphpd_auth_token
 - hphpd_install_user_command
 - hphpd_get_user_commands
 - hphpd_break
@@ -31,8 +32,6 @@ testing and some alternative PHP implementation.
 - fb_load_local_databases
 - fb_parallel_query
 - fb_crossall_query
-
-- dangling_server_proxy_new_request
 
 - pagelet_server_is_enabled
 - pagelet_server_task_start

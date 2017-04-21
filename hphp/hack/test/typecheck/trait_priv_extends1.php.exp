@@ -1,9 +1,10 @@
 File "trait_priv_extends1.php", line 10, characters 7-7:
-This object is of type C (Typing[4110])
+Class C does not correctly implement all required methods  (Typing[4110])
 File "trait_priv_extends1.php", line 11, characters 7-7:
-It is incompatible with this object of type T
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type T
 Read the following to see why:
+File "trait_priv_extends1.php", line 17, characters 20-20:
+Member f has the wrong type
 File "trait_priv_extends1.php", line 5, characters 25-27:
 This is an int
 File "trait_priv_extends1.php", line 17, characters 25-30:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,6 @@
 #define incl_HPHP_UTIL_TINYVECTOR_H_
 
 #include <stdlib.h>
-#include <boost/noncopyable.hpp>
 #include <boost/type_traits/has_trivial_destructor.hpp>
 #include <boost/type_traits/has_trivial_copy.hpp>
 #include <boost/type_traits/has_trivial_assign.hpp>
@@ -27,6 +26,8 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compact-tagged-ptrs.h"
+
+#include <folly/portability/Malloc.h>
 
 namespace HPHP {
 
@@ -59,8 +60,28 @@ namespace HPHP {
  * in that case.  (Unless you want the first element to remain
  * accessible inline instead of moved to the heap.)
  */
-template<class T, size_t InternalSize = 1, size_t MinHeapCapacity = 0>
-struct TinyVector : private boost::noncopyable {
+
+// Allocator interface to control how TinyVector allocates memory. It would be
+// nice if it could use the standard allocator interface. However, it expects to
+// allocate raw memory of N bytes, while the standard allocator interface
+// allocates N instances of type T.
+template <typename T> struct TinyVectorMallocAllocator {
+  template <typename U> struct rebind {
+    using type = TinyVectorMallocAllocator<U>;
+  };
+
+  void* allocate(std::size_t size) const { return malloc(size); }
+  void deallocate(void* ptr) const { free(ptr); }
+  std::size_t usable_size(void* ptr, std::size_t size) const {
+    return malloc_usable_size(ptr);
+  }
+};
+
+template<class T,
+         size_t InternalSize = 1,
+         size_t MinHeapCapacity = 0,
+         typename OrigAllocator = TinyVectorMallocAllocator<T>>
+struct TinyVector {
   struct const_iterator;
 
 #ifndef __INTEL_COMPILER
@@ -74,9 +95,13 @@ struct TinyVector : private boost::noncopyable {
   static_assert(InternalSize >= 1,
                 "TinyVector assumes that the internal size is at least 1");
 
+  TinyVector() {}
   ~TinyVector() { clear(); }
 
-  size_t size() const { return m_data.size(); }
+  TinyVector(const TinyVector&) = delete;
+  TinyVector& operator=(const TinyVector&) = delete;
+
+  size_t size() const { return m_impl.m_data.size(); }
   bool empty() const { return !size(); }
 
   const_iterator begin() const { return const_iterator(this, 0); }
@@ -92,10 +117,10 @@ struct TinyVector : private boost::noncopyable {
   }
 
   void clear() {
-    if (HeapData* p = m_data.ptr()) {
-      free(p);
+    if (HeapData* p = m_impl.m_data.ptr()) {
+      m_impl.deallocate(p);
     }
-    m_data.set(0, 0);
+    m_impl.m_data.set(0, 0);
   }
 
   void push_back(const T& t) {
@@ -109,13 +134,13 @@ struct TinyVector : private boost::noncopyable {
   T& alloc_back() {
     size_t current = size();
     reserve(current + 1);
-    m_data.set(current + 1, m_data.ptr());
+    m_impl.m_data.set(current + 1, m_impl.m_data.ptr());
     return back();
   }
 
   void pop_back() {
     assert(!empty());
-    m_data.set(size() - 1, m_data.ptr());
+    m_impl.m_data.set(size() - 1, m_impl.m_data.ptr());
   }
 
   T& back() {
@@ -130,18 +155,19 @@ struct TinyVector : private boost::noncopyable {
 
   T& front() {
     assert(!empty());
-    return m_vals[0];
+    return m_impl.m_vals[0];
   }
 
   const T& front() const {
     assert(!empty());
-    return m_vals[0];
+    return m_impl.m_vals[0];
   }
 
   void reserve(size_t sz) {
     if (sz < InternalSize) return;
 
-    const size_t currentHeap = m_data.ptr() ? m_data.ptr()->capacity : 0;
+    const size_t currentHeap =
+      m_impl.m_data.ptr() ? m_impl.m_data.ptr()->capacity : 0;
     const size_t neededHeap = sz - InternalSize;
     if (neededHeap <= currentHeap) {
       return;
@@ -151,16 +177,26 @@ struct TinyVector : private boost::noncopyable {
       currentHeap ? currentHeap * 4 / 3
                   : std::max(neededHeap, MinHeapCapacity),
       neededHeap);
-    HeapData* newHeap = static_cast<HeapData*>(
-      malloc(sizeof(HeapData) + sizeof(T) * newCapacity));
-    newHeap->capacity = (malloc_usable_size(newHeap) -
+    const size_t requested = sizeof(HeapData) + sizeof(T) * newCapacity;
+    HeapData* newHeap = static_cast<HeapData*>(m_impl.allocate(requested));
+    newHeap->capacity = (m_impl.usable_size(newHeap, requested) -
                          offsetof(HeapData, vals)) / sizeof(T);
 
-    std::copy(&m_data.ptr()->vals[0],
-              &m_data.ptr()->vals[size() - InternalSize],
+    std::copy(&m_impl.m_data.ptr()->vals[0],
+              &m_impl.m_data.ptr()->vals[size() - InternalSize],
               &newHeap->vals[0]);
-    free(m_data.ptr());
-    m_data.set(size(), newHeap);
+    m_impl.deallocate(m_impl.m_data.ptr());
+    m_impl.m_data.set(size(), newHeap);
+  }
+
+  template<size_t isize, size_t minheap, typename origalloc>
+  bool operator==(const TinyVector<T, isize, minheap, origalloc>& tv) const {
+    if (size() != tv.size()) return false;
+
+    for (size_t i = 0; i < size(); ++i) {
+      if ((*this)[i] != tv[i]) return false;
+    }
+    return true;
   }
 
 private:
@@ -170,19 +206,27 @@ private:
   };
 
   T* location(size_t index) {
-    return index < InternalSize ? &m_vals[index]
-                                : &m_data.ptr()->vals[index - InternalSize];
+    return index < InternalSize ?
+                   &m_impl.m_vals[index]
+                   : &m_impl.m_data.ptr()->vals[index - InternalSize];
   }
 
 private:
-  CompactSizedPtr<HeapData> m_data;
-  T m_vals[InternalSize];
+  using Allocator = typename OrigAllocator::template rebind<HeapData>::type;
+  struct Impl : Allocator {
+    CompactSizedPtr<HeapData> m_data;
+    T m_vals[InternalSize];
+  };
+  Impl m_impl;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T, size_t InternalSize, size_t MinHeapCapacity>
-struct TinyVector<T,InternalSize,MinHeapCapacity>::const_iterator
+template<class T,
+         size_t InternalSize,
+         size_t MinHeapCapacity,
+         typename Allocator>
+struct TinyVector<T,InternalSize,MinHeapCapacity,Allocator>::const_iterator
   : boost::iterator_facade<const_iterator,
                            const T,
                            boost::forward_traversal_tag>

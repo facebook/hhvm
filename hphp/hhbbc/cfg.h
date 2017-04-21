@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,14 +41,14 @@ struct TargetVisitor : boost::static_visitor<void> {
 
   template<class T>
   typename std::enable_if<has_target<T>::value,void>::type
-  operator()(T const& t) const { f(*t.target); }
+  operator()(T const& t) const { f(t.target); }
 
   void operator()(const bc::Switch& b) const {
-    for (auto& t : b.targets) f(*t);
+    for (auto& t : b.targets) f(t);
   }
 
   void operator()(const bc::SSwitch& b) const {
-    for (auto& kv : b.targets) f(*kv.second);
+    for (auto& kv : b.targets) f(kv.second);
   }
 
 private:
@@ -79,6 +79,12 @@ inline bool ends_with_unwind(const php::Block& b) {
 inline bool is_single_nop(const php::Block& b) {
   return b.hhbcs.size() == 1 && b.hhbcs.back().op == Op::Nop;
 }
+
+/*
+ * Walk through single_nop blocks to the next block that actually does
+ * something.
+ */
+BlockId next_real_block(const php::Func& func, BlockId id);
 
 /*
  * Call a function for every jump target of a given bytecode.  If the
@@ -117,9 +123,9 @@ template<class Fun>
 void forEachSuccessor(const php::Block& block, Fun f) {
   if (!is_single_nop(block)) {
     forEachTakenEdge(block.hhbcs.back(), f);
-    for (auto& ex : block.factoredExits) f(*ex);
+    for (auto& ex : block.factoredExits) f(ex);
   }
-  if (block.fallthrough) f(*block.fallthrough);
+  if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
 
 /*
@@ -129,7 +135,7 @@ void forEachSuccessor(const php::Block& block, Fun f) {
 template<class Fun>
 void forEachNormalSuccessor(const php::Block& block, Fun f) {
   forEachTakenEdge(block.hhbcs.back(), f);
-  if (block.fallthrough) f(*block.fallthrough);
+  if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
 
 /*

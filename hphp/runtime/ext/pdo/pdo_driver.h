@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,10 +24,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOConnection;
-class PDODriver;
-class PDOResource;
-class PDOStatement;
+struct PDOConnection;
+struct PDODriver;
+struct PDOResource;
+struct PDOStatement;
 
 using sp_PDOConnection = std::shared_ptr<PDOConnection>;
 using sp_PDOStatement = req::ptr<PDOStatement>;
@@ -174,8 +174,24 @@ defined by SQL-92.
 */
 
 using PDOErrorType = char[6]; /* SQLSTATE */
-
 #define PDO_ERR_NONE  "00000"
+static_assert(sizeof(PDO_ERR_NONE) <= sizeof(PDOErrorType),
+              "PDO_ERR_NONE should actually fit into PDOErrorType");
+
+inline void setPDOErrorNone(PDOErrorType& err) {
+  memcpy(err, PDO_ERR_NONE, strlen(PDO_ERR_NONE) + 1);
+}
+inline void setPDOError(PDOErrorType& err, const char* val) {
+  auto const len = strlen(val);
+  if (len >= sizeof(PDOErrorType)) {
+    raise_notice("PDO Driver error too long, truncated");
+    memcpy(err, val, sizeof(PDOErrorType) - 1);
+    err[sizeof(PDOErrorType) - 1] = 0;
+  } else {
+    memcpy(err, val, len + 1);
+  }
+}
+
 
 enum PDOErrorMode {
   PDO_ERRMODE_SILENT,    /* just set error codes */
@@ -247,7 +263,6 @@ private:
  * A connection to a database.
  */
 struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
-
   enum SupportedMethod {
     MethodCloser,
     MethodPreparer,
@@ -263,14 +278,12 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
     MethodCheckLiveness
   };
 
-
   /////////////////////////////////////////////////////////////////////////////
 
   PDOConnection() : m_bits{0} {}
 
   virtual ~PDOConnection() {}
   virtual bool create(const Array& options) = 0;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Virtual DB methods.
@@ -347,11 +360,9 @@ struct PDOConnection : std::enable_shared_from_this<PDOConnection> {
    */
   virtual bool checkLiveness();
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
-public:
   // Credentials.
   std::string username;
   std::string password;
@@ -407,6 +418,23 @@ public:
   std::string def_stmt_clsname;
 
   PDOFetchType default_fetch_type{PDO_FETCH_USE_DEFAULT};
+
+protected:
+  /* For the convenience of drivers, this function will parse a data source
+   * string, of the form "name=value; name2=value2" and populate variables
+   * according to the data you pass in and array of pdo_data_src_parser
+   * structures */
+  struct pdo_data_src_parser {
+    const char *optname;
+    char *optval;
+    int freeme;
+  };
+
+  int parseDataSource(const char *data_source,
+                      int data_source_len,
+                      struct pdo_data_src_parser *parsed,
+                      int nparams,
+                      folly::StringPiece separators = ";");
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -448,8 +476,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 /* describes a column */
-class PDOColumn : public ResourceData {
-public:
+struct PDOColumn : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(PDOColumn);
   PDOColumn();
   ~PDOColumn();
@@ -469,8 +496,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 /* describes a bound parameter */
-class PDOBoundParam : public SweepableResourceData {
-public:
+struct PDOBoundParam : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(PDOBoundParam);
   PDOBoundParam();
   ~PDOBoundParam();
@@ -495,6 +521,7 @@ public:
   bool is_param;           /* parameter or column ? */
 
   void *driver_data;
+  TYPE_SCAN_CONSERVATIVE_FIELD(driver_data);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

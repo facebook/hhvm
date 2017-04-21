@@ -1,0 +1,2 @@
+<?hh
+<< eM ( ( ( int ) ( ( float ) $gRtG ) ) ) >> interface kXG { abstract const type mFdtBlR as num ; public static function oM ( ) : cIAkSXxxW { { if ( ( $zYQLj ( 0123 ) ) ) { ; ; } elseif ( 0123 ) ; else if ( 42.42 ) ; } { for ( ; ; ) for ( ; ; ( list ( ) ) , ( $aEJ -- ) ) ; } if ( ( + ( string ) ( ( int ) $aWl <<= ( $lZhx -- ) -> eVNGfrjC ) ) ) while ( ( ( ( $fIR ++ ) ) ) . ( ( ( 42.42 ) ) > ( ( $qTVOXL ) ) ) ) try { try { } catch ( string $eIbOIlD ) { } } finally { ; ; } } const type yWR as ? float = array < num , ? arraykey > ; require extends fUzHtUB ; }

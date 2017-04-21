@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -51,6 +51,12 @@ namespace HPHP { namespace Intl {
 /* Dot terminates it because of POSIX form  where dot precedes the codepage
  *  * except for variant */
 #define isTerminator(a)  ((a==0)||(a=='.')||(a=='@'))
+
+#define CHECK_LOCALELEN_OR_RETURN(locale_name, ret) \
+  if (locale_name.size() > MAX_LOCALE_LEN) { \
+    s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "locale string too long"); \
+    return ret; \
+  }
 
 static std::vector<std::string> g_grandfathered = {
   "art-lojban", "i-klingon", "i-lux", "i-navajo", "no-bok", "no-nyn",
@@ -144,6 +150,7 @@ static int singleton_pos(const String& str) {
 static Variant get_icu_value(const String &locale, LocaleTag tag,
                              bool fromParseLocale = false) {
   String locale_name(locale);
+  CHECK_LOCALELEN_OR_RETURN(locale_name, false);
   if (tag != LOC_CANONICALIZE) {
     if (getGrandfatheredOffset(locale) >= 0) {
       if (tag == LOC_LANG) {
@@ -209,6 +216,7 @@ static Variant get_icu_display_value(const String& locale,
                                      const String& disp_locale,
                                      LocaleTag tag) {
   String locname(locale);
+  CHECK_LOCALELEN_OR_RETURN(locname, false);
   if (tag != LOC_DISPLAY) {
     int ofs = getGrandfatheredOffset(locale);
     if (ofs >= 0) {
@@ -289,6 +297,26 @@ static Variant HHVM_STATIC_METHOD(Locale, acceptFromHttp,
   char out[MAX_LOCALE_LEN];
   UAcceptResult result;
   error = U_ZERO_ERROR;
+
+  if(header.size() > ULOC_FULLNAME_CAPACITY) {
+    /* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */
+    char *start = (char *)header.c_str();
+    char *end;
+    size_t len;
+    do {
+      end = strchr(start, ',');
+      len = end ? end-start : header.size()-(start-header.c_str());
+      if(len > ULOC_FULLNAME_CAPACITY) {
+        s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
+                               "locale_accept_from_http: locale string too long");
+        return false;
+      }
+      if(end) {
+        start = end+1;
+      }
+    } while(end != NULL);
+  }
+
   int len = uloc_acceptLanguageFromHTTP(out, sizeof(out), &result,
                                         header.c_str(), avail, &error);
   uenum_close(avail);
@@ -442,40 +470,46 @@ static String HHVM_STATIC_METHOD(Locale, getDefault) {
 static String HHVM_STATIC_METHOD(Locale, getDisplayLanguage,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_LANG);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_LANG
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayName,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_DISPLAY);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_DISPLAY
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayRegion,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_REGION);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_REGION
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayScript,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_SCRIPT);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_SCRIPT
+  ).toString();
 }
 
 static String HHVM_STATIC_METHOD(Locale, getDisplayVariant,
                                  const String& locale,
                                  const String& in_locale) {
-  return get_icu_display_value(localeOrDefault(locale),
-                               localeOrDefault(in_locale), LOC_VARIANT);
+  return get_icu_display_value(
+    localeOrDefault(locale), localeOrDefault(in_locale), LOC_VARIANT
+  ).toString();
 }
 
 static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   UErrorCode error = U_ZERO_ERROR;
+  CHECK_LOCALELEN_OR_RETURN(locale, Array());
   String locname = localeOrDefault(locale);
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
   if (!e) return Array();
@@ -509,7 +543,7 @@ tryagain:
 
 static String HHVM_STATIC_METHOD(Locale, getPrimaryLanguage,
                                  const String& locale) {
-  return get_icu_value(localeOrDefault(locale), LOC_LANG);
+  return get_icu_value(localeOrDefault(locale), LOC_LANG).toString();
 }
 
 static Variant HHVM_STATIC_METHOD(Locale, getRegion, const String& locale) {
@@ -549,6 +583,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
                                  const String& locale,
                                  bool canonicalize, const String& def) {
   String locname(localeOrDefault(locale), CopyString);
+  CHECK_LOCALELEN_OR_RETURN(locale, def);
   std::vector<std::pair<String,String>> cur_arr;
   for (ArrayIter iter(langtag); iter; ++iter) {
     auto val = iter.second();
@@ -560,7 +595,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
     String normalized(val.toString(), CopyString);
     normalize_for_match(normalized);
     if (canonicalize) {
-      normalized = get_icu_value(normalized, LOC_CANONICALIZE);
+      normalized = get_icu_value(normalized, LOC_CANONICALIZE).toString();
       if (normalized.isNull()) {
         s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: "
                                "unable to canonicalize lang_tag");
@@ -572,7 +607,7 @@ static String HHVM_STATIC_METHOD(Locale, lookup, const Array& langtag,
   }
 
   if (canonicalize) {
-    locname = get_icu_value(locname, LOC_CANONICALIZE);
+    locname = get_icu_value(locname, LOC_CANONICALIZE).toString();
     if (locname.isNull()) {
       s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: "
                              "unable to canonicalize loc_range");
@@ -648,6 +683,7 @@ static void add_array_entry(Array& ret,
 }
 
 static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
+  CHECK_LOCALELEN_OR_RETURN(locale, Array());
   String locname = localeOrDefault(locale);
   Array ret = Array::Create();
   if (std::find(g_grandfathered.begin(),
@@ -706,7 +742,7 @@ void IntlExtension::initLocale() {
   HHVM_RC_INT_SAME(ULOC_VALID_LOCALE);
   HHVM_RCC_INT(Locale, VALID_LOCALE, ULOC_VALID_LOCALE);
 
-  HHVM_RC_INT(INTL_MAX_LOCALE_LEN, 80);
+  HHVM_RC_INT(INTL_MAX_LOCALE_LEN, MAX_LOCALE_LEN);
 
   loadSystemlib("icu_locale");
 }

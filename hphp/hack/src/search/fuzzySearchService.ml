@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Utils
 
 module Make(S : SearchUtils.Searchable) = struct
 
@@ -19,12 +18,12 @@ type search_result_type = S.t
 
 let all_types = S.fuzzy_types
 
-module TMap = MyMap(struct
+module TMap = MyMap.Make (struct
   type t = search_result_type
   let compare = S.compare_result_type
 end)
 
-type type_to_key_to_term_list = (Pos.t, S.t) term list SMap.t TMap.t
+type type_to_key_to_term_list = (FileInfo.pos, S.t) term list SMap.t TMap.t
 type type_to_keyset = SSet.t TMap.t
 
 (* Note only shared memory is modified within workers - and the keys are files
@@ -47,6 +46,7 @@ type type_to_keyset = SSet.t TMap.t
 module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
   type t = type_to_keyset
   let prefix = Prefix.make()
+  let description = "SearchKeys"
 end)
 
 (* The workers are in charge of keeping this up to date per file, we use it
@@ -70,6 +70,7 @@ end)
 module SearchKeyToTermMap = SharedMem.WithCache (Relative_path.S) (struct
   type t = type_to_key_to_term_list
   let prefix = Prefix.make()
+  let description = "SearchKeyToTermMap"
 end)
 
 (* This is the table which we can find which terms are relevant to the query.
@@ -111,16 +112,6 @@ let old_search_terms = ref (Hashtbl.create 160000)
  * }
  *)
 let term_lookup = ref (Hashtbl.create 250000)
-
-let marshal chan =
-  Marshal.to_channel chan !term_indexes [];
-  Marshal.to_channel chan !old_search_terms [];
-  Marshal.to_channel chan !term_lookup []
-
-let unmarshal chan =
-  term_indexes := Marshal.from_channel chan;
-  old_search_terms := Marshal.from_channel chan;
-  term_lookup := Marshal.from_channel chan
 
 (* We take out special characters from the string for the query - they aren't
  * useful during searches *)
@@ -256,14 +247,14 @@ let update_term_lookup file add_terms remove_terms =
       try Hashtbl.find !term_lookup term
       with Not_found -> Relative_path.Set.empty
     in
-    Hashtbl.replace !term_lookup term (Relative_path.Set.remove file old_val);
+    Hashtbl.replace !term_lookup term (Relative_path.Set.remove old_val file);
   end remove_terms;
   SSet.iter begin fun term ->
     let old_val =
       try Hashtbl.find !term_lookup term
       with Not_found -> Relative_path.Set.empty
     in
-    Hashtbl.replace !term_lookup term (Relative_path.Set.add file old_val);
+    Hashtbl.replace !term_lookup term (Relative_path.Set.add old_val file);
   end add_terms
 
 (* Updates the keylist and defmap for a file (will be used to populate
@@ -305,7 +296,7 @@ let index_files files =
       TMap.add x (Hashtbl.create 30) acc
     end ~init:TMap.empty
   end;
-  Relative_path.Set.iter begin fun file ->
+  List.iter files begin fun file ->
     let new_terms = try SearchKeys.find_unsafe file
     with Not_found -> TMap.empty in
     let old_terms = try Hashtbl.find !old_search_terms file
@@ -326,7 +317,7 @@ let index_files files =
       remove_terms_from_index type_ removed_terms;
       add_terms_to_index type_ added_terms;
     end new_terms;
-  end files
+  end
 
 (* Looks up relevant terms in the index given a search query *)
 let get_terms needle type_ =
@@ -365,7 +356,7 @@ let get_terms_from_string_and_type strings =
       try Hashtbl.find !term_lookup str
       with Not_found -> Relative_path.Set.empty
     in
-    Relative_path.Set.fold begin fun file acc ->
+    Relative_path.Set.fold files ~init:acc ~f:begin fun file acc ->
       let defmap =
         try SearchKeyToTermMap.find_unsafe file
         with Not_found -> TMap.empty
@@ -381,12 +372,13 @@ let get_terms_from_string_and_type strings =
           (term, score) :: acc
         end ~init:acc
       with Not_found -> acc
-    end files acc
+    end
   end ~init:[]
 
-let query needle type_ =
-  let needle = strip_special_characters needle in
-  let terms = get_terms needle type_ in
+let results_limit = 50
+let compare_results a b = (snd a) - (snd b)
+
+let check_terms needle acc terms =
   let terms = List.fold_left terms ~f:begin fun acc (term, type_) ->
     if check_if_matches_uppercase_chars needle term then
       ((term, type_), 0) :: acc
@@ -409,11 +401,25 @@ let query needle type_ =
           ((term, type_), (snd cs)) :: acc
         else
           acc
-  end ~init:[] in
-  let terms = List.sort begin fun a b ->
-    (snd a) - (snd b)
-  end terms in
-  let res_terms = List.take terms 50 in
+  end ~init:acc in
+  let terms = List.sort compare_results terms in
+  List.take terms results_limit
+
+let keep_top x y =
+  let merged = List.merge x y compare_results in
+  List.take merged results_limit
+
+let query workers needle type_ =
+  let needle = strip_special_characters needle in
+  let terms = get_terms needle type_ in
+
+  let res_terms = MultiWorker.call
+    workers
+    ~job:(check_terms needle)
+    ~neutral:([])
+    ~merge:(keep_top)
+    ~next:(MultiWorker.next workers terms)
+  in
   let res = get_terms_from_string_and_type res_terms in
   List.rev res
 

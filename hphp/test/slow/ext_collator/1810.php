@@ -177,7 +177,6 @@ function ut_main3()
     $locales = array(
         'EN-US-ODESSA',
         'UK_UA_ODESSA',
-        'uk-ua_CALIFORNIA@currency=;currency=GRN',
         '',
         'root',
         'uk@currency=EURO'

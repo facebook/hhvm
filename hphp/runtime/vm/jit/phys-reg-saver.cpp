@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,8 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
+#include "hphp/util/arch.h"
+
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,10 +35,8 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
   auto xmm = m_regs & abi().simd();
   auto const sp = rsp();
 
-  m_adjust = gpr.size() & 0x1 ? 8 : 0;
-
   if (!xmm.empty()) {
-    v << subqi{16 * xmm.size(), sp, sp, v.makeReg()};
+    v << lea{sp[-16 * xmm.size()], sp};
 
     int offset = 0;
     xmm.forEach([&] (PhysReg r) {
@@ -45,28 +45,24 @@ PhysRegSaver::PhysRegSaver(Vout& v, RegSet regs)
     });
   }
 
-  gpr.forEach([&] (PhysReg r) {
-    v << push{r};
+  gpr.forEachPair([&] (PhysReg r0, PhysReg r1) {
+    v << pushp{r0, r1 == InvalidReg ? r0 : r1};
   });
 
-  if (m_adjust) {
-    v << subqi{m_adjust, sp, sp, v.makeReg()};
-  }
+  v << vregunrestrict{};
 }
 
 PhysRegSaver::~PhysRegSaver() {
   auto& v = m_v;
   auto const sp = rsp();
 
-  if (m_adjust) {
-    v << addqi{m_adjust, sp, sp, v.makeReg()};
-  }
-
   auto gpr = m_regs & abi().gp();
   auto xmm = m_regs & abi().simd();
 
-  gpr.forEachR([&] (PhysReg r) {
-    v << pop{r};
+  v << vregrestrict{};
+
+  gpr.forEachPairR([&] (PhysReg r0, PhysReg r1) {
+    v << popp{r0 == InvalidReg ? v.makeReg() : Vreg{r0}, r1};
   });
 
   if (!xmm.empty()) {
@@ -75,17 +71,14 @@ PhysRegSaver::~PhysRegSaver() {
       v << loadups{sp[offset], r};
       offset += 16;
     });
-    v << addqi{offset, sp, sp, v.makeReg()};
+    v << lea{sp[offset], sp};
   }
 }
 
-size_t PhysRegSaver::rspAdjustment() const {
-  return m_adjust;
-}
-
 size_t PhysRegSaver::dwordsPushed() const {
-  assertx((m_adjust % sizeof(int64_t)) == 0);
-  return m_regs.size() + m_adjust / sizeof(int64_t);
+  auto const gpr = m_regs & abi().gp();
+  auto const xmm = m_regs & abi().simd();
+  return 2 * xmm.size() + gpr.size() + (gpr.size() & 0x1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

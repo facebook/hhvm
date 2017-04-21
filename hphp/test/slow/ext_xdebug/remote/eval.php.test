@@ -40,6 +40,8 @@ $bar = array_fill(0, 10, 2);
 $bar[1] = &$bar;
 var_dump($bar);
 
-$baz = fopen("/tmp/remote_eval.test", "w"); 
+$tempfile = tempnam(sys_get_temp_dir(), 'remote_eval.test');
+$baz = fopen($tempfile, "w");
 var_dump($baz);
 fclose($baz);
+unlink($tempfile);

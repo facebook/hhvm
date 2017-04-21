@@ -1,0 +1,6 @@
+int(0)
+int(1)
+int(0)
+int(1)
+Exception: Out of bounds keyset access: invalid index 1
+Exception: Out of bounds keyset access: invalid index 2

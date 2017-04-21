@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
-#define incl_HPHP_HHVM_HHIR_SIMPLIFIER_H_
+#ifndef incl_HPHP_JIT_SIMPLIFY_H_
+#define incl_HPHP_JIT_SIMPLIFY_H_
 
 #include <folly/Optional.h>
 
@@ -62,7 +62,7 @@ struct SimplifyResult {
   jit::vector<IRInstruction*> instrs;
   SSATmp* dst;
 };
-SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
+SimplifyResult simplify(IRUnit&, const IRInstruction*);
 
 /*
  * Instruction stream modifying simplification routine.
@@ -77,7 +77,7 @@ SimplifyResult simplify(IRUnit&, const IRInstruction*, bool typesMightRelax);
  * need to track which blocks are still reachable if you are making simplify()
  * calls.
  */
-void simplify(IRUnit&, IRInstruction*);
+void simplifyInPlace(IRUnit&, IRInstruction*);
 
 /*
  * Perform a simplification pass in the entire unit.
@@ -86,52 +86,6 @@ void simplify(IRUnit&, IRInstruction*);
  * invariants.
  */
 void simplifyPass(IRUnit&);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Return true if the given AssertType-like instruction can be nop'd.
- *
- * This is exposed so that the preOptimizeAssertX() methods can share this
- * logic.
- *
- * WARNING: Under certain (very uncommon) conditions, we may find that external
- * information (e.g., from static analysis) conflicts with the instruction
- * stream we have built.  This function will detect this scenario and will punt
- * the entire trace in this case.
- */
-bool canSimplifyAssertType(const IRInstruction* inst,
-                           Type srcType,
-                           bool srcMightRelax);
-
-/*
- * Propagate very simple copies through Mov instructions.
- *
- * More complicated copy-propagation is performed in the Simplifier.
- */
-void copyProp(IRInstruction*);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Statically check whether a packed array access is within bounds, based on
- * the type of the array.
- */
-enum class PackedBounds { In, Out, Unknown };
-PackedBounds packedArrayBoundsStaticCheck(Type, int64_t key);
-
-/*
- * Get the type of `arr[idx]` for a packed array, considering constness,
- * staticness, and RAT types.
- *
- * Note that this function does not require the existence of `arr[idx]`.  If we
- * can statically determine that the access is out of bounds, InitNull is
- * returned.  Otherwise we return a type `t`, such that when the access is
- * within bounds, `arr[idx].isA(t)` holds.  (Thus, if this function is used in
- * contexts where the bounds are not statically known, TInitNull must be
- * unioned in for correctness.)
- */
-Type packedArrayElemType(SSATmp* arr, SSATmp* idx);
 
 //////////////////////////////////////////////////////////////////////
 

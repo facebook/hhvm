@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/boot_timer.h"
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/compression.h"
@@ -28,7 +28,7 @@ StaticContentCache StaticContentCache::TheCache;
 std::shared_ptr<FileCache> StaticContentCache::TheFileCache;
 
 void StaticContentCache::load() {
-  BootTimer::Block timer("loading static content");
+  BootStats::Block timer("loading static content");
 
   if (!RuntimeOption::FileCache.empty()) {
     TheFileCache = std::make_shared<FileCache>();

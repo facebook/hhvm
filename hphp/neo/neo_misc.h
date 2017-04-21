@@ -81,7 +81,7 @@ typedef unsigned short int UINT16;
 typedef short int INT16;
 typedef unsigned char UINT8;
 /* This was conflicting with a cygwin header definition */
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 typedef signed char INT8;
 #else
 typedef char INT8;
@@ -95,9 +95,6 @@ void ne_vwarn (const char *fmt, va_list ap)
                ATTRIBUTE_PRINTF(1,0);
 void ne_warn (const char *fmt, ...)
               ATTRIBUTE_PRINTF(1,2);
-void ne_set_log (int level);
-void ne_log (int level, const char *fmt, ...)
-             ATTRIBUTE_PRINTF(2,3);
 UINT32 ne_crc (UINT8 *data, UINT32 bytes);
 
 __END_DECLS

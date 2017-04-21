@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
+#include <folly/Assume.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 #define ICONV_SUPPORTS_ERRNO 1
@@ -126,12 +127,6 @@ struct ICONVGlobals final : RequestEventHandler {
 
   ICONVGlobals() {}
 
-  void vscan(IMarker& mark) const override {
-    mark(input_encoding);
-    mark(output_encoding);
-    mark(internal_encoding);
-  }
-
   void requestInit() override {
     input_encoding = s_ISO_8859_1;
     output_encoding = s_ISO_8859_1;
@@ -166,9 +161,13 @@ const char* munge_one(const char* chs, char** tofree,
   if (!chs[len]) return rep;
   if (chs[len] != '/' || chs[len + 1] != '/') return chs;
   auto chslen = strlen(chs);
-  *tofree = static_cast<char*>(malloc(replen + chslen - len + 1));
+  auto charset_len = chslen - len;
+  /* Avoid warnings about reading beyond array bounds, by indicating
+   * to the compiler the relative sizes of the passed in strings.  */
+  folly::assume(len + 2 <= chslen);
+  *tofree = static_cast<char*>(malloc(replen + charset_len + 1));
   memcpy(*tofree, rep, replen);
-  memcpy(*tofree + replen, chs + len, chslen - len + 1);
+  memcpy(*tofree + replen, chs + len, charset_len + 1);
   return *tofree;
 }
 
@@ -672,9 +671,9 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 
 #define _php_iconv_memequal(a, b, c)            \
   ((c) == sizeof(uint64_t)                      \
-   ? (x).buf_64 == *((uint64_t *)(b))           \
+   ? (a).buf_64 == *((uint64_t *)(b))           \
    : ((c) == sizeof(uint32_t)                   \
-      ? (x).buf_32 == *((uint32_t *)(b))        \
+      ? (a).buf_32 == *((uint32_t *)(b))        \
       : memcmp((a).buf, b, c) == 0))
 
   union gsnb_t {
@@ -1372,7 +1371,7 @@ const StaticString
 
 static Variant HHVM_FUNCTION(iconv_mime_encode,
     const String& field_name, const String& field_value,
-    const Variant& preferences /* = null_variant */) {
+    const Variant& preferences /* = uninit_variant */) {
   php_iconv_enc_scheme_t scheme_id = PHP_ICONV_ENC_SCHEME_BASE64;
   String in_charset;
   String out_charset;
@@ -1795,7 +1794,7 @@ static Variant HHVM_FUNCTION(iconv_mime_decode_headers,
       String value(header_value, header_value_len, CopyString);
       if (ret.exists(header)) {
         Variant elem = ret[header];
-        if (!elem.is(KindOfArray)) {
+        if (!elem.isArray()) {
           ret.set(header, make_packed_array(elem, value));
         } else {
           elem.toArrRef().append(value);
@@ -1989,8 +1988,7 @@ const char* iconv_version() { return "2.5"; }
 #endif
 #endif
 
-class iconvExtension final : public Extension {
-public:
+struct iconvExtension final : Extension {
   iconvExtension() : Extension("iconv") {}
 
   void moduleInit() override {

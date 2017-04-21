@@ -207,7 +207,7 @@ a more precise partitioning.
 
 = GCCOptimization
 
-Default is disabled. This option allows to selectively decrease the compiler
+Default is disabled. This option allows one to selectively decrease the compiler
 optimization level for long functions. It is specified as:
 
   GCCOptimization {
@@ -250,6 +250,17 @@ EvalJitEnableRenameFunction is false at runtime.)
 
 We should probably rename this option to something like
 InterceptableFunctions, but we haven't yet.
+
+= ConstantFunctions
+
+This is a list of functions and static class methods that may be assumed to
+always return a constant value. Each entry should be in the format
+function_name|serialized_value, like so:
+
+  ConstantFunctions {
+    * = SomeClass::GetString|s:8:"a_string";
+    * = some_function|b:0;
+  }
 
 = CodeGeneration
 

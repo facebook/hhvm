@@ -25,14 +25,16 @@
 open Autocomplete
 open Core
 open Nast
+open String_utils
 open Typing_defs
-open Typing_deps
 open Utils
+open Typing_subtype
 
 module Env = Typing_env
-module Inst = Typing_instantiate
+module Inst = Decl_instantiate
 module Phase = Typing_phase
-module TSubst = Typing_subst
+module TGenConstraint = Typing_generic_constraint
+module Subst = Decl_subst
 module TUtils = Typing_utils
 
 module CheckFunctionType = struct
@@ -55,6 +57,7 @@ module CheckFunctionType = struct
         ()
     | _, Noop
     | _, Fallthrough
+    | _, (GotoLabel _ | Goto _)
     | _, Break _ | _, Continue _ -> ()
     | _, Static_var _ -> ()
     | _, If (_, b1, b2) ->
@@ -71,7 +74,7 @@ module CheckFunctionType = struct
         block f_type b;
         ()
     | _, Switch (_, cl) ->
-        liter case f_type cl;
+        List.iter cl (case f_type);
         ()
     | (Ast.FSync | Ast.FGenerator), Foreach (_, (Await_as_v (p, _) | Await_as_kv (p, _, _)), _) ->
         Errors.await_in_sync_function p;
@@ -81,12 +84,12 @@ module CheckFunctionType = struct
         ()
     | _, Try (b, cl, fb) ->
         block f_type b;
-        liter catch f_type cl;
+        List.iter cl (catch f_type);
         block f_type fb;
         ()
 
   and block f_type stl =
-    liter stmt f_type stl
+    List.iter stl (stmt f_type)
 
   and case f_type = function
     | Default b -> block f_type b
@@ -120,15 +123,24 @@ module CheckFunctionType = struct
     | _, Class_const _
     | _, Typename _
     | _, Lvar _
-    | _, Lplaceholder _ -> ()
+    | _, Lvarvar _
+    | _, Lplaceholder _
+    | _, Pipe _
+    | _, Dollardollar _ -> ()
     | _, Array afl ->
-        liter afield f_type afl;
+        List.iter afl (afield f_type);
+        ()
+    | _, Darray afl ->
+        List.iter afl (expr2 f_type);
+        ()
+    | _, Varray afl ->
+        List.iter afl (expr f_type);
         ()
     | _, ValCollection (_, el) ->
-        liter expr f_type el;
+        List.iter el (expr f_type);
         ()
     | _, KeyValCollection (_, fdl) ->
-        liter expr2 f_type fdl;
+        List.iter fdl (expr2 f_type);
         ()
     | _, Clone e -> expr f_type e; ()
     | _, Obj_get (e, (_, Id _s), _) ->
@@ -143,22 +155,22 @@ module CheckFunctionType = struct
         ()
     | _, Call (_, e, el, uel) ->
         expr f_type e;
-        liter expr f_type el;
-        liter expr f_type uel;
+        List.iter el (expr f_type);
+        List.iter uel (expr f_type);
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
     | _, String2 el ->
-        liter expr f_type el;
+        List.iter el (expr f_type);
         ()
     | _, List el ->
-        liter expr f_type el;
+        List.iter el (expr f_type);
         ()
     | _, Pair (e1, e2) ->
         expr2 f_type (e1, e2);
         ()
     | _, Expr_list el ->
-        liter expr f_type el;
+        List.iter el (expr f_type);
         ()
     | _, Unop (_, e) -> expr f_type e
     | _, Binop (_, e1, e2) ->
@@ -168,14 +180,14 @@ module CheckFunctionType = struct
         expr2 f_type (e1, e3);
         ()
     | _, Eif (e1, Some e2, e3) ->
-        liter expr f_type [e1; e2; e3];
+        List.iter [e1; e2; e3] (expr f_type);
         ()
     | _, NullCoalesce (e1, e2) ->
-        liter expr f_type [e1; e2];
+        List.iter [e1; e2] (expr f_type);
         ()
     | _, New (_, el, uel) ->
-      liter expr f_type el;
-      liter expr f_type uel;
+      List.iter el (expr f_type);
+      List.iter uel (expr f_type);
       ()
     | _, InstanceOf (e, _) ->
         expr f_type e;
@@ -207,11 +219,11 @@ module CheckFunctionType = struct
         (match func with
           | Gena e
           | Gen_array_rec e -> expr f_type e
-          | Genva el -> liter expr f_type el);
+          | Genva el -> List.iter el (expr f_type));
         ()
     | _, Xml (_, attrl, el) ->
         List.iter attrl (fun (_, e) -> expr f_type e);
-        liter expr f_type el;
+        List.iter el (expr f_type);
         ()
     | _, Assert (AE_assert e) ->
         expr f_type e;
@@ -251,7 +263,6 @@ let is_magic =
 let rec fun_ tenv f named_body =
   if !auto_complete then ()
   else begin
-    let tenv = Typing_env.set_root tenv (Dep.Fun (snd f.f_name)) in
     let env = { t_is_finally = false;
                 class_name = None; class_kind = None;
                 imm_ctrl_ctx = Toplevel;
@@ -264,8 +275,13 @@ and func env f named_body =
   let p, fname = f.f_name in
   if String.lowercase (strip_ns fname) = Naming_special_names.Members.__construct
   then Errors.illegal_function_name p fname;
+  (* Add type parameters to typing environment and localize the bounds *)
+  let tenv, constraints =
+    Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
+       ~ety_env:(Phase.env_with_self env.tenv) in
+  let tenv = add_constraints p tenv constraints in
   let env = { env with
-    tenv = Env.set_mode env.tenv f.f_mode;
+    tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
   } in
   maybe hint env f.f_ret;
@@ -274,22 +290,23 @@ and func env f named_body =
   block env named_body.fnb_nast;
   CheckFunctionType.block f.f_fun_kind named_body.fnb_nast
 
-and tparam env (_, _, cstr_opt) =
-  match cstr_opt with
-  | Some (_, cstr) -> hint env cstr
-  | None -> ()
+and tparam env (_, _, cstrl) =
+  List.iter cstrl (fun (_, h) -> hint env h)
 
 and hint env (p, h) =
   hint_ env p h
 
 and hint_ env p = function
-  | Habstr (_, Some (_, h)) ->
-      hint env h
-  | Hany  | Hmixed  | Habstr _ | Hprim _  | Hthis | Haccess _ ->
+  | Hany  | Hmixed  | Hprim _  | Hthis | Haccess _ | Habstr _ ->
       ()
   | Harray (ty1, ty2) ->
       maybe hint env ty1;
       maybe hint env ty2
+  | Hdarray (ty1, ty2) ->
+      hint env ty1;
+      hint env ty2
+  | Hvarray ty ->
+      hint env ty
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
@@ -297,15 +314,13 @@ and hint_ env p = function
       List.iter hl (hint env);
       hint env h;
       ()
-  | Happly ((_, x), hl) as h when Typing_env.is_typedef x ->
-      let tdef = Typing_heap.Typedefs.find_unsafe x in
-      let params =
-        match tdef with
-        | Typing_heap.Typedef.Error -> []
-        | Typing_heap.Typedef.Ok (_, x, _, _, _) -> x
-      in
-      check_happly env.typedef_tparams env.tenv (p, h);
-      check_params env p x params hl
+  | Happly ((_, x), hl) as h when Env.is_typedef x ->
+    begin match Typing_lazy_heap.get_typedef (Env.get_options env.tenv) x with
+      | Some {td_tparams; _} ->
+        check_happly env.typedef_tparams env.tenv (p, h);
+        check_params env p x td_tparams hl
+      | None -> ()
+    end
   | Happly ((_, x), hl) as h ->
       (match Env.get_class env.tenv x with
       | None -> ()
@@ -314,8 +329,18 @@ and hint_ env p = function
           check_params env p x class_.tc_tparams hl
       );
       ()
-  | Hshape fdl ->
-      ShapeMap.iter (fun _ v -> hint env v) fdl
+  | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
+      let optional_shape_field_enabled =
+        TypecheckerOptions.experimental_feature_enabled
+          (Env.get_options env.tenv)
+          TypecheckerOptions.experimental_optional_shape_field in
+
+      let compute_hint_for_shape_field_info _ { sfi_optional; sfi_hint } =
+        (if sfi_optional && not optional_shape_field_enabled
+        then Errors.optional_shape_fields_not_supported p);
+        hint env sfi_hint in
+
+      ShapeMap.iter compute_hint_for_shape_field_info nsi_field_map
 
 and check_params env p x params hl =
   let arity = List.length params in
@@ -330,27 +355,26 @@ and check_arity env p tname arity size =
 
 and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in
-  let env, decl_ty = Typing_hint.hint env h in
-  let env, unchecked_tparams = lfold begin fun env (v, sid, cstr_opt) ->
-    let env, cstr_opt = match cstr_opt with
-      | Some (ck, cstr) ->
-          let env, cstr = Typing_hint.hint env cstr in
-          env, Some (ck, cstr)
-      | _ -> env, None in
-    env, (v, sid, cstr_opt)
-  end env unchecked_tparams in
+  let decl_ty = Decl_hint.hint env.Env.decl_env h in
+  let unchecked_tparams =
+    List.map unchecked_tparams begin fun (v, sid, cstrl) ->
+      let cstrl = List.map cstrl (fun (ck, cstr) ->
+            let cstr = Decl_hint.hint env.Env.decl_env cstr in
+            (ck, cstr)) in
+      (v, sid, cstrl)
+    end in
   let tyl =
     List.map
       unchecked_tparams
       (fun (_, (p, _), _) -> Reason.Rwitness p, Tany) in
   let subst = Inst.make_subst unchecked_tparams tyl in
-  let env, decl_ty = Inst.instantiate subst env decl_ty in
+  let decl_ty = Inst.instantiate subst decl_ty in
   match decl_ty with
   | _, Tapply (_, tyl) when tyl <> [] ->
       let env, locl_ty = Phase.localize_with_self env decl_ty in
-      begin match TUtils.get_base_type locl_ty with
+      begin match TUtils.get_base_type env locl_ty with
         | _, Tclass (cls, tyl) ->
-            (match Env.get_class env (snd cls) with
+          (match Env.get_class env (snd cls) with
             | Some { tc_tparams; _ } ->
                 (* We want to instantiate the class type parameters with the
                  * type list of the class we are localizing. We do not want to
@@ -360,22 +384,20 @@ and check_happly unchecked_tparams env h =
                  *)
                 let ety_env =
                   { (Phase.env_with_self env) with
-                    substs = TSubst.make tc_tparams tyl;
+                    substs = Subst.make tc_tparams tyl;
                   } in
-                iter2_shortest begin fun (_, (p, x), cstr_opt) ty ->
-                  match cstr_opt with
-                  | Some (ck, cstr_ty) ->
+                iter2_shortest begin fun (_, (p, x), cstrl) ty ->
+                  List.iter cstrl (fun (ck, cstr_ty) ->
                       let r = Reason.Rwitness p in
                       let env, cstr_ty = Phase.localize ~ety_env env cstr_ty in
                       ignore @@ Errors.try_
                         (fun () ->
-                          TSubst.check_constraint env ck cstr_ty ty
+                           TGenConstraint.check_constraint env ck cstr_ty ty
                         )
                         (fun l ->
                           Reason.explain_generic_constraint env.Env.pos r x l;
                           env
-                        )
-                  | None -> ()
+                        ))
                 end tc_tparams tyl
             | _ -> ()
             )
@@ -386,14 +408,18 @@ and check_happly unchecked_tparams env h =
 and class_ tenv c =
   if !auto_complete then () else begin
   let cname = Some (snd c.c_name) in
-  let tenv = Typing_env.set_root tenv (Dep.Class (snd c.c_name)) in
   let env = { t_is_finally = false;
               class_name = cname;
               class_kind = Some c.c_kind;
               imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               tenv = tenv } in
-  let env = { env with tenv = Env.set_mode env.tenv c.c_mode } in
+  (* Add type parameters to typing environment and localize the bounds *)
+  let tenv, constraints = Phase.localize_generic_parameters_with_bounds
+               tenv (fst c.c_tparams)
+               ~ety_env:(Phase.env_with_self tenv) in
+  let tenv = add_constraints (fst c.c_name) tenv constraints in
+  let env = { env with tenv = Env.set_mode tenv c.c_mode } in
   if c.c_kind = Ast.Cinterface then begin
     interface c;
   end
@@ -401,18 +427,19 @@ and class_ tenv c =
     maybe method_ (env, true) c.c_constructor;
   end;
   List.iter (fst c.c_tparams) (tparam env);
-  liter hint env c.c_extends;
-  liter hint env c.c_implements;
-  liter class_const env c.c_consts;
-  liter typeconst (env, (fst c.c_tparams)) c.c_typeconsts;
-  liter class_var env c.c_static_vars;
-  liter class_var env c.c_vars;
-  liter method_ (env, true) c.c_static_methods;
-  liter method_ (env, false) c.c_methods;
-  liter check_is_interface (env, "implement") c.c_implements;
-  liter check_is_interface (env, "require implementation of") c.c_req_implements;
-  liter check_is_class env c.c_req_extends;
-  liter check_is_trait env c.c_uses;
+  List.iter c.c_extends (hint env);
+  List.iter c.c_implements (hint env);
+  List.iter c.c_consts (class_const env);
+  List.iter c.c_typeconsts (typeconst (env, (fst c.c_tparams)));
+  List.iter c.c_static_vars (class_var env);
+  List.iter c.c_vars (class_var env);
+  List.iter c.c_static_methods (method_ (env, true));
+  List.iter c.c_methods (method_ (env, false));
+  List.iter c.c_implements (check_is_interface (env, "implement"));
+  List.iter c.c_req_implements
+    (check_is_interface (env, "require implementation of"));
+  List.iter c.c_req_extends (check_is_class env);
+  List.iter c.c_uses (check_is_trait env);
   end;
   ()
 
@@ -431,7 +458,7 @@ and check_is_interface (env, error_verb) (x : hint) =
         | Some { tc_name; _ } ->
           Errors.non_interface (fst x) tc_name error_verb
       )
-    | Habstr (_, _) ->
+    | Habstr _ ->
       Errors.non_interface (fst x) "generic" error_verb
     | _ ->
       Errors.non_interface (fst x) "invalid type hint" error_verb
@@ -452,7 +479,7 @@ and check_is_class env (x : hint) =
         | Some { tc_kind; tc_name; _ } ->
           Errors.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
       )
-    | Habstr (name, _) ->
+    | Habstr name ->
       Errors.requires_non_class (fst x) name "a generic"
     | _ ->
       Errors.requires_non_class (fst x) "This" "an invalid type hint"
@@ -493,7 +520,7 @@ and check_class_property_initialization prop =
       match (snd e) with
       | Any | Shape _ | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ ->
+      | Null | String _ | Pipe _ ->
         ()
       | Array field_list ->
         List.iter field_list begin function
@@ -502,22 +529,18 @@ and check_class_property_initialization prop =
               rec_assert_static_literal expr1;
               rec_assert_static_literal expr2;
         end
+      | Darray fl -> List.iter fl assert_static_literal_for_field_list
+      | Varray el -> List.iter el rec_assert_static_literal
       | List el
       | Expr_list el
       | String2 el
-      | ValCollection (_, el) ->
-        List.iter el begin function e ->
-          rec_assert_static_literal e;
-        end
+      | ValCollection (_, el) -> List.iter el rec_assert_static_literal
       | Pair (expr1, expr2)
       | Binop (_, expr1, expr2) ->
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
       | KeyValCollection (_, field_list) ->
-        List.iter field_list begin function (expr1, expr2) ->
-          rec_assert_static_literal expr1;
-          rec_assert_static_literal expr2;
-        end
+        List.iter field_list assert_static_literal_for_field_list
       | Cast (_, e)
       | Unop (_, e) ->
         rec_assert_static_literal e;
@@ -528,11 +551,15 @@ and check_class_property_initialization prop =
       | NullCoalesce (expr1, expr2) ->
         rec_assert_static_literal expr1;
         rec_assert_static_literal expr2;
-      | This | Lvar _ | Lplaceholder _ | Fun_id _ | Method_id _
+      | This | Lvar _ | Lvarvar _ | Lplaceholder _ | Dollardollar _ | Fun_id _
+      | Method_id _
       | Method_caller _ | Smethod_id _ | Obj_get _ | Array_get _ | Class_get _
       | Call _ | Special_func _ | Yield_break | Yield _
       | Await _ | InstanceOf _ | New _ | Efun _ | Xml _ | Assert _ | Clone _ ->
         Errors.class_property_only_static_literal (fst e)
+    and assert_static_literal_for_field_list (expr1, expr2) =
+      rec_assert_static_literal expr1;
+      rec_assert_static_literal expr2
     in
     rec_assert_static_literal e;
   end
@@ -594,19 +621,24 @@ and check_no_class_tparams class_tparams (pos, ty)  =
     | Hany | Hmixed | Hprim _ | Hthis -> ()
     (* We have found a type parameter. Make sure its name does not match
      * a name in class_tparams *)
-    | Habstr (tparam_name, cstr_opt) ->
-        maybe_check_tparams (Option.map cstr_opt snd);
+    | Habstr tparam_name ->
         matches_class_tparam tparam_name
     | Harray (ty1, ty2) ->
         maybe_check_tparams ty1;
         maybe_check_tparams ty2
+    | Hdarray (ty1, ty2) ->
+        check_tparams ty1;
+        check_tparams ty2
+    | Hvarray ty ->
+        check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
     | Hoption ty_ -> check_tparams ty_
     | Hfun (tyl, _, ty_) ->
         List.iter tyl check_tparams;
         check_tparams ty_
     | Happly (_, tyl) -> List.iter tyl check_tparams
-    | Hshape fdl -> ShapeMap.iter (fun _ v -> check_tparams v) fdl
+    | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
+        ShapeMap.iter (fun _ v -> check_tparams v.sfi_hint) nsi_field_map
     | Haccess (root_ty, _) ->
         check_tparams root_ty
 
@@ -636,10 +668,23 @@ and check__toString m is_static =
       | None -> ()
   end
 
+and add_constraint pos tenv (ty1, ck, ty2) =
+  Typing_subtype.add_constraint pos tenv ck ty1 ty2
+
+and add_constraints pos tenv (cstrs: locl where_constraint list) =
+  List.fold_left cstrs ~init:tenv ~f:(add_constraint pos)
+
 and method_ (env, is_static) m =
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
-  liter fun_param env m.m_params;
+  (* Add method type parameters to environment and localize the bounds *)
+  let tenv, constraints =
+    Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
+               ~ety_env:(Phase.env_with_self env.tenv) in
+  let tenv = add_constraints (fst m.m_name) tenv constraints in
+  let env = { env with tenv = tenv } in
+  List.iter m.m_params (fun_param env);
+  List.iter m.m_tparams (tparam env);
   block env named_body.fnb_nast;
   maybe hint env m.m_ret;
   CheckFunctionType.block m.m_fun_kind named_body.fnb_nast;
@@ -671,6 +716,8 @@ and stmt env = function
   | Return (p, _) when env.t_is_finally ->
     Errors.return_in_finally p; ()
   | Return (_, None)
+  | GotoLabel _
+  | Goto _
   | Noop
   | Fallthrough -> ()
   | Break p -> begin
@@ -688,7 +735,7 @@ and stmt env = function
   | Expr e | Throw (_, e) ->
     expr env e
   | Static_var el ->
-    liter expr env el
+    List.iter el (expr env)
   | If (e, b1, b2) ->
     expr env e;
     block env b1;
@@ -710,7 +757,7 @@ and stmt env = function
       ()
   | Switch (e, cl) ->
       expr env e;
-      liter case { env with imm_ctrl_ctx = SwitchContext } cl;
+      List.iter cl (case { env with imm_ctrl_ctx = SwitchContext });
       ()
   | Foreach (e1, ae, b) ->
       expr env e1;
@@ -719,7 +766,7 @@ and stmt env = function
       ()
   | Try (b, cl, fb) ->
       block env b;
-      liter catch env cl;
+      List.iter cl (catch env);
       block { env with t_is_finally = true } fb;
       ()
 
@@ -737,7 +784,7 @@ and afield env = function
   | AFkvalue (e1, e2) -> expr env e1; expr env e2;
 
 and block env stl =
-  liter stmt env stl
+  List.iter stl (stmt env)
 
 and expr env (_, e) =
   expr_ env e
@@ -752,7 +799,12 @@ and expr_ env = function
   | Class_get _
   | Class_const _
   | Typename _
-  | Lvar _ | Lplaceholder _ -> ()
+  | Lvar _
+  | Lvarvar _
+  | Lplaceholder _ | Dollardollar _ -> ()
+  | Pipe (_, e1, e2) ->
+      expr env e1;
+      expr env e2
   (* Check that __CLASS__ and __TRAIT__ are used appropriately *)
   | Id (pos, const) ->
       if SN.PseudoConsts.is_pseudo_const const then
@@ -766,13 +818,19 @@ and expr_ env = function
             | _ -> Errors.illegal_TRAIT pos);
       ()
   | Array afl ->
-      liter afield env afl;
+      List.iter afl (afield env);
+      ()
+  | Darray fdl ->
+      List.iter fdl (field env);
+      ()
+  | Varray el ->
+      List.iter el (expr env);
       ()
   | ValCollection (_, el) ->
-      liter expr env el;
+      List.iter el (expr env);
       ()
   | KeyValCollection (_, fdl) ->
-      liter field env fdl;
+      List.iter fdl (field env);
       ()
   | Clone e -> expr env e; ()
   | Obj_get (e, (_, Id s), _) ->
@@ -790,13 +848,13 @@ and expr_ env = function
       ()
   | Call (_, e, el, uel) ->
       expr env e;
-      liter expr env el;
-      liter expr env uel;
+      List.iter el (expr env);
+      List.iter uel (expr env);
       ()
   | True | False | Int _
   | Float _ | Null | String _ -> ()
   | String2 el ->
-      liter expr env el;
+      List.iter el (expr env);
       ()
   | Unop (_, e) -> expr env e
   | Yield_break -> ()
@@ -806,7 +864,7 @@ and expr_ env = function
         | Gen_array_rec e ->
           expr env e
         | Genva el ->
-          liter expr env el);
+          List.iter el (expr env));
       ()
   | Yield e ->
       afield env e;
@@ -815,14 +873,14 @@ and expr_ env = function
       expr env e;
       ()
   | List el ->
-      liter expr env el;
+      List.iter el (expr env);
       ()
   | Pair (e1, e2) ->
     expr env e1;
     expr env e2;
     ()
   | Expr_list el ->
-      liter expr env el;
+      List.iter el (expr env);
       ()
   | Cast (h, e) ->
       hint env h;
@@ -850,16 +908,16 @@ and expr_ env = function
       expr env e;
       ()
   | New (_, el, uel) ->
-      liter expr env el;
-      liter expr env uel;
+      List.iter el (expr env);
+      List.iter uel (expr env);
       ()
   | Efun (f, _) ->
       let env = { env with imm_ctrl_ctx = Toplevel } in
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()
   | Xml (_, attrl, el) ->
-      liter attribute env attrl;
-      liter expr env el;
+      List.iter attrl (attribute env);
+      List.iter el (expr env);
       ()
   | Shape fdm ->
       ShapeMap.iter (fun _ v -> expr env v) fdm

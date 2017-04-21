@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,8 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class hash_fnv132 : public HashEngine {
-public:
+struct hash_fnv132 : HashEngine {
   explicit hash_fnv132(bool a);
 
   virtual void hash_init(void *context);
@@ -36,8 +35,7 @@ private:
   bool m_a;
 };
 
-class hash_fnv164 : public HashEngine {
-public:
+struct hash_fnv164 : HashEngine {
   explicit hash_fnv164(bool a);
 
   virtual void hash_init(void *context);

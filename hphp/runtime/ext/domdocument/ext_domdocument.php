@@ -623,6 +623,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
+  <<__AllowStatic>>
   public function load($filename, $options = 0): mixed {
     if (empty($this)) {
       $ret = new DOMDocument;
@@ -649,6 +650,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
+  <<__AllowStatic>>
   public function loadHTML($source, $options = 0): mixed {
     if (empty($this)) {
       $ret = new DOMDocument;
@@ -677,6 +679,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
+  <<__AllowStatic>>
   public function loadHTMLFile($filename, $options = 0): mixed {
     if (empty($this)) {
       $ret = new DOMDocument;
@@ -701,6 +704,7 @@ class DOMDocument extends DOMNode {
    *   statically, returns a DOMDocument and issues E_STRICT warning.
    *
    */
+  <<__AllowStatic>>
   public function loadXML($source, $options = 0): mixed {
     if (empty($this)) {
       $ret = new DOMDocument;
@@ -1335,7 +1339,7 @@ class DOMImplementation {
    *   element
    *
    */
-  <<__Native>>
+  <<__Native,__AllowStatic>>
   function createDocument(?string $namespaceuri = null,
                           ?string $qualifiedname = null,
                           ?DOMDocumentType $doctypeobj = null): mixed;
@@ -1354,7 +1358,7 @@ class DOMImplementation {
    *   NULL.
    *
    */
-  <<__Native>>
+  <<__Native,__AllowStatic>>
   function createDocumentType(?string $qualifiedname = null,
                               ?string $publicid = null,
                               ?string $systemid = null): mixed;
@@ -1367,7 +1371,7 @@ class DOMImplementation {
    * @return bool - Returns TRUE on success or FALSE on failure.
    *
    */
-  <<__Native>>
+  <<__Native,__AllowStatic>>
   function hasFeature(string $feature, string $version): bool;
 }
 

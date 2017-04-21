@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,13 +26,12 @@
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+
+#include "hphp/system/systemlib.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,24 +64,6 @@ void HHVM_METHOD(WaitHandle, import) {
   assert(obj->instanceof(c_WaitableWaitHandle::classof()));
   auto const ctx_idx = AsioSession::Get()->getCurrentContextIdx();
   asio::enter_context(static_cast<c_WaitableWaitHandle*>(this_), ctx_idx);
-}
-
-Variant HHVM_METHOD(WaitHandle, join) {
-  auto obj = wait_handle<c_WaitHandle>(this_);
-  if (!obj->isFinished()) {
-    // run the full blown machinery
-    assert(obj->instanceof(c_WaitableWaitHandle::classof()));
-    static_cast<c_WaitableWaitHandle*>(obj)->join();
-  }
-  assert(obj->isFinished());
-
-  if (LIKELY(obj->isSucceeded())) {
-    // succeeded? return result
-    return cellAsCVarRef(obj->getResult());
-  } else {
-    // failed? throw exception
-    throw Object{obj->getException()};
-  }
 }
 
 bool HHVM_METHOD(WaitHandle, isFinished) {
@@ -122,9 +103,6 @@ size_t asio_object_size(const ObjectData* od) {
     case c_WaitHandle::Kind::knd: \
       return sizeof(c_ ## knd ## WaitHandle);
     X(Static)
-    X(GenArray)
-    X(GenMap)
-    X(GenVector)
     X(Condition)
     X(Reschedule)
     X(Sleep)
@@ -132,16 +110,16 @@ size_t asio_object_size(const ObjectData* od) {
     X(AsyncGenerator)
 #undef X
     case c_WaitHandle::Kind::AwaitAll:
-      assert(false); // Handled by its own HeaderKind
       return obj->asAwaitAll()->heapSize();
     case c_WaitHandle::Kind::AsyncFunction:
-      assert(false); // Handled by its own HeaderKind
       return obj->asAsyncFunction()->resumable()->size();
   }
   always_assert(false);
 }
 
 void AsioExtension::initWaitHandle() {
+  // ensure AsioBlockable* fields are pointer-followable
+  (void)type_scan::getIndexForMalloc<AsioBlockable>();
 #define WH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\WaitHandle, meth, WaitHandle, meth)
   WH_SME(setOnIoWaitEnterCallback);
@@ -152,13 +130,19 @@ void AsioExtension::initWaitHandle() {
 #define WH_ME(meth) \
   HHVM_MALIAS(HH\\WaitHandle, meth, WaitHandle, meth)
   WH_ME(import);
-  WH_ME(join);
   WH_ME(isFinished);
   WH_ME(isSucceeded);
   WH_ME(isFailed);
   WH_ME(getId);
   WH_ME(getName);
 #undef WH_ME
+}
+
+const StaticString
+  s_DoNotNewInstance("WaitHandles may not be directly instantiated");
+
+static ObjectData* asioInstanceCtor(Class*) {
+  SystemLib::throwExceptionObject(s_DoNotNewInstance);
 }
 
 // Asio's memory layout relies on the following invariants:
@@ -185,11 +169,7 @@ finish_class() {
   assert(!cls->m_extra->m_nativeDataInfo);
   assert(!cls->m_extra->m_instanceCtor);
   assert(!cls->m_extra->m_instanceDtor);
-  // Having an InstanceDtor means we must be IsCppBuiltin
-  // Being IsCppBuiltin means we must have an InstanceCtor
-  // Use the default newInstance which will fail as expected
-  // on the private final constructor (asserted above)
-  cls->m_extra.raw()->m_instanceCtor = ObjectData::newInstance;
+  cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
 }
 
@@ -197,9 +177,6 @@ void AsioExtension::finishClasses() {
   finish_class<c_WaitHandle>();
   finish_class<c_WaitableWaitHandle>();
   finish_class<c_AwaitAllWaitHandle>();
-  finish_class<c_GenArrayWaitHandle>();
-  finish_class<c_GenMapWaitHandle>();
-  finish_class<c_GenVectorWaitHandle>();
   finish_class<c_ResumableWaitHandle>();
   finish_class<c_AsyncFunctionWaitHandle>();
   finish_class<c_AsyncGeneratorWaitHandle>();

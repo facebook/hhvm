@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,12 +19,13 @@
 
 #include <pthread.h>
 
+#include <atomic>
+
 #include <folly/Portability.h>
 
-#include "hphp/util/synchronizable.h"
-#include "hphp/util/lock.h"
 #include "hphp/util/exception.h"
-#include "hphp/util/alloc.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/synchronizable.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,9 +33,8 @@ namespace HPHP {
 /**
  * Invokes a function asynchrously. For example,
  *
- *   class MyClass {
- *    public:
- *      void doJob();
+ *   struct MyClass {
+ *     void doJob();
  *   };
  *
  *   MyClass obj;
@@ -47,9 +47,8 @@ namespace HPHP {
  * Maybe this can help people understand asynchronous function is actually a
  * broader/identical view of running threads,
  *
- *   class MyRunnable {
- *    public:
- *      void run();
+ *   struct MyRunnable {
+ *     void run();
  *   };
  *
  *   MyRunnable thread;
@@ -59,10 +58,9 @@ namespace HPHP {
  * Well, asynchronous function is sometimes more flexible in writing a server,
  * because it can bind different threads to methods on the same object:
  *
- *   class MyServer {
- *    public:
- *      void thread1();
- *      void thread2();
+ *   struct MyServer {
+ *     void thread1();
+ *     void thread2();
  *   };
  *
  *   MyServer server;
@@ -75,38 +73,28 @@ namespace HPHP {
  * There is nothing wrong embedding the async function object itself in the
  * class like this,
  *
- *   class MyServer {
- *    public:
- *      MyServer()
- *       : m_thread1(this, &MyServer::thread1),
- *       : m_thread2(this, &MyServer::thread2) {
- *      }
+ *   struct MyServer {
+ *     MyServer()
+ *       : m_thread1(this, &MyServer::thread1)
+ *       , m_thread2(this, &MyServer::thread2)
+ *     {}
  *
- *      void thread1();
- *      void thread2();
+ *     void thread1();
+ *     void thread2();
  *
- *      void start() {
- *        m_thread1.start();
- *        m_thread2.start();
- *      }
+ *     void start() {
+ *       m_thread1.start();
+ *       m_thread2.start();
+ *     }
  *
- *    private:
- *      AsyncFunc<MyServer> m_thread1;
- *      AsyncFunc<MyServer> m_thread2;
+ *   private:
+ *     AsyncFunc<MyServer> m_thread1;
+ *     AsyncFunc<MyServer> m_thread2;
  *   };
  *
  */
 struct AsyncFuncImpl {
   typedef void PFN_THREAD_FUNC(void *);
-
-  static const size_t kStackSizeMinimum =
-#ifdef FOLLY_SANITIZE_ADDRESS
-  // asan modifies the generated code in ways that cause abnormally high C++
-  // stack usage.
-  16 << 20;
-#else
-  8 << 20;
-#endif
 
   /**
    * The global static to feed into pthread_create(), and this will delegate
@@ -169,7 +157,9 @@ struct AsyncFuncImpl {
     return s_finiFunc;
   }
 
-  void setNoInit() { m_noInit = true; }
+  void setNoInitFini() { m_noInitFini = true; }
+
+  static uint32_t count() { return s_count; }
 private:
   Synchronizable m_stopMonitor;
 
@@ -179,13 +169,14 @@ private:
   static PFN_THREAD_FUNC* s_finiFunc;
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
+  static std::atomic<uint32_t> s_count;
   void* m_threadStack;
   pthread_attr_t m_attr;
   pthread_t m_threadId;
   Exception* m_exception; // exception was thrown and thread was terminated
   int m_node;
   bool m_stopped;
-  bool m_noInit;
+  bool m_noInitFini;
 
   /**
    * Called by ThreadFunc() to delegate the work.
@@ -202,8 +193,7 @@ private:
  * AsyncFuncImpl by all AsyncFunc<T> classes.
  */
 template<class T>
-class AsyncFunc : public AsyncFuncImpl {
-public:
+struct AsyncFunc : AsyncFuncImpl {
   AsyncFunc(T *obj, void (T::*member_func)())
     : AsyncFuncImpl((void*)this, run_), m_obj(obj), m_memberFunc(member_func) {
   }

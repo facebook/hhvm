@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,8 @@ struct ActRec;
 
 namespace jit {
 
+struct CGMeta;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -61,21 +63,6 @@ namespace jit {
   REQ(BIND_JMP)           \
                           \
   /*
-   * bind_jcc_first(TCA jcc, SrcKey taken, SrcKey next, bool did_take)
-   *
-   * A branch between two potentially untranslated targets.
-   *
-   * A bind_jcc_1st is emitted as a jcc followed by a jmp, both to the same
-   * stub.  When invoked, a translation of the appropriate side of the branch
-   * (indicated by `did_take') is obtained, and the jcc is rewritten so that it
-   * will translate the other side of the branch when the inverse condition is
-   * met.
-   *
-   * @see: MCGenerator::bindJccFirst()
-   */                     \
-  REQ(BIND_JCC_FIRST)     \
-                          \
-  /*
    * bind_addr(TCA* addr, SrcKey target, TransFlags trflags)
    *
    * A code pointer to the potentially untranslated `target'; used for
@@ -100,11 +87,12 @@ namespace jit {
   REQ(RETRANSLATE)        \
                           \
   /*
-   * retranslate_opt(SrcKey target, TransID transID)
+   * retranslate_opt(SrcKey sk)
    *
-   * A request to retranslate a function entry `target', leveraging profiling
-   * data to produce a larger, more optimized translation.  Only used when PGO
-   * is enabled.
+   * A request to retranslate the function from `sk', leveraging profiling data
+   * to produce a set of larger, more optimized translations.  Only used when
+   * PGO is enabled. Execution will resume at `sk' whether or not retranslation
+   * is successful.
    */                     \
   REQ(RETRANSLATE_OPT)    \
                           \
@@ -193,20 +181,23 @@ using ArgVec = jit::vector<Arg>;
  * address) is that ephemeral requests are padded to stub_size().
  *
  * Since making a service request leaves the TC, we need to sync the current
- * `spOff' to vmsp.  In the cases where vmsp also needs to be synced between
- * translations (namely, in resumed contexts), we do this sync inline at the
- * site of the jump to the stub, so that it still occurs once the jump gets
- * smashed.  Otherwise (namely, in non-resumed contexts), the client must pass
- * a non-none `spOff', and we do the sync in the stub to save work once the
- * service request is completed and the jump is smashed.
+ * bytecode eval stack pointer, given via `spOff', to vmsp.  In the cases where
+ * vmsp also needs to be synced between translations (namely, in resumed
+ * contexts), we do this sync inline at the site of the jump to the stub, so
+ * that it still occurs once the jump gets smashed.  Otherwise (namely, in
+ * non-resumed contexts), the client must pass a non-none `spOff', and we do
+ * the sync in the stub to save work once the service request is completed and
+ * the jump is smashed.
  */
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
+                    DataBlock& data,
                     folly::Optional<FPInvOffset> spOff,
                     ServiceRequest sr,
                     Args... args);
 template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
+                   DataBlock& data,
                    TCA start,
                    folly::Optional<FPInvOffset> spOff,
                    ServiceRequest sr,
@@ -215,16 +206,19 @@ TCA emit_ephemeral(CodeBlock& cb,
 /*
  * Helpers for emitting specific service requests.
  */
-TCA emit_bindjmp_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                      FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags);
-TCA emit_bindjcc1st_stub(CodeBlock& cb, FPInvOffset spOff,
-                         TCA jcc, SrcKey taken, SrcKey next, ConditionCode cc);
-TCA emit_bindaddr_stub(CodeBlock& cb, FPInvOffset spOff,
-                       TCA* addr, SrcKey target, TransFlags trflags);
-TCA emit_retranslate_stub(CodeBlock& cb, FPInvOffset spOff,
+TCA emit_bindjcc1st_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                         FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
+                         ConditionCode cc);
+TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                       FPInvOffset spOff, TCA* addr, SrcKey target,
+                       TransFlags trflags);
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
                           SrcKey target, TransFlags trflags);
-TCA emit_retranslate_opt_stub(CodeBlock& cb, FPInvOffset spOff,
-                              SrcKey target, TransID transID);
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
+                              SrcKey sk);
 
 /*
  * Space used by an ephemeral stub.
@@ -257,7 +251,7 @@ constexpr int kMaxArgs = 4;
  *
  * This structure is created on the stack by handleSRHelper() from the SR
  * arguments passed in registers.  Any changes to its size or layout of must be
- * reflected in handleSRHelper() in translator-asm-helpers.S.
+ * reflected in the handleSRHelper unique stub.
  */
 struct ReqInfo {
   /*
@@ -292,21 +286,7 @@ static_assert(sizeof(ReqInfo) == 0x30,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-} // svcreq
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Service request assembly stub.
- *
- * Called by translated code before a service request to pack argument
- * registers into a ReqInfo and perform some other bookkeeping tasks.
- */
-extern "C" void handleSRHelper();
-
-///////////////////////////////////////////////////////////////////////////////
-
-}}
+}}}
 
 #include "hphp/runtime/vm/jit/service-requests-inl.h"
 

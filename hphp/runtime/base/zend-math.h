@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -75,9 +75,17 @@ double php_math_round(double value, int places, int mode = PHP_ROUND_HALF_UP);
 
 void math_mt_srand(uint32_t seed);
 int64_t math_mt_rand(int64_t min = 0, int64_t max = RAND_MAX);
+
 double math_combined_lcg();
 int64_t math_generate_seed();
-void zend_get_rand_data();
+
+/*
+ * The zend rand bookkeeping gets initialized at thread startup, and gets
+ * reseeded on its first use in a request.  This is done by wiping the 'seeded'
+ * bit at the end of each request.
+ */
+void zend_rand_init();
+void zend_rand_unseed();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -1,0 +1,1 @@
+Catchable fatal error: Argument 1 to Character::setActor() must be of type ?string, int given in %s/test/slow/type_constraint/prop-fail.php on line 14

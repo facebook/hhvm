@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,20 +15,46 @@
 */
 #include "hphp/runtime/base/apc-local-array.h"
 
-#include <vector>
-
 #include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
+
+//////////////////////////////////////////////////////////////////////
+
+namespace {
+
+// Helper for when we need to escalate the array and then perform an operation
+// on it which may then mutate it further. This handles optionally releasing the
+// escalated intermediate array in an exception-safe way.
+struct EscalateHelper {
+  explicit EscalateHelper(const ArrayData* in)
+    : escalated{APCLocalArray::Escalate(in)} {}
+
+  ~EscalateHelper() {
+    if (escalated) escalated->release();
+  }
+
+  // Release ownership of the escalated array. If it has mutated to a new array,
+  // the original escalated array will be released upon destruction.
+  ArrayData* release(ArrayData* in) {
+    if (escalated == in) escalated = nullptr;
+    return in;
+  }
+
+  ArrayData* escalated;
+};
+
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,7 +79,7 @@ Variant APCLocalArray::getKey(ssize_t pos) const {
 }
 
 void APCLocalArray::sweep() {
-  m_arr->getHandle()->unreference();
+  m_arr->unreference();
 }
 
 const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
@@ -68,9 +94,7 @@ const Variant& APCLocalArray::GetValueRef(const ArrayData* adIn, ssize_t pos) {
   } else {
     static_assert(KindOfUninit == 0, "must be 0 since we use req::calloc");
     unsigned cap = ad->m_arr->capacity();
-    ad->m_localCache = static_cast<TypedValue*>(
-      req::calloc(cap, sizeof(TypedValue))
-    );
+    ad->m_localCache = req::calloc_raw_array<TypedValue>(cap);
   }
   auto const tv = &ad->m_localCache[pos];
   tvAsVariant(tv) = sv->toLocal();
@@ -87,7 +111,7 @@ APCLocalArray::~APCLocalArray() {
     }
     req::free(m_localCache);
   }
-  m_arr->getHandle()->unreference();
+  m_arr->unreference();
   MM().removeApcArray(this);
 }
 
@@ -157,62 +181,75 @@ ArrayData* APCLocalArray::loadElems() const {
   return elems;
 }
 
-/* if a2 is modified copy of a1 (i.e. != a1), then release a1 and return a2 */
-static inline ArrayData* releaseIfCopied(ArrayData* a1, ArrayData* a2) {
-  if (a1 != a2) a1->release();
-  return a2;
+member_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lval(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayData *APCLocalArray::LvalInt(ArrayData* ad, int64_t k, Variant *&ret,
-                                  bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->lval(k, ret, false));
+member_lval APCLocalArray::LvalIntRef(ArrayData* ad, int64_t k, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lvalRef(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayData *APCLocalArray::LvalStr(ArrayData* ad, StringData* k, Variant *&ret,
-                                  bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->lval(k, ret, false));
+member_lval APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lval(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
-ArrayData *APCLocalArray::LvalNew(ArrayData* ad, Variant *&ret, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->lvalNew(ret, false));
+member_lval APCLocalArray::LvalStrRef(ArrayData* ad, StringData* k, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lvalRef(k, false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+}
+
+member_lval APCLocalArray::LvalNew(ArrayData* ad, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lvalNew(false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
+}
+
+member_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool copy) {
+  EscalateHelper helper{ad};
+  auto const lval = helper.escalated->lvalNewRef(false);
+  return member_lval { helper.release(lval.arr_base()), lval.elem() };
 }
 
 ArrayData*
 APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->set(k, tvAsCVarRef(&v), false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->set(k, tvAsCVarRef(&v), false));
 }
 
 ArrayData*
 APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->set(k, tvAsCVarRef(&v), false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->set(k, tvAsCVarRef(&v), false));
 }
 
 ArrayData*
 APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->setRef(k, v, false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->setRef(k, v, false));
 }
 
 ArrayData*
 APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->setRef(k, v, false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->setRef(k, v, false));
 }
 
 ArrayData *APCLocalArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->remove(k, false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->remove(k, false));
 }
 
 ArrayData*
 APCLocalArray::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->remove(k, false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->remove(k, false));
 }
 
 ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
@@ -220,28 +257,29 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
 }
 
 ArrayData* APCLocalArray::CopyWithStrongIterators(const ArrayData*) {
-  throw FatalErrorException(
+  raise_fatal_error(
     "Unimplemented ArrayData::copyWithStrongIterators");
 }
 
-ArrayData* APCLocalArray::Append(ArrayData* ad, const Variant& v, bool copy) {
-  ArrayData* escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->append(v, false));
+ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool copy) {
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->append(v, false));
 }
 
 ArrayData*
 APCLocalArray::AppendRef(ArrayData* ad, Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->appendRef(v, false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->appendRef(v, false));
 }
 
 ArrayData*
 APCLocalArray::AppendWithRef(ArrayData* ad, const Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->appendWithRef(v, false));
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->appendWithRef(v, false));
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {
+  if (!elems->isPHPArray()) throwInvalidAdditionException(elems);
   auto escalated = Array::attach(Escalate(ad));
   return (escalated += const_cast<ArrayData*>(elems)).detach();
 }
@@ -251,9 +289,9 @@ ArrayData* APCLocalArray::Merge(ArrayData* ad, const ArrayData *elems) {
   return escalated->merge(elems);
 }
 
-ArrayData *APCLocalArray::Prepend(ArrayData* ad, const Variant& v, bool copy) {
-  ArrayData *escalated = Escalate(ad);
-  return releaseIfCopied(escalated, escalated->prepend(v, false));
+ArrayData* APCLocalArray::Prepend(ArrayData* ad, Cell v, bool copy) {
+  EscalateHelper helper{ad};
+  return helper.release(helper.escalated->prepend(v, false));
 }
 
 ArrayData *APCLocalArray::Escalate(const ArrayData* ad) {
@@ -279,16 +317,12 @@ const TypedValue* APCLocalArray::NvGetStr(const ArrayData* ad,
   return GetValueRef(a, index).asTypedValue();
 }
 
-void APCLocalArray::NvGetKey(const ArrayData* ad,
-                             TypedValue* out,
-                             ssize_t pos) {
+Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
-  TypedValue* tv = k.asTypedValue();
-  // copy w/out clobbering out->_count.
-  out->m_type = tv->m_type;
-  out->m_data.num = tv->m_data.num;
-  if (tv->m_type != KindOfInt64) out->m_data.pstr->incRefCount();
+  auto const tv = k.asTypedValue();
+  tvRefcountedIncRef(tv);
+  return *tv;
 }
 
 ArrayData* APCLocalArray::EscalateForSort(ArrayData* ad, SortFunction sf) {

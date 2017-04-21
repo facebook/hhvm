@@ -1,3 +1,5 @@
-fun Tstring,  -> Tint
-fun Tstring,  -> Tint
+File "class_meth6.php", line 20, characters 3-13:
+  (function(string $s): int)
+File "class_meth6.php", line 26, characters 3-13:
+  (function(string $s): int)
 No errors

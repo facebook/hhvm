@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,13 +35,13 @@ namespace {
       "ConditionWaitHandle not notified by its child");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void throwNotNotifiedException() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "ConditionWaitHandle not notified by its child");
   }
 
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void failAlreadyFinished() {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Unable to notify ConditionWaitHandle that has already finished");
@@ -89,9 +89,9 @@ void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result) {
 }
 
 void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception) {
-  if (!exception->instanceof(SystemLib::s_ExceptionClass)) {
+  if (!exception->instanceof(SystemLib::s_ThrowableClass)) {
     SystemLib::throwInvalidArgumentExceptionObject(
-      "Expected exception to be an instance of Exception");
+      "Expected exception to be an instance of Throwable");
   }
   auto obj = wait_handle<c_ConditionWaitHandle>(this_);
 

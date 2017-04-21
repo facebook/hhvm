@@ -17,7 +17,7 @@ async function main() {
   $wait_handles = Vector {};
   $wait_handles[] = foo();
   $wait_handles[] = bar();
-  return GenVectorWaitHandle::create($wait_handles);
+  return AwaitAllWaitHandle::fromVector($wait_handles);
 }
 
 async function main2() {

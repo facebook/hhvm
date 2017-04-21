@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,17 +16,17 @@
 */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/ext/fileinfo/libmagic/magic.h"
 
+#include <folly/portability/Unistd.h>
+
 namespace HPHP {
 const StaticString s_finfo("finfo");
 
-class FileinfoResource : public SweepableResourceData {
-public:
+struct FileinfoResource : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(FileinfoResource)
   CLASSNAME_IS("file_info")
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -218,7 +218,7 @@ static String HHVM_FUNCTION(finfo_buffer,
   }
   return php_finfo_get_type(
       finfo, s, options, context,
-      FILEINFO_MODE_BUFFER, 0);
+      FILEINFO_MODE_BUFFER, 0).toString();
 }
 
 static String HHVM_FUNCTION(finfo_file,
@@ -231,17 +231,18 @@ static String HHVM_FUNCTION(finfo_file,
   }
   return php_finfo_get_type(
       finfo, fn, options, context,
-      FILEINFO_MODE_FILE, 0);
+      FILEINFO_MODE_FILE, 0).toString();
 }
 
 static String HHVM_FUNCTION(mime_content_type, const Variant& filename) {
-  return php_finfo_get_type(Resource{}, filename, 0, uninit_null(), -1, 1);
+  return php_finfo_get_type(
+    Resource{}, filename, 0, uninit_null(), -1, 1
+  ).toString();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-class fileinfoExtension final : public Extension {
- public:
+struct fileinfoExtension final : Extension {
   fileinfoExtension() : Extension("fileinfo", "1.0.5-dev") {}
   void moduleInit() override {
     HHVM_RC_INT(FILEINFO_NONE, MAGIC_NONE);

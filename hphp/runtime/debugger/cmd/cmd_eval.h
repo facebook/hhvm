@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define incl_HPHP_EVAL_DEBUGGER_CMD_EVAL_H_
 
 #include "hphp/runtime/debugger/debugger_command.h"
+#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,7 @@ protected:
 private:
   void handleReply(DebuggerClient&);
 
-  String m_output;
+  req::root<String> m_output;
   int m_frame;
   bool m_bypassAccessCheck{false};
   bool m_failed{false};

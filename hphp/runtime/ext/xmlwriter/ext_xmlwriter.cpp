@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include <libxml/tree.h>
 #include <libxml/uri.h>
@@ -521,7 +522,7 @@ struct XMLWriterData {
     return ret != -1;
   }
 
-  Variant flush(const Variant& empty /*= true*/) {
+  String flush(const Variant& empty /*= true*/) {
     if (m_ptr && m_output) {
       xmlTextWriterFlush(m_ptr);
       String ret((char*)m_output->content, CopyString);
@@ -530,7 +531,7 @@ struct XMLWriterData {
       }
       return ret;
     }
-    return empty_string_variant();
+    return empty_string();
   }
 
   String outputMemory(const Variant& flush /*= true*/) {
@@ -563,7 +564,8 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XMLWriterResource : public SweepableResourceData {
+struct XMLWriterResource : SweepableResourceData {
+private:
   DECLARE_RESOURCE_ALLOCATION(XMLWriterResource)
 
 public:
@@ -638,6 +640,7 @@ void XMLWriterResource::sweep() {
 #define XMLWRITER_METHOD(return_type, method_name, ...)                        \
   static return_type HHVM_METHOD(XMLWriter, method_name,                       \
                                  CREATE_PARAMS(__VA_ARGS__)) {                 \
+    VMRegGuard _;                                                             \
     auto data = Native::data<XMLWriterData>(this_);                            \
     return data->method_name(EXTRACT_ARGS(__VA_ARGS__));                       \
   }                                                                            \
@@ -653,6 +656,7 @@ void XMLWriterResource::sweep() {
 #define XMLWRITER_FUNCTION(return_type, function_name, method_name, ...)       \
   static return_type HHVM_FUNCTION(function_name,                              \
                             const Resource& wr, CREATE_PARAMS(__VA_ARGS__)) {  \
+    VMRegGuard _;                                                             \
     CHECK_RESOURCE(resource);                                                  \
     return resource->m_writer.method_name(EXTRACT_ARGS(__VA_ARGS__));          \
   }                                                                            \
@@ -664,12 +668,14 @@ void XMLWriterResource::sweep() {
 
 #define XMLWRITER_METHOD_NO_ARGS(return_type, method_name)                     \
   static return_type HHVM_METHOD(XMLWriter, method_name) {                     \
+    VMRegGuard _;                                                             \
     auto data = Native::data<XMLWriterData>(this_);                            \
     return data->method_name();                                                \
   }                                                                            \
 
 #define XMLWRITER_FUNCTION_NO_ARGS(return_type, function_name, method_name)    \
   static return_type HHVM_FUNCTION(function_name, const Resource& wr) {        \
+    VMRegGuard _;                                                             \
     CHECK_RESOURCE(resource);                                                  \
     return resource->m_writer.method_name();                                   \
   }                                                                            \
@@ -710,6 +716,7 @@ XMLWRITER_METHOD(bool, setIndentString,
 
 static Variant HHVM_FUNCTION(xmlwriter_set_indent_string,
                              const Resource& wr, const Variant& indentString) {
+  VMRegGuard _;
   CHECK_RESOURCE(resource);
 
   if (!indentString.isString()) {
@@ -864,8 +871,7 @@ XMLWRITER_METHOD_AND_FUNCTION(String, xmlwriter_output_memory, outputMemory,
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-class XMLWriterExtension final : public Extension {
-  public:
+struct XMLWriterExtension final : Extension {
     XMLWriterExtension() : Extension("xmlwriter", "0.1") {};
 
     void moduleInit() override {

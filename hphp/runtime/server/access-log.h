@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,18 +28,19 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-class LogWriter;
+struct LogWriter;
 enum class LogChannel {CRONOLOG, THREADLOCAL, REGULAR};
 
-class AccessLogFileData {
-public:
+struct AccessLogFileData {
   AccessLogFileData() {}
   AccessLogFileData(const std::string& fil,
                     const std::string& lnk,
-                    const std::string& fmt);
+                    const std::string& fmt,
+                    int mpl);
   std::string file;
   std::string symLink;
   std::string format;
+  int periodMultiplier;
   // Concrete LogWriter factories to be used depending on the handle
   using factory_t = std::function<
     std::unique_ptr<LogWriter>(const AccessLogFileData&, LogChannel)>;
@@ -53,16 +54,14 @@ private:
 };
 
 
-class AccessLog {
-public:
-  class ThreadData {
-  public:
+struct AccessLog {
+  struct ThreadData {
     ThreadData() : log(nullptr) {}
     FILE *log;
     int64_t startTime;
     LogFileFlusher flusher;
   };
-  typedef ThreadData* (*GetThreadDataFunc)();
+  using GetThreadDataFunc = ThreadData* (*)();
   explicit AccessLog(GetThreadDataFunc f) :
     m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();
@@ -78,8 +77,8 @@ public:
   bool setThreadLog(const char *file);
   void clearThreadLog();
   void onNewRequest();
+  void flushAllWriters();
 private:
-
   bool m_initialized;
   Mutex m_lock;
   GetThreadDataFunc m_fGetThreadData;
@@ -88,8 +87,7 @@ private:
 };
 
 
-class LogWriter {
-public:
+struct LogWriter {
   explicit LogWriter(LogChannel chan)
     : m_channel(chan)
   {}
@@ -97,6 +95,7 @@ public:
   virtual void init(const std::string& username,
                     AccessLog::GetThreadDataFunc fn) = 0;
   virtual void write(Transport* transport, const VirtualHost* vhost) = 0;
+  virtual void flush() {}
 protected:
   const LogChannel m_channel;
   FILE* m_filelog{nullptr};

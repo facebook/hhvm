@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file://%s/test/slow/ext_xdebug/remote/eval.php.test" language="PHP" protocol_version="" appid=""><engine version=""><![CDATA[xdebug]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
-(cmd) breakpoint_set -i 0 -t line -f eval.php.test -n 45
+(cmd) breakpoint_set -i 0 -t line -f eval.php.test -n 46
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="0" id="0" state="enabled"></response>
 (cmd) run -i 0
@@ -68,16 +68,18 @@ array(10) {
 }
 resource(4) of type (stream)
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="0"><xdebug:message lineno="45" filename="file://%s/test/slow/ext_xdebug/remote/eval.php.test"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="0"><xdebug:message lineno="46" filename="file://%s/test/slow/ext_xdebug/remote/eval.php.test"></xdebug:message></response>
 (cmd) eval -i 0 -- NSs1
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="0"><property address="" type="int"><![CDATA[10]]></property></response>
 (cmd) eval -i 0 -- IyRsW0AjJEA=
 Hit fatal : syntax error, unexpected $end
     #0 at [:1]
-    #1 include(), called at [%s/test/slow/ext_xdebug/remote/eval.php.test:45]
+    #1 include(), called at [%s/test/slow/ext_xdebug/remote/eval.php.test:46]
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="0"><error code="206"><message><![CDATA[error evaluating code]]></message></error></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="0"><error code="206"><message><![CDATA[error evaluating code
+Hit fatal : syntax error, unexpected $end
+]]></message></error></response>
 (cmd) eval -i 0 -- cHJpbnQgNA==
 4<?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="0"><property address="" type="int"><![CDATA[1]]></property></response>
@@ -124,9 +126,14 @@ Hit fatal : syntax error, unexpected $end
 Hit a php exception : exception 'Exception' with message 'hello from eval' in %s/test/slow/ext_xdebug/remote/eval.php.test:30
 Stack trace:
 #0 (1): thrower()
-#1 %s/test/slow/ext_xdebug/remote/eval.php.test(45): include()
+#1 %s/test/slow/ext_xdebug/remote/eval.php.test(46): include()
 #2 {main}<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="0"><error code="206"><message><![CDATA[error evaluating code]]></message></error></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="0"><error code="206"><message><![CDATA[error evaluating code
+Hit a php exception : exception 'Exception' with message 'hello from eval' %s
+Stack trace:
+#0 (1): thrower()
+#1 %s/eval.php.test(46): include()
+#2 {main}]]></message></error></response>
 (cmd) run -i 0
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="0"></response>

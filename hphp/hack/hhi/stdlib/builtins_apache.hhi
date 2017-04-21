@@ -8,7 +8,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-function apache_note($note_name, $note_value = null) { }
+function apache_note($note_name, $note_value = "") { }
 function apache_request_headers(): array<string, string> { }
 function apache_response_headers(): array<string, string> { }
 function apache_setenv($variable, $value, $walk_to_top = false) { }

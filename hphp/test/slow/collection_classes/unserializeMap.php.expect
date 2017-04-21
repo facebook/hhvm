@@ -1,0 +1,6 @@
+object(HH\Map)#1 (2) {
+  [1]=>
+  string(3) "foo"
+  ["a"]=>
+  int(1)
+}

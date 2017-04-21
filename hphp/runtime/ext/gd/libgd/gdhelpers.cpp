@@ -1,7 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "gd.h"
 #include "gdhelpers.h"
 #include <stdlib.h>
@@ -37,16 +33,16 @@ gd_strtok_r (char *s, char *sep, char **state)
   if (SEP_TEST)
     {
       do
-	{
-	  s++;
-	}
+  {
+    s++;
+  }
       while (SEP_TEST);
       /* 2a. EOS after separators only */
       if (!(*s))
-	{
-	  *state = s;
-	  return 0;
-	}
+  {
+    *state = s;
+    return 0;
+  }
     }
   /* 3. A token */
   result = s;
@@ -54,10 +50,10 @@ gd_strtok_r (char *s, char *sep, char **state)
     {
       /* 3a. Token at end of string */
       if (!(*s))
-	{
-	  *state = s;
-	  return result;
-	}
+  {
+    *state = s;
+    return result;
+  }
       s++;
     }
   while (!SEP_TEST);

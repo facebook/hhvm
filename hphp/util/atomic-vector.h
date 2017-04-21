@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_ATOMIC_VECTOR_H
 #define incl_HPHP_ATOMIC_VECTOR_H
 
+#include <algorithm>
 #include <atomic>
+#include <functional>
 
 #include <folly/String.h>
 
@@ -44,18 +46,31 @@ namespace HPHP {
  */
 
 template<typename Value>
-class AtomicVector {
- public:
+struct AtomicVector {
   AtomicVector(size_t size, const Value& def);
   ~AtomicVector();
 
   void ensureSize(size_t size);
   Value exchange(size_t i, const Value& val);
-  bool compare_exchange(size_t i, Value expect, const Value& val);
+  std::atomic<Value>& operator[](size_t i);
+  const std::atomic<Value>& operator[](size_t i) const;
 
+  size_t size() const;
   Value get(size_t i) const;
-  template <typename F>
-  void foreach(F fun) const;
+  template <typename F> void foreach(F fun) const;
+
+  Value defaultValue() const;
+
+  /*
+   * Reconstruct a currently empty vector with new initial size. Thread-unsafe.
+   *
+   * A number of AtomicVectors have sizes that we'd like to control with runtime
+   * options, but these options are parsed after the relevant AtomicVectors are
+   * constructed. This method  allows us to reconstruct them once the options
+   * have been parsed.
+   */
+  template<typename V>
+  friend void UnsafeReinitEmptyAtomicVector(AtomicVector<V>& vec, size_t size);
 
  private:
   static std::string typeName();
@@ -67,130 +82,8 @@ class AtomicVector {
   TRACE_SET_MOD(atomicvector);
 };
 
-template<typename Value>
-std::string AtomicVector<Value>::typeName() {
-  auto name = folly::demangle(typeid(Value));
-  return folly::format("AtomicVector<{}>", name).str();
 }
 
-template<typename Value>
-AtomicVector<Value>::AtomicVector(size_t size, const Value& def)
-  : m_size(size)
-  , m_next(nullptr)
-  , m_default(def)
-  , m_vals(new std::atomic<Value>[size])
-{
-  FTRACE(1, "{} {} constructing with size {}, default {}\n",
-         typeName(), this, size, def);
-  assert(size > 0 && "size must be nonzero");
-
-  for (size_t i = 0; i < size; ++i) {
-    new (&m_vals[i]) std::atomic<Value>(def);
-  }
-}
-
-template<typename Value>
-AtomicVector<Value>::~AtomicVector() {
-  FTRACE(1, "{} {} destructing\n",
-         typeName(), this);
-
-  delete m_next.load(std::memory_order_relaxed);
-}
-
-template<typename Value>
-void AtomicVector<Value>::ensureSize(size_t size) {
-  FTRACE(2, "{}::ensureSize({}), m_size = {}\n",
-         typeName(), size, m_size);
-  if (m_size >= size) return;
-
-  auto next = m_next.load(std::memory_order_acquire);
-  if (!next) {
-    next = new AtomicVector(m_size * 2, m_default);
-    AtomicVector* expected = nullptr;
-    FTRACE(2, "Attempting to use {}...", next);
-    if (!m_next.compare_exchange_strong(expected, next,
-                                        std::memory_order_acq_rel)) {
-      FTRACE(2, "lost race to {}\n", expected);
-      delete next;
-      next = expected;
-    } else {
-      FTRACE(2, "success\n");
-    }
-  }
-
-  next->ensureSize(size - m_size);
-}
-
-template<typename Value>
-Value AtomicVector<Value>::exchange(size_t i, const Value& val) {
-  FTRACE(3, "{}::exchange({}, {}), m_size = {}\n",
-         typeName(), i, val, m_size);
-  if (i < m_size) {
-    auto oldVal = m_vals[i].exchange(val, std::memory_order_acq_rel);
-    FTRACE(3, "{}::exchange returning {}\n", typeName(), oldVal);
-    return oldVal;
-  }
-
-#ifdef MSVC_NO_NONVOID_ATOMIC_IF
-  assert(m_next.load());
-#else
-  assert(m_next);
-#endif
-  return m_next.load(std::memory_order_acquire)->exchange(i - m_size, val);
-}
-
-template<typename Value>
-bool AtomicVector<Value>::compare_exchange(size_t i,
-                                           Value expect,
-                                           const Value& val) {
-  FTRACE(3, "{}::compare_exchange({}, {}), m_size = {}\n",
-         typeName(), i, val, m_size);
-  if (i < m_size) {
-    auto oldVal = m_vals[i].compare_exchange_strong(expect, val,
-        std::memory_order_release, std::memory_order_acquire);
-
-    FTRACE(3, "{}::compare_exchange returning {}\n", typeName(), oldVal);
-    return oldVal;
-  }
-
-#ifdef MSVC_NO_NONVOID_ATOMIC_IF
-  assert(m_next.load());
-#else
-  assert(m_next);
-#endif
-  return m_next.load(std::memory_order_acquire)->
-                     compare_exchange(i - m_size, expect,  val);
-}
-
-template<typename Value>
-Value AtomicVector<Value>::get(size_t i) const {
-  FTRACE(4, "{}::get({}), m_size = {}\n", typeName(), i, m_size);
-  if (i < m_size) {
-    auto val = m_vals[i].load(std::memory_order_acquire);
-    FTRACE(5, "{}::get returning {}\n", typeName(), m_vals[i].load());
-    return val;
-  }
-
-#ifdef MSVC_NO_NONVOID_ATOMIC_IF
-  assert(m_next.load());
-#else
-  assert(m_next);
-#endif
-  return m_next.load(std::memory_order_acquire)->get(i - m_size);
-}
-
-template<typename Value>
-template<typename F>
-void AtomicVector<Value>::foreach(F fun) const {
-  auto size = m_size;
-
-  for (auto i = 0; i < size; i++) {
-    fun(m_vals[i].load(std::memory_order_acquire));
-  }
-  auto next = m_next.load(std::memory_order_acquire);
-  if (next) next->foreach(fun);
-}
-
-}
+#include "hphp/util/atomic-vector-inl.h"
 
 #endif

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,10 @@ static void addBreakPointInUnit(BreakPointInfoPtr bp, Unit* unit) {
   bp->m_bindState = BreakPointInfo::KnownToBeValid;
   TRACE(3, "Add to breakpoint filter for %s:%d, unit %p:\n",
       unit->filepath()->data(), bp->m_line1, unit);
-  phpAddBreakPointRange(unit, offsets);
+
+  assertx(offsets.size() > 0);
+  auto bpOffset = offsets[0].base;
+  phpAddBreakPoint(unit, bpOffset);
 }
 
 void proxySetBreakPoints(DebuggerProxy* proxy) {
@@ -54,8 +57,8 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
       size_t numFuncs = cls->numMethods();
       if (numFuncs == 0) continue;
       auto methodName = bp->getFunction();
-      for (size_t i = 0; i < numFuncs; ++i) {
-        auto f = cls->getMethod(i);
+      for (size_t i2 = 0; i2 < numFuncs; ++i2) {
+        auto f = cls->getMethod(i2);
         if (!matchFunctionName(methodName, f)) continue;
         bp->m_bindState = BreakPointInfo::KnownToBeValid;
         phpAddBreakPointFuncEntry(f);
@@ -77,7 +80,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
     auto fileName = bp->m_file;
     if (!fileName.empty()) {
       for (auto& kv : g_context->m_evaledFiles) {
-        auto const unit = kv.second;
+        auto const unit = kv.second.unit;
         if (!BreakPointInfo::MatchFile(fileName,
                             unit->filepath()->toCppString())) {
           continue;
@@ -160,8 +163,8 @@ void HphpdHook::onDefClass(const Class* cls) {
     // TODO: check name space separately
     if (bp->getClass() != clsName->data()) continue;
     bp->m_bindState = BreakPointInfo::KnownToBeInvalid;
-    for (size_t i = 0; i < numFuncs; ++i) {
-      auto f = cls->getMethod(i);
+    for (size_t i2 = 0; i2 < numFuncs; ++i2) {
+      auto f = cls->getMethod(i2);
       if (!matchFunctionName(bp->getFunction(), f)) continue;
       bp->m_bindState = BreakPointInfo::KnownToBeValid;
       phpAddBreakPointFuncEntry(f);

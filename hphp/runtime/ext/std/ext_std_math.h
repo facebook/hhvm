@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,37 +21,10 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-math.h"
-#include <math.h>
-
-#if defined(__APPLE__)
-#ifndef isnan
-#define isnan(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnanl ((long double)(x)))
-#endif
-
-#ifndef isinf
-#define isinf(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinfl ((long double)(x)))
-#endif
-#endif
-
-#ifdef __CYGWIN__
 #include <cmath>
-#define isinf std::isinf
-#define isnan std::isnan
-#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-extern const int64_t k_PHP_ROUND_HALF_UP;
-extern const int64_t k_PHP_ROUND_HALF_DOWN;
-extern const int64_t k_PHP_ROUND_HALF_EVEN;
-extern const int64_t k_PHP_ROUND_HALF_ODD;
 
 Variant HHVM_FUNCTION(min, const Variant& value, const Array& args);
 Variant HHVM_FUNCTION(max, const Variant& value, const Array& args);
@@ -108,16 +81,16 @@ double HHVM_FUNCTION(fmod, double x, double y);
 double HHVM_FUNCTION(sqrt, double arg);
 
 int64_t HHVM_FUNCTION(getrandmax);
-void HHVM_FUNCTION(srand, const Variant& seed = null_variant);
+void HHVM_FUNCTION(srand, const Variant& seed = uninit_variant);
 int64_t HHVM_FUNCTION(rand,
                       int64_t min = 0,
-                      const Variant& max = null_variant);
+                      const Variant& max = uninit_variant);
 int64_t HHVM_FUNCTION(mt_getrandmax);
 void HHVM_FUNCTION(mt_srand,
-                   const Variant& seed = null_variant);
+                   const Variant& seed = uninit_variant);
 int64_t HHVM_FUNCTION(mt_rand,
                       int64_t min = 0,
-                      const Variant& max = null_variant);
+                      const Variant& max = uninit_variant);
 double HHVM_FUNCTION(lcg_value);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -31,8 +31,7 @@ typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_exts = nullptr;
 
 // just to make valgrind cleaner
-class ExtensionRegistryUninitializer {
-public:
+struct ExtensionRegistryUninitializer {
   ~ExtensionRegistryUninitializer() {
     delete s_exts;
   }
@@ -223,7 +222,7 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 
 void moduleInit() {
   bool wasInited = SystemLib::s_inited;
-  LitstrTable::get().setWriting();
+  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
   auto const wasDB = RuntimeOption::EvalDumpBytecode;
   RuntimeOption::EvalDumpBytecode &= ~1;
   SCOPE_EXIT {
@@ -285,13 +284,6 @@ void requestShutdown() {
 }
 
 bool modulesInitialised() { return s_initialized; }
-
-void scanExtensions(IMarker& mark) {
-  assert(s_sorted);
-  for (auto& ext : s_ordered) {
-    ext->vscan(mark);
-  }
-}
 
 /////////////////////////////////////////////////////////////////////////////
 

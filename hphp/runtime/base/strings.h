@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@ const char* const ASSIGN_THIS_ERROR = "Cannot re-assign $this";
 const char* const FUNCTION_ALREADY_DEFINED = "Function already defined: %s";
 const char* const CONSTANT_ALREADY_DEFINED = "Constant %s already defined";
 const char* const CONSTANTS_MUST_BE_SCALAR =
-  "Constants may only evaluate to scalar values";
+  "Constants may only evaluate to scalar values or arrays";
 const char* const CONSTANTS_CASE_SENSITIVE =
   "Case insensitive constant names are not supported in HipHop";
 const char* const MODULO_BY_ZERO = "Modulo by zero";
@@ -51,6 +51,8 @@ const char* const CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
 const char* const CREATING_DEFAULT_OBJECT =
   "Creating default object from empty value";
+const char* const SET_PROP_NON_OBJECT =
+  "Setting a property on a non-object";
 const char* const NULLSAFE_PROP_WRITE_ERROR =
   "?-> is not allowed in write context";
 const char* const NULLSAFE_THIS_BASE_ERROR = "?-> is not allowed with $this";
@@ -89,6 +91,13 @@ const char* const TRAIT_BAD_REQ_EXTENDS =
 const char* const TRAIT_BAD_REQ_IMPLEMENTS =
   "Trait '%s' requires implementations of '%s', but %s "
   "is not an interface";
+const char* const INCONSISTENT_INSTEADOF =
+  "Inconsistent insteadof definition. The method %s is to be used from %s, "
+  "but %s is also on the exclude list";
+const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
+const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
+const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
+  "Comparing array with non-array";
 
 } // namespace Strings
 } // namespace HPHP

@@ -8,14 +8,14 @@
  *
  *)
 
-type action = Ai.ServerFindRefs.action =
-  | Class of string
-  | Method of string * string
-  | Function of string
+open FindRefsService
 
-type result = (string * Pos.absolute) list
+val to_json: result -> Hh_json.json
 
-val get_refs_with_defs : action -> ServerEnv.genv ->
-  ServerEnv.env -> (Naming_heap.FunHeap.key * Pos.t) list
+val get_refs : action -> bool -> ServerEnv.genv ->
+  ServerEnv.env -> (string * Pos.t) list
 
-val go : action -> ServerEnv.genv -> ServerEnv.env -> result
+val go : action -> bool -> ServerEnv.genv -> ServerEnv.env -> result
+
+val go_from_file :
+  (string * int * int * bool) -> ServerEnv.genv -> ServerEnv.env -> ide_result

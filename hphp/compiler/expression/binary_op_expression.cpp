@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -134,19 +134,6 @@ bool BinaryOpExpression::isLogicalOrOperator() const {
   return false;
 }
 
-ExpressionPtr BinaryOpExpression::unneededHelper() {
-  bool shortCircuit = isShortCircuitOperator();
-  if (!m_exp2->getContainedEffects() ||
-      (!shortCircuit && !m_exp1->getContainedEffects())) {
-    return Expression::unneededHelper();
-  }
-
-  if (shortCircuit) {
-    m_exp2 = m_exp2->unneeded();
-  }
-  return static_pointer_cast<Expression>(shared_from_this());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
@@ -170,6 +157,33 @@ int BinaryOpExpression::getLocalEffects() const {
     // invoke arbitrary side-effects. This is because it may involve invoking an
     // object's __toString() method, which can have side-effects.
     if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
+      effect = UnknownEffect;
+      m_canThrow = true;
+    }
+    break;
+  }
+  case T_PIPE:
+    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
+      effect = UnknownEffect;
+      m_canThrow = true;
+    }
+    break;
+  case '<':
+  case T_IS_SMALLER_OR_EQUAL:
+  case '>':
+  case T_IS_GREATER_OR_EQUAL:
+  case T_IS_EQUAL:
+  case T_IS_NOT_EQUAL:
+  case T_SPACESHIP:
+  case T_IS_IDENTICAL:
+  case T_IS_NOT_IDENTICAL: {
+    Variant v1;
+    Variant v2;
+    // With HackArrCompatNotices enabled, we'll emit a notice if we compare an
+    // array with something other than an array.
+    if (!m_exp1->getScalarValue(v1) || !m_exp2->getScalarValue(v2) ||
+        (RuntimeOption::EvalHackArrCompatNotices &&
+         v1.isPHPArray() != v2.isPHPArray())) {
       effect = UnknownEffect;
       m_canThrow = true;
     }
@@ -336,6 +350,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
+      ThrowAllErrorsSetter taes;
       auto scalar1 = dynamic_pointer_cast<ScalarExpression>(m_exp1);
       auto scalar2 = dynamic_pointer_cast<ScalarExpression>(m_exp2);
       // Some data, like the values of __CLASS__ and friends, are not available
@@ -469,6 +484,21 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           if (v2.isString()) {
             if (v1.isArray() &&
                 interface_supports_array(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isVecArray() &&
+                interface_supports_vec(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isDict() &&
+                interface_supports_dict(v2.getStringData())) {
+              result = true;
+              break;
+            }
+            if (v1.isKeyset() &&
+                interface_supports_keyset(v2.getStringData())) {
               result = true;
               break;
             }
@@ -622,6 +652,7 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_IS_GREATER_OR_EQUAL: cg_printf(" >= ");         break;
   case T_SPACESHIP:           cg_printf(" <=> ");        break;
   case T_INSTANCEOF:          cg_printf(" instanceof "); break;
+  case T_PIPE:                cg_printf(" |> ");         break;
   case T_COLLECTION: {
     auto el = static_pointer_cast<ExpressionList>(m_exp2);
     if (el->getCount() == 0) {

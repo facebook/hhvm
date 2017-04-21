@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -44,7 +44,7 @@ WddxPacket::WddxPacket(const Variant& comment, bool manualPacket, bool sVar) :
 bool WddxPacket::add_var(const String& varName, bool hasVarTag) {
   VarEnv* v = g_context->getOrCreateVarEnv();
   if (!v) return false;
-  Variant varVariant = *reinterpret_cast<Variant*>(v->lookup(varName.get()));
+  Variant varVariant = tvAsVariant(v->lookup(varName.get()));
   return recursiveAddVar(varName, varVariant, hasVarTag);
 }
 
@@ -66,21 +66,42 @@ bool WddxPacket::serialize_value(const Variant& varVariant) {
 bool WddxPacket::recursiveAddVar(const String& varName,
                                  const Variant& varVariant,
                                  bool hasVarTag) {
+  SeenContainers seen;
+  return recursiveAddVarImpl(varName, varVariant, hasVarTag, seen);
+}
 
+bool WddxPacket::recursiveAddVarImpl(const String& varName,
+                                     const Variant& varVariant,
+                                     bool hasVarTag,
+                                     SeenContainers& seen) {
   bool isArray = varVariant.isArray();
   bool isObject = varVariant.isObject();
 
   if (isArray || isObject) {
+    Array varAsArray;
+    Object varAsObject;
+    ArrayOrObject ptr;
+    if (isArray) {
+      varAsArray = varVariant.toArray();
+      ptr = varAsArray.get();
+    }
+    if (isObject) {
+      varAsObject = varVariant.toObject();
+      varAsArray = varAsObject.toArray();
+      ptr = varAsObject.get();
+    }
+    assert(!ptr.isNull());
+    if (!seen.emplace(ptr).second) {
+      raise_warning("recursion detected");
+      return false;
+    }
+    SCOPE_EXIT { seen.erase(ptr); };
+
     if (hasVarTag) {
       m_packetString.append("<var name='");
       m_packetString.append(varName.data());
       m_packetString.append("'>");
     }
-
-    Array varAsArray;
-    Object varAsObject = varVariant.toObject();
-    if (isArray) varAsArray = varVariant.toArray();
-    if (isObject) varAsArray = varAsObject.toArray();
 
     int length = varAsArray.length();
     if (length > 0) {
@@ -98,10 +119,10 @@ bool WddxPacket::recursiveAddVar(const String& varName,
         m_packetString.append(std::to_string(length));
         m_packetString.append("'>");
       }
-      for (ArrayIter it(varAsArray); it; ++it) {
-        Variant key = it.first();
-        Variant value = it.second();
-        recursiveAddVar(key.toString(), value, isObject);
+      for (; it; ++it) {
+        auto key = it.first();
+        auto const& value = it.secondRef();
+        recursiveAddVarImpl(key.toString(), value, isObject, seen);
       }
       if (isObject) {
         m_packetString.append("</struct>");
@@ -198,7 +219,7 @@ void find_var_recursive(const TypedValue* tv,
     String var_name{tvCastToString(tv)};
     wddxPacket->add_var(var_name, true);
   }
-  if (tv->m_type == KindOfArray) {
+  if (isArrayLikeType(tv->m_type)) {
     for (ArrayIter iter(tv->m_data.parr); iter; ++iter) {
       find_var_recursive(iter.secondRef().asTypedValue(), wddxPacket);
     }
@@ -257,8 +278,7 @@ static String HHVM_FUNCTION(wddx_serialize_value, const Variant& var,
 
 //////////////////////////////////////////////////////////////////////////////
 
-class wddxExtension final : public Extension {
- public:
+struct wddxExtension final : Extension {
   wddxExtension() : Extension("wddx") {}
   void moduleInit() override {
     HHVM_FE(wddx_add_vars);

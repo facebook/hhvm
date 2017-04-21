@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_container.h"
@@ -34,6 +32,7 @@
 
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
+#include "hphp/util/text-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,37 +48,27 @@ DECLARE_BOOST_TYPES(StatementList);
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-class FileScope : public BlockScope,
-                  public FunctionContainer,
-                  public JSON::DocTarget::ISerializable {
-public:
+struct FileScope : BlockScope, FunctionContainer,
+                   JSON::DocTarget::ISerializable {
   enum Attribute {
     ContainsDynamicVariable  = 0x0001,
     ContainsLDynamicVariable = 0x0002,
     VariableArgument         = 0x0004,
-    ContainsExtract          = 0x0008, // contains call to extract()
-    ContainsCompact          = 0x0010, // contains call to compact()
     ContainsReference        = 0x0020, // returns ref or has ref parameters
     ReferenceVariableArgument = 0x0040, // like sscanf or fscanf
     ContainsUnset            = 0x0080, // need special handling
     NoEffect                 = 0x0100, // does not side effect
     HelperFunction           = 0x0200, // runtime helper function
-    ContainsGetDefinedVars   = 0x0400, // need VariableTable with getDefinedVars
-    IsFoldable               = 0x01000,// function can be constant folded
     NoFCallBuiltin           = 0x02000,// function should not use FCallBuiltin
-    AllowOverride            = 0x04000,// allow override of systemlib or builtin
     NeedsFinallyLocals       = 0x08000,
     VariadicArgumentParam    = 0x10000,// ...$ capture of variable arguments
-    ContainsAssert           = 0x20000,// contains call to assert()
+    RefVariadicArgumentParam = 0x40000,// &...$ variadicargument by ref
   };
 
 public:
   FileScope(const std::string &fileName, int fileSize, const MD5 &md5);
   ~FileScope() { delete m_redeclaredFunctions; }
   int getSize() const { return m_size;}
-
-  // implementing FunctionContainer
-  virtual std::string getParentName() const { assert(false); return "";}
 
   const std::string &getName() const { return m_fileName;}
   const MD5& getMd5() const { return m_md5; }
@@ -89,7 +78,6 @@ public:
     return m_classes;
   }
   void getClassesFlattened(std::vector<ClassScopePtr>& classes) const;
-  ClassScopePtr getClass(const char *name);
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
   int getFunctionCount() const;
@@ -97,7 +85,6 @@ public:
 
   void pushAttribute();
   void setAttribute(Attribute attr);
-  int getGlobalAttribute() const;
   int popAttribute();
 
   void serialize(JSON::DocTarget::OutputStream &out) const;
@@ -133,26 +120,10 @@ public:
    * save the symbols for our iface.
    * This stuff only happens in the filechanged state.
    */
-  void addConstant(const std::string &name, ExpressionPtr value,
-                   AnalysisResultPtr ar, ConstructPtr con);
   void declareConstant(AnalysisResultPtr ar, const std::string &name);
-  void getConstantNames(std::vector<std::string> &names);
-
-  void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.insert(
-      std::make_pair(
-        boost::to_lower_copy(target),
-        boost::to_lower_copy(alias)
-      )
-    );
-  }
-
-  std::multimap<std::string,std::string> const& getClassAliases() const {
-    return m_classAliasMap;
-  }
 
   void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.insert(boost::to_lower_copy(name));
+    m_typeAliasNames.emplace(toLower(name));
   }
 
   std::set<std::string> const& getTypeAliasNames() const {
@@ -164,6 +135,9 @@ public:
 
   void setHHFile();
   bool isHHFile() const { return m_isHHFile; }
+
+  void setUseStrictTypes();
+  bool useStrictTypes() const { return m_useStrictTypes; }
 
   void setPreloadPriority(int p) { m_preloadPriority = p; }
   int preloadPriority() const { return m_preloadPriority; }
@@ -190,6 +164,7 @@ private:
   MD5 m_md5;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
+  unsigned m_useStrictTypes : 1;
   int m_preloadPriority;
 
   std::vector<int> m_attributes;
@@ -202,10 +177,6 @@ private:
 
   std::string m_pseudoMainName;
   std::set<std::string> m_redecBases;
-
-  // Map from class alias names to the class they are aliased to.
-  // This is only needed in WholeProgram mode.
-  std::multimap<std::string,std::string> m_classAliasMap;
 
   // Set of names that are on the left hand side of type alias
   // declarations.  We need this to make sure we don't mark classes

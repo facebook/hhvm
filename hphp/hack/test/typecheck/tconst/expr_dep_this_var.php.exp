@@ -1,3 +1,5 @@
-[<static>][this][1]intersect(App \C<>)
-[2]intersect([<static>::T][this::T][\C::T])
+File "expr_dep_this_var.php", line 12, characters 5-18:
+  <static> as this as ^(C)
+File "expr_dep_this_var.php", line 13, characters 5-25:
+  ^(<static>::T as this::T as C::T)
 No errors

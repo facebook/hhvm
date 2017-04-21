@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,21 +40,24 @@
 #include "hphp/util/process.h"
 
 #include <folly/String.h>
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/SysFile.h>
 
 #include <algorithm>
-#include <sys/file.h>
 
 namespace HPHP {
 
-const int FileData::CHUNK_SIZE = 8192;
+const int FileData::DEFAULT_CHUNK_SIZE = 8192;
 
 FileData::FileData(bool nonblocking)
 : m_nonblocking(nonblocking)
 { }
 
 bool FileData::closeImpl() {
-  free(m_buffer);
-  m_buffer = nullptr;
+  if (m_buffer != nullptr) {
+    free(m_buffer);
+    m_buffer = nullptr;
+  }
   return true;
 }
 
@@ -69,7 +72,6 @@ StaticString File::s_resource_name("stream");
 
 int __thread s_pcloseRet;
 
-const int File::CHUNK_SIZE = FileData::CHUNK_SIZE;
 const int File::USE_INCLUDE_PATH = 1;
 
 String File::TranslatePathKeepRelative(const char* filename, uint32_t size) {
@@ -161,8 +163,11 @@ req::ptr<File> File::Open(const String& filename, const String& mode,
   auto file = wrapper->open(filename, mode, options, rcontext);
   if (file) {
     file->m_data->m_name = filename.data();
-    file->m_data->m_mode = mode.data();
     file->m_streamContext = rcontext;
+    // Let the wrapper set the mode itself if needed.
+    if (file->m_data->m_mode.empty()) {
+      file->m_data->m_mode = mode.data();
+    }
   }
   return file;
 }
@@ -261,8 +266,8 @@ String File::read() {
 
   while (!eof() || avail) {
     if (m_data->m_buffer == nullptr) {
-      m_data->m_buffer = (char *)malloc(CHUNK_SIZE);
-      m_data->m_bufferSize = CHUNK_SIZE;
+      m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
+      m_data->m_bufferSize = m_data->m_chunkSize;
     }
 
     if (avail > 0) {
@@ -300,8 +305,8 @@ String File::read(int64_t length) {
 
   while (avail < length && !eof()) {
     if (m_data->m_buffer == nullptr) {
-      m_data->m_buffer = (char *)malloc(CHUNK_SIZE);
-      m_data->m_bufferSize = CHUNK_SIZE;
+      m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
+      m_data->m_bufferSize = m_data->m_chunkSize;
     }
 
     if (avail > 0) {
@@ -336,7 +341,7 @@ String File::read(int64_t length) {
 }
 
 int64_t File::filteredReadToBuffer() {
-  int64_t bytes_read = readImpl(m_data->m_buffer, CHUNK_SIZE);
+  int64_t bytes_read = readImpl(m_data->m_buffer, m_data->m_bufferSize);
   if (LIKELY(m_readFilters.empty())) {
     return bytes_read;
   }
@@ -441,6 +446,20 @@ bool File::seek(int64_t offset, int whence /* = SEEK_SET */) {
     }
   }
   return true;
+}
+
+bool File::setBlocking(bool mode) {
+  int flags = fcntl(fd(), F_GETFL, 0);
+  if (mode) {
+    flags &= ~O_NONBLOCK;
+  } else {
+    flags |= O_NONBLOCK;
+  }
+  return fcntl(fd(), F_SETFL, flags) != -1;
+}
+
+bool File::setTimeout(uint64_t usecs) {
+  return false;
 }
 
 int64_t File::tell() {
@@ -627,8 +646,8 @@ String File::readLine(int64_t maxlen /* = 0 */) {
       break;
     } else {
       if (m_data->m_buffer == nullptr) {
-        m_data->m_buffer = (char *)malloc(CHUNK_SIZE);
-        m_data->m_bufferSize = CHUNK_SIZE;
+        m_data->m_buffer = (char *)malloc(m_data->m_chunkSize);
+        m_data->m_bufferSize = m_data->m_chunkSize;
       }
       m_data->m_writepos = filteredReadToBuffer();
       m_data->m_readpos = 0;
@@ -652,21 +671,29 @@ Variant File::readRecord(const String& delimiter, int64_t maxlen /* = 0 */) {
     return false;
   }
 
-  if (maxlen <= 0 || maxlen > CHUNK_SIZE) {
-    maxlen = CHUNK_SIZE;
+  if (maxlen <= 0 || maxlen > m_data->m_chunkSize) {
+    maxlen = m_data->m_chunkSize;
   }
 
   int64_t avail = bufferedLen();
   if (m_data->m_buffer == nullptr) {
-    m_data->m_buffer = (char *)malloc(CHUNK_SIZE * 3);
+    m_data->m_buffer = (char *)malloc(m_data->m_chunkSize * 3);
+    m_data->m_bufferSize = m_data->m_chunkSize * 3;
+  } else if (m_data->m_bufferSize < m_data->m_chunkSize * 3) {
+    auto newbuf = malloc(m_data->m_chunkSize * 3);
+    memcpy(newbuf, m_data->m_buffer, m_data->m_bufferSize);
+    free(m_data->m_buffer);
+    m_data->m_buffer = (char*) newbuf;
+    m_data->m_bufferSize = m_data->m_chunkSize * 3;
   }
+
   if (avail < maxlen && !eof()) {
-    assert(m_data->m_writepos + maxlen - avail <= CHUNK_SIZE * 3);
+    assert(m_data->m_writepos + maxlen - avail <= m_data->m_chunkSize * 3);
     m_data->m_writepos +=
       readImpl(m_data->m_buffer + m_data->m_writepos, maxlen - avail);
     maxlen = bufferedLen();
   }
-  if (m_data->m_readpos >= CHUNK_SIZE) {
+  if (m_data->m_readpos >= m_data->m_chunkSize) {
     memcpy(m_data->m_buffer,
            m_data->m_buffer + m_data->m_readpos,
            bufferedLen());
@@ -750,6 +777,22 @@ const StaticString s_Unknown("Unknown");
 const String& File::o_getResourceName() const {
   if (isInvalid()) return s_Unknown;
   return s_resource_name;
+}
+
+int64_t File::getChunkSize() const{
+  return m_data->m_chunkSize;
+}
+
+void File::setChunkSize(int64_t chunk_size) {
+
+  assertx(chunk_size > 0);
+
+  m_data->m_chunkSize = chunk_size;
+
+  if (m_data->m_buffer != nullptr && m_data->m_chunkSize > m_data->m_bufferSize) {
+    m_data->m_buffer = (char *)realloc(m_data->m_buffer, m_data->m_chunkSize);
+    m_data->m_bufferSize = m_data->m_chunkSize;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -876,7 +919,7 @@ Array File::readCSV(int64_t length /* = 0 */,
     }
 
     if (first_field && bptr == line_end) {
-      ret.append(null_variant);
+      ret.append(uninit_variant);
       break;
     }
     first_field = false;

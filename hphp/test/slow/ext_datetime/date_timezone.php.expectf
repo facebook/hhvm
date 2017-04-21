@@ -1,0 +1,25 @@
+string(19) "America/Los_Angeles"
+bool(true)
+string(13) "Asia/Shanghai"
+bool(true)
+string(19) "America/Los_Angeles"
+string(19) "America/Los_Angeles"
+string(13) "Asia/Shanghai"
+string(19) "2008-08-09 03:34:56"
+string(13) "Europe/Berlin"
+string(12) "Europe/Paris"
+string(13) "Asia/Shanghai"
+int(28800)
+int(32400)
+string(13) "Asia/Shanghai"
+int(-1693706400)
+int(7200)
+bool(true)
+string(4) "CEST"
+string(16) "America/New_York"
+string(19) "America/Los_Angeles"
+string(15) "Pacific/Chatham"
+bool(true)
+
+Warning: timezone_open(): Unknown or bad timezone (sdf) in %s
+bool(false)

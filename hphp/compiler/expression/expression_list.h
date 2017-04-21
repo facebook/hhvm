@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_EXPRESSION_LIST_H_
 #define incl_HPHP_EXPRESSION_LIST_H_
 
+#include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/expression/expression.h"
+#include "hphp/runtime/base/type-variant.h"
 #include <vector>
 
 namespace HPHP {
@@ -25,12 +27,12 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ExpressionList);
 
-class ExpressionList : public Expression {
-public:
+struct ExpressionList : Expression {
   enum ListKind {
     ListKindParam,
     ListKindComma,
     ListKindWrapped,
+    ListKindWrappedNoWarn,
     ListKindLeft
   };
 
@@ -59,6 +61,7 @@ public:
   std::string getLiteralString() const override;
 
   bool isScalarArrayPairs() const;
+  bool isSetCollectionScalar() const;
 
   int getCount() const { return m_exps.size();}
   ExpressionPtr &operator[](int index);
@@ -80,6 +83,7 @@ public:
    */
   bool flattenLiteralStrings(std::vector<ExpressionPtr> &literals) const;
 
+  template <typename F> bool getListScalars(F) const;
 private:
   void optimize(AnalysisResultConstPtr ar);
   unsigned int checkLitstrKeys() const;
@@ -91,6 +95,39 @@ private:
   bool m_argUnpack;
   ListKind m_kind;
 };
+
+template <typename F>
+inline bool ExpressionList::getListScalars(F f) const {
+  if (m_elems_kind == ElemsKind::None) {
+    for (const auto ape : m_exps) {
+      Variant v;
+      if (!ape->getScalarValue(v)) return false;
+      if (!f(Variant{}, v)) return false;
+    }
+    return true;
+  }
+  if (!isScalarArrayPairs()) return false;
+  for (const auto ape : m_exps) {
+    auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
+    if (!exp) return false;
+    auto name = exp->getName();
+    auto val = exp->getValue();
+    if (!name) {
+      Variant v;
+      bool ret = val->getScalarValue(v);
+      if (!ret) assert(false);
+      if (!f(Variant{}, v)) return false;
+    } else {
+      Variant n;
+      Variant v;
+      bool ret1 = name->getScalarValue(n);
+      bool ret2 = val->getScalarValue(v);
+      if (!(ret1 && ret2)) return false;
+      if (!f(n, v)) return false;
+    }
+  }
+  return true;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

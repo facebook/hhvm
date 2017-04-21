@@ -4640,7 +4640,7 @@ gdFontPtr gdFontLarge = &gdFontLargeRep;
 
 gdFontPtr gdFontGetLarge(void)
 {
-	return gdFontLarge;
+  return gdFontLarge;
 }
 
 /* This file has not been truncated. */

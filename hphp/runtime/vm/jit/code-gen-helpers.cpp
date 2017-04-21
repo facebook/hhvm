@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/runtime/vm/jit/code-gen-helpers.h"
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
@@ -26,8 +28,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -38,6 +39,7 @@
 #include "hphp/util/immed.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/thread-local.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -79,6 +81,18 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
   }
 }
 
+void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size) {
+  if (size == 8) {
+    v << store{reg, mem};
+  } else if (size == 4) {
+    auto const temp = v.makeReg();
+    v << movtql{reg, temp};
+    v << storel{temp, mem};
+  } else {
+    not_implemented();
+  }
+}
+
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
   auto prep = [&] (Vreg r) {
     if (VregDbl::allowable(r)) return r;
@@ -90,8 +104,8 @@ void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0) {
   v << unpcklpd{prep(s1), prep(s0), d0}; // s0,s1 -> d0[0],d0[1]
 }
 
-Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
-  if (!src->isA(TBool)) return reg;
+Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
+  if (!(ty <= TBool)) return reg;
 
   // Zero-extend the bool from a byte to a quad.
   auto extended = v.makeReg();
@@ -100,6 +114,88 @@ Vreg zeroExtendIfBool(Vout& v, const SSATmp* src, Vreg reg) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
+  auto const type = src->type();
+
+  if (srcLoc.isFullSIMD()) {
+    // The whole TV is stored in a single SIMD reg.
+    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
+    v << storeups{srcLoc.reg(), dst};
+    return;
+  }
+
+  if (type.needsReg()) {
+    assertx(srcLoc.hasReg(1));
+    v << storeb{srcLoc.reg(1), dst + TVOFF(m_type)};
+  } else {
+    v << storeb{v.cns(type.toDataType()), dst + TVOFF(m_type)};
+  }
+
+  // We ignore the values of statically nullish types.
+  if (src->isA(TNull) || src->isA(TNullptr)) return;
+
+  // Store the value.
+  if (src->hasConstVal()) {
+    // Skip potential zero-extend if we know the value.
+    v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
+  } else {
+    assertx(srcLoc.hasReg(0));
+    auto const extended = zeroExtendIfBool(v, src->type(), srcLoc.reg(0));
+    v << store{extended, dst + TVOFF(m_data)};
+  }
+}
+
+void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
+            bool aux /* = false */) {
+  auto const type = dst->type();
+
+  if (dstLoc.isFullSIMD()) {
+    // The whole TV is loaded into a single SIMD reg.
+    assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
+    v << loadups{src, dstLoc.reg()};
+    return;
+  }
+
+  if (type.needsReg()) {
+    assertx(dstLoc.hasReg(1));
+    if (aux) {
+      v << load{src + TVOFF(m_type), dstLoc.reg(1)};
+    } else {
+      v << loadb{src + TVOFF(m_type), dstLoc.reg(1)};
+    }
+  }
+
+  if (type <= TBool) {
+    v << loadtqb{src + TVOFF(m_data), dstLoc.reg(0)};
+  } else {
+    v << load{src + TVOFF(m_data), dstLoc.reg(0)};
+  }
+}
+
+void copyTV(Vout& v, Vreg data, Vreg type, Vloc srcLoc, const SSATmp* src) {
+  // SIMD register are not supported here.
+  assertx(!srcLoc.isFullSIMD());
+
+  if (src->type().needsReg()) {
+    assertx(srcLoc.hasReg(1));
+    v << copy{srcLoc.reg(1), type};
+  } else {
+    v << copy{v.cns(src->type().toDataType()), type};
+  }
+
+  // Ignore the values for nulls.
+  if (src->isA(TNull)) return;
+
+  if (src->hasConstVal()) {
+    // Skip potential zero-extend if we know the value.
+    v << copy{v.cns(src->rawVal()), data};
+  } else {
+    assertx(srcLoc.hasReg(0));
+    auto const extended = zeroExtendIfBool(v, src->type(), srcLoc.reg(0));
+    v << copy{extended, data};
+  }
+}
 
 void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   auto src_arity = src.numAllocated();
@@ -123,6 +219,16 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   } else {
     v << copy{src.reg(0), dst.reg(0)};
   }
+}
+
+void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
+  int32_t trash32;
+  memset(&trash32, byte, sizeof(trash32));
+  static_assert(sizeof(TypedValue) == 16, "");
+  v << storeli{trash32, ptr[offset + 0x0]};
+  v << storeli{trash32, ptr[offset + 0x4]};
+  v << storeli{trash32, ptr[offset + 0x8]};
+  v << storeli{trash32, ptr[offset + 0xc]};
 }
 
 void emitAssertRefCount(Vout& v, Vreg data) {
@@ -166,7 +272,7 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
   });
 }
 
-void emitDecRefObj(Vout& v, Vreg obj) {
+void emitDecRefWorkObj(Vout& v, Vreg obj) {
   auto const shouldRelease = v.makeReg();
   v << cmplim{1, obj[FAST_REFCOUNT_OFFSET], shouldRelease};
   ifThenElse(
@@ -185,16 +291,18 @@ void emitDecRefObj(Vout& v, Vreg obj) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitCall(Vout& v, CallSpec target, RegSet args) {
+  using K = CallSpec::Kind;
+
   switch (target.kind()) {
-    case CallSpec::Kind::Direct:
+    case K::Direct:
       v << call{static_cast<TCA>(target.address()), args};
       return;
 
-    case CallSpec::Kind::Smashable:
+    case K::Smashable:
       v << calls{static_cast<TCA>(target.address()), args};
       return;
 
-    case CallSpec::Kind::ArrayVirt: {
+    case K::ArrayVirt: {
       auto const addr = reinterpret_cast<intptr_t>(target.arrayTable());
 
       auto const arrkind = v.makeReg();
@@ -210,16 +318,12 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
       static_assert(sizeof(HeaderKind) == 1, "");
     } return;
 
-    case CallSpec::Kind::Destructor: {
-      // this movzbq is only needed because callers aren't required to
-      // zero-extend the type.
-      auto zextType = v.makeReg();
-      v << movzbq{target.reg(), zextType};
-      auto dtor_ptr = lookupDestructor(v, zextType);
-      v << callm{dtor_ptr, args};
+    case K::Destructor: {
+      auto dtor = lookupDestructor(v, target.reg());
+      v << callm{dtor, args};
     } return;
 
-    case CallSpec::Kind::Stub:
+    case K::Stub:
       v << callstub{target.stubAddr(), args};
       return;
   }
@@ -228,19 +332,23 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
 
 Vptr lookupDestructor(Vout& v, Vreg type) {
   auto const table = reinterpret_cast<intptr_t>(g_destructors);
-  always_assert_flog(deltaFits(table, sz::dword),
-    "Destructor function table is expected to be in the data "
-    "segment, with addresses less than 2^31"
-  );
-  static_assert((KindOfString   >> kShiftDataTypeToDestrIndex == 1) &&
-                (KindOfArray    >> kShiftDataTypeToDestrIndex == 2) &&
-                (KindOfObject   >> kShiftDataTypeToDestrIndex == 3) &&
-                (KindOfResource >> kShiftDataTypeToDestrIndex == 4) &&
-                (KindOfRef      >> kShiftDataTypeToDestrIndex == 5),
-                "lookup of destructors depends on KindOf* values");
-  auto index = v.makeReg();
-  v << shrli{kShiftDataTypeToDestrIndex, type, index, v.makeReg()};
-  return baseless(index * 8 + safe_cast<int>(table));
+
+  auto const typel = v.makeReg();
+  auto const index = v.makeReg();
+  auto const indexl = v.makeReg();
+
+  // This movzbl is only needed because callers aren't required to zero-extend
+  // the type.
+  v << movzbl{type, typel};
+  v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
+  v << movzlq{indexl, index};
+
+  // The baseless form is more compact, but isn't supported for 64-bit
+  // displacements.
+  if (table <= std::numeric_limits<int>::max()) {
+    return baseless(index * 8 + safe_cast<int>(table));
+  }
+  return v.cns(table)[index * 8];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -252,41 +360,44 @@ Vreg emitLdObjClass(Vout& v, Vreg obj, Vreg d) {
 }
 
 Vreg emitLdClsCctx(Vout& v, Vreg src, Vreg dst) {
+  static_assert(ActRec::kHasClassBit == 1,
+                "Fix the decq if you change kHasClassBit");
   v << decq{src, dst, v.makeReg()};
   return dst;
 }
 
-void emitCmpClass(Vout& v, Vreg sf, const Class* cls, Vptr mem) {
-  auto size = sizeof(LowPtr<Class>);
+void cmpLowPtrImpl(Vout& v, Vreg sf, const void* ptr, Vptr mem, size_t size) {
   if (size == 8) {
-    v << cmpqm{v.cns(cls), mem, sf};
+    v << cmpqm{v.cns(ptr), mem, sf};
   } else if (size == 4) {
-    auto const clsImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(cls));
-    v << cmplm{v.cns(clsImm), mem, sf};
+    auto const ptrImm = safe_cast<uint32_t>(reinterpret_cast<intptr_t>(ptr));
+    v << cmplm{v.cns(ptrImm), mem, sf};
   } else {
     not_implemented();
   }
 }
 
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg, Vptr mem) {
-  auto size = sizeof(LowPtr<Class>);
+void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
   if (size == 8) {
     v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
-    auto lowCls = v.makeReg();
-    v << movtql{reg, lowCls};
-    v << cmplm{lowCls, mem, sf};
+    auto low = v.makeReg();
+    v << movtql{reg, low};
+    v << cmplm{low, mem, sf};
   } else {
     not_implemented();
   }
 }
 
-void emitCmpClass(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
-  auto size = sizeof(LowPtr<Class>);
+void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
   if (size == 8) {
     v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {
-    v << cmpl{reg1, reg2, sf};
+    auto const l1 = v.makeReg();
+    auto const l2 = v.makeReg();
+    v << movtql{reg1, l1};
+    v << movtql{reg2, l2};
+    v << cmpl{l1, l2, sf};
   } else {
     not_implemented();
   }
@@ -311,12 +422,6 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
 }
 
-void emitTransCounterInc(Vout& v) {
-  if (!mcg->tx().isTransDBEnabled()) return;
-  auto t = v.cns(mcg->tx().getTransCounterAddr());
-  v << incqmlock{*t, v.makeReg()};
-}
-
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
   if (!Trace::moduleEnabled(Trace::ringbuffer, 1)) return;
   v << vcall{CallSpec::direct(Trace::ringbufferMsg),
@@ -324,6 +429,30 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
+void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
+  if (!force && !Stats::enabled()) return;
+  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
+  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  auto const gen = v.makeReg();
+  auto const sf = v.makeReg();
+  v << loadb{rvmtl()[rds::genNumberHandleFrom(ch)], gen};
+  v << cmpbm{gen, rvmtl()[rds::currentGenNumberHandle()], sf};
+  return sf;
+}
+
+void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  auto const gen = v.makeReg();
+  v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
+  v << storeb{gen, rvmtl()[rds::genNumberHandleFrom(ch)]};
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 }}

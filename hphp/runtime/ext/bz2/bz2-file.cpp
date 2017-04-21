@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,14 +32,11 @@ BZ2File::BZ2File(req::ptr<PlainFile>&& innerFile)
 }
 
 BZ2File::~BZ2File() {
-  if (m_bzFile)
-    closeImpl();
+  closeImpl();
 }
 
 void BZ2File::sweep() {
-  if (m_bzFile) {
-    closeImpl();
-  }
+  closeImpl();
   File::sweep();
 }
 
@@ -95,8 +92,11 @@ int64_t BZ2File::readImpl(char * buf, int64_t length) {
    * to BZ_STREAM_END, but it's not actually EOF, and you can keep reading from
    * the file - so, only set EOF after a failed read. This matches PHP5.
    */
-  if (len == 0) {
+  if (len <= 0) {
     setEof(true);
+    if (len < 0) {
+      return -1;
+    }
   }
   return len;
 }
@@ -107,15 +107,18 @@ int64_t BZ2File::writeImpl(const char * buf, int64_t length) {
 }
 
 bool BZ2File::closeImpl() {
-  assert(m_bzFile);
-  bool ret = true;
-  BZ2_bzclose(m_bzFile);
-  m_bzFile = nullptr;
-  setIsClosed(true);
-  m_innerFile->close();
+  if (!isClosed()) {
+    if (m_bzFile) {
+      BZ2_bzclose(m_bzFile);
+      m_bzFile = nullptr;
+    }
+    setIsClosed(true);
+    if (m_innerFile) {
+      m_innerFile->close();
+    }
+  }
   File::closeImpl();
-  setEof(false);
-  return ret;
+  return true;
 }
 
 bool BZ2File::eof() {

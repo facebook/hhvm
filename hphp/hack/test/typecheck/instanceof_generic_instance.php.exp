@@ -1,2 +1,4 @@
-generic T
-No errors
+File "instanceof_generic_instance.php", line 7, characters 3-13:
+  T
+File "instanceof_generic_instance.php", line 4, characters 8-23:
+'instanceof' cannot be used on 'classname<T>' because 'T' may be instantiated with a type such as 'C<int>' that cannot be checked at runtime (Typing[4162])

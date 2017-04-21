@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,12 +18,13 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -295,7 +296,7 @@ void CmdList::onClient(DebuggerClient &client) {
             return;
           }
         } else {
-          int line = atoi(arg.c_str());
+          line = atoi(arg.c_str());
           if (line <= 0) {
             client.error("A line number has to be a positive integer.");
             help(client);

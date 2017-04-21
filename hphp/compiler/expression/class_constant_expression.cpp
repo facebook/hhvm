@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,6 +77,14 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
       m_depsSet = true;
+      if (auto scope = getScope()) {
+        if (auto clsScope = scope->getContainingClass()) {
+          // Record that this class constant is referenced inside this scope
+          // (which will be associated with another class constant if we're
+          // inside a class constant definition).
+          clsScope->addReferencedClassConstant(cls, m_varName);
+        }
+      }
     }
   }
 }

@@ -121,7 +121,7 @@ function system(string $command, mixed &$return_var = null): string;
 function proc_open(string $cmd,
                    array $descriptorspec,
                    mixed &$pipes,
-                   string $cwd = "",
+                   ?string $cwd = null,
                    mixed $env = null,
                    mixed $other_options = null): mixed;
 

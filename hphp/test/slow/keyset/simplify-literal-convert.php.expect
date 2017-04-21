@@ -1,0 +1,24 @@
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(3) {
+  string(1) "a"
+  int(100)
+  string(1) "b"
+}
+keyset(3) {
+  string(1) "a"
+  int(100)
+  string(1) "b"
+}
+keyset(3) {
+  string(1) "a"
+  int(100)
+  string(1) "b"
+}
+keyset(3) {
+  string(1) "a"
+  int(100)
+  string(1) "b"
+}

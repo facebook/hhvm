@@ -7,68 +7,37 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  *)
+include Typing_env_types_sig.S
 
-open Utils
 open Typing_defs
+open Typing_heap
 
-module Funs : module type of Typing_heap.Funs
-module Classes : module type of Typing_heap.Classes
-module Typedefs : module type of Typing_heap.Typedefs
-module GConsts : module type of Typing_heap.GConsts
-
-type fake_members = {
-  last_call : Pos.t option;
-  invalid : SSet.t;
-  valid : SSet.t;
-}
-type expression_id = Ident.t
-type local = locl ty list * locl ty * expression_id
-type local_env = fake_members * local IMap.t
-type env = {
-  pos : Pos.t;
-  tenv : locl ty IMap.t;
-  subst : int IMap.t;
-  lenv : local_env;
-  genv : genv;
-  todo : tfun list;
-  in_loop : bool;
-  grow_super : bool;
-}
-and genv
-and anon = env -> locl fun_params -> env * locl ty
-and tfun = env -> env
+val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : unit -> locl ty
+val fresh_unresolved_type : env -> env * locl ty
 val add_subst : env -> int -> int -> env
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env
 val add : env -> int -> locl ty -> env
-val get_type : env -> int -> env * locl ty
+val get_type : env -> Reason.t -> int -> env * locl ty
 val get_type_unsafe : env -> int -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
-val expand_type_recorded : env -> ISet.t -> locl ty -> env * ISet.t * locl ty
 val make_ft : Pos.t -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
-val debugl : ISet.t -> env -> locl ty list -> unit
-val debug : env -> locl ty -> unit
 val empty_fake_members : fake_members
-val empty_local : local_env
-val empty : TypecheckerOptions.t -> Relative_path.t -> env
-val add_class : Classes.key -> Classes.t -> unit
-val add_typedef : Typedefs.key -> Typing_heap.Typedef.tdef -> unit
+val empty_local : tpenv -> local_env
+val empty : TypecheckerOptions.t -> Relative_path.t ->
+  droot: Typing_deps.Dep.variant option -> env
 val is_typedef : Typedefs.key -> bool
-val get_enum : Classes.key -> Classes.t option
-val is_enum : Classes.key -> bool
-val get_enum_constraint : Classes.key -> decl ty option
-val add_typedef_error : Typedefs.key -> unit
-val add_fun : Funs.key -> Funs.t -> unit
+val get_enum : env -> Classes.key -> Classes.t option
+val is_enum : env -> Classes.key -> bool
+val get_enum_constraint : env -> Classes.key -> decl ty option
 val add_wclass : env -> string -> unit
-val fresh_tenv : env -> (env -> unit) -> unit
+val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> Classes.key -> Classes.t option
 val get_typedef : env -> Typedefs.key -> Typedefs.t option
-val add_extends_dependency : env -> string -> unit
-val get_class_dep : env -> Classes.key -> Classes.t option
-val get_const : env -> class_type -> string -> class_elt option
+val get_const : env -> class_type -> string -> class_const option
 val get_typeconst : env -> class_type -> string -> typeconst_type option
 val get_gconst : env -> GConsts.key -> GConsts.t option
 val get_static_member : bool -> env -> class_type -> string -> class_elt option
@@ -80,10 +49,8 @@ val get_construct : env -> class_type -> class_elt option * bool
 val get_todo : env -> tfun list
 val get_return : env -> locl ty
 val set_return : env -> locl ty -> env
-val with_return : env -> (env -> env) -> env
+val with_return : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool
-val grow_super : env -> bool
-val invert_grow_super : env -> (env -> env) -> env
 val get_self : env -> locl ty
 val get_self_id : env -> string
 val is_outside_class : env -> bool
@@ -103,13 +70,12 @@ val set_parent_id : env -> string -> env
 val set_parent : env -> decl ty -> env
 val set_static : env -> env
 val set_mode : env -> FileInfo.mode -> env
-val set_root : env -> Typing_deps.Dep.variant -> env
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool
 val get_options: env -> TypecheckerOptions.t
 val get_last_call : env -> Pos.t
-val lost_info : string -> ISet.t -> env -> locl ty -> env * locl ty
+val lost_info : string -> env -> locl ty -> env * locl ty
 val forget_members : env -> Pos.t -> env
 module FakeMembers :
   sig
@@ -119,14 +85,31 @@ module FakeMembers :
     val is_invalid : env -> Nast.expr -> string -> bool
     val get_static : env -> Nast.class_id -> string -> int option
     val is_static_invalid : env -> Nast.class_id -> string -> bool
-    val make : Pos.t -> env -> Nast.expr -> string -> env * int
-    val make_static : Pos.t -> env -> Nast.class_id -> string -> env * int
+    val make : Pos.t -> env -> Nast.expr -> string -> env * Local_id.t
+    val make_static : Pos.t -> env -> Nast.class_id -> string ->
+      env * Local_id.t
   end
 val unbind : env -> locl ty -> env * locl ty
-val set_local : env -> Ident.t -> locl ty -> env
-val get_local : env -> Ident.t -> env * locl ty
-val set_local_expr_id : env -> Ident.t -> expression_id -> env
-val get_local_expr_id : env -> Ident.t -> expression_id option
+val set_local : env -> Local_id.t -> locl ty -> env
+val get_local : env -> Local_id.t -> env * locl ty
+val set_local_expr_id : env -> Local_id.t -> expression_id -> env
+val get_local_expr_id : env -> Local_id.t -> expression_id option
+val get_lower_bounds : env -> string -> tparam_bounds
+val get_upper_bounds : env -> string -> tparam_bounds
+val add_upper_bound : env -> string -> locl ty -> env
+val add_lower_bound : env -> string -> locl ty -> env
+val env_with_tpenv : env -> tpenv -> env
+val add_generic_parameters : env -> Nast.tparam list -> env
+val is_generic_parameter : env -> string -> bool
+val get_generic_parameters : env -> string list
+val add_fresh_generic_parameter : env -> string -> env * string
+val get_tpenv_size : env -> int
 val freeze_local_env : env -> env
+val env_with_locals :
+  env -> local_types -> local_history Local_id.Map.t -> env
 val anon : local_env -> env -> (env -> env * locl ty) -> env * locl ty
-val in_loop : env -> (env -> env) -> env
+val in_loop : env -> (env -> env * 'a) -> env * 'a
+val merge_locals_and_history : local_env -> old_local Local_id.Map.t
+val seperate_locals_and_history :
+  old_local Local_id.Map.t ->
+  (local_types * local_history Local_id.Map.t)

@@ -1,8 +1,11 @@
 <?hh // strict
+namespace {
 
 class C {
   const type T = Foo\D;
   const type U = this;
+}
+
 }
 
 namespace Foo {

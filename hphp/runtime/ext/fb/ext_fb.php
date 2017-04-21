@@ -5,19 +5,22 @@
  * fb_unserialize().
  * @param mixed $thing - What to serialize. Note that objects are not
  * supported.
+ * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native>>
-function fb_serialize(mixed $thing): mixed;
+<<__HipHopSpecific, __Native, __IsFoldable>>
+function fb_serialize(mixed $thing, int $options = 0): mixed;
 
 /* Unserialize previously fb_serialize()-ed data.
  * @param mixed $thing - What to unserialize.
  * @param mixed $success - Whether it was successful or not.
+ * @param options bitmask of options: FB_SERIALIZE_HACK_ARRAYS.
  * @return mixed - Unserialized data.
  */
 <<__HipHopSpecific, __Native>>
 function fb_unserialize(mixed $thing,
-                        mixed &$success): mixed;
+                        mixed &$success,
+                        int $options = 0): mixed;
 
 /* Serialize data into a compact format that can be unserialized by
  * fb_compact_unserialize(). In general produces smaller output compared to
@@ -29,7 +32,7 @@ function fb_unserialize(mixed $thing,
  * supported.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_compact_serialize(mixed $thing): mixed;
 
 /* Unserialize a previously fb_compact_serialize()-ed data.
@@ -91,7 +94,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8ize(mixed &$input): bool;
 
 /* Count the number of UTF-8 code points in string or byte count if it's not
@@ -100,7 +103,7 @@ function fb_utf8ize(mixed &$input): bool;
  * @return int - Returns the count of code points if valid UTF-8 else byte
  * count.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_strlen_deprecated(string $input): int;
 
 /* Count the number of UTF-8 code points in string, substituting U+FFFD for
@@ -109,7 +112,7 @@ function fb_utf8_strlen_deprecated(string $input): int;
  * @return int - Returns the number of code points interpreting string as
  * UTF-8.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_strlen(string $input): int;
 
 /* Cuts a portion of str specified by the start and length parameters.
@@ -129,7 +132,7 @@ function fb_utf8_strlen(string $input): int;
  * length parameters.  If str is shorter than start characters long, the empty
  * string will be returned.
  */
-<<__HipHopSpecific, __Native>>
+<<__HipHopSpecific, __Native, __IsFoldable>>
 function fb_utf8_substr(string $str,
                         int $start,
                         int $length = PHP_INT_MAX): string;
@@ -193,7 +196,7 @@ function fb_lazy_lstat(string $filename): mixed;
  * @return string - Real path of the file.
  */
 <<__Native>>
-function fb_lazy_realpath(string $filename): string;
+function fb_lazy_realpath(string $filename): mixed;
 
 /* This function invokes $function with the arguments specified in its
  * parameter list. It returns an array of two elements, the first being a

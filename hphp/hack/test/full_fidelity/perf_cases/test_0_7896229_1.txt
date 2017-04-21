@@ -1,0 +1,2 @@
+<?hh
+newtype iVsSVB as ( function ( ) : this ) = nTIGrZ ;

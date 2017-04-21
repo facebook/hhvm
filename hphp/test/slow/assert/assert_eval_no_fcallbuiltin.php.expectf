@@ -1,0 +1,6 @@
+
+Warning: assert(): Assertion "false" failed in %s on line %d
+
+Fatal error: Uncaught exception 'Exception' with message '' in %s:%d
+Stack trace:
+%a

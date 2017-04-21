@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -87,7 +87,7 @@ getArg(ActRec *ar, unsigned arg) {
     return 0L;
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     tvCastInPlace(tv, DType);
   }
@@ -110,7 +110,7 @@ getArg(ActRec *ar, unsigned arg,
     return def;
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     tvCastInPlace(tv, DType);
   }
@@ -137,7 +137,7 @@ getArgStrict(ActRec *ar, unsigned arg) {
     throw IncoercibleArgumentException();
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     throw IncoercibleArgumentException();
   }
@@ -163,26 +163,12 @@ getArgStrict(ActRec *ar, unsigned arg,
     return def;
   }
   if (!tvCoerceParamInPlace(tv, DType)) {
-    raise_param_type_warning(ar->func()->name()->data(),
+    raise_param_type_warning(ar->func()->displayName()->data(),
                              arg + 1, DType, tv->m_type);
     throw IncoercibleArgumentException();
   }
   return unpack_tv<DType>(tv);
 }
-
-/**
- * Parse typed values from the function call
- * based on an expect format.
- *
- * e.g.:
- *   int64_t lval;
- *   double dval;
- *   TypedValye *tv = nullptr;
- *   if (!parseArgs(ar, "ld|v", &lval, &dval, &tv)) {
- *     return false;
- *   }
- */
-bool parseArgs(ActRec *ar, const char *format, ...);
 
 /////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP

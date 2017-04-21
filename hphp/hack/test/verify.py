@@ -1,17 +1,14 @@
+#!/usr/bin/env python3
 # @lint-avoid-pyflakes2
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 import argparse
 import os.path
 import subprocess
 import sys
 import difflib
+import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-from itertools import compress
 
 max_workers = 48
 verbose = False
@@ -19,20 +16,45 @@ dump_on_failure = False
 
 Failure = namedtuple('Failure', ['fname', 'expected', 'output'])
 
-def run_test_program(files, program, expect_ext, get_flags):
+"""
+Per-test flags passed to test executable. Expected to be in a file with
+same name as test, but with .flags extension.
+"""
+
+def get_test_flags(f):
+    prefix, _ext = os.path.splitext(f)
+    path = prefix + '.flags'
+
+    if not os.path.isfile(path):
+        return []
+    with open(path) as f:
+        return shlex.split(f.read().strip())
+
+
+def run_test_program(files, program, expect_ext, get_flags, use_stdin):
     """
     Run the program and return a list of Failures.
     """
     def run(f):
         test_dir, test_name = os.path.split(f)
         flags = get_flags(test_dir)
-        cmd = [program, test_name] + flags
+        test_flags = get_test_flags(f)
+        cmd = [program]
+        if not use_stdin:
+            cmd.append(test_name)
+        cmd += flags + test_flags
         if verbose:
             print('Executing', ' '.join(cmd))
         try:
-            output = subprocess.check_output(
+            def go(stdin=None):
+                return subprocess.check_output(
                     cmd, stderr=subprocess.STDOUT, cwd=test_dir,
-                    universal_newlines=True)
+                    universal_newlines=True, stdin=stdin)
+            if use_stdin:
+                with open(f) as stdin:
+                    output = go(stdin)
+            else:
+                output = go()
         except subprocess.CalledProcessError as e:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
@@ -72,7 +94,7 @@ def dump_failures(failures):
         print(expected)
         print("\n=====   Actual output   ======\n")
         print(actual)
-        print("\n<<<<< End Actual output <<<<<<<")
+        print("\n<<<<< End Actual output <<<<<<<\n")
         print("\n>>>>>       Diff        >>>>>>>\n")
         print(''.join(diff))
         print("\n<<<<<     End Diff      <<<<<<<\n")
@@ -84,7 +106,7 @@ def get_hh_flags(test_dir):
             print("No HH_FLAGS file found")
         return []
     with open(path) as f:
-        return f.read().strip().split(' ')
+        return shlex.split(f.read().strip())
 
 def files_with_ext(files, ext):
     """
@@ -97,9 +119,9 @@ def files_with_ext(files, ext):
             result.add(prefix)
     return result
 
-def list_test_files(root, disabled_ext):
+def list_test_files(root, disabled_ext, test_ext):
     if os.path.isfile(root):
-        if root.endswith('.php'):
+        if root.endswith(test_ext):
             return [root]
         else:
             return []
@@ -109,8 +131,11 @@ def list_test_files(root, disabled_ext):
         disabled = files_with_ext(children, disabled_ext)
         for child in children:
             if child != 'disabled' and child not in disabled:
-                result.extend(list_test_files(os.path.join(root, child),
-                    disabled_ext))
+                result.extend(
+                    list_test_files(
+                        os.path.join(root, child),
+                        disabled_ext,
+                        test_ext))
         return result
     elif os.path.islink(root):
         # Some editors create broken symlinks as part of their locking scheme,
@@ -128,6 +153,7 @@ if __name__ == '__main__':
     parser.add_argument('--program', type=os.path.abspath)
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
+    parser.add_argument('--in-extension', type=str, default='.php')
     parser.add_argument('--disabled-extension', type=str,
             default='.no_typecheck')
     parser.add_argument('--verbose', action='store_true')
@@ -135,6 +161,8 @@ if __name__ == '__main__':
     parser.add_argument('--diff', action='store_true',
                        help='On test failure, show the content of the files and a diff')
     parser.add_argument('--flags', nargs=argparse.REMAINDER)
+    parser.add_argument('--stdin', action='store_true',
+                        help='Pass test input file via stdin')
     parser.epilog = "Unless --flags is passed as an argument, "\
                     "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
@@ -149,7 +177,14 @@ if __name__ == '__main__':
     if not os.path.isfile(args.program):
         raise Exception('Could not find program at %s' % args.program)
 
-    files = list_test_files(args.test_path, args.disabled_extension)
+    files = list_test_files(
+        args.test_path,
+        args.disabled_extension,
+        args.in_extension)
+
+    if len(files) == 0:
+        raise Exception(
+            'Could not find any files to test in ' + args.test_path)
 
     flags_cache = {}
 
@@ -162,14 +197,14 @@ if __name__ == '__main__':
             return flags_cache[test_dir]
 
     failures = run_test_program(
-            files, args.program, args.expect_extension, get_flags)
+        files, args.program, args.expect_extension, get_flags, args.stdin)
     total = len(files)
     if failures == []:
-        print("All %d tests passed!" % total)
+        print("All %d tests passed!\n" % total)
     else:
         record_failures(failures, args.out_extension)
         fnames = [failure.fname for failure in failures]
-        print("To review the failures, use the following command:")
+        print("To review the failures, use the following command: ")
         print("OUT_EXT=%s EXP_EXT=%s ./hphp/hack/test/review.sh %s" %
                 (args.out_extension, args.expect_extension, " ".join(fnames)))
         if dump_on_failure:

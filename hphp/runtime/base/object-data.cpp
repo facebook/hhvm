@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,23 +17,21 @@
 #include "hphp/runtime/base/object-data.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/externals.h"
-#include "hphp/runtime/base/memory-profile.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 
-#include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/member-operations.h"
@@ -55,7 +53,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-__thread int ObjectData::os_max_id;
+__thread uint32_t ObjectData::os_max_id;
 
 TRACE_SET_MOD(runtime);
 
@@ -111,8 +109,8 @@ NEVER_INLINE bool ObjectData::destructImpl() {
   // when count == 1. This difference only matters for objects that
   // resurrect themselves in their destructors, so make sure count is
   // consistent here.
-  assert(m_hdr.count == 0 || m_hdr.count == 1);
-  m_hdr.count = 0;
+  assert(m_count == 0 || m_count == 1);
+  m_count = 0;
 
   // We raise the refcount around the call to __destruct(). This is to
   // prevent the refcount from going to zero when the destructor returns.
@@ -144,6 +142,7 @@ static void freeDynPropArray(ObjectData* inst) {
   auto& table = g_context->dynPropTable;
   auto it = table.find(inst);
   assert(it != end(table));
+  assert(it->second.arr().isPHPArray());
   it->second.destroy();
   table.erase(it);
 }
@@ -152,18 +151,15 @@ NEVER_INLINE
 void ObjectData::releaseNoObjDestructCheck() noexcept {
   assert(kindIsValid());
 
-  auto const attrs = getAttributes();
-
-  if (UNLIKELY(!(attrs & Attribute::NoDestructor))) {
+  if (UNLIKELY(!getAttribute(NoDestructor))) {
     if (UNLIKELY(!destructImpl())) return;
   }
 
   auto const cls = getVMClass();
 
-  if (UNLIKELY(attrs & InstanceDtor))  return cls->instanceDtor()(this, cls);
-
-  assert(!cls->preClass()->builtinObjSize());
-  assert(!cls->preClass()->builtinODOffset());
+  if (UNLIKELY(hasInstanceDtor())) {
+    return cls->instanceDtor()(this, cls);
+  }
 
   // `this' is being torn down now---be careful about where/how you dereference
   // this from here on.
@@ -177,11 +173,12 @@ void ObjectData::releaseNoObjDestructCheck() noexcept {
 
   // Deliberately reload `attrs' to check for dynamic properties.  This made
   // gcc generate better code at the time it was done (saving a spill).
-  if (UNLIKELY(getAttributes() & HasDynPropArr)) freeDynPropArray(this);
+  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
 
   auto& pmax = os_max_id;
   if (o_id && o_id == pmax) --pmax;
 
+  invalidateWeakRef();
   auto const size =
     reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
   assert(size == sizeForNProps(nProps));
@@ -284,6 +281,7 @@ Object ObjectData::iterableObject(bool& isIterable,
 Array& ObjectData::dynPropArray() const {
   assert(getAttribute(HasDynPropArr));
   assert(g_context->dynPropTable.count(this));
+  assert(g_context->dynPropTable[this].arr().isPHPArray());
   return g_context->dynPropTable[this].arr();
 }
 
@@ -292,9 +290,18 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
     return dynPropArray();
   }
 
+  return
+    setDynPropArray(Array::attach(MixedArray::MakeReserveMixed(numDynamic)));
+}
+
+Array& ObjectData::setDynPropArray(const Array& newArr) {
   assert(!g_context->dynPropTable.count(this));
+  assert(!getAttribute(HasDynPropArr));
+  assert(newArr.isPHPArray());
+
   auto& arr = g_context->dynPropTable[this].arr();
-  arr = Array::attach(MixedArray::MakeReserveMixed(numDynamic));
+  assert(arr.isPHPArray());
+  arr = newArr;
   setAttribute(HasDynPropArr);
   return arr;
 }
@@ -328,10 +335,9 @@ Variant* ObjectData::realPropImpl(const String& propName, int flags,
   // Property is non-NULL if we reach here.
   if ((lookup.accessible && prop->m_type != KindOfUninit) ||
       (flags & (RealPropUnchecked|RealPropExist))) {
-    return reinterpret_cast<Variant*>(prop);
-  } else {
-    return nullptr;
+    return &tvAsVariant(prop);
   }
+  return nullptr;
 }
 
 Variant* ObjectData::o_realProp(const String& propName, int flags,
@@ -361,10 +367,8 @@ inline Variant ObjectData::o_getImpl(const String& propName,
   }
 
   if (getAttribute(UseGet)) {
-    TypedValue tvResult;
-    tvWriteNull(&tvResult);
-    if (invokeGet(&tvResult, propName.get())) {
-      return tvAsCVarRef(&tvResult);
+    if (auto r = invokeGet(propName.get())) {
+      return std::move(tvAsVariant(&r.val));
     }
   }
 
@@ -520,7 +524,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */) const {
     return convert_to_array(this, SystemLib::s_ArrayObjectClass);
   } else if (UNLIKELY(instanceof(SystemLib::s_ArrayIteratorClass))) {
     return convert_to_array(this, SystemLib::s_ArrayIteratorClass);
-  } else if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
     return Array::Create(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
@@ -611,8 +615,7 @@ Array ObjectData::o_toIterArray(const String& context, IterMode mode) {
     ssize_t iter = ad->iter_begin();
     auto pos_limit = ad->iter_end();
     while (iter != pos_limit) {
-      TypedValue key;
-      dynProps->get()->nvGetKey(&key, iter);
+      auto const key = dynProps->get()->nvGetKey(iter);
       iter = dynProps->get()->iter_advance(iter);
 
       // You can get this if you cast an array to object. These
@@ -673,12 +676,8 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
 
   ctx.func = ctx.cls->lookupMethod(s.get());
   if (ctx.func) {
-    // Null out this_ for static methods, unless it's a closure.
-    //
-    // Closures will sort out $this for themselves downstream, and
-    // they need this one because it's the closure object.
-    if ((ctx.func->attrs() & AttrStatic) &&
-        !ctx.func->isClosureBody()) {
+    // Null out this_ for statically called methods
+    if (ctx.func->isStaticInPrologue()) {
       ctx.this_ = nullptr;
     }
   } else {
@@ -706,9 +705,9 @@ Variant ObjectData::o_invoke(const String& s, const Variant& params,
       (!isContainer(params) && !params.isNull())) {
     return Variant(Variant::NullInit());
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, ctx, params);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(ctx, params)
+  );
 }
 
 #define INVOKE_FEW_ARGS_IMPL3                        \
@@ -749,21 +748,52 @@ Variant ObjectData::o_invoke_few_args(const String& s, int count,
     case  0: break;
   }
 
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctx, count, args);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFuncFew(ctx, count, args)
+  );
 }
 
 ObjectData* ObjectData::clone() {
   if (getAttribute(HasClone) && getAttribute(IsCppBuiltin)) {
     if (isCollection()) {
       return collections::clone(this);
-    } else if (instanceof(c_Closure::classof())) {
-      return c_Closure::Clone(this);
     }
-    always_assert(false);
+    always_assert(instanceof(c_Closure::classof()));
+    return c_Closure::fromObject(this)->clone();
   }
-  return cloneImpl();
+
+  auto obj = instanceof(Generator::getClass()) ? Generator::allocClone(this) :
+             ObjectData::newInstance(m_cls);
+  // clone prevents a leak if something throws before clone() returns
+  Object clone = Object::attach(obj);
+  auto const nProps = m_cls->numDeclProperties();
+  auto const clonePropVec = clone->propVec();
+  auto const props = m_cls->declProperties();
+  for (auto i = Slot{0}; i < nProps; i++) {
+    if (props[i].attrs & AttrNoSerialize) {
+      continue;
+    }
+    tvRefcountedDecRef(&clonePropVec[i]);
+    tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
+  }
+  if (UNLIKELY(getAttribute(HasDynPropArr))) {
+    clone->setAttribute(HasDynPropArr);
+    g_context->dynPropTable.emplace(clone.get(), dynPropArray().get());
+  }
+  if (UNLIKELY(getAttribute(HasNativeData))) {
+    Native::nativeDataInstanceCopy(clone.get(), this);
+  }
+  if (getAttribute(HasClone)) {
+    auto const method = clone->m_cls->lookupMethod(s_clone.get());
+    // PHP classes that inherit from cpp builtins that have special clone
+    // functionality *may* also define a __clone method, but it's totally
+    // fine if a __clone doesn't exist.
+    if (method || !getAttribute(IsCppBuiltin)) {
+      assert(method);
+      g_context->invokeMethodV(clone.get(), method);
+    }
+  }
+  return clone.detach();
 }
 
 bool ObjectData::equal(const ObjectData& other) const {
@@ -773,8 +803,7 @@ bool ObjectData::equal(const ObjectData& other) const {
   }
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::getTimestamp(this) ==
-      DateTimeData::getTimestamp(&other);
+    return DateTimeData::compare(this, &other) == 0;
   }
   if (getVMClass() != other.getVMClass()) return false;
   if (UNLIKELY(instanceof(SystemLib::s_ArrayObjectClass))) {
@@ -785,7 +814,7 @@ bool ObjectData::equal(const ObjectData& other) const {
     other.o_getArray(ar2);
     return ar1->equal(ar2.get(), false);
   }
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
@@ -799,10 +828,9 @@ bool ObjectData::less(const ObjectData& other) const {
   if (this == &other) return false;
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::getTimestamp(this) <
-      DateTimeData::getTimestamp(&other);
+    return DateTimeData::compare(this, &other) == -1;
   }
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
@@ -817,10 +845,9 @@ bool ObjectData::more(const ObjectData& other) const {
   if (this == &other) return false;
   if (UNLIKELY(instanceof(SystemLib::s_DateTimeInterfaceClass) &&
                other.instanceof(SystemLib::s_DateTimeInterfaceClass))) {
-    return DateTimeData::getTimestamp(this) >
-      DateTimeData::getTimestamp(&other);
+    return DateTimeData::compare(this, &other) == 1;
   }
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
     return false;
   }
@@ -840,7 +867,7 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     return (t1 < t2) ? -1 : ((t1 > t2) ? 1 : 0);
   }
   // Return 1 for different classes to match PHP7 behavior.
-  if (UNLIKELY(instanceof(SystemLib::s_ClosureClass))) {
+  if (UNLIKELY(instanceof(c_Closure::classof()))) {
     // First comparison already proves they are different
     return 1;
   }
@@ -864,7 +891,6 @@ const StaticString
   s___set("__set"),
   s___isset("__isset"),
   s___unset("__unset"),
-  s___init__("__init__"),
   s___sleep("__sleep"),
   s___toDebugDisplay("__toDebugDisplay"),
   s___wakeup("__wakeup");
@@ -883,39 +909,6 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
   }
 }
 
-TypedValue* ObjectData::propVec() {
-  auto const ret = reinterpret_cast<uintptr_t>(this + 1);
-  if (UNLIKELY(getAttribute(IsCppBuiltin))) {
-    return reinterpret_cast<TypedValue*>(ret + m_cls->builtinODTailSize());
-  }
-  return reinterpret_cast<TypedValue*>(ret);
-}
-
-const TypedValue* ObjectData::propVec() const {
-  return const_cast<ObjectData*>(this)->propVec();
-}
-
-/**
- * Only call this if cls->callsCustomInstanceInit() is true
- */
-ObjectData* ObjectData::callCustomInstanceInit() {
-  auto const init = m_cls->lookupMethod(s___init__.get());
-  assert(init);
-
-  // No need to inc-ref here because we're a newly created object and our
-  // ref-count starts at 1.
-  try {
-    DEBUG_ONLY auto const tv = g_context->invokeMethod(this, init);
-    assert(!isRefcountedType(tv.m_type));
-  } catch (...) {
-    this->setNoDestruct();
-    decRefObj(this);
-    throw;
-  }
-
-  return this;
-}
-
 // called from jit code
 ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
   auto o = new (MM().mallocSmallSize(size)) ObjectData(cls, NoInit{});
@@ -925,7 +918,7 @@ ObjectData* ObjectData::newInstanceRaw(Class* cls, uint32_t size) {
 
 // called from jit code
 ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
-  auto o = new (MM().mallocBigSize<false>(size).ptr)
+  auto o = new (MM().mallocBigSize<MemoryManager::FreeRequested>(size).ptr)
     ObjectData(cls, NoInit{});
   assert(o->hasExactlyOneRef());
   return o;
@@ -934,7 +927,7 @@ ObjectData* ObjectData::newInstanceRawBig(Class* cls, size_t size) {
 // Note: the normal object destruction path does not actually call this
 // destructor.  See ObjectData::release.
 ObjectData::~ObjectData() {
-  int& pmax = os_max_id;
+  auto& pmax = os_max_id;
   if (o_id && o_id == pmax) {
     --pmax;
   }
@@ -942,13 +935,14 @@ ObjectData::~ObjectData() {
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
+  assert(properties->isPHPArray());
   Object retval{SystemLib::s_stdclassClass};
   retval->setAttribute(HasDynPropArr);
   g_context->dynPropTable.emplace(retval.get(), properties);
   return retval;
 }
 
-Slot ObjectData::declPropInd(TypedValue* prop) const {
+Slot ObjectData::declPropInd(const TypedValue* prop) const {
   // Do an address range check to determine whether prop physically resides
   // in propVec.
   const TypedValue* pv = propVec();
@@ -1019,6 +1013,20 @@ ObjectData::PropLookup<const TypedValue*> ObjectData::getProp(
 
 //////////////////////////////////////////////////////////////////////
 
+inline InvokeResult::InvokeResult(bool ok, Variant&& v) :
+  val(*v.asTypedValue()) {
+  tvWriteUninit(v.asTypedValue());
+  val.m_aux.u_ok = ok;
+}
+
+struct ObjectData::PropAccessInfo::Hash {
+  size_t operator()(PropAccessInfo const& info) const {
+    return hash_int64_pair(reinterpret_cast<intptr_t>(info.obj),
+                           info.key->hash() |
+                           (static_cast<int64_t>(info.attr) << 32));
+  }
+};
+
 namespace {
 
 /*
@@ -1039,55 +1047,27 @@ namespace {
  * to a recursion error.
  */
 
-struct PropAccessInfo {
-  struct Hash;
-
-  bool operator==(const PropAccessInfo& o) const {
-    return obj == o.obj && attr == o.attr && key->same(o.key);
-  }
-
-  ObjectData* obj;
-  const StringData* key;      // note: not necessarily static
-  ObjectData::Attribute attr;
-};
-
-struct PropAccessInfo::Hash {
-  size_t operator()(PropAccessInfo const& info) const {
-    return folly::hash::hash_combine(
-      hash_int64(reinterpret_cast<intptr_t>(info.obj)),
-      info.key->hash(),
-      static_cast<uint32_t>(info.attr)
-    );
-  }
-};
-
-struct PropRecurInfo {
-  typedef req::hash_set<PropAccessInfo,PropAccessInfo::Hash> RecurSet;
-  const PropAccessInfo* activePropInfo;
-  RecurSet* activeSet;
-};
-
-__thread PropRecurInfo propRecurInfo;
+__thread ObjectData::PropRecurInfo propRecurInfo;
 
 template<class Invoker>
-bool magic_prop_impl(const StringData* key,
-                     const PropAccessInfo& info,
-                     Invoker invoker) {
+InvokeResult magic_prop_impl(const StringData* key,
+                             const ObjectData::PropAccessInfo& info,
+                             Invoker invoker) {
   if (UNLIKELY(propRecurInfo.activePropInfo != nullptr)) {
     if (!propRecurInfo.activeSet) {
-      propRecurInfo.activeSet = req::make_raw<PropRecurInfo::RecurSet>();
+      propRecurInfo.activeSet =
+        req::make_raw<ObjectData::PropRecurInfo::RecurSet>();
       propRecurInfo.activeSet->insert(*propRecurInfo.activePropInfo);
     }
     if (!propRecurInfo.activeSet->insert(info).second) {
       // We're already running a magic method on the same type here.
-      return false;
+      return {false, make_tv<KindOfUninit>()};
     }
     SCOPE_EXIT {
       propRecurInfo.activeSet->erase(info);
     };
 
-    invoker();
-    return true;
+    return {true, invoker()};
   }
 
   propRecurInfo.activePropInfo = &info;
@@ -1099,115 +1079,106 @@ bool magic_prop_impl(const StringData* key,
     }
   };
 
-  invoker();
-  return true;
+  return {true, invoker()};
 }
 
 // Helper for making invokers for the single-argument magic property
 // methods.  __set takes 2 args, so it uses its own function.
 struct MagicInvoker {
-  TypedValue* retval;
   const StringData* magicFuncName;
-  const PropAccessInfo& info;
+  const ObjectData::PropAccessInfo& info;
 
-  void operator()() const {
+  TypedValue operator()() const {
     auto const meth = info.obj->getVMClass()->lookupMethod(magicFuncName);
     TypedValue args[1] = {
       make_tv<KindOfString>(const_cast<StringData*>(info.key))
     };
-    *retval = g_context->invokeMethod(info.obj, meth, folly::range(args));
+    return g_context->invokeMethod(info.obj, meth, folly::range(args));
   }
 };
 
 }
 
-bool ObjectData::invokeSet(const StringData* key, TypedValue* val) {
-  TypedValue ignored;
+bool ObjectData::invokeSet(const StringData* key, const TypedValue* val) {
   auto const info = PropAccessInfo { this, key, UseSet };
-  auto ok = magic_prop_impl(key, info, [&] {
+  auto r = magic_prop_impl(key, info, [&] {
     auto const meth = m_cls->lookupMethod(s___set.get());
     TypedValue args[2] = {
       make_tv<KindOfString>(const_cast<StringData*>(key)),
       *tvToCell(val)
     };
-    ignored = g_context->invokeMethod(this, meth, folly::range(args));
+    return g_context->invokeMethod(this, meth, folly::range(args));
   });
-  if (ok) tvRefcountedDecRef(ignored);
-  return ok;
+  if (r) tvRefcountedDecRef(r.val);
+  return r.ok();
 }
 
-bool ObjectData::invokeGet(TypedValue* retval, const StringData* key) {
+InvokeResult ObjectData::invokeGet(const StringData* key) {
   auto const info = PropAccessInfo { this, key, UseGet };
   return magic_prop_impl(
     key,
     info,
-    MagicInvoker { retval, s___get.get(), info }
+    MagicInvoker { s___get.get(), info }
   );
 }
 
-bool ObjectData::invokeIsset(TypedValue* retval, const StringData* key) {
+InvokeResult ObjectData::invokeIsset(const StringData* key) {
   auto const info = PropAccessInfo { this, key, UseIsset };
   return magic_prop_impl(
     key,
     info,
-    MagicInvoker { retval, s___isset.get(), info }
+    MagicInvoker { s___isset.get(), info }
   );
 }
 
 bool ObjectData::invokeUnset(const StringData* key) {
-  TypedValue ignored;
   auto const info = PropAccessInfo { this, key, UseUnset };
-  auto ok = magic_prop_impl(key, info,
-                            MagicInvoker{&ignored, s___unset.get(), info});
-  if (ok) tvRefcountedDecRef(ignored);
-  return ok;
+  auto r = magic_prop_impl(key, info,
+                           MagicInvoker{s___unset.get(), info});
+  if (r) tvRefcountedDecRef(r.val);
+  return r.ok();
 }
 
-static bool guardedNativePropResult(TypedValue* retval, Variant result) {
+static InvokeResult guardedNativePropResult(Variant result) {
   if (!Native::isPropHandled(result)) {
-    return false;
+    return {false, make_tv<KindOfUninit>()};
   }
-  tvDup(*result.asTypedValue(), *retval);
-  return true;
+  return InvokeResult{true, std::move(result)};
 }
 
-bool ObjectData::invokeNativeGetProp(TypedValue* retval,
-                                     const StringData* key) {
-  return guardedNativePropResult(retval,
-                                 Native::getProp(Object{this}, StrNR(key)));
+InvokeResult ObjectData::invokeNativeGetProp(const StringData* key) {
+  return guardedNativePropResult(
+      Native::getProp(Object{this}, StrNR(key))
+  );
 }
 
 bool ObjectData::invokeNativeSetProp(const StringData* key, TypedValue* val) {
-  TypedValue ignored;
-  auto ok = guardedNativePropResult(&ignored,
+  auto r = guardedNativePropResult(
     Native::setProp(Object{this}, StrNR(key), tvAsVariant(val))
   );
-  if (ok) tvRefcountedDecRef(ignored);
-  return ok;
+  tvRefcountedDecRef(r.val);
+  return r.ok();
 }
 
-bool ObjectData::invokeNativeIssetProp(TypedValue* retval,
-                                       const StringData* key) {
-  return guardedNativePropResult(retval,
-                                 Native::issetProp(Object{this}, StrNR(key)));
+InvokeResult ObjectData::invokeNativeIssetProp(const StringData* key) {
+  return guardedNativePropResult(
+      Native::issetProp(Object{this}, StrNR(key))
+  );
 }
 
 bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
-  TypedValue ignored;
-  auto ok = guardedNativePropResult(&ignored,
-                               Native::unsetProp(Object{this}, StrNR(key)));
-  if (ok) tvRefcountedDecRef(ignored);
-  return ok;
+  auto r = guardedNativePropResult(
+      Native::unsetProp(Object{this}, StrNR(key))
+  );
+  tvRefcountedDecRef(r.val);
+  return r.ok();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-template <bool warn, bool define>
-TypedValue* ObjectData::propImpl(
-  TypedValue* tvRef,
-  Class* ctx,
-  const StringData* key
-) {
+template<MOpMode mode>
+TypedValue* ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
+                                 const StringData* key) {
   auto const lookup = getProp(ctx, key);
   auto const prop = lookup.prop;
 
@@ -1217,17 +1188,24 @@ TypedValue* ObjectData::propImpl(
       if (prop->m_type != KindOfUninit) return prop;
 
       // Property is unset, try __get.
-      if (getAttribute(UseGet) && invokeGet(tvRef, key)) return tvRef;
+      if (getAttribute(UseGet)) {
+        if (auto r = invokeGet(key)) {
+          tvCopy(r.val, *tvRef);
+          return tvRef;
+        }
+      }
 
-      if (warn) raiseUndefProp(key);
-
-      if (define) return prop;
-      return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+      if (mode == MOpMode::Warn) raiseUndefProp(key);
+      if (mode == MOpMode::Define) return prop;
+      return const_cast<TypedValue*>(&immutable_null_base);
     }
 
     // Property is not accessible, try __get.
-    if (getAttribute(UseGet) && invokeGet(tvRef, key)) {
-      return tvRef;
+    if (getAttribute(UseGet)) {
+      if (auto r = invokeGet(key)) {
+        tvCopy(r.val, *tvRef);
+        return tvRef;
+      }
     }
 
     // Property exists, but it is either protected or private since accessible
@@ -1242,67 +1220,59 @@ TypedValue* ObjectData::propImpl(
       m_cls->preClass()->name()->data(),
       key->data()
     );
-
-    *tvRef = make_tv<KindOfUninit>();
-    return tvRef;
   }
 
   // First see if native getter is implemented.
-  if (getAttribute(HasNativePropHandler) && invokeNativeGetProp(tvRef, key)) {
-    return tvRef;
+  if (getAttribute(HasNativePropHandler)) {
+    if (auto r = invokeNativeGetProp(key)) {
+      tvCopy(r.val, *tvRef);
+      return tvRef;
+    }
   }
 
   // Next try calling user-level `__get` if it's used.
-  if (getAttribute(UseGet) && invokeGet(tvRef, key)) {
-    return tvRef;
+  if (getAttribute(UseGet)) {
+    if (auto r = invokeGet(key)) {
+      tvCopy(r.val, *tvRef);
+      return tvRef;
+    }
   }
 
   if (UNLIKELY(!*key->data())) {
     throw_invalid_property_name(StrNR(key));
-    *tvRef = make_tv<KindOfUninit>();
-    return tvRef;
   }
 
-  if (warn) raiseUndefProp(key);
-
-  if (define) {
+  if (mode == MOpMode::Warn) raiseUndefProp(key);
+  if (mode == MOpMode::Define) {
     auto& var = reserveProperties().lvalAt(StrNR(key), AccessFlags::Key);
     return var.asTypedValue();
   }
 
-  return const_cast<TypedValue*>(init_null_variant.asTypedValue());
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
 TypedValue* ObjectData::prop(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<false, false>(tvRef, ctx, key);
+  return propImpl<MOpMode::None>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propD(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<false, true>(tvRef, ctx, key);
+  return propImpl<MOpMode::Define>(tvRef, ctx, key);
 }
 
 TypedValue* ObjectData::propW(
   TypedValue* tvRef,
-  Class* ctx,
+  const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<true, false>(tvRef, ctx, key);
-}
-
-TypedValue* ObjectData::propWD(
-  TypedValue* tvRef,
-  Class* ctx,
-  const StringData* key
-) {
-  return propImpl<true, true>(tvRef, ctx, key);
+  return propImpl<MOpMode::Warn>(tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
@@ -1313,17 +1283,18 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
     return !cellIsNull(tvToCell(prop));
   }
 
-  auto tv = make_tv<KindOfUninit>();
-
-  if (getAttribute(HasNativePropHandler) && invokeNativeIssetProp(&tv, key)) {
-    tvCastToBooleanInPlace(&tv);
-    return tv.m_data.num;
+  if (getAttribute(HasNativePropHandler)) {
+    if (auto r = invokeNativeIssetProp(key)) {
+      tvCastToBooleanInPlace(&r.val);
+      return r.val.m_data.num;
+    }
   }
 
-  if (!getAttribute(UseIsset) || !invokeIsset(&tv, key)) return false;
-
-  tvCastToBooleanInPlace(&tv);
-  return tv.m_data.num;
+  if (!getAttribute(UseIsset)) return false;
+  auto r = invokeIsset(key);
+  if (!r) return false;
+  tvCastToBooleanInPlace(&r.val);
+  return r.val.m_data.num;
 }
 
 bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
@@ -1334,30 +1305,30 @@ bool ObjectData::propEmptyImpl(const Class* ctx, const StringData* key) {
     return !cellToBool(*tvToCell(prop));
   }
 
-  auto tv = make_tv<KindOfUninit>();
-
-  if (getAttribute(HasNativePropHandler) && invokeNativeIssetProp(&tv, key)) {
-    tvCastToBooleanInPlace(&tv);
-    if (!tv.m_data.num) {
-      return true;
+  if (getAttribute(HasNativePropHandler)) {
+    if (auto r = invokeNativeIssetProp(key)) {
+      tvCastToBooleanInPlace(&r.val);
+      if (!r.val.m_data.num) return true;
+      if (auto r2 = invokeNativeGetProp(key)) {
+        auto const emptyResult = !cellToBool(*tvToCell(&r2.val));
+        tvRefcountedDecRef(&r2.val);
+        return emptyResult;
+      }
+      return false;
     }
-    if (invokeNativeGetProp(&tv, key)) {
-      auto const emptyResult = !cellToBool(*tvToCell(&tv));
-      tvRefcountedDecRef(&tv);
-      return emptyResult;
-    }
-    return false;
   }
 
-  if (!getAttribute(UseIsset) || !invokeIsset(&tv, key)) return true;
+  if (!getAttribute(UseIsset)) return true;
+  auto r = invokeIsset(key);
+  if (!r) return true;
 
-  tvCastToBooleanInPlace(&tv);
-  if (!tv.m_data.num) return true;
+  tvCastToBooleanInPlace(&r.val);
+  if (!r.val.m_data.num) return true;
 
   if (getAttribute(UseGet)) {
-    if (invokeGet(&tv, key)) {
-      auto const emptyResult = !cellToBool(*tvToCell(&tv));
-      tvRefcountedDecRef(&tv);
+    if (auto r = invokeGet(key)) {
+      auto const emptyResult = !cellToBool(*tvToCell(&r.val));
+      tvRefcountedDecRef(&r.val);
       return emptyResult;
     }
   }
@@ -1437,19 +1408,17 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 
   if (prop && lookup.accessible) {
     if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
-      auto get_result = make_tv<KindOfUninit>();
-      if (invokeGet(&get_result, key)) {
-        SCOPE_EXIT { tvRefcountedDecRef(get_result); };
-        setopBody(tvToCell(&get_result), op, val);
+      if (auto r = invokeGet(key)) {
+        SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+        setopBody(tvToCell(&r.val), op, val);
         if (getAttribute(UseSet)) {
-          assert(tvRef.m_type == KindOfUninit);
-          cellDup(*tvToCell(&get_result), tvRef);
+          cellDup(*tvToCell(&r.val), tvRef);
           if (invokeSet(key, &tvRef)) {
             return &tvRef;
           }
           tvRef.m_type = KindOfUninit;
         }
-        cellDup(*tvToCell(&get_result), *prop);
+        cellDup(*tvToCell(&r.val), *prop);
         return prop;
       }
     }
@@ -1462,28 +1431,29 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
 
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
-    if (invokeNativeGetProp(&tvRef, key)) {
+    if (auto r = invokeNativeGetProp(key)) {
+      tvCopy(r.val, tvRef);
       setopBody(tvToCell(&tvRef), op, val);
       if (invokeNativeSetProp(key, &tvRef)) {
         return &tvRef;
       }
     }
+    // XXX else, write tvRef = null?
   }
 
   auto const useSet = getAttribute(UseSet);
   auto const useGet = getAttribute(UseGet);
 
   if (useGet && !useSet) {
-    auto get_result = make_tv<KindOfNull>();
-    // If invokeGet fails due to recursion, it leaves the KindOfNull.
-    invokeGet(&get_result, key);
-    SCOPE_EXIT { tvRefcountedDecRef(get_result); };
+    auto r = invokeGet(key);
+    if (!r) tvWriteNull(&r.val);
+    SCOPE_EXIT { tvRefcountedDecRef(r.val); };
 
     // Note: the tvUnboxIfNeeded comes *after* the setop on purpose
     // here, even though it comes before the IncDecOp in the analogous
     // situation in incDecProp.  This is to match zend 5.5 behavior.
-    setopBody(tvToCell(&get_result), op, val);
-    tvUnboxIfNeeded(&get_result);
+    setopBody(tvToCell(&r.val), op, val);
+    tvUnboxIfNeeded(&r.val);
 
     if (prop) raise_error("Cannot access protected property");
     prop = reinterpret_cast<TypedValue*>(
@@ -1494,16 +1464,17 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
     // unlike the non-magic case below, we may have already created it
     // under the recursion into invokeGet above, so we need to do a
     // tvSet here.
-    tvSet(get_result, *prop);
+    tvSet(r.val, *prop);
     return prop;
   }
 
   if (useGet && useSet) {
-    if (invokeGet(&tvRef, key)) {
+    if (auto r = invokeGet(key)) {
       // Matching zend again: incDecProp does an unbox before the
       // operation, but setop doesn't need to here.  (We'll unbox the
       // value that gets passed to the magic setter, though, since
       // __set functions can't take parameters by reference.)
+      tvCopy(r.val, tvRef);
       setopBody(tvToCell(&tvRef), op, val);
       invokeSet(key, &tvRef);
       return &tvRef;
@@ -1523,46 +1494,42 @@ TypedValue* ObjectData::setOpProp(TypedValue& tvRef,
   return prop;
 }
 
-// writes result into dest without decreffing old value.
-void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
-                            TypedValue& dest) {
+Cell ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key) {
   auto const lookup = getProp(ctx, key);
   auto prop = lookup.prop;
 
   if (prop && lookup.accessible) {
-    auto get_result = make_tv<KindOfNull>();
-    if (prop->m_type == KindOfUninit && getAttribute(UseGet) &&
-        invokeGet(&get_result, key)) {
-      SCOPE_EXIT { tvRefcountedDecRef(get_result); };
-      IncDecBody(op, &get_result, &dest);
-      if (getAttribute(UseSet)) {
-        invokeSet(key, &get_result);
-        return;
+    if (prop->m_type == KindOfUninit && getAttribute(UseGet)) {
+      if (auto r = invokeGet(key)) {
+        SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+        auto const dest = IncDecBody(op, &r.val);
+        if (getAttribute(UseSet)) {
+          invokeSet(key, &r.val);
+          return dest;
+        }
+        tvCopy(r.val, *prop);
+        tvWriteNull(&r.val); // suppress decref
+        return dest;
       }
-      memcpy(prop, &get_result, sizeof(TypedValue));
-      get_result.m_type = KindOfNull; // suppress decref
-      return;
     }
     if (prop->m_type == KindOfUninit) {
       tvWriteNull(prop);
     } else {
       prop = tvToCell(prop);
     }
-    IncDecBody(op, prop, &dest);
-    return;
+    return IncDecBody(op, prop);
   }
 
   if (UNLIKELY(!*key->data())) throw_invalid_property_name(StrNR(key));
 
   // Native accessors.
   if (getAttribute(HasNativePropHandler)) {
-    auto get_result = make_tv<KindOfUninit>();
-    if (invokeNativeGetProp(&get_result, key)) {
-      SCOPE_EXIT { tvRefcountedDecRef(get_result); };
-      tvUnboxIfNeeded(&get_result);
-      IncDecBody(op, &get_result, &dest);
-      if (invokeNativeSetProp(key, &get_result)) {
-        return;
+    if (auto r = invokeNativeGetProp(key)) {
+      SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+      tvUnboxIfNeeded(&r.val);
+      auto const dest = IncDecBody(op, &r.val);
+      if (invokeNativeSetProp(key, &r.val)) {
+        return dest;
       }
     }
   }
@@ -1571,12 +1538,11 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
   auto const useGet = getAttribute(UseGet);
 
   if (useGet && !useSet) {
-    auto get_result = make_tv<KindOfNull>();
-    // If invokeGet fails due to recursion, it leaves KindOfNull in get_result.
-    invokeGet(&get_result, key);
-    SCOPE_EXIT { tvRefcountedDecRef(get_result); };
-    tvUnboxIfNeeded(&get_result);
-    IncDecBody(op, &get_result, &dest);
+    auto r = invokeGet(key);
+    if (!r) tvWriteNull(&r.val);
+    SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+    tvUnboxIfNeeded(&r.val);
+    auto const dest = IncDecBody(op, &r.val);
     if (prop) raise_error("Cannot access protected property");
     prop = reinterpret_cast<TypedValue*>(
       &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
@@ -1586,18 +1552,17 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     // unlike the non-magic case below, we may have already created it
     // under the recursion into invokeGet above, so we need to do a
     // tvSet here.
-    tvSet(get_result, *prop);
-    return;
+    tvSet(r.val, *prop);
+    return dest;
   }
 
   if (useGet && useSet) {
-    auto get_result = make_tv<KindOfUninit>();
-    if (invokeGet(&get_result, key)) {
-      SCOPE_EXIT { tvRefcountedDecRef(get_result); };
-      tvUnboxIfNeeded(&get_result);
-      IncDecBody(op, &get_result, &dest);
-      invokeSet(key, &get_result);
-      return;
+    if (auto r = invokeGet(key)) {
+      SCOPE_EXIT { tvRefcountedDecRef(r.val); };
+      tvUnboxIfNeeded(&r.val);
+      auto const dest = IncDecBody(op, &r.val);
+      invokeSet(key, &r.val);
+      return dest;
     }
   }
 
@@ -1610,7 +1575,7 @@ void ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key,
     &reserveProperties().lvalAt(StrNR(key), AccessFlags::Key)
   );
   assert(prop->m_type == KindOfNull); // cannot exist yet
-  IncDecBody(op, prop, &dest);
+  return IncDecBody(op, prop);
 }
 
 void ObjectData::unsetProp(Class* ctx, const StringData* key) {
@@ -1621,7 +1586,7 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
   if (prop && lookup.accessible && prop->m_type != KindOfUninit) {
     if (propInd != kInvalidSlot) {
       // Declared property.
-      tvSetIgnoreRef(*null_variant.asTypedValue(), *prop);
+      tvSetIgnoreRef(*uninit_variant.asTypedValue(), *prop);
     } else {
       // Dynamic property.
       dynPropArray().remove(StrNR(key).asString(), true /* isString */);
@@ -1653,6 +1618,10 @@ void ObjectData::raiseObjToIntNotice(const char* clsName) {
   raise_notice("Object of class %s could not be converted to int", clsName);
 }
 
+void ObjectData::raiseObjToDoubleNotice(const char* clsName) {
+  raise_notice("Object of class %s could not be converted to float", clsName);
+}
+
 void ObjectData::raiseAbstractClassError(Class* cls) {
   Attr attrs = cls->attrs();
   raise_error("Cannot instantiate %s %s",
@@ -1673,8 +1642,9 @@ void ObjectData::getProp(const Class* klass,
                          Array& props,
                          std::vector<bool>& inserted) const {
   if (prop->attrs()
-      & (AttrStatic | // statics aren't part of individual instances
-         AttrBuiltin  // runtime-internal attrs, such as the <<Memoize>> cache
+      & (AttrStatic |    // statics aren't part of individual instances
+         AttrNoSerialize // runtime-internal attrs, such as the
+                         // <<__Memoize>> cache
         )) {
     return;
   }
@@ -1767,56 +1737,8 @@ bool ObjectData::hasToString() {
   return (m_cls->getToString() != nullptr);
 }
 
-void ObjectData::cloneSet(ObjectData* clone) {
-  auto const nProps = m_cls->numDeclProperties();
-  auto const clonePropVec = clone->propVec();
-  for (auto i = Slot{0}; i < nProps; i++) {
-    tvRefcountedDecRef(&clonePropVec[i]);
-    tvDupFlattenVars(&propVec()[i], &clonePropVec[i]);
-  }
-  if (UNLIKELY(getAttribute(HasDynPropArr))) {
-    clone->setAttribute(HasDynPropArr);
-    g_context->dynPropTable.emplace(clone, dynPropArray().get());
-  }
-}
-
-ObjectData* ObjectData::cloneImpl() {
-  ObjectData* obj = instanceof(Generator::getClass())
-                    ? Generator::allocClone(this)
-                    : ObjectData::newInstance(m_cls);
-  Object o = Object::attach(obj);
-  cloneSet(o.get());
-  if (UNLIKELY(getAttribute(HasNativeData))) {
-    Native::nativeDataInstanceCopy(o.get(), this);
-  }
-
-  auto const hasCloneBit = getAttribute(HasClone);
-
-  if (!hasCloneBit) return o.detach();
-
-  auto const method = o->m_cls->lookupMethod(s_clone.get());
-
-  // PHP classes that inherit from cpp builtins that have special clone
-  // functionality *may* also define a __clone method, but it's totally
-  // fine if a __clone doesn't exist.
-  if (!method && getAttribute(IsCppBuiltin)) return o.detach();
-  assert(method);
-
-  g_context->invokeMethodV(o.get(), method);
-
-  return o.detach();
-}
-
-bool ObjectData::hasDynProps() const {
-  return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
-}
-
 const char* ObjectData::classname_cstr() const {
   return getClassName().data();
-}
-
-void ObjectData::compileTimeAssertions() {
-  static_assert(offsetof(ObjectData, m_hdr) == HeaderOffset, "");
 }
 
 } // HPHP

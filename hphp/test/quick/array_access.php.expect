@@ -3,15 +3,15 @@ In C::offsetGet()
 In D::offsetGet()
 In D::__destruct()
 In E::offsetGet()
-In E::__destruct()
-In E::__destruct()
+In E::__destruct() 1
+In E::__destruct() 2
 string(5) "hello"
 In C::offsetGet()
 In D::offsetGet()
 In D::__destruct()
 In E::offsetGet()
-In E::__destruct()
-In E::__destruct()
+In E::__destruct() 3
+In E::__destruct() 4
 In cls::offsetExists(two)
 bool(true)
 In cls::offsetGet(two)

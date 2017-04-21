@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ struct SSLSocketData;
 /**
  * TCP sockets running SSL protocol.
  */
-struct SSLSocket : Socket {
+struct SSLSocket final : Socket {
   enum class CryptoMethod {
     ClientSSLv2,
     ClientSSLv3,
@@ -51,6 +51,10 @@ struct SSLSocket : Socket {
 
   static int GetSSLExDataIndex();
   static req::ptr<SSLSocket> Create(int fd, int domain, const HostURL &hosturl,
+                                    double timeout,
+                                    const req::ptr<StreamContext>& ctx);
+  static req::ptr<SSLSocket> Create(int fd, int domain, CryptoMethod method,
+                                    std::string address, int port,
                                     double timeout,
                                     const req::ptr<StreamContext>& ctx);
 
@@ -75,6 +79,8 @@ struct SSLSocket : Socket {
   virtual int64_t readImpl(char *buffer, int64_t length) override;
   virtual int64_t writeImpl(const char *buffer, int64_t length) override;
   virtual bool checkLiveness() override;
+
+  CryptoMethod getCryptoMethod();
 
   explicit SSLSocket(std::shared_ptr<SSLSocketData> data);
   std::shared_ptr<SSLSocketData> getData() const {
@@ -106,13 +112,14 @@ struct SSLSocketData : SocketData {
   virtual bool closeImpl();
   ~SSLSocketData();
 private:
-  friend class SSLSocket;
+  friend struct SSLSocket;
   bool m_ssl_active{false};
   bool m_client{false};
   bool m_enable_on_connect{false};
   bool m_state_set{false};
   bool m_is_blocked{true};
   SSL *m_handle{nullptr};
+  SSL_CTX *m_ctx{nullptr};
   SSLSocket::CryptoMethod m_method{(SSLSocket::CryptoMethod)-1};
   double m_connect_timeout{0};
 };
@@ -120,8 +127,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // helper class
 
-class Certificate : public SweepableResourceData {
-public:
+struct Certificate : SweepableResourceData {
   X509 *m_cert;
   explicit Certificate(X509 *cert) : m_cert(cert) { assert(m_cert);}
   ~Certificate() {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,7 +83,7 @@ ScalarExpression::ScalarExpression
         m_type = T_DNUMBER;
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         m_type = T_STRING;
         return;
@@ -91,11 +91,17 @@ ScalarExpression::ScalarExpression
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+      case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -163,9 +169,7 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
         m_translated.clear();
         if (b && b->is(BlockScope::ClassScope)) {
           auto clsScope = dynamic_pointer_cast<ClassScope>(b);
-          if (!clsScope->isTrait()) {
-            m_translated = clsScope->getOriginalName();
-          }
+          m_translated = clsScope->getOriginalName();
         }
         if (m_type == T_METHOD_C) {
           if (FunctionScopePtr func = getFunctionScope()) {

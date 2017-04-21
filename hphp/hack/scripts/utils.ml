@@ -35,11 +35,19 @@ let read_process_output name args =
   with_pipe @@ fun in_r in_w ->
   with_pipe @@ fun out_r out_w ->
   let pid = Unix.create_process name args in_r out_w out_w in
-  let out_inch = Unix.in_channel_of_descr out_r in
-  let line = input_line out_inch in
   match Unix.waitpid [] pid with
-  | _, Unix.WEXITED 0 -> line
-  | _ -> raise (Failure line)
+  | _, Unix.WEXITED 0 ->
+      input_line (Unix.in_channel_of_descr out_r)
+  | _, Unix.WEXITED 127 ->
+      raise (Failure (name ^ ": command not found"))
+  | _, Unix.WEXITED 128 ->
+      raise (Failure (input_line (Unix.in_channel_of_descr out_r)))
+  | _, Unix.WEXITED code ->
+      raise (Failure (name ^ ": exited code "^(string_of_int code)))
+  | _, Unix.WSIGNALED signal ->
+      raise (Failure (name ^ ": killed by signal " ^ (string_of_int signal)))
+  | _, Unix.WSTOPPED signal ->
+      raise (Failure (name ^ ": stopped by signal " ^ (string_of_int signal)))
 
 let string_of_file filename =
   with_in_channel filename @@ fun ic ->

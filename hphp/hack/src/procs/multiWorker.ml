@@ -10,14 +10,14 @@
 
 open Core
 
-type 'a bucket =
-| Job of 'a list
-| Wait
+type 'a nextlist = 'a list Bucket.next
 
-type 'a nextlist_dynamic =
-  unit -> 'a bucket
+type 'a bucket = 'a Bucket.bucket =
+  | Job of 'a
+  | Wait
+  | Done
 
-let single_threaded_call_dynamic job merge neutral next =
+let single_threaded_call job merge neutral next =
   let x = ref (next()) in
   let acc = ref neutral in
   (* This is a just a sanity check that the job is serializable and so
@@ -25,7 +25,7 @@ let single_threaded_call_dynamic job merge neutral next =
    * mode.
    *)
   let _ = Marshal.to_string job [Marshal.Closures] in
-  while !x <> Job [] do
+  while !x <> Done do
     match !x with
     | Wait ->
         (* this state should never be reached in single threaded mode, since
@@ -33,67 +33,60 @@ let single_threaded_call_dynamic job merge neutral next =
         failwith "stuck!"
     | Job l ->
         let res = job neutral l in
-        acc := merge !acc res;
+        acc := merge res !acc;
         x := next()
+    | Done -> ()
   done;
   !acc
 
-let call_dynamic workers ~job ~merge ~neutral ~next =
-  match workers with
-  | None -> single_threaded_call_dynamic job merge neutral next
-  | Some workers ->
-    let acc = ref neutral in
-    let procs = ref workers in
-    let busy = ref 0 in
-    let waiting_procs = ref [] in
-      try
-        while true do
-          List.iter !procs begin fun proc ->
-            let bucket_opt = next () in
-            match bucket_opt with
-            | Wait -> waiting_procs := proc::!waiting_procs (* wait *)
-            | Job bucket -> (
-              if bucket = [] then raise Exit;
-              incr busy;
-              ignore (Worker.call proc
-                        begin fun xl ->
-                          job neutral xl
-                        end
-                        bucket
-              );
-            )
-          end;
-          let ready_procs = Worker.select workers in
-          List.iter ready_procs begin fun proc ->
-            let res = Worker.get_result proc (Obj.magic 0) in
-            decr busy;
-            acc := merge res !acc
-          end;
-          if ready_procs = [] then
-            (* nothing changed, so no use calling next with the waiting procs,
-               since they would end up waiting again *)
-            procs := []
-          else (
-            (* call next with read_procs and waiting_procs *)
-            procs := List.rev_append !waiting_procs ready_procs;
-            waiting_procs := [];
-          )
-        done;
-        assert false
-      with Exit ->
-        while !busy > 0 do
-          List.iter (Worker.select workers) begin fun proc ->
-            let res = Worker.get_result proc (Obj.magic 0) in
-            decr busy;
-            acc := merge res !acc;
-          end;
-        done;
-        !acc
-
-(* special case of call_dynamic with no waiting, useful for static worklists *)
-type 'a nextlist =
-  unit -> 'a list
+let multi_threaded_call
+  (type a) (type b) (type c)
+  workers (job: c -> a -> b)
+  (merge: b -> c -> c)
+  (neutral: c)
+  (next: a Bucket.next) =
+  let rec dispatch workers handles acc =
+    (* 'worker' represents available workers. *)
+    (* 'handles' represents pendings jobs. *)
+    (* 'acc' are the accumulated results. *)
+    match workers with
+    | [] when handles = [] -> acc
+    | [] ->
+        (* No worker available: wait for some workers to finish. *)
+        collect [] handles acc
+    | worker :: workers ->
+        (* At least one worker is available... *)
+        match next () with
+        | Wait -> collect (worker :: workers) handles acc
+        | Done ->
+            (* ... but no more job to be distributed, let's collect results. *)
+            dispatch [] handles acc
+        | Job bucket ->
+            (* ... send a job to the worker.*)
+            let handle =
+              Worker.call worker
+                (fun xl -> job neutral xl)
+                bucket in
+            dispatch workers (handle :: handles) acc
+  and collect workers handles acc =
+    let { Worker.readys; waiters } = Worker.select handles in
+    let workers = List.map ~f:Worker.get_worker readys @ workers in
+    (* Collect the results. *)
+    let acc =
+      List.fold_left
+        ~f:(fun acc h -> merge (Worker.get_result h) acc)
+        ~init:acc
+        readys in
+    (* And continue.. *)
+    dispatch workers waiters acc in
+  dispatch workers [] neutral
 
 let call workers ~job ~merge ~neutral ~next =
-  let next = fun () -> Job (next ()) in
-  call_dynamic workers ~job ~merge ~neutral ~next
+  match workers with
+  | None -> single_threaded_call job merge neutral next
+  | Some workers -> multi_threaded_call workers job merge neutral next
+
+let next ?max_size workers =
+  Bucket.make
+    ~num_workers: (match workers with Some w -> List.length w | None -> 1)
+    ?max_size

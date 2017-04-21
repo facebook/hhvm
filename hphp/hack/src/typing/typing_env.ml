@@ -8,77 +8,19 @@
  *
  *)
 
+include Typing_env_types
 open Core
-open Utils
+open Decl_env
 open Typing_defs
 open Nast
 
 module SN = Naming_special_names
 module Dep = Typing_deps.Dep
+module TLazyHeap = Typing_lazy_heap
+module LEnvC = Typing_lenv_cont
+module Cont = Typing_continuations
 
-(* The following classes are used to make sure we make no typing
- * mistake when interacting with the database. The database knows
- * how to associate a string to a string. We need to deserialize
- * the string and make sure the type is correct. By using these
- * modules, the places where there could be a typing mistake are
- * very well isolated.
-*)
-
-module Funs = Typing_heap.Funs
-module Classes = Typing_heap.Classes
-module Typedefs = Typing_heap.Typedefs
-module GConsts = Typing_heap.GConsts
-
-type fake_members = {
-  last_call : Pos.t option;
-  invalid   : SSet.t;
-  valid     : SSet.t;
-}
-(* Along with a type, each local variable has a expression id associated with
- * it. This is used when generating expression dependent types for the 'this'
- * type. The idea is that if two local variables have the same expression_id
- * then they refer to the same late bound type, and thus have compatible
- * 'this' types.
- *)
-type expression_id = Ident.t
-type local = locl ty list * locl ty * expression_id
-type local_env = fake_members * local IMap.t
-
-type env = {
-  pos     : Pos.t      ;
-  tenv    : locl ty IMap.t ;
-  subst   : int IMap.t ;
-  lenv    : local_env  ;
-  genv    : genv       ;
-  todo    : tfun list  ;
-  in_loop : bool       ;
-  (* when encountering Tunresolved in the supertype, do we allow it to grow?
-   * if false, this allows the opposite, i.e. Tunresolved can grow in the
-   * subtype. *)
-  grow_super : bool      ;
-}
-
-and genv = {
-  tcopt   : TypecheckerOptions.t;
-  mode    : FileInfo.mode;
-  return  : locl ty;
-  parent_id : string;
-  parent  : decl ty;
-  self_id : string;
-  self    : locl ty;
-  static  : bool;
-  fun_kind : Ast.fun_kind;
-  anons   : anon IMap.t;
-  droot   : Typing_deps.Dep.variant option;
-  file    : Relative_path.t;
-}
-
-(* An anonymous function
- * the environment + the fun parameters + the captured identifiers
-*)
-and anon = env -> locl fun_params -> env * locl ty
-and tfun = env -> env
-
+let get_tcopt env = env.genv.tcopt
 let fresh () =
   Ident.tmp()
 
@@ -90,6 +32,8 @@ let add_subst env x x' =
   then { env with subst = IMap.add x x' env.subst }
   else env
 
+(* Apply variable-to-variable substitution from environment. Update environment
+   if we ended up iterating (cf path compression in union-find) *)
 let rec get_var env x =
   let x' = IMap.get x env.subst in
   (match x' with
@@ -100,6 +44,9 @@ let rec get_var env x =
       env, x'
   )
 
+(* This is basically union from union-find, but without balancing
+ *  (linking the smaller tree to the larger tree). In practice this
+ * isn't important: path compression is much more significant. *)
 let rename env x x' =
   let env, x = get_var env x in
   let env, x' = get_var env x' in
@@ -110,11 +57,15 @@ let add env x ty =
   let env, x = get_var env x in
   { env with tenv = IMap.add x ty env.tenv }
 
-let get_type env x =
+let fresh_unresolved_type env =
+  let v = Ident.tmp () in
+  add env v (Reason.Rnone, Tunresolved []), (Reason.Rnone, Tvar v)
+
+let get_type env x_reason x =
   let env, x = get_var env x in
   let ty = IMap.get x env.tenv in
   match ty with
-  | None -> env, (Reason.none, Tany)
+  | None -> env, (x_reason, Tany)
   | Some ty -> env, ty
 
 let get_type_unsafe env x =
@@ -126,18 +77,8 @@ let get_type_unsafe env x =
 
 let expand_type env x =
   match x with
-  | _, Tvar x -> get_type env x
+  | r, Tvar x -> get_type env r x
   | x -> env, x
-
-let expand_type_recorded env set ty =
-  match ty with
-  | r, Tvar x -> begin
-    let env, ty =
-      if ISet.mem x set then env, (r, Tany) else expand_type env ty in
-    let set = ISet.add x set in
-    env, set, ty
-  end
-  | x -> env, set, x
 
 let make_ft p params ret_ty =
   let arity = List.length params in
@@ -147,137 +88,111 @@ let make_ft p params ret_ty =
     ft_abstract = false;
     ft_arity    = Fstandard (arity, arity);
     ft_tparams  = [];
+    ft_where_constraints = [];
     ft_params   = params;
     ft_ret      = ret_ty;
   }
 
 let get_shape_field_name = function
-  | SFlit (_, s) -> s
-  | SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
+  | Ast.SFlit (_, s) -> s
+  | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
-(* When printing out types (by hh_show()), TVars are printed with an
- * associated identifier. We reindex them (in the order of appearance) to be
- * consecutive integers starting from zero, because the internal identifier
- * can change due to unrelated reasons, which breaks tests. *)
-let printable_tvar_ids = ref IMap.empty
+let empty_bounds = []
+let singleton_bound ty = [ty]
 
-let get_printable_tvar_id x =
-  match IMap.get x !printable_tvar_ids with
-    | None ->
-        let res = (IMap.cardinal !printable_tvar_ids) + 1 in
-        printable_tvar_ids := IMap.add
-          x
-          res
-          !printable_tvar_ids;
-       res
-    | Some v -> v
+let get_lower_bounds env name =
+  match SMap.get name env.lenv.tpenv with
+  | None -> empty_bounds
+  | Some {lower_bounds; _} -> lower_bounds
 
-let debug_shape_map fdm f =
-  let o = print_string in
-  let cmp = (fun (k1, _) (k2, _) ->
-     compare (get_shape_field_name k1) (get_shape_field_name k2)) in
-  let fields = List.sort ~cmp (ShapeMap.elements fdm) in
-  let o_field = (fun (k, v) ->
-     o (get_shape_field_name k); o " => "; f v;)
-  in
-  (match fields with
-  | [] -> ()
-  | f::l ->
-     o_field f;
-     List.iter l (fun f -> o ", "; o_field f;))
+let get_upper_bounds env name =
+  match SMap.get name env.lenv.tpenv with
+  | None -> empty_bounds
+  | Some {upper_bounds; _} -> upper_bounds
 
-let rec debug stack env (r, ty) =
-  let o = print_string in
-  (match r with Reason.Rlost_info _ -> o "~lost" | _ -> ());
-  match ty with
-  | Tunresolved tyl -> o "intersect("; debugl stack env tyl; o ")"
-  | Ttuple tyl -> o "tuple("; debugl stack env tyl; o ")"
-  | Tarraykind AKempty -> o "array"
-  | Tarraykind AKany -> o "array"
-  | Tarraykind (AKvec x) -> o "array<"; debug stack env x; o ">"
-  | Tarraykind (AKmap (x, y)) -> o "array<"; debug stack env x; o ", ";
-      debug stack env y; o ">"
-  | Tarraykind (AKshape fdm) ->
-    o "array<";
-      debug_shape_map fdm (fun (_tk, tv) -> debug stack env tv);
-    o ">"
-  | Tarraykind (AKtuple fields) ->
-    o "array[";
-      debugl stack env (List.rev (IMap.values fields));
-    o "]"
-  | Tmixed -> o "mixed"
-  | Tabstract (AKnewtype (x, argl), _)
-  | Tclass ((_, x), argl) ->
-      Printf.printf "App %s" x;
-      o "<"; List.iter argl (fun x -> debug stack env x; o ", ");
-      o ">"
-  | Tany -> o "X"
-  | Tanon _ -> o "anonymous"
-  | Tfun ft ->
-      o "fun ";
-      List.iter ft.ft_params (fun (_, x) -> debug stack env x; o ", ");
-      o " -> ";
-      debug stack env ft.ft_ret
-  | Toption ty -> o "option("; debug stack env ty; o ")"
-  | Tprim p ->
-      (match p with
-      | Tvoid -> o "Tvoid"
-      | Tint -> o "Tint"
-      | Tbool -> o "Tbool"
-      | Tfloat -> o "Tfloat"
-      | Tstring -> o "Tstring"
-      | Tnum -> o "Tnum"
-      | Tresource -> o "Tresource"
-      | Tarraykey -> o "Tarraykey"
-      | Tnoreturn -> o "Tnoreturn"
-      )
-  | Tabstract (AKgeneric(s, super), cstr_opt) ->
-      o "generic ";
-      o s;
-      (match cstr_opt, super with
-      | None, None -> ()
-      | Some x, _ -> o " as <"; debug stack env x; o ">"
-      | _, Some x -> o " super <"; debug stack env x; o ">"
-      )
-  | Tabstract (ak, cstr) ->
-     o "[";  o (AbstractKind.to_string ak); o "]";
-     Option.iter cstr ~f:(debug stack env)
-  | Tvar x ->
-      let env, x = get_var env x in
-      if ISet.mem x stack
-      then o (Ident.debug ~normalize:get_printable_tvar_id x)
-      else
-        let stack = ISet.add x stack in
-        let _, y = get_var env x in
-        o "["; o (string_of_int (get_printable_tvar_id y)); o "]";
-        (match get_type env x with
-        | _, (_, Tany) -> o (Ident.debug ~normalize:get_printable_tvar_id x)
-        | _, ty -> debug stack env ty)
-  | Tobject -> o "object"
-  | Tshape (fields_known, fdm) ->
-      o "shape<";
-      begin match fields_known with
-        | FieldsFullyKnown -> o "FieldsFullyKnown";
-        | FieldsPartiallyKnown unset_fields -> begin
-            o "FieldsPartiallyKnown(unset fields:";
-              ShapeMap.iter begin fun k _ ->
-                o (get_shape_field_name k); o " "
-              end unset_fields;
-            o ")"
-          end
-      end;
-      o ">(";
-        debug_shape_map fdm (fun v -> debug stack env v;);
-      o ")"
+(* Add a single new upper bound [ty] to generic parameter [name] in [tpenv] *)
+let add_upper_bound_ tpenv name ty =
+  match SMap.get name tpenv with
+  | None ->
+    SMap.add name
+      {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty} tpenv
+  | Some {lower_bounds; upper_bounds} ->
+    SMap.add name
+      {lower_bounds; upper_bounds = ty::upper_bounds} tpenv
 
-and debugl stack env x =
-  let o = print_string in
-  match x with
-  | [] -> ()
-  | [x] -> debug stack env x
-  | x :: rl -> debug stack env x; o ", "; debugl stack env rl
+(* Add a single new lower bound [ty] to generic parameter [name] in [tpenv] *)
+let add_lower_bound_ tpenv name ty =
+  match SMap.get name tpenv with
+  | None ->
+    SMap.add name
+      {lower_bounds = singleton_bound ty; upper_bounds = empty_bounds} tpenv
+  | Some {lower_bounds; upper_bounds} ->
+    SMap.add name
+      {lower_bounds = ty::lower_bounds; upper_bounds} tpenv
 
-let debug env ty = debug ISet.empty env ty; print_newline()
+let env_with_tpenv env tpenv =
+  { env with lenv = { env.lenv with tpenv = tpenv } }
+
+let add_upper_bound env name ty =
+  let tpenv =
+    begin match ty with
+    | (r, Tabstract (AKgeneric formal_super, _)) ->
+      add_lower_bound_ env.lenv.tpenv formal_super
+        (r, Tabstract (AKgeneric name, None))
+    | _ -> env.lenv.tpenv
+    end in
+  env_with_tpenv env (add_upper_bound_ tpenv name ty)
+
+let add_lower_bound env name ty =
+  let tpenv =
+    begin match ty with
+    | (r, Tabstract (AKgeneric formal_sub, _)) ->
+      add_upper_bound_ env.lenv.tpenv formal_sub
+        (r, Tabstract (AKgeneric name, None))
+    | _ -> env.lenv.tpenv
+    end in
+  env_with_tpenv env (add_lower_bound_ tpenv name ty)
+
+(* Add type parameters to environment, initially with no bounds.
+ * Existing type parameters with the same name will be overridden. *)
+let add_generic_parameters env tparaml =
+  let add_empty_bounds tpenv (_, (_, name), _) =
+    SMap.add name {lower_bounds = empty_bounds;
+                   upper_bounds = empty_bounds} tpenv in
+  env_with_tpenv env
+    (List.fold_left tparaml ~f:add_empty_bounds ~init:env.lenv.tpenv)
+
+let is_generic_parameter env name =
+  SMap.mem name env.lenv.tpenv
+
+let get_generic_parameters env =
+  SMap.keys env.lenv.tpenv
+
+let get_tpenv_size env =
+  SMap.fold (fun _x { lower_bounds; upper_bounds } count ->
+    count + List.length lower_bounds + List.length upper_bounds)
+    env.lenv.tpenv 0
+
+(* Generate a fresh generic parameter with a specified prefix but distinct
+ * from all generic parameters in the environment *)
+let add_fresh_generic_parameter env prefix =
+  let rec iterate i =
+    let name = Printf.sprintf "%s#%d" prefix i in
+    if is_generic_parameter env name then iterate (i+1) else name in
+  let name = iterate 1 in
+  let env =
+    env_with_tpenv env
+      (SMap.add name {lower_bounds = empty_bounds;
+                      upper_bounds = empty_bounds} env.lenv.tpenv) in
+  env, name
+
+
+(* Replace types for locals with empty environment *)
+let env_with_locals env locals history =
+  { env with lenv = {
+      env.lenv with local_types = locals; local_type_history = history;
+    }
+  }
 
 let empty_fake_members = {
   last_call = None;
@@ -285,19 +200,27 @@ let empty_fake_members = {
   valid     = SSet.empty;
 }
 
-let empty_local = empty_fake_members, IMap.empty
+let empty_local tpenv = {
+  tpenv = tpenv;
+  fake_members = empty_fake_members;
+  local_types = Typing_continuations.Map.empty;
+  local_type_history = Local_id.Map.empty;
+}
 
-let empty tcopt file = {
+let empty tcopt file ~droot = {
   pos     = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
-  lenv    = empty_local;
+  lenv    = empty_local SMap.empty;
   todo    = [];
   in_loop = false;
-  grow_super = true;
+  decl_env = {
+    mode = FileInfo.Mstrict;
+    droot;
+    decl_tcopt = tcopt;
+  };
   genv    = {
     tcopt   = tcopt;
-    mode    = FileInfo.Mstrict;
     return  = fresh_type();
     self_id = "";
     self    = Reason.none, Tany;
@@ -306,104 +229,98 @@ let empty tcopt file = {
     parent  = Reason.none, Tany;
     fun_kind = Ast.FSync;
     anons   = IMap.empty;
-    droot   = None;
     file    = file;
   }
 }
 
-let add_class x y =
-  Classes.add x y
+let add_wclass env x =
+  let dep = Dep.Class x in
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  ()
 
-let add_typedef x y =
-  Typedefs.add x (Typing_heap.Typedef.Ok y)
+let get_typedef env x =
+  add_wclass env x;
+  TLazyHeap.get_typedef env.genv.tcopt x
 
 let is_typedef x =
-  match Typedefs.get x with
-  | None -> false
-  | Some _ -> true
+  match Naming_heap.TypeIdHeap.get x with
+  | Some (_p, `Typedef) -> true
+  | _ -> false
 
-let get_enum x =
-  match Classes.get x with
-  | Some tc when tc.tc_enum_type <> None -> Some tc
-  | _ -> None
+let get_class env x =
+  add_wclass env x;
+  TLazyHeap.get_class env.genv.tcopt x
 
-let is_enum x = get_enum x <> None
-
-let get_enum_constraint x =
-  match Classes.get x with
+let get_enum_constraint env x =
+  match get_class env x with
   | None -> None
   | Some tc ->
     match tc.tc_enum_type with
-      | None -> None
-      | Some e -> e.te_constraint
-
-let add_typedef_error x =
-  Typedefs.add x Typing_heap.Typedef.Error
-
-(* Adds a new function (global) *)
-let add_fun x ft =
-  Funs.add x ft
+    | None -> None
+    | Some e -> e.te_constraint
 
 let add_wclass env x =
   let dep = Dep.Class x in
-  Typing_deps.add_idep env.genv.droot dep;
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   ()
 
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
-  let genv = env.genv in
-  f { env with todo = []; tenv = IMap.empty; genv = genv; in_loop = false }
+  f { env with
+      todo = [];
+      lenv = empty_local env.lenv.tpenv;
+      tenv = IMap.empty;
+      in_loop = false
+    }
 
-let get_class env x =
-  add_wclass env x;
-  Classes.get x
+let get_enum env x =
+  match TLazyHeap.get_class env.genv.tcopt x with
+  | Some tc when tc.tc_enum_type <> None -> Some tc
+  | _ -> None
 
-let get_typedef env x =
-  add_wclass env x;
-  Typedefs.get x
-
-let add_extends_dependency env x =
-  let dep = Dep.Class x in
-  Typing_deps.add_idep env.genv.droot dep;
-  Typing_deps.add_idep env.genv.droot (Dep.Extends x);
-  ()
-
-let get_class_dep env x =
-  add_wclass env x;
-  add_extends_dependency env x;
-  Classes.get x
+let is_enum env x = get_enum env x <> None
 
 let get_typeconst env class_ mid =
   add_wclass env class_.tc_name;
   let dep = Dep.Const (class_.tc_name, mid) in
-  Typing_deps.add_idep env.genv.droot dep;
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   SMap.get mid class_.tc_typeconsts
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
   add_wclass env class_.tc_name;
   let dep = Dep.Const (class_.tc_name, mid) in
-  Typing_deps.add_idep env.genv.droot dep;
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   SMap.get mid class_.tc_consts
 
 (* Used to access "global constants". That is constants that were
  * introduced with "const X = ...;" at topelevel, or "define('X', ...);"
  *)
 let get_gconst env cst_name =
-  Typing_deps.add_idep env.genv.droot (Dep.GConst cst_name);
-  GConsts.get cst_name
+  let dep = Dep.GConst cst_name in
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  TLazyHeap.get_gconst env.genv.tcopt cst_name
 
 let get_static_member is_method env class_ mid =
   add_wclass env class_.tc_name;
-  let dep = if is_method then Dep.SMethod (class_.tc_name, mid)
-  else Dep.SProp (class_.tc_name, mid) in
-  Typing_deps.add_idep env.genv.droot dep;
-  if is_method then SMap.get mid class_.tc_smethods
-  else SMap.get mid class_.tc_sprops
+  let add_dep x =
+    let dep = if is_method then Dep.SMethod (x, mid)
+      else Dep.SProp (x, mid) in
+    Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  in
+  add_dep class_.tc_name;
+  (* The type of a member is stored separately in the heap. This means that
+   * any user of the member also has a dependency on the class where the member
+   * originated.
+   *)
+  let ce_opt = if is_method then SMap.get mid class_.tc_smethods
+    else SMap.get mid class_.tc_sprops in
+  Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
+  ce_opt
 
 let suggest_member members mid =
-  let members = SMap.fold begin fun x ce acc ->
-    let pos = Reason.to_pos (fst ce.ce_type) in
+  let members = SMap.fold begin fun x {ce_type = lazy (r, _); _} acc ->
+    let pos = Reason.to_pos r in
     SMap.add (String.lowercase x) (pos, x) acc
   end members SMap.empty
   in
@@ -416,11 +333,20 @@ let suggest_static_member is_method class_ mid =
 
 let get_member is_method env class_ mid =
   add_wclass env class_.tc_name;
-  let dep = if is_method then Dep.Method (class_.tc_name, mid)
-  else Dep.Prop (class_.tc_name, mid) in
-  Typing_deps.add_idep env.genv.droot dep;
-  if is_method then (SMap.get mid class_.tc_methods)
-  else SMap.get mid class_.tc_props
+  let add_dep x =
+    let dep = if is_method then Dep.Method (x, mid)
+      else Dep.Prop (x, mid) in
+    Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep)
+  in
+  add_dep class_.tc_name;
+  (* The type of a member is stored separately in the heap. This means that
+   * any user of the member also has a dependency on the class where the member
+   * originated.
+   *)
+  let ce_opt = if is_method then (SMap.get mid class_.tc_methods)
+    else SMap.get mid class_.tc_props in
+  Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
+  ce_opt
 
 let suggest_member is_method class_ mid =
   let mid = String.lowercase mid in
@@ -429,22 +355,17 @@ let suggest_member is_method class_ mid =
 
 let get_construct env class_ =
   add_wclass env class_.tc_name;
-  let dep = Dep.Cstr (class_.tc_name) in
-  Typing_deps.add_idep env.genv.droot dep;
+  let add_dep x =
+    let dep = Dep.Cstr (x) in
+    Option.iter env.decl_env.Decl_env.droot
+      (fun root -> Typing_deps.add_idep root dep);
+  in
+  add_dep class_.tc_name;
+  Option.iter (fst class_.tc_construct) (fun ce -> add_dep ce.ce_origin);
   class_.tc_construct
 
 let get_todo env =
   env.todo
-
-let grow_super env =
-  env.grow_super
-
-let invert_grow_super env f =
-  let old = env.grow_super in
-  let env = { env with grow_super = not old } in
-  let env = f env in
-  let env = { env with grow_super = old } in
-  env
 
 let get_return env =
   env.genv.return
@@ -456,8 +377,8 @@ let set_return env x =
 
 let with_return env f =
   let ret = get_return env in
-  let env = f env in
-  set_return env ret
+  let env, result = f env in
+  set_return env ret, result
 
 let is_static env = env.genv.static
 let get_self env = env.genv.self
@@ -472,16 +393,39 @@ let get_file env = env.genv.file
 
 let get_fun env x =
   let dep = Dep.Fun x in
-  Typing_deps.add_idep env.genv.droot dep;
-  Funs.get x
+  Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
+  TLazyHeap.get_fun env.genv.tcopt x
 
 let set_fn_kind env fn_type =
   let genv = env.genv in
   let genv = { genv with fun_kind = fn_type } in
   { env with genv = genv }
 
-let add_todo env x =
-  { env with todo = x :: env.todo }
+(* Add a function on environments that gets run at some later stage to check
+ * constraints, by which time unresolved type variables may be resolved.
+ * Because the validity of the constraint might depend on tpenv
+ * at the point that the `add_todo` is called, we extend the environment at
+ * the point that the function gets run with `tpenv` captured at the point
+ * that `add_todo` gets called.
+ * Typical examples are `instanceof` tests that introduce bounds on fresh
+ * type parameters (e.g. named T#1) or on existing type parameters, which
+ * are removed after the end of the `instanceof` conditional block. e.g.
+ *   function foo<T as arraykey>(T $x): void { }
+ *   class C<+T> { }
+ *   class D extends C<arraykey> { }
+ *   function test<Tu>(C<Tu> $x, Tu $y): void {
+ *   if ($x instanceof D) {
+ *     // Here we know Tu <: arraykey but the constraint is checked later
+ *     foo($y);
+ *   }
+ *)
+ let add_todo env f =
+  let tpenv_now = env.lenv.tpenv in
+  let f' env =
+    let old_tpenv = env.lenv.tpenv in
+    let env = f (env_with_tpenv env tpenv_now) in
+    env_with_tpenv env old_tpenv in
+  { env with todo = f' :: env.todo }
 
 let add_anonymous env x =
   let genv = env.genv in
@@ -523,16 +467,11 @@ let set_static env =
   { env with genv = genv }
 
 let set_mode env mode =
-  let genv = env.genv in
-  let genv = { genv with mode = mode } in
-  { env with genv = genv }
+  let decl_env = env.decl_env in
+  let decl_env = { decl_env with mode } in
+  { env with decl_env }
 
-let set_root env root =
-  let genv = env.genv in
-  let genv = { genv with droot = Some root } in
-  { env with genv = genv }
-
-let get_mode env = env.genv.mode
+let get_mode env = env.decl_env.mode
 
 let is_strict env = get_mode env = FileInfo.Mstrict
 let is_decl env = get_mode env = FileInfo.Mdecl
@@ -565,33 +504,31 @@ let debug_env env =
 (*****************************************************************************)
 
 let get_last_call env =
-  match (fst env.lenv).last_call with
+  match (env.lenv.fake_members).last_call with
   | None -> assert false
   | Some pos -> pos
 
-let rec lost_info fake_name stack env ty =
+let rec lost_info fake_name env ty =
   let info r = Reason.Rlost_info (fake_name, r, get_last_call env) in
   match ty with
-  | _, Tvar v when ISet.mem v stack -> env, ty
   | _, Tvar v ->
-      let stack = ISet.add v stack in
       let env, v' = get_var env v in
       (match IMap.get v' env.tenv with
       | None ->
           env, ty
       | Some ty ->
-          let env, ty = lost_info fake_name stack env ty in
+          let env, ty = lost_info fake_name env ty in
           let env = add env v ty in
           env, ty
       )
   | r, Tunresolved tyl ->
-      let env, tyl = lfold (lost_info fake_name stack) env tyl in
+      let env, tyl = List.map_env env tyl (lost_info fake_name) in
       env, (info r, Tunresolved tyl)
   | r, ty ->
       env, (info r, ty)
 
 let forget_members env call_pos =
-  let fake_members, locals = env.lenv in
+  let {fake_members; local_types; local_type_history; tpenv} = env.lenv in
   let old_invalid = fake_members.invalid in
   let new_invalid = fake_members.valid in
   let new_invalid = SSet.union new_invalid old_invalid in
@@ -600,7 +537,7 @@ let forget_members env call_pos =
     invalid = new_invalid;
     valid = SSet.empty;
   } in
-  { env with lenv = fake_members, locals }
+  { env with lenv = {fake_members; local_types; local_type_history; tpenv } }
 
 module FakeMembers = struct
 
@@ -611,7 +548,7 @@ module FakeMembers = struct
       | _, Lvar (_, x) -> x
       | _ -> assert false
     in
-    string_of_int obj_name^"->"^member_name
+    Local_id.to_string obj_name^"->"^member_name
 
   let make_static_id cid member_name =
     let class_name = class_id_to_str cid in
@@ -622,7 +559,7 @@ module FakeMembers = struct
     | _, This
     | _, Lvar _ ->
         let id = make_id obj member_name in
-        if SSet.mem id (fst env.lenv).valid
+        if SSet.mem id env.lenv.fake_members.valid
         then Some (Hashtbl.hash id)
         else None
     | _ -> None
@@ -631,33 +568,33 @@ module FakeMembers = struct
     match obj with
     | _, This
     | _, Lvar _ ->
-        SSet.mem (make_id obj member_name) (fst env.lenv).invalid
+        SSet.mem (make_id obj member_name) env.lenv.fake_members.invalid
     | _ -> false
 
   let get_static env cid member_name =
     let name = make_static_id cid member_name in
-    if SSet.mem name (fst env.lenv).valid
+    if SSet.mem name env.lenv.fake_members.valid
     then Some (Hashtbl.hash name)
     else None
 
   let is_static_invalid env cid member_name =
-    SSet.mem (make_static_id cid member_name) (fst env.lenv).invalid
+    SSet.mem (make_static_id cid member_name) env.lenv.fake_members.invalid
 
   let add_member env fake_id =
-    let fake_members, locals = env.lenv in
+    let {fake_members; local_types; local_type_history; tpenv} = env.lenv in
     let valid = SSet.add fake_id fake_members.valid in
     let fake_members = { fake_members with valid = valid } in
-    { env with lenv = fake_members, locals }
+    { env with lenv = {fake_members; local_types; local_type_history; tpenv } }
 
   let make _ env obj_name member_name =
     let my_fake_local_id = make_id obj_name member_name in
     let env = add_member env my_fake_local_id in
-    env, Hashtbl.hash my_fake_local_id
+    env, Local_id.get my_fake_local_id
 
  let make_static _ env class_name member_name =
    let my_fake_local_id = make_static_id class_name member_name in
    let env = add_member env my_fake_local_id in
-   env, Hashtbl.hash my_fake_local_id
+   env, Local_id.get my_fake_local_id
 
 end
 
@@ -679,7 +616,7 @@ let rec unbind seen env ty =
     let seen = ty :: seen in
     match ty with
     | r, Tunresolved tyl ->
-        let env, tyl = lfold (unbind seen) env tyl in
+        let env, tyl = List.map_env env tyl (unbind seen) in
         env, (r, Tunresolved tyl)
     | ty -> env, ty
 
@@ -691,42 +628,54 @@ let unbind = unbind []
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let fake_members, locals = env.lenv in
+  let {fake_members; local_types ; local_type_history; tpenv} = env.lenv in
   let env, new_type = unbind env new_type in
+  let next_cont = LEnvC.get_cont Cont.Next local_types in
   let all_types, expr_id =
-    match IMap.get x locals with
-    | None -> [], Ident.tmp()
-    | Some (x, _, y) -> x, y
+    match
+      (Local_id.Map.get x next_cont, Local_id.Map.get x local_type_history)
+      with
+    | None, None -> [], Ident.tmp()
+    | Some (_, y), Some x -> x, y
+    | _ -> Exit_status.(exit Local_type_env_stale)
   in
   let all_types =
     if List.exists all_types (fun x -> x = new_type)
     then all_types
     else new_type :: all_types
   in
-  let local = all_types, new_type, expr_id in
-  let locals = IMap.add x local locals in
-  let env = { env with lenv = fake_members, locals } in
+  let local = new_type, expr_id in
+  let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
+  let local_type_history = Local_id.Map.add x all_types local_type_history in
+  let env = { env with
+    lenv = {fake_members; local_types; local_type_history; tpenv} }
+  in
   env
 
 let get_local env x =
-  let lcl = IMap.get x (snd env.lenv) in
+  let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in
+  let lcl = Local_id.Map.get x next_cont in
   match lcl with
   | None -> env, (Reason.Rnone, Tany)
-  | Some (_, x, _) -> env, x
+  | Some (x, _) -> env, x
 
 let set_local_expr_id env x new_eid =
-  let fake_members, locals = env.lenv in
-  match IMap.get x locals with
-  | Some (all_types, type_, eid) when eid <> new_eid ->
-      let local = all_types, type_, new_eid in
-      let locals = IMap.add x local locals in
-      let env = { env with lenv = fake_members, locals } in
+  let {fake_members; local_types; local_type_history; tpenv} = env.lenv in
+  let next_cont = LEnvC.get_cont Cont.Next local_types in
+  match Local_id.Map.get x next_cont with
+  | Some (type_, eid) when eid <> new_eid ->
+      let local = type_, new_eid in
+      let local_types = LEnvC.add_to_cont Cont.Next x local local_types in
+      let env ={ env with
+        lenv = {fake_members; local_types; local_type_history; tpenv} }
+      in
       env
   | _ -> env
 
 let get_local_expr_id env x =
-  let lcl = IMap.get x (snd env.lenv) in
-  Option.map lcl ~f:(fun (_, _, x) -> x)
+  let next_cont = LEnvC.get_cont Cont.Next env.lenv.local_types in
+  let lcl = Local_id.Map.get x next_cont in
+  Option.map lcl ~f:(fun (_, x) -> x)
 
 (*****************************************************************************)
 (* This function is called when we are about to type-check a block that will
@@ -759,10 +708,13 @@ let get_local_expr_id env x =
 (*****************************************************************************)
 
 let freeze_local_env env =
-  let (members, locals) = env.lenv in
-  let locals = IMap.map (fun (_, type_, eid) -> [type_], type_, eid) locals in
-  let lenv = members, locals in
-  { env with lenv = lenv }
+  let local_types = env.lenv.local_types in
+  let next_cont = LEnvC.get_cont Cont.Next local_types in
+  let local_type_history = Local_id.Map.map
+    (fun (type_, _) -> [type_])
+    next_cont
+  in
+  env_with_locals env local_types local_type_history
 
 (*****************************************************************************)
 (* Sets up/cleans up the environment when typing an anonymous function. *)
@@ -785,5 +737,38 @@ let anon anon_lenv env f =
 let in_loop env f =
   let old_in_loop = env.in_loop in
   let env = { env with in_loop = true } in
-  let env = f env in
-  { env with in_loop = old_in_loop }
+  let env, result = f env in
+  { env with in_loop = old_in_loop }, result
+
+(*****************************************************************************)
+(* Merge and un-merge locals *)
+(*****************************************************************************)
+
+let merge_locals_and_history lenv =
+  let merge_fn _key locals history =
+    match locals, history with
+      | None, None -> None
+      | Some (type_, exp_id), Some hist -> Some (hist, type_, exp_id)
+      | _ -> Exit_status.(exit Local_type_env_stale)
+  in
+  let next_cont = LEnvC.get_cont Cont.Next lenv.local_types in
+  Local_id.Map.merge
+    merge_fn next_cont lenv.local_type_history
+
+(* TODO: Right now the only continuation we have is next
+ * so I'm putting everything in next *)
+let seperate_locals_and_history locals_and_history =
+  let conts = Typing_continuations.Map.empty in
+  let next_cont = Local_id.Map.map
+    (fun (_, type_, exp_id) -> type_, exp_id) locals_and_history
+  in
+  let locals =
+    Typing_continuations.Map.add
+      Cont.Next
+      next_cont
+      conts
+  in
+  let history = Local_id.Map.map
+    (fun (hist, _, _) -> hist) locals_and_history
+  in
+  locals, history

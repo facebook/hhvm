@@ -319,7 +319,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
   nohost:
 
   if ((p = (const char*) memchr(s, '?', (ue - s)))) {
-    pp = strchr(s, '#');
+    pp = (const char*)memchr(s, '#', (ue - s));
 
     if (pp && pp < p) {
       if (pp - s) {
@@ -485,7 +485,7 @@ PHPAPI int php_url_decode(char *str, int len)
  */
 PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
 {
-  register int x, y;
+  register size_t x, y;
   unsigned char *str;
 
   str = (unsigned char *) safe_emalloc(3, len, 1);

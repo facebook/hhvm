@@ -3,7 +3,7 @@
 /* Gets information about the version and capabilities of the installed GD
  * library.
  */
-<<__Native>>
+<<__ParamCoerceModeFalse, __Native>>
 function gd_info(): array;
 
 /* The getimagesize() function will determine the size of any given image file
@@ -30,9 +30,9 @@ function getimagesizefromstring(string $filename,
 
 /* Returns the extension for the given IMAGETYPE_XXX constant.
  */
-<<__Native>>
+<<__ParamCoerceModeFalse, __Native>>
 function image_type_to_extension(int $imagetype,
-                                 bool $include_dot = true): string;
+                                 bool $include_dot = true): mixed;
 
 /* The image_type_to_mime_type() function will determine the Mime-Type for an
  * IMAGETYPE constant.
@@ -284,7 +284,7 @@ function imagecolortransparent(resource $image,
 /* Applies a convolution matrix on the image, using the given coefficient and
  * offset.
  */
-<<__Native>>
+<<__ParamCoerceModeFalse, __Native>>
 function imageconvolution(resource $image,
                           array $matrix,
                           float $div,
@@ -697,7 +697,7 @@ function imagegif(resource $image,
  * is set and the image is used as a JPEG image, the image is created as a
  * progressive JPEG.
  */
-<<__Native>>
+<<__Native("NumArgs")>>
 function imageinterlace(resource $image,
                         int $interlace = 0): mixed;
 

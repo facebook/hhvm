@@ -1,4 +1,7 @@
-[1]intersect([\C]App \C<>, option([2]tvar_2))
-[1]intersect([\C]App \C<>, option([3][\C]App \C<>))
-intersect([\C]App \C<>)
+File "dep_types_and_null2.php", line 17, characters 3-13:
+  ^(C as C | ?^_)
+File "dep_types_and_null2.php", line 19, characters 3-13:
+  ^(C as C | ?^C as C)
+File "dep_types_and_null2.php", line 22, characters 3-13:
+  (C as C)
 No errors

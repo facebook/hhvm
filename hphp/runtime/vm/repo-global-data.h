@@ -29,10 +29,17 @@ namespace HPHP {
  * Only used in RepoAuthoritative mode.  See loadGlobalData().
  */
 struct Repo::GlobalData {
+  GlobalData() {}
+
   /*
    * Indicates whether a repo was compiled using HHBBC.
    */
   bool UsedHHBBC = false;
+
+  /*
+   * Was the repo compiled with EnableHipHopSyntax.
+   */
+  bool EnableHipHopSyntax = false;
 
   /*
    * Indicates whether a repo was compiled with HardTypeHints.
@@ -42,6 +49,15 @@ struct Repo::GlobalData {
    * would allow violating assumptions from the optimizer.
    */
   bool HardTypeHints = false;
+
+  /*
+   * Indicates whether a repo was compiled with HardReturnTypeHints.
+   *
+   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
+   * raise if you violate a return typehint, because doing so would
+   * allow violating assumptions from the optimizer.
+   */
+  bool HardReturnTypeHints = false;
 
   /*
    * Indicates whether a repo was compiled with HardPrivatePropInference.
@@ -62,13 +78,11 @@ struct Repo::GlobalData {
   bool DisallowDynamicVarEnvFuncs = false;
 
   /*
-   * Indicates whether a repo was compiled with HardReturnTypeHints.
-   *
-   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
-   * raise if you violate a return typehint, because doing so would
-   * allow violating assumptions from the optimizer.
+   * Indicates whether the repo was compiled with ElideAutoloadInvokes. If so,
+   * potential invocations of the autoloader may have been optimized away if it
+   * could be proven the invocation would not find a viable function.
    */
-  bool HardReturnTypeHints = false;
+  bool ElideAutoloadInvokes = true;
 
   /*
    * Indicates whether the repo was compiled with PHP7 integer semantics. This
@@ -80,20 +94,66 @@ struct Repo::GlobalData {
   bool PHP7_IntSemantics = false;
 
   /*
+   * Indicates whether the repo was compiled with PHP7 scalar type hint support.
+   * In this mode non hh units will default to weak types and scalar types will
+   * be available outside the HH namespace.
+   */
+  bool PHP7_ScalarTypes = false;
+
+  /*
+   * Indicates whether the repo was compiled with PHP7 builtins enabled.
+   */
+  bool PHP7_Builtins = false;
+
+  /*
+   * Indicates whether the repo was compiled with PHP7 substr behavior which
+   * returns an empty string if the stringi length is equal to start characters
+   * long, instead of PHP5's false.
+   */
+  bool PHP7_Substr = false;
+
+  /*
    * Indicates that generators should be autoprimed and not require an initial
    * call to next() before calling other generator functions.
    */
   bool AutoprimeGenerators = true;
 
+  /*
+   * Should emptyish in lval context be promoted to a stdclass object?
+   */
+  bool PromoteEmptyObject = true;
+
+  /*
+   * Should all functions be interceptable?
+   */
+  bool EnableRenameFunction = false;
+
+  /*
+   * Are Hack array compatibility notices enabled? If so, certain optimizations
+   * may be disabled.
+   */
+  bool HackArrCompatNotices = false;
+
+  std::vector<const StringData*> APCProfile;
+
   template<class SerDe> void serde(SerDe& sd) {
     sd(UsedHHBBC)
+      (EnableHipHopSyntax)
       (HardTypeHints)
-      (HardPrivatePropInference)
-      (arrayTypeTable)
-      (DisallowDynamicVarEnvFuncs)
       (HardReturnTypeHints)
+      (HardPrivatePropInference)
+      (DisallowDynamicVarEnvFuncs)
+      (ElideAutoloadInvokes)
       (PHP7_IntSemantics)
+      (PHP7_ScalarTypes)
+      (PHP7_Substr)
+      (PHP7_Builtins)
       (AutoprimeGenerators)
+      (PromoteEmptyObject)
+      (EnableRenameFunction)
+      (HackArrCompatNotices)
+      (APCProfile)
+      (arrayTypeTable)
       ;
   }
 };

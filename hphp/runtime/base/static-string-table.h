@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,11 +39,14 @@ struct String;
  * We refer to these strings as "static strings"---they may be passed
  * around like request local strings, but have a bit set in their
  * reference count which indicates they should not actually be
- * incref'd or decref'd, and therefore are never freed.
+ * incref'd or decref'd, and therefore are never freed. Furthermore,
+ * any string marked static must be in the table and therefore can
+ * be compared by pointer.
  *
- * Note that when a static string is in a TypedValue, it may or may
- * not have KindOfStaticString.  (But no non-static strings will ever
- * have KindOfStaticString.)
+ * Note that when a static or uncounted string is in a TypedValue,
+ * it may or may not have KindOfPersistentString. (But no non-persistent
+ * strings will ever have KindOfPersistentString.) so-called "uncounted"
+ * strings are persistent (not ref counted) but not static.
  *
  * Because all constants defined in hhvm programs create a
  * process-lifetime string for the constant name, this module also
@@ -51,6 +54,8 @@ struct String;
  */
 
 //////////////////////////////////////////////////////////////////////
+
+extern StringData** precomputed_chars;
 
 /*
  * Attempt to lookup a string (specified in various ways) in the
@@ -63,6 +68,14 @@ StringData* makeStaticString(const std::string& str);
 StringData* makeStaticString(const String& str);
 StringData* makeStaticString(const char* str, size_t len);
 StringData* makeStaticString(const char* str);
+
+/*
+ * As their counterparts above, but check that the static string
+ * table has been initialized. These should be used for anything
+ * that might run before main().
+ */
+StringData* makeStaticStringSafe(const char* str, size_t len);
+StringData* makeStaticStringSafe(const char* str);
 
 /*
  * Lookup static strings for single character strings.  (We pre-create
@@ -106,6 +119,12 @@ std::vector<StringData*> lookupDefinedStaticStrings();
  * execution context.
  */
 Array lookupDefinedConstants(bool categorize = false);
+
+/*
+ * Return the number of static strings that correspond to defined
+ * constants.
+ */
+size_t countStaticStringConstants();
 
 /*
  * The static string table is generally initially created before main

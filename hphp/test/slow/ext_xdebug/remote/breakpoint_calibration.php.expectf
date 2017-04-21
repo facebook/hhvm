@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test" language="PHP" protocol_version="" appid=""><engine version=""><![CDATA[xdebug]]></engine><author><![CDATA[HHVM]]></author><url><![CDATA[http://hhvm.com/]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+(cmd) step_into -i 0
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="step_into" transaction_id="0"><xdebug:message lineno="3" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test"></xdebug:message></response>
+(cmd) breakpoint_set -i 1 -t line -f breakpoint_calibration.php.test -n 4
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="0" state="enabled"></response>
+(cmd) breakpoint_set -i 2 -t line -f breakpoint_calibration.php.test -n 7
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id="1" state="enabled"></response>
+(cmd) breakpoint_set -i 3 -t line -f breakpoint_calibration.php.test -n 12
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="2" state="enabled"></response>
+(cmd) breakpoint_set -i 4 -t line -f breakpoint_calibration.php.test -n 15
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="3" state="enabled"></response>
+(cmd) breakpoint_set -i 5 -t line -f breakpoint_calibration.php.test -n 17
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="5" id="4" state="enabled"></response>
+(cmd) breakpoint_list -i 6
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="6"><breakpoint id="4" state="enabled" resolved="resolved" hit_condition="&gt;=" hit_count="0" type="line" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test" lineno="17"></breakpoint><breakpoint id="0" state="enabled" resolved="resolved" hit_condition="&gt;=" hit_count="0" type="line" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test" lineno="6"></breakpoint><breakpoint id="1" state="enabled" resolved="resolved" hit_condition="&gt;=" hit_count="0" type="line" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test" lineno="9"></breakpoint><breakpoint id="2" state="enabled" resolved="resolved" hit_condition="&gt;=" hit_count="0" type="line" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test" lineno="13"></breakpoint><breakpoint id="3" state="enabled" resolved="resolved" hit_condition="&gt;=" hit_count="0" type="line" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test" lineno="16"></breakpoint></response>
+(cmd) run -i 7
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="7"><xdebug:message lineno="17" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test"></xdebug:message></response>
+(cmd) run -i 8
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="8"><xdebug:message lineno="6" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test"></xdebug:message></response>
+(cmd) run -i 9
+Enter increment<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="9"><xdebug:message lineno="9" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test"></xdebug:message></response>
+(cmd) run -i 10
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="break" reason="ok" command="run" transaction_id="10"><xdebug:message lineno="16" filename="%s/hphp/test/slow/ext_xdebug/remote/breakpoint_calibration.php.test"></xdebug:message></response>
+(cmd) run -i 11
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" status="stopping" reason="ok" command="run" transaction_id="11"></response>
+(cmd) run -i 12

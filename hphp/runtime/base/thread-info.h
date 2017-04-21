@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 
 #include "hphp/util/thread-local.h"
 #include "hphp/runtime/base/request-injection-data.h"
+#include "hphp/runtime/base/surprise-flags.h"
 
 namespace HPHP {
 
@@ -29,6 +30,7 @@ struct MemoryManager;
 struct Profiler;
 struct CodeCoverage;
 struct DebuggerHook;
+struct c_WaitableWaitHandle;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -71,13 +73,6 @@ struct ThreadInfo {
 
   ThreadInfo();
   ~ThreadInfo();
-
-  template<class F> void scan(F& mark) const {
-    //if (m_profiler) m_profiler->scan(mark);
-
-    // m_pendingException, if present, will register itself as a root, so no
-    // need to scan it here.
-  }
 
   ////////////////////////////////////////////////////////////////////
 
@@ -145,8 +140,21 @@ inline void check_recursion_throw() {
   throw Exception("Maximum stack size reached");
 }
 
-size_t check_request_surprise();
-void check_request_surprise_unlikely();
+size_t handle_request_surprise(c_WaitableWaitHandle* wh = nullptr,
+                               size_t mask = kSurpriseFlagMask);
+
+/*
+ * Check and handle non-safepoint surprise conditions.
+ *
+ * The intended use case for this helper is for instrumenting resource exceeded
+ * checks within an unbounded operation implemented in C++, like array
+ * unserialization or JSON decoding.
+ */
+inline void check_non_safepoint_surprise() {
+  if (UNLIKELY(getSurpriseFlag(NonSafepointFlags))) {
+    handle_request_surprise(nullptr, NonSafepointFlags);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////
 

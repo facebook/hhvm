@@ -1,0 +1,130 @@
+========== ref_param ===============================
+ref_param exception: "Vecs cannot contain references"
+ref_param exception: "Vecs cannot contain references"
+ref_param exception: "Invalid vec key: expected a key of type int, string given"
+ref_param exception: "Invalid vec key: expected a key of type int, bool given"
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== elem_ref ================================
+elem_ref exception: "Vecs cannot contain references"
+elem_ref exception: "Vecs cannot contain references"
+elem_ref exception: "Invalid vec key: expected a key of type int, string given"
+elem_ref exception: "Invalid vec key: expected a key of type int, bool given"
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== append_ref ==============================
+append_ref exception: "Vecs cannot contain references"
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== set_ref =================================
+set_ref exception: "Vecs cannot contain references"
+set_ref exception: "Vecs cannot contain references"
+set_ref exception: "Invalid vec key: expected a key of type int, string given"
+set_ref exception: "Invalid vec key: expected a key of type int, bool given"
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== ref_return ==============================
+ref_return exception: "Vecs cannot contain references"
+ref_return exception: "Vecs cannot contain references"
+ref_return exception: "Invalid vec key: expected a key of type int, string given"
+ref_return exception: "Invalid vec key: expected a key of type int, bool given"
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  array(3) {
+    [0]=>
+    int(5)
+    [1]=>
+    int(6)
+    [2]=>
+    int(7)
+  }
+}
+========== iterate_by_ref ==========================
+iterate_by_ref exception: "Vecs cannot contain references"
+iterate_by_ref (key) exception: "Vecs cannot contain references"
+========== convert_with_ref ========================
+convert_with_ref exception: "Vecs cannot contain references"
+========== ref_unserialize =========================
+
+Notice: Unable to unserialize: [v:2:{v:1:{i:123;}R:2;}]. Vecs cannot contain references. in %s on line %d
+bool(false)
+========== nested_refs =============================
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  array(4) {
+    [0]=>
+    int(5)
+    [1]=>
+    &int(6)
+    [2]=>
+    &int(100)
+    [3]=>
+    &int(100)
+  }
+}
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  array(3) {
+    [0]=>
+    &string(1) "c"
+    [1]=>
+    string(1) "d"
+    [2]=>
+    string(1) "e"
+  }
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -66,16 +66,18 @@ namespace HPHP {
 namespace either_policy { struct high_bit {}; }
 template<class L, class R, class TagBitPolicy = void>
 struct Either {
+  using Opaque = uintptr_t;
+
   static_assert(
     std::is_same<TagBitPolicy,void>::value ||
       std::is_same<TagBitPolicy,either_policy::high_bit>::value,
     "Unknown policy in Either"
   );
-  static constexpr uintptr_t TagBit =
+  static constexpr Opaque TagBit =
     std::conditional<
       std::is_same<TagBitPolicy,void>::value,
-      std::integral_constant<uintptr_t,0x1>,
-      std::integral_constant<uintptr_t,0x8000000000000000>
+      std::integral_constant<Opaque,0x1>,
+      std::integral_constant<Opaque,0x8000000000000000>
     >::type::value;
 
   /*
@@ -84,7 +86,7 @@ struct Either {
    * Post: left() == nullptr && right() == nullptr
    *       isNull()
    */
-  Either() : bits{0} {}
+  Either() noexcept : bits{0} {}
 
   /*
    * Create an Either that isNull.
@@ -100,9 +102,9 @@ struct Either {
    * Post: left() == l && right() == nullptr
    */
   /* implicit */ Either(L l)
-    : bits{reinterpret_cast<uintptr_t>(l)}
+    : bits{reinterpret_cast<Opaque>(l)}
   {
-    assert(!(reinterpret_cast<uintptr_t>(l) & TagBit));
+    assert(!(reinterpret_cast<Opaque>(l) & TagBit));
   }
 
   /*
@@ -111,10 +113,22 @@ struct Either {
    * Post: left() == nullptr && right() == r
    */
   /* implicit */ Either(R r)
-    : bits{reinterpret_cast<uintptr_t>(r) | TagBit}
+    : bits{reinterpret_cast<Opaque>(r) | TagBit}
   {
-    assert(!(reinterpret_cast<uintptr_t>(r) & TagBit));
+    assert(!(reinterpret_cast<Opaque>(r) & TagBit));
   }
+
+  /*
+   * Raw access to allow using e.g., std::atomic<Opaque>. Values must come
+   * from identical instantiations of the Either template, and nothing can
+   * be assumed about the meaning of the bits.
+   */
+  static Either fromOpaque(Opaque raw) {
+    Either result;
+    result.bits = raw;
+    return result;
+  }
+  Opaque toOpaque() const { return bits; }
 
   /*
    * Equality comparison is shallow.  If the pointers are equal, the
@@ -186,7 +200,7 @@ private:
   );
 
 private:
-  uintptr_t bits;
+  Opaque bits;
 };
 
 //////////////////////////////////////////////////////////////////////

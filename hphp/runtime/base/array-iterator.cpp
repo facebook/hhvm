@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,12 +23,12 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/struct-array.h"
-#include "hphp/runtime/base/struct-array-defs.h"
-#include "hphp/runtime/base/shape.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
@@ -48,8 +48,6 @@ const StaticString
   s_next("next"),
   s_key("key"),
   s_current("current");
-
-__thread MIterTable tl_miter_table;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -213,12 +211,25 @@ void ArrayIter::objInit(ObjectData* obj) {
 
 void ArrayIter::cellInit(const Cell c) {
   assert(cellIsPlausible(c));
-  if (LIKELY(c.m_type == KindOfArray)) {
+  if (LIKELY(isArrayLikeType(c.m_type))) {
     arrInit(c.m_data.parr);
   } else if (LIKELY(c.m_type == KindOfObject)) {
     objInit<true>(c.m_data.pobj);
   } else {
     arrInit(nullptr);
+  }
+}
+
+void ArrayIter::rewind() {
+  if (LIKELY(hasArrayData())) {
+    if (auto* data = getArrayData())
+      m_pos = data->iter_begin();
+  } else {
+    assert(hasCollection());
+    auto* obj = getObject();
+    auto i = obj->isCollection() ? ctype_index(obj->collectionType()) :
+      MaxCollectionTypes;
+    initFuncTable[i](this, obj);
   }
 }
 
@@ -269,6 +280,7 @@ bool ArrayIter::endHelper() const  {
   if (obj->isCollection()) {
     switch (obj->collectionType()) {
       case CollectionType::Vector:
+      case CollectionType::ImmVector:
         return m_pos >= static_cast<BaseVector*>(obj)->size();
       case CollectionType::Map:
       case CollectionType::ImmMap:
@@ -278,8 +290,6 @@ bool ArrayIter::endHelper() const  {
         return !static_cast<BaseSet*>(obj)->iter_valid(m_pos);
       case CollectionType::Pair:
         return m_pos >= static_cast<c_Pair*>(obj)->size();
-      case CollectionType::ImmVector:
-        return m_pos >= static_cast<c_ImmVector*>(obj)->size();
     }
   } else {
     return !obj->o_invoke_few_args(s_valid, 0).toBoolean();
@@ -413,9 +423,9 @@ Variant ArrayIter::second() {
   return obj->o_invoke_few_args(s_current, 0);
 }
 
-const Variant& ArrayIter::secondRef() {
+const Variant& ArrayIter::secondRef() const {
   if (!hasArrayData()) {
-    throw FatalErrorException("taking reference on iterator objects");
+    raise_fatal_error("taking reference on iterator objects");
   }
   assert(hasArrayData());
   const ArrayData* ad = getArrayData();
@@ -575,30 +585,43 @@ Variant ArrayIter::iterValue(VersionableSparse) {
 
 //////////////////////////////////////////////////////////////////////
 
+void MIterTable::Create(void* storage) {
+  new (storage) MIterTable();
+}
+
+void MIterTable::clear() {
+  if (TlsWrapper::isNull()) return;
+  auto t = TlsWrapper::getNoCheck();
+  t->ents.fill({nullptr, nullptr});
+  if (!t->extras.empty()) {
+    t->extras.release_if([] (const MIterTable::Ent& e) { return true; });
+  }
+}
+
 namespace {
 
 // Handle the cases where we didn't have enough preallocated Ents in
-// tl_miter_table, and we need to allocate from `extras'.
+// MIterTable, and we need to allocate from `extras'.
 NEVER_INLINE
-MIterTable::Ent* find_empty_strong_iter_slower() {
-  return tl_miter_table.extras.find_unpopulated();
+MIterTable::Ent* find_empty_strong_iter_slower(MIterTable& table) {
+  return table.extras.find_unpopulated();
 }
 
 // Handle finding an empty strong iterator slot when the first slot
 // was already in use.
 NEVER_INLINE
-MIterTable::Ent* find_empty_strong_iter_slow() {
+MIterTable::Ent* find_empty_strong_iter_slow(MIterTable& table) {
 #define X(i) \
-  if (LIKELY(!tl_miter_table.ents[i].array)) return &tl_miter_table.ents[i];
+  if (LIKELY(!table.ents[i].array)) return &table.ents[i];
 X(1);
 X(2);
 X(3);
 X(4);
 X(5);
 X(6);
-  static_assert(tl_miter_table.ents.size() == 7, "");
+  static_assert(MIterTable::ents_size == 7, "");
 #undef X
-  return find_empty_strong_iter_slower();
+  return find_empty_strong_iter_slower(table);
 }
 
 // Find a strong iterator slot that is empty.  Almost always the first
@@ -606,10 +629,11 @@ X(6);
 // delegates to slow.
 ALWAYS_INLINE
 MIterTable::Ent* find_empty_strong_iter() {
-  if (LIKELY(!tl_miter_table.ents[0].array)) {
-    return &tl_miter_table.ents[0];
+  auto& table = *MIterTable::TlsWrapper::getCheck();
+  if (LIKELY(!table.ents[0].array)) {
+    return &table.ents[0];
   }
-  return find_empty_strong_iter_slow();
+  return find_empty_strong_iter_slow(table);
 }
 
 void newMArrayIter(MArrayIter* marr, ArrayData* ad) {
@@ -646,27 +670,28 @@ void free_strong_iterator_impl(Cond cond) {
     }
   };
 
-  if (cond(tl_miter_table.ents[0])) {
-    tl_miter_table.ents[0].iter->setContainer(nullptr);
-    tl_miter_table.ents[0].array = nullptr;
-    tl_miter_table.ents[0].iter = nullptr;
+  auto& table = miter_table();
+  if (cond(table.ents[0])) {
+    table.ents[0].iter->setContainer(nullptr);
+    table.ents[0].array = nullptr;
+    table.ents[0].iter = nullptr;
     alreadyValid = false;
   }
-  rm(tl_miter_table.ents[1]);
-  rm(tl_miter_table.ents[2]);
-  rm(tl_miter_table.ents[3]);
-  rm(tl_miter_table.ents[4]);
-  rm(tl_miter_table.ents[5]);
-  rm(tl_miter_table.ents[6]);
-  static_assert(tl_miter_table.ents.size() == 7, "");
+  rm(table.ents[1]);
+  rm(table.ents[2]);
+  rm(table.ents[3]);
+  rm(table.ents[4]);
+  rm(table.ents[5]);
+  rm(table.ents[6]);
+  static_assert(MIterTable::ents_size == 7, "");
 
   if (UNLIKELY(pvalid != nullptr)) {
-    std::swap(*pvalid, tl_miter_table.ents[0]);
+    std::swap(*pvalid, table.ents[0]);
     alreadyValid = true;
   }
-  if (LIKELY(tl_miter_table.extras.empty())) return;
+  if (LIKELY(table.extras.empty())) return;
 
-  tl_miter_table.extras.release_if([&] (const MIterTable::Ent& e) {
+  table.extras.release_if([&] (const MIterTable::Ent& e) {
     if (cond(e)) {
       e.iter->setContainer(nullptr);
       return true;
@@ -677,10 +702,10 @@ void free_strong_iterator_impl(Cond cond) {
   // If we didn't manage to keep something in the first non-extra
   // slot, scan extras again to swap something over.
   if (LIKELY(alreadyValid)) return;
-  if (!tl_miter_table.extras.empty()) {
-    tl_miter_table.extras.visit_to_remove(
+  if (!table.extras.empty()) {
+    table.extras.visit_to_remove(
       [&] (const MIterTable::Ent& ent) {
-        tl_miter_table.ents[0] = ent;
+        table.ents[0] = ent;
       }
     );
   }
@@ -823,7 +848,7 @@ void MArrayIter::escalateCheck() {
     if (!data) return;
     auto const esc = data->escalate();
     if (data != esc) {
-      cellMove(make_tv<KindOfArray>(esc), *getRef()->tv());
+      cellMove(make_array_like_tv(esc), *getRef()->tv());
     }
     return;
   }
@@ -843,7 +868,7 @@ ArrayData* MArrayIter::cowCheck() {
     if (!data) return nullptr;
     if (data->cowCheck() && !data->noCopyOnWrite()) {
       data = data->copyWithStrongIterators();
-      cellMove(make_tv<KindOfArray>(data), *getRef()->tv());
+      cellMove(make_array_like_tv(data), *getRef()->tv());
     }
     return data;
   }
@@ -886,7 +911,7 @@ CufIter::~CufIter() {
 bool Iter::init(TypedValue* c1) {
   assert(c1->m_type != KindOfRef);
   bool hasElems = true;
-  if (c1->m_type == KindOfArray) {
+  if (isArrayLikeType(c1->m_type)) {
     if (!c1->m_data.parr->empty()) {
       (void) new (&arr()) ArrayIter(c1->m_data.parr);
       arr().setIterType(ArrayIter::TypeArray);
@@ -1092,19 +1117,7 @@ static inline void iter_key_cell_local_impl(Iter* iter, TypedValue* out) {
 static NEVER_INLINE
 int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
   assert(arr->decWillRelease());
-  assert(arr->isPacked());
-  // Use non-specialized release call so ArrayTracer can track its destruction
-  arr->release();
-  if (debug) {
-    iter->arr().setIterType(ArrayIter::TypeUndefined);
-  }
-  return 0;
-}
-
-static NEVER_INLINE
-int64_t iter_next_free_struct(Iter* iter, ArrayData* arr) {
-  assert(arr->decWillRelease());
-  assert(arr->isStruct());
+  assert(arr->hasPackedLayout());
   // Use non-specialized release call so ArrayTracer can track its destruction
   arr->release();
   if (debug) {
@@ -1115,7 +1128,7 @@ int64_t iter_next_free_struct(Iter* iter, ArrayData* arr) {
 
 static NEVER_INLINE
 int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
-  assert(arr->isMixed());
+  assert(arr->hasMixedLayout());
   assert(arr->decWillRelease());
   // Use non-specialized release call so ArrayTracer can track its destruction
   arr->release();
@@ -1171,9 +1184,8 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   TRACE(2, "%s: I %p, ad %p\n", __func__, dest, ad);
   if (UNLIKELY(ad->getSize() == 0)) {
     if (UNLIKELY(ad->decWillRelease())) {
-      if (ad->isPacked()) return iter_next_free_packed(dest, ad);
-      if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
-      if (ad->isStruct()) return iter_next_free_struct(dest, ad);
+      if (ad->hasPackedLayout()) return iter_next_free_packed(dest, ad);
+      if (ad->hasMixedLayout()) return iter_next_free_mixed(dest, ad);
     }
     ad->decRefCount();
     return 0;
@@ -1188,7 +1200,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   aiter.m_data = ad;
   auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
 
-  if (LIKELY(ad->isPacked())) {
+  if (LIKELY(ad->hasPackedLayout())) {
     aiter.m_pos = 0;
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
@@ -1198,7 +1210,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     return 1;
   }
 
-  if (LIKELY(ad->isMixed())) {
+  if (LIKELY(ad->hasMixedLayout())) {
     auto const mixed = MixedArray::asMixed(ad);
     aiter.m_pos = mixed->getIterBegin();
     aiter.m_itypeAndNextHelperIdx =
@@ -1206,16 +1218,6 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
     assert(aiter.m_itype == ArrayIter::TypeArray);
     assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayMixed);
     mixed->getArrayElm(aiter.m_pos, valOut);
-    return 1;
-  }
-
-  if (ad->isStruct()) {
-    aiter.m_pos = 0;
-    aiter.m_itypeAndNextHelperIdx =
-      static_cast<uint32_t>(IterNextIndex::ArrayStruct) << 16 | itypeU32;
-    assert(aiter.m_itype == ArrayIter::TypeArray);
-    assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayStruct);
-    cellDup(*tvToCell(StructArray::asStructArray(ad)->data()), *valOut);
     return 1;
   }
 
@@ -1229,9 +1231,8 @@ int64_t new_iter_array_key(Iter*       dest,
                            TypedValue* keyOut) {
   if (UNLIKELY(ad->getSize() == 0)) {
     if (UNLIKELY(ad->decWillRelease())) {
-      if (ad->isPacked()) return iter_next_free_packed(dest, ad);
-      if (ad->isMixed()) return iter_next_free_mixed(dest, ad);
-      if (ad->isStruct()) return iter_next_free_struct(dest, ad);
+      if (ad->hasPackedLayout()) return iter_next_free_packed(dest, ad);
+      if (ad->hasMixedLayout()) return iter_next_free_mixed(dest, ad);
     }
     ad->decRefCount();
     return 0;
@@ -1249,7 +1250,7 @@ int64_t new_iter_array_key(Iter*       dest,
   aiter.m_data = ad;
   auto const itypeU32 = static_cast<uint32_t>(ArrayIter::TypeArray);
 
-  if (ad->isPacked()) {
+  if (ad->hasPackedLayout()) {
     aiter.m_pos = 0;
     aiter.m_itypeAndNextHelperIdx =
       static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
@@ -1265,7 +1266,7 @@ int64_t new_iter_array_key(Iter*       dest,
     return 1;
   }
 
-  if (ad->isMixed()) {
+  if (ad->hasMixedLayout()) {
     auto const mixed = MixedArray::asMixed(ad);
     aiter.m_pos = mixed->getIterBegin();
     aiter.m_itypeAndNextHelperIdx =
@@ -1280,24 +1281,6 @@ int64_t new_iter_array_key(Iter*       dest,
     return 1;
   }
 
-  if (ad->isStruct()) {
-    aiter.m_pos = 0;
-    aiter.m_itypeAndNextHelperIdx =
-      static_cast<uint32_t>(IterNextIndex::ArrayStruct) << 16 | itypeU32;
-    assert(aiter.m_itype == ArrayIter::TypeArray);
-    assert(aiter.m_nextHelperIdx == IterNextIndex::ArrayStruct);
-    auto structArray = StructArray::asStructArray(ad);
-    if (WithRef) {
-      tvDupWithRef(*structArray->data(), *valOut);
-    } else {
-      cellDup(*tvToCell(structArray->data()), *valOut);
-    }
-    keyOut->m_type = KindOfStaticString;
-    keyOut->m_data.pstr = const_cast<StringData*>(
-      structArray->shape()->keyForOffset(0));
-    return 1;
-  }
-
   return new_iter_array_cold<WithRef>(dest, ad, valOut, keyOut);
 }
 
@@ -1308,8 +1291,7 @@ template int64_t new_iter_array_key<true>(Iter* dest, ArrayData* ad,
                                           TypedValue* valOut,
                                           TypedValue* keyOut);
 
-class FreeObj {
- public:
+struct FreeObj {
   FreeObj() : m_obj(0) {}
   void operator=(ObjectData* obj) { m_obj = obj; }
   ~FreeObj() { if (UNLIKELY(m_obj != nullptr)) decRefObj(m_obj); }
@@ -1532,8 +1514,7 @@ static int64_t iter_next_apc_array(Iter* iter,
   cellSet(*var.asTypedValue(), *valOut);
   if (LIKELY(!keyOut)) return 1;
 
-  Cell key;
-  APCLocalArray::NvGetKey(ad, &key, pos);
+  auto const key = APCLocalArray::NvGetKey(ad, pos);
   auto const keyType  = keyOut->m_type;
   auto const keyDatum = keyOut->m_data.num;
   cellCopy(key, *keyOut);
@@ -1553,11 +1534,10 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
 
   {
     auto const ad       = const_cast<ArrayData*>(arrIter->getArrayData());
-    auto const isPacked = ad->isPacked();
-    auto const isMixed  = ad->isMixed();
-    auto const isStruct = ad->isStruct();
+    auto const isPacked = ad->hasPackedLayout();
+    auto const isMixed  = ad->hasMixedLayout();
 
-    if (UNLIKELY(!isMixed && !isStruct && !isPacked)) {
+    if (UNLIKELY(!isMixed && !isPacked)) {
       if (ad->isApcArray()) {
         // TODO(#4055855): what if a local value in an apc array has
         // been turned into a ref?  Is this actually ok to do?
@@ -1590,35 +1570,6 @@ int64_t witer_next_key(Iter* iter, TypedValue* valOut, TypedValue* keyOut) {
       tvDupWithRef(packedData(ad)[pos], *valOut);
       keyOut->m_type = KindOfInt64;
       keyOut->m_data.num = pos;
-      return 1;
-    }
-
-    if (isStruct) {
-      ssize_t pos = arrIter->getPos() + 1;
-      if (size_t(pos) >= size_t(ad->getSize())) {
-        if (UNLIKELY(ad->decWillRelease())) {
-          return iter_next_free_struct(iter, ad);
-        }
-        ad->decRefCount();
-        if (debug) {
-          iter->arr().setIterType(ArrayIter::TypeUndefined);
-        }
-        return 0;
-      }
-
-      if (UNLIKELY(tvDecRefWillCallHelper(valOut)) ||
-          UNLIKELY(tvDecRefWillCallHelper(keyOut))) {
-        goto cold;
-      }
-      tvDecRefOnly(valOut);
-      tvDecRefOnly(keyOut);
-
-      auto structArray = StructArray::asStructArray(ad);
-      arrIter->setPos(pos);
-      tvDupWithRef(structArray->data()[pos], *valOut);
-      keyOut->m_type = KindOfStaticString;
-      keyOut->m_data.pstr = const_cast<StringData*>(
-        structArray->shape()->keyForOffset(pos));
       return 1;
     }
 
@@ -1663,6 +1614,11 @@ int64_t new_miter_array_key(Iter* dest, RefData* v1,
 
   TypedValue* rtv = v1->tv();
   ArrayData* ad = rtv->m_data.parr;
+
+  if (UNLIKELY(ad->isHackArray())) {
+    throwRefInvalidArrayValueException(ad);
+  }
+  if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefIter();
 
   if (UNLIKELY(ad->empty())) {
     return 0LL;
@@ -1782,16 +1738,16 @@ int64_t iter_next_mixed_impl(Iter* it,
 
 
   if (isRefcountedType(valOut->m_type)) {
-    if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
+    if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
       return iter_next_cold<false>(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*valOut, decRefCount);
+    valOut->m_data.pcnt->decRefCount();
   }
   if (HasKey && isRefcountedType(keyOut->m_type)) {
-    if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
+    if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
       return iter_next_cold_inc_val(it, valOut, keyOut);
     }
-    TV_GENERIC_DISPATCH(*keyOut, decRefCount);
+    keyOut->m_data.pcnt->decRefCount();
   }
 
   iter.setPos(pos);
@@ -1809,7 +1765,7 @@ int64_t iter_next_packed_impl(Iter* it,
                               TypedValue* keyOut) {
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isPacked());
+         it->arr().getArrayData()->hasPackedLayout());
   auto& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
   assert(PackedArray::checkInvariants(ad));
@@ -1817,16 +1773,16 @@ int64_t iter_next_packed_impl(Iter* it,
   ssize_t pos = iter.getPos() + 1;
   if (LIKELY(pos < ad->getSize())) {
     if (isRefcountedType(valOut->m_type)) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
+      if (UNLIKELY(valOut->m_data.pcnt->decWillRelease())) {
         return iter_next_cold<false>(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
+      valOut->m_data.pcnt->decRefCount();
     }
     if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
+      if (UNLIKELY(keyOut->m_data.pcnt->decWillRelease())) {
         return iter_next_cold_inc_val(it, valOut, keyOut);
       }
-      TV_GENERIC_DISPATCH(*keyOut, decRefCount);
+      keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
     cellDup(*tvToCell(packedData(ad) + pos), *valOut);
@@ -1848,68 +1804,14 @@ int64_t iter_next_packed_impl(Iter* it,
   return 0;
 }
 
-template<bool HasKey>
-int64_t iter_next_struct_impl(Iter* it,
-                              TypedValue* valOut,
-                              TypedValue* keyOut) {
-  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isStruct());
-  auto& iter = it->arr();
-  auto const ad = const_cast<ArrayData*>(iter.getArrayData());
-
-  ssize_t pos = iter.getPos() + 1;
-  if (LIKELY(pos < ad->getSize())) {
-    if (isRefcountedType(valOut->m_type)) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*valOut, decWillRelease))) {
-        return iter_next_cold<false>(it, valOut, keyOut);
-      }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
-    }
-    if (HasKey && UNLIKELY(isRefcountedType(keyOut->m_type))) {
-      if (UNLIKELY(TV_GENERIC_DISPATCH(*keyOut, decWillRelease))) {
-        return iter_next_cold_inc_val(it, valOut, keyOut);
-      }
-      TV_GENERIC_DISPATCH(*valOut, decRefCount);
-    }
-    auto structArray = StructArray::asStructArray(ad);
-    iter.setPos(pos);
-    cellDup(*tvToCell(structArray->data() + pos), *valOut);
-    if (HasKey) {
-      keyOut->m_data.pstr = const_cast<StringData*>(
-        structArray->shape()->keyForOffset(pos));
-      keyOut->m_type = KindOfStaticString;
-    }
-    return 1;
-  }
-
-  // Finished iterating---we need to free the array.
-  if (UNLIKELY(ad->decWillRelease())) {
-    return iter_next_free_struct(it, ad);
-  }
-  ad->decRefCount();
-  if (debug) {
-    iter.setIterType(ArrayIter::TypeUndefined);
-  }
-  return 0;
-}
-
 }
 
 int64_t iterNextArrayPacked(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayPacked: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isPacked());
+         it->arr().getArrayData()->hasPackedLayout());
   return iter_next_packed_impl<false>(it, valOut, nullptr);
-}
-
-int64_t iterNextArrayStruct(Iter* it, TypedValue* valOut) {
-  TRACE(2, "iterNextArrayStruct: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isStruct());
-  return iter_next_struct_impl<false>(it, valOut, nullptr);
 }
 
 int64_t iterNextKArrayPacked(Iter* it,
@@ -1918,25 +1820,15 @@ int64_t iterNextKArrayPacked(Iter* it,
   TRACE(2, "iterNextKArrayPacked: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isPacked());
+         it->arr().getArrayData()->hasPackedLayout());
   return iter_next_packed_impl<true>(it, valOut, keyOut);
-}
-
-int64_t iterNextKArrayStruct(Iter* it,
-                             TypedValue* valOut,
-                             TypedValue* keyOut) {
-  TRACE(2, "iterNextKArrayStruct: I %p\n", it);
-  assert(it->arr().getIterType() == ArrayIter::TypeArray &&
-         it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isStruct());
-  return iter_next_struct_impl<true>(it, valOut, keyOut);
 }
 
 int64_t iterNextArrayMixed(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArrayMixed: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isMixed());
+         it->arr().getArrayData()->hasMixedLayout());
   return iter_next_mixed_impl<false>(it, valOut, nullptr);
 }
 
@@ -1946,7 +1838,7 @@ int64_t iterNextKArrayMixed(Iter* it,
   TRACE(2, "iterNextKArrayMixed: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData() &&
-         it->arr().getArrayData()->isMixed());
+         it->arr().getArrayData()->hasMixedLayout());
   return iter_next_mixed_impl<true>(it, valOut, keyOut);
 }
 
@@ -1954,8 +1846,8 @@ int64_t iterNextArray(Iter* it, TypedValue* valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData());
-  assert(!it->arr().getArrayData()->isPacked());
-  assert(!it->arr().getArrayData()->isMixed());
+  assert(!it->arr().getArrayData()->hasPackedLayout());
+  assert(!it->arr().getArrayData()->hasMixedLayout());
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
@@ -1971,8 +1863,8 @@ int64_t iterNextKArray(Iter* it,
   TRACE(2, "iterNextKArray: I %p\n", it);
   assert(it->arr().getIterType() == ArrayIter::TypeArray &&
          it->arr().hasArrayData());
-  assert(!it->arr().getArrayData()->isMixed());
-  assert(!it->arr().getArrayData()->isPacked());
+  assert(!it->arr().getArrayData()->hasMixedLayout());
+  assert(!it->arr().getArrayData()->hasPackedLayout());
 
   ArrayIter& iter = it->arr();
   auto const ad = const_cast<ArrayData*>(iter.getArrayData());
@@ -2138,7 +2030,6 @@ using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*);
 const IterNextHelper g_iterNextHelpers[] = {
   &iterNextArrayPacked,
   &iterNextArrayMixed,
-  &iterNextArrayStruct,
   &iterNextArray,
   &iterNextVector,
   &iterNextImmVector,
@@ -2153,7 +2044,6 @@ const IterNextHelper g_iterNextHelpers[] = {
 const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArrayPacked,
   &iterNextKArrayMixed,
-  &iterNextKArrayStruct,
   &iterNextKArray,
   &iterNextKVector,
   &iterNextKImmVector,

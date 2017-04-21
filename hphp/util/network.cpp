@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,20 +15,15 @@
 */
 #include "hphp/util/network.h"
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #ifndef _MSC_VER
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include <sys/utsname.h>
 #endif
 
-#include <folly/String.h>
 #include <folly/IPAddress.h>
-
-#include "hphp/util/lock.h"
-#include "hphp/util/process.h"
+#include <folly/String.h>
+#include <folly/portability/Sockets.h>
 
 namespace HPHP {
 
@@ -37,8 +32,7 @@ namespace HPHP {
 // without calling res_init(), any call to getaddrinfo() may leak memory:
 //  http://sources.redhat.com/ml/libc-hacker/2004-02/msg00049.html
 
-class ResolverLibInitializer {
-public:
+struct ResolverLibInitializer {
   ResolverLibInitializer() {
     res_init();
     // We call sethostent with stayopen = 1 to keep /etc/hosts open across calls
@@ -55,8 +49,7 @@ static ResolverLibInitializer _resolver_lib_initializer;
 // thread-safe network functions
 
 bool safe_gethostbyname(const char *address, HostEnt &result) {
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
-    defined(_MSC_VER)
+#if defined(__APPLE__) || defined(_MSC_VER)
   // NOTE: on windows gethostbyname is "thread safe"
   // the hostent is allocated once per thread by winsock2
   // and cleaned up by winsock when the thread ends
@@ -140,7 +133,15 @@ std::string GetPrimaryIP() {
   return ipaddress;
 }
 
-static std::string normalizeIPv6Address(const std::string& address) {
+static std::string normalizeIPv6Address(std::string address) {
+  // strip the scopeId
+  std::string scopeId;
+  auto it = address.find('%');
+  if (it != std::string::npos) {
+    scopeId = address.substr(it + 1);
+    address = address.substr(0, it);
+  }
+
   struct in6_addr addr;
   if (inet_pton(AF_INET6, address.c_str(), &addr) <= 0) {
     return std::string();
@@ -151,7 +152,13 @@ static std::string normalizeIPv6Address(const std::string& address) {
     return std::string();
   }
 
-  return ipPresentation;
+  // restore the scopeId if it was originally present
+  std::string res(ipPresentation);
+  if (!scopeId.empty()) {
+    res += "%" + scopeId;
+  }
+
+  return res;
 }
 
 HostURL::HostURL(const std::string &hosturl, int port) :

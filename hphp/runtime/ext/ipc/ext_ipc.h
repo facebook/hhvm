@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -65,7 +65,8 @@ Array HHVM_FUNCTION(msg_stat_queue,
 // semaphore
 
 bool HHVM_FUNCTION(sem_acquire,
-                   const Resource& sem_identifier);
+                   const Resource& sem_identifier,
+                   bool nowait = false);
 Variant HHVM_FUNCTION(sem_get,
                       int64_t key,
                       int64_t max_acquire = 1,

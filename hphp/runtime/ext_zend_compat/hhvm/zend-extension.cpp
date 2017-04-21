@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -88,7 +88,7 @@ void ZendExtension::moduleInit() {
   // The systemlib name must match the name used by the build process. For
   // in-tree builds this is the directory name, which is typically the same
   // as the extension name converted to lower case.
-  std::string slName = toLower(std::string(getName()));
+  auto slName = toLower(getName());
   loadSystemlib(slName);
 }
 

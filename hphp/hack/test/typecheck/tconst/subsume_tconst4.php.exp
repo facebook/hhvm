@@ -1,8 +1,7 @@
 File "subsume_tconst4.php", line 7, characters 11-11:
-This object is of type C (Typing[4110])
+Class C does not correctly implement all required methods  (Typing[4110])
 File "subsume_tconst4.php", line 7, characters 21-21:
-It is incompatible with this object of type P
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type P
 Read the following to see why:
 File "subsume_tconst4.php", line 8, characters 23-23:
 The constraint on this type constant is inconsistent with its parent

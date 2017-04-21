@@ -18,7 +18,12 @@ function(HHVM_EXTENSION EXTNAME)
   add_library(${EXTNAME} SHARED ${ARGN})
   set_target_properties(${EXTNAME} PROPERTIES PREFIX "")
   set_target_properties(${EXTNAME} PROPERTIES SUFFIX ".so")
-  install(TARGETS ${EXTNAME} DESTINATION "${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_API_VERSION}")
+  
+  get_target_property(LOC ${EXTNAME} LOCATION)
+  get_target_property(TY ${EXTNAME} TYPE)
+  # Don't install via target, because it triggers a re-link that doesn't
+  # run the POST_BUILD custom command that embeds the systemlib on Linux.
+  install(CODE "FILE(INSTALL DESTINATION \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/hhvm/extensions/${HHVM_VERSION_BRANCH}\" TYPE ${TY} FILES \"${LOC}\")")
 endfunction()
 
 # Add an extension that uses the Zend compatibility layer.
@@ -40,6 +45,19 @@ function(HHVM_COMPAT_EXTENSION EXTNAME)
   include_directories("${EZC_DIR}/php-src/Zend")
   include_directories("${EZC_DIR}/php-src/TSRM")
 endfunction()
+
+function(embed_systemlibs TARGET DEST)
+  if (APPLE)
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
+  elseif (MSVC)
+    message(FATAL_ERROR "Shared extensions are not supported on Windows")
+  else()
+    add_custom_command(TARGET ${TARGET} POST_BUILD
+      COMMAND "objcopy"
+      ARGS ${${TARGET}_SLIBS} ${DEST}
+      COMMENT "Embedding php in ${TARGET}")
+  endif()
+endfunction(embed_systemlibs)
 
 function(HHVM_SYSTEMLIB EXTNAME)
   foreach (SLIB ${ARGN})

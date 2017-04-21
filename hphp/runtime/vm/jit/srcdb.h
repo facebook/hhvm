@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
 namespace HPHP { namespace jit {
 ////////////////////////////////////////////////////////////////////////////////
 
-struct CodeGenFixups;
+struct CGMeta;
 struct RelocationInfo;
 
 /*
@@ -85,7 +85,7 @@ private:
   }
 
   /* needed to allow IncomingBranch to be put in a GrowableVector */
-  friend class GrowableVector<IncomingBranch>;
+  friend struct GrowableVector<IncomingBranch>;
   IncomingBranch() {}
 
   CompactTaggedPtr<void,Tag> m_ptr;
@@ -132,12 +132,19 @@ struct TransLoc {
   uint32_t coldSize()   const { return *(uint32_t*)coldStart(); }
   uint32_t frozenSize() const { return *(uint32_t*)frozenStart(); }
 
+  bool empty() const {
+    return m_mainOff == kDefaultOff && m_mainLen == 0 &&
+      m_coldOff == kDefaultOff && m_frozenOff == kDefaultOff;
+  }
+
 private:
-  uint32_t m_mainOff {std::numeric_limits<uint32_t>::max()};
+  static auto constexpr kDefaultOff = std::numeric_limits<uint32_t>::max();
+
+  uint32_t m_mainOff {kDefaultOff};
   uint32_t m_mainLen {0};
 
-  uint32_t m_coldOff   {std::numeric_limits<uint32_t>::max()};
-  uint32_t m_frozenOff {std::numeric_limits<uint32_t>::max()};
+  uint32_t m_coldOff   {kDefaultOff};
+  uint32_t m_frozenOff {kDefaultOff};
 };
 
 // Prevent unintentional growth of the SrcDB
@@ -173,7 +180,6 @@ struct SrcRec {
    */
   void setFuncInfo(const Func* f);
   void chainFrom(IncomingBranch br);
-  void registerFallbackJump(TCA from, ConditionCode cc = CC_None);
   TCA getFallbackTranslation() const;
   void newTranslation(TransLoc newStart,
                       GrowableVector<IncomingBranch>& inProgressTailBranches);
@@ -220,7 +226,7 @@ struct SrcRec {
   /*
    * There is an unlikely race in retranslate, where two threads
    * could simultaneously generate the same translation for a
-   * tracelet. In practice its almost impossible to hit this, unless
+   * tracelet. In practice it's almost impossible to hit this, unless
    * Eval.JitRequireWriteLease is set. But when it is set, we hit
    * it a lot.
    * m_guard doesn't quite solve it, but its as good as things were
@@ -291,7 +297,7 @@ struct SrcDB {
   //////////////////////////////////////////////////////////////////////////////
 
   SrcRec* find(SrcKey sk) const {
-    SrcRec* const* p = m_map.find(sk.toAtomicInt());
+    auto const p = m_map.find(sk.toAtomicInt());
     return p ? *p : 0;
   }
 

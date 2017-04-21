@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,11 +29,13 @@
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
+#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/func-emitter.h"
+#include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass.h"
@@ -241,17 +243,7 @@ void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
 
   if (hoistable >= PreClass::MaybeHoistable) {
     m_hoistablePreClassSet.insert(pce->name());
-    if (hoistable == PreClass::ClosureHoistable) {
-      // Closures should appear at the VERY top of the file, so if any class in
-      // the same file tries to use them, they are already defined. We had a
-      // fun race where one thread was autoloading a file, finished parsing the
-      // class, then another thread came along and saw the class was already
-      // loaded and ran it before the first thread had time to parse the
-      // closure class.
-      m_hoistablePceIdList.push_front(pce->id());
-    } else {
-      m_hoistablePceIdList.push_back(pce->id());
-    }
+    m_hoistablePceIdList.push_back(pce->id());
   } else {
     m_allClassesHoistable = false;
   }
@@ -266,7 +258,7 @@ void UnitEmitter::addPreClassEmitter(PreClassEmitter* pce) {
 }
 
 PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
-  const StringData* name,
+  const std::string& name,
   PreClass::Hoistable hoistable
 ) {
   auto pce = new PreClassEmitter(*this, m_pceVec.size(), name, hoistable);
@@ -275,7 +267,7 @@ PreClassEmitter* UnitEmitter::newBarePreClassEmitter(
 }
 
 PreClassEmitter* UnitEmitter::newPreClassEmitter(
-  const StringData* name,
+  const std::string& name,
   PreClass::Hoistable hoistable
 ) {
   PreClassEmitter* pce = newBarePreClassEmitter(name, hoistable);
@@ -283,6 +275,14 @@ PreClassEmitter* UnitEmitter::newPreClassEmitter(
   return pce;
 }
 
+Id UnitEmitter::pceId(folly::StringPiece clsName) {
+  Id id = 0;
+  for (auto p : m_pceVec) {
+    if (p->name()->slice() == clsName) return id;
+    id++;
+  }
+  return -1;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
@@ -343,8 +343,9 @@ void UnitEmitter::recordSourceLocation(const Location::Range& sLoc,
            "source location offsets must be added to UnitEmitter in "
            "increasing order");
   } else {
-    // First record added should be for bytecode offset zero.
-    assert(start == 0);
+    // First record added should be for bytecode offset zero or very rarely one
+    // when the source starts with a label and a Nop is inserted.
+    assert(start == 0 || start == 1);
   }
   m_sourceLocTab.push_back(std::make_pair(start, newLoc));
 }
@@ -408,8 +409,8 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   Repo& repo = Repo::get();
   try {
     RepoTxn txn(repo);
-    bool err = insert(unitOrigin, txn);
-    if (!err) {
+    RepoStatus err = insert(unitOrigin, txn);
+    if (err == RepoStatus::success) {
       txn.commit();
     }
   } catch (RepoExc& re) {
@@ -422,12 +423,12 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   }
 }
 
-bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
+RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   Repo& repo = Repo::get();
   UnitRepoProxy& urp = repo.urp();
   int repoId = Repo::get().repoIdForNewUnit(unitOrigin);
   if (repoId == RepoIdInvalid) {
-    return true;
+    return RepoStatus::error;
   }
   m_repoId = repoId;
 
@@ -485,24 +486,32 @@ bool UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
         SourceLoc& e = m_sourceLocTab[i].second;
         Offset endOff = i < m_sourceLocTab.size() - 1
-                          ? m_sourceLocTab[i + 1].first
-                          : m_bclen;
+                            ? m_sourceLocTab[i + 1].first
+                            : m_bclen;
 
         urp.insertUnitSourceLoc[repoId]
            .insert(txn, usn, endOff, e.line0, e.char0, e.line1, e.char1);
       }
     }
-    return false;
+    return RepoStatus::success;
   } catch (RepoExc& re) {
     TRACE(3, "Failed to commit '%s' (0x%016" PRIx64 "%016" PRIx64 ") to '%s': %s\n",
              m_filepath->data(), m_md5.q[0], m_md5.q[1],
              repo.repoName(repoId).c_str(), re.msg().c_str());
-    return true;
+    return RepoStatus::error;
   }
 }
 
+ServiceData::ExportedTimeSeries* g_hhbc_size = ServiceData::createTimeSeries(
+  "vm.hhbc-size",
+  {ServiceData::StatsType::AVG,
+   ServiceData::StatsType::SUM,
+   ServiceData::StatsType::COUNT}
+);
+
 static const unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
+  g_hhbc_size->addValue(bclen);
   if (RuntimeOption::RepoAuthoritative) {
     // In RepoAuthoritative, we assume we won't ever deallocate units
     // and that this is read-only, mostly cold data.  So we throw it
@@ -517,6 +526,7 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
 }
 
 std::unique_ptr<Unit> UnitEmitter::create() {
+  INC_TPC(unit_load);
   auto u = folly::make_unique<Unit>();
   u->m_repoId = m_repoId;
   u->m_sn = m_sn;
@@ -526,11 +536,8 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   u->m_mainReturn = m_mainReturn;
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
-  {
-    const std::string& dirname = FileUtil::safe_dirname(m_filepath->data(),
-                                                        m_filepath->size());
-    u->m_dirpath = makeStaticString(dirname);
-  }
+  u->m_useStrictTypes = m_useStrictTypes;
+  u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_md5 = m_md5;
   for (unsigned i = 0; i < m_litstrs.size(); ++i) {
     NamedEntityPair np;
@@ -587,9 +594,10 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     } else {
       assert(!mi->m_firstHoistableFunc);
     }
+    assert(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  assert(u->getMain()->isPseudoMain());
+  assert(u->getMain(nullptr)->isPseudoMain());
   if (!mi->m_firstHoistableFunc) {
     mi->m_firstHoistableFunc =  ix;
   }
@@ -656,10 +664,19 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   }
 
   for (size_t i = 0; i < m_feTab.size(); ++i) {
-    assert(m_feTab[i].second->past == m_feTab[i].first);
-    assert(m_fMap.find(m_feTab[i].second) != m_fMap.end());
-    u->m_funcTable.push_back(
-      FuncEntry(m_feTab[i].first, m_fMap.find(m_feTab[i].second)->second));
+    auto const past = m_feTab[i].first;
+    auto const fe = m_feTab[i].second;
+    assert(fe->past == past);
+    assert(m_fMap.find(fe) != m_fMap.end());
+    auto func = m_fMap.find(fe)->second;
+    u->m_funcTable.push_back(FuncEntry(past, func));
+    // If this function has a dynamic call wrapper, hookup the Func* pointers so
+    // they point to each other.
+    if (fe->dynCallWrapperId != kInvalidId) {
+      auto wrapper = u->lookupFuncId(fe->dynCallWrapperId);
+      func->setDynCallWrapper(wrapper);
+      wrapper->setDynCallTarget(func);
+    }
   }
 
   // Funcs can be recorded out of order when loading them from the
@@ -667,16 +684,6 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   std::sort(u->m_funcTable.begin(), u->m_funcTable.end());
 
   m_fMap.clear();
-
-  if (RuntimeOption::EvalDumpBytecode) {
-    // Dump human-readable bytecode.
-    Trace::traceRelease("%s", u->toString().c_str());
-  }
-  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
-    std::printf("%s", disassemble(u.get()).c_str());
-    std::fflush(stdout);
-    _Exit(0);
-  }
 
   static const bool kVerify = debug || getenv("HHVM_VERIFY");
   static const bool kVerifyVerboseSystem =
@@ -701,6 +708,17 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     }
   }
 
+  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
+    std::printf("%s", disassemble(u.get()).c_str());
+    std::fflush(stdout);
+    _Exit(0);
+  }
+
+  if (RuntimeOption::EvalDumpBytecode) {
+    // Dump human-readable bytecode.
+    Trace::traceRelease("%s", u->toString().c_str());
+  }
+
   return u;
 }
 
@@ -710,6 +728,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_mergeOnly)
     (m_isHHFile)
     (m_typeAliases)
+    (m_useStrictTypes)
     ;
 }
 
@@ -775,21 +794,21 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
 }
 
-bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
-                               const std::string& name,
-                               const MD5& md5) {
+RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
+                                     const std::string& name,
+                                     const MD5& md5) {
   ue.m_filepath = makeStaticString(name);
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (!getUnit[repoId].get(ue, md5)) {
+    if (getUnit[repoId].get(ue, md5) == RepoStatus::success) {
       break;
     }
   }
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%016" PRIx64  "%016" PRIx64 ")\n",
              name.c_str(), md5.q[0], md5.q[1]);
-    return false;
+    return RepoStatus::error;
   }
   try {
     getUnitLitstrs[repoId].get(ue);
@@ -804,24 +823,55 @@ bool UnitRepoProxy::loadHelper(UnitEmitter& ue,
           PRIx64 ") from '%s': %s\n",
           name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
           re.msg().c_str());
-    return false;
+    return RepoStatus::error;
   }
   TRACE(3, "Repo loaded '%s' (0x%016" PRIx64 "%016" PRIx64 ") from '%s'\n",
            name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
-  return true;
+  return RepoStatus::success;
 }
 
 std::unique_ptr<UnitEmitter>
 UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
   auto ue = folly::make_unique<UnitEmitter>(md5);
-  if (!loadHelper(*ue, name, md5)) ue.reset();
+  if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   UnitEmitter ue(md5);
-  if (!loadHelper(ue, name, md5)) return nullptr;
+  if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
+
+  if (RuntimeOption::XenonTraceUnitLoad) {
+    Xenon::getInstance().logNoSurprise(Xenon::UnitLoadEvent, name.c_str());
+  }
+
+#ifdef USE_JEMALLOC
+  if (RuntimeOption::TrackPerUnitMemory) {
+    size_t len = sizeof(uint64_t*);
+    uint64_t* alloc;
+    uint64_t* del;
+    mallctl("thread.allocatedp", static_cast<void*>(&alloc), &len, nullptr, 0);
+    mallctl("thread.deallocatedp", static_cast<void*>(&del), &len, nullptr, 0);
+    auto before = *alloc;
+    auto debefore = *del;
+    std::unique_ptr<Unit> result = ue.create();
+    auto after = *alloc;
+    auto deafter = *del;
+
+    auto path = folly::sformat("/tmp/units-{}.map", getpid());
+    auto change = (after - deafter) - (before - debefore);
+    auto str = folly::sformat("{} {}\n", name, change);
+    auto out = std::fopen(path.c_str(), "a");
+    if (out) {
+      std::fwrite(str.data(), str.size(), 1, out);
+      std::fclose(out);
+    }
+
+    return result;
+  }
+#endif
+
   return ue.create();
 }
 
@@ -851,8 +901,7 @@ void UnitRepoProxy::InsertUnitStmt
   unitSn = query.getInsertedRowid();
 }
 
-bool UnitRepoProxy::GetUnitStmt
-                  ::get(UnitEmitter& ue, const MD5& md5) {
+RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const MD5& md5) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -866,7 +915,7 @@ bool UnitRepoProxy::GetUnitStmt
     query.bindMd5("@md5", md5);
     query.step();
     if (!query.row()) {
-      return true;
+      return RepoStatus::error;
     }
     int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
     int preloadPriority;                /**/ query.getInt(1, preloadPriority);
@@ -881,9 +930,9 @@ bool UnitRepoProxy::GetUnitStmt
 
     txn.commit();
   } catch (RepoExc& re) {
-    return true;
+    return RepoStatus::error;
   }
-  return false;
+  return RepoStatus::success;
 }
 
 void UnitRepoProxy::InsertUnitLitstrStmt
@@ -1117,8 +1166,9 @@ void UnitRepoProxy::InsertUnitSourceLocStmt
   query.exec();
 }
 
-bool UnitRepoProxy::GetSourceLocTabStmt
-     ::get(int64_t unitSn, SourceLocTable& sourceLocTab) {
+RepoStatus
+UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
+                                        SourceLocTable& sourceLocTab) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
@@ -1134,7 +1184,7 @@ bool UnitRepoProxy::GetSourceLocTabStmt
     do {
       query.step();
       if (!query.row()) {
-        return true;
+        return RepoStatus::error;
       }
       Offset pastOffset;
       query.getOffset(0, pastOffset);
@@ -1148,9 +1198,9 @@ bool UnitRepoProxy::GetSourceLocTabStmt
     } while (!query.done());
     txn.commit();
   } catch (RepoExc& re) {
-    return true;
+    return RepoStatus::error;
   }
-  return false;
+  return RepoStatus::success;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

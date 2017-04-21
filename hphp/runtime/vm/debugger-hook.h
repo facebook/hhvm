@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,6 +61,12 @@ bool isHphpd(const DebuggerHook*);
 // out of JIT code. Second, that phpDebuggerOpcodeHook will continue to allow
 // debugger interrupts for every opcode executed (modulo filters.)
 #define DEBUGGER_FORCE_INTR (RID().getDebuggerForceIntr())
+
+enum class StackDepthDisposition {
+  Equal,        // Same.
+  Shallower,    // Less than baseline.
+  Deeper,       // Greater than baseline.
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // DebuggerHook
@@ -218,7 +224,6 @@ void phpDebuggerNext();
 
 // Add breakpoints of various types
 void phpAddBreakPoint(const Unit* unit, Offset offset);
-void phpAddBreakPointRange(const Unit* unit, OffsetRangeVec& offsets);
 void phpAddBreakPointFuncEntry(const Func* f);
 void phpAddBreakPointFuncExit(const Func* f);
 // Returns false if the line is invalid
@@ -242,6 +247,13 @@ void phpRemoveBreakPointFuncExit(const Func* f);
 void phpRemoveBreakPointLine(const Unit* unit, int line);
 
 bool phpHasBreakpoint(const Unit* unit, Offset offset);
+
+StackDepthDisposition getStackDisposition(int baseline);
+
+PCFilter* getBreakPointFilter();
+PCFilter* getFlowFilter();
+
+String getCurrentFilePath(int* pLine);
 
 }
 

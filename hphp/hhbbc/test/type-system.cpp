@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@ const StaticString s_WaitHandle("HH\\WaitHandle");
 
 // A test program so we can actually test things involving object or
 // class types.
-std::unique_ptr<php::Unit> make_test_unit() {
+std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
   assert(SystemLib::s_inited);
   std::string const hhas = R"(
     .main {
@@ -154,12 +154,12 @@ std::unique_ptr<php::Unit> make_test_unit() {
     "ignore.php",
     MD5("12345432123454321234543212345432")
   ));
-  return parse_unit(*ue);
+  return parse_unit(program, std::move(ue));
 }
 
 std::unique_ptr<php::Program> make_program() {
-  auto program = folly::make_unique<php::Program>();
-  program->units.push_back(make_test_unit());
+  auto program = folly::make_unique<php::Program>(1);
+  program->units.push_back(make_test_unit(*program));
   return program;
 }
 
@@ -302,25 +302,28 @@ std::vector<Type> all_with_waithandles(const Index& index) {
   return ret;
 }
 
+Cell tv(SString s) { return make_tv<KindOfPersistentString>(s); }
+Cell tv(const StaticString& s) { return tv(s.get()); }
+
 auto const specialized_array_examples = folly::lazy([] {
   auto ret = std::vector<Type>{};
 
-  auto test_map_a          = StructMap{};
-  test_map_a[s_test.get()] = ival(2);
-  ret.emplace_back(sarr_struct(test_map_a));
+  auto test_map_a          = MapElems{};
+  test_map_a[tv(s_test)]   = ival(2);
+  ret.emplace_back(sarr_map(test_map_a));
 
-  auto test_map_b          = StructMap{};
-  test_map_b[s_test.get()] = TInt;
-  ret.emplace_back(sarr_struct(test_map_b));
+  auto test_map_b          = MapElems{};
+  test_map_b[tv(s_test)]   = TInt;
+  ret.emplace_back(sarr_map(test_map_b));
 
-  auto test_map_c          = StructMap{};
-  test_map_c[s_A.get()]    = TInt;
-  ret.emplace_back(sarr_struct(test_map_c));
+  auto test_map_c          = MapElems{};
+  test_map_c[tv(s_A)]    = TInt;
+  ret.emplace_back(sarr_map(test_map_c));
 
-  auto test_map_d          = StructMap{};
-  test_map_d[s_A.get()]    = TInt;
-  test_map_d[s_test.get()] = TDbl;
-  ret.emplace_back(sarr_struct(test_map_d));
+  auto test_map_d          = MapElems{};
+  test_map_d[tv(s_A)]      = TInt;
+  test_map_d[tv(s_test)]   = TDbl;
+  ret.emplace_back(sarr_map(test_map_d));
 
   ret.emplace_back(arr_packedn(TInt));
   ret.emplace_back(arr_mapn(TSStr, arr_mapn(TInt, TSStr)));
@@ -424,7 +427,7 @@ TEST(Type, Relations) {
 }
 
 TEST(Type, Prim) {
-  auto subtype_true = std::initializer_list<std::pair<Type,Type>> {
+  const std::initializer_list<std::pair<Type, Type>> subtype_true{
     { TInt,      TPrim },
     { TBool,     TPrim },
     { TNum,      TPrim },
@@ -442,7 +445,7 @@ TEST(Type, Prim) {
     { ival(0),   TInitPrim },
   };
 
-  auto subtype_false = std::initializer_list<std::pair<Type,Type>> {
+  const std::initializer_list<std::pair<Type, Type>> subtype_false{
     { sval(s_test.get()), TPrim },
     { TSStr, TPrim },
     { TSArr, TPrim },
@@ -460,20 +463,18 @@ TEST(Type, Prim) {
     { TPrim, dval(0.0) },
   };
 
-  auto couldbe_true = std::initializer_list<std::pair<Type,Type>> {
+  const std::initializer_list<std::pair<Type, Type>> couldbe_true{
     { TPrim, TInt },
     { TPrim, TBool },
     { TPrim, TNum },
     { TInitPrim, TNum },
     { TInitPrim, TFalse },
     { TPrim, TCell },
-    { TPrim, TInt },
-    { TPrim, TInt },
     { TPrim, TOptObj },
     { TPrim, TOptFalse },
   };
 
-  auto couldbe_false = std::initializer_list<std::pair<Type,Type>> {
+  const std::initializer_list<std::pair<Type, Type>> couldbe_false{
     { TPrim, TSStr },
     { TInitPrim, TSStr },
     { TInitPrim, sval(s_test.get()) },
@@ -487,16 +488,19 @@ TEST(Type, Prim) {
     EXPECT_TRUE(kv.first.subtypeOf(kv.second))
       << show(kv.first) << " subtypeOf " << show(kv.second);
   }
+
   for (auto kv : subtype_false) {
     EXPECT_FALSE(kv.first.subtypeOf(kv.second))
       << show(kv.first) << " !subtypeOf " << show(kv.second);
   }
+
   for (auto kv : couldbe_true) {
     EXPECT_TRUE(kv.first.couldBe(kv.second))
       << show(kv.first) << " couldbe " << show(kv.second);
     EXPECT_TRUE(kv.second.couldBe(kv.first))
       << show(kv.first) << " couldbe " << show(kv.second);
   }
+
   for (auto kv : couldbe_false) {
     EXPECT_TRUE(!kv.first.couldBe(kv.second))
       << show(kv.first) << " !couldbe " << show(kv.second);
@@ -525,7 +529,7 @@ TEST(Type, Unc) {
   EXPECT_TRUE(TDbl.subtypeOf(TUnc));
   EXPECT_TRUE(dval(3.0).subtypeOf(TInitUnc));
 
-  auto pairs = std::initializer_list<std::pair<Type,Type>> {
+  const std::initializer_list<std::pair<Type, Type>> pairs{
     { TUnc, TInitUnc },
     { TUnc, TInitCell },
     { TUnc, TCell },
@@ -685,7 +689,7 @@ TEST(Type, OptTV) {
 TEST(Type, OptCouldBe) {
   for (auto& x : optionals) EXPECT_TRUE(x.couldBe(unopt(x)));
 
-  auto true_cases = std::initializer_list<std::pair<Type,Type>> {
+  const std::initializer_list<std::pair<Type, Type>> true_cases{
     { opt(sval(s_test.get())), TStr },
     { opt(sval(s_test.get())), TInitNull },
     { opt(sval(s_test.get())), TSStr },
@@ -714,7 +718,13 @@ TEST(Type, OptCouldBe) {
     { opt(TDbl), TNum },
   };
 
-  auto false_cases = std::initializer_list<std::pair<Type,Type>> {
+  for (auto kv : true_cases) {
+    EXPECT_TRUE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " couldBe " << show(kv.second)
+      << " should be true";
+  }
+
+  const std::initializer_list<std::pair<Type, Type>> false_cases{
     { opt(sval(s_test.get())), TCStr },
     { opt(ival(2)), TDbl },
     { opt(dval(2.0)), TInt },
@@ -723,16 +733,12 @@ TEST(Type, OptCouldBe) {
     { TFalse, opt(TNum) },
   };
 
-  for (auto kv : true_cases) {
-    EXPECT_TRUE(kv.first.couldBe(kv.second))
-      << show(kv.first) << " couldBe " << show(kv.second)
-      << " should be true";
-  }
   for (auto kv : false_cases) {
     EXPECT_TRUE(!kv.first.couldBe(kv.second))
       << show(kv.first) << " couldBe " << show(kv.second)
       << " should be false";
   }
+
   for (auto kv : boost::join(true_cases, false_cases)) {
     EXPECT_EQ(kv.first.couldBe(kv.second), kv.second.couldBe(kv.first))
       << show(kv.first) << " couldBe " << show(kv.second)
@@ -1734,20 +1740,20 @@ TEST(Type, ArrPackedN) {
 }
 
 TEST(Type, ArrStruct) {
-  auto test_map_a          = StructMap{};
-  test_map_a[s_test.get()] = ival(2);
+  auto test_map_a          = MapElems{};
+  test_map_a[tv(s_test)]   = ival(2);
 
-  auto test_map_b          = StructMap{};
-  test_map_b[s_test.get()] = TInt;
+  auto test_map_b          = MapElems{};
+  test_map_b[tv(s_test)]   = TInt;
 
-  auto test_map_c          = StructMap{};
-  test_map_c[s_test.get()] = ival(2);
-  test_map_c[s_A.get()]    = TInt;
-  test_map_c[s_B.get()]    = TDbl;
+  auto test_map_c          = MapElems{};
+  test_map_c[tv(s_test)]   = ival(2);
+  test_map_c[tv(s_A)]      = TInt;
+  test_map_c[tv(s_B)]      = TDbl;
 
-  auto const ta = arr_struct(test_map_a);
-  auto const tb = arr_struct(test_map_b);
-  auto const tc = arr_struct(test_map_c);
+  auto const ta = arr_map(test_map_a);
+  auto const tb = arr_map(test_map_b);
+  auto const tc = arr_map(test_map_c);
 
   EXPECT_FALSE(ta.subtypeOf(tc));
   EXPECT_FALSE(tc.subtypeOf(ta));
@@ -1762,9 +1768,9 @@ TEST(Type, ArrStruct) {
   EXPECT_TRUE(tb.subtypeOf(TArr));
   EXPECT_TRUE(tc.subtypeOf(TArr));
 
-  auto const sa = sarr_struct(test_map_a);
-  auto const sb = sarr_struct(test_map_b);
-  auto const sc = sarr_struct(test_map_c);
+  auto const sa = sarr_map(test_map_a);
+  auto const sb = sarr_map(test_map_b);
+  auto const sc = sarr_map(test_map_c);
 
   EXPECT_FALSE(sa.subtypeOf(sc));
   EXPECT_FALSE(sc.subtypeOf(sa));
@@ -1779,16 +1785,16 @@ TEST(Type, ArrStruct) {
   EXPECT_TRUE(sb.subtypeOf(TSArr));
   EXPECT_TRUE(sc.subtypeOf(TSArr));
 
-  auto test_map_d          = StructMap{};
-  test_map_d[s_A.get()]    = sval(s_B.get());
-  test_map_d[s_test.get()] = ival(12);
-  auto const sd = sarr_struct(test_map_d);
+  auto test_map_d          = MapElems{};
+  test_map_d[tv(s_A)]      = sval(s_B.get());
+  test_map_d[tv(s_test)]   = ival(12);
+  auto const sd = sarr_map(test_map_d);
   EXPECT_EQ(sd, aval(test_array_map_value()));
 
-  auto test_map_e          = StructMap{};
-  test_map_e[s_A.get()]    = TSStr;
-  test_map_e[s_test.get()] = TNum;
-  auto const se = sarr_struct(test_map_e);
+  auto test_map_e          = MapElems{};
+  test_map_e[tv(s_A)]      = TSStr;
+  test_map_e[tv(s_test)]   = TNum;
+  auto const se = sarr_map(test_map_e);
   EXPECT_TRUE(aval(test_array_map_value()).subtypeOf(se));
   EXPECT_TRUE(se.couldBe(aval(test_array_map_value())));
 }
@@ -1802,9 +1808,9 @@ TEST(Type, ArrMapN) {
   EXPECT_TRUE(sarr_packedn({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
   EXPECT_TRUE(sarr_packed({TInt}).subtypeOf(arr_mapn(TInt, TInt)));
 
-  auto test_map_a          = StructMap{};
-  test_map_a[s_test.get()] = ival(2);
-  auto const tstruct       = sarr_struct(test_map_a);
+  auto test_map_a          = MapElems{};
+  test_map_a[tv(s_test)]   = ival(2);
+  auto const tstruct       = sarr_map(test_map_a);
 
   EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TSStr, ival(2))));
   EXPECT_TRUE(tstruct.subtypeOf(arr_mapn(TSStr, TInt)));
@@ -1838,32 +1844,32 @@ TEST(Type, ArrEquivalentRepresentations) {
   {
     auto const simple = aval(test_array_map_value());
 
-    auto map          = StructMap{};
-    map[s_A.get()]    = sval(s_B.get());
-    map[s_test.get()] = ival(12);
-    auto const bulky  = sarr_struct(map);
+    auto map          = MapElems{};
+    map[tv(s_A)]      = sval(s_B.get());
+    map[tv(s_test)]   = ival(12);
+    auto const bulky  = sarr_map(map);
 
     EXPECT_EQ(simple, bulky);
   }
 }
 
 TEST(Type, ArrUnions) {
-  auto test_map_a          = StructMap{};
-  test_map_a[s_test.get()] = ival(2);
-  auto const tstruct       = sarr_struct(test_map_a);
+  auto test_map_a          = MapElems{};
+  test_map_a[tv(s_test)]   = ival(2);
+  auto const tstruct       = sarr_map(test_map_a);
 
-  auto test_map_b          = StructMap{};
-  test_map_b[s_test.get()] = TInt;
-  auto const tstruct2      = sarr_struct(test_map_b);
+  auto test_map_b          = MapElems{};
+  test_map_b[tv(s_test)]   = TInt;
+  auto const tstruct2      = sarr_map(test_map_b);
 
-  auto test_map_c          = StructMap{};
-  test_map_c[s_A.get()]    = TInt;
-  auto const tstruct3      = sarr_struct(test_map_c);
+  auto test_map_c          = MapElems{};
+  test_map_c[tv(s_A)]      = TInt;
+  auto const tstruct3      = sarr_map(test_map_c);
 
-  auto test_map_d          = StructMap{};
-  test_map_d[s_A.get()]    = TInt;
-  test_map_d[s_test.get()] = TDbl;
-  auto const tstruct4      = sarr_struct(test_map_d);
+  auto test_map_d          = MapElems{};
+  test_map_d[tv(s_A)]      = TInt;
+  test_map_d[tv(s_test)]   = TDbl;
+  auto const tstruct4      = sarr_map(test_map_d);
 
   auto const packed_int = arr_packedn(TInt);
 

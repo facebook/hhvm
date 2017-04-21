@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,19 +25,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class c_WaitableWaitHandle;
+struct c_WaitableWaitHandle;
 
+/*
+ * AsioBlockable is an intrusive node in an AsioBlockableChain.
+ * Each node contains a pointer to the next node (AsioBlockable*)
+ * as well as a Kind, describing the waithandle that owns *this* node.
+ */
 struct AsioBlockable final {
   enum class Kind : uint8_t {
     AsyncFunctionWaitHandleNode,
     AsyncGeneratorWaitHandle,
-    AwaitAllWaitHandle,
+    AwaitAllWaitHandleNode,
     ConditionWaitHandle,
-
-    // DEPRECATED
-    GenArrayWaitHandle,
-    GenMapWaitHandle,
-    GenVectorWaitHandle,
   };
 
   static constexpr ptrdiff_t bitsOff() {
@@ -45,27 +45,51 @@ struct AsioBlockable final {
   }
 
   AsioBlockable* getNextParent() const {
-    return reinterpret_cast<AsioBlockable*>(m_bits & ~7UL);
+    return reinterpret_cast<AsioBlockable*>(m_bits & kParentMask);
   }
 
   Kind getKind() const {
-    return static_cast<Kind>(m_bits & 7);
+    return static_cast<Kind>(m_bits & kKindMask);
   }
 
+  // return ptr to the WH containing this blockable
   c_WaitableWaitHandle* getWaitHandle() const;
 
   void setNextParent(AsioBlockable* parent, Kind kind) {
-    assert(!(reinterpret_cast<intptr_t>(parent) & 7));
-    assert(!(static_cast<intptr_t>(kind) & ~7UL));
-    m_bits = reinterpret_cast<intptr_t>(parent) |
-             static_cast<intptr_t>(kind);
+    assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
+    assert(!(static_cast<intptr_t>(kind) & kParentMask));
+    m_bits = reinterpret_cast<intptr_t>(parent) | static_cast<intptr_t>(kind);
   }
 
+  // Only update the next parent w/o changing kind.
+  void updateNextParent(AsioBlockable* parent) {
+    assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
+    m_bits = (m_bits & ~kParentMask) | reinterpret_cast<intptr_t>(parent);
+  }
+
+  static constexpr uint64_t kKindMask   = 7UL;
+  static constexpr uint64_t kParentMask = ~kKindMask;
+
 private:
-  // Stores pointer to the next parent + kind in the lowest 3 bits.
-  uintptr_t m_bits;
+  // m_bits stores kind in the lowest 3 bits and next parent in the
+  // upper 61 bits.
+  // +--- Layout for m_bits (64 bits) ---+
+  // | 63.....................3 | 2....0 |
+  // | [Pointer to next parent] | [Kind] |
+  // +-----------------------------------+
+  union {
+    uintptr_t m_bits;
+    AsioBlockable* m_next;
+  };
+  TYPE_SCAN_CUSTOM() {
+    scanner.scan(m_next);
+  }
 };
 
+/*
+ * AsioBlockableChain is an intrusive linked list of parent
+ * waithandles, formed by AsioBlockable fields in each waithandle.
+ */
 struct AsioBlockableChain final {
   static constexpr ptrdiff_t firstParentOff() {
     return offsetof(AsioBlockableChain, m_firstParent);
@@ -81,16 +105,14 @@ struct AsioBlockableChain final {
   }
 
   static void Unblock(AsioBlockableChain chain) { chain.unblock(); }
+  static void UnblockJitHelper(ActRec* ar,
+                               TypedValue* sp,
+                               AsioBlockableChain chain);
   void unblock();
   void exitContext(context_idx_t ctx_idx);
+  void removeFromChain(AsioBlockable* parent);
   Array toArray();
   c_WaitableWaitHandle* firstInContext(context_idx_t ctx_idx);
-
-  template<class F> void scan(F& mark) const {
-    for (auto p = m_firstParent; p; p = p->getNextParent()) {
-      mark(p->getWaitHandle());
-    }
-  }
 
 private:
   AsioBlockable* m_firstParent;

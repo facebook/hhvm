@@ -1,0 +1,2 @@
+<?hh
+namespace { << sOYArHWz ( ) , uJSXwgCZr ( ) >> trait fCdpwTzzq < - gVbPyi as shape ( ) > implements pYZsyATy { use dHcVkN ; use zHIiFG ; use jOGUlUSRJ , nDCSRw < jFGlWef > ; } interface sBaJUiG < + cHpgJK > { } enum aECYv : int as ? int { } newtype yS as ( function ( ) : bool ) = pUksOtulm ; require 'single string' ; newtype xJ = sTPnMlh ; namespace sPx { function lEnKjYoDs < - iNf as resource > ( mixed $jZIQPEx ) : shape ( ) { } } }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,8 +39,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  * contains all classes, functions, variables, constants and their types.
  * Therefore, a package is really toppest entry point for parsing.
  */
-class Package {
-public:
+struct Package {
   explicit Package(const char *root,
                    bool bShortTags = true,
                    bool bAspTags = false);
@@ -64,7 +63,6 @@ public:
   int getFileCount() const { return m_files.size();}
   int getLineCount() const { return m_lineCount;}
   int getCharCount() const { return m_charCount;}
-  void getFiles(std::vector<std::string> &files) const;
 
   void saveStatsToFile(const char *filename, int totalSeconds) const;
 

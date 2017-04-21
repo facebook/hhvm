@@ -19,7 +19,7 @@ function setup() {
   }
   $text .= "class Y { const C = $i; }\n";
 
-  $file = __FILE__ . ".inc";
+  $file = __FILE__ . ".$i.inc";
   file_put_contents($file, "<?php $text");
   include $file;
   unlink($file);

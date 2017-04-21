@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-class Func;
+struct Func;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -43,11 +43,10 @@ class Func;
  * To use this class, instantiate a BCPattern with a list of opcodes and
  * metacharacters, then matchAnchored() on a PC.
  */
-class BCPattern {
-public:
+struct BCPattern {
   ////////////////////////////////////////////////////////////////////
 
-  class Atom;
+  struct Atom;
 
   typedef std::vector<Atom> Expr;
   typedef std::vector<PC> CaptureVec;
@@ -57,8 +56,7 @@ public:
    *
    * For JmpZ and JmpNZ, also supports pattern matching on the taken branch.
    */
-  class Atom {
-  public:
+  struct Atom {
     /* implicit */ Atom(Op op)
       : m_op(op)
       , m_capture(false)
@@ -129,8 +127,7 @@ public:
   /**
    * Result of a pattern match.
    */
-  class Result {
-  public:
+  struct Result {
     bool found() const  { return m_start; }
 
     PC getStart() const { return m_start; }
@@ -154,7 +151,7 @@ public:
     PC m_end{0};
     CaptureVec m_captures;
 
-    friend class BCPattern;
+    friend struct BCPattern;
   };
 
   ////////////////////////////////////////////////////////////////////

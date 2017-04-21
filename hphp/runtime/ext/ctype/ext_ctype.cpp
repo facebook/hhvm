@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -100,8 +100,7 @@ bool HHVM_FUNCTION(ctype_xdigit, const Variant& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class CtypeExtension final : public Extension {
- public:
+struct CtypeExtension final : Extension {
   CtypeExtension() : Extension("ctype") {}
   void moduleInit() override {
     HHVM_FE(ctype_alnum);

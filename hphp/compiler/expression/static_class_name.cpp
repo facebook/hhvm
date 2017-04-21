@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,8 +53,8 @@ void StaticClassName::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   }
 }
 
-bool StaticClassName::isNamed(const std::string& clsName) const {
-  return !strcasecmp(m_origClassName.c_str(), clsName.c_str());
+bool StaticClassName::isNamed(folly::StringPiece clsName) const {
+  return bstrcasecmp(m_origClassName, clsName) == 0;
 }
 
 void StaticClassName::updateClassName() {

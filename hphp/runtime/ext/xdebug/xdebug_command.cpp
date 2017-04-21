@@ -17,10 +17,11 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_command.h"
 #include "hphp/runtime/ext/xdebug/hook.h"
-#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+#include "hphp/runtime/ext/xdebug/util.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
 #include "hphp/compiler/builtin_symbols.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
@@ -97,6 +98,7 @@ namespace HPHP {
   FEATURE("supports_postmortem", "1", "1", false)                              \
   FEATURE("show_hidden", "1",                                                  \
           xdebug_sprintf("%d", m_server.m_showHidden), true)                   \
+  FEATURE("notify_ok", "1", "1", false)                                        \
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -127,34 +129,36 @@ static Unit* compile_expression(const String& expr) {
 
 // Evaluates the given unit at the given depth and returns the result or throws
 // and error on failure.
-static Variant do_eval(Unit* evalUnit, int depth) {
+static Variant do_eval(Unit* evalUnit, int depth, bool bypassCheck) {
   // Set the error reporting level to 0 to ensure non-fatal errors are hidden
   auto& req_data = ThreadInfo::s_threadInfo->m_reqInjectionData;
   auto const old_level = req_data.getErrorReportingLevel();
   req_data.setErrorReportingLevel(0);
 
+  g_context->debuggerSettings.bypassCheck = bypassCheck;
   // Do the eval
-  Variant result;
-  bool failure = g_context->evalPHPDebugger((TypedValue*)&result,
-                                            evalUnit, depth);
+  auto const result = g_context->evalPHPDebugger(evalUnit, depth);
+  g_context->debuggerSettings.bypassCheck = false;
 
   // Restore the error reporting level and then either return or throw
   req_data.setErrorReportingLevel(old_level);
-  if (failure) {
-    throw_exn(Error::EvaluatingCode);
+  if (result.failed) {
+    throw_exn(Error::EvaluatingCode, result.error);
   }
-  return result;
+  return result.result;
 }
 
 // Same as do_eval(const Unit*, int) except that this evaluates a string
-static Variant do_eval(const String& evalStr, int depth) {
-  return do_eval(compile(evalStr), depth);
+static Variant do_eval(const String& evalStr, int depth, bool bypassCheck) {
+  return do_eval(compile(evalStr), depth, bypassCheck);
 }
 
 // Helper for the breakpoint commands that returns an xml node containing
 // breakpoint information
-static xdebug_xml_node* breakpoint_xml_node(int id,
-                                            const XDebugBreakpoint& bp) {
+xdebug_xml_node* breakpoint_xml_node(
+  int id,
+  const XDebugBreakpoint& bp
+) {
   // Initialize the xml node
   auto xml = xdebug_xml_node_init("breakpoint");
   xdebug_xml_add_attribute(xml, "id", id);
@@ -170,6 +174,13 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
   } else {
     xdebug_xml_add_attribute(xml, "state", "disabled");
   }
+
+  // Whether the breakpoint is resolved or not.
+  xdebug_xml_add_attribute(
+    xml,
+    "resolved",
+    bp.resolved ? "resolved" : "unresolved"
+  );
 
   // Add the hit condition and count
   switch (bp.hitCondition) {
@@ -191,14 +202,14 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
     // Line breakpoints add a file, line, and possibly a condition
     case XDebugBreakpoint::Type::LINE:
       xdebug_xml_add_attribute(xml, "type", "line");
-      xdebug_xml_add_attribute_dup(xml, "filename",
-                                   XDebugUtils::pathToUrl(bp.fileName).data());
+      xdebug_xml_add_attribute(xml, "filename",
+                               xdebug_path_to_url(bp.fileName.c_str()));
       xdebug_xml_add_attribute(xml, "lineno", bp.line);
 
       // Add the condition. cast is due to xml api
       if (bp.conditionUnit != nullptr) {
         xdebug_xml_node* expr_xml = xdebug_xml_node_init("expression");
-        xdebug_xml_add_text(expr_xml, xdstrdup(bp.condition.data()));
+        xdebug_xml_add_text(expr_xml, xdstrdup(bp.condition.c_str()));
         xdebug_xml_add_child(xml, expr_xml);
       }
       break;
@@ -209,19 +220,17 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
     // Call breakpoints add function + class (optionally)
     case XDebugBreakpoint::Type::CALL:
       xdebug_xml_add_attribute(xml, "type", "call");
-      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.data());
-      if (!bp.className.isNull()) {
-        xdebug_xml_add_attribute_dup(xml, "class",
-                                     bp.className.toString().data());
+      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.c_str());
+      if (bp.className.hasValue()) {
+        xdebug_xml_add_attribute_dup(xml, "class", bp.className.value().c_str());
       }
       break;
     // Return breakpoints add function + class (optionally)
     case XDebugBreakpoint::Type::RETURN:
       xdebug_xml_add_attribute(xml, "type", "return");
-      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.data());
-      if (!bp.className.isNull()) {
-        xdebug_xml_add_attribute_dup(xml, "class",
-                                     bp.className.toString().data());
+      xdebug_xml_add_attribute_dup(xml, "function", bp.funcName.c_str());
+      if (bp.className.hasValue()) {
+        xdebug_xml_add_attribute_dup(xml, "class", bp.className.value().c_str());
       }
       break;
   }
@@ -230,7 +239,7 @@ static xdebug_xml_node* breakpoint_xml_node(int id,
 
 // Given a symbol name and a depth, returns the symbol's value. Throws an error
 // if the symbol is not found
-static Variant find_symbol(const String& name, int depth) {
+static Variant find_symbol(const String& name, int depth, bool bypassCheck) {
   // Retrieve the symbol by treating it as an expression.
   // NOTE: This does not match php5 xdebug. php5 xdebug allows 'special'
   // semantics to select the symbol. However, there is no evidence so far of an
@@ -239,7 +248,7 @@ static Variant find_symbol(const String& name, int depth) {
   auto eval_unit = compile_expression(name);
 
   // If the result is unitialized, the property must be undefined
-  auto result = do_eval(eval_unit, depth);
+  auto result = do_eval(eval_unit, depth, bypassCheck);
   if (!result.isInitialized()) {
     throw_exn(Error::PropertyNonExistent);
   }
@@ -361,7 +370,7 @@ struct FeatureSetCmd : XDebugCommand {
     } else if (m_feature == "max_depth") {
       m_server.m_maxDepth = strtol(value_str, nullptr, 10);
     } else if (m_feature == "show_hidden") {
-      m_server.m_showHidden = strtol(value_str, nullptr, 10);
+      m_server.m_showHidden = (strtol(value_str, nullptr, 10) != 0);
     } else if (m_feature == "multiple_sessions") {
       // php5 xdebug doesn't do anything here with this value, but it is doesn't
       // throw an error, either
@@ -369,6 +378,8 @@ struct FeatureSetCmd : XDebugCommand {
       if (m_value != "iso-8859-1") {
         throw_exn(Error::EncodingNotSupported);
       }
+    } else if (m_feature == "notify_ok" ) {
+      m_server.m_supportsNotify = (strtol(value_str, nullptr, 10) != 0);
     } else {
       throw_exn(Error::InvalidArgs);
     }
@@ -521,7 +532,7 @@ struct StopCmd : XDebugCommand {
     // We need to throw an exception, so this needs to be sent manually
     m_server.addStatus(xml);
     m_server.sendMessage(xml);
-    throw ExitException(0);
+    throw XDebugExitExn();
   }
 };
 
@@ -554,8 +565,7 @@ struct BreakCmd : XDebugCommand {
   ~BreakCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    // If we got here, then we were already paused.
-    m_server.addStatus(xml);
+    xdebug_xml_add_attribute(&xml, "success", "1");
   }
 };
 
@@ -656,18 +666,18 @@ struct BreakpointSetCmd : XDebugCommand {
         if (filename == staticEmptyString()) {
           throw_exn(Error::StackDepthInvalid);
         }
-        bp.fileName = String(filename);
+        bp.fileName = filename->toCppString();
       } else {
-        bp.fileName = XDebugUtils::pathFromUrl(args['f'].toString());
+        bp.fileName = xdebug_path_from_url(args['f'].toString()).toCppString();
       }
 
       // Ensure consistency between filenames
-      bp.fileName = File::TranslatePath(bp.fileName);
+      bp.fileName = File::TranslatePath(String(bp.fileName)).toCppString();
 
       // Create the condition unit if a condition string was supplied
       if (!args['-'].isNull()) {
         auto condition = StringUtil::Base64Decode(args['-'].toString());
-        bp.condition = condition;
+        bp.condition = condition.toCppString();
         bp.conditionUnit = compile_expression(condition);
       }
     }
@@ -678,18 +688,18 @@ struct BreakpointSetCmd : XDebugCommand {
       if (args['m'].isNull()) {
         throw_exn(Error::InvalidArgs);
       }
-      bp.funcName = args['m'].toString();
+      bp.funcName = args['m'].toString().toCppString();
 
       // This is in php5 xdebug, but not in the spec. If 'a' is passed, the
       // value is expected to be a class name that will be prepended to the
       // passed method name.
       if (!args['a'].isNull()) {
-        bp.className = args['a'];
+        bp.className = args['a'].toString().toCppString();
       }
 
       // Precompute full function name
-      bp.fullFuncName = bp.className.isNull() ?
-        bp.funcName : (bp.className.toString() + "::" + bp.funcName);
+      bp.fullFuncName = !bp.className.hasValue() ?
+        bp.funcName : (bp.className.value() + "::" + bp.funcName);
     }
 
     // Exception type
@@ -697,7 +707,7 @@ struct BreakpointSetCmd : XDebugCommand {
       if (args['x'].isNull()) {
         throw_exn(Error::InvalidArgs);
       }
-      bp.exceptionName = args['x'].toString();
+      bp.exceptionName = args['x'].toString().toCppString();
       return;
     }
   }
@@ -921,8 +931,7 @@ struct StackDepthCmd : XDebugCommand {
   ~StackDepthCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    auto const depth = XDebugUtils::stackDepth();
-    xdebug_xml_add_attribute(&xml, "depth", depth);
+    xdebug_xml_add_attribute(&xml, "depth", xdebug_stack_depth());
   }
 };
 
@@ -931,7 +940,9 @@ struct StackDepthCmd : XDebugCommand {
 // Returns the stack at the given depth, or the entire stack if no depth is
 // provided
 
-const StaticString s_FILE("file");
+const StaticString s_file("file");
+const StaticString s_line("line");
+const StaticString s_function("function");
 
 struct StackGetCmd : XDebugCommand {
   StackGetCmd(XDebugServer& server, const String& cmd, const Array& args)
@@ -939,7 +950,7 @@ struct StackGetCmd : XDebugCommand {
     // Grab the optional depth argument
     if (!args['d'].isNull()) {
       m_clientDepth = strtol(args['d'].toString().data(), nullptr, 10);
-      if (m_clientDepth < 0 || m_clientDepth > XDebugUtils::stackDepth()) {
+      if (m_clientDepth < 0 || m_clientDepth > xdebug_stack_depth()) {
         throw_exn(Error::StackDepthInvalid);
       }
     }
@@ -950,17 +961,28 @@ struct StackGetCmd : XDebugCommand {
   bool isValidInStatus(Status status) const override { return true; }
 
   void handleImpl(xdebug_xml_node& xml) override {
-    // Iterate up the stack. We need to keep track of both the frame actrec and
-    // our current depth in case the client passed us a depth
-    Offset offset;
-    int depth = 0;
-    for (const ActRec* fp = g_context->getStackFrame();
-         fp != nullptr && (m_clientDepth == -1 || depth <= m_clientDepth);
-         fp = g_context->getPrevVMState(fp, &offset), depth++) {
+    auto backtraceArgs = BacktraceArgs()
+      .withSelf()
+      .withPseudoMain();
+    if (m_clientDepth >= 0) {
+      backtraceArgs.setLimit(m_clientDepth);
+    }
+    const Array backtrace = createBacktrace(backtraceArgs);
+    for (int depth = 0; depth < backtrace.size() - 1; depth++) {
       // If a depth was provided, we're only interested in that depth
       if (m_clientDepth < 0 || depth == m_clientDepth) {
-        auto frame = getFrame(fp, offset, depth);
-        xdebug_xml_add_child(&xml, frame);
+        // We need the function name in the parent frame, because in this
+        // data structure, a frame's function name is actually the function
+        // being called in that frame.
+        const auto parent_frame = backtrace.rvalAt(depth + 1);
+        const auto func_name = parent_frame.getArrayData()->get(s_function);
+        const auto frame = backtrace.rvalAt(depth);
+        const auto xdebug_frame = getFrame(
+          frame.getArrayData(),
+          depth,
+          func_name.toString()
+        );
+        xdebug_xml_add_child(&xml, xdebug_frame);
       }
     }
   }
@@ -968,32 +990,25 @@ struct StackGetCmd : XDebugCommand {
 private:
   // Returns the xml node for the given stack frame. If level is non-zero,
   // offset is the current offset within the frame
-  xdebug_xml_node* getFrame(const ActRec* fp, Offset offset, int level) {
-    const auto func = fp->func();
-    const auto unit = fp->unit();
-
-    // Compute the function name. php5 xdebug includes names for each type of
-    // include, we don't have access to that
-    auto const func_name =
-      func->isPseudoMain() ?
-        (g_context->getPrevVMState(fp) == nullptr ? "{main}" : "include") :
-        func->fullName()->data();
+  xdebug_xml_node* getFrame(
+    HPHP::ArrayData* frame,
+    int level,
+    const String& func_name
+  ) {
+    const auto file = frame->get(s_file);
+    const auto line = frame->get(s_line);
 
     // Create the frame node
-    auto node = xdebug_xml_node_init("stack");
-    xdebug_xml_add_attribute(node, "where", func_name);
+    const auto node = xdebug_xml_node_init("stack");
+    xdebug_xml_add_attribute_dup(node, "where", func_name.data());
     xdebug_xml_add_attribute(node, "level", level);
     xdebug_xml_add_attribute(node, "type", "file");
 
-    // Grab the file/line for the frame. For level 0, this is the current
-    // file/line, for all other frames this is the stored file/line #
-    auto file =
-      XDebugUtils::pathToUrl(String(const_cast<StringData*>(unit->filepath())));
-    auto line = level == 0 ? g_context->getLine() : unit->getLineNumber(offset);
+    const auto xdebug_file = xdebug_path_to_url(file.toString());
 
     // Add the call file/line. Duplication is necessary due to xml api
-    xdebug_xml_add_attribute_dup(node, "filename", file.data());
-    xdebug_xml_add_attribute(node, "lineno", line);
+    xdebug_xml_add_attribute_dup(node, "filename", xdebug_file.data());
+    xdebug_xml_add_attribute(node, "lineno", line.toInt64());
     return node;
   }
 
@@ -1088,7 +1103,7 @@ struct ContextGetCmd : XDebugCommand {
         // Iterate through the globals, filtering out non-superglobals
         Array globals = php_globals_as_array();
         for (ArrayIter iter(globals); iter; ++iter) {
-          String name = iter.first();
+          auto const name = iter.first().toString();
           if (!is_superglobal(name)) {
             continue;
           }
@@ -1114,6 +1129,7 @@ struct ContextGetCmd : XDebugCommand {
       }
       case XDebugContext::LOCAL: {
         VMRegAnchor regAnchor;
+
         auto const fp = g_context->getFrameAtDepth(m_depth);
         auto const vars = getDefinedVariables(fp);
 
@@ -1260,7 +1276,7 @@ struct PropertyGetCmd : XDebugCommand {
       // Globals and superglobals can be fetched by finding the symbol
       case XDebugContext::LOCAL:
       case XDebugContext::SUPERGLOBALS: {
-        Variant val = find_symbol(m_name, m_depth);
+        Variant val = find_symbol(m_name, m_depth, m_server.m_showHidden);
         auto node = xdebug_get_value_xml_node(m_name.data(), val,
                                               XDebugVarType::Normal,
                                               exporter);
@@ -1286,7 +1302,7 @@ struct PropertyGetCmd : XDebugCommand {
   }
 
 private:
-  String m_name;
+  req::root<String> m_name;
   XDebugContext m_context = XDebugContext::LOCAL;
   int m_depth = 0; // desired stack depth
   int m_maxDepth = m_server.m_maxDepth; // max property depth
@@ -1328,7 +1344,7 @@ struct PropertySetCmd : XDebugCommand {
     m_type = args['t'];
     if (!args['d'].isNull()) {
       m_depth = strtol(args['d'].toString().data(), nullptr, 10);
-      if (m_depth < 0 || m_depth > XDebugUtils::stackDepth()) {
+      if (m_depth < 0 || m_depth > xdebug_stack_depth()) {
         throw_exn(Error::StackDepthInvalid);
       }
     }
@@ -1363,7 +1379,7 @@ struct PropertySetCmd : XDebugCommand {
     // with errors in property_get and eval, php5 xdebug sends back success = 0
     // on failure, not an error.
     try {
-      do_eval(eval_str, m_depth);
+      do_eval(eval_str, m_depth, m_server.m_showHidden);
       xdebug_xml_add_attribute(&xml, "success", "1");
     } catch (...) {
       xdebug_xml_add_attribute(&xml, "success", "0");
@@ -1371,9 +1387,9 @@ struct PropertySetCmd : XDebugCommand {
   }
 
 private:
-  String m_symbol;
-  String m_newValue;
-  Variant m_type ; // datatype name
+  req::root<String> m_symbol;
+  req::root<String> m_newValue;
+  req::root<Variant> m_type ; // datatype name
   int m_depth = 0; // desired stack depth
 };
 
@@ -1393,9 +1409,9 @@ struct SourceCmd : XDebugCommand {
       }
       m_filename = String(filename_data);
     } else {
-      m_filename = XDebugUtils::pathFromUrl(args['f'].toString());
+      m_filename = xdebug_path_from_url(args['f'].toString());
     }
-    m_filename = File::TranslatePath(m_filename); // canonicolize path
+    m_filename = File::TranslatePath(m_filename); // canonicalize path
 
 
     // Grab and 0-index the begin line
@@ -1430,7 +1446,8 @@ struct SourceCmd : XDebugCommand {
     // Compute the source string. The initial size is arbitrary, we just guess
     // 80 characters per line
     StringBuffer buf((m_endLine - m_beginLine) * 80);
-    ArrayIter iter(source); iter.setPos(m_beginLine);
+    ArrayIter iter(source);
+    iter.advance(m_beginLine);
     for (int i = m_beginLine; i <= m_endLine && iter; i++, ++iter) {
       buf.append(iter.second());
     }
@@ -1442,8 +1459,8 @@ struct SourceCmd : XDebugCommand {
   }
 
 private:
-  String m_filename;
-  String m_source;
+  req::root<String> m_filename;
+  req::root<String> m_source;
   int m_beginLine = 0;
   int m_endLine = -1;
 };
@@ -1556,7 +1573,8 @@ struct EvalCmd : XDebugCommand {
   ~EvalCmd() {}
 
   void handleImpl(xdebug_xml_node& xml) override {
-    auto result = do_eval(m_evalUnit, 0);
+    auto result = do_eval(m_evalUnit, 0, m_server.m_showHidden);
+    m_server.setStatus(Status::Break, Reason::Ok);
 
     // Construct the exporter
     XDebugExporter exporter;
@@ -1615,18 +1633,21 @@ bool XDebugCommand::handle(xdebug_xml_node& response) {
   return shouldContinue();
 }
 
-XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
-                                         const String& cmdStr,
-                                         const Array& args) {
+
+/*static*/ std::shared_ptr<XDebugCommand> XDebugCommand::fromString(
+  XDebugServer& server,
+  const String& cmdStr,
+  const Array& args
+) {
   // Match will be set true once there is a match.
   auto match = false;
   auto cmd_cpp = cmdStr.toCppString();
 
   // Check each command
-  XDebugCommand* cmd;
+  std::shared_ptr<XDebugCommand> cmd;
   #define COMMAND(name, className)                                             \
     if (!match && cmd_cpp == name) {                                           \
-      cmd = new className(server, cmdStr, args);                               \
+      cmd = std::make_shared<className>(server, cmdStr, args);                 \
       match = true;                                                            \
     }
   COMMANDS
@@ -1642,7 +1663,6 @@ XDebugCommand* XDebugCommand::fromString(XDebugServer& server,
   XDebugReason reason;
   server.getStatus(status, reason);
   if (!cmd->isValidInStatus(status)) {
-    delete cmd;
     throw_exn(Error::CommandUnavailable);
   }
   return cmd;

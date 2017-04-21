@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,10 @@
 #ifndef incl_HPHP_ALIAS_CLASS_H_
 #define incl_HPHP_ALIAS_CLASS_H_
 
-#include "hphp/runtime/vm/jit/alias-id-set.h"
 #include "hphp/runtime/vm/minstr-state.h"
+
+#include "hphp/runtime/vm/jit/alias-id-set.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 
 #include <folly/Optional.h>
 
@@ -48,11 +50,11 @@ struct SSATmp;
  *                         Unknown
  *                            |
  *                            |
- *                    +-------+-------+----------+
- *                    |               |          |
- *                 UnknownTV      IterPosAny  IterBaseAny
- *                    |               |          |
- *                    |              ...        ...
+ *                    +-------+-------+----------+--------------+
+ *                    |               |          |              |
+ *                 UnknownTV      IterPosAny  IterBaseAny  ClsRefSlotAny
+ *                    |               |          |              |
+ *                    |              ...        ...            ...
  *                    |
  *      +---------+---+---------------+-------------------------+
  *      |         |                   |                         |
@@ -144,13 +146,14 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  *     HHBC-level semantics.)
  */
 struct AStack {
-  // We can create an AStack from either a stack pointer or a frame
-  // pointer. This constructor canonicalizes the offset to base on the
-  // outermost frame pointer.
-  explicit AStack(SSATmp* base, int32_t offset, int32_t size);
-  explicit AStack(int32_t o, int32_t s) : offset(o), size(s) {}
+  // We can create an AStack from either a stack pointer or a frame pointer.
+  // These constructors canonicalize the offset to be relative to the outermost
+  // frame pointer.
+  explicit AStack(SSATmp* fp, FPRelOffset offset, int32_t size);
+  explicit AStack(SSATmp* sp, IRSPRelOffset offset, int32_t size);
+  explicit AStack(FPRelOffset o, int32_t s) : offset(o), size(s) {}
 
-  int32_t offset;
+  FPRelOffset offset;
   int32_t size;
 };
 
@@ -158,6 +161,12 @@ struct AStack {
  * A RefData referenced by a BoxedCell.
  */
 struct ARef { SSATmp* boxed; };
+
+
+/*
+ * A set of class-ref slots in the given frame.
+ */
+struct AClsRefSlot { SSATmp* fp; AliasIdSet ids; };
 
 //////////////////////////////////////////////////////////////////////
 
@@ -174,19 +183,20 @@ struct AliasClass {
     BElemS    = 1 << 5,
     BStack    = 1 << 6,
     BRef      = 1 << 7,
+    BClsRefSlot = 1 << 8,
 
     // Have no specialization, put them last.
-    BMITempBase = 1 << 8,
-    BMITvRef    = 1 << 9,
-    BMITvRef2   = 1 << 10,
-    BMIBase     = 1 << 11,
+    BMITempBase = 1 << 9,
+    BMITvRef    = 1 << 10,
+    BMITvRef2   = 1 << 11,
+    BMIBase     = 1 << 12,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp | BRef,
     BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
     BMIState   = BMIStateTV | BMIBase,
 
-    BUnknownTV = ~(BIterPos | BIterBase | BMIBase),
+    BUnknownTV = ~(BIterPos | BIterBase | BMIBase | BClsRefSlot),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -214,6 +224,7 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
   /* implicit */ AliasClass(ARef);
+  /* implicit */ AliasClass(AClsRefSlot);
 
   /*
    * Exact equality.
@@ -241,6 +252,7 @@ struct AliasClass {
    * Guaranteed to be commutative.
    */
   AliasClass operator|(AliasClass o) const;
+  AliasClass& operator|=(AliasClass o) { return *this = *this | o; }
 
   /*
    * Returns whether this alias class is a non-strict-subset of another one.
@@ -272,6 +284,7 @@ struct AliasClass {
   folly::Optional<AElemS>    elemS() const;
   folly::Optional<AStack>    stack() const;
   folly::Optional<ARef>      ref() const;
+  folly::Optional<AClsRefSlot> clsRefSlot() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -289,6 +302,7 @@ struct AliasClass {
   folly::Optional<AElemS>    is_elemS() const;
   folly::Optional<AStack>    is_stack() const;
   folly::Optional<ARef>      is_ref() const;
+  folly::Optional<AClsRefSlot> is_clsRefSlot() const;
 
   /*
    * Like the other foo() and is_foo() methods, but since we don't have an
@@ -308,6 +322,7 @@ private:
     ElemS,
     Stack,
     Ref,
+    ClsRefSlot,
 
     IterBoth,  // A union of base and pos for the same iter.
   };
@@ -342,6 +357,7 @@ private:
     AElemS    m_elemS;
     AStack    m_stack;
     ARef      m_ref;
+    AClsRefSlot m_clsRefSlot;
 
     UIterBoth m_iterBoth;
   };
@@ -358,6 +374,7 @@ auto const APropAny     = AliasClass{AliasClass::BProp};
 auto const AHeapAny     = AliasClass{AliasClass::BHeap};
 auto const ARefAny      = AliasClass{AliasClass::BRef};
 auto const AStackAny    = AliasClass{AliasClass::BStack};
+auto const AClsRefSlotAny = AliasClass{AliasClass::BClsRefSlot};
 auto const AElemIAny    = AliasClass{AliasClass::BElemI};
 auto const AElemSAny    = AliasClass{AliasClass::BElemS};
 auto const AElemAny     = AliasClass{AliasClass::BElem};

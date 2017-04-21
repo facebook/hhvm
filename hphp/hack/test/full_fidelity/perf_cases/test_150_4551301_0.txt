@@ -1,0 +1,2 @@
+<?hh
+function kXXlMKQ < - eGZwOmL as ( function ( shape ( ) ) : num ) , nSQ , + zVcz , - eKXC > ( ) : mixed { foreach ( ( - ( bool ) ( ( ( ( $sESwsF &= await ( ( $wItIoZ ) ? : ( $aKEMrz ) ) instanceof $kGX ) ) ) - ( ( ( ( ( $oBnRENS ) ) == ( ( 42.42 ) ) ) * ( ( await ( function ( $xOikwPd ) { } ) ) ) ? : ( ( ( bool ) ( ( $uYaJyC ) ? ( 12 ) : ( $dJaQJdYov ) ) ) ) < ( ( ( 0x16 ) ) * ( ( 'single string' ) ) ) ) ) ) ) as $bESnGuAo = ( $dEaNYIDx *= ( $fE = ( $jLaDVQAj ^= $iEWTN ) ) ) => $yGNGk ) { } }

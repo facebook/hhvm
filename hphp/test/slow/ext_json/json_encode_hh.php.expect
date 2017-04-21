@@ -1,0 +1,38 @@
+** array string keys**
+string(2) "[]"
+string(7) "["foo"]"
+string(13) "["foo","bar"]"
+string(37) "{"fookey":"fooval","barkey":"barval"}"
+string(19) "{"fookey":"fooval"}"
+
+** array int keys**
+string(13) "["foo","bar"]"
+string(23) "{"10":"foo","11":"bar"}"
+
+** vec **
+string(2) "[]"
+string(7) "["foo"]"
+string(13) "["foo","bar"]"
+
+string(5) "[0,1]"
+string(7) "[10,11]"
+string(11) "["10","11"]"
+
+** keyset **
+string(2) "[]"
+string(7) "["foo"]"
+string(13) "["foo","bar"]"
+
+string(5) "[0,1]"
+string(7) "[10,11]"
+string(9) "["0","1"]"
+string(11) "["10","11"]"
+
+** dict **
+string(2) "{}"
+string(19) "{"fookey":"fooval"}"
+string(37) "{"fookey":"fooval","barkey":"barval"}"
+
+string(27) "{"0":"fooval","1":"barval"}"
+string(29) "{"10":"fooval","11":"barval"}"
+string(27) "{"0":"fooval","1":"barval"}"

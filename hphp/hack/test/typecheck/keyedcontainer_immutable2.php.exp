@@ -1,0 +1,4 @@
+File "keyedcontainer_immutable2.php", line 4, characters 3-8:
+You cannot mutate this (Typing[4011])
+File "keyedcontainer_immutable2.php", line 3, characters 15-28:
+This is an object of type KeyedContainer

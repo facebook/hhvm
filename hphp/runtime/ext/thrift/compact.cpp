@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,13 +15,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/request-local.h"
-#include "hphp/runtime/ext/thrift/transport.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/request-local.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/thrift/spec-holder.h"
+#include "hphp/runtime/ext/thrift/transport.h"
+
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/perf-counters.h"
+
+#include "hphp/util/fixed-vector.h"
+
+#include <folly/AtomicHashMap.h>
+#include <folly/Format.h>
 
 #include <stack>
 #include <utility>
@@ -36,17 +50,6 @@ const uint8_t VERSION_DOUBLE_BE = 2;
 const uint8_t PROTOCOL_ID = 0x82;
 const uint8_t TYPE_MASK = 0xe0;
 const uint8_t TYPE_SHIFT_AMOUNT = 5;
-
-enum TError {
-  ERR_UNKNOWN = 0,
-  ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
-};
-
-ATTRIBUTE_NORETURN static void thrift_error(const String& what, TError why);
-static void thrift_error(const String& what, TError why) {
-  throw create_object(s_TProtocolException, make_packed_array(what, why));
-}
 
 enum CState {
   STATE_CLEAR,
@@ -123,41 +126,32 @@ static CType ttype_to_ctype(TType x) {
   }
 }
 
+static const TType s_ctype_to_ttype_map[14] {
+  T_STOP,
+  T_BOOL,
+  T_BOOL,
+  T_BYTE,
+  T_I16,
+  T_I32,
+  T_I64,
+  T_DOUBLE,
+  T_STRING,
+  T_LIST,
+  T_SET,
+  T_MAP,
+  T_STRUCT,
+  T_FLOAT
+};
+
 static TType ctype_to_ttype(CType x) {
-  switch (x) {
-    case C_STOP:
-      return T_STOP;
-    case C_TRUE:
-    case C_FALSE:
-      return T_BOOL;
-    case C_BYTE:
-      return T_BYTE;
-    case C_I16:
-      return T_I16;
-    case C_I32:
-      return T_I32;
-    case C_I64:
-      return T_I64;
-    case C_DOUBLE:
-      return T_DOUBLE;
-    case C_BINARY:
-      return T_STRING;
-    case C_STRUCT:
-      return T_STRUCT;
-    case C_LIST:
-      return T_LIST;
-    case C_SET:
-      return T_SET;
-    case C_MAP:
-      return T_MAP;
-    case C_FLOAT:
-      return T_FLOAT;
-    default:
-      thrift_error(
-        folly::to<std::string>(
-          "Unknown Compact data type ", static_cast<int>(x)),
-        ERR_INVALID_DATA);
+  uint8_t index = static_cast<uint8_t>(x);
+  if (UNLIKELY(index > C_FLOAT)) {
+    thrift_error(
+      folly::to<std::string>(
+        "Unknown Compact data type ", static_cast<int>(x)),
+      ERR_INVALID_DATA);
   }
+  return s_ctype_to_ttype_map[index];
 }
 
 struct CompactRequestData final : RequestEventHandler {
@@ -172,14 +166,11 @@ struct CompactRequestData final : RequestEventHandler {
     clear();
   }
 
-  void vscan(IMarker&) const override {}
-
   uint8_t version;
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 
-class CompactWriter {
-  public:
+struct CompactWriter {
     explicit CompactWriter(PHPOutputTransport *transport) :
       transport(transport),
       version(VERSION),
@@ -217,6 +208,19 @@ class CompactWriter {
     std::stack<std::pair<CState, uint16_t> > structHistory;
     std::stack<CState> containerHistory;
 
+    void writeSlow(const FieldSpec& field, const Object& obj) {
+      INC_TPC(thrift_write_slow);
+      StrNR fieldName(field.name);
+      Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
+      if (!fieldVal.isNull()) {
+        TType fieldType = field.type;
+        writeFieldBegin(field.fieldNum, fieldType);
+        ArrNR fieldSpec(field.spec);
+        writeField(fieldVal, fieldSpec.asArray(), fieldType);
+        writeFieldEnd();
+      }
+    }
+
     void writeStruct(const Object& obj) {
       // Save state
       structHistory.push(std::make_pair(state, lastFieldNum));
@@ -224,32 +228,27 @@ class CompactWriter {
       lastFieldNum = 0;
 
       // Get field specification
-      const Array& spec = HHVM_FN(hphp_get_static_property)(obj->getClassName(),
-                                                       s_TSPEC, false)
-        .toArray();
-
+      Class* cls = obj->getVMClass();
+      Array spec(get_tspec(cls));
+      SpecHolder specHolder;
+      const auto& fields = specHolder.getSpec(spec);
+      auto prop = cls->declProperties().begin();
+      auto objProp = obj->propVec();
+      const size_t numProps = cls->numDeclProperties();
+      const size_t numFields = fields.size();
       // Write each member
-      for (ArrayIter specIter = spec.begin(); !specIter.end(); ++specIter) {
-        Variant key = specIter.first();
-        if (!key.isInteger()) {
-          thrift_error("Bad keytype in TSPEC (expected 'long')",
-            ERR_INVALID_DATA);
-        }
-
-        uint16_t fieldNo = key.toInt16();
-        Array fieldSpec = specIter.second().toArray();
-
-        String fieldName = fieldSpec
-          .rvalAt(s_var, AccessFlags::Error_Key).toString();
-        TType fieldType = (TType)fieldSpec
-          .rvalAt(s_type, AccessFlags::Error_Key).toByte();
-
-        Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
-
-        if (!fieldVal.isNull()) {
-          writeFieldBegin(fieldNo, fieldType);
-          writeField(fieldVal, fieldSpec, fieldType);
-          writeFieldEnd();
+      for (int i = 0; i < numFields; ++i) {
+        if (i <= numProps && fields[i].name == prop[i].name) {
+          Variant fieldVal = tvAsVariant(&objProp[i]);
+          if (!fieldVal.isNull()) {
+            TType fieldType = fields[i].type;
+            ArrNR fieldSpec(fields[i].spec);
+            writeFieldBegin(fields[i].fieldNum, fieldType);
+            writeField(fieldVal, fieldSpec.asArray(), fieldType);
+            writeFieldEnd();
+          }
+        } else {
+          writeSlow(fields[i], obj);
         }
       }
 
@@ -373,15 +372,15 @@ class CompactWriter {
           }
 
         case T_MAP:
-          writeMap(value.toArray(), valueSpec);
+          writeMap(value, valueSpec);
           break;
 
         case T_LIST:
-          writeList(value.toArray(), valueSpec, C_LIST_LIST);
+          writeList(value, valueSpec, C_LIST_LIST);
           break;
 
         case T_SET:
-          writeList(value.toArray(), valueSpec, C_LIST_SET);
+          writeList(value, valueSpec, C_LIST_SET);
           break;
 
         default:
@@ -390,44 +389,71 @@ class CompactWriter {
       }
     }
 
-    void writeMap(Array arr, const Array& spec) {
+    void writeMap(const Variant& map, const Array& spec) {
       TType keyType = (TType)spec
-        .rvalAt(s_ktype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_ktype, AccessFlags::ErrorKey).toByte();
       TType valueType = (TType)spec
-        .rvalAt(s_vtype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_vtype, AccessFlags::ErrorKey).toByte();
 
-      Array keySpec = spec.rvalAt(s_key, AccessFlags::Error_Key)
-        .toArray();
-      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error_Key)
-        .toArray();
+      Array keySpec = spec.rvalAt(s_key, AccessFlags::ErrorKey).toArray();
+      Array valueSpec = spec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
 
-      writeMapBegin(keyType, valueType, arr.size());
+      auto elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+        writeField(tvAsCVarRef(k), keySpec, keyType);
+        writeField(tvAsCVarRef(v), valueSpec, valueType);
+        return false;
+      };
 
-      for (ArrayIter arrIter = arr.begin(); !arrIter.end(); ++arrIter) {
-        writeField(arrIter.first(), keySpec, keyType);
-        writeField(arrIter.second(), valueSpec, valueType);
+      if (isContainer(map)) {
+        writeMapBegin(keyType, valueType, getContainerSize(map));
+        IterateKV(
+          *map.asCell(),
+          [](const ArrayData* ad) { return false; },
+          elemWriter,
+          [](const ObjectData* o) { return false; }
+        );
+      } else {
+        auto const arr = map.toArray();
+        writeMapBegin(keyType, valueType, arr.size());
+        IterateKV(arr.get(), elemWriter);
       }
 
       writeCollectionEnd();
     }
 
-    void writeList(Array arr, const Array& spec, CListType listType) {
+    void writeList(const Variant& list, const Array& spec, CListType listType) {
       TType valueType = (TType)spec
-        .rvalAt(s_etype, AccessFlags::Error_Key).toByte();
+        .rvalAt(s_etype, AccessFlags::ErrorKey).toByte();
       Array valueSpec = spec
-        .rvalAt(s_elem, AccessFlags::Error_Key).toArray();
+        .rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
 
-      writeListBegin(valueType, arr.size());
+      std::function<bool(const TypedValue*, const TypedValue*)> elemWriter;
+      if (listType == C_LIST_LIST) {
+        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+          writeField(tvAsCVarRef(v), valueSpec, valueType);
+          return false;
+        };
+      } else if (listType == C_LIST_SET) {
+        elemWriter = [&](const TypedValue* k, const TypedValue* v) {
+          writeField(tvAsCVarRef(k), valueSpec, valueType);
+          return false;
+        };
+      } else {
+        always_assert(false);
+      }
 
-      for (ArrayIter arrIter = arr.begin(); !arrIter.end(); ++arrIter) {
-        Variant x;
-        if (listType == C_LIST_LIST) {
-          x = arrIter.second();
-        } else if (listType == C_LIST_SET) {
-          x = arrIter.first();
-        }
-
-        writeField(x, valueSpec, valueType);
+      if (isContainer(list)) {
+        writeListBegin(valueType, getContainerSize(list));
+        IterateKV(
+          *list.asCell(),
+          [](const ArrayData* ad) { return false; },
+          elemWriter,
+          [](const ObjectData* o) { return false; }
+        );
+      } else {
+        auto const arr = list.toArray();
+        writeListBegin(valueType, arr.size());
+        IterateKV(arr.get(), elemWriter);
       }
 
       writeCollectionEnd();
@@ -501,8 +527,7 @@ class CompactWriter {
     }
 };
 
-class CompactReader {
-  public:
+struct CompactReader {
     explicit CompactReader(const Object& _transportobj) :
       transport(_transportobj),
       version(VERSION),
@@ -532,33 +557,24 @@ class CompactReader {
 
       if (type == T_REPLY) {
         Object ret = create_object(resultClassName, Array());
-        Variant spec = HHVM_FN(hphp_get_static_property)(resultClassName,
-                                                         s_TSPEC, false);
-        readStruct(ret, spec.toArray());
+        Array spec(get_tspec(ret->getVMClass()));
+        readStruct(ret, spec);
         return ret;
       } else if (type == T_EXCEPTION) {
         Object exn = create_object(s_TApplicationException, Array());
-        Variant spec = HHVM_FN(hphp_get_static_property)(
-                                      s_TApplicationException, s_TSPEC, false);
-        readStruct(exn, spec.toArray());
-        throw exn;
+        Array spec(get_tspec(exn->getVMClass()));
+        readStruct(exn, spec);
+        throw_object(exn);
       } else {
         thrift_error("Invalid response type", ERR_INVALID_DATA);
       }
     }
 
-    void readStruct(const Object& dest, const Array& spec) {
-      readStructBegin();
-
-      while (true) {
-        int16_t fieldNum;
-        TType fieldType;
-        readFieldBegin(fieldNum, fieldType);
-
-        if (fieldType == T_STOP) {
-          break;
-        }
-
+    NEVER_INLINE
+    void readStructSlow(const Object& dest, const Array& spec,
+                        int16_t fieldNum, TType fieldType) {
+      INC_TPC(thrift_read_slow);
+      while (fieldType != T_STOP) {
         bool readComplete = false;
 
         Variant fieldSpecVariant = spec.rvalAt(fieldNum);
@@ -573,16 +589,59 @@ class CompactReader {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
             dest->o_set(fieldName, fieldValue, dest->getClassName());
+            bool isUnion = spec.rvalAt(s_union).toBoolean();
+            if (isUnion) {
+              dest->o_set(s__type, Variant(fieldNum), dest->getClassName());
+            }
           }
         }
 
         if (!readComplete) {
+          INC_TPC(thrift_spec_slow);
           skip(fieldType);
         }
-
         readFieldEnd();
+        readFieldBegin(fieldNum, fieldType);
       }
+      readStructEnd();
+    }
 
+    void readStruct(const Object& dest, const Array& spec) {
+      readStructBegin();
+      int16_t fieldNum;
+      TType fieldType;
+      readFieldBegin(fieldNum, fieldType);
+      SpecHolder specHolder;
+      const auto& fields = specHolder.getSpec(spec);
+      const size_t numFields = fields.size();
+      Class* cls = dest->getVMClass();
+      if (cls->numDeclProperties() < numFields) {
+        return readStructSlow(dest, spec, fieldNum, fieldType);
+      }
+      auto objProp = dest->propVec();
+      auto prop = cls->declProperties().begin();
+      int i = -1;
+      while (fieldType != T_STOP) {
+        do {
+          ++i;
+        } while (i < numFields && fields[i].fieldNum != fieldNum);
+        if (i == numFields ||
+            prop[i].name != fields[i].name ||
+            !typesAreCompatible(fieldType, fields[i].type)) {
+          return readStructSlow(dest, spec, fieldNum, fieldType);
+        }
+        if (fields[i].isUnion) {
+          if (s__type.equal(prop[numFields].name)) {
+            tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
+          } else {
+            return readStructSlow(dest, spec, fieldNum, fieldType);
+          }
+        }
+        ArrNR fieldSpec(fields[i].spec);
+        tvAsVariant(&objProp[i]) = readField(fieldSpec.asArray(), fieldType);
+        readFieldEnd();
+        readFieldBegin(fieldNum, fieldType);
+      }
       readStructEnd();
     }
 
@@ -660,15 +719,9 @@ class CompactReader {
               thrift_error("invalid class type in spec", ERR_INVALID_DATA);
             }
 
-            Variant newStructSpec =
-              HHVM_FN(hphp_get_static_property)(classNameString, s_TSPEC,
-                                                false);
-
-            if (!newStructSpec.isArray()) {
-              thrift_error("invalid type of spec", ERR_INVALID_DATA);
-            }
-
-            readStruct(newStruct.toObject(), newStructSpec.toArray());
+            Object obj = newStruct.toObject();
+            Array arrSpec(get_tspec(obj->getVMClass()));
+            readStruct(obj, arrSpec);
             return newStruct;
           }
 
@@ -839,11 +892,36 @@ class CompactReader {
 
       Array keySpec = spec.rvalAt(s_key,
         AccessFlags::Error).toArray();
-      Array valueSpec = spec.rvalAt(s_val,
-        AccessFlags::Error).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      Array valueSpec = spec.rvalAt(s_val, AccessFlags::Error).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        DictInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          switch (keyType) {
+            case TType::T_I08:
+            case TType::T_I16:
+            case TType::T_I32:
+            case TType::T_I64: {
+              int64_t key = readField(keySpec, keyType).toInt64();
+              Variant value = readField(valueSpec, valueType);
+              arr.set(key, value);
+              break;
+            }
+            case TType::T_STRING: {
+              String key = readField(keySpec, keyType).toString();
+              Variant value = readField(valueSpec, valueType);
+              arr.set(key, value);
+              break;
+            }
+            default:
+              thrift_error(
+                  "Unable to deserialize non int/string array keys",
+                  ERR_INVALID_DATA);
+          }
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto ret(req::make<c_Map>(size));
         for (uint32_t i = 0; i < size; i++) {
           Variant key = readField(keySpec, keyType);
@@ -869,14 +947,19 @@ class CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(s_elem,
-                                    AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        VecArrayInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.append(readField(valueSpec, valueType));
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t i = 0; i < size; i++) {
-          pvec->t_add(readField(valueSpec, valueType));
+          pvec->add(readField(valueSpec, valueType));
         }
         readCollectionEnd();
         return Variant(std::move(pvec));
@@ -895,15 +978,20 @@ class CompactReader {
       uint32_t size;
       readListBegin(valueType, size);
 
-      Array valueSpec = spec.rvalAt(s_elem,
-                                    AccessFlags::Error_Key).toArray();
-      String format = spec.rvalAt(s_format,
-        AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      Array valueSpec = spec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
+      String format = spec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        KeysetInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.add(readField(valueSpec, valueType));
+        }
+        readCollectionEnd();
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto set_ret = req::make<c_Set>(size);
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
-          set_ret->t_add(value);
+          set_ret->add(value);
         }
         readCollectionEnd();
         return Variant(std::move(set_ret));
@@ -1044,6 +1132,7 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 Variant HHVM_FUNCTION(thrift_protocol_read_compact,
                       const Object& transportobj,
                       const String& obj_typename) {
+  EagerVMRegAnchor _;
   CompactReader reader(transportobj);
   return reader.read(obj_typename);
 }
@@ -1051,11 +1140,11 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename) {
+  EagerVMRegAnchor _;
   CompactReader reader(transportobj);
   Object ret = create_object(obj_typename, Array());
-  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename,
-                                                   s_TSPEC, false);
-  reader.readStruct(ret, spec.toArray());
+  Array spec(get_tspec(ret->getVMClass()));
+  reader.readStruct(ret, spec);
   return ret;
 }
 

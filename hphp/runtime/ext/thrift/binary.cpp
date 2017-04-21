@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,19 +15,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thrift/transport.h"
-#include "hphp/runtime/ext/thrift/ext_thrift.h"
-#include "hphp/runtime/ext/std/ext_std_classobj.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
-#include "hphp/runtime/ext/reflection/ext_reflection.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/collections.h"
+
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/std/ext_std_classobj.h"
+#include "hphp/runtime/ext/thrift/spec-holder.h"
+#include "hphp/runtime/ext/thrift/transport.h"
+
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/perf-counters.h"
+
 #include "hphp/util/logger.h"
 
+#include <folly/portability/Sockets.h>
+#include <folly/portability/Unistd.h>
+
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <unistd.h>
 #include <stdexcept>
 
 namespace HPHP { namespace thrift {
@@ -45,12 +54,15 @@ const StaticString
   s_val("val"),
   s_elem("elem"),
   s_var("var"),
+  s_union("union"),
+  s__type("_type"),
   s_type("type"),
   s_ktype("ktype"),
   s_vtype("vtype"),
   s_etype("etype"),
   s_format("format"),
   s_collection("collection"),
+  s_harray("harray"),
   s_TSPEC("_TSPEC"),
   s_TProtocolException("TProtocolException"),
   s_TApplicationException("TApplicationException");
@@ -81,8 +93,8 @@ void skip_element(long thrift_typeID, PHPInputTransport& transport);
 // Create a PHP object given a typename and call the ctor,
 //optionally passing up to 2 arguments
 Object createObject(const String& obj_typename, int nargs = 0,
-                    const Variant& arg1 = null_variant,
-                    const Variant& arg2 = null_variant) {
+                    const Variant& arg1 = uninit_variant,
+                    const Variant& arg2 = uninit_variant) {
   if (!HHVM_FN(class_exists)(obj_typename)) {
     raise_warning("runtime/ext_thrift: Class %s does not exist",
                   obj_typename.data());
@@ -98,8 +110,7 @@ Object createObject(const String& obj_typename, int nargs = 0,
 }
 
 void throw_tprotocolexception(const String& what, long errorcode) {
-  Object ex = createObject(s_TProtocolException, 2, what, errorcode);
-  throw ex;
+  throw_object(createObject(s_TProtocolException, 2, what, errorcode));
 }
 
 Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
@@ -122,9 +133,8 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
         skip_element(T_STRUCT, transport);
         return init_null();
       }
-      Variant spec = HHVM_FN(hphp_get_static_property)(structType, s_TSPEC,
-                                                                   false);
-      if (!spec.is(KindOfArray)) {
+      Variant spec(get_tspec(ret->getVMClass()));
+      if (!spec.isArray()) {
         char errbuf[128];
         snprintf(errbuf, 128, "spec for %s is wrong type: %s\n",
                  structType.data(), ret->getClassName().c_str());
@@ -199,13 +209,38 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       transport.readBytes(types, 2);
       uint32_t size = transport.readU32();
 
-      Array keyspec = fieldspec.rvalAt(s_key,
-                                       AccessFlags::Error_Key).toArray();
-      Array valspec = fieldspec.rvalAt(s_val,
-                                       AccessFlags::Error_Key).toArray();
-      String format = fieldspec.rvalAt(s_format,
-                                       AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      Array keyspec = fieldspec.rvalAt(s_key, AccessFlags::ErrorKey).toArray();
+      Array valspec = fieldspec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
+      String format = fieldspec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        DictInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          switch (types[0]) {
+            case TType::T_I08:
+            case TType::T_I16:
+            case TType::T_I32:
+            case TType::T_I64: {
+              int64_t key =
+                  binary_deserialize(types[0], transport, keyspec).toInt64();
+              Variant value = binary_deserialize(types[1], transport, valspec);
+              arr.set(key, value);
+              break;
+            }
+            case TType::T_STRING: {
+              String key =
+                  binary_deserialize(types[0], transport, keyspec).toString();
+              Variant value = binary_deserialize(types[1], transport, valspec);
+              arr.set(key, value);
+              break;
+            }
+            default:
+              thrift_error(
+                  "Unable to deserialize non int/string array keys",
+                  ERR_INVALID_DATA);
+          }
+        }
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto obj(req::make<c_Map>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(types[0], transport, keyspec);
@@ -226,16 +261,20 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
     case T_LIST: { // array with autogenerated numeric keys
       int8_t type = transport.readI8();
       uint32_t size = transport.readU32();
-      Variant elemvar = fieldspec.rvalAt(s_elem,
-                                         AccessFlags::Error_Key);
+      Variant elemvar = fieldspec.rvalAt(s_elem, AccessFlags::ErrorKey);
       Array elemspec = elemvar.toArray();
-      String format = fieldspec.rvalAt(s_format,
-                                       AccessFlags::None).toString();
+      String format = fieldspec.rvalAt(s_format, AccessFlags::None).toString();
 
-      if (format.equal(s_collection)) {
+      if (format.equal(s_harray)) {
+        VecArrayInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.append(binary_deserialize(type, transport, elemspec));
+        }
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto const pvec(req::make<c_Vector>(size));
         for (uint32_t s = 0; s < size; ++s) {
-          pvec->t_add(binary_deserialize(type, transport, elemspec));
+          pvec->add(binary_deserialize(type, transport, elemspec));
         }
         return Variant(std::move(pvec));
       } else {
@@ -252,20 +291,24 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       transport.readBytes(&type, 1);
       transport.readBytes(&size, 4);
       size = ntohl(size);
-      Variant elemvar = fieldspec.rvalAt(s_elem,
-                                         AccessFlags::Error_Key);
+      Variant elemvar = fieldspec.rvalAt(s_elem, AccessFlags::ErrorKey);
       Array elemspec = elemvar.toArray();
-      String format = fieldspec.rvalAt(s_format,
-                                       AccessFlags::None).toString();
-      if (format.equal(s_collection)) {
+      String format = fieldspec.rvalAt(s_format, AccessFlags::None).toString();
+      if (format.equal(s_harray)) {
+        KeysetInit arr(size);
+        for (uint32_t i = 0; i < size; i++) {
+          arr.add(binary_deserialize(type, transport, elemspec));
+        }
+        return arr.toVariant();
+      } else if (format.equal(s_collection)) {
         auto set_ret(req::make<c_Set>(size));
         for (uint32_t s = 0; s < size; ++s) {
           Variant key = binary_deserialize(type, transport, elemspec);
 
           if (key.isInteger()) {
-            set_ret->t_add(key);
+            set_ret->add(key);
           } else {
-            set_ret->t_add(key.toString());
+            set_ret->add(key.toString());
           }
         }
 
@@ -375,16 +418,13 @@ inline bool ttypes_are_compatible(int8_t t1, int8_t t2) {
   return ((t1 == t2) || (ttype_is_int(t1) && ttype_is_int(t2)));
 }
 
-void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport,
-                             const Array& spec) {
-  // SET and LIST have 'elem' => array('type', [optional] 'class')
-  // MAP has 'val' => array('type', [optiona] 'class')
-  while (true) {
+NEVER_INLINE
+void binary_deserialize_slow(const Object& zthis, const Array& spec,
+                           int16_t fieldno, TType ttype,
+                           PHPInputTransport& transport) {
+  INC_TPC(thrift_read_slow);
+  while (ttype != T_STOP) {
     Variant val;
-
-    int8_t ttype = transport.readI8();
-    if (ttype == T_STOP) return;
-    int16_t fieldno = transport.readI16();
     if (!(val = spec.rvalAt(fieldno)).isNull()) {
       Array fieldspec = val.toArray();
       // pull the field name
@@ -396,12 +436,61 @@ void binary_deserialize_spec(const Object& zthis, PHPInputTransport& transport,
       if (ttypes_are_compatible(ttype, expected_ttype)) {
         Variant rv = binary_deserialize(ttype, transport, fieldspec);
         zthis->o_set(varname, rv, zthis->getClassName());
+        bool isUnion = fieldspec.rvalAt(s_union).toBoolean();
+        if (isUnion) {
+          zthis->o_set(s__type, Variant(fieldno), zthis->getClassName());
+        }
       } else {
         skip_element(ttype, transport);
       }
     } else {
       skip_element(ttype, transport);
     }
+    ttype = static_cast<TType>(transport.readI8());
+    if (ttype == T_STOP) return;
+    fieldno = transport.readI16();
+  }
+}
+
+void binary_deserialize_spec(const Object& dest, PHPInputTransport& transport,
+                             const Array& spec) {
+  SpecHolder specHolder;
+  const auto& fields = specHolder.getSpec(spec);
+  const size_t numFields = fields.size();
+  Class* cls = dest->getVMClass();
+  if (cls->numDeclProperties() < numFields) {
+    TType fieldType = static_cast<TType>(transport.readI8());
+    int16_t fieldNum = transport.readI16();
+    return binary_deserialize_slow(dest, spec, fieldNum, fieldType, transport);
+  }
+  auto objProp = dest->propVec();
+  auto prop = cls->declProperties().begin();
+  int i = -1;
+  TType fieldType = static_cast<TType>(transport.readI8());
+  int16_t fieldNum;
+  while (fieldType != T_STOP) {
+    fieldNum = transport.readI16();
+    do {
+      ++i;
+    } while (i < numFields && fields[i].fieldNum != fieldNum);
+    if (i == numFields ||
+        prop[i].name != fields[i].name ||
+        !ttypes_are_compatible(fieldType, fields[i].type)) {
+      return binary_deserialize_slow(
+        dest, spec, fieldNum, fieldType, transport);
+    }
+    if (fields[i].isUnion) {
+      if (s__type.equal(prop[numFields].name)) {
+        tvAsVariant(&objProp[numFields]) = Variant(fieldNum);
+      } else {
+        return binary_deserialize_slow(
+          dest, spec, fieldNum, fieldType, transport);
+      }
+    }
+    ArrNR fieldSpec(fields[i].spec);
+    tvAsVariant(&objProp[i]) =
+      binary_deserialize(fieldType, transport, fieldSpec.asArray());
+    fieldType = static_cast<TType>(transport.readI8());
   }
 }
 
@@ -418,11 +507,8 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
         throw_tprotocolexception("Attempt to send non-object "
                                  "type as a T_STRUCT", INVALID_DATA);
       }
-      binary_serialize_spec(value.toObject(), transport,
-                            HHVM_FN(hphp_get_static_property)(value.toObject()->
-                                                       getClassName(),
-                                                       s_TSPEC,
-                                                       false).toArray());
+      Variant spec(get_tspec(value.toCObjRef()->getVMClass()));
+      binary_serialize_spec(value.toCObjRef(), transport, spec.toArray());
     } return;
     case T_BOOL:
       transport.writeI8(value.toBoolean() ? 1 : 0);
@@ -466,14 +552,13 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
     case T_MAP: {
       Array ht = value.toArray();
       uint8_t keytype = fieldspec.rvalAt(s_ktype,
-                                         AccessFlags::Error_Key).toByte();
+                                         AccessFlags::ErrorKey).toByte();
       transport.writeI8(keytype);
       uint8_t valtype = fieldspec.rvalAt(s_vtype,
-                                         AccessFlags::Error_Key).toByte();
+                                         AccessFlags::ErrorKey).toByte();
       transport.writeI8(valtype);
 
-      Array valspec = fieldspec.rvalAt(s_val,
-                                       AccessFlags::Error_Key).toArray();
+      Array valspec = fieldspec.rvalAt(s_val, AccessFlags::ErrorKey).toArray();
 
       transport.writeI32(ht.size());
       for (ArrayIter key_ptr = ht.begin(); !key_ptr.end(); ++key_ptr) {
@@ -486,10 +571,9 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       Variant val;
 
       uint8_t valtype = fieldspec.rvalAt(s_etype,
-                                         AccessFlags::Error_Key).toInt64();
+                                         AccessFlags::ErrorKey).toInt64();
       transport.writeI8(valtype);
-      Array valspec = fieldspec.rvalAt(s_elem,
-                                       AccessFlags::Error_Key).toArray();
+      Array valspec = fieldspec.rvalAt(s_elem, AccessFlags::ErrorKey).toArray();
       transport.writeI32(ht.size());
       for (ArrayIter key_ptr = ht.begin(); !key_ptr.end(); ++key_ptr) {
         binary_serialize(valtype, transport, key_ptr.second(), valspec);
@@ -499,7 +583,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       Array ht = value.toArray();
 
       uint8_t keytype = fieldspec.rvalAt(s_etype,
-                                         AccessFlags::Error_Key).toByte();
+                                         AccessFlags::ErrorKey).toByte();
       transport.writeI8(keytype);
 
       transport.writeI32(ht.size());
@@ -513,32 +597,42 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
   throw_tprotocolexception(String(errbuf, CopyString), INVALID_DATA);
 }
 
+void binary_serialize_slow(const FieldSpec& field, const Object& obj,
+                           PHPOutputTransport& transport) {
+  INC_TPC(thrift_write_slow);
+  StrNR fieldName(field.name);
+  Variant fieldVal = obj->o_get(fieldName, true, obj->getClassName());
+  if (!fieldVal.isNull()) {
+    TType fieldType = field.type;
+    ArrNR fieldSpec(field.spec);
+    transport.writeI8(fieldType);
+    transport.writeI16(field.fieldNum);
+    binary_serialize(fieldType, transport, fieldVal, fieldSpec);
+  }
+}
 
-void binary_serialize_spec(const Object& zthis, PHPOutputTransport& transport,
+void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
                            const Array& spec) {
-  for (ArrayIter key_ptr = spec.begin(); !key_ptr.end(); ++key_ptr) {
-    Variant key = key_ptr.first();
-    if (!key.isInteger()) {
-      throw_tprotocolexception("Bad keytype in TSPEC (expected 'long')",
-                               INVALID_DATA);
-      return;
-    }
-    unsigned long fieldno = key.toInt64();
-    Array fieldspec = key_ptr.second().toArray();
-
-    // field name
-    String varname = fieldspec.rvalAt(s_var,
-                                      AccessFlags::Error_Key).toString();
-
-    // thrift type
-    int8_t ttype = fieldspec.rvalAt(s_type,
-                                    AccessFlags::Error_Key).toByte();
-
-    Variant prop = zthis->o_get(varname, true, zthis->getClassName());
-    if (!prop.isNull()) {
-      transport.writeI8(ttype);
-      transport.writeI16(fieldno);
-      binary_serialize(ttype, transport, prop, fieldspec);
+  SpecHolder specHolder;
+  const auto& fields = specHolder.getSpec(spec);
+  Class* cls = obj->getVMClass();
+  auto prop = cls->declProperties().begin();
+  auto objProp = obj->propVec();
+  const size_t numProps = cls->numDeclProperties();
+  const size_t numFields = fields.size();
+  // Write each member
+  for (int i = 0; i < numFields; ++i) {
+    if (i <= numProps && fields[i].name == prop[i].name) {
+      Variant fieldVal = tvAsVariant(&objProp[i]);
+      if (!fieldVal.isNull()) {
+        TType fieldType = fields[i].type;
+        ArrNR fieldSpec(fields[i].spec);
+        transport.writeI8(fieldType);
+        transport.writeI16(fields[i].fieldNum);
+        binary_serialize(fieldType, transport, fieldVal, fieldSpec);
+      }
+    } else {
+      binary_serialize_slow(fields[i], obj, transport);
     }
   }
   transport.writeI8(T_STOP); // struct end
@@ -567,10 +661,8 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
   }
 
   const Object& obj_request_struct = request_struct;
-  Variant spec = HHVM_FN(hphp_get_static_property)(
-    obj_request_struct->getClassName(),
-    s_TSPEC,
-    false);
+
+  Variant spec(get_tspec(obj_request_struct->getVMClass()));
   binary_serialize_spec(obj_request_struct, transport, spec.toArray());
 
   if (oneway) {
@@ -584,6 +676,7 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
                      const Object& transportobj,
                      const String& obj_typename,
                      bool strict_read) {
+  EagerVMRegAnchor _;
   PHPInputTransport transport(transportobj);
   int8_t messageType = 0;
   int32_t sz = transport.readI32();
@@ -619,15 +712,13 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
 
   if (messageType == T_EXCEPTION) {
     Object ex = createObject(s_TApplicationException);
-    Variant spec = HHVM_FN(hphp_get_static_property)(s_TApplicationException,
-                                                     s_TSPEC, false);
+    Variant spec(get_tspec(ex->getVMClass()));
     binary_deserialize_spec(ex, transport, spec.toArray());
-    throw ex;
+    throw_object(ex);
   }
 
   Object ret_val = createObject(obj_typename);
-  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,
-                                                   false);
+  Variant spec(get_tspec(ret_val->getVMClass()));
   binary_deserialize_spec(ret_val, transport, spec.toArray());
   return ret_val;
 }
@@ -635,11 +726,11 @@ Object HHVM_FUNCTION(thrift_protocol_read_binary,
 Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
                       const Object& transportobj,
                       const String& obj_typename) {
+  EagerVMRegAnchor _;
   PHPInputTransport transport(transportobj);
 
   Object ret_val = createObject(obj_typename);
-  Variant spec = HHVM_FN(hphp_get_static_property)(obj_typename, s_TSPEC,
-                                                   false);
+  Variant spec(get_tspec(ret_val->getVMClass()));
   binary_deserialize_spec(ret_val, transport, spec.toArray());
   return ret_val;
 }

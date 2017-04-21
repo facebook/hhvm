@@ -1,0 +1,25 @@
+string(6) "HH\vec"
+bool(false)
+string(14) "HH\vec<HH\int>"
+bool(false)
+string(6) "HH\int"
+bool(false)
+string(10) "Foo::Tdict"
+string(14) "HH\vec<HH\int>"
+bool(false)
+string(17) "HH\vec<HH\string>"
+bool(false)
+string(11) "HH\vec<Foo>"
+array(2) {
+  ["kind"]=>
+  int(20)
+  ["generic_types"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}
+string(3) "vec"

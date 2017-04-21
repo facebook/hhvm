@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ struct AsmInfo;
 struct Block;
 struct GuardConstraints;
 struct IRInstruction;
-class  SSATmp;
+struct SSATmp;
 
 // IRInstruction
 void printInstr(std::ostream& ostream, const IRInstruction*,
@@ -83,7 +83,8 @@ constexpr int kExtraLevel = 6;
 constexpr int kExtraExtraLevel = 7;
 
 void printUnit(int level, const IRUnit&, const char* caption,
-               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr);
+               AsmInfo* ai = nullptr, const GuardConstraints* guards = nullptr,
+               Annotations* annot = nullptr);
 
 inline std::ostream& operator<<(std::ostream& os, const Type& t) {
   return os << t.toString();

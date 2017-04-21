@@ -34,9 +34,8 @@
 #ifdef ZTS
 #include "TSRM.h"
 #endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+
+#include <folly/portability/SysTime.h>
 
 #ifdef PHP_WIN32
 #define STRCASECMP stricmp

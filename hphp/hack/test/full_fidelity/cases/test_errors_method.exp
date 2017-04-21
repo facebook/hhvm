@@ -1,0 +1,15 @@
+(4,3)-(4,16) A method declaration cannot have multiple visibility modifiers.
+(5,3)-(5,13) A method declaration cannot have duplicate modifiers.
+(6,3)-(6,23) A method cannot be both abstract and final.
+(7,3)-(7,18) A method cannot be both abstract and private.
+(8,47)-(8,48) An abstract method cannot have a method body.
+(10,31)-(10,31) A non-abstract method must have a body.
+(11,3)-(11,15) A constructor cannot be static.
+(14,43)-(14,44) An abstract method cannot have a method body.
+(15,22)-(15,34) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
+(16,31)-(16,36) A destructor must have an empty parameter list.
+(17,3)-(17,8) A destructor can only have visibility modifiers.
+(18,36)-(18,38) A constructor or destructor cannot have a non-void type annotation.
+(19,35)-(19,35) A constructor or destructor cannot have a non-void type annotation.
+(23,25)-(23,25) A variadic parameter ('...') may not be followed by a comma.
+(24,22)-(24,24) A variadic parameter ('...') may only appear at the end of a parameter list.

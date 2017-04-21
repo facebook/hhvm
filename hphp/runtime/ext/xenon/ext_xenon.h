@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -38,7 +38,7 @@
   Instead, Xenon has a pthread waiting for the semaphore.  When the semaphore
   is set in the handler, it wakes, sets the Xenon Surprise flag for every
   thread - this is the flash.
-  There are is a mechanism that hooks the enter/exit of every PHP function,
+  There is a mechanism that hooks the enter/exit of every PHP function,
   using the Surprise flags leverages that mechanism and calls logging.
   At this point, if the flag is set for this thread, the PHP and async stack
   will be logged for that thread.
@@ -61,12 +61,17 @@
 */
 
 namespace HPHP {
-class Xenon final {
-  public:
+
+struct c_WaitableWaitHandle;
+
+struct Xenon final {
 
     enum SampleType {
       // Sample was taken during I/O wait and thus does not represent CPU time.
       IOWaitSample,
+
+      // Sample was taken to trace loading of new units.
+      UnitLoadEvent,
 
       // Sample was taken before an async function was resumed at await opcode.
       // The CPU time is attributed to the resumed async function, because the
@@ -78,6 +83,8 @@ class Xenon final {
       // Sample was taken before a function was called or a generator was
       // resumed at yield opcode.
       // The CPU time is attributed to the caller of the entered function.
+      // Inlined frames are skipped as they did not trigger EnterSample events
+      // to properly attribute their parent's cost.
       EnterSample,
 
       // Sample was taken before a function returned, suspended or failed
@@ -85,6 +92,30 @@ class Xenon final {
       // The CPU time is attributed to the exited function.
       ExitSample,
     };
+
+    static bool isCPUTime(SampleType t) {
+      switch (t) {
+        case IOWaitSample:
+        case UnitLoadEvent:
+          return false;
+        case ResumeAwaitSample:
+        case EnterSample:
+        case ExitSample:
+          return true;
+      }
+      always_assert(false);
+    }
+
+    static const char* show(SampleType t) {
+      switch (t) {
+        case IOWaitSample: return "IOWait";
+        case UnitLoadEvent: return "UnitLoad";
+        case ResumeAwaitSample: return "ResumeAwait";
+        case EnterSample: return "Enter";
+        case ExitSample: return "Exit";
+      }
+      always_assert(false);
+    }
 
     static Xenon& getInstance(void) noexcept;
 
@@ -95,7 +126,14 @@ class Xenon final {
 
     void start(uint64_t msec);
     void stop();
-    void log(SampleType t) const;
+    // Log a sample if XenonSignalFlag is set. Also clear it, unless
+    // in always-on mode.
+    void log(SampleType t, c_WaitableWaitHandle* wh = nullptr) const;
+    // Like `log' but does not check or reset XenonSignalFlag. `info' may be
+    // brief description of why sample was logged, or nullptr.
+    void logNoSurprise(SampleType t,
+                       const char* info,
+                       c_WaitableWaitHandle* wh = nullptr) const;
     void surpriseAll();
     void onTimer();
 

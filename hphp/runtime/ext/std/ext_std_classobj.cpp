@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,13 +16,13 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
+
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
-#include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/ext/array/ext_array.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
 
@@ -39,7 +39,7 @@ static const Class* get_cls(const Variant& class_or_object) {
   if (class_or_object.is(KindOfObject)) {
     ObjectData* obj = class_or_object.toCObjRef().get();
     cls = obj->getVMClass();
-  } else if (class_or_object.is(KindOfArray)) {
+  } else if (class_or_object.isArray()) {
     // do nothing but avoid the toString conversion notice
   } else {
     cls = Unit::loadClass(class_or_object.toString().get());
@@ -50,33 +50,25 @@ static const Class* get_cls(const Variant& class_or_object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array HHVM_FUNCTION(get_declared_classes) {
-  return ClassInfo::GetClasses();
+  return Unit::getClassesInfo();
 }
 
 Array HHVM_FUNCTION(get_declared_interfaces) {
-  return ClassInfo::GetInterfaces();
+  return Unit::getInterfacesInfo();
 }
 
 Array HHVM_FUNCTION(get_declared_traits) {
-  return ClassInfo::GetTraits();
+  return Unit::getTraitsInfo();
 }
 
 bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
                                 bool autoload /* = true */) {
-  auto const origClass =
-    autoload ? Unit::loadClass(original.get())
-             : Unit::lookupClass(original.get());
-  if (!origClass) {
-    raise_warning("Class %s not found", original.data());
+  if (RuntimeOption::EvalAuthoritativeMode) {
+    raise_warning("Cannot call class_alias dynamically "
+                  "in repo-authoritative mode");
     return false;
   }
-  if (origClass->isBuiltin()) {
-    raise_warning(
-      "First argument of class_alias() must be a name of user defined class");
-    return false;
-  }
-
-  return Unit::aliasClass(origClass, alias.get());
+  return Unit::aliasClass(original.get(), alias.get(), autoload);
 }
 
 bool HHVM_FUNCTION(class_exists, const String& class_name,
@@ -106,19 +98,19 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   if (!cls) return init_null();
   VMRegAnchor _;
 
-  auto retVal = Array::attach(MixedArray::MakeReserve(cls->numMethods()));
+  auto retVal = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
   Class::getMethodNames(
     cls,
     arGetContextClassFromBuiltin(vmfp()),
     retVal
   );
-  return HHVM_FN(array_values)(retVal).toArray();
+  return Variant::attach(HHVM_FN(array_values)(retVal)).toArray();
 }
 
 Array HHVM_FUNCTION(get_class_constants, const String& className) {
   auto const cls = Unit::loadClass(className.get());
   if (cls == NULL) {
-    return Array::attach(MixedArray::MakeReserve(0));
+    return Array::attach(PackedArray::MakeReserve(0));
   }
 
   auto const numConstants = cls->numConstants();
@@ -169,8 +161,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   assert(propVals->size() == numDeclProps);
 
   // For visibility checks
-  CallerFrame cf;
-  auto ctx = arGetContextClass(cf());
+  auto ctx = arGetContextClass(GetCallerFrame());
 
   ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
 
@@ -199,71 +190,56 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(get_class, const Variant& object /* = null_variant */) {
+Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
   if (object.isNull()) {
     // No arg passed.
-    String ret;
-    CallerFrame cf;
-    auto cls = arGetContextClassImpl<true>(cf());
+    auto cls = arGetContextClassImpl<true>(GetCallerFrame());
     if (cls) {
-      ret = String(cls->nameStr());
+      return Variant{cls->name(), Variant::PersistentStrInit{}};
     }
 
-    if (ret.empty()) {
-      raise_warning("get_class() called without object from outside a class");
-      return false;
-    }
-    return ret;
+    raise_warning("get_class() called without object from outside a class");
+    return false;
   }
   if (!object.isObject()) return false;
-  return VarNR(object.toObject()->getClassName());
+  return Variant{object.toCObjRef()->getVMClass()->name(),
+                 Variant::PersistentStrInit{}};
 }
 
 Variant HHVM_FUNCTION(get_called_class) {
   EagerCallerFrame cf;
   ActRec* ar = cf();
-  if (ar) {
-    if (ar->hasThis()) {
-      return Variant(ar->getThis()->getClassName());
-    }
-    if (ar->hasClass()) {
-      return Variant(ar->getClass()->preClass()->name(),
-        Variant::StaticStrInit{});
-    }
+  if (ar && ar->func()->cls()) {
+    auto const cls = ar->hasThis() ?
+      ar->getThis()->getVMClass() : ar->getClass();
+
+    return Variant{cls->name(), Variant::PersistentStrInit{}};
   }
 
   raise_warning("get_called_class() called from outside a class");
-  return Variant(false);
+  return false;
 }
 
 Variant HHVM_FUNCTION(get_parent_class,
-                      const Variant& object /* = null_variant */) {
+                      const Variant& object /* = uninit_variant */) {
+  const Class* cls;
   if (object.isNull()) {
-    CallerFrame cf;
-    Class* cls = arGetContextClass(cf());
-    if (cls && cls->parent()) {
-      return String(cls->parentStr());
-    }
-    return false;
-  }
-
-  Variant class_name;
-  if (object.isObject()) {
-    class_name = HHVM_FN(get_class)(object);
-  } else if (object.isString()) {
-    class_name = object;
+    cls = arGetContextClass(GetCallerFrame());
+    if (!cls) return false;
   } else {
-    return false;
-  }
-
-  const Class* cls = Unit::loadClass(class_name.toString().get());
-  if (cls) {
-    auto parentClass = cls->parentStr();
-    if (!parentClass.empty()) {
-      return VarNR(parentClass);
+    if (object.isObject()) {
+      cls = object.toCObjRef()->getVMClass();
+    } else if (object.isString()) {
+      cls = Unit::loadClass(object.toCStrRef().get());
+      if (!cls) return false;
+    } else {
+      return false;
     }
   }
-  return false;
+
+  if (!cls->parent()) return false;
+
+  return Variant{cls->parentStr().get(), Variant::PersistentStrInit{}};
 }
 
 static bool is_a_impl(const Variant& class_or_object, const String& class_name,

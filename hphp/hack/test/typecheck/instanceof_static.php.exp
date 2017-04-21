@@ -1,2 +1,3 @@
-[<static>][this]App \C<>
+File "instanceof_static.php", line 17, characters 7-17:
+  <static> as this as C
 No errors

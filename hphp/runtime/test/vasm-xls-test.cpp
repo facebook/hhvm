@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,23 +40,40 @@ template<class T> uint64_t test_const(T val) {
     .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
   };
-  static uint8_t code[1000];
+
+  constexpr auto blockSize = 4096;
+  auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
+                                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+  SCOPE_EXIT { munmap(code, blockSize); };
+
+  constexpr auto dataSize = 100;
+  constexpr auto codeSize = blockSize - dataSize;
+  // None of these tests should use much data.
+  auto data_buffer = code + codeSize;
 
   CodeBlock main;
-  main.init(code, sizeof(code), "test");
+  main.init(code, codeSize, "test");
+  DataBlock data;
+  data.init(data_buffer, dataSize, "data");
 
-  Vasm vasm;
-  Vtext text { main };
+  Vunit unit;
+  Vasm vasm{unit};
+  Vtext text { main, data };
 
-  auto& unit = vasm.unit();
   auto& v = vasm.main();
   unit.entry = v;
 
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
 
-  optimizeX64(vasm.unit(), test_abi);
-  emitX64(unit, text, nullptr);
+  optimizeX64(vasm.unit(), test_abi, true /* regalloc */);
+  CGMeta fixups;
+
+  emitX64(unit, text, fixups, nullptr);
+  // The above code might use fixups.literals but shouldn't use anything else.
+  fixups.literals.clear();
+  EXPECT_TRUE(fixups.empty());
 
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();

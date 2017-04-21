@@ -1,0 +1,48 @@
+=== testCancelInvalidAwaitables ===
+ok
+ok
+=== testCancelExternalThreadEventBeforeAwait ===
+bool(true)
+before await
+after await
+operation was canceled
+=== testCancelExternalThreadEventAfterAwait ===
+before await
+after await
+bool(true)
+bool(true)
+bool(true)
+=== testCancelExternalThreadEventDuringAwait ===
+before await
+bool(true)
+after await
+operation was canceled
+=== testCancelExternalThreadEventFromBeginIOWait ===
+before await
+io wait enter
+bool(true)
+io wait exit
+operation was canceled
+after await
+=== testCancelSleepBeforeAwait ===
+bool(true)
+before await
+operation was canceled
+after await
+=== testCancelSleepAfterAwait ===
+before await
+after await
+bool(true)
+bool(true)
+=== testCancelSleepDuringAwait ===
+before await
+bool(true)
+after await
+operation was canceled
+=== testCancelSleepFromBeginIOWait ===
+before await
+io wait enter
+bool(true)
+io wait exit
+operation was canceled
+after await

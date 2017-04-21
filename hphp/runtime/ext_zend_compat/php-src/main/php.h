@@ -155,9 +155,7 @@ typedef unsigned int socklen_t;
 
 #include <stdlib.h>
 #include <ctype.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include <folly/portability/Unistd.h>
 #if HAVE_STDARG_H
 #include <stdarg.h>
 #else

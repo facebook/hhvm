@@ -1,0 +1,52 @@
+string(7) "INT-ONE"
+string(7) "STR-TWO"
+string(9) "INT-THREE"
+string(8) "STR-FOUR"
+string(1) "b"
+string(1) "d"
+Caught Out of bounds dict access: invalid index "1"
+Caught Out of bounds dict access: invalid index 2
+Caught Out of bounds dict access: invalid index "3"
+Caught Out of bounds dict access: invalid index 4
+Caught Out of bounds dict access: invalid index "b"
+Caught Out of bounds dict access: invalid index "d"
+Caught Out of bounds dict access: invalid index "foobar"
+dict(6) {
+  ["a"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "d"
+  [1]=>
+  string(7) "INT-ONE"
+  ["2"]=>
+  string(7) "STR-TWO"
+  [3]=>
+  string(9) "INT-THREE"
+  ["4"]=>
+  string(8) "STR-FOUR"
+}
+Caught Out of bounds dict access: invalid index "bar"
+string(5) "hello"
+Caught Out of bounds dict access: invalid index 2
+
+Notice: Undefined index: 256 in %s on line 26
+NULL
+array(1) {
+  ["foo"]=>
+  dict(3) {
+    [1]=>
+    string(5) "hello"
+    ["2"]=>
+    string(5) "world"
+    [3]=>
+    array(2) {
+      [0]=>
+      int(5)
+      ["bar"]=>
+      array(1) {
+        [0]=>
+        int(12)
+      }
+    }
+  }
+}

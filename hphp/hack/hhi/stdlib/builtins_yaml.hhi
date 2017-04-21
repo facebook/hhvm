@@ -35,8 +35,8 @@ const int YAML_CR_BREAK = 1;
 const int YAML_LN_BREAK = 2;
 const int YAML_CRLN_BREAK = 3;
 
-function yaml_parse($input, $pos = null, &$ndocs = null, array $callbacks = []) {}
-function yaml_parse_file($filename, $pos = null, &$ndocs = null, array $callbacks = []) {}
-function yaml_parse_url($url, $pos = null, &$ndocs = null, array $callbacks = []) {}
-function yaml_emit($data, $encoding = null, $linebreak = null, array $callbacks = []) {}
-function yaml_emit_file($filename, $data, $encoding = null, $linebreak = null, array $callbacks = []) {}
+function yaml_parse($input, $pos = null, &$ndocs = null, array $callbacks = array()) {}
+function yaml_parse_file($filename, $pos = null, &$ndocs = null, array $callbacks = array()) {}
+function yaml_parse_url($url, $pos = null, &$ndocs = null, array $callbacks = array()) {}
+function yaml_emit($data, $encoding = null, $linebreak = null, array $callbacks = array()) {}
+function yaml_emit_file($filename, $data, $encoding = null, $linebreak = null, array $callbacks = array()) {}

@@ -10,7 +10,6 @@
 
 open Core
 open Sys_utils
-open Utils
 
 type t = string SMap.t
 
@@ -40,10 +39,19 @@ let parse fn =
 
 module Getters = struct
 
+  let string_opt key config =
+    SMap.get key config
+
+  let string_ key ~default config =
+    Option.value (SMap.get key config) ~default
+
   let int_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:int_of_string
 
   let bool_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:bool_of_string
+
+  let string_list ~delim key ~default config =
+    Option.value_map (SMap.get key config) ~default ~f:(Str.split delim)
 
 end

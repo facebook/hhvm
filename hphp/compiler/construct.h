@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Variant;
+struct Variant;
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IParseHandler);
@@ -37,14 +37,13 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-class AstWalkerStateVec;
+struct AstWalkerStateVec;
 
-class IParseHandler {
+struct IParseHandler {
   /**
    * To avoid iteration of parse tree, we move any work that can be done
    * in parse phase into this function, so to speed up static analysis.
    */
-public:
   virtual ~IParseHandler() {}
 
   /**
@@ -104,7 +103,8 @@ public:
   x(TraitPrecStatement)     \
   x(TraitAliasStatement)    \
   x(TypedefStatement)       \
-  x(UseDeclarationStatementFragment)
+  x(UseDeclarationStatementFragment) \
+  x(DeclareStatement)
 
 #define DECLARE_EXPRESSION_TYPES(x)     \
   x(Expression,                  None) \
@@ -112,6 +112,7 @@ public:
   x(AssignmentExpression,       Store) \
   x(SimpleVariable,              Load) \
   x(DynamicVariable,             Load) \
+  x(PipeVariable,                Load) \
   x(StaticMemberExpression,      Load) \
   x(ArrayElementExpression,      Load) \
   x(DynamicFunctionCall,         Call) \
@@ -135,15 +136,15 @@ public:
   x(ClosureExpression,           None) \
   x(ClassExpression,             None) \
   x(YieldExpression,             None) \
+  x(YieldFromExpression,         None) \
   x(AwaitExpression,             None) \
   x(UserAttribute,               None)
 
 /**
  * Base class of Expression and Statement.
  */
-class Construct : public std::enable_shared_from_this<Construct>,
-                  public JSON::CodeError::ISerializable {
-public:
+struct Construct : std::enable_shared_from_this<Construct>,
+                   JSON::CodeError::ISerializable {
   virtual ~Construct() {}
 
 #define DEC_STATEMENT_ENUM(x) KindOf##x,
@@ -291,7 +292,6 @@ public:
   void dumpNode(int spc) const;
 
   void dump(int spc, AnalysisResultConstPtr ar);
-  void dumpNode(int spc, AnalysisResultConstPtr ar);
 
   /**
    * Called when generating code.
@@ -311,10 +311,6 @@ public:
 
   void recomputeEffects();
 
-  /**
-   * Write where this construct was in PHP files.
-   */
-  void printSource(CodeGenerator &cg);
   ExpressionPtr makeConstant(AnalysisResultConstPtr ar,
                              const std::string &value) const;
   ExpressionPtr makeScalarExpression(AnalysisResultConstPtr ar,
@@ -337,8 +333,7 @@ protected:
   mutable int m_effectsTag;
 };
 
-class LocalEffectsContainer {
-public:
+struct LocalEffectsContainer {
   int getLocalEffects() const { return m_localEffects; }
   virtual void effectsCallback() = 0;
 protected:

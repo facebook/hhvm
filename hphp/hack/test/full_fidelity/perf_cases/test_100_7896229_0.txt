@@ -1,0 +1,2 @@
+<?hh
+<< oJaMHUMTx ( "double string" ) , bSgbau ( ) , hVZFD ( $zDs = ( $pOFyXglg |= ( $wUKGqk &= @ ( $wUGLIz -- ) -> ( ( ~ ( bool ) $kOLxjdVQ = clone $mK %= ( $vD = ( list ( ) ) ) ) ) -> ( list ( $wZRJmRTrB , $vIbk , $aNueehXMY , $oRuJj , $aJOc ) ) ) ) ) >> trait oKvCnzEa < + qWjiLw as string > { use zAA < shape ( 'single string' => shape ( 'single string' => xVmL < mVzkIS > , 'single string' => bool ) , 'single string' => wPZY ) , nJSep , mixed , bXmsdxHe > ; }

@@ -1,0 +1,2 @@
+<?hh
+<< cTptLKr , hIDFHYdPe ( ) , uZVZumDSt >> class mX < + tJaJP as ( function ( yWL < ( function ( shape ( ) , num , ( function ( ) : vMbKfVumy ) ) : shape ( 'single string' => arraykey , 'single string' => array < array < classname < yEj > , this :: xV :: sZVbHMxr > > ) ) > ) : mixed ) > implements tQoYyr < array < float > > , eAGdicI < aQhQVOwaQ , ? aGI , array < this > , aR , resource > , lPAAKcP < ( function ( ) : classname < zHr > ) > { }

@@ -16,7 +16,7 @@ function msg_receive($queue, $desiredmsgtype, &$msgtype, $maxsize, &$message, $u
 function msg_remove_queue($queue) { }
 function msg_set_queue($queue, $data) { }
 function msg_stat_queue($queue) { }
-function sem_acquire($sem_identifier) { }
+function sem_acquire($sem_identifier, bool $nowait = false) { }
 function sem_get($key, $max_acquire = 1, $perm = 0666, $auto_release = true) { }
 function sem_release($sem_identifier) { }
 function sem_remove($sem_identifier) { }

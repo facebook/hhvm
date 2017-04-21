@@ -1,0 +1,85 @@
+HHVM's HHProf feature provides memory heap profiling based on optional jemalloc
+functionality.  For HHProf to function, jemalloc must be built with
+--enable-prof, and HHVM must be built with USE_JEMALLOC and ENABLE_HHPROF.
+
+HHProf configuration is controlled in part by the following boolean runtime
+configuration options, all of which default to false:
+
+* HHProf.Enabled: If true, enable admin server commands:
+
+  /hhprof/start:    start profiling
+      requestType   "all" or "next"*
+      url           profile next matching url for "next"
+      lgSample      lg sample rate
+      profileType   "current"* or "cumulative"
+  /hhprof/status:   configuration and current dump status
+  /hhprof/stop:     stop profiling
+  /pprof/cmdline:   program command line
+  /pprof/heap:      heap dump
+  /pprof/symbol:    symbol lookup
+      retain        regex for symbols client cares about
+      exclude       regex for symbols client does not care about
+
+  The /hhprof/* endpoints are intended for direct use, whereas the /pprof/*
+  endpoints support jeprof (included with jemalloc).
+
+* HHProf.Active: If true, activate allocation sampling during startup.  This is
+  useful if the usage goal is to gain an application-global understanding of
+  memory usage; for request-based profiling, activation/deactivation is
+  controlled via other means.
+
+* HHProf.Accum: If true, enable cumulative sample statistics in addition to
+  current sample statistics.  Beware that metadata overhead is proportional to
+  the number of unique backtraces associated with sampled allocations, and with
+  cumulative statistics enabled, no samples are ever discarded.  This means that
+  if the application's call graph is complex, a combinatorial explosion of
+  potential backtraces can cause unbounded metadata growth.
+
+* HHProf.Request: If true, enable support for per request profiling.  This
+  causes selected requests to allocate memory such that PHP-level allocations
+  are independently allocated, thus making their effects visible in heap
+  profiles.
+
+Following are some common use case examples:
+
+* Per request profiling
+
+  Start hhvm as such:
+
+    hhvm -m server -vHHProf.Enabled=true -vHHProf.Request=true
+
+  Profile the next request:
+
+    curl -s 'example.com:8088/hhprof/start?requestType=next&lgSample=12'
+
+  Profile the next request to a particular endpoint:
+
+    curl -s 'example.com:8088/hhprof/start?requestType=next&url=home.php&lgSample=12'
+
+  Note that the default sample rate (on average once per 512 KiB) is too low to
+  capture meaningful sample sets unless the allocation volume is sufficiently
+  high.  Therefore the above examples set the rate to average one sample per 4
+  KiB, which is a reasonable setting for most purposes, though the higher the
+  sample rate, the higher the computational and memory overhead.
+
+  Download the resulting profile using jeprof, symbolizing only PHP functions:
+
+    jeprof --raw --retain='^PHP::' 'example.com:8088/pprof/heap' > hhprof.raw
+
+  Generate a call graph, focusing only on PHP functions:
+
+    jeprof --pdf --retain='^PHP::' hhprof.raw > hhprof.pdf
+
+* Whole server profiling
+
+  Start hhvm as such:
+
+    hhvm -m server -vHHProf.Enabled=true -vHHProf.Active=true
+
+  Download a profile for currently allocated memory:
+
+    jeprof --raw 'example.com:8088/pprof/heap' > hhprof.raw
+
+  Generate a call graph:
+
+    jeprof --pdf hhprof.raw > hhprof.pdf

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class c_ExternalThreadEventWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
 
 /* This is not an optimal solution
  * This value is in principle a constexp, but the integer-to-pointer cast would
@@ -39,6 +39,7 @@ struct AsioExternalThreadEventQueue final {
   AsioExternalThreadEventQueue();
 
   bool hasReceived() { return m_received; }
+  c_ExternalThreadEventWaitHandle* lastReceived() { return m_received; }
   void processAllReceived();
   bool abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle);
 
@@ -47,15 +48,6 @@ struct AsioExternalThreadEventQueue final {
       std::chrono::time_point<std::chrono::steady_clock> waketime);
   void receiveSome();
   void send(c_ExternalThreadEventWaitHandle* wait_handle);
-
-  template<class F> void scan(F& mark) const {
-    mark(m_received);
-    // TODO: t7930461 if other threads have ptrs to our heap stashed in their
-    // thread-local or stack, we need to also scan them, or track them
-    // as roots somewhere. and if they're allowed to mutate our heap
-    // asyncronously, we need to rethink the single-threaded-gc
-    mark(m_queue.load());
-  }
 
 private:
   c_ExternalThreadEventWaitHandle* m_received;

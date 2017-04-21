@@ -15,128 +15,295 @@ if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(WINDOWS TRUE)
 endif()
 
-# using Clang
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-  # For unclear reasons, our detection for what crc32 intrinsics you have will
-  # cause clang to ICE. Specifying a baseline here works around the issue.
-  # (SSE4.2 has been available on processors for quite some time now.)
-  set(LLVM_OPT "-msse4.2")
-  execute_process(
-    COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} --version COMMAND head -1
-    OUTPUT_VARIABLE _clang_version_info)
-  string(
-    REGEX MATCH "(clang version|based on LLVM) ([0-9]\\.[0-9]\\.?[0-9]?)"
-    CLANG_VERSION "${_clang_version_info}")
-  # Enabled GCC/LLVM stack-smashing protection
+# Do this until cmake has a define for ARMv8
+INCLUDE(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __x86_64__
+#error Not x64
+#endif
+int main() { return 0; }" IS_X64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __AARCH64EL__
+#error Not ARMv8
+#endif
+int main() { return 0; }" IS_AARCH64)
+
+CHECK_CXX_SOURCE_COMPILES("
+#ifndef __powerpc64__
+#error Not PPC64
+#endif
+int main() { return 0; }" IS_PPC64)
+
+# using Clang or GCC
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+  # Warnings to disable by name, -Wno-${name}
+  set(DISABLED_NAMED_WARNINGS)
+  list(APPEND DISABLED_NAMED_WARNINGS
+    "error=array-bounds"
+    "error=switch"
+    "attributes"
+    "deprecated"
+    "invalid-offsetof"
+    "sign-compare"
+    "strict-aliasing"
+    "unused-function"
+    "unused-local-typedefs"
+    "unused-result"
+    "write-strings"
+  )
+
+  # Warnings to disable by name when building C code.
+  set(DISABLED_C_NAMED_WARNINGS)
+  list(APPEND DISABLED_C_NAMED_WARNINGS
+    "missing-field-initializers"
+    "sign-compare"
+  )
+
+  # General options to pass to both C & C++ compilers
+  set(GENERAL_OPTIONS)
+
+  # General options to pass to the C++ compiler
+  set(GENERAL_CXX_OPTIONS)
+  list(APPEND GENERAL_CXX_OPTIONS
+    "std=gnu++1y"
+    "fno-omit-frame-pointer"
+    "fno-operator-names"
+    "Wall"
+    "Woverloaded-virtual"
+    "Werror=format-security"
+  )
+
+  # Options to pass for debug mode to the C++ compiler
+  set(DEBUG_CXX_OPTIONS)
+
+  # Options to pass for release mode to the C++ compiler
+  set(RELEASE_CXX_OPTIONS)
+
+  # Suboption of -g in debug mode
+  set(GDB_SUBOPTION)
+
+  # Enable GCC/LLVM stack-smashing protection
   if(ENABLE_SSP)
-    if(CLANG_VERSION VERSION_GREATER 3.6 OR CLANG_VERSION VERSION_EQUAL 3.6)
-      set(LLVM_OPT "${LLVM_OPT} -fstack-protector-strong")
-    else()
-      set(LLVM_OPT "${LLVM_OPT} -fstack-protector")
+    list(APPEND GENERAL_OPTIONS
+      # This needs two dashes in the name, so put one here.
+      "-param=ssp-buffer-size=4"
+      "pie"
+      "fPIC"
+    )
+  endif()
+
+  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang") # using Clang
+    if (IS_X64)
+      list(APPEND GENERAL_OPTIONS
+        # For unclear reasons, our detection for what crc32 intrinsics you have
+        # will cause clang to ICE. Specifying a baseline here works around the
+        # issue. (SSE4.2 has been available on processors for quite some time now.)
+        "msse4.2"
+      )
+      # Also need to pass the right option to ASM files to avoid inconsistencies
+      # in CRC hash function handling
+      set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -msse4.2")
     endif()
-    set(LLVM_OPT "${LLVM_OPT} --param=ssp-buffer-size=4 -pie -fPIC")
-  endif()
 
-  if(CLANG_FORCE_LIBSTDCXX)
-    set(CLANG_STDLIB "libstdc++")
-  else()
-    set(CLANG_STDLIB "libc++")
-  endif()
+    list(APPEND GENERAL_CXX_OPTIONS
+      "Qunused-arguments"
+    )
+    list(APPEND DISABLED_C_NAMED_WARNINGS
+      "unused-command-line-argument"
+    )
+    list(APPEND DISABLED_NAMED_WARNINGS
+      "return-type-c-linkage"
+      "unknown-warning-option"
+      "unused-command-line-argument"
+    )
 
-  set(CMAKE_C_FLAGS_DEBUG            "-g")
-  set(CMAKE_CXX_FLAGS_DEBUG          "-g")
-  set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-  set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${LLVM_OPT} -w")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -stdlib=${CLANG_STDLIB} -fno-omit-frame-pointer -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-mismatched-tags -Wno-unknown-warning-option -Wno-return-type-c-linkage -Qunused-arguments ${LLVM_OPT}")
-# using GCC
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-  execute_process(COMMAND ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_ARG1} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-  set(GNUCC_OPT "")
-  if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
-    # FIXME: GCC 4.8+ regressions http://git.io/4r7VCQ
-    set(GNUCC_OPT "${GNUCC_OPT} -ftrack-macro-expansion=0 -fno-builtin-memcmp")
-  else()
-     message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater.")
-  endif()
-
-  # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
-  if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
-    set(GNUCC_OPT "${GNUCC_OPT} -fno-delete-null-pointer-checks")
-  endif()
-
-  if(GCC_VERSION VERSION_GREATER 5.0 OR GCC_VERSION VERSION_EQUAL 5.0)
-    message(WARNING "HHVM is primarily tested on GCC 4.8 and GCC 4.9. Using other versions may produce unexpected results, or may not even build at all.")
-  endif()
-
-  if(GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
-    set(GNUCC_OPT "${GNUCC_OPT} -Wno-bool-compare -DFOLLY_HAVE_MALLOC_H")
-  endif()
-
-  # Enabled GCC/LLVM stack-smashing protection
-  if(ENABLE_SSP)
-    if(GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
-      if(LINUX)
-        # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
-        set(GNUCC_OPT "${GNUCC_OPT} -Wl,-z,relro,-z,now")
+    # Enabled GCC/LLVM stack-smashing protection
+    if(ENABLE_SSP)
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 3.6 OR
+         CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 3.6)
+        list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
+      else()
+        list(APPEND GENERAL_OPTIONS "fstack-protector")
       endif()
-      if(GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
-        set(GNUCC_OPT "${GNUCC_OPT} -fstack-protector-strong")
-      endif()
-    else()
-      set(GNUCC_OPT "${GNUCC_OPT} -fstack-protector")
     endif()
-    set(GNUCC_OPT "${GNUCC_OPT} -pie -fPIC --param=ssp-buffer-size=4")
-  endif()
 
-  # X64
-  set(GNUCC_PLAT_OPT "")
-  if(IS_X64)
-    set(GNUCC_PLAT_OPT "-mcrc32")
-  endif()
+    if(CLANG_FORCE_LIBSTDCXX)
+      list(APPEND GENERAL_CXX_OPTIONS "stdlib=libstdc++")
+    else()
+      list(APPEND GENERAL_CXX_OPTIONS "stdlib=libc++")
+    endif()
+  else() # using GCC
+    list(APPEND DISABLED_NAMED_WARNINGS
+      "deprecated-declarations"
+      "maybe-uninitialized"
+    )
+    list(APPEND DISABLED_C_NAMED_WARNINGS
+      "maybe-uninitialized"
+      "old-style-declaration"
+    )
+    list(APPEND GENERAL_CXX_OPTIONS
+      "ffunction-sections"
+      "fdata-sections"
+      "fno-gcse"
+      "fno-canonical-system-headers"
+      "Wvla"
+    )
+    list(APPEND RELEASE_CXX_OPTIONS
+      "-param max-inline-insns-auto=100"
+      "-param=inline-unit-growth=200"
+      "-param=large-unit-insns=10000"
+    )
+    # The params bellow causes problem on GCC 4.9 and 5.4 on PPC64
+    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=72855
+    if(NOT IS_PPC64)
+      list(APPEND RELEASE_CXX_OPTIONS
+        "-param early-inlining-insns=200"
+        "-param max-early-inliner-iterations=50"
+       )
+    endif()
 
-  # PPC64
-  if(NOT IS_PPC64)
-    set(CMAKE_CXX_OMIT_LEAF_FRAME_POINTER "-momit-leaf-frame-pointer")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.8)
+      # FIXME: GCC 4.8+ regressions http://git.io/4r7VCQ
+      list(APPEND GENERAL_OPTIONS
+        "ftrack-macro-expansion=0"
+        "fno-builtin-memcmp"
+      )
+    else()
+       message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater.")
+    endif()
+
+    # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
+      list(APPEND GENERAL_OPTIONS "fno-delete-null-pointer-checks")
+    endif()
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 6.0)
+     message(WARNING "HHVM is primarily tested on GCC 4.9 and 5. Using other versions may produce unexpected results, or may not even build at all.")
+    endif()
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.1 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 5.1)
+      list(APPEND DISABLED_NAMED_WARNINGS "bool-compare")
+      list(APPEND GENERAL_OPTIONS "DFOLLY_HAVE_MALLOC_H")
+    endif()
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0 OR
+       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 6.0)
+      list(APPEND GENERAL_CXX_OPTIONS "Wno-misleading-indentation")
+    endif()
+
+    # Enabled GCC/LLVM stack-smashing protection
+    if(ENABLE_SSP)
+      if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.8 OR
+         CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.8)
+        if(LINUX)
+          # https://isisblogs.poly.edu/2011/06/01/relro-relocation-read-only/
+          list(APPEND GENERAL_OPTIONS "Wl,-z,relro,-z,now")
+        endif()
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
+           CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
+          list(APPEND GENERAL_OPTIONS "fstack-protector-strong")
+        endif()
+      else()
+        list(APPEND GENERAL_OPTIONS "fstack-protector")
+      endif()
+    endif()
+
+    # X64
+    if(IS_X64)
+      list(APPEND GENERAL_CXX_OPTIONS "mcrc32")
+    endif()
+
+    # ARM64
+    if(IS_AARCH64)
+      # Force char type to be signed, which is not the case on aarch64.
+      list(APPEND GENERAL_OPTIONS "fsigned-char")
+
+      # If a CPU was specified, build a -mcpu option for the compiler.
+      set(AARCH64_TARGET_CPU "" CACHE STRING "CPU to tell gcc to optimize for (-mcpu)")
+      if(AARCH64_TARGET_CPU)
+        list(APPEND GENERAL_OPTIONS "mcpu=${AARCH64_TARGET_CPU}")
+        set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mcpu=${AARCH64_TARGET_CPU}")
+
+        # Make sure GCC is not using the fix for errata 843419. This change
+        # interferes with the gold linker. Note that GCC applies this fix
+        # even if you specify an mcpu other than cortex-a53, which is why
+        # it's explicitly being disabled here for any cpu other than
+        # cortex-a53. If you're running a newer pass of the cortex-a53, then
+        # you can likely disable this fix with the following flag too. YMMV
+        if(NOT ${AARCH64_TARGET_CPU} STREQUAL "cortex-a53")
+          list(APPEND GENERAL_OPTIONS "mno-fix-cortex-a53-843419")
+        endif()
+      endif()
+    endif()
+
+    # PPC64
+    if(NOT IS_PPC64)
+      list(APPEND RELEASE_CXX_OPTIONS "momit-leaf-frame-pointer")
+    endif()
+
+    if(STATIC_CXX_LIB)
+      set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+    endif()
+
+    if (ENABLE_SPLIT_DWARF)
+      set(GDB_SUBOPTION "split-dwarf")
+    endif()
   endif()
 
   # No optimizations for debug builds.
   # -Og enables some optimizations, but makes debugging harder by optimizing
   # away some functions and locals. -O0 is more debuggable.
   # -O0-ggdb was reputed to cause gdb to crash (github #4450)
-  set(CMAKE_C_FLAGS_DEBUG    "-O0 -g")
-  set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
-
-  # Generic GCC flags and Optional flags
+  set(CMAKE_C_FLAGS_DEBUG            "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g${GDB_SUBOPTION}")
+  set(CMAKE_C_FLAGS_DEBUGOPT         "-O2 -g${GDB_SUBOPTION}")
+  set(CMAKE_CXX_FLAGS_DEBUGOPT       "-O2 -g${GDB_SUBOPTION}")
   set(CMAKE_C_FLAGS_MINSIZEREL       "-Os -DNDEBUG")
   set(CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
   set(CMAKE_C_FLAGS_RELEASE          "-O3 -DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG -fno-gcse ${CMAKE_CXX_OMIT_LEAF_FRAME_POINTER} --param max-inline-insns-auto=100 --param early-inlining-insns=200 --param max-early-inliner-iterations=50 --param=inline-unit-growth=200 --param=large-unit-insns=10000")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} ${GNUCC_OPT} -w")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++11 -ffunction-sections -fdata-sections -fno-gcse -fno-omit-frame-pointer -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names -Wno-error=array-bounds -Wno-error=switch -Werror=format-security -Wno-unused-result -Wno-sign-compare -Wno-attributes -Wno-maybe-uninitialized -Wno-unused-local-typedefs -fno-canonical-system-headers -Wno-deprecated-declarations -Wno-unused-function -Wvla ${GNUCC_OPT} ${GNUCC_PLAT_OPT}")
-  if(STATIC_CXX_LIB)
-    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
-  endif()
+  set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO   "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g${GDB_SUBOPTION} -DNDEBUG")
+  set(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -W -Werror=implicit-function-declaration")
+
+  mark_as_advanced(CMAKE_C_FLAGS_DEBUGOPT CMAKE_CXX_FLAGS_DEBUGOPT)
+
+  foreach(opt ${DISABLED_NAMED_WARNINGS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-${opt}")
+  endforeach()
+
+  foreach(opt ${DISABLED_C_NAMED_WARNINGS})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-${opt}")
+  endforeach()
+
+  foreach(opt ${GENERAL_OPTIONS})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -${opt}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -${opt}")
+  endforeach()
+
+  foreach(opt ${GENERAL_CXX_OPTIONS})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -${opt}")
+  endforeach()
+
+  foreach(opt ${DEBUG_CXX_OPTIONS})
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -${opt}")
+  endforeach()
+
+  foreach(opt ${RELEASE_CXX_OPTIONS})
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -${opt}")
+  endforeach()
+
+  # The ASM part of this makes it more effort than it's worth
+  # to add these to the general flags system.
   if(ENABLE_AVX2)
     set(CMAKE_C_FLAGS    "${CMAKE_C_FLAGS} -mavx2 -march=core-avx2")
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2 -march=core-avx2")
     set(CMAKE_ASM_FLAGS  "${CMAKE_ASM_FLAGS} -mavx2 -march=core-avx2")
-  endif()
-
-  if(CYGWIN)
-  # in debug mode large files can overflow pe/coff sections
-  # this switches binutils to use the pe+ format
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wa,-mbig-obj")
-    # stack limit is set at compile time on windows
-    # code expects a minimum of 8 * 1024 * 1024 + 8 for a buffer
-    # the default is 2 mb
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--stack,8388616")
   endif()
 # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")

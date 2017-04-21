@@ -76,3 +76,7 @@ function xdebug_stop_trace(): mixed; // filename or false
 function xdebug_time_index(): float;
 
 function xdebug_var_dump(mixed $var, ...): void;
+
+namespace HH {
+  function xdebug_remote_attached(): bool;
+}

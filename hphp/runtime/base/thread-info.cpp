@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,13 +23,18 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/lock.h"
+#include "hphp/util/perf-event.h"
 
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/code-coverage.h"
+#include "hphp/runtime/base/perf-mem-event.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/ext/process/ext_process.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/ext/process/ext_process.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,84 +145,121 @@ void raise_infinite_recursion_error() {
   }
 }
 
-static Exception* generate_request_timeout_exception() {
+static Exception* generate_request_timeout_exception(c_WaitableWaitHandle* wh) {
   auto exceptionMsg = folly::sformat(
-    RuntimeOption::ClientExecutionMode()
+    !RuntimeOption::ServerExecutionMode() || is_cli_mode()
       ? "Maximum execution time of {} seconds exceeded"
       : "entire web request took longer than {} seconds and timed out",
     RID().getTimeout());
   auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis());
   return new RequestTimeoutException(exceptionMsg, exceptionStack);
 }
 
-static Exception* generate_request_cpu_timeout_exception() {
+static Exception* generate_request_cpu_timeout_exception(
+  c_WaitableWaitHandle* wh
+) {
   auto exceptionMsg = folly::sformat(
     "Maximum CPU time of {} seconds exceeded",
     RID().getCPUTimeout()
   );
 
   auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis());
   return new RequestCPUTimeoutException(exceptionMsg, exceptionStack);
 }
 
-static Exception* generate_memory_exceeded_exception() {
+static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
   auto exceptionStack = createBacktrace(BacktraceArgs()
+                                        .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis());
   return new RequestMemoryExceededException(
     "request has exceeded memory limit", exceptionStack);
 }
 
-size_t check_request_surprise() {
+// suppress certain callbacks when we're running a user error handler;
+// to reduce the chances that a subsequent error occurs in the callback
+// and obscures the effect that the first handler would have had.
+static bool callbacksOk() {
+  switch (g_context->getErrorState()) {
+    case ExecutionContext::ErrorState::NoError:
+    case ExecutionContext::ErrorState::ErrorRaised:
+    case ExecutionContext::ErrorState::ErrorRaisedByUserHandler:
+      return true;
+    case ExecutionContext::ErrorState::ExecutingUserHandler:
+      return false;
+  }
+  not_reached();
+}
+
+size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
+  NoHandleSurpriseScope::AssertNone(static_cast<SurpriseFlag>(mask));
   auto& info = TI();
   auto& p = info.m_reqInjectionData;
 
-  auto const flags = fetchAndClearSurpriseFlags();
-  auto const do_timedout = (flags & TimedOutFlag) && !p.getDebuggerAttached();
-  auto const do_memExceeded = flags & MemExceededFlag;
-  auto const do_signaled = flags & SignaledFlag;
-  auto const do_cpuTimedOut =
-    (flags & CPUTimedOutFlag) && !p.getDebuggerAttached();
-  auto const do_GC = flags & PendingGCFlag;
+  auto flags = fetchAndClearSurpriseFlags() & mask;
+  auto const debugging = p.getDebuggerAttached();
 
   // Start with any pending exception that might be on the thread.
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
 
-  if (do_timedout) {
+  if (auto cbFlags =
+      flags & (XenonSignalFlag | MemThresholdFlag | IntervalTimerFlag)) {
+    if (!callbacksOk()) {
+      setSurpriseFlag(static_cast<SurpriseFlag>(cbFlags));
+      flags -= cbFlags;
+    }
+  }
+
+  if ((flags & TimedOutFlag) && !debugging) {
     p.setCPUTimeout(0);  // Stop CPU timer so we won't time out twice.
     if (pendingException) {
       setSurpriseFlag(TimedOutFlag);
     } else {
-      pendingException = generate_request_timeout_exception();
+      pendingException = generate_request_timeout_exception(wh);
     }
-  }
-  // Don't bother with the CPU timeout if we're already handling a wall timeout.
-  if (do_cpuTimedOut && !do_timedout) {
+  } else if ((flags & CPUTimedOutFlag) && !debugging) {
+    // Don't bother with the CPU timeout if we're already handling a wall
+    // timeout.
     p.setTimeout(0);  // Stop wall timer so we won't time out twice.
     if (pendingException) {
       setSurpriseFlag(CPUTimedOutFlag);
     } else {
-      pendingException = generate_request_cpu_timeout_exception();
+      pendingException = generate_request_cpu_timeout_exception(wh);
     }
   }
-  if (do_memExceeded) {
+  if (flags & MemExceededFlag) {
     if (pendingException) {
       setSurpriseFlag(MemExceededFlag);
     } else {
-      pendingException = generate_memory_exceeded_exception();
+      pendingException = generate_memory_exceeded_exception(wh);
     }
   }
-  if (do_GC) {
-    VMRegAnchor _;
-    MM().collect("surprise");
+  if (flags & PendingGCFlag) {
+    if (StickyFlags & PendingGCFlag) {
+      clearSurpriseFlag(PendingGCFlag);
+    }
+    if (MM().isGCEnabled()) {
+      MM().collect("surprise");
+    } else {
+      MM().checkHeap("surprise");
+    }
   }
-  if (do_signaled) {
+  if (flags & SignaledFlag) {
     HHVM_FN(pcntl_signal_dispatch)();
+  }
+
+  if (flags & PendingPerfEventFlag) {
+    if (StickyFlags & PendingPerfEventFlag) {
+      clearSurpriseFlag(PendingPerfEventFlag);
+    }
+    perf_event_consume(record_perf_mem_event);
   }
 
   if (pendingException) {
@@ -225,11 +267,5 @@ size_t check_request_surprise() {
   }
   return flags;
 }
-
-void check_request_surprise_unlikely() {
-  if (UNLIKELY(checkSurpriseFlags())) check_request_surprise();
-}
-
-//////////////////////////////////////////////////////////////////////
 
 }

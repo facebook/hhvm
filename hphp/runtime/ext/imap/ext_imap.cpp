@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -39,8 +40,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ImapStream : public SweepableResourceData {
-public:
+struct ImapStream : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(ImapStream);
 
   ImapStream(MAILSTREAM *stream, int64_t flag)
@@ -124,8 +124,6 @@ struct ImapRequestData final : RequestEventHandler {
       m_alertstack = NIL;
     }
   }
-
-  void vscan(IMarker&) const override {}
 
   std::string m_user;
   std::string m_password;
@@ -1312,6 +1310,10 @@ static Variant HHVM_FUNCTION(imap_open, const String& mailbox,
                              int64_t retries /* = 0 */) {
   String filename = mailbox;
   if (filename[0] != '{') {
+    if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+      return init_null();
+    }
+
     filename = File::TranslatePath(filename);
     if (filename.empty()) {
       return false;
@@ -1570,8 +1572,7 @@ static Variant HHVM_FUNCTION(imap_utf8, const String& mime_encoded_text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class imapExtension final : public Extension {
-public:
+static struct imapExtension final : Extension {
   imapExtension() : Extension("imap", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

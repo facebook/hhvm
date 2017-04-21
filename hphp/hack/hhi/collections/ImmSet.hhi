@@ -38,7 +38,7 @@
  * $s = ImmSet {1, 2};
  * ```
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 
@@ -83,7 +83,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `array` containing the values from the current `ImmSet`,
    *           where each key of the `array` are the same as each value.
    */
-  public function toArray(): array;
+  public function toArray(): array<Tv, Tv>;
 
   /**
    * Returns an `array` containing the values from the current `ImmSet`.
@@ -360,20 +360,20 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
     ImmSet<Tv>;
 
   /**
-   *  Throws an exception unless the current `ImmSet` or the `Traversable` is
-   *  empty.
+   * Throws an exception unless the current `ImmSet` or the `Traversable` is
+   * empty.
    *
-   *  Since `ImmSet`s only support integers or strings as values, we cannot
-   *  have a `Pair` as an `ImmSet` value. So in order to avoid an
-   *  `InvalidArgumentException`, either the current `ImmSet` or the
-   *  `Traversable` must be empty so that we actually return an empty `ImmSet`.
+   * Since `ImmSet`s only support integers or strings as values, we cannot
+   * have a `Pair` as an `ImmSet` value. So in order to avoid an
+   * `InvalidArgumentException`, either the current `ImmSet` or the
+   * `Traversable` must be empty so that we actually return an empty `ImmSet`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `ImmSet`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `ImmSet`.
    *
-   *  @return - The `ImmSet` that combines the values of the current `ImmSet`
-   *            with the provided `Traversable`; one of these must be empty or
-   *            an exception is thrown.
+   * @return - The `ImmSet` that combines the values of the current `ImmSet`
+   *           with the provided `Traversable`; one of these must be empty or
+   *           an exception is thrown.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
 

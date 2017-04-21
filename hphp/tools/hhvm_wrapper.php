@@ -44,16 +44,40 @@ function my_option_map(): OptionInfoMap {
 }
 
 function get_paths(OptionMap $opts): Map<string,string> {
-  $root = __DIR__.'/../../_bin/hphp';
-  if (!is_dir($root)) {
-    $root = __DIR__.'/..';
+  $root = __DIR__.'/..';
+
+  $buck = __DIR__.'/../../buck-out/gen/hphp';
+  if (is_dir($buck)) {
+    $root = $buck;
   }
+
+  $fbbuild = __DIR__.'/../../_bin/hphp';
+  if (is_dir($fbbuild)) {
+
+    if ($root === $buck) {
+      echo "Multiple build directories found.\n";
+      echo " - " . $fbbuild . "\n";
+      echo " - " . $buck . "\n";
+      error("Delete one of them, or use the --build-root flag.");
+    }
+
+    $root = $fbbuild;
+  }
+
   if ($opts->containsKey('build-root')) {
     $root = realpath($opts['build-root']);
   }
+
+  if ($root === $buck) {
+    return Map {
+      'hhvm' => $root.'/hhvm/hhvm/hhvm',
+      'hphp' => $root.'/hhvm/symlinks=hphp/hphp',
+    };
+  }
+
   return Map {
-    'hhvm' => "$root/hhvm/hhvm",
-    'hphp' => "$root/hhvm/hphp",
+    'hhvm' => $root.'/hhvm/hhvm',
+    'hphp' => $root.'/hhvm/hphp',
   };
 }
 
@@ -107,7 +131,6 @@ function determine_flags(OptionMap $opts): string {
   if ($opts->containsKey('region-mode')) {
     if ($opts['region-mode'] == 'method') {
       $flags .=
-        '-v Eval.JitLoops=1 '.
         '-v Eval.JitPGO=0 '.
         '';
       if (!$opts->containsKey('compile')) {
@@ -118,7 +141,6 @@ function determine_flags(OptionMap $opts): string {
     if ($opts['region-mode'] == 'wholecfg') {
       $flags .=
         '-v Eval.JitPGORegionSelector='.((string)$opts['region-mode']).' '.
-        '-v Eval.JitLoops=1 '.
         '';
     } else {
       $flags .=

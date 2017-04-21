@@ -240,6 +240,22 @@ function test_preg_split() {
   VS($chars[4], "n");
   VS($chars[5], "g");
 
+  $chars = preg_split("//", $str, null, PREG_SPLIT_NO_EMPTY);
+  VS(count($chars), 6);
+  VS($chars[0], "s");
+  VS($chars[1], "t");
+  VS($chars[2], "r");
+  VS($chars[3], "i");
+  VS($chars[4], "n");
+  VS($chars[5], "g");
+
+  $chars = preg_split("//", $str, 3, PREG_SPLIT_NO_EMPTY);
+  VS(count($chars), 3);
+  VS($chars[0], "s");
+  VS($chars[1], "t");
+  VS($chars[2], "ring");
+
+
   $str = "hypertext language programming";
   $chars = preg_split("/ /", $str, -1, PREG_SPLIT_OFFSET_CAPTURE);
   VS(print_r($chars, true),

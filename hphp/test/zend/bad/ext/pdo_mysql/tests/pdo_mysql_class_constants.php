@@ -2,7 +2,7 @@
 	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 	$expected = array(
-		'MYSQL_ATTR_USE_BUFFERED_QUERY'		=> true,
+		'MYSQL_ATTR_USE_BUFFERED_QUERY'				=> true,
 		'MYSQL_ATTR_LOCAL_INFILE'					=> true,
 		'MYSQL_ATTR_DIRECT_QUERY'					=> true,
 		'MYSQL_ATTR_FOUND_ROWS'						=> true,
@@ -14,6 +14,7 @@
 		"MYSQL_ATTR_SSL_CAPATH"						=> true,
 		"MYSQL_ATTR_SSL_CIPHER"						=> true,
 		"MYSQL_ATTR_COMPRESS"						=> true,
+		"MYSQL_ATTR_MULTI_STATEMENTS"				=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {
@@ -29,7 +30,7 @@
 			$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']	= true;
 	    }
 	} else if (MySQLPDOTest::getClientVersion(MySQLPDOTest::factory()) > 50605) {
-		/* XXX the MySQL client library version isn't exposed with any 
+		/* XXX the MySQL client library version isn't exposed with any
 		constants, the single possibility is to use the PDO::getAttribute().
 		This however will fail with no connection. */
 		$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;

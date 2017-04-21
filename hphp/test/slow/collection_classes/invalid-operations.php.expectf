@@ -10,26 +10,26 @@ object(HH\ImmVector)#3 (2) {
     int(2)
   }
 }
-object(HH\ImmMap)#4 (2) {
+object(HH\ImmMap)#6 (2) {
   [0]=>
-  object(HH\Vector)#5 (1) {
+  object(HH\Vector)#4 (1) {
     [0]=>
     int(1)
   }
   [1]=>
-  object(HH\Vector)#6 (1) {
+  object(HH\Vector)#5 (1) {
     [0]=>
     int(2)
   }
 }
-object(HH\Pair)#7 (2) {
+object(HH\Pair)#9 (2) {
   [0]=>
-  object(HH\Vector)#8 (1) {
+  object(HH\Vector)#7 (1) {
     [0]=>
     int(1)
   }
   [1]=>
-  object(HH\Vector)#9 (1) {
+  object(HH\Vector)#8 (1) {
     [0]=>
     int(2)
   }
@@ -53,38 +53,38 @@ object(HH\ImmVector)#13 (2) {
     }
   }
 }
-object(HH\ImmMap)#14 (2) {
+object(HH\ImmMap)#16 (2) {
   [0]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#14 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
   array(1) {
     [0]=>
     object(HH\Vector)#15 (1) {
       [0]=>
-      int(1)
-    }
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    object(HH\Vector)#16 (1) {
-      [0]=>
       int(2)
     }
   }
 }
-object(HH\Pair)#17 (2) {
+object(HH\Pair)#19 (2) {
   [0]=>
+  array(1) {
+    [0]=>
+    object(HH\Vector)#17 (1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
   array(1) {
     [0]=>
     object(HH\Vector)#18 (1) {
       [0]=>
-      int(1)
-    }
-  }
-  [1]=>
-  array(1) {
-    [0]=>
-    object(HH\Vector)#19 (1) {
-      [0]=>
       int(2)
     }
   }
@@ -126,5 +126,16 @@ Caught exception: Cannot use [] with collections for reading in an lvalue contex
 Caught exception: Cannot use [] with collections for reading in an lvalue context
 Caught exception: Cannot use [] with collections for reading in an lvalue context
 
-
-Fatal error: Collection elements cannot be taken by reference in %s on line 174
+Caught exception: Cannot modify immutable object of type HH\Pair
+object(HH\Pair)#90 (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}

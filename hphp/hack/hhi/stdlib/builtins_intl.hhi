@@ -76,6 +76,17 @@ const int U_ERROR_WARNING_START = -128;
 const int U_FILE_ACCESS_ERROR = 4;
 const int U_FMT_PARSE_ERROR_LIMIT = 65804;
 const int U_FMT_PARSE_ERROR_START = 65792;
+const int U_IDNA_ACE_PREFIX_ERROR = 66564;
+const int U_IDNA_CHECK_BIDI_ERROR = 66562;
+const int U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR = 66568;
+const int U_IDNA_ERROR_LIMIT = 66569;
+const int U_IDNA_ERROR_START = 66560;
+const int U_IDNA_LABEL_TOO_LONG_ERROR = 66566;
+const int U_IDNA_PROHIBITED_ERROR = 66560;
+const int U_IDNA_STD3_ASCII_RULES_ERROR = 66563;
+const int U_IDNA_UNASSIGNED_ERROR = 66561;
+const int U_IDNA_VERIFICATION_ERROR = 66565;
+const int U_IDNA_ZERO_LENGTH_LABEL_ERROR = 66567;
 const int U_ILLEGAL_ARGUMENT_ERROR = 1;
 const int U_ILLEGAL_CHARACTER = 65567;
 const int U_ILLEGAL_CHAR_FOUND = 12;
@@ -116,6 +127,7 @@ const int U_MISSING_SEGMENT_CLOSE = 65548;
 const int U_MULTIPLE_ANTE_CONTEXTS = 65549;
 const int U_MULTIPLE_COMPOUND_FILTERS = 65559;
 const int U_MULTIPLE_CURSORS = 65550;
+const int U_MULTIPLE_DECIMAL_SEPARATORS = 65793;
 const int U_MULTIPLE_EXPONENTIAL_SYMBOLS = 65794;
 const int U_MULTIPLE_PAD_SPECIFIERS = 65798;
 const int U_MULTIPLE_PERCENT_SYMBOLS = 65796;
@@ -187,6 +199,7 @@ function collator_get_attribute($obj, $attr) {}
 function collator_get_error_code($obj) {}
 function collator_get_error_message($obj) {}
 function collator_get_locale($obj, $type = 0) {}
+function collator_get_sort_key($obj, $str) {}
 function collator_get_strength($obj) {}
 function collator_set_attribute($obj, $attr, $val) {}
 function collator_set_strength($obj, $strength) {}
@@ -378,14 +391,15 @@ class Collator {
   public function asort(&$arr, $sort_flag = null) {}
   public function compare($str1, $str2) {}
   static public function create($locale) {}
-  public function getattribute($attr) {}
-  public function geterrorcode() {}
-  public function geterrormessage() {}
-  public function getlocale($type = 0) {}
-  public function getstrength() {}
-  public function setattribute($attr, $val) {}
-  public function setstrength($strength) {}
-  public function sortwithsortkeys(&$arr) {}
+  public function getAttribute($attr) {}
+  public function getErrorCode() {}
+  public function getErrorMessage() {}
+  public function getLocale($type = 0) {}
+  public function getSortKey($str) {}
+  public function getStrength() {}
+  public function setAttribute($attr, $val) {}
+  public function setStrength($strength) {}
+  public function sortWithSortKeys(&$arr) {}
   public function sort(&$arr, $sort_flag = null) {}
 }
 

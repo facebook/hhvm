@@ -7671,15 +7671,15 @@ TEST(Assembler, printf_no_preserve) {
 // Functions for testing the HostCall pseudo-opcode.
 extern "C" {
 
-int64_t minusOne() {
+intptr_t minusOne() {
   return -1;
 }
 
-char secondChar(const char* str) {
+intptr_t secondChar(const char* str) {
   return str[1];
 }
 
-int addTogether(int a, int b) {
+intptr_t addTogether(intptr_t a, intptr_t b) {
   // Make sure the arguments are in the right order
   return (3 * a) + b;
 }

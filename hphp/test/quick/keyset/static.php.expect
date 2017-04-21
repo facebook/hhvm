@@ -1,0 +1,25 @@
+keyset(4) {
+  int(1)
+  string(1) "1"
+  int(2)
+  string(1) "2"
+}
+keyset(4) {
+  int(1)
+  string(1) "1"
+  int(2)
+  string(1) "2"
+}
+keyset(1) {
+  string(3) "bar"
+}
+array(1) {
+  ["TestAttr"]=>
+  array(1) {
+    [0]=>
+    keyset(2) {
+      int(1)
+      string(1) "1"
+    }
+  }
+}

@@ -1,3 +1,5 @@
+include(HHVMExtensionConfig)
+
 set(RECURSIVE_SOURCE_SUBDIRS base debugger eval server vm)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
   HHVM_SELECT_SOURCES("${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
@@ -42,7 +44,7 @@ add_precompiled_header(
   CXX_SOURCES
 )
 
-ADD_LIBRARY(hphp_runtime_static STATIC
+add_object_library(hphp_runtime_static
             ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES}
             "ir-opcode-generated.h")
 auto_source_group("hphp_runtime_static" "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -50,20 +52,16 @@ auto_source_group("hphp_runtime_static" "${CMAKE_CURRENT_SOURCE_DIR}"
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+object_library_hphp_link(hphp_runtime_static)
+object_library_ld_link_libraries(hphp_runtime_static hphp_util hphp_proxygen vixl ppc64-asm hphp_zend hphp_system jit_sort)
+HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_static)
 
 SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
 
-hphp_link(hphp_runtime_static)
 HHVM_PUBLIC_HEADERS(runtime ${HEADER_SOURCES})
 
 if (ENABLE_COTIRE)
   cotire(hphp_runtime_static)
-endif()
-
-if(CYGWIN AND CMAKE_BUILD_TYPE MATCHES "Debug")
-  set_source_files_properties(
-    ${CMAKE_CURRENT_SOURCE_DIR}/vm/jit/hhbc-translator.cpp
-    PROPERTIES COMPILE_FLAGS -Og)
 endif()
 
 set(EZC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../runtime/ext_zend_compat/")

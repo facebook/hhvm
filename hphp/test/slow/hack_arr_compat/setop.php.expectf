@@ -1,0 +1,61 @@
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 5
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 6
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 7
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 8
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 10
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 11
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 12
+
+Notice: Hack Array Compat: Inc/dec on missing array element in %s/setop.php on line 13
+
+Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 15
+
+Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 16
+
+Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 17
+
+Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 19
+
+Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 20
+
+Notice: Hack Array Compat: Set-op on missing array element in %s/setop.php on line 21
+array(16) {
+  [1]=>
+  string(3) "foo"
+  ["baz"]=>
+  int(123)
+  [10]=>
+  int(1)
+  [11]=>
+  int(1)
+  [12]=>
+  NULL
+  [13]=>
+  NULL
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(1)
+  ["c"]=>
+  NULL
+  ["d"]=>
+  NULL
+  [20]=>
+  string(3) "abc"
+  [21]=>
+  int(10)
+  [22]=>
+  int(1)
+  ["e"]=>
+  string(3) "abc"
+  ["f"]=>
+  int(10)
+  ["g"]=>
+  int(1)
+}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -14,6 +14,8 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
+
+#include "hphp/zend/zend-md5.h"
 
 #include "hphp/zend/zend-string.h"
 #include <cinttypes>
@@ -134,12 +136,6 @@ static void Decode(uint32_t *output, const unsigned char *input,
       (((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
   }
 }
-
-typedef struct {
-  uint32_t state[4];          /* state (ABCD) */
-  uint32_t count[2];          /* number of bits, modulo 2^64 (lsb first) */
-  unsigned char buffer[64]; /* input buffer */
-} PHP_MD5_CTX;
 
 /**
  * MD5 initialization. Begins an MD5 operation, writing a new context.
@@ -316,10 +312,10 @@ Md5Digest::Md5Digest(const char *arg, int arg_len) {
   PHP_MD5Final(digest, &context);
 }
 
-std::string string_md5(const char* s, int len) {
-  Md5Digest md5(s, len);
-  const auto rawLen = sizeof(md5.digest);
-  const auto hexLen = 2*rawLen;
+std::string string_md5(folly::StringPiece s) {
+  Md5Digest md5(s.begin(), s.size());
+  auto constexpr rawLen = sizeof(md5.digest);
+  auto constexpr hexLen = 2*rawLen;
   char hex[hexLen+1];
   string_bin2hex((char*)md5.digest, rawLen, hex);
   return std::string(hex, hexLen);

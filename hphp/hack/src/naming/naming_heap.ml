@@ -8,25 +8,41 @@
  *
  *)
 
+(* Mapping the canonical name (lower case form) to the actual name *)
+module type CanonHeap =
+  SharedMem.NoCache with type t = string
+               and type key = string
+               and module KeySet = Set.Make (StringKey)
 
-open Utils
-
-module ClassHeap = SharedMem.NoCache (String) (struct
-  type t = Nast.class_
+module TypeCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
+  type t = string
   let prefix = Prefix.make()
+  let description = "TypeCanon"
 end)
 
-module FunHeap = SharedMem.NoCache (String) (struct
-  type t = Nast.fun_
+module FunCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
+  type t = string
   let prefix = Prefix.make()
+  let description = "FunCanon"
 end)
 
-module TypedefHeap = SharedMem.NoCache (String) (struct
-  type t = Nast.typedef
-  let prefix = Prefix.make()
+(* TypeIdHeap records both class names and typedefs since they live in the
+ * same namespace. That is, one cannot both define a class Foo and a typedef
+ * Foo (or FOO or fOo, due to case insensitivity). *)
+module TypeIdHeap = SharedMem.WithCache (StringKey) (struct
+  type t = FileInfo.pos * [`Class | `Typedef]
+  let prefix = Prefix.make ()
+  let description = "TypeId"
 end)
 
-module ConstHeap = SharedMem.NoCache (String) (struct
-  type t = Nast.gconst
+module FunPosHeap = SharedMem.NoCache (StringKey) (struct
+  type t = FileInfo.pos
   let prefix = Prefix.make()
+  let description = "FunPos"
+end)
+
+module ConstPosHeap = SharedMem.NoCache (StringKey) (struct
+  type t = FileInfo.pos
+  let prefix = Prefix.make()
+  let description = "ConstPos"
 end)

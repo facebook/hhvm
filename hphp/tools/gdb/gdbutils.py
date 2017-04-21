@@ -50,9 +50,9 @@ def invalidate_all_memoizers():
 
 def errorwrap(func):
     @functools.wraps(func)
-    def wrapped(*args):
+    def wrapped(*args, **kwds):
         try:
-            func(*args)
+            return func(*args, **kwds)
         except:
             print('')
             traceback.print_exc()
@@ -64,8 +64,12 @@ def errorwrap(func):
 #------------------------------------------------------------------------------
 # General-purpose helpers.
 
-def parse_argv(args):
-    return [gdb.parse_and_eval(arg) for arg in gdb.string_to_argv(args)]
+def parse_argv(args, limit=None):
+    """Explode a gdb argument string, then eval all args up to `limit'."""
+    if limit is None:
+        limit = len(args)
+    return [gdb.parse_and_eval(arg) if i < limit else arg
+            for i, arg in enumerate(gdb.string_to_argv(args))]
 
 
 def gdbprint(val, ty=None):
@@ -91,7 +95,8 @@ def _bit_reflect(num, nbits):
         mask >>= 1
     return out
 
-def _crc32q(crc, quad):
+
+def crc32q(crc, quad):
     """Intel SSE4 CRC32 implementation."""
 
     crc = _bit_reflect(crc, 32)
@@ -116,7 +121,12 @@ def _crc32q(crc, quad):
 def string_data_val(val, keep_case=True):
     """Convert an HPHP::StringData[*] to a Python string."""
 
-    s = val['m_data'].string('utf-8', 'ignore', val['m_len'])
+    if V('HPHP::use_lowptr'):
+        data = (deref(val).address + 1).cast(T('char').pointer())
+    else:
+        data = val['m_data']
+
+    s = data.string('utf-8', 'ignore', val['m_len'])
     return s if keep_case else s.lower()
 
 
@@ -133,7 +143,7 @@ def hash_string(s):
     crc = 0xffffffff
 
     for i in xrange(0, size, 8):
-        crc = _crc32q(crc, _unpack(s[i:i+8]))
+        crc = crc32q(crc, _unpack(s[i:i+8]))
 
     if tail_sz == 0:
         return crc >> 1
@@ -141,7 +151,7 @@ def hash_string(s):
     shift = -((tail_sz - 8) << 3) & 0b111111
     tail = _unpack(s[size:].ljust(8, '\0'))
 
-    crc = _crc32q(crc, tail << shift)
+    crc = crc32q(crc, tail << shift)
     return crc >> 1
 
 
@@ -249,7 +259,7 @@ def rawptr(val):
     if t.code == gdb.TYPE_CODE_PTR:
         return val
     elif t.code == gdb.TYPE_CODE_REF:
-        return val.referenced_type().address
+        return val.referenced_value().address
 
     name = template_type(t)
     ptr = None

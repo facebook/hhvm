@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,11 +31,11 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/loop-analysis.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
 
@@ -79,13 +79,15 @@ bool is_pure_licmable(const IRInstruction* inst) {
   case EqDbl:
   case NeqDbl:
   case InterfaceSupportsArr:
+  case InterfaceSupportsVec:
+  case InterfaceSupportsDict:
+  case InterfaceSupportsKeyset:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
   case LdClsCtor:
   case LdClsName:
   case Mov:
-  case LookupClsRDSHandle:
   case LdContActRec:
   case LdAFWHActRec:
   case LdCtx:
@@ -284,9 +286,9 @@ template<class Seen, class F>
 void visit_loop_post_order(LoopEnv& env, Seen& seen, Block* b, F f) {
   if (seen[b->id()]) return;
   seen.set(b->id());
-  auto go = [&] (Block* b) {
-    if (!b || !env.blocks.count(b)) return;
-    visit_loop_post_order(env, seen, b, f);
+  auto go = [&] (Block* block) {
+    if (!block || !env.blocks.count(block)) return;
+    visit_loop_post_order(env, seen, block, f);
   };
   go(b->next());
   go(b->taken());
@@ -323,7 +325,7 @@ void analyze_block(LoopEnv& env, Block* blk) {
       [&] (UnknownEffects)   { kill(AUnknown); },
 
       [&] (CallEffects x)    { env.contains_call = true;
-                               if (x.destroys_locals) kill(AFrameAny);
+                               if (x.writes_locals) kill(AFrameAny);
                                kill(AHeapAny); },
       [&] (PureStore x)      { kill(x.dst); },
       [&] (PureSpillFrame x) { kill(x.stk); },
@@ -350,8 +352,7 @@ void analyze_block(LoopEnv& env, Block* blk) {
 
       [&] (IrrelevantEffects) {},
 
-      [&] (ReturnEffects)     { assertx(inst.is(InlineReturn) ||
-                                        inst.is(InlineReturnNoFrame)); },
+      [&] (ReturnEffects)     { assertx(!"tried to return in a loop"); },
       [&] (ExitEffects)       { assertx(!"tried to exit in a loop"); }
     );
   }
@@ -529,7 +530,7 @@ bool may_have_side_effects(const IRInstruction& inst) {
 void find_invariant_code(LoopEnv& env) {
   auto may_still_hoist_checks = true;
   auto visited_block = boost::dynamic_bitset<>(env.global.unit.numBlocks());
-  auto profData = mcg->tx().profData();
+  auto profData = jit::profData();
   auto numInvocations = linfo(env).numInvocations;
   FTRACE(4, "numInvocations: {}\n", numInvocations);
   for (auto& b : rpo_sort_loop(env)) {
@@ -544,11 +545,11 @@ void find_invariant_code(LoopEnv& env) {
       });
     }
 
-    // Skip this block if its profile weight is less than the number
-    // of times the loop is invoked, since otherwise we're likely to
-    // executed the instruction more by hoisting it out of the loop.
+    // Skip this block if its profile weight is less than the number of times
+    // the loop is invoked, since otherwise we're likely to executed the
+    // instruction more by hoisting it out of the loop.
     auto tid = b->front().marker().profTransID();
-    auto profCount = profData->transCounter(tid);
+    auto profCount = profData ? profData->transCounter(tid) : 0;
     if (profCount < numInvocations) {
       FTRACE(4, "   skipping Block {} because of low profile weight ({})\n",
              b->id(), profCount);
@@ -720,6 +721,7 @@ void insert_pre_headers_and_exits(IRUnit& unit, LoopAnalysis& loops) {
 
 void optimizeLoopInvariantCode(IRUnit& unit) {
   PassTracer tracer { &unit, Trace::hhir_licm, "LICM" };
+  Timer t(Timer::optimize_licm, unit.logEntry().get_pointer());
   Env env { unit, rpoSortCfg(unit) };
   if (env.loops.loops.empty()) {
     FTRACE(1, "no loops\n");

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,14 +20,18 @@
 #include <cstdlib>
 #include <cinttypes>
 #include <string>
+#include <unordered_map>
 #include <boost/variant.hpp>
 #include <folly/Range.h>
 
 #include "hphp/runtime/base/types.h"
 
+#include "hphp/util/type-scan.h"
+
 namespace HPHP {
   struct Array;
   struct StringData;
+  struct Class;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -37,20 +41,19 @@ namespace HPHP { namespace rds {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * The RDS (Request Data Segment) is a region of memory quickly
- * accessible to each hhvm thread that is running a PHP request.
+ * The RDS (Request Data Segment) is a region of memory quickly accessible to
+ * each hhvm thread that is running a PHP request.
  *
- * Essentially this is a per-thread memory region, along with an
- * internal dynamic link table to give the segment the same layout for
- * each thread as new data is allocated.
+ * Essentially this is a per-thread memory region, along with an internal
+ * dynamic link table to give the segment the same layout for each thread as
+ * new data is allocated.
  *
- * The RDS starts with a small header that is statically layed out,
- * followed by the main "normal" segment, which is initialized to zero
- * at the start of each request.  The next section, called "local",
- * contains unshared but still persistent data---this is data that is
- * local to a thread but retains its value across requests.  The final
- * section contains shared "persistent" data, which is data that
- * retains the same values across requests.
+ * The RDS starts with a small header that is statically layed out, followed by
+ * the main "normal" segment, which is (logically) reset at the beginning of
+ * every request. The next section, called "local", contains unshared but still
+ * persistent data---this is data that is local to a thread but retains its
+ * value across requests.  The final section contains shared "persistent" data,
+ * which is data that retains the same values across requests.
  *
  * The shared persistent segment is           RDS Layout:
  * implemented by mapping the same physical
@@ -71,6 +74,12 @@ namespace HPHP { namespace rds {
  *                                               |     region  | higher
  *                                               +-------------+   addresses
  *
+ * Every element in the "normal" segment has an associated generation number,
+ * and the segment as a whole has a "current" generation number.  A particular
+ * element is considered initialized if its generation number matches the
+ * segment's current generation number.  If it does not, the element should be
+ * considered to contain garbage and should be initialized as needed by the
+ * element type.  Once done, it must be manually marked as initialized.
  *
  * Allocation/linking API:
  *
@@ -100,12 +109,13 @@ namespace HPHP { namespace rds {
 
 /*
  * Lifetime-related hooks, exported to be called at the appropriate
- * times.
+ * times. If shouldRegister is false the resultant rds will be excluded from
+ * the global rds list.
  */
 void requestInit();
 void requestExit();
-void threadInit();
-void threadExit();
+void threadInit(bool shouldRegister = true);
+void threadExit(bool shouldUnregister = true);
 
 /*
  * Flushing RDS means to madvise the memory away.  Should only be done
@@ -127,6 +137,12 @@ size_t usedPersistentBytes();
 folly::Range<const char*> normalSection();
 folly::Range<const char*> localSection();
 folly::Range<const char*> persistentSection();
+
+// Invoke F on each initialized allocation in the normal section. F is invoked
+// with a void* pointer to the data, the size of the data, and the stored
+// type-index.
+template <typename F> void forEachNormalAlloc(F);
+template <typename F> void forEachLocalAlloc(F);
 
 /*
  * The thread-local pointer to the base of RDS.
@@ -155,12 +171,6 @@ struct ClsConstant { const StringData* clsName;
                      const StringData* cnsName; };
 
 /*
- * SPropCache allocations.  These cache static properties accesses
- * within the class that declares the static property.
- */
-struct StaticProp { const StringData* name; };
-
-/*
  * StaticMethod{F,}Cache allocations.  These are used to cache static
  * method dispatch targets in a given class context.  The `name' field
  * here is a string that encodes the target class, property, and
@@ -178,12 +188,19 @@ struct Profile { TransID transId;
                  Offset bcOff;
                  const StringData* name; };
 
+/*
+ * Static class properties in Mode::Local
+ */
+
+struct SPropCache { const Class* cls;
+                    Slot slot; };
+
 using Symbol = boost::variant< StaticLocal
                              , ClsConstant
-                             , StaticProp
                              , StaticMethod
                              , StaticMethodF
                              , Profile
+                             , SPropCache
                              >;
 
 //////////////////////////////////////////////////////////////////////
@@ -191,25 +208,39 @@ using Symbol = boost::variant< StaticLocal
 enum class Mode { Normal, Local, Persistent };
 
 /*
- * Handles into Request Data Segment.  These are offsets from
- * rds::tl_base.
+ * Handles into Request Data Segment.  These are offsets from rds::tl_base.
  */
 using Handle = uint32_t;
 constexpr Handle kInvalidHandle = 0;
 
 /*
+ * Normal segment element generation numbers.
+ *
+ * The segment's current generation number will never be kInvalidGenNumber;
+ * thus, it is safe to use to mark an element as being uninitialized
+ * unconditionally.
+ */
+using GenNumber = uint8_t;
+constexpr GenNumber kInvalidGenNumber = 0;
+
+/*
+ * Tag passed to RDS handle initialization routines to indicate that the handle
+ * is known to be normal.
+ */
+enum class NormalTag {};
+
+/*
  * rds::Link<T> is a thin, typed wrapper around an rds::Handle.
  *
- * Note that nothing prevents using non-POD types with this.  But
- * nothing here is going to run the constructor.  (In the
- * non-persistent region, the space for T will be zero'd at the
- * start of each request.)
+ * Note that nothing prevents using non-POD types with this.  But nothing here
+ * is going to run the constructor.  (In the non-persistent region, the space
+ * for T will contain garbage at the start of each request.)
  *
  * Links are atomic types.  All apis may be called concurrently by
  * multiple threads, and the alloc() api guarantees only a single
  * caller will actually allocate new space in RDS.
  */
-template<class T>
+template<class T, bool normal_only = false>
 struct Link {
   explicit Link(Handle handle);
   Link(const Link&);
@@ -218,22 +249,20 @@ struct Link {
   Link& operator=(const Link& r);
 
   /*
-   * Ensure this Link is bound to an RDS allocation.  If it is not,
-   * allocate it using this Link itself as the symbol.
+   * Ensure this Link is bound to an RDS allocation.  If it is not, allocate it
+   * using this Link itself as the symbol.
    *
-   * This function internally synchronizes to avoid double-allocating.
-   * It is legal to call it repeatedly with a link that may already be
-   * bound.  The `mode' parameter and `Align' parameters are ignored
-   * if the link is already bound, and only affects the call that
-   * allocates RDS memory.
+   * This function internally synchronizes to avoid double-allocating.  It is
+   * legal to call it repeatedly with a link that may already be bound.  The
+   * `mode' parameter and `Align' parameters are ignored if the link is already
+   * bound, and only affects the call that allocates RDS memory.
    *
    * Post: bound()
    */
   template<size_t Align = alignof(T)> void bind(Mode mode = Mode::Normal);
 
   /*
-   * Dereference a Link and access its RDS memory for the current
-   * thread.
+   * Dereference a Link and access its RDS memory for the current thread.
    *
    * Pre: bound()
    */
@@ -242,8 +271,8 @@ struct Link {
   T* get() const;
 
   /*
-   * Returns: whether this Link is bound to RDS memory or not.
-   * (I.e. is its internal handle valid.)
+   * Whether this Link is bound to RDS memory or not (i.e., whether its
+   * internal handle is valid).
    */
   bool bound() const;
 
@@ -252,6 +281,61 @@ struct Link {
    */
   Handle handle() const;
 
+  /*
+   * Return the generation number of this element.
+   *
+   * Pre: bound() && isNormal()
+   */
+  GenNumber genNumber() const;
+
+  /*
+   * Return the handle for this element's generation number.
+   *
+   * Pre: bound() && isNormal()
+   */
+  Handle genNumberHandle() const;
+
+  /*
+   * Check whether this element is initialized.
+   *
+   * This is only an interesting designation for normal handles, where we need
+   * to check the generation number.  Persistent handles are expected not to be
+   * "published" until they are in some sort of initialized state (which might
+   * simply be some nullish sentinel value).
+   *
+   * Pre: bound()
+   */
+  bool isInit() const;
+  bool isInit(NormalTag) const;
+
+  /*
+   * Manually mark this element as initialized or uninitialized.
+   *
+   * Pre: bound() && isNormal()
+   */
+  void markInit() const;
+  void markUninit() const;
+
+  /*
+   * Initialize this element to `val'.
+   *
+   * Anything previously stored in the element is considered to be garbage, so
+   * it is not destructed.  initWith() can thus be used to unconditionally
+   * initialize something that might already be inited, but only if it's
+   * trivially destructible.
+   *
+   * Post: isInit()
+   */
+  void initWith(const T& val) const;
+  void initWith(T&& val) const;
+
+  /*
+   * Check which segment this element resides in.
+   *
+   * Pre: bound()
+   */
+  bool isNormal() const;
+  bool isLocal() const;
   bool isPersistent() const;
 
   /*
@@ -270,13 +354,17 @@ private:
  *
  * Mode indicates whether the memory should be placed in the persistent region
  * or not, Align indicates the alignment requirements, and extraSize allows for
- * allocating additional space beyond sizeof(T), for variable-length
- * structures.  All three arguments are ignored if there is already an
- * allocation for the Symbol---they only affect the first caller for the given
- * Symbol.
+ * allocating additional space beyond sizeof(T), for variable-length structures
+ * (not allowed for normal mode).  All three arguments are ignored if there is
+ * already an allocation for the Symbol---they only affect the first caller for
+ * the given Symbol.
+ *
+ * N indicates that the binding for `key' will always be in the "normal" RDS
+ * region; it is allowed to be true only if `key' is only ever bound with
+ * Mode::Normal.
  */
-template<class T, size_t Align = alignof(T)>
-Link<T> bind(Symbol key, Mode mode = Mode::Normal, size_t extraSize = 0);
+template<class T, bool N = false, size_t Align = alignof(T)>
+Link<T,N> bind(Symbol key, Mode mode = Mode::Normal, size_t extraSize = 0);
 
 /*
  * Try to bind to a symbol in RDS, returning an unbound link if the
@@ -291,11 +379,11 @@ Link<T> attach(Symbol key);
 /*
  * Allocate anonymous memory from RDS.
  *
- * The memory is not keyed on any Symbol, so the handle in the
- * returned Link will be unique.
+ * The memory is not keyed on any Symbol, so the handle in the returned Link
+ * will be unique.
  */
-template<class T, size_t Align = alignof(T)>
-Link<T> alloc(Mode mode = Mode::Normal);
+template<class T, size_t Align = alignof(T), bool N = false>
+Link<T,N> alloc(Mode mode = Mode::Normal);
 
 /*
  * Allocate a single anonymous bit from non-persistent RDS.  The bit
@@ -305,6 +393,20 @@ Link<T> alloc(Mode mode = Mode::Normal);
  */
 size_t allocBit();
 bool testAndSetBit(size_t bit);
+
+std::unordered_map<Handle,Symbol> reverseLinkTable();
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Retrieve the current generation number for the normal segment.
+ */
+GenNumber currentGenNumber();
+
+/*
+ * Retrieve the handle for the current generation number for the normal segment.
+ */
+Handle currentGenNumberHandle();
 
 //////////////////////////////////////////////////////////////////////
 
@@ -316,10 +418,66 @@ template<class T> T& handleToRef(Handle h);
 template<class T> T& handleToRef(void* base, Handle h);
 
 /*
- * Returns: whether the supplied handle is from the persistent RDS
- * region.
+ * Whether `handle' looks valid---i.e., whether it lies within the RDS bounds.
+ */
+bool isValidHandle(Handle handle);
+
+/*
+ * Whether `handle' is from the normal RDS region.
+ *
+ * Pre: isValidHandle(handle)
+ */
+bool isNormalHandle(Handle handle);
+
+/*
+ * Whether `handle' is from the local RDS region.
+ *
+ * Pre: isValidHandle(handle)
+ */
+bool isLocalHandle(Handle handle);
+
+/*
+ * Whether `handle' is from the persistent RDS region.
+ *
+ * Pre: isValidHandle(handle)
  */
 bool isPersistentHandle(Handle handle);
+
+/*
+ * The generation number associated with `handle'.
+ *
+ * Pre: isNormalHandle(handle)
+ */
+GenNumber genNumberOf(Handle handle);
+
+/*
+ * The handle for the generation number associated with `handle'.
+ *
+ * Pre: isNormalHandle(handle)
+ */
+Handle genNumberHandleFrom(Handle handle);
+
+/*
+ * Whether the element associated with `handle' is initialized.
+ */
+bool isHandleInit(Handle handle);
+bool isHandleInit(Handle handle, NormalTag);
+
+/*
+ * Mark the element associated with `handle' as being initialized.
+ *
+ * Pre: isNormalHandle(handle)
+ */
+void initHandle(Handle handle);
+
+/*
+ * Marks the element associated with the supplied handle as being
+ * uninitialized. This happens automatically after every request, but can be
+ * done manually with this.
+ *
+ * Pre: isNormalHandle(handle)
+ */
+void uninitHandle(Handle handle);
 
 /*
  * Used to record information about the rds handle h in the

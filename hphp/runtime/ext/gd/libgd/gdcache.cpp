@@ -55,10 +55,10 @@
 /* create a new cache */
 gdCache_head_t *
 gdCacheCreate (
-		int size,
-		gdCacheTestFn_t gdCacheTest,
-		gdCacheFetchFn_t gdCacheFetch,
-		gdCacheReleaseFn_t gdCacheRelease)
+    int size,
+    gdCacheTestFn_t gdCacheTest,
+    gdCacheFetchFn_t gdCacheFetch,
+    gdCacheReleaseFn_t gdCacheRelease)
 {
   gdCache_head_t *head;
 
@@ -98,16 +98,16 @@ gdCacheGet (gdCache_head_t * head, void *keydata)
   while (elem)
     {
       if ((*(head->gdCacheTest)) (elem->userdata, keydata))
-	{
-	  if (i)
-	    {			/* if not already most-recently-used */
-	      /* relink to top of list */
-	      prev->next = elem->next;
-	      elem->next = head->mru;
-	      head->mru = elem;
-	    }
-	  return elem->userdata;
-	}
+  {
+    if (i)
+      {     /* if not already most-recently-used */
+        /* relink to top of list */
+        prev->next = elem->next;
+        elem->next = head->mru;
+        head->mru = elem;
+      }
+    return elem->userdata;
+  }
       prevprev = prev;
       prev = elem;
       elem = elem->next;
@@ -120,11 +120,11 @@ gdCacheGet (gdCache_head_t * head, void *keydata)
       return NULL;
     }
   if (i < head->size)
-    {				/* cache still growing - add new elem */
+    {       /* cache still growing - add new elem */
       elem = (gdCache_element_t *) gdPMalloc(sizeof (gdCache_element_t));
     }
   else
-    {				/* cache full - replace least-recently-used */
+    {       /* cache full - replace least-recently-used */
       /* preveprev becomes new end of list */
       prevprev->next = NULL;
       elem = prev;

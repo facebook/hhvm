@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/native-data.h"
 
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -31,23 +32,15 @@ static NativeDataInfoMap s_nativedatainfo;
 
 size_t ndsize(const ObjectData* obj, const NativeDataInfo* ndi) {
   auto cls = obj->getVMClass();
-  if (cls == Generator::getClass() || cls == AsyncGenerator::getClass()) {
-    return (cls == Generator::getClass())
-      ? Native::data<Generator>(obj)->resumable()->size()
-      - sizeof(ObjectData)
-      : Native::data<AsyncGenerator>(obj)->resumable()->size()
-      - sizeof(ObjectData);
+  if (cls == Generator::getClass()) {
+    return Native::data<Generator>(obj)->resumable()->size() -
+           sizeof(ObjectData);
+  }
+  if (cls == AsyncGenerator::getClass()) {
+    return Native::data<AsyncGenerator>(obj)->resumable()->size() -
+           sizeof(ObjectData);
   }
   return ndsize(ndi->sz);
-}
-
-void conservativeScan(const ObjectData* obj, IMarker& mark) {
-  // Conservative scan.
-  auto h = reinterpret_cast<const Header*>(
-    Native::getNativeNode(obj, obj->getVMClass()->getNativeDataInfo())
-  );
-  assert(h->kind() == HeaderKind::NativeData);
-  mark(h, h->size() - sizeof(ObjectData));
 }
 
 void registerNativeDataInfo(const StringData* name,
@@ -58,20 +51,20 @@ void registerNativeDataInfo(const StringData* name,
                             NativeDataInfo::SweepFunc sweep,
                             NativeDataInfo::SleepFunc sleep,
                             NativeDataInfo::WakeupFunc wakeup,
-                            NativeDataInfo::ScanFunc scan) {
+                            type_scan::Index tyindex) {
   assert(s_nativedatainfo.find(name) == s_nativedatainfo.end());
   assert((sleep == nullptr && wakeup == nullptr) ||
          (sleep != nullptr && wakeup != nullptr));
   NativeDataInfo info;
   info.sz = sz;
   info.odattrs = ObjectData::Attribute::HasNativeData;
+  info.tyindex = tyindex;
   info.init = init;
   info.copy = copy;
   info.destroy = destroy;
   info.sweep = sweep;
   info.sleep = sleep;
   info.wakeup = wakeup;
-  info.scan = scan ? scan : conservativeScan;
   s_nativedatainfo[name] = info;
 }
 
@@ -96,14 +89,6 @@ NativeDataInfo* getNativeDataInfo(const StringData* name) {
  * NativeNode is a link in the NativeData sweep list for this ND block
  */
 ObjectData* nativeDataInstanceCtor(Class* cls) {
-  HPHP::Attr attrs = cls->attrs();
-  if (UNLIKELY(attrs &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
-    ObjectData::raiseAbstractClassError(cls);
-  }
-  if (cls->needInitialization()) {
-    cls->initialize();
-  }
   auto ndi = cls->getNativeDataInfo();
   size_t nativeDataSize = ndsize(ndi->sz);
   size_t nProps = cls->numDeclProperties();
@@ -113,7 +98,7 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
     MM().objMalloc(size)
   );
   node->obj_offset = nativeDataSize;
-  node->hdr.kind = HeaderKind::NativeData;
+  node->initHeader(ndi->tyindex, HeaderKind::NativeData, 0);
   auto obj = new (reinterpret_cast<char*>(node) + nativeDataSize)
              ObjectData(cls);
   assert(obj->hasExactlyOneRef());
@@ -123,9 +108,6 @@ ObjectData* nativeDataInstanceCtor(Class* cls) {
   }
   if (ndi->sweep) {
     MM().addNativeObject(node);
-  }
-  if (UNLIKELY(cls->callsCustomInstanceInit())) {
-    obj->callCustomInstanceInit();
   }
   return obj;
 }
@@ -142,8 +124,6 @@ void nativeDataInstanceCopy(ObjectData* dest, ObjectData *src) {
 }
 
 void nativeDataInstanceDtor(ObjectData* obj, const Class* cls) {
-  assert(!cls->preClass()->builtinObjSize());
-  assert(!cls->preClass()->builtinODOffset());
   obj->~ObjectData();
 
   auto const nProps = size_t{cls->numDeclProperties()};

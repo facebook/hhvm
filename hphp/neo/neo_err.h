@@ -51,7 +51,6 @@ extern NERR_TYPE NERR_MAX_RECURSION;
 typedef struct _neo_err
 {
   int error;
-  int err_stack;
   int flags;
   char desc[256];
   const char *file;
@@ -167,21 +166,6 @@ void nerr_log_error (NEOERR *nerr);
  */
 void nerr_error_string (NEOERR *nerr, NEOSTRING *str);
 
-/* function: nerr_error_traceback - returns the full trackeback of the error
- *          chain
- * description: returns the full traceback of the error chain
- * arguments: nerr - error
- *            str - string to which the data is appended
- * returns: None - errors appending to the string are ignored
- */
-void nerr_error_traceback (NEOERR *nerr, NEOSTRING *str);
-
-/* function: nerr_ignore - free the error chain
- * description: you should only call this if you actually handle the
- *              error (should I rename it?).  Free's the error chain.
- */
-void nerr_ignore (NEOERR **err);
-
 /* function: nerr_register - register a NEOERR type
  * description: register an error type.  This will assign a numeric value
  *              to the type, and keep track of the "pretty name" for it.
@@ -201,28 +185,6 @@ NEOERR *nerr_register (NERR_TYPE *err, const char *name);
  *          UnknownError if NERR_NOMEM hasn't been registered yet.
  */
 NEOERR *nerr_init (void);
-
-/* function: nerr_match - walk the NEOERR chain for a matching error ("catch")
- * description: nerr_match is used to walk the NEOERR chain and match
- *              the error against a specific error type.  In exception
- *              parlance, this would be the equivalent of "catch".
- *              Typically, you can just compare a NEOERR against STATUS_OK
- *              or just test for true if you are checking for any error.
- * arguments: nerr - the NEOERR that has an error.
- *            type - the NEOERR type, as registered with nerr_register
- * returns: true on match
- */
-int nerr_match (NEOERR *nerr, NERR_TYPE type);
-
-/* function: nerr_handle - walk the NEOERR chain for a matching error
- * description: nerr_handle is a convenience function.  It is the equivalent
- *              of nerr_match, but it will also deallocate the error chain
- *              on a match.
- * arguments: err - pointer to a pointer NEOERR
- *            type - the NEOERR type, as registered with nerr_register
- * returns: true on match
- */
-int nerr_handle (NEOERR **err, NERR_TYPE type);
 
 __END_DECLS
 

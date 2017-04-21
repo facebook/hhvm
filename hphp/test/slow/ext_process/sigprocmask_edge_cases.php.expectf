@@ -10,7 +10,4 @@ Warning: pcntl_sigprocmask(): Invalid argument in %s/test/slow/ext_process/sigpr
 bool(false)
 Invalid byref arg
 bool(true)
-array(1) {
-  [0]=>
-  int(1)
-}
+bool(true)

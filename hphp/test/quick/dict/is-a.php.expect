@@ -1,0 +1,136 @@
+====================================================
+Testing: dict(0) {
+}
+	gettype: string(4) "dict"
+	is_null: bool(false)
+	is_bool: bool(false)
+	is_int: bool(false)
+	is_float: bool(false)
+	is_numeric: bool(false)
+	is_string: bool(false)
+	is_scalar: bool(false)
+	is_array: bool(false)
+	is_vec: bool(false)
+	is_dict: bool(true)
+	is_keyset: bool(false)
+	is_object: bool(false)
+	is_resource: bool(false)
+instanceof Traversable: bool(true)
+instanceof KeyedTraversable: bool(true)
+instanceof Container: bool(true)
+instanceof KeyedContainer: bool(true)
+instanceof Indexish: bool(true)
+instanceof XHPChild: bool(true)
+instanceof ArrayAccess: bool(false)
+instanceof Vector: bool(false)
+instanceof Map: bool(false)
+instanceof Foo: bool(false)
+instanceof (string) HH\Traversable: bool(true)
+instanceof (string) HH\KeyedTraversable: bool(true)
+instanceof (string) HH\Container: bool(true)
+instanceof (string) HH\KeyedContainer: bool(true)
+instanceof (string) Indexish: bool(true)
+instanceof (string) XHPChild: bool(true)
+instanceof (string) ArrayAccess: bool(false)
+instanceof (string) Vector: bool(false)
+instanceof (string) Map: bool(false)
+instanceof (string) Foo: bool(false)
+====================================================
+Testing: dict(2) {
+  ["a"]=>
+  int(100)
+  [200]=>
+  string(1) "b"
+}
+	gettype: string(4) "dict"
+	is_null: bool(false)
+	is_bool: bool(false)
+	is_int: bool(false)
+	is_float: bool(false)
+	is_numeric: bool(false)
+	is_string: bool(false)
+	is_scalar: bool(false)
+	is_array: bool(false)
+	is_vec: bool(false)
+	is_dict: bool(true)
+	is_keyset: bool(false)
+	is_object: bool(false)
+	is_resource: bool(false)
+instanceof Traversable: bool(true)
+instanceof KeyedTraversable: bool(true)
+instanceof Container: bool(true)
+instanceof KeyedContainer: bool(true)
+instanceof Indexish: bool(true)
+instanceof XHPChild: bool(true)
+instanceof ArrayAccess: bool(false)
+instanceof Vector: bool(false)
+instanceof Map: bool(false)
+instanceof Foo: bool(false)
+instanceof (string) HH\Traversable: bool(true)
+instanceof (string) HH\KeyedTraversable: bool(true)
+instanceof (string) HH\Container: bool(true)
+instanceof (string) HH\KeyedContainer: bool(true)
+instanceof (string) Indexish: bool(true)
+instanceof (string) XHPChild: bool(true)
+instanceof (string) ArrayAccess: bool(false)
+instanceof (string) Vector: bool(false)
+instanceof (string) Map: bool(false)
+instanceof (string) Foo: bool(false)
+====================================================
+Testing for is_dict: NULL
+NO
+====================================================
+Testing for is_dict: bool(false)
+NO
+====================================================
+Testing for is_dict: int(7)
+NO
+====================================================
+Testing for is_dict: float(1.23)
+NO
+====================================================
+Testing for is_dict: string(4) "abcd"
+NO
+====================================================
+Testing for is_dict: object(stdClass)#1 (0) {
+}
+NO
+====================================================
+Testing for is_dict: array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+NO
+====================================================
+Testing for is_dict: object(HH\Vector)#1 (3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+NO
+====================================================
+Testing for is_dict: object(HH\Map)#1 (2) {
+  [100]=>
+  string(1) "a"
+  ["b"]=>
+  int(200)
+}
+NO
+====================================================
+Testing for is_dict: object(HH\Pair)#1 (2) {
+  [0]=>
+  int(123)
+  [1]=>
+  string(3) "abc"
+}
+NO
+====================================================
+Testing for is_dict: resource(4) of type (gd)
+NO

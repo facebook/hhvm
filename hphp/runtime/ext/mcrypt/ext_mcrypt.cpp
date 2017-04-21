@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,8 +31,7 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class MCrypt : public SweepableResourceData {
-public:
+struct MCrypt : SweepableResourceData {
   explicit MCrypt(MCRYPT td) : m_td(td), m_init(false) {}
 
   ~MCrypt() {
@@ -70,8 +69,7 @@ typedef enum {
   RAND
 } iv_source;
 
-class mcrypt_data {
-public:
+struct mcrypt_data {
   std::string algorithms_dir;
   std::string modes_dir;
 };
@@ -459,10 +457,10 @@ Variant HHVM_FUNCTION(mcrypt_ofb, const String& cipher, const String& key,
 }
 
 Variant HHVM_FUNCTION(mcrypt_get_block_size, const String& cipher,
-                                    const Variant& module /* = null_string */) {
+                                             const String& mode) {
   MCRYPT td = mcrypt_module_open((char*)cipher.data(),
                                  (char*)MCG(algorithms_dir).data(),
-                                 (char*)module.asCStrRef().data(),
+                                 (char*)mode.data(),
                                  (char*)MCG(modes_dir).data());
   if (td == MCRYPT_FAILED) {
     MCRYPT_OPEN_MODULE_FAILED("mcrypt_get_block_size");
@@ -728,8 +726,7 @@ bool HHVM_FUNCTION(mcrypt_generic_end, const Resource& td) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class McryptExtension final : public Extension {
- public:
+struct McryptExtension final : Extension {
   McryptExtension() : Extension("mcrypt") {}
   void moduleInit() override {
     HHVM_RC_STR(MCRYPT_3DES, "tripledes");

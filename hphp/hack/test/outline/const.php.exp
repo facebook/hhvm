@@ -1,0 +1,28 @@
+C
+  kind: class
+  id: type_id::C
+  position: line 3, characters 16-16
+  span: line 3, character 1 - line 9, character 1
+  modifiers: abstract 
+
+  FOO
+    kind: const
+    id: class_const::C::FOO
+    position: line 5, characters 5-7
+    span: line 5, character 5 - line 5, character 16
+    modifiers: 
+
+  FOO2
+    kind: const
+    id: class_const::C::FOO2
+    position: line 6, characters 5-8
+    span: line 6, character 5 - line 6, character 17
+    modifiers: 
+
+  BAR
+    kind: const
+    id: class_const::C::BAR
+    position: line 8, characters 22-24
+    span: line 8, character 22 - line 8, character 24
+    modifiers: abstract 
+

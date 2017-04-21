@@ -1,0 +1,2 @@
+<?hh
+trait nSR { use yWU < array < num , zB > , gDYtPQl , rK , arraykey > , yXNW ; use lLxTJdEkj < mixed > , sPmY < ( void , bool , mixed ) , xGCZJMl > ; use iOYljHCI ; protected function __destruct ( ) { while ( ( float ) ( ( ! ( string ) @ $hLsAJqx = $aD instanceof $fNxwvfZ ) ) ) switch ( $vXVMShO *= await $vQUjyqMg = ( $hI = 12 ) ) { case ( ( 42.42 ) ? : ( $tA ) ) : foreach ( 42.42 await as $vUEwtMh => $mLWkNmFM ) ; ; ; ; default : while ( ( ( float ) ( ( 'single string' ) ) % ( ( $oZeaa ) ) ) ) { ; ; try { } finally { } } } } }

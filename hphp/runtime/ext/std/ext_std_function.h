@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -38,12 +38,9 @@ String HHVM_FUNCTION(create_function, const String& args, const String& code);
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(func_get_arg, int arg_num);
-// __SystemLib\\func_get_arg_sl
-Variant HHVM_FUNCTION(SystemLib_func_get_arg_sl, int arg_num);
 
 Variant HHVM_FUNCTION(func_get_args);
-// __SystemLib\\func_get_args_sl
-Variant HHVM_FUNCTION(SystemLib_func_get_args_sl);
+
 Array hhvm_get_frame_args(const ActRec* ar, int offset);
 
 /**
@@ -53,8 +50,6 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset);
 Variant HHVM_FUNCTION(SystemLib_func_slice_args, int offset);
 
 int64_t HHVM_FUNCTION(func_num_args);
-// __SystemLib\\func_num_arg_
-int64_t HHVM_FUNCTION(SystemLib_func_num_arg_);
 
 ///////////////////////////////////////////////////////////////////////////////
 

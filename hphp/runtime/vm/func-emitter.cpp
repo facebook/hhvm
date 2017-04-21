@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,12 +25,10 @@
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/runtime/vm/verifier/cfg.h"
@@ -40,7 +38,6 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/debug.h"
 #include "hphp/util/trace.h"
-#include "hphp/runtime/ext_zend_compat/hhvm/zend-wrap-func.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -53,28 +50,20 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, Id id, const StringData* n)
   , m_id(id)
   , name(n)
   , top(false)
-  , returnType(folly::none)
+  , maxStackCells(0)
+  , hniReturnType(folly::none)
   , retUserType(nullptr)
-  , isClosureBody(false)
-  , isAsync(false)
-  , isGenerator(false)
-  , isPairGenerator(false)
-  , isMemoizeImpl(false)
-  , isMemoizeWrapper(false)
-  , hasMemoizeSharedProp(false)
-  , containsCalls(false)
   , docComment(nullptr)
   , originalFilename(nullptr)
   , memoizePropName(nullptr)
+  , memoizeGuardPropName(nullptr)
   , memoizeSharedPropIndex(0)
   , m_numLocals(0)
   , m_numUnnamedLocals(0)
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
-  , m_info(nullptr)
-  , m_builtinFuncPtr(nullptr)
-  , m_nativeFuncPtr(nullptr)
+  , m_numClsRefSlots(0)
   , m_ehTabSorted(false)
 {}
 
@@ -86,28 +75,20 @@ FuncEmitter::FuncEmitter(UnitEmitter& ue, int sn, const StringData* n,
   , m_id(kInvalidId)
   , name(n)
   , top(false)
-  , returnType(folly::none)
+  , maxStackCells(0)
+  , hniReturnType(folly::none)
   , retUserType(nullptr)
-  , isClosureBody(false)
-  , isAsync(false)
-  , isGenerator(false)
-  , isPairGenerator(false)
-  , isMemoizeImpl(false)
-  , isMemoizeWrapper(false)
-  , hasMemoizeSharedProp(false)
-  , containsCalls(false)
   , docComment(nullptr)
   , originalFilename(nullptr)
   , memoizePropName(nullptr)
+  , memoizeGuardPropName(nullptr)
   , memoizeSharedPropIndex(0)
   , m_numLocals(0)
   , m_numUnnamedLocals(0)
   , m_activeUnnamedLocals(0)
   , m_numIterators(0)
   , m_nextFreeIterator(0)
-  , m_info(nullptr)
-  , m_builtinFuncPtr(nullptr)
-  , m_nativeFuncPtr(nullptr)
+  , m_numClsRefSlots(0)
   , m_ehTabSorted(false)
 {}
 
@@ -163,8 +144,7 @@ static std::vector<EHEnt> toFixed(const std::vector<EHEntEmitter>& vec) {
     e.m_past = ehe.m_past;
     e.m_iterId = ehe.m_iterId;
     e.m_parentIndex = ehe.m_parentIndex;
-    e.m_fault = ehe.m_fault;
-    e.m_catches = ehe.m_catches;
+    e.m_handler = ehe.m_handler;
     ret.emplace_back(std::move(e));
   }
   return ret;
@@ -178,10 +158,17 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (preClass && preClass->attrs() & AttrInterface) {
     attrs |= AttrAbstract;
   }
-  if (attrs & AttrPersistent &&
-      ((RuntimeOption::EvalJitEnableRenameFunction && !isGenerated) ||
-       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited) ||
-       attrs & AttrInterceptable)) {
+  if (!RuntimeOption::RepoAuthoritative) {
+    if (RuntimeOption::EvalJitEnableRenameFunction) {
+      attrs |= AttrInterceptable;
+    } else {
+      attrs = Attr(attrs & ~AttrInterceptable);
+    }
+  }
+  if (attrs & AttrPersistent && !preClass &&
+      (RuntimeOption::EvalJitEnableRenameFunction ||
+       attrs & AttrInterceptable ||
+       (!RuntimeOption::RepoAuthoritative && SystemLib::s_inited))) {
     if (attrs & AttrBuiltin) {
       SystemLib::s_anyNonPersistentBuiltins = true;
     }
@@ -191,15 +178,20 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     // In non-RepoAuthoritative mode, any function could get a VarEnv because
     // of evalPHPDebugger.
     attrs |= AttrMayUseVV;
-  } else if (RuntimeOption::EvalJitEnableRenameFunction &&
-      !name->empty() &&
-      !Func::isSpecial(name) &&
-      !isClosureBody) {
+  } else if ((attrs & AttrInterceptable) &&
+             !name->empty() &&
+             !Func::isSpecial(name) &&
+             !isClosureBody) {
     // intercepted functions need to pass all args through
     // to the interceptee
     attrs |= AttrMayUseVV;
   }
-  if (isVariadic()) { attrs |= AttrVariadicParam; }
+  if (isVariadic()) {
+    attrs |= AttrVariadicParam;
+    if (isVariadicByRef()) {
+      attrs |= AttrVariadicByRef;
+    }
+  }
 
   if (!containsCalls) { attrs |= AttrPhpLeafFn; }
 
@@ -209,12 +201,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->m_isPreFunc = !!preClass;
 
   bool const needsExtendedSharedData =
-    m_info ||
-    m_builtinFuncPtr ||
-    m_nativeFuncPtr ||
-    (attrs & AttrNative) ||
+    isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
-    past - base >= Func::kSmallDeltaLimit;
+    past - base >= Func::kSmallDeltaLimit ||
+    m_numClsRefSlots > 3;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -228,26 +218,24 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (auto const ex = f->extShared()) {
     ex->m_hasExtendedSharedData = true;
-    ex->m_builtinFuncPtr = m_builtinFuncPtr;
-    ex->m_nativeFuncPtr = m_nativeFuncPtr;
-    ex->m_info = m_info;
+    ex->m_builtinFuncPtr = nullptr;
+    ex->m_nativeFuncPtr = nullptr;
     ex->m_line2 = line2;
     ex->m_past = past;
     ex->m_returnByValue = false;
+    ex->m_isMemoizeWrapper = false;
+    ex->m_actualNumClsRefSlots = m_numClsRefSlots;
   }
 
   std::vector<Func::ParamInfo> fParams;
-  bool usesDoubles = false;
   for (unsigned i = 0; i < params.size(); ++i) {
     Func::ParamInfo pi = params[i];
-    if (pi.builtinType == KindOfDouble) usesDoubles = true;
     if (pi.isVariadic()) {
       pi.builtinType = KindOfArray;
     }
     f->appendParam(params[i].byRef, pi, fParams);
   }
 
-  f->shared()->m_returnType = returnType;
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -264,9 +252,15 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_retUserType = retUserType;
   f->shared()->m_originalFilename = originalFilename;
   f->shared()->m_isGenerated = isGenerated;
+  f->shared()->m_repoReturnType = repoReturnType;
+  f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
+  f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
+  f->shared()->m_numClsRefSlots = m_numClsRefSlots;
 
-  if (attrs & AttrNative) {
+  if (isNative) {
     auto const ex = f->extShared();
+
+    ex->m_hniReturnType = hniReturnType;
 
     auto const& info = Native::GetBuiltinFunction(
       name,
@@ -274,46 +268,38 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       f->isStatic()
     );
 
-    auto const nif = info.ptr;
-    if (nif) {
-      Attr dummy = AttrNone;
-      int nativeAttrs = parseNativeAttributes(dummy);
-      if (nativeAttrs & Native::AttrZendCompat) {
-        ex->m_nativeFuncPtr = nif;
-        ex->m_builtinFuncPtr = zend_wrap_func;
-      } else {
-        if (parseNativeAttributes(dummy) & Native::AttrActRec) {
-          ex->m_builtinFuncPtr = nif;
-          ex->m_nativeFuncPtr = nullptr;
-        } else {
-          ex->m_nativeFuncPtr = nif;
-          ex->m_builtinFuncPtr = Native::getWrapper(m_pce, usesDoubles);
+    Attr dummy = AttrNone;
+    auto nativeAttributes = parseNativeAttributes(dummy);
+    Native::getFunctionPointers(
+      info,
+      nativeAttributes,
+      ex->m_builtinFuncPtr,
+      ex->m_nativeFuncPtr
+    );
 
-          if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
-            ex->m_returnByValue = true;
-          }
-          int extra =
-            (attrs & AttrNumArgs ? 1 : 0) +
-            (isMethod() ? 1 : 0);
-          assert(info.sig.args.size() == params.size() + extra);
-          for (auto i = params.size(); i--; ) {
-            switch (info.sig.args[extra + i]) {
-              case Native::NativeSig::Type::ObjectArg:
-              case Native::NativeSig::Type::StringArg:
-              case Native::NativeSig::Type::ArrayArg:
-              case Native::NativeSig::Type::ResourceArg:
-              case Native::NativeSig::Type::OutputArg:
-              case Native::NativeSig::Type::MixedTV:
-                fParams[i].nativeArg = true;
-                break;
-              default:
-                break;
-            }
-          }
+    if (ex->m_nativeFuncPtr &&
+        !(nativeAttributes & Native::AttrZendCompat)) {
+      if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
+        ex->m_returnByValue = true;
+      }
+      int extra =
+        (attrs & AttrNumArgs ? 1 : 0) +
+        (isMethod() ? 1 : 0);
+      assert(info.sig.args.size() == params.size() + extra);
+      for (auto i = params.size(); i--; ) {
+        switch (info.sig.args[extra + i]) {
+          case Native::NativeSig::Type::ObjectArg:
+          case Native::NativeSig::Type::StringArg:
+          case Native::NativeSig::Type::ArrayArg:
+          case Native::NativeSig::Type::ResourceArg:
+          case Native::NativeSig::Type::OutputArg:
+          case Native::NativeSig::Type::MixedTV:
+            fParams[i].nativeArg = true;
+            break;
+          default:
+            break;
         }
       }
-    } else {
-      ex->m_builtinFuncPtr = Native::unimplementedWrapper;
     }
   }
 
@@ -330,16 +316,21 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (base)
     (past)
     (attrs)
-    (returnType)
+    (hniReturnType)
+    (repoReturnType)
+    (repoAwaitedReturnType)
     (docComment)
     (m_numLocals)
     (m_numIterators)
+    (m_numClsRefSlots)
     (maxStackCells)
     (isClosureBody)
     (isAsync)
     (isGenerator)
     (isPairGenerator)
     (containsCalls)
+    (isNative)
+    (isMemoizeWrapper)
 
     (params)
     (m_localNames)
@@ -350,6 +341,8 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (retTypeConstraint)
     (retUserType)
     (originalFilename)
+
+    (dynCallWrapperId)
     ;
 }
 
@@ -462,7 +455,7 @@ void FuncEmitter::sortFPITab(bool load) {
     fpitab[i].m_parentIndex = -1;
     fpitab[i].m_fpiDepth = 1;
     for (int j = i - 1; j >= 0; j--) {
-      if (fpitab[j].m_fcallOff > fpitab[i].m_fcallOff) {
+      if (fpitab[j].m_fpiEndOff >= fpitab[i].m_fpiEndOff) {
         fpitab[i].m_parentIndex = j;
         fpitab[i].m_fpiDepth = fpitab[j].m_fpiDepth + 1;
         break;
@@ -473,6 +466,7 @@ void FuncEmitter::sortFPITab(bool load) {
       // the AR itself. Fix it here.
       fpitab[i].m_fpOff += m_numLocals
         + m_numIterators * kNumIterCells
+        + clsRefCountToCells(m_numClsRefSlots)
         + (fpitab[i].m_fpiDepth) * kNumActRecCells;
     }
   }
@@ -515,6 +509,8 @@ void FuncEmitter::setEHTabIsSorted() {
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
  *  "ZendCompat": Use zend compat wrapper
+ *  "ReadsCallerFrame": Function might read from the caller's frame
+ *  "WritesCallerFrame": Function might write to the caller's frame
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
@@ -526,7 +522,9 @@ static const StaticString
   s_noinjection("NoInjection"),
   s_zendcompat("ZendCompat"),
   s_numargs("NumArgs"),
-  s_opcodeimpl("OpCodeImpl");
+  s_opcodeimpl("OpCodeImpl"),
+  s_readsCallerFrame("ReadsCallerFrame"),
+  s_writesCallerFrame("WritesCallerFrame");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
@@ -534,7 +532,7 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   auto it = userAttributes.find(s_native.get());
   assert(it != userAttributes.end());
   const TypedValue userAttr = it->second;
-  assert(userAttr.m_type == KindOfArray);
+  assert(isArrayType(userAttr.m_type));
   for (ArrayIter it(userAttr.m_data.parr); it; ++it) {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
@@ -557,76 +555,18 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         attrs_ |= AttrNumArgs;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
         ret |= Native::AttrOpCodeImpl;
+      } else if (userAttrStrVal.get()->isame(s_readsCallerFrame.get())) {
+        attrs_ |= AttrReadsCallerFrame;
+      } else if (userAttrStrVal.get()->isame(s_writesCallerFrame.get())) {
+        attrs_ |= AttrWritesCallerFrame;
       }
     }
   }
   return ret;
 }
 
-void FuncEmitter::setBuiltinFunc(const ClassInfo::MethodInfo* info,
-                                 BuiltinFunction bif, BuiltinFunction nif,
-                                 Offset base_) {
-  assert(info);
-  m_info = info;
-  Attr attrs_ = AttrBuiltin;
-  if (info->attribute & ClassInfo::RefVariableArguments) {
-    attrs_ |= AttrVariadicByRef;
-  }
-  if (info->attribute & ClassInfo::IsReference) {
-    attrs_ |= AttrReference;
-  }
-  if (info->attribute & ClassInfo::NoInjection) {
-    attrs_ |= AttrNoInjection;
-  }
-  if (info->attribute & ClassInfo::NoFCallBuiltin) {
-    attrs_ |= AttrNoFCallBuiltin;
-  }
-  if (info->attribute & ClassInfo::ParamCoerceModeNull) {
-    attrs_ |= AttrParamCoerceModeNull;
-  } else if (info->attribute & ClassInfo::ParamCoerceModeFalse) {
-    attrs_ |= AttrParamCoerceModeFalse;
-  }
-  if (pce()) {
-    if (info->attribute & ClassInfo::IsStatic) {
-      attrs_ |= AttrStatic;
-    }
-    if (info->attribute & ClassInfo::IsFinal) {
-      attrs_ |= AttrFinal;
-    }
-    if (info->attribute & ClassInfo::IsAbstract) {
-      attrs_ |= AttrAbstract;
-    }
-    if (info->attribute & ClassInfo::IsPrivate) {
-      attrs_ |= AttrPrivate;
-    } else if (info->attribute & ClassInfo::IsProtected) {
-      attrs_ |= AttrProtected;
-    } else {
-      attrs_ |= AttrPublic;
-    }
-  } else if (info->attribute & ClassInfo::AllowOverride) {
-    attrs_ |= AttrAllowOverride;
-  }
-
-  returnType = info->returnType;
-  docComment = makeStaticString(info->docComment);
-  setLocation(0, 0);
-  setBuiltinFunc(bif, nif, attrs_, base_);
-
-  for (unsigned i = 0; i < info->parameters.size(); ++i) {
-    // For builtin only, we use a dummy ParamInfo
-    FuncEmitter::ParamInfo pi;
-    const auto& parameter = info->parameters[i];
-    pi.byRef = parameter->attribute & ClassInfo::IsReference;
-    pi.builtinType = parameter->argType;
-    appendParam(makeStaticString(parameter->name), pi);
-  }
-}
-
-void FuncEmitter::setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
-                                 Attr attrs_, Offset base_) {
-  assert(bif);
-  m_builtinFuncPtr = bif;
-  m_nativeFuncPtr = nif;
+void FuncEmitter::setBuiltinFunc(Attr attrs_, Offset base_) {
+  isNative = true;
   base = base_;
   top = true;
   // TODO: Task #1137917: See if we can avoid marking most builtins with

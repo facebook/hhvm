@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -101,7 +101,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   if (!orig || !orig->datefmt()) {
     s_intl_error->setError(U_ILLEGAL_ARGUMENT_ERROR,
                            "Cannot clone unconstructed IntlDateFormatter");
-    throw getException("%s", s_intl_error->getErrorMessage(false).c_str());
+    throwException("%s", s_intl_error->getErrorMessage(false).c_str());
   }
   if (m_date_fmt) {
     udat_close(m_date_fmt);
@@ -110,7 +110,7 @@ void IntlDateFormatter::setDateFormatter(const IntlDateFormatter *orig) {
   m_date_fmt = udat_clone(orig->datefmt(), &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "datefmt_clone: date formatter clone failed");
-    throw getException("%s", s_intl_error->getErrorMessage().c_str());
+    throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
 }
 

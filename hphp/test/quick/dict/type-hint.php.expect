@@ -1,0 +1,298 @@
+====================================================
+dict(0) {
+}
+ERROR: string(77) "Argument 1 passed to takes_vec() must be an instance of HH\vec, HH\dict given"
+ERROR: string(78) "Value returned from function takes_vec() must be of type HH\vec, HH\dict given"
+ERROR: string(83) "Argument 1 passed to takes_keyset() must be an instance of HH\keyset, HH\dict given"
+ERROR: string(84) "Value returned from function takes_keyset() must be of type HH\keyset, HH\dict given"
+ERROR: string(79) "Argument 1 passed to takes_array1() must be an instance of array, HH\dict given"
+ERROR: string(80) "Value returned from function takes_array1() must be of type array, HH\dict given"
+ERROR: string(66) "Argument 1 to takes_array2() must be of type ?array, HH\dict given"
+ERROR: string(81) "Value returned from function takes_array2() must be of type ?array, HH\dict given"
+ERROR: string(76) "Argument 1 passed to takes_bool() must be an instance of bool, HH\dict given"
+ERROR: string(77) "Value returned from function takes_bool() must be of type bool, HH\dict given"
+ERROR: string(80) "Argument 1 passed to takes_string() must be an instance of string, HH\dict given"
+ERROR: string(81) "Value returned from function takes_string() must be of type string, HH\dict given"
+ERROR: string(74) "Argument 1 passed to takes_foo() must be an instance of Foo, HH\dict given"
+ERROR: string(75) "Value returned from function takes_foo() must be of type Foo, HH\dict given"
+ERROR: string(93) "Argument 1 passed to takes_array_access() must implement interface ArrayAccess, HH\dict given"
+ERROR: string(92) "Value returned from function takes_array_access() must be of type ArrayAccess, HH\dict given"
+ERROR: string(93) "Argument 1 passed to takes_vector_container() must be an instance of HH\Vector, HH\dict given"
+ERROR: string(94) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\dict given"
+ERROR: string(87) "Argument 1 passed to takes_map_container() must be an instance of HH\Map, HH\dict given"
+ERROR: string(88) "Value returned from function takes_map_container() must be of type HH\Map, HH\dict given"
+dict(0) {
+}
+====================================================
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["b"]=>
+  int(2)
+}
+ERROR: string(77) "Argument 1 passed to takes_vec() must be an instance of HH\vec, HH\dict given"
+ERROR: string(78) "Value returned from function takes_vec() must be of type HH\vec, HH\dict given"
+ERROR: string(83) "Argument 1 passed to takes_keyset() must be an instance of HH\keyset, HH\dict given"
+ERROR: string(84) "Value returned from function takes_keyset() must be of type HH\keyset, HH\dict given"
+ERROR: string(79) "Argument 1 passed to takes_array1() must be an instance of array, HH\dict given"
+ERROR: string(80) "Value returned from function takes_array1() must be of type array, HH\dict given"
+ERROR: string(66) "Argument 1 to takes_array2() must be of type ?array, HH\dict given"
+ERROR: string(81) "Value returned from function takes_array2() must be of type ?array, HH\dict given"
+ERROR: string(76) "Argument 1 passed to takes_bool() must be an instance of bool, HH\dict given"
+ERROR: string(77) "Value returned from function takes_bool() must be of type bool, HH\dict given"
+ERROR: string(80) "Argument 1 passed to takes_string() must be an instance of string, HH\dict given"
+ERROR: string(81) "Value returned from function takes_string() must be of type string, HH\dict given"
+ERROR: string(74) "Argument 1 passed to takes_foo() must be an instance of Foo, HH\dict given"
+ERROR: string(75) "Value returned from function takes_foo() must be of type Foo, HH\dict given"
+ERROR: string(93) "Argument 1 passed to takes_array_access() must implement interface ArrayAccess, HH\dict given"
+ERROR: string(92) "Value returned from function takes_array_access() must be of type ArrayAccess, HH\dict given"
+ERROR: string(93) "Argument 1 passed to takes_vector_container() must be an instance of HH\Vector, HH\dict given"
+ERROR: string(94) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\dict given"
+ERROR: string(87) "Argument 1 passed to takes_map_container() must be an instance of HH\Map, HH\dict given"
+ERROR: string(88) "Value returned from function takes_map_container() must be of type HH\Map, HH\dict given"
+dict(2) {
+  [1]=>
+  string(1) "a"
+  ["b"]=>
+  int(2)
+}
+====================================================
+NULL
+ERROR: string(77) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, null given"
+ERROR: string(78) "Value returned from function takes_dict1() must be of type HH\dict, null given"
+ERROR: string(77) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, null given"
+ERROR: string(78) "Value returned from function takes_dict2() must be of type HH\dict, null given"
+ERROR: string(77) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, null given"
+ERROR: string(78) "Value returned from function takes_dict3() must be of type HH\dict, null given"
+ERROR: string(77) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, null given"
+ERROR: string(78) "Value returned from function takes_dict4() must be of type HH\dict, null given"
+NULL
+====================================================
+bool(false)
+ERROR: string(77) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, bool given"
+ERROR: string(78) "Value returned from function takes_dict1() must be of type HH\dict, bool given"
+ERROR: string(77) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, bool given"
+ERROR: string(78) "Value returned from function takes_dict2() must be of type HH\dict, bool given"
+ERROR: string(77) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, bool given"
+ERROR: string(78) "Value returned from function takes_dict3() must be of type HH\dict, bool given"
+ERROR: string(77) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, bool given"
+ERROR: string(78) "Value returned from function takes_dict4() must be of type HH\dict, bool given"
+ERROR: string(64) "Argument 1 to takes_dict5() must be of type ?HH\dict, bool given"
+ERROR: string(79) "Value returned from function takes_dict5() must be of type ?HH\dict, bool given"
+bool(false)
+====================================================
+int(717)
+ERROR: string(76) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, int given"
+ERROR: string(77) "Value returned from function takes_dict1() must be of type HH\dict, int given"
+ERROR: string(76) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, int given"
+ERROR: string(77) "Value returned from function takes_dict2() must be of type HH\dict, int given"
+ERROR: string(76) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, int given"
+ERROR: string(77) "Value returned from function takes_dict3() must be of type HH\dict, int given"
+ERROR: string(76) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, int given"
+ERROR: string(77) "Value returned from function takes_dict4() must be of type HH\dict, int given"
+ERROR: string(63) "Argument 1 to takes_dict5() must be of type ?HH\dict, int given"
+ERROR: string(78) "Value returned from function takes_dict5() must be of type ?HH\dict, int given"
+int(717)
+====================================================
+float(1.234)
+ERROR: string(78) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, float given"
+ERROR: string(79) "Value returned from function takes_dict1() must be of type HH\dict, float given"
+ERROR: string(78) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, float given"
+ERROR: string(79) "Value returned from function takes_dict2() must be of type HH\dict, float given"
+ERROR: string(78) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, float given"
+ERROR: string(79) "Value returned from function takes_dict3() must be of type HH\dict, float given"
+ERROR: string(78) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, float given"
+ERROR: string(79) "Value returned from function takes_dict4() must be of type HH\dict, float given"
+ERROR: string(65) "Argument 1 to takes_dict5() must be of type ?HH\dict, float given"
+ERROR: string(80) "Value returned from function takes_dict5() must be of type ?HH\dict, float given"
+float(1.234)
+====================================================
+string(6) "string"
+ERROR: string(79) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, string given"
+ERROR: string(80) "Value returned from function takes_dict1() must be of type HH\dict, string given"
+ERROR: string(79) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, string given"
+ERROR: string(80) "Value returned from function takes_dict2() must be of type HH\dict, string given"
+ERROR: string(79) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, string given"
+ERROR: string(80) "Value returned from function takes_dict3() must be of type HH\dict, string given"
+ERROR: string(79) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, string given"
+ERROR: string(80) "Value returned from function takes_dict4() must be of type HH\dict, string given"
+ERROR: string(66) "Argument 1 to takes_dict5() must be of type ?HH\dict, string given"
+ERROR: string(81) "Value returned from function takes_dict5() must be of type ?HH\dict, string given"
+string(6) "string"
+====================================================
+object(stdClass)#2 (0) {
+}
+ERROR: string(81) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, stdClass given"
+ERROR: string(82) "Value returned from function takes_dict1() must be of type HH\dict, stdClass given"
+ERROR: string(81) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, stdClass given"
+ERROR: string(82) "Value returned from function takes_dict2() must be of type HH\dict, stdClass given"
+ERROR: string(81) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, stdClass given"
+ERROR: string(82) "Value returned from function takes_dict3() must be of type HH\dict, stdClass given"
+ERROR: string(81) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, stdClass given"
+ERROR: string(82) "Value returned from function takes_dict4() must be of type HH\dict, stdClass given"
+ERROR: string(68) "Argument 1 to takes_dict5() must be of type ?HH\dict, stdClass given"
+ERROR: string(83) "Value returned from function takes_dict5() must be of type ?HH\dict, stdClass given"
+object(stdClass)#2 (0) {
+}
+====================================================
+array(0) {
+}
+ERROR: string(78) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict1() must be of type HH\dict, array given"
+ERROR: string(78) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict2() must be of type HH\dict, array given"
+ERROR: string(78) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict3() must be of type HH\dict, array given"
+ERROR: string(78) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict4() must be of type HH\dict, array given"
+ERROR: string(65) "Argument 1 to takes_dict5() must be of type ?HH\dict, array given"
+ERROR: string(80) "Value returned from function takes_dict5() must be of type ?HH\dict, array given"
+array(0) {
+}
+====================================================
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+ERROR: string(78) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict1() must be of type HH\dict, array given"
+ERROR: string(78) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict2() must be of type HH\dict, array given"
+ERROR: string(78) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict3() must be of type HH\dict, array given"
+ERROR: string(78) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, array given"
+ERROR: string(79) "Value returned from function takes_dict4() must be of type HH\dict, array given"
+ERROR: string(65) "Argument 1 to takes_dict5() must be of type ?HH\dict, array given"
+ERROR: string(80) "Value returned from function takes_dict5() must be of type ?HH\dict, array given"
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+====================================================
+vec(0) {
+}
+ERROR: string(79) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict1() must be of type HH\dict, HH\vec given"
+ERROR: string(79) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict2() must be of type HH\dict, HH\vec given"
+ERROR: string(79) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict3() must be of type HH\dict, HH\vec given"
+ERROR: string(79) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict4() must be of type HH\dict, HH\vec given"
+ERROR: string(66) "Argument 1 to takes_dict5() must be of type ?HH\dict, HH\vec given"
+ERROR: string(81) "Value returned from function takes_dict5() must be of type ?HH\dict, HH\vec given"
+vec(0) {
+}
+====================================================
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+ERROR: string(79) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict1() must be of type HH\dict, HH\vec given"
+ERROR: string(79) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict2() must be of type HH\dict, HH\vec given"
+ERROR: string(79) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict3() must be of type HH\dict, HH\vec given"
+ERROR: string(79) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, HH\vec given"
+ERROR: string(80) "Value returned from function takes_dict4() must be of type HH\dict, HH\vec given"
+ERROR: string(66) "Argument 1 to takes_dict5() must be of type ?HH\dict, HH\vec given"
+ERROR: string(81) "Value returned from function takes_dict5() must be of type ?HH\dict, HH\vec given"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+keyset(0) {
+}
+ERROR: string(82) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict1() must be of type HH\dict, HH\keyset given"
+ERROR: string(82) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict2() must be of type HH\dict, HH\keyset given"
+ERROR: string(82) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict3() must be of type HH\dict, HH\keyset given"
+ERROR: string(82) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict4() must be of type HH\dict, HH\keyset given"
+ERROR: string(69) "Argument 1 to takes_dict5() must be of type ?HH\dict, HH\keyset given"
+ERROR: string(84) "Value returned from function takes_dict5() must be of type ?HH\dict, HH\keyset given"
+keyset(0) {
+}
+====================================================
+keyset(2) {
+  string(1) "a"
+  int(1)
+}
+ERROR: string(82) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict1() must be of type HH\dict, HH\keyset given"
+ERROR: string(82) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict2() must be of type HH\dict, HH\keyset given"
+ERROR: string(82) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict3() must be of type HH\dict, HH\keyset given"
+ERROR: string(82) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, HH\keyset given"
+ERROR: string(83) "Value returned from function takes_dict4() must be of type HH\dict, HH\keyset given"
+ERROR: string(69) "Argument 1 to takes_dict5() must be of type ?HH\dict, HH\keyset given"
+ERROR: string(84) "Value returned from function takes_dict5() must be of type ?HH\dict, HH\keyset given"
+keyset(2) {
+  string(1) "a"
+  int(1)
+}
+====================================================
+object(HH\Vector)#2 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+ERROR: string(82) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, HH\Vector given"
+ERROR: string(83) "Value returned from function takes_dict1() must be of type HH\dict, HH\Vector given"
+ERROR: string(82) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, HH\Vector given"
+ERROR: string(83) "Value returned from function takes_dict2() must be of type HH\dict, HH\Vector given"
+ERROR: string(82) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, HH\Vector given"
+ERROR: string(83) "Value returned from function takes_dict3() must be of type HH\dict, HH\Vector given"
+ERROR: string(82) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, HH\Vector given"
+ERROR: string(83) "Value returned from function takes_dict4() must be of type HH\dict, HH\Vector given"
+ERROR: string(69) "Argument 1 to takes_dict5() must be of type ?HH\dict, HH\Vector given"
+ERROR: string(84) "Value returned from function takes_dict5() must be of type ?HH\dict, HH\Vector given"
+object(HH\Vector)#2 (3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+====================================================
+object(HH\Map)#2 (2) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}
+ERROR: string(79) "Argument 1 passed to takes_dict1() must be an instance of HH\dict, HH\Map given"
+ERROR: string(80) "Value returned from function takes_dict1() must be of type HH\dict, HH\Map given"
+ERROR: string(79) "Argument 1 passed to takes_dict2() must be an instance of HH\dict, HH\Map given"
+ERROR: string(80) "Value returned from function takes_dict2() must be of type HH\dict, HH\Map given"
+ERROR: string(79) "Argument 1 passed to takes_dict3() must be an instance of HH\dict, HH\Map given"
+ERROR: string(80) "Value returned from function takes_dict3() must be of type HH\dict, HH\Map given"
+ERROR: string(79) "Argument 1 passed to takes_dict4() must be an instance of HH\dict, HH\Map given"
+ERROR: string(80) "Value returned from function takes_dict4() must be of type HH\dict, HH\Map given"
+ERROR: string(66) "Argument 1 to takes_dict5() must be of type ?HH\dict, HH\Map given"
+ERROR: string(81) "Value returned from function takes_dict5() must be of type ?HH\dict, HH\Map given"
+object(HH\Map)#2 (2) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}

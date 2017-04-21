@@ -1,2 +1,3 @@
-fun Tstring,  -> Tint
+File "inst_meth6.php", line 20, characters 3-13:
+  (function(string $s): int)
 No errors

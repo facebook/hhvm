@@ -1,0 +1,6 @@
+File "list_generic_assign.php", line 5, characters 3-19:
+Invalid assignment (Typing[4110])
+File "list_generic_assign.php", line 5, characters 3-14:
+This is a tuple
+File "list_generic_assign.php", line 4, characters 18-18:
+It is incompatible with a value of generic type T

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,6 +33,7 @@ Generator::Generator()
   : m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
+  , m_delegate(make_tv<KindOfNull>())
 {
 }
 
@@ -44,11 +45,12 @@ Generator::~Generator() {
   assert(getState() != State::Running);
   tvRefcountedDecRef(m_key);
   tvRefcountedDecRef(m_value);
+  tvRefcountedDecRef(m_delegate);
 
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
-  frame_free_locals_inl_no_hook<false>(ar, ar->func()->numLocals());
+  frame_free_locals_inl_no_hook(ar, ar->func()->numLocals());
 }
 
 Generator& Generator::operator=(const Generator& other) {
@@ -66,19 +68,20 @@ Generator& Generator::operator=(const Generator& other) {
   m_index = other.m_index;
   cellSet(other.m_key, m_key);
   cellSet(other.m_value, m_value);
+  cellSet(other.m_delegate, m_delegate);
   return *this;
 }
 
 void Generator::copyVars(const ActRec* srcFp) {
   const auto dstFp = actRec();
   const auto func = dstFp->func();
-  assert(srcFp->func() == dstFp->func());
+  assertx(srcFp->func() == dstFp->func());
 
   for (Id i = 0; i < func->numLocals(); ++i) {
     tvDupFlattenVars(frame_local(srcFp, i), frame_local(dstFp, i));
   }
 
-  if (dstFp->hasThis()) {
+  if (func->cls() && dstFp->hasThis()) {
     dstFp->getThis()->incRefCount();
   }
 
@@ -95,7 +98,7 @@ void Generator::copyVars(const ActRec* srcFp) {
 
 void Generator::yield(Offset resumeOffset,
                       const Cell* key, const Cell value) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
   if (key) {
@@ -115,7 +118,7 @@ void Generator::yield(Offset resumeOffset,
 }
 
 void Generator::done(TypedValue tv) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   cellSetNull(m_key);
   cellSet(*tvToCell(&tv), m_value);
   setState(State::Done);
@@ -146,25 +149,22 @@ String HHVM_METHOD(Generator, getOrigFuncName) {
 }
 
 String HHVM_METHOD(Generator, getCalledClass) {
-  Generator* gen = Native::data<Generator>(this_);
-  String called_class;
+  auto const gen = Native::data<Generator>(this_);
+  auto const ar = gen->actRec();
 
-  if (gen->actRec()->hasThis()) {
-    called_class =
-      gen->actRec()->getThis()->getVMClass()->name()->data();
-  } else if (gen->actRec()->hasClass()) {
-    called_class = gen->actRec()->getClass()->name()->data();
-  } else {
-    called_class = empty_string();
+  if (ar->func()->cls()) {
+    auto const cls = ar->hasThis() ?
+      ar->getThis()->getVMClass() : ar->getClass();
+
+    return cls->nameStr();
   }
 
-  return called_class;
+  return empty_string();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class GeneratorExtension final : public Extension {
-public:
+struct GeneratorExtension final : Extension {
   GeneratorExtension() : Extension("generator") {}
 
   void moduleInit() override {

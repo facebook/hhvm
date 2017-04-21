@@ -1,0 +1,30 @@
+string(7) "beep: 1"
+string(7) "beep: 1"
+string(7) "beep: 1"
+string(7) "beep: 2"
+string(7) "beep: 2"
+string(7) "beep: 2"
+string(9) "beep: 100"
+string(9) "beep: 100"
+string(9) "beep: 100"
+string(7) "beep: 3"
+string(7) "beep: 3"
+string(7) "beep: 3"
+string(7) "beep: 3"
+string(7) "beep: 3"
+string(12) "Make wrapper"
+string(15) "beep: <Wrapper>"
+string(15) "Destroy wrapper"
+string(13) "beep: <array>"
+string(6) "Hello!"
+array(4) {
+  [0]=>
+  string(8) "STR: 120"
+  [1]=>
+  string(8) "STR: 140"
+  [2]=>
+  string(6) "STR: 2"
+  [4]=>
+  string(6) "STR: 4"
+}
+string(7) "Goodbye"

@@ -1,0 +1,2 @@
+<?hh
+namespace { interface bTLYcl < - gDG > { } async function cAVIJ ( << rRjM ( ) >> ( function ( this :: qF ) : self :: bLjasSI ) $dRoND = ( $tLOjHlzs ++ ) ) : ? int { return ( ( ( ( ( int ) ( ( $hPrf ) ) << ( ( $fK ) ) ) ? : ( ( 42.42 ) ) !== ( ( 42.42 ) ) ) ) . ( ( ( await ( $bHp -- ) instanceof $qUgF ) ) ) ) > ( ( array ( ) ) ) ; } << cFIRfyUia >> trait gDBRQU { use oSJuOIS < yCMq , void , arraykey , float , dEhmKvGc > , sUl , iLWtG , dIBWr ; } type sNqJxDT = resource ; use wHruU as zZTrU ; newtype bEB = arraykey ; }

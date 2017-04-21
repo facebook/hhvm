@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,13 +31,13 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class BaseGenerator
 
-class BaseGenerator {
-public:
+struct BaseGenerator {
   enum class State : uint8_t {
     Created = 0,  // generator was created but never iterated
     Started = 1,  // generator was iterated but not currently running
-    Running = 2,  // generator is currently being iterated
-    Done    = 3   // generator has finished its execution
+    Priming = 2,  // generator is advancing to the first yield
+    Running = 3,  // generator is currently being iterated
+    Done    = 4   // generator has finished its execution
   };
 
   static constexpr ptrdiff_t resumableOff() {
@@ -78,13 +78,18 @@ public:
       sizeof(ObjectData);
   }
 
+  template<class T>
   static ObjectData* Alloc(Class* cls, size_t totalSize) {
     auto const node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
-    const size_t objOff = totalSize - sizeof(ObjectData);
-    node->obj_offset = objOff;
-    node->hdr.kind = HeaderKind::NativeData;
-    auto const obj = new (reinterpret_cast<char*>(node) + objOff)
-                     ObjectData(cls, ObjectData::HasNativeData);
+    auto const obj_offset = totalSize - sizeof(ObjectData);
+    auto const objmem = reinterpret_cast<char*>(node) + obj_offset;
+    auto const datamem = objmem - sizeof(T);
+    auto const ar_off = (char*)((T*)datamem)->actRec() - (char*)node;
+    auto const tyindex = type_scan::getIndexForMalloc<T>();
+    node->obj_offset = obj_offset;
+    node->initHeader(tyindex, HeaderKind::NativeData, ar_off);
+    auto const obj = new (objmem) ObjectData(cls, ObjectData::HasNativeData);
+    assert((void*)obj == (void*)objmem);
     assert(obj->hasExactlyOneRef());
     assert(obj->noDestruct());
     return obj;
@@ -106,6 +111,10 @@ public:
     m_state = state;
   }
 
+  bool isRunning() const {
+    return getState() == State::Priming || getState() == State::Running;
+  }
+
   void startedCheck() {
     if (getState() == State::Created) {
       throw_exception(
@@ -118,18 +127,26 @@ public:
     if (checkStarted) {
       startedCheck();
     }
-    if (getState() == State::Running) {
-      throw_exception(
-        SystemLib::AllocExceptionObject("Generator is already running")
-      );
+    switch (getState()) {
+      case State::Created:
+        setState(State::Priming);
+        break;
+      case State::Started:
+        setState(State::Running);
+        break;
+      // For our purposes priming is basically running.
+      case State::Priming:
+      case State::Running:
+        throw_exception(
+          SystemLib::AllocExceptionObject("Generator is already running")
+        );
+        break;
+      case State::Done:
+        throw_exception(
+          SystemLib::AllocExceptionObject("Generator is already finished")
+        );
+        break;
     }
-    if (getState() == State::Done) {
-      throw_exception(
-        SystemLib::AllocExceptionObject("Generator is already finished")
-      );
-    }
-    assert(getState() == State::Created || getState() == State::Started);
-    setState(State::Running);
   }
 
   Resumable m_resumable;
@@ -142,8 +159,7 @@ static_assert(offsetof(BaseGenerator, m_resumable) == 0,
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Generator
-class Generator final : public BaseGenerator {
-public:
+struct Generator final : BaseGenerator {
   explicit Generator();
   ~Generator();
   Generator& operator=(const Generator& other);
@@ -164,8 +180,9 @@ public:
   static ObjectData* allocClone(ObjectData *obj) {
     auto const genDataSz = Native::getNativeNode(
                              obj, getClass()->getNativeDataInfo())->obj_offset;
-    auto const clone = BaseGenerator::Alloc(getClass(),
-                         genDataSz + sizeof(ObjectData));
+    auto const clone = BaseGenerator::Alloc<Generator>(
+        getClass(), genDataSz + sizeof(ObjectData)
+    );
     UNUSED auto const genData = new (Native::data<Generator>(clone))
                                 Generator();
     return clone;
@@ -187,6 +204,7 @@ public:
   int64_t m_index;
   Cell m_key;
   Cell m_value;
+  TypedValue m_delegate;
 
   static Class* s_class;
   static const StaticString s_className;
@@ -200,7 +218,7 @@ ObjectData* Generator::Create(const ActRec* fp, size_t numSlots,
   assert(fp->func()->isNonAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(Generator), frameSz);
-  auto const obj = BaseGenerator::Alloc(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<Generator>(s_class, genSz);
   auto const genData = new (Native::data<Generator>(obj)) Generator();
   genData->resumable()->initialize<clone>(fp,
                                           resumeAddr,

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ String StringUtil::StripHTMLTags(const String& input,
 // splits/joins
 
 Variant StringUtil::Explode(const String& input, const String& delimiter,
-                            int limit /* = 0x7FFFFFFF */) {
+                            int64_t limit /* = PHP_INT_MAX */) {
   if (delimiter.empty()) {
     throw_invalid_argument("delimiter: (empty)");
     return false;
@@ -88,7 +88,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
       std::vector<int> positions;
       int len = delimiter.size();
       int pos0 = 0;
-      int found = 0;
+      int64_t found = 0;
       do {
         positions.push_back(pos0);
         positions.push_back(pos - pos0);
@@ -102,8 +102,8 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
         positions.push_back(input.size() - pos0);
         found++;
       }
-      int iMax = (found + limit) << 1;
-      for (int i = 0; i < iMax; i += 2) {
+      uint64_t nelems = std::max(found + limit, (int64_t)0);
+      for (uint64_t i = 0; i < nelems * 2; i += 2) {
         ret.append(input.substr(positions[i], positions[i+1]));
       }
     } // else we have negative limit and delimiter not found
@@ -122,17 +122,16 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   int size = getContainerSize(items);
   if (size == 0) return empty_string();
 
-  String* sitems = (String*)req::malloc(size * sizeof(String));
-  int len = 0;
-  int lenDelim = delim.size();
-  int i = 0;
+  req::vector<String> sitems;
+  sitems.reserve(size);
+  size_t len = 0;
+  size_t lenDelim = delim.size();
   for (ArrayIter iter(items); iter; ++iter) {
-    new (&sitems[i]) String(iter.second().toString());
-    len += sitems[i].size() + lenDelim;
-    i++;
+    sitems.emplace_back(iter.second().toString());
+    len += sitems.back().size() + lenDelim;
   }
   len -= lenDelim; // always one delimiter less than count of items
-  assert(i == size);
+  assert(sitems.size() == size);
 
   String s = String(len, ReserveString);
   char *buffer = s.mutableData();
@@ -142,7 +141,6 @@ String StringUtil::Implode(const Variant& items, const String& delim,
   int init_len = init_str.size();
   memcpy(p, init_str.data(), init_len);
   p += init_len;
-  sitems[0].~String();
   for (int i = 1; i < size; i++) {
     String &item = sitems[i];
     memcpy(p, sdelim, lenDelim);
@@ -150,9 +148,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     int lenItem = item.size();
     memcpy(p, item.data(), lenItem);
     p += lenItem;
-    sitems[i].~String();
   }
-  req::free(sitems);
   assert(p - buffer == len);
   s.setSize(len);
   return s;

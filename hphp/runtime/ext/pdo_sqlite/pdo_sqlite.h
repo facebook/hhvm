@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -44,8 +44,10 @@ struct PDOSqliteError {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct PDOSqliteResource;
+
 struct PDOSqliteConnection : PDOConnection {
-  friend class PDOSqliteResource;
+  friend struct PDOSqliteResource;
 
   PDOSqliteConnection();
   virtual ~PDOSqliteConnection();
@@ -69,23 +71,10 @@ struct PDOSqliteConnection : PDOConnection {
   bool fetchErr(PDOStatement *stmt, Array &info) override;
   int getAttribute(int64_t attr, Variant &value) override;
 
-  bool createFunction(const String& name,
-                      const Variant& callback,
-                      int argcount);
-  void clearFunctions();
-
   int handleError(const char *file, int line, PDOStatement *stmt = nullptr);
-
-  /////////////////////////////////////////////////////////////////////////////
-
-private:
-  struct UDF : SQLite3::UserDefinedFunc {
-    std::string name;
-  };
 
   sqlite3 *m_db;
   PDOSqliteError m_einfo;
-  std::vector<std::shared_ptr<UDF>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,7 +88,20 @@ struct PDOSqliteResource : PDOResource {
     return std::dynamic_pointer_cast<PDOSqliteConnection>(m_conn);
   }
 
-  void sweep() override;
+  bool createFunction(const String& name,
+                      const Variant& callback,
+                      int argcount);
+
+  DECLARE_RESOURCE_ALLOCATION(PDOSqliteResource);
+
+private:
+
+  struct UDF : SQLite3::UserDefinedFunc {
+    // nb: UserDefinedFunc contains req-heap pointers
+    std::string name;
+  };
+
+  req::vector<req::unique_ptr<UDF>> m_udfs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

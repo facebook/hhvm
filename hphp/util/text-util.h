@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,15 +21,12 @@
 
 #include <string>
 #include <vector>
+
+#include <folly/Range.h>
+
 #include "hphp/util/portability.h"
 
 namespace HPHP {
-
-/**
- * Split a string into a list of tokens by character delimiter.
- */
-void split(char delimiter, const char *s, std::vector<std::string> &out,
-           bool ignoreEmpty = false);
 
 /**
  * Replace all occurrences of "from" substring to "to" string.
@@ -39,12 +36,12 @@ void replaceAll(std::string &s, const char *from, const char *to);
 /**
  * Change an ASCII string to lower case.
  */
-std::string toLower(const std::string &s);
+std::string toLower(folly::StringPiece s);
 
 /**
  * Change an ASCII string to upper case.
  */
-std::string toUpper(const std::string &s);
+std::string toUpper(folly::StringPiece s);
 
 /**
  * Convert a full pathname of a file to an identifier.
@@ -54,13 +51,13 @@ std::string getIdentifier(const std::string &fileName);
 /**
  * Duplicate a buffer of given size, null-terminate the result.
  */
-const void *buffer_duplicate(const void *src, int size);
+const void *buffer_duplicate(const void *src, size_t size);
 
 /**
  * Append buf2 to buf2, null-terminate the result.
  */
-const void *buffer_append(const void *buf1, int size1,
-                          const void *buf2, int size2);
+const void *buffer_append(const void *buf1, size_t size1,
+                          const void *buf2, size_t size2);
 
 /**
  * printf into a std::string.

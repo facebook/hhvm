@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include <netinet/in.h>
+#include <folly/portability/Sockets.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,8 +27,7 @@ namespace HPHP {
 // configuration, then is used to test candidate addresses to see if they
 // fall into one of the forbidden networks for a particular request type.
 
-class IpBlockMap {
-public:
+struct IpBlockMap {
   // Reads a textual IPv4 or IPv6 address, possibly including a bit count,
   // and turns it into an IPv6 address and a number of significant bits.
   // IPv4 addresses are turned into mapped IPv6 addresses.
@@ -47,8 +46,7 @@ public:
   // node has a flag to indicate whether matching addresses are allowed or
   // disallowed. The value at the deepest trie node that matches a prefix of
   // the candidate address is the value for that address's network.
-  class BinaryPrefixTrie {
-  public:
+  struct BinaryPrefixTrie {
     explicit BinaryPrefixTrie(bool allow);
 
     // Returns the "allow" value of the longest matching prefix of the

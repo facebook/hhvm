@@ -1,0 +1,4 @@
+<?php
+if (!function_exists('posix_access')) {
+  echo "skip";
+}

@@ -14,11 +14,11 @@ from lookup import lookup_litstr
 
 
 #------------------------------------------------------------------------------
-# HPHP::Op -> int8_t table helpers.
+# HPHP::Op -> int16_t table helpers.
 
 def as_idx(op):
-    """Cast an HPHP::Op to a uint8_t."""
-    return op.cast(T('uint8_t'))
+    """Cast an HPHP::Op to a uint16_t."""
+    return op.cast(T('uint16_t'))
 
 @memoized
 def op_table(name):
@@ -31,11 +31,19 @@ def op_table(name):
 
 @memoized
 def iva_imm_types():
-    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA']]
+    return [V('HPHP::' + t) for t in ['IVA', 'LA', 'IA', 'CAR', 'CAW']]
 
 @memoized
 def vec_imm_types():
-    return [V('HPHP::' + t) for t in ['MA', 'BLA', 'ILA', 'VSA', 'SLA']]
+    return [V('HPHP::' + t) for t in ['BLA', 'ILA', 'VSA', 'SLA']]
+
+@memoized
+def cell_loc_mcodes():
+    return [V('HPHP::' + t) for t in ['MEC', 'MPC', 'MEL', 'MPL']]
+
+@memoized
+def str_imm_mcodes():
+    return [V('HPHP::' + t) for t in ['MET', 'MPT', 'MQT']]
 
 @memoized
 def vec_elm_sizes():
@@ -78,13 +86,33 @@ class HHBC(object):
         encoding."""
 
         pc = pc.cast(T('uint8_t').pointer())
-        raw_val = ~pc.dereference()
+        raw_val = (pc.dereference()).cast(T('size_t'))
 
         if (raw_val == 0xff):
-            byte = ~pc.dereference()
+            pc += 1
+            byte = pc.dereference()
             raw_val += byte
 
-        return raw_val.cast(T('HPHP::Op'))
+        return [raw_val.cast(T('HPHP::Op')), 2 if raw_val >= 0xff else 1]
+
+    @staticmethod
+    def decode_iva(pc):
+        """Decode the IVA immediate at `pc', returning a dict with 'value' and
+        'size' keys."""
+
+        info = {}
+
+        small = pc.cast(T('unsigned char').pointer()).dereference()
+
+        if small & 0x80:
+            large = pc.cast(T('uint32_t').pointer()).dereference()
+            info['value'] = ((large & 0xffffff00) >> 1) | (large & 0x7f);
+            info['size'] = 4
+        else:
+            info['value'] = small
+            info['size'] = 1
+
+        return info
 
     @staticmethod
     def op_name(op):
@@ -95,10 +123,15 @@ class HHBC(object):
         return op_table(table_name).cast(table_type)[as_idx(op)]
 
     @staticmethod
-    def op_size(op):
-        """Return the encoding size of the HPHP::Op `op'."""
+    def try_lookup_litstr(imm):
+        """Return the literal string corresponding to the litstr ID `imm'.  If
+        we can't resolve it, just return `imm'."""
 
-        return 1 if op.cast(T('size_t')) < 0xff else 2
+        if unit.curunit is None:
+            return imm
+
+        litstr = lookup_litstr(imm, unit.curunit)
+        return string_data_val(rawptr(litstr))
 
     ##
     # Opcode immediate info.
@@ -114,8 +147,15 @@ class HHBC(object):
     def imm_type(op, arg):
         """Return the type of the arg'th immediate for HPHP::Op `op'."""
 
-        table_fmt = 'HPHP::immType(HPHP::Op, int)::arg%dTypes'
-        immtype = op_table(table_fmt % arg)[as_idx(op)]
+        op_count = V('HPHP::Op_count')
+
+        table_name = 'HPHP::immType(HPHP::Op, int)::argTypes'
+        # This looks like an int8_t[4][op_count], but in fact, it's actually an
+        # int8_t[op_count][4], as desired.
+        table_type = T('int8_t').array(4 - 1).array(op_count - 1).pointer()
+        table = op_table(table_name).cast(table_type).dereference()
+
+        immtype = table[as_idx(op)][arg]
         return immtype.cast(T('HPHP::ArgType'))
 
     @staticmethod
@@ -126,26 +166,52 @@ class HHBC(object):
         info = {}
 
         if immtype in iva_imm_types():
-            imm = ptr.cast(T('unsigned char').pointer()).dereference()
-
-            if imm & 0x1:
-                iva_type = T('int32_t')
-            else:
-                iva_type = T('unsigned char')
-
-            imm = ptr.cast(iva_type.pointer()).dereference()
-            info['size'] = iva_type.sizeof
-            info['value'] = imm >> 1
+            info = HHBC.decode_iva(ptr)
 
         elif immtype in vec_imm_types():
-            prefixes = 2 if immtype == V('HPHP::MA') else 1
             elm_size = vec_elm_sizes()[vec_imm_types().index(immtype)]
 
             num_elms = ptr.cast(T('int32_t').pointer()).dereference()
 
-            info['size'] = prefixes * T('int32_t').sizeof + \
-                           elm_size * num_elms
+            info['size'] = T('int32_t').sizeof + elm_size * num_elms
             info['value'] = '<vector>'
+
+        elif immtype == V('HPHP::KA'):
+            ptr = ptr.cast(T('unsigned char').pointer())
+
+            mcode = ptr.dereference().cast(T('HPHP::MemberCode'))
+            ptr += 1
+
+            imm_info = {}
+
+            if mcode in cell_loc_mcodes():
+                imm_info = HHBC.decode_iva(ptr)
+                imm_info['kind'] = 'iva'
+
+            elif mcode == V('HPHP::MEI'):
+                t = T('int64_t')
+                imm_info['size'] = t.sizeof
+                imm_info['kind'] = 'int64'
+                imm_info['value'] = ptr.cast(t.pointer()).dereference()
+
+            elif mcode in str_imm_mcodes():
+                t = T('HPHP::Id')
+                imm_info['size'] = t.sizeof
+                imm_info['kind'] = 'litstr'
+                raw = ptr.cast(t.pointer()).dereference()
+                imm_info['value'] = HHBC.try_lookup_litstr(raw)
+
+            elif mcode == V('HPHP::MW'):
+                imm_info['size'] = 0
+                imm_info['kind'] = 'iva'
+                imm_info['value'] = 0
+
+            info['size'] = 1 + imm_info['size']
+            info['value'] = '%s:%s=%s' % (
+                str(mcode)[len('HPHP::'):],
+                imm_info['kind'],
+                str(imm_info['value'])
+            )
 
         elif immtype == V('HPHP::RATA'):
             imm = ptr.cast(T('unsigned char').pointer()).dereference()
@@ -164,6 +230,27 @@ class HHBC(object):
 
             info['value'] = str(tag)[len('HPHP::RepoAuthType::Tag::'):]
 
+        elif immtype == V('HPHP::LAR'):
+            first = ptr.cast(T('unsigned char').pointer()).dereference()
+            if first & 0x1:
+                first_type = T('int32_t')
+            else:
+                first_type = T('unsigned char')
+
+            count = (ptr.cast(T('unsigned char').pointer())
+                     + first_type.sizeof).dereference()
+            if count & 0x1:
+                count_type = T('int32_t')
+            else:
+                count_type = T('unsigned char')
+
+            first = ptr.cast(first_type.pointer()).dereference()
+            count = (ptr.cast(T('unsigned char').pointer())
+                     + first_type.sizeof).cast(count_type.pointer()).dereference()
+
+            info['size'] = first_type.sizeof + count_type.sizeof
+            info['value'] = 'L:' + str(first >> 1) + '+' + str(count >> 1)
+
         else:
             table_name = 'HPHP::immSize(unsigned char const*, int)::argTypeToSizes'
             if immtype >= 0:
@@ -177,9 +264,8 @@ class HHBC(object):
                 info['value'] = au['u_' + str(immtype)[6:]]
 
                 # Try to print out literal strings.
-                if immtype == V('HPHP::SA') and unit.curunit is not None:
-                    litstr = lookup_litstr(info['value'], unit.curunit)
-                    info['value'] = litstr['m_data']
+                if immtype == V('HPHP::SA'):
+                    info['value'] = HHBC.try_lookup_litstr(info['value'])
             else:
                 info['size'] = 0
                 info['value'] = None
@@ -191,13 +277,12 @@ class HHBC(object):
     #
     @staticmethod
     def instr_info(bc):
-        op = HHBC.decode_op(bc)
+        op, instrlen = HHBC.decode_op(bc)
 
-        if op <= V('HPHP::OpLowInvalid') or op >= V('HPHP::OpHighInvalid'):
-            print('Invalid Op %d @ %p' % (op, bc))
-            return 1
+        if op <= 0 or op >= V('HPHP::Op_count'):
+            print('hhx: Invalid Op %d @ 0x%x' % (op, bc))
+            return None
 
-        instrlen = HHBC.op_size(op)
         imms = []
 
         for i in xrange(0, int(HHBC.num_imms(op))):
@@ -259,9 +344,15 @@ remains where it left off after the previous call.
 
         for i in xrange(0, self.count):
             instr = HHBC.instr_info(self.bcpos)
+            if instr is None:
+                print('hhx: Bytecode dump failed')
+                break
+
             name = HHBC.op_name(instr['op']).string()
 
-            out = "%s+%d: %s" % (str(bcstart), self.bcoff, name)
+            start_addr = bcstart.cast(T('void').pointer())
+
+            out = "%s+%d: %s" % (str(start_addr), self.bcoff, name)
             for imm in instr['imms']:
                 if type(imm) is str:
                     pass

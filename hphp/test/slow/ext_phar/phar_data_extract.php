@@ -29,7 +29,7 @@ function getFileCount($path) {
   return $size;
 }
 
-$directory = dirname(__FILE__)."/tgz";
+$directory = __DIR__."/tgz";
 $iterator = new DirectoryIterator($directory);
 $files = array();
 foreach ($iterator as $fileinfo) {

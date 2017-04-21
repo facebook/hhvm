@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,14 +23,15 @@
 #include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
-class ArrayData;
-class c_Pair;
-class c_Vector;
-class c_ImmVector;
-class c_Map;
-class c_ImmMap;
-class c_Set;
-class c_ImmSet;
+struct ArrayData;
+struct Class;
+struct c_Pair;
+struct c_Vector;
+struct c_ImmVector;
+struct c_Map;
+struct c_ImmMap;
+struct c_Set;
+struct c_ImmSet;
 }
 
 namespace HPHP { namespace collections {
@@ -78,13 +79,13 @@ inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
   return allocFromArrayFunc(ctype)(arr);
 }
 
+/*
+ * Creates a Pair. Takes ownership of the TypedValues passed in.
+ */
+ObjectData* allocPair(TypedValue c1, TypedValue c2);
+
 /* Preallocate room for {sz} elements in the Collection */
 void reserve(ObjectData* obj, int64_t sz);
-
-/* Used by Collections Literals syntax for Maps */
-void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val);
-/* Used by Collections Literals syntax for non-Maps */
-void initElem(ObjectData* obj, TypedValue* val);
 
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Cloing
@@ -139,7 +140,7 @@ TypedValue* atRw(ObjectData* obj, const TypedValue* key);
  * `empty` needs to exist and not be falsy
  */
 bool contains(ObjectData* obj, const Variant& offset);
-bool isset(ObjectData* obj, const TypedValue* key);
+bool (isset)(ObjectData* obj, const TypedValue* key);
 bool empty(ObjectData* obj, const TypedValue* key);
 
 /* Remove element {key} from Collection {obj} */

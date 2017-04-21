@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,8 +27,7 @@ namespace HPHP {
 /**
  * Lock instrumentation for mutex stats.
  */
-class LockProfiler {
-public:
+struct LockProfiler {
   typedef void (*PFUNC_PROFILE)(const std::string &stack, int64_t elapsed_us);
   static PFUNC_PROFILE s_pfunc_profile;
   static bool s_profile;
@@ -45,8 +44,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename MutexT>
-class BaseConditionalLock {
-public:
+struct BaseConditionalLock {
   BaseConditionalLock(MutexT &mutex, bool condition, bool profile = true)
     : m_profiler(profile), m_mutex(mutex), m_acquired(false) {
     if (condition) {
@@ -65,8 +63,7 @@ private:
   bool         m_acquired;
 };
 
-class ConditionalLock : public BaseConditionalLock<Mutex> {
-public:
+struct ConditionalLock : BaseConditionalLock<Mutex> {
   ConditionalLock(Mutex &mutex,
                   bool condition, bool profile = true)
     : BaseConditionalLock<Mutex>(mutex, condition, profile)
@@ -90,8 +87,7 @@ public:
  *   // inside lock
  * } // unlock here
  */
-class Lock : public ConditionalLock {
-public:
+struct Lock : ConditionalLock {
   explicit Lock(Mutex &mutex, bool profile = true)
     : ConditionalLock(mutex, true, profile) {}
   explicit Lock(Synchronizable *obj, bool profile = true)
@@ -100,8 +96,7 @@ public:
     : ConditionalLock(obj, true, profile) {}
 };
 
-class ScopedUnlock {
-public:
+struct ScopedUnlock {
   explicit ScopedUnlock(Mutex &mutex) : m_mutex(mutex) {
     m_mutex.unlock();
   }
@@ -120,8 +115,7 @@ private:
   Mutex &m_mutex;
 };
 
-class SimpleConditionalLock : public BaseConditionalLock<SimpleMutex> {
-public:
+struct SimpleConditionalLock : BaseConditionalLock<SimpleMutex> {
   SimpleConditionalLock(SimpleMutex &mutex,
                         bool condition, bool profile = true)
     : BaseConditionalLock<SimpleMutex>(mutex, condition, profile)
@@ -132,8 +126,7 @@ public:
   }
 };
 
-class SimpleLock : public SimpleConditionalLock {
-public:
+struct SimpleLock : SimpleConditionalLock {
   explicit SimpleLock(SimpleMutex &mutex, bool profile = true)
     : SimpleConditionalLock(mutex, true, profile) {}
 };

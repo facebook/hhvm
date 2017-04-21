@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -21,8 +21,11 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
-#include <math.h>
+#include <cmath>
+
+#ifndef _MSC_VER
 #include <monetary.h>
+#endif
 
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -32,70 +35,13 @@
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
-#ifdef __APPLE__
-#ifndef isnan
-#define isnan(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isnanf((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isnand((double)(x))  \
-  : __inline_isnan ((long double)(x)))
-#endif
-
-#ifndef isinf
-#define isinf(x)  \
-  ( sizeof (x) == sizeof(float )  ? __inline_isinff((float)(x)) \
-  : sizeof (x) == sizeof(double)  ? __inline_isinfd((double)(x))  \
-  : __inline_isinf ((long double)(x)))
-#endif
-#endif
-
+#include <folly/portability/String.h>
 
 #define PHP_QPRINT_MAXL 75
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
-
-bool string_substr_check(int len, int &f, int &l) {
-  if (l < 0 && -l > len) {
-    return false;
-  } else if (l > len) {
-    l = len;
-  }
-
-  if (f > len) {
-    return false;
-  } else if (f < 0 && -f > len) {
-    f = 0;
-  }
-
-  if (l < 0 && (l + len - f) < 0) {
-    return false;
-  }
-
-  // if "from" position is negative, count start position from the end
-  if (f < 0) {
-    f += len;
-    if (f < 0) {
-      f = 0;
-    }
-  }
-  if (f >= len) {
-    return false;
-  }
-
-  // if "length" position is negative, set it to the length
-  // needed to stop that many chars from the end of the string
-  if (l < 0) {
-    l += len - f;
-    if (l < 0) {
-      l = 0;
-    }
-  }
-  if ((unsigned int)f + (unsigned int)l > (unsigned int)len) {
-    l = len - f;
-  }
-  return true;
-}
 
 void string_charmask(const char *sinput, int len, char *mask) {
   const unsigned char *input = (unsigned char *)sinput;
@@ -678,7 +624,8 @@ static int string_tag_find(const char *tag, int len, const char *set) {
     return 0;
   }
 
-  norm = (char *)req::malloc(len+1);
+  norm = (char *)req::malloc_noptrs(len+1);
+  SCOPE_EXIT { req::free(norm); };
 
   n = norm;
   t = tag;
@@ -719,7 +666,6 @@ static int string_tag_find(const char *tag, int len, const char *set) {
   } else {
     done=0;
   }
-  req::free(norm);
   return done;
 }
 
@@ -774,7 +720,7 @@ String string_strip_tags(const char *s, const int len,
     allowString.setSize(allow_len);
     abuf = allowString.data();
 
-    tbuf = (char *)req::malloc(PHP_TAG_BUF_SIZE+1);
+    tbuf = (char *)req::malloc_noptrs(PHP_TAG_BUF_SIZE+1);
     tp = tbuf;
   } else {
     abuf = nullptr;
@@ -784,7 +730,8 @@ String string_strip_tags(const char *s, const int len,
   auto move = [&pos, &tbuf, &tp]() {
     if (tp - tbuf >= PHP_TAG_BUF_SIZE) {
       pos = tp - tbuf;
-      tbuf = (char*)req::realloc(tbuf, (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
+      tbuf = (char*)req::realloc_noptrs(tbuf,
+                                        (tp - tbuf) + PHP_TAG_BUF_SIZE + 1);
       tp = tbuf + pos;
     }
   };
@@ -993,43 +940,6 @@ String string_strip_tags(const char *s, const int len,
   }
 
   retString.setSize(rp - rbuf);
-  return retString;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-String string_addslashes(const char *str, int length) {
-  assert(str);
-  if (length == 0) {
-    return String();
-  }
-
-  String retString((length << 1) + 1, ReserveString);
-  char *new_str = retString.mutableData();
-  const char *source = str;
-  const char *end = source + length;
-  char *target = new_str;
-
-  while (source < end) {
-    switch (*source) {
-    case '\0':
-      *target++ = '\\';
-      *target++ = '0';
-      break;
-    case '\'':
-    case '\"':
-    case '\\':
-      *target++ = '\\';
-      /* break is missing *intentionally* */
-    default:
-      *target++ = *source;
-      break;
-    }
-
-    source++;
-  }
-
-  retString.setSize(target - new_str);
   return retString;
 }
 
@@ -1402,7 +1312,9 @@ String string_uudecode(const char *src, int src_len) {
 ///////////////////////////////////////////////////////////////////////////////
 // base64
 
-static const char base64_table[] = {
+namespace {
+
+const char base64_table[] = {
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
   'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -1410,9 +1322,9 @@ static const char base64_table[] = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', '\0'
 };
 
-static const char base64_pad = '=';
+const char base64_pad = '=';
 
-static const short base64_reverse_table[256] = {
+const short base64_reverse_table[256] = {
   -2, -2, -2, -2, -2, -2, -2, -2, -2, -1, -1, -2, -2, -1, -2, -2,
   -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
   -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 62, -2, -2, -2, 63,
@@ -1431,17 +1343,18 @@ static const short base64_reverse_table[256] = {
   -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2
 };
 
-static String php_base64_encode(const unsigned char *str, int length) {
-  const unsigned char *current = str;
-  unsigned char *p;
-  unsigned char *result;
-
+folly::Optional<int> maxEncodedSize(int length) {
   if ((length + 2) < 0 || ((length + 2) / 3) >= (1 << (sizeof(int) * 8 - 2))) {
-    return String();
+    return folly::none;
   }
+  return ((length + 2) / 3) * 4;
+}
 
-  String ret(((length + 2) / 3) * 4, ReserveString);
-  p = result = (unsigned char *)ret.mutableData();
+// outstr must be at least maxEncodedSize(length) bytes
+size_t php_base64_encode(const unsigned char *str, int length,
+                         unsigned char* outstr) {
+  const unsigned char *current = str;
+  unsigned char *p = outstr;
 
   while (length > 2) { /* keep going until we have less than 24 bits */
     *p++ = base64_table[current[0] >> 2];
@@ -1466,17 +1379,17 @@ static String php_base64_encode(const unsigned char *str, int length) {
       *p++ = base64_pad;
     }
   }
-  ret.setSize(p - result);
-  return ret;
+  return p - outstr;
 }
 
-static String php_base64_decode(const char *str, int length, bool strict) {
+// outstr must be at least length bytes
+ssize_t php_base64_decode(const char *str, int length, bool strict,
+                         unsigned char* outstr) {
   const unsigned char *current = (unsigned char*)str;
   int ch, i = 0, j = 0, k;
   /* this sucks for threaded environments */
 
-  String retString(length, ReserveString);
-  unsigned char* result = (unsigned char*)retString.mutableData();
+  unsigned char* result = outstr;
 
   /* run through the whole string, converting as we go */
   while ((ch = *current++) != '\0' && length-- > 0) {
@@ -1490,7 +1403,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
             continue;
           }
         }
-        return String();
+        return -1;
       }
       continue;
     }
@@ -1500,7 +1413,7 @@ static String php_base64_decode(const char *str, int length, bool strict) {
       /* a space or some other separator character, we simply skip over */
       continue;
     } else if (ch == -2) {
-      return String();
+      return -1;
     }
 
     switch(i % 4) {
@@ -1527,23 +1440,61 @@ static String php_base64_decode(const char *str, int length, bool strict) {
   if (ch == base64_pad) {
     switch(i % 4) {
     case 1:
-      return String();
+      return -1;
     case 2:
       k++;
     case 3:
       result[k] = 0;
     }
   }
-  retString.setSize(j);
-  return retString;
+  return j;
 }
 
-String string_base64_encode(const char *input, int len) {
-  return php_base64_encode((unsigned char *)input, len);
 }
 
-String string_base64_decode(const char *input, int len, bool strict) {
-  return php_base64_decode(input, len, strict);
+String string_base64_encode(const char* input, int len) {
+  if (auto const wantedSize = maxEncodedSize(len)) {
+    String ret(*wantedSize, ReserveString);
+    auto actualSize = php_base64_encode((unsigned char*)input, len,
+                                        (unsigned char*)ret.mutableData());
+    ret.setSize(actualSize);
+    return ret;
+  }
+  return String();
+}
+
+String string_base64_decode(const char* input, int len, bool strict) {
+  String ret(len, ReserveString);
+  auto actualSize = php_base64_decode(input, len, strict,
+                                      (unsigned char*)ret.mutableData());
+  if (actualSize < 0) return String();
+
+  ret.setSize(actualSize);
+  return ret;
+}
+
+std::string base64_encode(const char* input, int len) {
+  if (auto const wantedSize = maxEncodedSize(len)) {
+    std::string ret;
+    ret.resize(*wantedSize);
+    auto actualSize = php_base64_encode((unsigned char*)input, len,
+                                        (unsigned char*)ret.data());
+    ret.resize(actualSize);
+    return ret;
+  }
+  return std::string();
+}
+
+std::string base64_decode(const char* input, int len, bool strict) {
+  if (!len) return std::string();
+  std::string ret;
+  ret.resize(len);
+  auto actualSize = php_base64_decode(input, len, strict,
+                                      (unsigned char*)ret.data());
+  if (!actualSize) return std::string();
+
+  ret.resize(actualSize);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1740,8 +1691,10 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
     return -1;
   }
 
-  p1 = (int*)req::malloc((l2+1) * sizeof(int));
-  p2 = (int*)req::malloc((l2+1) * sizeof(int));
+  p1 = (int*)req::malloc_noptrs((l2+1) * sizeof(int));
+  SCOPE_EXIT { req::free(p1); };
+  p2 = (int*)req::malloc_noptrs((l2+1) * sizeof(int));
+  SCOPE_EXIT { req::free(p2); };
 
   for(i2=0;i2<=l2;i2++) {
     p1[i2] = i2*cost_ins;
@@ -1759,8 +1712,6 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
   }
 
   c0=p1[l2];
-  req::free(p1);
-  req::free(p2);
   return c0;
 }
 
@@ -2632,7 +2583,7 @@ String string_convert_hebrew_string(const String& inStr,
   tmp = str;
   block_start=block_end=0;
 
-  heb_str = (char *) req::malloc(str_len + 1);
+  heb_str = (char *) req::malloc_noptrs(str_len + 1);
   SCOPE_EXIT { req::free(heb_str); };
   target = heb_str+str_len;
   *target = 0;
@@ -2768,17 +2719,6 @@ String string_convert_hebrew_string(const String& inStr,
   brokenStr.setSize(str_len);
   return brokenStr;
 }
-
-#if defined(__APPLE__)
-
-  void *memrchr(const void *s, int c, size_t n) {
-    for (const char *p = (const char *)s + n - 1; p >= s; p--) {
-      if (*p == c) return (void *)p;
-    }
-    return nullptr;
-  }
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

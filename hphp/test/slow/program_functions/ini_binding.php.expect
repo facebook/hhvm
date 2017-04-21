@@ -2,6 +2,7 @@ string(1) "1"
 string(0) ""
 string(3) "256"
 string(3) "100"
+string(34) "#^/pattern.that/will/be.formatted#"
 string(4) "4100"
 string(0) ""
 string(1) "1"
@@ -11,8 +12,10 @@ string(1) "1"
 string(0) ""
 string(0) ""
 string(4) "1000"
-string(1) "2"
+string(2) "15"
 string(14) "/tmp/apc_store"
+string(0) ""
+bool(false)
 bool(false)
 bool(false)
 bool(false)

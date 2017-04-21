@@ -35,8 +35,12 @@
  *
  * `Map`s support `$m[$k]` style syntax for getting and setting values by key.
  * `Map`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and they
- * provide similar semantics as arrays. Adding an element using `$m[] = ..`
- * syntax is not supported.
+ * provide similar semantics as arrays. Adding an element with square bracket
+ * syntax `[]` is supported either by providing a key between the brackets or
+ * a `Pair` on the right-hand side. e.g.,
+ * `$m[$k] = $v` is supported
+ * `$m[] = Pair {$k, $v}` is supported
+ * `$m[] = $v` is not supported.
  *
  * `Map`s do not support iterating while new keys are being added or elements
  * are being removed. When a new key is added or an element is removed, all
@@ -47,7 +51,7 @@
  * passed by reference, of if a `Map` is used with `foreach` by reference, an
  * exception will be thrown.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 
@@ -251,22 +255,22 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
     Map<Tk, Tv>;
 
   /**
-   *  Returns a `Map` where each value is a `Pair` that combines the value
-   *  of the current `Map` and the provided `Traversable`.
+   * Returns a `Map` where each value is a `Pair` that combines the value
+   * of the current `Map` and the provided `Traversable`.
    *
-   *  If the number of values of the current `Map` are not equal to the number
-   *  of elements in the `Traversable`, then only the combined elements up to
-   *  and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of values of the current `Map` are not equal to the number
+   * of elements in the `Traversable`, then only the combined elements up to
+   * and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  The keys associated with the current `Map` remain unchanged in the
-   *  returned `Map`.
+   * The keys associated with the current `Map` remain unchanged in the
+   * returned `Map`.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `Map`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `Map`.
    *
-   *  @return - The `Map` that combines the values of the current `Map` with
-   *            the provided `Traversable`.
+   * @return - The `Map` that combines the values of the current `Map` with
+   *           the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Map<Tk, Pair<Tv, Tu>>;
 
@@ -415,7 +419,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * If the key is not present, an exception is thrown. If you don't want an
    * exception to be thrown, use `get()` instead.
    *
-   * `$v = $map->at($k)` is semantically equivalent to `$v = $map[$k]`.
+   * `$v = $map->at($k)` is equivalent to `$v = $map[$k]`.
    *
    * @param $k - the key from which to retrieve the value.
    *
@@ -441,20 +445,20 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * Stores a value into the current `Map` with the specified key, overwriting
    * the previous value associated with the key.
    *
-   * If the key is not present, an exception is thrown. If you want to add a
-   * value even if a key is not present, use `add()`.
+   * This method is equivalent to `Map::add()`. If the key to set does not exist,
+   * it is created. This is inconsistent with, for example, `Vector::set()`
+   * where if the key is not found, an exception is thrown.
    *
-   * `$map->set($k,$v)` is semantically equivalent to `$map[$k] = $v` (except
-   * that `set()` returns the current `Map`).
+   * `$map->set($k,$v)` is equivalent to `$map[$k] = $v` (except that `set()`
+   * returns the current `Map`).
    *
-   * Future changes made to the current `Map` ARE reflected in the returned,
-   * and vice-versa.
+   * Future changes made to the current `Map` ARE reflected in the returned
+   * `Map`, and vice-versa.
    *
    * @param $k - The key to which we will set the value.
    * @param $v - The value to set.
    *
-   * @return - A shallow copy of the current `Map` with the updated the value
-   *           set. The current `Map` is also updated.
+   * @return - Returns itself.
    */
   public function set(Tk $k, Tv $v): Map<Tk, Tv>;
 
@@ -463,9 +467,10 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * current `Map` associated with each key, overwriting the previous value
    * associated with the key.
    *
-   * If a key is not present this `Map` that is present in the `Traversable`,
-   * an exception is thrown. If you want to add a value even if a key is not
-   * present, use `addAll()`.
+   * This method is equivalent to `Map::addAll()`. If a key to set does not
+   * exist in the Map that does exist in the `Traversable`, it is created. This
+   * is inconsistent with, for example, the method `Vector::setAll()` where if
+   * a key is not found, an exception is thrown.
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
@@ -473,8 +478,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @param $k - The `Traversable` with the new values to set. If `null` is
    *             provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Map` with the updated the values
-   *           set. The current `Map` is also updated.
+   * @return - Returns itself.
    */
   public function setAll(?KeyedTraversable<Tk, Tv> $it): Map<Tk, Tv>;
 
@@ -484,8 +488,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
    *
-   * @return - A shallow copy of the current empty `Map`. The current `Map` is
-   *           also empty.
+   * @return - Returns itself.
    */
   public function clear(): Map<Tk, Tv>;
 
@@ -520,18 +523,18 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   /**
    * Add a key/value pair to the end of the current `Map`.
    *
-   * If you want to overwrite a value, use `set()`.
+   * This method is equivalent to `Map::set()`. If the key in the  `Pair`
+   * exists in the `Map`,  the value associated with it is overwritten.
    *
-   * `$map->add($p)` is semantically equivalent to `$map[$k] = $v` (except that
-   * `add()` returns the `Map`).
+   * `$map->add($p)` is equivalent to both `$map[$k] = $v` and
+   * `$map[] = Pair {$k, $v}` (except that `add()` returns the `Map`).
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
    *
    * @param $p - The key/value Pair to add to the current `Map`.
    *
-   * @return - A shallow copy of the current `Map` with the added key/value
-   *           pair set. This `Map` is also updated.
+   * @return - Returns itself.
    */
   public function add(Pair<Tk, Tv> $p): Map<Tk, Tv>;
 
@@ -539,7 +542,9 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * For every element in the provided `Traversable`, add a key/value pair into
    * the current `Map`.
    *
-   * If you want to overwrite values, use `setAll()`.
+   * This method is equivalent to `Map::setAll()`. If a key in the `Traversable`
+   * exists in the `Map`, then the value associated with that key in the `Map`
+   * is overwritten.
    *
    * Future changes made to the current `Map` ARE reflected in the returned
    * `Map`, and vice-versa.
@@ -547,8 +552,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @param $k - The `Traversable` with the new key/value `Pair` to set. If
    *             `null` is provided, no changes are made.
    *
-   * @return - A shallow copy of the current `Map` with the added key/value
-   *           pair set. This `Map` is also updated.
+   * @return - Returns itself.
    */
   public function addAll(?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
 
@@ -572,8 +576,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current `Map` with the key removed; the
-   *           current `Map` is also updated with the key removed.
+   * @return - Returns itself.
    */
   public function remove(Tk $k): Map<Tk, Tv>;
 
@@ -587,8 +590,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @param $k - The key to remove.
    *
-   * @return - A shallow copy of the current `Map` with the key removed; the
-   *           current `Map` is also updated with the key removed.
+   * @return - Returns itself.
    */
   public function removeKey(Tk $k): Map<Tk, Tv>;
 
@@ -612,7 +614,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public function getIterator(): KeyedIterator<Tk, Tv>;
 
   /**
-   * Returns a `Map` containing the key/valur pairs from the specified `array`.
+   * Returns a `Map` containing the key/value pairs from the specified `array`.
    *
    * This function is deprecated. Use `new `Map`($arr)` instead.
    *
@@ -624,7 +626,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
   public static function fromArray(array<Tk, Tv> $arr): Map<Tk, Tv>;
 
   /**
-   * Creates a `Map` from the given `Traversable`, or an empty `Vector` if
+   * Creates a `Map` from the given `Traversable`, or an empty `Map` if
    * `null` is passed.
    *
    * This is the static method version of the `Map::__construct()` constructor.

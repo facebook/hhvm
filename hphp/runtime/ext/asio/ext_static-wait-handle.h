@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,13 +30,15 @@ namespace HPHP {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-class c_StaticWaitHandle final : public c_WaitHandle {
- public:
+struct c_StaticWaitHandle final : c_WaitHandle {
   WAITHANDLE_CLASSOF(StaticWaitHandle);
   WAITHANDLE_DTOR(StaticWaitHandle);
 
-  explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
-    : c_WaitHandle(cls) {}
+  explicit c_StaticWaitHandle()
+    : c_WaitHandle(c_StaticWaitHandle::classof(),
+                   HeaderKind::WaitHandle,
+                   type_scan::getIndexForMalloc<c_StaticWaitHandle>())
+  {}
   ~c_StaticWaitHandle() {
     assert(isFinished());
     tvRefcountedDecRef(&m_resultOrException);

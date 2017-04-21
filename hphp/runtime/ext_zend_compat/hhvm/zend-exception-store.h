@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,11 +55,11 @@ struct ZendExceptionStore final : RequestEventHandler {
       std::rethrow_exception(p);
     }
   }
-  void vscan(IMarker&) const override {
-  }
 
 private:
   std::exception_ptr m_ptr;
+  TYPE_SCAN_IGNORE_FIELD(m_ptr); // if a ptr-rich exn is thrown,
+  // it should already have been registered as root with req::root<T>
   DECLARE_STATIC_REQUEST_LOCAL(ZendExceptionStore, tl_instance);
 };
 

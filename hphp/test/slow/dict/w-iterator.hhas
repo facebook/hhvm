@@ -1,0 +1,42 @@
+#
+# WIterInit on Hack arrays is identical to IterInit
+#
+
+.main {
+  FPushFuncD 0 "main"
+  FCall 0
+  PopR
+  Int 1
+  RetC
+}
+
+.function main {
+          .numiters 1;
+          NewDictArray 3
+          Int 100
+          Int 200
+          AddElemC
+          Int 300
+          Int 400
+          AddElemC
+          Int 500
+          Int 600
+          AddElemC
+          WIterInitK 0 end_loop $v $k
+loop:
+          FPushFuncD 1 "var_dump"
+          FPassL 0 $k
+          FCall 1
+          PopR
+          FPushFuncD 1 "var_dump"
+          FPassL 0 $v
+          FCall 1
+          PopR
+          WIterNextK 0 loop $v $k
+end_loop:
+          String "DONE\n"
+          Print
+          PopC
+          True
+          RetC
+}

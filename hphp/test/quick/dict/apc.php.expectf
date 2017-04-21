@@ -1,0 +1,256 @@
+Count: 1
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Dtor... 1
+Dtor... 2
+Sleep...
+dict(0) {
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+dict(4) {
+  [4]=>
+  string(1) "a"
+  [5]=>
+  string(1) "b"
+  [6]=>
+  string(1) "C"
+  [7]=>
+  string(1) "D"
+}
+dict(2) {
+  [1]=>
+  int(999)
+  [999]=>
+  int(1)
+}
+dict(2) {
+  [0]=>
+  object(stdClass)#%d (0) {
+  }
+  [1]=>
+  object(stdClass)#%d (0) {
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  dict(3) {
+    [50]=>
+    dict(0) {
+    }
+    ["50"]=>
+    dict(1) {
+      [100]=>
+      int(1)
+    }
+    [1]=>
+    dict(2) {
+      [101]=>
+      int(1)
+      [102]=>
+      int(2)
+    }
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  dict(1) {
+    ["cls"]=>
+    *RECURSION*
+  }
+}
+Wakeup...
+dict(1) {
+  [123]=>
+  object(Wakeup)#%d (1) {
+    ["val"]=>
+    int(12345)
+  }
+}
+string(16) "Wakeup exception"
+Dtor... 1
+string(16) "Wakeup exception"
+dict(1) {
+  ["abc"]=>
+  object(Sleep)#13 (1) {
+    ["val"]=>
+    NULL
+  }
+}
+Count: 2
+dict(0) {
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+dict(4) {
+  [4]=>
+  string(1) "a"
+  [5]=>
+  string(1) "b"
+  [6]=>
+  string(1) "C"
+  [7]=>
+  string(1) "D"
+}
+dict(2) {
+  [1]=>
+  int(999)
+  [999]=>
+  int(1)
+}
+dict(2) {
+  [0]=>
+  object(stdClass)#%d (0) {
+  }
+  [1]=>
+  object(stdClass)#%d (0) {
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  dict(3) {
+    [50]=>
+    dict(0) {
+    }
+    ["50"]=>
+    dict(1) {
+      [100]=>
+      int(1)
+    }
+    [1]=>
+    dict(2) {
+      [101]=>
+      int(1)
+      [102]=>
+      int(2)
+    }
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  dict(1) {
+    ["cls"]=>
+    *RECURSION*
+  }
+}
+Wakeup...
+dict(1) {
+  [123]=>
+  object(Wakeup)#%d (1) {
+    ["val"]=>
+    int(12345)
+  }
+}
+string(16) "Wakeup exception"
+Dtor... 1
+string(16) "Wakeup exception"
+dict(1) {
+  ["abc"]=>
+  object(Sleep)#8 (1) {
+    ["val"]=>
+    NULL
+  }
+}
+Dtor... 1
+Dtor... 2
+Sleep...
+dict(0) {
+}
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+dict(4) {
+  [4]=>
+  string(1) "a"
+  [5]=>
+  string(1) "b"
+  [6]=>
+  string(1) "C"
+  [7]=>
+  string(1) "D"
+}
+dict(2) {
+  [2]=>
+  int(999)
+  [999]=>
+  int(2)
+}
+dict(2) {
+  [0]=>
+  object(stdClass)#%d (0) {
+  }
+  [1]=>
+  object(stdClass)#%d (0) {
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  dict(3) {
+    [50]=>
+    dict(0) {
+    }
+    ["50"]=>
+    dict(1) {
+      [100]=>
+      int(2)
+    }
+    [2]=>
+    dict(2) {
+      [101]=>
+      int(2)
+      [102]=>
+      int(3)
+    }
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  dict(1) {
+    ["cls"]=>
+    *RECURSION*
+  }
+}
+Wakeup...
+dict(1) {
+  [123]=>
+  object(Wakeup)#%d (1) {
+    ["val"]=>
+    int(12345)
+  }
+}
+string(16) "Wakeup exception"
+Dtor... 1
+string(16) "Wakeup exception"
+dict(1) {
+  ["abc"]=>
+  object(Sleep)#19 (1) {
+    ["val"]=>
+    NULL
+  }
+}

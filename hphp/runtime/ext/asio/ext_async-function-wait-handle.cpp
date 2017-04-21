@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,8 +21,8 @@
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
 #include "hphp/runtime/ext/asio/asio-session.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
-#include "hphp/runtime/vm/bytecode-defs.h"
+#include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/types.h"
@@ -37,7 +37,7 @@ c_AsyncFunctionWaitHandle::~c_AsyncFunctionWaitHandle() {
   }
 
   assert(!isRunning());
-  frame_free_locals_inl_no_hook<false>(actRec(), actRec()->func()->numLocals());
+  frame_free_locals_inl_no_hook(actRec(), actRec()->func()->numLocals());
   decRefObj(m_children[0].getChild());
 }
 
@@ -60,8 +60,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   assert(!child->isFinished());
 
   const size_t frameSize = Resumable::getFrameSize(numSlots);
-  const size_t totalSize = sizeof(ResumableNode) + frameSize +
-                           sizeof(Resumable) +
+  const size_t totalSize = sizeof(NativeNode) + frameSize + sizeof(Resumable) +
                            sizeof(c_AsyncFunctionWaitHandle);
   auto const resumable = Resumable::Create(frameSize, totalSize);
   resumable->initialize<false, mayUseVV>(fp,
@@ -104,14 +103,8 @@ void c_AsyncFunctionWaitHandle::initialize(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncFunctionWaitHandle::resume() {
-  // may happen if scheduled in multiple contexts
-  if (getState() != STATE_SCHEDULED) {
-    decRefObj(this);
-    return;
-  }
-
   auto const child = m_children[0].getChild();
-  assert(getState() == STATE_SCHEDULED);
+  assert(getState() == STATE_READY);
   assert(child->isFinished());
   setState(STATE_RUNNING);
 
@@ -136,9 +129,13 @@ void c_AsyncFunctionWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 }
 
 void c_AsyncFunctionWaitHandle::onUnblocked() {
-  setState(STATE_SCHEDULED);
+  setState(STATE_READY);
   if (isInContext()) {
-    getContext()->schedule(this);
+    if (isFastResumable()) {
+      getContext()->scheduleFast(this);
+    } else {
+      getContext()->schedule(this);
+    }
   } else {
     decRefObj(this);
   }
@@ -163,7 +160,6 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
   parentChain.unblock();
-  decRefObj(this);
 }
 
 /**
@@ -174,7 +170,7 @@ void c_AsyncFunctionWaitHandle::ret(Cell& result) {
 void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   assert(isRunning());
   assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(exception->instanceof(SystemLib::s_ThrowableClass));
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnResumableFail())) {
@@ -190,7 +186,6 @@ void c_AsyncFunctionWaitHandle::fail(ObjectData* exception) {
   setState(STATE_FAILED);
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
-  decRefObj(this);
 }
 
 /**
@@ -203,17 +198,17 @@ void c_AsyncFunctionWaitHandle::failCpp() {
   setState(STATE_FAILED);
   tvWriteObject(exception, &m_resultOrException);
   parentChain.unblock();
-  decRefObj(this);
 }
 
 String c_AsyncFunctionWaitHandle::getName() {
   switch (getState()) {
     case STATE_BLOCKED:
-    case STATE_SCHEDULED:
+    case STATE_READY:
     case STATE_RUNNING: {
       auto func = actRec()->func();
-      if (!actRec()->getThisOrClass() ||
-          func->cls()->attrs() & AttrNoOverride) {
+      if (!func->cls() ||
+          func->cls()->attrs() & AttrNoOverride ||
+          actRec()->localsDecRefd()) {
         auto name = func->fullName();
         if (func->isClosureBody()) {
           const char* p = strchr(name->data(), ':');
@@ -227,29 +222,22 @@ String c_AsyncFunctionWaitHandle::getName() {
         }
         return String{const_cast<StringData*>(name)};
       }
-      String funcName;
-      if (actRec()->func()->isClosureBody()) {
-        // Can we do better than this?
-        funcName = s__closure_;
-      } else {
-        funcName = const_cast<StringData*>(actRec()->func()->name());
+
+      auto const cls = actRec()->hasThis() ?
+        actRec()->getThis()->getVMClass() :
+        actRec()->getClass();
+
+      if (cls == func->cls() && !func->isClosureBody()) {
+        return String{const_cast<StringData*>(func->fullName())};
       }
 
-      String clsName;
-      if (actRec()->hasThis()) {
-        clsName = const_cast<StringData*>(actRec()->getThis()->
-                                          getVMClass()->name());
-      } else if (actRec()->hasClass()) {
-        clsName = const_cast<StringData*>(actRec()->getClass()->name());
-      } else {
-        return funcName;
-      }
+      StrNR funcName(func->isClosureBody() ? s__closure_.get() : func->name());
 
-      return concat3(clsName, "::", funcName);
+      return concat3(cls->nameStr(), "::", funcName);
     }
 
     default:
-      throw FatalErrorException(
+      raise_fatal_error(
           "Invariant violation: encountered unexpected state");
   }
 }
@@ -258,7 +246,7 @@ c_WaitableWaitHandle* c_AsyncFunctionWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
     return m_children[0].getChild();
   } else {
-    assert(getState() == STATE_SCHEDULED || getState() == STATE_RUNNING);
+    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
@@ -287,7 +275,7 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
       decRefObj(this);
       break;
 
-    case STATE_SCHEDULED:
+    case STATE_READY:
       // Recursively move all wait handles blocked by us.
       getParentChain().exitContext(ctx_idx);
 
@@ -296,11 +284,14 @@ void c_AsyncFunctionWaitHandle::exitContext(context_idx_t ctx_idx) {
 
       // Reschedule if still in a context.
       if (isInContext()) {
-        getContext()->schedule(this);
+        if (isFastResumable()) {
+          getContext()->scheduleFast(this);
+        } else {
+          getContext()->schedule(this);
+        }
       } else {
         decRefObj(this);
       }
-
       break;
 
     default:

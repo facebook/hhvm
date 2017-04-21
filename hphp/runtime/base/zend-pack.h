@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -25,15 +25,14 @@ namespace HPHP {
 // pack/unpack
 
 struct Variant;
-class String;
-class Array;
+struct String;
+struct Array;
 
 /**
  * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d,
  * x, X, Z and @.
  */
-class ZendPack {
-public:
+struct ZendPack {
   ZendPack();
 
   /**
@@ -67,7 +66,7 @@ private:
   // Mapping of byte from char (8bit) to int32 for machine endian
   int64_t byte_map[1];
 
-  // Mappings of bytes from int (machine dependant) to int for machine endian
+  // Mappings of bytes from int (machine dependent) to int for machine endian
   int64_t int_map[sizeof(int)];
 
   // Mappings of bytes from shorts (16bit) for all endian environments

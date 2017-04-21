@@ -23,5 +23,3 @@ function func_get_arg(int $arg_num);
 function func_num_args(): int;
 function register_postsend_function($function, ...);
 function register_shutdown_function($function, ...);
-function register_tick_function($function, ...);
-function unregister_tick_function($function_name);

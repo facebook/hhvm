@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +19,6 @@
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/variable-unserializer.h"
-#include "hphp/system/constants.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
@@ -33,12 +32,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-#ifdef __CYGWIN__
-/* These is missing from cygwin ipc headers. */
-#define MSG_EXCEPT 02000
-#endif
-
-#if defined(__APPLE__) || defined(__CYGWIN__)
+#if defined(__APPLE__)
 /* OS X defines msgbuf, but it is defined with extra fields and some weird
  * types. It turns out that the actual msgsnd() and msgrcv() calls work fine
  * with the same structure that other OSes use. This is weird, but this is also
@@ -55,8 +49,7 @@ using HPHP::ScopedMem;
 
 namespace HPHP {
 
-static class SysvmsgExtension final : public Extension {
-public:
+static struct SysvmsgExtension final : Extension {
   SysvmsgExtension() : Extension("sysvmsg", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_RC_INT(MSG_IPC_NOWAIT, k_MSG_IPC_NOWAIT);
@@ -78,8 +71,7 @@ public:
   }
 } s_sysvmsg_extension;
 
-static class SysvsemExtension final : public Extension {
-public:
+static struct SysvsemExtension final : Extension {
   SysvsemExtension() : Extension("sysvsem", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(sem_acquire);
@@ -91,8 +83,7 @@ public:
   }
 } s_sysvsem_extension;
 
-static class SysvshmExtension final : public Extension {
-public:
+static struct SysvshmExtension final : Extension {
   SysvshmExtension() : Extension("sysvshm", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(shm_attach);
@@ -127,8 +118,7 @@ int64_t HHVM_FUNCTION(ftok,
 ///////////////////////////////////////////////////////////////////////////////
 // message queue
 
-class MessageQueue : public ResourceData {
-public:
+struct MessageQueue : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(MessageQueue)
 
   int64_t key;
@@ -374,7 +364,7 @@ struct Semaphore : SweepableResourceData {
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
-  bool op(bool acquire) {
+  bool op(bool acquire, bool nowait = false) {
     struct sembuf sop;
 
     if (!acquire && count == 0) {
@@ -385,13 +375,15 @@ struct Semaphore : SweepableResourceData {
 
     sop.sem_num = SYSVSEM_SEM;
     sop.sem_op  = acquire ? -1 : 1;
-    sop.sem_flg = SEM_UNDO;
+    sop.sem_flg = SEM_UNDO | (nowait ? IPC_NOWAIT : 0);
 
-    while (semop(semid, &sop, 1) == -1) {
+    if (semop(semid, &sop, 1) == -1) {
       if (errno != EINTR) {
-        raise_warning("failed to %s key 0x%x: %s",
-                        acquire ? "acquire" : "release",
-                        key, folly::errnoStr(errno).c_str());
+        if (errno != EAGAIN) {
+          raise_warning("failed to %s key 0x%x: %s",
+                          acquire ? "acquire" : "release",
+                          key, folly::errnoStr(errno).c_str());
+        }
         return false;
       }
     }
@@ -433,8 +425,9 @@ struct Semaphore : SweepableResourceData {
 IMPLEMENT_RESOURCE_ALLOCATION(Semaphore)
 
 bool HHVM_FUNCTION(sem_acquire,
-                   const Resource& sem_identifier) {
-  return cast<Semaphore>(sem_identifier)->op(true);
+                   const Resource& sem_identifier,
+                   bool nowait /* = false */) {
+  return cast<Semaphore>(sem_identifier)->op(true, nowait);
 }
 
 bool HHVM_FUNCTION(sem_release,
@@ -582,8 +575,7 @@ typedef struct {
   long total;
 } sysvshm_chunk_head;
 
-class sysvshm_shm {
-public:
+struct sysvshm_shm {
   key_t key;               /* Key set by user */
   long id;                 /* Returned by shmget. */
   sysvshm_chunk_head *ptr; /* memoryaddress of shared memory */
@@ -593,8 +585,7 @@ public:
   }
 };
 
-class shm_set : public std::set<sysvshm_shm*> {
-public:
+struct shm_set : std::set<sysvshm_shm*> {
   ~shm_set() {
     for (auto iter = begin(); iter != end(); ++iter) {
       delete *iter;
@@ -751,12 +742,7 @@ bool HHVM_FUNCTION(shm_remove,
 
   if (shmctl(shm_list_ptr->id, IPC_RMID,NULL) < 0) {
     raise_warning(
-#ifdef __CYGWIN__
-      // key is a long long int in cygwin
-      "failed for key 0x%lld, id %" PRId64 ": %s",
-#else
       "failed for key 0x%x, id %" PRId64 ": %s",
-#endif
       shm_list_ptr->key, shm_identifier, folly::errnoStr(errno).c_str()
     );
     return false;

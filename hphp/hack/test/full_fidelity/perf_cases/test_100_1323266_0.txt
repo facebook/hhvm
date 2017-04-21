@@ -1,0 +1,2 @@
+<?hh
+<< jKVc , lJ , rOzBK , wFcU ( ( ( $pPFILBx instanceof $lASENsD ) ) , ( ~ ( float ) "double string" ) ) , zMJ , yQzcK ( ) , eQ ( ) , wVV ( ) , qWBjvqUPr >> class sGwAgeJa < + oErmoWns as ( function ( ) : tG ) > implements nCCwV < jScvcBak > { use lOyTkYT < string , nBToMHWw , int , uNXIdGqOe , ( function ( eMH , ( function ( ) : mixed ) ) : shape ( ) ) , ( shape ( ) , shape ( ) , array < this > ) > , oH , aJh < gFEkofvQ , ( function ( mixed , arraykey , void ) : resource ) > ; use wHI ; }

@@ -30,17 +30,16 @@ FILE_RCSID("@(#)$File: readcdf.c,v 1.33 2012/06/20 21:52:36 christos Exp $")
 #endif
 
 #include <stdlib.h>
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#else
-#include <unistd.h>
-#endif
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
 
 #include "cdf.h"
 #include "magic.h"
+
+#include "hphp/util/bstring.h"
+
+#include <folly/portability/Unistd.h>
 
 #define NOTMIME(ms) (((ms)->flags & MAGIC_MIME) == 0)
 
@@ -95,7 +94,11 @@ cdf_app_to_mime(const char *vbuf, const struct nv *nv)
   assert(old_lc_ctype != nullptr);
 #endif
   for (i = 0; nv[i].pattern != nullptr; i++)
-    if (strcasestr(vbuf, nv[i].pattern) != nullptr) {
+    if (HPHP::bstrcasestr(
+        vbuf,
+        strlen(vbuf),
+        nv[i].pattern,
+        strlen(nv[i].pattern)) != nullptr) {
       rv = nv[i].mime;
       break;
     }
@@ -214,7 +217,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                         if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
                       return -1;
                     }
-                                        c = cdf_ctime(&ts.tv_sec, tbuf);
+                                        time_t tmp = ts.tv_sec;
+                                        c = cdf_ctime(&tmp, tbuf);
                                         if ((ec = strchr(c, '\n')) != nullptr)
                                                 *ec = '\0';
 

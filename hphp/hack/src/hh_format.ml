@@ -31,27 +31,26 @@ let debug () fnl =
   let modes = [Some FileInfo.Mstrict; Some FileInfo.Mpartial] in
   List.iter fnl begin fun (filepath : Path.t) ->
     try
-      let content = Sys_utils.cat (filepath :> string) in
-
       (* Checking that we can parse the output *)
-      let parsing_errors1, parser_output1 = Errors.do_ begin fun () ->
+      let parsing_errors1, parser_output1, _ = Errors.do_ begin fun () ->
         let rp =
           Relative_path.create Relative_path.Dummy (filepath :> string) in
-        Parser_hack.program rp content
+        Full_fidelity_ast.from_file_with_legacy rp
       end in
-      if parser_output1.Parser_hack.file_mode = None || parsing_errors1 <> []
+      if parser_output1.Parser_hack.file_mode = None
+        || not (Errors.is_empty parsing_errors1)
       then raise Exit;
 
-      if parsing_errors1 <> []
+      if not (Errors.is_empty parsing_errors1)
       then begin
         Printf.eprintf
           "The file had a syntax error before we even started: %s\n%!"
           (filepath :> string);
       end;
 
-      let content = Format_hack.program modes filepath content in
+      let content = parser_output1.Parser_hack.content in
       let content =
-        match content with
+        match Format_hack.program modes filepath content with
         | Format_hack.Success content -> content
         | Format_hack.Disabled_mode ->
             raise Exit
@@ -93,11 +92,11 @@ let debug () fnl =
       end;
 
       (* Checking that we can parse the output *)
-      let parsing_errors2, _parser_output2 = Errors.do_ begin fun () ->
+      let parsing_errors2, _parser_output2, _ = Errors.do_ begin fun () ->
         let rp = Relative_path.(create Dummy (filepath :> string)) in
-        Parser_hack.program rp content
+        Parser_hack.program_with_default_popt rp content
       end in
-      if parsing_errors2 <> []
+      if not (Errors.is_empty parsing_errors2)
       then begin
         Printf.eprintf
           "The output of the formatter could not be parsed: %s\n%!"
@@ -112,12 +111,12 @@ let debug () fnl =
         ()
   end
 
-let debug_directory dir =
+let debug_directory ~handle dir =
   let path = Path.make dir in
   let next = compose
-    (List.map ~f:Path.make)
-    (Find.make_next_files FindUtils.is_php path) in
-  let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
+    (fun paths -> paths |> List.map ~f:Path.make |> Bucket.of_list)
+    (Find.make_next_files ~filter:FindUtils.is_php path) in
+  let workers = ServerWorker.make GlobalConfig.gc_control handle in
   MultiWorker.call
     (Some workers)
     ~job:debug
@@ -214,12 +213,12 @@ let job_in_place modes acc fnl =
     | Some err -> err :: acc
   end ~init:acc
 
-let directory modes dir =
+let directory modes ~handle dir =
   let path = Path.make dir in
   let next = compose
-    (List.map ~f:Path.make)
-    (Find.make_next_files FindUtils.is_php path) in
-  let workers = Worker.make GlobalConfig.nbr_procs GlobalConfig.gc_control in
+    (fun paths -> paths |> List.map ~f:Path.make |> Bucket.of_list)
+    (Find.make_next_files ~filter:FindUtils.is_php path) in
+  let workers = ServerWorker.make GlobalConfig.gc_control handle in
   let messages =
     MultiWorker.call
       (Some workers)
@@ -273,8 +272,8 @@ let format_stdin modes from to_ =
 (*****************************************************************************)
 
 let () =
-  SharedMem.(init default_config);
-  PidLog.log_oc := Some (open_out "/dev/null");
+  let handle = SharedMem.init GlobalConfig.default_sharedmem_config in
+  PidLog.log_oc := Some (open_out Sys_utils.null_path);
   let files, from, to_, apply_mode, debug, diff, modes, root, test =
     parse_args() in
   if not test then FormatEventLogger.init (Unix.gettimeofday());
@@ -284,7 +283,7 @@ let () =
         match root with
         | None ->
             Printf.eprintf "No root specified, trying to guess one\n";
-            let root = ClientArgs.get_root None in
+            let root = ClientArgsUtils.get_root None in
             Printf.eprintf "Guessed root: %a\n%!" Path.output root;
             root
         | Some root -> Path.make root
@@ -301,8 +300,8 @@ let () =
   | [] -> format_stdin modes from to_
   | [dir] when Sys.is_directory dir ->
       if debug
-      then debug_directory dir
-      else directory modes dir
+      then debug_directory ~handle dir
+      else directory modes ~handle dir
   | [filename] ->
       let filepath = Path.make filename in
       (match apply_mode with

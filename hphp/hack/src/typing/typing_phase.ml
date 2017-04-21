@@ -15,7 +15,8 @@ open Utils
 
 module Env = Typing_env
 module TUtils = Typing_utils
-module TSubst = Typing_subst
+module TGenConstraint = Typing_generic_constraint
+module Subst = Decl_subst
 module ShapeMap = Nast.ShapeMap
 
 (* Here is the general problem the delayed application of the phase solves.
@@ -93,7 +94,7 @@ type env = expand_env
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
   match dty with
-  | _, (Tany | Tmixed | Tprim _ ) as x -> env, (ety_env, x)
+  | _, (Terr | Tany | Tmixed | Tprim _ ) as x -> env, (ety_env, x)
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty
@@ -120,29 +121,22 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         | None, Some _ ->
             failwith "Invalid array declaration type" in
       env, (ety_env, (r, ty))
-  | r, Tgeneric (x, cstr_opt) ->
-      (match SMap.get x ety_env.substs with
+  | r, Tdarray (tk, tv) ->
+      let env, tk = localize ~ety_env env tk in
+      let env, tv = localize ~ety_env env tv in
+      let ty = Tarraykind (AKdarray (tk, tv)) in
+      env, (ety_env, (r, ty))
+  | r, Tvarray tv ->
+      let env, tv = localize ~ety_env env tv in
+      let ty = Tarraykind (AKvarray tv) in
+      env, (ety_env, (r, ty))
+  | r, Tgeneric x ->
+      begin match SMap.get x ety_env.substs with
       | Some x_ty ->
-          let env =
-            match cstr_opt with
-            | Some (ck, ty) ->
-                let env, ty = localize ~ety_env env ty in
-                TSubst.add_check_constraint_todo env r x ck ty x_ty
-            | None -> env
-          in
-          env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
+        env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
       | None ->
-          (match cstr_opt with
-          | None ->
-              env, (ety_env, (r, Tabstract (AKgeneric (x, None), None)))
-          | Some (Ast.Constraint_as, ty) ->
-              let env, ty = localize ~ety_env env ty in
-              env, (ety_env, (r, Tabstract (AKgeneric (x, None), Some ty)))
-          | Some (Ast.Constraint_super, ty) ->
-              let env, ty = localize ~ety_env env ty in
-              env, (ety_env, (r, Tabstract (AKgeneric (x, Some ty), None)))
-          )
-      )
+        env, (ety_env, (r, Tabstract (AKgeneric x, None)))
+    end
   | r, Toption ty ->
        let env, ty = localize ~ety_env env ty in
        let ty_ =
@@ -155,9 +149,9 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, ft = localize_ft ~ety_env env ft in
       env, (ety_env, (r, Tfun ft))
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
-      let env, argl = lfold (localize ~ety_env) env argl in
+      let env, argl = List.map_env env argl (localize ~ety_env) in
       TUtils.expand_typedef ety_env env r x argl
-  | r, Tapply ((p, x), _argl) when Env.is_enum x ->
+  | r, Tapply ((p, x), _argl) when Env.is_enum env x ->
       (* if argl <> [], nastInitCheck would have raised an error *)
       if Typing_defs.has_expanded ety_env x then begin
         Errors.cyclic_enum_constraint p;
@@ -166,20 +160,20 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         let type_expansions = (p, x) :: ety_env.type_expansions in
         let ety_env = {ety_env with type_expansions} in
         let env, cstr =
-          opt (localize ~ety_env) env (Env.get_enum_constraint x) in
+          opt (localize ~ety_env) env (Env.get_enum_constraint env x) in
         env, (ety_env, (r, Tabstract (AKenum x, cstr)))
       end
   | r, Tapply (cls, tyl) ->
-      let env, tyl = lfold (localize ~ety_env) env tyl in
+      let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Tclass (cls, tyl)))
   | r, Ttuple tyl ->
-      let env, tyl = lfold (localize ~ety_env) env tyl in
+      let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Ttuple tyl))
   | r, Taccess (root_ty, ids) ->
       let env, root_ty = localize ~ety_env env root_ty in
       TUtils.expand_typeconst ety_env env r root_ty ids
   | r, Tshape (fields_known, tym) ->
-      let env, tym = ShapeMap.map_env (localize ~ety_env) env tym in
+      let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
       env, (ety_env, (r, Tshape (fields_known, tym)))
 
 and localize ~ety_env env ty =
@@ -195,27 +189,113 @@ and localize ~ety_env env ty =
 and localize_ft ?(instantiate_tparams=true) ~ety_env env ft =
   (* Set the instantiated type parameter to initially point to unresolved, so
    * that it can grow and eventually be a subtype of something like "mixed".
-   *)
+  *)
   let env, substs =
     if instantiate_tparams
-    then let env, tvarl = lfold TUtils.unresolved_tparam env ft.ft_tparams in
-         let ft_subst = TSubst.make ft.ft_tparams tvarl in
-         env, SMap.union ft_subst ety_env.substs
-    else env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _) ->
-      SMap.remove x subst
-    end ~init:ety_env.substs in
+    then
+      let env, tvarl =
+        List.map_env env ft.ft_tparams TUtils.unresolved_tparam in
+      let ft_subst = Subst.make ft.ft_tparams tvarl in
+      env, SMap.union ft_subst ety_env.substs
+    else
+      env, List.fold_left ft.ft_tparams ~f:begin fun subst (_, (_, x), _) ->
+        SMap.remove x subst
+      end ~init:ety_env.substs
+  in
   let ety_env = {ety_env with substs = substs} in
-  let env, params = lfold begin fun env (name, param) ->
+  let env, params = List.map_env env ft.ft_params begin fun env (name, param) ->
     let env, param = localize ~ety_env env param in
     env, (name, param)
-  end env ft.ft_params in
+  end in
+  (* Localize the constraints for a type parameter declaration *)
+  let localize_tparam env (var, name, cstrl) =
+    let env, cstrl = List.map_env env cstrl begin fun env (ck, ty) ->
+      let env, ty = localize ~ety_env env ty in
+      env, (ck, ty)
+    end in
+    env, (var, name, cstrl)
+  in
+
+  let localize_where_constraint env (ty1, ck, ty2) =
+    let env, ty1 = localize ~ety_env env ty1 in
+    let env, ty2 = localize ~ety_env env ty2 in
+    env, (ty1, ck, ty2)
+  in
+
+  (* If we're instantiating the generic parameters then remove them
+   * from the result. Otherwise localize them *)
+  let env, tparams =
+    if instantiate_tparams then env, []
+    else List.map_env env ft.ft_tparams localize_tparam in
+
+  (* Localize the 'where' constraints *)
+  let env, where_constraints =
+    List.map_env env ft.ft_where_constraints localize_where_constraint in
+
+  (* If we're instantiating the generic parameters then add a deferred
+   * check that constraints are satisfied under the
+   * substitution [ety_env.substs].
+   *)
+  let env =
+    if instantiate_tparams then
+      let env = check_tparams_constraints ~ety_env env ft.ft_tparams in
+      let env = check_where_constraints ~ety_env env ft.ft_pos
+                  ft.ft_where_constraints in
+      env
+    else env in
+
   let env, arity = match ft.ft_arity with
     | Fvariadic (min, (name, var_ty)) ->
        let env, var_ty = localize ~ety_env env var_ty in
        env, Fvariadic (min, (name, var_ty))
     | Fellipsis _ | Fstandard (_, _) as x -> env, x in
   let env, ret = localize ~ety_env env ft.ft_ret in
-  env, { ft with ft_arity = arity; ft_params = params; ft_ret = ret }
+  env, { ft with ft_arity = arity; ft_params = params;
+                 ft_ret = ret; ft_tparams = tparams;
+                 ft_where_constraints = where_constraints }
+
+(* Given a list of generic parameters [tparams] and a substitution
+ * in [ety_env.substs] whose domain is at least these generic parameters,
+ * check that the types satisfy
+ * the constraints on the corresponding generic parameter.
+ *
+ * Note that the constraints may contain occurrences of the generic
+ * parameters, but the subsitution will be applied to them. e.g. if tparams is
+ *   <Tu as MyCovariant<Tu>, Tv super Tu>
+ * and ety_env.substs is
+ *   Tu :-> C
+ *   Tv :-> I
+ * with
+ *   class C extends MyContravariant<I> implements I { ... }
+ * Then the constraints are satisfied, because
+ *   C is a subtype of MyContravariant<C>
+ *   I is a supertype of C
+ *
+ * In fact, the constraint checking isn't done immediately, but rather pushed
+ * onto the env.todo list. Typically we haven't resolved types sufficiently
+ * (e.g. we have completely unresolved type variables) and so the actual
+ * constraint checking is deferred until we have finished checking a
+ * function's body.
+ *)
+and check_tparams_constraints ~ety_env env tparams =
+  let check_tparam_constraints env (_var, (p, name), cstrl) =
+    let r = Reason.Rwitness p in
+    List.fold_left cstrl ~init:env ~f:begin fun env (ck, ty) ->
+      let env, ty = localize ~ety_env env ty in
+      match SMap.get name ety_env.substs with
+      | Some x_ty ->
+        TGenConstraint.add_check_constraint_todo env r name ck ty x_ty
+      | None ->
+        env
+    end in
+  List.fold_left tparams ~init:env ~f:check_tparam_constraints
+
+and check_where_constraints ~ety_env env def_pos cstrl =
+  List.fold_left cstrl ~init:env ~f:begin fun env (ty1, ck, ty2) ->
+      let env, ty1 = localize ~ety_env env ty1 in
+      let env, ty2 = localize ~ety_env env ty2 in
+      TGenConstraint.add_check_where_constraint_todo env def_pos ck ty2 ty1
+    end
 
 let env_with_self env =
   {
@@ -231,12 +311,35 @@ let env_with_self env =
 let localize_with_self env ty =
   localize env ty ~ety_env:(env_with_self env)
 
+(* Add generic parameters to the environment, localize their bounds, and
+ * transform these into a flat list of constraints of the form (ty1,ck,ty2)
+ * where ck is as, super or =
+ *)
+let localize_generic_parameters_with_bounds
+    ~ety_env (env:Env.env) (tparams:Nast.tparam list) =
+  let env = Env.add_generic_parameters env tparams in
+  let localize_bound env ((_var, (pos,name), cstrl): Nast.tparam) =
+    let tparam_ty = (Reason.Rwitness pos, Tabstract(AKgeneric name, None)) in
+    List.map_env env cstrl (fun env (ck, h) ->
+      let env, ty = localize env (Decl_hint.hint env.Env.decl_env h) ~ety_env in
+      env, (tparam_ty, ck, ty)) in
+  let env, cstrss = List.map_env env tparams localize_bound in
+  env, List.concat cstrss
+
+(* Helper functions *)
+
+let hint_locl env h =
+  let h = Decl_hint.hint env.Env.decl_env h in
+  localize_with_self env h
+
+(* Ensure that types are equivalent i.e. subtypes of each other *)
 let unify_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
-  TUtils.unify env ty1 ty2
+  ignore (TUtils.sub_type env ty2 ty1);
+  ignore (TUtils.sub_type env ty1 ty2)
 
 let sub_type_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
-  TUtils.sub_type env ty1 ty2
+  ignore (TUtils.sub_type env ty1 ty2)

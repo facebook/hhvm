@@ -1,0 +1,10 @@
+(GOOD) Bytes (props) works
+(GOOD) Bytes (arrays) works
+(GOOD) Bytes (dynamic) works
+(GOOD) Bytes (Mixed Map) works in default mode
+(GOOD) Bytes (Mixed Map) works in USER_TYPES_ONLY mode
+(GOOD) Bytes (Vector) works in default mode
+(GOOD) Bytes (Vector) works in USER_TYPES_ONLY mode
+(GOOD) Bytes (SharedString) works
+(GOOD) Bytes (Mixed Class Props) works in default mode
+(GOOD) Bytes (Mixed Class Props) works in USER_TYPES_ONLY mode

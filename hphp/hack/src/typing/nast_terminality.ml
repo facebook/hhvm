@@ -11,21 +11,24 @@
 open Core
 open Nast
 
+module Env = Typing_env
 module SN = Naming_special_names
 
-module FuncTerm = Typing_heap.FuncTerminality
+module FuncTerm = Typing_func_terminality
 
 let static_meth_terminal env ci meth_id =
   let class_name = match ci with
-    | CI cls_id -> Some (snd cls_id)
+    | CI (cls_id, _) -> Some (snd cls_id)
     | CIself | CIstatic -> Some (Typing_env.get_self_id env)
     | CIparent -> Some (Typing_env.get_parent_id env)
     | CIexpr _ -> None (* we declared the types, but didn't check the bodies yet
                        so can't tell anything here *)
-  in match class_name with
-    | Some class_name -> FuncTerm.raise_exit_if_terminal
-        (FuncTerm.get_static_meth class_name (snd meth_id))
-    | None -> ()
+  in
+  match class_name with
+  | Some class_name ->
+    FuncTerm.raise_exit_if_terminal
+      (FuncTerm.get_static_meth (Env.get_options env) class_name (snd meth_id))
+  | None -> ()
 
 (* Module coded with an exception, if we find a terminal statement we
  * throw the exception Exit.
@@ -44,11 +47,13 @@ end = struct
     | Continue _
     | Throw _
     | Return _
+    | Goto _
     | Expr (_, Yield_break)
     | Expr (_, Assert (AE_assert (_, False)))
       -> raise Exit
     | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _)) ->
-      FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun fun_name)
+      let tcopt = Env.get_options env in
+      FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun tcopt fun_name)
     | Expr (_, Call (Cnormal, (_, Class_const (ci, meth_id)), _, _)) ->
       static_meth_terminal env ci meth_id
     | If ((_, True), b1, _) -> terminal env inside_case b1
@@ -71,13 +76,14 @@ end = struct
     | While ((_, True), b)
     | Do (b, (_, True))
     | For ((_, Expr_list []), (_, Expr_list []), (_, Expr_list []), b) ->
-        if not (NastVisitor.HasBreak.block b) then raise Exit
+        if not (Nast.Visitor.HasBreak.block b) then raise Exit
     | Do _
     | While _
     | For _
     | Foreach _
     | Noop
     | Fallthrough
+    | GotoLabel _
     | Expr _
     | Static_var _ -> ()
 
@@ -133,10 +139,12 @@ end = struct
     | Continue _
     | Throw _
     | Return _
+    | Goto _
     | Expr (_, Yield_break)
     | Expr (_, Assert (AE_assert (_, False))) -> raise Exit
     | Expr (_, Call (Cnormal, (_, Id (_, fun_name)), _, _)) ->
-      FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun fun_name)
+      let tcopt = Env.get_options env in
+      FuncTerm.raise_exit_if_terminal (FuncTerm.get_fun tcopt fun_name)
     | Expr (_, Call (Cnormal, (_, Class_const (ci, meth_id)), _, _)) ->
       static_meth_terminal env ci meth_id
     | If ((_, True), b1, _) -> terminal env b1
@@ -155,6 +163,7 @@ end = struct
     | For _
     | Foreach _
     | Noop
+    | GotoLabel _
     | Expr _
     | Static_var _ -> ()
 

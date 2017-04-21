@@ -1,0 +1,363 @@
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+array(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  array(2) {
+    [0]=>
+    bool(false)
+    [1]=>
+    NULL
+  }
+  [2]=>
+  array(2) {
+    [0]=>
+    bool(true)
+    [1]=>
+    string(3) "abc"
+  }
+  [3]=>
+  float(1.23)
+  [4]=>
+  array(0) {
+  }
+}
+array(3) {
+  [0]=>
+  vec(0) {
+  }
+  [1]=>
+  dict(0) {
+  }
+  [2]=>
+  keyset(0) {
+  }
+}
+array(3) {
+  [0]=>
+  vec(2) {
+    int(1)
+    int(2)
+  }
+  [1]=>
+  dict(1) {
+    ["abc"]=>
+    bool(true)
+  }
+  [2]=>
+  keyset(3) {
+    string(1) "a"
+    int(100)
+    string(1) "b"
+  }
+}
+array(0) {
+}
+array(2) {
+  [0]=>
+  array(4) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(4)
+  }
+  [1]=>
+  array(4) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+    [3]=>
+    int(4)
+  }
+}
+array(1) {
+  [0]=>
+  array(4) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    string(1) "b"
+    [2]=>
+    string(1) "c"
+    [3]=>
+    string(1) "d"
+  }
+}
+vec(0) {
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+}
+vec(5) {
+  int(1)
+  vec(2) {
+    bool(false)
+    NULL
+  }
+  vec(2) {
+    bool(true)
+    string(3) "abc"
+  }
+  float(1.23)
+  vec(0) {
+  }
+}
+vec(3) {
+  array(0) {
+  }
+  dict(0) {
+  }
+  keyset(0) {
+  }
+}
+vec(3) {
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  dict(1) {
+    ["abc"]=>
+    bool(true)
+  }
+  keyset(3) {
+    string(1) "a"
+    int(100)
+    string(1) "b"
+  }
+}
+vec(0) {
+}
+vec(2) {
+  vec(4) {
+    int(1)
+    int(2)
+    int(3)
+    int(4)
+  }
+  vec(4) {
+    int(1)
+    int(2)
+    int(3)
+    int(4)
+  }
+}
+vec(1) {
+  vec(4) {
+    string(1) "a"
+    string(1) "b"
+    string(1) "c"
+    string(1) "d"
+  }
+}
+dict(0) {
+}
+dict(4) {
+  [100]=>
+  int(1)
+  [200]=>
+  int(2)
+  [300]=>
+  int(3)
+  [400]=>
+  int(4)
+}
+dict(4) {
+  ["key1"]=>
+  string(1) "a"
+  ["key2"]=>
+  string(1) "b"
+  ["key3"]=>
+  string(1) "c"
+  ["key4"]=>
+  string(1) "d"
+}
+dict(2) {
+  ["key1"]=>
+  int(500)
+  ["key2"]=>
+  int(800)
+}
+dict(2) {
+  [100]=>
+  string(3) "abc"
+  [200]=>
+  string(3) "def"
+}
+dict(4) {
+  ["100"]=>
+  string(3) "abc"
+  ["200"]=>
+  string(3) "def"
+  [100]=>
+  string(3) "ghi"
+  [200]=>
+  string(3) "jkl"
+}
+dict(5) {
+  [0]=>
+  int(1)
+  [1]=>
+  dict(2) {
+    ["a"]=>
+    bool(false)
+    [5]=>
+    NULL
+  }
+  [2]=>
+  dict(2) {
+    [10]=>
+    bool(true)
+    ["z"]=>
+    string(3) "abc"
+  }
+  [3]=>
+  float(1.23)
+  [4]=>
+  dict(0) {
+  }
+}
+dict(3) {
+  ["100"]=>
+  int(5)
+  [100]=>
+  string(3) "abc"
+  [1]=>
+  dict(2) {
+    [123]=>
+    string(3) "abc"
+    ["123"]=>
+    int(10)
+  }
+}
+dict(3) {
+  [100]=>
+  array(0) {
+  }
+  [200]=>
+  vec(0) {
+  }
+  [300]=>
+  keyset(0) {
+  }
+}
+dict(3) {
+  [100]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [200]=>
+  vec(1) {
+    string(3) "abc"
+  }
+  [300]=>
+  keyset(3) {
+    string(1) "a"
+    int(100)
+    string(1) "b"
+  }
+}
+dict(0) {
+}
+dict(2) {
+  [123]=>
+  dict(4) {
+    [100]=>
+    int(1)
+    [200]=>
+    int(2)
+    [300]=>
+    int(3)
+    [400]=>
+    int(4)
+  }
+  [456]=>
+  dict(4) {
+    [100]=>
+    int(1)
+    [200]=>
+    int(2)
+    [300]=>
+    int(3)
+    [400]=>
+    int(4)
+  }
+}
+dict(1) {
+  [100]=>
+  dict(4) {
+    ["key1"]=>
+    string(1) "a"
+    ["key2"]=>
+    string(1) "b"
+    ["key3"]=>
+    string(1) "c"
+    ["key4"]=>
+    string(1) "d"
+  }
+}
+keyset(0) {
+}
+keyset(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+keyset(4) {
+  int(1)
+  string(1) "1"
+  int(2)
+  string(1) "2"
+}
+keyset(0) {
+}
+keyset(1) {
+  int(1)
+}

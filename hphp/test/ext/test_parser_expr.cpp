@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -469,7 +469,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { attribute Thing a, Thing b; }",
 
     "class xhp_thing {\n"
-    "protected static function &__xhpAttributeDeclaration() {\n"
+    "protected static function __xhpAttributeDeclaration() {\n"
     "static $_ = -1;\n"
     "if ($_ === -1) {\n"
     "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
@@ -484,7 +484,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { attribute enum { 123, 456 } a; }",
 
     "class xhp_thing {\n"
-    "protected static function &__xhpAttributeDeclaration() {\n"
+    "protected static function __xhpAttributeDeclaration() {\n"
     "static $_ = -1;\n"
     "if ($_ === -1) {\n"
     "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
@@ -499,7 +499,7 @@ bool TestParserExpr::TestXHP() {
     " class :bar { attribute :foo, :foo, string bar; }",
 
     "class xhp_foo {\n"
-    "protected static function &__xhpAttributeDeclaration() {\n"
+    "protected static function __xhpAttributeDeclaration() {\n"
     "static $_ = -1;\n"
     "if ($_ === -1) {\n"
     "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
@@ -509,7 +509,7 @@ bool TestParserExpr::TestXHP() {
     "}\n"
     "}\n"
     "class xhp_bar {\n"
-    "protected static function &__xhpAttributeDeclaration() {\n"
+    "protected static function __xhpAttributeDeclaration() {\n"
     "static $_ = -1;\n"
     "if ($_ === -1) {\n"
     "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
@@ -525,7 +525,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { attribute int a = 123 @required, var b; }",
 
     "class xhp_thing {\n"
-    "protected static function &__xhpAttributeDeclaration() {\n"
+    "protected static function __xhpAttributeDeclaration() {\n"
     "static $_ = -1;\n"
     "if ($_ === -1) {\n"
     "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
@@ -539,7 +539,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { category %a:foo, %b; }",
 
     "class xhp_thing {\n"
-    "protected function &__xhpCategoryDeclaration() {\n"
+    "protected function __xhpCategoryDeclaration() {\n"
     "static $_ = array('a:foo' => 1, 'b' => 1);\n"
     "return $_;\n"
     "}\n"
@@ -549,7 +549,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { children(any,any); }",
 
     "class xhp_thing {\n"
-    "protected function &__xhpChildrenDeclaration() {\n"
+    "protected function __xhpChildrenDeclaration() {\n"
     "static $_ = array(0, 5, array(4, array(0, 1, null), "
     "array(0, 1, null)));\n"
     "return $_;\n"
@@ -559,7 +559,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { children any; }",
 
     "class xhp_thing {\n"
-    "protected function &__xhpChildrenDeclaration() {\n"
+    "protected function __xhpChildrenDeclaration() {\n"
     "static $_ = 1;\n"
     "return $_;\n"
     "}\n"
@@ -568,7 +568,7 @@ bool TestParserExpr::TestXHP() {
   V("<?hh class :thing { children ((:a:foo | %b:bar)+, pcdata); }",
 
     "class xhp_thing {\n"
-    "protected function &__xhpChildrenDeclaration() {\n"
+    "protected function __xhpChildrenDeclaration() {\n"
     "static $_ = array(0, 5, array(4, array(3, 5, "
     "array(5, array(0, 3, 'xhp_a__foo'), array(0, 4, 'b__bar'))), "
     "array(0, 2, null)));\n"
@@ -582,11 +582,11 @@ bool TestParserExpr::TestXHP() {
     "  children any; }",
 
     "class xhp_thing {\n"
-    "protected function &__xhpCategoryDeclaration() {\n"
+    "protected function __xhpCategoryDeclaration() {\n"
     "static $_ = array('a:foo' => 1, 'b' => 1);\n"
     "return $_;\n"
     "}\n"
-    "protected function &__xhpChildrenDeclaration() {\n"
+    "protected function __xhpChildrenDeclaration() {\n"
     "static $_ = 1;\n"
     "return $_;\n"
     "}\n"
@@ -602,11 +602,11 @@ bool TestParserExpr::TestXHP() {
     "}",
 
     "class xhp_thing {\n"
-    "protected function &__xhpCategoryDeclaration() {\n"
+    "protected function __xhpCategoryDeclaration() {\n"
     "static $_ = array('a' => 1);\n"
     "return $_;\n"
     "}\n"
-    "protected function &__xhpChildrenDeclaration() {\n"
+    "protected function __xhpChildrenDeclaration() {\n"
     "static $_ = 1;\n"
     "return $_;\n"
     "}\n"
@@ -614,7 +614,7 @@ bool TestParserExpr::TestXHP() {
     "}\n"
     "public function bar() {\n"
     "}\n"
-    "protected static function &__xhpAttributeDeclaration() {\n"
+    "protected static function __xhpAttributeDeclaration() {\n"
     "static $_ = -1;\n"
     "if ($_ === -1) {\n"
     "$_ = array_merge(parent::__xhpAttributeDeclaration(), "

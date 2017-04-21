@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,11 +28,11 @@ TRACE_SET_MOD(debugger);
 
 using namespace Eval;
 
-class DebuggerExtension final : public Extension {
- public:
+struct DebuggerExtension final : Extension {
   DebuggerExtension() : Extension("debugger", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_NAMED_FE(__SystemLib\\debugger_get_info, HHVM_FN(debugger_get_info));
+    HHVM_FE(hphpd_auth_token);
     HHVM_FE(hphpd_break);
     HHVM_FE(hphp_debugger_attached);
     loadSystemlib();
@@ -40,6 +40,15 @@ class DebuggerExtension final : public Extension {
 } s_debugger_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+String HHVM_FUNCTION(hphpd_auth_token) {
+  TRACE(5, "in f_hphpd_auth_token()\n");
+  if (auto proxy = Debugger::GetProxy()) {
+    return String(proxy->requestAuthToken());
+  }
+
+  return String();
+}
 
 void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");
@@ -49,7 +58,7 @@ void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
           condition, g_context->m_dbgNoBreak);
     return;
   }
-  CallerFrame cf;
+  VMRegAnchor _;
   Debugger::InterruptVMHook(HardBreakPoint);
   if (RuntimeOption::EvalJit && DEBUGGER_FORCE_INTR) {
     TRACE(5, "switch mode\n");

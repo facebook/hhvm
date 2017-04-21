@@ -1,4 +1,5 @@
-~lostintersect(~lostoption(Tint))
+File "fake_members4.php", line 23, characters 5-21:
+  (?int)
 File "fake_members4.php", line 24, characters 12-19:
 Invalid return type (Typing[4110])
 File "fake_members4.php", line 18, characters 27-29:

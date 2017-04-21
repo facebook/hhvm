@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,23 +16,17 @@
 #ifndef incl_HPHP_CODE_RELOCATION_H_
 #define incl_HPHP_CODE_RELOCATION_H_
 
+#include "hphp/runtime/vm/jit/types.h"
+#include "hphp/util/data-block.h"
+
+#include <map>
 #include <set>
-#include <cstdio>
 #include <vector>
 
-#include "hphp/util/data-block.h"
-#include "hphp/runtime/vm/srckey.h"
-#include "hphp/runtime/vm/jit/srcdb.h"
-
-namespace HPHP {
-
-struct CodeCache;
-
-namespace jit {
+namespace HPHP { namespace jit {
 
 struct AsmInfo;
-
-//////////////////////////////////////////////////////////////////////
+struct CGMeta;
 
 struct RelocationInfo {
   RelocationInfo() {}
@@ -50,10 +44,16 @@ struct RelocationInfo {
   }
   void rewind(TCA start, TCA end);
   void markAddressImmediates(const std::set<TCA>& ai) {
-    m_addressImmediates.insert(ai.begin(), ai.end());
+    addressImmediates.insert(ai.begin(), ai.end());
   }
   bool isAddressImmediate(TCA ip) {
-    return m_addressImmediates.count(ip);
+    return addressImmediates.count(ip);
+  }
+  void markSmashableRelocation(TCA ip) {
+    m_smashableRelocations.insert(ip);
+  }
+  bool isSmashableRelocation(TCA ip) {
+    return m_smashableRelocations.count(ip);
   }
   typedef std::vector<std::pair<TCA,TCA>> RangeVec;
   const RangeVec& srcRanges() { return m_srcRanges; }
@@ -69,84 +69,24 @@ struct RelocationInfo {
    * the fixup map would want the address of the nop.
    */
   std::map<TCA,std::pair<TCA,TCA>> m_adjustedAddresses;
-  std::set<TCA> m_addressImmediates;
+  std::set<TCA> addressImmediates;
+  std::set<TCA> m_smashableRelocations;
 };
 
-/*
-  relocate using data from perf.
-  If time is non-negative, its used as the time to run perf record.
-  If time is -1, we pick a random subset of translations, and relocate them
-  in a random order.
-  If time is -2, we relocate all of the translations.
-
-  Currently we don't ever relocate anything from frozen (or prof). We also
-  don't relocate the cold portion of translations; but we still need to know
-  where those are in order to relocate back-references to the code that was
-  relocated.
-*/
-void liveRelocate(int time);
-inline void liveRelocate(bool random) {
-  return liveRelocate(random ? -1 : 20);
-}
-void recordPerfRelocMap(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CodeGenFixups& fixups);
-String perfRelocMapInfo(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CodeGenFixups& fixups);
-
-struct TransRelocInfo;
-void readRelocations(
-  FILE* relocFile,
-  std::set<TCA>* liveStubs,
-  void (*callback)(TransRelocInfo&& tri, void* data),
-  void* data);
-void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& hot);
-
-/*
- * Relocate a new translation into a free region in the TC and update the
- * TransLoc.
- *
- * Attempt to relocate the main, cold, and frozen portions of the translation
- * loc into memory freed memory in the TC their respective code blocks. In
- * addition, reusable stubs associated with this translation will be relocated
- * to be outside of loc so that they can be managed separately.
- *
- * If set *adjust will be updated to its post relocation address.
- */
-bool relocateNewTranslation(TransLoc& loc, CodeCache& cache,
-                            TCA* adjust = nullptr);
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * X64-specific portions of the code are separated out here.
- */
-namespace x64 {
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
-void adjustCodeForRelocation(RelocationInfo& rel, CodeGenFixups& fixups);
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
-                                 CodeGenFixups& fixups);
-void findFixups(TCA start, TCA end, CodeGenFixups& fixups);
+                                 CGMeta& fixups);
+void findFixups(TCA start, TCA end, CGMeta& fixups);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
-                CodeGenFixups& fixups,
+                DataBlock& srcBlock,
+                CGMeta& fixups,
                 TCA* exitAddr);
 
-}
-
-//////////////////////////////////////////////////////////////////////
-
 }}
-
 
 #endif

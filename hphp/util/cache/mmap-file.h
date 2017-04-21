@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,14 +23,14 @@
 #include <cstdint>
 #include <string>
 
-#include <boost/utility.hpp>
-
 namespace HPHP {
 
-class MmapFile : private boost::noncopyable {
- public:
+struct MmapFile {
   explicit MmapFile(const std::string& path);
   ~MmapFile();
+
+  MmapFile(const MmapFile&) = delete;
+  MmapFile& operator=(const MmapFile&) = delete;
 
   // Class behavior is undefined until this returns true.
   // Read pointer is initialized to the beginning of the file.

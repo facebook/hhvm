@@ -26,6 +26,7 @@ function main(): void {
   $x2 = (string)$z;
   $x3 = new B();
   $x4 = (A)$x3;
+  $x5 = (false && (true)); // (true) is not a cast.
   if($y === 11 && $x2 === 'Afda') {
     echo 'OK';
   }

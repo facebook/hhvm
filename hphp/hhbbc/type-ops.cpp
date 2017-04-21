@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,17 +52,6 @@ folly::Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
   return folly::none;
 }
 
-// As eval_const, but don't divide/mod by zero at compile time.
-template<class Fun>
-folly::Optional<Type> eval_const_divmod(Type t1, Type t2, Fun fun) {
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-  if (v1 && v2 && cellToInt(*v2) != 0 && cellToDouble(*v2) != 0.0) {
-    return eval_cell([&] { return fun(*v1, *v2); });
-  }
-  return folly::none;
-}
-
 template<class Fun>
 Type bitwise_impl(Type t1, Type t2, Fun op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
@@ -92,17 +81,23 @@ Type typeToInt(Type ty) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeAdd(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellAdd))     return *t;
-  if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) return TArr;
+  if (auto t = eval_const(t1, t2, cellAdd))           return *t;
+  if (auto t = usual_arith_conversions(t1, t2))       return *t;
+  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
+  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
+  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
+  if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
   return TInitCell;
 }
 
 Type typeAddO(Type t1, Type t2) {
-  if (auto t = eval_const(t1, t2, cellAddO))    return *t;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
-  if (auto t = usual_arith_conversions(t1, t2)) return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr)) return TArr;
+  if (auto t = eval_const(t1, t2, cellAddO))          return *t;
+  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt))       return TNum;
+  if (auto t = usual_arith_conversions(t1, t2))       return *t;
+  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
+  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
+  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
+  if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
   return TInitCell;
 }
 
@@ -128,12 +123,12 @@ Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellSubO); }
 Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
 
 Type typeDiv(Type t1, Type t2) {
-  if (auto t = eval_const_divmod(t1, t2, cellDiv)) return *t;
+  if (auto t = eval_const(t1, t2, cellDiv)) return *t;
   return TInitPrim;
 }
 
 Type typeMod(Type t1, Type t2) {
-  if (auto t = eval_const_divmod(t1, t2, cellMod)) return *t;
+  if (auto t = eval_const(t1, t2, cellMod)) return *t;
   return TInitPrim;
 }
 
@@ -172,7 +167,7 @@ Type typeIncDec(IncDecOp op, Type t) {
     }
 
     // No-op on bool, array, resource, object.
-    if (t.subtypeOfAny(TBool, TArr, TRes, TObj)) return t;
+    if (t.subtypeOfAny(TBool, TArr, TRes, TObj, TVec, TDict, TKeyset)) return t;
 
     // Last unhandled case: strings. These result in Int|Str because of the
     // behavior on strictly-numeric strings, and we can't express that yet.

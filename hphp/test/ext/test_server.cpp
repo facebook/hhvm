@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/util/async-func.h"
-#include "hphp/util/process.h"
+#include "hphp/util/process-exec.h"
 
 #include "hphp/runtime/ext/curl/ext_curl.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
@@ -32,8 +32,6 @@
 #include "hphp/runtime/server/server.h"
 
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
 
 #include <fstream>
 #include <memory>
@@ -41,6 +39,7 @@
 #include <vector>
 
 #include <folly/Conv.h>
+#include <folly/portability/Sockets.h>
 
 using namespace HPHP;
 
@@ -74,7 +73,6 @@ bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
   assert(input);
   if (port == 0) port = s_server_port;
 
-  if (!CleanUp()) return false;
   std::string fullPath = "runtime/tmp/string";
   std::ofstream f(fullPath.c_str());
   if (!f) {
@@ -193,9 +191,12 @@ void TestServer::RunServer() {
     nullptr
   };
 
+#ifdef HHVM_PATH
   // replace __HHVM__
   argv[0] = HHVM_PATH;
-  Process::Exec(argv[0], argv, nullptr, out, &err);
+#endif
+
+  proc::exec(argv[0], argv, nullptr, out, &err);
 }
 
 void TestServer::StopServer() {
@@ -231,7 +232,7 @@ void TestServer::KillServer() {
   std::string out, err;
   const char *argv[] = {"kill", buf, nullptr};
   for (int i = 0; i < 10; i++) {
-    auto ret = Process::Exec(argv[0], argv, nullptr, out, &err);
+    auto ret = proc::exec(argv[0], argv, nullptr, out, &err);
     if (ret) {
       return;
     }
@@ -240,7 +241,7 @@ void TestServer::KillServer() {
   // Last resort
   const char *argv9[] = {"kill", "-9", buf, nullptr};
   for (int i = 0; i < 10; i++) {
-    auto ret = Process::Exec(argv9[0], argv9, nullptr, out, &err);
+    auto ret = proc::exec(argv9[0], argv9, nullptr, out, &err);
     if (ret) {
       return;
     }
@@ -251,8 +252,7 @@ void TestServer::KillServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestServerRequestHandler : public RequestHandler {
-public:
+struct TestServerRequestHandler : RequestHandler {
   explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
   virtual void handleRequest(Transport *transport) {
@@ -486,8 +486,9 @@ bool TestServer::TestSetCookie() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestTransport : public Transport {
-public:
+const StaticString s_test("test");
+
+struct TestTransport final : Transport {
   TestTransport() : m_code(0) {}
 
   int m_code;
@@ -496,18 +497,25 @@ public:
   /**
    * Implementing HttpTransport...
    */
-  virtual const char *getUrl() { return "/string";}
-  virtual const char *getRemoteHost() { return "remote";}
-  virtual const void *getPostData(int &size) { size = 0; return nullptr;}
-  virtual uint16_t getRemotePort() { return 0; }
-  virtual Method getMethod() { return Transport::Method::GET;}
-  virtual std::string getHeader(const char *name) { return "";}
-  virtual void getHeaders(HeaderMap &headers) {}
-  virtual void addHeaderImpl(const char *name, const char *value) {}
-  virtual void removeHeaderImpl(const char *name) {}
+  const char *getUrl() override { return "/string"; }
+  const char *getRemoteHost() override { return "remote"; }
+  const void *getPostData(size_t &size) override { size = 0; return nullptr; }
+  uint16_t getRemotePort() override { return 0; }
+  Method getMethod() override { return Transport::Method::GET; }
+  std::string getHeader(const char *name) override { return ""; }
+  void getHeaders(HeaderMap &headers) override {}
+  void addHeaderImpl(const char *name, const char *value) override {}
+  void removeHeaderImpl(const char *name) override {}
 
-  virtual void sendImpl(const void *data, int size, int code, bool chunked,
-                        bool eom) {
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_test;
+  }
+
+  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
+       override {
     m_response.clear();
     m_response.append((const char *)data, size);
     m_code = code;
@@ -650,11 +658,10 @@ bool TestServer::TestTakeoverServer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class EchoHandler : public RequestHandler {
-public:
+struct EchoHandler final : RequestHandler {
   explicit EchoHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
+  void handleRequest(Transport *transport) override {
     g_context.getCheck();
     HeaderMap headers;
     transport->getHeaders(headers);
@@ -664,7 +671,7 @@ public:
     response += transport->getParam("name");
 
     if (transport->getMethod() == Transport::Method::POST) {
-      int size = 0;
+      size_t size = 0;
       auto const data = (const char *)transport->getPostData(size);
       response += "\nPOST data: ";
       response += std::string(data, size);
@@ -686,7 +693,7 @@ public:
     transport->sendString(response);
     hphp_memory_cleanup();
   }
-  virtual void abortRequest(Transport *transport) {
+  void abortRequest(Transport *transport) override {
     transport->sendString("Service Unavailable", 503);
   }
 };
@@ -730,8 +737,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }
@@ -760,8 +767,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }

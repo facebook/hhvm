@@ -41,7 +41,7 @@ def set(repo_id, path):
 
 
 def table(prefix):
-    return '%s_%s' % (prefix, K('HPHP::kRepoSchemaId').string())
+    return '%s_%s' % (prefix, K('HPHP::(anonymous namespace)::repoSchema').string())
 
 
 #------------------------------------------------------------------------------

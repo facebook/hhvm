@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,18 +39,19 @@
   ConstructPtr getNthKid(int n) const override;                         \
   int getKidCount() const override;                                     \
   void setNthKid(int n, ConstructPtr cp) override
+
 #define NULL_STATEMENT()                                    \
-  BlockStatementPtr(new BlockStatement(getScope(),          \
-                                       getLabelScope(),     \
-                                       getRange(),          \
-                                       StatementListPtr()))
+  std::make_shared<BlockStatement>(getScope(),              \
+                                   getLabelScope(),         \
+                                   getRange(),              \
+                                   StatementListPtr())
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(LabelScope);
 
-class Statement : public Construct {
+struct Statement : Construct {
 private:
   static const char *Names[];
 

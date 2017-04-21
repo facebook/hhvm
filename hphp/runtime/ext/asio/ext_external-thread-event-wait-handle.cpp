@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -120,6 +120,43 @@ void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
   destroyEvent(sweeping);
 }
 
+bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
+  if (getState() != STATE_WAITING) {
+    return false;               // already finished
+  }
+
+  if (!m_event->cancel()) {
+    return false;
+  }
+
+  // canceled; the processing thread will take care of cleanup
+
+  if (isInContext()) {
+    unregisterFromContext();
+  }
+
+  // clean up once we finish canceling event
+  auto exit_guard = folly::makeGuard([&] {
+      // unregister Sweepable
+      m_sweepable.unregister();
+      m_privData.reset();
+      // drop ownership by pending event (see initialize())
+      decRefObj(this);
+    });
+
+  auto parentChain = getParentChain();
+  setState(STATE_FAILED);
+  tvWriteObject(exception.get(), &m_resultOrException);
+  parentChain.unblock();
+
+  auto session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
+    session->onExternalThreadEventFail(this, exception);
+  }
+
+  return true;
+}
+
 void c_ExternalThreadEventWaitHandle::process() {
   assert(getState() == STATE_WAITING);
 
@@ -134,7 +171,7 @@ void c_ExternalThreadEventWaitHandle::process() {
   try {
     m_event->unserialize(result);
   } catch (const Object& exception) {
-    assert(exception->instanceof(SystemLib::s_ExceptionClass));
+    assert(exception->instanceof(SystemLib::s_ThrowableClass));
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,8 +25,6 @@
 
 #include <sqlite3.h>
 
-// For sysconf(3).
-#include <unistd.h>
 // For getpwuid_r(3).
 #include <sys/types.h>
 #include <pwd.h>
@@ -35,21 +33,23 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/repo-status.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Repo : public RepoProxy {
-  static SimpleMutex s_lock;
-  static unsigned s_nRepos;
-
-public:
+struct Repo : RepoProxy {
   struct GlobalData;
 
   // Do not directly instantiate this class; a thread-local creates one per
   // thread on demand when Repo::get() is called.
   static Repo& get();
+  // Prefork is called before forking. It attempts to shut down other
+  // threads and returns true if forking should be prevented, false if
+  // it's ok to proceed.
   static bool prefork();
   static void postfork(pid_t pid);
 
@@ -95,8 +95,8 @@ public:
   static void setCliFile(const std::string& cliFile);
 
   std::unique_ptr<Unit> loadUnit(const std::string& name, const MD5& md5);
-  bool findFile(const char* path, const std::string& root, MD5& md5);
-  bool insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
+  RepoStatus findFile(const char* path, const std::string& root, MD5& md5);
+  RepoStatus insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);
 
   /*
@@ -146,11 +146,12 @@ public:
   struct InsertFileHashStmt : public RepoProxy::Stmt {
     InsertFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, const StringData* path, const MD5& md5);
+    // throws(RepoExc)
   };
 
   struct GetFileHashStmt : public RepoProxy::Stmt {
     GetFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(const char* path, MD5& md5);
+    RepoStatus get(const char* path, MD5& md5);
   };
 
   InsertFileHashStmt m_insertFileHash[RepoIdCount];
@@ -158,16 +159,16 @@ public:
 
  public:
   std::string table(int repoId, const char* tablePrefix);
-  void exec(const std::string& sQuery);
+  void exec(const std::string& sQuery); // throws(RepoExc)
 
-  void begin();
+  void begin(); // throws(RepoExc)
  private:
-  void txPop();
+  void txPop(); // throws(RepoExc)
  public:
   void rollback(); // nothrow
-  void commit();
-  bool insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
-                  RepoTxn& txn); // nothrow
+  void commit(); // throws(RepoExc)
+  RepoStatus insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
+                        RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
 
   // All database table names use the schema ID (md5 checksum based on the
@@ -193,17 +194,19 @@ public:
   void disconnect();
   void initCentral();
   std::string insertSchema(const char* path);
-  bool openCentral(const char* repoPath, std::string& errorMsg);
+  RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
   void initLocal();
   void attachLocal(const char* repoPath, bool isWritable);
-  void pragmas(int repoId);
-  void getIntPragma(int repoId, const char* name, int& val);
-  void setIntPragma(int repoId, const char* name, int val);
+  void pragmas(int repoId); // throws(RepoExc)
+  void getIntPragma(int repoId, const char* name, int& val); // throws(RepoExc)
+  void setIntPragma(int repoId, const char* name, int val); // throws(RepoExc)
   void getTextPragma(int repoId, const char* name, std::string& val);
+  // throws(RepoExc)
   void setTextPragma(int repoId, const char* name, const char* val);
-  bool initSchema(int repoId, bool& isWritable, std::string& errorMsg);
+  // throws(RepoExc)
+  RepoStatus initSchema(int repoId, bool& isWritable, std::string& errorMsg);
   bool schemaExists(int repoId);
-  bool createSchema(int repoId, std::string& errorMsg);
+  RepoStatus createSchema(int repoId, std::string& errorMsg);
   bool writable(int repoId);
 
 private:
@@ -230,7 +233,8 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Try to commit a vector of unit emitters to the current repo.
+ * Try to commit a vector of unit emitters to the current repo.  Note that
+ * errors are ignored!
  */
 void batchCommit(std::vector<std::unique_ptr<UnitEmitter>>);
 

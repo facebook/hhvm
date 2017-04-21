@@ -27,7 +27,7 @@ def atomic_get(atomic):
         return atomic['_M_i']
 
 
-def vector_at(vec, idx):
+def vector_at(vec, idx, hasher=None):
     vec = vec['_M_impl']
 
     if idx >= vec['_M_finish'] - vec['_M_start']:
@@ -36,16 +36,16 @@ def vector_at(vec, idx):
         return vec['_M_start'][idx]
 
 
-def unordered_map_at(umap, key):
+def unordered_map_at(umap, key, hasher=None):
     h = umap['_M_h']
 
-    bucket = h['_M_buckets'][hash_of(key) % h['_M_bucket_count']]
+    bucket = h['_M_buckets'][hash_of(key, hasher) % h['_M_bucket_count']]
     if bucket == 0x0:
         return None
 
     node = bucket['_M_nxt']
 
-    value_type = T(str(umap.type) + '::value_type').pointer()
+    value_type = T(str(rawtype(umap.type)) + '::value_type').pointer()
 
     while node != 0x0:
         # Hashtable nodes contain only a pointer to the next node in the
@@ -62,8 +62,8 @@ def unordered_map_at(umap, key):
 #------------------------------------------------------------------------------
 # Boost accessors.
 
-def boost_flat_map_at(flat_map, key):
-    vec = flat_map['m_flat_tree']['m_data']['m_vect']['members_']
+def boost_flat_map_at(flat_map, key, hasher=None):
+    vec = flat_map['m_flat_tree']['m_data']['m_vect']['m_holder']
 
     first = vec['m_start']
     last = first + vec['m_size']
@@ -92,18 +92,26 @@ def boost_flat_map_at(flat_map, key):
 # TBB accessors.
 
 def tbb_atomic_get(atomic):
+    try:
+        return atomic['rep']['value']
+    except gdb.error:
+        # atomic_impl representation since version 4.1 Update 2
+        return atomic['my_storage']['my_value']
     return atomic['rep']['value']
 
 
-def tbb_chm_at(chm, key):
-    h = hash_of(key) & tbb_atomic_get(chm['my_mask'])
+def tbb_chm_at(chm, key, hasher=None):
+    h = hash_of(key, hasher) & tbb_atomic_get(chm['my_mask'])
 
     # This simulates an Intel BSR (i.e., lg2) on h|1.
     s = len('{0:b}'.format(int(h | 1))) - 1     # segment_idx
     h -= 1 << s & ~1                            # segment_base
 
     # bucket_accessor b(this, h & m) <=> this->get_bucket(h & m).
-    seg = chm['my_table'][s]
+    try:
+        seg = chm['my_table'][s]
+    except:
+        return None
     b = seg[h].address
 
     if b['node_list'] == V('tbb::interface5::internal::rehash_req'):
@@ -131,7 +139,7 @@ def thread_local_get(tl):
     return tl['m_node']['m_p']
 
 
-def atomic_vector_at(av, idx):
+def atomic_vector_at(av, idx, hasher=None):
     size = av['m_size']
 
     if idx < size:
@@ -140,11 +148,11 @@ def atomic_vector_at(av, idx):
         return atomic_vector_at(atomic_get(av['m_next']), idx - size)
 
 
-def fixed_vector_at(fv, idx):
+def fixed_vector_at(fv, idx, hasher=None):
     return rawptr(fv['m_sp'])[idx]
 
 
-def fixed_string_map_at(fsm, sd):
+def fixed_string_map_at(fsm, sd, hasher=None):
     case_sensitive = rawtype(fsm.type).template_argument(1)
     sinfo = strinfo(sd, case_sensitive)
 
@@ -174,7 +182,7 @@ def _ism_access_list(ism):
     t = rawtype(rawtype(ism.type).template_argument(0))
     return ism['m_map']['m_table'].cast(t.pointer())
 
-def indexed_string_map_at(ism, idx):
+def indexed_string_map_at(ism, idx, hasher=None):
     # If `idx' is a string, it must be converted to an index via the underlying
     # FixedStringMap.
     sinfo = strinfo(idx)
@@ -187,11 +195,11 @@ def indexed_string_map_at(ism, idx):
     return None
 
 
-def tread_hash_map_at(thm, key):
+def tread_hash_map_at(thm, key, hasher=None):
     table = atomic_get(thm['m_table'])
     capac = table['capac']
 
-    idx = (hash_of(key) & (capac - 1)).cast(T('size_t'))
+    idx = (hash_of(key, hasher) & (capac - 1)).cast(T('size_t'))
 
     while True:
         entry = table['entries'][idx]
@@ -211,15 +219,11 @@ def tread_hash_map_at(thm, key):
 # PHP value accessors.
 
 def _object_data_prop_vec(obj):
-    cls = rawptr(obj['m_cls'])
-    extra = rawptr(cls['m_extra'])
-
-    prop_vec = (obj.address + 1).cast(T('uintptr_t')) + \
-                extra['m_builtinODTailSize']
+    prop_vec = (obj.address + 1).cast(T('uintptr_t'))
     return prop_vec.cast(T('HPHP::TypedValue').pointer())
 
 
-def object_data_at(obj, prop_name):
+def object_data_at(obj, prop_name, hasher=None):
     cls = rawptr(obj['m_cls'])
 
     prop_vec = _object_data_prop_vec(obj)
@@ -239,6 +243,8 @@ def idx_accessors():
     return {
         'std::vector':              vector_at,
         'std::unordered_map':       unordered_map_at,
+        'HPHP::jit::hash_map':      unordered_map_at,
+        'HPHP::hphp_hash_map':      unordered_map_at,
         'boost::container::flat_map':
                                     boost_flat_map_at,
         'tbb::interface5::concurrent_hash_map':
@@ -252,7 +258,7 @@ def idx_accessors():
     }
 
 
-def idx(container, index):
+def idx(container, index, hasher=None):
     value = None
 
     if container.type.code == gdb.TYPE_CODE_REF:
@@ -264,9 +270,9 @@ def idx(container, index):
     accessors = idx_accessors()
 
     if container_type in accessors:
-        value = accessors[container_type](container, index)
+        value = accessors[container_type](container, index, hasher)
     elif true_type in accessors:
-        value = accessors[true_type](container, index)
+        value = accessors[true_type](container, index, hasher)
     else:
         try:
             value = container[index]
@@ -280,14 +286,18 @@ def idx(container, index):
 class IdxCommand(gdb.Command):
     """Index into an arbitrary container.
 
-    Usage: idx <container> <index>
+    Usage: idx <container> <key> [hasher]
 
 GDB `print` is called on the address of the value, and then the value itself is
 printed.
 
 If `container' is of a recognized type (e.g., native arrays, std::vector),
 `idx' will index according to operator[].  Otherwise, it will attempt to treat
-`container' as an object with data member `index'.
+`container' as an object with data member `key'.
+
+If `container' is accessed by hashing `key', an optional `hasher' specification
+(a bare word string, such as "id", sans quotes) may be passed.  The specified
+hash, if valid, will be used instead of the default hash for the key type.
 """
 
     def __init__(self):
@@ -295,20 +305,26 @@ If `container' is of a recognized type (e.g., native arrays, std::vector),
 
     @errorwrap
     def invoke(self, args, from_tty):
-        argv = parse_argv(args)
+        argv = parse_argv(args, 2)
 
-        if len(argv) != 2:
-            print('Usage: idx <container> <index>')
+        if len(argv) == 2:
+            value = idx(argv[0], argv[1])
+        elif len(argv) == 3:
+            value = idx(argv[0], argv[1], argv[2])
+        else:
+            print('Usage: idx <container> <key> [hasher]')
             return
-
-        value = idx(argv[0], argv[1])
 
         if value is None:
             print('idx: Element not found.')
             return None
 
+        ty = str(value.type.pointer())
+        ty_parts = re.split('([*&])', ty, 1)
+        ty_parts[0] = "'%s'" % ty_parts[0]
+
         gdb.execute('print *(%s)%s' % (
-            str(value.type.pointer()), str(value.address)))
+            ''.join(ty_parts), str(value.address)))
 
 
 class IdxFunction(gdb.Function):

@@ -9,29 +9,23 @@
  *)
 
 open Core
+open SymbolInfoServiceTypes
 
 (* This module dumps all the symbol info(like fun-calls) in input files *)
 
-type result = {
-  fun_calls: SymbolFunCallService.result list;
-  symbol_types: SymbolTypeService.result list;
-}
-
-let recheck_naming filename_l =
+let recheck_naming filename_l tcopt =
   List.iter filename_l begin fun file ->
     match Parser_heap.ParserHeap.get file with
-    | Some ast -> begin
-      let tcopt = TypecheckerOptions.permissive in
+    | Some (ast, _) -> begin
+      let tcopt = TypecheckerOptions.make_permissive tcopt in
         Errors.ignore_ begin fun () ->
           (* We only need to name to find references to locals *)
           List.iter ast begin function
             | Ast.Fun f ->
-                let nenv = Naming.empty tcopt in
-                let _ = Naming.fun_ nenv f in
+                let _ = Naming.fun_ tcopt f in
                 ()
             | Ast.Class c ->
-                let nenv = Naming.empty tcopt in
-                let _ = Naming.class_ nenv c in
+                let _ = Naming.class_ tcopt c in
                 ()
             | _ -> ()
           end
@@ -40,33 +34,32 @@ let recheck_naming filename_l =
     | None -> () (* Do nothing if the file is not in parser heap *)
   end
 
-let recheck_typing fileinfo_l =
-  let nenv = Naming.empty (TypecheckerOptions.permissive) in
-  ignore(ServerIdeUtils.recheck nenv fileinfo_l)
+let recheck_typing filetuple_l tcopt =
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
+  ignore(ServerIdeUtils.recheck tcopt filetuple_l)
 
-let helper acc filetuple_l =
+let helper tcopt acc filetuple_l  =
   let fun_call_map = ref Pos.Map.empty in
   SymbolFunCallService.attach_hooks fun_call_map;
   let type_map = ref Pos.Map.empty in
   let lvar_map = ref Pos.Map.empty in
   SymbolTypeService.attach_hooks type_map lvar_map;
   let filename_l = List.rev_map filetuple_l fst in
-  let fileinfo_l = List.rev_map filetuple_l snd in
-  recheck_naming filename_l;
-  recheck_typing fileinfo_l;
+  recheck_naming filename_l tcopt;
+  recheck_typing filetuple_l tcopt;
   SymbolFunCallService.detach_hooks ();
   SymbolTypeService.detach_hooks ();
   let fun_calls = Pos.Map.values !fun_call_map in
   let symbol_types = SymbolTypeService.generate_types !lvar_map !type_map in
   (fun_calls, symbol_types) :: acc
 
-let parallel_helper workers filetuple_l =
+let parallel_helper workers filetuple_l tcopt =
   MultiWorker.call
     workers
-    ~job:helper
+    ~job:(helper tcopt)
     ~neutral:[]
     ~merge:List.rev_append
-    ~next:(Bucket.make filetuple_l)
+    ~next:(MultiWorker.next workers filetuple_l)
 
 (* Format result from '(fun_calls * symbol_types) list' raw result into *)
 (* 'fun_calls list, symbol_types list' and store in SymbolInfoService.result *)
@@ -87,14 +80,15 @@ let go workers file_list env =
   (* Convert 'string list' into 'fileinfo list' *)
   let filetuple_l = List.fold_left file_list ~f:begin fun acc file_path ->
     let fn = Relative_path.create Relative_path.Root file_path in
-    match Relative_path.Map.get fn env.ServerEnv.files_info with
+    match Relative_path.Map.get env.ServerEnv.files_info fn with
     | Some fileinfo -> (fn, fileinfo) :: acc
     | None -> acc
   end ~init:[]
   in
+  let tcopt = env.ServerEnv.tcopt in
   let raw_result =
     if (List.length file_list) < 10 then
-      helper [] filetuple_l
+      helper tcopt [] filetuple_l
     else
-      parallel_helper workers filetuple_l in
+      parallel_helper workers filetuple_l tcopt in
   format_result raw_result

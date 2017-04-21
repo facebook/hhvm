@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
@@ -287,16 +286,16 @@ void findPredTransIDs(TransID headerTID, Block* b,
 
 /*
  * Computes the approximate number of times that `loop' was invoked
- * (i.e. entered) using profiling data.  This value is computed by
- * adding up the profiling weights of all the Profile translations
- * that may execute immediately before the Profile translation
- * containing the loop header.
+ * (i.e. entered) using profiling data.  This value is computed by adding up
+ * the profiling weights of all the Profile translations that may execute
+ * immediately before the Profile translation containing the loop header.
  */
 uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
-  always_assert(mcg->tx().profData());
+  auto const profData = jit::profData();
+  if (profData == nullptr) return 0;
 
-  // Find the predecessor TransIDs along each non-back-edge
-  // predecessor of the loop header.
+  // Find the predecessor TransIDs along each non-back-edge predecessor of the
+  // loop header.
   boost::dynamic_bitset<> visited(unit.numBlocks());
   TransIDSet predTIDs;
   auto headerTID = loop.header->front().marker().profTransID();
@@ -305,7 +304,7 @@ uint64_t countInvocations(const LoopInfo& loop, const IRUnit& unit) {
       findPredTransIDs(headerTID, predEdge.from(), visited, predTIDs);
     }
   }
-  auto const profData = mcg->tx().profData();
+
   uint64_t count = 0;
   for (auto tid : predTIDs) {
     count += profData->transCounter(tid);
@@ -484,7 +483,7 @@ Block* insertLoopPreExit(IRUnit& unit,
   auto const jmp = &(oldPreHeader->back());
   oldPreHeader->erase(jmp);
   newPreHeader->prepend(jmp);
-  auto exitPlaceholder = unit.gen(ExitPlaceholder, jmp->marker(), preExit);
+  auto exitPlaceholder = unit.gen(ExitPlaceholder, jmp->bcctx(), preExit);
   oldPreHeader->insert(oldPreHeader->end(), exitPlaceholder);
   exitPlaceholder->setNext(newPreHeader);
 
@@ -530,7 +529,7 @@ void insertLoopPreHeader(IRUnit& unit,
   }
 
   auto const preHeader = unit.defBlock(loop.numInvocations);
-  auto const marker = header->front().marker();
+  auto const bcctx = header->front().bcctx();
 
   // If the header starts with a DefLabel, the arguments from all the incoming
   // edges need to be collected in a new DefLabel in the new pre-header, and
@@ -538,7 +537,7 @@ void insertLoopPreHeader(IRUnit& unit,
   jit::vector<SSATmp*> args;
   if (header->front().is(DefLabel)) {
     auto const num_args = header->front().numDsts();
-    auto const label = unit.defLabel(num_args, marker);
+    auto const label = unit.defLabel(num_args, bcctx);
     preHeader->insert(preHeader->begin(), label);
     if (num_args > 0) {
       args.reserve(num_args);
@@ -547,9 +546,9 @@ void insertLoopPreHeader(IRUnit& unit,
   }
 
   if (args.empty()) {
-    preHeader->prepend(unit.gen(Jmp, marker, header));
+    preHeader->prepend(unit.gen(Jmp, bcctx, header));
   } else {
-    preHeader->prepend(unit.gen(Jmp, marker, header,
+    preHeader->prepend(unit.gen(Jmp, bcctx, header,
                                 std::make_pair(args.size(), &args[0])));
   }
 

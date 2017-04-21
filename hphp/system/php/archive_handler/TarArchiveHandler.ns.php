@@ -1,45 +1,46 @@
 <?php
 
 namespace __SystemLib {
+  use Exception;
+  use Phar;
+  use PharException;
+
   final class TarArchiveHandler extends ArchiveHandler {
-    private Map<string, ArchiveEntryData> $entries = Map { };
     private Map<string, string> $contents = Map { };
     private Map<string, string> $symlinks = Map { };
-    private string $path = '';
-    private $fp = null;
+    private $fp;
 
-    public function __construct(string $path) {
+    public function __construct(
+      string $path,
+      bool $preventHaltTokenCheck = true
+    ) {
       $this->path = $path;
-      $this->entries = Map { };
-
       if (file_exists($path)) {
-        $this->readTar();
+        $this->open($path);
+        $this->parseTar();
+        if (
+          !$preventHaltTokenCheck &&
+          strpos($this->stub, Phar::HALT_TOKEN) === false
+        ) {
+          throw new PharException(
+            Phar::HALT_TOKEN.' must be declared in a phar'
+          );
+        }
       }
     }
 
-    private function readTar() {
+    private function parseTar() {
       /* If you have GNU Tar installed, you should be able to find
        * the file format documentation (including header byte offsets) at:
        * - /usr/include/tar.h
        * - the tar info page (Top/Tar Internals/Standard)
        */
 
-      $path = $this->path;
-      $fp = fopen($path, 'rb');
-      $data = fread($fp, 2);
-      fclose($fp);
-
-      if ($data === "\37\213") {
-        $fp = gzopen($path, 'rb');
-      } else if ($data === 'BZ') {
-        $fp = bzopen($path, 'r');
-      } else {
-        $fp = fopen($path, 'rb');
-      }
-
+      $pos = 0;
       $next_file_name = null;
-      while (!feof($fp)) {
-        $header = fread($fp, 512);
+      while (!$this->eof()) {
+        $header = $this->stream_get_contents(512);
+        $pos += 512;
         // skip empty blocks
         if (!trim($header)) {
           continue;
@@ -51,64 +52,59 @@ namespace __SystemLib {
           $next_file_name = null;
         }
 
-        $len = octdec(substr($header, 124, 12));
+        $size = octdec(substr($header, 124, 12));
         $timestamp = octdec(trim(substr($header, 136, 12)));
-        $type = substr($header, 156, 1);
-        $this->entries[$filename] = new ArchiveEntryStat(
-          /* crc = */ null,
-          $len,
-          /* compressed size = */ null,
-          $timestamp
-        );
-        $data = "";
-        $read_len = 0;
-        while ($read_len != $len) {
-          $read_data = fread($fp, $len - $read_len);
-          $data .= $read_data;
-          $read_len += strlen($read_data);
-        }
+        $type = $header[156];
 
-        switch ($type) {
-          case 'L':
-            $next_file_name = trim($data);
-            break;
+        // Hidden .phar directory should not appear in files listing
+        if (strpos($filename, '.phar') === 0) {
+          if ($filename == '.phar/stub.php') {
+            $this->stub = $this->stream_get_contents($size);
+          } else if ($filename == '.phar/alias.txt') {
+            $this->alias = $this->stream_get_contents($size);
+          }
+        } else if (substr($filename, -1) !== '/') {
+          $this->entries[$filename] = new ArchiveEntryStat(
+            /* crc = */ null,
+            $size,
+            /* compressed size = */ $size,
+            $timestamp
+          );
 
-          case '0':
-          case "\0":
-            $this->contents[$filename] = $data;
-            break;
+          switch ($type) {
+            case 'L':
+              $next_file_name = trim($this->stream_get_contents($size));
+              break;
 
-          case '2':
-            // Assuming this is from GNU Tar
-            $target = trim(substr($header, 157, 100), "\0");
-            $this->symlinks[$filename] = $target;
-            break;
+            case '0':
+            case "\0":
+              $this->fileOffsets[$filename] = [$pos, $size];
+              break;
 
-          case '5':
-            // Directory, ignore
-            break;
+            case '2':
+              // Assuming this is from GNU Tar
+              $target = trim(substr($header, 157, 100), "\0");
+              $this->symlinks[$filename] = $target;
+              break;
 
-          default:
-            throw new \Exception("type $type is not implemented yet");
-        }
+            case '5':
+              // Directory, ignore
+              break;
 
-        if ($len % 512 !== 0) {
-          $leftover = 512 - ($len % 512);
-          $zeros = fread($fp, $leftover);
-          if (strlen(trim($zeros)) != 0) {
-            throw new \Exception("Malformed tar. Padding isn't zeros. $zeros");
+            default:
+              throw new Exception("type $type is not implemented yet");
           }
         }
-      }
-    }
-
-    public function getContentsList(): Map<string, ArchiveEntryStat> {
-      return $this->entries;
-    }
-
-    public function read(string $path): ?string {
-      if ($this->contents->contains($path)) {
-        return $this->contents[$path];
+        $pos += $size;
+        $this->seek($pos);
+        if ($size % 512 !== 0) {
+          $leftover = 512 - ($size % 512);
+          $zeros = $this->stream_get_contents($leftover);
+          if (strlen(trim($zeros)) != 0) {
+            throw new Exception("Malformed tar. Padding isn't zeros. $zeros");
+          }
+          $pos += $leftover;
+        }
       }
     }
 
@@ -125,8 +121,15 @@ namespace __SystemLib {
     }
 
     public function extractAllTo(string $root) {
-      foreach ($this->contents as $path => $data) {
-        file_put_contents($this->createFullPath($root, $path), $data);
+      foreach ($this->fileOffsets as $path => list($offset, $size)) {
+        $fp = fopen($this->createFullPath($root, $path), 'wb');
+        while ($size) {
+          $data = $this->stream_get_contents(min(1024, $size), $offset);
+          fwrite($fp, $data);
+          $size -= strlen($data);
+          $offset += strlen($data);
+        }
+        fclose($fp);
       }
 
       // Intentional difference to PHP5: PHP5 just creates an empty

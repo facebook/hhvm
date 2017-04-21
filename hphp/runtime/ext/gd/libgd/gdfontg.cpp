@@ -4383,7 +4383,7 @@ gdFontPtr gdFontGiant = &gdFontGiantRep;
 
 gdFontPtr gdFontGetGiant(void)
 {
-	return gdFontGiant;
+  return gdFontGiant;
 }
 
 /* This file has not been truncated. */

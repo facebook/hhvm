@@ -8,6 +8,5 @@
  *
  *)
 
-let go _ _ _ _ = Some (fun _ _ _ _ -> ())
-let incremental_update _ _ _ _ = ()
-let get_all_targets () = []
+let go _ _ _ _ = Some (fun _ _ -> ())
+let get_live_targets _ = ([], [])

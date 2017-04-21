@@ -70,7 +70,7 @@ class ReflectionClass implements Reflector {
   public function getRequirements(): array<string, ReflectionClass>;
   public function getShortName(): string;
   public function getStartLine(): int;
-  public function getStaticProperties(): array<string, ReflectionProperty>;
+  public function getStaticProperties(): array<string, mixed>;
   public function getStaticPropertyValue(string $name, mixed $def_value = null): mixed;
   public function getTraitAliases(): array<string, string>;
   public function getTraitNames(): array<string>;

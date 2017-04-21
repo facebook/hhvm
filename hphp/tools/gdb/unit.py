@@ -43,6 +43,7 @@ Use `unit none` to unset.  Just `unit` displays the current Unit.
 
         if argv[0] == 'none':
             curunit = None
+            return
         else:
             unit_type = T('HPHP::Unit').const().pointer()
             curunit = gdb.parse_and_eval(argv[0]).cast(unit_type)

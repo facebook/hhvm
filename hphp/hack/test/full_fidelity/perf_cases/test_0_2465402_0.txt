@@ -1,0 +1,2 @@
+<?hh
+enum bXj : string as ? arraykey { }

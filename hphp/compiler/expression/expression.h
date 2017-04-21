@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,9 +48,9 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_EXTENDED_BOOST_TYPES(Expression);
-class Variant;
+struct Variant;
 
-class Expression : public Construct {
+struct Expression : Construct {
 private:
   static const char *Names[];
 
@@ -124,7 +124,7 @@ public:
   virtual void clearContext(Context context) { m_context &= ~context;}
   void copyContext(ExpressionPtr from) { copyContext(from->m_context); }
   void copyContext(int contexts);
-  ExpressionPtr replaceValue(ExpressionPtr rep);
+  ExpressionPtr replaceValue(ExpressionPtr rep, bool noWarn = false);
   void clearContext();
   int getContext() const { return m_context;}
   bool hasContext(Context context) const {
@@ -182,8 +182,6 @@ public:
     return false;
   }
   void deepCopy(ExpressionPtr exp);
-  virtual ExpressionPtr unneeded();
-  virtual ExpressionPtr unneededHelper();
 
   /**
    * This is to avoid dynamic casting to ExpressionList in Parser.

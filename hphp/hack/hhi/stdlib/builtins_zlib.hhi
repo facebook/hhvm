@@ -37,16 +37,11 @@ function gzseek($zp, $offset, $whence = SEEK_SET);
 function gztell($zp);
 function gzuncompress(string $data, int $length = 0): mixed;
 function gzwrite($zp, $str, $length = 0);
-function lz4_compress(string $uncompressed, bool $high = false): mixed;
-function lz4_hccompress(string $uncompressed): mixed;
-function lz4_uncompress(string $compressed): mixed;
 function nzcompress($uncompressed);
 function nzuncompress($compressed);
 function qlzcompress($data, $level = 1);
 function qlzuncompress(string $data, int $level = 1): mixed;
 function readgzfile($filename, $use_include_path = false);
-function sncompress($data);
-function snuncompress($data);
 function zlib_decode(string $data, int $max_len = 0): mixed; // string or false
 function zlib_encode(string $data, int $encoding, int $level = -1): mixed;
 function zlib_get_coding_type();

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/ext/icu/icu.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
@@ -57,15 +58,23 @@ void IntlError::clearError(bool clearGlobalError /*= true */) {
   }
 }
 
+[[noreturn]]
+void IntlError::throwException(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  char buffer[1024];
+  vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+  SystemLib::throwExceptionObject(buffer);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // INI Setting
 
 static __thread std::string* s_defaultLocale;
 
 void IntlExtension::bindIniSettings() {
-  // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
-  // but right now this is called for every request.
-  if (s_defaultLocale) return;
+  assert(!s_defaultLocale);
   s_defaultLocale = new std::string;
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                    "intl.default_locale", "",
@@ -170,6 +179,7 @@ void IntlExtension::bindConstants() {
   HHVM_RC_INT_SAME(U_MULTIPLE_ANTE_CONTEXTS);
   HHVM_RC_INT_SAME(U_MULTIPLE_COMPOUND_FILTERS);
   HHVM_RC_INT_SAME(U_MULTIPLE_CURSORS);
+  HHVM_RC_INT_SAME(U_MULTIPLE_DECIMAL_SEPARATORS);
   HHVM_RC_INT_SAME(U_MULTIPLE_EXPONENTIAL_SYMBOLS);
   HHVM_RC_INT_SAME(U_MULTIPLE_PAD_SPECIFIERS);
   HHVM_RC_INT_SAME(U_MULTIPLE_PERCENT_SYMBOLS);

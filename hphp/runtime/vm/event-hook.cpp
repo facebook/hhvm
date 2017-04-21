@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
 
@@ -43,6 +43,8 @@ const StaticString
   s_this_ptr("this_ptr"),
   s_enter("enter"),
   s_exit("exit"),
+  s_suspend("suspend"),
+  s_resume("resume"),
   s_exception("exception"),
   s_name("name"),
   s_return("return");
@@ -96,6 +98,19 @@ struct ExecutingSetprofileCallbackGuard {
   }
 };
 
+void EventHook::DoMemoryThresholdCallback() {
+  clearSurpriseFlag(MemThresholdFlag);
+  if (!g_context->m_memThresholdCallback.isNull()) {
+    VMRegAnchor _;
+    try {
+      vm_call_user_func(g_context->m_memThresholdCallback, empty_array());
+    } catch (Object& ex) {
+      raise_error("Uncaught exception escaping mem Threshold callback: %s",
+                  ex.toString().data());
+    }
+  }
+}
+
 namespace {
 
 bool shouldRunUserProfiler(const Func* func) {
@@ -117,11 +132,7 @@ bool shouldRunUserProfiler(const Func* func) {
 
 ALWAYS_INLINE
 ActRec* getParentFrame(const ActRec* ar) {
-  ActRec* ret = g_context->getPrevVMState(ar);
-  while (ret != nullptr && ret->skipFrame()) {
-    ret = g_context->getPrevVMState(ret);
-  }
-  return ret;
+  return g_context->getPrevVMStateSkipFrame(ar);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
@@ -130,7 +141,8 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   }
 
   if (isEnter) {
-    auto this_ptr = ar->hasThis() ? intptr_t(ar->getThis()) : 0;
+    auto this_ptr = ar->func()->cls() && ar->hasThis() ?
+      intptr_t(ar->getThis()) : 0;
     frameinfo.set(s_this_ptr, Variant(this_ptr));
   }
 
@@ -141,7 +153,11 @@ void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
   }
 }
 
-void runUserProfilerOnFunctionEnter(const ActRec* ar) {
+inline bool isResumeAware() {
+  return (g_context->m_setprofileFlags & EventHook::ProfileResumeAware) != 0;
+}
+
+void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileEnters) == 0) {
     return;
   }
@@ -150,7 +166,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
-  params.append(s_enter);
+  params.append((isResume && isResumeAware()) ? s_resume : s_enter);
   params.append(VarNR(ar->func()->fullName()));
 
   Array frameinfo;
@@ -162,7 +178,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar) {
 }
 
 void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
-                                   ObjectData* exception) {
+                                   ObjectData* exception, bool isSuspend) {
   if ((g_context->m_setprofileFlags & EventHook::ProfileExits) == 0) {
     return;
   }
@@ -171,7 +187,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   ExecutingSetprofileCallbackGuard guard;
 
   Array params;
-  params.append(s_exit);
+  params.append((isSuspend && isResumeAware()) ? s_suspend : s_exit);
   params.append(VarNR(ar->func()->fullName()));
 
   Array frameinfo;
@@ -253,14 +269,17 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   PC savePc = vmpc();
 
   Variant doneFlag = true;
-  Variant called_on;
+  Variant called_on = [&] {
+    if (func->cls()) {
+      if (ar->hasThis()) {
+        return Variant(ar->getThis());
+      }
+      // For static methods, give handler the name of called class
+      return Variant{ar->getClass()->name(), Variant::PersistentStrInit{}};
+    }
+    return init_null();
+  }();
 
-  if (ar->hasThis()) {
-    called_on = Variant(ar->getThis());
-  } else if (ar->hasClass()) {
-    // For static methods, give handler the name of called class
-    called_on = Variant(const_cast<StringData*>(ar->getClass()->name()));
-  }
   Variant intArgs =
     PackedArrayInit(5)
       .append(VarNR(ar->func()->fullName()))
@@ -275,7 +294,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     Offset pcOff;
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
-    frame_free_locals_inl_no_hook<true>(ar, ar->func()->numLocals());
+    ar->setLocalsDecRefd();
+    frame_free_locals_no_hook(ar);
     Stack& stack = vmStack();
     stack.top() = (Cell*)(ar + 1);
     cellDup(*ret.asCell(), *stack.allocTV());
@@ -317,11 +337,12 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
-void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
+void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
+                                ssize_t flags, bool isResume) {
   // User profiler
   if (flags & EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
-      runUserProfilerOnFunctionEnter(ar);
+      runUserProfilerOnFunctionEnter(ar, isResume);
     }
     auto profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr &&
@@ -339,26 +360,34 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType, ssize_t flags) {
 
 void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
                                bool unwind, ObjectData* phpException,
-                               size_t flags) {
+                               size_t flags, bool isSuspend) {
+  // Inlined calls normally skip the function enter and exit events. If we
+  // side exit in an inlined callee, we short-circuit here in order to skip
+  // exit events that could unbalance the call stack.
+  if (RuntimeOption::EvalJit &&
+      ((jit::TCA) ar->m_savedRip == jit::tc::ustubs().retInlHelper)) {
+    return;
+  }
+
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ExitSample);
   }
 
-  // Run IntervalTimer callbacks only if it's safe to do so, i.e., not when
+  // Run callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
-  if (flags & IntervalTimerFlag
-      && ThreadInfo::s_threadInfo->m_pendingException == nullptr
+  if (ThreadInfo::s_threadInfo->m_pendingException == nullptr
       && (!unwind || phpException)) {
-    IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
-  }
 
-  // Inlined calls normally skip the function enter and exit events. If we
-  // side exit in an inlined callee, we short-circuit here in order to skip
-  // exit events that could unbalance the call stack.
-  if (RuntimeOption::EvalJit &&
-      ((jit::TCA) ar->m_savedRip == jit::mcg->tx().uniqueStubs.retInlHelper)) {
-    return;
+    // Memory Threhsold
+    if (flags & MemThresholdFlag) {
+      DoMemoryThresholdCallback();
+    }
+
+    // Interval timer
+    if (flags & IntervalTimerFlag) {
+      IntervalTimer::RunCallbacks(IntervalTimer::ExitSample);
+    }
   }
 
   // User profiler
@@ -379,9 +408,9 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
         // Avoid running PHP code when exception from destructor is pending.
         // TODO(#2329497) will not happen once CheckSurprise is used
       } else if (!unwind) {
-        runUserProfilerOnFunctionExit(ar, retval, nullptr);
+        runUserProfilerOnFunctionExit(ar, retval, nullptr, isSuspend);
       } else if (phpException) {
-        runUserProfilerOnFunctionExit(ar, retval, phpException);
+        runUserProfilerOnFunctionExit(ar, retval, phpException, isSuspend);
       } else {
         // Avoid running PHP code when unwinding C++ exception.
       }
@@ -395,7 +424,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 }
 
 bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
   if (flags & InterceptFlag &&
       !RunInterceptHandler(const_cast<ActRec*>(ar))) {
     return false;
@@ -406,49 +435,64 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType) {
     Xenon::getInstance().log(Xenon::EnterSample);
   }
 
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
+  }
+
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
-  onFunctionEnter(ar, funcType, flags);
+  onFunctionEnter(ar, funcType, flags, false);
   return true;
 }
 
 void EventHook::onFunctionResumeAwait(const ActRec* ar) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
 
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::ResumeAwaitSample);
   }
 
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
+  }
+
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::ResumeAwaitSample);
   }
 
-  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+  onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
 void EventHook::onFunctionResumeYield(const ActRec* ar) {
-  auto const flags = check_request_surprise();
+  auto const flags = handle_request_surprise();
 
   // Xenon
   if (flags & XenonSignalFlag) {
     Xenon::getInstance().log(Xenon::EnterSample);
   }
 
+  // Memory Threhsold
+  if (flags & MemThresholdFlag) {
+    DoMemoryThresholdCallback();
+  }
+
   if (flags & IntervalTimerFlag) {
     IntervalTimer::RunCallbacks(IntervalTimer::EnterSample);
   }
 
-  onFunctionEnter(ar, EventHook::NormalFunc, flags);
+  onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
 // Child is the AFWH we're going to block on, nullptr iff this is a suspending
 // generator.
 void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
-  auto const flags = check_request_surprise();
-  onFunctionExit(suspending, nullptr, false, nullptr, flags);
+  auto const flags = handle_request_surprise();
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
 
   if ((flags & AsyncEventHookFlag) &&
       suspending->func()->isAsyncFunction()) {
@@ -472,13 +516,13 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
   // teleported the ActRec from suspending over to resumableAR, so we need to
   // make sure the unwinder knows not to touch the locals, $this, or
   // VarEnv/ExtraArgs.
-  suspending->setThisOrClassAllowNull(nullptr);
   suspending->setLocalsDecRefd();
-  suspending->setVarEnv(nullptr);
+  suspending->trashThis();
+  suspending->trashVarEnv();
 
   try {
-    auto const flags = check_request_surprise();
-    onFunctionExit(resumableAR, nullptr, false, nullptr, flags);
+    auto const flags = handle_request_surprise();
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
 
     if ((flags & AsyncEventHookFlag) &&
         resumableAR->func()->isAsyncFunction()) {
@@ -505,14 +549,14 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
-  // The locals are already gone. Null out everything.
-  ar->setThisOrClassAllowNull(nullptr);
+  // The locals are already gone. Tell everyone
   ar->setLocalsDecRefd();
-  ar->setVarEnv(nullptr);
+  ar->trashThis();
+  ar->trashVarEnv();
 
   try {
-    auto const flags = check_request_surprise();
-    onFunctionExit(ar, &retval, false, nullptr, flags);
+    auto const flags = handle_request_surprise();
+    onFunctionExit(ar, &retval, false, nullptr, flags, false);
 
     // Async profiler
     if ((flags & AsyncEventHookFlag) &&
@@ -535,15 +579,15 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 }
 
 void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
-  // The locals are already gone. Null out everything.
-  ar->setThisOrClassAllowNull(nullptr);
+  // The locals are already gone. Tell everyone
   ar->setLocalsDecRefd();
-  ar->setVarEnv(nullptr);
+  ar->trashThis();
+  ar->trashVarEnv();
 
-  // TODO(#2329497) can't check_request_surprise() yet, unwinder unable to
+  // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault
   auto const flags = stackLimitAndSurprise().load() & kSurpriseFlagMask;
-  onFunctionExit(ar, nullptr, true, phpException, flags);
+  onFunctionExit(ar, nullptr, true, phpException, flags, false);
 }
 
 } // namespace HPHP

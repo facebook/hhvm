@@ -1,0 +1,15 @@
+Warning: array_replace_recursive(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 6
+
+Warning: array_merge_recursive(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 9
+
+Warning: array_merge_recursive(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 9
+
+Warning: array_merge_recursive(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 9
+
+Warning: array_merge_recursive(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 9
+
+Warning: array_merge_recursive(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 9
+
+Warning: compact(): recursion detected in %s/test/slow/array_functions/self_recursive.php on line 18
+array(0) {
+}

@@ -30,9 +30,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <fcntl.h>
 #include <string.h>
 #include <time.h>
@@ -57,9 +54,8 @@
 #endif
 #include <errno.h>
 
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+#include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>

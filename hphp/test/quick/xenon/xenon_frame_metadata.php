@@ -20,7 +20,7 @@ main();
 
 $last = null;
 foreach (xenon_get_data() as $sample) {
-  foreach ($sample['phpStack'] as $frame) {
+  foreach ($sample['stack'] as $frame) {
     if (array_key_exists('metadata', $frame)) {
       $key = $frame['function'].' '.$frame['metadata'];
       if ($key !== $last) {

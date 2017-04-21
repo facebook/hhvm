@@ -1,4 +1,5 @@
-array<[1]intersect(Tstring, Tint)>
+File "out_of_range_index_lvalue.php", line 11, characters 3-13:
+  array<^(string | int)>
 File "out_of_range_index_lvalue.php", line 12, characters 15-19:
 Invalid argument (Typing[4110])
 File "out_of_range_index_lvalue.php", line 15, characters 22-27:

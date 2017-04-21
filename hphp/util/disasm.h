@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,12 +24,9 @@ extern "C" {
 
 #include <ostream>
 
-#include <boost/noncopyable.hpp>
-
 namespace HPHP {
 
-class Disasm : private boost::noncopyable {
- public:
+struct Disasm {
   struct Options {
     Options()
       : m_indentLevel(0)
@@ -82,11 +79,15 @@ class Disasm : private boost::noncopyable {
    * the instructions will also be in the output. */
   explicit Disasm(const Options& opts = Options());
 
+  Disasm(const Disasm&) = delete;
+  Disasm& operator=(const Disasm&) = delete;
+
   /* Disassemble instructions. start should be the first byte of the region to
    * disassemble and end should be the first byte past the region to
    * disassemble. */
   void disasm(std::ostream& out, uint8_t* start, uint8_t* end);
 
+  static void ExcludedAddressRange(void* low, size_t len);
  private:
 #ifdef HAVE_LIBXED
   xed_state_t m_xedState;

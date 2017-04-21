@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,17 +18,15 @@
 
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
+struct StackTrace;
 
-class ExtendedLogger : public Logger {
-public:
+struct ExtendedLogger : Logger {
   static bool EnabledByDefault;
-
   // These logging functions will also print stacktrace at end of each message.
   static void Error(const std::string &msg);
   static void Warning(const std::string &msg);
@@ -44,24 +42,19 @@ public:
   static void Verbose(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(1,2);
 
-  // Log additional injected stacktrace.
-  static void Log(LogLevelType level, const Array& stackTrace, bool escape = true,
-                  bool escapeMore = false);
-
   // Convenience functions for stringifying.
-  static std::string StringOfFrame(const Array& frame, int i, bool escape = false);
   static std::string StringOfStackTrace(const Array& stackTrace);
 
-protected:
-  virtual void log(LogLevelType level, const char *type, const Exception &e,
-                   const char *file = nullptr, int line = 0);
-  virtual void log(LogLevelType level, const std::string &msg,
-                   const StackTrace *stackTrace,
-                   bool escape = true, bool escapeMore = false);
-
 private:
-  static void PrintStackTrace(FILE *f, const Array& stackTrace,
-                              bool escape = false, bool escapeMore = false);
+  static void LogImpl(LogLevelType level, const std::string &msg);
+
+  static std::string StringOfFrame(const Array& frame, int i,
+                                   bool escape = false);
+  std::pair<int, int> log(LogLevelType level, const std::string &msg,
+                          const StackTrace *stackTrace,
+                          bool escape = true, bool escapeMore = false) override;
+  static int PrintStackTrace(FILE *f, const Array& stackTrace,
+                             bool escape = false);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

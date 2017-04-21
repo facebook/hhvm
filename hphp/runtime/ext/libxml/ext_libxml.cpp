@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-url.h"
@@ -47,8 +48,7 @@ TRACE_SET_MOD(libxml);
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class xmlErrorVec : public folly::fbvector<xmlError> {
-public:
+struct xmlErrorVec : folly::fbvector<xmlError> {
   ~xmlErrorVec() {
     clearErrors();
   }
@@ -73,16 +73,14 @@ struct LibXmlRequestData final : RequestEventHandler {
     m_errors = xmlErrorVec();
     m_entity_loader_disabled = false;
     m_streams_context = nullptr;
+    m_streams.reset();
   }
 
   void requestShutdown() override {
     m_use_error = false;
     m_errors = xmlErrorVec();
     m_streams_context = nullptr;
-  }
-
-  void vscan(IMarker& mark) const override {
-    mark(m_streams_context);
+    m_streams.reset();
   }
 
   bool m_entity_loader_disabled;
@@ -90,6 +88,7 @@ struct LibXmlRequestData final : RequestEventHandler {
   bool m_use_error;
   xmlErrorVec m_errors;
   req::ptr<StreamContext> m_streams_context;
+  RootMap<File> m_streams;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(LibXmlRequestData, tl_libxml_request_data);
@@ -100,29 +99,29 @@ namespace {
 // a void* token that can be used to lookup the File later.  This
 // is so a reference to the file can be stored in an XML context
 // object as a void*.  The set of remembered files is cleared out
-// during MemoryManager reset.  The ext_libxml extension is the only
-// XML extension that should be storing streams in the MemoryManager
+// at request shutdown. The ext_libxml extension is the only
+// XML extension that should be storing streams as roots,
 // since it has no other place to safely store a req::ptr.
 // The other XML extensions either own the req::ptr<File> locally
 // or are able to store it in a object.
 inline void* rememberStream(req::ptr<File>&& stream) {
-  return reinterpret_cast<void*>(MM().addRoot(std::move(stream)));
+  return reinterpret_cast<void*>(
+    tl_libxml_request_data->m_streams.addRoot(std::move(stream))
+  );
 }
 
 // This function returns the File associated with the given token.
-// If the token is not in the MemoryManager map, it means a pointer to
+// If the token is not in the m_streams map, it means a pointer to
 // the File has been stored directly in the XML context.
 inline req::ptr<File> getStream(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  auto res = MM().lookupRoot<File>(token);
-  return res ? res : *reinterpret_cast<req::ptr<File>*>(token);
+  auto file = tl_libxml_request_data->m_streams.lookupRoot(userData);
+  return file ? file : *reinterpret_cast<req::ptr<File>*>(userData);
 }
 
 // This closes and deletes the File associated with the given token.
 // It is used by the XML callback that destroys a context.
 inline bool forgetStream(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  auto ptr = MM().removeRoot<File>(token);
+  auto ptr = tl_libxml_request_data->m_streams.removeRoot(userData);
   return ptr->close();
 }
 
@@ -137,33 +136,7 @@ const StaticString
   s_column("column"),
   s_message("message"),
   s_file("file"),
-  s_line("line"),
-  s_LIBXML_VERSION("LIBXML_VERSION"),
-  s_LIBXML_DOTTED_VERSION("LIBXML_DOTTED_VERSION"),
-  s_LIBXML_LOADED_VERSION("LIBXML_LOADED_VERSION"),
-  s_LIBXML_NOENT("LIBXML_NOENT"),
-  s_LIBXML_DTDLOAD("LIBXML_DTDLOAD"),
-  s_LIBXML_DTDATTR("LIBXML_DTDATTR"),
-  s_LIBXML_DTDVALID("LIBXML_DTDVALID"),
-  s_LIBXML_NOERROR("LIBXML_NOERROR"),
-  s_LIBXML_NOWARNING("LIBXML_NOWARNING"),
-  s_LIBXML_NOBLANKS("LIBXML_NOBLANKS"),
-  s_LIBXML_XINCLUDE("LIBXML_XINCLUDE"),
-  s_LIBXML_NSCLEAN("LIBXML_NSCLEAN"),
-  s_LIBXML_NOCDATA("LIBXML_NOCDATA"),
-  s_LIBXML_NONET("LIBXML_NONET"),
-  s_LIBXML_PEDANTIC("LIBXML_PEDANTIC"),
-  s_LIBXML_COMPACT("LIBXML_COMPACT"),
-  s_LIBXML_NOXMLDECL("LIBXML_NOXMLDECL"),
-  s_LIBXML_PARSEHUGE("LIBXML_PARSEHUGE"),
-  s_LIBXML_NOEMPTYTAG("LIBXML_NOEMPTYTAG"),
-  s_LIBXML_SCHEMA_CREATE("LIBXML_SCHEMA_CREATE"),
-  s_LIBXML_HTML_NOIMPLIED("LIBXML_HTML_NOIMPLIED"),
-  s_LIBXML_HTML_NODEFDTD("LIBXML_HTML_NODEFDTD"),
-  s_LIBXML_ERR_NONE("LIBXML_ERR_NONE"),
-  s_LIBXML_ERR_WARNING("LIBXML_ERR_WARNING"),
-  s_LIBXML_ERR_ERROR("LIBXML_ERR_ERROR"),
-  s_LIBXML_ERR_FATAL("LIBXML_ERR_FATAL");
+  s_line("line");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -200,7 +173,7 @@ void XMLDocumentData::sweep() {
 // Callbacks and helpers
 //
 // Note that these stream callbacks may re-enter the VM via a user-defined
-// stream wrapper. The VM state should be synced using VMRegAnchor by the
+// stream wrapper. The VM state should be synced using VMRegGuard by the
 // caller, before entering libxml2.
 
 static req::ptr<File> libxml_streams_IO_open_wrapper(
@@ -220,7 +193,7 @@ static req::ptr<File> libxml_streams_IO_open_wrapper(
     int pathIndex = 0;
     Stream::Wrapper* wrapper = Stream::getWrapperFromURI(strFilename,
                                                          &pathIndex);
-    if (dynamic_cast<FileStreamWrapper*>(wrapper)) {
+    if (wrapper->isNormalFileStream()) {
       if (!HHVM_FN(file_exists)(strFilename)) {
         return nullptr;
       }
@@ -614,20 +587,8 @@ void HHVM_FUNCTION(libxml_set_streams_context, const Resource & context) {
 ///////////////////////////////////////////////////////////////////////////////
 // Extension
 
-class LibXMLExtension final : public Extension {
-  public:
+struct LibXMLExtension final : Extension {
     LibXMLExtension() : Extension("libxml") {}
-
-  private:
-    // Aliases for brevity
-    inline static void cnsInt(const StaticString & name, int64_t value) {
-      Native::registerConstant<KindOfInt64>(name.get(), value);
-    }
-
-    inline static void cnsStr(const StaticString & name, const char * value) {
-      Native::registerConstant<KindOfStaticString>(
-          name.get(), StaticString(value).get());
-    }
 
     void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
 
@@ -647,47 +608,47 @@ class LibXMLExtension final : public Extension {
     }
 
     void moduleInit() override {
-      cnsInt(s_LIBXML_VERSION, LIBXML_VERSION);
-      cnsStr(s_LIBXML_DOTTED_VERSION, LIBXML_DOTTED_VERSION);
-      cnsStr(s_LIBXML_LOADED_VERSION, xmlParserVersion);
+      HHVM_RC_INT_SAME(LIBXML_VERSION);
+      HHVM_RC_STR_SAME(LIBXML_DOTTED_VERSION);
+      HHVM_RC_STR(LIBXML_LOADED_VERSION, xmlParserVersion);
 
       // For use with loading xml
-      cnsInt(s_LIBXML_NOENT, XML_PARSE_NOENT);
-      cnsInt(s_LIBXML_DTDLOAD, XML_PARSE_DTDLOAD);
-      cnsInt(s_LIBXML_DTDATTR, XML_PARSE_DTDATTR);
-      cnsInt(s_LIBXML_DTDVALID, XML_PARSE_DTDVALID);
-      cnsInt(s_LIBXML_NOERROR, XML_PARSE_NOERROR);
-      cnsInt(s_LIBXML_NOWARNING, XML_PARSE_NOWARNING);
-      cnsInt(s_LIBXML_NOBLANKS, XML_PARSE_NOBLANKS);
-      cnsInt(s_LIBXML_XINCLUDE, XML_PARSE_XINCLUDE);
-      cnsInt(s_LIBXML_NSCLEAN, XML_PARSE_NSCLEAN);
-      cnsInt(s_LIBXML_NOCDATA, XML_PARSE_NOCDATA);
-      cnsInt(s_LIBXML_NONET, XML_PARSE_NONET);
-      cnsInt(s_LIBXML_PEDANTIC, XML_PARSE_PEDANTIC);
-      cnsInt(s_LIBXML_COMPACT, XML_PARSE_COMPACT);
-      cnsInt(s_LIBXML_NOXMLDECL, XML_SAVE_NO_DECL);
-      cnsInt(s_LIBXML_PARSEHUGE, XML_PARSE_HUGE);
-      cnsInt(s_LIBXML_NOEMPTYTAG, LIBXML_SAVE_NOEMPTYTAG);
+      HHVM_RC_INT(LIBXML_NOENT, XML_PARSE_NOENT);
+      HHVM_RC_INT(LIBXML_DTDLOAD, XML_PARSE_DTDLOAD);
+      HHVM_RC_INT(LIBXML_DTDATTR, XML_PARSE_DTDATTR);
+      HHVM_RC_INT(LIBXML_DTDVALID, XML_PARSE_DTDVALID);
+      HHVM_RC_INT(LIBXML_NOERROR, XML_PARSE_NOERROR);
+      HHVM_RC_INT(LIBXML_NOWARNING, XML_PARSE_NOWARNING);
+      HHVM_RC_INT(LIBXML_NOBLANKS, XML_PARSE_NOBLANKS);
+      HHVM_RC_INT(LIBXML_XINCLUDE, XML_PARSE_XINCLUDE);
+      HHVM_RC_INT(LIBXML_NSCLEAN, XML_PARSE_NSCLEAN);
+      HHVM_RC_INT(LIBXML_NOCDATA, XML_PARSE_NOCDATA);
+      HHVM_RC_INT(LIBXML_NONET, XML_PARSE_NONET);
+      HHVM_RC_INT(LIBXML_PEDANTIC, XML_PARSE_PEDANTIC);
+      HHVM_RC_INT(LIBXML_COMPACT, XML_PARSE_COMPACT);
+      HHVM_RC_INT(LIBXML_NOXMLDECL, XML_SAVE_NO_DECL);
+      HHVM_RC_INT(LIBXML_PARSEHUGE, XML_PARSE_HUGE);
+      HHVM_RC_INT(LIBXML_NOEMPTYTAG, LIBXML_SAVE_NOEMPTYTAG);
 
       // Schema validation options
 #if defined(LIBXML_SCHEMAS_ENABLED)
-      cnsInt(s_LIBXML_SCHEMA_CREATE, XML_SCHEMA_VAL_VC_I_CREATE);
+      HHVM_RC_INT(LIBXML_SCHEMA_CREATE, XML_SCHEMA_VAL_VC_I_CREATE);
 #endif
 
       // Additional constants for use with loading html
 #if LIBXML_VERSION >= 20707
-      cnsInt(s_LIBXML_HTML_NOIMPLIED, HTML_PARSE_NOIMPLIED);
+      HHVM_RC_INT(LIBXML_HTML_NOIMPLIED, HTML_PARSE_NOIMPLIED);
 #endif
 
 #if LIBXML_VERSION >= 20708
-      cnsInt(s_LIBXML_HTML_NODEFDTD, HTML_PARSE_NODEFDTD);
+      HHVM_RC_INT(LIBXML_HTML_NODEFDTD, HTML_PARSE_NODEFDTD);
 #endif
 
       // Error levels
-      cnsInt(s_LIBXML_ERR_NONE, XML_ERR_NONE);
-      cnsInt(s_LIBXML_ERR_WARNING, XML_ERR_WARNING);
-      cnsInt(s_LIBXML_ERR_ERROR, XML_ERR_ERROR);
-      cnsInt(s_LIBXML_ERR_FATAL, XML_ERR_FATAL);
+      HHVM_RC_INT(LIBXML_ERR_NONE, XML_ERR_NONE);
+      HHVM_RC_INT(LIBXML_ERR_WARNING, XML_ERR_WARNING);
+      HHVM_RC_INT(LIBXML_ERR_ERROR, XML_ERR_ERROR);
+      HHVM_RC_INT(LIBXML_ERR_FATAL, XML_ERR_FATAL);
 
       HHVM_FE(libxml_get_errors);
       HHVM_FE(libxml_get_last_error);
@@ -707,6 +668,13 @@ class LibXMLExtension final : public Extension {
       xmlOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
       s_default_entity_loader = xmlGetExternalEntityLoader();
       xmlSetExternalEntityLoader(libxml_ext_entity_loader);
+
+      // These callbacks will fallback to alternate defaults in a threaded
+      // context, we want to always use these functions.
+      xmlThrDefParserInputBufferCreateFilenameDefault(
+        libxml_create_input_buffer
+      );
+      xmlThrDefOutputBufferCreateFilenameDefault(libxml_create_output_buffer);
     }
 
     void requestInit() override {

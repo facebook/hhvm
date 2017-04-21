@@ -1,0 +1,2 @@
+File "strict_reference.php", line 4, characters 8-10:
+Cannot take a value by reference in strict mode. (Typing[4154])

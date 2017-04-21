@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-strtod.h"
+#include "hphp/util/fast_strtoll_base10.h"
 
 namespace HPHP {
 
@@ -31,39 +32,6 @@ static const char long_min_digits[] = "9223372036854775808";
 #define IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F')||((c) >= 'a'  && (c) <= 'f'))
 
 ///////////////////////////////////////////////////////////////////////////////
-
-folly::StringPiece conv_10(int64_t num, char* buf_end) {
-  auto p = buf_end;
-  uint64_t magnitude;
-
-  /*
-   * On a 2's complement machine, negating the most negative integer
-   * results in a number that cannot be represented as a signed integer.
-   * Here is what we do to obtain the number's magnitude:
-   *      a. add 1 to the number
-   *      b. negate it (becomes positive)
-   *      c. convert it to unsigned
-   *      d. add 1
-   */
-  if (num < 0) {
-    magnitude = static_cast<uint64_t>(-(num + 1)) + 1;
-  } else {
-    magnitude = static_cast<uint64_t>(num);
-  }
-
-  /*
-   * We use a do-while loop so that we write at least 1 digit
-   */
-  do {
-    auto const q = magnitude / 10;
-    auto const r = static_cast<uint32_t>(magnitude % 10);
-    *--p = r + '0';
-    magnitude = q;
-  } while (magnitude);
-
-  if (num < 0) *--p = '-';
-  return folly::StringPiece{p, static_cast<size_t>(buf_end - p)};
-}
 
 DataType is_numeric_string(const char *str, int length, int64_t *lval,
                            double *dval, int allow_errors /* = 0 */,
@@ -190,7 +158,8 @@ DataType is_numeric_string(const char *str, int length, int64_t *lval,
       }
     }
     if (lval) {
-      *lval = strtol(str, nullptr, base);
+      *lval = (base == 10 ? fast_strtoll_base10(str)
+                          : strtoll(str, nullptr, base));
     }
     return KindOfInt64;
   }

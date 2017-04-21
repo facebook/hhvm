@@ -1,0 +1,2 @@
+<?hh
+trait aRz < uOqjAK as this , - mCeWgp , - rERdW as mixed , - qOD as bool > implements aGRaZ { use oJLLwYWR < classname < nTK > , bool , kZyQspXG > ; use wZ , hQlPpFc < bOJe > , pXvRw < tUqr > , sKurlmc , zH < resource > ; }

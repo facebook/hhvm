@@ -1,0 +1,2 @@
+<?hh
+function pFaJ ( ) : shape ( 'single string' => ( function ( float , ( function ( ) : array < ( function ( ) : gOegZNM :: iAJ ) > ) ) : arraykey ) , 'single string' => shape ( 'single string' => ( function ( ) : string ) ) , 'single string' => shape ( 'single string' => pUG < mLusxyaSJ > ) , 'single string' => bool ) { }

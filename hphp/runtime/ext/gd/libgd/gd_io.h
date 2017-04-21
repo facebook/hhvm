@@ -8,21 +8,21 @@
 #endif
 
 typedef struct gdIOCtx {
-	int	(*getC)(struct gdIOCtx*);
-	int	(*getBuf)(struct gdIOCtx*, void*, int);
+  int (*getC)(struct gdIOCtx*);
+  int (*getBuf)(struct gdIOCtx*, void*, int);
 
-	void	(*putC)(struct gdIOCtx*, int);
-	int	(*putBuf)(struct gdIOCtx*, const void*, int);
+  void  (*putC)(struct gdIOCtx*, int);
+  int (*putBuf)(struct gdIOCtx*, const void*, int);
 
-	int	(*seek)(struct gdIOCtx*, const int);
-	long	(*tell)(struct gdIOCtx*);
+  int (*seek)(struct gdIOCtx*, const int);
+  long  (*tell)(struct gdIOCtx*);
 
-	void	(*gd_free)(struct gdIOCtx*);
+  void  (*gd_free)(struct gdIOCtx*);
 
-	void	*data;
+  void  *data;
 } gdIOCtx;
 
-typedef struct gdIOCtx	*gdIOCtxPtr;
+typedef struct gdIOCtx  *gdIOCtxPtr;
 
 void Putword(int w, gdIOCtx *ctx);
 void Putchar(int c, gdIOCtx *ctx);

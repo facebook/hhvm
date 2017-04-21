@@ -11,27 +11,27 @@ int(1)
 int(42)
 ------------------------
 int(0)
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 int(1)
 int(73)
 ------------------------
 string(3) "foo"
 int(42)
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 int(73)
 ------------------------
 string(3) "foo"
 int(42)
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 int(73)
 ------------------------
 string(3) "foo"
 int(42)
 NULL
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 int(73)
 NULL
@@ -44,7 +44,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  object(stdClass)#5 (0) {
+  object(stdClass)#4 (0) {
   }
   [1]=>
   int(73)
@@ -80,7 +80,7 @@ int(1)
 int(42)
 ------------------------
 int(0)
-object(stdClass)#5 (0) {
+object(stdClass)#4 (0) {
 }
 int(1)
 int(73)
@@ -93,7 +93,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  object(stdClass)#5 (0) {
+  object(stdClass)#4 (0) {
   }
   [1]=>
   int(73)
@@ -106,7 +106,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  object(stdClass)#5 (0) {
+  object(stdClass)#4 (0) {
   }
   [1]=>
   int(73)
@@ -120,7 +120,7 @@ object(HH\Pair)#6 (2) {
 }
 object(HH\Pair)#7 (2) {
   [0]=>
-  object(stdClass)#5 (0) {
+  object(stdClass)#4 (0) {
   }
   [1]=>
   int(73)

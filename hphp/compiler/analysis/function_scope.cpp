@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,6 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/util/atomic.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/parser/hphp.tab.hpp"
@@ -67,9 +66,9 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
-      m_noLSB(false), m_nextLSB(false),
-      m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0), m_nextID(0) {
+      m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false),
+      m_fromTrait(false),
+      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   init(ar);
 
   for (unsigned i = 0; i < attrs.size(); ++i) {
@@ -82,12 +81,6 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
     m_userAttributes[attrs[i]->getName()] = attrs[i]->getExp();
   }
 
-  // Support for systemlib functions implemented in PHP
-  if (!m_method &&
-      m_userAttributes.find("__Overridable") != m_userAttributes.end()) {
-    setAllowOverride();
-  }
-
   // Try to find if the function have __Native("VariadicByRef")
   auto params = getUserAttributeParams("__native");
   for (auto &param : params) {
@@ -98,13 +91,9 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
   }
 
   if (isNative()) {
-    // Support ParamCoerceMode in HNI
-    if (hasUserAttr("__ParamCoerceModeFalse")) {
-      setClassInfoAttribute(ClassInfo::ParamCoerceModeFalse);
-    } else {
-      // Default for HNI is __ParamCoerceModeNull
-      setClassInfoAttribute(ClassInfo::ParamCoerceModeNull);
-    }
+    m_coerceMode |= hasUserAttr("__ParamCoerceModeFalse")
+      ? AttrParamCoerceModeFalse
+      : AttrParamCoerceModeNull;
   }
 }
 
@@ -130,11 +119,10 @@ FunctionScope::FunctionScope(FunctionScopePtr orig,
       m_generator(orig->m_generator),
       m_async(orig->m_async),
       m_noLSB(orig->m_noLSB),
-      m_nextLSB(orig->m_nextLSB), m_hasTry(orig->m_hasTry),
-      m_hasGoto(orig->m_hasGoto), m_localRedeclaring(orig->m_localRedeclaring),
+      m_nextLSB(orig->m_nextLSB), m_localRedeclaring(orig->m_localRedeclaring),
+      m_fromTrait(orig->m_fromTrait),
       m_redeclaring(orig->m_redeclaring),
-      m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction),
-      m_nextID(0) {
+      m_inlineIndex(orig->m_inlineIndex), m_optFunction(orig->m_optFunction) {
   init(ar);
   setParamCounts(ar, m_minParam, m_numDeclParams);
 }
@@ -155,28 +143,15 @@ void FunctionScope::init(AnalysisResultConstPtr ar) {
   if (m_attribute & FileScope::ContainsLDynamicVariable) {
     m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
   }
-  if (m_attribute & FileScope::ContainsExtract) {
-    m_variables->setAttribute(VariableTable::ContainsExtract);
-  }
-  if (m_attribute & FileScope::ContainsAssert) {
-    m_variables->setAttribute(VariableTable::ContainsAssert);
-  }
-  if (m_attribute & FileScope::ContainsCompact) {
-    m_variables->setAttribute(VariableTable::ContainsCompact);
-  }
   if (m_attribute & FileScope::ContainsUnset) {
     m_variables->setAttribute(VariableTable::ContainsUnset);
-  }
-  if (m_attribute & FileScope::ContainsGetDefinedVars) {
-    m_variables->setAttribute(VariableTable::ContainsGetDefinedVars);
   }
 
   if (m_stmt && Option::AllVolatile && !m_pseudoMain && !m_method) {
     m_volatile = true;
   }
 
-  if (!m_method && Option::DynamicInvokeFunctions.find(m_scopeName) !=
-      Option::DynamicInvokeFunctions.end()) {
+  if (!m_method && RuntimeOption::DynamicInvokeFunctions.count(m_scopeName)) {
     setDynamicInvoke();
   }
   if (m_modifiers) {
@@ -212,13 +187,11 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_containsThis(false), m_containsBareThis(0),
       m_generator(false),
       m_async(false),
-      m_noLSB(false), m_nextLSB(false),
-      m_hasTry(false), m_hasGoto(false), m_localRedeclaring(false),
-      m_redeclaring(-1), m_inlineIndex(0),
+      m_noLSB(false), m_nextLSB(false), m_localRedeclaring(false),
+      m_fromTrait(false), m_redeclaring(-1), m_inlineIndex(0),
       m_optFunction(0) {
   m_dynamicInvoke = false;
-  if (!method && Option::DynamicInvokeFunctions.find(name) !=
-      Option::DynamicInvokeFunctions.end()) {
+  if (!method && RuntimeOption::DynamicInvokeFunctions.count(name)) {
     setDynamicInvoke();
   }
 }
@@ -261,8 +234,7 @@ bool FunctionScope::hasUserAttr(const char *attr) const {
 }
 
 bool FunctionScope::isParamCoerceMode() const {
-  return m_attributeClassInfo &
-    (ClassInfo::ParamCoerceModeNull | ClassInfo::ParamCoerceModeFalse);
+  return m_coerceMode & (AttrParamCoerceModeNull | AttrParamCoerceModeFalse);
 }
 
 bool FunctionScope::isPublic() const {
@@ -305,8 +277,8 @@ bool FunctionScope::usesVariableArgumentFunc() const {
   return m_attribute & FileScope::VariableArgument;
 }
 
-bool FunctionScope::allowOverride() const {
-  return m_attribute & FileScope::AllowOverride;
+bool FunctionScope::hasRefVariadicParam() const {
+  return m_attribute & FileScope::RefVariadicArgumentParam;
 }
 
 bool FunctionScope::isReferenceVariableArgument() const {
@@ -314,11 +286,6 @@ bool FunctionScope::isReferenceVariableArgument() const {
   // If this method returns true, then usesVariableArgumentFunc() must also
   // return true.
   assert(!res || usesVariableArgumentFunc());
-  return res;
-}
-
-bool FunctionScope::noFCallBuiltin() const {
-  bool res = (m_attribute & FileScope::NoFCallBuiltin);
   return res;
 }
 
@@ -343,44 +310,14 @@ void FunctionScope::setVariableArgument(int reference) {
   }
 }
 
-void FunctionScope::setAllowOverride() {
-  m_attribute |= FileScope::AllowOverride;
-}
-
 bool FunctionScope::hasEffect() const {
   return (m_attribute & FileScope::NoEffect) == 0;
 }
 
-void FunctionScope::setNoEffect() {
-  if (!(m_attribute & FileScope::NoEffect)) {
-    m_attribute |= FileScope::NoEffect;
-  }
-}
-
 bool FunctionScope::isFoldable() const {
-  if (m_attribute & FileScope::IsFoldable) {
-    // IDL based builtins
-    return true;
-  }
   // Systemlib (PHP&HNI) builtins
   auto f = Unit::lookupFunc(String(getScopeName()).get());
   return f && f->isFoldable();
-}
-
-void FunctionScope::setIsFoldable() {
-  m_attribute |= FileScope::IsFoldable;
-}
-
-void FunctionScope::setNoFCallBuiltin() {
-  m_attribute |= FileScope::NoFCallBuiltin;
-}
-
-void FunctionScope::setHelperFunction() {
-  m_attribute |= FileScope::HelperFunction;
-}
-
-bool FunctionScope::containsReference() const {
-  return m_attribute & FileScope::ContainsReference;
 }
 
 void FunctionScope::setContainsThis(bool f /* = true */) {
@@ -438,12 +375,6 @@ bool FunctionScope::isNamed(const char* n) const {
   return !strcasecmp(getScopeName().c_str(), n);
 }
 
-bool FunctionScope::isConstructor(ClassScopePtr cls) const {
-  return m_stmt && cls &&
-    (isNamed("__construct") ||
-     (cls->classNameCtor() && isNamed(cls->getScopeName())));
-}
-
 bool FunctionScope::isMagic() const {
   return m_scopeName.size() >= 2 &&
     m_scopeName[0] == '_' && m_scopeName[1] == '_';
@@ -483,20 +414,6 @@ void FunctionScope::addNewObjCaller(BlockScopePtr caller) {
   addUse(caller, UseKindCaller & ~UseKindCallerReturn);
 }
 
-bool FunctionScope::mayUseVV() const {
-  VariableTableConstPtr variables = getVariables();
-  return
-    (inPseudoMain() ||
-     usesVariableArgumentFunc() ||
-     variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-     variables->getAttribute(VariableTable::ContainsExtract) ||
-     variables->getAttribute(VariableTable::ContainsAssert) ||
-     variables->getAttribute(VariableTable::ContainsCompact) ||
-     variables->getAttribute(VariableTable::ContainsGetDefinedVars) ||
-     (!Option::EnableHipHopSyntax &&
-      variables->getAttribute(VariableTable::ContainsDynamicFunctionCall)));
-}
-
 bool FunctionScope::isRefParam(int index) const {
   assert(index >= 0 && index < (int)m_refs.size());
   return m_refs[index];
@@ -507,30 +424,9 @@ void FunctionScope::setRefParam(int index) {
   m_refs[index] = true;
 }
 
-bool FunctionScope::hasRefParam(int max) const {
-  assert(max >= 0 && max < (int)m_refs.size());
-  for (int i = 0; i < max; i++) {
-    if (m_refs[i]) return true;
-  }
-  return false;
-}
-
 const std::string &FunctionScope::getParamName(int index) const {
   assert(index >= 0 && index < (int)m_paramNames.size());
   return m_paramNames[index];
-}
-
-void FunctionScope::setParamName(int index, const std::string &name) {
-  assert(index >= 0 && index < (int)m_paramNames.size());
-  m_paramNames[index] = name;
-}
-
-void FunctionScope::addModifier(int mod) {
-  if (!m_modifiers) {
-    m_modifiers = std::make_shared<ModifierExpression>(shared_from_this(),
-                                                       Location::Range());
-  }
-  m_modifiers->add(mod);
 }
 
 std::vector<ScalarExpressionPtr> FunctionScope::getUserAttributeParams(
@@ -617,12 +513,12 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.add("docs", m_docComment);
 
   int mods = 0;
-  if (isPublic())    mods |= ClassInfo::IsPublic;
-  if (isProtected()) mods |= ClassInfo::IsProtected;
-  if (isPrivate())   mods |= ClassInfo::IsPrivate;
-  if (isStatic())    mods |= ClassInfo::IsStatic;
-  if (isFinal())     mods |= ClassInfo::IsFinal;
-  if (isAbstract())  mods |= ClassInfo::IsAbstract;
+  if (isPublic())    mods |= AttrPublic;
+  if (isProtected()) mods |= AttrProtected;
+  if (isPrivate())   mods |= AttrPrivate;
+  if (isStatic())    mods |= AttrStatic;
+  if (isFinal())     mods |= AttrFinal;
+  if (isAbstract())  mods |= AttrAbstract;
   ms.add("modifiers", mods);
 
   ms.add("refreturn", isRefReturn());
@@ -664,22 +560,6 @@ void FunctionScope::serialize(JSON::DocTarget::OutputStream &out) const {
   ms.done();
 }
 
-void FunctionScope::getClosureUseVars(
-    ParameterExpressionPtrIdxPairVec &useVars,
-    bool filterUsed /* = true */) {
-  useVars.clear();
-  if (!m_closureVars) return;
-  assert(isClosure());
-  VariableTablePtr variables = getVariables();
-  for (int i = 0; i < m_closureVars->getCount(); i++) {
-    auto param = dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
-    auto const& name = param->getName();
-    if (!filterUsed || variables->isUsed(name)) {
-      useVars.push_back(ParameterExpressionPtrIdxPair(param, i));
-    }
-  }
-}
-
 FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;
 static Mutex s_refParamInfoLock;
 
@@ -691,9 +571,6 @@ void FunctionScope::RecordFunctionInfo(std::string fname,
     FunctionInfoPtr &info = s_refParamInfo[fname];
     if (!info) {
       info = std::make_shared<FunctionInfo>();
-    }
-    if (func->isStatic()) {
-      info->setMaybeStatic();
     }
     if (func->isRefReturn()) {
       info->setMaybeRefReturn();

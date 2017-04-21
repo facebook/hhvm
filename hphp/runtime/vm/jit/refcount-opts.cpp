@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -568,6 +568,7 @@ way than to complicate the main pass further.
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 #include <folly/Conv.h>
+#include <folly/portability/Stdlib.h>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -1258,21 +1259,22 @@ void remove_helper(IRInstruction* inst) {
  * Walk through each block, and remove nearby IncRef/DecRef[NZ] pairs that
  * operate on the same must-alias-set, if there are obviously no instructions
  * in between them that could read the reference count of that object.
+ *
+ * Then run the same pass, but backwards, which removes nearby DecRef[NZ]/IncRef
+ * likewise.
  */
 void remove_trivial_incdecs(Env& env) {
   FTRACE(2, "remove_trivial_incdecs ---------------------------------\n");
   auto incs = jit::vector<IRInstruction*>{};
   for (auto& blk : env.rpoBlocks) {
-    incs.clear();
-
-    for (auto& inst : *blk) {
+    auto process = [&] (IRInstruction& inst) {
       if (inst.is(IncRef)) {
         incs.push_back(&inst);
-        continue;
+        return;
       }
 
       if (inst.is(DecRef, DecRefNZ)) {
-        if (incs.empty()) continue;
+        if (incs.empty()) return;
         auto const setID = env.asetMap[inst.src(0)];
         auto const to_rm = [&] () -> IRInstruction* {
           for (auto it = begin(incs); it != end(incs); ++it) {
@@ -1287,14 +1289,13 @@ void remove_trivial_incdecs(Env& env) {
           incs.clear();
           return nullptr;
         }();
-        if (to_rm == nullptr) continue;
+        if (to_rm == nullptr) return;
 
         FTRACE(3, "    ** trivial pair: {}, {}\n", *to_rm, inst);
         remove_helper(to_rm);
         remove_helper(&inst);
-        continue;
+        return;
       }
-
 
       auto const effects = memory_effects(inst);
       match<void>(
@@ -1306,13 +1307,36 @@ void remove_trivial_incdecs(Env& env) {
         [&] (PureSpillFrame) {},
         [&] (IrrelevantEffects) {},
 
+        // Inlining related instructions can manipulate the frame but don't
+        // observe reference counts.
+        [&] (GeneralEffects) {
+          auto const is_inlining_inst = inst.is(
+            BeginInlining,
+            DefInlineFP,
+            InlineReturn,
+            InlineReturnNoFrame,
+            SyncReturnBC
+          );
+          if (!is_inlining_inst) {
+            incs.clear();
+          }
+        },
+
         // Everything else may.
-        [&] (GeneralEffects)    { incs.clear(); },
         [&] (CallEffects)       { incs.clear(); },
         [&] (ReturnEffects)     { incs.clear(); },
         [&] (ExitEffects)       { incs.clear(); },
         [&] (UnknownEffects)    { incs.clear(); }
       );
+    };
+
+    incs.clear();
+    for (auto& inst : *blk) {
+      process(inst);
+    }
+    incs.clear();
+    for (auto iter = blk->rbegin(); iter != blk->rend(); ++iter) {
+      process(*iter);
     }
   }
 }
@@ -1416,12 +1440,10 @@ DEBUG_ONLY bool check_state(const RCState& state) {
 
     // If this set has support bits, then the reverse map in the state is
     // consistent with it.
-    if (set.memory_support.any()) {
-      for (auto id = uint32_t{0}; id < set.memory_support.size(); ++id) {
-        if (!set.memory_support[id]) continue;
-        always_assert(state.support_map[id] == asetID);
-      }
-    }
+    bitset_for_each_set(
+      set.memory_support,
+      [&](size_t id) { always_assert(state.support_map[id] == asetID); }
+    );
 
     if (set.pessimized) {
       always_assert(set.lower_bound == 0);
@@ -1566,13 +1588,13 @@ bool merge_into(Env& env, RCState& dst, const RCState& src) {
       changed = true;
     }
 
-    auto const& mem = dst.asets[asetID].memory_support;
-    if (mem.none()) continue;
-    for (auto loc = uint32_t{0}; loc < mem.size(); ++loc) {
-      if (!mem[loc]) continue;
-      assertx(dst.support_map[loc] == -1);
-      dst.support_map[loc] = asetID;
-    }
+    bitset_for_each_set(
+      dst.asets[asetID].memory_support,
+      [&](size_t loc) {
+        assertx(dst.support_map[loc] == -1);
+        dst.support_map[loc] = asetID;
+      }
+    );
   }
 
   assertx(check_state(dst));
@@ -1590,14 +1612,6 @@ void for_aset(Env& env, RCState& state, SSATmp* tmp, Fn fn) {
   fn(asetID);
 }
 
-template<class Fn>
-void for_each_bit(ALocBits bits, Fn fn) {
-  for (auto i = uint32_t{0}; i < bits.size(); ++i) {
-    if (!bits[i]) continue;
-    fn(i);
-  }
-}
-
 void reduce_lower_bound(Env& env, RCState& state, uint32_t asetID) {
   FTRACE(5, "      reduce_lower_bound {}\n", asetID);
   auto& aset = state.asets[asetID];
@@ -1610,13 +1624,11 @@ void pessimize_one(Env& env, RCState& state, ASetID asetID, NAdder add_node) {
   if (aset.pessimized) return;
   FTRACE(2, "      {} pessimized\n", asetID);
   aset.lower_bound = 0;
-  if (aset.memory_support.any()) {
-    for (auto id = uint32_t{0}; id < aset.memory_support.size(); ++id) {
-      if (!aset.memory_support[id]) continue;
-      state.support_map[id] = -1;
-    }
-    aset.memory_support.reset();
-  }
+  bitset_for_each_set(
+    aset.memory_support,
+    [&](size_t id) { state.support_map[id] = -1; }
+  );
+  aset.memory_support.reset();
   aset.pessimized = true;
   add_node(asetID, NHalt{});
 }
@@ -1754,9 +1766,12 @@ bool reduce_support_bits(Env& env,
                          NAdder add_node) {
   FTRACE(2, "    remove: {}\n", show(set));
   auto ret = true;
-  for_each_bit(set, [&] (uint32_t locID) {
-    if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
-  });
+  bitset_for_each_set(
+    set,
+    [&](uint32_t locID) {
+      if (!reduce_support_bit(env, state, locID, add_node)) ret = false;
+    }
+  );
   return ret;
 }
 
@@ -1785,9 +1800,12 @@ void drop_support_bit(Env& env, RCState& state, uint32_t bit) {
 
 void drop_support_bits(Env& env, RCState& state, ALocBits bits) {
   FTRACE(3, "    drop support {}\n", show(bits));
-  for_each_bit(bits, [&] (uint32_t bit) {
-    drop_support_bit(env, state, bit);
-  });
+  bitset_for_each_set(
+    bits,
+    [&] (uint32_t bit) {
+      drop_support_bit(env, state, bit);
+    }
+  );
 }
 
 template<class NAdder>
@@ -1856,7 +1874,7 @@ void handle_call(Env& env,
   // Figure out locations the call may cause stores to, then remove any memory
   // support on those locations.
   auto bset = ALocBits{};
-  if (e.destroys_locals) bset |= env.ainfo.all_frame;
+  if (e.writes_locals) bset |= env.ainfo.all_frame;
   bset |= env.ainfo.may_alias(e.stack);
   bset |= env.ainfo.may_alias(AHeapAny);
   bset &= ~env.ainfo.expand(e.kills);
@@ -2041,7 +2059,8 @@ bool consumes_reference_next_not_taken(const IRInstruction& inst,
  */
 bool observes_reference(const IRInstruction& inst, uint32_t srcID) {
   return consumes_reference_next_not_taken(inst, srcID) ||
-         consumes_reference_taken(inst, srcID);
+         consumes_reference_taken(inst, srcID) ||
+         (inst.op() == CheckArrayCOW && srcID == 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2362,10 +2381,12 @@ void node_skip_over(Env& env, Node* pred, Node* middle, Node* last) {
     (middle->next == nullptr || to_sig(middle)->taken == nullptr));
 
   // Unlink middle node.
-  if (last->type == NT::Phi) {
-    rm_phi_pred(to_phi(last), middle);
-  } else {
-    if (debug) last->prev = nullptr;
+  if (last) {
+    if (last->type == NT::Phi) {
+      rm_phi_pred(to_phi(last), middle);
+    } else {
+      if (debug) last->prev = nullptr;
+    }
   }
   if (middle->type == NT::Phi) {
     rm_phi_pred(to_phi(middle), pred);
@@ -2378,10 +2399,12 @@ void node_skip_over(Env& env, Node* pred, Node* middle, Node* last) {
   rechain_forward(pred, middle, last);
 
   // Set backward pointers from last to pred.
-  if (last->type == NT::Phi) {
-    add_phi_pred(env, to_phi(last), pred);
-  } else {
-    last->prev = pred;
+  if (last) {
+    if (last->type == NT::Phi) {
+      add_phi_pred(env, to_phi(last), pred);
+    } else {
+      last->prev = pred;
+    }
   }
 }
 
@@ -2968,6 +2991,10 @@ bool can_sink(Env& env, const IRInstruction* inst, const Block* block) {
   assertx(inst->is(IncRef));
   if (!block->taken() || !block->next()) return false;
   if (inst->src(0)->inst()->is(DefConst)) return true;
+  // We've split critical edges, so `next' and 'taken' blocks can't
+  // have other predecessors.
+  assertx(block->taken()->numPreds() == 1);
+  assertx(block->next()->numPreds() == 1);
   auto const defBlock = findDefiningBlock(inst->src(0), env.idoms);
   return dominates(defBlock, block->taken(), env.idoms) &&
          dominates(defBlock, block->next(), env.idoms);
@@ -3122,9 +3149,9 @@ Node* rule_inc_pass_sig(Env& env, Node* node) {
   auto const nsig     = to_sig(node->next);
 
   auto const value     = nold_inc->inst->src(0);
-  auto const marker    = nold_inc->inst->marker();
-  auto const new_taken = env.unit.gen(IncRef, marker, value);
-  auto const new_next  = env.unit.gen(IncRef, marker, value);
+  auto const bcctx     = nold_inc->inst->bcctx();
+  auto const new_taken = env.unit.gen(IncRef, bcctx, value);
+  auto const new_next  = env.unit.gen(IncRef, bcctx, value);
 
   FTRACE(2, "    ** inc_pass_sig: {} -> {}, {}\n",
     *nold_inc->inst, *new_taken, *new_next);
@@ -3183,7 +3210,7 @@ Node* rule_inc_pass_phi(Env& env, Node* node) {
   if (!sink) return node;
 
   auto const nphi     = to_phi(node);
-  auto const new_inc  = env.unit.gen(IncRef, sink->marker(), sink->src(0));
+  auto const new_inc  = env.unit.gen(IncRef, sink->bcctx(), sink->src(0));
   auto const nnew_inc = add_between(env, nphi, nphi->next, NInc{new_inc});
 
   nnew_inc->lower_bound = std::max(nphi->lower_bound - 1, 0);
@@ -3314,12 +3341,96 @@ void rcgraph_opts(Env& env) {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * sink_incs() is a simple pass that sinks IncRefs of values that may
+ * be uncount past some safe instructions.  These are instructions
+ * that cannot observe the reference count and so we can sink IncRefs
+ * across them regardless of their lower bounds.  The goal is to sink
+ * IncRefs past Check* and Assert* instructions that may provide
+ * further type information to enable more specialized IncRefs (or
+ * even completely eliminate them).
+ */
+
+bool can_sink_inc_through(const IRInstruction& inst) {
+  switch (inst.op()) {
+    // these refine the type
+    case AssertType:
+    case AssertLoc:
+    case AssertStk:  return true;
+
+    // these commonly occur along with type guards
+    case LdLoc:
+    case LdStk:
+    case InlineReturn:
+    case InlineReturnNoFrame:
+    case Nop:        return true;
+
+    default:         return false;
+  }
+}
+
+void sink_incs(Env& env) {
+  FTRACE(2, "sink_incs ---------------------------------\n");
+  jit::vector<IRInstruction*> incs;
+
+  // Find all IncRefs in the unit.
+  for (auto& blk : env.rpoBlocks) {
+    for (auto& inst : *blk) {
+      if (inst.is(IncRef)) {
+        incs.push_back(&inst);
+      }
+    }
+  }
+
+  // Process each of the IncRefs, including new ones that are created
+  // along the way.
+  while (!incs.empty()) {
+    auto inc = incs.back();
+    incs.pop_back();
+
+    auto block  = inc->block();
+    auto bcctx  = inc->bcctx();
+    auto tmp    = inc->src(0);
+    if (!tmp->type().maybe(TUncounted)) continue;
+
+    auto iter = block->iteratorTo(inc);
+    auto iterOrigSucc = ++iter;
+    while (can_sink_inc_through(*iter)) {
+      iter++;
+    }
+
+    auto const& succ = *iter;
+    if (succ.is(CheckType, CheckLoc, CheckStk, CheckMBase)) {
+      // try to sink past Check* instructions
+      if (!can_sink(env, inc, block)) continue;
+
+      auto const new_taken = env.unit.gen(IncRef, bcctx, tmp);
+      auto const new_next  = env.unit.gen(IncRef, bcctx, tmp);
+      block->taken()->prepend(new_taken);
+      block->next()->prepend(new_next);
+      incs.push_back(new_taken);
+      incs.push_back(new_next);
+      FTRACE(2, "    ** sink_incs: {} -> {}, {}\n",
+             *inc, *new_taken, *new_next);
+      remove_helper(inc);
+
+    } else if (iter != iterOrigSucc) {
+      // insert the inc right before succ if we advanced any instruction
+      auto const new_inc = env.unit.gen(IncRef, bcctx, tmp);
+      block->insert(iter, new_inc);
+      FTRACE(2, "    ** sink_incs: {} -> {}\n", *inc, *new_inc);
+      remove_helper(inc);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void optimizeRefcounts(IRUnit& unit) {
-  Timer timer(Timer::optimize_refcountOpts);
+  Timer timer(Timer::optimize_refcountOpts, unit.logEntry().get_pointer());
   splitCriticalEdges(unit);
 
   PassTracer tracer{&unit, Trace::hhir_refcount, "optimizeRefcounts"};
@@ -3332,6 +3443,7 @@ void optimizeRefcounts(IRUnit& unit) {
   weaken_decrefs(env);
   rcgraph_opts(env);
   remove_trivial_incdecs(env);
+  sink_incs(env);
 
   // We may have pushed IncRefs past CheckTypes, which could allow us to
   // specialize them.

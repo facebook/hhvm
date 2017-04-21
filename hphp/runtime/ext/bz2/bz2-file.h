@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/util/type-scan.h"
 #include <stdio.h>
 #include <bzlib.h>
 
@@ -27,8 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // BZ2File class
 
-class BZ2File : public File {
-public:
+struct BZ2File : File {
   DECLARE_RESOURCE_ALLOCATION(BZ2File);
 
   // overriding ResourceData
@@ -50,6 +50,8 @@ public:
 
 private:
   BZFILE * m_bzFile;
+  // BZFILE is a typedef to void.
+  TYPE_SCAN_IGNORE_FIELD(m_bzFile);
   req::ptr<PlainFile> m_innerFile;
   bool closeImpl();
 };

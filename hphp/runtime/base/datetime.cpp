@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -441,7 +441,7 @@ void DateTime::setTime(int hour, int minute, int second) {
 void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
   if (timezone) {
     m_tz = timezone->cloneTimeZone();
-    if (m_tz.get() && m_tz->get()) {
+    if (m_tz.get()) {
       timelib_set_timezone(m_time.get(), m_tz->get());
       timelib_unixtime2local(m_time.get(), m_time->sse);
     }
@@ -453,7 +453,10 @@ bool DateTime::modify(const String& diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              &error, TimeZone::GetDatabase(),
                                              TimeZone::GetTimeZoneInfoRaw);
-  SCOPE_EXIT { timelib_time_dtor(tmp_time); };
+  SCOPE_EXIT {
+    timelib_time_dtor(tmp_time);
+    if (error) timelib_error_container_dtor(error);
+  };
 
   if (error && error->error_count > 0) {
     raise_warning("DateTime::modify(): Failed to parse time string (%s)"
@@ -898,6 +901,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
   // needed if any date part is missing
   timelib_fill_holes(t, m_time.get(), TIMELIB_NO_CLONE);
   timelib_update_ts(t, m_tz->get());
+  timelib_update_from_sse(t);
 
   int error2;
   m_timestamp = timelib_date_to_int(t, &error2);
@@ -928,6 +932,10 @@ DateTime::diff(req::ptr<DateTime> datetime2, bool absolute) {
     rel->invert = 0;
   }
   return req::make<DateInterval>(rel);
+}
+
+int DateTime::compare(req::ptr<DateTime> datetime2) {
+  return timelib_time_compare(m_time.get(), datetime2.get()->m_time.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

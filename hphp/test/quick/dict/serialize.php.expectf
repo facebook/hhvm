@@ -1,0 +1,311 @@
+====================================================
+dict(0) {
+}
+string(6) "D:0:{}"
+dict(0) {
+}
+====================================================
+dict(3) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+string(42) "D:3:{i:1;s:1:"a";i:2;s:1:"b";i:3;s:1:"c";}"
+dict(3) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+  [3]=>
+  string(1) "c"
+}
+====================================================
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+string(42) "D:3:{s:1:"a";i:1;s:1:"b";i:2;s:1:"c";i:3;}"
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+====================================================
+dict(7) {
+  ["abc"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["def"]=>
+  bool(true)
+  [123]=>
+  float(1.23)
+  [456]=>
+  NULL
+  [789]=>
+  dict(2) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+  }
+  ["ghi"]=>
+  keyset(2) {
+    int(123)
+    string(3) "abc"
+  }
+  ["jkl"]=>
+  vec(4) {
+    int(1)
+    int(2)
+    int(3)
+    int(4)
+  }
+}
+string(170) "D:7:{s:3:"abc";O:8:"stdClass":0:{}s:3:"def";b:1;i:123;d:1.23;i:456;N;i:789;D:2:{s:1:"a";i:1;s:1:"b";i:2;}s:3:"ghi";k:2:{i:123;s:3:"abc";}s:3:"jkl";v:4:{i:1;i:2;i:3;i:4;}}"
+dict(7) {
+  ["abc"]=>
+  object(stdClass)#%d (0) {
+  }
+  ["def"]=>
+  bool(true)
+  [123]=>
+  float(1.23)
+  [456]=>
+  NULL
+  [789]=>
+  dict(2) {
+    ["a"]=>
+    int(1)
+    ["b"]=>
+    int(2)
+  }
+  ["ghi"]=>
+  keyset(2) {
+    int(123)
+    string(3) "abc"
+  }
+  ["jkl"]=>
+  vec(4) {
+    int(1)
+    int(2)
+    int(3)
+    int(4)
+  }
+}
+====================================================
+dict(2) {
+  ["123"]=>
+  int(1)
+  [123]=>
+  int(2)
+}
+string(30) "D:2:{s:3:"123";i:1;i:123;i:2;}"
+dict(2) {
+  ["123"]=>
+  int(1)
+  [123]=>
+  int(2)
+}
+====================================================
+dict(1) {
+  [1]=>
+  object(NoisyClass)#%d (0) {
+  }
+}
+NoisyClass::__sleep()
+string(32) "D:1:{i:1;O:10:"NoisyClass":0:{}}"
+NoisyClass::__wakeup()
+dict(1) {
+  [1]=>
+  object(NoisyClass)#%d (1) {
+    ["val"]=>
+    dict(1) {
+      ["abcd"]=>
+      int(12345)
+    }
+  }
+}
+====================================================
+string(6) "D:0:{}"
+dict(0) {
+}
+====================================================
+string(36) "D:2:{i:123;s:2:"ab";s:2:"cd";i:456;}"
+dict(2) {
+  [123]=>
+  string(2) "ab"
+  ["cd"]=>
+  int(456)
+}
+====================================================
+string(34) "D:2:{i:123;i:555;s:3:"123";i:666;}"
+dict(2) {
+  [123]=>
+  int(555)
+  ["123"]=>
+  int(666)
+}
+====================================================
+string(26) "D:2:{i:1;i:123;i:1;i:456;}"
+dict(1) {
+  [1]=>
+  int(456)
+}
+====================================================
+string(48) "D:2:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}i:1;i:456;}"
+Dtor::__destruct(): 1
+dict(1) {
+  [1]=>
+  int(456)
+}
+====================================================
+string(53) "D:1:{i:1;O:8:"stdClass":1:{s:3:"val";a:1:{i:1;r:2;}}}"
+dict(1) {
+  [1]=>
+  object(stdClass)#%d (1) {
+    ["val"]=>
+    array(1) {
+      [1]=>
+      object(stdClass)#%d (1) {
+        ["val"]=>
+        array(1) {
+          [1]=>
+          *RECURSION*
+        }
+      }
+    }
+  }
+}
+====================================================
+object(stdClass)#%d (1) {
+  ["val"]=>
+  dict(1) {
+    [1]=>
+    *RECURSION*
+  }
+}
+string(43) "O:8:"stdClass":1:{s:3:"val";D:1:{i:1;r:1;}}"
+object(stdClass)#%d (1) {
+  ["val"]=>
+  dict(1) {
+    [1]=>
+    *RECURSION*
+  }
+}
+====================================================
+dict(1) {
+  [1]=>
+  object(stdClass)#%d (1) {
+    ["val"]=>
+    dict(1) {
+      [1]=>
+      object(stdClass)#%d (1) {
+        ["val"]=>
+        *RECURSION*
+      }
+    }
+  }
+}
+string(41) "D:1:{i:1;O:8:"stdClass":1:{s:3:"val";N;}}"
+dict(1) {
+  [1]=>
+  object(stdClass)#%d (1) {
+    ["val"]=>
+    NULL
+  }
+}
+====================================================
+string(42) "D:2:{s:3:"abc";v:1:{i:456;}s:3:"def";r:2;}"
+dict(2) {
+  ["abc"]=>
+  vec(1) {
+    int(456)
+  }
+  ["def"]=>
+  vec(1) {
+    int(456)
+  }
+}
+====================================================
+string(36) "D:2:{s:3:"abc";s:3:"zyx";r:2;i:123;}"
+dict(2) {
+  ["abc"]=>
+  string(3) "zyx"
+  ["zyx"]=>
+  int(123)
+}
+====================================================
+string(15) "D:1:{b:0;i:123}"
+
+Notice: Unable to unserialize: [D:1:{b:0;i:123}]. Invalid key. in %s on line %d
+bool(false)
+====================================================
+string(18) "D:1:{a:0:{};i:123}"
+
+Notice: Unable to unserialize: [D:1:{a:0:{};i:123}]. Invalid key. in %s on line %d
+bool(false)
+====================================================
+string(42) "D:2:{i:123;a:1:{i:0;s:3:"abc";}R:3;i:456;}"
+
+Notice: Unable to unserialize: [D:2:{i:123;a:1:{i:0;s:3:"abc";}R:3;i:456;}]. Invalid key. in %s on line %d
+bool(false)
+====================================================
+string(36) "D:2:{i:123;a:1:{i:0;b:1;}r:3;i:456;}"
+
+Notice: Unable to unserialize: [D:2:{i:123;a:1:{i:0;b:1;}r:3;i:456;}]. Invalid key. in %s on line %d
+bool(false)
+====================================================
+string(21) "D:2:{i:1;i:2;i:3;R:2}"
+
+Notice: Unable to unserialize: [D:2:{i:1;i:2;i:3;R:2}]. Dicts cannot contain references. in %s on line %d
+bool(false)
+====================================================
+string(36) "D:2:{i:1;i:789;i:2;a:1:{i:123;R:2;}}"
+
+Notice: Unable to unserialize: [D:2:{i:1;i:789;i:2;a:1:{i:123;R:2;}}]. Dicts cannot contain references. in %s on line %d
+bool(false)
+====================================================
+string(44) "D:2:{i:1;a:1:{i:0;i:123;}i:2;a:1:{i:0;R:3;}}"
+dict(2) {
+  [1]=>
+  array(1) {
+    [0]=>
+    &int(123)
+  }
+  [2]=>
+  array(1) {
+    [0]=>
+    &int(123)
+  }
+}
+====================================================
+dict(1) {
+  [1]=>
+  object(SleepThrow)#%d (0) {
+  }
+}
+Serialize exception: Sleep exception
+====================================================
+string(35) "D:1:{i:123;O:11:"WakeupThrow":0:{}}"
+Unserialize exception: Wakeup exception
+====================================================
+string(97) "D:3:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}i:2;O:11:"WakeupThrow":0:{}i:3;O:4:"Dtor":1:{s:2:"id";i:2;}}"
+Dtor::__destruct(): 1
+Dtor::__destruct(): 2
+Unserialize exception: Wakeup exception
+====================================================
+string(84) "D:3:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}b:0;s:3:"abc";i:3;O:4:"Dtor":1:{s:2:"id";i:2;}}"
+Dtor::__destruct(): 1
+
+Notice: Unable to unserialize: [D:3:{i:1;O:4:"Dtor":1:{s:2:"id";i:1;}b:0;s:3:"abc";i:3;O:4:"Dtor":1:{s:2:"id";i:2;}}]. Invalid key. in %s on line %d
+bool(false)

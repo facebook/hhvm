@@ -15,25 +15,31 @@
 open Core
 open Utils
 
-let print_errorl_json oc el =
-  let res =
-    if el = [] then
-      Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool true;
-                    "errors", Hh_json.JSON_Array [];
-                    "version", Hh_json.JSON_String Build_id.build_id_ohai;
-                  ]
-    else
-      let errors_json = List.map ~f:Errors.to_json el in
-      Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool false;
-                    "errors", Hh_json.JSON_Array errors_json;
-                    "version", Hh_json.JSON_String Build_id.build_id_ohai;
-                  ]
-  in
-  (* N.B. json output always goes on stderr *)
-  output_string stderr (Hh_json.json_to_string res);
-  flush stderr
+let get_errorl_json el =
+  if el = [] then
+    Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool true;
+                  "errors", Hh_json.JSON_Array [];
+                  "version", Hh_json.JSON_String Build_id.build_id_ohai;
+                ]
+  else
+    let errors_json = List.map ~f:Errors.to_json el in
+    Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool false;
+                  "errors", Hh_json.JSON_Array errors_json;
+                  "version", Hh_json.JSON_String Build_id.build_id_ohai;
+                ]
 
-let print_errorl use_json el oc =
+let get_errorl_json_array errorl =
+  let el = Errors.get_sorted_error_list errorl in
+  let el = List.map ~f:Errors.to_absolute el in
+  let errors_json = List.map ~f:Errors.to_json el in
+  Hh_json.JSON_Array errors_json
+
+let print_errorl_json oc el =
+  let res = get_errorl_json el in
+  Hh_json.json_to_output oc res;
+  flush oc
+
+let print_errorl is_stale_msg use_json el oc =
   if use_json then
     print_errorl_json oc el
   else begin
@@ -51,9 +57,5 @@ let print_errorl use_json el oc =
         output_string oc "\n";
       end sl
   end;
+  Option.iter is_stale_msg ~f:(fun msg -> output_string oc msg);
   flush oc
-
-let sort_errorl el =
-  List.sort ~cmp:begin fun x y ->
-    Pos.compare (Errors.get_pos x) (Errors.get_pos y)
-  end el

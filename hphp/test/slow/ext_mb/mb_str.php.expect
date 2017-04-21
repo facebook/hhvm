@@ -3,6 +3,8 @@ string(5) "value"
 string(3) "baz"
 array(0) {
 }
+array(0) {
+}
 string(2) "04"
 string(2) "30"
 string(4) "1973"
@@ -66,3 +68,4 @@ string(3) "bcd"
 bool(true)
 bool(true)
 string(1) "f"
+int(3)

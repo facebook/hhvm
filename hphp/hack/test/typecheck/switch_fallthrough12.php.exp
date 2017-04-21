@@ -1,10 +1,19 @@
-Tint
-Tint
-Tstring
-[1]intersect(Tint, Tstring)
-Tbool
-[2]intersect(Tstring, Tbool, Tint)
-Tint
-Tfloat
-[3]intersect(Tint, Tstring, Tfloat, Tbool)
+File "switch_fallthrough12.php", line 6, characters 3-13:
+  int
+File "switch_fallthrough12.php", line 12, characters 7-17:
+  int
+File "switch_fallthrough12.php", line 15, characters 7-17:
+  string
+File "switch_fallthrough12.php", line 19, characters 7-17:
+  ^(int | string)
+File "switch_fallthrough12.php", line 22, characters 7-17:
+  bool
+File "switch_fallthrough12.php", line 26, characters 7-17:
+  ^(string | bool | int)
+File "switch_fallthrough12.php", line 30, characters 7-17:
+  int
+File "switch_fallthrough12.php", line 33, characters 7-17:
+  float
+File "switch_fallthrough12.php", line 37, characters 3-13:
+  ^(int | string | float | bool)
 No errors

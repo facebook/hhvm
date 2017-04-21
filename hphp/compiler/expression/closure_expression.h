@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,7 @@ DECLARE_BOOST_TYPES(ClosureExpression);
 DECLARE_BOOST_TYPES(FunctionStatement);
 DECLARE_BOOST_TYPES(ExpressionList);
 
-class ClosureExpression : public Expression {
-public:
+struct ClosureExpression : Expression {
   ClosureExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                     ClosureType type,
                     FunctionStatementPtr func,

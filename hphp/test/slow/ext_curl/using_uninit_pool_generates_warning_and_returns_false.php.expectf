@@ -1,0 +1,3 @@
+
+Warning: Attempting to use connection pooling without specifying an existent connection pool! in %s/hphp/test/slow/ext_curl/using_uninit_pool_generates_warning_and_returns_false.php on line 2
+bool(false)

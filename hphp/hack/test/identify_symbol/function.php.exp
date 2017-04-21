@@ -1,0 +1,10 @@
+name: \foo, kind: function, span: line 6, characters 3-5, definition: 
+ foo
+   kind: function
+   id: function::foo
+   position: line 3, characters 10-12
+   span: line 3, character 1 - line 3, character 17
+   modifiers: 
+   params:
+
+

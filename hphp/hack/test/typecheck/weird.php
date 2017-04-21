@@ -19,12 +19,21 @@ interface C<T as B> {
 interface D {
 }
 
-async function bar(
+async function foo<Tu as B>(C<Tu> $x):Awaitable<void> {
+  $d = await $x->genT();
+}
+
+async function bar<Tu as B>(
     A $rule,
+    C<Tu> $rule2,
   ): Awaitable<int> {
-  invariant($rule instanceof C, 'lala');
+  if (!($rule instanceof C)) {
+    echo 'blah';
+    return 123;
+  }
+//  hh_show($rule);
   $delegate = await $rule->genT();
+//  hh_show($delegate);
   $delegate->getInt();
   return 123;
 }
-

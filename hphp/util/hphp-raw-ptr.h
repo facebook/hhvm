@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,8 +37,7 @@ namespace HPHP {
  * Switching to raw pointers in a few select cases was a major
  * compile-time perf win for hphp.
  */
-template <class T> class hphp_raw_ptr {
-public:
+template <class T> struct hphp_raw_ptr {
   hphp_raw_ptr() : px(0) {}
   explicit hphp_raw_ptr(T *p) : px(p) {}
 

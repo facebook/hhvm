@@ -1,0 +1,8 @@
+mixed:
+  map: string(6) "value1"
+  vector: string(6) "value1"
+  set: bool(true)
+packed:
+  map: string(6) "value1"
+  vector: string(6) "value1"
+  set: bool(true)

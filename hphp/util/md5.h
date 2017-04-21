@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #include <folly/String.h>
 #include <folly/Range.h>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/byte-order.h"
 
 namespace HPHP {
@@ -37,24 +38,29 @@ struct MD5 : private boost::totally_ordered<MD5> {
   MD5() : q{} {}
 
   // Input should be null-terminated output from PHP::md5().
-  explicit MD5(const char* str) {
-    assert(strlen(str) == 32);
-    const int kQWordAsciiLen = 16;
+  explicit MD5(folly::StringPiece str) {
+    assertx(str.size() == 32);
+    auto constexpr kQWordAsciiLen = 16;
     char buf[kQWordAsciiLen + 1];
-    buf[kQWordAsciiLen] = 0;
-    memcpy(buf, str, kQWordAsciiLen);
-    assert(strlen(buf) == 16);
+    buf[kQWordAsciiLen] = '\0';
+    memcpy(buf, str.begin(), kQWordAsciiLen);
+    assertx(strlen(buf) == 16);
     q[0] = strtoull(buf, nullptr, 16);
 
-    memcpy(buf, str + kQWordAsciiLen, 16);
-    assert(strlen(buf) == 16);
+    memcpy(buf, str.begin() + kQWordAsciiLen, 16);
+    assertx(strlen(buf) == 16);
     q[1] = strtoull(buf, nullptr, 16);
   }
 
   // Blob is assumed to be in network byte order.
-  explicit MD5(const void* blob) {
+  explicit MD5(const void* blob, size_t len) {
+    assertx(len == 16);
     q[0] = ntohq(((const uint64_t*)blob)[0]);
     q[1] = ntohq(((const uint64_t*)blob)[1]);
+  }
+
+  explicit MD5(uint64_t x) {
+    q[0] = 0; q[1] = x;
   }
 
   // Copy out in network byte order.
@@ -81,8 +87,7 @@ struct MD5 : private boost::totally_ordered<MD5> {
   }
 
   uint64_t hash() const {
-    // hash_int64_pair does way more work than necessary; all the bits here
-    // are fantastically good.
+    // All the bits here are fantastically good.
     return q[0];
   }
 };
@@ -92,4 +97,3 @@ struct MD5 : private boost::totally_ordered<MD5> {
 }
 
 #endif
-

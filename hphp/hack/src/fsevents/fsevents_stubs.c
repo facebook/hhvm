@@ -15,17 +15,23 @@
 #include <caml/fail.h>
 #include <caml/signals.h>
 #include <caml/callback.h>
+#include <caml/unixsupport.h>
 
 #include <stdio.h>
 #include <pthread.h>
 
+#if (OCAML_VERSION_MAJOR == 4) && (OCAML_VERSION_MINOR < 3)
 // Basically the ocaml headers and the mac headers are redefining the same
 // types. AFAIK, this is a longstanding bug in the ocaml headers
 // (http://caml.inria.fr/mantis/print_bug_page.php?bug_id=4877). Looking at the
 // OS X headers, the conflicting typehints are gated with these definitions, so
 // this was the easiest workaround for me.
+//
+// This bug was apparently fixed in 4.03, causing the opposite problem, hence
+// the above gating.
 #define _UINT64
 #define _UINT32
+#endif
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
@@ -325,8 +331,7 @@ static void run_loop_thread(struct thread_env *thread_env) {
 /**
  * Starts up a thread running a run loop, creates the env, and then returns it
  */
-static struct env *fsevents_init()
-{
+static struct env *fsevents_init(void) {
   pthread_t loop_thread;
   struct thread_env *thread_env;
   struct env *env;
@@ -395,21 +400,25 @@ static struct event *read_events(struct env *env) {
   return to_do;
 }
 
-value stub_fsevents_init(value unit)
+CAMLprim value stub_fsevents_init(value unit)
 {
+  CAMLparam1(unit);
   // We're returning a pointer to ocaml land. This type will be opaque to them
   // and only be useful when passed back to c. This is a safe way to pass
   // pointers back to ocaml. See
   // http://caml.inria.fr/pub/docs/manual-ocaml/intfc.html#sec412
-  return (value)fsevents_init();
+  CAMLreturn((value)fsevents_init());
 }
 
-value stub_fsevents_add_watch(value env, value path)
+CAMLprim value stub_fsevents_add_watch(value env, value path)
 {
   CAMLparam2(env, path);
   CAMLlocal1(ret);
   struct env *c_env = (struct env*)env;
   char *rpath = realpath(String_val(path), NULL);
+  if (rpath == NULL) {
+    uerror("realpath", path);
+  }
   send_command(c_env, ADD_WATCH, rpath);
   ret = caml_copy_string(rpath);
   free(rpath);
@@ -419,31 +428,34 @@ value stub_fsevents_add_watch(value env, value path)
 /**
  * This functionality is not yet implemented
  */
-value stub_fsevents_rm_watch(value env, value path)
+CAMLprim value stub_fsevents_rm_watch(value env, value path)
 {
   CAMLparam2(env, path);
   CAMLlocal1(ret);
   struct env *c_env = (struct env*)env;
   char *rpath = realpath(String_val(path), NULL);
+  if (rpath == NULL) {
+    uerror("realpath", path);
+  }
   send_command(c_env, RM_WATCH, String_val(path));
   ret = caml_copy_string(rpath);
   free(rpath);
   CAMLreturn(ret);
 }
 
-value stub_fsevents_get_event_fd(value env)
+CAMLprim value stub_fsevents_get_event_fd(value env)
 {
   CAMLparam1(env);
   int fd = ((struct env *)env)->read_event_fd;
   CAMLreturn(Val_int(fd));
 }
 
-value stub_fsevents_read_events(value env)
+CAMLprim value stub_fsevents_read_events(value env)
 {
   CAMLparam1(env);
+  CAMLlocal3(event_list, event, cons);
   struct event *to_free;
   struct event *events = read_events((struct env*)env);
-  CAMLlocal3(event_list, event, cons);
   event_list = Val_emptylist;
   while (events != NULL) {
     // A tuple to store the filed

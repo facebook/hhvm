@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,8 @@ struct ObjectData;
  * MakeObject and Delete take care of isolating callers from that detail.
  */
 struct APCObject {
+  using ClassOrName = Either<const Class*,const StringData*>;
+
   /*
    * Create an APCObject from an ObjectData*; returns its APCHandle.
    */
@@ -55,16 +57,23 @@ struct APCObject {
   static void Delete(APCHandle* handle);
 
   static APCObject* fromHandle(APCHandle* handle) {
-    assert(offsetof(APCObject, m_handle) == 0);
+    assert(handle->checkInvariants() &&
+           handle->kind() == APCKind::SharedObject);
+    static_assert(offsetof(APCObject, m_handle) == 0, "");
     return reinterpret_cast<APCObject*>(handle);
   }
 
   static const APCObject* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCObject, m_handle) == 0);
+    assert(handle->checkInvariants() &&
+           handle->kind() == APCKind::SharedObject);
+    static_assert(offsetof(APCObject, m_handle) == 0, "");
     return reinterpret_cast<const APCObject*>(handle);
   }
 
   APCHandle* getHandle() { return &m_handle; }
+  const APCHandle* getHandle() const { return &m_handle; }
+
+  bool isPersistent() const { return m_persistent; }
 
 private:
   struct Prop {
@@ -74,24 +83,37 @@ private:
   };
 
 private:
-  explicit APCObject(ObjectData*, uint32_t propCount);
+  explicit APCObject(ClassOrName cls, uint32_t propCount);
   ~APCObject();
   APCObject(const APCObject&) = delete;
   APCObject& operator=(const APCObject&) = delete;
 
 private:
+  static APCHandle::Pair ConstructSlow(ObjectData* data, ClassOrName name);
+
   friend size_t getMemSize(const APCObject*);
   Object createObject() const;
+  Object createObjectSlow() const;
 
   Prop* props() { return reinterpret_cast<Prop*>(this + 1); }
   const Prop* props() const {
     return const_cast<APCObject*>(this)->props();
   }
 
+  APCHandle** persistentProps() {
+    return reinterpret_cast<APCHandle**>(this + 1);
+  }
+  const APCHandle* const * persistentProps() const {
+    return const_cast<APCObject*>(this)->persistentProps();
+  }
+
 private:
   APCHandle m_handle;
-  Either<const Class*,const StringData*> m_cls;
+  ClassOrName m_cls;
   uint32_t m_propCount;
+  uint8_t m_persistent:1;
+  uint8_t m_no_wakeup:1;
+  uint8_t m_fast_init:1;
 };
 
 //////////////////////////////////////////////////////////////////////

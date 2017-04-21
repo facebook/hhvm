@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,12 @@
 #define incl_HPHP_VM_HHBC_CODEC_H_
 
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/util/either.h"
 
 namespace HPHP {
+
+struct Unit;
+struct UnitEmitter;
 
 /*
  * This file contains various functions for reading and writing bytecode
@@ -35,9 +39,7 @@ namespace HPHP {
  *
  * We currently use a variable-width encoding scheme that can store [0, 0xff)
  * using one byte and [0xff, 0x1fe) using two bytes. If and when we hit 0x1fe
- * bytecodes we can adjust the encoding. All bytes are written with their bits
- * flipped, to ensure that any code attempting to read raw Ops from a bytecode
- * stream will fail.
+ * bytecodes we can adjust the encoding.
  */
 
 /*
@@ -64,13 +66,13 @@ void encode_op(Op op, F write_byte) {
                 "Op encoding scheme doesn't support Ops >= 0x1fe");
   auto rawVal = static_cast<size_t>(op);
   if (rawVal >= 0xff) {
-    // Write a 0xff signal byte, with its bits flipped.
-    write_byte(static_cast<uint8_t>(0));
+    // Write a 0xff signal byte
+    write_byte(static_cast<uint8_t>(0xff));
     rawVal -= 0xff;
   }
   assert(rawVal < 0xff);
 
-  write_byte(~rawVal);
+  write_byte(rawVal);
 }
 
 /*
@@ -79,15 +81,8 @@ void encode_op(Op op, F write_byte) {
  * decoding scheme with arbitrary values.
  */
 inline Op decode_op_unchecked(PC& pc) {
-  size_t rawVal = static_cast<uint8_t>(~decode_byte(pc));
-  if (rawVal == 0xff) {
-    auto const byte = static_cast<uint8_t>(~decode_byte(pc));
-    assert(byte < 0xff);
-    rawVal += byte;
-  }
-
-  auto const op = static_cast<Op>(rawVal);
-  return op;
+  uint32_t raw = decode_byte(pc);
+  return LIKELY(raw != 0xff) ? Op(raw) : Op(decode_byte(pc) + 0xff);
 }
 
 /*
@@ -124,21 +119,22 @@ template<class T> T decode_oa(PC& pc) {
   return decode_raw<T>(pc);
 }
 
-ALWAYS_INLINE
-int32_t decodeVariableSizeImm(PC* immPtr) {
-  auto const small = **immPtr;
-  if (UNLIKELY(small & 0x1)) {
-    auto const large = decode_raw<uint32_t>(*immPtr);
-    return (int32_t)(large >> 1);
-  }
-
-  (*immPtr)++;
-  return (int32_t)(small >> 1);
-}
-
 ALWAYS_INLINE int32_t decode_iva(PC& pc) {
-  return decodeVariableSizeImm(&pc);
+  auto const small = *pc;
+  if (UNLIKELY(int8_t(small) < 0)) {
+    auto const large = decode_raw<uint32_t>(pc);
+    return (large & 0xffffff00) >> 1 | (small & 0x7f);
+  }
+  pc++;
+  return small;
 }
+
+/*
+ * Decode a MemberKey, advancing pc past it.
+ */
+MemberKey decode_member_key(PC& pc, Either<const Unit*, const UnitEmitter*> u);
+
+void encode_member_key(MemberKey mk, UnitEmitter& ue);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -146,6 +142,10 @@ template<typename L>
 void foreachSwitchTarget(PC pc, L func) {
   auto const op = decode_op(pc);
   assert(isSwitch(op));
+  if (op == Op::Switch) {
+    (void)decode_oa<SwitchKind>(pc); // skip bounded kind
+    (void)decode_raw<int64_t>(pc); // skip base
+  }
   int32_t size = decode_raw<int32_t>(pc);
   for (int i = 0; i < size; ++i) {
     if (op == Op::SSwitch) decode_raw<Id>(pc);
@@ -154,7 +154,7 @@ void foreachSwitchTarget(PC pc, L func) {
 }
 
 template<typename L>
-void foreachSwitchString(PC pc, L func) {
+void foreachSSwitchString(PC pc, L func) {
   auto const UNUSED op = decode_op(pc);
   assert(op == Op::SSwitch);
   int32_t size = decode_raw<int32_t>(pc) - 1; // the last item is the default
@@ -163,6 +163,11 @@ void foreachSwitchString(PC pc, L func) {
     decode_raw<Offset>(pc);
   }
 }
+
+//////////////////////////////////////////////////////////////////////
+
+void encodeLocalRange(UnitEmitter&, const LocalRange&);
+LocalRange decodeLocalRange(const unsigned char*&);
 
 //////////////////////////////////////////////////////////////////////
 

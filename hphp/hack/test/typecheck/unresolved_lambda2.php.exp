@@ -1,4 +1,7 @@
-[1]intersect([2]intersect(Tfloat))
-[3]intersect([4]intersect(Tint), [5]intersect(Tstring))
-[6]intersect([7]intersect(Tfloat), [8]intersect(Tstring), [9]intersect(Tint))
+File "unresolved_lambda2.php", line 30, characters 5-17:
+  ^(^(float))
+File "unresolved_lambda2.php", line 33, characters 5-17:
+  ^(^(int) | ^(string))
+File "unresolved_lambda2.php", line 35, characters 3-15:
+  ^(^(float) | ^(string) | ^(int))
 No errors

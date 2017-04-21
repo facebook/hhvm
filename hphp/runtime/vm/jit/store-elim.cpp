@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,27 +35,37 @@
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 /*
   This implements partial-redundancy elimination for stores.
 
-  The basic algorithm follows Morel & Renvoise "Global Optimization
-  by Suppression of Partial Redundancies". That paper talks about
-  redundancy of expressions, so we have to "reverse" everything
-  to apply it to stores (Anticipated <=> Available, In <=> Out).
-  In addition, there are two forms of (non)-transparency for stores.
-  A (possible) use of the result of a candidate store prevents the
-  candidate from being moved past the use, and also prevents the candidate
-  from being killed by a later store. This is very similar to transparency
-  of expressions. But in addition, a possibly interfering store following a
-  candidate store prevents the candidate from moving past the store, but does
-  not prevent the candidate from being killed by a later store. We split
-  these out into alteredAnt, and alteredAvl. This also affects local
-  availabilty; a store may not be available in the sense that it can be moved
-  to the end of the block (because of a possible conflicting write), but it may
-  still be available in the sense that it can be killed by a later store. We
-  split this out into AvlLoc (can be moved to the end), and DelLoc (can be
-  deleted if its anticipated out).
+  The basic algorithm follows Morel & Renvoise "Global Optimization by
+  Suppression of Partial Redundancies".  That paper talks about redundancy of
+  expressions, so we have to "reverse" everything to apply it to stores
+  (Anticipated <=> Available, In <=> Out).
+
+  Some general terminology:
+    - A store to a location L is /available/ at code position P if it has
+      happened on all paths to P, and there is no interference (loads or
+      other stores) of L between those stores and P.
+    - A store to a location L is /anticipated/ at code position P if it occurs
+      between P and any subsequent use of L.
+
+  There are two forms of (non)-transparency for stores.  A (possible) use of
+  the result of a candidate store prevents the candidate from being moved past
+  the use, and also prevents the candidate from being killed by a later store.
+  This is very similar to transparency of expressions.  But in addition, a
+  possibly interfering store following a candidate store prevents the candidate
+  from moving past the store, but does not prevent the candidate from being
+  killed by a later store.  We represent these two criteria via alteredAnt and
+  alteredAvl (see below).
+
+  This also affects local availabilty; a store may not be available in the
+  sense that it can be moved to the end of the block (because of a possible
+  conflicting write), but it may still be available in the sense that it can be
+  killed by a later store.  We split this out into AvlLoc (can be moved to the
+  end), and DelLoc (can be deleted if it's anticipated out).
 
   Finally, we make some simplifications to the CONST term in M & R to
   reduce the number of bitvectors involved, and reduce the bidirectionality
@@ -63,21 +73,27 @@
 
   The final equations are:
 
-   Local bitvectors (contents of BlockAnalysis):
-    antLoc     : A store can be moved to the start of its block, without
-                 changing the meaning of the program
-    avlLoc     : A store can be moved to the end of its block, without changing
-                 the meaning of the program
-    delLoc     : A store can be killed if it would be redundant at the end of
-                 the block (even though it may not be legal to move it there)
+  Local bitvectors (contents of BlockAnalysis), per block B:
+    antLoc[L]     : There exists a store to L in B which is anticipated at the
+                    start of B---and thus can be moved there, without changing
+                    the meaning of the program.
+    avlLoc[L]     : There exists a store to L in B which is available at the
+                    end of B---and thus can be moved there, without changing
+                    the meaning of the program.
+    delLoc[L]     : There exists a store to L in B which could be killed if it
+                    would be redundant at the end of B (even though it may not
+                    be legal to move it there).
 
-    alteredAnt : prevents a store from being moved forward through this block,
-                 but does not prevent it being killed by a store in a later
-                 block.
-    alteredAvl : prevents a store from being moved forward through this block,
-                 and prevents it from being killed by a later store.
+    alteredAnt[L] : B contains a possible use of L.  This prevents a store to L
+                    from being killed by an otherwise-redundant store in a
+                    later block.  (It also prevents stores from being moved
+                    forward through this block.)
+    alteredAvl[L] : B contains a possible use or store of L.  This prevents a
+                    store to L from being moved through this block, but stores
+                    might still be allowed to be eliminated due to redundancy
+                    with later stores (unless, of course, alteredAnt[L] holds).
 
-   Global bitvectors:
+  Global bitvectors:
     Anticipated: (backward walk, initial 1s except in exit blocks)
     AntIn = AntLoc | (AntOut & ~alteredAnt);
     AntOut = Product(succs, AntIn(s))
@@ -98,11 +114,11 @@
 
       Roughly speaking, at any given block, we're interested in the stores that
       are PAntOut, because they're redundant on at least one path from this
-      block to the exit of the region. We can place a store at the end of a
-      block if its AvlLoc (by definition) or if its PPIn and "transparent" to
+      block to the exit of the region.  We can place a store at the end of a
+      block if it's AvlLoc (by definition) or if it's PPIn and "transparent" to
       the block; but since we're actually going to be inserting at the start of
       blocks, there's no point marking a block PPOut unless the store is PPIn
-      or its redundant in each of the following blocks.
+      or it's redundant in each of the following blocks.
 
       Note that we could use 1s instead of AvlIn/AvlOut, but convergence would
       be slower, and we would still need to deal with stores where the
@@ -110,13 +126,13 @@
       store).
 
     Insert = PPIn & ~AntIn & (~PPOut | alteredAvl);
-      We want to insert if its possible, and the store is not redundant, and we
+      We want to insert if it's possible, and the store is not redundant, and we
       can't push the store any later.
 
     Delete = (AntOut & DelLoc) | (PPOut & AvlLoc);
-      AntOut & DelLoc means its redundant; we'll just kill it.
+      AntOut & DelLoc means it's redundant; we'll just kill it.
       PPOut => PPIn | AntIn in each successor, meaning that for each successor
-      (recursively) we can either push the store into that successor, or its
+      (recursively) we can either push the store into that successor, or it's
       redundant there.
 */
 
@@ -186,9 +202,16 @@ struct TrackedStore {
   Block* pending() {
     return kind() == Pending ? static_cast<Block*>(m_ptr.ptr()) : nullptr;
   }
+  const Block* pending() const {
+    return kind() == Pending ? static_cast<const Block*>(m_ptr.ptr()) : nullptr;
+  }
   IRInstruction* processed() {
-    return kind() == Processed ? static_cast<IRInstruction*>(m_ptr.ptr()) :
-      nullptr;
+    return kind() == Processed ?
+      static_cast<IRInstruction*>(m_ptr.ptr()) : nullptr;
+  }
+  const IRInstruction* processed() const {
+    return kind() == Processed ?
+      static_cast<const IRInstruction*>(m_ptr.ptr()) : nullptr;
   }
   bool isUnseen() const {
     return kind() == Unseen;
@@ -197,7 +220,7 @@ struct TrackedStore {
     return kind() == Bad;
   }
   bool isPhi() const {
-    return kind() >= Phi && kind() != Bad;
+    return kind() >= Phi && kind() < Bad;
   }
   void set(IRInstruction* inst) { m_ptr.set(Instruction, inst); }
   void set(Block* block, uint32_t id) {
@@ -216,6 +239,17 @@ struct TrackedStore {
   }
   size_t hash() const {
     return m_ptr.tag() + intptr_t(m_ptr.ptr());
+  }
+  std::string toString() const {
+    if (isUnseen()) return "Unseen";
+    if (isBad()) return "Bad";
+    char* type;
+    if (instruction()) type = "Inst";
+    else if (isPhi()) type = "Phi";
+    else if (pending()) type = "Pending";
+    else if (processed()) type = "Processed";
+    else type = "XXX";
+    return folly::sformat("{}:0x{:x}",type, uintptr_t(m_ptr.ptr()));
   }
  private:
   Kind kind() const { return m_ptr.tag(); }
@@ -283,6 +317,7 @@ struct Global {
     , poBlockList(poSortCfg(unit))
     , ainfo(collect_aliases(unit, poBlockList))
     , blockStates(unit, BlockState{})
+    , seenStores(unit, 0)
   {}
 
   IRUnit& unit;
@@ -297,11 +332,18 @@ struct Global {
   // we do dataflow.
   StateVector<Block,BlockState> blockStates;
   jit::vector<IRInstruction*> reStores;
+  // Used to prevent cycles in find_candidate_store
+  StateVector<Block,uint32_t> seenStores;
+  uint32_t seenStoreId{0};
   bool needsReflow{false};
 };
 
 // Block-local environment.
 struct Local {
+  explicit Local(Global& global)
+    : global(global)
+  {}
+
   Global& global;
 
   ALocBits antLoc;     // Copied to BlockAnalysis::antLoc
@@ -311,6 +353,8 @@ struct Local {
   ALocBits delLoc;     // Copied to BlockAnalysis::delLoc
 
   ALocBits reStores;
+
+  bool containsCall{false}; // If there's a Call instruction in this block
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -322,6 +366,16 @@ std::string show(TrackedStore ts) {
   if (auto i = ts.instruction()) return folly::sformat("I{}", i->id());
   if (auto b = ts.block()) return folly::sformat("P{}", b->id());
   not_reached();
+}
+
+bool srcsCanSpanCall(const IRInstruction& inst) {
+  for (auto i = inst.numSrcs(); i--; ) {
+    auto const src = inst.src(i);
+    if (!src->isA(TStkPtr) &&
+        !src->isA(TFramePtr) &&
+        !src->inst()->is(DefConst)) return false;
+  }
+  return true;
 }
 
 const ALocBits* findSpillFrame(Global& genv, const TrackedStore& ts) {
@@ -338,12 +392,13 @@ void set_movable_store(Local& env, uint32_t bit, IRInstruction& inst) {
 void set_movable_spill_frame(Local& env, const ALocBits& bits,
                              IRInstruction& inst) {
   TrackedStore ts { &inst };
-  for (uint32_t i = env.global.ainfo.count(); i--; ) {
-    if (bits[i]) {
+  bitset_for_each_set(
+    bits,
+    [&](uint32_t i) {
       env.global.trackedStoreMap[
         StoreKey { inst.block(), StoreKey::Out, i }] = ts;
     }
-  }
+  );
   env.global.spillFrameMap[ts] = bits;
 }
 
@@ -367,21 +422,21 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
     case StStk:
       dbgInst = env.global.unit.gen(
         DbgTrashStk,
-        inst.marker(),
-        IRSPOffsetData { inst.extra<StStk>()->offset },
+        inst.bcctx(),
+        IRSPRelOffsetData { inst.extra<StStk>()->offset },
         inst.src(0)
       );
       break;
     case SpillFrame:
       dbgInst = env.global.unit.gen(
         DbgTrashFrame,
-        inst.marker(),
-        IRSPOffsetData { inst.extra<SpillFrame>()->spOffset },
+        inst.bcctx(),
+        IRSPRelOffsetData { inst.extra<SpillFrame>()->spOffset },
         inst.src(0)
       );
       break;
     case StMem:
-      dbgInst = env.global.unit.gen(DbgTrashMem, inst.marker(), inst.src(0));
+      dbgInst = env.global.unit.gen(DbgTrashMem, inst.bcctx(), inst.src(0));
       break;
     default:
       dbgInst = nullptr;
@@ -491,26 +546,13 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     [&] (ReturnEffects l) {
-      if (inst.is(InlineReturn)) {
-        // Returning from an inlined function.  This adds nothing to gen, but
-        // kills frame and stack locations for the callee.
-        auto const fp = inst.src(0);
-        killSet(env, env.global.ainfo.per_frame_bits[fp]);
-        kill(env, l.kills);
-        return;
-      }
-
-      if (inst.is(InlineReturnNoFrame)) {
-        kill(env, l.kills);
-        return;
-      }
-
       // Return from the main function.  Locations other than the frame and
       // stack (e.g. object properties and whatnot) are always live on a
       // function return---so mark everything read before we start killing
       // things.
       addAllLoad(env);
       killSet(env, env.global.ainfo.all_frame);
+      killSet(env, env.global.ainfo.all_clsRefSlot);
       kill(env, l.kills);
     },
 
@@ -520,15 +562,17 @@ void visit(Local& env, IRInstruction& inst) {
     },
 
     /*
-     * Call instructions potentially throw, even though we don't (yet) have
-     * explicit catch traces for them, which means it counts as possibly
-     * reading any local, on any frame---if it enters the unwinder it could
-     * read them.
+     * Call instructions can potentially read any heap location, but we can be
+     * more precise about everything else.
      */
     [&] (CallEffects l) {
+      env.containsCall = true;
+
       load(env, AHeapAny);
-      load(env, AFrameAny);  // Not necessary for some builtin calls, but it
-                             // depends which builtin...
+
+      load(env, l.locals);
+      if (l.writes_locals) mayStore(env, AFrameAny);
+
       load(env, l.stack);
       kill(env, l.kills);
     },
@@ -544,7 +588,9 @@ void visit(Local& env, IRInstruction& inst) {
         }
         if (!env.antLoc[*bit] &&
             !env.mayLoad[*bit] &&
-            !env.mayStore[*bit]) {
+            !env.mayStore[*bit] &&
+            (!env.containsCall ||
+             srcsCanSpanCall(inst))) {
           env.avlLoc[*bit] = 1;
           set_movable_store(env, *bit, inst);
         }
@@ -582,7 +628,9 @@ void visit(Local& env, IRInstruction& inst) {
         } else {
           auto avlLoc = it->second & ~(env.antLoc | env.mayLoad |
                                        env.mayStore);
-          if (avlLoc == it->second) {
+          if (avlLoc == it->second &&
+              (!env.containsCall ||
+               srcsCanSpanCall(inst))) {
             set_movable_spill_frame(env, avlLoc, inst);
             env.avlLoc |= avlLoc;
           }
@@ -598,16 +646,18 @@ void visit(Local& env, IRInstruction& inst) {
 
 void block_visit(Local& env, Block* block) {
   FTRACE(2, "  visiting B{}\n", block->id());
-  auto it = block->instrs().end();
-  --it;
+  assertx(!block->instrs().empty());
+
+  auto prev = std::prev(block->instrs().end());
   for (;;) {
-    folly::Optional<Block::iterator> prev;
+    auto it = prev;
     if (it != block->instrs().begin()) {
       prev = std::prev(it);
+      visit(env, *it);
+    } else {
+      visit(env, *it);
+      break;
     }
-    visit(env, *it);
-    if (!prev) break;
-    it = *prev;
   }
 }
 
@@ -619,6 +669,7 @@ struct BlockAnalysis {
   ALocBits alteredAvl;
   ALocBits avlLoc;
   ALocBits delLoc;
+  bool containsCall;
 };
 
 BlockAnalysis analyze_block(Global& genv, Block* block) {
@@ -631,9 +682,12 @@ BlockAnalysis analyze_block(Global& genv, Block* block) {
   return BlockAnalysis {
     env.antLoc,
     env.mayLoad,
+    // Note that we unset must-store bits in env.mayStore, so including
+    // env.antLoc and env.delLoc is required for correctness here.
     env.mayLoad | env.mayStore | env.antLoc | env.delLoc,
     env.avlLoc,
-    env.delLoc
+    env.delLoc,
+    env.containsCall
   };
 }
 
@@ -700,7 +754,7 @@ IRInstruction* resolve_cycle(Global& genv, Block* blk, uint32_t id) {
     // dst as the src of the Mov (this allows us to avoid
     // creating a new phi if there's already a suitable one
     // there).
-    auto mv = genv.unit.gen(Mov, blk->front().marker(), cand->src(i));
+    auto mv = genv.unit.gen(Mov, blk->front().bcctx(), cand->src(i));
     blk->prepend(mv);
     inst->setSrc(i, mv->dst());
   }
@@ -819,8 +873,10 @@ void optimize_block_pre(Global& genv, Block* block,
            block->id(),
            show(insertBits));
 
-    for (uint32_t i = 0; i < genv.ainfo.count(); i++) {
-      if (insertBits[i] && store_insert.go()) {
+    bitset_for_each_set(
+      insertBits,
+      [&](size_t i){
+        if (!store_insert.go()) return;
         const ALocBits* sf = nullptr;
         auto const cinst = resolve_ts(genv, block, StoreKey::In, i, &sf);
         if (sf) {
@@ -831,7 +887,7 @@ void optimize_block_pre(Global& genv, Block* block,
         auto const inst = genv.unit.clone(cinst);
         block->prepend(inst);
       }
-    }
+    );
   }
 }
 
@@ -946,30 +1002,51 @@ void compute_anticipated(Global& genv,
     });
 }
 
+TrackedStore find_candidate_store_helper(Global& genv, TrackedStore ts,
+                                         uint32_t id) {
+  auto block = ts.block();
+  assertx(block);
+  TrackedStore ret;
+  if (genv.seenStores[block] == genv.seenStoreId) return ret;
+
+  // look for a candidate in the immediate predecessors
+  block->forEachPred([&](Block* pred) {
+      if (ret.isBad() || ret.instruction()) return;
+      auto const pred_ts =
+        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
+      if (pred_ts.isBad() || pred_ts.instruction()) {
+        ret = pred_ts;
+        return;
+      }
+    });
+
+  if (ret.isBad() || ret.instruction()) return ret;
+
+  genv.seenStores[block] = genv.seenStoreId;
+  // recursively search the predecessors
+  block->forEachPred([&](Block* pred) {
+      if (ret.isBad() || ret.instruction()) return;
+      auto const pred_ts =
+        genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
+      if (!pred_ts.block()) {
+        always_assert_flog(pred_ts.isUnseen(),
+                           "pred_ts: {}", pred_ts.toString());
+        return;
+      }
+      ret = find_candidate_store_helper(genv, pred_ts, id);
+    });
+
+  return ret;
+}
+
 /*
  * Find a candidate store instruction; any one will do, because
  * compatibility between stores is transitive.
  */
 TrackedStore find_candidate_store(Global& genv, TrackedStore ts, uint32_t id) {
-  while (true) {
-    auto block = ts.block();
-    if (!block) return ts;
-    ts.reset();
-    block->forEachPred([&](Block* pred) {
-        if (ts.isBad()) return;
-        auto const pred_ts =
-          genv.trackedStoreMap[StoreKey { pred, StoreKey::Out, id }];
-        if (pred_ts.isBad() || pred_ts.instruction() || !ts.instruction()) {
-          // given a choice of blocks, choose the one with higher
-          // post-order id to avoid cycles
-          if (!ts.block() || !pred_ts.block() ||
-              genv.blockStates[ts.block()].id <
-              genv.blockStates[pred_ts.block()].id) {
-            ts = pred_ts;
-          }
-        }
-      });
-  }
+  if (!ts.block()) return ts;
+  genv.seenStoreId++;
+  return find_candidate_store_helper(genv, ts, id);
 }
 
 TrackedStore combine_ts(Global& genv, uint32_t id,
@@ -980,9 +1057,9 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
   if (s2.isUnseen() || s1.isBad()) return s1;
 
   enum class Compat { Same, Compat, Bad };
-  auto compat = [](TrackedStore s1, TrackedStore s2) {
-    auto i1 = s1.instruction();
-    auto i2 = s2.instruction();
+  auto compat = [](TrackedStore store1, TrackedStore store2) {
+    auto i1 = store1.instruction();
+    auto i2 = store2.instruction();
     assert(i1 && i2);
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
@@ -1066,32 +1143,43 @@ void compute_available_stores(
     [&](Block* blk, const BlockAnalysis& transfer, BlockState& state) {
       state.ppOut = transfer.avlLoc | (state.ppIn & ~transfer.alteredAvl);
       auto propagate = state.ppOut & ~transfer.avlLoc;
-      if (propagate.any()) {
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (!propagate[i]) continue;
+      bitset_for_each_set(
+        propagate,
+        [&](uint32_t i) {
           auto const& tsIn =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::In, i }];
           auto& tsOut =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          assert(!tsIn.isUnseen());
-          tsOut = tsIn;
+          assertx(!tsIn.isUnseen());
+
+          // Prevent tmps from spanning calls by not propagating tracked stores
+          // thru any block which contains a call. The exception is if the store
+          // only uses constants as those do not create a problem.
+          if (transfer.containsCall &&
+              (!tsIn.instruction() || !srcsCanSpanCall(*tsIn.instruction()))) {
+            tsOut.setBad();
+          } else {
+            tsOut = tsIn;
+          }
+
           if (tsOut.isBad()) {
-            state.ppOut[i] = 0;
+            state.ppOut[i] = false;
           } else if (auto sf = findSpillFrame(genv, tsIn)) {
             if ((propagate & *sf) != *sf) {
               state.ppOut &= ~*sf;
             }
           }
         }
-      }
+      );
       auto showv DEBUG_ONLY = [&] (StoreKey::Where w, const ALocBits& pp) {
         std::string r;
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (pp[i]) {
+        bitset_for_each_set(
+          pp,
+          [&](uint32_t i) {
             auto& ts = genv.trackedStoreMap[StoreKey { blk, w, i}];
             folly::format(&r, " {}:{}", i, show(ts));
           }
-        }
+        );
         return r;
       };
       FTRACE(4,
@@ -1116,11 +1204,11 @@ void compute_available_stores(
       auto const oldPpIn = succState.ppIn;
       succState.ppIn &= state.ppOut;
       bool changed = succState.ppIn != oldPpIn;
-      if (succState.ppIn.any()) {
-        auto blk = genv.poBlockList[state.id];
-        auto succ = genv.poBlockList[succState.id];
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (!succState.ppIn[i]) continue;
+      auto blk = genv.poBlockList[state.id];
+      auto succ = genv.poBlockList[succState.id];
+      bitset_for_each_set(
+        succState.ppIn,
+        [&](uint32_t i) {
           auto& ts =
             genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
           auto& tsSucc =
@@ -1131,7 +1219,7 @@ void compute_available_stores(
               changed = true;
               tsSucc.setBad();
               succState.ppIn &= ~*sf;
-              continue;
+              return;
             }
           }
           auto tsNew = succ->numPreds() == 1 ? ts : recompute_ts(genv, i, succ);
@@ -1148,7 +1236,7 @@ void compute_available_stores(
             }
           }
         }
-      }
+      );
       return changed;
     });
 }
@@ -1203,17 +1291,19 @@ void compute_placement_possible(
         });
 
       auto bitsToClear = state.ppOut & ~restrictBits;
+      // ensure that if we clear any spill frame bits, we clear
+      // them all.
       if (bitsToClear.any()) {
-        // ensure that if we clear any spill frame bits, we clear
-        // them all.
-        for (uint32_t i = genv.ainfo.count(); i--; ) {
-          if (!bitsToClear[i]) continue;
-          auto const ts =
-            genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
-          if (auto sf = findSpillFrame(genv, ts)) {
-            restrictBits &= ~*sf;
+        bitset_for_each_set(
+          bitsToClear,
+          [&](uint32_t i) {
+            auto const ts =
+              genv.trackedStoreMap[StoreKey { blk, StoreKey::Out, i }];
+            if (auto sf = findSpillFrame(genv, ts)) {
+              restrictBits &= ~*sf;
+            }
           }
-        }
+        );
         state.ppOut &= restrictBits;
       }
       trace();
@@ -1252,6 +1342,7 @@ void compute_placement_possible(
 
 void optimizeStores(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_store, "optimizeStores"};
+  Timer t(Timer::optimize_stores, unit.logEntry().get_pointer());
 
   // This isn't required for correctness, but it may allow removing stores that
   // otherwise we would leave alone.

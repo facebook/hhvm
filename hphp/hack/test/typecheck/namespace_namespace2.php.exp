@@ -1,4 +1,5 @@
-Tint
+File "namespace_namespace2.php", line 6, characters 5-15:
+  int
 File "namespace_namespace2.php", line 7, characters 12-13:
 Invalid return type (Typing[4110])
 File "namespace_namespace2.php", line 4, characters 17-22:

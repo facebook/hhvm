@@ -1,0 +1,2 @@
+<?hh
+use lNOtfxP as nOmAFnLY ;

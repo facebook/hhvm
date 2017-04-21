@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,9 +17,8 @@
 #ifndef incl_HPHP_SWEEPABLE_H_
 #define incl_HPHP_SWEEPABLE_H_
 
-#include <boost/noncopyable.hpp>
-
-#include "hphp/util/portability.h"
+#include "hphp/util/assertions.h"
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +30,9 @@ namespace HPHP {
  * method, allowing objects to clean up resources that are not othewise
  * owned by the current request, for example malloc'd-memory or file handles.
  */
-struct Sweepable: private boost::noncopyable {
+struct Sweepable {
+  Sweepable(const Sweepable&) = delete;
+  Sweepable& operator=(const Sweepable&) = delete;
 
   /*
    * There is no default behavior. Make sure this function frees all
@@ -80,6 +81,8 @@ protected:
 
 private:
   Sweepable *m_next, *m_prev;
+  TYPE_SCAN_IGNORE_FIELD(m_next);
+  TYPE_SCAN_IGNORE_FIELD(m_prev);
 };
 
 /*
@@ -89,7 +92,7 @@ private:
  * your warranty.
  */
 template<class T>
-struct SweepableMember: Sweepable {
+struct SweepableMember : Sweepable {
   void sweep() override {
     auto obj = reinterpret_cast<T*>(
       uintptr_t(this) - offsetof(T, m_sweepable)

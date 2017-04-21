@@ -1,0 +1,13 @@
+step_into -i 0
+breakpoint_set -i 1 -t line -f breakpoint_calibration.php.test -n 4
+breakpoint_set -i 2 -t line -f breakpoint_calibration.php.test -n 7
+breakpoint_set -i 3 -t line -f breakpoint_calibration.php.test -n 12
+breakpoint_set -i 4 -t line -f breakpoint_calibration.php.test -n 15
+breakpoint_set -i 5 -t line -f breakpoint_calibration.php.test -n 17
+breakpoint_list -i 6
+run -i 7
+run -i 8
+run -i 9
+run -i 10
+run -i 11
+run -i 12

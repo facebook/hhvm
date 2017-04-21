@@ -32,7 +32,7 @@ class Memcached {
    */
   public function add(mixed $key,
                       mixed $value,
-                      mixed $expiration = 0): bool {
+                      int $expiration = 0): bool {
     return $this->addByKey('', $key, $value, $expiration);
   }
 
@@ -84,6 +84,7 @@ class Memcached {
   public function addServers(array<array<mixed>> $servers): bool {
     $servers_vals = array_values($servers);
     foreach($servers_vals as $i => $server) {
+      $server = array_values($server);
       if (!is_array($server)) {
         trigger_error(
           sprintf('Server list entry #%d is not an array', $i + 1),
@@ -200,16 +201,17 @@ class Memcached {
    * @param string $key - The key of the item to decrement.
    * @param int $offset - The amount by which to decrement the item's
    *   value.
-   * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   * @param mixed $initial_value - The value to set the item to if it
+   *   doesn't currently exist. False to fail if the key does not exist
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns item's new value on success.
+   * @return mixed - Returns item's new value on success. False if the key
+   *   doesn't exist and no initial_value was provided.
    */
   <<__Native>>
   public function decrement(string $key,
                             int $offset = 1,
-                            int $initial_value = 0,
+                            mixed $initial_value = false,
                             int $expiry = 0): mixed;
 
   /**
@@ -220,16 +222,17 @@ class Memcached {
    * @param int $offset - The amount by which to decrement the item's
    *   value.
    * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   *   doesn't currently exist. False to fail if the key does not exist.
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns item's new value on success.
+   * @return int - Returns item's new value on success. False if the key
+   *   doesn't exist and no initial_value was provided.
    */
   <<__Native>>
   public function decrementByKey(string $server_key,
                                  string $key,
                                  int $offset = 1,
-                                 int $initial_value = 0,
+                                 mixed $initial_value = false,
                                  int $expiry = 0): mixed;
 
   /**
@@ -243,7 +246,7 @@ class Memcached {
    *   Memcached::RES_NOTFOUND if the key does not exist.
    */
   public function delete(mixed $key,
-                         mixed $time = 0): bool {
+                         int $time = 0): bool {
     return $this->deleteByKey('', $key, $time);
   }
 
@@ -408,7 +411,7 @@ class Memcached {
    */
   public function getMulti(mixed $keys,
                            mixed &$cas_tokens = null,
-                           mixed $flags = 0): mixed {
+                           int $flags = 0): mixed {
     return $this->getMultiByKey('', $keys, $cas_tokens, $flags);
   }
 
@@ -506,16 +509,17 @@ class Memcached {
    * @param string $key - The key of the item to increment.
    * @param int $offset - The amount by which to increment the item's
    *   value.
-   * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   * @param mixed $initial_value - The value to set the item to if it
+   *   doesn't currently exist. False to fail if the key does not exist.
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns new item's value on success.
+   * @return mixed - Returns new item's value on success. False if the key
+   * doesn't exist.
    */
   <<__Native>>
   public function increment(string $key,
                             int $offset = 1,
-                            int $initial_value = 0,
+                            mixed $initial_value = false,
                             int $expiry = 0): mixed;
 
   /**
@@ -525,17 +529,18 @@ class Memcached {
    * @param string $key - The key of the item to increment.
    * @param int $offset - The amount by which to increment the item's
    *   value.
-   * @param int $initial_value - The value to set the item to if it
-   *   doesn't currently exist.
+   * @param mixed $initial_value - The value to set the item to if it
+   *   doesn't currently exist. False to fail if the key does not exist.
    * @param int $expiry - The expiry time to set on the item.
    *
-   * @return int - Returns new item's value on success.
+   * @return mixed - Returns new item's value on success. False if the key
+   *   doesn't exist and no initial_value was provided.
    */
   <<__Native>>
   public function incrementByKey(string $server_key,
                                  string $key,
                                  int $offset = 1,
-                                 int $initial_value = 0,
+                                 mixed $initial_value = false,
                                  int $expiry = 0): mixed;
 
   /**
@@ -604,7 +609,7 @@ class Memcached {
    */
   public function replace(mixed $key,
                           mixed $value,
-                          mixed $expiration = 0): bool {
+                          int $expiration = 0): bool {
     return $this->replaceByKey('', $key, $value, $expiration);
   }
 
@@ -636,7 +641,7 @@ class Memcached {
    */
   public function set(mixed $key,
                       mixed $value,
-                      mixed $expiration = 0): bool {
+                      int $expiration = 0): bool {
     return $this->setByKey('', $key, $value, $expiration);
   }
 
@@ -682,7 +687,10 @@ class Memcached {
                                 array<string, mixed> $items,
                                 int $expiration = 0): bool {
     foreach($items as $key => $value) {
-      if (!is_string($key)) {
+      if (is_int($key)) {
+        // numeric strings (e.g. '5') become integers as array keys
+        $key = (string)$key;
+      } elseif (!is_string($key)) {
         continue;
       }
       if (!$this->setByKey($server_key, $key, $value, $expiration)) {
@@ -719,6 +727,37 @@ class Memcached {
     }
     return true;
   }
+
+  /**
+   * Set a new expiration on an item
+   *
+   * @param string $key - The key under which to store the value.
+   * @param int $expiration - The expiration time, defaults to 0.
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  public function touch(string $key,
+                        int $expiration = 0): bool {
+    return $this->touchByKey('', $key, $expiration);
+  }
+
+  /**
+   * Set a new expiration on an item on a specific server
+   *
+   * @param string $server_key - The key identifying the server to store the
+   *   value on or retrieve it from. Instead of hashing on the actual key for
+   *   the item, we hash on the server key when deciding which memcached server
+   *   to talk to. This allows related items to be grouped together on a single
+   *   server for efficiency with multi operations.
+   * @param string $key - The key under which to store the value.
+   * @param int $expiration - The expiration time, defaults to 0.
+   *
+   * @return bool - Returns TRUE on success or FALSE on failure.
+   */
+  <<__Native>>
+  public function touchByKey(string $server_key,
+                             string $key,
+                             int $expiration = 0): bool;
 
 }
 
@@ -793,7 +832,7 @@ class MemcachedSessionModule implements SessionHandlerInterface {
   public function write($sessionId, $data) {
     return $this->memcached->set($sessionId,
                                  $data,
-                                 ini_get('session.gc_maxlifetime'));
+                                 (int)ini_get('session.gc_maxlifetime'));
   }
 
   private static function parseSavePath($savePath) {

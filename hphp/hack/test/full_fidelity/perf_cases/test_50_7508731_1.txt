@@ -1,0 +1,2 @@
+<?hh
+<< kLjcr , dCXFNxJZ ( @ ( @ array ( ) ) , ( ~ ( int ) ( ( ( $eXMdKlryf ) ) === ( ( $lEvV ) ) ? ( ( @ $bOoOK ) ) : ( ( $fCtN ) ) && ( ( 12 ) ) ) ) ) , nDiIG ( ) , rKueA ( $bFeZ = await "double string" ) , pNfZ >> function eTB < - sYF as int > ( ... ) : array < shape ( 'single string' => num ) , void > { }

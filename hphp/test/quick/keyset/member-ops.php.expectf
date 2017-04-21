@@ -1,0 +1,767 @@
+======= base_elem_warn =============================
+
+Warning: Cannot use a scalar value as an array in %s on line %d
+NULL
+Exception: "Out of bounds keyset access: invalid index 3"
+string(1) "1"
+Exception: "Out of bounds keyset access: invalid index "foo""
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= base_elem ==================================
+
+Warning: Cannot use a scalar value as an array in %s on line %d
+string(7) "MISSING"
+string(7) "MISSING"
+string(1) "1"
+string(7) "MISSING"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= base_define ================================
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= base_define_reffy ==========================
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= base_unset =================================
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid operation on keyset"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= base_new_elem_set ==========================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= base_str_to_arr ============================
+Exception: "Invalid operation on keyset"
+======= base_prop_get ==============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= base_prop_set ==============================
+keyset(3) {
+  int(1)
+  int(2)
+  string(1) "1"
+}
+======= dim_elem_warn ==============================
+
+Warning: Cannot use a scalar value as an array in %s on line %d
+NULL
+Exception: "Out of bounds keyset access: invalid index 3"
+string(1) "1"
+Exception: "Out of bounds keyset access: invalid index "foo""
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= dim_elem ===================================
+
+Warning: Cannot use a scalar value as an array in %s on line %d
+string(7) "MISSING"
+string(7) "MISSING"
+string(1) "1"
+string(7) "MISSING"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= dim_define =================================
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= dim_define_reffy ===========================
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= dim_unset ==================================
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= dim_new_elem_set ===========================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= dim_str_to_arr =============================
+Exception: "Invalid operation on keyset"
+======= dim_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= dim_prop_set ===============================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_cget_warn =============================
+int(1)
+Exception: "Out of bounds keyset access: invalid index 3"
+string(1) "1"
+Exception: "Out of bounds keyset access: invalid index "foo""
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_cget_warn =============================
+int(1)
+string(7) "MISSING"
+string(1) "1"
+string(7) "MISSING"
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_empty =================================
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_isset =================================
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+======= fini_vget ==================================
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_vget_new_elem =========================
+Exception: "Keysets cannot contain references"
+======= fini_set ===================================
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_set_new_elem ==========================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(5) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+    int(123)
+  }
+}
+======= fini_incdec ================================
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_incdec_new_elem =======================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= fini_setop =================================
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid operation on keyset"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_setop_new_elem =======================
+Exception: "Cannot use [] with keysets for reading in an lvalue context"
+======= fini_unset =================================
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(3) {
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(3) {
+    int(1)
+    int(2)
+    string(0) ""
+  }
+}
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_bind ==================================
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Keysets cannot contain references"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+Exception: "Invalid keyset key: expected a key of type int or string, bool given"
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}
+======= fini_bind_new_elem =========================
+Exception: "Keysets cannot contain references"
+======= fini_str_to_arr ============================
+Exception: "Invalid operation on keyset"
+======= fini_prop_get ===============================
+
+Notice: Cannot access property on non-object in %s on line %d
+NULL
+======= fini_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s on line %d
+array(2) {
+  [0]=>
+  NULL
+  [1]=>
+  keyset(4) {
+    int(1)
+    int(2)
+    string(1) "1"
+    string(0) ""
+  }
+}

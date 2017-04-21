@@ -32,7 +32,8 @@
  *  uncompress(method, old, n, newch) - uncompress old into new,
  *              using method, return sizeof new
  */
-#include "config.h"
+#include "hphp/util/hphp-config.h"
+
 #include "file.h"
 
 #ifndef lint
@@ -41,25 +42,23 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 
 #include "magic.h"
 #include <stdlib.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
-#ifndef PHP_WIN32
+#ifndef _MSC_VER
 #include <sys/ioctl.h>
 #endif
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if defined(HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#endif
 #if defined(HAVE_ZLIB_H) && defined(HAVE_LIBZ)
 #define BUILTIN_DECOMPRESS
 #include <zlib.h>
 #endif
+
+#include <folly/portability/Stdlib.h>
+#include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 #undef FIONREAD
 

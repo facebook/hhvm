@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@ struct FuncCache {
   };
 
   static rds::Handle alloc();
-  static const Func* lookup(rds::Handle, StringData* lookup);
+  static void lookup(rds::Handle, StringData* lookup, ActRec* ar, ActRec* fp);
 
   Pair m_pairs[kNumLines];
 };
@@ -80,8 +80,8 @@ struct ClassCache {
 //////////////////////////////////////////////////////////////////////
 
 struct StaticMethodCache {
-  const Func* m_func;
-  const Class* m_cls;
+  LowPtr<const Func> m_func;
+  LowPtr<const Class> m_cls;
 
   static rds::Handle alloc(const StringData* cls,
                       const StringData* meth,
@@ -92,7 +92,7 @@ struct StaticMethodCache {
 };
 
 struct StaticMethodFCache {
-  const Func* m_func;
+  LowPtr<const Func> m_func;
   int m_static;
 
   static rds::Handle alloc(const StringData* cls,
@@ -121,12 +121,20 @@ struct Entry {
 };
 
 template<bool fatal>
-void handlePrimeCacheInit(Entry* mce,
+void handlePrimeCacheInit(rds::Handle mce_handle,
                           ActRec* ar,
                           StringData* name,
                           Class* cls,
                           Class* ctx,
                           uintptr_t rawTarget);
+
+template<bool fatal>
+void handleSlowPath(rds::Handle mce_handle,
+                    ActRec* ar,
+                    StringData* name,
+                    Class* cls,
+                    Class* ctx,
+                    uintptr_t mcePrime);
 
 } // namespace MethodCache
 

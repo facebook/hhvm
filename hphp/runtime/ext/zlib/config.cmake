@@ -7,9 +7,7 @@ HHVM_DEFINE_EXTENSION("zlib"
     zip-file.h
   SYSTEMLIB
     ext_zlib.php
-    ext_zlib-snappy.php
   DEPENDS
     libFolly
-    libLZ4
     libZLib
 )

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,8 +37,9 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 struct State {
-  bool initialized = false;
+  bool initialized{false};
   std::vector<Type> locals;
+  Type mbase{TGen};
 };
 
 struct BlockInfo {
@@ -52,20 +53,31 @@ struct BlockInfo {
 std::string DEBUG_ONLY show(const State& state) {
   if (!state.initialized) return "<uninit>\n";
   auto ret = std::string{};
+
   for (auto locID = uint32_t{0}; locID < state.locals.size(); ++locID) {
     auto const ty = state.locals[locID];
     if (ty < TGen) folly::format(&ret, "  L{}: {}\n", locID, ty.toString());
   }
+  auto const ty = state.mbase;
+  if (ty < TGen) folly::format(&ret, "  M{{}}: {}\n", ty.toString());
   return ret;
 }
 
 State entry_state(const RegionDesc& region, std::vector<Type>* input) {
-  auto const numLocals = region.start().func()->numLocals();
   auto ret = State{};
   ret.initialized = true;
+
   if (input) ret.locals = *input;
-  ret.locals.resize(numLocals, TGen);
+  auto const func = region.start().func();
+  ret.locals.resize(func->numLocals(), TGen);
+
   return ret;
+}
+
+bool merge_type(Type& lhs, const Type& rhs) {
+  auto const old = lhs;
+  lhs |= rhs;
+  return lhs != old;
 }
 
 bool merge_into(State& dst, const State& src) {
@@ -73,80 +85,89 @@ bool merge_into(State& dst, const State& src) {
     dst = src;
     return true;
   }
+  auto changed = false;
 
   always_assert(dst.locals.size() == src.locals.size());
-
-  auto changed = false;
-  for (auto loc = uint32_t{0}; loc < src.locals.size(); ++loc) {
-    auto const old_ty = dst.locals[loc];
-    dst.locals[loc] |= src.locals[loc];
-    if (old_ty != dst.locals[loc]) changed = true;
+  for (auto i = uint32_t{0}; i < src.locals.size(); ++i) {
+    changed |= merge_type(dst.locals[i], src.locals[i]);
   }
+
+  changed |= merge_type(dst.mbase, src.mbase);
 
   return changed;
 }
 
 //////////////////////////////////////////////////////////////////////
 
+bool is_tracked(Location l) {
+  switch (l.tag()) {
+    case LTag::Local:
+    case LTag::MBase:
+      return true;
+    case LTag::Stack:
+    case LTag::CSlot:
+      return false;
+  }
+  not_reached();
+}
+
+Type& type_of(State& state, Location l) {
+  switch (l.tag()) {
+    case LTag::Local: {
+      auto const locID = l.localId();
+      assertx(locID < state.locals.size());
+      return state.locals[locID];
+    }
+    case LTag::Stack:
+    case LTag::CSlot:
+      always_assert(false);
+    case LTag::MBase:
+      return state.mbase;
+  }
+  not_reached();
+}
+
+Type type_of(const State& state, Location l) {
+  return type_of(const_cast<State&>(state), l);
+}
+
 bool preconds_may_pass(const RegionDesc::Block& block,
                        const State& state) {
-  // Return false if the type of any local is bottom, which can only
-  // happen in unreachable paths.
-  for (auto& locType : state.locals) {
-    if (locType == TBottom) return false;
+  // Bail if any type is Bottom, which can only happen in unreachable paths.
+  for (auto const& ty : state.locals) {
+    if (ty == TBottom) return false;
   }
 
   auto const& preConds = block.typePreConditions();
-  for (auto const& preCond : preConds) {
-    using L = RegionDesc::Location::Tag;
-    switch (preCond.location.tag()) {
-    case L::Stack: break;
-    case L::Local:
-      {
-        auto const loc = preCond.location.localId();
-        assertx(loc < state.locals.size());
-        if (!state.locals[loc].maybe(preCond.type)) {
-          FTRACE(6, "  x B{}'s precond {} fails (Local{} is {})\n",
-                 block.id(), show(preCond), loc, state.locals[loc]);
-          return false;
-        }
-      }
-      break;
+
+  for (auto const& p : preConds) {
+    if (!is_tracked(p.location)) continue;
+    auto const ty = type_of(state, p.location);
+    if (!ty.maybe(p.type)) {
+      FTRACE(6, "  x B{}'s precond {} fails ({} is {})\n",
+             block.id(), show(p), show(p.location), ty);
+      return false;
     }
   }
   return true;
 }
 
-// PostConditions of a block are our local transfer functions.
-// Changed types are overwritten, while refined types are intersected
-// with the current type.
+/*
+ * PostConditions of a block are our local transfer functions.
+ *
+ * Changed types are overwritten, while refined types are intersected
+ * with the current type.
+ */
 void apply_transfer_function(State& dst, const PostConditions& postConds) {
   for (auto& p : postConds.refined) {
-    using L = RegionDesc::Location::Tag;
-    switch (p.location.tag()) {
-      case L::Stack:
-        break;
-      case L::Local: {
-        const auto locId = p.location.localId();
-        assert(locId < dst.locals.size());
-        dst.locals[locId] = dst.locals[locId] & p.type;
-        break;
-      }
-    }
+    if (!is_tracked(p.location)) continue;
+    auto& ty = type_of(dst, p.location);
+    ty &= p.type;
   }
-
   for (auto& p : postConds.changed) {
-    using L = RegionDesc::Location::Tag;
-    switch (p.location.tag()) {
-      case L::Stack:
-        break;
-      case L::Local: {
-        const auto locId = p.location.localId();
-        assert(locId < dst.locals.size());
-        dst.locals[locId] = p.type;
-        break;
-      }
-    }
+    if (!is_tracked(p.location)) continue;
+    auto& ty = type_of(dst, p.location);
+    ty = p.type;
   }
 }
 

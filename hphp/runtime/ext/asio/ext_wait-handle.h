@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,7 +32,6 @@ void HHVM_STATIC_METHOD(WaitHandle, setOnIoWaitExitCallback,
 void HHVM_STATIC_METHOD(WaitHandle, setOnJoinCallback,
                         const Variant& callback);
 void HHVM_METHOD(WaitHandle, import);
-Variant HHVM_METHOD(WaitHandle, join);
 bool HHVM_METHOD(WaitHandle, isFinished);
 bool HHVM_METHOD(WaitHandle, isSucceeded);
 bool HHVM_METHOD(WaitHandle, isFailed);
@@ -57,27 +56,19 @@ String HHVM_METHOD(WaitHandle, getName);
  *   SleepWaitHandle               - wait handle that finishes after a timeout
  *   ExternalThreadEventWaitHandle - thread-powered asynchronous execution
  *
- *   // DEPRECATED
- *   GenArrayWaitHandle            - wait handle representing an array of WHs
- *   GenMapWaitHandle              - wait handle representing an Map of WHs
- *   GenVectorWaitHandle           - wait handle representing an Vector of WHs
- *
  * A wait handle can be either synchronously joined (waited for the operation
  * to finish) or passed in various contexts as a dependency and waited for
  * asynchronously (such as using await mechanism of async function or
- * passed as an array member of GenArrayWaitHandle).
+ * passed to AwaitAllWaitHandle).
  */
 
-class c_AsyncFunctionWaitHandle;
-class c_AsyncGeneratorWaitHandle;
-class c_AwaitAllWaitHandle;
-class c_GenArrayWaitHandle;
-class c_GenMapWaitHandle;
-class c_GenVectorWaitHandle;
-class c_ConditionWaitHandle;
-class c_RescheduleWaitHandle;
-class c_SleepWaitHandle;
-class c_ExternalThreadEventWaitHandle;
+struct c_AsyncFunctionWaitHandle;
+struct c_AsyncGeneratorWaitHandle;
+struct c_AwaitAllWaitHandle;
+struct c_ConditionWaitHandle;
+struct c_RescheduleWaitHandle;
+struct c_SleepWaitHandle;
+struct c_ExternalThreadEventWaitHandle;
 
 #define WAITHANDLE_CLASSOF(cn) \
   static Class* classof() { \
@@ -99,8 +90,7 @@ T* wait_handle(const ObjectData* obj) {
   return static_cast<T*>(const_cast<ObjectData*>(obj));
 }
 
-class c_WaitHandle : public ObjectData {
- public:
+struct c_WaitHandle : ObjectData {
   WAITHANDLE_CLASSOF(WaitHandle);
   WAITHANDLE_DTOR(WaitHandle);
 
@@ -113,23 +103,24 @@ class c_WaitHandle : public ObjectData {
     AsyncFunction,
     AsyncGenerator,
     AwaitAll,
-    GenArray,
-    GenMap,
-    GenVector,
     Condition,
     Reschedule,
     Sleep,
     ExternalThreadEvent,
   };
 
-  explicit c_WaitHandle(Class* cls = c_WaitHandle::classof(),
-                        HeaderKind kind = HeaderKind::WaitHandle) noexcept
+  explicit c_WaitHandle(Class* cls, HeaderKind kind,
+                        type_scan::Index tyindex) noexcept
     : ObjectData(cls,
-                 ObjectData::IsWaitHandle|ObjectData::NoDestructor|
-                   ObjectData::InstanceDtor,
+                 ObjectData::IsWaitHandle | ObjectData::NoDestructor |
+                 ObjectData::IsCppBuiltin,
                  kind,
-                 NoInit{}) {}
-  ~c_WaitHandle() {}
+                 NoInit{}),
+      m_tyindex(tyindex)
+  {}
+
+  ~c_WaitHandle()
+  {}
 
  public:
   static constexpr ptrdiff_t stateOff() {
@@ -178,9 +169,6 @@ class c_WaitHandle : public ObjectData {
   c_AsyncFunctionWaitHandle* asAsyncFunction();
   c_AsyncGeneratorWaitHandle* asAsyncGenerator();
   c_AwaitAllWaitHandle* asAwaitAll();
-  c_GenArrayWaitHandle* asGenArray();
-  c_GenMapWaitHandle* asGenMap();
-  c_GenVectorWaitHandle* asGenVector();
   c_ConditionWaitHandle* asCondition();
   c_RescheduleWaitHandle* asReschedule();
   c_ResumableWaitHandle* asResumable();
@@ -189,13 +177,15 @@ class c_WaitHandle : public ObjectData {
 
   // The code in the TC will depend on the values of these constants.
   // See emitAwait().
-  static const int8_t STATE_SUCCEEDED = 0;
-  static const int8_t STATE_FAILED    = 1;
+  static const int8_t STATE_SUCCEEDED = 0; // completed with result
+  static const int8_t STATE_FAILED    = 1; // completed with exception
+
+  void scan(type_scan::Scanner&) const;
 
  private: // layout, ignoring ObjectData fields.
-  // 0                           8             9             10 12
-  // [m_parentChain             ][m_contextIdx][m_kind_state][ ][m_ctxVecIndex]
-  // [m_resultOrException.m_data][m_type]                       [m_aux]
+  // 0                         8           9           10       12
+  // [parentChain             ][contextIdx][kind_state][tyindex][ctxVecIndex]
+  // [resultOrException.m_data][m_type]                         [aux]
   static void checkLayout() {
     constexpr auto data = offsetof(c_WaitHandle, m_resultOrException);
     constexpr auto type = data + offsetof(TypedValue, m_type);
@@ -204,16 +194,6 @@ class c_WaitHandle : public ObjectData {
     static_assert(offsetof(c_WaitHandle, m_contextIdx) == type, "");
     static_assert(offsetof(c_WaitHandle, m_kind_state) < aux, "");
     static_assert(offsetof(c_WaitHandle, m_ctxVecIndex) == aux, "");
-  }
-
- public:
-  template<class F> void scan(F& mark) const {
-    if (isFinished()) {
-      mark(m_resultOrException);
-    } else {
-      m_parentChain.scan(mark);
-    }
-    // TODO: t7925088 switch on kind and handle subclasses
   }
 
  protected:
@@ -232,6 +212,9 @@ class c_WaitHandle : public ObjectData {
       // valid in any WaitHandle state. doesn't overlap Cell fields.
       uint8_t m_kind_state;
 
+      // type index of concrete waithandle for gc-scanning
+      type_scan::Index m_tyindex;
+
       union {
         // ExternalThreadEventWaitHandle: STATE_WAITING
         // SleepWaitHandle: STATE_WAITING
@@ -239,6 +222,14 @@ class c_WaitHandle : public ObjectData {
       };
     };
   };
+
+  TYPE_SCAN_CUSTOM() {
+    if (isFinished()) {
+      scanner.scan(m_resultOrException);
+    } else {
+      scanner.scan(m_parentChain);
+    }
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,6 @@
 #include "hphp/util/logger.h"
 
 #include <folly/Memory.h>
-#include <folly/MoveWrapper.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 
@@ -170,7 +169,7 @@ bool KVParser::parseKeyValueContent(Cursor& cursor,
 FastCGISession::FastCGISession(
   folly::EventBase* evBase,
   JobQueueDispatcher<FastCGIWorker>& dispatcher,
-  folly::AsyncSocket::UniquePtr sock,
+  folly::AsyncTransportWrapper::UniquePtr sock,
   const folly::SocketAddress& localAddr,
   const folly::SocketAddress& peerAddr)
   : m_eventBase(evBase)
@@ -342,9 +341,8 @@ void FastCGISession::onStdOut(std::unique_ptr<IOBuf> chain) {
   // FastCGITransport doesn't run in the same event base. Calling into internal
   // functions here is unsafe from other threads so we enqueue the work for the
   // event base.
-  folly::MoveWrapper<std::unique_ptr<IOBuf>> chain_wrapper(std::move(chain));
-  m_eventBase->runInEventBaseThread([this, chain_wrapper]() mutable {
-    writeStream(fcgi::STDOUT, std::move(*chain_wrapper));
+  m_eventBase->runInEventBaseThread([this, chain = std::move(chain)]() mutable {
+    writeStream(fcgi::STDOUT, std::move(chain));
   });
 }
 
@@ -714,4 +712,3 @@ void FastCGISession::writeStream(fcgi::Type type,
 
 ////////////////////////////////////////////////////////////////////////////////
 }
-

@@ -38,7 +38,7 @@ array(2) {
     ["count"]=>
     int(3)
     ["dn"]=>
-    string(19) "dc=my-domain,dc=com"
+    string(%s) "dc=my-domain,$base"
   }
 }
 ===DONE===

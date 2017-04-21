@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,10 +17,12 @@
 #define incl_HPHP_IRGEN_RET_H_
 
 namespace HPHP { namespace jit {
-struct IRSPOffset;
+
+struct IRSPRelOffset;
+
+namespace irgen {
+
 struct IRGS;
-}}
-namespace HPHP { namespace jit { namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -28,7 +30,7 @@ namespace HPHP { namespace jit { namespace irgen {
  * Helper to return the offset from the IR stack pointer to the frame's return
  * value slot.  This is used during return sequences from non-resumables.
  */
-IRSPOffset offsetToReturnSlot(IRGS&);
+IRSPRelOffset offsetToReturnSlot(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 

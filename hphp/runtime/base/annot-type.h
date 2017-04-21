@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,9 @@ enum class AnnotType : uint16_t {
   Array    = (uint8_t)KindOfArray    | (uint16_t)AnnotMetaType::Precise << 8,
   Object   = (uint8_t)KindOfObject   | (uint16_t)AnnotMetaType::Precise << 8,
   Resource = (uint8_t)KindOfResource | (uint16_t)AnnotMetaType::Precise << 8,
+  Dict     = (uint8_t)KindOfDict     | (uint16_t)AnnotMetaType::Precise << 8,
+  Vec      = (uint8_t)KindOfVec      | (uint16_t)AnnotMetaType::Precise << 8,
+  Keyset   = (uint8_t)KindOfKeyset   | (uint16_t)AnnotMetaType::Precise << 8,
   // Precise is intentionally excluded
   Mixed    = (uint16_t)AnnotMetaType::Mixed << 8    | (uint8_t)KindOfUninit,
   Self     = (uint16_t)AnnotMetaType::Self << 8     | (uint8_t)KindOfUninit,
@@ -73,6 +76,7 @@ inline DataType getAnnotDataType(AnnotType at) {
 inline AnnotType dataTypeToAnnotType(DataType dt) {
   assert(dt == KindOfUninit || dt == KindOfBoolean || dt == KindOfInt64 ||
          dt == KindOfDouble || dt == KindOfString || dt == KindOfArray ||
+         dt == KindOfVec || dt == KindOfDict || dt == KindOfKeyset ||
          dt == KindOfObject || dt == KindOfResource);
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
@@ -92,13 +96,24 @@ bool interface_supports_int(const StringData* s);
 bool interface_supports_double(const StringData* s);
 bool interface_supports_string(const StringData* s);
 bool interface_supports_array(const StringData* s);
+bool interface_supports_vec(const StringData* s);
+bool interface_supports_dict(const StringData* s);
+bool interface_supports_keyset(const StringData* s);
 
 bool interface_supports_int(std::string const&);
 bool interface_supports_double(std::string const&);
 bool interface_supports_string(std::string const&);
 bool interface_supports_array(std::string const&);
+bool interface_supports_vec(std::string const&);
+bool interface_supports_dict(std::string const&);
+bool interface_supports_keyset(std::string const&);
 
-enum class AnnotAction { Pass, Fail, ObjectCheck, CallableCheck };
+enum class AnnotAction {
+  Pass,
+  Fail,
+  ObjectCheck,
+  CallableCheck,
+};
 
 /*
  * annotCompat() takes a DataType (`dt') and tries to determine if a value
@@ -115,7 +130,9 @@ enum class AnnotAction { Pass, Fail, ObjectCheck, CallableCheck };
  * annotation at run time.  NOTE that if the annotation is "array" and the
  * value is a collection object, this function will return Fail but the
  * runtime might possibly cast the collection to an array and allow normal
- * execution to continue (see TypeConstraint::verifyFail() for details).
+ * execution to continue (see TypeConstraint::verifyFail() for details). In
+ * addition in Weak mode verifyFail may coerce certain types allowing
+ * execution to continue.
  *
  * CallableCheck: `at' is "callable" and a value with DataType `dt' might
  * be compatible with the annotation, but the caller needs to consult
@@ -133,7 +150,7 @@ enum class AnnotAction { Pass, Fail, ObjectCheck, CallableCheck };
  */
 inline AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
-  assert(dt != KindOfRef && dt != KindOfClass);
+  assert(dt != KindOfRef);
   assert(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
 
   auto const metatype = getAnnotMetaType(at);
@@ -155,7 +172,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::Callable:
       // For "callable", if `dt' is not string/array/object we know
       // it's not compatible, otherwise more checks are required
-      return (isStringType(dt) || dt == KindOfArray || dt == KindOfObject)
+      return (isStringType(dt) || isArrayType(dt) ||
+              dt == KindOfObject)
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::Precise:
       break;
@@ -181,12 +199,25 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfDouble:
         return interface_supports_double(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString:
         return interface_supports_string(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentArray:
       case KindOfArray:
         return interface_supports_array(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentVec:
+      case KindOfVec:
+        return interface_supports_vec(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentDict:
+      case KindOfDict:
+        return interface_supports_dict(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        return interface_supports_keyset(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfUninit:
       case KindOfNull:
@@ -195,7 +226,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         return AnnotAction::Fail;
       case KindOfObject:
       case KindOfRef:
-      case KindOfClass:
         not_reached();
         break;
     }

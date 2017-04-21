@@ -19,20 +19,37 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/async-job.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct InitFiniNode;
+
+struct IFJob {
+  explicit IFJob(const InitFiniNode& n) : node(n) {}
+  const InitFiniNode& node;
+};
+template <> struct WorkerInfo<IFJob> {
+  enum { DoInitFini = false };
+};
+
 struct InitFiniNode {
   enum class When {
-    RequestInit,
+    RequestStart,            // before executing PHP code in a request
       RequestFini,
       ThreadInit,
       ThreadFini,
-      ProcessInit,
-      ProcessExit,
+      // ProcessInitConcurrent should only be used for thread-safe code with few
+      // dependencies (e.g., runtime options, logging).
+      PostRuntimeOptions,    // after runtime options are set, single-threaded
+      ProcessPreInit,        // after pthread initialization and config parsing
+      ProcessInit,           // after PreInit
+      ProcessInitConcurrent, // after PreInit, concurrently with Init and others
+      ProcessExit,           // after Init and InitConcurrent
       ServerPreInit,
       ServerInit,
+      WarmupConcurrent,      // concurrent with OS file cache warmup, optional
       ServerExit,
       GlobalsInit,
 
@@ -41,37 +58,63 @@ struct InitFiniNode {
 
   const static unsigned NumNodes = static_cast<unsigned>(When::Sentinel);
 
-  InitFiniNode(void(*f)(), When when) {
-    InitFiniNode *&n = node(when);
+  InitFiniNode(void(*f)(), When when, const char* what = nullptr) {
+    InitFiniNode*& n = node(when);
     func = f;
     next = n;
+    name = what;
     n = this;
   }
 
-  static void RequestInit()   { iterate(When::RequestInit);   }
-  static void RequestFini()   { iterate(When::RequestFini);   }
-  static void ThreadInit()    { iterate(When::ThreadInit);    }
-  static void ThreadFini()    { iterate(When::ThreadFini);    }
-  static void ProcessInit()   { iterate(When::ProcessInit);   }
-  static void ProcessFini()   { iterate(When::ProcessExit);   }
-  static void ServerPreInit() { iterate(When::ServerPreInit); }
-  static void ServerInit()    { iterate(When::ServerInit);    }
-  static void ServerFini()    { iterate(When::ServerExit);    }
-  static void GlobalsInit()   { iterate(When::GlobalsInit);   }
+  static void RequestStart()   { iterate(When::RequestStart);   }
+  static void RequestFini()    { iterate(When::RequestFini);    }
+  static void ThreadInit()     { iterate(When::ThreadInit);     }
+  static void ThreadFini()     { iterate(When::ThreadFini);     }
+  static void ProcessPostRuntimeOptions() {
+    iterate(When::PostRuntimeOptions);
+  }
+  static void ProcessPreInit() { iterate(When::ProcessPreInit); }
+  static void ProcessInit()    { iterate(When::ProcessInit);    }
+  // Use maxWorkers == 0 to run synchronously on current thread.
+  static void ProcessInitConcurrentStart(uint32_t maxWorkers);
+  static void ProcessInitConcurrentWaitForEnd();
+  static void ProcessFini()    { iterate(When::ProcessExit);    }
+  static void ServerPreInit()  { iterate(When::ServerPreInit);  }
+  static void ServerInit()     { iterate(When::ServerInit);     }
+  static void WarmupConcurrentStart(uint32_t maxWorkers);
+  static void WarmupConcurrentWaitForEnd(); // No-op if not started.
+  static void ServerFini()     { iterate(When::ServerExit);     }
+  static void GlobalsInit()    { iterate(When::GlobalsInit);    }
 
+  struct IFWorker {
+    void onThreadEnter() {}
+    void doJob(std::shared_ptr<IFJob> job);
+    void onThreadExit() {}
+  };
  private:
+  using IFDispatcher = JobDispatcher<IFJob, IFWorker>;
+
   static InitFiniNode*& node(When when) {
     auto idx = static_cast<unsigned>(when);
     assert(idx < NumNodes);
     return s_nodes[idx];
   }
+  static IFDispatcher*& dispatcher(When when) {
+    auto idx = static_cast<unsigned>(when);
+    assert(idx < NumNodes);
+    return s_dispatcher[idx];
+  }
   void (*func)();
-  InitFiniNode *next;
+  InitFiniNode* next;
+  const char* name;
 
   static void iterate(When when) { iterate(node(when)); }
   static void iterate(InitFiniNode* node);
+  static void concurrentStart(uint32_t maxWorkers, When when);
+  static void concurrentWaitForEnd(When when);
 
-  static InitFiniNode *s_nodes[NumNodes];
+  static InitFiniNode* s_nodes[NumNodes];
+  static IFDispatcher* s_dispatcher[NumNodes];
 };
 
 ///////////////////////////////////////////////////////////////////////////////

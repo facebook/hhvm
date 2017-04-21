@@ -20,6 +20,27 @@ import repo
 
 
 #------------------------------------------------------------------------------
+# Frame sniffing.
+
+def is_jitted(fp, ip):
+    # Get the value of `s_code', the global CodeCache pointer.
+    s_code = K('HPHP::jit::tc::g_code')
+
+    # Set the bounds of the TC.
+    try:
+        tc_base = s_code['m_base']
+        tc_end = tc_base + s_code['m_codeSize']
+    except:
+        # We can't access `s_code' for whatever reason---maybe it's gotten
+        # corrupted somehow.  Assume that the TC is above the data section,
+        # but restricted to low memory.
+        tc_base = s_code.address.cast(T('uintptr_t'))
+        tc_end = 0x100000000
+
+    return ip >= tc_base and ip < tc_end
+
+
+#------------------------------------------------------------------------------
 # PHP frame info.
 
 def php_filename(func):
@@ -95,10 +116,13 @@ def php_line_number(func, pc):
 #------------------------------------------------------------------------------
 # Frame builders.
 
-def create_native(idx, fp, rip, native_frame=None):
+def create_native(idx, fp, rip, native_frame=None, name=None):
     # Try to get the function name.
     if native_frame is None:
-        func_name = '<unknown>'
+        if name is None:
+            func_name = '<unknown>'
+        else:
+            func_name = name
     else:
         try:
             func_name = native_frame.name() + '()'
@@ -120,14 +144,7 @@ def create_native(idx, fp, rip, native_frame=None):
 
     # Munge and print the code location if we have one.
     if loc is not None and loc.symtab is not None:
-        filename = loc.symtab.filename
-
-        if 'hphp' in filename:
-            head, base = os.path.split(filename)
-            _, basedir = os.path.split(head)
-            filename = 'hphp/.../' + basedir + '/' + base
-
-        frame['file'] = filename
+        frame['file'] = loc.symtab.filename
         frame['line'] = loc.line
 
     return frame

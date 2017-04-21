@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,13 +17,14 @@
 #define incl_HPHP_SMALLLOCKS_H_
 
 #include <atomic>
-#include <unistd.h>
 #include <iostream>
 #ifdef __linux__
 #include <syscall.h>
 #include <linux/futex.h>
-#include <sys/time.h>
 #endif
+
+#include <folly/portability/SysTime.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 

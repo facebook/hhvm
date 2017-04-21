@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_str.h"
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
+#include "hphp/runtime/base/memory-manager.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -33,21 +33,31 @@ char* xdebug_sprintf(const char* fmt, ...) {
   auto const orig_locale = setlocale(LC_ALL, nullptr);
   setlocale(LC_ALL, "C");
   SCOPE_EXIT { setlocale(LC_ALL, orig_locale); };
-  auto new_str = (char*)xdmalloc(size);
+  auto new_str = (char*)HPHP::req::malloc_noptrs(size);
   for (;;) {
     va_start(args, fmt);
     auto const n = vsnprintf(new_str, size, fmt, args);
     va_end(args);
 
     if (n > -1 && n < size) {
+      // Success case.
       break;
-    }
-    if (n < 0) {
-      size *= 2;
+    } else if (n < 0) {
+      // vsnprintf returned an error, free the allocated string and bail.
+      if (new_str) {
+        HPHP::req::free(new_str);
+        new_str = nullptr;
+      }
+      break;
     } else {
+      // vsnprintf indicated the supplied buffer was too small. In this case,
+      // the return value of vsnprintf indicates the number of characters
+      // the buffer was required to hold, not including the terminating NULL
+      // char, so set size = n + 1 (to include enough space for the NULL),
+      // reallocate the buffer and try again.
       size = n + 1;
+      new_str = (char*)HPHP::req::realloc_noptrs(new_str, size);
     }
-    new_str = (char*)xdrealloc(new_str, size);
   }
   return new_str;
 }
@@ -58,7 +68,7 @@ char* xdstrdup(const char* str) {
   }
 
   auto const size = strlen(str) + 1;
-  auto const dup = (char*)xdmalloc(size);
+  auto const dup = (char*)HPHP::req::malloc_noptrs(size);
   memcpy(dup, str, size);
   return dup;
 }

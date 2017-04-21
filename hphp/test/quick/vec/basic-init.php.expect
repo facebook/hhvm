@@ -1,0 +1,120 @@
+vec(0) {
+}
+vec(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(3) {
+  int(1)
+  string(1) "b"
+  int(3)
+}
+vec(4) {
+  int(10)
+  string(3) "abc"
+  int(10)
+  string(3) "abc"
+}
+vec(2) {
+  int(123)
+  string(3) "123"
+}
+vec(8) {
+  NULL
+  bool(false)
+  bool(true)
+  float(7.89)
+  array(0) {
+  }
+  vec(0) {
+  }
+  keyset(0) {
+  }
+  dict(0) {
+  }
+}
+vec(4) {
+  object(stdClass)#1 (0) {
+  }
+  int(1234)
+  string(3) "abc"
+  object(HH\Vector)#2 (3) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+    [2]=>
+    int(3)
+  }
+}
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+}
+vec(4) {
+  int(1)
+  string(1) "a"
+  int(2)
+  string(1) "b"
+}
+vec(4) {
+  int(10)
+  int(10)
+  string(3) "abc"
+  string(3) "abc"
+}
+vec(4) {
+  int(123)
+  string(3) "123"
+  int(123)
+  string(3) "123"
+}
+vec(4) {
+  float(1.23)
+  NULL
+  bool(false)
+  bool(true)
+}
+vec(4) {
+  object(stdClass)#2 (0) {
+  }
+  array(0) {
+  }
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  keyset(2) {
+    string(1) "a"
+    int(1)
+  }
+}
+vec(4) {
+  dict(1) {
+    [1]=>
+    string(1) "a"
+  }
+  object(ToString)#2 (0) {
+  }
+  string(3) "abc"
+  int(10)
+}
+3 Noisy::__destruct()
+2 Noisy::__destruct()
+1 Noisy::__destruct()
+Exception: Thrower::__construct()

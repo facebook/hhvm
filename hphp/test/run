@@ -113,6 +113,10 @@ Examples:
 
   # Run the Hack typechecker against the typechecker.expect[f] file in this test
   # $argv[0] --typechecker test/slow/test_runner_typechecker_mode/basic.php
+
+  # Use a specific typechecker binary
+  # $argv[0] --hhserver-binary-path ~/code/hhvm/hphp/hack/bin/hh_server --typechecker .
+
 EOT;
   return usage().$help;
 }
@@ -124,45 +128,98 @@ function error($message) {
 
 // If a user-supplied path is provided, let's make sure we have a valid
 // executable.
-function check_hhvm_executable($path) {
-  $path = realpath($path);
-  $msg = "Provided HHVM executable (" . $path . ") is not a file.\n"
-       . "If using HHVM_BIN, make sure that is set correctly.";
-  if (!is_file($path)) {
+function check_executable($path, $typechecker) {
+  $type = $typechecker ? "HH_SERVER" : "HHVM";
+  $rpath = realpath($path);
+  $msg = "Provided ".$type." executable (".$path.") is not a file.\n"
+       . "If using ".$type."_BIN, make sure that is set correctly.";
+  if (!is_file($rpath)) {
     error($msg);
   }
   $output = array();
-  exec($path . " --version", $output);
+  exec($rpath . " --help", $output);
   $str = implode($output);
-  $msg = "Provided file (" . $path . ") is not an HHVM executable.\n"
-       . "If using HHVM_BIN, make sure that is set correctly.";
-  if (strpos($str, "HipHop") === false && strpos($str, "HHVM") === false) {
+  $msg = "Provided file (".$rpath.") is not a/an ".$type." executable.\n"
+       . "If using ".$type."_BIN, make sure that is set correctly.";
+  if (strpos($str, "Usage") !== 0) {
     error($msg);
   }
 }
 
-function check_for_multiple_default_hhvm_binaries() {
-  $dir = hphp_home() . "/";
-  if (getenv("FBMAKE_BIN_ROOT")) {
-    $dir .= getenv("FBMAKE_BIN_ROOT");
-  } else {
-    $dir .= "_bin";
+function hhvm_binary_routes() {
+  $routes = array(
+    "fbbuild" => "/_bin/hphp/hhvm",
+    "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
+    "cmake"   => "/hphp/hhvm"
+  );
+
+  $env_root = getenv("FBMAKE_BIN_ROOT");
+  if ($env_root !== false) {
+    $routes["fbbuild"] = "/" . $env_root . "/hphp/hhvm";
   }
-  // For Facebook: We have two make systems fbmake and cmake, and we
-  // can use both in the same code repo. If two binaries exist, we
-  // want the onus to be on the user to specify a particular one because
-  // before we chose the fbmake one by default and that can cause unexpected
-  // results.
-  if (file_exists($dir.'/hphp/hhvm/hhvm') &&
-      file_exists(hphp_home().'/hphp/hhvm/hhvm')) {
-    $msg = "Two binaries exist in this repo. \n"
-         . " - " . $dir . "/hphp/hhvm/hhvm\n"
-         . " - " . hphp_home() . "/hphp/hhvm/hhvm\n"
-         . "Are you in fbcode? If so, remove a binary \n"
-         . "or use the --hhvm-binary-path option to the test runner. \n"
-         . "e.g., test/run -b hphp/hhvm/hhvm quick";
-    error($msg);
+  return $routes;
+}
+
+function hh_server_binary_routes() {
+  $routes = array(
+    "fbbuild" => "/_bin/hphp/hack/src",
+    "buck"    => "/buck-out/gen/hphp/hack/src/hh_server",
+    "cmake"   => "/hphp/hack/bin"
+  );
+  $env_root = getenv("FBMAKE_BIN_ROOT");
+  if ($env_root !== false) {
+    $routes["fbbuild"] = "/" . $env_root . "/hphp/hack/src";
   }
+  return $routes;
+}
+
+function hh_codegen_binary_routes() {
+  return array(
+    "buck"    => "/buck-out/bin/hphp/hack/src/hh_single_compile",
+    "cmake"   => "/hphp/hack/bin"
+  );
+}
+
+// For Facebook: We have several build systems, and we can use any of them in
+// the same code repo.  If multiple binaries exist, we want the onus to be on
+// the user to specify a particular one because before we chose the fbmake one
+// by default and that could cause unexpected results.
+function check_for_multiple_default_binaries($typechecker) {
+  // Env var we use in testing that'll pick which build system to use.
+  if (getenv("FBCODE_BUILD_TOOL") !== false) {
+    return;
+  }
+
+  $home = hphp_home();
+  $routes = $typechecker ? hh_server_binary_routes() : hhvm_binary_routes();
+  $binary = $typechecker ? "hh_server" : "hhvm";
+
+  $found = array();
+  foreach ($routes as $_ => $path) {
+    $abs_path = $home . $path . "/" . $binary;
+    if (file_exists($abs_path)) {
+      $found[] = $abs_path;
+    }
+  }
+
+  if (count($found) <= 1) {
+    return;
+  }
+
+  $path_option = $typechecker ? "--hhserver-binary-path" : "--hhvm-binary-path";
+
+  $msg = "Multiple binaries exist in this repo. \n";
+  foreach ($found as $bin) {
+    $msg .= " - " . $bin . "\n";
+  }
+  $msg .= "Are you in fbcode?  If so, remove a binary \n"
+    . "or use the " . $path_option . " option to the test runner. \n"
+    . "e.g., test/run ";
+  if ($typechecker) {
+    $msg .= "--typechecker";
+  }
+  $msg .= " " . $path_option . " /path/to/binary slow\n";
+  error($msg);
 }
 
 function hphp_home() {
@@ -198,25 +255,44 @@ function hhvm_path() {
   return rel_path($file);
 }
 
+function hh_codegen_cmd($options) {
+  // Right now hh_single_compile doesn't understand any of HHVM's options, to
+  // get 100% test coverage this will need to be fixed
+  $cmd = hh_codegen_path();
+  $cmd .= ' -v Eval.EnableHipHopSyntax=1';
+  return $cmd;
+}
+
 function bin_root() {
   if (getenv("HHVM_BIN") !== false) {
     return dirname(realpath(getenv("HHVM_BIN")));
   }
 
-  $dir = hphp_home() . "/";
-  if (getenv("FBMAKE_BIN_ROOT") !== false) {
-    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hhvm';
-  } else {
-    $dir .= "_bin/hphp/hhvm";
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hhvm_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
   }
-  return is_dir($dir) ?
-    $dir :      # fbmake
-    hphp_home() . "/hphp/hhvm" # github / cmake
-  ;
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
 }
 
 function hh_server_path() {
-  $file = hh_server_bin_root().'/hh_server';
+  $file = "";
+  if (getenv("HH_SERVER_BIN") !== false) {
+    $file = realpath(getenv("HH_SERVER_BIN"));
+  } else {
+    $file = hh_server_bin_root().'/hh_server';
+  }
   if (!is_file($file)) {
     error("$file doesn't exist. Did you forget to build first?");
   }
@@ -224,16 +300,58 @@ function hh_server_path() {
 }
 
 function hh_server_bin_root() {
-  $dir = hphp_home() . "/";
-  if (getenv("FBMAKE_BIN_ROOT") !== false) {
-    $dir .= getenv("FBMAKE_BIN_ROOT") . '/hphp/hack/src';
-  } else {
-    $dir .= "_bin/hphp/hack/src";
+  if (getenv("HH_SERVER_BIN") !== false) {
+    return dirname(realpath(getenv("HH_SERVER_BIN")));
   }
-  return is_dir($dir) ?
-    $dir :      # fbmake
-    hphp_home() . "/hphp/hack/bin" # github / cmake
-  ;
+
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hh_server_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
+  }
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
+}
+
+function hh_codegen_path() {
+  $file = "";
+  if (getenv("HH_CODEGEN_BIN") !== false) {
+    $file = realpath(getenv("HH_CODEGEN_BIN"));
+  } else {
+    $file = hh_codegen_bin_root().'/hh_single_compile.opt';
+  }
+  if (!is_file($file)) {
+    error("$file doesn't exist. Did you forget to build first?");
+  }
+  return rel_path($file);
+}
+
+function hh_codegen_bin_root() {
+  $home = hphp_home();
+  $env_tool = getenv("FBCODE_BUILD_TOOL");
+  $routes = hh_codegen_binary_routes();
+
+  if ($env_tool !== false) {
+    return $home . $routes[$env_tool];
+  }
+
+  foreach ($routes as $_ => $path) {
+    $dir = $home . $path;
+    if (is_dir($dir)) {
+      return $dir;
+    }
+  }
+
+  return $home . $routes["cmake"];
 }
 
 function verify_hhbc() {
@@ -300,11 +418,14 @@ function get_options($argv) {
   $parameters = array(
     'exclude:' => 'e:',
     'exclude-pattern:' => 'E:',
+    'exclude-recorded-failures:' => 'x:',
     'include:' => 'i:',
     'include-pattern:' => 'I:',
     'repo' => 'r',
+    'hhbbc2' => '',
     'mode:' => 'm:',
     'server' => 's',
+    'cli-server' => 'S',
     'shuffle' => '',
     'help' => 'h',
     'verbose' => 'v',
@@ -315,8 +436,6 @@ function get_options($argv) {
     'log' => 'l',
     'failure-file:' => '',
     'arm' => '',
-    'llvm' => '',
-    'force-llvm' => '',
     'wholecfg' => '',
     'hhas-round-trip' => '',
     'color' => 'c',
@@ -325,8 +444,13 @@ function get_options($argv) {
     'no-clean' => '',
     'list-tests' => '',
     'relocate:' => '',
+    'recycle-tc:' => '',
     'hhvm-binary-path:' => 'b:',
     'typechecker' => '',
+    'hhserver-binary-path:' => '',
+    'compare-hh-codegen' => '',
+    'run-hh-codegen' => '',
+    'record-failures:' => '',
   );
   $options = array();
   $files = array();
@@ -377,7 +501,35 @@ function get_options($argv) {
     exit(1);
   }
 
+  if (isset($options['relocate']) && isset($options['recycle-tc'])) {
+    echo "relocate and recycle-tc are mutually exclusive options\n";
+    exit(1);
+  }
+
+  if (isset($options['hhbbc2'])) $options['repo'] = true;
+
   return array($options, $files);
+}
+
+/*
+ * Return the path to $test relative to __DIR__, or false if __DIR__ does not
+ * contain test.
+ */
+function canonical_path($test) {
+  $full = realpath($test);
+  if (substr($full, 0, strlen(__DIR__)) === __DIR__) {
+    return substr($full, strlen(__DIR__) + 1);
+  }
+  $dirstat = stat(__DIR__);
+  if (!is_array($dirstat)) return false;
+  for ($p = dirname($full); $p && $p !== "/"; $p = dirname($p)) {
+    $s = stat($p);
+    if (!is_array($s)) continue;
+    if ($s['ino'] === $dirstat['ino'] && $s['dev'] === $dirstat['dev']) {
+      return substr($full, strlen($p) + 1);
+    }
+  }
+  return false;
 }
 
 /*
@@ -480,6 +632,7 @@ function find_tests($files, array $options = null) {
       function($test) {
         return file_exists($test . '.expect') ||
                file_exists($test . '.expectf') ||
+               file_exists($test . '.expectregex') ||
                file_exists($test . '.hhvm.expect') ||
                file_exists($test . '.hhvm.expectf');
       }
@@ -505,6 +658,13 @@ function find_tests($files, array $options = null) {
       return !preg_match($exclude, $test);
     });
   }
+  if (!empty($options['exclude-recorded-failures'])) {
+    $exclude_file = $options['exclude-recorded-failures'];
+    $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
+    $tests = array_filter($tests, function($test) use ($exclude) {
+      return (false === in_array(canonical_path($test), $exclude));
+    });
+  }
   if (!empty($options['include'])) {
     $include = $options['include'];
     $tests = array_filter($tests, function($test) use ($include) {
@@ -525,23 +685,30 @@ function list_tests($files, $options) {
   $mode = idx($options, 'mode', '');
   switch ($mode) {
     case '':
-    case 'jit':
-      $args[] = '-m jit';
       break;
-    case 'interp';
-      $args[] = '-m interp';
+    case 'jit':
+    case 'interp':
+    case 'interp,jit':
+      $args[] = '-m ' . $mode;
       break;
     default:
       throw new Exception("Unsupported mode for listing tests: ".$mode);
   }
 
-  if (isset($options['repo'])) {
+  if (isset($options['hhbbc2'])) {
+    $args[] = '--hhbbc2';
+  } else if (isset($options['repo'])) {
     $args[] = '-r';
   }
 
   if (isset($options['relocate'])) {
     $args[] = '--relocate';
     $args[] = $options['relocate'];
+  }
+
+  if (isset($options['recycle-tc'])) {
+    $args[] = '--recycle-tc';
+    $args[] = $options['recycle-tc'];
   }
 
   foreach (find_tests($files, $options) as $test) {
@@ -605,8 +772,6 @@ function mode_cmd($options) {
     case '':
     case 'jit':
       return "$jit_args";
-    case 'llvm':
-      return "$jit_args -vEval.JitLLVM=2";
     case 'pgo':
       return $jit_args.
         ' -vEval.JitPGO=1'.
@@ -614,8 +779,10 @@ function mode_cmd($options) {
         ' -vEval.JitPGOHotOnly=0';
     case 'interp':
       return "$repo_args -vEval.Jit=0";
+    case 'interp,jit':
+      return array("$repo_args -vEval.Jit=0", $jit_args);
     default:
-      error("-m must be one of jit | pgo | interp. Got: '$mode'");
+      error("-m must be one of jit | pgo | interp | interp,jit. Got: '$mode'");
   }
 }
 
@@ -628,32 +795,49 @@ function hhvm_cmd_impl() {
   $options = array_shift($args);
   $config = array_shift($args);
   $extra_args = $args;
-  $args = array(
-    hhvm_path(),
-    '-c',
-    $config,
-    '-vEval.EnableArgsInBacktraces=true',
-    '-vEval.EnableIntrinsicsExtension=true',
-    mode_cmd($options),
-    isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
-    isset($options['llvm']) ? '-vEval.JitLLVM=2' : '',
-    isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
-    isset($options['require-llvm']) ? '-vEval.JitLLVM=3' : '',
-    extra_args($options),
-  );
+  $modes = (array)mode_cmd($options);
+  $cmds = array();
+  foreach ($modes as $mode) {
+    $args = array(
+      hhvm_path(),
+      '-c',
+      $config,
+      '-vEval.EnableArgsInBacktraces=true',
+      '-vEval.EnableIntrinsicsExtension=true',
+      $mode,
+      isset($options['arm']) ? '-vEval.SimulateARM=1' : '',
+      isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
-  if (isset($options['relocate'])) {
-    $args[] = '--count='.($options['relocate'] * 2);
-    $args[] = '-vEval.JitAHotSize=6000000';
-    $args[] = '-vEval.HotFuncCount=0';
-    $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+      // load/store counters don't work on Ivy Bridge so disable for tests
+      '-vEval.ProfileHWEnable=false',
+
+      extra_args($options),
+    );
+
+    if (isset($options['relocate'])) {
+      $args[] = '--count='.($options['relocate'] * 2);
+      $args[] = '-vEval.JitAHotSize=6000000';
+      $args[] = '-vEval.HotFuncCount=0';
+      $args[] = '-vEval.PerfRelocate='.$options['relocate'];
+    }
+
+    if (isset($options['recycle-tc'])) {
+      $args[] = '--count='.$options['recycle-tc'];
+      $args[] = '-vEval.StressUnitCacheFreq=1';
+      $args[] = '-vEval.EnableReusableTC=true';
+    }
+
+    if (isset($options['run-hh-codegen'])) {
+      $args[] = '-vEval.AllowHhas=1';
+    }
+
+    if (!isset($options['cores'])) {
+      $args[] = '-vResourceLimit.CoreFileSize=0';
+    }
+    $cmds[] = implode(' ', array_merge($args, $extra_args));
   }
-
-  if (!isset($options['cores'])) {
-    $args[] = '-vResourceLimit.CoreFileSize=0';
-  }
-
-  return implode(' ', array_merge($args, $extra_args));
+  if (count($cmds) != 1) return $cmds;
+  return $cmds[0];
 }
 
 // Return the command and the env to run it in.
@@ -667,7 +851,7 @@ function hhvm_cmd($options, $test, $test_run = null) {
   $hdf = file_exists($test.$hdf_suffix)
        ? '-c ' . $test . $hdf_suffix
        : "";
-  $cmd = hhvm_cmd_impl(
+  $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
     $hdf,
@@ -676,6 +860,15 @@ function hhvm_cmd($options, $test, $test_run = null) {
     '--file',
     escapeshellarg($test_run)
   );
+
+  $cmd = "";
+
+  if (isset($options['cli-server']) && can_run_server_test($test)) {
+    $config = find_file_for_dir(dirname($test), 'config.ini');
+    $socket = $options['servers']['configs'][$config]['cli-socket'];
+    $cmd .= ' -vEval.UseRemoteUnixServer=only';
+    $cmd .= ' -vEval.UnixServerPath='.$socket;
+  }
 
   // Special support for tests that require a path to the current
   // test directory for things like prepend_file and append_file
@@ -705,7 +898,30 @@ function hhvm_cmd($options, $test, $test_run = null) {
     $cmd .= " -vRepo.Central.Path=$hhbbc_repo";
   }
 
+  // Command line arguments
+  $cli_args = find_test_ext($test, 'cli_args');
+  if ($cli_args !== null) {
+    $cmd .= " -- " . trim(file_get_contents($cli_args));
+  }
+
   $env = $_ENV;
+  // If there's an <test name>.env file then inject the contents of that into
+  // the test environment.
+  $env_file = find_test_ext($test, 'env');
+  if ($env_file !== null) {
+    $extra_env = explode("\n", trim(file_get_contents($env_file)));
+    foreach ($extra_env as $arg) {
+      $i = strpos($arg, '=');
+      if ($i) {
+        $key = substr($arg, 0, $i);
+        $val = substr($arg, $i + 1);
+        $env[$key] = $val;
+      } else {
+        unset($env[$arg]);
+      }
+    }
+  }
+
   $in = find_test_ext($test, 'in');
   if ($in !== null) {
     $cmd .= ' < ' . escapeshellarg($in);
@@ -716,13 +932,22 @@ function hhvm_cmd($options, $test, $test_run = null) {
     $env["TERM"] = "dumb";
   }
 
+  if (is_array($cmds)) {
+    foreach ($cmds as &$c) {
+      $c .= $cmd;
+    }
+    $cmd = $cmds;
+  } else {
+    $cmd = $cmds . $cmd;
+  }
+
   return array($cmd, $env);
 }
 
 function hphp_cmd($options, $test) {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
   return implode(" ", array(
-    "HHVM_DISABLE_HHBBC2=1",
+    "HHVM_DISABLE_HHBBC=1",
     hhvm_path(),
     '--hphp',
     '--config',
@@ -749,7 +974,7 @@ function hh_server_cmd($options, $test) {
   // files associated with the test to a temporary directory, rename the
   // basename($test_file).hhconfig file to just .hhconfig and set the command
   // appropriately.
-  $temp_dir = uniqid('/tmp/hh-test-runner-');
+  $temp_dir = '/tmp/hh-test-runner-'.bin2hex(random_bytes(16));
   mkdir($temp_dir);
   foreach (glob($test . '*') as $test_file) {
     copy($test_file, $temp_dir . '/' . basename($test_file));
@@ -797,6 +1022,7 @@ class Status {
   const MODE_VERBOSE = 1;
   const MODE_FBMAKE = 2;
   const MODE_TESTPILOT = 3;
+  const MODE_RECORD_FAILURES = 4;
 
   const MSG_STARTED = 7;
   const MSG_FINISHED = 1;
@@ -1090,7 +1316,8 @@ function clean_intermediate_files($test, $options) {
   if (isset($options['no-clean'])) {
     return;
   }
-  $exts = array('out', 'diff', 'repo');
+  $exts = array('out', 'diff', 'repo', 'round_trip.hhas',
+                'hhcodegen_output.hhas', 'hhcodegen_messages');
   foreach ($exts as $ext) {
     $file = "$test.$ext";
     if (file_exists($file)) {
@@ -1154,6 +1381,8 @@ function skip_test($options, $test) {
   unset($options_without_repo['repo']);
 
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
+  if (is_array($hhvm)) $hhvm=$hhvm[0];
+
   $descriptorspec = array(
     0 => array("pipe", "r"),
     1 => array("pipe", "w"),
@@ -1335,9 +1564,64 @@ function generate_diff($wanted, $wanted_re, $output)
 
 function dump_hhas_to_temp($hhvm_cmd, $test) {
   $tmp_file = $test . '.round_trip.hhas';
-  system("$hhvm_cmd -vEval.DumpHhas=1 > $tmp_file", $ret);
-  if ($ret) { echo "system failed\n"; exit(1); }
+  $cmd = str_replace(
+    ' -- ', ' -m dumphhas -vEval.AllowHhas=1 -- ', $hhvm_cmd
+  );
+  if ($cmd == $hhvm_cmd) $cmd .= " -m dumphhas -vEval.AllowHhas=1";
+  system("$cmd  > $tmp_file 2> /dev/null", $ret);
+  if ($ret) return false;
   return $tmp_file;
+}
+
+function dump_hh_codegen($options, $test) {
+  $temp_file = $test.'.hhcodegen_output.hhas';
+  $msgs_file = $test.'.hhcodegen_messages';
+  $cmd = hh_codegen_cmd($options);
+  $ret = false;
+  system("/usr/bin/timeout 300 $cmd $test > $temp_file 2> $msgs_file", $ret);
+  return $ret === 0 ? $temp_file : false;
+}
+
+function strip_hhas_file($file) {
+  $h = fopen($file, "r");
+  $buf = "";
+  while (($s = fgets($h)) !== false) {
+    if (substr($s, 0, 6) === "# NYI:") {
+      fclose($h);
+      return false;
+    }
+    if ($s === "" || $s[0] === "#" || substr($s, 0, 10) === ".filepath ") {
+      continue;
+    }
+    $buf .= $s;
+  }
+  fclose($h);
+  file_put_contents($file, $buf);
+}
+
+function contains_nyi_line($file) {
+  $h = fopen($file, "r");
+  while (($s = fgets($h)) !== false) {
+    if (substr($s, 0, 6) === "# NYI:") {
+      fclose($h);
+      return true;
+    }
+  }
+  fclose($h);
+  return false;
+}
+
+const ASM_ERROR = "  String \"Assembler Error: ";
+function is_assembler_fail($file) {
+  $h = fopen($file, "r");
+  while (($s = fgets($h)) !== false) {
+    if (substr($s, 0, strlen(ASM_ERROR)) === ASM_ERROR) {
+      fclose($h);
+      return true;
+    }
+  }
+  fclose($h);
+  return false;
 }
 
 const HHAS_EXT = '.hhas';
@@ -1444,7 +1728,15 @@ function run_config_post($outputs, $test, $options) {
     return true;
   }
 
-  $repeats = isset($options['relocate']) ? $options['relocate'] * 2 : 0;
+  $repeats = 0;
+
+  if (isset($options['relocate'])) {
+    $repeats = $options['relocate'] * 2;
+  }
+
+  if (isset($options['recycle-tc'])) {
+    $repeats = $options['recycle-tc'];
+  }
 
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file === null || $type === null) {
@@ -1560,13 +1852,32 @@ function run_config_post($outputs, $test, $options) {
     return 'skip';
   }
   if (!$passed) {
-    file_put_contents("$test.diff",
-                      generate_diff($wanted_re, $wanted_re, $output));
+    $diff = generate_diff($wanted_re, $wanted_re, $output);
+    if ($passed === false && $diff === "") {
+      // the preg match failed, probably because the regex was too complex,
+      // but since the line by line diff came up empty, we're fine
+      $passed = 1;
+    } else {
+      file_put_contents("$test.diff", $diff);
+    }
   }
   return $passed;
 }
 
 function run_one_config($options, $test, $cmd, $cmd_env) {
+  if (is_array($cmd)) {
+    $result = 'skip';
+    foreach ($cmd as $c) {
+      $result = run_one_config($options, $test, $c, $cmd_env);
+      if (!$result) return $result;
+    }
+    return $result;
+  }
+  if (is_executable('/usr/bin/timeout')) {
+    $cmd = '/usr/bin/timeout 300 ' . $cmd;
+  } else {
+    $cmd = __DIR__.'/../tools/timeout.sh -t 300 '. $cmd;
+  }
   $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
   if ($outputs === false) return false;
   return run_config_post($outputs, $test, $options);
@@ -1589,11 +1900,6 @@ function run_typechecker_test($options, $test) {
   if (skip_test($options, $test)) return 'skip';
   if (!file_exists($test . ".hhconfig")) return 'skip';
   list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
-  if (is_executable('/usr/bin/timeout')) {
-    $hh_server = '/usr/bin/timeout 300 ' . $hh_server;
-  } else {
-    $hh_server = __DIR__.'/../tools/timeout.sh -t 300 '. $hh_server;
-  }
   $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
   // Remove the temporary directory.
   if (!isset($options['no-clean'])) {
@@ -1607,21 +1913,13 @@ function run_test($options, $test) {
 
   $test_ext = pathinfo($test, PATHINFO_EXTENSION);
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  if (isset($options['relocate']) &&
-      preg_match('/ --count[ =].* --count[ =]/', $hhvm)) {
+  if ((isset($options['relocate']) || isset($options['recycle-tc'])) &&
+      preg_grep('/ --count[ =].* --count[ =]/', (array)$hhvm)) {
     return 'skip';
   }
 
-  if (is_executable('/usr/bin/timeout')) {
-    $hhvm = '/usr/bin/timeout 300 '.$hhvm;
-  } else {
-    $hhvm = __DIR__.'/../tools/timeout.sh -t 300 '.$hhvm;
-  }
-
   if (isset($options['repo'])) {
-    if ($test_ext === 'hhas' ||
-        strpos($hhvm, '-m debug') !== false ||
-        file_exists($test.'.norepo')) {
+    if (preg_grep('/-m debug/', (array)$hhvm) || file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }
 
@@ -1632,6 +1930,24 @@ function run_test($options, $test) {
     $hhbbc = hhbbc_cmd($options, $test);
     shell_exec("$hphp 2>&1");
     shell_exec("$hhbbc 2>&1");
+    if (isset($options['hhbbc2'])) {
+      $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
+      shell_exec("mv $hhbbc_repo $hphp_repo");
+      shell_exec("$hhbbc 2>&1");
+      $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
+      if ($hhas_temp1 === false || $hhas_temp2 === false) {
+        if ($hhas_temp1 != $hhas_temp2)  {
+          shell_exec("cat $hhas_temp1$hhas_temp2 > $test.diff");
+          return false;
+        }
+      } else {
+        $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
+        if (trim($diff) != '0') {
+          shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
+          return false;
+        }
+      }
+    }
 
     return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
@@ -1639,9 +1955,62 @@ function run_test($options, $test) {
   if (file_exists($test.'.onlyrepo')) {
     return 'skip-onlyrepo';
   }
+
   if (isset($options['hhas-round-trip'])) {
+    if (substr($test, -5) === ".hhas") return 'skip';
     $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    if ($hhas_temp === false) {
+      echo "system failed\n";
+      exit(1);
+    }
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
+  if (isset($options['run-hh-codegen'])) {
+    if (substr($test, -5) === ".hhas") return 'skip';
+
+    $hhas_temp = dump_hh_codegen($options, $test);
+    if (!$hhas_temp || file_get_contents($hhas_temp) === "") {
+      file_put_contents($test.'.diff', "CODEGEN FAILED");
+      return false;
+    }
+    if (contains_nyi_line($hhas_temp) === true) return 'skip';
+    list($hhvm, $hhvm_env) = hhvm_cmd($options, $hhas_temp);
+  }
+
+  if (isset($options['compare-hh-codegen'])) {
+    $diff = $test.'.diff';
+
+    if (substr($test, -5) === ".hhas") return 'skip';
+    $hhas = dump_hhas_to_temp($hhvm, $test);
+    if (!$hhas) return 'skip';
+    $hhcg = dump_hh_codegen($options, $test);
+    if (!$hhcg || file_get_contents($hhcg) === "") {
+      file_put_contents($diff, "CODEGEN FAILED");
+      return false;
+    }
+    if (contains_nyi_line($hhcg) === true) return 'skip';
+    list($hhvm2, $hhvm2_env) = hhvm_cmd($options, $hhcg);
+    $hhcg2 = dump_hhas_to_temp($hhvm2, $hhcg);
+    $rv = true;
+    if (
+      !$hhcg2 ||
+      file_get_contents($hhcg2) === "" ||
+      is_assembler_fail($hhcg2)
+    ) {
+      $rv = false;
+      $hhcg2 = $hhcg;
+    }
+
+    strip_hhas_file($hhas);
+    strip_hhas_file($hhcg2);
+
+    system("diff $hhcg2 $hhas > $diff", $ret);
+    if ($ret === 0) {
+      if ($rv) unlink($diff);
+      return $rv;
+    }
+    return false;
   }
 
   if ($outputs = run_config_server($options, $test)) {
@@ -1684,14 +2053,31 @@ function print_commands($tests, $options) {
       list($command, $_) = hhvm_cmd($options, $test);
     }
     if (!isset($options['repo'])) {
-      print "$command\n";
+      foreach ((array)$command as $c) {
+        print "$c\n";
+      }
       continue;
     }
 
     // How to run it with hhbbc:
     $hhbbc_cmds = hphp_cmd($options, $test)."\n";
-    $hhbbc_cmds .= hhbbc_cmd($options, $test)."\n";
-    $hhbbc_cmds .= $command."\n";
+    $hhbbc_cmd  = hhbbc_cmd($options, $test)."\n";
+    $hhbbc_cmds .= $hhbbc_cmd;
+    if (isset($options['hhbbc2'])) {
+      foreach ((array)$command as $c) {
+        $hhbbc_cmds .= $c." -m dumphhas > $test.before.round_trip.hhas\n";
+      }
+      $hhbbc_cmds .= "mv $test.repo/hhvm.hhbbc $test.repo/hhvm.hhbc\n";
+      $hhbbc_cmds .= $hhbbc_cmd;
+      foreach ((array)$command as $c) {
+        $hhbbc_cmds .= $c." -m dumphhas > $test.after.round_trip.hhas\n";
+      }
+      $hhbbc_cmds .=
+        "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
+    }
+    foreach ((array)$command as $c) {
+      $hhbbc_cmds .= $c."\n";
+    }
     print "$hhbbc_cmds\n";
   }
 }
@@ -1701,8 +2087,13 @@ function msg_loop($num_tests, $queue) {
   $skipped = 0;
   $failed = 0;
 
-  $do_progress = Status::getMode() == Status::MODE_NORMAL &&
+  $do_progress =
+    (
+      Status::getMode() === Status::MODE_NORMAL ||
+      Status::getMode() === Status::MODE_RECORD_FAILURES
+    ) &&
     Status::hasCursorControl();
+
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
     preg_match_all("/columns ([0-9]+);/", $stty, $output);
@@ -1747,6 +2138,9 @@ function msg_loop($num_tests, $queue) {
 
           case Status::MODE_TESTPILOT:
             break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
         }
 
       case Status::MSG_TEST_PASS:
@@ -1775,6 +2169,9 @@ function msg_loop($num_tests, $queue) {
 
           case Status::MODE_TESTPILOT:
             Status::sayFBMake($test, 'passed', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
             break;
         }
         break;
@@ -1806,6 +2203,9 @@ function msg_loop($num_tests, $queue) {
           case Status::MODE_TESTPILOT:
             Status::sayFBMake($test, 'not_relevant', $stime, $etime);
             break;
+
+          case Status::MODE_RECORD_FAILURES:
+            break;
         }
         break;
 
@@ -1833,6 +2233,9 @@ function msg_loop($num_tests, $queue) {
 
           case Status::MODE_TESTPILOT:
             Status::sayFBMake($test, 'failed', $stime, $etime);
+            break;
+
+          case Status::MODE_RECORD_FAILURES:
             break;
         }
         break;
@@ -2001,9 +2404,18 @@ function print_failure($argv, $results, $options) {
 
   $rerun = make_header("Re-run just the failing tests:") . $argv[0];
   foreach ($options as $option => $value) {
+    if ($option === "servers") continue;
     if ($option === "threads") {
       // e.g., For a small number of failed tests, we don't need max threads.
       $rerun .= " --" . $option . ' ' . get_num_threads($options, $failed);
+    } else if ($option === "typechecker" ||
+               $option === "verbose" ||
+               $option === "repo" ||
+               $option === "server" ||
+               $option === "cli-server") {
+      // The escapeshellarg($value) of these is 1, but there is no real value
+      // associated with these options.
+      $rerun .= " --" . $option;
     } else {
       $rerun .= " --" . $option . ' ' . escapeshellarg($value);
     }
@@ -2026,8 +2438,17 @@ function find_open_port() {
   error("Couldn't find an open port");
 }
 
-function start_server_impl($options, $config, $port) {
+function start_server_proc($options, $config, $port) {
+  if (isset($options['cli-server'])) {
+    $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
+  } else {
+    // still want to test that an unwritable socket works...
+    $cli_sock = '/var/run/hhvm-cli.sock';
+  }
   $threads = $options['threads'];
+  $thread_option = isset($options['cli-server'])
+    ? '-vEval.UnixServerWorkers='.$threads
+    : '-vServer.ThreadCount='.$threads;
   $command = hhvm_cmd_impl(
     $options,
     $config,
@@ -2035,12 +2456,15 @@ function start_server_impl($options, $config, $port) {
     "-vServer.Port=$port",
     "-vServer.Type=proxygen",
     "-vAdminServer.Port=0",
-    "-vServer.ThreadCount=$threads",
+    $thread_option,
     '-vServer.ExitOnBindFail=1',
     '-vServer.RequestTimeoutSeconds='.SERVER_TIMEOUT,
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
     '-vLog.File=/dev/null',
+
+    // The server will unlink the temp file
+    '-vEval.UnixServerPath='.$cli_sock,
 
     // This ensures we actually jit everything:
     '-vEval.JitRequireWriteLease=1',
@@ -2048,8 +2472,14 @@ function start_server_impl($options, $config, $port) {
     // The default test config uses a small TC but we'll be running thousands
     // of tests against the same process:
     '-vEval.JitASize=100000000',
-    '-vEval.JitGlobalDataSize=32000000'
+    '-vEval.JitGlobalDataSize=32000000',
+
+    // load/store counters don't work on Ivy Bridge so disable for tests
+    '-vEval.ProfileHWEnable=false'
   );
+  if (is_array($command)) {
+    error("Can't run multi-mode tests in server mode");
+  }
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";
   }
@@ -2068,19 +2498,30 @@ function start_server_impl($options, $config, $port) {
   $status['proc'] = $proc;
   $status['port'] = $port;
   $status['config'] = $config;
+  $status['cli-socket'] = $cli_sock;
   return $status;
 }
 
-function start_server($options, $config) {
-  for ($i = 0; $i < 5; ++$i) {
-    $port = find_open_port();
-    $status = start_server_impl($options, $config, $port);
+/*
+ * For each config file in $configs, start up a server on a randomly-determined
+ * port. Return value is an array mapping pids and config files to arrays of
+ * information about the server.
+ */
+function start_servers($options, $configs) {
+  $starting = array();
+  foreach ($configs as $config) {
+    $starting[] = start_server_proc($options, $config, find_open_port());
+  }
 
-    // Wait for the server to start responding. If someone else bound to $port
-    // between the call to find_open_port and the call to proc_open, then we
-    // might start talking to them thinking it's our server.
-    for ($j = 0; $j < 40; ++$j) {
-      $new_status = proc_get_status($status['proc']);
+  $start_time = microtime(true);
+  $servers = array('pids' => array(), 'configs' => array());
+
+  // Wait for all servers to come up.
+  while (count($starting) > 0) {
+    $still_starting = array();
+
+    foreach ($starting as $server) {
+      $new_status = proc_get_status($server['proc']);
 
       if (!$new_status['running']) {
         if ($new_status['exitcode'] === 0) {
@@ -2091,34 +2532,29 @@ function start_server($options, $config) {
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\n\nLost connection race on port $port. Trying another.\n\n";
         }
-        continue 2;
+        $still_starting[] =
+          start_server_proc($options, $server['config'], find_open_port());
+      } else if (!port_is_listening($server['port'])) {
+        $still_starting[] = $server;
+      } else {
+        $servers['pids'][$server['pid']] =& $server;
+        $servers['configs'][$server['config']] =& $server;
+        unset($server);
       }
-
-      if (port_is_listening($port)) {
-        return $status;
-      }
-
-      usleep(250000);
     }
-    error("Server took too long to come up");
+
+    $starting = $still_starting;
+    $max_time = 10;
+    if (microtime(true) - $start_time > $max_time) {
+      error("Servers took more than $max_time seconds to come up");
+    }
+
+    // Take a short nap and try again.
+    usleep(100000);
   }
 
-  error("Couldn't start server");
-}
-
-/*
- * For each config file in $configs, start up a server on a randomly-determined
- * port. Return value is an array mapping pids and config files to arrays of
- * information about the server.
- */
-function start_servers($options, $configs) {
-  $servers = array('pids' => array(), 'configs' => array());
-  foreach ($configs as $config) {
-    $server = start_server($options, $config);
-    $servers['pids'][$server['pid']] =& $server;
-    $servers['configs'][$server['config']] =& $server;
-    unset($server);
-  }
+  $elapsed = microtime(true) - $start_time;
+  printf("Started %d servers in %.1f seconds\n\n", count($configs), $elapsed);
   return $servers;
 }
 
@@ -2128,7 +2564,8 @@ function drain_queue($queue) {
 }
 
 function get_num_threads($options, $tests) {
-  $cpus = isset($options['server']) ? num_cpus() * 2 : num_cpus();
+  $cpus = isset($options['server']) || isset($options['cli-server'])
+    ? num_cpus() * 2 : num_cpus();
   return min(count($tests), idx($options, 'threads', $cpus));
 }
 
@@ -2162,23 +2599,58 @@ function main($argv) {
     error("Repo mode and typechecker mode are not compatible");
   }
 
+  if (isset($options['hhvm-binary-path']) &&
+      isset($options['typechecker'])) {
+    error("Did you mean to set the hh_server binary path instead?");
+  }
+
+  if (isset($options['hhserver-binary-path']) &&
+      !isset($options['typechecker'])) {
+    error("hh_server binary path set, but not --typechecker");
+  }
+
+  if (isset($options['hhvm-binary-path']) &&
+      isset($options['hhserver-binary-path'])) {
+    error("Need to choose one of the two binaries to run");
+  }
+
   $binary_path = "";
-  if (isset($options['typechecker'])) {
-    $binary_path = hh_server_path();
-  } else {
-    // Explicit path given by --hhvm-binary-path takes priority
-    // Then, if an HHVM_BIN env var exists, and the file it points to exists,
-    // that trumps any default hhvm executable path.
-    if (isset($options['hhvm-binary-path'])) {
-      $binary_path = realpath($options['hhvm-binary-path']);
-      check_hhvm_executable($binary_path);
-      putenv("HHVM_BIN=" . $binary_path);
-    } else if (getenv("HHVM_BIN") !== false) {
-      $binary_path = realpath(getenv("HHVM_BIN"));
-      check_hhvm_executable($binary_path);
+  $typechecker = false;
+  if (isset($options['hhvm-binary-path'])) {
+    check_executable($options['hhvm-binary-path'], false);
+    $binary_path = realpath($options['hhvm-binary-path']);
+    putenv("HHVM_BIN=" . $binary_path);
+  } else if (isset($options['hhserver-binary-path'])) {
+    check_executable($options['hhserver-binary-path'], true);
+    $binary_path = realpath($options['hhserver-binary-path']);
+    $typechecker = true;
+    putenv("HH_SERVER_BIN=" . $binary_path);
+  } else if (isset($options['typechecker'])) {
+    $typechecker = true;
+  }
+
+  // Explicit path given by --hhvm-binary-path or --hhserver-binary-path
+  // takes priority (see above)
+  // Then, if an HHVM_BIN or HH_SERVER env var exists, and the file it
+  // points to exists, that trumps any default hhvm / typechecker executable
+  // path.
+  if ($binary_path === "") {
+    if (!$typechecker) {
+      if (getenv("HHVM_BIN") !== false) {
+        $binary_path = realpath(getenv("HHVM_BIN"));
+        check_executable($binary_path, false);
+      } else {
+        check_for_multiple_default_binaries(false);
+        $binary_path = hhvm_path();
+      }
     } else {
-      check_for_multiple_default_hhvm_binaries();
-      $binary_path = hhvm_path();
+      if (getenv("HH_SERVER_BIN") !== false) {
+        $binary_path = realpath(getenv("HH_SERVER_BIN"));
+        check_executable($binary_path, true);
+      } else {
+        check_for_multiple_default_binaries(true);
+        $binary_path = hh_server_path();
+      }
     }
   }
 
@@ -2189,7 +2661,10 @@ function main($argv) {
   $options['threads'] = get_num_threads($options, $tests);
 
   $servers = null;
-  if (isset($options['server'])) {
+  if (isset($options['server']) || isset($options['cli-server'])) {
+    if (isset($options['server']) && isset($options['cli-server'])) {
+      error("Server mode and CLI Server mode are mutually exclusive");
+    }
     if (isset($options['repo']) || isset($options['typechecker'])) {
       error("Server mode repo tests are not supported");
     }
@@ -2206,7 +2681,7 @@ function main($argv) {
       $configs[$config] = $config;
     }
 
-    $max_configs = 10;
+    $max_configs = 20;
     if (count($configs) > $max_configs) {
       error("More than $max_configs unique config files will be needed to run ".
             "the tests you specified. They may not be a good fit for server ".
@@ -2285,6 +2760,9 @@ function main($argv) {
   if (isset($options['testpilot'])) {
     Status::setMode(Status::MODE_TESTPILOT);
   }
+  if (isset($options['record-failures'])) {
+    Status::setMode(Status::MODE_RECORD_FAILURES);
+  }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
 
   Status::$key = rand();
@@ -2343,19 +2821,16 @@ function main($argv) {
       }
       Status::serverRestarted();
       $server =& $servers['pids'][$pid];
-      $server = start_server_impl($options, $server['config'], $server['port']);
+      $server = start_server_proc($options, $server['config'], $server['port']);
 
       // Unset the old $pid entry and insert the new one.
       unset($servers['pids'][$pid]);
       $servers['pids'][$server['pid']] =& $server;
       unset($server);
-    } else {
-      if (!isset($children[$pid])) {
-        error("Unexpected child pid $pid from wait");
-      }
+    } elseif (isset($children[$pid])) {
       unset($children[$pid]);
       $return_value |= pcntl_wexitstatus($status);
-    }
+    } // Else, ignorable signal
   }
 
   Status::finished();
@@ -2381,7 +2856,36 @@ function main($argv) {
     unlink($bad_test_file);
   }
 
-  if (isset($options['fbmake']) || isset($options['testpilot'])) {
+  if (isset($options['record-failures'])) {
+    $fail_file = $options['record-failures'];
+    $failed_tests = array();
+    $prev_failing = array();
+    if (file_exists($fail_file)) {
+      $prev_failing = explode("\n", file_get_contents($fail_file));
+    }
+
+    $new_fails = 0;
+    $new_passes = 0;
+    foreach ($results as $r) {
+      if (!isset($r['name']) || !isset($r['status'])) continue;
+      $test = canonical_path($r['name']);
+      $status = $r['status'];
+      if ($status === 'passed' && in_array($test, $prev_failing)) {
+        $new_passes++;
+        continue;
+      }
+      if ($status !== 'failed') continue;
+      if (!in_array($test, $prev_failing)) $new_fails++;
+      $failed_tests[] = $test;
+    }
+    printf(
+      "Recording %d tests as failing.\n".
+      "There are %d new failing tests, and %d new passing tests.\n",
+      count($failed_tests), $new_fails, $new_passes
+    );
+    sort($failed_tests);
+    file_put_contents($fail_file, implode("\n", $failed_tests));
+  } else if (isset($options['fbmake']) || isset($options['testpilot'])) {
     Status::say(array('op' => 'all_done', 'results' => $results));
   } else if (!$return_value) {
     print_success($tests, $results, $options);
@@ -2389,16 +2893,17 @@ function main($argv) {
     print_failure($argv, $results, $options);
   }
 
-
-  Status::sayColor("\nTotal time for all executed tests as run: ",
-                   Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::getOverallEndTime() -
-                   Status::getOverallStartTime()));
-  Status::sayColor("Total time for all executed tests if run serially: ",
-                   Status::BLUE,
-                   sprintf("%.2fs\n",
-                   Status::addTestTimesSerial()));
+  if (!isset($options['fbmake'])) {
+    Status::sayColor("\nTotal time for all executed tests as run: ",
+                     Status::BLUE,
+                     sprintf("%.2fs\n",
+                     Status::getOverallEndTime() -
+                     Status::getOverallStartTime()));
+    Status::sayColor("Total time for all executed tests if run serially: ",
+                     Status::BLUE,
+                     sprintf("%.2fs\n",
+                     Status::addTestTimesSerial()));
+  }
 
   return $return_value;
 }

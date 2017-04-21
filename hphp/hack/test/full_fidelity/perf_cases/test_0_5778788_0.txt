@@ -1,0 +1,2 @@
+<?hh
+interface cQ { require extends cHuR ; }

@@ -1,0 +1,110 @@
+** exit fb_setprofile
+** enter genFoo
+** enter error_log
+In genFoo
+** exit error_log
+** enter var_dump
+int(42)
+** exit var_dump
+** enter genBar
+** enter error_log
+In genBar
+** exit error_log
+** enter var_dump
+int(43)
+** exit var_dump
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
+** suspend genBar
+** enter genBar
+** enter error_log
+In genBar
+** exit error_log
+** enter var_dump
+int(44)
+** exit var_dump
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
+** suspend genBar
+** enter gen2
+** enter error_log
+In gen2
+** exit error_log
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
+** suspend gen2
+** enter genList
+** enter HH\AwaitAllWaitHandle::fromArray
+** exit HH\AwaitAllWaitHandle::fromArray
+** suspend genList
+** suspend genFoo
+** enter HH\Asio\join
+** enter Exception::__construct
+** exit Exception::__construct
+** resume genBar
+** enter error_log
+Finished in genBar
+** exit error_log
+** exit genBar
+** resume genBar
+** enter error_log
+Finished in genBar
+** exit error_log
+** exit genBar
+** resume gen2
+** enter gen1
+** enter error_log
+In gen1
+** exit error_log
+** enter error_log
+Finished in gen1
+** exit error_log
+** enter HH\RescheduleWaitHandle::create
+** exit HH\RescheduleWaitHandle::create
+** suspend gen1
+** enter HH\Asio\join
+** resume gen1
+** exit gen1
+** exit HH\Asio\join
+** enter error_log
+Finished in gen2
+** exit error_log
+** exit gen2
+** resume genList
+** enter array_map
+** enter __invoke
+** enter HH\Asio\result
+** enter HH\WaitHandle::result
+** exit HH\WaitHandle::result
+** exit HH\Asio\result
+** exit __invoke
+** enter __invoke
+** enter HH\Asio\result
+** enter HH\WaitHandle::result
+** exit HH\WaitHandle::result
+** exit HH\Asio\result
+** exit __invoke
+** enter __invoke
+** enter HH\Asio\result
+** enter HH\WaitHandle::result
+** exit HH\WaitHandle::result
+** exit HH\Asio\result
+** exit __invoke
+** exit array_map
+** exit genList
+** resume genFoo
+** enter var_dump
+int(45)
+** exit var_dump
+** enter var_dump
+int(46)
+** exit var_dump
+** enter error_log
+Finished in genFoo
+** exit error_log
+** exit genFoo
+** exit HH\Asio\join
+** enter var_dump
+int(91)
+** exit var_dump
+** enter fb_setprofile

@@ -1,0 +1,22 @@
+array(1) {
+  [1]=>
+  NULL
+}
+array(1) {
+  [100]=>
+  bool(false)
+}
+array(1) {
+  [123]=>
+  bool(false)
+}
+array(1) {
+  [123]=>
+  bool(true)
+}
+array(2) {
+  [123]=>
+  string(1) "c"
+  [456]=>
+  string(1) "d"
+}

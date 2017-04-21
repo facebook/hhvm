@@ -1,0 +1,36 @@
+string(2) "11"
+string(2) "11"
+array(3) {
+  [0]=>
+  string(2) "ls"
+  [1]=>
+  string(13) "Custom String"
+  [2]=>
+  string(14) "Another String"
+}
+array(4) {
+  ["ANOTHERSTR"]=>
+  string(14) "Another String"
+  ["MYBOOL"]=>
+  string(1) "1"
+  ["MYINT"]=>
+  string(2) "11"
+  ["MYSTR"]=>
+  string(13) "Custom String"
+}
+array(4) {
+  ["ANOTHERSTR"]=>
+  string(14) "Another String"
+  ["MYBOOL"]=>
+  string(1) "1"
+  ["MYINT"]=>
+  string(4) "9999"
+  ["MYSTR"]=>
+  string(9) "My String"
+}
+string(1) "1"
+string(1) "1"
+string(1) "1"
+string(1) "1"
+string(1) "1"
+string(8) "15728640"

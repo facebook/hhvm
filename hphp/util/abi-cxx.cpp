@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,12 +24,9 @@
 #include <string>
 #include <unordered_map>
 
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#ifdef _MSC_VER
 # include <windows.h>
 # include <dbghelp.h>
-# ifndef _MSC_VER
-#  include <cxxabi.h>
-# endif
 #else
 # include <cxxabi.h>
 # include <execinfo.h>
@@ -39,6 +36,10 @@
 
 #include "hphp/util/functional.h"
 #include "hphp/util/compatibility.h"
+
+#ifdef FACEBOOK
+#include <folly/experimental/symbolizer/Symbolizer.h>
+#endif
 
 namespace HPHP {
 
@@ -62,7 +63,7 @@ std::string getNativeFunctionName(void* codeAddr) {
   }
   std::string functionName;
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
   HANDLE process = GetCurrentProcess();
   SYMBOL_INFO *symbol;
   DWORD64 addr_disp = 0;
@@ -78,13 +79,9 @@ std::string getNativeFunctionName(void* codeAddr) {
     functionName.assign(symbol->Name);
 
     int status;
-#ifdef _MSC_VER
     char* demangledName = (char*)calloc(1024, sizeof(char));
-    status = !(int)UnDecorateSymbolName(symbol->Name, demangledName, 1023, UNDNAME_COMPLETE);
-#else
-    char* demangledName = abi::__cxa_demangle(functionName.c_str(),
-                                              0, 0, &status);
-#endif
+    status = !(int)UnDecorateSymbolName(
+        symbol->Name, demangledName, 1023, UNDNAME_COMPLETE);
     SCOPE_EXIT { free(demangledName); };
     if (status == 0) functionName.assign(demangledName);
 
@@ -92,6 +89,14 @@ std::string getNativeFunctionName(void* codeAddr) {
   free(symbol);
 
   SymCleanup(process);
+#elif defined(FACEBOOK)
+
+  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SymbolizedFrame frame;
+  if (symbolizer.symbolize(uintptr_t(codeAddr), frame)) {
+    functionName = frame.demangledName().toStdString();
+  }
+
 #else
   void* buf[1] = {codeAddr};
   char** symbols = backtrace_symbols(buf, 1);

@@ -1,0 +1,67 @@
+string(1) "j"
+int(42)
+bool(false)
+object(stdClass)#1 (0) {
+}
+NULL
+string(11) "not_reached"
+NULL
+int(5)
+
+int(2)
+string(1) "f"
+NULL
+string(1) "f"
+string(1) "a"
+string(1) "d"
+NULL
+string(1) "d"
+
+string(1) "e"
+string(3) "abc"
+string(1) "e"
+NULL
+string(1) "h"
+string(1) "e"
+string(1) "e"
+NULL
+NULL
+NULL
+string(3) "abc"
+
+string(5) "apple"
+NULL
+string(6) "orange"
+NULL
+string(6) "orange"
+
+
+Notice: Undefined index: not_real in %s on line 10
+NULL
+int(43)
+
+Notice: Undefined index: absent in %s on line 10
+NULL
+int(43)
+
+NULL
+string(3) "wtf"
+
+
+Warning: HH\idx() expects at least 2 parameters, 1 given%S
+
+Notice: Undefined variable: idx%S
+NULL
+
+Warning: HH\idx() expects at least 2 parameters, 0 given%S
+
+Notice: Undefined variable: arr%S
+
+Notice: Undefined variable: arr%S
+
+Notice: Undefined variable: arr%S
+
+Notice: Undefined variable: arr%S
+
+Notice: Undefined variable: idx%S
+NULL

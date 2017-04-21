@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -44,7 +44,7 @@ Variant HHVM_FUNCTION(
                                  const Variant& subject, int limit = -1,
                                  VRefParam count = uninit_null());
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
-                                  int limit = -1, int flags = 0);
+                                  const Variant& limit, int flags = 0);
 String HHVM_FUNCTION(preg_quote, const String& str,
                                  const Variant& = null_string);
 int64_t HHVM_FUNCTION(preg_last_error);

@@ -9,23 +9,23 @@
  *)
 
 open Core
-open Utils
+open Reordered_argument_collections
 
 let checkpoints = ref SMap.empty
 
 let process_updates updates =
   (* Appending changed files to each checkpoint in the map *)
-  checkpoints := SMap.map begin fun cur_set ->
-    Relative_path.Map.fold begin fun path _ acc ->
-      Relative_path.Set.add path acc
-    end updates cur_set
-  end !checkpoints
+  checkpoints := SMap.map !checkpoints begin fun cur_set ->
+    Relative_path.Map.fold updates ~f:begin fun path _ acc ->
+      Relative_path.Set.add acc path
+    end ~init:cur_set
+  end
 
 let create_checkpoint x =
-  checkpoints := SMap.add x Relative_path.Set.empty !checkpoints
+  checkpoints := SMap.add !checkpoints ~key:x ~data:Relative_path.Set.empty
 
 let retrieve_checkpoint x =
-  match SMap.get x !checkpoints with
+  match SMap.get !checkpoints x with
   | Some files ->
       Some(
         List.map
@@ -35,8 +35,8 @@ let retrieve_checkpoint x =
   | None -> None
 
 let delete_checkpoint x =
-  match SMap.get x !checkpoints with
+  match SMap.get !checkpoints x with
   | Some _ ->
-      checkpoints := SMap.remove x !checkpoints;
+      checkpoints := SMap.remove !checkpoints x;
       true
   | None -> false

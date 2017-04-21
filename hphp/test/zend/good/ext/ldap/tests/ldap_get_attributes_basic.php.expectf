@@ -1,0 +1,25 @@
+array(5) {
+  ["objectClass"]=>
+  array(3) {
+    ["count"]=>
+    int(2)
+    [0]=>
+    string(3) "top"
+    [1]=>
+    string(12) "organization"
+  }
+  [0]=>
+  string(11) "objectClass"
+  ["o"]=>
+  array(2) {
+    ["count"]=>
+    int(1)
+    [0]=>
+    string(4) "test"
+  }
+  [1]=>
+  string(1) "o"
+  ["count"]=>
+  int(2)
+}
+===DONE===

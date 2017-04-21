@@ -1,2 +1,3 @@
-App \classname<[\Tr]App \Tr<>, >
+File "acts_as_string.php", line 11, characters 3-13:
+  classname<Tr as Tr>
 No errors

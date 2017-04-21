@@ -29,11 +29,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "zend_API.h"
 #include "zend_constants.h"
-#include "zend_extensions.h"
-#include "zend_exceptions.h"
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+
+#include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -218,16 +215,14 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
       ad_params.append(v);
     }
   }
-  HPHP::TypedValue retval;
   try {
-    HPHP::g_context->invokeFunc(
-      &retval, f, ad_params.toArray(), obj, cls,
+    auto retval = HPHP::g_context->invokeFunc(
+      f, ad_params.toArray(), obj, cls,
       nullptr, invName, HPHP::ExecutionContext::InvokeCuf
     );
     if (retval.m_type == HPHP::KindOfUninit) {
       return FAILURE;
     }
-
     HPHP::zBoxAndProxy(&retval);
     *fci->retval_ptr_ptr = retval.m_data.pref;
     return SUCCESS;

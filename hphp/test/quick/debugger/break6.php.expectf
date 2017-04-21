@@ -1,0 +1,21 @@
+Program %s/break6.php loaded. Type '[r]un' or '[c]ontinue' to go.
+exception error
+Breakpoint 1 set right after an error
+run
+break6.php loaded
+Program %s/break6.php exited normally.
+@ bad()
+Breakpoint 1 reached: An error occurred at bad() on line 6 of %s/break6.php
+   5 function bad() {
+   6*  ~false;
+   7 }
+
+Error Message: Unsupported operand type for ~
+@ bad()
+Breakpoint 1 reached: An error occurred at bad() on line 6 of %s/break6.php
+   5 function bad() {
+   6*  ~false;
+   7 }
+
+Error Message: Unsupported operand type for ~
+quit

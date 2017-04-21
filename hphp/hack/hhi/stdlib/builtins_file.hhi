@@ -8,9 +8,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
-const STDIN = 0;
-const STDOUT = 0;
-const STDERR = 0;
+const resource STDIN = /* UNSAFE_EXPR */ 0;
+const resource STDOUT = /* UNSAFE_EXPR */ 0;
+const resource STDERR = /* UNSAFE_EXPR */ 0;
 
 const PATHINFO_DIRNAME = 0;
 const PATHINFO_BASENAME = 0;
@@ -46,6 +46,14 @@ const SEEK_END = 0;
 const INI_SCANNER_NORMAL = 0;
 const INT_SCANNER_RAW = 0;
 
+const GLOB_ERR     = 1;
+const GLOB_MARK    = 2;
+const GLOB_NOSORT  = 4;
+const GLOB_NOCHECK = 16;
+const GLOB_ESCAPE  = 64;
+const GLOB_BRACE   = 1024;
+const GLOB_ONLYDIR = 8129;
+
 function fopen($filename, $mode, $use_include_path = false, $context = null);
 function popen($command, $mode);
 function fclose($handle);
@@ -68,8 +76,8 @@ function vfprintf($handle, $format, $args);
 function fflush($handle);
 function ftruncate($handle, $size);
 function flock($handle, $operation, &$wouldblock = null);
-function fputcsv($handle, $fields, $delimiter = ",", $enclosure = "\"");
-function fgetcsv($handle, $length = 0, $delimiter = ",", $enclosure = "\"");
+function fputcsv($handle, $fields, $delimiter = ",", $enclosure = "\"", $escape_char = "\\");
+function fgetcsv($handle, $length = 0, $delimiter = ",", $enclosure = "\"", $escape_char = "\\");
 function file_get_contents($filename, $use_include_path = false, $context = null, $offset = 0, $maxlen = 0);
 function file_put_contents($filename, $data, $flags = 0, $context = null);
 function file($filename, $flags = 0, $context = null);
@@ -98,7 +106,7 @@ function tempnam($dir, $prefix);
 function tmpfile();
 function fileperms($filename);
 function fileinode($filename);
-function filesize($filename);
+function filesize(?Stringish $filename);
 function fileowner($filename);
 function filegroup($filename);
 function fileatime($filename);

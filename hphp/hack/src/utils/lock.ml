@@ -8,8 +8,6 @@
  *
  *)
 
-open Utils
-
 let lock_fds = ref SMap.empty
 
 (**
@@ -80,12 +78,20 @@ let _operations lock_file op : bool =
 (**
  * Grabs the file lock and returns true if it the lock was grabbed
  *)
-let grab lock_file : bool = _operations lock_file Unix.F_TLOCK
+let grab lock_file : bool =
+  let _ = Sys_utils.mkdir_no_fail (Filename.dirname lock_file) in
+  _operations lock_file Unix.F_TLOCK
 
 (**
  * Releases a file lock.
  *)
 let release lock_file : bool = _operations lock_file Unix.F_ULOCK
+
+let blocking_grab_then_release lock_file =
+  let _ = Sys_utils.mkdir_no_fail (Filename.dirname lock_file) in
+  ignore (_operations lock_file Unix.F_LOCK);
+  ignore (release lock_file)
+
 
 (**
  * Gets the server instance-unique integral fd for a given lock file.

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,7 +30,7 @@ namespace HPHP {
 typedef std::map<std::string, xmlDocPtr> xmlDocMap;
 typedef std::map<std::string, xmlNodePtr> xmlNodeMap;
 
-#define NS_STRING(ns) (ns.empty() ? NULL : BAD_CAST(ns.c_str()))
+#define NS_STRING(ns) (ns.empty() ? nullptr : BAD_CAST(ns.c_str()))
 
 xmlDocPtr soap_xmlParseFile(const char *filename);
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size, bool skip_clean = true);
@@ -80,10 +80,10 @@ inline bool attr_is_equal(xmlAttrPtr node, char* name) {
   return attr_is_equal_ex(node, name, nullptr);
 }
 
-#define FOREACHATTRNODE(n,c,i)      FOREACHATTRNODEEX(n,c,NULL,i)
+#define FOREACHATTRNODE(n,c,i)      FOREACHATTRNODEEX(n,c,nullptr,i)
 #define FOREACHATTRNODEEX(n,c,ns,i)             \
   do {                                          \
-    if (n == NULL) {                            \
+    if (n == nullptr) {                         \
       break;                                    \
     }                                           \
     if (c) {                                    \
@@ -91,21 +91,21 @@ inline bool attr_is_equal(xmlAttrPtr node, char* name) {
     } else {                                    \
       i = n;                                    \
     }                                           \
-    if (i != NULL) {                            \
+    if (i != nullptr) {                         \
       n = i;
 
-#define FOREACHNODE(n,c,i)      FOREACHNODEEX(n,c,NULL,i)
+#define FOREACHNODE(n,c,i)      FOREACHNODEEX(n,c,nullptr,i)
 #define FOREACHNODEEX(n,c,ns,i)                 \
   do {                                          \
-    if (n == NULL) {                            \
+    if (n == nullptr) {                         \
       break;                                    \
     }                                           \
-    if (c!=NULL) {                              \
-      i = get_node_ex(n,c,NULL);                \
+    if (c != nullptr) {                         \
+      i = get_node_ex(n,c,nullptr);             \
     } else {                                    \
       i = n;                                    \
     }                                           \
-    if (i != NULL) {                            \
+    if (i != nullptr) {                         \
       n = i;
 
 #define ENDFOREACH(n)                           \

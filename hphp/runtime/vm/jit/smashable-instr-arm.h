@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,11 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP { namespace jit {
+
+struct CGMeta;
+
+namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -37,18 +41,18 @@ namespace HPHP { namespace jit { namespace arm {
  */
 constexpr size_t smashableMovqLen() { return 2 * 4 + 8; }
 constexpr size_t smashableCmpqLen() { return 0; }
-constexpr size_t smashableCallLen() { return 3 * 4 + 8; }
+constexpr size_t smashableCallLen() { return 4 + 8 + 2 * 4; }
 constexpr size_t smashableJmpLen()  { return 2 * 4 + 8; }
-constexpr size_t smashableJccLen()  { return 3 * 4 + 8; }
+constexpr size_t smashableJccLen()  { return 4 + smashableJmpLen(); }
 
-TCA emitSmashableMovq(CodeBlock& cb, uint64_t imm, PhysReg d);
-TCA emitSmashableCmpq(CodeBlock& cb, int32_t imm, PhysReg r, int8_t disp);
-TCA emitSmashableCall(CodeBlock& cb, TCA target);
-TCA emitSmashableJmp(CodeBlock& cb, TCA target);
-TCA emitSmashableJcc(CodeBlock& cb, TCA target, ConditionCode cc);
-std::pair<TCA,TCA>
-emitSmashableJccAndJmp(CodeBlock& cb, TCA target, ConditionCode cc);
-
+TCA emitSmashableMovq(CodeBlock& cb, CGMeta& meta, uint64_t imm,
+                      PhysReg d);
+TCA emitSmashableCmpq(CodeBlock& cb, CGMeta& meta, int32_t imm,
+                      PhysReg r, int8_t disp);
+TCA emitSmashableCall(CodeBlock& cb, CGMeta& meta, TCA target);
+TCA emitSmashableJmp(CodeBlock& cb, CGMeta& meta, TCA target);
+TCA emitSmashableJcc(CodeBlock& cb, CGMeta& meta, TCA target,
+                     ConditionCode cc);
 void smashMovq(TCA inst, uint64_t imm);
 void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
@@ -61,6 +65,9 @@ TCA smashableCallTarget(TCA inst);
 TCA smashableJmpTarget(TCA inst);
 TCA smashableJccTarget(TCA inst);
 ConditionCode smashableJccCond(TCA inst);
+
+constexpr size_t kSmashMovqImmOff = 0;
+constexpr size_t kSmashCmpqImmOff = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 

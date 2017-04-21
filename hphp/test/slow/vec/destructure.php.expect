@@ -1,0 +1,6 @@
+int(1)
+int(2)
+string(3) "abc"
+string(3) "def"
+Exception: Out of bounds vec access: invalid index 1
+Exception: Out of bounds vec access: invalid index 2

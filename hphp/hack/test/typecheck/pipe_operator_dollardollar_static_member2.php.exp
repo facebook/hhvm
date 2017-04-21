@@ -1,0 +1,6 @@
+File "pipe_operator_dollardollar_static_member2.php", line 12, characters 26-35:
+Invalid argument (Typing[4110])
+File "pipe_operator_dollardollar_static_member2.php", line 7, characters 25-30:
+This is a string
+File "pipe_operator_dollardollar_static_member2.php", line 4, characters 17-19:
+It is incompatible with an int

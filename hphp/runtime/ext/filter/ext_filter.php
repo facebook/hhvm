@@ -20,7 +20,7 @@ function filter_list(): mixed;
  *
  */
 <<__Native>>
-function filter_id(mixed $filtername): mixed;
+function filter_id(string $filtername): mixed;
 
 /**
  * Filters a variable with a specified filter

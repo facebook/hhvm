@@ -8,6 +8,7 @@ function tlog($str) {
 
   fwrite($error_log_file, $str);
   fwrite($error_log_file, "\n");
+  fflush($error_log_file);
   // error_log($str);
 }
 
@@ -71,8 +72,57 @@ function get_random_port($exclude1, $exclude2) {
   return $t;
 }
 
+# Return the command line to start the server with the specified options
+function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
+                      $customArgs = '', $serverId = null) {
+  global $test_run_id, $LOG_ROOT;
+  $portConfig = ' -vServer.Port='.$serverPort;
+  $serverConfig = ' --config='.$home.'/config/server.ini';
+  $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
+  $logFileConfig.= ' -vLog.Access.Default.File='.
+    "${LOG_ROOT}_access_log$test_run_id.log";
+  $srcRootConfig = ' -vServer.SourceRoot='.$root;
+  $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
+  $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
+  $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
+  $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_server$test_run_id.hhbc";
+  $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
+  $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
+  // To emulate sandbox setup, let Sandbox.Home be '$home'
+  // and user name be 'debugger', so that the server can find the
+  // sandbox_conf.hdf in '$root'.
+  $sandboxHomeConfig = ' -vSandbox.Home='.$home;
+  if ($serverId === null) $serverId = $test_run_id;
+
+  $hhvm = PHP_BINARY;
+
+  if (ini_get('hhvm.repo.authoritative')) {
+    $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode$test_run_id ".
+      "--input-dir $root";
+    tlog('Building repo with command: '.$cmd);
+    tlog(exec($cmd));
+    $repoConfig .=
+      " -vRepo.Local.Path=${LOG_ROOT}_bytecode$test_run_id/hhvm.hhbc".
+      " -vRepo.Authoritative=true";
+  }
+
+  $cmd = "exec env MALLOC_CONF=junk:true TESTID={$serverId} " .
+    "SERVERPORT={$serverPort} $hhvm" .
+    ' --mode=server' . $serverConfig . $logFileConfig .
+    ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
+    ' --instance-id=' . $test_run_id .
+    ' -vPageletServer.ThreadCount=5' .
+    $portConfig . $srcRootConfig .
+    $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
+    $debugPortConfig . $repoConfig . $jitConfig . ' ' . $customArgs .
+    " > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
+    " 2> ${LOG_ROOT}_test_server_stderr$test_run_id.log";
+
+  return $cmd;
+}
+
 function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
-                     $customArgs = '') {
+                     $customArgs = '', $serverId = null) {
   global $test_run_id, $LOG_ROOT;
 
   $chooseServer = $serverPort === null;
@@ -85,53 +135,14 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
     if ($chooseAdmin) $adminPort = get_random_port($serverPort, $debugPort);
     if ($chooseDebug) $debugPort = get_random_port($serverPort, $adminPort);
 
-    $portConfig = ' -vServer.Port='.$serverPort;
-    $serverConfig = ' --config='.$home.'/config/server.ini';
-    $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
-    $logFileConfig.= ' -vLog.Access.Default.File='.
-      "${LOG_ROOT}_access_log$test_run_id.log";
-    $srcRootConfig = ' -vServer.SourceRoot='.$root;
-    $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
-    $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
-    $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
-    $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_server$test_run_id.hhbc";
-    $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
-    $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
-    // To emulate sandbox setup, let Sandbox.Home be '$home'
-    // and user name be 'debugger', so that the server can find the
-    // sandbox_conf.hdf in '$root'.
-    $sandboxHomeConfig = ' -vSandbox.Home='.$home;
-
-    $hhvm = PHP_BINARY;
-
-    if (ini_get('hhvm.repo.authoritative')) {
-      $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode$test_run_id ".
-        "--input-dir $root";
-      tlog('Building repo with command: '.$cmd);
-      tlog(exec($cmd));
-      $repoConfig .=
-        " -vRepo.Local.Path=${LOG_ROOT}_bytecode$test_run_id/hhvm.hhbc".
-        " -vRepo.Authoritative=true";
-    }
-
-    $cmd = "exec env MALLOC_CONF=junk:true TESTID={$test_run_id} " .
-      "SERVERPORT={$serverPort} $hhvm" .
-      ' --mode=server' . $serverConfig . $logFileConfig .
-      ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
-      ' --instance-id=' . $test_run_id .
-      $portConfig . $srcRootConfig .
-      $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
-      $debugPortConfig . $repoConfig . $jitConfig .
-      ' ' . $customArgs .
-      " > ${LOG_ROOT}_test_server_stdout$test_run_id.log" .
-      " 2> ${LOG_ROOT}_test_server_stderr$test_run_id.log";
-
+    $cmd = getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
+                        $customArgs, $serverId);
     tlog('Starting server with command: '.$cmd);
     $pipes = array();
     $serverProc = proc_open($cmd, array(), $pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
-    } else if (waitForServerToGetGoing($serverPort, $serverProc)) {
+    } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId)) {
       return $serverProc;
     }
     killChildren($pid);
@@ -140,23 +151,33 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
   dumpLogFilesToStdoutAndDie();
 }
 
-function waitForServerToGetGoing($serverPort, $serverProc) {
-  global $test_run_id;
+// Check if the server id is in the expected list of ids.
+function checkServerId($serverPort, $expectedIds) {
   $host = php_uname('n');
-  $r = "";
+  $r = request($host, $serverPort, "hello.php");
+  if (preg_match('/Hello, World!(.*+)/', $r, $matches)) {
+    foreach ((array)$expectedIds as $id) {
+      if ($matches[1] == $id) return true;
+    }
+    tlog('a server for a different test responded');
+    return false;
+  }
+  tlog('Server replied: '.$r);
+  return false;
+}
+
+function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null) {
+  global $test_run_id;
+  if ($serverId === null) $serverId = $test_run_id;
   for ($i = 1; $i <= 20; $i++) {
     $status = proc_get_status($serverProc);
     if ($status === false || !$status['running']) {
       break;
     }
     sleep(1);
-    $r = request($host, $serverPort, "hello.php");
-    if (preg_match('/Hello, World!(\d+)/', $r, $matches)) {
-      if ($matches[1] == $test_run_id) return true;
-      tlog('a server for a different test responded');
-      break;
+    if (checkServerId($serverPort, $serverId)) {
+      return true;
     }
-    tlog('Server replied: '.$r);
   }
 
   tlog('Server is not responding.');
@@ -191,7 +212,29 @@ function stopServer($adminPort, $serverProc) {
   @rmdir("${LOG_ROOT}_bytecode$test_run_id");
 }
 
-function http_request($host, $port, $path, $timeout = 1200) {
+// Start a new server to takeover the old one, we want to assign a new
+// server id in order to distinguish between the two servers.
+function takeoverOldServer($serverPort, $adminPort, $home, $root,
+                           $socketFile, $oldServerProc, $customArgs,
+                           $serverId) {
+  $status = proc_get_status($oldServerProc);
+  if ($status === false || !$status['running']) {
+    tlog('Old server is not running');
+    return;
+  }
+  $customArgs .= " -vServer.TakeoverFilename=${socketFile}";
+  $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
+                      $customArgs, $serverId);
+  $pipes = array();
+  $serverProc = proc_open($cmd, array(), $pipes);
+  if (!is_resource($serverProc)) {
+    tlog('Failed to start a shell process for the server');
+    return;
+  }
+  return $serverProc;
+}
+
+function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   global $test_run_id, $LOG_ROOT;
 
   @list($path, $post, $headers) = (array)$path;
@@ -201,14 +244,14 @@ function http_request($host, $port, $path, $timeout = 1200) {
   }
   if ($headers) {
     foreach ($headers as $h => $v) {
-      $s[] = "-H '$h : $v'";
+      $s[] = "-H '$h: $v'";
     }
     $headers = implode(" ", $s);
   }
   $url = "http://$host:$port/$path";
   $host_name = "hphpd.debugger.".php_uname('n');
   $cmd = "curl $post --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
-    "--silent --connect-timeout $timeout ".
+    "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");
   if (exec($cmd, $result) === null) return null;

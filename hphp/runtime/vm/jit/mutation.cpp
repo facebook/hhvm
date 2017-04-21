@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -275,7 +275,7 @@ void insertNegativeAssertTypes(IRUnit& unit, const BlockList& blocks) {
     auto const takenTy = negativeCheckType(srcTy, checkTy);
     if (takenTy < srcTy) {
       inst.taken()->prepend(
-        unit.gen(AssertType, inst.marker(), takenTy, inst.src(0))
+        unit.gen(AssertType, inst.bcctx(), takenTy, inst.src(0))
       );
     }
   }
@@ -296,7 +296,7 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
   assert(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
-    label = unit.defLabel(1, label->marker());
+    label = unit.defLabel(1, label->bcctx());
     blk->insert(blk->begin(), label);
   } else {
     for (auto d = label->numDsts(); d--; ) {

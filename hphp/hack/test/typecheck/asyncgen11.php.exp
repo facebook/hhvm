@@ -4,3 +4,5 @@ File "asyncgen11.php", line 3, characters 36-38:
 This is an int
 File "asyncgen11.php", line 4, characters 9-12:
 It is incompatible with a nullable type because "yield x" is equivalent to "yield null => x" in an async function
+File "asyncgen11.php", line 3, characters 36-38:
+Considering that this type argument is invariant with respect to AsyncGenerator

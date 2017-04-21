@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,14 +19,15 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 
 #include <folly/Conv.h>
+#include <folly/portability/Fcntl.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/conv-10.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,7 +183,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfInt64:
       append(cell->m_data.num);
       break;
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       append(cell->m_data.pstr);
       break;
@@ -190,11 +191,17 @@ void StringBuffer::append(const Variant& v) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfDouble:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       append(v.toString());
   }
 }
@@ -238,12 +245,12 @@ void StringBuffer::printf(const char *format, ...) {
     va_list v;
     va_copy(v, ap);
 
-    char *buf = (char*)req::malloc(len);
+    char *buf = (char*)req::malloc_noptrs(len);
+    SCOPE_EXIT { req::free(buf); };
     if (vsnprintf(buf, len, format, v) < len) {
       append(buf);
       printed = true;
     }
-    req::free(buf);
 
     va_end(v);
   }
@@ -320,13 +327,6 @@ void StringBuffer::growBy(int spaceRequired) {
   auto const s = m_str->bufferSlice();
   m_buffer = s.data();
   m_cap = s.size();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void StringBufferLimitException::vscan(IMarker& mark) const {
-  FatalErrorException::vscan(mark);
-  mark(m_result);
 }
 
 //////////////////////////////////////////////////////////////////////

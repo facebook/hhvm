@@ -201,6 +201,11 @@ class Instruction {
     return Mask(UnconditionalBranchFMask) == UnconditionalBranchFixed;
   }
 
+  inline bool IsUncondBranchReg() const {
+    return Mask(UnconditionalBranchToRegisterFMask) ==
+      UnconditionalBranchToRegisterFixed;
+  }
+
   inline bool IsCompareBranch() const {
     return Mask(CompareBranchFMask) == CompareBranchFixed;
   }
@@ -229,9 +234,23 @@ class Instruction {
     return Mask(LoadStoreAnyFMask) == LoadStoreAnyFixed;
   }
 
+  inline bool IsLoadLiteral() const {
+    return Mask(LoadLiteralFMask) == LoadLiteralFixed;
+  }
+
   inline bool IsMovn() const {
     return (Mask(MoveWideImmediateMask) == MOVN_x) ||
            (Mask(MoveWideImmediateMask) == MOVN_w);
+  }
+
+  inline bool IsMovz() const {
+    return (Mask(MoveWideImmediateMask) == MOVZ_x) ||
+           (Mask(MoveWideImmediateMask) == MOVZ_w);
+  }
+
+  inline bool IsMovk() const {
+    return (Mask(MoveWideImmediateMask) == MOVK_x) ||
+           (Mask(MoveWideImmediateMask) == MOVK_w);
   }
 
   // Indicate whether Rd can be the stack pointer or the zero register. This

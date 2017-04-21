@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -95,8 +95,7 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   if (UNLIKELY(getState() != STATE_SCHEDULED)) {
-    throw FatalErrorException(
-      "Invariant violation: encountered unexpected state");
+    raise_fatal_error("Invariant violation: encountered unexpected state");
   }
 
   // move us to the parent context
@@ -113,26 +112,15 @@ void c_RescheduleWaitHandle::exitContext(context_idx_t ctx_idx) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_HH_RescheduleWaitHandle("HH\\RescheduleWaitHandle"),
-  s_QUEUE_DEFAULT("QUEUE_DEFAULT"),
-  s_QUEUE_NO_PENDING_IO("QUEUE_NO_PENDING_IO");
-
+const StaticString s_HH_RescheduleWaitHandle("HH\\RescheduleWaitHandle");
 void AsioExtension::initRescheduleWaitHandle() {
   HHVM_STATIC_MALIAS(HH\\RescheduleWaitHandle, create,
                      RescheduleWaitHandle, create);
 
-  Native::registerClassConstant<KindOfInt64>(
-    s_HH_RescheduleWaitHandle.get(),
-    s_QUEUE_DEFAULT.get(),
-    AsioContext::QUEUE_DEFAULT
-  );
-
-  Native::registerClassConstant<KindOfInt64>(
-    s_HH_RescheduleWaitHandle.get(),
-    s_QUEUE_NO_PENDING_IO.get(),
-    AsioContext::QUEUE_NO_PENDING_IO
-  );
+  HHVM_RCC_INT(HH_RescheduleWaitHandle, QUEUE_DEFAULT,
+               AsioContext::QUEUE_DEFAULT);
+  HHVM_RCC_INT(HH_RescheduleWaitHandle, QUEUE_NO_PENDING_IO,
+               AsioContext::QUEUE_NO_PENDING_IO);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/range.h"
+#include "hphp/util/service-data.h"
 
 #include <map>
 #include <ostream>
@@ -178,6 +178,13 @@ int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 void stashLineTable(const Unit* unit, LineTable table);
 
+const SourceLocTable& getSourceLocTable(const Unit*);
+
+/*
+ * Sum of all Unit::m_bclen
+ */
+extern ServiceData::ExportedTimeSeries* g_hhbc_size;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -189,8 +196,8 @@ void stashLineTable(const Unit* unit, LineTable table);
  * required.
  */
 struct Unit {
-  friend class UnitEmitter;
-  friend class UnitRepoProxy;
+  friend struct UnitEmitter;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -235,8 +242,8 @@ public:
    * not mergeable, since DefFunc also uses this list as its mapping from ID's.
    */
   struct MergeInfo {
-    typedef IterRange<Func* const*> FuncRange;
-    typedef IterRange<Func**> MutableFuncRange;
+    using FuncRange = folly::Range<Func* const*>;
+    using MutableFuncRange = folly::Range<Func**>;
 
     /*
      * Allocate a new MergeInfo with `num' mergeables.
@@ -295,17 +302,15 @@ public:
   /*
    * Range types.
    */
-  typedef MergeInfo::FuncRange FuncRange;
-  typedef MergeInfo::MutableFuncRange MutableFuncRange;
-  typedef Range<std::vector<PreClassPtr>> PreClassRange;
-  typedef Range<FixedVector<TypeAlias>> TypeAliasRange;
+  using FuncRange = MergeInfo::FuncRange;
+  using MutableFuncRange = MergeInfo::MutableFuncRange;
 
   /*
    * Cache for pseudomains for this unit, keyed by Class context.
    */
-  typedef hphp_hash_map<const Class*, Func*,
-                        pointer_hash<Class>> PseudoMainCacheMap;
-
+  using PseudoMainCacheMap = hphp_hash_map<
+    const Class*, Func*, pointer_hash<Class>
+  >;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
@@ -393,6 +398,13 @@ public:
   bool getOffsetRanges(int line, OffsetRangeVec& offsets) const;
 
   /*
+   * Get next line with executable code starting from input `line'.
+   *
+   * Return -1 if not found.
+   */
+  int getNearestLineWithCode(int line) const;
+
+  /*
    * Return the Func* for the code at offset `pc'.
    *
    * Return nullptr if the offset is not in a Func body (but this should be
@@ -441,7 +453,7 @@ public:
   /*
    * Look up a scalar array by ID.
    */
-  ArrayData* lookupArrayId(Id id) const;
+  const ArrayData* lookupArrayId(Id id) const;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -457,7 +469,8 @@ public:
    * Range over all Funcs or PreClasses in the Unit.
    */
   FuncRange funcs() const;
-  PreClassRange preclasses() const;
+  folly::Range<PreClassPtr*> preclasses();
+  folly::Range<const PreClassPtr*> preclasses() const;
 
   /*
    * Get a pseudomain for the Unit with the context class `cls'.
@@ -465,7 +478,7 @@ public:
    * We clone the toplevel pseudomain for each context class and cache the
    * results in m_pseudoMainCache.
    */
-  Func* getMain(Class* cls = nullptr) const;
+  Func* getMain(Class* cls) const;
 
   /*
    * The first hoistable Func in the Unit.
@@ -482,27 +495,43 @@ public:
    */
   void renameFunc(const StringData* oldName, const StringData* newName);
 
+  /*
+   * Visit all functions and methods in this unit.
+   */
+  template<class Fn> void forEachFunc(Fn fn) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Func lookup.                                                      [static]
 
   /*
-   * Look up the defined Func in this request with name `name', or with the
-   * name mapped to the NamedEntity `ne'.
+   * Define `func' for this request by initializing its RDS handle.
+   */
+  static void defFunc(Func* func, bool debugger);
+
+  /*
+   * Look up the defined Func in this request with name `name', or with the name
+   * mapped to the NamedEntity `ne'. The `DynCall` variants are used in dynamic
+   * call contexts. They behave the same as the normal functions, but return the
+   * dynamic call wrapper for the function, if present.
    *
    * Return nullptr if the function is not yet defined in this request.
    */
   static Func* lookupFunc(const NamedEntity* ne);
   static Func* lookupFunc(const StringData* name);
+  static Func* lookupDynCallFunc(const StringData* name);
 
   /*
-   * Look up, or autoload and define, the Func in this request with name
-   * `name', or with the name mapped to the NamedEntity `ne'.
+   * Look up, or autoload and define, the Func in this request with name `name',
+   * or with the name mapped to the NamedEntity `ne'. The `DynCall` variants are
+   * used in dynamic call contexts. They behave the same as the normal
+   * functions, but return the dynamic call wrapper for the function, if
+   * present.
    *
    * @requires: NamedEntity::get(name) == ne
    */
   static Func* loadFunc(const NamedEntity* ne, const StringData* name);
   static Func* loadFunc(const StringData* name);
+  static Func* loadDynCallFunc(const StringData* name);
 
   /*
    * Load or reload `func'---i.e., bind (or rebind) it to the NamedEntity
@@ -510,6 +539,13 @@ public:
    */
   static void loadFunc(const Func* func);
 
+  /*
+   * Lookup the builtin in this request with name `name', or nullptr if none
+   * exists. This does not access RDS so it is safe to use from within the
+   * compiler. Note that does not mean imply that the name binding for the
+   * builtin is immutable. The builtin could be renamed or intercepted.
+   */
+  static Func* lookupBuiltin(const StringData* name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Class lookup.                                                     [static]
@@ -526,12 +562,21 @@ public:
   static Class* defClass(const PreClass* preClass, bool failIsFatal = true);
 
   /*
-   * Set the NamedEntity for `alias' to refer to the Class `original' in this
+   * Define a closure from preClass. Closures have unique names, so unlike
+   * defClass, this is a one time operation.
+   */
+  static Class* defClosure(const PreClass* preClass);
+
+  /*
+   * Set the NamedEntity for `alias' to refer to the class `original' in this
    * request.
    *
-   * Raises a warning if `alias' already refers to a Class in this request.
+   * Raises a warning and returns false if `alias' already refers to a
+   * Class in this request, or if original is not loaded, and autoload
+   * is false, or it can't be autoloaded. Returns true otherwise.
    */
-  static bool aliasClass(Class* original, const StringData* alias);
+  static bool aliasClass(const StringData* original, const StringData* alias,
+                         bool autoload);
 
   /*
    * Look up the Class in this request with name `name', or with the name
@@ -543,15 +588,16 @@ public:
   static Class* lookupClass(const StringData* name);
 
   /*
-   * Same as lookupClass(), except that if the Class is not defined but is
-   * unique, return it anyway.
+   * Finds a class which is guaranteed to be unique in the specified
+   * context. The class has not necessarily been loaded in the
+   * current request.
    *
-   * When jitting code before a unique class is defined, we can often still
-   * burn the Class* into the TC, since it will be defined by the time the code
-   * that needs the Class* runs (via autoload or whatnot).
+   * Return nullptr if there is no such class.
    */
-  static Class* lookupClassOrUniqueClass(const NamedEntity* ne);
-  static Class* lookupClassOrUniqueClass(const StringData* name);
+  static const Class* lookupUniqueClassInContext(const NamedEntity* ne,
+                                                 const Class* ctx);
+  static const Class* lookupUniqueClassInContext(const StringData* name,
+                                                 const Class* ctx);
 
   /*
    * Look up, or autoload and define, the Class in this request with name
@@ -634,7 +680,9 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
-  TypeAliasRange typeAliases() const;
+  folly::Range<TypeAlias*> typeAliases();
+  folly::Range<const TypeAlias*> typeAliases() const;
+
   static const TypeAliasReq* loadTypeAlias(const StringData* name);
 
   /*
@@ -770,6 +818,14 @@ public:
    */
   bool isHHFile() const;
 
+  /*
+   * Should calls from this unit use strict types? (This is always true for HH
+   * units).
+   *
+   * With strict types enabled only lossless int->float conversions are allowed
+   */
+  bool useStrictTypes() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -808,6 +864,7 @@ private:
   bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
+  bool m_useStrictTypes : 1;
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;
@@ -824,63 +881,6 @@ private:
   FixedVector<const ArrayData*> m_arrays;
   FuncTable m_funcTable;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// TODO(#4717225): Rewrite these in iterators.h.
-
-struct AllFuncs {
-  explicit AllFuncs(const Unit* unit)
-    : fr(unit->funcs())
-    , mr(0, 0)
-    , cr(unit->preclasses())
-  {
-    if (fr.empty()) skip();
-  }
-
-  bool empty() const {
-    return fr.empty() && mr.empty() && cr.empty();
-  }
-
-  const Func* front() const {
-    assert(!empty());
-    if (!fr.empty()) return fr.front();
-    assert(!mr.empty());
-    return mr.front();
-  }
-
-  const Func* popFront() {
-    auto f = !fr.empty() ? fr.popFront() :
-             !mr.empty() ? mr.popFront() : 0;
-    assert(f);
-    if (fr.empty() && mr.empty()) skip();
-    return f;
-  }
-
-private:
-  void skip() {
-    assert(fr.empty());
-    while (!cr.empty() && mr.empty()) {
-      auto c = cr.popFront();
-      mr = Unit::FuncRange(c->methods(),
-                           c->methods() + c->numMethods());
-    }
-  }
-
-  Unit::FuncRange fr;
-  Unit::FuncRange mr;
-  Unit::PreClassRange cr;
-};
-
-class AllCachedClasses {
-  NamedEntity::Map::iterator m_next, m_end;
-  void skip();
-
-public:
-  AllCachedClasses();
-  bool empty() const;
-  Class* front();
-  Class* popFront();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

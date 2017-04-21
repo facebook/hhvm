@@ -1,2 +1,3 @@
-[<static>][this]App \Tr<>
+File "instanceof_trait_this.php", line 7, characters 7-17:
+  <static> as this as Tr
 No errors

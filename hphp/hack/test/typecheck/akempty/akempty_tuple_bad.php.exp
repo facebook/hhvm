@@ -1,0 +1,6 @@
+File "akempty_tuple_bad.php", line 6, characters 10-11:
+Invalid return type (Typing[4110])
+File "akempty_tuple_bad.php", line 4, characters 17-37:
+This is a tuple
+File "akempty_tuple_bad.php", line 5, characters 8-12:
+It is incompatible with an empty array

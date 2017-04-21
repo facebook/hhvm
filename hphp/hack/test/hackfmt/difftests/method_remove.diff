@@ -1,0 +1,18 @@
+diff --git a/Point.php b/Point.php
+--- a/Point.php
++++ b/Point.php
+@@ -28,14 +28,6 @@
+         return sqrt($this->x ** 2 + $this->y ** 2);
+     }
+
+-    public function distance(Point $p)
+-    {
+-        return sqrt(
+-          ($this->x - $p->x) ** 2 +
+-          ($this->y - $p->y) ** 2
+-        );
+-    }
+-
+     public function __toString()
+     {
+         return '(' . $this->x . ',' . $this->y . ')';

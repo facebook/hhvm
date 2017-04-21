@@ -37,7 +37,5 @@ async function test(): Awaitable<void> {
   list($a, $b, $o) =
     await genva(ALoader::gen(), BLoader::gen(), OtherALoader::gen());
 
-  hh_show($a);
-  hh_show($o);
   $a->set($o);
 }

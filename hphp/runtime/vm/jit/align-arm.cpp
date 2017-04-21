@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,46 +16,69 @@
 
 #include "hphp/runtime/vm/jit/align-arm.h"
 
+#include "hphp/runtime/vm/jit/align-internal.h"
+#include "hphp/runtime/vm/jit/smashable-instr-arm.h"
+
 #include "hphp/util/data-block.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
+
+#include <folly/Bits.h>
+
+#include <utility>
 
 namespace HPHP { namespace jit { namespace arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool is_aligned(TCA frontier, Alignment alignment) {
-  return true;
+namespace {
+
+/*
+ * Targets of jmps on arm must be aligned to instruction size
+ */
+constexpr size_t kJmpTargetAlign = vixl::kInstructionSize;
+
+struct AlignImpl {
+  static DECLARE_ALIGN_TABLE(s_table);
+
+  static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
+    vixl::MacroAssembler a { cb };
+    auto const start = reinterpret_cast<char*>(cb.frontier());
+
+    switch (context) {
+      case AlignContext::Live:
+        assert(((bytes & 3) == 0) && "alignment must be multiple of 4");
+        for (; bytes > 0; bytes -= 4) {
+          a.Nop();
+        }
+        __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+        return;
+
+      case AlignContext::Dead:
+        if (bytes > 4) {
+          a.Brk();
+          bytes -= 4;
+        }
+        __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+        if (bytes > 0) pad(cb, AlignContext::Live, bytes);
+        return;
+    }
+    not_reached();
+  }
+};
+
+DEFINE_ALIGN_TABLE(AlignImpl::s_table);
+
 }
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups /* = false */) {
-  vixl::MacroAssembler a { cb };
+///////////////////////////////////////////////////////////////////////////////
 
-  switch (alignment) {
-    case Alignment::CacheLine:
-    case Alignment::CacheLineRoundUp:
-    case Alignment::JmpTarget:
-      break;
+bool is_aligned(TCA frontier, Alignment alignment) {
+  return jit::is_aligned<AlignImpl>(frontier, alignment);
+}
 
-    case Alignment::SmashCmpq:
-      break;
-
-    case Alignment::SmashMovq:
-    case Alignment::SmashJmp:
-      // Smashable movs and jmps are two instructions plus inline 64-bit data,
-      // so they need to be 8-byte aligned.
-      if (!cb.isFrontierAligned(8)) a.Nop();
-      break;
-
-    case Alignment::SmashCall:
-    case Alignment::SmashJcc:
-    case Alignment::SmashJccAndJmp:
-      // Other smashable control flow instructions are three instructions plus
-      // inline 64-bit data, so it needs to be one instruction off from 8-byte
-      // alignment.
-      if (cb.isFrontierAligned(8)) a.Nop();
-      break;
-  }
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
+  return jit::align<AlignImpl>(cb, meta, alignment, context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

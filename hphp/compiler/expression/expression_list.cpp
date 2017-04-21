@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,7 +92,9 @@ void ExpressionList::clearElements() {
 }
 
 bool ExpressionList::isRefable(bool checkError /* = false */) const {
-  if (m_kind == ListKindWrapped || m_kind == ListKindLeft) {
+  if (m_kind == ListKindWrapped ||
+      m_kind == ListKindWrappedNoWarn ||
+      m_kind == ListKindLeft) {
     // Its legal to ref a list...
     if (checkError) return true;
     // ...but we shouldnt apply ref() to it unless the corresponding
@@ -148,6 +150,20 @@ bool ExpressionList::isScalarArrayPairs() const {
   return true;
 }
 
+bool ExpressionList::isSetCollectionScalar() const {
+  assertx(getListKind() == ExpressionList::ListKindParam);
+
+  for (const auto& ape : m_exps) {
+    Variant val;
+    auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
+    if (!exp || !exp->getValue() || !exp->getValue()->getScalarValue(val)) {
+      return false;
+    }
+    if (!val.isString() && !val.isInteger()) return false;
+  }
+  return true;
+}
+
 void ExpressionList::getStrings(std::vector<std::string> &strings) {
   for (const auto& exp : m_exps) {
     auto s = dynamic_pointer_cast<ScalarExpression>(exp);
@@ -184,30 +200,20 @@ bool ExpressionList::flattenLiteralStrings(
 
 bool ExpressionList::getScalarValue(Variant &value) {
   if (m_elems_kind != ElemsKind::None) {
-    if (isScalarArrayPairs()) {
-      ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
-      for (const auto ape : m_exps) {
-        auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
-        auto name = exp->getName();
-        auto val = exp->getValue();
-        if (!name) {
-          Variant v;
-          bool ret = val->getScalarValue(v);
-          if (!ret) assert(false);
-          init.append(v);
-        } else {
-          Variant n;
-          Variant v;
-          bool ret1 = name->getScalarValue(n);
-          bool ret2 = val->getScalarValue(v);
-          if (!(ret1 && ret2)) return false;
+    ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
+    auto const result = getListScalars(
+      [&](const Variant& n, const Variant& v) {
+        if (n.isInitialized()) {
           init.setUnknownKey(n, v);
+        } else {
+          init.append(v);
         }
+        return true;
       }
-      value = init.toVariant();
-      return true;
-    }
-    return false;
+    );
+    if (!result) return false;
+    value = init.toVariant();
+    return true;
   }
   if (m_kind != ListKindParam && !hasEffect()) {
     ExpressionPtr v(listValue());
@@ -310,7 +316,9 @@ void ExpressionList::setNthKid(int n, ConstructPtr cp) {
 
 ExpressionPtr ExpressionList::listValue() const {
   if (size_t i = m_exps.size()) {
-    if (m_kind == ListKindComma || m_kind == ListKindWrapped) {
+    if (m_kind == ListKindComma ||
+        m_kind == ListKindWrapped ||
+        m_kind == ListKindWrappedNoWarn) {
       return m_exps[i-1];
     } else if (m_kind == ListKindLeft) {
       return m_exps[0];
@@ -347,14 +355,11 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
             insertElement((*el)[j], i);
           }
           changed = true;
-        } else if (e->getLocalEffects() == NoEffect) {
-          e = e->unneeded();
-          // changed already handled by unneeded
         }
       }
     }
     if (m_exps.size() == 1) {
-      m_kind = ListKindWrapped;
+      if (m_kind != ListKindWrappedNoWarn) m_kind = ListKindWrapped;
     } else if (m_kind == ListKindLeft && m_exps[0]->isScalar()) {
       ExpressionPtr e = m_exps[0];
       removeElement(0);

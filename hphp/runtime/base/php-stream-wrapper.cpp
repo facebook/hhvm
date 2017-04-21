@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/temp-file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/output-file.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
@@ -34,7 +35,12 @@ const StaticString s_temp("TEMP");
 const StaticString s_memory("MEMORY");
 
 req::ptr<File> PhpStreamWrapper::openFD(const char *sFD) {
-  if (!RuntimeOption::ClientExecutionMode()) {
+  if (is_cli_mode()) {
+    raise_warning("Direct access to file descriptors is not "
+                  "available via remote unix server execution");
+    return nullptr;
+  }
+  if (RuntimeOption::ServerExecutionMode()) {
     raise_warning("Direct access to file descriptors "
                   "is only available from command-line");
     return nullptr;
@@ -64,7 +70,7 @@ static void phpStreamApplyFilterList(const Resource& fpres,
   filter = strtok_r(filter, "|", &token);
   while (filter) {
     auto ret = HHVM_FN(stream_filter_append)(fpres, String(filter, CopyString),
-                                             rwMode, null_variant);
+                                             rwMode, uninit_variant);
     if (!ret.toBoolean()) {
       raise_warning("Unable to create filter (%s)", filter);
     }
@@ -155,6 +161,25 @@ PhpStreamWrapper::open(const String& filename, const String& mode,
       raise_warning("Unable to create temporary file");
       return nullptr;
     }
+
+    file->getData()->m_mode = [mode] {
+      if (mode.empty()) {
+        return "w+b";
+      }
+      for (auto c : mode.slice()) {
+        switch (c) {
+          case '+':
+          case 'w':
+          case 'a':
+          case 'x':
+          case 'c':
+            return "w+b";
+          default:
+            break;
+        }
+      }
+      return "rb";
+    }();
     return file;
   }
 

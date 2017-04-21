@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,7 @@
 #ifndef incl_HPHP_XDEBUG_STATUS_H_
 #define incl_HPHP_XDEBUG_STATUS_H_
 
-#include <exception>
+#include "hphp/util/exception.h"
 
 namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,10 +76,24 @@ enum class XDebugError {
 /* An exception wrapper over XDebugError. */
 struct XDebugExn : std::exception {
   explicit XDebugExn(XDebugError error) : error(error) {}
+  XDebugExn(XDebugError error,
+            const std::string& errorMsg) : error(error),
+                                           errorMsg(errorMsg) {}
 
   const char* what() const noexcept override;
 
   XDebugError error;
+  const std::string errorMsg;
+};
+
+/*
+ * Separate from XDebugExn, as this is used specifically to exit the request
+ * when a 'stop' command is issued.
+ */
+struct XDebugExitExn : Exception {
+  EXCEPTION_COMMON_IMPL(XDebugExitExn)
+
+  const char* what() const noexcept override;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,6 +105,7 @@ const char* xdebug_error_str(XDebugError);
 
 /* Helper for throwing XDebug errors. */
 void throw_exn(XDebugError);
+void throw_exn(XDebugError, const std::string&);
 
 ////////////////////////////////////////////////////////////////////////////////
 }

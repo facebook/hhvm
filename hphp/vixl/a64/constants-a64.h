@@ -52,9 +52,9 @@ V_(Rd, 4, 0, Bits)                        /* Destination register.     */      \
 V_(Rn, 9, 5, Bits)                        /* First source register.    */      \
 V_(Rm, 20, 16, Bits)                      /* Second source register.   */      \
 V_(Ra, 14, 10, Bits)                      /* Third source register.    */      \
-V_(Rt, 4, 0, Bits)                        /* Load dest / store source. */      \
-V_(Rt2, 14, 10, Bits)                     /* Load second dest /        */      \
-                                         /* store second source.      */       \
+V_(Rt, 4, 0, Bits)                        /* Load/store register.      */      \
+V_(Rt2, 14, 10, Bits)                     /* Load/store 2nd register   */      \
+V_(Rs, 20, 16, Bits)                      /* Exclusive access status.  */      \
 V_(PrefetchMode, 4, 0, Bits)                                                   \
                                                                                \
 /* Common bits */                                                              \
@@ -262,6 +262,11 @@ enum SystemRegister {
           (0x4 << CRn_offset) |
           (0x4 << CRm_offset) |
           (0x0 << SysOp2_offset)) >> ImmSystemRegister_offset,
+  FPSR = ((0x1 << SysO0_offset) |
+          (0x3 << SysOp1_offset) |
+          (0x4 << CRn_offset) |
+          (0x4 << CRm_offset) |
+          (0x1 << SysOp2_offset)) >> ImmSystemRegister_offset,
   TPIDR_EL0 = ((0x1 << SysO0_offset) |
                (0x3 << SysOp1_offset) |
                (0xd << CRn_offset) |
@@ -295,6 +300,31 @@ enum GenericInstrField {
   ThirtyTwoBits        = 0x00000000,
   FP32                 = 0x00000000,
   FP64                 = 0x00400000
+};
+
+enum NEONFormatField {
+  NEONFormatFieldMask   = 0x40C00000,
+  NEON_Q                = 0x40000000,
+  NEON_8B               = 0x00000000,
+  NEON_16B              = NEON_8B | NEON_Q,
+  NEON_4H               = 0x00400000,
+  NEON_8H               = NEON_4H | NEON_Q,
+  NEON_2S               = 0x00800000,
+  NEON_4S               = NEON_2S | NEON_Q,
+  NEON_1D               = 0x00C00000,
+  NEON_2D               = 0x00C00000 | NEON_Q
+};
+
+enum NEONLSFormatField {
+  NEONLSFormatFieldMask = 0x40000C00,
+  LS_NEON_8B            = 0x00000000,
+  LS_NEON_16B           = LS_NEON_8B | NEON_Q,
+  LS_NEON_4H            = 0x00000400,
+  LS_NEON_8H            = LS_NEON_4H | NEON_Q,
+  LS_NEON_2S            = 0x00000800,
+  LS_NEON_4S            = LS_NEON_2S | NEON_Q,
+  LS_NEON_1D            = 0x00000C00,
+  LS_NEON_2D            = LS_NEON_1D | NEON_Q
 };
 
 // PC relative addressing.
@@ -738,6 +768,45 @@ enum LoadStoreRegisterOffset {
   #undef LOAD_STORE_REGISTER_OFFSET
 };
 
+// Load/store excusively
+enum LoadStoreExclusive {
+  LoadStoreExclusiveFixed = 0x08000000,
+  LoadStoreExclusiveFMask = 0x3F000000,
+  LoadStoreExclusiveMask  = 0xFFE08000,
+  STXRB_w  = LoadStoreExclusiveFixed | 0x00000000,
+  STXRH_w  = LoadStoreExclusiveFixed | 0x40000000,
+  STXR_w   = LoadStoreExclusiveFixed | 0x80000000,
+  STXR_x   = LoadStoreExclusiveFixed | 0xC0000000,
+  LDXRB_w  = LoadStoreExclusiveFixed | 0x00400000,
+  LDXRH_w  = LoadStoreExclusiveFixed | 0x40400000,
+  LDXR_w   = LoadStoreExclusiveFixed | 0x80400000,
+  LDXR_x   = LoadStoreExclusiveFixed | 0xC0400000,
+  STXP_w   = LoadStoreExclusiveFixed | 0x80200000,
+  STXP_x   = LoadStoreExclusiveFixed | 0xC0200000,
+  LDXP_w   = LoadStoreExclusiveFixed | 0x80600000,
+  LDXP_x   = LoadStoreExclusiveFixed | 0xC0600000,
+  STLXRB_w = LoadStoreExclusiveFixed | 0x00008000,
+  STLXRH_w = LoadStoreExclusiveFixed | 0x40008000,
+  STLXR_w  = LoadStoreExclusiveFixed | 0x80008000,
+  STLXR_x  = LoadStoreExclusiveFixed | 0xC0008000,
+  LDAXRB_w = LoadStoreExclusiveFixed | 0x00408000,
+  LDAXRH_w = LoadStoreExclusiveFixed | 0x40408000,
+  LDAXR_w  = LoadStoreExclusiveFixed | 0x80408000,
+  LDAXR_x  = LoadStoreExclusiveFixed | 0xC0408000,
+  STLXP_w  = LoadStoreExclusiveFixed | 0x80208000,
+  STLXP_x  = LoadStoreExclusiveFixed | 0xC0208000,
+  LDAXP_w  = LoadStoreExclusiveFixed | 0x80608000,
+  LDAXP_x  = LoadStoreExclusiveFixed | 0xC0608000,
+  STLRB_w  = LoadStoreExclusiveFixed | 0x00808000,
+  STLRH_w  = LoadStoreExclusiveFixed | 0x40808000,
+  STLR_w   = LoadStoreExclusiveFixed | 0x80808000,
+  STLR_x   = LoadStoreExclusiveFixed | 0xC0808000,
+  LDARB_w  = LoadStoreExclusiveFixed | 0x00C08000,
+  LDARH_w  = LoadStoreExclusiveFixed | 0x40C08000,
+  LDAR_w   = LoadStoreExclusiveFixed | 0x80C08000,
+  LDAR_x   = LoadStoreExclusiveFixed | 0xC0C08000
+};
+
 // Conditional compare.
 enum ConditionalCompareOp {
   ConditionalCompareMask = 0x60000000,
@@ -934,8 +1003,10 @@ enum FPDataProcessing1SourceOp {
   FRINTN   = FRINTN_s,
   FRINTP_s = FPDataProcessing1SourceFixed | 0x00048000,
   FRINTP_d = FPDataProcessing1SourceFixed | FP64 | 0x00048000,
+  FRINTP   = FRINTP_s,
   FRINTM_s = FPDataProcessing1SourceFixed | 0x00050000,
   FRINTM_d = FPDataProcessing1SourceFixed | FP64 | 0x00050000,
+  FRINTM   = FRINTM_s,
   FRINTZ_s = FPDataProcessing1SourceFixed | 0x00058000,
   FRINTZ_d = FPDataProcessing1SourceFixed | FP64 | 0x00058000,
   FRINTZ   = FRINTZ_s,
@@ -1064,7 +1135,9 @@ enum FPIntegerConvertOp {
   FMOV_ws   = FPIntegerConvertFixed | 0x00060000,
   FMOV_sw   = FPIntegerConvertFixed | 0x00070000,
   FMOV_xd   = FMOV_ws | SixtyFourBits | FP64,
-  FMOV_dx   = FMOV_sw | SixtyFourBits | FP64
+  FMOV_dx   = FMOV_sw | SixtyFourBits | FP64,
+  FMOV_d1_x = FPIntegerConvertFixed | SixtyFourBits | 0x008F0000,
+  FMOV_x_d1 = FPIntegerConvertFixed | SixtyFourBits | 0x008E0000
 };
 
 // Conversion between fixed point and floating point.
@@ -1092,6 +1165,189 @@ enum FPFixedPointConvertOp {
   UCVTF_sx_fixed  = UCVTF_fixed | SixtyFourBits,
   UCVTF_dw_fixed  = UCVTF_fixed | FP64,
   UCVTF_dx_fixed  = UCVTF_fixed | SixtyFourBits | FP64
+};
+
+enum NEONLoadStoreMultiOp {
+  NEONLoadStoreMultiL    = 0x00400000,
+  NEONLoadStoreMulti1_1v = 0x00007000,
+  NEONLoadStoreMulti1_2v = 0x0000A000,
+  NEONLoadStoreMulti1_3v = 0x00006000,
+  NEONLoadStoreMulti1_4v = 0x00002000,
+  NEONLoadStoreMulti2    = 0x00008000,
+  NEONLoadStoreMulti3    = 0x00004000,
+  NEONLoadStoreMulti4    = 0x00000000
+};
+
+// NEON load/store multiple structures.
+enum NEONLoadStoreMultiStructOp {
+  NEONLoadStoreMultiStructFixed = 0x0C000000,
+  NEONLoadStoreMultiStructFMask = 0xBFBF0000,
+  NEONLoadStoreMultiStructMask  = 0xBFFFF000,
+  NEONLoadStoreMultiStructStore = NEONLoadStoreMultiStructFixed,
+  NEONLoadStoreMultiStructLoad  = NEONLoadStoreMultiStructFixed |
+                                  NEONLoadStoreMultiL,
+  NEON_LD1_1v = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti1_1v,
+  NEON_LD1_2v = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti1_2v,
+  NEON_LD1_3v = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti1_3v,
+  NEON_LD1_4v = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti1_4v,
+  NEON_LD2    = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti2,
+  NEON_LD3    = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti3,
+  NEON_LD4    = NEONLoadStoreMultiStructLoad | NEONLoadStoreMulti4,
+  NEON_ST1_1v = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti1_1v,
+  NEON_ST1_2v = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti1_2v,
+  NEON_ST1_3v = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti1_3v,
+  NEON_ST1_4v = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti1_4v,
+  NEON_ST2    = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti2,
+  NEON_ST3    = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti3,
+  NEON_ST4    = NEONLoadStoreMultiStructStore | NEONLoadStoreMulti4
+};
+
+// NEON load/store multiple structures with post-index addressing.
+enum NEONLoadStoreMultiStructPostIndexOp {
+  NEONLoadStoreMultiStructPostIndexFixed = 0x0C800000,
+  NEONLoadStoreMultiStructPostIndexFMask = 0xBFA00000,
+  NEONLoadStoreMultiStructPostIndexMask  = 0xBFE0F000,
+  NEONLoadStoreMultiStructPostIndex = 0x00800000,
+  NEON_LD1_1v_post = NEON_LD1_1v | NEONLoadStoreMultiStructPostIndex,
+  NEON_LD1_2v_post = NEON_LD1_2v | NEONLoadStoreMultiStructPostIndex,
+  NEON_LD1_3v_post = NEON_LD1_3v | NEONLoadStoreMultiStructPostIndex,
+  NEON_LD1_4v_post = NEON_LD1_4v | NEONLoadStoreMultiStructPostIndex,
+  NEON_LD2_post = NEON_LD2 | NEONLoadStoreMultiStructPostIndex,
+  NEON_LD3_post = NEON_LD3 | NEONLoadStoreMultiStructPostIndex,
+  NEON_LD4_post = NEON_LD4 | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST1_1v_post = NEON_ST1_1v | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST1_2v_post = NEON_ST1_2v | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST1_3v_post = NEON_ST1_3v | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST1_4v_post = NEON_ST1_4v | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST2_post = NEON_ST2 | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST3_post = NEON_ST3 | NEONLoadStoreMultiStructPostIndex,
+  NEON_ST4_post = NEON_ST4 | NEONLoadStoreMultiStructPostIndex
+};
+
+enum NEONLoadStoreSingleOp {
+  NEONLoadStoreSingle1        = 0x00000000,
+  NEONLoadStoreSingle2        = 0x00200000,
+  NEONLoadStoreSingle3        = 0x00002000,
+  NEONLoadStoreSingle4        = 0x00202000,
+  NEONLoadStoreSingleL        = 0x00400000,
+  NEONLoadStoreSingle_b       = 0x00000000,
+  NEONLoadStoreSingle_h       = 0x00004000,
+  NEONLoadStoreSingle_s       = 0x00008000,
+  NEONLoadStoreSingle_d       = 0x00008400,
+  NEONLoadStoreSingleAllLanes = 0x0000C000,
+  NEONLoadStoreSingleLenMask  = 0x00202000
+};
+
+// NEON load/store single structure.
+enum NEONLoadStoreSingleStructOp {
+  NEONLoadStoreSingleStructFixed = 0x0D000000,
+  NEONLoadStoreSingleStructFMask = 0xBF9F0000,
+  NEONLoadStoreSingleStructMask  = 0xBFFFE000,
+  NEONLoadStoreSingleStructStore = NEONLoadStoreSingleStructFixed,
+  NEONLoadStoreSingleStructLoad  = NEONLoadStoreSingleStructFixed |
+                                   NEONLoadStoreSingleL,
+  NEONLoadStoreSingleStructLoad1 = NEONLoadStoreSingle1 |
+                                   NEONLoadStoreSingleStructLoad,
+  NEONLoadStoreSingleStructLoad2 = NEONLoadStoreSingle2 |
+                                   NEONLoadStoreSingleStructLoad,
+  NEONLoadStoreSingleStructLoad3 = NEONLoadStoreSingle3 |
+                                   NEONLoadStoreSingleStructLoad,
+  NEONLoadStoreSingleStructLoad4 = NEONLoadStoreSingle4 |
+                                   NEONLoadStoreSingleStructLoad,
+  NEONLoadStoreSingleStructStore1 = NEONLoadStoreSingle1 |
+                                    NEONLoadStoreSingleStructFixed,
+  NEONLoadStoreSingleStructStore2 = NEONLoadStoreSingle2 |
+                                    NEONLoadStoreSingleStructFixed,
+  NEONLoadStoreSingleStructStore3 = NEONLoadStoreSingle3 |
+                                    NEONLoadStoreSingleStructFixed,
+  NEONLoadStoreSingleStructStore4 = NEONLoadStoreSingle4 |
+                                    NEONLoadStoreSingleStructFixed,
+  NEON_LD1_b = NEONLoadStoreSingleStructLoad1 | NEONLoadStoreSingle_b,
+  NEON_LD1_h = NEONLoadStoreSingleStructLoad1 | NEONLoadStoreSingle_h,
+  NEON_LD1_s = NEONLoadStoreSingleStructLoad1 | NEONLoadStoreSingle_s,
+  NEON_LD1_d = NEONLoadStoreSingleStructLoad1 | NEONLoadStoreSingle_d,
+  NEON_LD1R  = NEONLoadStoreSingleStructLoad1 | NEONLoadStoreSingleAllLanes,
+  NEON_ST1_b = NEONLoadStoreSingleStructStore1 | NEONLoadStoreSingle_b,
+  NEON_ST1_h = NEONLoadStoreSingleStructStore1 | NEONLoadStoreSingle_h,
+  NEON_ST1_s = NEONLoadStoreSingleStructStore1 | NEONLoadStoreSingle_s,
+  NEON_ST1_d = NEONLoadStoreSingleStructStore1 | NEONLoadStoreSingle_d,
+
+  NEON_LD2_b = NEONLoadStoreSingleStructLoad2 | NEONLoadStoreSingle_b,
+  NEON_LD2_h = NEONLoadStoreSingleStructLoad2 | NEONLoadStoreSingle_h,
+  NEON_LD2_s = NEONLoadStoreSingleStructLoad2 | NEONLoadStoreSingle_s,
+  NEON_LD2_d = NEONLoadStoreSingleStructLoad2 | NEONLoadStoreSingle_d,
+  NEON_LD2R  = NEONLoadStoreSingleStructLoad2 | NEONLoadStoreSingleAllLanes,
+  NEON_ST2_b = NEONLoadStoreSingleStructStore2 | NEONLoadStoreSingle_b,
+  NEON_ST2_h = NEONLoadStoreSingleStructStore2 | NEONLoadStoreSingle_h,
+  NEON_ST2_s = NEONLoadStoreSingleStructStore2 | NEONLoadStoreSingle_s,
+  NEON_ST2_d = NEONLoadStoreSingleStructStore2 | NEONLoadStoreSingle_d,
+
+  NEON_LD3_b = NEONLoadStoreSingleStructLoad3 | NEONLoadStoreSingle_b,
+  NEON_LD3_h = NEONLoadStoreSingleStructLoad3 | NEONLoadStoreSingle_h,
+  NEON_LD3_s = NEONLoadStoreSingleStructLoad3 | NEONLoadStoreSingle_s,
+  NEON_LD3_d = NEONLoadStoreSingleStructLoad3 | NEONLoadStoreSingle_d,
+  NEON_LD3R  = NEONLoadStoreSingleStructLoad3 | NEONLoadStoreSingleAllLanes,
+  NEON_ST3_b = NEONLoadStoreSingleStructStore3 | NEONLoadStoreSingle_b,
+  NEON_ST3_h = NEONLoadStoreSingleStructStore3 | NEONLoadStoreSingle_h,
+  NEON_ST3_s = NEONLoadStoreSingleStructStore3 | NEONLoadStoreSingle_s,
+  NEON_ST3_d = NEONLoadStoreSingleStructStore3 | NEONLoadStoreSingle_d,
+
+  NEON_LD4_b = NEONLoadStoreSingleStructLoad4 | NEONLoadStoreSingle_b,
+  NEON_LD4_h = NEONLoadStoreSingleStructLoad4 | NEONLoadStoreSingle_h,
+  NEON_LD4_s = NEONLoadStoreSingleStructLoad4 | NEONLoadStoreSingle_s,
+  NEON_LD4_d = NEONLoadStoreSingleStructLoad4 | NEONLoadStoreSingle_d,
+  NEON_LD4R  = NEONLoadStoreSingleStructLoad4 | NEONLoadStoreSingleAllLanes,
+  NEON_ST4_b = NEONLoadStoreSingleStructStore4 | NEONLoadStoreSingle_b,
+  NEON_ST4_h = NEONLoadStoreSingleStructStore4 | NEONLoadStoreSingle_h,
+  NEON_ST4_s = NEONLoadStoreSingleStructStore4 | NEONLoadStoreSingle_s,
+  NEON_ST4_d = NEONLoadStoreSingleStructStore4 | NEONLoadStoreSingle_d
+};
+
+// NEON load/store single structure with post-index addressing.
+enum NEONLoadStoreSingleStructPostIndexOp {
+  NEONLoadStoreSingleStructPostIndexFixed = 0x0D800000,
+  NEONLoadStoreSingleStructPostIndexFMask = 0xBF800000,
+  NEONLoadStoreSingleStructPostIndexMask  = 0xBFE0E000,
+  NEONLoadStoreSingleStructPostIndex = 0x00800000,
+  NEON_LD1_b_post = NEON_LD1_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD1_h_post = NEON_LD1_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD1_s_post = NEON_LD1_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD1_d_post = NEON_LD1_d | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD1R_post  = NEON_LD1R | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST1_b_post = NEON_ST1_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST1_h_post = NEON_ST1_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST1_s_post = NEON_ST1_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST1_d_post = NEON_ST1_d | NEONLoadStoreSingleStructPostIndex,
+
+  NEON_LD2_b_post = NEON_LD2_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD2_h_post = NEON_LD2_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD2_s_post = NEON_LD2_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD2_d_post = NEON_LD2_d | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD2R_post  = NEON_LD2R | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST2_b_post = NEON_ST2_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST2_h_post = NEON_ST2_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST2_s_post = NEON_ST2_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST2_d_post = NEON_ST2_d | NEONLoadStoreSingleStructPostIndex,
+
+  NEON_LD3_b_post = NEON_LD3_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD3_h_post = NEON_LD3_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD3_s_post = NEON_LD3_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD3_d_post = NEON_LD3_d | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD3R_post  = NEON_LD3R | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST3_b_post = NEON_ST3_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST3_h_post = NEON_ST3_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST3_s_post = NEON_ST3_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST3_d_post = NEON_ST3_d | NEONLoadStoreSingleStructPostIndex,
+
+  NEON_LD4_b_post = NEON_LD4_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD4_h_post = NEON_LD4_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD4_s_post = NEON_LD4_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD4_d_post = NEON_LD4_d | NEONLoadStoreSingleStructPostIndex,
+  NEON_LD4R_post  = NEON_LD4R | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST4_b_post = NEON_ST4_b | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST4_h_post = NEON_ST4_h | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST4_s_post = NEON_ST4_s | NEONLoadStoreSingleStructPostIndex,
+  NEON_ST4_d_post = NEON_ST4_d | NEONLoadStoreSingleStructPostIndex
 };
 
 // Unimplemented and unallocated instructions. These are defined to make fixed

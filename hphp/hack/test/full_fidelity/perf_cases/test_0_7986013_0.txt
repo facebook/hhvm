@@ -1,0 +1,2 @@
+<?hh
+newtype vPgKhQbDo = bool ;

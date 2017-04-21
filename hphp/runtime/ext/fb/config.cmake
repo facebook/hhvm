@@ -3,9 +3,9 @@ HHVM_DEFINE_EXTENSION("fb"
     ext_fb.cpp
   HEADERS
     ext_fb.h
-    FBSerialize.h
-    FBSerialize-inl.h
     VariantController.h
+    FBSerialize/FBSerialize.h
+    FBSerialize/FBSerialize-inl.h
   SYSTEMLIB
     ext_fb.php
   DEPENDS

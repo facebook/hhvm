@@ -33,12 +33,14 @@ const int JSON_PARTIAL_OUTPUT_ON_ERROR = 1<<9;
 const int JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
 
 // json_decode
-const int JSON_BIGINT_AS_STRING = 1;
+const int JSON_OBJECT_AS_ARRAY = 1<<0;
+const int JSON_BIGINT_AS_STRING = 1<<1;
 
 const int JSON_FB_LOOSE = 0;
 const int JSON_FB_UNLIMITED = 0;
 const int JSON_FB_EXTRA_ESCAPES = 0;
 const int JSON_FB_COLLECTIONS = 0;
+const int JSON_FB_HACK_ARRAYS = 0;
 
 function json_encode($value, $options = 0, $depth = 512);
 function json_decode($json, $assoc = false, $depth = 512, $options = 0);

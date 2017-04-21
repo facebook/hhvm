@@ -1,2 +1,3 @@
-[<static>][this]App \C2<>
+File "new_expr_dependent.php", line 18, characters 5-15:
+  <static> as this as C2
 No errors

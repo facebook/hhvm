@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -207,7 +207,7 @@ void NameValueTable::allocate(const size_t newCapac) {
   Elm* oldTab = m_table;
   const size_t oldMask = m_tabMask;
 
-  m_table = static_cast<Elm*>(req::calloc(sizeof(Elm), newCapac));
+  m_table = req::calloc_raw_array<Elm>(newCapac);
   m_tabMask = uint32_t(newCapac - 1);
 
   if (oldTab) {

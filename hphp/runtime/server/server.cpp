@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,19 +28,18 @@ namespace HPHP {
 bool Server::StackTraceOnError = true;
 ///////////////////////////////////////////////////////////////////////////////
 
-Server::Server(const std::string &address, int port, int threadCount)
-  : m_address(address), m_port(port), m_threadCount(threadCount),
-    m_urlChecker(SatelliteServerInfo::checkMainURL),
-    m_status(RunStatus::NOT_YET_STARTED) {
+Server::Server(const std::string &address, int port)
+  : m_address(address), m_port(port),
+    m_urlChecker(SatelliteServerInfo::checkMainURL) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 ServerPtr ServerFactory::createServer(const std::string &address,
                                       uint16_t port,
-                                      int numThreads) {
-  ServerOptions options(address, port, numThreads);
-  return createServer(options);
+                                      int maxThreads,
+                                      int initThreads) {
+  return createServer(ServerOptions{address, port, maxThreads, initThreads});
 }
 
 ServerFactoryRegistry::ServerFactoryRegistry()
@@ -55,10 +54,11 @@ ServerFactoryRegistry *ServerFactoryRegistry::getInstance() {
 ServerPtr ServerFactoryRegistry::createServer(const std::string &type,
                                               const std::string &address,
                                               uint16_t port,
-                                              int numThreads) {
+                                              int maxThreads,
+                                              int initThreads) {
   auto factory = getInstance()->getFactory(type);
-  ServerOptions options(address, port, numThreads);
-  return factory->createServer(options);
+  return factory->createServer(
+    ServerOptions{address, port, maxThreads, initThreads});
 }
 
 void ServerFactoryRegistry::registerFactory(const std::string &name,

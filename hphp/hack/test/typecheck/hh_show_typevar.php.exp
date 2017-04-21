@@ -1,5 +1,9 @@
-generic Ta super <generic Tb as <App \Foo<>>>
-generic Tb as <App \Foo<>>
-generic Ta as <generic Tb super <App \Foo<>>>
-generic Tb super <App \Foo<>>
+File "hh_show_typevar.php", line 4, characters 3-13:
+  Ta
+File "hh_show_typevar.php", line 5, characters 3-13:
+  Tb
+File "hh_show_typevar.php", line 9, characters 3-13:
+  Ta
+File "hh_show_typevar.php", line 10, characters 3-13:
+  Tb
 No errors

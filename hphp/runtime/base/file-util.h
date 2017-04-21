@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,6 +82,8 @@ String canonicalize(const std::string& path);
 String canonicalize(const char* path, size_t len,
                     bool collapse_slashes = true);
 
+std::string expandUser(const std::string& path,
+                       const std::string& sysUser = "");
 /**
  * Makes sure there is ending slash by changing "path/name" to "path/name/".
  */
@@ -90,14 +92,7 @@ std::string normalizeDir(const std::string &dirname);
 /**
  * Thread-safe dirname().
  */
-std::string safe_dirname(const char *path, int len);
-std::string safe_dirname(const char *path);
-std::string safe_dirname(const std::string& path);
-
-/**
- * Helper function for safe_dirname.
- */
-size_t dirname_helper(char *path, int len);
+String dirname(const String& path);
 
 /**
  * Search for PHP or non-PHP files under a directory.
@@ -106,6 +101,22 @@ void find(std::vector<std::string> &out,
           const std::string &root, const char *path, bool php,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
+
+/**
+ * Determines if a given string is a valid path or not
+ * (ie: contains no null bytes)
+ */
+bool isValidPath(const String& path);
+
+/**
+ * Helper functions for use with FileUtil::isValidPath
+ */
+bool checkPathAndWarn(const String& path,
+                      const char* func_name,
+                      int param_pos);
+void checkPathAndError(const String& path,
+                       const char* func_name,
+                       int param_pos);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

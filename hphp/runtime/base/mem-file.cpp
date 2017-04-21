@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,7 @@ bool MemFile::open(const String& filename, const String& mode) {
       assert(RuntimeOption::EnableOnDemandUncompress);
       data = gzdecode(data, len);
       if (data == nullptr) {
-        throw FatalErrorException("cannot unzip compressed data");
+        raise_fatal_error("cannot unzip compressed data");
       }
       m_data = data;
       m_malloced = true;
@@ -173,12 +173,12 @@ bool MemFile::rewind() {
 }
 
 int64_t MemFile::writeImpl(const char *buffer, int64_t length) {
-  throw FatalErrorException((std::string("cannot write a mem stream: ") +
+  raise_fatal_error((std::string("cannot write a mem stream: ") +
                              getName()).c_str());
 }
 
 bool MemFile::flush() {
-  throw FatalErrorException((std::string("cannot flush a mem stream: ") +
+  raise_fatal_error((std::string("cannot flush a mem stream: ") +
                              getName()).c_str());
 }
 
@@ -200,7 +200,7 @@ void MemFile::unzip() {
   int len = m_len;
   char *data = gzdecode(m_data, len);
   if (data == nullptr) {
-    throw FatalErrorException((std::string("cannot unzip mem stream: ") +
+    raise_fatal_error((std::string("cannot unzip mem stream: ") +
                                getName()).c_str());
   }
   m_data = data;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,7 @@ void DSandboxInfo::set(const std::string &id) {
   m_path.clear();
   if (!id.empty()) {
     std::vector<std::string> tokens;
-    split('\t', id.c_str(), tokens);
+    folly::split('\t', id, tokens);
     if (tokens.size() == 2) {
       m_user = tokens[0];
       m_name = tokens[1];

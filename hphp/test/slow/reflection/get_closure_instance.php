@@ -29,6 +29,7 @@ class B { }
 function execute($class_name, $method_name, $instance) {
   try {
     $ref = new ReflectionMethod($class_name, $method_name);
+    $ref->setAccessible(true);
     $method = $ref->getClosure($instance);
     var_dump($method());
   } catch (Exception $e) {

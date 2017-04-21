@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,6 @@ string TCRegionString[] = {
   "hot", "main", "profile", "cold", "frozen"
 };
 
-static string helpersMapFileName("/tc_dump_helpers_addrs.txt");
 static string nmMapFileName("/hhvm.nm");
 static string tcRegionFileNames[TCRCount] = { "/tc_dump_ahot",
                                               "/tc_dump_a",
@@ -93,7 +92,7 @@ void OfflineX86Code::xedInit() {
   xed_state_init(&xed_state, XED_MACHINE_MODE_LONG_64,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
   xed_tables_init();
-  xed_syntax = getenv("HHVM_ATT_DISAS") ? XED_SYNTAX_ATT : XED_SYNTAX_INTEL;
+  xed_syntax = getenv("HHVM_INTEL_DISAS") ? XED_SYNTAX_INTEL : XED_SYNTAX_ATT;
 }
 
 
@@ -109,9 +108,14 @@ TCA OfflineX86Code::getTransJmpTargets(const TransRec *transRec,
                                     transRec->aStart, transRec->aLen,
                                     jmpTargets);
 
-  collectJmpTargets(tcRegions[TCRCold].file,
-                    tcRegions[TCRCold].baseAddr,
-                    transRec->acoldStart, transRec->acoldLen, jmpTargets);
+  // Sometimes acoldStart is the same as afrozenStart.  In these cases, don't
+  // look up the address range in the "cold" file, since it the range isn't
+  // there.
+  if (transRec->acoldStart != transRec->afrozenStart) {
+    collectJmpTargets(tcRegions[TCRCold].file,
+                      tcRegions[TCRCold].baseAddr,
+                      transRec->acoldStart, transRec->acoldLen, jmpTargets);
+  }
 
   collectJmpTargets(tcRegions[TCRFrozen].file,
                     tcRegions[TCRFrozen].baseAddr,
@@ -216,12 +220,16 @@ void OfflineX86Code::disasm(FILE* file,
 
   if (codeLen == 0) return;
 
-  if (fseek(file, codeStartAddr - fileStartAddr, SEEK_SET)) {
+  auto const offset = codeStartAddr - fileStartAddr;
+  if (fseek(file, offset, SEEK_SET)) {
     error("disasm error: seeking file");
   }
 
   size_t readLen = fread(code, codeLen, 1, file);
-  if (readLen != 1) error("disasm error: reading file");
+  if (readLen != 1) {
+    error("Failed to read {} bytes at offset {} from code file due to {}",
+          codeLen, offset, feof(file) ? "EOF" : "read error");
+  }
 
   xed_decoded_inst_t xedd;
 
@@ -236,7 +244,11 @@ void OfflineX86Code::disasm(FILE* file,
 
     // Get disassembled instruction in codeStr
     if (!xed_format_context(xed_syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr)) {
+                            MAX_INSTR_ASM_LEN, (uint64_t)ip, nullptr
+#if XED_ENCODE_ORDER_MAX_ENTRIES != 28 // Newer version of XED library
+                            , 0
+#endif
+                           )) {
       error("disasm error: xed_format_context failed");
     }
 
@@ -314,45 +326,6 @@ void OfflineX86Code::disasm(FILE* file,
 }
 
 void OfflineX86Code::loadSymbolsMap() {
-  loadSymbolsMapNm();
-  loadSymbolsMapTramp();
-}
-
-
-void OfflineX86Code::loadSymbolsMapTramp() {
-  FILE* helpersMapFile;
-
-  string helpersFileName = dumpDir + helpersMapFileName;
-  helpersMapFile = fopen(helpersFileName.c_str(), "rt");
-
-  if (!helpersMapFile) return;
-
-  TCA trampAddr, helperAddr;
-  char symName[MAX_SYM_LEN];
-  uint32_t count=0;
-
-  while (fscanf(helpersMapFile, "%p %p ", (void**)&trampAddr,
-                (void**)&helperAddr) == 2) {
-    if (fgets(symName, MAX_SYM_LEN, helpersMapFile) == nullptr) break;
-
-    // remove trailing '\n'
-    size_t symLen = strlen(symName);
-    if (symLen && symName[symLen - 1] == '\n') {
-      symName[symLen - 1] = 0;
-    }
-    string strSymName = symName;
-    addr2SymMap[trampAddr] = strSymName;
-    addr2SymMap[helperAddr] = strSymName;
-    count++;
-  }
-
-  printf("# Read %u symbols from file %s\n", count, helpersFileName.c_str());
-
-  fclose(helpersMapFile);
-}
-
-
-void OfflineX86Code::loadSymbolsMapNm() {
   FILE* nmMapFile;
 
   string nmFileName = dumpDir + nmMapFileName;

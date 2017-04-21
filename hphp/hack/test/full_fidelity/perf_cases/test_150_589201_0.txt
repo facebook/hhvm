@@ -1,0 +1,2 @@
+<?hh
+<< rLiUMaINR ( $xDdod /= ( $gKfWup <<= ( $iHLLJ ^= ( $xI /= ( $jQyQI = $hRhbL ) ) ) ) , ! ( int ) $yWGuEdU = clone ( ( ( ( 0x16 ) ) * ( ( $hCNyVpBLq ) ) ? ( ( int ) $xSRKr &= ( $iW = 0b101010 ) ) : ( ( float ) ( ( $aQ ) ? : ( 42.42 ) ) ) ) ) == ( ( ( ( $gYLxrBAi instanceof $kVVqSce ) ) ) && ( ( ( bool ) $vCzicn <<= ( $iBw %= 42.42 ) ) ) ) [ ] ) , nL ( $oVShNc = ( $bFlu = list ( $qY ) ) ) >> interface nZfPT < yEt , bBQHNV , - uHrUHdI , iEhLPpvIi as ( function ( string , this ) : this ) , - mA as int , + zFje , + mMKFjSW as arraykey , - xKDsuPMN as kYgZN > { }

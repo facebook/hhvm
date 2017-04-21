@@ -5,10 +5,6 @@ Some type constraint(s) here are violated
 File "super_constraint_5.php", line 6, characters 3-4:
 'Ty' is a constrained type
 File "super_constraint_5.php", line 8, characters 4-5:
-'Tx' is a constrained type
-File "super_constraint_5.php", line 5, characters 23-25:
-'Tx1' is a constrained type
-File "super_constraint_5.php", line 5, characters 38-40:
-This is an object of type Foo
+This is a value of generic type Tx
 File "super_constraint_5.php", line 5, characters 49-51:
 It is incompatible with a value of generic type Ty1

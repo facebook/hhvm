@@ -8,7 +8,7 @@
  *
  *)
 
-let go (results : ServerLint.result) output_json =
+let go (results : ServerLintTypes.result) output_json =
   if output_json then
     ServerLint.output_json stdout results
   else

@@ -12,24 +12,24 @@
 open Core
 open Nast
 open Typing_defs
-open Utils
 
 module Env = Typing_env
 module Phase = Typing_phase
 module Reason = Typing_reason
 module SN = Naming_special_names
-module TSubst = Typing_subst
+module Subst = Decl_subst
 module TUtils = Typing_utils
 
 let make_ts env ty =
   match Env.get_typedef env SN.FB.cTypeStructure with
-  | Some (Typing_heap.Typedef.Ok (_, tparaml, _, _, _)) ->
-      let params = List.map ~f:begin fun (_, (p, x), cstr) ->
-        Reason.Rwitness p, Tgeneric (x, cstr)
-      end tparaml in
+  | Some {td_tparams; _} ->
+      (* Typedef parameters can not have constraints *)
+      let params = List.map ~f:begin fun (_, (p, x), _) ->
+        Reason.Rwitness p, Tgeneric x
+      end td_tparams in
       let ts = fst ty, Tapply ((Pos.none, SN.FB.cTypeStructure), params) in
       let ety_env = { (Phase.env_with_self env) with
-                      substs = TSubst.make tparaml [ty] } in
+                      substs = Subst.make td_tparams [ty] } in
       Phase.localize ~ety_env env ts
   | _ ->
       (* Should not hit this because TypeStructure should always be defined *)
@@ -47,36 +47,44 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
       transform_shapemap ~nullable:true env ty shape
   | _ ->
       (* If the abstract type is unbounded we do not specialize at all *)
-      let is_unbound = match ety |> TUtils.get_base_type |> snd with
+      let is_unbound = match ety |> TUtils.get_base_type env |> snd with
         (* An enum is considered a valid bound *)
         | Tabstract (AKenum _, _) -> false
         | Tabstract (_, None) -> true
         | _ -> false in
-      if is_unbound then env, shape else
+      if is_unbound then (env, shape) else
       let is_generic =
         match snd ety with Tabstract (AKgeneric _, _) -> true | _ -> false in
-      ShapeMap.fold begin fun field field_ty (env, shape) ->
-        match field, field_ty, TUtils.get_base_type ety with
-        | Nast.SFlit (_, "nullable"), (_, Toption (fty)), _ when nullable ->
-            env, ShapeMap.add field fty shape
-        | Nast.SFlit (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->
-            env, ShapeMap.add field fty shape
-        | Nast.SFlit (_, "classname"), (_, Toption (fty)),
+      let transform_shape_field field { sft_ty; _ } (env, shape) =
+        let open Ast in
+
+        (* Accumulates the provided type for this iteration of the fold, adding
+           it to the accumulation ShapeMap for the current field. Since the
+           field must have been explicitly set, we set sft_optional to true. *)
+        let acc_field_with_type sft_ty =
+          ShapeMap.add field { sft_optional = false; sft_ty } shape in
+
+        match field, sft_ty, TUtils.get_base_type env ety with
+        | SFlit (_, "nullable"), (_, Toption (fty)), _ when nullable ->
+            env, acc_field_with_type fty
+        | SFlit (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->
+            env, acc_field_with_type fty
+        | SFlit (_, "classname"), (_, Toption (fty)),
           (_, (Tclass _ | Tabstract (AKenum _, _))) ->
-            env, ShapeMap.add field fty shape
-        | Nast.SFlit (_, "elem_types"), _, (r, Ttuple tyl) ->
-            let env, tyl = lfold make_ts env tyl in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, "param_types"), _, (r, (Tfun funty)) ->
+            env, acc_field_with_type fty
+        | SFlit (_, "elem_types"), _, (r, Ttuple tyl) ->
+            let env, tyl = List.map_env env tyl make_ts in
+            env, acc_field_with_type (r, Ttuple tyl)
+        | SFlit (_, "param_types"), _, (r, (Tfun funty)) ->
             let tyl = List.map ~f:snd funty.ft_params in
-            let env, tyl = lfold make_ts env tyl in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, "return_type"), _, (r, Tfun funty) ->
+            let env, tyl = List.map_env env tyl make_ts in
+            env, acc_field_with_type (r, Ttuple tyl)
+        | SFlit (_, "return_type"), _, (r, Tfun funty) ->
             let env, ty = make_ts env funty.ft_ret in
-            env, ShapeMap.add field (r, Ttuple [ty]) shape
-        | Nast.SFlit (_, "fields"), _, (r, Tshape (fk, fields)) ->
-            let env, fields = ShapeMap.map_env make_ts env fields in
-            env, ShapeMap.add field (r, Tshape (fk, fields)) shape
+            env, acc_field_with_type (r, Ttuple [ty])
+        | SFlit (_, "fields"), _, (r, Tshape (fk, fields)) ->
+            let env, fields = ShapeFieldMap.map_env make_ts env fields in
+            env, acc_field_with_type (r, Tshape (fk, fields))
         (* For generics we cannot specialize the generic_types field. Consider:
          *
          *  class C<T> {}
@@ -88,24 +96,24 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
          *
          * For test(TypeStructure<D>) there will not be a generic_types field
          *)
-        | Nast.SFlit (_, "generic_types"), _, _ when is_generic ->
-            env, ShapeMap.add field field_ty shape
-        | Nast.SFlit (_, "generic_types"), _, (r, Tarraykind (AKvec ty))
+        | SFlit (_, "generic_types"), _, _ when is_generic ->
+            env, acc_field_with_type sft_ty
+        | SFlit (_, "generic_types"), _, (r, Tarraykind (AKvec ty))
               when not is_generic ->
             let env, ty = make_ts env ty in
-            env, ShapeMap.add field (r, Ttuple [ty]) shape
-        | Nast.SFlit (_, "generic_types"), _,
+            env, acc_field_with_type (r, Ttuple [ty])
+        | SFlit (_, "generic_types"), _,
           (r, Tarraykind (AKmap (ty1, ty2)))
               when not is_generic ->
             let tyl = [ty1; ty2] in
-            let env, tyl = lfold make_ts env tyl in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, "generic_types"), _, (r, Tclass (_, tyl))
+            let env, tyl = List.map_env env tyl make_ts in
+            env, acc_field_with_type (r, Ttuple tyl)
+        | SFlit (_, "generic_types"), _, (r, Tclass (_, tyl))
               when List.length tyl > 0 ->
-            let env, tyl = lfold make_ts env tyl in
-            env, ShapeMap.add field (r, Ttuple tyl) shape
-        | Nast.SFlit (_, ("kind" | "name" | "alias")), _, _ ->
-            env, ShapeMap.add field field_ty shape
+            let env, tyl = List.map_env env tyl make_ts in
+            env, acc_field_with_type (r, Ttuple tyl)
+        | SFlit (_, ("kind" | "name" | "alias")), _, _ ->
+            env, acc_field_with_type sft_ty
         | _, _, _ ->
-            env, shape
-      end shape (env, ShapeMap.empty)
+            env, shape in
+      ShapeMap.fold transform_shape_field shape (env, ShapeMap.empty)

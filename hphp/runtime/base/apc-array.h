@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,9 @@
 #define incl_HPHP_APC_ARRAY_H_
 
 #include "hphp/runtime/base/apc-handle-defs.h"
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/util/atomic.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/hash.h"
@@ -34,29 +37,53 @@ struct APCArray {
   static APCHandle::Pair MakeSharedArray(ArrayData* data,
                                          APCHandleLevel level,
                                          bool unserializeObj);
+  static APCHandle::Pair MakeSharedVec(ArrayData* data,
+                                       APCHandleLevel level,
+                                       bool unserializeObj);
+  static APCHandle::Pair MakeSharedDict(ArrayData* data,
+                                        APCHandleLevel level,
+                                        bool unserializeObj);
+  static APCHandle::Pair MakeSharedKeyset(ArrayData* data,
+                                          APCHandleLevel level,
+                                          bool unserializeObj);
 
   static APCHandle* MakeUncountedArray(ArrayData* array);
+  static APCHandle* MakeUncountedVec(ArrayData* vec);
+  static APCHandle* MakeUncountedDict(ArrayData* dict);
+  static APCHandle* MakeUncountedKeyset(ArrayData* dict);
 
   static APCHandle::Pair MakeSharedEmptyArray();
-  static Variant MakeLocalArray(const APCHandle* handle);
   static void Delete(APCHandle* handle);
 
   static APCArray* fromHandle(APCHandle* handle) {
-    assert(offsetof(APCArray, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedArray ||
+           handle->kind() == APCKind::SharedPackedArray ||
+           handle->kind() == APCKind::SharedVec ||
+           handle->kind() == APCKind::SharedDict ||
+           handle->kind() == APCKind::SharedKeyset);
+    static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<APCArray*>(handle);
   }
 
   static const APCArray* fromHandle(const APCHandle* handle) {
-    assert(offsetof(APCArray, m_handle) == 0);
+    assert(handle->checkInvariants());
+    assert(handle->kind() == APCKind::SharedArray ||
+           handle->kind() == APCKind::SharedPackedArray ||
+           handle->kind() == APCKind::SharedVec ||
+           handle->kind() == APCKind::SharedDict ||
+           handle->kind() == APCKind::SharedKeyset);
+    static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
 
-  APCHandle* getHandle() {
-    return &m_handle;
-  }
-  const APCHandle* getHandle() const {
-    return &m_handle;
-  }
+  // Used when creating/destroying a local wrapper (see APCLocalArray).
+  void reference() const { m_handle.referenceNonRoot(); }
+  void unreference() const { m_handle.unreferenceNonRoot(); }
+
+  ArrayData* toLocalVec() const { return PackedArray::MakeVecFromAPC(this); }
+  ArrayData* toLocalDict() const { return MixedArray::MakeDictFromAPC(this); }
+  ArrayData* toLocalKeyset() const { return SetArray::MakeSetFromAPC(this); }
 
   //
   // Array API
@@ -99,7 +126,39 @@ struct APCArray {
     return indexOf(key);
   }
 
-  bool isPacked() const { return m_handle.isPacked(); }
+  bool isPacked() const {
+    auto const k = m_handle.kind();
+    return
+      k == APCKind::SharedPackedArray ||
+      k == APCKind::SharedVec ||
+      k == APCKind::SharedKeyset;
+  }
+
+  bool isHashed() const {
+    auto const k = m_handle.kind();
+    return
+      k == APCKind::SharedArray ||
+      k == APCKind::SharedDict;
+  }
+
+  bool isPHPArray() const {
+    auto const k = m_handle.kind();
+    return
+      k == APCKind::SharedArray ||
+      k == APCKind::SharedPackedArray;
+  }
+
+  bool isVec() const {
+    return m_handle.kind() == APCKind::SharedVec;
+  }
+
+  bool isDict() const {
+    return m_handle.kind() == APCKind::SharedDict;
+  }
+
+  bool isKeyset() const {
+    return m_handle.kind() == APCKind::SharedKeyset;
+  }
 
 private:
   struct Bucket {
@@ -111,10 +170,15 @@ private:
   };
 
 private:
-  explicit APCArray(size_t size) : m_handle(KindOfArray), m_size(size) {
-    m_handle.setPacked();
+  enum class PackedCtor {};
+  APCArray(PackedCtor, APCKind kind, size_t size)
+    : m_handle(kind, kInvalidDataType), m_size(size) {
+    assert(isPacked());
   }
-  explicit APCArray(unsigned int cap) : m_handle(KindOfArray) {
+
+  enum class HashedCtor {};
+  APCArray(HashedCtor, APCKind kind, unsigned int cap) : m_handle(kind) {
+    assert(isHashed());
     m.m_capacity_mask = cap - 1;
     m.m_num = 0;
   }
@@ -124,13 +188,16 @@ private:
   APCArray& operator=(const APCArray&) = delete;
 
 private:
-  static APCHandle::Pair MakeHash(ArrayData* data, bool unserializeObj);
-  static APCHandle::Pair MakePacked(ArrayData* data, bool unserializeObj);
+  template <typename A, typename B, typename C>
+  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, C);
+
+  static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
+                                  bool unserializeObj);
+  static APCHandle::Pair MakePacked(ArrayData* data, APCKind kind,
+                                    bool unserializeObj);
 
 private:
   friend size_t getMemSize(const APCArray*);
-
-  void setPacked() { m_handle.setPacked(); }
 
   void add(APCHandle* key, APCHandle* val);
   ssize_t indexOf(const StringData* key) const;
@@ -142,6 +209,13 @@ private:
   Bucket* buckets() const { return (Bucket*)(hash() + m.m_capacity_mask + 1); }
   /* start of the data for packed array */
   APCHandle** vals() const { return (APCHandle**)(this + 1); }
+
+  APCHandle* getHandle() {
+    return &m_handle;
+  }
+  const APCHandle* getHandle() const {
+    return &m_handle;
+  }
 
 private:
   APCHandle m_handle;

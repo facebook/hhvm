@@ -1,0 +1,35 @@
+(script(header((<))((?))((name)(end_of_line)))
+(function_declaration
+(missing)
+(function_declaration_header
+(missing)((function)(whitespace))
+((name))(missing)((lparen))
+(parameter_declaration(missing)(missing)
+(simple_type_specifier((name)(whitespace)))((variable))(missing))
+((rparen))(missing)(missing))
+(compound_statement(({)(end_of_line))
+(list(
+expression_statement(
+binary_expression(
+list_expression
+((whitespace)(list))
+((lparen))
+(list(list_item(variable((variable)))((,)(whitespace)))
+(list_item(variable((variable)))(missing)))
+((rparen)(whitespace)))
+((=)(whitespace))(variable((variable))))
+((;)(end_of_line)))
+(expression_statement(
+binary_expression(
+list_expression(
+(whitespace)(list))
+((lparen))
+(list(list_item(variable((variable)))((,)(whitespace)))
+(list_item(
+  list_expression((list))((lparen))
+  (list(list_item(variable((variable)))((,)(whitespace)))
+  (list_item(variable((variable)))(missing)))((rparen)))(missing)))
+((rparen)(whitespace)))
+((=)(whitespace))
+(variable((variable))))
+((;)(end_of_line))))((})))))

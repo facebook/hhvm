@@ -1,0 +1,69 @@
+f
+  kind: function
+  id: function::f
+  position: line 3, characters 10-10
+  span: line 3, character 1 - line 7, character 1
+  modifiers: 
+  params:
+    $foo
+      kind: param
+      position: line 4, characters 3-6
+      span: line 4, character 3 - line 4, character 6
+      modifiers: 
+
+    $bar
+      kind: param
+      position: line 5, characters 10-13
+      span: line 5, character 3 - line 5, character 22
+      modifiers: 
+
+
+g
+  kind: function
+  id: function::g
+  position: line 9, characters 10-10
+  span: line 9, character 1 - line 12, character 1
+  modifiers: 
+  params:
+    $varargs
+      kind: param
+      position: line 10, characters 6-13
+      span: line 10, character 6 - line 10, character 13
+      modifiers: 
+
+
+C
+  kind: class
+  id: type_id::C
+  position: line 14, characters 7-7
+  span: line 14, character 1 - line 21, character 1
+  modifiers: 
+
+  __construct
+    kind: method
+    id: method::C::__construct
+    position: line 16, characters 19-29
+    span: line 16, character 3 - line 18, character 6
+    modifiers: public 
+    params:
+      $x
+        kind: param
+        position: line 17, characters 19-20
+        span: line 17, character 12 - line 17, character 26
+        modifiers: public 
+
+
+  h
+    kind: method
+    id: method::C::h
+    position: line 20, characters 19-19
+    span: line 20, character 3 - line 20, character 41
+    modifiers: public 
+    params:
+      $method_param
+        kind: param
+        position: line 20, characters 25-37
+        span: line 20, character 21 - line 20, character 37
+        modifiers: 
+
+

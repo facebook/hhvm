@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,16 +21,17 @@
 #include <boost/scoped_array.hpp>
 #include <boost/thread/barrier.hpp>
 
-#include <sys/resource.h>
-#include <sys/socket.h>
+#include <folly/portability/SysMman.h>
+#include <folly/portability/SysResource.h>
+#include <folly/portability/Sockets.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
 #include <afdt.h>
 #include <grp.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <poll.h>
+#include <folly/portability/Unistd.h>
+
 #include <pwd.h>
 #include <signal.h>
 
@@ -40,8 +41,10 @@
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 
@@ -50,6 +53,7 @@ namespace HPHP {
 
 namespace {
 
+__thread LightProcess* tl_proc;
 bool s_trackProcessTimes = false;
 Mutex s_mutex;
 
@@ -112,7 +116,7 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
   int child_pipe = read ? 1 : 0;
   if (pid == 0) {
     // child
-
+    mprotect_1g_pages(PROT_READ);
     // replace stdin or stdout with the appropriate end
     // of the pipe
     if (p[child_pipe] == child_pipe) {
@@ -130,7 +134,7 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
     sigprocmask(SIG_SETMASK, &eset, nullptr);
     execl("/bin/sh", "sh", "-c", cmd, nullptr);
     Logger::Warning("Failed to exec: `%s'", cmd);
-    _exit(1);
+    _Exit(1);
   }
   // parent
 
@@ -225,7 +229,8 @@ void hardwareCounterWrapperHelper(pid_t (*func)(int), int afdt_fd) {
   arg->barrier.wait();
   if (arg->pid > 0) {
     // successfully forked, so don't join until waitpid.
-    s_pidToHCWMap[arg->pid] = std::move(arg);
+    auto& map_entry = s_pidToHCWMap[arg->pid];
+    map_entry = std::move(arg);
   } else {
     // fork failed, join now.
     pthread_join(arg->thr, nullptr);
@@ -305,6 +310,7 @@ pid_t do_proc_open_helper(int afdt_fd) {
   // now ready to start the child process
   pid_t child = fork();
   if (child == 0) {
+    mprotect_1g_pages(PROT_READ);
     for (int i = 0; i < pvals.size(); i++) {
       dup2(pkeys[i], pvals[i]);
     }
@@ -459,10 +465,10 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   afdt_error_t err = AFDT_ERROR_T_INIT;
   auto afdt_lid = afdt_listen(afdt_filename.c_str(), &err);
   if (afdt_lid < 0) {
-    Logger::Warning("Unable to afdt_listen to %s: %d %s",
-                    afdt_filename.c_str(),
-                    errno, folly::errnoStr(errno).c_str());
-    return;
+    Logger::Error("Unable to afdt_listen to %s: %d %s",
+                  afdt_filename.c_str(),
+                  errno, folly::errnoStr(errno).c_str());
+    abort();
   }
 
   SCOPE_EXIT {
@@ -482,11 +488,10 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   }
 
   if (!s_handlerInited) {
-    struct sigaction sa;
-    struct sigaction old_sa;
+    struct sigaction sa = {};
     sa.sa_sigaction = &LightProcess::SigChldHandler;
     sa.sa_flags = SA_SIGINFO | SA_NOCLDSTOP;
-    if (sigaction(SIGCHLD, &sa, &old_sa) != 0) {
+    if (sigaction(SIGCHLD, &sa, nullptr) != 0) {
       Logger::Error("Couldn't install SIGCHLD handler");
       abort();
     }
@@ -502,11 +507,15 @@ bool LightProcess::initShadow(int afdt_lid,
   pid_t child = fork();
   if (child == 0) {
     // child
+    mprotect_1g_pages(PROT_READ);
+    if (s_trackProcessTimes) {
+      HardwareCounter::RecordSubprocessTimes();
+    }
     Logger::ResetPid();
     pid_t sid = setsid();
     if (sid < 0) {
       Logger::Warning("Unable to setsid");
-      exit(HPHP_EXIT_FAILURE);
+      _Exit(HPHP_EXIT_FAILURE);
     }
     afdt_error_t err = AFDT_ERROR_T_INIT;
     auto afdt_fd = afdt_connect(afdt_filename.c_str(), &err);
@@ -514,7 +523,7 @@ bool LightProcess::initShadow(int afdt_lid,
       Logger::Warning("Unable to afdt_connect, filename %s: %d %s",
                       afdt_filename.c_str(),
                       errno, folly::errnoStr(errno).c_str());
-      exit(HPHP_EXIT_FAILURE);
+      _Exit(HPHP_EXIT_FAILURE);
     }
 
     // shadow process doesn't use g_procs
@@ -616,7 +625,7 @@ void handleException(const char* call) {
 template <class R, class F1>
 R runLight(const char* call, F1 body, R failureResult) {
   try {
-    auto proc = &g_procs[GetId()];
+    auto proc = tl_proc ? tl_proc : &g_procs[GetId()];
     Lock lock(proc->mutex());
 
     return body(proc);
@@ -663,6 +672,7 @@ void LightProcess::closeFiles() {
 }
 
 bool LightProcess::Available() {
+  if (tl_proc) return true;
   return g_procsCount > 0;
 }
 
@@ -676,6 +686,10 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
     FILE *f = LightPopenImpl(cmd, type, cwd);
     if (f) {
       return f;
+    }
+    if (tl_proc) {
+      Logger::Warning("Light-weight fork failed in remote CLI mode.");
+      return nullptr;
     }
     Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
   }
@@ -748,13 +762,16 @@ int LightProcess::pclose(FILE *f) {
     pid = it->second;
     s_popenMap.erase(it);
   } else {
-    int id = GetId();
-    Lock lock(g_procs[id].m_procMutex);
+    auto proc = [] {
+      if (tl_proc) return tl_proc;
+      return &g_procs[GetId()];
+    }();
+    Lock lock(proc->m_procMutex);
 
-    auto it = g_procs[id].m_popenMap.find(f);
-    if (it == g_procs[id].m_popenMap.end()) return -1;
+    auto it = proc->m_popenMap.find(f);
+    if (it == proc->m_popenMap.end()) return -1;
     pid = it->second;
-    g_procs[id].m_popenMap.erase(it);
+    proc->m_popenMap.erase(it);
   }
 
   fclose(f);
@@ -861,6 +878,60 @@ void LightProcess::ChangeUser(const std::string &username) {
 
 void LightProcess::SetLostChildHandler(const LostChildHandler& handler) {
   s_lostChildHandler = handler;
+}
+
+void LightProcess::setThreadLocalAfdtOverride(int fd) {
+  tl_proc = new LightProcess;
+  tl_proc->m_afdt_fd = fd;
+}
+
+void LightProcess::clearThreadLocalAfdtOverride() {
+  delete tl_proc;
+  tl_proc = nullptr;
+}
+
+int LightProcess::createCLIDelegate() {
+  int pair[2];
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair)) {
+    Logger::Warning("Unable to create a unix socket pair: %s",
+                    folly::errnoStr(errno).c_str());
+    return -1;
+  }
+
+  pid_t child = fork();
+
+  if (child < 0) {
+    Logger::Warning("Unable to fork CLI delegate process: %s",
+                    folly::errnoStr(errno).c_str());
+    close(pair[0]);
+    close(pair[1]);
+    return -1;
+  }
+
+  if (child == 0) {
+    // child
+    fclose(stdin);
+    fclose(stdout);
+    fclose(stderr);
+
+    mprotect_1g_pages(PROT_READ);
+    if (s_trackProcessTimes) {
+      HardwareCounter::RecordSubprocessTimes();
+    }
+    Logger::ResetPid();
+    pid_t sid = setsid();
+    if (sid < 0) {
+      Logger::Warning("Unable to setsid");
+      _Exit(HPHP_EXIT_FAILURE);
+    }
+
+    close(pair[0]);
+    runShadow(pair[1]);
+  }
+
+  always_assert(child > 0);
+  close(pair[1]);
+  return pair[0];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

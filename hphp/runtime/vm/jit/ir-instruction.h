@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,23 +21,37 @@
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/string-tag.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include <boost/intrusive/list.hpp>
 #include <folly/Range.h>
 
 #include <cstdint>
+#include <limits>
 #include <string>
 
 namespace HPHP { namespace jit {
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 struct Block;
 struct Edge;
 struct IRUnit;
 struct SSATmp;
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Bytecode-relative position context for an IRInstruction.
+ *
+ * These are threaded around to construct IRInstructions.
+ */
+struct BCContext {
+  BCMarker marker;
+  uint16_t iroff;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * An HHIR instruction.
@@ -57,7 +71,7 @@ struct IRInstruction {
    * than directly via the constructor.
    */
   explicit IRInstruction(Opcode op,
-                         BCMarker marker,
+                         BCContext bcctx,
                          Edge* edges = nullptr,
                          uint32_t numSrcs = 0,
                          SSATmp** srcs = nullptr);
@@ -112,7 +126,6 @@ struct IRInstruction {
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;
-  bool killsSources() const;
   bool mayRaiseError() const;
   bool isTerminal() const;
   bool hasEdges() const;
@@ -154,6 +167,11 @@ struct IRInstruction {
   bool isTransient() const;
 
   /*
+   * The index of this instruction relative to its BCMarker.
+   */
+  uint16_t iroff() const;
+
+  /*
    * Whether the instruction has one among a variadic list of opcodes.
    */
   template<typename... Args>
@@ -171,6 +189,24 @@ struct IRInstruction {
    */
   const BCMarker& marker() const;
   BCMarker& marker();
+
+  /*
+   * Get the BCContext of the instruction.
+   *
+   * This is only used for threading through to IRInstruction's constructor.
+   */
+  BCContext bcctx() const;
+
+  /*
+   * Return the current Func, or nullptr if not known (it should only
+   * be unknown in test code).
+   */
+  const Func* func() const;
+
+  /*
+   * Return the current Func's cls(), or nullptr if not known.
+   */
+  const Class* ctx() const;
 
   /*
    * Check for, get, or set the instruction's optional type parameter.
@@ -327,6 +363,11 @@ struct IRInstruction {
   bool isBlockEnd() const;
   bool isRawLoad() const;
 
+  /*
+   * Clear any outgoing edges this instruction has, if any.
+   */
+  void clearEdges();
+
 private:
   /*
    * Block/edge implementations.
@@ -334,7 +375,6 @@ private:
   Block* succ(int i) const;
   Edge* succEdge(int i);
   void setSucc(int i, Block* b);
-  void clearEdges();
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -343,20 +383,21 @@ private:
 private:
   Type m_typeParam;  // garbage unless m_hasTypeParam is true
   Opcode m_op;
+  uint16_t m_iroff{std::numeric_limits<uint16_t>::max()};
   uint16_t m_numSrcs;
   uint16_t m_numDsts : 15;
   bool m_hasTypeParam : 1;
-  // <2 byte hole>
   BCMarker m_marker;
-  const Id m_id;
-  SSATmp** m_srcs;
+  const Id m_id{kTransient};
+  // 4-byte hole
+  SSATmp** m_srcs{nullptr};
   union {
-    SSATmp* m_dest; // if HasDest
-    SSATmp** m_dsts;// if NaryDest
+    SSATmp* m_dest;  // if HasDest
+    SSATmp** m_dsts; // if NaryDest
   };
-  Block* m_block;   // what block owns this instruction
-  Edge* m_edges;    // outgoing edges, if this is a block-end
-  IRExtraData* m_extra;
+  Block* m_block{nullptr};  // what block owns this instruction
+  Edge* m_edges{nullptr};   // outgoing edges, if this is a block-end
+  IRExtraData* m_extra{nullptr};
 
 public:
   boost::intrusive::list_member_hook<> m_listNode; // for InstructionList
@@ -384,6 +425,14 @@ using InstructionList = boost::intrusive::list<IRInstruction,
 Type outputType(const IRInstruction*, int dstId = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return a type appropriate for $this given a function.
+ */
+Type thisTypeFromFunc(const Func* func);
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}
 
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"

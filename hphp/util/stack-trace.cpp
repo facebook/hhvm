@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,12 +15,13 @@
 */
 #include "hphp/util/stack-trace.h"
 
-#if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER))
-#include <execinfo.h>
-#endif
+#include <fstream>
+#include <mutex>
+#include <set>
+#include <string>
 
-#ifdef HAVE_LIBBFD
-#include <bfd.h>
+#ifndef _MSC_VER
+#include <execinfo.h>
 #endif
 
 #include <signal.h>
@@ -28,209 +29,391 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <folly/String.h>
-#include <folly/ScopeGuard.h>
 #include <folly/Conv.h>
+#include <folly/Demangle.h>
+#include <folly/FileUtil.h>
+#include <folly/Format.h>
+#include <folly/ScopeGuard.h>
+#include <folly/String.h>
 
-#include "hphp/util/process.h"
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
+#include "hphp/util/conv-10.h"
+#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/process.h"
+#include "hphp/util/thread-local.h"
+
+#if defined USE_FOLLY_SYMBOLIZER
+
+#include <folly/experimental/symbolizer/Symbolizer.h>
+
+#elif defined HAVE_LIBBFD
+
+#include <bfd.h>
+
+#endif
 
 namespace HPHP {
+////////////////////////////////////////////////////////////////////////////////
 
-#ifdef HAVE_LIBBFD
-
-///////////////////////////////////////////////////////////////////////////////
-
-std::string StackTrace::Frame::toString() const {
-  std::string out;
-  out = funcname.empty() ? "??" : funcname;
-  out += " at ";
-  out += filename.empty() ? "??" : filename;
-  out += ":";
-  out += folly::to<std::string>(lineno);
-  return out;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// signal handler
-
-///////////////////////////////////////////////////////////////////////////////
-// Types
-struct bfd_cache {
-  bfd_cache() : abfd(nullptr) {}
-  bfd *abfd;
-  asymbol **syms;
-
-  ~bfd_cache() {
-    if (abfd) {
-      bfd_cache_close(abfd);
-      bfd_free_cached_info(abfd);
-      bfd_close_all_done(abfd);
-    }
-  }
+const char* const s_defaultBlacklist[] = {
+  "_ZN4HPHP16StackTraceNoHeap",
+  "_ZN5folly10symbolizer17getStackTraceSafeEPmm",
 };
-
-static const int MaxKey = 100;
-struct NamedBfd {
-  bfd_cache bc;
-  char key [MaxKey] ;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// statics
 
 bool StackTraceBase::Enabled = true;
-static const char* s_defaultBlacklist[] = {"_ZN4HPHP16StackTraceNoHeap"};
-const char** StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
-unsigned int StackTraceBase::FunctionBlacklistCount = 1;
 
-///////////////////////////////////////////////////////////////////////////////
-// constructor and destructor
+const char* const* StackTraceBase::FunctionBlacklist = s_defaultBlacklist;
+unsigned StackTraceBase::FunctionBlacklistCount = 2;
 
-StackTraceBase::StackTraceBase() {
-  bfd_init();
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+void printStr(int fd, folly::StringPiece s) {
+  write(fd, s.begin(), s.size());
 }
 
-StackTrace::StackTrace(const StackTrace &bt) {
-  assert(this != &bt);
-
-  m_bt_pointers = bt.m_bt_pointers;
-  m_bt = bt.m_bt;
+void printInt(int fd, int64_t val) {
+  char buf[24];
+  printStr(fd, conv_10(val, buf + sizeof buf));
 }
 
-StackTrace::StackTrace(bool trace) {
-  if (trace && Enabled) {
-    create();
+void printFrameHdr(int fd, int fr) {
+  printStr(fd, "# ");
+  printInt(fd, fr);
+  printStr(fd, (fr < 10 ? "  " : " "));
+}
+
+void printPair(int fd,
+               folly::StringPiece first,
+               folly::StringPiece second) {
+  printStr(fd, first);
+  write(fd, ": ", 2);
+  printStr(fd, second);
+  write(fd, "\n", 1);
+}
+
+void printPair(int fd,
+               folly::StringPiece first,
+               int64_t second) {
+  char buf[24];
+  printPair(fd, first, conv_10(second, buf + sizeof buf));
+}
+
+/*
+ * Writes a file path to a file while folding any consecutive forward slashes.
+ */
+void write_path(int fd, folly::StringPiece path) {
+  while (!path.empty()) {
+    auto const pos = path.find('/');
+    if (pos == std::string::npos) {
+      folly::writeNoInt(fd, path.data(), path.size());
+      break;
+    }
+
+    auto const left = path.subpiece(0, pos + 1);
+    folly::writeNoInt(fd, left.data(), left.size());
+
+    auto right = path.subpiece(pos);
+    while (!right.empty() && right[0] == '/') {
+      right = right.subpiece(1);
+    }
+
+    path = right;
   }
 }
 
-StackTraceNoHeap::StackTraceNoHeap(bool trace) {
-  if (trace && Enabled) {
-    create();
-  }
-}
-
-void StackTrace::initFromHex(const char *hexEncoded) {
-  std::vector<std::string> frames;
-  folly::split(':', hexEncoded, frames);
-  for (unsigned int i = 0; i < frames.size(); i++) {
-    m_bt_pointers.push_back((void*)strtoll(frames[i].c_str(), nullptr, 16));
-  }
-}
-
-StackTrace::StackTrace(const std::string &hexEncoded) {
-  initFromHex(hexEncoded.c_str());
-}
-
-StackTrace::StackTrace(const char *hexEncoded) {
-  initFromHex(hexEncoded);
-}
-
-void StackTrace::create() {
-  void *btpointers[MAXFRAME];
-  int framecount = 0;
-  framecount = backtrace(btpointers, MAXFRAME);
-  if (framecount <= 0 || framecount > (signed) MAXFRAME) {
-    m_bt_pointers.clear();
-    return;
-  }
-  m_bt_pointers.resize(framecount);
-  for (int i = 0; i < framecount; i++) {
-    m_bt_pointers[i] = btpointers[i];
-  }
-}
-
-void StackTraceNoHeap::create() {
-  int unsigned framecount = 0;
-  framecount = backtrace(m_btpointers, MAXFRAME);
-  if (framecount <= 0 || framecount > MAXFRAME) {
-    m_btpointers_cnt = 0;
-    return;
-  }
-  m_btpointers_cnt = framecount;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// reporting functions
-
-const std::string &StackTrace::toString(int skip, int limit) const {
-  if (skip != 0 || limit != -1) m_bt.clear();
-  if (m_bt.empty()) {
-    size_t frame = 0;
-    for (auto btpi = m_bt_pointers.begin();
-         btpi != m_bt_pointers.end(); ++btpi) {
-      std::string framename = Translate(*btpi)->toString();
-      if (framename.find("StackTrace::") != std::string::npos) {
-        continue; // ignore frames in the StackTrace class
-      }
-      if (skip-- > 0) continue;
-      m_bt += "# ";
-      m_bt += folly::to<std::string>(frame);
-      if (frame < 10) m_bt += " ";
-
-      m_bt += " ";
-      m_bt += framename;
-      m_bt += "\n";
-      ++frame;
-      if ((int)frame == limit) break;
+bool isBlacklisted(const char* funcname) {
+  for (int i = 0; i < StackTraceBase::FunctionBlacklistCount; i++) {
+    auto ignoreFunc = StackTraceBase::FunctionBlacklist[i];
+    if (strncmp(funcname, ignoreFunc, strlen(ignoreFunc)) == 0) {
+      return true;
     }
   }
-  return m_bt;
+  return false;
 }
 
-void StackTraceNoHeap::printStackTrace(int fd) const {
+/*
+ * Demangle a function name and return it as a string.
+ */
+std::string demangle(const char* mangled) {
+  auto const skip_first =
+    static_cast<int>(mangled[0] == '.' || mangled[0] == '$');
 
-  int frame = 0;
-  // m_btpointers_cnt must be an upper bound on the number of filenames
-  // then *2 for tolerable hash table behavior
-  unsigned int bfds_size = m_btpointers_cnt * 2;
-  const std::unique_ptr<NamedBfd[]> bfds (new NamedBfd[bfds_size]);
-  for (unsigned int i = 0; i < bfds_size; i++) bfds.get()[i].key[0]='\0';
-  for (unsigned int i = 0; i < m_btpointers_cnt; i++) {
-    if (Translate(fd, m_btpointers[i], frame, bfds.get(), bfds_size)) {
-      frame++;
+  auto const result = folly::demangle(mangled + skip_first);
+  auto const ret = std::string(result.data(), result.size());
+  if (mangled[0] == '.') {
+    return "." + ret;
+  }
+
+  return ret;
+}
+
+/*
+ * Demangle a function name and write it to a file.
+ */
+void demangle(int fd, const char* mangled) {
+  if (mangled == nullptr || mangled[0] == '\0') {
+    write(fd, "??", 2);
+    return;
+  }
+
+  auto const skip_first =
+    static_cast<int>(mangled[0] == '.' || mangled[0] == '$');
+
+  char buf[2048];
+  auto sz = folly::demangle(mangled + skip_first, buf, sizeof buf);
+  if (sz > sizeof buf) {
+    write(fd, mangled, strlen(mangled));
+    return;
+  }
+
+  if (mangled[0] == '.') write(fd, ".", 1);
+  write(fd, buf, sz);
+}
+
+std::mutex s_perfMapCacheMutex;
+StackTrace::PerfMap s_perfMapCache;
+std::set<void*> s_perfMapNegCache;
+
+void translateFromPerfMap(StackFrameExtra* frame) {
+  std::lock_guard<std::mutex> lock(s_perfMapCacheMutex);
+
+  if (s_perfMapCache.translate(frame)) {
+    if (s_perfMapNegCache.count(frame->addr)) {
+      // A prior failed lookup of frame already triggered a rebuild.
+      return;
+    }
+    // Rebuild the cache, then search again.
+    s_perfMapCache.rebuild();
+    if (s_perfMapCache.translate(frame)) {
+      s_perfMapNegCache.insert(frame->addr);
     }
   }
-  // ~bfds[i].bc here (unlike the heap case)
 }
 
-void StackTrace::get(std::vector<std::shared_ptr<Frame>> &frames) const {
-  frames.clear();
-  for (auto btpi = m_bt_pointers.begin();
-       btpi != m_bt_pointers.end(); ++btpi) {
-    frames.push_back(Translate(*btpi));
+template <bool safe>
+int ALWAYS_INLINE get_backtrace(void** frame, int max) {
+  int ret = 0;
+#if defined USE_FOLLY_SYMBOLIZER
+  if (safe) {
+    ret = folly::symbolizer::getStackTraceSafe((uintptr_t*)frame, max);
+  } else {
+    ret = folly::symbolizer::getStackTrace((uintptr_t*)frame, max);
   }
-}
-
-std::string StackTrace::hexEncode(int minLevel /* = 0 */,
-                                  int maxLevel /* = 999 */) const {
-  std::string bts;
-  for (int i = minLevel; i < (int)m_bt_pointers.size() && i < maxLevel; i++) {
-    if (i > minLevel) bts += ':';
-    char buf[20];
-    snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)m_bt_pointers[i]);
-    bts.append(buf);
+#elif defined __GLIBC__
+  ret = backtrace(frame, max);
+#endif
+  if (ret < 0 || ret > max) {
+    return 0;
   }
-  return bts;
+  return ret;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// crash log
+}
 
-class StackTraceLog {
-public:
+struct StackTraceLog {
   hphp_string_map<std::string> data;
 
   static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
 };
 IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
 
-void StackTraceNoHeap::AddExtraLogging(const char *name,
-                                       const std::string &value) {
-  assert(name && *name);
+////////////////////////////////////////////////////////////////////////////////
+
+StackTraceBase::StackTraceBase() {
+#if !defined USE_FOLLY_SYMBOLIZER && defined HAVE_LIBBFD
+  bfd_init();
+#endif
+}
+
+StackTrace::StackTrace(bool trace) {
+  if (trace && Enabled) {
+    m_frames.resize(kMaxFrame);
+    m_frames.resize(get_backtrace<false>(m_frames.data(), kMaxFrame));
+  }
+}
+
+StackTrace::StackTrace(StackTrace::Force) {
+  m_frames.resize(kMaxFrame);
+  m_frames.resize(get_backtrace<false>(m_frames.data(), kMaxFrame));
+}
+
+StackTrace::StackTrace(void* const* ips, size_t count) {
+  m_frames.resize(count);
+  m_frames.assign(ips, ips + count);
+}
+
+StackTrace::StackTrace(folly::StringPiece hexEncoded) {
+  // Can't split into StringPieces, strtoll() expects a null terminated string.
+  std::vector<std::string> frames;
+  folly::split(':', hexEncoded, frames);
+  for (auto const& frame : frames) {
+    m_frames.push_back((void*)strtoll(frame.c_str(), nullptr, 16));
+  }
+}
+
+void StackTrace::get(std::vector<std::shared_ptr<StackFrameExtra>>&
+                     frames) const {
+  frames.clear();
+  for (auto const frame_ptr : m_frames) {
+    frames.push_back(Translate(frame_ptr));
+  }
+}
+
+std::string StackTrace::hexEncode(int minLevel /* = 0 */,
+                                  int maxLevel /* = 999 */) const {
+  std::string bts;
+  for (int i = minLevel; i < (int)m_frames.size() && i < maxLevel; i++) {
+    if (i > minLevel) bts += ':';
+    char buf[20];
+    snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)m_frames[i]);
+    bts.append(buf);
+  }
+  return bts;
+}
+
+const std::string& StackTrace::toString(int skip, int limit) const {
+  auto usable = skip == 0 && limit == -1;
+  if (!usable || !m_trace_usable) {
+    m_trace.clear();
+  }
+
+  if (!m_trace.empty()) return m_trace;
+
+  size_t frame = 0;
+  for (auto const frame_ptr : m_frames) {
+    auto const framename = Translate(frame_ptr)->toString();
+    // Ignore frames in the StackTrace class.
+    if (framename.find("StackTrace::") != std::string::npos) {
+      continue;
+    }
+    if (skip-- > 0) continue;
+    m_trace += "# ";
+    m_trace += folly::to<std::string>(frame);
+    if (frame < 10) m_trace += " ";
+
+    m_trace += " ";
+    m_trace += framename;
+    m_trace += "\n";
+    ++frame;
+    if ((int)frame == limit) break;
+  }
+
+  m_trace_usable = usable;
+  return m_trace;
+}
+
+void StackTrace::PerfMap::rebuild() {
+  m_map.clear();
+
+  char filename[64];
+  snprintf(filename, sizeof(filename), "/tmp/perf-%d.map", getpid());
+
+  std::ifstream perf_map(filename);
+  if (!perf_map) return;
+
+  std::string line;
+
+  while (!perf_map.bad() && !perf_map.eof()) {
+    if (!std::getline(perf_map, line)) continue;
+
+    uintptr_t addr;
+    uint32_t size;
+    int name_pos = 0;
+    // We compare < 2 because some implementations of sscanf() increment the
+    // assignment count for %n against the specification.
+    if (sscanf(line.c_str(), "%lx %x %n", &addr, &size, &name_pos) < 2 ||
+        name_pos < 4 /* not assigned, or not enough spaces */) {
+      continue;
+    }
+    if (name_pos >= line.size()) continue;
+
+    auto const past = addr + size;
+    auto const range = PerfMap::Range { addr, past };
+
+    m_map[range] = line.substr(name_pos);
+  }
+
+  m_built = true;
+}
+
+bool StackTrace::PerfMap::translate(StackFrameExtra* frame) const {
+  if (!m_built) {
+    const_cast<StackTrace::PerfMap*>(this)->rebuild();
+  }
+
+  // Use a key with non-zero span, because otherwise a key right at the base of
+  // a range will be treated as before the range (bad) rather than within it
+  // (good).
+  PerfMap::Range key{uintptr_t(frame->addr), uintptr_t(frame->addr)+1};
+  auto const& it = m_map.find(key);
+  if (it == m_map.end()) {
+    // Not found.
+    frame->filename = "?";
+    frame->funcname = "TC?"; // Note HHProf::HandlePProfSymbol() dependency.
+    return true;
+  }
+
+  // Found.
+  auto const& filefunc = it->second;
+  auto const colon_pos = filefunc.find("::");
+  if (colon_pos == std::string::npos) {
+    frame->funcname = filefunc;
+    return false;
+  }
+
+  auto const prefix = std::string(filefunc, 0, colon_pos);
+  if (prefix == "HHVM") {
+    // HHVM unique stubs are simply "HHVM::stubName".
+    frame->funcname = filefunc + "()";
+    return false;
+  }
+
+  if (prefix != "PHP") {
+    // We don't recognize the prefix, so don't do any munging.
+    frame->funcname = filefunc;
+    return false;
+  }
+
+  // Jitted PHP functions have the format "PHP::file.php::Full::funcName".
+  auto const file_pos = colon_pos + 2;
+  auto const file_end_pos = filefunc.find("::", file_pos);
+  if (file_end_pos == std::string::npos) {
+    // Bad PHP function descriptor.
+    frame->funcname = filefunc;
+    return false;
+  }
+  frame->filename = std::string(filefunc, file_pos, file_end_pos - file_pos);
+  frame->funcname = "PHP::" + std::string(filefunc, file_end_pos + 2) + "()";
+  return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+std::string StackFrameExtra::toString() const {
+  constexpr folly::StringPiece qq{"??"};
+  return folly::sformat(
+    "{} at {}:{}",
+    funcname.empty() ? qq : folly::StringPiece{funcname},
+    filename.empty() ? qq : folly::StringPiece{filename},
+    lineno
+  );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+StackTraceNoHeap::StackTraceNoHeap(bool trace) {
+  if (trace && Enabled) {
+    m_frame_count = get_backtrace<true>(m_frames, kMaxFrame);
+  }
+}
+
+void StackTraceNoHeap::AddExtraLogging(const char* name,
+                                       const std::string& value) {
+  assertx(name != nullptr && name[0] != '\0');
   StackTraceLog::s_logData->data[name] = value;
 }
 
@@ -238,176 +421,144 @@ void StackTraceNoHeap::ClearAllExtraLogging() {
   StackTraceLog::s_logData->data.clear();
 }
 
-void StackTraceNoHeap::log(const char *errorType, int fd, const char *buildId,
+void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
                            int debuggerCount) const {
   assert(fd >= 0);
 
-  dprintf(fd, "Host: %s\n",Process::GetHostName().c_str());
-  dprintf(fd, "ProcessID: %u\n", Process::GetProcessId());
-  dprintf(fd, "ThreadID: %" PRIx64"\n", (int64_t)Process::GetThreadId());
-  dprintf(fd, "ThreadPID: %u\n", Process::GetThreadPid());
-  dprintf(fd, "Name: %s\n", Process::GetAppName().c_str());
-  dprintf(fd, "Type: %s\n", errorType ? errorType : "(unknown error)");
-  dprintf(fd, "Runtime: hhvm\n");
-  dprintf(fd, "Version: %s\n", buildId);
-  dprintf(fd, "DebuggerCount: %d\n", debuggerCount);
-  dprintf(fd, "\n");
+  printPair(fd, "Host", Process::GetHostName().c_str());
+  printPair(fd, "ProcessID", (int64_t)getpid());
+  printPair(fd, "ThreadID", (int64_t)Process::GetThreadId());
+  printPair(fd, "ThreadPID", Process::GetThreadPid());
+  printPair(fd, "Name", Process::GetAppName().c_str());
+  printPair(fd, "Type", errorType ? errorType : "(unknown error)");
+  printPair(fd, "Runtime", "hhvm");
+  printPair(fd, "Version", buildId);
+  printPair(fd, "DebuggerCount", debuggerCount);
+  write(fd, "\n", 1);
 
   for (auto const& pair : StackTraceLog::s_logData->data) {
-    dprintf(fd, "%s: %s\n", pair.first.c_str(), pair.second.c_str());
+    printPair(fd, pair.first.c_str(), pair.second.c_str());
   }
-  dprintf(fd, "\n");
+  write(fd, "\n", 1);
 
   printStackTrace(fd);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// helpers
+////////////////////////////////////////////////////////////////////////////////
 
-struct addr2line_data {
-  asymbol **syms;
-  bfd_vma pc;
-  const char *filename;
-  const char *functionname;
-  unsigned int line;
-  bfd_boolean found;
+#if defined USE_FOLLY_SYMBOLIZER
+
+void StackTraceNoHeap::printStackTrace(int fd) const {
+  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SymbolizedFrame frames[kMaxFrame];
+  symbolizer.symbolize((uintptr_t*)m_frames, frames, m_frame_count);
+  for (int i = 0, fr = 0; i < m_frame_count; i++) {
+    auto const& frame = frames[i];
+    if (!frame.name ||
+        !frame.name[0] ||
+        isBlacklisted(frame.name)) {
+      continue;
+    }
+    printFrameHdr(fd, fr);
+    demangle(fd, frame.name);
+    if (frame.location.hasFileAndLine) {
+      char fileBuf[PATH_MAX];
+      fileBuf[0] = '\0';
+      frame.location.file.toBuffer(fileBuf, sizeof(fileBuf));
+      printStr(fd, " at ");
+      write_path(fd, fileBuf);
+      printStr(fd, ":");
+      printInt(fd, frame.location.line);
+    }
+    printStr(fd, "\n");
+    fr++;
+  }
+}
+
+std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* frame_addr,
+                                                       PerfMap* pm) {
+  folly::symbolizer::Symbolizer symbolizer;
+  folly::symbolizer::SymbolizedFrame sf;
+  symbolizer.symbolize((uintptr_t*)&frame_addr, &sf, 1);
+
+  auto frame = std::make_shared<StackFrameExtra>(frame_addr);
+  if (!sf.found ||
+      !sf.name ||
+      !sf.name[0]) {
+    // Lookup failed, so this is probably a PHP symbol.  Let's
+    // check the perf map.
+    if (pm != nullptr) {
+      pm->translate(frame.get());
+    } else {
+      translateFromPerfMap(frame.get());
+    }
+    return frame;
+  }
+
+  if (sf.location.hasFileAndLine) {
+    frame->filename = sf.location.file.toString();
+    frame->lineno = sf.location.line;
+  }
+
+  frame->funcname = sf.name ? demangle(sf.name) : "";
+
+  return frame;
+}
+
+#elif defined HAVE_LIBBFD
+
+namespace {
+////////////////////////////////////////////////////////////////////////////////
+
+constexpr int MaxKey = 100;
+
+struct BfdCache {
+  bfd* abfd{nullptr};
+  asymbol** syms{nullptr};
+
+  ~BfdCache() {
+    if (abfd == nullptr) return;
+    bfd_cache_close(abfd);
+    bfd_free_cached_info(abfd);
+    bfd_close_all_done(abfd);
+  }
 };
 
+struct NamedBfd {
+  BfdCache bc;
+  char key[MaxKey];
+};
 
-bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
-                               Dl_info &dlInfo, void* data,
-                               void *bfds, unsigned bfds_size) {
-  char sframe[32];
-  snprintf(sframe, sizeof(sframe), "%p", frame);
+using NamedBfdRange = folly::Range<NamedBfd*>;
 
-  if (!dladdr(frame, &dlInfo)) {
-    return false;
-  }
+struct Addr2lineData {
+  asymbol** syms;
+  bfd_vma pc;
+  const char* filename{nullptr};
+  const char* functionname{nullptr};
+  unsigned line{0};
+  bfd_boolean found{FALSE};
+};
 
-  // frame pointer offset in previous frame
-  f->offset = (char*)frame - (char*)dlInfo.dli_saddr;
+using BfdMap = hphp_hash_map<
+  std::string,
+  std::shared_ptr<BfdCache>,
+  string_hash
+>;
 
-  if (dlInfo.dli_fname) {
+/*
+ * We cache opened bfd file pointers that in turn cache frame pointer lookup
+ * tables.
+ */
+std::mutex s_bfdMutex;
+BfdMap s_bfds;
 
-    // 1st attempt without offsetting base address
-    if (!Addr2line(dlInfo.dli_fname, sframe, f, data, bfds, bfds_size) &&
-        dlInfo.dli_fname && strstr(dlInfo.dli_fname,".so")) {
-      // offset shared lib's base address
-      frame = (char*)frame - (size_t)dlInfo.dli_fbase;
-      snprintf(sframe, sizeof(sframe), "%p", frame);
+////////////////////////////////////////////////////////////////////////////////
 
-      // Use addr2line to get line number info.
-      Addr2line(dlInfo.dli_fname, sframe, f, data, bfds, bfds_size);
-    }
-  }
-  return true;
-}
+/* Copied and re-factored from addr2line. */
 
-std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *frame) {
-  Dl_info dlInfo;
-  addr2line_data adata;
-
-  Frame * f1 = new Frame(frame);
-  std::shared_ptr<Frame> f(f1);
-  if (!StackTraceBase::Translate(frame, f1, dlInfo, &adata)) {
-    // Lookup using dladdr() failed, so this is probably a PHP symbol.
-    // Let's check the perf map.
-    StackTrace::TranslateFromPerfMap(frame, f1);
-    return f;
-  }
-
-  if (adata.filename) {
-    f->filename = adata.filename;
-  }
-  if (adata.functionname) {
-    f->funcname = Demangle(adata.functionname);
-  }
-  if (f->filename.empty() && dlInfo.dli_fname) {
-    f->filename = dlInfo.dli_fname;
-  }
-  if (f->funcname.empty() && dlInfo.dli_sname) {
-    f->funcname = Demangle(dlInfo.dli_sname);
-  }
-
-  return f;
-}
-
-void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
-  // For now just read the whole map file every time.  If this is
-  // egregiously slow I'll build a map and cache it.
-  char perfMapName[64];
-  snprintf(perfMapName,
-           sizeof(perfMapName),
-           "/tmp/perf-%d.map", getpid());
-  FILE* perfMap = fopen(perfMapName, "r");
-  if (!perfMap) {
-    f->filename = "?";
-    f->funcname = "TC?";
-    return;
-  }
-  SCOPE_EXIT { fclose(perfMap); };
-  uintptr_t begin;
-  uint32_t size;
-  char name[256];
-  while (fscanf(perfMap, "%lx %x %255s", &begin, &size, name) == 3) {
-    uintptr_t end = begin + size;
-    if (bt >= (void*)begin && bt <= (void*)end) {
-      break;
-    }
-  }
-  std::string filefunc = std::string(name);
-  size_t endPhp = filefunc.find("::");
-  if (endPhp == std::string::npos) {
-    f->funcname = std::string(filefunc);
-    return;
-  }
-  endPhp += 2;   // Skip the ::
-  size_t endFile = filefunc.find("::", endPhp);
-  f->filename = std::string(filefunc, endPhp, endFile - endPhp);
-  f->funcname = "PHP::" + std::string(filefunc, endFile + 2) + "()";
-}
-
-bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,
-                                 void *bfds, unsigned bfds_size) {
-  // frame pointer offset in previous frame
-  Dl_info dlInfo;
-  addr2line_data adata;
-  Frame f(frame);
-  if (!StackTraceBase::Translate(frame, &f, dlInfo, &adata, bfds,
-                                 bfds_size))  {
-    return false;
-  }
-
-  const char *filename = adata.filename ? adata.filename : dlInfo.dli_fname;
-  if (!filename) filename = "??";
-  const char *funcname = adata.functionname ? adata.functionname
-                                            : dlInfo.dli_sname;
-  if (!funcname) funcname = "??";
-
-  // ignore some frames that are always present
-  for (int i = 0; i < FunctionBlacklistCount; i++) {
-    auto ignoreFunc = FunctionBlacklist[i];
-    if (strncmp(funcname, ignoreFunc, strlen(ignoreFunc)) == 0) {
-      return false;
-    }
-  }
-
-  dprintf(fd, "# %d%s ", frame_num, frame_num < 10 ? " " : "");
-  Demangle(fd, funcname);
-  dprintf(fd, " at %s:%u\n", filename, f.lineno);
-
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// copied and re-factored from addr2line
-
-static void find_address_in_section(bfd *abfd, asection *section, void *data) {
-  addr2line_data *adata = reinterpret_cast<addr2line_data*>(data);
-
-  bfd_vma vma;
-  bfd_size_type size;
-
+void find_address_in_section(bfd* abfd, asection* section, void* data) {
+  auto adata = reinterpret_cast<Addr2lineData*>(data);
   if (adata->found) {
     return;
   }
@@ -416,27 +567,28 @@ static void find_address_in_section(bfd *abfd, asection *section, void *data) {
     return;
   }
 
-  vma = bfd_get_section_vma(abfd, section);
+  auto const vma = bfd_get_section_vma(abfd, section);
   if (adata->pc < vma) {
     return;
   }
 
-  size = bfd_get_section_size(section);
+  auto const size = bfd_get_section_size(section);
   if (adata->pc >= vma + size) {
     return;
   }
 
   // libdwarf allocates its own unaligned memory so it doesn't play well with
-  // valgrind
+  // valgrind.
 #ifndef VALGRIND
-  adata->found = bfd_find_nearest_line(abfd, section, adata->syms,
-                                       adata->pc - vma, &adata->filename,
-                                       &adata->functionname, &adata->line);
+  adata->found = bfd_find_nearest_line(
+    abfd, section, adata->syms, adata->pc - vma, &adata->filename,
+    &adata->functionname, &adata->line
+  );
 #endif
 
   if (adata->found) {
-    const char *file = adata->filename;
-    unsigned int line = adata->line;
+    auto file = adata->filename;
+    auto line = adata->line;
     bfd_boolean found = TRUE;
     while (found) {
       found = bfd_find_inliner_info(abfd, &file, &adata->functionname, &line);
@@ -444,21 +596,20 @@ static void find_address_in_section(bfd *abfd, asection *section, void *data) {
   }
 }
 
-static bool slurp_symtab(asymbol ***syms, bfd *abfd) {
-  long symcount;
-  unsigned int size;
+bool slurp_symtab(asymbol*** syms, bfd* abfd) {
+  unsigned size;
 
-  symcount = bfd_read_minisymbols(abfd, FALSE, (void **)syms, &size);
+  auto symcount = bfd_read_minisymbols(abfd, FALSE, (void**)syms, &size);
   if (symcount == 0) {
-    symcount = bfd_read_minisymbols(abfd, TRUE /* dynamic */, (void **)syms,
-                                    &size);
+    symcount = bfd_read_minisymbols(
+      abfd, TRUE /* dynamic */, (void**)syms, &size
+    );
   }
   return symcount >= 0;
 }
 
-static bool translate_addresses(bfd *abfd, const char *addr,
-                                addr2line_data *adata) {
-  if (!abfd) return false;
+bool translate_addresses(bfd* abfd, const char* addr, Addr2lineData* adata) {
+  if (abfd == nullptr) return false;
   adata->pc = bfd_scan_vma(addr, nullptr, 16);
 
   adata->found = FALSE;
@@ -470,86 +621,95 @@ static bool translate_addresses(bfd *abfd, const char *addr,
   return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// We cache opened bfd file pointers that in turn cached frame pointer lookup
-// tables.
+bool fill_bfd_cache(folly::StringPiece filename, BfdCache& p) {
+  // Hard to avoid heap here!
+  auto abfd = bfd_openr(filename.begin(), nullptr);
+  if (abfd == nullptr) return true;
 
-
-typedef std::shared_ptr<bfd_cache> bfd_cache_ptr;
-typedef hphp_hash_map<std::string, bfd_cache_ptr, string_hash> bfdMap;
-static Mutex s_bfdMutex;
-static bfdMap s_bfds;
-
-static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
-  bfd *abfd = bfd_openr(filename, nullptr); // hard to avoid heap here!
-  if (!abfd) return true;
-// Some systems don't have the BFD_DECOMPRESS flag
+  // Some systems don't have the BFD_DECOMPRESS flag.
 #ifdef BFD_DECOMPRESS
   abfd->flags |= BFD_DECOMPRESS;
 #endif
-  p->abfd = nullptr;
-  p->syms = nullptr;
-  char **match;
+
+  p.abfd = nullptr;
+  p.syms = nullptr;
+  char** match;
   if (bfd_check_format(abfd, bfd_archive) ||
       !bfd_check_format_matches(abfd, bfd_object, &match) ||
-      !slurp_symtab(&p->syms, abfd)) {
+      !slurp_symtab(&p.syms, abfd)) {
     bfd_close(abfd);
     return true;
   }
-  p->abfd = abfd;
+  p.abfd = abfd;
   return false;
 }
 
-static bfd_cache_ptr get_bfd_cache(const char *filename) {
-  bfdMap::const_iterator iter = s_bfds.find(filename);
+std::shared_ptr<BfdCache> get_bfd_cache(folly::StringPiece filename) {
+  // Heterogeneous lookup is in C++14.  Otherwise we'll end up making a
+  // std::string copy.
+  auto iter = std::find_if(
+    s_bfds.begin(),
+    s_bfds.end(),
+    [&] (const BfdMap::value_type& pair) { return pair.first == filename; }
+  );
+
   if (iter != s_bfds.end()) {
     return iter->second;
   }
-  bfd_cache_ptr p(new bfd_cache());
-  if (fill_bfd_cache(filename, p.get())) {
+
+  auto p = std::make_shared<BfdCache>();
+  if (fill_bfd_cache(filename, *p)) {
     p.reset();
   }
-  s_bfds[filename] = p;
+  s_bfds[filename.str()] = p;
   return p;
 }
 
-static bfd_cache * get_bfd_cache(const char *filename, NamedBfd* bfds,
-                                   int bfds_size) {
-  int probe = hash_string(filename) % bfds_size;
-  // match on the end of filename instead of the beginning, if necessary
-  int tooLong = strlen(filename) - MaxKey;
-  if (tooLong > 0) filename += tooLong;
-  while (bfds[probe].key[0]
-         && strncmp(filename, bfds[probe].key, MaxKey) != 0) {
-     probe = probe ? probe-1 : bfds_size-1;
+BfdCache* get_bfd_cache(folly::StringPiece filename, NamedBfdRange bfds) {
+  auto probe = hash_string(filename.begin()) % bfds.size();
+
+  // Match on the end of filename instead of the beginning, if necessary.
+  if (filename.size() >= MaxKey) {
+    filename = filename.subpiece(filename.size() - MaxKey + 1);
   }
-  bfd_cache *p = &bfds[probe].bc;
+
+  while (bfds[probe].key[0] && strcmp(filename.begin(), bfds[probe].key) != 0) {
+    probe = probe ? probe-1 : bfds.size()-1;
+  }
+
+  auto p = &bfds[probe].bc;
   if (bfds[probe].key[0]) return p;
-  // accept the rare collision on keys (requires probe collision too)
-  strncpy(bfds[probe].key, filename, MaxKey);
-  fill_bfd_cache(filename, p);
+
+  assert(filename.size() < MaxKey);
+  assert(filename.begin()[filename.size()] == 0);
+  // Accept the rare collision on keys (requires probe collision too).
+  memcpy(bfds[probe].key, filename.begin(), filename.size() + 1);
+  fill_bfd_cache(filename, *p);
   return p;
 }
 
-bool StackTraceBase::Addr2line(const char *filename, const char *address,
-                           Frame *frame, void *adata,
-                           void *bfds, unsigned bfds_size) {
-  Lock lock(s_bfdMutex);
-  addr2line_data *data = reinterpret_cast<addr2line_data*>(adata);
+/*
+ * Run addr2line to translate a function pointer into function name and line
+ * number.
+ */
+bool addr2line(folly::StringPiece filename, StackFrame* frame,
+               Addr2lineData* data, NamedBfdRange bfds) {
+  char address[32];
+  snprintf(address, sizeof(address), "%p", frame->addr);
+
+  std::lock_guard<std::mutex> lock(s_bfdMutex);
   data->filename = nullptr;
   data->functionname = nullptr;
   data->line = 0;
   bool ret;
 
-  if (!bfds) {
-    bfd_cache_ptr p = get_bfd_cache(filename);
-    if (!p) return false;
+  if (bfds.empty()) {
+    auto p = get_bfd_cache(filename);
     data->syms = p->syms;
     ret = translate_addresses(p->abfd, address, data);
   } else {
-    // don't let bfd_cache_ptr malloc behind the scenes in this case
-    bfd_cache *q = get_bfd_cache(filename, (NamedBfd*)bfds, bfds_size);
-    if (!q) return false;
+    // Don't let shared_ptr malloc behind the scenes in this case.
+    auto q = get_bfd_cache(filename, bfds);
     data->syms = q->syms;
     ret = translate_addresses(q->abfd, address, data);
   }
@@ -560,127 +720,159 @@ bool StackTraceBase::Addr2line(const char *filename, const char *address,
   return ret;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// copied and re-factored from demangle/c++filt
-
-#define DMGL_PARAMS   (1 << 0)  /* Include function args */
-#define DMGL_ANSI     (1 << 1)  /* Include const, volatile, etc */
-#define DMGL_VERBOSE  (1 << 3)  /* Include implementation details. */
-
-extern "C" {
-  extern char *cplus_demangle (const char *mangled, int options);
-}
-
-std::string StackTrace::Demangle(const char *mangled) {
-  assert(mangled);
-  if (!mangled || !*mangled) {
-    return "";
+/*
+ * Translate a frame pointer to file name and line number pair.
+ */
+bool translate(StackFrame* frame, Dl_info& dlInfo, Addr2lineData* data,
+               NamedBfdRange bfds = NamedBfdRange()) {
+  if (!dladdr(frame->addr, &dlInfo)) {
+    return false;
   }
 
-  size_t skip_first = 0;
-  if (mangled[0] == '.' || mangled[0] == '$') ++skip_first;
-  //if (mangled[skip_first] == '_') ++skip_first;
+  // Frame pointer offset in previous frame.
+  frame->offset = (char*)frame->addr - (char*)dlInfo.dli_saddr;
 
-  char *result = cplus_demangle(mangled + skip_first, DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
-  if (result == nullptr) return mangled;
+  if (dlInfo.dli_fname) {
+    // First attempt without offsetting base address.
+    if (!addr2line(dlInfo.dli_fname, frame, data, bfds) &&
+        dlInfo.dli_fname && strstr(dlInfo.dli_fname, ".so")) {
+      // Offset shared lib's base address.
 
-  std::string ret;
-  if (mangled[0] == '.') ret += '.';
-  ret += result;
-  free (result);
-  return ret;
-}
+      frame->addr = (char*)frame->addr - (size_t)dlInfo.dli_fbase;
 
-void StackTraceNoHeap::Demangle(int fd, const char *mangled) {
-  assert(mangled);
-  if (!mangled || !*mangled) {
-    dprintf(fd, "??");
-    return ;
+      // Use addr2line to get line number info.
+      addr2line(dlInfo.dli_fname, frame, data, bfds);
+    }
   }
-
-  size_t skip_first = 0;
-  if (mangled[0] == '.' || mangled[0] == '$') ++skip_first;
-  //if (mangled[skip_first] == '_') ++skip_first;
-
-  char *result = cplus_demangle(mangled + skip_first,
-                                DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
-  if (result == nullptr) {
-    dprintf(fd, "%s", mangled);
-    return;
-  }
-  dprintf(fd, "%s%s", mangled[0]=='.' ? "." : "", result);
-  return ;
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#else // HAVE_LIBBFD
+/*
+ * Variant of translate() used by StackTraceNoHeap.
+ */
+bool translate(int fd, void* frame_addr, int frame_num, NamedBfdRange bfds) {
+  // Frame pointer offset in previous frame.
+  Dl_info dlInfo;
+  Addr2lineData adata;
+  StackFrame frame(frame_addr);
+  if (!translate(&frame, dlInfo, &adata, bfds)) {
+    return false;
+  }
 
-// Basically everything in here requires libbfd. So, stub city it is.
+  auto filename = adata.filename ? adata.filename : dlInfo.dli_fname;
+  if (filename == nullptr) filename = "??";
+  auto funcname = adata.functionname ? adata.functionname : dlInfo.dli_sname;
+  if (funcname == nullptr) funcname = "??";
 
-std::string StackTraceBase::Frame::toString() const {
-  return "";
+  // Ignore some frames that are always present.
+  if (isBlacklisted(funcname)) return false;
+
+  printFrameHdr(fd, frame_num);
+  demangle(fd, funcname);
+  printStr(fd, " at ");
+  write_path(fd, filename);
+  printStr(fd, ":");
+  printInt(fd, frame.lineno);
+  printStr(fd, "\n");
+
+  return true;
 }
 
-bool StackTraceBase::Enabled = false;
-const char** StackTraceBase::FunctionBlacklist = {};
-unsigned int StackTraceBase::FunctionBlacklistCount = 0;
-
-StackTraceBase::StackTraceBase() {
+////////////////////////////////////////////////////////////////////////////////
 }
 
-std::string StackTrace::Frame::toString() const {
-  return "";
+std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* frame_addr,
+                                                       PerfMap* pm) {
+  Dl_info dlInfo;
+  Addr2lineData adata;
+
+  auto frame = std::make_shared<StackFrameExtra>(frame_addr);
+  if (!translate(frame.get(), dlInfo, &adata)) {
+    // Lookup using dladdr() failed, so this is probably a PHP symbol.  Let's
+    // check the perf map.
+    if (pm != nullptr) {
+      pm->translate(frame.get());
+    } else {
+      translateFromPerfMap(frame.get());
+    }
+    return frame;
+  }
+
+  if (adata.filename) {
+    frame->filename = adata.filename;
+  }
+  if (adata.functionname) {
+    frame->funcname = demangle(adata.functionname);
+  }
+  if (frame->filename.empty() && dlInfo.dli_fname) {
+    frame->filename = dlInfo.dli_fname;
+  }
+  if (frame->funcname.empty() && dlInfo.dli_sname) {
+    frame->funcname = demangle(dlInfo.dli_sname);
+  }
+
+  return frame;
 }
 
-StackTrace::StackTrace(bool trace) {
+void StackTraceNoHeap::printStackTrace(int fd) const {
+  // m_frame_count must be an upper bound on the number of filenames then *2 for
+  // tolerable hash table behavior.
+  auto const size = m_frame_count * 2;
+
+  // Using the heap in "NoHeap" is bad but we do it anyway.
+  const std::unique_ptr<NamedBfd[]> bfds(new NamedBfd[size]);
+  for (unsigned i = 0; i < size; i++) {
+    bfds.get()[i].key[0] = '\0';
+  }
+
+  int frame = 0;
+  for (unsigned i = 0; i < m_frame_count; i++) {
+    auto range = NamedBfdRange(bfds.get(), size);
+    if (translate(fd, m_frames[i], frame, range)) {
+      frame++;
+    }
+  }
+  // ~bfds[i].bc here (unlike the heap case).
 }
 
-std::shared_ptr<StackTrace::Frame> StackTrace::Translate(void *bt) {
-  return std::shared_ptr<StackTrace::Frame>(new Frame(bt));
+////////////////////////////////////////////////////////////////////////////////
+
+#else // No libbfd or folly::Symbolizer
+
+namespace {
+
+void printHex(int fd, uint64_t val) {
+  char buf[16];
+  auto ptr = buf + sizeof buf;
+
+  while (ptr > buf) {
+    auto ch = val & 0xf;
+    *--ptr = ch + (ch >= 10 ? 'a' - 10 : '0');
+    val >>= 4;
+  }
+
+  printStr(fd, folly::StringPiece(buf, sizeof buf));
 }
 
-void StackTrace::TranslateFromPerfMap(void* bt, Frame* f) {
 }
 
-std::string Demangle(const char *mangled) {
-  return "";
+std::shared_ptr<StackFrameExtra> StackTrace::Translate(void* bt, PerfMap* pm) {
+  return std::make_shared<StackFrameExtra>(bt);
 }
 
-StackTrace::StackTrace(const StackTrace &bt) {
+void StackTraceNoHeap::printStackTrace(int fd) const {
+  for (int i = 0; i < m_frame_count; i++) {
+    printStr(fd, "# ");
+    printInt(fd, i);
+    printStr(fd, (i < 10 ? "  " : " "));
+    printHex(fd, (uintptr_t)m_frames[i]);
+    printStr(fd, "\n");
+  }
 }
 
-StackTrace::StackTrace(const std::string &hexEncoded) {
-}
+#endif
 
-StackTrace::StackTrace(const char *hexEncoded) {
-}
-
-const std::string &StackTrace::toString(int skip, int limit) const {
-  return m_bt;
-}
-
-void StackTrace::get(std::vector<std::shared_ptr<Frame>> &frames) const {
-}
-
-std::string StackTrace::hexEncode(int minLevel, int maxLevel) const {
-  return "";
-}
-
-StackTraceNoHeap::StackTraceNoHeap(bool trace) {
-}
-
-void StackTraceNoHeap::log(const char *errorType, int fd, const char *buildId,
-    int debuggerCount) const {
-}
-
-void StackTraceNoHeap::AddExtraLogging(const char *name,
-    const std::string &value) {
-}
-
-void StackTraceNoHeap::ClearAllExtraLogging() {
-}
-
-#endif // HAVE_LIBBFD
-
+////////////////////////////////////////////////////////////////////////////////
 }

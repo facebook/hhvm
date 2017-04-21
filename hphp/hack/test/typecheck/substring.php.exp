@@ -1,2 +1,3 @@
-option([1]intersect(option(tvar_1)))
+File "substring.php", line 14, characters 3-19:
+  ?^(^?^[unresolved])
 No errors

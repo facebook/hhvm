@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
 #include "hphp/compiler/package.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -26,6 +24,8 @@
 #include <utility>
 #include <vector>
 #include <folly/String.h>
+#include <folly/portability/Dirent.h>
+#include <folly/portability/Unistd.h>
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/symbol_table.h"
@@ -39,6 +39,9 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/zend/zend-string.h"
 
 using namespace HPHP;
 using std::set;
@@ -49,7 +52,7 @@ Package::Package(const char *root, bool bShortTags /* = true */,
                  bool bAspTags /* = false */)
   : m_files(4000), m_dispatcher(0), m_lineCount(0), m_charCount(0) {
   m_root = FileUtil::normalizeDir(root);
-  m_ar = AnalysisResultPtr(new AnalysisResult());
+  m_ar = std::make_shared<AnalysisResult>();
   m_fileCache = std::make_shared<FileCache>();
 }
 
@@ -125,17 +128,6 @@ void Package::addPHPDirectory(const char *path, bool force) {
   }
 }
 
-void Package::getFiles(std::vector<std::string> &files) const {
-  assert(m_filesToParse.empty());
-
-  files.clear();
-  files.reserve(m_files.size());
-  for (unsigned int i = 0; i < m_files.size(); i++) {
-    const char *fileName = m_files.at(i);
-    files.push_back(fileName);
-  }
-}
-
 std::shared_ptr<FileCache> Package::getFileCache() {
   for (auto iter = m_directories.begin();
        iter != m_directories.end(); ++iter) {
@@ -193,9 +185,9 @@ std::shared_ptr<FileCache> Package::getFileCache() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ParserWorker :
-    public JobQueueWorker<std::pair<const char *,bool>, Package*, true, true> {
-public:
+struct ParserWorker
+  : JobQueueWorker<std::pair<const char *,bool>, Package*, true, true>
+{
   bool m_ret;
   ParserWorker() : m_ret(true) {}
   void doJob(JobType job) override {
@@ -243,6 +235,9 @@ bool Package::parse(bool check) {
     return true;
   }
 
+  LitstrTable::get().setWriting();
+  SCOPE_EXIT { LitstrTable::get().setReading(); };
+
   unsigned int threadCount = Option::ParserThreadCount;
   if (threadCount > m_filesToParse.size()) {
     threadCount = m_filesToParse.size();
@@ -250,7 +245,7 @@ bool Package::parse(bool check) {
   if (threadCount <= 0) threadCount = 1;
 
   JobQueueDispatcher<ParserWorker>
-    dispatcher(threadCount, true, 0, false, this);
+    dispatcher(threadCount, 0, false, this);
 
   m_dispatcher = &dispatcher;
 
@@ -300,6 +295,25 @@ bool Package::parseImpl(const char *fileName) {
   if ((sb.st_mode & S_IFMT) == S_IFDIR) {
     Logger::Error("Unable to parse directory: %s", fullPath.c_str());
     return false;
+  }
+
+  if (RuntimeOption::EvalAllowHhas) {
+    if (const char* dot = strrchr(fileName, '.')) {
+      if (!strcmp(dot + 1, "hhas")) {
+        std::ifstream s(fileName);
+        std::string content {
+          std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
+        };
+        MD5 md5{string_md5(content)};
+
+        std::unique_ptr<UnitEmitter> ue{
+          assemble_string(content.data(), content.size(), fileName, md5)
+        };
+        Lock lock(m_ar->getMutex());
+        m_ar->addHhasFile(std::move(ue));
+        return true;
+      }
+    }
   }
 
   int lines = 0;

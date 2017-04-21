@@ -19,6 +19,7 @@ namespace {
     echo "reflection:\n";
     $rc = (new \ReflectionClass("Foo\\Derived"))->getMethod('set');
     var_dump($rc->getParameters()[0]->getDefaultValue());
+    var_dump($rc->getParameters()[0]->getDefaultValueText());
     var_dump($rc->getParameters()[0]->getDefaultValueConstantName());
     echo "call:\n";
     (new Foo\Derived())->set();

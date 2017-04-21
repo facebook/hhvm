@@ -11,5 +11,7 @@ $gaussian = array(
 imageconvolution($image, $gaussian, 16, 0);
 // Rewrites the text for comparison
 imagestring($image, 5, 10, 18, 'Gaussian Blur Text', 0x00ff00);
-header('Content-Type: image/png');
+ob_start();
 imagepng($image, null, 9);
+$md5 = md5(ob_get_clean());
+echo "md5: $md5\n";

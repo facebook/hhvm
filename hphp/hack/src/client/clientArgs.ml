@@ -13,40 +13,37 @@ open ClientCommand
 open ClientEnv
 open Utils
 
-let rec guess_root config start recursion_limit : Path.t option =
-  if start = Path.parent start then None (* Reach fs root, nothing to do. *)
-  else if Wwwroot.is_www_directory ~config start then Some start
-  else if recursion_limit <= 0 then None
-  else guess_root config (Path.parent start) (recursion_limit - 1)
+(** Arg specs shared across more than 1 arg parser. *)
+module Common_argspecs = struct
+  let force_dormant_start value_ref =
+    ("--force-dormant-start",
+      Arg.Bool (fun x -> value_ref := x),
+      " If server is dormant, force start a new one instead of waiting for"^
+      " the next one to start up automatically (default: false)")
+end
+
 
 let parse_command () =
   if Array.length Sys.argv < 2
   then CKNone
-  else match String.lowercase Sys.argv.(1) with
+  else match String.lowercase_ascii Sys.argv.(1) with
   | "check" -> CKCheck
   | "start" -> CKStart
   | "stop" -> CKStop
   | "restart" -> CKRestart
   | "build" -> CKBuild
+  | "ide" -> CKIde
+  | "lsp" -> CKLsp
+  | "debug" -> CKDebug
   | _ -> CKNone
 
 let parse_without_command options usage command =
   let args = ref [] in
   Arg.parse (Arg.align options) (fun x -> args := x::!args) usage;
   match List.rev !args with
-  | x::rest when (String.lowercase x) = (String.lowercase command) -> rest
+  | x::rest when (String.lowercase_ascii x) = (String.lowercase_ascii command)
+    -> rest
   | args -> args
-
-let get_root ?(config=".hhconfig") path_opt =
-  let start_str = match path_opt with
-    | None -> "."
-    | Some s -> s in
-  let start_path = Path.make start_str in
-  let root = match guess_root config start_path 50 with
-    | None -> start_path
-    | Some r -> r in
-  Wwwroot.assert_www_directory ~config root;
-  root
 
 (* *** *** NB *** *** ***
  * Commonly-used options are documented in hphp/hack/man/hh_client.1 --
@@ -62,9 +59,15 @@ let parse_check_args cmd =
   let no_load = ref false in
   let timeout = ref None in
   let autostart = ref true in
+  let force_dormant_start = ref false in
   let from = ref "" in
   let version = ref false in
+  let monitor_logname = ref false in
   let logname = ref false in
+  let refactor_mode = ref "" in
+  let refactor_before = ref "" in
+  let format_from = ref 0 in
+  let ai_mode = ref None in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -92,6 +95,10 @@ let parse_check_args cmd =
           \t\tStops a Hack server\n\
         \trestart\
           \t\tRestarts a Hack server\n\
+        \tlsp\
+          \t\t[experimental] runs a persistent language service\n\
+        \tdebug\
+          \t\tDebug mode\n\
       \n\
       Default values if unspecified:\n\
         \tCOMMAND\
@@ -105,30 +112,44 @@ let parse_check_args cmd =
   in
   let options = [
     (* modes *)
-    "--status", Arg.Unit (set_mode MODE_STATUS),
+    "--status",
+      Arg.Unit (set_mode MODE_STATUS),
       " (mode) show a human readable list of errors (default)";
-    "--type-at-pos", Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
+    "--type-at-pos",
+      Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),
       " (mode) show type at a given position in file [line:character]";
-    "--args-at-pos", Arg.String (fun x -> set_mode (MODE_ARGUMENT_INFO x) ()),
-      "";
-    "--list-files", Arg.Unit (set_mode MODE_LIST_FILES),
+    "--list-files",
+      Arg.Unit (set_mode MODE_LIST_FILES),
       " (mode) list files with errors";
-    "--list-modes", Arg.Unit (set_mode MODE_LIST_MODES),
+    "--list-modes",
+      Arg.Unit (set_mode MODE_LIST_MODES),
       " (mode) list all files with their associated hack modes";
-    "--auto-complete", Arg.Unit (set_mode MODE_AUTO_COMPLETE),
+    "--auto-complete",
+      Arg.Unit (set_mode MODE_AUTO_COMPLETE),
       " (mode) auto-completes the text on stdin";
-    "--colour", Arg.String (fun x -> set_mode (MODE_COLORING x) ()), " ";
-    "--color", Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
-      " (mode) pretty prints the file content showing what is checked (give '-' for stdin)";
-    "--coverage", Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
+    "--colour",
+      Arg.String (fun x -> set_mode (MODE_COLORING x) ()), " ";
+    "--color",
+      Arg.String (fun x -> set_mode (MODE_COLORING x) ()),
+      " (mode) pretty prints the file content \
+       showing what is checked (give '-' for stdin)";
+    "--coverage",
+      Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
       " (mode) calculates the extent of typing of a given file or directory";
-    "--find-refs", Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
+    "--find-dependent-files",
+      Arg.String (fun x -> set_mode (MODE_FIND_DEPENDENT_FILES x) ()),
+      " (mode) list all files that make any use of the provided list of files";
+    "--find-refs",
+      Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
-    "--find-class-refs", Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
+    "--trace_ai",
+      Arg.String (fun x -> set_mode (MODE_TRACE_AI x) ()),
+       "";
+    "--find-class-refs",
+      Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
-    "--dump-symbol-info", Arg.String (fun files ->
-        set_mode (MODE_DUMP_SYMBOL_INFO files) ()
-        ),
+    "--dump-symbol-info",
+      Arg.String (fun files -> set_mode (MODE_DUMP_SYMBOL_INFO files) ()),
       (*  Input format:
        *  The file list can either be "-" which accepts the input from stdin
        *  separated by newline(for long list) or directly from command line
@@ -139,40 +160,88 @@ let parse_check_args cmd =
        *    ]
        *  Note: results list can be in any order *)
       "";
-    "--dump-ai-info", Arg.String (fun files ->
-        set_mode (MODE_DUMP_AI_INFO files) ()),
+    "--dump-ai-info",
+      Arg.String (fun files -> set_mode (MODE_DUMP_AI_INFO files) ()),
         (* Just like --dump-symbol-info, but uses the AI to obtain info *)
         "";
-    "--identify-function", Arg.String (fun x -> set_mode (MODE_IDENTIFY_FUNCTION x) ()),
-      " (mode) print the full function name at the position [line:character] of the text on stdin";
-    "--refactor", Arg.Unit (set_mode MODE_REFACTOR),
+    "--identify-function",
+      Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x) ()),
+      " (mode) print the full function name at the position " ^
+      "[line:character] of the text on stdin";
+    "--ide-get-definition",
+      Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL2 x) ()),
+      (* alias for --identify-function *) "";
+    "--get-method-name",
+      Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL3 x) ()),
+      (* alias for --identify-function *) "";
+    "--get-definition-by-id",
+      Arg.String (fun x -> set_mode (MODE_GET_DEFINITION_BY_ID x) ()),
       "";
-    "--search", Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
+    "--refactor", Arg.Tuple ([
+        Arg.Symbol (
+          ["Class"; "Function"; "Method"],
+          (fun x -> refactor_mode := x));
+        Arg.String (fun x -> refactor_before := x);
+        Arg.String (fun x ->
+          set_mode (MODE_REFACTOR (!refactor_mode, !refactor_before, x)) ())
+      ]),
+      " (mode) rename a symbol, Usage: --refactor " ^
+      "[\"Class\", \"Function\", \"Method\"] <Current Name> <New Name>";
+    "--search",
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "")) ()),
       " (mode) fuzzy search symbol definitions";
     "--search-class",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "class")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "class")) ()),
       " (mode) fuzzy search class definitions";
     "--search-function",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "function")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "function")) ()),
       " (mode) fuzzy search function definitions";
     "--search-typedef",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "typedef")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "typedef")) ()),
       " (mode) fuzzy search typedef definitions";
     "--search-constant",
-      Arg.String (fun x -> set_mode
-          (MODE_SEARCH (x, "constant")) ()),
+      Arg.String (fun x -> set_mode (MODE_SEARCH (x, "constant")) ()),
       " (mode) fuzzy search constant definitions";
-    "--outline", Arg.Unit (set_mode MODE_OUTLINE),
+    "--outline",
+      Arg.Unit (set_mode MODE_OUTLINE),
       " (mode) prints an outline of the text on stdin";
-    "--inheritance-children", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),
-      " (mode) prints a list of all related classes or methods to the given class";
-    "--inheritance-ancestors", Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
-      " (mode) prints a list of all related classes or methods to the given class";
-    "--show", Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
-      " (mode) show human-readable type info for the given name; output is not meant for machine parsing";
+    "--ide-outline",
+      Arg.Unit (set_mode (MODE_OUTLINE2)), "";
+    "--inheritance-children",
+      Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_CHILDREN x) ()),
+      " (mode) prints a list of all related classes or methods \
+       to the given class";
+    "--inheritance-ancestors",
+      Arg.String (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS x) ()),
+      " (mode) prints a list of all related classes or methods \
+       to the given class";
+    "--show",
+      Arg.String (fun x -> set_mode (MODE_SHOW x) ()),
+      " (mode) show human-readable type info for the given name; \
+       output is not meant for machine parsing";
+    "--remove-dead-fixme",
+        Arg.Int begin fun code ->
+        mode := match !mode with
+          | None -> Some (MODE_REMOVE_DEAD_FIXMES [code])
+          | Some (MODE_REMOVE_DEAD_FIXMES codel) ->
+            Some (MODE_REMOVE_DEAD_FIXMES (code :: codel))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+        end,
+      " (mode) remove dead HH_FIXME for specified error code " ^
+      "(first do hh_client restart --no-load)";
+    "--remove-dead-fixmes",
+        Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
+      " (mode) remove dead HH_FIXME for any error code < 5000 " ^
+      "(first do hh_client restart --no-load)";
+    "--ignore-fixme",
+        Arg.Rest begin fun x ->
+          mode := match !mode with
+            | None -> Some (MODE_IGNORE_FIXMES [x])
+            | Some (MODE_IGNORE_FIXMES xs) -> Some (MODE_IGNORE_FIXMES (x::xs))
+            | _ -> raise (Arg.Bad "only a single mode should be specified")
+          end,
+        " (mode) ignores fixmes in the given space separated files " ^
+        "(provide relative path inside code's root directory)";
     "--lint", Arg.Rest begin fun fn ->
         mode := match !mode with
           | None -> Some (MODE_LINT [fn])
@@ -180,14 +249,21 @@ let parse_check_args cmd =
           | _ -> raise (Arg.Bad "only a single mode should be specified")
       end,
       " (mode) lint the given list of files";
-    "--lint-all", Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
+    "--lint-all",
+      Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
       " (mode) find all occurrences of lint with the given error code";
-    "--version", Arg.Set version,
+    "--version",
+      Arg.Set version,
       " (mode) show version and exit\n";
-    "--logname", Arg.Set logname,
+    "--monitor-logname",
+      Arg.Set monitor_logname,
+      " (mode) show monitor log filename and exit\n";
+    "--logname",
+      Arg.Set logname,
       " (mode) show log filename and exit\n";
     (* Create a checkpoint which can be used to retrieve changed files later *)
-    "--create-checkpoint", Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),
+    "--create-checkpoint",
+      Arg.String (fun x -> set_mode (MODE_CREATE_CHECKPOINT x) ()),
       "";
     (* Retrieve changed files since input checkpoint.
      * Output is separated by newline.
@@ -203,26 +279,57 @@ let parse_check_args cmd =
     "--stats",
       Arg.Unit (set_mode MODE_STATS),
       " display some server statistics";
-
+    "--format",
+      Arg.Tuple ([
+        Arg.Int (fun x -> format_from := x);
+        Arg.Int (fun x -> set_mode (MODE_FORMAT (!format_from, x)) ())
+      ]), "";
+    "--ide-find-refs",
+      Arg.String (fun x -> set_mode (MODE_IDE_FIND_REFS x) ()), "";
+    "--ide-highlight-refs",
+      Arg.String (fun x -> set_mode (MODE_IDE_HIGHLIGHT_REFS x) ()),
+    (* Similar to --ide-find-refs, but returns references in current file only,
+     * and is optimized to be faster in that case *) "";
+    "--ai-query", Arg.String (fun x -> set_mode (MODE_AI_QUERY x) ()),
+    (* Send an AI query *) "";
+    "--dump-full-fidelity-parse",
+        Arg.String (fun x -> set_mode (MODE_FULL_FIDELITY_PARSE x) ()),
+        "";
+    "--full-fidelity-schema",
+      Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
     (* flags *)
-    "--json", Arg.Set output_json,
+    "--json",
+      Arg.Set output_json,
       " output json for machine consumption. (default: false)";
-    "--retries", Arg.Set_int retries,
+    "--retries",
+      Arg.Set_int retries,
       spf " set the number of retries. (default: %d)" !retries;
-    "--retry-if-init", Arg.Bool (fun x -> retry_if_init := x),
+    "--retry-if-init",
+      Arg.Bool (fun x -> retry_if_init := x),
       " retry if the server is initializing (default: true)";
-    "--no-load", Arg.Set no_load,
+    "--no-load",
+      Arg.Set no_load,
       " start from a fresh state";
-    "--from", Arg.Set_string from,
+    "--from",
+      Arg.Set_string from,
       " set this so we know who is calling hh_client";
-    "--timeout",  Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
+    "--timeout",
+      Arg.Float (fun x -> timeout := Some (Unix.time() +. x)),
       " set the timeout in seconds (default: no timeout)";
-    "--autostart-server", Arg.Bool (fun x -> autostart := x),
-      " automatically start hh_server if it's not running (default: true)\n";
+    "--autostart-server",
+      Arg.Bool (fun x -> autostart := x),
+      " automatically start hh_server if it's not running (default: true)";
+    Common_argspecs.force_dormant_start force_dormant_start;
+    "--ai",
+      Arg.String (fun s -> ai_mode :=
+         Some (ignore (Ai_options.prepare ~server:true s); s)),
+      " run AI module with provided options\n";
 
     (* deprecated *)
-    "--from-vim", Arg.Unit (fun () -> from := "vim"; retries := 0; retry_if_init := false),
-      " (deprecated) equivalent to --from vim --retries 0 --retry-if-init false";
+    "--from-vim",
+      Arg.Unit (fun () -> from := "vim"; retries := 0; retry_if_init := false),
+      " (deprecated) equivalent to \
+       --from vim --retries 0 --retry-if-init false";
     "--from-emacs", Arg.Unit (set_from "emacs"),
       " (deprecated) equivalent to --from emacs";
     "--from-arc-diff", Arg.Unit (set_from "arc_diff"),
@@ -235,23 +342,31 @@ let parse_check_args cmd =
   let args = parse_without_command options usage "check" in
 
   if !version then begin
-    print_endline Build_id.build_id_ohai;
+    if !output_json then ServerArgs.print_json_version ()
+    else print_endline Build_id.build_id_ohai;
     exit 0;
   end;
 
   (* fixups *)
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
-        Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
+        Printf.fprintf stderr
+          "Error: please provide at most one www directory\n%!";
         exit 1;
   in
 
+  if !monitor_logname then begin
+    let monitor_log_link = ServerFiles.monitor_log_link root in
+    Printf.printf "%s\n%!" monitor_log_link;
+    exit 0;
+  end;
+
   if !logname then begin
     let log_link = ServerFiles.log_link root in
-    print_endline log_link;
+    Printf.printf "%s\n%!" log_link;
     exit 0;
   end;
 
@@ -267,7 +382,9 @@ let parse_check_args cmd =
     retries = !retries;
     timeout = !timeout;
     autostart = !autostart;
+    force_dormant_start = !force_dormant_start;
     no_load = !no_load;
+    ai_mode = !ai_mode;
   }
 
 let parse_start_env command =
@@ -276,28 +393,35 @@ let parse_start_env command =
       "Usage: %s %s [OPTION]... [WWW-ROOT]\n\
       %s a Hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
-      Sys.argv.(0) command (String.capitalize command) in
-  let wait = ref false in
+      Sys.argv.(0) command (String.capitalize_ascii command) in
   let no_load = ref false in
+  let ai_mode = ref None in
+  let wait_deprecation_msg () = Printf.eprintf
+    "WARNING: --wait is deprecated, does nothing, and will be going away \
+     soon!\n%!" in
   let options = [
-    "--wait", Arg.Set wait,
-    " wait for the server to finish initializing (default: false)";
+    "--wait", Arg.Unit wait_deprecation_msg,
+    " this flag is deprecated and does nothing!";
     "--no-load", Arg.Set no_load,
-    " start from a fresh state"
+    " start from a fresh state";
+    "--ai", Arg.String (fun x -> ai_mode := Some x),
+    "  run ai with options ";
   ] in
   let args = parse_without_command options usage command in
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
         Printf.fprintf stderr
           "Error: please provide at most one www directory\n%!";
         exit 1 in
   { ClientStart.
     root = root;
-    wait = !wait;
     no_load = !no_load;
+    ai_mode = !ai_mode;
+    silent = false;
+    debug_port = None;
   }
 
 let parse_start_args () =
@@ -317,10 +441,11 @@ let parse_stop_args () =
   let args = parse_without_command options usage "stop" in
   let root =
     match args with
-    | [] -> get_root None
-    | [x] -> get_root (Some x)
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ ->
-        Printf.fprintf stderr "Error: please provide at most one www directory\n%!";
+        Printf.fprintf stderr
+          "Error: please provide at most one www directory\n%!";
         exit 1
   in CStop {ClientStop.root = root}
 
@@ -330,8 +455,11 @@ let parse_build_args () =
       "Usage: %s build [WWW-ROOT]\n\
       Generates build files\n"
       Sys.argv.(0) in
+  let force_dormant_start = ref false in
   let steps = ref None in
+  let ignore_killswitch = ref false in
   let no_steps = ref None in
+  let use_factsdb_static = ref false in
   let verbose = ref false in
   let serial = ref false in
   let test_dir = ref None in
@@ -341,20 +469,24 @@ let parse_build_args () =
   let clean = ref false in
   (* todo: for now better to default to true here, but this is temporary! *)
   let clean_before_build = ref true in
-  let incremental = ref false in
   let run_scripts = ref true in
   let wait = ref false in
   let options = [
     "--steps", Arg.String (fun x ->
       steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps to run";
+    "--ignore-killswitch", Arg.Set ignore_killswitch,
+    " run all steps (including kill-switched ones) except steps in --no-steps";
     "--no-steps", Arg.String (fun x ->
       no_steps := Some (Str.split (Str.regexp ",") x)),
     " comma-separated list of build steps not to run";
+    "--use-factsdb-static", Arg.Set use_factsdb_static,
+    " build autoload-map and arc-facts using FactsDB";
     "--no-run-scripts", Arg.Clear run_scripts,
     " don't run unported arc build scripts";
     "--serial", Arg.Set serial,
     " run without parallel worker processes";
+    Common_argspecs.force_dormant_start force_dormant_start;
     "--test-dir", Arg.String (fun x -> test_dir := Some x),
     " <dir> generates into <dir> and compares with root";
     "--no-grade", Arg.Clear grade,
@@ -369,8 +501,6 @@ let parse_build_args () =
     " erase previously generated files before building (default)";
     "--no-clean-before-build", Arg.Clear clean_before_build,
     " do not erase previously generated files before building";
-    (* Don't document --incremental option for now *)
-    "--incremental", Arg.Set incremental, "";
     "--wait", Arg.Set wait,
     " wait forever for hh_server intialization (default: false)";
     "--verbose", Arg.Set verbose,
@@ -379,15 +509,18 @@ let parse_build_args () =
   let args = parse_without_command options usage "build" in
   let root =
     match args with
-    | [x] -> get_root (Some x)
+    | [x] -> ClientArgsUtils.get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
   CBuild { ClientBuild.
     root = root;
     wait = !wait;
+    force_dormant_start = !force_dormant_start;
     build_opts = { ServerBuild.
       steps = !steps;
+      ignore_killswitch = !ignore_killswitch;
       no_steps = !no_steps;
+      use_factsdb_static = !use_factsdb_static;
       run_scripts = !run_scripts;
       serial = !serial;
       test_dir = !test_dir;
@@ -396,11 +529,49 @@ let parse_build_args () =
       clean = !clean;
       clean_before_build = !clean_before_build;
       check = !check;
-      incremental = !incremental;
       user = Sys_utils.logname ();
       verbose = !verbose;
       id = Random_id.short_string ();
     }
+  }
+
+let parse_ide_args () =
+  let usage =
+    Printf.sprintf
+      "Usage: %s ide [WWW-ROOT]\n"
+      Sys.argv.(0) in
+
+  let options = [] in
+  let args = parse_without_command options usage "ide" in
+  let root =
+    match args with
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
+    | _ -> Printf.printf "%s\n" usage; exit 2 in
+  CIde { ClientIde.
+    root = root
+  }
+
+let parse_lsp_args () =
+  let usage = Printf.sprintf "Usage: %s lsp\n" Sys.argv.(0) in
+  let options = [] in
+  let args = parse_without_command options usage "lsp" in
+  match args with
+  | [] -> CLsp
+  | _ -> Printf.printf "%s\n" usage; exit 2
+
+let parse_debug_args () =
+  let usage =
+    Printf.sprintf "Usage: %s debug [WWW-ROOT]\n" Sys.argv.(0) in
+  let options = [] in
+  let args = parse_without_command options usage "debug" in
+  let root =
+    match args with
+    | [] -> ClientArgsUtils.get_root None
+    | [x] -> ClientArgsUtils.get_root (Some x)
+    | _ -> Printf.printf "%s\n" usage; exit 2 in
+  CDebug { ClientDebug.
+    root
   }
 
 let parse_args () =
@@ -411,10 +582,16 @@ let parse_args () =
     | CKStop -> parse_stop_args ()
     | CKRestart -> parse_restart_args ()
     | CKBuild -> parse_build_args ()
+    | CKDebug -> parse_debug_args ()
+    | CKIde -> parse_ide_args ()
+    | CKLsp -> parse_lsp_args ()
 
 let root = function
   | CBuild { ClientBuild.root; _ }
   | CCheck { ClientEnv.root; _ }
   | CStart { ClientStart.root; _ }
   | CRestart { ClientStart.root; _ }
-  | CStop { ClientStop.root; _ } -> root
+  | CStop { ClientStop.root; _ }
+  | CIde { ClientIde.root; _}
+  | CDebug { ClientDebug.root } -> root
+  | CLsp -> Path.dummy_path

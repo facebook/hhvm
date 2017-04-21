@@ -1,0 +1,137 @@
+====================================================
+keyset(0) {
+}
+string(6) "k:0:{}"
+keyset(0) {
+}
+====================================================
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(18) "k:3:{i:1;i:2;i:3;}"
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+string(30) "k:3:{s:1:"a";s:1:"b";s:1:"c";}"
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+====================================================
+keyset(4) {
+  string(1) "a"
+  int(1)
+  string(1) "b"
+  int(2)
+}
+string(30) "k:4:{s:1:"a";i:1;s:1:"b";i:2;}"
+keyset(4) {
+  string(1) "a"
+  int(1)
+  string(1) "b"
+  int(2)
+}
+====================================================
+keyset(4) {
+  int(2)
+  string(1) "b"
+  int(1)
+  string(1) "a"
+}
+string(30) "k:4:{i:2;s:1:"b";i:1;s:1:"a";}"
+keyset(4) {
+  int(2)
+  string(1) "b"
+  int(1)
+  string(1) "a"
+}
+====================================================
+keyset(2) {
+  int(123)
+  string(3) "123"
+}
+string(22) "k:2:{i:123;s:3:"123";}"
+keyset(2) {
+  int(123)
+  string(3) "123"
+}
+====================================================
+string(6) "k:0:{}"
+keyset(0) {
+}
+====================================================
+string(28) "k:3:{i:123;s:3:"abc";i:456;}"
+keyset(3) {
+  int(123)
+  string(3) "abc"
+  int(456)
+}
+====================================================
+string(22) "k:2:{i:123;s:3:"123";}"
+keyset(2) {
+  int(123)
+  string(3) "123"
+}
+====================================================
+string(10) "k:1:{b:0;}"
+
+Notice: Unable to unserialize: [k:1:{b:0;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(13) "k:1:{d:1.23;}"
+
+Notice: Unable to unserialize: [k:1:{d:1.23;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(8) "k:1:{N;}"
+
+Notice: Unable to unserialize: [k:1:{N;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(16) "k:2:{i:123;r:1;}"
+
+Notice: Unable to unserialize: [k:2:{i:123;r:1;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(54) "a:3:{i:123;s:3:"abc";i:456;i:101;i:456;k:2:{r:2;r:3;}}"
+array(2) {
+  [123]=>
+  string(3) "abc"
+  [456]=>
+  keyset(2) {
+    string(3) "abc"
+    int(101)
+  }
+}
+====================================================
+string(10) "k:1:{R:1;}"
+
+Notice: Unable to unserialize: [k:1:{R:1;}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(38) "a:2:{i:123;s:3:"abc";i:456;k:1:{R:2;}}"
+
+Notice: Unable to unserialize: [a:2:{i:123;s:3:"abc";i:456;k:1:{R:2;}}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)
+====================================================
+string(34) "a:2:{i:123;k:1:{i:731;}i:456;R:3;}"
+
+Notice: Unable to unserialize: [a:2:{i:123;k:1:{i:731;}i:456;R:3;}]. Id 3 out of range. in %s on line %d
+bool(false)
+====================================================
+string(62) "k:2:{O:4:"Dtor":1:{s:2:"id";i:1;}O:4:"Dtor":1:{s:2:"id";i:2;}}"
+Dtor::__destruct(): 1
+
+Notice: Unable to unserialize: [k:2:{O:4:"Dtor":1:{s:2:"id";i:1;}O:4:"Dtor":1:{s:2:"id";i:2;}}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)

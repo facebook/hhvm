@@ -1,0 +1,252 @@
+======================== get =================================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== null coalesce =======================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== idx =================================
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== isset ===============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== array key exists ====================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Warning: Array key should be either a string or an integer in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Warning: Array key should be either a string or an integer in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+
+Warning: Array key should be either a string or an integer in %s on line %d
+======================== empty ===============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== set =================================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== set-op ==============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== unset ===============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== base-elem ===========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== base-elem no-warn ===================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== base-define =========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== base-unset ==========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== dim-elem ============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== dim-elem no-warn ====================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== dim-define ==========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== dim-unset ===========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-get ============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-get no-warn ====================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-isset ==========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-empty ==========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-set ============================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-set-op =========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+======================== fini-unset ==========================
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d

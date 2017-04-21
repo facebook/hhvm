@@ -1,0 +1,2 @@
+<?hh
+newtype eHSIRS as ( shape ( 'single string' => classname < pYXZwAWz > , 'single string' => num , 'single string' => mixed ) , ( shape ( 'single string' => bool , 'single string' => qIsRhMJS < mixed > , 'single string' => this ) , ( function ( wIkElUkkZ ) : rFWumkziB < arraykey > ) , ( function ( ) : classname < kCGAr > ) , ( ? float , arraykey ) , this , array < string , ? void > , shape ( 'single string' => mixed , 'single string' => arraykey , 'single string' => shape ( ) ) , void , vZft < arraykey > ) ) = resource ;

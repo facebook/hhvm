@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "hphp/util/match.h"
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
@@ -48,7 +49,9 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (IrrelevantEffects)   {},
         [&] (UnknownEffects)      {},
         [&] (ReturnEffects x)     { visit(x.kills); },
-        [&] (CallEffects x)       { visit(x.kills); visit(x.stack); },
+        [&] (CallEffects x)       { visit(x.kills);
+                                    visit(x.stack);
+                                    visit(x.locals); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
                                     visit(x.moves);
@@ -78,6 +81,37 @@ folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   return meta.index;
 };
 
+// Expand a location into a set of locations that may alias it. This is for
+// locals and class-ref locations where the location may contain a discrete set
+// of local/class-ref slots.
+template<class T>
+ALocBits may_alias_component(const AliasAnalysis& aa,
+                             AliasClass acls,
+                             folly::Optional<T> proj,
+                             const AliasAnalysis::LocationMap& sets,
+                             AliasClass any,
+                             ALocBits pessimistic) {
+  if (proj) {
+    auto ret = ALocBits{};
+    if (proj->ids.hasSingleValue()) {
+      if (auto const slot = aa.find(*proj)) {
+        ret.set(slot->index);
+      }
+      // Otherwise the location is untracked, and cannot interfere with any
+      // tracked location.
+    } else {
+      auto const it = sets.find(*proj);
+      if (it != end(sets)) {
+        ret |= it->second;
+      } else {
+        ret |= pessimistic;
+      }
+    }
+    return ret;
+  }
+  return acls.maybe(any) ? pessimistic : ALocBits{};
+}
+
 template<class T>
 ALocBits may_alias_part(const AliasAnalysis& aa,
                         AliasClass acls,
@@ -92,6 +126,35 @@ ALocBits may_alias_part(const AliasAnalysis& aa,
     return pessimistic;
   }
   return acls.maybe(any) ? pessimistic : ALocBits{};
+}
+
+// Expand a location into a set of locations which definitely contain it. This
+// is for locals and class-ref locations where the location may contain a
+// discrete set of local/class-ref slots.
+template<class T>
+ALocBits expand_component(const AliasAnalysis& aa,
+                          AliasClass acls,
+                          folly::Optional<T> loc,
+                          const AliasAnalysis::LocationMap& sets,
+                          AliasClass any,
+                          ALocBits all) {
+  if (loc) {
+    auto ret = ALocBits{};
+    if (loc->ids.hasSingleValue()) {
+      if (auto const meta = aa.find(*loc)) {
+        ret.set(meta->index);
+      }
+    } else {
+      auto const it = sets.find(*loc);
+      if (it != end(sets)) {
+        ret |= it->second;
+      }
+      // We could iterate over everything and set corresponding bits, but that
+      // seldom adds value.
+    }
+    return ret;
+  }
+  return any <= acls ? all : ALocBits{};
 }
 
 template<class T>
@@ -111,13 +174,40 @@ ALocBits expand_part(const AliasAnalysis& aa,
   return any <= acls ? all : ret;
 }
 
+template<class T>
+bool collect_component(AliasAnalysis& aa,
+                       folly::Optional<T> loc,
+                       AliasAnalysis::LocationMap& map) {
+  if (loc) {
+    assertx(!loc->ids.empty());
+    if (loc->ids.hasSingleValue()) {
+      add_class(aa, *loc);
+    } else {
+      auto complete = true;
+      auto range = ALocBits{};
+      if (loc->ids.size() <= kMaxExpandedSize) {
+        for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
+          if (loc->ids.test(id)) {
+            if (auto const index = add_class(aa, T { loc->fp, id })) {
+              range.set(*index);
+            } else {
+              complete = false;
+            }
+          }
+        }
+      }
+      if (complete) map[AliasClass { *loc }] = range;
+    }
+    return true;
+  }
+  return false;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
 
-AliasAnalysis::AliasAnalysis(const IRUnit& unit)
-  : per_frame_bits(unit.numTmps())
-{}
+AliasAnalysis::AliasAnalysis(const IRUnit& unit) {}
 
 folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
   auto const it = locations.find(acls);
@@ -142,23 +232,10 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     ret |= may_alias_part(*this, acls, acls.stack(), AStackAny, all_stack);
   }
 
-  if (auto const frame = acls.frame()) {
-    if (frame->ids.hasSingleValue()) {
-      if (auto const slot = find(*frame)) {
-        ret.set(slot->index);
-      }
-      // Otherwise the location is untracked.
-    } else {
-      auto const it = local_sets.find(*frame);
-      if (it != end(local_sets)) {
-        ret |= it->second;
-      } else {
-        ret |= all_frame;
-      }
-    }
-  } else if (acls.maybe(AFrameAny)) {
-    ret |= all_frame;
-  }
+  ret |= may_alias_component(*this, acls, acls.frame(), local_sets,
+                             AFrameAny, all_frame);
+  ret |= may_alias_component(*this, acls, acls.clsRefSlot(), clsref_sets,
+                             AClsRefSlotAny, all_clsRefSlot);
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) {
@@ -166,9 +243,8 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
       if (cls <= *mis) {
         if (auto meta = find(cls)) {
           ret |= ALocBits{meta->conflicts}.set(meta->index);
-        } else {
-          ret |= all_mistate;
         }
+        // The location is untracked.
       }
     };
 
@@ -207,22 +283,10 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     ret |= all_stack;
   }
 
-  if (auto const frame = acls.frame()) {
-    if (frame->ids.hasSingleValue()) {
-      if (auto const meta = find(*frame)) {
-        ret.set(meta->index);
-      }
-    } else {
-      auto const it = local_sets.find(*frame);
-      if (it != end(local_sets)) {
-        ret |= it->second;
-      }
-      // We could iterate over the all the frame locals and set corresponding
-      // bits, but that seldom adds value.
-    }
-  } else if (AFrameAny <= acls) {
-    ret |= all_frame;
-  }
+  ret |= expand_component(*this, acls, acls.frame(), local_sets,
+                          AFrameAny, all_frame);
+  ret |= expand_component(*this, acls, acls.clsRefSlot(), clsref_sets,
+                          AClsRefSlotAny, all_clsRefSlot);
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) {
@@ -278,7 +342,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const ref = acls.is_ref()) {
+    if (acls.is_ref()) {
       if (auto const index = add_class(ret, acls)) {
         ret.all_ref.set(*index);
       }
@@ -295,30 +359,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const frame = acls.frame()) {
-      assertx(!frame->ids.empty());
-      if (frame->ids.hasSingleValue()) {
-        add_class(ret, *frame);
-      } else {
-        auto complete = true;
-        auto range = ALocBits{};
-        if (frame->ids.size() <= kMaxExpandedSize) {
-          for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
-            if (frame->ids.test(id)) {
-              if (auto const index = add_class(ret, AFrame { frame->fp, id })) {
-                range.set(*index);
-              } else {
-                complete = false;
-              }
-            }
-          }
-        }
-        if (complete) {
-          ret.local_sets[AliasClass { *frame }] = range;
-        }
-      }
-      return;
-    }
+    if (collect_component(ret, acls.frame(), ret.local_sets)) return;
+    if (collect_component(ret, acls.clsRefSlot(), ret.clsref_sets)) return;
 
     /*
      * Note that unlike the above we're going to assign location ids to the
@@ -363,6 +405,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
   always_assert(ret.locations.size() <= kMaxTrackedALocs);
   if (ret.locations.size() == kMaxTrackedALocs) {
+    logLowPriPerfWarning(
+      "alias-analysis kMaxTrackedALocs",
+      25000,
+      [&](StructuredLogEntry& cols) {
+        auto const func = unit.context().func;
+        cols.setStr("func", func->fullName()->slice());
+        cols.setStr("filename", func->unit()->filepath()->slice());
+        cols.setStr("hhir_unit", show(unit));
+      }
+    );
     FTRACE(1, "max locations limit was reached\n");
   }
 
@@ -383,38 +435,43 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (auto const frame = acls.is_frame()) {
       ret.all_frame.set(meta.index);
-      ret.per_frame_bits[frame->fp].set(meta.index);
       return;
     }
 
-    if (auto const stk = acls.is_stack()) {
+    if (auto const slot = acls.is_clsRefSlot()) {
+      ret.all_clsRefSlot.set(meta.index);
+      return;
+    }
+
+    if (acls.is_stack()) {
       ret.all_stack.set(meta.index);
       return;
     }
 
-    if (auto const iterPos = acls.is_iterPos()) {
+    if (acls.is_iterPos()) {
       ret.all_iterPos.set(meta.index);
       return;
     }
 
-    if (auto const iterBase = acls.is_iterBase()) {
+    if (acls.is_iterBase()) {
       ret.all_iterBase.set(meta.index);
       return;
     }
 
-    if (auto const mis = acls.is_mis()) {
-      ret.all_mistate.set(meta.index);
-      return;
-    }
-
-    if (auto const ref = acls.is_ref()) {
+    if (acls.is_ref()) {
       meta.conflicts = ret.all_ref;
       meta.conflicts.reset(meta.index);
       return;
     }
 
+    if (acls.is_mis()) {
+      // We don't maintain an all_mistate set so there's nothing to do here but
+      // avoid hitting the assert below.
+      return;
+    }
+
     always_assert_flog(0, "AliasAnalysis assigned an AliasClass an id "
-      "but it didn't match a situation we undestood: {}\n", show(acls));
+      "but it didn't match a situation we understood: {}\n", show(acls));
   };
 
   ret.locations_inv.resize(ret.locations.size());
@@ -442,6 +499,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       }
     } else if (kv.first.is_frame()) {
       for (auto& ent : ret.local_sets) {
+        if (kv.first <= ent.first) {
+          FTRACE(2, "  ({}) {} <= {}\n",
+            kv.second.index,
+            show(kv.first),
+            show(ent.first));
+          ent.second.set(kv.second.index);
+        }
+      }
+    } else if (kv.first.is_clsRefSlot()) {
+      for (auto& ent : ret.clsref_sets) {
         if (kv.first <= ent.first) {
           FTRACE(2, "  ({}) {} <= {}\n",
             kv.second.index,
@@ -485,13 +552,15 @@ std::string show(const AliasAnalysis& ainfo) {
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
                       " {: <20}       : {}\n"
+                      " {: <20}       : {}\n"
                       " {: <20}       : {}\n",
     "all props",    show(ainfo.all_props),
     "all elemIs",   show(ainfo.all_elemIs),
     "all refs",     show(ainfo.all_ref),
     "all iterPos",  show(ainfo.all_iterPos),
     "all iterBase", show(ainfo.all_iterBase),
-    "all frame",    show(ainfo.all_frame)
+    "all frame",    show(ainfo.all_frame),
+    "all clsRefSlot", show(ainfo.all_clsRefSlot)
   );
   for (auto& kv : ainfo.local_sets) {
     folly::format(&ret, " ex {: <17}       : {}\n",

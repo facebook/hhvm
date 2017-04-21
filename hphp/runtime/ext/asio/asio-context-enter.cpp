@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,9 +22,6 @@
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
@@ -74,27 +71,6 @@ namespace {
       });
     }
 
-    void discover(c_GenArrayWaitHandle* node) {
-      assert(node->getState() == c_GenArrayWaitHandle::STATE_BLOCKED);
-      node->forEachChild([this] (c_WaitableWaitHandle* child) {
-        enqueue(child);
-      });
-    }
-
-    void discover(c_GenMapWaitHandle* node) {
-      assert(node->getState() == c_GenMapWaitHandle::STATE_BLOCKED);
-      node->forEachChild([this] (c_WaitableWaitHandle* child) {
-        enqueue(child);
-      });
-    }
-
-    void discover(c_GenVectorWaitHandle* node) {
-      assert(node->getState() == c_GenVectorWaitHandle::STATE_BLOCKED);
-      node->forEachChild([this] (c_WaitableWaitHandle* child) {
-        enqueue(child);
-      });
-    }
-
     void discover(c_ConditionWaitHandle* node) {
       assert(node->getState() == c_ConditionWaitHandle::STATE_BLOCKED);
       enqueue(node->getChild());
@@ -115,15 +91,6 @@ namespace {
           case Kind::AwaitAll:
             discover(node->asAwaitAll());
             break;
-          case Kind::GenArray:
-            discover(node->asGenArray());
-            break;
-          case Kind::GenMap:
-            discover(node->asGenMap());
-            break;
-          case Kind::GenVector:
-            discover(node->asGenVector());
-            break;
           case Kind::Condition:
             discover(node->asCondition());
             break;
@@ -137,7 +104,7 @@ namespace {
     }
 
     void enter(c_ResumableWaitHandle* node) {
-      if (node->getState() == c_ResumableWaitHandle::STATE_SCHEDULED) {
+      if (node->getState() == c_ResumableWaitHandle::STATE_READY) {
         node->getContext()->schedule(node);
         node->incRefCount();
       }
@@ -187,9 +154,6 @@ namespace {
           case Kind::AsyncFunction:
           case Kind::AsyncGenerator:
           case Kind::AwaitAll:
-          case Kind::GenArray:
-          case Kind::GenMap:
-          case Kind::GenVector:
           case Kind::Condition:
           case Kind::Reschedule:
             break;
@@ -213,9 +177,6 @@ namespace {
             break;
           case Kind::Static:
           case Kind::AwaitAll:
-          case Kind::GenArray:
-          case Kind::GenMap:
-          case Kind::GenVector:
           case Kind::Condition:
             break;
         }

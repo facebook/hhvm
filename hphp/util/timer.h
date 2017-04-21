@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,19 +19,19 @@
 
 #include <cstdint>
 #include <string>
-#include <sys/resource.h>
-#include <sys/time.h>
+
+#include <folly/portability/SysResource.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/compatibility.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
+/*
  * Timing execution of block of codes.
  */
-class Timer {
-public:
+struct Timer {
   enum Type {
     WallTime,
     SystemCPU,
@@ -43,6 +43,13 @@ public:
     Stderr,
     Trace,
   };
+  enum Who {
+    Self = RUSAGE_SELF,
+    Children = RUSAGE_CHILDREN,
+#ifdef RUSAGE_THREAD
+    Thread = RUSAGE_THREAD,
+#endif
+  };
 
 public:
   explicit Timer(Type type, const char *name = nullptr, ReportType r = Log);
@@ -51,7 +58,8 @@ public:
   static void GetRealtimeTime(timespec &sp);
   static void GetMonotonicTime(timespec &sp);
   static int64_t GetCurrentTimeMicros();
-  static int64_t GetRusageMicros(Type t, int who);
+  static int64_t GetRusageMicros(Type t, Who who);
+  static int64_t GetThreadCPUTimeNanos();
   const char *getName() const;
   int64_t getMicroSeconds() const;
   void report() const;
@@ -65,8 +73,9 @@ private:
   int64_t measure() const;
 };
 
-class SlowTimer {
-public:
+///////////////////////////////////////////////////////////////////////////////
+
+struct SlowTimer {
   SlowTimer(int64_t msThreshold, const char *location, const char *info);
   ~SlowTimer();
 
@@ -78,6 +87,17 @@ private:
   std::string m_location;
   std::string m_info;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+extern __thread int64_t s_extra_request_microseconds;
+
+int gettime(clockid_t, struct timespec*);
+
+/*
+ * Computes the difference between two timespec objects in microseconds.
+ */
+int64_t gettime_diff_us(const timespec&, const timespec&);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

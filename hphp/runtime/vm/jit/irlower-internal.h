@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_JIT_IRLOWER_INTERNAL_H_
 #define incl_HPHP_JIT_IRLOWER_INTERNAL_H_
 
+#include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 
 #include "hphp/util/asm-x64.h"
 
@@ -27,15 +29,12 @@ namespace HPHP { namespace jit {
 
 struct ArgGroup;
 struct Block;
+struct CallDest;
 struct IRInstruction;
 struct Vlabel;
 struct Vloc;
 struct Vout;
 struct Vreg;
-
-namespace irlower { struct IRLS; }
-
-///////////////////////////////////////////////////////////////////////////////
 
 namespace irlower {
 
@@ -63,6 +62,15 @@ Vloc dstLoc(IRLS& env, const IRInstruction* inst, unsigned i);
  */
 ArgGroup argGroup(IRLS& env, const IRInstruction* inst);
 
+/*
+ * CallDest constructor helpers.
+ */
+CallDest callDest(Vreg reg0);
+CallDest callDest(Vreg reg0, Vreg reg1);
+CallDest callDest(IRLS& env, const IRInstruction*);
+CallDest callDestTV(IRLS& env, const IRInstruction*);
+CallDest callDestDbl(IRLS& env, const IRInstruction*);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -70,6 +78,58 @@ ArgGroup argGroup(IRLS& env, const IRInstruction* inst);
  * the branch is not taken.
  */
 void fwdJcc(Vout& v, IRLS& env, ConditionCode cc, Vreg sf, Block* target);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Make a Fixup at `marker' with `sync' options.
+ */
+Fixup makeFixup(const BCMarker& marker, SyncOptions sync = SyncOptions::Sync);
+
+/*
+ * Native call helper.
+ */
+void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
+                  SyncOptions sync, const ArgGroup& args);
+
+/*
+ * Helper for native calls registered in the NativeCalls::CallMap.
+ */
+void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst);
+
+#define IMPL_OPCODE_CALL(Opcode)                        \
+  void cg##Opcode(IRLS& env, const IRInstruction* i) {  \
+    cgCallNative(vmain(env), env, i);                   \
+  }
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Test whether the TypedValue given by (`typeSrc', `dataSrc') matches `type',
+ * setting the result in `sf', and delegating conditional work to `doJcc':
+ *
+ *    void doJcc(ConditionCode cc, Vreg sf)
+ *
+ * `doJcc' is passed `sf', and can check whether `cc' is set to determine if
+ * the type matched.
+ */
+template<class Loc, class JmpFn>
+void emitTypeTest(Vout& v, IRLS& env, Type type,
+                  Loc typeSrc, Loc dataSrc, Vreg sf, JmpFn doJcc);
+
+/*
+ * Does the work of emitTypeTest(), then branches to `taken' if the type does
+ * not match.
+ */
+template<class Loc>
+void emitTypeCheck(Vout& v, IRLS& env, Type type,
+                   Loc typeSrc, Loc dataSrc, Block* taken);
+
+/*
+ * Check the surprise flags, and call functionEnterHelper if they are set.
+ */
+void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
+                                 Fixup fixup, Vlabel catchBlock);
 
 ///////////////////////////////////////////////////////////////////////////////
 

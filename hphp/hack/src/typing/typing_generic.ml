@@ -30,18 +30,20 @@ end = struct
   let rec ty (_, x) = ty_ x
   and ty_ = function
     | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
-    | Tabstract (AKgeneric (x, _), _) -> raise (Found x)
-    | Tanon _ | Tany | Tmixed | Tprim _ -> ()
+    | Tabstract (AKgeneric x, _) -> raise (Found x)
+    | Tanon _ | Tany | Terr | Tmixed | Tprim _ -> ()
     | Tarraykind akind ->
       begin match akind with
         | AKany -> ()
         | AKempty -> ()
+        | AKvarray tv
         | AKvec tv -> ty tv
+        | AKdarray (tk, tv)
         | AKmap (tk, tv) -> ty tk; ty tv
         | AKshape fdm ->
             ShapeMap.iter (fun _ (tk, tv) -> ty tk; ty tv) fdm
         | AKtuple fields ->
-            Utils.IMap.iter (fun _ tv -> ty tv) fields
+            IMap.iter (fun _ tv -> ty tv) fields
       end
     | Tvar _ -> assert false (* Expansion got rid of Tvars ... *)
     | Toption x -> ty x
@@ -58,7 +60,7 @@ end = struct
     | Tunresolved tyl -> List.iter tyl ty
     | Tobject -> ()
     | Tshape (_, fdm) ->
-        ShapeMap.iter (fun _ v -> ty v) fdm
+        ShapeFieldMap.iter (fun _ v -> ty v) fdm
 
   and ty_opt = function None -> () | Some x -> ty x
 

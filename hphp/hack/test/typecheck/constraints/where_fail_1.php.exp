@@ -1,0 +1,8 @@
+File "where_fail_1.php", line 14, characters 28-29:
+A 'where' type constraint is violated here (Typing[4110])
+File "where_fail_1.php", line 10, characters 19-33:
+This is the method with 'where' type constraints
+File "where_fail_1.php", line 10, characters 61-67:
+This is an object of type Derived
+File "where_fail_1.php", line 13, characters 24-27:
+It is incompatible with an object of type Base

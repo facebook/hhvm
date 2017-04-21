@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,20 +38,28 @@ using namespace reg;
 
 namespace {
 
-struct TestDataBlock : public DataBlock {
+struct TestDataBlock {
   explicit TestDataBlock(size_t sz) {
-    Address result = (Address)mmap(0, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
-                                   MAP_ANON | MAP_PRIVATE, -1, 0);
-    always_assert(result != MAP_FAILED);
-    m_base = m_frontier = result;
-    m_size = sz;
+    auto code = (Address)mmap(0, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
+                              MAP_ANON | MAP_PRIVATE, -1, 0);
+    always_assert(code != MAP_FAILED);
+    m_db.init(code, sz, "TestBlock");
   }
 
   ~TestDataBlock() {
-    munmap(m_base, m_size);
-    m_base = m_frontier = nullptr;
-    m_size = 0;
+    munmap(m_db.base(), m_db.capacity());
   }
+
+  Address frontier() const {
+    return m_db.frontier();
+  }
+
+  /* implicit */ operator DataBlock&() {
+    return m_db;
+  }
+
+private:
+  DataBlock m_db;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -88,7 +96,7 @@ void compare(const char* expectedOpName,
     // that affects memory.  We could figure this out and check for
     // it, but it's good enough just to see that the opcode has the
     // prefix we expect.
-    EXPECT_EQ(true, boost::starts_with(opName, expectedOpName))
+    EXPECT_TRUE(boost::starts_with(opName, expectedOpName))
       << "expected " << expectedOpName << ", got " << opName;
 
     if (expectIt == expecteds.end()) {

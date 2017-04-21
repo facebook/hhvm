@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@ namespace HPHP {
 TEST(JobQueue, Ordering) {
   {
     // FIFO only.
-    JobQueue<int> job_queue(1, false, 0, false);
+    JobQueue<int> job_queue(1, 0, false);
     for (int i = 0; i < 100; ++i) {
       job_queue.enqueue(i);
     }
@@ -38,7 +38,7 @@ TEST(JobQueue, Ordering) {
 
   {
     // LIFO only.
-    JobQueue<int> job_queue(1, false, 0, false, 0);
+    JobQueue<int> job_queue(1, 0, false, 0);
     for (int i = 0; i < 100; ++i) {
       job_queue.enqueue(i);
     }
@@ -54,7 +54,7 @@ TEST(JobQueue, Ordering) {
 
   {
     // Hybrid. First do 50 LIFO, then 50 FIFO.
-    JobQueue<int> job_queue(1, false, 0, false, 50);
+    JobQueue<int> job_queue(1, 0, false, 50);
     for (int i = 0; i < 100; ++i) {
       job_queue.enqueue(i);
     }
@@ -79,7 +79,7 @@ TEST(JobQueue, Expiration) {
   timeExpired.tv_sec += 31;
 
   {
-    JobQueue<int> fifo_queue(1, false, 0, false, INT_MAX, 30000);
+    JobQueue<int> fifo_queue(1, 0, false, INT_MAX, 30000);
     fifo_queue.enqueue(1);
     fifo_queue.enqueue(2);
     fifo_queue.enqueue(3);
@@ -97,7 +97,7 @@ TEST(JobQueue, Expiration) {
   }
 
   {
-    JobQueue<int> lifo_queue(1, false, 0, false, 0, 30000);
+    JobQueue<int> lifo_queue(1, 0, false, 0, 30000);
     lifo_queue.enqueue(1);
     lifo_queue.enqueue(2);
     lifo_queue.enqueue(3);
@@ -118,24 +118,25 @@ TEST(JobQueue, Expiration) {
 
   {
     // job reaper.
-    JobQueue<int> lifo_queue(1, false, 0, false, 0, 30000);
+    JobQueue<int> lifo_queue(1, 0, false, 0, 30000);
     lifo_queue.enqueue(1);
     lifo_queue.enqueue(2);
     lifo_queue.enqueue(3);
     lifo_queue.enqueue(4);
     lifo_queue.enqueue(5);
-    lifo_queue.setJobReaperId(1);
 
     // manipulate m_jobs timestamp to simulate time passing.
     lifo_queue.m_jobQueues[0][0].second.tv_sec -= 32;
     lifo_queue.m_jobQueues[0][1].second.tv_sec -= 31;
 
     // having job reaper should not affect anything other threads are doing.
-    bool expired = false;
-    EXPECT_EQ(1, lifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
-    EXPECT_TRUE(expired);
-    EXPECT_EQ(2, lifo_queue.dequeueMaybeExpired(1, 0, true, &expired));
-    EXPECT_TRUE(expired);
+    {
+      bool expired = false;
+      EXPECT_EQ(1, lifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+      EXPECT_TRUE(expired);
+      EXPECT_EQ(2, lifo_queue.dequeueMaybeExpired(1, 0, true, &expired));
+      EXPECT_TRUE(expired);
+    }
 
     // now no more jobs are expired. job reaper would block.
     std::atomic<int> value(-1);
@@ -148,9 +149,12 @@ TEST(JobQueue, Expiration) {
     lifo_queue.notify();
     EXPECT_EQ(-1, value.load());
 
-    // but normal workers should proceed.
-    EXPECT_EQ(5, lifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
-    EXPECT_FALSE(expired);
+    {
+      // but normal workers should proceed.
+      bool expired = false;
+      EXPECT_EQ(5, lifo_queue.dequeueMaybeExpired(0, 0, true, &expired));
+      EXPECT_FALSE(expired);
+    }
 
     // now set the first job to be expired.
     lifo_queue.m_jobQueues[0][0].second.tv_sec -= 32;
@@ -177,7 +181,7 @@ TEST(JobQueue, Expiration) {
 }
 
 TEST(JobQueue, Priority) {
-  JobQueue<int> fifo_queue(1, false, 0, false, INT_MAX, 30, 3);
+  JobQueue<int> fifo_queue(1, 0, false, INT_MAX, 30, 3);
   fifo_queue.enqueue(1);
   fifo_queue.enqueue(2);
   fifo_queue.enqueue(3, 2);

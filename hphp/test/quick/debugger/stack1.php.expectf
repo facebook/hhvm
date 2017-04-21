@@ -169,23 +169,25 @@ Break at cls::pri() on line 30 of %s/stack1.php
   31     }
 
 where
-#0  hphpd_break ()
+#0   ()
     at %s/stack1.php:30
-#1  cls::pri (3, 1)
+#1  hphpd_break ()
+    at %s/stack1.php:30
+#2  cls::pri (3, 1)
     at %s/stack1.php:22
-#2  cls::pub (2, 1)
+#3  cls::pub (2, 1)
     at %s/stack1.php:11
-#3  bar (2, 2)
+#4  bar (2, 2)
     at %s/stack1.php:16
-#4  foo (2, 2)
+#5  foo (2, 2)
     at %s/stack1.php:28
-#5  cls::pri (2, 2)
+#6  cls::pri (2, 2)
     at %s/stack1.php:22
-#6  cls::pub (2, 2)
+#7  cls::pub (2, 2)
     at %s/stack1.php:39
-#7  test (2, 2)
+#8  test (2, 2)
     at :1
-#8  include ("")
+#9  include ("")
     at :1
 variable
 $x = 3

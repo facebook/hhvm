@@ -67,7 +67,7 @@
  */
 void gd_putout (int i, void *out)
 {
-	gdPutC(i, (gdIOCtx *) out);
+  gdPutC(i, (gdIOCtx *) out);
 }
 
 
@@ -78,7 +78,7 @@ void gd_putout (int i, void *out)
  */
 int gd_getin (void *in)
 {
-	return (gdGetC((gdIOCtx *) in));
+  return (gdGetC((gdIOCtx *) in));
 }
 
 
@@ -93,31 +93,31 @@ int gd_getin (void *in)
  */
 void gdImageWBMPCtx (gdImagePtr image, int fg, gdIOCtx * out)
 {
-	int x, y, pos;
-	Wbmp *wbmp;
+  int x, y, pos;
+  Wbmp *wbmp;
 
-	/* create the WBMP */
-	if ((wbmp = createwbmp (gdImageSX (image), gdImageSY (image), WBMP_WHITE)) == NULL) {
-		php_gd_error("Could not create WBMP");
-	}
+  /* create the WBMP */
+  if ((wbmp = createwbmp (gdImageSX (image), gdImageSY (image), WBMP_WHITE)) == NULL) {
+    php_gd_error("Could not create WBMP");
+  }
 
-	/* fill up the WBMP structure */
-	pos = 0;
-	for (y = 0; y < gdImageSY(image); y++) {
-		for (x = 0; x < gdImageSX(image); x++) {
-			if (gdImageGetPixel (image, x, y) == fg) {
-				wbmp->bitmap[pos] = WBMP_BLACK;
-			}
-			pos++;
-		}
-	}
+  /* fill up the WBMP structure */
+  pos = 0;
+  for (y = 0; y < gdImageSY(image); y++) {
+    for (x = 0; x < gdImageSX(image); x++) {
+      if (gdImageGetPixel (image, x, y) == fg) {
+        wbmp->bitmap[pos] = WBMP_BLACK;
+      }
+      pos++;
+    }
+  }
 
-	/* write the WBMP to a gd file descriptor */
-	if (writewbmp (wbmp, &gd_putout, out)) {
-		php_gd_error("Could not save WBMP");
-	}
-	/* des submitted this bugfix: gdFree the memory. */
-	freewbmp(wbmp);
+  /* write the WBMP to a gd file descriptor */
+  if (writewbmp (wbmp, &gd_putout, out)) {
+    php_gd_error("Could not save WBMP");
+  }
+  /* des submitted this bugfix: gdFree the memory. */
+  freewbmp(wbmp);
 }
 
 /* gdImageCreateFromWBMPCtx
@@ -126,41 +126,41 @@ void gdImageWBMPCtx (gdImagePtr image, int fg, gdIOCtx * out)
  */
 gdImagePtr gdImageCreateFromWBMPCtx (gdIOCtx * infile)
 {
-	/* FILE *wbmp_file; */
-	Wbmp *wbmp;
-	gdImagePtr im = NULL;
-	int black, white;
-	int col, row, pos;
+  /* FILE *wbmp_file; */
+  Wbmp *wbmp;
+  gdImagePtr im = NULL;
+  int black, white;
+  int col, row, pos;
 
-	if (readwbmp (&gd_getin, infile, &wbmp)) {
-		return NULL;
-	}
+  if (readwbmp (&gd_getin, infile, &wbmp)) {
+    return NULL;
+  }
 
-	if (!(im = gdImageCreate (wbmp->width, wbmp->height))) {
-		freewbmp (wbmp);
-		return NULL;
-	}
+  if (!(im = gdImageCreate (wbmp->width, wbmp->height))) {
+    freewbmp (wbmp);
+    return NULL;
+  }
 
-	/* create the background color */
-	white = gdImageColorAllocate(im, 255, 255, 255);
-	/* create foreground color */
-	black = gdImageColorAllocate(im, 0, 0, 0);
+  /* create the background color */
+  white = gdImageColorAllocate(im, 255, 255, 255);
+  /* create foreground color */
+  black = gdImageColorAllocate(im, 0, 0, 0);
 
-	/* fill in image (in a wbmp 1 = white/ 0 = black) */
-	pos = 0;
-	for (row = 0; row < wbmp->height; row++) {
-		for (col = 0; col < wbmp->width; col++) {
-			if (wbmp->bitmap[pos++] == WBMP_WHITE) {
-				gdImageSetPixel(im, col, row, white);
-			} else {
-				gdImageSetPixel(im, col, row, black);
-			}
-		}
-	}
+  /* fill in image (in a wbmp 1 = white/ 0 = black) */
+  pos = 0;
+  for (row = 0; row < wbmp->height; row++) {
+    for (col = 0; col < wbmp->width; col++) {
+      if (wbmp->bitmap[pos++] == WBMP_WHITE) {
+        gdImageSetPixel(im, col, row, white);
+      } else {
+        gdImageSetPixel(im, col, row, black);
+      }
+    }
+  }
 
-	freewbmp(wbmp);
+  freewbmp(wbmp);
 
-	return im;
+  return im;
 }
 
 /* gdImageCreateFromWBMP
@@ -168,21 +168,21 @@ gdImagePtr gdImageCreateFromWBMPCtx (gdIOCtx * infile)
  */
 gdImagePtr gdImageCreateFromWBMP (FILE * inFile)
 {
-	gdImagePtr im;
-	gdIOCtx *in = gdNewFileCtx(inFile);
-	im = gdImageCreateFromWBMPCtx(in);
-	in->gd_free(in);
+  gdImagePtr im;
+  gdIOCtx *in = gdNewFileCtx(inFile);
+  im = gdImageCreateFromWBMPCtx(in);
+  in->gd_free(in);
 
-	return im;
+  return im;
 }
 
 gdImagePtr gdImageCreateFromWBMPPtr (int size, void *data)
 {
-	gdImagePtr im;
-	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
-	im = gdImageCreateFromWBMPCtx(in);
-	in->gd_free(in);
-	return im;
+  gdImagePtr im;
+  gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
+  im = gdImageCreateFromWBMPCtx(in);
+  in->gd_free(in);
+  return im;
 }
 
 /* gdImageWBMP
@@ -190,9 +190,9 @@ gdImagePtr gdImageCreateFromWBMPPtr (int size, void *data)
  */
 void gdImageWBMP (gdImagePtr im, int fg, FILE * outFile)
 {
-	gdIOCtx *out = gdNewFileCtx(outFile);
-	gdImageWBMPCtx(im, fg, out);
-	out->gd_free(out);
+  gdIOCtx *out = gdNewFileCtx(outFile);
+  gdImageWBMPCtx(im, fg, out);
+  out->gd_free(out);
 }
 
 /* gdImageWBMPPtr
@@ -200,11 +200,11 @@ void gdImageWBMP (gdImagePtr im, int fg, FILE * outFile)
  */
 void * gdImageWBMPPtr (gdImagePtr im, int *size, int fg)
 {
-	void *rv;
-	gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
-	gdImageWBMPCtx(im, fg, out);
-	rv = gdDPExtractData(out, size);
-	out->gd_free(out);
+  void *rv;
+  gdIOCtx *out = gdNewDynamicCtx(2048, NULL);
+  gdImageWBMPCtx(im, fg, out);
+  rv = gdDPExtractData(out, size);
+  out->gd_free(out);
 
-	return rv;
+  return rv;
 }

@@ -1,0 +1,15 @@
+File "where_override_bad.php", line 15, characters 7-11:
+Class List4 does not correctly implement all required methods  (Typing[4110])
+File "where_override_bad.php", line 15, characters 24-29:
+Some methods are incompatible with those declared in type MyList
+Read the following to see why:
+File "where_override_bad.php", line 16, characters 19-21:
+Member foo has the wrong type
+File "where_override_bad.php", line 10, characters 23-23:
+Some type constraint(s) here are violated
+File "where_override_bad.php", line 16, characters 40-40:
+'T' is a constrained type
+File "where_override_bad.php", line 16, characters 45-51:
+This is an object of type Derived
+File "where_override_bad.php", line 10, characters 45-48:
+It is incompatible with an object of type Base

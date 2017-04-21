@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -259,7 +259,7 @@ Array HHVM_FUNCTION(iterator_to_array, const Variant& obj,
 }
 
 bool HHVM_FUNCTION(spl_autoload_register,
-                   const Variant& autoload_function /* = null_variant */,
+                   const Variant& autoload_function /* = uninit_variant */,
                    bool throws /* = true */,
                    bool prepend /* = false */) {
   if (same(autoload_function, s_spl_autoload_call)) {
@@ -279,7 +279,8 @@ bool HHVM_FUNCTION(spl_autoload_register,
 }
 
 bool HHVM_FUNCTION(spl_autoload_unregister, const Variant& autoload_function) {
-  if (same(autoload_function, s_spl_autoload_call)) {
+  if (same(autoload_function, s_spl_autoload_call) &&
+      !AutoloadHandler::s_instance->isRunning()) {
     AutoloadHandler::s_instance->removeAllHandlers();
   } else {
     AutoloadHandler::s_instance->removeHandler(autoload_function);
@@ -300,7 +301,6 @@ void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
   AutoloadHandler::s_instance->autoloadClass(class_name, true);
 }
 
-namespace {
 struct ExtensionList final : RequestEventHandler {
   void requestInit() override {
     extensions = make_packed_array(String(".inc"), String(".php"));
@@ -308,15 +308,11 @@ struct ExtensionList final : RequestEventHandler {
   void requestShutdown() override {
     extensions.reset();
   }
-  void vscan(IMarker& mark) const override {
-    mark(extensions);
-  }
 
   Array extensions;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
-}
 
 String HHVM_FUNCTION(spl_autoload_extensions,
                      const String& file_extensions /* = null_string */) {
@@ -354,8 +350,7 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class SPLExtension final : public Extension {
-public:
+struct SPLExtension final : Extension {
   SPLExtension() : Extension("spl", "0.2") { }
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
     HHVM_ME(DirectoryIterator, hh_readdir);

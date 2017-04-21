@@ -1,8 +1,7 @@
 File "with_tconst_bad1.php", line 11, characters 7-13:
-This object is of type CLoader (Typing[4110])
+Class CLoader does not correctly implement all required methods  (Typing[4110])
 File "with_tconst_bad1.php", line 11, characters 23-29:
-It is incompatible with this object of type ALoader
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type ALoader
 Read the following to see why:
 File "with_tconst_bad1.php", line 7, characters 23-24:
 Unable to satisfy constraint on this type constant

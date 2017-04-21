@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
@@ -180,10 +181,10 @@ static void php_libxml_internal_error_handler(int error_type, void *ctx,
 }
 
 /**
- * The error handler callbacks below are called from libxml code
- * that is compiled without frame pointers, so it's necessary to do
- * SYNC_VM_REGS_SCOPED() before calling libxml code that uses these
- * error handler callbacks.
+ * The error handler callbacks below are called from libxml code that
+ * is compiled without frame pointers, so it's necessary to use a
+ * VMRegGuard before calling libxml code that uses these error handler
+ * callbacks.
  */
 
 static void php_libxml_ctx_error(void *ctx,
@@ -431,9 +432,9 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
     ctxp = xmlXPathNewContext(docp);
     ctxp->node = nodep;
     if (arr.exists(s_namespaces)) {
-      Variant tmp = arr.rvalAt(s_namespaces);
-      if (tmp.isArray()) {
-        for (ArrayIter it = tmp.toArray().begin(); it; ++it) {
+      Variant temp = arr.rvalAt(s_namespaces);
+      if (temp.isArray()) {
+        for (ArrayIter it = temp.toArray().begin(); it; ++it) {
           Variant prefix = it.first();
           Variant tmpns = it.second();
           if (prefix.isString() || tmpns.isString()) {
@@ -499,7 +500,7 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       if (ret > 0) {
         retval = String((char *)xmlOutputBufferGetContent(buf), ret, CopyString);
       } else {
-        retval.setNull();
+        retval = empty_string();
       }
     }
   }
@@ -690,7 +691,7 @@ static xmlNsPtr dom_get_ns(xmlNodePtr nodep, const char *uri, int *errorcode,
 static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
                                      const String& source,
                                      int options) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
 
   xmlDocPtr ret = nullptr;
   xmlParserCtxtPtr ctxt = nullptr;
@@ -702,8 +703,6 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   keep_blanks = domdoc->m_preservewhitespace;
   substitute_ent = domdoc->m_substituteentities;
   recover = domdoc->m_recover;
-
-  xmlInitParser();
 
   req::ptr<File> stream;
 
@@ -771,7 +770,7 @@ static xmlDocPtr dom_document_parser(DOMNode* domnode, bool isFile,
   int old_error_reporting = 0;
   if (recover) {
     old_error_reporting = HHVM_FN(error_reporting)();
-    HHVM_FN(error_reporting)(old_error_reporting | k_E_WARNING);
+    HHVM_FN(error_reporting)(old_error_reporting | (int)ErrorMode::WARNING);
   }
 
   xmlParseDocument(ctxt);
@@ -809,6 +808,10 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
     raise_warning("Empty string supplied as input");
     return false;
   }
+  if (isFile && !FileUtil::isValidPath(source)) {
+    raise_warning("Invalid file source");
+    return false;
+  }
   auto domdoc = Native::data<DOMNode>(this_);
   auto newdoc = dom_document_parser(domdoc, isFile, source, options);
   if (!newdoc) {
@@ -825,7 +828,7 @@ static bool HHVM_METHOD(DomDocument, _load, const String& source,
 
 static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
                         int64_t options, bool isFile) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
 
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -834,6 +837,11 @@ static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
 
   htmlParserCtxtPtr ctxt;
   if (isFile) {
+    if (!FileUtil::isValidPath(source)) {
+      raise_warning("Invalid file source");
+      return false;
+    }
+
     ctxt = htmlCreateFileParserCtxt(source.data(), nullptr);
   } else {
     ctxt = htmlCreateMemoryParserCtxt(source.data(), source.size());
@@ -841,14 +849,14 @@ static bool HHVM_METHOD(DomDocument, _loadHTML, const String& source,
   if (!ctxt) {
     return false;
   }
-  if (options) {
-    htmlCtxtUseOptions(ctxt, options);
-  }
   ctxt->vctxt.error = php_libxml_ctx_error;
   ctxt->vctxt.warning = php_libxml_ctx_warning;
   if (ctxt->sax != nullptr) {
     ctxt->sax->error = php_libxml_ctx_error;
     ctxt->sax->warning = php_libxml_ctx_warning;
+  }
+  if (options) {
+    htmlCtxtUseOptions(ctxt, options);
   }
   htmlParseDocument(ctxt);
   xmlDocPtr newdoc = ctxt->myDoc;
@@ -1251,7 +1259,7 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   }
   ctxp->namespaces = ns;
   ctxp->nsNr = nsnbr;
-  CallerFrame cf;
+  checkVMRegStateGuarded();
   xpathobjp = xmlXPathEvalExpression((xmlChar*)expr.data(), ctxp);
   ctxp->node = nullptr;
   if (ns != nullptr) {
@@ -1523,7 +1531,7 @@ struct DOMPropHandler: Native::BasePropHandler {
 
   static Variant setProp(const Object& this_,
                          const String& name,
-                         Variant& value) {
+                         const Variant& value) {
     Derived::map.setter(name)(this_, value);
     return true;
   }
@@ -2121,6 +2129,25 @@ Variant HHVM_METHOD(DOMNode, appendChild,
   }
   dom_reconcile_ns(nodep->doc, new_child);
   return create_node_object(new_child, data->doc());
+}
+
+DOMNode& DOMNode::operator=(const DOMNode& copy) {
+  if (auto copyNode = copy.nodep()) {
+    auto newNode = xmlDocCopyNode(copyNode, copyNode->doc, true /* deep */);
+    setNode(newNode);
+    if (auto d = copy.doc()) {
+      setDoc(std::move(d));
+    }
+    return *this;
+  }
+
+  if (m_node) {
+    assert(m_node->getCache() &&
+           Native::data<DOMNode>(m_node->getCache()) == this);
+    m_node->clearCache();
+    m_node = nullptr;
+  }
+  return *this;
 }
 
 Variant HHVM_METHOD(DOMNode, cloneNode,
@@ -3615,6 +3642,17 @@ Variant HHVM_METHOD(DOMDocument, importNode,
       return false;
     }
   }
+  if ((retnodep->type == XML_ATTRIBUTE_NODE) && (nodep->ns != nullptr)) {
+    xmlNsPtr nsptr = nullptr;
+    xmlNodePtr root = xmlDocGetRootElement(docp);
+
+    nsptr = xmlSearchNsByHref (nodep->doc, root, nodep->ns->href);
+    if (nsptr == nullptr) {
+      int errorcode;
+      nsptr = dom_get_ns(root, (char *) nodep->ns->href, &errorcode, (char *) nodep->ns->prefix);
+    }
+    xmlSetNs(retnodep, nsptr);
+  }
   return create_node_object(retnodep, data->doc());
 }
 
@@ -3652,13 +3690,13 @@ bool HHVM_METHOD(DOMDocument, registerNodeClass,
 
 bool HHVM_METHOD(DOMDocument, relaxNGValidate,
                  const String& filename) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_relaxNG_validate(data, filename, DOM_LOAD_FILE);
 }
 
 bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const String& source) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_relaxNG_validate(data, source, DOM_LOAD_STRING);
 }
@@ -3666,7 +3704,7 @@ bool HHVM_METHOD(DOMDocument, relaxNGValidateSource, const String& source) {
 Variant HHVM_METHOD(DOMDocument, save,
                     const String& file,
                     int64_t options /* = 0 */) {
-  VMRegAnchor _;
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0, saveempty = 0;
@@ -3689,6 +3727,7 @@ Variant HHVM_METHOD(DOMDocument, save,
 
 Variant HHVM_METHOD(DOMDocument, saveHTMLFile,
                     const String& file) {
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int bytes, format = 0;
@@ -3724,7 +3763,7 @@ Variant HHVM_METHOD(DOMDocument, saveXML,
 }
 
 Variant HHVM_METHOD(DOMDocument, saveHTML,
-                    const Variant& node /* = null_variant */) {
+                    const Variant& node /* = uninit_variant */) {
   auto* data = Native::data<DOMNode>(this_);
   const Object& obj_node = node.isNull() ? null_object : node.toObject();
   return save_html_or_xml(data, /* as_xml = */ false, obj_node);
@@ -3733,6 +3772,7 @@ Variant HHVM_METHOD(DOMDocument, saveHTML,
 Variant save_html_or_xml(DOMNode* obj,
                          bool as_xml,
                          const Object& node /* = null_object */) {
+  VMRegGuard _;
   xmlDocPtr docp = (xmlDocPtr)obj->nodep();
   xmlBufferPtr buf;
   xmlChar *mem;
@@ -3790,20 +3830,20 @@ Variant save_html_or_xml(DOMNode* obj,
 
 bool HHVM_METHOD(DOMDocument, schemaValidate,
                  const String& filename) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_schema_validate(data, filename, DOM_LOAD_FILE);
 }
 
 bool HHVM_METHOD(DOMDocument, schemaValidateSource,
                  const String& source) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   return _dom_document_schema_validate(data, source, DOM_LOAD_STRING);
 }
 
 bool HHVM_METHOD(DOMDocument, validate) {
-  SYNC_VM_REGS_SCOPED();
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   xmlValidCtxt *cvp;
@@ -3821,7 +3861,7 @@ bool HHVM_METHOD(DOMDocument, validate) {
 
 Variant HHVM_METHOD(DOMDocument, xinclude,
                     int64_t options /* = 0 */) {
-  VMRegAnchor _;
+  VMRegGuard _;
   auto* data = Native::data<DOMNode>(this_);
   xmlDocPtr docp = (xmlDocPtr)data->nodep();
   int err = xmlXIncludeProcessFlags(docp, options);
@@ -4534,11 +4574,17 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
       if (nodep != nullptr && nodep->type != XML_ATTRIBUTE_DECL) {
         node_list_unlink(nodep->children);
       }
-      if (xmlStrEqual((xmlChar*)prefix, (xmlChar*)"xmlns") &&
-          xmlStrEqual((xmlChar*)namespaceuri.data(),
-                      (xmlChar*)DOM_XMLNS_NAMESPACE)) {
+      if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") ||
+          (prefix == nullptr &&
+          xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) &&
+          xmlStrEqual((xmlChar *) namespaceuri.data(),
+                      (xmlChar *)DOM_XMLNS_NAMESPACE)) {
         is_xmlns = 1;
-        nsptr = dom_get_nsdecl(elemp, (xmlChar*)localname);
+        if (prefix == nullptr) {
+          nsptr = dom_get_nsdecl(elemp, nullptr);
+        } else {
+          nsptr = dom_get_nsdecl(elemp, (xmlChar *)localname);
+        }
       } else {
         nsptr = xmlSearchNsByHref(elemp->doc, elemp,
                                   (xmlChar*)namespaceuri.data());
@@ -4560,7 +4606,12 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
       }
       if (nsptr == nullptr) {
         if (prefix == nullptr) {
-          errorcode = NAMESPACE_ERR;
+          if (is_xmlns == 1) {
+            xmlNewNs(elemp, (xmlChar *)value.data(), nullptr);
+            xmlReconciliateNs(elemp->doc, elemp);
+          } else {
+            errorcode = NAMESPACE_ERR;
+          }
         } else {
           if (is_xmlns == 1) {
             xmlNewNs(elemp, (xmlChar*)value.data(), (xmlChar*)localname);
@@ -5575,6 +5626,7 @@ Variant HHVM_METHOD(DOMXPath, evaluate,
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
+  VMRegGuard _;
   return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_EVALUATE,
                         registerNodeNS);
 }
@@ -5587,6 +5639,7 @@ Variant HHVM_METHOD(DOMXPath, query,
   const Object& obj_context = context.isNull()
                             ? null_object
                             : context.toObject();
+  VMRegGuard _;
   return php_xpath_eval(data, expr, obj_context, PHP_DOM_XPATH_QUERY,
                         registerNodeNS);
 }
@@ -5806,8 +5859,7 @@ Variant HHVM_FUNCTION(dom_import_simplexml,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DOMDocumentExtension final : public Extension {
-public:
+struct DOMDocumentExtension final : Extension {
   DOMDocumentExtension() : Extension("domdocument") {}
   void moduleInit() override {
     HHVM_ME(DOMNode, appendChild);
@@ -5972,25 +6024,22 @@ public:
     HHVM_FE(dom_import_simplexml);
 
     HHVM_RC_INT_SAME(DOMSTRING_SIZE_ERR);
-#define HHVM_RC_INT_DOM(cns) Native::registerConstant<KindOfInt64>\
-                               (makeStaticString("DOM_" #cns), cns)
-    HHVM_RC_INT_DOM(HIERARCHY_REQUEST_ERR);
-    HHVM_RC_INT_DOM(INDEX_SIZE_ERR);
-    HHVM_RC_INT_DOM(INUSE_ATTRIBUTE_ERR);
-    HHVM_RC_INT_DOM(INVALID_ACCESS_ERR);
-    HHVM_RC_INT_DOM(INVALID_CHARACTER_ERR);
-    HHVM_RC_INT_DOM(INVALID_MODIFICATION_ERR);
-    HHVM_RC_INT_DOM(INVALID_STATE_ERR);
-    HHVM_RC_INT_DOM(NAMESPACE_ERR);
-    HHVM_RC_INT_DOM(NOT_FOUND_ERR);
-    HHVM_RC_INT_DOM(NOT_SUPPORTED_ERR);
-    HHVM_RC_INT_DOM(NO_DATA_ALLOWED_ERR);
-    HHVM_RC_INT_DOM(NO_MODIFICATION_ALLOWED_ERR);
-    HHVM_RC_INT_DOM(PHP_ERR);
-    HHVM_RC_INT_DOM(SYNTAX_ERR);
-    HHVM_RC_INT_DOM(VALIDATION_ERR);
-    HHVM_RC_INT_DOM(WRONG_DOCUMENT_ERR);
-#undef HHVM_RC_INT_DOM
+    HHVM_RC_INT(DOM_HIERARCHY_REQUEST_ERR, HIERARCHY_REQUEST_ERR);
+    HHVM_RC_INT(DOM_INDEX_SIZE_ERR, INDEX_SIZE_ERR);
+    HHVM_RC_INT(DOM_INUSE_ATTRIBUTE_ERR, INUSE_ATTRIBUTE_ERR);
+    HHVM_RC_INT(DOM_INVALID_ACCESS_ERR, INVALID_ACCESS_ERR);
+    HHVM_RC_INT(DOM_INVALID_CHARACTER_ERR, INVALID_CHARACTER_ERR);
+    HHVM_RC_INT(DOM_INVALID_MODIFICATION_ERR, INVALID_MODIFICATION_ERR);
+    HHVM_RC_INT(DOM_INVALID_STATE_ERR, INVALID_STATE_ERR);
+    HHVM_RC_INT(DOM_NAMESPACE_ERR, NAMESPACE_ERR);
+    HHVM_RC_INT(DOM_NOT_FOUND_ERR, NOT_FOUND_ERR);
+    HHVM_RC_INT(DOM_NOT_SUPPORTED_ERR, NOT_SUPPORTED_ERR);
+    HHVM_RC_INT(DOM_NO_DATA_ALLOWED_ERR, NO_DATA_ALLOWED_ERR);
+    HHVM_RC_INT(DOM_NO_MODIFICATION_ALLOWED_ERR, NO_MODIFICATION_ALLOWED_ERR);
+    HHVM_RC_INT(DOM_PHP_ERR, PHP_ERR);
+    HHVM_RC_INT(DOM_SYNTAX_ERR, SYNTAX_ERR);
+    HHVM_RC_INT(DOM_VALIDATION_ERR, VALIDATION_ERR);
+    HHVM_RC_INT(DOM_WRONG_DOCUMENT_ERR, WRONG_DOCUMENT_ERR);
 
     HHVM_RC_INT_SAME(XML_ELEMENT_NODE);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_NODE);
@@ -6012,7 +6061,7 @@ public:
     HHVM_RC_INT(XML_NAMESPACE_DECL_NODE, XML_NAMESPACE_DECL);
 
     HHVM_RC_INT_SAME(XML_LOCAL_NAMESPACE);
-#ifdef XML_GLOBAL_NAMESAPCE
+#ifdef XML_GLOBAL_NAMESPACE
     HHVM_RC_INT_SAME(XML_GLOBAL_NAMESPACE);
 #endif
 
@@ -6020,7 +6069,7 @@ public:
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_ID);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_IDREF);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_IDREFS);
-    HHVM_RC_INT_SAME(XML_ATTRIBUTE_ENTITY);
+    HHVM_RC_INT(XML_ATTRIBUTE_ENTITY, XML_ATTRIBUTE_ENTITIES);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_NMTOKEN);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_NMTOKENS);
     HHVM_RC_INT_SAME(XML_ATTRIBUTE_ENUMERATION);

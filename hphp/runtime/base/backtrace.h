@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,10 +16,14 @@
 #ifndef incl_HPHP_BACKTRACE_H_
 #define incl_HPHP_BACKTRACE_H_
 
+#include <stdint.h>
+
 namespace HPHP {
 
-class Array;
-class VMParserFrame;
+struct Array;
+struct VMParserFrame;
+struct c_WaitableWaitHandle;
+struct StructuredLogEntry;
 
 struct BacktraceArgs {
 
@@ -34,6 +38,16 @@ struct BacktraceArgs {
    */
   BacktraceArgs& skipTop(bool skipTop = true) {
     m_skipTop = skipTop;
+    return *this;
+  }
+
+  /**
+   * Skip the top inlined frames of the stack. Used to properly attribute cost
+   * measured by event hooks. If both skipTop and skipInlined are set then
+   * the first frame and all immediately following inlined frames are skipped.
+   */
+  BacktraceArgs& skipInlined(bool skipInlined = true) {
+    m_skipInlined = skipInlined;
     return *this;
   }
 
@@ -112,8 +126,17 @@ struct BacktraceArgs {
     return *this;
   }
 
+  /**
+   * Backtrace from wait handle, instead of current frame.
+   */
+  BacktraceArgs& fromWaitHandle(c_WaitableWaitHandle* handle) {
+    m_fromWaitHandle = handle;
+    return *this;
+  }
+
 private:
   bool m_skipTop{false};
+  bool m_skipInlined{false};
   bool m_withSelf{false};
   bool m_withThis{false};
   bool m_withMetadata{false};
@@ -122,9 +145,12 @@ private:
   bool m_withArgNames{false};
   int m_limit{0};
   VMParserFrame* m_parserFrame{nullptr};
+  c_WaitableWaitHandle* m_fromWaitHandle{nullptr};
 };
 
 Array createBacktrace(const BacktraceArgs& backtraceArgs);
+void addBacktraceToStructLog(const Array& bt, StructuredLogEntry& cols);
+int64_t createBacktraceHash();
 
 } // HPHP
 

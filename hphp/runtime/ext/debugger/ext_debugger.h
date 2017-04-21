@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,6 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+String HHVM_FUNCTION(hphpd_auth_token);
 void HHVM_FUNCTION(hphpd_break, bool condition = true);
 bool HHVM_FUNCTION(hphp_debugger_attached);
 Array HHVM_FUNCTION(debugger_get_info);

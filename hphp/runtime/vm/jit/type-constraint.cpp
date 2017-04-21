@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,6 @@ std::string TypeConstraint::toString() const {
 
   if (category == DataTypeSpecialized) {
     if (wantArrayKind()) ret += ",ArrayKind";
-    if (wantArrayShape()) ret += ",ArrayShape";
     if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
     }
@@ -50,15 +49,16 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       return true;
 
     case DataTypeCountness:
+    case DataTypeBoxAndCountness:
       // Consumers using this constraint expect the type to be relaxed to
       // Uncounted or left alone, so something like Arr|Obj isn't specific
       // enough.
       return !t.maybe(TCounted) ||
-             t.subtypeOfAny(TStr, TArr, TObj,
+             t.subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset, TObj,
                             TRes, TBoxedCell);
 
-    case DataTypeCountnessInit:
-      return typeFitsConstraint(t, DataTypeCountness) &&
+    case DataTypeBoxAndCountnessInit:
+      return typeFitsConstraint(t, DataTypeBoxAndCountness) &&
              (t <= TUninit || !t.maybe(TUninit));
 
     case DataTypeSpecific:
@@ -78,7 +78,6 @@ bool typeFitsConstraint(Type t, TypeConstraint tc) {
       }
       if (t < TArr && t.arrSpec()) {
         auto arrSpec = t.arrSpec();
-        if (tc.wantArrayShape() && !arrSpec.shape()) return false;
         if (tc.wantArrayKind() && !arrSpec.kind()) return false;
         return true;
       }
@@ -100,6 +99,12 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
          origTc, knownType, toRelax);
   Trace::Indent _i;
 
+  // AssertType can be given TCtx, which should never relax.
+  if (toRelax.maybe(TCctx)) {
+    always_assert(toRelax <= TCtx);
+    return origTc;
+  }
+
   auto const dstType = knownType & toRelax;
   always_assert_flog(typeFitsConstraint(dstType, origTc),
                      "refine({}, {}) doesn't fit {}",
@@ -114,7 +119,6 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       // We need to ask for the right kind of specialization, so grab it from
       // origTc.
       if (origTc.wantArrayKind()) newTc.setWantArrayKind();
-      if (origTc.wantArrayShape()) newTc.setWantArrayShape();
       if (origTc.wantClass()) newTc.setDesiredClass(origTc.desiredClass());
     }
 
@@ -126,7 +130,15 @@ TypeConstraint relaxConstraint(const TypeConstraint origTc,
       newDstType, newTc);
     incCategory(newTc.category);
   }
-
+  // DataTypeCountness can be relaxed to DataTypeGeneric in
+  // optimizeProfiledGuards, so we can't rely on this category to give type
+  // information through guards.  Since relaxConstraint is used to relax the
+  // DataTypeCategory for guards, we cannot return DataTypeCountness unless we
+  // already had it to start with.  Instead, we return DataTypeBoxCountness,
+  // which won't be further relaxed by optimizeProfiledGuards.
+  if (newTc.category == DataTypeCountness && origTc != DataTypeCountness) {
+    newTc.category = DataTypeBoxAndCountness;
+  }
   ITRACE(4, "Returning {}\n", newTc);
   // newTc shouldn't be any more specific than origTc.
   always_assert(newTc.category <= origTc.category);
@@ -137,7 +149,6 @@ TypeConstraint applyConstraint(TypeConstraint tc, const TypeConstraint newTc) {
   tc.category = std::max(newTc.category, tc.category);
 
   if (newTc.wantArrayKind()) tc.setWantArrayKind();
-  if (newTc.wantArrayShape()) tc.setWantArrayShape();
 
   if (newTc.wantClass()) {
     if (tc.wantClass()) {

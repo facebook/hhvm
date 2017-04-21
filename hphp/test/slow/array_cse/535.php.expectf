@@ -13,16 +13,16 @@ string(1) "b"
 string(1) "a"
 string(1) "b"
 
-Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 10
+Notice: Uninitialized string offset: 0 in %s/test/slow/array_cse/535.php on line 10
 string(0) ""
 
-Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 11
+Notice: Uninitialized string offset: 1 in %s/test/slow/array_cse/535.php on line 11
 string(0) ""
 
-Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 12
+Notice: Uninitialized string offset: 0 in %s/test/slow/array_cse/535.php on line 12
 string(0) ""
 string(1) "b"
 
-Warning: Out of bounds in %s/test/slow/array_cse/535.php on line 11
+Notice: Uninitialized string offset: 1 in %s/test/slow/array_cse/535.php on line 11
 string(0) ""
 string(1) "b"

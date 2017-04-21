@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,9 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_typevar(false),
                                 m_typeaccess(false),
                                 m_shape(false),
-                                m_clsCnsShapeField(false) { }
+                                m_allowsUnknownFields(false),
+                                m_clsCnsShapeField(false),
+                                m_optionalShapeField(false) { }
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
@@ -103,6 +105,12 @@ MaybeDataType TypeAnnotation::dataType() const {
   if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
   if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
   if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\dict"))     return KindOfDict;
+  if (!strcasecmp(m_name.c_str(), "HH\\vec"))      return KindOfVec;
+  if (!strcasecmp(m_name.c_str(), "HH\\keyset"))   return KindOfKeyset;
+  if (!strcasecmp(m_name.c_str(), "HH\\varray"))   return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\darray"))   return KindOfArray;
+  if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) return KindOfArray;
   if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
   if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
 
@@ -290,6 +298,24 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
       ? TypeStructure::Kind::T_shape
       : TypeStructure::Kind::T_array;
   }
+  if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
+    return TypeStructure::Kind::T_array;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
+    return TypeStructure::Kind::T_array;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
+    return TypeStructure::Kind::T_array;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\dict")) {
+    return TypeStructure::Kind::T_dict;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\vec")) {
+    return TypeStructure::Kind::T_vec;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\keyset")) {
+    return TypeStructure::Kind::T_keyset;
+  }
   if (m_typevar) {
     return TypeStructure::Kind::T_typevar;
   }
@@ -316,7 +342,9 @@ const StaticString
   s_root_name("root_name"),
   s_access_list("access_list"),
   s_fields("fields"),
+  s_allows_unknown_fields("allows_unknown_fields"),
   s_is_cls_cns("is_cls_cns"),
+  s_optional_shape_field("optional_shape_field"),
   s_value("value"),
   s_typevars("typevars")
 ;
@@ -344,6 +372,11 @@ void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
     assert(shapeField->m_typeArgs);
     auto field = Array::Create();
     if (shapeField->isClsCnsShapeField()) field.add(s_is_cls_cns, true_varNR);
+
+    if (shapeField->isOptionalShapeField()) {
+      field.add(s_optional_shape_field, true_varNR);
+    }
+
     field.add(s_value, Variant(shapeField->m_typeArgs->getScalarArrayRep()));
     fields.add(String(shapeField->m_name), Variant(field.get()));
     shapeField = shapeField->m_typeList;
@@ -357,6 +390,11 @@ Array TypeAnnotation::getScalarArrayRep() const {
   bool nullable = (bool) m_nullable;
   if (nullable) {
     rep.add(s_nullable, true_varNR);
+  }
+
+  bool allowsUnknownFields = (bool) m_allowsUnknownFields;
+  if (allowsUnknownFields) {
+    rep.add(s_allows_unknown_fields, true_varNR);
   }
 
   TypeStructure::Kind kind = getKind();
@@ -375,6 +413,9 @@ Array TypeAnnotation::getScalarArrayRep() const {
             Variant(argsListToScalarArray(m_typeArgs->m_typeList)));
     break;
   case TypeStructure::Kind::T_array:
+  case TypeStructure::Kind::T_dict:
+  case TypeStructure::Kind::T_vec:
+  case TypeStructure::Kind::T_keyset:
     if (m_typeArgs) {
       rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }

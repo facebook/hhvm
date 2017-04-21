@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,9 +26,11 @@
 #include "hphp/runtime/vm/jit/translator.h"
 
 #include "hphp/util/arena.h"
+#include "hphp/util/struct-log.h"
 
 #include <string>
 #include <type_traits>
+#include <folly/Optional.h>
 
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
@@ -188,7 +190,34 @@ struct IRUnit {
    */
   SSATmp* mainFP() const;
 
+  /*
+   * Return the main StkPtr for the unit.  This is the result of the DefSP
+   * instruction on the entry block. (note that tere should be no other stack
+   * pointers in the unit).
+   */
+  SSATmp* mainSP() const;
+
+  /*
+   * Return the "start" timestamp when this IRUnit was constructed.
+   */
+  int64_t startNanos() const;
+  folly::Optional<StructuredLogEntry>& logEntry() const;
+  void initLogEntry(const Func*);
+
   /////////////////////////////////////////////////////////////////////////////
+
+  struct Hinter {
+    Hinter(IRUnit& unit, Block::Hint defHint) :
+        m_unit(unit), m_saved(unit.m_defHint) {
+      m_unit.m_defHint = defHint;
+    }
+    ~Hinter() {
+      m_unit.m_defHint = m_saved;
+    }
+   private:
+    IRUnit& m_unit;
+    Block::Hint m_saved;
+  };
 
   /*
    * Add a block to the IRUnit's arena.
@@ -206,7 +235,7 @@ struct IRUnit {
   /*
    * Create a DefLabel instruction.
    */
-  IRInstruction* defLabel(unsigned numDst, BCMarker marker);
+  IRInstruction* defLabel(unsigned numDst, BCContext bcctx);
 
   /*
    * Add some extra destinations to a defLabel.
@@ -217,6 +246,8 @@ struct IRUnit {
    * Add an extra SSATmp to jmp.
    */
   void expandJmp(IRInstruction* jmp, SSATmp* value);
+
+  /////////////////////////////////////////////////////////////////////////////
 
 private:
   template<class... Args> SSATmp* newSSATmp(Args&&...);
@@ -240,6 +271,15 @@ private:
 
   // Map from SSATmp ids to SSATmp*.
   jit::vector<SSATmp*> m_ssaTmps;
+
+  // Default hint value for new blocks in this unit.
+  Block::Hint m_defHint{Block::Hint::Neither};
+
+  // "Cursor" for IRInstructions in the current bytecode.  Managed externally.
+  uint16_t m_iroff{0};
+
+  int64_t m_startNanos; // Timestamp at construction time.
+  mutable folly::Optional<StructuredLogEntry> m_logEntry;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -251,6 +291,13 @@ std::string show(const IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Find and return a unique block that ends the unit at lastSk.
+ *
+ * If one cannot be found, abort, unless the unit has 0 main exits and 1 or
+ * more blocks that end with Unreachable, in which case return nullptr. This
+ * indicates regions that ended early due to type contradictions.
+ */
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk);
 
 //////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,7 +19,8 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/util/thread-local.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/root-map.h"
 #include <folly/String.h>
 #include <lber.h>
 #include "hphp/util/text-util.h"
@@ -27,7 +28,7 @@
 #define LDAP_DEPRECATED 1
 #include <ldap.h>
 
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
 
 #define PHP_LD_FULL_ADD 0xff
 
@@ -37,18 +38,26 @@ const int64_t
   k_LDAP_ESCAPE_FILTER  = 1<<0,
   k_LDAP_ESCAPE_DN      = 1<<1;
 
-const StaticString
-  s_LDAP_ESCAPE_FILTER("LDAP_ESCAPE_FILTER"),
-  s_LDAP_ESCAPE_DN("LDAP_ESCAPE_DN");
+#define LDAP_MODIFY_BATCH_ADD 0x01
+#define LDAP_MODIFY_BATCH_REMOVE 0x02
+#define LDAP_MODIFY_BATCH_REMOVE_ALL 0x12
+#define LDAP_MODIFY_BATCH_REPLACE 0x03
+#define LDAP_MODIFY_BATCH_ATTRIB "attrib"
+#define LDAP_MODIFY_BATCH_MODTYPE "modtype"
+#define LDAP_MODIFY_BATCH_VALUES "values"
 
-static class LdapExtension final : public Extension {
-public:
+static const StaticString
+  s_LDAP_MODIFY_BATCH_ATTRIB(LDAP_MODIFY_BATCH_ATTRIB),
+  s_LDAP_MODIFY_BATCH_MODTYPE(LDAP_MODIFY_BATCH_MODTYPE),
+  s_LDAP_MODIFY_BATCH_VALUES(LDAP_MODIFY_BATCH_VALUES);
+
+static struct LdapExtension final : Extension {
   LdapExtension() : Extension("ldap", NO_EXTENSION_VERSION_YET) {}
+  void requestInit() override;
+  void requestShutdown() override;
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_FILTER.get(),
-                                          k_LDAP_ESCAPE_FILTER);
-    Native::registerConstant<KindOfInt64>(s_LDAP_ESCAPE_DN.get(),
-                                          k_LDAP_ESCAPE_DN);
+    HHVM_RC_INT(LDAP_ESCAPE_FILTER, k_LDAP_ESCAPE_FILTER);
+    HHVM_RC_INT(LDAP_ESCAPE_DN, k_LDAP_ESCAPE_DN);
 
     HHVM_FE(ldap_connect);
     HHVM_FE(ldap_explode_dn);
@@ -59,6 +68,7 @@ public:
     HHVM_FE(ldap_mod_del);
     HHVM_FE(ldap_mod_replace);
     HHVM_FE(ldap_modify);
+    HHVM_FE(ldap_modify_batch);
     HHVM_FE(ldap_bind);
     HHVM_FE(ldap_set_rebind_proc);
     HHVM_FE(ldap_sort);
@@ -99,6 +109,14 @@ public:
     HHVM_RC_INT_SAME(LDAP_DEREF_NEVER);
     HHVM_RC_INT_SAME(LDAP_DEREF_SEARCHING);
 
+    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_ADD);
+    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE);
+    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REMOVE_ALL);
+    HHVM_RC_INT_SAME(LDAP_MODIFY_BATCH_REPLACE);
+    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_ATTRIB);
+    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_MODTYPE);
+    HHVM_RC_STR_SAME(LDAP_MODIFY_BATCH_VALUES);
+
     HHVM_RC_INT_SAME(LDAP_OPT_DEREF);
     HHVM_RC_INT_SAME(LDAP_OPT_SIZELIMIT);
     HHVM_RC_INT_SAME(LDAP_OPT_TIMELIMIT);
@@ -136,19 +154,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class LdapRequestData {
-public:
-  LdapRequestData() : m_num_links(0), m_max_links(-1) {
-  }
-
-  long m_num_links;
-  long m_max_links;
-};
-static IMPLEMENT_THREAD_LOCAL(LdapRequestData, s_ldap_data);
-#define LDAPG(name) s_ldap_data->m_ ## name
-
-class LdapLink : public SweepableResourceData {
-public:
+struct LdapLink : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
   LdapLink() {}
@@ -175,22 +181,49 @@ public:
   Variant rebindproc;
 };
 
+struct LdapRequestData {
+  LdapRequestData() : m_num_links(0), m_max_links(-1) {
+  }
+
+  long m_num_links;
+  long m_max_links;
+
+  RootMap<LdapLink> m_links;
+};
+static IMPLEMENT_THREAD_LOCAL(LdapRequestData, s_ldap_data);
+#define LDAPG(name) s_ldap_data->m_ ## name
+
+void LdapExtension::requestInit() {
+  if (!s_ldap_data.isNull()) {
+    s_ldap_data->m_links.reset();
+  }
+}
+
+void LdapExtension::requestShutdown() {
+  if (!s_ldap_data.isNull()) {
+    s_ldap_data->m_links.reset();
+  }
+}
+
 namespace {
 
 req::ptr<LdapLink> getLdapLinkFromToken(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  return MM().lookupRoot<LdapLink>(token);
+  return s_ldap_data->m_links.lookupRoot(userData);
 }
 
 void* getLdapLinkToken(const req::ptr<LdapLink>& link) {
-  return reinterpret_cast<void*>(MM().addRoot(link));
+  return reinterpret_cast<void*>(
+    s_ldap_data->m_links.addRoot(link)
+  );
 }
 
 // Note: a raw pointer is ok here since clearLdapLink is being
 // called from ~LdapLink which might be getting invoked from
 // sweep and we can't create any new req::ptrs at the point.
 void clearLdapLink(const LdapLink* link) {
-  MM().removeRoot(link);
+  if (!s_ldap_data.isNull()) {
+    s_ldap_data->m_links.removeRoot(link);
+  }
 }
 
 }
@@ -209,8 +242,7 @@ void LdapLink::closeImpl() {
   }
 }
 
-class LdapResult : public SweepableResourceData {
-public:
+struct LdapResult : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapResult)
 
   LdapResult(LDAPMessage *res) : data(res) {}
@@ -235,8 +267,7 @@ public:
 };
 IMPLEMENT_RESOURCE_ALLOCATION(LdapResult)
 
-class LdapResultEntry : public SweepableResourceData {
-public:
+struct LdapResultEntry : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapResultEntry)
 
   LdapResultEntry(LDAPMessage *entry, req::ptr<LdapResult> res)
@@ -710,7 +741,7 @@ static void get_attributes(Array &ret, LDAP *ldap,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(ldap_connect,
-                      const Variant& hostname /* = null_variant */,
+                      const Variant& hostname /* = uninit_variant */,
                       int port /* = 389 */) {
   const String& str_hostname = hostname.isNull()
                              ? null_string
@@ -818,10 +849,296 @@ bool HHVM_FUNCTION(ldap_modify,
   return php_ldap_do_modify(link, dn, entry, LDAP_MOD_REPLACE);
 }
 
+bool HHVM_FUNCTION(ldap_modify_batch,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& modifs) {
+  /*
+  $modifs = [
+    [
+      "attrib" => "unicodePwd",
+      "modtype" => LDAP_MODIFY_BATCH_REMOVE,
+      "values" => [$oldpw]
+    ],
+    [
+      "attrib" => "unicodePwd",
+      "modtype" => LDAP_MODIFY_BATCH_ADD,
+      "values" => [$newpw]
+    ],
+    [
+      "attrib" => "userPrincipalName",
+      "modtype" => LDAP_MODIFY_BATCH_REPLACE,
+      "values" => ["janitor@corp.contoso.com"]
+    ],
+    [
+      "attrib" => "userCert",
+      "modtype" => LDAP_MODIFY_BATCH_REMOVE_ALL
+    ]
+  ];
+  */
+
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
+    return false;
+  }
+
+  ssize_t num_mods = modifs.size();
+  int return_value;
+
+  /* perform validation */
+  {
+    /* make sure the DN contains no NUL bytes */
+    if (dn.find('\0') != String::npos) {
+      raise_warning("DN must not contain NUL bytes");
+      return false;
+    }
+
+    for (ssize_t i = 0; i < num_mods; ++i) {
+      /* are the keys consecutive integers? */
+      if (!modifs.exists((int64_t)i)) {
+        raise_warning("Modifications array must have integer indices "
+                      "0, 1, ...");
+        return false;
+      }
+
+      Variant mod = modifs[(int64_t)i];
+
+      /* is the value an array itself? */
+      if (!mod.isArray()) {
+        raise_warning("Each entry of modifications array must be an array "
+                      "itself");
+        return false;
+      }
+
+      /* for the modification hashtable... */
+      const Array& modprops = mod.asCArrRef();
+      ssize_t num_modprops = modprops.size();
+      ArrayIter modprops_iter(modprops);
+
+      for (ssize_t j = 0; j < num_modprops; ++j) {
+        /* is the key a string? */
+        if (!modprops_iter.first().isString()) {
+          raise_warning("Each entry of modifications array must be "
+                        "string-indexed");
+          return false;
+        }
+
+        /* is this a valid entry? */
+        const String& modkey = modprops_iter.first().asCStrRef();
+        if (modkey != s_LDAP_MODIFY_BATCH_ATTRIB
+            && modkey != s_LDAP_MODIFY_BATCH_MODTYPE
+            && modkey != s_LDAP_MODIFY_BATCH_VALUES) {
+          raise_warning("The only allowed keys in entries of the modifications "
+                        "array are '" LDAP_MODIFY_BATCH_ATTRIB "', '"
+                        LDAP_MODIFY_BATCH_MODTYPE "' and '"
+                        LDAP_MODIFY_BATCH_VALUES "'");
+          return false;
+        }
+
+        /* does the value type match the key? */
+        if (modkey == s_LDAP_MODIFY_BATCH_ATTRIB) {
+          if (!modprops_iter.second().isString()) {
+            raise_warning("A '" LDAP_MODIFY_BATCH_ATTRIB "' value must be "
+                          "a string");
+            return false;
+          }
+          if (modprops_iter.second().asCStrRef().find('\0') != String::npos) {
+            raise_warning("A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not "
+                          "contain NUL bytes");
+            return false;
+          }
+        } else if (modkey == s_LDAP_MODIFY_BATCH_MODTYPE) {
+          if (!modprops_iter.second().isInteger()) {
+            raise_warning("A '" LDAP_MODIFY_BATCH_MODTYPE "' value must be "
+                          "an integer");
+            return false;
+          }
+
+          int64_t modtype = modprops_iter.second().asInt64Val();
+          if (modtype != LDAP_MODIFY_BATCH_ADD
+              && modtype != LDAP_MODIFY_BATCH_REMOVE
+              && modtype != LDAP_MODIFY_BATCH_REPLACE
+              && modtype != LDAP_MODIFY_BATCH_REMOVE_ALL) {
+            raise_warning("The '" LDAP_MODIFY_BATCH_MODTYPE "' value must "
+                          "match one of the LDAP_MODIFY_BATCH_* constants");
+            return false;
+          }
+
+          /* if it's REMOVE_ALL, there must not be a values array; */
+          /* otherwise, there must */
+          if (modtype == LDAP_MODIFY_BATCH_REMOVE_ALL) {
+            if (modprops.exists(s_LDAP_MODIFY_BATCH_VALUES)) {
+              raise_warning("If '" LDAP_MODIFY_BATCH_MODTYPE "' is "
+                            "LDAP_MODIFY_BATCH_REMOVE_ALL, a '"
+                            LDAP_MODIFY_BATCH_VALUES "' array must not "
+                            "be provided");
+              return false;
+            }
+          } else {
+            if (!modprops.exists(s_LDAP_MODIFY_BATCH_VALUES)) {
+              raise_warning("If '" LDAP_MODIFY_BATCH_MODTYPE "' is not "
+                            "LDAP_MODIFY_BATCH_REMOVE_ALL, a '"
+                            LDAP_MODIFY_BATCH_VALUES "' array must "
+                            "be provided");
+              return false;
+            }
+          }
+        } else if (modkey == s_LDAP_MODIFY_BATCH_VALUES) {
+          if (!modprops_iter.second().isArray()) {
+            raise_warning("A '" LDAP_MODIFY_BATCH_VALUES "' value must be "
+                          "an array");
+            return false;
+          }
+
+          const Array& modvalues = modprops_iter.second().asCArrRef();
+          ssize_t num_modvalues = modvalues.size();
+
+          /* is the array not empty? */
+          if (num_modvalues == 0) {
+            raise_warning("A '" LDAP_MODIFY_BATCH_VALUES "' array must have "
+                          "at least one element");
+            return false;
+          }
+
+          /* for the modification hashtable... */
+          for (ssize_t k = 0; k < num_modvalues; ++k) {
+            /* are the keys consecutive integers? */
+            if (!modvalues.exists((int64_t)k)) {
+              raise_warning("A '" LDAP_MODIFY_BATCH_VALUES "' array must have "
+                            "integer indices 0, 1, ...");
+              return false;
+            }
+
+            Variant modvalue = modvalues[(int64_t)k];
+
+            /* is the data element a string? */
+            if (!modvalue.isString()) {
+              raise_warning("Each element of a '" LDAP_MODIFY_BATCH_VALUES "' "
+                            "array must be a string");
+              return false;
+            }
+          }
+        }
+
+        ++modprops_iter;
+      }
+    }
+  }
+
+  /* validation was successful */
+
+  /* allocate array of modifications */
+  req::vector<LDAPMod *> ldap_mods(num_mods + 1);
+
+  {
+    /* for each modification */
+    for (int64_t i = 0; i < num_mods; ++i) {
+      /* allocate the modification struct */
+      ldap_mods[i] = req::make_raw<LDAPMod>();
+
+      /* fetch the relevant data */
+      const Array& mod = modifs[i].asCArrRef();
+      const String& attrib = mod[s_LDAP_MODIFY_BATCH_ATTRIB].asCStrRef();
+      int64_t modtype = mod[s_LDAP_MODIFY_BATCH_MODTYPE].asInt64Val();
+      const Array& vals = mod[s_LDAP_MODIFY_BATCH_VALUES].asCArrRef();
+
+      /* map the modification type */
+      int oper;
+      switch (modtype) {
+      case LDAP_MODIFY_BATCH_ADD:
+        oper = LDAP_MOD_ADD;
+        break;
+      case LDAP_MODIFY_BATCH_REMOVE:
+      case LDAP_MODIFY_BATCH_REMOVE_ALL:
+        oper = LDAP_MOD_DELETE;
+        break;
+      case LDAP_MODIFY_BATCH_REPLACE:
+        oper = LDAP_MOD_REPLACE;
+        break;
+      default:
+        raise_error("Unknown and uncaught modification type.");
+        return false;
+      }
+
+      /* fill in the basic info */
+      ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
+      ldap_mods[i]->mod_type = req::strndup(attrib.data(), attrib.size());
+
+      if (modtype == LDAP_MODIFY_BATCH_REMOVE_ALL) {
+        /* no values */
+        ldap_mods[i]->mod_bvalues = nullptr;
+      } else {
+        /* allocate space for the values as part of this modification */
+        ssize_t num_modvals = vals.size();
+        ldap_mods[i]->mod_bvalues =
+          (struct berval **)req::malloc((num_modvals + 1) *
+                                        sizeof(struct berval *));
+
+        /* for each value */
+        for (int64_t j = 0; j < num_modvals; ++j) {
+          /* fetch it */
+          const String& modval = vals[j].asCStrRef();
+
+          /* allocate the data struct */
+          ldap_mods[i]->mod_bvalues[j] = req::make_raw<struct berval>();
+
+          /* fill it */
+          ldap_mods[i]->mod_bvalues[j]->bv_len = modval.size();
+          ldap_mods[i]->mod_bvalues[j]->bv_val =
+            req::make_raw_array<char>(modval.size());
+          memcpy(ldap_mods[i]->mod_bvalues[j]->bv_val, modval.data(),
+                 modval.size());
+        }
+
+        /* NULL-terminate values */
+        ldap_mods[i]->mod_bvalues[num_modvals] = nullptr;
+      }
+    }
+
+    /* NULL-terminate modifications */
+    ldap_mods[num_mods] = nullptr;
+  }
+
+  /* perform (finally) */
+  if ((return_value = ldap_modify_ext_s(ld->link, dn.data(), ldap_mods.data(),
+                                        nullptr, nullptr)) != LDAP_SUCCESS) {
+    raise_warning("Batch Modify: %s", ldap_err2string(return_value));
+    /* only return after cleanup */
+  }
+
+  /* clean up */
+  {
+    for (ssize_t i = 0; i < num_mods; ++i) {
+      /* attribute */
+      req::free(ldap_mods[i]->mod_type);
+
+      if (ldap_mods[i]->mod_bvalues != nullptr) {
+        /* each BER value */
+        for (ssize_t j = 0; ldap_mods[i]->mod_bvalues[j] != nullptr; ++j) {
+          /* free the data bytes */
+          req::destroy_raw_array(ldap_mods[i]->mod_bvalues[j]->bv_val,
+                                 ldap_mods[i]->mod_bvalues[j]->bv_len);
+
+          /* free the bvalue struct */
+          req::destroy_raw(ldap_mods[i]->mod_bvalues[j]);
+        }
+
+        /* the BER value array */
+        req::free(ldap_mods[i]->mod_bvalues);
+      }
+
+      /* the modifications */
+      req::destroy_raw(ldap_mods[i]);
+    }
+  }
+
+  return (return_value == LDAP_SUCCESS);
+}
+
 bool HHVM_FUNCTION(ldap_bind,
                    const Resource& link,
-                   const Variant& bind_rdn /* = null_variant */,
-                   const Variant& bind_password /* = null_variant */) {
+                   const Variant& bind_rdn /* = uninit_variant */,
+                   const Variant& bind_password /* = uninit_variant */) {
 
   auto ld = get_valid_ldap_link_resource(link);
   if (!ld) {
@@ -1192,7 +1509,7 @@ Variant HHVM_FUNCTION(ldap_list,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,
@@ -1205,7 +1522,7 @@ Variant HHVM_FUNCTION(ldap_read,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,
@@ -1218,7 +1535,7 @@ Variant HHVM_FUNCTION(ldap_search,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes /* = null_variant */,
+                      const Variant& attributes /* = uninit_variant */,
                       int attrsonly /* = 0 */,
                       int sizelimit /* = -1 */,
                       int timelimit /* = -1 */,

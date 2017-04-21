@@ -46,35 +46,35 @@ typedef long int          count_int;
 
 #define HSIZE  5003            /* 80% occupancy */
 #define hsize HSIZE            /* Apparently invariant, left over from
-					compress */
+          compress */
 
 typedef struct {
-	int Width, Height;
-	int curx, cury;
-	long CountDown;
-	int Pass;
-	int Interlace;
+  int Width, Height;
+  int curx, cury;
+  long CountDown;
+  int Pass;
+  int Interlace;
         int n_bits;                        /* number of bits/code */
         code_int maxcode;                  /* maximum code, given n_bits */
         count_int htab [HSIZE];
         unsigned short codetab [HSIZE];
-	code_int free_ent;                  /* first unused entry */
-	/*
-	 * block compression parameters -- after all codes are used up,
-	 * and compression rate changes, start over.
-	 */
-	int clear_flg;
-	int offset;
-	long int in_count;            /* length of input */
-	long int out_count;           /* # of codes output (for debugging) */
+  code_int free_ent;                  /* first unused entry */
+  /*
+   * block compression parameters -- after all codes are used up,
+   * and compression rate changes, start over.
+   */
+  int clear_flg;
+  int offset;
+  long int in_count;            /* length of input */
+  long int out_count;           /* # of codes output (for debugging) */
 
-	int g_init_bits;
-	gdIOCtx * g_outfile;
+  int g_init_bits;
+  gdIOCtx * g_outfile;
 
-	int ClearCode;
-	int EOFCode;
-	unsigned long cur_accum;
-	int cur_bits;
+  int ClearCode;
+  int EOFCode;
+  unsigned long cur_accum;
+  int cur_bits;
         /*
          * Number of characters so far in this 'packet'
          */
@@ -116,27 +116,27 @@ void gdImageGif (gdImagePtr im, FILE * outFile)
 
 void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 {
-	gdImagePtr pim = 0, tim = im;
-	int BitsPerPixel;
-	if (im->trueColor) {
-		/* Expensive, but the only way that produces an
-			acceptable result: mix down to a palette
-			based temporary image. */
-		pim = gdImageCreatePaletteFromTrueColor(im, 1, 256);
-		if (!pim) {
-			return;
-		}
-		tim = pim;
-	}
-	BitsPerPixel = colorstobpp(tim->colorsTotal);
-	/* All set, let's do it. */
-	GIFEncode(
-		out, tim->sx, tim->sy, tim->interlace, 0, tim->transparent, BitsPerPixel,
-		tim->red, tim->green, tim->blue, tim);
-	if (pim) {
-		/* Destroy palette based temporary image. */
-		gdImageDestroy(	pim);
-	}
+  gdImagePtr pim = 0, tim = im;
+  int BitsPerPixel;
+  if (im->trueColor) {
+    /* Expensive, but the only way that produces an
+      acceptable result: mix down to a palette
+      based temporary image. */
+    pim = gdImageCreatePaletteFromTrueColor(im, 1, 256);
+    if (!pim) {
+      return;
+    }
+    tim = pim;
+  }
+  BitsPerPixel = colorstobpp(tim->colorsTotal);
+  /* All set, let's do it. */
+  GIFEncode(
+    out, tim->sx, tim->sy, tim->interlace, 0, tim->transparent, BitsPerPixel,
+    tim->red, tim->green, tim->blue, tim);
+  if (pim) {
+    /* Destroy palette based temporary image. */
+    gdImageDestroy( pim);
+  }
 }
 
 static int
@@ -262,11 +262,11 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
         int ColorMapSize;
         int InitCodeSize;
         int i;
-		GifCtx ctx;
+    GifCtx ctx;
 
-		memset(&ctx, 0, sizeof(ctx));
+    memset(&ctx, 0, sizeof(ctx));
         ctx.Interlace = GInterlace;
-		ctx.in_count = 1;
+    ctx.in_count = 1;
 
         ColorMapSize = 1 << BitsPerPixel;
 
@@ -349,19 +349,19 @@ GIFEncode(gdIOCtxPtr fp, int GWidth, int GHeight, int GInterlace, int Background
                 gdPutC( Blue[i], fp );
         }
 
-	/*
-	 * Write out extension for transparent colour index, if necessary.
-	 */
-	if ( Transparent >= 0 ) {
-	    gdPutC( '!', fp );
-	    gdPutC( 0xf9, fp );
-	    gdPutC( 4, fp );
-	    gdPutC( 1, fp );
-	    gdPutC( 0, fp );
-	    gdPutC( 0, fp );
-	    gdPutC( (unsigned char) Transparent, fp );
-	    gdPutC( 0, fp );
-	}
+  /*
+   * Write out extension for transparent colour index, if necessary.
+   */
+  if ( Transparent >= 0 ) {
+      gdPutC( '!', fp );
+      gdPutC( 0xf9, fp );
+      gdPutC( 4, fp );
+      gdPutC( 1, fp );
+      gdPutC( 0, fp );
+      gdPutC( 0, fp );
+      gdPutC( (unsigned char) Transparent, fp );
+      gdPutC( 0, fp );
+  }
 
         /*
          * Write an Image separator
@@ -605,9 +605,18 @@ static unsigned long masks[] = { 0x0000, 0x0001, 0x0003, 0x0007, 0x000F,
                                   0x01FF, 0x03FF, 0x07FF, 0x0FFF,
                                   0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF };
 
+/* Arbitrary value to mark output is done.  When we see EOFCode, then we don't
+ * expect to see any more data.  If we do (e.g. corrupt image inputs), cur_bits
+ * might be negative, so flag it to return early.
+ */
+#define CUR_BITS_FINISHED -1000
+
 static void
 output(code_int code, GifCtx *ctx)
 {
+    if (ctx->cur_bits == CUR_BITS_FINISHED) {
+        return;
+    }
     ctx->cur_accum &= masks[ ctx->cur_bits ];
 
     if( ctx->cur_bits > 0 )
@@ -654,6 +663,8 @@ output(code_int code, GifCtx *ctx)
                 ctx->cur_bits -= 8;
         }
 
+        /* Flag that it's done to prevent re-entry. */
+        ctx->cur_bits = CUR_BITS_FINISHED;
         flush_char(ctx);
 
     }
@@ -750,10 +761,10 @@ flush_char(GifCtx *ctx)
 
 static int gifPutWord(int w, gdIOCtx *out)
 {
-	/* Byte order is little-endian */
-	gdPutC(w & 0xFF, out);
-	gdPutC((w >> 8) & 0xFF, out);
-	return 0;
+  /* Byte order is little-endian */
+  gdPutC(w & 0xFF, out);
+  gdPutC((w >> 8) & 0xFF, out);
+  return 0;
 }
 
 

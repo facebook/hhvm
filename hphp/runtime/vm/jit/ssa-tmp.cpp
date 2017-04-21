@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
 
@@ -48,11 +49,11 @@ int typeNeededWords(Type t) {
   }
   if (!t.isUnion()) {
     // Not a union type and not a special case: 1 register.
-    assertx(IMPLIES(t <= TStkElem, t.isKnownDataType()));
+    assertx(IMPLIES(t <= TGen, t.isKnownDataType()));
     return 1;
   }
 
-  assertx(t <= TStkElem);
+  assertx(t <= TGen);
 
   // XXX(t4592459): This will return 2 for TNull, even though it only
   // needs 1 register (one for the type, none for the value). This is to work
@@ -79,18 +80,31 @@ Variant SSATmp::variantVal() const {
       return intVal();
     case KindOfDouble:
       return dblVal();
-    case KindOfStaticString:
+    case KindOfPersistentString:
+      return Variant{strVal(), Variant::PersistentStrInit{}};
+    case KindOfPersistentVec:
+      return Variant{vecVal(), KindOfPersistentVec,
+                     Variant::PersistentArrInit{}};
+    case KindOfPersistentDict:
+      return Variant{dictVal(), KindOfPersistentDict,
+                     Variant::PersistentArrInit{}};
+    case KindOfPersistentKeyset:
+      return Variant{keysetVal(), KindOfPersistentKeyset,
+                     Variant::PersistentArrInit{}};
+    case KindOfPersistentArray:
+      return Variant{arrVal(), KindOfPersistentArray,
+                     Variant::PersistentArrInit{}};
     case KindOfString:
-      return Variant(const_cast<StringData*>(strVal()));
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
     case KindOfArray:
-      return Variant{const_cast<ArrayData*>(arrVal())};
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
-  not_reached();
+  always_assert(false);
 }
 
 std::string SSATmp::toString() const {

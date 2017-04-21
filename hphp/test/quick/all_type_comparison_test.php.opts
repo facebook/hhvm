@@ -1,1 +1,1 @@
--vEval.JitMaxTranslations=10000
+-vEval.JitMaxTranslations=500000

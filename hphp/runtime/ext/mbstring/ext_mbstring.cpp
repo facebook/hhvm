@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/system/constants.h"
 
 extern "C" {
 #include <mbfl/mbfl_convert.h>
@@ -187,9 +186,6 @@ struct MBGlobals final : RequestEventHandler {
   OnigRegion *search_regs;
   OnigOptionType regex_default_options;
   OnigSyntaxType *regex_default_syntax;
-
-  void vscan(IMarker& mark) const override {
-  }
 
   MBGlobals() :
     language(mbfl_no_language_uni),
@@ -555,12 +551,19 @@ static int php_mb_parse_encoding_list(const char *value, int value_length,
 
     /* copy the value string for work */
     if (value[0]=='"' && value[value_length-1]=='"' && value_length>2) {
-      tmpstr = (char *)strndup(value+1, value_length-2);
-      value_length -= 2;
+      tmpstr = req::strndup(value + 1, value_length - 2);
+    } else {
+      tmpstr = req::strndup(value, value_length);
     }
-    else
-      tmpstr = (char *)strndup(value, value_length);
-    if (tmpstr == nullptr) {
+    value_length = tmpstr ? strlen(tmpstr) : 0;
+    if (!value_length) {
+      req::free(tmpstr);
+      if (return_list) {
+        *return_list = nullptr;
+      }
+      if (return_size) {
+        *return_size = 0;
+      }
       return 0;
     }
     /* count the number of listed encoding names */
@@ -641,7 +644,7 @@ static int php_mb_parse_encoding_list(const char *value, int value_length,
       }
       ret = 0;
     }
-    free(tmpstr);
+    req::free(tmpstr);
   }
 
   return ret;
@@ -837,7 +840,7 @@ static int php_mb_parse_encoding_array(const Array& array,
     bauto = 0;
     n = 0;
     for (ArrayIter iter(array); iter; ++iter) {
-      String hash_entry = iter.second();
+      auto const hash_entry = iter.second().toString();
       if (strcasecmp(hash_entry.data(), "auto") == 0) {
         if (!bauto) {
           bauto = 1;
@@ -890,7 +893,7 @@ static bool php_mb_parse_encoding(const Variant& encoding,
                                   mbfl_encoding ***return_list,
                                   int *return_size, bool persistent) {
   bool ret;
-  if (encoding.is(KindOfArray)) {
+  if (encoding.isArray()) {
     ret = php_mb_parse_encoding_array(encoding.toArray(),
                                       return_list, return_size,
                                       persistent ? 1 : 0);
@@ -1081,12 +1084,12 @@ Variant HHVM_FUNCTION(mb_list_encodings_alias_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
 
         if (encoding->aliases != nullptr) {
           j = 0;
@@ -1133,12 +1136,12 @@ Variant HHVM_FUNCTION(mb_list_mime_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
         if (encoding->mime_name != nullptr) {
           return String(encoding->mime_name, CopyString);
         }
@@ -1237,9 +1240,9 @@ Variant HHVM_FUNCTION(mb_convert_case,
 Variant HHVM_FUNCTION(mb_convert_encoding,
                       const String& str,
                       const String& to_encoding,
-                      const Variant& from_encoding /* = null_variant */) {
+                      const Variant& from_encoding /* = uninit_variant */) {
   String encoding = from_encoding.toString();
-  if (from_encoding.is(KindOfArray)) {
+  if (from_encoding.isArray()) {
     StringBuffer _from_encodings;
     Array encs = from_encoding.toArray();
     for (ArrayIter iter(encs); iter; ++iter) {
@@ -1318,6 +1321,10 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 
   ret = mbfl_ja_jp_hantozen(&string, &result, opt);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1326,7 +1333,7 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 static bool php_mbfl_encoding_detect(const Variant& var,
                                      mbfl_encoding_detector *identd,
                                      mbfl_string *string) {
-  if (var.is(KindOfArray) || var.is(KindOfObject)) {
+  if (var.isArray() || var.is(KindOfObject)) {
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
       if (php_mbfl_encoding_detect(iter.second(), identd, string)) {
@@ -1348,7 +1355,7 @@ static Variant php_mbfl_convert(const Variant& var,
                                 mbfl_buffer_converter *convd,
                                 mbfl_string *string,
                                 mbfl_string *result) {
-  if (var.is(KindOfArray)) {
+  if (var.isArray()) {
     Array ret = empty_array();
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
@@ -1422,7 +1429,7 @@ Variant HHVM_FUNCTION(mb_convert_variables,
                                         MBSTRG(strict_detection));
     if (identd != nullptr) {
       for (int n = -1; n < args.size(); n++) {
-        if (php_mbfl_encoding_detect(n < 0 ? (Variant&)vars : args[n],
+        if (php_mbfl_encoding_detect(n < 0 ? vars.wrapped() : args[n],
                                      identd, &string)) {
           break;
         }
@@ -1525,7 +1532,7 @@ static Variant php_mb_numericentity_exec(const String& str,
 
   /* conversion map */
   int *iconvmap = nullptr;
-  if (convmap.is(KindOfArray)) {
+  if (convmap.isArray()) {
     Array convs = convmap.toArray();
     mapsize = convs.size();
     if (mapsize > 0) {
@@ -1544,6 +1551,10 @@ static Variant php_mb_numericentity_exec(const String& str,
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
   free(iconvmap);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1559,8 +1570,8 @@ Variant HHVM_FUNCTION(mb_decode_numericentity,
 
 Variant HHVM_FUNCTION(mb_detect_encoding,
                       const String& str,
-                      const Variant& encoding_list /* = null_variant */,
-                      const Variant& strict /* = null_variant */) {
+                      const Variant& encoding_list /* = uninit_variant */,
+                      const Variant& strict /* = uninit_variant */) {
   mbfl_string string;
   mbfl_encoding *ret;
   mbfl_encoding **elist, **list;
@@ -1601,7 +1612,7 @@ Variant HHVM_FUNCTION(mb_detect_encoding,
 }
 
 Variant HHVM_FUNCTION(mb_detect_order,
-                      const Variant& encoding_list /* = null_variant */) {
+                      const Variant& encoding_list /* = uninit_variant */) {
   int n, size;
   mbfl_encoding **list, **entry;
 
@@ -1682,6 +1693,10 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
   ret = mbfl_mime_header_encode(&string, &result, charsetenc, transenc,
                                 linefeed.data(), indent);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1690,7 +1705,7 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
 Variant HHVM_FUNCTION(mb_encode_numericentity,
                       const String& str,
                       const Variant& convmap,
-                      const Variant& opt_encoding /* = null_variant */,
+                      const Variant& opt_encoding /* = uninit_variant */,
                       bool is_hex /* = false */) {
   const String encoding = convertArg(opt_encoding);
   return php_mb_numericentity_exec(str, convmap, encoding, is_hex, 0);
@@ -2218,7 +2233,9 @@ static mbfl_encoding* _php_mb_encoding_handler_ex
     }
     n++;
 
-    arg.set(String(var, CopyString), String(val, val_len, CopyString));
+    if (val_len > 0) {
+      arg.set(String(var, CopyString), String(val, val_len, CopyString));
+    }
 
     if (convd != nullptr) {
       mbfl_string_clear(&resvar);
@@ -2246,7 +2263,7 @@ bool HHVM_FUNCTION(mb_parse_str,
                    VRefParam result /* = null */) {
   php_mb_encoding_handler_info_t info;
   info.data_type              = PARSE_STRING;
-  info.separator              = ";&";
+  info.separator              = "&";
   info.force_register_globals = false;
   info.report_errors          = 1;
   info.to_encoding            = MBSTRG(current_internal_encoding);
@@ -2255,11 +2272,11 @@ bool HHVM_FUNCTION(mb_parse_str,
   info.num_from_encodings     = MBSTRG(http_input_list_size);
   info.from_language          = MBSTRG(current_language);
 
-  char *encstr = strndup(encoded_string.data(), encoded_string.size());
+  char *encstr = req::strndup(encoded_string.data(), encoded_string.size());
   Array resultArr = Array::Create();
   mbfl_encoding *detected =
     _php_mb_encoding_handler_ex(&info, resultArr, encstr);
-  free(encstr);
+  req::free(encstr);
   result.assignIfRef(resultArr);
 
   MBSTRG(http_input_identify) = detected;
@@ -2650,6 +2667,8 @@ Variant HHVM_FUNCTION(mb_strrpos,
   mbs_needle.val = (unsigned char *)needle.data();
   mbs_needle.len = needle.size();
 
+  // This hack is so that if the caller puts the encoding in the offset field we
+  // attempt to detect it and use that as the encoding.  Ick.
   const char *enc_name = encoding.data();
   long noffset = 0;
   String soffset = offset.toString();
@@ -2676,7 +2695,7 @@ Variant HHVM_FUNCTION(mb_strrpos,
     noffset = offset.toInt32();
   }
 
-  if (!enc_name && !*enc_name) {
+  if (enc_name != nullptr && *enc_name) {
     mbs_haystack.no_encoding = mbs_needle.no_encoding =
       mbfl_name2no_encoding(enc_name);
     if (mbs_haystack.no_encoding == mbfl_no_encoding_invalid) {
@@ -2869,9 +2888,104 @@ Variant HHVM_FUNCTION(mb_strstr,
   return false;
 }
 
+const StaticString s_utf_8("utf-8");
+
+/**
+ * Fast check for the most common form of the UTF-8 encoding identifier.
+ */
+ALWAYS_INLINE
+static bool isUtf8(const Variant& encoding) {
+  return encoding.getStringDataOrNull() == s_utf_8.get();
+}
+
+/**
+ * Given a byte sequence, return
+ *    0 if it contains bytes >= 128 (thus non-ASCII), else
+ *   -1 if it contains any upper-case character ('A'-'Z'), else
+ *    1 (and thus is a lower-case ASCII string).
+ */
+ALWAYS_INLINE
+static int isUtf8AsciiLower(folly::StringPiece s) {
+  const auto bytelen = s.size();
+  bool caseOK = true;
+  for (uint32_t i = 0; i < bytelen; ++i) {
+    uint8_t byte = s[i];
+    if (byte >= 128) {
+      return 0;
+    } else if (byte <= 'Z' && byte >= 'A') {
+      caseOK = false;
+    }
+  }
+  return caseOK ? 1 : -1;
+}
+
+/**
+ * Return a string containing the lower-case of a given ASCII string.
+ */
+ALWAYS_INLINE
+static StringData* asciiToLower(const StringData* s) {
+  const auto size = s->size();
+  auto ret = StringData::Make(s, CopyString);
+  auto output = ret->mutableData();
+  for (int i = 0; i < size; ++i) {
+    auto& c = output[i];
+    if (c <= 'Z' && c >= 'A') {
+      c |= 0x20;
+    }
+  }
+  ret->invalidateHash(); // We probably modified it.
+  return ret;
+}
+
+/* Like isUtf8AsciiLower, but with upper/lower swapped. */
+ALWAYS_INLINE
+static int isUtf8AsciiUpper(folly::StringPiece s) {
+  const auto bytelen = s.size();
+  bool caseOK = true;
+  for (uint32_t i = 0; i < bytelen; ++i) {
+    uint8_t byte = s[i];
+    if (byte >= 128) {
+      return 0;
+    } else if (byte >= 'a' && byte <= 'z') {
+      caseOK = false;
+    }
+  }
+  return caseOK ? 1 : -1;
+}
+
+/* Like asciiToLower, but with upper/lower swapped. */
+ALWAYS_INLINE
+static StringData* asciiToUpper(const StringData* s) {
+  const auto size = s->size();
+  auto ret = StringData::Make(s, CopyString);
+  auto output = ret->mutableData();
+  for (int i = 0; i < size; ++i) {
+    auto& c = output[i];
+    if (c >= 'a' && c <= 'z') {
+      c -= (char)0x20;
+    }
+  }
+  ret->invalidateHash(); // We probably modified it.
+  return ret;
+}
+
 Variant HHVM_FUNCTION(mb_strtolower,
                       const String& str,
                       const Variant& opt_encoding) {
+  /* Fast-case for empty static string without dereferencing any pointers. */
+  if (str.get() == staticEmptyString()) return empty_string_variant();
+  if (LIKELY(isUtf8(opt_encoding))) {
+    /* Fast-case for ASCII. */
+    if (auto sd = str.get()) {
+      auto sl = sd->slice();
+      auto r = isUtf8AsciiLower(sl);
+      if (r > 0) {
+        return str;
+      } else if (r < 0) {
+        return String::attach(asciiToLower(sd));
+      }
+    }
+  }
   const String encoding = convertArg(opt_encoding);
 
   const char *from_encoding;
@@ -2894,6 +3008,20 @@ Variant HHVM_FUNCTION(mb_strtolower,
 Variant HHVM_FUNCTION(mb_strtoupper,
                       const String& str,
                       const Variant& opt_encoding) {
+  /* Fast-case for empty static string without dereferencing any pointers. */
+  if (str.get() == staticEmptyString()) return empty_string_variant();
+  if (LIKELY(isUtf8(opt_encoding))) {
+    /* Fast-case for ASCII. */
+    if (auto sd = str.get()) {
+      auto sl = sd->slice();
+      auto r = isUtf8AsciiUpper(sl);
+      if (r > 0) {
+        return str;
+      } else if (r < 0) {
+        return String::attach(asciiToUpper(sd));
+      }
+    }
+  }
   const String encoding = convertArg(opt_encoding);
 
   const char *from_encoding;
@@ -2941,7 +3069,7 @@ Variant HHVM_FUNCTION(mb_strwidth,
 }
 
 Variant HHVM_FUNCTION(mb_substitute_character,
-                      const Variant& substrchar /* = null_variant */) {
+                      const Variant& substrchar /* = uninit_variant */) {
   if (substrchar.isNull()) {
     switch (MBSTRG(current_filter_illegal_mode)) {
     case MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE:
@@ -4184,8 +4312,8 @@ bool HHVM_FUNCTION(mb_send_mail,
   }
 
   struct {
-    int cnt_type:1;
-    int cnt_trans_enc:1;
+    unsigned int cnt_type:1;
+    unsigned int cnt_trans_enc:1;
   } suppressed_hdrs = { 0, 0 };
 
   static const StaticString s_CONTENT_TYPE("CONTENT-TYPE");
@@ -4227,7 +4355,7 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   static const StaticString
          s_CONTENT_TRANSFER_ENCODING("CONTENT-TRANSFER-ENCODING");
-  s = ht_headers[s_CONTENT_TRANSFER_ENCODING];
+  s = ht_headers[s_CONTENT_TRANSFER_ENCODING].toString();
   if (!s.isNull()) {
     mbfl_no_encoding _body_enc = mbfl_name2no_encoding(s.data());
     switch (_body_enc) {
@@ -4249,31 +4377,26 @@ bool HHVM_FUNCTION(mb_send_mail,
   /* To: */
   char *to_r = nullptr;
   int err = 0;
-  if (!to.empty()) {
-    int to_len = to.size();
-    if (to_len > 0) {
-      to_r = strndup(to.data(), to_len);
-      for (; to_len; to_len--) {
-        if (!isspace((unsigned char)to_r[to_len - 1])) {
-          break;
-        }
-        to_r[to_len - 1] = '\0';
+  if (auto to_len = strlen(to.data())) { // not to.size()
+    to_r = req::strndup(to.data(), to_len);
+    for (; to_len; to_len--) {
+      if (!isspace((unsigned char)to_r[to_len - 1])) {
+        break;
       }
-      for (int i = 0; to_r[i]; i++) {
-        if (iscntrl((unsigned char)to_r[i])) {
-          /**
-           * According to RFC 822, section 3.1.1 long headers may be
-           * separated into parts using CRLF followed at least one
-           * linear-white-space character ('\t' or ' ').
-           * To prevent these separators from being replaced with a space,
-           * we use the SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
-           */
-          SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
-          to_r[i] = ' ';
-        }
+      to_r[to_len - 1] = '\0';
+    }
+    for (int i = 0; to_r[i]; i++) {
+      if (iscntrl((unsigned char)to_r[i])) {
+        /**
+         * According to RFC 822, section 3.1.1 long headers may be
+         * separated into parts using CRLF followed at least one
+         * linear-white-space character ('\t' or ' ').
+         * To prevent these separators from being replaced with a space,
+         * we use the SKIP_LONG_HEADER_SEP_MBSTRING to skip over them.
+         */
+        SKIP_LONG_HEADER_SEP_MBSTRING(to_r, i);
+        to_r[i] = ' ';
       }
-    } else {
-      to_r = (char*)to.data();
     }
   } else {
     raise_warning("Missing To: field");
@@ -4399,11 +4522,11 @@ bool HHVM_FUNCTION(mb_send_mail,
                                encoded_message.data(),
                                all_headers, cmd.data()));
   mbfl_memory_device_clear(&device);
+  req::free(to_r);
   return ret;
 }
 
-static class mbstringExtension final : public Extension {
-  public:
+static struct mbstringExtension final : Extension {
   mbstringExtension() : Extension("mbstring", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

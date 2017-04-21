@@ -1,2 +1,2 @@
-File "dynamic_class_bad.php", line 9, characters 3-11:
-Don't use dynamic classes (Typing[4125])
+File "dynamic_class_bad.php", line 9, characters 3-4:
+Was expecting a class, but got a string (Typing[4026])

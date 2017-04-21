@@ -1,4 +1,7 @@
-Tstring
-App \classname<generic T as <App \I<>>, >
-Tstring
+File "classname_usage.php", line 80, characters 3-15:
+  string
+File "classname_usage.php", line 85, characters 3-16:
+  classname<T>
+File "classname_usage.php", line 87, characters 3-15:
+  string
 No errors

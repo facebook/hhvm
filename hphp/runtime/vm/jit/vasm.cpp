@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,11 +27,6 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Link<uint64_t> g_bytecodesLLVM{rds::kInvalidHandle};
-rds::Link<uint64_t> g_bytecodesVasm{rds::kInvalidHandle};
-
-///////////////////////////////////////////////////////////////////////////////
-
 folly::Range<Vlabel*> succs(Vinstr& inst) {
   switch (inst.op) {
     case Vinstr::callphp:     return {inst.callphp_.targets, 2};
@@ -44,8 +39,6 @@ folly::Range<Vlabel*> succs(Vinstr& inst) {
     case Vinstr::unwind:      return {inst.unwind_.targets, 2};
     case Vinstr::vcallarray:  return {inst.vcallarray_.targets, 2};
     case Vinstr::vinvoke:     return {inst.vinvoke_.targets, 2};
-    case Vinstr::cbcc:        return {inst.cbcc_.targets, 2};
-    case Vinstr::tbcc:        return {inst.tbcc_.targets, 2};
     default:                  return {nullptr, nullptr};
   }
 }
@@ -93,7 +86,7 @@ struct BlockSorter {
   }
 
   unsigned area(Vlabel b) {
-    return (unsigned)unit.blocks[b].area;
+    return (unsigned)unit.blocks[b].area_idx;
   }
 
   void dfs(Vlabel b) {

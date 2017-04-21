@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,7 +43,6 @@
 #include "hphp/compiler/statement/use_trait_statement.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 
@@ -51,7 +50,6 @@
 
 #include <folly/Conv.h>
 
-#include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <map>
@@ -219,30 +217,6 @@ void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
   }
 }
 
-bool ClassScope::implementsArrayAccess() {
-  return
-    getAttribute(MayHaveArrayAccess) |
-    getAttribute(HasArrayAccess) |
-    getAttribute(InheritsArrayAccess);
-}
-
-bool ClassScope::implementsAccessor(int prop) {
-  if (m_attribute & prop) return true;
-  if (prop & MayHaveUnknownPropGetter) {
-    prop |= HasUnknownPropGetter | InheritsUnknownPropGetter;
-  }
-  if (prop & MayHaveUnknownPropSetter) {
-    prop |= HasUnknownPropSetter | InheritsUnknownPropSetter;
-  }
-  if (prop & MayHaveUnknownPropTester) {
-    prop |= HasUnknownPropTester | InheritsUnknownPropTester;
-  }
-  if (prop & MayHavePropUnsetter) {
-    prop |= HasPropUnsetter | InheritsPropUnsetter;
-  }
-  return m_attribute & prop;
-}
-
 void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_iset &seen) {
   seen.insert(m_scopeName);
 
@@ -400,14 +374,16 @@ ClassScope::importTraitMethod(const TraitMethod&  traitMethod,
       cloneMeth->getModifiers(), cScope->isUserClass());
   cloneMeth->resetScope(cloneFuncScope);
   cloneFuncScope->setOuterScope(shared_from_this());
+  cloneFuncScope->setFromTrait(true);
   informClosuresAboutScopeClone(cloneMeth, cloneFuncScope, ar);
-
   cloneMeth->addTraitMethodToScope(ar,
                dynamic_pointer_cast<ClassScope>(shared_from_this()));
 
   // Preserve original filename (as this varies per-function and not per-unit
   // in the case of methods imported from flattened traits)
-  cloneMeth->setOriginalFilename(meth->getFileScope()->getName());
+  auto const& name = meth->getOriginalFilename().empty() ?
+    meth->getFileScope()->getName() : meth->getOriginalFilename();
+  cloneMeth->setOriginalFilename(name);
 
   return cloneMeth;
 }
@@ -439,28 +415,39 @@ void ClassScope::informClosuresAboutScopeClone(
   }
 }
 
-void ClassScope::addClassRequirement(const std::string &requiredName,
+bool ClassScope::addClassRequirement(const std::string &requiredName,
                                      bool isExtends) {
   assert(isTrait() || (isInterface() && isExtends)
          // when flattening traits, their requirements get flattened
          || Option::WholeProgram);
+
   if (isExtends) {
+    if (m_requiredImplements.count(requiredName)) return false;
     m_requiredExtends.insert(requiredName);
   } else {
+    if (m_requiredExtends.count(requiredName)) return false;
     m_requiredImplements.insert(requiredName);
   }
+
+  return true;
 }
 
 void ClassScope::importClassRequirements(AnalysisResultPtr ar,
                                          ClassScopePtr trait) {
-  /* Defer enforcement of requirements until the creation of the class
-   * happens at runtime. */
-  for (auto const& req : trait->getClassRequiredExtends()) {
-    addClassRequirement(req, true);
-  }
-  for (auto const& req : trait->getClassRequiredImplements()) {
-    addClassRequirement(req, false);
-  }
+  auto addRequires = [&] (
+    const boost::container::flat_set<std::string>& reqs, bool isExtends) {
+    for (auto const& req : reqs) {
+      if (!addClassRequirement(req, isExtends)) {
+        getStmt()->analysisTimeFatal(
+          Compiler::InvalidTraitStatement,
+          "Conflicting requirements for '%s'",
+          req.c_str());
+      }
+    }
+  };
+
+  addRequires(trait->getClassRequiredExtends(), true);
+  addRequires(trait->getClassRequiredImplements(), false);
 }
 
 bool ClassScope::hasMethod(const std::string &methodName) const {
@@ -535,14 +522,7 @@ MethodStatementPtr findTraitMethodImpl(AnalysisResultPtr ar,
 void ClassScope::TMIOps::addTraitAlias(ClassScope* cs,
                                        TraitAliasStatementPtr stmt,
                                        ClassScopePtr traitCls) {
-  auto const& traitName = stmt->getTraitName();
-  auto const& origMethName = stmt->getMethodName();
-  auto const& newMethName = stmt->getNewMethodName();
-
-  auto origName = traitName.empty() ? "(null)" : traitName;
-  origName += "::" + origMethName;
-
-  cs->m_traitAliases.push_back(std::make_pair(newMethName, origName));
+  // We don't actually need to track this here, so do nothing.
 }
 
 ClassScopePtr
@@ -598,7 +578,7 @@ void ClassScope::applyTraitRules(TMIData& tmid) {
       auto rule = (*rules)[r];
       auto precStmt = dynamic_pointer_cast<TraitPrecStatement>(rule);
       if (precStmt) {
-        tmid.applyPrecRule(precStmt);
+        tmid.applyPrecRule(precStmt, this);
       } else {
         auto aliasStmt = dynamic_pointer_cast<TraitAliasStatement>(rule);
         assert(aliasStmt);
@@ -746,7 +726,6 @@ void ClassScope::importUsedTraits(AnalysisResultPtr ar) {
 
   for (auto const& traitPair : importedTraitsWithOrigName) {
     auto traitMethod = traitPair.second;
-
     MethodStatementPtr newMeth = importTraitMethod(
       *traitMethod,
       ar,
@@ -917,11 +896,6 @@ void ClassScope::setSystem() {
   }
 }
 
-bool ClassScope::needLazyStaticInitializer() {
-  return getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
-    getConstants()->hasDynamic();
-}
-
 bool ClassScope::hasConst(const std::string &name) const {
   const Symbol *sym = m_constants->getSymbol(name);
   assert(!sym || sym->isPresent());
@@ -1011,8 +985,7 @@ static inline std::string GetDocName(AnalysisResultPtr ar,
   return c ? c->getDocName() : "UnknownClass";
 }
 
-class GetDocNameFunctor {
-public:
+struct GetDocNameFunctor {
   GetDocNameFunctor(AnalysisResultPtr ar, BlockScopeRawPtr scope) :
     m_ar(ar), m_scope(scope) {}
   std::string operator()(const std::string &name) const {
@@ -1050,14 +1023,22 @@ void ClassScope::serialize(JSON::DocTarget::OutputStream &out) const {
 
   int mods = 0;
   switch (m_kindOf) {
-    case KindOf::AbstractClass: mods |= ClassInfo::IsAbstract; break;
+    case KindOf::AbstractClass:
+      mods |= AttrAbstract;
+      break;
     case KindOf::Enum:
     case KindOf::FinalClass:
-      mods |= ClassInfo::IsFinal; break;
+      mods |= AttrFinal;
+      break;
     case KindOf::UtilClass:
-      mods |= ClassInfo::IsFinal | ClassInfo::IsAbstract; break;
-    case KindOf::Interface:     mods |= ClassInfo::IsInterface; break;
-    case KindOf::Trait:         mods |= ClassInfo::IsTrait; break;
+      mods |= AttrFinal | AttrAbstract;
+      break;
+    case KindOf::Interface:
+      mods |= AttrInterface;
+      break;
+    case KindOf::Trait:
+      mods |= AttrTrait;
+      break;
     case KindOf::ObjectClass:
       break;
   }

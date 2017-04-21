@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <stdlib.h>
 
-#include "boost/algorithm/string.hpp"
+#include <boost/algorithm/string.hpp>
 
 #include <folly/Format.h>
 
@@ -27,13 +27,18 @@
 
 namespace HPHP {
 
+static uintptr_t excludeLow, excludeLen;
+
 #ifdef HAVE_LIBXED
+
 // XED callback function to get a symbol from an address
 static int addressToSymbol(xed_uint64_t  address,
                            char*         symbolBuffer,
                            xed_uint32_t  bufferLength,
                            xed_uint64_t* offset,
                            void*         context) {
+  if (address - excludeLow < excludeLen) return 0;
+
   auto name = boost::trim_copy(getNativeFunctionName((void*)address));
   if (boost::starts_with(name, "0x")) {
     return 0;
@@ -49,6 +54,11 @@ static int addressToSymbol(xed_uint64_t  address,
 }
 #endif /* HAVE_LIBXED */
 
+void Disasm::ExcludedAddressRange(void* low, size_t len) {
+  excludeLow = uintptr_t(low);
+  excludeLen = len;
+}
+
 Disasm::Disasm(const Disasm::Options& opts)
     : m_opts(opts)
 {
@@ -56,7 +66,9 @@ Disasm::Disasm(const Disasm::Options& opts)
   xed_state_init(&m_xedState, XED_MACHINE_MODE_LONG_64,
                  XED_ADDRESS_WIDTH_64b, XED_ADDRESS_WIDTH_64b);
   xed_tables_init();
+#if XED_ENCODE_ORDER_MAX_ENTRIES == 28 // Older version of XED library
   xed_register_disassembly_callback(addressToSymbol);
+#endif
 #endif // HAVE_LIBXED
 }
 
@@ -65,7 +77,7 @@ Disasm::Disasm(const Disasm::Options& opts)
 #define MAX_INSTR_ASM_LEN 128
 
 static const xed_syntax_enum_t s_xed_syntax =
-  getenv("HHVM_ATT_DISAS") ? XED_SYNTAX_ATT : XED_SYNTAX_INTEL;
+  getenv("HHVM_INTEL_DISAS") ? XED_SYNTAX_INTEL : XED_SYNTAX_ATT;
 #endif // HAVE_LIBXED
 
 void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
@@ -98,7 +110,11 @@ void Disasm::disasm(std::ostream& out, uint8_t* codeStartAddr,
     auto const syntax = m_opts.m_forceAttSyntax ? XED_SYNTAX_ATT
                                                 : s_xed_syntax;
     if (!xed_format_context(syntax, &xedd, codeStr,
-                            MAX_INSTR_ASM_LEN, ip, nullptr)) {
+                            MAX_INSTR_ASM_LEN, ip, nullptr
+#if XED_ENCODE_ORDER_MAX_ENTRIES != 28 // Newer version of XED library
+                            , addressToSymbol
+#endif
+                           )) {
       out << folly::format("xed_format_context failed at address {}\n",
                            frontier);
       return;

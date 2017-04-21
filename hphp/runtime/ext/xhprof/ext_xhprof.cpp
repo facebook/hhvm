@@ -48,18 +48,6 @@ void HHVM_FUNCTION(xhprof_enable, int64_t flags/* = 0 */,
     return;
   }
 
-  bool missingClockGetTimeNS = true;
-#ifdef CLOCK_THREAD_CPUTIME_ID
-  missingClockGetTimeNS = Vdso::ClockGetTimeNS(CLOCK_THREAD_CPUTIME_ID) == -1;
-#endif
-
-  if (missingClockGetTimeNS) {
-    // Both TrackVtsc and TrackCPU mean "do CPU time profiling".
-    //
-    // TrackVtsc means: require clock_gettime, or else no data.
-    // TrackCPU means: prefer clock_gettime, but fall back to getrusage.
-    flags &= ~TrackVtsc;
-  }
   if (flags & TrackVtsc) {
     flags |= TrackCPU;
   }
@@ -108,8 +96,7 @@ Variant HHVM_FUNCTION(xhprof_sample_disable) {
 
 /////////////////////////////////////////////////////////////////////////////
 
-class XHProfExtension : public Extension {
- public:
+struct XHProfExtension : Extension {
   XHProfExtension(): Extension("xhprof", "0.9.4") {}
 
   void moduleInit() override {
@@ -126,6 +113,7 @@ class XHProfExtension : public Extension {
     HHVM_RC_INT(SETPROFILE_FLAGS_DEFAULT, EventHook::ProfileDefault);
     HHVM_RC_INT(SETPROFILE_FLAGS_FRAME_PTRS, EventHook::ProfileFramePointers);
     HHVM_RC_INT(SETPROFILE_FLAGS_CTORS, EventHook::ProfileConstructors);
+    HHVM_RC_INT(SETPROFILE_FLAGS_RESUME_AWARE, EventHook::ProfileResumeAware);
 
     HHVM_FE(fb_setprofile);
     HHVM_FE(xhprof_frame_begin);

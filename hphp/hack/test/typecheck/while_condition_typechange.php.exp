@@ -1,4 +1,4 @@
-File "while_condition_typechange.php", line 15, characters 11-12:
+File "while_condition_typechange.php", line 15, characters 5-12:
 Typing error (Typing[4110])
 File "while_condition_typechange.php", line 15, characters 11-12:
 This is a num (int/float) because this is used in an arithmetic operation

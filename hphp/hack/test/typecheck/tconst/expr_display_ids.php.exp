@@ -1,5 +1,9 @@
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
+File "expr_display_ids.php", line 20, characters 3-20:
+  <expr#1>::T as C::T as num
+File "expr_display_ids.php", line 24, characters 3-20:
+  <expr#1>::T as C::T as num
+File "expr_display_ids.php", line 11, characters 5-22:
+  <expr#1>::T as C::T as num
+File "expr_display_ids.php", line 15, characters 5-22:
+  <expr#1>::T as C::T as num
 No errors

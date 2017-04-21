@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,10 +17,15 @@
 #include "hphp/runtime/base/tv-helpers.h"
 
 #include "hphp/runtime/base/dummy-resource.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/system/systemlib.h"
 
@@ -46,31 +51,70 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfInt64:
       case KindOfDouble:
         return;
-      case KindOfStaticString:
+      case KindOfPersistentString:
         assertPtr(cell.m_data.pstr);
-        assert(cell.m_data.pstr->isStatic());
+        assert(cell.m_data.pstr->kindIsValid());
+        assert(!cell.m_data.pstr->isRefCounted());
         return;
       case KindOfString:
         assertPtr(cell.m_data.pstr);
+        assert(cell.m_data.pstr->kindIsValid());
         assert(cell.m_data.pstr->checkCount());
+        return;
+      case KindOfPersistentVec:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isVecArray());
+        return;
+      case KindOfVec:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isVecArray());
+        return;
+      case KindOfPersistentDict:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isDict());
+        return;
+      case KindOfDict:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isDict());
+        return;
+      case KindOfPersistentKeyset:
+        assertPtr(cell.m_data.parr);
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isKeyset());
+        return;
+      case KindOfKeyset:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isKeyset());
+        return;
+      case KindOfPersistentArray:
+        assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->kindIsValid());
+        assert(!cell.m_data.parr->isRefCounted());
+        assert(cell.m_data.parr->isPHPArray());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
+        assert(cell.m_data.parr->kindIsValid());
         assert(cell.m_data.parr->checkCount());
+        assert(cell.m_data.parr->isPHPArray());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
+        assert(cell.m_data.pobj->kindIsValid());
         assert(cell.m_data.pobj->checkCount());
         return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
+        assert(cell.m_data.pres->kindIsValid());
         assert(cell.m_data.pres->checkCount());
         return;
       case KindOfRef:
         assert(!"KindOfRef found in a Cell");
-        break;
-      case KindOfClass:
-        assert(!"Invalid Cell type");
         break;
     }
     not_reached();
@@ -83,6 +127,7 @@ bool tvIsPlausible(TypedValue tv) {
   if (tv.m_type == KindOfRef) {
     assert(tv.m_data.pref);
     assert(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
+    assert(tv.m_data.pref->kindIsValid());
     assert(tv.m_data.pref->checkCount());
     tv = *tv.m_data.pref->tv();
   }
@@ -94,14 +139,14 @@ bool refIsPlausible(const Ref ref) {
   return tvIsPlausible(ref);
 }
 
-bool tvDecRefWillRelease(TypedValue* tv) {
+bool tvDecRefWillRelease(const TypedValue* tv) {
   if (!isRefcountedType(tv->m_type)) {
     return false;
   }
   if (tv->m_type == KindOfRef) {
     return tv->m_data.pref->getRealCount() <= 1;
   }
-  return TV_GENERIC_DISPATCH(*tv, decWillRelease);
+  return tv->m_data.pcnt->decWillRelease();
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -127,7 +172,7 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         b = (tv->m_data.dbl != 0);
         continue;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
         b = tv->m_data.pstr->toBoolean();
         continue;
 
@@ -136,8 +181,18 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
+      case KindOfPersistentArray:
+        b = !tv->m_data.parr->empty();
+        continue;
+
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
-        b = !!tv->m_data.parr->size();
+        b = !tv->m_data.parr->empty();
         tvDecRefArr(tv);
         continue;
 
@@ -152,7 +207,6 @@ void tvCastToBooleanInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -184,16 +238,27 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
       case KindOfDouble:
         return;
 
-      case KindOfStaticString:
+      case KindOfPersistentString:
         d = tv->m_data.pstr->toDouble();
         continue;
 
       case KindOfString:
-        d = tv->m_data.pstr->toDouble(); tvDecRefStr(tv);
+        d = tv->m_data.pstr->toDouble();
+        tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
+      case KindOfPersistentArray:
+        d = tv->m_data.parr->empty() ? 0 : 1;
+        continue;
+
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
-        d = (double)(tv->m_data.parr->empty() ? 0LL : 1LL);
+        d = tv->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(tv);
         continue;
 
@@ -208,7 +273,6 @@ void tvCastToDoubleInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -239,8 +303,8 @@ void cellCastToInt64InPlace(Cell* cell) {
         i = toInt64(cell->m_data.dbl);
         continue;
 
-      case KindOfStaticString:
-        i = (cell->m_data.pstr->toInt64());
+      case KindOfPersistentString:
+        i = cell->m_data.pstr->toInt64();
         continue;
 
       case KindOfString:
@@ -248,6 +312,16 @@ void cellCastToInt64InPlace(Cell* cell) {
         tvDecRefStr(cell);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfPersistentDict:
+      case KindOfPersistentKeyset:
+      case KindOfPersistentArray:
+        i = cell->m_data.parr->empty() ? 0 : 1;
+        continue;
+
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
         i = cell->m_data.parr->empty() ? 0 : 1;
         tvDecRefArr(cell);
@@ -264,7 +338,6 @@ void cellCastToInt64InPlace(Cell* cell) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -280,7 +353,7 @@ void tvCastToInt64InPlace(TypedValue* tv) {
   cellCastToInt64InPlace(tv);
 }
 
-double tvCastToDouble(TypedValue* tv) {
+double tvCastToDouble(const TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   if (tv->m_type == KindOfRef) {
     tv = tv->m_data.pref->tv();
@@ -300,10 +373,17 @@ double tvCastToDouble(TypedValue* tv) {
     case KindOfDouble:
       return tv->m_data.dbl;
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
     case KindOfString:
       return tv->m_data.pstr->toDouble();
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
       return tv->m_data.parr->empty() ? 0.0 : 1.0;
 
@@ -314,7 +394,6 @@ double tvCastToDouble(TypedValue* tv) {
       return tv->m_data.pres->data()->o_toDouble();
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -327,61 +406,73 @@ const StaticString
 void tvCastToStringInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
-  StringData* s;
 
-  do {
-    switch (tv->m_type) {
-      case KindOfUninit:
-      case KindOfNull:
-        s = staticEmptyString();
-        goto static_string;
+  auto string = [&](StringData* s) {
+    tv->m_type = KindOfString;
+    tv->m_data.pstr = s;
+  };
+  auto persistentString = [&](StringData* s) {
+    assert(!s->isRefCounted());
+    tv->m_type = KindOfPersistentString;
+    tv->m_data.pstr = s;
+  };
 
-      case KindOfBoolean:
-        s = tv->m_data.num ? s_1.get() : staticEmptyString();
-        goto static_string;
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+      return persistentString(staticEmptyString());
 
-      case KindOfInt64:
-        s = buildStringData(tv->m_data.num);
-        continue;
+    case KindOfBoolean:
+      return persistentString(tv->m_data.num ? s_1.get() : staticEmptyString());
 
-      case KindOfDouble:
-        s = buildStringData(tv->m_data.dbl);
-        continue;
+    case KindOfInt64:
+      return string(buildStringData(tv->m_data.num));
 
-      case KindOfStaticString:
-      case KindOfString:
-        return;
+    case KindOfDouble:
+      return string(buildStringData(tv->m_data.dbl));
 
-      case KindOfArray:
-        raise_notice("Array to string conversion");
-        s = array_string.get();
-        tvDecRefArr(tv);
-        goto static_string;
+    case KindOfPersistentString:
+    case KindOfString:
+      return;
 
-      case KindOfObject:
-        // For objects, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
-        return;
+    case KindOfVec:
+    case KindOfPersistentVec:
+      raise_notice("Vec to string conversion");
+      if (tv->m_type == KindOfVec) tvDecRefArr(tv);
+      return persistentString(vec_string.get());
 
-      case KindOfResource:
-        // For resources, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pres->data()->o_toString();
-        return;
+    case KindOfDict:
+    case KindOfPersistentDict:
+      raise_notice("Dict to string conversion");
+      if (tv->m_type == KindOfDict) tvDecRefArr(tv);
+      return persistentString(dict_string.get());
 
-      case KindOfRef:
-      case KindOfClass:
-        break;
-    }
-    not_reached();
-  } while (0);
+    case KindOfKeyset:
+    case KindOfPersistentKeyset:
+      raise_notice("Keyset to string conversion");
+      if (tv->m_type == KindOfKeyset) tvDecRefArr(tv);
+      return persistentString(keyset_string.get());
 
-  tv->m_data.pstr = s;
-  tv->m_type = KindOfString;
-  return;
+    case KindOfArray:
+    case KindOfPersistentArray:
+      raise_notice("Array to string conversion");
+      if (tv->m_type == KindOfArray) tvDecRefArr(tv);
+      return persistentString(array_string.get());
 
-static_string:
-  tv->m_data.pstr = s;
-  tv->m_type = KindOfStaticString;
+    case KindOfObject:
+      // For objects, we fall back on the Variant machinery
+      tvAsVariant(tv) = tv->m_data.pobj->invokeToString();
+      return;
+
+    case KindOfResource:
+      // For resources, we fall back on the Variant machinery
+      tvAsVariant(tv) = tv->m_data.pres->data()->o_toString();
+      return;
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
 }
 
 StringData* tvCastToString(const TypedValue* tv) {
@@ -404,7 +495,7 @@ StringData* tvCastToString(const TypedValue* tv) {
     case KindOfDouble:
       return buildStringData(tv->m_data.dbl);
 
-    case KindOfStaticString:
+    case KindOfPersistentString:
       return tv->m_data.pstr;
 
     case KindOfString: {
@@ -413,6 +504,22 @@ StringData* tvCastToString(const TypedValue* tv) {
       return s;
     }
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+      raise_notice("Vec to string conversion");
+      return vec_string.get();
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      raise_notice("Dict to string conversion");
+      return dict_string.get();
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      raise_notice("Keyset to string conversion");
+      return keyset_string.get();
+
+    case KindOfPersistentArray:
     case KindOfArray:
       raise_notice("Array to string conversion");
       return array_string.get();
@@ -424,7 +531,6 @@ StringData* tvCastToString(const TypedValue* tv) {
       return tv->m_data.pres->data()->o_toString().detach();
 
     case KindOfRef:
-    case KindOfClass:
       not_reached();
   }
   not_reached();
@@ -445,7 +551,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
         a = ArrayData::Create(tvAsVariant(tv));
         continue;
 
@@ -454,7 +560,57 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        a = PackedArray::ToPHPArrayVec(adIn, true);
+        assert(a != adIn);
+        continue;
+      }
+
+      case KindOfVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
+        if (a != adIn) tvDecRefArr(tv);
+        continue;
+      }
+
+      case KindOfPersistentDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        a = MixedArray::ToPHPArrayDict(adIn, true);
+        assert(a != adIn);
+        continue;
+      }
+
+      case KindOfDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+        if (a != adIn) tvDecRefArr(tv);
+        continue;
+      }
+
+      case KindOfPersistentKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        a = SetArray::ToPHPArray(adIn, true);
+        assert(a != adIn);
+        continue;
+      }
+
+      case KindOfKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
+        if (a != adIn) tvDecRefArr(tv);
+        continue;
+      }
+
+      case KindOfPersistentArray:
       case KindOfArray:
+        assert(tv->m_data.parr->isPHPArray());
         return;
 
       case KindOfObject:
@@ -468,7 +624,6 @@ void tvCastToArrayInPlace(TypedValue* tv) {
         continue;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -478,6 +633,338 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
+  assert(cellIsPlausible(*tv));
+}
+
+static Array arrayFromCollection(ObjectData* obj) {
+  if (auto ad = collections::asArray(obj)) {
+    return ArrNR{ad}.asArray();
+  }
+  return collections::toArray(obj);
+}
+
+void tvCastToVecInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  ArrayData* a;
+
+  do {
+    switch (tv->m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        raise_warning("Null to vec conversion");
+        a = staticEmptyVecArray();
+        continue;
+
+      case KindOfBoolean:
+        raise_warning("Bool to vec conversion");
+        a = staticEmptyVecArray();
+        continue;
+
+      case KindOfInt64:
+        raise_warning("Int to vec conversion");
+        a = staticEmptyVecArray();
+        continue;
+
+      case KindOfDouble:
+        raise_warning("Double to vec conversion");
+        a = staticEmptyVecArray();
+        continue;
+
+      case KindOfPersistentString:
+      case KindOfString:
+        raise_warning("String to vec conversion");
+        a = staticEmptyVecArray();
+        decRefStr(tv->m_data.pstr);
+        continue;
+
+      case KindOfResource:
+        raise_warning("Resource to vec conversion");
+        a = staticEmptyVecArray();
+        decRefRes(tv->m_data.pres);
+        continue;
+
+      case KindOfPersistentDict:
+      case KindOfDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        a = MixedArray::ToVecDict(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        a = SetArray::ToVec(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentArray:
+      case KindOfArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        a = adIn->toVec(adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentVec:
+      case KindOfVec:
+        assert(tv->m_data.parr->isVecArray());
+        return;
+
+      case KindOfObject: {
+        auto* obj = tv->m_data.pobj;
+        if (obj->isCollection()) {
+          a = arrayFromCollection(obj).toVec().detach();
+          decRefObj(obj);
+          tv->m_data.parr = a;
+          tv->m_type = KindOfVec;
+          assert(cellIsPlausible(*tv));
+          return;
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::CreateVec();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.append(iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to vec");
+          a = staticEmptyVecArray();
+        }
+        decRefObj(obj);
+        continue;
+      }
+
+      case KindOfRef:
+        break;
+    }
+    not_reached();
+  } while (0);
+
+  assert(!a->isRefCounted() || a->hasExactlyOneRef());
+
+  tv->m_data.parr = a;
+  tv->m_type = KindOfVec;
+  assert(cellIsPlausible(*tv));
+}
+
+void tvCastToDictInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  ArrayData* a;
+
+  do {
+    switch (tv->m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        raise_warning("Null to dict conversion");
+        a = staticEmptyDictArray();
+        continue;
+
+      case KindOfBoolean:
+        raise_warning("Bool to dict conversion");
+        a = staticEmptyDictArray();
+        continue;
+
+      case KindOfInt64:
+        raise_warning("Int to dict conversion");
+        a = staticEmptyDictArray();
+        continue;
+
+      case KindOfDouble:
+        raise_warning("Double to dict conversion");
+        a = staticEmptyDictArray();
+        continue;
+
+      case KindOfPersistentString:
+      case KindOfString:
+        raise_warning("String to dict conversion");
+        a = staticEmptyDictArray();
+        decRefStr(tv->m_data.pstr);
+        continue;
+
+      case KindOfResource:
+        raise_warning("Resource to dict conversion");
+        a = staticEmptyDictArray();
+        decRefRes(tv->m_data.pres);
+        continue;
+
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        a = SetArray::ToDict(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentArray:
+      case KindOfArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        a = adIn->toDict(adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentDict:
+      case KindOfDict:
+        assert(tv->m_data.parr->isDict());
+        return;
+
+      case KindOfObject: {
+        auto* obj = tv->m_data.pobj;
+        if (obj->isCollection()) {
+          a = arrayFromCollection(obj).toDict().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::CreateDict();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.set(iter.first(), iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to dict");
+          a = staticEmptyDictArray();
+        }
+        tv->m_data.parr = a;
+        tv->m_type = KindOfDict;
+        assert(cellIsPlausible(*tv));
+        decRefObj(obj);
+        return;
+      }
+
+      case KindOfRef:
+        break;
+    }
+    not_reached();
+  } while (0);
+
+  assert(!a->isRefCounted() || a->hasExactlyOneRef());
+
+  tv->m_data.parr = a;
+  tv->m_type = KindOfDict;
+  assert(cellIsPlausible(*tv));
+}
+
+void tvCastToKeysetInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  ArrayData* a;
+
+  do {
+    switch (tv->m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        raise_warning("Null to keyset conversion");
+        a = staticEmptyKeysetArray();
+        continue;
+
+      case KindOfBoolean:
+        raise_warning("Bool to keyset conversion");
+        a = staticEmptyKeysetArray();
+        continue;
+
+      case KindOfInt64:
+        raise_warning("Int to keyset conversion");
+        a = staticEmptyKeysetArray();
+        continue;
+
+      case KindOfDouble:
+        raise_warning("Double to keyset conversion");
+        a = staticEmptyKeysetArray();
+        continue;
+
+      case KindOfPersistentString:
+      case KindOfString:
+        raise_warning("String to keyset conversion");
+        a = staticEmptyKeysetArray();
+        decRefStr(tv->m_data.pstr);
+        continue;
+
+      case KindOfResource:
+        raise_warning("Resource to keyset conversion");
+        a = staticEmptyKeysetArray();
+        decRefRes(tv->m_data.pres);
+        continue;
+
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentDict:
+      case KindOfDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        a = MixedArray::ToKeysetDict(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentArray:
+      case KindOfArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        a = adIn->toKeyset(adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        assert(tv->m_data.parr->isKeyset());
+        return;
+
+      case KindOfObject: {
+        auto* obj = tv->m_data.pobj;
+        if (obj->isCollection()) {
+          a = arrayFromCollection(obj).toKeyset().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::CreateKeyset();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.append(iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to keyset");
+          a = staticEmptyKeysetArray();
+        }
+        decRefObj(obj);
+        continue;
+      }
+
+      case KindOfRef:
+        break;
+    }
+    not_reached();
+  } while (0);
+
+  assert(!a->isRefCounted() || a->hasExactlyOneRef());
+
+  tv->m_data.parr = a;
+  tv->m_type = KindOfKeyset;
+  assert(cellIsPlausible(*tv));
 }
 
 void tvCastToObjectInPlace(TypedValue* tv) {
@@ -495,7 +982,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
       case KindOfBoolean:
       case KindOfInt64:
       case KindOfDouble:
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfResource:
         o = SystemLib::AllocStdClassObject().detach();
         o->o_set(s_scalar, tvAsVariant(tv));
@@ -507,6 +994,15 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         tvDecRefStr(tv);
         continue;
 
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        tvCastToArrayInPlace(tv);
+        // Fall-through to array case
+      case KindOfPersistentArray:
       case KindOfArray:
         // For arrays, we fall back on the Variant machinery
         tvAsVariant(tv) = ObjectData::FromArray(tv->m_data.parr);
@@ -516,7 +1012,6 @@ void tvCastToObjectInPlace(TypedValue* tv) {
         return;
 
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -524,6 +1019,7 @@ void tvCastToObjectInPlace(TypedValue* tv) {
 
   tv->m_data.pobj = o;
   tv->m_type = KindOfObject;
+  assert(cellIsPlausible(*tv));
 }
 
 void tvCastToNullableObjectInPlace(TypedValue* tv) {
@@ -549,6 +1045,9 @@ void tvCastToResourceInPlace(TypedValue* tv) {
       DT_UNCOUNTED_CASE:
         continue;
       case KindOfString:
+      case KindOfVec:
+      case KindOfDict:
+      case KindOfKeyset:
       case KindOfArray:
       case KindOfObject:
         tvDecRef(tv);
@@ -557,7 +1056,6 @@ void tvCastToResourceInPlace(TypedValue* tv) {
         // no op, return
         return;
       case KindOfRef:
-      case KindOfClass:
         break;
     }
     not_reached();
@@ -565,6 +1063,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
 
   tv->m_type = KindOfResource;
   tv->m_data.pres = req::make<DummyResource>().detach()->hdr();
+  assert(cellIsPlausible(*tv));
 }
 
 bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
@@ -572,52 +1071,82 @@ bool tvCoerceParamToBooleanInPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    DT_UNCOUNTED_CASE:
-    case KindOfString:
-      tvCastToBooleanInPlace(tv);
-      return true;
-
-    case KindOfArray:
-    case KindOfObject:
-    case KindOfResource:
-      return false;
-
-    case KindOfRef:
-    case KindOfClass:
-      break;
-  }
-  not_reached();
-}
-
-bool tvCanBeCoercedToNumber(TypedValue* tv) {
-  switch (tv->m_type) {
     case KindOfUninit:
     case KindOfNull:
     case KindOfBoolean:
     case KindOfInt64:
     case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+      // In PHP 7 mode handling of null types is stricter
+      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
+        return false;
+      }
+      tvCastToBooleanInPlace(tv);
       return true;
 
-    case KindOfStaticString:
-    case KindOfString: {
-      // Simplified version of is_numeric_string
-      // which also allows for non-numeric garbage
-      // Because PHP
-      auto p = tv->m_data.pstr->data();
-      auto l = tv->m_data.pstr->size();
-      while (l && isspace(*p)) { ++p; --l; }
-      if (l && (*p == '+' || *p == '-')) { ++p; --l; }
-      if (l && *p == '.') { ++p; --l; }
-      return l && isdigit(*p);
-    }
-
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
       return false;
 
     case KindOfRef:
-    case KindOfClass:
+      break;
+  }
+  not_reached();
+}
+
+bool tvCanBeCoercedToNumber(const TypedValue* tv) {
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      return true;
+
+    case KindOfNull:
+      // In PHP 7 mode handling of null types is stricter
+      return !RuntimeOption::PHP7_ScalarTypes;
+
+    case KindOfPersistentString:
+    case KindOfString: {
+      // Simplified version of is_numeric_string
+      // which also allows for non-numeric garbage
+      // Because PHP
+      auto str = tv->m_data.pstr;
+      auto p = str->data();
+      auto l = tv->m_data.pstr->size();
+      while (l && isspace(*p)) { ++p; --l; }
+      if (l && (*p == '+' || *p == '-')) { ++p; --l; }
+      if (l && *p == '.') { ++p; --l; }
+      bool okay = l && isdigit(*p);
+      // In PHP7 garbage at the end of a numeric string will trigger a notice
+      if (RuntimeOption::PHP7_ScalarTypes && okay && !str->isNumeric()) {
+        raise_notice("A non well formed numeric value encountered");
+      }
+      return okay;
+    }
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+      return false;
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -628,6 +1157,13 @@ bool tvCoerceParamToInt64InPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
   if (!tvCanBeCoercedToNumber(tv)) {
     return false;
+  }
+  // In PHP 7 mode doubles only convert to integers when the conversion is non-
+  // narrowing
+  if (RuntimeOption::PHP7_ScalarTypes && tv->m_type == KindOfDouble) {
+    if (tv->m_data.dbl < std::numeric_limits<int64_t>::min()) return false;
+    if (tv->m_data.dbl > std::numeric_limits<int64_t>::max()) return false;
+    if (std::isnan(tv->m_data.dbl)) return false;
   }
   tvCastToInt64InPlace(tv);
   return true;
@@ -648,11 +1184,27 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
     case KindOfString:
+      // In PHP 7 mode handling of null types is stricter
+      if (tv->m_type == KindOfNull && RuntimeOption::PHP7_ScalarTypes) {
+        return false;
+      }
       tvCastToStringInPlace(tv);
       return true;
 
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
     case KindOfArray:
       return false;
 
@@ -667,7 +1219,6 @@ bool tvCoerceParamToStringInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -678,10 +1229,22 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
   tvUnboxIfNeeded(tv);
 
   switch (tv->m_type) {
-    DT_UNCOUNTED_CASE:
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
     case KindOfString:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
       return false;
 
+    case KindOfPersistentArray:
     case KindOfArray:
       return true;
 
@@ -695,7 +1258,102 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv) {
       return false;
 
     case KindOfRef:
-    case KindOfClass:
+      break;
+  }
+  not_reached();
+}
+
+bool tvCoerceParamToVecInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
+    case KindOfArray:
+      return false;
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+      return true;
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
+}
+
+bool tvCoerceParamToDictInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
+    case KindOfArray:
+      return false;
+
+    case KindOfPersistentDict:
+    case KindOfDict:
+      return true;
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
+}
+
+bool tvCoerceParamToKeysetInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+
+  switch (tv->m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentArray:
+    case KindOfArray:
+      return false;
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      return true;
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -724,14 +1382,45 @@ bool tvCoerceParamToResourceInPlace(TypedValue* tv) {
   return tv->m_type == KindOfResource;
 }
 
+namespace {
+/*
+ * Sometimes calls to builtin functions are inlined so that the call itself can
+ * occur via CallBuiltin rather than NativeImpl. In these instances it's
+ * possible that no ActRec was pushed for the builtin call, in which case the
+ * liveFunc() will be the caller rather than the callee.
+ *
+ * If no ActRec was pushed for the builtin function inspect the caller to
+ * determine if the call used strict types.
+ */
+bool useStrictTypes(const Func* callee) {
+  return liveFunc() == callee
+    ? !liveFrame()->useWeakTypes()
+    : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
+}
+}
+
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
+  if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
+             RuntimeOption::EnableHipHopSyntax)) {
+    return;
+  }
+
+  VMRegAnchor _;
+  if (!useStrictTypes(func)) return;
+
+  auto const& tc = func->params()[argNum - 1].typeConstraint;
+  tc.verifyParam(&tv, func, argNum - 1, true);
+}
+
 #define XX(kind, expkind)                                         \
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
                                     const Func* callee,           \
                                     unsigned int arg_num) {       \
+  tvCoerceIfStrict(*tv, arg_num, callee);                         \
   if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
     return;                                                       \
   }                                                               \
-  raise_param_type_warning(callee->name()->data(),                \
+  raise_param_type_warning(callee->displayName()->data(),         \
                            arg_num, KindOf##expkind, tv->m_type); \
   throw TVCoercionException(callee, arg_num, tv->m_type,          \
                             KindOf##expkind);                     \
@@ -741,6 +1430,9 @@ X(Boolean)
 X(Int64)
 X(Double)
 X(String)
+X(Vec)
+X(Dict)
+X(Keyset)
 X(Array)
 X(Object)
 XX(NullableObject, Object)

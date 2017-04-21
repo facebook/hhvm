@@ -1,0 +1,37 @@
+TEST 0
+bool(true)
+TEST 1
+bool(true)
+TEST 2
+bool(true)
+TEST 3
+bool(true)
+TEST 4
+bool(true)
+TEST 5
+bool(true)
+
+Warning: %s
+bool(false)
+bool(false)
+bool(false)
+TEST 0
+bool(true)
+TEST 1
+bool(true)
+
+Warning: %s
+bool(false)
+bool(false)
+bool(false)
+TEST 0
+bool(true)
+TEST 1
+bool(true)
+TEST 2
+bool(true)
+
+Warning: %s
+bool(false)
+bool(false)
+bool(false)

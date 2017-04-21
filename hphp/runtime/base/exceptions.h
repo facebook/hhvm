@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,7 @@
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/req-root.h"
 
 namespace HPHP {
 
@@ -57,7 +58,6 @@ struct ExtendedException : Exception {
     ATTRIBUTE_PRINTF(2,3);
   ExtendedException(const ExtendedException& other);
   ExtendedException(ExtendedException&& other) noexcept;
-  ~ExtendedException();
 
   ExtendedException& operator=(const ExtendedException& other);
   ExtendedException& operator=(ExtendedException&& other) noexcept;
@@ -72,8 +72,6 @@ struct ExtendedException : Exception {
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
 
-  virtual void vscan(IMarker&) const;
-  template<class F> void scan(F& mark) const;
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace);
 
@@ -81,11 +79,8 @@ private:
   void computeBacktrace(bool skipFrame = false);
 
 private:
-  Array m_btp;
+  req::root<Array> m_btp;
   bool m_silent{false};
-  MemoryManager::ExceptionRootKey m_key;
-
-  friend class MemoryManager;
 };
 
 struct FatalErrorException : ExtendedException {
@@ -104,6 +99,11 @@ struct FatalErrorException : ExtendedException {
 private:
   bool m_recoverable{false};
 };
+
+[[noreturn]]
+void raise_fatal_error(const char* msg, const Array& bt = null_array,
+                       bool recoverable = false, bool silent = false,
+                       bool throws = true);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -138,8 +138,7 @@ struct RequestMemoryExceededException : ResourceExceededException {
 
 //////////////////////////////////////////////////////////////////////
 
-class ExitException : public ExtendedException {
-public:
+struct ExitException : ExtendedException {
   static std::atomic<int> ExitCode; // XXX should not be static
 
   explicit ExitException(int exitCode) {
@@ -148,8 +147,7 @@ public:
   EXCEPTION_COMMON_IMPL(ExitException);
 };
 
-class PhpFileDoesNotExistException : public ExtendedException {
-public:
+struct PhpFileDoesNotExistException : ExtendedException {
   explicit PhpFileDoesNotExistException(const char *file)
     : ExtendedException("File could not be loaded: %s", file) {}
   explicit PhpFileDoesNotExistException(const char *msg, bool empty_file)
@@ -167,11 +165,22 @@ public:
  *
  * In newer code you'll generally want to use raise_error.
  */
-ATTRIBUTE_NORETURN void throw_null_pointer_exception();
-ATTRIBUTE_NORETURN void throw_invalid_object_type(const char* clsName);
-ATTRIBUTE_NORETURN void throw_not_implemented(const char* feature);
-ATTRIBUTE_NORETURN
+[[noreturn]] void throw_null_pointer_exception();
+[[noreturn]] void throw_invalid_object_type(const char* clsName);
+[[noreturn]] void throw_not_implemented(const char* feature);
+[[noreturn]]
 void throw_not_supported(const char* feature, const char* reason);
+
+/*
+ * Initialize Throwable's file name and line number assuming the stack trace
+ * was already initialized and the current vmfp() is a built-in.
+ */
+void throwable_init_file_and_line_from_builtin(ObjectData* throwable);
+
+/*
+ * Initialize Throwable's stack trace, file name and line number.
+ */
+void throwable_init(ObjectData* throwable);
 
 //////////////////////////////////////////////////////////////////////
 

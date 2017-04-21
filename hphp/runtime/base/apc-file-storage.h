@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,12 @@
 #ifndef incl_HPHP_APC_FILE_STORAGE_H_
 #define incl_HPHP_APC_FILE_STORAGE_H_
 
+#include <atomic>
+#include <string>
+#include <mutex>
 #include <vector>
-#include "hphp/util/lock.h"
+
+#include "hphp/util/hash.h"
 
 namespace HPHP {
 
@@ -36,17 +40,12 @@ struct APCFileStorage {
     Full
   };
 
-  APCFileStorage()
-    : m_state(StorageState::Invalid)
-    , m_current(nullptr)
-    , m_chunkRemain(0)
-  {}
-
+  APCFileStorage() = default;
   APCFileStorage(const APCFileStorage&) = delete;
   APCFileStorage& operator=(const APCFileStorage&) = delete;
 
-  void enable(const std::string& prefix, int64_t chunkSize);
-  char *put(const char *data, int32_t len);
+  void enable(const std::string& prefix, size_t chunkSize);
+  char *put(const char *data, uint32_t len);
   void seal();
   void adviseOut();
   bool hashCheck();
@@ -57,19 +56,21 @@ private:
   bool addFile();
 
 private:
-  std::vector<void*> m_chunks;
-  std::string m_prefix;
-  int64_t m_chunkSize;
-  StorageState m_state;
-  char *m_current;
-  int32_t m_chunkRemain;
+  // [32-bit chunk index]:[32-bit offset]
+  std::atomic_uint_fast64_t m_current{~0ull};
+  size_t m_chunkSize{0};
+  StorageState m_state{StorageState::Invalid};
+  std::vector<char*> m_chunks;
   std::vector<std::string> m_fileNames;
+  std::vector<int> m_fds;
+  std::string m_prefix;
 
-  Mutex m_lock;
-  static const strhash_t TombHash = 0xdeadbeef;
-  static const int PaddingSize = sizeof(strhash_t) + // hash
-                                 sizeof(int32_t) + // len
-                                 sizeof(char); // '\0'
+  // This lock is needed when manipulating chunks.
+  std::mutex m_lock;
+  static constexpr strhash_t TombHash = 0xdeadbeef;
+  static constexpr uint32_t PaddingSize = sizeof(strhash_t) + // hash
+                                          sizeof(int32_t) + // len
+                                          sizeof(char); // '\0'
 };
 
 extern APCFileStorage s_apc_file_storage;

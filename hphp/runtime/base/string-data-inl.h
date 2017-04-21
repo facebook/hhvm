@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,12 +21,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 // CopyString
 
-inline StringData* StringData::Make(const char* data) {
-  return Make(data, CopyString);
-}
-
-inline StringData* StringData::Make(const std::string& data) {
-  return Make(data.data(), data.length(), CopyString);
+inline StringData* StringData::Make(folly::StringPiece s) {
+  return Make(s.begin(), s.size(), CopyString);
 }
 
 inline StringData* StringData::Make(const char* data, CopyStringMode) {
@@ -58,12 +54,12 @@ inline StringData* StringData::Make(const StringData* s1, const char* lit2) {
 //////////////////////////////////////////////////////////////////////
 
 inline folly::StringPiece StringData::slice() const {
-  return folly::StringPiece{m_data, m_len};
+  return folly::StringPiece{data(), m_len};
 }
 
 inline folly::MutableStringPiece StringData::bufferSlice() {
   assert(!isImmutable());
-  return folly::MutableStringPiece{m_data, capacity()};
+  return folly::MutableStringPiece{mutableData(), capacity()};
 }
 
 inline void StringData::invalidateHash() {
@@ -76,7 +72,7 @@ inline void StringData::invalidateHash() {
 inline void StringData::setSize(int len) {
   assert(len >= 0 && len <= capacity() && !isImmutable());
   assert(!hasMultipleRefs());
-  m_data[len] = 0;
+  mutableData()[len] = 0;
   m_lenAndHash = len;
   assert(m_hash == 0);
   assert(checkSane());
@@ -88,19 +84,23 @@ inline void StringData::checkStack() const {
 
 inline const char* StringData::data() const {
   // TODO: t1800106: re-enable this assert
-  // assert(m_data[size()] == 0); // all strings must be null-terminated
+  // assert(data()[size()] == 0); // all strings must be null-terminated
+#ifdef NO_M_DATA
+  return reinterpret_cast<const char*>(this + 1);
+#else
   return m_data;
+#endif
 }
 
 inline char* StringData::mutableData() const {
   assert(!isImmutable());
-  return m_data;
+  return const_cast<char*>(data());
 }
 
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return m_hdr.aux.decode();
+  return aux<CapCode>().decode();
 }
 
 inline size_t StringData::heapSize() const {
@@ -117,7 +117,7 @@ inline bool StringData::isStrictlyInteger(int64_t& res) const {
   if ((unsigned char)(data()[0] - '-') > ('9' - '-')) {
     return false;
   }
-  if (isStatic() && m_hash < 0) return false;
+  if (m_hash < 0) return false;
   auto const s = slice();
   return is_strictly_integer(s.data(), s.size(), res);
 }
@@ -131,7 +131,7 @@ inline StringData* StringData::modifyChar(int offset, char c) {
   assert(!hasMultipleRefs());
 
   auto const sd = isProxy() ? escalate(size()) : this;
-  sd->m_data[offset] = c;
+  sd->mutableData()[offset] = c;
   sd->m_hash = 0;
   return sd;
 }
@@ -169,8 +169,11 @@ inline StringData::Proxy* StringData::proxy() {
   return static_cast<Proxy*>(payload());
 }
 
+#ifndef NO_M_DATA
 inline bool StringData::isFlat() const { return m_data == payload(); }
 inline bool StringData::isProxy() const { return m_data != payload(); }
+#endif
+
 inline bool StringData::isImmutable() const {
   return !isRefCounted() || isProxy();
 }
@@ -204,6 +207,26 @@ struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     assert(s1 && s2);
     return s1->isame(s2);
+  }
+};
+
+struct string_data_lt {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    int len1 = s1->size();
+    int len2 = s2->size();
+    if (len1 < len2) {
+      return (len1 == 0) || (memcmp(s1->data(), s2->data(), len1) <= 0);
+    } else if (len1 == len2) {
+      return (len1 != 0) && (memcmp(s1->data(), s2->data(), len1) < 0);
+    } else /* len1 > len2 */ {
+      return ((len2 != 0) && (memcmp(s1->data(), s2->data(), len2) < 0));
+    }
+  }
+};
+
+struct string_data_lti {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
   }
 };
 

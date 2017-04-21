@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ParameterExpression);
 DECLARE_BOOST_TYPES(TypeAnnotation);
 
-class ParameterExpression : public Expression {
-public:
+struct ParameterExpression : Expression {
   ParameterExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                       TypeAnnotationPtr type,
                       bool hhType,

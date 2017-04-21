@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,9 +19,13 @@
 #define incl_HPHP_EXT_CURL_H_
 
 #include "hphp/runtime/ext/extension.h"
+
 #include <curl/curl.h>
 
 #define CURLOPT_RETURNTRANSFER 19913
+#define CURLOPT_BINARYTRANSFER 19914
+
+#define CURLOPT_SAFE_UPLOAD -1
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,6 +33,12 @@ namespace HPHP {
 Variant HHVM_FUNCTION(curl_init, const Variant& url = null_string);
 Variant HHVM_FUNCTION(curl_init_pooled, const String& poolName,
                               const Variant& url = null_string);
+void HHVM_FUNCTION(curl_create_pool, const String& poolName,
+                              const int size = 5,
+                              const int connGetTimeout = 5000,
+                              const int reuseLimit = 500);
+bool HHVM_FUNCTION(curl_destroy_pool, const String& poolName);
+Array HHVM_FUNCTION(curl_list_pools);
 Variant HHVM_FUNCTION(curl_copy_handle, const Resource& ch);
 Variant HHVM_FUNCTION(curl_version, int uversion = CURLVERSION_NOW);
 bool HHVM_FUNCTION(curl_setopt, const Resource& ch, int option, const Variant& value);
@@ -42,6 +52,7 @@ String HHVM_FUNCTION(curl_strerror, int code);
 Variant HHVM_FUNCTION(curl_close, const Resource& ch);
 void HHVM_FUNCTION(curl_reset, const Resource& ch);
 Resource HHVM_FUNCTION(curl_multi_init);
+Variant HHVM_FUNCTION(curl_multi_strerror, int64_t code);
 Variant HHVM_FUNCTION(curl_multi_add_handle, const Resource& mh, const Resource& ch);
 Variant HHVM_FUNCTION(curl_multi_remove_handle, const Resource& mh, const Resource& ch);
 Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh, VRefParam still_running);
@@ -55,6 +66,9 @@ Variant HHVM_FUNCTION(fb_curl_multi_fdset, const Resource& mh,
 Variant HHVM_FUNCTION(curl_multi_info_read, const Resource& mh,
                                VRefParam msgs_in_queue = null_object);
 Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
+bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
+                              int option,
+                              const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

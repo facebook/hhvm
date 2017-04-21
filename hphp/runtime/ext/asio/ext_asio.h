@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,8 +22,7 @@
 
 namespace HPHP {
 
-class AsioExtension final : public Extension {
-public:
+struct AsioExtension final : Extension {
   AsioExtension() : Extension("asio", "0.1") {}
 
   void moduleInit() override {
@@ -34,9 +33,6 @@ public:
     initResumableWaitHandle();
     initAsyncGenerator();
     initAwaitAllWaitHandle();
-    initGenArrayWaitHandle();
-    initGenMapWaitHandle();
-    initGenVectorWaitHandle();
     initConditionWaitHandle();
     initSleepWaitHandle();
     initRescheduleWaitHandle();
@@ -55,9 +51,6 @@ private:
   void initResumableWaitHandle();
   void initAsyncGenerator();
   void initAwaitAllWaitHandle();
-  void initGenArrayWaitHandle();
-  void initGenMapWaitHandle();
-  void initGenVectorWaitHandle();
   void initConditionWaitHandle();
   void initSleepWaitHandle();
   void initRescheduleWaitHandle();

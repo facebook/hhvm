@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,13 +41,19 @@ namespace HPHP { namespace rds {
  * live in RDS.  Note that we don't put closure locals here because
  * they are per-instance.
  */
-Link<RefData> bindStaticLocal(const Func*, const StringData*);
+
+struct StaticLocalData {
+  RefData ref;
+  static size_t ref_offset() { return offsetof(StaticLocalData, ref); }
+};
+Link<StaticLocalData, true /* normal_only */>
+bindStaticLocal(const Func*, const StringData*);
 
 /*
  * Allocate storage for the value of a class constant in RDS.
  */
-Link<TypedValue> bindClassConstant(const StringData* className,
-                                   const StringData* constName);
+Link<TypedValue, true /* normal_only */>
+bindClassConstant(const StringData* clsName, const StringData* cnsName);
 
 //////////////////////////////////////////////////////////////////////
 

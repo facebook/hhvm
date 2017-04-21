@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,16 +15,20 @@
 */
 #include "hphp/runtime/base/timestamp.h"
 
-#include <sys/time.h>
+#include <folly/portability/SysTime.h>
+
 extern "C" {
 #include <timelib.h>
 }
+
+#include <chrono>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/util/vdso.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,9 +39,11 @@ int64_t TimeStamp::Current() {
 }
 
 double TimeStamp::CurrentSecond() {
-  struct timeval tp;
-  gettimeofday(&tp, nullptr);
-  return (double)tp.tv_sec + (double)tp.tv_usec / 1000000;
+  auto now_ns = vdso::clock_gettime_ns(CLOCK_REALTIME);
+  using DoubleSeconds =
+    std::chrono::duration<double, std::chrono::seconds::period>;
+  auto now_double_secs = DoubleSeconds(std::chrono::nanoseconds(now_ns));
+  return now_double_secs.count();
 }
 
 const StaticString

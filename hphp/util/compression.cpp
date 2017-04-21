@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,8 +16,9 @@
 */
 
 #include "hphp/util/compression.h"
-#include "hphp/util/logger.h"
+
 #include "hphp/util/exception.h"
+#include "hphp/util/logger.h"
 
 #define PHP_ZLIB_MODIFIER 1000
 #define GZIP_HEADER_LENGTH 10

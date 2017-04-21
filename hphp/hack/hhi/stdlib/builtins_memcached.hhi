@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl /* -*- php -*- */
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -30,6 +30,8 @@ class Memcached {
   const DISTRIBUTION_CONSISTENT = 0;
   const OPT_LIBKETAMA_COMPATIBLE = 0;
   const OPT_LIBKETAMA_HASH = 0;
+  const bool GET_ERROR_RETURN_VALUE = false;
+  const int LIBMEMCACHED_VERSION_HEX = 0;
   const OPT_BUFFER_WRITES = 0;
   const OPT_BINARY_PROTOCOL = 0;
   const OPT_NO_BLOCK = 0;
@@ -108,4 +110,8 @@ class Memcached {
   public function setMulti($items, $expiration = 0) { }
   public function setMultiByKey($server_key, $items, $expiration = 0) { }
   public function setOption($option, $value) { }
+  public function touch(string $key, int $expiration = 0): bool { }
+  public function touchByKey(string $server_key,
+                             string $key,
+                             int $expiration = 0): bool { }
 }

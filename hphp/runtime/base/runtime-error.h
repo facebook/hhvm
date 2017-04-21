@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,8 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+struct Func;
 
 enum class HackStrictOption;
 
@@ -71,10 +73,10 @@ enum class ErrorMode {
   UPGRADEABLE_ERROR = WARNING | USER_WARNING | NOTICE | USER_NOTICE
 };
 
-ATTRIBUTE_NORETURN void raise_error(const std::string&);
-ATTRIBUTE_NORETURN void raise_error(ATTRIBUTE_PRINTF_STRING const char*, ...)
+[[noreturn]] void raise_error(const std::string&);
+[[noreturn]] void raise_error(ATTRIBUTE_PRINTF_STRING const char*, ...)
   ATTRIBUTE_PRINTF(1, 2);
-ATTRIBUTE_NORETURN void raise_error_without_first_frame(const std::string&);
+[[noreturn]] void raise_error_without_first_frame(const std::string&);
 void raise_recoverable_error(const std::string &msg);
 void raise_recoverable_error(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
   ATTRIBUTE_PRINTF(1, 2);
@@ -126,7 +128,24 @@ void raise_typehint_error(const std::string& msg);
  */
 void raise_return_typehint_error(const std::string& msg);
 
-void raise_disallowed_dynamic_call(const std::string& msg);
+void raise_disallowed_dynamic_call(const Func* f);
+
+// RAII mechanism to temporarily suppress Hack array compat notices within a
+// scope.
+struct SuppressHackArrCompatNotices {
+  SuppressHackArrCompatNotices();
+  ~SuppressHackArrCompatNotices();
+  SuppressHackArrCompatNotices(const SuppressHackArrCompatNotices&) = delete;
+  SuppressHackArrCompatNotices(SuppressHackArrCompatNotices&&) = delete;
+  SuppressHackArrCompatNotices&
+  operator=(const SuppressHackArrCompatNotices&) = delete;
+  SuppressHackArrCompatNotices&
+  operator=(SuppressHackArrCompatNotices&&) = delete;
+private:
+  bool old;
+};
+
+void raise_hackarr_compat_notice(const std::string& msg);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

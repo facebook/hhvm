@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #ifndef incl_HPHP_JIT_UNIQUE_STUBS_H_
 #define incl_HPHP_JIT_UNIQUE_STUBS_H_
 
@@ -22,12 +23,19 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
+#include <string>
+#include <vector>
+
 namespace HPHP {
 
 struct ActRec;
 struct SrcKey;
 
+namespace Debug { struct DebugInfo; }
+
 namespace jit {
+
+struct CodeCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -147,18 +155,14 @@ struct UniqueStubs {
   TCA funcBodyHelperThunk;
 
   /*
-   * Call EventHook::onFunctionEnter() and handle the case where it requests
+   * Call EventHook::onFunctionCall() and handle the case where it requests
    * that we skip the function.
-   *
-   * functionEnterHelperReturn is only used by unwinder code to detect calls
-   * made from this stub.
    *
    * @reached:  vinvoke from func prologue
    *            jmp from functionSurprisedOrStackOverflow
    * @context:  stub
    */
   TCA functionEnterHelper;
-  TCA functionEnterHelperReturn;
 
   /*
    * Handle either a surprise condition or a stack overflow.
@@ -203,17 +207,6 @@ struct UniqueStubs {
   TCA retInlHelper;
 
   /*
-   * Async function return stub: first check whether the parent can be resumed
-   * directly (single parent in the same asio context, which is the fast &
-   * common path).  If not, follow the slow path, which unblock parents and
-   * return to the scheduler.
-   *
-   * @reached: jmp from TC
-   * @context: func body
-   */
-  TCA asyncRetCtrl;
-
-  /*
    * Return from a function when the ActRec was called from jitted code but
    * had its m_savedRip smashed by the debugger.
    *
@@ -226,6 +219,35 @@ struct UniqueStubs {
   TCA debuggerRetHelper;
   TCA debuggerGenRetHelper;
   TCA debuggerAsyncGenRetHelper;
+
+  /*
+   * Async function return stub.
+   *
+   * Check whether the parent of the returning WaitHandle can be resumed
+   * directly (namely, if it is the solitary parent and is in the same
+   * AsioContext), and do so if possible.  Otherwise, unblock all parents and
+   * jump to asyncSwitchCtrl.
+   *
+   * rvmfp() should point to the ActRec of the WaitHandle that is returning.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA asyncRetCtrl;
+
+  /*
+   * Async function finish-suspend-and-resume stub.
+   *
+   * Check for fast resumables on the AsioContext runnable queue.  If one is
+   * found that is ready to run, jump to it directly; otherwise, leave the TC
+   * and return to the scheduler.
+   *
+   * rvmfp() should point to the ActRec of the WaitHandle that is suspending.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA asyncSwitchCtrl;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -248,6 +270,16 @@ struct UniqueStubs {
    * @context:  func prologue
    */
   TCA fcallArrayHelper;
+
+  /*
+   * Similar to fcallArrayHelper, but takes an additional arg specifying the
+   * total number of args, including the array parameter (which must be the
+   * last one).
+   *
+   * @reached:  callarray from TC
+   * @context:  func prologue
+   */
+  TCA fcallUnpackHelper;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -272,6 +304,17 @@ struct UniqueStubs {
    * @context:  func prologue
    */
   TCA resumeHelperRet;
+
+  /*
+   * Finish suspending a stack of FCallAwaits.  See comments for
+   * handleFCallAwaitSuspend.
+   *
+   * Expects that all VM registers are synced.
+   *
+   * @reached:  phpret from TC
+   * @context:  func body (after returning to caller)
+   */
+  TCA fcallAwaitSuspendHelper;
 
   /*
    * Like resumeHelper, but interpret a basic block first to ensure we make
@@ -338,12 +381,26 @@ struct UniqueStubs {
   // Other stubs.
 
   /*
+   * Enter (or reenter) the TC.
+   *
+   * This is an assembly stub called from native code to transfer control
+   * (back) to jitted PHP code.
+   *
+   * enterTCExit is the address returned to when we leave the TC.
+   */
+  void (*enterTCHelper)(Cell* sp, ActRec* fp, TCA start,
+                        ActRec* firstAR, void* tl, ActRec* stashedAR);
+  TCA enterTCExit;
+
+  /*
    * Return from this VM nesting level to the previous one.
    *
    * This has the same effect as a leavetc{} instruction---it pops the address
    * of enterTCExit off the stack and transfers control to it.
    *
    * @reached:  phpret from TC
+   *            jmp from TC
+   * @context:  func body
    */
   TCA callToExit;
 
@@ -357,22 +414,44 @@ struct UniqueStubs {
   TCA endCatchHelperPast;
 
   /*
+   * Service request helper.
+   *
+   * Packs service request arguments into a struct on the stack before calling
+   * the C++ service request handler.
+   *
+   * @reached:  jmp from TC
+   * @context:  func body
+   */
+  TCA handleSRHelper;
+
+  /*
    * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
    */
   TCA throwSwitchMode;
 
+  /*
+   * Method lookup helpers. Normally point to the corresponding c++
+   * functions, but may be generated stubs if the c++ code is too far
+   * from the translation cache.
+   */
+  TCA handlePrimeCacheInit;
+  TCA handlePrimeCacheInitFatal;
+  TCA handleSlowPath;
+  TCA handleSlowPathFatal;
+
   /////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Emit one of every unique stub.
+   * Emit the full set of unique stubs to `code'.
    */
-  void emitAll();
+  void emitAll(CodeCache& code, Debug::DebugInfo& dbg);
 
   /*
-   * Utility for logging stubs addresses during startup and registering the gdb
+   * Utility for logging stub addresses during startup and registering the gdb
    * symbols.  It's often useful to know where they were when debugging.
    */
-  TCA add(const char* name, TCA start);
+  TCA add(const char* name, TCA start, const CodeCache& code,
+          Debug::DebugInfo& dbg);
 
   /*
    * If the given address is within one of the registered stubs, return a
@@ -380,7 +459,7 @@ struct UniqueStubs {
    *
    * Otherwise, return a string representation of the raw address: "0xabcdef".
    */
-  std::string describe(TCA addr);
+  std::string describe(TCA addr) const;
 
 private:
   struct StubRange {
@@ -399,7 +478,7 @@ private:
   std::vector<StubRange> m_ranges;
 };
 
-///////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 /*
  * Registers that are live on entry to an interpOneCFHelper.

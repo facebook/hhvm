@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,11 +40,10 @@ void implMIterInit(IRGS& env, Offset relOffset, Lambda genFunc) {
   // TODO MIterInit doesn't check iterBranchTarget; this might be bug ...
 
   auto const exit  = makeExit(env);
-  auto const pred  = env.irb->predictedStackInnerType(
-    offsetFromIRSP(env, BCSPOffset{0}));
+  auto const pred  = env.irb->predictedStackInnerType(spOffBCFromIRSP(env));
   auto const src   = topV(env);
 
-  if (!pred.subtypeOfAny(TArr, TObj)) {
+  if (!pred.subtypeOfAny(TArrLike, TObj)) {
     PUNT(MIterInit-unsupportedSrcType);
   }
 
@@ -67,7 +66,7 @@ void emitIterInit(IRGS& env,
                   int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(IterInit);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   auto const res = gen(
     env,
     IterInit,
@@ -86,7 +85,7 @@ void emitIterInitK(IRGS& env,
                    int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(IterInitK);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
   auto const res = gen(
     env,
     IterInitK,
@@ -137,7 +136,7 @@ void emitWIterInit(IRGS& env,
                    int32_t valLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(WIterInit);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInit);
   auto const res = gen(
     env,
     WIterInit,
@@ -156,7 +155,7 @@ void emitWIterInitK(IRGS& env,
                     int32_t keyLocalId) {
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const src = popC(env);
-  if (!src->type().subtypeOfAny(TArr, TObj)) PUNT(WIterInitK);
+  if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(WIterInitK);
   auto const res = gen(
     env,
     WIterInitK,
@@ -273,9 +272,7 @@ void emitMIterFree(IRGS& env, int32_t iterId) {
   gen(env, MIterFree, IterId(iterId), fp(env));
 }
 
-void emitIterBreak(IRGS& env,
-                   const ImmVector& iv,
-                   Offset relOffset) {
+void emitIterBreak(IRGS& env, Offset relOffset, const ImmVector& iv) {
   for (int iterIndex = 0; iterIndex < iv.size(); iterIndex += 2) {
     IterKind iterKind = (IterKind)iv.vec32()[iterIndex];
     Id       iterId   = iv.vec32()[iterIndex + 1];
@@ -292,7 +289,7 @@ void emitIterBreak(IRGS& env,
 void emitDecodeCufIter(IRGS& env, int32_t iterId, Offset relOffset) {
   auto const src        = popC(env);
   auto const type       = src->type();
-  if (type.subtypeOfAny(TArr, TStr, TObj)) {
+  if (type.subtypeOfAny(TArrLike, TStr, TObj)) {
     auto const res = gen(
       env,
       DecodeCufIter,

@@ -1,0 +1,2 @@
+File "strict_foreach_reference1.php", line 4, characters 20-22:
+Cannot take a value by reference in strict mode. (Typing[4154])

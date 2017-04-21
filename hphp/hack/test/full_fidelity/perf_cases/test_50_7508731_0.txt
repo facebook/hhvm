@@ -1,0 +1,2 @@
+<?hh
+namespace { enum lNCVfSsgL : string as ( function ( num , sEWUPFuY , void , arraykey , nUyGRG , ( function ( ? bool ) : uZMS < lBjUXdSOg , void > ) ) : ( function ( ) : aUaWXLDZR ) ) { } interface mZNsO < - gCXWYQuW > extends fTACt < string > , eSoHFMb < arraykey , nFGSU , tPi > { abstract const type lRzs ; } require_once ( "nowdoc" ) ; use pJVJQHcK , bOyyU ; }

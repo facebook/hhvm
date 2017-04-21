@@ -14,6 +14,14 @@ class E1 extends D1 {
     var_dump('D2');
     var_dump($a0, $a1);
   }
+  public function test() {
+    C1::__invoke(0, 1);
+    D1::__invoke(0, 1);
+    E1::__invoke(0, 1);
+    call_user_func(mk('C1'), 0, 1);
+    call_user_func(mk('D1'), 0, 1);
+    call_user_func(mk('E1'), 0, 1);
+  }
 }
 class F1 {
   public function __invoke($a0) {
@@ -35,13 +43,8 @@ call_user_func_array($e, array(0, 1));
 $c->__invoke(0, 1);
 $d->__invoke(0, 1);
 $e->__invoke(0, 1);
-C1::__invoke(0, 1);
-D1::__invoke(0, 1);
-E1::__invoke(0, 1);
 function mk($n) {
- return $n . '::__invoke';
- }
-call_user_func(mk('C1'), 0, 1);
-call_user_func(mk('D1'), 0, 1);
-call_user_func(mk('E1'), 0, 1);
+  return $n . '::__invoke';
+}
+(new E1)->test();
 var_dump(array_filter(array(0, 1, 11, 13), new F1));

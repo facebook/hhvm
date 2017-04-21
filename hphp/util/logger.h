@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,21 +18,36 @@
 #define incl_HPHP_LOGGER_H_
 
 #include <atomic>
+#include <chrono>
+#include <cstdarg>
 #include <string>
-#include <stdarg.h>
 
-#include "hphp/util/thread-local.h"
 #include "hphp/util/cronolog.h"
 #include "hphp/util/log-file-flusher.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/thread-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StackTrace;
-class Exception;
+struct StackTrace;
+struct Exception;
 
-class Logger {
-public:
+struct ErrorLogFileData {
+  ErrorLogFileData() {}
+  ErrorLogFileData(const std::string& file, const std::string& symlink, int mpl)
+    : logFile(file)
+    , symLink(symlink)
+    , periodMultiplier(mpl)
+  {}
+  std::string logFile;
+  std::string symLink;
+  int periodMultiplier;
+  bool isPipeOutput() const { return !logFile.empty() && logFile[0] == '|'; }
+  bool hasTemplate() const { return logFile.find('%') != std::string::npos; }
+};
+
+struct Logger {
   enum LogLevelType {
     LogNone,
     LogError,
@@ -41,18 +56,18 @@ public:
     LogVerbose
   };
 
-  Logger(): m_standardOut(stderr) { ResetPid(); }
+  Logger()
+    : m_isPipeOutput(false)
+    , m_output(nullptr)
+    , m_standardOut(stderr)
+  { ResetPid(); }
 
   static bool AlwaysEscapeLog;
   static bool UseSyslog;
   static bool UseLogFile;
   static bool UseRequestLog;
-  static bool IsPipeOutput;
   static bool UseCronolog;
-  static FILE *Output;
-  static Cronolog cronOutput;
   static LogLevelType LogLevel;
-  static LogFileFlusher flusher;
   static bool LogHeader;
   static bool LogNativeStackTrace;
   static std::string ExtraHeader;
@@ -85,31 +100,33 @@ public:
 
   static bool SetThreadLog(const char *file, bool threadOnly);
   static void ClearThreadLog();
-  static void SetNewOutput(FILE *output);
   static void UnlimitThreadMessages();
 
   typedef void (*PFUNC_LOG)(const char *header, const char *msg,
                             const char *ending, void *data);
   static void SetThreadHook(PFUNC_LOG func, void *data);
 
-  static void SetTheLogger(Logger* logger) {
-    if (logger != nullptr) {
-      delete s_logger;
-      s_logger = logger;
-    }
-  }
+  static constexpr const char *DEFAULT = "Default";
+  static void SetTheLogger(const std::string &name, Logger* newLogger);
 
   static char *EscapeString(const std::string &msg);
 
-  static FILE *GetStandardOut(LogLevelType level);
-  static void SetStandardOut(FILE*);
+  static void SetStandardOut(const std::string &name, FILE* file);
+  static Cronolog *CronoOutput(const std::string &name);
+  static void SetOutput(const std::string &name, FILE *output, bool isPipe);
+  static std::pair<FILE*, bool> GetOutput(const std::string &name);
 
   virtual ~Logger() { }
   static void ResetPid();
 
+  static void FlushAll();
+  static void SetBatchSize(size_t bsize);
+  static void SetFlushTimeout(std::chrono::milliseconds timeoutMs);
+
+  virtual FILE* fileForStackTrace() { return output(); }
+
 protected:
-  class ThreadData {
-  public:
+  struct ThreadData {
     int request{0};
     int message{0};
     LogFileFlusher flusher;
@@ -117,16 +134,13 @@ protected:
     bool threadLogOnly{false};
     PFUNC_LOG hook{nullptr};
     void *hookData;
+    TYPE_SCAN_CONSERVATIVE_FIELD(hookData);
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
-  static void Log(LogLevelType level,
-    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
-  static void LogEscapeMore(LogLevelType level,
-    ATTRIBUTE_PRINTF_STRING const char *fmt, va_list ap) ATTRIBUTE_PRINTF(2,0);
-  static void Log(LogLevelType level, const std::string &msg,
-                  const StackTrace *stackTrace,
-                  bool escape = false, bool escapeMore = false);
+  static void LogImpl(LogLevelType level, const std::string &msg,
+                      const StackTrace *stackTrace,
+                      bool escape = false, bool escapeMore = false);
 
   static inline bool IsEnabled() {
     return Logger::UseLogFile || Logger::UseSyslog;
@@ -134,25 +148,43 @@ protected:
 
   static int GetSyslogLevel(LogLevelType level);
 
-  /**
-   * For subclasses to override, e.g., to support injected stack trace.
-   */
-  virtual void log(LogLevelType level, const char *type, const Exception &e,
-                   const char *file = nullptr, int line = 0);
-  virtual void log(LogLevelType level, const std::string &msg,
-                   const StackTrace *stackTrace,
-                   bool escape = false, bool escapeMore = false);
+  friend struct ExtendedLogger;
+
+  // For subclasses to override, e.g., to support injected stack trace.
+  // Returns (lines, bytes) it's going to output. Used for monitoring growth.
+  virtual std::pair<int, int> log(LogLevelType level, const std::string& msg,
+                                  const StackTrace* stackTrace,
+                                  bool escape = false, bool escapeMore = false);
+  // Intended for subclass of loggers that batch.
+  // Returns (lines, bytes) it's going to output. Used for monitoring growth.
+  virtual std::pair<int, int> flush() { return std::make_pair(0, 0); }
+
+  virtual void setBatchSize(size_t bsize) {}
+
+  // flush the log after this timeout (in milliseconds) has been exceeded.
+  // 0 will disable the timeout and flush only when the batch size has been
+  // met.
+  virtual void setFlushTimeout(std::chrono::milliseconds timeoutMs) {}
+
+  // deduce where to write log
+  virtual FILE* output();
 
   /**
    * What needs to be print for each line of logging. Currently it's
    * [machine:thread:datetime].
    */
   static std::string GetHeader();
-private:
-  static Logger *s_logger;
   static pid_t s_pid;
-
+protected:
+  bool m_isPipeOutput;
+  FILE *m_output;
   FILE* m_standardOut;
+  Cronolog m_cronOutput;
+  LogFileFlusher m_flusher;
+  static std::map<std::string, Logger*> s_loggers;
+  // bytes and lines the DEFAULT logger has written
+  static ServiceData::ExportedCounter* s_errorLines;
+  static ServiceData::ExportedCounter* s_errorBytes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

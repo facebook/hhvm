@@ -1,2 +1,1 @@
-
-Fatal error: Class 'NonExistent' required by trait 'T1' cannot be loaded in %s on line 3
+Fatal error: Class 'X' required to extend class 'NonExistent' by trait '%s' in %s/test/slow/traits/require_constraint_nonexistent_class.php on line 7

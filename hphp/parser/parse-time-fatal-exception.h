@@ -6,11 +6,10 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
-class ParseTimeFatalException : public Exception {
-public:
+struct ParseTimeFatalException : Exception {
   ParseTimeFatalException(const std::string& file, int line,
     ATTRIBUTE_PRINTF_STRING const char* msg, ...) ATTRIBUTE_PRINTF(4,5)
-  : m_file(file), m_line(line) {
+  : m_file(file), m_line(line), m_parseFatal(true) {
     va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
   }
 

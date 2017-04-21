@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -113,7 +113,7 @@ struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
 /*
  * Calls are somewhat special enough that they get a top-level effect.
  *
- * The `destroys_locals' flag indicates whether the call can change locals in
+ * The `writes_locals' flag indicates whether the call can write to locals in
  * the calling frame (e.g. extract() or parse_str(), when called with FCall).
  *
  * The `kills' set are locations that cannot be read by this instruction unless
@@ -121,17 +121,19 @@ struct PureSpillFrame { AliasClass stk; AliasClass ctx; };
  * for killing stack slots below the call depth.)
  *
  * The `stack' set contains stack locations the call will read as arguments, as
- * well as stack locations it may read or write via other means
- * (e.g. debug_backtrace, or pointers to stack slots to a CallBuiltin).
- * Locations in any intersection between `stack' and `kills' may be assumed to
- * be killed.
+ * well as stack locations it may read or write via other means. Locations in
+ * any intersection between `stack' and `kills' may be assumed to be killed.
+ *
+ * The `locals` set contains frame locations that the call might read. (If the
+ * call might write *any* local, then writes_local will be true).
  *
  * Note that calls that have been weakened to CallBuiltin use GeneralEffects,
  * not CallEffects.
  */
-struct CallEffects    { bool destroys_locals;
+struct CallEffects    { bool writes_locals;
                         AliasClass kills;
-                        AliasClass stack; };
+                        AliasClass stack;
+                        AliasClass locals; };
 
 /*
  * ReturnEffects is a return, either from the php function or an inlined

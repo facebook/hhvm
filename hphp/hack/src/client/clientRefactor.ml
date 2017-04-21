@@ -10,7 +10,6 @@
 
 open Core
 open ClientEnv
-open Utils
 
 let compare_pos pos1 pos2 =
   let char_start1, char_end1 = Pos.info_raw pos1 in
@@ -22,9 +21,9 @@ let compare_pos pos1 pos2 =
   else 0
 
 let get_pos = function
-  | ServerRefactor.Insert patch
-  | ServerRefactor.Replace patch -> patch.ServerRefactor.pos
-  | ServerRefactor.Remove p -> p
+  | ServerRefactorTypes.Insert patch
+  | ServerRefactorTypes.Replace patch -> patch.ServerRefactorTypes.pos
+  | ServerRefactorTypes.Remove p -> p
 
 let compare_result res1 res2 =
   compare_pos (get_pos res1) (get_pos res2)
@@ -57,12 +56,12 @@ let write_patches_to_buffer buf original_content patch_list =
     let char_start, char_end = Pos.info_raw pos in
     add_original_content (char_start - 1);
     match res with
-      | ServerRefactor.Insert patch ->
-          Buffer.add_string buf patch.ServerRefactor.text
-      | ServerRefactor.Replace patch ->
-          Buffer.add_string buf patch.ServerRefactor.text;
+      | ServerRefactorTypes.Insert patch ->
+          Buffer.add_string buf patch.ServerRefactorTypes.text
+      | ServerRefactorTypes.Replace patch ->
+          Buffer.add_string buf patch.ServerRefactorTypes.text;
           i := char_end
-      | ServerRefactor.Remove _ ->
+      | ServerRefactorTypes.Remove _ ->
           i := char_end
   end;
   add_original_content (String.length original_content - 1)
@@ -87,11 +86,11 @@ let apply_patches file_map =
 
 let patch_to_json res =
   let type_, replacement = match res with
-    | ServerRefactor.Insert patch ->
-        "insert", patch.ServerRefactor.text
-    | ServerRefactor.Replace patch ->
-        "replace", patch.ServerRefactor.text
-    | ServerRefactor.Remove _ ->
+    | ServerRefactorTypes.Insert patch ->
+        "insert", patch.ServerRefactorTypes.text
+    | ServerRefactorTypes.Replace patch ->
+        "replace", patch.ServerRefactorTypes.text
+    | ServerRefactorTypes.Remove _ ->
         "remove", ""
   in
   let pos = get_pos res in
@@ -116,41 +115,38 @@ let print_patches_json file_map =
   end file_map [] in
   print_endline (Hh_json.json_to_string (Hh_json.JSON_Array entries))
 
-let go conn args =
-  try
-    print_endline ("WARNING: This tool will only refactor references in "^
-        "typed, hack code. Its results should be manually verified. "^
-        "Namespaces are not yet supported.");
-    print_endline "What would you like to refactor:";
-    print_endline "    1 - Class";
-    print_endline "    2 - Function";
-    print_endline "    3 - Method";
-    print_string "Enter 1, 2, or 3: ";
-    flush stdout;
+let go conn args mode before after =
+    let command = match mode with
+    | "Class" -> ServerRefactorTypes.ClassRename (before, after)
+    | "Function" -> ServerRefactorTypes.FunctionRename (before, after)
+    | "Method" ->
+      let befores = Str.split (Str.regexp "::") before in
+      if (List.length befores) <> 2
+        then failwith "Before string should be of the format class::method"
+        else ();
+      let afters = Str.split (Str.regexp "::") after in
+      if (List.length afters) <> 2
+        then failwith "After string should be of the format class::method"
+        else ();
+      let before_class = List.hd_exn befores in
+      let before_method = List.hd_exn (List.tl_exn befores) in
+      let after_class = List.hd_exn afters in
+      let after_method = List.hd_exn (List.tl_exn afters) in
+      if before_class <> after_class
+      then begin
+        Printf.printf "%s %s\n" before_class after_class;
+        failwith "Before and After classname must match"
+      end
+      else
+        ServerRefactorTypes.MethodRename
+          (before_class, before_method, after_method)
+    | _ ->
+        failwith "Unexpected Mode" in
 
-    let refactor_type = input_line stdin in
-    let command = match refactor_type with
-    | "1" ->
-      let class_name = input_prompt "Enter class name: " in
-      let new_name = input_prompt "Enter a new name for this class: " in
-      ServerRefactor.ClassRename (class_name, new_name)
-    | "2" ->
-      let fun_name = input_prompt "Enter function name: " in
-      let new_name = input_prompt "Enter a new name for this function: " in
-      ServerRefactor.FunctionRename (fun_name, new_name)
-    | "3" ->
-      let class_name = input_prompt "Enter class name: " in
-      let method_name = input_prompt "Enter method name: " in
-      let new_name =
-          input_prompt ("Enter a new name for this method: "^class_name^"::") in
-      ServerRefactor.MethodRename (class_name, method_name, new_name)
-    | _ -> raise Exit in
-
-    let patches = ServerCommand.rpc conn @@ ServerRpc.REFACTOR command in
+    let patches =
+      ServerCommand.rpc conn @@ ServerCommandTypes.REFACTOR command in
     let file_map = List.fold_left patches
       ~f:map_patches_to_filename ~init:SMap.empty in
     if args.output_json
     then print_patches_json file_map
     else apply_patches file_map
-  with Exit ->
-    print_endline "Invalid Input"

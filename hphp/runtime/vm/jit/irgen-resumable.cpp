@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
@@ -66,7 +67,7 @@ void suspendHookR(IRGS& env, SSATmp* frame, SSATmp* objOrNullptr) {
   );
 }
 
-void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
+void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(!resumed(env));
   assertx(child->type() <= TObj);
@@ -74,8 +75,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   // Create the AsyncFunctionWaitHandle object. CreateAFWH takes care of
   // copying local variables and iterators.
   auto const func = curFunc(env);
-  auto const resumeSk = SrcKey(func, resumeOffset, true);
-  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const resumeSk = SrcKey(func, resumeOffset, true, hasThis(env));
+  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const waitHandle =
     gen(env,
@@ -97,10 +98,15 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset, int numIters) {
   suspendHookE(env, fp(env), asyncAR, waitHandle);
   discard(env, 1);
 
-  // store the return value and return control to the caller.
-  gen(env, StRetVal, fp(env), waitHandle);
-  auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, ret_data, sp(env), fp(env));
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    gen(env, DbgTrashRetVal, fp(env));
+  }
+  auto const ret_data = RetCtrlData {
+    offsetToReturnSlot(env),
+    false, // suspendingResumed
+    AuxUnion{1}
+  };
+  gen(env, RetCtrl, ret_data, sp(env), fp(env), waitHandle);
 }
 
 void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
@@ -117,37 +123,38 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   gen(env, AFWHPrepareChild, fp(env), child);
 
   // Suspend the async function.
-  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true, hasThis(env));
+  auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StAsyncArResume, ResumeOffset { resumeOffset }, fp(env),
-    resumeAddr);
+      resumeAddr);
 
   // Set up the dependency.
   gen(env, AFWHBlockOn, fp(env), child);
 
-  auto const stack = sp(env);
-  auto const frame = fp(env);
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, AsyncRetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
+  // We put a fake return value on the stack for the same reason that returning
+  // from a resumed function does.  See the comments in asyncFunctionReturn.
+  auto const retVal = cns(env, TInitNull);
+  push(env, retVal);
+
+  gen(env, AsyncSwitchFast, RetCtrlData { spOffBCFromIRSP(env), true },
+      sp(env), fp(env), retVal);
 }
 
 void yieldReturnControl(IRGS& env) {
-  // Push return value of next()/send()/raise().
-  push(env, cns(env, TInitNull));
+  auto const retVal = cns(env, TInitNull);
+  push(env, retVal);
 
-  auto const stack    = sp(env);
-  auto const frame    = fp(env);
-  auto const spAdjust = offsetFromIRSP(env, BCSPOffset{0});
-  gen(env, RetCtrl, RetCtrlData { spAdjust, true }, stack, frame);
+  gen(env, RetCtrl, RetCtrlData { spOffBCFromIRSP(env), true },
+      sp(env), fp(env), retVal);
 }
 
 void yieldImpl(IRGS& env, Offset resumeOffset) {
   suspendHookR(env, fp(env), cns(env, TNullptr));
 
   // Resumable::setResumeAddr(resumeAddr, resumeOffset)
-  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true);
-  auto const data = LdBindAddrData { resumeSk, invSPOff(env) };
+  auto const resumeSk = SrcKey(curFunc(env), resumeOffset, true, hasThis(env));
+  auto const data = LdBindAddrData { resumeSk, spOffBCFromFP(env) };
   auto const resumeAddr = gen(env, LdBindAddr, data);
   gen(env, StContArResume, ResumeOffset { resumeOffset }, fp(env), resumeAddr);
 
@@ -161,6 +168,18 @@ void yieldImpl(IRGS& env, Offset resumeOffset) {
   gen(env, StContArState,
       GeneratorState { BaseGenerator::State::Started },
       fp(env));
+}
+
+Type returnTypeAwaited(SSATmp* retVal) {
+  while (retVal->inst()->isPassthrough()) {
+    retVal = retVal->inst()->getPassthroughValue();
+  }
+  auto const inst = retVal->inst();
+  if (!inst->is(Call)) return TInitCell;
+  auto const callee = inst->extra<Call>()->callee;
+  return callee
+    ? typeFromRAT(callee->repoAwaitedReturnType(), inst->func()->cls())
+    : TInitCell;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -179,19 +198,19 @@ void emitWHResult(IRGS& env) {
     "we test state for non-zero, success must be zero"
   );
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
-  auto const res = gen(env, LdWHResult, TInitCell, child);
+  auto const res = gen(env, LdWHResult, returnTypeAwaited(child), child);
   gen(env, IncRef, res);
   decRef(env, child);
   push(env, res);
 }
 
-void emitAwait(IRGS& env, int32_t numIters) {
+void emitAwait(IRGS& env) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
 
   if (curFunc(env)->isAsyncGenerator()) PUNT(Await-AsyncGenerator);
 
-  auto const exitSlow   = makeExitSlow(env);
+  auto const exitSlow = makeExitSlow(env);
 
   if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
 
@@ -218,11 +237,11 @@ void emitAwait(IRGS& env, int32_t numIters) {
   auto const knownTy = [&] {
     auto pc = curUnit(env)->at(resumeOffset);
     if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
-    auto const stkLoc = decodeVariableSizeImm(&pc);
-    if (stkLoc != 0) return TInitCell;
+    auto const stkLoc = decode_iva(pc);
+    if (stkLoc != 0) return returnTypeAwaited(child);
     auto const rat = decodeRAT(curUnit(env), pc);
     auto const ty = ratToAssertType(env, rat);
-    return ty ? *ty : TInitCell;
+    return ty ? *ty : returnTypeAwaited(child);
   }();
 
   ifThenElse(
@@ -237,7 +256,7 @@ void emitAwait(IRGS& env, int32_t numIters) {
       if (resumed(env)) {
         implAwaitR(env, child, resumeOffset);
       } else {
-        implAwaitE(env, child, resumeOffset, numIters);
+        implAwaitE(env, child, resumeOffset);
       }
     },
     [&] { // Taken: retrieve the result from the wait handle
@@ -247,6 +266,46 @@ void emitAwait(IRGS& env, int32_t numIters) {
       push(env, res);
     }
   );
+}
+
+void emitFCallAwait(IRGS& env,
+                    int32_t numParams,
+                    const StringData*,
+                    const StringData*) {
+  auto const resumeOffset = nextBcOff(env);
+
+  auto const ret = implFCall(env, numParams);
+  assertTypeStack(env, BCSPRelOffset{0}, TInitCell);
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const aux = gen(env, LdTVAux, LdTVAuxData { 1 }, ret);
+      gen(env, JmpNZero, taken, aux);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+      assertTypeStack(env, BCSPRelOffset{0}, TObj);
+
+      // If an event hook throws we need the current bytecode to be
+      // after the FCallAwait, otherwise the unwinder will expect
+      // to find a PreLive ActRec on the stack.
+      env.irb->setCurMarker(makeMarker(env, resumeOffset));
+      auto const child = popC(env);
+      if (resumed(env)) {
+        // We've popped a stack element, so inform the unwinder
+        // of the current stack depth.
+        env.irb->setCurMarker(makeMarker(env, resumeOffset));
+        env.irb->exceptionStackBoundary();
+        implAwaitR(env, child, resumeOffset);
+      } else {
+        // implAwaitE pushes a null before calling the event hook,
+        // so we don't want to update the marker here.
+        implAwaitE(env, child, resumeOffset);
+      }
+    }
+  );
+  assertTypeStack(env, BCSPRelOffset{0}, returnTypeAwaited(ret));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -261,8 +320,8 @@ void emitCreateCont(IRGS& env) {
   // Create the Generator object. CreateCont takes care of copying local
   // variables and iterators.
   auto const func = curFunc(env);
-  auto const resumeSk = SrcKey(func, resumeOffset, true);
-  auto const bind_data = LdBindAddrData { resumeSk, invSPOff(env) + 1 };
+  auto const resumeSk = SrcKey(func, resumeOffset, true, hasThis(env));
+  auto const bind_data = LdBindAddrData { resumeSk, spOffBCFromFP(env) + 1 };
   auto const resumeAddr = gen(env, LdBindAddr, bind_data);
   auto const cont =
     gen(env,
@@ -280,11 +339,13 @@ void emitCreateCont(IRGS& env) {
         cont);
   suspendHookE(env, fp(env), contAR, cont);
 
-  // Grab caller info from ActRec, free ActRec, store the return value
-  // and return control to the caller.
-  gen(env, StRetVal, fp(env), cont);
+  // Grab caller info from the ActRec, free the ActRec, and return control to
+  // the caller.
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    gen(env, DbgTrashRetVal, fp(env));
+  }
   auto const ret_data = RetCtrlData { offsetToReturnSlot(env), false };
-  gen(env, RetCtrl, ret_data, sp(env), fp(env));
+  gen(env, RetCtrl, ret_data, sp(env), fp(env), cont);
 }
 
 void emitContEnter(IRGS& env) {
@@ -311,7 +372,7 @@ void emitContEnter(IRGS& env) {
   gen(
     env,
     ContEnter,
-    ContEnterData { offsetFromIRSP(env, BCSPOffset{0}), returnBcOffset },
+    ContEnterData { spOffBCFromIRSP(env), returnBcOffset },
     sp(env),
     fp(env),
     genFp,
@@ -366,14 +427,15 @@ void emitYieldK(IRGS& env) {
   yieldReturnControl(env);
 }
 
-void emitContCheck(IRGS& env, int32_t checkStarted) {
+void emitContCheck(IRGS& env, ContCheckOp subop) {
   assertx(curClass(env));
   assertx(curClass(env)->classof(AsyncGenerator::getClass()) ||
           curClass(env)->classof(Generator::getClass()));
   auto const cont = ldThis(env);
+  auto const checkStarted = subop == ContCheckOp::CheckStarted;
   gen(env, ContPreNext,
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())),
-    makeExitSlow(env), cont, cns(env, static_cast<bool>(checkStarted)));
+    makeExitSlow(env), cont, cns(env, checkStarted));
 }
 
 void emitContValid(IRGS& env) {
@@ -391,12 +453,25 @@ void emitContStarted(IRGS& env) {
   push(env, gen(env, ContStarted, cont));
 }
 
+// Delegate generators aren't currently supported in the IR, so just use the
+// interpreter if we get into a situation where we need to use the delegate
+void interpIfHasDelegate(IRGS& env, SSATmp *cont) {
+  auto const delegateOffset = cns(env,
+      offsetof(Generator, m_delegate) - Generator::objectOff());
+  auto const delegate = gen(env, LdContField, TObj, cont, delegateOffset);
+  // Check if delegate is non-null. If it is, go to the interpreter
+  gen(env, CheckType, TNull, makeExitSlow(env), delegate);
+}
+
 void emitContKey(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
   if (!RuntimeOption::AutoprimeGenerators) {
     gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
   }
+
+  interpIfHasDelegate(env, cont);
+
   auto const offset = cns(env,
     offsetof(Generator, m_key) - Generator::objectOff());
   auto const value = gen(env, LdContField, TCell, cont, offset);
@@ -409,6 +484,9 @@ void emitContCurrent(IRGS& env) {
   if (!RuntimeOption::AutoprimeGenerators) {
     gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
   }
+
+  interpIfHasDelegate(env, cont);
+
   // We reuse the same storage for the return value as the yield (`m_value`),
   // so doing a blind read will cause `current` to return the wrong value on a
   // finished generator. We should return NULL instead

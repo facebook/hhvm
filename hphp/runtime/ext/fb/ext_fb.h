@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,14 +23,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(fb_serialize, const Variant& thing);
-Variant HHVM_FUNCTION(fb_unserialize, const Variant& thing, VRefParam success);
+extern const int64_t k_FB_SERIALIZE_HACK_ARRAYS;
+
+Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options = 0);
+Variant HHVM_FUNCTION(fb_unserialize,
+                      const Variant& thing,
+                      VRefParam success,
+                      int64_t options = 0);
 Variant HHVM_FUNCTION(fb_compact_serialize, const Variant& thing);
 Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, VRefParam success,
-                      VRefParam errcode = null_variant);
+                      VRefParam errcode = uninit_variant);
 bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
-                    const Variant& data = null_variant);
+                    const Variant& data = uninit_variant);
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                           const String& new_func_name);
 bool HHVM_FUNCTION(fb_utf8ize, VRefParam input);
@@ -45,7 +50,7 @@ bool HHVM_FUNCTION(fb_output_compression, bool new_value);
 void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
-String HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
+Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
 
 Array HHVM_FUNCTION(fb_call_user_func_safe,
                     const Variant& function,
@@ -60,17 +65,14 @@ Array HHVM_FUNCTION(fb_call_user_func_array_safe,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum FBCompactSerializeBehavior {
-  Base,
-  MemoizeParam,
-};
-
-Variant fb_unserialize(const char* str, int len, VRefParam success);
-String fb_compact_serialize(const Variant& thing,
-                            FBCompactSerializeBehavior behavior);
+Variant fb_unserialize(const char* str,
+                       int len,
+                       VRefParam success,
+                       int64_t options);
+String fb_compact_serialize(const Variant& thing);
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
-                               VRefParam errcode = null_variant);
+                               VRefParam errcode = uninit_variant);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

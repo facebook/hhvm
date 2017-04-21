@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -52,12 +52,16 @@ extern const int64_t k_OPENSSL_PKCS1_PADDING;
 #define OPENSSL_ALGO_RMD160     10
 #endif
 
+#if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
+#define HAVE_EVP_PKEY_EC 1
+#endif
+
 enum php_openssl_key_type {
   OPENSSL_KEYTYPE_RSA,
   OPENSSL_KEYTYPE_DSA,
   OPENSSL_KEYTYPE_DH,
   OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
   OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH + 1
 #endif
 };
@@ -81,34 +85,35 @@ Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
                       bool use_shortnames = true);
 Variant HHVM_FUNCTION(openssl_csr_new,
                       const Variant& dn, VRefParam privkey,
-                      const Variant& configargs = null_variant,
-                      const Variant& extraattribs = null_variant);
+                      const Variant& configargs = uninit_variant,
+                      const Variant& extraattribs = uninit_variant);
 Variant HHVM_FUNCTION(openssl_csr_sign,
                       const Variant& csr,
                       const Variant& cacert,
                       const Variant& priv_key, int days,
-                      const Variant& configargs = null_variant,
+                      const Variant& configargs = uninit_variant,
                       int serial = 0);
 Variant HHVM_FUNCTION(openssl_error_string);
 bool HHVM_FUNCTION(openssl_open, const String& sealed_data, VRefParam open_data,
                                  const String& env_key,
                                  const Variant& priv_key_id,
-                                 const String& method = null_string);
+                                 const String& method = null_string,
+                                 const String& iv = null_string);
 bool HHVM_FUNCTION(openssl_pkcs12_export_to_file, const Variant& x509,
                                                   const String& filename,
                                                   const Variant& priv_key,
                                                   const String& pass,
-                                    const Variant& args = null_variant);
+                                    const Variant& args = uninit_variant);
 bool HHVM_FUNCTION(openssl_pkcs12_export, const Variant& x509, VRefParam out,
                                           const Variant& priv_key,
                                           const String& pass,
-                                    const Variant& args = null_variant);
+                                    const Variant& args = uninit_variant);
 bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, VRefParam certs,
                                         const String& pass);
 bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
                                           const String& outfilename,
                                           const Variant& recipcert,
-                                const Variant& recipkey = null_variant);
+                                const Variant& recipkey = uninit_variant);
 bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
                                           const String& outfilename,
                                           const Variant& recipcerts,
@@ -142,16 +147,16 @@ Variant HHVM_FUNCTION(fb_unsafe_openssl_pkcs7_verify_ignore_cert_expiration,
 bool HHVM_FUNCTION(openssl_pkey_export_to_file, const Variant& key,
                                                 const String& outfilename,
                                    const String& passphrase = null_string,
-                               const Variant& configargs = null_variant);
+                               const Variant& configargs = uninit_variant);
 bool HHVM_FUNCTION(openssl_pkey_export, const Variant& key, VRefParam out,
                                    const String& passphrase = null_string,
-                              const Variant& configargs = null_variant);
+                              const Variant& configargs = uninit_variant);
 Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key);
 Variant HHVM_FUNCTION(openssl_pkey_get_private, const Variant& key,
                                  const String& passphrase = null_string);
 Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate);
-Resource HHVM_FUNCTION(openssl_pkey_new,
-                       const Variant& configargs = null_variant);
+Variant HHVM_FUNCTION(openssl_pkey_new,
+                       const Variant& configargs = uninit_variant);
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
                                             VRefParam decrypted,
                                             const Variant& key,
@@ -171,7 +176,8 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
 Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
                                     VRefParam env_keys,
                                     const Array& pub_key_ids,
-                                    const String& method = null_string);
+                                    const String& method = null_string,
+                                    VRefParam iv = null_string);
 bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
                                  const Variant& priv_key_id,
                      const Variant& signature_alg = OPENSSL_ALGO_SHA1);
@@ -199,14 +205,20 @@ Variant HHVM_FUNCTION(openssl_cipher_iv_length, const String& method);
 Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
                                        const String& password,
                                        int options = 0,
-                                       const String& iv = null_string);
+                                       const String& iv = null_string,
+                                       VRefParam tag_out = null_string,
+                                       const String& aad = null_string,
+                                       int tag_length = 16);
 Variant HHVM_FUNCTION(openssl_decrypt, const String& data, const String& method,
                                        const String& password,
                                        int options = 0,
-                                       const String& iv = null_string);
+                                       const String& iv = null_string,
+                                       const String& tag = null_string,
+                                       const String& aad = null_string);
 Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
                                       bool raw_output = false);
 Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases = false);
+Variant HHVM_FUNCTION(openssl_get_curve_names);
 Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases = false);
 
 ///////////////////////////////////////////////////////////////////////////////

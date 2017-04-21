@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,23 +61,24 @@ ActRecState::pushFunc(const NormalizedInstruction& inst) {
   if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncU) {
     Id funcId = inst.imm[1].u_SA;
     auto const& nep = unit.lookupNamedEntityPairId(funcId);
-    func = Unit::lookupFunc(nep.second);
+    func = lookupImmutableFunc(&unit, nep.first).func;
   } else if (inst.op() == OpFPushCtorD) {
     Id clsId = inst.imm[1].u_SA;
-    auto const& nep = unit.lookupNamedEntityPairId(clsId);
-    auto const cls = Unit::lookupClass(nep.second);
-    auto const scopeFunc = knownFunc();
-    auto const ctx = scopeFunc ? scopeFunc->cls() : nullptr;
-    func = lookupImmutableCtor(cls, ctx);
+    auto const ctxFunc = inst.func();
+    if (ctxFunc) {
+      auto const str = unit.lookupLitstrId(clsId);
+      auto const ctx = ctxFunc->cls();
+      auto const cls = Unit::lookupUniqueClassInContext(str, ctx);
+      func = lookupImmutableCtor(cls, ctx);
+    }
   }
 
-  if (func) func->validate();
-  if (func && func->isNameBindingImmutable(&unit)) {
+  if (func) {
+    func->validate();
     pushFuncD(func);
-    return;
+  } else {
+    pushDynFunc();
   }
-
-  pushDynFunc();
 }
 
 void
@@ -117,7 +118,8 @@ ActRecState::pop() {
  * the beginning of the tracelet and ar.
  */
 bool
-ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
+ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps,
+                        const RegionContext& ctx) {
   FTRACE(2, "ActRecState: getting reffiness for arg {}, arDelta {}\n",
          argNum, entryArDelta);
   if (m_arStack.empty()) {
@@ -125,12 +127,17 @@ ActRecState::checkByRef(int argNum, int entryArDelta, RefDeps* refDeps) {
     // tracelet, so we can make a guess about parameter reffiness and
     // record our assumptions about parameter reffiness as tracelet
     // guards.
-    const ActRec* ar = arFromSpOffset((ActRec*)vmsp(), entryArDelta);
+    auto const func = [&] {
+      for (auto& ar : ctx.preLiveARs) {
+        if (ar.stackOff == entryArDelta) return ar.func;
+      }
+      not_reached();
+    }();
     Record r;
     r.m_state = State::GUESSABLE;
     r.m_entryArDelta = entryArDelta;
-    ar->m_func->validate();
-    r.m_topFunc = ar->m_func;
+    func->validate();
+    r.m_topFunc = func;
     m_arStack.push_back(r);
   }
   Record& r = m_arStack.back();

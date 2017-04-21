@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,15 +38,15 @@ Mutex BlockScope::s_constMutex;
 
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
-  : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
+  : m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0),
     m_pass(0), m_updated(0), m_runId(0), m_mark(MarkWaitingInQueue),
     m_effectsTag(1), m_numDepsToWaitFor(0),
     m_forceRerun(false),
     m_rescheduleFlags(0), m_selfUser(0) {
   m_scopeName = name;
-  m_variables = VariableTablePtr(new VariableTable(*this));
-  m_constants = ConstantTablePtr(new ConstantTable(*this));
+  m_variables = std::make_shared<VariableTable>(*this);
+  m_constants = std::make_shared<ConstantTable>(*this);
 }
 
 void BlockScope::incLoopNestedLevel() {

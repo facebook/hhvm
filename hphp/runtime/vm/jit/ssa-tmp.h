@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,14 +20,15 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
+#include "hphp/runtime/base/type-variant.h"
+
 namespace HPHP { namespace jit {
 
-class IRInstruction;
-class IRUnit;
-class IRBuilder;
+struct IRInstruction;
+struct IRUnit;
+namespace irgen { struct IRBuilder; }
 
-class SSATmp {
-public:
+struct SSATmp {
   uint32_t          id() const { return m_id; }
   IRInstruction*    inst() const { return m_inst; }
   void              setInstruction(IRInstruction* i, int dstId = 0);
@@ -53,6 +54,9 @@ public:
   double             dblVal() const       { return type().dblVal(); }
   const StringData*  strVal() const       { return type().strVal(); }
   const ArrayData*   arrVal() const       { return type().arrVal(); }
+  const ArrayData*   vecVal() const       { return type().vecVal(); }
+  const ArrayData*   dictVal() const      { return type().dictVal(); }
+  const ArrayData*   keysetVal() const    { return type().keysetVal(); }
   const Func*        funcVal() const      { return type().funcVal(); }
   const Class*       clsVal() const       { return type().clsVal(); }
   ConstCctx          cctxVal() const      { return type().cctxVal(); }
@@ -77,8 +81,8 @@ public:
   int numWords() const;
 
 private:
-  friend class IRUnit;
-  friend class IRBuilder;
+  friend struct IRUnit;
+  friend struct irgen::IRBuilder;
 
   // May only be created via IRUnit.  Note that this class is never
   // destructed, so don't add complex members.

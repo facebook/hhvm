@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,8 @@ struct StackTraceSample {
  * stack traces easier to understand:
  *   -O2 -fno-inline -fno-optimize-sibling-calls
  */
-class StackTraceProfiler {
+struct StackTraceProfiler {
+private:
   struct Node {
     explicit Node(void* addr) :
       addr(addr), callers(nullptr), next(nullptr), hits(0) {

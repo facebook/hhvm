@@ -44,6 +44,7 @@ const StaticString
   s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
+  s_error("SystemLib\\Error"),
   s_previous("previous");
 
 using CufIterPtr = req::unique_ptr<CufIter>;
@@ -53,9 +54,7 @@ using CufIterPtr = req::unique_ptr<CufIter>;
 Variant invoke_for_autoload(const String& function, const Variant& params) {
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
-    Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, params);
-    return ret;
+    return Variant::attach(g_context->invokeFunc(func, params));
   }
   raise_warning("call_user_func to non-existent function %s",
     function.c_str());
@@ -82,10 +81,10 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
   if (invName) {
     invName->incRefCount();
   }
-  Variant ret;
-  g_context->invokeFunc((TypedValue*)&ret, f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeCuf);
-  return ret;
+  return Variant::attach(
+    g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
+                          ExecutionContext::InvokeCuf)
+  );
 }
 
 /*
@@ -95,11 +94,11 @@ bool vm_decode_function_cufiter(const Variant& function,
                                 CufIterPtr& cufIter) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
-  CallerFrame cf;
   StringData* invName = nullptr;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
-  const HPHP::Func* func = vm_decode_function(function, cf(), false,
-                                              obj, cls, invName, false);
+  const HPHP::Func* func = vm_decode_function(function, GetCallerFrame(), false,
+                                              obj, cls, invName,
+                                              DecodeFlags::NoWarn);
   if (func == nullptr) {
     return false;
   }
@@ -131,12 +130,14 @@ void AutoloadHandler::requestInit() {
   assert(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
   new (&m_handlers) req::deque<HandlerBundle>();
+  m_handlers_valid = true;
 }
 
 void AutoloadHandler::requestShutdown() {
   m_map.reset();
   m_map_root.reset();
   m_loading.reset();
+  m_handlers_valid = false;
   // m_spl_stack_inited will be re-initialized by the next requestInit
   // m_handlers will be re-initialized by the next requestInit
 }
@@ -237,7 +238,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   const String& name = normalizeNS(clsName);
   const Variant& type_map = m_map.get()->get(kind);
   auto const typeMapCell = type_map.asCell();
-  if (typeMapCell->m_type != KindOfArray) return Failure;
+  if (!isArrayType(typeMapCell->m_type)) return Failure;
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
   const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
   bool ok = false;
@@ -255,11 +256,11 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       auto const unit = lookupUnit(fName.get(), "", &initial);
       if (unit) {
         if (initial) {
-          TypedValue retval;
-          ec->invokeFunc(&retval, unit->getMain(), init_null_variant,
-                         nullptr, nullptr, nullptr, nullptr,
-                         ExecutionContext::InvokePseudoMain);
-          tvRefcountedDecRef(&retval);
+          tvRefcountedDecRef(
+            ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
+                           nullptr, nullptr, nullptr, nullptr,
+                           ExecutionContext::InvokePseudoMain)
+          );
         }
         ok = true;
       }
@@ -350,7 +351,7 @@ bool AutoloadHandler::autoloadType(const String& name) {
  * Taken from php-src
  * https://github.com/php/php-src/blob/PHP-5.6/Zend/zend_execute_API.c#L960
  */
-static bool is_valid_class_name(const String& className) {
+bool is_valid_class_name(folly::StringPiece className) {
   return strspn(
     className.data(),
     "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177"
@@ -362,7 +363,7 @@ static bool is_valid_class_name(const String& className) {
     "\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345"
     "\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366"
     "\367\370\371\372\373\374\375\376\377\\"
-  ) == className.length();
+  ) == className.size();
 }
 
 bool AutoloadHandler::autoloadClass(const String& clsName,
@@ -370,7 +371,7 @@ bool AutoloadHandler::autoloadClass(const String& clsName,
   if (clsName.empty()) return false;
   const String& className = normalizeNS(clsName);
   // Verify class name before passing it to __autoload()
-  if (!is_valid_class_name(className)) {
+  if (!is_valid_class_name(className.slice())) {
     return false;
   }
   if (!m_map.isNull()) {
@@ -400,7 +401,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // Make sure state is cleaned up from this load; autoloading of arbitrary
   // code below can throw
   SCOPE_EXIT {
-    String l_className = m_loading.pop();
+    DEBUG_ONLY auto const l_className = m_loading.pop().toString();
     assert(l_className == className);
   };
 
@@ -420,17 +421,20 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     try {
       vm_call_user_func_cufiter(*hb.m_cufIter, params);
     } catch (Object& ex) {
-      assert(ex.instanceof(SystemLib::s_ExceptionClass));
+      assert(ex.instanceof(SystemLib::s_ThrowableClass));
       if (autoloadException.isNull()) {
         autoloadException = ex;
       } else {
         Object cur = ex;
-        Variant next = cur->o_get(s_previous, false, s_exception);
+        auto const ctx = cur->instanceof(SystemLib::s_ExceptionClass)
+          ? s_exception
+          : s_error;
+        Variant next = cur->o_get(s_previous, false, ctx);
         while (next.isObject()) {
           cur = next.toObject();
-          next = cur->o_get(s_previous, false, s_exception);
+          next = cur->o_get(s_previous, false, ctx);
         }
-        cur->o_set(s_previous, autoloadException, s_exception);
+        cur->o_set(s_previous, autoloadException, ctx);
         autoloadException = ex;
       }
     }
@@ -439,7 +443,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     }
   }
   if (!autoloadException.isNull()) {
-    throw autoloadException;
+    throw_object(autoloadException);
   }
   return true;
 }
@@ -492,7 +496,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         typeRes = loadFromMapPartial(className, s_type, true, cte, typeErr);
         if (typeRes == Success) return true;
       }
-      const Variant& func = m_map.get()->get(s_failure);
+      const Variant func = m_map.get()->get(s_failure);
       // If we reach this point, then for each map either nothing was found
       // or the file we included didn't define a class or type alias with the
       // specified name, and the failure callback (if one exists) did not throw

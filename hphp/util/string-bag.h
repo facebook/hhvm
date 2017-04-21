@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,7 @@ namespace HPHP {
  * Holding a list of char* safely, so other places only need to store char*
  * than making a copy.
  */
-class StringBag {
-public:
+struct StringBag {
   explicit StringBag(int reserve_count = 0);
   ~StringBag();
 

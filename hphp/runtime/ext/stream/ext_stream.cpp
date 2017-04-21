@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,6 +30,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-await.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/stream-wrapper.h"
@@ -38,20 +39,19 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
 #include <memory>
-#include <unistd.h>
 #include <fcntl.h>
-#include <poll.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 #include <sys/stat.h>
+
+#include <folly/portability/Sockets.h>
+#include <folly/portability/Unistd.h>
+
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #include <algorithm>
 #endif
 
 #define PHP_STREAM_COPY_ALL     (-1)
-
-
 
 namespace HPHP {
 
@@ -62,8 +62,7 @@ req::ptr<StreamContext> get_stream_context(const Variant& stream_or_context);
 
 #define REGISTER_SAME_CONSTANT(name) HHVM_RC_INT(name, k_ ## name);
 
-static class StreamExtension final : public Extension {
-public:
+static struct StreamExtension final : Extension {
   StreamExtension() : Extension("stream") {}
   void moduleInit() override {
     REGISTER_SAME_CONSTANT(PSFS_ERR_FATAL);
@@ -175,6 +174,8 @@ public:
     HHVM_FE(stream_select);
     HHVM_FE(stream_await);
     HHVM_FE(stream_set_blocking);
+    HHVM_FE(stream_set_read_buffer);
+    HHVM_FE(stream_set_chunk_size);
     HHVM_FE(stream_set_timeout);
     HHVM_FE(stream_set_write_buffer);
     HHVM_FE(set_file_buffer);
@@ -195,8 +196,8 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(stream_context_create,
-                      const Variant& options /* = null_variant */,
-                      const Variant& params /* = null_variant */) {
+                      const Variant& options /* = uninit_variant */,
+                      const Variant& params /* = uninit_variant */) {
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   const Array& arrParams = params.isNull() ? null_array : params.toArray();
 
@@ -241,8 +242,8 @@ static bool stream_context_set_option1(const req::ptr<StreamContext>& context,
 bool HHVM_FUNCTION(stream_context_set_option,
                    const Variant& stream_or_context,
                    const Variant& wrapper_or_options,
-                   const Variant& option /* = null_variant */,
-                   const Variant& value /* = null_variant */) {
+                   const Variant& option /* = uninit_variant */,
+                   const Variant& value /* = uninit_variant */) {
   auto context = get_stream_context(stream_or_context);
   if (!context) {
     raise_warning("Invalid stream/context parameter");
@@ -265,7 +266,7 @@ bool HHVM_FUNCTION(stream_context_set_option,
 }
 
 Variant HHVM_FUNCTION(stream_context_get_default,
-                      const Variant& options /* = null_variant */) {
+                      const Variant& options /* = uninit_variant */) {
   const Array& arrOptions = options.isNull() ? null_array : options.toArray();
   auto context = g_context->getStreamContext();
   if (!context) {
@@ -328,7 +329,17 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {
     int remaining = maxlength - cbytes;
-    String buf = srcFile->read(std::min(remaining, File::CHUNK_SIZE));
+    //srcFile->getChunkSize currently returns an int64_t, we need int currently
+    auto chunkSize = srcFile->getChunkSize();
+    int intChunkSize = 0;
+    if (chunkSize <= INT_MAX) {
+      intChunkSize = static_cast<int>(chunkSize);
+    } else {
+      raise_warning("Invalid chunk size provided, using default: %d",
+                    FileData::DEFAULT_CHUNK_SIZE);
+      intChunkSize = FileData::DEFAULT_CHUNK_SIZE;
+    }
+    String buf = srcFile->read(std::min(remaining, intChunkSize));
     if (buf.size() == 0) break;
     if (destFile->write(buf) != buf.size()) {
       return false;
@@ -379,7 +390,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
 Variant HHVM_FUNCTION(stream_get_line,
                       const Resource& handle,
                       int length /* = 0 */,
-                      const Variant& ending /* = null_variant */) {
+                      const Variant& ending /* = uninit_variant */) {
   const String& strEnding = ending.isNull() ? null_string : ending.toString();
   return cast<File>(handle)->readRecord(strEnding, length);
 }
@@ -396,12 +407,16 @@ Variant HHVM_FUNCTION(stream_get_meta_data,
 }
 
 Array HHVM_FUNCTION(stream_get_transports) {
-  return make_packed_array("tcp", "udp", "unix", "udg");
+  return make_packed_array("tcp", "udp", "unix", "udg", "ssl", "tls");
 }
 
 Variant HHVM_FUNCTION(stream_resolve_include_path,
                       const String& filename,
-                      const Variant& context /* = null_variant */) {
+                      const Variant& context /* = uninit_variant */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
   struct stat s;
   String ret = resolveVmInclude(filename.get(), "", &s, true);
   if (ret.isNull()) {
@@ -429,15 +444,48 @@ Object HHVM_FUNCTION(stream_await,
 
 bool HHVM_FUNCTION(stream_set_blocking,
                    const Resource& stream,
-                   int mode) {
-  auto file = cast<File>(stream);
-  int flags = fcntl(file->fd(), F_GETFL, 0);
-  if (mode) {
-    flags &= ~O_NONBLOCK;
+                   bool mode) {
+  if (isa<File>(stream)) {
+    return cast<File>(stream)->setBlocking(mode);
   } else {
-    flags |= O_NONBLOCK;
+    return false;
   }
-  return fcntl(file->fd(), F_SETFL, flags) != -1;
+}
+
+int64_t HHVM_FUNCTION(stream_set_read_buffer,
+                      const Resource& stream,
+                      int buffer) {
+  if (isa<File>(stream)) {
+    auto plain_file = dyn_cast<PlainFile>(stream);
+    if (!plain_file) {
+      return -1;
+    }
+    FILE* file = plain_file->getStream();
+    if (!file) {
+      return -1;
+    }
+    if (buffer == 0) {
+      // Use _IONBF (no buffer) macro to set no buffer
+      return setvbuf(file, nullptr, _IONBF, 0);
+    } else {
+      // Use _IOFBF (full buffer) macro
+      return setvbuf(file, nullptr, _IOFBF, buffer);
+    }
+  } else {
+    return -1;
+  }
+}
+
+Variant HHVM_FUNCTION(stream_set_chunk_size,
+                      const Resource& stream,
+                      int64_t chunk_size) {
+  if (isa<File>(stream) && chunk_size > 0) {
+    auto file = cast<File>(stream);
+    int64_t orig_chunk_size = file->getChunkSize();
+    file->setChunkSize(chunk_size);
+    return orig_chunk_size;
+  }
+  return false;
 }
 
 const StaticString
@@ -452,8 +500,12 @@ bool HHVM_FUNCTION(stream_set_timeout,
     return HHVM_FN(socket_set_option)
       (stream, SOL_SOCKET, SO_RCVTIMEO,
        make_map_array(s_sec, seconds, s_usec, microseconds));
+  } else if (isa<File>(stream)) {
+    return cast<File>(stream)->setTimeout(
+      (uint64_t)seconds * 1000000 + microseconds);
+  } else {
+    return false;
   }
-  return false;
 }
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
@@ -467,16 +519,12 @@ int64_t HHVM_FUNCTION(stream_set_write_buffer,
   if (!file) {
     return -1;
   }
-
-  switch (buffer) {
-  case k_STREAM_BUFFER_NONE:
+  if (buffer ==0) {
+    // Use _IONBF (no buffer) macro to set no buffer
     return setvbuf(file, nullptr, _IONBF, 0);
-  case k_STREAM_BUFFER_LINE:
-    return setvbuf(file, nullptr, _IOLBF, BUFSIZ);
-  case k_STREAM_BUFFER_FULL:
-    return setvbuf(file, nullptr, _IOFBF, BUFSIZ);
-  default:
-    return -1;
+  } else {
+  // Use _IOFBF (full buffer) macro
+    return setvbuf(file, nullptr, _IOFBF, buffer);
   }
 }
 
@@ -529,8 +577,9 @@ bool HHVM_FUNCTION(stream_wrapper_register,
     return false;
   }
 
-  auto wrapper = std::unique_ptr<Stream::Wrapper>(
-    new UserStreamWrapper(protocol, cls, flags));
+  auto wrapper = req::unique_ptr<Stream::Wrapper>(
+      req::make_raw<UserStreamWrapper>(protocol, cls, flags)
+  );
   if (!Stream::registerRequestWrapper(protocol, std::move(wrapper))) {
     raise_warning("Unable to register protocol: %s\n", protocol.data());
     return false;
@@ -551,19 +600,40 @@ bool HHVM_FUNCTION(stream_wrapper_unregister,
 ///////////////////////////////////////////////////////////////////////////////
 // stream socket functions
 
-static req::ptr<Socket> socket_accept_impl(
+static Variant socket_accept_impl(
   const Resource& socket,
   struct sockaddr *addr,
   socklen_t *addrlen
 ) {
-  auto sock = cast<Socket>(socket);
-  auto new_sock = req::make<Socket>(
-    accept(sock->fd(), addr, addrlen), sock->getType());
+  req::ptr<Socket> new_sock;
+  req::ptr<SSLSocket> sslsock;
+  if (isa<SSLSocket>(socket)) {
+    auto sock = cast<SSLSocket>(socket);
+    auto new_fd = accept(sock->fd(), addr, addrlen);
+    double timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+      m_reqInjectionData.getSocketDefaultTimeout();
+    sslsock = SSLSocket::Create(new_fd, sock->getType(),
+                                sock->getCryptoMethod(), sock->getAddress(),
+                                sock->getPort(), timeout,
+                                sock->getStreamContext());
+    new_sock = sslsock;
+  } else {
+    auto sock = cast<Socket>(socket);
+    auto new_fd = accept(sock->fd(), addr, addrlen);
+    new_sock = req::make<StreamSocket>(new_fd, sock->getType());
+  }
+
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
     new_sock.reset();
   }
-  return new_sock;
+
+  if (sslsock && !sslsock->onAccept()) {
+    raise_warning("Failed to enable crypto");
+    return false;
+  }
+
+  return Variant(std::move(new_sock));
 }
 
 static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
@@ -649,7 +719,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
     if (auto ref = peername.getVariantOrNull()) {
       *ref = get_sockaddr_name(&sa, salen);
     }
-    if (new_sock) return Resource(new_sock);
+    return new_sock;
   } else if (n < 0) {
     sock->setError(errno);
   } else {
@@ -663,9 +733,9 @@ Variant HHVM_FUNCTION(stream_socket_server,
                       VRefParam errnum /* = null */,
                       VRefParam errstr /* = null */,
                       int flags /* = 0 */,
-                      const Variant& context /* = null_variant */) {
+                      const Variant& context /* = uninit_variant */) {
   HostURL hosturl(static_cast<const std::string>(local_socket));
-  return socket_server_impl(hosturl, flags, errnum, errstr);
+  return socket_server_impl(hosturl, flags, errnum, errstr, context);
 }
 
 Variant HHVM_FUNCTION(stream_socket_client,
@@ -674,7 +744,7 @@ Variant HHVM_FUNCTION(stream_socket_client,
                       VRefParam errstr /* = null */,
                       double timeout /* = -1.0 */,
                       int flags /* = 0 */,
-                      const Variant& context /* = null_variant */) {
+                      const Variant& context /* = uninit_variant */) {
   HostURL hosturl(static_cast<const std::string>(remote_socket));
   bool persistent = (flags & k_STREAM_CLIENT_PERSISTENT) ==
     k_STREAM_CLIENT_PERSISTENT;
@@ -753,8 +823,10 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
   } else {
     ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
   }
-  if (ret) {
+  if (ret && port.isInteger()) {
     return address.toString() + ":" + port.toString();
+  } else if (ret) {
+    return address.toString();
   }
   return false;
 }
@@ -764,7 +836,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!HHVM_FN(socket_create_pair)(domain, type, protocol, ref(fd))) {
+  if (!socket_create_pair_impl(domain, type, protocol, ref(fd), true)) {
     return false;
   }
   return fd;
@@ -796,7 +868,7 @@ Variant HHVM_FUNCTION(stream_socket_sendto,
                       const Resource& socket,
                       const String& data,
                       int flags /* = 0 */,
-                      const Variant& address /* = null_variant */) {
+                      const Variant& address /* = uninit_variant */) {
   String host; int port;
   const String& strAddress = address.isNull()
                            ? null_string

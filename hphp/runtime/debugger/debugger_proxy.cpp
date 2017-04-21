@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 
 #include <folly/Conv.h>
 
+#include "hphp/runtime/debugger/cmd/cmd_auth.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
@@ -760,10 +761,10 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
-                                  int frame, bool &failed, int flags) {
+std::pair<bool,Variant>
+DebuggerProxy::ExecutePHP(const std::string &php, String &output,
+                          int frame, int flags) {
   TRACE(2, "DebuggerProxy::ExecutePHP\n");
-  Variant ret;
   // Wire up stdout and stderr to our own string buffer so we can pass
   // any output back to the client.
   StringBuffer sb;
@@ -793,14 +794,54 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     if (flags & ExecutePHPFlagsAtInterrupt) disableSignalPolling();
     switchThreadMode(origThreadMode, m_thread);
   };
-  failed = g_context->evalPHPDebugger((TypedValue*)&ret, code.get(), frame);
+  auto const ret = g_context->evalPHPDebugger(code.get(), frame);
   g_context->setStdout(nullptr, nullptr);
   g_context->swapOutputBuffer(save);
   if (flags & ExecutePHPFlagsLog) {
     Logger::SetThreadHook(nullptr, nullptr);
   }
   output = sb.detach();
-  return ret;
+  return {ret.failed, ret.result};
+}
+
+std::string DebuggerProxy::requestAuthToken() {
+  Lock lock(m_signalMutex);
+  TRACE_RB(2, "DebuggerProxy::requestauthToken: sending auth request\n");
+
+  // Try to use the current sandbox's path, defaulting to the path from
+  // DebuggerDefaultSandboxPath if the current sandbox path is empty.
+  auto sandboxPath = getSandbox().m_path;
+  if (sandboxPath.empty()) {
+    sandboxPath = RuntimeOption::DebuggerDefaultSandboxPath;
+  }
+
+  CmdAuth cmd;
+  cmd.setSandboxPath(sandboxPath);
+  if (!cmd.onServer(*this)) {
+    TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
+             "Failed to send CmdAuth to client\n");
+    return "";
+  }
+
+  DebuggerCommandPtr res;
+  while (!DebuggerCommand::Receive(m_thrift, res,
+                                   "DebuggerProxy::requestAuthToken()")) {
+    checkStop();
+  }
+  if (!res) {
+    TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
+             "Failed to get CmdAuth back from client\n");
+    return "";
+  }
+
+  auto token = std::dynamic_pointer_cast<CmdAuth>(res);
+  if (!token) {
+    TRACE_RB(2, "DebuggerProxy::requestAuthToken: "
+             "bad response from token request: %d", res->getType());
+    return "";
+  }
+
+  return token->getToken();
 }
 
 int DebuggerProxy::getRealStackDepth() {

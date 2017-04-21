@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,14 +16,13 @@
 #ifndef incl_HPHP_UTIL_ASM_X64_H_
 #define incl_HPHP_UTIL_ASM_X64_H_
 
-#include <boost/noncopyable.hpp>
 #include <type_traits>
 
-#include "hphp/util/data-block.h"
 #include "hphp/util/atomic.h"
+#include "hphp/util/data-block.h"
 #include "hphp/util/immed.h"
-#include "hphp/util/trace.h"
 #include "hphp/util/safe-cast.h"
+#include "hphp/util/trace.h"
 
 /*
  * An experimental macro assembler for x64, that strives for low coupling to
@@ -112,8 +111,12 @@ inline Reg8 rbyte(Reg64 r)     { return Reg8(int(r)); }
 inline Reg16 r16(Reg8 r)       { return Reg16(int(r)); }
 inline Reg32 r32(Reg8 r)       { return Reg32(int(r)); }
 inline Reg32 r32(Reg16 r)      { return Reg32(int(r)); }
-inline Reg32 r32(Reg64 r)      { return Reg32(int(r)); }
 inline Reg32 r32(Reg32 r)      { return r; }
+inline Reg32 r32(Reg64 r)      { return Reg32(int(r)); }
+inline Reg64 r64(Reg8 r)       { return Reg64(int(r)); }
+inline Reg64 r64(Reg16 r)      { return Reg64(int(r)); }
+inline Reg64 r64(Reg32 r)      { return Reg64(int(r)); }
+inline Reg64 r64(Reg64 r)      { return r; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -253,7 +256,7 @@ struct DispRIP {
     return DispRIP(disp - x);
   }
 
-  intptr_t disp; // TODO #4613274: should be int32_t
+  intptr_t disp;
 };
 
 // *(reg + x)
@@ -712,7 +715,8 @@ struct Label;
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-class X64Assembler : private boost::noncopyable {
+struct X64Assembler {
+private:
   friend struct Label;
 
   /*
@@ -727,6 +731,9 @@ class X64Assembler : private boost::noncopyable {
 public:
   explicit X64Assembler(CodeBlock& cb) : codeBlock(cb) {}
 
+  X64Assembler(const X64Assembler&) = delete;
+  X64Assembler& operator=(const X64Assembler&) = delete;
+
   CodeBlock& code() const { return codeBlock; }
 
   CodeAddress base() const {
@@ -735,6 +742,10 @@ public:
 
   CodeAddress frontier() const {
     return codeBlock.frontier();
+  }
+
+  CodeAddress toDestAddress(CodeAddress addr) const {
+    return codeBlock.toDestAddress(addr);
   }
 
   void setFrontier(CodeAddress newFrontier) {
@@ -888,6 +899,8 @@ public:
                                                        rn(src), rn(dest)); }
   void movsbl(Reg8 src, Reg32 dest)         { emitRR(instr_movsbx,
                                                        rn(src), rn(dest)); }
+  void movzwl(Reg16 src, Reg32 dest)        { emitRR32(instr_movzwx,
+                                                       rn(src), rn(dest)); }
 
   void loadsbq(MemoryRef m, Reg64 r)        { instrMR(instr_movsbx,
                                                       m, r); }
@@ -936,6 +949,8 @@ public:
   void decl(MemoryRef m) { instrM32(instr_dec, m); }
   void decw(MemoryRef m) { instrM16(instr_dec, m); }
 
+  void push(Immed64 i) { emitI(instr_push, i.q()); }
+
   void movups(RegXMM x, MemoryRef m)        { instrRM(instr_movups, x, m); }
   void movups(MemoryRef m, RegXMM x)        { instrMR(instr_movups, m, x); }
   void movdqu(RegXMM x, MemoryRef m)        { instrRM(instr_movdqu, x, m); }
@@ -983,6 +998,7 @@ public:
 
   void jmp(Reg64 r)            { instrR(instr_jmp, r); }
   void jmp(MemoryRef m)        { instrM(instr_jmp, m); }
+  void jmp(RIPRelativeRef m)   { instrM(instr_jmp, m); }
   void call(Reg64 r)           { instrR(instr_call, r); }
   void call(MemoryRef m)       { instrM(instr_call, m); }
   void call(RIPRelativeRef m)  { instrM(instr_call, m); }
@@ -990,7 +1006,7 @@ public:
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
 
   void jmp(CodeAddress dest) {
-    always_assert(dest && jmpDeltaFits(dest));
+    always_assert_flog(dest && jmpDeltaFits(dest), "Bad Jmp: {}", dest);
     emitJ32(instr_jmp, ssize_t(dest));
   }
 
@@ -1137,33 +1153,33 @@ public:
     movq (imm.q(), dest);
   }
 
-  static void patchJcc(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert(jmp[0] == 0x0F && (jmp[1] & 0xF0) == 0x80);
-    ssize_t diff = dest - (jmp + 6);
+    ssize_t diff = dest - (from + 6);
     *(int32_t*)(jmp + 2) = safe_cast<int32_t>(diff);
   }
 
-  static void patchJcc8(CodeAddress jmp, CodeAddress dest) {
+  static void patchJcc8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert((jmp[0] & 0xF0) == 0x70);
-    ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
+    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  static void patchJmp(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert(jmp[0] == 0xE9);
-    ssize_t diff = dest - (jmp + 5);
+    ssize_t diff = dest - (from + 5);
     *(int32_t*)(jmp + 1) = safe_cast<int32_t>(diff);
   }
 
-  static void patchJmp8(CodeAddress jmp, CodeAddress dest) {
+  static void patchJmp8(CodeAddress jmp, CodeAddress from, CodeAddress dest) {
     assert(jmp[0] == 0xEB);
-    ssize_t diff = dest - (jmp + 2);  // one for opcode, one for offset
+    ssize_t diff = dest - (from + 2);  // one for opcode, one for offset
     *(int8_t*)(jmp + 1) = safe_cast<int8_t>(diff);
   }
 
-  static void patchCall(CodeAddress call, CodeAddress dest) {
+  static void patchCall(CodeAddress call, CodeAddress from, CodeAddress dest) {
     assert(call[0] == 0xE8);
-    ssize_t diff = dest - (call + 5);
+    ssize_t diff = dest - (from + 5);
     *(int32_t*)(call + 1) = safe_cast<int32_t>(diff);
   }
 
@@ -2085,7 +2101,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-struct Label : private boost::noncopyable {
+struct Label {
   explicit Label()
     : m_a(nullptr)
     , m_address(nullptr)
@@ -2096,15 +2112,19 @@ struct Label : private boost::noncopyable {
       assert(m_a && m_address && "Label had jumps but was never set");
     }
     for (auto& ji : m_toPatch) {
+      auto realSrc = ji.a->toDestAddress(ji.addr);
       switch (ji.type) {
-      case Branch::Jmp:   ji.a->patchJmp(ji.addr, m_address);  break;
-      case Branch::Jmp8:  ji.a->patchJmp8(ji.addr, m_address); break;
-      case Branch::Jcc:   ji.a->patchJcc(ji.addr, m_address);  break;
-      case Branch::Jcc8:  ji.a->patchJcc8(ji.addr, m_address); break;
-      case Branch::Call:  ji.a->patchCall(ji.addr, m_address); break;
+      case Branch::Jmp:   ji.a->patchJmp(realSrc, ji.addr, m_address);  break;
+      case Branch::Jmp8:  ji.a->patchJmp8(realSrc, ji.addr, m_address); break;
+      case Branch::Jcc:   ji.a->patchJcc(realSrc, ji.addr, m_address);  break;
+      case Branch::Jcc8:  ji.a->patchJcc8(realSrc, ji.addr, m_address); break;
+      case Branch::Call:  ji.a->patchCall(realSrc, ji.addr, m_address); break;
       }
     }
   }
+
+  Label(const Label&) = delete;
+  Label& operator=(const Label&) = delete;
 
   void jmp(X64Assembler& a) {
     addJump(&a, Branch::Jmp);
@@ -2222,8 +2242,15 @@ CodeBlock& codeBlockChoose(CodeAddress addr, CodeBlock& a, Blocks&... as) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace x64 {
+
 struct DecodedInstruction {
-  explicit DecodedInstruction(uint8_t* ip) { decode(ip); }
+  DecodedInstruction(uint8_t* ip, uint8_t* base)
+    : m_base(base)
+  { decode(ip); }
+
+  explicit DecodedInstruction(uint8_t* ip) : DecodedInstruction(ip, ip) {}
+
   std::string toString();
   size_t size() { return m_size; }
 
@@ -2257,6 +2284,10 @@ private:
   void determineOperandsMap3(uint8_t* ip);
   int decodeModRm(uint8_t* ip);
   int decodeImm(uint8_t* ip);
+
+  // We may wish to decode an instruction whose address is m_ip, but treat all
+  // PIC references as relative to m_base.
+  uint8_t* m_base;
 
   uint8_t*   m_ip;
   uint32_t   m_size;
@@ -2309,6 +2340,6 @@ private:
 #undef logical_const
 #undef CCS
 
-}}
+}}}
 
 #endif

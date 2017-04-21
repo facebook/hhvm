@@ -1,0 +1,12 @@
+Class \Bar -> Class \Bar
+Class \Bar -> Class \Foo
+Class \Bar -> Class \N
+Class \Bar -> Cstr \Foo
+Class \Bar -> Extends \Foo
+Class \Foo -> Class \Foo
+Class \Foo -> Class \M
+Class \M -> Class \M
+Class \N -> Class \M
+Class \N -> Class \N
+Class \N -> Cstr \M
+Class \N -> Extends \M

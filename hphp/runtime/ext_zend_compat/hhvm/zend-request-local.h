@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,6 @@
 #define incl_HPHP_ZEND_REQUEST_LOCAL
 
 #include "hphp/runtime/base/request-local.h"
-#include <unordered_map>
-#include <vector>
 #include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {
@@ -43,26 +41,25 @@ template <class T, class F>
 struct ZendRequestLocalVector final : RequestEventHandler {
   static_assert(std::is_pointer<T>::value,
                 "ZendRequestLocalVector only stores pointers");
-  using container = std::vector<T>;
+  using container = req::vector<T>;
   container& get() { return m_container; }
-  void requestInit() override { clear(); }
-  void requestShutdown() override { clear(); }
-  void vscan(IMarker& mark) const override {
-    for (const auto& p : m_container) {
-      if (p) p->scan(mark);
-    }
+  void requestInit() override {
+    clear();
+    m_container.push_back(nullptr); // don't give out id 0
+  }
+  void requestShutdown() override {
+    clear();
   }
 private:
   void clear() {
-    for (size_t i = 0; i < m_container.size(); ++i) {
-      if (m_container[i]) {
-        auto element = m_container[i];
-        m_container[i] = nullptr;
+    for (auto& e : m_container) {
+      if (e) {
+        auto element = e;
+        e = nullptr;
         m_destroy_callback(element);
       }
     }
-    m_container.clear();
-    m_container.push_back(nullptr); // don't give out id 0
+    m_container = container{};
   }
 
   container m_container;
@@ -76,19 +73,15 @@ private:
 
 template <class K, class V>
 struct ZendRequestLocalMap final : RequestEventHandler {
-  using container = std::unordered_map<K, V>;
-  container& get() { return m_map; }
+  using container = req::hash_map<K, V>;
+  container& get() {
+    if (!m_map) m_map.emplace();
+    return *m_map;
+  }
   void requestInit() override { m_map.clear(); }
   void requestShutdown() override { m_map.clear(); }
-  void vscan(IMarker& mark) const override {
-    // TODO: t7925927 this is wrong when container has pointers. The below is
-    // sufficient for the current usage of this class.
-    for (const auto& pair : m_map) {
-      mark(&pair.second, sizeof(pair.second));
-    }
-  }
 private:
-  container m_map;
+  folly::Optional<container> m_map;
 };
 
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,8 +31,8 @@ struct stat;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamContext;
-class StreamFilter;
+struct StreamContext;
+struct StreamFilter;
 
 extern int __thread s_pcloseRet;
 
@@ -48,7 +48,7 @@ extern int __thread s_pcloseRet;
 // FileData to add any persistent data members, e.g. see Socket.
 // Classes in the FileData hierarchy may not contain request-allocated data.
 struct FileData {
-  static const int CHUNK_SIZE;
+  static const int DEFAULT_CHUNK_SIZE;
 
   FileData() { }
   explicit FileData(bool nonblocking);
@@ -63,7 +63,8 @@ struct FileData {
   int getFd() { return m_fd; }
 
  private:
-  friend class File;
+  friend struct File;
+  friend struct PhpStreamWrapper;
   int m_fd{-1};      // file descriptor
   bool m_isLocal{false}; // is this on the local disk?
   bool m_closed{false}; // whether close() was called
@@ -81,7 +82,8 @@ struct FileData {
   std::string m_mode;
 
   char *m_buffer{nullptr};
-  int64_t m_bufferSize{CHUNK_SIZE};
+  int64_t m_bufferSize{0};
+  int64_t m_chunkSize{DEFAULT_CHUNK_SIZE};
 };
 
 /**
@@ -91,8 +93,6 @@ struct FileData {
  * so they can share some minimal functionalities.
  */
 struct File : SweepableResourceData {
-  static const int CHUNK_SIZE;
-
   static String TranslatePath(const String& filename);
   // Same as TranslatePath except doesn't make paths absolute
   static String TranslatePathKeepRelative(const char* fn, uint32_t len);
@@ -136,6 +136,9 @@ struct File : SweepableResourceData {
   virtual int fd() const { return m_data->m_fd;}
   bool valid() const { return m_data && m_data->m_fd >= 0; }
   std::string getName() const { return m_data->m_name;}
+
+  virtual bool setBlocking(bool mode);
+  virtual bool setTimeout(uint64_t usecs);
 
   /**
    * How to open this type of file.
@@ -246,6 +249,16 @@ struct File : SweepableResourceData {
    * Write to file with specified format and arguments.
    */
   int64_t printf(const String& format, const Array& args);
+
+  /**
+   * Get the Chunk Size.
+   */
+  int64_t getChunkSize() const;
+
+  /**
+   * Set the Chunk Size.
+   */
+  void setChunkSize(int64_t chunk_size);
 
   /**
    * Write one line of csv record.

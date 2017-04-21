@@ -32,3 +32,11 @@ array(1) {
   ["path"]=>
   string(12) "content/:/\*"
 }
+array(3) {
+  ["host"]=>
+  string(11) "example.org"
+  ["port"]=>
+  int(8088)
+  ["path"]=>
+  string(30) "/sites/default/files/drums.mp3"
+}

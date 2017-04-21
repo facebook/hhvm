@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -223,14 +223,12 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
         if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
           if (v.isArray()) {
             try {
-              g_context->setThrowAllErrors(true);
+              ThrowAllErrorsSetter taes;
               Variant res = v.toArrRef().rvalAt(
                 o, hasContext(ExistContext) ?
                 AccessFlags::None : AccessFlags::Error);
-              g_context->setThrowAllErrors(false);
               return replaceValue(makeScalarExpression(ar, res));
             } catch (...) {
-              g_context->setThrowAllErrors(false);
             }
           }
         }
@@ -248,13 +246,6 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
  * encaps T_VARIABLE[expr]
  * encaps ${T_STRING[expr]}
  */
-
-ExpressionPtr ArrayElementExpression::unneeded() {
-  if (m_global) {
-    if (m_offset) return m_offset->unneeded();
-  }
-  return Expression::unneeded();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

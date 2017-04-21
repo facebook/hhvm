@@ -1,0 +1,7 @@
+Deprecated: HH\Vector::contains: Use Vector::containsKey() for key search or Vector::linearSearch() for value serach in %s/test/slow/collection_classes/contains-deprecated.php on line 4
+bool(true)
+
+Deprecated: HH\Vector::contains: Use Vector::containsKey() for key search or Vector::linearSearch() for value serach in %s/test/slow/collection_classes/contains-deprecated.php on line 5
+bool(false)
+bool(true)
+bool(false)

@@ -16,6 +16,6 @@ function hphp_instanceof($obj, $name) { }
 function hphp_create_object_without_constructor($name) { }
 function hphp_get_property($obj, $cls, $prop) { }
 function hphp_set_property($obj, $cls, $prop, $value) { }
-function hphp_get_static_property($cls, $prop) { }
-function hphp_set_static_property($cls, $prop, $value) { }
+function hphp_get_static_property($cls, $prop, $force) { }
+function hphp_set_static_property($cls, $prop, $value, $force) { }
 function hphp_scalar_typehints_enabled() { }

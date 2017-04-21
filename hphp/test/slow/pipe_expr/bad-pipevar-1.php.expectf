@@ -1,0 +1,2 @@
+
+Fatal error: Cannot take indirect reference to a pipe variable in %s/bad-pipevar-1.php on line 4

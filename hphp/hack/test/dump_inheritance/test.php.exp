@@ -1,0 +1,65 @@
+Ancestors of \IFoo and their overridden methods:
+
+Ancestors of \IBar and their overridden methods:
+
+Ancestors of \IQux and their overridden methods:
+File "test.php", line 9, characters 11-14: IQux
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 9, characters 11-14: IQux
+    inherited from File "test.php", line 7, characters 11-14: IBar
+
+Ancestors of \Foo and their overridden methods:
+File "test.php", line 11, characters 7-9: Foo
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 12, characters 19-30: Foo::implement_me
+    inherited from File "test.php", line 4, characters 19-30: IFoo::implement_me
+
+Ancestors of \Bar and their overridden methods:
+File "test.php", line 16, characters 7-9: Bar
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 16, characters 7-9: Bar
+    inherited from File "test.php", line 11, characters 7-9: Foo
+
+Ancestors of \Baz and their overridden methods:
+File "test.php", line 20, characters 7-9: Baz
+    inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 20, characters 7-9: Baz
+    inherited from File "test.php", line 11, characters 7-9: Foo
+File "test.php", line 21, characters 19-29: Baz::override_me
+    inherited from File "test.php", line 13, characters 19-29: Foo::override_me
+File "test.php", line 20, characters 7-9: Baz
+    inherited from File "test.php", line 16, characters 7-9: Bar
+
+
+Children of \IFoo and the methods they override:
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 20, characters 7-9: Baz
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 16, characters 7-9: Bar
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 11, characters 7-9: Foo
+File "test.php", line 4, characters 19-30: IFoo::implement_me
+    inherited by File "test.php", line 12, characters 19-30: Foo::implement_me
+File "test.php", line 3, characters 11-14: IFoo
+    inherited by File "test.php", line 9, characters 11-14: IQux
+
+Children of \IBar and the methods they override:
+File "test.php", line 7, characters 11-14: IBar
+    inherited by File "test.php", line 9, characters 11-14: IQux
+
+Children of \IQux and the methods they override:
+
+Children of \Foo and the methods they override:
+File "test.php", line 11, characters 7-9: Foo
+    inherited by File "test.php", line 20, characters 7-9: Baz
+File "test.php", line 13, characters 19-29: Foo::override_me
+    inherited by File "test.php", line 21, characters 19-29: Baz::override_me
+File "test.php", line 11, characters 7-9: Foo
+    inherited by File "test.php", line 16, characters 7-9: Bar
+
+Children of \Bar and the methods they override:
+File "test.php", line 16, characters 7-9: Bar
+    inherited by File "test.php", line 20, characters 7-9: Baz
+
+Children of \Baz and the methods they override:
+

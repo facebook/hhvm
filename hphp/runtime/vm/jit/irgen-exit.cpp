@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+
+#include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -50,8 +52,8 @@ bool branchesToItself(SrcKey sk) {
  */
 void exitRequest(IRGS& env, TransFlags flags, SrcKey target) {
   auto const curBCOff = bcOff(env);
-  auto const irSP = offsetFromIRSP(env, BCSPOffset{0});
-  auto const invSP = invSPOff(env);
+  auto const irSP = spOffBCFromIRSP(env);
+  auto const invSP = spOffBCFromFP(env);
   if (env.firstBcInst && target.offset() == curBCOff) {
     gen(
       env,
@@ -125,16 +127,11 @@ Block* makePseudoMainExit(IRGS& env) {
     : nullptr;
 }
 
-Block* makeExitOpt(IRGS& env, TransID transId) {
-  assertx(!isInlining(env));
-  auto const targetBcOff = bcOff(env);
+Block* makeExitOpt(IRGS& env) {
+  always_assert(!isInlining(env));
   auto const exit = defBlock(env, Block::Hint::Unlikely);
-  BlockPusher blockPusher(*env.irb, makeMarker(env, targetBcOff), exit);
-  auto const data = ReqRetranslateOptData {
-    transId,
-    SrcKey { curSrcKey(env), targetBcOff },
-    offsetFromIRSP(env, BCSPOffset{0})
-  };
+  BlockPusher blockPusher(*env.irb, makeMarker(env, bcOff(env)), exit);
+  auto const data = IRSPRelOffsetData{spOffBCFromIRSP(env)};
   gen(env, ReqRetranslateOpt, data, sp(env), fp(env));
   return exit;
 }

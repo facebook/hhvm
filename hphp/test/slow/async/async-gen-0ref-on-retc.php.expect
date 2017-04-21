@@ -1,0 +1,8 @@
+int(42)
+iterating
+waiting for clearing ref
+clearing ref
+waiting for foo to finish
+finishing and destructing
+generator destructed
+survived

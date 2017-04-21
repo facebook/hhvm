@@ -1,0 +1,5 @@
+here
+
+Fatal error: Uncaught exception 'RuntimeException' with message 'Timeout reached waiting for an available pooled curl connection!' in %s/hphp/test/slow/ext_curl/pools_can_be_replaced.php:10
+Stack trace:
+#0 {main}

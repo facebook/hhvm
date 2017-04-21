@@ -23,10 +23,9 @@
 
 #include "php.h"
 
+#include <folly/portability/Dirent.h>
+
 #include <sys/types.h>
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
 #include <time.h>
 
 /* currently, PHP does not check for these functions, but assumes

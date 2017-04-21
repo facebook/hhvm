@@ -2,8 +2,6 @@ set(CXX_SOURCES)
 set(C_SOURCES)
 set(ASM_SOURCES)
 set(HEADER_SOURCES)
-set(IDL_SOURCES)
-set(IDL_DEFINES)
 set(PHP_SOURCES)
 
 # Pick up all files in the base ext/ folder unconditionally
@@ -30,18 +28,15 @@ include(HHVMExtensionConfig)
 file(GLOB subdirs ${CMAKE_CURRENT_SOURCE_DIR}/*)
 foreach (dir ${subdirs})
   if (IS_DIRECTORY ${dir})
-    if (EXISTS "${dir}/config.cmake")
-      set(HRE_CURRENT_EXT_PATH "${dir}")
-      include("${dir}/config.cmake")
-    else ()
+    if (NOT EXISTS "${dir}/config.cmake")
       HHVM_SELECT_SOURCES(${dir})
     endif()
+    # Otherwise the sources are already known.
   endif()
 endforeach()
-HHVM_EXTENSION_RESOLVE_DEPENDENCIES()
-set(EXTENSION_IDL_SOURCES ${IDL_SOURCES} CACHE INTERNAL "" FORCE)
-set(EXTENSION_IDL_DEFINES ${IDL_DEFINES} CACHE INTERNAL "" FORCE)
+HHVM_EXTENSION_BUILD_SOURCE_LISTS()
 set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
+set(HRE_LINK_LIBRARIES ${HRE_LIBARIES} CACHE INTERNAL "" FORCE)
 
 add_precompiled_header(
   "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.h"
@@ -49,14 +44,16 @@ add_precompiled_header(
   CXX_SOURCES
 )
 
-ADD_LIBRARY(hphp_runtime_ext STATIC
-            ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
+add_object_library(hphp_runtime_ext
+  ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_runtime_ext" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${ASM_SOURCES} ${C_SOURCES} ${CXX_SOURCES} ${HEADER_SOURCES})
+add_dependencies(hphp_runtime_ext hphp_runtime_static)
 if (ENABLE_ASYNC_MYSQL)
   add_dependencies(hphp_runtime_ext webscalesqlclient squangle)
 endif ()
-target_link_libraries(hphp_runtime_ext ${HRE_LIBRARIES})
-hphp_link(hphp_runtime_ext)
+object_library_ld_link_libraries(hphp_runtime_ext hphp_zend hphp_facts_parser ${HRE_LINK_LIBRARIES})
+object_library_hphp_link(hphp_runtime_ext)
+HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_ext)
 
 HHVM_PUBLIC_HEADERS(ext ${HEADER_SOURCES})

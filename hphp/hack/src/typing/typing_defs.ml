@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Utils
 
 module Reason = Typing_reason
 module SN = Naming_special_names
@@ -31,6 +30,20 @@ type decl = private DeclPhase
 type locl = private LoclPhase
 
 type 'phase ty = Reason.t * 'phase ty_
+
+(* A shape may specify whether or not fields are required. For example, consider
+   this typedef:
+
+     type ShapeWithOptionalField = shape(?'a' => ?int);
+
+   With this definition, the field 'a' may be unprovided in a shape. In this
+   case, the field 'a' would have sf_optional set to true.
+   *)
+and 'phase shape_field_type = {
+  sft_optional : bool;
+  sft_ty : 'phase ty;
+}
+
 and _ ty_ =
   (*========== Following Types Exist Only in the Declared Phase ==========*)
   (* The late static bound type of a class *)
@@ -39,17 +52,12 @@ and _ ty_ =
   (* Either an object type or a type alias, ty list are the arguments *)
   | Tapply : Nast.sid * decl ty list -> decl ty_
 
-  (* The type of a generic inside a function using that generic, with an
-   * optional "as" or "super" constraint. For example:
-   *
-   * function f<T as int>(T $x) {
-   *   // ...
-   * }
-   *
-   * The type of $x inside f() is
-   * Tgeneric("T", Some(Constraint_as, Tprim Tint))
+  (* The type of a generic parameter. The constraints on a generic parameter
+   * are accessed through the lenv.tpenv component of the environment, which
+   * is set up when checking the body of a function or method. See uses of
+   * Typing_phase.localize_generic_parameters_with_bounds.
    *)
-  | Tgeneric : string * (Ast.constraint_kind * decl ty) option -> decl ty_
+  | Tgeneric : string -> decl ty_
 
   (* Name of class, name of type const, remaining names of type consts *)
   | Taccess : taccess_type -> decl ty_
@@ -61,6 +69,12 @@ and _ ty_ =
    * Tarray (None, Some ty)      => [invalid]
    *)
   | Tarray : decl ty option * decl ty option -> decl ty_
+
+  (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
+  | Tdarray : decl ty * decl ty -> decl ty_
+
+  (* Tvarray (ty) => "varray<ty>" *)
+  | Tvarray : decl ty -> decl ty_
 
   (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
@@ -88,6 +102,8 @@ and _ ty_ =
   | Tany
   | Tmixed
 
+  | Terr
+
   (* Nullable, called "option" in the ML parlance. *)
   | Toption : 'phase ty -> 'phase ty_
 
@@ -106,7 +122,9 @@ and _ ty_ =
   (* Whether all fields of this shape are known, types of each of the
    * known arms.
    *)
-  | Tshape : shape_fields_known * ('phase ty Nast.ShapeMap.t) -> 'phase ty_
+  | Tshape
+    : shape_fields_known * ('phase shape_field_type Nast.ShapeMap.t)
+      -> 'phase ty_
 
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
@@ -218,7 +236,11 @@ and array_kind =
   (* Those three types directly correspond to their decl level counterparts:
    * array, array<_> and array<_, _> *)
   | AKany
+  (* An array declared as a varray. *)
+  | AKvarray of locl ty
   | AKvec of locl ty
+  (* An array declared as a darray. *)
+  | AKdarray of locl ty * locl ty
   | AKmap of locl ty * locl ty
   (* This is a type created when we see array() literal *)
   | AKempty
@@ -238,7 +260,7 @@ and abstract_kind =
     (* enum foo ... *)
   | AKenum of string
     (* <T super C> ; None if 'as' constrained *)
-  | AKgeneric of string * locl ty option
+  | AKgeneric of string
     (* see dependent_type *)
   | AKdependent of dependent_type
 
@@ -317,13 +339,14 @@ and shape_fields_known =
 (* The type of a function AND a method.
  * A function has a min and max arity because of optional arguments *)
 and 'phase fun_type = {
-  ft_pos       : Pos.t;
-  ft_deprecated: string option   ;
-  ft_abstract  : bool            ;
-  ft_arity     : 'phase fun_arity    ;
-  ft_tparams   : tparam list     ;
-  ft_params    : 'phase fun_params   ;
-  ft_ret       : 'phase ty           ;
+  ft_pos        : Pos.t               ;
+  ft_deprecated : string option       ;
+  ft_abstract   : bool                ;
+  ft_arity      : 'phase fun_arity    ;
+  ft_tparams    : 'phase tparam list  ;
+  ft_where_constraints : 'phase where_constraint list  ;
+  ft_params     : 'phase fun_params   ;
+  ft_ret        : 'phase ty           ;
 }
 
 (* Arity information for a fun_type; indicating the minimum number of
@@ -352,10 +375,34 @@ and class_elt = {
      synthesized elts. *)
   ce_synthesized : bool;
   ce_visibility  : visibility;
-  ce_type        : decl ty;
+  ce_type        : decl ty Lazy.t;
   (* identifies the class from which this elt originates *)
   ce_origin      : string;
 }
+
+and class_const = {
+  cc_synthesized : bool;
+  cc_abstract    : bool;
+  cc_pos         : Pos.t;
+  cc_type        : decl ty;
+  cc_expr        : Nast.expr option;
+  (* identifies the class from which this const originates *)
+  cc_origin      : string;
+}
+
+(* The position is that of the hint in the `use` / `implements` AST node
+ * that causes a class to have this requirement applied to it. E.g.
+ *
+ * class Foo {}
+ *
+ * interface Bar {
+ *   require extends Foo; <- position of the decl ty
+ * }
+ *
+ * class Baz extends Foo implements Bar { <- position of the `implements`
+ * }
+ *)
+and requirement = Pos.t * decl ty
 
 and class_type = {
   tc_need_init           : bool;
@@ -370,8 +417,8 @@ and class_type = {
   tc_kind                : Ast.class_kind;
   tc_name                : string ;
   tc_pos                 : Pos.t ;
-  tc_tparams             : tparam list ;
-  tc_consts              : class_elt SMap.t;
+  tc_tparams             : decl tparam list ;
+  tc_consts              : class_const SMap.t;
   tc_typeconsts          : typeconst_type SMap.t;
   tc_props               : class_elt SMap.t;
   tc_sprops              : class_elt SMap.t;
@@ -381,10 +428,9 @@ and class_type = {
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
   tc_ancestors           : decl ty SMap.t ;
-  tc_req_ancestors       : decl ty SMap.t;
+  tc_req_ancestors       : requirement list;
   tc_req_ancestors_extends : SSet.t; (* the extends of req_ancestors *)
   tc_extends             : SSet.t;
-  tc_user_attributes     : Nast.user_attribute list;
   tc_enum_type           : enum_type option;
 }
 
@@ -400,7 +446,19 @@ and enum_type = {
   te_constraint : decl ty option;
 }
 
-and tparam = Ast.variance * Ast.id * (Ast.constraint_kind * decl ty) option
+and typedef_type = {
+  td_pos: Pos.t;
+  td_vis: Nast.typedef_visibility;
+  td_tparams: decl tparam list;
+  td_constraint: decl ty option;
+  td_type: decl ty;
+}
+
+and 'phase tparam =
+  Ast.variance * Ast.id * (Ast.constraint_kind * 'phase ty) list
+
+and 'phase where_constraint =
+  'phase ty * Ast.constraint_kind * 'phase ty
 
 type phase_ty =
   | DeclTy of decl ty
@@ -429,7 +487,7 @@ let has_expanded {type_expansions; _} x =
   end
 
 (* The identifier for this *)
-let this = Ident.make "$this"
+let this = Local_id.make "$this"
 
 let arity_min ft_arity : int = match ft_arity with
   | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis min -> min
@@ -437,7 +495,7 @@ let arity_min ft_arity : int = match ft_arity with
 module AbstractKind = struct
   let to_string = function
     | AKnewtype (name, _) -> name
-    | AKgeneric (name, _) -> name
+    | AKgeneric name -> name
     | AKenum name -> "enum "^(Utils.strip_ns name)
     | AKdependent (dt, ids) ->
        let dt =
@@ -451,12 +509,42 @@ module AbstractKind = struct
        String.concat "::" (dt::ids)
 end
 
-(*****************************************************************************)
-(* Accumulate method calls mode *)
-(*****************************************************************************)
+module ShapeFieldMap = struct
+  include Nast.ShapeMap
 
-let accumulate_method_calls = ref false
-let (accumulate_method_calls_result: (Pos.t * string) list ref) = ref []
+  let map_and_rekey shape_map key_f value_f =
+    let f_over_shape_field_type ({ sft_ty; _ } as shape_field_type) =
+      { shape_field_type with sft_ty = value_f sft_ty } in
+    Nast.ShapeMap.map_and_rekey
+      shape_map
+      key_f
+      f_over_shape_field_type
+
+  let map_env f env shape_map =
+    let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
+      let env, sft_ty = f env sft_ty in
+      env, { shape_field_type with sft_ty } in
+    Nast.ShapeMap.map_env f_over_shape_field_type env shape_map
+
+  let map f shape_map = map_and_rekey shape_map (fun x -> x) f
+
+  let iter f shape_map =
+    let f_over_shape_field_type shape_map_key { sft_ty; _ } =
+      f shape_map_key sft_ty in
+    Nast.ShapeMap.iter f_over_shape_field_type shape_map
+
+  let iter_values f = iter (fun _ -> f)
+end
+
+module ShapeFieldList = struct
+  include Core.List
+
+  let map_env env xs ~f =
+    let f_over_shape_field_type env ({ sft_ty; _ } as shape_field_type) =
+      let env, sft_ty = f env sft_ty in
+      env, { shape_field_type with sft_ty } in
+    Core.List.map_env env xs ~f:f_over_shape_field_type
+end
 
 (*****************************************************************************)
 (* Suggest mode *)

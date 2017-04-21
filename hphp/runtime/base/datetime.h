@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,7 @@ namespace HPHP {
  * Encapsulating all date/time manipulations, conversions, input and output
  * into this one single class.
  */
-class DateTime final : public SweepableResourceData {
-public:
+struct DateTime final : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(DateTime);
 
   /**
@@ -286,6 +285,7 @@ public:
   // comparison
   req::ptr<DateInterval> diff(req::ptr<DateTime> datetime2,
                               bool absolute = false);
+  int compare(req::ptr<DateTime> datetime2);
 
   // cloning
   req::ptr<DateTime> cloneDateTime() const;
@@ -332,7 +332,6 @@ private:
       }
       return ret.toArray();
     }
-    void vscan(IMarker&) const override {}
 
   private:
     timelib_error_container *m_errors;

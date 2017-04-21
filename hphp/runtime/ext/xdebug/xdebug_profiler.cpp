@@ -17,11 +17,11 @@
 
 #include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_utils.h"
+#include "hphp/runtime/ext/xdebug/util.h"
 
-#include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/timer.h"
 
@@ -96,7 +96,7 @@ void XDebugProfiler::collectFrameData(FrameData& frameData,
   // is enabled, or on function end if computerized tracing output is enabled
   if ((is_func_begin && (m_tracingEnabled || m_collectMemory)) ||
       (m_tracingEnabled && (m_tracingOpts & k_XDEBUG_TRACE_COMPUTERIZED))) {
-    frameData.memory_usage = MM().getStats().usage;
+    frameData.memory_usage = MM().getStats().usage();
   } else {
     frameData.memory_usage = 0;
   }
@@ -254,7 +254,7 @@ void XDebugProfiler::writeTracingResultsHeader() {
       /* fall through */
     case TraceOutputType::NORMAL:
       fprintf(m_tracingFile, "TRACE START ");
-      XDebugUtils::fprintTimestamp(m_tracingFile);
+      xdebug_print_timestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
     case TraceOutputType::HTML:
@@ -277,7 +277,7 @@ void XDebugProfiler::writeTracingResultsFooter() {
     case TraceOutputType::NORMAL:
     case TraceOutputType::COMPUTERIZED:
       fprintf(m_tracingFile, "TRACE END   ");
-      XDebugUtils::fprintTimestamp(m_tracingFile);
+      xdebug_print_timestamp(m_tracingFile);
       fprintf(m_tracingFile, "\n");
       break;
     case TraceOutputType::HTML:

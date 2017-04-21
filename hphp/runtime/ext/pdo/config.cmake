@@ -3,7 +3,6 @@ HHVM_DEFINE_EXTENSION("pdo"
     ext_pdo.cpp
     pdo_driver.cpp
   HEADERS
-    ext_pdo.h
     pdo_driver.h
   SYSTEMLIB
     ext_pdo.php

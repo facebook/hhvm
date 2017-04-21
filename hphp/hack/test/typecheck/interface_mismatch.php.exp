@@ -1,11 +1,10 @@
 File "interface_mismatch.php", line 16, characters 7-9:
-This object is of type Foo (Typing[4054])
+Class Foo does not correctly implement all required methods  (Typing[4054])
 File "interface_mismatch.php", line 16, characters 22-25:
-It is incompatible with this object of type IFoo
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type IFoo
 Read the following to see why:
 File "interface_mismatch.php", line 16, characters 7-9:
-This object doesn't implement the method whatever
+This type doesn't implement the method whatever
 File "interface_mismatch.php", line 16, characters 22-25:
 Which is required by this interface
 File "interface_mismatch.php", line 13, characters 19-26:

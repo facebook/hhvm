@@ -10,11 +10,11 @@
 
 open Core
 open Typing_defs
-open Utils
 
 module ExprDepTy = struct
   module N = Nast
   module Env = Typing_env
+  module TUtils = Typing_utils
 
   let to_string dt = AbstractKind.to_string (AKdependent dt)
 
@@ -41,7 +41,7 @@ module ExprDepTy = struct
               let ereason, dep = new_() in
               pos, ereason, dep
           )
-      | N.CI (p, cls) ->
+      | N.CI ((p, cls), _) ->
           p, Reason.ERclass cls, `cls cls
       | N.CIstatic ->
           pos, Reason.ERstatic, `static
@@ -68,10 +68,17 @@ module ExprDepTy = struct
   (* Takes the given list of dependent types and applies it to the given
    * locl ty to create a new locl ty
    *)
-  let apply dep_tys ty =
-    List.fold_left dep_tys ~f:begin fun ty (r, dep_ty) ->
-      r, Tabstract (AKdependent dep_ty, Some ty)
-    end ~init:ty
+  let apply env dep_tys ty =
+    let apply_single dep_tys ty =
+      List.fold_left dep_tys ~f:begin fun ty (r, dep_ty) ->
+        r, Tabstract (AKdependent dep_ty, Some ty)
+      end ~init:ty in
+
+    let _, ety = Env.expand_type env ty in
+    match ety with
+    | r, Tunresolved tyl ->
+      r, Tunresolved (List.map tyl ~f:(apply_single dep_tys))
+    | _ -> apply_single dep_tys ety
 
   (* We do not want to create a new expression dependent type if the type is
    * already expression dependent. However if the type is Tunresolved that
@@ -90,29 +97,35 @@ module ExprDepTy = struct
    *  // (`cls '\A') <> (\cls '\B')
    *  $x->expression_dependent_function();
    *)
-  let rec should_apply ?(seen=ISet.empty) env (_, ty_ as ty) = match ty_ with
+  let rec should_apply env ty =
+    let env, ty = Env.expand_type env ty in
+    match snd ty with
+    | Tabstract (AKgeneric _, _) ->
+      let env, tyl = Typing_utils.get_concrete_supertypes env ty in
+      List.exists tyl (should_apply env)
     | Toption ty
     | Tabstract (
-        (AKgeneric _
-        | AKnewtype _
+        ( AKnewtype _
         | AKenum _
         | AKdependent (`this, [])
         ), Some ty) ->
-        should_apply ~seen env ty
+        should_apply env ty
     | Tabstract (AKdependent _, Some _) ->
         false
-    | Tvar _ ->
-        let env, seen, ty = Env.expand_type_recorded env seen ty in
-        should_apply ~seen env ty
     | Tunresolved tyl ->
-        List.exists tyl (should_apply ~seen env)
+        List.exists tyl (should_apply env)
     | Tclass ((_, x), _) ->
         let class_ = Env.get_class env x in
+        (* If a class is both final and variant, we must treat it as non-final
+         * since we can't statically guarantee what the runtime type
+         * will be.
+         *)
         Option.value_map class_
           ~default:false
-          ~f:(fun {tc_final; _} -> not tc_final)
+          ~f:(fun class_ty ->
+              not (TUtils.class_is_final_and_not_contravariant class_ty))
     | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
-    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany ->
+    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ | Terr ->
         false
 
   (****************************************************************************)
@@ -136,7 +149,7 @@ module ExprDepTy = struct
   (****************************************************************************)
   let make env cid cid_ty =
     if should_apply env cid_ty then
-      apply [from_cid env (fst cid_ty) cid] cid_ty
+      apply env [from_cid env (fst cid_ty) cid] cid_ty
     else
       cid_ty
 end

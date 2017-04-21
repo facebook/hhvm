@@ -3,4 +3,4 @@ B accepts param from subclass C
 A accepts param from subclass C
 C accepts param from subclass C
 
-Catchable fatal error: Argument 1 passed to D::test() must be an instance of D, C given in %s on line 26
+Catchable fatal error: Argument 1 passed to D::test() must be an instance of D, C given in %s on line 33

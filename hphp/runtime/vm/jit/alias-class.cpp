@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ namespace {
 // Helper for returning the lowest index of an AStack range, non inclusive.
 // I.e. a AStack class affects stack slots in [sp+offset,lowest_offset).
 int32_t lowest_offset(AStack stk) {
-  auto const off    = int64_t{stk.offset};
+  auto const off    = int64_t{stk.offset.offset};
   auto const sz     = int64_t{stk.size};
   auto const low    = off - sz;
   auto const i32min = int64_t{std::numeric_limits<int32_t>::min()};
@@ -68,6 +68,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BMITvRef2:   break;
   case A::BMIBase:     break;
   case A::BRef:        break;
+  case A::BClsRefSlot: break;
   }
 
   auto ret = std::string{};
@@ -96,6 +97,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BMITvRef2:   ret += "MiT2"; break;
     case A::BMIBase:     ret += "MiB"; break;
     case A::BRef:        ret += "Ref"; break;
+    case A::BClsRefSlot: ret += "Cls"; break;
     }
   }
   return ret;
@@ -122,28 +124,40 @@ bool framelike_equal(T a, U b) {
 
 }
 
-AStack::AStack(SSATmp* base, int32_t o, int32_t s)
-  : offset(o), size(s)
+AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
+  : offset(o)
+  , size(s)
 {
-  // Always canonicalize to the outermost frame pointer.
-  if (base->isA(TStkPtr)) {
-    auto const defSP = base->inst();
-    always_assert_flog(defSP->is(DefSP),
-                       "unexpected StkPtr: {}\n", base->toString());
-    offset -= defSP->extra<DefSP>()->offset.offset;
-    return;
-  }
+  always_assert(fp->isA(TFramePtr));
 
-  assertx(base->isA(TFramePtr));
-  auto const defInlineFP = base->inst();
-  if (defInlineFP->is(DefInlineFP)) {
-    auto const sp = defInlineFP->src(0)->inst();
-    offset += defInlineFP->extra<DefInlineFP>()->spOffset.offset;
-    offset -= sp->extra<DefSP>()->offset.offset;
-    always_assert_flog(sp->src(0)->inst()->is(DefFP),
-                       "failed to canonicalize to outermost FramePtr: {}\n",
-                       sp->src(0)->toString());
-  }
+  auto const defInlineFP = fp->inst();
+  if (!defInlineFP->is(DefInlineFP)) return;
+  auto const sp = defInlineFP->src(0)->inst();
+
+  // FP-relative offset of the inlined frame.
+  auto const innerFPRel =
+    defInlineFP->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(
+      sp->extra<DefSP>()->offset);
+
+  // Offset from the outermost FP is simply the sum of (inner frame relative to
+  // outer) and (offset relative to inner frame).
+  offset += innerFPRel.offset;
+
+  always_assert_flog(sp->src(0)->inst()->is(DefFP),
+                     "failed to canonicalize to outermost FramePtr: {}\n",
+                     sp->src(0)->toString());
+}
+
+AStack::AStack(SSATmp* sp, IRSPRelOffset spRel, int32_t s)
+  : offset()
+  , size(s)
+{
+  always_assert(sp->isA(TStkPtr));
+
+  auto const defSP = sp->inst();
+  always_assert_flog(defSP->is(DefSP),
+                     "unexpected StkPtr: {}\n", sp->toString());
+  offset = spRel.to<FPRelOffset>(defSP->extra<DefSP>()->offset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -162,6 +176,10 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     return folly::hash::hash_combine(hash,
                                      acls.m_frame.fp,
                                      acls.m_frame.ids.raw());
+  case STag::ClsRefSlot:
+    return folly::hash::hash_combine(hash,
+                                     acls.m_clsRefSlot.fp,
+                                     acls.m_clsRefSlot.ids.raw());
   case STag::Prop:
     return folly::hash::hash_combine(hash,
                                      acls.m_prop.obj,
@@ -176,7 +194,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
                                      acls.m_elemS.key->hash());
   case STag::Stack:
     return folly::hash::hash_combine(hash,
-                                     acls.m_stack.offset,
+                                     acls.m_stack.offset.offset,
                                      acls.m_stack.size);
   case STag::Ref:
     return folly::hash::hash_combine(hash, acls.m_ref.boxed);
@@ -208,6 +226,7 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(Ref, ref)
+X(ClsRefSlot, clsRefSlot)
 
 #undef X
 
@@ -223,6 +242,7 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(Ref, ref)
+X(ClsRefSlot, clsRefSlot)
 
 #undef X
 
@@ -265,6 +285,7 @@ AliasClass::rep AliasClass::stagBits(STag tag) {
   case STag::ElemS:    return BElemS;
   case STag::Stack:    return BStack;
   case STag::Ref:      return BRef;
+  case STag::ClsRefSlot: return BClsRefSlot;
   case STag::IterBoth: return static_cast<rep>(BIterPos | BIterBase);
   }
   always_assert(0);
@@ -281,6 +302,10 @@ bool AliasClass::checkInvariants() const {
   case STag::Frame:
     assertx(m_frame.fp->isA(TFramePtr));
     assertx(!m_frame.ids.empty());
+    break;
+  case STag::ClsRefSlot:
+    assertx(m_clsRefSlot.fp->isA(TFramePtr));
+    assertx(!m_clsRefSlot.ids.empty());
     break;
   case STag::Stack:
     assertx(m_stack.size > 0);          // use AEmpty if you want that
@@ -304,6 +329,8 @@ bool AliasClass::equivData(AliasClass o) const {
   case STag::None:     return true;
   case STag::Frame:    return m_frame.fp == o.m_frame.fp &&
                               m_frame.ids == o.m_frame.ids;
+  case STag::ClsRefSlot: return m_clsRefSlot.fp == o.m_clsRefSlot.fp &&
+                                m_clsRefSlot.ids == o.m_clsRefSlot.ids;
   case STag::IterPos:  return framelike_equal(m_iterPos, o.m_iterPos);
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
@@ -357,6 +384,23 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       return ret;
     }
 
+  case STag::ClsRefSlot:
+    {
+      auto ret = AliasClass{newBits};
+      auto const slotA = a.m_clsRefSlot;
+      auto const slotB = b.m_clsRefSlot;
+      if (slotA.fp != slotB.fp) return ret;
+
+      auto const newIds = slotA.ids | slotB.ids;
+      // Even when newIds.isAny(), we still know it won't alias class-ref slots
+      // in other frames, so keep the specialization tag.
+      ret.m_stag = STag::ClsRefSlot;
+      ret.m_clsRefSlot = AClsRefSlot { slotA.fp, newIds };
+      assertx(ret.checkInvariants());
+      assertx(a <= ret && b <= ret);
+      return ret;
+    }
+
   case STag::Stack:
     {
       auto const stkA = a.m_stack;
@@ -365,7 +409,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       // Make a stack range big enough to contain both of them.
       auto const highest = std::max(stkA.offset, stkB.offset);
       auto const lowest = std::min(lowest_offset(stkA), lowest_offset(stkB));
-      auto const newStack = AStack { highest, highest - lowest };
+      auto const newStack = AStack { highest, highest.offset - lowest };
       auto ret = AliasClass{newBits};
       new (&ret.m_stack) AStack(newStack);
       ret.m_stag = STag::Stack;
@@ -488,6 +532,9 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   case STag::IterBoth: new (&ret.m_iterBoth) UIterBoth(chosen->m_iterBoth);
                        break;
   case STag::Frame:    new (&ret.m_frame) AFrame(chosen->m_frame); break;
+  case STag::ClsRefSlot:
+    new (&ret.m_clsRefSlot) AClsRefSlot(chosen->m_clsRefSlot);
+    break;
   case STag::Prop:     new (&ret.m_prop) AProp(chosen->m_prop); break;
   case STag::ElemI:    new (&ret.m_elemI) AElemI(chosen->m_elemI); break;
   case STag::ElemS:    new (&ret.m_elemS) AElemS(chosen->m_elemS); break;
@@ -512,6 +559,9 @@ bool AliasClass::subclassData(AliasClass o) const {
     return equivData(o);
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.ids <= o.m_frame.ids;
+  case STag::ClsRefSlot:
+    return m_clsRefSlot.fp == o.m_clsRefSlot.fp &&
+           m_clsRefSlot.ids <= o.m_clsRefSlot.ids;
   case STag::Stack:
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
@@ -528,6 +578,7 @@ folly::Optional<AliasClass::UIterBoth> AliasClass::asUIter() const {
   case STag::ElemS:
   case STag::Ref:
   case STag::Stack:
+  case STag::ClsRefSlot:
     return folly::none;
   case STag::IterPos:   return UIterBoth { m_iterPos.fp, m_iterPos.id };
   case STag::IterBase:  return UIterBoth { m_iterBase.fp, m_iterBase.id };
@@ -621,6 +672,9 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.ids.maybe(o.m_frame.ids);
+  case STag::ClsRefSlot:
+    return m_clsRefSlot.fp == o.m_clsRefSlot.fp &&
+           m_clsRefSlot.ids.maybe(o.m_clsRefSlot.ids);
   case STag::Prop:
     /*
      * We can't tell if two objects could be the same from here in general, but
@@ -654,7 +708,7 @@ bool AliasClass::maybeData(AliasClass o) const {
         lowest_offset(m_stack),
         lowest_offset(o.m_stack)
       );
-      return lowest_upper > highest_lower;
+      return lowest_upper.offset > highest_lower;
     }
 
   /*
@@ -704,9 +758,12 @@ bool AliasClass::isSingleLocation() const {
   // location.
   if (m_stag == STag::None) return *this <= AMIStateAny;
 
-  // AFrame and AStack can contain multiple locations.
+  // AFrame, AClsRefSlot, and AStack can contain multiple locations.
   if (auto const frame = is_frame()) {
     return frame->ids.hasSingleValue();
+  }
+  if (auto const slot = is_clsRefSlot()) {
+    return slot->ids.hasSingleValue();
   }
   if (auto const stk = is_stack()) {
     return stk->size == 1;
@@ -745,6 +802,7 @@ AliasClass canonicalize(AliasClass a) {
   case T::IterBoth: return a;
   case T::Stack:    return a;
   case T::Ref:      return a;
+  case T::ClsRefSlot: return a;
   case T::Prop:     a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:    a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:    a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
@@ -768,6 +826,10 @@ std::string show(AliasClass acls) {
   case A::STag::Frame:
     folly::format(&ret, "Fr t{}:{}", acls.m_frame.fp->id(),
                   show(acls.m_frame.ids));
+    break;
+  case A::STag::ClsRefSlot:
+    folly::format(&ret, "Cls t{}:{}", acls.m_clsRefSlot.fp->id(),
+                  show(acls.m_clsRefSlot.ids));
     break;
   case A::STag::IterPos:
     folly::format(&ret, "ItP t{}:{}", acls.m_iterPos.fp->id(),
@@ -793,7 +855,7 @@ std::string show(AliasClass acls) {
     break;
   case A::STag::Stack:
     folly::format(&ret, "St {}{}",
-      acls.m_stack.offset,
+      acls.m_stack.offset.offset,
       acls.m_stack.size == std::numeric_limits<int32_t>::max()
         ? "<"
         : folly::sformat(";{}", acls.m_stack.size)

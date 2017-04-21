@@ -1,5 +1,5 @@
 Fatal error: Uncaught exception escaping IntervalTimer: exception 'Exception' with message 'buffalo' in %s/throwing.php:%d
 Stack trace:
-#0 %s/throwing.php(%d): Closure$busy()
-#1 %s/throwing.php(%d): busy()
+#0 %s): Closure$()
+#1 %s/throwing.php(%d): %s()
 #2 {main} in %s/throwing.php on line %d

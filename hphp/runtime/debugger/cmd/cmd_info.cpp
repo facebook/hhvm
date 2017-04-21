@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP { namespace Eval {
@@ -237,11 +238,10 @@ void getClassSymbolNames(
   auto& clsConstants =
     liveLists->get(DebuggerClient::AutoCompleteClassConstants);
 
-  for (AllCachedClasses ac; !ac.empty(); ) {
-    auto c = ac.popFront();
+  NamedEntity::foreach_cached_class([&](Class* c) {
     if (interface ? !(c->attrs() & AttrInterface) :
         c->attrs() & (AttrInterface | AttrTrait)) {
-      continue;
+      return; // continue
     }
     classes.push_back(c->name()->toCppString());
     for (Slot i = 0; i < c->numMethods(); i++) {
@@ -261,7 +261,7 @@ void getClassSymbolNames(
       auto const_name = c->nameStr() + s_constSep + StrNR(cns.name);
       clsConstants.push_back(const_name.get()->toCppString());
     }
-  }
+  });
 }
 
 /* Caches an estimate of the number of named entities we have. */

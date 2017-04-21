@@ -72,9 +72,13 @@
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/portability.h"
 
-#ifdef _MSC_VER
-#include <direct.h>
-#endif
+#include <folly/portability/Dirent.h>
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Stdlib.h>
+#include <folly/portability/String.h>
+#include <folly/portability/SysStat.h>
+#include <folly/portability/Time.h>
+#include <folly/portability/Unistd.h>
 
 extern char *tzname[2];
 
@@ -214,7 +218,7 @@ create_link(const char *pfilename,
 #ifndef _MSC_VER
     struct stat		stat_buf;
 
-    if (lstat(prevlinkname, &stat_buf) == 0)
+    if (prevlinkname && lstat(prevlinkname, &stat_buf) == 0)
     {
 	unlink(prevlinkname);
     }
@@ -230,13 +234,15 @@ create_link(const char *pfilename,
     if (linktype == S_IFLNK)
     {
 	if (symlink(pfilename, linkname) < 0) {
-          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+          fprintf(stderr, "Creating link from %s to %s failed",
+                  pfilename, linkname);
         }
     }
     else
     {
 	if (link(pfilename, linkname) < 0) {
-          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+          fprintf(stderr, "Creating link from %s to %s failed",
+                  pfilename, linkname);
         }
     }
 #else

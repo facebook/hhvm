@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/member-lval.h"
 
 namespace HPHP {
 
@@ -40,18 +41,20 @@ struct MArrayIter;
  * via APC. It has a pointer to the APCArray that it represents and it may
  * cache values locally depending on the type accessed and/or the operation.
  */
-struct APCLocalArray : private ArrayData {
+struct APCLocalArray final : ArrayData,
+                             type_scan::MarkCountable<APCLocalArray> {
   template<class... Args> static APCLocalArray* Make(Args&&...);
 
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant *&ret,
-                            bool copy);
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant *&ret,
-                            bool copy);
-  static ArrayData* LvalNew(ArrayData*, Variant *&ret, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
@@ -63,15 +66,17 @@ struct APCLocalArray : private ArrayData {
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
-  static ArrayData* Append(ArrayData* a, const Variant& v, bool copy);
+  static ArrayData* Append(ArrayData* a, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
-  static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static constexpr auto NvTryGetStr = &NvGetStr;
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
@@ -94,6 +99,12 @@ struct APCLocalArray : private ArrayData {
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
+  static ArrayData* ToPHPArray(ArrayData* ad, bool) {
+    return ad;
+  }
+  static constexpr auto ToVec = &ArrayCommon::ToVec;
+  static constexpr auto ToDict = &ArrayCommon::ToDict;
+  static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
 public:
   using ArrayData::decRefCount;
@@ -129,13 +140,8 @@ private:
 
 public:
   void reap();
-  template<class F> void scan(F& mark) const {
-    //mark(m_arr);
-    if (m_localCache) {
-      for (unsigned i = 0, n = m_arr->capacity(); i < n; ++i) {
-        mark(m_localCache[i]);
-      }
-    }
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_localCache);
   }
 
 private:

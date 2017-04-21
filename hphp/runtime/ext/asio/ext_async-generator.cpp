@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -40,12 +40,12 @@ AsyncGenerator::~AsyncGenerator() {
     return;
   }
 
-  assert(getState() != State::Running);
+  assert(!isRunning());
 
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
   ActRec* ar = actRec();
-  frame_free_locals_inl_no_hook<false>(ar, ar->m_func->numLocals());
+  frame_free_locals_inl_no_hook(ar, ar->m_func->numLocals());
 }
 
 ObjectData*
@@ -56,7 +56,7 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
   assert(fp->func()->isAsyncGenerator());
   const size_t frameSz = Resumable::getFrameSize(numSlots);
   const size_t genSz = genSize(sizeof(AsyncGenerator), frameSz);
-  auto const obj = BaseGenerator::Alloc(s_class, genSz);
+  auto const obj = BaseGenerator::Alloc<AsyncGenerator>(s_class, genSz);
   auto const genData = new (Native::data<AsyncGenerator>(obj)) AsyncGenerator();
   genData->resumable()->initialize<false>(fp,
                                           resumeAddr,
@@ -69,24 +69,23 @@ AsyncGenerator::Create(const ActRec* fp, size_t numSlots,
 
 c_AsyncGeneratorWaitHandle*
 AsyncGenerator::await(Offset resumeOffset, c_WaitableWaitHandle* child) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   resumable()->setResumeAddr(nullptr, resumeOffset);
 
   if (m_waitHandle) {
     // Resumed execution.
     m_waitHandle->await(child);
     return nullptr;
-  } else {
-    // Eager executon.
-    m_waitHandle = c_AsyncGeneratorWaitHandle::Create(this, child);
-    return m_waitHandle;
   }
+  // Eager executon.
+  m_waitHandle = c_AsyncGeneratorWaitHandle::Create(this, child);
+  return m_waitHandle.get();
 }
 
 c_StaticWaitHandle*
 AsyncGenerator::yield(Offset resumeOffset,
                       const Cell* key, const Cell value) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   resumable()->setResumeAddr(nullptr, resumeOffset);
   setState(State::Started);
 
@@ -97,55 +96,52 @@ AsyncGenerator::yield(Offset resumeOffset,
 
   if (m_waitHandle) {
     // Resumed execution.
-    m_waitHandle->ret(*tvAssertCell(&keyValueTupleTV));
-    m_waitHandle = nullptr;
+    req::ptr<c_AsyncGeneratorWaitHandle> wh(std::move(m_waitHandle));
+    wh->ret(*tvAssertCell(&keyValueTupleTV));
     return nullptr;
-  } else {
-    // Eager execution.
-    return c_StaticWaitHandle::CreateSucceeded(keyValueTupleTV);
   }
+  // Eager execution.
+  return c_StaticWaitHandle::CreateSucceeded(keyValueTupleTV);
 }
 
 c_StaticWaitHandle*
 AsyncGenerator::ret() {
-  assert(getState() == State::Running);
+  assert(isRunning());
   setState(State::Done);
 
   auto nullTV = make_tv<KindOfNull>();
 
   if (m_waitHandle) {
-    // Resumed execution.
-    m_waitHandle->ret(nullTV);
-    m_waitHandle = nullptr;
+    // Resumed execution. Take wh out of `this` as ret() may free `this`.
+    req::ptr<c_AsyncGeneratorWaitHandle> wh(std::move(m_waitHandle));
+    wh->ret(nullTV);
     return nullptr;
-  } else {
-    return c_StaticWaitHandle::CreateSucceeded(nullTV);
   }
+  return c_StaticWaitHandle::CreateSucceeded(nullTV);
 }
 
 c_StaticWaitHandle*
 AsyncGenerator::fail(ObjectData* exception) {
-  assert(getState() == State::Running);
+  assert(isRunning());
   setState(State::Done);
 
   if (m_waitHandle) {
-    // Resumed execution.
-    m_waitHandle->fail(exception);
-    m_waitHandle = nullptr;
+    // Resumed execution. Take wh out of `this` as fail() may free `this`.
+    req::ptr<c_AsyncGeneratorWaitHandle> wh(std::move(m_waitHandle));
+    wh->fail(exception);
     return nullptr;
-  } else {
-    return c_StaticWaitHandle::CreateFailed(exception);
   }
+  return c_StaticWaitHandle::CreateFailed(exception);
 }
 
 void AsyncGenerator::failCpp() {
-  assert(getState() == State::Running);
+  assert(isRunning());
   setState(State::Done);
 
   if (m_waitHandle) {
-    // Resumed execution.
-    m_waitHandle->failCpp();
-    m_waitHandle = nullptr;
+    // Resumed execution. Take wh out of `this` as failCpp() may free `this`.
+    req::ptr<c_AsyncGeneratorWaitHandle> wh(std::move(m_waitHandle));
+    wh->failCpp();
   }
 }
 ///////////////////////////////////////////////////////////////////////////////

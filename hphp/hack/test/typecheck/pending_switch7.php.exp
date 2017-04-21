@@ -1,4 +1,4 @@
 File "pending_switch7.php", line 31, characters 10-11:
 The variable $x is defined (Naming[2007])
-File "pending_switch7.php", line 27, characters 7-8:
+File "pending_switch7.php", line 19, characters 11-12:
 But in a different scope

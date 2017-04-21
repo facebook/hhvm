@@ -3,8 +3,11 @@
 print "Test begin\n";
 
 class E implements ArrayAccess {
+  public function __construct() {
+    $this->i = ++self::$count;
+  }
   public function __destruct() {
-    print "In E::__destruct()\n";
+    printf("In E::__destruct() %d\n", $this->i);;
   }
   public function offsetGet($offset) {
     print "In E::offsetGet()\n";
@@ -16,6 +19,9 @@ class E implements ArrayAccess {
   public function offsetExists($offset) {}
   public function offsetSet($offset, $value) {}
   public function offsetUnset($offset) {}
+
+  private static $count = 0;
+  private $i;
 }
 
 class D implements ArrayAccess {

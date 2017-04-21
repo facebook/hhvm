@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,7 +16,8 @@
 */
 
 #include "hphp/runtime/ext/extension.h"
-
+#include "hphp/runtime/base/builtin-functions.h"
+#include <folly/Format.h>
 /*
  *                       Heapgraph Extension
  * What is it?
@@ -41,17 +42,22 @@
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
-#include "hphp/runtime/vm/iterators.h"
 #include "hphp/util/alloc.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/heap-algorithms.h"
 #include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
+
+struct PhpStack;
+struct CppStack;
+struct CppTls;
 
 namespace {
 
@@ -63,39 +69,54 @@ const StaticString
   s_nodes("nodes"),
   s_edges("edges"),
   s_roots("roots"),
+  s_root_nodes("root_nodes"),
   s_root_path("root_path"),
+  s_exact("exact"),
+  s_format("format"),
 
   // Node description
   s_kind("kind"),
   s_size("size"),
   s_index("index"),
   s_class("class"),
+  s_func("func"),
+  s_local("local"),
+  s_prop("prop"),
+  s_Root("Root"),
+  s_type("type"),
 
   // Edge description
-  s_seat("seat"),
-  s_name("name"),
   s_from("from"),
-  s_to("to");
+  s_to("to"),
+  s_key("key"),
+  s_value("value"),
+  s_offset("offset");
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // CONTEXT OBJECTS
 
-struct CapturedNode {
-  HeaderKind kind;
-  size_t size;
-  const char* classname;
+// Extra information about a HeapGraph::Node.
+union CapturedNode {
+  rds::StaticLocal static_local; // only for rds::StaticLocalData
+  rds::SPropCache sprop_cache; // only for HPHP::SPropCache
+  struct {
+    HeaderKind kind;
+    const Class* cls;
+  } heap_object; // only for non-roots
 };
-struct CapturedPtr : HeapGraph::Ptr {
-  std::string edgename;
+
+// Extra information about a HeapGraph::Ptr
+struct CapturedPtr {
+  enum { Key, Value, Property, Offset } index_kind;
+  uint32_t index; // location of ptr within it's from node
 };
 
 struct HeapGraphContext : SweepableResourceData {
-  explicit HeapGraphContext(const HeapGraph& hg_)
-    : hg(hg_) {
-  }
-
-  ~HeapGraphContext() {
-  }
+  explicit HeapGraphContext(const HeapGraph& hg) : hg(hg) {}
+  explicit HeapGraphContext(HeapGraph&& hg) : hg(std::move(hg)) {}
+  ~HeapGraphContext() {}
 
   bool isInvalid() const override {
     return false;
@@ -113,6 +134,8 @@ struct HeapGraphContext : SweepableResourceData {
 };
 
 IMPLEMENT_RESOURCE_ALLOCATION(HeapGraphContext)
+
+namespace {
 
 using HeapGraphContextPtr = req::ptr<HeapGraphContext>;
 static HeapGraphContextPtr get_valid_heapgraph_context_resource(
@@ -133,150 +156,131 @@ static HeapGraphContextPtr get_valid_heapgraph_context_resource(
 ///////////////////////////////////////////////////////////////////////////////
 // TRAVERSAL FUNCTIONS
 
-bool supportsToArray(ObjectData* obj) {
-  if (obj->isCollection()) {
-    assertx(isValidCollection(obj->collectionType()));
-    return true;
-  } else if (UNLIKELY(obj->getAttribute(ObjectData::CallToImpl))) {
-    return obj->instanceof(SimpleXMLElement_classof());
-  } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayObjectClass))) {
-    return true;
-  } else if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
-    return true;
-  } else if (UNLIKELY(obj->instanceof(SystemLib::s_ClosureClass))) {
-    return true;
-  } else if (UNLIKELY(obj->instanceof(DateTimeData::getClass()))) {
-    return true;
-  } else {
-    if (LIKELY(!obj->getAttribute(ObjectData::InstanceDtor))) {
-      return true;
-    }
+static const StringData* edge_kind_strs[3];
+static const char* edge_kind_cstrs[] = {
+  "Ptr:Counted", "Ptr:Implicit", "Ptr:Ambiguous"
+};
 
-    return false;
+const StringData* edgeKindName(HeapGraph::PtrKind kind) {
+  auto s = edge_kind_strs[(int)kind];
+  if (!s) {
+    s = makeStaticString(edge_kind_cstrs[(int)kind]);
+    edge_kind_strs[(int)kind] = s;
   }
+  return s;
+  static_assert(HeapGraph::NumPtrKinds == 3, "");
+  static_assert(HeapGraph::Counted == 0, "");
+  static_assert(HeapGraph::Implicit == 1, "");
+  static_assert(HeapGraph::Ambiguous == 2, "");
 }
 
-std::string getObjectConnectionName(
-  ObjectData* obj,
-  const void* target
-) {
-  Class* cls = obj->getVMClass();
-  FTRACE(5, "HG: Getting connection name for type {} at {}\n",
-    obj->getClassName().data(),
-    obj
-  );
+// return metadata about this pointer, in the form of a CapturedPtr
+CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
+  // Try to drill down and resolve the edge name
+  assert(g.ptrs[ptr].from != -1 && g.ptrs[ptr].to != -1);
+  auto& edge = g.ptrs[ptr];
+  auto& from = g.nodes[edge.from];
+  int prop_offset = edge.offset;
+  if (!from.is_root) {
+    auto from_hdr = from.h;
 
-  if (!supportsToArray(obj)) {
-    return "";
-  }
-
-  auto arr = obj->toArray();
-  bool is_packed = arr->isPacked();
-  for (ArrayIter iter(arr); iter; ++iter) {
-    auto first = iter.first();
-    auto key = first.toString();
-    auto key_tv = first.asTypedValue();
-    auto val_tv = iter.secondRef().asTypedValue();
-
-    if (key_tv->m_type == HPHP::KindOfString) {
-      // If the key begins with a NUL, it's a private or protected property.
-      // Read the class name from between the two NUL bytes.
-      //
-      // Note: Copied from object-data.cpp
-      if (!key.empty() && key[0] == '\0') {
-        int subLen = key.find('\0', 1) + 1;
-        key = key.substr(subLen);
-      }
+    // get the actual ObjectData*. This deals with object kinds that
+    // have data before the object: AFWH, Native, and Closure. Compute
+    // prop_offset relative to the inner ObjectData.
+    const ObjectData* from_obj{nullptr};
+    if (from_hdr->kind() == HeaderKind::AsyncFuncFrame) {
+      from_obj = from_hdr->asyncFuncWH();
+      prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
+    } else if (from_hdr->kind() == HeaderKind::NativeData) {
+      from_obj = from_hdr->nativeObj();
+      prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
+    } else if (from_hdr->kind() == HeaderKind::ClosureHdr) {
+      from_obj = from_hdr->closureObj();
+      prop_offset = edge.offset - (uintptr_t(from_obj) - uintptr_t(from_hdr));
+    } else if (isObjectKind(from_hdr->kind())) {
+      from_obj = &from_hdr->obj_;
+      prop_offset = edge.offset;
     }
 
-    FTRACE(5, "HG: ...Iterating over object key-val {}=>{}\n",
-      key, tname(val_tv->m_type)
-    );
-
-    // We're only interested in the porperty name that points to our target
-    if ((void*)val_tv->m_data.pobj != target) {
-      continue;
-    }
-
-    bool is_declared =
-        key_tv->m_type == HPHP::KindOfString &&
-        cls->lookupDeclProp(key.get()) != kInvalidSlot;
-
-    if (!is_declared && !is_packed) {
-      return std::string("Key:" + key);
-    } else if (is_packed) {
-      return std::string("PropertyIndex");
-    } else {
-      return std::string("Property:" + key);
-    }
-  }
-
-  return "";
-}
-
-std::string getEdgeKindName(HeapGraph::PtrKind kind) {
-  switch (kind) {
-    case HeapGraph::Counted:
-      return "Ptr:Counted";
-    case HeapGraph::Implicit:
-      return "Ptr:Implicit";
-    case HeapGraph::Ambiguous:
-      return "Ptr:Ambiguous";
-  }
-  not_reached();
-}
-
-std::string getNodesConnectionName(
-  const HeapGraph& g,
-  int ptr,
-  int from,
-  int to
-) {
-  // For non Ambiguous pointers, try to drill down and resolve the edge name
-  if (from != -1 && to != -1 && g.ptrs[ptr].kind != HeapGraph::Ambiguous) {
-    auto h = g.nodes[from].h;
-    auto th = g.nodes[to].h;
-    const void* target_ptr = &th->obj_;
-    ObjectData* obj;
-    std::string conn_name;
-
-    switch (h->kind()) {
+    switch (from_hdr->kind()) {
       // Known generalized cases that don't really need pointer kind
-      case HeaderKind::Struct: // Not implemented yet
       case HeaderKind::Mixed:
-        return "ArrayKeyValue";
+      case HeaderKind::Dict:
+      case HeaderKind::Keyset: {
+        if (edge.offset >= sizeof(MixedArray)) {
+          using Elm = MixedArray::Elm;
+          auto elm_offset = edge.offset - sizeof(MixedArray);
+          uint32_t index = elm_offset / sizeof(Elm);
+          if (index < from_hdr->mixed_.iterLimit()) {
+            auto field = elm_offset - index * sizeof(Elm);
+            if (field == Elm::keyOff()) {
+              return {CapturedPtr::Key, index};
+            }
+            if (field == Elm::dataOff() + offsetof(TypedValue, m_data)) {
+              return {CapturedPtr::Value, index};
+            }
+          }
+        }
+        break;
+      }
 
-      // Obvious cases that do not need pointer type
+      case HeaderKind::Packed:
+      case HeaderKind::VecArray: {
+        if (edge.offset >= sizeof(ArrayData)) {
+          auto elm_offset = edge.offset - sizeof(ArrayData);
+          uint32_t index = elm_offset / sizeof(TypedValue);
+          if (index < from_hdr->arr_.size()) {
+            return {CapturedPtr::Value, index};
+          }
+        }
+        break;
+      }
+
+      case HeaderKind::Pair: {
+        if (edge.offset >= c_Pair::dataOffset()) {
+          auto elm_offset = edge.offset - c_Pair::dataOffset();
+          uint32_t index = elm_offset / sizeof(TypedValue);
+          if (index < 2) {
+            return {CapturedPtr::Value, index};
+          }
+        }
+        break;
+      }
+
       case HeaderKind::AwaitAllWH:
       case HeaderKind::WaitHandle:
-      case HeaderKind::ResumableObj:
-      case HeaderKind::Pair:
-      case HeaderKind::ResumableFrame:
-      case HeaderKind::Set:
-      case HeaderKind::ImmSet:
-      case HeaderKind::Vector:
-      case HeaderKind::ImmVector:
-      case HeaderKind::Packed:
-        return "";
-
-      // Explicit cases that have explicit pointer name
-
       case HeaderKind::Ref:
-        return "";
-
-      case HeaderKind::Map:
-      case HeaderKind::ImmMap:
-      case HeaderKind::Object:
-        obj = const_cast<ObjectData*>(&h->obj_);
-        //auto obj_tv = make_tv<KindOfObject>(obj);
-        conn_name = getObjectConnectionName(obj, target_ptr);
-        if (!conn_name.empty()) {
-          return conn_name;
-        }
-        // Fallback to pointer kind
         break;
 
-      // Unknown drilldown cases that need pointer type
+      // cases that have explicit pointer name
+      case HeaderKind::AsyncFuncWH:
+      case HeaderKind::AsyncFuncFrame:
+      case HeaderKind::ClosureHdr:
+      case HeaderKind::Closure:
+        // the class of a c_Closure describes the captured variables
+      case HeaderKind::NativeData:
+      case HeaderKind::Object: {
+        auto cls = from_obj->getVMClass();
+        FTRACE(5, "HG: Getting connection name for class {} at {}\n",
+               from_obj->getClassName().data(), from_obj);
+        if (prop_offset >= sizeof(ObjectData)) {
+          uint32_t index = (prop_offset - sizeof(ObjectData)) /
+                           sizeof(TypedValue);
+          if (index < cls->numDeclProperties()) {
+            return {CapturedPtr::Property, index};
+          }
+        } else {
+          // edge_offset > 0 && prop_offset < 0 means nativedata fields
+        }
+        break;
+      }
+
+      case HeaderKind::Vector:
+      case HeaderKind::ImmVector:
+      case HeaderKind::Set:
+      case HeaderKind::ImmSet:
+      case HeaderKind::Map:
+      case HeaderKind::ImmMap:
       case HeaderKind::Empty:
       case HeaderKind::Apc:
       case HeaderKind::Globals:
@@ -285,80 +289,123 @@ std::string getNodesConnectionName(
       case HeaderKind::Resource:
       case HeaderKind::BigMalloc:
       case HeaderKind::SmallMalloc:
-      case HeaderKind::NativeData:
       case HeaderKind::Free:
       case HeaderKind::BigObj:
       case HeaderKind::Hole:
-        // Fallback to pointer kind
+        // just provide raw prop_offset
         break;
-    }
-  } else if (from == -1 && to != -1) {
-    auto seat = g.ptrs[ptr].seat;
-    std::string conn_name;
-
-    if (seat != nullptr) {
-      conn_name = std::string(seat);
-    }
-
-    if (!conn_name.empty()) {
-      return conn_name;
     }
   }
 
-  return getEdgeKindName(g.ptrs[ptr].kind);
+  return {CapturedPtr::Offset, uint32_t(prop_offset)};
 }
 
 void heapgraphCallback(Array fields, const Variant& callback) {
   VMRegAnchor _;
-  Array params;
-  params.append(fields);
+  auto params = make_packed_array(fields);
   vm_call_user_func(callback, params);
 }
 
 void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   VMRegAnchor _;
-  Array params;
-  params.append(fields);
-  params.append(fields2);
+  auto params = make_packed_array(fields, fields2);
   vm_call_user_func(callback, params);
 }
 
-Array createPhpNode(HeapGraphContextPtr hgptr , int index) {
-  auto cnode = hgptr->cnodes[index];
+static bool isStaticLocal(const HeapGraph::Node& node) {
+  return node.tyindex == type_scan::getIndexForScan<rds::StaticLocalData>();
+}
 
-  auto node_arr = make_map_array(
-    s_index, Variant(index),
-    s_kind, Variant(header_names[int(cnode.kind)]),
-    s_size, Variant(cnode.size)
-  );
+static bool isStaticProp(const HeapGraph::Node& node) {
+  return node.tyindex == type_scan::getIndexForScan<StaticPropData>();
+}
 
-  if (cnode.classname != nullptr) {
-    node_arr.set(s_class, Variant(cnode.classname));
+static const StringData* header_name_strs[NumHeaderKinds];
+
+Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
+  const auto& node = hgptr->hg.nodes[index];
+  const auto& cnode = hgptr->cnodes[index];
+
+  const StringData* kind_str;
+  if (!node.is_root) {
+    auto k = int(cnode.heap_object.kind);
+    kind_str = header_name_strs[k];
+    if (!kind_str) {
+      kind_str = makeStaticString(header_names[k]);
+      header_name_strs[k] = kind_str;
+    }
+  } else {
+    kind_str = s_Root.get(); // fake HeaderKind "Root"
   }
 
+  auto node_arr = make_map_array(
+    s_index, VarNR(index),
+    s_kind, VarNR(kind_str),
+    s_size, VarNR(int64_t(node.size))
+  );
+  if (type_scan::hasNonConservative()) {
+    auto ty = node.tyindex;
+    if (ty > type_scan::kIndexUnknownNoPtrs) {
+      auto type = type_scan::getName(ty);
+      node_arr.set(s_type, VarNR(makeStaticString(type)));
+    }
+  }
+  if (!node.is_root) {
+    if (auto cls = cnode.heap_object.cls) {
+      node_arr.set(s_class, VarNR(cls->nameStr()));
+    }
+  } else if (isStaticLocal(node)) {
+    auto func = Func::fromFuncId(cnode.static_local.funcId);
+    node_arr.set(s_func, VarNR(func->nameStr()));
+    node_arr.set(s_local, VarNR(cnode.static_local.name));
+    if (auto cls = func->cls()) {
+      node_arr.set(s_class, VarNR(cls->nameStr()));
+    }
+  } else if (isStaticProp(node)) {
+    auto cls = cnode.sprop_cache.cls;
+    auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
+    node_arr.set(s_class, VarNR(cls->nameStr()));
+    node_arr.set(s_prop, VarNR(sprop.name));
+  }
   return node_arr;
 }
 
 Array createPhpEdge(HeapGraphContextPtr hgptr, int index) {
-  auto ptr = hgptr->hg.ptrs[index];
-  auto cptr = hgptr->cptrs[index];
+  const auto& ptr = hgptr->hg.ptrs[index];
+  const auto& cptr = hgptr->cptrs[index];
+  const auto& cfrom = hgptr->cnodes[ptr.from];
 
   auto ptr_arr = make_map_array(
-    s_index, Variant(index),
-    s_kind, Variant(getEdgeKindName(ptr.kind)),
-    s_from, Variant(ptr.from),
-    s_to, Variant(ptr.to),
-    s_seat, (ptr.seat == nullptr ? init_null() : Variant(ptr.seat)),
-    s_name, Variant(cptr.edgename)
+    s_index, VarNR(index),
+    s_kind, VarNR(edgeKindName(ptr.ptr_kind)),
+    s_from, VarNR(ptr.from),
+    s_to, VarNR(ptr.to)
   );
+  switch (cptr.index_kind) {
+    case CapturedPtr::Key:
+      ptr_arr.set(s_key, VarNR(int64_t(cptr.index)));
+      break;
+    case CapturedPtr::Value:
+      ptr_arr.set(s_value, VarNR(int64_t(cptr.index)));
+      break;
+    case CapturedPtr::Property: {
+      auto& prop = cfrom.heap_object.cls->declProperties()[cptr.index];
+      ptr_arr.set(s_prop, VarNR(prop.name));
+      break;
+    }
+    case CapturedPtr::Offset:
+      if (cptr.index) ptr_arr.set(s_offset, VarNR(int64_t(cptr.index)));
+      break;
+  }
 
   return ptr_arr;
 }
 
 std::vector<int> toBoundIntVector(const Array& arr, int64_t max) {
   std::vector<int> result;
+  result.reserve(arr.size());
   for (ArrayIter iter(arr); iter; ++iter) {
-    auto index = iter.second().toInt64();
+    auto index = iter.second().toInt64(); // Cannot re-enter.
     if (index < 0 || index >= max) {
       continue;
     }
@@ -378,38 +425,49 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
 
   // Copy edges into captured edges
   // Capturing edges first because after capturing nodes we nullify the header
+  cptrs.reserve(hg.ptrs.size());
   for (int i = 0; i < hg.ptrs.size(); ++i) {
-    auto src_ptr = hg.ptrs[i];
-    CapturedPtr new_ptr;
-    new_ptr.edgename = getNodesConnectionName(
-      hg,
-      i,
-      src_ptr.from,
-      src_ptr.to
-    );
+    auto new_ptr = getEdgeInfo(hg, i); // edge name
     cptrs.push_back(new_ptr);
   }
 
-  // Copy nodes into captured nodes
-  for (int i = 0; i < hg.nodes.size(); ++i) {
-    auto src_node = hg.nodes[i];
-    CapturedNode new_node;
-    new_node.kind = src_node.h->kind();
-    new_node.size = src_node.h->size();
-    if (src_node.h->kind() == HeaderKind::Object) {
-      new_node.classname = src_node.h->obj_.classname_cstr();
-    } else {
-      new_node.classname = nullptr;
+  // obtain mapping of rds offsets (handles) to metadata
+  auto links = rds::reverseLinkTable();
+
+  // Copy useful information from heap into cnodes
+  cnodes.resize(hg.nodes.size());
+  for (size_t i = 0, n = hg.nodes.size(); i < n; ++i) {
+    auto& node = hg.nodes[i];
+    auto& cnode = cnodes[i];
+    if (!node.is_root) {
+      auto obj = node.h->obj();
+      cnode.heap_object.kind = node.h->kind();
+      cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;
+    } else if (isStaticLocal(node)) {
+      rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
+      auto it = links.find(handle);
+      if (it != links.end()) {
+        cnode.static_local = boost::get<rds::StaticLocal>(it->second);
+      } else {
+        cnode.static_local = {InvalidFuncId, nullptr};
+      }
+    } else if (isStaticProp(node)) {
+      rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
+      auto it = links.find(handle);
+      if (it != links.end()) {
+        cnode.sprop_cache = boost::get<rds::SPropCache>(it->second);
+      } else {
+        cnode.sprop_cache = {nullptr, 0};
+      }
     }
-    cnodes.push_back(new_node);
 
     // Nullify the pointers to be safe since this is a captured heap
-    hg.nodes[i].h = nullptr;
+    node.h = nullptr;
   }
 
-  auto hgcontext = req::make<HeapGraphContext>(hg);
-  hgcontext->cnodes = cnodes;
-  hgcontext->cptrs = cptrs;
+  auto hgcontext = req::make<HeapGraphContext>(std::move(hg));
+  std::swap(hgcontext->cnodes, cnodes);
+  std::swap(hgcontext->cptrs, cptrs);
   return Resource(hgcontext);
 }
 
@@ -443,9 +501,21 @@ void HHVM_FUNCTION(heapgraph_foreach_root,
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr || callback.isNull()) return;
-  for (int i = 0; i < hgptr->hg.roots.size(); i++) {
-    auto phpedge = createPhpEdge(hgptr, hgptr->hg.roots[i]);
+  for (int i = 0, n = hgptr->hg.root_ptrs.size(); i < n; ++i) {
+    auto phpedge = createPhpEdge(hgptr, hgptr->hg.root_ptrs[i]);
     heapgraphCallback(phpedge, callback);
+  }
+}
+
+void HHVM_FUNCTION(heapgraph_foreach_root_node,
+  const Resource& resource,
+  const Variant& callback
+) {
+  auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
+  if (!hgptr || callback.isNull()) return;
+  for (auto n : hgptr->hg.root_nodes) {
+    auto phpnode = createPhpNode(hgptr, n);
+    heapgraphCallback(phpnode, callback);
   }
 }
 
@@ -487,14 +557,14 @@ void HHVM_FUNCTION(heapgraph_dfs_edges,
 Array HHVM_FUNCTION(heapgraph_edge, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.ptrs.size())) return empty_array();
+  if (size_t(index) >= hgptr->hg.ptrs.size()) return empty_array();
   return createPhpEdge(hgptr, index);
 }
 
 Array HHVM_FUNCTION(heapgraph_node, const Resource& resource, int64_t index) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
+  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
   return createPhpNode(hgptr, index);
 }
 
@@ -504,12 +574,14 @@ Array HHVM_FUNCTION(heapgraph_node_out_edges,
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
-  Array result;
-  hgptr->hg.eachSuccPtr(index, [&](int ptr) {
+  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  size_t num_edges{0};
+  hgptr->hg.eachOutPtr(index, [&](int) { num_edges++; });
+  PackedArrayInit result(num_edges);
+  hgptr->hg.eachOutPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
-  return result;
+  return result.toArray();
 }
 
 Array HHVM_FUNCTION(heapgraph_node_in_edges,
@@ -518,21 +590,25 @@ Array HHVM_FUNCTION(heapgraph_node_in_edges,
 ) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
-  if (index < 0 || index >= (hgptr->hg.nodes.size())) return empty_array();
-  Array result;
-  hgptr->hg.eachPredPtr(index, [&](int ptr) {
+  if (size_t(index) >= hgptr->hg.nodes.size()) return empty_array();
+  size_t num_edges{0};
+  hgptr->hg.eachInPtr(index, [&](int) { num_edges++; });
+  PackedArrayInit result(num_edges);
+  hgptr->hg.eachInPtr(index, [&](int ptr) {
     result.append(createPhpEdge(hgptr, ptr));
   });
-  return result;
+  return result.toArray();
 }
 
 Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
   auto hgptr = get_valid_heapgraph_context_resource(resource, __FUNCTION__);
   if (!hgptr) return empty_array();
   auto result = make_map_array(
-    s_nodes, Variant(hgptr->hg.nodes.size()),
-    s_edges, Variant(hgptr->hg.ptrs.size()),
-    s_roots, Variant(hgptr->hg.roots.size())
+    s_nodes, VarNR(int64_t(hgptr->hg.nodes.size())),
+    s_edges, VarNR(int64_t(hgptr->hg.ptrs.size())),
+    s_roots, VarNR(int64_t(hgptr->hg.root_ptrs.size())),
+    s_root_nodes, VarNR(int64_t(hgptr->hg.root_nodes.size())),
+    s_exact, VarNR(type_scan::hasNonConservative() ? 1 : 0)
   );
   return result;
 }
@@ -542,8 +618,7 @@ Array HHVM_FUNCTION(heapgraph_stats, const Resource& resource) {
 
 }
 
-class heapgraphExtension final : public Extension {
-public:
+struct heapgraphExtension final : Extension {
   heapgraphExtension() : Extension("heapgraph", "1.0") { }
 
   void moduleInit() override {
@@ -552,6 +627,7 @@ public:
     HHVM_FALIAS(HH\\heapgraph_foreach_node, heapgraph_foreach_node);
     HHVM_FALIAS(HH\\heapgraph_foreach_edge, heapgraph_foreach_edge);
     HHVM_FALIAS(HH\\heapgraph_foreach_root, heapgraph_foreach_root);
+    HHVM_FALIAS(HH\\heapgraph_foreach_root_node, heapgraph_foreach_root_node);
     HHVM_FALIAS(HH\\heapgraph_edge, heapgraph_edge);
     HHVM_FALIAS(HH\\heapgraph_node, heapgraph_node);
     HHVM_FALIAS(HH\\heapgraph_node_out_edges, heapgraph_node_out_edges);

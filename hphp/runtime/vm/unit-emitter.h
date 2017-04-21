@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/repo-helpers.h"
+#include "hphp/runtime/vm/repo-status.h"
 #include "hphp/runtime/vm/type-alias.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -43,6 +44,13 @@ struct FuncEmitter;
 struct PreClassEmitter;
 struct StringData;
 
+/*
+ * Report capacity of RepoAuthoritative mode bytecode arena.
+ *
+ * Returns 0 if !RuntimeOption::RepoAuthoritative.
+ */
+size_t hhbc_arena_capacity();
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -50,7 +58,7 @@ struct StringData;
  * runtime Units.
  */
 struct UnitEmitter {
-  friend class UnitRepoProxy;
+  friend struct UnitRepoProxy;
 
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
@@ -66,7 +74,7 @@ struct UnitEmitter {
   /*
    * Insert this unit in a repo as part of transaction `txn'.
    */
-  bool insert(UnitOrigin unitOrigin, RepoTxn& txn);
+  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn);
 
   /*
    * Instatiate a runtime Unit*.
@@ -89,6 +97,7 @@ struct UnitEmitter {
    */
   const unsigned char* bc() const;
   Offset bcPos() const;
+  Offset offsetOf(const unsigned char* pc) const;
 
   /*
    * Set the bytecode pointer by allocating a copy of `bc' with size `bclen'.
@@ -206,6 +215,12 @@ struct UnitEmitter {
   PreClassEmitter* pce(Id preClassId);
 
   /*
+   * The id for the pre-class named clsName, or -1 if
+   * there is no such pre-class
+   */
+  Id pceId(folly::StringPiece clsName);
+
+  /*
    * Add a PreClassEmitter to the hoistability tracking data structures.
    *
    * @see: PreClass::Hoistable
@@ -217,14 +232,14 @@ struct UnitEmitter {
    *
    * @see: PreClass::Hoistable
    */
-  PreClassEmitter* newPreClassEmitter(const StringData* name,
+  PreClassEmitter* newPreClassEmitter(const std::string& name,
                                       PreClass::Hoistable hoistable);
   /*
    * Create a new PreClassEmitter without adding it to the hoistability
    * tracking data structures.
-   * It should be added latter with addPreClassEmitter.
+   * It should be added later with addPreClassEmitter.
    */
-  PreClassEmitter* newBarePreClassEmitter(const StringData* name,
+  PreClassEmitter* newBarePreClassEmitter(const std::string& name,
                                           PreClass::Hoistable hoistable);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -326,8 +341,8 @@ struct UnitEmitter {
   void emitInt64(int64_t n, int64_t pos = -1);
   void emitDouble(double n, int64_t pos = -1);
 
-  template<typename T>
-  void emitIVA(T n);
+  void emitIVA(bool) = delete;
+  template<typename T> void emitIVA(T n);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -337,8 +352,7 @@ struct UnitEmitter {
    * Is this a Unit for a systemlib?
    */
   bool isASystemLib() const;
-
-private:
+ private:
   /*
    * Bytecode emit implementation.
    */
@@ -360,6 +374,7 @@ public:
 
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
+  bool m_useStrictTypes{false};
   bool m_returnSeen{false};
   int m_preloadPriority{0};
   TypedValue m_mainReturn;
@@ -396,7 +411,7 @@ private:
    * FuncEmitter tables.
    */
   std::vector<FuncEmitter*> m_fes;
-  hphp_hash_map<const FuncEmitter*, const Func*,
+  hphp_hash_map<const FuncEmitter*, Func*,
                 pointer_hash<FuncEmitter>> m_fMap;
 
   /*
@@ -442,19 +457,20 @@ private:
  * Proxy for converting in-repo unit representations into UnitEmitters.
  */
 struct UnitRepoProxy : public RepoProxy {
-  friend class Unit;
-  friend class UnitEmitter;
+  friend struct Unit;
+  friend struct UnitEmitter;
 
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
   std::unique_ptr<Unit> load(const std::string& name, const MD5& md5);
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
                                            const MD5& md5);
 
   void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
-                           LineTable& lineTable);
+                           LineTable& lineTable); // throws(RepoExc)
   void getUnitLineTable(int repoId, int64_t unitSn, LineTable& lineTable);
+  // throws(RepoExc)
 
   struct InsertUnitStmt : public RepoProxy::Stmt {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -463,48 +479,48 @@ struct UnitRepoProxy : public RepoProxy {
                 int64_t& unitSn,
                 const MD5& md5,
                 const unsigned char* bc,
-                size_t bclen);
+                size_t bclen); // throws(RepoExc)
   };
   struct GetUnitStmt : public RepoProxy::Stmt {
     GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(UnitEmitter& ue, const MD5& md5);
+    RepoStatus get(UnitEmitter& ue, const MD5& md5);
   };
   struct InsertUnitLitstrStmt : public RepoProxy::Stmt {
     InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
-                const StringData* litstr);
+                const StringData* litstr); // throws(RepoExc)
   };
   struct GetUnitLitstrsStmt : public RepoProxy::Stmt {
     GetUnitLitstrsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
   struct InsertUnitArrayStmt : public RepoProxy::Stmt {
     InsertUnitArrayStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
-                const std::string& array);
+                const std::string& array); // throws(RepoExc)
   };
   struct GetUnitArraysStmt : public RepoProxy::Stmt {
     GetUnitArraysStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
   struct InsertUnitMergeableStmt : public RepoProxy::Stmt {
     InsertUnitMergeableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
                 int ix, Unit::MergeKind kind,
-                Id id, TypedValue* value);
+                Id id, TypedValue* value); // throws(RepoExc)
   };
   struct GetUnitMergeablesStmt : public RepoProxy::Stmt {
     GetUnitMergeablesStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
   struct InsertUnitSourceLocStmt : public RepoProxy::Stmt {
     InsertUnitSourceLocStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset, int line0,
-                int char0, int line1, int char1);
+                int char0, int line1, int char1); // throws(RepoExc)
   };
   struct GetSourceLocTabStmt : public RepoProxy::Stmt {
     GetSourceLocTabStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    bool get(int64_t unitSn, SourceLocTable& sourceLocTab);
+    RepoStatus get(int64_t unitSn, SourceLocTable& sourceLocTab);
   };
 
 #define URP_IOP(o) URP_OP(Insert##o, insert##o)
@@ -527,7 +543,7 @@ struct UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 
 private:
-  bool loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
+  RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

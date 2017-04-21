@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/timer.h"
 #include <unordered_map>
 
 namespace HPHP { namespace jit {
@@ -250,7 +251,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvIntToDbl:
   case ConvBoolToInt:
   case ConvDblToInt:
-  case ConvBoolToStr:
   case ConvClsToCctx:
   case GtInt:
   case GteInt:
@@ -293,6 +293,14 @@ bool supportsGVN(const IRInstruction* inst) {
   case NSameObj:
   case SameArr:
   case NSameArr:
+  case SameVec:
+  case NSameVec:
+  case SameDict:
+  case NSameDict:
+  case EqKeyset:
+  case NeqKeyset:
+  case SameKeyset:
+  case NSameKeyset:
   case GtRes:
   case GteRes:
   case LtRes:
@@ -301,6 +309,8 @@ bool supportsGVN(const IRInstruction* inst) {
   case NeqRes:
   case CmpRes:
   case EqCls:
+  case EqFunc:
+  case EqStrPtr:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -308,6 +318,9 @@ bool supportsGVN(const IRInstruction* inst) {
   case InstanceOfBitmask:
   case NInstanceOfBitmask:
   case InterfaceSupportsArr:
+  case InterfaceSupportsVec:
+  case InterfaceSupportsDict:
+  case InterfaceSupportsKeyset:
   case InterfaceSupportsStr:
   case InterfaceSupportsInt:
   case InterfaceSupportsDbl:
@@ -320,15 +333,15 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdRDSAddr:
   case LdCtx:
   case LdCctx:
-  case CastCtxThis:
   case LdClsCtx:
   case LdClsCctx:
   case LdClsCtor:
   case DefConst:
+  case DefCls:
   case LdCls:
   case LdClsCached:
   case LdClsInitData:
-  case LookupClsRDSHandle:
+  case LdFuncVecLen:
   case LdClsMethod:
   case LdIfaceMethod:
   case LdPropAddr:
@@ -341,10 +354,15 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdContActRec:
   case LdAFWHActRec:
   case LdResumableArObj:
-  case LdPackedArrayElemAddr:
+  case LdPackedArrayDataElemAddr:
   case OrdStr:
+  case ChrInt:
   case CheckRange:
   case CountArrayFast:
+  case CountVec:
+  case CountDict:
+  case CountKeyset:
+  case Select:
     return true;
   default:
     return false;
@@ -465,6 +483,10 @@ void tryReplaceInstruction(
     if (valueNumber == s) continue;
     if (!valueNumber) continue;
     if (!is_tmp_usable(idoms, valueNumber, inst->block())) continue;
+
+    // Don't replace a value with one that has a less refined type.
+    if (s->type() < valueNumber->type()) continue;
+
     FTRACE(1,
       "instruction {}\n"
       "replacing src {} with dst of {}\n",
@@ -476,7 +498,7 @@ void tryReplaceInstruction(
     if (valueInst->producesReference()) {
       auto block = valueInst->block();
       auto iter = block->iteratorTo(valueInst);
-      block->insert(++iter, unit.gen(IncRef, valueInst->marker(), valueNumber));
+      block->insert(++iter, unit.gen(IncRef, valueInst->bcctx(), valueNumber));
     }
   }
 }
@@ -500,6 +522,7 @@ void replaceRedundantComputations(
 
 void gvn(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_gvn, "gvn"};
+  Timer t(Timer::optimize_gvn, unit.logEntry().get_pointer());
 
   GVNState state;
   auto const rpoBlocks = rpoSortCfg(unit);

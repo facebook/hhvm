@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -73,7 +73,35 @@ void c_SleepWaitHandle::initialize(int64_t usecs) {
   }
 }
 
-void c_SleepWaitHandle::process() {
+bool c_SleepWaitHandle::cancel(const Object& exception) {
+  if (getState() != STATE_WAITING) {
+    return false;               // already finished
+  }
+
+  if (isInContext()) {
+    unregisterFromContext();
+  }
+
+  auto parentChain = getParentChain();
+  setState(STATE_FAILED);
+  tvWriteObject(exception.get(), &m_resultOrException);
+  parentChain.unblock();
+
+  // this is technically a lie, since sleep failed
+  auto session = AsioSession::Get();
+  if (UNLIKELY(session->hasOnSleepSuccess())) {
+    session->onSleepSuccess(this);
+  }
+
+  return true;
+}
+
+bool c_SleepWaitHandle::process() {
+  if (getState() == STATE_FAILED) {
+    // sleep handle was cancelled, everything is taken care of
+    return false;
+  }
+
   assert(getState() == STATE_WAITING);
 
   if (isInContext()) {
@@ -89,6 +117,8 @@ void c_SleepWaitHandle::process() {
   if (UNLIKELY(session->hasOnSleepSuccess())) {
     session->onSleepSuccess(this);
   }
+
+  return true;
 }
 
 String c_SleepWaitHandle::getName() {

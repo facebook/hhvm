@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,18 +16,23 @@
 */
 
 #include "hphp/runtime/ext/std/ext_std_output.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/ext/json/ext_json.h"
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/vm-regs.h"
-#include "hphp/system/constants.h"
+
+#include "hphp/runtime/vm/jit/perf-counters.h"
+
+#include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/server-stats.h"
+
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/stack-trace.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +54,7 @@ const int64_t k_PHP_OUTPUT_HANDLER_STDFLAGS =
 bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
                              int chunk_size /* = 0 */,
                              int flags /* = k_PHP_OUTPUT_HANDLER_STDFLAGS */) {
-  // ignoring flags for now
+  // Note: the only flag which is implemented is FLUSHABLE
 
   if (!callback.isNull()) {
     CallCtx ctx;
@@ -58,15 +63,29 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
       return false;
     }
   }
-  g_context->obStart(callback, chunk_size);
+  OBFlags f = OBFlags::None;
+  if (flags & k_PHP_OUTPUT_HANDLER_CLEANABLE) f |= OBFlags::Cleanable;
+  if (flags & k_PHP_OUTPUT_HANDLER_FLUSHABLE) f |= OBFlags::Flushable;
+  if (flags & k_PHP_OUTPUT_HANDLER_REMOVABLE) f |= OBFlags::Removable;
+  g_context->obStart(callback, chunk_size, f);
   return true;
 }
 void HHVM_FUNCTION(ob_clean) {
   // PHP_OUTPUT_HANDLER_START is included by PHP5
   g_context->obClean(k_PHP_OUTPUT_HANDLER_START | k_PHP_OUTPUT_HANDLER_CLEAN);
 }
-void HHVM_FUNCTION(ob_flush) {
-  g_context->obFlush();
+bool HHVM_FUNCTION(ob_flush) {
+  int level = g_context->obGetLevel();
+  if (level == 0) {
+    raise_notice("failed to flush buffer. No buffer to flush");
+    return false;
+  }
+  if (!g_context->obFlush()) {
+    raise_notice("failed to flush buffer of %s (%d)",
+        g_context->obGetBufferName().c_str(), level);
+    return false;
+  }
+  return true;
 }
 bool HHVM_FUNCTION(ob_end_clean) {
   g_context->obClean(k_PHP_OUTPUT_HANDLER_START |
@@ -75,7 +94,7 @@ bool HHVM_FUNCTION(ob_end_clean) {
   return g_context->obEnd();
 }
 bool HHVM_FUNCTION(ob_end_flush) {
-  bool ret = g_context->obFlush();
+  bool ret = g_context->obFlush(true);
   g_context->obEnd();
   return ret;
 }
@@ -89,7 +108,7 @@ Variant HHVM_FUNCTION(ob_get_contents) {
   return g_context->obCopyContents();
 }
 Variant HHVM_FUNCTION(ob_get_clean) {
-  String output = HHVM_FN(ob_get_contents)();
+  auto output = HHVM_FN(ob_get_contents)();
   if (!HHVM_FN(ob_end_clean)()) {
     return false;
   }
@@ -138,7 +157,7 @@ int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
 Array HHVM_FUNCTION(hphp_get_status) {
   std::string out;
   ServerStats::ReportStatus(out, Writer::Format::JSON);
-  return HHVM_FN(json_decode)(String(out)).toArray();
+  return Variant::attach(HHVM_FN(json_decode)(String(out))).toArray();
 }
 Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();
@@ -221,13 +240,14 @@ Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
   Array ret;
 
   HardwareCounter::GetPerfEvents(
-    [](const std::string& key, int64_t value, void* data) {
+    [] (const std::string& key, int64_t value, void* data) {
       Array& ret = *reinterpret_cast<Array*>(data);
       ret.set(String(key), value);
     },
-    &ret);
+    &ret
+  );
+  jit::getPerfCounters(ret);
 
-  jit::mcg->getPerfCounters(ret);
   return ret;
 }
 
@@ -244,10 +264,10 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
 
 // __SystemLib\print_hashbang
 void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
-  CallerFrame cf;
-  auto ar = cf();
+  auto const ar = GetCallerFrame();
 
-  if (ar->m_func->name()->empty() && RuntimeOption::ClientExecutionMode()) {
+  if (ar->m_func->name()->empty() && (!RuntimeOption::ServerExecutionMode() ||
+      is_cli_mode())) {
     // If run in cli mode, print nothing in the lowest pseudomain
     if (!g_context->getPrevFunc(ar)) return;
   }
@@ -288,20 +308,17 @@ void StandardExtension::initOutput() {
   HHVM_FE(hphp_clear_hardware_events);
   HHVM_FALIAS(__SystemLib\\print_hashbang, SystemLib_print_hashbang);
 
-#define INTCONST(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString(#v), k_##v);
-  INTCONST(PHP_OUTPUT_HANDLER_CONT);
-  INTCONST(PHP_OUTPUT_HANDLER_WRITE);
-  INTCONST(PHP_OUTPUT_HANDLER_START);
-  INTCONST(PHP_OUTPUT_HANDLER_CLEAN);
-  INTCONST(PHP_OUTPUT_HANDLER_FLUSH);
-  INTCONST(PHP_OUTPUT_HANDLER_END);
-  INTCONST(PHP_OUTPUT_HANDLER_FINAL);
-  INTCONST(PHP_OUTPUT_HANDLER_CLEANABLE);
-  INTCONST(PHP_OUTPUT_HANDLER_FLUSHABLE);
-  INTCONST(PHP_OUTPUT_HANDLER_REMOVABLE);
-  INTCONST(PHP_OUTPUT_HANDLER_STDFLAGS);
-#undef INTCONST
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_CONT, k_PHP_OUTPUT_HANDLER_CONT);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_WRITE, k_PHP_OUTPUT_HANDLER_WRITE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_START, k_PHP_OUTPUT_HANDLER_START);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_CLEAN, k_PHP_OUTPUT_HANDLER_CLEAN);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_FLUSH, k_PHP_OUTPUT_HANDLER_FLUSH);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_END, k_PHP_OUTPUT_HANDLER_END);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_FINAL, k_PHP_OUTPUT_HANDLER_FINAL);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_CLEANABLE, k_PHP_OUTPUT_HANDLER_CLEANABLE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_FLUSHABLE, k_PHP_OUTPUT_HANDLER_FLUSHABLE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_REMOVABLE, k_PHP_OUTPUT_HANDLER_REMOVABLE);
+  HHVM_RC_INT(PHP_OUTPUT_HANDLER_STDFLAGS, k_PHP_OUTPUT_HANDLER_STDFLAGS);
 
   loadSystemlib("std_output");
 }

@@ -1,9 +1,12 @@
-[<expr#1>]generic Tobj as <App \C<generic Targ, >>
-[1]intersect(App \C<Tint, >)
-[2]intersect(App \C<Tint, >)
+File "new_generic.php", line 13, characters 3-16:
+  <expr#1> as Tobj
+File "new_generic.php", line 18, characters 3-32:
+  ^(C<int>)
+File "new_generic.php", line 19, characters 3-38:
+  ^(C<int>)
 File "new_generic.php", line 19, characters 29-36:
 Some type constraint(s) here are violated (Typing[4110])
-File "new_generic.php", line 11, characters 4-7:
+File "new_generic.php", line 8, characters 26-29:
 'Tobj' is a constrained type
 File "new_generic.php", line 17, characters 35-37:
 This is an int

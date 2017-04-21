@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -46,7 +46,7 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateSucceeded(const Cell result) {
  */
 c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
   assert(exception);
-  assert(exception->instanceof(SystemLib::s_ExceptionClass));
+  assert(exception->instanceof(SystemLib::s_ThrowableClass));
 
   auto waitHandle = req::make<c_StaticWaitHandle>();
   waitHandle->setState(STATE_FAILED);

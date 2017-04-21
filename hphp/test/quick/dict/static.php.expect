@@ -1,0 +1,32 @@
+dict(4) {
+  [1]=>
+  string(5) "alpha"
+  ["1"]=>
+  string(5) "ALPHA"
+  [2]=>
+  string(4) "beta"
+  ["2"]=>
+  string(4) "BETA"
+}
+dict(4) {
+  [1]=>
+  string(5) "hello"
+  ["1"]=>
+  string(5) "world"
+  [2]=>
+  string(3) "foo"
+  ["2"]=>
+  string(3) "bar"
+}
+array(1) {
+  ["TestAttr"]=>
+  array(1) {
+    [0]=>
+    dict(2) {
+      [1]=>
+      string(1) "a"
+      ["1"]=>
+      string(1) "b"
+    }
+  }
+}

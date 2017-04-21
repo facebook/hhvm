@@ -1,0 +1,29 @@
+
+.main {
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $x;
+  Int 42
+  SetL $x
+  PopC
+  IncStat 917 1
+  CGetL $x
+  Switch Bounded 0 <L0 L1 L1>
+L0:
+  String "zero"
+  Print
+  PopC
+  Jmp L2
+L1:
+  String "default"
+  Print
+  PopC
+  Jmp L2
+L2:
+  Null
+  RetC
+}
+

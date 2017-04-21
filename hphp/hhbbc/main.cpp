@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@
 #include <memory>
 #include <cstdint>
 #include <algorithm>
-#include <unistd.h>
 #include <exception>
 #include <utility>
 #include <vector>
@@ -32,6 +31,7 @@
 
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/hhvm/process-init.h"
@@ -57,6 +57,36 @@ bool logging = true;
 
 //////////////////////////////////////////////////////////////////////
 
+template<class SinglePassReadableRange>
+MethodMap make_method_map(SinglePassReadableRange& range) {
+  auto ret = MethodMap{};
+  for (auto& str : range) {
+    std::vector<std::string> parts;
+    folly::split("::", str, parts);
+    if (parts.size() != 2) {
+      ret[""].insert(str);
+      continue;
+    }
+    ret[parts[0]].insert(parts[1]);
+  }
+  return ret;
+}
+
+template<class SinglePassReadableRange>
+OpcodeSet make_bytecode_map(SinglePassReadableRange& bcs) {
+  if (bcs.empty()) return {};
+  std::map<std::string,Op> bcmap;
+  for (auto i = 0; i < Op_count; i++) {
+    auto const op = static_cast<Op>(i);
+    bcmap[opcodeToName(op)] = op;
+  }
+  OpcodeSet oset;
+  for (auto& n : bcs) {
+    if (bcmap.count(n)) oset.insert(bcmap[n]);
+  }
+  return oset;
+}
+
 void parse_options(int argc, char** argv) {
   namespace po = boost::program_options;
 
@@ -65,6 +95,7 @@ void parse_options(int argc, char** argv) {
 
   std::vector<std::string> interceptable_fns;
   std::vector<std::string> trace_fns;
+  std::vector<std::string> trace_bcs;
   bool no_logging = false;
 
   po::options_description basic("Options");
@@ -94,12 +125,12 @@ void parse_options(int argc, char** argv) {
     ("parallel-work-size",
       po::value(&parallel::work_chunk)->default_value(120),
       "Work unit size for parallelism")
-    ("interceptable",
-      po::value(&interceptable_fns)->composing(),
-      "Add an interceptable function")
     ("trace",
       po::value(&trace_fns)->composing(),
       "Add a function to increase tracing level on (for debugging)")
+    ("trace-bytecode",
+      po::value(&trace_bcs)->composing(),
+      "Add a bytecode to trace (for debugging)")
     ;
 
   // Some extra esoteric options that aren't exposed in --help for
@@ -122,6 +153,7 @@ void parse_options(int argc, char** argv) {
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))
+    ("remove-unused-clsref-slots", po::value(&options.RemoveUnusedClsRefSlots))
     ("insert-assertions",       po::value(&options.InsertAssertions))
     ("insert-stack-assertions", po::value(&options.InsertStackAssertions))
     ("filter-assertions",       po::value(&options.FilterAssertions))
@@ -129,12 +161,9 @@ void parse_options(int argc, char** argv) {
     ("func-families",           po::value(&options.FuncFamilies))
 
     ("hard-const-prop",         po::value(&options.HardConstProp))
-    ("hard-type-hints",         po::value(&options.HardTypeHints))
-    ("hard-return-type-hints",  po::value(&options.HardReturnTypeHints))
     ("hard-private-prop",       po::value(&options.HardPrivatePropInference))
     ("disallow-dyn-var-env-funcs",
                                 po::value(&options.DisallowDynamicVarEnvFuncs))
-    ("all-funcs-interceptable", po::value(&options.AllFuncsInterceptable))
     ("analyze-pseudomains",     po::value(&options.AnalyzePseudomains))
     ("analyze-public-statics",  po::value(&options.AnalyzePublicStatics))
     ;
@@ -173,8 +202,8 @@ void parse_options(int argc, char** argv) {
     std::exit(0);
   }
 
-  options.InterceptableFunctions = make_method_map(interceptable_fns);
   options.TraceFunctions         = make_method_map(trace_fns);
+  options.TraceBytecodes         = make_bytecode_map(trace_bcs);
   logging = !no_logging;
 }
 
@@ -193,39 +222,48 @@ UNUSED void validate_options() {
     std::cerr << "-fremove-unused-locals requires -fglobal-dce\n";
     std::exit(1);
   }
+
+  if (options.RemoveUnusedClsRefSlots && !options.GlobalDCE) {
+    std::cerr << "-fremove-unused-clsref-slots requires -fglobal-dce\n";
+    std::exit(1);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void open_repo(const std::string& path) {
   RuntimeOption::RepoCentralPath = path;
+  // Make sure the changes take effect
+  Repo::shutdown();
   Repo::get();
 }
 
-std::vector<std::unique_ptr<UnitEmitter>> load_input() {
-  std::vector<std::unique_ptr<UnitEmitter>> ret;
-
+std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
+          std::vector<SString>> load_input() {
   trace_time timer("load units");
 
   open_repo(input_repo);
   Repo::get().loadGlobalData();
   SCOPE_EXIT { Repo::shutdown(); };
 
-  if (Repo::get().global().UsedHHBBC) {
-    throw std::runtime_error("This hhbc repo has already been "
-      "optimized by hhbbc");
-  }
+  auto const& gd = Repo::get().global();
+  RuntimeOption::EvalPromoteEmptyObject      = gd.PromoteEmptyObject;
+  RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
+  RuntimeOption::EvalHackArrCompatNotices    = gd.HackArrCompatNotices;
+  options.DisallowDynamicVarEnvFuncs         = gd.DisallowDynamicVarEnvFuncs;
 
-  return parallel::map(
-    Repo::get().enumerateUnits(RepoIdCentral, false, true),
-    [&] (const std::pair<std::string,MD5>& kv) {
-      return Repo::get().urp().loadEmitter(kv.first, kv.second);
-    }
-  );
+  return {
+    parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
+                  [&] (const std::pair<std::string,MD5>& kv) {
+                    return Repo::get().urp().loadEmitter(kv.first, kv.second);
+                  }),
+    Repo().get().global().APCProfile
+  };
 }
 
 void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
-                  std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
+                  std::unique_ptr<ArrayTypeTable::Builder> arrTable,
+                  std::vector<SString> apcProfile) {
   RuntimeOption::RepoCommit = true;
   RuntimeOption::RepoEvalMode = "local";
   open_repo(output_repo);
@@ -234,27 +272,39 @@ void write_output(std::vector<std::unique_ptr<UnitEmitter>> ues,
 
   auto gd                     = Repo::GlobalData{};
   gd.UsedHHBBC                = true;
+  gd.EnableHipHopSyntax       = RuntimeOption::EnableHipHopSyntax;
   gd.HardTypeHints            = options.HardTypeHints;
   gd.HardReturnTypeHints      = options.HardReturnTypeHints;
   gd.HardPrivatePropInference = options.HardPrivatePropInference;
   gd.DisallowDynamicVarEnvFuncs = options.DisallowDynamicVarEnvFuncs;
+  gd.ElideAutoloadInvokes     = options.ElideAutoloadInvokes;
   gd.PHP7_IntSemantics        = RuntimeOption::PHP7_IntSemantics;
+  gd.PHP7_ScalarTypes         = RuntimeOption::PHP7_ScalarTypes;
+  gd.PHP7_Substr              = RuntimeOption::PHP7_Substr;
+  gd.PHP7_Builtins            = RuntimeOption::PHP7_Builtins;
   gd.AutoprimeGenerators      = RuntimeOption::AutoprimeGenerators;
+  gd.PromoteEmptyObject       = RuntimeOption::EvalPromoteEmptyObject;
+  gd.EnableRenameFunction     = RuntimeOption::EvalJitEnableRenameFunction;
+  gd.HackArrCompatNotices     = RuntimeOption::EvalHackArrCompatNotices;
+  gd.APCProfile               = std::move(apcProfile);
 
   gd.arrayTypeTable.repopulate(*arrTable);
+  // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
   Repo::get().saveGlobalData(gd);
 }
 
 void compile_repo() {
-  auto ues = load_input();
+  auto input = load_input();
   if (logging) {
-    std::cout << folly::format("{} units\n", ues.size());
+    std::cout << folly::format("{} units\n", input.first.size());
   }
 
-  auto pair = whole_program(std::move(ues));
+  auto pair = whole_program(std::move(input.first));
   {
     trace_time timer("writing output repo");
-    write_output(std::move(pair.first), std::move(pair.second));
+    write_output(std::move(pair.first),
+                 std::move(pair.second),
+                 std::move(input.second));
   }
 }
 
@@ -278,6 +328,15 @@ int main(int argc, char** argv) try {
     return 1;
   }
 
+  initialize_repo();
+
+  LitstrTable::init();
+  RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoEvalMode = "readonly";
+  open_repo(input_repo);
+  Repo::get().loadGlobalData();
+  LitstrTable::fini();
+
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;
   RuntimeOption::Load(ini, config);
@@ -292,13 +351,14 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoAuthoritative = true;
 
   register_process_init();
-  initialize_repo();
 
   hphp_process_init();
+  SCOPE_EXIT { hphp_process_exit(); };
+
   Repo::shutdown();
 
   Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-  compile_repo();
+  compile_repo(); // NOTE: errors ignored
   return 0;
 }
 

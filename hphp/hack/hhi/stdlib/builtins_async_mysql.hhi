@@ -72,24 +72,64 @@ class AsyncMysqlClient {
       string $password,
       int $timeout_micros = -1,
       ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
-  static public function adoptConnection($connection) { }
+
+    static public function connectWithOpts(
+      string $host,
+      int $port,
+      string $dbname,
+      string $user,
+      string $password,
+      AsyncMysqlConnectionOptions $conn_opts): Awaitable<AsyncMysqlConnection> { }
+
+    static public function connectAndQuery(
+      Traversable<string> $queries,
+      string $host,
+      int $port,
+      string $dbname,
+      string $user,
+      string $password,
+      AsyncMysqlConnectionOptions $conn_opts
+    ): Awaitable<Vector<AsyncMysqlQueryResult>>{ }
+
+   static public function adoptConnection($connection) { }
 }
 
 class AsyncMysqlConnectionPool {
   public function __construct(array $options) { }
   public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
+  public function connectWithOpts(
+    string $host,
+    int $port,
+    string $dbname,
+    string $user,
+    string $password,
+    AsyncMysqlConnectionOptions $conn_opts,
+    string $caller = ""): Awaitable<AsyncMysqlConnection> { }
+
   public function getPoolStats(): array { }
 }
 
 class MySSLContextProvider {
-  private function __contruct(): void { }
+  private function __construct(): void { }
   public function isValid(): bool { }
+}
+
+class AsyncMysqlConnectionOptions {
+  public function setConnectTimeout(int $timeout): void { }
+  public function setConnectAttempts(int $attempts): void { }
+  public function setTotalTimeout(int $timeout): void { }
+  public function setQueryTimeout(int $timeout): void { }
+  public function setConnectionAttributes(array<string, string> $val): void { }
+  public function setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void { }
 }
 
 class AsyncMysqlClientStats {
   public function __construct() { }
   public function ioEventLoopMicrosAvg() : float {}
   public function callbackDelayMicrosAvg() : float {}
+  public function ioThreadBusyMicrosAvg() : float {}
+  public function ioThreadIdleMicrosAvg() : float {}
+  public function notificationQueueSize() : int {}
 }
 
 class AsyncMysqlConnection {
@@ -100,7 +140,10 @@ class AsyncMysqlConnection {
   public function escapeString(string $data): string { }
   public function close(): void{ }
   public function releaseConnection() { }
+  public function isValid() { }
   public function serverInfo() { }
+  public function sslSessionReused() { }
+  public function isSSL() { }
   public function warningCount() { }
   public function host(): string { }
   public function port(): int { }

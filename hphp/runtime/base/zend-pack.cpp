@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -160,8 +160,8 @@ void ZendPack::pack(const Variant& val, int64_t size, int64_t *map,
 
 Variant ZendPack::pack(const String& fmt, const Array& argv) {
   /* Preprocess format into formatcodes and formatargs */
-  TinyVector<char, 64> formatcodes; // up to 64 codes on the stack
-  TinyVector<int, 64> formatargs;
+  req::TinyVector<char, 64> formatcodes; // up to 64 codes on the stack
+  req::TinyVector<int, 64> formatargs;
   int argc = argv.size();
 
   const char *format = fmt.c_str();
@@ -339,8 +339,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     }
   }
 
-  String s = String(outputsize, ReserveString);
-  char *output = s.mutableData();
+  String str = String(outputsize, ReserveString);
+  char *output = str.mutableData();
   outputpos = 0;
   currentarg = 0;
 
@@ -526,8 +526,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     }
   }
 
-  s.setSize(outputpos);
-  return s;
+  str.setSize(outputpos);
+  return str;
 }
 
 int64_t ZendPack::unpack(const char *data, int64_t size, int issigned,
@@ -555,7 +555,6 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
   Array ret = Array::Create();
   while (formatlen-- > 0) {
     char type = *(format++);
-    char c;
     int arg = 1, argb;
     const char *name;
     int namelen;
@@ -563,7 +562,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
     /* Handle format arguments if any */
     if (formatlen > 0) {
-      c = *format;
+      char c = *format;
 
       if (c >= '0' && c <= '9') {
         arg = atoi(format);

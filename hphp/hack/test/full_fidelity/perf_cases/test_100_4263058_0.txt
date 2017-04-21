@@ -1,0 +1,2 @@
+<?hh
+namespace zDWVQ { trait iZtmGV < - fYapNdURn , tDkit as int , + sUTUUGQg as array < classname < sF > > > { use wRskBEX < sOJByN > , dAoBR < vWKCKH :: qQLs , rT , ( function ( ) : bB < ? nMl :: xIGfZXS > ) > ; } type vHs = ( function ( string ) : nVKjcqG < aT < void , qWEPIf , uIsO < string > , lTNRFUWkI < rVLtAGyty > , rXYua :: rHmuCxckI :: dQ > , cEdLoFr , shape ( ) > ) ; trait mUsa < pUkxn as mixed , rFQsoNSM , lSjae as bool > { use jGaR < pNdH > , sJT , fHNVvacra < bool , rQ < oIAi > , jFkEN > , jJgFYb , sUPfzI , hFhCnKHbf , rMtb ; } }

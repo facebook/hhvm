@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,11 +23,12 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/type.h"
+
+#include "hphp/runtime/base/perf-warning.h"
 
 #include <folly/Format.h>
 
@@ -130,39 +131,43 @@ bool checkBlock(Block* b) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Check some invariants around InitCtx:
- * 1. At most one should exist in a given unit.
- * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx.
+ * Check some invariants around InitCtx(fp):
+ * 1. For each fp, at most one should exist in a given unit.
+ * 2. If present, InitCtx must dominate all occurrences of LdCtx and LdCctx
+ *    with the same fp.
  */
 bool DEBUG_ONLY checkInitCtxInvariants(const IRUnit& unit) {
   auto const blocks = rpoSortCfg(unit);
 
-  const Block* init_ctx_block = nullptr;
+  jit::hash_map<SSATmp*, Block*> init_ctx_blocks;
 
   for (auto& blk : blocks) {
     for (auto& inst : blk->instrs()) {
       if (!inst.is(InitCtx)) continue;
+      auto& init_ctx_block = init_ctx_blocks[inst.src(0)];
       if (init_ctx_block) return false;
       init_ctx_block = blk;
     }
   }
 
-  if (!init_ctx_block) return true;
+  if (init_ctx_blocks.empty()) return true;
 
   auto const rpoIDs = numberBlocks(unit, blocks);
   auto const idoms = findDominators(unit, blocks, rpoIDs);
 
   for (auto& blk : blocks) {
-    bool found_init_ctx = false;
+    SSATmp* init_ctx_src = nullptr;
 
     for (auto& inst : blk->instrs()) {
       if (inst.is(InitCtx)) {
-        found_init_ctx = true;
+        init_ctx_src = inst.src(0);
         continue;
       }
       if (!inst.is(LdCtx, LdCctx)) continue;
 
-      if (init_ctx_block == blk && !found_init_ctx) return false;
+      auto const init_ctx_block = init_ctx_blocks[inst.src(0)];
+      if (!init_ctx_block) continue;
+      if (init_ctx_block == blk && init_ctx_src != inst.src(0)) return false;
       if (!dominates(init_ctx_block, blk, idoms)) return false;
     }
   }
@@ -235,6 +240,16 @@ bool checkCfg(const IRUnit& unit) {
     for (auto& inst : blk->instrs()) {
       for (auto src : inst.srcs()) {
         if (src->inst()->is(DefConst)) continue;
+
+        always_assert_flog(
+          src->inst()->dsts().contains(src),
+          "src '{}' has '{}' as its instruction, "
+          "but the instruction does not have '{}' as a dst",
+          src->toString(),
+          src->inst()->toString(),
+          src->toString()
+        );
+
         auto const dom = findDefiningBlock(src, idoms);
         auto const locally_defined =
           src->inst()->block() == inst.block() && defined_set.contains(src);
@@ -289,6 +304,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
 
   StateVector<Block,IdSet<SSATmp>> livein(unit, IdSet<SSATmp>());
   bool isValid = true;
+  std::string failures;
   postorderWalk(unit, [&](Block* block) {
     auto& live = livein[block];
     if (auto taken = block->taken()) live = livein[taken];
@@ -300,17 +316,7 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
       }
       if (isCallOp(inst.op())) {
         live.forEach([&](uint32_t tmp) {
-          auto msg = folly::sformat("checkTmpsSpanningCalls failed\n"
-                                    "  instruction: {}\n"
-                                    "  src:         t{}\n"
-                                    "\n"
-                                    "Unit:\n"
-                                    "{}\n",
-                                    inst.toString(),
-                                    tmp,
-                                    show(unit));
-          std::cerr << msg;
-          FTRACE(1, "{}", msg);
+          folly::format(&failures, "t{} is live across `{}`\n", tmp, inst);
           isValid = false;
         });
       }
@@ -320,6 +326,15 @@ bool checkTmpsSpanningCalls(const IRUnit& unit) {
     }
   });
 
+  if (!isValid) {
+    logLowPriPerfWarning(
+      "checkTmpsSpanningCalls",
+      [&](StructuredLogEntry& cols) {
+        cols.setStr("live_tmps", failures);
+        cols.setStr("hhir_unit", show(unit));
+      }
+    );
+  }
   return isValid;
 }
 
@@ -338,6 +353,16 @@ Type buildUnion() {
 template<class... Args>
 Type buildUnion(Type t, Args... ts) {
   return t | buildUnion(ts...);
+}
+
+template <uint32_t...> struct IdxSeq {};
+
+template <typename F>
+inline void forEachSrcIdx(F f, IdxSeq<>) {}
+
+template <typename F, uint32_t Idx, uint32_t... Rest>
+inline void forEachSrcIdx(F f, IdxSeq<Idx, Rest...>) {
+  f(Idx); forEachSrcIdx(f, IdxSeq<Rest...>{});
 }
 
 }
@@ -441,9 +466,13 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
     return true;
   };
 
-  auto requireTypeParam = [&] {
+  auto requireTypeParam = [&] (Type ty) {
     checkDst(inst->hasTypeParam() || inst->is(DefConst),
              "Missing paramType for DParam instruction");
+    if (inst->hasTypeParam()) {
+      checkDst(inst->typeParam() <= ty,
+               "Invalid paramType for DParam instruction");
+    }
   };
 
   auto requireTypeParamPtr = [&] (Ptr kind) {
@@ -474,11 +503,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
                         check(src()->isA(t), t, nullptr); \
                         ++curSrc;                         \
                       }
-#define AK(kind)      {                                                 \
-                        Type t = Type::Array(ArrayData::k##kind##Kind); \
-                        check(src()->isA(t), t, nullptr);               \
-                        ++curSrc;                                       \
-                      }
+#define AK(kind)      Type::Array(ArrayData::k##kind##Kind)
 #define C(T)          check(src()->hasConstVal(T) ||     \
                             src()->isA(TBottom),    \
                             Type(),                      \
@@ -491,26 +516,37 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #define DSetElem
 #define D(...)
 #define DBuiltin
+#define DCall
 #define DSubtract(src, t)checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DofS(src)   checkDst(src < inst->numSrcs(),  \
                              "invalid src num");
 #define DRefineS(src) checkDst(src < inst->numSrcs(),  \
                                "invalid src num");     \
-                      requireTypeParam();
-#define DParamMayRelax requireTypeParam();
-#define DParam         requireTypeParam();
+                      requireTypeParam(Top);
+#define DParamMayRelax(t) requireTypeParam(t);
+#define DParam(t)         requireTypeParam(t);
 #define DParamPtr(k)   requireTypeParamPtr(Ptr::k);
+#define DUnion(...)    forEachSrcIdx(                                          \
+                         [&](uint32_t idx) {                                   \
+                           checkDst(idx < inst->numSrcs(), "invalid src num"); \
+                         },                                                    \
+                         IdxSeq<__VA_ARGS__>{}                                 \
+                       );
 #define DLdObjCls
 #define DUnboxPtr
 #define DBoxPtr
 #define DAllocObj
 #define DArrElem
+#define DVecElem
+#define DDictElem
+#define DKeysetElem
 #define DArrPacked
 #define DCol
-#define DThis
 #define DCtx
+#define DCtxCls
 #define DCns
+#define DMemoKey
 
 #define O(opcode, dstinfo, srcinfo, flags) \
   case opcode: dstinfo srcinfo countCheck(); return true;
@@ -532,6 +568,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef ND
 #undef D
 #undef DBuiltin
+#undef DCall
 #undef DSubtract
 #undef DMulti
 #undef DSetElem
@@ -545,20 +582,25 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* unit) {
 #undef DBoxPtr
 #undef DAllocObj
 #undef DArrElem
+#undef DVecElem
+#undef DDictElem
+#undef DKeysetElem
 #undef DArrPacked
 #undef DCol
-#undef DThis
 #undef DCtx
+#undef DCtxCls
 #undef DCns
+#undef DUnion
+#undef DMemoKey
 
   return true;
 }
 
 bool checkEverything(const IRUnit& unit) {
   assertx(checkCfg(unit));
-  assertx(checkTmpsSpanningCalls(unit));
   assertx(checkInitCtxInvariants(unit));
   if (debug) {
+    checkTmpsSpanningCalls(unit);
     forEachInst(rpoSortCfg(unit), [&](IRInstruction* inst) {
       assertx(checkOperandTypes(inst, &unit));
     });

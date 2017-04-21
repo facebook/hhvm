@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,8 @@
 #include "hphp/util/hash-map-typedefs.h"
 #include "hphp/parser/parser.h"
 
+#include "hphp/runtime/base/static-string-table.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,7 +46,7 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(ParameterExpression);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class CodeGenerator;
+struct CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
                                         AnalysisResultConstPtr ar,
@@ -60,10 +62,9 @@ typedef std::vector< ParameterExpressionPtrIdxPair >
  * A FunctionScope corresponds to a function declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
  */
-class FunctionScope : public BlockScope,
-                      public JSON::CodeError::ISerializable,
-                      public JSON::DocTarget::ISerializable {
-public:
+struct FunctionScope : BlockScope,
+                       JSON::CodeError::ISerializable,
+                       JSON::DocTarget::ISerializable {
   /**
    * User defined functions.
    */
@@ -86,11 +87,7 @@ public:
   FunctionScope(bool method, const std::string &name, bool reference);
   void setParamCounts(AnalysisResultConstPtr ar,
                       int minParam, int numDeclParam);
-  void setParamName(int index, const std::string &name);
   void setRefParam(int index);
-  bool hasRefParam(int max) const;
-
-  void addModifier(int mod);
 
   bool hasUserAttr(const char *attr) const;
 
@@ -120,19 +117,14 @@ public:
   void setGenerator(bool f) { m_generator = f; }
   bool isAsync() const { return m_async; }
   void setAsync(bool f) { m_async = f; }
+  bool isFromTrait() const { return m_fromTrait; }
+  void setFromTrait(bool f) { m_fromTrait = f; }
 
   int nextInlineIndex() { return ++m_inlineIndex; }
 
   bool usesLSB() const { return !m_noLSB; }
-  void clearUsesLSB() { m_noLSB = true; }
   bool nextLSB() const { return m_nextLSB; }
   void setNextLSB(bool f) { m_nextLSB = f; }
-
-  void setHasGoto() { m_hasGoto = true; }
-  void setHasTry() { m_hasTry = true; }
-  bool hasGoto() const { return m_hasGoto; }
-  bool hasTry() const { return m_hasTry; }
-  unsigned getNewID() { return m_nextID++; }
 
   bool needsLocalThis() const;
 
@@ -141,20 +133,7 @@ public:
     return isNamed(n.c_str());
   }
 
-  /**
-   * Either __construct or a class-name constructor.
-   */
-  bool isConstructor(ClassScopePtr cls) const;
-
   const std::string &getParamName(int index) const;
-
-//  const std::string &name() const {
-//    return getName();
-//  }
-
-  int getRedeclaringId() const {
-    return m_redeclaring;
-  }
 
   void setSystem() {
     m_system = true;
@@ -187,6 +166,7 @@ public:
    */
   bool allowsVariableArguments() const;
   bool hasVariadicParam() const;
+  bool hasRefVariadicParam() const;
   bool usesVariableArgumentFunc() const;
   bool isReferenceVariableArgument() const;
   void setVariableArgument(int reference);
@@ -195,37 +175,13 @@ public:
    * Whether this function has no side effects
    */
   bool hasEffect() const;
-  void setNoEffect();
 
   /**
    * Whether this function can be constant folded
    */
   bool isFoldable() const;
-  void setIsFoldable();
-
-  /*
-   * If this is a builtin function and does not need an ActRec
-   */
-  bool noFCallBuiltin() const;
-  void setNoFCallBuiltin();
-
-  /*
-   * If this is a builtin (C++ or PHP) and can be redefined
-   */
-  bool allowOverride() const;
-  void setAllowOverride();
 
   bool needsFinallyLocals() const;
-
-  /**
-   * Whether this function is a runtime helper function
-   */
-  void setHelperFunction();
-
-  /**
-   * Whether this function returns reference or has reference parameters.
-   */
-  bool containsReference() const;
 
   /**
    * Whether this function contains a usage of $this
@@ -235,15 +191,10 @@ public:
   bool containsBareThis() const { return m_containsBareThis; }
   bool containsRefThis() const { return m_containsBareThis & 2; }
   void setContainsBareThis(bool f, bool ref = false);
-  /**
-   * How many parameters a caller should provide.
-   */
-  int getMinParamCount() const { return m_minParam; }
   int getDeclParamCount() const { return m_numDeclParams; }
   int getMaxParamCount() const {
     return hasVariadicParam() ? (m_numDeclParams-1) : m_numDeclParams;
   }
-  int getOptionalParamCount() const { return getMaxParamCount() - m_minParam;}
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
@@ -274,10 +225,6 @@ public:
   bool isPersistent() const { return m_persistent; }
   void setPersistent(bool p) { m_persistent = p; }
 
-  /* Indicates if a function may need to use a VarEnv or varargs (aka
-   * extraArgs) at run time */
-  bool mayUseVV() const;
-
   typedef hphp_hash_map<std::string, ExpressionPtr, string_hashi,
     string_eqstri> UserAttributeMap;
 
@@ -304,20 +251,11 @@ public:
     m_closureVars = closureVars;
   }
 
-  ExpressionListPtr getClosureVars() const {
-    return m_closureVars;
-  }
-
-  void getClosureUseVars(ParameterExpressionPtrIdxPairVec &useVars,
-                         bool filterUsed = true);
-
   void addCaller(BlockScopePtr caller, bool careAboutReturn = true);
   void addNewObjCaller(BlockScopePtr caller);
 
-  class FunctionInfo {
-  public:
+  struct FunctionInfo {
     explicit FunctionInfo(int rva = -1)
-      : m_maybeStatic(false)
       /*
        * Note: m_maybeRefReturn used to implement an optimization to
        * avoid unbox checks when we call functions where we know no
@@ -326,7 +264,7 @@ public:
        * it's disabled here.  (The default to enable it should be
        * 'false'.)
        */
-      , m_maybeRefReturn(true)
+      : m_maybeRefReturn(true)
       , m_refVarArg(rva)
     {}
 
@@ -343,14 +281,10 @@ public:
       m_refParams.insert(p);
     }
 
-    void setMaybeStatic() { m_maybeStatic = true; }
-    bool getMaybeStatic() { return m_maybeStatic; }
-
     void setMaybeRefReturn() { m_maybeRefReturn = true; }
     bool getMaybeRefReturn() { return m_maybeRefReturn; }
 
   private:
-    bool m_maybeStatic; // this could be a static method
     bool m_maybeRefReturn;
     int m_refVarArg; // -1: no ref varargs;
                      // otherwise, any arg >= m_refVarArg is a reference
@@ -362,11 +296,22 @@ public:
   static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
   static FunctionInfoPtr GetFunctionInfo(const std::string& fname);
 
+  const StringData* getFatalMessage() const {
+    return m_fatal_error_msg;
+  }
+
+  void setFatal(const std::string& msg) {
+    assert(m_fatal_error_msg == nullptr);
+    m_fatal_error_msg = makeStaticString(msg);
+    assert(m_fatal_error_msg != nullptr);
+  }
+
 private:
   void init(AnalysisResultConstPtr ar);
 
   static StringToFunctionInfoPtrMap s_refParamInfo;
 
+  int m_coerceMode{0};
   int m_minParam;
   int m_numDeclParams;
   int m_attribute;
@@ -392,17 +337,18 @@ private:
   unsigned m_async : 1;
   unsigned m_noLSB : 1;
   unsigned m_nextLSB : 1;
-  unsigned m_hasTry : 1;
-  unsigned m_hasGoto : 1;
   unsigned m_localRedeclaring : 1;
+  unsigned m_fromTrait : 1;
 
   int m_redeclaring; // multiple definition of the same function
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
   ExpressionListPtr m_closureVars;
   ExpressionListPtr m_closureValues;
-  unsigned m_nextID; // used when cloning generators for traits
   std::list<FunctionScopeRawPtr> m_clonedTraitOuterScope;
+
+  // holds the fact that defining this function is a fatal error
+  const StringData* m_fatal_error_msg = nullptr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

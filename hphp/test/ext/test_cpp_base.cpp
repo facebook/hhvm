@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,7 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestVirtualHostIni);
   RUN_TEST(TestCollectionHdf);
   RUN_TEST(TestCollectionIni);
+  RUN_TEST(TestVariantArrayRef);
   return ret;
 }
 
@@ -57,6 +58,50 @@ static inline long in6addrWord(struct in6_addr addr, char wordNo) {
           (addr.s6_addr[(wordNo*4)+1] << 16) |
           (addr.s6_addr[(wordNo*4)+2] <<  8) |
           (addr.s6_addr[(wordNo*4)+3] <<  0)) & 0xFFFFFFFF;
+}
+
+static void arrayRefHelper(Variant& arr) {
+  String sms("hhvm.stats.max_slot");
+  String hfc("hhvm.hot_func_count");
+  Variant r(Variant::StrongBind{}, arr.toArrRef().lvalAt(sms));
+  arr.toArrRef().setRef(hfc, r);
+}
+
+bool TestCppBase::TestVariantArrayRef() {
+  String sms("hhvm.stats.max_slot");
+  String hfc("hhvm.hot_func_count");
+  String mla("hhvm.multi_level_array");
+  String k1("key1");
+  String k2("key2");
+  String k3("key3");
+  Variant v1(11);
+  Variant v2(77);
+  Variant v3(99);
+  Variant v4(true);
+
+  Variant ml_arr(Array::Create());
+  ml_arr.toArrRef().set(k1, Array::Create());
+  ml_arr.toArrRef().lvalAt(k1).toArrRef().set(k2, Array::Create());
+  ml_arr.toArrRef().lvalAt(k1).toArrRef().lvalAt(k2).toArrRef().set(k3, v4);
+
+  Variant arr(Array::Create());
+  arr.toArrRef().set(sms, v1);
+  arrayRefHelper(arr);
+  arr.toArrRef().set(sms, v2);
+
+  VERIFY(arr.toArray().rvalAt(hfc).toInt64() == 77);
+
+  // bidirectional references
+  arr.toArrRef().set(hfc, v3);
+  VERIFY(arr.toArray().rvalAt(sms).toInt64() == 99);
+
+  VERIFY(ml_arr.toArray().size() == 1);
+  VERIFY(ml_arr.toArray().rvalAt(k1).isArray() == true);
+  VERIFY(ml_arr.toArray().
+         rvalAt(k1).toArray().
+         rvalAt(k2).toArray().
+         rvalAt(k3).toBoolean() == true);
+  return Count(true);
 }
 
 bool TestCppBase::TestIpBlockMap() {
@@ -483,34 +528,6 @@ bool TestCppBase::TestVirtualHost() {
   return Count(true);
 }
 
-bool TestCppBase::TestCollectionHdf() {
-  IniSetting::Map ini = IniSetting::Map::object;
-  Hdf hdf;
-  hdf.fromString(
-    "  Server {\n"
-    "    AllowedDirectories.* = /var/www\n"
-    "    AllowedDirectories.* = /usr/bin\n"
-    "    HighPriorityEndPoints.* = /end\n"
-    "    HighPriorityEndPoints.* = /point\n"
-    "    HighPriorityEndPoints.* = /power\n"
-    "  }\n"
-  );
-  RuntimeOption::AllowedDirectories.clear();
-
-  Config::Bind(RuntimeOption::AllowedDirectories, ini,
-               hdf, "Server.AllowedDirectories");
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
-  std::vector<std::string> ad =
-    Config::GetVector(ini, hdf, "Server.AllowedDirectories",
-                      RuntimeOption::AllowedDirectories);
-  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
-  VERIFY(ad.size() == 2);
-  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
-               hdf, "Server.HighPriorityEndPoints");
-  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
-  return Count(true);
-}
-
 bool TestCppBase::TestVirtualHostIni() {
   std::string inistr =
     "hhvm.server.allowed_directories[] = /var/www\n"
@@ -565,6 +582,7 @@ bool TestCppBase::TestVirtualHostIni() {
   // version of this test is run at the same time, we don't want to append
   // the same directories to it. We want to start fresh.
   RuntimeOption::AllowedDirectories.clear();
+
   Config::ParseIniString(inistr, ini);
   RuntimeOption::AllowedDirectories =
     Config::GetVector(ini, empty, "Server.AllowedDirectories");
@@ -633,18 +651,50 @@ bool TestCppBase::TestVirtualHostIni() {
   return Count(true);
 }
 
+bool TestCppBase::TestCollectionHdf() {
+  IniSetting::Map ini = IniSetting::Map::object;
+  Hdf hdf;
+  hdf.fromString(
+    "  Server {\n"
+    "    AllowedDirectories.* = /var/www\n"
+    "    AllowedDirectories.* = /usr/bin\n"
+    "    HighPriorityEndPoints.* = /end\n"
+    "    HighPriorityEndPoints.* = /point\n"
+    "    HighPriorityEndPoints.* = /power\n"
+    "  }\n"
+  );
+  RuntimeOption::AllowedDirectories.clear();
+
+  Config::Bind(RuntimeOption::AllowedDirectories, ini,
+               hdf, "Server.AllowedDirectories");
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  std::vector<std::string> ad =
+    Config::GetVector(ini, hdf, "Server.AllowedDirectories",
+                      RuntimeOption::AllowedDirectories);
+  VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
+  VERIFY(ad.size() == 2);
+  Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini,
+               hdf, "Server.HighPriorityEndPoints");
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  return Count(true);
+}
+
 bool TestCppBase::TestCollectionIni() {
   std::string inistr =
     "hhvm.server.allowed_directories[] = /var/www\n"
     "hhvm.server.allowed_directories[] = /usr/bin\n"
-    "hhvm.server.high_priority_endpoints[] = /end\n"
-    "hhvm.server.high_priority_endpoints[] = /point\n"
-    "hhvm.server.high_priority_endpoints[] = /power\n";
+    "hhvm.server.high_priority_end_points[] = /end\n"
+    "hhvm.server.high_priority_end_points[] = /point\n"
+    "hhvm.server.high_priority_end_points[] = /power\n"
+    "hhvm.server.high_priority_end_points[] = /word\n";
 
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf empty;
 
+  // Ensure we have no residuals left over from the HDF run.
   RuntimeOption::AllowedDirectories.clear();
+  RuntimeOption::ServerHighPriorityEndPoints.clear();
+
   Config::ParseIniString(inistr, ini);
   Config::Bind(RuntimeOption::AllowedDirectories, ini, empty,
                "Server.AllowedDirectories"); // Test converting name
@@ -659,6 +709,6 @@ bool TestCppBase::TestCollectionIni() {
   Config::Bind(RuntimeOption::ServerHighPriorityEndPoints, ini, empty,
                "Server.HighPriorityEndPoints",
                 RuntimeOption::ServerHighPriorityEndPoints, false);
-  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 3);
+  VERIFY(RuntimeOption::ServerHighPriorityEndPoints.size() == 4);
   return Count(true);
 }

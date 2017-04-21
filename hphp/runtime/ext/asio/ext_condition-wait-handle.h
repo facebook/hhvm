@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
 namespace HPHP {
@@ -31,13 +30,13 @@ namespace HPHP {
  * A wait handle that waits for a list of wait handles. The wait handle succeeds
  * with null once all given wait handles are finished (succeeded or failed).
  */
-class c_ConditionWaitHandle final : public c_WaitableWaitHandle {
- public:
+struct c_ConditionWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(ConditionWaitHandle);
   WAITHANDLE_DTOR(ConditionWaitHandle);
 
-  explicit c_ConditionWaitHandle(Class* cls = c_ConditionWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_ConditionWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+                       type_scan::getIndexForMalloc<c_ConditionWaitHandle>()) {}
   ~c_ConditionWaitHandle() {}
 
  public:
@@ -64,6 +63,10 @@ class c_ConditionWaitHandle final : public c_WaitableWaitHandle {
  private:
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_child) {
+    if (!isFinished()) scanner.scan(m_child);
+  }
 };
 
 void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,

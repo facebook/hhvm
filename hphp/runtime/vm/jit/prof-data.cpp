@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,476 +24,256 @@
 #include "hphp/util/logger.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
+#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
 namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
+////////////////////////////////////////////////////////////////////////////////
 
-///////////   Counters   //////////
-
-template<typename T>
-T ProfCounters<T>::get(uint32_t id) const {
-  if (id / kCountersPerChunk >= m_chunks.size()) {
-    return m_initVal;
-  }
-  return m_chunks[id / kCountersPerChunk][id % kCountersPerChunk];
-}
-
-template<typename T>
-T* ProfCounters<T>::getAddr(uint32_t id) {
-  // allocate a new chunk of counters if necessary
-  while (id >= m_chunks.size() * kCountersPerChunk) {
-    uint32_t size = sizeof(T) * kCountersPerChunk;
-    T* chunk = (T*)malloc(size);
-    std::fill_n(chunk, kCountersPerChunk, m_initVal);
-    m_chunks.push_back(chunk);
-  }
-  assertx(id / kCountersPerChunk < m_chunks.size());
-  return &(m_chunks[id / kCountersPerChunk][id % kCountersPerChunk]);
-}
-
-
-///////////   PrologueCallersRec   //////////
-
-const PrologueCallersVec& PrologueCallersRec::mainCallers() const {
-  return m_mainCallers;
-}
-
-const PrologueCallersVec& PrologueCallersRec::guardCallers() const {
-  return m_guardCallers;
-}
-
-void PrologueCallersRec::removeMainCaller(TCA caller) {
-  auto pos = std::find(m_mainCallers.begin(), m_mainCallers.end(), caller);
-  if (pos != m_mainCallers.end()) m_mainCallers.erase(pos);
-}
-
-void PrologueCallersRec::removeGuardCaller(TCA caller) {
-  auto pos = std::find(m_guardCallers.begin(), m_guardCallers.end(), caller);
-  if (pos != m_mainCallers.end()) m_guardCallers.erase(pos);
-}
-
-void PrologueCallersRec::addMainCaller(TCA caller) {
-  m_mainCallers.push_back(caller);
-}
-
-void PrologueCallersRec::addGuardCaller(TCA caller) {
-  m_guardCallers.push_back(caller);
-}
-
-void PrologueCallersRec::clearAllCallers() {
-  m_mainCallers.clear();
-  m_guardCallers.clear();
-}
-
-
-///////////   PrologueToTransMap   //////////
-
-void PrologueToTransMap::add(FuncId funcId, int numArgs, TransID transId) {
-  auto pid = PrologueID(funcId, numArgs);
-  assertx(m_prologueIdToTransId.find(pid) == m_prologueIdToTransId.end());
-  m_prologueIdToTransId[pid] = transId;
-}
-
-TransID PrologueToTransMap::get(FuncId funcId, int numArgs) const {
-  auto pid = PrologueID(funcId, numArgs);
-  return folly::get_default(m_prologueIdToTransId, pid, kInvalidTransID);
-}
-
-
-///////////   ProfTransRec   //////////
-
-ProfTransRec::ProfTransRec(TransID       id,
-                           TransKind     kind,
-                           Offset        lastBcOff,
-                           SrcKey sk,
-                           RegionDescPtr region)
-    : m_id(id)
-    , m_kind(kind)
+ProfTransRec::ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region)
+    : m_kind(TransKind::Profile)
     , m_lastBcOff(lastBcOff)
-    , m_region(region)
-    , m_sk(sk) {
-  assertx(region == nullptr || (!region->empty() && region->start() == sk));
+    , m_sk(sk)
+    , m_region(region) {
+  assertx(region != nullptr && !region->empty() && region->start() == sk);
 }
 
-ProfTransRec::ProfTransRec(TransID       id,
-                           TransKind     kind,
-                           SrcKey sk)
-    : m_id(id)
-    , m_kind(kind)
-    , m_lastBcOff(-1)
-    , m_region(nullptr)
-    , m_sk(sk) {
-  assertx(kind == TransKind::Anchor || kind == TransKind::Optimize ||
-         kind == TransKind::Interp || kind == TransKind::Live);
-}
-
-ProfTransRec::ProfTransRec(TransID       id,
-                           TransKind     kind,
-                           SrcKey sk,
-                           int           nArgs)
-    : m_id(id)
-    , m_kind(kind)
+ProfTransRec::ProfTransRec(SrcKey sk, int nArgs)
+    : m_kind(TransKind::ProfPrologue)
     , m_prologueArgs(nArgs)
-    , m_region(nullptr)
-    , m_sk(sk) {
-  assertx(kind == TransKind::Prologue || kind == TransKind::Proflogue);
-  if (kind == TransKind::Proflogue) {
-    // we only need to keep track of the callers for Proflogues
-    m_prologueCallers = folly::make_unique<PrologueCallersRec>();
+    , m_sk(sk)
+    , m_callers()
+{}
+
+ProfTransRec::~ProfTransRec() {
+  if (m_kind == TransKind::Profile) {
+    m_region.~RegionDescPtr();
+    return;
   }
+  assertx(m_kind == TransKind::ProfPrologue);
+  m_callers.~CallerRec();
 }
 
-TransID ProfTransRec::transId() const {
-  return m_id;
+////////////////////////////////////////////////////////////////////////////////
+
+template<typename Map>
+typename Map::Config makeAHMConfig() {
+  typename Map::Config config;
+  config.growthFactor = 1;
+  config.entryCountThreadCacheSize = 10;
+  return config;
 }
-
-TransKind ProfTransRec::kind() const {
-  return m_kind;
-}
-
-SrcKey ProfTransRec::srcKey() const {
-  return m_sk;
-}
-
-SrcKey ProfTransRec::lastSrcKey() const {
-  assertx(m_kind == TransKind::Profile);
-  return SrcKey(m_sk.func(), m_lastBcOff, m_sk.resumed());
-}
-
-Offset ProfTransRec::startBcOff() const {
-  return m_region->start().offset();;
-}
-
-Offset ProfTransRec::lastBcOff() const {
-  assertx(m_kind == TransKind::Profile);
-  return m_lastBcOff;
-}
-
-int ProfTransRec::prologueArgs() const {
-  assertx(m_kind == TransKind::Proflogue);
-  return m_prologueArgs;
-}
-
-Func* ProfTransRec::func() const {
-  return const_cast<Func*>(m_sk.func());
-}
-
-FuncId ProfTransRec::funcId() const {
-  return m_sk.funcID();
-}
-
-RegionDescPtr ProfTransRec::region() const {
-  assertx(kind() == TransKind::Profile);
-  return m_region;
-}
-
-PrologueCallersRec* ProfTransRec::prologueCallers() const {
-  assertx(kind() == TransKind::Proflogue);
-  return m_prologueCallers.get();
-}
-
-
-///////////   ProfData   //////////
 
 ProfData::ProfData()
-    : m_numTrans(0)
-    , m_freed(false)
-    , m_counters(RuntimeOption::EvalJitPGOThreshold) {
+  : m_counters(RuntimeOption::ServerExecutionMode()
+                 ? std::numeric_limits<int64_t>::max()
+                 : RuntimeOption::EvalJitPGOThreshold)
+  , m_profilingFuncs(RuntimeOption::EvalFuncCountHint, false)
+  , m_optimizedFuncs(RuntimeOption::EvalFuncCountHint, false)
+  , m_queuedFuncs(RuntimeOption::EvalFuncCountHint, false)
+  , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
+                   makeAHMConfig<decltype(m_optimizedSKs)>())
+  , m_proflogueDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+                  makeAHMConfig<decltype(m_proflogueDB)>())
+  , m_dvFuncletDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+                  makeAHMConfig<decltype(m_dvFuncletDB)>())
+  , m_jmpToTransID(RuntimeOption::EvalPGOFuncCountHint * 10,
+                   makeAHMConfig<decltype(m_jmpToTransID)>())
+  , m_blockEndOffsets(RuntimeOption::EvalPGOFuncCountHint,
+                      makeAHMConfig<decltype(m_blockEndOffsets)>())
+{}
+
+TransID ProfData::allocTransID() {
+  WriteLock lock{m_transLock};
+  m_transRecs.emplace_back();
+  return m_transRecs.size() - 1;
 }
 
-uint32_t ProfData::numTrans() const {
-  return m_numTrans;
-}
-
-TransID ProfData::curTransID() const {
-  return static_cast<TransID>(numTrans());
-}
-
-bool ProfData::hasTransRec(TransID id) const {
-  return id < m_transRecs.size() && m_transRecs[id].get() != nullptr;
-}
-
-SrcKey ProfData::transSrcKey(TransID id) const {
-  assertx(id < m_transRecs.size());
-  return m_transRecs[id]->srcKey();
-}
-
-SrcKey ProfData::transLastSrcKey(TransID id) const {
-  assertx(id < m_transRecs.size());
-  return m_transRecs[id]->lastSrcKey();
-}
-
-Offset ProfData::transStartBcOff(TransID id) const {
-  assertx(id < m_transRecs.size());
-  return m_transRecs[id]->startBcOff();
-}
-
-Offset ProfData::transLastBcOff(TransID id) const {
-  assertx(id < m_transRecs.size());
-  return m_transRecs[id]->lastBcOff();
-}
-
-PC ProfData::transLastInstr(TransID id) const {
-  Unit* unit = transFunc(id)->unit();
-  Offset lastBcOff = transLastBcOff(id);
-  return unit->at(lastBcOff);
-}
-
-Offset ProfData::transStopBcOff(TransID id) const {
-  Unit*  unit      = m_transRecs[id]->func()->unit();
-  Offset lastBcOff = transLastBcOff(id);
-  return lastBcOff + instrLen(unit->at(lastBcOff));
-}
-
-FuncId ProfData::transFuncId(TransID id) const {
-  assertx(id < m_transRecs.size());
-  return m_transRecs[id]->funcId();
-}
-
-Func* ProfData::transFunc(TransID id) const {
-  assertx(id < m_transRecs.size());
-  return m_transRecs[id]->func();
-}
-
-const TransIDVec& ProfData::funcProfTransIDs(FuncId funcId) const {
-  auto it = m_funcProfTrans.find(funcId);
-  assertx(it != m_funcProfTrans.end());
-  return it->second;
-}
-
-TransKind ProfData::transKind(TransID id) const {
-  assertx(id < m_numTrans);
-  return m_transRecs[id]->kind();
-}
-
-bool ProfData::isKindProfile(TransID id) const {
-  assertx(id < m_numTrans);
-  // we don't keep ProfTransRecs for non-profile translations
-  if (m_transRecs[id] == nullptr) return false;
-  return m_transRecs[id]->kind() == TransKind::Profile;
-}
-
-int64_t ProfData::transCounter(TransID id) const {
-  assertx(id < m_numTrans);
-  return RuntimeOption::EvalJitPGOThreshold - m_counters.get(id);
-}
-
-int64_t ProfData::transCounterRaw(TransID id) const {
-  assertx(id < m_numTrans);
-  return m_counters.get(id);
-}
-
-int64_t* ProfData::transCounterAddr(TransID id) {
-  return m_counters.getAddr(id);
-}
-
-TransID ProfData::prologueTransId(const Func* func, int nArgs) const {
-  int numParams = func->numNonVariadicParams();
+TransID ProfData::proflogueTransId(const Func* func, int nArgs) const {
+  auto const numParams = func->numNonVariadicParams();
   if (nArgs > numParams) nArgs = numParams + 1;
-  FuncId funcId = func->getFuncId();
-  return m_prologueDB.get(funcId, nArgs);
+
+  return folly::get_default(
+    m_proflogueDB,
+    PrologueID{func->getFuncId(), nArgs},
+    kInvalidTransID
+  );
 }
 
-TransID ProfData::dvFuncletTransId(const Func* func, int nArgs) const {
-  return m_dvFuncletDB.get(func->getFuncId(), nArgs);
+TransID ProfData::dvFuncletTransId(SrcKey sk) const {
+  return folly::get_default(
+    m_dvFuncletDB,
+    sk.toAtomicInt(),
+    kInvalidTransID
+  );
 }
 
-PrologueCallersRec* ProfData::prologueCallers(TransID id) const {
-  return m_transRecs[id]->prologueCallers();
-}
-
-PrologueCallersRec* ProfData::prologueCallers(const Func* func,
-                                              int nArgs) const {
-  TransID id = prologueTransId(func, nArgs);
-  return prologueCallers(id);
-}
-
-int ProfData::prologueArgs(TransID id) const {
-  return m_transRecs[id]->prologueArgs();
-}
-
-bool ProfData::optimized(SrcKey sk) const {
-  return m_optimizedSKs.count(sk);
-}
-
-bool ProfData::optimized(FuncId funcId) const {
-  return m_optimizedFuncs.count(funcId);
-}
-
-void ProfData::setOptimized(SrcKey sk) {
-  m_optimizedSKs.insert(sk);
-}
-
-void ProfData::clearOptimized(SrcKey sk) {
-  m_optimizedSKs.erase(sk);
-}
-
-void ProfData::setOptimized(FuncId funcId) {
-  m_optimizedFuncs.insert(funcId);
-}
-
-bool ProfData::profiling(FuncId funcId) const {
-  return m_profilingFuncs.count(funcId);
-}
-
-void ProfData::setProfiling(FuncId funcId) {
-  m_profilingFuncs.insert(funcId);
-  if (m_funcProfTrans.find(funcId) == m_funcProfTrans.end()) {
-    m_funcProfTrans[funcId] = TransIDVec();
-  }
-}
-
-RegionDescPtr ProfData::transRegion(TransID id) const {
-  assertx(id < m_transRecs.size());
-  const ProfTransRec& pTransRec = *m_transRecs[id];
-  return pTransRec.region();
-}
-
-TransID ProfData::addTransProfile(const RegionDescPtr&  region,
-                                  const PostConditions& pconds) {
-  TransID transId   = m_numTrans++;
-  Offset  lastBcOff = region->lastSrcKey().offset();
+void ProfData::addTransProfile(TransID transID,
+                               const RegionDescPtr& region,
+                               const PostConditions& pconds) {
+  auto const lastBcOff = region->lastSrcKey().offset();
 
   assertx(region);
-  DEBUG_ONLY size_t nBlocks = region->blocks().size();
+  DEBUG_ONLY auto const nBlocks = region->blocks().size();
   assertx(nBlocks == 1);
-  region->renumberBlock(region->entry()->id(), transId);
-  for (auto& b : region->blocks()) b->setProfTransID(transId);
+  region->renumberBlock(region->entry()->id(), transID);
+  for (auto& b : region->blocks()) b->setProfTransID(transID);
   region->blocks().back()->setPostConds(pconds);
   auto const startSk = region->start();
-  m_transRecs.emplace_back(new ProfTransRec(transId,
-                                            TransKind::Profile,
-                                            lastBcOff,
-                                            startSk,
-                                            region));
 
   // If the translation corresponds to a DV Funclet, then add an entry
   // into dvFuncletDB.
-  const Func* func = startSk.func();
-  FuncId    funcId = func->getFuncId();
-  Offset  bcOffset = startSk.offset();
+  auto const func = startSk.func();
+  auto const funcId = func->getFuncId();
+  auto const bcOffset = startSk.offset();
+
   if (func->isDVEntry(bcOffset)) {
-    int nParams = func->getDVEntryNumParams(bcOffset);
-    // Normal DV funclets don't have type guards, and thus have a
-    // single translation.  However, some special functions written
-    // in hhas (e.g. array_map) have complex DV funclets that get
-    // retranslated for different types.  For those functions,
-    // m_dvFuncletDB keeps the TransID for their first translation.
-    if (m_dvFuncletDB.get(funcId, nParams) == kInvalidTransID) {
-      m_dvFuncletDB.add(funcId, nParams, transId);
-    }
+    // Normal DV funclets don't have type guards, and thus have a single
+    // translation.  However, some special functions written in hhas
+    // (e.g. array_map) have complex DV funclets that get retranslated for
+    // different types.  For those functions, m_dvFuncletDB keeps the TransID
+    // for their first translation.
+    m_dvFuncletDB.emplace(startSk.toAtomicInt(), transID);
   }
 
-  m_funcProfTrans[funcId].push_back(transId);
-  return transId;
-}
-
-TransID ProfData::addTransPrologue(TransKind kind, SrcKey sk,
-                                   int nArgs) {
-  assertx(kind == TransKind::Prologue || kind == TransKind::Proflogue);
-  TransID transId = m_numTrans++;
-  m_transRecs.emplace_back(new ProfTransRec(transId, kind, sk, nArgs));
-  if (kind == TransKind::Proflogue) {
-    // only Proflogue translations need an entry in the m_prologueDB
-    m_prologueDB.add(sk.funcID(), nArgs, transId);
-  }
-  return transId;
-}
-
-TransID ProfData::addTransNonProf(TransKind kind, SrcKey sk) {
-  assertx(kind == TransKind::Anchor || kind == TransKind::Interp ||
-         kind == TransKind::Live   || kind == TransKind::Optimize);
-  TransID transId = m_numTrans++;
-  m_transRecs.emplace_back(nullptr);
-  return transId;
-}
-
-PrologueCallersRec* ProfData::findPrologueCallersRec(const Func* func,
-                                                     int nArgs) const {
-  TransID tid = prologueTransId(func, nArgs);
-  if (tid == kInvalidTransID) {
-    assertx(RuntimeOption::EvalJitPGOHotOnly && !(func->attrs() & AttrHot));
-    return nullptr;
-  }
-  assertx(transKind(tid) == TransKind::Proflogue);
-  PrologueCallersRec* prologueCallers = m_transRecs[tid]->prologueCallers();
-  assertx(prologueCallers);
-  return prologueCallers;
-}
-
-void ProfData::addPrologueMainCaller(const Func* func, int nArgs, TCA caller) {
-  PrologueCallersRec* prologueCallers = findPrologueCallersRec(func, nArgs);
-  if (prologueCallers) {
-    prologueCallers->addMainCaller(caller);
-  }
-}
-
-void ProfData::addPrologueGuardCaller(const Func* func, int nArgs, TCA caller) {
-  PrologueCallersRec* prologueCallers = findPrologueCallersRec(func, nArgs);
-  if (prologueCallers) {
-    prologueCallers->addGuardCaller(caller);
-  }
-}
-
-void ProfData::freeFuncData(FuncId funcId) {
-  // Free ProfTransRecs for Profile translations.
-  for (TransID tid : funcProfTransIDs(funcId)) {
-    m_transRecs[tid].reset();
+  {
+    WriteLock lock{m_transLock};
+    m_transRecs[transID].reset(new ProfTransRec(lastBcOff, startSk, region));
   }
 
-  // Free ProfTransRecs for Proflogue translations.
-  const Func* func = Func::fromFuncId(funcId);
-  for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
-    TransID tid = prologueTransId(func, nArgs);
-    if (tid != kInvalidTransID) {
-      m_transRecs[tid].reset();
-    }
-  }
-
-  // We don't need the cached block offsets anymore.  They are only used when
-  // generating profiling translations.
-  m_blockEndOffsets.erase(funcId);
+  // Putting transID in m_funcProfTrans makes it visible to other threads, so
+  // this has to happen after we've already put its metadata in m_transRecs.
+  WriteLock lock{m_funcProfTransLock};
+  m_funcProfTrans[funcId].push_back(transID);
 }
 
-bool ProfData::freed() const {
-  return m_freed;
-}
+void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs) {
+  m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
-void ProfData::free() {
-  if (m_freed) return;
-  m_freed = true;
-  Logger::Info("Freeing JIT profiling data");
-  for (auto& trec : m_transRecs) {
-    trec.reset();
-  }
-  m_blockEndOffsets.clear();
+  WriteLock lock{m_transLock};
+  m_transRecs[transID].reset(new ProfTransRec(sk, nArgs));
 }
 
 bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
-  auto const mapIt = m_blockEndOffsets.find(func->getFuncId());
-  if (mapIt != end(m_blockEndOffsets)) {
-    return mapIt->second.count(offset);
+  auto it = m_blockEndOffsets.find(func->getFuncId());
+  if (it == m_blockEndOffsets.end()) {
+    Arena arena;
+    Verifier::GraphBuilder builder{arena, func};
+    auto cfg = builder.build();
+    std::unordered_set<Offset> offsets;
+
+    for (auto blocks = linearBlocks(cfg); !blocks.empty(); ) {
+      auto last = blocks.popFront()->last - func->unit()->entry();
+      offsets.insert(last);
+    }
+
+    it = m_blockEndOffsets.emplace(func->getFuncId(), std::move(offsets)).first;
   }
 
-  using namespace Verifier;
-
-  Arena arena;
-  GraphBuilder builder{arena, func};
-  Graph* cfg = builder.build();
-
-  auto& offsets = m_blockEndOffsets[func->getFuncId()];
-
-  for (LinearBlocks blocks = linearBlocks(cfg); !blocks.empty(); ) {
-    auto last = blocks.popFront()->last - func->unit()->entry();
-    offsets.insert(last);
-  }
-
-  return offsets.count(offset);
+  return it->second.count(offset);
 }
 
-} }
+////////////////////////////////////////////////////////////////////////////////
+
+namespace {
+std::atomic<ProfData*> s_profData{nullptr};
+struct ProfDataShutdownDeleter {
+  ~ProfDataShutdownDeleter() {
+    delete s_profData.load();
+  }
+} s_profDataShutdownDeleter;
+
+/*
+ * Used to free ProfData from the Treadmill. Since we currently do nothing to
+ * make Profile translations unreachable when we're otherwise done with
+ * ProfData, we move the profiling counters out of ProfData before deleting it.
+ */
+ProfCounters<int64_t> s_persistentCounters{0};
+struct ProfDataTreadmillDeleter {
+  void operator()() {
+    s_persistentCounters = data->takeCounters();
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Info("Deleting JIT ProfData");
+    }
+  }
+
+  std::unique_ptr<ProfData> data;
+};
+}
+
+__thread ProfData* tl_profData{nullptr};
+
+void processInitProfData() {
+  if (!RuntimeOption::EvalJitPGO) return;
+
+  s_profData.store(new ProfData(), std::memory_order_relaxed);
+}
+
+void requestInitProfData() {
+  tl_profData = s_profData.load(std::memory_order_relaxed);
+}
+
+void requestExitProfData() {
+  tl_profData = nullptr;
+}
+
+const ProfData* globalProfData() {
+  return s_profData.load(std::memory_order_relaxed);
+}
+
+void discardProfData() {
+  if (s_profData.load(std::memory_order_relaxed) == nullptr) return;
+
+  // Make sure s_profData is nullptr so any new requests won't try to use the
+  // object we're deleting, then send it to the Treadmill for deletion.
+  std::unique_ptr<ProfData> data{
+    s_profData.exchange(nullptr, std::memory_order_relaxed)
+  };
+  if (data != nullptr) {
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::Info("Putting JIT ProfData on Treadmill");
+    }
+    Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(data)});
+  }
+}
+
+void ProfData::maybeResetCounters() {
+  if (m_countersReset.load(std::memory_order_acquire)) return;
+  if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
+
+  WriteLock lock{m_transLock};
+  if (m_countersReset.load(std::memory_order_relaxed)) return;
+  m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
+  m_countersReset.store(true, std::memory_order_release);
+}
+
+void ProfData::addTargetProfile(const ProfData::TargetProfileInfo& info) {
+  WriteLock lock{m_targetProfilesLock};
+  m_targetProfiles[info.key.transId].push_back(info);
+}
+
+std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
+  TransID transID) const {
+  ReadLock lock{m_targetProfilesLock};
+  auto it = m_targetProfiles.find(transID);
+  if (it != m_targetProfiles.end()) {
+    return it->second;
+  } else {
+    return std::vector<TargetProfileInfo>{};
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool hasEnoughProfDataToRetranslateAll() {
+  return requestCount() >= RuntimeOption::EvalJitRetranslateAllRequest;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+}}

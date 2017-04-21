@@ -1,9 +1,10 @@
 File "variadic_args5.php", line 13, characters 7-8:
-This object is of type C2 (Typing[4043])
+Class C2 does not correctly implement all required methods  (Typing[4043])
 File "variadic_args5.php", line 13, characters 18-19:
-It is incompatible with this object of type C1
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type C1
 Read the following to see why:
+File "variadic_args5.php", line 14, characters 19-22:
+Member meth has the wrong type
 File "variadic_args5.php", line 14, characters 19-22:
 Variadic arguments: ...-style is not a subtype of ...$args
 File "variadic_args5.php", line 10, characters 19-22:

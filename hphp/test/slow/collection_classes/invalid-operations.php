@@ -171,10 +171,14 @@ function main() {
   echo "\n";
 
   $x = Pair {array(1), array(2)};
-  $y =& $x[0][0];
+
+  try {
+    $y =& $x[0][0];
+  } catch (InvalidOperationException $e) {
+    echo "Caught exception: " . $e->getMessage() . "\n";
+  }
   $y = 2;
   var_dump($x);
 }
 
 main();
-

@@ -8,9 +8,9 @@
  *
  *)
 
+open Core
 open Nast
 open Typing_defs
-open Utils
 
 module Env          = Typing_env
 module Reason       = Typing_reason
@@ -37,15 +37,77 @@ let rec shrink_shape pos field_name env shape =
       let result = Reason.Rwitness pos, Tshape (fields_known, fields) in
       env, result
   | _, Tunresolved tyl ->
-      let env, tyl = lfold (shrink_shape pos field_name) env tyl in
+      let env, tyl = List.map_env env tyl(shrink_shape pos field_name) in
       let result = Reason.Rwitness pos, Tunresolved tyl in
       env, result
   | x ->
       env, x
 
+let experiment_enabled env experiment =
+  TypecheckerOptions.experimental_feature_enabled
+    (Env.get_options env)
+    experiment
+
+(* Helper function to create a temporary "fake" type for use by Shapes::idx,
+  which will be used as the supertype of the first argument passed to
+  Shapes::idx (arg_ty). In most cases, the returned supertype will be
+    shape(?field_name: res, ...)
+
+  If experimental_shape_idx_relaxed is enabled, then we will return shape(...)
+  for the case where field_name does not exist in the arg_ty and arg_ty is
+  partial but does not unset field_name.
+
+  If experimental_optional_shape_field is disabled, then a nullable type will be
+  used instead of an optional type in the returned supertype.
+*)
+let make_idx_fake_super_shape env (arg_r, arg_ty) field_name res =
+  let optional_shape_field_enabled = experiment_enabled env
+    TypecheckerOptions.experimental_optional_shape_field in
+  let shape_idx_relaxed = experiment_enabled env
+    TypecheckerOptions.experimental_shape_idx_relaxed in
+  let fake_shape_field =
+    if optional_shape_field_enabled then
+      { sft_optional = true; sft_ty = res }
+    else
+      { sft_optional = false; sft_ty = (Reason.Rnone, Toption res) } in
+  if shape_idx_relaxed then
+    match arg_ty with
+    | Tshape (FieldsPartiallyKnown unset_fields, fdm)
+        when not (ShapeMap.mem field_name fdm
+                  || ShapeMap.mem field_name unset_fields) ->
+      (* Special logic for when arg_ty does not have field and does not
+        explicitly unset field. We want to relax Shapes::idx to allow accessing
+        field in this case, so we will only require that arg_ty be a shape. *)
+      (* This is dangerous because the shape may later be instantiated with a
+        field that conflicts with the return type of Shapes::idx. Programmers
+        should instead use direct accessing (i.e. shape[field]) when possible to
+        get stricter behavior. *)
+      Lint.shape_idx_access_unknown_field (Reason.to_pos arg_r)
+        (Env.get_shape_field_name field_name);
+      (* But we allow it anyhow *)
+      Nast.ShapeMap.empty
+    | _ -> Nast.ShapeMap.singleton field_name fake_shape_field
+  else
+    Nast.ShapeMap.singleton field_name fake_shape_field
+
+(* Typing rule for Shapes::idx($s, field, [default])
+
+  Shapes::idx has type res (or Toption res, if res is not already Toption _ and
+  default is not provided), where res is the inferred type of field (provided by
+  $s, or else Tmixed). If default is provided, then res must be a subtype of
+  Tunresolved[default].
+
+  Ensures that $s is a shape. $s must be a subtype of:
+  shape(...) -- if experimental_shape_idx_relaxed and $s does not contain field
+                and does not unset field; i.e. it is possible for an instance of
+                $s to provide the field with an arbitrary type.
+                (This will emit a lint warning)
+  shape(?field => Tmixed, ...)  -- if experimental_optional_shape_field
+  shape(field => ?Tmixed, ...)  -- otherwise
+*)
 let idx env fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res = Typing_utils.in_var env (Reason.Rnone, Tunresolved []) in
+  let env, res = Env.fresh_unresolved_type env in
   match TUtils.shape_field_name env (fst field) (snd field) with
   | None -> env, (Reason.Rwitness (fst field), Tany)
   | Some field_name ->
@@ -55,11 +117,11 @@ let idx env fty shape_ty field default =
       Reason.Rnone,
       Tshape (
         FieldsPartiallyKnown Nast.ShapeMap.empty,
-        Nast.ShapeMap.singleton field_name (Reason.Rnone, Toption res)
+        make_idx_fake_super_shape env shape_ty field_name res
       )
     ) in
     let env =
-      Type.sub_type (fst field) Reason.URparam env fake_shape shape_ty in
+      Type.sub_type (fst field) Reason.URparam env shape_ty fake_shape in
     match default with
       | None when TUtils.is_option env res -> env, res
       | None ->
@@ -68,9 +130,52 @@ let idx env fty shape_ty field default =
         env, (fst fty, Toption res)
       | Some (default_pos, default_ty) ->
         let env, default_ty = Typing_utils.unresolved env default_ty in
-        Type.sub_type default_pos Reason.URparam env default_ty res, res
+        Type.sub_type default_pos Reason.URparam env res default_ty, res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env (fst field) (snd field) with
    | None -> env, (Reason.Rwitness (fst field), Tany)
    | Some field_name -> shrink_shape p field_name env shape_ty
+
+let to_array env shape_ty res =
+  let mapper = object
+    inherit Type_mapper.shallow_type_mapper as super
+    inherit! Type_mapper.tunresolved_type_mapper
+    inherit! Type_mapper.tvar_expanding_type_mapper
+
+    method! on_tshape env r fields_known fdm =
+      match fields_known with
+      | FieldsFullyKnown ->
+        let env, values =
+          ShapeFieldList.map_env
+            env (ShapeMap.values fdm) (Typing_utils.unresolved) in
+        let keys = ShapeMap.keys fdm in
+        let env, keys = List.map_env env keys begin fun env key ->
+          let env, ty = match key with
+          | Ast.SFlit (p, _) -> env, (Reason.Rwitness p, Tprim Tstring)
+          | Ast.SFclass_const ((_, cid), (_, mid)) ->
+            begin match Env.get_class env cid with
+              | Some class_ -> begin match Env.get_const env class_ mid with
+                  | Some const ->
+                    Typing_phase.localize_with_self env const.cc_type
+                  | None -> env, (Reason.Rnone, Tany)
+                end
+              | None -> env, (Reason.Rnone, Tany)
+            end in
+          Typing_utils.unresolved env ty
+        end in
+        let env, key =
+          Typing_arrays.array_type_list_to_single_type env keys in
+        let values = List.map ~f:(fun { sft_ty; _ } -> sft_ty) values in
+        let env, value =
+          Typing_arrays.array_type_list_to_single_type env values in
+        env, (r, Tarraykind (AKmap (key, value)))
+      | FieldsPartiallyKnown _ ->
+        env, res
+
+    method! on_type env (r, ty) = match ty with
+      | Tvar _ | Tunresolved _ | Tshape _ ->  super#on_type env (r, ty)
+      | _ -> env, res
+
+  end in
+  mapper#on_type (Type_mapper.fresh_env env) shape_ty

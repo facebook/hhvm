@@ -1,0 +1,321 @@
+====================================================
+vec(0) {
+}
+string(6) "v:0:{}"
+vec(0) {
+}
+====================================================
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+string(18) "v:3:{i:1;i:2;i:3;}"
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+vec(7) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+string(62) "v:7:{s:1:"a";s:1:"b";s:1:"c";s:1:"d";s:1:"e";s:1:"f";s:1:"g";}"
+vec(7) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+  string(1) "f"
+  string(1) "g"
+}
+====================================================
+vec(6) {
+  string(1) "a"
+  string(1) "b"
+  int(100)
+  int(200)
+  string(1) "c"
+  int(500)
+}
+string(48) "v:6:{s:1:"a";s:1:"b";i:100;i:200;s:1:"c";i:500;}"
+vec(6) {
+  string(1) "a"
+  string(1) "b"
+  int(100)
+  int(200)
+  string(1) "c"
+  int(500)
+}
+====================================================
+vec(6) {
+  int(1)
+  int(1)
+  int(1)
+  string(1) "a"
+  string(1) "a"
+  string(1) "a"
+}
+string(42) "v:6:{i:1;i:1;i:1;s:1:"a";s:1:"a";s:1:"a";}"
+vec(6) {
+  int(1)
+  int(1)
+  int(1)
+  string(1) "a"
+  string(1) "a"
+  string(1) "a"
+}
+====================================================
+vec(2) {
+  int(123)
+  string(3) "123"
+}
+string(22) "v:2:{i:123;s:3:"123";}"
+vec(2) {
+  int(123)
+  string(3) "123"
+}
+====================================================
+vec(5) {
+  object(stdClass)#%d (0) {
+  }
+  bool(true)
+  bool(false)
+  float(1.23)
+  NULL
+}
+string(42) "v:5:{O:8:"stdClass":0:{}b:1;b:0;d:1.23;N;}"
+vec(5) {
+  object(stdClass)#%d (0) {
+  }
+  bool(true)
+  bool(false)
+  float(1.23)
+  NULL
+}
+====================================================
+vec(3) {
+  vec(0) {
+  }
+  vec(2) {
+    int(100)
+    int(200)
+  }
+  vec(3) {
+    string(4) "key1"
+    string(4) "key2"
+    string(4) "key3"
+  }
+}
+string(69) "v:3:{v:0:{}v:2:{i:100;i:200;}v:3:{s:4:"key1";s:4:"key2";s:4:"key3";}}"
+vec(3) {
+  vec(0) {
+  }
+  vec(2) {
+    int(100)
+    int(200)
+  }
+  vec(3) {
+    string(4) "key1"
+    string(4) "key2"
+    string(4) "key3"
+  }
+}
+====================================================
+vec(4) {
+  array(0) {
+  }
+  array(2) {
+    [0]=>
+    int(111)
+    [1]=>
+    int(222)
+  }
+  dict(3) {
+    ["a"]=>
+    int(50)
+    ["b"]=>
+    int(60)
+    ["c"]=>
+    int(70)
+  }
+  keyset(4) {
+    string(3) "abc"
+    int(123)
+    string(3) "def"
+    int(456)
+  }
+}
+string(121) "v:4:{a:0:{}a:2:{i:0;i:111;i:1;i:222;}D:3:{s:1:"a";i:50;s:1:"b";i:60;s:1:"c";i:70;}k:4:{s:3:"abc";i:123;s:3:"def";i:456;}}"
+vec(4) {
+  array(0) {
+  }
+  array(2) {
+    [0]=>
+    int(111)
+    [1]=>
+    int(222)
+  }
+  dict(3) {
+    ["a"]=>
+    int(50)
+    ["b"]=>
+    int(60)
+    ["c"]=>
+    int(70)
+  }
+  keyset(4) {
+    string(3) "abc"
+    int(123)
+    string(3) "def"
+    int(456)
+  }
+}
+====================================================
+vec(1) {
+  object(NoisyClass)#%d (0) {
+  }
+}
+NoisyClass::__sleep()
+string(28) "v:1:{O:10:"NoisyClass":0:{}}"
+NoisyClass::__wakeup()
+vec(1) {
+  object(NoisyClass)#%d (1) {
+    ["val"]=>
+    vec(1) {
+      int(12345)
+    }
+  }
+}
+====================================================
+string(6) "v:0:{}"
+vec(0) {
+}
+====================================================
+string(28) "v:4:{i:123;s:3:"abc";b:0;N;}"
+vec(4) {
+  int(123)
+  string(3) "abc"
+  bool(false)
+  NULL
+}
+====================================================
+string(22) "v:2:{i:123;s:3:"123";}"
+vec(2) {
+  int(123)
+  string(3) "123"
+}
+====================================================
+string(22) "v:2:{v:1:{i:123;}r:2;}"
+vec(2) {
+  vec(1) {
+    int(123)
+  }
+  vec(1) {
+    int(123)
+  }
+}
+====================================================
+string(22) "v:2:{v:1:{i:123;}R:2;}"
+
+Notice: Unable to unserialize: [v:2:{v:1:{i:123;}R:2;}]. Vecs cannot contain references. in %s on line %d
+bool(false)
+====================================================
+string(26) "v:2:{i:123;a:1:{i:1;R:2;}}"
+
+Notice: Unable to unserialize: [v:2:{i:123;a:1:{i:1;R:2;}}]. Vecs cannot contain references. in %s on line %d
+bool(false)
+====================================================
+string(36) "v:2:{a:1:{i:0;i:123;}a:1:{i:0;R:3;}}"
+vec(2) {
+  array(1) {
+    [0]=>
+    &int(123)
+  }
+  array(1) {
+    [0]=>
+    &int(123)
+  }
+}
+====================================================
+string(45) "v:1:{O:8:"stdClass":1:{s:3:"val";v:1:{r:2;}}}"
+vec(1) {
+  object(stdClass)#%d (1) {
+    ["val"]=>
+    vec(1) {
+      object(stdClass)#%d (1) {
+        ["val"]=>
+        vec(1) {
+          *RECURSION*
+        }
+      }
+    }
+  }
+}
+====================================================
+object(stdClass)#%d (1) {
+  ["val"]=>
+  vec(1) {
+    *RECURSION*
+  }
+}
+string(39) "O:8:"stdClass":1:{s:3:"val";v:1:{r:1;}}"
+object(stdClass)#%d (1) {
+  ["val"]=>
+  vec(1) {
+    *RECURSION*
+  }
+}
+====================================================
+vec(1) {
+  object(stdClass)#%d (1) {
+    ["val"]=>
+    vec(1) {
+      object(stdClass)#%d (1) {
+        ["val"]=>
+        *RECURSION*
+      }
+    }
+  }
+}
+string(37) "v:1:{O:8:"stdClass":1:{s:3:"val";N;}}"
+vec(1) {
+  object(stdClass)#%d (1) {
+    ["val"]=>
+    NULL
+  }
+}
+====================================================
+vec(1) {
+  object(SleepThrow)#%d (0) {
+  }
+}
+Serialize exception: Sleep exception
+====================================================
+string(29) "v:1:{O:11:"WakeupThrow":0:{}}"
+Unserialize exception: Wakeup exception
+====================================================
+string(141) "v:5:{O:4:"Dtor":1:{s:2:"id";i:1;}O:4:"Dtor":1:{s:2:"id";i:2;}O:4:"Dtor":1:{s:2:"id";i:3;}O:11:"WakeupThrow":0:{}O:4:"Dtor":1:{s:2:"id";i:4;}}"
+Dtor::__destruct(): 1
+Dtor::__destruct(): 2
+Dtor::__destruct(): 3
+Dtor::__destruct(): 4
+Unserialize exception: Wakeup exception
+====================================================
+string(50) "v:3:{v:1:{i:123;}R:2;O:4:"Dtor":1:{s:2:"id";i:1;}}"
+
+Notice: Unable to unserialize: [v:3:{v:1:{i:123;}R:2;O:4:"Dtor":1:{s:2:"id";i:1;}}]. Vecs cannot contain references. in %s on line %d
+bool(false)
+====================================================
+string(50) "v:3:{O:4:"Dtor":1:{s:2:"id";i:1;}v:1:{i:123;}R:3;}"
+Dtor::__destruct(): 1
+
+Notice: Unable to unserialize: [v:3:{O:4:"Dtor":1:{s:2:"id";i:1;}v:1:{i:123;}R:3;}]. Vecs cannot contain references. in %s on line %d
+bool(false)

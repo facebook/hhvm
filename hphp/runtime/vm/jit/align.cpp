@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,10 +16,11 @@
 
 #include "hphp/runtime/vm/jit/align.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/align-arm.h"
+#include "hphp/runtime/vm/jit/align-ppc64.h"
 #include "hphp/runtime/vm/jit/align-x64.h"
+
+#include "hphp/util/arch.h"
 
 namespace HPHP { namespace jit {
 
@@ -29,9 +30,9 @@ bool is_aligned(TCA frontier, Alignment alignment) {
   return ARCH_SWITCH_CALL(is_aligned, frontier, alignment);
 }
 
-void align(CodeBlock& cb, Alignment alignment, AlignContext context,
-           bool fixups /* = true */) {
-  return ARCH_SWITCH_CALL(align, cb, alignment, context, fixups);
+void align(CodeBlock& cb, CGMeta* meta,
+           Alignment alignment, AlignContext context) {
+  return ARCH_SWITCH_CALL(align, cb, meta, alignment, context);
 }
 
 size_t cache_line_size() {

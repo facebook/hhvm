@@ -1,0 +1,65 @@
+========== ref_param ===============================
+ref_param exception: "Keysets cannot contain references"
+ref_param exception: "Keysets cannot contain references"
+ref_param exception: "Keysets cannot contain references"
+ref_param exception: "Keysets cannot contain references"
+ref_param exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(4) {
+  string(4) "key1"
+  int(1)
+  string(3) "abc"
+  int(123)
+}
+========== elem_ref ================================
+elem_ref exception: "Keysets cannot contain references"
+elem_ref exception: "Keysets cannot contain references"
+elem_ref exception: "Keysets cannot contain references"
+elem_ref exception: "Keysets cannot contain references"
+elem_ref exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(4) {
+  string(4) "key1"
+  int(1)
+  string(3) "abc"
+  int(123)
+}
+========== append_ref ==============================
+append_ref exception: "Keysets cannot contain references"
+keyset(4) {
+  string(4) "key1"
+  int(1)
+  string(3) "abc"
+  int(123)
+}
+========== set_ref =================================
+set_ref exception: "Keysets cannot contain references"
+set_ref exception: "Keysets cannot contain references"
+set_ref exception: "Keysets cannot contain references"
+set_ref exception: "Keysets cannot contain references"
+set_ref exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(4) {
+  string(4) "key1"
+  int(1)
+  string(3) "abc"
+  int(123)
+}
+========== ref_return ==============================
+ref_return exception: "Keysets cannot contain references"
+ref_return exception: "Keysets cannot contain references"
+ref_return exception: "Keysets cannot contain references"
+ref_return exception: "Keysets cannot contain references"
+ref_return exception: "Invalid keyset key: expected a key of type int or string, bool given"
+keyset(4) {
+  string(4) "key1"
+  int(1)
+  string(3) "abc"
+  int(123)
+}
+========== iterate_by_ref ==========================
+iterate_by_ref exception: "Keysets cannot contain references"
+iterate_by_ref (key) exception: "Keysets cannot contain references"
+========== convert_with_ref ========================
+convert_with_ref exception: "Keysets cannot contain references"
+========== ref_unserialize =========================
+
+Notice: Unable to unserialize: [a:2:{i:123;s:3:"abc";i:456;k:1:{R:2;}}]. Keysets can only contain integers and strings. in %s on line %d
+bool(false)

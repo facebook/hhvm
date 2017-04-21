@@ -10,10 +10,10 @@
  */
 
 interface Foo {
-  public function bar() : void { }
+  public function bar() : void;
 }
 
-class Bar implements Foo {
+class Baz implements Foo {
   public static function bar() : void { } // ERROR
   public function bar() : void { }
 }

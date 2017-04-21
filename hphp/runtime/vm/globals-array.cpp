@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,13 +16,45 @@
 #include "hphp/runtime/vm/globals-array.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+static __thread GlobalsArray* g_variables;
+
+GlobalsArray* get_global_variables() {
+  assertx(g_variables != nullptr);
+  return g_variables;
+}
+
+GlobalsArray::GlobalsArray(NameValueTable* tab)
+  : ArrayData(kGlobalsKind)
+  , m_tab(tab)
+{
+  Variant arr(staticEmptyArray());
+#define X(s,v) tab->set(makeStaticString(#s), v.asTypedValue());
+
+  X(argc,                 init_null_variant);
+  X(argv,                 init_null_variant);
+  X(_SERVER,              arr);
+  X(_GET,                 arr);
+  X(_POST,                arr);
+  X(_COOKIE,              arr);
+  X(_FILES,               arr);
+  X(_ENV,                 arr);
+  X(_REQUEST,             arr);
+  X(_SESSION,             arr);
+  X(HTTP_RAW_POST_DATA,   init_null_variant);
+#undef X
+
+  g_variables = this;
+  assert(hasExactlyOneRef());
+}
 
 inline GlobalsArray* GlobalsArray::asGlobals(ArrayData* ad) {
   assert(ad->kind() == kGlobalsKind);
@@ -50,24 +82,24 @@ size_t GlobalsArray::Vsize(const ArrayData* ad) {
   return count;
 }
 
-void GlobalsArray::NvGetKey(const ArrayData* ad, TypedValue* out,
-                                     ssize_t pos) {
+Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
   if (iter.valid()) {
     auto k = iter.curKey();
-    out->m_data.pstr = const_cast<StringData*>(k);
-    out->m_type = KindOfString;
-    k->incRefCount();
-  } else {
-    out->m_type = KindOfUninit;
+    if (k->isRefCounted()) {
+      k->incRefCount();
+      return make_tv<KindOfString>(const_cast<StringData*>(k));
+    }
+    return make_tv<KindOfPersistentString>(k);
   }
+  return make_tv<KindOfUninit>();
 }
 
 const Variant& GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
-  return iter.valid() ? tvAsCVarRef(iter.curVal()) : null_variant;
+  return iter.valid() ? tvAsCVarRef(iter.curVal()) : uninit_variant;
 }
 
 bool
@@ -90,15 +122,11 @@ GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayData*
-GlobalsArray::LvalInt(ArrayData* ad, int64_t k, Variant*& ret,
-                               bool copy) {
-  return LvalStr(ad, String(k).get(), ret, copy);
+member_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+  return LvalStr(ad, String(k).get(), copy);
 }
 
-ArrayData*
-GlobalsArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
-                               bool copy) {
+member_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
@@ -106,14 +134,11 @@ GlobalsArray::LvalStr(ArrayData* ad, StringData* k, Variant*& ret,
     tvWriteNull(&nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  ret = &tvAsVariant(tv);
-  return a;
+  return member_lval { a, tv };
 }
 
-ArrayData*
-GlobalsArray::LvalNew(ArrayData* ad, Variant*& ret, bool copy) {
-  ret = &lvalBlackHole();
-  return ad;
+member_lval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
+  return member_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,
@@ -167,33 +192,27 @@ GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
  * is currently $GLOBALS.
  */
 
-ArrayData*
-GlobalsArray::Append(ArrayData*, const Variant& v, bool copy) {
+ArrayData* GlobalsArray::Append(ArrayData*, Cell v, bool copy) {
   throw_not_implemented("append on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::AppendRef(ArrayData*, Variant& v, bool copy) {
+ArrayData* GlobalsArray::AppendRef(ArrayData*, Variant&, bool) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::AppendWithRef(ArrayData*, const Variant& v, bool copy) {
+ArrayData* GlobalsArray::AppendWithRef(ArrayData*, const Variant&, bool) {
   throw_not_implemented("appendWithRef on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::PlusEq(ArrayData*, const ArrayData* elems) {
+ArrayData* GlobalsArray::PlusEq(ArrayData*, const ArrayData*) {
   throw_not_implemented("plus on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::Merge(ArrayData*, const ArrayData* elems) {
+ArrayData* GlobalsArray::Merge(ArrayData*, const ArrayData*) {
   throw_not_implemented("merge on $GLOBALS");
 }
 
-ArrayData*
-GlobalsArray::Prepend(ArrayData*, const Variant& v, bool copy) {
+ArrayData* GlobalsArray::Prepend(ArrayData*, Cell, bool) {
   throw_not_implemented("prepend on $GLOBALS");
 }
 
@@ -284,12 +303,12 @@ bool GlobalsArray::IsVectorData(const ArrayData*) {
 
 ArrayData*
 GlobalsArray::CopyWithStrongIterators(const ArrayData* ad) {
-  throw FatalErrorException(
+  raise_fatal_error(
     "Unimplemented ArrayData::copyWithStrongIterators");
 }
 
 ArrayData* GlobalsArray::CopyStatic(const ArrayData*) {
-  throw FatalErrorException("GlobalsArray::copyStatic "
+  raise_fatal_error("GlobalsArray::copyStatic "
     "not implemented.");
 }
 

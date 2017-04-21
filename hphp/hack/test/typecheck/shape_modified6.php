@@ -11,7 +11,7 @@
 
 type my_shape = shape(
   'x' => int,
-  'y' => ?bool,
+  ?'y' => bool,
 );
 
 function foo(bool $cond): my_shape {

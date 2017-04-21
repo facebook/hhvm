@@ -59,7 +59,7 @@ class RegexIterator extends FilterIterator
 
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.construct.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.construct.php )
    *
    * Create a new RegexIterator which filters an Iterator using a regular
    * expression.
@@ -91,7 +91,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.accept.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.accept.php )
    *
    * Matches (string) RegexIterator::current() (or RegexIterator::key() if
    * the RegexIterator::USE_KEY flag is set) against the regular expression.
@@ -170,7 +170,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/filteriterator.key.php )
+   * ( excerpt from http://php.net/manual/en/filteriterator.key.php )
    *
    * Get the current key.
    *
@@ -181,7 +181,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/filteriterator.current.php )
+   * ( excerpt from http://php.net/manual/en/filteriterator.current.php )
    *
    * Get the current element value.
    *
@@ -192,7 +192,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getregex.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.getregex.php )
    *
    * Returns current regular expression.
    *
@@ -203,7 +203,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getmode.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.getmode.php )
    *
    * Returns the operation mode, see RegexIterator::setMode() for the list
    * of operation modes.
@@ -215,7 +215,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getflags.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.getflags.php )
    *
    * Returns the flags, see RegexIterator::setFlags() for a list of available
    * flags.
@@ -227,7 +227,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.getpregflags.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.getpregflags.php )
    *
    * Returns the regular expression flags, see RegexIterator::__construct()
    * for the list of flags.
@@ -239,7 +239,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.setmode.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.setmode.php )
    *
    * Sets the operation mode.
    *
@@ -266,7 +266,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.setflags.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.setflags.php )
    *
    * Sets the flags.
    *
@@ -281,7 +281,7 @@ class RegexIterator extends FilterIterator
   }
 
   /**
-   * ( excerpt from http://docs.hhvm.com/manual/en/regexiterator.setpregflags.php )
+   * ( excerpt from http://php.net/manual/en/regexiterator.setpregflags.php )
    *
    * Sets the regular expression flags.
    *

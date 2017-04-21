@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FunctionCall);
 
-class FunctionCall : public Expression, public StaticClassName {
+struct FunctionCall : Expression, StaticClassName {
 protected:
   FunctionCall(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS, ExpressionPtr nameExp,
                const std::string &name, bool hadBackslash,
@@ -43,9 +43,9 @@ public:
 
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
-  const std::string &getName() const = delete;//{ return m_name; }
-  const std::string &getOriginalName() const { return m_origName; }
-  const std::string getNonNSOriginalName() const {
+  const std::string& getName() const = delete;//{ return m_name; }
+  const std::string& getOriginalName() const { return m_origName; }
+  std::string getNonNSOriginalName() const {
     auto nsPos = m_origName.rfind('\\');
     if (nsPos == std::string::npos) {
       return m_origName;
@@ -63,10 +63,7 @@ public:
   bool hasUnpack() const;
   void onParse(AnalysisResultConstPtr ar, FileScopePtr fileScope) override;
   bool checkUnpackParams();
-  bool isNamed(const char* name) const;
-  bool isNamed(const std::string& name) const {
-    return isNamed(name.c_str());
-  }
+  bool isNamed(folly::StringPiece name) const;
 private:
   void checkParamTypeCodeErrors(AnalysisResultPtr);
 

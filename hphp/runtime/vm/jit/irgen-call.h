@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,13 +18,19 @@
 
 #include <cstdint>
 
-namespace HPHP { struct StringData; }
-namespace HPHP { namespace jit {
-struct IRGS;
-struct SSATmp;
-}}
+namespace HPHP {
 
-namespace HPHP { namespace jit { namespace irgen {
+struct StringData;
+struct Func;
+
+namespace jit {
+
+struct Type;
+struct SSATmp;
+
+namespace irgen {
+
+struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -34,9 +40,15 @@ void fpushActRec(IRGS& env,
                  int32_t numArgs,
                  const StringData* invName);
 
+void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
+                    SSATmp* const* const args);
+
+SSATmp* implFCall(IRGS& env, int32_t numParams);
+
+Type callReturnType(const Func* callee);
+
 //////////////////////////////////////////////////////////////////////
 
 }}}
-
 
 #endif

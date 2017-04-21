@@ -1,0 +1,2 @@
+<?hh
+interface mQSraCvn < uYZ > extends aEyp < bNEgmLqH , array < bool , classname < lLgKRJKLF > > > , tUV < rVmn , cTc , shape ( ) > , rRuDCepR < mixed > , cSrBsnqMz < mWJDUUHD > , nStqy < fU > , oNT < oNwPg > { }

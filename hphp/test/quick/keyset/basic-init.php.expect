@@ -1,0 +1,66 @@
+keyset(0) {
+}
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+keyset(3) {
+  int(1)
+  string(1) "b"
+  int(3)
+}
+keyset(1) {
+  int(10)
+}
+keyset(1) {
+  string(3) "abc"
+}
+keyset(2) {
+  int(123)
+  string(3) "123"
+}
+keyset(3) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+}
+keyset(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+keyset(3) {
+  int(1)
+  string(1) "b"
+  int(3)
+}
+keyset(1) {
+  int(10)
+}
+keyset(1) {
+  string(3) "abc"
+}
+keyset(3) {
+  string(3) "123"
+  int(456)
+  int(123)
+}
+Exception: Invalid keyset key: expected a key of type int or string, null given
+Exception: Invalid keyset key: expected a key of type int or string, bool given
+Exception: Invalid keyset key: expected a key of type int or string, double given
+Exception: Invalid keyset key: expected a key of type int or string, array given
+Exception: Invalid keyset key: expected a key of type int or string, vec given
+Exception: Invalid keyset key: expected a key of type int or string, dict given
+Exception: Invalid keyset key: expected a key of type int or string, keyset given
+Exception: Invalid keyset key: expected a key of type int or string, stdClass given
+Exception: Invalid keyset key: expected a key of type int or string, HH\Vector given
+Exception: Invalid keyset key: expected a key of type int or string, ToString given
+2 Noisy::__destruct()
+1 Noisy::__destruct()
+Exception: Invalid keyset key: expected a key of type int or string, Noisy given

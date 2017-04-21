@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,19 +13,21 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/server/memory-stats.h"
 
-#include <stdio.h>
-#include <unistd.h>
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/vm/jit/tc.h"
+
+#include <algorithm>
+#include <cstdio>
+#include <fstream>
 #include <ios>
 #include <iostream>
-#include <string>
 #include <sstream>
-#include <fstream>
-#include <algorithm>
+#include <string>
 
-#include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 
@@ -95,22 +97,22 @@ namespace HPHP {
       size_t globalTCUsed = 0;
       size_t globalTCSize = 0;
 
-      auto processUsageInfo = [&](jit::UsageInfo blockUsageInfo) {
-        if (blockUsageInfo.m_global) {
-          globalTCSize += blockUsageInfo.m_capacity;
-          globalTCUsed += blockUsageInfo.m_used;
-          w->beginObject(blockUsageInfo.m_name.c_str());
-          w->writeEntry("Used", blockUsageInfo.m_used);
-          w->writeEntry("Capacity", blockUsageInfo.m_capacity);
-          w->endObject(blockUsageInfo.m_name.c_str());
+      w->beginObject("Details");
+
+      for (auto const& blockUsageInfo : jit::tc::getUsageInfo()) {
+        if (blockUsageInfo.global) {
+          globalTCSize += blockUsageInfo.capacity;
+          globalTCUsed += blockUsageInfo.used;
+          w->beginObject(blockUsageInfo.name.c_str());
+          w->writeEntry("Used", blockUsageInfo.used);
+          w->writeEntry("Capacity", blockUsageInfo.capacity);
+          w->endObject(blockUsageInfo.name.c_str());
         }
       };
-      auto usageInfo = jit::mcg->getUsageInfo();
-      w->beginObject("Details");
-      for_each( usageInfo.begin(), usageInfo.end(), processUsageInfo);
       w->writeEntry("Total Used", globalTCUsed);
       w->writeEntry("Total Capacity", globalTCSize);
       w->endObject("Details");
+
       w->writeEntry("Bytes", globalTCSize);
       totalBytes += globalTCSize;
     }
@@ -131,7 +133,8 @@ namespace HPHP {
   }
 
   MemoryStats* MemoryStats::GetInstance() {
-    return &g_memoryStats;
+    static MemoryStats s_memoryStats;
+    return &s_memoryStats;
   }
 
   void MemoryStats::ResetStaticStringSize() {

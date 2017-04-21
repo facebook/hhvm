@@ -1,0 +1,37 @@
+File "arithmetic_any.php--file2.php", line 7, characters 3-13:
+  int
+File "arithmetic_any.php--file2.php", line 12, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 17, characters 3-13:
+  float
+File "arithmetic_any.php--file2.php", line 22, characters 3-13:
+  float
+File "arithmetic_any.php--file2.php", line 27, characters 3-13:
+  _
+File "arithmetic_any.php--file2.php", line 32, characters 3-13:
+  num
+File "arithmetic_any.php--file2.php", line 37, characters 3-13:
+  num
+File "arithmetic_any.php--file2.php", line 43, characters 3-13:
+  float
+File "arithmetic_any.php--file2.php", line 48, characters 3-13:
+  float
+File "arithmetic_any.php--file2.php", line 53, characters 3-13:
+  num
+File "arithmetic_any.php--file2.php", line 59, characters 3-13:
+  num
+File "arithmetic_any.php--file2.php", line 64, characters 3-13:
+  num
+File "arithmetic_any.php--file2.php", line 76, characters 35-45:
+  _
+File "arithmetic_any.php--file2.php", line 76, characters 48-58:
+  _
+File "arithmetic_any.php--file2.php", line 76, characters 35-45:[2]
+  (_)
+File "arithmetic_any.php--file2.php", line 76, characters 48-58:[2]
+  (_)
+File "arithmetic_any.php--file2.php", line 85, characters 3-13:
+  (int | ?int)
+File "arithmetic_any.php--file2.php", line 90, characters 3-13:
+  float
+No errors

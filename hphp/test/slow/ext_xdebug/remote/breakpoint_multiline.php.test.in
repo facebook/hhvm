@@ -1,0 +1,9 @@
+breakpoint_set -i 0 -t line -f breakpoint_multiline.php.test -n 3
+breakpoint_set -i 1 -t line -f breakpoint_multiline.php.test -n 12
+breakpoint_set -i 2 -t line -f breakpoint_multiline.php.test -n 14
+run -i 3
+status -i 4
+run -i 5
+run -i 6
+run -i 7
+run -i 8

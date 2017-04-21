@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/irgen-arith.h"
+
 #include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -24,11 +26,7 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_emptyString("");
+static const StaticString s_emptyString("");
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto checkArith = [](Type ty) {
@@ -127,11 +125,13 @@ Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& src1, SSATmp*& src2) {
   return opc;
 }
 
+namespace {
+
 void binaryBitOp(IRGS& env, Op op) {
-  auto const type2 = topC(env, BCSPOffset{0})->type();
-  auto const type1 = topC(env, BCSPOffset{1})->type();
+  auto const type2 = topC(env, BCSPRelOffset{0})->type();
+  auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
-    PUNT(BunaryBitOp-Unsupported);
+    PUNT(BinaryBitOp-Unsupported);
     return;
   }
 
@@ -141,12 +141,11 @@ void binaryBitOp(IRGS& env, Op op) {
 }
 
 void binaryArith(IRGS& env, Op op) {
-  auto const type2 = topC(env, BCSPOffset{0})->type();
-  auto const type1 = topC(env, BCSPOffset{1})->type();
+  auto const type2 = topC(env, BCSPRelOffset{0})->type();
+  auto const type1 = topC(env, BCSPRelOffset{1})->type();
   if (!areBinaryArithTypesSupported(op, type1, type2)) {
     // either an int or a dbl, but can't tell
     PUNT(BinaryArith-Unsupported);
-    return;
   }
 
   auto const exitSlow = makeExitSlow(env);
@@ -265,6 +264,41 @@ Opcode toArrCmpOpcode(Op op) {
     case Op::Neq:   return NeqArr;
     case Op::NSame: return NSameArr;
     case Op::Cmp:   return CmpArr;
+    default: always_assert(false);
+  }
+}
+
+Opcode toVecCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Gt:    return GtVec;
+    case Op::Gte:   return GteVec;
+    case Op::Lt:    return LtVec;
+    case Op::Lte:   return LteVec;
+    case Op::Eq:    return EqVec;
+    case Op::Same:  return SameVec;
+    case Op::Neq:   return NeqVec;
+    case Op::NSame: return NSameVec;
+    case Op::Cmp:   return CmpVec;
+    default: always_assert(false);
+  }
+}
+
+Opcode toDictCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Eq:    return EqDict;
+    case Op::Same:  return SameDict;
+    case Op::Neq:   return NeqDict;
+    case Op::NSame: return NSameDict;
+    default: always_assert(false);
+  }
+}
+
+Opcode toKeysetCmpOpcode(Op op) {
+  switch (op) {
+    case Op::Eq:    return EqKeyset;
+    case Op::Same:  return SameKeyset;
+    case Op::Neq:   return NeqKeyset;
+    case Op::NSame: return NSameKeyset;
     default: always_assert(false);
   }
 }
@@ -389,6 +423,75 @@ SSATmp* emitConstCmp(IRGS& env, Op op, bool left, bool right) {
   return gen(env, toBoolCmpOpcode(op), cns(env, left), cns(env, right));
 }
 
+// Relational comparisons of vecs with non-vecs isn't allowed and will always
+// throw. Equality comparisons always act as if they are not equal.
+SSATmp* emitMixedVecCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithVec.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
+// Relational comparisons of dicts with non-dicts isn't allowed and will always
+// throw. Equality comparisons always act as if they are not equal.
+SSATmp* emitMixedDictCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithDict.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
+// Relational comparisons of keysets with non-keysets isn't allowed and will
+// always throw. Equality comparisons always act as if they are not equal.
+SSATmp* emitMixedKeysetCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithKeyset.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
 void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assert(left->type() <= TNull);
   auto const rightTy = right->type();
@@ -408,6 +511,12 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     // in certain cases, which we do not want here. Also note that no collection
     // check is done.
     push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Otherwise, convert both sides to booleans (with null becoming false).
     push(env,
@@ -420,13 +529,23 @@ void implNullCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 
 void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assert(left->type() <= TBool);
-  // Convert whatever is on the right to a boolean and compare. The conversion
-  // may be a no-op if the right operand is already a bool.
-  push(env,
-       gen(env,
-           toBoolCmpOpcode(op),
-           left,
-           gen(env, ConvCellToBool, right)));
+  auto const rightTy = right->type();
+
+  if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
+  } else {
+    // Convert whatever is on the right to a boolean and compare. The conversion
+    // may be a no-op if the right operand is already a bool.
+    push(env,
+         gen(env,
+             toBoolCmpOpcode(op),
+             left,
+             gen(env, ConvCellToBool, right)));
+  }
 }
 
 void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
@@ -450,7 +569,7 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       emitCommutedOp(
         env,
         op,
-        [&](Op op){ return gen(env, toStrIntCmpOpcode(op), right, left); }
+        [&](Op op2){ return gen(env, toStrIntCmpOpcode(op2), right, left); }
       )
     );
   } else if (rightTy.subtypeOfAny(TNull, TBool)) {
@@ -463,6 +582,12 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TArr) {
     // All ints are implicity less than arrays.
     push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TObj) {
     // If compared against an object, emit a collection check before performing
     // the comparison.
@@ -509,6 +634,12 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   } else if (rightTy <= TArr) {
     // All doubles are implicitly less than arrays.
     push(env, emitConstCmp(env, op, false, true));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else if (rightTy <= TObj) {
     // If compared against an object, emit a collection check before performing
     // the comparison.
@@ -566,9 +697,73 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&]{ return emitConstCmp(env, op, false, true); }
       )
     );
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Array is always greater than everything else.
     push(env, emitConstCmp(env, op, true, false));
+  }
+}
+
+void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TVec);
+  auto const rightTy = right->type();
+
+  // Left operand is a vec.
+  if (rightTy <= TVec) {
+    push(env, gen(env, toVecCmpOpcode(op), left, right));
+  } else {
+    push(env, emitMixedVecCmp(env, op));
+  }
+}
+
+void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TDict);
+  auto const rightTy = right->type();
+
+  // Left operand is a dict.
+  if (rightTy <= TDict) {
+    // Dicts can't use relational comparisons.
+    if (op == Op::Eq || op == Op::Neq ||
+        op == Op::Same || op == Op::NSame) {
+      push(env, gen(env, toDictCmpOpcode(op), left, right));
+    } else {
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithDict.get())
+      );
+      push(env, cns(env, false));
+    }
+  } else {
+    push(env, emitMixedDictCmp(env, op));
+  }
+}
+
+void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  assert(left->type() <= TKeyset);
+  auto const rightTy = right->type();
+
+  // Left operand is a keyset.
+  if (rightTy <= TKeyset) {
+    // Keysets can't use relational comparisons.
+    if (op == Op::Eq || op == Op::Neq ||
+        op == Op::Same || op == Op::NSame) {
+      push(env, gen(env, toKeysetCmpOpcode(op), left, right));
+    } else {
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithKeyset.get())
+      );
+      push(env, cns(env, false));
+    }
+  } else {
+    push(env, emitMixedKeysetCmp(env, op));
   }
 }
 
@@ -638,6 +833,12 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         }
       )
     );
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Strings are less than anything else (usually arrays).
     push(env, emitConstCmp(env, op, false, true));
@@ -722,6 +923,12 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         [&]{ return emitConstCmp(env, op, true, false); }
       )
     );
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // For anything else, the object is always greater.
     push(env, emitConstCmp(env, op, true, false));
@@ -769,6 +976,12 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
              toDblCmpOpcode(op),
              gen(env, ConvResToDbl, left),
              gen(env, ConvStrToDbl, right)));
+  } else if (rightTy <= TVec) {
+    push(env, emitMixedVecCmp(env, op));
+  } else if (rightTy <= TDict) {
+    push(env, emitMixedDictCmp(env, op));
+  } else if (rightTy <= TKeyset) {
+    push(env, emitMixedKeysetCmp(env, op));
   } else {
     // Resources are always less than anything else.
     push(env, emitConstCmp(env, op, false, true));
@@ -793,19 +1006,57 @@ void implCmp(IRGS& env, Op op) {
     PUNT(cmpUnknownDataType);
   }
 
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    // With EvalHackArrCompatNotices enabled, we'll raise a notice on ===, !==,
+    // ==, or != between a PHP array and a Hack array. On relational compares,
+    // we'll raise a notice between a PHP array and any other type.
+    switch (op) {
+      case Op::Same:
+      case Op::NSame:
+      case Op::Eq:
+      case Op::Neq:
+        if ((leftTy <= TArr && rightTy <= (TVec|TDict|TKeyset)) ||
+            (leftTy <= (TVec|TDict|TKeyset) && rightTy <= TArr)) {
+          gen(
+            env,
+            RaiseHackArrCompatNotice,
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+          );
+        }
+        break;
+      case Op::Lt:
+      case Op::Lte:
+      case Op::Gt:
+      case Op::Gte:
+      case Op::Cmp:
+        if ((leftTy <= TArr) != (rightTy <= TArr)) {
+          gen(
+            env,
+            RaiseHackArrCompatNotice,
+            cns(env, makeStaticString(Strings::HACKARR_COMPAT_ARR_MIXEDCMP))
+          );
+        }
+        break;
+      default:
+        always_assert(false);
+    }
+  }
+
   // If it's a same-ish comparison and the types don't match (taking into
   // account Str and StaticStr), lower to a bool comparison of
   // constants. Otherwise, switch on the type of the left operand to emit the
   // right kind of comparison.
   if ((op == Op::Same || op == Op::NSame) &&
-      leftTy.toDataType() != rightTy.toDataType() &&
-      !(leftTy <= TStr && rightTy <= TStr)) {
+      !equivDataTypes(leftTy.toDataType(), rightTy.toDataType())) {
     push(env, emitConstCmp(env, op, false, true));
   } else if (leftTy <= TNull) implNullCmp(env, op, left, right);
   else if (leftTy <= TBool) implBoolCmp(env, op, left, right);
   else if (leftTy <= TInt) implIntCmp(env, op, left, right);
   else if (leftTy <= TDbl) implDblCmp(env, op, left, right);
   else if (leftTy <= TArr) implArrCmp(env, op, left, right);
+  else if (leftTy <= TVec) implVecCmp(env, op, left, right);
+  else if (leftTy <= TDict) implDictCmp(env, op, left, right);
+  else if (leftTy <= TKeyset) implKeysetCmp(env, op, left, right);
   else if (leftTy <= TStr) implStrCmp(env, op, left, right);
   else if (leftTy <= TObj) implObjCmp(env, op, left, right);
   else if (leftTy <= TRes) implResCmp(env, op, left, right);
@@ -816,8 +1067,8 @@ void implCmp(IRGS& env, Op op) {
 }
 
 void implAdd(IRGS& env, Op op) {
-  if (topC(env, BCSPOffset{0})->type() <= TArr &&
-      topC(env, BCSPOffset{1})->type() <= TArr) {
+  if (topC(env, BCSPRelOffset{0})->type() <= TArr &&
+      topC(env, BCSPRelOffset{1})->type() <= TArr) {
     auto const tr = popC(env);
     auto const tl = popC(env);
     // The ArrayAdd helper decrefs its args, so don't decref pop'ed values.
@@ -946,7 +1197,7 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
    * boxed locals.
    */
   bool const isAdd = (*subOpc == Op::Add || *subOpc == Op::AddO);
-  if (isAdd && (env.irb->localType(id, DataTypeSpecific) <= TArr) &&
+  if (isAdd && (env.irb->local(id, DataTypeSpecific).type <= TArr) &&
       topC(env)->isA(TArr)) {
     /*
      * ArrayAdd decrefs its sources and returns a new array with
@@ -1041,6 +1292,8 @@ void emitXor(IRGS& env) {
   decRef(env, btr);
 }
 
+const StaticString s_NEGATIVE_SHIFT(Strings::NEGATIVE_SHIFT);
+
 void implShift(IRGS& env, Opcode op) {
   auto const shiftAmount    = popC(env);
   auto const lhs            = popC(env);
@@ -1077,10 +1330,8 @@ void implShift(IRGS& env, Opcode op) {
             // Unlikely: shifting by a negative amount.
             hint(env, Block::Hint::Unlikely);
 
-            // TODO(https://github.com/facebook/hhvm/issues/6012)
-            // This should throw an ArithmeticError.
-            gen(env, ThrowInvalidOperation,
-                cns(env, makeStaticString(Strings::NEGATIVE_SHIFT)));
+            gen(env, ThrowArithmeticError,
+                cns(env, s_NEGATIVE_SHIFT.get()));
 
             // Dead-code, but needed to satisfy cond().
             return cns(env, false);
@@ -1124,6 +1375,34 @@ void emitShr(IRGS& env) {
 }
 
 void emitPow(IRGS& env) {
+  // Special-case exponent of 2 or 3, i.e.
+  // $x**2 becomes $x*$x,
+  // $x**3 becomes ($x*$x)*$x
+  // TODO(t14096669) if input will result in integer overflow,
+  // compute double result and return instead of slow exit path.
+  auto exponent = topC(env);
+  auto base = topC(env, BCSPRelOffset{1});
+  if ((exponent->hasConstVal(2) || exponent->hasConstVal(3)) &&
+      (base->isA(TDbl) || base->isA(TInt))) {
+    auto intVal = exponent->intVal();
+    SSATmp* genPowResult;
+    auto const exitSlow = makeExitSlow(env);
+    if (base->isA(TInt)) {
+      genPowResult = gen(env, MulIntO, exitSlow, base, base);
+    } else {
+      genPowResult = gen(env, MulDbl, base, base);
+    }
+    if (intVal == 3) {
+      if (genPowResult->isA(TInt)) {
+        genPowResult = gen(env, MulIntO, exitSlow, genPowResult, base);
+      } else {
+        genPowResult = gen(env, MulDbl, genPowResult, base);
+      }
+    }
+    discard(env, 2);
+    push(env, genPowResult);
+    return;
+  }
   interpOne(env, TUncountedInit, 2);
 }
 
@@ -1154,9 +1433,10 @@ void emitNot(IRGS& env) {
   decRef(env, src);
 }
 
+const StaticString s_DIVISION_BY_ZERO(Strings::DIVISION_BY_ZERO);
 void emitDiv(IRGS& env) {
-  auto const divisorType  = topC(env, BCSPOffset{0})->type();
-  auto const dividendType = topC(env, BCSPOffset{1})->type();
+  auto const divisorType  = topC(env, BCSPRelOffset{0})->type();
+  auto const dividendType = topC(env, BCSPRelOffset{1})->type();
 
   auto isNumeric = [&] (Type type) {
     return type.subtypeOfAny(TInt, TDbl, TBool);
@@ -1193,7 +1473,7 @@ void emitDiv(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+      auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
       gen(env, RaiseWarning, msg);
 
       // PHP5 results in false; we side exit since the type of the result
@@ -1257,6 +1537,7 @@ void emitDiv(IRGS& env) {
   push(env, result);
 }
 
+const StaticString s_MODULO_BY_ZERO(Strings::MODULO_BY_ZERO);
 void emitMod(IRGS& env) {
   auto const btr = popC(env);
   auto const btl = popC(env);
@@ -1273,14 +1554,12 @@ void emitMod(IRGS& env) {
       hint(env, Block::Hint::Unlikely);
 
       if (RuntimeOption::PHP7_IntSemantics) {
-        // TODO(https://github.com/facebook/hhvm/issues/6012)
-        // This should throw a DivisionByZeroError.
-        auto const msg = cns(env, makeStaticString(Strings::MODULO_BY_ZERO));
-        gen(env, ThrowInvalidOperation, msg);
+        auto const msg = cns(env, s_MODULO_BY_ZERO.get());
+        gen(env, ThrowDivisionByZeroError, msg);
       } else {
         // Make progress before side-exiting to the next instruction: raise a
         // warning and push false.
-        auto const msg = cns(env, makeStaticString(Strings::DIVISION_BY_ZERO));
+        auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
         gen(env, RaiseWarning, msg);
         decRef(env, btr);
         decRef(env, btl);

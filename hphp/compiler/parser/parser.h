@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,8 +65,7 @@ enum class ThisContextError {
 ///////////////////////////////////////////////////////////////////////////////
 // scanner
 
-class Token : public ScannerToken {
-public:
+struct Token : ScannerToken {
   ExpressionPtr exp;
   StatementPtr stmt;
   TypeAnnotationPtr typeAnnotation;
@@ -114,8 +113,7 @@ public:
 
 DECLARE_BOOST_TYPES(Parser);
 
-class Parser : public ParserBase {
-public:
+struct Parser : ParserBase {
   static StatementListPtr ParseString(const String& input, AnalysisResultPtr ar,
                                       const char *fileName = nullptr,
                                       bool lambdaMode = false);
@@ -159,6 +157,7 @@ public:
   void onClassAbstractConstant(Token &out, Token *exprs, Token &var);
   void onClassTypeConstant(Token &out, Token &var, Token &value);
   void onSimpleVariable(Token &out, Token &var);
+  void onPipeVariable(Token &out);
   void onSynthesizedVariable(Token &out, Token &var) {
     onSimpleVariable(out, var);
   }
@@ -203,8 +202,12 @@ public:
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
+  void onDict(Token &out, Token &pairs);
+  void onVec(Token& out, Token& exprs);
+  void onKeyset(Token& out, Token& exprs);
+  void onVArray(Token& out, Token& exprs);
+  void onDArray(Token& out, Token& exprs);
   void onEmptyCollection(Token &out);
-  void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onClassClass(Token &out, Token &cls, Token &name, bool text);
@@ -263,6 +266,7 @@ public:
   void onBreakContinue(Token &out, bool isBreak, Token *expr);
   void onReturn(Token &out, Token *expr);
   void onYield(Token &out, Token *expr);
+  void onYieldFrom(Token &out, Token *expr);
   void onYieldPair(Token &out, Token *key, Token *val);
   void onYieldBreak(Token &out);
   void onAwait(Token &out, Token &expr);
@@ -291,7 +295,8 @@ public:
                   Token& params,
                   Token& cparams,
                   Token& stmts,
-                  Token& ret);
+                  Token& ret1,
+                  Token* ret2 = nullptr);
   Token onExprForLambda(const Token& expr);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
 
@@ -304,9 +309,11 @@ public:
   void onTypeAnnotation(Token& out, const Token& name, const Token& typeArgs);
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
+  void onShapeFieldSpecialization(Token& shapeField, char specialization);
   void onClsCnsShapeField(Token& out, const Token& cls, const Token& cns,
     const Token& value);
-  void onShape(Token& out, const Token& shapeMemberList);
+  void onShape(
+    Token& out, const Token& shapeMemberList, bool terminatedWithEllipsis);
 
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
@@ -353,6 +360,9 @@ public:
   void useFunction(const std::string &fn, const std::string &as);
   void useConst(const std::string &cnst, const std::string &as);
 
+  void onDeclare(Token& out, Token& block);
+  void onDeclareList(Token& out, Token& ident, Token& value);
+
   /*
    * Get the current label scope. A new label scope is demarcated by
    * one of the following: a loop, a switch statement, a finally block,
@@ -392,16 +402,15 @@ public:
 
 private:
   struct FunctionContext {
-    FunctionContext()
-      : hasCallToGetArgs(false)
+    explicit FunctionContext(std::string name)
+      : name(std::move(name))
       , hasNonEmptyReturn(false)
       , isGenerator(false)
       , isAsync(false)
       , mayCallSetFrameMetadata(false)
     {}
 
-    // Function contains a call to func_num_args, func_get_args or func_get_arg.
-    bool hasCallToGetArgs;
+    std::string name;
 
     // Function contains a non-empty return statement.
     bool hasNonEmptyReturn;
@@ -438,8 +447,6 @@ private:
   std::vector<FunctionContext> m_funcContexts;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::stack<ClassContext> m_clsContexts;
-  std::string m_funcName;
-  std::string m_containingFuncName;
 
   // parser output
   StatementListPtr m_tree;
@@ -456,6 +463,16 @@ private:
   void newScope();
   void completeScope(BlockScopePtr inner);
 
+  /*
+   * The name of the containing named function (ie, not including
+   * closures), if any.
+   */
+  const std::string& realFuncName() const;
+  /*
+   * The name of the currently active function, or '{closure}'
+   * if its a closure.
+   */
+  const std::string& funcName() const;
   const std::string& clsName() const;
   bool inTrait() const;
 
@@ -504,16 +521,23 @@ private:
     InsideNamespace,
   };
 
+public:
   /*
    * An AliasTable maps aliases to names.
    * We use it instead a regular map because it lazily imports a bunch of
    * names into the current namespace when appropriate.
    */
-  class AliasTable {
-  public:
-    struct AliasEntry {
-      std::string alias;
+  struct AliasTable {
+    enum class AliasFlags {
+      None = 0,
+      HH = 0x1,
+      PHP7_ScalarTypes = 0x2,
+      PHP7_EngineExceptions = 0x4,
+    };
+
+    struct AutoAlias {
       std::string name;
+      AliasFlags flags;
     };
 
     enum class AliasType {
@@ -523,14 +547,20 @@ private:
       DEF
     };
 
-    AliasTable(const hphp_string_imap<std::string>& autoAliases,
-               std::function<bool ()> autoOracle);
+    using AutoAliasMap = std::unordered_map<
+      std::string,
+      AutoAlias,
+      string_hashi,
+      string_eqstri>;
 
-    std::string getName(const std::string& alias, int line_no);
+    AliasTable(const AutoAliasMap& aliases,
+               std::function<AliasFlags ()> autoOracle);
+
+    std::string getName(const std::string& alias, int line_no, bool forNs);
     std::string getNameRaw(const std::string& alias);
     AliasType getType(const std::string& alias);
     int getLine(const std::string& alias);
-    bool isAliased(const std::string& alias);
+    bool isAliased(const std::string& alias, bool forNs);
     void set(const std::string& alias,
              const std::string& name,
              AliasType type,
@@ -545,14 +575,19 @@ private:
     };
 
     hphp_string_imap<NameEntry> m_aliases;
-    const hphp_string_imap<std::string>& m_autoAliases;
+    const AutoAliasMap& m_autoAliases;
     // Returns true if stuff should be auto-imported.
-    std::function<bool ()> m_autoOracle;
+    std::function<AliasFlags ()> m_autoOracle;
     void setFalseOracle();
+    const AutoAliasMap& getAutoAliases();
   };
 
+  using AutoAlias = AliasTable::AutoAlias;
   using AliasType = AliasTable::AliasType;
+  using AliasFlags = AliasTable::AliasFlags;
+  using AutoAliasMap = AliasTable::AutoAliasMap;
 
+private:
   NamespaceState m_nsState;
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
@@ -568,10 +603,19 @@ private:
   hphp_string_map<std::string> m_cnstAliasTable;
 
   void registerAlias(std::string name);
-  bool isAutoAliasOn();
-  const hphp_string_imap<std::string>& getAutoAliasedClasses();
-  hphp_string_imap<std::string> getAutoAliasedClassesHelper();
+  AliasFlags getAliasFlags();
+  const AutoAliasMap& getAutoAliasedClasses();
 };
+
+inline Parser::AliasFlags operator|(const Parser::AliasFlags& lhs,
+                                    const Parser::AliasFlags& rhs) {
+  return (Parser::AliasFlags)((unsigned)lhs | (unsigned)rhs);
+}
+
+inline unsigned operator&(const Parser::AliasFlags& lhs,
+                          const Parser::AliasFlags& rhs) {
+  return (unsigned)lhs & (unsigned)rhs;
+}
 
 template<typename... Args>
 inline void HPHP_PARSER_ERROR(const char* fmt,

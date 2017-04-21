@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,9 +16,13 @@
 #include "hphp/runtime/vm/jit/irgen-create.h"
 
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -27,6 +31,10 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_uuinvoke("__invoke");
+const StaticString s_traceOpts("traceOpts");
+const StaticString s_trace("trace");
+const StaticString s_file("file");
+const StaticString s_line("line");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -42,6 +50,64 @@ void initProps(IRGS& env, const Class* cls) {
       gen(env, InitProps, ClassData(cls));
     }
   );
+}
+
+void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
+  assertx(cls->classof(SystemLib::s_ErrorClass) ||
+          cls->classof(SystemLib::s_ExceptionClass));
+  assertx(throwable->type() <= TObj);
+
+  // Root of the class hierarchy.
+  auto const rootCls = cls->classof(SystemLib::s_ExceptionClass)
+    ? SystemLib::s_ExceptionClass : SystemLib::s_ErrorClass;
+
+  auto const propAddr = [&] (Slot idx) {
+    return gen(
+      env,
+      LdPropAddr,
+      ByteOffsetData { (ptrdiff_t)rootCls->declPropOffset(idx) },
+      TInitNull.ptr(Ptr::Prop),
+      throwable
+    );
+  };
+
+  // Load Exception::$traceOpts
+  auto const sprop = ldClsPropAddrKnown(
+    env, SystemLib::s_ExceptionClass, s_traceOpts.get());
+  auto const traceOpts = cond(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckTypeMem, TInt, taken, sprop);
+    },
+    [&] {
+      // sprop is an integer, load it
+      return gen(env, LdMem, TInt, sprop);
+    },
+    [&] {
+      // sprop is a garbage, use default traceOpts value
+      return cns(env, 0);
+    }
+  );
+
+  // Call debug_backtrace(traceOpts)
+  auto const trace = gen(env, DebugBacktrace, traceOpts);
+
+  // $throwable->trace = $trace
+  auto const traceIdx = rootCls->lookupDeclProp(s_trace.get());
+  assertx(traceIdx != kInvalidSlot);
+  gen(env, StMem, propAddr(traceIdx), trace);
+
+  // Populate $throwable->{file,line}
+  if (UNLIKELY(curFunc(env)->isBuiltin())) {
+    gen(env, InitThrowableFileAndLine, throwable);
+  } else {
+    auto const fileIdx = rootCls->lookupDeclProp(s_file.get());
+    auto const lineIdx = rootCls->lookupDeclProp(s_line.get());
+    auto const unit = curFunc(env)->unit();
+    auto const line = unit->getLineNumber(bcOff(env));
+    gen(env, StMem, propAddr(fileIdx), cns(env, unit->filepath()));
+    gen(env, StMem, propAddr(lineIdx), cns(env, line));
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -66,24 +132,6 @@ void initSProps(IRGS& env, const Class* cls) {
 }
 
 SSATmp* allocObjFast(IRGS& env, const Class* cls) {
-  // CustomInstance classes always go through IR:AllocObj and
-  // ObjectData::newInstance()
-  assert(!cls->callsCustomInstanceInit());
-
-  auto registerObj = [&] (SSATmp* obj) {
-    if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
-      gen(env, RegisterLiveObj, obj);
-    }
-    return obj;
-  };
-
-  // If it's an extension class with a custom instance initializer,
-  // that init function does all the work.
-  if (cls->instanceCtor()) {
-    auto const obj = gen(env, ConstructInstance, ClassData(cls));
-    return registerObj(obj);
-  }
-
   // Make sure our property init vectors are all set up.
   const bool props = cls->pinitVec().size() > 0;
   const bool sprops = cls->numStaticProperties() > 0;
@@ -99,11 +147,29 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
    * initialization above can throw, so we don't want to have the object
    * allocated already.
    */
-  auto const ssaObj = gen(env, NewInstanceRaw, ClassData(cls));
+  SSATmp* obj;
+  if (cls->instanceCtor()) {
+    // If it's an extension class with a custom instance initializer,
+    // use it to construct the object.
+    obj = gen(env, ConstructInstance, ClassData(cls));
+  } else {
+    // Construct a new instance of PHP class.
+    obj = gen(env, NewInstanceRaw, ClassData(cls));
 
-  // Initialize the properties
-  gen(env, InitObjProps, ClassData(cls), ssaObj);
-  return registerObj(ssaObj);
+    // Initialize the properties.
+    gen(env, InitObjProps, ClassData(cls), obj);
+  }
+
+  // Initialize Throwable.
+  if (cls->needsInitThrowable()) {
+    initThrowable(env, cls, obj);
+  }
+
+  if (RuntimeOption::EnableObjDestructCall && cls->getDtor()) {
+    gen(env, RegisterLiveObj, obj);
+  }
+
+  return obj;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -116,27 +182,32 @@ SSATmp* allocObjFast(IRGS& env, const Class* cls) {
  * this code is reachable it will always use the same closure Class*,
  * so we can just burn it into the TC without using RDS.
  */
-void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
-  auto cls = Unit::lookupClassOrUniqueClass(clsName)->rescope(
-    const_cast<Class*>(curClass(env))
-  );
-  assertx(cls && (cls->attrs() & AttrUnique));
+void emitCreateCl(IRGS& env, int32_t numParams, int32_t clsIx) {
+  auto const preCls = curFunc(env)->unit()->lookupPreClassId(clsIx);
+  auto cls = Unit::defClosure(preCls);
+
+  assertx(cls);
+  assertx(cls->attrs() & AttrUnique);
+
+  cls = cls->rescope(const_cast<Class*>(curClass(env)));
 
   auto const func = cls->getCachedInvoke();
 
   auto const closure = allocObjFast(env, cls);
 
-  auto const ctx = [&]{
-    if (!curClass(env)) return cns(env, nullptr);
-    auto const ldctx = gen(env, LdCtx, fp(env));
-    if (func->isStatic()) {
-      return gen(env, ConvClsToCctx, gen(env, LdClsCtx, ldctx));
+  auto const live_ctx = [&] {
+    auto const ldctx = ldCtx(env);
+    if (!ldctx->type().maybe(TObj)) {
+      return ldctx;
     }
-    gen(env, IncRefCtx, ldctx);
+    if (func->isStatic()) {
+      return gen(env, FwdCtxStaticCall, ldctx);
+    }
+    gen(env, IncRef, ldctx);
     return ldctx;
   }();
 
-  gen(env, StClosureCtx, closure, ctx);
+  gen(env, StClosureCtx, closure, live_ctx);
 
   SSATmp** args = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (int32_t i = 0; i < numParams; ++i) {
@@ -148,7 +219,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
     gen(
       env,
       StClosureArg,
-      PropByteOffset(cls->declPropOffset(propId)),
+      ByteOffsetData { safe_cast<ptrdiff_t>(cls->declPropOffset(propId)) },
       closure,
       args[propId]
     );
@@ -165,7 +236,7 @@ void emitCreateCl(IRGS& env, int32_t numParams, const StringData* clsName) {
     gen(
       env,
       StClosureArg,
-      PropByteOffset(cls->declPropOffset(propId)),
+      ByteOffsetData { safe_cast<ptrdiff_t>(cls->declPropOffset(propId)) },
       closure,
       cns(env, TUninit)
     );
@@ -194,6 +265,24 @@ void emitNewMixedArray(IRGS& env, int32_t capacity) {
   }
 }
 
+void emitNewDictArray(IRGS& env, int32_t capacity) {
+  push(env, gen(env, NewDictArray, cns(env, capacity)));
+}
+
+void emitNewKeysetArray(IRGS& env, int32_t numArgs) {
+  auto const array = gen(
+    env,
+    NewKeysetArray,
+    NewKeysetArrayData {
+      spOffBCFromIRSP(env),
+      static_cast<uint32_t>(numArgs)
+    },
+    sp(env)
+  );
+  discard(env, numArgs);
+  push(env, array);
+}
+
 void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);
@@ -209,23 +298,26 @@ void emitNewLikeArrayL(IRGS& env, int32_t id, int32_t capacity) {
   push(env, arr);
 }
 
-void emitNewPackedArray(IRGS& env, int32_t numArgs) {
+namespace {
+
+ALWAYS_INLINE
+void emitNewPackedLayoutArray(IRGS& env, int32_t numArgs, Opcode op) {
   if (numArgs > CapCode::Threshold) {
-    PUNT(NewPackedArray-UnrealisticallyHuge);
+    PUNT(NewPackedLayoutArray-UnrealisticallyHuge);
   }
 
   auto const array = gen(
     env,
-    AllocPackedArray,
+    op,
     PackedArrayData { static_cast<uint32_t>(numArgs) }
   );
   static constexpr auto kMaxUnrolledInitArray = 8;
   if (numArgs > kMaxUnrolledInitArray) {
     gen(
       env,
-      InitPackedArrayLoop,
+      InitPackedLayoutArrayLoop,
       InitPackedArrayLoopData {
-        offsetFromIRSP(env, BCSPOffset{0}),
+        spOffBCFromIRSP(env),
         static_cast<uint32_t>(numArgs)
       },
       array,
@@ -239,7 +331,7 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
   for (int i = 0; i < numArgs; ++i) {
     gen(
       env,
-      InitPackedArray,
+      InitPackedLayoutArray,
       IndexData { static_cast<uint32_t>(numArgs - i - 1) },
       array,
       popC(env, DataTypeGeneric)
@@ -248,12 +340,22 @@ void emitNewPackedArray(IRGS& env, int32_t numArgs) {
   push(env, array);
 }
 
+}
+
+void emitNewPackedArray(IRGS& env, int32_t numArgs) {
+  emitNewPackedLayoutArray(env, numArgs, AllocPackedArray);
+}
+
+void emitNewVecArray(IRGS& env, int32_t numArgs) {
+  emitNewPackedLayoutArray(env, numArgs, AllocVecArray);
+}
+
 void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
   auto const numArgs = immVec.size();
   auto const ids = immVec.vec32();
 
   NewStructData extra;
-  extra.offset  = offsetFromIRSP(env, BCSPOffset{0});
+  extra.offset  = spOffBCFromIRSP(env);
   extra.numKeys = numArgs;
   extra.keys    = new (env.unit.arena()) StringData*[numArgs];
   for (auto i = size_t{0}; i < numArgs; ++i) {
@@ -265,17 +367,31 @@ void emitNewStructArray(IRGS& env, const ImmVector& immVec) {
 }
 
 void emitAddElemC(IRGS& env) {
-  // This is just to peek at the type; it'll be consumed for real down below and
-  // we don't want to constrain it if we're just going to InterpOne.
-  auto const kt = topC(env, BCSPOffset{1}, DataTypeGeneric)->type();
+  // This is just to peek at the types; they'll be consumed for real down below
+  // and we don't want to constrain it if we're just going to InterpOne.
+  auto const kt = topC(env, BCSPRelOffset{1}, DataTypeGeneric)->type();
+  auto const at = topC(env, BCSPRelOffset{2}, DataTypeGeneric)->type();
   Opcode op;
-  if (kt <= TInt) {
-    op = AddElemIntKey;
-  } else if (kt <= TStr) {
-    op = AddElemStrKey;
+  if (at <= TArr) {
+    if (kt <= TInt) {
+      op = AddElemIntKey;
+    } else if (kt <= TStr) {
+      op = AddElemStrKey;
+    } else {
+      interpOne(env, TArr, 3);
+      return;
+    }
+  } else if (at <= TDict) {
+    if (kt <= TInt) {
+      op = DictAddElemIntKey;
+    } else if (kt <= TStr) {
+      op = DictAddElemStrKey;
+    } else {
+      interpOne(env, TDict, 3);
+      return;
+    }
   } else {
-    interpOne(env, TArr, 3);
-    return;
+    PUNT(AddElemC-BadArr);
   }
 
   // val is teleported from the stack to the array, so we don't have to do any
@@ -289,7 +405,7 @@ void emitAddElemC(IRGS& env) {
 }
 
 void emitAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{1})->isA(TArr)) {
+  if (!topC(env, BCSPRelOffset{1})->isA(TArr)) {
     return interpOne(env, TArr, 2);
   }
 
@@ -300,40 +416,22 @@ void emitAddNewElemC(IRGS& env) {
 }
 
 void emitNewCol(IRGS& env, int type) {
+  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   push(env, gen(env, NewCol, NewColData{type}));
 }
 
+void emitNewPair(IRGS& env) {
+  auto const c1 = popC(env, DataTypeGeneric);
+  auto const c2 = popC(env, DataTypeGeneric);
+  // elements were pushed onto the stack in the order they should appear
+  // in the pair, so the top of the stack should become the second element
+  push(env, gen(env, NewPair, c2, c1));
+}
+
 void emitColFromArray(IRGS& env, int type) {
+  assertx(static_cast<CollectionType>(type) != CollectionType::Pair);
   auto const arr = popC(env);
   push(env, gen(env, NewColFromArray, NewColData{type}, arr));
-}
-
-void emitMapAddElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{2})->isA(TObj)) {
-    return interpOne(env, TObj, 3);
-  }
-  if (!topC(env, BCSPOffset{1}, DataTypeGeneric)->type().
-      subtypeOfAny(TInt, TStr)) {
-    interpOne(env, TObj, 3);
-    return;
-  }
-
-  auto const val = popC(env);
-  auto const key = popC(env);
-  auto const coll = popC(env);
-  push(env, gen(env, MapAddElemC, coll, key, val));
-  decRef(env, key);
-}
-
-void emitColAddNewElemC(IRGS& env) {
-  if (!topC(env, BCSPOffset{1})->isA(TObj)) {
-    return interpOne(env, TObj, 2);
-  }
-
-  auto const val = popC(env);
-  auto const coll = popC(env);
-  // The AddNewElem helper decrefs its args, so don't decref pop'ed values.
-  push(env, gen(env, ColAddNewElemC, coll, val));
 }
 
 void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
@@ -346,23 +444,43 @@ void emitStaticLocInit(IRGS& env, int32_t locId, const StringData* name) {
   // source location" rule that the inline fastpath requires
   auto const box = [&]{
     if (curFunc(env)->isClosureBody()) {
-      return gen(env, ClosureStaticLocInit, cns(env, name), fp(env), value);
+      auto const theBox = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+      ifThen(
+        env,
+        [&] (Block* taken) {
+          gen(env, CheckClosureStaticLocInit, taken, theBox);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, InitClosureStaticLoc, theBox, value);
+        }
+      );
+      return theBox;
     }
 
-    auto const cachedBox =
-      gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
-    ifThen(
+    return cond(
       env,
       [&] (Block* taken) {
-        gen(env, CheckStaticLocInit, taken, cachedBox);
+        return gen(
+          env,
+          LdStaticLoc,
+          StaticLocName { curFunc(env), name },
+          taken
+        );
       },
+      [&] (SSATmp* theBox) { return theBox; },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        gen(env, StaticLocInitCached, cachedBox, value);
+        return gen(
+          env,
+          InitStaticLoc,
+          StaticLocName { curFunc(env), name },
+          value
+        );
       }
     );
-    return cachedBox;
   }();
+
   gen(env, IncRef, box);
   auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeSpecific);
   stLocRaw(env, locId, fp(env), box);
@@ -376,38 +494,64 @@ void emitStaticLoc(IRGS& env, int32_t locId, const StringData* name) {
 
   auto const ldPMExit = makePseudoMainExit(env);
 
-  auto const box = curFunc(env)->isClosureBody() ?
-    gen(env, ClosureStaticLocInit,
-             cns(env, name), fp(env), cns(env, TUninit)) :
-    gen(env, LdStaticLocCached, StaticLocName { curFunc(env), name });
+  SSATmp* box;
+  SSATmp* inited;
+  std::tie(box, inited) = [&] {
+    if (curFunc(env)->isClosureBody()) {
+      auto const box = gen(env, LdClosureStaticLoc, cns(env, name), fp(env));
+      auto const inited = cond(
+        env,
+        [&] (Block* taken) {
+          gen(env, CheckClosureStaticLocInit, taken, box);
+        },
+        [&] { // Next: the static local is already initialized
+          return cns(env, true);
+        },
+        [&] { // Taken: need to initialize the static local
+          /*
+           * Even though this path is "cold", we're not marking it
+           * unlikely because the size of the instructions this will
+           * generate is about 10 bytes, which is not much larger than the
+           * 5 byte jump to acold would be.
+           */
+          gen(env, InitClosureStaticLoc, box, cns(env, TInitNull));
+          return cns(env, false);
+        }
+      );
+      return std::make_pair(box, inited);
+    }
 
-  auto const res = cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckStaticLocInit, taken, box);
-    },
-    [&] { // Next: the static local is already initialized
-      return cns(env, true);
-    },
-    [&] { // Taken: need to initialize the static local
-      /*
-       * Even though this path is "cold", we're not marking it
-       * unlikely because the size of the instructions this will
-       * generate is about 10 bytes, which is not much larger than the
-       * 5 byte jump to acold would be.
-       *
-       * One note about StaticLoc: we're literally always going to
-       * generate a fallthrough trace here that is cold (the code that
-       * initializes the static local).  TODO(#2894612).
-       */
-      gen(env, StaticLocInitCached, box, cns(env, TInitNull));
-      return cns(env, false);
-    });
+    return condPair(
+      env,
+      [&] (Block* taken) {
+        return gen(
+          env,
+          LdStaticLoc,
+          StaticLocName { curFunc(env), name },
+          taken
+        );
+      },
+      [&] (SSATmp* box2) { // Next: the static local is already initialized
+        return std::make_pair(box2, cns(env, true));
+      },
+      [&] { // Taken: need to initialize the static local
+        hint(env, Block::Hint::Unlikely);
+        auto const inited = gen(
+          env,
+          InitStaticLoc,
+          StaticLocName { curFunc(env), name },
+          cns(env, TInitNull)
+        );
+        return std::make_pair(inited, cns(env, false));
+      }
+    );
+  }();
+
   gen(env, IncRef, box);
   auto const oldValue = ldLoc(env, locId, ldPMExit, DataTypeGeneric);
   stLocRaw(env, locId, fp(env), box);
   decRef(env, oldValue);
-  push(env, res);
+  push(env, inited);
 }
 
 //////////////////////////////////////////////////////////////////////

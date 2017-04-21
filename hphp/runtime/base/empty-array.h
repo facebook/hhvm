@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,9 +22,12 @@
 #include <sys/types.h>
 
 #include "hphp/runtime/base/array-common.h"
-#include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/util/type-scan.h"
 
 namespace HPHP {
 
@@ -45,15 +48,17 @@ struct MixedArray;
  * Other arrays may also be empty in the sense that size() == 0, but
  * this one is dealt with commonly enough to deserve special handlers.
  */
-struct EmptyArray {
+struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
   static void Release(ArrayData*);
   static const TypedValue* NvGetInt(const ArrayData*, int64_t) {
     return nullptr;
   }
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData*) {
     return nullptr;
   }
-  static void NvGetKey(const ArrayData*, TypedValue* out, ssize_t pos);
+  static constexpr auto NvTryGetStr = &NvGetStr;
+  static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData* ad, int64_t, bool) {
@@ -73,10 +78,12 @@ struct EmptyArray {
   static bool ExistsStr(const ArrayData*, const StringData*) {
     return false;
   }
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
-                            bool copy);
-  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static member_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
     bool copy);
@@ -118,12 +125,18 @@ struct EmptyArray {
   static ArrayData* ZSetInt(ArrayData* ad, int64_t k, RefData* v);
   static ArrayData* ZSetStr(ArrayData* ad, StringData* k, RefData* v);
   static ArrayData* ZAppend(ArrayData* ad, RefData* v, int64_t* key_ptr);
-  static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
-  static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
+  static ArrayData* ToPHPArray(ArrayData* ad, bool) {
+    return ad;
+  }
+  static ArrayData* ToDict(ArrayData*, bool);
+  static ArrayData* ToVec(ArrayData*, bool);
+  static ArrayData* ToKeyset(ArrayData*, bool);
   static void Renumber(ArrayData*) {}
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad) {
@@ -131,10 +144,10 @@ struct EmptyArray {
   }
 
 private:
-  static std::pair<ArrayData*,TypedValue*> MakePacked(TypedValue);
-  static std::pair<ArrayData*,TypedValue*> MakePackedInl(TypedValue);
-  static std::pair<ArrayData*,TypedValue*> MakeMixed(StringData*, TypedValue);
-  static std::pair<ArrayData*,TypedValue*> MakeMixed(int64_t, TypedValue);
+  static member_lval MakePacked(TypedValue);
+  static member_lval MakePackedInl(TypedValue);
+  static member_lval MakeMixed(StringData*, TypedValue);
+  static member_lval MakeMixed(int64_t, TypedValue);
 
 private:
   struct Initializer;

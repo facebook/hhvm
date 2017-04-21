@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,12 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #include "hphp/runtime/vm/jit/relocation.h"
 
 #include "hphp/runtime/vm/jit/align-x64.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
+#include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
 namespace HPHP { namespace jit { namespace x64 {
@@ -70,7 +73,8 @@ void fixupRanges(AsmInfo* asmInfo, AreaIndex area, RelocationInfo& rel) {
 size_t relocateImpl(RelocationInfo& rel,
                     CodeBlock& destBlock,
                     TCA start, TCA end,
-                    CodeGenFixups& fixups,
+                    DataBlock& srcBlock,
+                    CGMeta& fixups,
                     TCA* exitAddr,
                     WideJmpSet& wideJmps) {
   TCA src = start;
@@ -85,11 +89,11 @@ size_t relocateImpl(RelocationInfo& rel,
   try {
     while (src != end) {
       assertx(src < end);
-      DecodedInstruction di(src);
+      DecodedInstruction di(srcBlock.toDestAddress(src), src);
       asm_count++;
 
       int destRange = 0;
-      auto af = fixups.m_alignFixups.equal_range(src);
+      auto af = fixups.alignments.equal_range(src);
       while (af.first != af.second) {
         auto const alignPair = af.first->second;
         auto const alignInfo = alignment_info(alignPair.first);
@@ -102,7 +106,7 @@ size_t relocateImpl(RelocationInfo& rel,
         if (!keepNopHigh || keepNopHigh < hi) keepNopHigh = hi;
 
         TCA tmp = destBlock.frontier();
-        align(destBlock, alignPair.first, alignPair.second);
+        align(destBlock, nullptr, alignPair.first, alignPair.second);
 
         if (destBlock.frontier() != tmp) {
           destRange += destBlock.frontier() - tmp;
@@ -115,8 +119,8 @@ size_t relocateImpl(RelocationInfo& rel,
         keepNopLow <= src && keepNopHigh > src;
       TCA target = nullptr;
       TCA dest = destBlock.frontier();
-      destBlock.bytes(di.size(), src);
-      DecodedInstruction d2(dest);
+      destBlock.bytes(di.size(), srcBlock.toDestAddress(src));
+      DecodedInstruction d2(destBlock.toDestAddress(dest), dest);
       if (di.hasPicOffset()) {
         if (di.isBranch(false)) {
           target = di.picAddress();
@@ -146,12 +150,12 @@ size_t relocateImpl(RelocationInfo& rel,
         }
       }
       if (di.hasImmediate()) {
-        if (fixups.m_addressImmediates.count(src)) {
+        if (fixups.addressImmediates.count(src)) {
           if (size_t(di.immediate() - (uint64_t)start) < range) {
             hasInternalRefs = internalRefsNeedUpdating = true;
           }
         } else {
-          if (fixups.m_addressImmediates.count((TCA)~uintptr_t(src))) {
+          if (fixups.addressImmediates.count((TCA)~uintptr_t(src))) {
             // Handle weird, encoded offset, used by cgLdObjMethod
             always_assert(di.immediate() == ((uintptr_t(src) << 1) | 1));
             bool DEBUG_ONLY success =
@@ -162,7 +166,7 @@ size_t relocateImpl(RelocationInfo& rel,
            * An immediate that points into the range being moved, but which
            * isn't tagged as an addressImmediate, is most likely a bug
            * and its instruction's address needs to be put into
-           * fixups.m_addressImmediates. But it could just happen by bad
+           * fixups.addressImmediates. But it could just happen by bad
            * luck, so just log it.
            */
           if (size_t(di.immediate() - (uint64_t)start) < range) {
@@ -212,7 +216,7 @@ size_t relocateImpl(RelocationInfo& rel,
       src = start;
       bool ok = true;
       while (src != end) {
-        DecodedInstruction di(src);
+        DecodedInstruction di(srcBlock.toDestAddress(src), src);
         TCA newPicAddress = nullptr;
         int64_t newImmediate = 0;
         if (di.hasPicOffset() &&
@@ -222,14 +226,14 @@ size_t relocateImpl(RelocationInfo& rel,
         }
         if (di.hasImmediate() &&
             size_t((TCA)di.immediate() - start) < range &&
-            fixups.m_addressImmediates.count(src)) {
+            fixups.addressImmediates.count(src)) {
           newImmediate =
             (int64_t)rel.adjustedAddressAfter((TCA)di.immediate());
           always_assert(newImmediate);
         }
         if (newImmediate || newPicAddress) {
           TCA dest = rel.adjustedAddressAfter(src);
-          DecodedInstruction d2(dest);
+          DecodedInstruction d2(destBlock.toDestAddress(dest), dest);
           if (newPicAddress) {
             if (!d2.setPicAddress(newPicAddress)) {
               always_assert(d2.isBranch() && d2.size() == 2);
@@ -249,7 +253,7 @@ size_t relocateImpl(RelocationInfo& rel,
         throw JmpOutOfRange();
       }
     }
-    rel.markAddressImmediates(fixups.m_addressImmediates);
+    rel.markAddressImmediates(fixups.addressImmediates);
   } catch (...) {
     rel.rewind(start, end);
     destBlock.setFrontier(destStart);
@@ -338,8 +342,8 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
  */
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
-                                 CodeGenFixups& fixups) {
-  auto& ip = fixups.m_inProgressTailJumps;
+                                 CGMeta& meta) {
+  auto& ip = meta.inProgressTailJumps;
   for (size_t i = 0; i < ip.size(); ++i) {
     IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
     if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {
@@ -347,49 +351,55 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
-  for (auto& fixup : fixups.m_pendingFixups) {
+  for (auto watch : meta.watchpoints) {
+    if (auto const adjusted = rel.adjustedAddressBefore(*watch)) {
+      *watch = adjusted;
+    }
+  }
+
+  for (auto& fixup : meta.fixups) {
     /*
      * Pending fixups always point after the call instruction,
      * so use the "before" address, since there may be nops
      * before the next actual instruction.
      */
-    if (TCA adjusted = rel.adjustedAddressBefore(fixup.m_tca)) {
-      fixup.m_tca = adjusted;
+    if (TCA adjusted = rel.adjustedAddressBefore(fixup.first)) {
+      fixup.first = adjusted;
     }
   }
 
-  for (auto& ct : fixups.m_pendingCatchTraces) {
+  for (auto& ct : meta.catches) {
     /*
      * Similar to fixups - this is a return address so get
      * the address returned to.
      */
-    if (CTCA adjusted = rel.adjustedAddressBefore(ct.first)) {
+    if (auto const adjusted = rel.adjustedAddressBefore(ct.first)) {
       ct.first = adjusted;
     }
     /*
      * But the target is an instruction, so skip over any nops
      * that might have been inserted (eg for alignment).
      */
-    if (TCA adjusted = rel.adjustedAddressAfter(ct.second)) {
+    if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
       ct.second = adjusted;
     }
   }
 
-  for (auto& jt : fixups.m_pendingJmpTransIDs) {
-    if (TCA adjusted = rel.adjustedAddressAfter(jt.first)) {
+  for (auto& jt : meta.jmpTransIDs) {
+    if (auto const adjusted = rel.adjustedAddressAfter(jt.first)) {
       jt.first = adjusted;
     }
   }
 
-  if (!fixups.m_bcMap.empty()) {
+  if (!meta.bcMap.empty()) {
     /*
      * Most of the time we want to adjust to a corresponding "before" address
      * with the exception of the start of the range where "before" can point to
      * the end of a previous range.
      */
-    auto const aStart = fixups.m_bcMap[0].aStart;
-    auto const acoldStart = fixups.m_bcMap[0].acoldStart;
-    auto const afrozenStart = fixups.m_bcMap[0].afrozenStart;
+    auto const aStart = meta.bcMap[0].aStart;
+    auto const acoldStart = meta.bcMap[0].acoldStart;
+    auto const afrozenStart = meta.bcMap[0].afrozenStart;
     auto adjustAddress = [&](TCA& address, TCA blockStart) {
       if (TCA adjusted = (address == blockStart
                             ? rel.adjustedAddressAfter(blockStart)
@@ -397,15 +407,15 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
         address = adjusted;
       }
     };
-    for (auto& tbc : fixups.m_bcMap) {
+    for (auto& tbc : meta.bcMap) {
       adjustAddress(tbc.aStart, aStart);
       adjustAddress(tbc.acoldStart, acoldStart);
       adjustAddress(tbc.afrozenStart, afrozenStart);
     }
   }
 
-  decltype(fixups.m_addressImmediates) updatedAI;
-  for (auto addrImm : fixups.m_addressImmediates) {
+  decltype(meta.addressImmediates) updatedAI;
+  for (auto addrImm : meta.addressImmediates) {
     if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
       updatedAI.insert(adjusted);
     } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
@@ -415,23 +425,39 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
       updatedAI.insert(addrImm);
     }
   }
-  updatedAI.swap(fixups.m_addressImmediates);
+  updatedAI.swap(meta.addressImmediates);
 
-  decltype(fixups.m_alignFixups) updatedAF;
-  for (auto af : fixups.m_alignFixups) {
+  decltype(meta.alignments) updatedAF;
+  for (auto af : meta.alignments) {
     if (TCA adjusted = rel.adjustedAddressAfter(af.first)) {
       updatedAF.emplace(adjusted, af.second);
     } else {
       updatedAF.emplace(af);
     }
   }
-  updatedAF.swap(fixups.m_alignFixups);
+  updatedAF.swap(meta.alignments);
 
-  for (auto& af : fixups.m_reusedStubs) {
+  for (auto& af : meta.reusedStubs) {
     if (TCA adjusted = rel.adjustedAddressAfter(af)) {
       af = adjusted;
     }
   }
+
+  for (auto& li : meta.literals) {
+    if (auto adjusted = rel.adjustedAddressAfter((TCA)li.second)) {
+      li.second = (uint64_t*)adjusted;
+    }
+  }
+
+  decltype(meta.codePointers) updatedCP;
+  for (auto cp : meta.codePointers) {
+    if (auto adjusted = (TCA*)rel.adjustedAddressAfter((TCA)cp)) {
+      updatedCP.emplace(adjusted);
+    } else {
+      updatedCP.emplace(cp);
+    }
+  }
+  updatedCP.swap(meta.codePointers);
 
   if (asmInfo) {
     assert(asmInfo->validate());
@@ -447,8 +473,8 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
  * area.
  * Must not be called until its safe to run the relocated code.
  */
-void adjustCodeForRelocation(RelocationInfo& rel, CodeGenFixups& fixups) {
-  for (auto addr : fixups.m_reusedStubs) {
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
+  for (auto addr : fixups.reusedStubs) {
     /*
      * The stubs are terminated by a ud2. Check for it.
      */
@@ -463,25 +489,25 @@ void adjustCodeForRelocation(RelocationInfo& rel, CodeGenFixups& fixups) {
     }
   }
 
-  for (auto codePtr : fixups.m_codePointers) {
+  for (auto codePtr : fixups.codePointers) {
     if (TCA adjusted = rel.adjustedAddressAfter(*codePtr)) {
       *codePtr = adjusted;
     }
   }
 }
 
-void findFixups(TCA start, TCA end, CodeGenFixups& fixups) {
+void findFixups(TCA start, TCA end, CGMeta& meta) {
   while (start != end) {
     assert(start < end);
     DecodedInstruction di(start);
     start += di.size();
 
     if (di.isCall()) {
-      if (auto fixup = mcg->fixupMap().findFixup(start)) {
-        fixups.m_pendingFixups.push_back(PendingFixup(start, *fixup));
+      if (auto fixup = FixupMap::findFixup(start)) {
+        meta.fixups.emplace_back(start, *fixup);
       }
-      if (auto ct = mcg->catchTraceMap().find(start)) {
-        fixups.m_pendingCatchTraces.emplace_back(start, *ct);
+      if (auto ct = getCatchTrace(start)) {
+        meta.catches.emplace_back(start, *ct);
       }
     }
   }
@@ -499,12 +525,13 @@ void findFixups(TCA start, TCA end, CodeGenFixups& fixups) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
-                CodeGenFixups& fixups,
+                DataBlock& srcBlock,
+                CGMeta& fixups,
                 TCA* exitAddr) {
   WideJmpSet wideJmps;
   while (true) {
     try {
-      return relocateImpl(rel, destBlock, start, end,
+      return relocateImpl(rel, destBlock, start, end, srcBlock,
                           fixups, exitAddr, wideJmps);
     } catch (JmpOutOfRange& j) {
     }

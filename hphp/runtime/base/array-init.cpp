@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,15 +39,63 @@ ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
 {
   if (n > std::numeric_limits<int>::max()) {
     MM().forceOOM();
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
   if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
   m_data = MixedArray::MakeReserveMixed(n);
   assert(m_data->hasExactlyOneRef());
-  check_request_surprise_unlikely();
+  check_non_safepoint_surprise();
+}
+
+DictInit::DictInit(size_t n)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  m_data = MixedArray::MakeReserveDict(n);
+  assert(m_data->hasExactlyOneRef());
+}
+
+DictInit::DictInit(size_t n, CheckAllocation)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  if (n > std::numeric_limits<int>::max()) {
+    MM().forceOOM();
+    check_non_safepoint_surprise();
+  }
+  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+  m_data = MixedArray::MakeReserveDict(n);
+  assert(m_data->hasExactlyOneRef());
+  check_non_safepoint_surprise();
+}
+
+KeysetInit::KeysetInit(size_t n, CheckAllocation)
+#ifdef DEBUG
+  : m_addCount(0)
+  , m_expectedCount(n)
+#endif
+{
+  if (n > std::numeric_limits<int>::max()) {
+    MM().forceOOM();
+    check_non_safepoint_surprise();
+  }
+  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
+  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+  m_keyset = SetArray::MakeReserveSet(n);
+  assert(m_keyset->hasExactlyOneRef());
+  check_non_safepoint_surprise();
 }
 
 //////////////////////////////////////////////////////////////////////

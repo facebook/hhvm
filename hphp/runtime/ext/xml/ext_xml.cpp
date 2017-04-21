@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -41,8 +43,7 @@ enum php_xml_option {
     PHP_XML_OPTION_SKIP_WHITE
 };
 
-static class XMLExtension final : public Extension {
-public:
+static struct XMLExtension final : Extension {
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
     HHVM_FE(xml_parser_create);
@@ -106,8 +107,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class XmlParser : public SweepableResourceData {
-public:
+struct XmlParser : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(XmlParser)
   XmlParser() {}
   virtual ~XmlParser();
@@ -171,19 +171,25 @@ const String& XmlParser::o_getClassNameHook() const {
   return classnameof();
 }
 
+struct XmlParserData final : RequestEventHandler {
+  void requestInit() override { parsers.reset(); }
+  void requestShutdown() override { parsers.reset(); }
+  RootMap<XmlParser> parsers;
+};
+IMPLEMENT_STATIC_REQUEST_LOCAL(XmlParserData, s_xml_data);
+
 namespace {
 
 inline req::ptr<XmlParser> getParserFromToken(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  return MM().lookupRoot<XmlParser>(token);
+  return s_xml_data->parsers.lookupRoot(userData);
 }
 
 inline void* getParserToken(const req::ptr<XmlParser>& parser) {
-  return reinterpret_cast<void*>(MM().addRoot(parser));
+  return reinterpret_cast<void*>(s_xml_data->parsers.addRoot(parser));
 }
 
 inline void clearParser(const req::ptr<XmlParser>& p) {
-  MM().removeRoot(p);
+  s_xml_data->parsers.removeRoot(p);
 }
 
 }
@@ -368,22 +374,27 @@ static Variant php_xml_parser_create_impl(const String& encoding_param,
   return Variant(std::move(parser));
 }
 
+static bool name_contains_class(const String& name) {
+  if (name) {
+    int pos = name.find("::");
+    return pos != 0 && pos != String::npos && pos + 2 < name.size();
+  }
+  return false;
+}
+
 static Variant xml_call_handler(const req::ptr<XmlParser>& parser,
                                 const Variant& handler,
                                 const Array& args) {
   if (parser && handler.toBoolean()) {
     Variant retval;
-    if (handler.isString()) {
+    if (handler.isString() && !name_contains_class(handler.toString())) {
       if (!parser->object.isObject()) {
         retval = invoke(handler.toString().c_str(), args, -1);
       } else {
         retval = parser->object.toObject()->
           o_invoke(handler.toString(), args);
       }
-    } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
-               (handler.toCArrRef()[0].isString() ||
-                handler.toCArrRef()[0].isObject()) &&
-               handler.toCArrRef()[1].isString()) {
+    } else if (is_callable(handler)) {
       vm_call_user_func(handler, args);
     } else {
       raise_warning("Handler is invalid");
@@ -527,7 +538,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
               return;
             }
           }
-          if (parser->level <= XML_MAXLEVEL) {
+          if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
             tag = Array::Create();
             _xml_add_to_info(parser, parser->ltags[parser->level-1] +
                              parser->toffset);
@@ -725,9 +736,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 
 static void xml_set_handler(Variant * handler, const Variant& data) {
   if (data.isNull() || same(data, false) || data.isString() ||
-      (data.isArray() && data.getArrayData()->size() == 2 &&
-       (data.toCArrRef()[0].isString() || data.toCArrRef()[0].isObject()) &&
-       data.toCArrRef()[1].isString())) {
+        is_callable(data)) {
     *handler = data;
   } else {
     raise_warning("Handler is invalid");
@@ -737,7 +746,7 @@ static void xml_set_handler(Variant * handler, const Variant& data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Resource HHVM_FUNCTION(xml_parser_create,
-                       const Variant& encoding /* = null_variant */) {
+                       const Variant& encoding /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();
@@ -745,8 +754,8 @@ Resource HHVM_FUNCTION(xml_parser_create,
 }
 
 Resource HHVM_FUNCTION(xml_parser_create_ns,
-                       const Variant& encoding /* = null_variant */,
-                       const Variant& separator /* = null_variant */) {
+                       const Variant& encoding /* = uninit_variant */,
+                       const Variant& separator /* = uninit_variant */) {
   const String& strEncoding = encoding.isNull()
                             ? null_string
                             : encoding.toString();

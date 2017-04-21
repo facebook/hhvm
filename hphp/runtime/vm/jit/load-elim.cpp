@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
 
 #include <cstdint>
 #include <algorithm>
-#include <utility>
 
 #include <boost/variant.hpp>
 #include <folly/Optional.h>
@@ -41,6 +40,7 @@
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
+#include "hphp/runtime/vm/jit/timer.h"
 
 namespace HPHP { namespace jit {
 
@@ -207,7 +207,7 @@ DEBUG_ONLY std::string show(const State& state) {
 //////////////////////////////////////////////////////////////////////
 
 struct Local {
-  Global& global;
+  const Global& global;
   State state;
 };
 
@@ -245,21 +245,21 @@ void clear_everything(Local& env) {
   env.state.avail.reset();
 }
 
-TrackedLoc* find_tracked(Local& env,
-                         const IRInstruction& inst,
+TrackedLoc* find_tracked(State& state,
                          folly::Optional<ALocMeta> meta) {
   if (!meta) return nullptr;
-  return env.state.avail[meta->index] ? &env.state.tracked[meta->index]
-                                      : nullptr;
+  return state.avail[meta->index] ? &state.tracked[meta->index]
+                                  : nullptr;
+}
+
+TrackedLoc* find_tracked(Local& env,
+                         folly::Optional<ALocMeta> meta) {
+  return find_tracked(env.state, meta);
 }
 
 Flags load(Local& env,
            const IRInstruction& inst,
            AliasClass acls) {
-  // Bail out early when the instruction is in a catch block.  We don't want to
-  // increase lifetimes of values because of cold paths.
-  if (inst.block()->hint() == Block::Hint::Unused) return FNone{};
-
   acls = canonicalize(acls);
 
   auto const meta = env.global.ainfo.find(acls);
@@ -268,22 +268,16 @@ Flags load(Local& env,
 
   auto& tracked = env.state.tracked[meta->index];
 
-  if (env.state.avail[meta->index]) {
-    if (tracked.knownValue != nullptr) {
-      return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
-    }
-    /*
-     * We didn't have a value, but we had an available type.  This can happen
-     * at control flow joins right now (since we don't have support for
-     * inserting phis for available values).  Whatever the old type is is still
-     * valid, and whatever information the load instruction knows is also
-     * valid, so we can keep their intersection.
-     */
-    tracked.knownType &= inst.dst()->type();
-  } else {
+  // We can always trust the dst type of the load. Add its knowledge to
+  // knownType before doing anything else.
+  if (!env.state.avail[meta->index]) {
+    tracked.knownValue = nullptr;
     tracked.knownType = inst.dst()->type();
     env.state.avail.set(meta->index);
+  } else {
+    tracked.knownType &= inst.dst()->type();
   }
+
   if (tracked.knownType.hasConstVal() ||
       tracked.knownType.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
     tracked.knownValue = env.global.unit.cns(tracked.knownType);
@@ -295,6 +289,19 @@ Flags load(Local& env,
       tracked.knownType,
       kMaxTrackedALocs    // it's a constant, so it is nowhere
     };
+  }
+
+  if (tracked.knownValue != nullptr) {
+    // Don't use knownValue if it's from a different block and we're currently
+    // in a catch trace, to avoid extending lifetimes too much.
+    auto const block = tracked.knownValue.match(
+      [] (SSATmp* tmp) { return tmp->inst()->block(); },
+      [] (Block* blk)  { return blk; }
+    );
+    if (inst.block() != block && inst.block()->hint() == Block::Hint::Unused) {
+      return FNone{};
+    }
+    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
   }
 
   tracked.knownValue = inst.dst();
@@ -328,57 +335,62 @@ void store(Local& env, AliasClass acls, SSATmp* value) {
 Flags handle_general_effects(Local& env,
                              const IRInstruction& inst,
                              GeneralEffects m) {
+  auto handleCheck = [&](Type typeParam) -> folly::Optional<Flags> {
+    auto const meta = env.global.ainfo.find(canonicalize(m.loads));
+    if (!meta) return folly::none;
+
+    auto const tloc = &env.state.tracked[meta->index];
+    if (!env.state.avail[meta->index]) {
+      // We know nothing about the location. Initialize it with our typeParam.
+      tloc->knownValue = nullptr;
+      tloc->knownType = typeParam;
+      env.state.avail.set(meta->index);
+    } else if (tloc->knownType <= typeParam) {
+      // We had a type that was good enough to pass the check.
+      return Flags{FJmpNext{}};
+    } else {
+      // We had a type that didn't pass the check. Narrow it using our
+      // typeParam.
+      tloc->knownType &= typeParam;
+    }
+
+    if (tloc->knownType <= TBottom) {
+      // i.e., !maybe(typeParam); fail check.
+      return Flags{FJmpTaken{}};
+    }
+    if (tloc->knownValue != nullptr) {
+      return Flags{FReducible{tloc->knownValue, tloc->knownType, meta->index}};
+    }
+    return folly::none;
+  };
+
   switch (inst.op()) {
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckMBase:
   case CheckRefInner:
-    {
-      auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-      auto const tloc = find_tracked(env, inst, meta);
-      if (!tloc) break;
-      if (tloc->knownType <= inst.typeParam()) {
-        return FJmpNext{};
-      }
-      tloc->knownType &= inst.typeParam();
-
-      if (tloc->knownType <= TBottom) {
-        // i.e., !maybe(inst.typeParam()); fail check.
-        return FJmpTaken{};
-      }
-      if (tloc->knownValue != nullptr) {
-        return FReducible { tloc->knownValue, tloc->knownType, meta->index };
-      }
-    }
+    if (auto flags = handleCheck(inst.typeParam())) return *flags;
     break;
 
   case CheckInitMem:
-    {
-      auto const meta = env.global.ainfo.find(canonicalize(m.loads));
-      auto const tloc = find_tracked(env, inst, meta);
-      if (!tloc) break;
-      if (!tloc->knownType.maybe(TUninit)) {
-        return FJmpNext{};
-      }
-      if (tloc->knownType <= TUninit) {
-        return FJmpTaken{};
-      }
-      if (tloc->knownValue != nullptr) {
-        return FReducible { tloc->knownValue, tloc->knownType, meta->index };
-      }
-    }
+    if (auto flags = handleCheck(TInitGen)) return *flags;
     break;
 
   case CastStk:
   case CoerceStk:
     {
-      // We only care about the stack component, since we only optimize the case
-      // where we don't need to reenter.
-      assert(m.loads.stack());
-      AliasClass const stk = *m.loads.stack();
+      auto const stkOffset = [&]{
+        if (inst.is(CastStk)) return inst.extra<CastStk>()->offset;
+        if (inst.is(CoerceStk)) return inst.extra<CoerceStk>()->offset;
+        always_assert(false);
+      }();
+      auto const stk =
+        canonicalize(AliasClass { AStack { inst.src(0), stkOffset, 1 } });
+      always_assert(stk <= canonicalize(m.loads));
 
-      auto const meta = env.global.ainfo.find(canonicalize(stk));
-      auto const tloc = find_tracked(env, inst, meta);
+      auto const meta = env.global.ainfo.find(stk);
+      auto const tloc = find_tracked(env, meta);
       if (!tloc) break;
       if (inst.op() == CastStk &&
           inst.typeParam() == TNullableObj &&
@@ -404,19 +416,20 @@ Flags handle_general_effects(Local& env,
 }
 
 void handle_call_effects(Local& env, CallEffects effects) {
-  if (effects.destroys_locals) {
+  if (effects.writes_locals) {
     clear_everything(env);
     return;
   }
 
   /*
-   * Keep types for stack and frame locations, and throw away the values.  We
-   * are just doing this to avoid extending lifetimes across php calls, which
-   * currently always leads to spilling.
+   * Keep types for stack, locals, and class-ref slots, and throw away the
+   * values.  We are just doing this to avoid extending lifetimes across php
+   * calls, which currently always leads to spilling.
    */
-  auto const stk_and_frame = env.global.ainfo.all_stack |
-                             env.global.ainfo.all_frame;
-  env.state.avail &= stk_and_frame;
+  auto const stk_frame_cslot = env.global.ainfo.all_stack |
+                               env.global.ainfo.all_frame |
+                               env.global.ainfo.all_clsRefSlot;
+  env.state.avail &= stk_frame_cslot;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
       ++aloc) {
@@ -434,7 +447,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
       };
     case AssertStk:
       return AliasClass {
-        AStack { inst.src(0), inst.extra<AssertStk>()->offset.offset, 1 }
+        AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 }
       };
     default: break;
     }
@@ -443,7 +456,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
   if (!acls) return FNone{};
 
   auto const meta = env.global.ainfo.find(canonicalize(*acls));
-  auto const tloc = find_tracked(env, inst, meta);
+  auto const tloc = find_tracked(env, meta);
   if (!tloc) return FNone{};
 
   tloc->knownType &= inst.typeParam();
@@ -455,28 +468,27 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
 }
 
 void refine_value(Local& env, SSATmp* newVal, SSATmp* oldVal) {
-  for (auto i = uint32_t{0}; i < kMaxTrackedALocs; ++i) {
-    if (!env.state.avail[i]) continue;
-    auto& tracked = env.state.tracked[i];
-    if (tracked.knownValue != oldVal) continue;
-    FTRACE(4, "       refining {} to {}\n", i, newVal->toString());
-    tracked.knownValue = newVal;
-    tracked.knownType  = newVal->type();
-  }
+  bitset_for_each_set(
+    env.state.avail,
+    [&](size_t i) {
+      auto& tracked = env.state.tracked[i];
+      if (tracked.knownValue != oldVal) return;
+      FTRACE(4, "       refining {} to {}\n", i, newVal->toString());
+      tracked.knownValue = newVal;
+      tracked.knownType  = newVal->type();
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
 
 Flags analyze_inst(Local& env, const IRInstruction& inst) {
-  if (inst.taken()) {
-    env.global.blockInfo[inst.block()].stateOutTaken = env.state;
-  }
-
   auto const effects = memory_effects(inst);
   FTRACE(3, "    {}\n"
             "      {}\n",
             inst.toString(),
             show(effects));
+
   auto flags = Flags{};
   match<void>(
     effects,
@@ -505,8 +517,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   default:
     break;
   }
-
-  if (inst.next()) env.global.blockInfo[inst.block()].stateOutNext = env.state;
 
   return flags;
 }
@@ -567,7 +577,7 @@ SSATmp* resolve_phis_work(Global& env,
   if (block->front().is(DefLabel)) {
     env.unit.expandLabel(&block->front(), 1);
   } else {
-    block->prepend(env.unit.defLabel(1, block->front().marker()));
+    block->prepend(env.unit.defLabel(1, block->front().bcctx()));
   }
   auto const label = &block->front();
   mutated_labels.push_back(label);
@@ -632,7 +642,7 @@ SSATmp* resolve_phis(Global& env, Block* block, uint32_t alocID) {
 }
 
 template<class Flag>
-SSATmp* resolve_value(Local& env, const IRInstruction& inst, Flag flags) {
+SSATmp* resolve_value(Global& env, const IRInstruction& inst, Flag flags) {
   if (inst.dst() && !(flags.knownType <= inst.dst()->type())) {
     /*
      * It's possible we could assert the intersection of the types, but it's
@@ -647,11 +657,11 @@ SSATmp* resolve_value(Local& env, const IRInstruction& inst, Flag flags) {
   if (val == nullptr) return nullptr;
   return val.match(
     [&] (SSATmp* t) { return t; },
-    [&] (Block* b) { return resolve_phis(env.global, b, flags.aloc); }
+    [&] (Block* b) { return resolve_phis(env, b, flags.aloc); }
   );
 }
 
-void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
+void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   auto const resolved = resolve_value(env, inst, flags);
   if (!resolved) return;
 
@@ -660,9 +670,9 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
 
   auto const reduce_to = [&] (Opcode op, folly::Optional<Type> typeParam) {
     auto const taken = hasEdges(op) ? inst.taken() : nullptr;
-    auto const newInst = env.global.unit.gen(
+    auto const newInst = env.unit.gen(
       op,
-      inst.marker(),
+      inst.bcctx(),
       taken,
       typeParam,
       resolved
@@ -680,6 +690,7 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
   case CheckTypeMem:
   case CheckLoc:
   case CheckStk:
+  case CheckMBase:
   case CheckRefInner:
     reduce_to(CheckType, inst.typeParam());
     break;
@@ -704,59 +715,54 @@ void reduce_inst(Local& env, IRInstruction& inst, const FReducible& flags) {
 
 //////////////////////////////////////////////////////////////////////
 
-void optimize_inst(Local& env, IRInstruction& inst, Flags flags) {
+void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
   match<void>(
     flags,
     [&] (FNone) {},
 
-    [&] (FRedundant flags) {
-      auto const resolved = resolve_value(env, inst, flags);
+    [&] (FRedundant redundantFlags) {
+      auto const resolved = resolve_value(env, inst, redundantFlags);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
              inst.dst()->toString(),
-             flags.knownType.toString(),
+             redundantFlags.knownType.toString(),
              resolved->toString());
 
       if (resolved->type().subtypeOfAny(TGen, TCls)) {
-        env.global.unit.replace(
-          &inst,
-          AssertType,
-          flags.knownType,
-          resolved
-        );
+        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
-        env.global.unit.replace(&inst, Mov, resolved);
+        env.unit.replace(&inst, Mov, resolved);
       }
     },
 
-    [&] (FReducible flags) { reduce_inst(env, inst, flags); },
+    [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
-      env.global.unit.replace(&inst, Jmp, inst.next());
+      env.unit.replace(&inst, Jmp, inst.next());
     },
 
     [&] (FJmpTaken) {
       FTRACE(2, "      unnecessary\n");
-      env.global.unit.replace(&inst, Jmp, inst.taken());
+      env.unit.replace(&inst, Jmp, inst.taken());
     }
   );
 
   // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplify(env.global.unit, &inst);
+  if (inst.is(AssertType)) simplifyInPlace(env.unit, &inst);
 }
 
-void optimize_block(Local& env, Block* blk) {
+void optimize_block(Local& env, Global& genv, Block* blk) {
   if (!env.state.initialized) {
     FTRACE(2, "  unreachable\n");
     return;
   }
 
   for (auto& inst : *blk) {
-    simplify(env.global.unit, &inst);
+    simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
-    optimize_inst(env, inst, flags);
+    optimize_inst(genv, inst, flags);
   }
 }
 
@@ -780,7 +786,7 @@ void optimize(Global& genv) {
     }
 
     auto env = Local { genv, genv.blockInfo[blk].stateIn };
-    optimize_block(env, blk);
+    optimize_block(env, genv, blk);
 
     if (auto const x = blk->next()) reachable[x] = true;
     if (auto const x = blk->taken()) reachable[x] = true;
@@ -844,17 +850,45 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
 
   dst.avail &= src.avail;
 
-  for (auto idx = uint32_t{0}; idx < kMaxTrackedALocs; ++idx) {
-    if (!src.avail[idx]) continue;
-    dst.avail &= ~genv.ainfo.locations_inv[idx].conflicts;
+  bitset_for_each_set(
+    src.avail,
+    [&](size_t idx) {
+      dst.avail &= ~genv.ainfo.locations_inv[idx].conflicts;
+      if (dst.avail[idx]) {
+        merge_into(target, dst.tracked[idx], src.tracked[idx]);
+      }
+    }
+  );
+}
 
-    if (dst.avail[idx]) {
-      merge_into(target, dst.tracked[idx], src.tracked[idx]);
+//////////////////////////////////////////////////////////////////////
+
+void save_taken_state(Global& genv, const IRInstruction& inst,
+                      const State& state) {
+  if (!inst.taken()) return;
+
+  auto& outState = genv.blockInfo[inst.block()].stateOutTaken = state;
+
+  // CheckInitMem's pointee is TUninit on the taken branch, so update outState.
+  if (inst.is(CheckInitMem)) {
+    auto const effects = memory_effects(inst);
+    auto const ge = boost::get<GeneralEffects>(effects);
+    auto const meta = genv.ainfo.find(canonicalize(ge.loads));
+    if (auto const tloc = find_tracked(outState, meta)) {
+      tloc->knownType &= TUninit;
+    } else if (meta) {
+      auto tloc = &outState.tracked[meta->index];
+      tloc->knownValue = nullptr;
+      tloc->knownType = TUninit;
+      outState.avail.set(meta->index);
     }
   }
 }
 
-//////////////////////////////////////////////////////////////////////
+void save_next_state(Global& genv, const IRInstruction& inst,
+                     const State& state) {
+  if (inst.next()) genv.blockInfo[inst.block()].stateOutNext = state;
+}
 
 void analyze(Global& genv) {
   FTRACE(1, "\nAnalyze:\n");
@@ -881,14 +915,27 @@ void analyze(Global& genv) {
       auto const oldState = targetInfo.stateIn;
       targetInfo.stateIn.initialized = false; // re-merge of all pred states
       target->forEachPred([&] (Block* pred) {
+        auto const merge = [&](const State& predState) {
+          if (predState.initialized) {
+            FTRACE(7, "pulling state from pred B{}:\n{}\n",
+                   pred->id(), show(predState));
+            merge_into(genv, target, targetInfo.stateIn, predState);
+          }
+        };
+
         auto const& predInfo = genv.blockInfo[pred];
-        auto const& predState = pred->next() == target
-          ? predInfo.stateOutNext
-          : predInfo.stateOutTaken;
-        if (predState.initialized) {
-          FTRACE(7, "pulling state from pred B{}:\n{}\n",
-                 pred->id(), show(predState));
-          merge_into(genv, target, targetInfo.stateIn, predState);
+        if (pred->next() != pred->taken()) {
+          auto const& predState = pred->next() == target
+            ? predInfo.stateOutNext
+            : predInfo.stateOutTaken;
+          merge(predState);
+        } else {
+          // The predecessor jumps to this block along both its next and taken
+          // branches. We can't distinguish the two paths, so just merge both
+          // in.
+          assertx(pred->next() == target);
+          merge(predInfo.stateOutNext);
+          merge(predInfo.stateOutTaken);
         }
       });
       if (oldState != targetInfo.stateIn) {
@@ -902,7 +949,11 @@ void analyze(Global& genv) {
     FTRACE(2, "B{}:\n", blk->id());
 
     auto env = Local { genv, blkInfo.stateIn };
-    for (auto& inst : *blk) analyze_inst(env, inst);
+    for (auto& inst : *blk) {
+      save_taken_state(genv, inst, env.state);
+      analyze_inst(env, inst);
+      save_next_state(genv, inst, env.state);
+    }
     if (auto const t = blk->taken()) propagate(t);
     if (auto const n = blk->next())  propagate(n);
   } while (!incompleteQ.empty());
@@ -973,6 +1024,7 @@ void analyze(Global& genv) {
  */
 void optimizeLoads(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
+  Timer t(Timer::optimize_loads, unit.logEntry().get_pointer());
 
   auto genv = Global { unit };
   if (genv.ainfo.locations.size() == 0) {

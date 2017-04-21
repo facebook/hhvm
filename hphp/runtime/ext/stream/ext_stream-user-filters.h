@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,10 +30,9 @@ const int64_t k_STREAM_FILTER_ALL   = k_STREAM_FILTER_READ |
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class File;
+struct File;
 
-class BucketBrigade : public ResourceData {
-public:
+struct BucketBrigade : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(BucketBrigade);
   CLASSNAME_IS("bucket brigade");
   const String& o_getClassNameHook() const override {
@@ -54,8 +53,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class StreamFilter : public ResourceData {
-public:
+struct StreamFilter : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(StreamFilter);
   CLASSNAME_IS("stream filter");
   const String& o_getClassNameHook() const override {

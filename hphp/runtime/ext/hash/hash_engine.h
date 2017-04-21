@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,8 +29,7 @@ namespace HPHP {
 
 #define L64(x) (x ## ULL)
 
-class HashEngine {
-public:
+struct HashEngine {
   HashEngine(int digest_size_, int block_size_, int context_size_)
     : digest_size(digest_size_), block_size(block_size_),
       context_size(context_size_) {}

@@ -41,21 +41,18 @@ header files. This can discourage "include what you use," discussed in the
 
 ### Include guards ###
 
-To prevent multiple inclusion, all headers should have define guards, which
-should have the form
+To prevent multiple inclusion, all headers should have the following directive
+after their license header comment:
 
 ```cpp
-#ifndef incl_HPHP_<OPTIONAL-DIR>_<FILE>_H_
-#define incl_HPHP_<OPTIONAL-DIR>_<FILE>_H_
+/*
+ * ...see the 'File copyright' section for details on what goes here...
+ */
 
-// Lots of nice codez.
+#pragma once
 
-#endif
+// File contents
 ```
-
-The optional dir might be something like `JIT`, but does not have to include
-the less interesting parts of the path, like `RUNTIME` or `BASE`. Just make
-sure it's unique across the whole codebase.
 
 ### What to include ###
 
@@ -151,8 +148,11 @@ In C++, `struct` and `class` have nearly identical meanings; the only
 difference lies in the default accessibility (`struct` defaults to public, and
 `class`, to private).
 
-We do not assign further meaning to these keywords, so using `struct`
-everywhere is a common (but not required) practice.
+We do not assign further meaning to these keywords, so we use `struct`
+everywhere.  Efforts to compile under MSVC also require that we use the same
+keyword between a struct/class definition and its forward declarations due to
+MSVC's failure to adhere to the C++ spec, and sticking to `struct` everywhere
+makes this easier.
 
 ### Access control ###
 
@@ -597,7 +597,8 @@ five newlines, ASCII-art cartoon characters).
 
 ### File copyright ###
 
-All files must begin with the HHVM copyright notice:
+All files must begin with a copyright/license notice. For files created by
+Facebook employees, the following should be used:
 
 ```cpp
 /*
@@ -618,3 +619,7 @@ All files must begin with the HHVM copyright notice:
 
 // File contents start here.
 ```
+
+We do not require copyright assignment for external contributions, so
+non-Facebook contributors should include their own header. The exact contents
+are up to you, as long as the license is compatible with the PHP license.

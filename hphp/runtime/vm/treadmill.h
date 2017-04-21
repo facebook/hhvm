@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,12 @@
 namespace HPHP { namespace Treadmill {
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Return the current thread's index.
+ */
+constexpr int64_t kInvalidThreadIdx = -1;
+int64_t threadIdx();
 
 /*
  * The Treadmill allows us to defer work until all currently
@@ -64,6 +70,13 @@ void deferredFree(void*);
  * Important: f() must not throw an exception.
  */
 template<class F> void enqueue(F&& f);
+
+struct Session final {
+  Session() { startRequest(); }
+  ~Session() { finishRequest(); }
+  Session(Session&&) = delete;
+  Session& operator=(Session&&) = delete;
+};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -9,7 +9,8 @@
  *)
 
 open Core
-module CCS = ClientConnectSimple
+module MC = MonitorConnection
+module SMUtils = ServerMonitorUtils
 
 exception FailedToKill
 
@@ -20,7 +21,7 @@ type env = {
 let wait_for_death root secs =
   let i = ref 0 in
   try
-    while CCS.server_exists root do
+    while MC.server_exists (ServerFiles.lock_file root) do
       incr i;
       if !i < secs then ignore @@ Unix.sleep 1
       else raise Exit
@@ -28,16 +29,33 @@ let wait_for_death root secs =
     true
   with Exit -> false
 
-let nice_kill (ic, oc) env =
+let nice_kill env =
   let root_s = Path.to_string env.root in
   Printf.eprintf "Attempting to nicely kill server for %s\n%!" root_s;
-  let _response = ServerCommand.rpc (ic, oc) ServerRpc.KILL in
-  let success = wait_for_death env.root 3 in
-  if not success then begin
+  try begin
+    match ServerUtils.shut_down_server env.root with
+    | Result.Ok shutdown_result ->
+      begin match shutdown_result with
+      | SMUtils.SHUTDOWN_VERIFIED ->
+        Printf.eprintf "Successfully killed server for %s\n%!" root_s
+      | SMUtils.SHUTDOWN_UNVERIFIED ->
+        Printf.eprintf
+          "Failed to kill server nicely for %s (Shutdown not verified)\n%!"
+          root_s;
+        raise FailedToKill
+      end
+    | Result.Error SMUtils.Build_id_mismatched ->
+      Printf.eprintf "Successfully killed server for %s\n%!" root_s
+    | Result.Error SMUtils.Server_missing ->
+      Printf.eprintf "No server to kill for %s\n%!" root_s
+    | Result.Error _ ->
+      Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;
+      raise FailedToKill
+  end
+  with
+  | _ ->
     Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;
-    raise FailedToKill;
-  end else
-    Printf.eprintf "Successfully killed server for %s\n%!" root_s
+    raise FailedToKill
 
 let mean_kill env =
   let root_s = Path.to_string env.root in
@@ -51,8 +69,8 @@ let mean_kill env =
   in
   let success =
     try
-      List.iter pids ~f:begin fun (pid, reason) ->
-        try Unix.kill pid 9
+      List.iter pids ~f:begin fun (pid, _reason) ->
+        try Sys_utils.terminate_process pid
         with Unix.Unix_error (Unix.ESRCH, "kill", _) ->
           (* no such process *)
           ()
@@ -69,26 +87,13 @@ let mean_kill env =
   end else Printf.eprintf "Successfully killed server for %s\n%!" root_s
 
 let do_kill env =
-  let root_s = Path.to_string env.root in
-  match CCS.connect_once env.root with
-  | Result.Ok conn ->
-      begin
-        try nice_kill conn env with FailedToKill ->
-          try mean_kill env with FailedToKill ->
-            raise Exit_status.(Exit_with Kill_error)
-      end
-  | Result.Error CCS.Server_missing ->
-      Printf.eprintf "Error: no server to kill for %s\n%!" root_s
-  | Result.Error CCS.Build_id_mismatch ->
-      Printf.eprintf "Successfully killed server for %s\n%!" root_s
-  | Result.Error (CCS.Server_busy | CCS.Server_initializing) ->
-      try mean_kill env
-      with FailedToKill ->
-        raise Exit_status.(Exit_with Kill_error)
+  try nice_kill env with FailedToKill ->
+    try mean_kill env with FailedToKill ->
+      raise Exit_status.(Exit_with Kill_error)
 
 let main env =
   HackEventLogger.client_stop ();
   do_kill env;
-  Exit_status.Ok
+  Exit_status.No_error
 
 let kill_server root = do_kill {root}

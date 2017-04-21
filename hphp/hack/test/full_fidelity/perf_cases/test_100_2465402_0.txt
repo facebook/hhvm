@@ -1,0 +1,2 @@
+<?hh
+<< iAstQXMX ( ) , oC ( ~ ( float ) $zYsQ -= ( $vGny ++ ) ) , vE ( array ( ( function ( $uSeUaZDY = $wG = function ( << kOK >> mOXJXyHYQ $tH = 'single string' ) : shape ( 'single string' => this , 'single string' => num , 'single string' => classname < kFOgJhy > ) { ; } ) { } ) , $yWjABekB => 'single string' , ( $tCWqV ++ ) ( ( int ) ( $eRrmkHcm ++ ) ) => 0x16 , ) ) , sGoCkJ ( ( ( ( $zS -- ) ) ) << ( ( ! ( int ) function ( ) : aZATOtkb use ( $jJuMvj ) { { } } ) ) ) >> class gDrKy < rX , + fJden > extends kOSBD implements pZuvSIdM { use gQULPze < vNSUS , jENOsLtrw > ; }

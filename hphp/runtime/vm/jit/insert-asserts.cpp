@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,24 +34,20 @@ namespace {
  * If `definer' ends its block, it must have a fallthrough block, and `inst'
  * will be inserted at the beginning of that block, as long as the block has no
  * other predecessors.
- *
- * Returns: true if it inserted the intruction.
  */
-bool insertAfter(IRInstruction* definer, IRInstruction* inst) {
+void insertAfter(IRInstruction* definer, IRInstruction* inst) {
   assertx(!definer->isTerminal());
   if (definer->isControlFlow()) {
     assertx(definer->next());
     if (definer->next()->numPreds() == 1) {
       definer->next()->prepend(inst);
-      return true;
     }
-    return false;
+    return;
   }
 
   auto const block = definer->block();
   auto const pos = block->iteratorTo(definer);
   block->insert(std::next(pos), inst);
-  return true;
 }
 
 /*
@@ -62,45 +58,17 @@ void insertRefCountAsserts(IRUnit& unit, IRInstruction& inst) {
   for (auto dst : inst.dsts()) {
     auto const t = dst->type();
     if (t <= TGen && t.maybe(TCounted)) {
-      insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.marker(), dst));
+      insertAfter(&inst, unit.gen(DbgAssertRefCount, inst.bcctx(), dst));
     }
   }
-}
-
-void insertStkAssert(IRUnit& unit,
-                     IRInstruction* where,
-                     SSATmp* sp,
-                     IRSPOffset off) {
-  auto const addr = unit.gen(
-    LdStkAddr,
-    where->marker(),
-    IRSPOffsetData { off },
-    sp
-  );
-  if (!insertAfter(where, addr)) return;
-  auto const check = unit.gen(DbgAssertPtr, where->marker(), addr->dst());
-  insertAfter(addr, check);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void visit(IRUnit& unit, Block* block) {
   for (auto it = block->begin(); it != block->end();) {
-    auto& inst = *it;
-    ++it;
-
-    switch (inst.op()) {
-    case Call:
-      {
-        auto const extra = inst.extra<Call>();
-        insertStkAssert(unit, &inst, inst.src(0),
-          extra->spOffset + extra->numParams + kNumActRecCells - 1);
-      }
-      break;
-    default:
-      insertRefCountAsserts(unit, inst);
-      break;
-    }
+    auto& inst = *it++;
+    insertRefCountAsserts(unit, inst);
   }
 }
 

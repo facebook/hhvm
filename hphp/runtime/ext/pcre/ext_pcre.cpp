@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -44,18 +44,18 @@ TypedValue HHVM_FUNCTION(preg_match,
                          StringArg pattern, StringArg subject,
                          OutputArg matches /* = null */,
                          int flags /* = 0 */, int offset /* = 0 */) {
-  return tvReturn(preg_match(StrNR(pattern.get()), StrNR(subject.get()),
+  return tvReturn(preg_match(pattern.get(), subject.get(),
                              matches.get() ? matches->var() : nullptr,
                              flags, offset));
 }
 
 TypedValue HHVM_FUNCTION(preg_match_all,
-                         const String& pattern,
-                         const String& subject,
+                         StringArg pattern,
+                         StringArg subject,
                          OutputArg matches /* = null */,
                          int flags /* = 0 */,
                          int offset /* = 0 */) {
-  return tvReturn(preg_match_all(pattern, subject,
+  return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  matches.get() ? matches->var() : nullptr,
                                  flags, offset));
 }
@@ -181,8 +181,9 @@ Variant HHVM_FUNCTION(preg_filter, const Variant& pattern, const Variant& callba
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
-                                  int limit /* = -1 */, int flags /* = 0 */) {
-  return preg_split(pattern, subject, limit, flags);
+                                  const Variant& limit, int flags /* = 0 */) {
+  //NOTE: .toInt64() returns 0 for null
+  return preg_split(pattern, subject, limit.toInt64(), flags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,13 +207,13 @@ int64_t HHVM_FUNCTION(preg_last_error) {
 String HHVM_FUNCTION(ereg_replace, const String& pattern,
                                    const String& replacement,
                                    const String& str) {
-  return HHVM_FN(mb_ereg_replace)(pattern, replacement, str);
+  return HHVM_FN(mb_ereg_replace)(pattern, replacement, str).toString();
 }
 
 String HHVM_FUNCTION(eregi_replace, const String& pattern,
                                     const String& replacement,
                                     const String& str) {
-  return HHVM_FN(mb_eregi_replace)(pattern, replacement, str);
+  return HHVM_FN(mb_eregi_replace)(pattern, replacement, str).toString();
 }
 
 Variant HHVM_FUNCTION(ereg, const String& pattern, const String& str,
@@ -259,8 +260,7 @@ String HHVM_FUNCTION(sql_regcase, const String& str) {
 
 extern IMPLEMENT_THREAD_LOCAL(PCREglobals, tl_pcre_globals);
 
-class PcreExtension final : public Extension {
-public:
+struct PcreExtension final : Extension {
   PcreExtension() : Extension("pcre", NO_EXTENSION_VERSION_YET) {}
 
   void moduleInit() override {

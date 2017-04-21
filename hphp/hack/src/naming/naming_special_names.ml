@@ -72,6 +72,9 @@ module Collections = struct
   let cCollection       = "\\Collection"
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
+  let cDict             = "\\dict"
+  let cVec              = "\\vec"
+  let cKeyset           = "\\keyset"
 
 end
 
@@ -93,10 +96,9 @@ module Members = struct
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)
   let is_special_xhp_attribute s =
-    (Utils.str_starts_with s ":data-") || (Utils.str_starts_with s ":aria-")
+    (String_utils.string_starts_with s ":data-") ||
+    (String_utils.string_starts_with s ":aria-")
 end
-
-open Utils
 
 module UserAttributes = struct
 
@@ -139,6 +141,7 @@ module SpecialIdents = struct
 
   let this = "$this"
   let placeholder = "$_"
+  let dollardollar = "$$"
 
 end
 
@@ -150,6 +153,8 @@ module PseudoFunctions = struct
   let exit_ = "\\exit"
   let die = "\\die"
   let hh_show = "\\hh_show"
+  let hh_show_env = "\\hh_show_env"
+  let hh_log_level = "\\hh_log_level"
 
 end
 
@@ -158,6 +163,9 @@ module StdlibFunctions = struct
   let is_int      = "\\is_int"
   let is_bool     = "\\is_bool"
   let is_array    = "\\is_array"
+  let is_vec      = "\\is_vec"
+  let is_dict     = "\\is_dict"
+  let is_keyset   = "\\is_keyset"
   let is_float    = "\\is_float"
   let is_string   = "\\is_string"
   let is_null     = "\\is_null"
@@ -187,6 +195,8 @@ module Typehints = struct
   let float   = "float"
   let string  = "string"
   let array   = "array"
+  let darray  = "darray"
+  let varray  = "varray"
   let integer = "integer"
   let boolean = "boolean"
   let double  = "double"
@@ -237,11 +247,18 @@ module FB = struct
 
 end
 
+module HH = struct
+
+  let asio_va                = "\\HH\\Asio\\va"
+
+end
+
 module Shapes = struct
   let cShapes                = "\\Shapes"
   let idx                    = "idx"
   let keyExists              = "keyExists"
   let removeKey              = "removeKey"
+  let toArray                = "toArray"
 end
 
 module Superglobals = struct

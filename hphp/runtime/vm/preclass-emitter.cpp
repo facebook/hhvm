@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,8 @@
 
 #include <folly/Memory.h>
 
+#include "hphp/parser/parser.h"
+
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/blob-helper.h"
@@ -26,6 +28,21 @@
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
+
+namespace {
+
+const StringData* preClassName(const std::string& name) {
+  static std::atomic<uint32_t> next_anon_class;
+  if (ParserBase::IsAnonymousClassName(name)) {
+    if (name.find(';') == std::string::npos) {
+      return makeStaticString(
+        folly::sformat("{};{}", name, next_anon_class.fetch_add(1)));
+    }
+  }
+  return makeStaticString(name);
+}
+
+}
 
 //=============================================================================
 // PreClassEmitter::Prop.
@@ -53,15 +70,20 @@ PreClassEmitter::Prop::~Prop() {
 //=============================================================================
 // PreClassEmitter.
 
+extern const StaticString s_Closure;
+
 PreClassEmitter::PreClassEmitter(UnitEmitter& ue,
                                  Id id,
-                                 const StringData* n,
+                                 const std::string& n,
                                  PreClass::Hoistable hoistable)
   : m_ue(ue)
-  , m_name(n)
+  , m_name(preClassName(n))
   , m_id(id)
-  , m_hoistable(hoistable)
-{}
+  , m_hoistable(hoistable) {
+  if (m_name->isame(s_Closure.get())) {
+    setClosurePreClass();
+  }
+}
 
 void PreClassEmitter::init(int line1, int line2, Offset offset, Attr attrs,
                            const StringData* parent,
@@ -147,14 +169,15 @@ bool PreClassEmitter::addConstant(const StringData* n,
                                   const TypedValue* val,
                                   const StringData* phpCode,
                                   const bool typeconst,
-                                  const Array typeStructure) {
+                                  const Array& typeStructure) {
   ConstMap::Builder::const_iterator it = m_constMap.find(n);
   if (it != m_constMap.end()) {
     return false;
   }
   TypedValue tvVal;
   if (typeconst && !typeStructure.empty())  {
-    tvVal = make_tv<KindOfArray>(typeStructure.get());
+    tvVal = make_tv<KindOfPersistentArray>(typeStructure.get());
+    assert(tvIsPlausible(tvVal));
   } else {
     tvVal = *val;
   }
@@ -195,29 +218,6 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   }
 }
 
-void PreClassEmitter::setBuiltinClassInfo(const ClassInfo* info,
-                                          BuiltinCtorFunction ctorFunc,
-                                          BuiltinDtorFunction dtorFunc,
-                                          BuiltinObjExtents extents) {
-  if (info->getAttribute() & ClassInfo::IsFinal) {
-    m_attrs = m_attrs | AttrFinal;
-  }
-  if (info->getAttribute() & ClassInfo::IsAbstract) {
-    m_attrs = m_attrs | AttrAbstract;
-  }
-  if (info->getAttribute() & ClassInfo::IsTrait) {
-    m_attrs = m_attrs | AttrTrait;
-  }
-  m_attrs = m_attrs | AttrUnique;
-  m_instanceCtor = ctorFunc;
-  m_instanceDtor = dtorFunc;
-
-  assert(extents.totalSizeBytes <= std::numeric_limits<uint32_t>::max());
-  assert(extents.odOffsetBytes  <= std::numeric_limits<int32_t>::max());
-  m_builtinObjSize  = extents.totalSizeBytes - sizeof(ObjectData);
-  m_builtinODOffset = extents.odOffsetBytes;
-}
-
 const StaticString s_nativedata("__nativedata");
 
 PreClass* PreClassEmitter::create(Unit& unit) const {
@@ -233,8 +233,6 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     m_hoistable);
   pc->m_instanceCtor = m_instanceCtor;
   pc->m_instanceDtor = m_instanceDtor;
-  pc->m_builtinObjSize = m_builtinObjSize;
-  pc->m_builtinODOffset = m_builtinODOffset;
   pc->m_interfaces = m_interfaces;
   pc->m_usedTraits = m_usedTraits;
   pc->m_requirements = m_requirements;
@@ -255,7 +253,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     if (it == m_userAttributes.end()) return;
 
     TypedValue ndiInfo = it->second;
-    if (ndiInfo.m_type != KindOfArray) return;
+    if (!isArrayType(ndiInfo.m_type)) return;
 
     // Use the first string label which references a registered type.  In
     // practice, there should generally only be one item and it should be a
@@ -296,13 +294,13 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     TypedValueAux tvaux;
     if (const_.isAbstract()) {
       tvWriteUninit(&tvaux);
-      tvaux.constModifiers().m_isAbstract = true;
+      tvaux.constModifiers().isAbstract = true;
     } else {
       tvCopy(const_.val(), tvaux);
-      tvaux.constModifiers().m_isAbstract = false;
+      tvaux.constModifiers().isAbstract = false;
     }
 
-    tvaux.constModifiers().m_isType = const_.isTypeconst();
+    tvaux.constModifiers().isType = const_.isTypeconst();
 
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,
@@ -383,11 +381,16 @@ void PreClassRepoProxy::InsertPreClassStmt
     txn.prepare(*this, ssInsert.str());
   }
 
+  auto n = name->slice();
+  auto const pos = RuntimeOption::RepoAuthoritative ?
+    std::string::npos : qfind(n, ';');
+  auto const nm = pos == std::string::npos ?
+    n : folly::StringPiece{n.data(), pos};
   BlobEncoder extraBlob;
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@preClassId", preClassId);
-  query.bindStaticString("@name", name);
+  query.bindStringPiece("@name", nm);
   query.bindInt("@hoistable", hoistable);
   const_cast<PreClassEmitter&>(pce).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
@@ -410,7 +413,7 @@ void PreClassRepoProxy::GetPreClassesStmt
     query.step();
     if (query.row()) {
       Id preClassId;          /**/ query.getId(0, preClassId);
-      StringData* name;       /**/ query.getStaticString(1, name);
+      std::string name;       /**/ query.getStdString(1, name);
       int hoistable;          /**/ query.getInt(2, hoistable);
       BlobDecoder extraBlob = /**/ query.getBlob(3);
       PreClassEmitter* pce = ue.newPreClassEmitter(

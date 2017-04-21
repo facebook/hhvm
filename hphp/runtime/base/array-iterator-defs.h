@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,18 +22,23 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+inline MIterTable& miter_table() {
+  return *MIterTable::TlsWrapper::getNoCheck();
+}
+
 /*
  * Fast check for whether any strong iterators exist in the entire
  * program.  Most strong iterator operations from arrays should be
  * guarded on checking this first, and placed in an unlikely path.
  */
 inline bool strong_iterators_exist() {
-  return tl_miter_table.ents[0].array != nullptr;
+  return !MIterTable::TlsWrapper::isNull() &&
+         miter_table().ents[0].array != nullptr;
 }
 
 template<class Fn> NEVER_INLINE
-void for_each_strong_iterator_slow(Fn fn) {
-  tl_miter_table.extras.for_each(fn);
+void for_each_strong_iterator_slow(MIterTable& table, Fn fn) {
+  table.extras.for_each(fn);
 }
 
 /*
@@ -46,35 +51,21 @@ void for_each_strong_iterator_slow(Fn fn) {
  */
 template<class Fn>
 void for_each_strong_iterator(Fn fn) {
+  static_assert(MIterTable::ents_size == 7, "");
   assert(strong_iterators_exist());
-  fn(tl_miter_table.ents[0]);
-  fn(tl_miter_table.ents[1]);
-  fn(tl_miter_table.ents[2]);
-  fn(tl_miter_table.ents[3]);
-  fn(tl_miter_table.ents[4]);
-  fn(tl_miter_table.ents[5]);
-  fn(tl_miter_table.ents[6]);
-  static_assert(tl_miter_table.ents.size() == 7, "");
-  if (UNLIKELY(!tl_miter_table.extras.empty())) {
-    for_each_strong_iterator_slow(fn);
+  auto& table = miter_table();
+  fn(table.ents[0]);
+  fn(table.ents[1]);
+  fn(table.ents[2]);
+  fn(table.ents[3]);
+  fn(table.ents[4]);
+  fn(table.ents[5]);
+  fn(table.ents[6]);
+  if (UNLIKELY(!table.extras.empty())) {
+    for_each_strong_iterator_slow(table, fn);
   }
-}
-
-template<typename F> void ArrayIter::scan(F& mark) const {
-  if (hasArrayData()) {
-    mark(getArrayData());
-  } else {
-    mark(getObject());
-  }
-}
-
-template<typename F> void MArrayIter::scan(F& mark) const {
-  mark(getArray());
-  mark(getContainer());
 }
 
 //////////////////////////////////////////////////////////////////////
-
 }
-
 #endif

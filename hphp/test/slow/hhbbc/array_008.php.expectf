@@ -3,5 +3,5 @@ bool(true)
 bool(true)
 bool(true)
 
-Notice: Undefined index: 13foo in %s/slow/hhbbc/array_008.php on line 16
+Notice: Undefined index: 13foo in %s/slow/hhbbc/array_008.php on line %d
 bool(true)

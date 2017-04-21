@@ -18,25 +18,25 @@ async function re($e) {
     array($r(-1), $r(0), $r(1)),
   );
 }
-AwaitAllWaitHandle::fromArray(array_map(
+\HH\Asio\join(AwaitAllWaitHandle::fromArray(array_map(
   async $e ==> await re($e),
   [ 1, 10, 20 ],
-))->join();
+)));
 echo "\n\n";
-AwaitAllWaitHandle::fromArray(array_map(
+\HH\Asio\join(AwaitAllWaitHandle::fromArray(array_map(
   async $e ==> await re($e),
   [ 1, 30, 31, 32, 33, 48, 62, 63 ],
-))->join();
+)));
 
-RescheduleWaitHandle::create(
+\HH\Asio\join(RescheduleWaitHandle::create(
   RescheduleWaitHandle::QUEUE_DEFAULT,
   PHP_INT_MAX,
-)->join();
+));
 try {
-  RescheduleWaitHandle::create(
+  \HH\Asio\join(RescheduleWaitHandle::create(
     RescheduleWaitHandle::QUEUE_DEFAULT,
     PHP_INT_MAX + 1,
-  )->join();
+  ));
 } catch (Exception $ex) {
   echo "caught expected exception\n";
 }

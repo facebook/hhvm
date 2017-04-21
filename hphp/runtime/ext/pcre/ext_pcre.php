@@ -132,7 +132,7 @@ function preg_match(string $pattern,
  *
  * @return string - Returns the quoted (escaped) string.
  */
-<<__Native>>
+<<__IsFoldable, __Native>>
 function preg_quote(string $str,
                     ?string $delimiter = NULL): string;
 
@@ -287,7 +287,7 @@ function preg_replace(mixed $pattern,
 <<__Native>>
 function preg_split(string $pattern,
                     string $subject,
-                    int $limit = -1,
+                    mixed $limit = null,
                     int $flags = 0): mixed;
 
 /**

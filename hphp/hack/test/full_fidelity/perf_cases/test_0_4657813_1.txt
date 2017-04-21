@@ -1,0 +1,2 @@
+<?hh
+namespace nDBbZ { enum gLZ : int as classname < uLNV > { } }

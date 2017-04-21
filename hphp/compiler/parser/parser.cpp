@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/dynamic_variable.h"
+#include "hphp/compiler/expression/pipe_variable.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/dynamic_function_call.h"
@@ -47,6 +48,7 @@
 #include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/class_expression.h"
 #include "hphp/compiler/expression/yield_expression.h"
+#include "hphp/compiler/expression/yield_from_expression.h"
 #include "hphp/compiler/expression/await_expression.h"
 #include "hphp/compiler/expression/user_attribute.h"
 
@@ -86,6 +88,7 @@
 #include "hphp/compiler/statement/trait_alias_statement.h"
 #include "hphp/compiler/statement/typedef_statement.h"
 #include "hphp/compiler/statement/use_declaration_statement_fragment.h"
+#include "hphp/compiler/statement/declare_statement.h"
 
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -99,6 +102,7 @@
 
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/annot-type.h"
+#include "hphp/system/systemlib.h"
 
 #define NEW_EXP0(cls)                                           \
   std::make_shared<cls>(BlockScopePtr(),                        \
@@ -172,9 +176,10 @@ Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false),
       m_closureGenerator(false), m_nsState(SeenNothing),
-      m_nsAliasTable(getAutoAliasedClasses(), [&] { return isAutoAliasOn(); }) {
+      m_nsAliasTable(getAutoAliasedClasses(),
+                     [&] { return getAliasFlags(); }) {
   auto const md5str = mangleUnitMd5(scanner.getMd5());
-  MD5 md5 = MD5(md5str.c_str());
+  auto const md5 = MD5{md5str};
 
   m_file = std::make_shared<FileScope>(m_fileName, fileSize, md5);
 
@@ -202,9 +207,18 @@ bool Parser::parse() {
     }
     if (scanner().isHHFile()) {
       m_file->setHHFile();
+      m_file->setUseStrictTypes();
+    }
+    // Default to strict types in force_hh mode and when not using PHP 7 scalar
+    // types.
+    if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
+      m_file->setUseStrictTypes();
     }
     return true;
   } catch (const ParseTimeFatalException& e) {
+    Logger::Verbose("Error parsing %s:%d: %s", m_fileName, e.m_line,
+                    e.getMessage().c_str());
+
     m_file->cleanupForError(m_ar);
     if (e.m_parseFatal) {
       m_file->makeParseFatal(m_ar, e.getMessage(), e.m_line);
@@ -283,13 +297,29 @@ void Parser::completeScope(BlockScopePtr inner) {
   }
 }
 
+static const std::string empty = "";
+static const std::string closure = "{closure}";
+
+const std::string& Parser::realFuncName() const {
+  for (auto i = m_funcContexts.size(); i--; ) {
+    auto const& ctx = m_funcContexts[i];
+    if (!ctx.name.empty()) return ctx.name;
+  }
+  return empty;
+}
+
+const std::string& Parser::funcName() const {
+  if (m_funcContexts.empty()) return empty;
+  auto const& name = m_funcContexts.back().name;
+  return name.empty() ? closure : name;
+}
+
 const std::string& Parser::clsName() const {
-  const static std::string empty = "";
-  return m_clsContexts.empty () ? empty : m_clsContexts.top().name;
+  return m_clsContexts.empty() ? empty : m_clsContexts.top().name;
 }
 
 bool Parser::inTrait() const {
-  return m_clsContexts.empty () ? false : m_clsContexts.top().type == T_TRAIT;
+  return m_clsContexts.empty() ? false : m_clsContexts.top().type == T_TRAIT;
 }
 
 LabelScopePtr Parser::getLabelScope() const {
@@ -412,11 +442,18 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
   out->exp = NEW_EXP(SimpleVariable, var->text());
 }
 
+void Parser::onPipeVariable(Token &out) {
+  out->exp = NEW_EXP(PipeVariable);
+}
+
 void Parser::onDynamicVariable(Token &out, Token &expr, bool encap) {
   out->exp = getDynamicVariable(expr->exp, encap);
 }
 
 void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
+  if (var->exp->is(Expression::KindOfPipeVariable)) {
+    PARSE_ERROR("Cannot take indirect reference to a pipe variable");
+  }
   out->exp = var->exp;
   for (int i = 0; i < refCount->num(); i++) {
     out->exp = createDynamicVariable(out->exp);
@@ -527,13 +564,10 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
           stripped == "func_get_args" ||
           stripped == "func_get_arg") {
         funcName = stripped;
-        if (m_funcContexts.size() > 0) {
-          m_funcContexts.back().hasCallToGetArgs = true;
-        }
       }
       // Auto import a few functions from the HH namespace
       // TODO(#4245628): merge those into m_fnAliasTable
-      if (isAutoAliasOn() &&
+      if (getAliasFlags() & AliasFlags::HH &&
           (stripped == "fun" ||
            stripped == "meth_caller" ||
            stripped == "class_meth" ||
@@ -552,7 +586,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "objprof_get_strings" ||
            stripped == "objprof_get_data" ||
            stripped == "objprof_get_paths" ||
-           stripped == "objprof_start" ||
            stripped == "heapgraph_create" ||
            stripped == "heapgraph_stats" ||
            stripped == "heapgraph_foreach_node" ||
@@ -564,7 +597,16 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
            stripped == "heapgraph_edge" ||
            stripped == "heapgraph_node_in_edges" ||
            stripped == "heapgraph_node_out_edges" ||
-           stripped == "server_warmup_status"
+           stripped == "server_warmup_status" ||
+           stripped == "dict" ||
+           stripped == "vec" ||
+           stripped == "keyset" ||
+           stripped == "varray" ||
+           stripped == "darray" ||
+           stripped == "is_vec" ||
+           stripped == "is_dict" ||
+           stripped == "is_keyset" ||
+           stripped == "is_varray_or_darray"
           )) {
         funcName = "HH\\" + stripped;
       }
@@ -729,13 +771,16 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     case T_METHOD_C:
       if (inTrait()) {
         exp = NEW_EXP(ScalarExpression, type, scalar->text(),
-                      clsName() + "::" + m_funcName);
+                      clsName() + "::" + realFuncName());
+      } else if (IsAnonymousClassName(clsName())) {
+        onUnaryOpExp(out, scalar, type, true);
+        return;
       } else {
         exp = NEW_EXP(ScalarExpression, type, scalar->text());
       }
       break;
     case T_CLASS_C:
-      if (inTrait()) {
+      if (inTrait() || IsAnonymousClassName(clsName())) {
         // Inside traits we already did the magic for static::class so lets
         // reuse that
         out->exp = NEW_EXP(SimpleFunctionCall, "get_class", true,
@@ -953,6 +998,35 @@ void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
   onUnaryOpExp(out, pairs, T_ARRAY, true);
 }
 
+void Parser::onDict(Token &out, Token &pairs) {
+  onUnaryOpExp(out, pairs, T_DICT, true);
+}
+
+void Parser::onVec(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_VEC, true);
+}
+
+void Parser::onKeyset(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_KEYSET, true);
+}
+
+void Parser::onVArray(Token& out, Token& exprs) {
+  if (exprs->exp) {
+    // varray uses the same grammar as vec, which produces Expressions instead
+    // of ArrayPairExpressions, so wrap the Expressions in ArrayPairExpressions.
+    auto& el = *static_pointer_cast<ExpressionList>(exprs->exp);
+    auto const count = el.getCount();
+    for (int i = 0; i < count; ++i) {
+      el[i] = NEW_EXP(ArrayPairExpression, nullptr, el[i], false);
+    }
+  }
+  onUnaryOpExp(out, exprs, T_ARRAY, true);
+}
+
+void Parser::onDArray(Token& out, Token& exprs) {
+  onUnaryOpExp(out, exprs, T_ARRAY, true);
+}
+
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
   if (!value->exp) return;
@@ -970,22 +1044,6 @@ void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
 
 void Parser::onEmptyCollection(Token &out) {
   out->exp = NEW_EXP0(ExpressionList);
-}
-
-void
-Parser::onCollectionPair(Token &out, Token *pairs, Token *name, Token &value) {
-  if (!value->exp) return;
-
-  ExpressionPtr expList;
-  if (pairs && pairs->exp) {
-    expList = pairs->exp;
-  } else {
-    expList = NEW_EXP0(ExpressionList);
-  }
-  ExpressionPtr nameExp = name ? name->exp : ExpressionPtr();
-  expList->addElement(NEW_EXP(ArrayPairExpression, nameExp, value->exp, false,
-                              true));
-  out->exp = expList;
 }
 
 void Parser::onUserAttribute(Token &out, Token *attrList, Token &name,
@@ -1060,8 +1118,7 @@ void Parser::onFunctionStart(Token &name, bool doPushComment /* = true */) {
     pushComment();
   }
   newScope();
-  m_funcContexts.push_back(FunctionContext());
-  m_funcName = name.text();
+  m_funcContexts.push_back(FunctionContext(name.text()));
   m_staticVars.emplace_back();
 }
 
@@ -1168,7 +1225,7 @@ void Parser::prepareConstructorParameters(StatementListPtr stmts,
 std::string Parser::getFunctionName(FunctionType type, Token* name) {
   switch (type) {
     case FunctionType::Closure:
-      return newClosureName(m_namespace, clsName(), m_containingFuncName);
+      return newClosureName(m_namespace, clsName(), realFuncName());
     case FunctionType::Function:
       assert(name);
       if (!m_lambdaMode) {
@@ -1249,16 +1306,12 @@ StatementPtr Parser::onFunctionHelper(FunctionType type,
 
     func->onParse(m_ar, m_file);
     completeScope(func->getFunctionScope());
-    if (func->ignored()) {
-      return NEW_STMT0(StatementList);
-    }
     mth = func;
   }
 
   // check and set generator/async flags
   FunctionContext funcContext = m_funcContexts.back();
   checkFunctionContext(funcName, funcContext, modifiersExp, ref->num());
-  mth->setHasCallToGetArgs(funcContext.hasCallToGetArgs);
   mth->setMayCallSetFrameMetadata(funcContext.mayCallSetFrameMetadata);
   mth->getFunctionScope()->setGenerator(funcContext.isGenerator);
   mth->getFunctionScope()->setAsync(modifiersExp->isAsync());
@@ -1288,15 +1341,11 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 void Parser::onVariadicParam(Token &out, Token *params,
                              Token &type, Token &var,
                              bool ref, Token *attr, Token *modifier) {
-  if (!type.text().empty()) {
+  if (!type.text().empty() && !m_scanner.isHHSyntaxEnabled()) {
     PARSE_ERROR("Parameter $%s is variadic and has a type constraint (%s)"
-                "; variadic params with type constraints are not supported",
+                "; variadic params with type constraints are not supported"
+                " in non-Hack files",
                 var.text().c_str(), type.text().c_str());
-  }
-  if (ref) {
-    PARSE_ERROR("Parameter $%s is both variadic and by reference"
-                "; this is unsupported",
-                var.text().c_str());
   }
 
   ExpressionPtr expList;
@@ -1310,7 +1359,10 @@ void Parser::onVariadicParam(Token &out, Token *params,
     attrList = dynamic_pointer_cast<ExpressionList>(attr->exp);
   }
 
-  TypeAnnotationPtr typeAnnotation = type.typeAnnotation;
+  TypeAnnotationPtr typeAnnotation = std::make_shared<TypeAnnotation>(
+    "array", type.typeAnnotation);
+  typeAnnotation->setTypeVar();
+
   expList->addElement(NEW_EXP(ParameterExpression, typeAnnotation,
                               m_scanner.isHHSyntaxEnabled(), var->text(),
                               ref, (modifier) ? modifier->num() : 0,
@@ -1356,21 +1408,23 @@ void Parser::checkClassDeclName(const std::string& name) {
   bool isHHNamespace = (strcasecmp(m_namespace.c_str(), "HH") == 0);
   auto const* at = nameToAnnotType(
     [&]() -> const std::string& {
-      if (isHHNamespace ||
-          (m_namespace.empty() && m_scanner.isHHSyntaxEnabled())) {
-        auto const& autoAliases = getAutoAliasedClasses();
+      if (isHHNamespace || (m_namespace.empty() &&
+                            getAliasFlags() != AliasFlags::None)) {
         // For the HH namespace, it's important to apply the Hack auto-
         // alias rules so that we catch cases involving synonyms such
         // as "class Boolean {..}".
-        auto it = autoAliases.find(
+        auto it = getAutoAliasedClasses().find(
           // "self" and "parent" are treated specially when namespace
           // resolution is performed, so when we're in the HH namespace
           // we can't just assume the name starts with "HH\", we need
           // to actually check.
-          (isHHNamespace && boost::starts_with(name, "HH\\"))
+          (isHHNamespace && folly::StringPiece(name).startsWith("HH\\"))
             ? name.substr(3) : name);
-        if (it != autoAliases.end()) {
-          return it->second;
+        auto const flags = isHHNamespace
+          ? getAliasFlags() | AliasFlags::HH
+          : getAliasFlags();
+        if (it != getAutoAliasedClasses().end() && it->second.flags & flags) {
+          return it->second.name;
         }
       }
       return name;
@@ -1388,7 +1442,11 @@ void Parser::checkClassDeclName(const std::string& name) {
       case AnnotType::Mixed:
       case AnnotType::Number:
       case AnnotType::ArrayKey:
-        if (!m_scanner.isHHSyntaxEnabled() && !isHHNamespace) {
+      case AnnotType::Dict:
+      case AnnotType::Vec:
+      case AnnotType::Keyset:
+        if (!RuntimeOption::PHP7_ScalarTypes &&
+            !m_scanner.isHHSyntaxEnabled() && !isHHNamespace) {
           // If HH syntax is not enabled and we're not in the HH namespace,
           // allow Hack-specific reserved names such "string" to be used
           break;
@@ -1454,7 +1512,6 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
     auto param =
         dynamic_pointer_cast<ParameterExpression>((*promote)[i]);
     TokenID mod = param->getModifier();
-    std::string name = param->getName();
     std::string type = param->hasUserType() ? param->getUserTypeHint() : "";
 
     // create the class variable and change the location to
@@ -1464,7 +1521,7 @@ StatementPtr Parser::onClassHelper(int type, const std::string &name,
       BlockScopePtr(), range);
     modifier->add(mod);
     SimpleVariablePtr svar = std::make_shared<SimpleVariable>(
-      BlockScopePtr(), range, name);
+      BlockScopePtr(), range, param->getName());
     ExpressionListPtr expList = std::make_shared<ExpressionList>(
       BlockScopePtr(), range);
     expList->addElement(svar);
@@ -1491,8 +1548,10 @@ void Parser::onClassExpressionStart() {
   pushClass(false);
   pushComment();
   newScope();
-  auto name = newAnonClassName("class@anonymous", m_namespace, clsName(),
-      m_containingFuncName);
+  auto name = newAnonClassName("class@anonymous",
+                               m_namespace,
+                               clsName(),
+                               realFuncName());
   m_clsContexts.push(ClassContext(T_CLASS, name));
 }
 
@@ -1899,7 +1958,7 @@ void Parser::setIsGenerator() {
     PARSE_ERROR("Yield can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(m_funcName, clsName())) {
+  if (!canBeAsyncOrGenerator(funcName(), clsName())) {
     invalidYield();
     PARSE_ERROR("'yield' is not allowed in constructor, destructor, or "
                 "magic methods");
@@ -1913,6 +1972,11 @@ void Parser::onYield(Token &out, Token *expr) {
   // yield; == yield null;
   auto expPtr = expr ? expr->exp : NEW_EXP(ConstantExpression, "null", false);
   out->exp = NEW_EXP(YieldExpression, ExpressionPtr(), expPtr);
+}
+
+void Parser::onYieldFrom(Token &out, Token *expr) {
+  setIsGenerator();
+  out->exp = NEW_EXP(YieldFromExpression, expr->exp);
 }
 
 void Parser::onYieldPair(Token &out, Token *key, Token *val) {
@@ -1938,7 +2002,7 @@ void Parser::setIsAsync() {
     PARSE_ERROR("'await' can only be used inside a function");
   }
 
-  if (!canBeAsyncOrGenerator(m_funcName, clsName())) {
+  if (!canBeAsyncOrGenerator(funcName(), clsName())) {
     invalidAwait();
     PARSE_ERROR("'await' is not allowed in constructors, destructors, or "
                     "magic methods.");
@@ -2108,11 +2172,6 @@ void Parser::onThrow(Token &out, Token &expr) {
 }
 
 void Parser::onClosureStart(Token &name) {
-  if (!m_funcName.empty()) {
-    m_containingFuncName = m_funcName;
-  } else {
-    // pseudoMain
-  }
   onFunctionStart(name, true);
 }
 
@@ -2122,9 +2181,44 @@ Token Parser::onClosure(ClosureType type,
                         Token& params,
                         Token& cparams,
                         Token& stmts,
-                        Token& ret) {
+                        Token& ret1,
+                        Token* ret2 /* = nullptr */) {
   Token out;
   Token name;
+
+  // This is a bit ugly: when PHP7 picked up Hack-style return types, they
+  // inverted the syntax for a long-form closure with both a "use" clause and a
+  // return type. (Hack says the return type comes first, PHP7 says the "use"
+  // clause comes first.)
+  //
+  // This leaves us in the unenviable position of having to support both. Since
+  // they are both optional, it's really hard to express that there can be
+  // either ordering in the bison grammar. Instead, it's much easier to allow
+  // an optional return type both before and after an optional use clause. (The
+  // latter is only a shift/reduce conflict since, in the absence of a use
+  // clause, bison is unsure whether the return type is in the "first" or
+  // "second" slot.) Then, we can fix it up here -- pick the one that is
+  // nonempty, or generate a special parse error if they are both nonempty.
+  //
+  // This is slighly more annoying by the fact that many callsites to this
+  // function are *not* long-form closures, and so all of the above doesn't
+  // apply to them, hence ret2 being a pointer with a nullptr default, so they
+  // don't all have to explicitly opt out of this mess.
+  //
+  // If it makes you feel any better, the PHP contributor responsible for this
+  // has since said that he regrets his decision.
+  Token ret;
+  if (ret2) {
+    if (!ret1.num()) {
+      ret = *ret2;
+    } else if (!ret2->num()) {
+      ret = ret1;
+    } else {
+      PARSE_ERROR("Cannot have return types both before and after use clause");
+    }
+  } else {
+    ret = ret1;
+  }
 
   auto stmt = onFunctionHelper(
     FunctionType::Closure,
@@ -2227,6 +2321,22 @@ void Parser::onTypedef(Token& out, const Token& name, const Token& type,
 
 void Parser::onTypeAnnotation(Token& out, const Token& name,
                                           const Token& typeArgs) {
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    auto text = name.text();
+    auto const pos = text.rfind(NAMESPACE_SEP);
+    if (pos != std::string::npos && text.substr(0, pos + 1) != "HH\\" &&
+        text.substr(0, pos + 1) != "\\HH\\") {
+      auto const key = text.substr(pos + 1);
+      auto& table = getAutoAliasedClasses();
+      auto it = table.find(key);
+      if (it != table.end() &&
+          it->second.flags & AliasFlags::PHP7_ScalarTypes) {
+        error("Cannot use '%s' as class name as it is reserved: %s",
+              key.c_str(), getMessage(false,true).c_str());
+        return;
+      }
+    }
+  }
   out.set(name.num(), name.text());
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
     name.text(), typeArgs.typeAnnotation);
@@ -2261,10 +2371,14 @@ void Parser::onClsCnsShapeField(Token& out,
   out.typeAnnotation->setClsCnsShapeField();
 }
 
-void Parser::onShape(Token &out, const Token &shapeFieldsList) {
+void Parser::onShape(
+    Token &out, const Token &shapeFieldsList, bool terminatedWithEllipsis) {
   out.typeAnnotation = std::make_shared<TypeAnnotation>(
     "array", shapeFieldsList.typeAnnotation);
   out.typeAnnotation->setShape();
+  if (terminatedWithEllipsis) {
+    out.typeAnnotation->setAllowsUnknownFields();
+  }
 }
 
 void Parser::onTypeSpecialization(Token& type, char specialization) {
@@ -2292,33 +2406,61 @@ void Parser::onTypeSpecialization(Token& type, char specialization) {
   }
 }
 
+void Parser::onShapeFieldSpecialization(
+    Token& shapeField, char specialization) {
+  if (specialization == '?') {
+    shapeField.typeAnnotation->setOptionalShapeField();
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // namespace support
 
 //////////////////// AliasTable /////////////////////
 
-Parser::AliasTable::AliasTable(const hphp_string_imap<std::string>& autoAliases,
-                               std::function<bool ()> autoOracle)
-  : m_autoAliases(autoAliases), m_autoOracle(autoOracle) {
+Parser::AliasTable::AliasTable(
+  const Parser::AutoAliasMap& aliases,
+  std::function<Parser::AliasFlags ()> autoOracle)
+  : m_autoAliases(aliases)
+  , m_autoOracle(autoOracle) {
   if (!m_autoOracle) {
     setFalseOracle();
   }
 }
 
-void Parser::AliasTable::setFalseOracle() {
-  m_autoOracle = [] () { return false; };
+const Parser::AutoAliasMap&
+Parser::AliasTable::getAutoAliases() {
+  static AutoAliasMap emptyAliases;
+
+  return m_autoOracle() != AliasFlags::None
+    ? m_autoAliases
+    : emptyAliases;
 }
 
-std::string Parser::AliasTable::getName(const std::string& alias, int line_no) {
+void Parser::AliasTable::setFalseOracle() {
+  m_autoOracle = [] () { return AliasFlags::None; };
+}
+
+std::string Parser::AliasTable::getName(const std::string& alias,
+                                        int line_no,
+                                        bool forNs) {
+  if (forNs) {
+    auto it = RuntimeOption::AliasedNamespaces.find(alias);
+    if (it != RuntimeOption::AliasedNamespaces.end()) {
+      return it->second;
+    }
+  }
   auto it = m_aliases.find(alias);
   if (it != m_aliases.end()) {
     return it->second.name;
   }
-  auto autoIt = m_autoAliases.find(alias);
-  if (autoIt != m_autoAliases.end()) {
-    set(alias, autoIt->second, AliasType::AUTO_USE, line_no);
-    return autoIt->second;
+  auto autoIt = getAutoAliases().find(alias);
+  if (autoIt != getAutoAliases().end() &&
+      autoIt->second.flags & m_autoOracle()) {
+    set(alias, autoIt->second.name, AliasType::AUTO_USE, line_no);
+    return autoIt->second.name;
   }
+
   return "";
 }
 
@@ -2342,12 +2484,19 @@ int Parser::AliasTable::getLine(const std::string& alias) {
   return (it != m_aliases.end()) ? it->second.line_no : -1;
 }
 
-bool Parser::AliasTable::isAliased(const std::string& alias) {
+bool Parser::AliasTable::isAliased(const std::string& alias, bool forNs) {
+  if (forNs) {
+    if (RuntimeOption::AliasedNamespaces.count(alias)) {
+      return true;
+    }
+  }
   auto t = getType(alias);
   if (t == AliasType::USE || t == AliasType::AUTO_USE) {
     return true;
   }
-  return m_autoOracle() && m_autoAliases.find(alias) != m_autoAliases.end();
+  auto autoIt = getAutoAliases().find(alias);
+  return
+    autoIt != getAutoAliases().end() && autoIt->second.flags & m_autoOracle();
 }
 
 void Parser::AliasTable::set(const std::string& alias,
@@ -2370,10 +2519,24 @@ void Parser::AliasTable::clear() {
 /*
  * We auto-alias classes only on HH mode.
  */
-bool Parser::isAutoAliasOn() {
-  return m_scanner.isHHSyntaxEnabled();
+Parser::AliasFlags Parser::getAliasFlags() {
+  auto flags = AliasFlags::None;
+  if (m_scanner.isHHSyntaxEnabled()) {
+    flags = AliasFlags::HH;
+  }
+
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    flags = flags | AliasFlags::PHP7_ScalarTypes;
+  }
+
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    flags = flags | AliasFlags::PHP7_EngineExceptions;
+  }
+
+  return flags;
 }
 
+namespace {
 /**
  * This is the authoritative map that drives Hack's auto-importation
  * mechanism for core types and classes defined in the HH namespace.
@@ -2385,84 +2548,109 @@ bool Parser::isAutoAliasOn() {
  * Note that this map serves a different purpose than the AnnotType
  * map in "runtime/base/annot-type.cpp".
  */
-hphp_string_imap<std::string> Parser::getAutoAliasedClassesHelper() {
-  hphp_string_imap<std::string> autoAliases;
-  typedef AliasTable::AliasEntry AliasEntry;
-  std::vector<AliasEntry> aliases {
-    AliasEntry{"AsyncIterator", "HH\\AsyncIterator"},
-    AliasEntry{"AsyncKeyedIterator", "HH\\AsyncKeyedIterator"},
-    AliasEntry{"Traversable", "HH\\Traversable"},
-    AliasEntry{"Container", "HH\\Container"},
-    AliasEntry{"KeyedTraversable", "HH\\KeyedTraversable"},
-    AliasEntry{"KeyedContainer", "HH\\KeyedContainer"},
-    AliasEntry{"Iterator", "HH\\Iterator"},
-    AliasEntry{"KeyedIterator", "HH\\KeyedIterator"},
-    AliasEntry{"Iterable", "HH\\Iterable"},
-    AliasEntry{"KeyedIterable", "HH\\KeyedIterable"},
-    AliasEntry{"Collection", "HH\\Collection"},
-    AliasEntry{"Vector", "HH\\Vector"},
-    AliasEntry{"Map", "HH\\Map"},
-    AliasEntry{"Set", "HH\\Set"},
-    AliasEntry{"Pair", "HH\\Pair"},
-    AliasEntry{"ImmVector", "HH\\ImmVector"},
-    AliasEntry{"ImmMap", "HH\\ImmMap"},
-    AliasEntry{"ImmSet", "HH\\ImmSet"},
-    AliasEntry{"InvariantException", "HH\\InvariantException"},
-    AliasEntry{"IMemoizeParam", "HH\\IMemoizeParam"},
-    AliasEntry{"Shapes", "HH\\Shapes"},
-    AliasEntry{"TypeStructureKind", "HH\\TypeStructureKind"},
-    AliasEntry{"TypeStructure", "HH\\TypeStructure"},
+Parser::AutoAliasMap getAutoAliasedClassesHelper() {
+  using AutoAlias  = Parser::AliasTable::AutoAlias;
+  using AliasFlags = Parser::AliasTable::AliasFlags;
+#define ALIAS(alias, name, flags) {alias, AutoAlias{name, flags}}
+#define HH_TYPE(name, flags) \
+  ALIAS(#name, "HH\\" #name, AliasFlags::HH | flags)
+#define HH_ONLY_TYPE(name) HH_TYPE(name, AliasFlags::None)
+#define HH_ALIAS(alias, name) \
+  ALIAS(#alias, "HH\\" #name, AliasFlags::HH)
+#define SCALAR_TYPE(name) HH_TYPE(name, AliasFlags::PHP7_ScalarTypes)
+#define PHP7_TYPE(name, option) \
+  ALIAS(#name, "__SystemLib\\" #name, AliasFlags::option)
+  Parser::AutoAliasMap aliases {
+    HH_ONLY_TYPE(AsyncIterator),
+    HH_ONLY_TYPE(AsyncKeyedIterator),
+    HH_ONLY_TYPE(Traversable),
+    HH_ONLY_TYPE(Container),
+    HH_ONLY_TYPE(KeyedTraversable),
+    HH_ONLY_TYPE(KeyedContainer),
+    HH_ONLY_TYPE(Iterator),
+    HH_ONLY_TYPE(KeyedIterator),
+    HH_ONLY_TYPE(Iterable),
+    HH_ONLY_TYPE(KeyedIterable),
+    HH_ONLY_TYPE(Collection),
+    HH_ONLY_TYPE(Vector),
+    HH_ONLY_TYPE(Map),
+    HH_ONLY_TYPE(Set),
+    HH_ONLY_TYPE(Pair),
+    HH_ONLY_TYPE(ImmVector),
+    HH_ONLY_TYPE(ImmMap),
+    HH_ONLY_TYPE(ImmSet),
+    HH_ONLY_TYPE(InvariantException),
+    HH_ONLY_TYPE(IMemoizeParam),
+    HH_ONLY_TYPE(Shapes),
+    HH_ONLY_TYPE(TypeStructureKind),
+    HH_ONLY_TYPE(TypeStructure),
+    HH_ONLY_TYPE(dict),
+    HH_ONLY_TYPE(vec),
+    HH_ONLY_TYPE(keyset),
+    HH_ONLY_TYPE(varray),
+    HH_ONLY_TYPE(darray),
 
-    AliasEntry{"Awaitable", "HH\\Awaitable"},
-    AliasEntry{"AsyncGenerator", "HH\\AsyncGenerator"},
-    AliasEntry{"WaitHandle", "HH\\WaitHandle"},
+    HH_ONLY_TYPE(Awaitable),
+    HH_ONLY_TYPE(AsyncGenerator),
+    HH_ONLY_TYPE(WaitHandle),
     // Keep in sync with order in hphp/runtime/ext/asio/wait-handle.h
-    AliasEntry{"StaticWaitHandle", "HH\\StaticWaitHandle"},
-    AliasEntry{"WaitableWaitHandle", "HH\\WaitableWaitHandle"},
-    AliasEntry{"ResumableWaitHandle", "HH\\ResumableWaitHandle"},
-    AliasEntry{"AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle"},
-    AliasEntry{"AsyncGeneratorWaitHandle", "HH\\AsyncGeneratorWaitHandle"},
-    AliasEntry{"AwaitAllWaitHandle", "HH\\AwaitAllWaitHandle"},
-    AliasEntry{"GenArrayWaitHandle", "HH\\GenArrayWaitHandle"},
-    AliasEntry{"GenMapWaitHandle", "HH\\GenMapWaitHandle"},
-    AliasEntry{"GenVectorWaitHandle", "HH\\GenVectorWaitHandle"},
-    AliasEntry{"ConditionWaitHandle", "HH\\ConditionWaitHandle"},
-    AliasEntry{"RescheduleWaitHandle", "HH\\RescheduleWaitHandle"},
-    AliasEntry{"SleepWaitHandle", "HH\\SleepWaitHandle"},
-    AliasEntry{
-      "ExternalThreadEventWaitHandle",
-      "HH\\ExternalThreadEventWaitHandle"
-    },
+    HH_ONLY_TYPE(StaticWaitHandle),
+    HH_ONLY_TYPE(WaitableWaitHandle),
+    HH_ONLY_TYPE(ResumableWaitHandle),
+    HH_ONLY_TYPE(AsyncFunctionWaitHandle),
+    HH_ONLY_TYPE(AsyncGeneratorWaitHandle),
+    HH_ONLY_TYPE(AwaitAllWaitHandle),
+    HH_ONLY_TYPE(ConditionWaitHandle),
+    HH_ONLY_TYPE(RescheduleWaitHandle),
+    HH_ONLY_TYPE(SleepWaitHandle),
+    HH_ONLY_TYPE(ExternalThreadEventWaitHandle),
 
-    AliasEntry{"bool", "HH\\bool"},
-    AliasEntry{"int", "HH\\int"},
-    AliasEntry{"float", "HH\\float"},
-    AliasEntry{"num", "HH\\num"},
-    AliasEntry{"arraykey", "HH\\arraykey"},
-    AliasEntry{"string", "HH\\string"},
-    AliasEntry{"resource", "HH\\resource"},
-    AliasEntry{"mixed", "HH\\mixed"},
-    AliasEntry{"noreturn", "HH\\noreturn"},
-    AliasEntry{"void", "HH\\void"},
-    AliasEntry{"this", "HH\\this"},
-    AliasEntry{"classname", "HH\\string"}, // for ::class
-    AliasEntry{"typename", "HH\\string"}, // for ::class
+    // Types supported by PHP 7 scalar type RFC
+    SCALAR_TYPE(bool),
+    SCALAR_TYPE(int),
+    SCALAR_TYPE(float),
+    SCALAR_TYPE(string),
+
+    // Hack-only primatives
+    HH_ONLY_TYPE(num),
+    HH_ONLY_TYPE(arraykey),
+    HH_ONLY_TYPE(resource),
+    HH_ONLY_TYPE(mixed),
+    HH_ONLY_TYPE(noreturn),
+    HH_ONLY_TYPE(void),
+    HH_ONLY_TYPE(this),
+    HH_ONLY_TYPE(varray_or_darray),
+    HH_ALIAS(classname, string),
+    HH_ALIAS(typename, string),
 
     // Support a handful of synonyms for backwards compat with code written
     // against older versions of HipHop, and to be consistent with PHP5 casting
     // syntax (for example, PHP5 supports both "(bool)$x" and "(boolean)$x")
-    AliasEntry{"boolean", "HH\\bool"},
-    AliasEntry{"integer", "HH\\int"},
-    AliasEntry{"double", "HH\\float"},
-    AliasEntry{"real", "HH\\float"},
+    HH_ALIAS(boolean, bool),
+    HH_ALIAS(integer, int),
+    HH_ALIAS(double, float),
+    HH_ALIAS(real, float),
+
+    // Engine exception classes
+    PHP7_TYPE(Throwable, PHP7_EngineExceptions),
+    PHP7_TYPE(Error, PHP7_EngineExceptions),
+    PHP7_TYPE(ArithmeticError, PHP7_EngineExceptions),
+    PHP7_TYPE(AssertionError, PHP7_EngineExceptions),
+    PHP7_TYPE(DivisionByZeroError, PHP7_EngineExceptions),
+    PHP7_TYPE(ParseError, PHP7_EngineExceptions),
+    PHP7_TYPE(TypeError, PHP7_EngineExceptions),
   };
-  for (auto entry : aliases) {
-    autoAliases[entry.alias] = entry.name;
-  }
-  return autoAliases;
+#undef PHP7_TYPE
+#undef HH_ALIAS
+#undef SCALAR_TYPE
+#undef HH_ONLY_TYPE
+#undef HH_TYPE
+#undef ALIAS
+  return aliases;
+}
 }
 
-const hphp_string_imap<std::string>& Parser::getAutoAliasedClasses() {
+const Parser::AutoAliasMap& Parser::getAutoAliasedClasses() {
   static auto autoAliases = getAutoAliasedClassesHelper();
   return autoAliases;
 }
@@ -2474,8 +2662,9 @@ void Parser::nns(int token, const std::string& text) {
     return;
   }
 
-  if (m_nsState == SeenNothing && !text.empty() && token != T_DECLARE &&
-      token != ';' && token != T_HASHBANG) {
+  if (m_nsState == SeenNothing && (SystemLib::s_inited || !text.empty()) &&
+      token != T_DECLARE && token != T_USE && token != ';' &&
+      token != T_HASHBANG) {
     m_nsState = SeenNonNamespaceStatement;
   }
 }
@@ -2612,6 +2801,17 @@ void Parser::useClass(const std::string &ns, const std::string &as) {
     }
   }
 
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    auto& table = getAutoAliasedClasses();
+    auto it = table.find(key);
+    if (it != table.end() && it->second.flags & AliasFlags::PHP7_ScalarTypes) {
+      error("Cannot use %s as %s because '%s' is a special class name: %s",
+            key.c_str(), key.c_str(), as.c_str(),
+            getMessage(false,true).c_str());
+      return;
+    }
+  }
+
   m_nsAliasTable.set(key, ns, AliasType::USE, line1());
 }
 
@@ -2639,6 +2839,42 @@ void Parser::useConst(const std::string &cnst, const std::string &as) {
   m_cnstAliasTable[key] = cnst;
 }
 
+void Parser::onDeclare(Token& out, Token& block) {
+  if (!out->stmt) {
+    out->stmt = NEW_STMT0(DeclareStatement);
+  }
+
+  auto st = static_pointer_cast<DeclareStatement>(out->stmt);
+  st->setBlock(static_pointer_cast<BlockStatement>(block->stmt));
+}
+
+void Parser::onDeclareList(Token& out, Token& ident, Token& exp) {
+  if (ident->text() == "strict_types") {
+    if (m_nsState != SeenNothing) {
+      error("strict_types declaration must be the very first statement in the "
+            "script: %s", getMessage(false,true).c_str());
+      return;
+    }
+    Variant val;
+    if (!exp->exp->getScalarValue(val) || !val.isInteger() ||
+        (val.toInt64Val() != 0 && val.toInt64Val() != 1)) {
+      error("strict_types declaration must have 0 or 1 as its value: %s",
+            getMessage(false,true).c_str());
+      return;
+    }
+    if (val.toInt64Val() == 1) {
+      m_file->setUseStrictTypes();
+    }
+  }
+
+  if (!out->stmt) {
+    out->stmt = NEW_STMT0(DeclareStatement);
+  }
+
+  auto st = static_pointer_cast<DeclareStatement>(out->stmt);
+  st->addDeclare(ident->text(), exp->exp);
+}
+
 std::string Parser::nsClassDecl(const std::string &name) {
   if (m_namespace.empty() ||
       !strcasecmp("self", name.c_str()) ||
@@ -2657,15 +2893,16 @@ std::string Parser::nsDecl(const std::string &name) {
 
 std::string Parser::resolve(const std::string &ns, bool cls) {
   auto const pos = ns.find(NAMESPACE_SEP);
-  auto const alias = (pos != std::string::npos) ? ns.substr(0, pos) : ns;
+  auto const forNs = pos != std::string::npos;
+  auto const alias = forNs ? ns.substr(0, pos) : ns;
 
   // Don't expand type variables into the current namespace.
   if (isTypeVar(ns)) {
     return ns;
   }
 
-  if (m_nsAliasTable.isAliased(alias)) {
-    auto name = m_nsAliasTable.getName(alias, line1());
+  if (m_nsAliasTable.isAliased(alias, forNs)) {
+    auto name = m_nsAliasTable.getName(alias, line1(), forNs);
     // Was it a namespace alias?
     if (pos != std::string::npos) {
       return name + ns.substr(pos);
@@ -2721,6 +2958,15 @@ TStatementPtr Parser::extractStatement(ScannerToken *stmt) {
 void Parser::registerAlias(std::string name) {
   auto const pos = name.rfind(NAMESPACE_SEP);
   auto const key = (pos != std::string::npos) ? name.substr(pos + 1) : name;
+  if (RuntimeOption::PHP7_ScalarTypes) {
+    auto& table = getAutoAliasedClasses();
+    auto it = table.find(key);
+    if (it != table.end() && it->second.flags & AliasFlags::PHP7_ScalarTypes) {
+      error("Cannot use '%s' as class name as it is reserved: %s",
+            key.c_str(), getMessage(false,true).c_str());
+      return;
+    }
+  }
   if (m_nsAliasTable.getType(key) != AliasType::USE &&
       m_nsAliasTable.getType(key) != AliasType::AUTO_USE) {
     m_nsAliasTable.set(key, name, AliasType::DEF, line1());

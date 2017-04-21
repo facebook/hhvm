@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -23,8 +23,7 @@
 
 namespace HPHP {
 
-class WddxPacket: public ResourceData {
- public:
+struct WddxPacket : ResourceData {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(WddxPacket);
 
   WddxPacket(const Variant& comment, bool manualPacket, bool sVar);
@@ -39,7 +38,7 @@ class WddxPacket: public ResourceData {
   String packet_end();
   bool serialize_value(const Variant& varVariant);
   bool recursiveAddVar(const String& varName, const Variant& varVariant,
-                       bool hasVarTag );
+                       bool hasVarTag);
 
  private:
   String getWddxEncoded(const String& varType,
@@ -52,6 +51,17 @@ class WddxPacket: public ResourceData {
                    const String& varValue,
                    const String& varName,
                    bool hasVarTag);
+
+  using ArrayOrObject = Either<ArrayData*,ObjectData*>;
+  struct EitherHash {
+    size_t operator()(const ArrayOrObject data) const {
+      return data.toOpaque();
+    }
+  };
+  using SeenContainers = req::hash_set<ArrayOrObject, EitherHash>;
+
+  bool recursiveAddVarImpl(const String& varName, const Variant& varVariant,
+                           bool hasVarTag, SeenContainers& seen);
 
   StringBuffer m_packetString;
   bool m_packetClosed;

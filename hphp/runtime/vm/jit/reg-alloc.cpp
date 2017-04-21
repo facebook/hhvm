@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 
-#include "hphp/runtime/base/arch.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/irlower.h"
@@ -27,6 +25,8 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
+
+#include "hphp/util/arch.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -53,21 +53,28 @@ bool loadsCell(Opcode op) {
   case LdContField:
   case LdElem:
   case LdRef:
-  case LdStaticLocCached:
   case LookupCns:
-  case LookupClsCns:
+  case InitClsCns:
   case CGetProp:
   case VGetProp:
   case ArrayGet:
+  case DictGet:
+  case DictGetQuiet:
+  case DictGetK:
+  case KeysetGet:
+  case KeysetGetQuiet:
+  case KeysetGetK:
   case MapGet:
   case CGetElem:
   case VGetElem:
   case ArrayIdx:
-  case GenericIdx:
+  case DictIdx:
+  case KeysetIdx:
+  case LdVecElem:
     switch (arch()) {
     case Arch::X64: return true;
-    case Arch::ARM: return false;
-    case Arch::PPC64: not_implemented(); break;
+    case Arch::ARM: return true;
+    case Arch::PPC64: return true;
     }
     not_reached();
 
@@ -84,8 +91,8 @@ bool loadsCell(Opcode op) {
 bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   switch (arch()) {
   case Arch::X64: break;
-  case Arch::ARM: return false;
-  case Arch::PPC64: not_implemented(); break;
+  case Arch::ARM: break;
+  case Arch::PPC64: return false;
   }
 
   // If this function returns true for an operand, then the register allocator
@@ -95,16 +102,12 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // MixedArray elements, Map elements, and RefData inner values.  We don't
   // have StMem in here since it sometimes stores to RefDatas.
   switch (inst.op()) {
-  case StRetVal:
   case StLoc:
     return srcIdx == 1;
-
   case StElem:
     return srcIdx == 2;
-
   case StStk:
     return srcIdx == 1;
-
   default:
     return false;
   }
@@ -119,25 +122,6 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 
   auto inst = tmp.inst();
   auto opc = inst->op();
-
-  auto const forceStkPtrs = [&] {
-    switch (arch()) {
-    case Arch::X64: return false;
-    case Arch::ARM: return true;
-    case Arch::PPC64: not_implemented(); break;
-    }
-    not_reached();
-  }();
-
-  if (forceStkPtrs && tmp.isA(TStkPtr)) {
-    assert_flog(
-      opc == DefSP ||
-      opc == Mov,
-      "unexpected StkPtr dest from {}",
-      opcodeName(opc)
-    );
-    return rvmsp();
-  }
 
   // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
   // we have a pointer to an AR that is not in rvmfp().
@@ -154,7 +138,7 @@ PhysReg forceAlloc(const SSATmp& tmp) {
 // a known DataType only get one register. Assign "wide" locations when
 // possible (when all uses and defs can be wide). These will be assigned
 // SIMD registers later.
-void assignRegs(IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
+void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
                 const BlockList& blocks) {
   // visit instructions to find tmps eligible to use SIMD registers
   auto const try_wide = RuntimeOption::EvalHHIRAllocSIMDRegs;
@@ -223,12 +207,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::calls:
     case Vinstr::callstub:
       defs = abi.all() - (abi.calleeSaved | rvmfp());
-
-      switch (arch()) {
-        case Arch::ARM: defs.add(PhysReg(arm::rLinkReg)); break;
-        case Arch::X64: break;
-        case Arch::PPC64: not_implemented(); break;
-      }
       break;
 
     case Vinstr::callfaststub:
@@ -236,22 +214,12 @@ void getEffects(const Abi& abi, const Vinstr& i,
       break;
 
     case Vinstr::callphp:
-      defs = abi.all();
-      switch (arch()) {
-        case Arch::ARM: break;
-        case Arch::X64: defs.remove(rvmtl()); break;
-        case Arch::PPC64: not_implemented(); break;
-      }
+      defs = abi.all() - RegSet(rvmtl());
       break;
 
     case Vinstr::callarray:
     case Vinstr::contenter:
-      defs = abi.all() - RegSet(rvmfp());
-      switch (arch()) {
-        case Arch::ARM: break;
-        case Arch::X64: defs.remove(rvmtl()); break;
-        case Arch::PPC64: not_implemented(); break;
-      }
+      defs = abi.all() - (rvmfp() | rvmtl());
       break;
 
     case Vinstr::cqo:
@@ -264,12 +232,6 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::shlq:
     case Vinstr::sarq:
       across = RegSet(reg::rcx);
-      break;
-
-    // arm instrs
-    case Vinstr::hostcall:
-      defs = (abi.all() - abi.calleeSaved) |
-             RegSet(PhysReg(arm::rHostCallReg));
       break;
 
     case Vinstr::vcall:

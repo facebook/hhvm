@@ -8,18 +8,26 @@
  *
  *)
 
-val type_check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * int
+ type check_kind =
+   | Lazy_check
+   | Full_check
+
+val check_kind_to_string : check_kind -> string
+
+val type_check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
+  ServerEnv.env * int * int
 
 (* just add also some debugging information on stdout *)
-val check: ServerEnv.genv -> ServerEnv.env -> ServerEnv.env * int
+val check: ServerEnv.genv -> ServerEnv.env -> check_kind ->
+  ServerEnv.env * int * int
 
-val hook_after_parsing: (ServerEnv.genv -> (* old *) ServerEnv.env ->
-    (* new *) ServerEnv.env -> Relative_path.Set.t -> unit) option ref
+val hook_after_parsing: (ServerEnv.genv ->
+    (* new *) ServerEnv.env -> unit) option ref
 
 (****************************************************************************)
 (* Debugging: Declared here to stop ocamlc yelling at us for unused defs *)
 (****************************************************************************)
 
 val print_defs: string -> ('a * string) list -> unit
-val print_fast_pos: (('a * string) list * ('b * string) list) Utils.SMap.t -> unit
-val print_fast: (Utils.SSet.t * Utils.SSet.t) Utils.SMap.t -> unit
+val print_fast_pos: (('a * string) list * ('b * string) list) SMap.t -> unit
+val print_fast: (SSet.t * SSet.t) SMap.t -> unit

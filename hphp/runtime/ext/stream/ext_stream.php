@@ -242,7 +242,7 @@ function stream_wrapper_restore(string $protocol): bool;
 /**
  * Allows you to disable an already defined stream wrapper. Once the wrapper
  *   has been disabled you may override it with a user-defined wrapper using
- *   stream_wrapper_register() or reenable it later on with
+ *   stream_wrapper_register() or re-enable it later on with
  *   stream_wrapper_restore().
  *
  * @param string $protocol
@@ -326,7 +326,7 @@ function stream_select(mixed &$read,
  * @param resource $fp - Stream resource, must be backed by a file descriptor
  *                       such as a normal file, socket, tempfile, or stdio.
  *                       Does not work with memory streams or user streams.
- * @param int $events - Mix of STREAM_AWAIT_READ and/or STREAM_EVENT_WRITE
+ * @param int $events - Mix of STREAM_AWAIT_READ and/or STREAM_AWAIT_WRITE
  * @param float $timeout - Timeout in seconds
  *
  * @return int - Result code
@@ -346,8 +346,8 @@ function stream_await(resource $fp,
  *   socket streams).
  *
  * @param resource $stream - The stream.
- * @param int $mode - If mode is 0, the given stream will be switched to
- *   non-blocking mode, and if 1, it will be switched to blocking mode. This
+ * @param int $mode - If mode is FALSE, the given stream will be switched to
+ *   non-blocking mode, and if TRUE, it will be switched to blocking mode. This
  *   affects calls like fgets() and fread() that read from the stream. In
  *   non-blocking mode an fgets() call will always return right away while in
  *   blocking mode it will wait for data to become available on the stream.
@@ -356,7 +356,34 @@ function stream_await(resource $fp,
  *
  */
 <<__Native>>
-function stream_set_blocking(resource $stream, int $mode): bool;
+function stream_set_blocking(resource $stream, bool $mode): bool;
+
+/**
+ * Set read file buffering on the given stream.
+ *
+ * @param resource $stream - The file pointer.
+ * @param int $buffer - The number of bytes to buffer. If buffer is 0 then
+ * read operations are unbuffered.
+ *
+ * @return int - Returns 0 on success, or another value if the request cannot
+ * be honored.
+ *
+ */
+<<__Native>>
+function stream_set_read_buffer(resource $stream, int $buffer): int;
+
+/**
+ * Set the stream chunk size.
+ *
+ * @param resource $stream - The target stream.
+ * @param int $chunk_size - The desired new chunk size.
+ *
+ * @return int - Returns the previous chunk size on success.  Will return FALSE
+ * if less than 1 or greater than PHP_INT_MAX.
+ *
+ */
+<<__Native>>
+function stream_set_chunk_size(resource $stream, int $chunk_size): mixed;
 
 /**
  * Sets the timeout value on stream, expressed in the sum of seconds and
@@ -388,8 +415,7 @@ function stream_set_timeout(resource $stream,
  *   are completed before other processes are allowed to write to that output
  *   stream.
  *
- * @return int - Returns 0 on success, or EOF if the request cannot be
- *   honored.
+ * @return int - Returns 0 on success.
  *
  */
 <<__Native>>
@@ -517,7 +543,7 @@ function stream_socket_client(string $remote_socket,
  *   - STREAM_CRYPTO_SSLv23_SERVER
  *   - STREAM_CRYPTO_TLS_SERVER
  *
- *   When enabling crypto in HHVM, this parameter is requried as the
+ *   When enabling crypto in HHVM, this parameter is required as the
  *   session_stream parameter is not supported.
  *
  *   Under PHP, if omitted, the crypto_type context option on the stream's SSL

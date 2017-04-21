@@ -4,7 +4,7 @@
  * Accessing fields/passing shapes to functions
  * doesn't change the "known fields" property
  */
-type s = shape('z' => ?int);
+type s = shape(?'z' => int);
 
 function test(): s {
   $s = shape();
@@ -12,7 +12,7 @@ function test(): s {
   return $s;
 }
 
-type t = shape('x' => ?int);
+type t = shape(?'x' => int);
 
 function f(t $_): void {}
 

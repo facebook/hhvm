@@ -1,0 +1,2 @@
+<?hh
+<< fZrntB ( ) , eDyRMN , aVktxzQv ( ) >> async function wJRXcsJ ( ... ) : mMYGl { ; ; ; if ( ( ( "double string" ) ? ( $wKTDTznZ ) : ( 0b101010 ) ) ) do ; while ( "double string" ) ; do { if ( $fJOxzVu /= $eXYq ) ; } while ( ( ( 42.42 ) ? ( $oIUjV ) : ( $aY ) ) ) ; ; ; do for ( $fJ *= ( $qQyJmLcO = ( $gFFA <<= ( $fNSmDK |= ( $uSo .= ( $gDJapVzuV = 42.42 ) ) ) ) ) ; ; ) continue ; while ( ! ( int ) ( new $rNUP ( ( ( $wDSG <<= ( $eNnmLrXE -= "heredoc" ) instanceof $cCuNywj ) ) ) ) ) ; }

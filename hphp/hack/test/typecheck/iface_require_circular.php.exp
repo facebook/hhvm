@@ -1,0 +1,6 @@
+File "iface_require_circular.php", line 17, characters 41-43:
+Unable to satisfy trait/interface requirement (Typing[4110])
+File "iface_require_circular.php", line 12, characters 25-26:
+This is an object of type KK
+File "iface_require_circular.php", line 17, characters 25-27:
+It is incompatible with an object of type Qux

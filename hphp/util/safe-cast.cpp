@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,6 +15,8 @@
 */
 #include "hphp/util/safe-cast.h"
 
+#include "hphp/util/assertions.h"
+
 #include <iostream>
 #include <cstdlib>
 
@@ -25,9 +27,11 @@ namespace HPHP {
 void safe_cast_failure(const std::string& valStr,
                        const char* fn,
                        const char* what) {
-  std::cerr << "conversion of " << valStr << " failed in "
-            << fn << " : " << what << '\n';
-  std::abort();
+  always_assert_flog(
+    false,
+    "conversion of {} failed in {} : {}\n",
+    valStr, fn, what
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

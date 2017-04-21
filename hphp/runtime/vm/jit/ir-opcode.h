@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,6 @@ namespace jit {
 struct IRUnit;
 struct IRInstruction;
 struct SSATmp;
-struct FrameStateMgr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -53,8 +52,9 @@ struct FrameStateMgr;
  *     D(type)      single dst has a specific type
  *     DofS(N)      single dst has the type of src N
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
- *     DParam       single dst has type of the instruction's type parameter
- *     DParamMayRelax like DParam, except type may relax
+ *     DParam(t)    single dst has type of the instruction's type parameter,
+ *                    which must be a subtype of t
+ *     DParamMayRelax(t) like DParam, except type may relax
  *     DParamPtr(k) like DParam, but the param must be a PtrTo* of kind k
  *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
  *     DBoxPtr      Boxed PtrTo*T
@@ -63,8 +63,12 @@ struct FrameStateMgr;
  *     DArrPacked   single dst has a packed array type
  *     DArrElem     single dst has type based on reading an array element,
  *                    intersected with an optional type parameter
- *     DThis        single dst has type Obj<ctx>, where ctx is the
- *                    current context class
+ *     DVecElem    single dst has type based on reading a vec element,
+ *                    intersected with an optional type parameter
+ *     DDictElem   single dst has type based on reading a dict element,
+                      intersected with an optional type parameter
+ *     DKeysetElem single dst has type int or string, intersected with an
+ *                   optional type parameter.
  *     DCtx         single dst has type Cctx|Obj<=ctx, where ctx is the
  *                    current context class
  *     DMulti       multiple dests. type and number depend on instruction
@@ -72,9 +76,15 @@ struct FrameStateMgr;
  *                    sources
  *     DBuiltin     single dst for CallBuiltin. This can return complex data
  *                    types such as (TStr | TNull)
+ *     DCall        single dst for non-builtin calls. This can return different
+ *                     types depending on static analysis.
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DCns         single dst's type is the union of legal types for PHP
  *                    constants
+ *     DUnion(N1,...) single dest has type that is the union of the specified
+ *                      N srcs.
+ *     DMemoKey     single dst for memoization key generation. Type depends on
+ *                    source type.
  *
  * srcinfo:
  *
@@ -82,7 +92,7 @@ struct FrameStateMgr;
  *
  *     NA               instruction takes no sources
  *     S(t1,...,tn)     source must be a subtype of {t1|..|tn}
- *     AK(<kind>)       source must be an array with specified kind
+ *     S(AK(<kind>))    source must be an array with specified kind
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
@@ -105,7 +115,6 @@ struct FrameStateMgr;
  *      T     isTerminal
  *      B     isBranch
  *      P     passthrough
- *      K     killsSource
  *      MProp MInstrProp
  *      MElem MInstrElem
  */
@@ -184,7 +193,8 @@ namespace std {
 }
 
 namespace folly {
-template<> struct FormatValue<HPHP::jit::Opcode> {
+template<> class FormatValue<HPHP::jit::Opcode> {
+ public:
   explicit FormatValue(HPHP::jit::Opcode op) : m_op(op) {}
 
   template<typename Callback> void format(FormatArg& arg, Callback& cb) const {

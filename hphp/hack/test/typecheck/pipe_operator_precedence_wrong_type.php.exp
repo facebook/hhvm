@@ -1,0 +1,6 @@
+File "pipe_operator_precedence_wrong_type.php", line 16, characters 42-43:
+Invalid argument (Typing[4110])
+File "pipe_operator_precedence_wrong_type.php", line 11, characters 17-22:
+This is a string
+File "pipe_operator_precedence_wrong_type.php", line 16, characters 19-30:
+It is incompatible with an int because this is the result of an arithmetic operation

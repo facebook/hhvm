@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,27 +27,34 @@
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/compilation-flags.h"
-#include "hphp/util/trace.h"
 #include "hphp/util/thread-local.h"
+#include "hphp/util/trace.h"
+#include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
 
-// used for mmapping contiguous heap space
-// If used, anonymous pages are not cleared when mapped with mmap. It is not
-// enabled by default and should be checked before use
-#define       MAP_UNINITIALIZED 0x4000000 /* XXX Fragile. */
-
 namespace HPHP {
+
 struct APCLocalArray;
+struct Header;
 struct MemoryManager;
 struct ObjectData;
 struct ResourceData;
-struct ExtendedException;
+
+namespace req {
+struct root_handle;
+void* malloc_big(size_t, type_scan::Index);
+void* calloc_big(size_t, type_scan::Index);
+void* realloc_big(void*, size_t);
+void  free_big(void*);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -56,9 +63,9 @@ struct ExtendedException;
  * called MemoryManager.
  *
  * The object may be accessed with MM(), but higher-level apis are
- * also provided below.
+ * also provided.
  *
- * The MemoryManager serves the following funcitons in hhvm:
+ * The MemoryManager serves the following functions in hhvm:
  *
  *   - Managing request-local memory.
  *
@@ -71,125 +78,6 @@ struct ExtendedException;
  *     compiled with jemalloc.)
  */
 MemoryManager& MM();
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * req::malloc api for request-scoped memory
- *
- * This is the most generic entry point to the request local
- * allocator.  If you easily know the size of the allocation at free
- * time, it might be more efficient to use MM() apis directly.
- *
- * These functions behave like C's malloc/free, but get memory from
- * the current thread's MemoryManager instance.  At request-end, any
- * un-freed memory is explicitly freed (and in debug, garbage filled).
- * If any pointers to this memory survive beyond a request, they'll be
- * dangling pointers.
- *
- * These functions only guarantee 8-byte alignment for the returned
- * pointer.
- */
-
-namespace req {
-
-void* malloc(size_t nbytes);
-void* calloc(size_t count, size_t bytes);
-void* realloc(void* ptr, size_t nbytes);
-void  free(void* ptr);
-
-/*
- * request-heap (de)allocators for non-POD C++-style stuff. Runs constructors
- * and destructors.
- *
- * Unlike the normal operator delete, req::destroy_raw() requires ~T() must
- * be nothrow and that p is not null.
- */
-template<class T, class... Args> T* make_raw(Args&&...);
-template<class T> void destroy_raw(T* p);
-
-/*
- * Allocate an array of objects.  Similar to req::malloc, but with
- * support for constructors.
- *
- * Note that explicitly calling req::destroy_raw will run the destructors,
- * but if you let the allocator sweep it the destructors will not be
- * called.
- *
- * Unlike the normal operator delete, req::destroy_raw_array requires
- * ~T() must be nothrow.
- */
-template<class T> T* make_raw_array(size_t count);
-template<class T> void destroy_raw_array(T* t, size_t count);
-
-//////////////////////////////////////////////////////////////////////
-
-// STL-style allocator for the request-heap allocator.  (Unfortunately we
-// can't use allocator_traits yet.)
-//
-// You can also use req::Allocator as a model of folly's
-// SimpleAllocator where appropriate.
-//
-
-template <class T>
-struct Allocator {
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
-
-  template <class U>
-  struct rebind {
-    typedef Allocator<U> other;
-  };
-
-  pointer address(reference value) {
-    return &value;
-  }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
-
-  Allocator() noexcept {}
-  Allocator(const Allocator&) noexcept {}
-  template<class U> Allocator(const Allocator<U>&) noexcept {}
-  ~Allocator() noexcept {}
-
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
-  }
-
-  pointer allocate(size_type num, const void* = 0) {
-    pointer ret = (pointer)req::malloc(num * sizeof(T));
-    return ret;
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  void deallocate(pointer p, size_type num) {
-    req::free((void*)p);
-  }
-
-  template<class U> bool operator==(const Allocator<U>&) const {
-    return true;
-  }
-
-  template<class U> bool operator!=(const Allocator<U>&) const {
-    return false;
-  }
-};
-
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -218,79 +106,79 @@ struct Allocator {
  */
 #define SMALL_SIZES \
 /*         index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig */ \
-  SMALL_SIZE(  0,      4,        4,      0,  4,              32) \
-  SMALL_SIZE(  1,      4,        4,      1,  4,              32) \
-  SMALL_SIZE(  2,      4,        4,      2,  4,              32) \
-  SMALL_SIZE(  3,      4,        4,      3,  4,              32) \
+  SMALL_SIZE(  0,      4,        4,      0,  4,             128) \
+  SMALL_SIZE(  1,      4,        4,      1,  4,             128) \
+  SMALL_SIZE(  2,      4,        4,      2,  4,             128) \
+  SMALL_SIZE(  3,      4,        4,      3,  4,              96) \
   \
-  SMALL_SIZE(  4,      6,        4,      1,  4,              24) \
-  SMALL_SIZE(  5,      6,        4,      2,  4,              24) \
-  SMALL_SIZE(  6,      6,        4,      3,  4,              24) \
-  SMALL_SIZE(  7,      6,        4,      4,  4,              24) \
+  SMALL_SIZE(  4,      6,        4,      1,  4,              96) \
+  SMALL_SIZE(  5,      6,        4,      2,  4,              96) \
+  SMALL_SIZE(  6,      6,        4,      3,  4,              96) \
+  SMALL_SIZE(  7,      6,        4,      4,  4,              64) \
   \
-  SMALL_SIZE(  8,      7,        5,      1,  5,              16) \
-  SMALL_SIZE(  9,      7,        5,      2,  5,              16) \
-  SMALL_SIZE( 10,      7,        5,      3,  5,              16) \
-  SMALL_SIZE( 11,      7,        5,      4,  5,              16) \
+  SMALL_SIZE(  8,      7,        5,      1,  5,              64) \
+  SMALL_SIZE(  9,      7,        5,      2,  5,              64) \
+  SMALL_SIZE( 10,      7,        5,      3,  5,              64) \
+  SMALL_SIZE( 11,      7,        5,      4,  5,              32) \
   \
-  SMALL_SIZE( 12,      8,        6,      1,  6,              12) \
-  SMALL_SIZE( 13,      8,        6,      2,  6,              12) \
-  SMALL_SIZE( 14,      8,        6,      3,  6,              12) \
-  SMALL_SIZE( 15,      8,        6,      4,  6,              12) \
+  SMALL_SIZE( 12,      8,        6,      1,  6,              32) \
+  SMALL_SIZE( 13,      8,        6,      2,  6,              32) \
+  SMALL_SIZE( 14,      8,        6,      3,  6,              32) \
+  SMALL_SIZE( 15,      8,        6,      4,  6,              16) \
   \
-  SMALL_SIZE( 16,      9,        7,      1,  7,               8) \
-  SMALL_SIZE( 17,      9,        7,      2,  7,               8) \
-  SMALL_SIZE( 18,      9,        7,      3,  7,               8) \
+  SMALL_SIZE( 16,      9,        7,      1,  7,              16) \
+  SMALL_SIZE( 17,      9,        7,      2,  7,              16) \
+  SMALL_SIZE( 18,      9,        7,      3,  7,              16) \
   SMALL_SIZE( 19,      9,        7,      4,  7,               8) \
   \
-  SMALL_SIZE( 20,     10,        8,      1,  8,               6) \
-  SMALL_SIZE( 21,     10,        8,      2,  8,               6) \
-  SMALL_SIZE( 22,     10,        8,      3,  8,               6) \
-  SMALL_SIZE( 23,     10,        8,      4,  8,               6) \
+  SMALL_SIZE( 20,     10,        8,      1,  8,               8) \
+  SMALL_SIZE( 21,     10,        8,      2,  8,               8) \
+  SMALL_SIZE( 22,     10,        8,      3,  8,               8) \
+  SMALL_SIZE( 23,     10,        8,      4,  8,               4) \
   \
   SMALL_SIZE( 24,     11,        9,      1,  9,               4) \
   SMALL_SIZE( 25,     11,        9,      2,  9,               4) \
   SMALL_SIZE( 26,     11,        9,      3,  9,               4) \
-  SMALL_SIZE( 27,     11,        9,      4,  9,               4) \
+  SMALL_SIZE( 27,     11,        9,      4,  9,               2) \
   \
-  SMALL_SIZE( 28,     12,       10,      1, no,               3) \
-  SMALL_SIZE( 29,     12,       10,      2, no,               3) \
-  SMALL_SIZE( 30,     12,       10,      3, no,               3) \
-  SMALL_SIZE( 31,     12,       10,      4, no,               3) \
+  SMALL_SIZE( 28,     12,       10,      1, no,               2) \
+  SMALL_SIZE( 29,     12,       10,      2, no,               2) \
+  SMALL_SIZE( 30,     12,       10,      3, no,               2) \
+  SMALL_SIZE( 31,     12,       10,      4, no,               1) \
   \
-  SMALL_SIZE( 32,     13,       11,      1, no,               2) \
-  SMALL_SIZE( 33,     13,       11,      2, no,               2) \
-  SMALL_SIZE( 34,     13,       11,      3, no,               2) \
-  SMALL_SIZE( 35,     13,       11,      4, no,               2) \
+  SMALL_SIZE( 32,     13,       11,      1, no,               1) \
+  SMALL_SIZE( 33,     13,       11,      2, no,               1) \
+  SMALL_SIZE( 34,     13,       11,      3, no,               1) \
+  SMALL_SIZE( 35,     13,       11,      4, no,               1) \
   \
-  SMALL_SIZE( 36,     14,       12,      1, no,               2) \
-  SMALL_SIZE( 37,     14,       12,      2, no,               2) \
-  SMALL_SIZE( 38,     14,       12,      3, no,               2) \
-  SMALL_SIZE( 39,     14,       12,      4, no,               2) \
+  SMALL_SIZE( 36,     14,       12,      1, no,               1) \
+  SMALL_SIZE( 37,     14,       12,      2, no,               1) \
+  SMALL_SIZE( 38,     14,       12,      3, no,               1) \
+  SMALL_SIZE( 39,     14,       12,      4, no,               1) \
   \
-  SMALL_SIZE( 40,     15,       13,      1, no,               2) \
-  SMALL_SIZE( 41,     15,       13,      2, no,               2) \
-  SMALL_SIZE( 42,     15,       13,      3, no,               2) \
-  SMALL_SIZE( 43,     15,       13,      4, no,               2) \
+  SMALL_SIZE( 40,     15,       13,      1, no,               1) \
+  SMALL_SIZE( 41,     15,       13,      2, no,               1) \
+  SMALL_SIZE( 42,     15,       13,      3, no,               1) \
+  SMALL_SIZE( 43,     15,       13,      4, no,               1) \
   \
-  SMALL_SIZE( 44,     16,       14,      1, no,               2) \
-  SMALL_SIZE( 45,     16,       14,      2, no,               2) \
-  SMALL_SIZE( 46,     16,       14,      3, no,               2) \
-  SMALL_SIZE( 47,     16,       14,      4, no,               2) \
+  SMALL_SIZE( 44,     16,       14,      1, no,               1) \
+  SMALL_SIZE( 45,     16,       14,      2, no,               1) \
+  SMALL_SIZE( 46,     16,       14,      3, no,               1) \
+  SMALL_SIZE( 47,     16,       14,      4, no,               1) \
   \
-  SMALL_SIZE( 48,     17,       15,      1, no,               2) \
-  SMALL_SIZE( 49,     17,       15,      2, no,               2) \
-  SMALL_SIZE( 50,     17,       15,      3, no,               2) \
-  SMALL_SIZE( 51,     17,       15,      4, no,               2) \
+  SMALL_SIZE( 48,     17,       15,      1, no,               1) \
+  SMALL_SIZE( 49,     17,       15,      2, no,               1) \
+  SMALL_SIZE( 50,     17,       15,      3, no,               1) \
+  SMALL_SIZE( 51,     17,       15,      4, no,               1) \
   \
-  SMALL_SIZE( 52,     18,       16,      1, no,               2) \
-  SMALL_SIZE( 53,     18,       16,      2, no,               2) \
-  SMALL_SIZE( 54,     18,       16,      3, no,               2) \
-  SMALL_SIZE( 55,     18,       16,      4, no,               2) \
+  SMALL_SIZE( 52,     18,       16,      1, no,               1) \
+  SMALL_SIZE( 53,     18,       16,      2, no,               1) \
+  SMALL_SIZE( 54,     18,       16,      3, no,               1) \
+  SMALL_SIZE( 55,     18,       16,      4, no,               1) \
   \
-  SMALL_SIZE( 56,     19,       17,      1, no,               2) \
-  SMALL_SIZE( 57,     19,       17,      2, no,               2) \
-  SMALL_SIZE( 58,     19,       17,      3, no,               2) \
+  SMALL_SIZE( 56,     19,       17,      1, no,               1) \
+  SMALL_SIZE( 57,     19,       17,      2, no,               1) \
+  SMALL_SIZE( 58,     19,       17,      3, no,               1) \
   SMALL_SIZE( 59,     19,       17,      4, no,               1) \
   \
   SMALL_SIZE( 60,     20,       18,      1, no,               1) \
@@ -380,6 +268,13 @@ alignas(64) constexpr uint32_t kSmallIndex2Size[] = {
 #undef SMALL_SIZE
 };
 
+alignas(64) constexpr unsigned kNContigTab[] = {
+#define SMALL_SIZE(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  ncontig,
+  SMALL_SIZES
+#undef SMALL_SIZE
+};
+
 constexpr uint32_t kMaxSmallSizeLookup = 4096;
 
 constexpr unsigned kLgSlabSize = 21;
@@ -401,17 +296,14 @@ constexpr unsigned kLgSizeClassesPerDoubling = 2;
  */
 constexpr uint32_t kNumSmallSizes = 63;
 static_assert(kNumSmallSizes <= (1 << 6),
-              "only 6 bits available in HeaderWord");
+              "only 6 bits available in HeapObject");
 
 constexpr uint32_t kMaxSmallSize = kSmallIndex2Size[kNumSmallSizes-1];
 static_assert(kMaxSmallSize > kSmallSizeAlign * 2,
               "Too few size classes");
 static_assert(kMaxSmallSize < kSlabSize, "fix kNumSmallSizes or kLgSlabSize");
-static_assert(kNumSmallSizes <= sizeof(kSmallSize2Index),
+static_assert(kNumSmallSizes <= (sizeof(kSmallIndex2Size) / sizeof(uint32_t)),
               "Extend SMALL_SIZES table");
-
-constexpr unsigned kSmallPreallocCountLimit = 8;
-constexpr uint32_t kSmallPreallocBytesLimit = uint32_t{1} << 9;
 
 /*
  * Constants for the various debug junk-filling of different types of
@@ -423,11 +315,14 @@ constexpr uint32_t kSmallPreallocBytesLimit = uint32_t{1} << 9;
  * ex-TypedValue memory (evaluation stack).
  */
 constexpr char kSmallFreeFill   = 0x6a;
+constexpr char kRDSTrashFill    = 0x6b; // used by RDS for "normal" section
+constexpr char kTrashClsRef     = 0x6c; // used for class-ref slots
 constexpr char kTVTrashFill     = 0x7a; // used by interpreter
 constexpr char kTVTrashFill2    = 0x7b; // used by req::ptr dtors
 constexpr char kTVTrashJITStk   = 0x7c; // used by the JIT for stack slots
 constexpr char kTVTrashJITFrame = 0x7d; // used by the JIT for stack frames
 constexpr char kTVTrashJITHeap  = 0x7e; // used by the JIT for heap
+constexpr char kTVTrashJITRetVal = 0x7f; // used by the JIT for ActRec::m_r
 constexpr uintptr_t kSmallFreeWord = 0x6a6a6a6a6a6a6a6aLL;
 constexpr uintptr_t kMallocFreeWord = 0x5a5a5a5a5a5a5a5aLL;
 
@@ -439,40 +334,42 @@ struct StringDataNode {
   StringDataNode* prev;
 };
 
-// This is the header MemoryManager uses to remember large allocations
-// so they can be auto-freed in MemoryManager::reset()
-struct BigNode {
-  size_t nbytes;
-  HeaderWord<> hdr;
-  uint32_t& index() { return hdr.hi32; }
-};
+static_assert(std::numeric_limits<type_scan::Index>::max() <=
+              std::numeric_limits<uint16_t>::max(),
+              "type_scan::Index must be no greater than 16-bits "
+              "to fit into HeapObject");
 
-// Header used for small req::malloc allocations (but not *Size allocs)
-struct SmallNode {
-  size_t padbytes;
-  HeaderWord<> hdr;
+// This is the header MemoryManager uses to remember large allocations
+// so they can be auto-freed in MemoryManager::reset(), as well as large/small
+// req::malloc()'d blocks, which must track their size internally.
+struct MallocNode : HeapObject {
+  size_t nbytes;
+  uint32_t& index() { return m_aux32; }
+  uint16_t& typeIndex() { return m_aux16; }
+  uint16_t typeIndex() const { return m_aux16; }
 };
 
 // all FreeList entries are parsed by inspecting this header.
-struct FreeNode {
+struct FreeNode : HeapObject {
   FreeNode* next;
-  HeaderWord<> hdr;
-  uint32_t& size() { return hdr.hi32; }
-  uint32_t size() const { return hdr.hi32; }
+  uint32_t& size() { return m_aux32; }
+  uint32_t size() const { return m_aux32; }
+  static FreeNode* InitFrom(void* addr, uint32_t size, HeaderKind);
+  static FreeNode* UninitFrom(void* addr, FreeNode* next);
 };
 
 // header for HNI objects with NativeData payloads. see native-data.h
 // for details about memory layout.
-struct NativeNode {
+struct NativeNode : HeapObject,
+                    type_scan::MarkCountable<NativeNode> {
+  NativeNode(HeaderKind k, uint32_t off) : obj_offset(off) {
+    initHeader(k, 0);
+  }
   uint32_t sweep_index; // index in MM::m_natives
   uint32_t obj_offset; // byte offset from this to ObjectData*
-  HeaderWord<> hdr;
-};
-
-// header for Resumable objects. See layout comment in resumable.h
-struct ResumableNode {
-  size_t framesize;
-  HeaderWord<> hdr;
+  uint16_t& typeIndex() { return m_aux16; }
+  uint16_t typeIndex() const { return m_aux16; }
+  uint32_t arOff() const { return m_count; } // from this to ActRec, or 0
 };
 
 // POD type for tracking arbitrary memory ranges
@@ -488,81 +385,68 @@ struct MemBlock {
  */
 struct BigHeap {
   BigHeap() {}
-  bool empty() const {
-    return m_slabs.empty() && m_bigs.empty();
-  }
+  ~BigHeap();
 
-  // return true if ptr points into one of the slabs
+  /*
+   * Is the heap empty?
+   */
+  bool empty() const;
+
+  /*
+   * Whether `ptr' refers to slab-allocated memory.
+   *
+   * Note that memory in big blocks is explicitly excluded.
+   */
   bool contains(void* ptr) const;
 
-  // allocate a MemBlock of at least size bytes, track in m_slabs.
+  /*
+   * Allocate a MemBlock of at least size bytes, track in m_slabs.
+   */
   MemBlock allocSlab(size_t size);
 
-  // allocation api for big blocks. These get a BigNode header and
-  // are tracked in m_bigs
-  MemBlock allocBig(size_t size, HeaderKind kind);
-  MemBlock callocBig(size_t size);
+  /*
+   * Allocation API for big blocks.
+   */
+  MemBlock allocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
+  MemBlock callocBig(size_t size, HeaderKind kind, type_scan::Index tyindex);
   MemBlock resizeBig(void* p, size_t size);
   void freeBig(void*);
 
-  // free all slabs and big blocks
+  /*
+   * Free all slabs and big blocks.
+   */
   void reset();
 
-  // Release auxiliary structures to prepare to be idle for a while
+  /*
+   * Release auxiliary structures to prepare to be idle for a while.
+   *
+   * @requires: empty()
+   */
   void flush();
 
-  // allow whole-heap iteration
+  /*
+   * Iterate over all the slabs and bigs.
+   */
   template<class Fn> void iterate(Fn);
 
+  /*
+   * Find the Header* in the heap which contains `p', else nullptr if `p' is
+   * not contained in any heap allocation.
+   */
+  Header* find(const void* p);
+
+  /*
+   * Sorting helpers
+   */
+  void sortSlabs();
+  void sortBigs();
+
  protected:
-  void enlist(BigNode*, HeaderKind kind, size_t size);
+  void enlist(MallocNode*, HeaderKind kind, size_t size, type_scan::Index);
 
  protected:
   std::vector<MemBlock> m_slabs;
-  std::vector<BigNode*> m_bigs;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * ContiguousHeap handles allocations and provides a contiguous address space
- * for requests.
- *
- * To turn on build with CONTIGUOUS_HEAP = 1.
- */
-struct ContiguousHeap : BigHeap {
-  bool contains(void* ptr) const;
-
-  MemBlock allocSlab(size_t size);
-
-  MemBlock allocBig(size_t size, HeaderKind kind);
-  MemBlock callocBig(size_t size);
-  MemBlock resizeBig(void* p, size_t size);
-  void freeBig(void*);
-
-  void reset();
-
-  void flush();
-
-  ~ContiguousHeap();
-
- private:
-  // Contiguous Heap Pointers
-  char* m_base = nullptr;
-  char* m_used;
-  char* m_end;
-  char* m_peak;
-  char* m_OOMMarker;
-  FreeNode m_freeList;
-
-  // Contiguous Heap Counters
-  uint32_t m_requestCount;
-  size_t m_heapUsage;
-  size_t m_contiguousHeapSize;
-
- private:
-  void* heapAlloc(size_t nbytes, size_t &cap);
-  void  createRequestHeap();
+  std::vector<MallocNode*> m_bigs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -642,15 +526,24 @@ struct MemoryManager {
    * amay be larger than the requested size.  The returned pointer is
    * guaranteed to be 16-byte aligned.
    *
-   * The size passed to freeBigSize must either be the size that was
-   * passed to mallocBigSize, or the value that was returned as the
+   * The size passed to freeBigSize must either be the requested size that was
+   * passed to mallocBigSize, or the MemBlock size that was returned as the
    * actual allocation size.
+   *
+   * Mode of ZeroFreeActual is the same as FreeActual, but zeros memory.
    *
    * Pre: size > kMaxSmallSize
    */
-  template<bool callerSavesActualSize>
-  MemBlock mallocBigSize(size_t size);
+  enum MBS {
+    FreeRequested, // caller frees requested size
+    FreeActual,    // caller frees actual size returned in MemBlock
+    ZeroFreeActual // calloc & FreeActual
+  };
+  template<MBS Mode>
+  MemBlock mallocBigSize(size_t size, HeaderKind kind = HeaderKind::BigObj,
+                         type_scan::Index tyindex = 0);
   void freeBigSize(void* vp, size_t size);
+  MemBlock resizeBig(MallocNode* n, size_t nbytes);
 
   /*
    * Allocate/deallocate objects when the size is not known to be
@@ -724,29 +617,60 @@ struct MemoryManager {
   /*
    * Whether `p' points into memory owned by `m_heap'.  checkContains() will
    * assert that it does.
+   *
+   * Note that this explicitly excludes allocations that are made through the
+   * big alloc API.
    */
   bool contains(void* p) const;
   bool checkContains(void* p) const;
+
+  /*
+   * Heap iterator methods.  `fn' takes a Header* argument.
+   *
+   * initFree(): prepare to iterate by initializing free block headers.
+   * iterate(): Raw iterator loop over the headers of everything in the heap.
+   *            Skips BigObj because it's just a detail of which sub-heap we
+   *            used to allocate something based on its size, and it can prefix
+   *            almost any other header kind.  (Also skips Hole.)  Clients can
+   *            call this directly to avoid unnecessary initFree()s.
+   * forEachHeader(): Like iterate(), but with an eager initFree().
+   * forEachObject(): Iterate just the ObjectDatas, including the kinds with
+   *                  prefixes (NativeData and AsyncFuncFrame).
+   */
+  void initFree();
+  template<class Fn> void iterate(Fn fn);
+  template<class Fn> void forEachHeader(Fn fn);
+  template<class Fn> void forEachObject(Fn fn);
+
+  /*
+   * Iterate over the roots owned by MemoryManager.
+   * call fn(ptr, size, type_scan::Index) for each root
+   */
+  template<class Fn> void iterateRoots(Fn) const;
+
+  /*
+   * Find the Header* in the heap which contains `p', else nullptr if `p' is
+   * not contained in any heap allocation.
+   */
+  Header* find(const void* p);
 
   /////////////////////////////////////////////////////////////////////////////
   // Stats.
 
   /*
-   * Get access to the current memory allocation stats, without refreshing them
-   * first.
+   * Update the request-memory limit.
    */
-  MemoryUsageStats& getStatsNoRefresh();
+  void setMemoryLimit(size_t limit);
 
   /*
-   * Get most recent stats, updating the tracked stats in the MemoryManager
-   * object.
+   * Update the tracked stats in the MemoryManager object, then return
+   * a copy of the stats.
    */
-  MemoryUsageStats& getStats();
+  MemoryUsageStats getStats();
 
   /*
    * Get most recent stats data, as one would with getStats(), but without
    * altering the underlying data stored in the MemoryManager.
-   *
    * Used for obtaining debug info.
    */
   MemoryUsageStats getStatsCopy();
@@ -847,6 +771,13 @@ struct MemoryManager {
   static bool triggerProfiling(const std::string& filename);
 
   /*
+   * Installs a PHP callback for the specified peak memory watermarks
+   * Each request may have 1 memory callback for 1 specific threshold
+   * at a given time
+   */
+  void setMemThresholdCallback(size_t threshold);
+
+  /*
    * Do per-request initialization.
    *
    * Attempt to consume the profiling trigger, and copy it to m_profctx if we
@@ -861,7 +792,17 @@ struct MemoryManager {
    */
   static void requestShutdown();
 
+  /*
+   * Setup/teardown profiling for current request.  This causes all allocation
+   * requests to be passed through to the underlying memory allocator so that
+   * heap profiling can capture backtraces for individual allocations rather
+   * than slab allocations.
+   */
+  static void setupProfiling();
+  static void teardownProfiling();
+
   /////////////////////////////////////////////////////////////////////////////
+  // Garbage collection.
 
   /*
    * Returns ptr to head node of m_strings linked list. This used by
@@ -870,43 +811,21 @@ struct MemoryManager {
   StringDataNode& getStringList();
 
   /*
-   * Methods for maintaining maps of root objects keyed by RootIds.
-   *
-   * The id/object associations are only valid for a single request.  This
-   * interface is useful for extensions that cannot physically hold on to a
-   * req::ptr, etc. or other handle class.
-   */
-  template <typename T> RootId addRoot(req::ptr<T>&& ptr);
-  template <typename T> RootId addRoot(const req::ptr<T>& ptr);
-  template <typename T> req::ptr<T> lookupRoot(RootId tok) const;
-  template <typename T> bool removeRoot(const req::ptr<T>& ptr);
-  template <typename T> bool removeRoot(const T* ptr);
-  template <typename T> req::ptr<T> removeRoot(RootId token);
-  template <typename F> void scanRootMaps(F& m) const;
-  template <typename F> void scanSweepLists(F& m) const;
-
-  // Opaque type used to allow for quick removal of exception roots. Should be
-  // embedded in ExtendedException.
-  struct ExceptionRootKey {
-    std::size_t m_index = 0;
-  };
-
-  // Add/remove exceptions as GC roots.
-  void addExceptionRoot(ExtendedException* exn);
-  void removeExceptionRoot(ExtendedException* exn);
-
-  /*
-   * Heap iterator methods.
-   */
-  template<class Fn> void iterate(Fn);
-  template<class Fn> void forEachHeader(Fn);
-  template<class Fn> void forEachObject(Fn);
-
-  /*
    * Run the experimental collector.
    */
   void collect(const char* phase);
-  void quarantine(); // turn free objects into holes
+  void resetGC();
+  void updateNextGc();
+
+  bool isGCEnabled();
+  void setGCEnabled(bool isGCEnabled);
+
+  /*
+   * beginQuarantine() swaps out the normal freelists. endQuarantine()
+   * fills everything freed with holes, then restores the original freelists.
+   */
+  void beginQuarantine();
+  void endQuarantine();
 
   /*
    * Run an integrity check on the heap
@@ -916,10 +835,7 @@ struct MemoryManager {
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  friend void* req::malloc(size_t nbytes);
-  friend void* req::calloc(size_t count, size_t bytes);
-  friend void* req::realloc(void* ptr, size_t nbytes);
-  friend void  req::free(void* ptr);
+  friend struct req::root_handle; // access m_root_handles
 
   struct FreeList {
     void* maybePop();
@@ -934,16 +850,6 @@ private:
     void* owner() override { return nullptr; }
   };
 
-  template <typename T>
-  using RootMap =
-    std::unordered_map<
-      RootId,
-      req::ptr<T>,
-      std::hash<RootId>,
-      std::equal_to<RootId>,
-      req::Allocator<std::pair<const RootId,req::ptr<T>>>
-    >;
-
   /*
    * Request-local heap profiling context.
    */
@@ -951,7 +857,7 @@ private:
     bool flag{false};
     bool prof_active{false};
     bool thread_prof_active{false};
-    std::string filename;
+    std::string filename{};
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -960,20 +866,16 @@ private:
   MemoryManager();
   MemoryManager(const MemoryManager&) = delete;
   MemoryManager& operator=(const MemoryManager&) = delete;
+  ~MemoryManager();
 
 private:
-  void* slabAlloc(uint32_t bytes, unsigned index);
-  void* newSlab(uint32_t nbytes);
   void storeTail(void* tail, uint32_t tailBytes);
   void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
                  uint32_t splitUsable, unsigned splitInd);
+  void* slabAlloc(uint32_t bytes, unsigned index);
+  void* newSlab(uint32_t nbytes);
   void* mallocSmallSizeSlow(uint32_t bytes, unsigned index);
   void  updateBigStats();
-  void* mallocBig(size_t nbytes);
-  void* callocBig(size_t nbytes);
-  void* malloc(size_t nbytes);
-  void* realloc(void* ptr, size_t nbytes);
-  void  free(void* ptr);
 
   static uint32_t bsr(uint32_t x);
 
@@ -986,61 +888,12 @@ private:
 
   void resetStatsImpl(bool isInternalCall);
 
-  void logAllocation(void*, size_t);
-  void logDeallocation(void*);
-
   void initHole(void* ptr, uint32_t size);
   void initHole();
-  void initFree();
 
-  void dropRootMaps();
-  void deleteRootMaps();
-
-  void eagerGCCheck();
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ResourceData,T>::value,
-    RootMap<ResourceData>&
-  >::type getRootMap() {
-    if (UNLIKELY(!m_resourceRoots)) {
-      m_resourceRoots = req::make_raw<RootMap<ResourceData>>();
-    }
-    return *m_resourceRoots;
-  }
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ObjectData,T>::value,
-    RootMap<ObjectData>&
-  >::type getRootMap() {
-    if (UNLIKELY(!m_objectRoots)) {
-      m_objectRoots = req::make_raw<RootMap<ObjectData>>();
-    }
-    return *m_objectRoots;
-  }
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ResourceData,T>::value,
-    const RootMap<ResourceData>&
-  >::type getRootMap() const {
-    if (UNLIKELY(!m_resourceRoots)) {
-      m_resourceRoots = req::make_raw<RootMap<ResourceData>>();
-    }
-    return *m_resourceRoots;
-  }
-
-  template <typename T>
-  typename std::enable_if<
-    std::is_base_of<ObjectData,T>::value,
-    const RootMap<ObjectData>&
-  >::type getRootMap() const {
-    if (UNLIKELY(!m_objectRoots)) {
-      m_objectRoots = req::make_raw<RootMap<ObjectData>>();
-    }
-    return *m_objectRoots;
-  }
+  void requestEagerGC();
+  void resetEagerGC();
+  void requestGC();
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -1052,28 +905,25 @@ private:
   std::array<FreeList,kNumSmallSizes> m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
   std::vector<APCLocalArray*> m_apc_arrays;
+  int64_t m_nextGc; // request gc when heap usage reaches this size
   MemoryUsageStats m_stats;
-#if CONTIGUOUS_HEAP
-  ContiguousHeap m_heap;
-#else
   BigHeap m_heap;
-#endif
   std::vector<NativeNode*> m_natives;
   SweepableList m_sweepables;
 
-  mutable RootMap<ResourceData>* m_resourceRoots{nullptr};
-  mutable RootMap<ObjectData>* m_objectRoots{nullptr};
-  mutable std::vector<ExtendedException*> m_exceptionRoots;
+  mutable std::vector<req::root_handle*> m_root_handles;
 
   bool m_exiting{false};
-  bool m_sweeping{false};
   bool m_statsIntervalActive;
   bool m_couldOOM{true};
   bool m_bypassSlabAlloc;
-  bool m_needInitFree{false}; // true after free(), false after initFree()
+  bool m_gc_enabled{RuntimeOption::EvalEnableGC};
 
   ReqProfContext m_profctx;
   static std::atomic<ReqProfContext*> s_trigger;
+
+  // Peak memory threshold callback (installed via setMemThresholdCallback)
+  size_t m_memThresholdCallbackPeakUsage{SIZE_MAX};
 
   static void* TlsInitSetup;
 
@@ -1089,6 +939,13 @@ private:
   static size_t s_cactiveLimitCeiling;
   bool m_enableStatsSync;
 #endif
+
+  int64_t m_req_start_micros;
+
+  // freelists to use when quarantine is active
+  std::array<FreeList,kNumSmallSizes> m_quarantine;
+
+  TYPE_SCAN_IGNORE_ALL; // heap-scan handles MM fields itself.
 };
 
 //////////////////////////////////////////////////////////////////////

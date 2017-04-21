@@ -1,0 +1,188 @@
+= empty =
+bool(false)
+bool(true)
+
+= count =
+int(3)
+int(0)
+
+= items =
+int(3)
+
+= keys =
+HH\ImmVector [
+int(0)
+int(1)
+int(2)
+]
+
+= lazy =
+LazyKeyedIterableView [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+]
+
+= at =
+int(1)
+OutOfBoundsException: Integer key 3 is not defined
+OutOfBoundsException: String key "3" is not defined
+
+= get =
+int(1)
+NULL
+
+= contains =
+bool(true)
+bool(false)
+bool(false)
+
+= containskey..
+bool(true)
+bool(false)
+bool(false)
+
+= values =
+HH\ImmVector [
+int(1)
+int(2)
+int(3)
+]
+
+= differencebykey =
+bool(true)
+HH\ImmMap [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(3)
+}
+]
+
+= map =
+bool(true)
+HH\ImmMap [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(2)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(4)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(6)
+}
+]
+
+= mapwithkey =
+bool(true)
+HH\ImmMap [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  object(HH\Pair)#%d (2) {
+    [0]=>
+    int(0)
+    [1]=>
+    int(1)
+  }
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  object(HH\Pair)#%d (2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  object(HH\Pair)#%d (2) {
+    [0]=>
+    int(2)
+    [1]=>
+    int(3)
+  }
+}
+]
+
+= filter =
+bool(true)
+HH\ImmMap [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+]
+
+= filterwithkey =
+bool(true)
+HH\ImmMap [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(1)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+]
+
+= fromItems =
+bool(true)
+HH\ImmMap [
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(3)
+  [1]=>
+  int(4)
+}
+object(HH\Pair)#%d (2) {
+  [0]=>
+  int(5)
+  [1]=>
+  int(6)
+}
+]

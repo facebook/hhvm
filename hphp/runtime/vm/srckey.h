@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,12 +59,13 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
    */
   SrcKey();
 
-  SrcKey(const Func* f, Offset off, bool resumed);
-  SrcKey(const Func* f, PC pc, bool resumed);
-  SrcKey(FuncId funcId, Offset off, bool resumed);
+  SrcKey(const Func* f, Offset off, bool resumed, bool hasThis);
+  SrcKey(const Func* f, PC pc, bool resumed, bool hasThis);
+  SrcKey(FuncId funcId, Offset off, bool resumed, bool hasThis);
 
   SrcKey(const Func* f, Offset off, PrologueTag);
   SrcKey(const Func* f, PC pc, PrologueTag);
+  SrcKey(FuncId funcId, Offset off, PrologueTag);
 
   SrcKey(SrcKey other, Offset off);
 
@@ -93,6 +94,7 @@ struct SrcKey : private boost::totally_ordered<SrcKey> {
   int offset() const;
   bool prologue() const;
   bool resumed() const;
+  bool hasThis() const;
 
   /*
    * Derived accessors.
@@ -154,9 +156,10 @@ private:
     AtomicInt m_atomicInt;
     struct {
       FuncId m_funcID;
-      uint32_t m_offset : 30;
-      bool m_prologue : 1;
-      bool m_resumed : 1;
+      uint32_t m_offset : 29;
+      uint32_t m_hasThis : 1;
+      uint32_t m_prologue : 1;
+      uint32_t m_resumed : 1;
     };
   };
 };

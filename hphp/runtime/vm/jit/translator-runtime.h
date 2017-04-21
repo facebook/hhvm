@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,15 +28,16 @@ struct _Unwind_Exception;
 namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
-class Func;
-class c_Pair;
-class c_Vector;
+struct Func;
+struct Iter;
 struct MInstrState;
+struct c_Pair;
+struct c_Vector;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////
 
-struct ClassProfile;
+struct ArrayKindProfile;
 struct TypeConstraint;
 
 //////////////////////////////////////////////////////////////////////
@@ -83,25 +84,41 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
+ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
+ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
+                                      TypedValue val);
 void setNewElem(TypedValue* base, Cell val);
 void setNewElemArray(TypedValue* base, Cell val);
-void bindNewElemIR(TypedValue* base, RefData* val, MInstrState* mis);
+void setNewElemVec(TypedValue* base, Cell val);
 RefData* boxValue(TypedValue tv);
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
-TypedValue setOpElem(TypedValue* base, TypedValue key,
-                     Cell val, MInstrState* mis, SetOpOp op);
-TypedValue incDecElem(TypedValue* base, TypedValue key,
-                      MInstrState* mis, IncDecOp op);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
+ArrayData* convVecToArrHelper(ArrayData* a);
+ArrayData* convDictToArrHelper(ArrayData* a);
+ArrayData* convKeysetToArrHelper(ArrayData* a);
+ArrayData* convArrToVecHelper(ArrayData* a);
+ArrayData* convDictToVecHelper(ArrayData* a);
+ArrayData* convKeysetToVecHelper(ArrayData* a);
+ArrayData* convObjToVecHelper(ObjectData* o);
+ArrayData* convCellToVecHelper(TypedValue tv);
+ArrayData* convArrToDictHelper(ArrayData* a);
+ArrayData* convVecToDictHelper(ArrayData* a);
+ArrayData* convKeysetToDictHelper(ArrayData* a);
+ArrayData* convObjToDictHelper(ObjectData* o);
+ArrayData* convCellToDictHelper(TypedValue tv);
+ArrayData* convArrToKeysetHelper(ArrayData* a);
+ArrayData* convVecToKeysetHelper(ArrayData* a);
+ArrayData* convDictToKeysetHelper(ArrayData* a);
+ArrayData* convObjToKeysetHelper(ObjectData* o);
+ArrayData* convCellToKeysetHelper(TypedValue tv);
 int64_t convObjToDblHelper(const ObjectData* o);
 int64_t convArrToDblHelper(ArrayData* a);
 int64_t convStrToDblHelper(const StringData* s);
 int64_t convResToDblHelper(const ResourceHdr* r);
 int64_t convCellToDblHelper(TypedValue tv);
-int64_t convArrToIntHelper(ArrayData* a);
 ObjectData* convCellToObjHelper(TypedValue tv);
 StringData* convDblToStrHelper(int64_t i);
 StringData* convIntToStrHelper(int64_t i);
@@ -129,29 +146,24 @@ void VerifyRetTypeSlow(const Class* cls,
                        const HPHP::TypeConstraint* expected,
                        const TypedValue value);
 void VerifyRetTypeCallable(TypedValue value);
-void VerifyRetTypeFail(const TypedValue value);
+void VerifyRetTypeFail(TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 
-RefData* closureStaticLocInit(StringData* name, ActRec* fp, TypedValue val);
-
-bool ak_exist_string(ArrayData* arr, StringData* key);
-bool ak_exist_string_obj(ObjectData* obj, StringData* key);
-bool ak_exist_int_obj(ObjectData* obj, int64_t key);
+RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
-TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
-TypedValue genericIdx(TypedValue, TypedValue, TypedValue);
-TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
+TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
 
-TypedValue getMemoKeyHelper(TypedValue tv);
+TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
+TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 
 int32_t arrayVsize(ArrayData*);
 
-TypedValue* ldGblAddrHelper(StringData* name);
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,
@@ -163,45 +175,13 @@ int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
-typedef FixedStringMap<TCA,true> SSwitchMap;
-TCA sswitchHelperFast(const StringData* val, const SSwitchMap* table, TCA* def);
-
-void tv_release_generic(TypedValue* tv);
-
-void profileObjClassHelper(ClassProfile*, ObjectData*);
-
-Cell lookupCnsHelper(const TypedValue* tv,
-                     StringData* nm,
-                     bool error);
-Cell lookupCnsUHelper(const TypedValue* tv,
-                      StringData* nm,
-                      StringData* fallback);
-void lookupClsMethodHelper(Class* cls,
-                           StringData* meth,
-                           ActRec* ar,
-                           ActRec* fp);
-
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
-void traceCallback(ActRec* fp, Cell* sp, Offset pcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
 void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
-const Func* loadClassCtor(Class* cls);
-const Func* lookupUnknownFunc(const StringData*);
-const Func* lookupFallbackFunc(const StringData*, const StringData*);
-
-Class* lookupKnownClass(Class** cache, const StringData* clsName);
-
-TypedValue lookupClassConstantTv(TypedValue* cache,
-                                 const NamedEntity* ne,
-                                 const StringData* cls,
-                                 const StringData* cns);
-
-ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
-ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
-                              TypedValue value);
+const Func* loadClassCtor(Class* cls, ActRec* fp);
 
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
@@ -212,7 +192,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar);
 
 void raiseMissingArgument(const Func* func, int got);
 
-rds::Handle lookupClsRDSHandle(const StringData* name);
+Class* lookupClsRDS(const StringData* name);
 
 /*
  * Insert obj into the set of live objects to be destructed at the end of the
@@ -226,15 +206,22 @@ bool methodExistsHelper(Class*, StringData*);
 /*
  * Throw a VMSwitchMode exception.
  */
-ATTRIBUTE_NORETURN void throwSwitchMode();
+[[noreturn]] void throwSwitchMode();
+
+[[noreturn]] void throwOOBException(TypedValue base, TypedValue key);
+[[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
+TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-void bindElemC(TypedValue*, TypedValue, RefData*, MInstrState*);
-void setWithRefElemC(TypedValue*, TypedValue, TypedValue, MInstrState*);
-void setWithRefNewElem(TypedValue*, TypedValue, MInstrState*);
+void bindElemC(TypedValue*, TypedValue, RefData*);
+void setWithRefElem(TypedValue*, TypedValue, TypedValue);
+TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
+void bindNewElem(TypedValue* base, RefData* val);
+TypedValue* elemVecID(TypedValue* base, int64_t key);
+TypedValue* elemVecIU(TypedValue* base, int64_t key);
 }
 
 /*

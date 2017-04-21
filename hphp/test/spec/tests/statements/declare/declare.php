@@ -28,3 +28,7 @@ declare(ticks = 0)
 declare(ticks = 0) :
 
 enddeclare;
+
+declare(ticks = 0) {
+  $x = 7;
+}

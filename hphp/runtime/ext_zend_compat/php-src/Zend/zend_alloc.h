@@ -177,7 +177,7 @@ END_EXTERN_C()
 /* fast cache for zval's */
 #ifdef HHVM
 #define ALLOC_ZVAL(z)  \
-  (z) = HPHP::RefData::Make(*HPHP::init_null_variant.asTypedValue())
+  (z) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfNull>())
 #else
 #define ALLOC_ZVAL(z)  \
   (z) = (zval *) emalloc(sizeof(zval))
@@ -195,7 +195,7 @@ END_EXTERN_C()
 
 #ifdef HHVM
 #define ALLOC_ZVAL_REL(z)  \
-  (z) = HPHP::RefData::Make(*HPHP::init_null_variant.asTypedValue())
+  (z) = HPHP::RefData::Make(HPHP::make_tv<HPHP::KindOfNull>())
 #else
 #define ALLOC_ZVAL_REL(z)  \
   (z) = (zval *) emalloc_rel(sizeof(zval))
@@ -215,7 +215,7 @@ END_EXTERN_C()
 #ifdef HHVM
 #define ALLOC_HASHTABLE(ht)                               \
   (ht) = [&]{ auto ret = HPHP::ProxyArray::Make(          \
-      HPHP::MixedArray::MakeReserve(0));                   \
+      HPHP::MixedArray::MakeReserveMixed(0));             \
       return ret; }()
 #else
 #define ALLOC_HASHTABLE(ht)  \

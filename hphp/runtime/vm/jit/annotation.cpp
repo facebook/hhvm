@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,24 +35,30 @@ const StaticString s_empty("");
 const Func* lookupDirectFunc(SrcKey const sk,
                              const StringData* fname,
                              const StringData* clsName,
-                             bool staticCall) {
+                             Op pushOp) {
   if (clsName && !clsName->empty()) {
-    auto const cls = Unit::lookupClassOrUniqueClass(clsName);
+    auto const cls = Unit::lookupUniqueClassInContext(clsName,
+                                                      sk.func()->cls());
     bool magic = false;
-    auto const ctx = sk.func()->cls();
-    return lookupImmutableMethod(cls, fname, magic, staticCall, ctx);
-  }
-  auto const func = Unit::lookupFunc(fname);
-  if (func && func->isNameBindingImmutable(sk.unit())) {
+    auto const isExact =
+      pushOp == Op::FPushClsMethodD ||
+      pushOp == Op::FPushClsMethodF;
+    auto const isStatic = isExact || pushOp == Op::FPushClsMethod;
+    auto const func = lookupImmutableMethod(cls, fname, magic,
+                                            isStatic, sk.func(), isExact);
+    if (func &&
+        !isExact &&
+        !func->isImmutableFrom(cls) &&
+        (isStatic || !(func->attrs() & AttrPrivate))) return nullptr;
     return func;
   }
-  return nullptr;
+  return lookupImmutableFunc(sk.unit(), fname).func;
 }
 
 const Func* lookupDirectCtor(SrcKey const sk, const StringData* clsName) {
   if (clsName && !clsName->isame(s_empty.get())) {
-    auto const cls = Unit::lookupClassOrUniqueClass(clsName);
     auto const ctx = sk.func()->cls();
+    auto const cls = Unit::lookupUniqueClassInContext(clsName, ctx);
     return lookupImmutableCtor(cls, ctx);
   }
 
@@ -64,9 +70,6 @@ const void annotate(NormalizedInstruction* i,
   auto const fpi      = i->func()->findFPI(i->source.offset());
   auto pc             = i->m_unit->at(fpi->m_fpushOff);
   auto const pushOp   = decode_op(pc);
-  auto const isStatic = pushOp == Op::FPushClsMethodD ||
-    pushOp == Op::FPushClsMethodF ||
-    pushOp == Op::FPushClsMethod;
 
   auto decode_litstr = [&] {
     Id id;
@@ -78,17 +81,17 @@ const void annotate(NormalizedInstruction* i,
   if (!funcName && !clsName) {
     switch (pushOp) {
       case Op::FPushClsMethodD:
-        decodeVariableSizeImm(&pc);
+        decode_iva(pc);
         funcName = decode_litstr();
         clsName = decode_litstr();
         break;
       case Op::FPushFuncD:
-        decodeVariableSizeImm(&pc);
+        decode_iva(pc);
         funcName = decode_litstr();
         clsName = nullptr;
         break;
       case Op::FPushCtorD:
-        decodeVariableSizeImm(&pc);
+        decode_iva(pc);
         clsName = decode_litstr();
         break;
       default:
@@ -96,17 +99,10 @@ const void annotate(NormalizedInstruction* i,
     }
   }
 
-  /*
-   * Currently we don't attempt any of this for FPushClsMethod
-   * because lookupImmutableMethod is only for situations that
-   * don't involve LSB.
-   */
   auto const func =
-    pushOp == Op::FPushClsMethod
-    ? nullptr
-    : pushOp == Op::FPushCtorD
-    ? lookupDirectCtor(i->source, clsName)
-    : lookupDirectFunc(i->source, funcName, clsName, isStatic);
+    pushOp == Op::FPushCtorD ?
+    lookupDirectCtor(i->source, clsName) :
+    lookupDirectFunc(i->source, funcName, clsName, pushOp);
 
   if (func) {
     FTRACE(1, "found direct func ({}) for FCallD\n",

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,12 +17,14 @@
 #include "hphp/runtime/vm/verifier/check.h"
 
 #include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/struct-array.h"
+#include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/vm/native.h"
 
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
+
+#include <boost/dynamic_bitset.hpp>
 
 #include <cstdio>
 #include <iomanip>
@@ -57,6 +59,7 @@ struct State {
   FlavorDesc* stk; // Evaluation stack.
   FpiState* fpi;    // FPI stack.
   bool* iters;      // defined/not-defined state of each iter var.
+  boost::dynamic_bitset<> clsRefSlots; // init state of class-ref slots
   int stklen;       // length of evaluation stack.
   int fpilen;       // length of FPI stack.
   bool mbr_live;    // liveness of member base register
@@ -96,6 +99,7 @@ struct FuncChecker {
   ARGTYPES
 #undef ARGTYPE
 #undef ARGTYPEVEC
+  bool checkOp(State*, PC, Op);
   template<typename Subop> bool checkImmOAImpl(PC& pc, PC instr);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
@@ -104,21 +108,22 @@ struct FuncChecker {
   bool checkTerminal(State* cur, PC pc);
   bool checkFpi(State* cur, PC pc, Block* b);
   bool checkIter(State* cur, PC pc);
+  bool checkClsRefSlots(State* cur, PC pc);
   bool checkLocal(PC pc, int val);
   bool checkString(PC pc, Id id);
   void reportStkUnderflow(Block*, const State& cur, PC);
   void reportStkOverflow(Block*, const State& cur, PC);
   void reportStkMismatch(Block* b, Block* target, const State& cur);
   void reportEscapeEdge(Block* b, Block* s);
-  std::string stateToString(const State& cur);
-  std::string sigToString(int len, const FlavorDesc* sig);
-  std::string stkToString(int len, const FlavorDesc* args);
-  std::string fpiToString(const FpiState&);
-  std::string iterToString(const State& cur);
+  std::string stateToString(const State& cur) const;
+  std::string sigToString(int len, const FlavorDesc* sig) const;
+  std::string stkToString(int len, const FlavorDesc* args) const;
+  std::string fpiToString(const FpiState&) const;
+  std::string iterToString(const State& cur) const;
+  std::string slotsToString(const boost::dynamic_bitset<>&) const;
   void copyState(State* to, const State* from);
   void initState(State* s);
   const FlavorDesc* sig(PC pc);
-  const FlavorDesc* vectorSig(PC pc, FlavorDesc rhs_flavor);
   Offset offset(PC pc) const { return pc - unit()->entry(); }
   PC at(Offset off) const { return unit()->at(off); }
   int maxStack() const { return m_func->maxStackCells(); }
@@ -126,6 +131,7 @@ struct FuncChecker {
   int numIters() const { return m_func->numIterators(); }
   int numLocals() const { return m_func->numLocals(); }
   int numParams() const { return m_func->numParams(); }
+  int numClsRefSlots() const { return m_func->numClsRefSlots(); }
   const Unit* unit() const { return m_func->unit(); }
 
  private:
@@ -150,7 +156,7 @@ struct FuncChecker {
 };
 
 bool checkNativeFunc(const Func* func, bool verbose) {
-  auto const funcname = func->name();
+  auto const funcname = func->displayName();
   auto const pc = func->preClass();
   auto const clsname = pc ? pc->name() : nullptr;
   auto const& info = Native::GetBuiltinFunction(funcname, clsname,
@@ -241,9 +247,9 @@ bool FuncChecker::checkOffsets() {
   SectionMap sections;
   for (auto& eh : m_func->ehtab()) {
     if (eh.m_type == EHEnt::Type::Fault) {
-      ok &= checkOffset("fault funclet", eh.m_fault, "func bytecode", base,
+      ok &= checkOffset("fault funclet", eh.m_handler, "func bytecode", base,
                         past, false);
-      sections[eh.m_fault] = 0;
+      sections[eh.m_handler] = 0;
     }
   }
   Offset funclets = !sections.empty() ? sections.begin()->first : past;
@@ -284,7 +290,7 @@ bool FuncChecker::checkOffsets() {
   // check EH regions and targets
   for (auto& eh : m_func->ehtab()) {
     if (eh.m_type == EHEnt::Type::Fault) {
-      ok &= checkOffset("fault", eh.m_fault, "funclets", funclets, past);
+      ok &= checkOffset("fault", eh.m_handler, "funclets", funclets, past);
     }
   }
   return ok;
@@ -313,7 +319,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     m_instrs.set(offset(pc) - m_func->base());
     if (isSwitch(op) ||
         instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
-      if (op == OpSwitch && getImm(pc, 2).u_IVA != 0) {
+      if (op == OpSwitch && getImm(pc, 0).u_IVA == int(SwitchKind::Bounded)) {
         int64_t switchBase = getImm(pc, 1).u_I64A;
         int32_t len = getImmVector(pc).size();
         if (len <= 2) {
@@ -324,7 +330,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
           error("Overflow in Switch bounds [%d:%d]\n", base, past);
         }
       } else if (op == Op::SSwitch) {
-        foreachSwitchString(pc, [&](Id id) {
+        foreachSSwitchString(pc, [&](Id id) {
           ok &= checkString(pc, id);
         });
       }
@@ -356,11 +362,8 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   for (auto branch : branches) {
     if (isSwitch(peek_op(branch))) {
       foreachSwitchTarget(branch, [&](Offset o) {
-        // TODO(#2464197): dce breaks switch for verify
-        if (offset(branch + o) != -1) {
-          ok &= checkOffset("switch target", offset(branch + o),
-                            name, base, past);
-        }
+        ok &= checkOffset("switch target", offset(branch + o),
+                          name, base, past);
       });
     } else {
       Offset target = instrJumpTarget(bc, offset(branch));
@@ -386,65 +389,6 @@ Offset decodeOffset(PC* ppc) {
   return offset;
 }
 
-/**
- * Range over the members of an immediate member vector.
- */
-class ImmVecRange {
- public:
-  explicit ImmVecRange(PC instr)
-    : v(getImmVector(instr))
-    , vecp(v.vec() + 1) // skip location code
-    , loc(v.locationCode())
-    , loc_local(numLocationCodeImms(loc) ? decodeVariableSizeImm(&vecp) : -1)
-  {
-  }
-
-  bool empty() const {
-    return vecp >= v.vec() + v.size();
-  }
-
-  PC end() const {
-    return v.vec() + v.size();
-  }
-
-  MemberCode frontMember() const {
-    assert(!empty());
-    return MemberCode(*vecp);
-  }
-
-  int frontLocal() const {
-    PC p = vecp + 1;
-    const MemberCode mc = frontMember();
-    return (mc == MEL || mc == MPL) ? decodeMemberCodeImm(&p, mc) : -1;
-  }
-
-  Id frontString() const {
-    PC p = vecp + 1;
-    const MemberCode mc = frontMember();
-    return (mc == MET || mc == MPT) ? Id(decodeMemberCodeImm(&p, mc)) : -1;
-  }
-
-  void popFront() {
-    assert(!empty());
-    vecp++;
-    const MemberCode mc = MemberCode(vecp[-1]);
-    if (memberCodeHasImm(mc)) {
-      decodeMemberCodeImm(&vecp, mc);
-    }
-  }
-
-  int size() const {
-    return v.size();
-  }
-
- private:
-  ImmVector v;
-  PC vecp;
- public:
-  const LocationCode loc;
-  const int loc_local;    // local variable id or -1
-};
-
 bool FuncChecker::checkLocal(PC pc, int k) {
   if (k < 0 || k >= numLocals()) {
     error("invalid local variable id %d at Offset %d\n",
@@ -456,56 +400,6 @@ bool FuncChecker::checkLocal(PC pc, int k) {
 
 bool FuncChecker::checkString(PC pc, Id id) {
   return unit()->isLitstrId(id);
-}
-
-bool FuncChecker::checkImmMA(PC& pc, PC const instr) {
-  auto ok = true;
-
-  ImmVecRange vr(instr);
-  if (vr.size() < 2) {
-    // vector must at least have a LocationCode and 1+ MemberCodes
-    error("invalid vector size %d at %d\n",
-           vr.size(), offset(instr));
-    throw unknown_length{};
-  }
-
-  if (vr.loc < 0 || vr.loc >= NumLocationCodes) {
-    error("invalid location code %d in vector at %d\n",
-          (int)vr.loc, offset(instr));
-    ok = false;
-  }
-  if (vr.loc_local != -1) ok &= checkLocal(pc, vr.loc_local);
-  for (; !vr.empty(); vr.popFront()) {
-    MemberCode member = vr.frontMember();
-    if (member < 0 || member >= NumMemberCodes) {
-      error("invalid member code %d in vector at %d\n",
-            (int)member, offset(instr));
-      ok = false;
-    }
-    if (vr.frontLocal() != -1) {
-      ok &= checkLocal(pc, vr.frontLocal());
-    } else if (vr.frontString() != -1) {
-      ok &= checkString(pc, vr.frontString());
-    }
-    if (member == MQT) {
-      switch (peek_op(instr)) {
-        case Op::CGetM:
-        case Op::IssetM:
-        case Op::EmptyM:
-        case Op::VGetM:
-        case Op::FPassM:
-          break;
-        default:
-          error("Illegal QT member code at %d: %s\n",
-                offset(instr), instrToString(instr).c_str());
-          ok = false;
-          break;
-      }
-    }
-  }
-
-  pc = vr.end();
-  return ok;
 }
 
 bool FuncChecker::checkImmVec(PC& pc, size_t elemSize) {
@@ -569,6 +463,24 @@ bool FuncChecker::checkImmIA(PC& pc, PC const instr) {
   return true;
 }
 
+bool FuncChecker::checkImmCAR(PC& pc, PC const instr) {
+  auto const slot = decode_iva(pc);
+  if (slot < 0 || slot >= numClsRefSlots()) {
+    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
+    return false;
+  }
+  return true;
+}
+
+bool FuncChecker::checkImmCAW(PC& pc, PC const instr) {
+  auto const slot = decode_iva(pc);
+  if (slot < 0 || slot >= numClsRefSlots()) {
+    error("invalid class-ref slot %d at %d\n", slot, offset(instr));
+    return false;
+  }
+  return true;
+}
+
 bool FuncChecker::checkImmDA(PC& pc, PC const instr) {
   pc += sizeof(double);
   return true;
@@ -604,7 +516,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
 
 bool FuncChecker::checkImmVSA(PC& pc, PC const instr) {
   auto const len = decode_raw<int32_t>(pc);
-  if (len < 1 || len > StructArray::MaxMakeSize) {
+  if (len < 1 || len > MixedArray::MaxStructMakeSize) {
     error("invalid length of immedate VSA vector %d at offset %d\n",
           len, offset(pc));
     throw unknown_length{};
@@ -626,6 +538,46 @@ bool FuncChecker::checkImmOAImpl(PC& pc, PC const instr) {
     return false;
   }
   return true;
+}
+
+bool FuncChecker::checkImmKA(PC& pc, PC const instr) {
+  auto const mcode = decode_raw<MemberCode>(pc);
+  if (mcode < 0 || mcode >= NumMemberCodes) {
+    ferror("Invalid MemberCode {}\n", uint8_t{mcode});
+    return false;
+  }
+
+  auto ok = true;
+  switch (mcode) {
+    case MW:
+      break;
+    case MEL: case MPL: {
+      auto const loc = decode_iva(pc);
+      ok &= checkLocal(pc, loc);
+      break;
+    }
+    case MEC: case MPC:
+      decode_iva(pc);
+      break;
+    case MEI:
+      pc += sizeof(int64_t);
+      break;
+    case MET: case MPT: case MQT:
+      auto const id = decode_raw<Id>(pc);
+      ok &= checkString(pc, id);
+      break;
+  }
+
+  return ok;
+}
+
+bool FuncChecker::checkImmLAR(PC& pc, PC const instr) {
+  auto ok = true;
+  auto const range = decodeLocalRange(pc);
+  for (auto i = uint32_t{0}; i < range.restCount+1; ++i) {
+    ok &= checkLocal(instr, range.first + i);
+  }
+  return ok;
 }
 
 /**
@@ -665,7 +617,12 @@ bool FuncChecker::checkImmediates(const char* name, PC const instr) {
     return false;
   }
 
-  assert(pc == instr + instrLen(instr));
+  auto const expectPC = instr + instrLen(instr);
+  if (pc != expectPC) {
+    ferror("PC after decoding {} at {} is {} instead of expected {}\n",
+           opcodeToName(op), instr, pc, expectPC);
+    return false;
+  }
   return ok;
 }
 
@@ -674,7 +631,6 @@ static const char* stkflav(FlavorDesc f) {
   case NOV:  return "N";
   case CV:   return "C";
   case VV:   return "V";
-  case AV:   return "A";
   case RV:   return "R";
   case FV:   return "F";
   case UV:   return "U";
@@ -711,45 +667,10 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
   return true;
 }
 
-/**
- * format of vector in memory:
- *   int32 size;
- *   int32 numstk;
- *   uint8 locationCode
- *   [IVA imm for location]
- *   [uint8 MemberCode; [IVA imm for member]]
- */
-const FlavorDesc* FuncChecker::vectorSig(PC pc, FlavorDesc rhs_flavor) {
-  ImmVecRange vr(pc);
-  int n = 0;
-  if (vr.loc_local != -1 ||
-      vr.loc == LH ||
-      vr.loc == LGL ||
-      vr.loc == LNL ||
-      vr.loc == LSL) {
-    /* nothing on stack for loc */
-  } else if (vr.loc == LR) {
-    m_tmp_sig[n++] = RV;
-  } else {
-    m_tmp_sig[n++] = CV;
-  }
-  for (; !vr.empty(); vr.popFront()) {
-    MemberCode member = vr.frontMember();
-    if (member == MEC || member == MPC) {
-      m_tmp_sig[n++] = CV;
-    }
-  }
-  if (vr.loc == LSC || vr.loc == LSL) m_tmp_sig[n++] = AV; // extra classref
-  if (rhs_flavor != NOV) m_tmp_sig[n++] = rhs_flavor; // extra rhs value for Set
-  assert(n == instrNumPops(pc));
-  return m_tmp_sig;
-}
-
 const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][4] = {
   #define NOV { },
   #define FMANY { },
-  #define CVMANY { },
   #define CVUMANY { },
   #define CMANY { },
   #define SMANY { },
@@ -757,28 +678,18 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define TWO(a,b) { b, a },
   #define THREE(a,b,c) { c, b, a },
   #define FOUR(a,b,c,d) { d, c, b, a },
-  #define MMANY { },
-  #define C_MMANY { },
-  #define V_MMANY { },
-  #define R_MMANY { },
   #define MFINAL { },
+  #define F_MFINAL { },
   #define C_MFINAL { },
-  #define R_MFINAL { },
   #define V_MFINAL { },
-  #define IDX_A { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
-  #undef C_MMANY
-  #undef V_MMANY
-  #undef R_MMANY
-  #undef MMANY
   #undef MFINAL
+  #undef F_MFINAL
   #undef C_MFINAL
-  #undef R_MFINAL
   #undef V_MFINAL
   #undef FMANY
-  #undef CVMANY
   #undef CVUMANY
   #undef CMANY
   #undef SMANY
@@ -787,47 +698,35 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef TWO
   #undef ONE
   #undef NOV
-  #undef IDX_A
   };
   switch (peek_op(pc)) {
-  case Op::CGetM:     // ONE(LA),      MMANY, ONE(CV)
-  case Op::VGetM:     // ONE(LA),      MMANY, ONE(VV)
-  case Op::IssetM:    // ONE(LA),      MMANY, ONE(CV)
-  case Op::EmptyM:    // ONE(LA),      MMANY, ONE(CV)
-  case Op::UnsetM:    // ONE(LA),      MMANY, NOV
-  case Op::FPassM:    // TWO(IVA,LA),  MMANY, ONE(FV)
-  case Op::IncDecM:   // TWO(OA,LA),   MMANY, ONE(CV)
-    return vectorSig(pc, NOV);
-  case Op::BindM:     // ONE(LA),    V_MMANY, ONE(VV)
-    return vectorSig(pc, VV);
-  case Op::SetM:      // ONE(LA),    C_MMANY, ONE(CV)
-  case Op::SetOpM:    // TWO(OA,LA), C_MMANY, ONE(CV)
-    return vectorSig(pc, CV);
-  case Op::SetWithRefLM://TWO(MA, HA), MMANY, NOV
-    return vectorSig(pc, NOV);
-  case Op::SetWithRefRM://ONE(MA),   R_MMANY, NOV
-    return vectorSig(pc, RV);
-  case Op::QueryML:
-  case Op::QueryMC:
-  case Op::QueryMInt:
-  case Op::QueryMStr:
+  case Op::QueryM:
+  case Op::VGetM:
+  case Op::FPassM:
+  case Op::IncDecM:
+  case Op::UnsetM:
+  case Op::MemoGet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CRV;
     }
     return m_tmp_sig;
-  case Op::SetML:
-  case Op::SetMC:
-  case Op::SetMInt:
-  case Op::SetMStr:
-  case Op::SetMNewElem:
+  case Op::SetM:
+  case Op::SetOpM:
+  case Op::MemoSet:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? CV : CRV;
     }
     return m_tmp_sig;
-  case Op::FCall:       // ONE(IVA),     FMANY,   ONE(RV)
-  case Op::FCallD:      // THREE(IVA,SA,SA), FMANY,   ONE(RV)
-  case Op::FCallUnpack: // ONE(IVA), FMANY, ONE(RV)
-  case Op::FCallArray:  // NA,           ONE(FV), ONE(RV)
+  case Op::BindM:
+    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
+      m_tmp_sig[i] = i == n - 1 ? VV : CRV;
+    }
+    return m_tmp_sig;
+  case Op::FCall:       // ONE(IVA),            FMANY,   ONE(RV)
+  case Op::FCallD:      // THREE(IVA,SA,SA),    FMANY,   ONE(RV)
+  case Op::FCallAwait:  // THREE(IVA,SA,SA),    FMANY,   ONE(CV)
+  case Op::FCallUnpack: // ONE(IVA),            FMANY,   ONE(RV)
+  case Op::FCallArray:  // NA,                  ONE(FV), ONE(RV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = FV;
     }
@@ -844,23 +743,13 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     return m_tmp_sig;
   case Op::NewPackedArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewStructArray:  // ONE(VSA),     SMANY,   ONE(CV)
+  case Op::NewVecArray:     // ONE(IVA),     CMANY,   ONE(CV)
+  case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
     }
     return m_tmp_sig;
-  case Op::BaseSC:   // TWO(IVA, IVA),    IDX_A,           IDX_A
-  case Op::BaseSL: { // TWO(LA, IVA),    IDX_A,           IDX_A
-    auto const pops = instrNumPops(pc);
-    assert(pops == 2 || pops == 1);
-    if (pops == 1) {
-      m_tmp_sig[0] = AV;
-    } else {
-      m_tmp_sig[0] = AV;
-      m_tmp_sig[1] = CV;
-    }
-    return m_tmp_sig;
-  }
   default:
     return &inputSigs[size_t(peek_op(pc))][0];
   }
@@ -892,6 +781,11 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
     if (cur->stklen != 0) {
       error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
              cur->stklen);
+      return false;
+    }
+    if (cur->clsRefSlots.any()) {
+      ferror("all class-ref slots must be uninitialized after Ret* and Unwind; "
+             "got {}\n", slotsToString(cur->clsRefSlots));
       return false;
     }
   }
@@ -938,11 +832,16 @@ bool FuncChecker::checkFpi(State* cur, PC pc, Block* b) {
              param_id, fpi.next);
       ok = false;
     }
-    // we have already popped FPush's input, but not pushed the output,
-    // so this check doesn't count the F result of this FPush, but does
-    // count the previous FPush*s.
+    if (isMemberBaseOp(op) || isMemberDimOp(op)) {
+      // The argument isn't pushed until the final member operation. Skip the
+      // last two checks.
+      return ok;
+    }
+    // we have already popped FPass's input, but not pushed the output, so this
+    // check doesn't count the F result of this FPass, but does count the
+    // previous FPass*s.
     if (cur->stklen != fpi.stkmin + param_id) {
-      error("Stack depth incorrect after FPush; got %d expected %d\n",
+      error("Stack depth incorrect after FPass; got %d expected %d\n",
              cur->stklen, fpi.stkmin + param_id);
       ok = false;
     }
@@ -980,6 +879,99 @@ bool FuncChecker::checkIter(State* cur, PC const pc) {
   return ok;
 }
 
+std::array<int32_t, 4> getReadClsRefSlots(PC pc) {
+  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
+  size_t index = 0;
+
+  auto const op = peek_op(pc);
+  auto const numImmeds = numImmediates(op);
+  for (int i = 0; i < numImmeds; ++i) {
+    if (immType(op, i) == ArgType::CAR) {
+      assertx(index < ret.size());
+      ret[index++] = getImm(pc, i).u_CAR;
+    }
+  }
+  return ret;
+}
+
+std::array<int32_t, 4> getWrittenClsRefSlots(PC pc) {
+  std::array<int32_t, 4> ret = { -1, -1, -1, -1 };
+  size_t index = 0;
+
+  auto const op = peek_op(pc);
+  auto const numImmeds = numImmediates(op);
+  for (int i = 0; i < numImmeds; ++i) {
+    if (immType(op, i) == ArgType::CAW) {
+      assertx(index < ret.size());
+      ret[index++] = getImm(pc, i).u_CAW;
+    }
+  }
+  return ret;
+}
+
+bool FuncChecker::checkClsRefSlots(State* cur, PC const pc) {
+  bool ok = true;
+
+  auto const op = peek_op(pc);
+
+  for (auto const read : getReadClsRefSlots(pc)) {
+    if (read < 0) continue;
+    if (!cur->clsRefSlots[read]) {
+      ferror("{} trying to read from uninitialized class-ref slot {} at {}\n",
+             opcodeToName(op), read, offset(pc));
+      ok = false;
+    }
+    cur->clsRefSlots[read] = false;
+  }
+  for (auto const write : getWrittenClsRefSlots(pc)) {
+    if (write < 0) continue;
+    if (cur->clsRefSlots[write]) {
+      ferror(
+        "{} trying to write to already initialized class-ref slot {} at {}\n",
+        opcodeToName(op), write, offset(pc)
+      );
+      ok = false;
+    }
+    cur->clsRefSlots[write] = true;
+  }
+
+  return ok;
+}
+
+bool FuncChecker::checkOp(State* cur, PC pc, Op op) {
+  switch (op) {
+    case Op::GetMemoKeyL:
+    case Op::MemoGet:
+    case Op::MemoSet:
+      if (!m_func->isMemoizeWrapper()) {
+        ferror("{} can only appear within memoize wrappers\n",
+               opcodeToName(op));
+        return false;
+      }
+      break;
+    case Op::AssertRATStk:
+    case Op::BaseNC:
+    case Op::BaseGC:
+    case Op::BaseSC:
+    case Op::BaseC:
+    case Op::BaseR:
+    case Op::FPassBaseNC:
+    case Op::FPassBaseGC: {
+      auto const stackIdx = getImm(pc, 0).u_IVA;
+      if (stackIdx >= cur->stklen) {
+        ferror("{} indexes ({}) past end of stack ({})\n", opcodeToName(op),
+               stackIdx, cur->stklen);
+        return false;
+      }
+      break;
+    }
+    default:
+      break;
+  }
+
+  return true;
+}
+
 bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   static const FlavorDesc outputSigs[][4] = {
   #define NOV { },
@@ -991,30 +983,18 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define THREE(a,b,c) { a, b, c },
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define INS_1(a) { a },
-  #define INS_2(a) { a },
-  #define MMANY() { },
-  #define C_MMANY() { },
-  #define V_MMANY() { },
-  #define R_MMANY() { },
-  #define IDX_A { },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
-  #undef C_MMANY
-  #undef V_MMANY
-  #undef R_MMANY
-  #undef MMANY
   #undef FMANY
   #undef CMANY
   #undef SMANY
   #undef INS_1
-  #undef INS_2
   #undef FOUR
   #undef THREE
   #undef TWO
   #undef ONE
   #undef NOV
-  #undef IDX_A
   };
   bool ok = true;
   auto const op = peek_op(pc);
@@ -1035,7 +1015,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     FlavorDesc *outs = &cur->stk[cur->stklen];
     cur->stklen += pushes;
     if (op == Op::BaseSC || op == Op::BaseSL) {
-      if (pushes == 1) outs[0] = CV;
+      if (pushes == 1) outs[0] = outs[1];
     } else {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = outputSigs[size_t(op)][i];
@@ -1060,7 +1040,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   return ok;
 }
 
-std::string FuncChecker::stkToString(int len, const FlavorDesc* args) {
+std::string FuncChecker::stkToString(int len, const FlavorDesc* args) const {
   std::stringstream out;
   out << '[';
   for (int i = 0; i < len; ++i) {
@@ -1070,7 +1050,7 @@ std::string FuncChecker::stkToString(int len, const FlavorDesc* args) {
   return out.str();
 }
 
-std::string FuncChecker::sigToString(int len, const FlavorDesc* sig) {
+std::string FuncChecker::sigToString(int len, const FlavorDesc* sig) const {
   std::stringstream out;
   out << '[';
   for (int i = 0; i < len; ++i) {
@@ -1080,7 +1060,7 @@ std::string FuncChecker::sigToString(int len, const FlavorDesc* sig) {
   return out.str();
 }
 
-std::string FuncChecker::iterToString(const State& cur) {
+std::string FuncChecker::iterToString(const State& cur) const {
   int n = numIters();
   if (!n) return "";
   std::stringstream out;
@@ -1092,11 +1072,23 @@ std::string FuncChecker::iterToString(const State& cur) {
   return out.str();
 }
 
-std::string FuncChecker::stateToString(const State& cur) {
-  return iterToString(cur) + stkToString(cur.stklen, cur.stk);
+std::string
+FuncChecker::slotsToString(const boost::dynamic_bitset<>& slots) const {
+  std::ostringstream oss;
+  oss << slots;
+  return oss.str();
 }
 
-std::string FuncChecker::fpiToString(const FpiState& fpi) {
+std::string FuncChecker::stateToString(const State& cur) const {
+  return folly::sformat(
+    "{}{}[{}]",
+    iterToString(cur),
+    stkToString(cur.stklen, cur.stk),
+    slotsToString(cur.clsRefSlots)
+  );
+}
+
+std::string FuncChecker::fpiToString(const FpiState& fpi) const {
   std::stringstream out;
   out << '(' << fpi.fpush << ':' << fpi.stkmin << ',' << fpi.next << ')';
   return out.str();
@@ -1107,6 +1099,7 @@ void FuncChecker::initState(State* s) {
   s->fpi = new (m_arena) FpiState[maxFpi()];
   s->iters = new (m_arena) bool[numIters()];
   for (int i = 0, n = numIters(); i < n; ++i) s->iters[i] = false;
+  s->clsRefSlots.resize(numClsRefSlots());
   s->stklen = 0;
   s->fpilen = 0;
   s->mbr_live = false;
@@ -1118,6 +1111,7 @@ void FuncChecker::copyState(State* to, const State* from) {
   memcpy(to->stk, from->stk, from->stklen * sizeof(*to->stk));
   memcpy(to->fpi, from->fpi, from->fpilen * sizeof(*to->fpi));
   memcpy(to->iters, from->iters, numIters() * sizeof(*to->iters));
+  to->clsRefSlots = from->clsRefSlots;
   to->stklen = from->stklen;
   to->fpilen = from->fpilen;
   to->mbr_live = from->mbr_live;
@@ -1152,12 +1146,14 @@ bool FuncChecker::checkFlow() {
                      stateToString(cur) << " " <<
                      instrToString(pc, unit()) << std::endl;
       }
-      ok &= checkInputs(&cur, pc, b);
       auto const op = peek_op(pc);
+      ok &= checkOp(&cur, pc, op);
+      ok &= checkInputs(&cur, pc, b);
       auto const flags = instrFlags(op);
       if (flags & TF) ok &= checkTerminal(&cur, pc);
       if (flags & FF) ok &= checkFpi(&cur, pc, b);
       if (isIter(pc)) ok &= checkIter(&cur, pc);
+      ok &= checkClsRefSlots(&cur, pc);
       ok &= checkOutputs(&cur, pc, b);
     }
     ok &= checkSuccEdges(b, &cur);
@@ -1173,17 +1169,19 @@ bool FuncChecker::checkFlow() {
 
 bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
   bool ok = true;
-  // Reachable catch blocks and fault funclets have an empty stack.
-  if (m_graph->exn_cap > 0) {
+  // Reachable catch blocks and fault funclets have an empty stack and
+  // non-initialized class-ref slots.
+  if (b->exn) {
     int save_stklen = cur->stklen;
     int save_fpilen = cur->fpilen;
+    auto save_slots = cur->clsRefSlots;
     cur->stklen = 0;
     cur->fpilen = 0;
-    for (BlockPtrRange i = exnBlocks(m_graph, b); !i.empty(); ) {
-      ok &= checkEdge(b, *cur, i.popFront());
-    }
+    cur->clsRefSlots.reset();
+    ok &= checkEdge(b, *cur, b->exn);
     cur->stklen = save_stklen;
     cur->fpilen = save_fpilen;
+    cur->clsRefSlots = std::move(save_slots);
   }
   if (isIter(b->last) && numSuccBlocks(b) == 2) {
     // IterInit* and IterNext*, Both implicitly free their iterator variable
@@ -1243,7 +1241,6 @@ bool FuncChecker::checkEHStack(const EHEnt& handler, Block* b) {
  * Otherwise, require the state exactly match.
  */
 bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
-  bool ok = true;
   State& state = m_info[t->id].state_in;
   if (!state.stk) {
     copyState(&state, &cur);
@@ -1287,7 +1284,19 @@ bool FuncChecker::checkEdge(Block* b, const State& cur, Block *t) {
       }
     }
   }
-  return ok;
+
+  // Check class-ref slot state.
+  if (state.clsRefSlots != cur.clsRefSlots) {
+    ferror(
+      "mismatched class-ref state on edge B{}->B{}, current {} target {}\n",
+      b->id, t->id,
+      slotsToString(cur.clsRefSlots),
+      slotsToString(state.clsRefSlots)
+    );
+    return false;
+  }
+
+  return true;
 }
 
 void FuncChecker::reportStkUnderflow(Block*, const State& cur, PC pc) {
@@ -1351,7 +1360,7 @@ bool FuncChecker::checkRegion(const char* name, Offset b, Offset p,
     return false;
   } else if (check_instrs &&
              (!m_instrs.get(b - m_func->base()) ||
-              !m_instrs.get(p - m_func->base()))) {
+              (p < past && !m_instrs.get(p - m_func->base())))) {
     error("region %s %d:%d boundaries are inbetween instructions\n",
            name, b, p);
     return false;

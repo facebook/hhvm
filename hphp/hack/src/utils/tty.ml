@@ -9,7 +9,6 @@
  *)
 
 open Core
-open Utils
 
 type raw_color =
   | Default
@@ -73,7 +72,7 @@ let style_num = function
   | NormalWithBG (text, bg) -> (text_num text) ^ ";" ^ (background_num bg)
   | BoldWithBG (text, bg) -> (text_num text) ^ ";" ^ (background_num bg) ^ ";1"
 
-let print_one ?(color_mode=Color_Auto) c s =
+let print_one ?(color_mode=Color_Auto) ?(out_channel=stdout) c s =
   let should_color = match color_mode with
     | Color_Always -> true
     | Color_Never -> false
@@ -85,14 +84,14 @@ let print_one ?(color_mode=Color_Auto) c s =
             Unix.isatty Unix.stdout && term <> "dumb"
       end in
   if should_color
-  then Printf.printf "\x1b[%sm%s\x1b[0m" (style_num c) (s)
-  else Printf.printf "%s" s
+  then Printf.fprintf out_channel "\x1b[%sm%s\x1b[0m" (style_num c) (s)
+  else Printf.fprintf out_channel "%s" s
 
-let print ?(color_mode=Color_Auto) strs =
-  List.iter strs (fun (c, s) -> print_one ~color_mode c s)
+let cprint ?(color_mode=Color_Auto) ?(out_channel=stdout) strs =
+  List.iter strs (fun (c, s) -> print_one ~color_mode ~out_channel c s)
 
-let printf ?(color_mode=Color_Auto) c =
-  Printf.ksprintf (print_one ~color_mode c)
+let cprintf ?(color_mode=Color_Auto) ?(out_channel=stdout) c =
+  Printf.ksprintf (print_one ~color_mode ~out_channel c)
 
 let (spinner, spinner_used) =
   let state = ref 0 in
@@ -110,7 +109,7 @@ let clear_line_seq = "\r\x1b[0K"
 let print_clear_line chan =
   if Unix.isatty (Unix.descr_of_out_channel chan)
   then Printf.fprintf chan "%s%!" clear_line_seq
-  else Printf.fprintf chan "\n%!"
+  else ()
 
 (* Read a single char and return immediately, without waiting for a newline.
  * `man termios` to see how termio works. *)
@@ -134,8 +133,13 @@ let read_char () =
 let read_choice message choices =
   let rec loop () =
     Printf.printf "%s (%s)%!" message
-      (String.concat "|" (List.map choices string_of_char));
+      (String.concat "|" (List.map choices String_utils.string_of_char));
     let choice = read_char () in
     print_newline ();
     if List.mem choices choice then choice else loop ()
   in loop ()
+
+let eprintf fmt =
+  if Unix.(isatty stderr)
+  then Printf.eprintf fmt
+  else Printf.ifprintf stderr fmt

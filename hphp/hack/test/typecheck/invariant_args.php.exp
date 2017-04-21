@@ -1,3 +1,5 @@
-option(App \C<>)
-App \C<>
+File "invariant_args.php", line 13, characters 3-13:
+  ?C
+File "invariant_args.php", line 15, characters 3-13:
+  C
 No errors

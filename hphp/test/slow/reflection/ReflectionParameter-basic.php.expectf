@@ -1,0 +1,228 @@
+name: string(1) "a"
+position: int(0)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(9) "HH\string"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(true)
+  }
+}
+type isBuiltin: bool(true)
+type allowsNull: bool(false)
+type hint: string(9) "HH\string"
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(false)
+isVariadic: bool(false)
+allowsNull: bool(false)
+isDefaultValueAvailable: bool(false)
+isDefaultValueConstant: bool(false)
+getDefaultValue: string(16) "no default value"
+getDefaultValueConstantName: string(16) "no default value"
+
+
+name: string(1) "b"
+position: int(1)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(6) "HH\int"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(true)
+  }
+}
+type isBuiltin: bool(true)
+type allowsNull: bool(false)
+type hint: string(6) "HH\int"
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(false)
+isVariadic: bool(false)
+allowsNull: bool(false)
+isDefaultValueAvailable: bool(false)
+isDefaultValueConstant: bool(false)
+getDefaultValue: string(16) "no default value"
+getDefaultValueConstantName: string(16) "no default value"
+
+
+name: string(1) "c"
+position: int(2)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(8) "HH\float"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(true)
+  }
+}
+type isBuiltin: bool(true)
+type allowsNull: bool(false)
+type hint: string(8) "HH\float"
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(false)
+isVariadic: bool(false)
+allowsNull: bool(false)
+isDefaultValueAvailable: bool(false)
+isDefaultValueConstant: bool(false)
+getDefaultValue: string(16) "no default value"
+getDefaultValueConstantName: string(16) "no default value"
+
+
+name: string(1) "d"
+position: int(3)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(7) "HH\bool"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(true)
+  }
+}
+type isBuiltin: bool(true)
+type allowsNull: bool(false)
+type hint: string(7) "HH\bool"
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(false)
+isVariadic: bool(false)
+allowsNull: bool(false)
+isDefaultValueAvailable: bool(false)
+isDefaultValueConstant: bool(false)
+getDefaultValue: string(16) "no default value"
+getDefaultValueConstantName: string(16) "no default value"
+
+
+name: string(1) "e"
+position: int(4)
+canBePassedByValue: bool(false)
+isPassedByReference: bool(true)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(9) "Exception"
+    ["nullable"]=>
+    bool(false)
+    ["builtin"]=>
+    bool(false)
+  }
+}
+type isBuiltin: bool(false)
+type allowsNull: bool(false)
+type hint: string(9) "Exception"
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(false)
+isVariadic: bool(false)
+allowsNull: bool(false)
+isDefaultValueAvailable: bool(false)
+isDefaultValueConstant: bool(false)
+getDefaultValue: string(16) "no default value"
+getDefaultValueConstantName: string(16) "no default value"
+
+
+name: string(1) "f"
+position: int(5)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(8) "callable"
+    ["nullable"]=>
+    bool(true)
+    ["builtin"]=>
+    bool(true)
+  }
+}
+type isBuiltin: bool(true)
+type allowsNull: bool(true)
+type hint: string(8) "callable"
+isArray: bool(false)
+isCallable: bool(true)
+isOptional: bool(true)
+isVariadic: bool(false)
+allowsNull: bool(true)
+isDefaultValueAvailable: bool(true)
+isDefaultValueConstant: bool(true)
+getDefaultValue: NULL
+getDefaultValueConstantName: string(4) "NULL"
+
+
+name: string(1) "g"
+position: int(6)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(true)
+getType: object(ReflectionType)#%d (1) {
+  ["type_hint_info":"ReflectionType":private]=>
+  array(3) {
+    ["name"]=>
+    string(11) "HH\resource"
+    ["nullable"]=>
+    bool(true)
+    ["builtin"]=>
+    bool(true)
+  }
+}
+type isBuiltin: bool(true)
+type allowsNull: bool(true)
+type hint: string(11) "HH\resource"
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(true)
+isVariadic: bool(false)
+allowsNull: bool(true)
+isDefaultValueAvailable: bool(true)
+isDefaultValueConstant: bool(true)
+getDefaultValue: NULL
+getDefaultValueConstantName: string(4) "NULL"
+
+
+name: string(6) "noType"
+position: int(7)
+canBePassedByValue: bool(true)
+isPassedByReference: bool(false)
+hasType: bool(false)
+getType: NULL
+type isBuiltin: bool(false)
+type allowsNull: bool(false)
+type hint: bool(false)
+isArray: bool(false)
+isCallable: bool(false)
+isOptional: bool(true)
+isVariadic: bool(false)
+allowsNull: bool(true)
+isDefaultValueAvailable: bool(true)
+isDefaultValueConstant: bool(false)
+getDefaultValue: string(8) "whatever"
+getDefaultValueConstantName: NULL

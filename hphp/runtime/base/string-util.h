@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_STRING_UTIL_H_
 #define incl_HPHP_STRING_UTIL_H_
 
+#include "hphp/runtime/ext/std/ext_std_misc.h"
+
 #include "hphp/runtime/base/type-string.h"
 
 #include "hphp/util/assertions.h"
@@ -26,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Array;
+struct Array;
 struct Variant;
 
 extern const StaticString k_HPHP_TRIM_CHARLIST;
@@ -35,8 +37,7 @@ extern const StaticString k_HPHP_TRIM_CHARLIST;
  * Utility string functions. These are mostly wrappers around zend/ string
  * functions, but in a safe and convenient form.
  */
-class StringUtil {
-public:
+struct StringUtil {
   enum class PadType {
     Left = 0,
     Right = 1,
@@ -109,7 +110,7 @@ public:
    * Split/joins.
    */
   static Variant Explode(const String& input, const String& delimiter,
-                         int limit = 0x7FFFFFFF);
+                         int64_t limit = k_PHP_INT_MAX);
     static String Implode(const Variant& items, const String& delim,
                           const bool checkIsContainer = true); // == Join()
   static Variant Split(const String& str, int64_t split_length = 1);

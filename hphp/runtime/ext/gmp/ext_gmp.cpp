@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,13 +32,10 @@ static String mpzToString(mpz_t gmpData, const int64_t base) {
     ++charLength;
   }
 
-  char *charStr = (char*)req::malloc(charLength);
-  mpz_get_str(charStr, base, gmpData);
-
-  String returnValue(charStr);
-  req::free(charStr);
-
-  return returnValue;
+  String str{size_t(charLength), ReserveString};
+  auto buf = str.mutableData();
+  mpz_get_str(buf, base, gmpData);
+  return str.setSize(strlen(buf));
 }
 
 
@@ -132,7 +129,7 @@ static bool variantToGMPData(const char* const fnCaller,
   }
 
   case KindOfString:
-  case KindOfStaticString:
+  case KindOfPersistentString:
     if (!setMpzFromString(gmpData, data.toString(), base)) {
       raise_warning(cs_GMP_INVALID_STRING, fnCaller);
       return false;
@@ -154,9 +151,15 @@ static bool variantToGMPData(const char* const fnCaller,
 
   case KindOfUninit:
   case KindOfNull:
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
+  case KindOfPersistentArray:
   case KindOfArray:
   case KindOfRef:
-  case KindOfClass:
   case KindOfResource:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;
@@ -171,7 +174,7 @@ static Variant HHVM_FUNCTION(gmp_abs,
                              const Variant& data) {
   mpz_t gmpReturn, gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ABS, gmpData, data)) {
+  if (!variantToGMPData("gmp_abs", gmpData, data)) {
     return false;
   }
 
@@ -192,10 +195,10 @@ static Variant HHVM_FUNCTION(gmp_add,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ADD, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_add", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ADD, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_add", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -218,10 +221,10 @@ static Variant HHVM_FUNCTION(gmp_and,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_AND, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_and", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_AND, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_and", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -244,20 +247,19 @@ static void HHVM_FUNCTION(gmp_clrbit,
                           int64_t index) {
 
   if (index < 0) {
-    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, "gmp_clrbit");
     return;
   }
 
   Object gmpObject = data.toObject();
   if (!gmpObject.instanceof(s_GMP_GMP)) {
-    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    raise_warning(cs_GMP_INVALID_OBJECT, "gmp_clrbit");
     return;
   }
 
   auto gmpData = Native::data<GMPData>(gmpObject);
   if (!gmpData) {
-    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_CLRBIT);
+    raise_warning(cs_GMP_INVALID_OBJECT, "gmp_clrbit");
     return;
   }
 
@@ -270,10 +272,10 @@ static Variant HHVM_FUNCTION(gmp_cmp,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_CMP, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_cmp", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_CMP, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_cmp", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -291,7 +293,7 @@ static Variant HHVM_FUNCTION(gmp_com,
                              const Variant& data) {
   mpz_t gmpReturn, gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_COM, gmpData, data)) {
+  if (!variantToGMPData("gmp_com", gmpData, data)) {
     return false;
   }
 
@@ -313,10 +315,10 @@ static Variant HHVM_FUNCTION(gmp_div_q,
                              int64_t round = GMP_ROUND_ZERO) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIV_Q, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_div_q", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIV_Q, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_div_q", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -325,8 +327,7 @@ static Variant HHVM_FUNCTION(gmp_div_q,
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
-                  cs_GMP_FUNC_NAME_GMP_DIV_Q);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, "gmp_div_q");
     return false;
   }
 
@@ -349,7 +350,7 @@ static Variant HHVM_FUNCTION(gmp_div_q,
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
     mpz_clear(gmpReturn);
-    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_Q);
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, "gmp_div_q");
     return false;
   }
 
@@ -369,10 +370,10 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
                              int64_t round = GMP_ROUND_ZERO) {
   mpz_t gmpDataA, gmpDataB, gmpReturnQ, gmpReturnR;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIV_QR, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_div_qr", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIV_QR, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_div_qr", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -381,8 +382,7 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
-                  cs_GMP_FUNC_NAME_GMP_DIV_QR);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, "gmp_div_qr");
     return false;
   }
 
@@ -408,7 +408,7 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
     mpz_clear(gmpDataB);
     mpz_clear(gmpReturnQ);
     mpz_clear(gmpReturnR);
-    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_QR);
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, "gmp_div_qr");
     return false;
   }
 
@@ -431,10 +431,10 @@ static Variant HHVM_FUNCTION(gmp_div_r,
                              int64_t round = GMP_ROUND_ZERO) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIV_R, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_div_r", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIV_R, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_div_r", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -443,8 +443,7 @@ static Variant HHVM_FUNCTION(gmp_div_r,
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
 
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
-                  cs_GMP_FUNC_NAME_GMP_DIV_R);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, "gmp_div_r");
     return false;
   }
 
@@ -466,7 +465,7 @@ static Variant HHVM_FUNCTION(gmp_div_r,
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
     mpz_clear(gmpReturn);
-    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, cs_GMP_FUNC_NAME_GMP_DIV_R);
+    raise_warning(cs_GMP_INVALID_ROUNDING_MODE, "gmp_div_r");
     return false;
   }
 
@@ -486,17 +485,16 @@ static Variant HHVM_FUNCTION(gmp_divexact,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIVEXACT, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_divexact", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_DIVEXACT, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_divexact", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
 
   if (mpz_sgn(gmpDataB) == 0) {
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
-                  cs_GMP_FUNC_NAME_GMP_DIVEXACT);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, "gmp_divexact");
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
     return false;
@@ -521,15 +519,14 @@ static Variant HHVM_FUNCTION(gmp_fact,
 
   if (data.isObject()) {
     mpz_t gmpData;
-    if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_FACT, gmpData, data)) {
+    if (!variantToGMPData("gmp_fact", gmpData, data)) {
       return false;
     }
 
     if (mpz_sgn(gmpData) < 0) {
       mpz_clear(gmpData);
 
-      raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE,
-                    cs_GMP_FUNC_NAME_GMP_FACT);
+      raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE, "gmp_fact");
       return false;
     }
 
@@ -539,8 +536,7 @@ static Variant HHVM_FUNCTION(gmp_fact,
     mpz_clear(gmpData);
   } else {
     if (data.toInt64() < 0) {
-      raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE,
-                    cs_GMP_FUNC_NAME_GMP_FACT);
+      raise_warning(cs_GMP_INVALID_VALUE_MUST_BE_POSITIVE, "gmp_fact");
       return false;
     }
 
@@ -560,10 +556,10 @@ static Variant HHVM_FUNCTION(gmp_gcd,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_GCD, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_gcd", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_GCD, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_gcd", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -586,10 +582,10 @@ static Variant HHVM_FUNCTION(gmp_gcdext,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturnG, gmpReturnS, gmpReturnT;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_GCDEXCT, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_gcdexct", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_GCDEXCT, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_gcdexct", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -620,10 +616,10 @@ static Variant HHVM_FUNCTION(gmp_hamdist,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_HAMDIST, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_hamdist", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_HAMDIST, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_hamdist", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -643,14 +639,11 @@ static Variant HHVM_FUNCTION(gmp_init,
   mpz_t gmpData;
 
   if (base < GMP_MIN_BASE || base == -1 || base == 1 || base > GMP_MAX_BASE) {
-    raise_warning(cs_GMP_INVALID_BASE_VALUE,
-                  cs_GMP_FUNC_NAME_GMP_INIT,
-                  base,
-                  GMP_MAX_BASE);
+    raise_warning(cs_GMP_INVALID_BASE_VALUE, "gmp_init", base, GMP_MAX_BASE);
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_INIT, gmpData, data, base)) {
+  if (!variantToGMPData("gmp_init", gmpData, data, base)) {
     return false;
   }
 
@@ -670,7 +663,7 @@ static int64_t HHVM_FUNCTION(gmp_intval,
       || data.isResource()
       || (data.isString() && data.toString().empty())
       || (data.isObject() && !data.toObject().instanceof(s_GMP_GMP))
-      || !variantToGMPData(cs_GMP_FUNC_NAME_GMP_INTVAL, gmpData, data)) {
+      || !variantToGMPData("gmp_intval", gmpData, data)) {
     return data.toInt64();
   }
 
@@ -687,10 +680,10 @@ static Variant HHVM_FUNCTION(gmp_invert,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_INVERT, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_invert", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_INVERT, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_invert", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -718,10 +711,10 @@ static Variant HHVM_FUNCTION(gmp_jacobi,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_JACOBI, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_jacobi", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_JACOBI, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_jacobi", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -740,10 +733,10 @@ static Variant HHVM_FUNCTION(gmp_legendre,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_LEGENDRE, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_legendre", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_LEGENDRE, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_legendre", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -762,17 +755,16 @@ static Variant HHVM_FUNCTION(gmp_mod,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_MOD, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_mod", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_MOD, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_mod", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
 
   if (mpz_sgn(gmpDataB) == 0) {
-    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO,
-                  cs_GMP_FUNC_NAME_GMP_MOD);
+    raise_warning(cs_GMP_INVALID_VALUE_MUST_NOT_BE_ZERO, "gmp_mod");
     mpz_clear(gmpDataA);
     mpz_clear(gmpDataB);
     return false;
@@ -798,10 +790,10 @@ static Variant HHVM_FUNCTION(gmp_mul,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_MUL, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_mul", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_MUL, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_mul", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -823,7 +815,7 @@ static Variant HHVM_FUNCTION(gmp_neg,
                              const Variant& data) {
   mpz_t gmpReturn, gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_NEG, gmpData, data)) {
+  if (!variantToGMPData("gmp_neg", gmpData, data)) {
     return false;
   }
 
@@ -843,7 +835,7 @@ static Variant HHVM_FUNCTION(gmp_nextprime,
                              const Variant& data) {
   mpz_t gmpReturn, gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_NEXTPRIME, gmpData, data)) {
+  if (!variantToGMPData("gmp_nextprime", gmpData, data)) {
     return false;
   }
 
@@ -864,10 +856,10 @@ static Variant HHVM_FUNCTION(gmp_or,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_OR, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_or", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_OR, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_or", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -889,7 +881,7 @@ static bool HHVM_FUNCTION(gmp_perfect_square,
                           const Variant& data) {
   mpz_t gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_PERFECT_SQUARE, gmpData, data)) {
+  if (!variantToGMPData("gmp_perfect_square", gmpData, data)) {
     return false;
   }
 
@@ -905,7 +897,7 @@ static Variant HHVM_FUNCTION(gmp_popcount,
                              const Variant& data) {
   mpz_t gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POPCOUNT, gmpData, data)) {
+  if (!variantToGMPData("gmp_popcount", gmpData, data)) {
     return false;
   }
 
@@ -922,12 +914,11 @@ static Variant HHVM_FUNCTION(gmp_pow,
   mpz_t gmpReturn, gmpData;
 
   if (exp < 0) {
-    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE,
-                  cs_GMP_FUNC_NAME_GMP_POW);
+    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE, "gmp_pow");
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POW, gmpData, data)) {
+  if (!variantToGMPData("gmp_pow", gmpData, data)) {
     return false;
   }
 
@@ -949,18 +940,17 @@ static Variant HHVM_FUNCTION(gmp_powm,
                              const Variant& dataC) {
   mpz_t gmpDataA, gmpDataB, gmpDataC, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_powm", gmpDataB, dataB)) {
     return false;
   }
   if (mpz_sgn(gmpDataB) < 0) {
     mpz_clear(gmpDataB);
 
-    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE,
-                  cs_GMP_FUNC_NAME_GMP_POWM);
+    raise_warning(cs_GMP_INVALID_EXPONENT_MUST_BE_POSITIVE, "gmp_powm");
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataC, dataC)) {
+  if (!variantToGMPData("gmp_powm", gmpDataC, dataC)) {
     mpz_clear(gmpDataB);
     return false;
   }
@@ -968,12 +958,11 @@ static Variant HHVM_FUNCTION(gmp_powm,
     mpz_clear(gmpDataB);
     mpz_clear(gmpDataC);
 
-    raise_warning(cs_GMP_INVALID_MODULUS_MUST_NOT_BE_ZERO,
-                  cs_GMP_FUNC_NAME_GMP_POWM);
+    raise_warning(cs_GMP_INVALID_MODULUS_MUST_NOT_BE_ZERO, "gmp_powm");
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_POWM, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_powm", gmpDataA, dataA)) {
     mpz_clear(gmpDataC);
     mpz_clear(gmpDataB);
     return false;
@@ -998,7 +987,7 @@ static Variant HHVM_FUNCTION(gmp_prob_prime,
                              int64_t reps = 10) {
   mpz_t gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_PROB_PRIME, gmpData, data)) {
+  if (!variantToGMPData("gmp_prob_prime", gmpData, data)) {
     return false;
   }
 
@@ -1012,7 +1001,7 @@ static Variant HHVM_FUNCTION(gmp_prob_prime,
 
 static void HHVM_FUNCTION(gmp_random,
                           int64_t limiter) {
-  throw_not_implemented(cs_GMP_FUNC_NAME_GMP_RANDOM);
+  throw_not_implemented("gmp_random");
 }
 
 
@@ -1020,20 +1009,18 @@ static Variant HHVM_FUNCTION(gmp_root,
                              const Variant& data,
                              int64_t root) {
   if (root < 1) {
-    raise_warning(cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE,
-                  cs_GMP_FUNC_NAME_GMP_ROOT);
+    raise_warning(cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE, "gmp_root");
     return false;
   }
 
   mpz_t gmpData, gmpReturn;
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ROOT, gmpData, data)) {
+  if (!variantToGMPData("gmp_root", gmpData, data)) {
     return false;
   }
 
   if (root % 2 == 0 && mpz_sgn(gmpData) < 0) {
     mpz_clear(gmpData);
-    raise_warning(cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER,
-                  cs_GMP_FUNC_NAME_GMP_ROOT);
+    raise_warning(cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER, "gmp_root");
     return false;
   }
 
@@ -1053,20 +1040,18 @@ static Variant HHVM_FUNCTION(gmp_rootrem,
                              const Variant& data,
                              int64_t root) {
   if (root < 1) {
-    raise_warning(cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE,
-                  cs_GMP_FUNC_NAME_GMP_ROOTREM);
+    raise_warning(cs_GMP_INVALID_ROOT_MUST_BE_POSITIVE, "gmp_rootrem");
     return false;
   }
 
   mpz_t gmpData, gmpReturn0, gmpReturn1;
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_ROOTREM, gmpData, data)) {
+  if (!variantToGMPData("gmp_rootrem", gmpData, data)) {
     return false;
   }
 
   if (root % 2 == 0 && mpz_sgn(gmpData) < 0) {
     mpz_clear(gmpData);
-    raise_warning(cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER,
-                  cs_GMP_FUNC_NAME_GMP_ROOTREM);
+    raise_warning(cs_GMP_ERROR_EVEN_ROOT_NEGATIVE_NUMBER, "gmp_rootrem");
     return false;
   }
 
@@ -1091,13 +1076,12 @@ static Variant HHVM_FUNCTION(gmp_scan0,
                              const Variant& data,
                              int64_t start) {
   if (start < 0) {
-    raise_warning(cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_SCAN0);
+    raise_warning(cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE, "gmp_scan0");
     return false;
   }
 
   mpz_t gmpData;
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SCAN0, gmpData, data)) {
+  if (!variantToGMPData("gmp_scan0", gmpData, data)) {
     return false;
   }
 
@@ -1113,13 +1097,12 @@ static Variant HHVM_FUNCTION(gmp_scan1,
                              const Variant& data,
                              int64_t start) {
   if (start < 0) {
-    raise_warning(cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_SCAN1);
+    raise_warning(cs_GMP_INVALID_STARTING_INDEX_IS_NEGATIVE, "gmp_scan1");
     return false;
   }
 
   mpz_t gmpData;
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SCAN1, gmpData, data)) {
+  if (!variantToGMPData("gmp_scan1", gmpData, data)) {
     return false;
   }
 
@@ -1136,20 +1119,19 @@ static void HHVM_FUNCTION(gmp_setbit,
                           int64_t index,
                           bool bitOn /* = true*/) {
   if (index < 0) {
-    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_SETBIT);
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, "gmp_setbit");
     return;
   }
 
   Object gmpObject = data.toObject();
   if (!gmpObject.instanceof(s_GMP_GMP)) {
-    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_SETBIT);
+    raise_warning(cs_GMP_INVALID_OBJECT, "gmp_setbit");
     return;
   }
 
   auto gmpData = Native::data<GMPData>(gmpObject);
   if (!gmpData) {
-    raise_warning(cs_GMP_INVALID_OBJECT, cs_GMP_FUNC_NAME_GMP_SETBIT);
+    raise_warning(cs_GMP_INVALID_OBJECT, "gmp_setbit");
     return;
   }
 
@@ -1165,7 +1147,7 @@ static Variant HHVM_FUNCTION(gmp_sign,
                              const Variant& data) {
   mpz_t gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SIGN, gmpData, data)) {
+  if (!variantToGMPData("gmp_sign", gmpData, data)) {
     return false;
   }
 
@@ -1181,13 +1163,12 @@ static Variant HHVM_FUNCTION(gmp_sqrt,
                              const Variant& data) {
   mpz_t gmpReturn, gmpData;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SQRT, gmpData, data)) {
+  if (!variantToGMPData("gmp_sqrt", gmpData, data)) {
     return false;
   }
 
   if (mpz_sgn(gmpData) < 0) {
-    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_SQRT);
+    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE, "gmp_sqrt");
     return false;
   }
 
@@ -1207,13 +1188,12 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
                              const Variant& data) {
   mpz_t gmpData, gmpSquareRoot, gmpRemainder;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SQRTREM, gmpData, data)) {
+  if (!variantToGMPData("gmp_sqrtrem", gmpData, data)) {
     return false;
   }
 
   if (mpz_sgn(gmpData) < 0) {
-    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_SQRTREM);
+    raise_warning(cs_GMP_INVALID_NUMBER_IS_NEGATIVE, "gmp_sqrtrem");
     return false;
   }
 
@@ -1240,14 +1220,11 @@ static Variant HHVM_FUNCTION(gmp_strval,
   mpz_t gmpData;
 
   if (base < GMP_MIN_BASE || (base > -2 && base < 2) || base > GMP_MAX_BASE) {
-    raise_warning(cs_GMP_INVALID_BASE_VALUE,
-                  cs_GMP_FUNC_NAME_GMP_STRVAL,
-                  base,
-                  GMP_MAX_BASE);
+    raise_warning(cs_GMP_INVALID_BASE_VALUE, "gmp_strval", base, GMP_MAX_BASE);
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_STRVAL, gmpData, data)) {
+  if (!variantToGMPData("gmp_strval", gmpData, data)) {
     return false;
   }
 
@@ -1264,10 +1241,10 @@ static Variant HHVM_FUNCTION(gmp_sub,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SUB, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_sub", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_SUB, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_sub", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -1291,12 +1268,11 @@ static bool HHVM_FUNCTION(gmp_testbit,
   mpz_t gmpData;
 
   if (index < 0) {
-    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE,
-                  cs_GMP_FUNC_NAME_GMP_TESTBIT);
+    raise_warning(cs_GMP_INVALID_INDEX_IS_NEGATIVE, "gmp_testbit");
     return false;
   }
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_TESTBIT, gmpData, data)) {
+  if (!variantToGMPData("gmp_testbit", gmpData, data)) {
     return false;
   }
 
@@ -1313,10 +1289,10 @@ static Variant HHVM_FUNCTION(gmp_xor,
                              const Variant& dataB) {
   mpz_t gmpDataA, gmpDataB, gmpReturn;
 
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_XOR, gmpDataA, dataA)) {
+  if (!variantToGMPData("gmp_xor", gmpDataA, dataA)) {
     return false;
   }
-  if (!variantToGMPData(cs_GMP_FUNC_NAME_GMP_XOR, gmpDataB, dataB)) {
+  if (!variantToGMPData("gmp_xor", gmpDataB, dataB)) {
     mpz_clear(gmpDataA);
     return false;
   }
@@ -1366,14 +1342,14 @@ static void HHVM_METHOD(GMP, unserialize,
   // First value is a string (our number value)
   Variant num = unserializer.unserialize();
   if (!num.isString() || !setMpzFromString(gmpData, num.toString(), 10)) {
-    throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_NUMBER);
+    throw Exception("Could not unserialize number");
   }
 
   // Second value is an array of object properties optionally set by the user
   Variant props = unserializer.unserialize();
   if (!props.isArray()) {
     mpz_clear(gmpData);
-    throw Exception(cs_GMP_COULD_NOT_UNSERIALIZE_PROPERTIES);
+    throw Exception("Could not unserialize properties");
   }
 
   auto gmpObjectData = Native::data<GMPData>(this_);
@@ -1423,8 +1399,7 @@ void GMPData::setGMPMpz(const mpz_t data) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension
-class GMPExtension final : public Extension {
-public:
+struct GMPExtension final : Extension {
   GMPExtension() : Extension("gmp", "2.0.0-hhvm") { };
   void moduleInit() override {
     HHVM_RC_INT_SAME(GMP_MAX_BASE);

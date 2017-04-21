@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,24 +33,26 @@ struct ActRec;
  * execution of PHP code that can be resumed once the result of awaited
  * WaitHandle becomes available.
  */
-class c_ResumableWaitHandle : public c_WaitableWaitHandle {
- public:
+struct c_ResumableWaitHandle : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(ResumableWaitHandle);
   WAITHANDLE_DTOR(ResumableWaitHandle);
 
-  explicit c_ResumableWaitHandle(Class* cls = c_ResumableWaitHandle::classof(),
-                                 HeaderKind kind = HeaderKind::WaitHandle)
-  noexcept : c_WaitableWaitHandle(cls, kind) {}
-  ~c_ResumableWaitHandle() {}
+  explicit c_ResumableWaitHandle(Class* cls, HeaderKind kind,
+                                 type_scan::Index tyindex) noexcept
+    : c_WaitableWaitHandle(cls, kind, tyindex)
+  {}
+
+  ~c_ResumableWaitHandle()
+  {}
 
  public:
   static c_ResumableWaitHandle* getRunning(ActRec* fp);
   void resume();
   void exitContext(context_idx_t ctx_idx);
 
-  static const int8_t STATE_BLOCKED   = 2;
-  static const int8_t STATE_SCHEDULED = 3;
-  static const int8_t STATE_RUNNING   = 4;
+  static const int8_t STATE_BLOCKED   = 2; // waiting on dependencies.
+  static const int8_t STATE_READY     = 3; // ready to run
+  static const int8_t STATE_RUNNING   = 4; // currently running
 };
 
 inline c_ResumableWaitHandle* c_WaitHandle::asResumable() {

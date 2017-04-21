@@ -1,7 +1,13 @@
-[\Ref]App \Ref<[1]intersect(option([2]tvar_2)), >
-[\Ref]App \Ref<[3]option(Tstring), >
-[3]option(Tstring)
-[\Ref]App \Ref<[4]intersect(option([5]tvar_5)), >
-[4]intersect(option([5]tvar_5))
-[\Ref]App \Ref<[6]intersect([\Exception]App \Exception<>, [<expr#1>]App \Exception<>, option([5]tvar_5)), >
+File "dep_types_and_null.php", line 15, characters 3-13:
+  Ref as Ref<^(?^_)>
+File "dep_types_and_null.php", line 17, characters 3-13:
+  Ref as Ref<^?string>
+File "dep_types_and_null.php", line 18, characters 3-20:
+  ^?string
+File "dep_types_and_null.php", line 24, characters 3-13:
+  Ref as Ref<^(?^_)>
+File "dep_types_and_null.php", line 25, characters 3-20:
+  ^(?^_)
+File "dep_types_and_null.php", line 28, characters 3-13:
+  Ref as Ref<^(Exception as Exception | <expr#1> as Exception | ?^_)>
 No errors

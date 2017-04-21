@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 #include "hphp/runtime/vm/jit/irgen-exit.h"
@@ -91,10 +92,8 @@ void emitJmpNZ(IRGS& env, Offset relOffset) {
 
 static const StaticString s_switchProfile("SwitchProfile");
 
-void emitSwitch(IRGS& env,
-                const ImmVector& iv,
-                int64_t base,
-                SwitchKind kind) {
+void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
+                const ImmVector& iv) {
   auto bounded = kind == SwitchKind::Bounded;
   int nTargets = bounded ? iv.size() - 2 : iv.size();
 
@@ -124,7 +123,7 @@ void emitSwitch(IRGS& env,
     gen(env, Jmp, getBlock(env, zeroOff));
     return;
   }
-  if (type <= TArr) {
+  if (type <= TArrLike) {
     decRef(env, switchVal);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;
@@ -221,10 +220,10 @@ void emitSwitch(IRGS& env,
   }
 
   auto data = JmpSwitchData{};
-  data.cases       = iv.size();
-  data.targets     = &targets[0];
-  data.invSPOff    = invSPOff(env);
-  data.irSPOff     = offsetFromIRSP(env, BCSPOffset{0});
+  data.cases = iv.size();
+  data.targets = &targets[0];
+  data.spOffBCFromFP = spOffBCFromFP(env);
+  data.spOffBCFromIRSP = spOffBCFromIRSP(env);
 
   gen(env, JmpSwitchDest, data, index, sp(env), fp(env));
 }
@@ -261,7 +260,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.cases      = &cases[0];
   data.defaultSk  = SrcKey{curSrcKey(env),
                            bcOff(env) + iv.strvec()[iv.size() - 1].dest};
-  data.spOff      = invSPOff(env);
+  data.bcSPOff    = spOffBCFromFP(env);
 
   auto const dest = gen(env,
                         fastPath ? LdSSwitchDestFast
@@ -272,7 +271,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   gen(
     env,
     JmpSSwitchDest,
-    IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+    IRSPRelOffsetData { spOffBCFromIRSP(env) },
     dest,
     sp(env),
     fp(env)

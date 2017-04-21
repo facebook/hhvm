@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -97,22 +97,22 @@ inline Func** Unit::MergeInfo::funcHoistableBegin() const {
 
 inline
 Unit::MergeInfo::FuncRange Unit::MergeInfo::funcs() const {
-  return FuncRange(funcBegin(), funcEnd());
+  return { funcBegin(), funcEnd() };
 }
 
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::mutableFuncs() const {
-  return MutableFuncRange(funcBegin(), funcEnd());
+  return { funcBegin(), funcEnd() };
 }
 
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::nonMainFuncs() const {
-  return MutableFuncRange(funcBegin() + 1, funcEnd());
+  return { funcBegin() + 1, funcEnd() };
 }
 
 inline
 Unit::MergeInfo::MutableFuncRange Unit::MergeInfo::hoistableFuncs() const {
-  return MutableFuncRange(funcHoistableBegin(), funcEnd());
+  return { funcHoistableBegin(), funcEnd() };
 }
 
 inline void*& Unit::MergeInfo::mergeableObj(int idx) {
@@ -220,9 +220,9 @@ inline size_t Unit::numArrays() const {
   return m_arrays.size();
 }
 
-inline ArrayData* Unit::lookupArrayId(Id id) const {
+inline const ArrayData* Unit::lookupArrayId(Id id) const {
   assert(id < m_arrays.size());
-  return const_cast<ArrayData*>(m_arrays[id]);
+  return m_arrays[id];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,18 +242,39 @@ inline Unit::FuncRange Unit::funcs() const {
   return m_mergeInfo->funcs();
 }
 
-inline Unit::PreClassRange Unit::preclasses() const {
-  return PreClassRange(m_preClasses);
+inline folly::Range<PreClassPtr*> Unit::preclasses() {
+  return { m_preClasses.data(), m_preClasses.size() };
+}
+
+inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
+  return { m_preClasses.data(), m_preClasses.size() };
 }
 
 inline Func* Unit::firstHoistable() const {
   return *m_mergeInfo->funcHoistableBegin();
 }
 
+template<class Fn> void Unit::forEachFunc(Fn fn) const {
+  for (auto& func : funcs()) {
+    fn(func);
+  }
+  for (auto& c : preclasses()) {
+    auto methods = FuncRange{c->methods(), c->methods() + c->numMethods()};
+    for (auto& method : methods) {
+      fn(method);
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases
-inline Unit::TypeAliasRange Unit::typeAliases() const {
-  return TypeAliasRange(m_typeAliases);
+
+inline folly::Range<TypeAlias*> Unit::typeAliases() {
+  return { m_typeAliases.begin(), m_typeAliases.end() };
+}
+
+inline folly::Range<const TypeAlias*> Unit::typeAliases() const {
+  return { m_typeAliases.begin(), m_typeAliases.end() };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -267,19 +288,18 @@ inline Class* Unit::lookupClass(const StringData* name) {
   return lookupClass(NamedEntity::get(name));
 }
 
-inline Class* Unit::lookupClassOrUniqueClass(const NamedEntity* ne) {
+inline const Class* Unit::lookupUniqueClassInContext(const NamedEntity* ne,
+                                                     const Class* ctx) {
   Class* cls = ne->clsList();
-  if (LIKELY(cls != nullptr)) {
-    if (cls->attrs() & AttrUnique && RuntimeOption::RepoAuthoritative) {
-      return cls;
-    }
-    return cls->getCached();
-  }
-  return nullptr;
+  if (UNLIKELY(cls == nullptr)) return nullptr;
+  if (cls->attrs() & AttrUnique) return cls;
+  if (!ctx) return nullptr;
+  return ctx->getClassDependency(cls->name());
 }
 
-inline Class* Unit::lookupClassOrUniqueClass(const StringData* name) {
-  return lookupClassOrUniqueClass(NamedEntity::get(name));
+inline const Class* Unit::lookupUniqueClassInContext(const StringData* name,
+                                                     const Class* ctx) {
+  return lookupUniqueClassInContext(NamedEntity::get(name), ctx);
 }
 
 inline Class* Unit::loadClass(const StringData* name) {
@@ -329,6 +349,10 @@ inline void Unit::setInterpretOnly() {
 
 inline bool Unit::isHHFile() const {
   return m_isHHFile;
+}
+
+inline bool Unit::useStrictTypes() const {
+  return m_useStrictTypes;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

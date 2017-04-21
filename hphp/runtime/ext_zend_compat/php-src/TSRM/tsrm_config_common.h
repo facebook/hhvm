@@ -33,9 +33,7 @@ char *alloca ();
 # endif
 #endif
 
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include <folly/portability/Unistd.h>
 
 #if HAVE_LIMITS_H
 #include <limits.h>

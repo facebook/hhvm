@@ -1,0 +1,33 @@
+
+.main {
+  DefCls 0
+  DefCls 1
+  Int 1
+  RetC
+}
+
+.function <"HH\\void" N  > test() {
+  .declvars $b;
+  FPushCtorD 0 "B"
+  FCall 0
+  PopR
+  SetL $b
+  PopC
+  Null
+  RetC
+}
+
+.class A {
+  .method [public] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class B extends A {
+  .method [public] 86ctor() {
+    Null
+    RetC
+  }
+}
+

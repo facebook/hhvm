@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/util/process.h"
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,7 +33,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   Hdf hdf;
 
   char buf[32];
-  snprintf(buf, sizeof(buf), "%u", Process::GetProcessId());
+  snprintf(buf, sizeof(buf), "%" PRId64, (int64_t)getpid());
   hdf["pid"] = std::string(buf);
   snprintf(buf, sizeof(buf), "%" PRIx64, (int64_t)Process::GetThreadId());
   hdf["tid"] = std::string(buf);
@@ -55,10 +56,10 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
     }
   }
 
-  int size;
+  size_t size;
   const void *data = transport->getPostData(size);
   if (size) {
-    String encoded = string_uuencode((const char *)data, size);
+    String encoded = string_uuencode((const char *)data, safe_cast<int>(size));
     hdf["post"] = encoded.get()->data();
   } else {
     hdf["post"] = "";
@@ -104,7 +105,7 @@ uint16_t ReplayTransport::getRemotePort() {
   return Config::GetUInt16(m_ini, m_hdf, "remote_port", 0, false);
 }
 
-const void *ReplayTransport::getPostData(int &size) {
+const void *ReplayTransport::getPostData(size_t &size) {
   size = m_postData.size();
   return m_postData.data();
 }

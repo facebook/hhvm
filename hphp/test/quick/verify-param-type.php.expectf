@@ -6,34 +6,20 @@ array(6) {
   [2]=>
   string(%d) "%s"
   [3]=>
-  int(16)
+  int(18)
   [4]=>
   array(1) {
     ["foo"]=>
     float(0)
   }
   [5]=>
-  array(2) {
+  array(1) {
     [0]=>
     array(2) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
-      int(16)
-    }
-    [1]=>
-    array(4) {
-      ["file"]=>
-      string(%d) "%s"
-      ["line"]=>
       int(18)
-      ["function"]=>
-      string(4) "main"
-      ["args"]=>
-      array(1) {
-        [0]=>
-        float(0)
-      }
     }
   }
 }

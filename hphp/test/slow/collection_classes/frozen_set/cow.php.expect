@@ -11,43 +11,43 @@ object(HH\ImmSet)#4 (3) {
   int(3)
 }
 ------ addAll -------
-object(HH\Set)#3 (4) {
+object(HH\Set)#4 (4) {
   int(1)
   int(2)
   int(3)
   int(42)
 }
-object(HH\ImmSet)#4 (3) {
+object(HH\ImmSet)#5 (3) {
   int(1)
   int(2)
   int(3)
 }
 ------ addAllKeysOf -------
-object(HH\Set)#3 (4) {
+object(HH\Set)#5 (4) {
   int(1)
   int(2)
   int(3)
   int(42)
 }
-object(HH\ImmSet)#4 (3) {
+object(HH\ImmSet)#6 (3) {
   int(1)
   int(2)
   int(3)
 }
 ------ clear -------
-object(HH\Set)#3 (0) {
+object(HH\Set)#6 (0) {
 }
-object(HH\ImmSet)#4 (3) {
+object(HH\ImmSet)#7 (3) {
   int(1)
   int(2)
   int(3)
 }
 ------ remove -------
-object(HH\Set)#3 (2) {
+object(HH\Set)#7 (2) {
   int(2)
   int(3)
 }
-object(HH\ImmSet)#4 (3) {
+object(HH\ImmSet)#8 (3) {
   int(1)
   int(2)
   int(3)

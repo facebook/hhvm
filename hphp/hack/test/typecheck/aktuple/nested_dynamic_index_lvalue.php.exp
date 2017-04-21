@@ -1,4 +1,5 @@
-[1]intersect(array<[2]intersect(Tstring, Tint)>)
+File "nested_dynamic_index_lvalue.php", line 11, characters 3-16:
+  ^(array<^(string | int)>)
 File "nested_dynamic_index_lvalue.php", line 12, characters 15-22:
 Invalid argument (Typing[4110])
 File "nested_dynamic_index_lvalue.php", line 15, characters 22-27:

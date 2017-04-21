@@ -1,7 +1,11 @@
-X
-X
-X
-X
+File "asyncgen4.php", line 14, characters 5-15:
+  _
+File "asyncgen4.php", line 15, characters 5-15:
+  _
+File "asyncgen4.php", line 14, characters 5-15:[2]
+  _
+File "asyncgen4.php", line 15, characters 5-15:[2]
+  _
 File "asyncgen4.php", line 9, characters 3-7:
 Invalid yield (Typing[4110])
 File "asyncgen4.php", line 7, characters 21-29:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,16 +157,6 @@ void Construct::serialize(JSON::CodeError::OutputStream &out) const {
   ls.done();
 }
 
-void Construct::printSource(CodeGenerator &cg) {
-  if (auto scope = getFileScope()) {
-    cg_printf("/* SRC: %s line %d */\n", scope->getName().c_str(), m_r.line0);
-  }
-}
-
-void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
-  dumpNode(spc);
-}
-
 void Construct::dumpNode(int spc) const {
   // evil, but helpful!
   const_cast<Construct*>(this)->dumpNode(spc);
@@ -174,11 +164,11 @@ void Construct::dumpNode(int spc) const {
 
 void Construct::dumpNode(int spc) {
   int nkid = getKidCount();
-  const char *name = 0;
+  const char* name = nullptr;
   int type = 0;
-  std::string scontext = "";
-  std::string value = "";
-  std::string type_info = "";
+  std::string scontext;
+  std::string value;
+  std::string type_info;
   int ef = 0;
 
   if (isStatement()) {
@@ -197,7 +187,7 @@ void Construct::dumpNode(int spc) {
     name = Expression::nameOfKind(etype);
     switch (etype) {
       case Expression::KindOfSimpleFunctionCall:
-        value = static_cast<SimpleFunctionCall*>(e)->getOriginalName();
+        value = static_cast<SimpleFunctionCall*>(e)->getFullName();
         break;
       case Expression::KindOfSimpleVariable:
         value = static_cast<SimpleVariable*>(e)->getName();

@@ -19,11 +19,13 @@ interface IMemoizeParam {
  *
  * The map has the form:
  *
+ * ```
  *  array('class'    => array('cls' => 'cls_file.php', ...),
  *        'function' => array('fun' => 'fun_file.php', ...),
  *        'constant' => array('con' => 'con_file.php', ...),
  *        'type'     => array('type' => 'type_file.php', ...),
  *        'failure'  => callable);
+ * ```
  *
  *  If the 'failure' element exists, it will be called if the
  *  lookup in the map fails, or the file cant be included. It
@@ -62,7 +64,7 @@ function serialize_memoize_param(mixed $param): arraykey;
  * Attach metadata to the caller's stack frame. The metadata can be retrieved
  * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
  */
-<<__Native>>
+<<__Native("WritesCallerFrame")>>
 function set_frame_metadata(mixed $metadata): void;
 
 }

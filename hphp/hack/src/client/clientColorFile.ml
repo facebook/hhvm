@@ -9,7 +9,7 @@
  *)
 
 open Core
-open Coverage_level
+open Ide_api_types
 
 module C = Tty
 
@@ -32,18 +32,6 @@ let replace_color input =
 let replace_colors input =
   List.map input replace_color
 
-let to_json input =
-  let entries = List.map input begin fun (clr, text) ->
-    let color_string = match clr with
-      | Some lvl -> string_of_level lvl
-      | None -> "default"
-    in Hh_json.JSON_Object [
-      "color", Hh_json.JSON_String color_string;
-      "text",  Hh_json.JSON_String text;
-    ]
-  end in
-  Hh_json.JSON_Array entries
-
 (*****************************************************************************)
 (* The entry point. *)
 (*****************************************************************************)
@@ -55,7 +43,11 @@ let go file_input output_json pos_level_l =
   in
   let results = ColorFile.go str pos_level_l in
   if output_json then
-    print_endline (Hh_json.json_to_string (to_json results))
+    let open Ide_message in
+    let response = Coverage_levels_response
+      (Deprecated_text_span_coverage_levels_response results)
+    in
+    Nuclide_rpc_message_printer.print_json ~response
   else if Unix.isatty Unix.stdout
-  then C.print (replace_colors results)
+  then C.cprint (replace_colors results)
   else print_endline str

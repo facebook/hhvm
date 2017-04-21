@@ -1,2 +1,3 @@
-[1]intersect(App \Foo<>, App \IFoo<>)
+File "local_inference.php", line 20, characters 3-15:
+  ^(Foo | IFoo)
 No errors

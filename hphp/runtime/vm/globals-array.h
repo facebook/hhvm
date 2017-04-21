@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,9 +16,10 @@
 #ifndef incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 #define incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 
-#include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/member-lval.h"
+#include "hphp/runtime/vm/name-value-table.h"
 
 namespace HPHP {
 
@@ -52,7 +53,7 @@ namespace HPHP {
  * to outlast the lifetime of the GlobalsArray.  (The wrapper is
  * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
-struct GlobalsArray : ArrayData {
+struct GlobalsArray final : ArrayData, type_scan::MarkCountable<GlobalsArray> {
   explicit GlobalsArray(NameValueTable* tab);
   ~GlobalsArray() {}
 
@@ -68,19 +69,23 @@ public:
     return const_cast<ArrayData*>(ad);
   }
   static size_t Vsize(const ArrayData*);
-  static void NvGetKey(const ArrayData* ad, TypedValue* out, ssize_t pos);
+  static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
   static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
   static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static constexpr auto NvTryGetInt = &NvGetInt;
   static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static constexpr auto NvTryGetStr = &NvGetStr;
 
-  static ArrayData* LvalInt(ArrayData*, int64_t k, Variant*& ret, bool copy);
-  static ArrayData* LvalStr(ArrayData*, StringData* k, Variant*& ret,
-                            bool copy);
-  static ArrayData* LvalNew(ArrayData*, Variant*& ret, bool copy);
+  static member_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static constexpr auto LvalIntRef = &LvalInt;
+  static member_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static constexpr auto LvalStrRef = &LvalStr;
+  static member_lval LvalNew(ArrayData*, bool copy);
+  static constexpr auto LvalNewRef = &LvalNew;
 
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
@@ -92,13 +97,13 @@ public:
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 
-  static ArrayData* Append(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
   static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
 
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
-  static ArrayData* Prepend(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
   static ArrayData* CopyWithStrongIterators(const ArrayData*);
 
   static ssize_t IterBegin(const ArrayData*);
@@ -128,13 +133,20 @@ public:
     return const_cast<ArrayData*>(ad);
   }
 
+  static ArrayData* ToPHPArray(ArrayData* ad, bool) {
+    return ad;
+  }
+  static constexpr auto ToVec = &ArrayCommon::ToVec;
+  static constexpr auto ToDict = &ArrayCommon::ToDict;
+  static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+
 private:
   static GlobalsArray* asGlobals(ArrayData* ad);
   static const GlobalsArray* asGlobals(const ArrayData* ad);
 
 public:
-  template<class F> void scan(F& mark) const {
-    mark(m_tab);
+  void scan(type_scan::Scanner& scanner) const {
+    scanner.scan(m_tab);
   }
 
 private:
@@ -142,6 +154,11 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Gets our request-local global variables array.
+ */
+GlobalsArray* get_global_variables();
 
 }
 

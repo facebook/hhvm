@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -36,8 +36,7 @@ namespace HPHP {
  * That binding can be done in a dynamic shared object.
  */
 
-class SystemProfiler {
-public:
+struct SystemProfiler {
   SystemProfiler() { }
   virtual ~SystemProfiler() { }
 
@@ -53,7 +52,9 @@ public:
   virtual void fileLoadCallBack(const std::string &name) = 0;
 
   /*
-   * Called once to get the hotprofiler.
+   * Called once to get the hotprofiler. The profiler should have
+   * been allocated with req::make_raw<T>; ProfilerFactory will
+   * destroy it with req::destroy_raw().
    */
   virtual Profiler *getHotProfiler() = 0;
 };

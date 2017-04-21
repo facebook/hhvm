@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,7 @@ namespace HPHP {
  * A temporary read/write file system file for php://temp, it will be deleted
  * from the file system on close.
  */
-class TempFile : public PlainFile {
-public:
+struct TempFile : PlainFile {
   DECLARE_RESOURCE_ALLOCATION(TempFile);
 
   explicit TempFile(bool autoDelete = true,
@@ -47,11 +46,16 @@ public:
       "Temporary stream does not support awaiting");
   }
 
+  bool seek(int64_t offset, int whence = SEEK_SET) override;
+  bool truncate(int64_t size) override;
+  int64_t tell() override;
+
 private:
   bool m_autoDelete;
   std::string m_rawName;
 
   bool closeImpl();
+  int64_t getLength();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

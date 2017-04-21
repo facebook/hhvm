@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,12 +27,10 @@ namespace Verifier {
 /**
  * Fixed-sized, arena-based bitset class (size determined on allocation)
  */
-class Bits {
-  static const int BPW = 8 * sizeof(uintptr_t); // bits per word
- public:
+struct Bits {
   Bits(Arena& arena, int bit_cap);
   ~Bits() { /* words was arena-allocated */ }
- public:
+
   void set(int i) {
     word(i) |= mask(i);
   }
@@ -40,10 +38,14 @@ class Bits {
   bool get(int i) {
     return (word(i) & mask(i)) != 0;
   }
- private:
+
+private:
+  static const int BPW = 8 * sizeof(uintptr_t); // bits per word
+
   uintptr_t& word(int i) { return m_words[i / BPW]; }
   static uintptr_t mask(int i) { return uintptr_t(1) << (i % BPW); }
- private:
+
+private:
   uintptr_t* m_words;
 };
 

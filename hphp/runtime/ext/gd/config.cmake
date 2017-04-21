@@ -3,7 +3,6 @@ HHVM_DEFINE_EXTENSION("gd"
   SOURCES
     ext_gd.cpp
     libgd/gd_arc.cpp
-    libgd/gd_arc_f_buggy.cpp
     libgd/gdcache.cpp
     libgd/gd_color.cpp
     libgd/gd.cpp
@@ -53,8 +52,6 @@ HHVM_DEFINE_EXTENSION("gd"
     libgd/gdfonts.h
     libgd/gdfontt.h
     libgd/jisx0208.h
-    libgd/php.h
-    libgd/php_compat.h
     libgd/wbmp.h
     libgd/webpimg.h
   SYSTEMLIB

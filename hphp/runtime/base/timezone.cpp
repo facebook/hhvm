@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,6 +27,7 @@
 
 #include "hphp/util/functional.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/lock.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -34,10 +35,8 @@ namespace HPHP {
 IMPLEMENT_RESOURCE_ALLOCATION(TimeZone)
 ///////////////////////////////////////////////////////////////////////////////
 
-class GuessedTimeZone {
-public:
+struct GuessedTimeZone {
   std::string m_tzid;
-  std::string m_warning;
 
   GuessedTimeZone() {
     time_t the_time = time(0);
@@ -55,32 +54,16 @@ public:
       tzid = "UTC";
     }
     m_tzid = tzid;
-
-#define DATE_TZ_ERRMSG \
-  "It is not safe to rely on the system's timezone settings. Please use " \
-  "the date.timezone setting, the TZ environment variable or the " \
-  "date_default_timezone_set() function. In case you used any of those " \
-  "methods and you are still getting this warning, you most likely " \
-  "misspelled the timezone identifier. "
-
-    string_printf(m_warning, DATE_TZ_ERRMSG
-                  "We selected '%s' for '%s/%.1f/%s' instead", tzid,
-#ifdef _MSC_VER
-                  "Unknown", 0,
-#else
-                  ta ? ta->tm_zone : "Unknown",
-                  ta ? (float) (ta->tm_gmtoff / 3600) : 0,
-#endif
-                  ta ? (ta->tm_isdst ? "DST" : "no DST") : "Unknown");
   }
 };
 static GuessedTimeZone s_guessed_timezone;
+static Mutex s_tzdb_mutex;
+static std::atomic<const timelib_tzdb*> s_tzdb_cache { nullptr };
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-class TimeZoneData {
-public:
+struct TimeZoneData {
   TimeZoneData() : Database(nullptr) {}
 
   const timelib_tzdb *Database;
@@ -112,10 +95,25 @@ void timezone_init() {
   s_tzvCache = TimeZoneValidityCache::create(kMaxTimeZoneCache).release();
 }
 
+const timelib_tzdb* (*timezone_raw_get_tzdb)() = timelib_builtin_db;
+
+const timelib_tzdb* timezone_get_tzdb() {
+  if (s_tzdb_cache.load() == nullptr) {
+    Lock tzdbLock(s_tzdb_mutex);
+    if (s_tzdb_cache.load() == nullptr) {
+      s_tzdb_cache = (*timezone_raw_get_tzdb)();
+    }
+  }
+  if (s_tzdb_cache == nullptr) {
+    raise_error("Couldn't load tzdata");
+  }
+  return s_tzdb_cache;
+}
+
 const timelib_tzdb *TimeZone::GetDatabase() {
   const timelib_tzdb *&Database = s_timezone_data->Database;
   if (Database == nullptr) {
-    Database = timelib_builtin_db();
+    Database = timezone_get_tzdb();
   }
   return Database;
 }
@@ -168,8 +166,6 @@ String TimeZone::CurrentName() {
     return String(env, CopyString);
   }
 
-  /* Try to guess timezone from system information */
-  raise_strict_warning(s_guessed_timezone.m_warning);
   return String(s_guessed_timezone.m_tzid);
 }
 
@@ -297,14 +293,7 @@ Array TimeZone::transitions(int64_t timestamp_begin, /* = k_PHP_INT_MIN */
   Array ret;
   if (m_tzi) {
     uint32_t timecnt;
-#ifdef FACEBOOK
-    // Internal builds embed tzdata into HHVM by keeping timelib updated
     timecnt = m_tzi->bit32.timecnt;
-#else
-    // OSS builds read tzdata from the system location (eg /usr/share/zoneinfo)
-    // as this format must be stable, we're keeping timelib stable too
-    timecnt = m_tzi->timecnt;
-#endif
     uint32_t lastBefore = 0;
     for (uint32_t i = 0;
          i < timecnt && m_tzi->trans && m_tzi->trans[i] <= timestamp_begin;

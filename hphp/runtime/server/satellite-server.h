@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 
 #include "hphp/util/hdf.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/server/transport.h"
 
 #include <chrono>
 
@@ -27,13 +28,11 @@ namespace HPHP {
 
 struct SatelliteServerInfo;
 
-class SatelliteServer {
-public:
+struct SatelliteServer {
   enum class Type {
     Unknown,
 
     KindOfInternalPageServer,  // handles restricted URLs
-    KindOfDanglingPageServer,  // handles old version requests during shutdown
     KindOfRPCServer,           // invokes one PHP function and returns JSON
     KindOfXboxServer,          // handles internal xbox tasks
   };
@@ -59,14 +58,12 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-class SatelliteServerInfo {
-public:
+struct SatelliteServerInfo {
   /**
    * These are regular expressions of URLs that are not allowed on main server.
    * These are collected from all internal page servers.
    */
   static std::set<std::string> InternalURLs;
-  static int DanglingServerPort;
 
   /**
    * Check whether a requested path should be allowed on the main server.
@@ -77,10 +74,11 @@ public:
   SatelliteServerInfo(const IniSetting::Map& ini, const Hdf& hdf,
                       const std::string& ini_key = "");
 
-  const std::string &getName() const { return m_name;}
-  SatelliteServer::Type getType() const { return m_type;}
-  int getPort() const { return m_port;}
-  int getThreadCount() const { return m_threadCount;}
+  const std::string &getName() const { return m_name; }
+  SatelliteServer::Type getType() const { return m_type; }
+  int getPort() const { return m_port; }
+  std::string getServerIP() const { return m_serverIP; }
+  int getThreadCount() const { return m_threadCount; }
 
   // for all libevent servers
   std::chrono::seconds getTimeoutSeconds() const { return m_timeoutSeconds;}
@@ -97,6 +95,7 @@ public:
   const std::set<std::string> &getPasswords() const { return m_passwords;}
   bool alwaysReset() const { return m_alwaysReset;}
   const std::set<std::string> &getFunctions() const { return m_functions; }
+  Transport::Method getMethod() const { return m_method;}
 
 protected:
   std::string m_name;
@@ -105,6 +104,7 @@ protected:
   int m_threadCount = 5;
   int m_maxRequest = 500;
   int m_maxDuration = 120;
+  std::string m_serverIP;
   std::chrono::seconds m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;
@@ -113,6 +113,7 @@ protected:
   std::set<std::string> m_passwords;
   bool m_alwaysReset = false;
   std::set<std::string> m_functions;
+  Transport::Method m_method;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

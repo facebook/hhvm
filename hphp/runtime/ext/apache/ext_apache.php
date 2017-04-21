@@ -15,7 +15,7 @@ namespace {
  */
 <<__Native>>
 function apache_note(string $note_name,
-                     string $note_value = ""): mixed;
+                     ?string $note_value = ""): mixed;
 
 /**
  * Fetch all HTTP request headers

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,6 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
@@ -35,10 +34,10 @@ Block* create_catch_block(IRGS& env) {
   BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
   auto const& exnState = env.irb->exceptionStackState();
-  env.irb->fs().setSyncedSpLevel(exnState.syncedSpLevel);
+  env.irb->fs().setBCSPOff(exnState.syncedSpLevel);
 
   gen(env, BeginCatch);
-  gen(env, EndCatch, IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) },
+  gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
       fp(env), sp(env));
   return catchBlock;
 }
@@ -58,8 +57,10 @@ void check_catch_stack_state(IRGS& env, const IRInstruction* inst) {
 
 uint64_t curProfCount(const IRGS& env) {
   auto tid = env.profTransID;
+  assertx(tid == kInvalidTransID ||
+          (env.region != nullptr && profData() != nullptr));
   return env.profFactor *
-         (tid != kInvalidTransID ? mcg->tx().profData()->transCounter(tid) : 1);
+         (tid != kInvalidTransID ? env.region->blockProfCount(tid) : 1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -86,9 +87,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
   }
 
   if (inst->mayRaiseError() && !inst->taken()) {
-    FTRACE(1, "{}: creating {}catch block\n",
-           inst->toString(),
-           env.catchCreator ? "custom " : "");
+    FTRACE(1, "{}: creating catch block\n", inst->toString());
     /*
      * If you hit this assertion, you're gen'ing an IR instruction that can
      * throw after gen'ing one that could write to the evaluation stack.  This
@@ -97,9 +96,7 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      * information.
      */
     check_catch_stack_state(env, inst);
-    inst->setTaken(
-      env.catchCreator ? env.catchCreator() : create_catch_block(env)
-    );
+    inst->setTaken(create_catch_block(env));
   }
 
   if (inst->mayRaiseError()) {
@@ -112,14 +109,12 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////
 
-void incTransCounter(IRGS& env) { gen(env, IncTransCounter); }
-
 void incProfCounter(IRGS& env, TransID transId) {
   gen(env, IncProfCounter, TransIDData(transId));
 }
 
 void checkCold(IRGS& env, TransID transId) {
-  gen(env, CheckCold, makeExitOpt(env, transId), TransIDData(transId));
+  gen(env, CheckCold, makeExitOpt(env), TransIDData(transId));
 }
 
 void ringbufferEntry(IRGS& env, Trace::RingBufferType t, SrcKey sk, int level) {
@@ -141,7 +136,7 @@ void prepareEntry(IRGS& env) {
    * C++ function that checks the state of everything.
    */
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const data = IRSPOffsetData { offsetFromIRSP(env, BCSPOffset{0}) };
+    auto const data = IRSPRelOffsetData { spOffBCFromIRSP(env) };
     gen(env, DbgTraceCall, data, fp(env), sp(env));
   }
 
@@ -170,8 +165,8 @@ void endRegion(IRGS& env, SrcKey nextSk) {
   }
   auto const data = ReqBindJmpData {
     nextSk,
-    invSPOff(env),
-    offsetFromIRSP(env, BCSPOffset{0}),
+    spOffBCFromFP(env),
+    spOffBCFromIRSP(env),
     TransFlags{}
   };
   gen(env, ReqBindJmp, data, sp(env), fp(env));
@@ -181,74 +176,46 @@ void sealUnit(IRGS& env) {
   mandatoryDCE(env.unit);
 }
 
-Type predictedTypeFromLocal(const IRGS& env, uint32_t locId) {
-  return env.irb->predictedLocalType(locId);
+///////////////////////////////////////////////////////////////////////////////
+
+Type publicTopType(const IRGS& env, BCSPRelOffset idx) {
+  // It's logically const, because we're using DataTypeGeneric.
+  return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
-Type predictedTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  return env.irb->predictedStackType(offsetFromIRSP(env, offset));
-}
+Type predictedType(const IRGS& env, const Location& loc) {
+  auto& fs = env.irb->fs();
 
-// All accesses to the stack and locals in this function use DataTypeGeneric so
-// this function should only be used for inspecting state; when the values are
-// actually used they must be constrained further.
-Type predictedTypeFromLocation(const IRGS& env, const Location& loc) {
-  switch (loc.space) {
-    case Location::Stack:
-      return predictedTypeFromStack(env, loc.bcRelOffset);
-    case Location::Local:
-      return predictedTypeFromLocal(env, loc.offset);
-    case Location::Litstr:
-      return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
-    case Location::Litint:
-      return Type::cns(loc.offset);
-    case Location::This:
-      // Don't specialize $this for cloned closures which may have been re-bound
-      if (curFunc(env)->hasForeignThis()) return TObj;
-      if (auto const cls = curFunc(env)->cls()) {
-        return Type::SubObj(cls);
-      }
-      return TObj;
-
-    case Location::Iter:
-    case Location::Invalid:
-      break;
+  switch (loc.tag()) {
+    case LTag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).predictedType;
+    case LTag::Local:
+      return fs.local(loc.localId()).predictedType;
+    case LTag::MBase:
+      return fs.mbase().predictedType;
+    case LTag::CSlot:
+      return fs.clsRefSlot(loc.clsRefSlot()).predictedType;
   }
   not_reached();
 }
 
-Type provenTypeFromLocal(const IRGS& env, uint32_t locId) {
-  return env.irb->localType(locId, DataTypeGeneric);
-}
+Type provenType(const IRGS& env, const Location& loc) {
+  auto& fs = env.irb->fs();
 
-Type provenTypeFromStack(const IRGS& env, BCSPOffset offset) {
-  return env.irb->stackType(offsetFromIRSP(env, offset), DataTypeGeneric);
-}
-
-Type provenTypeFromLocation(const IRGS& env, const Location& loc) {
-  switch (loc.space) {
-  case Location::Stack:
-    return provenTypeFromStack(env, loc.bcRelOffset);
-  case Location::Local:
-    return provenTypeFromLocal(env, loc.offset);
-  case Location::Litstr:
-    return Type::cns(curUnit(env)->lookupLitstrId(loc.offset));
-  case Location::Litint:
-    return Type::cns(loc.offset);
-  case Location::This:
-    // Don't specialize $this for cloned closures which may have been re-bound
-    if (curFunc(env)->hasForeignThis()) return TObj;
-    if (auto const cls = curFunc(env)->cls()) {
-      return Type::SubObj(cls);
-    }
-    return TObj;
-
-  case Location::Iter:
-  case Location::Invalid:
-    break;
+  switch (loc.tag()) {
+    case LTag::Stack:
+      return fs.stack(offsetFromIRSP(env, loc.stackIdx())).type;
+    case LTag::Local:
+      return fs.local(loc.localId()).type;
+    case LTag::MBase:
+      return fs.mbase().type;
+    case LTag::CSlot:
+      return fs.clsRefSlot(loc.clsRefSlot()).type;
   }
   not_reached();
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 void endBlock(IRGS& env, Offset next) {
   if (!fp(env)) {
@@ -292,24 +259,12 @@ void prepareForNextHHBC(IRGS& env,
   env.bcStateStack.back().setOffset(newSk.offset());
   updateMarker(env);
   env.lastBcInst = lastBcInst;
-  env.catchCreator = nullptr;
   env.irb->exceptionStackBoundary();
+  env.irb->resetCurIROff();
 }
 
 void finishHHBC(IRGS& env) {
   env.firstBcInst = false;
-}
-
-FPInvOffset logicalStackDepth(const IRGS& env) {
-  // Negate the offsetFromIRSP because it is an offset from the actual StkPtr
-  // (so negative values go deeper on the stack), but this function deals with
-  // logical stack depths (where more positive values are deeper).
-  return env.irb->spOffset() - offsetFromIRSP(env, BCSPOffset{0});
-}
-
-Type publicTopType(const IRGS& env, BCSPOffset idx) {
-  // It's logically const, because we're using DataTypeGeneric.
-  return topType(const_cast<IRGS&>(env), idx, DataTypeGeneric);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1,0 +1,7 @@
+In gen
+string(3) "bar"
+Finished in gen
+array(1) {
+  [0]=>
+  int(42)
+}

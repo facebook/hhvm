@@ -10,11 +10,12 @@
  */
 
 class X<T> {
-  public function foo(T $x): T { return $x; }
+  public function foo(T $x): T {
+    return $x;
+  }
 }
 
-function use_with_ints((function(X<int>, int): int) $caller): void {
-}
+function use_with_ints((function(X<int>, int): int) $caller): void {}
 
 function test(): (function(X<bool>, bool): bool) {
   $caller = meth_caller('X', 'foo');

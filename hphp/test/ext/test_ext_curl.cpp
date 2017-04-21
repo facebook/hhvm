@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,16 +32,15 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class TestCurlRequestHandler : public RequestHandler {
-public:
+struct TestCurlRequestHandler final : RequestHandler {
   explicit TestCurlRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
+  void handleRequest(Transport *transport) override {
     g_context.getCheck();
     transport->addHeader("ECHOED", transport->getHeader("ECHO").c_str());
 
     if (transport->getMethod() == Transport::Method::POST) {
-      int len = 0;
+      size_t len = 0;
       const void *data = transport->getPostData(len);
       String res = "POST: ";
       res += String((char*)data, len, CopyString);
@@ -51,7 +50,7 @@ public:
     }
     hphp_memory_cleanup();
   }
-  virtual void abortRequest(Transport *transport) {
+  void abortRequest(Transport *transport) override {
     transport->sendString("Aborted");
   }
 };
@@ -190,7 +189,7 @@ bool TestExtCurl::test_curl_exec() {
                          "curl_write_func");
     HHVM_FN(ob_start)();
     HHVM_FN(curl_exec)(c.toResource());
-    String res = HHVM_FN(ob_get_contents)();
+    auto const res = HHVM_FN(ob_get_contents)().toString();
     VS(res, "curl_write_func called with OK");
     HHVM_FN(ob_end_clean)();
   }

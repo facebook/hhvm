@@ -42,6 +42,15 @@ Break at foo() on line 41 of %s/flow2.php
   42   }
 
 next
+Break at foo() on line 39 of %s/flow2.php
+  38   $i = 0;
+  39*  foreach (genFoo($a) as $x) {
+  40*    $i++;
+  41*    var_dump($x);
+  42*  }
+  43 
+
+next
 Break at foo() on line 40 of %s/flow2.php
   39   foreach (genFoo($a) as $x) {
   40*    $i++;
@@ -52,6 +61,15 @@ Break at foo() on line 41 of %s/flow2.php
   40     $i++;
   41*    var_dump($x);
   42   }
+
+next
+Break at foo() on line 39 of %s/flow2.php
+  38   $i = 0;
+  39*  foreach (genFoo($a) as $x) {
+  40*    $i++;
+  41*    var_dump($x);
+  42*  }
+  43 
 
 next
 Finished in genFoo

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -30,7 +29,7 @@
 
 #include "hphp/runtime/ext/debugger/ext_debugger.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/extension-registry.h"
@@ -41,6 +40,7 @@
 #include "hphp/runtime/vm/native-prop-handler.h"
 
 #include <functional>
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace HPHP {
 
@@ -111,14 +111,11 @@ const StaticString
   s_type_hint_nullable("type_hint_nullable");
 
 Class* get_cls(const Variant& class_or_object) {
-  Class* cls = nullptr;
   if (class_or_object.is(KindOfObject)) {
-    ObjectData* obj = class_or_object.toCObjRef().get();
-    cls = obj->getVMClass();
-  } else {
-    cls = Unit::loadClass(class_or_object.toString().get());
+    return class_or_object.toCObjRef()->getVMClass();
   }
-  return cls;
+
+  return Unit::loadClass(class_or_object.toString().get());
 }
 
 const Func* get_method_func(const Class* cls, const String& meth_name) {
@@ -153,7 +150,8 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
       // We use cls() instead of implCls() because we want the namespace and
       // class context for which the closure is scoped, not that of the Closure
       // subclass (which, among other things, is always globally namespaced).
-      func->cls() ? func->cls()->nameStr() : func->nameStr()
+      func->cls() ? func->cls()->nameStr() : func->nameStr(),
+      func->unit()
     );
   }
 }
@@ -361,16 +359,59 @@ Variant HHVM_FUNCTION(hphp_invoke, const String& name, const Variant& params) {
   return invoke(name.data(), params);
 }
 
-Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj, const String& cls,
-                                          const String& name, const Variant& params) {
+static const StaticString s_invoke_not_instanceof_error(
+  "Given object is not an instance of the class this method was declared in"
+);
+
+static const StaticString s_invoke_non_object(
+  "Non-object passed to Invoke()"
+);
+
+Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
+                                          const String& cls,
+                                          const String& name,
+                                          const Variant& params) {
   if (obj.isNull()) {
     return invoke_static_method(cls, name, params);
   }
-  ObjectData *o = obj.toObject().get();
-  return o->o_invoke(name, params);
+
+  if (!obj.is(KindOfObject)) {
+    Reflection::ThrowReflectionExceptionObject(s_invoke_non_object);
+  }
+
+  auto const providedClass = Unit::loadClass(cls.get());
+  if (!providedClass) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+  auto const selectedFunc = providedClass->lookupMethod(name.get());
+  if (!selectedFunc) {
+    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+  }
+
+  auto const objData = obj.toCObjRef().get();
+  auto const implementingClass = selectedFunc->implCls();
+  if (!objData->instanceof(implementingClass)) {
+    Reflection::ThrowReflectionExceptionObject(s_invoke_not_instanceof_error);
+  }
+
+  // Get the CallCtx this way instead of using vm_decode_function() because
+  // vm_decode_function() has no way to specify a class independent from the
+  // class::function being called.
+  // Note that this breaks the rules for name lookup (for protected and private)
+  // but that's okay because so does Zend's implementation.
+  CallCtx ctx;
+  ctx.cls = providedClass;
+  ctx.this_ = objData;
+  ctx.invName = nullptr;
+  ctx.func = selectedFunc;
+
+  return Variant::attach(
+    g_context->invokeFunc(ctx, params)
+  );
 }
 
-Object HHVM_FUNCTION(hphp_create_object, const String& name, const Variant& params) {
+Object HHVM_FUNCTION(hphp_create_object, const String& name,
+                     const Variant& params) {
   return Object::attach(g_context->createObject(name.get(), params));
 }
 
@@ -397,6 +438,65 @@ void HHVM_FUNCTION(hphp_set_property, const Object& obj, const String& cls,
       "You can't change accessibility in Whole Program mode"
     );
   }
+
+  /*
+   * This interface can be used to clear memo caches, but we don't want to allow
+   * setting the memo cache values to arbitrary values. HHBBC and the JIT make
+   * aggressive assumptions about the layout and values of the caches to improve
+   * performance. So, if the property being set is a memo cache, we'll allow
+   * resetting it to an empty value, but nothing else.
+   *
+   * Furthermore, existing PHP code assumes that the memo cache stores arrays,
+   * not dicts, so for backwards compatibility, we'll allow null or any empty
+   * array-like value to mean clear.
+   */
+  auto const isMultiMemo = prop.slice().endsWith("$multi$memoize_cache");
+  auto const isSingleMemo = prop.slice().endsWith("$single$memoize_cache");
+  auto const isGuardedSingleMemo =
+    prop.slice().endsWith("$guarded_single$memoize_cache");
+  auto const isGuard =
+    prop.slice().endsWith("$guarded_single$memoize_cache$guard");
+
+  if (isGuard) {
+    // Allow setting the guard to false only. Clear out the associated cache at
+    // the same time.
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfBoolean || tv->m_data.num) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    obj->o_set(prop, false_varNR, cls);
+    obj->o_set(
+      prop.slice().subpiece(0, prop.length() - 6),
+      init_null_variant,
+      cls
+    );
+    return;
+  }
+
+  if (isMultiMemo || isSingleMemo || isGuardedSingleMemo) {
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfNull &&
+        (!isArrayLikeType(tv->m_type) || tv->m_data.parr->size() != 0)) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    // Reset to empty value. Depending on the type of the memo cache, this might
+    // be null or an empty dict.
+    if (isMultiMemo) {
+      obj->o_set(
+        prop,
+        cellAsCVarRef(make_tv<KindOfPersistentDict>(staticEmptyDictArray())),
+        cls
+      );
+    } else if (isSingleMemo || isGuardedSingleMemo) {
+      obj->o_set(prop, init_null_variant, cls);
+      if (isGuardedSingleMemo) {
+        // If there's a guard, reset it to false as well.
+        obj->o_set(folly::sformat("{}$guard", prop), false_varNR, cls);
+      }
+    }
+    return;
+  }
+
   obj->o_set(prop, value, cls);
 }
 
@@ -452,6 +552,74 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
     raise_error("Invalid access to class %s's property %s",
                 sd->data(), prop.get()->data());
   }
+
+  /*
+   * Like in hphp_set_property(), this interface can be used to clear memo
+   * caches, but we don't want to allow setting the memo cache values to
+   * arbitrary values. HHBBC and the JIT make aggressive assumptions about the
+   * layout and values of the caches to improve performance. So, if the property
+   * being set is a memo cache, we'll allow resetting it to an empty value, but
+   * nothing else.
+   *
+   * Furthermore, existing PHP code assumes that the memo cache stores arrays,
+   * not dicts, so for backwards compatibility, we'll allow null or any empty
+   * array-like value to mean clear.
+   */
+  auto const isMultiMemo = prop.slice().endsWith("$multi$memoize_cache");
+  auto const isSingleMemo = prop.slice().endsWith("$single$memoize_cache");
+  auto const isGuardedSingleMemo =
+    prop.slice().endsWith("$guarded_single$memoize_cache");
+  auto const isGuard =
+    prop.slice().endsWith("$guarded_single$memoize_cache$guard");
+
+  if (isGuard) {
+    // Allow setting the guard to false only. Clear out the associated cache at
+    // the same time.
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfBoolean || tv->m_data.num) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    cellSet(make_tv<KindOfBoolean>(false), *lookup.prop);
+
+    auto const cacheLookup = class_->getSProp(
+      force ? class_ : arGetContextClass(vmfp()),
+      String{prop.slice().subpiece(0, prop.length() - 6)}.get()
+    );
+    if (cacheLookup.prop) {
+      cellSet(make_tv<KindOfNull>(), *cacheLookup.prop);
+    }
+    return;
+  }
+
+  if (isMultiMemo || isSingleMemo || isGuardedSingleMemo) {
+    auto const tv = value.asTypedValue();
+    if (tv->m_type != KindOfNull &&
+        (!isArrayLikeType(tv->m_type) || tv->m_data.parr->size() != 0)) {
+      raise_error("Reflection can only reset memoize caches");
+    }
+    // Reset to empty value. Depending on the type of the memo cache, this might
+    // be null or an empty dict.
+    if (isMultiMemo) {
+      cellSet(
+        make_tv<KindOfPersistentDict>(staticEmptyDictArray()),
+        *lookup.prop
+      );
+    } else if (isSingleMemo || isGuardedSingleMemo) {
+      cellSet(make_tv<KindOfNull>(), *lookup.prop);
+      if (isGuardedSingleMemo) {
+        // If there's a guard, reset it to false as well.
+        auto const guardLookup = class_->getSProp(
+          force ? class_ : arGetContextClass(vmfp()),
+          String{folly::sformat("{}$guard", prop)}.get()
+        );
+        if (guardLookup.prop) {
+          cellSet(make_tv<KindOfBoolean>(false), *guardLookup.prop);
+        }
+      }
+    }
+    return;
+  }
+
   tvAsVariant(lookup.prop) = value;
 }
 
@@ -469,12 +637,8 @@ Array HHVM_FUNCTION(type_structure,
   if (!cns_sd) {
     auto name = cls_or_obj.toString();
 
-    auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
-    if (!ne) {
-      raise_error("Non-existent type alias %s", name.get()->data());
-    }
+    auto const typeAlias = Unit::loadTypeAlias(name.get());
 
-    auto const typeAlias = ne->getCachedTypeAlias();
     if (!typeAlias) {
       raise_error("Non-existent type alias %s", name.get()->data());
     }
@@ -483,7 +647,8 @@ Array HHVM_FUNCTION(type_structure,
     assert(!typeStructure.empty());
     Array resolved;
     try {
-      resolved = TypeStructure::resolve(name, typeStructure);
+      bool persistent = true;
+      resolved = TypeStructure::resolve(name, typeStructure, persistent);
     } catch (Exception& e) {
       raise_error("resolving type alias %s failed. "
                   "Have you declared all classes in the type alias",
@@ -496,10 +661,7 @@ Array HHVM_FUNCTION(type_structure,
   auto const cls = get_cls(cls_or_obj);
 
   if (!cls) {
-    // an object must have an associated class
-    assert(!cls_or_obj.is(KindOfObject));
-    auto const cls_sd = cls_or_obj.toString().get();
-    raise_error("Non-existent class %s", cls_sd->data());
+    raise_error("Non-existent class %s", cls_or_obj.toString().get()->data());
   }
 
   auto const cls_sd = cls->name();
@@ -514,7 +676,7 @@ Array HHVM_FUNCTION(type_structure,
     }
   }
 
-  assert(typeCns.m_type == KindOfArray);
+  assert(isArrayLikeType(typeCns.m_type));
   assert(typeCns.m_data.parr->isStatic());
   return Array::attach(typeCns.m_data.parr);
 }
@@ -525,15 +687,15 @@ String HHVM_FUNCTION(hphp_get_original_class_name, const String& name) {
   return cls->nameStr();
 }
 
-Object Reflection::AllocReflectionExceptionObject(const Variant& message) {
+[[noreturn]]
+void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
-  TypedValue ret;
-  g_context->invokeFunc(&ret,
-                        s_ReflectionExceptionClass->getCtor(),
-                        make_packed_array(message),
-                        inst.get());
-  tvRefcountedDecRef(&ret);
-  return inst;
+  tvRefcountedDecRef(
+    g_context->invokeFunc(s_ReflectionExceptionClass->getCtor(),
+                          make_packed_array(message),
+                          inst.get())
+  );
+  throw_object(inst);
 }
 
 
@@ -596,13 +758,13 @@ static Array get_function_static_variables(const Func* func) {
 
   for (size_t i = 0; i < staticVars.size(); ++i) {
     const Func::SVInfo &sv = staticVars[i];
-    auto const refData = rds::bindStaticLocal(func, sv.name);
+    auto const staticLocalData = rds::bindStaticLocal(func, sv.name);
     // FIXME: this should not require variant hops
     ai.setUnknownKey(
       VarNR(sv.name),
-      refData->isUninitializedInRDS()
-        ? null_variant
-        : tvAsCVarRef(refData.get()->tv())
+      staticLocalData.isInit()
+        ? tvAsCVarRef(staticLocalData.get()->ref.tv())
+        : uninit_variant
     );
   }
   return ai.toArray();
@@ -684,11 +846,20 @@ static Array get_function_param_info(const Func* func) {
     if (
       fpi.typeConstraint.isCallable() ||
       (fpi.typeConstraint.underlyingDataType() &&
-       fpi.typeConstraint.underlyingDataType() != KindOfClass &&
        fpi.typeConstraint.underlyingDataType() != KindOfObject
       )
     ) {
       param.set(s_type_hint_builtin, true_varNR);
+      // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
+      // the types to come back as PHP 7 style scalar types, not HH\ style
+      // scalar types.
+      if (!(func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax) &&
+          RuntimeOption::PHP7_ScalarTypes &&
+          boost::starts_with(typeHint->toCppString(), "HH\\")) {
+        String no_hh_type_hint(typeHint->toCppString());
+        no_hh_type_hint = no_hh_type_hint.substr(3);
+        param.set(s_type_hint, no_hh_type_hint);
+      }
     } else {
       param.set(s_type_hint_builtin, false_varNR);
     }
@@ -711,30 +882,6 @@ static Array get_function_param_info(const Func* func) {
       Variant v = default_arg_from_php_code(fpi, func);
       param.set(s_default, v);
       param.set(s_defaultText, VarNR(fpi.phpCode));
-    } else if (auto mi = func->methInfo()) {
-      auto p = mi->parameters[i];
-      auto defText = p->valueText;
-      auto defTextLen = p->valueTextLen;
-      if (defText == nullptr) {
-        defText = "";
-        defTextLen = 0;
-      }
-      if (p->value && *p->value) {
-        if (*p->value == '\x01') {
-          Variant v;
-          if (resolveDefaultParameterConstant(defText, defTextLen, v)) {
-            param.set(s_default, v);
-          } else {
-            auto obj = SystemLib::AllocStdClassObject();
-            obj->o_set(s_msg, String("Unknown unserializable default value: ")
-                       + defText);
-            param.set(s_default, std::move(obj));
-          }
-        } else {
-          param.set(s_default, unserialize_from_string(p->value));
-        }
-        param.set(s_defaultText, defText);
-      }
     }
 
     if (func->byRef(i)) {
@@ -800,11 +947,18 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     if (
       retType.isCallable() || // callable type hint is considered builtin
       (retType.underlyingDataType() &&
-       retType.underlyingDataType() != KindOfClass && // stdclass is not
        retType.underlyingDataType() != KindOfObject
       )
     ) {
       retTypeInfo.set(s_type_hint_builtin, true_varNR);
+      // If we are in <?php and in PHP 7 mode w.r.t. scalar types, then we want
+      // the types to come back as PHP 7 style scalar types, not HH\ style
+      // scalar types.
+      if (!(func->unit()->isHHFile() || RuntimeOption::EnableHipHopSyntax) &&
+          RuntimeOption::PHP7_ScalarTypes &&
+          boost::starts_with(name.toCppString(), "HH\\")) {
+          name = name.substr(3);
+      }
     } else {
       retTypeInfo.set(s_type_hint_builtin, false_varNR);
     }
@@ -823,7 +977,7 @@ static Array get_function_user_attributes(const Func* func) {
 
   ArrayInit ai(userAttrs.size(), ArrayInit::Mixed{});
   for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(String(StrNR(it->first)).toKey(), tvAsCVarRef(&it->second));
+    ai.set(VarNR::MakeKey(String(StrNR(it->first))), tvAsCVarRef(&it->second));
   }
   return ai.toArray();
 }
@@ -948,23 +1102,30 @@ static bool HHVM_METHOD(ReflectionFunction, __initClosure,
   return true;
 }
 
+const StaticString s_ExpectedClosureInstance("Expected closure instance");
+
 // helper for getClosureScopeClass
-static String HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
-                          const Object& closure) {
-  auto clos = unsafe_cast<c_Closure>(closure);
-  if (clos->getScope()) {
-    return String(const_cast<StringData*>(clos->getScope()->name()));
+static Variant HHVM_METHOD(ReflectionFunction, getClosureScopeClassname,
+                           const Object& closure) {
+  if (!closure->instanceof(c_Closure::classof())) {
+    SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
   }
-  return String();
+  if (auto scope = c_Closure::fromObject(closure.get())->getScope()) {
+    return String(const_cast<StringData*>(scope->name()));
+  }
+  return init_null_variant;
 }
 
-static Object HHVM_METHOD(ReflectionFunction, getClosureThisObject,
-                          const Object& closure) {
-  auto clos = unsafe_cast<c_Closure>(closure);
+static Variant HHVM_METHOD(ReflectionFunction, getClosureThisObject,
+                           const Object& closure) {
+  if (!closure->instanceof(c_Closure::classof())) {
+    SystemLib::throwExceptionObject(s_ExpectedClosureInstance);
+  }
+  auto const clos = c_Closure::fromObject(closure.get());
   if (clos->hasThis()) {
     return Object{clos->getThis()};
   }
-  return Object{};
+  return init_null_variant;
 }
 
 // helper for getStaticVariables
@@ -1214,7 +1375,7 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
 
   // At each step, we fetch from the PreClass is important because the
   // order in which getMethods returns matters
-  StringISet visitedMethods;
+  req::StringISet visitedMethods;
   auto st = req::make<c_Set>();
   st->reserve(cls->numMethods());
 
@@ -1231,13 +1392,13 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
   std::function<void(const Class*)> collect;
   std::function<void(const Class*)> collectInterface;
 
-  collect = [&] (const Class* cls) {
-    if (!cls) return;
+  collect = [&] (const Class* clas) {
+    if (!clas) return;
 
-    auto const methods = cls->preClass()->methods();
-    auto const numMethods = cls->preClass()->numMethods();
+    auto const methods = clas->preClass()->methods();
+    auto const numMethods = clas->preClass()->numMethods();
 
-    auto numDeclMethods = cls->preClass()->numDeclMethods();
+    auto numDeclMethods = clas->preClass()->numDeclMethods();
     if (numDeclMethods == -1) numDeclMethods = numMethods;
 
     // Add declared methods.
@@ -1246,15 +1407,15 @@ static Object HHVM_METHOD(ReflectionClass, getMethodOrder, int64_t filter) {
     }
 
     // Recurse; we need to order the parent's methods before our trait methods.
-    collect(cls->parent());
+    collect(clas->parent());
 
     for (Slot i = numDeclMethods; i < numMethods; ++i) {
       // For repo mode, where trait methods are flattened at compile-time.
       add(methods[i]);
     }
-    for (Slot i = cls->traitsBeginIdx(); i < cls->traitsEndIdx(); ++i) {
+    for (Slot i = clas->traitsBeginIdx(); i < clas->traitsEndIdx(); ++i) {
       // For non-repo mode, where they are added at Class-creation time.
-      add(cls->getMethod(i));
+      add(clas->getMethod(i));
     }
   };
 
@@ -1379,7 +1540,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedAbstractConstants) {
   }
 
   assert(st->size() <= numConsts);
-  return st->t_toarray();
+  return st->toArray();
 }
 
 
@@ -1404,7 +1565,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
   }
 
   assert(st->size() <= numConsts);
-  return st->t_toarray();
+  return st->toArray();
 }
 
 static Array HHVM_METHOD(ReflectionClass, getAttributes) {
@@ -1534,21 +1695,21 @@ static String HHVM_METHOD(ReflectionClass, getConstructorName) {
 }
 
 void ReflectionClassHandle::wakeup(const Variant& content, ObjectData* obj) {
-    if (!content.isString()) {
-      throw Exception("Native data of ReflectionClass should be a class name");
-    }
+  if (!content.isString()) {
+    throw Exception("Native data of ReflectionClass should be a class name");
+  }
 
-    String clsName = content.toString();
-    String result = init(clsName);
-    if (result.empty()) {
-      auto msg = folly::format("Class {} does not exist", clsName).str();
-      throw Reflection::AllocReflectionExceptionObject(String(msg));
-    }
+  String clsName = content.toString();
+  String result = init(clsName);
+  if (result.empty()) {
+    auto msg = folly::format("Class {} does not exist", clsName).str();
+    Reflection::ThrowReflectionExceptionObject(String(msg));
+  }
 
-    // It is possible that $name does not get serialized. If a class derives
-    // from ReflectionClass and the return value of its __sleep() function does
-    // not contain 'name', $name gets ignored. So, we restore $name here.
-    obj->o_set(s_name, result);
+  // It is possible that $name does not get serialized. If a class derives
+  // from ReflectionClass and the return value of its __sleep() function does
+  // not contain 'name', $name gets ignored. So, we restore $name here.
+  obj->o_set(s_name, result);
 }
 
 static Variant reflection_extension_name_get(const Object& this_) {
@@ -1622,7 +1783,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     return String(cns->val.m_data.pstr);
   }
 
-  if (cns->val.m_type == KindOfArray) {
+  if (isArrayLikeType(cns->val.m_type)) {
     auto const cls = cns->cls;
     // go to the preclass to find the unresolved TypeStructure to get
     // the original assigned type text
@@ -1630,7 +1791,7 @@ static String HHVM_METHOD(ReflectionTypeConstant, getAssignedTypeHint) {
     auto typeCns = preCls->lookupConstant(cns->name);
     assert(typeCns->isType());
     assert(!typeCns->isAbstract());
-    assert(typeCns->val().m_type == KindOfArray);
+    assert(isArrayLikeType(typeCns->val().m_type));
     return TypeStructure::toString(Array::attach(typeCns->val().m_data.parr));
   }
 
@@ -1757,10 +1918,8 @@ const StaticString s_ReflectionTypeAliasHandle("ReflectionTypeAliasHandle");
 // helper for __construct:
 // caller throws exception when return value is false
 static bool HHVM_METHOD(ReflectionTypeAlias, __init, const String& name) {
-  auto ne = NamedEntity::get(name.get(), /* allowCreate = */ false);
-  if (!ne) return false;
+  auto const typeAliasReq = Unit::loadTypeAlias(name.get());
 
-  auto const typeAliasReq = ne->getCachedTypeAlias();
   if (!typeAliasReq) return false;
 
   ReflectionTypeAliasHandle::Get(this_)->setTypeAliasReq(typeAliasReq);
@@ -1796,8 +1955,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class ReflectionExtension final : public Extension {
- public:
+struct ReflectionExtension final : Extension {
   ReflectionExtension() : Extension("reflection", "$Id$") { }
   void moduleInit() override {
     HHVM_FE(hphp_create_object);

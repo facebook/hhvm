@@ -1,0 +1,2 @@
+<?hh
+<< bYguyz ( ) >> interface bBho < zTbeF as ( eZ , dDKgeqYJx < jJSHwtrQE , nVgkPyO < ? array < xIa < qTR , vRs , cP , ? bEqtKHdb :: zRa > > , ( function ( bool , int ) : mixed ) > > ) , - lO as uDKbz > { require extends eWSoBP ; }

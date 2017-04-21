@@ -393,8 +393,8 @@ let hackify ~upgrade header file =
      | _ -> 
        pr2 (spf "no open tag, skipping %s" file);
        None
-  with Parse_php.Parse_error _ ->
-    pr2 (spf "Parse error: %s" file);
+  with Parse_php.Parse_error info ->
+    pr2 (spf "Parse error: %s" (PI.error_message_info info));
     None
 
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,6 @@
 #define incl_HPHP_VM_FUNC_EMITTER_H_
 
 #include "hphp/runtime/base/attr.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -50,8 +49,7 @@ struct EHEntEmitter {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  std::vector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
 
   template<class SerDe> void serde(SerDe& sd);
 };
@@ -107,7 +105,7 @@ struct FuncEmitter {
   /*
    * Commit this function to a repo.
    */
-  void commit(RepoTxn& txn) const;
+  void commit(RepoTxn& txn) const; // throws(RepoExc)
 
   /*
    * Instantiate a runtime Func*.
@@ -147,12 +145,14 @@ struct FuncEmitter {
   Id numLocals() const;
   Id numIterators() const;
   Id numLiveIterators() const;
+  Id numClsRefSlots() const;
 
   /*
    * Set things.
    */
   void setNumIterators(Id numIterators);
   void setNumLiveIterators(Id id);
+  void setNumClsRefSlots(Id num);
 
   /*
    * Check existence of, look up, and allocate named locals.
@@ -217,6 +217,7 @@ public:
   bool isPseudoMain() const;
   bool isMethod() const;
   bool isVariadic() const;
+  bool isVariadicByRef() const;
 
   /*
    * @returns: std::make_pair(line1, line2)
@@ -227,8 +228,6 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   // Complex setters.
   //
-  // XXX: Some of these should be moved to the emitter (esp. the
-  // setBuiltinFunc() methods).
 
   /*
    * Shorthand for setting `line1' and `line2' because typing is hard.
@@ -244,17 +243,9 @@ public:
   int parseNativeAttributes(Attr& attrs_) const;
 
   /*
-   * Pull fields for builtin functions out of a MethodInfo object.
-   */
-  void setBuiltinFunc(const ClassInfo::MethodInfo* info,
-                      BuiltinFunction bif, BuiltinFunction nif,
-                      Offset base_);
-
-  /*
    * Set some fields for builtin functions.
    */
-  void setBuiltinFunc(BuiltinFunction bif, BuiltinFunction nif,
-                      Attr attrs_, Offset base_);
+  void setBuiltinFunc(Attr attrs_, Offset base_);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -286,29 +277,35 @@ public:
   SVInfoVec staticVars;
   int maxStackCells;
 
-  MaybeDataType returnType;
+  MaybeDataType hniReturnType;
   TypeConstraint retTypeConstraint;
   LowStringPtr retUserType;
 
   EHEntVec ehtab;
   FPIEntVec fpitab;
 
-  bool isClosureBody;
-  bool isAsync;
-  bool isGenerator;
-  bool isPairGenerator;
-  bool isMemoizeImpl;
-  bool isMemoizeWrapper;
-  bool hasMemoizeSharedProp;
-  bool containsCalls;
+  bool isClosureBody{false};
+  bool isAsync{false};
+  bool isGenerator{false};
+  bool isPairGenerator{false};
+  bool isMemoizeImpl{false};
+  bool isMemoizeWrapper{false};
+  bool hasMemoizeSharedProp{false};
+  bool containsCalls{false};
+  bool isNative{false};
 
   LowStringPtr docComment;
   LowStringPtr originalFilename;
 
   UserAttributeMap userAttributes;
 
-  StringData *memoizePropName;
+  StringData* memoizePropName;
+  StringData* memoizeGuardPropName;
   int memoizeSharedPropIndex;
+  RepoAuthType repoReturnType;
+  RepoAuthType repoAwaitedReturnType;
+
+  Id dynCallWrapperId{kInvalidId};
 
 private:
   /*
@@ -320,11 +317,7 @@ private:
   int m_activeUnnamedLocals;
   Id m_numIterators;
   Id m_nextFreeIterator;
-
-  const ClassInfo::MethodInfo* m_info;
-  BuiltinFunction m_builtinFuncPtr;
-  BuiltinFunction m_nativeFuncPtr;
-
+  Id m_numClsRefSlots;
   bool m_ehTabSorted;
 };
 
@@ -334,23 +327,23 @@ private:
  * Proxy for converting in-repo function representations into FuncEmitters.
  */
 struct FuncRepoProxy : public RepoProxy {
-  friend class Func;
-  friend class FuncEmitter;
+  friend struct Func;
+  friend struct FuncEmitter;
 
   explicit FuncRepoProxy(Repo& repo);
   ~FuncRepoProxy();
-  void createSchema(int repoId, RepoTxn& txn);
+  void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
 
   struct InsertFuncStmt : public RepoProxy::Stmt {
     InsertFuncStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(const FuncEmitter& fe,
                 RepoTxn& txn, int64_t unitSn, int funcSn, Id preClassId,
-                const StringData* name, bool top);
+                const StringData* name, bool top); // throws(RepoExc)
   };
 
   struct GetFuncsStmt : public RepoProxy::Stmt {
     GetFuncsStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void get(UnitEmitter& ue);
+    void get(UnitEmitter& ue); // throws(RepoExc)
   };
 
   InsertFuncStmt insertFunc[RepoIdCount];

@@ -68,6 +68,9 @@ type t =
   | Rtconst_no_cstr  of Nast.sid
   | Rused_as_map     of Pos.t
   | Rused_as_shape   of Pos.t
+  | Rpredicated      of Pos.t * string
+  | Rinstanceof      of Pos.t * string
+  | Rfinal_property  of Pos.t
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -88,7 +91,8 @@ let rec to_string prefix r =
       [(p, prefix)] @
       [(if r2 = Rnone then p else to_pos r2),
         "This can only be indexed with integers"]
-  | Ridx_vector      _ -> [(p, prefix ^ ". Only int can be used to index into a Vector.")]
+  | Ridx_vector      _ -> [(p, prefix ^
+    " because only int can be used to index into a Vector or vec.")]
   | Rappend          _ -> [(p, prefix ^ " because a value is appended to it")]
   | Rfield           _ -> [(p, prefix ^ " because one of its field is accessed")]
   | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]
@@ -183,6 +187,12 @@ let rec to_string prefix r =
   | Rused_as_map _ -> [(p, prefix ^ " because it is used as map here")]
   | Rused_as_shape _ ->
       [(p, prefix ^ " because it is used as shape-like array here")]
+  | Rpredicated (p, f) ->
+      [(p, prefix ^ " from the argument to this "^ f ^" test")]
+  | Rinstanceof (p,s) ->
+      [(p, prefix ^ " from this instanceof test matching " ^ s)]
+  | Rfinal_property _ ->
+      [(p, prefix ^ " because properties cannot be declared final")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -238,6 +248,9 @@ and to_pos = function
   | Rtconst_no_cstr (p, _) -> p
   | Rused_as_map p -> p
   | Rused_as_shape p -> p
+  | Rpredicated (p, _) -> p
+  | Rinstanceof (p, _) -> p
+  | Rfinal_property p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -281,15 +294,9 @@ type ureason =
   | URif
   | URawait
   | URyield
-  | URxhp
-  | URarray_get
-  | URmap_get
-  | URvector_get
-  | URconst_vector_get
-  | URimm_vector_get
-  | URcontainer_get
-  | URtuple_get
-  | URpair_get
+  (* Name of XHP class, Name of XHP attribute *)
+  | URxhp of string * string
+  | URindex of string
   | URparam
   | URarray_value
   | URarray_key
@@ -298,12 +305,16 @@ type ureason =
   | URdynamic_yield
   | URnewtype_cstr
   | URclass_req
-  | URclass_req_merge
   | URenum
   | URenum_cstr
   | URtypeconst_cstr
   | URsubsume_tconst_cstr
   | URsubsume_tconst_assign
+  | URfinal_property
+
+let index_array = URindex "array"
+let index_tuple = URindex "tuple"
+let index_class s =  URindex (strip_ns s)
 
 let string_of_ureason = function
   | URnone -> "Typing error"
@@ -319,15 +330,9 @@ let string_of_ureason = function
   | URif -> "The two branches of ? must have the same type"
   | URawait -> "await can only operate on an Awaitable"
   | URyield -> "Invalid yield"
-  | URxhp -> "Invalid xhp value"
-  | URarray_get -> "Invalid index type for this array"
-  | URmap_get -> "Invalid index type for this Map"
-  | URvector_get -> "Invalid index type for this Vector"
-  | URconst_vector_get -> "Invalid index type for this ConstVector"
-  | URimm_vector_get -> "Invalid index type for this ImmVector"
-  | URcontainer_get -> "Invalid index type for this container"
-  | URtuple_get -> "Invalid index for this tuple"
-  | URpair_get -> "Invalid index for this pair"
+  | URxhp (cls, attr) ->
+      "Invalid xhp value for attribute " ^ attr ^ " in " ^ (strip_ns cls)
+  | URindex s -> "Invalid index type for this " ^ s
   | URparam -> "Invalid argument"
   | URarray_value -> "Incompatible field values"
   | URarray_key -> "Incompatible array keys"
@@ -340,7 +345,6 @@ let string_of_ureason = function
   | URnewtype_cstr ->
       "Invalid constraint on newtype"
   | URclass_req -> "Unable to satisfy trait/interface requirement"
-  | URclass_req_merge -> "Incompatible trait/interface requirements"
   | URenum ->
       "Constant does not match the type of the enum it is in"
   | URenum_cstr ->
@@ -351,6 +355,8 @@ let string_of_ureason = function
      "The constraint on this type constant is inconsistent with its parent"
   | URsubsume_tconst_assign ->
      "The assigned type of this type constant is inconsistent with its parent"
+  | URfinal_property ->
+      "Property cannot be declared final"
 
 let compare r1 r2 =
   let get_pri = function

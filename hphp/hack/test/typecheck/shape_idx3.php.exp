@@ -1,7 +1,11 @@
-[1]intersect(Tarraykey, Tint)
-[2]intersect(Tint, Tarraykey)
-[3]intersect(Tint, Tarraykey)
-[4]intersect(Tarraykey, Tint)
+File "shape_idx3.php", line 14, characters 3-28:
+  ^(arraykey | int)
+File "shape_idx3.php", line 15, characters 3-28:
+  ^(int | arraykey)
+File "shape_idx3.php", line 16, characters 3-36:
+  ^(int | arraykey)
+File "shape_idx3.php", line 17, characters 3-36:
+  ^(arraykey | int)
 File "shape_idx3.php", line 21, characters 10-34:
 Invalid return type (Typing[4110])
 File "shape_idx3.php", line 13, characters 4-6:

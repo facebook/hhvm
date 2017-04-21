@@ -80,32 +80,32 @@
   RetC
 }
 
-.function [mayusevv] foo(<"@Foo" "Foo" hh_type extended_hint soft > $x) {
+.function foo(<"@Foo" "Foo" hh_type extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] bar(<"@Bar" "Bar" hh_type extended_hint soft > $x) {
+.function bar(<"@Bar" "Bar" hh_type extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] baz(<"@Baz" "Baz" hh_type extended_hint soft > $x) {
+.function baz(<"@Baz" "Baz" hh_type extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
-.function [mayusevv] quux(<"@Quux" "Quux" hh_type extended_hint soft > $x) {
+.function quux(<"@Quux" "Quux" hh_type extended_hint soft > $x) {
   VerifyParamType $x
   Null
   RetC
 }
 
 .class C {
-  .method [public mayusevv] 86ctor() {
+  .method [public] 86ctor() {
     Null
     RetC
   }

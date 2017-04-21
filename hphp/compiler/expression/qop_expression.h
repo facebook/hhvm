@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(QOpExpression);
 
-class QOpExpression : public Expression {
-public:
+struct QOpExpression : Expression {
   QOpExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                 ExpressionPtr condition, ExpressionPtr expYes,
                 ExpressionPtr expNo);
@@ -34,7 +33,6 @@ public:
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
   int getLocalEffects() const override { return NoEffect; }
 
-  ExpressionPtr unneededHelper() override;
   ExpressionPtr getCondition() const { return m_condition; }
   ExpressionPtr getYes() const { return m_expYes; }
   ExpressionPtr getNo() const { return m_expNo; }

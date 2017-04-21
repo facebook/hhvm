@@ -1,8 +1,7 @@
 File "interface2.php", line 10, characters 11-11:
-This object is of type I (Typing[4110])
+Class I does not correctly implement all required methods  (Typing[4110])
 File "interface2.php", line 10, characters 25-26:
-It is incompatible with this object of type I2
-because some declarations are incompatible.
+Some methods are incompatible with those declared in type I2
 Read the following to see why:
 File "interface2.php", line 4, characters 23-23:
 The constraint on this type constant is inconsistent with its parent

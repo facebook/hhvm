@@ -13,7 +13,7 @@
  *
  * @return bool -
  */
-<<__Native("ActRec")>>
+<<__Native("ActRec", "ReadsCallerFrame")>>
 function wddx_add_vars(resource $packet_id, ...): bool;
 
 /**
@@ -214,5 +214,5 @@ function wddx_serialize_value(mixed $var,
  *
  * @return string - Returns the WDDX packet, or FALSE on error.
  */
-<<__Native("ActRec")>>
+<<__Native("ActRec", "ReadsCallerFrame")>>
 function wddx_serialize_vars(...): string;

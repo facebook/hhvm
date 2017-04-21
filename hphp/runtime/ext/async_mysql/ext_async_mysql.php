@@ -36,7 +36,7 @@
  * for asynchronous connection(s) to a MySQL database.
  *
  * @guide /hack/async/extensions
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  */
 final class AsyncMysqlClient {
 
@@ -101,6 +101,71 @@ final class AsyncMysqlClient {
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
+   * Begin an async connection to a MySQL instance.
+   *
+   * Use this to asynchronously connect to a MySQL instance.
+   *
+   * Normally you would use this to make one asynchronous connection to the
+   * MySQL client.
+   *
+   * If you want to be able to pool up a bunch of connections, you would call
+   * `setPoolsConnectionLimit()`, create a default pool of connections with
+   * `AsyncMysqlConnectionPool()::__construct()`, which now
+   * has that limit set, and then call `AsyncMysqlConnectionPool()::connect()`.
+   *
+   * @param $host - The hostname to connect to.
+   * @param $port - The port to connect to.
+   * @param $dbname - The initial database to use when connecting.
+   * @param $user - The user to connect as.
+   * @param $password - The password to connect with.
+   * @param $connection_options - A set of options used for connection.
+   *
+   * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
+   * or `join` this result to obtain the actual connection.
+   */
+  <<__HipHopSpecific, __Native>>
+  public static function connectWithOpts(string $host,
+                                        int $port,
+                                        string $dbname,
+                                        string $user,
+                                        string $password,
+                                        AsyncMysqlConnectionOptions $conn_opts,
+                                        ): Awaitable<AsyncMysqlConnection>;
+
+  /**
+   * Begin an async connection and query  to a MySQL instance.
+   *
+   * Use this to asynchronously connect and query a MySQL instance.
+   *
+   * Normally you would use this to make one query to the
+   * MySQL client.
+   *
+   * If you want to be able to reuse the connection use connect or
+   * connectWithOpts
+   *
+   * @param $host - The hostname to connect to.
+   * @param $port - The port to connect to.
+   * @param $dbname - The initial database to use when connecting.
+   * @param $user - The user to connect as.
+   * @param $password - The password to connect with.
+   * @param $connection_options - A set of options used for connection.
+   *
+   * @return - an `Awaitable` representing the result of your query. Use
+   *           `await` or `join` to get the actual `AsyncMysqlQueryResult`
+   *           object.
+   */
+  <<__HipHopSpecific, __Native>>
+    public static function connectAndQuery(
+                                        array $queries,
+                                        string $host,
+                                        int $port,
+                                        string $dbname,
+                                        string $user,
+                                        string $password,
+                                        AsyncMysqlConnectionOptions $conn_opts,
+                                      ): Awaitable<Vector<AsyncMysqlQueryResult>>;
+
+  /**
    * Create a new async connection from a synchronous MySQL instance.
    *
    * This is a synchronous function. You will block until the connection has
@@ -108,8 +173,8 @@ final class AsyncMysqlClient {
    * the async `AsyncMysqlConnection` methods like `queryf()`, etc.
    *
    * This is a tricky function to use and we are actually thinking of
-   * deprecating it. This function *requrires* a deprecated, MySQL resource.
-   * Once this resource is adpoted by a call to this function, it is no longer
+   * deprecating it. This function *requires* a deprecated, MySQL resource.
+   * Once this resource is adopted by a call to this function, it is no longer
    * valid in the context on which it was being used.
    *
    * If you are using this function, you might consider just creating a
@@ -139,7 +204,7 @@ final class AsyncMysqlClient {
  * you nearly the flexibility. In fact, there is discussion about deprecating
  * the `AsyncMysqlClient` class all together.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlConnectionPool")>>
@@ -165,12 +230,12 @@ class AsyncMysqlConnectionPool {
    *                            `AsyncMysqlClient::setPoolsConnectionLimit()`.
    * - `idle_timeout_micros`: The maximum amount of time, in microseconds, that
    *                          a connection is allowed to sit idle in the pool
-   *                          becore being destroyed. The default is 4 seconds.
+   *                          before being destroyed. The default is 4 seconds.
    * - `age_timeout_micros`: The maximum age, in microseconds, that a connection
    *                         in the pool will be allowed to reach before being
    *                         destroyed. The default is 60 seconds.
    * - `expiration_policy`: A `string` of either `'IdleTime'` or `'Age'" that
-   *                        specifies whehter connections in the pool will be
+   *                        specifies whether connections in the pool will be
    *                        destroyed based on how long it sits idle or total
    *                        age in the pool. The default is `'Age'`.
    *
@@ -229,6 +294,16 @@ class AsyncMysqlConnectionPool {
                           int $timeout_micros = -1,
                           string $extra_key = ""
                          ): Awaitable<AsyncMysqlConnection>;
+
+  <<__HipHopSpecific, __Native>>
+  public function connectWithOpts(string $host,
+                          int $port,
+                          string $dbname,
+                          string $user,
+                          string $password,
+                          AsyncMysqlConnectionOptions $conn_options,
+                          string $extra_key = "",
+                         ): Awaitable<AsyncMysqlConnection>;
 }
 
 /**
@@ -239,7 +314,7 @@ class AsyncMysqlConnectionPool {
  * actual do real work with the MySQL database, with the primary work being
  * querying the database itself.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlConnection")>>
@@ -251,13 +326,16 @@ final class AsyncMysqlConnection {
   }
 
   /**
-   * Begin running a query on the MySQL database client.
+   * Begin running an unsafe query on the MySQL database client.
    *
    * If you have a direct query that requires no placeholders, then you can
    * use this method. It takes a raw string query that will be executed as-is.
    *
    * You may want to call `escapeString()` to ensure that any queries out of
    * your direct control are safe.
+   *
+   * We strongly recommend using `queryf()` instead in all cases, which
+   * automatically escapes parameters.
    *
    * @param $query - The query itself.
    * @param $timeout_micros - The maximum time, in microseconds, in which the
@@ -295,7 +373,13 @@ final class AsyncMysqlConnection {
    *  - `%Q`   raw SQL query. The typechecker intentionally does not recognize
    *           this, however, you can use it in combination with // UNSAFE
    *           if absolutely required. Use this at your own risk as it could
-   *           open you up for SQL injuection.
+   *           open you up for SQL injection.
+   *  - `%Lx`  where `x` is one of `T`, `C`, `s`, `d`, or `f`, represents a list
+   *           of table names, column names, nullable strings, integers or
+   *           floats, respectively. Pass a `Vector` of values to have it
+   *           expanded into a comma-separated list. Parentheses are not
+   *           added automatically around the placeholder in the query string,
+   *           so be sure to add them if necessary.
    *
    * With the exception of `%Q`, any strings provided will be properly
    * escaped.
@@ -322,13 +406,17 @@ final class AsyncMysqlConnection {
    * `join` on the returned `Awaitable`, you will get a `Vector` of
    * `AsyncMysqlQueryResult`, one result for each query.
    *
+   * We strongly recommend using multiple calls to `queryf()` instead as it
+   * escapes parameters; multiple queries can be executed simultaneously by
+   * combining `queryf()` with `HH\Asio\v()`.
+   *
    * @param $queries - A `Vector` of queries, with each query being a `string`
    *                    in the array.
    * @param $timeout_micros - The maximum time, in microseconds, in which the
    *                          query must be completed; -1 for default, 0 for
    *                          no timeout.
    *
-   * @return - an `Awaitable` representing the result of your mutli-query. Use
+   * @return - an `Awaitable` representing the result of your multi-query. Use
    *           `await` or `join` to get the actual `Vector` of
    *           `AsyncMysqlQueryResult` objects.
    */
@@ -338,10 +426,14 @@ final class AsyncMysqlConnection {
     int $timeout_micros = -1): Awaitable<Vector<AsyncMysqlQueryResult>>;
 
   /**
-   * Escape a string to be safe to include in a query.
+   * Escape a string to be safe to include in a raw query.
    *
    * Use this method to ensure your query is safe from, for example, SQL
-   * injection.
+   * injection if you are not using an API that automatically escapes
+   * queries.
+   *
+   * We strongly recommend using `queryf()` instead, which automatically
+   * escapes string parameters.
    *
    * This method is equivalent to PHP's
    * [mysql_real_escape_string()](http://goo.gl/bnxqtE).
@@ -365,12 +457,24 @@ final class AsyncMysqlConnection {
    * This method will destroy the current `AsyncMysqlConnection` object and give
    * you back a vanilla, synchronous MySQL resource.
    *
-   * @return - A `resouce` respresenting a
+   * @return - A `resource` representing a
    *           [MySQL](http://php.net/manual/en/book.mysql.php) resource, or
    *           `false` on failure.
    */
   <<__HipHopSpecific, __Native>>
   function releaseConnection(): mixed;
+
+  /**
+   * Checks if the data inside `AsyncMysqlConnection` object is valid. For
+   * example, during a timeout in a query, the MySQL connection gets closed.
+   *
+   * @return - `true` if MySQL resource is valid and can be accessed;
+   *           `false` otherwise.
+   */
+  <<__HipHopSpecific, __Native>>
+  function isValid(): bool;
+
+
 
   /**
    * The MySQL server version associated with the current connection.
@@ -379,6 +483,29 @@ final class AsyncMysqlConnection {
    */
   <<__HipHopSpecific, __Native>>
   function serverInfo(): string;
+
+  /**
+   * Returns whether or not the current connection reused the SSL session
+   * from another SSL connection. The session is set by MySSLContextProvider.
+   * Some cases, the server can deny the session that was set and the handshake
+   * will create a new one, in those cases this function will return `false`.
+   * If this connections isn't SSL, `false` will be returned as well.
+   *
+   * @return - `true` if this is a SSL connection and the SSL session was
+   *           reused; `false` otherwise.
+   */
+  <<__HipHopSpecific, __Native>>
+  function sslSessionReused(): bool;
+
+
+  /**
+   * Returns whether or not the current connection was established as SSL based
+   * on client flag exchanged during handshake.
+   *
+   * @return - `true` if this is a SSL connection; `false` otherwise
+   */
+  <<__HipHopSpecific, __Native>>
+  function isSSL(): bool;
 
   /**
    * The number of errors, warnings, and notes returned during execution of
@@ -408,7 +535,7 @@ final class AsyncMysqlConnection {
   /**
    * Sets if the current connection can be recycled without any clean up.
    *
-   * By default, the current connection *is* resuable.
+   * By default, the current connection *is* reusable.
    *
    * If a connection in a `AsyncMysqlConnectionPool` is used, but you call
    * `setReusable(false)`, then you will have to create a whole new connection
@@ -466,7 +593,7 @@ final class AsyncMysqlConnection {
  *
  * The SSL context data isn't accessible by PHP; it is for internal use only.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("MySSLContextProvider")>>
@@ -474,7 +601,7 @@ class MySSLContextProvider {
   /**
    * @internal
    */
-  private function __contruct(): void {
+  private function __construct(): void {
     throw new InvalidOperationException(
       __CLASS__ . " objects cannot be directly created");
   }
@@ -488,6 +615,44 @@ class MySSLContextProvider {
   public function isValid(): bool;
 }
 
+/**
+ * This class holds the Connection Options that MySQL client will use to
+ * establish a connection.
+ *
+ * The `AsyncMysqlConnectionOptions` will be passed to
+ * `AsyncMysqlClient::connectWithOpts()`.
+ *
+ * @guide /hack/async/introduction
+ * @guide /hack/async/extensions
+ */
+<<__NativeData("AsyncMysqlConnectionOptions")>>
+class AsyncMysqlConnectionOptions {
+
+  // Sets the Connect Timeout for each connection attempt
+  <<__HipHopSpecific, __Native>>
+  public function setConnectTimeout(int $timeout): void;
+
+  // Sets the number of attempts this operation will retry connecting
+  <<__HipHopSpecific, __Native>>
+  public function setConnectAttempts(int $attempts): void;
+
+  // Sets the total timeout that the connect will use
+  <<__HipHopSpecific, __Native>>
+  public function setTotalTimeout(int $timeout): void;
+
+  // Sets the maximum time for a running query
+  <<__HipHopSpecific, __Native>>
+  public function setQueryTimeout(int $timeout): void;
+
+  // Sets a map of connection attributes that will be sent to Mysql in the
+  // Connection Attributes Handshake field
+  <<__HipHopSpecific, __Native>>
+  public function setConnectionAttributes(array<string,string> $attrs): void;
+
+  // SSL Configuration if SSL is to be used for connection
+  <<__HipHopSpecific, __Native>>
+  public function setSSLOptionsProvider(?MySSLContextProvider $ssl_opts): void;
+}
 /**
  * Provides timing statistics about the MySQL client.
  *
@@ -507,7 +672,7 @@ class MySSLContextProvider {
  * these type of statistics by calling its `clientStats()` method and a method
  * on this class.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlClientStats")>>
@@ -546,11 +711,44 @@ class AsyncMysqlClientStats {
    *
    * This returns an exponentially-smoothed average.
    *
-   * @return - A `float` representing the average callback dealy on this
+   * @return - A `float` representing the average callback delay on this
    *           MySQL client.
    */
   <<__HipHopSpecific, __Native>>
   function callbackDelayMicrosAvg() : float;
+
+  /**
+   * Average of reported busy time in the client's IO thread.
+   *
+   * This returns an exponentially-smoothed average.
+   *
+   * @return - A `float` representing the average busy time of this
+   *           MySQL client's IO Thread.
+   */
+  <<__HipHopSpecific, __Native>>
+  function ioThreadBusyMicrosAvg() : float;
+
+  /**
+   * Average of reported idle time in the client's IO thread.
+   *
+   * This returns an exponentially-smoothed average.
+   *
+   * @return - A `float` representing the average busy time of this
+   *           MySQL client's IO Thread.
+   */
+  <<__HipHopSpecific, __Native>>
+  function ioThreadIdleMicrosAvg() : float;
+
+  /**
+   * Size of this client's event base notification queue.
+   * Value is collected at the end of the operation.
+   *
+   * @return - A `int` representing the size of notification queue of this
+   *           MySQL client's IO Thread.
+   */
+  <<__HipHopSpecific, __Native>>
+  function notificationQueueSize() : int;
+
 }
 
 /**
@@ -560,7 +758,7 @@ class AsyncMysqlClientStats {
  * that concrete classes must implement, which are timing information methods
  * regarding a query, connection or a resulting error.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlResult")>>
@@ -617,7 +815,7 @@ abstract class AsyncMysqlResult {
  * This class is instantiated through a call from the connection object
  * via `AsyncMysqlConnection::connectResult()`.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlConnectResult")>>
@@ -677,7 +875,7 @@ final class AsyncMysqlConnectResult extends AsyncMysqlResult {
  * This class is instantiated when an `AsyncMysqlException` is thrown and
  * `AsyncMysqlException::getResult()` is called.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlErrorResult")>>
@@ -779,7 +977,7 @@ class AsyncMysqlErrorResult extends AsyncMysqlResult {
  * This class is instantiated when an `AsyncMysqlQueryException` is thrown and
  * `AsyncMysqlQueryException::getResult()` is called.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlQueryErrorResult")>>
@@ -825,7 +1023,7 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
  * `AsyncMysqlConnection::query()`, `AsyncMysqlConection::queryf()` and
  * `AsyncMysqlConnection::multiQuery()`
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlQueryResult")>>
@@ -940,7 +1138,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
   function mapRows(): Vector<Map>;
 
   /**
-   * Returns the actual rows reeturned by the successful query, each row
+   * Returns the actual rows returned by the successful query, each row
    * including the values for each column.
    *
    * All values come back as `string`s. If you want typed values, use
@@ -973,7 +1171,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
   function mapRowsTyped(): Vector;
 
   /**
-   * Returns the actual rows reeturned by the successful query, each row
+   * Returns the actual rows returned by the successful query, each row
    * including the typed values for each column.
    *
    * The rows are returned as a `Vector` of `Vector` objects which hold the
@@ -1022,7 +1220,7 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
  * You can get an instance of `AsyncMysqlRowBlock` via the
  * `AsyncMysqlQueryResult::rowBlocks()` call.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowBlock")>>
@@ -1188,7 +1386,7 @@ final class AsyncMysqlRowBlock implements IteratorAggregate, Countable {
  * You can iterate over all the rows of an `AsyncMysqlRowBlock` one by one until
  * the iterator is not valid any longer.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowBlockIterator")>>
@@ -1251,7 +1449,7 @@ final class AsyncMysqlRowBlockIterator implements HH\KeyedIterator {
  * returned as a result from a query. The row has values associated with
  * each column.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRow")>>
@@ -1360,7 +1558,7 @@ final class AsyncMysqlRow implements MysqlRow {
  * You can iterate over all the fields (columns) of an `AsyncMysqlBlock` one by
  * one until the iterator is not valid any longer.
  *
- * @guide /hack/async/intro
+ * @guide /hack/async/introduction
  * @guide /hack/async/extensions
  */
 <<__NativeData("AsyncMysqlRowIterator")>>

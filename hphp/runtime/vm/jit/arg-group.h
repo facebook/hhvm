@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,9 +20,11 @@
 #include "hphp/runtime/vm/jit/reg-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
+#include "hphp/util/arch.h"
+
 namespace HPHP { namespace jit {
 
-class SSATmp;
+struct SSATmp;
 struct IRInstruction;
 
 namespace NativeCalls { struct CallInfo; }
@@ -42,12 +44,13 @@ namespace NativeCalls { struct CallInfo; }
 //////////////////////////////////////////////////////////////////////
 
 enum class DestType : uint8_t {
-  None,  // return void (no valid registers)
-  SSA,   // return a single-register value
-  Byte,  // return a single-byte register value
-  TV,    // return a TypedValue packed in two registers
-  Dbl,   // return scalar double in a single FP register
-  SIMD,  // return a TypedValue in one SIMD register
+  None,      // return void (no valid registers)
+  Indirect,  // return struct/object to the address in the first arg
+  SSA,       // return a single-register value
+  Byte,      // return a single-byte register value
+  TV,        // return a TypedValue packed in two registers
+  Dbl,       // return scalar double in a single FP register
+  SIMD,      // return a TypedValue in one SIMD register
 };
 const char* destTypeName(DestType);
 
@@ -56,6 +59,7 @@ struct CallDest {
   Vreg reg0, reg1;
 };
 UNUSED const CallDest kVoidDest { DestType::None };
+UNUSED const CallDest kIndirectDest { DestType::Indirect };
 
 struct ArgDesc {
   enum class Kind {
@@ -63,18 +67,27 @@ struct ArgDesc {
     Imm,     // 64-bit Immediate
     TypeImm, // DataType Immediate
     Addr,    // Address (register plus 32-bit displacement)
+    DataPtr, // Pointer to data section
+    IndRet,  // Indirect Return Address (register plus 32-bit displacement)
   };
 
   PhysReg dstReg() const { return m_dstReg; }
   Vreg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
   void setDstReg(PhysReg reg) { m_dstReg = reg; }
-  Immed64 imm() const { assertx(m_kind == Kind::Imm); return m_imm64; }
+  Immed64 imm() const {
+    assertx(m_kind == Kind::Imm || m_kind == Kind::DataPtr);
+    return m_imm64;
+  }
   DataType typeImm() const {
     assertx(m_kind == Kind::TypeImm);
     return m_typeImm;
   }
-  Immed disp() const { assertx(m_kind == Kind::Addr); return m_disp32; }
+  Immed disp() const {
+    assertx(m_kind == Kind::Addr ||
+	    m_kind == Kind::IndRet);
+    return m_disp32;
+  }
   bool isZeroExtend() const { return m_zeroExtend; }
   bool done() const { return m_done; }
   void markDone() { m_done = true; }
@@ -131,12 +144,13 @@ struct ArgGroup {
 
   explicit ArgGroup(const IRInstruction* inst,
                     const StateVector<SSATmp,Vloc>& locs)
-    : m_inst(inst), m_locs(locs), m_override(nullptr)
+    : m_inst(inst), m_locs(locs)
   {}
 
   size_t numGpArgs() const { return m_gpArgs.size(); }
   size_t numSimdArgs() const { return m_simdArgs.size(); }
   size_t numStackArgs() const { return m_stkArgs.size(); }
+  size_t numIndRetArgs() const { return m_indRetArgs.size(); }
 
   ArgDesc& gpArg(size_t i) {
     assertx(i < m_gpArgs.size());
@@ -153,6 +167,10 @@ struct ArgGroup {
     assertx(i < m_stkArgs.size());
     return m_stkArgs[i];
   }
+  const ArgDesc& indRetArg(size_t i) const {
+    assertx(i < m_indRetArgs.size());
+    return m_indRetArgs[i];
+  }
   ArgDesc& operator[](size_t i) = delete;
 
   ArgGroup& imm(Immed64 imm) {
@@ -166,6 +184,11 @@ struct ArgGroup {
 
   ArgGroup& immPtr(std::nullptr_t) { return imm(0); }
 
+  template<class T> ArgGroup& dataPtr(const T* ptr) {
+    push_arg(ArgDesc{ArgDesc::Kind::DataPtr, ptr});
+    return *this;
+  }
+
   ArgGroup& reg(Vreg reg) {
     push_arg(ArgDesc(ArgDesc::Kind::Reg, reg, -1));
     return *this;
@@ -176,11 +199,26 @@ struct ArgGroup {
     return *this;
   }
 
+  /*
+   * indRet args are similar to simple addr args, but are used specifically to
+   * pass the address that the native call will use for indirect returns. If a
+   * platform has no dedicated registers for indirect returns, then it uses
+   * the first general purpose argument register.
+   */
+  ArgGroup& indRet(Vreg base, Immed off) {
+    push_arg(ArgDesc(ArgDesc::Kind::IndRet, base, off));
+    return *this;
+  }
+
   ArgGroup& ssa(int i, bool isFP = false) {
     auto s = m_inst->src(i);
     ArgDesc arg(s, m_locs[s]);
     if (isFP) {
       push_SIMDarg(arg);
+      if (arch() == Arch::PPC64) {
+        // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
+        push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
+      }
     } else {
       push_arg(arg);
     }
@@ -228,7 +266,8 @@ private:
 private:
   const IRInstruction* m_inst;
   const StateVector<SSATmp,Vloc>& m_locs;
-  ArgVec* m_override; // used to force args to go into a specific ArgVec
+  ArgVec* m_override{nullptr}; // force args to go into a specific ArgVec
+  ArgVec m_indRetArgs; // Indirect Return Address
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow

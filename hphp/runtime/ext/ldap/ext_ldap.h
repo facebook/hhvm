@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(ldap_connect,
-                      const Variant& hostname = null_variant,
+                      const Variant& hostname = uninit_variant,
                       int port = 389);
 Variant HHVM_FUNCTION(ldap_explode_dn,
                       const String& dn,
@@ -53,10 +53,14 @@ bool HHVM_FUNCTION(ldap_modify,
                    const Resource& link,
                    const String& dn,
                    const Array& entry);
+bool HHVM_FUNCTION(ldap_modify_batch,
+                   const Resource& link,
+                   const String& dn,
+                   const Array& modifs);
 bool HHVM_FUNCTION(ldap_bind,
                    const Resource& link,
-                   const Variant& bind_rdn = null_variant,
-                   const Variant& bind_password = null_variant);
+                   const Variant& bind_rdn = uninit_variant,
+                   const Variant& bind_password = uninit_variant);
 bool HHVM_FUNCTION(ldap_set_rebind_proc,
                    const Resource& link,
                    const Variant& callback);
@@ -82,7 +86,7 @@ Variant HHVM_FUNCTION(ldap_list,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes = null_variant,
+                      const Variant& attributes = uninit_variant,
                       int attrsonly = 0,
                       int sizelimit = -1,
                       int timelimit = -1,
@@ -91,7 +95,7 @@ Variant HHVM_FUNCTION(ldap_read,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes = null_variant,
+                      const Variant& attributes = uninit_variant,
                       int attrsonly = 0,
                       int sizelimit = -1,
                       int timelimit = -1,
@@ -100,7 +104,7 @@ Variant HHVM_FUNCTION(ldap_search,
                       const Variant& link,
                       const Variant& base_dn,
                       const Variant& filter,
-                      const Variant& attributes = null_variant,
+                      const Variant& attributes = uninit_variant,
                       int attrsonly = 0,
                       int sizelimit = -1,
                       int timelimit = -1,

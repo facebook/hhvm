@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,21 +32,38 @@ struct default_ptr {
   /*
    * Constructors.
    */
-  default_ptr() = default;
+  default_ptr() : m_p{fallback()} {}
 
   /* implicit */ default_ptr(std::nullptr_t) {}
 
   /* implicit */ default_ptr(T* p) : m_p{p ? p : fallback()} {}
 
   /*
+   * Thread-safe allocation.
+   */
+  T* ensureAllocated() {
+    if (auto p = raw()) return p;
+    auto ptr = new T();
+    T* expected = fallback();
+    if (!m_p.compare_exchange_strong(
+          expected, ptr, std::memory_order_relaxed)) {
+      // Already set by someone else, use theirs.
+      delete ptr;
+      return expected;
+    } else {
+      return ptr;
+    }
+  }
+
+  /*
    * Assignments.
    */
   default_ptr& operator=(std::nullptr_t p) {
-    m_p = fallback();
+    m_p.store(fallback(), std::memory_order_relaxed);
     return *this;
   }
   default_ptr& operator=(T* p) {
-    m_p = p ? p : fallback();
+    m_p.store(p ? p : fallback(), std::memory_order_relaxed);
     return *this;
   }
 
@@ -54,7 +71,7 @@ struct default_ptr {
    * Observers.
    */
   const T* get() const {
-    return m_p;
+    return m_p.load(std::memory_order_relaxed);
   }
   const T& operator*() const {
     return *get();
@@ -64,7 +81,8 @@ struct default_ptr {
   }
 
   T* raw() const {
-    return m_p == &s_default ? nullptr : m_p;
+    auto p = m_p.load(std::memory_order_relaxed);
+    return p == &s_default ? nullptr : p;
   }
   explicit operator bool() const {
     return raw();
@@ -86,7 +104,7 @@ private:
   }
 
 private:
-  T* m_p{const_cast<T*>(&s_default)};
+  std::atomic<T*> m_p{const_cast<T*>(&s_default)};
   static const T s_default;
 };
 

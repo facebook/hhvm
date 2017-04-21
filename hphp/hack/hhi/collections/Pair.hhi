@@ -43,7 +43,7 @@
  * You may notice that many methods affecting the instace of `Pair` return an
  * `ImmVector` -- `Pair`s are essentially backed by 2-element `ImmVector`s.
  *
- * @guide /hack/collections/intro
+ * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */
 
@@ -239,19 +239,19 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
     ImmVector<mixed>;
 
   /**
-   *  Returns an `ImmVector` where each element is a `Pair` that combines each
-   *  element of the current `Pair` and the provided `Traversable`.
+   * Returns an `ImmVector` where each element is a `Pair` that combines each
+   * element of the current `Pair` and the provided `Traversable`.
    *
-   *  If the number of elements of the current `Pair` are not equal to the
-   *  number of elements in the `Traversable`, then only the combined elements
-   *  up to and including the final element of the one with the least number of
-   *  elements is included.
+   * If the number of elements of the current `Pair` are not equal to the
+   * number of elements in the `Traversable`, then only the combined elements
+   * up to and including the final element of the one with the least number of
+   * elements is included.
    *
-   *  @param $traversable - The `Traversable` to use to combine with the
-   *                        elements of the current `Pair`.
+   * @param $traversable - The `Traversable` to use to combine with the
+   *                       elements of the current `Pair`.
    *
-   *  @return - The `ImmVector` that combines the values of the current `Pair`
-   *            with the provided `Traversable`.
+   * @return - The `ImmVector` that combines the values of the current `Pair`
+   *           with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     ImmVector<Pair<mixed, Tu>>;

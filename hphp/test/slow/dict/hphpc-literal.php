@@ -1,0 +1,69 @@
+<?hh
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+function main() {
+  var_dump(dict[123 => 'abc'] == dict['123' => 'abc']);
+  var_dump(dict[123 => 'abc'] != dict['123' => 'abc']);
+  var_dump(dict[123 => 'abc'] === dict['123' => 'abc']);
+  var_dump(dict[123 => 'abc'] !== dict['123' => 'abc']);
+  try { var_dump(dict[123 => 'abc'] < dict['123' => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] <= dict['123' => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] > dict['123' => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] >= dict['123' => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] <=> dict['123' => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+
+  var_dump(dict['123' => 'abc'] == dict[123 => 'abc']);
+  var_dump(dict['123' => 'abc'] != dict[123 => 'abc']);
+  var_dump(dict['123' => 'abc'] === dict[123 => 'abc']);
+  var_dump(dict['123' => 'abc'] !== dict[123 => 'abc']);
+  try { var_dump(dict['123' => 'abc'] < dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict['123' => 'abc'] <= dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict['123' => 'abc'] > dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict['123' => 'abc'] >= dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict['123' => 'abc'] <=> dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+
+  var_dump(dict[123 => 'abc'] == dict[123 => 'abc']);
+  var_dump(dict[123 => 'abc'] != dict[123 => 'abc']);
+  var_dump(dict[123 => 'abc'] === dict[123 => 'abc']);
+  var_dump(dict[123 => 'abc'] !== dict[123 => 'abc']);
+  try { var_dump(dict[123 => 'abc'] < dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] <= dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] > dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] >= dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] <=> dict[123 => 'abc']); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+
+  var_dump(dict[123 => 'abc'] == 123);
+  var_dump(dict[123 => 'abc'] != 123);
+  var_dump(dict[123 => 'abc'] === 123);
+  var_dump(dict[123 => 'abc'] !== 123);
+  try { var_dump(dict[123 => 'abc'] < 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] <= 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] > 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] >= 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[123 => 'abc'] <=> 123); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+
+  try { var_dump(dict[false => 123] === dict[true => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[1.234 => 123] === dict[5.678 => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump(dict[null => 123] === dict[null => 123]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+
+  var_dump([dict[0 => 123], dict[0 => '123']] == [dict[0 => '123'], dict[0 => 123]]);
+  var_dump([dict[0 => 123], dict[0 => '123']] != [dict[0 => '123'], dict[0 => 123]]);
+  var_dump([dict[0 => 123], dict[0 => '123']] === [dict[0 => '123'], dict[0 => 123]]);
+  var_dump([dict[0 => 123], dict[0 => '123']] !== [dict[0 => '123'], dict[0 => 123]]);
+  try { var_dump([dict[0 => 123], dict[0 => '123']] < [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], dict[0 => '123']] <= [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], dict[0 => '123']] > [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], dict[0 => '123']] >= [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], dict[0 => '123']] <=> [dict[0 => '123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+
+  var_dump([dict[0 => 123], vec['123']] == [vec['123'], dict[0 => 123]]);
+  var_dump([dict[0 => 123], vec['123']] != [vec['123'], dict[0 => 123]]);
+  var_dump([dict[0 => 123], vec['123']] === [vec['123'], dict[0 => 123]]);
+  var_dump([dict[0 => 123], vec['123']] !== [vec['123'], dict[0 => 123]]);
+  try { var_dump([dict[0 => 123], vec['123']] < [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], vec['123']] <= [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], vec['123']] > [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], vec['123']] >= [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+  try { var_dump([dict[0 => 123], vec['123']] <=> [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
+}
+main();

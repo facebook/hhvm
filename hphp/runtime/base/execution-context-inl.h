@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,11 +17,17 @@
 #ifndef incl_HPHP_EXECUTION_CONTEXT_INL_H_
 #define incl_HPHP_EXECUTION_CONTEXT_INL_H_
 
+#include "hphp/runtime/vm/act-rec.h"
+
 namespace HPHP {
+
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void* ExecutionContext::operator new(size_t s) {
-  return req::malloc(s);
+  // Can't use req::make_raw here because we want raw memory, not a constructed
+  // object. This gets called generically from ThreadLocal, so we can't just
+  // change the call-sites.
+  return req::malloc(s, type_scan::getIndexForMalloc<ExecutionContext>());
 }
 
 inline void* ExecutionContext::operator new(size_t s, void* p) {
@@ -180,26 +186,23 @@ inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
   return state ? state->func() : nullptr;
 }
 
-inline void ExecutionContext::invokeFunc(
-  TypedValue* retval,
+inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
   const Variant& args_,
   VarEnv* varEnv
 ) {
-  invokeFunc(retval, ctx.func, args_, ctx.this_, ctx.cls, varEnv, ctx.invName);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv, ctx.invName);
 }
 
-inline void ExecutionContext::invokeFuncFew(
-  TypedValue* retval,
+inline TypedValue ExecutionContext::invokeFuncFew(
   const Func* f,
   void* thisOrCls,
   StringData* invName
 ) {
-  invokeFuncFew(retval, f, thisOrCls, invName, 0, nullptr);
+  return invokeFuncFew(f, thisOrCls, invName, 0, nullptr);
 }
 
-inline void ExecutionContext::invokeFuncFew(
-  TypedValue* retval,
+inline TypedValue ExecutionContext::invokeFuncFew(
   const CallCtx& ctx,
   int argc,
   const TypedValue* argv
@@ -210,8 +213,7 @@ inline void ExecutionContext::invokeFuncFew(
     return nullptr;
   }();
 
-  invokeFuncFew(
-    retval,
+  return invokeFuncFew(
     ctx.func,
     thisOrCls,
     ctx.invName,
@@ -225,16 +227,13 @@ inline TypedValue ExecutionContext::invokeMethod(
   const Func* meth,
   InvokeArgs args
 ) {
-  TypedValue ret;
-  invokeFuncFew(
-    &ret,
+  return invokeFuncFew(
     meth,
     ActRec::encodeThis(obj),
     nullptr /* invName */,
     args.size(),
     args.start()
   );
-  return ret;
 }
 
 inline Variant ExecutionContext::invokeMethodV(
@@ -242,15 +241,44 @@ inline Variant ExecutionContext::invokeMethodV(
   const Func* meth,
   InvokeArgs args
 ) {
-  auto const tv = invokeMethod(obj, meth, args);
-
   // Construct variant without triggering incref.
-  Variant ret;
-  *ret.asTypedValue() = tv;
-  return ret;
+  return Variant::attach(invokeMethod(obj, meth, args));
+}
+
+inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
+  ActRec* sfp = ar->sfp();
+  if (LIKELY(sfp != nullptr)) return sfp;
+  return LIKELY(!m_nestedVMs.empty()) ? m_nestedVMs.back().fp : nullptr;
+}
+
+inline Cell ExecutionContext::lookupClsCns(const StringData* cls,
+                                      const StringData* cns) {
+  return lookupClsCns(NamedEntity::get(cls), cls, cns);
+}
+
+inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
+  auto const fp = getFrameAtDepth(frame);
+  if (fp && (fp->func()->attrs() & AttrMayUseVV)) {
+    if (fp->hasVarEnv()) return fp->getVarEnv();
+  }
+  return nullptr;
+}
+
+inline ActRec*
+ExecutionContext::getPrevVMStateSkipFrame(const ActRec* fp,
+                                          Offset* prevPc /* = NULL */,
+                                          TypedValue** prevSp /* = NULL */,
+                                          bool* fromVMEntry /* = NULL */) {
+  auto prev = getPrevVMState(fp, prevPc, prevSp, fromVMEntry);
+  if (LIKELY(!prev || !prev->skipFrame())) return prev;
+  do {
+    prev = getPrevVMState(prev, prevPc, prevSp, fromVMEntry);
+  } while (prev && prev->skipFrame());
+  return prev;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif

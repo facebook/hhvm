@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,24 +39,6 @@ struct FailedIRGen : std::runtime_error {
 
 struct FailedTraceGen : std::runtime_error {
   FailedTraceGen(const char* file, int line, const char* why);
-};
-
-struct FailedCodeGen : std::runtime_error {
-  const char*   file;
-  const int     line;
-  const char*   func;
-  const Offset  bcOff;
-  const Func*   vmFunc;
-  const bool    resumed;
-  const TransID profTransId;
-
-  FailedCodeGen(const char* _file,
-                int _line,
-                const char* _func,
-                uint32_t _bcOff,
-                const Func* _vmFunc,
-                bool _resumed,
-                TransID _profTransId);
 };
 
 //////////////////////////////////////////////////////////////////////

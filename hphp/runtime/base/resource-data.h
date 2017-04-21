@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,19 +18,17 @@
 #define incl_HPHP_RESOURCE_DATA_H_
 
 #include <iostream>
-#include <boost/noncopyable.hpp>
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/classname-is.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/imarker.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
 
-class Array;
-class String;
+struct Array;
+struct String;
 struct ResourceData;
 
 namespace req {
@@ -43,7 +41,7 @@ make(Args&&... args);
 /*
  * De-virtualized header for Resource objects. The memory layout is:
  *
- * [ResourceHdr] { m_id, m_hdr; }
+ * [ResourceHdr] { HeapObject, m_id; }
  * [ResourceData] { vtbl, subclass fields; }
  *
  * Historically, we only had ResourceData. To ease refactoring, we have
@@ -65,15 +63,20 @@ make(Args&&... args);
  *
  * In the JIT, SSATmps of type Res are ResourceHdr pointers.
  */
-struct ResourceHdr {
+struct ResourceHdr final : Countable, // aux stores heap size
+                           type_scan::MarkCountable<ResourceHdr> {
   static void resetMaxId();
 
-  IMPLEMENT_COUNTABLE_METHODS
-  bool kindIsValid() const { return m_hdr.kind == HeaderKind::Resource; }
+  ALWAYS_INLINE void decRefAndRelease() {
+    assert(kindIsValid());
+    if (decReleaseCheck()) release();
+  }
+  bool kindIsValid() const { return m_kind == HeaderKind::Resource; }
   void release() noexcept;
 
-  void init(size_t size) {
-    m_hdr.init(size, HeaderKind::Resource, 1);
+  void init(uint16_t size, type_scan::Index tyindex) {
+    initHeader(size, HeaderKind::Resource, 1);
+    m_type_index = tyindex;
   }
 
   ResourceData* data() {
@@ -87,26 +90,32 @@ struct ResourceHdr {
 
   size_t heapSize() const {
     assert(kindIsValid());
-    assert(m_hdr.aux != 0);
-    return m_hdr.aux;
+    assert(m_aux16 != 0);
+    return m_aux16;
   }
+
+  type_scan::Index typeIndex() const { return m_type_index; }
 
   int32_t getId() const { return m_id; }
   void setRawId(int32_t id) { m_id = id; }
   void setId(int32_t id); // only for BuiltinFiles
 
 private:
-  static void compileTimeAssertions();
-private:
+  static_assert(sizeof(type_scan::Index) <= 4,
+                "type_scan::Index cannot be greater than 32-bits");
+
   int32_t m_id;
-  HeaderWord<uint16_t> m_hdr; // m_hdr.aux stores heap size
+  type_scan::Index m_type_index;
 };
 
 /**
  * Base class of all PHP resources.
  */
-struct ResourceData : private boost::noncopyable {
+struct ResourceData : type_scan::MarkCountable<ResourceData> {
   ResourceData();
+
+  ResourceData(const ResourceData&) = delete;
+  ResourceData& operator=(const ResourceData&) = delete;
 
   const ResourceHdr* hdr() const {
     auto h = reinterpret_cast<const ResourceHdr*>(this) - 1;
@@ -132,9 +141,6 @@ struct ResourceData : private boost::noncopyable {
   void operator delete(void* p) {
     always_assert(false);
   }
-
-  template<class F> void scan(F&) const;
-  virtual void vscan(IMarker& mark) const;
 
   const String& o_getClassName() const;
   virtual const String& o_getClassNameHook() const;
@@ -180,8 +186,7 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *
  * 1. If a ResourceData is entirely request-allocated, for example,
  *
- *    class EntirelyRequestAllocated : public ResourceData {
- *    public:
+ *    struct EntirelyRequestAllocated : ResourceData {
  *       int number; // primitives are allocated together with "this"
  *       String str; // request-allocated objects are fine
  *    };
@@ -196,8 +201,7 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *
  * 2. If a ResourceData is entirely not request allocated, for example,
  *
- *    class NonRequestAllocated : public SweepableResourceData {
- *    public:
+ *    struct NonRequestAllocated : SweepableResourceData {
  *       int number; // primitives are always not in consideration
  *       std::string str; // this has malloc() in its own
  *       std::vector<int> vec; // all STL collection classes belong here
@@ -225,8 +229,7 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *    no way to free up vector's memory without touching String, which is
  *    request-allocated.
  *
- *    class MixedRequestAllocated : public SweepableResourceData {
- *    public:
+ *    struct MixedRequestAllocated : SweepableResourceData {
  *       int number; // primitives are always not in consideration
  *
  *       // STL classes need to new/delete to have clean sweep
@@ -246,14 +249,8 @@ inline const ResourceHdr* safehdr(const ResourceData* data) {
  *    }
  *
  */
-class SweepableResourceData : public ResourceData, public Sweepable {
+struct SweepableResourceData : ResourceData, Sweepable {
 protected:
-  void sweep() override {
-    // ResourceData objects are globally allocated by default (see
-    // operator delete in ResourceData), so sweeping will destroy the
-    // object and deallocate its seat as well.
-    delete this;
-  }
   void* owner() override {
     return static_cast<ResourceData*>(this)->hdr();
   }
@@ -282,9 +279,12 @@ ALWAYS_INLINE void decRefRes(ResourceHdr* res) {
   DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(T)                       \
   void sweep() override;
 
-#define IMPLEMENT_RESOURCE_ALLOCATION(T) \
-  static_assert(std::is_base_of<ResourceData,T>::value, ""); \
-  void HPHP::T::sweep() { this->~T(); }
+#define IMPLEMENT_RESOURCE_ALLOCATION_NS(NS, T)                          \
+  static_assert(std::is_base_of<HPHP::ResourceData,NS::T>::value, ""); \
+  void NS::T::sweep() { this->~T(); }
+
+#define IMPLEMENT_RESOURCE_ALLOCATION(T)  \
+  IMPLEMENT_RESOURCE_ALLOCATION_NS(HPHP, T)
 
 namespace req {
 // allocate and construct a resource subclass type T,
@@ -295,10 +295,11 @@ typename std::enable_if<
   req::ptr<T>
 >::type make(Args&&... args) {
   constexpr auto size = sizeof(ResourceHdr) + sizeof(T);
-  static_assert(size <= 0xffff && size < kMaxSmallSize, "");
+  static_assert(uint16_t(size) == size && size < kMaxSmallSize, "");
   static_assert(std::is_convertible<T*,ResourceData*>::value, "");
   auto const b = static_cast<ResourceHdr*>(MM().mallocSmallSize(size));
-  b->init(size); // initialize HeaderWord
+  // initialize HeapObject
+  b->init(size, type_scan::getIndexForMalloc<T>());
   try {
     auto r = new (b->data()) T(std::forward<Args>(args)...);
     assert(r->hasExactlyOneRef());

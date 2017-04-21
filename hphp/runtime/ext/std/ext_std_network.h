@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -21,7 +21,8 @@
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/util/network.h"
-#include <syslog.h>
+
+#include <folly/portability/Syslog.h>
 
 namespace HPHP {
 
@@ -41,17 +42,17 @@ String HHVM_FUNCTION(long2ip, const String& proper_address);
 bool HHVM_FUNCTION(checkdnsrr, const String& host,
                                const String& type = null_string);
 Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type = -1,
-                         VRefParam authnsRef = null_variant,
-                         VRefParam addtlRef = null_variant);
+                         VRefParam authnsRef = uninit_variant,
+                         VRefParam addtlRef = uninit_variant);
 bool HHVM_FUNCTION(getmxrr, const String& hostname,
                             VRefParam mxhostsRef,
-                            VRefParam weightsRef = null_variant);
+                            VRefParam weightsRef = uninit_variant);
 void HHVM_FUNCTION(header, const String& str, bool replace = true,
                    int http_response_code = 0);
 Variant HHVM_FUNCTION(http_response_code, int response_code = 0);
 Array HHVM_FUNCTION(headers_list);
-bool HHVM_FUNCTION(headers_sent, VRefParam file = null_variant,
-                                 VRefParam line = null_variant);
+bool HHVM_FUNCTION(headers_sent, VRefParam file = uninit_variant,
+                                 VRefParam line = uninit_variant);
 Variant HHVM_FUNCTION(header_register_callback, const Variant& callback);
 void HHVM_FUNCTION(header_remove, const Variant& name = null_string);
 int64_t HHVM_FUNCTION(get_http_request_size);

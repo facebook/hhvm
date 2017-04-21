@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,97 +19,21 @@
 #endif
 
 namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
-// Translator accessors.
-
-inline ProfData* Translator::profData() const {
-  return m_profData.get();
-}
-
-inline const SrcDB& Translator::getSrcDB() const {
-  return m_srcDB;
-}
-
-inline SrcRec* Translator::getSrcRec(SrcKey sk) {
-  // XXX: Add a insert-or-find primitive to THM.
-  if (SrcRec* r = m_srcDB.find(sk)) return r;
-  assertx(s_writeLease.amOwner());
-
-  auto rec = m_srcDB.insert(sk);
-  if (RuntimeOption::EvalEnableReusableTC) {
-    recordFuncSrcRec(sk.func(), rec);
-  }
-
-  return rec;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Translator configuration.
-
-inline TransKind Translator::mode() const {
-  return m_mode;
-}
-
-inline void Translator::setMode(TransKind mode) {
-  m_mode = mode;
-}
-
-inline bool Translator::useAHot() const {
-  return m_useAHot;
-}
-
-inline void Translator::setUseAHot(bool val) {
-  m_useAHot = val;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// TransDB.
-
-inline bool Translator::isTransDBEnabled() {
-  return debug ||
-         RuntimeOption::EvalDumpTC ||
-         RuntimeOption::EvalDumpIR ||
-         RuntimeOption::EvalDumpRegion;
-}
-
-inline const TransRec* Translator::getTransRec(TCA tca) const {
-  if (!isTransDBEnabled()) return nullptr;
-
-  TransDB::const_iterator it = m_transDB.find(tca);
-  if (it == m_transDB.end()) {
-    return nullptr;
-  }
-  if (it->second >= m_translations.size()) {
-    return nullptr;
-  }
-  return &m_translations[it->second];
-}
-
-inline const TransRec* Translator::getTransRec(TransID transId) const {
-  if (!isTransDBEnabled()) return nullptr;
-
-  always_assert(transId < m_translations.size());
-  return &m_translations[transId];
-}
-
-inline TransID Translator::getCurrentTransID() const {
-  return m_translations.size();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline Lease& Translator::WriteLease() {
-  return s_writeLease;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // TransContext.
 
-inline TransContext::TransContext(TransID id, SrcKey sk, FPInvOffset spOff)
+inline TransContext::TransContext(
+  TransID id, TransKind kind, TransFlags flags,
+  SrcKey sk, FPInvOffset spOff, Op fpushOff)
   : transID(id)
+  , kind(kind)
+  , flags(flags)
   , initSpOffset(spOff)
+  , callerFPushOp(fpushOff)
   , func(sk.valid() ? sk.func() : nullptr)
   , initBcOffset(sk.offset())
+  , hasThis(sk.hasThis())
   , prologue(sk.prologue())
   , resumed(sk.resumed())
 {}
@@ -119,7 +43,7 @@ inline SrcKey TransContext::srcKey() const {
     assertx(!resumed);
     return SrcKey { func, initBcOffset, SrcKey::PrologueTag{} };
   }
-  return SrcKey { func, initBcOffset, resumed };
+  return SrcKey { func, initBcOffset, resumed, hasThis };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,6 +60,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::CreateCont:
     case Op::Yield:
     case Op::YieldK:
+    case Op::YieldFromDelegate:
     case Op::Await:
     case Op::RetC:
     case Op::RetV:
@@ -167,6 +92,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op) {
     case Op::FCallUnpack:
     case Op::ContEnter:
     case Op::ContRaise:
+    case Op::ContEnterDelegate:
     case Op::Incl:
     case Op::InclOnce:
     case Op::Req:
@@ -190,7 +116,7 @@ inline bool opcodeBreaksBB(const Op op) {
 // Input and output information.
 
 inline std::string InputInfo::pretty() const {
-  std::string p = loc.pretty();
+  std::string p = show(loc);
   if (dontBreak) p += ":dc";
   if (dontGuard) p += ":dg";
   if (dontGuardInner) p += ":dgi";

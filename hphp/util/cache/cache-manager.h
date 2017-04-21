@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,13 +35,12 @@
 #include <set>
 #include <string>
 #include <vector>
-
-#include <boost/utility.hpp>
+#include <functional>
 
 namespace HPHP {
 
-class CacheData;
-class MmapFile;
+struct CacheData;
+struct MmapFile;
 
 enum class VFileType : uint8_t {
   NotFound = 0,
@@ -49,10 +48,12 @@ enum class VFileType : uint8_t {
   Directory
 };
 
-class CacheManager : private boost::noncopyable {
- public:
+struct CacheManager {
   CacheManager();
   ~CacheManager();
+
+  CacheManager(const CacheManager&) = delete;
+  CacheManager& operator=(const CacheManager&) = delete;
 
   // Look up a named file to retrieve its contents.
   //
@@ -119,15 +120,24 @@ class CacheManager : private boost::noncopyable {
   std::vector<std::string> readDirectory(const std::string& name) const;
   void dump() const;
 
+  static void setLogger(
+      std::function<void(bool, const std::string&)>&& logger) {
+    s_logger = std::move(logger);
+  }
  private:
   using CacheMap = std::map<std::string, std::unique_ptr<CacheData>>;
 
+  template<class F>
+  bool existsHelper(const std::string& name, F fn) const;
+
   void addDirectories(const std::string& name);
 
-  std::unique_ptr<MmapFile> mmap_file_;
-  uint64_t entry_counter_;
+  std::unique_ptr<MmapFile> m_mmap_file;
+  uint64_t m_entry_counter{ 0 };
 
-  CacheMap cache_map_;
+  CacheMap m_cache_map;
+
+  static std::function<void(bool, const std::string&)> s_logger;
 };
 
 }  // namespace HPHP

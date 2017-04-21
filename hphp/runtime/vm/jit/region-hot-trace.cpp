@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,6 +14,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/region-selection.h"
+
+#include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -28,13 +31,11 @@ TRACE_SET_MOD(pgo);
  * Remove from pConds the elements that correspond to stack positions
  * that have been popped given the current SP offset from FP.
  */
-static void discardPoppedTypes(
-  TypedLocations& pConds,
-  FPInvOffset curSpOffset
-) {
+static void discardPoppedTypes(TypedLocations& pConds,
+                               FPInvOffset curSpOffset) {
   for (auto it = pConds.begin(); it != pConds.end(); ) {
-    if (it->location.tag() == RegionDesc::Location::Tag::Stack &&
-        it->location.offsetFromFP() > curSpOffset) {
+    if (it->location.tag() == LTag::Stack &&
+        it->location.stackIdx() > curSpOffset) {
       it = pConds.erase(it);
     } else {
       it++;
@@ -58,15 +59,11 @@ static void mergePostConds(TypedLocations& dst,
   }
 }
 
-RegionDescPtr selectHotTrace(HotTransContext& ctx,
-                             TransIDSet& selectedSet,
-                             TransIDVec* selectedVec /* = nullptr */) {
+RegionDescPtr selectHotTrace(HotTransContext& ctx) {
   auto region = std::make_shared<RegionDesc>();
   TransID tid    = ctx.tid;
   TransID prevId = kInvalidTransID;
-  selectedSet.clear();
-  if (selectedVec) selectedVec->clear();
-
+  TransIDSet selectedSet;
   TypedLocations accumPostConds;
 
   // Maps from BlockIds to accumulated post conditions for that block.
@@ -78,8 +75,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
   FTRACE(1, "selectHotTrace: starting with maxBCInstrs = {}\n", numBCInstrs);
 
   while (!selectedSet.count(tid)) {
-
-    RegionDescPtr blockRegion = ctx.profData->transRegion(tid);
+    auto rec = ctx.profData->transRec(tid);
+    auto blockRegion = rec->region();
     if (blockRegion == nullptr) break;
 
     // Break if region would be larger than the specified limit.
@@ -101,8 +98,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
     // large regions containing the function body (starting at various
     // DV funclets).
     if (prevId != kInvalidTransID) {
-      const Func* func = ctx.profData->transFunc(tid);
-      Offset  bcOffset = ctx.profData->transStartBcOff(tid);
+      auto const func = rec->func();
+      auto const bcOffset = rec->startBcOff();
       if (func->base() == bcOffset) {
         FTRACE(2, "selectHotTrace: breaking region because reached the main "
                "function body entry at Translation {} (BC offset {})\n",
@@ -112,7 +109,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
     }
 
     if (prevId != kInvalidTransID) {
-      auto sk = ctx.profData->transSrcKey(tid);
+      auto sk = rec->srcKey();
       if (ctx.profData->optimized(sk)) {
         FTRACE(2, "selectHotTrace: breaking region because next sk already "
                "optimized, for Translation {}\n", tid);
@@ -135,9 +132,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
       region->addArc(predBlockId, newFirstBlockId);
     }
     selectedSet.insert(tid);
-    if (selectedVec) selectedVec->push_back(tid);
 
-    const auto lastSk = ctx.profData->transLastSrcKey(tid);
+    const auto lastSk = rec->lastSrcKey();
     if (breaksRegion(lastSk)) {
       FTRACE(2, "selectHotTrace: breaking region because of last instruction "
              "in Translation {}: {}\n", tid, opcodeToName(lastSk.op()));
@@ -159,8 +155,8 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx,
 
     TransCFG::ArcPtrVec possibleOutArcs;
     for (auto arc : outArcs) {
-      RegionDesc::BlockPtr possibleNext =
-        ctx.profData->transRegion(arc->dst())->entry();
+      auto dstRec = ctx.profData->transRec(arc->dst());
+      auto possibleNext = dstRec->region()->entry();
       if (preCondsAreSatisfied(possibleNext, accumPostConds)) {
         possibleOutArcs.emplace_back(arc);
       }

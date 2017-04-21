@@ -1,3 +1,8 @@
+Requesting 'test_status.php'
+string(%d) "int(%d)
+bool(false)
+bool(false)
+int(%d)"
 Requesting 'test_get.php?name=Foo'
 string(15) "string(3) "Foo""
 Requesting 'test_get.php?name=Bar'
@@ -28,29 +33,39 @@ Requesting 'test_header.php?test_string=f%%0d%%0aoo'
 NULL
 Requesting 'test_duplicate_headers.php'
 string(%d) "array(5) {
-  ["Host"]=>
-  string(%d) "%s"
-  ["xxxxx "]=>
-  string(2) "45"
-  ["xyzzy "]=>
-  string(2) "44"
   ["Accept"]=>
   string(3) "*/*"
+  ["Host"]=>
+  string(%d) "%s"
   ["User-Agent"]=>
   string(%s) "%s"
+  ["xxxxx"]=>
+  string(2) "45"
+  ["xyzzy"]=>
+  string(2) "44"
 }
 array(5) {
+  ["accept"]=>
+  array(1) {
+    [0]=>
+    string(3) "*/*"
+  }
   ["host"]=>
   array(1) {
     [0]=>
     string(%d) "%s"
   }
-  ["xxxxx "]=>
+  ["user-agent"]=>
+  array(1) {
+    [0]=>
+    string(%d) "%s"
+  }
+  ["xxxxx"]=>
   array(1) {
     [0]=>
     string(2) "45"
   }
-  ["xyzzy "]=>
+  ["xyzzy"]=>
   array(3) {
     [0]=>
     string(2) "42"
@@ -59,16 +74,12 @@ array(5) {
     [2]=>
     string(2) "44"
   }
-  ["accept"]=>
-  array(1) {
-    [0]=>
-    string(3) "*/*"
-  }
-  ["user-agent"]=>
-  array(1) {
-    [0]=>
-    string(%d) "%s"
-  }
 }"
 Requesting 'test_curl_multi_except.php'
 string(%d) "Hello, World!%d:::Exception: oops"
+Requesting 'test_pagelet.php'
+string(%d) "resource(%d) of type (PageletTask)
+string(3) "one"
+string(3) "two"
+string(0) ""
+int(200)"

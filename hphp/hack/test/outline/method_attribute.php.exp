@@ -1,0 +1,15 @@
+C
+  kind: class
+  id: type_id::C
+  position: line 3, characters 7-7
+  span: line 3, character 1 - line 9, character 1
+  modifiers: 
+
+  methodWithAttribute
+    kind: method
+    id: method::C::methodWithAttribute
+    position: line 5, characters 19-37
+    span: line 4, character 3 - line 8, character 3
+    modifiers: public 
+    params:
+

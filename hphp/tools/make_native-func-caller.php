@@ -44,18 +44,20 @@ fwrite($fp, "static_assert(kNumSIMDRegs == " . NUM_SIMD_ARGS.
             ",\"Regenerate native-func-caller.h for updated ".
             "kNumSIMDRegs\");\n\n");
 
-$callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
-              'double* SIMD, int SIMD_count';
-foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
-        $ret => $name) {
+function go($name, $ret) {
+  global $fp;
+
+  $callerArgs = 'BuiltinFunction f, int64_t* GP, int GP_count, '.
+                'double* SIMD, int SIMD_count';
+
   fwrite($fp, "${ret} callFunc{$name}Impl({$callerArgs}) {\n");
   fwrite($fp, "  switch (GP_count) {\n");
   $gpargs = [];
-  for($gp = 0; $gp <= NUM_GP_ARGS; ++$gp) {
+  for ($gp = 0; $gp <= NUM_GP_ARGS; ++$gp) {
     fwrite($fp, "    case ${gp}:\n");
     fwrite($fp, "      switch (SIMD_count) {\n");
     $simdargs = [];
-    for($simd = 0; $simd <= NUM_SIMD_ARGS; ++$simd) {
+    for ($simd = 0; $simd <= NUM_SIMD_ARGS; ++$simd) {
       $argsD = implode(',', array_merge($gpargs, $simdargs));
       $argsC = [];
       for ($i = 0; $i < $gp; ++$i) {
@@ -77,3 +79,9 @@ foreach(['double'=>'Double','int64_t'=>'Int64','TypedValue'=>'TV'] as
   fwrite($fp, "  }\n");
   fwrite($fp, "}\n\n");
 }
+
+go('Double', 'double');
+go('Int64', 'int64_t');
+go('TV', 'TypedValue');
+fwrite($fp, "template<class IndirectRet>\n");
+go('Indirect', 'IndirectRet');

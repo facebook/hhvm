@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -37,14 +37,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  template<bool decRef, class TWaitHandle>
+  template<class TWaitHandle>
   void exitContextQueue(context_idx_t ctx_idx,
                         req::deque<TWaitHandle*>& queue) {
     while (!queue.empty()) {
       auto wait_handle = queue.front();
       queue.pop_front();
       wait_handle->exitContext(ctx_idx);
-      if (decRef) decRefObj(wait_handle);
+      decRefObj(wait_handle);
     }
   }
 
@@ -64,18 +64,20 @@ namespace {
     }
   }
 
-  inline void onIOWaitExit(AsioSession* session) {
+  inline void onIOWaitExit(AsioSession* session, AsioContext* context) {
     // The web request may have timed out while we were waiting for I/O.  Fail
     // early to avoid further execution of PHP code.  We limit I/O waiting to
     // the time currently remaining in the request (see
     // AsioSession::getLatestWakeTime).
     if (UNLIKELY(checkSurpriseFlags())) {
-      auto const flags = check_request_surprise();
+      c_WaitableWaitHandle* wait_handle = context->getBlamedWaitHandle();
+
+      auto const flags = handle_request_surprise(wait_handle);
       if (flags & XenonSignalFlag) {
-        Xenon::getInstance().log(Xenon::IOWaitSample);
+        Xenon::getInstance().log(Xenon::IOWaitSample, wait_handle);
       }
       if (flags & IntervalTimerFlag) {
-        IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample);
+        IntervalTimer::RunCallbacks(IntervalTimer::IOWaitSample, wait_handle);
       }
     }
 
@@ -89,12 +91,13 @@ void AsioContext::exit(context_idx_t ctx_idx) {
   assert(AsioSession::Get()->getContext(ctx_idx) == this);
 
   exitContextVector(ctx_idx, m_runnableQueue);
+  exitContextVector(ctx_idx, m_fastRunnableQueue);
 
   for (auto& it : m_priorityQueueDefault) {
-    exitContextQueue<true>(ctx_idx, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
   for (auto& it : m_priorityQueueNoPendingIO) {
-    exitContextQueue<true>(ctx_idx, it.second);
+    exitContextQueue(ctx_idx, it.second);
   }
 
   exitContextVector(ctx_idx, m_sleepEvents);
@@ -114,6 +117,32 @@ void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
   wait_handle->incRefCount();
 }
 
+c_AsyncFunctionWaitHandle* AsioContext::maybePopFast() {
+  assertx(this == AsioSession::Get()->getCurrentContext());
+
+  while (!m_fastRunnableQueue.empty()) {
+    auto wh = m_fastRunnableQueue.back();
+    m_fastRunnableQueue.pop_back();
+
+    if (wh->getState() == c_ResumableWaitHandle::STATE_READY &&
+        wh->isFastResumable()) {
+      // We only call maybePopFast() on the current context.  Since `wh' was
+      // scheduled in this context at some point, it must still be scheduled
+      // here now, since the only way it could leave the context is if the
+      // context was destroyed.  (Being scheduled here supercedes it having
+      // been scheduled in earlier contexts.)
+      assertx(wh->getContextIdx() ==
+              AsioSession::Get()->getCurrentContextIdx());
+      return wh;
+    } else {
+      // `wh' is blocked or finished in some other context.
+      m_fastRunnableQueue.push_back(wh);
+      return nullptr;
+    }
+  }
+  return nullptr;
+}
+
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   assert(wait_handle);
   assert(wait_handle->getContext() == this);
@@ -128,9 +157,26 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
   while (!wait_handle->isFinished()) {
     // Run queue of ready async functions once.
     if (!m_runnableQueue.empty()) {
-      auto current = m_runnableQueue.back();
+      auto wh = m_runnableQueue.back();
       m_runnableQueue.pop_back();
-      current->resume();
+      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
+        // may happen if wh was scheduled in multiple contexts
+        decRefObj(wh);
+      } else {
+        wh->resume();
+      }
+      continue;
+    }
+
+    if (!m_fastRunnableQueue.empty()) {
+      auto wh = m_fastRunnableQueue.back();
+      m_fastRunnableQueue.pop_back();
+      if (wh->getState() != c_ResumableWaitHandle::STATE_READY) {
+        // may happen if wh was scheduled in multiple contexts
+        decRefObj(wh);
+      } else {
+        wh->resume();
+      }
       continue;
     }
 
@@ -154,14 +200,18 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // Wait for pending external thread events...
     if (!m_externalThreadEvents.empty()) {
       // ...but only until the next sleeper (from any context) finishes.
-      auto waketime = session->sleepWakeTime();
 
-      // Wait if necessary.
-      if (LIKELY(!ete_queue->hasReceived())) {
-        onIOWaitEnter(session);
+      onIOWaitEnter(session);
+      // check if onIOWaitEnter callback unblocked any wait handles
+      if (LIKELY(m_runnableQueue.empty() &&
+                 m_fastRunnableQueue.empty() &&
+                 !m_externalThreadEvents.empty() &&
+                 !ete_queue->hasReceived() &&
+                 m_priorityQueueDefault.empty())) {
+        auto waketime = session->sleepWakeTime();
         ete_queue->receiveSomeUntil(waketime);
-        onIOWaitExit(session);
       }
+      onIOWaitExit(session, this);
 
       if (ete_queue->hasReceived()) {
         // Either we didn't have to wait, or we waited but no sleeper timed us
@@ -179,8 +229,15 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // be ready (in any context).
     if (!m_sleepEvents.empty()) {
       onIOWaitEnter(session);
-      std::this_thread::sleep_until(session->sleepWakeTime());
-      onIOWaitExit(session);
+      // check if onIOWaitEnter callback unblocked any wait handles
+      if (LIKELY(m_runnableQueue.empty() &&
+                 m_fastRunnableQueue.empty() &&
+                 m_externalThreadEvents.empty() &&
+                 m_priorityQueueDefault.empty() &&
+                 !m_sleepEvents.empty())) {
+        std::this_thread::sleep_until(session->sleepWakeTime());
+      }
+      onIOWaitExit(session, this);
 
       session->processSleepEvents();
       continue;
@@ -193,16 +250,47 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
 
     // What? The wait handle did not finish? We know it is part of the current
     // context and since there is nothing else to run, it cannot be in RUNNING
-    // or SCHEDULED state. So it must be BLOCKED on something. Apparently, the
-    // same logic can be used recursively on the something, so there is an
+    // or READY/SCHEDULED state. So it must be BLOCKED on something. Apparently,
+    // the same logic can be used recursively on the something, so there is an
     // infinite chain of blocked wait handles. But our memory is not infinite.
     // What could it possibly mean? I think we are in a deep sh^H^Hcycle.
     // But we can't, the cycles are detected and avoided at blockOn() time.
     // So, looks like it's not cycle, but the word I started typing first.
     assert(false);
-    throw FatalErrorException(
+    raise_fatal_error(
       "Invariant violation: queues are empty, but wait handle did not finish");
   }
+}
+
+c_WaitableWaitHandle* AsioContext::getBlamedWaitHandle() {
+  // first let's try to find wait handle, responsible for wakeup
+  auto session = AsioSession::Get();
+  auto ete_queue = session->getExternalThreadEventQueue();
+
+  c_ExternalThreadEventWaitHandle* ewh = ete_queue->lastReceived();
+  if (ewh != nullptr &&
+      ewh->getContextIdx() == session->getCurrentContextIdx()) {
+    return ewh;
+  }
+
+  // may return cancelled wait handle, which no longer has contextIdx
+  c_SleepWaitHandle* swh = session->nextSleepEvent();
+  if (swh != nullptr && !swh->isFinished() &&
+      swh->getContextIdx() == session->getCurrentContextIdx() &&
+      swh->getWakeTime() <= AsioSession::TimePoint::clock::now()) {
+    return swh;
+  }
+
+  // not found? let's find a wait handle from current context to blame
+  if (!m_externalThreadEvents.empty()) {
+    return m_externalThreadEvents[0];
+  }
+
+  if (!m_sleepEvents.empty()) {
+    return m_sleepEvents[0];
+  }
+
+  return nullptr;
 }
 
 /**

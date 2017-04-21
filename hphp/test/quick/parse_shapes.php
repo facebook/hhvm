@@ -85,7 +85,6 @@ function foo8(string $foo, string $bar) : Foobar {
 >>
 class SomeClass {}
 
-// These parse, but don't work at runtime currently:
 const Foobar SCALAR_SHAPE = shape(
   'foobar' => 'constant'
 );

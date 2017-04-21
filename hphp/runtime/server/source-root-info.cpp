@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -136,11 +136,15 @@ void SourceRootInfo::createFromUserConfig() {
   Hdf config;
   String sp, lp, alp, userOverride;
   try {
-    Config::ParseConfigFile(confFileName, ini, config);
-    userOverride = Config::Get(ini, config, "user_override");
-    sp = Config::Get(ini, config, (m_sandbox + ".path").c_str());
-    lp = Config::Get(ini, config, (m_sandbox + ".log").c_str());
-    alp = Config::Get(ini, config, (m_sandbox + ".accesslog").c_str());
+    // These settings are NOT system settings.
+    Config::ParseConfigFile(confFileName, ini, config, false);
+    // Do not prepend "hhvm." to these when accessing.
+    userOverride = Config::Get(ini, config, "user_override", "", false);
+    sp = Config::Get(ini, config, (m_sandbox + ".path").c_str(), "", false);
+    lp = Config::Get(ini, config, (m_sandbox + ".log").c_str(), "", false);
+    alp = Config::Get(
+        ini, config, (m_sandbox + ".accesslog").c_str(), "", false
+    );
   } catch (HdfException &e) {
     Logger::Error("%s ignored: %s", confFileName.c_str(),
                   e.getMessage().c_str());
@@ -217,8 +221,11 @@ Array SourceRootInfo::setServerVariables(Array server) const {
                String(parseSandboxServerVariable(it->second)));
   }
 
-  if (!m_serverVars.empty()) {
-    server += m_serverVars;
+  {
+    SuppressHackArrCompatNotices suppress;
+    if (!m_serverVars.empty()) {
+      server += m_serverVars;
+    }
   }
 
   return server;

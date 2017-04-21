@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,7 @@ namespace HPHP {
 // compositions
 
 Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 */,
-                          const Variant& replacement /* = null_variant */,
+                          const Variant& replacement /* = uninit_variant */,
                           Array *removed /* = NULL */) {
   int num_in = input.size();
   if (offset > num_in) {
@@ -81,8 +81,8 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
 
   Array arr = replacement.toArray();
   if (!arr.empty()) {
-    for (ArrayIter iter(arr); iter; ++iter) {
-      const Variant& v = iter.secondRef();
+    for (ArrayIter iterb(arr); iterb; ++iterb) {
+      const Variant& v = iterb.secondRef();
       out_hash.appendWithRef(v);
     }
   }
@@ -100,30 +100,39 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
   return out_hash;
 }
 
-Variant ArrayUtil::Pad(const Array& input, const Variant& pad_value, int pad_size,
-                       bool pad_right /* = true */) {
+Variant ArrayUtil::PadRight(const Array& input, const Variant& pad_value,
+                            int pad_size) {
   int input_size = input.size();
   if (input_size >= pad_size) {
     return input;
   }
 
-  Array ret = Array::Create();
-  if (pad_right) {
-    ret = input;
-    for (int i = input_size; i < pad_size; i++) {
-      ret.append(pad_value);
-    }
-  } else {
-    for (int i = input_size; i < pad_size; i++) {
-      ret.append(pad_value);
-    }
-    for (ArrayIter iter(input); iter; ++iter) {
-      Variant key(iter.first());
-      if (key.isNumeric()) {
-        ret.appendWithRef(iter.secondRef());
-      } else {
-        ret.setWithRef(key, iter.secondRef(), true);
-      }
+  Array ret = input;
+  for (int i = input_size; i < pad_size; i++) {
+    ret.append(pad_value);
+  }
+  return ret;
+}
+
+Variant ArrayUtil::PadLeft(const Array& input, const Variant& pad_value,
+                           int pad_size) {
+  int input_size = input.size();
+  if (input_size >= pad_size) {
+    return input;
+  }
+
+  auto ret = Array::attach(
+    MixedArray::MakeReserveLike(input.get(), pad_size)
+  );
+  for (int i = input_size; i < pad_size; i++) {
+    ret.append(pad_value);
+  }
+  for (ArrayIter iter(input); iter; ++iter) {
+    Variant key(iter.first());
+    if (key.isNumeric()) {
+      ret.appendWithRef(iter.secondRef());
+    } else {
+      ret.setWithRef(key, iter.secondRef(), true);
     }
   }
   return ret;
@@ -166,27 +175,30 @@ void rangeCheckAlloc(double estNumSteps) {
   // An array can hold at most INT_MAX elements
   if (estNumSteps > std::numeric_limits<int32_t>::max()) {
     MM().forceOOM();
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
     return;
   }
 
   int32_t numElms = static_cast<int32_t>(estNumSteps);
   if (MM().preAllocOOM(MixedArray::computeAllocBytesFromMaxElms(numElms))) {
-    check_request_surprise_unlikely();
+    check_non_safepoint_surprise();
   }
 }
 }
 
 Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   Array ret;
+  double element;
+  int64_t i;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
       throw_invalid_argument("step exceeds the specified range");
       return false;
     }
     rangeCheckAlloc((low - high) / step);
-    for (; low >= (high - DOUBLE_DRIFT_FIX); low -= step) {
-      ret.append(low);
+    for (i = 0, element = low; element >= (high - DOUBLE_DRIFT_FIX);
+         i++, element = low - (i * step)) {
+      ret.append(element);
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
@@ -194,8 +206,9 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
       return false;
     }
     rangeCheckAlloc((high - low) / step);
-    for (; low <= (high + DOUBLE_DRIFT_FIX); low += step) {
-      ret.append(low);
+    for (i = 0, element = low; element <= (high + DOUBLE_DRIFT_FIX);
+         i++, element = low + (i * step)) {
+      ret.append(element);
     }
   } else {
     ret.append(low);
@@ -203,7 +216,7 @@ Variant ArrayUtil::Range(double low, double high, double step /* = 1.0 */) {
   return ret;
 }
 
-Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
+Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
   Array ret;
   if (low > high) { // Negative steps
     if (low - high < step || step <= 0) {
@@ -212,7 +225,7 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
     }
     rangeCheckAlloc((low - high) / step);
     for (; low >= high; low -= step) {
-      ret.append((int64_t)low);
+      ret.append(toInt64(low));
     }
   } else if (high > low) { // Positive steps
     if (high - low < step || step <= 0) {
@@ -221,10 +234,10 @@ Variant ArrayUtil::Range(double low, double high, int64_t step /* = 1 */) {
     }
     rangeCheckAlloc((high - low) / step);
     for (; low <= high; low += step) {
-      ret.append((int64_t)low);
+      ret.append(toInt64(low));
     }
   } else {
-    ret.append((int64_t)low);
+    ret.append(toInt64(low));
   }
   return ret;
 }
@@ -271,10 +284,10 @@ Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
 
 Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */) {
   if (input.empty()) {
-    return input;
+    return empty_array();
   }
 
-  Array ret = Array::Create();
+  auto ret = Array::Create();
   auto pos_limit = input->iter_end();
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {
@@ -318,12 +331,28 @@ Variant ArrayUtil::Shuffle(const Array& input) {
   }
   php_array_data_shuffle(indices);
 
-  PackedArrayInit ret(count);
-  for (int i = 0; i < count; i++) {
-    ssize_t pos = indices[i];
-    ret.appendWithRef(input->getValueRef(pos));
+  if (input->isVecArray()) {
+    VecArrayInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.append(input->getValueRef(pos));
+    }
+    return ret.toVariant();
+  } else if (input->isDict()) {
+    DictInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.append(input->getValueRef(pos));
+    }
+    return ret.toVariant();
+  } else {
+    PackedArrayInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.appendWithRef(input->getValueRef(pos));
+    }
+    return ret.toVariant();
   }
-  return ret.toVariant();
 }
 
 Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
@@ -452,7 +481,7 @@ static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
   bool isIterable;
   Object iterable = odata->iterableObject(isIterable);
   if (isIterable) {
-    throw FatalErrorException("An iterator cannot be used with "
+    raise_fatal_error("An iterator cannot be used with "
                               "foreach by reference");
   }
   Array properties = iterable->o_toIterArray(null_string,
@@ -463,7 +492,7 @@ static void create_miter_for_walk(folly::Optional<MArrayIter>& miter,
 void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
                      const void *data, bool recursive /* = false */,
                      PointerSet *seen /* = NULL */,
-                     const Variant& userdata /* = null_variant */) {
+                     const Variant& userdata /* = uninit_variant */) {
   assert(walk_function);
 
   // The Optional is just to avoid copy constructing MArrayIter.
@@ -476,7 +505,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
   while (miter->advance()) {
     k = miter->key();
     v.assignRef(miter->val());
-    if (recursive && v.is(KindOfArray)) {
+    if (recursive && v.isArray()) {
       assert(seen);
       ArrayData *arr = v.getArrayData();
 
@@ -500,7 +529,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
 
 Variant ArrayUtil::Reduce(const Array& input, PFUNC_REDUCE reduce_function,
                           const void *data,
-                          const Variant& initial /* = null_variant */) {
+                          const Variant& initial /* = uninit_variant */) {
   Variant result(initial);
   for (ArrayIter iter(input); iter; ++iter) {
     result = reduce_function(result, iter.second(), data);

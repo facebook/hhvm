@@ -1,0 +1,84 @@
+vec(0) {
+}
+vec(5) {
+  int(1)
+  int(2)
+  int(3)
+  int(4)
+  int(5)
+}
+vec(5) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "c"
+  string(1) "d"
+  string(1) "e"
+}
+vec(4) {
+  int(100)
+  int(200)
+  int(300)
+  int(400)
+}
+vec(4) {
+  string(1) "z"
+  string(1) "y"
+  string(1) "x"
+  string(1) "w"
+}
+vec(10) {
+  int(10)
+  int(20)
+  int(30)
+  int(40)
+  int(50)
+  int(60)
+  int(70)
+  int(80)
+  int(90)
+  int(100)
+}
+vec(10) {
+  string(1) "f"
+  string(1) "g"
+  string(1) "h"
+  string(1) "i"
+  string(1) "j"
+  string(1) "k"
+  string(1) "l"
+  string(1) "m"
+  string(1) "n"
+  string(1) "o"
+}
+vec(0) {
+}
+vec(3) {
+  int(1000)
+  int(1001)
+  int(1002)
+}
+vec(3) {
+  string(2) "C1"
+  string(2) "C2"
+  string(2) "C3"
+}
+vec(2) {
+  string(7) "public1"
+  string(7) "public2"
+}
+vec(4) {
+  string(6) "const1"
+  string(6) "const2"
+  string(6) "const3"
+  string(6) "const4"
+}
+array(1) {
+  ["TestAttr"]=>
+  array(1) {
+    [0]=>
+    vec(2) {
+      string(9) "testattr1"
+      string(9) "testattr2"
+    }
+  }
+}

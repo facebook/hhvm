@@ -256,7 +256,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
     case HPHP::KindOfInt64:
       return HASH_KEY_IS_LONG;
     case HPHP::KindOfString:
-    case HPHP::KindOfStaticString:
+    case HPHP::KindOfPersistentString:
       return HASH_KEY_IS_STRING;
     default:
       not_reached();

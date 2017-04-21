@@ -1,0 +1,2 @@
+<?hh
+<< fQDq ( $nEGBvmfA <<= 0b101010 ) >> function hEbtiTCE < kDJsSS > ( << jDsIF ( ) , uZsTLDtG ( ( $nAdp -- ) -> kNbzV , ( ( ( $uZWpZXkh ) ) - ( ( $mZRy ) ) ) / ( ( ~ ( float ) $eIZvq ) ) ) >> mixed $nSFzkuxG ) : oEVPtTdNT < nRzbS , ? void , ( function ( float , ? ( function ( ) : self :: gJ ) ) : string ) , mRIwZpYm > { ; }

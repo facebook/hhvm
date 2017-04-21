@@ -1,8 +1,15 @@
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
-[<expr#1>::T][\C::T]Tnum
-[<expr#2>::T][\C::T]Tnum
-[1]intersect([<expr#3>::T][\C::T]Tnum)
-[2]intersect([<expr#4>::T][\C::T]Tnum)
-[3]intersect([<expr#4>::T][\C::T]Tnum)
+File "lvar_expr_dependent5.php", line 13, characters 5-22:
+  <expr#1>::T as C::T as num
+File "lvar_expr_dependent5.php", line 14, characters 5-22:
+  <expr#1>::T as C::T as num
+File "lvar_expr_dependent5.php", line 18, characters 7-24:
+  <expr#1>::T as C::T as num
+File "lvar_expr_dependent5.php", line 21, characters 7-24:
+  <expr#2>::T as C::T as num
+File "lvar_expr_dependent5.php", line 24, characters 7-24:
+  ^(<expr#3>::T as C::T as num)
+File "lvar_expr_dependent5.php", line 27, characters 7-24:
+  ^(<expr#4>::T as C::T as num)
+File "lvar_expr_dependent5.php", line 31, characters 5-22:
+  ^(<expr#4>::T as C::T as num)
 No errors

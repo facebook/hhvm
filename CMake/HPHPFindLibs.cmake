@@ -27,19 +27,6 @@ if (LIBDL_INCLUDE_DIRS)
   endif()
 endif()
 
-# boost checks
-find_package(Boost 1.51.0 COMPONENTS system program_options filesystem context REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
-add_definitions("-DHAVE_BOOST1_49")
-
-
-# features.h
-FIND_PATH(FEATURES_HEADER features.h)
-if (FEATURES_HEADER)
-  add_definitions("-DHAVE_FEATURES_H=1")
-endif()
-
 # google-glog
 find_package(Glog REQUIRED)
 if (LIBGLOG_STATIC)
@@ -63,7 +50,7 @@ if (ENABLE_ASYNC_MYSQL)
   )
   set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
   set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
+    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
   )
 else()
   find_package(MySQL REQUIRED)
@@ -137,7 +124,7 @@ endif ()
 
 # liblz4
 find_package(LZ4)
-if (LZ4_INCLUDE_DIR)
+if (LZ4_FOUND)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
@@ -265,6 +252,11 @@ if (GOOGLE_CPU_PROFILER_ENABLED)
   add_definitions(-DGOOGLE_CPU_PROFILER=1)
 endif()
 
+# HHProf
+if (JEMALLOC_ENABLED AND ENABLE_HHPROF)
+  add_definitions(-DENABLE_HHPROF=1)
+endif()
+
 # tbb libs
 find_package(TBB REQUIRED)
 if (${TBB_INTERFACE_VERSION} LESS 5005)
@@ -281,6 +273,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 # LibreSSL explicitly refuses to support RAND_egd()
+SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
 SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
 INCLUDE(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("#include <openssl/rand.h>
@@ -290,6 +283,8 @@ int main() {
 if (NOT OPENSSL_HAVE_RAND_EGD)
   add_definitions("-DOPENSSL_NO_RAND_EGD")
 endif()
+SET(CMAKE_REQUIRED_INCLUDES)
+SET(CMAKE_REQUIRED_LIBRARIES)
 
 
 # ZLIB
@@ -341,13 +336,6 @@ if (NOT WINDOWS)
     add_definitions("-DHAVE_ELF_GETSHDRSTRNDX")
   endif()
 endif()
-
-# LLVM. Disabled in OSS for now: t5056266
-# find_package(LLVM)
-# if (LIBLLVM_INCLUDE_DIR)
-#   include_directories(LIBLLVM_INCLUDE_DIR)
-#   add_definitions("-DUSE_LLVM")
-# endif()
 
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
@@ -439,7 +427,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
-  target_link_libraries(${target} ${Boost_LIBRARIES})
+  target_link_libraries(${target} boost)
   target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)
@@ -515,7 +503,7 @@ macro(hphp_link target)
     target_link_libraries(${target} double-conversion)
   endif()
 
-  if (LZ4_LIBRARY)
+  if (LZ4_FOUND)
     target_link_libraries(${target} ${LZ4_LIBRARY})
   else()
     target_link_libraries(${target} lz4)
@@ -542,6 +530,8 @@ macro(hphp_link target)
   target_link_libraries(${target} timelib)
   target_link_libraries(${target} folly)
   target_link_libraries(${target} wangle)
+  target_link_libraries(${target} brotli_enc)
+  target_link_libraries(${target} brotli_dec)
 
   if (ENABLE_MCROUTER)
     target_link_libraries(${target} mcrouter)
@@ -561,10 +551,6 @@ macro(hphp_link target)
   if (NOT WINDOWS)
     target_link_libraries(${target} ${LIBDWARF_LIBRARIES})
     target_link_libraries(${target} ${LIBELF_LIBRARIES})
-  endif()
-
-  if (LIBLLVM_LIBRARY)
-    target_link_libraries(${target} ${LIBLLVM_LIBRARY})
   endif()
 
   if (LINUX)

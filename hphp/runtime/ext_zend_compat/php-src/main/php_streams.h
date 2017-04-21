@@ -21,15 +21,15 @@
 #ifndef PHP_STREAMS_H
 #define PHP_STREAMS_H
 
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
+#include <folly/portability/SysTime.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #undef getThis
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/directory.h"
+#include "hphp/util/type-scan.h"
 #define getThis() (this_ptr)
 
 BEGIN_EXTERN_C()
@@ -166,6 +166,7 @@ typedef struct _php_stream_wrapper_ops {
 struct _php_stream_wrapper  {
   php_stream_wrapper_ops *wops;  /* operations the wrapper can perform */
   void *abstract;          /* context for the wrapper */
+  TYPE_SCAN_CONSERVATIVE_FIELD(abstract);
   int is_url;            /* so that PG(allow_url_fopen) can be respected */
 };
 
@@ -196,6 +197,9 @@ struct _php_stream  {
     HPHP::File *hphp_file;
     HPHP::Directory *hphp_dir;
   };
+
+  TYPE_SCAN_CONSERVATIVE_FIELD(abstract);
+  TYPE_SCAN_CONSERVATIVE_FIELD(wrapperthis);
 #endif
   php_stream_ops *ops;
   void *abstract;      /* convenience pointer for abstraction */

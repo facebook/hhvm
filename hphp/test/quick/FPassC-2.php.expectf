@@ -1,5 +1,5 @@
 
-Warning: File not found: doesnotexist.php in %s on line 14
+Warning: include(doesnotexist.php): File not found in %s on line 14
 bool(false)
 NULL
 object(stdClass)#1 (0) {

@@ -24,8 +24,8 @@ abstract class WaitHandle implements Awaitable {
   <<__HipHopSpecific, __Native>>
   final public static function setOnIOWaitExitCallback(mixed $callback): void;
 
-  /* Set callback for when join() is called
-   * @param mixed $callback - A Closure to be called on join()
+  /* Set callback for when \HH\Asio\join() is called
+   * @param mixed $callback - A Closure to be called on \HH\Asio\join()
    */
   <<__HipHopSpecific, __Native>>
   final public static function setOnJoinCallback(mixed $callback): void;
@@ -42,19 +42,16 @@ abstract class WaitHandle implements Awaitable {
   <<__Native>>
   final public function import(): void;
 
-  /* Wait until this wait handle is finished and return its result (operates in
-   * a new scheduler context)
-   * @return mixed - A result of the operation represented by given wait handle
-   */
-  <<__Native("NoFCallBuiltin")>>
-  final public function join(): mixed;
-
   /* Return the wait handle's result if it is already finished (and valid),
    * throw an exception otherwise
    * @return mixed - A result of the operation represented by given wait handle
    */
-  <<__Native("OpCodeImpl")>>
-  final public function result(): mixed;
+  final public function result(): mixed {
+    return \hh\asm('
+      This
+      WHResult
+    ');
+  }
 
   /* Check if this wait handle finished (succeeded or failed)
    * @return bool - A boolean indicating whether this wait handle finished
@@ -176,6 +173,22 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   <<__Native>>
   public static function fromArray(array $dependencies): WaitHandle;
 
+  /* Create a wait handle that waits for a given vec of dependencies
+   * @param array $dependencies - A vec of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given vec of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromVec(vec $dependencies): WaitHandle;
+
+  /* Create a wait handle that waits for a given dict of dependencies
+   * @param array $dependencies - A dict of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given dict of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromDict(dict $dependencies): WaitHandle;
+
   /* Create a wait handle that waits for a given Map of dependencies
    * @param mixed $dependencies - A Map of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given Map of
@@ -193,63 +206,6 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
   public static function fromVector(mixed $dependencies): WaitHandle;
 
   /* Set callback for when a AwaitAllWaitHandle is created
-   * @param mixed $callback - A Closure to be called on creation
-   */
-  <<__HipHopSpecific, __Native>>
-  public static function setOnCreateCallback(mixed $callback): void;
-}
-
-/* A wait handle representing an array of asynchronous operations
- */
-final class GenArrayWaitHandle extends WaitableWaitHandle {
-
-  /* Create a wait handle that waits for a given array of dependencies
-   * @param array $dependencies - An Array of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given array of
-   * dependencies and return their results
-   */
-  <<__Native>>
-  public static function create(array $dependencies): WaitHandle;
-
-  /* Set callback for when a GenArrayWaitHandle is created
-   * @param mixed $callback - A Closure to be called on creation
-   */
-  <<__HipHopSpecific, __Native>>
-  public static function setOnCreateCallback(mixed $callback): void;
-}
-
-/* A wait handle representing a map of asynchronous operations
- */
-final class GenMapWaitHandle extends WaitableWaitHandle {
-
-  /* Create a wait handle that waits for a given map of dependencies
-   * @param mixed $dependencies - A map of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given map of
-   * dependencies and return their results
-   */
-  <<__Native>>
-  public static function create(Map $dependencies): WaitHandle;
-
-  /* Set callback for when a GenMapWaitHandle is created
-   * @param mixed $callback - A Closure to be called on creation
-   */
-  <<__HipHopSpecific, __Native>>
-  public static function setOnCreateCallback(mixed $callback): void;
-}
-
-/* A wait handle representing a vector of asynchronous operations
- */
-final class GenVectorWaitHandle extends WaitableWaitHandle {
-
-  /* Create a wait handle that waits for a given vector of dependencies
-   * @param mixed $dependencies - A Vector of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given vector of
-   * dependencies and return their results
-   */
-  <<__Native>>
-  public static function create(Vector $dependencies): WaitHandle;
-
-  /* Set callback for when a GenVectorWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
    */
   <<__HipHopSpecific, __Native>>
@@ -393,13 +349,8 @@ async function void(): Awaitable<void> {}
  * Launches a new instance of scheduler to drive asynchronous execution
  * until the provided Awaitable is finished.
  */
-function join<T>(Awaitable<T> $awaitable): T {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
-  return $awaitable->join();
-}
+<<__Native("NoFCallBuiltin")>>
+function join<T>(Awaitable<T> $awaitable): mixed;
 
 /**
  * Get result of an already finished Awaitable.
@@ -424,5 +375,42 @@ function has_finished<T>(Awaitable<T> $awaitable): bool {
   );
   return $awaitable->isFinished();
 }
+
+/**
+ * Cancel Awaitable, if it's still pending.
+ *
+ * If Awaitable has not been completed yet, fails Awaitable with
+ * $exception and returns true.
+ * Otherwise, returns false.
+ *
+ * Throws InvalidArgumentException, if Awaitable does not support cancellation.
+ */
+<<__Native>>
+function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
+
+/**
+ * Generates a backtrace for $awaitable.
+ * Following conditions must be met to produce non-empty backtrace:
+ * - $awaitable has not finished yet (i.e. has_finished($awaitable) === false)
+ * - $awaitable is part of valid scheduler context
+ *     (i.e. $awaitable->getContextIdx() > 0)
+ * If either condition is not met, backtrace() returns empty array.
+ *
+ * @param $awaitable - Awaitable, to take backtrace from.
+ * @param int $options - bitmask of the following options:
+ *   DEBUG_BACKTRACE_PROVIDE_OBJECT
+ *   DEBUG_BACKTRACE_PROVIDE_METADATA
+ *   DEBUG_BACKTRACE_IGNORE_ARGS
+ * @param int $limit - the maximum number of stack frames returned.
+ *   By default (limit=0) it returns all stack frames.
+ *
+ * @return array - Returns an array of associative arrays.
+ *   See debug_backtrace() for detailed format description.
+ */
+<<__Native>>
+function backtrace<T>(Awaitable<T> $awaitable,
+                      int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
+                      int $limit = 0): array<array>;
+
 
 } // namespace

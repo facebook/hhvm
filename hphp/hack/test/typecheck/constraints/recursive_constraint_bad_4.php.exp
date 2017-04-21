@@ -1,0 +1,12 @@
+File "recursive_constraint_bad_4.php", line 6, characters 12-13:
+Invalid return type (Typing[4110])
+File "recursive_constraint_bad_4.php", line 6, characters 12-13:
+Some type constraint(s) here are violated
+File "recursive_constraint_bad_4.php", line 5, characters 31-32:
+'Tx' is a constrained type
+File "recursive_constraint_bad_4.php", line 4, characters 19-20:
+'Ty' is a constrained type
+File "recursive_constraint_bad_4.php", line 5, characters 39-41:
+This is an int
+File "recursive_constraint_bad_4.php", line 4, characters 29-30:
+It is incompatible with a value of generic type Tx

@@ -1,0 +1,4 @@
+File "class_meth_no_typedef.php", line 10, characters 21-25:
+Unexpected typedef (Naming[2052])
+File "class_meth_no_typedef.php", line 7, characters 6-8:
+Definition is here

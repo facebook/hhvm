@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,7 @@ namespace HPHP{
 ///////////////////////////////////////////////////////////////////////////////
 // writers
 
-class Writer {
-public:
+struct Writer {
 
   enum class Format {
     XML,
@@ -69,8 +68,8 @@ public:
     endObject(name);
   }
 
-  static folly::fbstring escape_for_json(const char* s) {
-    auto ret = folly::fbstring{};
+  static std::string escape_for_json(const char* s) {
+    auto ret = std::string{};
     auto opts = folly::json::serialization_opts{};
     opts.skip_invalid_utf8 = true;
     opts.encode_non_ascii = true;
@@ -90,8 +89,7 @@ protected:
   }
 };
 
-class XMLWriter : public Writer {
-public:
+struct XMLWriter : Writer {
   explicit XMLWriter(std::ostream &out) : Writer(out) {}
 
 
@@ -150,7 +148,7 @@ private:
   }
 };
 
-class JSONWriter : public Writer {
+struct JSONWriter : Writer {
 
 protected:
   // If true it will generate human-friendly output on multiple lines and with
@@ -295,9 +293,7 @@ public:
   }
 };
 
-class HTMLWriter : public Writer {
-
-public:
+struct HTMLWriter : Writer {
   explicit HTMLWriter(std::ostream &out) : Writer(out) {}
 
   virtual void writeFileHeader() {

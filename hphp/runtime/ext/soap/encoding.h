@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -153,6 +153,14 @@
 #define SOAP_ENC_ARRAY_STRING "Array"
 #define SOAP_ENC_OBJECT 301
 #define SOAP_ENC_OBJECT_STRING "Struct"
+#define SOAP_ENC_INT_DT 302
+#define SOAP_ENC_INT_DT_STRING XSD_INT_STRING
+#define SOAP_ENC_DOUBLE_DT 303
+#define SOAP_ENC_DOUBLE_DT_STRING XSD_FLOAT_STRING
+#define SOAP_ENC_ARRAY_DT 304
+#define SOAP_ENC_ARRAY_DT_STRING SOAP_ENC_ARRAY_STRING
+#define SOAP_ENC_NULL_DT 305
+#define SOAP_ENC_NULL_DT_STRING "nil"
 
 #define WSDL_NAMESPACE "http://schemas.xmlsoap.org/wsdl/"
 #define WSDL_NS_PREFIX "wsdl"
@@ -176,6 +184,7 @@
 #define WSDL_DIME_CLOSED \
   "http://schemas.xmlsoap.org/ws/2002/04/dime/closed-layout"
 
+#define INVALID_TYPE 999997
 #define UNKNOWN_TYPE 999998
 #define END_KNOWN_TYPES 999999
 
@@ -189,34 +198,30 @@ struct soapMapping {
 
 struct sdlType;
 
-class encodeType {
-public:
-  encodeType() : type(0), sdl_type(NULL) {}
-
-  int type;
+struct encodeType {
+  int type{0};
   std::string type_str;
   std::string ns;
-  sdlType* sdl_type; // weak pointer
+  sdlType* sdl_type{nullptr}; // weak pointer
   std::shared_ptr<soapMapping> map;
 };
-typedef encodeType* encodeTypePtr;
 
 struct encode {
   encodeType details;
-  Variant (*to_zval)(encodeTypePtr type, xmlNodePtr data);
-  xmlNodePtr (*to_xml)(encodeTypePtr type, const Variant& data, int style,
+  Variant (*to_zval)(encodeType* type, xmlNodePtr data);
+  xmlNodePtr (*to_xml)(encodeType* type, const Variant& data, int style,
                        xmlNodePtr parent);
 };
 using encodePtr = std::shared_ptr<encode>;
-typedef hphp_string_hash_map<std::shared_ptr<encode>,encode> encodeMap;
-typedef std::shared_ptr<encodeMap> encodeMapPtr;
+using encodeMap = hphp_string_hash_map<encodePtr,encode>;
+using encodeMapPtr = std::shared_ptr<encodeMap>;
 
 struct encodeStatic {
   int type;
   const char *type_str;
   const char *ns;
-  Variant (*to_zval)(encodeTypePtr type, xmlNodePtr data);
-  xmlNodePtr (*to_xml)(encodeTypePtr type, const Variant& data, int style,
+  Variant (*to_zval)(encodeType* type, xmlNodePtr data);
+  xmlNodePtr (*to_xml)(encodeType* type, const Variant& data, int style,
                        xmlNodePtr parent);
 };
 
@@ -228,16 +233,16 @@ xmlNodePtr master_to_xml(encodePtr encode, const Variant& data, int style,
 Variant master_to_zval(encodePtr encode, xmlNodePtr data);
 
 /* user defined mapping */
-xmlNodePtr to_xml_user(encodeTypePtr type, const Variant& data, int style,
+xmlNodePtr to_xml_user(encodeType* type, const Variant& data, int style,
                        xmlNodePtr parent);
-Variant to_zval_user(encodeTypePtr type, xmlNodePtr node);
+Variant to_zval_user(encodeType* type, xmlNodePtr node);
 
 void whiteSpace_replace(xmlChar* str);
 void whiteSpace_collapse(xmlChar* str);
 
-xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, const Variant& data,
+xmlNodePtr sdl_guess_convert_xml(encodeType* enc, const Variant& data,
                                  int style, xmlNodePtr parent);
-Variant sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
+Variant sdl_guess_convert_zval(encodeType* enc, xmlNodePtr data);
 
 void encode_finish();
 void encode_reset_ns();
@@ -251,6 +256,35 @@ encodePtr get_conversion(int encode);
 extern encodeStatic s_defaultEncoding[];
 
 ///////////////////////////////////////////////////////////////////////////////
+
+inline int dataTypeToSoap(DataType dt) {
+  switch (dt) {
+    case KindOfUninit:
+    case KindOfNull:    return SOAP_ENC_NULL_DT;
+    case KindOfBoolean: return XSD_BOOLEAN;
+    case KindOfInt64:   return SOAP_ENC_INT_DT;
+    case KindOfDouble:  return SOAP_ENC_DOUBLE_DT;
+    case KindOfPersistentString:
+    case KindOfString:  return XSD_STRING;
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentArray:
+    case KindOfArray:   return SOAP_ENC_ARRAY_DT;
+    case KindOfObject:  return SOAP_ENC_OBJECT;
+    case KindOfResource:
+    case KindOfRef:     return INVALID_TYPE;
+  }
+  return INVALID_TYPE;
+}
+
+inline bool isSoapArrayType(int t) {
+  return t == SOAP_ENC_ARRAY || t == SOAP_ENC_ARRAY_DT;
+}
+
 }
 
 #endif

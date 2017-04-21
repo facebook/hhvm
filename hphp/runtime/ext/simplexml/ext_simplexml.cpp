@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include <vector>
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/class-info.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml_include.h"
@@ -61,7 +60,6 @@ const Class* SimpleXMLIterator_classof() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // NativeData definitions
-namespace {
 
 struct SimpleXMLElement {
   SimpleXMLElement() {
@@ -135,8 +133,6 @@ struct SimpleXMLElementIterator {
 };
 
 using SimpleXMLIterator = SimpleXMLElement;
-
-} // anon namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helpers
@@ -375,7 +371,7 @@ static xmlNodePtr php_sxe_get_first_node(SimpleXMLElement* sxe,
 }
 
 xmlNodePtr SimpleXMLElement_exportNode(const Object& sxe) {
-  assert(sxe->instanceof(SimpleXMLElement_classof()));
+  if (!sxe->instanceof(SimpleXMLElement_classof())) return nullptr;
   auto data = Native::data<SimpleXMLElement>(sxe.get());
   return php_sxe_get_first_node(data, data->nodep());
 }
@@ -825,7 +821,9 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
       rv.append(sxe_xmlNodeListGetString(node->doc, node->children, 1));
       node = nullptr;
     } else if (sxe->iter.type != SXE_ITER_CHILD) {
-      if (!node->children || !node->parent || node->children->next ||
+      if (sxe->iter.type == SXE_ITER_NONE || !node->children ||
+          !node->parent ||
+          node->children->next ||
           node->children->children ||
           node->parent->children == node->parent->last) {
         node = node->children;
@@ -898,7 +896,7 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
     sxe_get_prop_hash(sxe, true, properties, true);
     return properties.size() != 0;
   }
-  if (type == KindOfArray) {
+  if (isArrayType((DataType)type)) {
     Array properties = Array::Create();
     sxe_get_prop_hash(sxe, true, properties);
     return properties;
@@ -1165,9 +1163,15 @@ static const Class* class_from_name(const String& class_name,
   return cls;
 }
 
+const StaticString s_DOMNode("DOMNode");
+
 static Variant HHVM_FUNCTION(simplexml_import_dom,
-  const Object& node,
-  const String& class_name /* = "SimpleXMLElement" */) {
+                             const Object& node,
+                             const String& class_name) {
+  if (!node->instanceof(s_DOMNode)) {
+    raise_warning("Invalid Nodetype to import");
+    return init_null();
+  }
   auto domnode = Native::data<DOMNode>(node);
   xmlNodePtr nodep = domnode->nodep();
 
@@ -1429,6 +1433,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
       int strval_len;
       xmlDocDumpMemoryEnc(doc, &strval, &strval_len,
                           (const char*)doc->encoding);
+      if (!strval) {
+        return false;
+      }
       String ret = String((char*)strval);
       xmlFree(strval);
       return ret;
@@ -1450,6 +1457,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
 #else
       str = (char*)outbuf->buffer->content;
 #endif
+      if (!str) {
+        return false;
+      }
       String ret = String(str);
       xmlOutputBufferClose(outbuf);
       return ret;
@@ -1647,7 +1657,7 @@ static void HHVM_METHOD(SimpleXMLElement, addAttribute,
 }
 
 static String HHVM_METHOD(SimpleXMLElement, __toString) {
-  return SimpleXMLElement_objectCast(this_, KindOfString);
+  return SimpleXMLElement_objectCast(this_, KindOfString).toString();
 }
 
 static Variant HHVM_METHOD(SimpleXMLElement, __get, const Variant& name) {
@@ -1814,8 +1824,7 @@ static bool HHVM_METHOD(SimpleXMLIterator, hasChildren) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static class SimpleXMLExtension : public Extension {
- public:
+static struct SimpleXMLExtension : Extension {
   SimpleXMLExtension(): Extension("simplexml", "1.0") {}
 
   void moduleInit() override {

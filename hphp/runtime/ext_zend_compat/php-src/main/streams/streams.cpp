@@ -220,39 +220,39 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: _php_stream_set_option");
+  HPHP::raise_fatal_error("unimplemented: _php_stream_set_option");
 }
 
 PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_context_set");
+  HPHP::raise_fatal_error("unimplemented: php_stream_context_set");
 }
 
 PHPAPI void php_stream_notification_notify(php_stream_context *context, int notifycode, int severity,
     char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_notification_notify");
+  HPHP::raise_fatal_error("unimplemented: php_stream_notification_notify");
 }
 
 PHPAPI void php_stream_context_free(php_stream_context *context)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_context_free");
+  HPHP::raise_fatal_error("unimplemented: php_stream_context_free");
 }
 
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_notification_alloc");
+  HPHP::raise_fatal_error("unimplemented: php_stream_notification_alloc");
 }
 
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_notification_free");
+  HPHP::raise_fatal_error("unimplemented: php_stream_notification_free");
 }
 
 PHPAPI int php_stream_context_get_option(php_stream_context *context,
     const char *wrappername, const char *optionname, zval ***optionvalue)
 {
-  throw HPHP::FatalErrorException("unimplemented: php_stream_context_get_option");
+  HPHP::raise_fatal_error("unimplemented: php_stream_context_get_option");
 }
 
 PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC) {

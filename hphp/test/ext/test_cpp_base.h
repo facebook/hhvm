@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,8 +32,7 @@
  * calling library functions, therefore we can easily run it under valgrind
  * and other tools to detect any coding problems.
  */
-class TestCppBase : public TestBase {
- public:
+struct TestCppBase : TestBase {
   TestCppBase();
 
   virtual bool RunTests(const std::string &which);
@@ -47,6 +46,7 @@ class TestCppBase : public TestBase {
   bool TestVirtualHostIni();
   bool TestCollectionHdf();
   bool TestCollectionIni();
+  bool TestVariantArrayRef();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

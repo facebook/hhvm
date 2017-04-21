@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/portability.h"
+#include "hphp/util/low-ptr.h"
+#include "hphp/util/alloc.h"
 
 #include <folly/AtomicHashMap.h>
 
@@ -31,19 +33,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class Class;
-class Func;
-class String;
+struct Func;
+struct String;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
  * StringData* comparison for AtomicHashMap entries, where -1, -2, and -3 are
- * used as magic values.
+ * used as magic values. Optimized for comparisons between static strings.
  */
 struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return int64_t(s1) > 0 && s1->isame(s2);
+    assert(int64_t(s2) > 0);  // RHS is never a magic value.
+    return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };
 
@@ -77,7 +79,8 @@ struct NamedEntity {
   typedef folly::AtomicHashMap<const StringData*,
                                NamedEntity,
                                string_data_hash,
-                               ahm_string_data_isame> Map;
+                               ahm_string_data_isame,
+                               LowAllocator<char>> Map;
 
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
@@ -156,6 +159,21 @@ struct NamedEntity {
   void pushClass(Class* cls);
   void removeClass(Class* goner);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Unique func.
+
+  /*
+   * Return the unique func corresponding to this name, or nullptr if there is
+   * none registered.
+   */
+  Func* uniqueFunc() const;
+
+  /*
+   * Register the unique func corresponding to this name.
+   *
+   * Precondition: func->isUnique()
+   */
+  void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
@@ -172,40 +190,45 @@ struct NamedEntity {
                           String* normalizedStr = nullptr) FLATTEN;
 
   /*
-   * The global NamedEntity table.
-   *
-   * TODO(#4717225) Get rid of this.
+   * Visitors that traverse the named entity table
    */
-  static Map* table();
+  template<class Fn> static void foreach_class(Fn fn);
+  template<class Fn> static void foreach_cached_class(Fn fn);
+  template<class Fn> static void foreach_cached_func(Fn fn);
 
   /*
    * Size of the global NamedEntity table.
    */
   static size_t tableSize();
 
+private:
+  template<class Fn> static void foreach_name(Fn);
+  static Map* table();
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
-  mutable rds::Link<Class*> m_cachedClass;
-  mutable rds::Link<Func*> m_cachedFunc;
+  mutable rds::Link<LowPtr<Class>> m_cachedClass;
+  mutable rds::Link<LowPtr<Func>> m_cachedFunc;
   mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
 
 private:
-  std::atomic<Class*> m_clsList{nullptr};
+  AtomicLowPtr<Class, std::memory_order_acquire,
+               std::memory_order_release> m_clsList{nullptr};
+  AtomicLowPtr<Func, std::memory_order_acquire,
+               std::memory_order_release> m_uniqueFunc{nullptr};
 };
 
 /*
  * Litstr and NamedEntity pair.
  */
-using NamedEntityPair = std::pair<const StringData*, const NamedEntity*>;
+using NamedEntityPair = std::pair<LowStringPtr,LowPtr<const NamedEntity>>;
 
-///////////////////////////////////////////////////////////////////////////////
 }
 
 #define incl_HPHP_VM_NAMED_ENTITY_INL_H_
 #include "hphp/runtime/vm/named-entity-inl.h"
 #undef incl_HPHP_VM_NAMED_ENTITY_INL_H_
 
-#endif // incl_HPHP_VM_NAMED_ENTITY_INL_H_
+#endif

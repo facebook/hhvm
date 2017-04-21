@@ -15,7 +15,7 @@ $new_dir_name = "$file_path/rename_variation9.phpt_dir9_new";
 mkdir($dir_name);
 
 var_dump( rename($dir_name, $new_dir_name, $context) );
-var_dump( file_exists($dir_name) );  // expecting flase
+var_dump( file_exists($dir_name) );  // expecting false
 var_dump( file_exists($new_dir_name) ); // expecting true
 
 //on file

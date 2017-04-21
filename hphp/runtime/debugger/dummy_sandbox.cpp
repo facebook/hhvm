@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/debugger/dummy_sandbox.h"
 
-#include <boost/noncopyable.hpp>
-
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
@@ -26,9 +24,9 @@
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/file-util.h"
 
 #include "hphp/util/logger.h"
-#include "hphp/util/process.h"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,7 +55,7 @@ bool DummySandbox::stop(int timeout) {
 
 namespace {
 
-struct CLISession : private boost::noncopyable {
+struct CLISession {
   CLISession() {
     TRACE(2, "CLISession::CLISession\n");
     char *argv[] = {"", nullptr};
@@ -69,6 +67,9 @@ struct CLISession : private boost::noncopyable {
     DebuggerHook::detach();
     execute_command_line_end(0, false, nullptr);
   }
+
+  CLISession(const CLISession&) = delete;
+  CLISession& operator=(const CLISession&) = delete;
 };
 
 }
@@ -176,27 +177,7 @@ std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
       path += '/';
     }
     path += m_startupFile;
-
-    // resolving home directory
-    if (path[0] == '~') {
-      std::string user, home;
-      size_t pos = path.find('/');
-      if (pos == std::string::npos) pos = path.size();
-      if (pos > 1) {
-        user = path.substr(1, pos - 1);
-      }
-      if (user.empty()) user = sandbox.m_user;
-      if (user.empty() || user == Process::GetCurrentUser()) {
-        home = Process::GetHomeDirectory();
-      } else {
-        home = "/home/" + user + "/";
-      }
-      if (pos + 1 < path.size()) {
-        path = home + path.substr(pos + 1);
-      } else {
-        path = home;
-      }
-    }
+    path = FileUtil::expandUser(path, sandbox.m_user);
   }
   return path;
 }

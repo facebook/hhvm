@@ -1,3 +1,7 @@
+if (${CMAKE_MAJOR_VERSION} GREATER 2)
+  cmake_policy(SET CMP0026 OLD)
+endif()
+
 include(GNUInstallDirs)
 
 function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
@@ -109,7 +113,7 @@ macro(MYSQL_SOCKET_SEARCH)
 endmacro()
 
 function(append_systemlib TARGET SOURCE SECTNAME)
-  if(CYGWIN OR MSVC OR MINGW)
+  if(MSVC)
     list(APPEND ${TARGET}_SLIBS_NAMES "${SECTNAME}")
     set(${TARGET}_SLIBS_NAMES ${${TARGET}_SLIBS_NAMES} PARENT_SCOPE)
     list(APPEND ${TARGET}_SLIBS_SOURCES "${SOURCE}")
@@ -126,15 +130,27 @@ function(append_systemlib TARGET SOURCE SECTNAME)
   endif()
 endfunction(append_systemlib)
 
-function(embed_systemlibs TARGET DEST)
+function(embed_sections TARGET DEST)
+  add_custom_command(TARGET ${TARGET} PRE_BUILD
+    # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
+    COMMAND "${HPHP_HOME}/hphp/util/generate-buildinfo.sh"
+    WORKING_DIRECTORY "${HPHP_HOME}/hphp/util"
+    COMMENT "Generating Repo Schema ID and Compiler ID"
+    VERBATIM)
+
   if (APPLE)
-    target_link_libraries(${TARGET} ${${TARGET}_SLIBS})
-  elseif(CYGWIN OR MSVC OR MINGW)
+    set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${HPHP_HOME}/hphp/util/generated-compiler-id.txt")
+    set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt")
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA})
+  elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}#include \"${HPHP_HOME}/hphp/runtime/version.h\"\n")
     file(READ "${HPHP_HOME}/hphp/hhvm/hhvm.rc" VERSION_INFO)
+    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${HPHP_HOME}/hphp/util/generated-compiler-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
     set(i 0)
     foreach (nm ${${TARGET}_SLIBS_NAMES})
@@ -146,10 +162,15 @@ function(embed_systemlibs TARGET DEST)
   else()
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"
-      ARGS ${${TARGET}_SLIBS} ${DEST}
+      ARGS "--add-section" "compiler_id=${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
+           "--add-section" "repo_schema_id=${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
+           ${${TARGET}_SLIBS}
+           ${DEST}
+      DEPENDS "${HPHP_HOME}/hphp/util/generated-compiler-id.txt"
+              "${HPHP_HOME}/hphp/util/generated-repo-schema-id.txt"
       COMMENT "Embedding php in ${TARGET}")
   endif()
-endfunction(embed_systemlibs)
+endfunction(embed_sections)
 
 macro(embed_systemlib_byname TARGET SLIB)
   get_filename_component(SLIB_BN ${SLIB} "NAME_WE")
@@ -159,7 +180,7 @@ macro(embed_systemlib_byname TARGET SLIB)
   string(MD5 SLIB_HASH_NAME ${SLIB_EXTNAME})
   # Some platforms limit section names to 16 characters :(
   string(SUBSTRING ${SLIB_HASH_NAME} 0 12 SLIB_HASH_NAME_SHORT)
-  if (CYGWIN OR MINGW OR MSVC)
+  if (MSVC)
     # The dot would be causing the RC lexer to begin a number in the
     # middle of our resource name, so use an underscore instead.
     append_systemlib(${TARGET} ${SLIB} "ext_${SLIB_HASH_NAME_SHORT}")
@@ -173,7 +194,7 @@ function(embed_all_systemlibs TARGET ROOT DEST)
   foreach(SLIB ${EXTENSION_SYSTEMLIB_SOURCES} ${EZC_SYSTEMLIB_SOURCES})
     embed_systemlib_byname(${TARGET} ${SLIB})
   endforeach()
-  embed_systemlibs(${TARGET} ${DEST})
+  embed_sections(${TARGET} ${DEST})
 endfunction(embed_all_systemlibs)
 
 # Custom install function that doesn't relink, instead it uses chrpath to change it, if
@@ -244,9 +265,9 @@ endmacro()
 # matching "/test/" or "Test.cpp$", but not matching
 # "BobTest.cpp$".
 # HHVM_REMOVE_MATCHES_FROM_LISTS(CPP_SOURCES MATCHES "/test/" "Test.cpp$" IGNORE_MATCHES "BobTest.cpp$")
-# 
+#
 # Parameters:
-# 
+#
 # [...]:
 # The names of the lists to remove matches from.
 #
@@ -276,7 +297,7 @@ function(HHVM_REMOVE_MATCHES_FROM_LISTS)
       message(FATAL_ERROR "Unknown argument state!")
     endif()
   endforeach()
-  
+
   foreach (theList ${LISTS_TO_SEARCH})
     foreach (entry ${${theList}})
       foreach (match ${MATCHES_TO_REMOVE})
@@ -288,7 +309,7 @@ function(HHVM_REMOVE_MATCHES_FROM_LISTS)
               break()
             endif()
           endforeach()
-          
+
           if (NOT SHOULD_IGNORE)
             list(REMOVE_ITEM ${theList} ${entry})
           endif()
@@ -311,23 +332,21 @@ function(auto_source_group rootName rootDir)
       message(FATAL_ERROR "Unable to locate the final forward slash in '${filePath}'!")
     endif()
     string(SUBSTRING "${filePath}" 0 ${rIdx} filePath)
-    
+
     string(LENGTH "${filePath}" filePathLength)
     string(FIND "${filePath}" "${rootDir}" rIdx)
-    if (NOT rIdx EQUAL 0)
-      continue()
-      #message(FATAL_ERROR "Source '${fil}' is outside of the root directory, '${rootDir}', that was passed to auto_source_group!")
-    endif()
-    math(EXPR filePathLength "${filePathLength} - ${rootDirLength}")
-    string(SUBSTRING "${filePath}" ${rootDirLength} ${filePathLength} fileGroup)
-    
-    string(REPLACE "/" "\\" fileGroup "${fileGroup}")
-    set(fileGroup "\\${rootName}${fileGroup}")
-    
-    list(FIND sourceGroups "${fileGroup}" rIdx)
-    if (rIdx EQUAL -1)
-      list(APPEND sourceGroups "${fileGroup}")
-      source_group("${fileGroup}" REGULAR_EXPRESSION "${filePath}/[^/.]+(.(idl|tab|yy))?.(c|cc|cpp|h|hpp|json|ll|php|tcc|y)$")
+    if (rIdx EQUAL 0)
+      math(EXPR filePathLength "${filePathLength} - ${rootDirLength}")
+      string(SUBSTRING "${filePath}" ${rootDirLength} ${filePathLength} fileGroup)
+
+      string(REPLACE "/" "\\" fileGroup "${fileGroup}")
+      set(fileGroup "\\${rootName}${fileGroup}")
+
+      list(FIND sourceGroups "${fileGroup}" rIdx)
+      if (rIdx EQUAL -1)
+        list(APPEND sourceGroups "${fileGroup}")
+        source_group("${fileGroup}" REGULAR_EXPRESSION "${filePath}/[^/.]+(.(tab|yy))?.(c|cc|cpp|h|hpp|ll|php|tcc|y)$")
+      endif()
     endif()
   endforeach()
 endfunction()
@@ -351,3 +370,109 @@ macro(add_precompiled_header PrecompiledHead PrecompiledSrc SourcesVar)
     list(APPEND ${SourcesVar} ${PrecompiledSource} ${PrecompiledHeader})
   endif()
 endmacro()
+
+function(parse_version PREFIX VERSION)
+  if (NOT ${VERSION} MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-.+)?$")
+    message(FATAL_ERROR "VERSION must conform to X.Y(.Z)?(-.+)?")
+  endif()
+
+  string(FIND ${VERSION} "-" SUFFIX_POS)
+  set(SUFFIX "")
+  if (SUFFIX_POS)
+    string(SUBSTRING ${VERSION} ${SUFFIX_POS} -1 SUFFIX)
+    string(SUBSTRING ${VERSION} 0 ${SUFFIX_POS} NUMERIC_VERSION)
+  else()
+    set(NUMERIC_VERSION ${VERSION})
+  endif()
+
+  string(REPLACE "." ";" VERSION_LIST "${NUMERIC_VERSION}")
+  list(GET VERSION_LIST 0 MAJOR)
+  list(GET VERSION_LIST 1 MINOR)
+  list(LENGTH VERSION_LIST VERSION_LIST_LENGTH)
+  if (VERSION_LIST_LENGTH GREATER 2)
+    list(GET VERSION_LIST 2 PATCH)
+  else()
+    set(PATCH 0)
+  endif()
+
+  set(${PREFIX}MAJOR ${MAJOR} PARENT_SCOPE)
+  set(${PREFIX}MINOR ${MINOR} PARENT_SCOPE)
+  set(${PREFIX}PATCH ${PATCH} PARENT_SCOPE)
+  set(${PREFIX}SUFFIX ${SUFFIX} PARENT_SCOPE)
+endfunction()
+
+# MSVC doesn't support a --whole-archive flag, but newer versions
+# of CMake do support object libraries, which give the same result.
+# As we can't easily upgrade the normal builds to CMake 3.0, we
+# will just require CMake 3.0+ for MSVC builds only.
+function(add_object_library libraryName)
+  if (MSVC)
+    add_library(${libraryName} OBJECT ${ARGN})
+  else()
+    add_library(${libraryName} STATIC ${ARGN})
+  endif()
+endfunction()
+
+# Get what might be the objects of the object libraries, if needed.
+function(get_object_libraries_objects targetVariable)
+  set(OBJECTS)
+  if (MSVC)
+    foreach (fil ${ARGN})
+      list(APPEND OBJECTS $<TARGET_OBJECTS:${fil}>)
+    endforeach()
+  endif()
+
+  set(${targetVariable} ${OBJECTS} PARENT_SCOPE)
+endfunction()
+
+# Add the additional link targets for a set of object libraries,
+# if needed.
+function(link_object_libraries target)
+  if (MSVC)
+    return()
+  endif()
+
+  set(WHOLE_ARCHIVE_LIBS)
+  foreach (fil ${ARGN})
+    list(APPEND WHOLE_ARCHIVE_LIBS ${fil})
+  endforeach()
+
+  set(ANCHOR_SYMS)
+  if (APPLE)
+    set(ANCHOR_SYMS
+      -Wl,-pagezero_size,0x00001000
+      # Set the .text.keep section to be executable.
+      -Wl,-segprot,.text,rx,rx)
+    foreach(lib ${WHOLE_ARCHIVE_LIBS})
+      # It's important to use -Xlinker and not -Wl here: ${lib} needs to be its
+      # own option on the command line, since target_link_libraries will expand it
+      # from its logical name here into the full .a path. (Eww.)
+      list(APPEND ANCHOR_SYMS -Xlinker -force_load -Xlinker ${lib})
+    endforeach()
+  else()
+    set(ANCHOR_SYMS -Wl,--whole-archive ${WHOLE_ARCHIVE_LIBS} -Wl,--no-whole-archive)
+  endif()
+
+  target_link_libraries(${target} ${ANCHOR_SYMS})
+endfunction()
+
+# This should be called for object libraries, rather than calling
+# hphp_link directly.
+function(object_library_hphp_link target)
+  # Gold doesn't need this, and MSVC can't have it. (see below)
+  if (NOT ENABLE_LD_GOLD AND NOT MSVC)
+    hphp_link(${target})
+  endif()
+endfunction()
+
+# If a library needs to be linked in to make GNU ld happy,
+# it should be done by calling this.
+function(object_library_ld_link_libraries target)
+  if (${ARGC})
+    # CMake doesn't allow calls to target_link_libraries if the target
+    # is an OBJECT library, so MSVC can't have this.
+    if (NOT MSVC)
+      target_link_libraries(${target} ${ARGN})
+    endif()
+  endif()
+endfunction()

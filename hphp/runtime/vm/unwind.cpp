@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -99,6 +99,15 @@ void discardStackTemps(const ActRec* const fp,
     }
   );
 
+  if (debug) {
+    auto const numSlots = fp->m_func->numClsRefSlots();
+    for (int i = 0; i < numSlots; ++i) {
+      ITRACE(2, "  trash class-ref slot : {}\n", i);
+      auto const slot = frame_clsref_slot(fp, i);
+      memset(slot, kTrashClsRef, sizeof(*slot));
+    }
+  }
+
   ITRACE(2, "discardStackTemps ends with sp = {}\n",
          implicit_cast<void*>(stack.top()));
 }
@@ -137,32 +146,16 @@ UnwindAction checkHandlers(const EHEnt* eh,
       switch (eh->m_type) {
       case EHEnt::Type::Fault:
         ITRACE(1, "checkHandlers: entering fault at {}: save {}\n",
-               eh->m_fault,
+               eh->m_handler,
                func->unit()->offsetOf(pc));
-        pc = func->unit()->entry() + eh->m_fault;
+        pc = func->unit()->at(eh->m_handler);
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return UnwindAction::ResumeVM;
       case EHEnt::Type::Catch:
-        // Note: we skip catch clauses if we have a pending C++ exception
-        // as part of our efforts to avoid running more PHP code in the
-        // face of such exceptions.
-        if (ThreadInfo::s_threadInfo->m_pendingException == nullptr) {
-          auto const obj = fault.m_userException;
-          for (auto& idOff : eh->m_catches) {
-            ITRACE(1, "checkHandlers: catch candidate {}\n", idOff.second);
-            auto handler = func->unit()->at(idOff.second);
-            auto const cls = Unit::lookupClass(
-              func->unit()->lookupNamedEntityId(idOff.first)
-            );
-            if (!cls || !obj->instanceof(cls)) continue;
-
-            ITRACE(1, "checkHandlers: entering catch at {}\n", idOff.second);
-            pc = handler;
-            DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-            return UnwindAction::ResumeVM;
-          }
-        }
-        break;
+        ITRACE(1, "checkHandlers: entering catch at {}\n", eh->m_handler);
+        pc = func->unit()->at(eh->m_handler);
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
+        return UnwindAction::ResumeVM;
       }
     }
     if (eh->m_parentIndex != -1) {
@@ -200,8 +193,10 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
   // logically finished and we're unwinding for some internal reason (timeout
   // or user profiler, most likely). More importantly, fp->m_this may have
   // already been destructed and/or overwritten due to sharing space with
-  // fp->m_r.
+  // the return value via fp->retSlot().
   if (curOp != OpRetC &&
+      !fp->localsDecRefd() &&
+      fp->m_func->cls() &&
       fp->hasThis() &&
       fp->getThis()->getVMClass()->getCtor() == func &&
       fp->getThis()->getVMClass()->getDtor()) {
@@ -243,11 +238,8 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
      *   - When that happens, exit hook sets localsDecRefd flag.
      */
     if (!fp->localsDecRefd()) {
+      fp->setLocalsDecRefd();
       try {
-        // Note that we must convert locals and the $this to
-        // uninit/zero during unwind.  This is because a backtrace
-        // from another destructing object during this unwind may try
-        // to read them.
         frame_free_locals_unwind(fp, func->numLocals(), phpException);
       } catch (...) {}
     }
@@ -255,15 +247,17 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   if (LIKELY(!fp->resumed())) {
     decRefLocals();
-    if (UNLIKELY(func->isAsyncFunction()) && phpException) {
+    if (UNLIKELY(func->isAsyncFunction()) &&
+        phpException &&
+        !fp->isFCallAwait()) {
       // If in an eagerly executed async function, wrap the user exception
       // into a failed StaticWaitHandle and return it to the caller.
       auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);
       phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());
       stack.ret();
-      assert(stack.topTV() == &fp->m_r);
-      cellCopy(make_tv<KindOfObject>(waitHandle), fp->m_r);
+      assert(stack.topTV() == fp->retSlot());
+      cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
     } else {
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());
@@ -275,6 +269,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // Handle exception thrown by async function.
       decRefLocals();
       waitHandle->fail(phpException);
+      decRefObj(waitHandle);
       phpException = nullptr;
     } else if (waitHandle->isRunning()) {
       // Let the C++ exception propagate. If the current frame represents async
@@ -283,6 +278,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       // decides to throw C++ exception.
       decRefLocals();
       waitHandle->failCpp();
+      decRefObj(waitHandle);
     }
   } else if (func->isAsyncGenerator()) {
     auto const gen = frame_async_generator(fp);
@@ -329,7 +325,9 @@ const StaticString s_previous("previous");
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   while (true) {
     auto const lookup = top->getProp(
-      SystemLib::s_ExceptionClass,
+      top->instanceof(SystemLib::s_ExceptionClass)
+        ? SystemLib::s_ExceptionClass
+        : SystemLib::s_ErrorClass,
       s_previous.get()
     );
     auto const top_tv = lookup.prop;
@@ -337,7 +335,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
 
     assert(top_tv->m_type != KindOfUninit && lookup.accessible);
     if (top_tv->m_type != KindOfObject ||
-        !top_tv->m_data.pobj->instanceof(SystemLib::s_ExceptionClass)) {
+        !top_tv->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
       // Since we are overwriting, decref.
       tvRefcountedDecRef(top_tv);
       // Objects held in m_faults are not refcounted, therefore we need to
@@ -468,6 +466,13 @@ void unwindPhp() {
     }
 
     do {
+      // Note: we skip catch/finally clauses if we have a pending C++
+      // exception as part of our efforts to avoid running more PHP code
+      // in the face of such exceptions.
+      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
+        continue;
+      }
+
       const EHEnt* eh = fp->m_func->findEH(fault.m_raiseOffset);
       if (eh != nullptr) {
         switch (checkHandlers(eh, fp, pc, fault)) {
@@ -511,8 +516,7 @@ void unwindPhp() {
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
   g_context->m_faults.pop_back();
 
-  Object obj = Object::attach(fault.m_userException);
-  throw obj;
+  throw_object(Object::attach(fault.m_userException));
 }
 
 void unwindPhp(ObjectData* phpException) {

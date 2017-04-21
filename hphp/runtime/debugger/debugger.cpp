@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,8 @@
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+#include "hphp/runtime/vm/jit/debugger.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/util/text-color.h"
@@ -37,8 +38,13 @@ namespace HPHP { namespace Eval {
 
 TRACE_SET_MOD(debugger);
 
-Debugger Debugger::s_debugger;
 bool Debugger::s_clientStarted = false;
+
+
+Debugger& Debugger::get() {
+  static Debugger s_debugger;
+  return s_debugger;
+}
 
 bool Debugger::StartServer() {
   TRACE(2, "Debugger::StartServer\n");
@@ -58,8 +64,8 @@ DebuggerProxyPtr Debugger::StartClient(const DebuggerClientOptions &options) {
 void Debugger::Stop() {
   TRACE(2, "Debugger::Stop\n");
   LogShutdown(ShutdownKind::Normal);
-  while (!s_debugger.m_proxyMap.empty()) {
-    s_debugger.m_proxyMap.begin()->second->stop();
+  while (!get().m_proxyMap.empty()) {
+    get().m_proxyMap.begin()->second->stop();
   }
   DebuggerServer::Stop();
   CleanupRetiredProxies();
@@ -72,64 +78,64 @@ void Debugger::Stop() {
 
 void Debugger::RegisterSandbox(const DSandboxInfo &sandbox) {
   TRACE(2, "Debugger::RegisterSandbox\n");
-  s_debugger.registerSandbox(sandbox);
+  get().registerSandbox(sandbox);
 }
 
 void Debugger::UnregisterSandbox(const String& id) {
   TRACE(2, "Debugger::UnregisterSandbox\n");
-  s_debugger.unregisterSandbox(id.get());
+  get().unregisterSandbox(id.get());
 }
 
 DebuggerProxyPtr Debugger::CreateProxy(req::ptr<Socket> socket, bool local) {
   TRACE(2, "Debugger::CreateProxy\n");
-  return s_debugger.createProxy(socket, local);
+  return get().createProxy(socket, local);
 }
 
 void Debugger::RemoveProxy(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::RemoveProxy\n");
-  s_debugger.removeProxy(proxy);
+  get().removeProxy(proxy);
 }
 
 int Debugger::CountConnectedProxy() {
   TRACE(7, "Debugger::CountConnectedProxy\n");
-  return s_debugger.countConnectedProxy();
+  return get().countConnectedProxy();
 }
 
 DebuggerProxyPtr Debugger::GetProxy() {
   TRACE(7, "Debugger::GetProxy\n");
   const String& sandboxId = g_context->getSandboxId();
-  return s_debugger.findProxy(sandboxId.get());
+  return get().findProxy(sandboxId.get());
 }
 
 bool Debugger::SwitchSandbox(DebuggerProxyPtr proxy,
                              const std::string &newId,
                              bool force) {
   TRACE(2, "Debugger::SwitchSandbox\n");
-  return s_debugger.switchSandbox(proxy, newId, force);
+  return get().switchSandbox(proxy, newId, force);
 }
 
 void Debugger::GetRegisteredSandboxes(
     std::vector<DSandboxInfoPtr> &sandboxes) {
   TRACE(2, "Debugger::GetRegisteredSandboxes\n");
-  s_debugger.getSandboxes(sandboxes);
+  get().getSandboxes(sandboxes);
 }
 
 bool Debugger::IsThreadDebugging(int64_t id) {
   TRACE(2, "Debugger::IsThreadDebugging\n");
-  return s_debugger.isThreadDebugging(id);
+  return get().isThreadDebugging(id);
 }
 
 void Debugger::RequestInterrupt(DebuggerProxyPtr proxy) {
   TRACE(2, "Debugger::RequestInterrupt\n");
-  s_debugger.requestInterrupt(proxy);
+  get().requestInterrupt(proxy);
 }
 
 void Debugger::RetireProxy(DebuggerProxyPtr proxy) {
-  s_debugger.retireProxy(proxy);
+  get().retireProxy(proxy);
 }
 
 void Debugger::CleanupRetiredProxies() {
-  s_debugger.cleanupRetiredProxies();
+  get().cleanupRetiredProxies();
 }
 
 void Debugger::DebuggerSession(const DebuggerClientOptions& options,
@@ -156,13 +162,13 @@ void Debugger::DebuggerSession(const DebuggerClientOptions& options,
 }
 
 void Debugger::LogShutdown(ShutdownKind shutdownKind) {
-  int proxyCount = s_debugger.countConnectedProxy();
+  int proxyCount = get().countConnectedProxy();
   if (proxyCount > 0) {
     Logger::Warning(DEBUGGER_LOG_TAG "%s with connected debuggers!",
                     shutdownKind == ShutdownKind::Normal ?
                       "Normal shutdown" : "Unexpected crash");
 
-    for (const auto& proxyEntry: s_debugger.m_proxyMap) {
+    for (const auto& proxyEntry: get().m_proxyMap) {
       auto sid = proxyEntry.first;
       auto proxy = proxyEntry.second;
       auto dummySid = makeStaticString(proxy->getDummyInfo().id());
@@ -183,7 +189,7 @@ void Debugger::InterruptSessionStarted(const char *file,
                                        const char *error /* = NULL */) {
   TRACE(2, "Debugger::InterruptSessionStarted\n");
   DebuggerHook::attach<HphpdHook>();
-  s_debugger.registerThread(); // Register this thread as being debugged
+  get().registerThread(); // Register this thread as being debugged
   Interrupt(SessionStarted, file, nullptr, error);
 }
 
@@ -195,7 +201,7 @@ void Debugger::InterruptSessionEnded(const char *file) {
 void Debugger::InterruptWithUrl(int type, const char *url) {
   // Build a site to represent the URL. Note it won't have any source info
   // in it, because this event is raised with no PHP on the stack.
-  InterruptSite site(false, null_variant);
+  InterruptSite site(false, uninit_variant);
   site.url() = url ? url : "";
   Interrupt(type, url, &site);
 }
@@ -203,7 +209,7 @@ void Debugger::InterruptWithUrl(int type, const char *url) {
 void Debugger::InterruptRequestStarted(const char *url) {
   TRACE(2, "Debugger::InterruptRequestStarted\n");
   if (isDebuggerAttached()) {
-    s_debugger.registerThread(); // Register this thread as being debugged
+    get().registerThread(); // Register this thread as being debugged
     InterruptWithUrl(RequestStarted, url);
   }
 }
@@ -214,7 +220,7 @@ void Debugger::InterruptRequestEnded(const char *url) {
     InterruptWithUrl(RequestEnded, url);
   }
   const String& sandboxId = g_context->getSandboxId();
-  s_debugger.unregisterSandbox(sandboxId.get());
+  get().unregisterSandbox(sandboxId.get());
 }
 
 void Debugger::InterruptPSPEnded(const char *url) {
@@ -283,7 +289,7 @@ void Debugger::Interrupt(int type, const char *program,
 // as "BreakPointReached". Currently this results in spurious work in the
 // debugger.
 void Debugger::InterruptVMHook(int type /* = BreakPointReached */,
-                               const Variant& e /* = null_variant */) {
+                               const Variant& e /* = uninit_variant */) {
   TRACE(2, "Debugger::InterruptVMHook\n");
   // Computing the interrupt site here pulls in more data from the Unit to
   // describe the current execution point.
@@ -525,7 +531,7 @@ void Debugger::removeProxy(DebuggerProxyPtr proxy) {
   m_proxyMap.erase(dummySid);
   // Clear the debugger blacklist PC upon last detach if JIT is used
   if (RuntimeOption::EvalJit && countConnectedProxy() == 0) {
-    jit::mcg->tx().clearDbgBL();
+    jit::clearDbgBL();
   }
 }
 
@@ -620,18 +626,18 @@ void Debugger::updateProxySandbox(DebuggerProxyPtr proxy,
 // again with nullptr before destroying the given usage logger.
 void Debugger::SetUsageLogger(DebuggerUsageLogger *usageLogger) {
   TRACE(1, "Debugger::SetUsageLogger\n");
-  s_debugger.m_usageLogger = usageLogger;
+  get().m_usageLogger = usageLogger;
 }
 
 void Debugger::InitUsageLogging() {
   TRACE(1, "Debugger::InitUsageLogging\n");
-  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->init();
+  if (get().m_usageLogger) get().m_usageLogger->init();
 }
 
 void Debugger::UsageLog(const std::string &mode, const std::string &sandboxId,
                         const std::string &cmd, const std::string &data) {
-  if (s_debugger.m_usageLogger) s_debugger.m_usageLogger->log(mode, sandboxId,
-                                                              cmd, data);
+  if (get().m_usageLogger) get().m_usageLogger->log(mode, sandboxId,
+                                                    cmd, data);
 }
 
 const char *Debugger::InterruptTypeName(CmdInterrupt &cmd) {

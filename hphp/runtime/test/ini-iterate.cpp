@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "hphp/util/code-cache.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
@@ -34,7 +34,7 @@ TEST(IniSetting, ini_iterate) {
   value = ini_iterate(ini, "hhvm.server.apc.ttl_limit");
   EXPECT_EQ("1000", value.toString().toCppString());
   value = ini_iterate(ini, "hhvm.server.bogus.ttl_limit");
-  EXPECT_EQ(true, value.isNull());
+  EXPECT_TRUE(value.isNull());
   value = ini_iterate(ini, "hhvm.server.allowed_exec_cmds.1");
   EXPECT_EQ("cp", value.toString().toCppString());
   value = ini_iterate(ini, "hhvm.ip_block_map.0.ip.deny.0");
@@ -43,15 +43,15 @@ TEST(IniSetting, ini_iterate) {
   EXPECT_EQ("aaaa:bbbb:cccc:dddd:eeee:ffff:1111::/80",
             value.toString().toCppString());
   value = ini_iterate(ini, "hhvm.ip_block_map.1.ip.allow.2");
-  EXPECT_EQ(true, value.isNull());
+  EXPECT_TRUE(value.isNull());
   value = ini_iterate(init_null(), "hhvm.ip_block_map");
-  EXPECT_EQ(true, value.isNull());
+  EXPECT_TRUE(value.isNull());
   value = ini_iterate(ini, "hhvm.ip_block_map");
-  EXPECT_EQ(true, value.isArray());
+  EXPECT_TRUE(value.isArray());
   EXPECT_EQ(2, value.toArray().size());
 
   // Check some runtime options
-  EXPECT_EQ(22222222, CodeCache::AColdSize);
+  EXPECT_EQ(22222222, jit::CodeCache::AColdSize);
   EXPECT_EQ("", RuntimeOption::ExtensionDir);
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,15 +30,14 @@ extern "C" {
 
 namespace HPHP {
 
-class Array;
+struct Array;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Handles all timezone related functions.
  */
-class TimeZone : public SweepableResourceData {
-public:
+struct TimeZone : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(TimeZone);
 
   /**
@@ -117,9 +116,9 @@ public:
   req::ptr<TimeZone> cloneTimeZone() const;
 
 protected:
-  friend class DateTime;
-  friend class TimeStamp;
-  friend class DateInterval;
+  friend struct DateTime;
+  friend struct TimeStamp;
+  friend struct DateInterval;
 
   /**
    * Returns raw pointer. For internal use only.
@@ -140,6 +139,8 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 void timezone_init();
+const timelib_tzdb* timezone_get_tzdb();
+extern const timelib_tzdb* (*timezone_raw_get_tzdb)();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

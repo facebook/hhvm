@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,55 +14,47 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdlib.h>
+#include "hphp/runtime/vm/php-debug.h"
 
 #include <set>
 #include <string>
-#include <vector>
 
+#include <folly/String.h>
+
+#include "hphp/util/compilation-flags.h"
 #include "hphp/util/debug.h"
-#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
-
-#ifndef DEBUG
-/*
- * Forcefully always compile this unit with debug enabled, to permit mixing
- * and matching of optimized and unoptimized binaries.
- */
-#define DEBUG
-#endif
-
-using std::string;
-using std::vector;
-
-#include "hphp/runtime/vm/php-debug.h"
 
 namespace HPHP {
 
 struct PhpDebugger {
-  std::set<string> enabledFunctions;
+  std::set<std::string> enabledFunctions;
 
   PhpDebugger() {
-    const char *env = getenv("PHPBREAKPOINTS");
-    if (env) {
-      vector<string> names;
-      split(',', env, names, true /*ignoreEmpty*/);
-      for (size_t i = 0; i < names.size(); ++i) {
-        enabledFunctions.insert(names[i]);
-      }
+    if (!debug) return;
+
+    if (auto const env = getenv("PHPBREAKPOINTS")) {
+      folly::splitTo<std::string>(
+        ',',
+        env,
+        std::inserter(enabledFunctions, enabledFunctions.begin()),
+        true /*ignoreEmpty*/
+      );
     }
   }
 
   bool isBpFunction(const char* nm) const {
-    std::set<string>::const_iterator i = enabledFunctions.find(string(nm));
-    return i != enabledFunctions.end();
+    return enabledFunctions.find(nm) != enabledFunctions.end();
   }
 };
 
 static PhpDebugger dbg;
+
+#ifdef DEBUG
 bool phpBreakpointEnabled(const char* sourceName) {
   return dbg.isBpFunction(sourceName);
 }
+#endif
 
 }
 

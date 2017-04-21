@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
 #include "hphp/util/cache/cache-saver.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 
 #include <cstdint>
 #include <string>
@@ -25,7 +24,10 @@
 
 #include <folly/FileUtil.h>
 #include <folly/Format.h>
+#include <folly/portability/SysStat.h>
+#include <folly/portability/Unistd.h>
 #include "hphp/util/cache/magic-numbers.h"
+#include "hphp/util/assertions.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -170,9 +172,9 @@ bool CacheSaver::rewriteDirectory(uint64_t expected_directory_len) {
       return false;
     }
 
-    ssize_t ret = writeFull(fd_, (void*) &fp.data_ofs, sizeof(fp.data_ofs));
+    ssize_t len = writeFull(fd_, (void*) &fp.data_ofs, sizeof(fp.data_ofs));
 
-    if (ret != sizeof(fp.data_ofs)) {
+    if (len != sizeof(fp.data_ofs)) {
       Logger::Error(format("Unable to update directory entry: {}",
                            folly::errnoStr(errno)).str());
     }

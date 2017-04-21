@@ -26,7 +26,7 @@ let enforce_not_awaitable env p ty =
   | r, Tclass ((_, awaitable), _) when
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
-  | _, (Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) -> ()
 
@@ -55,7 +55,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       TUtils.flatten_unresolved env rty rtyl
     end tyl ~init:(env, []) in
     env, (r, Tunresolved rtyl)
-  | _, (Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tobject | Tshape _) ->
     let expected_opt_type = r, Toption (r, Tclass ((p, SN.Classes.cAwaitable), [type_var])) in
@@ -65,11 +65,13 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
         expected_opt_type, (r, Toption type_var)
       | _, Tany ->
         expected_non_opt_type, (r, Tany)
+      | _, Terr ->
+        expected_non_opt_type, (r, Terr)
       | _, (Tmixed | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
         | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
         | Tunresolved _ | Tobject | Tshape _)->
         expected_non_opt_type, type_var) in
-    let env = Type.sub_type p Reason.URawait env expected_type opt_ty_maybe in
+    let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
     env, return_type
   )
 
@@ -86,7 +88,7 @@ let overload_extract_from_awaitable_shape env p fdm =
   end env fdm
 
 let overload_extract_from_awaitable_aktuple env p fields =
-  Utils.IMap.map_env begin fun env ty ->
+  IMap.map_env begin fun env ty ->
     let env, rty = overload_extract_from_awaitable env p ty in
     env, rty
   end env fields
@@ -116,7 +118,7 @@ let gena env p ty =
     let expected_ty = r, Tarraykind AKany in
     let env =
       Errors.try_
-        (fun () -> Type.sub_type p Reason.URawait env expected_ty (r, ty))
+        (fun () -> Type.sub_type p Reason.URawait env (r, ty) expected_ty)
         (fun _ ->
           let ty_str = Typing_print.error ty in
           Errors.gena_expects_array p (Reason.to_pos r) ty_str;
@@ -154,7 +156,7 @@ let rec gen_array_rec env p ty =
         end tyl ~init:(env, []) in
         env, (r, Tunresolved rtyl)
       end
-      | _, (Tany | Tmixed | Tprim _ | Toption _ | Tvar _
+      | _, (Terr | Tany | Tmixed | Tprim _ | Toption _ | Tvar _
         | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Tanon (_, _) | Tobject
         | Tshape _
            ) -> overload_extract_from_awaitable env p ety
@@ -173,13 +175,13 @@ let rec gen_array_rec env p ty =
     end env fdm in
     env, (r, Tarraykind (AKshape fdm))
   | r, Tarraykind (AKtuple fields) ->
-    let env, fields = Utils.IMap.map_env begin fun env ty ->
+    let env, fields = IMap.map_env begin fun env ty ->
       let env, ty = is_array env ty in
       env, ty
     end env fields in
     env, (r, Tarraykind (AKtuple fields))
   | _, Ttuple tyl -> gen_array_va_rec env p tyl
-  | _, (Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
     | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
        ) -> gena env p ty
@@ -194,7 +196,7 @@ and gen_array_va_rec env p tyl =
       env, (r, Toption opt_ty)
     | _, Tarraykind _ -> gen_array_rec env p ty
     | _, Ttuple tyl -> genva env p tyl
-    | _, (Tany | Tmixed | Tprim _ | Tvar _ | Tfun _
+    | _, (Terr | Tany | Tmixed | Tprim _ | Tvar _ | Tfun _
       | Tabstract (_, _) | Tclass (_, _) | Tanon (_, _) | Tunresolved _
       | Tobject | Tshape _) ->
       overload_extract_from_awaitable env p ty) in

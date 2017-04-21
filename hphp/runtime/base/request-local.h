@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,7 @@ namespace HPHP {
  *
  * Use DECLARE_STATIC_REQUEST_LOCAL to declare a *static* class field as
  * request local:
- *   class SomeClass {
+ *   struct SomeClass {
  *     DECLARE_STATIC_REQUEST_LOCAL(SomeFieldType, f);
  *   }
  *
@@ -126,8 +126,7 @@ void RequestLocal<T>::create() {
 #else // defined(USE_GCC_FAST_TLS)
 
 template<typename T>
-class RequestLocal {
-public:
+struct RequestLocal {
   explicit RequestLocal(ThreadLocal<T> & tl) : m_tlsObjects(tl) {}
 
   bool getInited() const {

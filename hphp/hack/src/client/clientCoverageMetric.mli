@@ -8,4 +8,4 @@
  *
  *)
 
-val go : json:bool -> ServerCoverageMetric.result -> unit
+val go : json:bool -> ServerCoverageMetricTypes.result -> unit

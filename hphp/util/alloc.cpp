@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,22 +17,28 @@
 
 #include <atomic>
 
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/mman.h>
 #include <stdlib.h>
 #include <errno.h>
 
 #ifdef HAVE_NUMA
 #include <sys/prctl.h>
-#include <numa.h>
+#endif
+
+#ifdef __APPLE__
+#include <sys/sysctl.h>
 #endif
 
 #include <folly/Bits.h>
 #include <folly/Format.h>
+#include <folly/portability/SysMman.h>
+#include <folly/portability/SysResource.h>
+#include <folly/portability/SysTime.h>
 
+#include "hphp/util/hugetlb.h"
+#include "hphp/util/kernel-version.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/async-func.h"
+#include "hphp/util/managed-arena.h"
+#include "hphp/util/numa.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -60,10 +66,7 @@ static void numa_purge_arena();
 void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   if (mallctl) {
-    int err = mallctl("thread.tcache.flush", nullptr, nullptr, nullptr, 0);
-    if (UNLIKELY(err != 0)) {
-      Logger::Warning("mallctl thread.tcache.flush failed with error %d", err);
-    }
+    mallctlCall("thread.tcache.flush", true);
     numa_purge_arena();
   }
 #endif
@@ -72,6 +75,67 @@ void flush_thread_caches() {
     MallocExtensionInstance()->MarkThreadIdle();
   }
 #endif
+}
+
+bool purge_all(std::string* errStr) {
+#ifdef USE_JEMALLOC
+  if (mallctl) {
+    assert(mallctlnametomib && mallctlbymib);
+    // Purge all dirty unused pages.
+    int err = mallctlWrite<uint64_t>("epoch", 1, true);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctl(\"epoch\", ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+
+    unsigned narenas;
+    err = mallctlRead("arenas.narenas", &narenas, true);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctl(\"arenas.narenas\", ...)"
+             << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+
+    size_t mib[3];
+    size_t miblen = 3;
+    err = mallctlnametomib("arena.0.purge", mib, &miblen);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err
+             << " in mallctlnametomib(\"arenas.narenas\", ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+    mib[1] = narenas;
+
+    err = mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
+    if (err) {
+      if (errStr) {
+        std::ostringstream estr;
+        estr << "Error " << err << " in mallctlbymib([\"arena." << narenas
+             << ".purge\"], ...)" << std::endl;
+        *errStr = estr.str();
+      }
+      return false;
+    }
+  }
+#endif
+#ifdef USE_TCMALLOC
+  if (MallocExtensionInstance) {
+    MallocExtensionInstance()->ReleaseFreeMemory();
+  }
+#endif
+  return true;
 }
 
 __thread uintptr_t s_stackLimit;
@@ -102,18 +166,16 @@ void init_stack_limits(pthread_attr_t* attr) {
   stackaddr = pthread_get_stackaddr_np(self);
   stacksize = pthread_get_stacksize_np(self);
 
-  // On OSX 10.9, we are lied to about the main thread's stack size.
-  // Set it to the minimum stack size, which is set earlier by
-  // execute_program_impl.
-  const size_t stackSizeMinimum = AsyncFuncImpl::kStackSizeMinimum;
+  // On OSX 10.9, we are lied to about the main thread's stack size.  Set it to
+  // the minimum stack size, which is set earlier by execute_program_impl.
   if (pthread_main_np() == 1) {
-    if (s_stackSize < stackSizeMinimum) {
+    if (s_stackSize < kStackSizeMinimum) {
       char osRelease[256];
       size_t osReleaseSize = sizeof(osRelease);
       if (sysctlbyname("kern.osrelease", osRelease, &osReleaseSize,
                        nullptr, 0) == 0) {
         if (atoi(osRelease) >= 13) {
-          stacksize = stackSizeMinimum;
+          stacksize = kStackSizeMinimum;
         }
       }
     }
@@ -141,9 +203,9 @@ void init_stack_limits(pthread_attr_t* attr) {
   // "stack space"), we can differentiate between the part of the native stack
   // that could conceivably be used in practice and all anonymous mmap() memory.
   if (getrlimit(RLIMIT_STACK, &rlim) == 0 && rlim.rlim_cur == RLIM_INFINITY &&
-      s_stackSize > AsyncFuncImpl::kStackSizeMinimum) {
-    s_stackLimit += s_stackSize - AsyncFuncImpl::kStackSizeMinimum;
-    s_stackSize = AsyncFuncImpl::kStackSizeMinimum;
+      s_stackSize > kStackSizeMinimum) {
+    s_stackLimit += s_stackSize - kStackSizeMinimum;
+    s_stackSize = kStackSizeMinimum;
   }
 }
 
@@ -164,16 +226,13 @@ int32_t __thread s_numaNode;
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
 void enable_numa(bool local) {}
-int next_numa_node() { return 0; }
 void set_numa_binding(int node) {}
-int num_numa_nodes() { return 1; }
-void numa_interleave(void* start, size_t size) {}
-void numa_local(void* start, size_t size) {}
-void numa_bind_to(void* start, size_t size, int node) {}
 #endif
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+unsigned low_huge1g_arena = 0;
+unsigned high_huge1g_arena = 0;
 std::atomic<int> low_huge_pages(0);
 std::atomic<void*> highest_lowmall_addr;
 static const unsigned kLgHugeGranularity = 21;
@@ -181,54 +240,35 @@ static const unsigned kHugePageSize = 1 << kLgHugeGranularity;
 static const unsigned kHugePageMask = (1 << kLgHugeGranularity) - 1;
 
 #ifdef HAVE_NUMA
-static uint32_t numa_node_set;
-static uint32_t numa_num_nodes;
-static uint32_t numa_node_mask;
 static uint32_t base_arena;
-static std::atomic<uint32_t> numa_cur_node;
-static std::vector<bitmask*> *node_to_cpu_mask;
-static bool use_numa = false;
 static bool threads_bind_local = false;
 
-extern "C" void numa_init();
-
-static void initNuma() {
-  // numa_init is called automatically, but is probably called after
-  // JEMallocInitializer(). its idempotent, so call it here.
-  numa_init();
-  if (numa_available() < 0) return;
-
-  // set interleave for early code. we'll then force interleave
-  // for a few regions, and switch to local for the threads
-  numa_set_interleave_mask(numa_all_nodes_ptr);
-
-  int max_node = numa_max_node();
-  if (!max_node || max_node >= 32) return;
-
-  bool ret = true;
-  bitmask* run_nodes = numa_get_run_node_mask();
-  bitmask* mem_nodes = numa_get_mems_allowed();
-  for (int i = 0; i <= max_node; i++) {
-    if (!numa_bitmask_isbitset(run_nodes, i) ||
-        !numa_bitmask_isbitset(mem_nodes, i)) {
-      // Only deal with the case of a contiguous set
-      // of nodes where we can run/allocate memory
-      // on each node.
-      ret = false;
-      break;
-    }
-    numa_node_set |= (uint32_t)1 << i;
-    numa_num_nodes++;
+static bool purge_decay_hard() {
+  const char *purge;
+  if (mallctlRead("opt.purge", &purge, true) == 0) {
+    return (strcmp(purge, "decay") == 0);
   }
-  numa_bitmask_free(run_nodes);
-  numa_bitmask_free(mem_nodes);
 
-  if (!ret || numa_num_nodes <= 1) return;
+  // If "opt.purge" is absent, it's either because jemalloc is too old
+  // (pre-4.1.0), or because ratio-based purging is no longer present
+  // (likely post-4.x).
+  ssize_t decay_time;
+  return (mallctlRead("opt.decay_time", &decay_time, true) == 0);
+}
 
-  numa_node_mask = folly::nextPowTwo(numa_num_nodes) - 1;
+static bool purge_decay() {
+  static bool initialized = false;
+  static bool decay;
+
+  if (!initialized) {
+    decay = purge_decay_hard();
+    initialized = true;
+  }
+  return decay;
 }
 
 static void set_lg_dirty_mult(unsigned arena, ssize_t lg_dirty_mult) {
+  assert(!purge_decay());
   constexpr size_t max_miblen = 3;
   size_t miblen = max_miblen;
   size_t mib[max_miblen];
@@ -247,10 +287,10 @@ static void numa_purge_arena() {
   // Only purge if the thread's assigned arena is one of those created for use
   // by request threads.
   if (!threads_bind_local) return;
+  // Only purge if ratio-based purging is active.
+  if (purge_decay()) return;
   unsigned arena;
-  size_t sz = sizeof(arena);
-  int DEBUG_ONLY err = mallctl("thread.arena", &arena, &sz, nullptr, 0);
-  assert(err == 0);
+  mallctlRead("thread.arena", &arena);
   if (arena >= base_arena && arena < base_arena + numa_num_nodes) {
     // Threads may race through the following calls, but the last call made by
     // any idling thread will correctly restore lg_dirty_mult.
@@ -268,24 +308,24 @@ void enable_numa(bool local) {
     threads_bind_local = true;
 
     unsigned arenas;
-    size_t sz_arenas = sizeof(arenas);
-    if (mallctl("arenas.narenas", &arenas, &sz_arenas, nullptr, 0) != 0) {
+    if (mallctlRead("arenas.narenas", &arenas, true) != 0) {
       return;
     }
 
     base_arena = arenas;
     for (int i = 0; i < numa_num_nodes; i++) {
       int arena;
-      size_t sz = sizeof(arena);
-      if (mallctl("arenas.extend", &arena, &sz, nullptr, 0) != 0) {
+      if (mallctlRead("arenas.extend", &arena, true) != 0) {
         return;
       }
       if (arena != arenas) {
         return;
       }
       arenas++;
-      // Tune dirty page purging for new arena.
-      set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+      if (!purge_decay()) {
+        // Tune dirty page purging for new arena.
+        set_lg_dirty_mult(arena, LG_DIRTY_MULT_REQUEST_ACTIVE);
+      }
     }
   }
 
@@ -301,7 +341,6 @@ void enable_numa(bool local) {
   if (numa_sched_getaffinity(0, enabled) < 0) {
     return;
   }
-  node_to_cpu_mask = new std::vector<bitmask*>;
   int num_cpus = numa_num_configured_cpus();
   int max_node = numa_max_node();
   for (int i = 0; i <= max_node; i++) {
@@ -312,29 +351,19 @@ void enable_numa(bool local) {
         numa_bitmask_clearbit(cpus_for_node, j);
       }
     }
-    assert(node_to_cpu_mask->size() == i);
-    node_to_cpu_mask->push_back(cpus_for_node);
+    assert(node_to_cpu_mask.size() == i);
+    node_to_cpu_mask.push_back(cpus_for_node);
   }
   numa_bitmask_free(enabled);
 
   use_numa = true;
 }
 
-int next_numa_node() {
-  if (!use_numa) return 0;
-  int node;
-  do {
-    node = numa_cur_node.fetch_add(1, std::memory_order_relaxed);
-    node &= numa_node_mask;
-  } while (!((numa_node_set >> node) & 1));
-  return node;
-}
-
 void set_numa_binding(int node) {
   if (!use_numa) return;
 
   s_numaNode = node;
-  numa_sched_setaffinity(0, (*node_to_cpu_mask)[node]);
+  numa_sched_setaffinity(0, node_to_cpu_mask[node]);
   if (threads_bind_local) {
     numa_set_interleave_mask(numa_no_nodes_ptr);
     bitmask* nodes = numa_allocate_nodemask();
@@ -343,9 +372,7 @@ void set_numa_binding(int node) {
     numa_bitmask_free(nodes);
 
     int arena = base_arena + node;
-    int DEBUG_ONLY e = mallctl("thread.arena", nullptr, nullptr,
-                               &arena, sizeof(arena));
-    assert(!e);
+    mallctlWrite("thread.arena", arena);
   }
 
   char buf[32];
@@ -353,29 +380,79 @@ void set_numa_binding(int node) {
   prctl(PR_SET_NAME, buf);
 }
 
-int num_numa_nodes() {
-  if (!use_numa) return 1;
-  return numa_num_nodes;
-}
-
-void numa_interleave(void* start, size_t size) {
-  if (!use_numa) return;
-  numa_interleave_memory(start, size, numa_all_nodes_ptr);
-}
-
-void numa_local(void* start, size_t size) {
-  if (!use_numa) return;
-  numa_setlocal_memory(start, size);
-}
-
-void numa_bind_to(void* start, size_t size, int node) {
-  if (!use_numa) return;
-  numa_tonode_memory(start, size, node);
-}
-
 #else
-static void initNuma() {}
 static void numa_purge_arena() {}
+#endif
+
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+/*
+ * Get `pages` (at most 2) 1G huge pages and map to the low memory that grows
+ * down from 4G.  We can do either one (3G-4G) or two pages (2G-4G).
+ */
+void setup_low_1g_arena(int pages) {
+  if (pages <= 0) return;
+  if (pages > 2) pages = 2;             // At most 2 1G pages in low memory
+#ifdef HAVE_NUMA
+  const int max_node = numa_max_node();
+#else
+  constexpr int max_node = 0;
+#endif
+  try {
+    ManagedArena* ma = nullptr;
+    if (max_node < 1) {
+      // We either don't have libnuma, or run on a single-node system.  In
+      // either case, no need to worry about NUMA.
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
+                            size1g * pages);
+    } else {
+#ifdef HAVE_NUMA
+      // Tell the arena hook to interleave between all possible nodes, and try
+      // to grab the first page from Node 0 if it is allowed..
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 4),
+                            size1g * pages,
+                            0, numa_node_set);
+#endif
+    }
+    if (ma) low_huge1g_arena = ma->id();
+  } catch (...) {
+    low_huge1g_arena = 0;
+  }
+}
+
+/*
+ * Get `pages` 1G huge pages with explicit NUMA balancing.
+ */
+void setup_high_1g_arena(int pages) {
+  if (pages <= 0) return;
+  // We don't need/want a crazy number of pages here.
+  if (pages > 12) pages = 12;
+#ifdef HAVE_NUMA
+  const int max_node = numa_max_node();
+#else
+  constexpr int max_node = 0;
+#endif
+  try {
+    ManagedArena* ma = nullptr;
+    if (max_node < 1) {
+      // We either don't have libnuma, or run on a single-node system.
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
+                            size1g * pages);
+    } else {
+#ifdef HAVE_NUMA
+      // Tell the arena hook to interleave between all possible nodes, and try
+      // to grab the first page from a node other than the one where the first
+      // page for low-1G arena lives.
+      ma = new ManagedArena(reinterpret_cast<void*>(size1g * 16),
+                            size1g * pages,
+                            max_node / 2 + 1, numa_node_set);
+#endif
+    }
+    if (ma) high_huge1g_arena = ma->id();
+  } catch (...) {
+    high_huge1g_arena = 0;
+  }
+}
+
 #endif
 
 struct JEMallocInitializer {
@@ -402,18 +479,18 @@ struct JEMallocInitializer {
     dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
 
+    // Enable backtracing through PHP frames (t9814472).
+    setenv("UNW_RBP_ALWAYS_VALID", "1", false);
+
     initNuma();
 
     // Create a special arena to be used for allocating objects in low memory.
-    size_t sz = sizeof(low_arena);
-    if (mallctl("arenas.extend", &low_arena, &sz, nullptr, 0) != 0) {
+    if (mallctlRead("arenas.extend", &low_arena, true) != 0) {
       // Error; bail out.
       return;
     }
-    const char *dss = "primary";
-    if (mallctl(folly::format("arena.{}.dss", low_arena).str().c_str(),
-                nullptr, nullptr,
-                (void *)&dss, sizeof(const char *)) != 0) {
+    if (mallctlWrite(folly::sformat("arena.{}.dss", low_arena).c_str(),
+                     "primary", true) != 0) {
       // Error; bail out.
       return;
     }
@@ -426,6 +503,51 @@ struct JEMallocInitializer {
     (void) sbrk(leftInPage);
     assert((uintptr_t(sbrk(0)) & kHugePageMask) == 0);
     highest_lowmall_addr = (char*)sbrk(0) - 1;
+
+#if defined USE_JEMALLOC_CHUNK_HOOKS && defined __linux__
+    // Number of 1G huge pages for data in low memeory
+    int low_1g_pages = 0;
+    if (char* buffer = getenv("HHVM_LOW_1G_PAGE")) {
+      sscanf(buffer, "%d", &low_1g_pages);
+    }
+    // Number of 1G pages for shared data not in low memory (e.g., APC)
+    int high_1g_pages = 0;
+    if (char* buffer = getenv("HHVM_HIGH_1G_PAGE")) {
+      sscanf(buffer, "%d", &high_1g_pages);
+    }
+
+    if (low_1g_pages > 0 || high_1g_pages > 0) {
+      KernelVersion version;
+      if (version.m_major < 3 ||
+          (version.m_major == 3 && version.m_minor < 9)) {
+        // Older kernels need an explicit hugetlbfs mount point.
+        find_hugetlbfs_path() || auto_mount_hugetlbfs();
+      }
+    }
+
+    HugePageInfo info = get_huge1g_info();
+    int remaining = info.nr_hugepages;
+    if (remaining == 0) return;         // no pages reverved
+
+    // Do some allocation between low and high 1G arenas
+    if (low_1g_pages > 0) {
+      if (low_1g_pages > 2) {
+        low_1g_pages = 2;
+      }
+      if (low_1g_pages + high_1g_pages > remaining) {
+        low_1g_pages = 1;
+      }
+      remaining -= low_1g_pages;
+      setup_low_1g_arena(low_1g_pages);
+    }
+
+    if (high_1g_pages > remaining) {
+      high_1g_pages = remaining;
+    }
+    if (high_1g_pages > 0) {
+      setup_high_1g_arena(high_1g_pages);
+    }
+#endif
   }
 };
 
@@ -478,6 +600,7 @@ static void low_malloc_hugify(void* ptr) {
 }
 
 void* low_malloc_impl(size_t size) {
+  if (size == 0) return nullptr;
   void* ptr = mallocx(size, low_mallocx_flags());
   low_malloc_hugify((char*)ptr + size - 1);
   return ptr;
@@ -492,30 +615,49 @@ void low_malloc_skip_huge(void* start, void* end) {
   }
 }
 
+#ifdef USE_JEMALLOC_CHUNK_HOOKS
+void* low_malloc_huge1g_impl(size_t size) {
+  if (size == 0) return nullptr;
+  if (low_huge1g_arena == 0) return low_malloc(size);
+  auto ret = mallocx(size, low_mallocx_huge1g_flags());
+  if (ret) return ret;
+  return low_malloc(size);
+}
+
+void* malloc_huge1g_impl(size_t size) {
+  if (size == 0) return nullptr;
+  if (high_huge1g_arena == 0) return malloc(size);
+  auto ret = mallocx(size, mallocx_huge1g_flags());
+  if (ret) return ret;
+  return malloc(size);
+}
+
+#endif
+
 #else
 
 void low_malloc_skip_huge(void* start, void* end) {}
 
 #endif // USE_JEMALLOC
 
-#ifdef USE_JEMALLOC
+int mallctlCall(const char* cmd, bool errOk) {
+  // Use <unsigned> rather than <void> to avoid sizeof(void).
+  return mallctlHelper<unsigned>(cmd, nullptr, nullptr, errOk);
+}
 
 int jemalloc_pprof_enable() {
-  bool active = true;
-  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+  return mallctlWrite("prof.active", true, true);
 }
 
 int jemalloc_pprof_disable() {
-  bool active = false;
-  return mallctl("prof.active", nullptr, nullptr, &active, sizeof(bool));
+  return mallctlWrite("prof.active", false, true);
 }
 
 int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   if (!force) {
     bool active = false;
-    size_t activeSize = sizeof(active);
     // Check if profiling has been enabled before trying to dump.
-    int err = mallctl("opt.prof", &active, &activeSize, nullptr, 0);
+    int err = mallctlRead("opt.prof", &active, true);
     if (err || !active) {
       return 0; // nothing to do
     }
@@ -523,13 +665,11 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
   if (prefix != "") {
     const char *s = prefix.c_str();
-    return mallctl("prof.dump", nullptr, nullptr, (void *)&s, sizeof(char *));
+    return mallctlWrite("prof.dump", s, true);
   } else {
-    return mallctl("prof.dump", nullptr, nullptr, nullptr, 0);
+    return mallctlCall("prof.dump", true);
   }
 }
-
-#endif // USE_JEMALLOC
 
 ///////////////////////////////////////////////////////////////////////////////
 }
@@ -539,5 +679,9 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force) {
 
 extern "C" {
   const char* malloc_conf = "narenas:1,lg_tcache_max:16,"
-    "lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT);
+    "lg_dirty_mult:" STRINGIFY(LG_DIRTY_MULT_DEFAULT)
+#ifdef ENABLE_HHPROF
+    ",prof:true,prof_active:false,prof_thread_active_init:false"
+#endif
+    ;
 }

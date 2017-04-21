@@ -12,7 +12,7 @@
  *
  */
 <<__Native, __IsFoldable>>
-function array_change_key_case(array $input, int $case_ = CASE_LOWER): mixed;
+function array_change_key_case(mixed $input, int $case_ = CASE_LOWER): mixed;
 
 /**
  * Chunks an array into size large chunks. The last chunk may contain less
@@ -43,8 +43,8 @@ function array_chunk(mixed $input,
  * @return mixed - Returns the array column, or FALSE on failure
  *
  */
-<<__Native>>
-function array_column(array $arr,
+<<__Native, __IsFoldable>>
+function array_column(mixed $arr,
                       mixed $val_key,
                       mixed $idx_key = null): mixed;
 
@@ -205,7 +205,7 @@ function array_merge_recursive(mixed $array1,
  *
  */
 <<__Native("NumArgs"), __IsFoldable>>
-function array_merge(array $array1, mixed $array2 = null, ...$argv): mixed;
+function array_merge(mixed $array1, mixed $array2 = null, ...$argv): mixed;
 
 /**
  * array_replace_recursive() replaces the values of the first array with the
@@ -364,7 +364,7 @@ function array_rand(mixed $input, int $num_req = 1): mixed;
  *
  */
 <<__Native, __IsFoldable>>
-function array_reverse(array $array, bool $preserve_keys = false): mixed;
+function array_reverse(mixed $array, bool $preserve_keys = false): mixed;
 
 /**
  * Searches haystack for needle.
@@ -592,7 +592,7 @@ function array_walk(mixed &$input,
  *   it.
  *
  */
-<<__Native>>
+<<__Native("ReadsCallerFrame")>>
 function compact(mixed $varname, ...$argv): array;
 
 /**
@@ -1282,11 +1282,11 @@ function uksort(mixed &$array, mixed $cmp_function): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
-function natsort(mixed &$array): mixed;
+function natsort(mixed &$array): bool;
 
 /**
  * natcasesort() is a case insensitive version of natsort(). This function
@@ -1296,11 +1296,11 @@ function natsort(mixed &$array): mixed;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
-function natcasesort(mixed &$array): mixed;
+function natcasesort(mixed &$array): bool;
 
 <<__Native>>
 function i18n_loc_get_default(): string;
@@ -1347,26 +1347,6 @@ function hphp_array_idx(mixed $search, mixed $key, mixed $def): mixed;
 function array_multisort(mixed &$arr1, ...): bool;
 
 namespace __SystemLib {
-  /**
-   * Creates an array containing variables and their values. For each of these,
-   *   compact() looks for a variable with that name in the current symbol table
-   *   and adds it to the output array such that the variable name becomes the
-   *   key and the contents of the variable become the value for that key. In
-   *   short, it does the opposite of extract(). Any strings that are not set
-   *   will simply be skipped.
-   *
-   * @param mixed $varname - compact() takes a variable number of parameters.
-   *   Each parameter can be either a string containing the name of the
-   *   variable, or an array of variable names. The array can contain other
-   *   arrays of variable names inside it; compact() handles it recursively.
-   *
-   * @return array - Returns the output array with all the variables added to
-   *   it.
-   *
-   */
-  <<__Native>>
-  function compact_sl(mixed $varname, ...$argv): array;
-
   /* array_map() returns an array containing all the elements of arr1 after
    * applying the callback function to each one. The number of parameters that
    * the callback function accepts should match the number of arrays passed to
@@ -1387,4 +1367,21 @@ namespace __SystemLib {
   function array_map(mixed $callback,
                      mixed $arr1,
                      ...$argv): mixed;
+}
+
+namespace HH {
+  <<__Native, __IsFoldable>>
+  function dict(mixed $arr): dict;
+
+  <<__Native, __IsFoldable>>
+  function vec(mixed $arr): vec;
+
+  <<__Native, __IsFoldable>>
+  function keyset(mixed $arr): keyset;
+
+  <<__Native, __IsFoldable>>
+  function varray(mixed $arr): varray;
+
+  <<__Native, __IsFoldable>>
+  function darray(mixed $arr): darray;
 }

@@ -1,0 +1,8 @@
+File "nullary_constructor_constraint.php", line 13, characters 10-15:
+Some type constraint(s) here are violated (Typing[4110])
+File "nullary_constructor_constraint.php", line 10, characters 9-9:
+'T' is a constrained type
+File "nullary_constructor_constraint.php", line 10, characters 14-14:
+This is an object of type B
+File "nullary_constructor_constraint.php", line 15, characters 14-20:
+It is incompatible with an object of type A

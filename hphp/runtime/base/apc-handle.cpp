@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+#include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 
 namespace HPHP {
 
@@ -31,17 +33,6 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
                                   bool serialized,
                                   APCHandleLevel level,
                                   bool unserializeObj) {
-
-  auto createStaticStr = [&](StringData* s) {
-    assert(s->isStatic());
-    if (serialized) {
-      // It is priming, and there might not be the right class definitions
-      // for unserialization.
-      return APCString::MakeSerializedObject(apc_reserialize(String{s}));
-    }
-    auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
-    return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
-  };
 
   auto type = source.getType(); // this gets rid of the ref, if it was one
   switch (type) {
@@ -66,34 +57,78 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       auto value = new APCTypedValue(source.getDouble());
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
+    case KindOfPersistentString:
     case KindOfString: {
       StringData* s = source.getStringData();
-      if (s->isStatic()) {
-        return createStaticStr(s);
-      }
       if (serialized) {
         // It is priming, and there might not be the right class definitions
         // for unserialization.
         return APCString::MakeSerializedObject(apc_reserialize(String{s}));
+      }
+      if (s->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticStr{}, s);
+        return APCHandle::Pair{value->getHandle(), sizeof(APCTypedValue)};
       }
       auto const st = lookupStaticString(s);
       if (st) {
         auto value = new APCTypedValue(APCTypedValue::StaticStr{}, st);
         return {value->getHandle(), sizeof(APCTypedValue)};
       }
-      if (level == APCHandleLevel::Outer && apcExtension::UseUncounted) {
+      if (apcExtension::UseUncounted) {
         auto st = StringData::MakeUncounted(s->slice());
         auto value = new APCTypedValue(APCTypedValue::UncountedStr{}, st);
         return {value->getHandle(), st->size() + sizeof(APCTypedValue)};
       }
       return APCString::MakeSharedString(s);
     }
-    case KindOfStaticString:
-      return createStaticStr(source.getStringData());
 
-    case KindOfArray:
-      return APCArray::MakeSharedArray(source.getArrayData(), level,
-                                       unserializeObj);
+    case KindOfPersistentVec:
+    case KindOfVec: {
+      auto ad = source.getArrayData();
+      assert(ad->isVecArray());
+      if (ad->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticVec{}, ad);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+
+      return APCArray::MakeSharedVec(ad, level, unserializeObj);
+    }
+
+    case KindOfPersistentDict:
+    case KindOfDict: {
+      auto ad = source.getArrayData();
+      assert(ad->isDict());
+      if (ad->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticDict{}, ad);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+
+      return APCArray::MakeSharedDict(ad, level, unserializeObj);
+    }
+
+    case KindOfPersistentKeyset:
+    case KindOfKeyset: {
+      auto ad = source.getArrayData();
+      assert(ad->isKeyset());
+      if (ad->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticKeyset{}, ad);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+
+      return APCArray::MakeSharedKeyset(ad, level, unserializeObj);
+    }
+
+    case KindOfPersistentArray:
+    case KindOfArray: {
+      auto ad = source.getArrayData();
+      assert(ad->isPHPArray());
+      if (ad->isStatic()) {
+        auto value = new APCTypedValue(APCTypedValue::StaticArr{}, ad);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+
+      return APCArray::MakeSharedArray(ad, level, unserializeObj);
+    }
 
     case KindOfObject:
       if (source.getObjectData()->isCollection()) {
@@ -111,74 +146,211 @@ APCHandle::Pair APCHandle::Create(const Variant& source,
       return APCArray::MakeSharedEmptyArray();
 
     case KindOfRef:
-    case KindOfClass:
       return {nullptr, 0};
   }
   not_reached();
 }
 
 Variant APCHandle::toLocal() const {
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
+  switch (m_kind) {
+    case APCKind::Uninit:
+    case APCKind::Null:
       return init_null(); // shortcut.. no point to forward
-    case KindOfBoolean:
+    case APCKind::Bool:
       return APCTypedValue::fromHandle(this)->getBoolean();
-    case KindOfInt64:
+    case APCKind::Int:
       return APCTypedValue::fromHandle(this)->getInt64();
-    case KindOfDouble:
+    case APCKind::Double:
       return APCTypedValue::fromHandle(this)->getDouble();
-    case KindOfStaticString:
-      return Variant{APCTypedValue::fromHandle(this)->getStringData()};
-    case KindOfString:
-      return APCString::MakeLocalString(this);
-    case KindOfArray:
-      return APCArray::MakeLocalArray(this);
-    case KindOfObject:
+    case APCKind::StaticString:
+    case APCKind::UncountedString:
+      return Variant{APCTypedValue::fromHandle(this)->getStringData(),
+                     Variant::PersistentStrInit{}};
+    case APCKind::SharedString:
+      return Variant::attach(
+        StringData::MakeProxy(APCString::fromHandle(this))
+      );
+    case APCKind::StaticArray:
+    case APCKind::UncountedArray:
+      return Variant{APCTypedValue::fromHandle(this)->getArrayData(),
+                     KindOfPersistentArray,
+                     Variant::PersistentArrInit{}};
+    case APCKind::StaticVec:
+    case APCKind::UncountedVec:
+      return Variant{APCTypedValue::fromHandle(this)->getVecData(),
+                     KindOfPersistentVec,
+                     Variant::PersistentArrInit{}};
+    case APCKind::StaticDict:
+    case APCKind::UncountedDict:
+      return Variant{APCTypedValue::fromHandle(this)->getDictData(),
+                     KindOfPersistentDict,
+                     Variant::PersistentArrInit{}};
+    case APCKind::StaticKeyset:
+    case APCKind::UncountedKeyset:
+      return Variant{APCTypedValue::fromHandle(this)->getKeysetData(),
+                     KindOfPersistentKeyset,
+                     Variant::PersistentArrInit{}};
+    case APCKind::SerializedArray: {
+      auto const serArr = APCString::fromHandle(this)->getStringData();
+      auto const v = apc_unserialize(serArr->data(), serArr->size());
+      assert(v.isPHPArray());
+      return v;
+    }
+    case APCKind::SerializedVec: {
+      auto const serVec = APCString::fromHandle(this)->getStringData();
+      auto const v = apc_unserialize(serVec->data(), serVec->size());
+      assert(v.isVecArray());
+      return v;
+    }
+    case APCKind::SerializedDict: {
+      auto const serDict = APCString::fromHandle(this)->getStringData();
+      auto const v = apc_unserialize(serDict->data(), serDict->size());
+      assert(v.isDict());
+      return v;
+    }
+    case APCKind::SerializedKeyset: {
+      auto const serKeyset = APCString::fromHandle(this)->getStringData();
+      auto const v = apc_unserialize(serKeyset->data(), serKeyset->size());
+      assert(v.isKeyset());
+      return v;
+    }
+    case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
+      return Variant::attach(
+        APCLocalArray::Make(APCArray::fromHandle(this))->asArrayData()
+      );
+    case APCKind::SharedVec:
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalVec()
+      );
+    case APCKind::SharedDict:
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalDict()
+      );
+    case APCKind::SharedKeyset:
+      return Variant::attach(
+        APCArray::fromHandle(this)->toLocalKeyset()
+      );
+    case APCKind::SerializedObject: {
+      auto const serObj = APCString::fromHandle(this)->getStringData();
+      return apc_unserialize(serObj->data(), serObj->size());
+    }
+    case APCKind::SharedCollection:
+      return APCCollection::fromHandle(this)->createObject();
+    case APCKind::SharedObject:
       return APCObject::MakeLocalObject(this);
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
   }
   not_reached();
 }
 
 void APCHandle::deleteShared() {
-  assert(!isUncounted());
-  switch (m_type) {
-    case KindOfUninit:
-    case KindOfNull:
-    case KindOfBoolean:
+  assert(checkInvariants());
+  switch (m_kind) {
+    case APCKind::Uninit:
+    case APCKind::Null:
+    case APCKind::Bool:
       return;
-    case KindOfInt64:
-    case KindOfDouble:
-    case KindOfStaticString:
+    case APCKind::Int:
+    case APCKind::Double:
+    case APCKind::StaticString:
+    case APCKind::StaticArray:
+    case APCKind::StaticVec:
+    case APCKind::StaticDict:
+    case APCKind::StaticKeyset:
       delete APCTypedValue::fromHandle(this);
       return;
 
-    case KindOfString:
+    case APCKind::SharedString:
+    case APCKind::SerializedArray:
+    case APCKind::SerializedVec:
+    case APCKind::SerializedDict:
+    case APCKind::SerializedKeyset:
+    case APCKind::SerializedObject:
       APCString::Delete(APCString::fromHandle(this));
       return;
 
-    case KindOfArray:
+    case APCKind::SharedPackedArray:
+    case APCKind::SharedArray:
+    case APCKind::SharedVec:
+    case APCKind::SharedDict:
+    case APCKind::SharedKeyset:
       APCArray::Delete(this);
       return;
 
-    case KindOfObject:
-      if (isAPCCollection()) {
-        APCCollection::Delete(this);
-        return;
-      }
+    case APCKind::SharedObject:
       APCObject::Delete(this);
       return;
 
-    case KindOfResource:
-    case KindOfRef:
-    case KindOfClass:
-      break;
+    case APCKind::SharedCollection:
+      APCCollection::Delete(this);
+      return;
+
+    case APCKind::UncountedArray:
+    case APCKind::UncountedVec:
+    case APCKind::UncountedDict:
+    case APCKind::UncountedKeyset:
+    case APCKind::UncountedString:
+      assert(false);
+      return;
   }
   not_reached();
+}
+
+bool APCHandle::checkInvariants() const {
+  switch (m_kind) {
+    case APCKind::Uninit:
+      assert(m_type == KindOfUninit);
+      return true;
+    case APCKind::Null:
+      assert(m_type == KindOfNull);
+      return true;
+    case APCKind::Bool:
+      assert(m_type == KindOfBoolean);
+      return true;
+    case APCKind::Int:
+      assert(m_type == KindOfInt64);
+      return true;
+    case APCKind::Double:
+      assert(m_type == KindOfDouble);
+      return true;
+    case APCKind::StaticString:
+    case APCKind::UncountedString:
+      assert(m_type == KindOfPersistentString);
+      return true;
+    case APCKind::StaticArray:
+    case APCKind::UncountedArray:
+      assert(m_type == KindOfPersistentArray);
+      return true;
+    case APCKind::StaticVec:
+    case APCKind::UncountedVec:
+      assert(m_type == KindOfPersistentVec);
+      return true;
+    case APCKind::StaticDict:
+    case APCKind::UncountedDict:
+      assert(m_type == KindOfPersistentDict);
+      return true;
+    case APCKind::StaticKeyset:
+    case APCKind::UncountedKeyset:
+      assert(m_type == KindOfPersistentKeyset);
+      return true;
+    case APCKind::SharedString:
+    case APCKind::SharedArray:
+    case APCKind::SharedPackedArray:
+    case APCKind::SharedVec:
+    case APCKind::SharedDict:
+    case APCKind::SharedKeyset:
+    case APCKind::SharedObject:
+    case APCKind::SharedCollection:
+    case APCKind::SerializedArray:
+    case APCKind::SerializedVec:
+    case APCKind::SerializedDict:
+    case APCKind::SerializedKeyset:
+    case APCKind::SerializedObject:
+      assert(m_type == kInvalidDataType);
+      return true;
+  }
+  not_reached();
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////

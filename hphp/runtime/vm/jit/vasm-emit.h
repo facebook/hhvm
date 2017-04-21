@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,32 +17,60 @@
 #ifndef incl_HPHP_JIT_VASM_EMIT_H_
 #define incl_HPHP_JIT_VASM_EMIT_H_
 
+#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/types.h"
+
 namespace HPHP { namespace jit {
-///////////////////////////////////////////////////////////////////////////////
 
 struct Abi;
 struct AsmInfo;
+struct CGMeta;
+struct IRUnit;
 struct Vtext;
 struct Vunit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Optimize, lower for x64, register allocator, and perform more optimizations
- * on `unit'.
+ * Information about the expected cost of inlining a function  call.
  */
-void optimizeX64(Vunit& unit, const Abi&);
+struct Vcost {
+  // The "cost" of inlining the callee is based on an estimate of the resulting
+  // increase in code size
+  int cost;
+  // If the callee region contains any bind* or fallback instructions track that
+  // separately as executing them will be disproportionately expensive
+  bool incomplete;
+};
 
 /*
- * Emit code for the given unit using the given code areas. The unit should
- * have already been through optimizeX64().
+ * Optimize, lower for the specified architecture, register allocate (if
+ * desired), and perform more optimizations on the given unit.
  */
-void emitX64(const Vunit&, Vtext&, AsmInfo*);
+void optimizeX64(Vunit&, const Abi&, bool regalloc);
+void optimizeARM(Vunit&, const Abi&, bool regalloc);
+void optimizePPC64(Vunit&, const Abi&, bool regalloc);
 
 /*
- * Optimize, register allocate, and emit ARM code for the given unit.
+ * Emit code for the given unit using the given code areas. The unit must have
+ * already been through the corresponding optimizeArch() function.
  */
-void finishARM(Vunit&, Vtext&, const Abi&, AsmInfo*);
+void emitX64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitARM(Vunit&, Vtext&, CGMeta&, AsmInfo*);
+void emitPPC64(Vunit&, Vtext&, CGMeta&, AsmInfo*);
+
+/*
+ * Emit code for the given Vunit, which must already be register-allocated, to
+ * the given CodeBlocks.
+ */
+void emitVunit(Vunit& vunit, const IRUnit& unit,
+               CodeCache::View code, CGMeta& fixups,
+               Annotations* annotations = nullptr);
+
+/*
+ * Estimate the cost of a Vunit.
+ */
+Vcost computeVunitCost(const Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

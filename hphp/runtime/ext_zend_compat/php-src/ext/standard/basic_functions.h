@@ -115,8 +115,6 @@ PHP_FUNCTION(getprotobynumber);
 
 PHP_NAMED_FUNCTION(php_if_crc32);
 
-PHP_FUNCTION(register_tick_function);
-PHP_FUNCTION(unregister_tick_function);
 #ifdef HAVE_GETLOADAVG
 PHP_FUNCTION(sys_getloadavg);
 #endif

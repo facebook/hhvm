@@ -1,4 +1,4 @@
-Program %s/break_async.php loaded. Type '[r]un' or '[c]ontinue' to go.
+Program %s.php loaded. Type '[r]un' or '[c]ontinue' to go.
 break gen1()
 Breakpoint 1 set upon entering gen1()
 But won't break until function gen1 has been loaded.
@@ -6,25 +6,25 @@ b main()
 Breakpoint 2 set upon entering main()
 But won't break until function main has been loaded.
 continue
-Breakpoint 2 reached at main() on line 43 of %s/break_async.php
-  42 function main($a) {
-  43*  $result = HH\Asio\join(genFoo($a));
-  44   var_dump($result);
+Breakpoint 2 reached at main() on line %d of %s/break_async.php
+  %d function main($a) {
+  %d*  $result = HH\Asio\join(genFoo($a));
+  %d   var_dump($result);
 
 break genFoo()
 Breakpoint 3 set upon entering genFoo()
 c
-Breakpoint 3 reached at genFoo() on line 26 of %s/break_async.php
-  25 async function genFoo($a) {
-  26*  error_log('In genFoo');
-  27   var_dump($a);
+Breakpoint 3 reached at genFoo() on line %d of %s/break_async.php
+  %d async function genFoo($a) {
+  %d*  error_log('In genFoo');
+  %d   var_dump($a);
 
 n
 In genFoo
-Break at genFoo() on line 27 of %s/break_async.php
-  26   error_log('In genFoo');
-  27*  var_dump($a);
-  28   $a++;
+Break at genFoo() on line %d of %s/break_async.php
+  %d   error_log('In genFoo');
+  %d*  var_dump($a);
+  %d   $a++;
 
 c
 int(42)
@@ -35,17 +35,17 @@ In genBar
 int(44)
 Finished in genBar
 In gen2
-Breakpoint 1 reached at gen1() on line 6 of %s/break_async.php
-   5 async function gen1($a) {
-   6*  error_log('In gen1');
-   7   error_log('Finished in gen1');
+Breakpoint 1 reached at gen1() on line %d of %s/break_async.php
+  %d async function gen1($a) {
+  %d*  error_log('In gen1');
+  %d   error_log('Finished in gen1');
 
 n
 In gen1
-Break at gen1() on line 7 of %s/break_async.php
-   6   error_log('In gen1');
-   7*  error_log('Finished in gen1');
-   8   return $a + 1;
+Break at gen1() on line %d of %s/break_async.php
+  %d   error_log('In gen1');
+  %d*  error_log('Finished in gen1');
+  %d   return $a + 1;
 
 c
 Finished in gen1
@@ -54,5 +54,5 @@ int(45)
 int(46)
 Finished in genFoo
 int(91)
-Program %s/break_async.php exited normally.
+Program %s.php exited normally.
 quit

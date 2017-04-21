@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
+#include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/method-lookup.h"
 
 namespace HPHP {
 
@@ -31,15 +32,15 @@ UserFSNode::UserFSNode(Class* cls,
   const Func* ctor;
   m_cls = cls;
   if (LookupResult::MethodFoundWithThis !=
-      g_context->lookupCtorMethod(ctor, m_cls)) {
+      lookupCtorMethod(ctor, m_cls, arGetContextClass(vmfp()))) {
     raise_error("Unable to call %s'n constructor", m_cls->name()->data());
   }
 
   m_obj = Object{m_cls};
   m_obj.o_set("context", Variant(context));
-  Variant ret;
-  g_context->invokeFuncFew(ret.asTypedValue(), ctor, m_obj.get());
-
+  auto ret = Variant::attach(
+    g_context->invokeFuncFew(ctor, m_obj.get())
+  );
   m_Call = lookupMethod(s_call.get());
 }
 
@@ -54,8 +55,9 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
   if (func &&
       !(func->attrs() & (AttrPrivate|AttrProtected|AttrAbstract)) &&
       !func->hasPrivateAncestor()) {
-    Variant ret;
-    g_context->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
+    auto ret = Variant::attach(
+      g_context->invokeFunc(func, args, m_obj.get())
+    );
     invoked = true;
     return ret;
   }
@@ -68,20 +70,21 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
 
   CallerFrame cf;
   Class* ctx = arGetContextClass(cf());
-  switch(g_context->lookupObjMethod(func, m_cls, name.get(), ctx)) {
+  switch(lookupObjMethod(func, m_cls, name.get(), ctx)) {
     case LookupResult::MethodFoundWithThis:
     {
-      Variant ret;
-      g_context->invokeFunc(ret.asTypedValue(), func, args, m_obj.get());
+      auto ret = Variant::attach(
+        g_context->invokeFunc(func, args, m_obj.get())
+      );
       invoked = true;
       return ret;
     }
 
     case LookupResult::MagicCallFound:
     {
-      Variant ret;
-      g_context->invokeFunc(ret.asTypedValue(), func,
-                              make_packed_array(name, args), m_obj.get());
+      auto ret = Variant::attach(
+        g_context->invokeFunc(func, make_packed_array(name, args), m_obj.get())
+      );
       invoked = true;
       return ret;
     }

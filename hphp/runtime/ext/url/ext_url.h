@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -43,7 +43,7 @@ Array HHVM_FUNCTION(get_meta_tags, const String& filename,
                                    bool use_include_path /* = false */);
 
 Variant HHVM_FUNCTION(http_build_query, const Variant& formdata,
-                           const String& numeric_prefix /* = null_string */,
+                           const Variant& numeric_prefix /* = null_string */,
                            const String& arg_separator /* = null_string */,
                            int enc_type = k_PHP_QUERY_RFC1738);
 Variant HHVM_FUNCTION(parse_url, const String& url,

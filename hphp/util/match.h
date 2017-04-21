@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,9 +16,12 @@
 #ifndef incl_HPHP_UTIL_MATCH_H_
 #define incl_HPHP_UTIL_MATCH_H_
 
+#include <type_traits>
 #include <utility>
 
 #include <boost/variant.hpp>
+
+#include <folly/DiscriminatedPtr.h>
 
 namespace HPHP {
 
@@ -70,13 +73,45 @@ visitor<Ret,Funcs...> make_visitor(Funcs&&... funcs) {
   return { std::forward<Funcs>(funcs)... };
 }
 
+template <typename T> struct is_variant {
+  static constexpr bool value = false;
+};
+template <typename... T> struct is_variant<boost::variant<T...>> {
+  static constexpr bool value = true;
+};
+
+template <typename T> struct is_discriminated_ptr {
+  static constexpr bool value = false;
+};
+template <typename... T>
+struct is_discriminated_ptr<folly::DiscriminatedPtr<T...>> {
+  static constexpr bool value = true;
+};
+
 }
 
 template<class Ret, class Var, class... Funcs>
-Ret match(Var& v, Funcs&&... funcs) {
+typename std::enable_if<
+  match_detail::is_variant<
+    typename std::remove_cv<Var>::type
+    >::value,
+  Ret>::type
+match(Var& v, Funcs&&... funcs) {
   return boost::apply_visitor(
     match_detail::make_visitor<Ret>(std::forward<Funcs>(funcs)...),
     v
+  );
+}
+
+template<class Ret, class Var, class... Funcs>
+typename std::enable_if<
+  match_detail::is_discriminated_ptr<
+    typename std::remove_cv<Var>::type
+    >::value,
+  Ret>::type
+match(Var& v, Funcs&&... funcs) {
+  return v.apply(
+    match_detail::make_visitor<Ret>(std::forward<Funcs>(funcs)...)
   );
 }
 

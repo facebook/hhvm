@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -28,7 +28,10 @@
 #include <json/json.h>
 #endif
 
-#include "hphp/runtime/ext/collections/ext_collections-idl.h"
+#include <folly/CppAttributes.h>
+
+#include "hphp/runtime/ext/collections/ext_collections-map.h"
+#include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/collections.h"
@@ -169,6 +172,13 @@ Variant json_object_to_variant(json_object *new_obj, const bool assoc,
 
     type = json_object_get_type(new_obj);
     switch (type) {
+    case json_type_int:
+        i64 = json_object_get_int64(new_obj);
+        if (!(i64==INT64_MAX || i64==INT64_MIN)) {
+          return Variant(i64);
+        }
+        FOLLY_FALLTHROUGH
+
     case json_type_double:
         return Variant(json_object_get_double(new_obj));
 
@@ -176,13 +186,6 @@ Variant json_object_to_variant(json_object *new_obj, const bool assoc,
         return Variant(String(json_object_get_string(new_obj),
                               json_object_get_string_len(new_obj),
                               CopyString));
-
-    case json_type_int:
-        i64 = json_object_get_int64(new_obj);
-        if (i64==INT64_MAX || i64==INT64_MIN) {
-            // php notice: integer overflow detected
-        }
-        return Variant(i64);
 
     case json_type_boolean:
         if (json_object_get_boolean(new_obj)) {
@@ -258,6 +261,14 @@ bool JSON_parser(Variant &return_value, const char *data, int data_len,
 
     json_tokener_free(tok);
     return retval;
+}
+
+void json_parser_init() {
+    // Nop
+}
+
+void json_parser_flush_caches() {
+    // Nop
 }
 
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,8 +26,7 @@ DECLARE_BOOST_TYPES(UnaryOpExpression);
 
 struct Variant;
 
-class UnaryOpExpression : public Expression,
-                          public LocalEffectsContainer {
+struct UnaryOpExpression : Expression, LocalEffectsContainer {
 private:
   void ctorInit();
 protected:
@@ -55,7 +54,6 @@ public:
   bool isCast() const;
   bool getFront() const { return m_front; }
 
-  ExpressionPtr unneededHelper() override;
   void setDefinedScope(BlockScopeRawPtr scope);
 protected:
   ExpressionPtr m_exp;
@@ -67,6 +65,31 @@ private:
   bool preCompute(const Variant& value, Variant &result);
   void setExistContext();
 };
+
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for a
+ * dictionary.
+ *
+ * If the list contains invalid keys it cannot statically initialize a dict.
+ */
+bool isDictScalar(ExpressionPtr exp);
+
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for a keyset.
+ *
+ * If the list contains keys that are not string nor integers, it cannot
+ * statically initialize a keyset.
+ */
+bool isKeysetScalar(ExpressionPtr exp);
+
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for an array.
+ *
+ * If the list contains keys or values, it cannot statically initialize an
+ * array. In addition, if EvalHackArrCompatNotices is set, the keys must either
+ * be strings or integers.
+ */
+bool isArrayScalar(ExpressionPtr exp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

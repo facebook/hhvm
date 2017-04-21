@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,12 +20,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <vector>
 #include <string>
 #include <iostream>
 #include <sstream>
+
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Stdlib.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 
@@ -112,6 +115,13 @@ int emulate_zend(int argc, char** argv) {
       need_file = true;
       cnt += 2;
       continue;
+    }
+    if (strcmp(argv[cnt], "-i") == 0 || strcmp(argv[cnt], "--info") == 0) {
+      // Pretend they did "-r 'phpinfo();'"
+      program = "phpinfo();";
+      need_file = true;
+      cnt = argc; // no need to check the rest of options and arguments
+      break;
     }
     if (strcmp(argv[cnt], "-w") == 0) {
       cnt++;

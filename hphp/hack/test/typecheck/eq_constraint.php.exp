@@ -1,0 +1,6 @@
+File "eq_constraint.php", line 34, characters 20-30:
+You are trying to access the member assertIsFoo but this object can be null.  (Typing[4064])
+File "eq_constraint.php", line 31, characters 40-43:
+This is what makes me believe it can be null
+File "eq_constraint.php", line 27, characters 30-35:
+  via this generic Tclass

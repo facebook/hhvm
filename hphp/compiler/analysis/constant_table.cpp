@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,8 +30,9 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-    : SymbolTable(blockScope),
-      m_hasDynamic(false) {
+    : SymbolTable(blockScope)
+    , m_hasDynamic(false)
+    , m_hasDependencies(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,8 +71,7 @@ void ConstantTable::add(const std::string &name,
 }
 
 void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
-                               const std::string &name) {
-  Symbol *sym = genSymbol(name, true);
+                               Symbol* sym) {
   if (!sym->isDynamic()) {
     Lock lock(BlockScope::s_constMutex);
     sym->setDynamic();
@@ -81,6 +81,11 @@ void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
     }
     m_hasDynamic = true;
   }
+}
+
+void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
+                               const std::string &name) {
+  setDynamic(ar, genSymbol(name, true));
 }
 
 void ConstantTable::setValue(AnalysisResultConstPtr ar, const std::string &name,
@@ -108,6 +113,7 @@ ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstPtr ar,
                                           ClassScopePtr &defClass) const {
   if (const Symbol *sym = getSymbol(name)) {
     assert(sym->isPresent() && sym->valueSet());
+    if (sym->isDynamic()) return ConstructPtr();
     if (sym->getValue()) return sym->getValue();
   }
   ClassScopePtr parent = findParent(ar, name);
@@ -132,6 +138,32 @@ const {
     return parent->getConstants()->getDeclarationRecur(ar, name, defClass);
   }
   return ConstructPtr();
+}
+
+void ConstantTable::recordDependencies(Symbol* sym,
+                                       const ClassConstantSet& depends) {
+  auto& set = m_dependencies[sym];
+  set.insert(depends.begin(), depends.end());
+  m_hasDependencies |= !set.empty();
+}
+
+void ConstantTable::recordDependencies(const std::string& name,
+                                       const ClassConstantSet& depends) {
+  if (Symbol* sym = getSymbol(name)) {
+    recordDependencies(sym, depends);
+  }
+}
+
+void ConstantTable::lookupDependencies(const std::string& name,
+                                       ClassConstantSet& out) {
+
+  if (!m_hasDependencies) return;
+  if (Symbol* sym = getSymbol(name)) {
+    auto iter = m_dependencies.find(sym);
+    if (iter != m_dependencies.end()) {
+      out.insert(iter->second.begin(), iter->second.end());
+    }
+  }
 }
 
 void ConstantTable::cleanupForError(AnalysisResultConstPtr ar) {

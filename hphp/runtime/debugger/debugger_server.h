@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ private:
   static DebuggerServer s_debugger_server;
 
   req::ptr<Socket> nthSocket(unsigned i) const {
-    return req::make<Socket>(m_socks[i]);
+    return req::make<StreamSocket>(m_socks[i]);
   }
 
   AsyncFunc<DebuggerServer> m_serverThread;

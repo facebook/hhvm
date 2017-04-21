@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,9 +29,10 @@ Opcode canonicalOp(Opcode op) {
   if (op == ElemUX || op == UnsetElem) {
     return UnsetElem;
   }
-  if (op == SetWithRefElem || op == SetWithRefNewElem) {
+  if (op == SetWithRefElem) {
     return SetWithRefElem;
   }
+  if (op == MemoSet) return MemoSet;
   return opcodeHasFlags(op, MInstrProp) ? SetProp
        : opcodeHasFlags(op, MInstrElem) ? SetElem
        : bad_value<Opcode>();
@@ -73,13 +74,30 @@ void getBaseType(Opcode rawOp, bool predict,
   }
 
   if ((op == SetElem || op == UnsetElem || op == SetWithRefElem) &&
-      baseType.maybe(TArr | TStr)) {
+      baseType.maybe(TArrLike | TStr)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
-    if (baseType.maybe(TStaticArr)) baseType |= TCountedArr;
-    if (baseType.maybe(TStaticStr)) baseType |= TCountedStr;
+    if (baseType.maybe(TArr)) {
+      if (rawOp == SetNewElemArray &&
+          (baseType <= Type::Array(ArrayData::kPackedKind) ||
+           baseType <= Type::Array(ArrayData::kEmptyKind))) {
+        baseType = Type::Array(ArrayData::kPackedKind);
+      } else {
+        baseType |= TCountedArr;
+      }
+    }
+
+    if (baseType.maybe(TVec)) baseType |= TCountedVec;
+    if (baseType.maybe(TDict)) baseType |= TCountedDict;
+    if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
+    if (baseType.maybe(TStr)) baseType |= TCountedStr;
+  }
+
+  if (op == MemoSet) {
+    baseValChanged = true;
+    baseType = TCountedDict;
   }
 }
 

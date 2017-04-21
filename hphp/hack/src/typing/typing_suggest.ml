@@ -15,9 +15,9 @@ open Core
 open Typing_defs
 open Utils
 
-let compare_types x y =
-  let tcopt = TypecheckerOptions.permissive in
-  let tenv = Typing_env.empty tcopt Relative_path.default in
+let compare_types x y tcopt =
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
+  let tenv = Typing_env.empty tcopt Relative_path.default ~droot:None in
   String.compare
     (Typing_print.full tenv x) (Typing_print.full tenv y)
 
@@ -42,13 +42,17 @@ let (types: (Env.env * Pos.t * hint_kind * locl ty) list ref) = ref []
 let (initialized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 
 let add_type env pos k type_ =
+  let tcopt = Env.get_tcopt env in
+  let new_env =
+    Env.empty
+      (TypecheckerOptions.make_permissive tcopt)
+      Relative_path.default ~droot:None in
   let new_type = (
     (* Some stuff in env isn't serializable, which we need so that we can infer
      * types part of the codebase at a time in worker threads. Fortunately we
      * don't actually need the whole env, so just keep the parts we do need for
      * typing, which *are* serializable. *)
-    {(Env.empty TypecheckerOptions.permissive Relative_path.default) with
-     Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
+    {new_env with Env.tenv = env.Env.tenv; Env.subst = env.Env.subst},
     pos,
     k,
     type_
@@ -70,7 +74,7 @@ let save_type hint_kind env x arg =
             let x_pos = Reason.to_pos (fst x) in
             add_type env x_pos hint_kind arg;
         )
-    | _, (Tmixed | Tarraykind _ | Tprim _ | Toption _
+    | _, (Terr | Tmixed | Tarraykind _ | Tprim _ | Toption _
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
@@ -88,131 +92,124 @@ let save_param name env x arg = save_type (Kparam name) env x arg
  * }
  *
  *)
-let uninitialized_member cname mname env x arg = if !is_suggest_mode then begin
-  match SMap.get cname !initialized_members with
-    (* No static initalizer and no initalization in the constructor means that
-     * this variable can be used before it's written to, and thus must be
-     * nullable. *)
-    | Some inits ->
-      if not (SSet.mem mname inits)
-      then save_member mname env x (fst x, Toption arg)
+let uninitialized_member cname mname env x arg =
+  if !is_suggest_mode then begin
+    match SMap.get cname !initialized_members with
+      (* No static initalizer and no initalization in the constructor means that
+       * this variable can be used before it's written to, and thus must be
+       * nullable. *)
+      | Some inits ->
+        if not (SSet.mem mname inits)
+        then save_member mname env x (fst x, Toption arg)
 
-    (* Some constructions, such as traits, don't calculate initialized members.
-     * TODO: this will suggest wrong types for some member variables defined in
-     * traits, since they might be nullable, but that depends on the constructor
-     * of the class that includes the trait (!). Not sure how to deal with this
-     * right now, will just let the "revert bad patch" logic take care of it. *)
-    | None -> ()
-end
+      (* Some constructions, such as traits, don't calculate initialized members.
+       * TODO: this will suggest wrong types for some member variables defined in
+       * traits, since they might be nullable, but that depends on the constructor
+       * of the class that includes the trait (!). Not sure how to deal with this
+       * right now, will just let the "revert bad patch" logic take care of it. *)
+      | None -> ()
+  end
 
 let save_initialized_members cname inits = if !is_suggest_mode then begin
   initialized_members := SMap.add cname inits !initialized_members
 end
 
-(* Normally, when we unify ?int and int, we don't want
- * them to be compatible, but here things are different,
- * we are trying to guess what the type should be.
-*)
-let rec my_unify depth env ty1 ty2 =
-  let my_unify = my_unify (depth+1) in
-  if depth > 10 then fst ty1, Tunresolved [ty1; ty2] else
-  match ty1, ty2 with
-  | (r, Tmixed), _
-  | _, (r, Tmixed) -> r, Tmixed
-  | (_, Tunresolved [ty1]), ty2
-  | ty2, (_, Tunresolved [ty1]) ->
-     my_unify env ty1 ty2
-  | (r, Toption ty1), (_, Toption ty2) ->
-      r, Toption (my_unify env ty1 ty2)
-  | (r, Toption ty1), ty2
-  | ty2, (r, Toption ty1) ->
-      r, Toption (my_unify env ty1 ty2)
-  | (r, Tarraykind _), (_, Tarraykind _) ->
-      (try snd (Typing_ops.unify Pos.none Typing_reason.URnone env ty1 ty2)
-      with _ -> (r, Tarraykind AKany))
-  | (_, Tunresolved tyl), ty2
-  | ty2, (_, Tunresolved tyl) ->
-      List.fold_left tyl ~f:(my_unify env) ~init:ty2
-  | (r, _), _ -> snd (TUtils.fold_unresolved env (r, Tunresolved [ty1; ty2]))
-
 (** returns the classes/interfaces implemented by a class
  * we are only interested in the non-parametric ones, infering
  * the parameter would be too hard anyway.
  *)
-let get_implements (_, x) =
-  match Env.Classes.get x with
+let get_implements tcopt (_, x) =
+  match Typing_lazy_heap.get_class tcopt x with
   | None -> SSet.empty
   | Some { tc_ancestors = tyl; _ } ->
       SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
-        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric (_, _) | Tfun _
-          | Toption _ | Tapply (_, _) | Ttuple _ | Tshape _ | Taccess (_, _)
-          | Tthis) ->
-          raise Exit
+        | _,
+          (
+            Tany
+            | Terr
+            | Tmixed
+            | Tarray (_, _)
+            | Tdarray (_, _)
+            | Tvarray _
+            | Tprim _
+            | Tgeneric _
+            | Tfun _
+            | Toption _
+            | Tapply (_, _)
+            | Ttuple _
+            | Tshape _
+            | Taccess (_, _)
+            | Tthis
+          ) ->
+            raise Exit
       end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
  * the inferred type doesn't resolve to a type hint.
  *)
-let rec normalize (r, ty) = r, normalize_ ty
-and normalize_ = function
-  | Tunresolved [x] -> snd (normalize x)
+let rec normalize tcopt (r, ty) = r, normalize_ tcopt ty
+and normalize_ tcopt = function
+  | Tunresolved [x] -> snd (normalize tcopt x)
   | Tunresolved tyl
     when List.exists tyl (function _, Toption _ -> true | _ -> false) ->
       let tyl = List.map tyl (function _, Toption ty -> ty | x -> x) in
-      normalize_ (Toption (Reason.Rnone, Tunresolved tyl))
+      normalize_ tcopt (Toption (Reason.Rnone, Tunresolved tyl))
   | Tunresolved tyl
     when List.exists tyl
     (function _, (Tany | Tunresolved []) -> true | _ -> false) ->
       let tyl = List.filter tyl begin function
         |  _, (Tany |  Tunresolved []) -> false
-        | _, (Tmixed | Tarraykind _ | Tprim _ | Toption _
+        | _, (Terr | Tmixed | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
              ) -> true
       end in
-      normalize_ (Tunresolved tyl)
+      normalize_ tcopt (Tunresolved tyl)
   | Tunresolved ((_, Tclass (x, [])) :: rl) ->
       (* If we have A & B & C where all the elements are classes
        * we try to find a unique common ancestor.
        *)
       let rl = List.map rl begin function
         | _, Tclass (x, []) -> x
-        | _, (Tany | Tmixed | Tarraykind _ | Tprim _
+        | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _
           | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
       end in
-      let x_imp = get_implements x in
+      let x_imp = get_implements tcopt x in
       let set = List.fold_left rl ~f:begin fun x_imp x ->
-        SSet.inter x_imp (get_implements x)
+        SSet.inter x_imp (get_implements tcopt x)
       end ~init:x_imp in
       (* is it unique? *)
       if SSet.cardinal set = 1
       then Tclass ((Pos.none, SSet.choose set), [])
       else raise Exit
-  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y = 0 ->
-      normalize_ (Tunresolved rl)
+  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y tcopt = 0 ->
+      normalize_ tcopt (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
+  | Terr -> Terr
   | Tarraykind akind -> begin
     try
       Tarraykind (match akind with
         | AKany -> AKany
         | AKempty -> AKempty
-        | AKvec tk -> AKvec (normalize tk)
-        | AKmap (tk, tv) -> AKmap (normalize tk, normalize tv)
+        | AKvarray tk -> AKvarray (normalize tcopt tk)
+        | AKvec tk -> AKvec (normalize tcopt tk)
+        | AKdarray (tk, tv) -> AKdarray (normalize tcopt tk, normalize tcopt tv)
+        | AKmap (tk, tv) -> AKmap (normalize tcopt tk, normalize tcopt tv)
         (* fully_expand_tvars_downcast_aktypes should have removed those *)
         | AKshape _ | AKtuple _ -> raise Exit
       )
     with Exit -> Tarraykind AKany
   end
-  | Tabstract (AKgeneric (_, _), _) as x -> x
-  | Tabstract (AKdependent _, Some ty) -> normalize_ (snd ty)
-  | Toption (_, (Toption (_, _) as ty)) -> normalize_ ty
+  | Tabstract (AKgeneric _, _) as x -> x
+  | Tabstract (AKdependent _, Some ty) -> normalize_ tcopt (snd ty)
+  | Toption (_, (Toption (_, _) as ty)) -> normalize_ tcopt ty
   | Toption (_, Tprim Nast.Tvoid) -> raise Exit
-  | Toption ty -> Toption (normalize ty)
+  | Toption ty -> Toption (normalize tcopt ty)
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
@@ -222,7 +219,7 @@ and normalize_ = function
        * local one. Figure something else out that doesn't involve spamming '\'
        * across FB code, maybe? See if anyone complains on GitHub? I have no
        * idea how bad this is in practice, I'm kinda hoping it's okay. *)
-      normalize_ (Tclass ((pos, strip_ns name), tyl))
+      normalize_ tcopt (Tclass ((pos, strip_ns name), tyl))
   | Tclass ((pos1, "Awaitable"), [(_, Toption (pos2, Tprim Nast.Tvoid))]) ->
       (* Special case: Awaitable<?void> is nonsensical, but often
        * Awaitable<void> works. *)
@@ -234,14 +231,14 @@ and normalize_ = function
         then ":"^name
         else name
       in
-      Tclass ((pos, name), List.map tyl normalize)
-  | Ttuple tyl -> Ttuple (List.map tyl normalize)
+      Tclass ((pos, name), List.map tyl (normalize tcopt))
+  | Ttuple tyl -> Ttuple (List.map tyl (normalize tcopt))
   | Tanon _ -> raise Exit
   | Tobject -> raise Exit
   | Tabstract _ -> raise Exit
   | Tshape _ -> raise Exit
 
-let normalize ty =
+let normalize tcopt ty =
   try
-    Some (normalize ty)
+    Some (normalize tcopt ty)
   with Exit -> None

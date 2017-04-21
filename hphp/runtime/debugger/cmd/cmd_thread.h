@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/debuggable.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/debugger/debugger_base.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
@@ -43,7 +44,7 @@ private:
   // implementing IDebuggable
   void debuggerInfo(InfoVec&) override;
 
-  String m_out;
+  req::root<String> m_out;
   std::vector<DThreadInfoPtr> m_threads;
 
   void processList(DebuggerClient &client, bool output = true);

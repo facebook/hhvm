@@ -1,0 +1,21 @@
+<?php
+
+function sum(...$args) {
+  return array_sum($args);
+}
+
+function three() {
+  return extension_loaded("pdo") ? 3 : 0;
+}
+
+function main() {
+  $result = sum(
+    5,
+    three(),
+    three(),
+    2
+  );
+  return $result;
+}
+
+var_dump(main());

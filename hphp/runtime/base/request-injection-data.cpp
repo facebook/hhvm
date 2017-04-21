@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,11 +21,11 @@
 #include <string>
 #include <limits>
 
-#include <sys/time.h>
 #include <signal.h>
 
 #include <boost/filesystem.hpp>
 #include <folly/Optional.h>
+#include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file.h"
@@ -48,8 +48,6 @@ void RequestTimer::onTimeout() {
 
 RequestTimer::RequestTimer(RequestInjectionData* data)
     : m_reqInjectionData(data)
-    , m_timeoutSeconds(0)
-    , m_timerSource(nullptr)
 {
   // Unlike the canonical Linux implementation, this does not distinguish
   // between whether we wanted real seconds or CPU seconds -- you always get
@@ -136,8 +134,6 @@ int RequestTimer::getRemainingTime() const {
 
 RequestTimer::RequestTimer(RequestInjectionData* data)
     : m_reqInjectionData(data)
-    , m_timeoutSeconds(0)
-    , m_tce(nullptr)
 {}
 
 RequestTimer::~RequestTimer() {
@@ -184,7 +180,6 @@ int RequestTimer::getRemainingTime() const {
 
 RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
     : m_reqInjectionData(data)
-    , m_timeoutSeconds(0)  // no timeout by default
     , m_clockType(clockType)
     , m_hasTimer(false)
     , m_timerActive(false)
@@ -192,7 +187,7 @@ RequestTimer::RequestTimer(RequestInjectionData* data, clockid_t clockType)
 
 RequestTimer::~RequestTimer() {
   if (m_hasTimer) {
-    timer_delete(m_timer_id);
+    timer_delete(m_timerId);
   }
 }
 
@@ -212,7 +207,7 @@ void RequestTimer::setTimeout(int seconds) {
     sev.sigev_notify = SIGEV_SIGNAL;
     sev.sigev_signo = SIGVTALRM;
     sev.sigev_value.sival_ptr = this;
-    if (timer_create(m_clockType, &sev, &m_timer_id)) {
+    if (timer_create(m_clockType, &sev, &m_timerId)) {
       raise_error("Failed to set timeout: %s", folly::errnoStr(errno).c_str());
     }
     m_hasTimer = true;
@@ -228,7 +223,7 @@ void RequestTimer::setTimeout(int seconds) {
    */
   itimerspec ts = {};
   itimerspec old;
-  timer_settime(m_timer_id, 0, &ts, &old);
+  timer_settime(m_timerId, 0, &ts, &old);
   if (!old.it_value.tv_sec && !old.it_value.tv_nsec) {
     // the timer has gone off...
     if (m_timerActive.load(std::memory_order_acquire)) {
@@ -242,7 +237,7 @@ void RequestTimer::setTimeout(int seconds) {
   if (m_timeoutSeconds) {
     m_timerActive.store(true, std::memory_order_relaxed);
     ts.it_value.tv_sec = m_timeoutSeconds;
-    timer_settime(m_timer_id, 0, &ts, nullptr);
+    timer_settime(m_timerId, 0, &ts, nullptr);
   } else {
     m_timerActive.store(false, std::memory_order_relaxed);
   }
@@ -251,7 +246,7 @@ void RequestTimer::setTimeout(int seconds) {
 int RequestTimer::getRemainingTime() const {
   if (m_hasTimer) {
     itimerspec ts;
-    if (!timer_gettime(m_timer_id, &ts)) {
+    if (!timer_gettime(m_timerId, &ts)) {
       int remaining = ts.it_value.tv_sec;
       return remaining > 1 ? remaining : 1;
     }
@@ -491,11 +486,28 @@ void RequestInjectionData::threadInit() {
   // TODO(T5601927): output_compression supports int values where the value
   // represents the output buffer size. Also need to add a
   // zlib.output_handler ini setting as well.
-  // http://docs.hhvm.com/zlib.configuration.php
+  // http://php.net/zlib.configuration.php
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression", &m_gzipCompression);
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
                    "zlib.output_compression_level", &m_gzipCompressionLevel);
+
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "brotli.chunked_compression", &m_brotliChunkedEnabled);
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "brotli.compression", &m_brotliEnabled);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "brotli.compression_quality",
+      std::to_string(RuntimeOption::BrotliCompressionQuality).c_str(),
+      &m_brotliQuality);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "brotli.compression_lgwin",
+      std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
+      &m_brotliLgWindowSize);
 
   // Assertions
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
@@ -613,8 +625,9 @@ void RequestInjectionData::reset() {
   m_debuggerAttached = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;
-  m_debuggerStepOut = StepOutState::NONE;
+  m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
+  m_suppressHackArrayCompatNotices = false;
   m_breakPointFilter.clear();
   m_flowFilter.clear();
   m_lineBreakPointFilter.clear();
@@ -645,19 +658,20 @@ void RequestInjectionData::setFlag(SurpriseFlag flag) {
   m_sflagsAndStkPtr->fetch_or(flag);
 }
 
-void RequestInjectionData::setMemoryLimit(std::string limit) {
-  int64_t newInt = strtoll(limit.c_str(), nullptr, 10);
+void RequestInjectionData::setMemoryLimit(folly::StringPiece limit) {
+  int64_t newInt = strtoll(limit.begin(), nullptr, 10);
   if (newInt <= 0) {
-   newInt = std::numeric_limits<int64_t>::max();
-   m_maxMemory = std::to_string(newInt);
+    newInt = std::numeric_limits<int64_t>::max();
+    m_maxMemory = std::to_string(newInt);
   } else {
-   m_maxMemory = limit;
-   newInt = convert_bytes_to_long(limit);
-   if (newInt <= 0) {
-     newInt = std::numeric_limits<int64_t>::max();
-   }
+    m_maxMemory = limit.str();
+    newInt = convert_bytes_to_long(limit);
+    if (newInt <= 0) {
+      newInt = std::numeric_limits<int64_t>::max();
+    }
   }
-  MM().getStatsNoRefresh().maxBytes = newInt;
+  MM().setMemoryLimit(newInt);
   m_maxMemoryNumeric = newInt;
 }
+
 }

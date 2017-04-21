@@ -15,17 +15,12 @@
 */
 #include "hphp/runtime/base/php-globals.h"
 
-#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/vm/globals-array.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-const StaticString s_GLOBALS("GLOBALS");
-
-extern GlobalsArray* get_global_variables();
 
 Array php_globals_as_array() {
   return Array(get_global_variables()->asArrayData());

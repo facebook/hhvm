@@ -66,7 +66,7 @@ IF (WIN32)
     $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
     $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
 ELSE (WIN32)
-  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r
+  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r mysqlclient
     PATHS
     /usr/lib/mysql
     /usr/local/lib/mysql
@@ -90,7 +90,11 @@ IF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
 
   FIND_LIBRARY(MYSQL_ZLIB zlib PATHS ${MYSQL_LIB_DIR})
   FIND_LIBRARY(MYSQL_TAOCRYPT taocrypt PATHS ${MYSQL_LIB_DIR})
-  SET(MYSQL_CLIENT_LIBS mysqlclient_r)
+  IF (MYSQL_LIB)
+    SET(MYSQL_CLIENT_LIBS ${MYSQL_LIB})
+  ELSE()
+    SET(MYSQL_CLIENT_LIBS mysqlclient_r)
+  ENDIF()
   IF (MYSQL_ZLIB)
     SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} zlib)
   ENDIF (MYSQL_ZLIB)

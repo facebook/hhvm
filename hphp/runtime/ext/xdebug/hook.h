@@ -19,18 +19,22 @@
 #define incl_HPHP_XDEBUG_HOOK_H_
 
 #include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#include "hphp/runtime/ext/xdebug/xdebug_server.h"
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
+#include "hphp/runtime/ext/xdebug/server.h"
 
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 
+#include <boost/variant.hpp>
+#include <folly/Optional.h>
+
 namespace HPHP {
-
 ////////////////////////////////////////////////////////////////////////////////
-// XDebug Breakpoint Type
 
-// This struct contains all the runtime information about a given breakpoint.
-// Each breakpoint is tagged with its type.
+/*
+ * This struct contains all the runtime information about a given breakpoint.
+ * Each breakpoint is tagged with its type.
+ */
 struct XDebugBreakpoint {
   enum class Type : int8_t {
     LINE,
@@ -49,6 +53,7 @@ struct XDebugBreakpoint {
 
   Type type; // The breakpoint type. This must be provided.
   bool enabled = true; // Whether or not this breakpoint is enabled
+  bool resolved = false;
   bool temporary = false; // If true, removed after being hit
   HitCondition hitCondition = HitCondition::GREATER_OR_EQUAL;
   int hitValue = 0; // Value to compare hitCount against
@@ -61,29 +66,29 @@ struct XDebugBreakpoint {
   // internally between this and a conditional breakpoint (which is in the spec)
   // The encoded condition is kept around for display purposes. The unit is
   // updated to the matched unit once the breakpoint has been matched.
-  String fileName;
+  std::string fileName;
   int line = -1;
   Unit* conditionUnit = nullptr;
-  String condition;
+  std::string condition;
   const Unit* unit = nullptr;
 
   // A call or return breakpoint occurs when the function in the given class
   // with the given name is called/returns. The class name and function name
   // are kept around for listing breakpoint info. The function id is added
   // once the breakpoint has been matched with a function
-  Variant className = init_null(); // optional
-  String funcName;
-  String fullFuncName;
+  folly::Optional<std::string> className;
+  std::string funcName;
+  std::string fullFuncName;
   int funcId = -1;
 
   // An exception breakpoint occurs when an exception with a given name is
   // thrown.
-  String exceptionName;
+  std::string exceptionName;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-// Thread Local Storage for Breakpoints
 
+/* Thread local storage for breakpoints. */
 struct XDebugThreadBreakpoints {
   // Adding a breakpoint. Returns a unique id for the breakpoint. Throws an
   // XDebugServer::ErrorCode on failure.
@@ -146,14 +151,36 @@ extern DECLARE_THREAD_LOCAL_NO_CHECK(XDebugThreadBreakpoints,
   (s_xdebug_breakpoints->m_breakMap)
 
 ////////////////////////////////////////////////////////////////////////////////
-// XDebugHook
+
+/* Function enter/exit breakpoint. */
+struct FuncBreak {
+  const Func* func;
+  bool entry;
+};
+
+/* Line breakpoint. */
+struct LineBreak {
+  const Unit* unit;
+  int line;
+};
+
+/* Exception breakpoint (for both errors and exceptions). */
+struct ExnBreak {
+  const StringData* name;
+  const StringData* message;
+};
+
+using BreakInfo = boost::variant<FuncBreak, LineBreak, ExnBreak>;
+
+////////////////////////////////////////////////////////////////////////////////
 
 struct XDebugHook : DebuggerHook {
   static DebuggerHook* GetInstance();
+
   // Starting the server on request init
   void onRequestInit() override {
     if (XDebugServer::isNeeded()) {
-      XDebugServer::attach(XDebugServer::Mode::REQ);
+      XDebugServer::attach(XDebugServer::Mode::Req);
     }
   }
 
@@ -166,61 +193,34 @@ struct XDebugHook : DebuggerHook {
 
   void onOpcode(PC pc) override;
 
-  // Information possibly passed during a breakpoint
-  union BreakInfo {
-    // Function enter/exit breakpoint
-    const Func* func;
-    // Line breakpoint
-    struct {
-      const Unit* unit;
-      int line;
-    };
-    // Exception breakpoint (for both errors and exceptions)
-    struct {
-      const StringData* name;
-      const StringData* message;
-    };
-  };
-
-  // Generic breakpoint handling routine. Most of the break handling
-  // code is the same across the different breakpoint types.
-  template<XDebugBreakpoint::Type type>
-  void onBreak(const BreakInfo& bi);
+  // Generic breakpoint handling routine.  Most of the break handling code is
+  // the same across the different breakpoint types.
+  void onBreak(const BreakInfo&);
 
   void onFuncEntryBreak(const Func* func) override {
-    BreakInfo bi;
-    bi.func = func;
-    onBreak<XDebugBreakpoint::Type::CALL>(bi);
+    onBreak(FuncBreak { func, true });
   }
 
   void onFuncExitBreak(const Func* func) override {
-    BreakInfo bi;
-    bi.func = func;
-    onBreak<XDebugBreakpoint::Type::RETURN>(bi);
+    onBreak(FuncBreak { func, false });
   }
 
   void onLineBreak(const Unit* unit, int line) override {
-    BreakInfo bi;
-    bi.unit = unit;
-    bi.line = line;
-    onBreak<XDebugBreakpoint::Type::LINE>(bi);
+    onBreak(LineBreak { unit, line });
   }
 
   // Helper for errors and exceptions that potentially starts the debug server
   // if needed
   void onExceptionBreak(const StringData* name, const StringData* msg) {
-    // Potentially start the debug server if it hasn't been started
+    // Potentially start the debug server if it hasn't been started.
     if (XDEBUG_GLOBAL(RemoteEnable) &&
         !XDebugServer::isAttached() &&
         XDEBUG_GLOBAL(RemoteMode) == "jit") {
-      XDebugServer::attach(XDebugServer::Mode::JIT);
+      XDebugServer::attach(XDebugServer::Mode::Jit);
     }
 
-    // Handle the exception
-    BreakInfo bi;
-    bi.name = name;
-    bi.message = msg;
-    onBreak<XDebugBreakpoint::Type::EXCEPTION>(bi);
+    // Handle the exception.
+    onBreak(ExnBreak { name, msg });
   }
 
   void onExceptionThrown(ObjectData* exception) override;
@@ -232,7 +232,7 @@ struct XDebugHook : DebuggerHook {
     onExceptionBreak(name.get(), msg.get());
   }
 
-  // Flow control. Each break type just calls the generic onFlowBreak
+  // Flow control.  Each break type just calls the generic onFlowBreak.
   void onFlowBreak(const Unit* unit, int line);
   void onStepInBreak(const Unit* unit, int line) override {
     onFlowBreak(unit, line);
@@ -244,13 +244,14 @@ struct XDebugHook : DebuggerHook {
     onFlowBreak(unit, line);
   }
 
-  // Handle loading unmatched breakpoints
+  // Handle loading unmatched breakpoints.
   void onFileLoad(Unit* efile) override;
   void onDefClass(const Class* cls) override;
   void onDefFunc(const Func* func) override;
- private:
-  XDebugHook() {}
-  ~XDebugHook() override {}
+
+private:
+  explicit XDebugHook() {}
+  ~XDebugHook() {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

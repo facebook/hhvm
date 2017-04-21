@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,15 +19,12 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
+#include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
-
-inline void emitLoadTVType(Vout& v, Vptr mem, Vreg8 d) {
-  v << loadb{mem, d};
-}
 
 inline void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << testbi{s0, s1, sf};
@@ -45,6 +42,18 @@ inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
   v << cmpbi{s0, s1, sf};
 }
 
+inline Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1) {
+  auto const dst = v.makeReg();
+  v << andbi{s0, s1, dst, v.makeReg()};
+  return dst;
+}
+
+inline Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1) {
+  auto const reg = v.makeReg();
+  v << loadb{s1, reg};
+  return emitMaskTVType(v, s0, reg);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Destroy>
@@ -52,14 +61,17 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
                     Destroy destroy, bool unlikelyDestroy) {
   auto const sf = v.makeReg();
   v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-  ifThenElse(v, vcold, CC_E, sf,
+  ifThenElse(
+    v, vcold, CC_E, sf,
     destroy,
     [&] (Vout& v) {
       // If it's not static, actually reduce the reference count.  This does
       // another branch using the same status flags from the cmplim above.
-      ifThen(v, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); });
+      ifThen(v, CC_NL, sf, [&] (Vout& v) { emitDecRef(v, data); },
+             tag_from_string("decref-is-static"));
     },
-    unlikelyDestroy
+    unlikelyDestroy,
+    tag_from_string("decref-is-one")
   );
 }
 

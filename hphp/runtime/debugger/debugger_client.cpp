@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,25 +18,29 @@
 #include <signal.h>
 #include <fstream>
 
-#include "hphp/runtime/debugger/debugger_command.h"
-#include "hphp/runtime/debugger/cmd/all.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/debugger/cmd/all.h"
+#include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/util/text-color.h"
-#include "hphp/util/text-art.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
-#include "hphp/runtime/base/config.h"
+#include "hphp/util/text-art.h"
+#include "hphp/util/text-color.h"
+
 #include <boost/scoped_ptr.hpp>
 #include <folly/Conv.h>
+#include <folly/portability/Unistd.h>
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -78,11 +82,10 @@ static String wordwrap(const String& str, int width /* = 75 */,
   args.append(width);
   args.append(wordbreak);
   args.append(cut);
-  return vm_call_user_func("wordwrap", args);
+  return vm_call_user_func("wordwrap", args).toString();
 }
 
-class DebuggerExtension final : public Extension {
- public:
+struct DebuggerExtension final : Extension {
   DebuggerExtension() : Extension("hhvm.debugger", NO_EXTENSION_VERSION_YET) {}
 } s_debugger_extension;
 
@@ -173,8 +176,7 @@ int DebuggerClient::pollSignal() {
 /**
  * Initialization and shutdown.
  */
-class ReadlineApp {
-public:
+struct ReadlineApp {
   ReadlineApp() {
     TRACE(2, "ReadlineApp::ReadlineApp\n");
     DebuggerClient::AdjustScreenMetrics();
@@ -203,8 +205,7 @@ public:
 /**
  * Displaying a spinning wait icon.
  */
-class ReadlineWaitCursor {
-public:
+struct ReadlineWaitCursor {
   ReadlineWaitCursor()
       : m_thread(this, &ReadlineWaitCursor::animate), m_waiting(true) {
     TRACE(2, "ReadlineWaitCursor::ReadlineWaitCursor\n");
@@ -567,8 +568,8 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  auto socket1 = req::make<Socket>(fds[0], AF_UNIX);
-  auto socket2 = req::make<Socket>(fds[1], AF_UNIX);
+  auto socket1 = req::make<StreamSocket>(fds[0], AF_UNIX);
+  auto socket2 = req::make<StreamSocket>(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -638,7 +639,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
-    auto sock = req::make<Socket>(
+    auto sock = req::make<StreamSocket>(
       socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,
       cur->ai_addr->sa_data,
@@ -702,8 +703,8 @@ void DebuggerClient::init(const DebuggerClientOptions &options) {
   loadConfig();
 
   if (m_scriptMode) {
-    print("running in script mode, pid=%d\n",
-        (int32_t)Process::GetProcessId());
+    print("running in script mode, pid=%" PRId64 "\n",
+          (int64_t)getpid());
   }
 
   if (!options.cmds.empty()) {
@@ -753,12 +754,12 @@ void DebuggerClient::run() {
   }
 
   hphp_session_init();
-  hphp_context_init();
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {
     hphp_invoke_simple(m_options.extension, false);
   }
+
   while (true) {
     bool reconnect = false;
     try {
@@ -1102,8 +1103,9 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
         Logger::Error("Unable to communicate with server. Server's down?");
         throw DebuggerServerLostException();
       }
-      if (cmd->is(DebuggerCommand::KindOfSignal)) {
-        // Respond to signal polling from the server.
+      if (cmd->is(DebuggerCommand::KindOfSignal) ||
+          cmd->is(DebuggerCommand::KindOfAuth)) {
+        // Respond to polling from the server.
         cmd->onClient(*this);
         continue;
       }
@@ -2526,7 +2528,7 @@ void DebuggerClient::saveConfig() {
 
   std::vector<std::string> names;
   get_supported_colors(names);
-  for (unsigned int i = 0; i < names.size(); i++) {
+  for (i = 0; i < names.size(); i++) {
     stream << "hhvm.color.supported_names[" << i+1 << "] = " << names[i]
            << std::endl;
   }

@@ -1,0 +1,2 @@
+
+Fatal error: Inconsistent insteadof definition. The method foo is to be used from B, but B is also on the exclude list%S in %s on line %d

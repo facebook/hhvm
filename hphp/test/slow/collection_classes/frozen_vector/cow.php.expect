@@ -16,7 +16,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ ArrayAppend -------
-object(HH\Vector)#3 (4) {
+object(HH\Vector)#4 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -26,7 +26,7 @@ object(HH\Vector)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#5 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -35,7 +35,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ add -------
-object(HH\Vector)#3 (4) {
+object(HH\Vector)#5 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -45,7 +45,7 @@ object(HH\Vector)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#6 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -54,7 +54,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ append -------
-object(HH\Vector)#3 (4) {
+object(HH\Vector)#6 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -64,7 +64,7 @@ object(HH\Vector)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#7 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -73,7 +73,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ addAll -------
-object(HH\Vector)#3 (4) {
+object(HH\Vector)#7 (4) {
   [0]=>
   int(1)
   [1]=>
@@ -83,7 +83,7 @@ object(HH\Vector)#3 (4) {
   [3]=>
   int(42)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#8 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -92,7 +92,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ addAllKeysOf -------
-object(HH\Vector)#3 (5) {
+object(HH\Vector)#8 (5) {
   [0]=>
   int(1)
   [1]=>
@@ -104,7 +104,7 @@ object(HH\Vector)#3 (5) {
   [4]=>
   int(43)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#9 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -113,13 +113,13 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ pop -------
-object(HH\Vector)#3 (2) {
+object(HH\Vector)#9 (2) {
   [0]=>
   int(1)
   [1]=>
   int(2)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#10 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -128,9 +128,9 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ resize -------
-object(HH\Vector)#3 (0) {
+object(HH\Vector)#10 (0) {
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#11 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -139,9 +139,9 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ clear -------
-object(HH\Vector)#3 (0) {
+object(HH\Vector)#11 (0) {
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#12 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -150,7 +150,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ set -------
-object(HH\Vector)#3 (3) {
+object(HH\Vector)#12 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -158,7 +158,7 @@ object(HH\Vector)#3 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#13 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -167,7 +167,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ setAll -------
-object(HH\Vector)#3 (3) {
+object(HH\Vector)#13 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -175,7 +175,7 @@ object(HH\Vector)#3 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#14 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -184,13 +184,13 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ removeKey -------
-object(HH\Vector)#3 (2) {
+object(HH\Vector)#14 (2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#15 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -199,7 +199,7 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ reverse -------
-object(HH\Vector)#3 (3) {
+object(HH\Vector)#15 (3) {
   [0]=>
   int(3)
   [1]=>
@@ -207,7 +207,7 @@ object(HH\Vector)#3 (3) {
   [2]=>
   int(1)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#16 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -216,13 +216,13 @@ object(HH\ImmVector)#4 (3) {
   int(3)
 }
 ------ splice -------
-object(HH\Vector)#3 (2) {
+object(HH\Vector)#16 (2) {
   [0]=>
   int(2)
   [1]=>
   int(3)
 }
-object(HH\ImmVector)#4 (3) {
+object(HH\ImmVector)#17 (3) {
   [0]=>
   int(1)
   [1]=>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,16 +31,14 @@ namespace HPHP {
  * wait handle if a result is not yet available. Once the wait handle finishes,
  * all blocked wait handles are notified.
  */
-class AsioBlockable;
-class AsioContext;
+struct AsioBlockable;
+struct AsioContext;
 
-class c_WaitableWaitHandle : public c_WaitHandle {
- public:
+struct c_WaitableWaitHandle : c_WaitHandle {
   WAITHANDLE_CLASSOF(WaitableWaitHandle);
   WAITHANDLE_DTOR(WaitableWaitHandle);
 
-  explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof(),
-                           HeaderKind kind = HeaderKind::WaitHandle) noexcept;
+  explicit c_WaitableWaitHandle(Class*, HeaderKind, type_scan::Index) noexcept;
   ~c_WaitableWaitHandle();
 
  public:
@@ -73,7 +71,7 @@ class c_WaitableWaitHandle : public c_WaitHandle {
   void detectCycle(c_WaitableWaitHandle* child) const;
 
  private:
-  NEVER_INLINE ATTRIBUTE_NORETURN
+  [[noreturn]] NEVER_INLINE
   void throwCycleException(c_WaitableWaitHandle* child) const;
 };
 

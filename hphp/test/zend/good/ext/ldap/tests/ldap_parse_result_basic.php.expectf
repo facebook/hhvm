@@ -1,0 +1,9 @@
+bool(true)
+int(10)
+string(%d) "cn=userref,%s"
+string(0) ""
+array(1) {
+  [0]=>
+  string(%d) "cn=userA,%s"
+}
+===DONE===

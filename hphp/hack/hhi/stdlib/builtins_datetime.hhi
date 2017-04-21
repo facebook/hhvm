@@ -175,6 +175,15 @@ class DateTimeZone {
 }
 
 class DateInterval {
+  public int $y;
+  public int $m;
+  public int $d;
+  public int $h;
+  public int $i;
+  public int $s;
+  public int $invert;
+  public mixed $days;
+
   public function __construct(string $interval_spec);
   public function __get($member);
   public function __set($member, $value);
@@ -187,7 +196,7 @@ class DatePeriod implements Iterator<DateTime> {
 
   public function __construct(
     /* DateTimeInterface */ $start, // date string converts
-    ?DateInterval $interval = null,
+    DateInterval $interval,
     /* ?DateTimeInterface */ $end = null, // date string converts
     int $options = 0,
   );
@@ -196,4 +205,7 @@ class DatePeriod implements Iterator<DateTime> {
   public function key();
   public function next();
   public function valid(): bool;
+  public function getStartDate(): DateTime;
+  public function getEndDate(): DateTime;
+  public function getDateInterval(): DateInterval;
 }

@@ -1,0 +1,2 @@
+<?hh
+interface pZZ < - mWTao as vYnlp :: kCbON , - wOuPy as void > extends bR < array < mixed , ( function ( resource ) : array < ( arraykey , resource , ( function ( mixed ) : int ) ) > ) > , kLZx , iYHTnsQl > , eIyZ < ( function ( ) : resource ) , gHA > , rV < lU > { }

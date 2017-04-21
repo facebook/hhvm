@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,11 +21,11 @@
 #include <algorithm>
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/disasm.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/text-util.h"
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
 
 #include "hphp/runtime/vm/jit/asm-info.h"
@@ -34,7 +34,9 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
+
+#include "hphp/ppc64-asm/asm-ppc64.h"
+#include "hphp/ppc64-asm/dasm-ppc64.h"
 
 #include "hphp/vixl/a64/disasm-a64.h"
 
@@ -268,8 +270,14 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
       return;
     }
 
-    case Arch::PPC64:
-      not_implemented();
+    case Arch::PPC64: {
+      ppc64_asm::Disassembler disasm(dumpIR, true, kIndent + 4,
+                                      color(ANSI_COLOR_BROWN));
+      for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
+        disasm.disassembly(os, begin);
+      }
+      return;
+    }
   }
   not_reached();
 }
@@ -552,22 +560,38 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   os << "digraph G {\n";
   for (auto block : blocks) {
     if (block->empty()) continue;
-    if (dotBodies && block->hint() != Block::Hint::Unlikely &&
-        block->hint() != Block::Hint::Unused) {
-      // Include the IR in the body of the node
-      std::ostringstream out;
-      print(out, block, AreaIndex::Main, asmInfo, guards, &curMarker);
-      auto bodyRaw = out.str();
-      std::string body;
-      body.reserve(bodyRaw.size() * 1.25);
-      for (auto c : bodyRaw) {
-        if (c == '\n')      body += "\\n";
-        else if (c == '"')  body += "\\\"";
-        else if (c == '\\') body += "\\\\";
-        else                body += c;
+    if (dotBodies) {
+      if (block->hint() != Block::Hint::Unlikely &&
+          block->hint() != Block::Hint::Unused) {
+        // Include the IR in the body of the node
+        std::ostringstream out;
+        print(out, block, AreaIndex::Main, asmInfo, guards, &curMarker);
+        auto bodyRaw = out.str();
+        std::string body;
+        body.reserve(bodyRaw.size() * 1.25);
+        for (auto c : bodyRaw) {
+          if (c == '\n')      body += "\\n";
+          else if (c == '"')  body += "\\\"";
+          else if (c == '\\') body += "\\\\";
+          else                body += c;
+        }
+        os << folly::format("B{} [shape=box,label=\"{}\"]\n",
+                            block->id(), body);
       }
-      os << folly::format("B{} [shape=\"box\" label=\"{}\"]\n",
-                          block->id(), body);
+    } else {
+      const auto color = [&] {
+        switch (block->hint()) {
+          case Block::Hint::Likely :  return "red";
+          case Block::Hint::Neither:  return "orange";
+          case Block::Hint::Unlikely: return "blue";
+          case Block::Hint::Unused:   return "gray";
+        }
+        not_reached();
+      }();
+      os << folly::format(
+        "B{} [shape=box,color={},label=\"B{}\\ncount={}\"]\n",
+        block->id(), color, block->id(), block->profCount()
+      );
     }
 
     auto next = block->nextEdge();
@@ -576,10 +600,9 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
     auto edge_color = [&] (Edge* edge) {
       auto const target = edge->to();
       return
-        target->isCatch() ? " [color=blue]" :
-        target->isExit() ? " [color=cyan]" :
-        retreating_edges.count(edge) ? " [color=red]" :
-        target->hint() == Block::Hint::Unlikely ? " [color=green]" : "";
+        target->isCatch() ? " [color=gray]" :
+        target->hint() == Block::Hint::Unlikely ? " [color=blue]" :
+        retreating_edges.count(edge) ? " [color=red]" : "";
     };
     auto show_edge = [&] (Edge* edge) {
       os << folly::format(
@@ -635,8 +658,9 @@ std::string banner(const char* caption) {
 
 // Suggested captions: "before jiffy removal", "after goat saturation",
 // etc.
-void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
-               const GuardConstraints* guards) {
+void printUnit(int level, const IRUnit& unit, const char* caption,
+               AsmInfo* ai,
+               const GuardConstraints* guards, Annotations* annotations) {
   if (dumpIREnabled(level)) {
     std::ostringstream str;
     str << banner(caption);
@@ -645,8 +669,8 @@ void printUnit(int level, const IRUnit& unit, const char* caption, AsmInfo* ai,
     if (HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level)) {
       HPHP::Trace::traceRelease("%s\n", str.str().c_str());
     }
-    if (RuntimeOption::EvalDumpIR >= level) {
-      mcg->annotations().emplace_back(caption, str.str());
+    if (annotations && RuntimeOption::EvalDumpIR >= level) {
+      annotations->emplace_back(caption, str.str());
     }
   }
 }

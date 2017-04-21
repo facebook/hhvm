@@ -18,8 +18,6 @@
 
 #include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_var.h"
 
-#include "hphp/runtime/ext/xdebug/php5_xdebug/xdebug_mm.h"
-
 #include <cstdint>
 
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -180,7 +178,8 @@ struct Indenter {
  * RAII helper for tracking seen arrays and objects.
  */
 struct Tracker {
-  explicit Tracker(XDebugExporter& exp, void* ptr): exp(exp), ptr(ptr) {
+  explicit Tracker(XDebugExporter& exp, XDebugExporter::PtrWrapper ptr)
+      : exp(exp), ptr(ptr) {
     auto const result = exp.seen.insert(ptr);
     seen = !result.second;
   }
@@ -190,7 +189,7 @@ struct Tracker {
   }
 
   XDebugExporter& exp;
-  void* ptr;
+  XDebugExporter::PtrWrapper ptr;
   bool seen;
 };
 
@@ -241,7 +240,11 @@ static void object_instance_property_export_xml_node(xdebug_xml_node& parent,
 
   auto const make_full_name = [&] (const char* name) -> const char* {
     if (parentName == nullptr) return nullptr;
-    auto const format_str = obj->isCollection() ? "%s[%s]" : "%s->%s";
+    auto const format_str = [&] {
+      if (!obj->isCollection()) return "%s->%s";
+      if (key.isInteger()) return "%s[%s]";
+      return "%s['%s']";
+    }();
     return xdebug_sprintf(format_str, parentName, name);
   };
 
@@ -429,7 +432,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
                                 0, 1);
     // Add each child
     ArrayIter iter(arr);
-    iter.setPos(start);
+    iter.advance(start);
     for (uint32_t i = start; i < end && iter; i++, ++iter) {
       xdebug_array_element_export_xml_node(*node, name,
                                            iter.first(),
@@ -483,7 +486,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
                                 0, 1);
 
     ArrayIter iter(inst_props);
-    iter.setPos(start);
+    iter.advance(start);
     uint32_t i = start;
     for ( ; i < end && iter; i++, ++iter) {
       object_instance_property_export_xml_node(
@@ -497,7 +500,7 @@ xdebug_xml_node* xdebug_var_export_xml_node(const char* name,
     }
 
     ArrayIter iter2(static_props);
-    iter2.setPos(i - inst_props.size());
+    iter2.advance(i - inst_props.size());
     for ( ; i < end && iter2; i++, ++iter2) {
       object_static_property_export_xml_node(
         *node,
@@ -622,7 +625,7 @@ void xdebug_var_export_text_ansi(
       ANSI_COLOR_RESET
     );
     break;
-  case KindOfStaticString:
+  case KindOfPersistentString:
     /* fallthrough */
   case KindOfString: {
     auto const charlist = ansi ? s_ansi_esc : s_text_esc;
@@ -671,10 +674,26 @@ void xdebug_var_export_text_ansi(
     );
     break;
   }
+
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
+  case KindOfPersistentArray:
   case KindOfArray: {
     auto const& arr = v.toCArrRef();
 
-    sb.printf("%sarray%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
+    const char* type_str = [&] {
+      if (v.isVecArray()) return "vec";
+      if (v.isDict()) return "dict";
+      if (v.isKeyset()) return "keyset";
+      assert(v.isArray());
+      return "array";
+    }();
+
+    sb.printf("%s%s%s", ANSI_COLOR_BOLD, type_str, ANSI_COLOR_BOLD_OFF);
 
     Tracker track(exporter, arr.get());
     if (track.seen) {
@@ -704,7 +723,7 @@ void xdebug_var_export_text_ansi(
             ANSI_COLOR_RESET
           );
           break;
-        case KindOfStaticString:
+        case KindOfPersistentString:
         case KindOfString: {
           auto const key_str = String{first.m_data.pstr};
           auto const esc_str = HHVM_FN(addcslashes)(
@@ -802,8 +821,7 @@ void xdebug_var_export_text_ansi(
     sb.printf("%*s}", (exporter.level * 2) - 2, "");
     break;
   }
-  default:
-    not_reached();
+  case KindOfRef: not_reached();
   }
 
   sb.append('\n');
@@ -877,7 +895,7 @@ void xdebug_var_export_fancy(
       v.toDoubleVal()
     );
     break;
-  case KindOfStaticString:
+  case KindOfPersistentString:
     /* fallthrough */
   case KindOfString: {
     auto const& str = v.toCStrRef();
@@ -895,18 +913,33 @@ void xdebug_var_export_fancy(
     sb.printf(" <i>(length=%d)</i>", str.size());
     break;
   }
+  case KindOfPersistentVec:
+  case KindOfVec:
+  case KindOfPersistentDict:
+  case KindOfDict:
+  case KindOfPersistentKeyset:
+  case KindOfKeyset:
+  case KindOfPersistentArray:
   case KindOfArray: {
     auto const& arr = v.toCArrRef();
 
     sb.printf("\n%*s", (exporter.level - 1) * 4, "");
 
+    const char* type_str = [&] {
+      if (v.isVecArray()) return "vec";
+      if (v.isDict()) return "dict";
+      if (v.isKeyset()) return "keyset";
+      assert(v.isArray());
+      return "array";
+    }();
+
     Tracker track(exporter, arr.get());
     if (track.seen) {
-      sb.append("<i>&</i><b>array</b>\n");
+      sb.printf("<i>&</i><b>%s</b>\n", type_str);
       break;
     }
 
-    sb.printf("<b>array</b> <i>(size=%zd)</i>\n", arr.size());
+    sb.printf("<b>%s</b> <i>(size=%zd)</i>\n", type_str, arr.size());
 
     if (exporter.level > exporter.max_depth) {
       sb.printf("%*s...\n", (exporter.level * 4) - 2, "");
@@ -936,7 +969,7 @@ void xdebug_var_export_fancy(
       case KindOfInt64:
         sb.append(first.m_data.num);
         break;
-      case KindOfStaticString:
+      case KindOfPersistentString:
       case KindOfString: {
         auto const str = first.m_data.pstr;
         sb.append('\'');
@@ -1030,11 +1063,12 @@ void xdebug_var_export_fancy(
     }
     break;
   }
-  default:
+  case KindOfResource:
+  case KindOfRef:
     not_reached();
   }
 
-  if (v.getType() != KindOfArray && v.getType() != KindOfObject) {
+  if (!isArrayLikeType(v.getType()) && v.getType() != KindOfObject) {
     sb.append('\n');
   }
 }
@@ -1092,7 +1126,7 @@ xdebug_xml_node* xdebug_get_value_xml_node(
         char* tmp_name = prepare_variable_name(name);
         short_name = xdstrdup(tmp_name);
         full_name = xdstrdup(tmp_name);
-        xdfree(tmp_name);
+        HPHP::req::free(tmp_name);
         break;
       }
       case XDebugVarType::Static:

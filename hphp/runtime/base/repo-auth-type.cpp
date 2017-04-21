@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void>), "");
 namespace {
 
 bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
-  assert(tv.m_type == KindOfArray);
+  assert(isArrayType(tv.m_type));
   auto const ad = tv.m_data.parr;
   using A = RepoAuthType::Array;
 
@@ -118,6 +118,20 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Obj:
     return true;
 
+  case T::SVec:
+  case T::Vec:
+  case T::OptSVec:
+  case T::OptVec:
+  case T::SDict:
+  case T::Dict:
+  case T::OptSDict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::Keyset:
+  case T::OptSKeyset:
+  case T::OptKeyset:
+    return true;
+
   case T::OptSArr:
   case T::OptArr:
     // Can't currently have array() info.
@@ -155,52 +169,6 @@ size_t RepoAuthType::hash() const {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<DataType> convertToDataType(RepoAuthType ty) {
-  using T = RepoAuthType::Tag;
-  switch (ty.tag()) {
-  case T::OptBool:
-  case T::OptInt:
-  case T::OptSArr:
-  case T::OptArr:
-  case T::OptSStr:
-  case T::OptStr:
-  case T::OptDbl:
-  case T::OptRes:
-  case T::OptSubObj:
-  case T::OptExactObj:
-  case T::OptObj:
-  case T::Null:
-    return folly::none;
-
-  case T::Cell:
-  case T::Ref:
-  case T::InitUnc:
-  case T::Unc:
-  case T::InitCell:
-  case T::InitGen:
-  case T::Gen:
-    return folly::none;
-
-  case T::Uninit:       return KindOfUninit;
-  case T::InitNull:     return KindOfNull;
-  case T::Bool:         return KindOfBoolean;
-  case T::Int:          return KindOfInt64;
-  case T::Dbl:          return KindOfDouble;
-  case T::Res:          return KindOfResource;
-
-  case T::SStr:
-  case T::Str:          return KindOfString;
-
-  case T::SArr:
-  case T::Arr:          return KindOfArray;
-
-  case T::Obj:
-  case T::SubObj:
-  case T::ExactObj:     return KindOfObject;
-  }
-  not_reached();
-}
-
 bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   assert(tvIsPlausible(tv));
 
@@ -231,8 +199,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SStr:
-    return tv.m_type == KindOfStaticString ||
-           (tv.m_type == KindOfString && tv.m_data.pstr->isStatic());
+    return isStringType(tv.m_type) && tv.m_data.pstr->isStatic();
 
   case T::OptStr:
     if (initNull) return true;
@@ -244,7 +211,7 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::SArr:
-    if (tv.m_type != KindOfArray || !tv.m_data.parr->isStatic()) {
+    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isStatic()) {
       return false;
     }
     if (auto const arr = ty.array()) {
@@ -256,11 +223,47 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     if (initNull) return true;
     // fallthrough
   case T::Arr:
-    if (tv.m_type != KindOfArray) return false;
+    if (!isArrayType(tv.m_type)) return false;
     if (auto const arr = ty.array()) {
       if (!tvMatchesArrayType(tv, arr)) return false;
     }
     return true;
+
+  case T::OptSVec:
+    if (initNull) return true;
+    // fallthrough
+  case T::SVec:
+    return isVecType(tv.m_type) && tv.m_data.parr->isStatic();
+
+  case T::OptVec:
+    if (initNull) return true;
+    // fallthrough
+  case T::Vec:
+    return isVecType(tv.m_type);
+
+  case T::OptSDict:
+    if (initNull) return true;
+    // fallthrough
+  case T::SDict:
+    return isDictType(tv.m_type) && tv.m_data.parr->isStatic();
+
+  case T::OptDict:
+    if (initNull) return true;
+    // fallthrough
+  case T::Dict:
+    return isDictType(tv.m_type);
+
+  case T::OptSKeyset:
+    if (initNull) return true;
+    // fallthrough
+  case T::SKeyset:
+    return isKeysetType(tv.m_type) && tv.m_data.parr->isStatic();
+
+  case T::OptKeyset:
+    if (initNull) return true;
+    // fallthrough
+  case T::Keyset:
+    return isKeysetType(tv.m_type);
 
   case T::Null:
     return initNull || tv.m_type == KindOfUninit;
@@ -360,6 +363,21 @@ std::string show(RepoAuthType rat) {
       return ret;
     }
     break;
+
+  case T::SVec:        return "SVec";
+  case T::Vec:         return "Vec";
+  case T::OptSVec:     return "?SVec";
+  case T::OptVec:      return "?Vec";
+
+  case T::SDict:       return "SDict";
+  case T::Dict:        return "Dict";
+  case T::OptSDict:    return "?SDict";
+  case T::OptDict:     return "?Dict";
+
+  case T::SKeyset:     return "SKeyset";
+  case T::Keyset:      return "Keyset";
+  case T::OptSKeyset:  return "?SKeyset";
+  case T::OptKeyset:   return "?Keyset";
 
   case T::OptSubObj:
   case T::OptExactObj:

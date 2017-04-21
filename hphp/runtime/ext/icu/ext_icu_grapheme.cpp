@@ -340,7 +340,7 @@ static Variant HHVM_FUNCTION(grapheme_strlen, const String& str) {
   }
   UErrorCode error = U_ZERO_ERROR;
   icu::UnicodeString str16(u16(str, error));
-  CHECK_CONVERR(error, null_variant);
+  CHECK_CONVERR(error, uninit_variant);
   auto bi = get_break_iterator(str16.getBuffer(), str16.length());
   if (!bi) return false;
   SCOPE_EXIT { ubrk_close(bi); };

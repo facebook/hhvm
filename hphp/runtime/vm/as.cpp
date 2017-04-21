@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,7 +87,6 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/bind.hpp>
 
 #include <folly/Conv.h>
@@ -426,7 +425,15 @@ struct FPIReg {
  */
 struct StackDepth {
   int currentOffset;
+  /*
+   * Tracks the max depth of elem stack + desc stack offset inside a region
+   * where baseValue is unknown.
+   */
   int maxOffset;
+  /*
+   * Tracks the min depth of the elem stack inside a region where baseValue
+   * is unknown, and the line where the min occurred.
+   */
   int minOffset;
   int minOffsetLine;
   folly::Optional<int> baseValue;
@@ -452,6 +459,10 @@ struct StackDepth {
   void adjust(AsmState& as, int delta);
   void addListener(AsmState& as, StackDepth* target);
   void setBase(AsmState& as, int stackDepth);
+  int absoluteDepth() {
+    assert(baseValue.hasValue());
+    return baseValue.value() + currentOffset;
+  }
 
   /*
    * Sets the baseValue such as the current stack depth matches the
@@ -484,28 +495,27 @@ struct Label {
   std::vector<Id> dvInits;
 
   /*
-   * List of EHEnt's that should have m_fault bound to the Offset of
-   * this label.
+   * List of EHEnts that have m_handler pointing to this label.
    */
-  std::vector<size_t> ehFaults;
-
-  /*
-   * Map from exception names to the list of EHEnt's that have a catch
-   * block jumping to this label for that name.
-   */
-  std::map<std::string,std::vector<size_t>> ehCatches;
+  std::vector<size_t> ehEnts;
 };
 
-struct AsmState : private boost::noncopyable {
+struct AsmState {
   explicit AsmState(std::istream& in)
     : in(in)
   {
     currentStackDepth->setBase(*this, 0);
   }
 
-  void error(const std::string& what) {
-    throw Error(in.getLineNumber(), what);
+  AsmState(const AsmState&) = delete;
+  AsmState& operator=(const AsmState&) = delete;
+
+  template<typename... Args>
+  void error(const std::string& fmt, Args&&... args) {
+    throw Error(in.getLineNumber(),
+                folly::sformat(fmt, std::forward<Args>(args)...));
   }
+
 
   void adjustStack(int delta) {
     if (currentStackDepth == nullptr) {
@@ -517,7 +527,9 @@ struct AsmState : private boost::noncopyable {
   }
 
   void adjustStackHighwater(int depth) {
-    stackHighWater = std::max(stackHighWater, depth);
+    if (depth) {
+      fe->maxStackCells = std::max(fe->maxStackCells, depth);
+    }
   }
 
   std::string displayStackDepth() {
@@ -592,20 +604,11 @@ struct AsmState : private boost::noncopyable {
     labelMap[name].stackDepth.setBase(*this, 0);
   }
 
-  void addLabelEHFault(const std::string& name, size_t ehIdx) {
-    labelMap[name].ehFaults.push_back(ehIdx);
+  void addLabelEHEnt(const std::string& name, size_t ehIdx) {
+    labelMap[name].ehEnts.push_back(ehIdx);
 
     // Stack depth should be 0 when entering a fault funclet
     labelMap[name].stackDepth.setBase(*this, 0);
-  }
-
-  void addLabelEHCatch(const std::string& what,
-                       const std::string& label,
-                       size_t ehIdx) {
-    labelMap[label].ehCatches[what].push_back(ehIdx);
-
-    // Stack depth should be 0 when entering a catch block
-    labelMap[label].stackDepth.setBase(*this, 0);
   }
 
   void beginFpi(Offset fpushOff) {
@@ -619,16 +622,18 @@ struct AsmState : private boost::noncopyable {
       currentStackDepth->currentOffset
     });
     fdescDepth += kNumActRecCells;
-    fdescHighWater = std::max(fdescDepth, fdescHighWater);
+    currentStackDepth->adjust(*this, 0);
   }
 
   void endFpi() {
-    assert(!fpiRegs.empty());
+    if (fpiRegs.empty()) {
+      error("endFpi called with no active fpi region");
+    }
 
     auto& ent = fe->addFPIEnt();
     const auto& reg = fpiRegs.back();
     ent.m_fpushOff = reg.fpushOff;
-    ent.m_fcallOff = ue->bcPos();
+    ent.m_fpiEndOff = ue->bcPos();
     ent.m_fpOff = reg.fpOff;
     if (reg.stackDepth->baseValue) {
       ent.m_fpOff += *reg.stackDepth->baseValue;
@@ -641,6 +646,7 @@ struct AsmState : private boost::noncopyable {
     }
 
     fpiRegs.pop_back();
+    always_assert(fdescDepth >= kNumActRecCells);
     fdescDepth -= kNumActRecCells;
   }
 
@@ -660,19 +666,12 @@ struct AsmState : private boost::noncopyable {
       fe->params[dvinit].funcletOff = label.target;
     }
 
-    for (auto const& fault : label.ehFaults) {
-      fe->ehtab[fault].m_fault = label.target;
-    }
-
-    for (auto const& eh_catch : label.ehCatches) {
-      auto const exId = ue->mergeLitstr(makeStaticString(eh_catch.first));
-      for (auto const& idx : eh_catch.second) {
-        fe->ehtab[idx].m_catches.emplace_back(exId, label.target);
-      }
+    for (auto const& ehEnt : label.ehEnts) {
+      fe->ehtab[ehEnt].m_handler = label.target;
     }
   }
 
-  void finishFunction() {
+  void finishSection() {
     for (auto const& label : labelMap) {
       if (!label.second.bound) {
         error("Undefined label " + label.first);
@@ -692,6 +691,10 @@ struct AsmState : private boost::noncopyable {
 
       fe->fpitab[kv.first].m_fpOff += *kv.second->baseValue;
     }
+  }
+
+  void finishFunction() {
+    finishSection();
 
     // Stack depth should be 0 at the end of a function body
     enforceStackDepth(0);
@@ -702,10 +705,11 @@ struct AsmState : private boost::noncopyable {
       fe->allocUnnamedLocal();
     }
 
-    fe->maxStackCells = fe->numLocals() +
-                        fe->numIterators() * kNumIterCells +
-                        stackHighWater +
-                        fdescHighWater; // in units of cells already
+    fe->maxStackCells +=
+      fe->numLocals() +
+      fe->numIterators() * kNumIterCells +
+      clsRefCountToCells(fe->numClsRefSlots());
+
     fe->finish(ue->bcPos(), false);
     ue->recordFunction(fe);
 
@@ -713,12 +717,11 @@ struct AsmState : private boost::noncopyable {
     fpiRegs.clear();
     labelMap.clear();
     numItersSet = false;
+    numClsRefSlotsSet = false;
     initStackDepth = StackDepth();
     initStackDepth.setBase(*this, 0);
     currentStackDepth = &initStackDepth;
-    stackHighWater = 0;
     fdescDepth = 0;
-    fdescHighWater = 0;
     maxUnnamed = -1;
     fpiToUpdate.clear();
   }
@@ -746,6 +749,14 @@ struct AsmState : private boost::noncopyable {
     return id;
   }
 
+  int getClsRefSlot(int32_t slot) {
+    if (slot >= fe->numClsRefSlots()) {
+      error("class-ref slot id exceeded number of class-ref "
+            "slots in the function");
+    }
+    return slot;
+  }
+
   UnitEmitter* ue;
   Input in;
   bool emittedPseudoMain{false};
@@ -760,12 +771,12 @@ struct AsmState : private boost::noncopyable {
   std::vector<FPIReg> fpiRegs;
   std::map<std::string,Label> labelMap;
   bool numItersSet{false};
+  bool numClsRefSlotsSet{false};
   bool enumTySet{false};
   StackDepth initStackDepth;
   StackDepth* currentStackDepth{&initStackDepth};
-  int stackHighWater{0};
   int fdescDepth{0};
-  int fdescHighWater{0};
+  int minStackDepth{0};
   int maxUnnamed{-1};
   std::vector<std::pair<size_t, StackDepth*>> fpiToUpdate;
   std::set<std::string,stdltistr> hoistables;
@@ -778,7 +789,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     // The absolute stack depth is unknown. We only store the min
     // and max offsets, and we will take a decision later, when the
     // base value will be known.
-    maxOffset = std::max(currentOffset, maxOffset);
+    maxOffset = std::max(currentOffset + as.fdescDepth, maxOffset);
     if (currentOffset < minOffset) {
       minOffsetLine = as.in.getLineNumber();
       minOffset = currentOffset;
@@ -790,7 +801,7 @@ void StackDepth::adjust(AsmState& as, int delta) {
     as.error("opcode sequence caused stack depth to go negative");
   }
 
-  as.adjustStackHighwater(*baseValue + currentOffset);
+  as.adjustStackHighwater(*baseValue + currentOffset + as.fdescDepth);
 }
 
 void StackDepth::addListener(AsmState& as, StackDepth* target) {
@@ -803,7 +814,8 @@ void StackDepth::addListener(AsmState& as, StackDepth* target) {
 
 void StackDepth::setBase(AsmState& as, int stackDepth) {
   if (baseValue && stackDepth != *baseValue) {
-    as.error("stack depth do not match");
+    as.error("stack depth {} does not match base value {}",
+             stackDepth, *baseValue);
   }
 
   baseValue = stackDepth;
@@ -835,7 +847,7 @@ void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
 /*
  * Opcode arguments must be on the same line as the opcode itself,
  * although certain argument types may contain internal newlines (see,
- * for example, read_immvector, read_jmpvector, or string literals).
+ * for example, read_jmpvector or string literals).
  */
 template<class Target> Target read_opcode_arg(AsmState& as) {
   as.in.skipSpaceTab();
@@ -917,80 +929,6 @@ ArrayData* read_litarray(AsmState& as) {
   return it->second;
 }
 
-void read_immvector_immediate(AsmState& as, std::vector<unsigned char>& ret,
-                              MemberCode mcode = InvalidMemberCode) {
-  if (memberCodeImmIsLoc(mcode) || mcode == InvalidMemberCode) {
-    if (as.in.getc() != '$') {
-      as.error("*L member code in vector immediate must be followed by "
-               "a local variable name");
-    }
-    std::string name;
-    if (!as.in.readword(name)) {
-      as.error("couldn't read name for local variable in vector immediate");
-    }
-    encodeIvaToVector(ret, as.getLocalId("$" + name));
-  } else if (memberCodeImmIsString(mcode)) {
-    encodeToVector<int32_t>(ret, as.ue->mergeLitstr(read_litstr(as)));
-  } else if (memberCodeImmIsInt(mcode)) {
-    encodeToVector<int64_t>(ret, read_opcode_arg<int64_t>(as));
-  } else {
-    as.error(std::string("don't understand immediate for member code ") +
-             memberCodeString(mcode));
-  }
-}
-
-std::vector<unsigned char> read_immvector(AsmState& as, int& stackCount) {
-  std::vector<unsigned char> ret;
-
-  as.in.skipSpaceTab();
-  as.in.expect('<');
-
-  std::string word;
-  if (!as.in.readword(word)) {
-    as.error("expected location code in immediate vector");
-  }
-
-  auto lcode = parseLocationCode(word.c_str());
-  if (lcode == InvalidLocationCode) {
-    as.error("expected location code, saw `" + word + "'");
-  }
-  ret.push_back(uint8_t(lcode));
-  if (word[word.size() - 1] == 'L') {
-    if (as.in.getc() != ':') {
-      as.error("expected `:' after location code `" + word + "'");
-    }
-  }
-  for (int i = 0; i < numLocationCodeImms(lcode); ++i) {
-    read_immvector_immediate(as, ret);
-  }
-  stackCount = numLocationCodeStackVals(lcode);
-
-  // Read all the member entries.
-  for (;;) {
-    as.in.skipWhitespace();
-    if (as.in.peek() == '>') { as.in.getc(); break; }
-
-    if (!as.in.readword(word)) {
-      as.error("expected member code in immediate vector");
-    }
-    MemberCode mcode = parseMemberCode(word.c_str());
-    if (mcode == InvalidMemberCode) {
-      as.error("unrecognized member code `" + word + "'");
-    }
-    ret.push_back(uint8_t(mcode));
-    if (memberCodeHasImm(mcode)) {
-      if (as.in.getc() != ':') {
-        as.error("expected `:' after member code `" + word + "'");
-      }
-      read_immvector_immediate(as, ret, mcode);
-    } else if (mcode != MW) {
-      ++stackCount;
-    }
-  }
-
-  return ret;
-}
-
 RepoAuthType read_repo_auth_type(AsmState& as) {
   auto const str = read_opcode_arg<std::string>(as);
   folly::StringPiece parse(str);
@@ -1021,6 +959,12 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
 
   X("Arr",      T::Arr);
   X("?Arr",     T::OptArr);
+  X("Vec",      T::Vec);
+  X("?Vec",     T::OptVec);
+  X("Dict",     T::Dict);
+  X("?Dict",    T::OptDict);
+  X("Keyset",   T::Keyset);
+  X("?Keyset",  T::OptKeyset);
   X("Bool",     T::Bool);
   X("?Bool",    T::OptBool);
   X("Cell",     T::Cell);
@@ -1041,6 +985,12 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("Res",      T::Res);
   X("?SArr",    T::OptSArr);
   X("SArr",     T::SArr);
+  X("?SVec",    T::OptSVec);
+  X("SVec",     T::SVec);
+  X("?SDict",   T::OptSDict);
+  X("SDict",    T::SDict);
+  X("?SKeyset", T::OptSKeyset);
+  X("SKeyset",  T::SKeyset);
   X("?SStr",    T::OptSStr);
   X("SStr",     T::SStr);
   X("?Str",     T::OptStr);
@@ -1073,6 +1023,18 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVec:
+  case T::OptSVec:
+  case T::Vec:
+  case T::OptVec:
+  case T::SDict:
+  case T::OptSDict:
+  case T::Dict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::OptSKeyset:
+  case T::Keyset:
+  case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
   case T::InitUnc:
@@ -1187,21 +1149,66 @@ SSwitchJmpVector read_sswitch_jmpvector(AsmState& as) {
   return ret;
 }
 
+MemberKey read_member_key(AsmState& as) {
+  as.in.skipWhitespace();
+
+  std::string word;
+  if (!as.in.readword(word)) as.error("expected member code");
+
+  auto optMcode = parseMemberCode(word.c_str());
+  if (!optMcode) as.error("unrecognized member code `" + word + "'");
+
+  auto const mcode = *optMcode;
+  if (mcode != MW && as.in.getc() != ':') {
+    as.error("expected `:' after member code `" + word + "'");
+  }
+
+  switch (mcode) {
+    case MW:
+      return MemberKey{};
+    case MEL: case MPL: {
+      std::string name;
+      if (!as.in.readword(name)) {
+        as.error("couldn't read name for local variable in member key");
+      }
+      return MemberKey{mcode, as.getLocalId(name)};
+    }
+    case MEC: case MPC:
+      return MemberKey{mcode, read_opcode_arg<int32_t>(as)};
+    case MEI:
+      return MemberKey{mcode, read_opcode_arg<int64_t>(as)};
+    case MET: case MPT: case MQT:
+      return MemberKey{mcode, read_litstr(as)};
+  }
+  not_reached();
+}
+
+LocalRange read_local_range(AsmState& as) {
+  auto const first = read_opcode_arg<std::string>(as);
+  auto const firstLoc = as.getLocalId(first);
+  as.in.expect('+');
+  auto const restCount = read_opcode_arg<uint32_t>(as);
+  if (firstLoc + restCount > as.maxUnnamed) {
+    as.maxUnnamed = firstLoc + restCount;
+  }
+  return LocalRange{uint32_t(firstLoc), restCount};
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::map<std::string,ParserFunc> opcode_parsers;
 
 #define IMM_NA
 #define IMM_ONE(t) IMM_##t
-#define IMM_TWO(t1, t2) IMM_##t1; IMM_##t2
-#define IMM_THREE(t1, t2, t3) IMM_##t1; IMM_##t2; IMM_##t3
-#define IMM_FOUR(t1, t2, t3, t4) IMM_##t1; IMM_##t2; IMM_##t3; IMM_##t4
+#define IMM_TWO(t1, t2) IMM_ONE(t1); ++immIdx; IMM_##t2
+#define IMM_THREE(t1, t2, t3) IMM_TWO(t1, t2); ++immIdx; IMM_##t3
+#define IMM_FOUR(t1, t2, t3, t4) IMM_THREE(t1, t2, t3); ++immIdx; IMM_##t4
 
-// Some bytecodes need to know the the first iva imm for (PUSH|POP)_*.
+// Some bytecodes need to know an iva imm for (PUSH|POP)_*.
 #define IMM_IVA do {                            \
-    int imm = read_opcode_arg<int64_t>(as);     \
+    int imm = read_opcode_arg<int32_t>(as);     \
     as.ue->emitIVA(imm);                        \
-    if (immIVA < 0) immIVA = imm;               \
+    immIVA[immIdx] = imm;                       \
   } while (0)
 
 #define IMM_VSA \
@@ -1220,8 +1227,13 @@ std::map<std::string,ParserFunc> opcode_parsers;
                      read_opcode_arg<std::string>(as)))
 #define IMM_IA     as.ue->emitIVA(as.getIterId( \
                      read_opcode_arg<int32_t>(as)))
+#define IMM_CAR    as.ue->emitIVA(as.getClsRefSlot( \
+                     read_opcode_arg<int32_t>(as)))
+#define IMM_CAW    as.ue->emitIVA(as.getClsRefSlot( \
+                     read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_AA     as.ue->emitInt32(as.ue->mergeArray(read_litarray(as)))
+#define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
 
 /*
  * There can currently be no more than one immvector per instruction,
@@ -1229,15 +1241,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
  * NUM_POP_*, so the member vector guy exposes a vecImmStackValues
  * integer.
  */
-#define IMM_MA                                                        \
-  int vecImmStackValues = 0;                                          \
-  auto vecImm = read_immvector(as, vecImmStackValues);                \
-  as.ue->emitInt32(vecImm.size());                                    \
-  as.ue->emitInt32(vecImmStackValues);                                \
-  for (auto const& imm : vecImm) {                                    \
-    as.ue->emitByte(imm);                                             \
-  }
-
 #define IMM_ILA do {                               \
   std::vector<uint32_t> vecImm = read_itervec(as); \
   as.ue->emitInt32(vecImm.size() / 2);             \
@@ -1273,35 +1276,29 @@ std::map<std::string,ParserFunc> opcode_parsers;
   as.ue->emitInt32(0);                                              \
 } while (0)
 
+#define IMM_KA encode_member_key(read_member_key(as), *as.ue)
+
 #define NUM_PUSH_NOV 0
 #define NUM_PUSH_ONE(a) 1
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
-#define NUM_PUSH_INS_2(a) 1
-#define NUM_PUSH_IDX_A immIVA
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
 #define NUM_POP_TWO(a,b) 2
 #define NUM_POP_THREE(a,b,c) 3
-#define NUM_POP_MMANY vecImmStackValues
-#define NUM_POP_C_MMANY (1 + vecImmStackValues)
-#define NUM_POP_V_MMANY NUM_POP_C_MMANY
-#define NUM_POP_R_MMANY NUM_POP_C_MMANY
-#define NUM_POP_MFINAL immIVA
-#define NUM_POP_C_MFINAL (immIVA + 1)
-#define NUM_POP_R_MFINAL NUM_POP_C_MFINAL
+#define NUM_POP_MFINAL immIVA[0]
+#define NUM_POP_F_MFINAL immIVA[1]
+#define NUM_POP_C_MFINAL (immIVA[0] + 1)
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL
-#define NUM_POP_FMANY immIVA /* number of arguments */
-#define NUM_POP_CVMANY immIVA /* number of arguments */
-#define NUM_POP_CVUMANY immIVA /* number of arguments */
-#define NUM_POP_CMANY immIVA /* number of arguments */
+#define NUM_POP_FMANY immIVA[0] /* number of arguments */
+#define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
+#define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
-#define NUM_POP_IDX_A immIVA + 1
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED int64_t immIVA = -1;                                        \
+    UNUSED int32_t immIVA[4];                                          \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
     std::vector<std::pair<std::string, Offset> > labelJumps;           \
@@ -1320,6 +1317,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     as.ue->emitOp(Op##name);                                           \
                                                                        \
+    UNUSED size_t immIdx = 0;                                          \
     IMM_##imm;                                                         \
                                                                        \
     int stackDelta = NUM_PUSH_##push - NUM_POP_##pop;                  \
@@ -1340,7 +1338,8 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     /* Stack depth should be 1 after resume from suspend. */           \
     if (thisOpcode == OpCreateCont || thisOpcode == OpAwait ||         \
-        thisOpcode == OpYield || thisOpcode == OpYieldK) {             \
+        thisOpcode == OpYield || thisOpcode == OpYieldK ||             \
+        thisOpcode == OpYieldFromDelegate) {                           \
       as.enforceStackDepth(1);                                         \
     }                                                                  \
                                                                        \
@@ -1359,6 +1358,8 @@ OPCODES
 #undef IMM_DA
 #undef IMM_IVA
 #undef IMM_LA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_BA
 #undef IMM_BLA
 #undef IMM_SLA
@@ -1366,6 +1367,8 @@ OPCODES
 #undef IMM_MA
 #undef IMM_AA
 #undef IMM_VSA
+#undef IMM_KA
+#undef IMM_LAR
 
 #undef NUM_PUSH_NOV
 #undef NUM_PUSH_ONE
@@ -1373,26 +1376,19 @@ OPCODES
 #undef NUM_PUSH_THREE
 #undef NUM_PUSH_POS_N
 #undef NUM_PUSH_INS_1
-#undef NUM_PUSH_IDX_A
 #undef NUM_POP_NOV
 #undef NUM_POP_ONE
 #undef NUM_POP_TWO
 #undef NUM_POP_THREE
 #undef NUM_POP_POS_N
-#undef NUM_POP_MMANY
-#undef NUM_POP_V_MMANY
-#undef NUM_POP_R_MMANY
-#undef NUM_POP_C_MMANY
 #undef NUM_POP_MFINAL
+#undef NUM_POP_F_MFINAL
 #undef NUM_POP_C_MFINAL
-#undef NUM_POP_R_MFINAL
 #undef NUM_POP_V_MFINAL
 #undef NUM_POP_FMANY
-#undef NUM_POP_CVMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
-#undef NUM_POP_IDX_A
 
 void initialize_opcode_map() {
 #define O(name, imm, pop, push, flags) \
@@ -1459,6 +1455,21 @@ void parse_numiters(AsmState& as) {
 }
 
 /*
+ * directive-numclsrefslots : integer ';'
+ *                          ;
+ */
+void parse_numclsrefslots(AsmState& as) {
+  if (as.numClsRefSlotsSet) {
+    as.error("only one .numclsrefslots directive may appear "
+             "in a given function");
+  }
+  int32_t count = read_opcode_arg<int32_t>(as);
+  as.numClsRefSlotsSet = true;
+  as.fe->setNumClsRefSlots(count);
+  as.in.expectWs(';');
+}
+
+/*
  * directive-declvars : var-name* ';'
  *                    ;
  *
@@ -1501,54 +1512,35 @@ void parse_fault(AsmState& as, int nestLevel) {
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
 
-  as.addLabelEHFault(label, as.fe->ehtab.size() - 1);
+  as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
 
 /*
- * directive-catch : catch-spec+ '{' function-body
+ * directive-catch : identifier integer? '{' function-body
  *                 ;
- *
- * catch-spec : '(' identifier identifier ')'
- *            ;
  */
 void parse_catch(AsmState& as, int nestLevel) {
   const Offset start = as.ue->bcPos();
 
-  std::vector<std::pair<std::string,std::string> > catches;
-  size_t numCatches = 0;
+  std::string label;
+  if (!as.in.readword(label)) {
+    as.error("expected label name after .try_catch");
+  }
+  int iterId = -1;
   as.in.skipWhitespace();
-  for (; as.in.peek() == '('; ++numCatches) {
-    as.in.getc();
-
-    std::string except, label;
-    if (!as.in.readword(except) || !as.in.readword(label)) {
-      as.error("expected (ExceptionType label) after .try_catch");
-    }
-
-    as.in.expectWs(')');
-
-    catches.emplace_back(except, label);
-    as.in.skipWhitespace();
+  if (as.in.peek() != '{') {
+    iterId = read_opcode_arg<int32_t>(as);
   }
-  if (catches.empty()) {
-    as.error("expected at least one (ExceptionType label) pair "
-             "after .try_catch");
-  }
-
-  as.in.expect('{');
+  as.in.expectWs('{');
   parse_function_body(as, nestLevel + 1);
 
   auto& eh = as.fe->addEHEnt();
   eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
-  eh.m_iterId = -1;
+  eh.m_iterId = iterId;
 
-  for (const auto& eh_catch : catches) {
-    as.addLabelEHCatch(eh_catch.first,
-                       eh_catch.second,
-                       as.fe->ehtab.size() - 1);
-  }
+  as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
 }
 
 /*
@@ -1556,6 +1548,7 @@ void parse_catch(AsmState& as, int nestLevel) {
  *               ;
  *
  * fbody-line :  ".numiters" directive-numiters
+              |  ".numclsrefslots" directive-numclsrefslots
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
@@ -1587,6 +1580,7 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
     if (word[0] == '.') {
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
+      if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
       if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       as.error("unrecognized directive `" + word + "' in function");
@@ -1625,7 +1619,7 @@ void parse_user_attribute(AsmState& as,
 
   as.in.expectWs(')');
 
-  if (!isArrayType(tvInit.m_type)) {
+  if (!tvIsArray(&tvInit)) {
     as.error("user attribute values must be arrays");
   }
 
@@ -1752,28 +1746,42 @@ void parse_parameter_list(AsmState& as) {
   // have a dv-initializer.
   bool inDVInits = false;
 
+  bool seenVariadic = false;
+
   for (;;) {
     FuncEmitter::ParamInfo param;
 
     as.in.skipWhitespace();
     int ch = as.in.peek();
     if (ch == ')') { as.in.getc(); break; } // allow empty param lists
+
+    if (seenVariadic) {
+      as.error("functions can only have one variadic argument");
+    }
+
     if (ch == '.') {
       as.in.getc();
       if (as.in.getc() != '.' ||
           as.in.getc() != '.') {
         as.error("expecting '...'");
       }
-      as.in.expectWs(')');
-      as.fe->attrs |= AttrMayUseVV;
-      break;
+
+      seenVariadic = true;
+      param.variadic = true;
+      as.fe->attrs |= AttrVariadicParam;
     }
 
-    std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
+    if (!seenVariadic) {
+      std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
+    }
+
     as.in.skipWhitespace();
     ch = as.in.getc();
 
     if (ch == '&') {
+      if (seenVariadic) {
+        as.error("variadic parameter cannot be by-ref");
+      }
       param.byRef = true;
       ch = as.in.getc();
     }
@@ -1789,6 +1797,10 @@ void parse_parameter_list(AsmState& as) {
     ch = as.in.getc();
     if (ch == '=') {
       inDVInits = true;
+
+      if (seenVariadic) {
+        as.error("variadic parameter cannot have dv-initializer");
+      }
 
       std::string label;
       if (!as.in.readword(label)) {
@@ -1820,7 +1832,7 @@ void parse_parameter_list(AsmState& as) {
         ch = as.in.getc();
       }
     } else {
-      if (inDVInits) {
+      if (inDVInits && !seenVariadic) {
         as.error("all parameters after the first with a dv-initializer "
                  "must have a dv-initializer");
       }
@@ -1905,7 +1917,7 @@ void parse_method(AsmState& as) {
   as.fe = as.ue->newMethodEmitter(makeStaticString(name), as.pce);
   as.pce->addMethod(as.fe);
   as.fe->init(as.in.getLineNumber(), as.in.getLineNumber() + 1 /* XXX */,
-              as.ue->bcPos(), attrs, true, 0);
+              as.ue->bcPos(), attrs, false, 0);
   std::tie(as.fe->retUserType, as.fe->retTypeConstraint) = typeInfo;
   as.fe->userAttributes = userAttrs;
 
@@ -1947,9 +1959,23 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
     tvAsVariant(&tvInit) = parse_php_serialized(as);
     if (isStringType(tvInit.m_type)) {
       tvInit.m_data.pstr = makeStaticString(tvInit.m_data.pstr);
+      tvInit.m_type = KindOfPersistentString;
       as.ue->mergeLitstr(tvInit.m_data.pstr);
     } else if (isArrayType(tvInit.m_type)) {
       tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      tvInit.m_type = KindOfPersistentArray;
+      as.ue->mergeArray(tvInit.m_data.parr);
+    } else if (isVecType(tvInit.m_type)) {
+      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      tvInit.m_type = KindOfPersistentVec;
+      as.ue->mergeArray(tvInit.m_data.parr);
+    } else if (isDictType(tvInit.m_type)) {
+      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      tvInit.m_type = KindOfPersistentDict;
+      as.ue->mergeArray(tvInit.m_data.parr);
+    } else if (isKeysetType(tvInit.m_type)) {
+      tvInit.m_data.parr = ArrayData::GetScalarArray(tvInit.m_data.parr);
+      tvInit.m_type = KindOfPersistentKeyset;
       as.ue->mergeArray(tvInit.m_data.parr);
     } else if (tvInit.m_type == KindOfObject) {
       as.error("property initializer can't be an object");
@@ -2027,7 +2053,7 @@ void parse_default_ctor(AsmState& as) {
               as.ue->bcPos(), AttrPublic, true, 0);
   as.ue->emitOp(OpNull);
   as.ue->emitOp(OpRetC);
-  as.stackHighWater = 1;
+  as.fe->maxStackCells = 1;
   as.finishFunction();
 
   as.in.expectWs(';');
@@ -2186,7 +2212,7 @@ PreClass::Hoistable compute_hoistable(AsmState& as,
   bool system = pce.attrs() & AttrBuiltin;
 
   if (pce.methods().size() == 1 && pce.methods()[0]->isClosureBody) {
-    return PreClass::ClosureHoistable;
+    return PreClass::NotHoistable;
   }
   if (!system) {
     if (!pce.interfaces().empty() ||
@@ -2246,8 +2272,7 @@ void parse_class(AsmState& as) {
     as.in.expect(')');
   }
 
-  as.pce = as.ue->newBarePreClassEmitter(makeStaticString(name),
-                                         PreClass::MaybeHoistable);
+  as.pce = as.ue->newBarePreClassEmitter(name, PreClass::MaybeHoistable);
   as.pce->init(as.in.getLineNumber(),
                as.in.getLineNumber() + 1, // XXX
                as.ue->bcPos(),
@@ -2415,6 +2440,7 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   auto ue = folly::make_unique<UnitEmitter>(md5);
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
+  ue->m_useStrictTypes = true;
 
   try {
     std::istringstream instr(std::string(code, codeLen));
@@ -2437,6 +2463,39 @@ UnitEmitter* assemble_string(const char* code, int codeLen,
   }
 
   return ue.release();
+}
+
+AsmResult assemble_expression(UnitEmitter& ue, FuncEmitter* fe,
+                         int incomingStackDepth,
+                         const std::string& expr) {
+  std::stringstream sstr(expr + '}');
+  AsmState as(sstr);
+  as.ue = &ue;
+  as.fe = fe;
+  as.initStackDepth.adjust(as, incomingStackDepth);
+  parse_function_body(as, 1);
+  as.finishSection();
+  if (as.maxUnnamed >= 0) {
+    as.error("Unnamed locals are not allowed in inline assembly");
+  }
+
+  if (!as.currentStackDepth) return AsmResult::Unreachable;
+
+  // If we fall off the end of the inline assembly, we're expected to
+  // leave a single value on the stack, or leave the stack unchanged.
+  if (!as.currentStackDepth->baseValue) {
+    as.error("Unknown stack offset on exit from inline assembly");
+  }
+  auto curStackDepth = as.currentStackDepth->absoluteDepth();
+  if (curStackDepth == incomingStackDepth + 1) {
+    return AsmResult::ValuePushed;
+  }
+  if (curStackDepth != incomingStackDepth) {
+    as.error("Inline assembly expressions should leave the stack unchanged, "
+             "or push exactly one cell onto the stack.");
+  }
+
+  return AsmResult::NoResult;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,9 +25,6 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_condition-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-array-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-map-wait-handle.h"
-#include "hphp/runtime/ext/asio/ext_gen-vector-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_reschedule-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
@@ -85,9 +82,6 @@ String c_WaitableWaitHandle::getName() {
     case Kind::AsyncFunction:       return asAsyncFunction()->getName();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getName();
     case Kind::AwaitAll:            return asAwaitAll()->getName();
-    case Kind::GenArray:            return asGenArray()->getName();
-    case Kind::GenMap:              return asGenMap()->getName();
-    case Kind::GenVector:           return asGenVector()->getName();
     case Kind::Condition:           return asCondition()->getName();
     case Kind::Reschedule:          return asReschedule()->getName();
     case Kind::Sleep:               return asSleep()->getName();
@@ -104,9 +98,6 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
     case Kind::AsyncFunction:       return asAsyncFunction()->getChild();
     case Kind::AsyncGenerator:      return asAsyncGenerator()->getChild();
     case Kind::AwaitAll:            return asAwaitAll()->getChild();
-    case Kind::GenArray:            return asGenArray()->getChild();
-    case Kind::GenMap:              return asGenMap()->getChild();
-    case Kind::GenVector:           return asGenVector()->getChild();
     case Kind::Condition:           return asCondition()->getChild();
     case Kind::Reschedule:          return nullptr;
     case Kind::Sleep:               return nullptr;

@@ -29,18 +29,19 @@ class Exception {
     protected ?Exception $previous = null,
   );
   public function getMessage(): string;
-  final public function getPrevious(): Exception;
+  final public function getPrevious(): ?Exception;
   public final function setPrevious(Exception $previous): void;
   public function getCode(): int;
   final public function getFile(): string;
   final public function getLine(): int;
   final public function getTrace(): array;
+  final protected function __prependTrace(array $trace): void;
   final public function getTraceAsString(): string;
   public function __toString(): string;
   final private function __clone(): void;
 
-  public static function getTraceOptions();
-  public static function setTraceOptions($opts);
+  final public static function getTraceOptions();
+  final public static function setTraceOptions($opts);
 }
 
 class ErrorException extends Exception {

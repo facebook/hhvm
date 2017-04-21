@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,9 +17,9 @@
 #ifndef incl_HPHP_TYPE_CONSTRAINT_H_
 #define incl_HPHP_TYPE_CONSTRAINT_H_
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/type-profile.h"
-#include "hphp/runtime/base/annot-type.h"
 
 #include "hphp/util/functional.h"
 
@@ -79,10 +79,12 @@ struct TypeConstraint {
     /*
      * Indicates a type constraint is a type constant, which is similar to a
      * type alias defined inside a class. For instance, the constraint on $x
-     * is a TypeConstant
+     * is a TypeConstant:
+     *
      * class Foo {
      *   const type T = int;
      *   public function bar(Foo::T $x) { ... }
+     * }
      */
      TypeConstant = 0x20,
   };
@@ -181,9 +183,13 @@ struct TypeConstraint {
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
 
   bool isArray()    const { return m_type == Type::Array; }
-  bool isObject()  const { return m_type == Type::Object; }
+  bool isDict()     const { return m_type == Type::Dict; }
+  bool isVec()      const { return m_type == Type::Vec; }
+  bool isKeyset()   const { return m_type == Type::Keyset; }
 
-  AnnotType type() const { return m_type; }
+  bool isObject()   const { return m_type == Type::Object; }
+
+  AnnotType type()  const { return m_type; }
 
   /*
    * A string representation of this type constraint.
@@ -219,27 +225,29 @@ struct TypeConstraint {
   bool checkTypeAliasNonObj(const TypedValue* tv) const;
 
   // NB: will throw if the check fails.
-  void verifyParam(TypedValue* tv, const Func* func, int paramNum) const {
+  void verifyParam(TypedValue* tv, const Func* func, int paramNum,
+                   bool useStrictTypes = true) const {
     if (UNLIKELY(!check(tv, func))) {
-      verifyParamFail(func, tv, paramNum);
+      verifyParamFail(func, tv, paramNum, useStrictTypes);
     }
   }
-  void verifyReturn(TypedValue* tv, const Func* func) const {
+  void verifyReturn(TypedValue* tv, const Func* func,
+                    bool useStrictTypes = true) const {
     if (UNLIKELY(!check(tv, func))) {
-      verifyReturnFail(func, tv);
+      verifyReturnFail(func, tv, useStrictTypes);
     }
   }
 
   // Can not be private; used by the translator.
   void selfToClass(const Func* func, const Class **cls) const;
   void parentToClass(const Func* func, const Class **cls) const;
-  void verifyFail(const Func* func, TypedValue* tv, int id) const;
+  void verifyFail(const Func* func, TypedValue* tv, int id,
+                  bool useStrictTypes) const;
   void verifyParamFail(const Func* func, TypedValue* tv,
-                       int paramNum) const {
-    verifyFail(func, tv, paramNum);
-  }
-  void verifyReturnFail(const Func* func, TypedValue* tv) const {
-    verifyFail(func, tv, ReturnId);
+                       int paramNum, bool useStrictTypes = true) const;
+  void verifyReturnFail(const Func* func, TypedValue* tv,
+                        bool useStrictTypes = true) const {
+    verifyFail(func, tv, ReturnId, useStrictTypes);
   }
 
 private:
@@ -256,7 +264,7 @@ private:
   Type m_type;
   Flags m_flags;
   LowStringPtr m_typeName;
-  const NamedEntity* m_namedEntity;
+  LowPtr<const NamedEntity> m_namedEntity;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -267,6 +275,33 @@ operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Its possible to use type constraints on function parameters to devise better
+ * memoization key generation schemes. For example, if we know the
+ * type-constraint limits the parameter to only ever being an integer or string,
+ * then the memoization key scheme can just be the identity. This is because
+ * integers and strings won't collide with each other, and we know it won't ever
+ * be anything else. Without such a constraint, the string would need escaping.
+ *
+ * This function takes a type-constraint and returns the suitable "memo-key
+ * constraint" if it corresponds to one. Note: HHBBC, the interpreter, and the
+ * JIT all need to agree exactly on the scheme for each constraint. It is the
+ * caller's responsibility to actually verify that type-hints are being
+ * enforced. If they are not, then none of this information can be used.
+ */
+enum class MemoKeyConstraint {
+  Null,
+  Int,
+  IntOrNull,
+  Bool,
+  BoolOrNull,
+  Str,
+  StrOrNull,
+  IntOrStr,
+  None
+};
+MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint&);
 
 }
 

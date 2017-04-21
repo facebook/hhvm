@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,8 +30,7 @@ extern "C" {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class MimePart : public ResourceData {
-public:
+struct MimePart : ResourceData {
   enum Decode {
     DecodeNone      = 0,  /* include headers but no section */
     Decode8Bit      = 1,  /* decode body into 8-bit */
@@ -62,8 +61,7 @@ public:
   int filter(int c);
 
 private:
-  class MimeHeader {
-  public:
+  struct MimeHeader {
     MimeHeader();
     explicit MimeHeader(const char *value);
     explicit MimeHeader(php_rfc822_tokenized_t *toks);

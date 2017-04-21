@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -32,6 +32,7 @@ $Newline      = [\\p{Word_Break = Newline}];\n\
 $Extend       = [\\p{Word_Break = Extend}];\n\
 $Format       = [\\p{Word_Break = Format}];\n\
 $Katakana     = [\\p{Word_Break = Katakana}];\n\
+$Hebrew_Letter  = [\\p{Word_Break = Hebrew_Letter}];\n\
 $ALetter      = [\\p{Word_Break = ALetter}];\n\
 $MidNumLet    = [\\p{Word_Break = MidNumLet}];\n\
 $MidLetter    = [\\p{Word_Break = MidLetter}];\n\
@@ -42,6 +43,7 @@ $dictionary   = [:LineBreak = Complex_Context:];\n\
 $Control      = [\\p{Grapheme_Cluster_Break = Control}];\n\
 $ALetterPlus  = [$ALetter [$dictionary-$Extend-$Control]];\n\
 $KatakanaEx     = $Katakana     ($Extend |  $Format)*;\n\
+$Hebrew_LetterEx  = $Hebrew_Letter      ($Extend |  $Format)*;\n\
 $ALetterEx      = $ALetterPlus  ($Extend |  $Format)*;\n\
 $MidNumLetEx    = $MidNumLet    ($Extend |  $Format)*;\n\
 $MidLetterEx    = $MidLetter    ($Extend |  $Format)*;\n\
@@ -78,6 +80,7 @@ $CR $LF;\n\
 [^$CR $LF $Newline]? ($Extend |  $Format)+;\n\
 $NumericEx {100};\n\
 $ALetterEx {200};\n\
+$Hebrew_LetterEx {200};\n\
 $KatakanaEx {300};\n\
 $HiraganaEx {300};\n\
 $IdeographicEx {400};\n\
@@ -87,13 +90,16 @@ $NumericEx $NumericEx {100};\n\
 $ALetterEx $NumericEx {200};\n\
 $NumericEx $ALetterEx {200};\n\
 $NumericEx ($MidNumEx | $MidNumLetEx) $NumericEx {100};\n\
+$Hebrew_LetterEx  $Hebrew_LetterEx {200};\n\
 $KatakanaEx  $KatakanaEx {300};\n\
 $ALetterEx      $ExtendNumLetEx {200};\n\
 $NumericEx      $ExtendNumLetEx {100};\n\
+$Hebrew_LetterEx  $ExtendNumLetEx {200};\n\
 $KatakanaEx     $ExtendNumLetEx {300};\n\
 $ExtendNumLetEx $ExtendNumLetEx {200};\n\
 $ExtendNumLetEx $ALetterEx  {200};\n\
 $ExtendNumLetEx $NumericEx  {100};\n\
+$ExtendNumLetEx $Hebrew_LetterEx {200};\n\
 $ExtendNumLetEx $KatakanaEx {300};\n\
 # FB custom\n\
 $EmailAddress {500};\n\
@@ -112,6 +118,7 @@ $BackNumericEx     = ($Format | $Extend)* $Numeric;\n\
 $BackMidNumEx      = ($Format | $Extend)* $MidNum;\n\
 $BackMidLetterEx   = ($Format | $Extend)* $MidLetter;\n\
 $BackKatakanaEx    = ($Format | $Extend)* $Katakana;\n\
+$BackHebrew_LetterEx    = ($Format | $Extend)* $Hebrew_LetterEx;\n\
 $BackExtendNumLetEx= ($Format | $Extend)* $ExtendNumLet;\n\
 $LF $CR;\n\
 ($Format | $Extend)*  [^$CR $LF $Newline]?;\n\
@@ -122,9 +129,14 @@ $BackNumericEx $BackALetterEx;\n\
 $BackALetterEx $BackNumericEx;\n\
 $BackNumericEx ($BackMidNumEx | $BackMidNumLetEx) $BackNumericEx;\n\
 $BackKatakanaEx $BackKatakanaEx;\n\
+$BackHebrew_LetterEx $BackHebrew_LetterEx;\n\
 $BackExtendNumLetEx ($BackALetterEx | $BackNumericEx | $BackKatakanaEx \
 | $BackExtendNumLetEx);\n\
+$BackExtendNumLetEx ($BackALetterEx | $BackNumericEx | $BackHebrew_LetterEx \
+| $BackExtendNumLetEx);\n\
 ($BackALetterEx | $BackNumericEx | $BackKatakanaEx) $BackExtendNumLetEx;\n\
+!!safe_reverse;\n\
+($BackALetterEx | $BackNumericEx | $BackHebrew_LetterEx) $BackExtendNumLetEx;\n\
 !!safe_reverse;\n\
 ($Extend | $Format)+ .?;\n\
 ($MidLetter | $MidNumLet) $BackALetterEx;\n\

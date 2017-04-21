@@ -1,3 +1,5 @@
-array<[1]intersect(Tstring, Tbool, Tint)>
-[2]intersect(array<[3]intersect(Tstring, Tbool, Tint)>)
+File "array_append.php", line 9, characters 3-13:
+  array<^(string | bool | int)>
+File "array_append.php", line 13, characters 3-16:
+  ^(array<^(string | bool | int)>)
 No errors

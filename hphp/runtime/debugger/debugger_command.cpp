@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
-#include <poll.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/debugger/cmd/all.h"
@@ -148,6 +148,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
     case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
     case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
     case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;
+    case KindOfAuth     : cmd = std::make_shared<CmdAuth>(); break;
     case KindOfShell    : cmd = std::make_shared<CmdShell>(); break;
     case KindOfInternalTesting :
       cmd = std::make_shared<CmdInternalTesting>();

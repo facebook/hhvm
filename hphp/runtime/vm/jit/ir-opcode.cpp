@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,9 +28,6 @@
 
 #include "hphp/util/trace.h"
 
-// Include last to localize effects to this file
-#include "hphp/util/assert-throw.h"
-
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -50,24 +47,30 @@ TRACE_SET_MOD(hhir);
 #define D(n)           HasDest
 #define DofS(n)        HasDest
 #define DRefineS(n)    HasDest
-#define DParamMayRelax HasDest
-#define DParam         HasDest
+#define DParamMayRelax(t) HasDest
+#define DParam(t)      HasDest
 #define DParamPtr(k)   HasDest
 #define DLdObjCls      HasDest
 #define DUnboxPtr      HasDest
 #define DBoxPtr        HasDest
 #define DAllocObj      HasDest
 #define DArrElem       HasDest
+#define DVecElem       HasDest
+#define DDictElem      HasDest
+#define DKeysetElem    HasDest
 #define DArrPacked     HasDest
 #define DCol           HasDest
-#define DThis          HasDest
 #define DCtx           HasDest
+#define DCtxCls        HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
 #define DPtrToParam    HasDest
 #define DBuiltin       HasDest
+#define DCall          HasDest
 #define DSubtract(n,t) HasDest
 #define DCns           HasDest
+#define DUnion(...)    HasDest
+#define DMemoKey       HasDest
 
 namespace {
 template<Opcode op, uint64_t flags>
@@ -115,17 +118,23 @@ OpInfo g_opInfo[] = {
 #undef DUnboxPtr
 #undef DBoxPtr
 #undef DArrElem
+#undef DVecElem
+#undef DDictElem
+#undef DKeysetElem
 #undef DArrPacked
 #undef DCol
 #undef DAllocObj
-#undef DThis
 #undef DCtx
+#undef DCtxCls
 #undef DMulti
 #undef DSetElem
 #undef DPtrToParam
+#undef DCall
 #undef DBuiltin
 #undef DSubtract
 #undef DCns
+#undef DUnion
+#undef DMemoKey
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -165,6 +174,7 @@ bool isGuardOp(Opcode opc) {
     case CheckLoc:
     case CheckStk:
     case CheckType:
+    case CheckMBase:
       return true;
 
     default:
@@ -215,12 +225,27 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
     case SameObj:             return NSameObj;
     case NSameObj:            return SameObj;
 
-    // Arrays can contain an element with NaN, so only equality comparisons can
-    // be negated.
+    // Arrays/vec/dicts can contain an element with NaN, so only equality
+    // comparisons can be negated.
     case EqArr:               return NeqArr;
     case NeqArr:              return EqArr;
     case SameArr:             return NSameArr;
     case NSameArr:            return SameArr;
+
+    case EqVec:               return NeqVec;
+    case NeqVec:              return EqVec;
+    case SameVec:             return NSameVec;
+    case NSameVec:            return SameVec;
+
+    case EqDict:              return NeqDict;
+    case NeqDict:             return EqDict;
+    case SameDict:            return NSameDict;
+    case NSameDict:           return SameDict;
+
+    case EqKeyset:            return NeqKeyset;
+    case NeqKeyset:           return EqKeyset;
+    case SameKeyset:          return NSameKeyset;
+    case NSameKeyset:         return SameKeyset;
 
     case GtRes:               return LteRes;
     case GteRes:              return LtRes;

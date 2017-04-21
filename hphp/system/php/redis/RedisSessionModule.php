@@ -113,7 +113,7 @@ class RedisSessionModule implements SessionHandlerInterface {
 
     $redis = new Redis;
     $func = ($r['persistent']) ? 'pconnect' : 'connect';
-    if (!$redis->{$func}($r['host'], $r['port'], $r['timeout'])) {
+    if (!$redis->{$func}($r['host'], $r['port'], (float)$r['timeout'])) {
       return false;
     }
     if (($r['auth'] !== '') &&

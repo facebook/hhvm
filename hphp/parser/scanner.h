@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,9 @@
 #include <cstdlib>
 #include <limits.h>
 
+#include <folly/portability/String.h>
+#include <folly/portability/Unistd.h>
+
 #include "hphp/util/exception.h"
 #include "hphp/util/portability.h"
 #include "hphp/parser/location.h"
@@ -37,25 +40,32 @@ typedef size_t yy_size_t;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef int TokenID;
+using TokenID = int;
 
-class ScannerToken {
-public:
-  ScannerToken() : m_num(0), m_check(false), m_id(-1) {}
-  void reset() { m_num = 0; m_text.clear(); m_id = -1; }
+struct ScannerToken {
+  void reset() {
+    m_num = 0;
+    m_text.clear();
+  }
 
-  TokenID num() const { return m_num;}
+  TokenID num() const {
+    return m_num;
+  }
+
   void setNum(TokenID num) {
     m_num = num;
   }
-  void set(TokenID num, const char *t) {
+
+  void set(TokenID num, const char* t) {
     m_num = num;
     m_text = t;
   }
-  void set(TokenID num, const std::string &t) {
+
+  void set(TokenID num, const std::string& t) {
     m_num = num;
     m_text = t;
   }
+
   void operator++(TokenID) {
     ++m_num;
   }
@@ -63,39 +73,39 @@ public:
   ScannerToken& operator=(const ScannerToken& other) {
     m_num = other.m_num;
     m_text = other.m_text;
-    m_id = other.m_id;
     return *this;
   }
 
-  const std::string &text() const {
+  const std::string& text() const {
     return m_text;
   }
-  bool same(const char *s) const {
+
+  bool same(const char* s) const {
     return strcasecmp(m_text.c_str(), s) == 0;
   }
-  void setText(const char *t, int len) {
+
+  void setText(const char* t, int len) {
     m_text = std::string(t, len);
   }
-  void setText(const char *t) {
+
+  void setText(const char* t) {
     m_text = t;
   }
-  void setText(const std::string &t) {
+
+  void setText(const std::string& t) {
     m_text = t;
   }
-  void setText(const ScannerToken &token) {
+
+  void setText(const ScannerToken& token) {
     m_text = token.m_text;
   }
+
   bool check() const {
     return m_check;
   }
+
   void setCheck() {
     m_check = true;
-  }
-  void setID(int id) {
-    m_id = id;
-  }
-  int ID() {
-    return m_id;
   }
 
   void xhpLabel(bool prefix = true);
@@ -103,10 +113,10 @@ public:
   void xhpDecode();  // xhp supports more entities than html
 
 protected:
-  TokenID m_num; // internal token id
+  /* Internal token id. */
+  TokenID m_num{0};
   std::string m_text;
-  bool m_check;
-  int m_id;
+  bool m_check{false};
 };
 
 struct LookaheadToken {
@@ -189,13 +199,7 @@ struct TokenStore {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct TokenListener {
-  virtual int publish(const char *rawText, int rawLeng, int type) = 0;
-  virtual ~TokenListener() {}
-};
-
-class Scanner {
-public:
+struct Scanner {
   enum Type {
     AllowShortTags       = 0x01, // allow <?
     AllowAspTags         = 0x02, // allow <% %>
@@ -211,7 +215,6 @@ public:
           bool md5 = false);
   Scanner(const char *source, int len, int type, const char *fileName = "",
           bool md5 = false);
-  void setListener(TokenListener *listener) { m_listener = listener; }
   ~Scanner();
 
   const std::string &getMd5() const {
@@ -260,7 +263,7 @@ public:
     incLoc(rawText, rawLeng, type);
   }
   void stepPos(const char *rawText, int rawLeng, int type = -1) {
-    if (shortTags()) {
+    if (full()) {
       m_token->setText(rawText, rawLeng);
     }
     incLoc(rawText, rawLeng, type);
@@ -379,7 +382,6 @@ private:
 
   TokenStore m_lookahead;
   int m_lookaheadLtDepth;
-  TokenListener *m_listener;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

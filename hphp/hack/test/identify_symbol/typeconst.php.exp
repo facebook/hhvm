@@ -1,0 +1,9 @@
+name: \C::FOO, kind: typeconst, span: line 7, characters 18-20, definition: 
+ FOO
+   kind: typeconst
+   id: class_const::C::FOO
+   position: line 4, characters 14-16
+   span: line 4, character 3 - line 4, character 25
+   modifiers: 
+
+

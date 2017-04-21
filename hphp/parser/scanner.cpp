@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 
 #include <fstream>
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/logger.h"
 #include "hphp/zend/zend-string.h"
@@ -89,8 +90,7 @@ void ScannerToken::xhpDecode() {
 Scanner::Scanner(const std::string& filename, int type, bool md5 /* = false */)
     : m_filename(filename), m_stream(nullptr), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0),
-      m_listener(nullptr) {
+      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0) {
 #ifdef _MSC_VER
   // I really don't know why this doesn't work properly with MSVC,
   // but I know this fixes the problem, so use it instead.
@@ -121,8 +121,7 @@ Scanner::Scanner(std::istream &stream, int type,
                  bool md5 /* = false */)
     : m_filename(fileName), m_source(nullptr), m_len(0), m_pos(0),
       m_state(Start), m_type(type), m_yyscanner(nullptr), m_token(nullptr),
-      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0),
-      m_listener(nullptr) {
+      m_loc(nullptr), m_lastToken(-1), m_isHHFile(0), m_lookaheadLtDepth(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (md5) computeMd5();
@@ -134,7 +133,7 @@ Scanner::Scanner(const char *source, int len, int type,
     : m_filename(fileName), m_stream(nullptr), m_source(source), m_len(len),
       m_pos(0), m_state(Start), m_type(type), m_yyscanner(nullptr),
       m_token(nullptr), m_loc(nullptr), m_lastToken(-1), m_isHHFile(0),
-      m_lookaheadLtDepth(0), m_listener(nullptr) {
+      m_lookaheadLtDepth(0) {
   assert(m_source);
   m_streamOwner = false;
   if (md5) {
@@ -155,10 +154,10 @@ void Scanner::computeMd5() {
   always_assert(length != -1 &&
                 length <= std::numeric_limits<int32_t>::max());
   m_stream->seekg(0, std::ios::beg);
-  char *ptr = (char*)malloc(length);
+  auto const ptr = (char*)malloc(length);
   m_stream->read(ptr, length);
   m_stream->seekg(startpos, std::ios::beg);
-  m_md5 = string_md5(ptr, length);
+  m_md5 = string_md5(folly::StringPiece{ptr, length});
   free(ptr);
 }
 
@@ -261,7 +260,7 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
     }
     pos = cpPos;
 
-    if (pos->t == T_AS || pos->t == T_SUPER) {
+    while (pos->t == T_AS || pos->t == T_SUPER) {
       nextLookahead(pos);
       if (!tryParseNSType(pos)) {
         return false;
@@ -373,6 +372,9 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
       case T_NAMESPACE:
       case T_SHAPE:
       case T_ARRAY:
+      case T_DICT:
+      case T_VEC:
+      case T_KEYSET:
       case T_FUNCTION:
       case T_DOUBLE_ARROW:
       case T_DOUBLE_COLON:
@@ -461,6 +463,9 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_XHP_REQUIRED:
       case T_ENUM:
       case T_ARRAY:
+      case T_DICT:
+      case T_VEC:
+      case T_KEYSET:
       case T_CALLABLE:
       case T_UNRESOLVED_TYPE:
       case T_UNRESOLVED_NEWTYPE:
@@ -611,6 +616,9 @@ static bool isValidClassConstantName(int tokid) {
   case T_WHILE:
   case T_AS:
   case T_CATCH:
+  case T_DICT:
+  case T_VEC:
+  case T_KEYSET:
     return true;
   default:
     return false;
@@ -760,9 +768,6 @@ void Scanner::warn(const char* fmt, ...) {
 void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
   assert(rawText);
   assert(rawLeng > 0);
-  if (m_listener) {
-    m_token->setID(m_listener->publish(rawText, rawLeng, type));
-  }
 
   m_loc->cursor += rawLeng;
 

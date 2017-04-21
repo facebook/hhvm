@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -43,9 +43,9 @@ Variant HHVM_FUNCTION(proc_open,
                       const String& cmd,
                       const Array& descriptorspec,
                       VRefParam pipes,
-                      const String& cwd = null_string,
-                      const Variant& env = null_variant,
-                      const Variant& other_options = null_variant);
+                      const Variant& cwd = uninit_variant,
+                      const Variant& env = uninit_variant,
+                      const Variant& other_options = uninit_variant);
 bool HHVM_FUNCTION(proc_terminate,
                    const Resource& process,
                    int signal = SIGTERM);

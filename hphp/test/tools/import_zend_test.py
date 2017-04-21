@@ -61,24 +61,18 @@ no_import = (
     '/ext/mssql',
     '/ext/mysqlnd',
     '/ext/oci8',
-    '/ext/odbc',
     '/ext/pdo_dblib',
     '/ext/pdo_firebird',
     '/ext/pdo_oci',
-    '/ext/pdo_odbc',
     '/ext/pdo_pgsql',
     '/ext/pspell',
     '/ext/recode',
-    '/ext/shmop',
     '/ext/skeleton',
-    '/ext/snmp',
     '/ext/sybase_ct',
     '/ext/sysvmsg',
     '/ext/sysvsem',
     '/ext/sysvshm',
     '/ext/tidy',
-    '/ext/wddx',
-    '/ext/xmlrpc',
     '/sapi',
 
     # conscious decision not to match these
@@ -137,6 +131,12 @@ flaky_tests = (
     # these tests use each other's data
     '/ext/standard/tests/file/bug38086.php',
     '/ext/standard/tests/file/stream_copy_to_stream.php',
+    '/ext/standard/tests/file/mkdir_variation1.php',
+    '/ext/session/tests/session_set_save_handler_iface_001.php',
+    '/ext/session/tests/session_set_save_handler_class_016.php',
+    '/ext/gd/tests/gif2gd.php',
+    '/ext/gd/tests/jpg2gd.php',
+    '/ext/gd/tests/png2gd.php',
 
     # these all write to temp3.txt.gz
     '/ext/zlib/tests/gzseek_basic2.php',
@@ -161,6 +161,7 @@ flaky_tests = (
 
     # flaky for various reasons
     '/ext/sockets/tests/socket_getpeername_ipv6loop.php',
+    '/ext/sockets/tests/socket_read_params.php',
 
     # segfaults on contbuild in opt
     '/ext/standard/tests/strings/explode_bug.php',
@@ -331,6 +332,14 @@ flaky_tests = (
     # Socket based test that are possibly port clowny
     # Github commit: 6ae44fc92acb63e7fa31b5fd4fcd4cf939c3ef54
     '/ext/sockets/tests/socket_getsockname.php',
+
+    # Rely on system service configuration being a particular way.
+    '/ext/standard/tests/general_functions/getservbyname_variation9.php',
+    '/ext/standard/tests/general_functions/getservbyname_variation10.php',
+    '/ext/standard/tests/general_functions/getservbyport_variation1.php',
+
+    # bad assumption about system call effect
+    '/ext/standard/tests/general_functions/proc_nice_basic.php',
 )
 
 # Tests that work but not in repo mode
@@ -629,6 +638,15 @@ norepo_tests = (
     '/tests/lang/bug22690.php',
     '/tests/lang/bug24926.php',
 
+    # These tests use assert with a string argument, which is also basically
+    # eval.
+    '/ext/dom/tests/DOMNode_insertBefore_error2.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error3.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error4.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error5.php',
+    '/ext/dom/tests/DOMNode_insertBefore_error6.php',
+    '/tests/lang/bug23922.php',
+
     # This creates an interface with the same name as a builtin, which
     # hphpc doesn't correctly support AttrUnique flags on.
     '/Zend/tests/inter_06.php',
@@ -686,6 +704,7 @@ other_files = (
     '/ext/dom/tests/xinclude.xml',
     '/ext/exif/tests/bug34704.jpg',
     '/ext/exif/tests/bug48378.jpeg',
+    '/ext/exif/tests/bug50845.jpg',
     '/ext/exif/tests/bug60150.jpg',
     '/ext/exif/tests/bug62523_1.jpg',
     '/ext/exif/tests/bug62523_2.jpg',
@@ -728,6 +747,7 @@ other_files = (
     '/ext/ftp/tests/cert.pem',
     '/ext/ftp/tests/server.inc',
     '/ext/ftp/tests/skipif.inc',
+    '/ext/gd/tests/bug37360.gif',
     '/ext/gd/tests/bug37346.gif',
     '/ext/gd/tests/bug38112.gif',
     '/ext/gd/tests/bug43121.gif',
@@ -744,6 +764,7 @@ other_files = (
     '/ext/gd/tests/test8859.ttf',
     '/ext/gd/tests/test.png',
     '/ext/gd/tests/Tuffy.ttf',
+    '/ext/gd/tests/libgd00094.xbm',
     '/ext/gd/tests/logo_noise.png',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.mo',
     '/ext/gettext/tests/locale/en/LC_CTYPE/dgettextTest.po',
@@ -762,6 +783,8 @@ other_files = (
     '/ext/gettext/tests/locale/en/LC_MESSAGES/messages.po',
     '/ext/gettext/tests/locale/fi/LC_MESSAGES/messages.mo',
     '/ext/gettext/tests/locale/fi/LC_MESSAGES/messages.po',
+    '/ext/iconv/tests/iconv_stream_filter.txt',
+    '/ext/iconv/tests/Quotes.UTF-8',
     '/ext/iconv/tests/skipif.inc',
     '/ext/imap/tests/skipif.inc',
     '/ext/interbase/tests/skipif.inc',
@@ -878,6 +901,7 @@ other_files = (
     '/ext/standard/tests/file/test2.csv',
     '/ext/standard/tests/file/test3.csv',
     '/ext/standard/tests/file/test.csv',
+    '/ext/standard/tests/filters/filter_errors.inc',
     '/ext/standard/tests/general_functions/004.data',
     '/ext/standard/tests/general_functions/bug49692.ini',
     '/ext/standard/tests/general_functions/bug52138.data',
@@ -900,6 +924,7 @@ other_files = (
     '/ext/standard/tests/image/75x50.xbm',
     '/ext/standard/tests/image/blank_file.bmp',
     '/ext/standard/tests/image/bug13213.jpg',
+    '/ext/standard/tests/image/bug72278.jpg',
     '/ext/standard/tests/image/skipif_imagetype.inc',
     '/ext/standard/tests/image/test13pix.swf',
     '/ext/standard/tests/image/test1bpix.bmp',
@@ -1345,6 +1370,16 @@ def walk(filename, dest_subdir):
     if '/ext/standard/tests/strings/md5_file.php' in full_dest_filename:
         test = test.replace('DataFile.txt', 'md5_DataFile.txt')
         test = test.replace('EmptyFile.txt', 'md5_EmptyFile.txt')
+    if 'ext/standard/tests/strings/lcfirst.php' in full_dest_filename:
+        test = test.replace('dummy.txt', 'dummy-lcfirst.txt')
+    if 'ext/standard/tests/strings/strncmp_variation6.php' in full_dest_filename:
+        test = re.sub(r'^var_dump\( strncmp\(\$str1, \$str2, 8\) \)',
+                      'var_dump( strncmp($str1, $str2, 8) > 0)', test)
+        exp = re.sub(r'range, given in binary format --\nint\(1\)',
+                      'range, given in binary format --\nbool(true)', exp)
+        open(full_dest_filename + '.expectf', 'w').write(exp)
+    if 'ext/standard/tests/strings/ucfirst.php' in full_dest_filename:
+        test = test.replace('dummy.txt', 'dummy-ucfirst.txt')
     if '/ext/intl/tests/calendar_getNow_basic.php' in full_dest_filename:
         test = test.replace('500)', '1000)')
         test = test.replace('1000)', '2000)')
@@ -1355,6 +1390,15 @@ def walk(filename, dest_subdir):
     if '/ext/json/tests/unsupported_type_error.php' in full_dest_filename:
         exp = exp.replace('resource(5)', 'resource(%d)')
         open(full_dest_filename + '.expectf', 'w').write(exp)
+    if ('/ext/gd/tests/imagegd_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagegd2_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagegif_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagepng_nullbyte_injection.php' in full_dest_filename or
+       '/ext/gd/tests/imagewbmp_nullbyte_injection.php' in full_dest_filename):
+        test = test.replace("'/php-gdtest';\nif",
+                            "'/php-gdtest'.rand();\nif")
+        test = test.replace("$tempdir = sys_get_temp_dir(). '/php-gdtest';\n",
+                            "\n")
     if ('/ext/xmlreader/tests/007.php' in full_dest_filename or
        '/ext/xmlreader/tests/008.php' in full_dest_filename or
        '/ext/xmlreader/tests/012.php' in full_dest_filename or

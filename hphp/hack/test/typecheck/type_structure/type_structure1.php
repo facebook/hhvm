@@ -15,7 +15,11 @@ class D extends C<int> {
   const type TC5 = MyAlias3<C<int>>;
   const type TC6 = shape(
     'foo' => this::TC1,
-    'bar' => shape('x' => MyAlias2<num>),
+    'bar' => shape(
+      'x' => MyAlias2<num>,
+      ...
+    ),
+    ...
   );
 
   public function test(): void {

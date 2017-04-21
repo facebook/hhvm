@@ -1,4 +1,4 @@
-.function array_reduce($input = no_args, $func = one_arg, $res = two_args, $extra = got_args) {
+.function [skip_frame] array_reduce($input = no_args, $func = one_arg, $res = two_args, $extra = got_args) {
           .numiters 2;
 
 # If we get here, a value was supplied for $extra
@@ -11,7 +11,7 @@ one_arg:  String "array_reduce() expects at least 2 parameters, "
 
 bad_func: String "array_reduce() expects parameter 2 to be a valid callback"
           Jmp warning
-warn_num: FCallBuiltin 0 0 "__SystemLib\\func_num_arg_"
+warn_num: FCallBuiltin 0 0 "func_num_args"
           UnboxR
           String " given."
           ConcatN 3
@@ -38,11 +38,11 @@ check_func:
           JmpZ bad_func
           CGetL $func
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try_catch kill_iter_0 {
             CGetL $input
             IterInit 1 endloop $v
 
-  .try_fault kill_iter_1 1 {
+  .try_catch kill_iter_1 1 {
     loop_x:   FPushCufIter 2 0
               FPassL 0 $res
               FPassL 1 $v
@@ -52,15 +52,21 @@ check_func:
               PopC
               IterNext 1 loop_x $v
   }
+
+            Jmp endloop
+
+  kill_iter_1:
+            Catch
+            IterFree 1
+            Throw
 }
+
 endloop:  CIterFree 0
           CGetL $res
           RetC
 
 kill_iter_0:
+          Catch
           CIterFree 0
-          Unwind
-kill_iter_1:
-          IterFree 1
-          Unwind
+          Throw
 }

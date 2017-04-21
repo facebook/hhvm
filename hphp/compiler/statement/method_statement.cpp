@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,7 +64,6 @@ MethodStatement::MethodStatement
   : Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETER_VALUES)
   , m_method(method)
   , m_ref(ref)
-  , m_hasCallToGetArgs(false)
   , m_mayCallSetFrameMetadata(false)
   , m_attribute(attr)
   , m_cppLength(-1)
@@ -121,6 +120,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   int minParam = 0, numDeclParam = 0;
   bool hasRef = false;
   bool hasVariadicParam = false;
+  bool hasVariadicRefParam = false;
   if (m_params) {
     std::set<std::string> names, allDeclNames;
     int i = 0;
@@ -129,6 +129,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
       dynamic_pointer_cast<ParameterExpression>(
         (*m_params)[numDeclParam - 1]);
     hasVariadicParam = lastParam->isVariadic();
+    hasVariadicRefParam = lastParam->isVariadic() && lastParam->isRef();
     if (hasVariadicParam) {
       allDeclNames.insert(lastParam->getName());
       // prevent the next loop from visiting the variadic param and testing
@@ -174,6 +175,9 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   }
   if (hasVariadicParam) {
     m_attribute |= FileScope::VariadicArgumentParam;
+  }
+  if (hasVariadicRefParam) {
+    m_attribute |= FileScope::RefVariadicArgumentParam;
   }
 
   std::vector<UserAttributePtr> attrs;
@@ -350,7 +354,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 
   setSpecialMethod(fileScope, classScope);
 
-  if (Option::DynamicInvokeFunctions.count(getOriginalFullName())) {
+  if (RuntimeOption::DynamicInvokeFunctions.count(getOriginalFullName())) {
     funcScope->setDynamicInvoke();
   }
   if (m_params) {

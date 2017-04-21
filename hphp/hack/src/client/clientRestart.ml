@@ -10,9 +10,10 @@
 
 let main env =
   HackEventLogger.client_restart ();
-  if ClientConnectSimple.server_exists env.ClientStart.root
-  then ClientStop.kill_server env.ClientStart.root
+  if MonitorConnection.server_exists
+  (ServerFiles.lock_file env.ClientStart.root) then
+    ClientStop.kill_server env.ClientStart.root
   else Printf.eprintf "Warning: no server to restart for %s\n%!"
     (Path.to_string env.ClientStart.root);
   ClientStart.start_server env;
-  Exit_status.Ok
+  Exit_status.No_error

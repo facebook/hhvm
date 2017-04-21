@@ -1,1 +1,10 @@
-No errors
+File "constmap.php", line 14, characters 14-15:
+Invalid argument (Typing[4110])
+File "constmap.php", line 12, characters 30-34:
+This is a mixed value
+File "constmap.php", line 13, characters 20-25:
+It is incompatible with a string
+File "builtins.hhi", line 20, characters 45-46:
+  via this generic Tk
+File "constmap.php", line 12, characters 30-34:
+Considering that this type argument is invariant with respect to ConstMap

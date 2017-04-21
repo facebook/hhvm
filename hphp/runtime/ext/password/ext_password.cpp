@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -19,22 +19,12 @@
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
-const StaticString s_PASSWORD_BCRYPT("PASSWORD_BCRYPT");
-const StaticString s_PASSWORD_DEFAULT("PASSWORD_DEFAULT");
 
-const int64_t k_PASSWORD_BCRYPT = 1;
-const int64_t k_PASSWORD_DEFAULT = k_PASSWORD_BCRYPT;
-
-class PasswordExtension final : public Extension {
- public:
+struct PasswordExtension final : Extension {
   PasswordExtension() : Extension("password") {}
   void moduleInit() override {
-    Native::registerConstant<KindOfInt64>(
-      s_PASSWORD_BCRYPT.get(), k_PASSWORD_BCRYPT
-    );
-    Native::registerConstant<KindOfInt64>(
-      s_PASSWORD_DEFAULT.get(), k_PASSWORD_DEFAULT
-    );
+    HHVM_RC_INT(PASSWORD_BCRYPT, 1);
+    HHVM_RC_INT(PASSWORD_DEFAULT, 1 /* PASSWORD_BCRYPT */);
 
     loadSystemlib();
   }

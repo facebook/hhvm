@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,6 +49,7 @@ PerfEventType perfScriptOutputToEventType(const char* eventId) {
     std::make_pair("L1-dcache-prefetch-misses", EVENT_DCACHE_MISSES),
 
     std::make_pair("cache-misses",              EVENT_LLC_MISSES),
+    std::make_pair("LLC-store-misses",          EVENT_LLC_STORE_MISSES),
 
     // fake event grouping all iTLB misses
     std::make_pair("iTLB-misses",               EVENT_ITLB_MISSES),
@@ -77,14 +78,14 @@ const char* validArguments[] = {
   "L1-icache-misses",
   "L1-dcache-misses",
   "cache-misses",
+  "LLC-store-misses",
   "iTLB-misses",
   "dTLB-misses",
-  "prof-counters"
 };
 
 PerfEventType commandLineArgumentToEventType(const char* argument) {
-  size_t numEle = sizeof validArguments / sizeof (*validArguments);
-  always_assert(numEle == NUM_EVENT_TYPES);
+  constexpr size_t numEle = sizeof validArguments / sizeof (*validArguments);
+  static_assert(numEle == NUM_EVENT_TYPES, "need to update validArguments[]");
 
   for (size_t i = 0; i < numEle; i++) {
     if (!strcmp(validArguments[i], argument)) return (PerfEventType)i;

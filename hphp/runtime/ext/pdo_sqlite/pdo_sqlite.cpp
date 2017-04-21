@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,8 +30,7 @@ IMPLEMENT_DEFAULT_EXTENSION_VERSION(pdo_sqlite, 1.0.1);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class PDOSqliteStatement : public PDOStatement {
-public:
+struct PDOSqliteStatement : PDOStatement {
   DECLARE_RESOURCE_ALLOCATION(PDOSqliteStatement);
   PDOSqliteStatement(sqlite3 *db, sqlite3_stmt* stmt);
   virtual ~PDOSqliteStatement();
@@ -137,19 +136,19 @@ int PDOSqliteConnection::handleError(const char *file, int line,
     }
     m_einfo.errmsg = strdup((char*)sqlite3_errmsg(m_db));
   } else { /* no error */
-    strcpy(*pdo_err, PDO_ERR_NONE);
+    setPDOErrorNone(*pdo_err);
     return false;
   }
 
   switch (m_einfo.errcode) {
-  case SQLITE_NOTFOUND:    strcpy(*pdo_err, "42S02");  break;
-  case SQLITE_INTERRUPT:   strcpy(*pdo_err, "01002");  break;
-  case SQLITE_NOLFS:       strcpy(*pdo_err, "HYC00");  break;
-  case SQLITE_TOOBIG:      strcpy(*pdo_err, "22001");  break;
-  case SQLITE_CONSTRAINT:  strcpy(*pdo_err, "23000");  break;
+  case SQLITE_NOTFOUND:    setPDOError(*pdo_err, "42S02");  break;
+  case SQLITE_INTERRUPT:   setPDOError(*pdo_err, "01002");  break;
+  case SQLITE_NOLFS:       setPDOError(*pdo_err, "HYC00");  break;
+  case SQLITE_TOOBIG:      setPDOError(*pdo_err, "22001");  break;
+  case SQLITE_CONSTRAINT:  setPDOError(*pdo_err, "23000");  break;
   case SQLITE_ERROR:
   default:
-    strcpy(*pdo_err, "HY000");
+    setPDOError(*pdo_err, "HY000");
     break;
   }
 
@@ -277,49 +276,54 @@ int PDOSqliteConnection::getAttribute(int64_t attr, Variant &value) {
 void php_sqlite3_callback_func(sqlite3_context* context, int argc,
                                sqlite3_value** argv);
 
-bool PDOSqliteConnection::createFunction(const String& name,
-                                         const Variant& callback,
-                                         int argcount) {
+///////////////////////////////////////////////////////////////////////////////
+
+bool PDOSqliteResource::createFunction(const String& name,
+                                       const Variant& callback,
+                                       int argcount) {
   if (!is_callable(callback)) {
     raise_warning("function '%s' is not callable", callback.toString().data());
     return false;
   }
 
-  auto udf = std::make_shared<UDF>();
+  auto udf = req::make_unique<UDF>();
 
   udf->func = callback;
   udf->argc = argcount;
   udf->name = name.toCppString();
 
-  auto stat = sqlite3_create_function(m_db, udf->name.c_str(), argcount,
-                                      SQLITE_UTF8, udf.get(),
-                                      php_sqlite3_callback_func,
-                                      nullptr, nullptr);
+  auto stat = sqlite3_create_function(
+    conn()->m_db,
+    udf->name.c_str(),
+    argcount,
+    SQLITE_UTF8,
+    static_cast<SQLite3::UserDefinedFunc*>(udf.get()),
+    php_sqlite3_callback_func,
+    nullptr,
+    nullptr
+  );
+
   if (stat != SQLITE_OK) {
     return false;
   }
-  m_udfs.push_back(udf);
+  m_udfs.emplace_back(std::move(udf));
 
   return true;
 }
 
-void PDOSqliteConnection::clearFunctions() {
-  for (auto& udf : m_udfs) {
-    sqlite3_create_function(m_db, udf->name.data(), 0, SQLITE_UTF8,
-                            nullptr, nullptr, nullptr, nullptr);
-  }
-  m_udfs.clear();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void PDOSqliteResource::sweep() {
-  for (auto& udf : conn()->m_udfs) {
+  for (auto& udf : m_udfs) {
     udf->func.releaseForSweep();
     udf->step.releaseForSweep();
     udf->fini.releaseForSweep();
   }
-  conn()->clearFunctions();
+
+  for (auto const& udf : m_udfs) {
+    sqlite3_create_function(conn()->m_db, udf->name.data(), 0, SQLITE_UTF8,
+                            nullptr, nullptr, nullptr, nullptr);
+  }
+  m_udfs.clear();
+
   PDOResource::sweep();
 }
 

@@ -88,3 +88,10 @@ VERIFY((int)$db->version()['versionNumber'] > (int)3000000);
 
 $db->close();
 unlink(":memory:test");
+
+// Check that a PHP Exception is thrown for nonexistant databases
+try {
+  new SQLite3('/'.uniqid('random', true).'/db');
+} catch (Exception $e) {
+  var_dump(true);
+}

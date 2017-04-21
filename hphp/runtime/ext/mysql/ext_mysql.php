@@ -95,6 +95,16 @@ function mysql_connect_with_db(string $server = "",
                                int $connect_timeout_ms = -1,
                                int $query_timeout_ms = -1): mixed;
 
+<<__Native>>
+function mysql_connect_with_ssl(string $server,
+                               string $username,
+                               string $password,
+                               string $database = "",
+                               int $client_flags = 0,
+                               int $connect_timeout_ms = -1,
+                               int $query_timeout_ms = -1,
+                               ?MySSLContextProvider $ssl_context = null): mixed;
+
 /**
  * Create a MySQL database
  *

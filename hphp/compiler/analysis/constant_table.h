@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,8 +18,10 @@
 #define incl_HPHP_CONSTANT_TABLE_H_
 
 #include "hphp/compiler/analysis/symbol_table.h"
-#include <vector>
 #include "hphp/compiler/analysis/block_scope.h"
+
+#include <vector>
+#include <boost/container/flat_set.hpp>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,8 +38,7 @@ DECLARE_BOOST_TYPES(ClassScope);
  *   class { const T_STRING = static_scalar,...}
  *   define('NAME', static_scalar)
  */
-class ConstantTable : public SymbolTable {
-public:
+struct ConstantTable : SymbolTable {
   explicit ConstantTable(BlockScope &blockScope);
 
   /**
@@ -55,6 +56,7 @@ public:
    * Explicitly setting a constant to be dynamic, mainly for "Dynamic" note.
    */
   void setDynamic(AnalysisResultConstPtr ar, const std::string &name);
+  void setDynamic(AnalysisResultConstPtr ar, Symbol* sym);
 
   /**
    * Called when a constant is declared (l-value).
@@ -82,14 +84,30 @@ public:
                                    ClassScopePtr &defClass) const;
 
   void cleanupForError(AnalysisResultConstPtr ar);
+
+  using ClassConstantSet = boost::container::flat_set<
+    std::pair<ClassScopePtr, std::string>
+  >;
+  using DependencyMap = std::map<Symbol*, ClassConstantSet>;
+
+  void recordDependencies(Symbol*, const ClassConstantSet&);
+  void recordDependencies(const std::string&, const ClassConstantSet&);
+
+  void lookupDependencies(const std::string&, ClassConstantSet&);
+
+  bool hasDependencies() const { return m_hasDependencies; }
+  const DependencyMap& getDependencies() const { return m_dependencies; }
 private:
   bool m_hasDynamic;
+  bool m_hasDependencies;
 
   ClassScopePtr findParent(AnalysisResultConstPtr ar,
                            const std::string &name) const;
   ClassScopeRawPtr findBase(AnalysisResultConstPtr ar,
                             const std::string &name,
                             const std::vector<std::string> &bases) const;
+
+  DependencyMap m_dependencies;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

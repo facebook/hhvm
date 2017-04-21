@@ -18,9 +18,7 @@
 
 #include <type_traits>
 
-#include "hphp/runtime/base/arch.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -29,6 +27,7 @@
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/arch.h"
 #include "hphp/util/ringbuffer.h"
 #include "hphp/util/stack-trace.h"
 
@@ -93,6 +92,11 @@ struct FormatVisitor {
   void imm(TCA* addr) {
     str << sep() << folly::format("{}", addr);
   }
+  template<typename T>
+  void imm(VdataPtr<T> ptr) {
+    str << folly::format("{}{}{}",
+                         sep(), ptr.getRaw(), ptr.bound() ? "" : "(unbound)");
+  }
   void imm(const CallSpec& call) {
     switch (call.kind()) {
     default:
@@ -127,9 +131,6 @@ struct FormatVisitor {
       str << "nullptr";
     }
   }
-  void imm(ServiceRequest req) {
-    str << sep() << svcreq::to_name(req);
-  }
   void imm(TransFlags f) {
     if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
   }
@@ -142,6 +143,7 @@ struct FormatVisitor {
   void imm(RoundDirection rd) {
     str << sep() << show(rd);
   }
+  void imm(Vflags fl) {}
 
   void imm(RegSet x) { print(x); }
   void imm(ComparisonPred x) {
@@ -227,33 +229,61 @@ std::string show(Vreg r) {
 }
 
 std::string show(Vptr p) {
-  // [%fs + %base + disp + %index * scale]
-  std::string str = "[";
-  auto prefix = false;
-  if (p.seg == Vptr::FS) {
-    str += "%fs";
-    prefix = true;
+  std::string str;
+  switch(arch()) {
+    case Arch::X64:
+    case Arch::ARM: {
+      // [%fs + %base + disp + %index * scale]
+      str = "[";
+      auto prefix = false;
+      if (p.seg == Vptr::FS) {
+        str += "%fs";
+        prefix = true;
+      }
+      if (p.seg == Vptr::GS) {
+        str += "%gs";
+        prefix = true;
+      }
+      if (p.base.isValid()) {
+        folly::toAppend(prefix ? " + " : "", show(p.base), &str);
+        prefix = true;
+      }
+      if (p.disp) {
+        folly::format(&str, "{}{:#x}",
+                      prefix ? p.disp < 0 ? " - " : " + " : "",
+                      prefix ? std::abs(p.disp) : p.disp);
+        prefix = true;
+      }
+      if (p.index.isValid()) {
+        folly::toAppend(prefix ? " + " : "", show(p.index), &str);
+        if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
+      }
+      str += ']';
+      return str;
+    }
+    case Arch::PPC64: {
+      auto prefix = false;
+      if (p.disp) {
+        folly::format(&str, "{}{:#x}",
+                      p.disp < 0 ? "-" : "+",
+                      std::abs(p.disp));
+        prefix = true;
+      }
+
+      if (p.base.isValid()) {
+        folly::toAppend(prefix ? "(" : "", show(p.base), &str);
+        if (prefix == true) {
+          folly::toAppend(")", &str);
+        }
+        prefix = true;
+      }
+      if (p.index.isValid()) {
+        folly::toAppend(prefix ? "," : "", show(p.index), &str);
+      }
+      return str;
+    }
   }
-  if (p.seg == Vptr::GS) {
-    str += "%gs";
-    prefix = true;
-  }
-  if (p.base.isValid()) {
-    folly::toAppend(prefix ? " + " : "", show(p.base), &str);
-    prefix = true;
-  }
-  if (p.disp) {
-    folly::format(&str, "{}{:#x}",
-                  prefix ? p.disp < 0 ? " - " : " + " : "",
-                  prefix ? std::abs(p.disp) : p.disp);
-    prefix = true;
-  }
-  if (p.index.isValid()) {
-    folly::toAppend(prefix ? " + " : "", show(p.index), &str);
-    if (p.scale != 1) folly::toAppend(" * ", p.scale, &str);
-  }
-  str += ']';
-  return str;
+  not_reached();
 }
 
 std::string show(Vconst c) {
@@ -270,9 +300,6 @@ std::string show(Vconst c) {
       break;
     case Vconst::Double:
       str += 'd';
-      break;
-    case Vconst::ThreadLocal:
-      str += "tl";
       break;
   }
   return str;
@@ -303,7 +330,7 @@ void printBlock(std::ostream& out, const Vunit& unit,
   auto& block = unit.blocks[b];
   out << '\n' << color(ANSI_COLOR_MAGENTA);
   out << folly::format(" B{: <6} {}", size_t(b),
-           area_names[int(block.area)]);
+           area_names[int(block.area_idx)]);
   for (auto p : preds[b]) out << ", B" << size_t(p);
   out << color(ANSI_COLOR_END) << '\n';
 

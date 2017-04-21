@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,6 +117,26 @@ inline Reg Vr<Reg>::asReg() const {
          /* isSF() ? */   Reg(rn-Vreg::S0);
 }
 
+inline std::string show(Width w) {
+  switch (w) {
+    case Width::None:  return "Vreg{-}";
+    case Width::Byte:  return "Vreg8";
+    case Width::Word:  return "Vreg16";
+    case Width::Long:  return "Vreg32";
+    case Width::Quad:  return "Vreg64";
+    case Width::Octa:  return "Vreg128";
+    case Width::Dbl:   return "VregDbl";
+    case Width::Flags: return "VregSF";
+    case Width::Wide:  return "Vreg{128,Dbl}";
+    case Width::WordN: return "Vreg{8,16}";
+    case Width::LongN: return "Vreg{8,16,32}";
+    case Width::QuadN: return "Vreg{8,16,32,64}";
+    case Width::AnyNF: return "Vreg{8,16,32,64,128,Dbl}";
+    case Width::Any:   return "Vreg{8,16,32,64,128,Dbl,SF}";
+  }
+  not_reached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vr addressing.
 
@@ -215,6 +235,16 @@ inline bool Vloc::hasReg(int i) const {
 
 inline Vreg Vloc::reg(int i) const {
   return m_regs[i];
+}
+
+inline VregList Vloc::regs() const {
+  if (hasReg(1)) {
+    return { m_regs[0], m_regs[1] };
+  }
+  if (hasReg(0)) {
+    return { m_regs[0] };
+  }
+  return {};
 }
 
 inline int Vloc::numAllocated() const {

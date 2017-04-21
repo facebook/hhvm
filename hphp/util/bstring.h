@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_BSTRING_H_
 #define incl_HPHP_BSTRING_H_
 
+#include <folly/Range.h>
+
 #include <stdlib.h>
 
 namespace HPHP {
@@ -28,15 +30,14 @@ inline bool chrcaseeq(char left, char right) {
   char k = left ^ right;
   if (k == 0) return true;
   if (k != 32) return false;
-  k = left | right;
-  return (k >= 'a' && k <= 'z');
+  return isalpha(left);
 }
 
 // chrcasecmp performs a case insensitive comparison and returns < 0 if left
 // is less than right, > 0 if left is greater than right, and 0 if the
 // characters are equal
 inline int chrcasecmp(char left, char right) {
-  if (left == right) return 0;
+  if (chrcaseeq(left, right)) return 0;
   if (left >= 'A' && left <= 'Z') left += 32;
   if (right >= 'A' && right <= 'Z') right += 32;
   return (int)(unsigned char)left - (int)(unsigned char)right;
@@ -51,6 +52,9 @@ bool bstrcaseeq(const char* left, const char* right, size_t n);
 // right, > 0 if left is greater than right, and 0 if the strings are equal
 int bstrcasecmp(const char* left, size_t leftSize,
                 const char* right, size_t rightSize);
+inline int bstrcasecmp(folly::StringPiece left, folly::StringPiece right) {
+  return bstrcasecmp(left.begin(), left.size(), right.begin(), right.size());
+}
 
 // Given a binary string haystack and a character needle, bstrcasechr performs
 // a case insensitive search and returns a pointer to the first occurrence of

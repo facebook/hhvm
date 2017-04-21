@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,8 @@
 */
 #include "hphp/runtime/base/socket.h"
 
-#include <fcntl.h>
-#include <poll.h>
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -94,7 +94,7 @@ Socket::Socket(std::shared_ptr<SocketData> data,
   s_lastErrno = errno;
   setsockopt(getFd(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
   s_lastErrno = errno;
-  setTimeout(tv);
+  internalSetTimeout(tv);
   setIsLocal(type == AF_UNIX);
 
   // Attempt to infer stream type only if it was not explicitly specified.
@@ -132,7 +132,7 @@ bool Socket::close() {
   return closeImpl();
 }
 
-void Socket::setTimeout(struct timeval &tv) {
+void Socket::internalSetTimeout(struct timeval &tv) {
   if (tv.tv_sec >= 0 && tv.tv_usec >= 0) {
     m_data->m_timeout = tv.tv_sec * 1000000 + tv.tv_usec;
   } else {
@@ -158,16 +158,6 @@ bool Socket::checkLiveness() {
   }
 
   return true;
-}
-
-bool Socket::setBlocking(bool blocking) {
-  int flags = fcntl(getFd(), F_GETFL, 0);
-  if (blocking) {
-    flags &= ~O_NONBLOCK;
-  } else {
-    flags |= O_NONBLOCK;
-  }
-  return fcntl(getFd(), F_SETFL, flags) != -1;
 }
 
 bool Socket::waitForData() {
@@ -249,13 +239,20 @@ const StaticString
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
   ret.set(s_timed_out, m_data->m_timedOut);
-  ret.set(s_blocked, (bool)(fcntl(getFd(), F_GETFL, 0) & O_NONBLOCK));
+  ret.set(s_blocked, (fcntl(getFd(), F_GETFL, 0) & O_NONBLOCK) == 0);
   return ret;
 }
 
 int64_t Socket::tell() {
   return 0;
 }
+
+static const StaticString
+  s_tcp_socket("tcp_socket"),
+  s_tcp_socket_ssl("tcp_socket/ssl"),
+  s_udp_socket("udp_socket"),
+  s_unix_socket("unix_socket"),
+  s_udg_socket("udg_socket");
 
 // Tries to infer stream type based on getsockopt() values.
 // If no conclusive match can be found, leaves m_streamType
@@ -274,20 +271,20 @@ void Socket::inferStreamType() {
     if (m_data->m_type == AF_INET || m_data->m_type == AF_INET6) {
       if (type == SOCK_STREAM) {
         if (RuntimeOption::EnableHipHopSyntax) {
-          setStreamType(StaticString("tcp_socket"));
+          setStreamType(s_tcp_socket);
         } else {
           // Note: PHP returns "tcp_socket/ssl" for this query,
           // even though the socket is clearly not an SSL socket.
-          setStreamType(StaticString("tcp_socket/ssl"));
+          setStreamType(s_tcp_socket_ssl);
         }
       } else if (type == SOCK_DGRAM) {
-        setStreamType(StaticString("udp_socket"));
+        setStreamType(s_udp_socket);
       }
     } else if (m_data->m_type == AF_UNIX) {
       if (type == SOCK_STREAM) {
-        setStreamType(StaticString("unix_socket"));
+        setStreamType(s_unix_socket);
       } else if (type == SOCK_DGRAM) {
-        setStreamType(StaticString("udg_socket"));
+        setStreamType(s_udg_socket);
       }
     }
 

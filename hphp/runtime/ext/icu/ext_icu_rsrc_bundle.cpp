@@ -7,7 +7,7 @@ namespace HPHP { namespace Intl {
 #define FETCH_RSRC(data, obj) \
   auto data = ResourceBundle::Get(obj); \
   if (!data) { \
-    throw s_intl_error->getException("Uninitialized Message Formatter"); \
+    s_intl_error->throwException("Uninitialized Message Formatter"); \
   }
 
 
@@ -18,7 +18,7 @@ static Variant extractValue(ResourceBundle* data,
                             const icu::ResourceBundle& bundle) {
 #define EXTRACT_ERR(type) \
   if (U_FAILURE(error)) { \
-    data->setError(error, "Failed to retreive " #type " value"); \
+    data->setError(error, "Failed to retrieve " #type " value"); \
     return init_null(); \
   }
 
@@ -66,19 +66,26 @@ static Variant extractValue(ResourceBundle* data,
 #undef EXTRACT_ERR
 }
 
-static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
+static void HHVM_METHOD(ResourceBundle, __construct, const Variant& localeName,
                                                      const Variant& bundleName,
                                                      bool fallback) {
-  const char *bundle = bundleName.isNull() ? nullptr :
-                       bundleName.toString().c_str();
-  auto loc = Locale::createFromName(localeOrDefault(locale.toString()).c_str());
+  auto bundle = bundleName.isNull() ? String{} : bundleName.toString();
+  if (bundle.length() > PATH_MAX) {
+    raise_warning("Bundle name too long");
+    bundle = String{};
+  }
+  auto const locale = Locale::createFromName(
+    localeOrDefault(localeName.toString()).c_str()
+  );
   auto data = Native::data<ResourceBundle>(this_);
+
   UErrorCode error = U_ZERO_ERROR;
-  auto rsrc = new icu::ResourceBundle(bundle, loc, error);
+  auto rsrc = new icu::ResourceBundle(bundle.c_str(), locale, error);
+
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "resourcebundle_ctor: "
                                   "Cannot load libICU resource bundle");
-    throw data->getException("%s", s_intl_error->getErrorMessage().c_str());
+    data->throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
   if (!fallback &&
       ((error == U_USING_FALLBACK_WARNING) ||
@@ -87,10 +94,10 @@ static void HHVM_METHOD(ResourceBundle, __construct, const Variant& locale,
     s_intl_error->setError(error,
       "resourcebundle_ctor: Cannot load libICU resource "
       "'%s' without fallback from %s to %s",
-      bundle ? bundle : "(default data)", loc.getName(),
+      bundle ? bundle.c_str() : "(default data)", locale.getName(),
       rsrc->getLocale(ULOC_ACTUAL_LOCALE, dummy).getName());
     delete rsrc;
-    throw data->getException("%s", s_intl_error->getErrorMessage().c_str());
+    data->throwException("%s", s_intl_error->getErrorMessage().c_str());
   }
   data->setResource(rsrc);
 }
@@ -164,6 +171,10 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
                                                   const String& bundleName) {
   UErrorCode error = U_ZERO_ERROR;
   const char *bundle = bundleName.length() ? bundleName.c_str() : nullptr;
+  if (bundleName.length() >= PATH_MAX) {
+    raise_warning("Bundle name too long");
+    return false;
+  }
   auto le = ures_openAvailableLocales(bundle, &error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "Cannot fetch locales list");

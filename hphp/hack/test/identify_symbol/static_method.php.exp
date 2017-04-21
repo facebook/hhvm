@@ -1,0 +1,10 @@
+name: \C::foo, kind: method, span: line 8, characters 6-8, definition: 
+ foo
+   kind: method
+   id: method::C::foo
+   position: line 4, characters 26-28
+   span: line 4, character 3 - line 4, character 33
+   modifiers: public static 
+   params:
+
+

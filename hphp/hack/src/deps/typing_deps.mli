@@ -30,14 +30,17 @@ module Dep :
     val compare : t -> t -> int
   end
 
-module DepSet : module type of Set.Make (Dep)
+module DepSet : module type of
+  Reordered_argument_collections.Reordered_argument_set(Set.Make (Dep))
 
 val trace : bool ref
-val add_idep : Dep.variant option -> Dep.variant -> unit
+
+val debug_trace : bool ref
+val dump_deps : out_channel -> unit
+
+val add_idep : Dep.variant -> Dep.variant -> unit
 val get_ideps_from_hash : Dep.t -> DepSet.t
 val get_ideps : Dep.variant -> DepSet.t
 val get_bazooka : Dep.variant -> DepSet.t
-val marshal : out_channel -> unit
-val unmarshal : in_channel -> unit
 val get_files : DepSet.t -> Relative_path.Set.t
 val update_files : FileInfo.t Relative_path.Map.t -> unit

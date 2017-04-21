@@ -9,12 +9,11 @@
  *)
 
 open Core
-open Utils
 
 let (hint_hooks: (Pos.t * string -> unit) list ref) = ref []
 
-let (lvar_hooks: (Ident.t -> Pos.t * string ->
-                  (Pos.t * Ident.t) SMap.t -> unit) list ref) = ref []
+let (lvar_hooks: (Local_id.t -> Pos.t * string ->
+                  (Pos.t * Local_id.t) SMap.t -> unit) list ref) = ref []
 
 let (class_named_hooks: (Nast.class_ -> unit) list ref) = ref []
 

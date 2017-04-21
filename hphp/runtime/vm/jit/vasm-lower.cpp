@@ -33,9 +33,63 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace vasm_detail {
+
+constexpr auto kInvalidConstraint = std::numeric_limits<int>::max();
+
+jit::vector<int> computeDominatingConstraints(Vunit& unit) {
+  auto vregConstraints = jit::vector<int>(unit.blocks.size(),
+                                          kInvalidConstraint);
+
+  auto const rpo = sortBlocks(unit);
+
+  // Calculate each block's dominating Vreg constraint.  The lowerer will use
+  // this as the initial Vreg constraint for each block, adjusting as it
+  // encounter vregrestrict{}/vregunrestrict{} during lowering.
+  vregConstraints[rpo[0]] = 0;
+  for (auto const b : rpo) {
+    auto con = vregConstraints[b];
+    assert_flog(con != kInvalidConstraint,
+                "Dominating constraint can't be uninitialized.");
+
+    // Iterate through the instructions, updating the constraint accordingly.
+    for (auto const& inst : unit.blocks[b].code) {
+      if (inst.op == Vinstr::vregrestrict) {
+        con--;
+      } else if (inst.op == Vinstr::vregunrestrict) {
+        con++;
+      }
+    }
+
+    // Pass the constraint to each of the successors, enforcing that a block
+    // isn't passed conflicting constraints from predecessors.
+    for (auto const s : succs(unit.blocks[b])) {
+      if (vregConstraints[s] == kInvalidConstraint) {
+        vregConstraints[s] = con;
+      } else {
+        assert_flog(
+          vregConstraints[s] == con,
+          "Block must be dominated by a single vreg constraint level."
+        );
+      }
+    }
+  }
+
+  return vregConstraints;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+template<typename Lower>
+void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
+  vmodify(unit, b, i, [&] (Vout& v) { lower(v); return 1; });
+}
 
 template<class Inst>
 void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
@@ -55,22 +109,30 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
   auto const scratch = unit.makeScratchBlock();
   SCOPE_EXIT { unit.freeScratchBlock(scratch); };
-  Vout v(unit, scratch, vinstr.origin);
+  Vout v(unit, scratch, vinstr.irctx());
 
-  int32_t const adjust = (vargs.stkArgs.size() & 0x1) ? sizeof(uintptr_t) : 0;
-  if (adjust) v << subqi{adjust, rsp(), rsp(), v.makeReg()};
-
-  // Push stack arguments, in reverse order.
-  for (int i = vargs.stkArgs.size() - 1; i >= 0; --i) {
-    v << push{vargs.stkArgs[i]};
+  // Push stack arguments, in reverse order. Push in pairs without padding
+  // except for the last argument (pushed first) which should be padded if
+  // there are an odd number of arguments.
+  auto numArgs = vargs.stkArgs.size();
+  int32_t const adjust = (numArgs & 0x1) ? sizeof(uintptr_t) : 0;
+  if (adjust) {
+    // Using InvalidReg below fails SSA checks and simplify pass, so just
+    // push the arg twice. It's on the same cacheline and will actually
+    // perform faster than an explicit lea.
+    v << pushp{vargs.stkArgs[numArgs - 1], vargs.stkArgs[numArgs - 1]};
+    --numArgs;
+  }
+  for (auto i2 = numArgs; i2 >= 2; i2 -= 2) {
+    v << pushp{vargs.stkArgs[i2 - 1], vargs.stkArgs[i2 - 2]};
   }
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
   auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
     VregList argDests;
-    for (size_t i = 0, n = srcs.size(); i < n; ++i) {
-      auto const reg = r(i);
+    for (size_t i2 = 0, n = srcs.size(); i2 < n; ++i2) {
+      auto const reg = r(i2);
       argDests.push_back(reg);
       argRegs |= reg;
     }
@@ -79,6 +141,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
                     v.makeTuple(std::move(argDests))};
     }
   };
+  doArgs(vargs.indRetArgs, rarg_ind_ret);
   doArgs(vargs.args, rarg);
   doArgs(vargs.simdArgs, rarg_simd);
 
@@ -102,8 +165,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       assertx(taken.front().op == Vinstr::landingpad ||
               taken.front().op == Vinstr::jmp);
 
-      Vinstr vi { lea{rsp()[rspOffset], rsp()} };
-      vi.origin = taken.front().origin;
+      Vinstr vi { lea{rsp()[rspOffset], rsp()}, taken.front().irctx() };
 
       if (taken.front().op == Vinstr::jmp) {
         taken.insert(taken.begin(), vi);
@@ -162,6 +224,10 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       v << copy{rret_simd(0), dests[0]};
       break;
 
+    case DestType::Indirect:
+      // Already asserted above
+      break;
+
     case DestType::None:
       assertx(dests.empty());
       break;
@@ -171,7 +237,7 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
     auto const delta = safe_cast<int32_t>(
       vargs.stkArgs.size() * sizeof(uintptr_t) + adjust
     );
-    v << addqi{delta, rsp(), rsp(), v.makeReg()};
+    v << lea{rsp()[delta], rsp()};
   }
 
   // Insert new instructions to the appropriate block.
@@ -186,20 +252,60 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename Inst>
-void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
+void lower(VLS& env, Inst& inst, Vlabel b, size_t i) {}
 
-void lower(Vunit& unit, vcall& inst, Vlabel b, size_t i) {
-  lower_vcall(unit, inst, b, i);
+void lower(VLS& env, vcall& inst, Vlabel b, size_t i) {
+  lower_vcall(env.unit, inst, b, i);
 }
-void lower(Vunit& unit, vinvoke& inst, Vlabel b, size_t i) {
-  lower_vcall(unit, inst, b, i);
+void lower(VLS& env, vinvoke& inst, Vlabel b, size_t i) {
+  lower_vcall(env.unit, inst, b, i);
 }
 
-void lower(Vunit& unit, defvmsp& inst, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = copy{rvmsp(), inst.d};
+void lower(VLS& env, vcallarray& inst, Vlabel b, size_t i) {
+  // vcallarray can only appear at the end of a block.
+  assertx(i == env.unit.blocks[b].code.size() - 1);
+
+  lower_impl(env.unit, b, i, [&] (Vout& v) {
+    auto const& srcs = env.unit.tuples[inst.extraArgs];
+    auto args = inst.args;
+    auto dsts = jit::vector<Vreg>{};
+
+    for (auto i = 0; i < srcs.size(); ++i) {
+      dsts.emplace_back(rarg(i));
+      args |= rarg(i);
+    }
+
+    v << copyargs{env.unit.makeTuple(srcs),
+                  env.unit.makeTuple(std::move(dsts))};
+    v << callarray{inst.target, args};
+    v << unwind{{inst.targets[0], inst.targets[1]}};
+  });
 }
-void lower(Vunit& unit, syncvmsp& inst, Vlabel b, size_t i) {
-  unit.blocks[b].code[i] = copy{inst.s, rvmsp()};
+
+void lower(VLS& env, defvmsp& inst, Vlabel b, size_t i) {
+  env.unit.blocks[b].code[i] = copy{rvmsp(), inst.d};
+}
+void lower(VLS& env, syncvmsp& inst, Vlabel b, size_t i) {
+  env.unit.blocks[b].code[i] = copy{inst.s, rvmsp()};
+}
+
+void lower(VLS& env, defvmretdata& inst, Vlabel b, size_t i) {
+  env.unit.blocks[b].code[i] = copy{rret_data(), inst.data};
+}
+void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
+  env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
+}
+void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
+  env.unit.blocks[b].code[i] = copy2{inst.data,   inst.type,
+                                     rret_data(), rret_type()};
+}
+void lower(VLS& env, vregrestrict& inst, Vlabel b, size_t i) {
+  env.vreg_restrict_level--;
+  env.unit.blocks[b].code[i] = nop{};
+}
+void lower(VLS& env, vregunrestrict& inst, Vlabel b, size_t i) {
+  env.vreg_restrict_level++;
+  env.unit.blocks[b].code[i] = nop{};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -208,37 +314,18 @@ void lower(Vunit& unit, syncvmsp& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void vlower(Vunit& unit, Vlabel b, size_t i) {
-  Timer _t(Timer::vasm_lower);
-
-  auto& inst = unit.blocks[b].code[i];
+void vlower(VLS& env, Vlabel b, size_t i) {
+  auto& inst = env.unit.blocks[b].code[i];
 
   switch (inst.op) {
 #define O(name, ...)                    \
     case Vinstr::name:                  \
-      lower(unit, inst.name##_, b, i);  \
+      lower(env, inst.name##_, b, i);  \
       break;
 
     VASM_OPCODES
 #undef O
   }
-}
-
-void vlower(Vunit& unit) {
-  // This pass relies on having no critical edges in the unit.
-  splitCriticalEdges(unit);
-
-  auto& blocks = unit.blocks;
-
-  // The lowering operations for individual instructions may allocate scratch
-  // blocks, which may invalidate iterators on `blocks'.  Correctness of this
-  // pass relies on PostorderWalker /not/ using standard iterators on `blocks'.
-  PostorderWalker{unit}.dfs([&] (Vlabel b) {
-    assertx(!blocks[b].code.empty());
-    for (size_t i = 0; i < blocks[b].code.size(); ++i) {
-      vlower(unit, b, i);
-    }
-  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

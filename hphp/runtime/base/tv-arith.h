@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 #define incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 
+#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -161,6 +163,18 @@ void cellBitXorEq(Cell& c1, Cell);
  */
 void cellShlEq(Cell& c1, Cell);
 void cellShrEq(Cell& c1, Cell);
+
+/*
+ * PHP operator .=.
+ *
+ * Mutates the first argument in place, by concatenating the second argument
+ * onto its end.
+ *
+ * Post: lhs.m_type == KindOfString
+ */
+inline void cellConcatEq(Cell& lhs, Cell rhs) {
+  concat_assign(tvAsVariant(&lhs), cellAsCVarRef(rhs).toString());
+}
 
 //////////////////////////////////////////////////////////////////////
 

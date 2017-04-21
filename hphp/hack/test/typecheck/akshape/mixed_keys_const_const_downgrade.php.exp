@@ -1,2 +1,3 @@
-array<[1]intersect(Tstring), [2]intersect(Tint, Tstring)>
+File "mixed_keys_const_const_downgrade.php", line 22, characters 3-13:
+  array<^(string), ^(int | string)>
 No errors

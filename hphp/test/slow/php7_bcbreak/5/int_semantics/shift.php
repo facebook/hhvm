@@ -110,25 +110,43 @@ function run_tests() {
 
   echo "-\n";
 
-  try {echo 3 << -1, "\n";} catch (Exception $e) {exn($e);}
-  try {echo 3 << id(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo 3 << noinline(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo id(3) << -1, "\n";} catch (Exception $e) {exn($e);}
-  try {echo id(3) << id(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo id(3) << noinline(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo noinline(3) << -1, "\n";} catch (Exception $e) {exn($e);}
-  try {echo noinline(3) << id(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo noinline(3) << noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo 3 << -1, "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo 3 << id(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo 3 << noinline(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo id(3) << -1, "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo id(3) << id(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo id(3) << noinline(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo noinline(3) << -1, "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo noinline(3) << id(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo noinline(3) << noinline(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
 
-  try {echo 3 >> -1, "\n";} catch (Exception $e) {exn($e);}
-  try {echo 3 >> id(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo 3 >> noinline(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo id(3) >> -1, "\n";} catch (Exception $e) {exn($e);}
-  try {echo id(3) >> id(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo id(3) >> noinline(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo noinline(3) >> -1, "\n";} catch (Exception $e) {exn($e);}
-  try {echo noinline(3) >> id(-1), "\n";} catch (Exception $e) {exn($e);}
-  try {echo noinline(3) >> noinline(-1), "\n";} catch (Exception $e) {exn($e);}
+  try {echo 3 >> -1, "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo 3 >> id(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo 3 >> noinline(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo id(3) >> -1, "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo id(3) >> id(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo id(3) >> noinline(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo noinline(3) >> -1, "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo noinline(3) >> id(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
+  try {echo noinline(3) >> noinline(-1), "\n";}
+    catch (\__SystemLib\Throwable $e) {exn($e);}
 }
 
 run_tests();

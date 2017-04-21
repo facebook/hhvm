@@ -1,10 +1,19 @@
-array
-array<Tstring>
-array<Tarraykey, Tstring>
-X
-X
-array
-array<option(Tstring)>
-X
-X
+File "array_filter.php", line 15, characters 3-39:
+  array
+File "array_filter.php", line 16, characters 3-38:
+  array<string>
+File "array_filter.php", line 18, characters 3-35:
+  array<arraykey, string>
+File "array_filter.php", line 20, characters 3-29:
+  _
+File "array_filter.php", line 21, characters 3-33:
+  _
+File "array_filter.php", line 24, characters 3-43:
+  array
+File "array_filter.php", line 25, characters 3-42:
+  array<?string>
+File "array_filter.php", line 29, characters 3-33:
+  _
+File "array_filter.php", line 30, characters 3-37:
+  _
 No errors

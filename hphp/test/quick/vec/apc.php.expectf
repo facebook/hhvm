@@ -1,0 +1,196 @@
+Count: 1
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+Dtor... 1
+Dtor... 2
+Sleep...
+vec(0) {
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "C"
+  string(1) "D"
+}
+vec(2) {
+  int(1)
+  int(1)
+}
+vec(2) {
+  object(stdClass)#%d (0) {
+  }
+  object(stdClass)#%d (0) {
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  vec(3) {
+    vec(0) {
+    }
+    vec(1) {
+      int(1)
+    }
+    vec(2) {
+      int(1)
+      int(2)
+    }
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  vec(1) {
+    *RECURSION*
+  }
+}
+Wakeup...
+vec(1) {
+  object(Wakeup)#%d (1) {
+    ["val"]=>
+    int(12345)
+  }
+}
+string(16) "Wakeup exception"
+Dtor... 1
+string(16) "Wakeup exception"
+vec(1) {
+  object(Sleep)#%d (1) {
+    ["val"]=>
+    NULL
+  }
+}
+Count: 2
+vec(0) {
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "C"
+  string(1) "D"
+}
+vec(2) {
+  int(1)
+  int(1)
+}
+vec(2) {
+  object(stdClass)#%d (0) {
+  }
+  object(stdClass)#%d (0) {
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  vec(3) {
+    vec(0) {
+    }
+    vec(1) {
+      int(1)
+    }
+    vec(2) {
+      int(1)
+      int(2)
+    }
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  vec(1) {
+    *RECURSION*
+  }
+}
+Wakeup...
+vec(1) {
+  object(Wakeup)#%d (1) {
+    ["val"]=>
+    int(12345)
+  }
+}
+string(16) "Wakeup exception"
+Dtor... 1
+string(16) "Wakeup exception"
+vec(1) {
+  object(Sleep)#%d (1) {
+    ["val"]=>
+    NULL
+  }
+}
+Dtor... 1
+Dtor... 2
+Sleep...
+vec(0) {
+}
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+vec(4) {
+  string(1) "a"
+  string(1) "b"
+  string(1) "C"
+  string(1) "D"
+}
+vec(2) {
+  int(2)
+  int(2)
+}
+vec(2) {
+  object(stdClass)#%d (0) {
+  }
+  object(stdClass)#%d (0) {
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  vec(3) {
+    vec(0) {
+    }
+    vec(1) {
+      int(2)
+    }
+    vec(2) {
+      int(2)
+      int(3)
+    }
+  }
+}
+object(SomeClass)#%d (1) {
+  ["val"]=>
+  vec(1) {
+    *RECURSION*
+  }
+}
+Wakeup...
+vec(1) {
+  object(Wakeup)#%d (1) {
+    ["val"]=>
+    int(12345)
+  }
+}
+string(16) "Wakeup exception"
+Dtor... 1
+string(16) "Wakeup exception"
+vec(1) {
+  object(Sleep)#%d (1) {
+    ["val"]=>
+    NULL
+  }
+}

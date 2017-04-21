@@ -45,7 +45,7 @@ function strtolower($str);
 function strtoupper($str);
 function ucfirst($str);
 function lcfirst($str);
-function ucwords($str);
+function ucwords($str, $delimiters = " \t\r\n\f\v");
 function trim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function ltrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
 function rtrim($str, $charlist = HPHP_TRIM_CHARLIST)/*: string*/;
@@ -56,7 +56,7 @@ function str_split($str, $split_length = 1);
 function chunk_split($body, $chunklen = 76, $end = "\r\n");
 function strtok($str, $token = null);
 /**
- * http://docs.hhvm.com/manual/en/function.str-getcsv.php
+ * http://php.net/manual/en/function.str-getcsv.php
  *
  * Parse a CSV string into an array
  *

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,13 +24,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class VirtualHost {
-public:
+struct VirtualHost {
   static VirtualHost &GetDefault();
 
+  static VirtualHost* Resolve(const std::string& host);
   static void SetCurrent(VirtualHost *vhost);
   static const VirtualHost *GetCurrent();
   static int64_t GetMaxPostSize();
+  static int64_t GetLowestMaxPostSize();
   static int64_t GetUploadMaxFileSize();
   static void UpdateSerializationSizeLimit();
   static const std::vector<std::string> &GetAllowedDirectories();
@@ -46,6 +47,7 @@ public:
             const std::string &ini_key = "");
   void addAllowedDirectories(const std::vector<std::string>& dirs);
   int getRequestTimeoutSeconds(int defaultTimeout) const;
+  int64_t getMaxPostSize() const;
 
   const std::string &getName() const { return m_name;}
   const std::string &getPathTranslation() const { return m_pathTranslation;}
@@ -55,8 +57,8 @@ public:
   }
   std::string serverName(const std::string &host) const;
 
-  bool valid() const { return !(m_prefix.empty() && m_pattern.empty()); }
-  bool match(const std::string &host) const;
+  bool valid() const { return !(m_prefix.empty() && !m_pattern); }
+  bool match(const String &host) const;
   bool disabled() const { return m_disabled; }
 
   // whether to check (and serve) files that exist before applying rewrite rules
@@ -85,12 +87,12 @@ private:
       Host
     };
     Type type;
-    std::string pattern;
+    StringData* pattern;
     bool negate = false;
   };
 
   struct RewriteRule {
-    std::string pattern;
+    StringData* pattern;
     std::string to;
     bool qsa = false; // whether to append original query string
     bool encode_backrefs = false;
@@ -120,7 +122,7 @@ private:
   std::set<std::string, stdltistr> m_decodePostDataBlackList;
   std::string m_name;
   std::string m_prefix;
-  std::string m_pattern;
+  StringData* m_pattern{nullptr};
 
   std::string m_serverName;
   std::map<std::string, std::string> m_serverVars;

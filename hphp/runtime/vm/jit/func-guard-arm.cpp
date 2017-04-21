@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,9 +17,9 @@
 #include "hphp/runtime/vm/jit/func-guard-arm.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
-#include "hphp/runtime/vm/jit/mc-generator.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
@@ -37,7 +37,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE bool isPrologueStub(TCA addr) {
-  return addr == mcg->tx().uniqueStubs.fcallHelperThunk;
+  return addr == tc::ustubs().fcallHelperThunk;
 }
 
 vixl::Register X(Vreg64 r) {
@@ -56,14 +56,15 @@ vixl::MemOperand M(Vptr p) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitFuncGuard(const Func* func, CodeBlock& cb) {
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   vixl::MacroAssembler a { cb };
   vixl::Label after_data;
   vixl::Label target_data;
+  auto const start = reinterpret_cast<char*>(cb.frontier());
 
   assertx(arm::abi(CodeKind::CrossTrace).gpUnreserved.contains(vixl::x0));
 
-  emitSmashableMovq(cb, uint64_t(func), vixl::x0);
+  emitSmashableMovq(cb, fixups, uint64_t(func), vixl::x0);
   a.  Ldr   (rAsm, M(rvmfp()[AROFF(m_func)]));
   a.  Cmp   (vixl::x0, rAsm);
   a.  B     (&after_data, convertCC(CC_Z));
@@ -72,8 +73,10 @@ void emitFuncGuard(const Func* func, CodeBlock& cb) {
   a.  Br    (rAsm);
 
   a.  bind  (&target_data);
-  a.  dc64  (mcg->tx().uniqueStubs.funcPrologueRedispatch);
+  a.  dc64  (tc::ustubs().funcPrologueRedispatch);
   a.  bind  (&after_data);
+
+  __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
 }
 
 TCA funcGuardFromPrologue(TCA prologue, const Func* func) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,12 +16,9 @@
 */
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
 
-#include <netinet/in.h>
-#include <netdb.h>
-#include <poll.h>
-
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -37,45 +34,68 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static Variant HHVM_FUNCTION(mysql_connect,
-  const String& server,
-  const String& username,
-  const String& password,
-  bool new_link,
-  int client_flags,
-  int connect_timeout_ms,
-  int query_timeout_ms) {
+static Variant HHVM_FUNCTION(
+    mysql_connect,
+    const String& server,
+    const String& username,
+    const String& password,
+    bool new_link,
+    int client_flags,
+    int connect_timeout_ms,
+    int query_timeout_ms) {
   return Variant(php_mysql_do_connect(
-                   server,
-                   username,
-                   password,
-                   "",
-                   client_flags,
-                   false, false,
-                   connect_timeout_ms,
-                   query_timeout_ms
-                 ));
+      server,
+      username,
+      password,
+      "",
+      client_flags,
+      false,
+      false,
+      connect_timeout_ms,
+      query_timeout_ms));
 }
 
-static Variant HHVM_FUNCTION(mysql_connect_with_db,
-  const String& server,
-  const String& username,
-  const String& password,
-  const String& database,
-  bool new_link,
-  int client_flags,
-  int connect_timeout_ms,
-  int query_timeout_ms) {
+static Variant HHVM_FUNCTION(
+    mysql_connect_with_ssl,
+    const String& server,
+    const String& username,
+    const String& password,
+    const String& database,
+    int client_flags,
+    int connect_timeout_ms,
+    int query_timeout_ms,
+    const Variant& sslContextProvider /* = null */) {
+  return Variant(php_mysql_do_connect_with_ssl(
+      server,
+      username,
+      password,
+      database,
+      client_flags,
+      connect_timeout_ms,
+      query_timeout_ms,
+      sslContextProvider));
+}
+
+static Variant HHVM_FUNCTION(
+    mysql_connect_with_db,
+    const String& server,
+    const String& username,
+    const String& password,
+    const String& database,
+    bool new_link,
+    int client_flags,
+    int connect_timeout_ms,
+    int query_timeout_ms) {
   return Variant(php_mysql_do_connect(
-                   server,
-                   username,
-                   password,
-                   database,
-                   client_flags,
-                   false, false,
-                   connect_timeout_ms,
-                   query_timeout_ms
-                 ));
+      server,
+      username,
+      password,
+      database,
+      client_flags,
+      false,
+      false,
+      connect_timeout_ms,
+      query_timeout_ms));
 }
 
 static Variant HHVM_FUNCTION(mysql_pconnect,
@@ -938,21 +958,10 @@ static Variant HHVM_FUNCTION(mysql_field_flags, const Resource& result,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_MYSQL_ASSOC("MYSQL_ASSOC");
-const StaticString s_MYSQL_BOTH("MYSQL_BOTH");
-const StaticString s_MYSQL_CLIENT_COMPRESS("MYSQL_CLIENT_COMPRESS");
-const StaticString s_MYSQL_CLIENT_IGNORE_SPACE("MYSQL_CLIENT_IGNORE_SPACE");
-const StaticString s_MYSQL_CLIENT_INTERACTIVE("MYSQL_CLIENT_INTERACTIVE");
-const StaticString s_MYSQL_CLIENT_SSL("MYSQL_CLIENT_SSL");
-const StaticString s_MYSQL_NUM("MYSQL_NUM");
-const StaticString s_ASYNC_OP_INVALID("ASYNC_OP_INVALID");
-const StaticString s_ASYNC_OP_UNSET("ASYNC_OP_UNSET");
-const StaticString s_ASYNC_OP_CONNECT("ASYNC_OP_CONNECT");
-const StaticString s_ASYNC_OP_QUERY("ASYNC_OP_QUERY");
-
 void mysqlExtension::moduleInit() {
   HHVM_FE(mysql_connect);
   HHVM_FE(mysql_connect_with_db);
+  HHVM_FE(mysql_connect_with_ssl);
   HHVM_FE(mysql_pconnect);
   HHVM_FE(mysql_pconnect_with_db);
   HHVM_FE(mysql_set_timeout);
@@ -1000,39 +1009,17 @@ void mysqlExtension::moduleInit() {
   HHVM_FE(mysql_field_type);
   HHVM_FE(mysql_field_flags);
 
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_ASSOC.get(), PHP_MYSQL_ASSOC
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_BOTH.get(), PHP_MYSQL_BOTH
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_NUM.get(), PHP_MYSQL_NUM
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_CLIENT_COMPRESS.get(), 32
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_CLIENT_IGNORE_SPACE.get(), 256
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_CLIENT_INTERACTIVE.get(), 1024
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_MYSQL_CLIENT_SSL.get(), 2048
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_ASYNC_OP_INVALID.get(), k_ASYNC_OP_INVALID
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_ASYNC_OP_UNSET.get(), k_ASYNC_OP_UNSET
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_ASYNC_OP_CONNECT.get(), k_ASYNC_OP_CONNECT
-  );
-  Native::registerConstant<KindOfInt64>(
-    s_ASYNC_OP_QUERY.get(), k_ASYNC_OP_QUERY
-  );
+  HHVM_RC_INT(MYSQL_ASSOC, PHP_MYSQL_ASSOC);
+  HHVM_RC_INT(MYSQL_BOTH, PHP_MYSQL_BOTH);
+  HHVM_RC_INT(MYSQL_NUM, PHP_MYSQL_NUM);
+  HHVM_RC_INT(MYSQL_CLIENT_COMPRESS, 32);
+  HHVM_RC_INT(MYSQL_CLIENT_IGNORE_SPACE, 256);
+  HHVM_RC_INT(MYSQL_CLIENT_INTERACTIVE, 1024);
+  HHVM_RC_INT(MYSQL_CLIENT_SSL, 2048);
+  HHVM_RC_INT(ASYNC_OP_INVALID, k_ASYNC_OP_INVALID);
+  HHVM_RC_INT(ASYNC_OP_UNSET, k_ASYNC_OP_UNSET);
+  HHVM_RC_INT(ASYNC_OP_CONNECT, k_ASYNC_OP_CONNECT);
+  HHVM_RC_INT(ASYNC_OP_QUERY, k_ASYNC_OP_QUERY);
 
   loadSystemlib("mysql");
 

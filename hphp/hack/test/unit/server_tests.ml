@@ -8,28 +8,26 @@
  *
  *)
 
-open Core
+let test_process_data =
+  ServerProcess.{
+    pid = 2758734;
+    name = "typechecker";
+    start_t = 0.0;
+    in_fd = Unix.stdin;
+    out_fd = Unix.stdout;
+    last_request_handoff = ref 0.0;
+  }
 
 let test_dmesg_parser () =
   let input = [
     "[3034339.262439] Out of memory: Kill process 2758734 (hh_server) \
     score 253 or sacrifice child";
   ] in
-  ServerMonitor.find_oom_in_dmesg_output 2758734 input
-
+  ServerProcessTools.find_oom_in_dmesg_output test_process_data input
 
 let tests = [
   "test_dmesg_parser", test_dmesg_parser;
 ]
 
-let run (name, f) =
-  Printf.printf "Running %s ... %!" name;
-  let result = f () in
-  (if result
-  then Printf.printf "ok\n%!"
-  else Printf.printf "fail\n%!");
-  result
-
-
 let () =
-  exit (if List.for_all tests run then 0 else 1)
+  Unit_test.run_all tests

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -16,14 +16,20 @@
 */
 
 #include "hphp/runtime/ext/pdo/pdo_driver.h"
+
+#include "hphp/util/hphp-config.h"
 #ifdef ENABLE_EXTENSION_PDO_SQLITE
 #include "hphp/runtime/ext/pdo_sqlite/pdo_sqlite.h"
 #endif
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
 #include "hphp/runtime/ext/pdo_mysql/pdo_mysql.h"
 #endif
+#ifdef ENABLE_EXTENSION_PGSQL
+#include "hphp/runtime/ext/pgsql/pdo_pgsql.h"
+#endif
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/zend-string.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,6 +43,9 @@ static PDOSqlite s_sqlite_driver;
 #endif
 #ifdef ENABLE_EXTENSION_PDO_MYSQL
 static PDOMySql s_mysql_driver;
+#endif
+#ifdef ENABLE_EXTENSION_PGSQL
+static PDOPgSql s_pgsql_driver;
 #endif
 
 const StaticString s_general_error_code("HY000");
@@ -81,6 +90,79 @@ req::ptr<PDOResource> PDODriver::createResource(const String& datasource,
 
 bool PDOConnection::support(SupportedMethod method) {
   return false;
+}
+
+int PDOConnection::parseDataSource(const char *data_source,
+                                   int data_source_len,
+                                   struct pdo_data_src_parser *parsed,
+                                   int nparams,
+                                   folly::StringPiece separators/* = ";" */) {
+  int i, j;
+  int valstart = -1;
+  int semi = -1;
+  int optstart = 0;
+  int nlen;
+  int n_matches = 0;
+
+  char flags[256];
+  string_charmask(separators.data(), separators.size(), flags);
+
+  // Can always end with \0
+  flags[0] = 1;
+
+  i = 0;
+  while (i < data_source_len) {
+    /* looking for NAME= */
+
+    if (data_source[i] == '\0') {
+      break;
+    }
+
+    if (data_source[i] != '=') {
+      ++i;
+      continue;
+    }
+
+    valstart = ++i;
+
+    /* now we're looking for VALUE<separator> or just VALUE<NUL> */
+    semi = -1;
+    while (i < data_source_len) {
+      if (flags[(unsigned char)data_source[i]]) {
+        semi = i++;
+        break;
+      }
+      ++i;
+    }
+
+    if (semi == -1) {
+      semi = i;
+    }
+
+    /* find the entry in the array */
+    nlen = valstart - optstart - 1;
+    for (j = 0; j < nparams; j++) {
+      if (0 == strncmp(data_source + optstart, parsed[j].optname, nlen) &&
+          parsed[j].optname[nlen] == '\0') {
+        /* got a match */
+        if (parsed[j].freeme) {
+          free(parsed[j].optval);
+        }
+        parsed[j].optval = strndup(data_source + valstart, semi - valstart);
+        parsed[j].freeme = 1;
+        ++n_matches;
+        break;
+      }
+    }
+
+    while (i < data_source_len && isspace(data_source[i])) {
+      i++;
+    }
+
+    optstart = i;
+  }
+
+  return n_matches;
 }
 
 bool PDOConnection::closer() {

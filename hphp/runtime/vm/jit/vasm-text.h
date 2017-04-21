@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,6 +41,9 @@ struct Varea {
     , start(cb.frontier())
   {}
 
+  bool operator==(const Varea& area) const { return start == area.start; }
+  bool operator!=(const Varea& area) const { return start != area.start; }
+
   CodeBlock& code;
   CodeAddress start;
 };
@@ -53,23 +56,34 @@ struct Varea {
  * Vtext is a lightweight container for Vareas.
  */
 struct Vtext {
-  explicit Vtext(CodeBlock& main)
+  explicit Vtext(CodeBlock& main, DataBlock& data)
     : m_areas{main}
+    , m_data(data)
   {}
-  Vtext(CodeBlock& main, CodeBlock& cold)
+  Vtext(CodeBlock& main, CodeBlock& cold, DataBlock& data)
     : m_areas{main, cold}
+    , m_data(data)
   {}
-  Vtext(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen)
+  Vtext(CodeBlock& main, CodeBlock& cold, CodeBlock& frozen, DataBlock& data)
     : m_areas{main, cold, frozen}
-  {}
+    , m_data(data)
+  {
+    // Main and frozen aren't allowed to alias each other unless cold is /also/
+    // the same code region.
+    assertx(this->main() != this->frozen() ||
+            this->main() == this->cold());
+  }
 
   /*
    * Get an existing area.
    */
-  Varea& area(AreaIndex i);
+  const Varea& area(AreaIndex i) const;
+        Varea& area(AreaIndex i);
   Varea& main() { return area(AreaIndex::Main); }
   Varea& cold() { return area(AreaIndex::Cold); }
   Varea& frozen() { return area(AreaIndex::Frozen); }
+
+  DataBlock& data() { return m_data; }
 
   /*
    * The vector of areas.
@@ -78,6 +92,7 @@ struct Vtext {
 
 private:
   jit::vector<Varea> m_areas; // indexed by AreaIndex
+  DataBlock& m_data;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

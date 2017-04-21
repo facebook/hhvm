@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,12 +20,13 @@
 #include <execinfo.h>
 #include <dlfcn.h>
 #endif
-#include <unistd.h>
 
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
-#include "hphp/util/mutex.h"
+#include "hphp/util/lock.h"
+
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 
@@ -74,9 +75,9 @@ std::string get_thread_mem_usage() {
            "\t\tBytes allocated\t\tThread Name\n";
   for (auto it : threadMap) {
     if (!it.second->mm) continue;
-    auto& stats = it.second->mm->getStats();
+    auto usage = it.second->mm->getStats().usage();
     result += folly::sformat("\t{:10}\t{:9}\t{:13}\t\t{}\n", it.second->pid,
-                             it.second->tid, stats.usage,
+                             it.second->tid, usage,
                              *it.second->start_name_ptr);
   }
   return result;

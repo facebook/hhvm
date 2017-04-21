@@ -1,0 +1,2 @@
+<?hh
+class nANTfb implements aQ < xLnYt , qHMDI , int , cGywvkV > { }

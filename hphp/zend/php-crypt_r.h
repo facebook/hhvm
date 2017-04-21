@@ -17,31 +17,37 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _CRYPT_WIHN32_H_
-#define _CRYPT_WIHN32_H_
+#ifndef incl_HPHP_UTIL_PHP_CRYPT_R_H_
+#define incl_HPHP_UTIL_PHP_CRYPT_R_H_
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include "crypt-blowfish.h"
 #include "crypt-freesec.h"
+
+#define MD5_HASH_MAX_LEN 120
+#define PHP_MAX_SALT_LEN 123
+
+/* Macros specific to the portability of the crypto implementations taken from
+ * PHP. If these needed to be more generally used, they could be moved to
+ * util/portability.h but for now they are just here. */
+#ifdef _MSC_VER
+#define SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
+#define STRTOUL(s0, s1, base) _strtoui64((s0), (s1), (base))
+#else
+#define SECURE_ZERO(var, size) memset((var), 0, (size))
+#define STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
+#endif
+
+namespace HPHP {
 
 void php_init_crypt_r();
 void php_shutdown_crypt_r();
 
 extern void _crypt_extended_init_r(void);
 
-#define MD5_HASH_MAX_LEN 120
-#define PHP_MAX_SALT_LEN 123
-
-#include "crypt-blowfish.h"
-
 extern char * php_md5_crypt_r(const char *pw, const char *salt, char *out);
 extern char * php_sha512_crypt_r (const char *key, const char *salt, char *buffer, int buflen);
 extern char * php_sha256_crypt_r (const char *key, const char *salt, char *buffer, int buflen);
 
-#ifdef __cplusplus
 }
-#endif
 
-#endif /* _CRYPT_WIHN32_H_ */
+#endif /* incl_HPHP_UTIL_PHP_CRYPT_R_H_ */

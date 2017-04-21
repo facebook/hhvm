@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,10 +41,14 @@ void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 void LitstrRepoProxy::load() {
   for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (!getLitstrs(repoId).get()) {
+    // Return success on the first loaded repo.  In the case of an error we
+    // continue on to the next repo.
+    if (getLitstrs(repoId).get() == RepoStatus::success) {
       break;
     }
   }
+
+  // No repos were loadable.  This is normal for non-repo-authoritative repos.
 }
 
 void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
@@ -62,9 +66,9 @@ void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
   query.exec();
 }
 
-bool LitstrRepoProxy::GetLitstrsStmt::get() {
-  RepoTxn txn(m_repo);
+RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
   try {
+    RepoTxn txn(m_repo);
     if (!prepared()) {
       std::stringstream ssSelect;
       ssSelect << "SELECT litstrId,litstr FROM "
@@ -84,9 +88,9 @@ bool LitstrRepoProxy::GetLitstrsStmt::get() {
     LitstrTable::get().setNamedEntityPairTable(std::move(namedInfo));
     txn.commit();
   } catch (RepoExc& re) {
-    return true;
+    return RepoStatus::error;
   }
-  return false;
+  return RepoStatus::success;
 }
 
 }

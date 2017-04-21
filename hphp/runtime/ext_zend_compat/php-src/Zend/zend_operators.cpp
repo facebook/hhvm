@@ -100,7 +100,7 @@ ZEND_API long zend_atol(const char *str, int str_len) /* {{{ */
 HPHP::DataType& Z_TYPE(const zval& z) {
   HPHP::DataType* dt = &const_cast<zval*>(&z)->tv()->m_type;
   assert(*dt != HPHP::KindOfRef);
-  if (*dt == HPHP::KindOfStaticString) {
+  if (*dt == HPHP::KindOfPersistentString) {
     *dt = IS_STRING;
   }
   return *dt;

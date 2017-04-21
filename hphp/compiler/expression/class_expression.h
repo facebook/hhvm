@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,14 +24,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ClassExpression;
+struct ClassExpression;
 using ClassExpressionPtr = std::shared_ptr<ClassExpression>;
 
-class ClassStatement;
+struct ClassStatement;
 using ClassStatementPtr = std::shared_ptr<ClassStatement>;
 
-class ClassExpression : public FunctionCall {
-public:
+struct ClassExpression : FunctionCall {
   ClassExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                   ClassStatementPtr cls,
                   ExpressionListPtr params);

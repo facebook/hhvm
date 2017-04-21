@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,10 +26,9 @@ using namespace HPHP;
 
 ArrayPairExpression::ArrayPairExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr name, ExpressionPtr value, bool ref,
- bool collection /* = false */)
+ ExpressionPtr name, ExpressionPtr value, bool ref)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayPairExpression)),
-    m_name(name), m_value(value), m_ref(ref), m_collection(collection) {
+    m_name(name), m_value(value), m_ref(ref) {
   if (m_ref) {
     m_value->setContext(Expression::RefValue);
   }
@@ -55,7 +54,10 @@ bool ArrayPairExpression::isScalarArrayPair() const {
   if (!m_name) return true;
   if (!m_name->isScalar()) return false;
   if (m_name->is(KindOfUnaryOpExpression) &&
-      static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_ARRAY) {
+      (static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_ARRAY ||
+       static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_VEC ||
+       static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_DICT ||
+       static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_KEYSET)) {
     return false;
   }
   return true;

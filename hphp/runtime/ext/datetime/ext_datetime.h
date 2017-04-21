@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -29,8 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTime
 
-class DateTimeData {
-public:
+struct DateTimeData {
   DateTimeData() {}
   DateTimeData(const DateTimeData&) = delete;
   DateTimeData& operator=(const DateTimeData& other) {
@@ -52,6 +51,8 @@ public:
 
   static int64_t getTimestamp(const Object& obj);
   static int64_t getTimestamp(const ObjectData* od);
+  static int compare(const Object& left, const Object& right);
+  static int compare(const ObjectData* left, const ObjectData* right);
   static Object wrap(req::ptr<DateTime> dt);
   static req::ptr<DateTime> unwrap(const Object& datetime);
   static Class* getClass();
@@ -61,18 +62,16 @@ public:
   static const StaticString s_className;
 };
 
-Object HHVM_METHOD(DateTime, add,
-                   const Object& interval);
 void HHVM_METHOD(DateTime, __construct,
                  const String& time = "now",
-                 const Variant& timezone = null_variant);
+                 const Variant& timezone = uninit_variant);
 Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                            const String& format,
                            const String& time,
-                           const Variant& timezone /*= null_variant */);
-Object HHVM_METHOD(DateTime, diff,
-                   const Variant& datetime2,
-                   const Variant& absolute);
+                           const Variant& timezone /*= uninit_variant */);
+Variant HHVM_METHOD(DateTime, diff,
+                    const Variant& datetime2,
+                    const Variant& absolute);
 String HHVM_METHOD(DateTime, format,
                    const Variant& format);
 Array HHVM_STATIC_METHOD(DateTime, getLastErrors);
@@ -95,10 +94,12 @@ Object HHVM_METHOD(DateTime, setTime,
                    int64_t second /*= 0*/);
 Object HHVM_METHOD(DateTime, setTimestamp,
                    int64_t unixtimestamp);
-Object HHVM_METHOD(DateTime, setTimezone,
-                   const Object& timezone);
-Object HHVM_METHOD(DateTime, sub,
-                   const Object& interval);
+Variant HHVM_METHOD(DateTime, setTimezone,
+                    const Object& timezone);
+Variant HHVM_METHOD(DateTime, add,
+                    const Object& interval);
+Variant HHVM_METHOD(DateTime, sub,
+                    const Object& interval);
 Array HHVM_METHOD(DateTime, __sleep);
 void HHVM_METHOD(DateTime, __wakeup);
 Array HHVM_METHOD(DateTime, __debuginfo);
@@ -106,8 +107,7 @@ Array HHVM_METHOD(DateTime, __debuginfo);
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-class DateTimeZoneData {
-public:
+struct DateTimeZoneData {
   DateTimeZoneData() {}
   DateTimeZoneData(const DateTimeZoneData&) = delete;
   DateTimeZoneData& operator=(const DateTimeZoneData& other) {
@@ -146,7 +146,7 @@ void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
 Array HHVM_METHOD(DateTimeZone, getLocation);
 String HHVM_METHOD(DateTimeZone, getName);
-int64_t HHVM_METHOD(DateTimeZone, getOffset,
+Variant HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime);
 Array HHVM_METHOD(DateTimeZone, getTransitions,
                   int64_t timestamp_begin = k_PHP_INT_MIN,
@@ -159,8 +159,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
 
-class DateIntervalData {
-public:
+struct DateIntervalData {
   DateIntervalData() {}
   DateIntervalData(const DateIntervalData&) = delete;
   DateIntervalData& operator=(const DateIntervalData& other) {
@@ -235,16 +234,13 @@ bool HHVM_FUNCTION(checkdate,
                    int day,
                    int year);
 Variant HHVM_FUNCTION(date_create,
-                      const Variant& time = null_variant,
-                      const Variant& timezone = null_variant);
-String HHVM_FUNCTION(date_format,
-                     const Object& datetime,
-                     const String& format);
+                      const Variant& time = uninit_variant,
+                      const Variant& timezone = uninit_variant);
+Variant HHVM_FUNCTION(date_format,
+                      const Object& datetime,
+                      const String& format);
 Variant HHVM_FUNCTION(date_parse,
                       const String& date);
-Object HHVM_FUNCTION(date_sub,
-                     const Object& datetime,
-                     const Object& interval);
 
 ///////////////////////////////////////////////////////////////////////////////
 // sun

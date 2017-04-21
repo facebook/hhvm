@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -38,27 +38,6 @@ const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
 const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
 
-const int64_t k_E_ERROR = (1 << 0);
-const int64_t k_E_WARNING = (1 << 1);
-const int64_t k_E_PARSE = (1 << 2);
-const int64_t k_E_NOTICE = (1 << 3);
-const int64_t k_E_CORE_ERROR = (1 << 4);
-const int64_t k_E_CORE_WARNING = (1 << 5);
-const int64_t k_E_COMPILE_ERROR = (1 << 6);
-const int64_t k_E_COMPILE_WARNING = (1 << 7);
-const int64_t k_E_USER_ERROR = (1 << 8);
-const int64_t k_E_USER_WARNING = (1 << 9);
-const int64_t k_E_USER_NOTICE = (1 << 10);
-const int64_t k_E_STRICT = (1 << 11);
-const int64_t k_E_RECOVERABLE_ERROR = (1 << 12);
-const int64_t k_E_DEPRECATED = (1 << 13);
-const int64_t k_E_USER_DEPRECATED = (1 << 14);
-const int64_t k_E_ALL = k_E_ERROR | k_E_WARNING | k_E_PARSE | k_E_NOTICE |
-                        k_E_CORE_ERROR | k_E_CORE_WARNING | k_E_COMPILE_ERROR |
-                        k_E_COMPILE_WARNING | k_E_USER_ERROR |
-                        k_E_USER_WARNING | k_E_USER_NOTICE | k_E_STRICT |
-                        k_E_RECOVERABLE_ERROR | k_E_DEPRECATED |
-                        k_E_USER_DEPRECATED;
 
 Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                                      int64_t limit /* = 0 */) {
@@ -72,6 +51,10 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                          .setLimit(limit));
 }
 
+ArrayData* debug_backtrace_jit(int64_t options) {
+  return HHVM_FN(debug_backtrace)(options).detach();
+}
+
 /**
  * hphp_debug_caller_info - returns an array of info about the "caller"
  *
@@ -79,16 +62,16 @@ Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
  * as the "callee", and we refer to the function that called the callee as
  * the "caller".
  *
- * This function returns an array containing two keys "file" and "line" which
- * indicate the the filename and line number where the "caller" called the
- * "callee".
+ * This function returns an array containing keys "file", "function", "line" and
+ * optionally "class" which indicate the filename, function, line number and
+ * class name (if in class context) where the "caller" called the "callee".
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
   return g_context->getCallerInfo();
 }
 
 int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash) {
-  return g_context->getDebugBacktraceHash();
+  return createBacktraceHash();
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
@@ -129,16 +112,16 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     buf.append("(");
     if (!ignore_args) {
       bool first = true;
-      for (ArrayIter it(frame->get(s_args).toArray());
-          !it.end();
-          it.next()) {
+      for (ArrayIter argsIt(frame->get(s_args).toArray());
+          !argsIt.end();
+          argsIt.next()) {
         if (!first) {
           buf.append(", ");
         } else {
           first = false;
         }
         try {
-          buf.append(it.second().toString());
+          buf.append(argsIt.second().toString());
         } catch (FatalErrorException& fe) {
           buf.append(fe.getMessage());
         }
@@ -222,8 +205,13 @@ bool HHVM_FUNCTION(restore_exception_handler) {
 }
 
 Variant HHVM_FUNCTION(set_error_handler, const Variant& error_handler,
-                                         int error_types /* = k_E_ALL */) {
-  return g_context->pushUserErrorHandler(error_handler, error_types);
+                      int error_types /* = ErrorMode::PHP_ALL | STRICT */) {
+  if (!is_null(error_handler)) {
+    return g_context->pushUserErrorHandler(error_handler, error_types);
+  } else {
+    g_context->clearUserErrorHandlers();
+    return init_null_variant;
+  }
 }
 
 Variant HHVM_FUNCTION(set_exception_handler, const Variant& exception_handler) {
@@ -246,36 +234,36 @@ void HHVM_FUNCTION(hphp_clear_unflushed) {
 }
 
 bool HHVM_FUNCTION(trigger_error, const String& error_msg,
-                   int error_type /* = k_E_USER_NOTICE */) {
+                   int error_type /* = ErrorMode::USER_NOTICE */) {
   std::string msg = error_msg.data(); // not toCppString()
   if (UNLIKELY(g_context->getThrowAllErrors())) {
     throw Exception(folly::sformat("throwAllErrors: {}", error_type));
   }
-  if (error_type == k_E_USER_ERROR) {
+  if (error_type == (int)ErrorMode::USER_ERROR) {
     g_context->handleError(msg, error_type, true,
                            ExecutionContext::ErrorThrowMode::IfUnhandled,
                            "\nFatal error: ");
     return true;
   }
-  if (error_type == k_E_USER_WARNING) {
+  if (error_type == (int)ErrorMode::USER_WARNING) {
     g_context->handleError(msg, error_type, true,
                            ExecutionContext::ErrorThrowMode::Never,
                            "\nWarning: ");
     return true;
   }
-  if (error_type == k_E_USER_NOTICE) {
+  if (error_type == (int)ErrorMode::USER_NOTICE) {
     g_context->handleError(msg, error_type, true,
                            ExecutionContext::ErrorThrowMode::Never,
                            "\nNotice: ");
     return true;
   }
-  if (error_type == k_E_USER_DEPRECATED) {
+  if (error_type == (int)ErrorMode::USER_DEPRECATED) {
     g_context->handleError(msg, error_type, true,
                            ExecutionContext::ErrorThrowMode::Never,
                            "\nDeprecated: ");
     return true;
   }
-  if (error_type == k_E_STRICT) {
+  if (error_type == (int)ErrorMode::STRICT) {
     // So that we can raise strict warnings for mismatched
     // params in FCallBuiltin
     raise_strict_warning(msg);
@@ -284,28 +272,27 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
 
   ActRec* fp = g_context->getStackFrame();
 
-  if (fp->m_func->isNative() &&
-      fp->m_func->nativeFuncPtr() == (BuiltinFunction)HHVM_FN(trigger_error)) {
+  if (fp->m_func->nativeFuncPtr() == (BuiltinFunction)HHVM_FN(trigger_error)) {
     fp = g_context->getOuterVMFrame(fp);
   }
   if (fp && fp->m_func->isBuiltin()) {
-    if (error_type == k_E_ERROR) {
+    if (error_type == (int)ErrorMode::ERROR) {
       raise_error_without_first_frame(msg);
       return true;
     }
-    if (error_type == k_E_WARNING) {
+    if (error_type == (int)ErrorMode::WARNING) {
       raise_warning_without_first_frame(msg);
       return true;
     }
-    if (error_type == k_E_NOTICE) {
+    if (error_type == (int)ErrorMode::NOTICE) {
       raise_notice_without_first_frame(msg);
       return true;
     }
-    if (error_type == k_E_DEPRECATED) {
+    if (error_type == (int)ErrorMode::PHP_DEPRECATED) {
       raise_deprecated_without_first_frame(msg);
       return true;
     }
-    if (error_type == k_E_RECOVERABLE_ERROR) {
+    if (error_type == (int)ErrorMode::RECOVERABLE_ERROR) {
       raise_recoverable_error_without_first_frame(msg);
       return true;
     }
@@ -316,7 +303,7 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
 
 bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
                    int sample_rate,
-                   int error_type /* = k_E_USER_NOTICE */) {
+                   int error_type /* = (int)ErrorMode::USER_NOTICE */) {
   if (!folly::Random::oneIn(sample_rate)) {
     return true;
   }
@@ -324,7 +311,7 @@ bool HHVM_FUNCTION(trigger_sampled_error, const String& error_msg,
 }
 
 bool HHVM_FUNCTION(user_error, const String& error_msg,
-                               int error_type /* = k_E_USER_NOTICE */) {
+                   int error_type /* = (int)ErrorMode::USER_NOTICE */) {
   return HHVM_FN(trigger_error)(error_msg, error_type);
 }
 
@@ -349,28 +336,28 @@ void StandardExtension::initErrorFunc() {
   HHVM_FE(trigger_sampled_error);
   HHVM_FE(user_error);
 
-#define INTCONST(v) Native::registerConstant<KindOfInt64> \
-                  (makeStaticString(#v), k_##v);
-  INTCONST(DEBUG_BACKTRACE_PROVIDE_OBJECT);
-  INTCONST(DEBUG_BACKTRACE_IGNORE_ARGS);
-  INTCONST(DEBUG_BACKTRACE_PROVIDE_METADATA);
-  INTCONST(E_ERROR);
-  INTCONST(E_WARNING);
-  INTCONST(E_PARSE);
-  INTCONST(E_NOTICE);
-  INTCONST(E_CORE_ERROR);
-  INTCONST(E_CORE_WARNING);
-  INTCONST(E_COMPILE_ERROR);
-  INTCONST(E_COMPILE_WARNING);
-  INTCONST(E_USER_ERROR);
-  INTCONST(E_USER_WARNING);
-  INTCONST(E_USER_NOTICE);
-  INTCONST(E_STRICT);
-  INTCONST(E_RECOVERABLE_ERROR);
-  INTCONST(E_DEPRECATED);
-  INTCONST(E_USER_DEPRECATED);
-  INTCONST(E_ALL);
-#undef INTCONST
+  HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_OBJECT, k_DEBUG_BACKTRACE_PROVIDE_OBJECT);
+  HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
+  HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,
+              k_DEBUG_BACKTRACE_PROVIDE_METADATA);
+  HHVM_RC_INT(E_ERROR, (int)ErrorMode::ERROR);
+  HHVM_RC_INT(E_WARNING, (int)ErrorMode::WARNING);
+  HHVM_RC_INT(E_PARSE, (int)ErrorMode::PARSE);
+  HHVM_RC_INT(E_NOTICE, (int)ErrorMode::NOTICE);
+  HHVM_RC_INT(E_CORE_ERROR, (int)ErrorMode::CORE_ERROR);
+  HHVM_RC_INT(E_CORE_WARNING, (int)ErrorMode::CORE_WARNING);
+  HHVM_RC_INT(E_COMPILE_ERROR, (int)ErrorMode::COMPILE_ERROR);
+  HHVM_RC_INT(E_COMPILE_WARNING, (int)ErrorMode::COMPILE_WARNING);
+  HHVM_RC_INT(E_USER_ERROR, (int)ErrorMode::USER_ERROR);
+  HHVM_RC_INT(E_USER_WARNING, (int)ErrorMode::USER_WARNING);
+  HHVM_RC_INT(E_USER_NOTICE, (int)ErrorMode::USER_NOTICE);
+  HHVM_RC_INT(E_STRICT, (int)ErrorMode::STRICT);
+  HHVM_RC_INT(E_RECOVERABLE_ERROR, (int)ErrorMode::RECOVERABLE_ERROR);
+  HHVM_RC_INT(E_DEPRECATED, (int)ErrorMode::PHP_DEPRECATED);
+  HHVM_RC_INT(E_USER_DEPRECATED, (int)ErrorMode::USER_DEPRECATED);
+  HHVM_RC_INT(E_ALL, (int)ErrorMode::PHP_ALL | (int)ErrorMode::STRICT);
+
+  HHVM_RC_INT(E_HHVM_FATAL_ERROR, (int)ErrorMode::FATAL_ERROR);
 
   loadSystemlib("std_errorfunc");
 }

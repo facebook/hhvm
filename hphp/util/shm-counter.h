@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,8 +29,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ShmCounter {
-public:
+struct ShmCounter {
   ShmCounter() {}
   explicit ShmCounter(const char *n) : count(0) {
     size_t size = sizeof(name);
@@ -41,8 +40,7 @@ public:
   char name[64];
   long long count;
 };
-class ShmCounters {
-public:
+struct ShmCounters {
   SHM_COUNTER_DEF(dummy_def1)
   SHM_COUNTER_DEF(dummy_def2)
   // Add your real counter definition here

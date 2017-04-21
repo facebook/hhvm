@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,6 @@
 #include "hphp/util/bits.h"
 #include "hphp/util/lock.h"
 
-#include <boost/noncopyable.hpp>
 #include <tbb/concurrent_hash_map.h>
 
 #include <list>
@@ -34,7 +33,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class CodeGenerator;
+struct CodeGenerator;
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(VariableTable);
@@ -65,9 +64,7 @@ typedef std::vector< std::pair< BlockScopeRawPtr, int* > >
 /**
  * Base class of ClassScope and FunctionScope.
  */
-class BlockScope : private boost::noncopyable,
-                   public std::enable_shared_from_this<BlockScope> {
-public:
+struct BlockScope : std::enable_shared_from_this<BlockScope> {
   enum KindOf {
     ClassScope,
     FunctionScope,
@@ -107,6 +104,7 @@ public:
 
   BlockScope(const BlockScope&) = delete;
   BlockScope& operator=(const BlockScope&) = delete;
+
   BlockScope(const std::string &name, const std::string &docComment,
              StatementPtr stmt, KindOf kind);
   virtual ~BlockScope() {}
@@ -139,9 +137,6 @@ public:
   void decLoopNestedLevel();
   int getLoopNestedLevel() const { return m_loopNestedLevel;}
 
-  void setClassInfoAttribute(int flag) {
-    m_attributeClassInfo |= flag;
-  }
   const std::string &getDocComment() const { return m_docComment;}
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
@@ -217,7 +212,6 @@ public:
 
 protected:
   std::string m_scopeName;
-  int m_attributeClassInfo;
   std::string m_docComment;
   StatementPtr m_stmt;
   KindOf m_kind;

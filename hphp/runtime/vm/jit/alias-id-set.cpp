@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/vm/jit/alias-id-set.h"
+
+#include "hphp/util/bitops.h"
 
 #include <folly/Bits.h>
 #include <folly/Format.h>
@@ -63,6 +65,21 @@ uint32_t AliasIdSet::size() const {
 
   // MSB is always set in bitset mode; it doesn't count.
   return folly::popcount(m_bits) - 1;
+}
+
+uint32_t AliasIdSet::singleValue() const {
+  assertx(hasSingleValue());
+
+  if (isBitset()) {
+    assertx(m_bits != Empty);
+
+    uint64_t ret;
+    DEBUG_ONLY auto const success = ffs64(m_bits, ret);
+    assertx(success && ret != 63);
+    return ret; // `n' is represented by the nth bit set, for n < 63
+  }
+  assertx(isBigInteger());
+  return m_bits;
 }
 
 void AliasIdSet::set(uint32_t id) {

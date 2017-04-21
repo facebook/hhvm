@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,13 @@
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Mask of the bits in stackLimitAndSurprise that actually store surprise
+ * flags, and the bits that store the stack base pointer.
+ */
+auto constexpr kSurpriseFlagMask      = 0xffff000000000000ull;
+auto constexpr kSurpriseFlagStackMask = 0x0000ffffffffffffull;
 
 /*
  * Surprise flags are stored in the upper 16-bits of the stackLimitAndSurprise
@@ -49,6 +56,14 @@ enum SurpriseFlag : size_t {
   /* Set if a GC should be run at the next safe point. */
   PendingGCFlag        = 1ull << 60,
 
+  /* Set when memory threshold exceeds a PHP specified limit */
+  MemThresholdFlag     = 1ull << 61,
+
+  /*
+   * Set if there are perf events waiting to be consumed.
+   */
+  PendingPerfEventFlag = 1ull << 62,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
@@ -58,7 +73,8 @@ enum SurpriseFlag : size_t {
     MemExceededFlag |
     TimedOutFlag |
     CPUTimedOutFlag |
-    PendingGCFlag,
+    PendingGCFlag |
+    PendingPerfEventFlag,
 
   StickyFlags =
     AsyncEventHookFlag |
@@ -67,17 +83,40 @@ enum SurpriseFlag : size_t {
     InterceptFlag |
     XenonSignalFlag |
     IntervalTimerFlag |
+    MemThresholdFlag |
     ResourceFlags,
+
+  /*
+   * Flags that should only be checked at MemoryManager safe points.
+   */
+  SafepointFlags =
+    PendingGCFlag |
+    PendingPerfEventFlag,
+
+  NonSafepointFlags = ~SafepointFlags & kSurpriseFlagMask,
 };
 
-/*
- * Mask of the bits in stackLimitAndSurprise that actually store surprise
- * flags, and the bits that store the stack base pointer.
- */
-auto constexpr kSurpriseFlagMask      = 0xffff000000000000ull;
-auto constexpr kSurpriseFlagStackMask = 0x0000ffffffffffffull;
-
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Code within this scope must never handle any of the specified flags, and is
+ * furthermore not even allowed to check for them using, e.g. `getSurpriseFlag',
+ * regardess of whether they actually are set.
+ */
+struct NoHandleSurpriseScope {
+#ifdef DEBUG
+  static void AssertNone(SurpriseFlag flags);
+  explicit NoHandleSurpriseScope(SurpriseFlag flags);
+  ~NoHandleSurpriseScope();
+ private:
+  SurpriseFlag m_flags;
+#else
+  // Compiles to nothing in release mode.
+  static void AssertNone(SurpriseFlag flags) {}
+  explicit NoHandleSurpriseScope(SurpriseFlag flags) {}
+  ~NoHandleSurpriseScope() {}
+#endif
+};
 
 inline std::atomic<size_t>& stackLimitAndSurprise() {
   return rds::header()->stackLimitAndSurprise;
@@ -85,6 +124,8 @@ inline std::atomic<size_t>& stackLimitAndSurprise() {
 
 inline bool checkSurpriseFlags() {
   auto const val = stackLimitAndSurprise().load(std::memory_order_acquire);
+  auto constexpr all = static_cast<SurpriseFlag>(kSurpriseFlagMask);
+  NoHandleSurpriseScope::AssertNone(all);
   return val & kSurpriseFlagMask;
 }
 
@@ -95,6 +136,7 @@ inline void setSurpriseFlag(SurpriseFlag flag) {
 
 inline bool getSurpriseFlag(SurpriseFlag flag) {
   assertx(flag >= 1ull << 48);
+  NoHandleSurpriseScope::AssertNone(flag);
   return stackLimitAndSurprise().load() & flag;
 }
 

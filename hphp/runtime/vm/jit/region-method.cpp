@@ -1,8 +1,8 @@
-/*
+  /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010-2015 Facebook, Inc. (http://www.facebook.com)     |
+   | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,10 +13,15 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/util/arena.h"
+
 #include "hphp/runtime/vm/jit/region-selection.h"
-#include "hphp/runtime/vm/verifier/cfg.h"
+
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/location.h"
+
+#include "hphp/runtime/vm/verifier/cfg.h"
+
+#include "hphp/util/arena.h"
 
 namespace HPHP { namespace jit {
 
@@ -84,7 +89,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     for (Block* b = graph->first_linear; b != nullptr; b = b->next_rpo) {
       auto const start  = unit->offsetOf(b->start);
       auto const length = numInstrs(b->start, b->end);
-      SrcKey sk{context.func, start, context.resumed};
+      SrcKey sk{context.func, start, context.resumed, context.hasThis};
       auto const rblock = ret->addBlock(sk, length, spOffset);
       blockMap[b] = rblock->id();
       // flag SP offset as unknown for all but the first block
@@ -154,23 +159,23 @@ RegionDescPtr selectMethod(const RegionContext& context) {
     }
   }
 
-  /*
-   * Fill the first block predictions with the live types.
-   */
+  // Fill the first block predictions with the live types.
   assertx(!ret->empty());
   for (auto& lt : context.liveTypes) {
-    typedef RegionDesc::Location::Tag LTag;
-
     switch (lt.location.tag()) {
-    case LTag::Stack:
-      break;
-    case LTag::Local:
-      if (lt.location.localId() < context.func->numParams()) {
-        // Only predict objectness, not the specific class type.
-        auto const type = lt.type < TObj ? TObj : lt.type;
-        ret->entry()->addPreCondition({lt.location, type, DataTypeSpecific});
-      }
-      break;
+      case LTag::Local:
+        if (lt.location.localId() < context.func->numParams()) {
+          // Only predict objectness, not the specific class type.
+          auto const type = lt.type < TObj ? TObj : lt.type;
+          ret->entry()->addPreCondition({lt.location, type, DataTypeSpecific});
+        }
+        break;
+      case LTag::Stack:
+      case LTag::MBase:
+        break;
+      case LTag::CSlot:
+        assertx("Class-ref slot live-type" && false);
+        break;
     }
   }
 

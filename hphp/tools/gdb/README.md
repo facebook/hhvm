@@ -203,6 +203,14 @@ If no Unit is set, the raw IDs are printed instead.
 Stacktraces
 -----------
 
+### unwinder init
+
+Initialize the custom HHVM unwinder.  This is necessary for getting a coherent
+callchain via `backtrace` in the presence of jitted frames.
+
+It is also called implicitly by `walkstk`, which also requires the unwinder.
+
+
 ### walkstk
 
 The `walkstk` command prints out the native stack interleaved with the PHP

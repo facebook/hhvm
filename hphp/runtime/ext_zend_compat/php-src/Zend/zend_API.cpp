@@ -34,6 +34,18 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/native.h"
 
+namespace {
+
+void releaseZval(zval* v) {
+  if (v->zRefcount() > 1) {
+    v->zDelRef();
+  } else {
+    FREE_ZVAL(v);
+  }
+}
+
+}
+
 ZEND_API const char *zend_get_type_by_const(int type) {
   return HPHP::getDataTypeString((HPHP::DataType)type).data();
 }
@@ -225,7 +237,6 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
         zend_bool *p = va_arg(*va, zend_bool *);
 
         if (check_null) {
-          zend_bool *p = va_arg(*va, zend_bool *);
           *p = (Z_TYPE_PP(arg) == IS_NULL);
         }
 
@@ -1253,8 +1264,8 @@ ZEND_API void zend_update_property_null(zend_class_entry *scope, zval *object, c
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_NULL(tmp);
+  SCOPE_EXIT { releaseZval(tmp); };
   zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1265,8 +1276,8 @@ ZEND_API void zend_update_property_bool(zend_class_entry *scope, zval *object, c
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_BOOL(tmp, value);
+  SCOPE_EXIT { releaseZval(tmp); };
   zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1277,8 +1288,8 @@ ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, c
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_LONG(tmp, value);
+  SCOPE_EXIT { releaseZval(tmp); };
   zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1289,8 +1300,8 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object,
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_DOUBLE(tmp, value);
+  SCOPE_EXIT { releaseZval(tmp); };
   zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1301,8 +1312,8 @@ ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object,
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_STRING(tmp, value, 1);
+  SCOPE_EXIT { releaseZval(tmp); };
   zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1313,8 +1324,8 @@ ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_STRINGL(tmp, value, value_len, 1);
+  SCOPE_EXIT { releaseZval(tmp); };
   zend_update_property(scope, object, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1448,7 +1459,7 @@ ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce,
   Native::registerClassConstant(
       makeStaticString(ce->name, ce->name_length),
       makeStaticString(name, name_length),
-      make_tv<KindOfStaticString>(
+      make_tv<KindOfPersistentString>(
         makeStaticString(value, value_length)));
   return SUCCESS;
 }
@@ -1461,7 +1472,7 @@ ZEND_API int zend_declare_class_constant_string(zend_class_entry *ce,
   Native::registerClassConstant(
       makeStaticString(ce->name, ce->name_length),
       makeStaticString(name, name_length),
-      make_tv<KindOfStaticString>(makeStaticString(value)));
+      make_tv<KindOfPersistentString>(makeStaticString(value)));
   return SUCCESS;
 }
 /* }}} */
@@ -1495,8 +1506,8 @@ ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const cha
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_NULL(tmp);
+  SCOPE_EXIT { releaseZval(tmp); };
   return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1507,8 +1518,8 @@ ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, const cha
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_BOOL(tmp, value);
+  SCOPE_EXIT { releaseZval(tmp); };
   return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1519,8 +1530,8 @@ ZEND_API int zend_update_static_property_long(zend_class_entry *scope, const cha
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_LONG(tmp, value);
+  SCOPE_EXIT { releaseZval(tmp); };
   return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1531,8 +1542,8 @@ ZEND_API int zend_update_static_property_double(zend_class_entry *scope, const c
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_DOUBLE(tmp, value);
+  SCOPE_EXIT { releaseZval(tmp); };
   return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1543,8 +1554,8 @@ ZEND_API int zend_update_static_property_string(zend_class_entry *scope, const c
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_STRING(tmp, value, 1);
+  SCOPE_EXIT { releaseZval(tmp); };
   return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */
@@ -1555,8 +1566,8 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 
   ALLOC_ZVAL(tmp);
   Z_UNSET_ISREF_P(tmp);
-  Z_SET_REFCOUNT_P(tmp, 0);
   ZVAL_STRINGL(tmp, value, value_len, 1);
+  SCOPE_EXIT { releaseZval(tmp); };
   return zend_update_static_property(scope, name, name_length, tmp TSRMLS_CC);
 }
 /* }}} */

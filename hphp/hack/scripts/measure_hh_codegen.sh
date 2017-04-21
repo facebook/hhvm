@@ -23,19 +23,39 @@ if [ "$(basename "$PWD")" != 'fbcode' ]; then
   exit 1
 fi
 
-HHVM='/usr/local/hphpi/bin/hhvm'
 PHP_FILES=$(find "$1"/ -name '*.php')
 BUCK='tools/build/buck/bin/buck'
 DIFF_TMP=$(mktemp /tmp/diff_hh_codegen.XXXXXX)
+TIMEOUT_BIN='/usr/bin/timeout'
+TIMEOUT_DURATION='30s'
+
+# prepare HHVM
+export HHVM_USE_BUCK=1
+"$BUCK" build @mode/opt-hhvm -c cxx.extra_cxxppflags='-D USE_LOWPTR' \
+  //hphp/hhvm:hhvm
+
+# retrieve HHVM binary
+HHVM_PATH="$(find buck-out -type f -name hhvm | grep -v outputs | grep opt | head -n 1)"
 
 NUM_LINES_HHVM=0
 NUM_LINES_HH=0
 NUM_LINES_COMMON=0
 for FILE in $PHP_FILES; do
+  # HHVM
   HHVM_TMP=$(mktemp /tmp/measure_hh_codegen.hhvm.XXXXXX)
+  "$TIMEOUT_BIN" "$TIMEOUT_DURATION" \
+     "$HHVM_PATH" \
+      -m dumphhas \
+      -v Eval.AllowHhas=1  \
+      -v Eval.EnableHipHopSyntax=1  \
+      "$FILE" > "$HHVM_TMP"
+
+  # Hack
   HH_TMP=$(mktemp /tmp/measure_hh_codegen.hh.XXXXXX)
-  "$HHVM" -m dumphhas -v Eval.AllowHhas=1  -v Eval.EnableHipHopSyntax=1  "$FILE" > "$HHVM_TMP"
-  $BUCK run //hphp/hack/src:hh_single_compile -- "$FILE" > "$HH_TMP"
+  "$TIMEOUT_BIN" "$TIMEOUT_DURATION"  \
+    "$BUCK" run //hphp/hack/src:hh_single_compile -- \
+      "$FILE" > "$HH_TMP"
+
   NUM_LINES_HHVM=$((NUM_LINES_HHVM + $(wc -l < "$HHVM_TMP")))
   NUM_LINES_HH=$((NUM_LINES_HH + $(wc -l < "$HH_TMP")))
   NUM_LINES_COMMON=$((NUM_LINES_COMMON + $(/bin/diff -bBd --unchanged-group-format=\'%=\' --old-group-format=\'\' --new-group-format=\'\' --changed-group-format=\'\' "$HHVM_TMP" "$HH_TMP" | wc -l)))
@@ -67,6 +87,7 @@ done
 # log to scuba
 $BUCK run //hphp/hack/scripts:log_hh_codegen_results_to_scuba -- "$NUM_LINES_HHVM" "$NUM_LINES_HH" "$NUM_LINES_COMMON" "$1" "$DIFF_TMP"
 
+# and clean up
 rm -fr "$DIFF_TMP"
 rm -f "/tmp/hhvm_*"
 rm -f "/tmp/perf*"

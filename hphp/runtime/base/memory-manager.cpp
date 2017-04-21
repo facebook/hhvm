@@ -781,7 +781,7 @@ NEVER_INLINE void* MemoryManager::newSlab(uint32_t nbytes) {
 /*
  * Allocate `bytes' from the current slab, aligned to kSmallSizeAlign.
  */
-inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
+inline void* MemoryManager::slabAlloc(uint32_t bytes, size_t index) {
   FTRACE(3, "slabAlloc({}, {}): m_front={}, m_limit={}\n", bytes, index,
             m_front, m_limit);
   uint32_t nbytes = sizeIndex2Size(index);
@@ -823,7 +823,7 @@ inline void* MemoryManager::slabAlloc(uint32_t bytes, unsigned index) {
   return ptr;
 }
 
-void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, unsigned index) {
+void* MemoryManager::mallocSmallSizeSlow(uint32_t bytes, size_t index) {
   size_t nbytes = sizeIndex2Size(index);
   unsigned nContig = kNContigTab[index];
   size_t contigMin = nContig * nbytes;

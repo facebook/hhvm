@@ -574,8 +574,8 @@ struct MemoryManager {
    * Allocate/deallocate by size class index.  This is useful when size
    * class is already calculated at the call site.
    */
-  void* mallocSmallIndex(size_t index, uint32_t size);
-  void freeSmallIndex(void* ptr, size_t index, uint32_t size);
+  void* mallocSmallIndex(size_t index);
+  void freeSmallIndex(void* ptr, size_t index);
 
   /*
    * These functions are useful when working directly with size classes outside
@@ -881,9 +881,10 @@ private:
   void storeTail(void* tail, uint32_t tailBytes);
   void splitTail(void* tail, uint32_t tailBytes, unsigned nSplit,
                  uint32_t splitUsable, unsigned splitInd);
-  void* slabAlloc(uint32_t bytes, unsigned index);
+  void* slabAlloc(uint32_t bytes, size_t index);
   void* newSlab(uint32_t nbytes);
-  void* mallocSmallSizeSlow(uint32_t bytes, unsigned index);
+  void* mallocSmallSizeFast(uint32_t bytes, size_t index);
+  void* mallocSmallSizeSlow(uint32_t bytes, size_t index);
   void  updateBigStats();
 
   static uint32_t bsr(uint32_t x);

@@ -230,10 +230,7 @@ inline uint32_t MemoryManager::smallSizeClass(uint32_t reqBytes) {
   return ret;
 }
 
-inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
-  assert(index < kNumSmallSizes);
-  assert(bytes <= kSizeIndex2Size[index]);
-
+inline void* MemoryManager::mallocSmallSizeFast(uint32_t bytes, size_t index) {
   if (debug) requestEagerGC();
 
   m_stats.mmUsage += bytes;
@@ -243,22 +240,25 @@ inline void* MemoryManager::mallocSmallIndex(size_t index, uint32_t bytes) {
     p = mallocSmallSizeSlow(bytes, index);
   }
   assert((reinterpret_cast<uintptr_t>(p) & kSmallSizeAlignMask) == 0);
-  FTRACE(3, "mallocSmallSize: {} -> {}\n", bytes, p);
+  FTRACE(3, "mallocSmallSizeFast: {} -> {}\n", bytes, p);
   return p;
+}
+
+inline void* MemoryManager::mallocSmallIndex(size_t index) {
+  assert(index < kNumSmallSizes);
+  return mallocSmallSizeFast(sizeIndex2Size(index), index);
 }
 
 inline void* MemoryManager::mallocSmallSize(uint32_t bytes) {
   assert(bytes > 0);
   assert(bytes <= kMaxSmallSize);
-  unsigned index = smallSize2Index(bytes);
-  return mallocSmallIndex(index, bytes);
+  return mallocSmallSizeFast(bytes, smallSize2Index(bytes));
 }
 
-inline void MemoryManager::freeSmallIndex(void* ptr, size_t index,
-                                          uint32_t bytes) {
+inline void MemoryManager::freeSmallIndex(void* ptr, size_t index) {
   assert(index < kNumSmallSizes);
   assert((reinterpret_cast<uintptr_t>(ptr) & kSmallSizeAlignMask) == 0);
-  assert(bytes <= kSizeIndex2Size[index]);
+  uint32_t bytes = sizeIndex2Size(index);
 
   if (UNLIKELY(m_bypassSlabAlloc)) {
     return freeBigSize(ptr, bytes);

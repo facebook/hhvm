@@ -24,7 +24,6 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/word-mem.h"
 
-#include "hphp/runtime/base/cap-code.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -73,15 +72,19 @@ enum CopyStringMode { CopyString };
 struct StringData final : MaybeCountable,
                           type_scan::MarkCountable<StringData> {
   friend struct APCString;
-  friend StringData* allocFlatSmallImpl(size_t len);
-  friend StringData* allocFlatSlowImpl(size_t len);
+  friend StringData* allocFlat(size_t len);
 
   /*
    * Max length of a string, not counting the terminal 0.
    *
-   * This is smaller than MAX_INT, and we want a CapCode to precisely encode it.
+   * This is smaller than MAX_INT, and it plus StringData overhead should
+   * exactly equal a size class.
    */
-  static constexpr uint32_t MaxSize = 0x7ff00000; // 11 bits of 1's
+#ifdef NO_M_DATA
+  static constexpr uint32_t MaxSize = 0x80000000U - 16 - 1;
+#else
+  static constexpr uint32_t MaxSize = 0x80000000U - 24 - 1;
+#endif
 
   /*
    * Creates an empty request-local string with an unspecified amount of
@@ -469,7 +472,6 @@ private:
 private:
   template<bool trueStatic>
   static StringData* MakeShared(folly::StringPiece sl);
-  static StringData* MakeProxySlowPath(const APCString*);
 
   StringData(const StringData&) = delete;
   StringData& operator=(const StringData&) = delete;
@@ -515,10 +517,26 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * The allocation overhead of a StringData: the struct plus the null byte
+ */
+auto constexpr kStringOverhead = sizeof(StringData) + 1;
+static_assert(StringData::MaxSize + kStringOverhead == kSizeIndex2Size[103],
+              "max allocation size is a valid size class");
+
+/*
  * A reasonable length to reserve for small strings.  This is the
  * default reserve size for StringData::Make(), also.
  */
-constexpr uint32_t SmallStringReserve = 64 - sizeof(StringData) - 1;
+constexpr uint32_t SmallStringReserve = 64 - kStringOverhead;
+
+alignas(64) constexpr uint32_t kSizeIndex2StringCapacity[] = {
+#define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
+  ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)) > kStringOverhead \
+    ? ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)) - kStringOverhead \
+    : 0,
+  SIZE_CLASSES
+#undef SIZE_CLASS
+};
 
 /*
  * DecRef a string s, calling release if its reference count goes to
@@ -541,7 +559,7 @@ struct string_data_lti;
 //////////////////////////////////////////////////////////////////////
 
 extern std::aligned_storage<
-  sizeof(StringData) + 1,
+  kStringOverhead,
   alignof(StringData)
 >::type s_theEmptyString;
 

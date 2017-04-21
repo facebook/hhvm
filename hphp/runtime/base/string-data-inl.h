@@ -100,14 +100,14 @@ inline char* StringData::mutableData() const {
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return aux<CapCode>().decode();
+  return kSizeIndex2StringCapacity[m_aux16];
 }
 
 inline size_t StringData::heapSize() const {
   return isFlat()
     ? isRefCounted()
-      ? sizeof(StringData) + 1 + capacity()
-      : sizeof(StringData) + 1 + size()
+      ? MemoryManager::sizeIndex2Size(m_aux16)
+      : size() + kStringOverhead
     : sizeof(StringData) + sizeof(Proxy);
 }
 

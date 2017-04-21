@@ -27,6 +27,7 @@ namespace HPHP { namespace jit {
 
 struct AsmInfo;
 struct CGMeta;
+using TcaRange = folly::Range<TCA>;
 
 struct RelocationInfo {
   RelocationInfo() {}
@@ -34,6 +35,8 @@ struct RelocationInfo {
   void recordRange(TCA start, TCA end,
                    TCA destStart, TCA destEnd);
   void recordAddress(TCA src, TCA dest, int range);
+  TcaRange fixupRange(const TcaRange& rng);
+  void fixupRanges(AsmInfo* asmInfo, AreaIndex area);
   TCA adjustedAddressAfter(TCA addr) const;
   TCA adjustedAddressBefore(TCA addr) const;
   CTCA adjustedAddressAfter(CTCA addr) const {
@@ -75,16 +78,16 @@ struct RelocationInfo {
 
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
-void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
-                                 CGMeta& fixups);
-void findFixups(TCA start, TCA end, CGMeta& fixups);
+                                 CGMeta& meta);
+void findFixups(TCA start, TCA end, CGMeta& meta);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
                 DataBlock& srcBlock,
-                CGMeta& fixups,
+                CGMeta& meta,
                 TCA* exitAddr);
 
 }}

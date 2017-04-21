@@ -33,22 +33,21 @@ using namespace reg;
 
 template<class T> uint64_t test_const(T val) {
   using testfunc = double (*)();
-  static const Abi test_abi = {
-#ifdef __aarch64__
+  static const Abi test_abi_arm = {
     .gpUnreserved = RegSet{},
     .gpReserved = arm::abi().gp(),
     .simdUnreserved = RegSet{vixl::d0},
     .simdReserved = arm::abi().simd() - RegSet{vixl::d0},
     .calleeSaved = arm::abi().calleeSaved,
     .sf = arm::abi().sf
-#else
+  };
+  static const Abi test_abi_x64 = {
     .gpUnreserved = RegSet{},
     .gpReserved = x64::abi().gp(),
     .simdUnreserved = RegSet{xmm0},
     .simdReserved = x64::abi().simd() - RegSet{xmm0},
     .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
-#endif
   };
 
   constexpr auto blockSize = 4096;
@@ -78,13 +77,13 @@ template<class T> uint64_t test_const(T val) {
   v << ret{RegSet{xmm0}};
 
   CGMeta meta;
-#ifdef __aarch64__
-  optimizeARM(vasm.unit(), test_abi, true /* regalloc */);
-  emitARM(unit, text, meta, nullptr);
-#else
-  optimizeX64(vasm.unit(), test_abi, true /* regalloc */);
-  emitX64(unit, text, meta, nullptr);
-#endif
+  if (arch() == Arch::ARM) {
+    optimizeARM(vasm.unit(), test_abi_arm, true /* regalloc */);
+    emitARM(unit, text, meta, nullptr);
+  } else if (arch() == Arch::X64) {
+    optimizeX64(vasm.unit(), test_abi_x64, true /* regalloc */);
+    emitX64(unit, text, meta, nullptr);
+  }
   // The above code might use meta.literals but shouldn't use anything else.
   meta.literals.clear();
   EXPECT_TRUE(meta.empty());

@@ -150,7 +150,6 @@ quick/cuf__callStatic4.php
 quick/cuf__callStatic5.php
 quick/debug_backtrace_continuation.php
 quick/debug_backtrace_trait.php
-quick/dec-minint.php
 quick/decrefstack1.php
 quick/defaultVals.php
 quick/define-array.php
@@ -188,7 +187,6 @@ quick/dv_if.php
 quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
-quick/enormous-string.php
 quick/eq_int_str.php
 quick/eval.php
 quick/eval_noreturn.php
@@ -346,7 +344,6 @@ quick/keyset/serialize.php
 quick/keyset/static.php
 quick/keyset/type-hint.php
 quick/lambda1.php
-quick/lambda2.php
 quick/lambda3.php
 quick/lambda4.php
 quick/lambda7.php
@@ -395,7 +392,6 @@ quick/ns_use_func.php
 quick/null_constant.php
 quick/open_tag_with_echo.php
 quick/ops.php
-quick/packed-array-bounds.php
 quick/param-type.php
 quick/parse_fail_shapes.php
 quick/parse_fail_shapes2.php
@@ -467,7 +463,6 @@ quick/silencer.php
 quick/simp-add-dbl.php
 quick/simp-conv-to-int-dbl.php
 quick/simp-mul-dbl.php
-quick/simp-sub-dbl.php
 quick/some_cmp_tests.php
 quick/sp.php
 quick/sqrt.php

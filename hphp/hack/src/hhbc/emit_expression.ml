@@ -403,22 +403,45 @@ and emit_known_class_id cid =
     instr_clsrefgetc;
   ]
 
+and get_original_class () =
+  let scope = get_scope () in
+  Ast_scope.Scope.get_class scope
+
+(* Get the original enclosing class if possible *)
+and get_original_class_name () =
+  match get_original_class () with
+  | None ->  None
+  | Some cd ->
+    (* If we're in a closure we unmangle the name to get the original class *)
+    match SU.Closures.unmangle_closure (snd cd.Ast.c_name) with
+    | None -> Some (snd cd.Ast.c_name)
+    | Some scope_name ->
+      match SU.Closures.split_scope_name scope_name with
+      | [class_name] -> Some class_name
+      | [class_name; _method_name] -> Some class_name
+      | _ -> None
+
+and get_original_parent_class_name () =
+  let scope = get_scope () in
+  match Ast_scope.Scope.get_class scope with
+  | None ->  None
+  | Some cd ->
+    match SU.Closures.unmangle_closure (snd cd.Ast.c_name) with
+    | Some _ -> None
+    | None ->
+      match cd.A.c_extends with
+      | [(_, A.Happly((_, parent_cid), _))] -> Some parent_cid
+      | _ -> None
+
 (* Transform `self` into enclosing class and `parent` into parent of enclosing
  * class, if they exist *)
 and resolve_class cid =
-  let scope = get_scope () in
-  match Ast_scope.Scope.get_class scope with
-  | None -> cid
-  | Some cd ->
-    if cid = SN.Classes.cSelf then snd cd.A.c_name
-    else
-    if cid = SN.Classes.cParent
-    then
-      match cd.A.c_extends with
-      | [(_, A.Happly((_, parent_cid), _))] ->
-        parent_cid
-      | _ -> cid
-    else cid
+  if cid = SN.Classes.cSelf
+  then Option.value ~default:cid (get_original_class_name ())
+  else
+  if cid = SN.Classes.cParent
+  then Option.value ~default:cid (get_original_parent_class_name ())
+  else cid
 
 and emit_class_id cid =
   if cid = SN.Classes.cStatic
@@ -451,14 +474,13 @@ and emit_class_get param_num_opt cid id =
  * case in emitter.cpp
  *)
 and emit_class_const cid id =
-  let scope = get_scope () in
   let clscns () =
     if id = SN.Members.mClass
     then IMisc (ClsRefName 0)
     else ILitConst (ClsCns (id, 0)) in
-  let get_original_name cd =
+  let get_original_name () =
     if cid = SN.Classes.cSelf
-    then snd cd.A.c_name
+    then  Option.value ~default:cid (get_original_class_name ())
     else cid in
 
   if cid = SN.Classes.cStatic
@@ -468,9 +490,9 @@ and emit_class_const cid id =
       clscns ();
     ]
   else
-  match Ast_scope.Scope.get_class scope with
+  match get_original_class () with
   | Some cd when cd.Ast.c_kind <> A.Ctrait ->
-    let cid = get_original_name cd in
+    let cid = get_original_name () in
     if id = SN.Members.mClass
     then instr_string (Utils.strip_ns cid)
     else instr (ILitConst (ClsCnsD (id, cid)))

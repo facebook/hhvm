@@ -56,10 +56,20 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
             instr_verifyRetTypeC;
             instr_retc
           ] in
-    let method_is_async =
-      ast_method.Ast.m_fun_kind = Ast_defs.FAsync
-      || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
-    let body_instrs,
+  let method_is_async =
+    ast_method.Ast.m_fun_kind = Ast_defs.FAsync
+    || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
+  let scope =
+    [Ast_scope.ScopeItem.Method ast_method;
+     Ast_scope.ScopeItem.Class ast_class] in
+  (* TODO: use something that can't be faked in user code *)
+  let method_is_closure_body =
+   snd ast_method.Ast.m_name = "__invoke"
+   && String_utils.string_starts_with (snd ast_class.Ast.c_name) "Closure$" in
+  let scope =
+    if method_is_closure_body
+    then Ast_scope.ScopeItem.Lambda :: scope else scope in
+  let body_instrs,
       method_decl_vars,
       method_num_iters,
       method_num_cls_ref_slots,
@@ -68,18 +78,13 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       method_is_generator,
       method_is_pair_generator =
     Emit_body.from_ast
-      ~scope:[Ast_scope.ScopeItem.Method ast_method;
-              Ast_scope.ScopeItem.Class ast_class]
+      ~scope:scope
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       ast_method.Ast.m_params
       ret
       ast_method.Ast.m_body
       default_instrs
   in
-  (* TODO: use something that can't be faked in user code *)
-  let method_is_closure_body =
-    snd ast_method.Ast.m_name = "__invoke"
-    && String_utils.string_starts_with (snd ast_class.Ast.c_name) "Closure$" in
   (* Horrible hack to get decl_vars in the same order as HHVM *)
   let captured_vars =
     if method_is_closure_body

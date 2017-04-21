@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
-*)
+ *)
 
 open Core
 open Ast
@@ -14,16 +14,11 @@ open Ast_scope
 
 module ULS = Unique_list_string
 module SN = Naming_special_names
+module SU = Hhbc_string_utils
 
 type env = {
   (* What is the current context? *)
   scope : Scope.t;
-  (* Prefix used to name closure classes in form
-   *   Closure$ (top-level statements)
-   *   Closure$fun (top-level function called fun)
-   *   Closure$cls::meth (method)
-   *)
-  prefix : string;
 }
 
 type state = {
@@ -31,6 +26,7 @@ type state = {
   per_function_count : int;
   (* Free variables computed so far *)
   captured_vars : ULS.t;
+  captured_this : bool;
   (* Variables that are *defined* in current scope (e.g. lambda parameters,
    * locals) and so should not be added to capture set
    *)
@@ -47,6 +43,7 @@ let initial_state initial_class_num =
 {
   per_function_count = 0;
   captured_vars = ULS.empty;
+  captured_this = false;
   defined_vars = SSet.empty;
   total_count = 0;
   class_num = initial_class_num;
@@ -61,43 +58,43 @@ let add_var st var =
   else
   (* Don't bother if it's $this, as this is captured implicitly *)
   if var = Naming_special_names.SpecialIdents.this
-  then st
+  then { st with captured_this = true; }
   else { st with captured_vars = ULS.add st.captured_vars var }
 
 let env_with_lambda env =
-  { env with scope = ScopeItem.Lambda :: env.scope }
+  { scope = ScopeItem.Lambda :: env.scope }
 
 let env_with_longlambda env is_static =
-{ env with scope = ScopeItem.LongLambda is_static :: env.scope }
+  { scope = ScopeItem.LongLambda is_static :: env.scope }
+
+let strip_id id = Utils.strip_ns (snd id)
+
+let rec make_scope_name scope =
+  match scope with
+  | [] -> ""
+  | ScopeItem.Function fd :: _ -> strip_id fd.f_name
+  | ScopeItem.Method md :: scope ->
+    make_scope_name scope ^ "::" ^ strip_id md.m_name
+  | ScopeItem.Class cd :: _ -> strip_id cd.c_name
+  | _ :: scope -> make_scope_name scope
 
 let env_with_function env fd =
-  let name = Utils.strip_ns (snd fd.f_name) in
-  { prefix = "Closure$" ^ name;
-    scope = ScopeItem.Function fd :: env.scope;
-  }
+  { scope = ScopeItem.Function fd :: env.scope; }
 
 let env_toplevel =
-  { prefix = "Closure$";
-    scope = Scope.toplevel;
-  }
+  { scope = Scope.toplevel; }
 
-let env_with_method env cd md =
-  let name = Utils.strip_ns (snd md.m_name) in
-  let class_name = Utils.strip_ns (snd cd.c_name) in
-  { prefix = "Closure$" ^ class_name ^ "::" ^ name;
-    scope = ScopeItem.Method md :: env.scope;
-  }
+let env_with_method env md =
+  { scope = ScopeItem.Method md :: env.scope; }
 
 let env_with_class cd =
-  let name = Utils.strip_ns (snd cd.c_name) in
-  { prefix = "Closure$" ^ name;
-    scope = [ScopeItem.Class cd];
-  }
+  { scope = [ScopeItem.Class cd]; }
 
 (* Clear the variables, upon entering a lambda *)
 let enter_lambda st fd =
   { st with
     captured_vars = ULS.empty;
+    captured_this = false;
     defined_vars =
       SSet.of_list (List.map fd.f_params (fun param -> snd param.param_id));
    }
@@ -105,21 +102,16 @@ let enter_lambda st fd =
 let add_defined_var st var =
   { st with defined_vars = SSet.add var st.defined_vars }
 
-(* Set the prefix name, upon entering a top-level function *)
 let reset_function_count st =
-  { st with
-    per_function_count = 0;
-  }
+  { st with per_function_count = 0; }
 
 (* Retrieve the closure classes in the order that they were generated *)
 let get_closure_classes st =
   List.rev st.closures
 
 let make_closure_name total_count env st =
-  let name = if st.per_function_count = 1
-               then env.prefix
-               else env.prefix ^ "#" ^ string_of_int st.per_function_count in
-  name ^ ";" ^ string_of_int total_count
+  SU.Closures.mangle_closure
+    (make_scope_name env.scope) st.per_function_count total_count
 
 let make_closure ~explicit_use
   p total_count class_num env st lambda_vars tparams fd body =
@@ -128,7 +120,7 @@ let make_closure ~explicit_use
     | ScopeItem.LongLambda is_static :: _ -> is_static
     | ScopeItem.Function _ :: _ -> true
     | ScopeItem.Method md :: _ -> List.mem md.m_kind Static
-    | ScopeItem.Lambda :: scope -> is_scope_static scope
+    | ScopeItem.Lambda :: scope -> is_scope_static scope || not st.captured_this
     | [] -> true
     | _ -> false in
   let md = {
@@ -173,7 +165,6 @@ let make_closure ~explicit_use
  * because the enclosing class will be changed. *)
 let convert_id (env:env) p (pid, str as id) =
   let return newstr = (p, String (pid, newstr)) in
-  let strip_id id = Utils.strip_ns (snd id) in
   let get_class_name () =
     match Scope.get_class env.scope with
     | None -> ""
@@ -310,6 +301,7 @@ let rec convert_expr env st (p, expr_ as expr) =
 and convert_lambda env st p fd use_vars_opt =
   (* Remember the current capture and defined set across the lambda *)
   let captured_vars = st.captured_vars in
+  let captured_this = st.captured_this in
   let defined_vars = st.defined_vars in
   let total_count = st.total_count in
   let class_num = st.class_num in
@@ -339,7 +331,8 @@ and convert_lambda env st p fd use_vars_opt =
       p total_count class_num env st lambda_vars tparams fd block in
   (* Restore capture and defined set *)
   let st = { st with captured_vars = captured_vars;
-                       defined_vars = defined_vars; } in
+                     captured_this = captured_this;
+                     defined_vars = defined_vars; } in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:add_var in
   let st = { st with closures = st.closures @ cd :: closures_until_now } in
@@ -479,14 +472,14 @@ let convert_fun st fd =
 let rec convert_class st cd =
   let env = env_with_class cd in
   let st = reset_function_count st in
-  let st, c_body = List.map_env st cd.c_body (convert_class_elt cd env) in
+  let st, c_body = List.map_env st cd.c_body (convert_class_elt env) in
   st, { cd with c_body = c_body }
 
-and convert_class_elt cd env st ce =
+and convert_class_elt env st ce =
   match ce with
   | Method md ->
     let md = Ast_constant_folder.fold_method md in
-    let env = env_with_method env cd md in
+    let env = env_with_method env md in
     let st = reset_function_count st in
     let st, block = convert_block env st md.m_body in
     st, Method { md with m_body = block }

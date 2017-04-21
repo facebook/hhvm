@@ -19,6 +19,40 @@ module Locals = struct
 
 end
 
+module Closures = struct
+  (* Closure classes have names of the form
+   *   Closure$ scope ix ; num
+   * where
+   *   scope  ::=
+   *     <function-name>
+   *   | <class-name> :: <method-name>
+   *   |
+   *   ix ::=
+   *     # <digits>
+   *)
+  let unmangle_closure s =
+    if String_utils.string_starts_with s "Closure$"
+    then
+      let suffix = String_utils.lstrip s "Closure$" in
+      match String_utils.split ';' suffix with
+      | [prefix; _count] ->
+        begin match String_utils.split '#' prefix with
+        | [prefix; _] -> Some prefix
+        | _ -> Some prefix
+        end
+      | _ -> None
+    else None
+
+  let mangle_closure scope ix count =
+    "Closure$"
+    ^ scope
+    ^ (if ix = 1 then "" else "#" ^ string_of_int ix)
+    ^ ";" ^ string_of_int count
+
+  let split_scope_name s = Str.split (Str.regexp "::") s
+  let join_method class_name method_name = class_name ^ "::" ^ method_name
+end
+
 (* XHP name mangling *)
 module Xhp = struct
 

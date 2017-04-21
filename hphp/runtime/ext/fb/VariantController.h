@@ -17,10 +17,11 @@
 #ifndef VARIANTCONTROLLER_H
 #define VARIANTCONTROLLER_H
 
+#include <algorithm>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/extension.h"
-#include <algorithm>
+#include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 
 namespace HPHP {
 

@@ -8,6 +8,7 @@
  *)
 
 module CoroutineMethodLowerer = Coroutine_method_lowerer
+module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
 module List = Core_list
@@ -22,12 +23,18 @@ open EditableSyntax
  * If the provided methodish declaration is for a coroutine, rewrites the
  * methodish declaration into a desugared coroutine implementation.
  *)
-let maybe_rewrite_method node =
+let maybe_rewrite_method_and_generate_state_machine node =
   match syntax node with
   | MethodishDeclaration node ->
-      (* TODO(tingley): Using the MethodishDeclaration, generate the coroutine
-         state machine if the node is a coroutine. *)
-      CoroutineMethodLowerer.maybe_rewrite_methodish_declaration node
+      Option.value_map
+        (CoroutineMethodLowerer.maybe_rewrite_methodish_declaration node)
+        ~default:None
+        ~f:(fun method_node ->
+          Option.both
+            (Some method_node)
+            (CoroutineStateMachineGenerator.generate_coroutine_state_machine
+              node)
+        )
   | _ ->
       (* Irrelevant input. *)
       None
@@ -38,11 +45,15 @@ let maybe_rewrite_method node =
  * Transforms method nodes, accumulating all nodes. Accumulates whether at least
  * one node has been transformed.
  *)
-let rewrite_classish_body_element (methods_acc, any_rewritten_acc) node =
+let rewrite_classish_body_element
+    (methods_acc, state_machines_acc, any_rewritten_acc) node =
   Option.value_map
-    (maybe_rewrite_method node)
-    ~default:(node :: methods_acc, any_rewritten_acc)
-    ~f:(fun method_node -> method_node :: methods_acc, true)
+    (maybe_rewrite_method_and_generate_state_machine node)
+    ~default:(node :: methods_acc, state_machines_acc, any_rewritten_acc)
+    ~f:(fun (method_node, state_machine_node) ->
+      method_node :: methods_acc,
+      state_machine_node :: state_machines_acc,
+      true)
 
 (**
  * Rewrites classish body elements. If at least one element is modified, then
@@ -51,13 +62,13 @@ let rewrite_classish_body_element (methods_acc, any_rewritten_acc) node =
 let maybe_rewrite_classish_body_elements node =
   match syntax node with
   | SyntaxList syntax_list ->
-      let rewritten_nodes, any_rewritten =
+      let rewritten_nodes, state_machine_nodes, any_rewritten =
         List.fold
           ~f:rewrite_classish_body_element
-          ~init:([], false)
+          ~init:([], [], false)
           syntax_list in
       if any_rewritten then
-        Some (make_list rewritten_nodes)
+        Some (make_list rewritten_nodes, state_machine_nodes)
       else
         None
   | _ ->
@@ -74,15 +85,17 @@ let maybe_rewrite_classish_body node =
   | ClassishBody ({ classish_body_elements; _; } as node) ->
       Option.map
         (maybe_rewrite_classish_body_elements classish_body_elements)
-        (fun classish_body_elements ->
-          make_syntax { node with classish_body_elements; })
+        (fun (classish_body_elements, state_machine_nodes) ->
+          make_syntax { node with classish_body_elements; },
+          state_machine_nodes)
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
       None
 
 (**
  * If the class contains at least one coroutine method, then those methods are
- * rewritten. Otherwise, the class is not transformed.
+ * rewritten, and state machines are generated as necessary. Otherwise, the
+ * class is not transformed.
  *)
 let maybe_rewrite_class node =
   let make_syntax node = make_syntax (ClassishDeclaration node) in
@@ -90,24 +103,28 @@ let maybe_rewrite_class node =
   | ClassishDeclaration ({ classish_body; _; } as class_node) ->
       Option.map
         (maybe_rewrite_classish_body classish_body)
-        ~f:(fun classish_body ->
-          make_syntax { class_node with classish_body; })
+        ~f:(fun (classish_body, state_machine_nodes) ->
+          make_syntax { class_node with classish_body; },
+          state_machine_nodes)
   | _ ->
       (* Irrelevant input. *)
       None
 
 (**
  * Rewrites toplevel classes. The class nodes themselves are transformed
- * directly.
+ * directly. Generated state machine nodes are collected and written alongside
+ * of the class nodes.
  *)
 let rewrite_classes (node_acc, any_rewritten_acc) node =
   Option.value_map
     (maybe_rewrite_class node)
     ~default:(node :: node_acc, any_rewritten_acc)
-    ~f:(fun node -> node :: node_acc, true)
+    ~f:(fun (node, state_machine_nodes) ->
+      node :: (state_machine_nodes @ node_acc), true)
 
 (**
- * Rewrites classes containing coroutine methods.
+ * Rewrites classes containing coroutine methods. Additional state machine
+ * classes may be generated alongside of the original class.
  *)
 let maybe_rewrite_syntax_list node =
   match syntax node with

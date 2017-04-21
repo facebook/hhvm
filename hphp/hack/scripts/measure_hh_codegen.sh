@@ -67,4 +67,7 @@ done
 # log to scuba
 $BUCK run //hphp/hack/scripts:log_hh_codegen_results_to_scuba -- "$NUM_LINES_HHVM" "$NUM_LINES_HH" "$NUM_LINES_COMMON" "$1" "$DIFF_TMP"
 
-rm "$DIFF_TMP"
+rm -fr "$DIFF_TMP"
+rm -f "/tmp/hhvm_*"
+rm -f "/tmp/perf*"
+rm -f "/tmp/*.hhas"

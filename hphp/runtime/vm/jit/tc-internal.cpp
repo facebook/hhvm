@@ -138,8 +138,8 @@ bool shouldTranslate(const Func* func, TransKind kind) {
                           maxTransTime,
                           transCounter.wall_time_elapsed,
                           transCounter.count);
-      }
-      return false;
+    }
+    return false;
   }
 
   auto const main_under = code().main().used() < CodeCache::AMaxUsage;

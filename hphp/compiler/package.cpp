@@ -367,13 +367,6 @@ void Package::saveStatsToFile(const char *filename, int totalSeconds) const {
       ms.add("AvgLinePerFunc", getLineCount()/m_ar->getFunctionCount());
     }
 
-    ms.add("VariableTableFunctions");
-    JSON::CodeError::ListStream ls(o);
-    for (auto const& f : m_ar->m_variableTableFunctions) {
-      ls << f;
-    }
-    ls.done();
-
     ms.done();
     f.close();
   }

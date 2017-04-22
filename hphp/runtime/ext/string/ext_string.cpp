@@ -2127,7 +2127,7 @@ Variant HHVM_FUNCTION(strtr,
   }
 
   int maxlen = 0;
-  int minlen = -1;
+  int minlen = str.size();
   Array arr = from.toArray();
 
   if (arr.empty()) {
@@ -2140,7 +2140,7 @@ Variant HHVM_FUNCTION(strtr,
     auto const len = search.size();
     if (len < 1) return false;
     if (maxlen < len) maxlen = len;
-    if (minlen == -1 || minlen > len) minlen = len;
+    if (minlen > len) minlen = len;
   }
 
   if (arr.size() <= kBitsPerQword && maxlen <= 16) {

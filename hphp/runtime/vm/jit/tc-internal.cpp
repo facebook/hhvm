@@ -130,14 +130,14 @@ bool shouldTranslate(const Func* func, TransKind kind) {
   if (serverMode && maxTransTime >= 0 &&
       transCounter.wall_time_elapsed >= maxTransTime) {
 
-      if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
-        Trace::traceRelease("Skipping translation. "
-                            "Time budget of %" PRId64 " exceeded. "
-                            "%" PRId64 "us elapsed. "
-                            "%" PRId64 " translations completed\n",
-                            maxTransTime,
-                            transCounter.wall_time_elapsed,
-                            transCounter.count);
+    if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
+      Trace::traceRelease("Skipping translation. "
+                          "Time budget of %" PRId64 " exceeded. "
+                          "%" PRId64 "us elapsed. "
+                          "%" PRId64 " translations completed\n",
+                          maxTransTime,
+                          transCounter.wall_time_elapsed,
+                          transCounter.count);
       }
       return false;
   }

@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <boost/variant.hpp>
 #include <folly/Range.h>
+#include <folly/Optional.h>
 
 #include "hphp/runtime/base/types.h"
 
@@ -367,6 +368,12 @@ template<class T, bool N = false, size_t Align = alignof(T)>
 Link<T,N> bind(Symbol key, Mode mode = Mode::Normal, size_t extraSize = 0);
 
 /*
+ * Remove a bound link from RDS metadata. The actual space in RDS is
+ * not reclaimed.
+ */
+void unbind(Symbol, Handle);
+
+/*
  * Try to bind to a symbol in RDS, returning an unbound link if the
  * Symbol isn't already allocated in RDS.  Mode and alignment are not
  * specified---if the symbol is already bound, these are already
@@ -394,7 +401,7 @@ Link<T,N> alloc(Mode mode = Mode::Normal);
 size_t allocBit();
 bool testAndSetBit(size_t bit);
 
-std::unordered_map<Handle,Symbol> reverseLinkTable();
+folly::Optional<Symbol> reverseLink(Handle handle);
 
 //////////////////////////////////////////////////////////////////////
 

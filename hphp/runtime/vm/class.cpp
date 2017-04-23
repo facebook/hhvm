@@ -406,6 +406,20 @@ void Class::destroy() {
    */
   auto const pcls = m_preClass.get();
   pcls->namedEntity()->removeClass(this);
+
+  if (m_sPropCache) {
+    // Other threads find this class via rds::s_handleTable.
+    // Remove our sprop entries before the treadmill delay.
+    for (Slot i = 0, n = numStaticProperties(); i < n; ++i) {
+      if (m_staticProperties[i].cls == this) {
+        auto const &link = m_sPropCache[i];
+        if (link.bound()) {
+          rds::unbind(rds::SPropCache{this, i}, link.handle());
+        }
+      }
+    }
+  }
+
   Treadmill::enqueue(
     [this] {
       releaseRefs();

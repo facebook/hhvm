@@ -313,11 +313,13 @@ void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
 }
 
 static bool isStaticLocal(const HeapGraph::Node& node) {
-  return node.tyindex == type_scan::getIndexForScan<rds::StaticLocalData>();
+  return node.tyindex == type_scan::getIndexForScan<rds::StaticLocalData>() &&
+         type_scan::hasNonConservative();
 }
 
 static bool isStaticProp(const HeapGraph::Node& node) {
-  return node.tyindex == type_scan::getIndexForScan<StaticPropData>();
+  return node.tyindex == type_scan::getIndexForScan<StaticPropData>() &&
+         type_scan::hasNonConservative();
 }
 
 static const StringData* header_name_strs[NumHeaderKinds];
@@ -355,17 +357,21 @@ Array createPhpNode(HeapGraphContextPtr hgptr, int index) {
       node_arr.set(s_class, VarNR(cls->nameStr()));
     }
   } else if (isStaticLocal(node)) {
-    auto func = Func::fromFuncId(cnode.static_local.funcId);
-    node_arr.set(s_func, VarNR(func->nameStr()));
     node_arr.set(s_local, VarNR(cnode.static_local.name));
-    if (auto cls = func->cls()) {
-      node_arr.set(s_class, VarNR(cls->nameStr()));
+    auto func_id = cnode.static_local.funcId;
+    if (func_id != InvalidFuncId) {
+      auto func = Func::fromFuncId(cnode.static_local.funcId);
+      node_arr.set(s_func, VarNR(func->nameStr()));
+      if (auto cls = func->cls()) {
+        node_arr.set(s_class, VarNR(cls->nameStr()));
+      }
     }
   } else if (isStaticProp(node)) {
-    auto cls = cnode.sprop_cache.cls;
-    auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
-    node_arr.set(s_class, VarNR(cls->nameStr()));
-    node_arr.set(s_prop, VarNR(sprop.name));
+    if (auto cls = cnode.sprop_cache.cls) {
+      auto& sprop = cls->staticProperties()[cnode.sprop_cache.slot];
+      node_arr.set(s_class, VarNR(cls->nameStr()));
+      node_arr.set(s_prop, VarNR(sprop.name));
+    }
   }
   return node_arr;
 }
@@ -431,9 +437,6 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
     cptrs.push_back(new_ptr);
   }
 
-  // obtain mapping of rds offsets (handles) to metadata
-  auto links = rds::reverseLinkTable();
-
   // Copy useful information from heap into cnodes
   cnodes.resize(hg.nodes.size());
   for (size_t i = 0, n = hg.nodes.size(); i < n; ++i) {
@@ -445,17 +448,17 @@ Resource HHVM_FUNCTION(heapgraph_create, void) {
       cnode.heap_object.cls = obj ? obj->getVMClass() : nullptr;
     } else if (isStaticLocal(node)) {
       rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
-      auto it = links.find(handle);
-      if (it != links.end()) {
-        cnode.static_local = boost::get<rds::StaticLocal>(it->second);
+      auto sym = rds::reverseLink(handle);
+      if (sym) {
+        cnode.static_local = boost::get<rds::StaticLocal>(sym.value());
       } else {
         cnode.static_local = {InvalidFuncId, nullptr};
       }
     } else if (isStaticProp(node)) {
       rds::Handle handle = uintptr_t(node.ptr) - uintptr_t(rds::tl_base);
-      auto it = links.find(handle);
-      if (it != links.end()) {
-        cnode.sprop_cache = boost::get<rds::SPropCache>(it->second);
+      auto sym = rds::reverseLink(handle);
+      if (sym) {
+        cnode.sprop_cache = boost::get<rds::SPropCache>(sym.value());
       } else {
         cnode.sprop_cache = {nullptr, 0};
       }

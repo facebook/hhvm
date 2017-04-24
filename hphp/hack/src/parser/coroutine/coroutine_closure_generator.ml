@@ -68,7 +68,7 @@ let generate_do_resume_method method_node =
       void_syntax)
     (generate_do_resume_body method_node)
 
-let generate_state_machine_body method_node header_node =
+let generate_closure_body method_node header_node =
   [
     generate_constructor_method header_node;
     generate_resume_method method_node;
@@ -81,12 +81,12 @@ let generate_state_machine_body method_node header_node =
  * declaration header and the function body into a desugared coroutine
  * implementation.
  *)
-let generate_coroutine_state_machine
+let generate_coroutine_closure
     classish_name
     function_name
     ({ methodish_function_decl_header; _; } as method_node)
     header_node =
   make_classish_declaration_syntax
-    (make_state_machine_classname classish_name function_name)
+    (make_closure_classname classish_name function_name)
     [ make_continuation_type_syntax mixed_syntax ]
-    (generate_state_machine_body method_node header_node)
+    (generate_closure_body method_node header_node)

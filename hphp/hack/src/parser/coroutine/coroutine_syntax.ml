@@ -290,11 +290,8 @@ let suspended_coroutine_result_classname =
 let suspended_member_name =
   "create"
 
-let make_state_machine_classname enclosing_classname coroutine_function_name =
-  Printf.sprintf
-    "%s_%s_GeneratedClosure"
-    enclosing_classname
-    coroutine_function_name
+let make_closure_classname enclosing_classname function_name =
+  Printf.sprintf "%s_%s_GeneratedClosure" enclosing_classname function_name
 
 let constructor_member_name =
   "__construct"

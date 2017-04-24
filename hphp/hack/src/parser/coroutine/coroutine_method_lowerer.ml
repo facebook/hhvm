@@ -56,9 +56,9 @@ let rewrite_function_decl_header
         })
 
 (**
- * Rewrites a coroutine body to instantiate the state machine corresponding to
- * the coroutine, pass in or set any necessary variables, and return the result
- * from invoking resume (with a null argument) on the state machine.
+ * Rewrites a coroutine body to instantiate the closure corresponding to the
+ * coroutine, pass in or set any necessary variables, and return the result from
+ * invoking resume (with a null argument).
  *)
 let rewrite_coroutine_body
     classish_name
@@ -67,13 +67,13 @@ let rewrite_coroutine_body
   let make_syntax node = make_syntax (CompoundStatement node) in
   match syntax methodish_function_body with
   | CompoundStatement ({ compound_statements; _; } as node) ->
-      let new_state_machine_syntax =
+      let new_closure_syntax =
         make_object_creation_expression_syntax
-          (make_state_machine_classname classish_name function_name)
+          (make_closure_classname classish_name function_name)
           [continuation_variable_syntax] in
       let select_resume_member_syntax =
         make_member_selection_expression_syntax
-          new_state_machine_syntax
+          new_closure_syntax
           resume_member_name in
       let call_resume_with_null_syntax =
         make_function_call_expression_syntax

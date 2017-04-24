@@ -8,7 +8,7 @@
  *)
 
 module CoroutineMethodLowerer = Coroutine_method_lowerer
-module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
+module CoroutineClosureGenerator = Coroutine_closure_generator
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
@@ -31,9 +31,9 @@ let maybe_get_token_text node =
   | _ -> None
 
 (**
- * Returns the transformed method node and the generated state machine's syntax.
+ * Returns the transformed method node and the generated closure's syntax.
  *)
-let maybe_rewrite_function_and_generate_state_machine
+let maybe_rewrite_function_and_generate_closure
     classish_name
     method_node
     header_node
@@ -45,7 +45,7 @@ let maybe_rewrite_function_and_generate_state_machine
       method_node
       header_node)
     (Some
-      (CoroutineStateMachineGenerator.generate_coroutine_state_machine
+      (CoroutineClosureGenerator.generate_coroutine_closure
         classish_name
         function_name
         method_node
@@ -54,9 +54,9 @@ let maybe_rewrite_function_and_generate_state_machine
 (**
  * If the provided function header is for a coroutine, rewrites the declaration
  * header and the function body into a desugared coroutine implementation.
- * Also extracts the coroutine's state machine.
+ * Also extracts the coroutine's closure.
  *)
-let maybe_rewrite_function_header_and_generate_state_machine
+let maybe_rewrite_function_header_and_generate_closure
     classish_name
     ({ methodish_function_decl_header; _; } as method_node) =
   match syntax methodish_function_decl_header with
@@ -66,7 +66,7 @@ let maybe_rewrite_function_header_and_generate_state_machine
       option_flat_map
         (maybe_get_token_text function_name)
         ~f:
-          (maybe_rewrite_function_and_generate_state_machine
+          (maybe_rewrite_function_and_generate_closure
             classish_name
             method_node
             header_node)
@@ -79,10 +79,10 @@ let maybe_rewrite_function_header_and_generate_state_machine
  * If the provided methodish declaration is for a coroutine, rewrites the
  * methodish declaration into a desugared coroutine implementation.
  *)
-let maybe_rewrite_method_and_generate_state_machine classish_name node =
+let maybe_rewrite_method_and_generate_closure classish_name node =
   match syntax node with
   | MethodishDeclaration node ->
-      maybe_rewrite_function_header_and_generate_state_machine
+      maybe_rewrite_function_header_and_generate_closure
         classish_name
         node
   | _ ->
@@ -97,19 +97,19 @@ let maybe_rewrite_method_and_generate_state_machine classish_name node =
  *)
 let rewrite_classish_body_element
     classish_name
-    (classish_body_elements_acc, state_machines_acc, any_rewritten_acc)
+    (classish_body_elements_acc, closures_acc, any_rewritten_acc)
     classish_body_element_node =
   Option.value_map
-    (maybe_rewrite_method_and_generate_state_machine
+    (maybe_rewrite_method_and_generate_closure
       classish_name
       classish_body_element_node)
     ~default:
       (classish_body_element_node :: classish_body_elements_acc,
-        state_machines_acc,
+        closures_acc,
         any_rewritten_acc)
-    ~f:(fun (method_node, state_machine_node) ->
+    ~f:(fun (method_node, closure_node) ->
       method_node :: classish_body_elements_acc,
-      state_machine_node :: state_machines_acc,
+      closure_node :: closures_acc,
       true)
 
 (**
@@ -120,13 +120,13 @@ let maybe_rewrite_classish_body_elements
     classish_name classish_body_elemenets_node =
   match syntax classish_body_elemenets_node with
   | SyntaxList syntax_list ->
-      let rewritten_nodes, state_machine_nodes, any_rewritten =
+      let rewritten_nodes, closure_nodes, any_rewritten =
         List.fold
           ~f:(rewrite_classish_body_element classish_name)
           ~init:([], [], false)
           syntax_list in
       if any_rewritten then
-        Some (make_list rewritten_nodes, state_machine_nodes)
+        Some (make_list rewritten_nodes, closure_nodes)
       else
         None
   | _ ->
@@ -146,16 +146,16 @@ let maybe_rewrite_classish_body classish_name classish_body_node =
         (maybe_rewrite_classish_body_elements
           classish_name
           classish_body_elements)
-        (fun (classish_body_elements, state_machine_nodes) ->
+        (fun (classish_body_elements, closure_nodes) ->
           make_syntax { classish_body_node with classish_body_elements; },
-          state_machine_nodes)
+          closure_nodes)
   | _ ->
       (* Unexpected or malformed input, so we won't transform the coroutine. *)
       None
 
 (**
  * If the class contains at least one coroutine method, then those methods are
- * rewritten, and state machines are generated as necessary. Otherwise, the
+ * rewritten, and closures are generated as necessary. Otherwise, the
  * class is not transformed.
  *)
 let maybe_rewrite_class node =
@@ -166,9 +166,9 @@ let maybe_rewrite_class node =
       | Some classish_name ->
           Option.map
             (maybe_rewrite_classish_body classish_name classish_body)
-            ~f:(fun (classish_body, state_machine_nodes) ->
+            ~f:(fun (classish_body, closure_nodes) ->
               make_syntax { node with classish_body; },
-              state_machine_nodes)
+              closure_nodes)
       | _ ->
         (* Malformed class name. *)
         None)
@@ -178,19 +178,19 @@ let maybe_rewrite_class node =
 
 (**
  * Rewrites toplevel classes. The class nodes themselves are transformed
- * directly. Generated state machine nodes are collected and written alongside
+ * directly. Generated closure nodes are collected and written alongside
  * of the class nodes.
  *)
 let rewrite_classes (node_acc, any_rewritten_acc) node =
   Option.value_map
     (maybe_rewrite_class node)
     ~default:(node :: node_acc, any_rewritten_acc)
-    ~f:(fun (node, state_machine_nodes) ->
-      node :: (state_machine_nodes @ node_acc), true)
+    ~f:(fun (node, closure_nodes) ->
+      node :: (closure_nodes @ node_acc), true)
 
 (**
- * Rewrites classes containing coroutine methods. Additional state machine
- * classes may be generated alongside of the original class.
+ * Rewrites classes containing coroutine methods. Additional closure classes
+ * may be generated alongside of the original class.
  *)
 let maybe_rewrite_syntax_list node =
   match syntax node with

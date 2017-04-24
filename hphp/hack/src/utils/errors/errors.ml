@@ -532,6 +532,7 @@ module NastCheck                            = struct
   let interface_with_partial_typeconst      = 3031 (* DONT MODIFY!!!! *)
   let multiple_xhp_category                 = 3032 (* DONT MODIFY!!!! *)
   let optional_shape_fields_not_supported   = 3033 (* DONT MODIFY!!!! *)
+  let await_not_allowed                     = 3034 (* DONT MODIFY!!!! *)
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
 end
 
@@ -1236,6 +1237,11 @@ let continue_in_switch p =
 let await_in_sync_function p =
   add NastCheck.await_in_sync_function p
     "await can only be used inside async functions"
+
+let await_not_allowed p =
+  add NastCheck.await_not_allowed p
+    "await is only permitted as a statement, expression in a return statement \
+      or as a right hand side in top level assignment."
 
 let magic (p, s) =
   add NastCheck.magic p

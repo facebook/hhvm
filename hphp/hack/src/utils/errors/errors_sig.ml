@@ -237,6 +237,7 @@ module type S = sig
   val toplevel_continue: Pos.t -> unit
   val continue_in_switch: Pos.t -> unit
   val await_in_sync_function : Pos.t -> unit
+  val await_not_allowed : Pos.t -> unit
   val magic : Pos.t * string -> unit
   val non_interface : Pos.t -> string -> string -> unit
   val toString_returns_string : Pos.t -> unit

@@ -10,5 +10,6 @@
  */
 
 async function plus_three(Awaitable<string> $x): Awaitable<int> {
-  return 3 + await $x;
+  $a = await $x;
+  return 3 + $a;
 }

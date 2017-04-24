@@ -18,5 +18,7 @@ async function tweedledee(): Awaitable<Awaitable<string>> {
 }
 
 async function whats_in_the_rabbit_hole(): Awaitable<void> {
-  print (await await tweedledee());
+  $a = await tweedledee();
+  $b = await $a;
+  print ($b);
 }

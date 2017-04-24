@@ -10,7 +10,8 @@
  */
 
 async function slow_print(Awaitable<string> $x): Awaitable<void> {
-  display(await $x);
+  $a = await $x;
+  display($a);
 }
 
 function display(string $y): void {

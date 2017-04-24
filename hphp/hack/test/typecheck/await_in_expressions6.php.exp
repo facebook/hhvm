@@ -1,0 +1,2 @@
+File "await_in_expressions6.php", line 5, characters 12-19:
+await is only permitted as a statement, expression in a return statement or as a right hand side in top level assignment. (NastCheck[3034])

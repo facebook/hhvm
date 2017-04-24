@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-sort.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -1219,7 +1220,7 @@ static void walk_func(Variant& value,
   CallCtx* ctx = (CallCtx*)data;
   int nargs = userdata.isInitialized() ? 3 : 2;
   TypedValue args[3] = { *value.asRef(), *key.asCell(), *userdata.asCell() };
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFuncFew(*ctx, nargs, args)
   );
 }

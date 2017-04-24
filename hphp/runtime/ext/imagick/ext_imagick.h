@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/imagick/constants.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -67,7 +68,7 @@ struct ImagickExtension final : Extension {
     \
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
-      tvRefcountedDecRef(\
+      tvDecRefGen(\
         g_context->invokeFunc(cls->getCtor(), make_packed_array(arg), \
                               ret.get()) \
       );\

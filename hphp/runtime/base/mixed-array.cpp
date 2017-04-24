@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-comparisons.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -288,7 +289,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
         throwRefInvalidArrayValueException(staticEmptyDictArray());
       }
     }
-    tvRefcountedIncRef(&e.data);
+    tvIncRefGen(&e.data);
   }
 
   // We need to assert this up here before we possibly call compact (which
@@ -496,7 +497,7 @@ void MixedArray::Release(ArrayData* in) {
         // pointers to freed memory gracefully in prod mode.
         if (debug) ptr->skey = nullptr;
       }
-      tvRefcountedDecRef(&ptr->data);
+      tvDecRefGen(&ptr->data);
     }
 
     if (UNLIKELY(strong_iterators_exist())) {
@@ -931,7 +932,7 @@ MixedArray* MixedArray::initWithRef(TypedValue& tv, const Variant& v) {
 ALWAYS_INLINE
 ArrayData* MixedArray::zSetVal(TypedValue& tv, RefData* v) {
   // Dec ref the old value
-  tvRefcountedDecRef(tv);
+  tvDecRefGen(tv);
   // Store the RefData but do not increment the refcount
   tv.m_type = KindOfRef;
   tv.m_data.pref = v;
@@ -1419,15 +1420,14 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
   auto& e = elms[pos];
   // Mark the value as a tombstone.
   TypedValue* tv = &e.data;
-  DataType oldType = tv->m_type;
-  uint64_t oldDatum = tv->m_data.num;
+  auto const oldTV = *tv;
   tv->m_type = kInvalidDataType;
   --m_size;
   // Mark the hash entry as "deleted".
   assert(m_used <= capacity());
 
   // Finally, decref the old value
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(oldTV);
 }
 
 ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {

@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -338,12 +339,9 @@ struct BaseVector : ObjectData {
       return;
     }
     TypedValue* tv = &data()[key];
-    DataType oldType = tv->m_type;
-    uint64_t oldDatum = tv->m_data.num;
+    auto const oldTV = *tv;
     cellDup(*val, *tv);
-    if (isRefcountedType(oldType)) {
-      tvDecRefHelper(oldType, oldDatum);
-    }
+    tvDecRefGen(oldTV);
   }
   void setRaw(int64_t key, const Variant& val) {
     setRaw(key, val.asCell());

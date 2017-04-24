@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -54,39 +55,39 @@ folly::Optional<Type> eval_cell(Pred p) {
       case KindOfString:
         {
           if (c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
-            tvDecRef(&c);
+            tvDecRefCountable(&c);
             return TStr;
           }
           auto const sstr = makeStaticString(c.m_data.pstr);
-          tvDecRef(&c);
+          tvDecRefCountable(&c);
           c = make_tv<KindOfPersistentString>(sstr);
         }
         break;
       case KindOfArray:
         {
           auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
+          tvDecRefCountable(&c);
           c = make_tv<KindOfPersistentArray>(sarr);
         }
         break;
       case KindOfVec:
         {
           auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
+          tvDecRefCountable(&c);
           c = make_tv<KindOfPersistentVec>(sarr);
         }
         break;
       case KindOfDict:
         {
           auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
+          tvDecRefCountable(&c);
           c = make_tv<KindOfPersistentDict>(sarr);
         }
         break;
       case KindOfKeyset:
         {
           auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
+          tvDecRefCountable(&c);
           c = make_tv<KindOfPersistentKeyset>(sarr);
         }
         break;

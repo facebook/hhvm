@@ -3,7 +3,6 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
-   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,46 +14,17 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
-#define incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
+namespace HPHP {
 
 #include "hphp/runtime/base/tv-refcount.h"
 
-#include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/asio/ext_wait-handle.h"
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-// class StaticWaitHandle
-
-/**
- * A static wait handle is a wait handle that is statically finished. The result
- * of the operation is always available and waiting for the wait handle finishes
- * immediately.
- */
-struct c_StaticWaitHandle final : c_WaitHandle {
-  WAITHANDLE_CLASSOF(StaticWaitHandle);
-  WAITHANDLE_DTOR(StaticWaitHandle);
-
-  explicit c_StaticWaitHandle()
-    : c_WaitHandle(c_StaticWaitHandle::classof(),
-                   HeaderKind::WaitHandle,
-                   type_scan::getIndexForMalloc<c_StaticWaitHandle>())
-  {}
-  ~c_StaticWaitHandle() {
-    assert(isFinished());
-    tvDecRefGen(&m_resultOrException);
-  }
-
- public:
-  static c_StaticWaitHandle* CreateSucceeded(Cell result); // nothrow
-  static c_StaticWaitHandle* CreateFailed(ObjectData* exception);
-
- private:
-  void setState(uint8_t state) { setKindState(Kind::Static, state); }
-};
+#include "hphp/runtime/base/countable.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/typed-value.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
-
-#endif // incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_

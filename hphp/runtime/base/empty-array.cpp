@@ -209,7 +209,7 @@ member_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell c, bool) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (c.m_type == KindOfUninit) c.m_type = KindOfNull;
-  tvRefcountedIncRef(&c);
+  tvIncRefGen(&c);
   auto const lval = k == 0 ? EmptyArray::MakePacked(c)
                            : EmptyArray::MakeMixed(k, c);
   return lval.arr_base();
@@ -219,7 +219,7 @@ ArrayData* EmptyArray::SetStr(ArrayData*,
                               StringData* k,
                               Cell val,
                               bool copy) {
-  tvRefcountedIncRef(&val);
+  tvIncRefGen(&val);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (val.m_type == KindOfUninit) val.m_type = KindOfNull;
   return EmptyArray::MakeMixed(k, val).arr_base();
@@ -259,7 +259,7 @@ ArrayData* EmptyArray::SetRefInt(ArrayData*,
                                  bool) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto ref = *var.asRef();
-  tvIncRef(&ref);
+  tvIncRefCountable(&ref);
   auto const lval = k == 0 ? EmptyArray::MakePacked(ref)
                            : EmptyArray::MakeMixed(k, ref);
   return lval.arr_base();
@@ -271,19 +271,19 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*,
                                  bool) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefBind(k);
   auto ref = *var.asRef();
-  tvIncRef(&ref);
+  tvIncRefCountable(&ref);
   return EmptyArray::MakeMixed(k, ref).arr_base();
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool copy) {
-  tvRefcountedIncRef(&v);
+  tvIncRefGen(&v);
   return EmptyArray::MakePackedInl(v).arr_base();
 }
 
 ArrayData* EmptyArray::AppendRef(ArrayData*, Variant& v, bool copy) {
   if (RuntimeOption::EvalHackArrCompatNotices) raiseHackArrCompatRefNew();
   auto ref = *v.asRef();
-  tvIncRef(&ref);
+  tvIncRefCountable(&ref);
   return EmptyArray::MakePacked(ref).arr_base();
 }
 
@@ -330,7 +330,7 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
 }
 
 ArrayData* EmptyArray::Prepend(ArrayData*, Cell v, bool) {
-  tvRefcountedIncRef(&v);
+  tvIncRefGen(&v);
   return EmptyArray::MakePacked(v).arr_base();
 }
 

@@ -46,6 +46,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
@@ -365,7 +366,7 @@ struct ActiveSubscription {
         make_tv<KindOfString>(str_json_data.get()),
         make_tv<KindOfString>(str_socket_path.get())
       };
-      tvRefcountedDecRef(
+      tvDecRefGen(
           context->invokeFuncFew(func,
                                  nullptr, // thisOrCls
                                  nullptr, // invName

@@ -40,6 +40,7 @@
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/socket.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/ext/mysql/ext_mysql.h"
@@ -1313,7 +1314,7 @@ Variant MySQLStmt::result_metadata() {
   auto cls = Unit::lookupClass(s_mysqli_result.get());
   Object obj{cls};
 
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFunc(cls->getCtor(), args, obj.get())
   );
   return obj;

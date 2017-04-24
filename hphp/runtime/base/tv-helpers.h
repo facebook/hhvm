@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/req-root.h"
 
@@ -45,132 +46,6 @@ ALWAYS_INLINE bool isTypedNum(const TypedValue& tv) {
   return tv.m_type == KindOfInt64 || tv.m_type == KindOfDouble;
 }
 
-/*
- * Returns: true if the supplied TypedValue is a Cell, and either has
- * a non-reference counted type, or is a KindOfString that points to a
- * static string.
- */
-ALWAYS_INLINE bool isUncounted(const TypedValue& tv) {
-  auto const uncounted = !isRefcountedType(tv.m_type) ||
-    (tv.m_type == KindOfString && tv.m_data.pstr->isStatic());
-  if (uncounted) assert(cellIsPlausible(tv));
-  return uncounted;
-}
-
-typedef void(*RawDestructor)(void*);
-extern RawDestructor g_destructors[kDestrTableSize];
-
-/*
- * Returns true if decreffing the specified TypedValue will free heap-allocated
- * data. Note that this function always returns false for non-refcounted types.
- */
-bool tvDecRefWillRelease(const TypedValue* tv);
-
-/*
- * Returns true iff decreffing the specified TypedValue will cause any kind of
- * helper to be called. Note that there are cases where this function returns
- * true but tvDecRefWillRelease() will return false.
- */
-ALWAYS_INLINE bool tvDecRefWillCallHelper(const TypedValue* tv) {
-  return isRefcountedType(tv->m_type) && tv->m_data.pcnt->decWillRelease();
-}
-
-ALWAYS_INLINE void tvDecRefStr(const TypedValue* tv) {
-  assert(tv->m_type == KindOfString);
-  decRefStr(tv->m_data.pstr);
-}
-
-ALWAYS_INLINE void tvDecRefArr(const TypedValue* tv) {
-  assert(tv->m_type == KindOfArray ||
-         tv->m_type == KindOfVec ||
-         tv->m_type == KindOfDict ||
-         tv->m_type == KindOfKeyset);
-  decRefArr(tv->m_data.parr);
-}
-
-ALWAYS_INLINE void tvDecRefObj(const TypedValue* tv) {
-  assert(tv->m_type == KindOfObject);
-  decRefObj(tv->m_data.pobj);
-}
-
-ALWAYS_INLINE void tvDecRefRes(const TypedValue* tv) {
-  assert(tv->m_type == KindOfResource);
-  decRefRes(tv->m_data.pres);
-}
-
-// Assumes 'r' is live and points to a RefData
-ALWAYS_INLINE void tvDecRefRefInternal(RefData* r) {
-  assert(cellIsPlausible(*r->tv()));
-  decRefRef(r);
-}
-
-// Assumes 'tv' is live
-ALWAYS_INLINE void tvDecRefRef(const TypedValue* tv) {
-  assert(tv->m_type == KindOfRef);
-  tvDecRefRefInternal(tv->m_data.pref);
-}
-
-// Assumes 'data' is live
-// Assumes 'isRefcountedType(type)'
-ALWAYS_INLINE void tvDecRefHelper(DataType type, uint64_t datum) noexcept {
-  assert(type == KindOfString || type == KindOfArray ||
-         type == KindOfVec || type == KindOfDict || type == KindOfKeyset ||
-         type == KindOfObject || type == KindOfResource ||
-         type == KindOfRef);
-  TypedValue tmp;
-  tmp.m_type = type;
-  tmp.m_data.num = datum;
-  if (tmp.m_data.pcnt->decReleaseCheck()) {
-    g_destructors[typeToDestrIdx(type)]((void*)datum);
-  }
-}
-
-// Assumes 'tv' is live
-ALWAYS_INLINE void tvRefcountedDecRefHelper(DataType type, uint64_t datum) {
-  if (isRefcountedType(type)) {
-    tvDecRefHelper(type, datum);
-  }
-}
-
-// Assumes 'tv' is live and unlikely to be a refcounted type
-ALWAYS_INLINE void tvUnlikelyRefcountedDecRef(TypedValue tv) {
-  if (UNLIKELY(isRefcountedType(tv.m_type))) {
-    tvDecRefHelper(tv.m_type, tv.m_data.num);
-  }
-}
-
-ALWAYS_INLINE void tvRefcountedDecRef(TypedValue v) {
-  return tvRefcountedDecRefHelper(v.m_type, v.m_data.num);
-}
-
-ALWAYS_INLINE void tvRefcountedDecRefNZ(TypedValue tv) {
-  if (isRefcountedType(tv.m_type)) {
-    tv.m_data.pcnt->decRefCount();
-  }
-}
-
-// Assumes 'tv' is live
-// Assumes 'isRefcountedType(tv->m_type)'
-ALWAYS_INLINE void tvDecRef(const TypedValue* tv) {
-  tvDecRefHelper(tv->m_type, tv->m_data.num);
-}
-
-// Assumes 'tv' is live
-ALWAYS_INLINE void tvRefcountedDecRef(TypedValue* tv) {
-  if (isRefcountedType(tv->m_type)) {
-    tvDecRef(tv);
-    // If we're in debug mode, turn the entry into null so that the GC doesn't
-    // assert if it tries to follow it.
-    if (debug) tv->m_type = KindOfNull;
-  }
-}
-
-// decref when the count is known not to reach zero
-ALWAYS_INLINE void tvDecRefOnly(const TypedValue* tv) {
-  assert(!tvDecRefWillCallHelper(tv));
-  tvRefcountedDecRefNZ(*tv);
-}
-
 // Assumes 'tv' is live
 ALWAYS_INLINE TypedValue* tvBox(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
@@ -181,41 +56,17 @@ ALWAYS_INLINE TypedValue* tvBox(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-// Assumes 'isRefcountedType(tv->m_type)'
-ALWAYS_INLINE void tvIncRef(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  assert(isRefcountedType(tv->m_type));
-  tv->m_data.pcnt->incRefCount();
-}
-
-ALWAYS_INLINE void tvRefcountedIncRef(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (isRefcountedType(tv->m_type)) {
-    tvIncRef(tv);
-  }
-}
-
-// Assumes 'tv' is live
-// Assumes 'isRefcountedType(tv->m_type)'
-// Assumes 'tv' is not shared (ie KindOfRef or KindOfObject)
-ALWAYS_INLINE void tvIncRefNotShared(const TypedValue* tv) {
-  assert(tv->m_type == KindOfObject || tv->m_type == KindOfRef);
-  tv->m_type == KindOfObject ?
-    tv->m_data.pobj->incRefCount() :
-    tv->m_data.pref->incRefCount();
-}
-
-// Assumes 'tv' is live
 // Assumes 'tv.m_type == KindOfRef'
 ALWAYS_INLINE void tvUnbox(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   assert(tv->m_type == KindOfRef);
   RefData* r = tv->m_data.pref;
   TypedValue* innerCell = r->tv();
+  assert(cellIsPlausible(*innerCell));
   tv->m_data.num = innerCell->m_data.num;
   tv->m_type = innerCell->m_type;
-  tvRefcountedIncRef(tv);
-  tvDecRefRefInternal(r);
+  tvIncRefGen(tv);
+  decRefRef(r);
   assert(tvIsPlausible(*tv));
 }
 
@@ -252,7 +103,7 @@ ALWAYS_INLINE void refCopy(const Ref fr, Ref& to) {
  */
 ALWAYS_INLINE void tvDup(const TypedValue& fr, TypedValue& to) {
   tvCopy(fr, to);
-  tvRefcountedIncRef(&to);
+  tvIncRefGen(&to);
 }
 
 /*
@@ -263,7 +114,7 @@ ALWAYS_INLINE void tvDup(const TypedValue& fr, TypedValue& to) {
 ALWAYS_INLINE void cellDup(const Cell fr, Cell& to) {
   assert(cellIsPlausible(fr));
   tvCopy(fr, to);
-  tvRefcountedIncRef(&to);
+  tvIncRefGen(&to);
 }
 
 /*
@@ -336,40 +187,36 @@ ALWAYS_INLINE const Cell* tvAssertCell(const TypedValue* tv) {
 ALWAYS_INLINE void tvSet(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   cellDup(fr, *to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 // like tvSet, but RHS is bool
 ALWAYS_INLINE void tvSetBool(bool val, TypedValue& inTo) {
   Cell* to = tvToCell(&inTo);
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   to->m_type = KindOfBoolean;
   to->m_data.num = val;
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 // like tvSet, but RHS is int
 ALWAYS_INLINE void tvSetInt(int64_t val, TypedValue& inTo) {
   Cell* to = tvToCell(&inTo);
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   to->m_type = KindOfInt64;
   to->m_data.num = val;
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 // like tvSet, but RHS is double
 ALWAYS_INLINE void tvSetDouble(double val, TypedValue& inTo) {
   Cell* to = tvToCell(&inTo);
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   to->m_type = KindOfDouble;
   to->m_data.dbl = val;
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /*
@@ -384,10 +231,9 @@ ALWAYS_INLINE void tvSetDouble(double val, TypedValue& inTo) {
 ALWAYS_INLINE void tvMove(const Cell fr, TypedValue& inTo) {
   assert(cellIsPlausible(fr));
   Cell* to = tvToCell(&inTo);
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   cellCopy(fr, *to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /*
@@ -396,10 +242,9 @@ ALWAYS_INLINE void tvMove(const Cell fr, TypedValue& inTo) {
  * `to' must contain a live php value; use tvWriteNull when it doesn't.
  */
 ALWAYS_INLINE void cellSetNull(Cell& to) {
-  auto const oldType = to.m_type;
-  auto const oldDatum = to.m_data.num;
+  auto const old = to;
   tvWriteNull(&to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /*
@@ -426,10 +271,9 @@ ALWAYS_INLINE void tvSetNull(TypedValue& to) {
  */
 ALWAYS_INLINE void tvSetIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
-  auto const oldType = to.m_type;
-  auto const oldDatum = to.m_data.num;
+  auto const old = to;
   cellDup(fr, to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /*
@@ -458,10 +302,9 @@ ALWAYS_INLINE void cellSet(const Cell fr, Cell& to) {
  */
 ALWAYS_INLINE void tvMoveIgnoreRef(const Cell fr, TypedValue& to) {
   assert(cellIsPlausible(fr));
-  auto const oldType = to.m_type;
-  auto const oldDatum = to.m_data.num;
+  auto const old = to;
   cellCopy(fr, to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /*
@@ -481,19 +324,17 @@ ALWAYS_INLINE void cellMove(const Cell fr, Cell& to) {
 // Assumes that 'fr->m_type == KindOfRef'
 ALWAYS_INLINE void tvBind(const TypedValue* fr, TypedValue* to) {
   assert(fr->m_type == KindOfRef);
-  DataType oldType = to->m_type;
-  uint64_t oldDatum = to->m_data.num;
+  auto const old = *to;
   refDup(*fr, *to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 // Assumes 'to' and 'fr' are live
 ALWAYS_INLINE void tvBindRef(RefData* fr, TypedValue* to) {
-  auto const oldType  = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   fr->incRefCount();
   tvCopy(make_tv<KindOfRef>(fr), *to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /*
@@ -521,10 +362,9 @@ void tvDupWithRef(const TypedValue& frIn, TypedValue& dst) {
 
 // Assumes 'to' is live
 ALWAYS_INLINE void tvUnset(TypedValue* to) {
-  auto const oldType = to->m_type;
-  auto const oldDatum = to->m_data.num;
+  auto const old = *to;
   tvWriteUninit(to);
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(old);
 }
 
 /**
@@ -585,7 +425,7 @@ void tvDupFlattenImpl(const TypedValue* fr, TypedValue* to, Fun shouldFlatten) {
   auto type = fr->m_type;
   if (!isRefcountedType(type)) return;
   if (type != KindOfRef) {
-    tvIncRef(to);
+    tvIncRefCountable(to);
     return;
   }
   auto ref = fr->m_data.pref;
@@ -593,7 +433,10 @@ void tvDupFlattenImpl(const TypedValue* fr, TypedValue* to, Fun shouldFlatten) {
     cellDup(*ref->tv(), *to);
     return;
   }
-  tvIncRefNotShared(to);
+  assert(to->m_type == KindOfObject || to->m_type == KindOfRef);
+  to->m_type == KindOfObject ?
+    to->m_data.pobj->incRefCount() :
+    to->m_data.pref->incRefCount();
 }
 
 // Assumes 'fr' is live and 'to' is dead, and does not mutate to->m_aux
@@ -761,13 +604,6 @@ struct TVCoercionException : std::runtime_error {
 private:
   req::root<TypedValue> m_tv;
 };
-
-// for debugging & instrumentation only! otherwise, stick to the
-// predicates defined in countable.h
-ALWAYS_INLINE RefCount tvGetCount(const TypedValue* tv) {
-  assert(isRefcountedType(tv->m_type));
-  return tv->m_data.pcnt->count();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

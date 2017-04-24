@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/hash.h"
@@ -221,7 +222,7 @@ SetArray* SetArray::CopySet(const SetArray& other, AllocMode mode) {
     auto& elm = elms[i];
     if (UNLIKELY(elm.isTombstone())) continue;
     assert(!elm.isEmpty());
-    tvRefcountedIncRef(&elm.tv);
+    tvIncRefGen(&elm.tv);
   }
 
   assert(ad->m_kind == HeaderKind::Keyset);
@@ -301,7 +302,7 @@ void SetArray::Release(ArrayData* in) {
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
       assert(!elm.isEmpty());
-      tvRefcountedDecRef(&elm.tv);
+      tvDecRefGen(&elm.tv);
     }
 
     /*
@@ -483,7 +484,7 @@ void SetArray::erase(uint32_t* loc) {
 
   auto& elm = elms[pos];
   assert(!elm.isInvalid());
-  tvRefcountedDecRef(&elm.tv);
+  tvDecRefGen(&elm.tv);
   elm.setTombstone();
   --m_size;
 

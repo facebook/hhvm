@@ -2,6 +2,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
@@ -50,7 +51,7 @@ static void mcr_throwException(const std::string& message,
   }
 
   Object obj{c_MCRouterException};
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFunc(c_MCRouterException->getCtor(),
       make_packed_array(message, (int64_t)op, (int64_t)result, key),
       obj.get())
@@ -79,7 +80,7 @@ static void mcr_throwOptionException(
   }
 
   Object obj{c_MCRouterOptionException};
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFunc(
       c_MCRouterOptionException->getCtor(),
       make_packed_array(errorArray),

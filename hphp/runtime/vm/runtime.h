@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
 
@@ -127,12 +128,7 @@ frame_free_locals_helper_inl(ActRec* fp, int numLocals) {
     TRACE_MOD(Trace::runtime, 5,
               "RetC: freeing %d'th local of %d\n", i,
               fp->m_func->numLocals());
-    TypedValue* loc = frame_local(fp, i);
-    DataType t = loc->m_type;
-    if (isRefcountedType(t)) {
-      uint64_t datum = loc->m_data.num;
-      tvDecRefHelper(t, datum);
-    }
+    tvDecRefGen(*frame_local(fp, i));
   }
 }
 
@@ -177,18 +173,7 @@ frame_free_locals_no_this_inl(ActRec* fp, int numLocals, TypedValue* rv) {
 // Helper for iopFCallBuiltin.
 void ALWAYS_INLINE
 frame_free_args(TypedValue* args, int count) {
-  for (auto i = count; i--; ) {
-    TypedValue* loc = args - i;
-    DataType t = loc->m_type;
-    if (isRefcountedType(t)) {
-      uint64_t datum = loc->m_data.num;
-      // We don't have to write KindOfUninit here, because a
-      // debug_backtrace wouldn't be able to see these slots (they are
-      // stack cells).  But note we're also relying on the destructors
-      // not throwing.
-      tvDecRefHelper(t, datum);
-    }
-  }
+  for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
 // If set, releaseUnit will contain a pointer to any extraneous unit created due

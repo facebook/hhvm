@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/strings.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/globals-array.h"
@@ -1176,7 +1177,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
 
   // The caller will inc-ref the returned value, so undo the inc-ref caused by
   // storing it in the cache.
-  tvDecRefOnly(&ret);
+  tvDecRefGenNZ(&ret);
   return ret;
 }
 

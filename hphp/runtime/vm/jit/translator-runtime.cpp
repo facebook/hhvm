@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/zend-functions.h"
 
@@ -97,7 +98,7 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }
-  tvRefcountedDecRef(value);
+  tvDecRefGen(value);
   return r;
 }
 
@@ -114,7 +115,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
@@ -135,7 +136,7 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   decRefStr(key);
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
@@ -150,7 +151,7 @@ ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
 }
 
@@ -166,7 +167,7 @@ ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
   decRefStr(key);
-  tvRefcountedDecRef(&value);
+  tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfDict>(ad, retval, nullptr);
 }
 
@@ -1028,7 +1029,7 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
     // it now.
-    tvRefcountedDecRef(localTvRef);
+    tvDecRefGen(localTvRef);
     return;
   }
 
@@ -1063,7 +1064,7 @@ void bindNewElem(TypedValue* base, RefData* val) {
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
     // it now.
-    tvRefcountedDecRef(localTvRef);
+    tvDecRefGen(localTvRef);
     return;
   }
 

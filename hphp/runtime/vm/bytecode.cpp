@@ -63,6 +63,7 @@
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
@@ -578,7 +579,7 @@ ExtraArgs* ExtraArgs::allocateUninit(unsigned nargs) {
 void ExtraArgs::deallocate(ExtraArgs* ea, unsigned nargs) {
   assert(nargs > 0);
   for (unsigned i = 0; i < nargs; ++i) {
-    tvRefcountedDecRef(ea->m_extraArgs + i);
+    tvDecRefGen(ea->m_extraArgs + i);
   }
   ea->~ExtraArgs();
   req::free(ea);
@@ -1096,7 +1097,7 @@ static void shuffleExtraStackArgs(ActRec* ar) {
       // Incref the args (they're already referenced in extraArgs) but now
       // additionally referenced in varArgsArray ...
       auto tv = tvArgs; uint32_t i = 0;
-      for (; i < numVarArgs; ++i, ++tv) { tvRefcountedIncRef(tv); }
+      for (; i < numVarArgs; ++i, ++tv) { tvIncRefGen(tv); }
       // ... and now remove them from the stack
       stack.ndiscard(numVarArgs);
       auto const ad = varArgsArray.detach();
@@ -1767,7 +1768,7 @@ static inline TypedValue* ratchetRefs(TypedValue* result, TypedValue& tvRef,
   // that we need to stay alive until the next iteration.
   if (tvRef.m_type != KindOfUninit) {
     if (isRefcountedType(tvRef2.m_type)) {
-      tvDecRef(&tvRef2);
+      tvDecRefCountable(&tvRef2);
       TRACE(5, "Ratchet: decref tvref2\n");
       tvWriteUninit(&tvRef2);
     }
@@ -2215,7 +2216,7 @@ OPTBLD_INLINE void implCellBinOp(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = fn(*c2, *c1);
-  tvRefcountedDecRef(c2);
+  tvDecRefGen(c2);
   *c2 = result;
   vmStack().popC();
 }
@@ -2225,7 +2226,7 @@ OPTBLD_INLINE void implCellBinOpBool(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   bool const result = fn(*c2, *c1);
-  tvRefcountedDecRef(c2);
+  tvDecRefGen(c2);
   *c2 = make_tv<KindOfBoolean>(result);
   vmStack().popC();
 }
@@ -2235,7 +2236,7 @@ OPTBLD_INLINE void implCellBinOpInt64(Fn fn) {
   auto const c1 = vmStack().topC();
   auto const c2 = vmStack().indC(1);
   auto const result = fn(*c2, *c1);
-  tvRefcountedDecRef(c2);
+  tvDecRefGen(c2);
   *c2 = make_tv<KindOfInt64>(result);
   vmStack().popC();
 }
@@ -2703,42 +2704,42 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base, int veclen,
             case KindOfRef:
               not_reached();
           }
-          tvRefcountedDecRef(val);
+          if (val->m_type == KindOfString) tvDecRefStr(val);
           return;
         }
 
         case KindOfVec:
-          tvDecRef(val);
+          tvDecRefArr(val);
         case KindOfPersistentVec:
           match = SwitchMatch::DEFAULT;
           return;
 
         case KindOfDict:
-          tvDecRef(val);
+          tvDecRefArr(val);
         case KindOfPersistentDict:
           match = SwitchMatch::DEFAULT;
           return;
 
         case KindOfKeyset:
-          tvDecRef(val);
+          tvDecRefArr(val);
         case KindOfPersistentKeyset:
           match = SwitchMatch::DEFAULT;
           return;
 
         case KindOfArray:
-          tvDecRef(val);
+          tvDecRefArr(val);
         case KindOfPersistentArray:
           match = SwitchMatch::DEFAULT;
           return;
 
         case KindOfObject:
           intval = val->m_data.pobj->toInt64();
-          tvDecRef(val);
+          tvDecRefObj(val);
           return;
 
         case KindOfResource:
           intval = val->m_data.pres->data()->o_toInt64();
-          tvDecRef(val);
+          tvDecRefRes(val);
           return;
 
         case KindOfRef:
@@ -3075,10 +3076,10 @@ OPTBLD_INLINE void cgetn_body(bool warn) {
   SCOPE_EXIT { decRefStr(name); };
   if (fr == nullptr || fr->m_type == KindOfUninit) {
     if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    tvRefcountedDecRef(to);
+    tvDecRefGen(to);
     tvWriteNull(to);
   } else {
-    tvRefcountedDecRef(to);
+    tvDecRefGen(to);
     cgetl_inner_body(fr, to);
   }
 }
@@ -3096,14 +3097,14 @@ OPTBLD_INLINE void cgetg_body(bool warn) {
     if (warn && MoreWarnings) {
       raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
     }
-    tvRefcountedDecRef(to);
+    tvDecRefGen(to);
     tvWriteNull(to);
   } else if (fr->m_type == KindOfUninit) {
     if (warn) raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    tvRefcountedDecRef(to);
+    tvDecRefGen(to);
     tvWriteNull(to);
   } else {
-    tvRefcountedDecRef(to);
+    tvDecRefGen(to);
     cgetl_inner_body(fr, to);
   }
 }
@@ -3132,7 +3133,7 @@ SpropState::SpropState(Stack& vmstack, clsref_slot slot) {
 
 SpropState::~SpropState() {
   decRefStr(name);
-  tvRefcountedDecRef(oldNameCell);
+  tvDecRefGen(oldNameCell);
 }
 
 template<bool box> void getS(clsref_slot slot) {
@@ -3429,8 +3430,8 @@ static OPTBLD_INLINE void mFinal(MInstrState& mstate,
   for (auto i = 0; i < nDiscard; ++i) stack.popTV();
   if (result) tvCopy(*result, *stack.allocTV());
 
-  tvUnlikelyRefcountedDecRef(mstate.tvRef);
-  tvUnlikelyRefcountedDecRef(mstate.tvRef2);
+  tvDecRefGenUnlikely(mstate.tvRef);
+  tvDecRefGenUnlikely(mstate.tvRef2);
 }
 
 static OPTBLD_INLINE
@@ -3502,7 +3503,7 @@ OPTBLD_FLT_INLINE void iopSetM(intva_t nDiscard, MemberKey mk) {
     if (mcodeIsElem(mk.mcode)) {
       auto const result = SetElem<true>(mstate.base, key, topC);
       if (result) {
-        tvRefcountedDecRef(topC);
+        tvDecRefGen(topC);
         topC->m_type = KindOfString;
         topC->m_data.pstr = result;
       }
@@ -3550,7 +3551,7 @@ OPTBLD_INLINE void iopSetOpM(intva_t nDiscard, SetOpOp subop, MemberKey mk) {
 
   vmStack().popC();
   result = tvToCell(result);
-  tvRefcountedIncRef(result);
+  tvIncRefGen(result);
   mFinal(mstate, nDiscard, *result);
 }
 
@@ -3648,7 +3649,7 @@ OPTBLD_INLINE void iopVGetN() {
   lookupd_var(vmfp(), name, to, fr);
   SCOPE_EXIT { decRefStr(name); };
   assert(fr != nullptr);
-  tvRefcountedDecRef(to);
+  tvDecRefGen(to);
   vgetl_body(fr, to);
 }
 
@@ -3659,7 +3660,7 @@ OPTBLD_INLINE void iopVGetG() {
   lookupd_gbl(vmfp(), name, to, fr);
   SCOPE_EXIT { decRefStr(name); };
   assert(fr != nullptr);
-  tvRefcountedDecRef(to);
+  tvDecRefGen(to);
   vgetl_body(fr, to);
 }
 
@@ -3747,7 +3748,7 @@ OPTBLD_INLINE void iopIsTypeC(IsTypeOp op) {
   TypedValue* topTv = vmStack().topTV();
   assert(topTv->m_type != KindOfRef);
   bool ret = isTypeHelper(topTv, op);
-  tvRefcountedDecRef(topTv);
+  tvDecRefGen(topTv);
   topTv->m_data.num = ret;
   topTv->m_type = KindOfBoolean;
 }
@@ -3908,7 +3909,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
       case MK::Str:
       case MK::StrOrNull:
         if (tvIsString(loc.ptr)) {
-          tvRefcountedIncRef(loc.ptr);
+          tvIncRefGen(loc.ptr);
           return *loc.ptr;
         } else {
           assertx(loc.ptr->m_type == KindOfNull);
@@ -3916,7 +3917,7 @@ OPTBLD_INLINE void iopGetMemoKeyL(local_var loc) {
         }
       case MK::IntOrStr:
         assertx(tvIsString(loc.ptr) || loc.ptr->m_type == KindOfInt64);
-        tvRefcountedIncRef(loc.ptr);
+        tvIncRefGen(loc.ptr);
         return *loc.ptr;
       case MK::None:
         // Use the generic scheme, which is performed by
@@ -3956,7 +3957,7 @@ OPTBLD_INLINE void iopIdx() {
                                      tvAsCVarRef(def));
     vmStack().popTV();
   } else if (isNullType(key->m_type)) {
-    tvRefcountedDecRef(arr);
+    tvDecRefGen(arr);
     *arr = *def;
     vmStack().ndiscard(2);
     return;
@@ -3969,7 +3970,7 @@ OPTBLD_INLINE void iopIdx() {
     vmStack().popTV();
   }
   vmStack().popTV();
-  tvRefcountedDecRef(arr);
+  tvDecRefGen(arr);
   *arr = result;
 }
 
@@ -3983,7 +3984,7 @@ OPTBLD_INLINE void iopArrayIdx() {
                                               tvAsCVarRef(def));
   vmStack().popTV();
   vmStack().popTV();
-  tvRefcountedDecRef(arr);
+  tvDecRefGen(arr);
   *arr = result;
 }
 
@@ -4035,7 +4036,7 @@ OPTBLD_INLINE void iopSetS(clsref_slot slot) {
                 name->data());
   }
   tvSet(*tv1, *val);
-  tvRefcountedDecRef(propn);
+  tvDecRefGen(propn);
   memcpy(output, tv1, sizeof(TypedValue));
   vmStack().ndiscard(1);
 }
@@ -4044,7 +4045,7 @@ OPTBLD_INLINE void iopSetOpL(local_var loc, SetOpOp op) {
   Cell* fr = vmStack().topC();
   Cell* to = tvToCell(loc.ptr);
   setopBody(to, op, fr);
-  tvRefcountedDecRef(fr);
+  tvDecRefGen(fr);
   cellDup(*to, *fr);
 }
 
@@ -4058,8 +4059,8 @@ OPTBLD_INLINE void iopSetOpN(SetOpOp op) {
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
   setopBody(tvToCell(to), op, fr);
-  tvRefcountedDecRef(fr);
-  tvRefcountedDecRef(tv2);
+  tvDecRefGen(fr);
+  tvDecRefGen(tv2);
   cellDup(*tvToCell(to), *tv2);
   vmStack().discard();
 }
@@ -4074,8 +4075,8 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
   SCOPE_EXIT { decRefStr(name); };
   assert(to != nullptr);
   setopBody(tvToCell(to), op, fr);
-  tvRefcountedDecRef(fr);
-  tvRefcountedDecRef(tv2);
+  tvDecRefGen(fr);
+  tvDecRefGen(tv2);
   cellDup(*tvToCell(to), *tv2);
   vmStack().discard();
 }
@@ -4096,8 +4097,8 @@ OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot slot) {
                 name->data());
   }
   setopBody(tvToCell(val), op, fr);
-  tvRefcountedDecRef(propn);
-  tvRefcountedDecRef(fr);
+  tvDecRefGen(propn);
+  tvDecRefGen(fr);
   cellDup(*tvToCell(val), *output);
   vmStack().ndiscard(1);
 }
@@ -4122,7 +4123,7 @@ OPTBLD_INLINE void iopIncDecN(IncDecOp op) {
   auto oldNameCell = *nameCell;
   SCOPE_EXIT {
     decRefStr(name);
-    tvRefcountedDecRef(oldNameCell);
+    tvDecRefGen(oldNameCell);
   };
   assert(local != nullptr);
   cellCopy(IncDecBody(op, tvToCell(local)), *nameCell);
@@ -4136,7 +4137,7 @@ OPTBLD_INLINE void iopIncDecG(IncDecOp op) {
   auto oldNameCell = *nameCell;
   SCOPE_EXIT {
     decRefStr(name);
-    tvRefcountedDecRef(oldNameCell);
+    tvDecRefGen(oldNameCell);
   };
   assert(gbl != nullptr);
   cellCopy(IncDecBody(op, tvToCell(gbl)), *nameCell);
@@ -4199,7 +4200,7 @@ OPTBLD_INLINE void iopBindS(clsref_slot slot) {
                 name->data());
   }
   tvBind(fr, val);
-  tvRefcountedDecRef(propn);
+  tvDecRefGen(propn);
   memcpy(output, fr, sizeof(TypedValue));
   vmStack().ndiscard(1);
 }
@@ -4693,7 +4694,7 @@ OPTBLD_INLINE void doFPushCuf(int32_t numArgs, bool forward, bool safe) {
     ar->trashVarEnv();
   }
   setTypesFlag(vmfp(), ar);
-  tvRefcountedDecRef(&func);
+  tvDecRefGen(&func);
 }
 
 OPTBLD_INLINE void iopFPushCuf(intva_t numArgs) {
@@ -4918,7 +4919,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
         raise_warning_unsampled("Only containers may be unpacked");
         c1->m_type = KindOfPersistentArray;
         c1->m_data.parr = staticEmptyArray();
-        tvRefcountedDecRef(&tmp);
+        tvDecRefGen(&tmp);
         break;
       }
     }
@@ -4929,7 +4930,7 @@ static bool doFCallArray(PC& pc, int numStackValues,
     Cell args = *c1;
     vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
     numStackValues--;
-    SCOPE_EXIT { tvRefcountedDecRef(&args); };
+    SCOPE_EXIT { tvDecRefGen(&args); };
     checkStack(vmStack(), func, 0);
 
     assert(!ar->resumed());
@@ -4996,8 +4997,8 @@ OPTBLD_INLINE void iopCufSafeArray() {
 
 OPTBLD_INLINE void iopCufSafeReturn() {
   bool ok = cellToBool(*tvToCell(vmStack().top() + 1));
-  tvRefcountedDecRef(vmStack().top() + 1);
-  tvRefcountedDecRef(vmStack().top() + (ok ? 2 : 0));
+  tvDecRefGen(vmStack().top() + 1);
+  tvDecRefGen(vmStack().top() + (ok ? 2 : 0));
   if (ok) vmStack().top()[2] = vmStack().top()[0];
   vmStack().ndiscard(2);
 }
@@ -5321,11 +5322,11 @@ OPTBLD_INLINE void iopCheckThis() {
 }
 
 OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
-  tvRefcountedDecRef(thisLoc.ptr);
+  tvDecRefGen(thisLoc.ptr);
   if (vmfp()->func()->cls() && vmfp()->hasThis()) {
     thisLoc->m_data.pobj = vmfp()->getThis();
     thisLoc->m_type = KindOfObject;
-    tvIncRef(thisLoc.ptr);
+    tvIncRefCountable(thisLoc.ptr);
   } else {
     tvWriteUninit(thisLoc.ptr);
   }
@@ -5671,7 +5672,7 @@ OPTBLD_INLINE void iopContAssignDelegate(Iter* iter) {
   vmStack().discard();
   auto gen = frame_generator(vmfp());
   if (UNLIKELY(!typeIsValidGeneratorDelegate(param.m_type))) {
-    tvRefcountedDecRef(param);
+    tvDecRefGen(param);
     SystemLib::throwErrorObject(
       "Can use \"yield from\" only with arrays and Traversables"
     );

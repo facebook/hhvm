@@ -9,6 +9,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/sort-helpers.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -95,7 +96,7 @@ BaseVector::php_map(const Variant& callback) {
     TypedValue* tv = &nv->data()[i];
     *tv = g_context->invokeFuncFew(ctx, argc, argv);
     if (UNLIKELY(version != m_version)) {
-      tvRefcountedDecRef(tv);
+      tvDecRefGen(tv);
       throw_collection_modified();
     }
     nv->incSize();
@@ -593,14 +594,13 @@ void c_Vector::clear() {
 void c_Vector::removeKey(int64_t k) {
   if (!contains(k)) return;
   mutateAndBump();
-  uint64_t datum = data()[k].m_data.num;
-  DataType t = data()[k].m_type;
+  auto const old = data()[k];
   if (k+1 < m_size) {
     memmove(&data()[k], &data()[k+1],
             (m_size-(k+1)) * sizeof(TypedValue));
   }
   decSize();
-  tvRefcountedDecRefHelper(t, datum);
+  tvDecRefGen(old);
 }
 
 void c_Vector::addAllKeysOf(const Variant& container) {
@@ -647,7 +647,7 @@ void c_Vector::resize(int64_t sz, const Cell* val) {
   if (m_size > requestedSize) {
     do {
       decSize();
-      tvRefcountedDecRef(&data()[m_size]);
+      tvDecRefGen(&data()[m_size]);
     } while (m_size > requestedSize);
   } else {
     for (; m_size < requestedSize; incSize()) {
@@ -673,10 +673,9 @@ void c_Vector::splice(int64_t startPos, int64_t endPos) {
   // Null out each element before decreffing it. We need to do this in case
   // a __destruct method reenters and accesses this Vector object.
   for (int64_t i = startPos; i < endPos; ++i) {
-    uint64_t datum = data()[i].m_data.num;
-    DataType t = data()[i].m_type;
+    auto const old = data()[i];
     tvWriteNull(&data()[i]);
-    tvRefcountedDecRefHelper(t, datum);
+    tvDecRefGen(old);
   }
   // Move elements that came after the deleted elements (if there are any)
   if (endPos < m_size) {

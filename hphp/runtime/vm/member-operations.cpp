@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/member-operations.h"
 
+#include "hphp/runtime/base/tv-refcount.h"
+
 namespace HPHP {
 
 const StaticString
@@ -129,7 +131,7 @@ bool objOffsetEmpty(
 
   auto value = objOffsetGet(base, offset, false);
   auto result = !cellToBool(*tvToCell(&value));
-  tvRefcountedDecRef(value);
+  tvDecRefGen(value);
   return result;
 }
 
@@ -208,7 +210,7 @@ Cell incDecBodySlow(IncDecOp op, Cell* fr) {
   assert(cellIsPlausible(*fr));
   assert(fr->m_type != KindOfUninit);
 
-  auto dup = [&]() { tvRefcountedIncRef(fr); return *fr; };
+  auto dup = [&]() { tvIncRefGen(fr); return *fr; };
 
   switch (op) {
   case IncDecOp::PreInc:

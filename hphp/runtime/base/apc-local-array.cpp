@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-conversions.h"
 
 namespace HPHP {
@@ -107,7 +108,7 @@ APCLocalArray::~APCLocalArray() {
   if (m_localCache) {
     for (TypedValue* tv = m_localCache, *end = tv + m_arr->capacity();
          tv < end; ++tv) {
-      tvRefcountedDecRef(tv);
+      tvDecRefGen(tv);
     }
     req::free(m_localCache);
   }
@@ -321,7 +322,7 @@ Cell APCLocalArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asApcArray(ad);
   Variant k = a->m_arr->getKey(pos);
   auto const tv = k.asTypedValue();
-  tvRefcountedIncRef(tv);
+  tvIncRefGen(tv);
   return *tv;
 }
 

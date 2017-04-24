@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/spl/ext_spl.h"
 #include "hphp/runtime/vm/func.h"
@@ -43,9 +44,9 @@ Generator::~Generator() {
   }
 
   assert(getState() != State::Running);
-  tvRefcountedDecRef(m_key);
-  tvRefcountedDecRef(m_value);
-  tvRefcountedDecRef(m_delegate);
+  tvDecRefGen(m_key);
+  tvDecRefGen(m_value);
+  tvDecRefGen(m_delegate);
 
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
@@ -103,7 +104,7 @@ void Generator::yield(Offset resumeOffset,
 
   if (key) {
     cellSet(*key, m_key);
-    tvRefcountedDecRefNZ(*key);
+    tvDecRefGenNZ(*key);
     if (m_key.m_type == KindOfInt64) {
       int64_t new_index = m_key.m_data.num;
       m_index = new_index > m_index ? new_index : m_index;
@@ -112,7 +113,7 @@ void Generator::yield(Offset resumeOffset,
     cellSet(make_tv<KindOfInt64>(++m_index), m_key);
   }
   cellSet(value, m_value);
-  tvRefcountedDecRefNZ(value);
+  tvDecRefGenNZ(value);
 
   setState(State::Started);
 }

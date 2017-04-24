@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-conversions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -1157,7 +1158,7 @@ inline void SetElemScalar(Cell* value) {
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
-  tvRefcountedDecRef((TypedValue*)value);
+  tvDecRefGen((TypedValue*)value);
   tvWriteNull((TypedValue*)value);
 }
 
@@ -1197,7 +1198,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
   if (baseLen == 0) {
     SetElemEmptyish<keyType>(base, key, value);
     if (!setResult) {
-      tvRefcountedIncRef(value);
+      tvIncRefGen(value);
       throw InvalidSetMException(*value);
     }
     return nullptr;
@@ -1211,7 +1212,7 @@ inline StringData* SetElemString(TypedValue* base, key_type<keyType> key,
     if (!setResult) {
       throw InvalidSetMException(make_tv<KindOfNull>());
     }
-    tvRefcountedDecRef(value);
+    tvDecRefGen(value);
     tvWriteNull(value);
     return nullptr;
   }
@@ -1382,7 +1383,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
   raise_warning("Illegal offset type");
   // Assignment failed, so the result is null rather than the RHS.
   if (setResult) {
-    tvRefcountedDecRef(value);
+    tvDecRefGen(value);
     tvWriteNull(value);
   } else {
     throw InvalidSetMException(make_tv<KindOfNull>());
@@ -1597,7 +1598,7 @@ inline void SetNewElemScalar(Cell* value) {
   if (!setResult) {
     throw InvalidSetMException(make_tv<KindOfNull>());
   }
-  tvRefcountedDecRef((TypedValue*)value);
+  tvDecRefGen((TypedValue*)value);
   tvWriteNull((TypedValue*)value);
 }
 
@@ -2104,7 +2105,7 @@ inline Cell IncDecElem(
       }
 
       auto const dest = IncDecBody(op, result);
-      tvRefcountedDecRef(localTvRef);
+      tvDecRefGen(localTvRef);
       return dest;
     }
 
@@ -2849,7 +2850,7 @@ template <bool setResult>
 inline void SetPropNull(Cell* val) {
   raise_warning("Cannot access property on non-object");
   if (setResult) {
-    tvRefcountedDecRef(val);
+    tvDecRefGen(val);
     tvWriteNull(val);
   } else {
     throw InvalidSetMException(make_tv<KindOfNull>());

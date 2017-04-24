@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -340,13 +341,12 @@ struct HashCollection : ObjectData {
     for (auto i = posLimit(); i > begin; --i) {
       auto& e = data()[i - 1];
       auto tv = &e.data;
-      auto oldType = tv->m_type;
-      auto oldDatum = tv->m_data.num;
+      auto const old = *tv;
       tv->m_type = kInvalidDataType;
       decSize();
       setPosLimit(i - 1);
       if (e.hasStrKey()) decRefStr(e.skey);
-      tvRefcountedDecRefHelper(oldType, oldDatum);
+      tvDecRefGen(old);
     }
   }
 
@@ -499,7 +499,7 @@ struct HashCollection : ObjectData {
     assert(!isTombstoneType(frE.data.m_type));
     memcpy(&toE, &frE, sizeof(Elm));
     if (toE.hasStrKey()) toE.skey->incRefCount();
-    tvRefcountedIncRef(&toE.data);
+    tvIncRefGen(&toE.data);
   }
 
   MixedArray* arrayData() { return m_arr; }

@@ -39,6 +39,7 @@ SOFTWARE.
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/utf8-decode.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -317,7 +318,7 @@ NEVER_INLINE
 static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
   assert(begin <= end);
   for (auto tv = begin; tv != end; ++tv) {
-    tvRefcountedDecRef(tv);
+    tvDecRefGen(tv);
   }
 }
 

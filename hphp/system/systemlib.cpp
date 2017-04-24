@@ -31,9 +31,7 @@ namespace {
 ALWAYS_INLINE
 Object createAndConstruct(Class* cls, const Variant& args) {
   Object inst{cls};
-  tvRefcountedDecRef(
-    g_context->invokeFunc(cls->getCtor(), args, inst.get())
-  );
+  tvDecRefGen(g_context->invokeFunc(cls->getCtor(), args, inst.get()));
   return inst;
 }
 

@@ -17,6 +17,7 @@
 #define incl_HPHP_MINSTR_HELPERS_H_
 
 #include "hphp/runtime/base/ref-data.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 
@@ -124,14 +125,14 @@ inline TypedValue cGetRefShuffle(const TypedValue& localTvRef,
                                  const TypedValue* result) {
   if (LIKELY(result != &localTvRef)) {
     result = tvToCell(result);
-    tvRefcountedIncRef(result);
+    tvIncRefGen(result);
   } else {
     // If a magic getter or array access method returned by reference, we have
     // to incref the inner cell and drop our reference to the RefData.
     // Otherwise we do nothing, since we already own a reference to result.
     if (UNLIKELY(localTvRef.m_type == KindOfRef)) {
       auto inner = *localTvRef.m_data.pref->tv();
-      tvRefcountedIncRef(&inner);
+      tvIncRefGen(&inner);
       decRefRef(localTvRef.m_data.pref);
       return inner;
     }
@@ -245,7 +246,7 @@ void bindPropImpl(RefData* val, PropImpl prop_impl) {
   if (UNLIKELY(prop == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
     // it now.
-    tvRefcountedDecRef(localTvRef);
+    tvDecRefGen(localTvRef);
   } else {
     tvBindRef(val, prop);
   }
@@ -1027,7 +1028,7 @@ ISSET_EMPTY_ELEM_HELPER_TABLE(X)
 template<KeyType keyType>
 TypedValue mapGetImpl(c_Map* map, key_type<keyType> key) {
   TypedValue* ret = map->at(key);
-  tvRefcountedIncRef(ret);
+  tvIncRefGen(ret);
   return *ret;
 }
 

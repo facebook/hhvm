@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/vm/func.h"
@@ -137,16 +138,6 @@ bool tvIsPlausible(TypedValue tv) {
 bool refIsPlausible(const Ref ref) {
   assert(ref.m_type == KindOfRef);
   return tvIsPlausible(ref);
-}
-
-bool tvDecRefWillRelease(const TypedValue* tv) {
-  if (!isRefcountedType(tv->m_type)) {
-    return false;
-  }
-  if (tv->m_type == KindOfRef) {
-    return tv->m_data.pref->getRealCount() <= 1;
-  }
-  return tv->m_data.pcnt->decWillRelease();
 }
 
 void tvCastToBooleanInPlace(TypedValue* tv) {
@@ -1050,7 +1041,7 @@ void tvCastToResourceInPlace(TypedValue* tv) {
       case KindOfKeyset:
       case KindOfArray:
       case KindOfObject:
-        tvDecRef(tv);
+        tvDecRefCountable(tv);
         continue;
       case KindOfResource:
         // no op, return

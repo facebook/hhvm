@@ -19,6 +19,8 @@
 #error "This should only be included by ext_waitable-wait-handle.h"
 #endif
 
+#include "hphp/runtime/base/tv-refcount.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -32,7 +34,7 @@ c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind,
 inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
   switch (getState()) {
     case STATE_SUCCEEDED:
-      tvRefcountedDecRef(&m_resultOrException);
+      tvDecRefGen(&m_resultOrException);
       break;
 
     case STATE_FAILED:

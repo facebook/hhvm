@@ -33,8 +33,8 @@ static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
   if (!isRefcountedType(zvalue->tv()->m_type)) {
     return;
   }
-  bool willRelease = tvDecRefWillRelease(zvalue->tv());
-  tvDecRefHelper(zvalue->tv()->m_type, zvalue->tv()->m_data.num);
+  bool willRelease = tvDecRefWillRelease(*zvalue->tv());
+  tvDecRefCountable(zvalue->tv());
   if (willRelease) {
     zvalue->tv()->m_type = HPHP::KindOfNull;
     zvalue->tv()->m_data.num = 0;

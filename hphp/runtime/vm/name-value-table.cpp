@@ -19,6 +19,7 @@
 #include <limits>
 #include <folly/Bits.h>
 
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -83,7 +84,7 @@ NameValueTable::~NameValueTable() {
     if (elm->m_name) {
       decRefStr(const_cast<StringData*>(elm->m_name));
       if (elm->m_tv.m_type != kNamedLocalDataType) {
-        tvRefcountedDecRef(elm->m_tv);
+        tvDecRefGen(elm->m_tv);
       }
     }
   }

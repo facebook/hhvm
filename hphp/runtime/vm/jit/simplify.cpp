@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -3329,7 +3330,7 @@ SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
       ThrowAllErrorsSetter taes;
       auto const key =
         HHVM_FN(serialize_memoize_param)(*src->variantVal().asTypedValue());
-      SCOPE_EXIT { tvRefcountedDecRef(key); };
+      SCOPE_EXIT { tvDecRefGen(key); };
       assertx(cellIsPlausible(key));
       if (tvIsString(&key)) {
         return cns(env, makeStaticString(key.m_data.pstr));

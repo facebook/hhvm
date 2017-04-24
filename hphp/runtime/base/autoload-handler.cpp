@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/unit.h"
@@ -256,7 +257,7 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       auto const unit = lookupUnit(fName.get(), "", &initial);
       if (unit) {
         if (initial) {
-          tvRefcountedDecRef(
+          tvDecRefGen(
             ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
                            nullptr, nullptr, nullptr, nullptr,
                            ExecutionContext::InvokePseudoMain)

@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
@@ -349,7 +350,7 @@ void PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad,
         throwRefInvalidArrayValueException(ad);
       }
     }
-    tvRefcountedIncRef(pTv);
+    tvIncRefGen(pTv);
   }
 }
 
@@ -637,7 +638,7 @@ void PackedArray::Release(ArrayData* ad) {
   auto const data = packedData(ad);
   auto const stop = data + size;
   for (auto ptr = data; ptr != stop; ++ptr) {
-    tvRefcountedDecRef(ptr);
+    tvDecRefGen(ptr);
   }
   if (UNLIKELY(strong_iterators_exist())) {
     free_strong_iterators(ad);
@@ -966,11 +967,10 @@ PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
     if (UNLIKELY(strong_iterators_exist())) {
       adjustMArrayIter(ad, oldSize - 1);
     }
-    auto const oldType = tv.m_type;
-    auto const oldDatum = tv.m_data.num;
+    auto const oldTV = tv;
     ad->m_size = oldSize - 1;
     ad->m_pos = 0;
-    tvRefcountedDecRefHelper(oldType, oldDatum);
+    tvDecRefGen(oldTV);
     return ad;
   }
   throwVecUnsetException();
@@ -1140,11 +1140,10 @@ ArrayData* PackedArray::Pop(ArrayData* adIn, Variant& value) {
   if (UNLIKELY(strong_iterators_exist())) {
     adjustMArrayIter(ad, oldSize - 1);
   }
-  auto const oldType = tv.m_type;
-  auto const oldDatum = tv.m_data.num;
+  auto const oldTV = tv;
   ad->m_size = oldSize - 1;
   ad->m_pos = 0;
-  tvRefcountedDecRefHelper(oldType, oldDatum);
+  tvDecRefGen(oldTV);
   return ad;
 }
 

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
@@ -221,7 +222,7 @@ struct Variant : private TypedValue {
   Variant(const Variant& v, CellDup) noexcept {
     m_type = v.m_type;
     m_data = v.m_data;
-    tvRefcountedIncRef(asTypedValue());
+    tvIncRefGen(asTypedValue());
   }
 
   Variant(StrongBind, Variant& v) { constructRefHelper(v); }
@@ -331,7 +332,7 @@ struct Variant : private TypedValue {
   }
 
   ALWAYS_INLINE ~Variant() noexcept {
-    tvRefcountedDecRef(asTypedValue());
+    tvDecRefGen(asTypedValue());
     if (debug) {
       memset(this, kTVTrashFill2, sizeof(*this));
     }
@@ -356,10 +357,9 @@ struct Variant : private TypedValue {
    * Break bindings and set to uninit.
    */
   void unset() {
-    auto const d = m_data.num;
-    auto const t = m_type;
+    auto const old = *asTypedValue();
     m_type = KindOfUninit;
-    tvRefcountedDecRefHelper(t, d);
+    tvDecRefGen(old);
   }
 
   /**
@@ -1156,18 +1156,17 @@ struct Variant : private TypedValue {
     // An early check for self == other here would be faster in that case, but
     // slows down the frequent case of self != other.
     // The following code is correct even if self == other.
-    const DataType stype = self->m_type;
-    const Value sdata = self->m_data;
+    auto const oldSelf = *self->asTypedValue();
     const DataType otype = other->m_type;
     if (UNLIKELY(otype == KindOfUninit)) {
       self->m_type = KindOfNull;
     } else {
       const Value odata = other->m_data;
-      tvRefcountedIncRef(other);
+      tvIncRefGen(other);
       self->m_data = odata;
       self->m_type = otype;
     }
-    tvRefcountedDecRefHelper(stype, sdata.num);
+    tvDecRefGen(oldSelf);
   }
 
  private:
@@ -1187,11 +1186,10 @@ struct Variant : private TypedValue {
     PromoteToRef(v);
     RefData* r = v.m_data.pref;
     r->incRefCount(); // in case destruct() triggers deletion of v
-    auto const d = m_data.num;
-    auto const t = m_type;
+    auto const old = *asTypedValue();
     m_type = KindOfRef;
     m_data.pref = r;
-    tvRefcountedDecRefHelper(t, d);
+    tvDecRefGen(old);
   }
 
   ALWAYS_INLINE void constructRefHelper(Variant& v) {
@@ -1211,7 +1209,7 @@ struct Variant : private TypedValue {
     if (other->m_type == KindOfUninit) {
       m_type = KindOfNull;
     } else {
-      tvRefcountedIncRef(other);
+      tvIncRefGen(other);
       m_type = other->m_type;
       m_data = other->m_data;
     }
@@ -1223,7 +1221,7 @@ struct Variant : private TypedValue {
     assert(v.m_type == KindOfRef);
     m_type = v.m_data.pref->tv()->m_type; // Can't be KindOfUninit.
     m_data = v.m_data.pref->tv()->m_data;
-    tvRefcountedIncRef(asTypedValue());
+    tvIncRefGen(asTypedValue());
     decRefRef(v.m_data.pref);
     v.m_type = KindOfNull;
   }
@@ -1236,16 +1234,15 @@ struct Variant : private TypedValue {
     const Variant& rhs =
       v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
         ? *v.m_data.pref->var() : v;
-    tvRefcountedIncRef(rhs.asTypedValue());
-    auto const d = m_data.num;
-    auto const t = m_type;
+    tvIncRefGen(rhs.asTypedValue());
+    auto const old = *asTypedValue();
     if (rhs.m_type == KindOfUninit) {
       m_type = KindOfNull; // drop uninit
     } else {
       m_type = rhs.m_type;
       m_data.num = rhs.m_data.num;
     }
-    if (destroy) tvRefcountedDecRefHelper(t, d);
+    if (destroy) tvDecRefGen(old);
   }
 
   ALWAYS_INLINE

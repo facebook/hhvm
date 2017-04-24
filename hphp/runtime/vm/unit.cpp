@@ -50,6 +50,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -1765,7 +1766,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                 // local scope.
               }
             }
-            tvRefcountedDecRef(
+            tvDecRefGen(
               g_context->invokeFunc(unit->getMain(nullptr),
                                     init_null_variant,
                                     nullptr, nullptr, ve)

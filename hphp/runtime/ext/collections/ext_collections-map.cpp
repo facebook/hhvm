@@ -6,6 +6,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -259,7 +260,7 @@ retry:
     auto& e = data()[*p];
     TypedValue old = e.data;
     cellDup(*val, e.data);
-    tvRefcountedDecRef(old);
+    tvDecRefGen(old);
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -291,7 +292,7 @@ retry:
     auto& e = data()[*p];
     TypedValue old = e.data;
     cellDup(*val, e.data);
-    tvRefcountedDecRef(old);
+    tvDecRefGen(old);
     return;
   }
   if (UNLIKELY(isFull())) {

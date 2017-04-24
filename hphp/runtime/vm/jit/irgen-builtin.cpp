@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -615,7 +616,7 @@ SSATmp* opt_foldable(IRGS& env,
                                         nullptr, nullptr,
                                         ExecutionContext::InvokeNormal,
                                         !func->unit()->useStrictTypes());
-    SCOPE_EXIT { tvRefcountedDecRef(retVal); };
+    SCOPE_EXIT { tvDecRefGen(retVal); };
     assertx(tvIsPlausible(retVal));
 
     switch (retVal.m_type) {

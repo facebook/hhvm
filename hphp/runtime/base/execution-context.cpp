@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/system-profiler.h"
@@ -1090,7 +1091,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
   if (!isContainerOrNull(params)) {
     throw_param_is_not_container();
   }
-  tvRefcountedDecRef(invokeFunc(ctor, params, o));
+  tvDecRefGen(invokeFunc(ctor, params, o));
   return o;
 }
 
@@ -2035,7 +2036,7 @@ StrNR ExecutionContext::createFunction(const String& args,
   //   create_function('', '} echo "hi"; if (0) {');
   //
   // We have to eval now to emulate this behavior.
-  tvRefcountedDecRef(
+  tvDecRefGen(
       invokeFunc(unit->getMain(nullptr), init_null_variant,
                  nullptr, nullptr, nullptr, nullptr,
                  InvokePseudoMain)

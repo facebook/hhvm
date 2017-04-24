@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <unicode/uchar.h>
@@ -97,7 +98,7 @@ static UBool enumCharType_callback(CallCtx* ctx,
   args[0].m_data.num = start;
   args[1].m_data.num = limit;
   args[2].m_data.num = type;
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFuncFew(*ctx, 3, args)
   );
   return true;
@@ -165,7 +166,7 @@ static UBool enumCharNames_callback(CallCtx *ctx,
   Variant charName = String(name, length, CopyString);
   tvCopy(*charName.asTypedValue(), args[2]);
 
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFuncFew(*ctx, 3, args)
   );
   return true;

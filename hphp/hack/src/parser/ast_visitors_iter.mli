@@ -86,9 +86,6 @@ class virtual ['b] iter :
         on_Contravariant : 'c -> unit; on_Covariant : 'c -> unit;
         on_Cst_const : 'c -> unit; on_Cst_define : 'c -> unit;
         on_Ctrait : 'c -> unit;
-        on_Def_inline : 'c ->
-                                                Ast_visitors_ancestors.def ->
-                                                unit;
         on_Default : 'c -> Ast_visitors_ancestors.block -> unit;
         on_Diff : 'c -> unit; on_Diff2 : 'c -> unit;
         on_Do : 'c ->
@@ -407,9 +404,6 @@ class virtual ['b] iter :
     method on_Cst_const : 'c -> unit
     method on_Cst_define : 'c -> unit
     method on_Ctrait : 'c -> unit
-    method on_Def_inline :
-      'c ->
-      Ast_visitors_ancestors.def -> unit
     method on_Default : 'c -> Ast_visitors_ancestors.block -> unit
     method on_Diff : 'c -> unit
     method on_Diff2 : 'c -> unit

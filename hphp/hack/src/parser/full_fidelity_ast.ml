@@ -48,7 +48,6 @@ let php_file () = !(lowerer_state.mode) == FileInfo.Mphp
 type env =
   { saw_yield : bool ref
   ; errors    : (Pos.t * string) list ref
-  ; max_depth : int
   }
 
 type +'a parser = node -> env -> 'a
@@ -496,26 +495,6 @@ let rec pHint : hint parser = fun node env ->
     | _ -> missing_syntax "type hint" node env
   in
   get_pos node, pHint_ node env
-
-type fun_hdr =
-  { fh_is_sync         : bool
-  ; fh_name            : pstring
-  ; fh_type_parameters : tparam list
-  ; fh_parameters      : fun_param list
-  ; fh_return_type     : hint option
-  ; fh_param_modifiers : fun_param list
-  ; fh_keep_noop       : bool
-  }
-
-let empty_fun_hdr =
-  { fh_is_sync         = false
-  ; fh_name            = Pos.none, "<ANONYMOUS>"
-  ; fh_type_parameters = []
-  ; fh_parameters      = []
-  ; fh_return_type     = None
-  ; fh_param_modifiers = []
-  ; fh_keep_noop       = false
-  }
 
 let rec pSimpleInitializer node env =
   match syntax node with
@@ -1081,21 +1060,14 @@ and pStmt : stmt parser = fun node env ->
       ))
   | BreakStatement _ -> Break (get_pos node)
   | ContinueStatement _ -> Continue (get_pos node)
-  | _ when env.max_depth > 0 ->
-    (* OCaml optimisers; Forgive them, for they know not what they do!
-     *
-     * The max_depth is only there to stop the *optimised* version from an
-     * unbounded recursion. Sad times.
-     *)
-    Def_inline (pDef node { env with max_depth = env.max_depth - 1 })
   | _ -> missing_syntax "statement" node env
 
-and pTConstraintTy : hint parser = fun node ->
+let pTConstraintTy : hint parser = fun node ->
   match syntax node with
   | TypeConstraint { constraint_type; _ } -> pHint constraint_type
   | _ -> missing_syntax "type constraint" node
 
-and pTConstraint : (constraint_kind * hint) parser = fun node env ->
+let pTConstraint : (constraint_kind * hint) parser = fun node env ->
   match syntax node with
   | TypeConstraint { constraint_keyword; constraint_type } ->
     ( (match token_kind constraint_keyword with
@@ -1108,7 +1080,7 @@ and pTConstraint : (constraint_kind * hint) parser = fun node env ->
     )
   | _ -> missing_syntax "type constraint" node env
 
-and pTParaml : tparam list parser = fun node env ->
+let pTParaml : tparam list parser = fun node env ->
   let pTParam : tparam parser = fun node env ->
     match syntax node with
     | TypeParameter { type_variance; type_name; type_constraints } ->
@@ -1149,7 +1121,7 @@ let empty_fun_hdr =
   }
 
 (* TODO: Translate the where clause *)
-and pFunHdr : fun_hdr parser = fun node env ->
+let pFunHdr : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
     { function_async
@@ -1189,7 +1161,7 @@ and pFunHdr : fun_hdr parser = fun node env ->
   | Token _ -> empty_fun_hdr
   | _ -> missing_syntax "function header" node env
 
-and pClassElt : class_elt list parser = fun node env ->
+let pClassElt : class_elt list parser = fun node env ->
   match syntax node with
   | ConstDeclaration
     { const_abstract; const_type_specifier; const_declarators; _ } ->
@@ -1353,6 +1325,7 @@ and pClassElt : class_elt list parser = fun node env ->
 (*****************************************************************************(
  * Parsing definitions (AST's `def`)
 )*****************************************************************************)
+let rec pDefStmt node env = try Stmt (pStmt node env) with _ -> pDef node env
 and pDef : def parser = fun node env ->
   match syntax node with
   | FunctionDeclaration
@@ -1508,7 +1481,7 @@ and pDef : def parser = fun node env ->
       { syntax = NamespaceBody { namespace_declarations = decls; _ }; _ }
     ; _ } -> Namespace
       ( pos_name name
-      , List.map (fun x -> pDef x env) (as_list decls)
+      , List.map (fun x -> pDefStmt x env) (as_list decls)
       )
   | NamespaceDeclaration { namespace_name = name; _ } ->
     Namespace (pos_name name, [])
@@ -1615,7 +1588,7 @@ let pProgram : program parser = fun node env ->
         }
       | _ -> missing_syntax "DefineExpression:inner" args env
       ) :: aux env nodel
-  | node :: nodel -> pDef node env :: aux env nodel
+  | node :: nodel -> pDefStmt node env :: aux env nodel
   in
   post_process @@ aux env (as_list node)
 
@@ -1766,10 +1739,8 @@ let from_text
     lowerer_state.mode      := fi_mode;
     lowerer_state.popt      := parser_options;
     lowerer_state.ignorePos := ignore_pos;
-    let saw_yield = ref false in
     let errors = ref [] in (* The top-level error list. *)
-    let max_depth = 42 in (* Filthy hack around OCaml bug *)
-    let ast = runP pScript script { saw_yield; errors; max_depth } in
+    let ast = runP pScript script { saw_yield = ref false; errors } in
     let ast =
       if elaborate_namespaces
       then Namespaces.elaborate_defs parser_options ast

@@ -1643,8 +1643,6 @@ module Make (GetLocals : GetLocals) = struct
     | Switch (e, cl)       -> switch_stmt env st e cl
     | Foreach (e, aw, ae, b)-> foreach_stmt env e aw ae b
     | Try (b, cl, fb)      -> try_stmt env st b cl fb
-    | Def_inline _ ->
-      failwith "Naming of inlined definitions not (yet) supported."
     | Expr (cp, Call ((p, Id (fp, fn)), el, uel))
         when fn = SN.SpecialFunctions.invariant ->
       (* invariant is subject to a source-code transform in the HHVM

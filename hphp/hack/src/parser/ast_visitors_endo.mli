@@ -211,10 +211,6 @@ class virtual ['b] endo :
         on_Ctrait : 'c ->
                     Ast_visitors_ancestors.class_kind ->
                     Ast_visitors_ancestors.class_kind;
-        on_Def_inline : 'c ->
-                        Ast_visitors_ancestors.stmt ->
-                        Ast_visitors_ancestors.def ->
-                        Ast_visitors_ancestors.stmt;
         on_Default : 'c ->
                      Ast_visitors_ancestors.case ->
                      Ast_visitors_ancestors.block ->
@@ -983,10 +979,6 @@ class virtual ['b] endo :
     method on_Ctrait :
       'c ->
       Ast_visitors_ancestors.class_kind -> Ast_visitors_ancestors.class_kind
-    method on_Def_inline :
-      'c ->
-      Ast_visitors_ancestors.stmt ->
-      Ast_visitors_ancestors.def -> Ast_visitors_ancestors.stmt
     method on_Default :
       'c ->
       Ast_visitors_ancestors.case ->

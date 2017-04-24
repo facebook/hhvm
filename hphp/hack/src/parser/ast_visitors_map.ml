@@ -500,9 +500,6 @@ class virtual ['self] map =
       let r0 = self#on_block env c0 in
       let r1 = self#on_list self#on_catch env c1 in
       let r2 = self#on_block env c2 in Try (r0, r1, r2)
-    method on_Def_inline env c0 =
-      let r0 = self#on_def env c0 in
-      Def_inline r0
     method on_Noop env = Noop
     method on_stmt env this =
       match this with
@@ -524,8 +521,6 @@ class virtual ['self] map =
       | Switch (c0, c1) -> self#on_Switch env c0 c1
       | Foreach (c0, c1, c2, c3) -> self#on_Foreach env c0 c1 c2 c3
       | Try (c0, c1, c2) -> self#on_Try env c0 c1 c2
-      | Def_inline c0 ->
-        self#on_Def_inline env c0
       | Noop -> self#on_Noop env
     method on_As_v env c0 =
       let r0 = self#on_expr env c0 in As_v r0

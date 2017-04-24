@@ -61,7 +61,6 @@ and terminal_ tcopt nsenv ~in_try = function
   | While _
   | For _
   | Foreach _
-  | Def_inline _
   | Noop
   | Expr _
   | Unsafe
@@ -133,8 +132,7 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Fallthrough
   | Expr _ | Break _ | Continue _ | Throw _
   | Do _ | While _ | For _ | Foreach _
-  | Return _ | GotoLabel _ | Goto _ | Static_var _
-  | Def_inline _ | Noop -> acc
+  | Return _ | GotoLabel _ | Goto _ | Static_var _ | Noop -> acc
   | Block b -> block tcopt acc b
   | If (_, b1, b2) ->
     let term1 = is_terminal tcopt nsenv b1 in

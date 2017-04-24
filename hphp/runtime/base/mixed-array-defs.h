@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/mixed-array.h"
 
+#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-iterator-defs.h"
 #include "hphp/runtime/base/member-lval.h"
@@ -308,7 +309,7 @@ inline ArrayData* MixedArray::addValNoAsserts(StringData* key, Cell data) {
   e.setStrKey(key, h);
   // TODO(#3888164): we should restructure things so we don't have to check
   // KindOfUninit here.
-  initVal(e.data, data);
+  initElem(e.data, data);
   return this;
 }
 

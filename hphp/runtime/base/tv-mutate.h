@@ -20,9 +20,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/ref-data.h"
-#include "hphp/runtime/base/req-root.h"
-#include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -455,119 +452,6 @@ ALWAYS_INLINE TypedValue make_array_like_tv(ArrayData* a) {
   assert(cellIsPlausible(ret));
   return ret;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-/*
- * XXX: This will be moved out in a separate diff.
- */
-
-// Used when adding an array element.
-ALWAYS_INLINE void initVal(TypedValue& tv, Cell v) {
-  cellDup(v, tv);
-  if (UNLIKELY(tv.m_type == KindOfUninit)) {
-    tv.m_type = KindOfNull;
-  }
-}
-
-// Used when changing an array element.
-ALWAYS_INLINE void setVal(TypedValue& tv, Cell src) {
-  auto const dst = tvToCell(&tv);
-  if (UNLIKELY(src.m_type == KindOfUninit)) {
-    src.m_type = KindOfNull;
-  }
-  cellSet(src, *dst);
-}
-
-/*
- * TypedValue conversions that update the tv in place (decrefing and
- * old value, if necessary).
- *
- * CastInPlace will forcibly change the value to the new type
- *   and will not fail. (Though the results may be silly)
- * CoerceInPlace will attempt to convert the type and
- *   return false on failure
- * CoerceOrThrow will attempt to convert the type and
- *   both raise a warning and throw a TVCoercionException on failure
- */
-void cellCastToInt64InPlace(Cell*);
-double tvCastToDouble(const TypedValue* tv);
-StringData* tvCastToString(const TypedValue* tv);
-bool tvCanBeCoercedToNumber(const TypedValue* tv);
-
-/*
- * If the current function (func, a builtin) was called in a strict context then
- * verify that tv is the correct type for argNum or attempt to convert it to
- * the correct type, fataling on failure.
- *
- * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
- * nothing.
- */
-void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
-
-#define X(kind) \
-void tvCastTo##kind##InPlace(TypedValue* tv); \
-bool tvCoerceParamTo##kind##InPlace(TypedValue* tv); \
-void tvCoerceParamTo##kind##OrThrow(TypedValue* tv, \
-                                    const Func* callee, \
-                                    unsigned int arg_num);
-X(Boolean)
-X(Int64)
-X(Double)
-X(String)
-X(Vec)
-X(Dict)
-X(Keyset)
-X(Array)
-X(Object)
-X(NullableObject)
-X(Resource)
-#undef X
-
-ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
-#define X(kind) \
-  if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
-  X(Boolean)
-  X(Int64)
-  X(Double)
-  X(String)
-  X(Vec)
-  X(Dict)
-  X(Keyset)
-  X(Array)
-  X(Object)
-  X(Resource)
-#undef X
-  not_reached();
-}
-
-ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
-#define X(kind) \
-  if (DType == KindOf##kind) return tvCoerceParamTo##kind##InPlace(tv);
-  X(Boolean)
-  X(Int64)
-  X(Double)
-  X(String)
-  X(Vec)
-  X(Dict)
-  X(Keyset)
-  X(Array)
-  X(Object)
-  X(Resource)
-#undef X
-  not_reached();
-}
-
-/*
- * TVCoercionException is thrown to indicate that a parameter could not be
- * coerced when calling an HNI builtin function.
- */
-struct TVCoercionException : std::runtime_error {
-  TVCoercionException(const Func* func, int arg_num,
-                      DataType actual, DataType expected);
-  TypedValue tv() const { return m_tv; }
-private:
-  req::root<TypedValue> m_tv;
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -42,13 +42,16 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 
+#include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unwind.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -1091,6 +1094,55 @@ TypedValue* elemVecIU(TypedValue* base, int64_t key) {
 
 uintptr_t tlsBaseNoInline() {
   return tlsBase();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Sometimes calls to builtin functions are inlined so that the call itself can
+ * occur via CallBuiltin rather than NativeImpl.  In these instances it's
+ * possible that no ActRec was pushed for the builtin call, in which case the
+ * liveFunc() will be the caller rather than the callee.
+ *
+ * If no ActRec was pushed for the builtin function, inspect the caller to
+ * determine if the call used strict types.
+ */
+bool useStrictTypes(const Func* callee) {
+  return liveFunc() == callee
+    ? !liveFrame()->useWeakTypes()
+    : liveUnit()->useStrictTypes() && !liveUnit()->isHHFile();
+}
+
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
+  if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
+             RuntimeOption::EnableHipHopSyntax)) {
+    return;
+  }
+
+  VMRegAnchor _;
+  if (!useStrictTypes(func)) return;
+
+  auto const& tc = func->params()[argNum - 1].typeConstraint;
+  tc.verifyParam(&tv, func, argNum - 1, true);
+}
+
+TVCoercionException::TVCoercionException(const Func* func,
+                                         int arg_num,
+                                         DataType actual,
+                                         DataType expected)
+    : std::runtime_error(
+        folly::format("Unable to coerce param {} to {}() "
+                      "from {} to {}",
+                      arg_num,
+                      func->name(),
+                      actual,
+                      expected).str())
+{
+  if (func->attrs() & AttrParamCoerceModeFalse) {
+    m_tv = make_tv<KindOfBoolean>(false);
+  } else {
+    m_tv = make_tv<KindOfNull>();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -16,8 +16,8 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
-#include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-conversions.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
@@ -38,6 +38,40 @@
 namespace HPHP { namespace jit { namespace irlower {
 
 TRACE_SET_MOD(irlower);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Attempt to convert `tv' to a given type, raising a warning and throwing a
+ * TVCoercionException on failure.
+ */
+#define XX(kind, expkind)                                         \
+void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,               \
+                                    const Func* callee,           \
+                                    unsigned int arg_num) {       \
+  tvCoerceIfStrict(*tv, arg_num, callee);                         \
+  if (LIKELY(tvCoerceParamTo##kind##InPlace(tv))) {               \
+    return;                                                       \
+  }                                                               \
+  raise_param_type_warning(callee->displayName()->data(),         \
+                           arg_num, KindOf##expkind, tv->m_type); \
+  throw TVCoercionException(callee, arg_num, tv->m_type,          \
+                            KindOf##expkind);                     \
+}
+#define X(kind) XX(kind, kind)
+X(Boolean)
+X(Int64)
+X(Double)
+X(String)
+X(Vec)
+X(Dict)
+X(Keyset)
+X(Array)
+X(Object)
+XX(NullableObject, Object)
+X(Resource)
+#undef X
+#undef XX
 
 ///////////////////////////////////////////////////////////////////////////////
 

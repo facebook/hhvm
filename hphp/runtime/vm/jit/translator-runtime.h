@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -228,6 +230,30 @@ TypedValue* elemVecIU(TypedValue* base, int64_t key);
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */
 uintptr_t tlsBaseNoInline();
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If the current builtin function `func' was called in a strict context,
+ * verify that `tv' is the correct type for `argNum' or attempt to convert it
+ * to the correct type, fataling on failure.
+ *
+ * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
+ * nothing.
+ */
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
+
+/*
+ * Exception thrown to indicate that a parameter could not be coerced when
+ * calling an HNI builtin function.
+ */
+struct TVCoercionException : std::runtime_error {
+  TVCoercionException(const Func* func, int arg_num,
+                      DataType actual, DataType expected);
+  TypedValue tv() const { return m_tv; }
+private:
+  req::root<TypedValue> m_tv;
+};
 
 //////////////////////////////////////////////////////////////////////
 

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -1202,12 +1203,12 @@ ArrayData* MixedArray::update(K k, Cell data) {
   if (p.found) {
     // TODO(#3888164): we should restructure things so we don't have
     // to check KindOfUninit here.
-    setVal(p.tv, data);
+    setElem(p.tv, data);
     return this;
   }
   // TODO(#3888164): we should restructure things so we don't have to
   // check KindOfUninit here.
-  initVal(p.tv, data);
+  initElem(p.tv, data);
   return this;
 }
 

@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/member-lval.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -832,7 +833,7 @@ PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v, bool copy) {
     auto const ad = copy ? Copy(adIn) : adIn;
     // TODO(#3888164): we should restructure things so we don't have
     // to check KindOfUninit here.
-    setVal(packedData(ad)[k], v);
+    setElem(packedData(ad)[k], v);
     return ad;
   }
 
@@ -854,7 +855,7 @@ PackedArray::SetIntVec(ArrayData* adIn, int64_t k, Cell v, bool copy) {
   auto const ad = copy ? Copy(adIn) : adIn;
   // TODO(#3888164): we should restructure things so we don't have
   // to check KindOfUninit here.
-  setVal(packedData(ad)[k], v);
+  setElem(packedData(ad)[k], v);
   return ad;
 }
 

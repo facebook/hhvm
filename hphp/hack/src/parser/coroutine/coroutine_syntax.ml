@@ -76,6 +76,15 @@ let nullable_syntax =
 let mixed_syntax =
   make_token_syntax ~space_after:true TokenKind.Mixed "mixed"
 
+let mixed_type =
+  make_simple_type_specifier mixed_syntax
+
+let unit_syntax =
+  make_token_syntax ~space_after:true TokenKind.Name "Unit"
+
+let unit_type =
+  make_simple_type_specifier unit_syntax
+
 let void_syntax =
   make_token_syntax ~space_after:true TokenKind.Void "void"
 

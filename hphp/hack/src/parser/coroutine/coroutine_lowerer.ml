@@ -20,6 +20,7 @@ module SyntaxTree = Full_fidelity_syntax_tree
 
 open CoroutineSyntax
 open EditableSyntax
+open Coroutine_type_lowerer
 
 let option_flat_map o ~f =
   match Option.map o ~f with
@@ -60,6 +61,14 @@ let maybe_generate_methods_and_closure
     (fun rewritten_method_syntax ->
       [ rewritten_method_syntax; state_machine_syntax ], closure_syntax)
 
+(* A void function becomes a unit function; if the annotation is missing it
+becomes mixed. *)
+let fix_up_header_node ({ function_colon; function_type; _; } as node) =
+  let function_type = rewrite_return_type function_type in
+  let function_colon =
+    if is_missing function_colon then colon_syntax else function_colon in
+  { node with function_type; function_colon }
+
 (**
  * If the provided function header is for a coroutine, rewrites the declaration
  * header and the function body into a desugared coroutine implementation.
@@ -72,6 +81,7 @@ let maybe_generate_methods_and_closure_from_header
   | FunctionDeclarationHeader
     ({ function_coroutine; function_name; _; } as header_node)
     when not (is_missing function_coroutine) ->
+      let header_node = fix_up_header_node header_node in
       option_flat_map
         (maybe_get_token_text function_name)
         ~f:

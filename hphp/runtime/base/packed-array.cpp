@@ -28,7 +28,8 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/base/tv-comparisons.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
@@ -165,7 +166,7 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDupFlattenVars(&srcData[i], &dstData->data, old);
+    tvDupWithRef(srcData[i], dstData->data, old);
     ++dstData;
   }
 
@@ -195,7 +196,7 @@ MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
     auto h = hash_int64(i);
     *ad->findForNewInsert(dstHash, mask, h) = i;
     dstData->setIntKey(i, h);
-    tvDupFlattenVars(&srcData[i], &dstData->data, old);
+    tvDupWithRef(srcData[i], dstData->data, old);
     ++dstData;
   }
 
@@ -442,7 +443,7 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
   auto pos_limit = arr->iter_end();
   for (auto pos = arr->iter_begin(); pos != pos_limit;
        pos = arr->iter_advance(pos), ++data) {
-    tvDupFlattenVars(arr->getValueRef(pos).asTypedValue(), data, arr);
+    tvDupWithRef(*arr->getValueRef(pos).asTypedValue(), *data, arr);
   }
   assert(ad->m_pos == arr->m_pos);
   assert(ad->isStatic());

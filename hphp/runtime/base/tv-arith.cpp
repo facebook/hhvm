@@ -670,7 +670,7 @@ void cellMulEqO(Cell& c1, Cell c2) { cellSet(cellMulO(c1, c2), c1); }
 void cellDivEq(Cell& c1, Cell c2) {
   assert(cellIsPlausible(c1));
   assert(cellIsPlausible(c2));
-  if (!isTypedNum(c1)) {
+  if (!isIntType(c1.m_type) && !isDoubleType(c1.m_type)) {
     cellSet(numericConvHelper(c1), c1);
   }
   cellCopy(cellDiv(c1, c2), c1);

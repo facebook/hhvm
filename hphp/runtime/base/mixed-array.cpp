@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/vm/member-operations.h"
@@ -276,7 +277,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     if (e.hasStrKey()) e.skey->incRefCount();
     if (UNLIKELY(e.data.m_type == KindOfRef)) {
       auto ref = e.data.m_data.pref;
-      // See also tvDupFlattenVars()
+      // See also tvDupWithRef()
       if (!ref->isReferenced() && ref->tv()->m_data.parr != &other) {
         cellDup(*ref->tv(), *reinterpret_cast<Cell*>(&e.data));
         continue;
@@ -1591,7 +1592,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto mask = MixedArray::Mask(scale);
   for (; srcElm != srcStop; ++srcElm) {
     if (srcElm->isTombstone()) continue;
-    tvDupFlattenVars(&srcElm->data, &dstElm->data, src);
+    tvDupWithRef(srcElm->data, dstElm->data, src);
     auto const hash = static_cast<int32_t>(srcElm->probe());
     if (hash < 0) {
       dstElm->setIntKey(srcElm->ikey, hash);

@@ -72,7 +72,7 @@ NameValueTable::NameValueTable(const NameValueTable& nvTable, ActRec* fp)
         dst.m_tv.m_type = kNamedLocalDataType;
         dst.m_tv.m_data.num = src.m_tv.m_data.num;
       } else {
-        tvDupFlattenVars(&src.m_tv, &dst.m_tv);
+        tvDupWithRef(src.m_tv, dst.m_tv);
       }
     }
   }
@@ -167,7 +167,7 @@ TypedValue* NameValueTable::bind(const StringData* name, TypedValue* val) {
 void NameValueTable::unset(const StringData* name) {
   Elm* elm = findElm(name);
   if (!elm) return;
-  tvUnset(derefNamedLocal(&elm->m_tv));
+  tvUnset(*derefNamedLocal(&elm->m_tv));
 }
 
 TypedValue* NameValueTable::lookup(const StringData* name) {

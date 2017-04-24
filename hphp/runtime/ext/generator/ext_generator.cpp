@@ -79,7 +79,7 @@ void Generator::copyVars(const ActRec* srcFp) {
   assertx(srcFp->func() == dstFp->func());
 
   for (Id i = 0; i < func->numLocals(); ++i) {
-    tvDupFlattenVars(frame_local(srcFp, i), frame_local(dstFp, i));
+    tvDupWithRef(*frame_local(srcFp, i), *frame_local(dstFp, i));
   }
 
   if (func->cls() && dstFp->hasThis()) {

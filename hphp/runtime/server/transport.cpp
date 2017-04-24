@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/server/access-log.h"
 #include "hphp/runtime/server/http-protocol.h"

@@ -64,6 +64,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/ext/array/ext_array.h"
@@ -594,7 +595,7 @@ ExtraArgs* ExtraArgs::clone(ActRec* ar) const {
   const int numExtra = ar->numArgs() - ar->m_func->numParams();
   auto ret = allocateUninit(numExtra);
   for (int i = 0; i < numExtra; ++i) {
-    tvDupFlattenVars(&m_extraArgs[i], &ret->m_extraArgs[i]);
+    tvDupWithRef(m_extraArgs[i], ret->m_extraArgs[i]);
   }
   return ret;
 }
@@ -4206,7 +4207,7 @@ OPTBLD_INLINE void iopBindS(clsref_slot slot) {
 }
 
 OPTBLD_INLINE void iopUnsetL(local_var loc) {
-  tvUnset(loc.ptr);
+  tvUnset(*loc.ptr);
 }
 
 OPTBLD_INLINE void iopUnsetN() {
@@ -4216,7 +4217,7 @@ OPTBLD_INLINE void iopUnsetN() {
   lookup_var(vmfp(), name, tv1, tv);
   SCOPE_EXIT { decRefStr(name); };
   if (tv != nullptr) {
-    tvUnset(tv);
+    tvUnset(*tv);
   }
   vmStack().popC();
 }

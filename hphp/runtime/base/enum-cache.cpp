@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/enum-cache.h"
+#include "hphp/runtime/base/tv-type.h"
+
 #include <memory>
 
 namespace HPHP {

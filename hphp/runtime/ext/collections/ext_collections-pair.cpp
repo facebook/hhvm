@@ -7,6 +7,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////

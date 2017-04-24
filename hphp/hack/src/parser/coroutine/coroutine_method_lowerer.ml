@@ -61,14 +61,15 @@ let rewrite_function_decl_header
  * from invoking resume (with a null argument) on the state machine.
  *)
 let rewrite_coroutine_body
-    { methodish_function_body; _; }
-    { function_name; _; } =
+    classish_name
+    function_name
+    { methodish_function_body; _; } =
   let make_syntax node = make_syntax (CompoundStatement node) in
   match syntax methodish_function_body with
   | CompoundStatement ({ compound_statements; _; } as node) ->
       let new_state_machine_syntax =
         make_object_creation_expression_syntax
-          (make_state_machine_classname (text function_name))
+          (make_state_machine_classname classish_name function_name)
           [continuation_variable_syntax] in
       let select_resume_member_syntax =
         make_member_selection_expression_syntax
@@ -100,20 +101,19 @@ let rewrite_coroutine_body
  * implementation.
  *)
 let maybe_rewrite_methodish_declaration
-    ({ methodish_function_decl_header; methodish_function_body; _; } as node) =
-  let make_syntax node = make_syntax (MethodishDeclaration node) in
-  match syntax methodish_function_decl_header with
-  | FunctionDeclarationHeader ({ function_coroutine; _; } as header_node)
-    when not (is_missing function_coroutine) ->
-      Option.map2
-        (rewrite_function_decl_header header_node)
-        (rewrite_coroutine_body node header_node)
-        ~f:(fun methodish_function_decl_header methodish_function_body ->
-          make_syntax
-            { node with
-              methodish_function_decl_header;
-              methodish_function_body;
-            })
-  | _ ->
-      (* Unexpected or malformed input, so we won't transform the coroutine. *)
-      None
+    classish_name
+    function_name
+    ({ methodish_function_decl_header; methodish_function_body; _; }
+      as method_node)
+    header_node =
+  let make_syntax method_node =
+    make_syntax (MethodishDeclaration method_node) in
+  Option.map2
+    (rewrite_function_decl_header header_node)
+    (rewrite_coroutine_body classish_name function_name method_node)
+    ~f:(fun methodish_function_decl_header methodish_function_body ->
+      make_syntax
+        { method_node with
+          methodish_function_decl_header;
+          methodish_function_body;
+        })

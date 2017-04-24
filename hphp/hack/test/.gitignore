@@ -2,3 +2,5 @@
 *.format_out
 *.out
 *.decl_out
+*.reparse_out
+*.type_check_out

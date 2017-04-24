@@ -82,14 +82,11 @@ let generate_state_machine_body method_node header_node =
  * implementation.
  *)
 let generate_coroutine_state_machine
-    ({ methodish_function_decl_header; _; } as method_node) =
-  match syntax methodish_function_decl_header with
-  | FunctionDeclarationHeader
-    ({ function_name; function_type; _; } as header_node) ->
-      Some (
-        make_classish_declaration_syntax
-          (make_state_machine_classname (text function_name))
-          [ make_continuation_type_syntax function_type ]
-          (generate_state_machine_body method_node header_node)
-      )
-  | _ -> None
+    classish_name
+    function_name
+    ({ methodish_function_decl_header; _; } as method_node)
+    ({ function_type; _; } as header_node) =
+  make_classish_declaration_syntax
+    (make_state_machine_classname classish_name function_name)
+    [ make_continuation_type_syntax function_type ]
+    (generate_state_machine_body method_node header_node)

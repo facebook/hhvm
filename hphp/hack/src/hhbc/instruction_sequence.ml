@@ -291,7 +291,6 @@ let get_num_cls_ref_slots instrseq =
     ~init:0
     ~f:(fun num i ->
         match i with
-        | ILitConst (ClsCns (_, id))
         | IMisc (Parent id)
         | IMisc (LateBoundCls id)
         | IMisc (Self id)
@@ -351,13 +350,13 @@ let rewrite_user_labels instrseq =
 
 (* TODO: What other instructions manipulate the class ref stack *)
 let rewrite_class_refs_instr num = function
-| ILitConst (ClsCns (id, _)) -> (num + 1, ILitConst (ClsCns (id, num + 1)))
 | IGet (ClsRefGetL (lid, _)) -> (num + 1, IGet (ClsRefGetL (lid, num + 1)))
 | IGet (ClsRefGetC _) -> (num + 1, IGet (ClsRefGetC (num + 1)))
 | IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
 | IMisc (LateBoundCls _) -> (num + 1, IMisc (LateBoundCls (num + 1)))
 | IMisc (Self _) -> (num + 1, IMisc (Self (num + 1)))
 | IMisc (ClsRefName _) -> (num + 1, IMisc (ClsRefName (num + 1)))
+| ILitConst (ClsCns (id, _)) -> (num - 1, ILitConst (ClsCns (id, num)))
 | IGet (CGetS _) -> (num - 1, IGet (CGetS num))
 | IGet (VGetS _) -> (num - 1, IGet (VGetS num))
 | IMutator (SetS _) -> (num - 1, IMutator (SetS num))

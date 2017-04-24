@@ -771,8 +771,8 @@ let add_num_iters buf indent num_iters = if num_iters = 0 then () else begin
 
 let add_code_info buf indent num_cls_ref_slots num_iters decl_vars =
   begin
-    add_num_cls_ref_slots buf indent num_cls_ref_slots;
     add_num_iters buf indent num_iters;
+    add_num_cls_ref_slots buf indent num_cls_ref_slots;
     add_decl_vars buf indent decl_vars;
   end
 

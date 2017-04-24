@@ -9,6 +9,7 @@
  *)
 
 module SyntaxKind = Full_fidelity_syntax_kind
+module SyntaxTree = Full_fidelity_syntax_tree
 module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
 module MinimalSyntax = Full_fidelity_minimal_syntax
@@ -17,6 +18,8 @@ module MinimalTrivia = Full_fidelity_minimal_trivia
 module Rewriter = Full_fidelity_rewriter.WithSyntax(MinimalSyntax)
 
 open Core
+
+let identity x = x
 
 let rewrite_tree_no_trivia node =
   let rewrite _nl n = Some
@@ -91,3 +94,8 @@ let rec minimal_to_string node =
     let children = List.map children ~f:minimal_to_string in
     let children = String.concat "" children in
     Printf.sprintf "(%s%s)" name children
+
+let tree_to_string_ignore_trivia tree =
+  let root = SyntaxTree.root tree in
+  let new_root, _ = rewrite_tree_no_trivia root in
+  minimal_to_string new_root

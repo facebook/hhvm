@@ -75,6 +75,8 @@ let rec from_stmt st =
   | A.Foreach (collection, await_pos, iterator, block) ->
     from_foreach (await_pos <> None) collection iterator
       (A.Block block)
+  | A.Def_inline _ ->
+    emit_nyi "Def_inline"
   | A.Static_var es ->
     emit_static_var es
   (* TODO: What do we do with unsafe? *)

@@ -360,6 +360,7 @@ class virtual ['self] iter =
       self#on_block env c0;
       self#on_list self#on_catch env c1;
       self#on_block env c2;
+    method on_Def_inline = self#on_def
     method on_Noop env = ()
     method on_stmt env = function
       | Unsafe -> self#on_Unsafe env
@@ -380,6 +381,8 @@ class virtual ['self] iter =
       | Switch (c0, c1) -> self#on_Switch env c0 c1
       | Foreach (c0, c1, c2, c3) -> self#on_Foreach env c0 c1 c2 c3
       | Try (c0, c1, c2) -> self#on_Try env c0 c1 c2
+      | Def_inline c0 ->
+        self#on_Def_inline env c0
       | Noop -> self#on_Noop env
     method on_As_v = self#on_expr
     method on_As_kv env c0 c1 =

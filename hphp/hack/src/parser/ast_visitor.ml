@@ -41,6 +41,7 @@ class type ['a] ast_visitor_type = object
   method on_collection: 'a -> id -> afield list -> 'a
   method on_continue : 'a -> Pos.t -> 'a
   method on_darray : 'a -> (expr * expr) list -> 'a
+  method on_def_inline : 'a -> def -> 'a
   method on_do : 'a -> block -> expr -> 'a
   method on_efun : 'a -> fun_ -> (id * bool) list -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
@@ -243,9 +244,14 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Switch  (e, cl)         -> this#on_switch acc e cl
     | Foreach (e, popt, ae, b)-> this#on_foreach acc e popt ae b
     | Try     (b, cl, fb)     -> this#on_try acc b cl fb
+    | Def_inline d ->
+      this#on_def_inline acc d
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
+
+  method on_def_inline acc d =
+    this#on_def acc d
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

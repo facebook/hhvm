@@ -258,6 +258,7 @@ and stmt =
   | Switch of expr * case list
   | Foreach of expr * Pos.t option (* await as *) * as_expr * block
   | Try of block * catch list * block
+  | Def_inline of def
   | Noop
 
 and as_expr =

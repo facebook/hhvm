@@ -144,6 +144,9 @@ class virtual ['c] map :
         on_Cst_const : 'd -> Ast_visitors_ancestors.cst_kind;
         on_Cst_define : 'd -> Ast_visitors_ancestors.cst_kind;
         on_Ctrait : 'd -> Ast_visitors_ancestors.class_kind;
+        on_Def_inline : 'd ->
+                        Ast_visitors_ancestors.def ->
+                        Ast_visitors_ancestors.stmt;
         on_Default : 'd ->
                      Ast_visitors_ancestors.block ->
                      Ast_visitors_ancestors.case;

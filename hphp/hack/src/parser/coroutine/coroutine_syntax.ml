@@ -288,7 +288,7 @@ let suspended_coroutine_result_classname =
   "SuspendedCoroutineResult"
 
 let suspended_member_name =
-  "suspended"
+  "create"
 
 let make_state_machine_classname enclosing_classname coroutine_function_name =
   Printf.sprintf
@@ -341,6 +341,6 @@ let nullable_exception_parameter_syntax =
 let throw_unimplemented_syntax reason =
   let create_exception_syntax =
     make_object_creation_expression_syntax
-      "NotImplementedException"
+      "Exception"
       [make_string_literal_syntax reason] in
   make_throw_statement_syntax create_exception_syntax

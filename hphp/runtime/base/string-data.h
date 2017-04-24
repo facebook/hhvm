@@ -526,8 +526,8 @@ static_assert(StringData::MaxSize + kStringOverhead == kSizeIndex2Size[103],
               "max allocation size is a valid size class");
 
 /*
- * A reasonable length to reserve for small strings.  This is the
- * default reserve size for StringData::Make(), also.
+ * A reasonable length to reserve for small strings.  This is also the
+ * default reserve size for StringData::Make().
  */
 constexpr uint32_t SmallStringReserve = 64 - kStringOverhead;
 
@@ -539,6 +539,11 @@ alignas(64) constexpr uint32_t kSizeIndex2StringCapacity[] = {
   SIZE_CLASSES
 #undef SIZE_CLASS
 };
+
+/*
+ * Call this if we tried to make a string longer than StringData::MaxSize
+ */
+void raiseStringLengthExceededError(size_t len);
 
 /*
  * DecRef a string s, calling release if its reference count goes to

@@ -40,18 +40,14 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-NEVER_INLINE void throw_string_too_large(size_t len) {
-  raise_error("String length exceeded 2^31-2: %zu", len);
-}
-
+NEVER_INLINE void raiseStringLengthExceededError(size_t len) {
+  raise_error("String length exceeded: %zu > %u", len, StringData::MaxSize);
 }
 
 // Allocate, initialize `m_data' and HeapObject, but not `m_lenAndHash'.
 ALWAYS_INLINE StringData* allocFlat(size_t len) {
   if (UNLIKELY(len > StringData::MaxSize)) {
-    throw_string_too_large(len);
+    raiseStringLengthExceededError(len);
   }
   auto const sizeClass = MemoryManager::size2Index(len + kStringOverhead);
   StringData* sd;
@@ -95,7 +91,7 @@ ALWAYS_INLINE static bool UncountedStringOnHugePage() {
 template <bool trueStatic> ALWAYS_INLINE
 StringData* StringData::MakeShared(folly::StringPiece sl) {
   if (UNLIKELY(sl.size() > StringData::MaxSize)) {
-    throw_string_too_large(sl.size());
+    raiseStringLengthExceededError(sl.size());
   }
 
   auto const allocSize = sl.size() + kStringOverhead;
@@ -234,7 +230,7 @@ StringData* StringData::Make(folly::StringPiece sl, CopyStringMode) {
 
 StringData* StringData::Make(const char* data, size_t len, CopyStringMode) {
   if (UNLIKELY(len > StringData::MaxSize)) {
-    throw_string_too_large(len);
+    raiseStringLengthExceededError(len);
   }
 
   return Make(folly::StringPiece(data, len), CopyString);
@@ -258,7 +254,7 @@ StringData* StringData::Make() {
 
 StringData* StringData::Make(char* data, size_t len, AttachStringMode) {
   if (UNLIKELY(len > StringData::MaxSize)) {
-    throw_string_too_large(len);
+    raiseStringLengthExceededError(len);
   }
   auto const sd = Make(folly::StringPiece(data, len), CopyString);
   free(data);
@@ -422,7 +418,7 @@ StringData* StringData::append(folly::StringPiece range) {
   auto const newLen = size_t(m_len) + size_t(len);
 
   if (UNLIKELY(newLen > MaxSize)) {
-    throw_string_too_large(newLen);
+    raiseStringLengthExceededError(newLen);
   }
 
   /*
@@ -449,7 +445,7 @@ StringData* StringData::append(folly::StringPiece r1, folly::StringPiece r2) {
 
   if (len == 0) return this;
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw_string_too_large(size_t(len) + size_t(m_len));
+    raiseStringLengthExceededError(size_t(len) + size_t(m_len));
   }
 
   auto const newLen = m_len + len;
@@ -489,7 +485,7 @@ StringData* StringData::append(folly::StringPiece r1,
 
   if (len == 0) return this;
   if (UNLIKELY(size_t(m_len) + size_t(len) > MaxSize)) {
-    throw_string_too_large(size_t(len) + size_t(m_len));
+    raiseStringLengthExceededError(size_t(len) + size_t(m_len));
   }
 
   auto const newLen = m_len + len;
@@ -699,7 +695,7 @@ void StringData::incrementHelper() {
 
   if (carry) {
     if (UNLIKELY(len + 1 > MaxSize)) {
-      throw_string_too_large(len + 1);
+      raiseStringLengthExceededError(len + 1);
     }
 
     assert(len + 1 <= capacity());

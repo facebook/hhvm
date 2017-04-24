@@ -207,6 +207,9 @@ void verifyTypeImpl(IRGS& env, int32_t const id) {
   assertx(result == AnnotAction::ObjectCheck);
 
   if (!(valType <= TObj)) {
+    if (tc.isResolved()) {
+      return genFail();
+    }
     // For RepoAuthoritative mode, if tc is a type alias we can optimize in
     // some cases
     if (tc.isObject() && RuntimeOption::RepoAuthoritative) {

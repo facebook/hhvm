@@ -40,6 +40,10 @@ namespace HPHP { namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
+#define X(y) const Type T##y = Type(B##y);
+TYPES(X)
+#undef X
+
 namespace {
 
 //////////////////////////////////////////////////////////////////////

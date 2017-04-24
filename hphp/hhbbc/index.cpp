@@ -2134,6 +2134,18 @@ std::pair<const TypeAlias*,bool> Index::resolve_type_alias(SString name) const {
   return { ret, nullable };
 }
 
+const TypeConstraint* Index::resolve_enum(const Context& ctx,
+                                          SString name) const {
+  if (auto const rcls = resolve_class(ctx, name)) {
+    if (auto const cinfo = rcls->val.right()) {
+      if (cinfo->cls->attrs & AttrEnum) {
+        return &cinfo->cls->enumBaseTy;
+      }
+    }
+  }
+  return nullptr;
+}
+
 folly::Optional<Type> Index::resolve_class_or_type_alias(
   const Context& ctx, SString name, const Type& candidate) const {
   /*
@@ -2543,8 +2555,9 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
 }
 
 Type Index::lookup_constraint(Context ctx,
-                              const TypeConstraint& tc) const {
-  return get_type_for_constraint<true>(ctx, tc, TTop);
+                              const TypeConstraint& tc,
+                              const Type& t) const {
+  return get_type_for_constraint<true>(ctx, tc, t);
 }
 
 bool Index::satisfies_constraint(Context ctx, const Type& t,

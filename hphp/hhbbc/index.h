@@ -45,6 +45,8 @@ struct Index;
 struct PublicSPropIndexer;
 struct FuncAnalysis;
 
+extern const Type TTop;
+
 namespace php {
 struct Class;
 struct Func;
@@ -445,6 +447,14 @@ struct Index {
   std::pair<const TypeAlias*,bool> resolve_type_alias(SString name) const;
 
   /*
+   * Try to resolve name as an enum.
+   *
+   * Returns a pointer the enum's TypeConstraint, or nullptr if it's
+   * not found.
+   */
+  const TypeConstraint* resolve_enum(const Context& ctx, SString name) const;
+
+  /*
    * Try to resolve name in the given context. Follows TypeAliases.
    */
   folly::Optional<Type> resolve_class_or_type_alias(
@@ -521,8 +531,14 @@ struct Index {
    * For some non-soft constraints (such as "Stringish"), this
    * function may return a Type that is a strict supertype of the
    * constraint's type.
+   *
+   * If something is known about the type of the object against which
+   * the constraint will be checked, it can be passed in to help
+   * disambiguate certain constraints (useful because we don't support
+   * arbitrary unions, or intersection).
    */
-  Type lookup_constraint(Context, const TypeConstraint&) const;
+  Type lookup_constraint(Context, const TypeConstraint&,
+                         const Type& t = TTop) const;
 
   /*
    * If this function returns true, it is safe to assume that Type t

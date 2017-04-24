@@ -1275,12 +1275,29 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // perform a more efficient memoization scheme. Note that this all needs to
   // stay in sync with the interpreter and JIT.
   using MK = MemoKeyConstraint;
-  auto const mkc = [&]{
+  auto const mkc = [&] {
     if (!options.HardTypeHints) return MK::None;
     if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
-    return memoKeyConstraintFromTC(
-      env.ctx.func->params[op.loc1].typeConstraint
-    );
+    auto tc = env.ctx.func->params[op.loc1].typeConstraint;
+    if (tc.type() == AnnotType::Object) {
+      auto name = tc.typeName();
+      auto type = tc.type();
+      bool nullable = tc.isNullable();
+      auto ta = env.index.resolve_type_alias(name);
+      if (ta.first) {
+        type = ta.first->type;
+        name = ta.first->value;
+        nullable = nullable || ta.second;
+      }
+      if (type == AnnotType::Object) {
+        auto const entc = env.index.resolve_enum(env.ctx, name);
+        if (!entc) return MK::None;
+        type = entc->type();
+        assert(!entc->isNullable());
+      }
+      tc.resolveType(type, nullable);
+    }
+    return memoKeyConstraintFromTC(tc);
   }();
 
   switch (mkc) {

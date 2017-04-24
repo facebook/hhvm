@@ -615,124 +615,119 @@ struct DArrLikeMapN {
 
 //////////////////////////////////////////////////////////////////////
 
-#define X(y) const Type T##y = Type(B##y);
-
-X(Bottom)
-
-X(Uninit)
-X(InitNull)
-X(False)
-X(True)
-X(Int)
-X(Dbl)
-X(SStr)
-X(CStr)
-X(SArrE)
-X(CArrE)
-X(SArrN)
-X(CArrN)
-X(Obj)
-X(Res)
-X(Cls)
-X(Ref)
-X(SVecE)
-X(CVecE)
-X(SVecN)
-X(CVecN)
-X(SDictE)
-X(CDictE)
-X(SDictN)
-X(CDictN)
-X(SKeysetE)
-X(CKeysetE)
-X(SKeysetN)
-X(CKeysetN)
-
-X(Null)
-X(Bool)
-X(Num)
-X(Str)
-X(SArr)
-X(CArr)
-X(ArrE)
-X(ArrN)
-X(Arr)
-X(SVec)
-X(CVec)
-X(VecE)
-X(VecN)
-X(Vec)
-X(SDict)
-X(CDict)
-X(DictE)
-X(DictN)
-X(Dict)
-X(SKeyset)
-X(CKeyset)
-X(KeysetE)
-X(KeysetN)
-X(Keyset)
-
-X(InitPrim)
-X(Prim)
-X(InitUnc)
-X(Unc)
-
-X(OptTrue)
-X(OptFalse)
-X(OptBool)
-X(OptInt)
-X(OptDbl)
-X(OptNum)
-X(OptSStr)
-X(OptCStr)
-X(OptStr)
-X(OptSArrE)
-X(OptCArrE)
-X(OptSArrN)
-X(OptCArrN)
-X(OptSArr)
-X(OptCArr)
-X(OptArrE)
-X(OptArrN)
-X(OptArr)
-X(OptObj)
-X(OptRes)
-X(OptSVecE)
-X(OptCVecE)
-X(OptSVecN)
-X(OptCVecN)
-X(OptSVec)
-X(OptCVec)
-X(OptVecE)
-X(OptVecN)
-X(OptVec)
-X(OptSDictE)
-X(OptCDictE)
-X(OptSDictN)
-X(OptCDictN)
-X(OptSDict)
-X(OptCDict)
-X(OptDictE)
-X(OptDictN)
-X(OptDict)
-X(OptSKeysetE)
-X(OptCKeysetE)
-X(OptSKeysetN)
-X(OptCKeysetN)
-X(OptSKeyset)
-X(OptCKeyset)
-X(OptKeysetE)
-X(OptKeysetN)
-X(OptKeyset)
-
-X(InitCell)
-X(Cell)
-X(InitGen)
-X(Gen)
-
+#define TYPES(X)                                \
+X(Bottom)                                       \
+X(Uninit)                                       \
+X(InitNull)                                     \
+X(False)                                        \
+X(True)                                         \
+X(Int)                                          \
+X(Dbl)                                          \
+X(SStr)                                         \
+X(CStr)                                         \
+X(SArrE)                                        \
+X(CArrE)                                        \
+X(SArrN)                                        \
+X(CArrN)                                        \
+X(Obj)                                          \
+X(Res)                                          \
+X(Cls)                                          \
+X(Ref)                                          \
+X(SVecE)                                        \
+X(CVecE)                                        \
+X(SVecN)                                        \
+X(CVecN)                                        \
+X(SDictE)                                       \
+X(CDictE)                                       \
+X(SDictN)                                       \
+X(CDictN)                                       \
+X(SKeysetE)                                     \
+X(CKeysetE)                                     \
+X(SKeysetN)                                     \
+X(CKeysetN)                                     \
+X(Null)                                         \
+X(Bool)                                         \
+X(Num)                                          \
+X(Str)                                          \
+X(SArr)                                         \
+X(CArr)                                         \
+X(ArrE)                                         \
+X(ArrN)                                         \
+X(Arr)                                          \
+X(SVec)                                         \
+X(CVec)                                         \
+X(VecE)                                         \
+X(VecN)                                         \
+X(Vec)                                          \
+X(SDict)                                        \
+X(CDict)                                        \
+X(DictE)                                        \
+X(DictN)                                        \
+X(Dict)                                         \
+X(SKeyset)                                      \
+X(CKeyset)                                      \
+X(KeysetE)                                      \
+X(KeysetN)                                      \
+X(Keyset)                                       \
+X(InitPrim)                                     \
+X(Prim)                                         \
+X(InitUnc)                                      \
+X(Unc)                                          \
+X(OptTrue)                                      \
+X(OptFalse)                                     \
+X(OptBool)                                      \
+X(OptInt)                                       \
+X(OptDbl)                                       \
+X(OptNum)                                       \
+X(OptSStr)                                      \
+X(OptCStr)                                      \
+X(OptStr)                                       \
+X(OptSArrE)                                     \
+X(OptCArrE)                                     \
+X(OptSArrN)                                     \
+X(OptCArrN)                                     \
+X(OptSArr)                                      \
+X(OptCArr)                                      \
+X(OptArrE)                                      \
+X(OptArrN)                                      \
+X(OptArr)                                       \
+X(OptObj)                                       \
+X(OptRes)                                       \
+X(OptSVecE)                                     \
+X(OptCVecE)                                     \
+X(OptSVecN)                                     \
+X(OptCVecN)                                     \
+X(OptSVec)                                      \
+X(OptCVec)                                      \
+X(OptVecE)                                      \
+X(OptVecN)                                      \
+X(OptVec)                                       \
+X(OptSDictE)                                    \
+X(OptCDictE)                                    \
+X(OptSDictN)                                    \
+X(OptCDictN)                                    \
+X(OptSDict)                                     \
+X(OptCDict)                                     \
+X(OptDictE)                                     \
+X(OptDictN)                                     \
+X(OptDict)                                      \
+X(OptSKeysetE)                                  \
+X(OptCKeysetE)                                  \
+X(OptSKeysetN)                                  \
+X(OptCKeysetN)                                  \
+X(OptSKeyset)                                   \
+X(OptCKeyset)                                   \
+X(OptKeysetE)                                   \
+X(OptKeysetN)                                   \
+X(OptKeyset)                                    \
+X(InitCell)                                     \
+X(Cell)                                         \
+X(InitGen)                                      \
+X(Gen)                                          \
 X(Top)
 
+#define X(y) extern const Type T##y;
+TYPES(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

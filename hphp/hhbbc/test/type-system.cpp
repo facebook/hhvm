@@ -217,75 +217,82 @@ auto const with_data = folly::lazy([] {
 });
 
 // In the sense of "non-union type", not the sense of TPrim.
-auto const primitives = {
-  TUninit,
-  TInitNull,
-  TFalse,
-  TTrue,
-  TInt,
-  TDbl,
-  TSStr,
-  TCStr,
-  TSArrE,
-  TCArrE,
-  TSArrN,
-  TCArrN,
-  TObj,
-  TRes,
-  TCls,
-  TRef
-};
+auto const primitives = folly::lazy([] {
+  return std::vector<Type> {
+    TUninit,
+    TInitNull,
+    TFalse,
+    TTrue,
+    TInt,
+    TDbl,
+    TSStr,
+    TCStr,
+    TSArrE,
+    TCArrE,
+    TSArrN,
+    TCArrN,
+    TObj,
+    TRes,
+    TCls,
+    TRef
+  };
+});
 
-auto const optionals = {
-  TOptTrue,
-  TOptFalse,
-  TOptBool,
-  TOptInt,
-  TOptDbl,
-  TOptNum,
-  TOptSStr,
-  TOptCStr,
-  TOptStr,
-  TOptSArrE,
-  TOptCArrE,
-  TOptSArrN,
-  TOptCArrN,
-  TOptSArr,
-  TOptCArr,
-  TOptArr,
-  TOptObj,
-  TOptRes
-};
+auto const optionals = folly::lazy([] {
+  return std::vector<Type> {
+    TOptTrue,
+    TOptFalse,
+    TOptBool,
+    TOptInt,
+    TOptDbl,
+    TOptNum,
+    TOptSStr,
+    TOptCStr,
+    TOptStr,
+    TOptSArrE,
+    TOptCArrE,
+    TOptSArrN,
+    TOptCArrN,
+    TOptSArr,
+    TOptCArr,
+    TOptArr,
+    TOptObj,
+    TOptRes
+  };
+});
 
-auto const non_opt_unions = {
-  TInitCell,
-  TCell,
-  TInitGen,
-  TGen,
-  TNull,
-  TBool,
-  TNum,
-  TStr,
-  TArrE,
-  TArrN,
-  TSArr,
-  TCArr,
-  TArr,
-  TInitPrim,
-  TPrim,
-  TInitUnc,
-  TUnc,
-  TTop,
-};
+auto const non_opt_unions = folly::lazy([] {
+  return std::vector<Type> {
+    TInitCell,
+    TCell,
+    TInitGen,
+    TGen,
+    TNull,
+    TBool,
+    TNum,
+    TStr,
+    TArrE,
+    TArrN,
+    TSArr,
+    TCArr,
+    TArr,
+    TInitPrim,
+    TPrim,
+    TInitUnc,
+    TUnc,
+    TTop
+  };
+});
 
-auto const all_unions = boost::join(optionals, non_opt_unions);
+auto const all_unions = folly::lazy([] {
+  return boost::join(optionals(), non_opt_unions());
+});
 
 auto const all = folly::lazy([] {
   std::vector<Type> ret;
-  auto const wdata = with_data();
-  ret.insert(end(ret), begin(primitives), end(primitives));
-  ret.insert(end(ret), begin(all_unions), end(all_unions));
-  ret.insert(end(ret), begin(wdata), end(wdata));
+  ret.insert(end(ret), begin(primitives()), end(primitives()));
+  ret.insert(end(ret), begin(all_unions()), end(all_unions()));
+  ret.insert(end(ret), begin(with_data()), end(with_data()));
   return ret;
 });
 
@@ -372,8 +379,8 @@ TEST(Type, Prims) {
 
   // All pairs of non-equivalent primitives are not related by either
   // subtypeOf or couldBe, including if you wrap them in wait handles.
-  for (auto& t1 : primitives) {
-    for (auto& t2 : primitives) {
+  for (auto& t1 : primitives()) {
+    for (auto& t2 : primitives()) {
       if (t1 != t2) {
         EXPECT_TRUE(!t1.subtypeOf(t2) && !t2.subtypeOf(t1));
         EXPECT_TRUE(!t1.couldBe(t2));
@@ -615,11 +622,11 @@ TEST(Type, Option) {
   EXPECT_TRUE(TInitNull.subtypeOf(TOptRes));
   EXPECT_TRUE(!TUninit.subtypeOf(TOptRes));
 
-  for (auto& t : optionals) EXPECT_EQ(t, opt(unopt(t)));
-  for (auto& t : optionals) EXPECT_TRUE(is_opt(t));
+  for (auto& t : optionals()) EXPECT_EQ(t, opt(unopt(t)));
+  for (auto& t : optionals()) EXPECT_TRUE(is_opt(t));
   for (auto& t : all()) {
     auto const found =
-      std::find(begin(optionals), end(optionals), t) != end(optionals);
+      std::find(begin(optionals()), end(optionals()), t) != end(optionals());
     EXPECT_EQ(found, is_opt(t));
   }
 
@@ -681,13 +688,13 @@ TEST(Type, OptTV) {
   EXPECT_TRUE(!tv(opt(dval(2.0))));
   EXPECT_TRUE(!tv(TOptFalse));
   EXPECT_TRUE(!tv(TOptTrue));
-  for (auto& x : optionals) {
+  for (auto& x : optionals()) {
     EXPECT_TRUE(!tv(x));
   }
 }
 
 TEST(Type, OptCouldBe) {
-  for (auto& x : optionals) EXPECT_TRUE(x.couldBe(unopt(x)));
+  for (auto& x : optionals()) EXPECT_TRUE(x.couldBe(unopt(x)));
 
   const std::initializer_list<std::pair<Type, Type>> true_cases{
     { opt(sval(s_test.get())), TStr },
@@ -745,11 +752,11 @@ TEST(Type, OptCouldBe) {
       << " wasn't reflexive";
   }
 
-  for (auto& x : optionals) {
+  for (auto& x : optionals()) {
     EXPECT_TRUE(x.couldBe(unopt(x)));
     EXPECT_TRUE(x.couldBe(TInitNull));
     EXPECT_TRUE(!x.couldBe(TUninit));
-    for (auto& y : optionals) {
+    for (auto& y : optionals()) {
       EXPECT_TRUE(x.couldBe(y));
     }
   }

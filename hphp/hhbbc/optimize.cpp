@@ -702,7 +702,9 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
                       const FuncAnalysis&,
                       borrowed_ptr<php::Block> const blk,
                       const State&) {
-                   if (!persistence_check(blk)) persistent = false;
+                   if (persistent && !persistence_check(blk)) {
+                     persistent = false;
+                   }
                  });
     if (!persistent) {
       func->unit->persistent.store(persistent, std::memory_order_relaxed);
@@ -713,6 +715,52 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo) {
     visit_blocks("insert assertions", index, ainfo, insert_assertions);
   }
 
+  auto fixTypeConstraint = [&] (TypeConstraint& tc, const Type& candidate) {
+    if (!tc.hasConstraint() ||
+        tc.isSoft() ||
+        tc.isTypeVar() ||
+        tc.isTypeConstant() ||
+        tc.type() != AnnotType::Object) {
+      return;
+    }
+
+    auto t = index.lookup_constraint(ainfo.ctx, tc, candidate);
+    auto const nullable = is_opt(t);
+    if (nullable) t = unopt(std::move(t));
+
+    auto retype = [&] (AnnotType t) {
+      tc.resolveType(t, nullable);
+      FTRACE(1, "Retype tc {} -> {}\n",
+             tc.typeName(), tc.displayName());
+    };
+
+    if (t.subtypeOf(TInitNull)) return retype(AnnotType::Null);
+    if (t.subtypeOf(TBool))     return retype(AnnotType::Bool);
+    if (t.subtypeOf(TInt))      return retype(AnnotType::Int);
+    if (t.subtypeOf(TDbl))      return retype(AnnotType::Float);
+    if (t.subtypeOf(TStr))      return retype(AnnotType::String);
+    if (t.subtypeOf(TArr))      return retype(AnnotType::Array);
+    // if (t.subtypeOf(TObj))   return retype(AnnotType::Object);
+    if (t.subtypeOf(TRes))      return retype(AnnotType::Resource);
+    if (t.subtypeOf(TDict))     return retype(AnnotType::Dict);
+    if (t.subtypeOf(TVec))      return retype(AnnotType::Vec);
+    if (t.subtypeOf(TKeyset))   return retype(AnnotType::Keyset);
+  };
+
+  if (options.HardTypeHints) {
+    for (auto& p : func->params) {
+      fixTypeConstraint(p.typeConstraint, TTop);
+    }
+  }
+
+  if (options.HardReturnTypeHints) {
+    auto const rtype = [&] {
+      if (!func->isAsync) return ainfo.inferredReturn;
+      if (!is_specialized_wait_handle(ainfo.inferredReturn)) return TGen;
+      return wait_handle_inner(ainfo.inferredReturn);
+    }();
+    fixTypeConstraint(func->retTypeConstraint, rtype);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -56,14 +56,21 @@ void TypeConstraint::init() {
     assert(getAnnotDataType(m_type) != KindOfPersistentString);
     return;
   }
-  TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
-        this, m_typeName->data());
-  m_type = Type::Object;
+  if (m_flags & Flags::Resolved) {
+    TRACE(5, "TypeConstraint: this %p pre-resolved type %s, treating as %s\n",
+          this, m_typeName->data(), tname(getAnnotDataType(m_type)).c_str());
+  } else {
+    TRACE(5, "TypeConstraint: this %p no such type %s, treating as object\n",
+          this, m_typeName->data());
+    m_type = Type::Object;
+  }
   m_namedEntity = NamedEntity::get(m_typeName);
-  TRACE(5, "TypeConstraint: NamedEntity: %p\n", m_namedEntity.get());
+  TRACE(5, "TypeConstraint: this %p NamedEntity: %p\n",
+        this, m_namedEntity.get());
 }
 
-std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
+std::string TypeConstraint::displayName(const Func* func /*= nullptr*/,
+                                        bool extra /* = false */) const {
   const StringData* tn = typeName();
   std::string name;
   if (isSoft()) {
@@ -106,6 +113,31 @@ std::string TypeConstraint::displayName(const Func* func /*= nullptr*/) const {
       }
     }
     name += str;
+  }
+  if (extra && m_flags & Flags::Resolved && m_type != AnnotType::Object) {
+    const char* str = nullptr;
+    switch (m_type) {
+      case AnnotType::Uninit:   str = "uninit"; break;
+      case AnnotType::Null:     str = "null"; break;
+      case AnnotType::Bool:     str = "bool"; break;
+      case AnnotType::Int:      str = "int";  break;
+      case AnnotType::Float:    str = "float"; break;
+      case AnnotType::String:   str = "string"; break;
+      case AnnotType::Array:    str = "array"; break;
+      case AnnotType::Resource: str = "resource"; break;
+      case AnnotType::Dict:     str = "dict"; break;
+      case AnnotType::Vec:      str = "vec"; break;
+      case AnnotType::Keyset:   str = "keyset"; break;
+      case AnnotType::Number:   str = "num"; break;
+      case AnnotType::ArrayKey: str = "arraykey"; break;
+      case AnnotType::Self:
+      case AnnotType::Parent:
+      case AnnotType::Object:
+      case AnnotType::Mixed:
+      case AnnotType::Callable:
+        break;
+    }
+    if (str) folly::format(&name, " ({})", str);
   }
   return name;
 }

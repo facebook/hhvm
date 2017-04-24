@@ -86,7 +86,14 @@ struct TypeConstraint {
      *   public function bar(Foo::T $x) { ... }
      * }
      */
-     TypeConstant = 0x20,
+    TypeConstant = 0x20,
+
+    /*
+     * Indicates that a Object type-constraint was resolved by hhbbc,
+     * and the actual type is in m_type. When set, Object is guaranteed
+     * to be an object, not a type-alias.
+     */
+    Resolved = 0x40
   };
 
   /*
@@ -113,6 +120,7 @@ struct TypeConstraint {
     , m_typeName(typeName)
     , m_namedEntity(nullptr)
   {
+    assert(!(flags & Flags::Resolved));
     init();
   }
 
@@ -121,6 +129,9 @@ struct TypeConstraint {
     sd(m_typeName)
       (m_flags)
       ;
+    if (m_flags & Flags::Resolved) {
+      sd(m_type);
+    }
     if (SerDe::deserializing) {
       init();
     }
@@ -128,6 +139,14 @@ struct TypeConstraint {
 
   TypeConstraint(const TypeConstraint&) = default;
   TypeConstraint& operator=(const TypeConstraint&) = default;
+
+  void resolveType(AnnotType t, bool nullable) {
+    assert(m_type == AnnotType::Object);
+    auto flags = m_flags | Flags::Resolved;
+    if (nullable) flags |= Flags::Nullable;
+    m_flags = static_cast<Flags>(flags);
+    m_type = t;
+  }
 
   /*
    * Returns: whether this constraint implies any runtime checking at
@@ -173,6 +192,7 @@ struct TypeConstraint {
   bool isExtended() const { return m_flags & ExtendedHint; }
   bool isTypeVar()  const { return m_flags & TypeVar; }
   bool isTypeConstant() const { return m_flags & TypeConstant; }
+  bool isResolved() const { return m_flags & Resolved; }
 
   bool isPrecise()  const { return metaType() == MetaType::Precise; }
   bool isMixed()    const { return m_type == Type::Mixed; }
@@ -209,7 +229,7 @@ struct TypeConstraint {
     return name;
   }
 
-  std::string displayName(const Func* func = nullptr) const;
+  std::string displayName(const Func* func = nullptr, bool extra = false) const;
 
   /*
    * Returns: whether two TypeConstraints are compatible, in the sense

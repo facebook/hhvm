@@ -67,14 +67,25 @@ let rewrite_coroutine_body
   let make_syntax node = make_syntax (CompoundStatement node) in
   match syntax methodish_function_body with
   | CompoundStatement ({ compound_statements; _; } as node) ->
+      let call_inst_method_on_state_machine_syntax =
+        make_function_call_expression_syntax
+          inst_meth_syntax
+          [
+            this_syntax;
+            make_string_literal_syntax
+              (make_state_machine_method_name function_name);
+          ] in
       let new_closure_syntax =
         make_object_creation_expression_syntax
           (make_closure_classname classish_name function_name)
-          [continuation_variable_syntax] in
+          [
+            continuation_variable_syntax;
+            call_inst_method_on_state_machine_syntax;
+          ] in
       let select_resume_member_syntax =
         make_member_selection_expression_syntax
           new_closure_syntax
-          resume_member_name in
+          resume_member_name_syntax in
       let call_resume_with_null_syntax =
         make_function_call_expression_syntax
           select_resume_member_syntax

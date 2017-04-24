@@ -67,6 +67,9 @@ let semicolon_syntax =
 let colon_syntax =
   make_token_syntax ~space_after:true TokenKind.Colon ":"
 
+let assignment_operator_syntax =
+  make_token_syntax TokenKind.Equal "="
+
 let nullable_syntax =
   make_token_syntax TokenKind.Question "?"
 
@@ -78,6 +81,9 @@ let void_syntax =
 
 let null_syntax =
   make_token_syntax TokenKind.NullLiteral "null"
+
+let private_syntax =
+  make_token_syntax ~space_after:true TokenKind.Private "private"
 
 let class_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Class "class"
@@ -127,6 +133,9 @@ let make_string_literal_syntax string_literal =
       TokenKind.DoubleQuotedStringLiteral
       (Printf.sprintf "\"%s\"" string_literal))
 
+let make_qualified_name_syntax name =
+  make_qualified_name_expression (make_token_syntax TokenKind.Name name)
+
 let make_expression_statement expression_syntax =
   make_expression_statement expression_syntax semicolon_syntax
 
@@ -141,6 +150,16 @@ let make_return_statement_syntax expression_syntax =
 
 let make_throw_statement_syntax expression_syntax =
   make_throw_statement throw_keyword_syntax expression_syntax semicolon_syntax
+
+let make_assignment_syntax receiver_variable assignment_expression_syntax =
+  let receiver_variable_syntax =
+    make_token_syntax TokenKind.Variable receiver_variable in
+  let assignment_binary_expression =
+    make_binary_expression
+      receiver_variable_syntax
+      assignment_operator_syntax
+      assignment_expression_syntax in
+  make_expression_statement assignment_binary_expression
 
 let make_object_creation_expression_syntax classname arguments =
   let classname_syntax = make_token_syntax TokenKind.Classname classname in
@@ -164,9 +183,7 @@ let make_static_function_call_expression_syntax
     receiver_name
     member_name
     argument_list =
-  let receiver_name_syntax = make_token_syntax TokenKind.Name receiver_name in
-  let qualified_receiver_syntax =
-    make_qualified_name_expression receiver_name_syntax in
+  let qualified_receiver_syntax = make_qualified_name_syntax receiver_name in
   let member_syntax = make_token_syntax TokenKind.Name member_name in
   let receiver_syntax =
     make_scope_resolution_expression
@@ -175,24 +192,28 @@ let make_static_function_call_expression_syntax
       member_syntax in
   make_function_call_expression_syntax receiver_syntax argument_list
 
-let make_member_selection_expression_syntax receiver_syntax member_name =
-  let member_name_syntax = make_token_syntax TokenKind.Name member_name in
+let make_member_selection_expression_syntax receiver_syntax member_syntax =
   make_member_selection_expression
     receiver_syntax
     member_selection_syntax
-    member_name_syntax
+    member_syntax
 
 let make_parameter_declaration_syntax
+    ?(visibility_syntax = make_missing ())
     parameter_type_syntax
     parameter_variable =
   let parameter_variable_syntax =
     make_token_syntax TokenKind.Variable parameter_variable in
   make_parameter_declaration
     (* attribute *)  (make_missing ())
-    (* visibility *)  (make_missing ())
+    visibility_syntax
     parameter_type_syntax
     parameter_variable_syntax
     (* default value *)  (make_missing ())
+
+let make_simple_type_specifier_syntax classname =
+  let classname_syntax = make_token_syntax TokenKind.Classname classname in
+  make_simple_type_specifier classname_syntax
 
 let make_generic_type_specifier_syntax classname generic_argument_list =
   let classname_syntax = make_token_syntax TokenKind.Classname classname in
@@ -204,6 +225,18 @@ let make_generic_type_specifier_syntax classname generic_argument_list =
       generic_argument_list_syntax
       right_angle_syntax in
   make_generic_type_specifier classname_syntax type_arguments_syntax
+
+let make_functional_type_syntax argument_types return_type_syntax =
+  let argument_types_syntax = make_delimited_list comma_syntax argument_types in
+  make_closure_type_specifier
+    left_paren_syntax
+    function_keyword_syntax
+    left_paren_syntax
+    argument_types_syntax
+    right_paren_syntax
+    colon_syntax
+    return_type_syntax
+    right_paren_syntax
 
 (* TODO(tingley): Determine if it's worth tightening visibility here. *)
 let make_classish_declaration_syntax classname implements_list classish_body =
@@ -293,17 +326,29 @@ let suspended_member_name =
 let make_closure_classname enclosing_classname function_name =
   Printf.sprintf "%s_%s_GeneratedClosure" enclosing_classname function_name
 
+let make_closure_type_syntax enclosing_classname function_name =
+  make_simple_type_specifier_syntax
+    (make_closure_classname enclosing_classname function_name)
+
+let closure_variable =
+  "$closure"
+
+let make_closure_parameter_syntax enclosing_classname function_name =
+  make_parameter_declaration_syntax
+    (make_closure_type_syntax enclosing_classname function_name)
+    closure_variable
+
 let constructor_member_name =
   "__construct"
 
 let resume_member_name =
   "resume"
 
+let resume_member_name_syntax =
+  make_token_syntax TokenKind.Name resume_member_name
+
 let resume_with_exception_member_name =
   "resumeWithException"
-
-let do_resume_member_name =
-  "doResume"
 
 let coroutune_data_variable =
   "$coroutineData"
@@ -325,6 +370,9 @@ let exception_variable =
 let exception_variable_syntax =
   make_token_syntax TokenKind.Variable exception_variable
 
+let nullable_exception_type_syntax =
+  make_nullable_type_specifier_syntax exception_type_syntax
+
 let exception_parameter_syntax =
   make_parameter_declaration_syntax
     exception_type_syntax
@@ -332,7 +380,7 @@ let exception_parameter_syntax =
 
 let nullable_exception_parameter_syntax =
   make_parameter_declaration_syntax
-    (make_nullable_type_specifier_syntax exception_type_syntax)
+    nullable_exception_type_syntax
     exception_variable
 
 let throw_unimplemented_syntax reason =
@@ -341,3 +389,35 @@ let throw_unimplemented_syntax reason =
       "Exception"
       [make_string_literal_syntax reason] in
   make_throw_statement_syntax create_exception_syntax
+
+let make_state_machine_method_name function_name =
+  Printf.sprintf "%s_GeneratedStateMachine" function_name
+
+let state_machine_member_name =
+  "stateMachineFunction"
+
+let state_machine_member_name_syntax =
+  make_token_syntax TokenKind.Name state_machine_member_name
+
+let state_machine_variable_name =
+  "$" ^ state_machine_member_name
+
+let state_machine_variable_name_syntax =
+  make_token_syntax TokenKind.Variable state_machine_variable_name
+
+let make_state_machine_parameter_syntax enclosing_classname function_name =
+  let state_machine_type_syntax =
+    make_functional_type_syntax
+      [
+        make_closure_type_syntax enclosing_classname function_name;
+        mixed_syntax;
+        nullable_exception_type_syntax;
+      ]
+      (make_coroutine_result_type_syntax mixed_syntax) in
+  make_parameter_declaration_syntax
+    ~visibility_syntax:private_syntax
+    state_machine_type_syntax
+    state_machine_variable_name
+
+let inst_meth_syntax =
+  make_qualified_name_syntax "inst_meth"

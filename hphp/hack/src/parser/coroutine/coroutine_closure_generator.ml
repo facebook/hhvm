@@ -16,21 +16,36 @@ open CoroutineSyntax
 let generate_constructor_body =
   make_missing ()
 
-let generate_constructor_method { function_type; _; } =
+let generate_constructor_method
+    classish_name
+    function_name
+    { function_type; _; } =
   make_methodish_declaration_syntax
     (make_constructor_decl_header_syntax
       constructor_member_name
-      [ make_continuation_parameter_syntax function_type ])
+      [
+        make_continuation_parameter_syntax function_type;
+        make_state_machine_parameter_syntax classish_name function_name;
+      ])
     []
 
 let generate_resume_body { methodish_function_body; _; } =
-  let select_do_resume_syntax =
-    make_member_selection_expression_syntax this_syntax do_resume_member_name in
-  let call_do_resume_syntax =
+  let select_state_machine_syntax =
+    make_member_selection_expression_syntax
+      this_syntax
+      state_machine_member_name_syntax in
+  let assign_state_machine_syntax =
+    make_assignment_syntax
+      state_machine_variable_name
+      select_state_machine_syntax in
+  let call_state_machine_syntax =
     make_function_call_expression_syntax
-      select_do_resume_syntax
-      [ coroutune_data_variable_syntax; null_syntax ] in
-  [ make_expression_statement call_do_resume_syntax ]
+      state_machine_variable_name_syntax
+      [ this_syntax; coroutune_data_variable_syntax; null_syntax ] in
+  [
+    assign_state_machine_syntax;
+    make_expression_statement call_state_machine_syntax;
+  ]
 
 let generate_resume_method method_node =
   make_methodish_declaration_syntax
@@ -41,13 +56,22 @@ let generate_resume_method method_node =
     (generate_resume_body method_node)
 
 let generate_resume_with_exception_body _ =
-  let select_do_resume_syntax =
-    make_member_selection_expression_syntax this_syntax do_resume_member_name in
-  let call_do_resume_syntax =
+  let select_state_machine_syntax =
+    make_member_selection_expression_syntax
+      this_syntax
+      state_machine_member_name_syntax in
+  let assign_state_machine_syntax =
+    make_assignment_syntax
+      state_machine_variable_name
+      select_state_machine_syntax in
+  let call_state_machine_syntax =
     make_function_call_expression_syntax
-      select_do_resume_syntax
-      [ null_syntax; exception_variable_syntax ] in
-  [ make_expression_statement call_do_resume_syntax ]
+      state_machine_variable_name_syntax
+      [ this_syntax; null_syntax; exception_variable_syntax ] in
+  [
+    assign_state_machine_syntax;
+    make_expression_statement call_state_machine_syntax;
+  ]
 
 let generate_resume_with_exception_method method_node =
   make_methodish_declaration_syntax
@@ -57,23 +81,15 @@ let generate_resume_with_exception_method method_node =
       void_syntax)
     (generate_resume_with_exception_body method_node)
 
-let generate_do_resume_body _ =
-  [ throw_unimplemented_syntax "Coroutines are not yet implemented." ]
-
-let generate_do_resume_method method_node =
-  make_methodish_declaration_syntax
-    (make_function_decl_header_syntax
-      do_resume_member_name
-      [ coroutine_data_parameter_syntax; nullable_exception_parameter_syntax ]
-      void_syntax)
-    (generate_do_resume_body method_node)
-
-let generate_closure_body method_node header_node =
+let generate_closure_body
+    classish_name
+    function_name
+    method_node
+    header_node =
   [
-    generate_constructor_method header_node;
+    generate_constructor_method classish_name function_name header_node;
     generate_resume_method method_node;
     generate_resume_with_exception_method method_node;
-    generate_do_resume_method method_node;
   ]
 
 (**
@@ -89,4 +105,4 @@ let generate_coroutine_closure
   make_classish_declaration_syntax
     (make_closure_classname classish_name function_name)
     [ make_continuation_type_syntax mixed_syntax ]
-    (generate_closure_body method_node header_node)
+    (generate_closure_body classish_name function_name method_node header_node)

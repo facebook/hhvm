@@ -9,6 +9,7 @@
 
 module CoroutineMethodLowerer = Coroutine_method_lowerer
 module CoroutineClosureGenerator = Coroutine_closure_generator
+module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
@@ -33,30 +34,38 @@ let maybe_get_token_text node =
 (**
  * Returns the transformed method node and the generated closure's syntax.
  *)
-let maybe_rewrite_function_and_generate_closure
+let maybe_generate_methods_and_closure
     classish_name
     method_node
     header_node
     function_name =
-  Option.both
+  let state_machine_syntax =
+    CoroutineStateMachineGenerator.generate_coroutine_state_machine
+      classish_name
+      function_name
+      method_node
+      header_node in
+  let closure_syntax =
+    CoroutineClosureGenerator.generate_coroutine_closure
+      classish_name
+      function_name
+      method_node
+      header_node in
+  Option.map
     (CoroutineMethodLowerer.maybe_rewrite_methodish_declaration
       classish_name
       function_name
       method_node
       header_node)
-    (Some
-      (CoroutineClosureGenerator.generate_coroutine_closure
-        classish_name
-        function_name
-        method_node
-        header_node))
+    (fun rewritten_method_syntax ->
+      [ rewritten_method_syntax; state_machine_syntax ], closure_syntax)
 
 (**
  * If the provided function header is for a coroutine, rewrites the declaration
  * header and the function body into a desugared coroutine implementation.
  * Also extracts the coroutine's closure.
  *)
-let maybe_rewrite_function_header_and_generate_closure
+let maybe_generate_methods_and_closure_from_header
     classish_name
     ({ methodish_function_decl_header; _; } as method_node) =
   match syntax methodish_function_decl_header with
@@ -66,7 +75,7 @@ let maybe_rewrite_function_header_and_generate_closure
       option_flat_map
         (maybe_get_token_text function_name)
         ~f:
-          (maybe_rewrite_function_and_generate_closure
+          (maybe_generate_methods_and_closure
             classish_name
             method_node
             header_node)
@@ -76,13 +85,13 @@ let maybe_rewrite_function_header_and_generate_closure
       None
 
 (**
- * If the provided methodish declaration is for a coroutine, rewrites the
- * methodish declaration into a desugared coroutine implementation.
+ * If the provided methodish declaration is for a coroutine, generates the
+ * appropriate methods and state machine for the coroutine.
  *)
-let maybe_rewrite_method_and_generate_closure classish_name node =
+let maybe_generate_methods_and_closure_from_method classish_name node =
   match syntax node with
   | MethodishDeclaration node ->
-      maybe_rewrite_function_header_and_generate_closure
+      maybe_generate_methods_and_closure_from_header
         classish_name
         node
   | _ ->
@@ -100,15 +109,15 @@ let rewrite_classish_body_element
     (classish_body_elements_acc, closures_acc, any_rewritten_acc)
     classish_body_element_node =
   Option.value_map
-    (maybe_rewrite_method_and_generate_closure
+    (maybe_generate_methods_and_closure_from_method
       classish_name
       classish_body_element_node)
     ~default:
       (classish_body_element_node :: classish_body_elements_acc,
         closures_acc,
         any_rewritten_acc)
-    ~f:(fun (method_node, closure_node) ->
-      method_node :: classish_body_elements_acc,
+    ~f:(fun (method_nodes, closure_node) ->
+      method_nodes @ classish_body_elements_acc,
       closure_node :: closures_acc,
       true)
 

@@ -135,6 +135,8 @@ let maybe_rewrite_classish_body_elements
           ~init:([], [], false)
           syntax_list in
       if any_rewritten then
+        let rewritten_nodes = List.rev rewritten_nodes in
+        let closure_nodes = List.rev closure_nodes in
         Some (make_list rewritten_nodes, closure_nodes)
       else
         None

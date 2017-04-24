@@ -2684,9 +2684,9 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   auto const constraint = env.ctx.func->params[op.loc1].typeConstraint;
   if (constraint.hasConstraint() && !constraint.isTypeVar() &&
       !constraint.isTypeConstant()) {
-    FTRACE(2, "     {}\n", constraint.fullName());
     auto t = env.index.lookup_constraint(env.ctx, constraint);
     if (t.subtypeOf(TBottom)) unreachable(env);
+    FTRACE(2, "     {} ({})\n", constraint.fullName(), show(t));
     setLoc(env, op.loc1, std::move(t));
   }
 }
@@ -2755,8 +2755,6 @@ void in(ISS& env, const bc::VerifyRetTypeC& op) {
   push(env, std::move(retT));
 }
 
-// These only occur in traits, so we don't need to do better than
-// this.
 void in(ISS& env, const bc::Self& op) {
   auto self = selfClsExact(env);
   putClsRefSlot(env, op.slot, self ? *self : TCls);

@@ -429,6 +429,28 @@ struct Index {
   folly::Optional<res::Class> resolve_class(Context, SString name) const;
 
   /*
+   * Try to resolve self/parent types for the given context
+   */
+  folly::Optional<res::Class> selfCls(const Context& ctx) const;
+  folly::Optional<res::Class> parentCls(const Context& ctx) const;
+
+  /*
+   * Try to resolve name as a TypeAlias.
+   *
+   * Returns a pair whose first element is the TypeAlias (if found),
+   * and whose second element indicates whether its nullable (note
+   * that if we followed a chain of aliases, the resulting alias is
+   * nullable if *any* element of the chain was nullable).
+   */
+  std::pair<const TypeAlias*,bool> resolve_type_alias(SString name) const;
+
+  /*
+   * Try to resolve name in the given context. Follows TypeAliases.
+   */
+  folly::Optional<Type> resolve_class_or_type_alias(
+    const Context& ctx, SString name, const Type& candidate) const;
+
+  /*
    * Resolve a closure class.
    *
    * Returns both a resolved Class, and the actual php::Class for the
@@ -748,6 +770,9 @@ private:
   Type get_type_for_constraint(Context,
                                const TypeConstraint&,
                                const Type&) const;
+  folly::Optional<Type> get_type_for_annotated_type(
+    Context ctx, AnnotType annot, bool nullable,
+    SString name, const Type& candidate) const;
 
 private:
   std::unique_ptr<IndexData> const m_data;

@@ -1936,7 +1936,7 @@ Index::Index(borrowed_ptr<php::Program> program)
                          attribute_setter(
                            ta->attrs,
                            flag &&
-                           !m_data->classes.count(ta->name) &&
+                           !m_data->classInfo.count(ta->name) &&
                            !m_data->classAliases.count(ta->name),
                            AttrUnique);
                        });
@@ -1947,6 +1947,7 @@ Index::Index(borrowed_ptr<php::Program> program)
                          attribute_setter(
                            cinfo->cls->attrs,
                            flag &&
+                           !m_data->typeAliases.count(cinfo->cls->name) &&
                            !m_data->classAliases.count(cinfo->cls->name),
                            AttrUnique);
                        });
@@ -2051,27 +2052,6 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
 
   if (ctx.cls && ctx.cls->name->isame(clsName)) return resolve_class(ctx.cls);
 
-  // We know it has to name a class only if there's no type alias with this
-  // name.
-  //
-  // TODO(#3519401): when we start unfolding type aliases, we could
-  // look at whether it is an alias for a specific class here.
-  // (Note this might need to split into a different API: type
-  // aliases aren't allowed everywhere we're doing resolve_class
-  // calls.)
-  if (m_data->typeAliases.count(clsName)) {
-    return folly::none;
-  }
-
-  auto name_only = [&] () -> folly::Optional<res::Class> {
-    // We also refuse to have name-only resolutions of enums, so that
-    // all name only resolutions can be treated as objects.
-    if (!m_data->enums.count(clsName)) {
-      return res::Class { this, clsName };
-    }
-    return folly::none;
-  };
-
   /*
    * If there's only one preresolved ClassInfo, we can give out a
    * specific res::Class for it.  (Any other possible resolutions were
@@ -2081,20 +2061,134 @@ folly::Optional<res::Class> Index::resolve_class(Context ctx,
   for (auto it = begin(classes); it != end(classes); ++it) {
     auto const cinfo = it->second;
     if (cinfo->cls->attrs & AttrUnique) {
-      if (debug && std::next(it) != end(classes)) {
+      if (debug &&
+          (std::next(it) != end(classes) ||
+           m_data->typeAliases.count(clsName))) {
         std::fprintf(stderr, "non unique \"unique\" class: %s\n",
           cinfo->cls->name->data());
-        for (; it != end(classes); ++it) {
-          std::fprintf(stderr, "   and %s\n", cinfo->cls->name->data());
+        while (++it != end(classes)) {
+          std::fprintf(stderr, "   and %s\n", it->second->cls->name->data());
         }
-        assert(0);
+        auto const typeAliases = find_range(m_data->typeAliases, clsName);
+
+        for (auto ta = begin(typeAliases); ta != end(typeAliases); ++ta) {
+          std::fprintf(stderr, "   and type-alias %s\n",
+                       ta->second->name->data());
+        }
+        always_assert(0);
       }
       return res::Class { this, cinfo };
     }
     break;
   }
 
-  return name_only();
+  // We refuse to have name-only resolutions of enums, or typeAliases,
+  // so that all name only resolutions can be treated as objects.
+  if (!m_data->enums.count(clsName) &&
+      !m_data->typeAliases.count(clsName)) {
+    return res::Class { this, clsName };
+  }
+
+  return folly::none;
+}
+
+folly::Optional<res::Class> Index::selfCls(const Context& ctx) const {
+  if (!ctx.cls) return folly::none;
+  return resolve_class(ctx.cls);
+}
+
+folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
+  if (!ctx.cls || !ctx.cls->parentName) return folly::none;
+  if (auto const parent = resolve_class(ctx.cls).parent()) return parent;
+  return resolve_class(ctx, ctx.cls->parentName);
+}
+
+std::pair<const TypeAlias*,bool> Index::resolve_type_alias(SString name) const {
+  folly::Optional<std::unordered_set<const void*>> seen;
+  const TypeAlias* ret = nullptr;
+  bool nullable = false;
+  for (unsigned i = 0; ; ++i) {
+    name = normalizeNS(name);
+    auto const typeAliases = find_range(m_data->typeAliases, name);
+    auto const it = begin(typeAliases);
+    if (it == end(typeAliases)) break;
+    if (!(it->second->attrs & AttrUnique)) break;
+    ret = it->second;
+    nullable = nullable || ret->nullable;
+    if (ret->type != AnnotType::Object) break;
+    // deal with cycles of TypeAliases. Since we don't expect to
+    // encounter them, just use a counter until we hit a chain length
+    // of 10, then start tracking the names we resolve.
+    if (i == 10) {
+      seen.emplace();
+      seen->insert(name);
+    } else if (i > 10) {
+      if (seen->insert(name).second) {
+        ret = nullptr;
+        break;
+      }
+    }
+    name = ret->value;
+  }
+
+  return { ret, nullable };
+}
+
+folly::Optional<Type> Index::resolve_class_or_type_alias(
+  const Context& ctx, SString name, const Type& candidate) const {
+  /*
+   * If we can resolve the class, we'll normally give an object of a
+   * type according to that resolution.  But some classes in hhvm can
+   * be "enums", which we need to handle as non-object types.  A
+   * name-only resolution is guaranteed to be some kind of non-enum,
+   * non-type-alias object (see resolve_class).  Finally, some
+   * interfaces are magical, and allow non-object types to
+   * match. Handle them appropriately.
+   */
+  if (auto const rcls = resolve_class(ctx, name)) {
+    if (auto const cinfo = rcls->val.right()) {
+      if (cinfo->cls->attrs & AttrEnum) {
+        auto const& tc = cinfo->cls->enumBaseTy;
+        // we're not dealing with cycles here, because they should never
+        // be possible.
+        assert(tc.type() != AnnotType::Object);
+        return get_type_for_annotated_type(ctx,
+                                           tc.type(),
+                                           tc.isNullable(),
+                                           tc.typeName(),
+                                           candidate);
+      }
+    }
+    if (!interface_supports_non_objects(rcls->name()) ||
+        candidate.subtypeOf(TObj)) {
+      return subObj(*rcls);
+    }
+
+    if (candidate.subtypeOf(TOptArr)) {
+      if (interface_supports_array(rcls->name())) return TArr;
+    } else if (candidate.subtypeOf(TOptVec)) {
+      if (interface_supports_vec(rcls->name())) return TVec;
+    } else if (candidate.subtypeOf(TOptDict)) {
+      if (interface_supports_dict(rcls->name())) return TDict;
+    } else if (candidate.subtypeOf(TOptKeyset)) {
+      if (interface_supports_keyset(rcls->name())) return TKeyset;
+    } else if (candidate.subtypeOf(TOptStr)) {
+      if (interface_supports_string(rcls->name())) return TStr;
+    } else if (candidate.subtypeOf(TOptInt)) {
+      if (interface_supports_int(rcls->name())) return TInt;
+    } else if (candidate.subtypeOf(TOptDbl)) {
+      if (interface_supports_double(rcls->name())) return TDbl;
+    }
+    return folly::none;
+  }
+
+  auto tap = resolve_type_alias(name);
+  if (tap.first) {
+    return get_type_for_annotated_type(
+      ctx, tap.first->type, tap.second, tap.first->value, candidate);
+  }
+
+  return folly::none;
 }
 
 std::pair<res::Class,borrowed_ptr<php::Class>>
@@ -2372,107 +2466,80 @@ Type Index::get_type_for_constraint(Context ctx,
     if (tc.isSoft()) return TCell;
   }
 
-  switch (tc.metaType()) {
+  if (auto const t = get_type_for_annotated_type(ctx,
+                                                 tc.type(),
+                                                 tc.isNullable(),
+                                                 tc.typeName(),
+                                                 candidate)) {
+    return *t;
+  }
+  return getSuperType ? TInitCell : TBottom;
+}
+
+folly::Optional<Type> Index::get_type_for_annotated_type(
+  Context ctx, AnnotType annot, bool nullable,
+  SString name, const Type& candidate) const {
+
+  if (candidate.subtypeOf(TInitNull) && nullable) {
+    return TInitNull;
+  }
+  auto const mainType = [&]() -> const folly::Optional<Type> {
+    switch (getAnnotMetaType(annot)) {
     case AnnotMetaType::Precise: {
-      auto const mainType = [&]() -> const folly::Optional<Type> {
-        auto const dt = tc.underlyingDataType();
-        assert(dt.hasValue());
+      auto const dt = getAnnotDataType(annot);
 
-        switch (*dt) {
-        case KindOfUninit:       return TBottom;
-        case KindOfNull:         return TNull;
-        case KindOfBoolean:      return TBool;
-        case KindOfInt64:        return TInt;
-        case KindOfDouble:       return TDbl;
-        case KindOfPersistentString:
-        case KindOfString:       return TStr;
-        case KindOfPersistentVec:
-        case KindOfVec:          return TVec;
-        case KindOfPersistentDict:
-        case KindOfDict:         return TDict;
-        case KindOfPersistentKeyset:
-        case KindOfKeyset:       return TKeyset;
-        case KindOfPersistentArray:
-        case KindOfArray:        return TArr;
-        case KindOfResource:     return TRes;
-        case KindOfObject:
-          /*
-           * If we can resolve the class, we'll give an object of a type
-           * according to that resolution.  Some classes in hhvm can be
-           * "enums", which we need to handle as non-object types.  A name-only
-           * resolution is guaranteed to be some kind of non-enum,
-           * non-type-alias object (see resolve_class).
-           */
-          if (auto const rcls = resolve_class(ctx, tc.typeName())) {
-            if (auto const cinfo = rcls->val.right()) {
-              if (cinfo->cls->attrs & AttrEnum) {
-                return get_type_for_constraint<getSuperType>(
-                  ctx, cinfo->cls->enumBaseTy, candidate);
-              }
-            }
-            if (!interface_supports_non_objects(rcls->name()) ||
-                candidate.subtypeOf(TObj)) {
-              return subObj(*rcls);
-            } else if (getSuperType) {
-              if (candidate.subtypeOf(TOptArr)) {
-                if (interface_supports_array(rcls->name())) return TArr;
-              } else if (candidate.subtypeOf(TOptVec)) {
-                if (interface_supports_vec(rcls->name())) return TVec;
-              } else if (candidate.subtypeOf(TOptDict)) {
-                if (interface_supports_dict(rcls->name())) return TDict;
-              } else if (candidate.subtypeOf(TOptKeyset)) {
-                if (interface_supports_keyset(rcls->name())) return TKeyset;
-              } else if (candidate.subtypeOf(TOptStr)) {
-                if (interface_supports_string(rcls->name())) return TStr;
-              } else if (candidate.subtypeOf(TOptInt)) {
-                if (interface_supports_int(rcls->name())) return TInt;
-              } else if (candidate.subtypeOf(TOptDbl)) {
-                if (interface_supports_double(rcls->name())) return TDbl;
-              }
-            }
-          }
-          break;
-        case KindOfRef:
-          always_assert_flog(false, "Unexpected DataType");
-          break;
-        }
-        return folly::none;
-      }();
-
-      if (!mainType) {
-        return getSuperType ? TInitCell :
-          tc.isNullable() ? TInitNull : TBottom;
+      switch (dt) {
+      case KindOfUninit:       return TBottom;
+      case KindOfNull:         return TNull;
+      case KindOfBoolean:      return TBool;
+      case KindOfInt64:        return TInt;
+      case KindOfDouble:       return TDbl;
+      case KindOfPersistentString:
+      case KindOfString:       return TStr;
+      case KindOfPersistentVec:
+      case KindOfVec:          return TVec;
+      case KindOfPersistentDict:
+      case KindOfDict:         return TDict;
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:       return TKeyset;
+      case KindOfPersistentArray:
+      case KindOfArray:        return TArr;
+      case KindOfResource:     return TRes;
+      case KindOfObject:
+        return resolve_class_or_type_alias(ctx, name, candidate);
+      case KindOfRef:
+        always_assert_flog(false, "Unexpected DataType");
+        break;
       }
-      return !tc.isNullable() ? *mainType : opt(*mainType);
+      break;
     }
     case AnnotMetaType::Mixed:
       /*
        * Here we handle "mixed", typevars, and some other ignored
        * typehints (ex. "(function(..): ..)" typehints).
        */
-      return getSuperType ? TCell : TGen;
+      return TGen;
     case AnnotMetaType::Self:
-      if (!ctx.cls) break;
-      return subObj(resolve_class(ctx.cls));
+      if (auto s = selfCls(ctx)) return subObj(*s);
+      break;
     case AnnotMetaType::Parent:
-      if (ctx.cls && ctx.cls->parentName) {
-        auto p = resolve_class(ctx.cls).parent();
-        if (!p) p = resolve_class(ctx, ctx.cls->parentName);
-        if (p) return subObj(*p);
-      }
-      return getSuperType ? TObj : TBottom;
+      if (auto p = parentCls(ctx)) return subObj(*p);
+      break;
     case AnnotMetaType::Callable:
       break;
     case AnnotMetaType::Number:
-      return tc.isNullable() ? TOptNum : TNum;
+      return TNum;
     case AnnotMetaType::ArrayKey:
       if (candidate.subtypeOf(TInt)) return TInt;
       if (candidate.subtypeOf(TStr)) return TStr;
       // TODO(3774082): Support TInt | TStr type constraint
-      return getSuperType ? TInitCell : TBottom;
-  }
+      break;
+    }
+    return folly::none;
+  }();
 
-  return getSuperType ? TCell : TBottom;
+  if (!mainType || !nullable || mainType->couldBe(TInitNull)) return mainType;
+  return opt(*mainType);
 }
 
 Type Index::lookup_constraint(Context ctx,

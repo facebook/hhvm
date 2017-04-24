@@ -694,25 +694,17 @@ folly::Optional<Type> thisType(ISS& env) {
 }
 
 folly::Optional<Type> selfCls(ISS& env) {
-  if (!env.ctx.cls) return folly::none;
-  return subCls(env.index.resolve_class(env.ctx.cls));
+  if (auto rcls = env.index.selfCls(env.ctx)) return subCls(*rcls);
+  return folly::none;
 }
 
 folly::Optional<Type> selfClsExact(ISS& env) {
-  if (!env.ctx.cls) return folly::none;
-  return clsExact(env.index.resolve_class(env.ctx.cls));
+  if (auto rcls = env.index.selfCls(env.ctx)) return clsExact(*rcls);
+  return folly::none;
 }
 
 folly::Optional<Type> parentClsExact(ISS& env) {
-  if (!env.ctx.cls || !env.ctx.cls->parentName) return folly::none;
-  auto parent = env.index.resolve_class(env.ctx.cls).parent();
-  if (!parent) {
-    parent = env.index.resolve_class(env.ctx, env.ctx.cls->parentName);
-  }
-
-  if (parent) {
-    return clsExact(*parent);
-  }
+  if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
   return folly::none;
 }
 

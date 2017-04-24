@@ -230,15 +230,37 @@ struct FRedundant { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 struct FReducible { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 
 /*
+ * The instruction is a load which can be refined to a better type than its
+ * type-parameter currently has.
+ */
+struct FRefinableLoad { Type refinedType; };
+
+/*
  * The instruction can be legally replaced with a Jmp to either its next or
  * taken edge.
  */
 struct FJmpNext {};
 struct FJmpTaken {};
 
-using Flags = boost::variant<FNone,FRedundant,FReducible,FJmpNext,FJmpTaken>;
+using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
+                             FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
+
+// Conservative list of instructions which have type-parameters safe to refine.
+bool refinable_load_eligible(const IRInstruction& inst) {
+  switch (inst.op()) {
+    case LdLoc:
+    case LdStk:
+    case LdMBase:
+    case LdClsRef:
+    case LdMem:
+      assertx(inst.hasTypeParam());
+      return true;
+    default:
+      return false;
+  }
+}
 
 void clear_everything(Local& env) {
   FTRACE(3, "      clear_everything\n");
@@ -278,8 +300,7 @@ Flags load(Local& env,
     tracked.knownType &= inst.dst()->type();
   }
 
-  if (tracked.knownType.hasConstVal() ||
-      tracked.knownType.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
+  if (tracked.knownType.admitsSingleVal()) {
     tracked.knownValue = env.global.unit.cns(tracked.knownType);
 
     FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
@@ -298,16 +319,28 @@ Flags load(Local& env,
       [] (SSATmp* tmp) { return tmp->inst()->block(); },
       [] (Block* blk)  { return blk; }
     );
-    if (inst.block() != block && inst.block()->hint() == Block::Hint::Unused) {
-      return FNone{};
+    if (inst.block() == block || inst.block()->hint() != Block::Hint::Unused) {
+      return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
     }
-    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
+  } else {
+    // Only set a new known value if we previously didn't have one. If we had a
+    // known value already, we would have made the load redundant above, unless
+    // we're in an Hint::Unused block. In that case, we want to keep any old
+    // known value to avoid disturbing the main trace in case we merge back.
+    tracked.knownValue = inst.dst();
+    FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
+    FTRACE(5, "       av: {}\n", show(env.state.avail));
   }
 
-  tracked.knownValue = inst.dst();
+  // Even if we can't make this load redundant, we might be able to refine its
+  // type parameter.
+  if (refinable_load_eligible(inst)) {
+    assertx(tracked.knownType <= inst.typeParam());
+    if (tracked.knownType < inst.typeParam()) {
+      return FRefinableLoad { tracked.knownType };
+    }
+  }
 
-  FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
-  FTRACE(5, "       av: {}\n", show(env.state.avail));
   return FNone{};
 }
 
@@ -713,6 +746,20 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
          resolved->toString());
 }
 
+void refine_load(Global& env,
+                 IRInstruction& inst,
+                 const FRefinableLoad& flags) {
+  assertx(refinable_load_eligible(inst));
+  assertx(flags.refinedType < inst.typeParam());
+
+  FTRACE(2, "      refinable: {} :: {} -> {}\n",
+         inst.toString(),
+         inst.typeParam(),
+         flags.refinedType);
+
+  inst.setTypeParam(flags.refinedType);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
@@ -737,6 +784,8 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     },
 
     [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
+
+    [&] (FRefinableLoad flags) { refine_load(env, inst, flags); },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");

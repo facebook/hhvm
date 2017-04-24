@@ -256,27 +256,6 @@ strhash_t hash_string_i_unsafe(const char *arKey, uint32_t nKeyLength) {
 
 #endif
 
-inline strhash_t hash_string(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i(arKey, nKeyLength);
-}
-
-inline strhash_t hash_string_unsafe(const char *arKey, uint32_t nKeyLength) {
-  return hash_string_i_unsafe(arKey, nKeyLength);
-}
-
-/**
- * We probably should get rid of this, so to detect code generation errors,
- * where a binary string is treated as a NULL-terminated literal. Do we ever
- * allow binary strings as array keys or symbol names?
- */
-inline strhash_t hash_string(const char *arKey) {
-  return hash_string(arKey, strlen(arKey));
-}
-
-inline strhash_t hash_string_i(const char *arKey) {
-  return hash_string_i(arKey, strlen(arKey));
-}
-
 // This function returns true and sets the res parameter if arKey
 // is a non-empty string that matches one of the following conditions:
 //   1) The string is "0".

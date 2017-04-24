@@ -725,7 +725,7 @@ void StringData::incrementHelper() {
 
 void StringData::preCompute() {
   auto s = slice();
-  m_hash = hash_string_unsafe(s.data(), s.size());
+  m_hash = hash_string_i_unsafe(s.data(), s.size());
   assert(m_hash >= 0);
   if (s.size() > 0 &&
       (is_numeric_string(s.data(), s.size(), nullptr, nullptr,

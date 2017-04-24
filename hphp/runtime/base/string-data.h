@@ -412,6 +412,8 @@ struct StringData final : MaybeCountable,
    */
   strhash_t hash() const;
   NEVER_INLINE strhash_t hashHelper() const;
+  static strhash_t hash(const char* s, size_t len);
+  static strhash_t hash_unsafe(const char* s, size_t len);
 
   /*
    * Equality comparison, in the sense of php's string == operator.

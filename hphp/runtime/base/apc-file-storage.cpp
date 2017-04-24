@@ -92,7 +92,7 @@ char* APCFileStorage::put(const char* data, uint32_t len) {
 
   auto const chunkIndex = current >> 32;
   char* base = m_chunks[chunkIndex] + static_cast<uint32_t>(current);
-  uint64_t h = hash_string_unsafe(data, len);
+  uint64_t h = hash_string_cs_unsafe(data, len);
   *(uint64_t*)base = h | (static_cast<uint64_t>(len) << 32);
   base += sizeof(uint64_t);
   assert(base[len] == '\0');            // Should already be 0 after mmap.
@@ -162,7 +162,7 @@ bool APCFileStorage::hashCheck() {
                       (int64_t)current - (int64_t)m_chunks[i]);
         return false;
       }
-      strhash_t h_data = hash_string(current, len);
+      strhash_t h_data = hash_string_cs(current, len);
       if (h_data != h) {
         Logger::Error("invalid hash at chunk %d offset %" PRId64, i,
                       (int64_t)current - (int64_t)m_chunks[i]);

@@ -139,6 +139,14 @@ inline StringData* StringData::modifyChar(int offset, char c) {
   return sd;
 }
 
+inline strhash_t StringData::hash_unsafe(const char* s, size_t len) {
+  return hash_string_i_unsafe(s, len);
+}
+
+inline strhash_t StringData::hash(const char* s, size_t len) {
+  return hash_string_i(s, len);
+}
+
 inline strhash_t StringData::hash() const {
   strhash_t h = m_hash & STRHASH_MASK;
   return h ? h : hashHelper();

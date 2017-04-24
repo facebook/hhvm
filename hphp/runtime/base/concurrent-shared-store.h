@@ -358,7 +358,8 @@ private:
     }
     size_t hash(const char* s) const {
       assert(s);
-      return isTaggedStringData(s) ? getStringData(s)->hash() : hash_string(s);
+      return isTaggedStringData(s) ? getStringData(s)->hash() :
+             StringData::hash(s, strlen(s));
     }
   };
 

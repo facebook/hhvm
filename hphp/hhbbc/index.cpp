@@ -2103,104 +2103,109 @@ folly::Optional<res::Class> Index::parentCls(const Context& ctx) const {
   return resolve_class(ctx, ctx.cls->parentName);
 }
 
-std::pair<const TypeAlias*,bool> Index::resolve_type_alias(SString name) const {
+
+Index::ResolvedInfo Index::resolve_type_name(SString inName) const {
   folly::Optional<std::unordered_set<const void*>> seen;
-  const TypeAlias* ret = nullptr;
-  bool nullable = false;
+
+  auto nullable = false;
+  auto name = inName;
+
   for (unsigned i = 0; ; ++i) {
     name = normalizeNS(name);
-    auto const typeAliases = find_range(m_data->typeAliases, name);
-    auto const it = begin(typeAliases);
-    if (it == end(typeAliases)) break;
-    if (!(it->second->attrs & AttrUnique)) break;
-    ret = it->second;
-    nullable = nullable || ret->nullable;
-    if (ret->type != AnnotType::Object) break;
-    // deal with cycles of TypeAliases. Since we don't expect to
+    auto const classes = find_range(m_data->classInfo, name);
+    auto const cls_it = begin(classes);
+    if (cls_it != end(classes)) {
+      auto const cinfo = cls_it->second;
+      if (!(cinfo->cls->attrs & AttrUnique)) {
+        if (!m_data->enums.count(name) && !m_data->typeAliases.count(name)) {
+          break;
+        }
+        return { AnnotType::Object, false, nullptr };
+      }
+      if (!(cinfo->cls->attrs & AttrEnum)) {
+        return { AnnotType::Object, nullable, cinfo };
+      }
+      auto const& tc = cinfo->cls->enumBaseTy;
+      assert(!tc.isNullable());
+      if (tc.type() != AnnotType::Object) {
+        return { tc.type(), nullable, tc.typeName() };
+      }
+      name = tc.typeName();
+    } else {
+      auto const typeAliases = find_range(m_data->typeAliases, name);
+      auto const ta_it = begin(typeAliases);
+      if (ta_it == end(typeAliases)) break;
+      auto const ta = ta_it->second;
+      if (!(ta->attrs & AttrUnique)) {
+        return { AnnotType::Object, false, nullptr };
+      }
+      nullable = nullable || ta->nullable;
+      if (ta->type != AnnotType::Object) {
+        return { ta->type, nullable, ta->value.get() };
+      }
+      name = ta->value;
+    }
+
+    // deal with cycles. Since we don't expect to
     // encounter them, just use a counter until we hit a chain length
     // of 10, then start tracking the names we resolve.
     if (i == 10) {
       seen.emplace();
       seen->insert(name);
     } else if (i > 10) {
-      if (seen->insert(name).second) {
-        ret = nullptr;
-        break;
-      }
-    }
-    name = ret->value;
-  }
-
-  return { ret, nullable };
-}
-
-const TypeConstraint* Index::resolve_enum(const Context& ctx,
-                                          SString name) const {
-  if (auto const rcls = resolve_class(ctx, name)) {
-    if (auto const cinfo = rcls->val.right()) {
-      if (cinfo->cls->attrs & AttrEnum) {
-        return &cinfo->cls->enumBaseTy;
+      if (!seen->insert(name).second) {
+        return { AnnotType::Object, false, nullptr };
       }
     }
   }
-  return nullptr;
+
+  return { AnnotType::Object, nullable, name };
 }
 
 folly::Optional<Type> Index::resolve_class_or_type_alias(
   const Context& ctx, SString name, const Type& candidate) const {
-  /*
-   * If we can resolve the class, we'll normally give an object of a
-   * type according to that resolution.  But some classes in hhvm can
-   * be "enums", which we need to handle as non-object types.  A
-   * name-only resolution is guaranteed to be some kind of non-enum,
-   * non-type-alias object (see resolve_class).  Finally, some
-   * interfaces are magical, and allow non-object types to
-   * match. Handle them appropriately.
-   */
-  if (auto const rcls = resolve_class(ctx, name)) {
-    if (auto const cinfo = rcls->val.right()) {
-      if (cinfo->cls->attrs & AttrEnum) {
-        auto const& tc = cinfo->cls->enumBaseTy;
-        // we're not dealing with cycles here, because they should never
-        // be possible.
-        assert(tc.type() != AnnotType::Object);
-        return get_type_for_annotated_type(ctx,
-                                           tc.type(),
-                                           tc.isNullable(),
-                                           tc.typeName(),
-                                           candidate);
+
+  auto const res = resolve_type_name(name);
+
+  if (res.nullable && candidate.subtypeOf(TInitNull)) return TInitNull;
+
+  if (res.type == AnnotType::Object) {
+    auto resolve = [&] (const res::Class& rcls) -> folly::Optional<Type> {
+      if (!interface_supports_non_objects(rcls.name()) ||
+          candidate.subtypeOf(TObj)) {
+        return subObj(rcls);
       }
-    }
-    if (!interface_supports_non_objects(rcls->name()) ||
-        candidate.subtypeOf(TObj)) {
-      return subObj(*rcls);
-    }
 
-    if (candidate.subtypeOf(TOptArr)) {
-      if (interface_supports_array(rcls->name())) return TArr;
-    } else if (candidate.subtypeOf(TOptVec)) {
-      if (interface_supports_vec(rcls->name())) return TVec;
-    } else if (candidate.subtypeOf(TOptDict)) {
-      if (interface_supports_dict(rcls->name())) return TDict;
-    } else if (candidate.subtypeOf(TOptKeyset)) {
-      if (interface_supports_keyset(rcls->name())) return TKeyset;
-    } else if (candidate.subtypeOf(TOptStr)) {
-      if (interface_supports_string(rcls->name())) return TStr;
-    } else if (candidate.subtypeOf(TOptInt)) {
-      if (interface_supports_int(rcls->name())) return TInt;
-    } else if (candidate.subtypeOf(TOptDbl)) {
-      if (interface_supports_double(rcls->name())) return TDbl;
-    }
-    return folly::none;
+      if (candidate.subtypeOf(TOptArr)) {
+        if (interface_supports_array(rcls.name())) return TArr;
+      } else if (candidate.subtypeOf(TOptVec)) {
+        if (interface_supports_vec(rcls.name())) return TVec;
+      } else if (candidate.subtypeOf(TOptDict)) {
+        if (interface_supports_dict(rcls.name())) return TDict;
+      } else if (candidate.subtypeOf(TOptKeyset)) {
+        if (interface_supports_keyset(rcls.name())) return TKeyset;
+      } else if (candidate.subtypeOf(TOptStr)) {
+        if (interface_supports_string(rcls.name())) return TStr;
+      } else if (candidate.subtypeOf(TOptInt)) {
+        if (interface_supports_int(rcls.name())) return TInt;
+      } else if (candidate.subtypeOf(TOptDbl)) {
+        if (interface_supports_double(rcls.name())) return TDbl;
+      }
+      return folly::none;
+    };
+
+    if (res.value.isNull()) return folly::none;
+
+    auto ty = res.value.right() ?
+      resolve({ this, res.value.right() }) :
+      resolve({ this, res.value.left() });
+
+    if (ty && res.nullable) *ty = opt(std::move(*ty));
+    return ty;
   }
 
-  auto tap = resolve_type_alias(name);
-  if (tap.first) {
-    return get_type_for_annotated_type(
-      ctx, tap.first->type, tap.second, tap.first->value, candidate);
-  }
-
-  return folly::none;
+  return get_type_for_annotated_type(ctx, res.type, res.nullable,
+                                     res.value.left(), candidate);
 }
 
 std::pair<res::Class,borrowed_ptr<php::Class>>

@@ -436,23 +436,16 @@ struct Index {
   folly::Optional<res::Class> selfCls(const Context& ctx) const;
   folly::Optional<res::Class> parentCls(const Context& ctx) const;
 
-  /*
-   * Try to resolve name as a TypeAlias.
-   *
-   * Returns a pair whose first element is the TypeAlias (if found),
-   * and whose second element indicates whether its nullable (note
-   * that if we followed a chain of aliases, the resulting alias is
-   * nullable if *any* element of the chain was nullable).
-   */
-  std::pair<const TypeAlias*,bool> resolve_type_alias(SString name) const;
+  struct ResolvedInfo {
+    AnnotType                               type;
+    bool                                    nullable;
+    Either<SString,borrowed_ptr<ClassInfo>> value;
+  };
 
   /*
-   * Try to resolve name as an enum.
-   *
-   * Returns a pointer the enum's TypeConstraint, or nullptr if it's
-   * not found.
+   * Try to resolve name, looking through TypeAliases and enums.
    */
-  const TypeConstraint* resolve_enum(const Context& ctx, SString name) const;
+  ResolvedInfo resolve_type_name(SString name) const;
 
   /*
    * Try to resolve name in the given context. Follows TypeAliases.

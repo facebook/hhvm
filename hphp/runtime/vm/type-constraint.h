@@ -142,6 +142,7 @@ struct TypeConstraint {
 
   void resolveType(AnnotType t, bool nullable) {
     assert(m_type == AnnotType::Object);
+    assert(t != AnnotType::Object);
     auto flags = m_flags | Flags::Resolved;
     if (nullable) flags |= Flags::Nullable;
     m_flags = static_cast<Flags>(flags);

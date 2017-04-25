@@ -19,15 +19,15 @@ let generate_constructor_body =
 let generate_constructor_method
     classish_name
     function_name
-    { function_type; _; } =
-  make_methodish_declaration_syntax
-    (make_constructor_decl_header_syntax
-      constructor_member_name
-      [
-        make_continuation_parameter_syntax function_type;
-        make_state_machine_parameter_syntax classish_name function_name;
-      ])
-    []
+    { function_parameter_list; function_type; _; } =
+  let function_parameter_list = syntax_node_to_list function_parameter_list in
+  let function_parameter_list =
+    (make_continuation_parameter_syntax function_type)::
+    (make_state_machine_parameter_syntax classish_name function_name)::
+    function_parameter_list in
+  let ctor = make_constructor_decl_header_syntax
+    constructor_member_name function_parameter_list in
+  make_methodish_declaration_syntax ctor []
 
 let generate_resume_body { methodish_function_body; _; } =
   let select_state_machine_syntax =

@@ -16,11 +16,30 @@ open CoroutineSyntax
 let generate_constructor_body =
   make_missing ()
 
+let make_parameter_public param =
+  match syntax param with
+  | ListItem { list_item; list_separator } ->
+    begin
+    match syntax list_item with
+    | ParameterDeclaration p ->
+      let parameter_visibility = public_syntax in
+      let list_item =
+        make_syntax (ParameterDeclaration { p with parameter_visibility }) in
+      make_syntax (ListItem { list_item; list_separator })
+    | _ -> param
+    end
+  | _ -> param
+
+
+let fix_up_parameter_list function_parameter_list =
+  let function_parameter_list = syntax_node_to_list function_parameter_list in
+  List.map make_parameter_public function_parameter_list
+
 let generate_constructor_method
     classish_name
     function_name
     { function_parameter_list; function_type; _; } =
-  let function_parameter_list = syntax_node_to_list function_parameter_list in
+  let function_parameter_list = fix_up_parameter_list function_parameter_list in
   let function_parameter_list =
     (make_continuation_parameter_syntax function_type)::
     (make_state_machine_parameter_syntax classish_name function_name)::

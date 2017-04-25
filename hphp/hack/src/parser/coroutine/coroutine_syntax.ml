@@ -94,6 +94,9 @@ let null_syntax =
 let private_syntax =
   make_token_syntax ~space_after:true TokenKind.Private "private"
 
+let public_syntax =
+  make_token_syntax ~space_after:true TokenKind.Public "public"
+
 let class_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Class "class"
 

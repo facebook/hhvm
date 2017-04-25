@@ -319,8 +319,11 @@ let make_continuation_type_syntax return_type_syntax =
     "CoroutineContinuation"
     [return_type_syntax]
 
-let make_continuation_parameter_syntax return_type_syntax =
+let make_continuation_parameter_syntax
+    ?visibility_syntax
+    return_type_syntax =
   make_parameter_declaration_syntax
+    ?visibility_syntax
     (make_continuation_type_syntax return_type_syntax)
     continuation_variable
 

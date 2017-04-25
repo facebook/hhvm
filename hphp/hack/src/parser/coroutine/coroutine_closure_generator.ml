@@ -40,10 +40,12 @@ let generate_constructor_method
     function_name
     { function_parameter_list; function_type; _; } =
   let function_parameter_list = fix_up_parameter_list function_parameter_list in
+  let cont_param = make_continuation_parameter_syntax
+    ~visibility_syntax:private_syntax function_type in
+  let sm_param = make_state_machine_parameter_syntax
+    classish_name function_name in
   let function_parameter_list =
-    (make_continuation_parameter_syntax function_type)::
-    (make_state_machine_parameter_syntax classish_name function_name)::
-    function_parameter_list in
+    cont_param :: sm_param :: function_parameter_list in
   let ctor = make_constructor_decl_header_syntax
     constructor_member_name function_parameter_list in
   make_methodish_declaration_syntax ctor []

@@ -399,7 +399,7 @@ and emit_call_expr expr =
 
 and emit_known_class_id cid =
   gather [
-    instr_string (Utils.strip_ns cid);
+    instr_string (SU.Xhp.mangle @@ Utils.strip_ns cid);
     instr_clsrefgetc;
   ]
 

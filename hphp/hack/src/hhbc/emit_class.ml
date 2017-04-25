@@ -77,33 +77,57 @@ let xhp_attribute_declaration_method body =
 
 let emit_xhp_attribute_array xal =
   let p = Pos.none in
-  (* TODO: exhaust over all possibilities *)
+  (* Taken from hphp/parser/hphp.y *)
   let hint_to_num = function
     | "string" -> 1
-    | "bool" -> 2
-    | "int" -> 3
-    | "float" | "double" -> 8
-    | _ -> 99999
+    | "bool" | "boolean" -> 2
+    | "int" | "integer" -> 3
+    | "mixed" -> 6
+    | "enum" -> 7
+    | "real" | "float" | "double" -> 8
+    (* Regular class names is type 5 *)
+    | _ -> 5
   in
-  let inner_array ho eo =
-    let e = match eo with None -> (p, A.Null) | Some e -> e in
-    let hint = match ho with
-      | None -> failwith "Xhp attribute must have a type"
-      | Some (_, A.Happly ((_, id), [])) ->
-        (p, A.Int (p, string_of_int @@ hint_to_num id))
-      | _ -> (p, A.String (p, "NYI - Xhp attribute hint"))
+  let get_enum_attributes = function
+    | None ->
+      failwith "Xhp attribute that's supposed to be an enum but not really"
+    | Some (_, es) ->
+      let turn_to_kv i e = A.AFkvalue ((p, A.Int (p, string_of_int i)), e) in
+      p, A.Array (List.mapi ~f:turn_to_kv es)
+  in
+  let get_attribute_array_values id enumo =
+    let type_ = hint_to_num id in
+    let type_ident = (p, A.Int (p, string_of_int type_)) in
+    let class_name = match type_ with
+      (* regular class names is type 5 *)
+      | 5 -> (p, A.String (p, Hhbc_alias.normalize id))
+      (* enums are type 7 *)
+      | 7 -> get_enum_attributes enumo
+      | _ -> (p, A.Null)
     in
-    (* TODO: What is index 1 and 3? *)
+    class_name, type_ident
+  in
+  let inner_array ho expo enumo =
+    let e = match expo with None -> (p, A.Null) | Some e -> e in
+    let class_name, hint = match ho with
+      | None when enumo = None
+        -> failwith "Xhp attribute must either have a type or be enum"
+      | None -> get_attribute_array_values "enum" enumo
+      | Some (_, A.Happly ((_, id), [])) -> get_attribute_array_values id enumo
+      | _ -> (p, A.Null), (p, A.String (p, "NYI - Xhp attribute hint"))
+    in
+    (* TODO: What is index 3? *)
     [A.AFkvalue ((p, A.Int (p, "0")), hint);
-     A.AFkvalue ((p, A.Int (p, "1")), (p, A.Null));
+     A.AFkvalue ((p, A.Int (p, "1")), class_name);
      A.AFkvalue ((p, A.Int (p, "2")), e);
      A.AFkvalue ((p, A.Int (p, "3")), (p, A.Int (p, "0")))]
   in
   let aux xa =
     let ho = Hhas_xhp_attribute.type_ xa in
-    let _, (_, name), eo = Hhas_xhp_attribute.class_var xa in
+    let _, (_, name), expo = Hhas_xhp_attribute.class_var xa in
+    let enumo = Hhas_xhp_attribute.maybe_enum xa in
     let k = p, A.String (p, SU.Xhp.clean name) in
-    let v = p, A.Array (inner_array ho eo) in
+    let v = p, A.Array (inner_array ho expo enumo) in
     A.AFkvalue (k, v)
   in
   p, A.Array (List.map ~f:aux xal)

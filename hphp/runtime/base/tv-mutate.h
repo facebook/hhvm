@@ -205,10 +205,12 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to) {
  */
 ALWAYS_INLINE
 void tvDupWithRef(const TypedValue& fr, TypedValue& to,
-                        const ArrayData* container) {
+                  const ArrayData* container) {
   assert(container);
   detail::tvDupWithRef(fr, to, [&] (RefData* ref) {
-    return !ref->isReferenced() && container != ref->tv()->m_data.parr;
+    return !ref->isReferenced() &&
+           (!isArrayType(ref->tv()->m_type) ||
+            container != ref->tv()->m_data.parr);
   });
 }
 

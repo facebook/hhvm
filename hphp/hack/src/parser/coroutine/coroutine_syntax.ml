@@ -79,11 +79,18 @@ let mixed_syntax =
 let mixed_type =
   make_simple_type_specifier mixed_syntax
 
+(* TODO: Should be CoroutineUnit ? *)
 let unit_syntax =
   make_token_syntax ~space_after:true TokenKind.Name "Unit"
 
 let unit_type =
   make_simple_type_specifier unit_syntax
+
+let int_syntax =
+  make_token_syntax ~space_after:true TokenKind.Int "int"
+
+let int_type =
+  make_simple_type_specifier int_syntax
 
 let void_syntax =
   make_token_syntax ~space_after:true TokenKind.Void "void"
@@ -144,6 +151,10 @@ let make_string_literal_syntax string_literal =
     (make_token_syntax
       TokenKind.DoubleQuotedStringLiteral
       (Printf.sprintf "\"%s\"" string_literal))
+
+let make_int_literal_syntax value =
+  make_literal_expression
+    (make_token_syntax TokenKind.DecimalLiteral (string_of_int value))
 
 let make_qualified_name_syntax name =
   make_qualified_name_expression (make_token_syntax TokenKind.Name name)
@@ -305,8 +316,12 @@ let make_function_decl_header_syntax
 let make_constructor_decl_header_syntax name parameter_list =
   make_function_decl_header_syntax name parameter_list (make_missing ())
 
-
 (* Coroutine-specific syntaxes *)
+
+(* TODO: Either (1) rename this to something less likely to conflict with
+user variables or (2) put user variables in their own sub-closure.  *)
+let label_syntax =
+  make_token_syntax ~space_after:true TokenKind.Variable "$nextLabel"
 
 let continuation_variable =
   "$coroutineContinuation_generated"
@@ -436,3 +451,10 @@ let make_state_machine_parameter_syntax enclosing_classname function_name =
 
 let inst_meth_syntax =
   make_qualified_name_syntax "inst_meth"
+
+(* public int $nextLabel = 0; *)
+let label_declaration_syntax =
+  let zero = make_int_literal_syntax 0 in
+  let init = make_simple_initializer assignment_operator_syntax zero in
+  let decl = make_property_declarator label_syntax init in
+  make_property_declaration public_syntax int_type decl semicolon_syntax

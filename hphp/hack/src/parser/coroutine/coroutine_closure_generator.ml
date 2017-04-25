@@ -108,6 +108,7 @@ let generate_closure_body
     method_node
     header_node =
   [
+    label_declaration_syntax;
     generate_constructor_method classish_name function_name header_node;
     generate_resume_method method_node;
     generate_resume_with_exception_method method_node;

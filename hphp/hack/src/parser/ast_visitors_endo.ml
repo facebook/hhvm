@@ -684,6 +684,11 @@ class virtual ['self] endo =
       if c0 == r0 && c1 == r1 && c2 == r2
       then this
       else Try (r0, r1, r2)
+    method on_Def_inline env this c0 =
+      let r0 = self#on_def env c0 in
+      if c0 == r0
+      then this
+      else Def_inline r0
     method on_Noop env this = this
     method on_stmt env this =
       match this with
@@ -706,6 +711,8 @@ class virtual ['self] endo =
       | Foreach (c0, c1, c2, c3) as this ->
           self#on_Foreach env this c0 c1 c2 c3
       | Try (c0, c1, c2) -> self#on_Try env this c0 c1 c2
+      | Def_inline c0 ->
+          self#on_Def_inline env this c0
       | Noop -> self#on_Noop env this
     method on_As_v env this c0 =
       let r0 = self#on_expr env c0 in

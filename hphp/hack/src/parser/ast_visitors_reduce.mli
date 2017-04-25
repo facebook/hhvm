@@ -86,6 +86,7 @@ class virtual ['b] reduce :
         on_Contravariant : 'c -> 'd; on_Covariant : 'c -> 'd;
         on_Cst_const : 'c -> 'd; on_Cst_define : 'c -> 'd;
         on_Ctrait : 'c -> 'd;
+        on_Def_inline : 'c -> Ast_visitors_ancestors.def -> 'd;
         on_Default : 'c -> Ast_visitors_ancestors.block -> 'd;
         on_Diff : 'c -> 'd; on_Diff2 : 'c -> 'd;
         on_Do : 'c ->
@@ -393,6 +394,7 @@ class virtual ['b] reduce :
     method on_Cst_const : 'c -> 'd
     method on_Cst_define : 'c -> 'd
     method on_Ctrait : 'c -> 'd
+    method on_Def_inline : 'c -> Ast_visitors_ancestors.def -> 'd
     method on_Default : 'c -> Ast_visitors_ancestors.block -> 'd
     method on_Diff : 'c -> 'd
     method on_Diff2 : 'c -> 'd

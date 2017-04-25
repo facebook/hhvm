@@ -48,6 +48,7 @@ let php_file () = !(lowerer_state.mode) == FileInfo.Mphp
 type env =
   { saw_yield : bool ref
   ; errors    : (Pos.t * string) list ref
+  ; max_depth : int
   }
 
 type +'a parser = node -> env -> 'a
@@ -202,7 +203,15 @@ let pUop : bool -> (expr -> expr_) parser = fun postfix node env expr ->
   | Some TK.Await                   -> Await expr
   | Some TK.Clone                   -> Clone expr
   | Some TK.At                      -> snd expr
-  | _ -> missing_syntax "unary operator" node env
+  | Some TK.Dollar                  ->
+    (match expr with
+    | _, Lvarvar (n, id) -> Lvarvar (n + 1, id)
+    | _, Lvar id         -> Lvarvar (1, id)
+    | _ -> missing_syntax "unary operator:dollar-deref" node env
+    )
+  | _ ->
+
+    missing_syntax "unary operator" node env
 
 let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   match token_kind node with
@@ -281,6 +290,7 @@ let pKinds : kind list parser = couldMap ~f:(fun node env ->
   | Some TK.Private   -> Private
   | Some TK.Public    -> Public
   | Some TK.Protected -> Protected
+  | Some TK.Var       -> Public
   | _ -> missing_syntax "kind" node env
   )
 
@@ -496,6 +506,26 @@ let rec pHint : hint parser = fun node env ->
   in
   get_pos node, pHint_ node env
 
+type fun_hdr =
+  { fh_suspension_kind : suspension_kind
+  ; fh_name            : pstring
+  ; fh_type_parameters : tparam list
+  ; fh_parameters      : fun_param list
+  ; fh_return_type     : hint option
+  ; fh_param_modifiers : fun_param list
+  ; fh_keep_noop       : bool
+  }
+
+let empty_fun_hdr =
+  { fh_suspension_kind = SKSync
+  ; fh_name            = Pos.none, "<ANONYMOUS>"
+  ; fh_type_parameters = []
+  ; fh_parameters      = []
+  ; fh_return_type     = None
+  ; fh_param_modifiers = []
+  ; fh_keep_noop       = false
+  }
+
 let rec pSimpleInitializer node env =
   match syntax node with
   | SimpleInitializer { simple_initializer_value; _ } ->
@@ -684,8 +714,9 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       { postfix_unary_operand  = operand
       ; postfix_unary_operator = operator
       }
-      -> pUop (kind node = SyntaxKind.PostfixUnaryExpression) operator env @@
-        pExpr operand env
+      ->
+        let expr = pExpr operand env in
+        pUop (kind node = SyntaxKind.PostfixUnaryExpression) operator env expr
 
     | BinaryExpression
       { binary_left_operand; binary_operator; binary_right_operand }
@@ -704,6 +735,11 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       env.saw_yield := true;
       Yield (pAField yield_operand env)
 
+    | DefineExpression { define_keyword; define_argument_list; _ } -> Call
+      ( (let name = pos_name define_keyword in fst name, Id name)
+      , List.map (fun x -> pExpr x env) (as_list define_argument_list)
+      , []
+      )
 
     | ScopeResolutionExpression
       { scope_resolution_qualifier; scope_resolution_name; _ } ->
@@ -1060,14 +1096,21 @@ and pStmt : stmt parser = fun node env ->
       ))
   | BreakStatement _ -> Break (get_pos node)
   | ContinueStatement _ -> Continue (get_pos node)
+  | _ when env.max_depth > 0 ->
+    (* OCaml optimisers; Forgive them, for they know not what they do!
+     *
+     * The max_depth is only there to stop the *optimised* version from an
+     * unbounded recursion. Sad times.
+     *)
+    Def_inline (pDef node { env with max_depth = env.max_depth - 1 })
   | _ -> missing_syntax "statement" node env
 
-let pTConstraintTy : hint parser = fun node ->
+and pTConstraintTy : hint parser = fun node ->
   match syntax node with
   | TypeConstraint { constraint_type; _ } -> pHint constraint_type
   | _ -> missing_syntax "type constraint" node
 
-let pTConstraint : (constraint_kind * hint) parser = fun node env ->
+and pTConstraint : (constraint_kind * hint) parser = fun node env ->
   match syntax node with
   | TypeConstraint { constraint_keyword; constraint_type } ->
     ( (match token_kind constraint_keyword with
@@ -1080,7 +1123,7 @@ let pTConstraint : (constraint_kind * hint) parser = fun node env ->
     )
   | _ -> missing_syntax "type constraint" node env
 
-let pTParaml : tparam list parser = fun node env ->
+and pTParaml : tparam list parser = fun node env ->
   let pTParam : tparam parser = fun node env ->
     match syntax node with
     | TypeParameter { type_variance; type_name; type_constraints } ->
@@ -1100,28 +1143,8 @@ let pTParaml : tparam list parser = fun node env ->
     couldMap ~f:pTParam type_parameters_parameters env
   | _ -> missing_syntax "type parameter list" node env
 
-type fun_hdr =
-  { fh_suspension_kind : suspension_kind
-  ; fh_name            : pstring
-  ; fh_type_parameters : tparam list
-  ; fh_parameters      : fun_param list
-  ; fh_return_type     : hint option
-  ; fh_param_modifiers : fun_param list
-  ; fh_keep_noop       : bool
-  }
-
-let empty_fun_hdr =
-  { fh_suspension_kind = SKSync
-  ; fh_name            = Pos.none, "<ANONYMOUS>"
-  ; fh_type_parameters = []
-  ; fh_parameters      = []
-  ; fh_return_type     = None
-  ; fh_param_modifiers = []
-  ; fh_keep_noop       = false
-  }
-
 (* TODO: Translate the where clause *)
-let pFunHdr : fun_hdr parser = fun node env ->
+and pFunHdr : fun_hdr parser = fun node env ->
   match syntax node with
   | FunctionDeclarationHeader
     { function_async
@@ -1161,7 +1184,7 @@ let pFunHdr : fun_hdr parser = fun node env ->
   | Token _ -> empty_fun_hdr
   | _ -> missing_syntax "function header" node env
 
-let pClassElt : class_elt list parser = fun node env ->
+and pClassElt : class_elt list parser = fun node env ->
   match syntax node with
   | ConstDeclaration
     { const_abstract; const_type_specifier; const_declarators; _ } ->
@@ -1325,7 +1348,6 @@ let pClassElt : class_elt list parser = fun node env ->
 (*****************************************************************************(
  * Parsing definitions (AST's `def`)
 )*****************************************************************************)
-let rec pDefStmt node env = try Stmt (pStmt node env) with _ -> pDef node env
 and pDef : def parser = fun node env ->
   match syntax node with
   | FunctionDeclaration
@@ -1481,7 +1503,7 @@ and pDef : def parser = fun node env ->
       { syntax = NamespaceBody { namespace_declarations = decls; _ }; _ }
     ; _ } -> Namespace
       ( pos_name name
-      , List.map (fun x -> pDefStmt x env) (as_list decls)
+      , List.map (fun x -> pDef x env) (as_list decls)
       )
   | NamespaceDeclaration { namespace_name = name; _ } ->
     Namespace (pos_name name, [])
@@ -1514,17 +1536,11 @@ and pDef : def parser = fun node env ->
       in
       NamespaceUse (List.map f (as_list clauses))
   | NamespaceGroupUseDeclaration _ -> NamespaceUse []
-  (* The ugly duckling; Here, the FFP tree has one /fewer/ level of hierarchy,
-   * so we have to "step back" and look at node.
+  (* Fail open, assume top-level statement. Not too nice when reporting bugs,
+   * but if this turns out prohibitive, just `try` this and catch-and-correct
+   * the raised exception.
    *)
-  | ExpressionStatement _ -> Stmt (pStmt node env)
-  (* For PHP support; top-level statements are allowed for scripts. In
-   * particular, there is the case of "if(defined(Foo))". However, the AST does
-   * not have facilities for these. Therefore, do not reject the input, just
-   * drop that top-level if.
-   *)
-  | IfStatement _ when php_file () -> Stmt Noop
-  | _ -> missing_syntax "definition" node env
+  | _ -> Stmt (pStmt node env)
 let pProgram : program parser = fun node env ->
   let rec post_process program =
     let span (p : 'a -> bool) =
@@ -1588,7 +1604,7 @@ let pProgram : program parser = fun node env ->
         }
       | _ -> missing_syntax "DefineExpression:inner" args env
       ) :: aux env nodel
-  | node :: nodel -> pDefStmt node env :: aux env nodel
+  | node :: nodel -> pDef node env :: aux env nodel
   in
   post_process @@ aux env (as_list node)
 
@@ -1668,7 +1684,8 @@ let scour_comments
             | `EndEmbedded, '/'  -> mk `Block start idx @@ go next `Free next
             (* Whitespace skips everywhere else *)
             | _, (' ' | '\t' | '\n')      -> go start state        next
-            (* All comments start with a / *)
+            | `Free,     '#'              -> go next `LineCmt      next
+            (* All other comment delimiters start with a / *)
             | `Free,     '/'              -> go start `SawSlash    next
             (* After a / in trivia, we must see either another / or a * *)
             | `SawSlash, '/'              -> go next  `LineCmt     next
@@ -1739,8 +1756,10 @@ let from_text
     lowerer_state.mode      := fi_mode;
     lowerer_state.popt      := parser_options;
     lowerer_state.ignorePos := ignore_pos;
+    let saw_yield = ref false in
     let errors = ref [] in (* The top-level error list. *)
-    let ast = runP pScript script { saw_yield = ref false; errors } in
+    let max_depth = 42 in (* Filthy hack around OCaml bug *)
+    let ast = runP pScript script { saw_yield; errors; max_depth } in
     let ast =
       if elaborate_namespaces
       then Namespaces.elaborate_defs parser_options ast

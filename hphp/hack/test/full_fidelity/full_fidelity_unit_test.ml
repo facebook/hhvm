@@ -131,6 +131,7 @@ let minimal_tests =
     "test_type_const";
     "test_class_const";
     "test_type_alias";
+    "test_indirection";
     "test_global_constant";
     "test_closure_type";
     "test_inclusion_directive";

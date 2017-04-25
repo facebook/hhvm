@@ -1,0 +1,18 @@
+(script(header((<))((?))((name)(whitespace)(single_line_comment)(end_of_line)))
+  (list(classish_declaration(missing)(missing)((end_of_line)(class)(whitespace))
+    ((name)(whitespace))(missing)(missing)(missing)(missing)(missing)
+    (classish_body(({)(end_of_line))(list
+      (methodish_declaration(missing)(list((whitespace)(public)(whitespace)))
+        (function_declaration_header(missing)(missing)((function)(whitespace))
+          (missing)((name))(missing)((lparen))(missing)((rparen))
+          ((:)(whitespace))
+          (tuple_type_explicit_specifier((tuple))((<))(list
+            (list_item(simple_type_specifier((int)))((,)))
+            (list_item(simple_type_specifier((string)))(missing))
+        )((>)(whitespace)))(missing))(compound_statement(({)(end_of_line))
+          (list(return_statement((whitespace)(return)(whitespace))
+            (tuple_expression((tuple))((lparen))(list(list_item(literal
+              ((decimal_literal)))((,)(whitespace)))(list_item(literal
+              ((single_quoted_string_literal)))(missing)))((rparen))
+            )((;)(end_of_line))))((whitespace)(})(end_of_line)))(missing)
+      ))((}))))))

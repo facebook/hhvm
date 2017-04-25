@@ -139,6 +139,7 @@ type t =
 | TypeConstant
 | VectorTypeSpecifier
 | KeysetTypeSpecifier
+| TupleTypeExplicitSpecifier
 | VarrayTypeSpecifier
 | VectorArrayTypeSpecifier
 | TypeParameter
@@ -287,6 +288,7 @@ let to_string kind =
   | TypeConstant -> "type_constant"
   | VectorTypeSpecifier -> "vector_type_specifier"
   | KeysetTypeSpecifier -> "keyset_type_specifier"
+  | TupleTypeExplicitSpecifier -> "tuple_type_explicit_specifier"
   | VarrayTypeSpecifier -> "varray_type_specifier"
   | VectorArrayTypeSpecifier -> "vector_array_type_specifier"
   | TypeParameter -> "type_parameter"

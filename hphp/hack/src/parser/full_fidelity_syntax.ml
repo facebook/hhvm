@@ -773,6 +773,12 @@ module WithToken(Token: TokenType) = struct
       keyset_type_type: t;
       keyset_type_right_angle: t;
     }
+    and tuple_type_explicit_specifier = {
+      tuple_type_keyword: t;
+      tuple_type_left_angle: t;
+      tuple_type_types: t;
+      tuple_type_right_angle: t;
+    }
     and varray_type_specifier = {
       varray_keyword: t;
       varray_left_angle: t;
@@ -1022,6 +1028,7 @@ module WithToken(Token: TokenType) = struct
     | TypeConstant of type_constant
     | VectorTypeSpecifier of vector_type_specifier
     | KeysetTypeSpecifier of keyset_type_specifier
+    | TupleTypeExplicitSpecifier of tuple_type_explicit_specifier
     | VarrayTypeSpecifier of varray_type_specifier
     | VectorArrayTypeSpecifier of vector_array_type_specifier
     | TypeParameter of type_parameter
@@ -1304,6 +1311,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.VectorTypeSpecifier
       | KeysetTypeSpecifier _ ->
         SyntaxKind.KeysetTypeSpecifier
+      | TupleTypeExplicitSpecifier _ ->
+        SyntaxKind.TupleTypeExplicitSpecifier
       | VarrayTypeSpecifier _ ->
         SyntaxKind.VarrayTypeSpecifier
       | VectorArrayTypeSpecifier _ ->
@@ -1597,6 +1606,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.VectorTypeSpecifier
     let is_keyset_type_specifier node =
       kind node = SyntaxKind.KeysetTypeSpecifier
+    let is_tuple_type_explicit_specifier node =
+      kind node = SyntaxKind.TupleTypeExplicitSpecifier
     let is_varray_type_specifier node =
       kind node = SyntaxKind.VarrayTypeSpecifier
     let is_vector_array_type_specifier node =
@@ -3035,6 +3046,18 @@ module WithToken(Token: TokenType) = struct
       keyset_type_left_angle,
       keyset_type_type,
       keyset_type_right_angle
+    )
+
+    let get_tuple_type_explicit_specifier_children {
+      tuple_type_keyword;
+      tuple_type_left_angle;
+      tuple_type_types;
+      tuple_type_right_angle;
+    } = (
+      tuple_type_keyword,
+      tuple_type_left_angle,
+      tuple_type_types,
+      tuple_type_right_angle
     )
 
     let get_varray_type_specifier_children {
@@ -4533,6 +4556,17 @@ module WithToken(Token: TokenType) = struct
         keyset_type_type;
         keyset_type_right_angle;
       ]
+      | TupleTypeExplicitSpecifier {
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
+      } -> [
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
+      ]
       | VarrayTypeSpecifier {
         varray_keyword;
         varray_left_angle;
@@ -6006,6 +6040,17 @@ module WithToken(Token: TokenType) = struct
         "keyset_type_left_angle";
         "keyset_type_type";
         "keyset_type_right_angle";
+      ]
+      | TupleTypeExplicitSpecifier {
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
+      } -> [
+        "tuple_type_keyword";
+        "tuple_type_left_angle";
+        "tuple_type_types";
+        "tuple_type_right_angle";
       ]
       | VarrayTypeSpecifier {
         varray_keyword;
@@ -7653,6 +7698,18 @@ module WithToken(Token: TokenType) = struct
           keyset_type_left_angle;
           keyset_type_type;
           keyset_type_right_angle;
+        }
+      | (SyntaxKind.TupleTypeExplicitSpecifier, [
+          tuple_type_keyword;
+          tuple_type_left_angle;
+          tuple_type_types;
+          tuple_type_right_angle;
+        ]) ->
+        TupleTypeExplicitSpecifier {
+          tuple_type_keyword;
+          tuple_type_left_angle;
+          tuple_type_types;
+          tuple_type_right_angle;
         }
       | (SyntaxKind.VarrayTypeSpecifier, [
           varray_keyword;
@@ -9423,6 +9480,19 @@ module WithToken(Token: TokenType) = struct
         keyset_type_left_angle;
         keyset_type_type;
         keyset_type_right_angle;
+      ]
+
+    let make_tuple_type_explicit_specifier
+      tuple_type_keyword
+      tuple_type_left_angle
+      tuple_type_types
+      tuple_type_right_angle
+    =
+      from_children SyntaxKind.TupleTypeExplicitSpecifier [
+        tuple_type_keyword;
+        tuple_type_left_angle;
+        tuple_type_types;
+        tuple_type_right_angle;
       ]
 
     let make_varray_type_specifier

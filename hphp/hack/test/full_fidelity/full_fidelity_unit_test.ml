@@ -137,6 +137,8 @@ let minimal_tests =
     "test_inclusion_directive";
     "test_awaitable_creation";
     "test_literals";
+    "test_variadic_type_hint";
+    "test_tuple_type_keyword";
   ] ~f:mapper
 
 let error_tests =

@@ -383,6 +383,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return VectorTypeSpecifier::from_json($json, $position, $source);
     case 'keyset_type_specifier':
       return KeysetTypeSpecifier::from_json($json, $position, $source);
+    case 'tuple_type_explicit_specifier':
+      return TupleTypeExplicitSpecifier::from_json($json, $position, $source);
     case 'varray_type_specifier':
       return VarrayTypeSpecifier::from_json($json, $position, $source);
     case 'vector_array_type_specifier':
@@ -16945,6 +16947,115 @@ final class KeysetTypeSpecifier extends EditableSyntax {
     yield $this->_keyword;
     yield $this->_left_angle;
     yield $this->_type;
+    yield $this->_right_angle;
+    yield break;
+  }
+}
+final class TupleTypeExplicitSpecifier extends EditableSyntax {
+  private EditableSyntax $_keyword;
+  private EditableSyntax $_left_angle;
+  private EditableSyntax $_types;
+  private EditableSyntax $_right_angle;
+  public function __construct(
+    EditableSyntax $keyword,
+    EditableSyntax $left_angle,
+    EditableSyntax $types,
+    EditableSyntax $right_angle) {
+    parent::__construct('tuple_type_explicit_specifier');
+    $this->_keyword = $keyword;
+    $this->_left_angle = $left_angle;
+    $this->_types = $types;
+    $this->_right_angle = $right_angle;
+  }
+  public function keyword(): EditableSyntax {
+    return $this->_keyword;
+  }
+  public function left_angle(): EditableSyntax {
+    return $this->_left_angle;
+  }
+  public function types(): EditableSyntax {
+    return $this->_types;
+  }
+  public function right_angle(): EditableSyntax {
+    return $this->_right_angle;
+  }
+  public function with_keyword(EditableSyntax $keyword): TupleTypeExplicitSpecifier {
+    return new TupleTypeExplicitSpecifier(
+      $keyword,
+      $this->_left_angle,
+      $this->_types,
+      $this->_right_angle);
+  }
+  public function with_left_angle(EditableSyntax $left_angle): TupleTypeExplicitSpecifier {
+    return new TupleTypeExplicitSpecifier(
+      $this->_keyword,
+      $left_angle,
+      $this->_types,
+      $this->_right_angle);
+  }
+  public function with_types(EditableSyntax $types): TupleTypeExplicitSpecifier {
+    return new TupleTypeExplicitSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $types,
+      $this->_right_angle);
+  }
+  public function with_right_angle(EditableSyntax $right_angle): TupleTypeExplicitSpecifier {
+    return new TupleTypeExplicitSpecifier(
+      $this->_keyword,
+      $this->_left_angle,
+      $this->_types,
+      $right_angle);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $keyword = $this->keyword()->rewrite($rewriter, $new_parents);
+    $left_angle = $this->left_angle()->rewrite($rewriter, $new_parents);
+    $types = $this->types()->rewrite($rewriter, $new_parents);
+    $right_angle = $this->right_angle()->rewrite($rewriter, $new_parents);
+    if (
+      $keyword === $this->keyword() &&
+      $left_angle === $this->left_angle() &&
+      $types === $this->types() &&
+      $right_angle === $this->right_angle()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new TupleTypeExplicitSpecifier(
+        $keyword,
+        $left_angle,
+        $types,
+        $right_angle), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $keyword = EditableSyntax::from_json(
+      $json->tuple_type_keyword, $position, $source);
+    $position += $keyword->width();
+    $left_angle = EditableSyntax::from_json(
+      $json->tuple_type_left_angle, $position, $source);
+    $position += $left_angle->width();
+    $types = EditableSyntax::from_json(
+      $json->tuple_type_types, $position, $source);
+    $position += $types->width();
+    $right_angle = EditableSyntax::from_json(
+      $json->tuple_type_right_angle, $position, $source);
+    $position += $right_angle->width();
+    return new TupleTypeExplicitSpecifier(
+        $keyword,
+        $left_angle,
+        $types,
+        $right_angle);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_keyword;
+    yield $this->_left_angle;
+    yield $this->_types;
     yield $this->_right_angle;
     yield break;
   }

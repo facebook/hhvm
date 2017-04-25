@@ -451,6 +451,10 @@ let rec pHint : hint parser = fun node env ->
     | KeysetTypeSpecifier { keyset_type_keyword = kw; keyset_type_type = ty; _ }
     | VectorTypeSpecifier { vector_type_keyword = kw; vector_type_type = ty; _ }
     | ClassnameTypeSpecifier {classname_keyword = kw; classname_type   = ty; _ }
+    | TupleTypeExplicitSpecifier
+      { tuple_type_keyword = kw
+      ; tuple_type_types   = ty
+      ; _ }
     | VectorArrayTypeSpecifier
       { vector_array_keyword = kw
       ; vector_array_type    = ty

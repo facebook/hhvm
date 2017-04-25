@@ -64,6 +64,7 @@ let rec parse_type_specifier parser =
   | Vec -> parse_vec_type_specifier parser
   | Dict -> parse_dictionary_type_specifier parser
   | Keyset -> parse_keyset_type_specifier parser
+  | Tuple -> parse_tuple_type_explicit_specifier parser
   | LeftParen -> parse_tuple_or_closure_type_specifier parser
   | Shape -> parse_shape_specifier parser
   | Question -> parse_nullable_type_specifier parser
@@ -386,6 +387,30 @@ and parse_array_type_specifier parser =
       let (parser, t) = parse_type_specifier parser in
       let (parser, right) = expect_right_angle parser in
       let result = make_keyset_type_specifier keyword left t right in
+      (parser, result)
+
+  and parse_tuple_type_explicit_specifier parser =
+    (*
+      tuple < type-specifier-list >
+      TODO: Add this to the specification
+    *)
+    let (parser, keyword) = assert_token parser Tuple in
+    let (parser, left_angle) = assert_token parser LessThan in
+    let (parser, args) = parse_type_list parser GreaterThan in
+    let (parser1, right_angle) = next_token parser in
+    if (Token.kind right_angle) = GreaterThan then
+      let result = make_tuple_type_explicit_specifier keyword left_angle args
+        (make_token right_angle) in
+      (parser1, result)
+    else
+      (* ERROR RECOVERY: Don't eat the token that is in the place of the
+         missing > or ,.  Assume that it is the > that is missing and
+         try to parse whatever is coming after the type.  *)
+      let parser = with_error parser SyntaxError.error1022 in
+      let right_angle = make_missing () in
+      let result =
+        make_tuple_type_explicit_specifier keyword left_angle args right_angle
+      in
       (parser, result)
 
   and parse_dictionary_type_specifier parser =

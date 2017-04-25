@@ -1334,6 +1334,13 @@ let rec transform node =
   | TupleTypeSpecifier x ->
     let (left_p, types, right_p) = get_tuple_type_specifier_children x in
     transform_argish left_p types right_p
+  | TupleTypeExplicitSpecifier x ->
+    let (kw, left_a, types, right_a) =
+      get_tuple_type_explicit_specifier_children x in
+    Fmt [
+      t kw;
+      transform_argish left_a types right_a
+    ]
   | ErrorSyntax _ ->
     raise Hackfmt_error.InvalidSyntax
 

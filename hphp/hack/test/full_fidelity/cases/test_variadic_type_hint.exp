@@ -1,0 +1,18 @@
+(script
+  (header((<))((?))((name)(whitespace)(single_line_comment)(end_of_line)))
+  (list(function_declaration(missing)(function_declaration_header(missing)
+    (missing)
+    ((end_of_line)(function)(whitespace))
+    (missing)((name))(missing)((lparen))
+    (list(list_item(
+      parameter_declaration(missing)(missing)(error((function)))(missing)(missing)
+    )(missing)))
+    (missing)(missing)(missing)(missing))
+    (compound_statement(missing)(list(expression_statement
+      (parenthesized_expression((lparen))((...))((rparen)))(missing))
+      (expression_statement((rparen))(missing))
+      (expression_statement((:)(whitespace))(missing))
+      (expression_statement(collection_literal_expression(
+        (name)(whitespace))(({))(missing)((})))(missing)
+      )
+    )(missing)))))

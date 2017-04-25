@@ -1226,6 +1226,17 @@ let rec get_doc node =
     let ty = get_doc keyset_type_type in
     let ra = get_doc keyset_type_right_angle in
     ar ^^^ la ^^^ ty ^^^ ra
+  | TupleTypeExplicitSpecifier {
+      tuple_type_keyword;
+      tuple_type_left_angle;
+      tuple_type_types;
+      tuple_type_right_angle
+    } ->
+    let tu = get_doc tuple_type_keyword in
+    let la = get_doc tuple_type_left_angle in
+    let ts = get_doc tuple_type_types in
+    let ra = get_doc tuple_type_right_angle in
+    tu ^^^ la ^^^ ts ^^^ ra
   | DictionaryTypeSpecifier {
       dictionary_type_keyword;
       dictionary_type_left_angle;

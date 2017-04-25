@@ -320,6 +320,8 @@ class EditableSyntax
       return VectorTypeSpecifier.from_json(json, position, source);
     case 'keyset_type_specifier':
       return KeysetTypeSpecifier.from_json(json, position, source);
+    case 'tuple_type_explicit_specifier':
+      return TupleTypeExplicitSpecifier.from_json(json, position, source);
     case 'varray_type_specifier':
       return VarrayTypeSpecifier.from_json(json, position, source);
     case 'vector_array_type_specifier':
@@ -14807,6 +14809,110 @@ class KeysetTypeSpecifier extends EditableSyntax
     return KeysetTypeSpecifier._children_keys;
   }
 }
+class TupleTypeExplicitSpecifier extends EditableSyntax
+{
+  constructor(
+    keyword,
+    left_angle,
+    types,
+    right_angle)
+  {
+    super('tuple_type_explicit_specifier', {
+      keyword: keyword,
+      left_angle: left_angle,
+      types: types,
+      right_angle: right_angle });
+  }
+  get keyword() { return this.children.keyword; }
+  get left_angle() { return this.children.left_angle; }
+  get types() { return this.children.types; }
+  get right_angle() { return this.children.right_angle; }
+  with_keyword(keyword){
+    return new TupleTypeExplicitSpecifier(
+      keyword,
+      this.left_angle,
+      this.types,
+      this.right_angle);
+  }
+  with_left_angle(left_angle){
+    return new TupleTypeExplicitSpecifier(
+      this.keyword,
+      left_angle,
+      this.types,
+      this.right_angle);
+  }
+  with_types(types){
+    return new TupleTypeExplicitSpecifier(
+      this.keyword,
+      this.left_angle,
+      types,
+      this.right_angle);
+  }
+  with_right_angle(right_angle){
+    return new TupleTypeExplicitSpecifier(
+      this.keyword,
+      this.left_angle,
+      this.types,
+      right_angle);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var left_angle = this.left_angle.rewrite(rewriter, new_parents);
+    var types = this.types.rewrite(rewriter, new_parents);
+    var right_angle = this.right_angle.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      left_angle === this.left_angle &&
+      types === this.types &&
+      right_angle === this.right_angle)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new TupleTypeExplicitSpecifier(
+        keyword,
+        left_angle,
+        types,
+        right_angle), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.tuple_type_keyword, position, source);
+    position += keyword.width;
+    let left_angle = EditableSyntax.from_json(
+      json.tuple_type_left_angle, position, source);
+    position += left_angle.width;
+    let types = EditableSyntax.from_json(
+      json.tuple_type_types, position, source);
+    position += types.width;
+    let right_angle = EditableSyntax.from_json(
+      json.tuple_type_right_angle, position, source);
+    position += right_angle.width;
+    return new TupleTypeExplicitSpecifier(
+        keyword,
+        left_angle,
+        types,
+        right_angle);
+  }
+  get children_keys()
+  {
+    if (TupleTypeExplicitSpecifier._children_keys == null)
+      TupleTypeExplicitSpecifier._children_keys = [
+        'keyword',
+        'left_angle',
+        'types',
+        'right_angle'];
+    return TupleTypeExplicitSpecifier._children_keys;
+  }
+}
 class VarrayTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -17339,6 +17445,7 @@ exports.XHPClose = XHPClose;
 exports.TypeConstant = TypeConstant;
 exports.VectorTypeSpecifier = VectorTypeSpecifier;
 exports.KeysetTypeSpecifier = KeysetTypeSpecifier;
+exports.TupleTypeExplicitSpecifier = TupleTypeExplicitSpecifier;
 exports.VarrayTypeSpecifier = VarrayTypeSpecifier;
 exports.VectorArrayTypeSpecifier = VectorArrayTypeSpecifier;
 exports.TypeParameter = TypeParameter;

@@ -10,7 +10,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2017-04-17-0001"
+let full_fidelity_schema_version_number = "2017-04-25-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -999,6 +999,14 @@ let schema = List.map from_list [
     "keyword";
     "left_angle";
     "type";
+    "right_angle" ];
+  [ "TupleTypeExplicitSpecifier";
+    "tuple_type_explicit_specifier";
+    "tuple_type_explicit_specifier";
+    "tuple_type";
+    "keyword";
+    "left_angle";
+    "types";
     "right_angle" ];
   [ "VarrayTypeSpecifier";
     "varray_type_specifier";

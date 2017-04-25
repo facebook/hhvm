@@ -1094,6 +1094,12 @@ def walk(filename, dest_subdir):
                 '__DIR__',
             )
 
+        if '/tests/zend/good/ext/openssl/tests/openssl.cnf' in full_dest_filename:
+            data = data.replace(
+                'default_bits',
+                'default_md = sha256\ndefault_bits',
+            )
+
         open(full_dest_filename, 'w').write(data)
 
         if full_dest_filename.endswith('.php'):

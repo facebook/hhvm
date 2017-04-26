@@ -60,7 +60,7 @@ let emit_xhp_attribute_array xal =
     in
     class_name, type_ident
   in
-  let inner_array ho expo enumo =
+  let inner_array ho expo enumo is_req =
     let e = match expo with None -> (p, A.Null) | Some e -> e in
     let class_name, hint = match ho with
       | None when enumo = None
@@ -69,18 +69,19 @@ let emit_xhp_attribute_array xal =
       | Some (_, A.Happly ((_, id), [])) -> get_attribute_array_values id enumo
       | _ -> (p, A.Null), (p, A.String (p, "NYI - Xhp attribute hint"))
     in
-    (* TODO: What is index 3? *)
+    let is_required = (p, A.Int (p, if is_req then "1" else "0")) in
     [A.AFkvalue ((p, A.Int (p, "0")), hint);
      A.AFkvalue ((p, A.Int (p, "1")), class_name);
      A.AFkvalue ((p, A.Int (p, "2")), e);
-     A.AFkvalue ((p, A.Int (p, "3")), (p, A.Int (p, "0")))]
+     A.AFkvalue ((p, A.Int (p, "3")), is_required)]
   in
   let aux xa =
     let ho = Hhas_xhp_attribute.type_ xa in
     let _, (_, name), expo = Hhas_xhp_attribute.class_var xa in
     let enumo = Hhas_xhp_attribute.maybe_enum xa in
+    let is_req = Hhas_xhp_attribute.is_required xa in
     let k = p, A.String (p, SU.Xhp.clean name) in
-    let v = p, A.Array (inner_array ho expo enumo) in
+    let v = p, A.Array (inner_array ho expo enumo is_req) in
     A.AFkvalue (k, v)
   in
   p, A.Array (List.map ~f:aux xal)

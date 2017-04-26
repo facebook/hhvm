@@ -531,11 +531,20 @@ static_assert(StringData::MaxSize + kStringOverhead == kSizeIndex2Size[103],
  */
 constexpr uint32_t SmallStringReserve = 64 - kStringOverhead;
 
+/* this only exists so that clang won't warn on the subtraction */
+inline constexpr uint32_t sizeClassParams2StringCapacity(
+  uint32_t lg_grp,
+  uint32_t lg_delta,
+  uint32_t ndelta
+) {
+  return ((uint32_t{1} << lg_grp) + (ndelta << lg_delta)) > kStringOverhead
+    ? ((uint32_t{1} << lg_grp) + (ndelta << lg_delta)) - kStringOverhead
+    : 0;
+}
+
 alignas(64) constexpr uint32_t kSizeIndex2StringCapacity[] = {
 #define SIZE_CLASS(index, lg_grp, lg_delta, ndelta, lg_delta_lookup, ncontig) \
-  ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)) > kStringOverhead \
-    ? ((uint32_t{1}<<lg_grp) + (uint32_t{ndelta}<<lg_delta)) - kStringOverhead \
-    : 0,
+  sizeClassParams2StringCapacity(lg_grp, lg_delta, ndelta),
   SIZE_CLASSES
 #undef SIZE_CLASS
 };

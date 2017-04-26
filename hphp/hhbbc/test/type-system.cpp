@@ -246,6 +246,8 @@ auto const optionals = folly::lazy([] {
     TOptInt,
     TOptDbl,
     TOptNum,
+    TOptUncArrKey,
+    TOptArrKey,
     TOptSStr,
     TOptCStr,
     TOptStr,
@@ -280,6 +282,8 @@ auto const non_opt_unions = folly::lazy([] {
     TPrim,
     TInitUnc,
     TUnc,
+    TUncArrKey,
+    TArrKey,
     TTop
   };
 });
@@ -548,6 +552,7 @@ TEST(Type, Unc) {
     { TUnc, opt(ival(2)) },
     { TNum, TUnc },
     { TNum, TInitUnc },
+    { TUncArrKey, TInitUnc },
   };
   for (auto kv : pairs) {
     EXPECT_TRUE(kv.first.couldBe(kv.second))
@@ -621,6 +626,10 @@ TEST(Type, Option) {
   EXPECT_TRUE(TRes.subtypeOf(TOptRes));
   EXPECT_TRUE(TInitNull.subtypeOf(TOptRes));
   EXPECT_TRUE(!TUninit.subtypeOf(TOptRes));
+
+  EXPECT_TRUE(TArrKey.subtypeOf(TOptArrKey));
+  EXPECT_TRUE(TInitNull.subtypeOf(TOptArrKey));
+  EXPECT_TRUE(!TUninit.subtypeOf(TOptArrKey));
 
   for (auto& t : optionals()) EXPECT_EQ(t, opt(unopt(t)));
   for (auto& t : optionals()) EXPECT_TRUE(is_opt(t));
@@ -1458,6 +1467,8 @@ TEST(Type, FromHNIConstraint) {
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\float")), TDbl);
   EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\float")), TOptDbl);
   EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\mixed")), TInitGen);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("HH\\arraykey")), TArrKey);
+  EXPECT_EQ(from_hni_constraint(makeStaticString("?HH\\arraykey")), TOptArrKey);
 
   // These are conservative, but we're testing them that way.  If we
   // make the function better later we'll remove the tests.
@@ -2022,6 +2033,56 @@ TEST(Type, ArrBitCombos) {
   EXPECT_TRUE(u2.couldBe(TCArrE));
   EXPECT_TRUE(u2.couldBe(arr_packedn(TInt)));
   EXPECT_EQ(array_elem(u2, ival(0)), TOptInt);
+}
+
+TEST(Type, ArrKey) {
+  EXPECT_TRUE(TInt.subtypeOf(TArrKey));
+  EXPECT_TRUE(TStr.subtypeOf(TArrKey));
+  EXPECT_TRUE(ival(0).subtypeOf(TArrKey));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(TArrKey));
+
+  EXPECT_TRUE(TInt.subtypeOf(TOptArrKey));
+  EXPECT_TRUE(TStr.subtypeOf(TOptArrKey));
+  EXPECT_TRUE(ival(0).subtypeOf(TOptArrKey));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(TOptArrKey));
+  EXPECT_TRUE(TInitNull.subtypeOf(TOptArrKey));
+
+  EXPECT_TRUE(TInt.subtypeOf(TUncArrKey));
+  EXPECT_TRUE(TSStr.subtypeOf(TUncArrKey));
+  EXPECT_TRUE(ival(0).subtypeOf(TUncArrKey));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(TUncArrKey));
+
+  EXPECT_TRUE(TInt.subtypeOf(TOptUncArrKey));
+  EXPECT_TRUE(TSStr.subtypeOf(TOptUncArrKey));
+  EXPECT_TRUE(ival(0).subtypeOf(TOptUncArrKey));
+  EXPECT_TRUE(sval(s_test.get()).subtypeOf(TOptUncArrKey));
+  EXPECT_TRUE(TInitNull.subtypeOf(TOptUncArrKey));
+
+  EXPECT_TRUE(TArrKey.subtypeOf(TOptArrKey));
+  EXPECT_TRUE(TUncArrKey.subtypeOf(TOptUncArrKey));
+  EXPECT_TRUE(TUncArrKey.subtypeOf(TArrKey));
+  EXPECT_TRUE(TOptUncArrKey.subtypeOf(TOptArrKey));
+
+  EXPECT_TRUE(TArrKey.subtypeOf(TInitCell));
+  EXPECT_TRUE(TUncArrKey.subtypeOf(TInitCell));
+  EXPECT_TRUE(TOptArrKey.subtypeOf(TInitCell));
+  EXPECT_TRUE(TOptUncArrKey.subtypeOf(TInitCell));
+
+  EXPECT_TRUE(TUncArrKey.subtypeOf(TInitUnc));
+  EXPECT_TRUE(TOptUncArrKey.subtypeOf(TInitUnc));
+
+  EXPECT_TRUE(union_of(TInt, TStr) == TArrKey);
+  EXPECT_TRUE(union_of(TInt, TCStr) == TArrKey);
+  EXPECT_TRUE(union_of(TInt, TSStr) == TUncArrKey);
+  EXPECT_TRUE(union_of(ival(1), TStr) == TArrKey);
+  EXPECT_TRUE(union_of(ival(1), sval(s_test.get())) == TUncArrKey);
+  EXPECT_TRUE(union_of(TArrKey, TInitNull) == TOptArrKey);
+  EXPECT_TRUE(union_of(TUncArrKey, TInitNull) == TOptUncArrKey);
+
+  EXPECT_TRUE(opt(TArrKey) == TOptArrKey);
+  EXPECT_TRUE(opt(TUncArrKey) == TOptUncArrKey);
+  EXPECT_TRUE(unopt(TOptArrKey) == TArrKey);
+  EXPECT_TRUE(unopt(TOptUncArrKey) == TUncArrKey);
 }
 
 //////////////////////////////////////////////////////////////////////

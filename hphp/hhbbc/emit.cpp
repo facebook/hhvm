@@ -806,11 +806,15 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
+  case T::OptUncArrKey:
+  case T::OptArrKey:
   case T::Null:
   case T::Cell:
   case T::Ref:
   case T::InitUnc:
   case T::Unc:
+  case T::UncArrKey:
+  case T::ArrKey:
   case T::InitCell:
   case T::InitGen:
   case T::Gen:

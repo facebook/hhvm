@@ -187,13 +187,11 @@ struct Type;
  *         *may* be contiguous integers, so for example Arr([InitPrim]) <:
  *         Arr([Int => InitPrim]).
  *
- *     Arr([InitCell:InitCell])
+ *     Arr([ArrKey:InitCell])
  *
  *         Map-like array with either integer or string keys, and InitCell
  *         values, or empty.  Essentially this is the most generic array that
  *         can't contain php references.
- *
- *  TODO(#3774082): we should have a Str|Int type.
  */
 
 //////////////////////////////////////////////////////////////////////
@@ -303,6 +301,11 @@ enum trep : uint32_t {
   BOptKeysetE  = BInitNull | BKeysetE,
   BOptKeysetN  = BInitNull | BKeysetN,
   BOptKeyset   = BInitNull | BKeyset,
+
+  BUncArrKey    = BInt | BSStr,
+  BArrKey       = BUncArrKey | BCStr,
+  BOptUncArrKey = BInitNull | BUncArrKey,
+  BOptArrKey    = BInitNull | BArrKey,
 
   BInitPrim = BInitNull | BBool | BNum,
   BPrim     = BInitPrim | BUninit,
@@ -669,6 +672,8 @@ X(CKeyset)                                      \
 X(KeysetE)                                      \
 X(KeysetN)                                      \
 X(Keyset)                                       \
+X(UncArrKey)                                    \
+X(ArrKey)                                       \
 X(InitPrim)                                     \
 X(Prim)                                         \
 X(InitUnc)                                      \
@@ -720,6 +725,8 @@ X(OptCKeyset)                                   \
 X(OptKeysetE)                                   \
 X(OptKeysetN)                                   \
 X(OptKeyset)                                    \
+X(OptUncArrKey)                                 \
+X(OptArrKey)                                    \
 X(InitCell)                                     \
 X(Cell)                                         \
 X(InitGen)                                      \

@@ -365,6 +365,10 @@ folly::Optional<Type> ratToAssertType(IRGS& env, RepoAuthType rat) {
     case T::Ref:
     case T::InitUnc:
     case T::Unc:
+    case T::OptUncArrKey:
+    case T::OptArrKey:
+    case T::UncArrKey:
+    case T::ArrKey:
       return typeFromRAT(rat, nullptr);
 
     case T::OptExactObj:

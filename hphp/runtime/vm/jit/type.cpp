@@ -599,13 +599,15 @@ Type typeFromTV(const TypedValue* tv, const Class* ctx) {
 Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
   using T = RepoAuthType::Tag;
   switch (ty.tag()) {
-    case T::OptBool:        return TBool      | TInitNull;
-    case T::OptInt:         return TInt       | TInitNull;
-    case T::OptSStr:        return TStaticStr | TInitNull;
-    case T::OptStr:         return TStr       | TInitNull;
-    case T::OptDbl:         return TDbl       | TInitNull;
-    case T::OptRes:         return TRes       | TInitNull;
-    case T::OptObj:         return TObj       | TInitNull;
+    case T::OptBool:        return TBool       | TInitNull;
+    case T::OptInt:         return TInt        | TInitNull;
+    case T::OptSStr:        return TStaticStr  | TInitNull;
+    case T::OptStr:         return TStr        | TInitNull;
+    case T::OptDbl:         return TDbl        | TInitNull;
+    case T::OptRes:         return TRes        | TInitNull;
+    case T::OptObj:         return TObj        | TInitNull;
+    case T::OptArrKey:      return TInt | TStr | TInitNull;
+    case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
 
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
@@ -620,6 +622,8 @@ Type typeFromRAT(RepoAuthType ty, const Class* ctx) {
 
     case T::Cell:           return TCell;
     case T::Ref:            return TBoxedInitCell;
+    case T::UncArrKey:      return TInt | TPersistentStr;
+    case T::ArrKey:         return TInt | TStr;
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;

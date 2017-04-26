@@ -105,6 +105,8 @@ bool mayHaveData(trep bits) {
   case BPrim:
   case BInitUnc:
   case BUnc:
+  case BArrKey:
+  case BUncArrKey:
   case BOptTrue:
   case BOptFalse:
   case BOptBool:
@@ -124,6 +126,8 @@ bool mayHaveData(trep bits) {
   case BOptCKeysetE:
   case BOptKeysetE:
   case BOptRes:
+  case BOptArrKey:
+  case BOptUncArrKey:
   case BInitCell:
   case BCell:
   case BInitGen:
@@ -211,6 +215,8 @@ bool isPredefined(trep bits) {
   case BPrim:
   case BInitUnc:
   case BUnc:
+  case BUncArrKey:
+  case BArrKey:
   case BOptTrue:
   case BOptFalse:
   case BOptBool:
@@ -258,6 +264,8 @@ bool isPredefined(trep bits) {
   case BOptKeyset:
   case BOptObj:
   case BOptRes:
+  case BOptUncArrKey:
+  case BOptArrKey:
   case BInitCell:
   case BCell:
   case BInitGen:
@@ -307,6 +315,8 @@ bool canBeOptional(trep bits) {
   case BNum:
   case BBool:
   case BStr:
+  case BUncArrKey:
+  case BArrKey:
   case BSArr:
   case BCArr:
   case BArrE:
@@ -380,6 +390,8 @@ bool canBeOptional(trep bits) {
   case BOptKeyset:
   case BOptObj:
   case BOptRes:
+  case BOptUncArrKey:
+  case BOptArrKey:
     return false;
 
   case BInitPrim:
@@ -2219,6 +2231,7 @@ Type from_hni_constraint(SString s) {
   if (!strcasecmp(p, "HH\\darray"))   return union_of(ret, TArr);
   if (!strcasecmp(p, "HH\\varray_or_darray"))   return union_of(ret, TArr);
   if (!strcasecmp(p, "array"))        return union_of(ret, TArr);
+  if (!strcasecmp(p, "HH\\arraykey")) return union_of(ret, TArrKey);
   if (!strcasecmp(p, "HH\\mixed"))    return TInitGen;
 
   // It might be an object, or we might want to support type aliases in HNI at
@@ -2343,6 +2356,8 @@ Type union_of(Type a, Type b) {
   X(TKeysetN)
   X(TKeyset)
 
+  X(TUncArrKey)
+  X(TArrKey)
 
   /*
    * Merging option types tries to preserve subtype information where it's
@@ -2384,6 +2399,9 @@ Type union_of(Type a, Type b) {
   X(TOptKeysetE)
   X(TOptKeysetN)
   X(TOptKeyset)
+
+  X(TOptUncArrKey)
+  X(TOptArrKey)
 
   X(TInitPrim)
   X(TPrim)
@@ -2568,8 +2586,7 @@ ArrKey disect_array_key(const Type& keyTy) {
   // statically known values)---they may behave like integers at
   // runtime.
 
-  // TODO(#3774082): We should be able to set this to a Str|Int type.
-  ret.type = TInitCell;
+  ret.type = TArrKey;
   return ret;
 }
 
@@ -2919,9 +2936,7 @@ std::pair<Type,bool> array_like_set(Type arr,
   const bool isVector   = arr.m_bits & BOptVec;
   const bool isKeyset   = arr.m_bits & BOptKeyset;
   const bool isPhpArray = arr.m_bits & BOptArr;
-  const bool validKey   =
-    key.type.subtypeOf(TInt) ||
-    (!isVector && key.type.subtypeOf(TStr));
+  const bool validKey   = key.type.subtypeOf(isVector ? TInt : TArrKey);
 
   trep bits = combine_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits = static_cast<trep>(bits & ~BArrLikeE);
@@ -3156,8 +3171,11 @@ Type array_newelem(const Type& arr, const Type& val) {
 }
 
 std::pair<Type,Type> iter_types(const Type& iterable) {
-  if (!iterable.subtypeOf(TArr) || !is_specialized_array(iterable)) {
+  if (!iterable.subtypeOf(TArr)) {
     return { TInitCell, TInitCell };
+  }
+  if (!is_specialized_array(iterable)) {
+    return { TArrKey, TInitCell };
   }
 
   // Note: we don't need to handle possible emptiness explicitly,
@@ -3167,9 +3185,9 @@ std::pair<Type,Type> iter_types(const Type& iterable) {
   switch (iterable.m_dataTag) {
   case DataTag::None:
     if (iterable.subtypeOf(TSArr)) {
-      return { TInitUnc, TInitUnc };
+      return { TUncArrKey, TInitUnc };
     }
-    return { TInitCell, TInitCell };
+    return { TArrKey, TInitCell };
   case DataTag::Str:
   case DataTag::Obj:
   case DataTag::Int:
@@ -3234,7 +3252,7 @@ std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
 
 ArrKey disect_strict_key(const Type& keyTy) {
   auto ret = ArrKey{};
-  if (!keyTy.couldBe(TInt) && !keyTy.couldBe(TStr)) {
+  if (!keyTy.couldBe(TArrKey)) {
     ret.type = TBottom;
     return ret;
   }
@@ -3251,7 +3269,7 @@ ArrKey disect_strict_key(const Type& keyTy) {
     return ret;
   }
 
-  if (!keyTy.subtypeOf(TInt) && !keyTy.subtypeOf(TStr)) {
+  if (!keyTy.subtypeOf(TArrKey)) {
     ret.type = TInitCell;
     return ret;
   }
@@ -3410,6 +3428,10 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptKeyset)
   X(Obj)
   X(OptObj)
+  X(UncArrKey)
+  X(ArrKey)
+  X(OptUncArrKey)
+  X(OptArrKey)
   X(InitUnc)
   X(Unc)
   X(InitCell)

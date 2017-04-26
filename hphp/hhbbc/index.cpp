@@ -2549,8 +2549,7 @@ folly::Optional<Type> Index::get_type_for_annotated_type(
     case AnnotMetaType::ArrayKey:
       if (candidate.subtypeOf(TInt)) return TInt;
       if (candidate.subtypeOf(TStr)) return TStr;
-      // TODO(3774082): Support TInt | TStr type constraint
-      break;
+      return TArrKey;
     }
     return folly::none;
   }();

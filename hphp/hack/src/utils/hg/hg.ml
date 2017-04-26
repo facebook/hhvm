@@ -12,10 +12,7 @@
 
 open Core
 
-exception Malformed_result
-
-type hg_rev = string
-type svn_rev = string
+include Hg_sig.Types
 
 (** Returns the closest SVN ancestor to the hg revision.
  *

@@ -8,6 +8,11 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *
  */
+
+namespace HH {
+function server_warmup_status(): string;
+function execution_context(): string;
+}
 const INF = 0.0;
 const NAN = 0.0;
 function connection_aborted();

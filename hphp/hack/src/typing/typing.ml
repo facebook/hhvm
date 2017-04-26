@@ -3283,8 +3283,8 @@ and obj_get_concrete_ty ~is_method env concrete_ty class_id
               (fun _ -> Reason.Rwitness id_pos, Tany)
           else paraml in
         let member_info = Env.get_member is_method env class_info id_str in
-        Typing_hooks.dispatch_cmethod_hook class_info paraml id env None
-          ~is_method;
+        Typing_hooks.dispatch_cmethod_hook class_info paraml id env
+          (Some class_id) ~is_method;
 
         match member_info with
         | None when not is_method ->

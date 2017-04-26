@@ -104,6 +104,9 @@ let private_syntax =
 let public_syntax =
   make_token_syntax ~space_after:true TokenKind.Public "public"
 
+let switch_syntax =
+  make_token_syntax ~space_after:true TokenKind.Switch "switch"
+
 let class_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Class "class"
 
@@ -320,6 +323,10 @@ let make_constructor_decl_header_syntax name parameter_list =
 
 (* TODO: Either (1) rename this to something less likely to conflict with
 user variables or (2) put user variables in their own sub-closure.  *)
+
+let label_name_syntax =
+  make_token_syntax ~space_after:true TokenKind.Name "nextLabel"
+
 let label_syntax =
   make_token_syntax ~space_after:true TokenKind.Variable "$nextLabel"
 
@@ -362,6 +369,10 @@ let make_closure_type_syntax enclosing_classname function_name =
 
 let closure_variable =
   "$closure"
+
+(* $closure *)
+let closure_variable_syntax =
+  make_token_syntax TokenKind.Variable closure_variable
 
 let make_closure_parameter_syntax enclosing_classname function_name =
   make_parameter_declaration_syntax
@@ -458,3 +469,13 @@ let label_declaration_syntax =
   let init = make_simple_initializer assignment_operator_syntax zero in
   let decl = make_property_declarator label_syntax init in
   make_property_declaration public_syntax int_type decl semicolon_syntax
+
+(* $closure->nextLabel *)
+let label_access_syntax =
+  make_member_selection_expression_syntax
+    closure_variable_syntax label_name_syntax
+
+let make_coroutine_switch _label_count =
+  let sections = make_missing() in (* TODO: Generate sections *)
+  make_switch_statement switch_syntax left_paren_syntax label_access_syntax
+    right_paren_syntax left_brace_syntax sections right_brace_syntax

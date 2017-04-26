@@ -432,6 +432,8 @@ let rec get_doc node =
     let body = get_doc x.namespace_declarations in
     let right = get_doc x.namespace_right_brace in
     indent_block_no_space left body right indt |> add_break
+  | NamespaceEmptyBody x ->
+    get_doc x.namespace_semicolon
   | NamespaceUseDeclaration x ->
     let u = get_doc x.namespace_use_keyword in
     let k = get_doc x.namespace_use_kind in

@@ -168,6 +168,9 @@ module WithToken(Token: TokenType) = struct
       namespace_declarations: t;
       namespace_right_brace: t;
     }
+    and namespace_empty_body = {
+      namespace_semicolon: t;
+    }
     and namespace_use_declaration = {
       namespace_use_keyword: t;
       namespace_use_kind: t;
@@ -924,6 +927,7 @@ module WithToken(Token: TokenType) = struct
     | PropertyDeclarator of property_declarator
     | NamespaceDeclaration of namespace_declaration
     | NamespaceBody of namespace_body
+    | NamespaceEmptyBody of namespace_empty_body
     | NamespaceUseDeclaration of namespace_use_declaration
     | NamespaceGroupUseDeclaration of namespace_group_use_declaration
     | NamespaceUseClause of namespace_use_clause
@@ -1103,6 +1107,8 @@ module WithToken(Token: TokenType) = struct
         SyntaxKind.NamespaceDeclaration
       | NamespaceBody _ ->
         SyntaxKind.NamespaceBody
+      | NamespaceEmptyBody _ ->
+        SyntaxKind.NamespaceEmptyBody
       | NamespaceUseDeclaration _ ->
         SyntaxKind.NamespaceUseDeclaration
       | NamespaceGroupUseDeclaration _ ->
@@ -1398,6 +1404,8 @@ module WithToken(Token: TokenType) = struct
       kind node = SyntaxKind.NamespaceDeclaration
     let is_namespace_body node =
       kind node = SyntaxKind.NamespaceBody
+    let is_namespace_empty_body node =
+      kind node = SyntaxKind.NamespaceEmptyBody
     let is_namespace_use_declaration node =
       kind node = SyntaxKind.NamespaceUseDeclaration
     let is_namespace_group_use_declaration node =
@@ -1836,6 +1844,12 @@ module WithToken(Token: TokenType) = struct
       namespace_left_brace,
       namespace_declarations,
       namespace_right_brace
+    )
+
+    let get_namespace_empty_body_children {
+      namespace_semicolon;
+    } = (
+      namespace_semicolon
     )
 
     let get_namespace_use_declaration_children {
@@ -3450,6 +3464,11 @@ module WithToken(Token: TokenType) = struct
         namespace_declarations;
         namespace_right_brace;
       ]
+      | NamespaceEmptyBody {
+        namespace_semicolon;
+      } -> [
+        namespace_semicolon;
+      ]
       | NamespaceUseDeclaration {
         namespace_use_keyword;
         namespace_use_kind;
@@ -4934,6 +4953,11 @@ module WithToken(Token: TokenType) = struct
         "namespace_left_brace";
         "namespace_declarations";
         "namespace_right_brace";
+      ]
+      | NamespaceEmptyBody {
+        namespace_semicolon;
+      } -> [
+        "namespace_semicolon";
       ]
       | NamespaceUseDeclaration {
         namespace_use_keyword;
@@ -6488,6 +6512,12 @@ module WithToken(Token: TokenType) = struct
           namespace_left_brace;
           namespace_declarations;
           namespace_right_brace;
+        }
+      | (SyntaxKind.NamespaceEmptyBody, [
+          namespace_semicolon;
+        ]) ->
+        NamespaceEmptyBody {
+          namespace_semicolon;
         }
       | (SyntaxKind.NamespaceUseDeclaration, [
           namespace_use_keyword;
@@ -8166,6 +8196,13 @@ module WithToken(Token: TokenType) = struct
         namespace_left_brace;
         namespace_declarations;
         namespace_right_brace;
+      ]
+
+    let make_namespace_empty_body
+      namespace_semicolon
+    =
+      from_children SyntaxKind.NamespaceEmptyBody [
+        namespace_semicolon;
       ]
 
     let make_namespace_use_declaration

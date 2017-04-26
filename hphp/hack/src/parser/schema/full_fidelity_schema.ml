@@ -187,6 +187,11 @@ let schema = List.map from_list [
     "left_brace";
     "declarations";
     "right_brace" ];
+  [ "NamespaceEmptyBody";
+    "namespace_empty_body";
+    "namespace_empty_body";
+    "namespace";
+    "semicolon" ];
   [ "NamespaceUseDeclaration";
     "namespace_use_declaration";
     "namespace_use_declaration";

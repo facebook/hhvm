@@ -536,6 +536,13 @@
         { "field_name" : "declarations" },
         { "field_name" : "right_brace" }
       ] },
+    { "kind_name" : "NamespaceEmptyBody",
+      "type_name" : "namespace_empty_body",
+      "description" : "namespace_empty_body",
+      "prefix" : "namespace",
+      "fields" : [
+        { "field_name" : "semicolon" }
+      ] },
     { "kind_name" : "NamespaceUseDeclaration",
       "type_name" : "namespace_use_declaration",
       "description" : "namespace_use_declaration",

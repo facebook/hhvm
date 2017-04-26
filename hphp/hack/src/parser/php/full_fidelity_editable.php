@@ -175,6 +175,8 @@ abstract class EditableSyntax implements ArrayAccess {
       return NamespaceDeclaration::from_json($json, $position, $source);
     case 'namespace_body':
       return NamespaceBody::from_json($json, $position, $source);
+    case 'namespace_empty_body':
+      return NamespaceEmptyBody::from_json($json, $position, $source);
     case 'namespace_use_declaration':
       return NamespaceUseDeclaration::from_json($json, $position, $source);
     case 'namespace_group_use_declaration':
@@ -5698,6 +5700,49 @@ final class NamespaceBody extends EditableSyntax {
     yield $this->_left_brace;
     yield $this->_declarations;
     yield $this->_right_brace;
+    yield break;
+  }
+}
+final class NamespaceEmptyBody extends EditableSyntax {
+  private EditableSyntax $_semicolon;
+  public function __construct(
+    EditableSyntax $semicolon) {
+    parent::__construct('namespace_empty_body');
+    $this->_semicolon = $semicolon;
+  }
+  public function semicolon(): EditableSyntax {
+    return $this->_semicolon;
+  }
+  public function with_semicolon(EditableSyntax $semicolon): NamespaceEmptyBody {
+    return new NamespaceEmptyBody(
+      $semicolon);
+  }
+
+  public function rewrite(
+    ( function
+      (EditableSyntax, ?array<EditableSyntax>): ?EditableSyntax ) $rewriter,
+    ?array<EditableSyntax> $parents = null): ?EditableSyntax {
+    $new_parents = $parents ?? [];
+    array_push($new_parents, $this);
+    $semicolon = $this->semicolon()->rewrite($rewriter, $new_parents);
+    if (
+      $semicolon === $this->semicolon()) {
+      return $rewriter($this, $parents ?? []);
+    } else {
+      return $rewriter(new NamespaceEmptyBody(
+        $semicolon), $parents ?? []);
+    }
+  }
+
+  public static function from_json(mixed $json, int $position, string $source) {
+    $semicolon = EditableSyntax::from_json(
+      $json->namespace_semicolon, $position, $source);
+    $position += $semicolon->width();
+    return new NamespaceEmptyBody(
+        $semicolon);
+  }
+  public function children(): Generator<string, EditableSyntax, void> {
+    yield $this->_semicolon;
     yield break;
   }
 }

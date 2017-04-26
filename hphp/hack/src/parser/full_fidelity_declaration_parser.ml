@@ -222,10 +222,11 @@ module WithExpressionAndStatementAndTypeParser
 
   and parse_namespace_body parser =
     let (parser, token) = next_token parser in
+    let full_token = make_token token in
     match Token.kind token with
-    | Semicolon -> (parser, make_token token)
+    | Semicolon -> (parser, make_namespace_empty_body full_token)
     | LeftBrace ->
-      let left = make_token token in
+      let left = full_token in
       let (parser, body) =
         parse_terminated_list parser parse_declaration RightBrace in
       let (parser, right) = expect_right_brace parser in

@@ -112,6 +112,8 @@ class EditableSyntax
       return NamespaceDeclaration.from_json(json, position, source);
     case 'namespace_body':
       return NamespaceBody.from_json(json, position, source);
+    case 'namespace_empty_body':
+      return NamespaceEmptyBody.from_json(json, position, source);
     case 'namespace_use_declaration':
       return NamespaceUseDeclaration.from_json(json, position, source);
     case 'namespace_group_use_declaration':
@@ -4020,6 +4022,53 @@ class NamespaceBody extends EditableSyntax
         'declarations',
         'right_brace'];
     return NamespaceBody._children_keys;
+  }
+}
+class NamespaceEmptyBody extends EditableSyntax
+{
+  constructor(
+    semicolon)
+  {
+    super('namespace_empty_body', {
+      semicolon: semicolon });
+  }
+  get semicolon() { return this.children.semicolon; }
+  with_semicolon(semicolon){
+    return new NamespaceEmptyBody(
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new NamespaceEmptyBody(
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let semicolon = EditableSyntax.from_json(
+      json.namespace_semicolon, position, source);
+    position += semicolon.width;
+    return new NamespaceEmptyBody(
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (NamespaceEmptyBody._children_keys == null)
+      NamespaceEmptyBody._children_keys = [
+        'semicolon'];
+    return NamespaceEmptyBody._children_keys;
   }
 }
 class NamespaceUseDeclaration extends EditableSyntax
@@ -17341,6 +17390,7 @@ exports.PropertyDeclaration = PropertyDeclaration;
 exports.PropertyDeclarator = PropertyDeclarator;
 exports.NamespaceDeclaration = NamespaceDeclaration;
 exports.NamespaceBody = NamespaceBody;
+exports.NamespaceEmptyBody = NamespaceEmptyBody;
 exports.NamespaceUseDeclaration = NamespaceUseDeclaration;
 exports.NamespaceGroupUseDeclaration = NamespaceGroupUseDeclaration;
 exports.NamespaceUseClause = NamespaceUseClause;

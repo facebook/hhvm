@@ -214,6 +214,11 @@ let rec transform node =
       Space;
       braced_block_nest left_b right_b [handle_possible_list decls];
     ]
+  | NamespaceEmptyBody x ->
+    let semi = get_namespace_empty_body_children x in
+    Fmt [
+      t semi;
+    ]
   | NamespaceUseDeclaration x ->
     let (kw, use_kind, clauses, semi) =
       get_namespace_use_declaration_children x in

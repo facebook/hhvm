@@ -35,6 +35,7 @@ type t =
 | PropertyDeclarator
 | NamespaceDeclaration
 | NamespaceBody
+| NamespaceEmptyBody
 | NamespaceUseDeclaration
 | NamespaceGroupUseDeclaration
 | NamespaceUseClause
@@ -184,6 +185,7 @@ let to_string kind =
   | PropertyDeclarator -> "property_declarator"
   | NamespaceDeclaration -> "namespace_declaration"
   | NamespaceBody -> "namespace_body"
+  | NamespaceEmptyBody -> "namespace_empty_body"
   | NamespaceUseDeclaration -> "namespace_use_declaration"
   | NamespaceGroupUseDeclaration -> "namespace_group_use_declaration"
   | NamespaceUseClause -> "namespace_use_clause"

@@ -14,11 +14,13 @@ open EditableSyntax
 open CoroutineSyntax
 
 let generate_coroutine_state_machine_body =
-  [ make_coroutine_switch 0; (* TODO: Need label count. *)
-  (* TODO: Label 0 here *)
-  throw_unimplemented_syntax "Coroutines are not yet implemented."
-  (* TODO: rewritten body here *)
-  (* TODO: error label and throw here *)
+  [
+    make_coroutine_switch 0; (* TODO: Need label count. *)
+    goto_label_syntax 0;
+    throw_unimplemented_syntax "Coroutines are not yet implemented.";
+    (* TODO: rewritten body here *)
+    error_label_syntax;
+    throw_unimplemented_syntax "A completed coroutine was resumed.";
   ]
 
 (**

@@ -104,14 +104,23 @@ let private_syntax =
 let public_syntax =
   make_token_syntax ~space_after:true TokenKind.Public "public"
 
-let switch_syntax =
+let switch_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Switch "switch"
+
+let case_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.Case "case"
 
 let class_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Class "class"
 
+let default_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.Default "default"
+
 let function_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Function "function"
+
+let goto_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.Goto "goto"
 
 let implements_syntax =
   make_token_syntax ~space_after:true TokenKind.Implements "implements"
@@ -475,7 +484,66 @@ let label_access_syntax =
   make_member_selection_expression_syntax
     closure_variable_syntax label_name_syntax
 
-let make_coroutine_switch _label_count =
-  let sections = make_missing() in (* TODO: Generate sections *)
-  make_switch_statement switch_syntax left_paren_syntax label_access_syntax
-    right_paren_syntax left_brace_syntax sections right_brace_syntax
+(* label0 *)
+let goto_label_name number =
+  let text = Printf.sprintf "label%d" number in
+  make_token_syntax TokenKind.Name text
+
+(* label0: *)
+let goto_label_syntax number =
+  make_goto_label (goto_label_name number) colon_syntax
+
+(* labelerror *)
+let error_label_name =
+  make_token_syntax TokenKind.Name "labelerror"
+
+(* labelerror: *)
+let error_label_syntax =
+  make_goto_label error_label_name colon_syntax
+
+(* case 0: *)
+let make_case_label_syntax number =
+  let number = make_int_literal_syntax number in
+  make_case_label case_keyword_syntax number colon_syntax
+
+(* goto label0; *)
+let make_goto_syntax number =
+  let label = goto_label_name number in
+  make_goto_statement goto_keyword_syntax label semicolon_syntax
+
+(* goto labelerror; *)
+let make_goto_error_syntax =
+  make_goto_statement goto_keyword_syntax error_label_name semicolon_syntax
+
+(* default: *)
+let default_label_syntax =
+  make_default_label default_keyword_syntax colon_syntax
+
+(* case 0: goto label0; *)
+let make_switch_section_syntax number =
+  let label = make_case_label_syntax number in
+  let statement = make_goto_syntax number in
+  let fallthrough = make_missing() in
+  make_switch_section label statement fallthrough
+
+let default_section_syntax =
+  make_switch_section
+    default_label_syntax make_goto_error_syntax (make_missing())
+
+let make_switch_sections number =
+  let rec aux n acc =
+    if n < 0 then acc
+    else aux (n - 1) ((make_switch_section_syntax n) :: acc) in
+  make_list (aux number [ default_section_syntax ])
+
+(*
+  switch($closure->label) {
+    case 0: goto label0;
+    ...
+    default: goto labelerror;
+  } *)
+let make_coroutine_switch label_count =
+  let sections = make_switch_sections label_count in
+  make_switch_statement switch_keyword_syntax left_paren_syntax
+    label_access_syntax right_paren_syntax left_brace_syntax sections
+    right_brace_syntax

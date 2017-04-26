@@ -20,5 +20,4 @@ val get_closure_classes : state -> Ast.class_ list
 (* Convert functions, classes, or an entire program *)
 val convert_fun : state -> Ast.fun_ -> state * Ast.fun_
 val convert_class : state -> Ast.class_ -> state * Ast.class_
-val convert_toplevel : state -> Ast.stmt -> state * Ast.stmt
-val convert_prog : state -> Ast.program -> state * Ast.program
+val convert_toplevel_prog : state -> Ast.program -> state * Ast.program

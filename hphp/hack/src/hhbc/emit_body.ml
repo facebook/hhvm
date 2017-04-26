@@ -28,27 +28,22 @@ let emit_method_prolog params =
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)
 
-let verify_returns body =
-  let rewriter i =
-    match i with
-    | IContFlow RetC ->
-      [ (IMisc VerifyRetTypeC); (IContFlow RetC) ]
-    | _ -> [ i ] in
-  InstrSeq.flat_map body ~f:rewriter
-
 module ULS = Unique_list_string
 
 let add_local locals (_, name) =
   if name = "$GLOBALS" then locals else ULS.add locals name
 
-class declvar_visitor = object(_this)
+class declvar_visitor = object(this)
   inherit [ULS.t] Ast_visitor.ast_visitor as _super
 
   method! on_lvar locals id = add_local locals id
   method! on_efun locals _fn use_list =
     List.fold_left use_list ~init:locals
       ~f:(fun locals (x, _isref) -> add_local locals x)
-  method! on_catch locals (_, x, _) = add_local locals x
+  method! on_catch locals (_, x, b) =
+    this#on_block (add_local locals x) b
+  method! on_class_ locals _ = locals
+  method! on_fun_ locals _ = locals
 end
 
 
@@ -58,7 +53,7 @@ end
  *)
 let decl_vars_from_ast params b =
   let visitor = new declvar_visitor in
-  let decl_vars = visitor#on_block ULS.empty b in
+  let decl_vars = visitor#on_program ULS.empty b in
   let param_names =
     List.fold_left
       params
@@ -68,8 +63,35 @@ let decl_vars_from_ast params b =
   let decl_vars = ULS.diff decl_vars param_names in
   List.rev (ULS.items decl_vars)
 
-let from_ast ~scope ~skipawaitable
-  params ret body default_instrs =
+let emit_def def =
+  match def with
+  | Ast.Stmt s -> Emit_statement.from_stmt s
+  | Ast.Constant c ->
+    gather [
+      Emit_expression.from_expr c.Ast.cst_value;
+      instr (IIncludeEvalDefine (DefCns (snd c.Ast.cst_name)));
+      instr_popc;
+    ]
+  | Ast.Class cd ->
+    instr (IIncludeEvalDefine (DefCls (snd cd.Ast.c_name)))
+  | Ast.Typedef td ->
+    instr (IIncludeEvalDefine (DefTypeAlias (snd td.Ast.t_id)))
+  | _ ->
+    empty
+
+let rec emit_defs defs =
+  match defs with
+  | [] -> Emit_statement.emit_dropthrough_return ()
+  | [Ast.Stmt s] -> Emit_statement.emit_final_statement s
+  | [d] ->
+    gather [emit_def d; Emit_statement.emit_dropthrough_return ()]
+  | d::defs ->
+    let i1 = emit_def d in
+    let i2 = emit_defs defs in
+    gather [i1; i2]
+
+let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value
+  params ret body =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();
@@ -84,17 +106,15 @@ let from_ast ~scope ~skipawaitable
     | Some h ->
       Some (hint_to_type_info
         ~skipawaitable ~always_extended:true ~tparams h) in
-  let stmt_instrs = Emit_statement.from_stmts body in
-  let stmt_instrs =
-    if has_type_constraint return_type_info then
-      verify_returns stmt_instrs
-    else
-      stmt_instrs in
-  let ret_instrs =
-    match List.last body with
-    | Some (A.Return _) | Some (A.Throw _) -> empty
-    | Some _ -> gather [instr_null; instr_retc]
-    | None -> default_instrs return_type_info in
+  let verify_return =
+    match return_type_info with
+    | None -> false
+    | Some x when x. Hhas_type_info.type_info_user_type = Some "" -> false
+    | Some x -> Hhas_type_info.has_type_constraint x in
+  Emit_statement.set_verify_return verify_return;
+  Emit_statement.set_default_dropthrough default_dropthrough;
+  Emit_statement.set_default_return_value return_value;
+  let stmt_instrs = emit_defs body in
   let fault_instrs = extract_fault_instructions stmt_instrs in
   let begin_label, default_value_setters =
     Emit_param.emit_param_default_value_setter params
@@ -108,7 +128,6 @@ let from_ast ~scope ~skipawaitable
     emit_method_prolog params;
     generator_instr;
     stmt_instrs;
-    ret_instrs;
     default_value_setters;
     fault_instrs;
   ] in

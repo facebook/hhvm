@@ -142,3 +142,5 @@ let fold_method md =
   folder_visitor#on_method_ () md
 let fold_stmt s =
   folder_visitor#on_stmt () s
+let fold_gconst c =
+  folder_visitor#on_gconst () c

@@ -492,13 +492,17 @@ let convert_toplevel st stmt =
   let stmt = Ast_constant_folder.fold_stmt stmt in
   convert_stmt env_toplevel st stmt
 
-let rec convert_def st d =
+and convert_gconst st gconst =
+  let gconst = Ast_constant_folder.fold_gconst gconst in
+  let st, expr = convert_expr env_toplevel st gconst.Ast.cst_value in
+  st, { gconst with Ast.cst_value = expr }
+
+(* Convert *only* top level definitions, not classes and functions *)
+let rec convert_toplevel_def st d =
   match d with
   | Fun fd ->
-    let st, fd = convert_fun st fd in
     st, Fun fd
   | Class cd ->
-    let st, cd = convert_class st cd in
     st, Class cd
   | Stmt stmt ->
     let st, stmt = convert_toplevel st stmt in
@@ -506,12 +510,13 @@ let rec convert_def st d =
   | Typedef td ->
     st, Typedef td
   | Constant c ->
+    let st, c = convert_gconst st c in
     st, Constant c
   | Namespace(id, dl) ->
-    let st, dl = convert_prog st dl in
+    let st, dl = convert_toplevel_prog st dl in
     st, Namespace(id, dl)
   | NamespaceUse x ->
     st, NamespaceUse x
 
-and convert_prog st dl =
-  List.map_env st dl convert_def
+and convert_toplevel_prog st dl =
+  List.map_env st dl convert_toplevel_def

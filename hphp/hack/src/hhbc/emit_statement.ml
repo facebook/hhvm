@@ -19,12 +19,26 @@ module TC = Hhas_type_constraint
 module SN = Naming_special_names
 module CBR = Continue_break_rewriter
 
+(* Context for code generation. It would be more elegant to pass this
+ * around in an environment parameter. *)
+let verify_return = ref false
+let default_return_value = ref instr_null
+let default_dropthrough = ref None
+let set_verify_return b = verify_return := b
+let set_default_return_value i = default_return_value := i
+let set_default_dropthrough i = default_dropthrough := i
+
+let emit_return () =
+  if !verify_return
+  then gather [instr_verifyRetTypeC; instr_retc]
+  else instr_retc
+
 let rec from_stmt st =
   match st with
   | A.Expr (_, A.Yield_break) ->
     gather [
       instr_null;
-      instr_retc;
+      emit_return ();
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
     gather (List.map exprl emit_unset_expr)
@@ -33,12 +47,12 @@ let rec from_stmt st =
   | A.Return (_, None) ->
     gather [
       instr_null;
-      instr_retc;
+      emit_return ();
     ]
   | A.Return (_,  Some expr) ->
     gather [
       from_expr expr;
-      instr_retc;
+      emit_return ();
     ]
   | A.GotoLabel (_, label) ->
     instr_label (Label.named label)
@@ -441,3 +455,30 @@ and from_case c =
     | _ -> None
   in
   (e, l), gather [instr_label l; b]
+
+let emit_dropthrough_return () =
+  match !default_dropthrough with
+  | Some instrs -> instrs
+  | _ ->
+    gather [!default_return_value; emit_return ()]
+
+let rec emit_final_statement s =
+  match s with
+  | A.Throw _ | A.Return _ | A.Goto _ ->
+    from_stmt s
+  | A.Block b ->
+    emit_final_statements b
+  | _ ->
+    gather [
+      from_stmt s;
+      emit_dropthrough_return ()
+    ]
+
+and emit_final_statements b =
+  match b with
+  | [] -> emit_dropthrough_return ()
+  | [s] -> emit_final_statement s
+  | s::b ->
+    let i1 = from_stmt s in
+    let i2 = emit_final_statements b in
+    gather [i1; i2]

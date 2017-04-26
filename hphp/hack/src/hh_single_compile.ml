@@ -168,7 +168,7 @@ let parse_name compiler_options popt files_contents =
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
         { FileInfo.
           file_mode; funs; classes; typedefs; consts; comments = Some comments;
-          consider_names_just_for_autoload = false }
+          consider_names_just_for_autoload = false }, ast
       end parsed_files in
 
     files_info
@@ -208,7 +208,7 @@ let print_debug_time_info filename debug_time =
 
 let do_compile filename compiler_options opts files_info debug_time = begin
   let nyi_regexp = Str.regexp "\\(.\\|\n\\)*NYI" in
-  let get_nast_from_fileinfo tcopt fn fileinfo =
+  let get_nast_from_fileinfo tcopt fn (fileinfo, ast) =
     (* Functions *)
     let funs = fileinfo.FileInfo.funs in
     let parse_function (_, fun_) =
@@ -224,13 +224,7 @@ let do_compile filename compiler_options opts files_info debug_time = begin
     let parse_typedef (_, typedef_) =
         Parser_heap.find_typedef_in_file ~full:true tcopt fn typedef_ in
     let parsed_typedefs = List.filter_map typedefs parse_typedef in
-    (* Consts *)
-    let parsed_consts = [] in (* TODO consts *)
-    (* Statements *)
-    let parsed_statements =
-        Parser_heap.find_statements_in_file ~full:true tcopt fn in
-    (parsed_functions, parsed_classes, parsed_typedefs, parsed_consts,
-      parsed_statements) in
+    (parsed_functions, parsed_classes, parsed_typedefs, ast) in
   let f_fold fn fileinfo text = begin
     let t = Unix.gettimeofday () in
     let ast = get_nast_from_fileinfo opts fn fileinfo in

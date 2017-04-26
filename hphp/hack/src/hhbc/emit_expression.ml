@@ -1138,15 +1138,25 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
        )),
      0
 
+   | A.Array_get((_, A.Lvar (_, x)), Some (_, A.Lvar (_, y)))
+     when x = SN.Superglobals.globals ->
+     empty,
+     instr (IBase (
+       match param_num_opt with
+       | None -> BaseGL (Local.Named y, base_mode)
+       | Some i -> FPassBaseGL (i, Local.Named y)
+       )),
+     0
+
    | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
      let elem_expr_instrs = from_expr e in
      elem_expr_instrs,
      instr (IBase (
-       match param_num_opt with
-       | None -> BaseGC (base_offset, base_mode)
-       | Some i -> FPassBaseGC (i, base_offset)
-       )),
-     1
+     match param_num_opt with
+     | None -> BaseGC (base_offset, base_mode)
+     | Some i -> FPassBaseGC (i, base_offset)
+     )),
+   1
 
    | A.Array_get(base_expr, opt_elem_expr) ->
      let elem_expr_instrs, elem_stack_size = emit_elem_instrs opt_elem_expr in

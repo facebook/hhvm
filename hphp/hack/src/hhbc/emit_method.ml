@@ -33,32 +33,20 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     || method_name = Naming_special_names.Members.__destruct
     then None
     else ast_method.Ast.m_ret in
-  let default_instrs return_type =
-      if List.mem ast_method.Ast.m_kind Ast.Abstract
-      then gather [
-        instr_string ("Cannot call abstract method " ^ Utils.strip_ns class_name
-          ^ "::" ^ method_name ^ "()");
-        instr (IOp (Fatal FatalOp.RuntimeOmitFrame))
-      ]
-      else let default_seq =
-        gather [
-          instr_null;
-          instr_retc
-        ] in
-        (* TODO: the following cannot use Emit_body.has_type_constraint
-         *       because it would not follow the current HHVM behaviour *)
-        match return_type with
-        | None -> default_seq
-        | Some x when x. Hhas_type_info.type_info_user_type = Some "" ->
-          default_seq
-        | _ -> gather [
-            instr_null;
-            instr_verifyRetTypeC;
-            instr_retc
-          ] in
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
+  let default_dropthrough =
+    if List.mem ast_method.Ast.m_kind Ast.Abstract
+    then Some (gather [
+      instr_string ("Cannot call abstract method " ^ Utils.strip_ns class_name
+        ^ "::" ^ method_name ^ "()");
+      instr (IOp (Fatal FatalOp.RuntimeOmitFrame))
+    ])
+    else
+    if method_is_async
+    then Some (gather [instr_null; instr_retc])
+    else None in
   let scope =
     [Ast_scope.ScopeItem.Method ast_method;
      Ast_scope.ScopeItem.Class ast_class] in
@@ -80,10 +68,11 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     Emit_body.from_ast
       ~scope:scope
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
+      ~default_dropthrough
+      ~return_value:instr_null
       ast_method.Ast.m_params
       ret
-      ast_method.Ast.m_body
-      default_instrs
+      [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]
   in
   (* Horrible hack to get decl_vars in the same order as HHVM *)
   let captured_vars =

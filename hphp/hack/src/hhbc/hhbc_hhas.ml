@@ -552,12 +552,32 @@ let string_of_generator = function
   | YieldK -> "YieldK"
   | _ -> "### string_of_generator - NYI"
 
+let class_counter = ref 0
+let next_class_counter () =
+  let c = !class_counter in
+  class_counter := c + 1;
+  c
+
+let typedef_counter = ref 0
+let next_typedef_counter () =
+  let c = !typedef_counter in
+  typedef_counter := c + 1;
+  c
+
 let string_of_include_eval_define = function
   | Incl -> "Incl"
   | InclOnce -> "InclOnce"
   | Req -> "Req"
   | ReqOnce -> "ReqOnce"
-  | _ -> "### string_of_include_eval_define - NYI"
+  | ReqDoc -> "ReqDoc"
+  | Eval -> "Eval"
+  | DefFunc id -> sep ["DefFunc"; string_of_function_id id]
+  | DefCls _id -> sep ["DefCls"; string_of_int (next_class_counter ())]
+  | DefClsNop id -> sep ["DefClsNop"; string_of_class_id id]
+  | DefCns id -> sep ["DefCns"; string_of_class_id id]
+  | DefTypeAlias _id ->
+    sep ["DefTypeAlias"; string_of_int (next_typedef_counter ())]
+
 
 let string_of_instruction instruction =
   let s = match instruction with
@@ -883,8 +903,8 @@ let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
   let attrs = List.map attribute_to_string user_attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
-  let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
+  let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
   let attrs = if Hhas_method.is_public m then "public" :: attrs else attrs in
   let attrs = if Hhas_method.is_protected m then "protected" :: attrs else attrs in
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
@@ -1041,17 +1061,6 @@ let add_class_def buf class_def =
   (* TODO: other members *)
   B.add_string buf "\n}\n"
 
-let add_defcls buf classes =
-  List.iteri
-    (fun count _ -> B.add_string buf (Printf.sprintf "  DefCls %n\n" count))
-    classes
-
-let add_deftypealias buf typedefs =
-  List.iteri
-    (fun count _ ->
-      B.add_string buf (Printf.sprintf "  DefTypeAlias %n\n" count))
-    typedefs
-
 let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf ".adata A_";
   B.add_string buf @@ string_of_int num;
@@ -1093,9 +1102,6 @@ let add_data_region buf top_level_body functions classes =
   B.add_string buf "\n"
 
 let add_top_level buf hhas_prog =
-  let non_closure_classes =
-    List.filter (fun c -> not (Hhas_class.is_closure_class c))
-    (Hhas_program.classes hhas_prog) in
   let main = Hhas_program.main hhas_prog in
   let main_stmts = Hhas_main.body main in
   let main_decl_vars = Hhas_main.decl_vars main in
@@ -1104,8 +1110,6 @@ let add_top_level buf hhas_prog =
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
   add_code_info buf 2 main_num_cls_ref_slots main_num_iters main_decl_vars;
-  add_defcls buf non_closure_classes;
-  add_deftypealias buf (Hhas_program.typedefs hhas_prog);
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"
 
@@ -1130,5 +1134,6 @@ let add_program buf hhas_prog =
 
 let to_string hhas_prog =
   let buf = Buffer.create 1024 in
+  class_counter := 0;
   add_program buf hhas_prog;
   B.contents buf

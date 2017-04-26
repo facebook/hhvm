@@ -32,12 +32,16 @@ let typedefs hhas_prog =
 let main hhas_prog =
   hhas_prog.hhas_main
 
-let emit_main block =
-  let return_seq _ = Instruction_sequence.empty in
+open Instruction_sequence
+
+let emit_main defs =
   let body_instrs, decl_vars, num_iters, num_cls_ref_slots, _, _, _, _ =
     Emit_body.from_ast
-      ~skipawaitable:false ~scope:Ast_scope.Scope.toplevel
-      [] None block return_seq in
+      ~skipawaitable:false
+      ~scope:Ast_scope.Scope.toplevel
+      ~return_value:(instr_int 1)
+      ~default_dropthrough:None
+      [] None defs in
   Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs)
     decl_vars num_iters num_cls_ref_slots
 
@@ -47,11 +51,9 @@ let from_ast
   (parsed_functions,
   parsed_classes,
   parsed_typedefs,
-  _parsed_consts,
-  parsed_statements) =
+  parsed_defs) =
   let st = initial_state (List.length parsed_classes) in
-  let st, parsed_statements =
-    List.map_env st parsed_statements convert_toplevel in
+  let st, parsed_defs = convert_toplevel_prog st parsed_defs in
   let st, parsed_functions = List.map_env st parsed_functions convert_fun in
   let st, parsed_classes = List.map_env st parsed_classes convert_class in
   let closure_classes = Closure_convert.get_closure_classes st in
@@ -61,11 +63,5 @@ let from_ast
   let compiled_classes = Emit_class.from_asts all_classes in
   let compiled_classes = Generate_memoized.memoize_classes compiled_classes in
   let compiled_typedefs = Emit_typedef.from_asts parsed_typedefs in
-  let _compiled_consts = [] in (* TODO *)
-  let pos = Pos.none in
-  let parsed_statements = match List.last parsed_statements with
-    | Some (Ast.Return _) -> parsed_statements
-    | _ -> parsed_statements @ [Ast.Return (pos, Some (pos, Ast.Int(pos, "1")))]
-  in
-  let compiled_statements = emit_main parsed_statements in
-  make compiled_funs compiled_classes compiled_typedefs compiled_statements
+  let compiled_defs = emit_main parsed_defs in
+  make compiled_funs compiled_classes compiled_typedefs compiled_defs

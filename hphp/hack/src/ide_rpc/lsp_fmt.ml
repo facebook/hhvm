@@ -251,7 +251,7 @@ let print_shutdown (_r: Shutdown.result) : json =
 let parse_did_open (params: json option) : Did_open.params =
   let open Did_open in
   {
-    text_document = Jget.obj_exn params "text_document"
+    text_document = Jget.obj_exn params "textDocument"
                       |> parse_text_document_item;
   }
 
@@ -263,7 +263,7 @@ let parse_did_open (params: json option) : Did_open.params =
 let parse_did_close (params: json option) : Did_close.params =
   let open Did_close in
   {
-    text_document = Jget.obj_exn params "text_document"
+    text_document = Jget.obj_exn params "textDocument"
                       |> parse_text_document_identifier;
   }
 

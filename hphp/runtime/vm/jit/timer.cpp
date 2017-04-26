@@ -51,6 +51,11 @@ int64_t getCPUTimeNanos() {
          -1;
 }
 
+int64_t getWallClockMicros() {
+  return RuntimeOption::EvalJitTimer ? HPHP::Timer::GetCurrentTimeMicros() :
+         -1;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -59,6 +64,7 @@ Timer::Timer(Name name, StructuredLogEntry* log_entry)
   : m_name(name)
   , m_finished(false)
   , m_start(getCPUTimeNanos())
+  , m_start_wall(getWallClockMicros())
   , m_log_entry(log_entry)
 {
 }
@@ -72,6 +78,7 @@ int64_t Timer::stop() {
 
   assertx(!m_finished);
   auto const elapsed = getCPUTimeNanos() - m_start;
+  auto const elapsed_wall_lock = getWallClockMicros() - m_start_wall;
 
   if (m_log_entry) {
     m_log_entry->setInt(std::string(s_names[(size_t)m_name].str) + "_micros",
@@ -82,6 +89,7 @@ int64_t Timer::stop() {
   counter.total += elapsed;
   ++counter.count;
   counter.max = std::max(counter.max, elapsed);
+  counter.wall_time_elapsed += elapsed_wall_lock;
   m_finished = true;
   return elapsed;
 }

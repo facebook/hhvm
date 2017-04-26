@@ -250,6 +250,7 @@ let literal_from_unop op operand =
   | Ast.Udecr
   | Ast.Updecr -> failwith "unexpected decrement on constant"
   | Ast.Uref -> failwith "unexpected reference on constant"
+  | Ast.Usplat -> failwith "unexpected variadic argument"
 
 let rec collection_literal_fields expr fields =
   let need_index = match snd expr with

@@ -194,6 +194,7 @@ let pUop : bool -> (expr -> expr_) parser = fun postfix node env expr ->
   | Some TK.Plus                    -> Unop (Uplus,  expr)
   | Some TK.Minus                   -> Unop (Uminus, expr)
   | Some TK.Ampersand               -> Unop (Uref,   expr)
+  | Some TK.DotDotDot               -> Unop (Usplat, expr)
   (* The ugly ducklings; In the FFP, `await` and `clone` are parsed as
    * `UnaryOperator`s, whereas the typed AST has separate constructors for
    * `Await`, `Clone` and `Uop`. Also, `@` is thrown out by the old parser.
@@ -623,8 +624,12 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | EmbeddedBracedExpression
       { embedded_braced_expression_expression = expr; _ }
     | ParenthesizedExpression { parenthesized_expression_expression = expr; _ }
-    | DecoratedExpression     { decorated_expression_expression     = expr; _ }
       -> pExpr_ expr env
+
+    | DecoratedExpression
+      { decorated_expression_expression = expr
+      ; decorated_expression_decorator  = decorator
+      } -> pUop false decorator env @@ pExpr expr env
 
     | DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = kw

@@ -233,7 +233,8 @@ class virtual ['b] iter :
         on_Unot : 'c -> unit; on_Unsafe : 'c -> unit;
         on_Unsafeexpr : 'c -> Ast_visitors_ancestors.expr -> unit;
         on_Updecr : 'c -> unit; on_Upincr : 'c -> unit;
-        on_Uplus : 'c -> unit; on_Uref : 'c -> unit; on_Utild : 'c -> unit;
+        on_Uplus : 'c -> unit; on_Uref : 'c -> unit; on_Usplat : 'c -> unit;
+        on_Utild : 'c -> unit;
         on_While : 'c ->
                    Ast_visitors_ancestors.expr ->
                    Ast_visitors_ancestors.block -> unit;
@@ -589,6 +590,7 @@ class virtual ['b] iter :
     method on_Upincr : 'c -> unit
     method on_Uplus : 'c -> unit
     method on_Uref : 'c -> unit
+    method on_Usplat : 'c -> unit
     method on_Utild : 'c -> unit
     method on_While :
       'c ->

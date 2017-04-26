@@ -3867,6 +3867,9 @@ and unop p env uop te ty =
       if Env.is_strict env then
         Errors.reference_expr p;
       make_result env te ty
+  | Ast.Usplat ->
+      (* TODO(13988978) Splat operator not supported at use sites yet. *)
+      make_result env te ty
 
 and binop in_cond p env bop p1 te1 ty1 p2 te2 ty2 =
   let rec is_any ty =

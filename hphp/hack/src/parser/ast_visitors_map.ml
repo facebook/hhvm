@@ -796,6 +796,7 @@ class virtual ['self] map =
     method on_Upincr env = Upincr
     method on_Updecr env = Updecr
     method on_Uref env = Uref
+    method on_Usplat env = Usplat
     method on_uop env this =
       match this with
       | Utild -> self#on_Utild env
@@ -807,6 +808,7 @@ class virtual ['self] map =
       | Upincr -> self#on_Upincr env
       | Updecr -> self#on_Updecr env
       | Uref -> self#on_Uref env
+      | Usplat -> self#on_Usplat env
     method on_Default env c0 =
       let r0 = self#on_block env c0 in Default r0
     method on_Case env c0 c1 =

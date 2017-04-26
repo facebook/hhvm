@@ -382,6 +382,7 @@ class virtual ['c] map :
         on_Upincr : 'd -> Ast_visitors_ancestors.uop;
         on_Uplus : 'd -> Ast_visitors_ancestors.uop;
         on_Uref : 'd -> Ast_visitors_ancestors.uop;
+        on_Usplat : 'd -> Ast_visitors_ancestors.uop;
         on_Utild : 'd -> Ast_visitors_ancestors.uop;
         on_While : 'd ->
                    Ast_visitors_ancestors.expr ->
@@ -928,6 +929,7 @@ class virtual ['c] map :
     method on_Upincr : 'd -> Ast_visitors_ancestors.uop
     method on_Uplus : 'd -> Ast_visitors_ancestors.uop
     method on_Uref : 'd -> Ast_visitors_ancestors.uop
+    method on_Usplat : 'd -> Ast_visitors_ancestors.uop
     method on_Utild : 'd -> Ast_visitors_ancestors.uop
     method on_While :
       'd ->

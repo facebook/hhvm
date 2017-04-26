@@ -1769,6 +1769,8 @@ and emit_unop op e =
     end
   | A.Uref ->
     emit_nyi "references"
+  | A.Usplat ->
+    emit_nyi "splat operator"
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)

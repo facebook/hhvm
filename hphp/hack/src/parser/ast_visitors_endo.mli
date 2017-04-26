@@ -583,6 +583,8 @@ class virtual ['b] endo :
                    Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_Uref : 'c ->
                   Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
+        on_Usplat : 'c ->
+                    Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_Utild : 'c ->
                    Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop;
         on_While : 'c ->
@@ -1362,6 +1364,8 @@ class virtual ['b] endo :
     method on_Uplus :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
     method on_Uref :
+      'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
+    method on_Usplat :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop
     method on_Utild :
       'c -> Ast_visitors_ancestors.uop -> Ast_visitors_ancestors.uop

@@ -89,7 +89,7 @@ type uop =
 | Utild
 | Unot | Uplus | Uminus | Uincr
 | Udecr | Upincr | Updecr
-| Uref
+| Uref | Usplat
 
 (*****************************************************************************)
 (* Helpers *)

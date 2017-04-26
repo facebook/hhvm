@@ -60,109 +60,6 @@ let default_constructor ast_class =
     method_is_pair_generator
     method_is_closure_body
 
-let xhp_attribute_declaration_method body =
-  {
-    A.m_kind = [A.Protected; A.Static];
-    A.m_tparams = [];
-    A.m_constrs = [];
-    A.m_name = Pos.none, "__xhpAttributeDeclaration";
-    A.m_params = [];
-    A.m_body = body;
-    A.m_user_attributes = [];
-    A.m_ret = None;
-    A.m_ret_by_ref = false;
-    A.m_fun_kind = A.FSync;
-    A.m_span = Pos.none
-  }
-
-let emit_xhp_attribute_array xal =
-  let p = Pos.none in
-  (* Taken from hphp/parser/hphp.y *)
-  let hint_to_num = function
-    | "string" -> 1
-    | "bool" | "boolean" -> 2
-    | "int" | "integer" -> 3
-    | "mixed" -> 6
-    | "enum" -> 7
-    | "real" | "float" | "double" -> 8
-    (* Regular class names is type 5 *)
-    | _ -> 5
-  in
-  let get_enum_attributes = function
-    | None ->
-      failwith "Xhp attribute that's supposed to be an enum but not really"
-    | Some (_, es) ->
-      let turn_to_kv i e = A.AFkvalue ((p, A.Int (p, string_of_int i)), e) in
-      p, A.Array (List.mapi ~f:turn_to_kv es)
-  in
-  let get_attribute_array_values id enumo =
-    let type_ = hint_to_num id in
-    let type_ident = (p, A.Int (p, string_of_int type_)) in
-    let class_name = match type_ with
-      (* regular class names is type 5 *)
-      | 5 -> (p, A.String (p, Hhbc_alias.normalize id))
-      (* enums are type 7 *)
-      | 7 -> get_enum_attributes enumo
-      | _ -> (p, A.Null)
-    in
-    class_name, type_ident
-  in
-  let inner_array ho expo enumo =
-    let e = match expo with None -> (p, A.Null) | Some e -> e in
-    let class_name, hint = match ho with
-      | None when enumo = None
-        -> failwith "Xhp attribute must either have a type or be enum"
-      | None -> get_attribute_array_values "enum" enumo
-      | Some (_, A.Happly ((_, id), [])) -> get_attribute_array_values id enumo
-      | _ -> (p, A.Null), (p, A.String (p, "NYI - Xhp attribute hint"))
-    in
-    (* TODO: What is index 3? *)
-    [A.AFkvalue ((p, A.Int (p, "0")), hint);
-     A.AFkvalue ((p, A.Int (p, "1")), class_name);
-     A.AFkvalue ((p, A.Int (p, "2")), e);
-     A.AFkvalue ((p, A.Int (p, "3")), (p, A.Int (p, "0")))]
-  in
-  let aux xa =
-    let ho = Hhas_xhp_attribute.type_ xa in
-    let _, (_, name), expo = Hhas_xhp_attribute.class_var xa in
-    let enumo = Hhas_xhp_attribute.maybe_enum xa in
-    let k = p, A.String (p, SU.Xhp.clean name) in
-    let v = p, A.Array (inner_array ho expo enumo) in
-    A.AFkvalue (k, v)
-  in
-  p, A.Array (List.map ~f:aux xal)
-
-(* AST transformations taken from hphp/parser/hphp.y *)
-let emit_xhp_attribute_declaration ast_class xal =
-  let p = Pos.none in
-  let var_dollar_ = p, A.Lvar (p, "$_") in
-  let neg_one = p, A.Int (p, "-1") in
-  (* static $_ = -1; *)
-  let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, neg_one)] in
-  (* if ($_ === -1) {
-   *   $_ = array_merge(parent::__xhpAttributeDeclaration(),
-   *                    attributes);
-   * }
-   *)
-  let cond = p, A.Binop (A.EQeqeq, var_dollar_, neg_one) in
-  let arg1 =
-    p, A.Call (
-      (p, A.Class_const ((p, "parent"), (p, "__xhpAttributeDeclaration"))),
-      [],
-      [])
-  in
-  let args = [arg1; emit_xhp_attribute_array xal] in
-  let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), args, []) in
-  let true_branch =
-    [A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]
-  in
-  let token2 = A.If (cond, true_branch, []) in
-  (* return $_; *)
-  let token3 = A.Return (p, Some var_dollar_) in
-  let body = [token1; token2; token3] in
-  let m = xhp_attribute_declaration_method body in
-  Emit_method.from_ast ast_class m
-
 let from_extends ~is_enum _tparams extends =
   if is_enum then Some ("HH\\BuiltinEnum") else
   match extends with
@@ -262,6 +159,8 @@ let from_ast : A.class_ -> Hhas_class.t =
         | A.XhpAttr (ho, cv, b, eo) -> Some (Hhas_xhp_attribute.make ho cv b eo)
         | _ -> None)
   in
+  (* TODO: Add xhp children *)
+  let class_xhp_children = [] in
   let class_is_interface = ast_is_interface ast_class in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
@@ -287,11 +186,20 @@ let from_ast : A.class_ -> Hhas_class.t =
                 | A.Method { A.m_name; _} ->
                   snd m_name = SN.Members.__construct ||
                   snd m_name = "__invoke" && is_closure_class
-                | _ -> false) in
+                | _ -> false)
+  in
+  let additional_methods = [] in
+  let additional_methods =
+    if not class_is_xhp || class_xhp_children = []
+    then additional_methods
+    else additional_methods
+      @ [Emit_xhp.from_children_declaration ast_class class_xhp_children]
+  in
   let additional_methods =
     if not class_is_xhp || class_xhp_attributes = []
-    then []
-    else [emit_xhp_attribute_declaration ast_class class_xhp_attributes]
+    then additional_methods
+    else additional_methods
+      @ [Emit_xhp.from_attribute_declaration ast_class class_xhp_attributes]
   in
   let additional_methods =
     if has_constructor_or_invoke

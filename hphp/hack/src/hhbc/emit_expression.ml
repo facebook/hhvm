@@ -43,9 +43,6 @@ let scope = ref Ast_scope.Scope.toplevel
 let set_scope s = scope := s
 let get_scope () = !scope
 
-let compiler_options = ref Hhbc_options.default
-let set_compiler_options o = compiler_options := o
-
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
@@ -57,7 +54,7 @@ let make_kvarray p kvs =
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Plus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
   | A.Minus -> instr (IOp (if ints_overflow_to_ints then Sub else  SubO))
@@ -86,7 +83,7 @@ let from_binop op =
 
 let binop_to_eqop op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Plus -> Some (if ints_overflow_to_ints then PlusEqual else PlusEqualO)
   | A.Minus -> Some (if ints_overflow_to_ints then MinusEqual else MinusEqualO)
@@ -104,7 +101,7 @@ let binop_to_eqop op =
 
 let unop_to_incdec_op op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Uincr -> Some (if ints_overflow_to_ints then PreInc else PreIncO)
   | A.Udecr -> Some (if ints_overflow_to_ints then PreDec else PreDecO)
@@ -192,19 +189,24 @@ and emit_local x =
   ]
   else instr_cgetl (Local.Named x)
 
-and emit_two_exprs e1 e2 =
-  (* Special case to make use of CGetL2 *)
-  match e1 with
+(* Emit CGetL2 for local variables, and return true to indicate that
+ * the result will be just below the top of the stack *)
+and emit_first_expr e =
+  match e with
   | (_, A.Lvar (_, local)) when not (is_local_this local) ->
-    gather [
-      from_expr e2;
-      instr_cgetl2 (Local.Named local);
-    ]
+    instr_cgetl2 (Local.Named local), true
+
   | _ ->
-    gather [
-      from_expr e1;
-      from_expr e2;
-    ]
+    from_expr e, false
+
+(* Special case for binary operations to make use of CGetL2 *)
+and emit_two_exprs e1 e2 =
+  let instrs1, is_under_top = emit_first_expr e1 in
+  let instrs2 = from_expr e2 in
+  gather @@
+    if is_under_top
+    then [instrs2; instrs1]
+    else [instrs1; instrs2]
 
 and emit_is_null e =
   match e with
@@ -216,10 +218,9 @@ and emit_is_null e =
       instr_istypec OpNull
     ]
 
-and emit_binop op e1 e2 =
+and emit_binop expr op e1 e2 =
   match op with
-  | A.AMpamp -> emit_logical_and e1 e2
-  | A.BArbar -> emit_logical_or e1 e2
+  | A.AMpamp | A.BArbar -> emit_short_circuit_op expr
   | A.Eq None -> emit_lval_op LValOp.Set e1 (Some e2)
   | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
@@ -312,8 +313,7 @@ and emit_conditional_expression etest etrue efalse =
     let false_label = Label.next_regular () in
     let end_label = Label.next_regular () in
     gather [
-      from_expr etest;
-      instr_jmpz false_label;
+      emit_jmpz etest false_label;
       from_expr etrue;
       instr_jmp end_label;
       instr_label false_label;
@@ -733,7 +733,7 @@ and from_expr expr =
   | A.Lvar (_, x) -> emit_local x
   | A.Class_const ((_, cid), (_, id)) -> emit_class_const cid id
   | A.Unop (op, e) -> emit_unop op e
-  | A.Binop (op, e1, e2) -> emit_binop op e1 e2
+  | A.Binop (op, e1, e2) -> emit_binop expr op e1 e2
   | A.Pipe (e1, e2) -> emit_pipe e1 e2
   | A.Dollardollar -> instr_cgetl2 Local.Pipe
   | A.InstanceOf (e1, e2) -> emit_instanceof e1 e2
@@ -952,30 +952,99 @@ and emit_pipe e1 e2 =
   rewrite_dollardollar (from_expr e2)
   end
 
-and emit_logical_and e1 e2 =
-  let left_is_false = Label.next_regular () in
-  let right_is_true = Label.next_regular () in
-  let its_done = Label.next_regular () in
-  gather [
-    from_expr e1;
-    instr_jmpz left_is_false;
-    from_expr e2;
-    instr_jmpnz right_is_true;
-    instr_label left_is_false;
-    instr_false;
-    instr_jmp its_done;
-    instr_label right_is_true;
-    instr_true;
-    instr_label its_done ]
+(* Emit code that is equivalent to
+ *   <code for expr>
+ *   JmpZ label
+ * Generate specialized code in case expr is statically known, and for
+ * !, && and || expressions
+ *)
+and emit_jmpz (_, expr_ as expr) label =
+  match Ast_constant_folder.expr_to_typed_value expr with
+  | Some v ->
+    if Typed_value.to_bool v then empty else instr_jmp label
+  | None ->
+    match expr_ with
+    | A.Unop(A.Unot, e) ->
+      emit_jmpnz e label
+    | A.Binop(A.BArbar, e1, e2) ->
+      let skip_label = Label.next_regular () in
+      gather [
+        emit_jmpnz e1 skip_label;
+        emit_jmpz e2 label;
+        instr_label skip_label;
+      ]
+    | A.Binop(A.AMpamp, e1, e2) ->
+      gather [
+        emit_jmpz e1 label;
+        emit_jmpz e2 label;
+      ]
+    | A.Binop(A.EQeqeq, e, (_, A.Null))
+    | A.Binop(A.EQeqeq, (_, A.Null), e) ->
+      gather [
+        emit_is_null e;
+        instr_jmpz label
+      ]
+    | A.Binop(A.Diff2, e, (_, A.Null))
+    | A.Binop(A.Diff2, (_, A.Null), e) ->
+      gather [
+        emit_is_null e;
+        instr_jmpnz label
+      ]
+    | _ ->
+      gather [
+        from_expr expr;
+        instr_jmpz label
+      ]
 
-and emit_logical_or e1 e2 =
+(* Emit code that is equivalent to
+ *   <code for expr>
+ *   JmpNZ label
+ * Generate specialized code in case expr is statically known, and for
+ * !, && and || expressions
+ *)
+and emit_jmpnz (_, expr_ as expr) label =
+  match Ast_constant_folder.expr_to_typed_value expr with
+  | Some v ->
+    if Typed_value.to_bool v then instr_jmp label else empty
+  | None ->
+    match expr_ with
+    | A.Unop(A.Unot, e) ->
+      emit_jmpz e label
+    | A.Binop(A.BArbar, e1, e2) ->
+      gather [
+        emit_jmpnz e1 label;
+        emit_jmpnz e2 label;
+      ]
+    | A.Binop(A.AMpamp, e1, e2) ->
+      let skip_label = Label.next_regular () in
+      gather [
+        emit_jmpz e1 skip_label;
+        emit_jmpnz e2 label;
+        instr_label skip_label;
+      ]
+    | A.Binop(A.EQeqeq, e, (_, A.Null))
+    | A.Binop(A.EQeqeq, (_, A.Null), e) ->
+      gather [
+        emit_is_null e;
+        instr_jmpnz label
+      ]
+    | A.Binop(A.Diff2, e, (_, A.Null))
+    | A.Binop(A.Diff2, (_, A.Null), e) ->
+      gather [
+        emit_is_null e;
+        instr_jmpz label
+      ]
+    | _ ->
+      gather [
+        from_expr expr;
+        instr_jmpnz label
+      ]
+
+and emit_short_circuit_op expr =
   let its_true = Label.next_regular () in
   let its_done = Label.next_regular () in
   gather [
-    from_expr e1;
-    instr_jmpnz its_true;
-    from_expr e2;
-    instr_jmpnz its_true;
+    emit_jmpnz expr its_true;
     instr_false;
     instr_jmp its_done;
     instr_label its_true;
@@ -1612,11 +1681,14 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
     ]
 
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
-    gather [
-      from_expr e;
-      rhs_instrs;
-      emit_final_global_op op
-    ]
+    let final_global_op_instrs = emit_final_global_op op in
+    if rhs_stack_size = 0
+    then gather [from_expr e; final_global_op_instrs]
+    else
+      let index_instrs, under_top = emit_first_expr e in
+      if under_top
+      then gather [rhs_instrs; index_instrs; final_global_op_instrs]
+      else gather [index_instrs; rhs_instrs; final_global_op_instrs]
 
   | A.Array_get(base_expr, opt_elem_expr) ->
     let mode =
@@ -1677,7 +1749,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
 
 and emit_unop op e =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
   | A.Utild -> gather [from_expr e; instr (IOp BitNot)]
   | A.Unot -> gather [from_expr e; instr (IOp Not)]

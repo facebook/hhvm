@@ -93,42 +93,51 @@ let cast_value hint v =
  * expressions. *)
 let folder_visitor =
 object (self)
-  inherit [_] Ast_visitors.endo as super
+  inherit [_] Ast_visitors.endo as _super
 
-  (* Type casts *)
-  method! on_Cast env _this hint e =
-    let e = self#on_expr env e in
-    let default () = super#on_Cast env (A.Cast(hint, e)) hint e in
-    match expr_to_typed_value e with
+  (* Type casts. cast_expr is A.Cast(hint, e) *)
+  method! on_Cast env cast_expr hint e =
+    let enew = self#on_expr env e in
+    let default () =
+      if enew == e
+      then cast_expr
+      else A.Cast(hint, enew) in
+    match expr_to_typed_value enew with
     | None -> default ()
     | Some v ->
       match cast_value (snd hint) v with
       | None -> default ()
       | Some v -> value_to_expr (fst e) v
 
-  (* Unary operations. `this` is the parent expression. We don't use `env` *)
-  method! on_Unop env _this unop e =
-  let e = self#on_expr env e in
-  let default () = super#on_Unop env (A.Unop(unop, e)) unop e in
-  match expr_to_typed_value e with
-  | None -> default ()
-  | Some v ->
-    match unop_on_value unop v with
+  (* Unary operations. unop_expr is A.Unop(unop, e) *)
+  method! on_Unop env unop_expr unop e =
+    let enew = self#on_expr env e in
+    let default () =
+      if enew == e
+      then unop_expr
+      else A.Unop(unop, enew) in
+    match expr_to_typed_value enew with
     | None -> default ()
-    | Some result -> value_to_expr (fst e) result
+    | Some v ->
+      match unop_on_value unop v with
+      | None -> default ()
+      | Some result -> value_to_expr (fst e) result
 
-  (* Binary operations. *)
-  method! on_Binop env _this binop e1 e2 =
-  let e1 = self#on_expr env e1 in
-  let e2 = self#on_expr env e2 in
-  let default () = super#on_Binop env (A.Binop(binop, e1, e2)) binop e1 e2 in
-  match expr_to_typed_value e1, expr_to_typed_value e2 with
-  | Some v1, Some v2 ->
-    begin match binop_on_values binop v1 v2 with
-    | None -> default ()
-    | Some result -> value_to_expr (fst e1) result
-    end
-  | _, _ -> default ()
+  (* Binary operations. binop_expr is A.Binop(binop, e1, e2) *)
+  method! on_Binop env binop_expr binop e1 e2 =
+    let e1new = self#on_expr env e1 in
+    let e2new = self#on_expr env e2 in
+    let default () =
+      if e1new == e1 && e2new == e2
+      then binop_expr
+      else (A.Binop(binop, e1new, e2new)) in
+    match expr_to_typed_value e1new, expr_to_typed_value e2new with
+    | Some v1, Some v2 ->
+      begin match binop_on_values binop v1 v2 with
+      | None -> default ()
+      | Some result -> value_to_expr (fst e1) result
+      end
+    | _, _ -> default ()
 
   method on_Goto _ parent _ = parent
   method on_GotoLabel _ parent _ = parent

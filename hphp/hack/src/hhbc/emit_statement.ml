@@ -104,8 +104,7 @@ and emit_if condition consequence alternative =
   | A.Block [A.Noop] ->
     let done_label = Label.next_regular () in
     gather [
-      from_expr condition;
-      instr_jmpz done_label;
+      emit_jmpz condition done_label;
       from_stmt consequence;
       instr_label done_label;
     ]
@@ -113,8 +112,7 @@ and emit_if condition consequence alternative =
     let alternative_label = Label.next_regular () in
     let done_label = Label.next_regular () in
     gather [
-      from_expr condition;
-      instr_jmpz alternative_label;
+      emit_jmpz condition alternative_label;
       from_stmt consequence;
       instr_jmp done_label;
       instr_label alternative_label;

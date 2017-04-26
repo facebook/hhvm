@@ -231,7 +231,7 @@ let do_compile filename compiler_options opts files_info debug_time = begin
     let t = add_to_time_ref debug_time.parsing_t t in
     let options = Hhbc_options.get_options_from_config
       compiler_options.config in
-    Emit_expression.set_compiler_options options;
+    Hhbc_options.set_compiler_options options;
     let hhas_prog = Hhas_program.from_ast ast in
     let t = add_to_time_ref debug_time.codegen_t t in
     let hhas_text = Hhbc_hhas.to_string hhas_prog in

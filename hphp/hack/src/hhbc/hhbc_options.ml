@@ -54,3 +54,6 @@ let get_options_from_config config_list =
     | [name; value] -> set_option options name value
     | _ -> options
   end
+
+let compiler_options = ref default
+let set_compiler_options o = compiler_options := o

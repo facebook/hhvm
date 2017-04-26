@@ -139,7 +139,7 @@ let to_string v =
   | Float f -> string_of_float f
 
 let ints_overflow_to_ints () =
-  Hhbc_options.ints_overflow_to_ints !Emit_expression.compiler_options
+  Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
 
 (* Integer operations. For now, we don't attempt to implement the
  * overflow-to-float semantics *)

@@ -3017,9 +3017,9 @@ and expr_atomic_word ~allow_class ~class_const env pos = function
       pos, Null
   | "array" ->
       expr_array env pos
-  | "darray" ->
+  | "darray" when peek env = Tlb ->
       expr_darray env pos
-  | "varray" ->
+  | "varray" when peek env = Tlb ->
       expr_varray env pos
   | "shape" ->
       expr_shape env pos

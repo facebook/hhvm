@@ -159,6 +159,13 @@ let from_ast : A.class_ -> Hhas_class.t =
         | A.XhpAttr (ho, cv, b, eo) -> Some (Hhas_xhp_attribute.make ho cv b eo)
         | _ -> None)
   in
+  let class_xhp_use_attributes =
+    List.filter_map
+      ast_class.A.c_body
+      (function
+        | A.XhpAttrUse h -> Some h
+        | _ -> None)
+  in
   (* TODO: Add xhp children *)
   let class_xhp_children = [] in
   let class_xhp_categories =
@@ -210,10 +217,14 @@ let from_ast : A.class_ -> Hhas_class.t =
       @ [Emit_xhp.from_children_declaration ast_class class_xhp_children]
   in
   let additional_methods =
-    if not class_is_xhp || class_xhp_attributes = []
+    if not class_is_xhp ||
+      (class_xhp_attributes = [] && class_xhp_use_attributes = [])
     then additional_methods
     else additional_methods
-      @ [Emit_xhp.from_attribute_declaration ast_class class_xhp_attributes]
+      @ [Emit_xhp.from_attribute_declaration
+          ast_class
+          class_xhp_attributes
+          class_xhp_use_attributes]
   in
   let additional_methods =
     if has_constructor_or_invoke
@@ -227,7 +238,6 @@ let from_ast : A.class_ -> Hhas_class.t =
   let class_constants = List.concat_map class_body from_class_elt_constants in
   let class_type_constants =
     List.filter_map class_body from_class_elt_typeconsts in
-  (* TODO: xhp attr uses, xhp category *)
   Hhas_class.make
     class_attributes
     class_base

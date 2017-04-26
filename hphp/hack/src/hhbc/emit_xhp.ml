@@ -85,8 +85,21 @@ let emit_xhp_attribute_array xal =
   in
   p, A.Array (List.map ~f:aux xal)
 
+let emit_xhp_use_attributes xual =
+  let p = Pos.none in
+  let aux = function
+    | _, A.Happly ((_, s), []) ->
+      let s = SU.Xhp.mangle @@ Utils.strip_ns s in
+      let e =
+        p, A.Class_const ((p, s), (p, "__xhpAttributeDeclaration"))
+      in
+      p, A.Call (e, [], [])
+    | _ -> failwith "Xhp use attribute - unexpected attribute"
+  in
+  List.map ~f:aux xual
+
 (* AST transformations taken from hphp/parser/hphp.y *)
-let from_attribute_declaration ast_class xal =
+let from_attribute_declaration ast_class xal xual =
   let p = Pos.none in
   let var_dollar_ = p, A.Lvar (p, "$_") in
   let neg_one = p, A.Int (p, "-1") in
@@ -94,6 +107,7 @@ let from_attribute_declaration ast_class xal =
   let token1 = A.Static_var [p, A.Binop (A.Eq None, var_dollar_, neg_one)] in
   (* if ($_ === -1) {
    *   $_ = array_merge(parent::__xhpAttributeDeclaration(),
+   *                    use_attributes
    *                    attributes);
    * }
    *)
@@ -104,7 +118,9 @@ let from_attribute_declaration ast_class xal =
       [],
       [])
   in
-  let args = [arg1; emit_xhp_attribute_array xal] in
+  let args =
+    arg1 :: emit_xhp_use_attributes xual @ [emit_xhp_attribute_array xal]
+  in
   let array_merge_call = p, A.Call ((p, A.Id (p, "array_merge")), args, []) in
   let true_branch =
     [A.Expr (p, A.Binop (A.Eq None, var_dollar_, array_merge_call))]

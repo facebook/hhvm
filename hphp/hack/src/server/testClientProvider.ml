@@ -105,7 +105,7 @@ exception Client_went_away
 let provider_from_file_descriptor _ = ()
 let provider_for_test _ = ()
 
-let sleep_and_check _ _ =
+let sleep_and_check _ _ ~ide_idle:_ =
   get_mocked_new_client_type (),
   Option.is_some (get_mocked_client_request Persistent)
 
@@ -120,6 +120,8 @@ let read_connection_type _ = Utils.unsafe_opt (get_mocked_new_client_type ())
 let send_response_to_client c x = record_client_response x c
 
 let send_push_message_to_client _ x = record_push_message x
+
+let client_has_message _ = Option.is_some (get_mocked_client_request Persistent)
 
 let read_client_msg c = Rpc (Utils.unsafe_opt (get_mocked_client_request c))
 

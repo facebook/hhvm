@@ -148,3 +148,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       env, ServerUtils.FileName path |>
       ServerFileSync.get_file_content |>
       FileOutline.outline env.popt
+    | IDE_IDLE ->
+      {env with ide_idle = true;}, ()

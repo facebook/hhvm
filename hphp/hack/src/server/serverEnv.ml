@@ -94,6 +94,8 @@ type env = {
     failed_decl    : Relative_path.Set.t;
     failed_check   : Relative_path.Set.t;
     persistent_client : ClientProvider.client option;
+    (* Whether last received IDE command was IDE_IDLE *)
+    ide_idle : bool;
     (* Timestamp of last IDE file synchronization command *)
     last_command_time : float;
     (* Timestamp of last query for disk changes *)

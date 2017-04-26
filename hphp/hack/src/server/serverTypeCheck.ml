@@ -410,6 +410,7 @@ module FullCheckKind : CheckKindType = struct
       failed_decl;
       failed_check;
       persistent_client = old_env.persistent_client;
+      ide_idle = old_env.ide_idle;
       last_command_time = old_env.last_command_time;
       last_notifier_check_time = old_env.last_notifier_check_time;
       last_idle_job_time = old_env.last_idle_job_time;

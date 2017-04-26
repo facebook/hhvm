@@ -20,6 +20,9 @@ module type S = sig
   val sleep_and_check : t ->
     (** Optional persistent client. *)
     client option ->
+    (* Whether the most recent message received from persistent client
+     * was IDE_IDLE *)
+    ide_idle:bool ->
     (** Returns an optional new client, and a boolean for whether there is
      * a request on the persistent client. *)
     client option * bool
@@ -27,6 +30,7 @@ module type S = sig
   val read_connection_type : client -> ServerCommandTypes.connection_type
   val send_response_to_client : client -> 'a -> unit
   val send_push_message_to_client : client -> ServerCommandTypes.push -> unit
+  val client_has_message: client -> bool
   val read_client_msg: client -> 'a ServerCommandTypes.command
   val make_persistent : client -> client
   val is_persistent : client -> bool

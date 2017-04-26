@@ -163,6 +163,7 @@ let make_env config =
     failed_decl    = Relative_path.Set.empty;
     failed_check   = Relative_path.Set.empty;
     persistent_client = None;
+    ide_idle = false;
     last_command_time = 0.0;
     last_notifier_check_time = 0.0;
     last_idle_job_time = 0.0;

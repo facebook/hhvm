@@ -82,6 +82,7 @@ let malformed_input () =
   raise Exit_status.(Exit_with IDE_malformed_request)
 
 let pending_push_messages = Queue.create ()
+let stdin_idle = ref false
 let stdin_reader = Buffered_line_reader.create Unix.stdin
 
 let rpc conn command =
@@ -115,11 +116,22 @@ let write_response res =
 let get_ready_message server_in_fd =
   if not @@ Queue.is_empty pending_push_messages then `Server else
   if Buffered_line_reader.has_buffered_content stdin_reader then `Stdin else
-  let readable, _, _ = Unix.select
-    [server_in_fd; Buffered_line_reader.get_fd stdin_reader] [] [] 1.0 in
+
+  let stdin_fd = Buffered_line_reader.get_fd stdin_reader in
+
+  let change_to_idle = (not @@ !stdin_idle) && begin
+    let readable, _, _ = Unix.select [stdin_fd] [] [] 0.0 in
+    readable = []
+  end in
+
+  if change_to_idle then begin
+    stdin_idle := true; `Idle
+  end else
+  let readable, _, _ = Unix.select [server_in_fd; stdin_fd] [] [] 1.0 in
   if readable = [] then `None
   else if List.mem readable server_in_fd then `Server
-  else `Stdin
+  else
+    (stdin_idle := false; `Stdin)
 
 let print_message id protocol message =
   Ide_message_printer.to_json
@@ -277,6 +289,9 @@ let handle_server fd =
   end
   |> handle_push_message
 
+let handle_idle conn =
+  rpc conn (Rpc.IDE_IDLE)
+
 let main env =
   Printexc.record_backtrace true;
   let conn = connect_persistent env ~retries:800 in
@@ -286,5 +301,6 @@ let main env =
     | `None -> ()
     | `Stdin -> handle_stdin conn
     | `Server -> handle_server fd
+    | `Idle -> handle_idle conn
   done;
   Exit_status.exit Exit_status.No_error

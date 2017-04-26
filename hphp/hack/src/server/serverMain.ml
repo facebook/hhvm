@@ -153,6 +153,7 @@ let handle_connection_ genv env client =
 
 let handle_persistent_connection_ genv env client =
    try
+    let env = { env with ide_idle = false; } in
      ServerCommand.handle genv env client
    with
    (** TODO: Make sure the pipe exception is really about this client. *)
@@ -231,7 +232,9 @@ acc genv env new_client has_persistent_connection_request =
   let updates = Program.process_updates genv env raw_updates in
 
   let is_idle = (not has_persistent_connection_request) &&
-    t -. env.last_command_time > 0.1 in
+     (* "average person types [...] between 190 and 200 characters per minute"
+      * 60/200 = 0.3 *)
+     t -. env.last_command_time > 0.3 in
 
   let disk_recheck = not (Relative_path.Set.is_empty updates) in
   let ide_recheck =
@@ -256,8 +259,12 @@ acc genv env new_client has_persistent_connection_request =
       rechecked_count = acc.rechecked_count + rechecked;
       total_rechecked_count = acc.total_rechecked_count + total_rechecked;
     } in
-    recheck_loop ~force_flush:false
-      acc genv env new_client has_persistent_connection_request
+    (* Avoid batching ide rechecks with disk rechecks - there might be
+      * other ide edits to process first and we want to give the main loop
+      * a chance to process them first. *)
+    if ide_recheck then acc, env else
+      recheck_loop ~force_flush:false
+        acc genv env new_client has_persistent_connection_request
   end
 
 let recheck_loop ~force_flush
@@ -274,7 +281,11 @@ let serve_one_iteration ~force_flush genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
   let client, has_persistent_connection_request =
-    ClientProvider.sleep_and_check client_provider env.persistent_client in
+    ClientProvider.sleep_and_check
+      client_provider
+      env.persistent_client
+      ~ide_idle:env.ide_idle
+  in
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
   let env = if not has_persistent_connection_request &&
     client = None && not has_parsing_hook
@@ -313,13 +324,19 @@ let serve_one_iteration ~force_flush genv env client_provider =
       ~default:env
       ~f:begin fun sub ->
 
+    let client = Utils.unsafe_opt env.persistent_client in
+    (* We possibly just did a lot of work. Check the client again to see
+     * that we are still idle before proceeding to send diagnostics *)
+    if ClientProvider.client_has_message client then env else
+    (* We processed some edits but didn't recheck them yet. *)
+    if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then env else
+
     let sub, errors =
       Diagnostic_subscription.pop_errors sub env.editor_open_files in
 
     if not @@ SMap.is_empty errors then begin
       let id = Diagnostic_subscription.get_id sub in
       let res = ServerCommandTypes.DIAGNOSTIC (id, errors) in
-      let client = Utils.unsafe_opt env.persistent_client in
       try
         ClientProvider.send_push_message_to_client client res
       with ClientProvider.Client_went_away ->

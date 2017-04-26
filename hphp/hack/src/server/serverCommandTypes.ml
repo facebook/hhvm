@@ -71,6 +71,7 @@ type _ t =
   | SUBSCRIBE_DIAGNOSTIC : int -> unit t
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
   | OUTLINE : string -> FileOutline.outline t
+  | IDE_IDLE : unit t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

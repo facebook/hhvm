@@ -141,3 +141,29 @@ let from_children_declaration ast_class _children =
       body
   in
   Emit_method.from_ast ast_class m
+
+let get_category_array categories =
+  (* TODO: is this always 1? *)
+  let p = Pos.none in
+  List.map categories
+    ~f:(fun s -> A.AFkvalue ((p, A.String s), (p, A.Int (p, "1"))))
+
+(* AST transformations taken from hphp/parser/hphp.y *)
+let from_category_declaration ast_class categories =
+  let p = Pos.none in
+  let var_dollar_ = p, A.Lvar (p, "$_") in
+  (* static $_ = categories; *)
+  let category_arr = p, A.Array (get_category_array categories) in
+  let token1 =
+    A.Static_var [p, A.Binop (A.Eq None, var_dollar_, category_arr)]
+  in
+  (* return $_; *)
+  let token2 = A.Return (p, Some var_dollar_) in
+  let body = [token1; token2] in
+  let m =
+    xhp_attribute_declaration_method
+      "__xhpCategoryDeclaration"
+      [A.Protected]
+      body
+  in
+  Emit_method.from_ast ast_class m

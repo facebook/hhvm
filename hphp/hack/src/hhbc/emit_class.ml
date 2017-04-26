@@ -161,6 +161,14 @@ let from_ast : A.class_ -> Hhas_class.t =
   in
   (* TODO: Add xhp children *)
   let class_xhp_children = [] in
+  let class_xhp_categories =
+    List.concat @@
+    List.filter_map
+      ast_class.A.c_body
+      (function
+        | A.XhpCategory sl -> Some sl
+        | _ -> None)
+  in
   let class_is_interface = ast_is_interface ast_class in
   let class_is_abstract = ast_class.A.c_kind = Ast.Cabstract in
   let class_is_final =
@@ -189,6 +197,12 @@ let from_ast : A.class_ -> Hhas_class.t =
                 | _ -> false)
   in
   let additional_methods = [] in
+  let additional_methods =
+    if not class_is_xhp || class_xhp_categories = []
+    then additional_methods
+    else additional_methods
+      @ [Emit_xhp.from_category_declaration ast_class class_xhp_categories]
+  in
   let additional_methods =
     if not class_is_xhp || class_xhp_children = []
     then additional_methods

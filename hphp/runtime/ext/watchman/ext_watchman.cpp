@@ -598,7 +598,7 @@ getWatchmanClientForSocket(const std::string& socket_path) {
         promise.setException(e);
       }
       s_connectPromises.erase(socket_path);
-      e.throwException();
+      e.throw_exception();
       // shouldn't actually be reached but placates the compiler
       return std::shared_ptr<watchman::WatchmanClient>();
     });

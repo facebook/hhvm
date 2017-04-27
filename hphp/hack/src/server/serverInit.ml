@@ -282,7 +282,6 @@ module ServerInitCommon = struct
 
   let type_check genv env fast t =
     if ServerArgs.ai_mode genv.options = None
-      || not (is_check_mode genv.options)
     then begin
       let count = Relative_path.Map.cardinal fast in
       let errorl, err_info =

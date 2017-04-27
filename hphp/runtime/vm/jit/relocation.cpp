@@ -272,9 +272,10 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 CodeBlock& srcBlock,
                 CGMeta& fixups,
-                TCA* exitAddr) {
+                TCA* exitAddr,
+                AreaIndex codeArea) {
   return ARCH_SWITCH_CALL(relocate, rel, destBlock, start, end, srcBlock,
-                          fixups, exitAddr);
+                          fixups, exitAddr, codeArea);
 }
 
 //////////////////////////////////////////////////////////////////////

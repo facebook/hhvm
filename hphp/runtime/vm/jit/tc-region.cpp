@@ -110,12 +110,13 @@ TransLocMaker relocateLocalTranslation(TransRange range, TransKind kind,
       }
 
       relocate(rel, view.main(), range.main.begin(), range.main.end(),
-               srcView.main(), fixups, nullptr);
+               srcView.main(), fixups, nullptr, AreaIndex::Main);
       relocate(rel, view.cold(), range.cold.begin(), range.cold.end(),
-               srcView.cold(), fixups, nullptr);
+               srcView.cold(), fixups, nullptr, AreaIndex::Cold);
       if (&srcView.cold() != &srcView.frozen()) {
         relocate(rel, view.frozen(), range.frozen.begin(),
-                 range.frozen.end(), srcView.frozen(), fixups, nullptr);
+                 range.frozen.end(), srcView.frozen(), fixups, nullptr,
+                 AreaIndex::Frozen);
       }
 
       adjustForRelocation(rel);

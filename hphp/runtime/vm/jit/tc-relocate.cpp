@@ -238,7 +238,8 @@ void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
 
     CodeBlock dest;
     dest.init(cache.frozen().frontier(), stubSize, "New Stub");
-    relocate(rel, dest, addr, addr + stubSize, cache.frozen(), fixups, nullptr);
+    relocate(rel, dest, addr, addr + stubSize, cache.frozen(), fixups, nullptr,
+             AreaIndex::Frozen);
     cache.frozen().skip(stubSize);
     if (addr != frozenStart) {
       rel.recordRange(frozenStart, addr, frozenStart, addr);
@@ -335,7 +336,8 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     try {
       auto& srcBlock = code().blockFor(reloc.start);
       relocate(rel, dest,
-               reloc.start, reloc.end, srcBlock, reloc.fixups, nullptr);
+               reloc.start, reloc.end, srcBlock, reloc.fixups, nullptr,
+               AreaIndex::Main);
     } catch (const DataBlockFull& dbf) {
       break;
     }
@@ -475,7 +477,7 @@ bool relocateNewTranslation(TransLoc& loc,
 
     dest.init(mainStartRel, mainSize, "New Main");
     asm_count += relocate(rel, dest, mainStart, loc.mainEnd(), cache.main(),
-                          fixups, nullptr);
+                          fixups, nullptr, AreaIndex::Main);
     mainEndRel = dest.frontier();
 
     mainCode.free(loc.mainStart(), mainSize - pad);
@@ -489,7 +491,7 @@ bool relocateNewTranslation(TransLoc& loc,
 
     dest.init(frozenStartRel + sizeof(uint32_t), frozenSize, "New Frozen");
     asm_count += relocate(rel, dest, frozenStart, loc.frozenEnd(),
-                          cache.frozen(), fixups, nullptr);
+                          cache.frozen(), fixups, nullptr, AreaIndex::Frozen);
     frozenEndRel = dest.frontier();
 
     frozenCode.free(loc.frozenStart(), frozenSize - pad);
@@ -504,7 +506,7 @@ bool relocateNewTranslation(TransLoc& loc,
 
       dest.init(coldStartRel + sizeof(uint32_t), coldSize, "New Cold");
       asm_count += relocate(rel, dest, coldStart, loc.coldEnd(),
-                            cache.cold(), fixups, nullptr);
+                            cache.cold(), fixups, nullptr, AreaIndex::Cold);
       coldEndRel = dest.frontier();
 
       coldCode.free(loc.coldStart(), coldSize - pad);
@@ -729,10 +731,10 @@ void relocateTranslation(
 
   asm_count += relocate(rel, main_in,
                         main.base(), main.frontier(), main,
-                        meta, nullptr);
+                        meta, nullptr, AreaIndex::Main);
   asm_count += relocate(rel, cold_in,
                         cold.base(), cold.frontier(), cold,
-                        meta, nullptr);
+                        meta, nullptr, AreaIndex::Cold);
 
   TRACE(1, "asm %ld\n", asm_count);
 

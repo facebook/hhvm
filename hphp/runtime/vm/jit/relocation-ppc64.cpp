@@ -414,7 +414,8 @@ size_t relocate(RelocationInfo& rel,
                 TCA start, TCA end,
                 CodeBlock&,
                 CGMeta& fixups,
-                TCA* exit_addr) {
+                TCA* exit_addr,
+                AreaIndex) {
   JmpSet far_jmps, near_jmps;
   while (true) {
     try {

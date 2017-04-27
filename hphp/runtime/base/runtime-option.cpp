@@ -33,6 +33,7 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/cpuid.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/network.h"
@@ -467,6 +468,20 @@ static inline bool eagerGcDefault() {
 
 static inline uint64_t pgoThresholdDefault() {
   return debug ? 2 : 2000;
+}
+
+static inline bool alignMacroFusionPairs() {
+  switch (getProcessorFamily()) {
+    case ProcessorFamily::Intel_SandyBridge:
+    case ProcessorFamily::Intel_IvyBridge:
+    case ProcessorFamily::Intel_Haswell:
+    case ProcessorFamily::Intel_Broadwell:
+    case ProcessorFamily::Intel_Skylake:
+      return true;
+    case ProcessorFamily::Unknown:
+      return false;
+  }
+  return false;
 }
 
 static inline bool evalJitDefault() {

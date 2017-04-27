@@ -170,6 +170,17 @@ struct BlobEncoder {
     if (some) encode(*opt);
   }
 
+  template<size_t I = 0, typename... Ts>
+  typename std::enable_if<I == sizeof...(Ts), void>::type
+  encode(const std::tuple<Ts...>& val) {}
+
+  template<size_t I = 0, typename ...Ts>
+  typename std::enable_if<I < sizeof...(Ts), void>::type
+  encode(const std::tuple<Ts...>& val) {
+    encode(std::get<I>(val));
+    encode<I + 1, Ts...>(val);
+  }
+
   template<class K, class V>
   void encode(const std::pair<K,V>& kv) {
     encode(kv.first);
@@ -312,6 +323,17 @@ struct BlobDecoder {
       decode(value);
       opt = value;
     }
+  }
+
+  template<size_t I = 0, typename... Ts>
+  typename std::enable_if<I == sizeof...(Ts), void>::type
+  decode(std::tuple<Ts...>& val) {}
+
+  template<size_t I = 0, typename ...Ts>
+  typename std::enable_if<I < sizeof...(Ts), void>::type
+  decode(std::tuple<Ts...>& val) {
+    decode(std::get<I>(val));
+    decode<I + 1, Ts...>(val);
   }
 
   template<class K, class V>

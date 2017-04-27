@@ -183,21 +183,28 @@ let make_compound_statement_syntax compound_statements =
 let make_return_statement_syntax expression_syntax =
   make_return_statement return_keyword_syntax expression_syntax semicolon_syntax
 
+let make_return_missing_statement_syntax =
+  make_return_statement_syntax (make_missing())
+
 let make_throw_statement_syntax expression_syntax =
   make_throw_statement throw_keyword_syntax expression_syntax semicolon_syntax
 
-let make_assignment_syntax receiver_variable assignment_expression_syntax =
-  let receiver_variable_syntax =
-    make_token_syntax TokenKind.Variable receiver_variable in
+let make_assignment_syntax_variable left assignment_expression_syntax =
   let assignment_binary_expression =
     make_binary_expression
-      receiver_variable_syntax
+      left
       assignment_operator_syntax
       assignment_expression_syntax in
   make_expression_statement assignment_binary_expression
 
+let make_assignment_syntax receiver_variable assignment_expression_syntax =
+  let receiver_variable_syntax =
+    make_token_syntax TokenKind.Variable receiver_variable in
+  make_assignment_syntax_variable
+    receiver_variable_syntax assignment_expression_syntax
+
 let make_object_creation_expression_syntax classname arguments =
-  let classname_syntax = make_token_syntax TokenKind.Classname classname in
+  let classname_syntax = make_token_syntax TokenKind.Name classname in
   let arguments_syntax = make_delimited_list comma_syntax arguments in
   make_object_creation_expression
     new_keyword_syntax
@@ -537,7 +544,7 @@ let make_switch_sections number =
   make_list (aux number [ default_section_syntax ])
 
 (*
-  switch($closure->label) {
+  switch($closure->nextLabel) {
     case 0: goto label0;
     ...
     default: goto labelerror;
@@ -547,3 +554,13 @@ let make_coroutine_switch label_count =
   make_switch_statement switch_keyword_syntax left_paren_syntax
     label_access_syntax right_paren_syntax left_brace_syntax sections
     right_brace_syntax
+
+(* coroutine_unit() *)
+let coroutine_unit_call_syntax =
+  let name = make_token_syntax TokenKind.Name "coroutine_unit" in
+  make_function_call_expression_syntax name []
+
+(* $closure->nextLabel = x; *)
+let set_next_label_syntax number =
+  let number = make_int_literal_syntax number in
+  make_assignment_syntax_variable label_access_syntax number

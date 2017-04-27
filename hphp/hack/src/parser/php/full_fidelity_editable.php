@@ -918,6 +918,8 @@ abstract class EditableToken extends EditableSyntax {
        return new StringToken($leading, $trailing);
     case 'super':
        return new SuperToken($leading, $trailing);
+    case 'suspend':
+       return new SuspendToken($leading, $trailing);
     case 'switch':
        return new SwitchToken($leading, $trailing);
     case 'this':
@@ -2383,6 +2385,21 @@ final class SuperToken extends EditableToken {
 
   public function with_trailing(EditableSyntax $trailing): SuperToken {
     return new SuperToken($this->leading(), $trailing);
+  }
+}
+final class SuspendToken extends EditableToken {
+  public function __construct(
+    EditableSyntax $leading,
+    EditableSyntax $trailing) {
+    parent::__construct('suspend', $leading, $trailing, 'suspend');
+  }
+
+  public function with_leading(EditableSyntax $leading): SuspendToken {
+    return new SuspendToken($leading, $this->trailing());
+  }
+
+  public function with_trailing(EditableSyntax $trailing): SuspendToken {
+    return new SuspendToken($this->leading(), $trailing);
   }
 }
 final class SwitchToken extends EditableToken {

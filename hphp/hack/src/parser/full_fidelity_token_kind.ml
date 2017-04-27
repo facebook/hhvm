@@ -98,6 +98,7 @@ type t =
   | Static
   | String
   | Super
+  | Suspend
   | Switch
   | This
   | Throw
@@ -292,6 +293,7 @@ let from_string keyword =
   | "static" -> Some Static
   | "string" -> Some String
   | "super" -> Some Super
+  | "suspend" -> Some Suspend
   | "switch" -> Some Switch
   | "this" -> Some This
   | "throw" -> Some Throw
@@ -458,6 +460,7 @@ match kind with
   | Static -> "static"
   | String -> "string"
   | Super -> "super"
+  | Suspend -> "suspend"
   | Switch -> "switch"
   | This -> "this"
   | Throw -> "throw"

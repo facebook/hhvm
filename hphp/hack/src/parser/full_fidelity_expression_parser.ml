@@ -135,6 +135,9 @@ module WithStatementAndDeclAndTypeParser
     | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
+    | Suspend
+      (* TODO: The operand to a suspend is required to be a call to a
+      coroutine. Give an error in a later pass if this isn't the case. *)
     | Dollar
     | Exclamation
     | PlusPlus
@@ -918,6 +921,7 @@ TODO: This will need to be fixed to allow situations where the qualified name
     | Static
     | String
     | Super
+    | Suspend
     | Switch
     | This
     | Throw

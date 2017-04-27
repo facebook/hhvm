@@ -813,6 +813,8 @@ class EditableToken extends EditableSyntax
        return new StringToken(leading, trailing);
     case 'super':
        return new SuperToken(leading, trailing);
+    case 'suspend':
+       return new SuspendToken(leading, trailing);
     case 'switch':
        return new SwitchToken(leading, trailing);
     case 'this':
@@ -1640,6 +1642,13 @@ class SuperToken extends EditableToken
   constructor(leading, trailing)
   {
     super('super', leading, trailing, 'super');
+  }
+}
+class SuspendToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('suspend', leading, trailing, 'suspend');
   }
 }
 class SwitchToken extends EditableToken
@@ -17252,6 +17261,7 @@ exports.ShapeToken = ShapeToken;
 exports.StaticToken = StaticToken;
 exports.StringToken = StringToken;
 exports.SuperToken = SuperToken;
+exports.SuspendToken = SuspendToken;
 exports.SwitchToken = SwitchToken;
 exports.ThisToken = ThisToken;
 exports.ThrowToken = ThrowToken;

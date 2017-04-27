@@ -39,6 +39,7 @@ inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1) {
 }
 
 inline void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1) {
+  v << movtqb{s1, s1};
   v << cmpbi{s0, s1, sf};
 }
 

@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -98,12 +97,6 @@ uint8_t Log2(uint8_t value) {
     default:
       always_assert(false);
   }
-}
-
-int64_t MSKTOP(int64_t value) {
-  // Make sure that top 32 bits are consistent
-  assertx(((value >> 32) == 0) || ((value >> 32) == -1));
-  return value & ~0u;
 }
 
 vixl::MemOperand M(Vptr p) {
@@ -241,13 +234,15 @@ struct Vgen {
   void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const andbi& i);
+  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.ub(), UF(i.fl)); }
   void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const andli& i);
+  void emit(const andli& i) { a->And(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const andqi& i) { a->And(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
+  void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), i.s0.ub()); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -260,9 +255,9 @@ struct Vgen {
   void emit(const divint& i) { a->Sdiv(X(i.d), X(i.s0), X(i.s1)); }
   void emit(const divsd& i) { a->Fdiv(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const imul& i);
+  void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); a->Uxtw(W(i.d), W(i.s)); }
   void emit(const incl& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const incq& i) { a->Add(X(i.d), X(i.s), 1, UF(i.fl)); }
-  void emit(const incw& i) { a->Add(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const jcc& i);
   void emit(const jcci& i);
   void emit(const jmp& i);
@@ -271,19 +266,19 @@ struct Vgen {
   void emit(const lea& i);
   void emit(const leap& i) { a->Mov(X(i.d), i.s.r.disp); }
   void emit(const lead& i) { a->Mov(X(i.d), i.s.get()); }
-  void emit(const loadb& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadsd& i) { a->Ldr(D(i.d), M(i.s)); }
-  void emit(const loadtqb& i) { a->Ldrsb(W(i.d), M(i.s)); }
+  void emit(const loadtqb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadtql& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const loadups& i);
-  void emit(const loadw& i) { a->Ldrsh(W(i.d), M(i.s)); }
+  void emit(const loadw& i) { a->Ldrh(W(i.d), M(i.s)); }
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const movb& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movtqb& i) { a->Sxtb(W(i.d), W(i.s)); }
+  void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movzbw& i) { a->Uxtb(W(i.d), W(i.s)); }
@@ -318,16 +313,17 @@ struct Vgen {
   void emit(const storesd& i) { emit(store{i.s, i.m}); }
   void emit(const storeups& i);
   void emit(const storew& i) { a->Strh(W(i.s), M(i.m)); }
-  void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
+  void emit(const subb& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); a->Uxtb(W(i.d), W(i.d)); }
+  void emit(const subbi& i) { a->Sub(W(i.d), W(i.s1), i.s0.b(), UF(i.fl)); a->Uxtb(W(i.d), W(i.d)); }
   void emit(const subl& i) { a->Sub(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const subli& i) { a->Sub(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const subq& i) { a->Sub(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
+  void emit(const testb& i){ a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testbi& i){ a->Tst(W(i.s1), i.s0.ub()); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testli& i);
+  void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
   void emit(const testqi& i) { a->Tst(X(i.s1), i.s0.q()); }
   void emit(const ucomisd& i) { a->Fcmp(D(i.s0), D(i.s1)); }
@@ -386,6 +382,7 @@ void Vgen::patch(Venv& env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const copy& i) {
+  if (i.s == i.d) return;
   if (i.s.isGP() && i.d.isGP()) {
     a->Mov(X(i.d), X(i.s));
   } else if (i.s.isSIMD() && i.d.isGP()) {
@@ -399,21 +396,23 @@ void Vgen::emit(const copy& i) {
 }
 
 void Vgen::emit(const copy2& i) {
-  MovePlan moves;
-  Reg64 d0 = i.d0, d1 = i.d1, s0 = i.s0, s1 = i.s1;
-  moves[d0] = s0;
-  moves[d1] = s1;
-  auto howTo = doRegMoves(moves, rAsm); // rAsm isn't used.
-  for (auto& how : howTo) {
-    if (how.m_kind == MoveInfo::Kind::Move) {
-      a->Mov(X(how.m_dst), X(how.m_src));
+  assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
+  auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
+  assertx(d0 != d1);
+  if (d0 == s1) {
+    if (d1 == s0) {
+      a->Eor(X(d0), X(d0), X(s0));
+      a->Eor(X(s0), X(d0), X(s0));
+      a->Eor(X(d0), X(d0), X(s0));
     } else {
-      auto const d = X(how.m_dst);
-      auto const s = X(how.m_src);
-      a->Eor(d, d, s);
-      a->Eor(s, d, s);
-      a->Eor(d, d, s);
+      // could do this in a simplify pass
+      if (s1 != d1) a->Mov(X(s1), X(d1)); // save s1 first; d1 != s0
+      if (s0 != d0) a->Mov(X(s0), X(d0));
     }
+  } else {
+    // could do this in a simplify pass
+    if (s0 != d0) a->Mov(X(s0), X(d0));
+    if (s1 != d1) a->Mov(X(s1), X(d1));
   }
 }
 
@@ -443,9 +442,9 @@ void Vgen::emit(const vasm_opc& i) {          \
   }                                           \
 }
 
-Y(ldimmb, ub, 8, W, MSKTOP(i.s.l()))
-Y(ldimmw, w, 16, W, MSKTOP(i.s.l()))
-Y(ldimml, l, 32, W, MSKTOP(i.s.l()))
+Y(ldimmb, b, 8, W, i.s.ub())
+Y(ldimmw, w, 16, W, i.s.uw())
+Y(ldimml, l, 32, W, i.s.l())
 Y(ldimmq, q, 64, X, i.s.q())
 
 #undef Y
@@ -592,18 +591,6 @@ void Vgen::emit(const unwind& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const andbi& i) {
-  a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), UF(i.fl));
-}
-
-void Vgen::emit(const andli& i) {
-  a->And(W(i.d), W(i.s1), MSKTOP(i.s0.l()), UF(i.fl));
-}
-
-void Vgen::emit(const testli& i) {
-  a->Tst(W(i.s1), MSKTOP(i.s0.l()));
-}
 
 /*
  * Flags
@@ -784,7 +771,7 @@ void Vgen::emit(const vasm_opc& i) {                  \
 Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
 Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, MSKTOP(i.s0.l()), wzr);
+Y(xorbi, Eor, W, i.s0.ub(), wzr);
 Y(xorl, Eor, W, W(i.s0), wzr);
 Y(xorq, Eor, X, X(i.s0), xzr);
 Y(xorqi, Eor, X, i.s0.q(), xzr);
@@ -1194,46 +1181,6 @@ Y(storew, m)
 
 #undef Y
 
-#define ISAR vixl::Assembler::IsImmArithmetic(value)
-#define ISLG(w) vixl::Assembler::IsImmLogical(value, w)
-#define U2(v0, v1) v0, v1
-
-#define Y(vasm_opc, lower_opc, load_opc, chk, imm, use)     \
-void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
-    auto value = safe_cast<int64_t>(i.s0.q());              \
-    if (chk) {                                              \
-      v << i;                                               \
-    } else {                                                \
-      auto s0 = v.makeReg();                                \
-      v << load_opc{imm, s0};                               \
-      v << lower_opc{s0, use, i.sf};                        \
-    }                                                       \
-  });                                                       \
-}
-
-Y(addli, addl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
-Y(addqi, addq, ldimmq, ISAR, Immed64(value), U2(i.s1, i.d))
-Y(andbi, andb, ldimmb, (ISLG(32) || (safe_cast<int8_t>(value) == -1)), i.s0, U2(i.s1, i.d))
-Y(andli, andl, ldimml, (ISLG(32) || (safe_cast<int32_t>(value) == -1)), i.s0, U2(i.s1, i.d))
-Y(andqi, andq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
-Y(cmpli, cmpl, ldimml, ISAR, i.s0, i.s1)
-Y(cmpqi, cmpq, ldimmq, ISAR, Immed64(value), i.s1)
-Y(orqi, orq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
-Y(subbi, subb, ldimmb, ISAR, i.s0, U2(i.s1, i.d))
-Y(subli, subl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
-Y(subqi, subq, ldimmq, ISAR, Immed64(value), U2(i.s1, i.d))
-Y(testli, testl, ldimml, ISLG(32), i.s0, i.s1)
-Y(testqi, testq, ldimmq, ISLG(64), Immed64(value), i.s1)
-Y(xorbi, xorb, ldimmb, ISLG(32), i.s0, U2(i.s1, i.d))
-Y(xorqi, xorq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
-
-#undef Y
-
-#undef U2
-#undef ISLG
-#undef ISAR
-
 #define Y(vasm_opc, lower_opc, load_opc, store_opc, s0, m)  \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
@@ -1499,24 +1446,6 @@ void lower(const VLS& e, movtdq& i, Vlabel b, size_t z) {
   });
 }
 
-void lower(const VLS& e, cmpb& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    auto s0 = v.makeReg();
-    auto s1 = v.makeReg();
-    v << movzbl{i.s0, s0};
-    v << movzbl{i.s1, s1};
-    v << cmpl{s0, s1, i.sf};
-  });
-}
-
-void lower(const VLS& e, cmpbi& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    auto s1 = v.makeReg();
-    v << movzbl{i.s1, s1};
-    v << cmpli{i.s0, s1, i.sf};
-  });
-}
-
 #define Y(vasm_opc, conv_opc, load_opc, cmp_opc)            \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
@@ -1534,28 +1463,6 @@ Y(cmpwm, movzwl, loadw, cmpl)
 
 #undef Y
 
-void lower(const VLS& e, testb& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    if (i.s0 == i.s1) {
-      v << testbi{(uint8_t)0xff, i.s1, i.sf};
-    } else {
-      auto s0 = v.makeReg();
-      auto s1 = v.makeReg();
-      v << movzbl{i.s0, s0};
-      v << movzbl{i.s1, s1};
-      v << testl{s0, s1, i.sf};
-    }
-  });
-}
-
-void lower(const VLS& e, testbi& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    auto s1 = v.makeReg();
-    v << movzbl{i.s1, s1};
-    v << testli{i.s0, s1, i.sf};
-  });
-}
-
 #define Y(vasm_opc, lower_opc, load_opc, imm, zr, sz)   \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
   lower_impl(e.unit, b, z, [&] (Vout& v) {                   \
@@ -1572,7 +1479,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
 
 Y(storebi, storeb, ldimmb, i.s, wzr, b)
 Y(storeli, storel, ldimml, i.s, wzr, l)
-Y(storeqi, store, ldimmq, Immed64(i.s.q()), wzr, q)
+Y(storeqi, store, ldimmq, Immed64(i.s.l()), wzr, q) //storeqi only supports 32-bit immediates
 Y(storewi, storew, ldimmw, i.s, xzr, w)
 
 #undef Y
@@ -1636,12 +1543,13 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
 
   assertx(checkWidths(unit));
 
-  lowerForARM(unit);
   simplify(unit);
 
   if (!unit.constToReg.empty()) {
     foldImms<arm::ImmFolder>(unit);
   }
+
+  lowerForARM(unit);
 
   optimizeCopies(unit, abi);
 

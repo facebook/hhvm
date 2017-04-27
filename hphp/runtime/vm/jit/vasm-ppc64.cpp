@@ -1087,7 +1087,6 @@ void lowerForPPC64(Vout& v, vasm_src& inst) {                           \
 }
 
 X(cmpbi,  cmpqi,  movzbq, NONE)
-X(subbi,  subqi,  extsb,  ONE_R64(d))
 X(subli,  subqi,  extsl,  ONE_R64(d))
 X(testbi, testqi, extsb,  NONE)
 X(testli, testqi, extsl,  NONE)

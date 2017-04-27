@@ -175,8 +175,6 @@ struct Vunit;
   O(shlqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shrli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shrqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
-  O(subb, I(fl), UA(s0) U(s1), D(d) D(sf))\
-  O(subbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subl, I(fl), UA(s0) U(s1), D(d) D(sf))\
   O(subli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subq, I(fl), UA(s0) U(s1), D(d) D(sf))\
@@ -933,8 +931,6 @@ struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // sub: s1 - s0 => d, sf
-struct subb { Vreg8 s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
-struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };

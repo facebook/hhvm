@@ -1789,6 +1789,11 @@ To string conversions:
   This instruction is used at the beginning of tracelets to represent the state
   of the stack on entry and does not emit code.
 
+| FuncGuard<func,prologueAddrPtr>, ND, NA, NF
+
+  Emits a function guard for func, and arranges to write the address of the
+  following instruction to prologueAddrPtr.
+
 | Count, D(Int), S(Cell), Er
 
   Computes the number of elements in S0. The count of an array is the number of

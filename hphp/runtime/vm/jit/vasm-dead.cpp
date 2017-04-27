@@ -180,6 +180,7 @@ bool effectful(Vinstr& inst) {
     case Vinstr::bindaddr:
     case Vinstr::bindjcc:
     case Vinstr::bindjmp:
+    case Vinstr::funcguard:
     case Vinstr::call:
     case Vinstr::callarray:
     case Vinstr::callfaststub:

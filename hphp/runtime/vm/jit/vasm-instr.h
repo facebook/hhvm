@@ -83,6 +83,7 @@ struct Vunit;
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
+  O(funcguard, Inone, Un, Dn)\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -506,6 +507,12 @@ struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
  */
 struct conjure { Vreg c; };
 struct conjureuse { Vreg c; };
+
+/*
+ * Emit a function prologue guard.
+ * *watch will be set to the address following the guard.
+ */
+struct funcguard { const Func* func; TCA* watch; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Native function ABI.

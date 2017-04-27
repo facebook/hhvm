@@ -1371,6 +1371,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertLoc:
   case AssertStk:
   case AssertMBase:
+  case FuncGuard:
   case DefFP:
   case DefSP:
   case EndGuards:

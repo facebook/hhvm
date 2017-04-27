@@ -249,6 +249,12 @@ struct IRUnit {
 
   /////////////////////////////////////////////////////////////////////////////
 
+  /*
+   * For prologue contexts, the address of the start of the prologue
+   * (ie the address after the prologue guard) gets written here.
+   */
+  TCA prologueStart{nullptr};
+
 private:
   template<class... Args> SSATmp* newSSATmp(Args&&...);
 

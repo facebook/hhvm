@@ -699,6 +699,7 @@ let print_error (e: exn) : json =
     | Error.Server_error_end message -> (-32000, message, None)
     | Error.Server_not_initialized message -> (-32002, message, None)
     | Error.Unknown message -> (-32001, message, None)
+    | Error.Request_cancelled message -> (-32800, message, None)
     | _ -> (-32001, "Internal error", None)
   in
   (* TODO: move the backtrace into "data" once Nuclide can log it there. *)

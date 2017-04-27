@@ -615,6 +615,7 @@ end
 
 (* ErrorResponse *)
 module Error = struct
+  (* Defined by JSON-RPC. *)
   exception Parse of string (* -32700 *)
   exception Invalid_request of string (* -32600 *)
   exception Method_not_found of string (* -32601 *)
@@ -622,6 +623,9 @@ module Error = struct
   exception Internal_error of string (* -32603 *)
   exception Server_error_start of string * Initialize.error_data (* -32099 *)
   exception Server_error_end of string (* -32000 *)
-  exception Server_not_initialized of string (* -32002*)
+  exception Server_not_initialized of string (* -32002 *)
   exception Unknown of string (* -32001 *)
+
+  (* Defined by the protocol. *)
+  exception Request_cancelled of string (* -32800 *)
 end

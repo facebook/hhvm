@@ -318,6 +318,21 @@ let notify (outchan: out_channel) (method_: string) (json: Hh_json.json)
   in
   message |> Hh_json.json_to_string |> Http_lite.write_message outchan
 
+let short_timeout = 2.5
+let long_timeout = 15.0
+
+(* cancel_if_stale: If a message is stale, throw the necessary exception to
+   cancel it. A message is considered stale if it's sufficiently old and there
+   are other messages in the queue that are newer than it. *)
+let cancel_if_stale
+  (state: state)
+  (message: ClientMessageQueue.client_message)
+  (timeout: float)
+  : unit =
+  let message_received_time = message.ClientMessageQueue.timestamp in
+  let time_elapsed = (Unix.gettimeofday ()) -. message_received_time in
+  if time_elapsed >= timeout && ClientMessageQueue.has_message state.client
+  then raise (Error.Request_cancelled "request timed out")
 
 (************************************************************************)
 (** Protocol                                                           **)
@@ -719,18 +734,21 @@ let handle_event (state: state) (event: event) : unit =
 
   (* textDocument/hover request *)
   | Main_loop, Client_message c when c.method_ = "textDocument/hover" ->
+    cancel_if_stale state c short_timeout;
     parse_hover c.params |> do_hover state.server_conn |> print_hover
       |> respond stdout c;
 
   (* textDocument/definition request *)
   | Main_loop, Client_message c
     when c.method_ = "textDocument/definition" ->
+    cancel_if_stale state c short_timeout;
     parse_definition c.params |> do_definition state.server_conn
       |> print_definition |> respond stdout c
 
   (* textDocument/completion request *)
   | Main_loop, Client_message c
     when c.method_ = "textDocument/completion" ->
+    cancel_if_stale state c short_timeout;
     parse_completion c.params |> do_completion state.server_conn
       |> print_completion |> respond stdout c
 
@@ -748,12 +766,14 @@ let handle_event (state: state) (event: event) : unit =
   (* textDocument/references requeset *)
   | Main_loop, Client_message c
     when c.method_ = "textDocument/references" ->
+    cancel_if_stale state c long_timeout;
     parse_find_references c.params |> do_find_references state.server_conn
       |> print_find_references |> respond stdout c
 
   (* textDocument/documentHighlight *)
   | Main_loop, Client_message c
     when c.method_ = "textDocument/documentHighlight" ->
+    cancel_if_stale state c short_timeout;
     parse_document_highlights c.params
       |> do_document_highlights state.server_conn |> print_document_highlights
       |> respond stdout c

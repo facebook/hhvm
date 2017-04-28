@@ -130,7 +130,11 @@ module WithExpressionAndStatementAndTypeParser
 
     let (parser, token) = next_token parser in
     let token = make_token token in
-    let (parser, name) = expect_name parser in
+    (* Not `expect_name` but `expect_name_allow_keywords`, because the parser
+     * must allow keywords in the place of identifiers; at least to parse .hhi
+     * files.
+     *)
+    let (parser, name) = expect_name_allow_keywords parser in
     let (parser, generic) = parse_generic_parameter_list_opt parser in
     let (parser, constr) = parse_type_constraint_opt parser in
     let (parser, equal) = expect_equal parser in

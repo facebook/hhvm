@@ -131,11 +131,12 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
         args.kind = TransKind::Optimize;
         args.region = selectHotRegion(funcletTransId);
         auto const spOff = args.region->entry()->initialSpOffset();
-        if (translate(args, spOff, info.tcBuf.view())) {
+        if (auto res = translate(args, spOff, info.tcBuf.view())) {
           // Flag that this translation has been retranslated, so that
           // it's not retranslated again along with the function body.
           profData()->setOptimized(funcletSK);
           ret = true;
+          info.translations.emplace_back(std::move(res.value()));
         }
       };
       withThis(func, genPrologue);

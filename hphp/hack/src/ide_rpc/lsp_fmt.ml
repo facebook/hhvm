@@ -686,22 +686,24 @@ let print_initialize (r: Initialize.result) : json =
 (** error response                                                     **)
 (************************************************************************)
 
+let get_error_info (e: exn) : int * string * json option =
+  match e with
+  | Error.Parse message -> (-32700, message, None)
+  | Error.Invalid_request message -> (-32600, message, None)
+  | Error.Method_not_found message -> (-32601, message, None)
+  | Error.Invalid_params message -> (-32602, message, None)
+  | Error.Internal_error message -> (-32603, message, None)
+  | Error.Server_error_start (message, data) ->
+      (-32603, message, Some (print_initialize_error data))
+  | Error.Server_error_end message -> (-32000, message, None)
+  | Error.Server_not_initialized message -> (-32002, message, None)
+  | Error.Unknown message -> (-32001, message, None)
+  | Error.Request_cancelled message -> (-32800, message, None)
+  | _ -> (-32001, "Internal error", None)
+
 let print_error (e: exn) : json =
   let open Hh_json in
-  let (code, message, data) = match e with
-    | Error.Parse message -> (-32700, message, None)
-    | Error.Invalid_request message -> (-32600, message, None)
-    | Error.Method_not_found message -> (-32601, message, None)
-    | Error.Invalid_params message -> (-32602, message, None)
-    | Error.Internal_error message -> (-32603, message, None)
-    | Error.Server_error_start (message, data) ->
-        (-32603, message, Some (print_initialize_error data))
-    | Error.Server_error_end message -> (-32000, message, None)
-    | Error.Server_not_initialized message -> (-32002, message, None)
-    | Error.Unknown message -> (-32001, message, None)
-    | Error.Request_cancelled message -> (-32800, message, None)
-    | _ -> (-32001, "Internal error", None)
-  in
+  let (code, message, data) = get_error_info e in
   (* TODO: move the backtrace into "data" once Nuclide can log it there. *)
   let message = Printf.sprintf "%s - %s - %s"
     message

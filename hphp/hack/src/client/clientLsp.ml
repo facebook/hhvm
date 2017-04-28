@@ -844,6 +844,29 @@ let handle_event (state: state) (event: event) : unit =
     () (* todo *)
   | _, Server_exit _ -> () (* todo *)
 
+(* respond_to_error: if we threw an exception during the handling of a request,
+   report the exception to the client as the response their request. *)
+let respond_to_error (event: event) (e: exn) : unit =
+  match event with
+  | Client_message c
+    when c.ClientMessageQueue.is_request ->
+    print_error e |> respond stdout c;
+  | _ -> ()
+
+let log_error (event: event) (e: exn) : unit =
+  let (error_code, _message, _data) = get_error_info e in
+  let (command, is_request) = match event with
+    | Client_message c ->
+      let open ClientMessageQueue in
+      (Some c.method_, Some c.is_request)
+    | _ -> (None, None)
+  in
+  HackEventLogger.client_command_exception
+    ~command
+    ~is_request
+    ~e
+    ~error_code
+
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. *)
 let main () : unit =
@@ -874,9 +897,7 @@ let main () : unit =
             then rpc state.server_conn ServerCommandTypes.IDE_IDLE
         end
       | _ -> ()
-    with
-    | e -> match event with
-           | Client_message c when c.ClientMessageQueue.is_request ->
-             print_error e |> respond stdout c
-           | _ -> () (* todo: log this? *)
+    with e ->
+      respond_to_error event e;
+      log_error event e
   done

@@ -57,6 +57,9 @@ TAGS
 .cproject
 .settings
 
+# idea files
+.idea
+
 # vim files
 .*.swp
 .*.swo

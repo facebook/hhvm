@@ -1355,6 +1355,20 @@ and emit_object_expr (_, expr_ as expr) =
     instr_this
   | _ -> from_expr expr
 
+and is_unqualified_function = function
+  | "invariant_violation"
+  | "invariant"
+  | "inst_meth" -> true
+  | _ -> false
+
+and rename_function_call id = match id with
+  | "invariant_violation"
+  | "invariant"
+  | "inst_meth" -> SU.prefix_namespace "HH" id
+  | "min"
+  | "max" -> SU.prefix_namespace "__SystemLib" (id ^ "2")
+  | _ -> id
+
 and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
@@ -1402,12 +1416,13 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
 
-  | A.Id (_, id) when id = "invariant_violation" || id = "invariant" ->
-    let ns_id = SU.prefix_namespace "HH" id in
+  | A.Id (_, id) when is_unqualified_function id ->
+    let ns_id = rename_function_call id in
     instr (ICall (FPushFuncU (nargs, ns_id, id)))
 
   | A.Id (_, id) ->
-    instr (ICall (FPushFuncD (nargs, SU.strip_global_ns id)))
+    let id = SU.strip_global_ns @@ rename_function_call id in
+    instr (ICall (FPushFuncD (nargs, id)))
 
   | _ ->
     gather [
@@ -1512,35 +1527,35 @@ and emit_call (_, expr_ as expr) args uargs =
     let e = List.hd_exn args in
     emit_exit e, Flavor.Cell
 
-  | A.Id(_, "intval") when List.length args = 1 ->
+  | A.Id (_, "intval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
       from_expr e;
       instr (IOp CastInt)
     ], Flavor.Cell
 
-  | A.Id(_, "strval") when List.length args = 1 ->
+  | A.Id (_, "strval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
       from_expr e;
       instr (IOp CastString)
     ], Flavor.Cell
 
-  | A.Id(_, "boolval") when List.length args = 1 ->
+  | A.Id (_, "boolval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
       from_expr e;
       instr (IOp CastBool)
     ], Flavor.Cell
 
-  | A.Id(_, "floatval") when List.length args = 1 ->
+  | A.Id (_, "floatval") when List.length args = 1 ->
     let e = List.hd_exn args in
     gather [
       from_expr e;
       instr (IOp CastDouble)
     ], Flavor.Cell
 
-  | A.Id(_, "invariant") when List.length args > 0 ->
+  | A.Id (_, "invariant") when List.length args > 0 ->
     let e = List.hd_exn args in
     let rest = List.tl_exn args in
     let l = Label.next_regular () in
@@ -1553,6 +1568,24 @@ and emit_call (_, expr_ as expr) args uargs =
       instr (IOp (Fatal FatalOp.Runtime));
       instr_label l;
       instr_null;
+    ], Flavor.Cell
+
+  | A.Id (_, "assert") ->
+    let l0 = Label.next_regular () in
+    let l1 = Label.next_regular () in
+    gather [
+      instr_string "zend.assertions";
+      instr_fcallbuiltin 1 1 "ini_get";
+      instr_unboxr_nop;
+      instr_int 0;
+      instr_gt;
+      instr_jmpz l0;
+      fst @@ default ();
+      instr_unboxr;
+      instr_jmp l1;
+      instr_label l0;
+      instr_true;
+      instr_label l1;
     ], Flavor.Cell
 
   | A.Id (_, id) ->

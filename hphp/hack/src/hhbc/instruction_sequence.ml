@@ -53,6 +53,7 @@ let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
 let instr_eq = instr (IOp Eq)
+let instr_gt = instr (IOp Gt)
 let instr_retc = instr (IContFlow RetC)
 let instr_null = instr (ILitConst Null)
 let instr_catch = instr (IMisc Catch)
@@ -111,6 +112,7 @@ let instr_newcol collection_type = instr (ILitConst (NewCol collection_type))
 let instr_colfromarray collection_type =
   instr (ILitConst (ColFromArray collection_type))
 let instr_unboxr = instr (IBasic UnboxR)
+let instr_unboxr_nop = instr (IBasic UnboxRNop)
 let instr_entrynop = instr (IBasic EntryNop)
 let instr_dict x xs = instr (ILitConst (Dict(x, xs)))
 let instr_staticlocinit local text = instr (IMisc (StaticLocInit(local, text)))
@@ -164,6 +166,8 @@ let instr_static_loc_init name =
 let instr_exit = instr (IOp Hhbc_ast.Exit)
 let instr_idx = instr (IMisc Idx)
 let instr_array_idx = instr (IMisc ArrayIdx)
+
+let instr_fcallbuiltin n un s = instr (ICall (FCallBuiltin (n, un, s)))
 
 (* Functions on instr_seq that correspond to existing Core.List functions *)
 module InstrSeq = struct

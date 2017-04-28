@@ -264,6 +264,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::loadtql:
     case Vinstr::storel:
     case Vinstr::storeli:
+    case Vinstr::ubfm2r7ml:
       return Width::Long;
 
     case Vinstr::addq:

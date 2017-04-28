@@ -298,6 +298,7 @@ struct Vunit;
   O(fcvtzs, Inone, U(s), D(d))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
+  O(ubfm2r7ml, Inone, U(s), D(d))\
   /* ppc64 instructions */\
   O(extsb, Inone, UH(s,d), DH(d,s))\
   O(extsl, Inone, UH(s,d), DH(d,s))\
@@ -1107,6 +1108,7 @@ struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
+struct ubfm2r7ml { Vreg32 s, d; VregSF sf; Vflags fl; };
 
 /*
  * ppc64 intrinsics.

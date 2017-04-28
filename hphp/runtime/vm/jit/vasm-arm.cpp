@@ -340,6 +340,7 @@ struct Vgen {
   void emit(const fcvtzs& i) { a->Fcvtzs(X(i.d), D(i.s)); }
   void emit(const mrs& i) { a->Mrs(X(i.r), vixl::SystemRegister(i.s.l())); }
   void emit(const msr& i) { a->Msr(vixl::SystemRegister(i.s.l()), X(i.r)); }
+  void emit(const ubfm2r7ml& i) { a->ubfm(W(i.d), W(i.s), 2, 7); }
 
   void emit_nop() { a->Nop(); }
 

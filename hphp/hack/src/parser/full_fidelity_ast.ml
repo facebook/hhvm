@@ -178,42 +178,6 @@ let token_kind : node -> TK.t option = function
   | { syntax = Token t; _ } -> Some (PT.kind t)
   | _ -> None
 
-(**
- * FFP does not destinguish between ++$i and $i++ on the level of token kind
- * annotation. Prevent duplication by switching on `postfix` for the two
- * operatores for which AST /does/ differentiate between fixities.
- *)
-let pUop : bool -> (expr -> expr_) parser = fun postfix node env expr ->
-  match token_kind node with
-  | Some TK.PlusPlus   when postfix -> Unop (Upincr, expr)
-  | Some TK.MinusMinus when postfix -> Unop (Updecr, expr)
-  | Some TK.PlusPlus                -> Unop (Uincr,  expr)
-  | Some TK.MinusMinus              -> Unop (Udecr,  expr)
-  | Some TK.Exclamation             -> Unop (Unot,   expr)
-  | Some TK.Tilde                   -> Unop (Utild,  expr)
-  | Some TK.Plus                    -> Unop (Uplus,  expr)
-  | Some TK.Minus                   -> Unop (Uminus, expr)
-  | Some TK.Ampersand               -> Unop (Uref,   expr)
-  | Some TK.DotDotDot               -> Unop (Usplat, expr)
-  (* The ugly ducklings; In the FFP, `await` and `clone` are parsed as
-   * `UnaryOperator`s, whereas the typed AST has separate constructors for
-   * `Await`, `Clone` and `Uop`. Also, `@` is thrown out by the old parser.
-   * This is why we don't just project onto a `uop`, but rather a
-   * `expr -> expr_`.
-   *)
-  | Some TK.Await                   -> Await expr
-  | Some TK.Clone                   -> Clone expr
-  | Some TK.At                      -> snd expr
-  | Some TK.Dollar                  ->
-    (match expr with
-    | _, Lvarvar (n, id) -> Lvarvar (n + 1, id)
-    | _, Lvar id         -> Lvarvar (1, id)
-    | _ -> missing_syntax "unary operator:dollar-deref" node env
-    )
-  | _ ->
-
-    missing_syntax "unary operator" node env
-
 let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   match token_kind node with
   | Some TK.Equal                       -> Binop (Eq None,           lhs, rhs)
@@ -261,7 +225,7 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   (* The ugly ducklings; In the FFP, `|>` and '??' are parsed as
    * `BinaryOperator`s, whereas the typed AST has separate constructors for
    * NullCoalesce, Pipe and Binop. This is why we don't just project onto a
-   * `bop`, but - analagous to pUop - a `expr -> expr -> expr_`.
+   * `bop`, but a `expr -> expr -> expr_`.
    *)
   | Some TK.BarGreaterThan              -> Pipe         (lhs, rhs)
   | Some TK.QuestionQuestion            -> NullCoalesce (lhs, rhs)
@@ -626,12 +590,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
     | ParenthesizedExpression { parenthesized_expression_expression = expr; _ }
       -> pExpr_ expr env
 
-    | DecoratedExpression
-      { decorated_expression_expression = expr
-      ; decorated_expression_decorator  = decorator
-      } -> pUop false decorator env @@ pExpr expr env
-
-    | DictionaryIntrinsicExpression
+   | DictionaryIntrinsicExpression
       { dictionary_intrinsic_keyword = kw
       ; dictionary_intrinsic_members = members
       ; _ }
@@ -723,10 +682,41 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       { postfix_unary_operand  = operand
       ; postfix_unary_operator = operator
       }
+    | DecoratedExpression
+      { decorated_expression_expression = operand
+      ; decorated_expression_decorator  = operator
+      }
       ->
         let expr = pExpr operand env in
-        pUop (kind node = SyntaxKind.PostfixUnaryExpression) operator env expr
-
+        (**
+         * FFP does not destinguish between ++$i and $i++ on the level of token
+         * kind annotation. Prevent duplication by switching on `postfix` for
+         * the two operatores for which AST /does/ differentiate between
+         * fixities.
+         *)
+        let postfix = kind node = SyntaxKind.PostfixUnaryExpression in
+        (match token_kind operator with
+        | Some TK.PlusPlus   when postfix -> Unop (Upincr, expr)
+        | Some TK.MinusMinus when postfix -> Unop (Updecr, expr)
+        | Some TK.PlusPlus                -> Unop (Uincr,  expr)
+        | Some TK.MinusMinus              -> Unop (Udecr,  expr)
+        | Some TK.Exclamation             -> Unop (Unot,   expr)
+        | Some TK.Tilde                   -> Unop (Utild,  expr)
+        | Some TK.Plus                    -> Unop (Uplus,  expr)
+        | Some TK.Minus                   -> Unop (Uminus, expr)
+        | Some TK.Ampersand               -> Unop (Uref,   expr)
+        | Some TK.Await                   -> Await expr
+        | Some TK.Clone                   -> Clone expr
+        | Some TK.At                      -> snd expr
+        | Some TK.Dollar                  ->
+          (match expr with
+          | _, Lvarvar (n, id) -> Lvarvar (n + 1, id)
+          | _, Lvar id         -> Lvarvar (1, id)
+          (* TODO(17510521) Give ${<expr>} a proper representation. *)
+          | _ -> Unsafeexpr expr
+          )
+        | _ -> missing_syntax "unary operator" node env
+        )
     | BinaryExpression
       { binary_left_operand; binary_operator; binary_right_operand }
       ->

@@ -135,10 +135,10 @@ module WithStatementAndDeclAndTypeParser
     | Static -> parse_scope_resolution_or_name parser
     | Yield -> parse_yield_expression parser
     | Print -> parse_print_expression parser
+    | Dollar -> parse_dollar_expression parser
     | Suspend
       (* TODO: The operand to a suspend is required to be a call to a
       coroutine. Give an error in a later pass if this isn't the case. *)
-    | Dollar
     | Exclamation
     | PlusPlus
     | MinusMinus
@@ -1189,6 +1189,18 @@ TODO: This will need to be fixed to allow situations where the qualified name
     let (parser, operand) = parse_expression_with_operator_precedence
       parser operator in
     let result = make_prefix_unary_expression token operand in
+    (parser, result)
+
+  and parse_dollar_expression parser =
+    let (parser, dollar) = assert_token parser Dollar in
+    let (parser, operand) =
+      if peek_token_kind parser = TokenKind.LeftBrace
+      then parse_braced_expression parser
+      else
+        parse_expression_with_operator_precedence parser
+          (Operator.prefix_unary_from_token TokenKind.Dollar)
+    in
+    let result = make_prefix_unary_expression dollar operand in
     (parser, result)
 
   and parse_instanceof_expression parser left =

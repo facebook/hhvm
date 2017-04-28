@@ -132,6 +132,7 @@ let minimal_tests =
     "test_class_const";
     "test_type_alias";
     "test_indirection";
+    "test_eval_deref";
     "test_global_constant";
     "test_closure_type";
     "test_inclusion_directive";

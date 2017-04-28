@@ -164,7 +164,7 @@ let missing =
   let open Full_fidelity_source_text in
   { syntax = Missing
   ; value =
-    { V.source_text    = { text = ""; offset_map = [] }
+    { V.source_text    = { text = ""; offset_map = Line_break_map.make "" }
     ; V.offset         = 0
     ; V.leading_width  = 0
     ; V.width          = 0

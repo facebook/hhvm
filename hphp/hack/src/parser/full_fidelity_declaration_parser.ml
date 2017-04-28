@@ -540,6 +540,7 @@ module WithExpressionAndStatementAndTypeParser
     | Use -> parse_trait_use parser
     | Const -> parse_const_or_type_const_declaration parser (make_missing ())
     | Abstract -> parse_methodish_or_const_or_type_const parser
+    | Async
     | Static
     | Public
     | Protected

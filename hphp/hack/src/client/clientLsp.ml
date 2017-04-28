@@ -858,12 +858,21 @@ let main () : unit =
     try
       handle_event state event;
       match event with
-      | Client_message c ->
-        let open ClientMessageQueue in
-        HackEventLogger.client_handled_command
-          ~command:c.method_
-          ~start_t:c.timestamp
-          ~is_request:c.is_request
+      | Client_message c -> begin
+          let open ClientMessageQueue in
+          (* Log to scuba the time the message arrived at hh_client and the *)
+          (* time we finished handling it. This includes any time it spent  *)
+          (* waiting in the queue...                                        *)
+          HackEventLogger.client_handled_command
+            ~command:c.method_
+            ~start_t:c.timestamp
+            ~is_request:c.is_request;
+          (* If we're connected to a server and have no more messages in   *)
+          (* the queue, then let the server know we're idle, so it will be *)
+          (* free to handle command-line requests. *)
+          if Option.is_some state.server_conn && not (has_message state.client)
+            then rpc state.server_conn ServerCommandTypes.IDE_IDLE
+        end
       | _ -> ()
     with
     | e -> match event with

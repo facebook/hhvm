@@ -648,31 +648,22 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       , pExpr inclusion_filename env
       )
 
-    | MemberSelectionExpression { member_object; member_operator; member_name }
-      (* TODO: Surely member selection and safe member selection can be one *)
-      -> Obj_get
-      ( pExpr member_object env
-      , (let p, n as name = pos_name member_name in
-          (p, if n.[0] = '$' then Lvar name else Id name)
-        )
-      , pNullFlavor member_operator env
-      )
+    | MemberSelectionExpression
+      { member_object   = recv
+      ; member_operator = op
+      ; member_name     = name
+      }
     | SafeMemberSelectionExpression
-      { safe_member_object; safe_member_operator; safe_member_name } ->
-      Obj_get
-      ( pExpr safe_member_object env
-      , pExpr safe_member_name   env
-      , pNullFlavor safe_member_operator env
-      )
+      { safe_member_object   = recv
+      ; safe_member_operator = op
+      ; safe_member_name     = name
+      }
     | EmbeddedMemberSelectionExpression
-      { embedded_member_object;
-        embedded_member_operator;
-        embedded_member_name } ->
-      Obj_get
-      ( pExpr embedded_member_object env
-      , pExpr embedded_member_name   env
-      , pNullFlavor embedded_member_operator env
-      )
+      { embedded_member_object   = recv
+      ; embedded_member_operator = op
+      ; embedded_member_name     = name
+      }
+      -> Obj_get (pExpr recv env, pExpr name env, pNullFlavor op env)
 
     | PrefixUnaryExpression
       { prefix_unary_operator = operator

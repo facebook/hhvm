@@ -1,5 +1,4 @@
 quick/Cls.php
-quick/ClsCases.php
 quick/FPassC.php
 quick/FPassR.php
 quick/FPushCtor.php
@@ -18,7 +17,6 @@ quick/actrec.php
 quick/alias_torture.php
 quick/all_type_comparison_test.php
 quick/apc.php
-quick/args-test.php
 quick/array_packed.php
 quick/arrayidx.php
 quick/async_suspend_stack.php
@@ -27,6 +25,7 @@ quick/bool_types.php
 quick/builtin_extension_DateTime.php
 quick/builtin_extension_SimpleXMLElement.php
 quick/byref.php
+quick/call10.php
 quick/call_nonstatic_this.php
 quick/callable-namespace.php
 quick/castDbl.php
@@ -253,6 +252,8 @@ quick/lexer_nowdoc_many_buffers.php
 quick/libxml_suppress_errors.php
 quick/list-assign-ref-param.php
 quick/list-assignment.php
+quick/magic-get-set.php
+quick/method-non-object2.php
 quick/method_param_promotion_error.php
 quick/methodcache_direct_magic.php
 quick/methodcache_magic.php
@@ -261,7 +262,6 @@ quick/nested_vm_exceptions2.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
 quick/non-special-this.php
-quick/nonstatic_invname.php
 quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
 quick/ns_existing_names.php
@@ -297,6 +297,7 @@ quick/profile/setprofile-this.php
 quick/profile/setprofile_throw.php
 quick/prop_order.php
 quick/prop_order_parens.php
+quick/properties-dynamic.php
 quick/properties2.php
 quick/properties3.php
 quick/property_exists.php

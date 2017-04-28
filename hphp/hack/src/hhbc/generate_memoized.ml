@@ -280,12 +280,13 @@ let memoize_static_method_no_params original_name class_name =
   let label_3 = Label.Regular 3 in
   let label_4 = Label.Regular 4 in
   let label_5 = Label.Regular 5 in
+  let original_name_lc = String.lowercase_ascii original_name in
   gather [
     instr_entrynop;
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_0;
-    instr_string (original_name ^ single_memoize_cache);
+    instr_string (original_name_lc ^ single_memoize_cache);
     instr_string (Utils.strip_ns class_name);
     instr_clsrefgetc;
     instr_cgets;
@@ -299,7 +300,7 @@ let memoize_static_method_no_params original_name class_name =
     instr_null;
     instr_maybememotype;
     instr_jmpz label_2;
-    instr_string (original_name ^ single_memoize_cache_guard);
+    instr_string (original_name_lc ^ single_memoize_cache_guard);
     instr_string (Utils.strip_ns class_name);
     instr_clsrefgetc;
     instr_cgets;
@@ -310,7 +311,7 @@ let memoize_static_method_no_params original_name class_name =
     instr_null;
     instr_ismemotype;
     instr_jmpnz label_3;
-    instr_string (original_name ^ single_memoize_cache);
+    instr_string (original_name_lc ^ single_memoize_cache);
     instr_string (Utils.strip_ns class_name);
     instr_clsrefgetc;
     instr_fpushclsmethodd 0 (original_name ^ memoize_suffix) class_name;
@@ -326,7 +327,7 @@ let memoize_static_method_no_params original_name class_name =
     instr_null;
     instr_maybememotype;
     instr_jmpz label_5;
-    instr_string (original_name ^ single_memoize_cache_guard);
+    instr_string (original_name_lc ^ single_memoize_cache_guard);
     instr_string (Utils.strip_ns class_name);
     instr_clsrefgetc;
     instr_true;
@@ -340,11 +341,12 @@ let memoize_static_method_with_params params original_name class_name =
   let param_count = List.length params in
   let label = Label.Regular 0 in
   let first_local = Local.Unnamed param_count in
+  let original_name_lc = String.lowercase_ascii original_name in
   gather [
     instr_entrynop;
     Emit_body.emit_method_prolog params;
     param_code_sets params param_count;
-    instr_string (original_name ^ multi_memoize_cache);
+    instr_string (original_name_lc ^ multi_memoize_cache);
     instr_string (Utils.strip_ns class_name);
     instr_clsrefgetc;
     instr_basesc 0;
@@ -357,7 +359,7 @@ let memoize_static_method_with_params params original_name class_name =
     instr_ugetcunop;
     instr_popu;
     (* TODO: The strings have extra leading slashes unnecessarily *)
-    instr_string (original_name ^ multi_memoize_cache);
+    instr_string (original_name_lc ^ multi_memoize_cache);
     instr_string (Utils.strip_ns class_name);
     instr_clsrefgetc;
     instr_fpushclsmethodd param_count renamed_name class_name;
@@ -458,7 +460,7 @@ let add_static_properties class_ =
   let folder class_ method_ =
     if is_memoized_static method_ then
       let params = Hhas_method.params method_ in
-      let original_name = Hhas_method.name method_ in
+      let original_name = String.lowercase_ascii @@ Hhas_method.name method_ in
       if params = [] then
         let property = Hhas_property.make
           true false false true (original_name ^ single_memoize_cache)

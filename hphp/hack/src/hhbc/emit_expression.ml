@@ -1402,8 +1402,12 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
 
+  | A.Id (_, id) when id = "invariant_violation" || id = "invariant" ->
+    let ns_id = SU.prefix_namespace "HH" id in
+    instr (ICall (FPushFuncU (nargs, ns_id, id)))
+
   | A.Id (_, id) ->
-    instr (ICall (FPushFuncD (nargs, id)))
+    instr (ICall (FPushFuncD (nargs, SU.strip_global_ns id)))
 
   | _ ->
     gather [
@@ -1534,6 +1538,21 @@ and emit_call (_, expr_ as expr) args uargs =
     gather [
       from_expr e;
       instr (IOp CastDouble)
+    ], Flavor.Cell
+
+  | A.Id(_, "invariant") when List.length args > 0 ->
+    let e = List.hd_exn args in
+    let rest = List.tl_exn args in
+    let l = Label.next_regular () in
+    let p = Pos.none in
+    let id = p, A.Id (p, "hh\\invariant_violation") in
+    gather [
+      emit_jmpnz e l;
+      emit_ignored_expr (p, A.Call (id, rest, uargs));
+      instr_string "invariant_violation";
+      instr (IOp (Fatal FatalOp.Runtime));
+      instr_label l;
+      instr_null;
     ], Flavor.Cell
 
   | A.Id (_, id) ->

@@ -33,10 +33,8 @@ inline StringData* StringData::Make(const char* data, CopyStringMode) {
 // AttachString
 
 inline StringData* StringData::Make(char* data, AttachStringMode) {
-  auto const sd = Make(data, CopyString);
-  free(data);
-  assert(sd->checkSane());
-  return sd;
+  SCOPE_EXIT { free(data); };
+  return Make(data, CopyString);
 }
 
 //////////////////////////////////////////////////////////////////////

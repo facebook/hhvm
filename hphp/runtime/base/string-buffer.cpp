@@ -64,8 +64,8 @@ String StringBuffer::detach() {
     assert(m_str && m_str->hasExactlyOneRef());
     auto str = String::attach(m_str);
     str.setSize(m_len);
-    m_str = 0;
-    m_buffer = 0;
+    m_str = nullptr;
+    m_buffer = nullptr;
     m_len = 0;
     m_cap = 0;
     return str;
@@ -92,7 +92,7 @@ void StringBuffer::absorb(StringBuffer& buf) {
       buf.m_len = str->size();
       buf.m_cap = str->capacity();
     } else {
-      buf.m_buffer = 0;
+      buf.m_buffer = nullptr;
       buf.m_len = 0;
       buf.m_cap = 0;
     }
@@ -115,8 +115,8 @@ void StringBuffer::release() {
     }
     m_str->release();
   }
-  m_str = 0;
-  m_buffer = 0;
+  m_str = nullptr;
+  m_buffer = nullptr;
   m_len = m_cap = 0;
 }
 

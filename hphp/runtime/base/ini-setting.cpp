@@ -899,7 +899,7 @@ struct SystemSettings {
 };
 
 struct LocalSettings {
-  using Map = req::hash_map<std::string,Variant>;
+  using Map = std::unordered_map<std::string,Variant>;
   folly::Optional<Map> settings;
   Map& init() {
     if (!settings) settings.emplace();

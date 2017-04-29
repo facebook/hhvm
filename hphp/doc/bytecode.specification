@@ -3585,7 +3585,7 @@ WIterInitK <iterator id> <rel offset> <local id> <local id>    [C]  ->  []
   iterator and transfer control the location specified by %2.
 
   If $1 is an object that implements the Iterator interface, these instructions
-  create an user class iterator, call $1->rewind(), and store the user class
+  create a user class iterator, call $1->rewind(), and store the user class
   iterator in the iterator variable %1. Then these instructions check if
   $1->valid() returns false, and if it does these instructions free the
   iterator and transfer control to the location specified by %2.

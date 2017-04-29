@@ -35,6 +35,10 @@ let accept_client_opt parent_in_fd =
     None
   end
 
+(* sleep_and_check: waits up to 0.1 seconds and then returns either:        *)
+(* - If we should read from persistent_client, then (None, true)            *)
+(* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
+(* - If there's nothing to read, then (None, false)                         *)
 let sleep_and_check in_fd persistent_client_opt ~ide_idle =
   let l = match persistent_client_opt with
     | Some (Persistent_client fd) ->

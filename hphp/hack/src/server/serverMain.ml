@@ -286,6 +286,10 @@ let serve_one_iteration ~force_flush genv env client_provider =
       env.persistent_client
       ~ide_idle:env.ide_idle
   in
+  (* client here is "None" if we should either handle from our existing  *)
+  (* persistent client (i.e. has_persistent_connection_request), or if   *)
+  (* there's nothing to handle. It's "Some ..." if we should handle from *)
+  (* a new client.                                                       *)
   let has_parsing_hook = !ServerTypeCheck.hook_after_parsing <> None in
   let env = if not has_persistent_connection_request &&
     client = None && not has_parsing_hook
@@ -350,6 +354,8 @@ let serve_one_iteration ~force_flush genv env client_provider =
   | None -> env, false
   | Some client -> begin
     try
+      (* client here is the new client (not the existing persistent client) *)
+      (* whose request we're going to handle.                               *)
       let env, needs_flush = handle_connection genv env client false in
       HackEventLogger.handled_connection start_t;
       env, needs_flush
@@ -361,6 +367,8 @@ let serve_one_iteration ~force_flush genv env client_provider =
   end in
   if has_persistent_connection_request then
     let client = Utils.unsafe_opt env.persistent_client in
+    (* client here is the existing persistent client *)
+    (* whose request we're going to handle.          *)
     HackEventLogger.got_persistent_client_channels start_t;
     (try
       let env, needs_flush_2 = handle_connection genv env client true in

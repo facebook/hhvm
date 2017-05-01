@@ -195,6 +195,9 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     HHBBC::options.ElideAutoloadInvokes   = s_globalData.ElideAutoloadInvokes;
     RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
 
+    if (HHBBC::options.HardReturnTypeHints) {
+      RuntimeOption::EvalCheckReturnTypeHints = 3;
+    }
     if (RuntimeOption::ServerExecutionMode() &&
         RuntimeOption::EvalHackArrCompatNotices) {
       // Temporary until we verify Makefile changes work in prod

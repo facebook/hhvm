@@ -20,6 +20,12 @@ module Common_argspecs = struct
       Arg.Bool (fun x -> value_ref := x),
       " If server is dormant, force start a new one instead of waiting for"^
       " the next one to start up automatically (default: false)")
+
+  let retries value_ref =
+    ("--retries",
+      Arg.Set_int value_ref,
+      spf (" set the number of retries for connecting to server. " ^^
+        "Roughly 1 retry per second (default: %d)") !value_ref;)
 end
 
 
@@ -301,9 +307,7 @@ let parse_check_args cmd =
     "--json",
       Arg.Set output_json,
       " output json for machine consumption. (default: false)";
-    "--retries",
-      Arg.Set_int retries,
-      spf " set the number of retries. (default: %d)" !retries;
+    Common_argspecs.retries retries;
     "--retry-if-init",
       Arg.Bool (fun x -> retry_if_init := x),
       " retry if the server is initializing (default: true)";
@@ -456,6 +460,10 @@ let parse_build_args () =
       Generates build files\n"
       Sys.argv.(0) in
   let force_dormant_start = ref false in
+  (* 800s was chosen because it was above most of the historical p95 of
+   * hack server startup times as observed here:
+   * https://fburl.com/48825801, see also https://fburl.com/29184831 *)
+  let retries = ref 800 in
   let steps = ref None in
   let ignore_killswitch = ref false in
   let no_steps = ref None in
@@ -484,6 +492,7 @@ let parse_build_args () =
     " build autoload-map and arc-facts using FactsDB";
     "--no-run-scripts", Arg.Clear run_scripts,
     " don't run unported arc build scripts";
+    Common_argspecs.retries retries;
     "--serial", Arg.Set serial,
     " run without parallel worker processes";
     Common_argspecs.force_dormant_start force_dormant_start;
@@ -513,6 +522,7 @@ let parse_build_args () =
     | _ -> Printf.printf "%s\n" usage; exit 2
   in
   CBuild { ClientBuild.
+    retries = !retries;
     root = root;
     wait = !wait;
     force_dormant_start = !force_dormant_start;

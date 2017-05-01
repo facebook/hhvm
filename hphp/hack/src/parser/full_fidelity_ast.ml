@@ -1329,11 +1329,38 @@ and pClassElt : class_elt list parser = fun node env ->
       | _ -> missing_syntax "XHP attribute" node env
     in
     couldMap ~f:pXHPAttr xhp_attribute_attributes env
-  | XHPChildrenDeclaration _ -> []
+  | XHPChildrenDeclaration { xhp_children_expression; _; } ->
+    [ XhpChild (pXhpChild xhp_children_expression env) ]
   | XHPCategoryDeclaration { xhp_category_categories = cats; _ } ->
     let pNameSansPercent node _env = drop_pstr 1 (pos_name node) in
     [ XhpCategory (couldMap ~f:pNameSansPercent cats env) ]
   | _ -> missing_syntax "expression" node env
+
+and pXhpChild : xhp_child parser = fun node env ->
+  match syntax node with
+  | Token t -> ChildName (pos_name node)
+  | PostfixUnaryExpression { postfix_unary_operand; postfix_unary_operator;} ->
+    let operand = pXhpChild postfix_unary_operand env in
+    let operator =
+      begin
+        match token_kind postfix_unary_operator with
+          | Some TK.Question -> ChildQuestion
+          | Some TK.Plus -> ChildPlus
+          | Some TK.Star -> ChildStar
+          | _ -> missing_syntax "xhp children operator" node env
+      end in
+    ChildUnary(operand, operator)
+  | BinaryExpression
+    { binary_left_operand; binary_right_operand; _ } ->
+    let left = pXhpChild binary_left_operand env in
+    let right = pXhpChild binary_right_operand env in
+    ChildBinary(left, right)
+  | XHPChildrenParenthesizedList {xhp_children_list_xhp_children; _} ->
+    let children = as_list xhp_children_list_xhp_children in
+    let children = List.map (fun x -> pXhpChild x env) children in
+    ChildList children
+  | _ -> missing_syntax "xhp children" node env
+
 
 (*****************************************************************************(
  * Parsing definitions (AST's `def`)

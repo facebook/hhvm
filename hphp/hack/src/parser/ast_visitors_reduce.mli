@@ -242,6 +242,21 @@ class virtual ['b] reduce :
                      option -> 'd;
         on_XhpAttrUse : 'c -> Ast_visitors_ancestors.hint -> 'd;
         on_XhpCategory : 'c -> Ast_visitors_ancestors.pstring list -> 'd;
+
+
+        on_XhpChild : 'c -> Ast_visitors_ancestors.xhp_child -> 'd;
+        on_xhp_child : 'c -> Ast_visitors_ancestors.xhp_child -> 'd;
+        on_ChildName : 'c -> Ast_visitors_ancestors.id -> 'd;
+        on_ChildList : 'c -> Ast_visitors_ancestors.xhp_child list -> 'd;
+        on_ChildUnary : 'c -> Ast_visitors_ancestors.xhp_child ->
+          Ast_visitors_ancestors.xhp_child_op -> 'd;
+        on_ChildBinary : 'c -> Ast_visitors_ancestors.xhp_child ->
+          Ast_visitors_ancestors.xhp_child -> 'd;
+        on_xhp_child_op : 'c -> Ast_visitors_ancestors.xhp_child_op -> 'd;
+        on_ChildStar : 'c -> 'd;
+        on_ChildPlus : 'c -> 'd;
+        on_ChildQuestion : 'c -> 'd;
+
         on_Xml : 'c ->
                  Ast_visitors_ancestors.id ->
                  (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
@@ -581,6 +596,18 @@ class virtual ['b] reduce :
       option -> 'd
     method on_XhpAttrUse : 'c -> Ast_visitors_ancestors.hint -> 'd
     method on_XhpCategory : 'c -> Ast_visitors_ancestors.pstring list -> 'd
+    method on_XhpChild : 'c -> Ast_visitors_ancestors.xhp_child -> 'd
+    method on_xhp_child : 'c -> Ast_visitors_ancestors.xhp_child -> 'd
+    method on_ChildName : 'c -> Ast_visitors_ancestors.id -> 'd
+    method on_ChildList : 'c -> Ast_visitors_ancestors.xhp_child list -> 'd
+    method on_ChildUnary : 'c -> Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child_op -> 'd
+    method on_ChildBinary : 'c -> Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child -> 'd
+    method on_xhp_child_op : 'c -> Ast_visitors_ancestors.xhp_child_op -> 'd
+    method on_ChildStar : 'c -> 'd
+    method on_ChildPlus : 'c -> 'd
+    method on_ChildQuestion : 'c -> 'd
     method on_Xml :
       'c ->
       Ast_visitors_ancestors.id ->

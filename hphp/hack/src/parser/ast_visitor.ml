@@ -128,6 +128,7 @@ class type ['a] ast_visitor_type = object
                      ((Pos.t * expr list) option) -> 'a
   method on_xhpAttrUse: 'a -> hint -> 'a
   method on_xhpCategory: 'a -> pstring list -> 'a
+  method on_xhp_child: 'a -> xhp_child -> 'a
 
 end
 
@@ -252,6 +253,15 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_def_inline acc d =
     this#on_def acc d
+
+  method on_xhp_child acc e =
+    match e with
+   | ChildName id ->  this#on_id acc id
+   | ChildList children -> List.fold_left this#on_xhp_child acc children
+   | ChildUnary (child, _) -> this#on_xhp_child acc child
+   | ChildBinary (c1, c2) ->
+     let acc = this#on_xhp_child acc c1 in
+     this#on_xhp_child acc c2
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e
@@ -581,6 +591,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | ClassUse h -> this#on_classUse acc h
     | XhpAttrUse h -> this#on_xhpAttrUse acc h
     | XhpCategory cs -> this#on_xhpCategory acc cs
+    | XhpChild c -> this#on_xhp_child acc c
     | ClassTraitRequire (t, h) -> this#on_classTraitRequire acc t h
     | ClassVars (c,v,l) -> this#on_classVars acc c v l
     | XhpAttr (t,h,i,n) -> this#on_xhpAttr acc t h i n

@@ -1161,6 +1161,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1176,6 +1177,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1193,6 +1195,7 @@ module Make (GetLocals : GetLocals) = struct
       (match acc with
       | Some _ -> Errors.multiple_xhp_category (fst (List.hd_exn cs)); acc
       | None -> Some cs)
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1219,6 +1222,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1232,6 +1236,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method ({ m_name = (p, name); _ } as m)
         when name = SN.Members.__construct ->
       (match acc with
@@ -1251,6 +1256,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1275,6 +1281,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1333,6 +1340,7 @@ module Make (GetLocals : GetLocals) = struct
       let cv = fill_prop [] h cv in
       cv :: acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst _ -> acc
 
@@ -1347,6 +1355,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
     | Method m when List.mem m.m_kind Static -> method_ (fst env) m :: acc
     | Method _ -> acc
@@ -1363,6 +1372,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method m when snd m.m_name = SN.Members.__construct -> acc
     | Method m when not (List.mem m.m_kind Static) ->
       let genv = fst env in
@@ -1381,6 +1391,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars _ -> acc
     | XhpAttr _ -> acc
     | XhpCategory _ -> acc
+    | XhpChild _ -> acc
     | Method _ -> acc
     | TypeConst t -> typeconst env t :: acc
 

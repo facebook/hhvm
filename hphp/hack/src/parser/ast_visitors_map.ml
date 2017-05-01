@@ -230,6 +230,45 @@ class virtual ['self] map =
     method on_XhpCategory env c0 =
       let r0 = self#on_list self#on_pstring env c0 in
       XhpCategory r0
+    method on_XhpChild env c0 =
+      let r0 = self#on_xhp_child env c0 in
+      XhpChild r0
+
+    method on_xhp_child env this =
+      match this with
+      | ChildName c0 -> self#on_ChildName env this c0
+      | ChildList c0 -> self#on_ChildList env this c0
+      | ChildUnary (c0, c1) -> self#on_ChildUnary env this c0 c1
+      | ChildBinary (c0, c1) -> self#on_ChildBinary env this c0 c1
+
+    method on_ChildName env this c0 =
+      let r0 = self#on_id env c0 in
+      ChildName r0
+
+    method on_ChildList env this c0 =
+      let r0 = self#on_list self#on_xhp_child env c0 in
+      ChildList r0
+
+    method on_ChildUnary env this c0 c1 =
+      let r0 = self#on_xhp_child env c0 in
+      let r1 = self#on_xhp_child_op env c1 in
+      ChildUnary (r0, r1)
+
+    method on_ChildBinary env this c0 c1 =
+      let r0 = self#on_xhp_child env c0 in
+      let r1 = self#on_xhp_child env c1 in
+      ChildBinary (r0, r1)
+
+    method on_xhp_child_op env this =
+      match this with
+      | ChildStar -> self#on_ChildStar env this
+      | ChildPlus -> self#on_ChildPlus env this
+      | ChildQuestion -> self#on_ChildQuestion env this
+
+    method on_ChildStar env this = this
+    method on_ChildPlus env this = this
+    method on_ChildQuestion env this = this
+
     method on_class_elt env this =
       match this with
       | Const (c0, c1) -> self#on_Const env c0 c1
@@ -244,6 +283,7 @@ class virtual ['self] map =
       | XhpAttr (c0, c1, c2, c3) -> self#on_XhpAttr env c0 c1 c2 c3
       | Method c0 -> self#on_Method env c0
       | XhpCategory c0 -> self#on_XhpCategory env c0
+      | XhpChild c0 -> self#on_XhpChild env c0
     method on_CA_name env c0 =
       let r0 = self#on_id env c0 in CA_name r0
     method on_CA_field env c0 =

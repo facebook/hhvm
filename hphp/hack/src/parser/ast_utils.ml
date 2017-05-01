@@ -48,6 +48,7 @@ let class_elt_type_to_string = function
   | Ast.XhpAttr _ -> "xhpAttr"
   | Ast.Method _ -> "method"
   | Ast.XhpCategory _ -> "xhpCategory"
+  | Ast.XhpChild _ -> "xhpChild"
 
 (* Utility functions for getting all nodes of a particular type *)
 class ast_get_defs_visitor = object (this)

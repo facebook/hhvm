@@ -185,6 +185,34 @@ class virtual ['self] reduce =
       self#sum [ r0; r1; r2; r3 ]
     method on_Method = self#on_method_
     method on_XhpCategory = self#on_list self#on_pstring
+    method on_XhpChild = self#on_xhp_child
+    method on_xhp_child env = function
+      | ChildName c0 -> self#on_ChildName env c0
+      | ChildList c0 -> self#on_ChildList env c0
+      | ChildUnary (c0, c1) -> self#on_ChildUnary env c0 c1
+      | ChildBinary (c0, c1) -> self#on_ChildBinary env c0 c1
+
+    method on_ChildName = self#on_id
+    method on_ChildList = self#on_list self#on_xhp_child
+    method on_ChildUnary env c0 c1 =
+      let r0 = self#on_xhp_child env c0 in
+      let r1 = self#on_xhp_child_op env c1 in
+      self#add r0 r1
+
+    method on_ChildBinary env c0 c1 =
+      let r0 = self#on_xhp_child env c0 in
+      let r1 = self#on_xhp_child env c1 in
+      self#add r0 r1
+
+    method on_xhp_child_op env = function
+      | ChildStar -> self#on_ChildStar env
+      | ChildPlus -> self#on_ChildPlus env
+      | ChildQuestion -> self#on_ChildQuestion env
+
+    method on_ChildStar _ = self#e
+    method on_ChildPlus _ = self#e
+    method on_ChildQuestion _ = self#e
+
     method on_class_elt env = function
       | Const (c0, c1) -> self#on_Const env c0 c1
       | AbsConst (c0, c1) -> self#on_AbsConst env c0 c1
@@ -198,6 +226,7 @@ class virtual ['self] reduce =
       | XhpAttr (c0, c1, c2, c3) -> self#on_XhpAttr env c0 c1 c2 c3
       | Method c0 -> self#on_Method env c0
       | XhpCategory c0 -> self#on_XhpCategory env c0
+      | XhpChild c0 -> self#on_XhpChild env c0
     method on_CA_name = self#on_id
     method on_CA_field = self#on_ca_field
     method on_class_attr env = function

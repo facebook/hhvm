@@ -91,6 +91,15 @@ and class_elt =
                ((Pos.t * expr list) option)
   | Method of method_
   | XhpCategory of pstring list
+  | XhpChild of xhp_child
+
+and xhp_child =
+  | ChildName of id
+  | ChildList of xhp_child list
+  | ChildUnary of xhp_child * xhp_child_op
+  | ChildBinary of xhp_child * xhp_child
+
+and xhp_child_op = ChildStar | ChildPlus | ChildQuestion
 
 and class_attr =
   | CA_name of id

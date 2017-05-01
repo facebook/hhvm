@@ -247,6 +247,19 @@ class virtual ['b] iter :
                      option -> unit;
         on_XhpAttrUse : 'c -> Ast_visitors_ancestors.hint -> unit;
         on_XhpCategory : 'c -> Ast_visitors_ancestors.pstring list -> unit;
+        on_XhpChild : 'c -> Ast_visitors_ancestors.xhp_child -> unit;
+        on_xhp_child : 'c -> Ast_visitors_ancestors.xhp_child -> unit;
+        on_ChildName : 'c -> Ast_visitors_ancestors.id -> unit;
+        on_ChildList : 'c -> Ast_visitors_ancestors.xhp_child list -> unit;
+        on_ChildUnary : 'c -> Ast_visitors_ancestors.xhp_child ->
+          Ast_visitors_ancestors.xhp_child_op -> unit;
+        on_ChildBinary : 'c -> Ast_visitors_ancestors.xhp_child ->
+          Ast_visitors_ancestors.xhp_child -> unit;
+        on_xhp_child_op : 'c -> Ast_visitors_ancestors.xhp_child_op -> unit;
+        on_ChildStar : 'c -> unit;
+        on_ChildPlus : 'c -> unit;
+        on_ChildQuestion : 'c -> unit;
+
         on_Xml : 'c ->
                  Ast_visitors_ancestors.id ->
                  (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
@@ -604,6 +617,19 @@ class virtual ['b] iter :
       option -> unit
     method on_XhpAttrUse : 'c -> Ast_visitors_ancestors.hint -> unit
     method on_XhpCategory : 'c -> Ast_visitors_ancestors.pstring list -> unit
+    method on_XhpChild : 'c -> Ast_visitors_ancestors.xhp_child -> unit
+    method on_xhp_child : 'c -> Ast_visitors_ancestors.xhp_child -> unit
+    method on_ChildName : 'c -> Ast_visitors_ancestors.id -> unit
+    method on_ChildList : 'c -> Ast_visitors_ancestors.xhp_child list -> unit
+    method on_ChildUnary : 'c -> Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child_op -> unit
+    method on_ChildBinary : 'c -> Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child -> unit
+    method on_xhp_child_op : 'c -> Ast_visitors_ancestors.xhp_child_op -> unit
+    method on_ChildStar : 'c -> unit
+    method on_ChildPlus : 'c -> unit
+    method on_ChildQuestion : 'c -> unit
+
     method on_Xml :
       'c ->
       Ast_visitors_ancestors.id ->

@@ -401,6 +401,53 @@ class virtual ['c] map :
         on_XhpCategory : 'd ->
                          Ast_visitors_ancestors.pstring list ->
                          Ast_visitors_ancestors.class_elt;
+         on_XhpChild : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.class_elt;
+          on_xhp_child : 'd ->
+                           Ast_visitors_ancestors.xhp_child ->
+                           Ast_visitors_ancestors.xhp_child;
+          on_ChildName : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.id ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_ChildList : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child list ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_ChildUnary : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child_op ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_ChildBinary : 'd ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child ->
+                          Ast_visitors_ancestors.xhp_child;
+
+          on_xhp_child_op : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+          on_ChildStar : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+          on_ChildPlus : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+          on_ChildQuestion : 'd ->
+            Ast_visitors_ancestors.xhp_child_op ->
+            Ast_visitors_ancestors.xhp_child_op;
+
+
+
+
         on_Xml : 'd ->
                  Ast_visitors_ancestors.id ->
                  (Ast_visitors_ancestors.id * Ast_visitors_ancestors.expr)
@@ -947,6 +994,58 @@ class virtual ['c] map :
     method on_XhpCategory :
       'd ->
       Ast_visitors_ancestors.pstring list -> Ast_visitors_ancestors.class_elt
+    method on_XhpChild :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.class_elt
+    method on_xhp_child :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildName :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.id ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildList :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child list ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildUnary :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child_op ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_ChildBinary :
+      'd ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child ->
+      Ast_visitors_ancestors.xhp_child
+
+    method on_xhp_child_op : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildStar : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildPlus : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+    method on_ChildQuestion : 'd ->
+        Ast_visitors_ancestors.xhp_child_op ->
+        Ast_visitors_ancestors.xhp_child_op
+
+
     method on_Xml :
       'd ->
       Ast_visitors_ancestors.id ->

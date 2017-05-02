@@ -142,6 +142,7 @@ let get_passByRefKind expr =
     | A.Array_get(_, Some _) -> permissive_kind
     | A.Binop(A.Eq _, _, _) -> WarnOnCell
     | A.Unop((A.Uincr | A.Udecr), _) -> WarnOnCell
+    | A.Unop((A.Usplat, _)) -> AllowCell
     | _ -> ErrorOnCell in
   from_non_list_assignment AllowCell expr
 
@@ -1346,13 +1347,18 @@ and emit_ignored_expr e =
     instr_pop flavor;
   ]
 
+and is_splatted = function
+  | _, A.Unop (A.Usplat, _) -> true
+  | _ -> false
+
 (* Emit code to construct the argument frame and then make the call *)
 and emit_args_and_call args uargs =
   let all_args = args @ uargs in
+  let is_splatted = List.exists ~f:is_splatted args in
   let nargs = List.length all_args in
   gather [
     gather (List.mapi all_args emit_arg);
-    if uargs = []
+    if uargs = [] && not is_splatted
     then instr (ICall (FCall nargs))
     else instr (ICall (FCallUnpack nargs))
   ]
@@ -1831,7 +1837,7 @@ and emit_unop op e =
   | A.Uref ->
     emit_nyi "references"
   | A.Usplat ->
-    emit_nyi "splat operator"
+    from_expr e
 
 and from_exprs exprs =
   gather (List.map exprs from_expr)

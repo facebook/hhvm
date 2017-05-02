@@ -10,6 +10,7 @@
 
 open Instruction_sequence
 open Hhbc_ast
+open Core
 module A = Ast
 
 (* Follow HHVM rules here: see EmitterVisitor::requiresDeepInit *)
@@ -30,7 +31,9 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   let name = Litstr.to_string @@ cv_name in
   let is_private = Core.List.mem cv_kind_list Ast.Private in
   let is_protected = Core.List.mem cv_kind_list Ast.Protected in
-  let is_public = Core.List.mem cv_kind_list Ast.Public in
+  let is_public =
+    List.mem cv_kind_list Ast.Public
+    || (not is_private && not is_protected) in
   let is_static = Core.List.mem cv_kind_list Ast.Static in
   let initial_value, is_deep_init, initializer_instrs =
     match initial_value with

@@ -58,7 +58,6 @@ quick/ctor_param_promotion_abstract.php
 quick/ctor_param_promotion_attr.php
 quick/ctor_param_promotion_generic.php
 quick/ctor_param_promotion_generic1.php
-quick/ctor_param_promotion_genericgood.php
 quick/ctor_param_promotion_interface.php
 quick/ctor_param_promotion_redeclaration.php
 quick/ctor_param_promotion_trait.php
@@ -341,7 +340,6 @@ quick/static_array.php
 quick/static_closure.php
 quick/static_closure_gen.php
 quick/static_closure_params.php
-quick/static_sprop.php
 quick/static_vars.php
 quick/strToInt.php
 quick/strict_hashbang_start.php

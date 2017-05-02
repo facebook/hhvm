@@ -94,7 +94,7 @@ size_t relocateImpl(RelocationInfo& rel,
       if (RuntimeOption::EvalJitAlignMacroFusionPairs &&
           codeArea == AreaIndex::Main) {
         while (nextSrc != end) {
-          DecodedInstruction next(nextSrc);
+          DecodedInstruction next(srcBlock.toDestAddress(nextSrc), nextSrc);
           if (!next.isNop()) {
             if (di.isFuseable(next) &&
                 (0 == ALIGN_OFFSET((uint64_t)nextDest,

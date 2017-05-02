@@ -252,6 +252,10 @@ struct Vgen {
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
   void emit(const cmpqi& i) { a->Cmp(X(i.s1), i.s0.q()); }
   void emit(const cmpsd& i);
+  void emit(const csoneb& i) { a->Csinc(W(i.d), W(i.t), vixl::wzr, C(i.cc)); }
+  void emit(const csonew& i) { a->Csinc(W(i.d), W(i.t), vixl::wzr, C(i.cc)); }
+  void emit(const csonel& i) { a->Csinc(W(i.d), W(i.t), vixl::wzr, C(i.cc)); }
+  void emit(const csoneq& i) { a->Csinc(X(i.d), X(i.t), vixl::xzr, C(i.cc)); }
   void emit(const cvtsi2sd& i) { a->Scvtf(D(i.d), X(i.s)); }
   void emit(const decl& i) { a->Sub(W(i.d), W(i.s), 1, UF(i.fl)); }
   void emit(const decq& i) { a->Sub(X(i.d), X(i.s), 1, UF(i.fl)); }

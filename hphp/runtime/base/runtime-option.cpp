@@ -165,6 +165,7 @@ int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
+bool RuntimeOption::AlwaysDecodePostDataDefault = true;
 bool RuntimeOption::ServerThreadDropStack = false;
 bool RuntimeOption::ServerHttpSafeMode = false;
 bool RuntimeOption::ServerStatCache = false;
@@ -1341,6 +1342,9 @@ void RuntimeOption::Load(
     Config::Bind(Host, ini, config, "Server.Host");
     Config::Bind(DefaultServerNameSuffix, ini, config,
                  "Server.DefaultServerNameSuffix");
+    Config::Bind(AlwaysDecodePostDataDefault, ini, config,
+                 "Server.AlwaysDecodePostDataDefault",
+                 AlwaysDecodePostDataDefault);
     Config::Bind(ServerType, ini, config, "Server.Type", ServerType);
     Config::Bind(ServerIP, ini, config, "Server.IP");
     Config::Bind(ServerFileSocket, ini, config, "Server.FileSocket");

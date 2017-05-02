@@ -3237,14 +3237,15 @@ static void dom_document_version_write(const Object& obj,
 
 #define DOCPROP_READ_WRITE(member, name)                                \
   static Variant dom_document_ ##name## _read(const Object& obj) {      \
-    auto domdoc = Native::data<DOMNode>(obj);                           \
-    return (bool)domdoc->doc()->m_ ## member;                                  \
-  }                                                                            \
-  static void dom_document_ ##name## _write(const Object& obj,                 \
-                                            const Variant& value) {            \
-    auto domdoc = Native::data<DOMNode>(obj);                            \
-    domdoc->doc()->m_ ## member = value.toBoolean();                           \
-  }                                                                            \
+    CHECK_DOC(docp)                                                     \
+    return (bool)domdoc->doc()->m_ ## member;                           \
+  }                                                                     \
+  static void dom_document_ ##name## _write(const Object& obj,          \
+                                            const Variant& value) {     \
+    CHECK_WRITE_DOC(docp)                                               \
+    domdoc->doc()->m_ ## member = value.toBoolean();                    \
+  }                                                                     \
+/**/
 
 DOCPROP_READ_WRITE(stricterror,        strict_error_checking );
 DOCPROP_READ_WRITE(formatoutput,       format_output         );

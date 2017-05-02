@@ -16,17 +16,19 @@ module Env    = Typing_env
 module TUtils = Typing_utils
 module SN     = Naming_special_names
 
-let rec enforce_not_awaitable env p ty =
+let enforce_not_awaitable env p ty =
   let _, ety = Env.expand_type env ty in
   match ety with
-  | _, Tunresolved tyl ->
-    List.iter tyl (enforce_not_awaitable env p)
+  (* Match only a single unresolved -- this isn't typically how you
+   * look into an unresolved, but the single list case is all we care
+   * about since that's all you can get in this case (I think). *)
+  | _, Tunresolved [r, Tclass ((_, awaitable), _)]
   | r, Tclass ((_, awaitable), _) when
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Reason.to_pos r)
   | _, (Terr | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-    | Tanon (_, _) | Tobject | Tshape _) -> ()
+    | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _) -> ()
 
 (* We would like to pretend that the wait_for*() functions are overloaded like
  * function wait_for<T>(Awaitable<T> $a): _AsyncWaitHandle<T>

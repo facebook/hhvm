@@ -351,11 +351,11 @@ let unresolved_tparam env (_, (pos, _), _) =
 (*****************************************************************************)
 
 (* Try to unify all the types in a intersection *)
-let fold_unresolved env ty =
+let rec fold_unresolved env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
   | r, Tunresolved [] -> env, (r, Tany)
-  | _, Tunresolved [x] -> env, x
+  | _, Tunresolved [x] -> fold_unresolved env x
   | _, Tunresolved (x :: rl) ->
       (try
         let env, acc =

@@ -164,7 +164,7 @@ CodeCache::CodeCache()
 
   numa_interleave(base, m_totalSize);
 
-  if (kAHotSize) {
+  if (kAHotSize && (arch() != Arch::ARM)) {
     TRACE(1, "init ahot @%p\n", base);
     m_hot.init(base, kAHotSize, "hot");
     enhugen(base, kAHotSize >> 20);
@@ -176,6 +176,13 @@ CodeCache::CodeCache()
   m_main.init(base, kASize, "main");
   enhugen(base, CodeCache::TCNumHugeHotMB);
   base += kASize;
+
+  if (kAHotSize && (arch() == Arch::ARM)) {
+    TRACE(1, "init ahot @%p\n", base);
+    m_hot.init(base, kAHotSize, "hot");
+    enhugen(base, kAHotSize >> 20);
+    base += kAHotSize;
+  }
 
   TRACE(1, "init aprof @%p\n", base);
   m_prof.init(base, kAProfSize, "prof");

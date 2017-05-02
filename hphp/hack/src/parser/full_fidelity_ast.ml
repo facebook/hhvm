@@ -60,7 +60,8 @@ let get_pos : node -> Pos.t = fun node ->
   else begin
     let pos_file = Relative_path.(create Dummy !(lowerer_state.filePath)) in
     let text = source_text node in
-    let start_offset = start_offset node in
+    (* TODO(8086635) Figure out where this off-by-one comes from *)
+    let start_offset = start_offset node - 1 in
     let end_offset = end_offset node in
     let s_line, s_column = SourceText.offset_to_position text start_offset in
     let e_line, e_column = SourceText.offset_to_position text end_offset in
@@ -790,6 +791,8 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       (match syntax expr with
       | Token _ ->
         let s = text expr in
+        (* TODO(17796330): Get rid of linter functionality in the lowerer *)
+        if s <> String.lowercase s then Lint.lowercase_constant pos s;
         (match token_kind expr with
         | Some TK.DecimalLiteral
         | Some TK.OctalLiteral

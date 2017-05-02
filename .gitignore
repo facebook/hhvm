@@ -28,6 +28,8 @@ hphp.log
 /hphp/runtime/ext/*/CMakeLists.txt
 /hphp/runtime/ext/*/*.so
 
+/hphp/runtime/test/hphp_runtime_test
+
 /hphp/runtime/tmp/string
 
 /hphp/hhvm/gen

@@ -697,6 +697,7 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
         | Some TK.Plus                    -> Unop (Uplus,  expr)
         | Some TK.Minus                   -> Unop (Uminus, expr)
         | Some TK.Ampersand               -> Unop (Uref,   expr)
+        | Some TK.DotDotDot               -> Unop (Usplat, expr)
         | Some TK.Await                   -> Await expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.At                      -> snd expr

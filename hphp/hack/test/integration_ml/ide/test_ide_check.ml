@@ -50,14 +50,7 @@ class B extends A {
 }
 "
 
-let final_global_diagnostics = "/a.php:
-File \"/a.php\", line 4, characters 5-12:
-Typing error (Typing[4110])
-File \"/a.php\", line 4, characters 10-12:
-This is a num (int/float) because this is used in an arithmetic operation
-File \"/a.php\", line 4, characters 10-12:
-It is incompatible with a string
-
+let final_global_diagnostics = "
 /b.php:
 File \"/b.php\", line 4, characters 12-14:
 Could not find method foo in an object of type B (Typing[4053])
@@ -109,5 +102,5 @@ let () =
       "x.php", ""
     ]
   }) in
-  (* Global recheck produces full list of errors *)
+  (* Global recheck produces full list of errors, including errors in b.php *)
   Test.assert_diagnostics loop_output final_global_diagnostics;

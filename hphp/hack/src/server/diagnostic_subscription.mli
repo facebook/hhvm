@@ -16,12 +16,16 @@ val of_id : id:int -> init:Errors.t -> t
 
 val get_id : t -> int
 
-val update : t -> Errors.t -> t
+val update :
+  t ->
+  Relative_path.Set.t -> (* edited files, so we can prioritize them *)
+  FileInfo.fast -> (* rechecked files *)
+  Errors.t ->
+  t
 
 val file_has_errors_in_ide : t -> Relative_path.t -> bool
 
+val files_with_errors_in_ide : t -> Relative_path.Set.t
+
 (* Errors ready for sending to client *)
-val pop_errors :
-  t ->
-  Relative_path.Set.t -> (* edited files, so we can prioritize them *)
-  t * (Pos.absolute Errors.error_ list) SMap.t
+val pop_errors : t ->  t * (Pos.absolute Errors.error_ list) SMap.t

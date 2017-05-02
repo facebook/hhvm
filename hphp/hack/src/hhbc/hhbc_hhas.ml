@@ -13,6 +13,7 @@ module H = Hhbc_ast
 module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
+module TV = Typed_value
 open H
 
 (* Generic helpers *)
@@ -20,6 +21,7 @@ let sep pieces = String.concat " " pieces
 
 let string_of_class_id id = SU.quote_string (Utils.strip_ns id)
 let string_of_function_id id = SU.quote_string (Utils.strip_ns id)
+let string_of_property_name id = SU.quote_string (Utils.strip_ns id)
 
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
@@ -232,6 +234,11 @@ let string_of_istype_op op =
   | OpObj -> "Obj"
   | OpScalar -> "Scalar"
 
+let string_of_initprop_op op =
+  match op with
+  | NonStatic -> "NonStatic"
+  | Static -> "Static"
+
 let string_of_mutator x =
   match x with
   | SetL id -> sep ["SetL"; string_of_local_id id]
@@ -256,8 +263,9 @@ let string_of_mutator x =
   | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
   | UnsetN -> "UnsetN"
   | UnsetG -> "UnsetG"
-  | CheckProp _ -> failwith "NYI"
-  | InitProp _ -> failwith "NYI"
+  | CheckProp id -> sep ["CheckProp"; string_of_property_name id]
+  | InitProp (id, op) -> sep ["InitProp"; string_of_property_name id;
+      string_of_initprop_op op]
 
 let string_of_label label =
   match label with
@@ -798,6 +806,47 @@ let add_code_info buf indent num_cls_ref_slots num_iters decl_vars =
 
 let rec attribute_argument_to_string argument =
   match argument with
+  | TV.Uninit -> SS.str "uninit"
+  | TV.Null -> SS.str "N;"
+  | TV.Float f -> SS.str @@ Printf.sprintf "d:%.14f;" f
+  | TV.String s -> SS.str @@
+    Printf.sprintf "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
+  (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
+  | TV.Bool false -> SS.str "b:0;"
+  | TV.Bool true -> SS.str "b:1;"
+  | TV.Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
+  | TV.Array pairs -> attribute_dict_collection_argument_to_string "a" pairs
+  | TV.Vec values -> attribute_collection_argument_to_string "v" values
+  | TV.Dict pairs -> attribute_dict_collection_argument_to_string "D" pairs
+  | TV.Keyset values -> attribute_collection_argument_to_string "k" values
+
+and attribute_dict_collection_argument_to_string col_type pairs =
+  let num = List.length pairs in
+  let fields = List.concat (Core.List.map pairs (fun (v1, v2) -> [v1;v2])) in
+  let fields_str = attribute_arguments_to_string fields in
+  SS.gather [
+    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
+    fields_str;
+    SS.str "}"
+  ]
+
+and attribute_collection_argument_to_string col_type fields =
+  let fields_str = attribute_arguments_to_string fields in
+  let num = List.length fields in
+  SS.gather [
+    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
+    fields_str;
+    SS.str "}"
+  ]
+
+and attribute_arguments_to_string arguments =
+  arguments
+    |> Core.List.map ~f:attribute_argument_to_string
+    |> SS.gather
+
+
+let rec lit_argument_to_string argument =
+  match argument with
   | Null -> SS.str "N;"
   | Double f -> SS.str @@ Printf.sprintf "d:%s;" f
   | String s -> SS.str @@
@@ -807,11 +856,11 @@ let rec attribute_argument_to_string argument =
   | True -> SS.str "b:1;"
   | Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
   | Array (num, fields) ->
-    attribute_collection_argument_to_string "a" num fields
-  | Vec (num, fields) -> attribute_collection_argument_to_string "v" num fields
-  | Dict (num, fields) -> attribute_collection_argument_to_string "D" num fields
+    lit_collection_argument_to_string "a" num fields
+  | Vec (num, fields) -> lit_collection_argument_to_string "v" num fields
+  | Dict (num, fields) -> lit_collection_argument_to_string "D" num fields
   | Keyset (num, fields) ->
-    attribute_collection_argument_to_string "k" num fields
+    lit_collection_argument_to_string "k" num fields
   | NYI text -> SS.str @@ "NYI: " ^ text
   | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
   | MapAddElemC | File | Dir | Method | NameA
@@ -820,20 +869,48 @@ let rec attribute_argument_to_string argument =
   | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _ | NewPair
   | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
   | ClsCnsD (_, _) -> SS.str
-    "\r# NYI: unexpected literal kind in attribute_argument_to_string"
+    "\r# NYI: unexpected literal kind in lit_argument_to_string"
 
-and attribute_collection_argument_to_string col_type num fields =
-  let fields = attribute_arguments_to_string fields in
+
+and lit_collection_argument_to_string col_type num fields =
+  let fields = lit_arguments_to_string fields in
   SS.gather [
     SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
     fields;
     SS.str "}"
   ]
 
-and attribute_arguments_to_string arguments =
+and lit_arguments_to_string arguments =
   arguments
-    |> Core.List.map ~f:attribute_argument_to_string
+    |> Core.List.map ~f:lit_argument_to_string
     |> SS.gather
+
+let lit_to_string_helper ~has_keys ~if_class_attribute name args =
+  let count = List.length args in
+  let count =
+    if not has_keys then count
+    else
+      (if count mod 2 = 0 then count / 2
+      else failwith
+        "attribute string with keys should have even amount of arguments")
+  in
+  let arguments = lit_arguments_to_string args in
+  let attribute_str = format_of_string @@
+    if if_class_attribute
+    then "\"%s\"(\"\"\"a:%n:{"
+    else "\"\"\"%s:%n:{"
+  in
+  let attribute_begin = Printf.sprintf attribute_str name count in
+  let attribute_end =
+    if if_class_attribute
+    then "}\"\"\")"
+    else "}\"\"\""
+  in
+  SS.gather [
+    SS.str attribute_begin;
+    arguments;
+    SS.str attribute_end;
+  ]
 
 let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
   let count = List.length args in
@@ -983,6 +1060,7 @@ let add_implements buf class_implements =
 let property_attributes p =
   let module P = Hhas_property in
   let attrs = [] in
+  let attrs = if P.is_deep_init p then "deep_init" :: attrs else attrs in
   let attrs = if P.is_static p then "static" :: attrs else attrs in
   let attrs = if P.is_public p then "public" :: attrs else attrs in
   let attrs = if P.is_protected p then "protected" :: attrs else attrs in
@@ -996,11 +1074,13 @@ let add_property class_def buf property =
   B.add_string buf (property_attributes property);
   B.add_string buf (Hhas_property.name property);
   B.add_string buf " =\n    ";
+  let initial_value = Hhas_property.initial_value property in
   if Hhas_class.is_closure_class class_def
+  || initial_value = Some Typed_value.Uninit
   then B.add_string buf "uninit;"
   else begin
     B.add_string buf "\"\"\"";
-    let init = match Hhas_property.initial_value property with
+    let init = match initial_value with
       | None -> SS.str "N;"
       | Some value -> attribute_argument_to_string value
     in
@@ -1013,10 +1093,15 @@ let add_constant buf c =
   let value = Hhas_constant.value c in
   B.add_string buf "\n  .const ";
   B.add_string buf name;
-  B.add_string buf " = \"\"\"";
+  B.add_string buf " = ";
+  begin match value with
+  | Typed_value.Uninit -> B.add_string buf "uninit"
+  | _ -> B.add_string buf "\"\"\"";
   (* TODO: attribute_argument_to_string could stand to be renamed. *)
   SS.add_string_from_seq buf @@ attribute_argument_to_string value;
-  B.add_string buf "\"\"\";"
+  B.add_string buf "\"\"\""
+  end;
+  B.add_string buf ";"
 
 let add_type_constant buf c =
   B.add_string buf "\n  .const ";
@@ -1045,7 +1130,7 @@ let add_uses buf c =
 
 let add_class_def buf class_def =
   let class_name = fmt_name (Hhas_class.name class_def) in
-  (* TODO: user attributes *)
+  (* TODO: user attribuqtes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
   B.add_string buf class_name;
@@ -1066,7 +1151,7 @@ let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf @@ string_of_int num;
   B.add_string buf " = ";
   SS.add_string_from_seq buf
-    @@ attribute_to_string_helper
+    @@ lit_to_string_helper
       ~if_class_attribute:false
       ~has_keys
       name

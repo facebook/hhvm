@@ -17,7 +17,7 @@ let ast_attribute_name: A.user_attribute -> Litstr.id =
 
 let from_attribute_base attribute_name arguments =
   let attribute_arguments =
-    Constant_folder.literals_from_exprs_with_index arguments in
+    Ast_constant_folder.literals_from_exprs_with_index arguments in
   Hhas_attribute.make attribute_name attribute_arguments
 
 let from_ast : A.user_attribute -> Hhas_attribute.t =
@@ -26,8 +26,7 @@ let from_ast : A.user_attribute -> Hhas_attribute.t =
   from_attribute_base attribute_name ast_attr.A.ua_params
 
 let from_asts ast_attributes =
-  (* The list of attributes is reversed in the A. *)
-  List.map (List.rev ast_attributes) from_ast
+  List.map ast_attributes from_ast
 
 let ast_is_memoize : A.user_attribute -> bool =
   fun ast_attr ->

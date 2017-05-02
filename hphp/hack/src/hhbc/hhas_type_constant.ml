@@ -10,7 +10,7 @@
 
 type t = {
   type_constant_name         : Litstr.id;
-  type_constant_initializer  : Hhbc_ast.instruct_lit_const;
+  type_constant_initializer  : Typed_value.t;
   (* TODO: constraint? *)
 }
 

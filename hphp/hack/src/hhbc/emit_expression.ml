@@ -805,15 +805,24 @@ and emit_static_collection ~transform_to_collection expr es =
   let _, es =
     List.fold_left
       es
-      ~init:(0, [])
-      ~f:(fun (index, l) x ->
+      ~init:(Int64.zero, [])
+      ~f:(fun (maxindex, l) x ->
             let open Constant_folder in
-            (index + 1, match x with
+            match x with
             | A.AFvalue e when need_index ->
-              literal_from_expr e :: Int (Int64.of_int index) :: l
+              (Int64.add maxindex Int64.one,
+                literal_from_expr e :: Int maxindex :: l)
             | A.AFvalue e ->
-              literal_from_expr e :: l
+              (Int64.add maxindex Int64.one,
+                literal_from_expr e :: l)
+              (* Special treatment for explicit integer key *)
+            | A.AFkvalue ((_, A.Int (_, s) as k), v) ->
+              let newindex = Int64.of_string s in
+                (Int64.add (if Int64.compare newindex maxindex > 0
+                then newindex else maxindex) Int64.one,
+                literal_from_expr v :: literal_from_expr k :: l)
             | A.AFkvalue (k,v) ->
+              (maxindex,
               literal_from_expr v :: literal_from_expr k :: l)
           )
   in
@@ -959,7 +968,7 @@ and emit_pipe e1 e2 =
  * !, && and || expressions
  *)
 and emit_jmpz (_, expr_ as expr) label =
-  match Ast_constant_folder.expr_to_typed_value expr with
+  match Ast_constant_folder.expr_to_opt_typed_value expr with
   | Some v ->
     if Typed_value.to_bool v then empty else instr_jmp label
   | None ->
@@ -1003,7 +1012,7 @@ and emit_jmpz (_, expr_ as expr) label =
  * !, && and || expressions
  *)
 and emit_jmpnz (_, expr_ as expr) label =
-  match Ast_constant_folder.expr_to_typed_value expr with
+  match Ast_constant_folder.expr_to_opt_typed_value expr with
   | Some v ->
     if Typed_value.to_bool v then instr_jmp label else empty
   | None ->

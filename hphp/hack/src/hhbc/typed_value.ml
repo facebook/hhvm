@@ -15,6 +15,8 @@
  * HHVM takes a similar approach: see runtime/base/typed-value.h
  *)
 type t =
+  (* Used for fields that are initialized in the 86pinit method *)
+  | Uninit
   (* Hack/PHP integers are 64-bit *)
   | Int of Int64.t
   | Bool of bool
@@ -22,6 +24,12 @@ type t =
   | Float of float
   | String of string
   | Null
+  (* Classic PHP arrays with explicit (key,value) entries *)
+  | Array of (t*t) list
+  (* Hack arrays: vectors, keysets, and dictionaries *)
+  | Vec of t list
+  | Keyset of t list
+  | Dict of (t*t) list
 
 (* Some useful constants *)
 let zero = Int Int64.zero
@@ -60,6 +68,7 @@ end
 (* Cast to a boolean: the (bool) operator in PHP *)
 let to_bool v =
   match v with
+  | Uninit -> false (* Should not happen *)
   | Bool b -> b
   | Null -> false
   | String "" -> false
@@ -67,14 +76,16 @@ let to_bool v =
   | String _ -> true
   | Int i -> i <> Int64.zero
   | Float f -> f <> 0.0
+  (* Empty collections cast to false *)
+  | Dict [] | Array [] | Keyset [] | Vec [] -> false
+  (* Non-empty collections cast to true *)
+  | Dict _ | Array _ | Keyset _ | Vec _-> true
 
 (* Cast to an integer: the (int) operator in PHP. Return None if we can't
  * or won't produce the correct value *)
 let to_int v =
   match v with
-  | Bool false -> Some Int64.zero
-  | Bool true -> Some Int64.one
-  | Null -> Some Int64.zero
+  | Uninit -> None (* Should not happen *)
   | String s ->
     begin
     (*https://github.com/php/php-langspec/blob/master/spec/08-conversions.md
@@ -103,16 +114,17 @@ let to_int v =
     let fpClass = classify_float f in
     if fpClass = FP_nan || fpClass = FP_infinite then Some Int64.zero
     else
-    (* TODO: get this right. It's unlikely that Caml and PHP semantics match up *)
+    (* TODO: get this right. It's unlikely that Caml and
+     * PHP semantics match up *)
     (try Some (Int64.of_float f) with Failure _ -> None)
+  | _ ->
+    Some (if to_bool v then Int64.one else Int64.zero)
 
 (* Cast to a float: the (float) operator in PHP. Return None if we can't
  * or won't produce the correct value *)
 let to_float v =
   match v with
-  | Bool false -> Some 0.0
-  | Bool true -> Some 1.0
-  | Null -> Some 0.0
+  | Uninit -> None (* Should not happen *)
   | String s ->
     (*If the source is a numeric string or leading-numeric string having
     integer format, the string's integer value is treated as described above
@@ -125,18 +137,22 @@ let to_float v =
   | Int i ->
     (try Some (Int64.to_float i) with Failure _ -> None)
   | Float f -> Some f
+  | _ ->
+    Some (if to_bool v then 1.0 else 0.0)
 
 (* Cast to a string: the (string) operator in PHP. Return None if we can't
  * or won't produce the correct value *)
 let to_string v =
   match v with
-  | Bool false -> ""
-  | Bool true -> "1"
-  | Null -> ""
-  | Int i -> Int64.to_string i
-  | String s -> s
+  | Uninit -> None (* Should not happen *)
+  | Bool false -> Some ""
+  | Bool true -> Some "1"
+  | Null -> Some ""
+  | Int i -> Some (Int64.to_string i)
+  | String s -> Some s
   (* TODO: get this right. It's unlikely that Caml and PHP semantics match up *)
-  | Float f -> string_of_float f
+  | Float f -> Some (Printf.sprintf "%0.17g" f)
+  | _ -> None
 
 let ints_overflow_to_ints () =
   Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
@@ -177,6 +193,13 @@ let mul v1 v2 =
   | Int i1, Int i2 -> mul_int i1 i2
   | _, _ -> None
 
+let rem v1 v2 =
+  match v1, v2 with
+  | Int i1, Int i2 ->
+    Some (Int (Int64.rem i1 i2))
+  | _, _ ->
+    None
+
 let div v1 v2 =
   match v1, v2 with
   | Int left, Int right ->
@@ -202,13 +225,11 @@ let shift_right v1 v2 = shift Int64.shift_right v1 v2
 
 (* String concatenation *)
 let concat v1 v2 =
-  Some (String (to_string v1 ^ to_string v2))
+  match Option.both (to_string v1) (to_string v2) with
+  | Some (l, r) -> Some (String (l ^ r))
+  | None -> None
 
-(* Boolean operations *)
-let not v =
-  Some (Bool (not (to_bool v)))
-
-(* Bitwise operations. For now, only on integers *)
+(* Bitwise operations. *)
 let bitwise_not v =
   match v with
   | Int i -> Some (Int (Int64.lognot i))
@@ -217,21 +238,40 @@ let bitwise_not v =
 
 let bitwise_and v1 v2 =
   match v1, v2 with
-  | Int i1, Int i2 -> Some (Int (Int64.logand i1 i2))
+  | (Int _ | Bool _ | Null), (Int _ | Bool _ | Null) ->
+    (match Option.both (to_int v1) (to_int v2) with
+    | Some (i1, i2) -> Some (Int (Int64.logand i1 i2))
+    | None -> None)
   | String s1, String s2 -> Some (String (StringOps.bitwise_and s1 s2))
   | _ -> None
 
 let bitwise_or v1 v2 =
   match v1, v2 with
-  | Int i1, Int i2 -> Some (Int (Int64.logor i1 i2))
+  | (Int _ | Bool _ | Null), (Int _ | Bool _ | Null) ->
+    (match Option.both (to_int v1) (to_int v2) with
+    | Some (i1, i2) -> Some (Int (Int64.logor i1 i2))
+    | None -> None)
   | String s1, String s2 -> Some (String (StringOps.bitwise_or s1 s2))
   | _ -> None
 
 let bitwise_xor v1 v2 =
   match v1, v2 with
-  | Int i1, Int i2 -> Some (Int (Int64.logxor i1 i2))
+  | (Int _ | Bool _ | Null), (Int _ | Bool _ | Null) ->
+    (match Option.both (to_int v1) (to_int v2) with
+    | Some (i1, i2) -> Some (Int (Int64.logxor i1 i2))
+    | None -> None)
   | String s1, String s2 -> Some (String (StringOps.bitwise_xor s1 s2))
   | _ -> None
+
+(* Logical operators *)
+let not v =
+  Some (Bool (not (to_bool v)))
+
+let logical_or v1 v2 =
+  Some (Bool (to_bool v1 || to_bool v2))
+
+let logical_and v1 v2 =
+  Some (Bool (to_bool v1 && to_bool v2))
 
 (*
   returns (t * t) option option
@@ -260,7 +300,8 @@ let convert_literals_for_relational_ops v1 v2 =
     (* float op int *)
     | Float _, Int _ -> Some (Option.map(to_float v2)(fun v -> v1, Float v))
     (* string op null *)
-    | String _, Null -> Some (Some (v1, String (to_string v2)))
+    | String _, Null ->
+      Some (Option.map (to_string v2) (fun v -> v1, String v))
     (* string op bool*)
     | String _, Bool _ -> Some (Some (Bool (to_bool v1), v2))
     (* string op int *)
@@ -378,7 +419,7 @@ let greater_than v1 v2 = less_than v2 v1
 
 let greater_than_equals v1 v2 = less_than_equals v2 v1
 
-let cast_to_string v = Some (String (to_string v))
+let cast_to_string v = Option.map (to_string v) (fun x -> String x)
 
 let cast_to_int v = Option.map (to_int v) (fun x -> Int x)
 

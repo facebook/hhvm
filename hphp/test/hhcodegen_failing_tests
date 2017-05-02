@@ -119,13 +119,10 @@ quick/exceptions6.php
 quick/exceptions7.php
 quick/exceptions8.php
 quick/exit.php
-quick/fail_86pinit.php
-quick/fail_86sinit.php
 quick/fail_self.php
 quick/fb_dbt.php
 quick/fb_intercept.php
 quick/fc_enum_1.php
-quick/fc_enum_4.php
 quick/fib_gen.php
 quick/finally_break.php
 quick/float-overflow-literals.php

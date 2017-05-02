@@ -8,23 +8,62 @@
  *
 *)
 
+open Instruction_sequence
+open Hhbc_ast
+module A = Ast
+
+(* Follow HHVM rules here: see EmitterVisitor::requiresDeepInit *)
+let rec expr_requires_deep_init (_, expr_) =
+  match expr_ with
+  | A.Unop((A.Uplus | A.Uminus), e1) ->
+    expr_requires_deep_init e1
+  | A.Binop(_, e1, e2) ->
+    expr_requires_deep_init e1 || expr_requires_deep_init e2
+  | A.Lvar _ | A.Null | A.False | A.True | A.Id _ | A.Int _
+  | A.Float _ | A.String _ -> false
+  | _ -> true
+
 let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   (* TODO: Deal with type hint *)
-  (* TODO: Deal with initializer *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
-  let property_name = Litstr.to_string @@ cv_name in
-  let property_is_private = Core.List.mem cv_kind_list Ast.Private in
-  let property_is_protected = Core.List.mem cv_kind_list Ast.Protected in
-  let property_is_public = Core.List.mem cv_kind_list Ast.Public in
-  let property_is_static = Core.List.mem cv_kind_list Ast.Static in
-  let property_initial_value = match initial_value with
-    | None -> None
-    | Some expr -> Some (Constant_folder.literal_from_expr expr) in
+  let name = Litstr.to_string @@ cv_name in
+  let is_private = Core.List.mem cv_kind_list Ast.Private in
+  let is_protected = Core.List.mem cv_kind_list Ast.Protected in
+  let is_public = Core.List.mem cv_kind_list Ast.Public in
+  let is_static = Core.List.mem cv_kind_list Ast.Static in
+  let initial_value, is_deep_init, initializer_instrs =
+    match initial_value with
+    | None -> None, false, None
+    | Some expr ->
+      match Ast_constant_folder.expr_to_opt_typed_value expr with
+      | Some v ->
+        Some v, false, None
+      | None ->
+        let label = Label.next_regular () in
+        let prolog, epilog =
+          if is_static
+          then empty, instr (IMutator (InitProp (name, Static)))
+          else
+            gather [
+              instr (IMutator (CheckProp name));
+              instr_jmpnz label;
+            ],
+            gather [
+              instr (IMutator (InitProp (name, NonStatic)));
+              instr_label label;
+            ] in
+        Some Typed_value.Uninit, not is_static && expr_requires_deep_init expr,
+          Some (gather [
+            prolog;
+            Emit_expression.from_expr expr;
+            epilog]) in
   Hhas_property.make
-    property_is_private
-    property_is_protected
-    property_is_public
-    property_is_static
-    property_name
-    property_initial_value
+    is_private
+    is_protected
+    is_public
+    is_static
+    is_deep_init
+    name
+    initial_value
+    initializer_instrs

@@ -476,15 +476,14 @@ let rec convert_class st cd =
   st, { cd with c_body = c_body }
 
 and convert_class_elt env st ce =
+  let ce = Ast_constant_folder.fold_class_elt ce in
   match ce with
   | Method md ->
-    let md = Ast_constant_folder.fold_method md in
     let env = env_with_method env md in
     let st = reset_function_count st in
     let st, block = convert_block env st md.m_body in
     st, Method { md with m_body = block }
 
-  (* TODO Const, other elements containing expressions *)
   | _ ->
     st, ce
 

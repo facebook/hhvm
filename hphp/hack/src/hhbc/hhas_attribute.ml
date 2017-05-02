@@ -12,7 +12,7 @@ open Core
 
 type t = {
   attribute_name          : Litstr.id;
-  attribute_arguments     : Hhbc_ast.instruct_lit_const list
+  attribute_arguments     : Typed_value.t list
 }
 
 let make attribute_name attribute_arguments =

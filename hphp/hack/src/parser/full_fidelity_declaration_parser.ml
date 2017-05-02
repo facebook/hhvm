@@ -605,17 +605,24 @@ module WithExpressionAndStatementAndTypeParser
   and parse_xhp_children_term parser =
     (* SPEC (Draft)
     xhp-children-term:
-      name
-      xhp-class-name
-      xhp-category-name
+      ( xhp-children-expressions ) trailing-opt
+      name trailing-opt
+      xhp-class-name trailing-opt
+      xhp-category-name trailing-opt
+    trailing: * ? +
+
+    Note that there may be only zero or one trailing unary operator.
+    "foo*?" is not a legal xhp child expression.
     *)
     let (parser1, token) = next_xhp_children_name_or_other parser in
     let name = make_token token in
     match Token.kind token with
     | Name
     | XHPClassName
-    | XHPCategoryName -> (parser1, name)
-    | LeftParen -> parse_xhp_children_paren parser
+    | XHPCategoryName -> parse_xhp_children_trailing parser1 name
+    | LeftParen ->
+      let (parser, term) = parse_xhp_children_paren parser in
+      parse_xhp_children_trailing parser term
     | _ ->
       (* ERROR RECOVERY: Eat the offending token, keep going. *)
       (with_error parser SyntaxError.error1053, name)
@@ -627,24 +634,28 @@ module WithExpressionAndStatementAndTypeParser
     | Plus
     | Question ->
       let result = make_postfix_unary_expression term (make_token token) in
-      parse_xhp_children_trailing parser1 result
-    | Bar ->
-      let (parser, right) = parse_xhp_children_expression parser1 in
-      let result = make_binary_expression term (make_token token) right in
-      (parser, result)
+      (parser1, result)
     | _ -> (parser, term)
+
+  and parse_xhp_children_bar parser left =
+    let (parser1, token) = next_token parser in
+    match Token.kind token with
+    | Bar ->
+      let (parser, right) = parse_xhp_children_term parser1 in
+      let result = make_binary_expression left (make_token token) right in
+      parse_xhp_children_bar parser result
+    | _ -> (parser, left)
 
   and parse_xhp_children_expression parser =
     (* SPEC (Draft)
     xhp-children-expression:
       xhp-children-term
-      xhp-children-expression *
-      xhp-children-expression +
-      xhp-children-expression ?
-      xhp-children-term | xhp-children-expression
-    *)
+      xhp-children-expression | xhp-children-term
+
+    Note that the bar operator is left-associative. (Not that it matters
+    semantically. *)
     let (parser, term) = parse_xhp_children_term parser in
-    parse_xhp_children_trailing parser term
+    parse_xhp_children_bar parser term
 
   and parse_xhp_children_declaration parser =
     (* SPEC (Draft)

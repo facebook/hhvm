@@ -16,6 +16,9 @@ module ULS = Unique_list_string
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 
+let constant_folding () =
+  Hhbc_options.constant_folding !Hhbc_options.compiler_options
+
 type env = {
   (* What is the current context? *)
   scope : Scope.t;
@@ -463,7 +466,8 @@ and convert_afield env st afield =
     st, AFkvalue (e1, e2)
 
 let convert_fun st fd =
-  let fd = Ast_constant_folder.fold_function fd in
+  let fd =
+    if constant_folding () then Ast_constant_folder.fold_function fd else fd in
   let env = env_with_function env_toplevel fd in
   let st = reset_function_count st in
   let st, block = convert_block env st fd.f_body in
@@ -476,7 +480,8 @@ let rec convert_class st cd =
   st, { cd with c_body = c_body }
 
 and convert_class_elt env st ce =
-  let ce = Ast_constant_folder.fold_class_elt ce in
+  let ce =
+    if constant_folding () then Ast_constant_folder.fold_class_elt ce else ce in
   match ce with
   | Method md ->
     let env = env_with_method env md in
@@ -488,11 +493,14 @@ and convert_class_elt env st ce =
     st, ce
 
 let convert_toplevel st stmt =
-  let stmt = Ast_constant_folder.fold_stmt stmt in
+  let stmt =
+    if constant_folding () then Ast_constant_folder.fold_stmt stmt else stmt in
   convert_stmt env_toplevel st stmt
 
 and convert_gconst st gconst =
-  let gconst = Ast_constant_folder.fold_gconst gconst in
+  let gconst =
+    if constant_folding () then Ast_constant_folder.fold_gconst gconst
+    else gconst in
   let st, expr = convert_expr env_toplevel st gconst.Ast.cst_value in
   st, { gconst with Ast.cst_value = expr }
 

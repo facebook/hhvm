@@ -43,6 +43,9 @@ let scope = ref Ast_scope.Scope.toplevel
 let set_scope s = scope := s
 let get_scope () = !scope
 
+let optimize_null_check () =
+  Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
+
 (* Emit a comment in lieu of instructions for not-yet-implemented features *)
 let emit_nyi description =
   instr (IComment ("NYI: " ^ description))
@@ -228,25 +231,30 @@ and emit_binop expr op e1 e2 =
     | None -> emit_nyi "illegal eq op"
     | Some op -> emit_lval_op (LValOp.SetOp op) e1 (Some e2)
     end
-  | A.EQeqeq when snd e2 = A.Null ->
-    emit_is_null e1
-  | A.EQeqeq when snd e1 = A.Null ->
-    emit_is_null e2
-  | A.Diff2 when snd e2 = A.Null ->
-    gather [
-      emit_is_null e1;
-      instr_not
-    ]
-  | A.Diff2 when snd e1 = A.Null ->
-    gather [
-      emit_is_null e2;
-      instr_not
-    ]
   | _ ->
-    gather [
-      emit_two_exprs e1 e2;
-      from_binop op
-    ]
+    if not (optimize_null_check ())
+    then gather [emit_two_exprs e1 e2; from_binop op]
+    else
+    match op with
+    | A.EQeqeq when snd e2 = A.Null ->
+      emit_is_null e1
+    | A.EQeqeq when snd e1 = A.Null ->
+      emit_is_null e2
+    | A.Diff2 when snd e2 = A.Null ->
+      gather [
+        emit_is_null e1;
+        instr_not
+      ]
+    | A.Diff2 when snd e1 = A.Null ->
+      gather [
+        emit_is_null e2;
+        instr_not
+      ]
+    | _ ->
+      gather [
+        emit_two_exprs e1 e2;
+        from_binop op
+      ]
 
 and emit_instanceof e1 e2 =
   match (e1, e2) with
@@ -969,6 +977,7 @@ and emit_pipe e1 e2 =
  * !, && and || expressions
  *)
 and emit_jmpz (_, expr_ as expr) label =
+  let opt = optimize_null_check () in
   match Ast_constant_folder.expr_to_opt_typed_value expr with
   | Some v ->
     if Typed_value.to_bool v then empty else instr_jmp label
@@ -989,13 +998,13 @@ and emit_jmpz (_, expr_ as expr) label =
         emit_jmpz e2 label;
       ]
     | A.Binop(A.EQeqeq, e, (_, A.Null))
-    | A.Binop(A.EQeqeq, (_, A.Null), e) ->
+    | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
       gather [
         emit_is_null e;
         instr_jmpz label
       ]
     | A.Binop(A.Diff2, e, (_, A.Null))
-    | A.Binop(A.Diff2, (_, A.Null), e) ->
+    | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
       gather [
         emit_is_null e;
         instr_jmpnz label
@@ -1013,6 +1022,7 @@ and emit_jmpz (_, expr_ as expr) label =
  * !, && and || expressions
  *)
 and emit_jmpnz (_, expr_ as expr) label =
+  let opt = optimize_null_check () in
   match Ast_constant_folder.expr_to_opt_typed_value expr with
   | Some v ->
     if Typed_value.to_bool v then instr_jmp label else empty
@@ -1033,13 +1043,13 @@ and emit_jmpnz (_, expr_ as expr) label =
         instr_label skip_label;
       ]
     | A.Binop(A.EQeqeq, e, (_, A.Null))
-    | A.Binop(A.EQeqeq, (_, A.Null), e) ->
+    | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
       gather [
         emit_is_null e;
         instr_jmpnz label
       ]
     | A.Binop(A.Diff2, e, (_, A.Null))
-    | A.Binop(A.Diff2, (_, A.Null), e) ->
+    | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
       gather [
         emit_is_null e;
         instr_jmpz label

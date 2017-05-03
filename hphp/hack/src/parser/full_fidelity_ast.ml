@@ -28,7 +28,7 @@ let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
 (* Context of the file being parsed, as global state. *)
 type state_variables =
   { language  : string ref
-  ; filePath  : string ref
+  ; filePath  : Relative_path.t ref
   ; mode      : FileInfo.mode ref
   ; popt      : ParserOptions.t ref
   ; ignorePos : bool ref
@@ -36,7 +36,7 @@ type state_variables =
 
 let lowerer_state =
   { language  = ref "UNINITIALIZED"
-  ; filePath  = ref "UNINITIALIZED"
+  ; filePath  = ref Relative_path.default
   ; mode      = ref FileInfo.Mstrict
   ; popt      = ref ParserOptions.default
   ; ignorePos = ref false
@@ -58,7 +58,7 @@ let get_pos : node -> Pos.t = fun node ->
   if !(lowerer_state.ignorePos)
   then Pos.none
   else begin
-    let pos_file = Relative_path.(create Dummy !(lowerer_state.filePath)) in
+    let pos_file = !(lowerer_state.filePath) in
     let text = source_text node in
     (* TODO(8086635) Figure out where this off-by-one comes from *)
     let start_offset = start_offset node - 1 in
@@ -1783,7 +1783,7 @@ let from_text
       )
     in
     lowerer_state.language  := language tree;
-    lowerer_state.filePath  := Relative_path.suffix file;
+    lowerer_state.filePath  := file;
     lowerer_state.mode      := fi_mode;
     lowerer_state.popt      := parser_options;
     lowerer_state.ignorePos := ignore_pos;

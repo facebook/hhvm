@@ -493,6 +493,7 @@ struct RuntimeOption {
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
+  F(bool, PerfPidMapIncludeFilePath,   true)                            \
   F(bool, PerfJitDump,                 false)                           \
   F(string, PerfJitDumpDir,            "/tmp")                          \
   F(bool, PerfDataMap,                 false)                           \

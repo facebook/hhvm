@@ -175,21 +175,9 @@ void smashJmp(TCA inst, TCA target) {
   smashInstr(inst, target, smashableJmpLen());
 }
 
-void smashJcc(TCA inst, TCA target, ConditionCode cc) {
+void smashJcc(TCA inst, TCA target) {
   using namespace vixl;
 
-  // Smash the conditional branch if required
-  if (cc != CC_None) {
-    Instruction* bcc = Instruction::Cast(inst);
-    Instr bits = bcc->InstructionBits();
-    bits = (bits >> 4 << 4) | InvertCondition(arm::convertCC(cc));
-    bcc->SetInstructionBits(bits);
-    auto const begin = reinterpret_cast<char*>(inst);
-    auto const end = begin + 4;
-    __builtin___clear_cache(begin, end);
-  }
-
-  // Then smash the target if changed
   if (smashableJccTarget(inst) != target) {
     smashInstr(inst, target, smashableJccLen());
   }

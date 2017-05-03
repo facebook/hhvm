@@ -44,6 +44,7 @@ void updateFuncPrologue(TCA start, ProfTransRec* rec) {
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
 
+  auto lock = rec->lockCallerList();
   func->setPrologue(nArgs, start);
 
   // Smash callers of the old prologue with the address of the new one.

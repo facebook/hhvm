@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -299,6 +300,26 @@ void readRelocations(
   }
 }
 
+void adjustProfiledCallers(RelocationInfo& rel) {
+  auto pd = profData();
+  if (!pd) return;
+
+  auto updateCallers = [&] (std::vector<TCA>& callers) {
+    for (auto& caller : callers) {
+      if (auto adjusted = rel.adjustedAddressAfter(caller)) {
+        caller = adjusted;
+      }
+    }
+  };
+
+  pd->forEachTransRec([&] (ProfTransRec* rec) {
+    if (rec->kind() != TransKind::ProfPrologue) return;
+    auto lock = rec->lockCallerList();
+    updateCallers(rec->mainCallers());
+    updateCallers(rec->guardCallers());
+  });
+}
+
 void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
               CGMeta& fixups) {
   assertOwnsCodeLock();
@@ -364,6 +385,8 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
       relocs[i].fixups.process_only(nullptr);
     }
   }
+
+  adjustProfiledCallers(rel);
 
   // At this point, all the relocated code should be correct, and runable.
   // But eg if it has unlikely paths into cold code that has not been relocated,

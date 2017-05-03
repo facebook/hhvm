@@ -207,6 +207,18 @@ ALWAYS_INLINE SrcDB& srcDB() {
   return g_srcDB;
 }
 
+/*
+ * Initialize the TC recycling mechanism. Does nothing if EvalEnableReusableTC
+ * is false.
+ */
+void recycleInit();
+
+/*
+ * Teardown TC recycling mechanism. Does nothing if EvalEnableReusableTC is
+ * false.
+ */
+void recycleStop();
+
 }}}
 
 #endif

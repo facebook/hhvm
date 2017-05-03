@@ -2456,12 +2456,11 @@ void hphp_session_exit(const Transport* transport) {
   // In JitPGO mode, check if it's time to schedule the retranslation of all
   // profiled functions and, if so, schedule it.
   jit::mcgen::checkRetranslateAll();
+  jit::tc::requestExit();
   // Similarly, apc strings could be in the ServerNote array, and
   // it's possible they are scheduled to be destroyed after this request
   // finishes.
   Treadmill::finishRequest();
-
-  jit::tc::requestExit();
 
   TI().onSessionExit();
 
@@ -2494,6 +2493,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(teardown_cli_server())
   LOG_AND_IGNORE(Xenon::getInstance().stop())
   LOG_AND_IGNORE(jit::mcgen::joinWorkerThreads())
+  LOG_AND_IGNORE(jit::tc::processExit())
   LOG_AND_IGNORE(PageletServer::Stop())
   LOG_AND_IGNORE(XboxServer::Stop())
   // Debugger::Stop() needs an execution context

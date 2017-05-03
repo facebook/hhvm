@@ -208,9 +208,6 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
   auto tDest = getTranslation(args);
   if (!tDest) return nullptr;
 
-  LeaseHolder writer(destSk.func(), TransKind::Profile);
-  if (!writer) return tDest;
-
   if (req == REQ_BIND_ADDR) {
     return tc::bindAddr(toSmash, destSk, trflags, smashed);
   }
@@ -413,14 +410,8 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
   }
 
   if (start && !RuntimeOption::EvalFailJitPrologs) {
-    LeaseHolder writer(func, TransKind::Profile);
-    if (!writer) return start;
-
-    // Someone else may have changed the func prologue while we waited for
-    // the write lease, so read it again.
-    start = mcgen::getFuncPrologue(func, nArgs);
-    if (start && !isImmutable) start = funcGuardFromPrologue(start, func);
-
+    // Using start is racy but bindCall will recheck the start address after
+    // acquiring a lock on the ProfTransRec
     tc::bindCall(toSmash, start, func, nArgs, isImmutable);
   } else {
     // We couldn't get a prologue address. Return a stub that will finish

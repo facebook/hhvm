@@ -139,15 +139,8 @@ void smashJmp(TCA inst, TCA target) {
   }
 }
 
-void smashJcc(TCA inst, TCA target, ConditionCode cc) {
-  if (cc == CC_None) {
-    Assembler::patchBranch(inst, target);
-  } else {
-    auto& cb = tc::code().blockFor(inst);
-    CodeCursor cursor { cb, inst };
-    Assembler a { cb };
-    a.branchFar(target, cc);
-  }
+void smashJcc(TCA inst, TCA target) {
+  Assembler::patchBranch(inst, target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

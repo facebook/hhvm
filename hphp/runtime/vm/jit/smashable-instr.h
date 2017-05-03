@@ -90,7 +90,7 @@ void smashMovq(TCA inst, uint64_t imm);
 void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
-void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
+void smashJcc(TCA inst, TCA target);
 
 /*
  * Extract instruction operands from assembly.

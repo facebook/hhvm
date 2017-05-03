@@ -332,14 +332,29 @@ let applied_fixmes = M.applied_fixmes
 let ignored_fixme_files = ref None
 let set_ignored_fixmes files = ignored_fixme_files := files
 
-let is_ignored_fixme pos = match !ignored_fixme_files with
+let ignored_fixme_codes = ref ISet.empty
+
+let is_in_ignored_file pos = match !ignored_fixme_files with
 (* No fixme is ignored *)
 | None -> false
 (* Only the fixmes in gives files are ignored *)
 | Some l ->
   List.exists l ~f:(fun x -> x = (Pos.filename pos))
 
+let is_ignored_code code = ISet.mem code !ignored_fixme_codes
+
+let is_ignored_fixme pos code =
+  is_in_ignored_file pos || is_ignored_code code
+
 let (is_hh_fixme: (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
+let (get_hh_fixme_pos: (Pos.t -> error_code -> Pos.t option) ref) =
+  ref (fun _ _ -> None)
+
+let add_ignored_fixme_code_error pos code =
+  if !is_hh_fixme pos code && is_ignored_code code then
+    let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
+    M.add_error (M.make_error code
+      [pos, Printf.sprintf "HH_FIXME cannot be used for error %d" code])
 
 (*****************************************************************************)
 (* Errors accumulator. *)
@@ -350,15 +365,18 @@ let add_applied_fixme code pos =
 
 let rec add_error = M.add_error
 
-and add code pos msg =
-  if not (is_ignored_fixme pos) && !is_hh_fixme pos code
+and add code ?mode pos msg =
+  if not (is_ignored_fixme pos code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
-  else add_error (M.make_error code [pos, msg])
+  else add_error (M.make_error code [pos, msg]);
+  add_ignored_fixme_code_error pos code
 
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
-  if !is_hh_fixme pos code then add_applied_fixme code pos else
-  add_error (make_error code pos_msg_l)
+  if not (is_ignored_fixme pos code) && !is_hh_fixme pos code
+  then add_applied_fixme code pos
+  else add_error (make_error code pos_msg_l);
+  add_ignored_fixme_code_error pos code
 
 and merge (err',fixmes') (err,fixmes) =
   (List.rev_append err' err, List.rev_append fixmes' fixmes)

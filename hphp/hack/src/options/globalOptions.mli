@@ -59,6 +59,9 @@ type t = {
 
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
+
+ (* Error codes for which we do not allow HH_FIXMEs *)
+ ignored_fixme_codes : ISet.t;
 }
 val make :
   tco_assume_php: bool ->
@@ -66,7 +69,8 @@ val make :
   tco_safe_vector_array: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
-  po_auto_namespace_map: (string * string) list -> t
+  po_auto_namespace_map: (string * string) list ->
+  ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
@@ -82,3 +86,4 @@ val tco_experimental_darray_and_varray : string
 val tco_experimental_goto : string
 val tco_experimental_shape_idx_relaxed : string
 val tco_experimental_all : SSet.t
+val ignored_fixme_codes : t -> ISet.t

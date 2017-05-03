@@ -23,6 +23,7 @@ let global_opts = GlobalOptions.make
   ~tco_user_attrs: None
   ~tco_experimental_features: GlobalOptions.tco_experimental_all
   ~po_auto_namespace_map: []
+  ~ignored_fixme_codes: ISet.empty
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options

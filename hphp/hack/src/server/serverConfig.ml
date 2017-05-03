@@ -154,6 +154,12 @@ let prepare_auto_namespace_map config =
     ~default:[]
     ~f:convert_auto_namespace_to_map
 
+let prepare_ignored_fixme_codes config =
+  SMap.get config "ignored_fixme_codes"
+  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
+  |> List.map ~f:int_of_string
+  |> List.fold_right ~init:ISet.empty ~f:ISet.add
+
 let load config_filename options =
   let config = Config_file.parse (Relative_path.to_absolute config_filename) in
   let local_config = ServerLocalConfig.load () in
@@ -175,7 +181,10 @@ let load config_filename options =
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (prepare_auto_namespace_map config)
+    (prepare_ignored_fixme_codes config)
   in
+  Errors.ignored_fixme_codes :=
+    (GlobalOptions.ignored_fixme_codes global_opts);
   {
     load_script = load_script;
     load_script_timeout = load_script_timeout;

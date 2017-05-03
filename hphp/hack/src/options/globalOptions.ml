@@ -15,6 +15,7 @@ type t = {
   tco_user_attrs : SSet.t option;
   tco_experimental_features : SSet.t;
   po_auto_namespace_map : (string * string) list;
+  ignored_fixme_codes : ISet.t;
 }
 
 let tco_experimental_instanceof = "instanceof"
@@ -53,6 +54,7 @@ let default = {
   * from hhconfig, which defaults to empty. *)
  tco_experimental_features = tco_experimental_all;
  po_auto_namespace_map = [];
+ ignored_fixme_codes = ISet.empty;
 }
 
 (* Use this instead of default when you don't have access to a project
@@ -73,13 +75,15 @@ let make ~tco_assume_php
          ~tco_safe_vector_array
          ~tco_user_attrs
          ~tco_experimental_features
-         ~po_auto_namespace_map = {
+         ~po_auto_namespace_map
+         ~ignored_fixme_codes = {
                    tco_assume_php;
                    tco_safe_array;
                    tco_safe_vector_array;
                    tco_user_attrs;
                    tco_experimental_features;
                    po_auto_namespace_map;
+                   ignored_fixme_codes;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -91,3 +95,4 @@ let tco_allowed_attribute t name = match t.tco_user_attrs with
 let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features
 let po_auto_namespace_map t = t.po_auto_namespace_map
+let ignored_fixme_codes t = t.ignored_fixme_codes

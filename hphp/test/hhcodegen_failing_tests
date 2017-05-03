@@ -25,7 +25,6 @@ quick/bool_types.php
 quick/builtin_extension_DateTime.php
 quick/builtin_extension_SimpleXMLElement.php
 quick/byref.php
-quick/call10.php
 quick/call_nonstatic_this.php
 quick/callable-namespace.php
 quick/castDbl.php
@@ -49,7 +48,6 @@ quick/cmp.php
 quick/cnsu.php
 quick/constIntToString.php
 quick/const_cflow.php
-quick/constants.php
 quick/continue.php
 quick/coverage.php
 quick/cse_fwdctx.php
@@ -142,7 +140,6 @@ quick/func_slice_args.php
 quick/function-static-init.php
 quick/generator_method.php
 quick/get_class.php
-quick/get_class_constants.php
 quick/get_class_methods2.php
 quick/get_class_methods3.php
 quick/get_class_methods4.php
@@ -249,7 +246,6 @@ quick/libxml_suppress_errors.php
 quick/list-assign-ref-param.php
 quick/list-assignment.php
 quick/magic-get-set.php
-quick/method-non-object2.php
 quick/method_param_promotion_error.php
 quick/methodcache_direct_magic.php
 quick/methodcache_magic.php

@@ -35,7 +35,7 @@ module LValOp = struct
 end
 
 let special_functions =
-  ["isset"; "empty"; "tuple"; "idx"; "hphp_array_idx"]
+  ["isset"; "empty"; "tuple"; "idx"; "hphp_array_idx"; "define"]
 
 (* Context for code generation. It would be more elegant to pass this
  * around in an environment parameter. *)
@@ -769,6 +769,11 @@ and from_expr expr =
     emit_idx ~is_array:false es
   | A.Call ((_, A.Id (_, "hphp_array_idx")), es, _)
     when is_valid_idx ~is_array:true es -> emit_idx ~is_array:true es
+  | A.Call ((_, A.Id (_, "define")), [(_, A.String s); expr2], _) ->
+    gather [
+      from_expr expr2;
+      instr (IIncludeEvalDefine (DefCns (snd s)))
+    ]
   | A.Call _ -> emit_call_expr expr
   | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
   | A.Array es -> emit_collection expr es
@@ -1396,12 +1401,17 @@ and rename_function_call id = match id with
 
 and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
+  | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) when id.[0] = '$' ->
+    gather [
+      emit_object_expr obj;
+      instr_cgetl (Local.Named id);
+      instr (ICall (FPushObjMethod (nargs, null_flavor)));
+    ]
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
       emit_object_expr obj;
       instr (ICall (FPushObjMethodD (nargs, id, null_flavor)));
     ]
-
   | A.Obj_get(obj, method_expr, null_flavor) ->
     gather [
       emit_object_expr obj;

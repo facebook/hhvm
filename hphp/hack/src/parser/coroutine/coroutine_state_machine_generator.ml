@@ -103,14 +103,12 @@ let rewrite_returns node =
     let ret = make_return_statement
       return_keyword return_expression return_semicolon in
     let result = make_compound_statement_syntax [assignment; ret] in
-    Some (result, true)
-  | _ -> Some (node, false)
+    Rewriter.Result.Replace result
+  | _ -> Rewriter.Result.Keep
 
 let lower_body body =
   let body = add_missing_return body in
-  let (body, _) = Rewriter.rewrite_post rewrite_returns body in
-  body
-  (* TODO: more rewriting *)
+  Rewriter.rewrite_post rewrite_returns body
 
 let generate_coroutine_state_machine_body body =
   let body = lower_body body in

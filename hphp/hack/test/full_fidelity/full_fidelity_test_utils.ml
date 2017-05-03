@@ -22,15 +22,15 @@ open Core
 let identity x = x
 
 let rewrite_tree_no_trivia node =
-  let rewrite _nl n = Some
-    (match MinimalSyntax.syntax n with
-      | MinimalSyntax.Token t ->
-        let kind = MinimalToken.kind t in
-        let width = MinimalToken.width t in
-        let token = MinimalToken.make kind width [] [] in
-        (MinimalSyntax.make_token token, true)
-      | _ -> (n, false)) in
-  Rewriter.parented_rewrite_post rewrite node
+  let rewrite n =
+    match MinimalSyntax.syntax n with
+    | MinimalSyntax.Token t ->
+      let kind = MinimalToken.kind t in
+      let width = MinimalToken.width t in
+      let token = MinimalToken.make kind width [] [] in
+      Rewriter.Replace (MinimalSyntax.make_token token)
+    | _ -> Rewriter.Keep in
+  Rewriter.rewrite_post rewrite node
 
 let rewrite_tree_no_whitespace node =
   let filter_whitespace trivia_list =
@@ -51,21 +51,18 @@ let rewrite_tree_no_whitespace node =
       )
   in
 
-  let rewrite = (fun _nl n ->
-    let ret = match MinimalSyntax.syntax n with
-      | MinimalSyntax.Token t ->
-        let token = MinimalToken.(make
-          (kind t)
-          (width t)
-          (filter_whitespace (leading t))
-          (filter_whitespace (trailing t))
-        ) in
-        (MinimalSyntax.make_token token, true)
-      | _ -> (n, false)
-     in
-     Some ret
-  ) in
-  Rewriter.parented_rewrite_post rewrite node
+  let rewrite n =
+    match MinimalSyntax.syntax n with
+    | MinimalSyntax.Token t ->
+      let token = MinimalToken.(make
+        (kind t)
+        (width t)
+        (filter_whitespace (leading t))
+        (filter_whitespace (trailing t))
+      ) in
+      Rewriter.Replace (MinimalSyntax.make_token token)
+    | _ -> Rewriter.Keep in
+  Rewriter.rewrite_post rewrite node
 
 let minimal_trivia_to_string trivia =
   let name = TriviaKind.to_string (MinimalTrivia.kind trivia) in
@@ -97,5 +94,5 @@ let rec minimal_to_string node =
 
 let tree_to_string_ignore_trivia tree =
   let root = SyntaxTree.root tree in
-  let new_root, _ = rewrite_tree_no_trivia root in
+  let new_root = rewrite_tree_no_trivia root in
   minimal_to_string new_root

@@ -65,7 +65,7 @@ let decl_vars_from_ast params b =
 
 let emit_def def =
   match def with
-  | Ast.Stmt s -> Emit_statement.from_stmt s
+  | Ast.Stmt s -> Emit_statement.emit_stmt s
   | Ast.Constant c ->
     gather [
       Emit_expression.from_expr c.Ast.cst_value;

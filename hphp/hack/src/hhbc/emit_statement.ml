@@ -33,7 +33,7 @@ let emit_return () =
   then gather [instr_verifyRetTypeC; instr_retc]
   else instr_retc
 
-let rec from_stmt st =
+let rec emit_stmt st =
   match st with
   | A.Expr (_, A.Yield_break) ->
     gather [
@@ -58,19 +58,19 @@ let rec from_stmt st =
     instr_label (Label.named label)
   | A.Goto (_, label) ->
     instr_jmp (Label.named label)
-  | A.Block b -> from_stmts b
+  | A.Block b -> emit_stmts b
   | A.If (condition, consequence, alternative) ->
     emit_if condition (A.Block consequence) (A.Block alternative)
   | A.While (e, b) ->
-    from_while e (A.Block b)
+    emit_while e (A.Block b)
   | A.Break _ ->
     instr_break 1 (* TODO: Break takes an argument *)
   | A.Continue _ ->
     instr_continue 1 (* TODO: Continue takes an argument *)
   | A.Do (b, e) ->
-    from_do (A.Block b) e
+    emit_do (A.Block b) e
   | A.For (e1, e2, e3, b) ->
-    from_for e1 e2 e3 (A.Block b)
+    emit_for e1 e2 e3 (A.Block b)
   | A.Throw e ->
     gather [
       from_expr e;
@@ -78,16 +78,16 @@ let rec from_stmt st =
     ]
   | A.Try (try_block, catch_list, finally_block) ->
     if catch_list <> [] && finally_block <> [] then
-      from_stmt (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
+      emit_stmt (A.Try([A.Try (try_block, catch_list, [])], [], finally_block))
     else if catch_list <> [] then
-      from_try_catch (A.Block try_block) catch_list
+      emit_try_catch (A.Block try_block) catch_list
     else
-      from_try_finally (A.Block try_block) (A.Block finally_block)
+      emit_try_finally (A.Block try_block) (A.Block finally_block)
 
   | A.Switch (e, cl) ->
-    from_switch e cl
+    emit_switch e cl
   | A.Foreach (collection, await_pos, iterator, block) ->
-    from_foreach (await_pos <> None) collection iterator
+    emit_foreach (await_pos <> None) collection iterator
       (A.Block block)
   | A.Def_inline _ ->
     emit_nyi "Def_inline"
@@ -105,7 +105,7 @@ and emit_if condition consequence alternative =
     let done_label = Label.next_regular () in
     gather [
       emit_jmpz condition done_label;
-      from_stmt consequence;
+      emit_stmt consequence;
       instr_label done_label;
     ]
   | _ ->
@@ -113,10 +113,10 @@ and emit_if condition consequence alternative =
     let done_label = Label.next_regular () in
     gather [
       emit_jmpz condition alternative_label;
-      from_stmt consequence;
+      emit_stmt consequence;
       instr_jmp done_label;
       instr_label alternative_label;
-      from_stmt alternative;
+      emit_stmt alternative;
       instr_label done_label;
     ]
 
@@ -148,7 +148,7 @@ and emit_static_var es =
   in
   gather @@ List.map es ~f:emit_static_var_single
 
-and from_while e b =
+and emit_while e b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
@@ -166,7 +166,7 @@ and from_while e b =
     cond;
     instr_jmpz break_label;
     instr_label start_label;
-    from_stmt b;
+    emit_stmt b;
     instr_label cont_label;
     cond;
     instr_jmpnz start_label;
@@ -174,13 +174,13 @@ and from_while e b =
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
 
-and from_do b e =
+and emit_do b e =
   let cont_label = Label.next_regular () in
   let break_label = Label.next_regular () in
   let start_label = Label.next_regular () in
   let instrs = gather [
     instr_label start_label;
-    from_stmt b;
+    emit_stmt b;
     instr_label cont_label;
     from_expr e;
     instr_jmpnz start_label;
@@ -188,7 +188,7 @@ and from_do b e =
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
 
-and from_for e1 e2 e3 b =
+and emit_for e1 e2 e3 b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
@@ -210,7 +210,7 @@ and from_for e1 e2 e3 b =
     cond;
     instr_jmpz break_label;
     instr_label start_label;
-    from_stmt b;
+    emit_stmt b;
     instr_label cont_label;
     emit_ignored_expr e3;
     cond;
@@ -219,11 +219,17 @@ and from_for e1 e2 e3 b =
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
 
-and from_switch scrutinee_expr cl =
+and emit_switch scrutinee_expr cl =
   stash_in_local scrutinee_expr
   begin fun local break_label ->
+  (* If there is no default clause, add an empty one at the end *)
+  let is_default c = match c with A.Default _ -> true | _ -> false in
+  let cl =
+    if List.exists cl is_default
+    then cl
+    else cl @ [A.Default []] in
   (* "continue" in a switch in PHP has the same semantics as break! *)
-  let cl = List.map cl ~f:from_case in
+  let cl = List.map cl ~f:emit_case in
   let bodies = gather @@ List.map cl ~f:snd in
   let init = gather @@ List.map cl
     ~f: begin fun x ->
@@ -244,10 +250,10 @@ and from_switch scrutinee_expr cl =
     init;
     bodies;
   ] in
-  CBR.rewrite_in_switch instrs break_label
+CBR.rewrite_in_switch instrs break_label
   end
 
-and from_catch end_label ((_, catch_type), (_, catch_local), b) =
+and emit_catch end_label ((_, catch_type), (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to
     it directly in the event of an exception. *)
     let next_catch = Label.next_regular () in
@@ -257,19 +263,19 @@ and from_catch end_label ((_, catch_type), (_, catch_local), b) =
       instr_jmpz next_catch;
       instr_setl (Local.Named catch_local);
       instr_popc;
-      from_stmt (A.Block b);
+      emit_stmt (A.Block b);
       instr_jmp end_label;
       instr_label next_catch;
     ]
 
-and from_catches catch_list end_label =
-  gather (List.map catch_list ~f:(from_catch end_label))
+and emit_catches catch_list end_label =
+  gather (List.map catch_list ~f:(emit_catch end_label))
 
-and from_try_catch try_block catch_list =
+and emit_try_catch try_block catch_list =
   let end_label = Label.next_regular () in
   let catch_label = Label.next_catch () in
   let try_body = gather [
-    from_stmt try_block;
+    emit_stmt try_block;
     instr_jmp end_label;
   ] in
   gather [
@@ -278,12 +284,12 @@ and from_try_catch try_block catch_list =
     instr_try_catch_end;
     instr_label catch_label;
     instr_catch;
-    from_catches catch_list end_label;
+    emit_catches catch_list end_label;
     instr_throw;
     instr_label end_label;
   ]
 
-and from_try_finally try_block finally_block =
+and emit_try_finally try_block finally_block =
   (*
   We need to generate four things:
   (1) the try-body, which will be followed by
@@ -305,7 +311,7 @@ and from_try_finally try_block finally_block =
   what action the finally must perform when it is finished, followed by a
   jump directly to the finally.
   *)
-  let try_body = from_stmt try_block in
+  let try_body = emit_stmt try_block in
   let temp_local = Local.get_unnamed_local () in
   let finally_start = Label.next_regular () in
   let finally_end = Label.next_regular () in
@@ -331,7 +337,7 @@ and from_try_finally try_block finally_block =
 
   TODO: If we make this illegal at parse time then we can remove this pass.
   *)
-  let finally_body = from_stmt finally_block in
+  let finally_body = emit_stmt finally_block in
   let finally_body = CBR.rewrite_in_finally finally_body in
 
   (* (3) Finally epilogue *)
@@ -391,7 +397,7 @@ and get_foreach_key_value iterator =
     | Some lid -> Some (None, lid)
     end
 
-and from_foreach _has_await collection iterator block =
+and emit_foreach _has_await collection iterator block =
   (* TODO: await *)
   (* TODO: generate .numiters based on maximum nesting depth *)
   (* TODO: We need to be able to process arbitrary lvalues in the key, value
@@ -414,7 +420,7 @@ and from_foreach _has_await collection iterator block =
       let init = instr_iterinit iterator_number loop_break_label v in
       let cont = instr_iternext iterator_number loop_head_label v in
       init, cont in
-    let body = from_stmt block in
+    let body = emit_stmt block in
     let result = gather [
       from_expr collection;
       init;
@@ -437,16 +443,16 @@ and from_foreach _has_await collection iterator block =
     CBR.rewrite_in_loop
       result loop_continue_label loop_break_label (Some iterator_number)
 
-and from_stmts stl =
-  let results = List.map stl from_stmt in
+and emit_stmts stl =
+  let results = List.map stl emit_stmt in
   gather results
 
-and from_case c =
+and emit_case c =
   let l = Label.next_regular () in
   let b = match c with
     | A.Default b
     | A.Case (_, b) ->
-        from_stmt (A.Block b)
+        emit_stmt (A.Block b)
   in
   let e = match c with
     | A.Case (e, _) -> Some e
@@ -463,12 +469,12 @@ let emit_dropthrough_return () =
 let rec emit_final_statement s =
   match s with
   | A.Throw _ | A.Return _ | A.Goto _ ->
-    from_stmt s
+    emit_stmt s
   | A.Block b ->
     emit_final_statements b
   | _ ->
     gather [
-      from_stmt s;
+      emit_stmt s;
       emit_dropthrough_return ()
     ]
 
@@ -477,6 +483,6 @@ and emit_final_statements b =
   | [] -> emit_dropthrough_return ()
   | [s] -> emit_final_statement s
   | s::b ->
-    let i1 = from_stmt s in
+    let i1 = emit_stmt s in
     let i2 = emit_final_statements b in
     gather [i1; i2]

@@ -804,150 +804,9 @@ let add_code_info buf indent num_cls_ref_slots num_iters decl_vars =
     add_decl_vars buf indent decl_vars;
   end
 
-let rec attribute_argument_to_string argument =
-  match argument with
-  | TV.Uninit -> SS.str "uninit"
-  | TV.Null -> SS.str "N;"
-  | TV.Float f -> SS.str @@ Printf.sprintf "d:%.14f;" f
-  | TV.String s -> SS.str @@
-    Printf.sprintf "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
-  (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
-  | TV.Bool false -> SS.str "b:0;"
-  | TV.Bool true -> SS.str "b:1;"
-  | TV.Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
-  | TV.Array pairs -> attribute_dict_collection_argument_to_string "a" pairs
-  | TV.Vec values -> attribute_collection_argument_to_string "v" values
-  | TV.Dict pairs -> attribute_dict_collection_argument_to_string "D" pairs
-  | TV.Keyset values -> attribute_collection_argument_to_string "k" values
-
-and attribute_dict_collection_argument_to_string col_type pairs =
-  let num = List.length pairs in
-  let fields = List.concat (Core.List.map pairs (fun (v1, v2) -> [v1;v2])) in
-  let fields_str = attribute_arguments_to_string fields in
-  SS.gather [
-    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
-    fields_str;
-    SS.str "}"
-  ]
-
-and attribute_collection_argument_to_string col_type fields =
-  let fields_str = attribute_arguments_to_string fields in
-  let num = List.length fields in
-  SS.gather [
-    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
-    fields_str;
-    SS.str "}"
-  ]
-
-and attribute_arguments_to_string arguments =
-  arguments
-    |> Core.List.map ~f:attribute_argument_to_string
-    |> SS.gather
-
-
-let rec lit_argument_to_string argument =
-  match argument with
-  | Null -> SS.str "N;"
-  | Double f -> SS.str @@ Printf.sprintf "d:%s;" f
-  | String s -> SS.str @@
-    Printf.sprintf "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
-  (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)
-  | False -> SS.str "b:0;"
-  | True -> SS.str "b:1;"
-  | Int i -> SS.str @@ "i:" ^ (Int64.to_string i) ^ ";"
-  | Array (num, fields) ->
-    lit_collection_argument_to_string "a" num fields
-  | Vec (num, fields) -> lit_collection_argument_to_string "v" num fields
-  | Dict (num, fields) -> lit_collection_argument_to_string "D" num fields
-  | Keyset (num, fields) ->
-    lit_collection_argument_to_string "k" num fields
-  | NYI text -> SS.str @@ "NYI: " ^ text
-  | NullUninit | AddElemC | AddElemV | AddNewElemC | AddNewElemV
-  | MapAddElemC | File | Dir | Method | NameA
-  | NewArray _ | NewMixedArray _ | NewDictArray _
-  | NewMIArray _ | NewMSArray _ | NewLikeArrayL (_, _) | NewPackedArray _
-  | NewStructArray _ | NewVecArray _ | NewKeysetArray _ | NewCol _ | NewPair
-  | ColFromArray _ | Cns _ | CnsE _ | CnsU (_, _) | ClsCns (_, _)
-  | ClsCnsD (_, _) -> SS.str
-    "\r# NYI: unexpected literal kind in lit_argument_to_string"
-
-
-and lit_collection_argument_to_string col_type num fields =
-  let fields = lit_arguments_to_string fields in
-  SS.gather [
-    SS.str @@ Printf.sprintf "%s:%d:{" col_type num;
-    fields;
-    SS.str "}"
-  ]
-
-and lit_arguments_to_string arguments =
-  arguments
-    |> Core.List.map ~f:lit_argument_to_string
-    |> SS.gather
-
-let lit_to_string_helper ~has_keys ~if_class_attribute name args =
-  let count = List.length args in
-  let count =
-    if not has_keys then count
-    else
-      (if count mod 2 = 0 then count / 2
-      else failwith
-        "attribute string with keys should have even amount of arguments")
-  in
-  let arguments = lit_arguments_to_string args in
-  let attribute_str = format_of_string @@
-    if if_class_attribute
-    then "\"%s\"(\"\"\"a:%n:{"
-    else "\"\"\"%s:%n:{"
-  in
-  let attribute_begin = Printf.sprintf attribute_str name count in
-  let attribute_end =
-    if if_class_attribute
-    then "}\"\"\")"
-    else "}\"\"\""
-  in
-  SS.gather [
-    SS.str attribute_begin;
-    arguments;
-    SS.str attribute_end;
-  ]
-
-let attribute_to_string_helper ~has_keys ~if_class_attribute name args =
-  let count = List.length args in
-  let count =
-    if not has_keys then count
-    else
-      (if count mod 2 = 0 then count / 2
-      else failwith
-        "attribute string with keys should have even amount of arguments")
-  in
-  let arguments = attribute_arguments_to_string args in
-  let attribute_str = format_of_string @@
-    if if_class_attribute
-    then "\"%s\"(\"\"\"a:%n:{"
-    else "\"\"\"%s:%n:{"
-  in
-  let attribute_begin = Printf.sprintf attribute_str name count in
-  let attribute_end =
-    if if_class_attribute
-    then "}\"\"\")"
-    else "}\"\"\""
-  in
-  SS.gather [
-    SS.str attribute_begin;
-    arguments;
-    SS.str attribute_end;
-  ]
-
-let attribute_to_string a =
-  let name = Hhas_attribute.name a in
-  let args = Hhas_attribute.arguments a in
-  SS.seq_to_string @@
-  attribute_to_string_helper ~has_keys:true ~if_class_attribute:true name args
-
 let function_attributes f =
   let user_attrs = Hhas_function.attributes f in
-  let attrs = List.map attribute_to_string user_attrs in
+  let attrs = List.map Emit_adata.attribute_to_string user_attrs in
   let text = String.concat " " attrs in
   if text = "" then "" else "[" ^ text ^ "] "
 
@@ -978,7 +837,7 @@ let add_fun_def buf fun_def =
 
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
-  let attrs = List.map attribute_to_string user_attrs in
+  let attrs = List.map Emit_adata.attribute_to_string user_attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
@@ -1021,7 +880,7 @@ let add_method_def buf method_def =
 
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
-  let attrs = List.map attribute_to_string user_attrs in
+  let attrs = List.map Emit_adata.attribute_to_string user_attrs in
   let attrs = if Hhas_class.is_closure_class c
               then "no_override" :: "unique" :: attrs
               else attrs in
@@ -1082,7 +941,7 @@ let add_property class_def buf property =
     B.add_string buf "\"\"\"";
     let init = match initial_value with
       | None -> SS.str "N;"
-      | Some value -> attribute_argument_to_string value
+      | Some value -> Emit_adata.adata_argument_to_string value
     in
     SS.add_string_from_seq buf init;
     B.add_string buf "\"\"\";"
@@ -1097,8 +956,7 @@ let add_constant buf c =
   begin match value with
   | Typed_value.Uninit -> B.add_string buf "uninit"
   | _ -> B.add_string buf "\"\"\"";
-  (* TODO: attribute_argument_to_string could stand to be renamed. *)
-  SS.add_string_from_seq buf @@ attribute_argument_to_string value;
+  SS.add_string_from_seq buf @@ Emit_adata.adata_argument_to_string value;
   B.add_string buf "\"\"\""
   end;
   B.add_string buf ";"
@@ -1109,7 +967,7 @@ let add_type_constant buf c =
   let initializer_t = Hhas_type_constant.initializer_t c in
   B.add_string buf " isType = \"\"\"";
   B.add_string buf @@ SS.seq_to_string @@
-    attribute_argument_to_string initializer_t;
+    Emit_adata.adata_argument_to_string initializer_t;
   B.add_string buf "\"\"\";"
 
 let add_enum_ty buf c =
@@ -1151,7 +1009,7 @@ let add_data_region_element ~has_keys buf name num arguments =
   B.add_string buf @@ string_of_int num;
   B.add_string buf " = ";
   SS.add_string_from_seq buf
-    @@ lit_to_string_helper
+    @@ Emit_adata.adata_to_string_helper
       ~if_class_attribute:false
       ~has_keys
       name
@@ -1163,9 +1021,11 @@ let add_data_region buf top_level_body functions classes =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
     | ILitConst (Array (num, arguments)) ->
-      add_data_region_element ~has_keys:true buf "a" num arguments
+      add_data_region_element ~has_keys:true buf "a" num
+        (List.concat (Core.List.map arguments (fun (x,y) -> [x;y])))
     | ILitConst (Dict (num, arguments)) ->
-      add_data_region_element ~has_keys:true buf "D" num arguments
+      add_data_region_element ~has_keys:true buf "D" num
+        (List.concat (Core.List.map arguments (fun (x,y) -> [x;y])))
     | ILitConst (Vec (num, arguments)) ->
       add_data_region_element ~has_keys:false buf "v" num arguments
     | ILitConst (Keyset (num, arguments)) ->

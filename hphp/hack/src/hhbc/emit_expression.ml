@@ -808,44 +808,14 @@ and from_expr expr =
   | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
   | A.List _                    -> emit_nyi "list"
 
-and emit_static_collection ~transform_to_collection expr es =
+and emit_static_collection ~transform_to_collection tv =
   let a_label = Label.get_next_data_label () in
-  (* Arrays can either contains values or key/value pairs *)
-  let need_index = match snd expr with
-    | A.Collection ((_, "vec"), _)
-    | A.Collection ((_, "keyset"), _) -> false
-    | _ -> true
-  in
-  let _, es =
-    List.fold_left
-      es
-      ~init:(Int64.zero, [])
-      ~f:(fun (maxindex, l) x ->
-            let open Constant_folder in
-            match x with
-            | A.AFvalue e when need_index ->
-              (Int64.add maxindex Int64.one,
-                literal_from_expr e :: Int maxindex :: l)
-            | A.AFvalue e ->
-              (Int64.add maxindex Int64.one,
-                literal_from_expr e :: l)
-              (* Special treatment for explicit integer key *)
-            | A.AFkvalue ((_, A.Int (_, s) as k), v) ->
-              let newindex = Int64.of_string s in
-                (Int64.add (if Int64.compare newindex maxindex > 0
-                then newindex else maxindex) Int64.one,
-                literal_from_expr v :: literal_from_expr k :: l)
-            | A.AFkvalue (k,v) ->
-              (maxindex,
-              literal_from_expr v :: literal_from_expr k :: l)
-          )
-  in
-  let es = List.rev es in
-  let lit_constructor = match snd expr with
-    | A.Array _ -> Array (a_label, es)
-    | A.Collection ((_, ("dict" | "Map" | "ImmMap")), _) -> Dict (a_label, es)
-    | A.Collection ((_, "vec"), _) -> Vec (a_label, es)
-    | A.Collection ((_, "keyset"), _) -> Keyset (a_label, es)
+  let lit_constructor =
+    match tv with
+    | Typed_value.Array tvl -> Array (a_label, tvl)
+    | Typed_value.Dict tvl -> Dict (a_label, tvl)
+    | Typed_value.Vec tvl -> Vec (a_label, tvl)
+    | Typed_value.Keyset tvl -> Keyset (a_label, tvl)
     | _ -> failwith "emit_static_collection: unexpected collection type"
   in
   let transform_instr =
@@ -957,9 +927,10 @@ and emit_named_collection expr pos name fields =
   | _ -> failwith @@ "collection: " ^ name ^ " does not exist"
 
 and emit_collection ?(transform_to_collection) expr es =
-  if is_literal_afield_list es then
-    emit_static_collection ~transform_to_collection expr es
-  else
+  match Ast_constant_folder.expr_to_opt_typed_value expr with
+  | Some tv ->
+    emit_static_collection ~transform_to_collection tv
+  | None ->
     emit_dynamic_collection ~transform_to_collection expr es
 
 and emit_pipe e1 e2 =
@@ -1647,30 +1618,6 @@ and emit_flavored_expr (_, expr_ as expr) =
     emit_call e args uargs
   | _ ->
     from_expr expr, Flavor.Cell
-
-and is_unop_literal e = function
-  | A.Utild | A.Unot | A.Uplus | A.Uminus -> is_literal e
-  | _ -> false
-
-and is_literal expr =
-  match snd expr with
-  | A.Array afl
-  | A.Collection ((_, "vec"), afl)
-  | A.Collection ((_, "keyset"), afl)
-  | A.Collection ((_, "dict"), afl) -> is_literal_afield_list afl
-  | A.Float _
-  | A.String _
-  | A.Int _
-  | A.Null
-  | A.False
-  | A.True -> true
-  | A.Unop (uop, e) -> is_unop_literal e uop
-  | _ -> false
-
-and is_literal_afield_list afl =
-  List.for_all afl
-    ~f:(function A.AFvalue e -> is_literal e
-               | A.AFkvalue (k,v) -> is_literal k && is_literal v)
 
 and emit_final_member_op stack_index op mk =
   match op with

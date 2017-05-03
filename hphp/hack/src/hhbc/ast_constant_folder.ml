@@ -28,8 +28,7 @@ let rec expr_to_typed_value (_, expr_) =
     TV.Vec (List.map fields value_afield_to_typed_value)
   | A.Collection ((_, "keyset"), fields) ->
     TV.Keyset (List.map fields value_afield_to_typed_value)
-    (* What about Map or ImmMap? *)
-  | A.Collection ((_, "dict"), fields) ->
+  | A.Collection ((_, ("dict" | "ImmMap" | "Map")), fields) ->
     TV.Dict (List.map fields afield_to_typed_value_pair)
   | _ ->
     failwith "expr_to_typed_value: not a literal"
@@ -46,26 +45,32 @@ and array_to_typed_value fields =
             Int64.add (if Int64.compare newindex maxindex > 0
             then newindex else maxindex) Int64.one
         | A.AFkvalue (key, value) ->
-          (expr_to_typed_value key, expr_to_typed_value value) :: pairs,
+          (key_expr_to_typed_value key, expr_to_typed_value value) :: pairs,
           maxindex
         | A.AFvalue value ->
           (TV.Int maxindex, expr_to_typed_value value) :: pairs,
             Int64.add maxindex Int64.one)
   in TV.Array (List.rev pairs)
 
+and key_expr_to_typed_value expr =
+  let tv = expr_to_typed_value expr in
+  match TV.cast_to_arraykey tv with
+  | Some tv -> tv
+  | None -> failwith "key_expr_to_typed_value: invalid key type"
+
 and array_afield_to_typed_value_pair index afield =
   match afield with
   | A.AFvalue e ->
     (TV.Int (Int64.of_int index), expr_to_typed_value e)
   | A.AFkvalue (key, value) ->
-    (expr_to_typed_value key, expr_to_typed_value value)
+    (key_expr_to_typed_value key, expr_to_typed_value value)
 
 and afield_to_typed_value_pair afield =
   match afield with
   | A.AFvalue (_key, _value) ->
     failwith "afield_to_typed_value_pair: unexpected value"
   | A.AFkvalue (key, value) ->
-    (expr_to_typed_value key, expr_to_typed_value value)
+    (key_expr_to_typed_value key, expr_to_typed_value value)
 
 and value_afield_to_typed_value afield =
   match afield with

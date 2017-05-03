@@ -426,3 +426,8 @@ let cast_to_int v = Option.map (to_int v) (fun x -> Int x)
 let cast_to_bool v = Some (Bool (to_bool v))
 
 let cast_to_float v = Option.map (to_float v) (fun x -> Float x)
+
+let cast_to_arraykey v =
+  match v with
+  | String s -> Some (String s)
+  | _ -> cast_to_int v

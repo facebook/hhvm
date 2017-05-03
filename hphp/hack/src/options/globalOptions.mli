@@ -57,6 +57,9 @@ type t = {
  (* Set of experimental features, in lowercase. *)
  tco_experimental_features : SSet.t;
 
+ (* Set of opt-in migration behavior flags, in lowercase. *)
+ tco_migration_flags : SSet.t;
+
  (* Namespace aliasing map *)
  po_auto_namespace_map : (string * string) list;
 
@@ -69,6 +72,7 @@ val make :
   tco_safe_vector_array: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
+  tco_migration_flags: SSet.t ->
   po_auto_namespace_map: (string * string) list ->
   ignored_fixme_codes: ISet.t -> t
 val tco_assume_php : t -> bool
@@ -76,6 +80,7 @@ val tco_safe_array : t -> bool
 val tco_safe_vector_array : t -> bool
 val tco_user_attrs : t -> SSet.t option
 val tco_experimental_feature_enabled : t -> SSet.elt -> bool
+val tco_migration_flag_enabled : t -> SSet.elt -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val default : t
@@ -86,4 +91,5 @@ val tco_experimental_darray_and_varray : string
 val tco_experimental_goto : string
 val tco_experimental_shape_idx_relaxed : string
 val tco_experimental_all : SSet.t
+val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

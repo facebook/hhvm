@@ -1667,7 +1667,7 @@ let protected_class_meth pos1 pos2 =
 
 let array_cast pos =
   add Typing.array_cast pos
-    "(array) cast forbidden in strict mode; arrays with unspecified \
+    "(array) cast forbidden; arrays with unspecified \
     key and value types are not allowed"
 
 let anonymous_recursive pos =

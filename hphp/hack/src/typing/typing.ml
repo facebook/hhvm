@@ -42,6 +42,7 @@ module Phase        = Typing_phase
 module Subst        = Decl_subst
 module ExprDepTy    = Typing_dependent_type.ExprDepTy
 module Conts        = Typing_continuations
+module TCO          = TypecheckerOptions
 
 (*****************************************************************************)
 (* Debugging *)
@@ -1545,7 +1546,9 @@ and expr_
         new_object ~check_not_abstract p env c el uel in
       let env = Env.forget_members env p in
       make_result env (T.New(tc, tel, tuel)) (ExprDepTy.make env c ty)
-  | Cast ((_, Harray (None, None)), _) when Env.is_strict env ->
+  | Cast ((_, Harray (None, None)), _)
+    when Env.is_strict env
+    || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
       Errors.array_cast p;
       expr_error env (Reason.Rwitness p)
   | Cast (hint, e) ->

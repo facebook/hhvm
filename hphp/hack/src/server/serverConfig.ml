@@ -126,6 +126,24 @@ let config_experimental_tc_features config =
       let sl = Str.split config_list_regexp s in
       process_experimental sl
 
+let process_migration_flags sl =
+  match sl with
+  | ["false"] -> SSet.empty
+  | ["true"] -> TypecheckerOptions.migration_flags_all
+  | flags ->
+    begin
+      List.iter flags ~f:(fun s ->
+        if not (SSet.mem TypecheckerOptions.migration_flags_all s)
+        then failwith ("invalid migration flag: " ^ s));
+      List.fold_left flags ~f:SSet.add ~init:SSet.empty
+    end
+
+let config_tc_migration_flags config =
+  SMap.get config "enable_tc_migration_flags"
+  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
+  |> List.map ~f:String.lowercase_ascii
+  |> process_migration_flags
+
 let maybe_relative_path fn =
   (* Note: this is not the same as calling realpath; the cwd is not
    * necessarily the same as hh_server's root!!! *)
@@ -180,6 +198,7 @@ let load config_filename options =
     (bool_ "safe_vector_array" ~default:false config)
     (config_user_attributes config)
     (config_experimental_tc_features config)
+    (config_tc_migration_flags config)
     (prepare_auto_namespace_map config)
     (prepare_ignored_fixme_codes config)
   in

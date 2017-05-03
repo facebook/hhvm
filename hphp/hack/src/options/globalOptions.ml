@@ -14,6 +14,7 @@ type t = {
   tco_safe_vector_array : bool;
   tco_user_attrs : SSet.t option;
   tco_experimental_features : SSet.t;
+  tco_migration_flags : SSet.t;
   po_auto_namespace_map : (string * string) list;
   ignored_fixme_codes : ISet.t;
 }
@@ -35,8 +36,7 @@ let tco_experimental_shape_idx_relaxed =
   "shape_idx_relaxed"
 
 let tco_experimental_all =
- List.fold_left
-   (fun acc x -> SSet.add x acc) SSet.empty
+ SSet.empty |> List.fold_right SSet.add
    [
      tco_experimental_instanceof;
      tco_experimental_optional_shape_field;
@@ -44,6 +44,12 @@ let tco_experimental_all =
      tco_experimental_goto;
      tco_experimental_shape_idx_relaxed;
    ]
+
+let tco_migration_flags_all =
+  SSet.empty |> List.fold_right SSet.add
+    [
+      "array_cast"
+    ]
 
 let default = {
  tco_assume_php = true;
@@ -53,6 +59,7 @@ let default = {
  (** Default all features for testing. Actual options are set by reading
   * from hhconfig, which defaults to empty. *)
  tco_experimental_features = tco_experimental_all;
+ tco_migration_flags = SSet.empty;
  po_auto_namespace_map = [];
  ignored_fixme_codes = ISet.empty;
 }
@@ -75,6 +82,7 @@ let make ~tco_assume_php
          ~tco_safe_vector_array
          ~tco_user_attrs
          ~tco_experimental_features
+         ~tco_migration_flags
          ~po_auto_namespace_map
          ~ignored_fixme_codes = {
                    tco_assume_php;
@@ -82,6 +90,7 @@ let make ~tco_assume_php
                    tco_safe_vector_array;
                    tco_user_attrs;
                    tco_experimental_features;
+                   tco_migration_flags;
                    po_auto_namespace_map;
                    ignored_fixme_codes;
         }
@@ -94,5 +103,7 @@ let tco_allowed_attribute t name = match t.tco_user_attrs with
  | Some attr_names -> SSet.mem name attr_names
 let tco_experimental_feature_enabled t s =
   SSet.mem s t.tco_experimental_features
+let tco_migration_flag_enabled t s =
+  SSet.mem s t.tco_migration_flags
 let po_auto_namespace_map t = t.po_auto_namespace_map
 let ignored_fixme_codes t = t.ignored_fixme_codes

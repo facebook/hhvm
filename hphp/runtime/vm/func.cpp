@@ -622,6 +622,7 @@ static void print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrReadsCallerFrame) { out << " (reads_caller_frame)"; }
   if (attrs & AttrWritesCallerFrame) { out << " (writes_caller_frame)"; }
   if (attrs & AttrSkipFrame) { out << " (skip_frame)"; }
+  if (attrs & AttrIsFoldable) { out << " (foldable)"; }
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
@@ -630,6 +631,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   } else if (preClass() != nullptr) {
     out << "Method";
     print_attrs(out, m_attrs);
+    if (isMemoizeWrapper()) out << " (memoize_wrapper)";
     if (cls() != nullptr) {
       out << ' ' << fullName()->data();
     } else {
@@ -638,6 +640,7 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
   } else {
     out << "Function";
     print_attrs(out, m_attrs);
+    if (isMemoizeWrapper()) out << " (memoize_wrapper)";
     out << ' ' << m_name->data();
   }
 
@@ -687,6 +690,13 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
       << "numLocals: " << numLocals() << '\n'
       << "numIterators: " << numIterators() << '\n'
       << "numClsRefSlots: " << numClsRefSlots() << '\n';
+
+  if (auto const f = dynCallWrapper()) {
+    out << "dynCallWrapper: " << f->fullName()->data() << '\n';
+  }
+  if (auto const f = dynCallTarget()) {
+    out << "dynCallTarget: " << f->fullName()->data() << '\n';
+  }
 
   const EHEntVec& ehtab = shared()->m_ehtab;
   size_t ehId = 0;

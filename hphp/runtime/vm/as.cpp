@@ -727,6 +727,23 @@ struct AsmState {
     fpiToUpdate.clear();
   }
 
+  void resolveDynCallWrappers() {
+    auto const& allFuncs = ue->fevec();
+    for (auto const& p : dynCallWrappers) {
+      auto const iter = std::find_if(
+        allFuncs.begin(),
+        allFuncs.end(),
+        [&](const FuncEmitter* f){ return f->name->isame(p.second); }
+      );
+      if (iter == allFuncs.end()) {
+        error("{} specifies unknown function {} as a dyncall wrapper",
+              p.first->name, p.second);
+      }
+      p.first->dynCallWrapperId = (*iter)->id();
+    }
+    dynCallWrappers.clear();
+  }
+
   int getLocalId(const std::string& name) {
     if (name[0] == '_') {
       int id = folly::to<int>(name.substr(1));
@@ -763,6 +780,7 @@ struct AsmState {
   bool emittedPseudoMain{false};
 
   std::map<std::string,ArrayData*> adataMap;
+  std::map<FuncEmitter*,const StringData*> dynCallWrappers;
 
   // When inside a class, this state is active.
   PreClassEmitter* pce;
@@ -1561,6 +1579,8 @@ void parse_catch(AsmState& as, int nestLevel) {
  *            |  ".declvars" directive-declvars
  *            |  ".try_fault" directive-fault
  *            |  ".try_catch" directive-catch
+ *            |  ".ismemoizewrapper"
+ *            |  ".dyncallwrapper" string-literal
  *            |  label-name
  *            |  opcode-line
  *            ;
@@ -1587,6 +1607,15 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       as.error("unexpected directive or opcode line in function body");
     }
     if (word[0] == '.') {
+      if (word == ".ismemoizewrapper") {
+        as.fe->isMemoizeWrapper = true;
+        continue;
+      }
+      if (word == ".dyncallwrapper") {
+        as.dynCallWrappers.emplace(as.fe, read_litstr(as));
+        as.in.expectWs(';');
+        continue;
+      }
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
       if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
@@ -2438,6 +2467,8 @@ void parse(AsmState& as) {
   if (!as.emittedPseudoMain) {
     as.error("no .main found in hhas unit");
   }
+
+  as.resolveDynCallWrappers();
 }
 
 }

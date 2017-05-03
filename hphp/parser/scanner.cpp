@@ -523,30 +523,6 @@ bool Scanner::tryParseShapeType(TokenStore::iterator& pos) {
   return false;
 }
 
-bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
-  assert(pos->t != ')'); // already determined to be nonempty
-
-  for (;;) {
-    if (!nextIfToken(pos, T_CONSTANT_ENCAPSED_STRING) ||
-        !nextIfToken(pos, T_DOUBLE_ARROW)) {
-      return false;
-    }
-    if (!tryParseNSType(pos)) return false;
-    if (pos->t == ')') return true;
-    if (!nextIfToken(pos, ',')) return false;
-    if (pos->t == ')') return true;
-  }
-
-  return false;
-}
-
-static bool isUnresolved(int tokid) {
-  return tokid == T_UNRESOLVED_LT ||
-         tokid == T_UNRESOLVED_NEWTYPE ||
-         tokid == T_UNRESOLVED_TYPE ||
-         tokid == T_UNRESOLVED_OP;
-}
-
 static bool isValidClassConstantName(int tokid) {
   switch (tokid) {
   case T_STRING:
@@ -623,6 +599,74 @@ static bool isValidClassConstantName(int tokid) {
   default:
     return false;
   }
+}
+
+bool Scanner::tryParseClassConstant(TokenStore::iterator& pos) {
+  bool sawDoubleColon = false;
+  for (;;) {
+    if (sawDoubleColon) {
+      if (!isValidClassConstantName(pos->t)) return false;
+    } else {
+      // These are all valid class/namespace names under the right conditions,
+      // see also ident_no_semireserved in the parser.
+      switch (pos->t) {
+      case T_STRING:
+      case T_SUPER:
+      case T_XHP_ATTRIBUTE:
+      case T_XHP_CATEGORY:
+      case T_XHP_CHILDREN:
+      case T_XHP_REQUIRED:
+      case T_ENUM:
+      case T_ARRAY:
+      case T_DICT:
+      case T_VEC:
+      case T_KEYSET:
+      case T_CALLABLE:
+      case T_UNRESOLVED_TYPE:
+      case T_UNRESOLVED_NEWTYPE:
+      case T_XHP_LABEL:
+        break;
+      default:
+        return false;
+      }
+    }
+    nextLookahead(pos);
+
+    if (pos->t == T_NS_SEPARATOR) {
+      if (sawDoubleColon) return false;
+    } else if (pos->t == T_DOUBLE_COLON) {
+      sawDoubleColon = true;
+    } else {
+      break;
+    }
+    nextLookahead(pos);
+  }
+  return sawDoubleColon;
+}
+
+bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
+  assert(pos->t != ')'); // already determined to be nonempty
+
+  for (;;) {
+    if (!nextIfToken(pos, T_CONSTANT_ENCAPSED_STRING) &&
+        !tryParseClassConstant(pos)) {
+      return false;
+    }
+    if (!nextIfToken(pos, T_DOUBLE_ARROW)) return false;
+    if (!tryParseNSType(pos)) return false;
+    if (pos->t == ')') return true;
+    if (!nextIfToken(pos, ',')) return false;
+    if (pos->t == ')') return true;
+  }
+
+  return false;
+}
+
+static bool isUnresolved(int tokid) {
+  return tokid == T_UNRESOLVED_LT ||
+         tokid == T_UNRESOLVED_NEWTYPE ||
+         tokid == T_UNRESOLVED_TYPE ||
+         tokid == T_UNRESOLVED_OP;
 }
 
 int Scanner::getNextToken(ScannerToken &t, Location &l) {

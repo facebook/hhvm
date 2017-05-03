@@ -13,6 +13,17 @@ open Emit_expression
 
 module SU = Hhbc_string_utils
 
+let p = Pos.none
+
+let get_array3 i0 i1 i2 =
+  let index0 = p, i0 in
+  let index1 = p, i1 in
+  let index2 = p, i2 in
+  A.Array
+  [A.AFkvalue ((p, A.Int (p, "0")), index0);
+   A.AFkvalue ((p, A.Int (p, "1")), index1);
+   A.AFkvalue ((p, A.Int (p, "2")), index2)]
+
 let xhp_attribute_declaration_method name kind body =
   {
     A.m_kind = kind;
@@ -29,7 +40,6 @@ let xhp_attribute_declaration_method name kind body =
   }
 
 let emit_xhp_attribute_array xal =
-  let p = Pos.none in
   (* Taken from hphp/parser/hphp.y *)
   let hint_to_num = function
     | "string" -> 1
@@ -87,7 +97,6 @@ let emit_xhp_attribute_array xal =
   p, A.Array (List.map ~f:aux xal)
 
 let emit_xhp_use_attributes xual =
-  let p = Pos.none in
   let aux = function
     | _, A.Happly ((_, s), []) ->
       let s = SU.Xhp.mangle @@ Utils.strip_ns s in
@@ -101,7 +110,6 @@ let emit_xhp_use_attributes xual =
 
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_attribute_declaration ast_class xal xual =
-  let p = Pos.none in
   let var_dollar_ = p, A.Lvar (p, "$_") in
   let neg_one = p, A.Int (p, "-1") in
   (* static $_ = -1; *)
@@ -138,13 +146,62 @@ let from_attribute_declaration ast_class xal xual =
   in
   Emit_method.from_ast ast_class m
 
+let xhp_child_op_to_int = function
+  | None -> 0
+  | Some A.ChildStar -> 1
+  | Some A.ChildQuestion -> 2
+  | Some A.ChildPlus -> 3
+
+let rec emit_xhp_children_decl_expr ~unary = function
+  | [] -> failwith "Empty xhp child declaration"
+  | [A.ChildList l] ->
+    get_array3
+      (A.Int (p, unary))
+      (A.Int (p, "5"))
+      (emit_xhp_children_decl_expr ~unary:"0" l)
+  | [A.ChildName (_, s)] ->
+    get_array3
+      (A.Int (p, unary))
+      (A.Int (p, "3"))
+      (A.String (p, SU.Xhp.mangle s))
+  | [A.ChildUnary (c, op)] ->
+    emit_xhp_children_decl_expr [c]
+      ~unary:(string_of_int @@ xhp_child_op_to_int @@ Some op)
+  | [A.ChildBinary (c1, c2)] ->
+    get_array3
+      (A.Int (p, "5"))
+      (emit_xhp_children_decl_expr ~unary [c1])
+      (emit_xhp_children_decl_expr ~unary [c2])
+  | [c1; c2] ->
+    get_array3
+      (A.Int (p, "4"))
+      (emit_xhp_children_decl_expr ~unary [c1])
+      (emit_xhp_children_decl_expr ~unary [c2])
+  | c1 :: c2 :: cs ->
+    get_array3
+      (A.Int (p, "4"))
+      (emit_xhp_children_decl_expr ~unary [c1; c2])
+      (emit_xhp_children_decl_expr ~unary cs)
+
+let emit_xhp_children_paren_expr c =
+  let l, op_num = match c with
+    | A.ChildList l -> l, xhp_child_op_to_int None
+    | A.ChildUnary (A.ChildList l, op) -> l, xhp_child_op_to_int @@ Some op
+    | _ -> failwith "emit_xhp_children_paren_expr - NYI"
+  in
+  let arr = emit_xhp_children_decl_expr ~unary:"0" l in
+  get_array3 (A.Int (p, string_of_int op_num)) (A.Int (p, "5")) arr
+
+let emit_xhp_children_array = function
+  | [] | [A.ChildName (_, "empty")] -> A.Int (Pos.none, "0")
+  | [c] -> emit_xhp_children_paren_expr c
+  | _ -> failwith "HHVM does not support multiple children declarations"
+
 (* AST transformations taken from hphp/parser/hphp.y *)
-let from_children_declaration ast_class _children =
-  let p = Pos.none in
+let from_children_declaration ast_class children =
   let var_dollar_ = p, A.Lvar (p, "$_") in
   (* static $_ = children; *)
-  (* TODO: Use children to genenerate the array *)
-  let children_arr = p, A.Array [] in
+  let children_arr = p, emit_xhp_children_array children in
   let token1 =
     A.Static_var [p, A.Binop (A.Eq None, var_dollar_, children_arr)]
   in
@@ -161,13 +218,11 @@ let from_children_declaration ast_class _children =
 
 let get_category_array categories =
   (* TODO: is this always 1? *)
-  let p = Pos.none in
   List.map categories
     ~f:(fun s -> A.AFkvalue ((p, A.String s), (p, A.Int (p, "1"))))
 
 (* AST transformations taken from hphp/parser/hphp.y *)
 let from_category_declaration ast_class categories =
-  let p = Pos.none in
   let var_dollar_ = p, A.Lvar (p, "$_") in
   (* static $_ = categories; *)
   let category_arr = p, A.Array (get_category_array categories) in

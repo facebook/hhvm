@@ -98,14 +98,13 @@ let to_int v =
       characters in leading-numeric strings are ignored. For any other string,
       the result value is 0.
     *)
-      (* TODO: deal with strings whose initial prefix is digits *)
-      match (try Some (Int64.of_string s) with Failure _ -> None) with
-      | None ->
-        begin
-          try Some (Int64.of_float (float_of_string s))
-          with Failure _ -> Some Int64.zero
-        end
-      | x -> x
+    match (try Scanf.sscanf s "%Ld%s" (fun x _ -> Some x) with _ -> None) with
+    | None ->
+      begin
+        try Scanf.sscanf s "%f%s" (fun x _ -> Some (Int64.of_float x))
+        with _ -> Some Int64.zero
+      end
+    | x -> x
     end
   | Int i -> Some i
   | Float f ->
@@ -133,7 +132,8 @@ let to_float v =
     is the closest approximation to the string's floating-point value.
     The trailing non-numeric characters in leading-numeric strings are ignored.
     For any other string, the result value is 0.*)
-    (try Some (float_of_string s) with Failure _ -> Some 0.0)
+    (try Scanf.sscanf s "%f%s" (fun x _ -> Some x)
+      with _ -> Some 0.0)
   | Int i ->
     (try Some (Int64.to_float i) with Failure _ -> None)
   | Float f -> Some f

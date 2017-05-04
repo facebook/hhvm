@@ -99,7 +99,6 @@ quick/dv_if.php
 quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
-quick/eq_int_str.php
 quick/eval_noreturn.php
 quick/exception_bug_2080454.php
 quick/exception_destructor_1.php
@@ -108,7 +107,6 @@ quick/exception_destructor_3.php
 quick/exception_destructor_4.php
 quick/exception_destructor_5.php
 quick/exception_many_locals.php
-quick/exception_set_previous_chain.php
 quick/exceptions.php
 quick/exceptions2.php
 quick/exceptions3.php
@@ -214,7 +212,6 @@ quick/interface7.php
 quick/interface8.php
 quick/interface9.php
 quick/invoke.php
-quick/jmpfuse.php
 quick/keyset/basic-getters.php
 quick/keyset/basic-init.php
 quick/keyset/basic-setters.php
@@ -360,7 +357,6 @@ quick/trait_property_init.php
 quick/trait_self.php
 quick/traits.php
 quick/traits2.php
-quick/type_cycle.php
 quick/typechecks-obj.php
 quick/typehint_lsb_parent.php
 quick/typehint_lsb_self.php

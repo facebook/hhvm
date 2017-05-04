@@ -152,7 +152,6 @@ and emit_while e b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
-  let cond = from_expr e in
   (* TODO: This is *bizarre* codegen for a while loop.
   It would be better to generate this as
   instr_label continue_label;
@@ -163,13 +162,11 @@ and emit_while e b =
   instr_label break_label;
   *)
   let instrs = gather [
-    cond;
-    instr_jmpz break_label;
+    emit_jmpz e break_label;
     instr_label start_label;
     emit_stmt b;
     instr_label cont_label;
-    cond;
-    instr_jmpnz start_label;
+    emit_jmpnz e start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
@@ -182,8 +179,7 @@ and emit_do b e =
     instr_label start_label;
     emit_stmt b;
     instr_label cont_label;
-    from_expr e;
-    instr_jmpnz start_label;
+    emit_jmpnz e start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None
@@ -192,7 +188,6 @@ and emit_for e1 e2 e3 b =
   let break_label = Label.next_regular () in
   let cont_label = Label.next_regular () in
   let start_label = Label.next_regular () in
-  let cond = from_expr e2 in
   (* TODO: this is bizarre codegen for a "for" loop.
      This should be codegen'd as
      emit_ignored_expr initializer;
@@ -207,14 +202,12 @@ and emit_for e1 e2 e3 b =
   *)
   let instrs = gather [
     emit_ignored_expr e1;
-    cond;
-    instr_jmpz break_label;
+    emit_jmpz e2 break_label;
     instr_label start_label;
     emit_stmt b;
     instr_label cont_label;
     emit_ignored_expr e3;
-    cond;
-    instr_jmpnz start_label;
+    emit_jmpnz e2 start_label;
     instr_label break_label;
   ] in
   CBR.rewrite_in_loop instrs cont_label break_label None

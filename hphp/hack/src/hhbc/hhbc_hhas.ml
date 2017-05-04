@@ -677,9 +677,9 @@ let rec string_of_afield = function
   | A.AFkvalue (k, v) ->
     string_of_param_default_value k ^ " => " ^ string_of_param_default_value v
 
-and string_of_afield_list ~empty_escape afl =
+and string_of_afield_list afl =
   if List.length afl = 0
-  then if empty_escape then "\\n" else ""
+  then ""
   else String.concat ", " @@ List.map string_of_afield afl
 
 and shape_field_name_to_expr = function
@@ -735,15 +735,18 @@ and string_of_param_default_value expr =
   | A.Null -> "NULL"
   | A.True -> "true"
   | A.False -> "false"
-  (* For empty array there is a space between array and left paren? a bug ? *)
+  (* For arrays and collections, we are making a concious decision to not
+   * match HHMV has HHVM's emitter has inconsistencies in the pretty printer
+   * https://fburl.com/tzom2qoe *)
   | A.Array afl ->
-    "array(" ^ string_of_afield_list ~empty_escape:false afl ^ ")"
+    "array(" ^ string_of_afield_list afl ^ ")"
   | A.Collection ((_, name), afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
-    name ^ "[" ^ string_of_afield_list ~empty_escape:true afl ^ "]"
+    name ^ "[" ^ string_of_afield_list afl ^ "]"
   | A.Collection ((_, name), afl) when
-    name = "Set" || name = "Pair" || name = "Vector" ->
-    "HH\\\\" ^ name ^ "{" ^ string_of_afield_list ~empty_escape:false afl ^ "}"
+    name = "Set" || name = "Pair" || name = "Vector" || name = "Map" ||
+    name = "ImmSet " || name = "ImmVector" || name = "ImmMap" ->
+    "HH\\\\" ^ name ^ "{" ^ string_of_afield_list afl ^ "}"
   | A.Shape fl ->
     let fl =
       List.map

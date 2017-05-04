@@ -98,6 +98,7 @@ static int getNextTokenType(int t) {
     case T_SR:
     case T_BOOLEAN_OR:
     case T_BOOLEAN_AND:
+    case T_COALESCE:
     case T_IS_EQUAL:
     case T_IS_NOT_EQUAL:
     case T_IS_IDENTICAL:

@@ -3140,6 +3140,7 @@ void Generator::operator()(std::ostream& os) const {
   os << "#include <limits>\n\n";
 
   os << "#include \"hphp/util/assertions.h\"\n";
+  os << "#include \"hphp/util/portability.h\"\n";
   os << "#include \"hphp/util/type-scan.h\"\n\n";
 
   os << "using namespace HPHP::type_scan;\n";
@@ -3155,7 +3156,8 @@ void Generator::operator()(std::ostream& os) const {
   os << "}\n\n";
 
   os << "extern \"C\" {\n\n"
-     << "const Metadata* " << HPHP::type_scan::detail::kInitFuncName
+     << "EXTERNALLY_VISIBLE const Metadata* "
+     << HPHP::type_scan::detail::kInitFuncName
      << "(size_t& table_size) {\n"
      << "  init_indices();\n"
      << "  table_size = " << m_indexed_types.size()+2 << ";\n"

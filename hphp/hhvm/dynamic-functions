@@ -9,4 +9,8 @@
     HPHP::type_scan::detail::Indexer*;
     *::_type_scan_custom_*;
   };
+  extern "C" {
+    hphp_type_scan_module_init;
+    g_member_reflection_vtable_impl;
+  };
 };

@@ -42,6 +42,12 @@ HPHP_REFLECTABLES
 #undef X
 
 bool init_member_reflection() {
+  g_member_reflection_vtable =
+    reinterpret_cast<decltype(g_member_reflection_vtable)>(
+      dlsym(RTLD_DEFAULT, detail::kMemberReflectionTableName)
+    );
+  if (g_member_reflection_vtable) return true;
+
   embedded_data desc;
   if (!get_embedded_data("member_reflection", &desc)) {
     // We might not be embedding the shared object, depending on platform, so

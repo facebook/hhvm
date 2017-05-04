@@ -368,6 +368,15 @@ GeneralEffects may_raise(const IRInstruction& inst, GeneralEffects x) {
   );
 }
 
+// Equivalent to may_raise if EvalHackArrCompatNotices is enabled for certain
+// opcodes, no-op otherwise.
+GeneralEffects hack_arr_compat_may_raise(const IRInstruction& inst,
+                                         GeneralEffects x) {
+  assertx(inst.is(AKExistsArr, ArrayIdx, ArrayIsset));
+  if (!RuntimeOption::EvalHackArrCompatNotices) return x;
+  return may_raise(inst, x);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
@@ -1118,6 +1127,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AEmpty);
 
   case ArrayIsset:
+  case AKExistsArr:
+    return hack_arr_compat_may_raise(inst, may_load_store(AElemAny, AEmpty));
+
+  case ArrayIdx:
+    return hack_arr_compat_may_raise(
+      inst,
+      may_load_store(AElemAny | ARefAny, AEmpty)
+    );
+
   case DictGetQuiet:
   case DictIsset:
   case DictEmptyElem:
@@ -1126,7 +1144,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case KeysetIsset:
   case KeysetEmptyElem:
   case KeysetIdx:
-  case AKExistsArr:
   case AKExistsDict:
   case AKExistsKeyset:
     return may_load_store(AElemAny, AEmpty);
@@ -1141,10 +1158,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NSameKeyset:
     return may_load_store(AElemAny, AEmpty);
 
-  case ArrayIdx:
-    return may_load_store(AElemAny | ARefAny, AEmpty);
   case AKExistsObj:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_raise(inst, may_load_store(AHeapAny, AHeapAny));
 
   //////////////////////////////////////////////////////////////////////
   // Member instructions
@@ -1778,8 +1793,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StringGet:      // raise_notice
   case OrdStrIdx:      // raise_notice
   case ArrayAdd:       // decrefs source
-  case AddElemIntKey:  // decrefs value
-  case AddElemStrKey:  // decrefs value
+  case AddElemIntKey:
+  case AddElemStrKey:
   case AddNewElem:     // decrefs value
   case DictAddElemIntKey:  // decrefs value
   case DictAddElemStrKey:  // decrefs value

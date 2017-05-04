@@ -1,0 +1,142 @@
+=============== get ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 6
+
+Notice: Undefined index: 10 in %s/intlike.php on line 6
+NULL
+=============== isset===============================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 8
+bool(false)
+=============== akey-exists=========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 10
+bool(false)
+=============== idx ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 12
+NULL
+=============== null-get ===========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 14
+string(3) "def"
+=============== set ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 16
+=============== get ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 6
+int(3)
+=============== isset===============================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 8
+bool(true)
+=============== akey-exists=========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 10
+bool(true)
+=============== idx ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 12
+int(3)
+=============== null-get ===========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 14
+int(3)
+=============== set ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 16
+=============== get ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 6
+string(3) "abc"
+=============== isset===============================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 8
+bool(true)
+=============== akey-exists=========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 10
+bool(true)
+=============== idx ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 12
+string(3) "abc"
+=============== null-get ===========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 14
+string(3) "abc"
+=============== set ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 16
+=============== get ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 22
+
+Notice: Undefined index: 2 in %s/intlike.php on line 22
+NULL
+=============== isset===============================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 24
+bool(false)
+=============== akey-exists=========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 26
+bool(false)
+=============== idx ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 28
+NULL
+=============== null-get ===========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 30
+string(3) "def"
+=============== set ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 32
+=============== get ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 22
+int(3)
+=============== isset===============================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 24
+bool(true)
+=============== akey-exists=========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 26
+bool(true)
+=============== idx ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 28
+int(3)
+=============== null-get ===========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 30
+int(3)
+=============== set ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 32
+=============== get ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 22
+string(3) "abc"
+=============== isset===============================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 24
+bool(true)
+=============== akey-exists=========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 26
+bool(true)
+=============== idx ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 28
+string(3) "abc"
+=============== null-get ===========================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 30
+string(3) "abc"
+=============== set ================================
+
+Notice: Hack Array Compat: Intish index cast in %s/intlike.php on line 32

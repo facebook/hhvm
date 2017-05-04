@@ -376,12 +376,24 @@ SSATmp* opt_in_array(IRGS& env, const ParamPrep& params) {
 
   auto const needle = params[0].value;
   auto const array = flipped.toArray();
-  return gen(
-    env,
-    AKExistsArr,
-    cns(env, ArrayData::GetScalarArray(array.get())),
-    needle
-  );
+  if (RuntimeOption::EvalHackArrCompatNotices) {
+    // AKExistsArr can throw with HackArrCompatNotices enabled, so we need to
+    // manually provide a catch trace.
+    return gen(
+      env,
+      AKExistsArr,
+      make_opt_catch(env, params),
+      cns(env, ArrayData::GetScalarArray(array.get())),
+      needle
+    );
+  } else {
+    return gen(
+      env,
+      AKExistsArr,
+      cns(env, ArrayData::GetScalarArray(array.get())),
+      needle
+    );
+  }
 }
 
 SSATmp* opt_get_class(IRGS& env, const ParamPrep& params) {

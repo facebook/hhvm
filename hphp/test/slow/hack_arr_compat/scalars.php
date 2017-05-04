@@ -37,6 +37,19 @@ function test_add() {
   var_dump([1, 2, 3, 4, 5] + [1, 2, 3]);
 }
 
+function test_intlike_keys() {
+  var_dump(['0' => 1]);
+  var_dump(['0' => 1, 1 => 2, 2 => 3, 3 => 4]);
+  var_dump([0 => 1, 1 => 2, '2' => 3, 3 => 4]);
+  var_dump([0 => 1, 1 => 2, 2 => 3, '3' => 4]);
+
+  var_dump(['10' => 10]);
+  var_dump(['10' => 10, 20 => 20, 30 => 30]);
+  var_dump([10 => 10, '20' => 20, 30 => 30]);
+  var_dump([10 => 10, 20 => 20, '30' => 30]);
+}
+
 test_keys();
 test_cmp();
 test_add();
+test_intlike_keys();

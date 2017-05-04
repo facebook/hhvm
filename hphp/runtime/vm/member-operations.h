@@ -174,26 +174,33 @@ inline const TypedValue* ElemEmptyish() {
   return &immutable_null_base;
 }
 
-template<MOpMode mode>
+template<MOpMode mode, bool intishWarn>
 inline const TypedValue* ElemArrayPre(ArrayData* base, int64_t key) {
   return mode == MOpMode::Warn ? base->nvTryGet(key) : base->nvGet(key);
 }
 
-template<MOpMode mode>
+template<MOpMode mode, bool intishWarn>
 inline const TypedValue* ElemArrayPre(ArrayData* base, StringData* key) {
   auto constexpr warn = mode == MOpMode::Warn;
   int64_t n;
   assert(base->isPHPArray());
-  return key->isStrictlyInteger(n)
-    ? (warn ? base->nvTryGet(n) : base->nvGet(n))
-    : (warn ? base->nvTryGet(key) : base->nvGet(key));
+  if (key->isStrictlyInteger(n)) {
+    if (intishWarn) raise_intish_index_cast();
+    return warn ? base->nvTryGet(n) : base->nvGet(n);
+  } else {
+    return warn ? base->nvTryGet(key) : base->nvGet(key);
+  }
 }
 
-template<MOpMode mode>
+template<MOpMode mode, bool intishWarn>
 inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return ElemArrayPre<mode>(base, key.m_data.num);
-  if (isStringType(dt)) return ElemArrayPre<mode>(base, key.m_data.pstr);
+  if (isIntType(dt))    {
+    return ElemArrayPre<mode, false>(base, key.m_data.num);
+  }
+  if (isStringType(dt)) {
+    return ElemArrayPre<mode, intishWarn>(base, key.m_data.pstr);
+  }
 
   // TODO(#3888164): Array elements can never be KindOfUninit.  This API should
   // be changed.
@@ -204,11 +211,11 @@ inline const TypedValue* ElemArrayPre(ArrayData* base, TypedValue key) {
 /**
  * Elem when base is an Array
  */
-template<MOpMode mode, KeyType keyType>
+template<MOpMode mode, KeyType keyType, bool intishWarn>
 inline const TypedValue* ElemArray(ArrayData* base, key_type<keyType> key) {
   assert(base->isPHPArray());
 
-  auto result = ElemArrayPre<mode>(base, key);
+  auto result = ElemArrayPre<mode, intishWarn>(base, key);
 
   if (UNLIKELY(result == nullptr)) {
     if (mode == MOpMode::Warn) {
@@ -418,7 +425,7 @@ inline const TypedValue* ElemObject(TypedValue& tvRef,
 /**
  * $result = $base[$key];
  */
-template<MOpMode mode, KeyType keyType>
+template<MOpMode mode, KeyType keyType, bool intishWarn>
 NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
                                         TypedValue* base,
                                         key_type<keyType> key) {
@@ -455,7 +462,7 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
       return ElemKeyset<mode, keyType>(base->m_data.parr, key);
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemArray<mode, keyType>(base->m_data.parr, key);
+      return ElemArray<mode, keyType, intishWarn>(base->m_data.parr, key);
     case KindOfObject:
       return ElemObject<mode, keyType>(tvRef, base, key);
     case KindOfRef:
@@ -468,7 +475,7 @@ NEVER_INLINE const TypedValue* ElemSlow(TypedValue& tvRef,
  * Fast path for Elem assuming base is an Array.  Does not unbox the returned
  * pointer.
  */
-template<MOpMode mode, KeyType keyType = KeyType::Any>
+template<MOpMode mode, bool intishWarn, KeyType keyType = KeyType::Any>
 inline const TypedValue* Elem(TypedValue& tvRef,
                               TypedValue* base,
                               key_type<keyType> key) {
@@ -476,7 +483,7 @@ inline const TypedValue* Elem(TypedValue& tvRef,
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
-    return ElemArray<mode, keyType>(base->m_data.parr, key);
+    return ElemArray<mode, keyType, intishWarn>(base->m_data.parr, key);
   }
   if (LIKELY(tvIsVecArray(base))) {
     return ElemVec<mode, keyType>(base->m_data.parr, key);
@@ -488,49 +495,88 @@ inline const TypedValue* Elem(TypedValue& tvRef,
     return ElemKeyset<mode, keyType>(base->m_data.parr, key);
   }
 
-  return ElemSlow<mode, keyType>(tvRef, base, key);
+  return ElemSlow<mode, keyType, intishWarn>(tvRef, base, key);
 }
 
-template<bool reffy, KeyType kt>
-inline TypedValue* ElemDArrayPre(Array& base, key_type<kt> key) {
+template<MOpMode mode, bool reffy, bool intishWarn>
+inline TypedValue* ElemDArrayPre(TypedValue* base, int64_t key, bool& defined) {
+  auto* oldArr = base->m_data.parr;
+
+  defined = (mode != MOpMode::Warn) || oldArr->exists(key);
+  auto const r = reffy
+    ? oldArr->lvalRef(key, oldArr->cowCheck())
+    : oldArr->lval(key, oldArr->cowCheck());
+
+  if (r.arr_base() != oldArr) {
+    base->m_type = KindOfArray;
+    base->m_data.parr = r.arr_base();
+    assertx(cellIsPlausible(*base));
+    decRefArr(oldArr);
+  }
+
+  return r.tv();
+}
+
+template<MOpMode mode, bool reffy, bool intishWarn>
+inline TypedValue* ElemDArrayPre(TypedValue* base, StringData* key,
+                                 bool& defined) {
+  auto* oldArr = base->m_data.parr;
+
+  auto const r = [&]{
+    auto const cow = oldArr->cowCheck();
+    int64_t n;
+    if (oldArr->convertKey(key, n, intishWarn)) {
+      defined = (mode != MOpMode::Warn) || oldArr->exists(n);
+      return reffy ? oldArr->lvalRef(n, cow) : oldArr->lval(n, cow);
+    } else {
+      defined = (mode != MOpMode::Warn) || oldArr->exists(key);
+      return reffy ? oldArr->lvalRef(key, cow) : oldArr->lval(key, cow);
+    }
+  }();
+
+  if (r.arr_base() != oldArr) {
+    base->m_type = KindOfArray;
+    base->m_data.parr = r.arr_base();
+    assertx(cellIsPlausible(*base));
+    decRefArr(oldArr);
+  }
+  return r.tv();
+}
+
+template<MOpMode mode, bool reffy, bool intishWarn>
+inline TypedValue* ElemDArrayPre(TypedValue* base, TypedValue key,
+                                 bool& defined) {
+  auto const dt = key.m_type;
+  if (isIntType(dt)) {
+    return ElemDArrayPre<mode, reffy, false>(base, key.m_data.num, defined);
+  }
+  if (isStringType(dt)) {
+    return ElemDArrayPre<mode, reffy, intishWarn>(
+      base, key.m_data.pstr, defined
+    );
+  }
+  auto& arr = tvAsVariant(base).asArrRef();
+  defined = (mode != MOpMode::Warn) || arr.exists(tvAsCVarRef(&key));
   return reffy ?
-    const_cast<TypedValue*>(base.lvalAtRef(keyAsValue(key)).asTypedValue()) :
-    const_cast<TypedValue*>(base.lvalAt(keyAsValue(key)).asTypedValue());
-}
-
-template<>
-inline TypedValue*
-ElemDArrayPre<true, KeyType::Any>(Array& base, TypedValue key) {
-  if (key.m_type == KindOfInt64) {
-    return ElemDArrayPre<true, KeyType::Int>(base, key.m_data.num);
-  }
-  return const_cast<TypedValue*>(
-    base.lvalAtRef(tvAsCVarRef(&key)).asTypedValue()
-  );
-}
-
-template<>
-inline TypedValue*
-ElemDArrayPre<false, KeyType::Any>(Array& base, TypedValue key) {
-  if (key.m_type == KindOfInt64) {
-    return ElemDArrayPre<false, KeyType::Int>(base, key.m_data.num);
-  }
-  return const_cast<TypedValue*>(
-    base.lvalAt(tvAsCVarRef(&key)).asTypedValue()
-  );
+    const_cast<TypedValue*>(arr.lvalAtRef(tvAsCVarRef(&key)).asTypedValue()) :
+    const_cast<TypedValue*>(arr.lvalAt(tvAsCVarRef(&key)).asTypedValue());
 }
 
 /**
  * ElemD when base is an Array
  */
-template<MOpMode mode, bool reffy, KeyType keyType>
+template<MOpMode mode, bool reffy, bool intishWarn, KeyType keyType>
 inline TypedValue* ElemDArray(TypedValue* base, key_type<keyType> key) {
-  auto& baseArr = tvAsVariant(base).asArrRef();
-  assertx(baseArr.isPHPArray());
-  auto constexpr warn = mode == MOpMode::Warn;
-  auto const defined = !warn || baseArr.exists(keyAsValue(key));
+  assertx(tvIsArray(base));
+  assertx(tvIsPlausible(*base));
 
-  auto* result = ElemDArrayPre<reffy, keyType>(baseArr, key);
+  bool defined;
+  auto* result = ElemDArrayPre<mode, reffy, intishWarn>(base, key, defined);
+
+  assertx(tvIsArray(base));
+  assertx(tvIsPlausible(*base));
+  assertx(result->m_type != KindOfUninit);
+
   if (!defined) {
     auto scratchKey = initScratchKey(key);
     raise_notice(Strings::UNDEFINED_INDEX,
@@ -759,7 +805,9 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
                                    SystemLib::s_ArrayObjectClass->nameStr());
     // ArrayObject should have the 'storage' property...
     assert(storage != nullptr);
-    return ElemDArray<mode, reffy, keyType>(storage->asTypedValue(), key);
+    return UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+      ? ElemDArray<mode, reffy, true, keyType>(storage->asTypedValue(), key)
+      : ElemDArray<mode, reffy, false, keyType>(storage->asTypedValue(), key);
   }
 
 
@@ -772,7 +820,8 @@ inline TypedValue* ElemDObject(TypedValue& tvRef, TypedValue* base,
  *
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
-template<MOpMode mode, bool reffy, KeyType keyType = KeyType::Any>
+template<MOpMode mode, bool reffy, bool intishWarn,
+         KeyType keyType = KeyType::Any>
 TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   assertx(mode == MOpMode::Define);
 
@@ -803,7 +852,7 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
       return ElemDKeyset<reffy, keyType>(base, key);
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemDArray<mode, reffy, keyType>(base, key);
+      return ElemDArray<mode, reffy, intishWarn, keyType>(base, key);
     case KindOfObject:
       return ElemDObject<mode, reffy, keyType>(tvRef, base, key);
     case KindOfRef:
@@ -812,33 +861,75 @@ TypedValue* ElemD(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   unknownBaseType(base);
 }
 
-template<KeyType kt>
-inline TypedValue* ElemUArrayImpl(Array& base, key_type<kt> key) {
-  return base.lvalAt(keyAsValue(key)).asTypedValue();
+template <bool intishWarn>
+inline TypedValue* ElemUArrayImpl(TypedValue* base, int64_t key) {
+  auto* oldArr = base->m_data.parr;
+  if (!oldArr->exists(key)) return const_cast<TypedValue*>(ElemEmptyish());
+  auto const r = oldArr->lval(key, oldArr->cowCheck());
+  if (r.arr_base() != oldArr) {
+    base->m_type = KindOfArray;
+    base->m_data.parr = r.arr_base();
+    assertx(cellIsPlausible(*base));
+    decRefArr(oldArr);
+  }
+  return r.tv();
 }
 
-template<>
-inline TypedValue* ElemUArrayImpl<KeyType::Any>(Array& base, TypedValue key) {
-  if (key.m_type == KindOfInt64) {
-    return ElemUArrayImpl<KeyType::Int>(base, key.m_data.num);
+template <bool intishWarn>
+inline TypedValue* ElemUArrayImpl(TypedValue* base, StringData* key) {
+  auto* oldArr = base->m_data.parr;
+  int64_t n;
+  if (oldArr->convertKey(key, n, intishWarn)) {
+    if (!oldArr->exists(n)) return const_cast<TypedValue*>(ElemEmptyish());
+    auto const r = oldArr->lval(n, oldArr->cowCheck());
+    if (r.arr_base() != oldArr) {
+      base->m_type = KindOfArray;
+      base->m_data.parr = r.arr_base();
+      assertx(cellIsPlausible(*base));
+      decRefArr(oldArr);
+    }
+    return r.tv();
+  } else {
+    if (!oldArr->exists(key)) return const_cast<TypedValue*>(ElemEmptyish());
+    auto const r = oldArr->lval(key, oldArr->cowCheck());
+    if (r.arr_base() != oldArr) {
+      base->m_type = KindOfArray;
+      base->m_data.parr = r.arr_base();
+      assertx(cellIsPlausible(*base));
+      decRefArr(oldArr);
+    }
+    return r.tv();
   }
-  return base.lvalAt(tvAsCVarRef(&key)).asTypedValue();
+}
+
+template <bool intishWarn>
+inline TypedValue* ElemUArrayImpl(TypedValue* base, TypedValue key) {
+  auto const dt = key.m_type;
+  if (isIntType(dt)) {
+    return ElemUArrayImpl<false>(base, key.m_data.num);
+  }
+  if (isStringType(dt)) {
+    return ElemUArrayImpl<intishWarn>(base, key.m_data.pstr);
+  }
+  auto& arr = tvAsVariant(base).asArrRef();
+  if (!arr.exists(keyAsValue(key))) {
+    return const_cast<TypedValue*>(ElemEmptyish());
+  }
+  return arr.lvalAt(tvAsCVarRef(&key)).asTypedValue();
 }
 
 /**
  * ElemU when base is an Array
  */
-template <KeyType keyType>
+template <bool intishWarn, KeyType keyType>
 inline TypedValue* ElemUArray(TypedValue* base, key_type<keyType> key) {
-  auto& baseArr = tvAsVariant(base).asArrRef();
-  assertx(baseArr.isPHPArray());
-  if (baseArr.exists(keyAsValue(key))) {
-    return ElemUArrayImpl<keyType>(baseArr, key);
-  }
-
-  // Unset{Elem,Prop} do nothing when the base is InitNull, so this sketchy but
-  // should be okay.
-  return const_cast<TypedValue*>(ElemEmptyish());
+  assertx(tvIsArray(base));
+  assertx(tvIsPlausible(*base));
+  auto* result = ElemUArrayImpl<intishWarn>(base, key);
+  assertx(tvIsArray(base));
+  assertx(tvIsPlausible(*base));
+  assertx(result->m_type != KindOfUninit);
+  return result;
 }
 
 /**
@@ -986,7 +1077,7 @@ inline TypedValue* ElemUObject(TypedValue& tvRef, TypedValue* base,
  *
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
-template <KeyType keyType = KeyType::Any>
+template <bool intishWarn, KeyType keyType = KeyType::Any>
 TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -1016,7 +1107,7 @@ TypedValue* ElemU(TypedValue& tvRef, TypedValue* base, key_type<keyType> key) {
       return ElemUKeyset<keyType>(base, key);
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemUArray<keyType>(base, key);
+      return ElemUArray<intishWarn, keyType>(base, key);
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
     case KindOfRef:
@@ -1336,49 +1427,56 @@ arrayRefShuffle(ArrayData* oldData, ArrayData* newData, TypedValue* base) {
 /**
  * SetElem helper with Array base and Int64 key
  */
-template<bool setResult>
+template<bool setResult, bool intishWarn>
 inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   int64_t key,
                                   Cell* value,
                                   bool copy) {
-  return a->set(key, cellAsCVarRef(*value), copy);
+  return a->set(key, *value, copy);
 }
 
 /**
  * SetElem helper with Array base and String key
  */
-template<bool setResult>
+template<bool setResult, bool intishWarn>
 inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   StringData* key,
                                   Cell* value,
                                   bool copy) {
   int64_t n;
   assert(a->isPHPArray());
-  return key->isStrictlyInteger(n)
-    ? a->set(n, cellAsCVarRef(*value), copy)
-    : a->set(StrNR(key), cellAsCVarRef(*value), copy);
+  if (key->isStrictlyInteger(n)) {
+    if (intishWarn) raise_intish_index_cast();
+    return a->set(n, *value, copy);
+  } else {
+    return a->set(key, *value, copy);
+  }
 }
 
-template<bool setResult>
+template<bool setResult, bool intishWarn>
 inline ArrayData* SetElemArrayPre(ArrayData* a,
                                   TypedValue key,
                                   Cell* value,
                                   bool copy) {
   if (isStringType(key.m_type)) {
-    return SetElemArrayPre<setResult>(a, key.m_data.pstr, value, copy);
+    return SetElemArrayPre<setResult, intishWarn>(
+      a, key.m_data.pstr, value, copy
+    );
   }
   if (key.m_type == KindOfInt64) {
-    return SetElemArrayPre<setResult>(a, key.m_data.num, value, copy);
+    return SetElemArrayPre<setResult, false>(
+      a, key.m_data.num, value, copy
+    );
   }
   if (RuntimeOption::EvalHackArrCompatNotices) {
     raiseHackArrCompatImplicitArrayKey(&key);
   }
   if (isNullType(key.m_type)) {
-    return a->set(staticEmptyString(), cellAsCVarRef(*value), copy);
+    return a->set(staticEmptyString(), *value, copy);
   }
   if (!isArrayLikeType(key.m_type) && key.m_type != KindOfObject) {
-    return SetElemArrayPre<setResult>(a, tvAsCVarRef(&key).toInt64(),
-                                      value, copy);
+    return SetElemArrayPre<setResult, false>(a, tvAsCVarRef(&key).toInt64(),
+                                             value, copy);
   }
 
   raise_warning("Illegal offset type");
@@ -1395,7 +1493,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
 /**
  * SetElem when base is an Array
  */
-template <bool setResult, KeyType keyType>
+template <bool setResult, KeyType keyType, bool intishWarn>
 inline void SetElemArray(TypedValue* base, key_type<keyType> key,
                          Cell* value) {
   assertx(tvIsArray(base));
@@ -1405,7 +1503,7 @@ inline void SetElemArray(TypedValue* base, key_type<keyType> key,
   bool copy = a->cowCheck() ||
     (tvIsArray(value) && value->m_data.parr == a);
 
-  auto* newData = SetElemArrayPre<setResult>(a, key, value, copy);
+  auto* newData = SetElemArrayPre<setResult, intishWarn>(a, key, value, copy);
   assertx(newData->isPHPArray());
 
   arrayRefShuffle<true, KindOfArray>(a, newData, base);
@@ -1512,7 +1610,7 @@ inline void SetElemDict(TypedValue* base, key_type<keyType> key,
  * SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
  * get around.
  */
-template <bool setResult, KeyType keyType>
+template <bool setResult, KeyType keyType, bool intishWarn>
 NEVER_INLINE
 StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
   base = tvToCell(base);
@@ -1547,7 +1645,7 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
       throwInvalidKeysetOperation();
     case KindOfPersistentArray:
     case KindOfArray:
-      SetElemArray<setResult, keyType>(base, key, value);
+      SetElemArray<setResult, keyType, intishWarn>(base, key, value);
       return nullptr;
     case KindOfObject:
       SetElemObject<keyType>(base, key, value);
@@ -1561,13 +1659,13 @@ StringData* SetElemSlow(TypedValue* base, key_type<keyType> key, Cell* value) {
 /**
  * Fast path for SetElem assuming base is an Array
  */
-template <bool setResult, KeyType keyType = KeyType::Any>
+template <bool setResult, bool intishWarn, KeyType keyType = KeyType::Any>
 inline StringData* SetElem(TypedValue* base, key_type<keyType> key,
                            Cell* value) {
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
-    SetElemArray<setResult, keyType>(base, key, value);
+    SetElemArray<setResult, keyType, intishWarn>(base, key, value);
     return nullptr;
   }
   if (LIKELY(tvIsVecArray(base))) {
@@ -1578,7 +1676,7 @@ inline StringData* SetElem(TypedValue* base, key_type<keyType> key,
     SetElemDict<setResult, keyType>(base, key, value);
     return nullptr;
   }
-  return SetElemSlow<setResult, keyType>(base, key, value);
+  return SetElemSlow<setResult, keyType, intishWarn>(base, key, value);
 }
 
 /**
@@ -1785,6 +1883,7 @@ inline TypedValue* SetOpElemScalar(TypedValue& tvRef) {
 /**
  * $result = ($base[$x] <op>= $y)
  */
+template <bool intishWarn>
 inline TypedValue* SetOpElem(TypedValue& tvRef,
                              SetOpOp op, TypedValue* base,
                              TypedValue key, Cell* rhs) {
@@ -1847,7 +1946,7 @@ inline TypedValue* SetOpElem(TypedValue& tvRef,
       }
       TypedValue* result;
       auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
-      result = ElemDArray<mode, false, KeyType::Any>(base, key);
+      result = ElemDArray<mode, false, intishWarn, KeyType::Any>(base, key);
       result = tvToCell(result);
       setopBody(result, op, rhs);
       return result;
@@ -2032,6 +2131,7 @@ inline Cell IncDecElemScalar() {
   return make_tv<KindOfNull>();
 }
 
+template <bool intishWarn>
 inline Cell IncDecElem(
   IncDecOp op,
   TypedValue* base,
@@ -2089,7 +2189,8 @@ inline Cell IncDecElem(
         raiseHackArrCompatMissingIncDec();
       }
       auto constexpr mode = MoreWarnings ? MOpMode::Warn : MOpMode::None;
-      auto result = ElemDArray<mode, false, KeyType::Any>(base, key);
+      auto result =
+        ElemDArray<mode, false, intishWarn, KeyType::Any>(base, key);
       return IncDecBody(op, tvToCell(result));
     }
 
@@ -2199,6 +2300,7 @@ inline Cell IncDecNewElem(
 /**
  * UnsetElemArray when key is an Int64
  */
+template <bool intishWarn>
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
                                     bool copy) {
   return a->remove(key, copy);
@@ -2207,22 +2309,27 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
 /**
  * UnsetElemArray when key is a String
  */
+template <bool intishWarn>
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
                                     bool copy) {
   int64_t n;
   assert(a->isPHPArray());
-  return !key->isStrictlyInteger(n)
-    ? a->remove(StrNR(key), copy)
-    : a->remove(n, copy);
+  if (key->isStrictlyInteger(n)) {
+    if (intishWarn) raise_intish_index_cast();
+    return a->remove(n, copy);
+  } else {
+    return a->remove(key, copy);
+  }
 }
 
+template <bool intishWarn>
 inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
                                     bool copy) {
   if (isStringType(key.m_type)) {
-    return UnsetElemArrayPre(a, key.m_data.pstr, copy);
+    return UnsetElemArrayPre<intishWarn>(a, key.m_data.pstr, copy);
   }
   if (key.m_type == KindOfInt64) {
-    return UnsetElemArrayPre(a, key.m_data.num, copy);
+    return UnsetElemArrayPre<false>(a, key.m_data.num, copy);
   }
   VarNR varKey = tvAsCVarRef(&key).toKey(a);
   if (varKey.isNull()) {
@@ -2234,12 +2341,12 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
 /**
  * UnsetElem when base is an Array
  */
-template <KeyType keyType>
+template <KeyType keyType, bool intishWarn>
 inline void UnsetElemArray(TypedValue* base, key_type<keyType> key) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = base->m_data.parr;
-  ArrayData* a2 = UnsetElemArrayPre(a, key, a->cowCheck());
+  ArrayData* a2 = UnsetElemArrayPre<intishWarn>(a, key, a->cowCheck());
 
   if (a2 != a) {
     base->m_type = KindOfArray;
@@ -2365,7 +2472,7 @@ inline void UnsetElemKeyset(TypedValue* base, key_type<keyType> key) {
 /**
  * unset($base[$member])
  */
-template <KeyType keyType>
+template <KeyType keyType, bool intishWarn>
 NEVER_INLINE
 void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
   base = tvToCell(base);
@@ -2402,7 +2509,7 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
 
     case KindOfPersistentArray:
     case KindOfArray:
-      UnsetElemArray<keyType>(base, key);
+      UnsetElemArray<keyType, intishWarn>(base, key);
       return;
 
     case KindOfObject: {
@@ -2424,12 +2531,12 @@ void UnsetElemSlow(TypedValue* base, key_type<keyType> key) {
 /**
  * Fast path for UnsetElem assuming base is an Array
  */
-template <KeyType keyType = KeyType::Any>
+template <bool intishWarn, KeyType keyType = KeyType::Any>
 inline void UnsetElem(TypedValue* base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
-    return UnsetElemArray<keyType>(base, key);
+    return UnsetElemArray<keyType, intishWarn>(base, key);
   }
   if (LIKELY(tvIsVecArray(base))) {
     return UnsetElemVec<keyType>(base, key);
@@ -2440,7 +2547,7 @@ inline void UnsetElem(TypedValue* base, key_type<keyType> key) {
   if (LIKELY(tvIsKeyset(base))) {
     return UnsetElemKeyset<keyType>(base, key);
   }
-  return UnsetElemSlow<keyType>(base, key);
+  return UnsetElemSlow<keyType, intishWarn>(base, key);
 }
 
 /**
@@ -2512,10 +2619,10 @@ bool IssetEmptyElemString(TypedValue* base, key_type<keyType> key) {
 /**
  * IssetEmptyElem when base is an Array
  */
-template <bool useEmpty, KeyType keyType>
+template <bool useEmpty, KeyType keyType, bool intishWarn>
 bool IssetEmptyElemArray(ArrayData* a, key_type<keyType> key) {
   assertx(a->isPHPArray());
-  auto const result = ElemArray<MOpMode::None, keyType>(a, key);
+  auto const result = ElemArray<MOpMode::None, keyType, intishWarn>(a, key);
   if (useEmpty) {
     return !cellToBool(*tvToCell(result));
   }
@@ -2564,7 +2671,7 @@ bool IssetEmptyElemKeyset(ArrayData* a, key_type<keyType> key) {
 /**
  * isset/empty($base[$key])
  */
-template <bool useEmpty, KeyType keyType>
+template <bool useEmpty, KeyType keyType, bool intishWarn>
 NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
   base = tvToCell(base);
   assertx(cellIsPlausible(*base));
@@ -2596,7 +2703,9 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
 
     case KindOfPersistentArray:
     case KindOfArray:
-      return IssetEmptyElemArray<useEmpty, keyType>(base->m_data.parr, key);
+      return IssetEmptyElemArray<useEmpty, keyType, intishWarn>(
+        base->m_data.parr, key
+      );
 
     case KindOfObject:
       return IssetEmptyElemObj<useEmpty, keyType>(base->m_data.pobj, key);
@@ -2610,12 +2719,14 @@ NEVER_INLINE bool IssetEmptyElemSlow(TypedValue* base, key_type<keyType> key) {
 /**
  * Fast path for IssetEmptyElem assuming base is an Array
  */
-template <bool useEmpty, KeyType keyType = KeyType::Any>
+template <bool useEmpty, bool intishWarn, KeyType keyType = KeyType::Any>
 bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
 
   if (LIKELY(tvIsArray(base))) {
-    return IssetEmptyElemArray<useEmpty, keyType>(base->m_data.parr, key);
+    return IssetEmptyElemArray<useEmpty, keyType, intishWarn>(
+      base->m_data.parr, key
+    );
   }
   if (LIKELY(tvIsVecArray(base))) {
     return IssetEmptyElemVec<useEmpty, keyType>(base->m_data.parr, key);
@@ -2626,7 +2737,7 @@ bool IssetEmptyElem(TypedValue* base, key_type<keyType> key) {
   if (LIKELY(tvIsKeyset(base))) {
     return IssetEmptyElemKeyset<useEmpty, keyType>(base->m_data.parr, key);
   }
-  return IssetEmptyElemSlow<useEmpty, keyType>(base, key);
+  return IssetEmptyElemSlow<useEmpty, keyType, intishWarn>(base, key);
 }
 
 template<MOpMode mode>

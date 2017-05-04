@@ -47,8 +47,12 @@ inline StringData* getStringKey(const Cell* cell) {
 }
 }
 
-inline bool ArrayData::convertKey(const StringData* key, int64_t& i) const {
-  return key->isStrictlyInteger(i) && useWeakKeys();
+ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
+                                         int64_t& i,
+                                         bool notice) const {
+  auto const result = key->isStrictlyInteger(i) && useWeakKeys();
+  if (UNLIKELY(result && notice)) raise_intish_index_cast();
+  return result;
 }
 
 inline bool ArrayData::exists(const String& k) const {

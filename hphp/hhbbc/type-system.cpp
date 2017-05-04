@@ -2522,8 +2522,12 @@ ArrKey disect_array_key(const Type& keyTy) {
   if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
     int64_t i;
     if (keyTy.m_data.sval->isStrictlyInteger(i)) {
-      ret.i = i;
-      ret.type = ival(i);
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        ret.type = TInitCell;
+      } else {
+        ret.i = i;
+        ret.type = ival(i);
+      }
     } else {
       ret.s = keyTy.m_data.sval;
       ret.type = keyTy;

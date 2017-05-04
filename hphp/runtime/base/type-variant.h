@@ -1344,7 +1344,12 @@ struct VarNR : private TypedValueAux {
   static VarNR MakeKey(const String& s) {
     if (s.empty()) return VarNR(staticEmptyString());
     int64_t n;
-    if (s.get()->isStrictlyInteger(n)) return VarNR(n);
+    if (UNLIKELY(s.get()->isStrictlyInteger(n))) {
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        raise_intish_index_cast();
+      }
+      return VarNR(n);
+    }
     return VarNR(s);
   }
 

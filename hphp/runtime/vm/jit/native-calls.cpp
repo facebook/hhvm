@@ -240,8 +240,6 @@ static CallMap s_callMap {
     {ConcatStr4,         concat_s4, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
 
-    {AddElemStrKey,      addElemStringKeyHelper, DSSA, SSync,
-                           {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddElemIntKey,      addElemIntKeyHelper, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}, {TV, 2}}},
     {AddNewElem,         addNewElemHelper, DSSA, SSync,
@@ -482,10 +480,6 @@ static CallMap s_callMap {
                            {{SSA, 0}}},
 
     /* MInstrTranslator helpers */
-    {SetOpElem, MInstrHelpers::setOpElem, DTV, SSync,
-                 {{SSA, 0}, {TV, 1}, {TV, 2}, extra(&SetOpData::op)}},
-    {IncDecElem, MInstrHelpers::incDecElem, DTV, SSync,
-                 {{SSA, 0}, {TV, 1}, extra(&IncDecData::op)}},
     {SetNewElem, setNewElem, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemArray, setNewElemArray, DNone, SSync, {{SSA, 0}, {TV, 1}}},
     {SetNewElemVec, setNewElemVec, DNone, SSync, {{SSA, 0}, {TV, 1}}},
@@ -496,10 +490,6 @@ static CallMap s_callMap {
     {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {VectorIsset, MInstrHelpers::vectorIsset, DSSA, SSync,
                   {{SSA, 0}, {SSA, 1}}},
-    {BindElem, MInstrHelpers::bindElemC, DNone, SSync,
-                 {{SSA, 0}, {TV, 1}, {SSA, 2}}},
-    {SetWithRefElem, MInstrHelpers::setWithRefElem, DNone, SSync,
-                 {{SSA, 0}, {TV, 1}, {TV, 2}}},
     {ElemVecD, MInstrHelpers::elemVecID, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ElemVecU, MInstrHelpers::elemVecIU, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ThrowOutOfBounds, throwOOBException, DNone, SSync, {{TV, 0}, {TV, 1}}},

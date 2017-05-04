@@ -4055,7 +4055,7 @@ bool checkKeys(ExpressionPtr init_expr, bool check_size, Fun fun) {
  * MixedArray::SmallSize (12).
  */
 bool isPackedInit(ExpressionPtr init_expr, int* size,
-                  bool check_size = true) {
+                  bool check_size = true, bool hack_arr_compat = true) {
   *size = 0;
   return checkKeys<MixedArray::MaxMakeSize>(init_expr, check_size,
     [&](ArrayPairExpressionPtr ap) {
@@ -4071,10 +4071,15 @@ bool isPackedInit(ExpressionPtr init_expr, int* size,
           if (key.asInt64Val() != *size) return false;
         } else if (key.isBoolean()) {
           // Bool to Int conversion
+          if (hack_arr_compat &&
+              RuntimeOption::EvalHackArrCompatNotices) return false;
           if (static_cast<int>(key.asBooleanVal()) != *size) return false;
         } else {
           // Give up if it's not a string.
           if (!key.isString()) return false;
+
+          if (hack_arr_compat &&
+              RuntimeOption::EvalHackArrCompatNotices) return false;
 
           int64_t i; double d;
           auto numtype = key.getStringData()->isNumericWithVal(i, d, false);
@@ -10623,7 +10628,9 @@ void EmitterVisitor::emitArrayInit(Emitter& e, ExpressionListPtr el,
     return;
   }
 
-  if (isPackedInit(el, &nElms, false /* ignore size */)) {
+  if (isPackedInit(el, &nElms,
+                   false /* ignore size */,
+                   false /* hack arr compat */)) {
     e.NewArray(capacityHint);
   } else {
     e.NewMixedArray(capacityHint);

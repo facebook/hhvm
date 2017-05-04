@@ -140,7 +140,8 @@ public:
    */
   bool useWeakKeys() const { return isPHPArray(); }
 
-  bool convertKey(const StringData* key, int64_t& i) const;
+  bool convertKey(const StringData* key, int64_t& i,
+                  bool notice = RuntimeOption::EvalHackArrCompatNotices) const;
 
   /*
    * Return the capacity stored in the header. Not to be confused

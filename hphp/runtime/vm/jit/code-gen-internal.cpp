@@ -39,9 +39,13 @@ ArrayKeyInfo checkStrictlyInteger(Type arr, Type key) {
   if (key.hasConstVal()) {
     int64_t i;
     if (key.strVal()->isStrictlyInteger(i)) {
-      ret.converted    = true;
-      ret.type         = KeyType::Int;
-      ret.convertedInt = i;
+      if (!RuntimeOption::EvalHackArrCompatNotices) {
+        ret.converted    = true;
+        ret.type         = KeyType::Int;
+        ret.convertedInt = i;
+      } else {
+        ret.checkForInt = true;
+      }
     }
   } else {
     ret.checkForInt = true;

@@ -84,6 +84,7 @@ inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
+template <bool intishWarn>
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
@@ -156,6 +157,8 @@ RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+
+template <bool intishWarn>
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
@@ -214,12 +217,16 @@ bool methodExistsHelper(Class*, StringData*);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
+template<bool intishWarn>
 TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
+template <bool intishWarn>
 void bindElemC(TypedValue*, TypedValue, RefData*);
+template <bool intishWarn>
 void setWithRefElem(TypedValue*, TypedValue, TypedValue);
+template<bool intishWarn>
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
 void bindNewElem(TypedValue* base, RefData* val);
 TypedValue* elemVecID(TypedValue* base, int64_t key);

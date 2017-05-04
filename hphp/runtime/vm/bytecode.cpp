@@ -3346,19 +3346,35 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
       case MOpMode::None:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<MOpMode::None>(mstate.tvRef, mstate.base, key)
+          UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+            ? Elem<MOpMode::None, true>(mstate.tvRef, mstate.base, key)
+            : Elem<MOpMode::None, false>(mstate.tvRef, mstate.base, key)
         );
       case MOpMode::Warn:
         // We're not actually going to modify it, so this is "safe".
         return const_cast<TypedValue*>(
-          Elem<MOpMode::Warn>(mstate.tvRef, mstate.base, key)
+          UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+            ? Elem<MOpMode::Warn, true>(mstate.tvRef, mstate.base, key)
+            : Elem<MOpMode::Warn, false>(mstate.tvRef, mstate.base, key)
         );
       case MOpMode::Define:
-        return reffy
-          ? ElemD<MOpMode::Define, true>(mstate.tvRef, mstate.base, key)
-          : ElemD<MOpMode::Define, false>(mstate.tvRef, mstate.base, key);
+        if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+          return reffy
+            ? ElemD<MOpMode::Define, true, true>(mstate.tvRef, mstate.base,
+                                                 key)
+            : ElemD<MOpMode::Define, false, true>(mstate.tvRef, mstate.base,
+                                                  key);
+        } else {
+          return reffy
+            ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base,
+                                                  key)
+            : ElemD<MOpMode::Define, false, false>(mstate.tvRef, mstate.base,
+                                                   key);
+        }
       case MOpMode::Unset:
-        return ElemU(mstate.tvRef, mstate.base, key);
+        return UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+          ? ElemU<true>(mstate.tvRef, mstate.base, key)
+          : ElemU<false>(mstate.tvRef, mstate.base, key);
     }
     always_assert(false);
   }();
@@ -3457,9 +3473,15 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
           : IssetEmptyProp<false>(ctx, mstate.base, key);
       } else {
         assert(mcodeIsElem(mk.mcode));
-        result.m_data.num = op == QueryMOp::Empty
-          ? IssetEmptyElem<true>(mstate.base, key)
-          : IssetEmptyElem<false>(mstate.base, key);
+        if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+          result.m_data.num = op == QueryMOp::Empty
+            ? IssetEmptyElem<true, true>(mstate.base, key)
+            : IssetEmptyElem<false, true>(mstate.base, key);
+        } else {
+          result.m_data.num = op == QueryMOp::Empty
+            ? IssetEmptyElem<true, false>(mstate.base, key)
+            : IssetEmptyElem<false, false>(mstate.base, key);
+        }
       }
       break;
   }
@@ -3502,7 +3524,9 @@ OPTBLD_FLT_INLINE void iopSetM(intva_t nDiscard, MemberKey mk) {
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
-      auto const result = SetElem<true>(mstate.base, key, topC);
+      auto const result = UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+        ? SetElem<true, true>(mstate.base, key, topC)
+        : SetElem<true, false>(mstate.base, key, topC);
       if (result) {
         tvDecRefGen(topC);
         topC->m_type = KindOfString;
@@ -3527,7 +3551,9 @@ OPTBLD_INLINE void iopIncDecM(intva_t nDiscard, IncDecOp subop, MemberKey mk) {
   if (mcodeIsProp(mk.mcode)) {
     result = IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
   } else if (mcodeIsElem(mk.mcode)) {
-    result = IncDecElem(subop, mstate.base, key);
+    result = UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+      ? IncDecElem<true>(subop, mstate.base, key)
+      : IncDecElem<false>(subop, mstate.base, key);
   } else {
     result = IncDecNewElem(mstate.tvRef, subop, mstate.base);
   }
@@ -3545,7 +3571,9 @@ OPTBLD_INLINE void iopSetOpM(intva_t nDiscard, SetOpOp subop, MemberKey mk) {
     result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
                        mstate.base, key, rhs);
   } else if (mcodeIsElem(mk.mcode)) {
-    result = SetOpElem(mstate.tvRef, subop, mstate.base, key, rhs);
+    result = UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)
+      ? SetOpElem<true>(mstate.tvRef, subop, mstate.base, key, rhs)
+      : SetOpElem<false>(mstate.tvRef, subop, mstate.base, key, rhs);
   } else {
     result = SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs);
   }
@@ -3575,7 +3603,11 @@ OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
     UnsetProp(arGetContextClass(vmfp()), mstate.base, key);
   } else {
     assert(mcodeIsElem(mk.mcode));
-    UnsetElem(mstate.base, key);
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+      UnsetElem<true>(mstate.base, key);
+    } else {
+      UnsetElem<false>(mstate.base, key);
+    }
   }
 
   mFinal(mstate, nDiscard, folly::none);
@@ -3583,9 +3615,15 @@ OPTBLD_INLINE void iopUnsetM(intva_t nDiscard, MemberKey mk) {
 
 static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   auto& mstate = vmMInstrState();
-  mstate.base = UNLIKELY(value->m_type == KindOfRef)
-    ? ElemD<MOpMode::Define, true>(mstate.tvRef, mstate.base, key)
-    : ElemD<MOpMode::Define, false>(mstate.tvRef, mstate.base, key);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
+    mstate.base = UNLIKELY(value->m_type == KindOfRef)
+      ? ElemD<MOpMode::Define, true, true>(mstate.tvRef, mstate.base, key)
+      : ElemD<MOpMode::Define, false, true>(mstate.tvRef, mstate.base, key);
+  } else {
+    mstate.base = UNLIKELY(value->m_type == KindOfRef)
+      ? ElemD<MOpMode::Define, true, false>(mstate.tvRef, mstate.base, key)
+      : ElemD<MOpMode::Define, false, false>(mstate.tvRef, mstate.base, key);
+  }
   tvAsVariant(mstate.base).setWithRef(tvAsVariant(value));
 
   mFinal(mstate, 0, folly::none);

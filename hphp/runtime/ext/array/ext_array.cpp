@@ -204,6 +204,8 @@ TypedValue HHVM_FUNCTION(array_count_values,
 TypedValue HHVM_FUNCTION(array_fill_keys,
                          const Variant& keys,
                          const Variant& value) {
+  SuppressHackArrCompatNotices suppress;
+
   folly::Optional<ArrayInit> ai;
   auto ok = IterateV(*keys.asCell(),
                      [&](ArrayData* adata) {
@@ -264,6 +266,8 @@ TypedValue HHVM_FUNCTION(array_fill,
 
 TypedValue HHVM_FUNCTION(array_flip,
                          const Variant& trans) {
+  SuppressHackArrCompatNotices suppress;
+
   auto const& transCell = *trans.asCell();
   if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
@@ -1696,6 +1700,7 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
+      if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
       st->add(n);
     } else {
       st->add(s);
@@ -1720,6 +1725,7 @@ static inline bool checkSetHelper(const req::ptr<c_Set>& st,
   }
   int64_t n;
   if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
+    if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
     return st->contains(n);
   }
   return st->contains(s);
@@ -2008,6 +2014,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
+      if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
       mp->set(n, intOneTv);
     } else {
       mp->set(s, intOneTv);
@@ -2037,6 +2044,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
+      if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
       auto val = mp->get(n);
       if (val && val->m_data.num == pos) {
         assert(val->m_type == KindOfInt64);
@@ -2748,6 +2756,7 @@ bool HHVM_FUNCTION(uksort,
 TypedValue HHVM_FUNCTION(array_unique,
                          const Variant& array,
                          int sort_flags /* = 2 */) {
+  SuppressHackArrCompatNotices suppress;
   // NOTE, PHP array_unique accepts ArrayAccess objects as well,
   // which is not supported here.
   getCheckedArray(array);

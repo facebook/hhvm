@@ -226,7 +226,6 @@ bool canDCE(IRInstruction* inst) {
   case CountKeyset:
   case CountCollection:
   case Nop:
-  case AKExistsArr:
   case AKExistsDict:
   case AKExistsKeyset:
   case LdBindAddr:
@@ -258,8 +257,6 @@ bool canDCE(IRInstruction* inst) {
   case LdMBase:
   case MethodExists:
   case LdTVAux:
-  case ArrayIdx:
-  case ArrayIsset:
   case DictGetQuiet:
   case DictGetK:
   case DictIsset:
@@ -656,6 +653,11 @@ bool canDCE(IRInstruction* inst) {
   case MemoSet:
   case KillClsRef:
     return false;
+
+  case AKExistsArr:
+  case ArrayIsset:
+  case ArrayIdx:
+    return !RuntimeOption::EvalHackArrCompatNotices;
   }
   not_reached();
 }

@@ -124,6 +124,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
+template <bool intishWarn>
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
@@ -134,9 +135,13 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   // set will decRef any old value that may have been overwritten
   // if appropriate
   int64_t intkey;
-  ArrayData* retval = UNLIKELY(key->isStrictlyInteger(intkey)) ?
-                  ad->set(intkey, tvAsCVarRef(&value), copy) :
-                  ad->set(key, tvAsCVarRef(&value), copy);
+  ArrayData* retval;
+  if (UNLIKELY(key->isStrictlyInteger(intkey))) {
+    if (intishWarn) raise_intish_index_cast();
+    retval = ad->set(intkey, *tvToCell(&value), copy);
+  } else {
+    retval = ad->set(key, *tvToCell(&value), copy);
+  }
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
@@ -144,6 +149,11 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   tvDecRefGen(&value);
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
+
+template ArrayData*
+addElemStringKeyHelper<true>(ArrayData*, StringData*, TypedValue);
+template ArrayData*
+addElemStringKeyHelper<false>(ArrayData*, StringData*, TypedValue);
 
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
                                    int64_t key,
@@ -734,12 +744,18 @@ ALWAYS_INLINE
 TypedValue getDefaultIfNullCell(const TypedValue* tv, TypedValue& def) {
   return UNLIKELY(tv == nullptr) ? def : *tv;
 }
+
+template <bool intishWarn>
 NEVER_INLINE
 TypedValue arrayIdxSiSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
   int64_t i;
-  return getDefaultIfNullCell(
-    UNLIKELY(key->isStrictlyInteger(i)) ? a->nvGet(i) : a->nvGet(key), def);
+  if (UNLIKELY(key->isStrictlyInteger(i))) {
+    if (intishWarn) raise_intish_index_cast();
+    return getDefaultIfNullCell(a->nvGet(i), def);
+  } else {
+    return getDefaultIfNullCell(a->nvGet(key), def);
+  }
 }
 
 NEVER_INLINE
@@ -756,14 +772,21 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
 }
 
+template <bool intishWarn>
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow(a, key, def);
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow<intishWarn>(a, key, def);
   int64_t i;
-  return getDefaultIfNullCell(
-    UNLIKELY(key->isStrictlyInteger(i)) ?
-    MixedArray::NvGetInt(a, i) : MixedArray::NvGetStr(a, key), def);
+  if (UNLIKELY(key->isStrictlyInteger(i))) {
+    if (intishWarn) raise_intish_index_cast();
+    return getDefaultIfNullCell(MixedArray::NvGetInt(a, i), def);
+  } else {
+    return getDefaultIfNullCell(MixedArray::NvGetStr(a, key), def);
+  }
 }
+
+template TypedValue arrayIdxSi<false>(ArrayData*, StringData*, TypedValue);
+template TypedValue arrayIdxSi<true>(ArrayData*, StringData*, TypedValue);
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArray());
@@ -1000,13 +1023,17 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
 
 namespace MInstrHelpers {
 
+template <bool intishWarn>
 TypedValue setOpElem(TypedValue* base, TypedValue key,
                      Cell val, SetOpOp op) {
   TypedValue localTvRef;
-  auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val);
+  auto result = HPHP::SetOpElem<intishWarn>(localTvRef, op, base, key, &val);
 
   return cGetRefShuffle(localTvRef, result);
 }
+
+template TypedValue setOpElem<true>(TypedValue*, TypedValue, Cell, SetOpOp);
+template TypedValue setOpElem<false>(TypedValue*, TypedValue, Cell, SetOpOp);
 
 StringData* stringGetI(StringData* base, uint64_t x) {
   if (LIKELY(x < base->size())) {
@@ -1027,9 +1054,11 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return result ? !cellIsNull(result) : false;
 }
 
+template <bool intishWarn>
 void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   TypedValue localTvRef;
-  auto elem = HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, key);
+  auto elem =
+    HPHP::ElemD<MOpMode::Define, true, intishWarn>(localTvRef, base, key);
 
   if (UNLIKELY(elem == &localTvRef)) {
     // Skip binding a TypedValue that's about to be destroyed and just destroy
@@ -1041,22 +1070,33 @@ void bindElemC(TypedValue* base, TypedValue key, RefData* val) {
   tvBindRef(val, elem);
 }
 
+template void bindElemC<true>(TypedValue*, TypedValue, RefData*);
+template void bindElemC<false>(TypedValue*, TypedValue, RefData*);
+
+template <bool intishWarn>
 void setWithRefElem(TypedValue* base, TypedValue keyTV, TypedValue val) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(&keyTV);
   auto elem = UNLIKELY(val.m_type == KindOfRef)
-    ? HPHP::ElemD<MOpMode::Define, true>(localTvRef, base, *keyC)
-    : HPHP::ElemD<MOpMode::Define, false>(localTvRef, base, *keyC);
+    ? HPHP::ElemD<MOpMode::Define, true, intishWarn>(localTvRef, base, *keyC)
+    : HPHP::ElemD<MOpMode::Define, false, intishWarn>(localTvRef, base, *keyC);
   // Intentionally leak the old value pointed to by elem, including from magic
   // methods.
   tvDup(val, *elem);
 }
 
+template void setWithRefElem<true>(TypedValue*, TypedValue, TypedValue);
+template void setWithRefElem<false>(TypedValue*, TypedValue, TypedValue);
+
+template <bool intishWarn>
 TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op) {
-  auto const result = HPHP::IncDecElem(op, base, key);
+  auto const result = HPHP::IncDecElem<intishWarn>(op, base, key);
   assertx(result.m_type != KindOfRef);
   return result;
 }
+
+template TypedValue incDecElem<true>(TypedValue*, TypedValue, IncDecOp);
+template TypedValue incDecElem<false>(TypedValue*, TypedValue, IncDecOp);
 
 void bindNewElem(TypedValue* base, RefData* val) {
   if (UNLIKELY(isHackArrayType(base->m_type))) {

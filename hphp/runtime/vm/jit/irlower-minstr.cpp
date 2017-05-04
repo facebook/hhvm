@@ -311,7 +311,8 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
 void implElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode,
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto const args = elemArgs(env, inst).ssa(2);
 
@@ -323,7 +324,8 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 void implIssetEmptyElem(IRLS& env, const IRInstruction* inst) {
   auto const isEmpty = inst->op() == EmptyElem;
   auto const key     = inst->src(1);
-  BUILD_OPTAB(ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key), isEmpty);
+  BUILD_OPTAB(ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key),
+              isEmpty, RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -341,7 +343,8 @@ void cgElemUX(IRLS& env, const IRInstruction* i) { implElem(env, i); }
 void cgCGetElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
-  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mode);
+  BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mode,
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
@@ -350,7 +353,8 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
 
 void cgVGetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  BUILD_OPTAB(VGETELEM_HELPER_TABLE, getKeyType(key));
+  BUILD_OPTAB(VGETELEM_HELPER_TABLE, getKeyType(key),
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -359,23 +363,84 @@ void cgVGetElem(IRLS& env, const IRInstruction* inst) {
 
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key));
+  BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key),
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
                SyncOptions::Sync, elemArgs(env, inst).typedValue(2));
 }
 
-IMPL_OPCODE_CALL(BindElem);
-IMPL_OPCODE_CALL(SetWithRefElem);
-IMPL_OPCODE_CALL(SetOpElem);
-IMPL_OPCODE_CALL(IncDecElem);
 IMPL_OPCODE_CALL(SetNewElem);
 IMPL_OPCODE_CALL(BindNewElem);
 
+void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const target = RuntimeOption::EvalHackArrCompatNotices
+    ? CallSpec::direct(MInstrHelpers::setWithRefElem<true>)
+    : CallSpec::direct(MInstrHelpers::setWithRefElem<false>);
+
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .typedValue(1)
+    .typedValue(2);
+
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
+void cgBindElem(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const target = RuntimeOption::EvalHackArrCompatNotices
+    ? CallSpec::direct(MInstrHelpers::bindElemC<true>)
+    : CallSpec::direct(MInstrHelpers::bindElemC<false>);
+
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .typedValue(1)
+    .ssa(2);
+
+  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
+}
+
+void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const target = RuntimeOption::EvalHackArrCompatNotices
+    ? CallSpec::direct(MInstrHelpers::setOpElem<true>)
+    : CallSpec::direct(MInstrHelpers::setOpElem<false>);
+
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .typedValue(1)
+    .typedValue(2)
+    .imm(uint32_t(inst->extra<SetOpElem>()->op));
+
+  cgCallHelper(v, env, target, callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
+void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const target = RuntimeOption::EvalHackArrCompatNotices
+    ? CallSpec::direct(MInstrHelpers::incDecElem<true>)
+    : CallSpec::direct(MInstrHelpers::incDecElem<false>);
+
+  auto const args = argGroup(env, inst)
+    .ssa(0)
+    .typedValue(1)
+    .imm(uint32_t(inst->extra<IncDecElem>()->op));
+
+  cgCallHelper(v, env, target, callDestTV(env, inst),
+               SyncOptions::Sync, args);
+}
+
 void cgUnsetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  BUILD_OPTAB(UNSET_ELEM_HELPER_TABLE, getKeyType(key));
+  BUILD_OPTAB(UNSET_ELEM_HELPER_TABLE, getKeyType(key),
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), kVoidDest,
@@ -565,7 +630,8 @@ void implElemArray(IRLS& env, const IRInstruction* inst) {
   auto const mode = inst->op() == ElemArrayW ? MOpMode::Warn : MOpMode::None;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
-              keyInfo.type, keyInfo.checkForInt, mode);
+              keyInfo.type, keyInfo.checkForInt, mode,
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -580,7 +646,9 @@ void implArraySet(IRLS& env, const IRInstruction* inst) {
   BUILD_OPTAB(ARRAYSET_HELPER_TABLE,
               keyInfo.type,
               keyInfo.checkForInt,
-              setRef);
+              setRef,
+              RuntimeOption::EvalHackArrCompatNotices);
+
 
   auto args = arrArgs(env, inst, keyInfo);
   args.typedValue(2);
@@ -599,7 +667,8 @@ void cgElemArrayW(IRLS& env, const IRInstruction* i) { implElemArray(env, i); }
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type);
+  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type,
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -609,7 +678,8 @@ void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
 void cgElemArrayU(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type);
+  BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type,
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -632,7 +702,8 @@ void cgArrayGet(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const key = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  BUILD_OPTAB(ARRAYGET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt);
+  BUILD_OPTAB(ARRAYGET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt,
+                      RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDestTV(env, inst),
@@ -654,14 +725,26 @@ void cgArraySetRef(IRLS& env, const IRInstruction* i) { implArraySet(env, i); }
 IMPL_OPCODE_CALL(SetNewElemArray);
 
 IMPL_OPCODE_CALL(AddElemIntKey);
-IMPL_OPCODE_CALL(AddElemStrKey);
 IMPL_OPCODE_CALL(AddNewElem);
+
+void cgAddElemStrKey(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+
+  auto const target = RuntimeOption::EvalHackArrCompatNotices
+    ? CallSpec::direct(addElemStringKeyHelper<true>)
+    : CallSpec::direct(addElemStringKeyHelper<false>);
+
+  cgCallHelper(v, env, target,
+               callDest(env, inst), SyncOptions::Sync,
+               argGroup(env, inst).ssa(0).ssa(1).typedValue(2));
+}
 
 void cgArrayIsset(IRLS& env, const IRInstruction* inst) {
   auto const arr     = inst->src(0);
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
-  BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt);
+  BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt,
+              RuntimeOption::EvalHackArrCompatNotices);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, CallSpec::direct(opFunc), callDest(env, inst),
@@ -675,7 +758,9 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
 
   auto const target = [&] () -> CallSpec {
     if (keyInfo.checkForInt) {
-      return CallSpec::direct(arrayIdxSi);
+      return RuntimeOption::EvalHackArrCompatNotices
+        ? CallSpec::direct(arrayIdxSi<true>)
+        : CallSpec::direct(arrayIdxSi<false>);
     }
     if (keyInfo.type == KeyType::Int) {
       return CallSpec::direct(arrayIdxI);

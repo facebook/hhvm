@@ -2716,15 +2716,21 @@ SSATmp* arrIntKeyImpl(State& env, const IRInstruction* inst) {
   return value ? cns(env, *value) : nullptr;
 }
 
-SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst) {
+SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
   auto const arr = inst->src(0);
   auto const idx = inst->src(1);
   assertx(arr->hasConstVal(TArr));
   assertx(idx->hasConstVal(TStr));
   assertx(arr->arrVal()->isPHPArray());
-  auto const value = [&] {
+
+  skip = false;
+  auto const value = [&] () -> const TypedValue* {
     int64_t val;
-    if (arr->arrVal()->convertKey(idx->strVal(), val)) {
+    if (arr->arrVal()->convertKey(idx->strVal(), val, false)) {
+      if (RuntimeOption::EvalHackArrCompatNotices) {
+        skip = true;
+        return nullptr;
+      }
       return arr->arrVal()->nvGet(val);
     }
     return arr->arrVal()->nvGet(idx->strVal());
@@ -2742,9 +2748,11 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
       return cns(env, TInitNull);
     }
     if (inst->src(1)->type() <= TStr) {
-      if (auto result = arrStrKeyImpl(env, inst)) {
+      bool skip;
+      if (auto result = arrStrKeyImpl(env, inst, skip)) {
         return result;
       }
+      if (skip) return nullptr;
       gen(env, RaiseArrayKeyNotice, inst->taken(), inst->src(1));
       return cns(env, TInitNull);
     }
@@ -2761,9 +2769,11 @@ SSATmp* simplifyArrayIsset(State& env, const IRInstruction* inst) {
       return cns(env, false);
     }
     if (inst->src(1)->type() <= TStr) {
-      if (auto result = arrStrKeyImpl(env, inst)) {
+      bool skip;
+      if (auto result = arrStrKeyImpl(env, inst, skip)) {
         return cns(env, !result->isA(TInitNull));
       }
+      if (skip) return nullptr;
       return cns(env, false);
     }
   }
@@ -2779,9 +2789,11 @@ SSATmp* simplifyArrayIdx(State& env, const IRInstruction* inst) {
       return inst->src(2);
     }
     if (inst->src(1)->isA(TStr)) {
-      if (auto result = arrStrKeyImpl(env, inst)) {
+      bool skip;
+      if (auto result = arrStrKeyImpl(env, inst, skip)) {
         return result;
       }
+      if (skip) return nullptr;
       return inst->src(2);
     }
   }
@@ -2795,9 +2807,11 @@ SSATmp* simplifyAKExistsArr(State& env, const IRInstruction* inst) {
         return cns(env, true);
       }
     } else if (inst->src(1)->isA(TStr)) {
-      if (arrStrKeyImpl(env, inst)) {
+      bool skip;
+      if (arrStrKeyImpl(env, inst, skip)) {
         return cns(env, true);
       }
+      if (skip) return nullptr;
     }
     return cns(env, false);
   }

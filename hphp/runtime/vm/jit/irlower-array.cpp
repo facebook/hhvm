@@ -146,10 +146,11 @@ void cgCountKeyset(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
+template <bool intishWarn>
 ALWAYS_INLINE
 bool ak_exist_string_impl(const ArrayData* arr, const StringData* key) {
   int64_t n;
-  if (arr->convertKey(key, n)) {
+  if (arr->convertKey(key, n, intishWarn)) {
     return arr->exists(n);
   }
   return arr->exists(key);
@@ -157,8 +158,9 @@ bool ak_exist_string_impl(const ArrayData* arr, const StringData* key) {
 
 }
 
+template <bool intishWarn>
 bool ak_exist_string(const ArrayData* arr, const StringData* key) {
-  return ak_exist_string_impl(arr, key);
+  return ak_exist_string_impl<intishWarn>(arr, key);
 }
 
 bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
@@ -174,7 +176,7 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
     return collections::contains(obj, Variant{key});
   }
   auto const arr = obj->toArray();
-  return ak_exist_string_impl(arr.get(), key);
+  return ak_exist_string_impl<false>(arr.get(), key);
 }
 
 void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
@@ -184,9 +186,13 @@ void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
 
   auto const keyInfo = checkStrictlyInteger(arrTy, keyTy);
   auto const target =
-    keyInfo.checkForInt ? CallSpec::direct(ak_exist_string) :
-    keyInfo.type == KeyType::Int ? CallSpec::array(&g_array_funcs.existsInt)
-                                 : CallSpec::array(&g_array_funcs.existsStr);
+    keyInfo.checkForInt
+      ? (RuntimeOption::EvalHackArrCompatNotices
+         ? CallSpec::direct(ak_exist_string<true>)
+         : CallSpec::direct(ak_exist_string<false>))
+      : (keyInfo.type == KeyType::Int
+         ? CallSpec::array(&g_array_funcs.existsInt)
+         : CallSpec::array(&g_array_funcs.existsStr));
 
   auto args = argGroup(env, inst).ssa(0);
   if (keyInfo.converted) {
@@ -195,7 +201,12 @@ void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
     args.ssa(1);
   }
 
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None, args);
+  cgCallHelper(
+    v, env, target, callDest(env, inst),
+    RuntimeOption::EvalHackArrCompatNotices
+      ? SyncOptions::Sync : SyncOptions::None,
+    args
+  );
 }
 
 void cgAKExistsDict(IRLS& env, const IRInstruction* inst) {

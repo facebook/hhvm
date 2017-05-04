@@ -119,9 +119,14 @@ void raise_disallowed_dynamic_call(const Func* f) {
   );
 }
 
+void raise_intish_index_cast() {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  raise_notice("Hack Array Compat: Intish index cast");
+}
+
 void raise_hackarr_compat_notice(const std::string& msg) {
   if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
-  raise_notice(std::string{"Hack Array Compat: "} + msg);
+  raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
 void raise_recoverable_error(const char *fmt, ...) {

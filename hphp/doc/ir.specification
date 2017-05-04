@@ -2000,7 +2000,7 @@ To string conversions:
 
   Has the effects of the php + operator on the two source arrays.
 
-| AKExistsArr, D(Bool), S(Arr) S(Int,Str), NF
+| AKExistsArr, D(Bool), S(Arr) S(Int,Str), Er
 
   Has the effects of array_key_exists(S0, S1).
 
@@ -2025,7 +2025,7 @@ To string conversions:
   cause GetMemoKey to throw. This op can only be used within functions marked
   as memoize wrappers.
 
-| ArrayIdx, D(Gen), S(Arr) S(Int,Str) S(Cell), NF
+| ArrayIdx, D(Gen), S(Arr) S(Int,Str) S(Cell), Er
 
   Checks if S0 contains the key S1, and returns the result if found. Otherwise
   S2 is returned.
@@ -2842,7 +2842,7 @@ fields of that struct for holding intermediate values.
 
   Append the reference in S1 to S0.
 
-| ArrayIsset, D(Bool), S(Arr) S(Int,Str), NF
+| ArrayIsset, D(Bool), S(Arr) S(Int,Str), Er
 
   Returns true iff the element at key S1 in the base S0 is set.
 

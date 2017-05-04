@@ -20,6 +20,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc-relocate.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cfg.h"
@@ -121,7 +122,11 @@ buildCodeSizeCounters() {
   return counters;
 }
 
-const auto s_counters = buildCodeSizeCounters();
+static std::map<std::string, ServiceData::ExportedTimeSeries*> s_counters;
+
+static InitFiniNode initCodeSizeCounters([] {
+  s_counters = buildCodeSizeCounters();
+}, InitFiniNode::When::PostRuntimeOptions);
 
 ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
   assert(!s_counters.empty());

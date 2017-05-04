@@ -251,7 +251,6 @@ quick/nested_vm_exceptions.php
 quick/nested_vm_exceptions2.php
 quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
-quick/non-special-this.php
 quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
 quick/ns_existing_names.php
@@ -345,7 +344,6 @@ quick/switchRef.php
 quick/switch_special_cases.php
 quick/syntax-error.php
 quick/temparray.php
-quick/test_remat.php
 quick/tmpfile.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php

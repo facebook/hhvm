@@ -8,15 +8,14 @@
  *
 *)
 
-(* Unnamed local variables
-TODO: We will need to rename the unnamed local variables so that their count
-begins at the number of named local variables in the method.
- *)
-
 type t =
+  (* Unnamed local, numbered from 0, and rebased above named locals
+   * at the last moment when writing out the assembly file *)
  | Unnamed of int
+   (* Named local, necessarily starting with `$` *)
  | Named of string
- | Pipe (* Will be rewritten to an unnamed local. *)
+   (* Will be rewritten to an unnamed local. *)
+ | Pipe
 
 let next_local = ref 0
 

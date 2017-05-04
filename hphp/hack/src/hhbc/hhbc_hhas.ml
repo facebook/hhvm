@@ -16,6 +16,22 @@ module SU = Hhbc_string_utils
 module TV = Typed_value
 open H
 
+(* State associated with an entire file *)
+let class_counter = ref 0
+let next_class_counter () =
+  let c = !class_counter in
+  class_counter := c + 1;
+  c
+
+let typedef_counter = ref 0
+let next_typedef_counter () =
+  let c = !typedef_counter in
+  typedef_counter := c + 1;
+  c
+
+(* State associated with a single body of code *)
+let total_named_locals = ref 0
+
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
 
@@ -60,7 +76,7 @@ let string_of_param_num i = string_of_int i
 
 let string_of_local_id x =
   match x with
-  | Local.Unnamed i -> "_" ^ (string_of_int i)
+  | Local.Unnamed i -> "_" ^ (string_of_int (!total_named_locals + i))
   | Local.Named s -> s
   | Local.Pipe -> failwith "$$ should not have survived to codegen"
 
@@ -560,18 +576,6 @@ let string_of_generator = function
   | YieldK -> "YieldK"
   | _ -> "### string_of_generator - NYI"
 
-let class_counter = ref 0
-let next_class_counter () =
-  let c = !class_counter in
-  class_counter := c + 1;
-  c
-
-let typedef_counter = ref 0
-let next_typedef_counter () =
-  let c = !typedef_counter in
-  typedef_counter := c + 1;
-  c
-
 let string_of_include_eval_define = function
   | Incl -> "Incl"
   | InclOnce -> "InclOnce"
@@ -662,16 +666,6 @@ let string_of_typedef_info ti =
   let type_constraint = Hhas_type_info.type_constraint ti in
   let name = Hhas_type_constraint.name type_constraint in
     "<" ^ quote_str_option name ^ "  >"
-
-let string_of_type_infos type_infos =
-  let strs = List.map string_of_type_info type_infos in
-  String.concat " " strs
-
-let add_type_info buf ti =
-  B.add_string buf (string_of_type_info ti)
-
-let add_type_infos buf type_infos =
-  B.add_string buf (string_of_type_infos type_infos)
 
 let string_of_type_info_option tio =
   match tio with
@@ -797,11 +791,15 @@ let add_num_iters buf indent num_iters = if num_iters = 0 then () else begin
   B.add_string buf ";\n"
   end
 
-let add_code_info buf indent num_cls_ref_slots num_iters decl_vars =
+(* Emit .numiters, .clsrefslots, and .declvars
+ * Also set up count of named locals and parameters
+ *)
+let add_code_info buf indent num_cls_ref_slots num_iters decl_vars params =
   begin
     add_num_iters buf indent num_iters;
     add_num_cls_ref_slots buf indent num_cls_ref_slots;
     add_decl_vars buf indent decl_vars;
+    total_named_locals := List.length decl_vars + List.length params
   end
 
 let function_attributes f =
@@ -831,7 +829,8 @@ let add_fun_def buf fun_def =
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
   add_code_info buf 2
-    function_num_cls_ref_slots function_num_iters function_decl_vars;
+    function_num_cls_ref_slots function_num_iters function_decl_vars
+    function_params;
   add_instruction_list buf 2 function_body;
   B.add_string buf "}\n"
 
@@ -874,7 +873,8 @@ let add_method_def buf method_def =
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
   add_code_info buf 4
-    method_num_cls_ref_slots method_num_iters method_decl_vars;
+    method_num_cls_ref_slots method_num_iters method_decl_vars
+    method_params;
   add_instruction_list buf 4 method_body;
   B.add_string buf "  }"
 
@@ -1054,7 +1054,7 @@ let add_top_level buf hhas_prog =
   let main_num_cls_ref_slots = Hhas_main.num_cls_ref_slots main in
   let fun_name = ".main {\n" in
   B.add_string buf fun_name;
-  add_code_info buf 2 main_num_cls_ref_slots main_num_iters main_decl_vars;
+  add_code_info buf 2 main_num_cls_ref_slots main_num_iters main_decl_vars [];
   add_instruction_list buf 2 main_stmts;
   B.add_string buf "}\n"
 

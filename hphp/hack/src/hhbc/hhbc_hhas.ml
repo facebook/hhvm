@@ -677,9 +677,9 @@ let rec string_of_afield = function
   | A.AFkvalue (k, v) ->
     string_of_param_default_value k ^ " => " ^ string_of_param_default_value v
 
-and string_of_afield_list afl =
+and string_of_afield_list ~empty_escape afl =
   if List.length afl = 0
-  then "\\n"
+  then if empty_escape then "\\n" else ""
   else String.concat ", " @@ List.map string_of_afield afl
 
 and shape_field_name_to_expr = function
@@ -712,9 +712,22 @@ and string_of_bop = function
   | A.Diff -> "!="
   | A.Diff2 -> "!=="
 
+and string_of_uop = function
+  | A.Utild -> "~"
+  | A.Unot -> "!"
+  | A.Uplus -> "+"
+  | A.Uminus -> "-"
+  | A.Uincr -> "++"
+  | A.Udecr -> "--"
+  | A.Uref -> "&"
+  | A.Upincr
+  | A.Updecr
+  | A.Usplat -> failwith "string_of_uop - should have been captures earlier"
+
 and string_of_param_default_value expr =
   let expr = Ast_constant_folder.fold_expr expr in
   match snd expr with
+  | A.Id (_, litstr)
   | A.Lvar (_, litstr)
   | A.Float (_, litstr)
   | A.Int (_, litstr) -> litstr
@@ -723,13 +736,14 @@ and string_of_param_default_value expr =
   | A.True -> "true"
   | A.False -> "false"
   (* For empty array there is a space between array and left paren? a bug ? *)
-  | A.Array afl -> "array(" ^ string_of_afield_list afl ^ ")"
+  | A.Array afl ->
+    "array(" ^ string_of_afield_list ~empty_escape:false afl ^ ")"
   | A.Collection ((_, name), afl) when
     name = "vec" || name = "dict" || name = "keyset" ->
-    name ^ "[" ^ string_of_afield_list afl ^ "]"
+    name ^ "[" ^ string_of_afield_list ~empty_escape:true afl ^ "]"
   | A.Collection ((_, name), afl) when
-    name = "Set" || name = "Pair" ->
-    "HH\\\\" ^ name ^ "{" ^ string_of_afield_list afl ^ "}"
+    name = "Set" || name = "Pair" || name = "Vector" ->
+    "HH\\\\" ^ name ^ "{" ^ string_of_afield_list ~empty_escape:false afl ^ "}"
   | A.Shape fl ->
     let fl =
       List.map
@@ -743,6 +757,22 @@ and string_of_param_default_value expr =
     let e1 = string_of_param_default_value e1 in
     let e2 = string_of_param_default_value e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
+  | A.Call (e, es, ues) ->
+    let e = String_utils.lstrip (string_of_param_default_value e) "\\\\" in
+    let es = List.map string_of_param_default_value (es @ ues) in
+    e
+    ^ "("
+    ^ String.concat ", " es
+    ^ ")"
+  | A.Class_const ((_, s1), (_, s2)) -> "\\\\" ^ s1 ^ "::" ^ s2
+  | A.Unop (uop, e) -> begin
+    let e = string_of_param_default_value e in
+    match uop with
+    | A.Upincr -> e ^ "++"
+    | A.Updecr -> e ^ "--"
+    | A.Usplat -> e
+    | _ -> string_of_uop uop ^ e
+  end
   (* TODO: printing for other expressions *)
   | _ -> "string_of_param_default_value - NYI"
 

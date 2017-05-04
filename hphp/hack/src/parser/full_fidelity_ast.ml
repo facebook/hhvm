@@ -1723,6 +1723,7 @@ let scour_comments
             | `SawSlash, '*'              -> go next  `EmbeddedCmt next
             (* A * without a / does not end an embedded comment *)
             | `EmbeddedCmt, '*'           -> go start `EndEmbedded next
+            | `EndEmbedded, '*'           -> go start `EndEmbedded next
             | `EndEmbedded,  _            -> go start `EmbeddedCmt next
             (* When scanning comments, anything else is accepted *)
             | `LineCmt,     _             -> go start state        next
@@ -1745,9 +1746,6 @@ let scour_comments
 (*****************************************************************************(
  * Front-end matter
 )*****************************************************************************)
-
-exception Unknown_hh_mode of string
-let unknown_hh_mode s = raise (Unknown_hh_mode s)
 
 type result =
   { fi_mode  : FileInfo.mode
@@ -1779,7 +1777,8 @@ let from_text
         | "decl"           -> FileInfo.Mdecl
         | "strict"         -> FileInfo.Mstrict
         | ("partial" | "") -> FileInfo.Mpartial
-        | s                -> unknown_hh_mode s
+        (* TODO: Come up with better mode detection *)
+        | _                -> FileInfo.Mpartial
       )
     in
     lowerer_state.language  := language tree;

@@ -760,13 +760,17 @@ and string_of_param_default_value expr =
     let e1 = string_of_param_default_value e1 in
     let e2 = string_of_param_default_value e2 in
     e1 ^ " " ^ bop ^ " " ^ e2
+  | A.New (e, es, ues)
   | A.Call (e, es, ues) ->
     let e = String_utils.lstrip (string_of_param_default_value e) "\\\\" in
     let es = List.map string_of_param_default_value (es @ ues) in
-    e
+    let prefix = match snd expr with A.New (_, _, _) -> "new " | _ -> "" in
+    prefix
+    ^ e
     ^ "("
     ^ String.concat ", " es
     ^ ")"
+  | A.Class_get ((_, s1), (_, s2))
   | A.Class_const ((_, s1), (_, s2)) -> "\\\\" ^ s1 ^ "::" ^ s2
   | A.Unop (uop, e) -> begin
     let e = string_of_param_default_value e in
@@ -776,6 +780,36 @@ and string_of_param_default_value expr =
     | A.Usplat -> e
     | _ -> string_of_uop uop ^ e
   end
+  | A.Obj_get (e1, e2, f) ->
+    let e1 = string_of_param_default_value e1 in
+    let e2 = string_of_param_default_value e2 in
+    let f = match f with A.OG_nullthrows -> "->" | A.OG_nullsafe -> "?->" in
+    e1 ^ f ^ e2
+  | A.Clone e -> "clone " ^ string_of_param_default_value e
+  | A.Array_get (e, eo) ->
+    let e = string_of_param_default_value e in
+    let eo = Option.value_map eo ~default:"" ~f:string_of_param_default_value in
+    e ^ "[" ^ eo ^ "]"
+  | A.String2 es ->
+    String.concat " . " @@ List.map string_of_param_default_value es
+  | A.Eif (cond, etrue, efalse) ->
+    let cond = string_of_param_default_value cond in
+    let etrue =
+      Option.value_map etrue ~default:"" ~f:string_of_param_default_value
+    in
+    let efalse = string_of_param_default_value efalse in
+    cond ^ " \\? " ^ etrue ^ " : " ^ efalse
+  | A.Lvarvar (n, (_, s)) ->
+    let prefix =
+      String.init (2 * n) (fun x -> if x mod 2 = 0 then '$' else '{')
+    in
+    let suffix = String.make n '}' in
+    prefix ^ s ^ suffix
+  | A.Unsafeexpr e -> string_of_param_default_value e
+  | A.Dollardollar
+  | A.Yield _
+  | A.Yield_break
+  | A.Await _ -> failwith "illegal default value"
   (* TODO: printing for other expressions *)
   | _ -> "string_of_param_default_value - NYI"
 

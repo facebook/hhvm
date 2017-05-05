@@ -368,73 +368,268 @@ and emit_try_finally try_block finally_block =
     instr_label finally_end;
   ]
 
-and get_foreach_lvalue e =
-  match e with
-  | A.Lvar (_, x) -> Some (Local.Named x)
+and is_mutable_iterator iterator =
+  match iterator with
+  | A.As_kv (_, (_, A.Unop(A.Uref, _)))
+  | A.As_v (_, A.Unop(A.Uref, _)) -> true
+  | _ -> false
+
+and load_lvarvar n id =
+  instr_cgetl (Local.Named id) ::
+  List.replicate (n - 1) instr_cgetn
+
+and get_id_of_simple_lvar_opt v =
+  match v with
+  | A.Lvar (_, id) | A.Unop (A.Uref, (_, A.Lvar (_, id)))-> Some id
   | _ -> None
 
-and get_foreach_key_value iterator =
+and emit_load_list_elements path vs =
+  let preamble, load_value =
+    List.mapi ~f:(emit_load_list_element path) vs
+    |> List.unzip
+  in
+  List.concat preamble, List.concat load_value
+
+and emit_load_list_element path i v =
+  let query_value = gather [
+    gather @@ List.rev path;
+    instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int i));
+  ]
+  in
+  match v with
+  | _, A.Lvar (_, id) ->
+    let load_value = gather [
+      query_value;
+      instr_setl (Local.Named id);
+      instr_popc
+    ]
+    in
+    [], [load_value]
+  | _, A.Lvarvar (n, (_, id)) ->
+    let local = Local.Named id in
+    let preamble =
+      if n = 1 then []
+      else load_lvarvar n id
+    in
+    let load_value =
+      if n = 1 then [
+        query_value;
+        instr_cgetl2 local;
+        instr_setn;
+        instr_popc
+      ]
+      else [
+        query_value;
+        instr_setn;
+        instr_popc
+      ]
+    in
+    [gather preamble], [gather load_value]
+  | _, A.List exprs ->
+    let dim_instr =
+      instr_dim MemberOpMode.Warn (MemberKey.EI (Int64.of_int i))
+    in
+    emit_load_list_elements (dim_instr::path) exprs
+  | _ -> failwith "impossible, expected variables or lists"
+
+(* Assigns a location to store values for foreach-key and foreach-value and
+   creates a code to populate them.
+   Returns: key_local_opt * value_local * key_preamble * value_preamble
+   where:
+   - key_local_opt - local variable to store a foreach-key value if it is
+     declared
+   - value_local - local variable to store a foreach-value
+   - key_preamble - list of instructions to populate foreach-key
+   - value_preamble - list of instructions to populate foreach-value
+   *)
+and emit_iterator_key_value_storage iterator =
   match iterator with
   | A.As_kv ((_, k), (_, v)) ->
-    begin match get_foreach_lvalue v with
-    | None -> None
-    | Some v_lid ->
-      match get_foreach_lvalue k with
-      | None -> None
-      | Some k_lid ->
-        Some (Some k_lid, v_lid)
+    begin match get_id_of_simple_lvar_opt k, get_id_of_simple_lvar_opt v with
+    | Some key_id, Some value_id ->
+      let key_local = Local.Named key_id in
+      let value_local = Local.Named value_id in
+      Some key_local, value_local, [], []
+    | _ ->
+      let key_local = Local.get_unnamed_local () in
+      let value_local = Local.get_unnamed_local () in
+      let key_preamble, key_load =
+        emit_iterator_lvalue_storage k key_local in
+      let value_preamble, value_load =
+        emit_iterator_lvalue_storage v value_local
+      in
+
+      (* HHVM prepends code to initialize non-plain, non-list foreach-key
+         to the value preamble - do the same to minimize diffs *)
+      let key_preamble, value_preamble =
+        match k with
+        | A.List _ -> key_preamble, value_preamble
+        | _ -> [], (gather key_preamble) :: value_preamble
+      in
+      Some key_local, value_local,
+      (gather key_preamble)::key_load,
+      (gather value_preamble)::value_load
     end
   | A.As_v (_, v) ->
-    begin match get_foreach_lvalue v with
-    | None -> None
-    | Some lid -> Some (None, lid)
+    begin match get_id_of_simple_lvar_opt v with
+    | Some value_id ->
+      let value_local = Local.Named value_id in
+      None, value_local, [], []
+    | None ->
+      let value_local = Local.get_unnamed_local () in
+      let value_preamble, value_load =
+        emit_iterator_lvalue_storage v value_local in
+      None, value_local, value_preamble, value_load
     end
+
+(*Generates a code to initialize a given foreach-* value.
+  Returns: preamble * load_code
+  where:
+  - preamble - preparation part that should be executed before the loading
+  - load_code - instructions to actually populate the value.
+  This split is necessary to reflect the way how HHVM loads values.
+  as an example for the code
+    list($$$a, $$b, $$$c)
+  preamble part will include code that pushes cells for $$a and $$c on the stack
+  load_code will be executed assuming that stack is prepopulated:
+    [$aa, $$c] <- top
+  *)
+and emit_iterator_lvalue_storage v local =
+  match v with
+  | A.Lvar (_, id)
+  | A.Unop (A.Uref, (_, A.Lvar (_, id))) ->
+    let preamble = [] in
+    let load = [
+      instr_cgetl local;
+      instr_setl (Local.Named id);
+      instr_popc;
+      instr_unsetl local
+    ] in
+    preamble, load
+  | A.Lvarvar (n, (_, id)) ->
+    if n = 1 then
+      let preamble = [] in
+      let load = [
+        (* $$x case - can use cgetl2 to load cell for local*)
+        instr_cgetl local;
+        instr_cgetl2 (Local.Named id);
+        instr_setn;
+        instr_popc;
+        instr_unsetl local
+      ] in
+      preamble, load
+    else
+      let preamble = load_lvarvar n id in
+      let load = [
+        instr_cgetl local;
+        instr_setn;
+        instr_popc;
+        instr_unsetl local
+      ]
+      in
+      preamble, load
+  | A.List exprs ->
+    let preamble, load_values =
+      emit_load_list_elements [instr_basel local MemberOpMode.Warn] exprs
+    in
+    let load_values = [
+      gather @@ (List.rev load_values);
+      instr_unsetl local
+    ]
+    in
+    preamble, load_values
+  | _ -> failwith "impossible: expected only variables and lists"
+
+and wrap_non_empty_block_in_fault prefix block fault_block =
+  match block with
+  | [] -> prefix
+  | block ->
+    instr_try_fault
+      (Label.next_fault())
+      (gather @@ prefix::block)
+      fault_block
 
 and emit_foreach _has_await collection iterator block =
   (* TODO: await *)
   (* TODO: generate .numiters based on maximum nesting depth *)
-  (* TODO: We need to be able to process arbitrary lvalues in the key, value
-     pair. This will require writing a preamble into the block, in the general
-     case. For now we just support locals. *)
   let iterator_number = Iterator.get_iterator () in
   let fault_label = Label.next_fault () in
   let loop_break_label = Label.next_regular () in
   let loop_continue_label = Label.next_regular () in
   let loop_head_label = Label.next_regular () in
-  match get_foreach_key_value iterator with
-  | None -> emit_nyi "foreach codegen does not support arbitrary lvalues yet"
-  | Some (k, v) ->
-    let init, next = match k with
-    | Some k ->
-      let init = instr_iterinitk iterator_number loop_break_label v k in
-      let cont = instr_iternextk iterator_number loop_head_label v k in
-      init, cont
-    | None ->
-      let init = instr_iterinit iterator_number loop_break_label v in
-      let cont = instr_iternext iterator_number loop_head_label v in
-      init, cont in
-    let body = emit_stmt block in
-    let result = gather [
-      from_expr collection;
-      init;
-      instr_try_fault
-        fault_label
-        (* try body *)
-        (gather [
-          instr_label loop_head_label;
-          body;
-          instr_label loop_continue_label;
-          next
-        ])
-        (* fault body *)
-        (gather [
-          instr_iterfree iterator_number;
-          instr_unwind ]);
-      instr_label loop_break_label
-    ] in
-    Iterator.free_iterator ();
-    CBR.rewrite_in_loop
-      result loop_continue_label loop_break_label (Some iterator_number)
+  let mutable_iter = is_mutable_iterator iterator in
+  (* TODO: add support for mutable iterators *)
+  if mutable_iter then emit_nyi "MIter not supported"
+  else
+  let key_local_opt, value_local, key_preamble, value_preamble =
+    emit_iterator_key_value_storage iterator
+  in
+  let fault_block_local local = gather [
+    instr_unsetl local;
+    instr_unwind
+  ]
+  in
+  let init, next, preamble = match key_local_opt with
+  | Some (key_local) ->
+    let initf, nextf =
+      if mutable_iter then instr_miterinitk, instr_miternextk
+      else instr_iterinitk, instr_iternextk
+    in
+    let init = initf iterator_number loop_break_label value_local key_local in
+    let cont = nextf iterator_number loop_head_label value_local key_local in
+    let preamble =
+      wrap_non_empty_block_in_fault
+        (instr_label loop_head_label)
+        value_preamble
+        (fault_block_local value_local)
+    in
+    let preamble =
+      wrap_non_empty_block_in_fault
+        preamble
+        key_preamble
+        (fault_block_local key_local)
+    in
+    init, cont, preamble
+  | None ->
+    let initf, nextf =
+      if mutable_iter then instr_miterinit, instr_miternext
+      else instr_iterinit, instr_iternext
+    in
+    let init = initf iterator_number loop_break_label value_local in
+    let cont = nextf iterator_number loop_head_label value_local in
+    let preamble =
+      wrap_non_empty_block_in_fault
+        (instr_label loop_head_label)
+        value_preamble
+        (fault_block_local value_local)
+    in
+    init, cont, preamble
+  in
+  let body = emit_stmt block in
+
+  let result = gather [
+    from_expr collection;
+    init;
+    instr_try_fault
+      fault_label
+      (* try body *)
+      (gather [
+        preamble;
+        body;
+        instr_label loop_continue_label;
+        next
+      ])
+      (* fault body *)
+      (gather [
+        if mutable_iter then instr_miterfree iterator_number
+        else instr_iterfree iterator_number;
+
+        instr_unwind ]);
+    instr_label loop_break_label
+  ] in
+  Iterator.free_iterator ();
+  CBR.rewrite_in_loop
+    result loop_continue_label loop_break_label (Some iterator_number)
 
 and emit_stmts stl =
   let results = List.map stl emit_stmt in

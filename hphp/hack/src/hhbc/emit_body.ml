@@ -37,6 +37,7 @@ class declvar_visitor = object(this)
   inherit [ULS.t] Ast_visitor.ast_visitor as _super
 
   method! on_lvar locals id = add_local locals id
+  method! on_lvarvar locals _ id = add_local locals id
   method! on_efun locals _fn use_list =
     List.fold_left use_list ~init:locals
       ~f:(fun locals (x, _isref) -> add_local locals x)

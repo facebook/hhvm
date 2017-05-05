@@ -41,6 +41,16 @@ let instr_iternextk id label key value =
   instr (IIterator (IterNextK (id, label, key, value)))
 let instr_iterfree id =
   instr (IIterator (IterFree id))
+let instr_miterinit iter_id label value =
+  instr (IIterator (MIterInit (iter_id, label, value)))
+let instr_miterinitk id label key value =
+  instr (IIterator (MIterInitK (id, label, key, value)))
+let instr_miternext id label value =
+  instr (IIterator (MIterNext (id, label, value)))
+let instr_miternextk id label key value =
+  instr (IIterator (MIterNextK (id, label, key, value)))
+let instr_miterfree id =
+  instr (IIterator (MIterFree id))
 
 let instr_jmp label = instr (IContFlow (Jmp label))
 let instr_jmpz label = instr (IContFlow (JmpZ label))
@@ -149,6 +159,7 @@ let instr_querym_cget_pt num_params key =
   instr_querym num_params QueryOp.CGet (MemberKey.PT key)
 let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
 let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
+let instr_setn = instr (IMutator SetN)
 
 let instr_await = instr (IAsync Await)
 let instr_yield = instr (IGenerator Yield)

@@ -126,6 +126,7 @@ quick/float-overflow.php
 quick/floatcmp.php
 quick/floateq.php
 quick/flow.php
+quick/foreach-bad.php
 quick/foreach-superglobals.php
 quick/fpush_fatal.php
 quick/fsc01.php

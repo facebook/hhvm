@@ -1,4 +1,5 @@
 quick/Cls.php
+quick/Empty.php
 quick/FPassC.php
 quick/FPassR.php
 quick/FPushCtor.php
@@ -66,7 +67,6 @@ quick/cuf__callStatic4.php
 quick/debug_backtrace_continuation.php
 quick/decrefstack1.php
 quick/defaultVals.php
-quick/define.php
 quick/destruct.php
 quick/dict/apc.php
 quick/dict/basic-getters.php
@@ -101,11 +101,6 @@ quick/dv_si.php
 quick/dv_si_func.php
 quick/eval_noreturn.php
 quick/exception_bug_2080454.php
-quick/exception_destructor_1.php
-quick/exception_destructor_2.php
-quick/exception_destructor_3.php
-quick/exception_destructor_4.php
-quick/exception_destructor_5.php
 quick/exception_many_locals.php
 quick/exceptions.php
 quick/exceptions2.php
@@ -138,7 +133,10 @@ quick/func_get_args.php
 quick/func_get_args_namespace.php
 quick/func_slice_args.php
 quick/function-static-init.php
+quick/function_varargs.php
 quick/generator_method.php
+quick/generator_varargs.php
+quick/generator_vars.php
 quick/get_class.php
 quick/get_class_methods2.php
 quick/get_class_methods3.php
@@ -279,7 +277,6 @@ quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
 quick/pinit.php
-quick/poly-torture.php
 quick/post_try_error.php
 quick/priv5.php
 quick/profile/Setprofile_async.php
@@ -345,7 +342,6 @@ quick/switchRef.php
 quick/switch_special_cases.php
 quick/syntax-error.php
 quick/temparray.php
-quick/tmpfile.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php
 quick/trailing_comma_bad3.php
@@ -363,6 +359,8 @@ quick/undefined-bases.php
 quick/undefined-global.php
 quick/undefined-vgetg.php
 quick/unset_static.php
+quick/unset_varenv.php
+quick/varenv_extra_args.php
 quick/vec/apc.php
 quick/vec/basic-getters.php
 quick/vec/basic-init.php

@@ -1710,7 +1710,16 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       emit_final_local_op op (Local.Named id)
     ]
 
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Lvarvar (n, (_, id)) ->
+    (* TODO: if the rhs is lvarvar then use cgetl2 *)
+    gather [
+      instr_cgetl (Local.Named id);
+      gather @@ List.replicate ~num:(n-1) instr_cgetn;
+      rhs_instrs;
+      instr_setn;
+    ]
+
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op op in
     if rhs_stack_size = 0
     then gather [from_expr e; final_global_op_instrs]
@@ -1720,7 +1729,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       then gather [rhs_instrs; index_instrs; final_global_op_instrs]
       else gather [index_instrs; rhs_instrs; final_global_op_instrs]
 
-  | A.Array_get(base_expr, opt_elem_expr) ->
+  | A.Array_get (base_expr, opt_elem_expr) ->
     let mode =
       match op with
       | LValOp.Unset -> MemberOpMode.Unset
@@ -1740,7 +1749,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | A.Obj_get(e1, e2, null_flavor) ->
+  | A.Obj_get (e1, e2, null_flavor) ->
     let mode =
       match op with
       | LValOp.Unset -> MemberOpMode.Unset
@@ -1760,7 +1769,7 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       final_instr
     ]
 
-  | A.Class_get((_, cid), (_, id)) ->
+  | A.Class_get ((_, cid), (_, id)) ->
     let prop_expr_instrs =
       instr_string (SU.Locals.strip_dollar id) in
     let final_instr = emit_final_static_op cid id op in

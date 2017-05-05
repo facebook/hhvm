@@ -82,6 +82,7 @@ let instr_not = instr (IOp Not)
 let instr_sets =
   instr (IMutator (SetS class_ref_rewrite_sentinel))
 let instr_setl local = instr (IMutator (SetL local))
+let instr_setn = instr (IMutator SetN)
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
 let instr_cgets =
@@ -159,7 +160,6 @@ let instr_querym_cget_pt num_params key =
   instr_querym num_params QueryOp.CGet (MemberKey.PT key)
 let instr_setm num_params key = instr (IFinal (SetM (num_params, key)))
 let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
-let instr_setn = instr (IMutator SetN)
 
 let instr_await = instr (IAsync Await)
 let instr_yield = instr (IGenerator Yield)

@@ -1655,13 +1655,13 @@ and transform_braced_item left_p item right_p =
   let leading, right_p = remove_leading_trivia right_p in
   Fmt [
     transform left_p;
-    Split;
+    when_present item split;
     WithRule (Rule.Argument, Span [
       Nest [
         transform item;
         transform_leading_trivia leading;
       ];
-      Split;
+      when_present item split;
       transform right_p;
     ]);
   ]

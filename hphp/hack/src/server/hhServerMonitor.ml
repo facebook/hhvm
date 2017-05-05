@@ -68,6 +68,8 @@ let monitor_daemon_main (options: ServerArgs.options) =
     let waiting_client = ServerArgs.waiting_client options in
     let informant_options = {
       HhMonitorInformant.root = ServerArgs.root options;
+      state_prefetcher = ServerConfig.(state_prefetcher_script config)
+        |> State_prefetcher.of_script_opt;
       allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
       use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
     } in

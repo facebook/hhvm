@@ -23,6 +23,7 @@ val load_script_timeout : t -> int
 val load_mini_script    : t -> Path.t option
 val gc_control          : t -> Gc.control
 val sharedmem_config    : t -> SharedMem.config
+val state_prefetcher_script : t -> Path.t option
 val typechecker_options : t -> TypecheckerOptions.t
 val parser_options      : t -> ParserOptions.t
 val formatter_override  : t -> Path.t option

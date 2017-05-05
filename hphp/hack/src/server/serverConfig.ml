@@ -236,6 +236,7 @@ let load_script_timeout config = config.load_script_timeout
 let load_mini_script config = config.load_mini_script
 let gc_control config = config.gc_control
 let sharedmem_config config = config.sharedmem_config
+let state_prefetcher_script config = config.state_prefetcher_script
 let typechecker_options config = config.tc_options
 let parser_options config = config.parser_options
 let formatter_override config = config.formatter_override

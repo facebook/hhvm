@@ -79,6 +79,7 @@ let test_informant_restarts_significant_move () =
     (Watchman.Watchman_pushed (Watchman.Files_changed SSet.empty));
   let informant = HhMonitorInformant.init {
     HhMonitorInformant.root = Tools.fake_repo;
+    state_prefetcher = State_prefetcher.dummy;
     allow_subscriptions = true;
     use_dummy = false;
   } in

@@ -42,6 +42,10 @@ let rec emit_stmt st =
     ]
   | A.Expr (_, A.Call ((_, A.Id (_, "unset")), exprl, [])) ->
     gather (List.map exprl emit_unset_expr)
+  | A.Expr (_, A.Id (_, "exit")) -> emit_exit None
+  | A.Expr (_, A.Call ((_, A.Id (_, "exit")), args, []))
+    when List.length args = 0 || List.length args = 1 ->
+    emit_exit (List.hd args)
   | A.Expr expr ->
     emit_ignored_expr expr
   | A.Return (_, None) ->
@@ -656,7 +660,9 @@ let emit_dropthrough_return () =
 
 let rec emit_final_statement s =
   match s with
-  | A.Throw _ | A.Return _ | A.Goto _ ->
+  | A.Throw _ | A.Return _ | A.Goto _
+  | A.Expr (_, A.Call ((_, A.Id (_, "exit")), _, _))
+  | A.Expr (_, A.Id (_, "exit")) ->
     emit_stmt s
   | A.Block b ->
     emit_final_statements b

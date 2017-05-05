@@ -598,7 +598,6 @@ and emit_id (p, s) =
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in
     instr_int line
-  | "exit" -> emit_exit (p, A.Int (p, "0"))
   | _ -> instr (ILitConst (Cns s))
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
@@ -712,9 +711,9 @@ and emit_call_isset_exprs exprs =
         instr_label its_done
       ]
 
-and emit_exit expr =
+and emit_exit expr_opt =
   gather [
-    from_expr expr;
+    (match expr_opt with None -> instr_int 0 | Some e -> from_expr e);
     instr_exit;
   ]
 
@@ -1529,10 +1528,6 @@ and emit_call (_, expr_ as expr) args uargs =
       | arg :: args ->
         emit_call_user_func id arg args
     end
-
-  | A.Id (_, "exit") when List.length args = 1 ->
-    let e = List.hd_exn args in
-    emit_exit e, Flavor.Cell
 
   | A.Id (_, "intval") when List.length args = 1 ->
     let e = List.hd_exn args in

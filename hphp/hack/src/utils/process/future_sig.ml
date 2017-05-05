@@ -22,6 +22,10 @@ module type S = sig
   (** Blocking. Returns the value from the underlying process. *)
   val get : 'a t -> 'a
   val make : Process_types.t -> 'a deserializer -> 'a t
+
+  (** Just wrap a value inside a future. *)
+  val of_value : 'a -> 'a t
+
   (** Returns true if "get" will not block. *)
   val is_ready : 'a t -> bool
 end

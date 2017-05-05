@@ -27,4 +27,11 @@ module type S = sig
 
   (** hg update to the base svn revision. *)
   val update_to_base_rev : svn_rev -> string -> unit Future.t
+
+  module Mocking : sig
+    val current_working_copy_hg_rev_returns : (hg_rev * bool) Future.t -> unit
+    val current_working_copy_base_rev_returns : svn_rev Future.t -> unit
+    val closest_svn_ancestor_bind_value : hg_rev -> svn_rev Future.t -> unit
+    val files_changed_since_svn_rev_returns : string Future.t -> unit
+  end
 end

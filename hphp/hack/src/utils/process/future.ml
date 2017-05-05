@@ -23,6 +23,8 @@ type 'a t = 'a promise ref
 let make process transformer =
   ref (Incomplete (process, transformer))
 
+let of_value v = ref @@ Complete v
+
 let get : 'a t -> 'a = fun promise -> match !promise with
   | Complete v -> v
   | Incomplete (process, transformer) ->

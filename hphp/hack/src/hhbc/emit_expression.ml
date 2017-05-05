@@ -363,6 +363,7 @@ and emit_new class_expr args uargs =
       emit_args_and_call args uargs;
       instr_popr
     ]
+  | _, A.Id_type_arguments ((_, id), _)
   | _, A.Id (_, id) ->
     let id = rename_id_if_namespaced id in
     gather [
@@ -804,9 +805,9 @@ and from_expr expr =
     emit_xhp (fst expr) id attributes children
   | A.Import (flavor, e) -> emit_import flavor e
   | A.Lvarvar (n, id) -> emit_lvarvar n id
-  (* TODO *)
-  | A.Id_type_arguments (_, _)  -> emit_nyi "id_type_arguments"
-  | A.List _                    -> emit_nyi "list"
+  | A.Id_type_arguments (id, _) -> emit_id id
+  | A.List _ ->
+    failwith "List destructor can only be used as an lvar"
 
 and emit_static_collection ~transform_to_collection tv =
   let a_label = Label.get_next_data_label () in

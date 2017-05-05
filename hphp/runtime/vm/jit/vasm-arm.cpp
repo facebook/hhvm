@@ -663,15 +663,19 @@ void Vgen::emit(const imul& i) {
   }
 }
 
-#define Y(vasm_opc, arm_opc)           \
-void Vgen::emit(const vasm_opc& i) {   \
-  auto adr = M(i.m);                   \
-  vixl::Label again;                   \
-  a->bind(&again);                     \
-  a->ldxr(rAsm, adr);                  \
-  a->arm_opc(rAsm, rAsm, 1, SetFlags); \
-  a->stxr(rAsm.W(), rAsm, adr);        \
-  a->Cbnz(rAsm.W(), &again);           \
+#define Y(vasm_opc, arm_opc)                             \
+void Vgen::emit(const vasm_opc& i) {                     \
+  auto adr = M(i.m);                                     \
+  /* Use VIXL's macroassembler scratch regs. */          \
+  a->SetScratchRegisters(vixl::NoReg, vixl::NoReg);      \
+  vixl::Label again;                                     \
+  a->bind(&again);                                       \
+  a->ldxr(rAsm, adr);                                    \
+  a->arm_opc(rAsm, rAsm, 1, SetFlags);                   \
+  a->stxr(rVixlScratch0, rAsm, adr);                     \
+  a->Cbnz(rVixlScratch0, &again);                        \
+  /* Restore VIXL's scratch regs. */                     \
+  a->SetScratchRegisters(rVixlScratch0, rVixlScratch1);  \
 }
 
 Y(decqmlock, Sub)

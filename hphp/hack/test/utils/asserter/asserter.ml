@@ -27,7 +27,18 @@ module Bool_comparator = struct
     | false, false -> true
     | true, false -> false
     | false, true -> false
-end
+end;;
+
+
+module Hh_json_json_comparator = struct
+  type t = Hh_json.json
+  let to_string v = Hh_json.json_to_string v
+  let is_equal exp actual =
+    (** Shortcut by comparing the canonical string representation. *)
+    let exp = Hh_json.json_to_string exp in
+    let actual = Hh_json.json_to_string actual in
+    String.equal exp actual
+end;;
 
 
 module Recorder_event_comparator = struct
@@ -100,7 +111,34 @@ module Pattern_comparator(Substitutions : Pattern_substitutions) = struct
 end;;
 
 
+(** Useful for abstracting on option types. *)
+module Make_option_comparator (Comp : Comparator)
+  : Comparator with type t = (Comp.t option) = struct
+    type t = Comp.t option
+
+    let to_string v =
+      match v with
+      | None ->
+        "None"
+      | Some v ->
+        Comp.to_string v
+
+    let is_equal exp actual =
+      match exp, actual with
+      | None, None ->
+        true
+      | None, Some _
+      | Some _, None ->
+        false
+      | Some exp, Some actual ->
+        Comp.is_equal exp actual
+
+end;;
+
+
 module Make_asserter (Comp : Comparator) = struct
+
+  module Comp_option = Make_option_comparator(Comp)
 
   let assert_equals exp actual failure_msg =
     if Comp.is_equal exp actual then
@@ -127,11 +165,30 @@ module Make_asserter (Comp : Comparator) = struct
       let () = Printf.eprintf "%s" failure_msg in
       assert false
 
+  let assert_option_equals exp actual failure_msg =
+    match exp, actual with
+    | None, None ->
+      ()
+    | None, Some v ->
+      Printf.eprintf
+        "assert_option_equals failed. Expected None but got Some(%s)"
+        (Comp.to_string v)
+    | Some v, None ->
+      Printf.eprintf
+        "assert_option_equals failed. Expected Some(%s) but got None"
+        (Comp.to_string v)
+    | Some exp, Some actual ->
+      assert_equals exp actual failure_msg
+
 end;;
 
 
+module Hh_json_json_option_comparator =
+  Make_option_comparator (Hh_json_json_comparator);;
+
 module String_asserter = Make_asserter (String_comparator);;
 module Bool_asserter = Make_asserter (Bool_comparator);;
+module Hh_json_json_asserter = Make_asserter (Hh_json_json_comparator);;
 module Int_asserter = Make_asserter (Int_comparator);;
 module Process_status_asserter = Make_asserter (Process_status_comparator);;
 module Recorder_event_asserter = Make_asserter (Recorder_event_comparator);;

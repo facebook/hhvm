@@ -124,10 +124,10 @@ type instruct_lit_const =
   | Int of int64
   | Double of Litstr.id
   | String of Litstr.id
-  | Array of int * (Typed_value.t * Typed_value.t) list
-  | Vec of int * Typed_value.t list
-  | Dict of int * (Typed_value.t * Typed_value.t) list
-  | Keyset of int * Typed_value.t list
+  | Array of int * Typed_value.t
+  | Vec of int * Typed_value.t
+  | Dict of int * Typed_value.t
+  | Keyset of int * Typed_value.t
   | NewArray of int (* capacity hint *)
   | NewMixedArray of int (* capacity hint *)
   | NewDictArray of int (* capacity hint *)

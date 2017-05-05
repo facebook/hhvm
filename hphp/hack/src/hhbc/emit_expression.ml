@@ -812,10 +812,10 @@ and emit_static_collection ~transform_to_collection tv =
   let a_label = Label.get_next_data_label () in
   let lit_constructor =
     match tv with
-    | Typed_value.Array tvl -> Array (a_label, tvl)
-    | Typed_value.Dict tvl -> Dict (a_label, tvl)
-    | Typed_value.Vec tvl -> Vec (a_label, tvl)
-    | Typed_value.Keyset tvl -> Keyset (a_label, tvl)
+    | Typed_value.Array _ -> Array (a_label, tv)
+    | Typed_value.Dict _ -> Dict (a_label, tv)
+    | Typed_value.Vec _ -> Vec (a_label, tv)
+    | Typed_value.Keyset _ -> Keyset (a_label, tv)
     | _ -> failwith "emit_static_collection: unexpected collection type"
   in
   let transform_instr =

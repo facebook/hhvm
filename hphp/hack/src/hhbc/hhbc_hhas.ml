@@ -871,7 +871,7 @@ let add_code_info buf indent num_cls_ref_slots num_iters decl_vars params =
 
 let function_attributes f =
   let user_attrs = Hhas_function.attributes f in
-  let attrs = List.map Emit_adata.attribute_to_string user_attrs in
+  let attrs = Emit_adata.attributes_to_strings user_attrs in
   let text = String.concat " " attrs in
   if text = "" then "" else "[" ^ text ^ "] "
 
@@ -903,7 +903,7 @@ let add_fun_def buf fun_def =
 
 let method_attributes m =
   let user_attrs = Hhas_method.attributes m in
-  let attrs = List.map Emit_adata.attribute_to_string user_attrs in
+  let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in
   let attrs = if Hhas_method.is_final m then "final" :: attrs else attrs in
   let attrs = if Hhas_method.is_static m then "static" :: attrs else attrs in
@@ -947,7 +947,7 @@ let add_method_def buf method_def =
 
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
-  let attrs = List.map Emit_adata.attribute_to_string user_attrs in
+  let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs = if Hhas_class.is_closure_class c
               then "no_override" :: "unique" :: attrs
               else attrs in
@@ -1008,7 +1008,7 @@ let add_property class_def buf property =
     B.add_string buf "\"\"\"";
     let init = match initial_value with
       | None -> SS.str "N;"
-      | Some value -> Emit_adata.adata_argument_to_string value
+      | Some value -> Emit_adata.adata_to_string_seq value
     in
     SS.add_string_from_seq buf init;
     B.add_string buf "\"\"\";"
@@ -1023,7 +1023,7 @@ let add_constant buf c =
   begin match value with
   | Typed_value.Uninit -> B.add_string buf "uninit"
   | _ -> B.add_string buf "\"\"\"";
-  SS.add_string_from_seq buf @@ Emit_adata.adata_argument_to_string value;
+  SS.add_string_from_seq buf @@ Emit_adata.adata_to_string_seq value;
   B.add_string buf "\"\"\""
   end;
   B.add_string buf ";"
@@ -1034,7 +1034,7 @@ let add_type_constant buf c =
   let initializer_t = Hhas_type_constant.initializer_t c in
   B.add_string buf " isType = \"\"\"";
   B.add_string buf @@ SS.seq_to_string @@
-    Emit_adata.adata_argument_to_string initializer_t;
+    Emit_adata.adata_to_string_seq initializer_t;
   B.add_string buf "\"\"\";"
 
 let add_enum_ty buf c =
@@ -1071,32 +1071,24 @@ let add_class_def buf class_def =
   (* TODO: other members *)
   B.add_string buf "\n}\n"
 
-let add_data_region_element ~has_keys buf name num arguments =
+let add_data_region_element buf num argument =
   B.add_string buf ".adata A_";
   B.add_string buf @@ string_of_int num;
-  B.add_string buf " = ";
+  B.add_string buf " = \"\"\"";
   SS.add_string_from_seq buf
-    @@ Emit_adata.adata_to_string_helper
-      ~if_class_attribute:false
-      ~has_keys
-      name
-      arguments;
-  B.add_string buf ";\n"
+    @@ Emit_adata.adata_to_string_seq argument;
+  B.add_string buf "\"\"\";\n"
 
 let add_data_region buf top_level_body functions classes =
   let rec add_data_region_list buf instr =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
-    | ILitConst (Array (num, arguments)) ->
-      add_data_region_element ~has_keys:true buf "a" num
-        (List.concat (Core.List.map arguments (fun (x,y) -> [x;y])))
-    | ILitConst (Dict (num, arguments)) ->
-      add_data_region_element ~has_keys:true buf "D" num
-        (List.concat (Core.List.map arguments (fun (x,y) -> [x;y])))
-    | ILitConst (Vec (num, arguments)) ->
-      add_data_region_element ~has_keys:false buf "v" num arguments
-    | ILitConst (Keyset (num, arguments)) ->
-      add_data_region_element ~has_keys:false buf "k" num arguments
+    | ILitConst (Array (num, argument)
+                | Dict (num, argument)
+                | Vec (num, argument)
+                | Keyset (num, argument)
+                ) ->
+      add_data_region_element buf num argument
     | _ -> ()
   and iter_aux_fun buf fun_def =
     let function_body = Hhas_function.body fun_def in

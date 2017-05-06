@@ -2320,6 +2320,9 @@ and dispatch_call p env call_type (fpos, fun_expr as e) el uel =
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
      let env = if Env.is_strict env then
        (match el, uel with
+         | [(_, Array_get ((_, Class_const _), Some _))], [] ->
+           Errors.const_mutation p Pos.none "";
+           env
          | [(_, Array_get (ea, Some _))], [] ->
            let env, _te, ty = expr env ea in
            if List.exists ~f:(fun super -> SubType.is_sub_type env ty super) [

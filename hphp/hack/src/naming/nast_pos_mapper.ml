@@ -75,7 +75,7 @@ and expr_ f = function
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
 
 and afield f = function
-  | AFvalue e -> AFvalue e (* (expr f e) *)
+  | AFvalue e -> AFvalue (expr f e)
   | AFkvalue (e1, e2) ->
     let e1 : Nast.expr = expr f e1 in
     let e2 = expr f e2 in

@@ -1395,29 +1395,49 @@ module Make (GetLocals : GetLocals) = struct
     | Method _ -> acc
     | TypeConst t -> typeconst env t :: acc
 
-  and check_constant_expr (pos, e) =
+  and check_constant_expr env (pos, e) =
     match e with
     | Unsafeexpr _ | Id _ | Null | True | False | Int _
     | Float _ | String _ -> ()
     | Class_const ((_, cls), _) when cls <> "static" -> ()
-
-    | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr e
+    | Unop ((Uplus | Uminus | Utild | Unot), e) -> check_constant_expr env e
     | Binop (op, e1, e2) ->
       (* Only assignment is invalid *)
       (match op with
         | Eq _ -> Errors.illegal_constant pos
         | _ ->
-          check_constant_expr e1;
-          check_constant_expr e2)
+          check_constant_expr env e1;
+          check_constant_expr env e2)
     | Eif (e1, e2, e3) ->
-      check_constant_expr e1;
-      Option.iter e2 check_constant_expr;
-      check_constant_expr e3
+      check_constant_expr env e1;
+      Option.iter e2 (check_constant_expr env);
+      check_constant_expr env e3
+    | Array l -> List.iter l (check_afield_constant_expr env)
+    | Darray l -> List.iter l (fun (e1, e2) ->
+        check_constant_expr env e1;
+        check_constant_expr env e2)
+    | Varray l -> List.iter l (check_constant_expr env)
+    | Collection (id, l) ->
+      let p, cn = Namespaces.elaborate_id ((fst env).namespace) NSClass id in
+      (* Only vec/keyset/dict are allowed because they are value types *)
+      (match cn with
+        | _ when
+             cn = SN.Collections.cVec
+          || cn = SN.Collections.cKeyset
+          || cn = SN.Collections.cDict ->
+          List.iter l (check_afield_constant_expr env)
+        | _ -> Errors.illegal_constant p)
     | _ -> Errors.illegal_constant pos
+
+  and check_afield_constant_expr env = function
+    | AFvalue e -> check_constant_expr env e
+    | AFkvalue (e1, e2) ->
+        check_constant_expr env e1;
+        check_constant_expr env e2
 
   and constant_expr env e =
     Errors.try_with_error begin fun () ->
-      check_constant_expr e;
+      check_constant_expr env e;
       expr env e
     end (fun () -> fst e, N.Any)
 

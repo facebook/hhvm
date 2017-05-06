@@ -10,7 +10,7 @@
  */
 
 class A {
-  const X = array('test');
+  const array<string> X = array('test');
 }
 
 function foo(): bool {

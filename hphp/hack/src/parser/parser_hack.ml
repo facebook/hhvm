@@ -250,6 +250,8 @@ let rec check_lvalue env = function
       error_at env pos "?-> syntax is not supported for lvalues"
   | pos, Obj_get (_, (_, Id (_, name)), _) when name.[0] = ':' ->
       error_at env pos "->: syntax is not supported for lvalues"
+  | pos, Array_get ((_, Class_const _), _) ->
+      error_at env pos "Array-like class consts are not valid lvalues"
   | _, (Lvar _ | Lvarvar _ | Obj_get _ | Array_get _ | Class_get _ |
     Unsafeexpr _) -> ()
   | pos, Call ((_, Id (_, "tuple")), _, _) ->

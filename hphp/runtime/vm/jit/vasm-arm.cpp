@@ -1212,8 +1212,8 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
 
 Y(addli, addl, ldimml, ISAR, i.s0, U2(i.s1, i.d))
 Y(addqi, addq, ldimmq, ISAR, Immed64(value), U2(i.s1, i.d))
-Y(andbi, andb, ldimmb, (ISLG(32) || (safe_cast<int8_t>(value) == -1)), i.s0, U2(i.s1, i.d))
-Y(andli, andl, ldimml, (ISLG(32) || (safe_cast<int32_t>(value) == -1)), i.s0, U2(i.s1, i.d))
+Y(andbi, andb, ldimmb, ISLG(32), i.s0, U2(i.s1, i.d))
+Y(andli, andl, ldimml, ISLG(32), i.s0, U2(i.s1, i.d))
 Y(andqi, andq, ldimmq, ISLG(64), Immed64(value), U2(i.s1, i.d))
 Y(cmpli, cmpl, ldimml, ISAR, i.s0, i.s1)
 Y(cmpqi, cmpq, ldimmq, ISAR, Immed64(value), i.s1)
@@ -1633,7 +1633,10 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
 
   assertx(checkWidths(unit));
 
+  simplify(unit);
+
   lowerForARM(unit);
+
   simplify(unit);
 
   if (!unit.constToReg.empty()) {

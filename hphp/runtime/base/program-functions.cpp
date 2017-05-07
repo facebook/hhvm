@@ -986,7 +986,7 @@ static int start_server(const std::string &username, int xhprof) {
   if (RuntimeOption::RepoLocalReadaheadRate > 0 &&
       !RuntimeOption::RepoLocalPath.empty()) {
     HttpServer::CheckMemAndWait();
-    readaheadThread = folly::make_unique<std::thread>([&] {
+    readaheadThread = std::make_unique<std::thread>([&] {
         BootStats::Block timer("Readahead Repo");
         auto path = RuntimeOption::RepoLocalPath.c_str();
         Logger::Info("readahead %s", path);

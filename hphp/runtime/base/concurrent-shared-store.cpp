@@ -1004,7 +1004,7 @@ void ConcurrentTableSharedStore::primeDone() {
 }
 
 bool ConcurrentTableSharedStore::primeFromSnapshot(const char* filename) {
-  m_snapshotLoader = folly::make_unique<SnapshotLoader>();
+  m_snapshotLoader = std::make_unique<SnapshotLoader>();
   if (!m_snapshotLoader->tryInitializeFromFile(filename)) {
     m_snapshotLoader.reset();
     return false;

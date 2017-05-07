@@ -370,7 +370,7 @@ static void HHVM_METHOD(MCRouter, __construct,
 template <class M>
 static Object mcr_str(ObjectData* this_, const String& key) {
   return Native::data<MCRouter>(this_)->issue(
-      folly::make_unique<const M>(folly::StringPiece(key.c_str(), key.size())));
+      std::make_unique<const M>(folly::StringPiece(key.c_str(), key.size())));
 }
 
 template <class Request>
@@ -378,7 +378,7 @@ static Object mcr_set(ObjectData* this_,
                       const String& key, const String& val,
                       int64_t flags, int64_t expiration) {
   auto request =
-      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+      std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->value() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
   request->flags() = flags;
@@ -391,7 +391,7 @@ template <class Request>
 static Object mcr_aprepend(ObjectData* this_,
                            const String& key, const String& val) {
   auto request =
-      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+      std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->value() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
 
@@ -402,7 +402,7 @@ template <class Request>
 static Object mcr_str_delta(ObjectData* this_,
                             const String& key, int64_t val) {
   auto request =
-      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+      std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->delta() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
@@ -411,7 +411,7 @@ static Object mcr_str_delta(ObjectData* this_,
 static Object mcr_flushall(ObjectData* this_, int64_t val) {
   using Request = mc::McFlushAllRequest;
 
-  auto request = folly::make_unique<Request>("unused");
+  auto request = std::make_unique<Request>("unused");
   request->delay() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
@@ -419,7 +419,7 @@ static Object mcr_flushall(ObjectData* this_, int64_t val) {
 
 static Object mcr_version(ObjectData* this_) {
   return Native::data<MCRouter>(this_)->issue(
-      folly::make_unique<const mc::McVersionRequest>("unused"));
+      std::make_unique<const mc::McVersionRequest>("unused"));
 }
 
 static Object HHVM_METHOD(MCRouter, cas,
@@ -429,7 +429,7 @@ static Object HHVM_METHOD(MCRouter, cas,
                           int64_t expiration /*=0*/) {
   using Request = mc::McCasRequest;
 
-  auto request = folly::make_unique<Request>(
+  auto request = std::make_unique<Request>(
       folly::StringPiece(key.c_str(), key.size()));
   request->value() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));

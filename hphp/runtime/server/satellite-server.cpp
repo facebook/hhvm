@@ -24,7 +24,7 @@
 #include "hphp/util/text-util.h"
 #include <folly/Memory.h>
 
-using folly::make_unique;
+using std::make_unique;
 using std::set;
 
 namespace HPHP {

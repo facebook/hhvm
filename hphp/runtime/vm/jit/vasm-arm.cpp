@@ -19,7 +19,6 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
-#include "hphp/runtime/vm/jit/reg-algorithms.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/smashable-instr-arm.h"
 #include "hphp/runtime/vm/jit/timer.h"
@@ -384,6 +383,7 @@ void Vgen::patch(Venv& env) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Vgen::emit(const copy& i) {
+  if (i.s == i.d) return;
   if (i.s.isGP() && i.d.isGP()) {
     a->Mov(X(i.d), X(i.s));
   } else if (i.s.isSIMD() && i.d.isGP()) {
@@ -397,21 +397,23 @@ void Vgen::emit(const copy& i) {
 }
 
 void Vgen::emit(const copy2& i) {
-  MovePlan moves;
-  Reg64 d0 = i.d0, d1 = i.d1, s0 = i.s0, s1 = i.s1;
-  moves[d0] = s0;
-  moves[d1] = s1;
-  auto howTo = doRegMoves(moves, rAsm); // rAsm isn't used.
-  for (auto& how : howTo) {
-    if (how.m_kind == MoveInfo::Kind::Move) {
-      a->Mov(X(how.m_dst), X(how.m_src));
+  assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
+  auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
+  assertx(d0 != d1);
+  if (d0 == s1) {
+    if (d1 == s0) {
+      a->Eor(X(d0), X(d0), X(s0));
+      a->Eor(X(s0), X(d0), X(s0));
+      a->Eor(X(d0), X(d0), X(s0));
     } else {
-      auto const d = X(how.m_dst);
-      auto const s = X(how.m_src);
-      a->Eor(d, d, s);
-      a->Eor(s, d, s);
-      a->Eor(d, d, s);
+      // could do this in a simplify pass
+      if (s1 != d1) a->Mov(X(s1), X(d1)); // save s1 first; d1 != s0
+      if (s0 != d0) a->Mov(X(s0), X(d0));
     }
+  } else {
+    // could do this in a simplify pass
+    if (s0 != d0) a->Mov(X(s0), X(d0));
+    if (s1 != d1) a->Mov(X(s1), X(d1));
   }
 }
 

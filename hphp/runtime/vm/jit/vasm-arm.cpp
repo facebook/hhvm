@@ -637,8 +637,7 @@ void Vgen::emit(const imul& i) {
 
       // If hi is all 0's or 1's, then check the sign, else overflow
       // (fallthrough).
-      a->Cmp(rAsm, 0);
-      a->B(&checkSign, vixl::eq);
+      a->Cbz(rAsm, &checkSign);
       a->Cmp(rAsm, -1);
       a->B(&checkSign, vixl::eq);
 

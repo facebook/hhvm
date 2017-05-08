@@ -19,16 +19,11 @@
 #include "hphp/runtime/base/packed-array.h"
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/cap-code.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
-
-//////////////////////////////////////////////////////////////////////
-
-constexpr uint32_t kPackedSmallSize = 3; // same as mixed-array for now
 
 //////////////////////////////////////////////////////////////////////
 

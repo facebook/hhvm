@@ -287,7 +287,7 @@ struct BaseVector : ObjectData {
   [[noreturn]] static void throwBadKeyType();
 
   static constexpr uint64_t MaxCapacity() {
-    return PackedArray::MaxSize;
+    return MixedArray::MaxSize;
   }
 
   void scan(type_scan::Scanner& scanner) const {

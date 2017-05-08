@@ -121,7 +121,7 @@ ArrayData* EmptyArray::CopyWithStrongIterators(const ArrayData* ad) {
  */
 ALWAYS_INLINE
 member_lval EmptyArray::MakePackedInl(TypedValue tv) {
-  auto const cap = kPackedSmallSize;
+  auto const cap = PackedArray::SmallSize;
   auto const ad = static_cast<ArrayData*>(
     MM().objMalloc(sizeof(ArrayData) + cap * sizeof(TypedValue))
   );

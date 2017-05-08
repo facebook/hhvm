@@ -48,7 +48,6 @@ struct APCArray;
  * types.  The TypedValue's are placed right after the array header.
  */
 struct PackedArray final : type_scan::MarkCountable<PackedArray> {
-  static constexpr uint32_t MaxSize = 0xFFFFFFFFul;
   static constexpr uint32_t SmallSize = 3;
 
   static void Release(ArrayData*);

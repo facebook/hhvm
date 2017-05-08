@@ -144,10 +144,12 @@ public:
                   bool notice = RuntimeOption::EvalHackArrCompatNotices) const;
 
   /*
-   * Return the capacity stored in the header. Not to be confused
-   * with MixedArray::capacity
+   * Return the capacity stored in the header of a packed layout array. Not
+   * valid for arrays of other layouts, which have their own ways of measuring
+   * capacity (e.g. MixedArray::capacity).
    */
   uint32_t cap() const {
+    assert(kind() == kPackedKind || kind() == kVecKind);
     return aux<CapCode>().decode();
   }
 

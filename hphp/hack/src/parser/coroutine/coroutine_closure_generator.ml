@@ -7,40 +7,20 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
+module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
 
 open EditableSyntax
 open CoroutineSyntax
 
-let extract_parameter_declarations function_parameter_list =
-  function_parameter_list
-    |> syntax_node_to_list
-    |> Core_list.map ~f:syntax
-    |> Core_list.map ~f:
-      begin
-      function
-      | ListItem { list_item = { syntax = ParameterDeclaration p; _; }; _; } ->
-          p
-      | _ -> failwith "Parameter had unexpected type."
-      end
-
-let generate_hoisted_locals { function_parameter_list; _; } locals_and_params =
-  let params =
-    function_parameter_list
-      |> extract_parameter_declarations
-      |> Core_list.map ~f:(fun { parameter_name; _; } ->
-        match syntax parameter_name with
-        | Token { EditableToken.kind = TokenKind.Variable; text; _; } -> text
-        | _ -> failwith "Parameter name was not a variable token.")
-      |> SSet.of_list in
-  SSet.diff locals_and_params params
-    |> SSet.elements
+let generate_hoisted_locals { CoroutineStateMachineData.local_variables; _; } =
+  local_variables
+    |> SMap.values
     |> Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
 
-let make_parameters_public function_parameter_list =
-  function_parameter_list
-    |> extract_parameter_declarations
+let make_parameters_public { CoroutineStateMachineData.parameters; _; } =
+  parameters
     |> Core_list.map ~f:
       begin
       fun p ->
@@ -51,9 +31,10 @@ let make_parameters_public function_parameter_list =
 let generate_constructor_method
     classish_name
     function_name
-    { function_parameter_list; function_type; _; } =
+    { function_type; _; }
+    state_machine_data =
   let function_parameter_list =
-    make_parameters_public function_parameter_list in
+    make_parameters_public state_machine_data in
   let cont_param = make_continuation_parameter_syntax
     ~visibility_syntax:private_syntax function_type in
   let sm_param = make_state_machine_parameter_syntax
@@ -121,11 +102,15 @@ let generate_closure_body
     function_name
     method_node
     header_node
-    locals_and_params =
+    state_machine_data =
   label_declaration_syntax
-    :: generate_hoisted_locals header_node locals_and_params
+    :: generate_hoisted_locals state_machine_data
     @ [
-      generate_constructor_method classish_name function_name header_node;
+      generate_constructor_method
+        classish_name
+        function_name
+        header_node
+        state_machine_data;
       generate_resume_method method_node;
       generate_resume_with_exception_method method_node
     ]
@@ -140,7 +125,7 @@ let generate_coroutine_closure
     function_name
     ({ methodish_function_decl_header; _; } as method_node)
     header_node
-    locals_and_params =
+    state_machine_data =
   make_classish_declaration_syntax
     (make_closure_classname classish_name function_name)
     [ make_continuation_type_syntax mixed_syntax ]
@@ -149,4 +134,4 @@ let generate_coroutine_closure
       function_name
       method_node
       header_node
-      locals_and_params)
+      state_machine_data)

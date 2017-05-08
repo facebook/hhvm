@@ -40,7 +40,7 @@ let maybe_generate_methods_and_closure
     method_node
     header_node
     function_name =
-  let state_machine_syntax, locals_and_params =
+  let state_machine_syntax, state_machine_data =
     CoroutineStateMachineGenerator.generate_coroutine_state_machine
       classish_name
       function_name
@@ -52,7 +52,7 @@ let maybe_generate_methods_and_closure
       function_name
       method_node
       header_node
-      locals_and_params in
+      state_machine_data in
   Option.map
     (CoroutineMethodLowerer.maybe_rewrite_methodish_declaration
       classish_name

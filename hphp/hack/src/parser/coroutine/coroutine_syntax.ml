@@ -497,8 +497,7 @@ let label_declaration_syntax =
   let decl = make_property_declarator label_syntax init in
   make_property_declaration_syntax int_type decl
 
-let make_member_with_unknown_type_declaration_syntax variable_name =
-  let variable_syntax = make_token_syntax TokenKind.Variable variable_name in
+let make_member_with_unknown_type_declaration_syntax variable_syntax =
   let declaration_syntax =
     make_property_declarator variable_syntax (make_missing ()) in
   make_property_declaration_syntax (make_missing ()) declaration_syntax

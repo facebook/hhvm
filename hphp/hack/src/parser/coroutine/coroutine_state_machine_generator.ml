@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  *)
 
+module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
 module EditableToken = Full_fidelity_editable_token
@@ -126,7 +127,7 @@ let rewrite_locals_and_params_into_closure_variables node =
         let local_as_name_syntax =
           String_utils.lstrip text "$"
             |> make_token_syntax TokenKind.Name in
-        SSet.add text acc,
+        SMap.add text node acc,
         Rewriter.Result.Replace
           (make_member_selection_expression_syntax
             closure_variable_syntax
@@ -135,7 +136,7 @@ let rewrite_locals_and_params_into_closure_variables node =
   Rewriter.aggregating_rewrite_post
     rewrite_and_gather_locals_and_params
     node
-    SSet.empty
+    SMap.empty
 
 let lower_body body =
   let locals_and_params, body =
@@ -167,6 +168,44 @@ let make_function_decl_header
     ]
     (make_coroutine_result_type_syntax function_type)
 
+let extract_parameter_declarations { function_parameter_list; _; } =
+  function_parameter_list
+    |> syntax_node_to_list
+    |> Core_list.map ~f:syntax
+    |> Core_list.map ~f:
+      begin
+      function
+      | ListItem { list_item = { syntax = ParameterDeclaration p; _; }; _; } ->
+          p
+      | _ -> failwith "Parameter had unexpected type."
+      end
+
+let compute_state_machine_data locals_and_params function_node =
+  let parameters = extract_parameter_declarations function_node in
+  let parameter_names =
+    parameters
+      |> Core_list.map ~f:
+        begin
+        function
+        | {
+            parameter_name =
+              {
+                syntax =
+                  Token { EditableToken.kind = TokenKind.Variable; text; _; };
+                _;
+              };
+            _;
+          } ->
+            text
+        | _ -> failwith "Parameter had unexpected token."
+        end
+      |> SSet.of_list in
+  let local_variables =
+    SMap.filter
+      (fun k _ -> not (SSet.mem k parameter_names))
+      locals_and_params in
+  CoroutineStateMachineData.{ local_variables; parameters; }
+
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the
  * declaration header and the function body into a desugared coroutine
@@ -175,12 +214,14 @@ let make_function_decl_header
 let generate_coroutine_state_machine
     classish_name
     function_name
-    { methodish_function_decl_header; methodish_function_body; _; }
+    { methodish_function_body; _; }
     function_node =
   let body, locals_and_params =
     generate_coroutine_state_machine_body methodish_function_body in
+  let state_machine_data =
+    compute_state_machine_data locals_and_params function_node in
   let state_machine_method =
     make_methodish_declaration_syntax
       (make_function_decl_header classish_name function_name function_node)
       body in
-  state_machine_method, locals_and_params
+  state_machine_method, state_machine_data

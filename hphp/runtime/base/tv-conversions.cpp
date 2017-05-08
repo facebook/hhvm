@@ -521,8 +521,6 @@ void tvCastToArrayInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(!a->isRefCounted() || a->hasExactlyOneRef());
-
   tv->m_data.parr = a;
   tv->m_type = KindOfArray;
   assert(cellIsPlausible(*tv));
@@ -614,11 +612,6 @@ void tvCastToVecInPlace(TypedValue* tv) {
         auto* obj = tv->m_data.pobj;
         if (obj->isCollection()) {
           a = arrayFromCollection(obj).toVec().detach();
-          decRefObj(obj);
-          tv->m_data.parr = a;
-          tv->m_type = KindOfVec;
-          assert(cellIsPlausible(*tv));
-          return;
         } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
           auto arr = Array::CreateVec();
           for (ArrayIter iter(obj); iter; ++iter) {
@@ -638,8 +631,6 @@ void tvCastToVecInPlace(TypedValue* tv) {
     }
     not_reached();
   } while (0);
-
-  assert(!a->isRefCounted() || a->hasExactlyOneRef());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfVec;
@@ -747,8 +738,6 @@ void tvCastToDictInPlace(TypedValue* tv) {
     not_reached();
   } while (0);
 
-  assert(!a->isRefCounted() || a->hasExactlyOneRef());
-
   tv->m_data.parr = a;
   tv->m_type = KindOfDict;
   assert(cellIsPlausible(*tv));
@@ -851,8 +840,6 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
     }
     not_reached();
   } while (0);
-
-  assert(!a->isRefCounted() || a->hasExactlyOneRef());
 
   tv->m_data.parr = a;
   tv->m_type = KindOfKeyset;

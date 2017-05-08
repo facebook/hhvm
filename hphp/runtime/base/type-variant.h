@@ -20,8 +20,8 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/tv-mutate.h"
-#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-object.h"
@@ -33,6 +33,12 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+// Forward declare these to avoid including tv-conversions.h which has a
+// circular dependency with this file.
+void tvCastToVecInPlace(TypedValue*);
+void tvCastToDictInPlace(TypedValue*);
+void tvCastToKeysetInPlace(TypedValue*);
 
 /*
  * This class predates HHVM.
@@ -807,6 +813,30 @@ struct Variant : private TypedValue {
   Resource toResource() const {
     if (m_type == KindOfResource) return Resource{m_data.pres};
     return toResourceHelper();
+  }
+
+  Array toVecArray() const {
+    if (isVecType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToVecInPlace(copy.asTypedValue());
+    assertx(copy.isVecArray());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toDict() const {
+    if (isDictType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToDictInPlace(copy.asTypedValue());
+    assertx(copy.isDict());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toKeyset() const {
+    if (isKeysetType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToKeysetInPlace(copy.asTypedValue());
+    assertx(copy.isKeyset());
+    return Array::attach(copy.detach().m_data.parr);
   }
 
   template <typename T>

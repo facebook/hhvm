@@ -2892,80 +2892,17 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
 
 // HH\\dict
 Array HHVM_FUNCTION(HH_dict, const Variant& input) {
-  auto const inputCell = input.asCell();
-  if (LIKELY(isArrayLikeType(inputCell->m_type))) {
-    return ArrNR{inputCell->m_data.parr}.asArray().toDict();
-  } else if (inputCell->m_type == KindOfObject &&
-             inputCell->m_data.pobj->isCollection()) {
-    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
-      return ArrNR{ad}.asArray().toDict();
-    }
-    return HHVM_FN(HH_dict)(toArray(inputCell->m_data.pobj));
-  } else if (inputCell->m_type == KindOfObject &&
-             inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateDict();
-    for (ArrayIter iter(input.toObject()); iter; ++iter) {
-      arr.set(iter.first(), iter.second());
-    }
-    return arr;
-  } else {
-    raise_warning(
-      "Only arrays, vecs, keysets, and iterables can be converted into dicts"
-    );
-    return Array::CreateDict();
-  }
+  return input.toDict();
 }
 
 // HH\\keyset
 Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
-  auto const inputCell = input.asCell();
-  if (LIKELY(isArrayLikeType(inputCell->m_type))) {
-    return ArrNR{inputCell->m_data.parr}.asArray().toKeyset();
-  } else if (inputCell->m_type == KindOfObject &&
-             inputCell->m_data.pobj->isCollection()) {
-    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
-      return ArrNR{ad}.asArray().toKeyset();
-    }
-    return HHVM_FN(HH_keyset)(toArray(inputCell->m_data.pobj));
-  } else if (inputCell->m_type == KindOfObject &&
-             inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateKeyset();
-    for (ArrayIter iter(input.toObject()); iter; ++iter) {
-      arr.append(iter.second());
-    }
-    return arr;
-  } else {
-    raise_warning(
-      "Only arrays, vecs, dicts, and iterables can be converted into keysets"
-    );
-    return Array::CreateKeyset();
-  }
+  return input.toKeyset();
 }
 
 // HH\\vec
 Array HHVM_FUNCTION(HH_vec, const Variant& input) {
-  auto const inputCell = input.asCell();
-  if (LIKELY(isArrayLikeType(inputCell->m_type))) {
-    return ArrNR{inputCell->m_data.parr}.asArray().toVec();
-  } else if (inputCell->m_type == KindOfObject &&
-             inputCell->m_data.pobj->isCollection()) {
-    if (auto ad = collections::asArray(inputCell->m_data.pobj)) {
-      return ArrNR{ad}.asArray().toVec();
-    }
-    return HHVM_FN(HH_vec)(toArray(inputCell->m_data.pobj));
-  } else if (inputCell->m_type == KindOfObject &&
-             inputCell->m_data.pobj->instanceof(SystemLib::s_IteratorClass)) {
-    auto arr = Array::CreateVec();
-    for (ArrayIter iter(input.toObject()); iter; ++iter) {
-      arr.append(iter.second());
-    }
-    return arr;
-  } else {
-    raise_warning(
-      "Only arrays, dicts, keysets, and iterables can be converted into vecs"
-    );
-    return Array::CreateVec();
-  }
+  return input.toVecArray();
 }
 
 // HH\\varray

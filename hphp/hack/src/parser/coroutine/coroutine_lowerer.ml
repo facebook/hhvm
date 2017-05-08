@@ -221,28 +221,18 @@ let maybe_rewrite_syntax_list node =
           ~f:rewrite_classes
           ~init:([], false)
           syntax_list in
-      if any_rewritten then Some (make_list rewritten_nodes) else None
+      if any_rewritten then
+        Rewriter.Result.Replace (make_list rewritten_nodes)
+      else
+        Rewriter.Result.Keep
   | _ ->
       (* Irrelevant input. *)
-      None
-
-(**
- * Bridge function so that maybe_rewrite_class returns a value compatible with
- * the Rewriter.
- *)
-let rewrite node =
-  Some (
-    Option.value_map
-      (maybe_rewrite_syntax_list node)
-      ~default:(node, false)
-      ~f:(fun node -> node, true)
-  )
+      Rewriter.Result.Keep
 
 let lower_coroutines syntax_tree =
   syntax_tree
     |> from_tree
-    |> Rewriter.rewrite_pre rewrite
-    |> fst
+    |> Rewriter.rewrite_post maybe_rewrite_syntax_list
     |> text
     |> SourceText.make
     |> SyntaxTree.make

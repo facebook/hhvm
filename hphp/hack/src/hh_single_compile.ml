@@ -20,11 +20,12 @@ type parser =
   | FFP
 
 type options = {
-  filename    : string;
-  fallback    : bool;
-  config      : string list;
-  debug_time  : bool;
-  parser      : parser;
+  filename        : string;
+  fallback        : bool;
+  config          : string list;
+  debug_time      : bool;
+  parser          : parser;
+  output_file     : string;
 }
 
 (*****************************************************************************)
@@ -60,6 +61,7 @@ let parse_options () =
   let debug_time = ref false in
   let parser = ref FFP in
   let config = ref [] in
+  let output_file = ref "" in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let options =
     [ ("--fallback"
@@ -74,6 +76,10 @@ let parse_options () =
       , Arg.String (fun str -> config := str :: !config)
       , " Configuration: Eval.EnableHipHopSyntax=<value> or Hack.Lang.IntsOverflowToInts=<value>"
       );
+      ("-o"
+      , Arg.String (fun str -> output_file := str)
+      , " Output file. Creates it if necessary"
+      );
       ("--parser"
       , Arg.String
         (function "ffp" -> parser := FFP
@@ -87,11 +93,12 @@ let parse_options () =
   let fn = match !fn_ref with
     | Some fn -> fn
     | None -> die usage in
-  { filename = fn
-  ; fallback = !fallback
-  ; config = !config
-  ; debug_time = !debug_time
-  ; parser = !parser
+  { filename    = fn
+  ; fallback    = !fallback
+  ; config      = !config
+  ; debug_time  = !debug_time
+  ; parser      = !parser
+  ; output_file = !output_file
   }
 
 (* This allows one to fake having multiple files in one file. This
@@ -306,7 +313,12 @@ let decl_and_run_mode compiler_options popt tcopt =
   else
     let filename =
       Relative_path.create Relative_path.Dummy compiler_options.filename in
-    process_single_file filename None
+    let outputfile = compiler_options.output_file in
+    process_single_file
+      filename
+      (if outputfile = ""
+      then None
+      else Some outputfile)
 
 let main_hack opts =
   let popt = ParserOptions.default in

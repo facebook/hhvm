@@ -363,6 +363,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case CountDict:
   case CountKeyset:
   case Select:
+  case StrictlyIntegerConv:
     return true;
   default:
     return false;

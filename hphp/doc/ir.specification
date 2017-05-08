@@ -577,6 +577,12 @@ To string conversions:
   Convert the integer S0 to a the one character string with ascii code
   S0 & 255.
 
+| StrictlyIntegerConv,         D(Str|Int), S(Str),                        PRc
+
+  If S0 is a string representing an integer value (same criteria as array key
+  conversion), return that value as an integer. Otherwise return S0.
+
+
 4. Boolean predicates
 
 | GtInt,                       D(Bool), S(Int) S(Int),                    NF

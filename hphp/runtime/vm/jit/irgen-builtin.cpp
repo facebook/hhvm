@@ -104,6 +104,7 @@ const StaticString
   s_ord("ord"),
   s_chr("chr"),
   s_func_num_args("func_num_args"),
+  s_array_key_cast("hh\\array_key_cast"),
   s_one("1"),
   s_empty("");
 
@@ -558,6 +559,22 @@ SSATmp* opt_set_frame_metadata(IRGS& env, const ParamPrep& params) {
   return cns(env, TInitNull);
 }
 
+SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) return nullptr;
+  auto const value = params[0].value;
+
+  env.irb->constrainValue(value, DataTypeSpecific);
+
+  if (value->isA(TInt))  return value;
+  if (value->isA(TNull)) return cns(env, staticEmptyString());
+  if (value->isA(TBool)) return gen(env, ConvBoolToInt, value);
+  if (value->isA(TDbl))  return gen(env, ConvDblToInt, value);
+  if (value->isA(TRes))  return gen(env, ConvResToInt, value);
+  if (value->isA(TStr))  return gen(env, StrictlyIntegerConv, value);
+
+  return nullptr;
+}
+
 SSATmp* opt_foldable(IRGS& env,
                      const Func* func,
                      const ParamPrep& params,
@@ -721,6 +738,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(func_num_args)
     X(min2)
     X(set_frame_metadata)
+    X(array_key_cast)
 
 #undef X
 

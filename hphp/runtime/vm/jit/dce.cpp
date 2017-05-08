@@ -263,6 +263,7 @@ bool canDCE(IRInstruction* inst) {
   case Select:
   case MemoGet:
   case LdARCtx:
+  case StrictlyIntegerConv:
     assertx(!inst->isControlFlow());
     return true;
 

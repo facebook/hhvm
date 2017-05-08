@@ -1059,7 +1059,8 @@ FuncSet s_ignores_frame = {
   "HH\\dict",
   "HH\\keyset",
   "HH\\varray",
-  "HH\\darray"
+  "HH\\darray",
+  "HH\\array_key_cast"
 };
 
 const StaticString s_assert("assert");

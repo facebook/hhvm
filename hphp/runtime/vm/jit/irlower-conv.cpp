@@ -486,4 +486,27 @@ IMPL_OPCODE_CALL(ConvCellToObj);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static TypedValue strictlyIntegerConvImpl(StringData* str) {
+  int64_t n;
+  if (str->isStrictlyInteger(n)) {
+    return make_tv<KindOfInt64>(n);
+  }
+  str->incRefCount();
+  return make_tv<KindOfString>(str);
+}
+
+void cgStrictlyIntegerConv(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0);
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(strictlyIntegerConvImpl),
+    callDestTV(env, inst),
+    SyncOptions::None,
+    args
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }}}

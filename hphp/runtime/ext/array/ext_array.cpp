@@ -2915,6 +2915,59 @@ Array HHVM_FUNCTION(HH_darray, const Variant& input) {
   return input.toDArray();
 }
 
+TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
+  switch (input.getType()) {
+    case KindOfPersistentString:
+    case KindOfString: {
+      int64_t n;
+      auto const& str = input.asCStrRef();
+      if (str.get()->isStrictlyInteger(n)) {
+        return tvReturn(n);
+      }
+      return tvReturn(str);
+    }
+
+    case KindOfInt64:
+    case KindOfBoolean:
+    case KindOfDouble:
+    case KindOfResource:
+      return tvReturn(input.toInt64());
+
+    case KindOfUninit:
+    case KindOfNull:
+      return tvReturn(staticEmptyString());
+
+    case KindOfPersistentVec:
+    case KindOfVec:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Vecs cannot be cast to an array-key"
+      );
+    case KindOfPersistentDict:
+    case KindOfDict:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Dicts cannot be cast to an array-key"
+      );
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Keysets cannot be cast to an array-key"
+      );
+    case KindOfPersistentArray:
+    case KindOfArray:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Arrays cannot be cast to an array-key"
+      );
+    case KindOfObject:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Objects cannot be cast to an array-key"
+      );
+
+    case KindOfRef:
+      break;
+  }
+  not_reached();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct ArrayExtension final : Extension {
@@ -3050,6 +3103,7 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\keyset, HH_keyset);
     HHVM_FALIAS(HH\\varray, HH_varray);
     HHVM_FALIAS(HH\\darray, HH_darray);
+    HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
 
     loadSystemlib();
   }

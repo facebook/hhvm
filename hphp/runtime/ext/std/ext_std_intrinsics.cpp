@@ -43,11 +43,17 @@ void HHVM_FUNCTION(trigger_oom, bool oom) {
   if (oom) setSurpriseFlag(MemExceededFlag);
 }
 
+TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
+  return tvReturn(val);
+}
+
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
   HHVM_FALIAS(__hhvm_intrinsics\\disable_inlining, disable_inlining);
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
+  HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
+
   loadSystemlib("std_intrinsics");
 }
 

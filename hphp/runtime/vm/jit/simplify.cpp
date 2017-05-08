@@ -3397,6 +3397,15 @@ SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+SSATmp* simplifyStrictlyIntegerConv(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (!src->hasConstVal()) return nullptr;
+  int64_t n;
+  if (src->strVal()->isStrictlyInteger(n)) return cns(env, n);
+  gen(env, IncRef, src);
+  return src;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -3635,6 +3644,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckRange)
   X(SpillFrame)
   X(GetMemoKey)
+  X(StrictlyIntegerConv)
   default: break;
   }
 #undef X

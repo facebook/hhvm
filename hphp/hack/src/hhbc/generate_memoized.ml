@@ -115,7 +115,7 @@ let memoize_function_with_params params renamed_name =
     branch in this method. *)
     instr_entrynop;
     Emit_body.emit_method_prolog params;
-    instr_dict 0 (Typed_value.Dict []);
+    instr_dict (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
     instr_basel static_local Warn;

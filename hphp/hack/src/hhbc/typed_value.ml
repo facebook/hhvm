@@ -31,6 +31,12 @@ type t =
   | Keyset of t list
   | Dict of (t*t) list
 
+module TVMap : MyMap.S with type key = t = MyMap.Make (struct
+  type key = t
+  type t = key
+  let compare = Pervasives.compare
+end)
+
 (* Some useful constants *)
 let zero = Int Int64.zero
 let null = Null

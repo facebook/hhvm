@@ -14,6 +14,7 @@ module A = Ast
 module SS = String_sequence
 module SU = Hhbc_string_utils
 module TV = Typed_value
+module TVMap = Typed_value.TVMap
 open H
 
 (* State associated with an entire file *)
@@ -31,6 +32,27 @@ let next_typedef_counter () =
 
 (* State associated with a single body of code *)
 let total_named_locals = ref 0
+
+(* Array identifier map *)
+let array_identifier_counter = ref 0
+let next_array_identifier () =
+  let c = !array_identifier_counter in
+  array_identifier_counter := c + 1;
+  c
+
+let array_identifier_map = ref TVMap.empty
+let should_create_adata_entry tval =
+  if TVMap.mem tval !array_identifier_map
+  then (false, -1)
+  else begin
+    let i = next_array_identifier () in
+    array_identifier_map := TVMap.add tval i !array_identifier_map;
+    (true, i)
+    end
+let get_array_identifier tv =
+  match TVMap.get tv !array_identifier_map with
+  | None -> failwith "Such array does not exist in adata?"
+  | Some i -> string_of_int i
 
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
@@ -90,10 +112,11 @@ let string_of_lit_const instruction =
     | Double d    -> sep ["Double"; d]
     | AddElemC          -> "AddElemC"
     | AddNewElemC       -> "AddNewElemC"
-    | Array (i, _)      -> sep ["Array"; "@A_" ^ string_of_int i]
+    | Array tv          -> sep ["Array"; "@A_" ^ get_array_identifier tv]
+    | Dict tv           -> sep ["Dict"; "@A_" ^ get_array_identifier tv]
+    | Keyset tv         -> sep ["Keyset"; "@A_" ^ get_array_identifier tv]
+    | Vec tv            -> sep ["Vec"; "@A_" ^ get_array_identifier tv]
     | ColFromArray i    -> sep ["ColFromArray"; string_of_int i]
-    | Dict (i, _)       -> sep ["Dict"; "@A_" ^ string_of_int i]
-    | Keyset (i, _)     -> sep ["Keyset"; "@A_" ^ string_of_int i]
     | NewCol i          -> sep ["NewCol"; string_of_int i]
     | NewDictArray i    -> sep ["NewDictArray"; string_of_int i]
     | NewKeysetArray i  -> sep ["NewKeysetArray"; string_of_int i]
@@ -103,7 +126,6 @@ let string_of_lit_const instruction =
     | NewStructArray l  ->
       sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewPair -> "NewPair"
-    | Vec (i, _)        -> sep ["Vec"; "@A_" ^ string_of_int i]
     | ClsCns (name, id) ->
       sep ["ClsCns"; SU.quote_string name; string_of_classref id]
     | ClsCnsD (name, class_name) ->
@@ -1071,24 +1093,27 @@ let add_class_def buf class_def =
   (* TODO: other members *)
   B.add_string buf "\n}\n"
 
-let add_data_region_element buf num argument =
-  B.add_string buf ".adata A_";
-  B.add_string buf @@ string_of_int num;
-  B.add_string buf " = \"\"\"";
-  SS.add_string_from_seq buf
-    @@ Emit_adata.adata_to_string_seq argument;
-  B.add_string buf "\"\"\";\n"
+let add_data_region_element buf argument =
+  let b, num = should_create_adata_entry argument in
+  if b then begin
+    B.add_string buf ".adata A_";
+    B.add_string buf @@ string_of_int num;
+    B.add_string buf " = \"\"\"";
+    SS.add_string_from_seq buf
+      @@ Emit_adata.adata_to_string_seq argument;
+    B.add_string buf "\"\"\";\n"
+  end
 
 let add_data_region buf top_level_body functions classes =
   let rec add_data_region_list buf instr =
     List.iter (add_data_region_aux buf) instr
   and add_data_region_aux buf = function
-    | ILitConst (Array (num, argument)
-                | Dict (num, argument)
-                | Vec (num, argument)
-                | Keyset (num, argument)
+    | ILitConst (Array argument
+                | Dict argument
+                | Vec argument
+                | Keyset argument
                 ) ->
-      add_data_region_element buf num argument
+      add_data_region_element buf argument
     | _ -> ()
   and iter_aux_fun buf fun_def =
     let function_body = Hhas_function.body fun_def in

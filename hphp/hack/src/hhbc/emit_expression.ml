@@ -809,13 +809,12 @@ and from_expr expr =
     failwith "List destructor can only be used as an lvar"
 
 and emit_static_collection ~transform_to_collection tv =
-  let a_label = Label.get_next_data_label () in
   let lit_constructor =
     match tv with
-    | Typed_value.Array _ -> Array (a_label, tv)
-    | Typed_value.Dict _ -> Dict (a_label, tv)
-    | Typed_value.Vec _ -> Vec (a_label, tv)
-    | Typed_value.Keyset _ -> Keyset (a_label, tv)
+    | Typed_value.Array _ -> Array tv
+    | Typed_value.Dict _ -> Dict tv
+    | Typed_value.Vec _ -> Vec tv
+    | Typed_value.Keyset _ -> Keyset tv
     | _ -> failwith "emit_static_collection: unexpected collection type"
   in
   let transform_instr =

@@ -404,6 +404,10 @@ inline ArrayData* ArrayData::toKeyset(bool copy) {
   return g_array_funcs.toKeyset[kind()](this, copy);
 }
 
+inline ArrayData* ArrayData::toVArray(bool copy) {
+  return g_array_funcs.toVArray[kind()](this, copy);
+}
+
 inline void ArrayData::renumber() {
   return g_array_funcs.renumber[kind()](this);
 }

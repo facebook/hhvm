@@ -39,6 +39,8 @@ namespace HPHP {
 void tvCastToVecInPlace(TypedValue*);
 void tvCastToDictInPlace(TypedValue*);
 void tvCastToKeysetInPlace(TypedValue*);
+void tvCastToVArrayInPlace(TypedValue*);
+void tvCastToDArrayInPlace(TypedValue*);
 
 /*
  * This class predates HHVM.
@@ -836,6 +838,22 @@ struct Variant : private TypedValue {
     auto copy = *this;
     tvCastToKeysetInPlace(copy.asTypedValue());
     assertx(copy.isKeyset());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toVArray() const {
+    if (isArrayType(m_type)) return asCArrRef().toVArray();
+    auto copy = *this;
+    tvCastToVArrayInPlace(copy.asTypedValue());
+    assertx(copy.isPHPArray() && copy.asCArrRef().isVArray());
+    return Array::attach(copy.detach().m_data.parr);
+  }
+
+  Array toDArray() const {
+    if (isArrayType(m_type)) return Array{m_data.parr};
+    auto copy = *this;
+    tvCastToDArrayInPlace(copy.asTypedValue());
+    assertx(copy.isPHPArray());
     return Array::attach(copy.detach().m_data.parr);
   }
 

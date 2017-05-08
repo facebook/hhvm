@@ -846,6 +846,223 @@ void tvCastToKeysetInPlace(TypedValue* tv) {
   assert(cellIsPlausible(*tv));
 }
 
+void tvCastToVArrayInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  ArrayData* a;
+
+  do {
+    switch (tv->m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        raise_warning("Null to varray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfBoolean:
+        raise_warning("Bool to varray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfInt64:
+        raise_warning("Int to varray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfDouble:
+        raise_warning("Double to varray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfPersistentString:
+      case KindOfString:
+        raise_warning("String to varray conversion");
+        a = staticEmptyArray();
+        decRefStr(tv->m_data.pstr);
+        continue;
+
+      case KindOfResource:
+        raise_warning("Resource to varray conversion");
+        a = staticEmptyArray();
+        decRefRes(tv->m_data.pres);
+        continue;
+
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentDict:
+      case KindOfDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        a = MixedArray::ToVArrayDict(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        a = SetArray::ToVArray(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentArray:
+      case KindOfArray: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isPHPArray());
+        if (adIn->isVArray()) return;
+        a = adIn->toVArray(adIn->cowCheck());
+        if (a == adIn) return;
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfObject: {
+        auto* obj = tv->m_data.pobj;
+        if (obj->isCollection()) {
+          a = arrayFromCollection(obj).toVArray().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          // This assumes that appending to an initially empty array will never
+          // promote to mixed.
+          auto arr = Array::Create();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.append(iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to varray");
+          a = staticEmptyArray();
+        }
+        decRefObj(obj);
+        continue;
+      }
+
+      case KindOfRef:
+        break;
+    }
+    not_reached();
+  } while (0);
+
+  assert(a->isVArray());
+
+  tv->m_data.parr = a;
+  tv->m_type = KindOfArray;
+  assert(cellIsPlausible(*tv));
+}
+
+void tvCastToDArrayInPlace(TypedValue* tv) {
+  assert(tvIsPlausible(*tv));
+  tvUnboxIfNeeded(tv);
+  ArrayData* a;
+
+  do {
+    switch (tv->m_type) {
+      case KindOfUninit:
+      case KindOfNull:
+        raise_warning("Null to darray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfBoolean:
+        raise_warning("Bool to darray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfInt64:
+        raise_warning("Int to darray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfDouble:
+        raise_warning("Double to darray conversion");
+        a = staticEmptyArray();
+        continue;
+
+      case KindOfPersistentString:
+      case KindOfString:
+        raise_warning("String to darray conversion");
+        a = staticEmptyArray();
+        decRefStr(tv->m_data.pstr);
+        continue;
+
+      case KindOfResource:
+        raise_warning("Resource to darray conversion");
+        a = staticEmptyArray();
+        decRefRes(tv->m_data.pres);
+        continue;
+
+      case KindOfPersistentVec:
+      case KindOfVec: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isVecArray());
+        a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentDict:
+      case KindOfDict: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isDict());
+        a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+        if (a != adIn) decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentKeyset:
+      case KindOfKeyset: {
+        auto* adIn = tv->m_data.parr;
+        assert(adIn->isKeyset());
+        a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
+        assert(a != adIn);
+        decRefArr(adIn);
+        continue;
+      }
+
+      case KindOfPersistentArray:
+      case KindOfArray:
+        assert(tv->m_data.parr->isPHPArray());
+        return;
+
+      case KindOfObject: {
+        auto* obj = tv->m_data.pobj;
+        if (obj->isCollection()) {
+          a = arrayFromCollection(obj).toPHPArray().detach();
+        } else if (obj->instanceof(SystemLib::s_IteratorClass)) {
+          auto arr = Array::Create();
+          for (ArrayIter iter(obj); iter; ++iter) {
+            arr.set(iter.first(), iter.second());
+          }
+          a = arr.detach();
+        } else {
+          raise_warning("Non-iterable object conversion to darray");
+          a = staticEmptyArray();
+        }
+        decRefObj(obj);
+        continue;
+      }
+
+      case KindOfRef:
+        break;
+    }
+    not_reached();
+  } while (0);
+
+  tv->m_data.parr = a;
+  tv->m_type = KindOfArray;
+  assert(cellIsPlausible(*tv));
+}
+
 void tvCastToObjectInPlace(TypedValue* tv) {
   assert(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);

@@ -139,6 +139,7 @@ public:
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
 
 private:
   static GlobalsArray* asGlobals(ArrayData* ad);

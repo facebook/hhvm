@@ -143,6 +143,8 @@ struct EmptyArray final : type_scan::MarkCountable<EmptyArray> {
     return const_cast<ArrayData*>(ad);
   }
 
+  static constexpr auto ToVArray = &ToPHPArray;
+
 private:
   static member_lval MakePacked(TypedValue);
   static member_lval MakePackedInl(TypedValue);

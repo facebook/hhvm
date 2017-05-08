@@ -2907,12 +2907,12 @@ Array HHVM_FUNCTION(HH_vec, const Variant& input) {
 
 // HH\\varray
 Array HHVM_FUNCTION(HH_varray, const Variant& input) {
-  return input.toPHPArray();
+  return input.toVArray();
 }
 
 // HH\\darray
 Array HHVM_FUNCTION(HH_darray, const Variant& input) {
-  return input.toPHPArray();
+  return input.toDArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

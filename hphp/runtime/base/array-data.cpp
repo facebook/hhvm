@@ -703,12 +703,24 @@ const ArrayFunctions g_array_funcs = {
    /*
    * ArrayData* ToKeyset(ArrayData*, bool)
    *
-   *   Convert to a keyset. Values will be discarded and the keyset will contain
-   *   just the keys. If already a keyset, it will be returned unchange (without
-   *   copying). If copy is false, it may be converted in place. If the input
-   *   array contains references, an exception will be thrown.
+   *   Convert to a keyset. Keys will be discarded and the keyset will contain
+   *   just the values in iteration order. If already a keyset, it will be
+   *   returned unchange (without copying). If copy is false, it may be
+   *   converted in place. If the input array contains references, or if the
+   *   input contains values that are neither integers or strings, an exception
+   *   will be thrown.
    */
   DISPATCH(ToKeyset)
+
+  /*
+   * ArrayData* ToVArray(ArrayData*, bool)
+   *
+   * Convert to a varray (vector-like array). The array will be converted to a
+   * packed (or empty) array, discarding keys. If already a packed or empty
+   * array, it will be returned unchanged (without copying). If copy is false,
+   * it may be converted in place.
+   */
+  DISPATCH(ToVArray)
 };
 
 #undef DISPATCH

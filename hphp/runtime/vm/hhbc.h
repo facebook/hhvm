@@ -439,6 +439,8 @@ constexpr int32_t kMaxConcatN = 4;
   O(CastDict,        NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastKeyset,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(CastVec,         NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CastVArray,      NA,               ONE(CV),         ONE(CV),    NF) \
+  O(CastDArray,      NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(Print,           NA,               ONE(CV),         ONE(CV),    NF) \

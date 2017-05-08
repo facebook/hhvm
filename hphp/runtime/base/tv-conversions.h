@@ -53,6 +53,9 @@ X(NullableObject)
 X(Resource)
 #undef X
 
+void tvCastToVArrayInPlace(TypedValue* tv);
+void tvCastToDArrayInPlace(TypedValue* tv);
+
 ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
 #define X(kind) \
   if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }

@@ -5534,7 +5534,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                params && params->getCount() == 1) {
       visit((*params)[0]);
       emitConvertToCell(e);
-      e.CastArray();
+      e.CastVArray();
       return true;
     } else if (((call->isCallToFunction("darray") &&
                  (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||
@@ -5542,7 +5542,7 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                params && params->getCount() == 1) {
       visit((*params)[0]);
       emitConvertToCell(e);
-      e.CastArray();
+      e.CastDArray();
       return true;
     } else if (((call->isCallToFunction("is_vec") &&
                  (m_ue.m_isHHFile || RuntimeOption::EnableHipHopSyntax)) ||

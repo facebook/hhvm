@@ -240,6 +240,8 @@ bool hasObviousStackOutput(const Bytecode& op, const State& state) {
   case Op::CastDict:
   case Op::CastVec:
   case Op::CastKeyset:
+  case Op::CastVArray:
+  case Op::CastDArray:
   case Op::InstanceOfD:
   case Op::InstanceOf:
   case Op::Print:

@@ -523,6 +523,7 @@ public:
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
   static bool Same(const ArrayData*, const ArrayData*);

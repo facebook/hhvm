@@ -180,6 +180,7 @@ public:
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
+  static ArrayData* ToVArray(ArrayData*, bool);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData* ad);

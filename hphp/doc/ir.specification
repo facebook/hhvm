@@ -470,6 +470,24 @@ To keyset conversions:
 | ConvObjToKeyset,              D(Keyset), S(Obj),                Er|PRc|CRc
 
 
+To varray conversions:
+
+| ConvArrToVArr,                D(Arr), S(Arr),                      PRc|CRc
+
+| ConvVecToVArr,                D(Arr), S(Vec),                      PRc|CRc
+
+| ConvDictToVArr,               D(Arr), S(Dict),                     PRc|CRc
+
+| ConvKeysetToVArr,             D(Arr), S(Keyset),                   PRc|CRc
+
+| ConvObjToVArr,                D(Arr), S(Obj),                   Er|PRc|CRc
+
+
+To darray conversion:
+
+| ConvObjToDArr,                D(Arr), S(Obj),                   Er|PRc|CRc
+
+
 To bool conversions:
 
 | ConvArrToBool,               D(Bool), S(Arr),                           NF
@@ -483,6 +501,7 @@ To bool conversions:
 | ConvObjToBool,               D(Bool), S(Obj),                           NF
 
 | ConvCellToBool,              D(Bool), S(Cell),                          NF
+
 
 To double conversions:
 

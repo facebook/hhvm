@@ -351,6 +351,7 @@ public:
   static ArrayData* ToDict(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
 
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
@@ -427,6 +428,7 @@ public:
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArrayDict = &ArrayCommon::ToVArray;
 
   //////////////////////////////////////////////////////////////////////
 

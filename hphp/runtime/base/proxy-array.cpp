@@ -348,6 +348,12 @@ ArrayData* ProxyArray::ToKeyset(ArrayData* ad, bool copy) {
   return const_cast<ArrayData*>(ad);
 }
 
+ArrayData* ProxyArray::ToVArray(ArrayData* ad, bool copy) {
+  auto const r = innerArr(ad)->toVArray(innerArr(ad)->cowCheck());
+  reseatable(ad, r);
+  return const_cast<ArrayData*>(ad);
+}
+
 void ProxyArray::Renumber(ArrayData* ad) {
   innerArr(ad)->renumber();
 }

@@ -1,0 +1,652 @@
+============== test_varray =========================
+
+Warning: Null to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: Bool to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: Bool to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: String to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: Int to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: String to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: Double to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+array(0) {
+}
+============== test_varray =========================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_varray =========================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+============== test_varray =========================
+array(0) {
+}
+============== test_varray =========================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_varray =========================
+array(0) {
+}
+============== test_varray =========================
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+============== test_varray =========================
+array(0) {
+}
+============== test_varray =========================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  string(3) "abc"
+  [2]=>
+  int(200)
+}
+============== test_varray =========================
+
+Warning: Resource to varray conversion in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+
+Warning: Non-iterable object conversion to varray in %s/convert.php on line 46
+array(0) {
+}
+============== test_varray =========================
+array(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+  [2]=>
+  string(3) "ghi"
+}
+============== test_varray =========================
+Exception: ThrowIterableObj
+============== test_varray =========================
+array(2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+============== test_varray =========================
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  string(3) "100"
+}
+============== test_varray =========================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+============== test_varray =========================
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+============== test_varray =========================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+============== test_varray =========================
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(100)
+}
+============== test_darray =========================
+
+Warning: Null to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: Bool to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: Bool to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: String to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: Int to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: String to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: Double to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+array(0) {
+}
+============== test_darray =========================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_darray =========================
+array(3) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+  ["c"]=>
+  int(300)
+}
+============== test_darray =========================
+array(0) {
+}
+============== test_darray =========================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_darray =========================
+array(0) {
+}
+============== test_darray =========================
+array(2) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}
+============== test_darray =========================
+array(0) {
+}
+============== test_darray =========================
+array(3) {
+  [100]=>
+  int(100)
+  ["abc"]=>
+  string(3) "abc"
+  [200]=>
+  int(200)
+}
+============== test_darray =========================
+
+Warning: Resource to darray conversion in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+
+Warning: Non-iterable object conversion to darray in %s/convert.php on line 55
+array(0) {
+}
+============== test_darray =========================
+array(3) {
+  [100]=>
+  string(3) "abc"
+  [200]=>
+  string(3) "def"
+  [300]=>
+  string(3) "ghi"
+}
+============== test_darray =========================
+Exception: ThrowIterableObj
+============== test_darray =========================
+array(1) {
+  [100]=>
+  string(3) "def"
+}
+============== test_darray =========================
+array(1) {
+  [100]=>
+  int(100)
+}
+============== test_darray =========================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+============== test_darray =========================
+array(4) {
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+  ["d"]=>
+  string(1) "d"
+}
+============== test_darray =========================
+array(3) {
+  [100]=>
+  string(1) "a"
+  [200]=>
+  string(1) "b"
+  [300]=>
+  string(1) "c"
+}
+============== test_darray =========================
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(100)
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Null to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Bool to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Bool to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: String to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Int to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: String to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Double to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+============== test_indirect (HH\varray) ==================
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_indirect (HH\varray) ==================
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+}
+============== test_indirect (HH\varray) ==================
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  string(3) "abc"
+  [2]=>
+  int(200)
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Resource to varray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+
+Warning: Non-iterable object conversion to varray in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+  [2]=>
+  string(3) "ghi"
+}
+============== test_indirect (HH\varray) ==================
+Exception: ThrowIterableObj
+============== test_indirect (HH\varray) ==================
+array(2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+============== test_indirect (HH\varray) ==================
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  string(3) "100"
+}
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+============== test_indirect (HH\varray) ==================
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+  [3]=>
+  string(1) "d"
+}
+============== test_indirect (HH\varray) ==================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+============== test_indirect (HH\varray) ==================
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(100)
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Null to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Bool to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Bool to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: String to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Int to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: String to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Double to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_indirect (HH\darray) ==================
+array(3) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+  ["c"]=>
+  int(300)
+}
+============== test_indirect (HH\darray) ==================
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+============== test_indirect (HH\darray) ==================
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+array(2) {
+  [1]=>
+  string(1) "a"
+  [2]=>
+  string(1) "b"
+}
+============== test_indirect (HH\darray) ==================
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [100]=>
+  int(100)
+  ["abc"]=>
+  string(3) "abc"
+  [200]=>
+  int(200)
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Resource to darray conversion in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+
+Warning: Non-iterable object conversion to darray in %s/convert.php on line 63
+array(0) {
+}
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [100]=>
+  string(3) "abc"
+  [200]=>
+  string(3) "def"
+  [300]=>
+  string(3) "ghi"
+}
+============== test_indirect (HH\darray) ==================
+Exception: ThrowIterableObj
+============== test_indirect (HH\darray) ==================
+array(1) {
+  [100]=>
+  string(3) "def"
+}
+============== test_indirect (HH\darray) ==================
+array(1) {
+  [100]=>
+  int(100)
+}
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+============== test_indirect (HH\darray) ==================
+array(4) {
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+  ["d"]=>
+  string(1) "d"
+}
+============== test_indirect (HH\darray) ==================
+array(3) {
+  [100]=>
+  string(1) "a"
+  [200]=>
+  string(1) "b"
+  [300]=>
+  string(1) "c"
+}
+============== test_indirect (HH\darray) ==================
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  int(100)
+}

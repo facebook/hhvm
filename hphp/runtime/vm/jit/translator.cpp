@@ -187,6 +187,8 @@ static const struct {
   { OpCastDict,    {Stack1,           Stack1,       OutDict         }},
   { OpCastKeyset,  {Stack1,           Stack1,       OutKeyset       }},
   { OpCastVec,     {Stack1,           Stack1,       OutVec          }},
+  { OpCastVArray,  {Stack1,           Stack1,       OutArray        }},
+  { OpCastDArray,  {Stack1,           Stack1,       OutArray        }},
   { OpInstanceOf,  {StackTop2,        Stack1,       OutBoolean      }},
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpPrint,       {Stack1,           Stack1,       OutInt64        }},
@@ -918,6 +920,8 @@ bool dontGuardAnyInputs(Op op) {
   case Op::CastDict:
   case Op::CastKeyset:
   case Op::CastVec:
+  case Op::CastVArray:
+  case Op::CastDArray:
   case Op::CheckProp:
   case Op::CheckThis:
   case Op::Clone:

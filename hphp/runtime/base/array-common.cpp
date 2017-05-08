@@ -133,6 +133,17 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
   return init.create();
 }
 
+ArrayData* ArrayCommon::ToVArray(ArrayData* a, bool) {
+  auto const size = a->size();
+  if (!size) return staticEmptyArray();
+  PackedArrayInit init{size};
+  IterateV(
+    a,
+    [&](const TypedValue* v) { init.appendWithRef(tvAsCVarRef(v)); }
+  );
+  return init.create();
+}
+
 ArrayCommon::RefCheckResult
 ArrayCommon::CheckForRefs(const ArrayData* ad) {
   auto result = RefCheckResult::Pass;

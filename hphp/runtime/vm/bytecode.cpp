@@ -2401,6 +2401,16 @@ OPTBLD_INLINE void iopCastVec() {
   tvCastToVecInPlace(c1);
 }
 
+OPTBLD_INLINE void iopCastVArray() {
+  Cell* c1 = vmStack().topC();
+  tvCastToVArrayInPlace(c1);
+}
+
+OPTBLD_INLINE void iopCastDArray() {
+  Cell* c1 = vmStack().topC();
+  tvCastToDArrayInPlace(c1);
+}
+
 OPTBLD_INLINE bool cellInstanceOf(TypedValue* tv, const NamedEntity* ne) {
   assert(tv->m_type != KindOfRef);
   Class* cls = nullptr;

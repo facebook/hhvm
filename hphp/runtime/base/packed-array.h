@@ -119,6 +119,7 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   }
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ToPHPArray;
 
   static const TypedValue* NvTryGetIntVec(const ArrayData*, int64_t);
   static const TypedValue* NvTryGetStrVec(const ArrayData*, const StringData*);
@@ -176,6 +177,7 @@ struct PackedArray final : type_scan::MarkCountable<PackedArray> {
   static constexpr auto OnSetEvalScalarVec = &OnSetEvalScalar;
   static constexpr auto EscalateVec = &Escalate;
   static constexpr auto ToKeysetVec = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArrayVec = &ToPHPArrayVec;
 
   //////////////////////////////////////////////////////////////////////
 

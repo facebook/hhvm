@@ -131,6 +131,7 @@ public:
   Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
+  Array toVArray() const { COPY_BODY(toVArray(true), Array{}) }
 
   #undef COPY_BODY
 
@@ -182,6 +183,8 @@ public:
   bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
   bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
+
+  bool isVArray() const { return !m_arr || m_arr->isVArray(); }
 
   bool useWeakKeys() const {
     // If array isn't set we may implicitly create a mixed array. We never

@@ -1774,6 +1774,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvCellToArr:  // decrefs src, may read obj props
   case ConvCellToObj:  // decrefs src
   case ConvObjToArr:   // decrefs src
+  case ConvObjToVArr:  // can invoke PHP
+  case ConvObjToDArr:  // can invoke PHP
   case InitProps:
   case InitSProps:
   case OODeclExists:
@@ -1858,6 +1860,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvKeysetToVec:
   case ConvVecToDict:
   case ConvKeysetToDict:
+  case ConvArrToVArr:
+  case ConvVecToVArr:
+  case ConvDictToVArr:
+  case ConvKeysetToVArr:
     return may_load_store(AElemAny, AEmpty);
 
   case ReleaseVVAndSkip:  // can decref ExtraArgs or VarEnv and Locals

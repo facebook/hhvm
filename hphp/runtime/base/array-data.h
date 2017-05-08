@@ -200,6 +200,8 @@ public:
   bool isPHPArray() const { return kind() < kDictKind; }
   bool isHackArray() const { return kind() >= kDictKind; }
 
+  bool isVArray() const { return isPacked() || isEmptyArray(); }
+
   DataType toDataType() const {
     auto const k = kind();
     if (k < kDictKind) return KindOfArray;
@@ -423,6 +425,8 @@ public:
   ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
   ArrayData* toKeyset(bool copy);
+
+  ArrayData* toVArray(bool copy);
 
   /**
    * Only map classes need this. Re-index all numeric keys to start from 0.
@@ -679,6 +683,7 @@ struct ArrayFunctions {
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);
   ArrayData* (*toKeyset[NK])(ArrayData*, bool);
+  ArrayData* (*toVArray[NK])(ArrayData*, bool);
 };
 
 extern const ArrayFunctions g_array_funcs;

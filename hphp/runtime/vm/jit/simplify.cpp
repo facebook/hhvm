@@ -1908,6 +1908,14 @@ SSATmp* convToKeysetImpl(State& env, const IRInstruction* inst, G get) {
   );
 }
 
+template <typename G>
+SSATmp* convToVArrImpl(State& env, const IRInstruction* inst, G get) {
+  return arrayLikeConvImpl(
+    env, inst, get,
+    [&](ArrayData* a) { return a->toVArray(true); }
+  );
+}
+
 SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -1943,8 +1951,25 @@ X(Arr, arrVal, Keyset)
 X(Vec, vecVal, Keyset)
 X(Dict, dictVal, Keyset)
 
+//X(Arr, arrVal, VArr) // Below
+X(Vec, vecVal, VArr)
+X(Dict, dictVal, VArr)
+X(Keyset, keysetVal, VArr)
+
 #undef X
 
+SSATmp* simplifyConvArrToVArr(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+
+  auto const packedArrType = Type::Array(ArrayData::kPackedKind);
+  auto const emptyArrType  = Type::Array(ArrayData::kEmptyKind);
+
+  if (src->isA(emptyArrType) || src->isA(packedArrType)) return src;
+
+  return convToVArrImpl(
+    env, inst,
+    [&](const SSATmp* s) { return s->arrVal(); });
+}
 
 SSATmp* simplifyConvCellToArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
@@ -3448,6 +3473,10 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConvArrToKeyset)
   X(ConvVecToKeyset)
   X(ConvDictToKeyset)
+  X(ConvArrToVArr)
+  X(ConvVecToVArr)
+  X(ConvDictToVArr)
+  X(ConvKeysetToVArr)
   X(Count)
   X(CountArray)
   X(CountArrayFast)

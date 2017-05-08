@@ -742,6 +742,14 @@ void in(ISS& env, const bc::CastKeyset&) {
   castImpl(env, TKeyset, tvCastToKeysetInPlace);
 }
 
+void in(ISS& env, const bc::CastVArray&)  {
+  castImpl(env, TArr, tvCastToVArrayInPlace);
+}
+
+void in(ISS& env, const bc::CastDArray&)  {
+  castImpl(env, TArr, tvCastToDArrayInPlace);
+}
+
 void in(ISS& env, const bc::Print& op) { popC(env); push(env, ival(1)); }
 
 void in(ISS& env, const bc::Clone& op) {

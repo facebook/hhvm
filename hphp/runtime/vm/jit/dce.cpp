@@ -64,10 +64,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvBoolToArr:
   case ConvDblToArr:
   case ConvIntToArr:
-  case ConvStrToArr:
-  case ConvVecToArr:
-  case ConvDictToArr:
-  case ConvKeysetToArr:
   case ConvArrToBool:
   case ConvDblToBool:
   case ConvIntToBool:
@@ -85,10 +81,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvResToInt:
   case ConvDblToStr:
   case ConvIntToStr:
-  case ConvDictToVec:
-  case ConvKeysetToVec:
-  case ConvVecToDict:
-  case ConvKeysetToDict:
   case ConvClsToCctx:
   case NewColFromArray:
   case GtInt:
@@ -312,8 +304,15 @@ bool canDCE(IRInstruction* inst) {
   case AddIntO:
   case SubIntO:
   case MulIntO:
+
+    // These conversion functions either can run arbitrary PHP code, or decref
+    // their inputs.
   case ConvObjToArr:
   case ConvCellToArr:
+  case ConvStrToArr:
+  case ConvVecToArr:
+  case ConvDictToArr:
+  case ConvKeysetToArr:
   case ConvObjToDbl:
   case ConvCellToDbl:
   case ConvObjToInt:
@@ -323,13 +322,24 @@ bool canDCE(IRInstruction* inst) {
   case ConvResToStr:
   case ConvCellToStr:
   case ConvArrToVec:
-  case ConvArrToDict:
+  case ConvDictToVec:
+  case ConvKeysetToVec:
   case ConvObjToVec:
+  case ConvArrToDict:
+  case ConvVecToDict:
+  case ConvKeysetToDict:
   case ConvObjToDict:
   case ConvArrToKeyset:
   case ConvVecToKeyset:
   case ConvDictToKeyset:
   case ConvObjToKeyset:
+  case ConvArrToVArr:
+  case ConvVecToVArr:
+  case ConvDictToVArr:
+  case ConvKeysetToVArr:
+  case ConvObjToVArr:
+  case ConvObjToDArr:
+
   case GtObj:
   case GteObj:
   case LtObj:

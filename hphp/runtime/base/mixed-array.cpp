@@ -712,66 +712,6 @@ bool MixedArray::IsVectorData(const ArrayData* ad) {
 //=============================================================================
 // Lookup.
 
-ALWAYS_INLINE bool hitStringKey(const MixedArray::Elm& e, const StringData* s,
-                                strhash_t hash) {
-  // hitStringKey() should only be called on an Elm that is referenced by a
-  // hash table entry. MixedArray guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!MixedArray::isTombstone(e.data.m_type));
-  return hash == e.hash() && (s == e.skey || s->same(e.skey));
-}
-
-static bool hitIntKey(const MixedArray::Elm& e, int64_t ki) {
-  // hitIntKey() should only be called on an Elm that is referenced by a
-  // hash table entry. MixedArray guarantees that when it adds a hash table
-  // entry that it always sets it to refer to a valid element. Likewise when
-  // it removes an element it always removes the corresponding hash entry.
-  // Therefore the assertion below must hold.
-  assert(!e.isTombstone());
-  return e.ikey == ki && e.hasIntKey();
-}
-
-// Quadratic probe is:
-//
-//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
-//
-// Use 1/2 for c1 and c2.  In combination with a table size that is a power of
-// 2, this guarantees a probe sequence of length tableSize that probes all
-// table elements exactly once.
-
-template <class Hit> ALWAYS_INLINE
-ssize_t MixedArray::findImpl(hash_t h0, Hit hit) const {
-  uint32_t mask = this->mask();
-  auto elms = data();
-  auto hashtable = hashTab();
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    auto pos = hashtable[probeIndex & mask];
-    if (validPos(pos)) {
-      if (hit(elms[pos])) return pos;
-    } else if (pos & 1) {
-      assert(pos == Empty);
-      return pos;
-    }
-    probeIndex += i;
-    assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-ssize_t MixedArray::find(int64_t ki, inthash_t h) const {
-  return findImpl(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-ssize_t MixedArray::find(const StringData* s, strhash_t h) const {
-  return findImpl(h, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
-}
-
 NEVER_INLINE
 int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
   if (n > size_t(RuntimeOption::MaxArrayChain)) {
@@ -779,40 +719,6 @@ int32_t* warnUnbalanced(MixedArray* a, size_t n, int32_t* ei) {
     raise_error("Array is too unbalanced (%lu)", n);
   }
   return ei;
-}
-
-template <class Hit> ALWAYS_INLINE
-int32_t* MixedArray::findForInsertImpl(hash_t h0, Hit hit) const {
-  uint32_t mask = this->mask();
-  auto elms = data();
-  auto hashtable = hashTab();
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    auto ei = &hashtable[probeIndex & mask];
-    int32_t pos = *ei;
-    if (validPos(pos)) {
-      if (hit(elms[pos])) {
-        return ei;
-      }
-    } else if (pos & 1) {
-      assert(pos == Empty);
-      return ei;
-    }
-    probeIndex += i;
-    assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-int32_t* MixedArray::findForInsert(int64_t ki, inthash_t h) const {
-  return findForInsertImpl(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-int32_t* MixedArray::findForInsert(const StringData* s, strhash_t h) const {
-  return findForInsertImpl(h, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
 }
 
 MixedArray::InsertPos MixedArray::insert(int64_t k) {

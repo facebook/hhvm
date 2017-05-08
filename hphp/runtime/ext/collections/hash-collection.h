@@ -395,100 +395,34 @@ struct HashCollection : ObjectData {
     return (m_size != 0);
   }
 
-  template <class Hit>
-  ssize_t findImpl(hash_t h0, Hit) const;
-  ssize_t find(int64_t k, inthash_t h) const;
-  ssize_t find(const StringData* s, strhash_t h) const;
+  ssize_t find(int64_t ki, inthash_t h) const {
+    return m_arr->find(ki, h);
+  }
+
+  ssize_t find(const StringData* s, strhash_t h) const {
+    return m_arr->find(s, h);
+  }
 
   ssize_t findForRemove(int64_t k, inthash_t h) {
     assert(canMutateBuffer());
-    return arrayData()->findForRemove(k, h, false);
+    return m_arr->findForRemove(k, h, false);
   }
 
   ssize_t findForRemove(const StringData* s, strhash_t h) {
     assert(canMutateBuffer());
-    return arrayData()->findForRemove(s, h);
-  }
-
-  template <class Hit>
-  ALWAYS_INLINE
-  int32_t* findForInsertImpl(hash_t h0, Hit hit) const {
-    uint32_t mask = tableMask();
-    auto elms = data();
-    auto hashtable = hashTab();
-    int32_t* ret = nullptr;
-    for (uint32_t probe = h0, i = 1;; ++i) {
-      auto ei = &hashtable[probe & mask];
-      ssize_t pos = *ei;
-      if (validPos(pos)) {
-        if (hit(elms[pos])) {
-          return ei;
-        }
-      } else {
-        if (!ret) ret = ei;
-        if (pos & 1) {
-          assert(pos == Empty);
-          return LIKELY(i <= 100) ? ret : warnUnbalanced(i, ret);
-        }
-      }
-      probe += i;
-      assertx(i <= mask);
-      assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-    }
-  }
-
-  static bool hitStringKey(const HashCollection::Elm& e,
-                           const StringData* s, strhash_t hash) {
-    // hitStringKey() should only be called on an Elm that is
-    // referenced by a hash table entry. HashCollection guarantees
-    // that when it adds a hash table entry that it always sets it to
-    // refer to a valid element. Likewise when it removes an element
-    // it always removes the corresponding hash entry.  Therefore the
-    // assertion below must hold.
-    assert(!HashCollection::isTombstone(&e));
-    return hash == e.hash() && (s == e.skey || s->same(e.skey));
-  }
-
-  static bool hitIntKey(const HashCollection::Elm& e, int64_t ki) {
-    // hitIntKey() should only be called on an Elm that is referenced
-    // by a hash table entry. HashCollection guarantees that when it
-    // adds a hash table entry that it always sets it to refer to a
-    // valid element. Likewise when it removes an element it always
-    // removes the corresponding hash entry.  Therefore the assertion
-    // below must hold.
-    assert(!HashCollection::isTombstone(&e));
-    return e.ikey == ki && e.hasIntKey();
+    return m_arr->findForRemove(s, h);
   }
 
   int32_t* findForInsert(int64_t ki, inthash_t h) const {
-    return findForInsertImpl(h, [ki] (const Elm& e) {
-        return hitIntKey(e, ki);
-      });
+    return m_arr->findForInsert(ki, h);
   }
 
   int32_t* findForInsert(const StringData* s, strhash_t h) const {
-    return findForInsertImpl(h, [s, h] (const Elm& e) {
-        return hitStringKey(e, s, h);
-      });
+    return m_arr->findForInsert(s, h);
   }
 
-  // findForNewInsert() is only safe to use if you know for sure that the
-  // key is not already present in the HashCollection.
-  ALWAYS_INLINE int32_t* findForNewInsert(
-    int32_t* table, size_t mask, hash_t h0) const {
-    for (uint32_t i = 1, probe = h0;; ++i) {
-      auto ei = &table[probe & mask];
-      if (!validPos(*ei)) {
-        return ei;
-      }
-      probe += i;
-      assertx(i <= mask);
-      assertx(probe == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-    }
-  }
-
-  ALWAYS_INLINE int32_t* findForNewInsert(size_t h0) const {
-    return findForNewInsert(hashTab(), tableMask(), h0);
+  int32_t* findForNewInsert(int32_t* table, size_t mask, hash_t h0) const {
+    return m_arr->findForNewInsert(table, mask, h0);
   }
 
   static void copyElm(const Elm& frE, Elm& toE) {

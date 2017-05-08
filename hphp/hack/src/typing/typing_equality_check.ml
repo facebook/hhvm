@@ -42,10 +42,10 @@ let eq_incompatible_types p (r1, ty1) (r2, ty2) =
     (Reason.to_string ("This is " ^ tys1) r1)
     (Reason.to_string ("This is " ^ tys2) r2)
 
-let enforce_not_awaitable env p ty1 ty2 =
+let enforce_nullable_or_not_awaitable env p ty1 ty2 =
   begin
-    Typing_async.enforce_not_awaitable env p ty1;
-    Typing_async.enforce_not_awaitable env p ty2
+    Typing_async.enforce_nullable_or_not_awaitable env p ty1;
+    Typing_async.enforce_nullable_or_not_awaitable env p ty2
   end
 
 let rec assert_nontrivial p bop env ty1 ty2 =
@@ -54,7 +54,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   let _, ety1, trail1 = TDef.force_expand_typedef ~ety_env env ty1 in
   let _, ty2 = Env.expand_type env ty2 in
   let _, ety2, trail2 = TDef.force_expand_typedef ~ety_env env ty2 in
-  enforce_not_awaitable env p ety1 ety2;
+  enforce_nullable_or_not_awaitable env p ety1 ety2;
   match ty1, ty2 with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)

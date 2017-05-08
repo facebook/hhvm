@@ -3850,7 +3850,7 @@ and unop p env uop te ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   match uop with
   | Ast.Unot ->
-      Async.enforce_not_awaitable env p ty;
+      Async.enforce_nullable_or_not_awaitable env p ty;
       (* !$x (logical not) works with any type, so we just return Tbool *)
       make_result env te (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.Utild ->
@@ -4148,7 +4148,7 @@ and condition_isset env = function
 and condition env tparamet =
   let expr env x =
     let env, _te, ty = raw_expr ~in_cond:true env x in
-    Async.enforce_not_awaitable env (fst x) ty;
+    Async.enforce_nullable_or_not_awaitable env (fst x) ty;
     env, ty
   in function
   | _, Expr_list [] -> env
@@ -4296,7 +4296,7 @@ and condition env tparamet =
 
         if SubType.is_sub_type env obj_ty (
           Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Tany])
-        ) then () else Async.enforce_not_awaitable env (fst ivar) x_ty;
+        ) then () else Async.enforce_nullable_or_not_awaitable env (fst ivar) x_ty;
 
       let safe_instanceof_enabled =
         TypecheckerOptions.experimental_feature_enabled

@@ -604,9 +604,6 @@ array_replace_recursive 2: array(2) {
 array_splice: 
 Warning: Invalid operand type was used: array_splice expects array(s) in %s/builtins.php on line %d
 NULL
-shuffle: 
-Warning: Invalid operand type was used: shuffle expects array(s) in %s/builtins.php on line %d
-bool(false)
 array_multisort: 
 Warning: Invalid operand type was used: array_multisort expects array(s) in %s/builtins.php on line %d
 bool(false)

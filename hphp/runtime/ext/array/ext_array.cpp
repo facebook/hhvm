@@ -1320,7 +1320,7 @@ static int php_count_recursive(const Array& array) {
 
 bool HHVM_FUNCTION(shuffle,
                    VRefParam array) {
-  if (!array.isPHPArray()) {
+  if (!array.isArray()) {
     throw_expected_array_exception("shuffle");
     return false;
   }

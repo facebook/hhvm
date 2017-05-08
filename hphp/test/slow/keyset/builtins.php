@@ -195,8 +195,6 @@ var_dump(array_replace_recursive($ar1, ["colors" => ["green" => "blue"]]));
 $k1 = keyset[];
 echo "array_splice: ";
 var_dump(array_splice($k1, 2));
-echo "shuffle: ";
-var_dump(shuffle($k1));
 echo "array_multisort: ";
 var_dump(array_multisort($k1));
 echo "array_walk: ";

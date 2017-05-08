@@ -27,18 +27,23 @@ namespace HPHP {
 inline APCLocalArray::APCLocalArray(const APCArray* source)
   : ArrayData(kApcKind)
   , m_arr(source)
-  , m_localCache(nullptr)
 {
   m_size = m_arr->size();
   source->reference();
   MM().addApcArray(this);
+  memset(localCache(), KindOfUninit, m_size * sizeof(TypedValue));
   assert(hasExactlyOneRef());
 }
 
-template<class... Args>
-APCLocalArray* APCLocalArray::Make(Args&&... args) {
-  return new (MM().mallocSmallSize(sizeof(APCLocalArray)))
-    APCLocalArray(std::forward<Args>(args)...);
+inline size_t APCLocalArray::heapSize() const {
+  return sizeof(*this) + m_size * sizeof(TypedValue);
+}
+
+inline APCLocalArray* APCLocalArray::Make(const APCArray* aa) {
+  auto size = sizeof(APCLocalArray) + aa->size() * sizeof(TypedValue);
+  auto local = new (MM().objMalloc(size)) APCLocalArray(aa);
+  assert(local->heapSize() == size);
+  return local;
 }
 
 ALWAYS_INLINE
@@ -52,6 +57,16 @@ const APCLocalArray* APCLocalArray::asApcArray(const ArrayData* ad) {
   assert(ad->kind() == kApcKind);
   assert(checkInvariants(ad));
   return static_cast<const APCLocalArray*>(ad);
+}
+
+inline TypedValue* APCLocalArray::localCache() const {
+  return const_cast<TypedValue*>(
+    reinterpret_cast<const TypedValue*>(this + 1)
+  );
+}
+
+inline void APCLocalArray::scan(type_scan::Scanner& scanner) const {
+  scanner.scan(*localCache(), m_size * sizeof(TypedValue));
 }
 
 //////////////////////////////////////////////////////////////////////

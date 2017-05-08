@@ -43,7 +43,7 @@ struct MArrayIter;
  */
 struct APCLocalArray final : ArrayData,
                              type_scan::MarkCountable<APCLocalArray> {
-  template<class... Args> static APCLocalArray* Make(Args&&...);
+  static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);
   static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
@@ -127,6 +127,10 @@ public:
   static APCLocalArray* asApcArray(ArrayData*);
   static const APCLocalArray* asApcArray(const ArrayData*);
 
+  void reap();
+  void scan(type_scan::Scanner& scanner) const;
+  size_t heapSize() const;
+
 private:
   explicit APCLocalArray(const APCArray* source);
   ~APCLocalArray();
@@ -137,16 +141,10 @@ private:
   ArrayData* loadElems() const;
   Variant getKey(ssize_t pos) const;
   void sweep();
-
-public:
-  void reap();
-  void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(m_localCache);
-  }
+  TypedValue* localCache() const;
 
 private:
   const APCArray* m_arr;
-  mutable TypedValue* m_localCache;
   unsigned m_sweep_index;
   friend struct MemoryManager; // access to m_sweep_index
 };

@@ -406,7 +406,8 @@ NEVER_INLINE void Marker::sweep() {
         break;
       }
       case HeaderKind::Apc:
-        defer.push_back({h, h_size});
+        freed_ += h_size;
+        h->apc_.reap(); // also atomic-dec underlying APCArray
         break;
       case HeaderKind::String:
         freed_ += h_size;
@@ -440,8 +441,6 @@ NEVER_INLINE void Marker::sweep() {
       // dynPropTable is a req::hash_map, so this will req::free junk
       g_context->dynPropTable.erase(obj);
       mm.objFree(h, h_size);
-    } else if (h->kind() == HeaderKind::Apc) {
-      h->apc_.reap(); // also frees localCache and atomic-dec APCArray
     } else {
       always_assert(false && "what other kinds need deferral?");
     }

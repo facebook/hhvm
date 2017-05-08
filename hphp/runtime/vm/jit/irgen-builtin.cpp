@@ -692,7 +692,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
                               uint32_t numNonDefault) {
   auto const result = [&]() -> SSATmp* {
 
-    auto const fname = func->name();
+    auto const fname = func->fullName();
 
     if (auto const retVal = opt_foldable(env, func, params, numNonDefault)) {
       return retVal;

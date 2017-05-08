@@ -1112,6 +1112,12 @@ class Assembler {
   // Load literal to FP register.
   void ldr(const FPRegister& ft, double imm);
 
+  // Load-acquire exclusive register.
+  void ldaxr(const Register& rt, const MemOperand& src);
+
+  // Store-release exclusive register.
+  void stlxr(const Register& rs, const Register& rt, const MemOperand& dst);
+
   // Load exclusive register.
   void ldxr(const Register& rt, const MemOperand& src);
 

@@ -1135,6 +1135,23 @@ void Assembler::ldr(const FPRegister& ft, double imm) {
 }
 
 
+void Assembler::ldaxr(const Register& rt,
+                      const MemOperand& src) {
+  assert(src.IsImmediateOffset() && (src.offset() == 0));
+  LoadStoreExclusive op = rt.Is64Bits() ? LDAXR_x : LDAXR_w;
+  Emit(op | Rs_mask | Rt(rt) | Rt2_mask | RnSP(src.base()));
+}
+
+
+void Assembler::stlxr(const Register& rs,
+                      const Register& rt,
+                      const MemOperand& dst) {
+  assert(dst.IsImmediateOffset() && (dst.offset() == 0));
+  LoadStoreExclusive op = rt.Is64Bits() ? STLXR_x : STLXR_w;
+  Emit(op | Rs(rs) | Rt(rt) | Rt2_mask | RnSP(dst.base()));
+}
+
+
 void Assembler::ldxr(const Register& rt, const MemOperand& src) {
   assert(src.IsImmediateOffset() && (src.offset() == 0));
   LoadStoreExclusive op = rt.Is64Bits() ? LDXR_x : LDXR_w;

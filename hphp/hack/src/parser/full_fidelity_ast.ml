@@ -32,6 +32,7 @@ type state_variables =
   ; mode      : FileInfo.mode ref
   ; popt      : ParserOptions.t ref
   ; ignorePos : bool ref
+  ; quickMode : bool ref
   }
 
 let lowerer_state =
@@ -40,6 +41,7 @@ let lowerer_state =
   ; mode      = ref FileInfo.Mstrict
   ; popt      = ref ParserOptions.default
   ; ignorePos = ref false
+  ; quickMode = ref false
   }
 
 let php_file () = !(lowerer_state.mode) == FileInfo.Mphp
@@ -1290,6 +1292,14 @@ and pClassElt : class_elt list parser = fun node env ->
           | stmt        -> [stmt]
       in
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
+      let body =
+        (* Drop it on the floor in quickMode; we still need to process the body
+         * to know, e.g. whether it contains a yield.
+         *)
+        if !(lowerer_state.quickMode)
+        then [Noop]
+        else body
+      in
       let kind = pKinds methodish_modifiers env in
       member_def @ [Method
       { m_kind            = kind
@@ -1383,11 +1393,6 @@ and pDef : def parser = fun node env ->
   match syntax node with
   | FunctionDeclaration
     { function_attribute_spec; function_declaration_header; function_body } ->
-      let containsUNSAFE =
-        let re = Str.regexp_string "UNSAFE" in
-        try Str.search_forward re (full_text function_body) 0 >= 0 with
-        | Not_found -> false
-      in
       let hdr = pFunHdr function_declaration_header env in
       let block, yield = mpYielding (mpOptional pBlock) function_body env in
       Fun
@@ -1396,8 +1401,16 @@ and pDef : def parser = fun node env ->
       ; f_ret             = hdr.fh_return_type
       ; f_name            = hdr.fh_name
       ; f_params          = hdr.fh_parameters
-      ; f_body            = begin
+      ; f_body            =
+        if !(lowerer_state.quickMode)
+        then [Noop]
+        else begin
           (* FIXME: Filthy hack to catch UNSAFE *)
+          let containsUNSAFE =
+            let re = Str.regexp_string "UNSAFE" in
+            try Str.search_forward re (full_text function_body) 0 >= 0 with
+            | Not_found -> false
+          in
           match block with
           | Some [Noop] when containsUNSAFE -> [Unsafe]
           | Some [] -> [Noop]
@@ -1760,6 +1773,7 @@ let from_text
   ?(include_line_comments = false)
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
+  ?(quick                 = false)
   ?(parser_options        = ParserOptions.default)
   (file        : Relative_path.t)
   (source_text : Full_fidelity_source_text.t)
@@ -1786,6 +1800,7 @@ let from_text
     lowerer_state.mode      := fi_mode;
     lowerer_state.popt      := parser_options;
     lowerer_state.ignorePos := ignore_pos;
+    lowerer_state.quickMode := quick;
     let saw_yield = ref false in
     let errors = ref [] in (* The top-level error list. *)
     let max_depth = 42 in (* Filthy hack around OCaml bug *)
@@ -1815,6 +1830,7 @@ let from_file
   ?(include_line_comments = false)
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
+  ?(quick                 = false)
   ?(parser_options        = ParserOptions.default)
   (path : Relative_path.t)
   : result =
@@ -1823,6 +1839,7 @@ let from_file
       ~include_line_comments
       ~keep_errors
       ~ignore_pos
+      ~quick
       ~parser_options
       path
       (Full_fidelity_source_text.from_file path)
@@ -1843,6 +1860,7 @@ let from_text_with_legacy
   ?(include_line_comments = false)
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
+  ?(quick                 = false)
   ?(parser_options        = ParserOptions.default)
   (file    : Relative_path.t)
   (content : string)
@@ -1852,6 +1870,7 @@ let from_text_with_legacy
       ~include_line_comments
       ~keep_errors
       ~ignore_pos
+      ~quick
       ~parser_options
       file
       (Full_fidelity_source_text.make content)
@@ -1861,6 +1880,7 @@ let from_file_with_legacy
   ?(include_line_comments = false)
   ?(keep_errors           = true)
   ?(ignore_pos            = false)
+  ?(quick                 = false)
   ?(parser_options        = ParserOptions.default)
   (file : Relative_path.t)
   : Parser_hack.parser_return =
@@ -1869,5 +1889,6 @@ let from_file_with_legacy
       ~include_line_comments
       ~keep_errors
       ~ignore_pos
+      ~quick
       ~parser_options
       file

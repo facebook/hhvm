@@ -9,7 +9,9 @@
 
 module CoroutineSyntax = Coroutine_syntax
 module EditableSyntax = Full_fidelity_editable_syntax
+module EditableToken = Full_fidelity_editable_token
 module Rewriter = Full_fidelity_rewriter.WithSyntax(EditableSyntax)
+module TokenKind = Full_fidelity_token_kind
 
 open EditableSyntax
 open CoroutineSyntax
@@ -106,19 +108,64 @@ let rewrite_returns node =
     Rewriter.Result.Replace result
   | _ -> Rewriter.Result.Keep
 
+(**
+ * Converts references to parameters and locals into referenced to the hoisted
+ * versions of these identifiers that are part of the generated closure.
+ *
+ * If a function refers to a local or parameter variable $foo, then $foo should
+ * be made into a member on the closure.
+ *
+ * $this is not hoisted, since its state will be persisted between state machine
+ * resumptions automatically.
+ *)
+let rewrite_locals_and_params_into_closure_variables node =
+  let rewrite_and_gather_locals_and_params node acc =
+    match syntax node with
+    | Token { EditableToken.kind = TokenKind.Variable; text; _; }
+      when text <> this_variable ->
+        let local_as_name_syntax =
+          String_utils.lstrip text "$"
+            |> make_token_syntax TokenKind.Name in
+        SSet.add text acc,
+        Rewriter.Result.Replace
+          (make_member_selection_expression_syntax
+            closure_variable_syntax
+            local_as_name_syntax)
+    | _ -> acc, Rewriter.Result.Keep in
+  Rewriter.aggregating_rewrite_post
+    rewrite_and_gather_locals_and_params
+    node
+    SSet.empty
+
 let lower_body body =
+  let locals_and_params, body =
+    rewrite_locals_and_params_into_closure_variables body in
   let body = add_missing_return body in
-  Rewriter.rewrite_post rewrite_returns body
+  Rewriter.rewrite_post rewrite_returns body, locals_and_params
 
 let generate_coroutine_state_machine_body body =
-  let body = lower_body body in
-  [
+  let body, locals_and_params = lower_body body in
+  let body = [
     make_coroutine_switch 0; (* TODO: Need label count. *)
     goto_label_syntax 0;
     body;
     error_label_syntax;
     throw_unimplemented_syntax "A completed coroutine was resumed.";
-  ]
+  ] in
+  body, locals_and_params
+
+let make_function_decl_header
+    classish_name
+    function_name
+    { function_type; _; } =
+  make_function_decl_header_syntax
+    (make_state_machine_method_name function_name)
+    [
+      make_closure_parameter_syntax classish_name function_name;
+      coroutine_data_parameter_syntax;
+      nullable_exception_parameter_syntax;
+    ]
+    (make_coroutine_result_type_syntax function_type)
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the
@@ -129,14 +176,11 @@ let generate_coroutine_state_machine
     classish_name
     function_name
     { methodish_function_decl_header; methodish_function_body; _; }
-    { function_type; _; } =
-  make_methodish_declaration_syntax
-    (make_function_decl_header_syntax
-      (make_state_machine_method_name function_name)
-      [
-        make_closure_parameter_syntax classish_name function_name;
-        coroutine_data_parameter_syntax;
-        nullable_exception_parameter_syntax;
-      ]
-      (make_coroutine_result_type_syntax function_type))
-    (generate_coroutine_state_machine_body methodish_function_body)
+    function_node =
+  let body, locals_and_params =
+    generate_coroutine_state_machine_body methodish_function_body in
+  let state_machine_method =
+    make_methodish_declaration_syntax
+      (make_function_decl_header classish_name function_name function_node)
+      body in
+  state_machine_method, locals_and_params

@@ -13,33 +13,47 @@ module EditableSyntax = Full_fidelity_editable_syntax
 open EditableSyntax
 open CoroutineSyntax
 
-let generate_constructor_body =
-  make_missing ()
+let extract_parameter_declarations function_parameter_list =
+  function_parameter_list
+    |> syntax_node_to_list
+    |> Core_list.map ~f:syntax
+    |> Core_list.map ~f:
+      begin
+      function
+      | ListItem { list_item = { syntax = ParameterDeclaration p; _; }; _; } ->
+          p
+      | _ -> failwith "Parameter had unexpected type."
+      end
 
-let make_parameter_public param =
-  match syntax param with
-  | ListItem { list_item; list_separator } ->
-    begin
-    match syntax list_item with
-    | ParameterDeclaration p ->
-      let parameter_visibility = public_syntax in
-      let list_item =
-        make_syntax (ParameterDeclaration { p with parameter_visibility }) in
-      make_syntax (ListItem { list_item; list_separator })
-    | _ -> param
-    end
-  | _ -> param
+let generate_hoisted_locals { function_parameter_list; _; } locals_and_params =
+  let params =
+    function_parameter_list
+      |> extract_parameter_declarations
+      |> Core_list.map ~f:(fun { parameter_name; _; } ->
+        match syntax parameter_name with
+        | Token { EditableToken.kind = TokenKind.Variable; text; _; } -> text
+        | _ -> failwith "Parameter name was not a variable token.")
+      |> SSet.of_list in
+  SSet.diff locals_and_params params
+    |> SSet.elements
+    |> Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
 
-
-let fix_up_parameter_list function_parameter_list =
-  let function_parameter_list = syntax_node_to_list function_parameter_list in
-  List.map make_parameter_public function_parameter_list
+let make_parameters_public function_parameter_list =
+  function_parameter_list
+    |> extract_parameter_declarations
+    |> Core_list.map ~f:
+      begin
+      fun p ->
+        make_syntax
+          (ParameterDeclaration { p with parameter_visibility = public_syntax })
+      end
 
 let generate_constructor_method
     classish_name
     function_name
     { function_parameter_list; function_type; _; } =
-  let function_parameter_list = fix_up_parameter_list function_parameter_list in
+  let function_parameter_list =
+    make_parameters_public function_parameter_list in
   let cont_param = make_continuation_parameter_syntax
     ~visibility_syntax:private_syntax function_type in
   let sm_param = make_state_machine_parameter_syntax
@@ -106,13 +120,15 @@ let generate_closure_body
     classish_name
     function_name
     method_node
-    header_node =
-  [
-    label_declaration_syntax;
-    generate_constructor_method classish_name function_name header_node;
-    generate_resume_method method_node;
-    generate_resume_with_exception_method method_node;
-  ]
+    header_node
+    locals_and_params =
+  label_declaration_syntax
+    :: generate_hoisted_locals header_node locals_and_params
+    @ [
+      generate_constructor_method classish_name function_name header_node;
+      generate_resume_method method_node;
+      generate_resume_with_exception_method method_node
+    ]
 
 (**
  * If the provided methodish declaration is for a coroutine, rewrites the
@@ -123,8 +139,14 @@ let generate_coroutine_closure
     classish_name
     function_name
     ({ methodish_function_decl_header; _; } as method_node)
-    header_node =
+    header_node
+    locals_and_params =
   make_classish_declaration_syntax
     (make_closure_classname classish_name function_name)
     [ make_continuation_type_syntax mixed_syntax ]
-    (generate_closure_body classish_name function_name method_node header_node)
+    (generate_closure_body
+      classish_name
+      function_name
+      method_node
+      header_node
+      locals_and_params)

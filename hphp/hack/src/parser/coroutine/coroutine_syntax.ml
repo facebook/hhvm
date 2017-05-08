@@ -137,8 +137,11 @@ let new_keyword_syntax =
 let member_selection_syntax =
   make_token_syntax TokenKind.MinusGreaterThan "->"
 
+let this_variable =
+  "$this"
+
 let this_syntax =
-  make_token_syntax TokenKind.Variable "$this"
+  make_token_syntax TokenKind.Variable this_variable
 
 let exception_type_syntax =
   make_token_syntax ~space_after:true TokenKind.Classname "Exception"
@@ -335,6 +338,14 @@ let make_function_decl_header_syntax
 let make_constructor_decl_header_syntax name parameter_list =
   make_function_decl_header_syntax name parameter_list (make_missing ())
 
+let make_property_declaration_syntax type_syntax declaration_syntax =
+  make_property_declaration
+    (make_list [ public_syntax ])
+    type_syntax
+    declaration_syntax
+    semicolon_syntax
+
+
 (* Coroutine-specific syntaxes *)
 
 (* TODO: Either (1) rename this to something less likely to conflict with
@@ -484,7 +495,13 @@ let label_declaration_syntax =
   let zero = make_int_literal_syntax 0 in
   let init = make_simple_initializer assignment_operator_syntax zero in
   let decl = make_property_declarator label_syntax init in
-  make_property_declaration public_syntax int_type decl semicolon_syntax
+  make_property_declaration_syntax int_type decl
+
+let make_member_with_unknown_type_declaration_syntax variable_name =
+  let variable_syntax = make_token_syntax TokenKind.Variable variable_name in
+  let declaration_syntax =
+    make_property_declarator variable_syntax (make_missing ()) in
+  make_property_declaration_syntax (make_missing ()) declaration_syntax
 
 (* $closure->nextLabel *)
 let label_access_syntax =

@@ -314,13 +314,13 @@ void DateTime::sweep() {
 // informational
 
 int DateTime::beat() const {
-  int retval = (((((long)m_time->sse)-(((long)m_time->sse) -
+  int retval = ((((long)m_time->sse)-(((long)m_time->sse) -
                                        ((((long)m_time->sse) % 86400) +
-                                        3600))) * 10) / 864);
+                                        3600))) * 10);
   while (retval < 0) {
-    retval += 1000;
+    retval += 864000;
   }
-  retval = retval % 1000;
+  retval = (retval / 864) % 1000;
   return retval;
 }
 

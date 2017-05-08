@@ -418,19 +418,19 @@ let resume_member_name_syntax =
 let resume_with_exception_member_name =
   "resumeWithException"
 
-let coroutune_data_variable =
+let coroutine_data_variable =
   "$coroutineData"
 
-let coroutune_data_variable_syntax =
-  make_token_syntax TokenKind.Variable coroutune_data_variable
+let coroutine_data_variable_syntax =
+  make_token_syntax TokenKind.Variable coroutine_data_variable
 
-let coroutune_data_type_syntax =
+let coroutine_data_type_syntax =
   mixed_syntax
 
 let coroutine_data_parameter_syntax =
   make_parameter_declaration_syntax
-    coroutune_data_type_syntax
-    coroutune_data_variable
+    coroutine_data_type_syntax
+    coroutine_data_variable
 
 let exception_variable =
   "$exception"

@@ -57,7 +57,7 @@ let generate_resume_body { methodish_function_body; _; } =
   let call_state_machine_syntax =
     make_function_call_expression_syntax
       state_machine_variable_name_syntax
-      [ this_syntax; coroutune_data_variable_syntax; null_syntax ] in
+      [ this_syntax; coroutine_data_variable_syntax; null_syntax ] in
   [
     assign_state_machine_syntax;
     make_expression_statement call_state_machine_syntax;

@@ -2461,18 +2461,20 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
 struct ArraySortTmp {
-  explicit ArraySortTmp(Array& arr, SortFunction sf) : m_arr(arr) {
-    m_ad = arr.get()->escalateForSort(sf);
-    assert(m_ad == arr.get() || m_ad->hasExactlyOneRef());
+  explicit ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
+    m_ad = arr->m_data.parr->escalateForSort(sf);
+    assert(m_ad == arr->m_data.parr || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
-    if (m_ad != m_arr.get()) {
-      m_arr = Array::attach(m_ad);
+    if (m_ad != m_arr->m_data.parr) {
+      Array tmp = Array::attach(m_arr->m_data.parr);
+      m_arr->m_data.parr = m_ad;
+      m_arr->m_type = m_ad->toDataType();
     }
   }
   ArrayData* operator->() { return m_ad; }
  private:
-  Array& m_arr;
+  TypedValue* m_arr;
   ArrayData* m_ad;
 };
 }
@@ -2483,12 +2485,11 @@ php_sort(VRefParam container, int sort_flags,
   if (container.isArray()) {
     auto ref = container.getVariantOrNull();
     if (!ref) return true;
-    Array& arr_array = ref->asArrRef();
     if (use_zend_sort) {
       return zend_sort(*ref, sort_flags, ascending);
     }
     SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
-    ArraySortTmp ast(arr_array, sf);
+    ArraySortTmp ast(ref->asTypedValue(), sf);
     ast->sort(sort_flags, ascending);
     return true;
   }
@@ -2514,26 +2515,12 @@ php_asort(VRefParam container, int sort_flags,
   if (container.isArray()) {
     auto ref = container.getVariantOrNull();
     if (!ref) return true;
-    if (ref->isVecArray()) {
-      // Asort on a vec will make it become a dict. So, in order to avoid having
-      // a Variant with an incorrect datatype, sort a copy, then assign it to
-      // the Variant (which will update the datatype to the proper value).
-      Array arr_array = ref->asArrRef();
-      SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
-      {
-        ArraySortTmp ast(arr_array, sf);
-        ast->asort(sort_flags, ascending);
-      }
-      *ref = std::move(arr_array);
-    } else {
-      Array& arr_array = ref->asArrRef();
-      if (use_zend_sort) {
-        return zend_asort(*ref, sort_flags, ascending);
-      }
-      SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
-      ArraySortTmp ast(arr_array, sf);
-      ast->asort(sort_flags, ascending);
+    if (use_zend_sort) {
+      return zend_asort(*ref, sort_flags, ascending);
     }
+    SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
+    ArraySortTmp ast(ref->asTypedValue(), sf);
+    ast->asort(sort_flags, ascending);
     return true;
   }
   if (container.isObject()) {
@@ -2557,26 +2544,12 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
   if (container.isArray()) {
     auto ref = container.getVariantOrNull();
     if (!ref) return true;
-    if (ref->isVecArray()) {
-      // Krsort on a vec will make it become a dict. So, in order to avoid
-      // having a Variant with an incorrect datatype, sort a copy, then assign
-      // it to the Variant (which will update the datatype to the proper value).
-      Array arr_array = ref->asArrRef();
-      SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
-      {
-        ArraySortTmp ast(arr_array, sf);
-        ast->ksort(sort_flags, ascending);
-      }
-      *ref = std::move(arr_array);
-    } else {
-      Array& arr_array = ref->asArrRef();
-      if (use_zend_sort) {
-        return zend_ksort(*ref, sort_flags, ascending);
-      }
-      SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
-      ArraySortTmp ast(arr_array, sf);
-      ast->ksort(sort_flags, ascending);
+    if (use_zend_sort) {
+      return zend_ksort(*ref, sort_flags, ascending);
     }
+    SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
+    ArraySortTmp ast(ref->asTypedValue(), sf);
+    ast->ksort(sort_flags, ascending);
     return true;
   }
   if (container.isObject()) {
@@ -2652,9 +2625,10 @@ bool HHVM_FUNCTION(usort,
                    VRefParam container,
                    const Variant& cmp_function) {
   if (container.isArray()) {
-    auto sort = [](Array& arr_array, const Variant& cmp_function) -> bool {
+    auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
       if (RuntimeOption::EnableZendSorting) {
-        arr_array.sort(cmp_func, false, true, &cmp_function);
+        tvAsVariant(arr_array).asArrRef().sort(cmp_func, false, true,
+                                               &cmp_function);
         return true;
       } else {
         ArraySortTmp ast(arr_array, SORTFUNC_USORT);
@@ -2663,10 +2637,10 @@ bool HHVM_FUNCTION(usort,
     };
     auto ref = container.getVariantOrNull();
     if (LIKELY(ref != nullptr)) {
-      return sort(ref->asArrRef(), cmp_function);
+      return sort(ref->asTypedValue(), cmp_function);
     }
-    auto tmp = container->asCArrRef();
-    return sort(tmp, cmp_function);
+    auto tmp = container.wrapped();
+    return sort(tmp.asTypedValue(), cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -2688,9 +2662,10 @@ bool HHVM_FUNCTION(uasort,
                    VRefParam container,
                    const Variant& cmp_function) {
   if (container.isArray()) {
-    auto sort = [](Array& arr_array, const Variant& cmp_function) -> bool {
+    auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
       if (RuntimeOption::EnableZendSorting) {
-        arr_array.sort(cmp_func, false, false, &cmp_function);
+        tvAsVariant(arr_array).asArrRef().sort(cmp_func, false, false,
+                                               &cmp_function);
         return true;
       } else {
         ArraySortTmp ast(arr_array, SORTFUNC_UASORT);
@@ -2699,10 +2674,10 @@ bool HHVM_FUNCTION(uasort,
     };
     auto ref = container.getVariantOrNull();
     if (LIKELY(ref != nullptr)) {
-      return sort(ref->asArrRef(), cmp_function);
+      return sort(ref->asTypedValue(), cmp_function);
     }
-    auto tmp = container->asCArrRef();
-    return sort(tmp, cmp_function);
+    auto tmp = container.wrapped();
+    return sort(tmp.asTypedValue(), cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();
@@ -2725,16 +2700,16 @@ bool HHVM_FUNCTION(uksort,
                    VRefParam container,
                    const Variant& cmp_function) {
   if (container.isArray()) {
-    auto sort = [](Array& arr_array, const Variant& cmp_function) -> bool {
+    auto sort = [](TypedValue* arr_array, const Variant& cmp_function) -> bool {
       ArraySortTmp ast(arr_array, SORTFUNC_UKSORT);
       return ast->uksort(cmp_function);
     };
     auto ref = container.getVariantOrNull();
     if (LIKELY(ref != nullptr)) {
-      return sort(ref->asArrRef(), cmp_function);
+      return sort(ref->asTypedValue(), cmp_function);
     }
-    auto tmp = container->asCArrRef();
-    return sort(tmp, cmp_function);
+    auto tmp = container.wrapped();
+    return sort(tmp.asTypedValue(), cmp_function);
   }
   if (container.isObject()) {
     ObjectData* obj = container.getObjectData();

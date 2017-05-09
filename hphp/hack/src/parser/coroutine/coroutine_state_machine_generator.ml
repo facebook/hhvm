@@ -87,28 +87,6 @@ let add_missing_return body =
   else
     body
 
-(* return x; --> return new ActualCoroutineResult(x);
-   return;   --> return new ActualCoroutineResult(coroutine_unit());
-*)
-let rewrite_returns node =
-  (* TODO: We need a rewriter that doesn't recurse into lambdas *)
-  match syntax node with
-  | ReturnStatement {
-    return_keyword;
-    return_expression;
-    return_semicolon; } ->
-    let return_expression =
-      if is_missing return_expression then coroutine_unit_call_syntax
-      else return_expression in
-    let return_expression = make_object_creation_expression_syntax
-      "ActualCoroutineResult" [return_expression] in
-    let assignment = set_next_label_syntax (-1) in
-    let ret = make_return_statement
-      return_keyword return_expression return_semicolon in
-    let result = make_compound_statement_syntax [assignment; ret] in
-    Rewriter.Result.Replace result
-  | _ -> Rewriter.Result.Keep
-
 (**
  * Converts references to parameters and locals into referenced to the hoisted
  * versions of these identifiers that are part of the generated closure.
@@ -133,16 +111,205 @@ let rewrite_locals_and_params_into_closure_variables node =
             closure_variable_syntax
             local_as_name_syntax)
     | _ -> acc, Rewriter.Result.Keep in
+  let locals_and_params, body =
+    Rewriter.aggregating_rewrite_post
+      rewrite_and_gather_locals_and_params
+      node
+      SMap.empty in
+  body, locals_and_params
+
+(**
+ * Transforms suspend expressions recursively.
+ *
+ * Extracts a "prefix" list of statements, and transforms the suspend expression
+ * into a variable that will contain the result of the suspended expression
+ * after resumption.
+ *
+ * In particular, we perform a post-order traversal of the tree. Therefore, we
+ * process the deepest suspend operations before ones that depend on them, and
+ * we guarantee that we will never encounter another suspend operator while
+ * processing a suspend operator. For these suspend operations, we extract a
+ * list of statements to execute before the suspend operation. These statements
+ * are reported to the calling function. The calling function is responsible for
+ * ensuring that these statemnets are executed before the transformed node. The
+ * transformed node itself is rewritten into $coroutineData. The list of
+ * statements will ensure that $coroutineData contains the result of the suspend
+ * operation at the point in time that the suspend operation is completed.
+ *
+ * As an example, consider this expression.
+ *
+ *   suspend outerCoroutine(suspend innerCoroutine(), otherMethod())
+ *
+ * This is a PrefixUnaryExpression and will produce the following statement
+ * list. For demonstrative purposes, we assume that the next label number is 1.
+ *
+ *   $closure->nextLabel = 1;
+ *   $coroutineResult = innerCoroutine();
+ *   if ($coroutineResult->isSuspended()) {
+ *     return $coroutineResult;
+ *   }
+ *   $coroutineData = $coroutineResult->getResult();
+ *   label1:
+ *   if ($exception !== null) {
+ *     throw $exception;
+ *   }
+ *   $closure->nextLabel = 2;
+ *   $coroutineResult = outerCoroutine(
+ *     $coroutineData,
+ *     otherMethod(),
+ *   );
+ *   if ($coroutineResult->isSuspended()) {
+ *     return $coroutineResult;
+ *   }
+ *   $coroutineData = $coroutineResult->getResult();
+ *   label2:
+ *   if ($exception !== null) {
+ *     throw $exception;
+ *   }
+ *
+ * The node itself is is rewritten into the following.
+ *
+ *   $coroutineData
+ *)
+(*
+ * TODO(t17335630): IMPORTANT! $coroutineData is not enough to store the data
+ * between coroutine runs. Consider the following snippet.
+ *
+ *   suspend outerCoroutine(suspend innerCoroutine(), suspend innerCoroutine())
+ *
+ * The innerCoroutine results will both be stored in $coroutineData, which is
+ * incorrect. I think we can fix this by storing each result in a distinct local
+ * variable that gets hoisted into the closure.
+ *)
+let extract_suspend_statements node next_label =
+  let rewrite_suspends_and_gather_prefix_code
+      node
+      (next_label, prefix_statements_acc) =
+    match syntax node with
+    | PrefixUnaryExpression {
+        prefix_unary_operator =
+          { syntax = Token { EditableToken.kind = TokenKind.Suspend; _;}; _; };
+        prefix_unary_operand;
+      } ->
+        let update_next_label_syntax = set_next_label_syntax next_label in
+
+        let assign_coroutine_result_syntax =
+          make_assignment_syntax
+            coroutine_result_variable
+            prefix_unary_operand in
+
+        let select_is_suspended_member_syntax =
+          make_member_selection_expression_syntax
+            coroutine_result_variable_syntax
+            is_suspended_member_syntax in
+        let call_is_selected_syntax =
+          make_function_call_expression_syntax
+            select_is_suspended_member_syntax
+            [] in
+        let return_coroutine_result_syntax =
+          make_return_statement_syntax coroutine_result_variable_syntax in
+        let return_if_suspended_syntax =
+          make_if_syntax
+            call_is_selected_syntax
+            [ return_coroutine_result_syntax ] in
+
+        let select_coroutine_result_syntax =
+          make_member_selection_expression_syntax
+            coroutine_result_variable_syntax
+            get_result_member_syntax in
+        let call_get_result_syntax =
+          make_function_call_expression_syntax
+            select_coroutine_result_syntax
+            [] in
+        let assign_coroutine_data_syntax =
+          make_assignment_syntax
+            coroutine_data_variable
+            call_get_result_syntax in
+
+        let declare_next_label_syntax = goto_label_syntax next_label in
+
+        let exception_not_null_syntax =
+          make_not_null_syntax exception_variable_syntax in
+        let throw_if_exception_not_null_syntax =
+          make_if_syntax
+            exception_not_null_syntax
+            [ make_throw_statement_syntax exception_variable_syntax ] in
+
+        let statements = [
+          update_next_label_syntax;
+          assign_coroutine_result_syntax;
+          return_if_suspended_syntax;
+          assign_coroutine_data_syntax;
+          declare_next_label_syntax;
+          throw_if_exception_not_null_syntax;
+        ] in
+        (next_label + 1, prefix_statements_acc @ statements),
+        Rewriter.Result.Replace coroutine_data_variable_syntax
+    | _ ->
+        (next_label, prefix_statements_acc), Rewriter.Result.Keep in
   Rewriter.aggregating_rewrite_post
-    rewrite_and_gather_locals_and_params
+    rewrite_suspends_and_gather_prefix_code
     node
-    SMap.empty
+    (next_label, [])
+
+(**
+ * Processes statements that support the suspend keyword.
+ *
+ * Each statement has a notion of where expressions may exist. For each of these
+ * expression points, we recursively desugar the "suspend" operator using
+ * extract_suspend_statements. In addition to producing a transformed expression
+ * node, this produces a list of statements to be executed before the
+ * transformed node. The statement transforms itself so that these statements
+ * get executed before the statement itself is executed, and transforms its
+ * expression node appropriately.
+ *)
+let rewrite_suspends node =
+  let rewrite_statements node next_label =
+    match syntax node with
+    | ReturnStatement { return_expression; _; } ->
+        let (next_label, prefix_statements), return_expression =
+          extract_suspend_statements return_expression next_label in
+        let return_expression =
+          if is_missing return_expression then coroutine_unit_call_syntax
+          else return_expression in
+        let return_expression = make_object_creation_expression_syntax
+          "ActualCoroutineResult" [return_expression] in
+        let assignment = set_next_label_syntax (-1) in
+        let ret = make_return_statement_syntax return_expression in
+        let statements = prefix_statements @ [ assignment; ret ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
+    | ExpressionStatement _ (* TODO(t17335630): Support suspends here. *)
+    | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
+    | WhileStatement _ (* TODO(t17335630): Support suspends here. *)
+    | IfStatement _ (* TODO(t17335630): Support suspends here. *)
+    | TryStatement _ (* TODO(t17335630): Support suspends here. *)
+    | DoStatement _ (* TODO(t17335630): Support suspends here. *)
+    | ForStatement _ (* TODO(t17335630): Support suspends here. *)
+    | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)
+    | SwitchStatement _ (* TODO(t17335630): Support suspends here. *)
+    | ThrowStatement _ (* TODO(t17335630): Support suspends here. *)
+    | EchoStatement _ (* TODO(t17335630): Support suspends here. *)
+    (* Suspends will be handled recursively by compound statement's children. *)
+    | CompoundStatement _
+    | GotoStatement _ (* Suspends are invalid in goto statements. *)
+    | BreakStatement _ (* Suspends are impossible in break statements. *)
+    | ContinueStatement _ (* Suspends are impossible in continue statements. *)
+    | FunctionStaticStatement _ (* Suspends are impossible in these. *)
+    | GlobalStatement _ (* Suspends are impossible in global statements. *)
+    | _ ->
+        next_label, Rewriter.Result.Keep in
+  snd (Rewriter.aggregating_rewrite_post rewrite_statements node 1)
 
 let lower_body body =
-  let locals_and_params, body =
+  let body, locals_and_params =
     rewrite_locals_and_params_into_closure_variables body in
-  let body = add_missing_return body in
-  Rewriter.rewrite_post rewrite_returns body, locals_and_params
+  let body =
+    body
+      |> add_missing_return
+      |> rewrite_suspends
+      in
+  body, locals_and_params
 
 let generate_coroutine_state_machine_body body =
   let body, locals_and_params = lower_body body in

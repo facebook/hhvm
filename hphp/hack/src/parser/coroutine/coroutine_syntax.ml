@@ -70,6 +70,9 @@ let colon_syntax =
 let assignment_operator_syntax =
   make_token_syntax TokenKind.Equal "="
 
+let not_identical_syntax =
+  make_token_syntax TokenKind.ExclamationEqualEqual "!=="
+
 let nullable_syntax =
   make_token_syntax TokenKind.Question "?"
 
@@ -103,6 +106,9 @@ let private_syntax =
 
 let public_syntax =
   make_token_syntax ~space_after:true TokenKind.Public "public"
+
+let if_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.If "if"
 
 let switch_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Switch "switch"
@@ -199,6 +205,9 @@ let make_assignment_syntax_variable left assignment_expression_syntax =
       assignment_operator_syntax
       assignment_expression_syntax in
   make_expression_statement assignment_binary_expression
+
+let make_not_null_syntax operand =
+  make_binary_expression operand not_identical_syntax null_syntax
 
 let make_assignment_syntax receiver_variable assignment_expression_syntax =
   let receiver_variable_syntax =
@@ -345,6 +354,16 @@ let make_property_declaration_syntax type_syntax declaration_syntax =
     declaration_syntax
     semicolon_syntax
 
+let make_if_syntax condition_syntax true_statements =
+  make_if_statement
+    if_keyword_syntax
+    left_paren_syntax
+    condition_syntax
+    right_paren_syntax
+    (make_compound_statement_syntax true_statements)
+    (make_missing ())
+    (make_missing ())
+
 
 (* Coroutine-specific syntaxes *)
 
@@ -387,6 +406,18 @@ let suspended_coroutine_result_classname =
 let suspended_member_name =
   "create"
 
+let is_suspended_member_name =
+  "isSuspended"
+
+let is_suspended_member_syntax =
+  make_token_syntax TokenKind.Name is_suspended_member_name
+
+let get_result_member_name =
+  "getResult"
+
+let get_result_member_syntax =
+  make_token_syntax TokenKind.Name get_result_member_name
+
 let make_closure_classname enclosing_classname function_name =
   Printf.sprintf "%s_%s_GeneratedClosure" enclosing_classname function_name
 
@@ -423,6 +454,12 @@ let coroutine_data_variable =
 
 let coroutine_data_variable_syntax =
   make_token_syntax TokenKind.Variable coroutine_data_variable
+
+let coroutine_result_variable =
+  "$coroutineResult"
+
+let coroutine_result_variable_syntax =
+  make_token_syntax TokenKind.Variable coroutine_result_variable
 
 let coroutine_data_type_syntax =
   mixed_syntax

@@ -1689,13 +1689,12 @@ and remove_leading_trivia node =
     | Some t -> t
     | None -> failwith "Expected leading token"
   in
-  let rewritten_node, changed = Rewriter.rewrite_pre (fun rewrite_node ->
+  let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
     match syntax rewrite_node with
     | Token t when t == leading_token ->
-      Some (Syntax.make_token {t with EditableToken.leading = []}, true)
-    | _  -> Some (rewrite_node, false)
+      Rewriter.Replace (Syntax.make_token {t with EditableToken.leading = []})
+    | _  -> Rewriter.Keep
   ) node in
-  if not changed then failwith "Leading token not rewritten";
   EditableToken.leading leading_token, rewritten_node
 
 and remove_trailing_trivia node =
@@ -1703,13 +1702,12 @@ and remove_trailing_trivia node =
     | Some t -> t
     | None -> failwith "Expected trailing token"
   in
-  let rewritten_node, changed = Rewriter.rewrite_pre (fun rewrite_node ->
+  let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
     match syntax rewrite_node with
     | Token t when t == trailing_token ->
-      Some (Syntax.make_token {t with EditableToken.trailing = []}, true)
-    | _  -> Some (rewrite_node, false)
+      Rewriter.Replace (Syntax.make_token {t with EditableToken.trailing = []})
+    | _  -> Rewriter.Keep
   ) node in
-  if not changed then failwith "Trailing token not rewritten";
   rewritten_node, EditableToken.trailing trailing_token
 
 and transform_last_arg ~allow_trailing node =

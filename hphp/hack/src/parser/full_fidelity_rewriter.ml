@@ -51,8 +51,9 @@ module WithSyntax(Syntax: RewritableType) = struct
       in
       let ((acc, child_changed), option_new_children) =
         Core.List.map_env (acc, false) (Syntax.children node) ~f:mapper in
-      let new_children = Core.List.filter_opt option_new_children in
-      let node = if child_changed then
+      let node =
+        if child_changed then
+          let new_children = Core.List.filter_opt option_new_children in
           Syntax.from_children (Syntax.kind node) new_children
         else
           node
@@ -89,31 +90,81 @@ module WithSyntax(Syntax: RewritableType) = struct
     let (acc, result) = parented_aggregating_rewrite_post f node [] in
     result
 
+  (* Here f is a function node -> node opt, with the semantics of
+     "returning None means retain current node, returning Some node
+     means replace it " *)
+  let rewrite_post_opt f node =
+    let f node =
+      match f node with
+    | None -> Keep
+    | Some node -> Replace node in
+    rewrite_post f node
+
   (* As above, but the rewrite happens to the node first and then
      recurses on the children. *)
-
-  let parented_rewrite_pre f node =
-    let rec aux parents node =
-      let mapper changed child = match aux (node :: parents) child with
-        | Some (child, changed') -> changed || changed', Some child
-        | None -> true, None
-      in
-      Option.map (f parents node) ~f:begin fun (new_node, node_changed) ->
-        let cs = Syntax.children new_node in
-        let (child_changed, option_new_children) =
-          Core.List.map_env false cs ~f:mapper in
-        let new_children = Core.List.filter_opt option_new_children in
-        let with_new_children =
+  let parented_aggregating_rewrite_pre f node init_acc =
+    let rec aux parents node acc =
+      let mapper (acc, changed) child =
+        match aux (node :: parents) child acc with
+        | (acc, Replace new_child) -> ((acc, true), Some new_child)
+        | (acc, Keep) -> ((acc, changed), Some child)
+        | (acc, Remove) -> ((acc, true), None)
+      in (* end of mapper *)
+      let rewrite_children node_changed node acc =
+        let children = Syntax.children node in
+        let ((acc, child_changed), option_new_children) =
+          Core.List.map_env (acc, false) children ~f:mapper in
+        let result =
           if child_changed then
-            Syntax.from_children (Syntax.kind new_node) new_children
+            let new_children = Core.List.filter_opt option_new_children in
+            let node = Syntax.from_children (Syntax.kind node) new_children in
+            Replace node
+          else if node_changed then
+            Replace node
           else
-            new_node in
-        (with_new_children, node_changed || child_changed)
-      end in
-    Option.value ~default:(node, true) (aux [] node)
+            Keep in
+        (acc, result)
+      in (* end of rewrite_children *)
+      let (acc, result) = f parents node acc in
+      match result with
+      | Remove -> (acc, result)
+      | Keep -> rewrite_children false node acc
+      | Replace new_node -> rewrite_children true new_node acc
+    in (* end of aux *)
+    let (acc, result) = aux [] node init_acc in
+    let result_node = match result with
+      | Keep -> node
+      | Replace new_node -> new_node
+      | Remove -> failwith "rewriter removed the root node!" in
+    (acc, result_node)
 
-  let rewrite_pre f node =
-    let g parents node = f node in
-    parented_rewrite_pre g node
+    (* The same as the above, except that f does not take parents. *)
+    let aggregating_rewrite_pre f node init_acc =
+      let f parents node acc = f node acc in
+      parented_aggregating_rewrite_pre f node init_acc
+
+    (* The same as the above, except that f does not take or return an
+       accumulator. *)
+    let parented_rewrite_pre f node =
+      let f parents node acc = ([], f parents node) in
+      let (acc, result) = parented_aggregating_rewrite_pre f node [] in
+      result
+
+    (* The same as the above, except that f does not take or return an
+       accumulator, and f does not take parents *)
+    let rewrite_pre f node =
+      let f parents node acc = ([], f node) in
+      let (acc, result) = parented_aggregating_rewrite_pre f node [] in
+      result
+
+  (* Here f is a function node -> node opt, with the semantics of
+     "returning None means retain current node, returning Some node
+     means replace it " *)
+  let rewrite_pre_opt f node =
+    let f node =
+      match f node with
+      | None -> Keep
+      | Some node -> Replace node in
+    rewrite_pre f node
 
 end

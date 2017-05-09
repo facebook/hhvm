@@ -314,10 +314,20 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ new_if ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
+    (* The suspension result(s) are made into variable(s) that occur at the end
+       of the do_statement's body. The do_condition checks against that
+      variable. *)
+    | DoStatement ({ do_body; do_condition; _; } as node) ->
+        let (next_label, prefix_statements), do_condition =
+          extract_suspend_statements do_condition next_label in
+        let do_body =
+          make_compound_statement_syntax (do_body :: prefix_statements) in
+        let new_do =
+          make_syntax (DoStatement { node with do_condition; do_body; }) in
+        next_label, Rewriter.Result.Replace new_do
+    | WhileStatement _ (* TODO(t17335630): Support suspends here. *)
     | ExpressionStatement _ (* TODO(t17335630): Support suspends here. *)
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
-    | WhileStatement _ (* TODO(t17335630): Support suspends here. *)
-    | DoStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)
     | SwitchStatement _ (* TODO(t17335630): Support suspends here. *)

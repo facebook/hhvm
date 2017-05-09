@@ -658,6 +658,7 @@ String DateTime::rfcFormat(const String& format) const {
     case 'i': s.printf("%02d", (int)minute()); break;
     case 's': s.printf("%02d", (int)second()); break;
     case 'u': s.printf("%06d", (int)floor(fraction() * 1000000)); break;
+    case 'v': s.printf("%03d", (int)floor(fraction() * 1000)); break;
     case 'I': s.append(!utc() && m_tz->dst(toTimeStamp(error)) ? 1 : 0);
       break;
     case 'P': rfc_colon = true; /* break intentionally missing */

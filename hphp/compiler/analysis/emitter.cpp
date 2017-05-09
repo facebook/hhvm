@@ -1133,10 +1133,12 @@ public:
     IterKind kind;
   };
 
-  void newCatchRegion(Offset start,
-                      Offset end,
-                      Label* entry,
-                      FaultIterInfo = FaultIterInfo { -1, KindOfIter });
+  template<class EmitCatchBodyFun>
+  void emitCatch(Emitter& e,
+                 Offset start,
+                 Offset end,
+                 EmitCatchBodyFun emitCatchBody,
+                 FaultIterInfo = FaultIterInfo { -1, KindOfIter });
   void newFaultRegion(Offset start,
                       Offset end,
                       Label* entry,
@@ -4611,15 +4613,8 @@ bool EmitterVisitor::visit(ConstructPtr node) {
       };
 
       visit(ts->getBody());
-
-      StatementListPtr catches = ts->getCatches();
-      int catch_count = catches->getCount();
-      if (catch_count > 0) {
-        // include the jump out of the try-catch block in the
-        // exception handler address range
-        e.Jmp(after);
-      }
       end = m_ue.bcPos();
+
       if (!m_evalStack.empty()) {
         InvariantViolation("Emitter detected that the evaluation stack "
                            "is not empty at the end of a try region: %d",
@@ -4630,33 +4625,40 @@ bool EmitterVisitor::visit(ConstructPtr node) {
                            "at the end of a try region: %d",
                            end);
       }
+      if (m_evalStack.fdescSize()) {
+        InvariantViolation("Emitter detected an open function call at the end "
+                           "of a try region: %d",
+                           end);
+      }
 
+      StatementListPtr catches = ts->getCatches();
+      int catch_count = catches->getCount();
       if (catch_count > 0 && start != end) {
-        newCatchRegion(start, end, new Label(e));
-        e.Catch();
+        auto const emitCatchBody = [&] {
+          std::set<StringData*, string_data_lt> seen;
 
-        std::set<StringData*, string_data_lt> seen;
+          for (int i = 0; i < catch_count; i++) {
+            auto c = static_pointer_cast<CatchStatement>((*catches)[i]);
+            StringData* eName = makeStaticString(c->getOriginalClassName());
 
-        for (int i = 0; i < catch_count; i++) {
-          auto c = static_pointer_cast<CatchStatement>((*catches)[i]);
-          StringData* eName = makeStaticString(c->getOriginalClassName());
+            if (!seen.insert(eName).second) {
+              // Already seen a catch of this class, skip.
+              continue;
+            }
 
-          if (!seen.insert(eName).second) {
-            // Already seen a catch of this class, skip.
-            continue;
+            Label nextCatch;
+            e.Dup();
+            e.InstanceOfD(eName);
+            e.JmpZ(nextCatch);
+            visit(c);
+            // Safe to jump out of the catch block, as eval stack was empty at
+            // the end of try region.
+            e.Jmp(after);
+            nextCatch.set(e);
           }
+        };
 
-          Label nextCatch;
-          e.Dup();
-          e.InstanceOfD(eName);
-          e.JmpZ(nextCatch);
-          visit(c);
-          e.Jmp(after);
-          nextCatch.set(e);
-        }
-
-        // Rethrow exception if not caught.
-        e.Throw();
+        emitCatch(e, start, end, emitCatchBody);
       }
     }
 
@@ -10284,13 +10286,24 @@ void EmitterVisitor::emitFunclets(Emitter& e) {
   }
 }
 
-void EmitterVisitor::newCatchRegion(Offset start,
-                                    Offset end,
-                                    Label* entry,
-                                    FaultIterInfo iter) {
+template<class EmitCatchBodyFun>
+void EmitterVisitor::emitCatch(Emitter& e,
+                               Offset start,
+                               Offset end,
+                               EmitCatchBodyFun emitCatchBody,
+                               FaultIterInfo iter) {
+  Label afterCatch;
+  e.Jmp(afterCatch);
+
   assert(start < end);
-  auto r = new CatchRegion(start, end, entry, iter.iterId, iter.kind);
+  auto r = new CatchRegion(start, end, new Label(e), iter.iterId, iter.kind);
   m_catchRegions.push_back(r);
+
+  e.Catch();
+  emitCatchBody();
+  e.Throw();
+
+  afterCatch.set(e);
 }
 
 void EmitterVisitor::newFaultRegion(Offset start,

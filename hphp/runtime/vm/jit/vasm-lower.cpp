@@ -189,7 +189,20 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       static_assert(offsetof(TypedValue, m_type) == 8, "");
 
       if (dests.size() == 2) {
-        v << copy2{rret(0), rret(1), dests[0], dests[1]};
+        switch(arch()) {
+          case Arch::X64: // fall through
+          case Arch::PPC64:
+            v << copy2{rret(0), rret(1), dests[0], dests[1]};
+            break;
+          case Arch::ARM:
+            // For ARM64 we are truncating the aux data
+            // from the type. That allows to use the resulting
+            // register values to be used in type comparisons
+            // without the need for truncation there.
+            v << copy{rret(0), dests[0]};
+            v << movtqb{rret(1), dests[1]};
+            break;
+        }
       } else {
         // We have cases where we statically know the type but need the value
         // from native call.  Even if the type does not really need a register
@@ -293,11 +306,38 @@ void lower(VLS& env, defvmretdata& inst, Vlabel b, size_t i) {
   env.unit.blocks[b].code[i] = copy{rret_data(), inst.data};
 }
 void lower(VLS& env, defvmrettype& inst, Vlabel b, size_t i) {
-  env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
+  switch(arch()) {
+    case Arch::X64: // fall through
+    case Arch::PPC64:
+      env.unit.blocks[b].code[i] = copy{rret_type(), inst.type};
+      break;
+    case Arch::ARM:
+      // For ARM64 we are truncating the aux data
+      // from the type. That allows to use the resulting
+      // register values to be used in type comparisons
+      // without the need for truncation there.
+      env.unit.blocks[b].code[i] = movtqb{rret_type(), inst.type};
+      break;
+  }
 }
 void lower(VLS& env, syncvmret& inst, Vlabel b, size_t i) {
-  env.unit.blocks[b].code[i] = copy2{inst.data,   inst.type,
-                                     rret_data(), rret_type()};
+  switch(arch()) {
+    case Arch::X64: // fall through
+    case Arch::PPC64:
+      env.unit.blocks[b].code[i] = copy2{inst.data,   inst.type,
+                                         rret_data(), rret_type()};
+      break;
+    case Arch::ARM:
+      // For ARM64 we are truncating the aux data
+      // from the type. That allows to use the resulting
+      // register values to be used in type comparisons
+      // without the need for truncation there.
+      lower_impl(env.unit, b, i, [&] (Vout& v) {
+        v << copy{inst.data, rret_data()};
+        v << movtqb{inst.type, rret_type()};
+      });
+      break;
+  }
 }
 void lower(VLS& env, vregrestrict& inst, Vlabel b, size_t i) {
   env.vreg_restrict_level--;

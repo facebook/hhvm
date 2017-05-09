@@ -319,12 +319,11 @@ let rewrite_suspends node =
     | GlobalStatement _ (* Suspends are impossible in global statements. *)
     | _ ->
         next_label, Rewriter.Result.Keep in
-  snd (Rewriter.aggregating_rewrite_post rewrite_statements node 1)
+  Rewriter.aggregating_rewrite_post rewrite_statements node 1
 
-(* TOOD(t17335630): Generate the correct number of labels. *)
-let add_switch body =
+let add_switch (next_label, body) =
   make_compound_statement_syntax [
-    make_coroutine_switch 0; (* TODO: Need label count. *)
+    make_coroutine_switch (next_label - 1);
     goto_label_syntax 0;
     body;
     error_label_syntax;

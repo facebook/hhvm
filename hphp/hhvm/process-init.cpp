@@ -70,9 +70,6 @@ const StaticString s_TypeError("\\__SystemLib\\TypeError");
 
 void tweak_variant_dtors();
 void ProcessInit() {
-  jit::mcgen::processInit();
-  jit::processInitProfData();
-
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
   // normal repo.
@@ -87,6 +84,13 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
 
+  LitstrTable::init();
+  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
+  Repo::get().loadGlobalData();
+
+  jit::mcgen::processInit();
+  jit::processInitProfData();
+
   rds::requestInit();
   std::string hhas;
   auto const slib = get_systemlib(&hhas);
@@ -97,10 +101,6 @@ void ProcessInit() {
                   " or export HHVM_SYSTEMLIB to your ENV");
     _exit(1);
   }
-
-  LitstrTable::init();
-  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
-  Repo::get().loadGlobalData();
 
   // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.

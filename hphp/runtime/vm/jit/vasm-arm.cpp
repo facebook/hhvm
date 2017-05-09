@@ -14,6 +14,53 @@
    +----------------------------------------------------------------------+
 */
 
+/*
+ * The HHVM's ARM64 backend works with a early-truncation policy.
+ * That means that:
+ *
+ *  A Vreg8 is an extended W-register with a u8 value.
+ *  A Vreg16 is an extended W-register with a u16 value.
+ *  A Vreg32 is a W-register with a u32 value.
+ *  A Vreg64 is a X-register with a u64 value.
+ *
+ * This allows to omit truncation instructions for sub-32-bit
+ * operations. E.g. a cmpb{Vreg8 s0, Vreg8 s1} has to truncate
+ * s0 and s1 before emitting a cmp instruction. When using the
+ * early-truncation policy, the cmpb{} emitter can rely on the
+ * fact, that s0 and s1 are already truncated and can emit a
+ * cmp instruction without preceeding uxtb's.
+ *
+ * Early-truncation has also consequences to extension/truncation
+ * vasm instructions. The following list shows how to use them:
+ *
+ * movzbw: Vreg8 -> Vreg16: mov w0, w0 #nop if s==d
+ * movzbl: Vreg8 -> Vreg32: mov w0, w0 #nop if s==d
+ * movzbq: Vreg8 -> Vreg64: mov x0, x0 #nop if s==d
+ * movzwl: Vreg16 -> Vreg32 mov w0, w0 #nop if s==d
+ * movzwq: Vreg16 -> Vreg64 mov x0, x0 #nop if s==d
+ * movzlq: Vreg32 -> Vreg64 mov x0, x0 #nop if s==d
+ * movtqb: Vreg64 -> Vreg8:  uxtb w0, w0
+ * movtql: Vreg64 -> Vreg32: uxtw w0, w0
+ *
+ * Early-truncation also implies, that instructions have to truncate
+ * after performing the actual operation if it cannot guarantee that
+ * the resulting VregN type matches. E.g. emitting code for the vasm
+ * instruction subbi{Immed imm, Vreg8 s, Vreg8 d} has to truncate the
+ * result to guarantee that register d indeed holds a u8 value.
+ *
+ * Note, that the early-truncation policy allows aarch64 specific
+ * optimizations, which are not relevant on other architectures.
+ * E.g. the x86_64 does not need this policy as the ISA allows
+ * direct register accesses for Vreg8, Vreg16, Vreg32 and Vreg64
+ * (e.g. AL, AX, EAX, RAX).
+ *
+ * The early-truncation policy relies on the following
+ * requirements of the Vreg type-system:
+ *
+ *  * All VregNs are created for values of up to N bits
+ *  * All conversions between VregNs are done via movz/movt vasm instructions
+ */
+
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
 #include "hphp/runtime/vm/jit/abi-arm.h"
@@ -277,15 +324,16 @@ struct Vgen {
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
   void emit(const movb& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movw& i) { a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbw& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbl& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbq& i) { a->Mov(X(i.d), W(i.s).X()); }
+  void emit(const movzwl& i) { a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzwq& i) { a->Mov(X(i.d), W(i.s).X()); }
+  void emit(const movzlq& i) { a->Mov(X(i.d), W(i.s).X()); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
-  void emit(const movtql& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbl& i) { a->Uxtb(W(i.d), W(i.s)); }
-  void emit(const movzbw& i) { a->Uxtb(W(i.d), W(i.s)); }
-  void emit(const movzbq& i) { a->Uxtb(X(i.d), W(i.s).X()); }
-  void emit(const movzwl& i) { a->Uxth(W(i.d), W(i.s)); }
-  void emit(const movzwq& i) { a->Uxth(X(i.d), W(i.s).X()); }
-  void emit(const movzlq& i) { a->Uxtw(X(i.d), W(i.s).X()); }
+  void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
   void emit(const nop& i) { a->Nop(); }

@@ -81,7 +81,7 @@ module HhServerConfig = struct
 
   let on_server_exit = check_log_for_lazy_incremental
 
-  let start_server options = function
+  let start_server ~prior_exit_status options = match prior_exit_status with
     | Some c
       when c = Exit_status.(exit_code Sql_assertion_failure) ||
            c = Exit_status.(exit_code Sql_cantopen) ||

@@ -29,6 +29,8 @@ def conclude(ui, repo, hooktype, mergestate, wctx, labels):
     build_cmd = [
         hh_client,
         'build',
+        '--force-dormant-start',
+        'true',
         '--steps',
         'entschema-list',
         '.',

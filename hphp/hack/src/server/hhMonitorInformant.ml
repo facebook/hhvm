@@ -108,6 +108,10 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
+  let get_root t = match !t with
+    | Initializing (_, _, path, _) -> path
+    | Tracking env -> env.root
+
   let init watchman prefetcher root =
     ref @@ Initializing (watchman, prefetcher, root,
       Hg.current_working_copy_base_rev (Path.to_string root))
@@ -398,11 +402,28 @@ let init { root; allow_subscriptions; state_prefetcher; use_dummy } =
           state_prefetcher root;
       }
 
+(** Returns true if we believe the repo is in the middle of an update/rebase. *)
+let repo_is_mid_update root =
+  let sc_path = Path.concat root ".hg" in
+  Sys.file_exists ((Path.to_string sc_path) ^ "/updatestate")
+
+let should_start_first_server t = match t with
+  | Resigned ->
+    (** If Informant doesn't control the server lifetime, then the first server
+     * instance should always be started during startup. *)
+    true
+  | Active env ->
+    if repo_is_mid_update (Revision_tracker.get_root env.revision_tracker) then
+      (** We shouldn't start the server until we observe that the repo has
+       * settled, via a state-leave event. *)
+      false
+    else
+      true
+
 let report informant server_state = match informant with
   | Resigned -> Informant_sig.Move_along
   | Active env ->
     Revision_tracker.make_report server_state env.revision_tracker
-
 
 (** This is useful only for testing.
  *
@@ -419,6 +440,8 @@ module Fake_informant = struct
   let init _ = {
     init_time = Unix.time ();
   }
+
+  let should_start_first_server _ = true
 
   let report env _server_state =
     let elapsed = Unix.time () -. env.init_time in

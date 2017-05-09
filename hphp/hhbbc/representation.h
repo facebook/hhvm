@@ -375,6 +375,8 @@ struct Func {
 
   bool isMemoizeWrapper : 1;
 
+  bool isMemoizeImpl : 1;
+
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type

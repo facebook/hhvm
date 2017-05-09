@@ -694,6 +694,16 @@ struct Func final {
   bool isMemoizeWrapper() const;
 
   /*
+   * Is this string the name of a memoize implementation.
+   */
+  static bool isMemoizeImplName(const StringData*);
+
+  /*
+   * Is this function a memoization implementation.
+   */
+  bool isMemoizeImpl() const;
+
+  /*
    * Assuming this func is a memoization wrapper, the name of the function it is
    * wrapping.
    *

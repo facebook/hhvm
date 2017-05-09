@@ -2679,6 +2679,13 @@ void in(ISS& env, const bc::OODeclExists& op) {
 }
 
 void in(ISS& env, const bc::VerifyParamType& op) {
+  if (env.ctx.func->isMemoizeImpl &&
+      !locCouldBeRef(env, op.loc1) &&
+      options.HardTypeHints) {
+    // a MemoizeImpl's params have already been checked by the wrapper
+    return reduce(env, bc::Nop {});
+  }
+
   locAsCell(env, op.loc1);
   if (!options.HardTypeHints) return;
 

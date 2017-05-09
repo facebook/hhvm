@@ -354,6 +354,11 @@ void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assert(numParams() == fParams.size());
 }
 
+bool Func::isMemoizeImplName(const StringData* name) {
+  return name->size() > 13 && !memcmp(name->data() + name->size() - 13,
+                                      "$memoize_impl", 13);
+}
+
 const StringData* Func::genMemoizeImplName(const StringData* origName) {
   return makeStaticString(folly::sformat("{}$memoize_impl", origName->data()));
 }

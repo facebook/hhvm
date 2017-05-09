@@ -8831,7 +8831,7 @@ void EmitterVisitor::emitMemoizeMethod(MethodStatementPtr meth,
   Emitter e(meth, m_ue, *this);
   FuncFinisher ff(this, e, m_curFunc);
 
-  Label topOfBody(e);
+  Label topOfBody(e, Label::NoEntryNopFlag{});
   Label cacheMiss;
   Label cacheMissNoClean;
 

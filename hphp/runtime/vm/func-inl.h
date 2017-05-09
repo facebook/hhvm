@@ -405,6 +405,10 @@ inline bool Func::isMemoizeWrapper() const {
   return shared()->m_isMemoizeWrapper;
 }
 
+inline bool Func::isMemoizeImpl() const {
+  return isMemoizeImplName(name());
+}
+
 inline const StringData* Func::memoizeImplName() const {
   assertx(isMemoizeWrapper());
   return genMemoizeImplName(name());

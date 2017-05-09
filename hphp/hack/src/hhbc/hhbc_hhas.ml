@@ -672,13 +672,17 @@ let quote_str_option s =
   | None -> "N"
   | Some s -> SU.quote_string s
 
+let string_of_type_flags flags =
+  let flag_strs = List.map Hhas_type_constraint.string_of_flag flags in
+  let flags_text = String.concat " " flag_strs in
+  flags_text
+
 let string_of_type_info ?(is_enum = false) ti =
   let user_type = Hhas_type_info.user_type ti in
   let type_constraint = Hhas_type_info.type_constraint ti in
   let flags = Hhas_type_constraint.flags type_constraint in
-  let flag_strs = List.map Hhas_type_constraint.string_of_flag flags in
+  let flags_text = string_of_type_flags flags in
   let name = Hhas_type_constraint.name type_constraint in
-  let flags_text = String.concat " " flag_strs in
     "<" ^ quote_str_option user_type ^ " "
         ^ (if not is_enum then quote_str_option name ^ " " else "")
         ^ flags_text
@@ -687,7 +691,12 @@ let string_of_type_info ?(is_enum = false) ti =
 let string_of_typedef_info ti =
   let type_constraint = Hhas_type_info.type_constraint ti in
   let name = Hhas_type_constraint.name type_constraint in
-    "<" ^ quote_str_option name ^ "  >"
+  let flags = Hhas_type_constraint.flags type_constraint in
+  (* TODO: check if other flags are emitted for type aliases *)
+  let flags = List.filter (fun f -> f = Hhas_type_constraint.Nullable) flags in
+  let flags_text = string_of_type_flags flags in
+    "<" ^ SU.quote_string (Option.value ~default:"" name)
+    ^ " " ^ flags_text ^ " >"
 
 let string_of_type_info_option tio =
   match tio with

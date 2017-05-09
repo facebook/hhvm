@@ -314,15 +314,22 @@ let make_classish_declaration_syntax classname implements_list classish_body =
     (make_compound_statement_syntax classish_body)
 
 (* TODO(tingley): Determine if it's worth tightening visibility here. *)
-let make_methodish_declaration_syntax
+let make_methodish_declaration_with_body_syntax
     function_decl_header_syntax
     function_body =
   make_methodish_declaration
     (* methodish_attribute *) (make_missing ())
     (* methodish_modifiers *) (make_missing ())
     function_decl_header_syntax
-    (make_compound_statement_syntax function_body)
+    function_body
     (* methodish_semicolon *) (make_missing ())
+
+let make_methodish_declaration_syntax
+    function_decl_header_syntax
+    function_body =
+  make_methodish_declaration_with_body_syntax
+    function_decl_header_syntax
+    (make_compound_statement_syntax function_body)
 
 let make_function_decl_header_syntax
     name
@@ -370,11 +377,14 @@ let make_if_syntax condition_syntax true_statements =
 (* TODO: Either (1) rename this to something less likely to conflict with
 user variables or (2) put user variables in their own sub-closure.  *)
 
-let label_name_syntax =
-  make_token_syntax ~space_after:true TokenKind.Name "nextLabel"
+let next_label =
+  "nextLabel"
 
 let label_syntax =
-  make_token_syntax ~space_after:true TokenKind.Variable "$nextLabel"
+  make_token_syntax ~space_after:true TokenKind.Variable ("$" ^ next_label)
+
+let label_name_syntax =
+  make_token_syntax ~space_after:true TokenKind.Name next_label
 
 let continuation_variable =
   "$coroutineContinuation_generated"
@@ -461,6 +471,9 @@ let coroutine_result_variable =
 let coroutine_result_variable_syntax =
   make_token_syntax TokenKind.Variable coroutine_result_variable
 
+let make_coroutine_result_data_variable index =
+  Printf.sprintf "$coroutineResultData%d" index
+
 let coroutine_data_type_syntax =
   mixed_syntax
 
@@ -527,22 +540,10 @@ let make_state_machine_parameter_syntax enclosing_classname function_name =
 let inst_meth_syntax =
   make_qualified_name_syntax "inst_meth"
 
-(* public int $nextLabel = 0; *)
-let label_declaration_syntax =
-  let zero = make_int_literal_syntax 0 in
-  let init = make_simple_initializer assignment_operator_syntax zero in
-  let decl = make_property_declarator label_syntax init in
-  make_property_declaration_syntax int_type decl
-
 let make_member_with_unknown_type_declaration_syntax variable_syntax =
   let declaration_syntax =
     make_property_declarator variable_syntax (make_missing ()) in
   make_property_declaration_syntax (make_missing ()) declaration_syntax
-
-(* $closure->nextLabel *)
-let label_access_syntax =
-  make_member_selection_expression_syntax
-    closure_variable_syntax label_name_syntax
 
 (* label0 *)
 let goto_label_name number =
@@ -605,7 +606,7 @@ let make_switch_sections number =
 let make_coroutine_switch label_count =
   let sections = make_switch_sections label_count in
   make_switch_statement switch_keyword_syntax left_paren_syntax
-    label_access_syntax right_paren_syntax left_brace_syntax sections
+    label_syntax right_paren_syntax left_brace_syntax sections
     right_brace_syntax
 
 (* coroutine_unit() *)
@@ -616,4 +617,4 @@ let coroutine_unit_call_syntax =
 (* $closure->nextLabel = x; *)
 let set_next_label_syntax number =
   let number = make_int_literal_syntax number in
-  make_assignment_syntax_variable label_access_syntax number
+  make_assignment_syntax_variable label_syntax number

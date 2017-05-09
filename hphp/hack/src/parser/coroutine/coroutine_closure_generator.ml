@@ -43,7 +43,13 @@ let generate_constructor_method
     cont_param :: sm_param :: function_parameter_list in
   let ctor = make_constructor_decl_header_syntax
     constructor_member_name function_parameter_list in
-  make_methodish_declaration_syntax ctor []
+  let select_next_label_syntax =
+    make_member_selection_expression_syntax this_syntax label_name_syntax in
+  let initialize_next_label_syntax =
+    make_assignment_syntax_variable
+      select_next_label_syntax
+      (make_int_literal_syntax 0) in
+  make_methodish_declaration_syntax ctor [ initialize_next_label_syntax; ]
 
 let generate_resume_body { methodish_function_body; _; } =
   let select_state_machine_syntax =
@@ -103,8 +109,7 @@ let generate_closure_body
     method_node
     header_node
     state_machine_data =
-  label_declaration_syntax
-    :: generate_hoisted_locals state_machine_data
+  generate_hoisted_locals state_machine_data
     @ [
       generate_constructor_method
         classish_name

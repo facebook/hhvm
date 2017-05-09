@@ -88,6 +88,17 @@ let add_missing_return body =
     body
 
 (**
+ * The set of variable names that should not be hoisted.
+ *)
+let unhoistable_variables =
+  SSet.of_list [
+    this_variable;
+    coroutine_data_variable;
+    coroutine_result_variable;
+    exception_variable;
+  ]
+
+(**
  * Converts references to parameters and locals into referenced to the hoisted
  * versions of these identifiers that are part of the generated closure.
  *
@@ -101,7 +112,7 @@ let rewrite_locals_and_params_into_closure_variables node =
   let rewrite_and_gather_locals_and_params node acc =
     match syntax node with
     | Token { EditableToken.kind = TokenKind.Variable; text; _; }
-      when text <> this_variable ->
+      when not (SSet.mem text unhoistable_variables) ->
         let local_as_name_syntax =
           String_utils.lstrip text "$"
             |> make_token_syntax TokenKind.Name in
@@ -150,12 +161,13 @@ let rewrite_locals_and_params_into_closure_variables node =
  *   }
  *   $coroutineData = $coroutineResult->getResult();
  *   label1:
+ *   $closure->coroutineResultData1 = $coroutineData;
  *   if ($exception !== null) {
  *     throw $exception;
  *   }
  *   $closure->nextLabel = 2;
  *   $coroutineResult = outerCoroutine(
- *     $coroutineData,
+ *     $closure->coroutineResultData1,
  *     otherMethod(),
  *   );
  *   if ($coroutineResult->isSuspended()) {
@@ -163,23 +175,19 @@ let rewrite_locals_and_params_into_closure_variables node =
  *   }
  *   $coroutineData = $coroutineResult->getResult();
  *   label2:
+ *   $closure->coroutineResultData2 = $coroutineData;
  *   if ($exception !== null) {
  *     throw $exception;
  *   }
  *
  * The node itself is is rewritten into the following.
  *
- *   $coroutineData
+ *   $closure->coroutineResultData2
  *)
 (*
- * TODO(t17335630): IMPORTANT! $coroutineData is not enough to store the data
- * between coroutine runs. Consider the following snippet.
- *
- *   suspend outerCoroutine(suspend innerCoroutine(), suspend innerCoroutine())
- *
- * The innerCoroutine results will both be stored in $coroutineData, which is
- * incorrect. I think we can fix this by storing each result in a distinct local
- * variable that gets hoisted into the closure.
+ * TODO(t17335630): Consider nulling out the $coroutineResultData# after it's
+ * been used, for earlier garbage collection. This can be done with a list of
+ * statements to be executed *after* the rewritten variable.
  *)
 let extract_suspend_statements node next_label =
   let rewrite_suspends_and_gather_prefix_code
@@ -228,6 +236,13 @@ let extract_suspend_statements node next_label =
 
         let declare_next_label_syntax = goto_label_syntax next_label in
 
+        let coroutine_result_data_variable =
+          make_coroutine_result_data_variable next_label in
+        let assign_coroutine_result_data_syntax =
+          make_assignment_syntax
+            coroutine_result_data_variable
+            coroutine_data_variable_syntax in
+
         let exception_not_null_syntax =
           make_not_null_syntax exception_variable_syntax in
         let throw_if_exception_not_null_syntax =
@@ -241,10 +256,15 @@ let extract_suspend_statements node next_label =
           return_if_suspended_syntax;
           assign_coroutine_data_syntax;
           declare_next_label_syntax;
+          assign_coroutine_result_data_syntax;
           throw_if_exception_not_null_syntax;
         ] in
+
+        let coroutine_result_data_variable_syntax =
+          make_token_syntax TokenKind.Variable coroutine_result_data_variable in
+
         (next_label + 1, prefix_statements_acc @ statements),
-        Rewriter.Result.Replace coroutine_data_variable_syntax
+        Rewriter.Result.Replace coroutine_result_data_variable_syntax
     | _ ->
         (next_label, prefix_statements_acc), Rewriter.Result.Keep in
   Rewriter.aggregating_rewrite_post
@@ -301,26 +321,22 @@ let rewrite_suspends node =
         next_label, Rewriter.Result.Keep in
   snd (Rewriter.aggregating_rewrite_post rewrite_statements node 1)
 
-let lower_body body =
-  let body, locals_and_params =
-    rewrite_locals_and_params_into_closure_variables body in
-  let body =
-    body
-      |> add_missing_return
-      |> rewrite_suspends
-      in
-  body, locals_and_params
-
-let generate_coroutine_state_machine_body body =
-  let body, locals_and_params = lower_body body in
-  let body = [
+(* TOOD(t17335630): Generate the correct number of labels. *)
+let add_switch body =
+  make_compound_statement_syntax [
     make_coroutine_switch 0; (* TODO: Need label count. *)
     goto_label_syntax 0;
     body;
     error_label_syntax;
     throw_unimplemented_syntax "A completed coroutine was resumed.";
-  ] in
-  body, locals_and_params
+  ]
+
+let lower_body body =
+  body
+    |> add_missing_return
+    |> rewrite_suspends
+    |> add_switch
+    |> rewrite_locals_and_params_into_closure_variables
 
 let make_function_decl_header
     classish_name
@@ -383,12 +399,11 @@ let generate_coroutine_state_machine
     function_name
     { methodish_function_body; _; }
     function_node =
-  let body, locals_and_params =
-    generate_coroutine_state_machine_body methodish_function_body in
+  let body, locals_and_params = lower_body methodish_function_body in
   let state_machine_data =
     compute_state_machine_data locals_and_params function_node in
   let state_machine_method =
-    make_methodish_declaration_syntax
+    make_methodish_declaration_with_body_syntax
       (make_function_decl_header classish_name function_name function_node)
       body in
   state_machine_method, state_machine_data

@@ -150,6 +150,12 @@ bool HHVM_FUNCTION(is_resource, const Variant& v) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Array HHVM_FUNCTION(HH_object_prop_array, const Object& obj) {
+  return obj.toArray();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // input/output
 
 Variant HHVM_FUNCTION(print_r, const Variant& expression,
@@ -526,6 +532,7 @@ void StandardExtension::initVariable() {
   HHVM_FE(get_defined_vars);
   HHVM_FE(extract);
   HHVM_FE(parse_str);
+  HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
 
   loadSystemlib("std_variable");
 }

@@ -1185,7 +1185,11 @@ and emit_base mode base_offset param_num_opt (_, expr_ as expr) =
    match expr_ with
    | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
      instr_string (SU.Locals.strip_dollar x),
-     instr (IBase (BaseGC (base_offset, base_mode))),
+     instr (IBase (
+     match param_num_opt with
+     | None -> BaseGC (base_offset, base_mode)
+     | Some i -> FPassBaseGC (i, base_offset)
+     )),
      1
 
    | A.Lvar (_, x) when x = SN.SpecialIdents.this ->
@@ -1293,7 +1297,7 @@ and instr_fpassr i = instr (ICall (FPassR i))
 
 and emit_arg i ((_, expr_) as e) =
   match expr_ with
-  | A.Lvar (_, x) when x = SN.Superglobals.globals ->
+  | A.Lvar (_, x) when SN.Superglobals.is_superglobal x ->
     gather [
       instr_string (SU.Locals.strip_dollar x);
       instr (ICall (FPassG i))
@@ -1703,6 +1707,13 @@ and emit_lval_op op expr1 opt_expr2 =
 
 and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
   match expr_ with
+  | A.Lvar (_, id) when SN.Superglobals.is_superglobal id ->
+    gather [
+      instr_string @@ SU.Locals.strip_dollar id;
+      rhs_instrs;
+      emit_final_global_op op;
+    ]
+
   | A.Lvar (_, id) when not (is_local_this id) ->
     gather [
       rhs_instrs;

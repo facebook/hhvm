@@ -448,6 +448,8 @@ let program_init genv =
 let setup_server options handle =
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
+  let (>>|) = Option.(>>|) in
+  ignore ((Sys_utils.get_env "HOSTNAME") >>| (Hh_logger.log "Hostname: %s"));
   let root = ServerArgs.root options in
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)

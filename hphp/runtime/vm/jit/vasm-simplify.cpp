@@ -522,18 +522,31 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
   });
 }
 
-bool simplify(Env& env, const movzbq& inst, Vlabel b, size_t i) {
+template<typename Movzb>
+bool simplify_movzb(Env& env, const Movzb& inst, Vlabel b, size_t i) {
   auto const def_op = env.def_insts[inst.s];
 
   if (def_op != Vinstr::setcc) return false;
   if (!(arch() == Arch::ARM &&
     width(def_op) != Width::Long)) return false;
 
-  // movzbq{} is redundant--operation on 32-bit registers clear the upper bits.
+  // movzbX{} is redundant--operation on 32-bit registers clear the upper bits.
   return simplify_impl(env, b, i, [&] (Vout& v) {
     v << copy{inst.s, inst.d};
     return 1;
   });
+}
+
+bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
+  return simplify_movzb<movzbl>(env, inst, b, i);
+}
+
+bool simplify(Env& env, const movzbw& inst, Vlabel b, size_t i) {
+  return simplify_movzb<movzbw>(env, inst, b, i);
+}
+
+bool simplify(Env& env, const movzbq& inst, Vlabel b, size_t i) {
+  return simplify_movzb<movzbq>(env, inst, b, i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

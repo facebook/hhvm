@@ -348,11 +348,11 @@ let string_of_isset instruction =
   | IssetL id -> "IssetL " ^ string_of_local_id id
   | IssetN -> "IssetN"
   | IssetG -> "IssetG"
-  | IssetS -> "IssetS"
+  | IssetS cls -> "IssetS " ^ string_of_int cls
   | EmptyL id -> "EmptyL " ^ string_of_local_id id
   | EmptyN -> "EmptyN"
   | EmptyG -> "EmptyG"
-  | EmptyS -> "EmptyS"
+  | EmptyS cls -> "EmptyS " ^ string_of_int cls
   | IsTypeC op -> "IsTypeC " ^ string_of_istype_op op
   | IsTypeL (id, op) ->
     "IsTypeL " ^ string_of_local_id id ^ " " ^ string_of_istype_op op

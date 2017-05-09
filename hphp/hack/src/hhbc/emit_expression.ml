@@ -469,14 +469,16 @@ and emit_class_id cid =
   else emit_known_class_id cid
 
 
-and emit_class_get param_num_opt cid id =
+and emit_class_get param_num_opt qop cid id =
     gather [
       (* We need to strip off the initial dollar *)
       instr_string (SU.Locals.strip_dollar id);
       emit_class_id cid;
-      match param_num_opt with
-      | None -> instr_cgets
-      | Some i -> instr (ICall (FPassS (i, 0)))
+      match (param_num_opt, qop) with
+      | (None, QueryOp.CGet) -> instr_cgets
+      | (None, QueryOp.Isset) -> instr_issets
+      | (None, QueryOp.Empty) -> instr_emptys
+      | (Some i, _) -> instr (ICall (FPassS (i, 0)))
     ]
 
 (* Class constant <cid>::<id>.
@@ -512,7 +514,7 @@ and emit_class_const cid id =
     let cid = get_original_name () in
     if id = SN.Members.mClass
     then instr_string (Utils.strip_ns cid)
-    else instr (ILitConst (ClsCnsD (id, cid)))
+    else instr (ILitConst (ClsCnsD (id, SU.Xhp.mangle cid)))
   | _ ->
     if cid = SN.Classes.cSelf
     then
@@ -529,7 +531,7 @@ and emit_class_const cid id =
     else
       if id = SN.Members.mClass
       then instr_string (Utils.strip_ns cid)
-      else instr (ILitConst (ClsCnsD (id, cid)))
+      else instr (ILitConst (ClsCnsD (id, SU.Xhp.mangle cid)))
 
 and emit_await e =
   let after_await = Label.next_regular () in
@@ -641,13 +643,15 @@ and emit_lvarvar n (_, id) =
 
 and emit_call_isset_expr (_, expr_ as expr) =
   match expr_ with
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [
       from_expr e;
       instr (IIsset IssetG)
     ]
-  | A.Array_get(base_expr, opt_elem_expr) ->
+  | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get None QueryOp.Isset base_expr opt_elem_expr
+  | A.Class_get ((_, cid), (_, id))  ->
+    emit_class_get None QueryOp.Isset cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Isset expr prop nullflavor
   | A.Lvar(_, id) when is_local_this id ->
@@ -674,6 +678,8 @@ and emit_call_empty_expr (_, expr_ as expr) =
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     emit_array_get None QueryOp.Empty base_expr opt_elem_expr
+  | A.Class_get ((_, cid), (_, id))  ->
+    emit_class_get None QueryOp.Empty cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get None QueryOp.Empty expr prop nullflavor
   | A.Lvar(_, id) when not (is_local_this id) ->
@@ -796,7 +802,7 @@ and from_expr expr =
   | A.Lfun _ ->
     failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Efun (fundef, ids) -> emit_lambda fundef ids
-  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None cid id
+  | A.Class_get ((_, cid), (_, id))  -> emit_class_get None QueryOp.CGet cid id
   | A.String2 es -> emit_string2 es
   | A.Unsafeexpr e -> from_expr e
   | A.Id id -> emit_id id
@@ -1318,7 +1324,7 @@ and emit_arg i ((_, expr_) as e) =
     emit_obj_get (Some i) QueryOp.CGet e1 e2 nullflavor
 
   | A.Class_get((_, cid), (_, id)) ->
-    emit_class_get (Some i) cid id
+    emit_class_get (Some i) QueryOp.CGet cid id
 
   | _ ->
     let instrs, flavor = emit_flavored_expr e in

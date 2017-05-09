@@ -260,11 +260,11 @@ type instruct_isset =
   | IssetL of local_id
   | IssetN
   | IssetG
-  | IssetS
+  | IssetS of classref_id
   | EmptyL of local_id
   | EmptyN
   | EmptyG
-  | EmptyS
+  | EmptyS of classref_id
   | IsTypeC of istype_op
   | IsTypeL of local_id * istype_op
 

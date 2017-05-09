@@ -85,6 +85,8 @@ let instr_setl local = instr (IMutator (SetL local))
 let instr_setn = instr (IMutator SetN)
 let instr_unsetl local = instr (IMutator (UnsetL local))
 let instr_issetl local = instr (IIsset (IssetL local))
+let instr_issets = instr (IIsset (IssetS class_ref_rewrite_sentinel))
+let instr_emptys = instr (IIsset (EmptyS class_ref_rewrite_sentinel))
 let instr_cgets =
   instr (IGet (CGetS class_ref_rewrite_sentinel))
 let instr_cgetn = instr (IGet CGetN)
@@ -384,6 +386,8 @@ let rewrite_class_refs_instr num = function
 | ICall (FPushClsMethod (np, _)) -> (num - 1, ICall (FPushClsMethod (np, num)))
 | ICall (FPushClsMethodF (np, _)) ->
   (num - 1, ICall (FPushClsMethodF (np, num)))
+| IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
+| IIsset (EmptyS _) -> (num - 1, IIsset (EmptyS num))
 | i -> (num, i)
 
 (* Cannot use InstrSeq.fold_left since we want to maintain the exact

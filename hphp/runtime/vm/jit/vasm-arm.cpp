@@ -323,15 +323,15 @@ struct Vgen {
   void emit(const loadzbl& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzbq& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadzlq& i) { a->Ldr(W(i.d), M(i.s)); }
-  void emit(const movb& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movw& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movl& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbw& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbl& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbq& i) { a->Mov(X(i.d), W(i.s).X()); }
-  void emit(const movzwl& i) { a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzwq& i) { a->Mov(X(i.d), W(i.s).X()); }
-  void emit(const movzlq& i) { a->Mov(X(i.d), W(i.s).X()); }
+  void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzbq& i) { if (i.d != i.s) a->Mov(X(i.d), W(i.s).X()); }
+  void emit(const movzwl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
+  void emit(const movzwq& i) { if (i.d != i.s) a->Mov(X(i.d), W(i.s).X()); }
+  void emit(const movzlq& i) { if (i.d != i.s) a->Mov(X(i.d), W(i.s).X()); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }

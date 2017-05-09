@@ -930,7 +930,10 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_darray_and_varray in
         if not darray_and_varray_allowed then Errors.darray_not_supported p;
         Some (match hl with
-          | []
+          | [] ->
+              if (fst env).in_mode = FileInfo.Mstrict then
+                Errors.too_few_type_arguments p;
+              N.Hdarray ((p, N.Hany), (p, N.Hany))
           | [_] -> Errors.too_few_type_arguments p; N.Hany
           | [key_; val_] -> N.Hdarray (hint env key_, hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
@@ -941,7 +944,10 @@ module Make (GetLocals : GetLocals) = struct
             TypecheckerOptions.experimental_darray_and_varray in
         if not darray_and_varray_allowed then Errors.varray_not_supported p;
         Some (match hl with
-          | [] -> Errors.too_few_type_arguments p; N.Hany
+          | [] ->
+              if (fst env).in_mode = FileInfo.Mstrict then
+                Errors.too_few_type_arguments p;
+              N.Hvarray (p, N.Hany)
           | [val_] -> N.Hvarray (hint env val_)
           | _ -> Errors.too_many_type_arguments p; N.Hany)
       | nm when nm = SN.Typehints.integer ->

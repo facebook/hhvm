@@ -15,7 +15,7 @@
 */
 
 /*
- * The HHVM's ARM64 backend works with a early-truncation policy.
+ * The HHVM's ARM64 backend works with an early-truncation policy.
  * That means that:
  *
  *  A Vreg8 is an extended W-register with a u8 value.
@@ -97,6 +97,14 @@ namespace {
 
 static_assert(folly::kIsLittleEndian,
   "Code contains little-endian specific optimizations.");
+
+uint8_t bAsUb(Immed imm) {
+  return static_cast<uint8_t>(imm.b());
+}
+
+uint16_t wAsUw(Immed imm) {
+  return static_cast<uint16_t>(imm.w());
+}
 
 vixl::Register X(Vreg64 r) {
   PhysReg pr(r.asReg());
@@ -281,7 +289,7 @@ struct Vgen {
   void emit(const addqi& i) { a->Add(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
-  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.ub(), UF(i.fl)); }
+  void emit(const andbi& i) { a->And(W(i.d), W(i.s1), bAsUb(i.s0), UF(i.fl)); }
   void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andli& i) { a->And(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }
@@ -289,7 +297,7 @@ struct Vgen {
   void emit(const cmovb& i) { a->Csel(W(i.d), W(i.t), W(i.f), C(i.cc)); }
   void emit(const cmovq& i) { a->Csel(X(i.d), X(i.t), X(i.f), C(i.cc)); }
   void emit(const cmpb& i) { a->Cmp(W(i.s1), W(i.s0)); }
-  void emit(const cmpbi& i) { a->Cmp(W(i.s1), i.s0.ub()); }
+  void emit(const cmpbi& i) { a->Cmp(W(i.s1), bAsUb(i.s0)); }
   void emit(const cmpl& i) { a->Cmp(W(i.s1), W(i.s0)); }
   void emit(const cmpli& i) { a->Cmp(W(i.s1), i.s0.l()); }
   void emit(const cmpq& i) { a->Cmp(X(i.s1), X(i.s0)); }
@@ -326,12 +334,6 @@ struct Vgen {
   void emit(const movb& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
   void emit(const movl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbw& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzbq& i) { if (i.d != i.s) a->Mov(X(i.d), W(i.s).X()); }
-  void emit(const movzwl& i) { if (i.d != i.s) a->Mov(W(i.d), W(i.s)); }
-  void emit(const movzwq& i) { if (i.d != i.s) a->Mov(X(i.d), W(i.s).X()); }
-  void emit(const movzlq& i) { if (i.d != i.s) a->Mov(X(i.d), W(i.s).X()); }
   void emit(const movtqb& i) { a->Uxtb(W(i.d), W(i.s)); }
   void emit(const movtql& i) { a->Uxtw(W(i.d), W(i.s)); }
   void emit(const mulsd& i) { a->Fmul(D(i.d), D(i.s1), D(i.s0)); }
@@ -367,7 +369,7 @@ struct Vgen {
   void emit(const subqi& i) { a->Sub(X(i.d), X(i.s1), i.s0.q(), UF(i.fl)); }
   void emit(const subsd& i) { a->Fsub(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const testb& i){ a->Tst(W(i.s1), W(i.s0)); }
-  void emit(const testbi& i){ a->Tst(W(i.s1), i.s0.ub()); }
+  void emit(const testbi& i){ a->Tst(W(i.s1), bAsUb(i.s0)); }
   void emit(const testl& i) { a->Tst(W(i.s1), W(i.s0)); }
   void emit(const testli& i) { a->Tst(W(i.s1), i.s0.l()); }
   void emit(const testq& i) { a->Tst(X(i.s1), X(i.s0)); }
@@ -488,8 +490,8 @@ void Vgen::emit(const vasm_opc& i) {          \
   }                                           \
 }
 
-Y(ldimmb, b, 8, W, i.s.ub())
-Y(ldimmw, w, 16, W, i.s.uw())
+Y(ldimmb, b, 8, W, bAsUb(i.s))
+Y(ldimmw, w, 16, W, wAsUw(i.s))
 Y(ldimml, l, 32, W, i.s.l())
 Y(ldimmq, q, 64, X, i.s.q())
 
@@ -820,7 +822,7 @@ void Vgen::emit(const vasm_opc& i) {                  \
 Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
 Y(xorb, Eor, W, W(i.s0), wzr);
-Y(xorbi, Eor, W, i.s0.ub(), wzr);
+Y(xorbi, Eor, W, bAsUb(i.s0), wzr);
 Y(xorl, Eor, W, W(i.s0), wzr);
 Y(xorq, Eor, X, X(i.s0), xzr);
 Y(xorqi, Eor, X, i.s0.q(), xzr);
@@ -1481,6 +1483,37 @@ void lower(const VLS& e, pushpm& i, Vlabel b, size_t z) {
   });
 }
 
+template<typename movz>
+void lower_movz(const VLS& e, movz& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    v << copy{i.s, i.d};
+  });
+}
+
+void lower(const VLS& e, movzbw& i, Vlabel b, size_t z) {
+  lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movzbl& i, Vlabel b, size_t z) {
+  lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movzbq& i, Vlabel b, size_t z) {
+  lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movzwl& i, Vlabel b, size_t z) {
+  lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movzwq& i, Vlabel b, size_t z) {
+  lower_movz(e, i, b, z);
+}
+
+void lower(const VLS& e, movzlq& i, Vlabel b, size_t z) {
+  lower_movz(e, i, b, z);
+}
+
 void lower(const VLS& e, movtdb& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     auto d = v.makeReg();
@@ -1495,22 +1528,25 @@ void lower(const VLS& e, movtdq& i, Vlabel b, size_t z) {
   });
 }
 
-#define Y(vasm_opc, conv_opc, load_opc, cmp_opc)            \
-void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
-  lower_impl(e.unit, b, z, [&] (Vout& v) {                  \
-    auto s0 = v.makeReg();                                  \
-    v << conv_opc{i.s0, s0};                                \
-    lowerVptr(i.s1, v);                                     \
-    auto s1 = v.makeReg();                                  \
-    v << load_opc{i.s1, s1};                                \
-    v << cmp_opc{s0, s1, i.sf};                             \
-  });                                                       \
+template<typename load_op, typename cmp_op, typename cmpm>
+void lower_cmpm(const VLS&e, cmpm& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
+    lowerVptr(i.s1, v);
+    auto tmp0 = v.makeReg();
+    auto tmp1 = v.makeReg();
+    v << copy{i.s0, tmp0};
+    v << load_op{i.s1, tmp1};
+    v << cmp_op{tmp0, tmp1, i.sf};
+  });
 }
 
-Y(cmpbm, movzbl, loadzbl, cmpl)
-Y(cmpwm, movzwl, loadw, cmpl)
+void lower(const VLS& e, cmpbm& i, Vlabel b, size_t z) {
+  lower_cmpm<loadzbl, cmpl>(e, i, b, z);
+}
 
-#undef Y
+void lower(const VLS& e, cmpwm& i, Vlabel b, size_t z) {
+  lower_cmpm<loadw, cmpl>(e, i, b, z);
+}
 
 #define Y(vasm_opc, lower_opc, load_opc, imm, zr, sz)   \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
@@ -1527,9 +1563,9 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
 }
 
 Y(storebi, storeb, ldimmb, i.s, wzr, b)
+Y(storewi, storew, ldimmw, i.s, wzr, w)
 Y(storeli, storel, ldimml, i.s, wzr, l)
 Y(storeqi, store, ldimmq, Immed64(i.s.l()), wzr, q) //storeqi only supports 32-bit immediates
-Y(storewi, storew, ldimmw, i.s, xzr, w)
 
 #undef Y
 

@@ -299,11 +299,24 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ assignment; ret ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
+    (* The if_else_clause is simply an else_clause which contains an
+       if_statement. Thus, we need no special logic to rewrite the
+       if_else_clause as long as the generated code is contained within a
+       compound_statement. *)
+    | IfStatement ({ if_condition; if_elseif_clauses; _; } as node) ->
+        (* TODO(t17335630): Handle if_elseif_clauses by rewriting ones
+           containing suspensions into else_caluses. *)
+        assert (is_missing if_elseif_clauses);
+
+        let (next_label, prefix_statements), if_condition =
+          extract_suspend_statements if_condition next_label in
+        let new_if = make_syntax (IfStatement { node with if_condition; }) in
+        let statements = prefix_statements @ [ new_if ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
     | ExpressionStatement _ (* TODO(t17335630): Support suspends here. *)
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
     | WhileStatement _ (* TODO(t17335630): Support suspends here. *)
-    | IfStatement _ (* TODO(t17335630): Support suspends here. *)
-    | TryStatement _ (* TODO(t17335630): Support suspends here. *)
     | DoStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)
@@ -312,6 +325,8 @@ let rewrite_suspends node =
     | EchoStatement _ (* TODO(t17335630): Support suspends here. *)
     (* Suspends will be handled recursively by compound statement's children. *)
     | CompoundStatement _
+    (* Suspends will be handled recursively by try statements's children. *)
+    | TryStatement _
     | GotoStatement _ (* Suspends are invalid in goto statements. *)
     | BreakStatement _ (* Suspends are impossible in break statements. *)
     | ContinueStatement _ (* Suspends are impossible in continue statements. *)

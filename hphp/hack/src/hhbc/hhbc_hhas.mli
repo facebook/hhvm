@@ -9,3 +9,6 @@
 *)
 
 val to_string : Hhas_program.t -> string
+val string_of_instruction : Hhbc_ast.instruct -> string
+val string_of_local_id : Local.t -> string
+val string_of_label : Label.t -> string

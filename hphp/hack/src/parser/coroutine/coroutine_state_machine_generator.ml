@@ -325,8 +325,19 @@ let rewrite_suspends node =
         let new_do =
           make_syntax (DoStatement { node with do_condition; do_body; }) in
         next_label, Rewriter.Result.Replace new_do
+    | ExpressionStatement ({ expression_statement_expression; _; } as node) ->
+        let (next_label, prefix_statements), expression_statement_expression =
+          extract_suspend_statements
+            expression_statement_expression
+            next_label in
+        let new_expression_statement =
+          make_syntax
+            (ExpressionStatement
+              { node with expression_statement_expression; }) in
+        let statements = prefix_statements @ [ new_expression_statement ] in
+        let statements = make_compound_statement_syntax statements in
+        next_label, Rewriter.Result.Replace statements
     | WhileStatement _ (* TODO(t17335630): Support suspends here. *)
-    | ExpressionStatement _ (* TODO(t17335630): Support suspends here. *)
     | UnsetStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForStatement _ (* TODO(t17335630): Support suspends here. *)
     | ForeachStatement _ (* TODO(t17335630): Support suspends here. *)

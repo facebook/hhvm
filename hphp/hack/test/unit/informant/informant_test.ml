@@ -5,8 +5,6 @@ module Report_comparator : Asserter.Comparator
     let to_string v = match v with
       | Move_along ->
         "Move_along"
-      | Kill_server ->
-        "Kill_server"
       | Restart_server ->
         "Restart_server"
 
@@ -102,11 +100,11 @@ let test_informant_restarts_significant_move temp_dir =
   (** Move significant distance. *)
   Tools.test_transition
     informant Tools.State_enter Tools.hg_rev_3
-    Informant_sig.Server_alive Informant_sig.Kill_server
+    Informant_sig.Server_alive Informant_sig.Move_along
     "state enter significant distance";
   Tools.test_transition
     informant Tools.State_leave Tools.hg_rev_3
-    Informant_sig.Server_dead Informant_sig.Restart_server
+    Informant_sig.Server_alive Informant_sig.Restart_server
     "state leave significant distance";
 
   (** Informant now sitting at revision 200. Moving to 230 no restart. *)
@@ -132,11 +130,11 @@ let test_informant_restarts_significant_move temp_dir =
   (** Moving back to SVN rev 5 (hg_rev_2) restarts. *)
   Tools.test_transition
     informant Tools.State_enter Tools.hg_rev_2
-    Informant_sig.Server_alive Informant_sig.Kill_server
+    Informant_sig.Server_alive Informant_sig.Move_along
     "state enter significant distance";
   Tools.test_transition
     informant Tools.State_leave Tools.hg_rev_2
-    Informant_sig.Server_dead Informant_sig.Restart_server
+    Informant_sig.Server_alive Informant_sig.Restart_server
     "state leave significant distance";
   true
 

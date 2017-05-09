@@ -211,10 +211,7 @@ module Revision_tracker = struct
     | false, _, _ ->
       Move_along
     | true, State_enter, _ ->
-      (** We don't want a server to be running while transitioning to a
-       * distant revision. Kill it, and start a fresh one when the
-       * transition is done (State_leave below). *)
-      Kill_server
+      Move_along
     | true, State_leave, _ ->
       Restart_server
 
@@ -330,13 +327,6 @@ module Revision_tracker = struct
      *
      * Otherwise, we continue as per usual. *)
     match early_decision with
-    | Some (Kill_server, _svn_rev) ->
-      (** Early decision to kill the server, so prior state changes don't
-       * matter anymore. We go to a dead state awaiting the following
-       * state_leave to trigger a restart. *)
-      Hh_logger.log "Informant early decision: kill server";
-      Queue.clear env.state_changes;
-      Kill_server
     | Some (Restart_server, svn_rev) ->
       (** Early decision to restart, so the prior state changes don't
        * matter anymore. *)
@@ -427,8 +417,8 @@ let report informant server_state = match informant with
 
 (** This is useful only for testing.
  *
- * It oscillates between Move_along, Kill_server and Restart_server
- * every 6 seconds.
+ * It oscillates between Move_along and Restart_server
+ * every 3 seconds.
  * TODO: Consider injecting this version when injector config is improved. *)
 module Fake_informant = struct
   type t = {
@@ -449,7 +439,6 @@ module Fake_informant = struct
     let bucket = multiple mod 3 in
     match bucket with
       | 0 -> Informant_sig.Move_along
-      | 1 -> Informant_sig.Kill_server
       | 2 -> Informant_sig.Restart_server
       | _ ->
         (* Actually unreachable by modulus. *)

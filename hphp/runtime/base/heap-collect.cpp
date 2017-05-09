@@ -86,7 +86,7 @@ struct Marker {
   Counter allocd_, marked_, pinned_, freed_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
-  size_t init_us_, initfree_us_, roots_us_, mark_us_, unknown_us_, sweep_us_;
+  size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, unknown_ns_, sweep_ns_;
   size_t max_worklist_{0}; // max size of work_
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
@@ -184,16 +184,16 @@ Marker::conservativeScan(const void* start, size_t len) {
   }
 }
 
-inline int64_t cpu_micros() {
-  return HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
+inline int64_t cpu_ns() {
+  return HPHP::Timer::GetThreadCPUTimeNanos();
 }
 
 // initially parse the heap to find valid objects and initialize metadata.
 NEVER_INLINE void Marker::init() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { init_us_ = cpu_micros() - t0; };
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
   MM().initFree();
-  initfree_us_ = cpu_micros() - t0;
+  initfree_ns_ = cpu_ns() - t0;
   auto tyindex_max = type_scan::Index(
       type_scan::detail::g_metadata_table_size
   );
@@ -236,8 +236,8 @@ void Marker::finish_typescan() {
 }
 
 NEVER_INLINE void Marker::traceRoots() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { roots_us_ = cpu_micros() - t0; };
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { roots_ns_ = cpu_ns() - t0; };
   iterateRoots([&](const void* p, size_t size, type_scan::Index tyindex) {
     type_scanner_.scanByIndex(tyindex, p, size);
     finish_typescan();
@@ -247,8 +247,8 @@ NEVER_INLINE void Marker::traceRoots() {
 }
 
 NEVER_INLINE void Marker::trace() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { mark_us_ = cpu_micros() - t0; };
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { mark_ns_ = cpu_ns() - t0; };
   const auto process_worklist = [this](){
     while (!work_.empty()) {
       auto h = work_.back();
@@ -280,8 +280,8 @@ NEVER_INLINE void Marker::trace() {
    * things via non-conservative means.
    */
   if (!unknown_objects_.empty()) {
-    auto const t0 = cpu_micros();
-    SCOPE_EXIT { unknown_us_ = cpu_micros() - t0; };
+    auto const t0 = cpu_ns();
+    SCOPE_EXIT { unknown_ns_ = cpu_ns() - t0; };
     for (const auto h : unknown_objects_) {
       if (mark(h, GCBits::Pin)) {
         enqueue(h);
@@ -289,7 +289,7 @@ NEVER_INLINE void Marker::trace() {
     }
     process_worklist();
   } else {
-    unknown_us_ = 0;
+    unknown_ns_ = 0;
   }
 }
 
@@ -351,8 +351,8 @@ DEBUG_ONLY bool check_sweep_header(const Header* h) {
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Marker::sweep() {
-  auto const t0 = cpu_micros();
-  SCOPE_EXIT { sweep_us_ = cpu_micros() - t0; };
+  auto const t0 = cpu_ns();
+  SCOPE_EXIT { sweep_ns_ = cpu_ns() - t0; };
   auto& mm = MM();
   const bool use_quarantine = RuntimeOption::EvalQuarantine;
   if (use_quarantine) mm.beginQuarantine();
@@ -507,8 +507,8 @@ void logCollection(const char* phase, const Marker& mkr) {
       t_req_age,
       t_pre_stats.mmUsage/1024/1024,
       t_trigger/1024/1024,
-      mkr.init_us_/1000,
-      mkr.mark_us_/1000,
+      mkr.init_ns_/1000000,
+      mkr.mark_ns_/1000000,
       mkr.allocd_.bytes/1024/1024,
       100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
       100.0 * mkr.pinned_.bytes / mkr.allocd_.bytes,
@@ -524,12 +524,12 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("gc_num", t_gc_num);
   sample.setInt("req_age_micros", t_req_age);
   // timers of gc-sub phases
-  sample.setInt("init_micros", mkr.init_us_);
-  sample.setInt("initfree_micros", mkr.initfree_us_);
-  sample.setInt("roots_micros", mkr.roots_us_);
-  sample.setInt("mark_micros", mkr.mark_us_); // includes unknown
-  sample.setInt("unknown_micros", mkr.unknown_us_);
-  sample.setInt("sweep_micros", mkr.sweep_us_);
+  sample.setInt("init_micros", mkr.init_ns_/1000);
+  sample.setInt("initfree_micros", mkr.initfree_ns_/1000);
+  sample.setInt("roots_micros", mkr.roots_ns_/1000);
+  sample.setInt("mark_micros", mkr.mark_ns_/1000); // includes unknown
+  sample.setInt("unknown_micros", mkr.unknown_ns_/1000);
+  sample.setInt("sweep_micros", mkr.sweep_ns_/1000);
   // size metrics gathered during gc
   sample.setInt("allocd_bytes", mkr.allocd_.bytes);
   sample.setInt("allocd_objects", mkr.allocd_.count);
@@ -621,7 +621,7 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
-  t_req_age = cpu_micros() - m_req_start_micros;
+  t_req_age = cpu_ns()/1000 - m_req_start_micros;
   t_trigger = m_nextGc;
   collectImpl(phase);
   updateNextGc();

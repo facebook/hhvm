@@ -5649,12 +5649,8 @@ OPTBLD_INLINE void iopContRaise(PC& pc) {
   iopThrow();
 }
 
-OPTBLD_INLINE void moveProgramCounterToCaller(PC& pc) {
-  auto fp = vmfp();
-  // Grab caller info from ActRec.
-  ActRec* sfp = fp->sfp();
-  Offset soff = fp->m_soff;
-
+OPTBLD_INLINE void moveProgramCounterToCaller(PC& pc,
+                                              ActRec* sfp, Offset soff) {
   // Return control to the next()/send()/raise() caller.
   vmfp() = sfp;
   pc = sfp != nullptr ? sfp->func()->getEntry() + soff : nullptr;
@@ -5671,6 +5667,9 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
 
   EventHook::FunctionSuspendR(fp, nullptr);
 
+  auto const sfp = fp->sfp();
+  auto const soff = fp->m_soff;
+
   if (!func->isAsync()) {
     // Non-async generator.
     assert(fp->sfp());
@@ -5684,15 +5683,15 @@ OPTBLD_INLINE TCA yield(PC& pc, const Cell* key, const Cell value) {
     auto const eagerResult = gen->yield(resumeOffset, key, value);
     if (eagerResult) {
       // Eager execution => return StaticWaitHandle.
-      assert(fp->sfp());
+      assert(sfp);
       vmStack().pushObjectNoRc(eagerResult);
     } else {
       // Resumed execution => return control to the scheduler.
-      assert(!fp->sfp());
+      assert(!sfp);
     }
   }
 
-  moveProgramCounterToCaller(pc);
+  moveProgramCounterToCaller(pc, sfp, soff);
 
   return jitReturnPost(jitReturn);
 }
@@ -5801,6 +5800,9 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
   auto jitReturn = jitReturnPre(fp);
 
   EventHook::FunctionSuspendR(fp, nullptr);
+  auto const sfp = fp->sfp();
+  auto const soff = fp->m_soff;
+
   // We don't actually want to "yield" anything here. The implementation of
   // key/current are smart enough to dive into our delegate generator, so
   // really what we want to do is clean up all of the generator metadata
@@ -5809,7 +5811,7 @@ TCA yieldFromGenerator(PC& pc, Generator* gen, Offset resumeOffset) {
   gen->resumable()->setResumeAddr(nullptr, resumeOffset);
   gen->setState(BaseGenerator::State::Started);
 
-  moveProgramCounterToCaller(pc);
+  moveProgramCounterToCaller(pc, sfp, soff);
 
   return jitReturnPost(jitReturn);
 }
@@ -5839,11 +5841,14 @@ TCA yieldFromIterator(PC& pc, Generator* gen, Iter* it, Offset resumeOffset) {
   auto jitReturn = jitReturnPre(fp);
 
   EventHook::FunctionSuspendR(fp, nullptr);
+  auto const sfp = fp->sfp();
+  auto const soff = fp->m_soff;
+
   auto key = *(arr.first().asTypedValue());
   auto value = *(arr.second().asTypedValue());
   gen->yield(resumeOffset, &key, value);
 
-  moveProgramCounterToCaller(pc);
+  moveProgramCounterToCaller(pc, sfp, soff);
 
   it->next();
 

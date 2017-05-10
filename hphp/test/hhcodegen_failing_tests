@@ -24,7 +24,6 @@ quick/async_suspend_stack.php
 quick/backtick.php
 quick/bitwise_not.php
 quick/bool_types.php
-quick/builtin_call.php
 quick/builtin_extension_DateTime.php
 quick/builtin_extension_SimpleXMLElement.php
 quick/byref.php
@@ -49,11 +48,8 @@ quick/closure_use_this.php
 quick/clsmethodf.php
 quick/cmp.php
 quick/cnsu.php
-quick/collection-exceptions.php
 quick/constIntToString.php
 quick/const_cflow.php
-quick/constructor_throw.php
-quick/continuation_serialize.php
 quick/continue.php
 quick/coverage.php
 quick/cse_fwdctx.php
@@ -68,7 +64,6 @@ quick/ctor_param_promotion_trait.php
 quick/cuf__callStatic2.php
 quick/cuf__callStatic3.php
 quick/cuf__callStatic4.php
-quick/datetime.php
 quick/debug_backtrace_continuation.php
 quick/decrefstack1.php
 quick/defaultVals.php
@@ -105,14 +100,7 @@ quick/dv_is.php
 quick/dv_si.php
 quick/dv_si_func.php
 quick/eval_noreturn.php
-quick/exception_bug_1351681.php
 quick/exception_bug_2080454.php
-quick/exception_bug_more.php
-quick/exception_destructor_1.php
-quick/exception_destructor_2.php
-quick/exception_destructor_3.php
-quick/exception_destructor_4.php
-quick/exception_destructor_5.php
 quick/exception_many_locals.php
 quick/exceptions.php
 quick/exceptions2.php
@@ -122,7 +110,6 @@ quick/exceptions6.php
 quick/exceptions7.php
 quick/exceptions8.php
 quick/exit.php
-quick/ext_pdo_exception.php
 quick/fail_self.php
 quick/fb_dbt.php
 quick/fb_intercept.php
@@ -179,7 +166,6 @@ quick/hh_softtype3.php
 quick/hh_type_args2.php
 quick/hh_type_args3.php
 quick/hh_typehint3.php
-quick/hhir_cgetm_exceptions.php
 quick/hhir_eq_stack.php
 quick/hopt-add1.php
 quick/hopt-add2.php
@@ -217,7 +203,6 @@ quick/include2.php
 quick/include3.php
 quick/init-basic.php
 quick/instanceofInterface.php
-quick/intercept.php
 quick/interface-bad-methodbody.php
 quick/interface10.php
 quick/interface11.php
@@ -261,7 +246,6 @@ quick/magic-get-set.php
 quick/method_param_promotion_error.php
 quick/methodcache_direct_magic.php
 quick/methodcache_magic.php
-quick/missing_arg_exception.php
 quick/nested_vm_exceptions.php
 quick/nested_vm_exceptions2.php
 quick/no_hh/nullsafe-call-no-hh.php
@@ -278,7 +262,6 @@ quick/ns_invalid_func.php
 quick/ns_reflection.php
 quick/ns_use_const.php
 quick/ns_use_func.php
-quick/obj-string-throw.php
 quick/open_tag_with_echo.php
 quick/ops.php
 quick/param-type.php
@@ -294,10 +277,8 @@ quick/parser_massive_add_exp.php
 quick/parser_massive_concat_exp.php
 quick/pcre-crash.php
 quick/pinit.php
-quick/poly-torture.php
 quick/post_try_error.php
 quick/priv5.php
-quick/profile/Setprofile.php
 quick/profile/Setprofile_async.php
 quick/profile/setprofile-this.php
 quick/profile/setprofile_throw.php
@@ -308,7 +289,6 @@ quick/properties2.php
 quick/properties3.php
 quick/property_exists.php
 quick/pseudomain1.php
-quick/raise_array_index_notice.php
 quick/reassign_this2.php
 quick/reassign_this3.php
 quick/recursive-getter.php
@@ -357,16 +337,11 @@ quick/strict_hashbang_start.php
 quick/string-cse.php
 quick/string-util.php
 quick/strlen_non_integer.php
-quick/surprise_throw.php
 quick/switch.php
 quick/switchRef.php
 quick/switch_special_cases.php
 quick/syntax-error.php
 quick/temparray.php
-quick/throw.php
-quick/tobadtype.php
-quick/tostring_throw.php
-quick/tostring_throw_setopl.php
 quick/trailing_comma_bad1.php
 quick/trailing_comma_bad2.php
 quick/trailing_comma_bad3.php
@@ -378,11 +353,8 @@ quick/trait_self.php
 quick/traits.php
 quick/traits2.php
 quick/typechecks-obj.php
-quick/typehint_arraykey.php
-quick/typehint_callable.php
 quick/typehint_lsb_parent.php
 quick/typehint_lsb_self.php
-quick/typehint_number.php
 quick/undefined-bases.php
 quick/undefined-global.php
 quick/undefined-vgetg.php
@@ -402,7 +374,6 @@ quick/vec/reflect.php
 quick/vec/serialize.php
 quick/vec/static.php
 quick/vec/type-hint.php
-quick/vec/unset.php
 quick/vector-unwind-decref.php
 quick/xenon/xenon.php
 quick/xenon/xenon_crash.php

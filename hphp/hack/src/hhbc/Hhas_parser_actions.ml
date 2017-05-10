@@ -102,24 +102,24 @@ match dds with
 
 let rewriteinstr dds i =
 match i with
- | ILitConst (Array (n,_)) -> (match lookupdd n dds with
+ | ILitConst (Array (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
                     | Some (Typed_value.Array args) ->
-                              ILitConst (Array(n, Typed_value.Array args))
+                              ILitConst (Array(Typed_value.Array args))
                     | Some _ -> report_error "expected an array in data decl"
                     | None -> report_error "array name missing")
- | ILitConst (Vec (n,_)) -> (match lookupdd n dds with
+ | ILitConst (Vec (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
                     | Some (Typed_value.Vec args) ->
-                                  ILitConst (Vec(n, Typed_value.Vec args))
+                                  ILitConst (Vec(Typed_value.Vec args))
                     | Some _ -> report_error "expected a vector in data decl"
                     | None -> report_error "vec name missing")
- | ILitConst (Dict (n,_)) -> (match lookupdd n dds with
+ | ILitConst (Dict (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
                     | Some (Typed_value.Dict args) ->
-                                  ILitConst (Dict(n, Typed_value.Dict args))
+                                  ILitConst (Dict(Typed_value.Dict args))
                     | Some _ -> report_error "expected dictionary in data decl"
                     | None -> report_error "dict name missing")
- | ILitConst (Keyset (n,_)) -> (match lookupdd n dds with
+ | ILitConst (Keyset (Typed_value.Int n)) -> (match lookupdd (Int64.to_int n) dds with
                     | Some (Typed_value.Keyset args) ->
-                                ILitConst (Keyset(n, Typed_value.Keyset args))
+                                ILitConst (Keyset(Typed_value.Keyset args))
                     | Some _ -> report_error "expected a keyset in data decl"
                     | None -> report_error "keyset name missing")
  | _ -> i
@@ -282,10 +282,8 @@ let makenullaryinst s =
  | "IssetC" -> IIsset (IssetC)
  | "IssetN" -> IIsset (IssetN)
  | "IssetG" -> IIsset (IssetG)
- | "IssetS" -> IIsset (IssetS)
  | "EmptyN" -> IIsset (EmptyN)
  | "EmptyG" -> IIsset (EmptyG)
- | "EmptyS" -> IIsset (EmptyS)
 
  (* instruct_mutator *)
  | "SetN" -> IMutator (SetN)
@@ -528,21 +526,21 @@ let makeunaryinst s arg = match s with
    | "String" ->
     (match arg with | IAString sa -> ILitConst (String sa)
                       | _ -> report_error "bad string lit cst")
-   | "Array" ->
-    (match arg with | IAArrayno n -> ILitConst (Array (n,Typed_value.Array []))
-                    | _ -> report_error "bad array lit cst")
+   | "Array" -> (match arg with
+       | IAArrayno n -> ILitConst (Array (Typed_value.Int (Int64.of_int n)))
+       | _ -> report_error "bad array lit cst")
                                 (* Q: where's the real data?
                                    A: it's in the adata declaration, which
                                     we'll splice in here in a later pass.
                                 *)
    | "Vec" -> (match arg with
-       | IAArrayno n -> ILitConst (Vec (n,Typed_value.Vec []))
+       | IAArrayno n -> ILitConst (Vec (Typed_value.Int (Int64.of_int n)))
        | _ -> report_error "bad vec lit cst")
    | "Dict" -> (match arg with
-       | IAArrayno n -> ILitConst (Dict (n,Typed_value.Dict []))
+       | IAArrayno n -> ILitConst (Dict (Typed_value.Int (Int64.of_int n)))
        | _ -> report_error "bad dict lit cst")
    | "Keyset" -> (match arg with
-       | IAArrayno n -> ILitConst (Keyset (n,Typed_value.Keyset []))
+       | IAArrayno n -> ILitConst (Keyset (Typed_value.Int (Int64.of_int n)))
        | _ -> report_error "bad keyset lit cst")
    | "NewArray" -> (match arg with
        | IAInt64 n -> ILitConst (NewArray (Int64.to_int n))
@@ -619,7 +617,9 @@ let makeunaryinst s arg = match s with
 
    (*instruct_isset *)
    | "IssetL" -> IIsset (IssetL (localidofiarg arg))
+   | "IssetS" -> IIsset (IssetS (intofiarg arg))
    | "EmptyL" -> IIsset (EmptyL (localidofiarg arg))
+   | "EmptyS" -> IIsset (EmptyS (intofiarg arg))
    | "IsTypeC" -> IIsset (IsTypeC (typeopofiarg arg))
 
    (* instruct_mutator *)

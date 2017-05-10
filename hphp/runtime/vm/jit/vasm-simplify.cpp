@@ -322,7 +322,7 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
-  // movzbl{s, d}; shrli{2, s, d} --> ubfm2r7ml{s, d}
+  // movzbl{s, d}; shrli{2, s, d} --> ubfmli{2, 7, s, d}
   return if_inst<Vinstr::shrli>(env, b, i + 1, [&](const shrli& sh) {
     if (!(arch() == Arch::ARM &&
       sh.s0.l() == 2 &&
@@ -331,7 +331,7 @@ bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
 
   return simplify_impl(env, b, i, [&] (Vout& v) {
     v << copy{inst.s, inst.d};
-    v << ubfm2r7ml{inst.d, sh.d, sh.sf, sh.fl};
+    v << ubfmli{2, 7, inst.d, sh.d, sh.sf, sh.fl};
     return 2;
     });
   });

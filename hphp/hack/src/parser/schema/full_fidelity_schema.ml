@@ -1132,6 +1132,10 @@ let schema = List.map from_list [
     "left_paren";
     "items";
     "right_paren" ];
+  (* TODO: Rename this; generic type specifiers are also used for type-annotated
+   * method calls and for object creations with type annotations. This naming is
+   * now very misleading (e.g. class_type being any name).
+   *)
   [ "GenericTypeSpecifier";
     "generic_type_specifier";
     "generic_type_specifier";

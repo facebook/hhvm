@@ -790,6 +790,19 @@ and pExpr ?top_level:(top_level=true) : expr parser = fun node env ->
       , couldMap ~f:pExpr object_creation_argument_list env
       , []
       )
+    | GenericTypeSpecifier
+      { generic_class_type
+      ; generic_argument_list
+      } ->
+        let name = pos_name generic_class_type in
+        let hints =
+          match syntax generic_argument_list with
+          | TypeArguments { type_arguments_types; _ }
+            -> couldMap ~f:pHint type_arguments_types env
+          | _ ->
+            missing_syntax "generic type arguments" generic_argument_list env
+        in
+        Id_type_arguments (name, hints)
     | LiteralExpression { literal_expression = expr } ->
       (match syntax expr with
       | Token _ ->

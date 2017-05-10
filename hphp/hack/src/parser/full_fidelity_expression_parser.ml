@@ -28,9 +28,21 @@ module WithStatementAndDeclAndTypeParser
   include PrecedenceParser
   include Full_fidelity_parser_helpers.WithParser(PrecedenceParser)
 
+  exception Cancel_attempt
+
   let parse_type_specifier parser =
     let type_parser = TypeParser.make parser.lexer parser.errors in
     let (type_parser, node) = TypeParser.parse_type_specifier type_parser in
+    let lexer = TypeParser.lexer type_parser in
+    let errors = TypeParser.errors type_parser in
+    let parser = { parser with lexer; errors } in
+    (parser, node)
+
+  let parse_generic_type_arguments_opt parser =
+    let type_parser = TypeParser.make parser.lexer parser.errors in
+    let (type_parser, node) =
+      TypeParser.parse_generic_type_argument_list_opt type_parser
+    in
     let lexer = TypeParser.lexer type_parser in
     let errors = TypeParser.errors type_parser in
     let parser = { parser with lexer; errors } in
@@ -64,7 +76,9 @@ module WithStatementAndDeclAndTypeParser
 
   let rec parse_expression parser =
     let (parser, term) = parse_term parser in
-    parse_remaining_expression parser term
+    if kind term = SyntaxKind.QualifiedNameExpression
+    then parse_remaining_expression_or_specified_function_call parser term
+    else parse_remaining_expression parser term
 
   and parse_expression_with_reset_precedence parser =
     with_reset_precedence parser parse_expression
@@ -565,6 +579,19 @@ module WithStatementAndDeclAndTypeParser
     else
       let operator = Operator.trailing_from_token kind in
       (Operator.precedence operator) < parser.precedence
+
+  and parse_remaining_expression_or_specified_function_call parser term =
+    try begin
+      let parser, type_arguments = parse_generic_type_arguments_opt parser in
+      if kind type_arguments <> SyntaxKind.TypeArguments
+      || List.exists is_missing @@ children type_arguments
+      then raise Cancel_attempt;
+      let term = make_generic_type_specifier term type_arguments in
+      let parser, function_call = parse_function_call parser term in
+      if kind function_call <> SyntaxKind.FunctionCallExpression
+      then raise Cancel_attempt;
+      parser, function_call
+    end with Cancel_attempt -> parse_remaining_expression parser term
 
   and parse_remaining_expression parser term =
     if next_is_lower_precedence parser then (parser, term)

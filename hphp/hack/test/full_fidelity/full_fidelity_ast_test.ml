@@ -162,6 +162,34 @@ let comment_scraper_expected =
       (ns_const_uses: (SMap ()))))
     (f_span: p)))))"
 
+let type_annotated_function_call =
+"<?hh // strict
+
+foo(bar<TypesMakeThis,AnAnnotated>($function_call));
+baz(quz<ButThisShouldBe,Two($expressions));
+"
+
+let type_annotated_function_call_expected =
+"(AProgram
+ ((Stmt
+   (Expr
+    (p
+     (Call (p (Id (p foo)))
+      ((p
+        (Call
+         (p
+          (Id_type_arguments (p bar)
+           ((p (Happly (p TypesMakeThis) ()))
+            (p (Happly (p AnAnnotated) ())))))
+         ((p (Lvar (p $function_call)))) ())))
+      ()))))
+  (Stmt
+   (Expr
+    (p
+     (Call (p (Id (p baz)))
+      ((p (Binop Lt (p (Id (p quz))) (p (Id (p ButThisShouldBe)))))
+       (p (Call (p (Id (p Two))) ((p (Lvar (p $expressions)))) ())))"
+
 let test_data = [
   {
     name = "sanity_test_classic_parser";

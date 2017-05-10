@@ -616,7 +616,7 @@ void liveRelocate(int time) {
     break;
   case Arch::ARM:
     // Live (Dynamic) Relocation is not supported on ARM until smashable
-    // locations are tracked and rebuild using debug info.
+    // locations are tracked and rebuilt using debug info.
     return;
   }
 
@@ -804,9 +804,9 @@ void relocateTranslation(
   memset(cold.base(), 0xcc, cold.frontier() - cold.base());
   if (arch() == Arch::ARM) {
     __builtin___clear_cache(reinterpret_cast<char*>(main.base()),
-			    reinterpret_cast<char*>(main.frontier()));
+                            reinterpret_cast<char*>(main.frontier()));
     __builtin___clear_cache(reinterpret_cast<char*>(cold.base()),
-			    reinterpret_cast<char*>(cold.frontier()));
+                            reinterpret_cast<char*>(cold.frontier()));
   }
 #endif
 }

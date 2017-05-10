@@ -38,6 +38,8 @@ constexpr int kFirstCalleeSavedRegisterIndex = 19;
 constexpr int kNumberOfCalleeSavedFPRegisters = 8;
 constexpr int kFirstCalleeSavedFPRegisterIndex = 8;
 
+const int kWRegSizeInBits = 32;
+
 constexpr byte kSimulatorStackJunk = 0x8b;
 
 #define REGISTER_CODE_LIST(R)                                                  \

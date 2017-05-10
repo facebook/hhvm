@@ -14,6 +14,8 @@ exception Process_failure of Unix.process_status * (** Stderr *) string
 (** string is stderr output received so far. *)
 exception Timed_out of string
 
+exception Process_aborted
+
 (** Deserializes the byte sequence. *)
 type 'a deserializer = string -> 'a
 

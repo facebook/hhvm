@@ -30,12 +30,7 @@ module Tempfile = struct
 
 end;;
 
-
-(** The exit status and stderr from the process. *)
-exception Process_exited_abnormally of Unix.process_status * string
-
-(** Includes the stderr received so far. *)
-exception Process_timed_out of string
+exception Process_failed of Process_types.failure
 
 type t = {
   repo_dir : Path.t;
@@ -66,11 +61,8 @@ let get_server_logs harness =
     | Sys_error(m)
       when Sys_utils.string_contains m "No such file or directory" ->
       None)
-  | Result.Error (Process_types.Process_exited_abnormally
-      (status, _out, err)) ->
-    raise (Process_exited_abnormally (status, err))
-  | Result.Error (Process_types.Timed_out (_out, err)) ->
-    raise (Process_timed_out err)
+  | Result.Error failure ->
+    raise @@ Process_failed failure
 
 let wait_until_lock_free lock_file _harness =
   Lock.blocking_grab_then_release lock_file
@@ -100,26 +92,16 @@ let check_cmd harness =
   match Process.read_and_wait_pid ~timeout:30 process with
   | Result.Ok (result, _) ->
     Sys_utils.split_lines result
-  | Result.Error (Process_types.Process_exited_abnormally
-      (Unix.WEXITED i, result, _))
-      when i = Exit_status.(exit_code Type_error) ->
-    Sys_utils.split_lines result
-  | Result.Error (Process_types.Process_exited_abnormally
-      (status, _out, err)) ->
-    raise (Process_exited_abnormally (status, err))
-  | Result.Error (Process_types.Timed_out (_out, err)) ->
-    raise (Process_timed_out err)
+  | Result.Error failure ->
+    raise @@ Process_failed failure
 
 let stop_server harness =
   let process = exec_hh_client ["stop"] harness in
   match Process.read_and_wait_pid ~timeout:30 process with
   | Result.Ok (result, _) ->
     result
-  | Result.Error (Process_types.Process_exited_abnormally
-      (status, _out, err)) ->
-    raise (Process_exited_abnormally (status, err))
-  | Result.Error (Process_types.Timed_out (_out, err)) ->
-    raise (Process_timed_out err)
+  | Result.Error failure ->
+    raise @@ Process_failed failure
 
 let run_test config test_case =
   let base_tmp_dir = Tempfile.mkdtemp () in
@@ -182,11 +164,12 @@ let run_test config test_case =
     in
     let with_exception_printing test_case harness =
       let result = try test_case harness with
-      | Process_exited_abnormally(status, stderr) as e ->
-        Printf.eprintf "Process exited abnormally (%s). See also Stderr: %s\n"
-          (Tools.process_status_to_string status)
-          (Tools.boxed_string stderr);
-        raise e
+      | Process_failed (Process_types.Process_exited_abnormally
+          (status, _stdout, stderr)) as e ->
+            Printf.eprintf "Process exited abnormally (%s). See also Stderr: %s\n"
+              (Tools.process_status_to_string status)
+              (Tools.boxed_string stderr);
+            raise e
       in
       result
     in

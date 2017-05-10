@@ -37,6 +37,12 @@ let run_and_log (script, svn_rev) _ic_oc =
     Hh_logger.log "Prefetcher timed out. %s" msg;
     HackEventLogger.informant_prefetcher_failed start_t msg;
     exit 1
+  | Result.Error (Process_types.Process_aborted_input_too_large) ->
+    (** This is impossible. Consider making Process a GADT to avoid this. *)
+    Hh_logger.log ("Prefetcher failed. Process_aborted_input_too_large, " ^^
+      "but this should never happen since no input was given.");
+    exit 1
+
 
 (**
  * We have to annotate the type here because the type variables

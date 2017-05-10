@@ -77,6 +77,9 @@ let () =
   match Process.read_and_wait_pid ~timeout:30 process with
   | Result.Ok _ ->
     exit 0
+  | Result.Error Process_types.Process_aborted_input_too_large ->
+    Printf.eprintf "Process_aborted_input_too_large\n";
+    exit 1
   | Result.Error (Process_types.Process_exited_abnormally (_, _, stderr))
   | Result.Error (Process_types.Timed_out (_, stderr)) ->
     Printf.eprintf

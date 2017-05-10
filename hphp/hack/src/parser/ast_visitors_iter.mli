@@ -172,6 +172,8 @@ class virtual ['b] iter :
         on_Namespace : 'c ->
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program -> unit;
+        on_SetNamespaceEnv : 'c ->
+                             Ast_visitors_ancestors.nsenv -> unit;
         on_NamespaceUse : 'c ->
                           (Ast_visitors_ancestors.ns_kind *
                            Ast_visitors_ancestors.id *
@@ -523,6 +525,9 @@ class virtual ['b] iter :
     method on_Namespace :
       'c ->
       Ast_visitors_ancestors.id -> Ast_visitors_ancestors.program -> unit
+    method on_SetNamespaceEnv :
+      'c ->
+      Ast_visitors_ancestors.nsenv -> unit
     method on_NamespaceUse :
       'c ->
       (Ast_visitors_ancestors.ns_kind * Ast_visitors_ancestors.id *

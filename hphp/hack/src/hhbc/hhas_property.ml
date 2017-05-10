@@ -14,7 +14,7 @@ type t = {
   property_is_public    : bool;
   property_is_static    : bool;
   property_is_deep_init  : bool;
-  property_name         : Litstr.id;
+  property_name         : Hhbc_id.Prop.t;
   property_initial_value  : Typed_value.t option;
   property_initializer_instrs : Instruction_sequence.t option;
   (* TODO: xhp *)

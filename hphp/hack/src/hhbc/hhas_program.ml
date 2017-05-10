@@ -37,6 +37,7 @@ open Instruction_sequence
 let emit_main defs =
   let body_instrs, decl_vars, num_iters, num_cls_ref_slots, _, _, _, _ =
     Emit_body.from_ast
+      ~namespace:Namespace_env.empty_with_default_popt
       ~skipawaitable:false
       ~scope:Ast_scope.Scope.toplevel
       ~return_value:(instr_int 1)

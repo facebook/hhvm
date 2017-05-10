@@ -64,19 +64,37 @@ let decl_vars_from_ast params b =
   let decl_vars = ULS.diff decl_vars param_names in
   List.rev (ULS.items decl_vars)
 
-let emit_def def =
+let rec emit_def def =
   match def with
   | Ast.Stmt s -> Emit_statement.emit_stmt s
   | Ast.Constant c ->
+    let cns_name = snd c.Ast.cst_name in
+    let cns_id =
+      if c.Ast.cst_kind = Ast.Cst_define
+      then Hhbc_id.Const.from_raw_string cns_name
+      else Hhbc_id.Const.from_ast_name cns_name in
     gather [
       Emit_expression.from_expr c.Ast.cst_value;
-      instr (IIncludeEvalDefine (DefCns (snd c.Ast.cst_name)));
+      instr (IIncludeEvalDefine (DefCns cns_id));
       instr_popc;
     ]
   | Ast.Class cd ->
-    instr (IIncludeEvalDefine (DefCls (snd cd.Ast.c_name)))
+    instr (IIncludeEvalDefine
+      (DefCls (Hhbc_id.Class.from_ast_name (snd cd.Ast.c_name))))
   | Ast.Typedef td ->
-    instr (IIncludeEvalDefine (DefTypeAlias (snd td.Ast.t_id)))
+    instr (IIncludeEvalDefine
+      (DefTypeAlias (Hhbc_id.Class.from_ast_name (snd td.Ast.t_id))))
+  | Ast.Namespace((_, nsname), defs) ->
+    let nsname = match nsname with
+      | "" -> None
+      | _ -> Some nsname in
+    let new_nsenv = { (Emit_expression.get_namespace ()) with
+      Namespace_env.ns_name = nsname} in
+    Emit_expression.set_namespace new_nsenv;
+    gather (List.map defs emit_def)
+  | Ast.SetNamespaceEnv nsenv ->
+    Emit_expression.set_namespace nsenv;
+    empty
   | _ ->
     empty
 
@@ -91,7 +109,7 @@ let rec emit_defs defs =
     let i2 = emit_defs defs in
     gather [i1; i2]
 
-let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value
+let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value ~namespace
   params ret body =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
@@ -99,14 +117,14 @@ let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value
   Local.reset_local ();
   Iterator.reset_iterator ();
   Emit_expression.set_scope scope;
-  let params = Emit_param.from_asts tparams params in
+  let params = Emit_param.from_asts ~namespace ~tparams ~params in
   let return_type_info =
     match ret with
     | None ->
       Some (Hhas_type_info.make (Some "") (Hhas_type_constraint.make None []))
     | Some h ->
       Some (hint_to_type_info
-        ~skipawaitable ~always_extended:true ~tparams h) in
+        ~skipawaitable ~always_extended:true ~tparams ~namespace h) in
   let verify_return =
     match return_type_info with
     | None -> false

@@ -10,6 +10,7 @@
 module A = Ast
 module TV = Typed_value
 module SN = Naming_special_names
+module SU = Hhbc_string_utils
 open Core
 
 (* Literal expressions can be converted into values *)
@@ -96,7 +97,7 @@ let rec value_to_expr_ p v =
   | TV.Bool false -> A.False
   | TV.Bool true -> A.True
   | TV.String s -> A.String (p, s)
-  | TV.Float f -> A.Float (p, Printf.sprintf "%0.17g" f)
+  | TV.Float f -> A.Float (p, SU.Float.to_string f)
   | TV.Vec values -> A.Varray (List.map values (value_to_expr p))
   | TV.Keyset _values -> failwith "value_to_expr: keyset NYI"
   | TV.Array pairs -> A.Array (List.map pairs (value_pair_to_afield p))

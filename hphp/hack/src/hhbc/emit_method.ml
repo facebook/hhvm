@@ -20,7 +20,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   let method_is_final = List.mem ast_method.Ast.m_kind Ast.Final in
   let method_is_private = List.mem ast_method.Ast.m_kind Ast.Private in
   let method_is_protected = List.mem ast_method.Ast.m_kind Ast.Protected in
-  let method_is_public =
+    let method_is_public =
     List.mem ast_method.Ast.m_kind Ast.Public ||
     (not method_is_private && not method_is_protected) in
   let method_is_static = List.mem ast_method.Ast.m_kind Ast.Static in
@@ -33,6 +33,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     || method_name = Naming_special_names.Members.__destruct
     then None
     else ast_method.Ast.m_ret in
+  let method_id = Hhbc_id.Method.from_ast_name method_name in
   let method_is_async =
     ast_method.Ast.m_fun_kind = Ast_defs.FAsync
     || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
@@ -57,6 +58,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
   let scope =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
+  let namespace = ast_class.Ast.c_namespace in
   let body_instrs,
       method_decl_vars,
       method_num_iters,
@@ -70,6 +72,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
       ~default_dropthrough
       ~return_value:instr_null
+      ~namespace
       ast_method.Ast.m_params
       ret
       [Ast.Stmt (Ast.Block ast_method.Ast.m_body)]
@@ -110,7 +113,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     method_is_static
     method_is_final
     method_is_abstract
-    method_name
+    method_id
     method_params
     method_return_type
     method_body

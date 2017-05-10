@@ -280,15 +280,15 @@ let params_to_string ps = "(" ^ (concatstrs (List.map Hhas_param.name ps)) ^ ")"
 
 (* map of function names to functions *)
 let functions_alist_of_program p =
-  List.map (fun f -> (Hhas_function.name f, f))
+  List.map (fun f -> (Hhbc_id.Function.to_raw_string (Hhas_function.name f), f))
            (Hhas_program.functions p)
 
 let methods_alist_of_class c =
- List.map (fun m -> (Hhas_method.name m, m))
+ List.map (fun m -> (Hhbc_id.Method.to_raw_string (Hhas_method.name m), m))
           (Hhas_class.methods c)
 
 let classes_alist_of_program p =
-  List.map (fun c -> (Hhas_class.name c,c))
+  List.map (fun c -> (Hhbc_id.Class.to_raw_string (Hhas_class.name c),c))
           (Hhas_program.classes p)
 
 let name_comparer = string_comparer
@@ -327,11 +327,14 @@ let params_comparer = list_comparer param_ti_name_reference_comparer ", "
 
 let function_params_comparer =
  wrap Hhas_function.params
-      (fun f s -> (Hhas_function.name f) ^ "(" ^ s ^ ")") params_comparer
+      (fun f s ->
+        Hhbc_id.Function.to_raw_string (Hhas_function.name f)
+        ^ "(" ^ s ^ ")") params_comparer
 
 let method_params_comparer =
 wrap Hhas_method.params
-     (fun m s -> (Hhas_method.name m) ^ "(" ^ s ^ ")") params_comparer
+     (fun m s -> Hhbc_id.Method.to_raw_string (Hhas_method.name m)
+       ^ "(" ^ s ^ ")") params_comparer
 
 let function_params_flags_comparer =
  join (fun s1 s2 -> s1 ^ " " ^ s2)
@@ -369,15 +372,18 @@ let class_attributes_comparer =
   wrap Hhas_class.attributes (fun _ s -> s)
     (list_comparer attribute_comparer " ")
 
+let class_comparer =
+  wrap Hhbc_id.Class.to_raw_string (fun _ s -> s) string_comparer
+
 let class_base_comparer =
  wrap Hhas_class.base (fun _ s -> "extends " ^ s)
-     (option_comparer string_comparer)
+     (option_comparer class_comparer)
 
 let class_implements_comparer =
  wrap Hhas_class.implements (fun _ s -> "implements (" ^ s ^ ")")
-    (list_comparer string_comparer " ")
+    (list_comparer class_comparer " ")
 let class_name_comparer =
- wrap Hhas_class.name (fun _ s -> s) string_comparer
+ wrap Hhas_class.name (fun _ s -> s) class_comparer
 
 let class_name_base_implements_comparer =
  join (fun s1 s2 -> s1 ^ s2)
@@ -435,8 +441,11 @@ let property_is_static_comparer =
   wrap Hhas_property.is_static (fun _f s -> s) (flag_comparer "static")
 let property_is_deep_init_comparer =
   wrap Hhas_property.is_deep_init (fun _f s -> s) (flag_comparer "deep_init")
+let prop_comparer =
+  wrap Hhbc_id.Prop.to_raw_string (fun _ s -> s) string_comparer
+
 let property_name_comparer =
-  wrap Hhas_property.name (fun _ s -> s) string_comparer
+  wrap Hhas_property.name (fun _ s -> s) prop_comparer
 let property_initial_value_comparer =
  wrap Hhas_property.initial_value (fun _ s -> s)
      (option_comparer typed_value_comparer)

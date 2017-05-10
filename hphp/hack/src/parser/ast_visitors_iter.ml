@@ -45,6 +45,8 @@ class virtual ['self] iter =
                self#on_id env c1;
                self#on_id env c2; ()) env c0
       end;
+    method on_SetNamespaceEnv env c0 =
+      self#on_Namespace_env env c0;
     method on_def env = function
       | Fun c0 -> self#on_Fun env c0
       | Class c0 -> self#on_Class env c0
@@ -53,6 +55,7 @@ class virtual ['self] iter =
       | Constant c0 -> self#on_Constant env c0
       | Namespace (c0, c1) -> self#on_Namespace env c0 c1
       | NamespaceUse c0 -> self#on_NamespaceUse env c0
+      | SetNamespaceEnv c0 -> self#on_SetNamespaceEnv env c0
     method on_typedef env this =
       self#on_id env this.t_id;
       self#on_list self#on_tparam env this.t_tparams;

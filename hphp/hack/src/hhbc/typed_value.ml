@@ -8,6 +8,8 @@
  *
 *)
 
+module SU = Hhbc_string_utils
+
 (* We introduce a type for Hack/PHP values, mimicking what happens at runtime.
  * Currently this is used for constant folding. By defining a special type, we
  * ensure independence from usage: for example, it can be used for optimization
@@ -156,8 +158,7 @@ let to_string v =
   | Null -> Some ""
   | Int i -> Some (Int64.to_string i)
   | String s -> Some s
-  (* TODO: get this right. It's unlikely that Caml and PHP semantics match up *)
-  | Float f -> Some (Printf.sprintf "%0.17g" f)
+  | Float f -> Some (SU.Float.to_string f)
   | _ -> None
 
 let ints_overflow_to_ints () =

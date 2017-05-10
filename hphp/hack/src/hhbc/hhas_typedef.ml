@@ -9,7 +9,7 @@
 *)
 
 type t = {
-  typedef_name       : Litstr.id;
+  typedef_name       : Hhbc_id.Class.t;
   typedef_type_info  : Hhas_type_info.t;
 }
 

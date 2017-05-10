@@ -48,7 +48,7 @@ and in_HH_namespace = function
   | "Vector" | "ImmVector"
   | "Set" | "ImmSet"
   | "Map" | "ImmMap"
-  | "Pair" -> true
+  | "Pair" | "this" -> true
   | _ -> false
 
 and is_prim = function

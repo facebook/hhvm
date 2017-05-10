@@ -9,20 +9,21 @@
 *)
 
 open Core
-open Emit_type_hint
 
-let kind_to_type_info tparams k =
+let kind_to_type_info ~tparams ~namespace k =
   match k with
   | Ast.Alias h | Ast.NewType h ->
     Emit_type_hint.hint_to_type_info
-      ~skipawaitable:false ~always_extended:false ~tparams h
+      ~skipawaitable:false ~always_extended:false ~tparams ~namespace h
 
-let from_ast : A.typedef -> Hhas_typedef.t =
+let from_ast : Ast.typedef -> Hhas_typedef.t =
   fun ast_typedef ->
-  let typedef_name = Litstr.to_string @@ snd ast_typedef.Ast.t_id in
+  let namespace = ast_typedef.Ast.t_namespace in
+  let typedef_name, _ =
+    Hhbc_id.Class.elaborate_id namespace ast_typedef.Ast.t_id in
   let tparams = Emit_body.tparams_to_strings ast_typedef.Ast.t_tparams in
   let typedef_type_info =
-    kind_to_type_info tparams ast_typedef.Ast.t_kind in
+    kind_to_type_info ~tparams ~namespace ast_typedef.Ast.t_kind in
   Hhas_typedef.make
     typedef_name
     typedef_type_info

@@ -337,6 +337,36 @@ type iarg =
   | IAMemberkey of string*iarg (* these are not seriously recursive *)
   | IAArglist of iarg list
 
+let class_id_of_iarg arg =
+  match arg with
+  | IAString s -> Hhbc_id.Class.from_raw_string s
+  | _ -> report_error "expected quoted class identifier"
+
+let class_id_of_int_iarg arg =
+  match arg with
+  | IAInt64 i -> Hhbc_id.Class.from_raw_string (Int64.to_string i)
+  | _ -> report_error "expected quoted class identifier"
+
+let prop_id_of_iarg arg =
+  match arg with
+  | IAString s -> Hhbc_id.Prop.from_raw_string s
+  | _ -> report_error "expected quoted property identifier"
+
+let const_id_of_iarg arg =
+  match arg with
+  | IAString s -> Hhbc_id.Const.from_raw_string s
+  | _ -> report_error "expected quoted const identifier"
+
+let function_id_of_iarg arg =
+  match arg with
+  | IAString s -> Hhbc_id.Function.from_raw_string s
+  | _ -> report_error "expected quoted function identifier"
+
+let method_id_of_iarg arg =
+  match arg with
+  | IAString s -> Hhbc_id.Method.from_raw_string s
+  | _ -> report_error "expected quoted method identifier"
+
 let stringofiarg arg =
 match arg with
   | IAString s -> s
@@ -418,8 +448,8 @@ match arg with
        | "EI" -> MemberKey.EI (int64ofiarg arg')
        | "PC" -> MemberKey.PC (intofiarg arg')
        | "PL" -> MemberKey.PL (localidofiarg arg')
-       | "PT" -> MemberKey.PT (stringofiarg arg')
-       | "QT" -> MemberKey.QT (stringofiarg arg')
+       | "PT" -> MemberKey.PT (prop_id_of_iarg arg')
+       | "QT" -> MemberKey.QT (prop_id_of_iarg arg')
        | _ -> report_error "unknown memberkey string"
     )
   | IAId s' -> if s'="W" then MemberKey.W else report_error "bad memberkey"
@@ -573,10 +603,10 @@ let makeunaryinst s arg = match s with
        | IAInt64 n -> ILitConst (ColFromArray (Int64.to_int n))
        | _ -> report_error "bad collection type")
    | "Cns" -> (match arg with
-       | IAString sa -> ILitConst (Cns sa)
+       | IAString sa -> ILitConst (Cns (Hhbc_id.Const.from_raw_string sa))
        | _ -> report_error "bad cns arg")
    | "CnsE" -> (match arg with
-       | IAString sa -> ILitConst (CnsE sa)
+       | IAString sa -> ILitConst (CnsE (Hhbc_id.Const.from_raw_string sa))
        | _ -> report_error "bad cnse arg")
  (* instruct_operator *)
    | "Fatal" -> (match arg with
@@ -587,7 +617,7 @@ let makeunaryinst s arg = match s with
                                | _ -> report_error "bad fatal op arg"))
        | _ -> report_error "bad fatal op arg")
    | "InstanceOfD"-> (match arg with
-       | IAString sa -> IOp (InstanceOfD sa)
+       | IAString sa -> IOp (InstanceOfD (Hhbc_id.Class.from_raw_string sa))
        | _ -> report_error "bad InstanceOfD arg")
 (* instruct_control_flow *)
    | "Jmp" -> (match arg with
@@ -632,7 +662,7 @@ let makeunaryinst s arg = match s with
    | "BindL" -> IMutator(BindL (localidofiarg arg))
    | "BindS" -> IMutator(BindS (intofiarg arg))
    | "UnsetL" -> IMutator(UnsetL (localidofiarg arg))
-   | "CheckProp" -> IMutator(CheckProp (stringofiarg arg))
+   | "CheckProp" -> IMutator(CheckProp (prop_id_of_iarg arg))
 
    (* instruct_call *)
    | "FPushFunc" -> ICall(FPushFunc (intofiarg arg))
@@ -663,13 +693,13 @@ let makeunaryinst s arg = match s with
    | "CIterFree" ->IIterator(CIterFree (Iterator.Id (intofiarg arg)))
 
    (* instruct_include_eval_define *)
-   | "DefFunc" -> IIncludeEvalDefine(DefFunc (stringofiarg arg))
-   | "DefCls" -> IIncludeEvalDefine(DefCls (string_of_int (intofiarg arg)))
+   | "DefFunc" -> IIncludeEvalDefine(DefFunc (function_id_of_iarg arg))
+   | "DefCls" -> IIncludeEvalDefine(DefCls (class_id_of_int_iarg arg))
       (* TODO: Mismatch - that should be an integer, not a string *)
-   | "DefClsNop" -> IIncludeEvalDefine(DefClsNop (stringofiarg arg))
-   | "DefCns" -> IIncludeEvalDefine(DefCns (stringofiarg arg))
+   | "DefClsNop" -> IIncludeEvalDefine(DefClsNop (class_id_of_int_iarg arg))
+   | "DefCns" -> IIncludeEvalDefine(DefCns (const_id_of_iarg arg))
    | "DefTypeAlias" ->
-       IIncludeEvalDefine(DefTypeAlias(string_of_int (intofiarg arg)))
+     IIncludeEvalDefine(DefTypeAlias(class_id_of_int_iarg arg))
      (* TODO: Mismatch here too *)
 
    (* instruct_misc *)
@@ -694,9 +724,10 @@ match s with
 (* instruct_lit_const *)
  | "NewLikeArrayL" ->
      ILitConst(NewLikeArrayL(localidofiarg arg1, intofiarg arg2))
- | "CnsU" -> ILitConst(CnsU (stringofiarg arg1, stringofiarg arg2))
- | "ClsCns" -> ILitConst(ClsCns (stringofiarg arg1, intofiarg arg2))
- | "ClsCnsD" -> ILitConst(ClsCnsD (stringofiarg arg1, stringofiarg arg2))
+ | "CnsU" -> ILitConst(CnsU (const_id_of_iarg arg1, stringofiarg arg2))
+ | "ClsCns" -> ILitConst(ClsCns (const_id_of_iarg arg1, intofiarg arg2))
+ | "ClsCnsD" ->
+   ILitConst(ClsCnsD (const_id_of_iarg arg1, class_id_of_iarg arg2))
 
 (* instruct_get *)
  | "ClsRefGetL" -> IGet (ClsRefGetL (localidofiarg arg1, intofiarg arg2))
@@ -709,17 +740,18 @@ match s with
  | "SetOpS" -> IMutator (SetOpS (eqopofiarg arg1, intofiarg arg2))
  | "IncDecL" -> IMutator (IncDecL (localidofiarg arg1, incdecopofiarg arg2))
  | "IncDecS" -> IMutator (IncDecS (incdecopofiarg arg1, intofiarg arg2))
- | "InitProp" -> IMutator (InitProp (stringofiarg arg1, initpropopofiarg arg2))
+ | "InitProp" ->
+   IMutator (InitProp (prop_id_of_iarg arg1, initpropopofiarg arg2))
 
 (* instruct_call *)
- | "FPushFuncD" -> ICall (FPushFuncD (intofiarg arg1, stringofiarg arg2))
+ | "FPushFuncD" -> ICall (FPushFuncD (intofiarg arg1, function_id_of_iarg arg2))
  | "FPushObjMethod" ->
     ICall(FPushObjMethod (intofiarg arg1, nullflavorofiarg arg2))
  | "FPushClsMethod" -> ICall (FPushClsMethod (intofiarg arg1, intofiarg arg2))
  | "FPushClsMethodF" -> ICall (FPushClsMethodF (intofiarg arg1, intofiarg arg2))
  | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2))
- | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, stringofiarg arg2))
- | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, stringofiarg arg2))
+ | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
+ | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, intofiarg arg2))
  | "DecodeCufIter" -> ICall (DecodeCufIter (intofiarg arg1, labelofiarg arg2))
  | "FPushCufIter" -> ICall (FPushCufIter (intofiarg arg1, iterofiarg arg2))
  | "FPassL" -> ICall (FPassL (intofiarg arg1, localidofiarg arg2))
@@ -772,15 +804,17 @@ let maketernaryinst s arg1 arg2 arg3 =
 
  (* instruct_call *)
  | "FPushFuncU" ->
-    ICall(FPushFuncU (intofiarg arg1, stringofiarg arg2, stringofiarg arg3))
+    ICall(FPushFuncU (intofiarg arg1, function_id_of_iarg arg2, stringofiarg arg3))
  | "FPushObjMethodD" -> ICall(FPushObjMethodD
-                    (intofiarg arg1, stringofiarg arg2, nullflavorofiarg arg3))
+                    (intofiarg arg1, method_id_of_iarg arg2, nullflavorofiarg arg3))
  | "FPushClsMethodD" -> ICall(FPushClsMethodD
-                        (intofiarg arg1, stringofiarg arg2, stringofiarg arg3))
+                    (intofiarg arg1, method_id_of_iarg arg2, class_id_of_iarg arg3))
  | "FCallD" ->
-    ICall(FCallD (intofiarg arg1, stringofiarg arg2, stringofiarg arg3))
+    ICall(FCallD (intofiarg arg1,
+      class_id_of_iarg arg2, function_id_of_iarg arg3))
  | "FCallAwait" ->
-    ICall(FCallAwait (intofiarg arg1, stringofiarg arg2, stringofiarg arg3))
+    ICall(FCallAwait (intofiarg arg1,
+      class_id_of_iarg arg2, function_id_of_iarg arg3))
  | "FCallBuiltin" ->
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
 

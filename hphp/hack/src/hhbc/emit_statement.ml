@@ -250,13 +250,15 @@ and emit_switch scrutinee_expr cl =
 CBR.rewrite_in_switch instrs break_label
   end
 
-and emit_catch end_label ((_, catch_type), (_, catch_local), b) =
+and emit_catch end_label (catch_type, (_, catch_local), b) =
     (* Note that this is a "regular" label; we're not going to branch to
     it directly in the event of an exception. *)
     let next_catch = Label.next_regular () in
+    let id, _ = Hhbc_id.Class.elaborate_id
+      (Emit_expression.get_namespace ()) catch_type in
     gather [
       instr_dup;
-      instr_instanceofd catch_type;
+      instr_instanceofd id;
       instr_jmpz next_catch;
       instr_setl (Local.Named catch_local);
       instr_popc;

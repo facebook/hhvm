@@ -18,7 +18,7 @@ let rec adata_to_string_seq argument =
   match argument with
   | TV.Uninit -> SS.str "uninit"
   | TV.Null -> SS.str "N;"
-  | TV.Float f -> SS.str @@ Printf.sprintf "d:%0.17g;" f
+  | TV.Float f -> SS.str @@ Printf.sprintf "d:%s;" (SU.Float.to_string f)
   | TV.String s -> SS.str @@
     Printf.sprintf "s:%d:%s;" (String.length s) (SU.quote_string_with_escape s)
   (* TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why? *)

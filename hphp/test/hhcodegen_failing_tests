@@ -28,7 +28,6 @@ quick/builtin_extension_DateTime.php
 quick/builtin_extension_SimpleXMLElement.php
 quick/byref.php
 quick/call_nonstatic_this.php
-quick/callable-namespace.php
 quick/castDbl.php
 quick/catch-order.php
 quick/cgetm_ne.php
@@ -47,7 +46,6 @@ quick/closure_static_vars.php
 quick/closure_use_this.php
 quick/clsmethodf.php
 quick/cmp.php
-quick/cnsu.php
 quick/constIntToString.php
 quick/const_cflow.php
 quick/continue.php
@@ -77,7 +75,6 @@ quick/dict/convert.php
 quick/dict/dtor.php
 quick/dict/invalid-scalar.php
 quick/dict/is-a.php
-quick/dict/names.php
 quick/dict/oob-key.php
 quick/dict/reflect.php
 quick/dict/serialize.php
@@ -130,7 +127,6 @@ quick/fun_catch_block.php
 quick/func2.php
 quick/func3.php
 quick/func_get_args.php
-quick/func_get_args_namespace.php
 quick/func_slice_args.php
 quick/function-static-init.php
 quick/function_varargs.php
@@ -180,7 +176,6 @@ quick/hopt-true4.php
 quick/hopt-xor-simp.php
 quick/hopt_late_jcc_to_jmp.php
 quick/hopt_sprop_accessibility.php
-quick/hopt_sprop_accessibility2.php
 quick/iconv_stream_filter.php
 quick/impl_abstract_default_vals.php
 quick/impl_abstract_dv_2a.php
@@ -218,7 +213,6 @@ quick/keyset/comparisons.php
 quick/keyset/convert.php
 quick/keyset/invalid-scalar.php
 quick/keyset/is-a.php
-quick/keyset/names.php
 quick/keyset/reflect.php
 quick/keyset/serialize.php
 quick/keyset/static.php
@@ -252,16 +246,8 @@ quick/no_hh/nullsafe-call-no-hh.php
 quick/no_return_function.php
 quick/nonstrict_hashbang_start.php
 quick/nonstrict_hashbang_whitespace_start.php
-quick/ns_existing_names.php
 quick/ns_existing_names_class.php
-quick/ns_gen_func_get_args.php
-quick/ns_initial_backslash.php
-quick/ns_invalid_class.php
-quick/ns_invalid_const.php
-quick/ns_invalid_func.php
-quick/ns_reflection.php
-quick/ns_use_const.php
-quick/ns_use_func.php
+quick/null_constant.php
 quick/open_tag_with_echo.php
 quick/ops.php
 quick/param-type.php
@@ -323,6 +309,7 @@ quick/simp-add-dbl.php
 quick/simp-conv-to-int-dbl.php
 quick/simp-mul-dbl.php
 quick/some_cmp_tests.php
+quick/sp.php
 quick/sqrt.php
 quick/stack_overflow.php
 quick/stack_overflow_variadic_capture.php
@@ -369,7 +356,6 @@ quick/vec/comparisons.php
 quick/vec/convert.php
 quick/vec/dtor.php
 quick/vec/is-a.php
-quick/vec/names.php
 quick/vec/reflect.php
 quick/vec/serialize.php
 quick/vec/static.php

@@ -109,3 +109,11 @@ let rec normalize s =
   match SMap.get (String.lowercase_ascii s) alias_map with
   | None -> s
   | Some a -> normalize a
+
+let opt_normalize s =
+  match s with
+  | "callable" -> Some "callable"
+  | _ ->
+    match SMap.get (String.lowercase_ascii s) alias_map with
+    | None -> None
+    | Some a -> Some (normalize a)

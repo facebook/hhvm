@@ -168,6 +168,8 @@ class virtual ['b] reduce :
         on_Namespace : 'c ->
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program -> 'd;
+        on_SetNamespaceEnv : 'c ->
+                       Ast_visitors_ancestors.nsenv -> 'd;
         on_NamespaceUse : 'c ->
                           (Ast_visitors_ancestors.ns_kind *
                            Ast_visitors_ancestors.id *
@@ -507,6 +509,9 @@ class virtual ['b] reduce :
     method on_NSFun : 'c -> 'd
     method on_Namespace :
       'c -> Ast_visitors_ancestors.id -> Ast_visitors_ancestors.program -> 'd
+    method on_SetNamespaceEnv :
+      'c ->
+      Ast_visitors_ancestors.nsenv -> 'd
     method on_NamespaceUse :
       'c ->
       (Ast_visitors_ancestors.ns_kind * Ast_visitors_ancestors.id *

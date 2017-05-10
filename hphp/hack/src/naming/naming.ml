@@ -2514,16 +2514,18 @@ module Make (GetLocals : GetLocals) = struct
   (* The entry point to CHECK the program, and transform the program *)
   (**************************************************************************)
 
-  let program tcopt ast = List.filter_map ast begin function
-    | Ast.Fun f -> Some (N.Fun (fun_ tcopt f))
-    | Ast.Class c -> Some (N.Class (class_ tcopt c))
-    | Ast.Typedef t -> Some (N.Typedef (typedef tcopt t))
-    | Ast.Constant cst -> Some (N.Constant (global_const tcopt cst))
-    | Ast.Stmt _ -> None
-    | Ast.Namespace _
-    | Ast.NamespaceUse _ -> assert false
-  end
-
+  let program tcopt ast =
+    let rec program ast =
+    List.concat @@ List.map ast begin function
+    | Ast.Fun f -> [N.Fun (fun_ tcopt f)]
+    | Ast.Class c -> [N.Class (class_ tcopt c)]
+    | Ast.Typedef t -> [N.Typedef (typedef tcopt t)]
+    | Ast.Constant cst -> [N.Constant (global_const tcopt cst)]
+    | Ast.Stmt _ -> []
+    | Ast.Namespace (_ns, ast) -> program ast
+    | Ast.NamespaceUse _ -> []
+    | Ast.SetNamespaceEnv _ -> []
+  end in program ast
 end
 
 include Make(struct

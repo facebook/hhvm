@@ -43,6 +43,10 @@ let scope = ref Ast_scope.Scope.toplevel
 let set_scope s = scope := s
 let get_scope () = !scope
 
+let namespace = ref Namespace_env.empty_with_default_popt
+let get_namespace () = !namespace
+let set_namespace ns = namespace := ns
+
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -258,8 +262,8 @@ and emit_binop expr op e1 e2 =
 
 and emit_instanceof e1 e2 =
   match (e1, e2) with
-  | (_, (_, A.Id (_, id))) ->
-    let id = rename_id_if_namespaced id in
+  | (_, (_, A.Id id)) ->
+    let id, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
     gather [
       from_expr e1;
       instr_instanceofd id ]
@@ -363,11 +367,13 @@ and emit_new class_expr args uargs =
       emit_args_and_call args uargs;
       instr_popr
     ]
-  | _, A.Id_type_arguments ((_, id), _)
-  | _, A.Id (_, id) ->
-    let id = rename_id_if_namespaced id in
+
+  | _, A.Id_type_arguments (id, _)
+  | _, A.Id id ->
+    let fq_id, _id_opt = Hhbc_id.Class.elaborate_id (get_namespace ()) id in
+    let push_instr = instr (ICall (FPushCtorD (nargs, fq_id))) in
     gather [
-      instr_fpushctord nargs id;
+      push_instr;
       emit_args_and_call args uargs;
       instr_popr
     ]
@@ -489,7 +495,7 @@ and emit_class_const cid id =
   let clscns () =
     if id = SN.Members.mClass
     then IMisc (ClsRefName 0)
-    else ILitConst (ClsCns (id, 0)) in
+    else ILitConst (ClsCns (Hhbc_id.Const.from_ast_name id, 0)) in
   let get_original_name () =
     if cid = SN.Classes.cSelf
     then  Option.value ~default:cid (get_original_class_name ())
@@ -514,7 +520,8 @@ and emit_class_const cid id =
     let cid = get_original_name () in
     if id = SN.Members.mClass
     then instr_string (Utils.strip_ns cid)
-    else instr (ILitConst (ClsCnsD (id, SU.Xhp.mangle cid)))
+    else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id,
+      Hhbc_id.Class.from_ast_name cid)))
   | _ ->
     if cid = SN.Classes.cSelf
     then
@@ -531,7 +538,8 @@ and emit_class_const cid id =
     else
       if id = SN.Members.mClass
       then instr_string (Utils.strip_ns cid)
-      else instr (ILitConst (ClsCnsD (id, SU.Xhp.mangle cid)))
+      else instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id,
+        Hhbc_id.Class.from_ast_name cid)))
 
 and emit_await e =
   let after_await = Label.next_regular () in
@@ -592,7 +600,7 @@ and emit_lambda fundef ids =
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]
 
-and emit_id (p, s) =
+and emit_id (p, s as id) =
   match s with
   | "__FILE__" -> instr (ILitConst File)
   | "__DIR__" -> instr (ILitConst Dir)
@@ -600,7 +608,17 @@ and emit_id (p, s) =
     (* If the expression goes on multi lines, we return the last line *)
     let _, line, _, _ = Pos.info_pos_extended p in
     instr_int line
-  | _ -> instr (ILitConst (Cns s))
+  | "__NAMESPACE__" ->
+    let ns = get_namespace () in
+    instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
+  | _ ->
+    let fq_id, id_opt, contains_backslash =
+      Hhbc_id.Const.elaborate_id (get_namespace ()) id in
+    begin match id_opt with
+    | Some id -> instr (ILitConst (CnsU (fq_id, id)))
+    | None -> instr (ILitConst
+        (if contains_backslash then CnsE fq_id else Cns fq_id))
+    end
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 
@@ -778,7 +796,8 @@ and from_expr expr =
   | A.Call ((_, A.Id (_, "define")), [(_, A.String s); expr2], _) ->
     gather [
       from_expr expr2;
-      instr (IIncludeEvalDefine (DefCns (snd s)))
+      instr (IIncludeEvalDefine
+        (DefCns (Hhbc_id.Const.from_raw_string (snd s))))
     ]
   | A.Call _ -> emit_call_expr expr
   | A.New (typeexpr, args, uargs) -> emit_new typeexpr args uargs
@@ -1145,9 +1164,10 @@ and get_prop_member_key null_flavor stack_index prop_expr =
   match prop_expr with
   (* Special case for known property name *)
   | (_, A.Id (_, str)) ->
+    let pid = Hhbc_id.Prop.from_ast_name str in
     begin match null_flavor with
-    | Ast.OG_nullthrows -> MemberKey.PT str
-    | Ast.OG_nullsafe -> MemberKey.QT str
+    | Ast.OG_nullthrows -> MemberKey.PT pid
+    | Ast.OG_nullsafe -> MemberKey.QT pid
     end
   | (_, A.Lvar (_, x)) when not (is_local_this x) ->
     MemberKey.PL (Local.Named x)
@@ -1365,20 +1385,6 @@ and emit_object_expr (_, expr_ as expr) =
     instr_this
   | _ -> from_expr expr
 
-and is_unqualified_function = function
-  | "invariant_violation"
-  | "invariant"
-  | "inst_meth" -> true
-  | _ -> false
-
-and rename_function_call id = match id with
-  | "invariant_violation"
-  | "invariant"
-  | "inst_meth" -> SU.prefix_namespace "HH" id
-  | "min"
-  | "max" -> SU.prefix_namespace "__SystemLib" (id ^ "2")
-  | _ -> id
-
 and emit_call_lhs (_, expr_ as expr) nargs =
   match expr_ with
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) when id.[0] = '$' ->
@@ -1390,7 +1396,8 @@ and emit_call_lhs (_, expr_ as expr) nargs =
   | A.Obj_get (obj, (_, A.Id (_, id)), null_flavor) ->
     gather [
       emit_object_expr obj;
-      instr (ICall (FPushObjMethodD (nargs, id, null_flavor)));
+      instr (ICall (FPushObjMethodD
+        (nargs, Hhbc_id.Method.from_ast_name id, null_flavor)));
     ]
   | A.Obj_get(obj, method_expr, null_flavor) ->
     gather [
@@ -1421,8 +1428,10 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
 
-  | A.Class_const ((_, cid),  (_, id)) ->
-    instr (ICall (FPushClsMethodD (nargs, id, cid)))
+  | A.Class_const (cid,  (_, id)) ->
+    let fq_cid, _ = Hhbc_id.Class.elaborate_id (get_namespace ()) cid in
+    let method_id = Hhbc_id.Method.from_ast_name id in
+    instr (ICall (FPushClsMethodD (nargs, method_id, fq_cid)))
 
   | A.Class_get ((_, cid), (_, id)) when id.[0] = '$' ->
     gather [
@@ -1431,13 +1440,13 @@ and emit_call_lhs (_, expr_ as expr) nargs =
       instr (ICall (FPushClsMethod (nargs, 0)))
     ]
 
-  | A.Id (_, id) when is_unqualified_function id ->
-    let ns_id = rename_function_call id in
-    instr (ICall (FPushFuncU (nargs, ns_id, id)))
-
-  | A.Id (_, id) ->
-    let id = SU.strip_global_ns @@ rename_function_call id in
-    instr (ICall (FPushFuncD (nargs, id)))
+  | A.Id id ->
+    let fq_id, id_opt =
+      Hhbc_id.Function.elaborate_id (get_namespace ()) id in
+    begin match id_opt with
+    | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
+    | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
+    end
 
   | _ ->
     gather [

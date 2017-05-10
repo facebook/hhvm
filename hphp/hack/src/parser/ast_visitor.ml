@@ -520,7 +520,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | Constant g -> this#on_constant acc g
     | Namespace (i, p) -> this#on_namespace acc i p
     | NamespaceUse idl -> this#on_namespaceUse acc idl
-
+    | SetNamespaceEnv e -> acc
 
   method on_class_ acc c =
     let acc = List.fold_left this#on_user_attribute acc c.c_user_attributes in

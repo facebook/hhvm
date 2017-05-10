@@ -16,7 +16,7 @@ type t = {
   method_is_static     : bool;
   method_is_final      : bool;
   method_is_abstract   : bool;
-  method_name          : Litstr.id;
+  method_name          : Hhbc_id.Method.t;
   method_params        : Hhas_param.t list;
   method_return_type   : Hhas_type_info.t option;
   method_body          : Hhbc_ast.instruct list;

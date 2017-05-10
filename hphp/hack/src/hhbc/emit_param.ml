@@ -11,6 +11,7 @@
 open Core
 open Emit_type_hint
 open Instruction_sequence
+module A = Ast
 
 let from_variadic_param_hint_opt ho =
   let p = Pos.none in
@@ -18,7 +19,7 @@ let from_variadic_param_hint_opt ho =
   | None -> Some (p, A.Happly ((p, "array"), []))
   | Some h -> Some (p, A.Happly ((p, "array"), [h]))
 
-let from_ast tparams p =
+let from_ast ~tparams ~namespace p =
   let param_name = snd p.A.param_id in
   let param_is_variadic = p.Ast.param_is_variadic in
   let param_hint =
@@ -28,7 +29,8 @@ let from_ast tparams p =
   in
   let tparams = if param_is_variadic then "array"::tparams else tparams in
   let param_type_info = Option.map param_hint
-    (hint_to_type_info ~skipawaitable:false ~always_extended:false ~tparams) in
+    (hint_to_type_info ~skipawaitable:false
+      ~always_extended:false ~namespace ~tparams) in
   let param_default_value = Option.map p.Ast.param_expr
     ~f:(fun e -> Label.next_default_arg (), e)
   in
@@ -36,8 +38,8 @@ let from_ast tparams p =
   Some (Hhas_param.make param_name p.A.param_is_reference
         param_type_info param_default_value)
 
-let from_asts tparams params =
-  List.filter_map params (from_ast tparams)
+let from_asts ~namespace ~tparams ~params =
+  List.filter_map params (from_ast ~tparams ~namespace)
 
 let emit_param_default_value_setter params =
   let setters = List.filter_map params (fun p ->

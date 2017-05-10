@@ -524,6 +524,8 @@ let rec convert_toplevel_def st d =
     st, Namespace(id, dl)
   | NamespaceUse x ->
     st, NamespaceUse x
+  | SetNamespaceEnv e ->
+    st, SetNamespaceEnv e
 
 and convert_toplevel_prog st dl =
   List.map_env st dl convert_toplevel_def

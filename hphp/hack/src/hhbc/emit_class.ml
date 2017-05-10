@@ -43,7 +43,7 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
     is_static
     method_is_final
     is_abstract
-    name
+    (Hhbc_id.Method.from_ast_name name)
     params
     method_return_type
     method_body
@@ -55,14 +55,15 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
     method_is_pair_generator
     method_is_closure_body
 
-let from_extends ~is_enum _tparams extends =
-  if is_enum then Some ("HH\\BuiltinEnum") else
+let from_extends ~namespace ~is_enum _tparams extends =
+  if is_enum
+  then Some (Hhbc_id.Class.from_raw_string "HH\\BuiltinEnum") else
   match extends with
   | [] -> None
-  | h :: _ -> Some (hint_to_class h)
+  | h :: _ -> Some (hint_to_class ~namespace h)
 
-let from_implements _tparams implements =
-  List.map implements hint_to_class
+let from_implements ~namespace implements =
+  List.map implements (hint_to_class ~namespace)
 
 let from_constant (_hint, name, const_init) =
   (* The type hint is omitted. *)
@@ -121,10 +122,11 @@ let from_class_elt_typeconsts elt =
   | A.TypeConst tc -> from_type_constant tc
   | _ -> None
 
-let from_enum_type opt =
+let from_enum_type ~namespace opt =
   match opt with
   | Some e ->
-    let type_info_user_type = Some (Emit_type_hint.fmt_hint e.A.e_base) in
+    let type_info_user_type =
+      Some (Emit_type_hint.fmt_hint ~namespace ~tparams:[] e.A.e_base) in
     let type_info_type_constraint =
       Hhas_type_constraint.make
         None
@@ -137,7 +139,9 @@ let from_ast : A.class_ -> Hhas_class.t =
   fun ast_class ->
   let class_attributes =
     Emit_attribute.from_asts ast_class.Ast.c_user_attributes in
-  let class_name = Litstr.to_string @@ snd ast_class.Ast.c_name in
+  let class_name, _ =
+    Hhbc_id.Class.elaborate_id
+    ast_class.Ast.c_namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
   let class_uses =
     List.filter_map
@@ -148,7 +152,7 @@ let from_ast : A.class_ -> Hhas_class.t =
   in
   let class_enum_type =
     if ast_class.A.c_kind = Ast.Cenum
-    then from_enum_type ast_class.A.c_enum
+    then from_enum_type ast_class.A.c_namespace ast_class.A.c_enum
     else None
   in
   let class_is_xhp = ast_class.A.c_is_xhp in
@@ -186,9 +190,11 @@ let from_ast : A.class_ -> Hhas_class.t =
   let class_is_final =
     ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in
   let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams in
+  let namespace = ast_class.Ast.c_namespace in
   let class_base =
     if class_is_interface then None
     else from_extends
+          ~namespace
           ~is_enum:(class_enum_type <> None)
           tparams
           ast_class.A.c_extends
@@ -196,7 +202,7 @@ let from_ast : A.class_ -> Hhas_class.t =
   let implements =
     if class_is_interface then ast_class.A.c_extends
     else ast_class.A.c_implements in
-  let class_implements = from_implements tparams implements in
+  let class_implements = from_implements ~namespace implements in
   let class_body = ast_class.A.c_body in
   (* TODO: communicate this without looking at the name *)
   let is_closure_class =
@@ -232,6 +238,7 @@ let from_ast : A.class_ -> Hhas_class.t =
           class_xhp_use_attributes]
   in
   Label.reset_label ();
+  Emit_expression.set_namespace ast_class.Ast.c_namespace;
   let class_properties = List.concat_map class_body from_class_elt_classvars in
   let class_constants =
     List.concat_map class_body from_class_elt_constants in

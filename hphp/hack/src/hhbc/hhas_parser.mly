@@ -53,7 +53,7 @@ decl:
 ;
 aliasdecl:
     | ALIASDIRECTIVE ID EQUALS aliastypeinfo SEMI nl
-      {Hhas_typedef.make $2 $4}
+      {Hhas_typedef.make (Hhbc_id.Class.from_raw_string $2)  $4}
 ;
 maindecl:
     | MAINDIRECTIVE LBRACE nl numiters declvars nl functionbody RBRACE nl
@@ -80,7 +80,7 @@ fundecl:
     | FUNCTIONDIRECTIVE functionattributes typeinfooption ID fparams
       functionflags LBRACE nl numiters numclsrefslots declvars functionbody RBRACE
         {Hhas_function.make $2(*attributes*)
-           $4(*name*)
+           (Hhbc_id.Function.from_raw_string $4)(*name*)
             $5(*params*) $3(*typeinfo*) $12(*body*) $11(*declvars*)
             $9 (*numiters*)
             $10 (*numclsrefslots *)
@@ -143,7 +143,7 @@ classdecl:
         {Hhas_class.make (fst $2)(*attributes*)
           (fst $4) (*base*)
           (snd $4) (*implements*)
-          $3(*name*)
+          (Hhbc_id.Class.from_raw_string $3)(*name*)
         (List.mem "final" (snd $2))(*isfinal*)
         (List.mem "abstract" (snd $2))(*isabstract*)
         (List.mem "interface" (snd $2))(*isinterface*)
@@ -172,7 +172,7 @@ methoddecl:
     (List.mem "static" (snd $2))
     (List.mem "final" (snd $2))
     (List.mem "abstract" (snd $2))
-    $4 (* name *)
+    (Hhbc_id.Method.from_raw_string $4) (* name *)
     $5 (* params *)
     $3 (* return type *)
     $12 (* method body *)
@@ -205,7 +205,7 @@ classproperty:
     (List.mem "public" $2)
     (List.mem "static" $2)
     (List.mem "deep_init" $2)
-    $3 (*name *)
+    (Hhbc_id.Prop.from_raw_string $3) (*name *)
     $6 (*initial value *)
     None (* initializer instructions. already been emitted elsewhere *)
   }
@@ -265,12 +265,16 @@ classuses:
 ;
 extendsimplements:
   | /* empty */ {(None,[])}
-  | ID ID {if $1 = "extends" then (Some $2, [])
+  | ID ID {if $1 = "extends"
+           then (Some (Hhbc_id.Class.from_raw_string $2), [])
            else report_error "bad extends implements 1"}
-  | ID LPAR idlist RPAR {if $1 = "implements" then (None,$3)
+  | ID LPAR idlist RPAR {if $1 = "implements"
+                then (None, List.map Hhbc_id.Class.from_raw_string $3)
                 else report_error "bad extends implements 2"}
   | ID ID ID LPAR idlist RPAR {if $1="extends" && $3 = "implements"
-     then (Some $2, $5) else report_error "bad extends implements 3"}
+     then (Some (Hhbc_id.Class.from_raw_string $2),
+        List.map Hhbc_id.Class.from_raw_string $5)
+      else report_error "bad extends implements 3"}
 idlist:
   | /* empty */ {[]}
   | ID idlist {$1 :: $2}

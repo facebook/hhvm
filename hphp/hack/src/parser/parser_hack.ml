@@ -722,7 +722,7 @@ and toplevel_word def_start ~attr env = function
 
 and define_or_stmt env = function
   | Expr (_, Call ((_, Id (_, "define")), [(_, String name); value], [])) ->
-      Constant {
+    Constant {
       cst_mode = env.mode;
       cst_kind = Cst_define;
       cst_name = name;

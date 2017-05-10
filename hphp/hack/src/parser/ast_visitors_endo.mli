@@ -427,12 +427,16 @@ class virtual ['b] endo :
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program ->
                        Ast_visitors_ancestors.def;
+        on_SetNamespaceEnv : 'c ->
+                      Ast_visitors_ancestors.def ->
+                      Ast_visitors_ancestors.nsenv ->
+                      Ast_visitors_ancestors.def;
         on_NamespaceUse : 'c ->
-                          Ast_visitors_ancestors.def ->
-                          (Ast_visitors_ancestors.ns_kind *
-                           Ast_visitors_ancestors.id *
-                           Ast_visitors_ancestors.id)
-                          list -> Ast_visitors_ancestors.def;
+                      Ast_visitors_ancestors.def ->
+                      (Ast_visitors_ancestors.ns_kind *
+                       Ast_visitors_ancestors.id *
+                       Ast_visitors_ancestors.id)
+                      list -> Ast_visitors_ancestors.def;
         on_New : 'c ->
                  Ast_visitors_ancestors.expr_ ->
                  Ast_visitors_ancestors.expr ->
@@ -1247,6 +1251,11 @@ class virtual ['b] endo :
       Ast_visitors_ancestors.def ->
       Ast_visitors_ancestors.id ->
       Ast_visitors_ancestors.program -> Ast_visitors_ancestors.def
+    method on_SetNamespaceEnv :
+      'c ->
+      Ast_visitors_ancestors.def ->
+      Ast_visitors_ancestors.nsenv ->
+      Ast_visitors_ancestors.def
     method on_NamespaceUse :
       'c ->
       Ast_visitors_ancestors.def ->

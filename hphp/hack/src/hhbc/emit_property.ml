@@ -28,7 +28,7 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
   (* TODO: Deal with type hint *)
   (* TODO: Hack allows a property to be marked final, which is nonsensical.
   HHVM does not allow this.  Fix this in the Hack parser? *)
-  let name = Litstr.to_string @@ cv_name in
+  let pid = Hhbc_id.Prop.from_ast_name cv_name in
   let is_private = Core.List.mem cv_kind_list Ast.Private in
   let is_protected = Core.List.mem cv_kind_list Ast.Protected in
   let is_public =
@@ -46,14 +46,14 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
         let label = Label.next_regular () in
         let prolog, epilog =
           if is_static
-          then empty, instr (IMutator (InitProp (name, Static)))
+          then empty, instr (IMutator (InitProp (pid, Static)))
           else
             gather [
-              instr (IMutator (CheckProp name));
+              instr (IMutator (CheckProp pid));
               instr_jmpnz label;
             ],
             gather [
-              instr (IMutator (InitProp (name, NonStatic)));
+              instr (IMutator (InitProp (pid, NonStatic)));
               instr_label label;
             ] in
         Some Typed_value.Uninit, not is_static && expr_requires_deep_init expr,
@@ -67,6 +67,6 @@ let from_ast cv_kind_list _type_hint (_, (_, cv_name), initial_value) =
     is_public
     is_static
     is_deep_init
-    name
+    pid
     initial_value
     initializer_instrs

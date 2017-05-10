@@ -18,9 +18,9 @@
 
 type t = {
   class_attributes   : Hhas_attribute.t list;
-  class_base         : Litstr.id option;
-  class_implements   : Litstr.id list;
-  class_name         : Litstr.id;
+  class_base         : Hhbc_id.Class.t option;
+  class_implements   : Hhbc_id.Class.t list;
+  class_name         : Hhbc_id.Class.t;
   class_is_final     : bool;
   class_is_abstract  : bool;
   class_is_interface : bool;

@@ -57,9 +57,16 @@ let get_array_identifier tv =
 (* Generic helpers *)
 let sep pieces = String.concat " " pieces
 
-let string_of_class_id id = SU.quote_string (Utils.strip_ns id)
-let string_of_function_id id = SU.quote_string (Utils.strip_ns id)
-let string_of_property_name id = SU.quote_string (Utils.strip_ns id)
+let string_of_class_id id =
+  SU.quote_string (Hhbc_id.Class.to_raw_string id)
+let string_of_function_id id =
+  SU.quote_string (Hhbc_id.Function.to_raw_string id)
+let string_of_method_id id =
+  SU.quote_string (Hhbc_id.Method.to_raw_string id)
+let string_of_const_id id =
+  SU.quote_string (Hhbc_id.Const.to_raw_string id)
+let string_of_prop_id id =
+  SU.quote_string (Hhbc_id.Prop.to_raw_string id)
 
 (* Naming convention for functions below:
  *   string_of_X converts an X to a string
@@ -126,10 +133,10 @@ let string_of_lit_const instruction =
     | NewStructArray l  ->
       sep ["NewStructArray"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewPair -> "NewPair"
-    | ClsCns (name, id) ->
-      sep ["ClsCns"; SU.quote_string name; string_of_classref id]
-    | ClsCnsD (name, class_name) ->
-      sep ["ClsCnsD"; SU.quote_string name; string_of_class_id class_name]
+    | ClsCns (cnsid, cr) ->
+      sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]
+    | ClsCnsD (cnsid, cid) ->
+      sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
     | File -> "File"
     | Dir -> "Dir"
     | NYI text -> "NYI: " ^ text
@@ -144,9 +151,10 @@ let string_of_lit_const instruction =
     | NewMSArray n -> sep ["NewMSArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->
       sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
-    | Cns s -> sep ["Cns"; SU.quote_string s]
-    | CnsE s -> sep ["CnsE"; SU.quote_string s]
-    | CnsU (s1, s2) -> sep ["CnsU"; SU.quote_string s1; SU.quote_string s2]
+    | Cns cnsid -> sep ["Cns"; string_of_const_id cnsid]
+    | CnsE cnsid -> sep ["CnsE"; string_of_const_id cnsid]
+    | CnsU (id1, id2) ->
+      sep ["CnsU"; string_of_const_id id1; SU.quote_string id2]
 
 let string_of_operator instruction =
   match instruction with
@@ -191,7 +199,7 @@ let string_of_operator instruction =
     | CastDict -> "CastDict"
     | CastKeyset -> "CastKeyset"
     | InstanceOf -> "InstanceOf"
-    | InstanceOfD id -> sep ["InstanceOfD"; SU.quote_string id]
+    | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
     | Print -> "Print"
     | Clone -> "Clone"
     | H.Exit -> "Exit"
@@ -228,8 +236,8 @@ let string_of_member_key mk =
   | EI i -> "EI:" ^ Int64.to_string i
   | PC i -> "PC:" ^ string_of_stack_index i
   | PL id -> "PL:" ^ string_of_local_id id
-  | PT str -> "PT:" ^ SU.quote_string str
-  | QT str -> "QT:" ^ SU.quote_string str
+  | PT id -> "PT:" ^ string_of_prop_id id
+  | QT id -> "QT:" ^ string_of_prop_id id
   | W -> "W"
 
 let string_of_eq_op op =
@@ -301,8 +309,8 @@ let string_of_mutator x =
   | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
   | UnsetN -> "UnsetN"
   | UnsetG -> "UnsetG"
-  | CheckProp id -> sep ["CheckProp"; string_of_property_name id]
-  | InitProp (id, op) -> sep ["InitProp"; string_of_property_name id;
+  | CheckProp id -> sep ["CheckProp"; string_of_prop_id id]
+  | InitProp (id, op) -> sep ["InitProp"; string_of_prop_id id;
       string_of_initprop_op op]
 
 let string_of_label label =
@@ -434,27 +442,28 @@ let string_of_call instruction =
   | FPushFunc n ->
     sep ["FPushFunc"; string_of_int n]
   | FPushFuncD (n, id) ->
-    sep ["FPushFuncD"; string_of_int n; SU.quote_string id]
+    sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
   | FPushFuncU (n, id1, id2) ->
-    sep ["FPushFuncU"; string_of_int n; SU.quote_string id1; SU.quote_string id2]
+    sep ["FPushFuncU"; string_of_int n; string_of_function_id id1; SU.quote_string id2]
   | FPushObjMethod (n, nf) ->
     sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf]
   | FPushObjMethodD (n, id, nf) ->
     sep ["FPushObjMethodD";
-      string_of_int n; SU.quote_string id; string_of_null_flavor nf]
+      string_of_int n; string_of_method_id id; string_of_null_flavor nf]
   | FPushClsMethod (n, id) ->
     sep ["FPushClsMethod"; string_of_int n; string_of_classref id]
   | FPushClsMethodF (n, id) ->
     sep ["FPushClsMethodF"; string_of_int n; string_of_classref id]
-  | FPushClsMethodD (n, id1, id2) ->
+  | FPushClsMethodD (n, id, cid) ->
     sep ["FPushClsMethodD";
-      string_of_int n; string_of_class_id id1; string_of_function_id id2]
+      string_of_int n;
+      string_of_method_id id; string_of_class_id cid]
   | FPushCtor (n, id) ->
     sep ["FPushCtor"; string_of_int n; string_of_int id]
-  | FPushCtorD (n, id) ->
-    sep ["FPushCtorD"; string_of_int n; SU.quote_string id]
+  | FPushCtorD (n, cid) ->
+    sep ["FPushCtorD"; string_of_int n; string_of_class_id cid]
   | FPushCtorI (n, id) ->
-    sep ["FPushCtorI"; string_of_int n; SU.quote_string id]
+    sep ["FPushCtorI"; string_of_int n; string_of_classref id]
   | DecodeCufIter (n, l) ->
     sep ["DecodeCufIter"; string_of_int n; string_of_label l]
   | FPushCufIter (n, id) ->
@@ -608,7 +617,7 @@ let string_of_include_eval_define = function
   | DefFunc id -> sep ["DefFunc"; string_of_function_id id]
   | DefCls _id -> sep ["DefCls"; string_of_int (next_class_counter ())]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_id id]
-  | DefCns id -> sep ["DefCns"; string_of_class_id id]
+  | DefCns id -> sep ["DefCns"; string_of_const_id id]
   | DefTypeAlias _id ->
     sep ["DefTypeAlias"; string_of_int (next_typedef_counter ())]
 
@@ -865,8 +874,6 @@ let string_of_param p =
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
-let fmt_name s = Hhbc_string_utils.Xhp.mangle (Utils.strip_ns s)
-
 let add_num_cls_ref_slots buf indent num_cls_ref_slots =
   if num_cls_ref_slots = 0 then () else begin
   B.add_string buf (String.make indent ' ');
@@ -907,7 +914,7 @@ let function_attributes f =
   if text = "" then "" else "[" ^ text ^ "] "
 
 let add_fun_def buf fun_def =
-  let function_name = fmt_name (Hhas_function.name fun_def) in
+  let function_name = Hhas_function.name fun_def in
   let function_return_type = Hhas_function.return_type fun_def in
   let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in
@@ -920,7 +927,7 @@ let add_fun_def buf fun_def =
   B.add_string buf "\n.function ";
   B.add_string buf (function_attributes fun_def);
   B.add_string buf (string_of_type_info_option function_return_type);
-  B.add_string buf function_name;
+  B.add_string buf (Hhbc_id.Function.to_raw_string function_name);
   B.add_string buf (string_of_params function_params);
   if function_is_generator then B.add_string buf " isGenerator";
   if function_is_async then B.add_string buf " isAsync";
@@ -949,7 +956,7 @@ let add_method_def buf method_def =
   (* TODO: In the original codegen sometimes a missing return type is not in
   the text at all and sometimes it is <"" N  > -- which should we generate,
   and when? *)
-  let method_name = fmt_name (Hhas_method.name method_def) in
+  let method_name = Hhas_method.name method_def in
   let method_return_type = Hhas_method.return_type method_def in
   let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
@@ -963,7 +970,7 @@ let add_method_def buf method_def =
   B.add_string buf "\n  .method ";
   B.add_string buf (method_attributes method_def);
   B.add_string buf (string_of_type_info_option method_return_type);
-  B.add_string buf method_name;
+  B.add_string buf (Hhbc_id.Method.to_raw_string method_name);
   B.add_string buf (string_of_params method_params);
   if method_is_generator then B.add_string buf " isGenerator";
   if method_is_async then B.add_string buf " isAsync";
@@ -1001,7 +1008,7 @@ let add_extends buf class_base =
   | Some name ->
     begin
       B.add_string buf " extends ";
-      B.add_string buf (fmt_name name);
+      B.add_string buf (Hhbc_id.Class.to_raw_string name);
     end
 
 let add_implements buf class_implements =
@@ -1010,7 +1017,8 @@ let add_implements buf class_implements =
   | _ ->
   begin
     B.add_string buf " implements (";
-    B.add_string buf (String.concat " " (List.map fmt_name class_implements));
+    B.add_string buf (String.concat " "
+      (List.map Hhbc_id.Class.to_raw_string class_implements));
     B.add_string buf ")";
   end
 
@@ -1029,7 +1037,7 @@ let property_attributes p =
 let add_property class_def buf property =
   B.add_string buf "\n  .property ";
   B.add_string buf (property_attributes property);
-  B.add_string buf (Hhas_property.name property);
+  B.add_string buf (Hhbc_id.Prop.to_raw_string (Hhas_property.name property));
   B.add_string buf " =\n    ";
   let initial_value = Hhas_property.initial_value property in
   if Hhas_class.is_closure_class class_def
@@ -1085,11 +1093,11 @@ let add_uses buf c =
       @@ String.concat " " @@ List.map Utils.strip_ns use_l
 
 let add_class_def buf class_def =
-  let class_name = fmt_name (Hhas_class.name class_def) in
+  let class_name = Hhas_class.name class_def in
   (* TODO: user attribuqtes *)
   B.add_string buf "\n.class ";
   B.add_string buf (class_special_attributes class_def);
-  B.add_string buf class_name;
+  B.add_string buf (Hhbc_id.Class.to_raw_string class_name);
   add_extends buf (Hhas_class.base class_def);
   add_implements buf (Hhas_class.implements class_def);
   B.add_string buf " {";
@@ -1152,10 +1160,10 @@ let add_top_level buf hhas_prog =
   B.add_string buf "}\n"
 
 let add_typedef buf typedef =
-  let name = fmt_name (Hhas_typedef.name typedef) in
+  let name = Hhas_typedef.name typedef in
   let type_info = Hhas_typedef.type_info typedef in
   B.add_string buf "\n.alias ";
-  B.add_string buf name;
+  B.add_string buf (Hhbc_id.Class.to_raw_string name);
   B.add_string buf (" = " ^ string_of_typedef_info type_info ^ ";")
 
 let add_program buf hhas_prog =

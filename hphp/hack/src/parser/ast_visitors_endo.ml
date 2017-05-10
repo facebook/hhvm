@@ -68,6 +68,11 @@ class virtual ['self] endo =
                else (r0, r1, r2)) env c0
       in
       if c0 == r0 then this else NamespaceUse r0
+    method on_SetNamespaceEnv env this c0 =
+      let r0 = self#on_Namespace_env env c0 in
+      if c0 == r0
+      then this
+      else SetNamespaceEnv r0
     method on_def env this =
       match this with
       | Fun c0 -> self#on_Fun env this c0
@@ -77,6 +82,7 @@ class virtual ['self] endo =
       | Constant c0 -> self#on_Constant env this c0
       | Namespace (c0, c1) -> self#on_Namespace env this c0 c1
       | NamespaceUse c0 -> self#on_NamespaceUse env this c0
+      | SetNamespaceEnv c0 -> self#on_SetNamespaceEnv env this c0
     method on_typedef env this =
       let r0 = self#on_id env this.t_id in
       let r1 = self#on_list self#on_tparam env this.t_tparams in

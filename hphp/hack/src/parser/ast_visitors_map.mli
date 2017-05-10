@@ -284,6 +284,9 @@ class virtual ['c] map :
                        Ast_visitors_ancestors.id ->
                        Ast_visitors_ancestors.program ->
                        Ast_visitors_ancestors.def;
+        on_SetNamespaceEnv : 'd ->
+                            Ast_visitors_ancestors.nsenv ->
+                            Ast_visitors_ancestors.def;
         on_NamespaceUse : 'd ->
                           (Ast_visitors_ancestors.ns_kind *
                            Ast_visitors_ancestors.id *
@@ -874,6 +877,10 @@ class virtual ['c] map :
       'd ->
       Ast_visitors_ancestors.id ->
       Ast_visitors_ancestors.program -> Ast_visitors_ancestors.def
+    method on_SetNamespaceEnv :
+      'd ->
+      Ast_visitors_ancestors.nsenv ->
+      Ast_visitors_ancestors.def
     method on_NamespaceUse :
       'd ->
       (Ast_visitors_ancestors.ns_kind * Ast_visitors_ancestors.id *

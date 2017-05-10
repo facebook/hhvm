@@ -17,6 +17,10 @@ let strip_global_ns s =
   then String_utils.lstrip s "\\"
   else s
 
+module Float = struct
+  let to_string f = Printf.sprintf "%0.17g" f
+end
+
 module Locals = struct
 
   let strip_dollar s = String_utils.lstrip s "$"
@@ -64,19 +68,33 @@ module Xhp = struct
     if String.length s = 0 || s.[0] <> ':'
     then s else String_utils.lstrip s ":"
 
-  let mangle s =
+  (* Mangle an unqualified ID *)
+  let mangle_id s =
     if String.length s = 0 || s.[0] <> ':' then s else
       "xhp_" ^
         String_utils.lstrip s ":" |>
         Str.global_replace (Str.regexp ":") "__" |>
         Str.global_replace (Str.regexp "-") "_"
 
-  let unmangle s =
+  (* Mangle a possibly-qualified ID *)
+  let mangle s =
+    match List.rev (Str.split_delim (Str.regexp "\\") s) with
+    | [] -> ""
+    | id::rest ->
+      String.concat "\\" (List.rev (mangle_id id :: rest))
+
+  let unmangle_id s =
     if String_utils.string_starts_with s "xhp_"
     then
-      String_utils.lstrip s "xhp_" |>
+      ":" ^ String_utils.lstrip s "xhp_" |>
       Str.global_replace (Str.regexp "__") ":" |>
       Str.global_replace (Str.regexp "_") "-"
     else s
+
+  let unmangle s =
+    match List.rev (Str.split_delim (Str.regexp "\\") s) with
+    | [] -> ""
+    | id::rest ->
+      String.concat "\\" (List.rev (unmangle_id id :: rest))
 
 end

@@ -45,6 +45,8 @@ class virtual ['self] map =
     method on_Namespace env c0 c1 =
       let r0 = self#on_id env c0 in
       let r1 = self#on_program env c1 in Namespace (r0, r1)
+    method on_SetNamespaceEnv env c0 =
+      let r0 = self#on_Namespace_env env c0 in SetNamespaceEnv r0
     method on_NamespaceUse env c0 =
       let r0 =
         self#on_list
@@ -63,6 +65,7 @@ class virtual ['self] map =
       | Constant c0 -> self#on_Constant env c0
       | Namespace (c0, c1) -> self#on_Namespace env c0 c1
       | NamespaceUse c0 -> self#on_NamespaceUse env c0
+      | SetNamespaceEnv c0 -> self#on_SetNamespaceEnv env c0
     method on_typedef env this =
       let r0 = self#on_id env this.t_id in
       let r1 = self#on_list self#on_tparam env this.t_tparams in

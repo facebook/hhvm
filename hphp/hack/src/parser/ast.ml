@@ -24,6 +24,7 @@ and def =
   | Constant of gconst
   | Namespace of id * program
   | NamespaceUse of (ns_kind * id * id) list
+  | SetNamespaceEnv of Namespace_env.env
 
 and typedef = {
   t_id: id;

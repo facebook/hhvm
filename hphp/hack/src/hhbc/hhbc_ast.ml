@@ -8,9 +8,6 @@
  *
 *)
 
-(**
- * TODO (hgo): see within HHVM codebase what those types actually are *)
-type property_name = string
 type check_started =
   | IgnoreStarted
   | CheckStarted
@@ -25,9 +22,12 @@ type param_id =
   | Param_named of string
 type param_num = int
 type stack_index = int
-type class_id = string
+type class_id = Hhbc_id.Class.t
 type class_num = int
-type function_id = string
+type function_id = Hhbc_id.Function.t
+type method_id = Hhbc_id.Method.t
+type const_id = Hhbc_id.Const.t
+type prop_id = Hhbc_id.Prop.t
 type num_params = int
 type classref_id = int
 type collection_type = int
@@ -94,8 +94,8 @@ module MemberKey = struct
   | EI of int64
   | PC of stack_index
   | PL of local_id
-  | PT of Litstr.id
-  | QT of Litstr.id
+  | PT of prop_id
+  | QT of prop_id
   | W
 end (* Of MemberKey *)
 
@@ -146,11 +146,11 @@ type instruct_lit_const =
   | NewCol of collection_type
   | ColFromArray of collection_type
   | MapAddElemC
-  | Cns of Litstr.id
-  | CnsE of Litstr.id
-  | CnsU of Litstr.id * Litstr.id
-  | ClsCns of Litstr.id * classref_id
-  | ClsCnsD of Litstr.id * Litstr.id
+  | Cns of const_id
+  | CnsE of const_id
+  | CnsU of const_id * Litstr.id
+  | ClsCns of const_id * classref_id
+  | ClsCnsD of const_id * class_id
   | File
   | Dir
   | Method
@@ -198,7 +198,7 @@ type instruct_operator =
   | CastDict
   | CastKeyset
   | InstanceOf
-  | InstanceOfD of Litstr.id
+  | InstanceOfD of class_id
   | Print
   | Clone
   | Exit
@@ -319,21 +319,21 @@ type instruct_mutator =
   | UnsetL of local_id
   | UnsetN
   | UnsetG
-  | CheckProp of property_name
-  | InitProp of property_name * initprop_op
+  | CheckProp of prop_id
+  | InitProp of prop_id * initprop_op
 
 type instruct_call =
   | FPushFunc of num_params
-  | FPushFuncD of num_params * Litstr.id
-  | FPushFuncU of num_params * Litstr.id * Litstr.id
+  | FPushFuncD of num_params * function_id
+  | FPushFuncU of num_params * function_id * Litstr.id
   | FPushObjMethod of num_params * Ast.og_null_flavor
-  | FPushObjMethodD of num_params * Litstr.id * Ast.og_null_flavor
+  | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id
   | FPushClsMethodF of num_params * classref_id
-  | FPushClsMethodD of num_params * Litstr.id * Litstr.id
+  | FPushClsMethodD of num_params * method_id * class_id
   | FPushCtor of num_params * classref_id
-  | FPushCtorD of num_params * Litstr.id
-  | FPushCtorI of num_params * class_id
+  | FPushCtorD of num_params * class_id
+  | FPushCtorI of num_params * classref_id
   | DecodeCufIter of num_params * Label.t
   | FPushCufIter of num_params * Iterator.t
   | FPushCuf of num_params
@@ -357,68 +357,6 @@ type instruct_call =
   | FCallAwait of num_params * class_id * function_id
   | FCallUnpack of num_params
   | FCallBuiltin of num_params * num_params * Litstr.id
-
-type op_member_intermediate =
-  | ElemC
-  | ElemL of local_id
-  | ElemCW
-  | ElemLW of local_id
-  | ElemCD
-  | ElemLD of local_id
-  | ElemCU
-  | ElemLU of local_id
-  | NewElem
-  | PropC
-  | PropL of local_id
-  | PropCW
-  | PropLW of local_id
-  | PropCD
-  | PropLD of local_id
-  | PropCU
-  | PropLU of local_id
-
-type op_member_final =
-  | CGutElemC
-  | CGetElemL of local_id
-  | VGetElemC
-  | VGetElemL of local_id
-  | IssetElemC
-  | IssetElemL of local_id
-  | EmptyElemC
-  | EmptyElemL of local_id
-  | SetElemC
-  | SetElemL of local_id
-  | SetOpElemC of eq_op
-  | SetOpElemL of eq_op * local_id
-  | IncDecElemC of incdec_op
-  | IncDecElemL of incdec_op * local_id
-  | BindElemC
-  | BindElemL of local_id
-  | UnsetElemC
-  | UnsetElemL of local_id
-  | VGetNewElem
-  | SetNewElem
-  | SetOpNewElem of eq_op
-  | IncDecNewElem of incdec_op
-  | BindNewElem
-  | CGetPropC
-  | CGetPropL of local_id
-  | VGetPropC
-  | VGetPropL of local_id
-  | IssetPropC
-  | IssetPropL of local_id
-  | EmptyPropC
-  | EmptyPropL of local_id
-  | SetPropC
-  | SetPropL of local_id
-  | SetOpPropC of eq_op
-  | SetOpPropL of eq_op * local_id
-  | IncDecPropC of incdec_op
-  | IncDecPropL of incdec_op * local_id
-  | BindPropC
-  | BindPropL of local_id
-  | UnsetPropC
-  | UnsetPropL of local_id
 
 type instruct_base =
   | BaseNC of stack_index * MemberOpMode.t
@@ -479,8 +417,8 @@ type instruct_include_eval_define =
   | DefFunc of function_id
   | DefCls of class_id
   | DefClsNop of class_id
-  | DefCns of Litstr.id
-  | DefTypeAlias of Litstr.id
+  | DefCns of const_id
+  | DefTypeAlias of class_id
 
 type bare_this_op =
   | Notice

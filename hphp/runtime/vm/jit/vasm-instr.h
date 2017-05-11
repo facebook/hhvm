@@ -1108,7 +1108,7 @@ struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
-struct ubfmli { Immed mr, ms; Vreg32 s, d; VregSF sf; Vflags fl; };
+struct ubfmli { Immed mr, ms; Vreg32 s, d; };
 
 /*
  * ppc64 intrinsics.

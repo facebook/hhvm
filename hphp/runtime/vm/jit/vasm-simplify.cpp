@@ -327,12 +327,13 @@ bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
     if (!(arch() == Arch::ARM &&
       sh.s0.l() == 2 &&
       env.use_counts[inst.d] == 1 &&
+      env.use_counts[sh.sf] == 0 &&
       inst.d == sh.s1)) return false;
 
-  return simplify_impl(env, b, i, [&] (Vout& v) {
-    v << copy{inst.s, inst.d};
-    v << ubfmli{2, 7, inst.d, sh.d, sh.sf, sh.fl};
-    return 2;
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << copy{inst.s, inst.d};
+      v << ubfmli{2, 7, inst.d, sh.d};
+      return 2;
     });
   });
 }

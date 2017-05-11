@@ -335,7 +335,6 @@ Flags load(Local& env,
   // Even if we can't make this load redundant, we might be able to refine its
   // type parameter.
   if (refinable_load_eligible(inst)) {
-    assertx(tracked.knownType <= inst.typeParam());
     if (tracked.knownType < inst.typeParam()) {
       return FRefinableLoad { tracked.knownType };
     }

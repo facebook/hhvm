@@ -436,7 +436,7 @@ int64_t convResToDblHelper(const ResourceHdr* r) {
 }
 
 int64_t convCellToDblHelper(TypedValue tv) {
-  return reinterpretDblAsInt(tvCastToDouble(&tv));
+  return reinterpretDblAsInt(tvCastToDouble(tv));
 }
 
 ObjectData* convCellToObjHelper(TypedValue tv) {

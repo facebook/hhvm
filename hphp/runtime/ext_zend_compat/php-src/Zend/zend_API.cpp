@@ -60,7 +60,7 @@ ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) {
 }
 
 static int parse_arg_object_to_string(zval **arg, const char **p, int *pl, int type TSRMLS_DC) {
-  HPHP::StringData *sd = tvCastToString((*arg)->tv());
+  HPHP::StringData *sd = tvCastToString(*(*arg)->tv());
   *p = sd->data();
   *pl = sd->size();
   return sd->empty();

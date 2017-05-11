@@ -245,29 +245,29 @@ void tvCastToInt64InPlace(TypedValue* tv) {
   tv->m_type = KindOfInt64;
 }
 
-double tvCastToDouble(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (tv->m_type == KindOfRef) {
-    tv = tv->m_data.pref->tv();
+double tvCastToDouble(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (tv.m_type == KindOfRef) {
+    tv = *tv.m_data.pref->tv();
   }
 
-  switch (tv->m_type) {
+  switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
       return 0;
 
     case KindOfBoolean:
-      assert(tv->m_data.num == 0LL || tv->m_data.num == 1LL);
+      assert(tv.m_data.num == 0LL || tv.m_data.num == 1LL);
       // fallthru
     case KindOfInt64:
-      return (double)(tv->m_data.num);
+      return (double)(tv.m_data.num);
 
     case KindOfDouble:
-      return tv->m_data.dbl;
+      return tv.m_data.dbl;
 
     case KindOfPersistentString:
     case KindOfString:
-      return tv->m_data.pstr->toDouble();
+      return tv.m_data.pstr->toDouble();
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -277,13 +277,13 @@ double tvCastToDouble(const TypedValue* tv) {
     case KindOfKeyset:
     case KindOfPersistentArray:
     case KindOfArray:
-      return tv->m_data.parr->empty() ? 0.0 : 1.0;
+      return tv.m_data.parr->empty() ? 0.0 : 1.0;
 
     case KindOfObject:
-      return tv->m_data.pobj->toDouble();
+      return tv.m_data.pobj->toDouble();
 
     case KindOfResource:
-      return tv->m_data.pres->data()->o_toDouble();
+      return tv.m_data.pres->data()->o_toDouble();
 
     case KindOfRef:
       break;
@@ -367,31 +367,31 @@ void tvCastToStringInPlace(TypedValue* tv) {
   not_reached();
 }
 
-StringData* tvCastToString(const TypedValue* tv) {
-  assert(tvIsPlausible(*tv));
-  if (tv->m_type == KindOfRef) {
-    tv = tv->m_data.pref->tv();
+StringData* tvCastToString(TypedValue tv) {
+  assert(tvIsPlausible(tv));
+  if (tv.m_type == KindOfRef) {
+    tv = *tv.m_data.pref->tv();
   }
 
-  switch (tv->m_type) {
+  switch (tv.m_type) {
     case KindOfUninit:
     case KindOfNull:
       return staticEmptyString();
 
     case KindOfBoolean:
-      return tv->m_data.num ? s_1.get() : staticEmptyString();
+      return tv.m_data.num ? s_1.get() : staticEmptyString();
 
     case KindOfInt64:
-      return buildStringData(tv->m_data.num);
+      return buildStringData(tv.m_data.num);
 
     case KindOfDouble:
-      return buildStringData(tv->m_data.dbl);
+      return buildStringData(tv.m_data.dbl);
 
     case KindOfPersistentString:
-      return tv->m_data.pstr;
+      return tv.m_data.pstr;
 
     case KindOfString: {
-      auto s = tv->m_data.pstr;
+      auto s = tv.m_data.pstr;
       s->incRefCount();
       return s;
     }
@@ -417,10 +417,10 @@ StringData* tvCastToString(const TypedValue* tv) {
       return array_string.get();
 
     case KindOfObject:
-      return tv->m_data.pobj->invokeToString().detach();
+      return tv.m_data.pobj->invokeToString().detach();
 
     case KindOfResource:
-      return tv->m_data.pres->data()->o_toString().detach();
+      return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfRef:
       not_reached();

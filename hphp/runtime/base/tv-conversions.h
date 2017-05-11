@@ -92,11 +92,9 @@ ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType) {
 
 /*
  * Non-in-place casts.
- *
- * These don't modify `tv', and return the converted raw data element.
  */
-double tvCastToDouble(const TypedValue* tv);
-StringData* tvCastToString(const TypedValue* tv);
+double tvCastToDouble(TypedValue tv);
+StringData* tvCastToString(TypedValue tv);
 
 /*
  * Convert a cell to various raw data types, without changing the Cell.

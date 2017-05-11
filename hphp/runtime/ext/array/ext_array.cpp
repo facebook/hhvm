@@ -1694,7 +1694,7 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
     if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
-      s = tvCastToString(&c);
+      s = tvCastToString(c);
       decRefStr(strTv->m_data.pstr);
       strTv->m_data.pstr = s;
     }
@@ -1719,7 +1719,7 @@ static inline bool checkSetHelper(const req::ptr<c_Set>& st,
   if (LIKELY(isStringType(c.m_type))) {
     s = c.m_data.pstr;
   } else {
-    s = tvCastToString(&c);
+    s = tvCastToString(c);
     decRefStr(strTv->m_data.pstr);
     strTv->m_data.pstr = s;
   }
@@ -2008,7 +2008,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
-      s = tvCastToString(&c);
+      s = tvCastToString(c);
       decRefStr(strTv->m_data.pstr);
       strTv->m_data.pstr = s;
     }
@@ -2038,7 +2038,7 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
     if (LIKELY(isStringType(c.m_type))) {
       s = c.m_data.pstr;
     } else {
-      s = tvCastToString(&c);
+      s = tvCastToString(c);
       decRefStr(strTv->m_data.pstr);
       strTv->m_data.pstr = s;
     }

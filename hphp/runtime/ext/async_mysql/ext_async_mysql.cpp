@@ -200,7 +200,7 @@ static void HHVM_METHOD(
 
   IterateKV(attrs.get(), [&](const TypedValue* k, const TypedValue* v) {
     data->m_conn_opts.setConnectionAttribute(
-        tvCastToString(k)->toCppString(), tvCastToString(v)->toCppString());
+        tvCastToString(*k)->toCppString(), tvCastToString(*v)->toCppString());
   });
 }
 

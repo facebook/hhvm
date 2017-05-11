@@ -1214,7 +1214,11 @@ const StaticString
   s_blob("blob"),
   s_native_type("native_type"),
   s_flags("flags"),
-  s_table("table");
+  s_name("name"),
+  s_org_name("org_name"),
+  s_table("table"),
+  s_org_table("org_table"),
+  s_length("length");
 
 bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
   if (!m_result) {
@@ -1251,7 +1255,11 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
     ret.set(s_native_type, str);
   }
   ret.set(s_flags, flags);
+  ret.set(s_name, String(F->name, CopyString));
+  ret.set(s_org_name, String(F->org_name, CopyString));
   ret.set(s_table, String(F->table, CopyString));
+  ret.set(s_org_table, String(F->org_table, CopyString));
+  ret.set(s_length, F->length);
   return true;
 }
 

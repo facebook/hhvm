@@ -272,6 +272,99 @@ let extract_suspend_statements node next_label =
     node
     (next_label, [])
 
+let get_token node =
+  match EditableSyntax.get_token node with
+  | Some token -> token
+  | None -> failwith "expected a token"
+
+let rec rewrite_if_statement next_label if_stmt =
+  let { if_condition; if_elseif_clauses; if_else_clause; _; } = if_stmt in
+  match syntax_node_to_list if_elseif_clauses with
+  | [] ->
+  (* We have
+    if (suspend x()) a; else b;
+    Rewrite this as
+    $t = suspend x();
+    if ($t) a; else b;
+  *)
+    let (next_label, prefix_statements), if_condition =
+      extract_suspend_statements if_condition next_label in
+    let new_if = make_syntax (IfStatement { if_stmt with if_condition; }) in
+    let statements = prefix_statements @ [ new_if ] in
+    let statements = make_compound_statement_syntax statements in
+    (next_label, statements)
+  | h :: t ->
+
+  (* We have, say
+
+  if (suspend x()) a;
+  elseif(suspend y()) b;
+  elseif (suspend z()) c;
+  else d;
+
+  The recursion here is slightly tricky. We know that we can reduce the first
+  "elseif" to an "else if". That is, the code above is equivalent to:
+
+  if (suspend x()) a;
+  else {
+    if(suspend y()) b;
+    elseif (suspend z()) c;
+    else d;
+  }
+
+  So the first thing we do is construct the interior "if". It has one fewer
+  "elseif" than before, so we've made a smaller problem that we can solve
+  recursively. We recursively rewrite it, and then that becomes the "else"
+  of the outer "if". Finally we can recurse a second time to rewrite the outer
+  "if". The final result is:
+
+  {
+    $tx = suspend x();
+    if ($tx) a;
+    else {
+      $ty = suspend y();
+      if($ty) b;
+      else {
+        $tz = suspend z();
+        if ($tz) c;
+        else d;
+      }
+    }
+  }
+  *)
+
+    begin
+    match syntax h with
+    | ElseifClause {
+      elseif_keyword;
+      elseif_left_paren;
+      elseif_condition;
+      elseif_right_paren;
+      elseif_statement } ->
+      let child_if_keyword = get_token elseif_keyword in
+      let child_if_keyword =
+        EditableToken.with_kind child_if_keyword TokenKind.If in
+      let child_if_keyword = EditableToken.with_text child_if_keyword "if" in
+      let child_if_keyword = make_token child_if_keyword in
+      let child_if = {
+        if_keyword = child_if_keyword;
+        if_left_paren = elseif_left_paren;
+        if_condition = elseif_condition;
+        if_right_paren = elseif_right_paren;
+        if_statement = elseif_statement;
+        if_elseif_clauses = make_list t;
+        if_else_clause } in
+      let (next_label, child_if) = rewrite_if_statement next_label child_if in
+      let new_else_clause = make_else_clause else_keyword_syntax child_if in
+      let new_if = { if_stmt with
+        if_elseif_clauses = make_missing();
+        if_else_clause = new_else_clause
+      } in
+      rewrite_if_statement next_label new_if
+    | _ ->
+      failwith "Malformed elseif clause"
+    end
+
 (**
  * Processes statements that support the suspend keyword.
  *
@@ -299,21 +392,10 @@ let rewrite_suspends node =
         let statements = prefix_statements @ [ assignment; ret ] in
         let statements = make_compound_statement_syntax statements in
         next_label, Rewriter.Result.Replace statements
-    (* The if_else_clause is simply an else_clause which contains an
-       if_statement. Thus, we need no special logic to rewrite the
-       if_else_clause as long as the generated code is contained within a
-       compound_statement. *)
-    | IfStatement ({ if_condition; if_elseif_clauses; _; } as node) ->
-        (* TODO(t17335630): Handle if_elseif_clauses by rewriting ones
-           containing suspensions into else_caluses. *)
-        assert (is_missing if_elseif_clauses);
+    | IfStatement node ->
+      let (next_label, statements) = rewrite_if_statement next_label node in
+      next_label, Rewriter.Result.Replace statements
 
-        let (next_label, prefix_statements), if_condition =
-          extract_suspend_statements if_condition next_label in
-        let new_if = make_syntax (IfStatement { node with if_condition; }) in
-        let statements = prefix_statements @ [ new_if ] in
-        let statements = make_compound_statement_syntax statements in
-        next_label, Rewriter.Result.Replace statements
     (* The suspension result(s) are made into variable(s) that occur at the end
        of the do_statement's body. The do_condition checks against that
       variable. *)

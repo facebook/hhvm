@@ -110,6 +110,9 @@ let public_syntax =
 let if_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.If "if"
 
+let else_keyword_syntax =
+  make_token_syntax ~space_after:true TokenKind.Else "else"
+
 let switch_keyword_syntax =
   make_token_syntax ~space_after:true TokenKind.Switch "switch"
 

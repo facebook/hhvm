@@ -69,6 +69,11 @@ let text token =
 let with_text token text =
   { token with text }
 
+(* Rare, but possible. Used in, for instance, cases where we are transforming
+an elseif clause to an if, and want to preserve trivia. *)
+let with_kind token kind =
+  { token with kind }
+
 let leading_text token =
   EditableTrivia.text_from_trivia_list (leading token)
 

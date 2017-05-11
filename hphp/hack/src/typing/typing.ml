@@ -2973,7 +2973,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
           Errors.undefined_field
             p (TUtils.get_printable_shape_field_name field);
           env, (Reason.Rwitness p, Terr)
-        | Some { sft_optional = true; _ } ->
+        | Some { sft_optional = true; _ } when not is_lvalue ->
           let declared_field =
               List.find_exn
                 ~f:(fun x -> Ast.ShapeField.compare field x = 0)
@@ -2985,7 +2985,7 @@ and array_get is_lvalue p env ty1 e2 ty2 =
             declaration_pos
             (TUtils.get_printable_shape_field_name field);
           env, (Reason.Rwitness p, Terr)
-        | Some { sft_optional = false; sft_ty } -> env, sft_ty)
+        | Some { sft_optional = _; sft_ty } -> env, sft_ty)
     )
   | Toption _ ->
       Errors.null_container p

@@ -34,15 +34,15 @@ namespace {
 
 void fillMap(BaseMap* map, const APCArray* ar) {
   for (auto i = uint32_t{0}; i < ar->size(); ++i) {
-    map->set(ar->getKey(i).asTypedValue(),
-             ar->getValue(i)->toLocal().asTypedValue());
+    map->set(*ar->getKey(i).asTypedValue(),
+             *ar->getValue(i)->toLocal().asTypedValue());
   }
 }
 
 template<class T>
 void fillCollection(T* coll, const APCArray* ar) {
   for (auto i = uint32_t{0}; i < ar->size(); ++i) {
-    coll->add(ar->getValue(i)->toLocal().asTypedValue());
+    coll->add(*ar->getValue(i)->toLocal().asTypedValue());
   }
 }
 

@@ -273,8 +273,8 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
     auto vector = req::make<c_Vector>();
     for (int32_t idx = m_cap - 1; idx >= 0; --idx) {
-      TypedValue child = make_tv<KindOfObject>(m_children[idx].m_child);
-      vector->add(&child);
+      auto const child = make_tv<KindOfObject>(m_children[idx].m_child);
+      vector->add(child);
     }
     AsioSession::Get()->onAwaitAllCreate(this, Variant(std::move(vector)));
   }

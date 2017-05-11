@@ -485,13 +485,13 @@ void append(ObjectData* obj, TypedValue* val) {
   assertx(val->m_type != KindOfUninit);
   switch (obj->collectionType()) {
     case CollectionType::Vector:
-      static_cast<c_Vector*>(obj)->add(val);
+      static_cast<c_Vector*>(obj)->add(*val);
       break;
     case CollectionType::Map:
-      static_cast<c_Map*>(obj)->add(val);
+      static_cast<c_Map*>(obj)->add(*val);
       break;
     case CollectionType::Set:
-      static_cast<c_Set*>(obj)->add(val);
+      static_cast<c_Set*>(obj)->add(*val);
       break;
     case CollectionType::ImmVector:
     case CollectionType::ImmMap:

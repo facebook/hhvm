@@ -1152,10 +1152,10 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          vec->addFront(args->getValueRef(pos).asCell());
+          vec->addFront(*args->getValueRef(pos).asCell());
         }
       }
-      vec->addFront(var.asCell());
+      vec->addFront(*var.asCell());
       return make_tv<KindOfInt64>(vec->size());
     }
     case CollectionType::Set: {
@@ -1164,10 +1164,10 @@ TypedValue HHVM_FUNCTION(array_unshift,
         auto pos_limit = args->iter_end();
         for (ssize_t pos = args->iter_last(); pos != pos_limit;
              pos = args->iter_rewind(pos)) {
-          st->addFront(args->getValueRef(pos).asCell());
+          st->addFront(*args->getValueRef(pos).asCell());
         }
       }
-      st->addFront(var.asCell());
+      st->addFront(*var.asCell());
       return make_tv<KindOfInt64>(st->size());
     }
     case CollectionType::Map:
@@ -2002,7 +2002,7 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
                                            TypedValue* strTv,
                                            bool convertIntLikeStrs) {
   if (c.m_type == KindOfInt64) {
-    mp->set(c.m_data.num, intOneTv);
+    mp->set(c.m_data.num, *intOneTv);
   } else {
     StringData* s;
     if (LIKELY(isStringType(c.m_type))) {
@@ -2015,9 +2015,9 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
       if (RuntimeOption::EvalHackArrCompatNotices) raise_intish_index_cast();
-      mp->set(n, intOneTv);
+      mp->set(n, *intOneTv);
     } else {
-      mp->set(s, intOneTv);
+      mp->set(s, *intOneTv);
     }
   }
 }
@@ -2094,7 +2094,7 @@ static void containerValuesIntersectHelper(const req::ptr<c_Set>& st,
     const auto& val = *iter.secondRefPlus().asCell();
     assert(val.m_type == KindOfInt64);
     if (val.m_data.num == count) {
-      st->add(iter.first().asCell());
+      st->add(*iter.first().asCell());
     }
   }
 }
@@ -2132,7 +2132,7 @@ static void containerKeysIntersectHelper(const req::ptr<c_Set>& st,
     const auto& val = *iter.secondRefPlus().asCell();
     assert(val.m_type == KindOfInt64);
     if (val.m_data.num == count) {
-      st->add(iter.first().asCell());
+      st->add(*iter.first().asCell());
     }
   }
 }

@@ -1113,7 +1113,7 @@ uint64_t mapIssetImpl(c_Map* map, key_type<keyType> key) {
 template<KeyType keyType>
 void mapSetImpl(c_Map* map, key_type<keyType> key, Cell value) {
   // XXX: we should call this directly from the TC.
-  map->set(key, &value);
+  map->set(key, value);
 }
 
 //////////////////////////////////////////////////////////////////////

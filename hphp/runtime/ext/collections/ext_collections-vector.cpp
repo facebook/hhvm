@@ -135,7 +135,7 @@ BaseVector::php_filter(const Variant& callback) {
       throw_collection_modified();
     }
     if (b) {
-      nv->addRaw(&data()[i]);
+      nv->addRaw(data()[i]);
     }
   }
   return Object{std::move(nv)};
@@ -188,7 +188,7 @@ BaseVector::php_takeWhile(const Variant& fn) {
       }
     }
     if (!b) break;
-    vec->addRaw(&data()[i]);
+    vec->addRaw(data()[i]);
   }
   return Object{std::move(vec)};
 }
@@ -242,7 +242,7 @@ BaseVector::php_skipWhile(const Variant& fn) {
     if (!b) break;
   }
   for (; i < m_size; ++i) {
-    vec->addRaw(&data()[i]);
+    vec->addRaw(data()[i]);
   }
   return Object{std::move(vec)};
 }
@@ -347,7 +347,7 @@ void BaseVector::addAllImpl(const Variant& t) {
       }
     },
     [this](const TypedValue* item) {
-      add(tvToCell(item));
+      add(*tvToCell(item));
     });
 
   if (UNLIKELY(!ok)) {
@@ -430,8 +430,8 @@ void BaseVector::grow() {
   reserveImpl(newCap);
 }
 
-void BaseVector::addFront(const TypedValue* val) {
-  assert(val->m_type != KindOfRef);
+void BaseVector::addFront(TypedValue tv) {
+  assert(tv.m_type != KindOfRef);
   if (m_capacity <= m_size) {
     grow();
   } else {
@@ -440,7 +440,7 @@ void BaseVector::addFront(const TypedValue* val) {
   assert(canMutateBuffer());
   ++m_version;
   memmove(data()+1, data(), m_size * sizeof(TypedValue));
-  cellDup(*val, data()[0]);
+  cellDup(tv, data()[0]);
   incSize();
 }
 

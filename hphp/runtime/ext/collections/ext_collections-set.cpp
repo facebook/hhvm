@@ -430,7 +430,7 @@ BaseSet::php_map(const Variant& callback) {
       g_context->invokeFuncFew(ctx, argc, argv)
     );
     if (UNLIKELY(m_version != pVer)) throw_collection_modified();
-    set->addRaw(cbRet.asTypedValue());
+    set->addRaw(*cbRet.asTypedValue());
   }
   // ... and shrink back if that was incorrect
   set->shrinkIfCapacityTooHigh(oldCap);

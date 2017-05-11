@@ -289,28 +289,21 @@ and emit_null_coalesce e1 e2 =
 and emit_cast hint expr =
   let op =
     begin match hint with
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.int
-        || id = SN.Typehints.integer ->
-      instr (IOp CastInt)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.bool
-        || id = SN.Typehints.boolean ->
-      instr (IOp CastBool)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.string ->
-      instr (IOp CastString)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.object_cast ->
-      instr (IOp CastObject)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.array ->
-      instr (IOp CastArray)
-    | A.Happly((_, id), [])
-      when id = SN.Typehints.real
-        || id = SN.Typehints.double
-        || id = SN.Typehints.float ->
-      instr (IOp CastDouble)
+    | A.Happly((_, id), []) ->
+      let id = String.lowercase_ascii id in
+      begin match id with
+      | _ when id = SN.Typehints.int
+            || id = SN.Typehints.integer -> instr (IOp CastInt)
+      | _ when id = SN.Typehints.bool
+            || id = SN.Typehints.boolean -> instr (IOp CastBool)
+      | _ when id = SN.Typehints.string -> instr (IOp CastString)
+      | _ when id = SN.Typehints.object_cast -> instr (IOp CastObject)
+      | _ when id = SN.Typehints.array -> instr (IOp CastArray)
+      | _ when id = SN.Typehints.real
+            || id = SN.Typehints.double
+            || id = SN.Typehints.float -> instr (IOp CastDouble)
+      | _ -> emit_nyi "cast type"
+      end
       (* TODO: unset *)
     | _ ->
       emit_nyi "cast type"
@@ -1717,7 +1710,7 @@ and emit_lval_op op expr1 opt_expr2 =
       let rhs_instrs, rhs_stack_size =
         match opt_expr2 with
         | None -> empty, 0
-      | Some e -> from_expr e, 1 in
+        | Some e -> from_expr e, 1 in
       emit_lval_op_nonlist op expr1 rhs_instrs rhs_stack_size
 
 and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
@@ -1805,26 +1798,44 @@ and emit_lval_op_nonlist op (_, expr_) rhs_instrs rhs_stack_size =
       final_instr
     ]
 
+  | A.Unop (uop, e) ->
+    gather [
+      rhs_instrs;
+      emit_lval_op_nonlist op e empty rhs_stack_size;
+      from_unop uop;
+    ]
+
   | _ ->
     gather [
       emit_nyi "lval expression";
       rhs_instrs;
     ]
 
-and emit_unop op e =
+and from_unop op =
   let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
+    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
+  in
   match op with
-  | A.Utild -> gather [from_expr e; instr (IOp BitNot)]
-  | A.Unot -> gather [from_expr e; instr (IOp Not)]
+  | A.Utild -> instr (IOp BitNot)
+  | A.Unot -> instr (IOp Not)
+  | A.Uplus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
+  | A.Uminus -> instr (IOp (if ints_overflow_to_ints then Sub else SubO))
+  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usplat ->
+    emit_nyi "unop - probably does not need translation"
+
+and emit_unop op e =
+  let unop_instr = from_unop op in
+  match op with
+  | A.Utild -> gather [from_expr e; unop_instr]
+  | A.Unot -> gather [from_expr e; unop_instr]
   | A.Uplus -> gather
     [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (IOp (if ints_overflow_to_ints then Add else AddO))]
+    unop_instr]
   | A.Uminus -> gather
     [instr (ILitConst (Int (Int64.zero)));
     from_expr e;
-    instr (IOp (if ints_overflow_to_ints then Sub else SubO))]
+    unop_instr]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     begin match unop_to_incdec_op op with
     | None -> emit_nyi "incdec"

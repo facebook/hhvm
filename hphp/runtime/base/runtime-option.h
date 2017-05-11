@@ -104,6 +104,7 @@ struct RuntimeOption {
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static std::string ServerUser; // run server under this user account
+  static bool AllowRunAsRoot; // Allow running hhvm as root.
 
   static int  MaxSerializedStringSize;
   static bool NoInfiniteRecursionDetection;

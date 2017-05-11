@@ -261,6 +261,8 @@ std::shared_ptr<IpBlockMap> RuntimeOption::IpBlocks;
 std::vector<std::shared_ptr<SatelliteServerInfo>>
   RuntimeOption::SatelliteServerInfos;
 
+bool RuntimeOption::AllowRunAsRoot = false; // Allow running hhvm as root.
+
 int RuntimeOption::XboxServerThreadCount = 10;
 int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
 int RuntimeOption::XboxServerPort = 0;
@@ -1596,6 +1598,7 @@ void RuntimeOption::Load(
                  "Server.AllowDuplicateCookies", !EnableHipHopSyntax);
     Config::Bind(PathDebug, ini, config, "Server.PathDebug", false);
     Config::Bind(ServerUser, ini, config, "Server.User", "");
+    Config::Bind(AllowRunAsRoot, ini, config, "Server.AllowRunAsRoot", false);
   }
 
   VirtualHost::SortAllowedDirectories(AllowedDirectories);

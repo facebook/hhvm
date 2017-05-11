@@ -105,6 +105,7 @@
 #include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
 #include <folly/portability/Stdlib.h>
+#include <folly/portability/Unistd.h>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/options_description.hpp>
@@ -939,8 +940,14 @@ static int start_server(const std::string &username, int xhprof) {
         Cronolog::changeOwner(username, el.second.symLink);
       }
     }
-    Capability::ChangeUnixUser(username);
+    if (!Capability::ChangeUnixUser(username, RuntimeOption::AllowRunAsRoot)) {
+      _exit(1);
+    }
     LightProcess::ChangeUser(username);
+  } else if (getuid() == 0 && !RuntimeOption::AllowRunAsRoot) {
+    Logger::Error("hhvm not allowed to run as root unless "
+                  "-vServer.AllowRunAsRoot=1 is used.");
+    _exit(1);
   }
   Capability::SetDumpable();
 #endif

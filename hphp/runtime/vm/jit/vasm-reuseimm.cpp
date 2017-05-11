@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-
 #include "hphp/runtime/vm/jit/vasm.h"
 
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -50,7 +49,6 @@ struct ImmState {
 
 struct Env {
   Vunit& unit;
-  int max_span;
   std::vector<ImmState> immStateVec;
 };
 
@@ -78,8 +76,7 @@ folly::Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
     }
     if ((p < q) && (q < (p + 4095))) {
       reg = elem.base;
-//    return folly::Optional<int>(safe_cast<int>(-safe_cast<int>(q - p)));
-      return folly::Optional<int>(safe_cast<int>(safe_cast<int>(p - q)));
+      return folly::Optional<int>(safe_cast<int>(p - q));
     }
   }
   return folly::none;
@@ -88,7 +85,7 @@ folly::Optional<int> reuseCandidate(Env& env, int64_t p, Vreg& reg) {
 template <typename Inst>
 void reuseImmq(Env& env, const Inst& inst, Vlabel b, size_t i) {
   // leaky bucket
-  env.immStateVec[i % env.max_span] = ImmState{};
+  env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan] = ImmState{};
 }
 
 template<typename ReuseImm>
@@ -99,36 +96,36 @@ void reuseimm_impl(Vunit& unit, Vlabel b, size_t i, ReuseImm reuse) {
 void reuseImmq(Env& env, const ldimmq& ld, Vlabel b, size_t i) {
   if (isMultiword(ld.s.q())) {
     Vreg base;
-    folly::Optional<int> off = reuseCandidate(env, ld.s.q(), base);
+    auto const off = reuseCandidate(env, ld.s.q(), base);
 
     if (off.hasValue()) {
-//    if (off.value() >= 0 ) {
-        reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
-          v << addqi{off.value(), base, ld.d, v.makeReg()};
-        });
-//    } else {
-//      reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
-//        v << subqi{-off.value(), base, ld.d, v.makeReg()};
-//      });
-//    }
-    return;
+      reuseimm_impl(env.unit, b, i, [&] (Vout& v) {
+        v << addqi{off.value(), base, ld.d, v.makeReg()};
+      });
+      return;
     }
   }
-  env.immStateVec[i % env.max_span] = ImmState{ld.s, ld.d};
+  env.immStateVec[i % RuntimeOption::EvalJitLdimmqSpan] = ImmState{ld.s, ld.d};
 }
 
 void reuseImmq(Env& env, Vlabel b, size_t i) {
   assertx(i <= env.unit.blocks[b].code.size());
-  auto const& inst = env.unit.blocks[b].code[i];
+  auto& inst = env.unit.blocks[b].code[i];
 
   if (isBlockEnd(inst) || isCall(inst)) {
     for (auto &elem : env.immStateVec) elem.reset();
-  } else if (inst.op == Vinstr::ldimmq) {
-    reuseImmq(env, inst.ldimmq_, b, i);
-  } else {
-    reuseImmq(env, inst, b, i);
+    return;
+  } 
+
+  switch (inst.op) {
+#define O(name, ...)                      \
+    case Vinstr::name:                    \
+      reuseImmq(env, inst.name##_, b, i); \
+      break;
+
+    VASM_OPCODES
+#undef O
   }
-  return;
 }
 
 }
@@ -140,17 +137,18 @@ void reuseImmq(Vunit& unit) {
 
   if (RuntimeOption::EvalJitLdimmqSpan <= 0) return;
 
-  Env env { unit, RuntimeOption::EvalJitLdimmqSpan };
-  env.immStateVec.reserve(env.max_span);
+  Env env {unit};
+  env.immStateVec.resize(RuntimeOption::EvalJitLdimmqSpan);
 
   auto const labels = sortBlocks(unit);
 
-  for (auto const b : labels) {
-    // required for initial size of vector
-    for (auto i = 0; i < env.max_span; i++) {
-      env.immStateVec.push_back(ImmState{});
-    }
+  // required for initial size of vector
+  for (auto i = 0; i < RuntimeOption::EvalJitLdimmqSpan; i++) {
+    env.immStateVec.push_back(ImmState{});
+  }
 
+  for (auto const b : labels) {
+    for (auto &elem : env.immStateVec) elem.reset();
     for (size_t i = 0; i < blocks[b].code.size(); ++i) {
       reuseImmq(env, b, i);
     }

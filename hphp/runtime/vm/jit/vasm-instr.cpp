@@ -84,7 +84,9 @@ bool isCall(const Vinstr& inst) {
     case Vinstr::callstub:
     case Vinstr::calltc:
     case Vinstr::tailcallphp:
+    case Vinstr::tailcallstub:
     case Vinstr::vcall:
+    case Vinstr::vcallarray:
     case Vinstr::vinvoke:
       return true;
     default:

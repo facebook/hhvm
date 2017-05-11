@@ -22,17 +22,10 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
     if function_is_async
     then Some (gather [instr_null; instr_retc])
     else None in
-  Emit_expression.set_namespace (ast_fun.Ast.f_namespace);
-  let body_instrs,
-      function_decl_vars,
-      function_num_iters,
-      function_num_cls_ref_slots,
-      function_params,
-      function_return_type,
-      function_is_generator,
-      function_is_pair_generator =
-    Emit_body.from_ast
+  let function_body, function_is_generator, function_is_pair_generator =
+    Emit_body.emit_body
       ~scope:[Ast_scope.ScopeItem.Function ast_fun]
+      ~is_closure_body:false
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~default_dropthrough
       ~return_value:instr_null
@@ -40,18 +33,12 @@ let from_ast : Ast.fun_ -> Hhas_function.t =
       ast_fun.Ast.f_params
       ast_fun.Ast.f_ret
       [Ast.Stmt (Ast.Block ast_fun.Ast.f_body)] in
-  let function_body = instr_seq_to_list body_instrs in
   let function_attributes =
     Emit_attribute.from_asts ast_fun.Ast.f_user_attributes in
   Hhas_function.make
     function_attributes
     function_name
-    function_params
-    function_return_type
     function_body
-    function_decl_vars
-    function_num_iters
-    function_num_cls_ref_slots
     function_is_async
     function_is_generator
     function_is_pair_generator

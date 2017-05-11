@@ -14,7 +14,7 @@ type t = {
   hhas_fun     : Hhas_function.t list;
   hhas_classes : Hhas_class.t list;
   hhas_typedefs: Hhas_typedef.t list;
-  hhas_main    : Hhas_main.t;
+  hhas_main    : Hhas_body.t;
 }
 
 let make hhas_fun hhas_classes hhas_typedefs hhas_main =
@@ -35,16 +35,17 @@ let main hhas_prog =
 open Instruction_sequence
 
 let emit_main defs =
-  let body_instrs, decl_vars, num_iters, num_cls_ref_slots, _, _, _, _ =
-    Emit_body.from_ast
+  let body, _is_generator, _is_pair_generator =
+    Emit_body.emit_body
       ~namespace:Namespace_env.empty_with_default_popt
+      ~is_closure_body:false
       ~skipawaitable:false
       ~scope:Ast_scope.Scope.toplevel
       ~return_value:(instr_int 1)
       ~default_dropthrough:None
-      [] None defs in
-  Hhas_main.make (Instruction_sequence.instr_seq_to_list body_instrs)
-    decl_vars num_iters num_cls_ref_slots
+      [] None defs
+  in
+    body
 
 open Closure_convert
 

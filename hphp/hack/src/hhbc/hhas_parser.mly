@@ -57,7 +57,9 @@ aliasdecl:
 ;
 maindecl:
     | MAINDIRECTIVE LBRACE nl numiters declvars nl functionbody RBRACE nl
-      {Hhas_main.make $7(*body*) $5(*declvars*) $4(*numiters*) 0(*numclsrefslots*)
+      {Hhas_body.make $7(*instrs*)
+        $5(*declvars*) $4(*numiters*)
+        0(*numclsrefslots*) [](*params*) None(*return type*)
       (* TODO: This is currently wrong, as it includes defcls and type alias
          instructions in the body. We strip the former later *)}
 ;
@@ -81,10 +83,13 @@ fundecl:
       functionflags LBRACE nl numiters numclsrefslots declvars functionbody RBRACE
         {Hhas_function.make $2(*attributes*)
            (Hhbc_id.Function.from_raw_string $4)(*name*)
-            $5(*params*) $3(*typeinfo*) $12(*body*) $11(*declvars*)
-            $9 (*numiters*)
-            $10 (*numclsrefslots *)
-            (isasync $6) (isgenerator $6) (ispairgenerator $6) }
+             (Hhas_body.make $12(*instrs*)
+             $11(*declvars*)
+             $9 (*numiters*) $10 (*numclsrefslots *)
+             $5(*params*) $3(*typeinfo*))
+            (isasync $6)
+            (isgenerator $6)
+            (ispairgenerator $6)  }
 ;
 nl:
     | /* empty */ {()}
@@ -173,12 +178,14 @@ methoddecl:
     (List.mem "final" (snd $2))
     (List.mem "abstract" (snd $2))
     (Hhbc_id.Method.from_raw_string $4) (* name *)
-    $5 (* params *)
-    $3 (* return type *)
-    $12 (* method body *)
-    $11 (* declvars *)
-    $10 (* numiters *)
-    $9 (* num cls ref slots *)
+    (Hhas_body.make
+      $12 (* method instructions *)
+      $11 (* declvars *)
+      $10 (* numiters *)
+      $9 (* num cls ref slots *)
+      $5 (* params *)
+      $3 (* return type *)
+      )
     (List.mem "isAsync" $6)
     (List.mem "isGenerator" $6)
     (List.mem "isPairGenerator" $6)
@@ -340,16 +347,31 @@ enumtypeinfo:
       {Hhas_type_info.make $2 (Hhas_type_constraint.make None $3)}
 ;
 functionbody:
-    | /* empty */ {[]}
-    | instruction NEWLINE functionbody {$1 :: $3}
+    | /* empty */ {Instruction_sequence.empty}
+    | instruction NEWLINE functionbody {
+        Instruction_sequence.gather [Instruction_sequence.instr $1; $3]}
     | TRYFAULTDIRECTIVE ID LBRACE NEWLINE functionbody nl RBRACE nl
        functionbody
-       {Hhbc_ast.ITry(Hhbc_ast.TryFaultBegin (makelabel $2))
-       :: ($5 @ (Hhbc_ast.ITry(Hhbc_ast.TryFaultEnd) :: $9)) }
+       { Instruction_sequence.gather [
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryFaultBegin (makelabel $2)));
+           $5;
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryFaultEnd));
+           $9
+        ]
+      }
     | TRYCATCHDIRECTIVE ID LBRACE NEWLINE functionbody nl RBRACE nl
        functionbody
-       {Hhbc_ast.ITry(Hhbc_ast.TryCatchBegin (makelabel $2))
-       :: ($5 @ (Hhbc_ast.ITry(Hhbc_ast.TryCatchEnd) :: $9)) }
+       { Instruction_sequence.gather
+         [
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchBegin (makelabel $2)));
+           $5;
+           Instruction_sequence.instr (
+             Hhbc_ast.ITry(Hhbc_ast.TryCatchEnd));
+           $9
+         ] }
 ;
 instruction:
     | ID COLON            {makelabelinst $1}

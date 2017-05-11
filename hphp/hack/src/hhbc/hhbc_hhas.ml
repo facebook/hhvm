@@ -550,6 +550,7 @@ let string_of_misc instruction =
       sep ["CreateCl"; string_of_int n; string_of_int cid]
     | Idx -> "Idx"
     | ArrayIdx -> "ArrayIdx"
+    | InitThisLoc id -> sep ["InitThisLoc"; string_of_local_id id]
     | _ -> failwith "instruct_misc Not Implemented"
 
 let string_of_iterator instruction =
@@ -874,38 +875,35 @@ let string_of_param p =
 let string_of_params ps =
   "(" ^ String.concat ", " (List.map string_of_param ps) ^ ")"
 
+let add_indent buf indent = B.add_string buf (String.make indent ' ')
+let add_indented_line buf indent str =
+  add_indent buf indent;
+  B.add_string buf str;
+  B.add_string buf "\n"
+
 let add_num_cls_ref_slots buf indent num_cls_ref_slots =
-  if num_cls_ref_slots = 0 then () else begin
-  B.add_string buf (String.make indent ' ');
-  B.add_string buf ".numclsrefslots ";
-  B.add_string buf (Printf.sprintf "%d" num_cls_ref_slots);
-  B.add_string buf ";\n"
-  end
+  if num_cls_ref_slots <> 0
+  then add_indented_line buf indent
+    (Printf.sprintf ".numclsrefslots %d;" num_cls_ref_slots)
 
-let add_decl_vars buf indent decl_vars = if decl_vars = [] then () else begin
-  B.add_string buf (String.make indent ' ');
-  B.add_string buf ".declvars ";
-  B.add_string buf @@ String.concat " " decl_vars;
-  B.add_string buf ";\n"
-  end
+let add_decl_vars buf indent decl_vars =
+  if decl_vars <> []
+  then add_indented_line buf indent
+    (".declvars " ^ String.concat " " decl_vars ^ ";")
 
-let add_num_iters buf indent num_iters = if num_iters = 0 then () else begin
-  B.add_string buf (String.make indent ' ');
-  B.add_string buf ".numiters ";
-  B.add_string buf (Printf.sprintf "%d" num_iters);
-  B.add_string buf ";\n"
-  end
+let add_num_iters buf indent num_iters =
+  if num_iters <> 0
+  then add_indented_line buf indent
+    (Printf.sprintf ".numiters %d;" num_iters)
 
-(* Emit .numiters, .clsrefslots, and .declvars
- * Also set up count of named locals and parameters
- *)
-let add_code_info buf indent num_cls_ref_slots num_iters decl_vars params =
-  begin
-    add_num_iters buf indent num_iters;
-    add_num_cls_ref_slots buf indent num_cls_ref_slots;
-    add_decl_vars buf indent decl_vars;
-    total_named_locals := List.length decl_vars + List.length params
-  end
+let add_body buf indent body =
+  add_num_iters buf indent (Hhas_body.num_iters body);
+  add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
+  add_decl_vars buf indent (Hhas_body.decl_vars body);
+  total_named_locals := List.length (Hhas_body.decl_vars body) +
+    List.length (Hhas_body.params body);
+  add_instruction_list buf indent
+    (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))
 
 let function_attributes f =
   let user_attrs = Hhas_function.attributes f in
@@ -915,12 +913,9 @@ let function_attributes f =
 
 let add_fun_def buf fun_def =
   let function_name = Hhas_function.name fun_def in
-  let function_return_type = Hhas_function.return_type fun_def in
-  let function_params = Hhas_function.params fun_def in
   let function_body = Hhas_function.body fun_def in
-  let function_decl_vars = Hhas_function.decl_vars fun_def in
-  let function_num_iters = Hhas_function.num_iters fun_def in
-  let function_num_cls_ref_slots = Hhas_function.num_cls_ref_slots fun_def in
+  let function_return_type = Hhas_body.return_type function_body in
+  let function_params = Hhas_body.params function_body in
   let function_is_async = Hhas_function.is_async fun_def in
   let function_is_generator = Hhas_function.is_generator fun_def in
   let function_is_pair_generator = Hhas_function.is_pair_generator fun_def in
@@ -933,10 +928,7 @@ let add_fun_def buf fun_def =
   if function_is_async then B.add_string buf " isAsync";
   if function_is_pair_generator then B.add_string buf " isPairGenerator";
   B.add_string buf " {\n";
-  add_code_info buf 2
-    function_num_cls_ref_slots function_num_iters function_decl_vars
-    function_params;
-  add_instruction_list buf 2 function_body;
+  add_body buf 2 function_body;
   B.add_string buf "}\n"
 
 let method_attributes m =
@@ -953,16 +945,10 @@ let method_attributes m =
   text
 
 let add_method_def buf method_def =
-  (* TODO: In the original codegen sometimes a missing return type is not in
-  the text at all and sometimes it is <"" N  > -- which should we generate,
-  and when? *)
   let method_name = Hhas_method.name method_def in
-  let method_return_type = Hhas_method.return_type method_def in
-  let method_params = Hhas_method.params method_def in
   let method_body = Hhas_method.body method_def in
-  let method_num_cls_ref_slots = Hhas_method.num_cls_ref_slots method_def in
-  let method_decl_vars = Hhas_method.decl_vars method_def in
-  let method_num_iters = Hhas_method.num_iters method_def in
+  let method_return_type = Hhas_body.return_type method_body in
+  let method_params = Hhas_body.params method_body in
   let method_is_async = Hhas_method.is_async method_def in
   let method_is_generator = Hhas_method.is_generator method_def in
   let method_is_pair_generator = Hhas_method.is_pair_generator method_def in
@@ -977,10 +963,7 @@ let add_method_def buf method_def =
   if method_is_pair_generator then B.add_string buf " isPairGenerator";
   if method_is_closure_body then B.add_string buf " isClosureBody";
   B.add_string buf " {\n";
-  add_code_info buf 4
-    method_num_cls_ref_slots method_num_iters method_decl_vars
-    method_params;
-  add_instruction_list buf 4 method_body;
+  add_body buf 4 method_body;
   B.add_string buf "  }"
 
 let class_special_attributes c =
@@ -1122,8 +1105,9 @@ let add_data_region_element buf argument =
   end
 
 let add_data_region buf top_level_body functions classes =
-  let rec add_data_region_list buf instr =
-    List.iter (add_data_region_aux buf) instr
+  let rec add_data_region_list buf instrs =
+    List.iter (add_data_region_aux buf)
+    (Instruction_sequence.instr_seq_to_list instrs)
   and add_data_region_aux buf = function
     | ILitConst (Array argument
                 | Dict argument
@@ -1134,29 +1118,24 @@ let add_data_region buf top_level_body functions classes =
     | _ -> ()
   and iter_aux_fun buf fun_def =
     let function_body = Hhas_function.body fun_def in
-    add_data_region_list buf function_body
+    let instrs = Hhas_body.instrs function_body in
+    add_data_region_list buf instrs
   and iter_aux_class buf class_def =
     let methods = Hhas_class.methods class_def in
     List.iter (iter_aux_method buf) methods
   and iter_aux_method buf method_def =
     let method_body = Hhas_method.body method_def in
-    add_data_region_list buf method_body
+    let instrs = Hhas_body.instrs method_body in
+    add_data_region_list buf instrs
   in
-  add_data_region_list buf top_level_body;
+  add_data_region_list buf (Hhas_body.instrs top_level_body);
   List.iter (iter_aux_fun buf) functions;
   List.iter (iter_aux_class buf) classes;
   B.add_string buf "\n"
 
 let add_top_level buf hhas_prog =
-  let main = Hhas_program.main hhas_prog in
-  let main_stmts = Hhas_main.body main in
-  let main_decl_vars = Hhas_main.decl_vars main in
-  let main_num_iters = Hhas_main.num_iters main in
-  let main_num_cls_ref_slots = Hhas_main.num_cls_ref_slots main in
-  let fun_name = ".main {\n" in
-  B.add_string buf fun_name;
-  add_code_info buf 2 main_num_cls_ref_slots main_num_iters main_decl_vars [];
-  add_instruction_list buf 2 main_stmts;
+  B.add_string buf ".main {\n";
+  add_body buf 2 (Hhas_program.main hhas_prog);
   B.add_string buf "}\n"
 
 let add_typedef buf typedef =
@@ -1169,7 +1148,7 @@ let add_typedef buf typedef =
 let add_program buf hhas_prog =
   B.add_string buf "#starts here\n";
   let functions = Hhas_program.functions hhas_prog in
-  let top_level_body = Hhas_main.body @@ Hhas_program.main hhas_prog in
+  let top_level_body = Hhas_program.main hhas_prog in
   let classes = Hhas_program.classes hhas_prog in
   add_data_region buf top_level_body functions classes;
   add_top_level buf hhas_prog;

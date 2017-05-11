@@ -47,6 +47,10 @@ let namespace = ref Namespace_env.empty_with_default_popt
 let get_namespace () = !namespace
 let set_namespace ns = namespace := ns
 
+let needs_local_this = ref false
+let get_needs_local_this () = !needs_local_this
+let set_needs_local_this n = needs_local_this := n
+
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -188,6 +192,7 @@ let rec expr_and_newc instr_to_add_new instr_to_add = function
 and emit_local x =
   let scope = get_scope () in
   if x = SN.SpecialIdents.this && Ast_scope.Scope.has_this scope
+    && not (get_needs_local_this ())
   then instr (IMisc (BareThis Notice))
   else
   if x = SN.Superglobals.globals
@@ -1322,7 +1327,9 @@ and emit_arg i ((_, expr_) as e) =
       instr (ICall (FPassG i))
     ]
 
-  | A.Lvar (_, x) when not (is_local_this x) -> instr_fpassl i (Local.Named x)
+  | A.Lvar (_, x)
+    when not (is_local_this x) || get_needs_local_this () ->
+    instr_fpassl i (Local.Named x)
 
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
     gather [

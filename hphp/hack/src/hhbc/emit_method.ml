@@ -59,17 +59,11 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda :: scope else scope in
   let namespace = ast_class.Ast.c_namespace in
-  let body_instrs,
-      method_decl_vars,
-      method_num_iters,
-      method_num_cls_ref_slots,
-      method_params,
-      method_return_type,
-      method_is_generator,
-      method_is_pair_generator =
-    Emit_body.from_ast
+  let method_body, method_is_generator, method_is_pair_generator =
+    Emit_body.emit_body
       ~scope:scope
       ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
+      ~is_closure_body:method_is_closure_body
       ~default_dropthrough
       ~return_value:instr_null
       ~namespace
@@ -93,18 +87,15 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     if List.mem vars "$this"
     then remove_this vars @ ["$this"]
     else vars in
+  let method_decl_vars = Hhas_body.decl_vars method_body in
   let method_decl_vars =
     if method_is_closure_body
     then
       let method_decl_vars = move_this method_decl_vars in
       "$0Closure" :: captured_vars @
       List.filter method_decl_vars (fun v -> not (List.mem captured_vars v))
-    else
-      if method_is_static
-      then move_this method_decl_vars
-      else remove_this method_decl_vars
-  in
-  let method_body = instr_seq_to_list body_instrs in
+    else move_this method_decl_vars in
+  let method_body = Hhas_body.with_decl_vars method_body method_decl_vars in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -114,12 +105,7 @@ let from_ast : Ast.class_ -> Ast.method_ -> Hhas_method.t =
     method_is_final
     method_is_abstract
     method_id
-    method_params
-    method_return_type
     method_body
-    method_decl_vars
-    method_num_iters
-    method_num_cls_ref_slots
     method_is_async
     method_is_generator
     method_is_pair_generator

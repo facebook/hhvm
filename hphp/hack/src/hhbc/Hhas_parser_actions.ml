@@ -87,7 +87,7 @@ let attribute_from_string s =
    | None -> report_error "attribute from string failed"
 
 type decl =
- | Main_decl of Hhas_main.t
+ | Main_decl of Hhas_body.t
  | Fun_decl of Hhas_function.t
  | Class_decl of Hhas_class.t
  | Data_decl of (int*Typed_value.t)
@@ -124,22 +124,22 @@ match i with
                     | None -> report_error "keyset name missing")
  | _ -> i
 
+let rewrite_instrs_in_body dds body =
+  let instrs = Hhas_body.instrs body in
+  let newinstrs = Instruction_sequence.InstrSeq.map instrs (rewriteinstr dds) in
+  Hhas_body.with_instrs body newinstrs
+
 let rewritefundecl dds fd =
   Hhas_function.with_body fd
-                          (List.map (rewriteinstr dds) (Hhas_function.body fd))
+    (rewrite_instrs_in_body dds (Hhas_function.body fd))
 
 let rewritemethoddecl dds md =
-  Hhas_method.with_body md (List.map (rewriteinstr dds) (Hhas_method.body md))
+  Hhas_method.with_body md
+    (rewrite_instrs_in_body dds (Hhas_method.body md))
 
 let rewriteclassdecl dds cd =
   Hhas_class.with_methods cd
                     (List.map (rewritemethoddecl dds) (Hhas_class.methods cd))
-
-let rewritemaindecl dds md =
-  Hhas_main.make (List.map (rewriteinstr dds) (Hhas_main.body md))
-                 (Hhas_main.decl_vars md)
-                 (Hhas_main.num_iters md)
-                 (Hhas_main.num_cls_ref_slots md)
 
 let rec splitdecllist ds funs classes optmain datadecls aliasdecls =
  match ds with
@@ -149,7 +149,8 @@ let rec splitdecllist ds funs classes optmain datadecls aliasdecls =
   | Main_decl md :: rest ->
    (match optmain with
     | None -> splitdecllist rest funs classes
-                    (Some (rewritemaindecl datadecls md)) datadecls aliasdecls
+                  (Some (rewrite_instrs_in_body datadecls md))
+                  datadecls aliasdecls
     | Some _ -> report_error "duplicate main")
   (* We rewrite functions according to current datadecls.
      Order is a bit dubious, but it seems to work ok when decls are at the top,

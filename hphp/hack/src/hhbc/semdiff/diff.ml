@@ -487,67 +487,26 @@ let method_header_comparer =
   classes is special, and I'm a bit worried about aliasing
   between low-numbered unnamed and named - surely that means
   order does matter? *)
-let function_decl_vars_comparer =
-  wrap Hhas_function.decl_vars (fun _f s -> s)
-                               (primitive_set_comparer (fun s -> s))
+let body_decl_vars_comparer =
+  wrap Hhas_body.decl_vars (fun _f s -> s)
+                           (primitive_set_comparer (fun s -> s))
 
-let method_decl_vars_comparer =
-  wrap Hhas_method.decl_vars (fun _f s -> s)
-                             (primitive_set_comparer (fun s -> s))
+let body_num_iters_comparer =
+wrap Hhas_body.num_iters (fun _ s -> "numiters = " ^ s) int_comparer
 
-let main_decl_vars_comparer =
-wrap Hhas_main.decl_vars (fun _f s -> s)
-                             (primitive_set_comparer (fun s -> s))
-let main_num_iters_comparer =
-wrap Hhas_main.num_iters (fun _ s -> "numiters = " ^ s) int_comparer
-
-let function_num_iters_comparer =
-wrap Hhas_function.num_iters (fun _ s -> "numiters = " ^ s) int_comparer
-
-let method_num_iters_comparer =
-wrap Hhas_method.num_iters (fun _ s -> "numiters = " ^ s) int_comparer
-
-let main_num_cls_ref_slots_comparer =
-wrap Hhas_main.num_cls_ref_slots (fun _ s -> "numclsrefslots = " ^ s)
+let body_num_cls_ref_slots_comparer =
+wrap Hhas_body.num_cls_ref_slots (fun _ s -> "numclsrefslots = " ^ s)
      int_comparer
 
-let function_num_cls_ref_slots_comparer =
-wrap Hhas_function.num_cls_ref_slots (fun _ s -> "numclsrefslots = " ^ s)
-     int_comparer
-
-let method_num_cls_ref_slots_comparer =
-wrap Hhas_method.num_cls_ref_slots (fun _ s -> "numclsrefslots = " ^ s)
-     int_comparer
-
-let main_iters_cls_ref_slots_comparer =
+let body_iters_cls_ref_slots_comparer =
 join (fun s1 s2 -> s1 ^ "\n" ^ s2)
- main_num_iters_comparer
- main_num_cls_ref_slots_comparer
+ body_num_iters_comparer
+ body_num_cls_ref_slots_comparer
 
-let function_iters_cls_ref_slots_comparer =
-join (fun s1 s2 -> s1 ^ "\n" ^ s2)
- function_num_iters_comparer
- function_num_cls_ref_slots_comparer
-
-let method_iters_cls_ref_slots_comparer =
+let body_iters_cls_ref_slots_decl_vars_comparer =
  join (fun s1 s2 -> s1 ^ "\n" ^ s2)
-  method_num_iters_comparer
-  method_num_cls_ref_slots_comparer
-
-let main_iters_cls_ref_slots_decl_vars_comparer =
- join (fun s1 s2 -> s1 ^ "\n" ^ s2)
-  main_iters_cls_ref_slots_comparer
-  main_decl_vars_comparer
-
-let function_iters_cls_ref_slots_decl_vars_comparer =
- join (fun s1 s2 -> s1 ^ "\n" ^ s2)
-    function_iters_cls_ref_slots_comparer
-    function_decl_vars_comparer
-
-let method_iters_cls_ref_slots_decl_vars_comparer =
- join (fun s1 s2 -> s1 ^ "\n" ^ s2)
-    method_iters_cls_ref_slots_comparer
-    method_decl_vars_comparer
+  body_iters_cls_ref_slots_comparer
+  body_decl_vars_comparer
 
 (* string_of_instruction already appends a newline, so remove it *)
 let droplast s = String.sub s 0 (String.length s - 1)
@@ -588,34 +547,30 @@ let instruct_list_comparer_with_semdiff = {
   string_of = instruct_list_comparer.string_of;
 }
 
-let function_body_comparer =
+let body_comparer =
  join (fun s1 s2 -> s1 ^ "\n" ^ s2)
-      function_iters_cls_ref_slots_decl_vars_comparer
-      (wrap Hhas_function.body (fun _f s -> s)
+      body_iters_cls_ref_slots_decl_vars_comparer
+      (wrap
+        (fun b -> Instruction_sequence.instr_seq_to_list (Hhas_body.instrs b))
+        (fun _f s -> s)
             instruct_list_comparer_with_semdiff)
+
+let function_body_comparer =
+  wrap Hhas_function.body (fun _ s -> s) body_comparer
+
+let method_body_comparer =
+  wrap Hhas_method.body (fun _ s -> s) body_comparer
 
 let function_header_body_comparer =
  join (fun s1 s2 -> s1 ^ "{\n" ^ s2 ^ "}\n") function_header_comparer
                                              function_body_comparer
 
-let method_body_comparer =
-join (fun s1 s2 -> s1 ^ "\n" ^ s2)
-     method_iters_cls_ref_slots_decl_vars_comparer
-     (wrap Hhas_method.body (fun _f s -> s)
-           instruct_list_comparer_with_semdiff)
-
 let method_header_body_comparer =
 join (fun s1 s2 -> s1 ^ "{\n" ^ s2 ^ "}\n") method_header_comparer
                                             method_body_comparer
 
-let main_comparer =
-join (fun s1 s2 -> "{" ^ "\n" ^ s1 ^ "\n" ^ s2 ^ "}\n")
- main_iters_cls_ref_slots_decl_vars_comparer
- (wrap Hhas_main.body (fun _m s -> s)
-  instruct_list_comparer_with_semdiff)
-
 let program_main_comparer =
- wrap Hhas_program.main (fun _p s -> s) main_comparer
+ wrap Hhas_program.main (fun _p s -> s) body_comparer
 
 let functions_alist_comparer =
  alist_comparer function_header_body_comparer (fun fname -> fname)

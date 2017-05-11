@@ -118,7 +118,7 @@ let memoize_function_with_params params renamed_name =
     to the first intruction poorly, but we know there will never be any such
     branch in this method. *)
     instr_entrynop;
-    Emit_body.emit_method_prolog params;
+    Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     instr_dict (Typed_value.Dict []);
     instr_staticlocinit static_local static_memoize_cache;
     param_code_sets params (param_count + 1);
@@ -151,9 +151,10 @@ let memoize_function compiled =
   let renamed_name =
     Hhbc_id.Function.add_suffix original_name memoize_suffix in
   let renamed = Hhas_function.with_name compiled renamed_name in
-  let params = Hhas_function.params compiled in
-  let body = memoized_function_body params renamed_name in
-  let body = instr_seq_to_list body in
+  let body = Hhas_function.body compiled in
+  let params = Hhas_body.params body in
+  let body_instrs = memoized_function_body params renamed_name in
+  let body = Hhas_body.with_instrs body body_instrs in
   let memoized = Hhas_function.with_body compiled body in
   (renamed, memoized)
 
@@ -254,7 +255,7 @@ let memoize_instance_method_with_params params original_name total_count index =
   gather [
     (* Why do we emit a no-op that cannot be removed here? *)
     instr_entrynop;
-    Emit_body.emit_method_prolog params;
+    Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     instr_checkthis;
     index_block;
     param_code_sets params first_parameter_local;
@@ -358,7 +359,7 @@ let memoize_static_method_with_params params original_name class_name =
     (Hhbc_id.Method.to_raw_string original_name) in
   gather [
     instr_entrynop;
-    Emit_body.emit_method_prolog params;
+    Emit_body.emit_method_prolog ~params ~needs_local_this:false;
     param_code_sets params param_count;
     instr_string (original_name_lc ^ multi_memoize_cache);
     instr_string (Hhbc_id.Class.to_raw_string class_name);
@@ -372,7 +373,6 @@ let memoize_static_method_with_params params original_name class_name =
     instr_label label;
     instr_ugetcunop;
     instr_popu;
-    (* TODO: The strings have extra leading slashes unnecessarily *)
     instr_string (original_name_lc ^ multi_memoize_cache);
     instr_string (Hhbc_id.Class.to_raw_string class_name);
     instr_clsrefgetc;
@@ -402,15 +402,14 @@ let memoize_method method_ memoizer =
     Hhbc_id.Method.add_suffix original_name memoize_suffix in
   let renamed = Hhas_method.with_name method_ renamed_name in
   let renamed = Hhas_method.make_private renamed in
-  let params = Hhas_method.params method_ in
-  let body = memoizer params original_name in
-  let body = rewrite_class_refs body in
-  let num_cls_ref_slots = get_num_cls_ref_slots body in
-  let body = instr_seq_to_list body in
+  let body = Hhas_method.body method_ in
+  let params = Hhas_body.params body in
+  let instrs = memoizer params original_name in
+  let instrs = rewrite_class_refs instrs in
+  let num_cls_ref_slots = get_num_cls_ref_slots instrs in
+  let body = Hhas_body.with_instrs body instrs in
+  let body = Hhas_body.with_num_cls_ref_slots body num_cls_ref_slots in
   let memoized = Hhas_method.with_body method_ body in
-  let memoized =
-    Hhas_method.with_num_cls_ref_slots memoized num_cls_ref_slots
-  in
   (renamed, memoized)
 
 let memoize_instance_method method_ total_count index =
@@ -431,7 +430,8 @@ let null_init = Some (Typed_value.Null)
 let add_instance_properties class_ =
   let folder (count, zero_params) method_ =
     if is_memoized_instance method_ then
-      (count + 1, zero_params || (Hhas_method.params method_ = []) )
+      (count + 1, zero_params ||
+        Core_list.is_empty (Hhas_body.params (Hhas_method.body method_)))
     else
       (count, zero_params) in
   let methods = Hhas_class.methods class_ in
@@ -474,7 +474,7 @@ let is_memoized_static method_ =
 let add_static_properties class_ =
   let folder class_ method_ =
     if is_memoized_static method_ then
-      let params = Hhas_method.params method_ in
+      let params = Hhas_body.params (Hhas_method.body method_) in
       let original_name =
         Hhbc_id.Prop.from_ast_name
         (String.lowercase_ascii @@ Hhbc_id.Method.to_raw_string

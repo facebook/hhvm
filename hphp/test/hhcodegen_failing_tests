@@ -102,8 +102,6 @@ quick/exception_many_locals.php
 quick/exceptions.php
 quick/exceptions2.php
 quick/exceptions3.php
-quick/exceptions5.php
-quick/exceptions6.php
 quick/exceptions7.php
 quick/exceptions8.php
 quick/exit.php
@@ -135,8 +133,6 @@ quick/generator_varargs.php
 quick/generator_vars.php
 quick/get_class.php
 quick/get_class_methods2.php
-quick/get_class_methods3.php
-quick/get_class_methods4.php
 quick/getter-magic.php
 quick/global-obj-dtor.php
 quick/guard-bug.php
@@ -272,8 +268,6 @@ quick/prop_order.php
 quick/prop_order_parens.php
 quick/properties-dynamic.php
 quick/properties2.php
-quick/properties3.php
-quick/property_exists.php
 quick/pseudomain1.php
 quick/reassign_this2.php
 quick/reassign_this3.php

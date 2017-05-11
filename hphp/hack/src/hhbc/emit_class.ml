@@ -22,7 +22,6 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
   let method_attributes = [] in
   let params, instrs =
     Label_rewriter.relabel_function params body in
-  let method_body = instr_seq_to_list instrs in
   let method_is_final = false in
   let method_is_private = is_private in
   let method_is_protected = false in
@@ -35,6 +34,13 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
   let method_is_generator = false in
   let method_is_pair_generator = false in
   let method_is_closure_body = false in
+  let method_body = Hhas_body.make
+    instrs
+    method_decl_vars
+    method_num_iters
+    method_num_cls_ref_slots
+    params
+    method_return_type in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -44,12 +50,7 @@ let make_86method ~name ~params ~is_static ~is_private ~is_abstract body =
     method_is_final
     is_abstract
     (Hhbc_id.Method.from_ast_name name)
-    params
-    method_return_type
     method_body
-    method_decl_vars
-    method_num_iters
-    method_num_cls_ref_slots
     method_is_async
     method_is_generator
     method_is_pair_generator
@@ -238,7 +239,6 @@ let from_ast : A.class_ -> Hhas_class.t =
           class_xhp_use_attributes]
   in
   Label.reset_label ();
-  Emit_expression.set_namespace ast_class.Ast.c_namespace;
   let class_properties = List.concat_map class_body from_class_elt_classvars in
   let class_constants =
     List.concat_map class_body from_class_elt_constants in

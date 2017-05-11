@@ -17,8 +17,13 @@ let has_type_constraint ti =
   | Some ti when (Hhas_type_info.has_type_constraint ti) -> true
   | _ -> false
 
-let emit_method_prolog params =
-  gather (List.filter_map params (fun p ->
+let emit_method_prolog ~params ~needs_local_this =
+  gather (
+    (if needs_local_this
+    then instr (IMisc (InitThisLoc (Local.Named "$this")))
+    else empty)
+    ::
+    List.filter_map params (fun p ->
     let param_type_info = Hhas_param.type_info p in
     let param_name = Hhas_param.name p in
     if has_type_constraint param_type_info
@@ -27,42 +32,6 @@ let emit_method_prolog params =
 
 let tparams_to_strings tparams =
   List.map tparams (fun (_, (_, s), _) -> s)
-
-module ULS = Unique_list_string
-
-let add_local locals (_, name) =
-  if name = "$GLOBALS" then locals else ULS.add locals name
-
-class declvar_visitor = object(this)
-  inherit [ULS.t] Ast_visitor.ast_visitor as _super
-
-  method! on_lvar locals id = add_local locals id
-  method! on_lvarvar locals _ id = add_local locals id
-  method! on_efun locals _fn use_list =
-    List.fold_left use_list ~init:locals
-      ~f:(fun locals (x, _isref) -> add_local locals x)
-  method! on_catch locals (_, x, b) =
-    this#on_block (add_local locals x) b
-  method! on_class_ locals _ = locals
-  method! on_fun_ locals _ = locals
-end
-
-
-(* Given an AST for a statement sequence, compute the local variables that
- * are referenced or defined in the block, in the order in which they appear.
- * Do not include function parameters or $GLOBALS, but *do* include $this
- *)
-let decl_vars_from_ast params b =
-  let visitor = new declvar_visitor in
-  let decl_vars = visitor#on_program ULS.empty b in
-  let param_names =
-    List.fold_left
-      params
-        ~init:ULS.empty
-        ~f:(fun l p -> ULS.add l @@ Hhas_param.name p)
-  in
-  let decl_vars = ULS.diff decl_vars param_names in
-  List.rev (ULS.items decl_vars)
 
 let rec emit_def def =
   match def with
@@ -84,13 +53,8 @@ let rec emit_def def =
   | Ast.Typedef td ->
     instr (IIncludeEvalDefine
       (DefTypeAlias (Hhbc_id.Class.from_ast_name (snd td.Ast.t_id))))
-  | Ast.Namespace((_, nsname), defs) ->
-    let nsname = match nsname with
-      | "" -> None
-      | _ -> Some nsname in
-    let new_nsenv = { (Emit_expression.get_namespace ()) with
-      Namespace_env.ns_name = nsname} in
-    Emit_expression.set_namespace new_nsenv;
+    (* We assume that SetNamespaceEnv does namespace setting *)
+  | Ast.Namespace(_, defs) ->
     gather (List.map defs emit_def)
   | Ast.SetNamespaceEnv nsenv ->
     Emit_expression.set_namespace nsenv;
@@ -109,15 +73,14 @@ let rec emit_defs defs =
     let i2 = emit_defs defs in
     gather [i1; i2]
 
-let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value ~namespace
-  params ret body =
+let emit_body ~scope ~is_closure_body ~skipawaitable ~default_dropthrough
+  ~return_value ~namespace params ret body =
   let tparams =
     List.map (Ast_scope.Scope.get_tparams scope) (fun (_, (_, s), _) -> s) in
   Label.reset_label ();
   Local.reset_local ();
   Iterator.reset_iterator ();
   Emit_expression.set_scope scope;
-  let params = Emit_param.from_asts ~namespace ~tparams ~params in
   let return_type_info =
     match ret with
     | None ->
@@ -133,6 +96,12 @@ let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value ~namespace
   Emit_statement.set_verify_return verify_return;
   Emit_statement.set_default_dropthrough default_dropthrough;
   Emit_statement.set_default_return_value return_value;
+  Emit_expression.set_namespace namespace;
+  let params = Emit_param.from_asts ~namespace ~tparams ~params in
+  let has_this = Ast_scope.Scope.has_this scope in
+  let needs_local_this, decl_vars =
+    Decl_vars.from_ast ~is_closure_body ~has_this ~params body in
+  Emit_expression.set_needs_local_this needs_local_this;
   let stmt_instrs = emit_defs body in
   let fault_instrs = extract_fault_instructions stmt_instrs in
   let begin_label, default_value_setters =
@@ -144,7 +113,7 @@ let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value ~namespace
   in
   let body_instrs = gather [
     begin_label;
-    emit_method_prolog params;
+    emit_method_prolog ~params ~needs_local_this;
     generator_instr;
     stmt_instrs;
     default_value_setters;
@@ -154,14 +123,14 @@ let from_ast ~scope ~skipawaitable ~default_dropthrough ~return_value ~namespace
   let body_instrs = rewrite_class_refs body_instrs in
   let params, body_instrs =
     Label_rewriter.relabel_function params body_instrs in
-  let function_decl_vars = decl_vars_from_ast params body in
   let num_iters = !Iterator.num_iterators in
   let num_cls_ref_slots = get_num_cls_ref_slots body_instrs in
-  body_instrs,
-  function_decl_vars,
-  num_iters,
-  num_cls_ref_slots,
-  params,
-  return_type_info,
-  is_generator,
-  is_pair_generator
+  Hhas_body.make
+    body_instrs
+    decl_vars
+    num_iters
+    num_cls_ref_slots
+    params
+    return_type_info,
+    is_generator,
+    is_pair_generator

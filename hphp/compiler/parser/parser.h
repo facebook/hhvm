@@ -532,7 +532,6 @@ public:
       None = 0,
       HH = 0x1,
       PHP7_ScalarTypes = 0x2,
-      PHP7_EngineExceptions = 0x4,
     };
 
     struct AutoAlias {

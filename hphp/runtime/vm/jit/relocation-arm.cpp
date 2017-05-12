@@ -236,7 +236,9 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
   if (!(src->IsPCRelAddressing() ||
         src->IsLoadLiteral() ||
         src->IsCondBranchImm() ||
-        src->IsUncondBranchImm())) return false;
+        src->IsUncondBranchImm() ||
+	src->IsCompareBranch() ||
+	src->IsTestBranch())) return false;
 
   auto target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget());
 
@@ -318,6 +320,55 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
         destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
         isRelative = false;
       }
+    } else if (src->IsCompareBranch()) {
+      imm >>= vixl::kInstructionSizeLog2;
+      if (!is_int19(imm) || env.far.count(src)) {
+        env.destBlock.setFrontier(destAddr);
+        destCount--;
+
+        vixl::MacroAssembler a { env.destBlock };
+        vixl::Label end;
+        auto const rt = vixl::Register(src->Rt(), 64);
+        auto const tmp = rVixlScratch0;
+        a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+	if (src->Mask(CompareBranchMask) == CBZ_x) {
+	  a.Cbnz(rt, &end);
+	} else {
+	  a.Cbz(rt, &end);
+	}
+        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Br(tmp);
+        a.bind(&end);
+        a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
+
+        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        isRelative = false;
+      }
+    } else if (src->IsTestBranch()) {
+      imm >>= vixl::kInstructionSizeLog2;
+      if (!is_int14(imm) || env.far.count(src)) {
+        env.destBlock.setFrontier(destAddr);
+        destCount--;
+
+        vixl::MacroAssembler a { env.destBlock };
+        vixl::Label end;
+        auto const bit_pos = src->ImmTestBranchBit40();
+        auto const rt = vixl::Register(src->Rt(), 64);
+        auto const tmp = rVixlScratch0;
+        a.SetScratchRegisters(vixl::NoReg, vixl::NoReg);
+	if (src->Mask(TestBranchMask) == TBZ) {
+	  a.Tbnz(rt, bit_pos, &end);
+	} else {
+	  a.Tbz(rt, bit_pos, &end);
+	}
+        a.Mov(tmp, src->ImmPCOffsetTarget());
+        a.Br(tmp);
+        a.bind(&end);
+        a.SetScratchRegisters(rVixlScratch0, rVixlScratch1);
+
+        destCount += (env.destBlock.frontier() - destAddr) / kInstructionSize;
+        isRelative = false;
+      }
     }
 
     // Update offset if it was NOT converted from relative to absolute
@@ -333,7 +384,9 @@ bool relocatePCRelative(Env& env, Instruction* src, Instruction* dest,
 
   // Update the exitAddr if it was requested for this translation.
   if ((src->IsCondBranchImm() ||
-       src->IsUncondBranchImm()) &&
+       src->IsUncondBranchImm() ||
+       src->IsCompareBranch() ||
+       src->IsTestBranch()) &&
       env.exitAddr) {
     *env.exitAddr = target;
   }
@@ -579,11 +632,15 @@ size_t relocateImpl(Env& env) {
            *   ADR/ADRP
            *   LDR (literal)
            *   B[.<cc>] (immediate)
+	   *   CB[N]Z
+	   *   TB[N]Z
            */
           if (src->IsPCRelAddressing() ||
               src->IsLoadLiteral() ||
               src->IsCondBranchImm() ||
-              src->IsUncondBranchImm()) {
+              src->IsUncondBranchImm() ||
+	      src->IsCompareBranch() ||
+	      src->IsTestBranch()) {
             auto old_target = reinterpret_cast<TCA>(src->ImmPCOffsetTarget());
             auto adjusted_target = env.rel.adjustedAddressAfter(old_target);
             auto new_target = adjusted_target ? adjusted_target : old_target;
@@ -601,7 +658,11 @@ size_t relocateImpl(Env& env) {
                 (src->IsCondBranchImm() &&
                  !is_int19(imm >> vixl::kInstructionSizeLog2)) ||
                 (src->IsUncondBranchImm() &&
-                 !is_int26(imm >> vixl::kInstructionSizeLog2))) {
+                 !is_int26(imm >> vixl::kInstructionSizeLog2)) ||
+                (src->IsCompareBranch() &&
+                 !is_int19(imm >> vixl::kInstructionSizeLog2)) ||
+                (src->IsTestBranch() &&
+                 !is_int14(imm >> vixl::kInstructionSizeLog2))) {
               FTRACE(3,
                      "relocate: PC relative instruction at {} has",
                      "internal reference 0x{:08x} which can't be adjusted.",
@@ -711,11 +772,15 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
    *   ADR/ADRP
    *   LDR (literal)
    *   B[.<cc>] (immediate)
+   *   CB[N]Z
+   *   TB[N]Z
    */
   if (instr->IsPCRelAddressing() ||
       instr->IsLoadLiteral() ||
       instr->IsCondBranchImm() ||
-      instr->IsUncondBranchImm()) {
+      instr->IsUncondBranchImm() ||
+      instr->IsCompareBranch() ||
+      instr->IsTestBranch()) {
 
     auto const target = reinterpret_cast<TCA>(instr->ImmPCOffsetTarget());
     auto const adjusted = rel.adjustedAddressAfter(target);
@@ -740,6 +805,14 @@ void adjustInstruction(RelocationInfo& rel, Instruction* instr,
         imm >>= vixl::kInstructionSizeLog2;
         always_assert_flog(is_int26(imm),
           "Can't adjust B, imm won't fit in 26 bits.\n");
+      } else if (instr->IsCompareBranch()) {
+        imm >>= vixl::kInstructionSizeLog2;
+        always_assert_flog(is_int19(imm),
+          "Can't adjust CB[N]Z, imm won't fit in 19 bits.\n");
+      } else if (instr->IsTestBranch()) {
+        imm >>= vixl::kInstructionSizeLog2;
+        always_assert_flog(is_int14(imm),
+          "Can't adjust TB[N]Z, imm won't fit in 14 bits.\n");
       }
 
       // Update offset

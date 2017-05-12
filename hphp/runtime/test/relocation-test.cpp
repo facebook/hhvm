@@ -112,6 +112,134 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
 }
 
 /*
+ * Tests relocating PC relative compare and branch
+ * to a sequence of a compare and branch and an absolute
+ * branch to register. See arm::relocatePCRelativeHelper()
+ *
+ *     cbz $rt, <target>
+ * to
+ *     cbnz $rt, <past>
+ *     movz/movk $tmp, <target>
+ *     br $tmp
+ */
+TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
+  if (arch() != Arch::ARM) {
+    SUCCEED();
+    return;
+  }
+
+  // 1. Init Blocks
+  CodeBlock main;
+  DataBlock data;
+  initBlocks(4096, main, data);
+  SCOPE_EXIT { freeBlocks(); };
+
+  // 2. Emit cbz <imm> of -0x40000 (19-bit int min)
+  auto start = main.frontier();
+
+  MacroAssembler a { main };
+  a.cbz(x0, -0x40000);
+  auto cbzOrig = Instruction::Cast(start);
+
+  auto end = main.frontier();
+
+  // 3. Call relocate()
+  RelocationInfo rel;
+  CGMeta meta;
+  AreaIndex ai;
+  auto instr = Instruction::Cast(end);
+  relocate(rel, main, start, end, main, meta, NULL, ai);
+
+  // 4. Expect cbnz, movz/movk X and br X where with imm in X
+  auto cbnz = instr;
+  EXPECT_TRUE(cbnz->Mask(LoadStoreUnsignedOffsetMask) == CBNZ_x);
+  const auto rt = cbnz->Rt();
+  EXPECT_EQ(cbzOrig->Rt(), rt);
+
+  auto movz = cbnz->NextInstruction();
+  EXPECT_TRUE(movz->IsMovz());
+  const auto rd = movz->Rd();
+  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->NextInstruction();
+  while (instr->IsMovk()) {
+    EXPECT_EQ(instr->Rd(), rd);
+    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->NextInstruction();
+  }
+  EXPECT_EQ(Instruction::Cast(target), cbzOrig->ImmPCOffsetTarget());
+
+  auto br = instr;
+  EXPECT_TRUE(br->IsUncondBranchReg());
+  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(cbnz->ImmPCOffsetTarget(), br->NextInstruction());
+}
+
+/*
+ * Tests relocating PC relative test bit and branch
+ * to a sequence of a test bit and branch and an absolute
+ * branch to register. See arm::relocatePCRelativeHelper()
+ *
+ *     tbz $rt, <bit_pos>, <target>
+ * to
+ *     tbnz $rt, <it_pos>, <past>
+ *     movz/movk $tmp, <target>
+ *     br $tmp
+ */
+TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
+  if (arch() != Arch::ARM) {
+    SUCCEED();
+    return;
+  }
+
+  // 1. Init Blocks
+  CodeBlock main;
+  DataBlock data;
+  initBlocks(4096, main, data);
+  SCOPE_EXIT { freeBlocks(); };
+
+  // 2. Emit tbz <imm> of -0x2000 (14-bit int min)
+  auto start = main.frontier();
+
+  MacroAssembler a { main };
+  a.tbz(x0, 3, -0x2000);
+  auto tbzOrig = Instruction::Cast(start);
+
+  auto end = main.frontier();
+
+  // 3. Call relocate()
+  RelocationInfo rel;
+  CGMeta meta;
+  AreaIndex ai;
+  auto instr = Instruction::Cast(end);
+  relocate(rel, main, start, end, main, meta, NULL, ai);
+
+  // 4. Expect tbnz, movz/movk X and br X where with imm in X
+  auto tbnz = instr;
+  EXPECT_TRUE(tbnz->Mask(LoadStoreUnsignedOffsetMask) == TBNZ);
+  const auto rt = tbnz->Rt();
+  EXPECT_EQ(tbzOrig->Rt(), rt);
+  const auto bit_pos = tbnz->ImmTestBranchBit40();
+  EXPECT_EQ(bit_pos, 3);
+
+  auto movz = tbnz->NextInstruction();
+  EXPECT_TRUE(movz->IsMovz());
+  const auto rd = movz->Rd();
+  uint64_t target = movz->ImmMoveWide() << (16 * movz->ShiftMoveWide());
+  instr = movz->NextInstruction();
+  while (instr->IsMovk()) {
+    EXPECT_EQ(instr->Rd(), rd);
+    target |= instr->ImmMoveWide() << (16 * instr->ShiftMoveWide());
+    instr = instr->NextInstruction();
+  }
+  EXPECT_EQ(Instruction::Cast(target), tbzOrig->ImmPCOffsetTarget());
+
+  auto br = instr;
+  EXPECT_TRUE(br->IsUncondBranchReg());
+  EXPECT_EQ(br->Rn(), rd);
+  EXPECT_EQ(tbnz->ImmPCOffsetTarget(), br->NextInstruction());
+}
+
+/*
  * See arm::relocateImmediateHelper().
  */
 TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {

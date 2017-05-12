@@ -410,37 +410,11 @@ let should_start_first_server t = match t with
     else
       true
 
+let is_managing = function
+  | Resigned -> false
+  | Active _ -> true
+
 let report informant server_state = match informant with
   | Resigned -> Informant_sig.Move_along
   | Active env ->
     Revision_tracker.make_report server_state env.revision_tracker
-
-(** This is useful only for testing.
- *
- * It oscillates between Move_along and Restart_server
- * every 3 seconds.
- * TODO: Consider injecting this version when injector config is improved. *)
-module Fake_informant = struct
-  type t = {
-    init_time : float;
-  }
-
-  include HhMonitorInformant_sig.Types
-
-  let init _ = {
-    init_time = Unix.time ();
-  }
-
-  let should_start_first_server _ = true
-
-  let report env _server_state =
-    let elapsed = Unix.time () -. env.init_time in
-    let multiple = int_of_float @@ floor @@ elapsed /. 6.0 in
-    let bucket = multiple mod 3 in
-    match bucket with
-      | 0 -> Informant_sig.Move_along
-      | 2 -> Informant_sig.Restart_server
-      | _ ->
-        (* Actually unreachable by modulus. *)
-        Informant_sig.Move_along
-end

@@ -445,7 +445,7 @@ let program_init genv =
   HackEventLogger.init_really_end init_type;
   env
 
-let setup_server options handle =
+let setup_server ~informant_managed options handle =
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   let (>>|) = Option.(>>|) in
@@ -475,6 +475,7 @@ let setup_server options handle =
   else HackEventLogger.init
     root
     init_id
+    informant_managed
     (Unix.gettimeofday ())
     lazy_parse
     lazy_init
@@ -499,7 +500,7 @@ let setup_server options handle =
   ServerEnvBuild.make_genv options config local_config handle, init_id
 
 let run_once options handle =
-  let genv, _ = setup_server options handle in
+  let genv, _ = setup_server ~informant_managed:false options handle in
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
@@ -513,7 +514,7 @@ let run_once options handle =
  * The server monitor will pass client connections to this process
  * via ic.
  *)
-let daemon_main_exn options (ic, oc) =
+let daemon_main_exn ~informant_managed options (ic, oc) =
   Printexc.record_backtrace true;
   let in_fd = Daemon.descr_of_in_channel ic in
   let out_fd = Daemon.descr_of_out_channel oc in
@@ -521,14 +522,14 @@ let daemon_main_exn options (ic, oc) =
   let handle = SharedMem.init (ServerConfig.sharedmem_config config) in
   SharedMem.connect handle ~is_master:true;
 
-  let genv, init_id = setup_server options handle in
+  let genv, init_id = setup_server ~informant_managed options handle in
   if ServerArgs.check_mode genv.options then
     (Hh_logger.log "Invalid program args - can't run daemon in check mode.";
     Exit_status.(exit Input_error));
   let env = MainInit.go genv options init_id (fun () -> program_init genv) in
   serve genv env in_fd out_fd
 
-let daemon_main (state, options) (ic, oc) =
+let daemon_main (informant_managed, state, options) (ic, oc) =
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
   (* Restore hhi files every time the server restarts
@@ -536,7 +537,7 @@ let daemon_main (state, options) (ic, oc) =
   ignore (Hhi.get_hhi_root());
 
   ServerUtils.with_exit_on_exception @@ fun () ->
-  daemon_main_exn options (ic, oc)
+  daemon_main_exn ~informant_managed options (ic, oc)
 
 
 let entry =

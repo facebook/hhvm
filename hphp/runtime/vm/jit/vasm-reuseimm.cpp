@@ -137,7 +137,7 @@ void reuseImmq(Vunit& unit) {
 
   if (RuntimeOption::EvalJitLdimmqSpan <= 0) return;
 
-  Env env {unit};
+  Env env { unit };
   env.immStateVec.resize(RuntimeOption::EvalJitLdimmqSpan);
 
   auto const labels = sortBlocks(unit);

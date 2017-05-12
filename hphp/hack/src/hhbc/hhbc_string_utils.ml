@@ -16,6 +16,9 @@ let strip_global_ns s =
   if String.length s > 0 || s.[0] = '\\'
   then String_utils.lstrip s "\\"
   else s
+let strip_ns s =
+  (* strip zero or more chars followed by a backslash *)
+  Str.replace_first (Str.regexp {|.*\\|}) "" s
 
 module Float = struct
   let to_string f = Printf.sprintf "%0.17g" f

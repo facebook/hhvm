@@ -465,13 +465,23 @@ and convert_afield env st afield =
     let st, e2 = convert_expr env st e2 in
     st, AFkvalue (e1, e2)
 
+let convert_params env st param_list =
+  let convert_param env st param = match param.param_expr with
+    | None -> st, param
+    | Some e ->
+      let st, e = convert_expr env st e in
+      st, { param with param_expr = Some e }
+  in
+  List.map_env st param_list (convert_param env)
+
 let convert_fun st fd =
   let fd =
     if constant_folding () then Ast_constant_folder.fold_function fd else fd in
   let env = env_with_function env_toplevel fd in
   let st = reset_function_count st in
   let st, block = convert_block env st fd.f_body in
-  st, { fd with f_body = block }
+  let st, params = convert_params env st fd.f_params in
+  st, { fd with f_body = block; f_params = params }
 
 let rec convert_class st cd =
   let env = env_with_class cd in

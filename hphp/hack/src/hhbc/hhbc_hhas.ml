@@ -765,10 +765,83 @@ and string_of_uop = function
   | A.Updecr
   | A.Usplat -> failwith "string_of_uop - should have been captures earlier"
 
+and string_of_hint ~ns h =
+  let h =
+    Emit_type_hint.fmt_hint
+      ~tparams:[]
+      ~namespace:Namespace_env.empty_with_default_popt
+      h
+  in
+  if ns then h else SU.strip_ns h
+
+and string_of_import_flavor = function
+  | A.Include -> "include"
+  | A.Require -> "require"
+  | A.IncludeOnce -> "include_once"
+  | A.RequireOnce -> "require_once"
+
+and string_of_fun f use_list =
+  let string_of_args p =
+    let hint =
+      Option.value_map p.A.param_hint ~default:"" ~f:(string_of_hint ~ns:true)
+    in
+    let is_ref = if p.A.param_is_reference then "&" else "" in
+    let name = snd @@ p.A.param_id in
+    let default_val =
+      Option.value_map
+        p.A.param_expr
+        ~default:""
+        ~f:(fun e -> " = " ^ (string_of_param_default_value e))
+    in
+    hint ^ " " ^ is_ref ^ name ^ default_val
+  in
+  let args = String.concat ", " @@ List.map string_of_args f.A.f_params in
+  let use_list_helper ((_, id), b) = (if b then "&" else "") ^ id in
+  let use_statement = match use_list with
+    | [] -> ""
+    | _ ->
+      "use ("
+      ^ (String.concat ", " @@ List.map use_list_helper use_list)
+      ^ ") "
+  in
+  (* TODO: Pretty print body for closure as a default value *)
+  let body = "NYI: default value closure body" in
+  "function ("
+  ^ args
+  ^ ") "
+  ^ use_statement
+  ^ "{"
+  ^ body
+  ^ "}\\n"
+
+and string_of_xml (_, id) attributes children =
+  let p = Pos.none in
+  let name = SU.Xhp.mangle id in
+  let attributes = string_of_param_default_value @@
+   (p, A.Array (
+    List.map (fun (id, e) -> A.AFkvalue ((p, A.Id id), e)) attributes))
+  in
+  let children = string_of_param_default_value @@
+   (p, A.Array (List.map (fun e -> A.AFvalue e) children))
+  in
+  "new "
+  ^ name
+  ^ "("
+  ^ attributes
+  ^ ", "
+  ^ children
+  ^ ", __FILE__, __LINE__)"
+
 and string_of_param_default_value expr =
+  let middle_aux e1 s e2 =
+    let e1 = string_of_param_default_value e1 in
+    let e2 = string_of_param_default_value e2 in
+    e1 ^ s ^ e2
+  in
   let expr = Ast_constant_folder.fold_expr expr in
   match snd expr with
   | A.Id (_, litstr)
+  | A.Id_type_arguments ((_, litstr), _)
   | A.Lvar (_, litstr)
   | A.Float (_, litstr)
   | A.Int (_, litstr) -> litstr
@@ -786,8 +859,10 @@ and string_of_param_default_value expr =
     name ^ "[" ^ string_of_afield_list afl ^ "]"
   | A.Collection ((_, name), afl) when
     name = "Set" || name = "Pair" || name = "Vector" || name = "Map" ||
-    name = "ImmSet " || name = "ImmVector" || name = "ImmMap" ->
+    name = "ImmSet" || name = "ImmVector" || name = "ImmMap" ->
     "HH\\\\" ^ name ^ "{" ^ string_of_afield_list afl ^ "}"
+  | A.Collection ((_, name), _) ->
+    "NYI - Default value for an unknown collection - " ^ name
   | A.Shape fl ->
     let fl =
       List.map
@@ -847,12 +922,34 @@ and string_of_param_default_value expr =
     let suffix = String.make n '}' in
     prefix ^ s ^ suffix
   | A.Unsafeexpr e -> string_of_param_default_value e
+  | A.Cast (h, e) ->
+    let h = string_of_hint ~ns: false h in
+    let e = string_of_param_default_value e in
+    "(" ^ h ^ ")" ^ e
+  | A.Pipe (e1, e2) -> middle_aux e1 " |> " e2
+  | A.NullCoalesce (e1, e2) -> middle_aux e1 " \\?\\? " e2
+  | A.InstanceOf (e1, e2) -> middle_aux e1 " instanceof " e2
+  | A.Varray es ->
+    string_of_param_default_value @@
+     (Pos.none, A.Array (List.map (fun e -> A.AFvalue e) es))
+  | A.Darray es ->
+    string_of_param_default_value @@
+     (Pos.none, A.Array (List.map (fun (e1, e2) -> A.AFkvalue (e1, e2)) es))
+  | A.Import (fl, e) ->
+    let fl = string_of_import_flavor fl in
+    let e = string_of_param_default_value e in
+    fl ^ " " ^ e
+  | A.Xml (id, attributes, children) ->
+    string_of_xml id attributes children
+  | A.Efun (f, use_list) -> string_of_fun f use_list
+  | A.Lfun _ ->
+    failwith "expected Lfun to be converted to Efun during closure conversion"
   | A.Dollardollar
   | A.Yield _
   | A.Yield_break
-  | A.Await _ -> failwith "illegal default value"
-  (* TODO: printing for other expressions *)
-  | _ -> "string_of_param_default_value - NYI"
+  | A.Await _
+  | A.List _
+  | A.Expr_list _ -> failwith "illegal default value"
 
 let string_of_param_default_value_option = function
   | None -> ""

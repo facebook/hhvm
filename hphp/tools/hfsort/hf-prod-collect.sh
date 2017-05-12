@@ -14,7 +14,7 @@ if [[ -z $HHVM_PID ]] ; then
     exit 1
 fi
 
-perf record -ag -e instructions -o /tmp/perf.data -- sleep ${SLEEP_TIME:-200}
+perf record -BN --no-buffering -ag -e instructions -o /tmp/perf.data -- sleep ${SLEEP_TIME:-200}
 
 perf script -i /tmp/perf.data --fields comm,pid,ip | sed -ne "/^[^   ]\+[   ]*$HHVM_PID[   ]*\$/,+2p" | $GZIP -c > $TMPDIR/perf.pds.gz
 

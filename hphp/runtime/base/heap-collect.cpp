@@ -62,6 +62,8 @@ struct Marker {
   // mark ambiguous pointers in the range [start,start+len)
   void conservativeScan(const void* start, size_t len);
 
+  static bool marked(const HeapObject* h) { return h->marks() & GCBits::Mark; }
+  static bool marked(const Header* h) { return marked(&h->hdr_); }
   bool mark(const void*, GCBits = GCBits::Mark);
   void checkedEnqueue(const void* p, GCBits bits);
   void finish_typescan();
@@ -83,11 +85,12 @@ struct Marker {
       tyindex == type_scan::kIndexUnknown;
   }
 
-  Counter allocd_, marked_, pinned_, freed_, unknown_; // bytes
+  Counter allocd_, marked_, pinned_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
   size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, unknown_ns_, sweep_ns_;
   size_t max_worklist_{0}; // max size of work_
+  size_t freed_bytes_{0};
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
@@ -156,10 +159,13 @@ DEBUG_ONLY bool checkEnqueuedKind(const Header* h) {
 }
 
 void Marker::checkedEnqueue(const void* p, GCBits bits) {
-  if (auto h = ptrs_.header(p)) {
+  if (auto r = ptrs_.region(p)) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
     // we'll skip it when we process the queue.
+    auto h = r->first;
     if (mark(h, bits)) {
+      marked_ += r->second;
+      pinned_ += bits == GCBits::Pin ? r->second : 0;
       enqueue(h);
       assert(checkEnqueuedKind(h));
     }
@@ -293,158 +299,43 @@ NEVER_INLINE void Marker::trace() {
   }
 }
 
-// check that headers have a "sensible" state during sweeping.
-DEBUG_ONLY bool check_sweep_header(const Header* h) {
-  switch (h->kind()) {
-    case HeaderKind::Packed:
-    case HeaderKind::Mixed:
-    case HeaderKind::Dict:
-    case HeaderKind::Empty:
-    case HeaderKind::VecArray:
-    case HeaderKind::Keyset:
-    case HeaderKind::Apc:
-    case HeaderKind::Globals:
-    case HeaderKind::Proxy:
-    case HeaderKind::String:
-    case HeaderKind::Resource:
-    case HeaderKind::Ref:
-      // ordinary counted objects
-      break;
-    case HeaderKind::Object:
-    case HeaderKind::Vector:
-    case HeaderKind::Map:
-    case HeaderKind::Set:
-    case HeaderKind::Pair:
-    case HeaderKind::ImmVector:
-    case HeaderKind::ImmMap:
-    case HeaderKind::ImmSet:
-    case HeaderKind::WaitHandle:
-    case HeaderKind::AwaitAllWH:
-      // objects; should not have native-data
-      assert(!h->obj_.getAttribute(ObjectData::HasNativeData));
-      break;
-    case HeaderKind::AsyncFuncFrame:
-    case HeaderKind::NativeData:
-    case HeaderKind::ClosureHdr:
-      // not counted but marked when embedded object is marked
-      break;
-    case HeaderKind::SmallMalloc:
-    case HeaderKind::BigMalloc:
-      // not counted but can be marked.
-      break;
-    case HeaderKind::Free:
-      // free memory; these should not be marked.
-      assert(!(h->hdr_.marks() & GCBits::Mark));
-      break;
-    case HeaderKind::AsyncFuncWH:
-    case HeaderKind::Closure:
-    case HeaderKind::BigObj:
-    case HeaderKind::Hole:
-      // These should never be encountered because they don't represent
-      // independent allocations.
-      assert(false && "invalid header kind");
-      break;
-  }
-  return true;
-}
-
 // another pass through the heap, this time using the PtrMap we computed
 // in init(). Free and maybe quarantine unmarked objects.
 NEVER_INLINE void Marker::sweep() {
-  auto const t0 = cpu_ns();
-  SCOPE_EXIT { sweep_ns_ = cpu_ns() - t0; };
   auto& mm = MM();
-  const bool use_quarantine = RuntimeOption::EvalQuarantine;
-  if (use_quarantine) mm.beginQuarantine();
-  SCOPE_EXIT { if (use_quarantine) mm.endQuarantine(); };
-  std::deque<std::pair<Header*,size_t>> defer;
+  auto const t0 = cpu_ns();
+  auto const usage0 = mm.currentUsage();
+  if (RuntimeOption::EvalQuarantine) mm.beginQuarantine();
+  SCOPE_EXIT {
+    if (RuntimeOption::EvalQuarantine) mm.endQuarantine();
+    freed_bytes_ = usage0 - mm.currentUsage();
+    sweep_ns_ = cpu_ns() - t0;
+    assert(freed_bytes_ >= 0);
+  };
+
+  g_context->sweepDynPropTable([&](const ObjectData* obj) {
+    auto h = ptrs_.header(obj);
+    return !h || !marked(h);
+  });
+
+  mm.sweepApcArrays([&](APCLocalArray* a) {
+    return !marked(a);
+  });
+
+  mm.sweepApcStrings([&](StringData* s) {
+    return !marked(s);
+  });
+
+  mm.initFree();
+
   ptrs_.iterate([&](const Header* hdr, size_t h_size) {
-    assert(check_sweep_header(hdr));
-    if (hdr->hdr_.marks() & GCBits::Mark) {
-      marked_ += h_size;
-      if (hdr->hdr_.marks() == GCBits::Pin) pinned_ += h_size;
-      return; // continue iterate loop
-    }
-    // when freeing objects below, do not run their destructors! we don't
-    // want to execute cascading decrefs or anything. the normal release()
-    // methods of refcounted classes aren't usable because they run dtors.
-    auto h = const_cast<Header*>(hdr);
-    switch (h->kind()) {
-      case HeaderKind::Packed:
-      case HeaderKind::Mixed:
-      case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::VecArray:
-      case HeaderKind::Keyset:
-      case HeaderKind::Globals:
-      case HeaderKind::Proxy:
-      case HeaderKind::Resource:
-      case HeaderKind::Ref:
-        freed_ += h_size;
-        mm.objFree(h, h_size);
-        break;
-      case HeaderKind::Object:
-      case HeaderKind::WaitHandle:
-      case HeaderKind::AwaitAllWH:
-      case HeaderKind::Vector:
-      case HeaderKind::Map:
-      case HeaderKind::Set:
-      case HeaderKind::Pair:
-      case HeaderKind::ImmVector:
-      case HeaderKind::ImmMap:
-      case HeaderKind::ImmSet:
-      case HeaderKind::AsyncFuncFrame:
-      case HeaderKind::ClosureHdr:
-      case HeaderKind::NativeData: {
-        auto obj = h->obj();
-        if (obj->getAttribute(ObjectData::HasDynPropArr)) {
-          defer.push_back({h, h_size});
-        } else {
-          freed_ += h_size;
-          mm.objFree(h, h_size);
-        }
-        break;
-      }
-      case HeaderKind::Apc:
-        freed_ += h_size;
-        h->apc_.reap(); // also atomic-dec underlying APCArray
-        break;
-      case HeaderKind::String:
-        freed_ += h_size;
-        h->str_.release(); // also maybe atomic-dec APCString
-        break;
-      case HeaderKind::SmallMalloc:
-      case HeaderKind::BigMalloc:
-        // Don't free malloc-ed allocations even if they're not reachable.
-        // NativeData types might leak these
-        break;
-      case HeaderKind::Free:
-        // should not be in ptrmap; fall through to assert
-      case HeaderKind::Hole:
-      case HeaderKind::BigObj:
-      case HeaderKind::AsyncFuncWH:
-      case HeaderKind::Closure:
-        assert(false && "skipped by forEachHeader()");
-        break;
+    if (!marked(hdr) &&
+        hdr->kind() != HeaderKind::Free &&
+        hdr->kind() != HeaderKind::SmallMalloc &&
+        hdr->kind() != HeaderKind::BigMalloc) {
+      mm.objFree(const_cast<Header*>(hdr), h_size);
     }
   });
-  // deferred items explicitly free auxilary blocks, so it's unsafe to
-  // sweep them while iterating over ptrs_.
-  for (auto& e : defer) {
-    auto h = e.first;
-    auto h_size = e.second;
-    freed_ += h_size;
-    if (isObjectKind(h->kind()) || h->kind() == HeaderKind::NativeData ||
-        h->kind() == HeaderKind::AsyncFuncFrame) {
-      assert(h->obj()->getAttribute(ObjectData::HasDynPropArr));
-      auto obj = h->obj();
-      // dynPropTable is a req::hash_map, so this will req::free junk
-      g_context->dynPropTable.erase(obj);
-      mm.objFree(h, h_size);
-    } else {
-      always_assert(false && "what other kinds need deferral?");
-    }
-  }
 }
 
 template<size_t NBITS> struct BloomFilter {
@@ -512,7 +403,7 @@ void logCollection(const char* phase, const Marker& mkr) {
       mkr.allocd_.bytes/1024/1024,
       100.0 * mkr.marked_.bytes / mkr.allocd_.bytes,
       100.0 * mkr.pinned_.bytes / mkr.allocd_.bytes,
-      mkr.freed_.bytes/1024.0/1024.0,
+      mkr.freed_bytes_/1024.0/1024.0,
       (mkr.cscanned_.bytes - mkr.cscanned_roots_.bytes)/1024.0/1024.0,
       (mkr.xscanned_.bytes - mkr.xscanned_roots_.bytes)/1024.0/1024.0
     );
@@ -537,7 +428,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("marked_bytes", mkr.marked_.bytes);
   sample.setInt("pinned_bytes", mkr.pinned_.bytes);
   sample.setInt("unknown_bytes", mkr.unknown_.bytes);
-  sample.setInt("freed_bytes", mkr.freed_.bytes);
+  sample.setInt("freed_bytes", mkr.freed_bytes_);
   sample.setInt("trigger_bytes", t_trigger);
   sample.setInt("cscanned_roots", mkr.cscanned_roots_.bytes);
   sample.setInt("xscanned_roots", mkr.xscanned_roots_.bytes);

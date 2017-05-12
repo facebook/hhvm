@@ -128,7 +128,6 @@ public:
   static APCLocalArray* asApcArray(ArrayData*);
   static const APCLocalArray* asApcArray(const ArrayData*);
 
-  void reap();
   void scan(type_scan::Scanner& scanner) const;
   size_t heapSize() const;
 

@@ -698,6 +698,7 @@ struct MemoryManager {
    */
   int64_t getAllocated() const;
   int64_t getDeallocated() const;
+  int64_t currentUsage() const;
 
   /*
    * Reset all stats that are synchronzied externally from the memory manager.
@@ -766,6 +767,8 @@ struct MemoryManager {
   void addApcArray(APCLocalArray*);
   void removeApcArray(APCLocalArray*);
   void addSweepable(Sweepable*);
+  template<class Fn> void sweepApcArrays(Fn fn);
+  template<class Fn> void sweepApcStrings(Fn fn);
 
   /////////////////////////////////////////////////////////////////////////////
   // Request profiling.

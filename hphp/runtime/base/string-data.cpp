@@ -382,19 +382,22 @@ StringData* StringData::MakeProxy(const APCString* apcstr) {
 #endif
 }
 
-NEVER_INLINE
-void StringData::releaseDataSlowPath() {
+void StringData::unProxy() {
   assert(isProxy());
-  assert(checkSane());
   proxy()->apcstr->unreference();
   delist();
+}
+
+NEVER_INLINE
+void StringData::releaseProxy() {
+  unProxy();
   MM().freeSmallSize(this, sizeof(StringData) + sizeof(Proxy));
 }
 
 void StringData::release() noexcept {
   assert(isRefCounted());
   assert(checkSane());
-  if (UNLIKELY(!isFlat())) return releaseDataSlowPath();
+  if (UNLIKELY(!isFlat())) return releaseProxy();
   if (LIKELY(m_aux16 < kNumSmallSizes)) {
     MM().freeSmallIndex(this, m_aux16);
   } else {

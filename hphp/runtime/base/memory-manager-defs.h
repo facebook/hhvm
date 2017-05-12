@@ -428,6 +428,31 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   }
 }
 
+template<class Fn> void MemoryManager::sweepApcArrays(Fn fn) {
+  for (size_t i = 0; i < m_apc_arrays.size();) {
+    auto a = m_apc_arrays[i];
+    if (fn(a)) {
+      a->sweep();
+      removeApcArray(a);
+    } else {
+      ++i;
+    }
+  }
+}
+
+template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
+  auto& head = getStringList();
+  for (StringDataNode *next, *n = head.next; n != &head; n = next) {
+    next = n->next;
+    assert(next && uintptr_t(next) != kSmallFreeWord);
+    assert(next && uintptr_t(next) != kMallocFreeWord);
+    auto const s = StringData::node2str(n);
+    if (fn(s)) {
+      s->unProxy();
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // information about heap objects, indexed by valid object starts.

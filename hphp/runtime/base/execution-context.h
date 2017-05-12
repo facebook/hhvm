@@ -481,6 +481,8 @@ public:
 
   bool setHeaderCallback(const Variant& callback);
 
+  template<class Fn> void sweepDynPropTable(Fn);
+
 private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>
   TypedValue invokeFuncImpl(const Func* f,

@@ -465,6 +465,8 @@ struct StringData final : MaybeCountable,
 
   bool checkSane() const;
 
+  void unProxy();
+
 private:
   struct Proxy {
     StringDataNode node;
@@ -491,7 +493,7 @@ private:
   bool isFlat() const;
 #endif
 
-  void releaseDataSlowPath();
+  void releaseProxy();
   int numericCompare(const StringData *v2) const;
   StringData* escalate(size_t cap);
   void enlist();

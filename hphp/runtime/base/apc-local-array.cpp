@@ -112,13 +112,6 @@ void APCLocalArray::Release(ArrayData* ad) {
   MM().objFree(a, size);
 }
 
-void APCLocalArray::reap() {
-  // free stuff without running destructor or decrefing contents
-  sweep();
-  MM().removeApcArray(this);
-  MM().objFree(this, heapSize());
-}
-
 size_t APCLocalArray::Vsize(const ArrayData*) { not_reached(); }
 
 bool APCLocalArray::IsVectorData(const ArrayData* ad) {

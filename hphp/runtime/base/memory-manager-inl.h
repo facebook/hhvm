@@ -324,6 +324,10 @@ inline int64_t MemoryManager::getDeallocated() const {
 #endif
 }
 
+inline int64_t MemoryManager::currentUsage() const {
+  return m_stats.mmUsage;
+}
+
 inline MemoryUsageStats MemoryManager::getStats() {
   refreshStats();
   return m_stats;

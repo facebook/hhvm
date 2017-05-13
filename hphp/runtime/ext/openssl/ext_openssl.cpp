@@ -2553,7 +2553,8 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
   gmadjust = -(thetime.tm_isdst ?
                (long)timezone - 3600 : (long)timezone);
 #endif
-  ret += gmadjust;
+  /* no adjustment for UTC */
+  if (timezone) ret += gmadjust;
   free(strbuf);
   return ret;
 }

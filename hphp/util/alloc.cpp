@@ -662,9 +662,11 @@ int jemalloc_pprof_disable() {
 
 int jemalloc_pprof_dump(const std::string& prefix, bool force) {
   if (!force) {
+    bool enabled = false;
     bool active = false;
-    // Check if profiling has been enabled before trying to dump.
-    int err = mallctlRead("opt.prof", &active, true);
+    // Check if profiling is active before trying to dump.
+    int err = mallctlRead("opt.prof", &enabled, true) ||
+      (enabled && mallctlRead("prof.active", &active, true));
     if (err || !active) {
       return 0; // nothing to do
     }

@@ -109,136 +109,136 @@ MemoryManager& MM();
   SIZE_CLASS(  0,      4,        4,      0,  4,             128) \
   SIZE_CLASS(  1,      4,        4,      1,  4,             128) \
   SIZE_CLASS(  2,      4,        4,      2,  4,             128) \
-  SIZE_CLASS(  3,      4,        4,      3,  4,              96) \
+  SIZE_CLASS(  3,      4,        4,      3,  4,              96) /* 64 */\
   \
   SIZE_CLASS(  4,      6,        4,      1,  4,              96) \
   SIZE_CLASS(  5,      6,        4,      2,  4,              96) \
   SIZE_CLASS(  6,      6,        4,      3,  4,              96) \
-  SIZE_CLASS(  7,      6,        4,      4,  4,              64) \
+  SIZE_CLASS(  7,      6,        4,      4,  4,              64) /* 128 */\
   \
   SIZE_CLASS(  8,      7,        5,      1,  5,              64) \
   SIZE_CLASS(  9,      7,        5,      2,  5,              64) \
   SIZE_CLASS( 10,      7,        5,      3,  5,              64) \
-  SIZE_CLASS( 11,      7,        5,      4,  5,              32) \
+  SIZE_CLASS( 11,      7,        5,      4,  5,              32) /* 256 */\
   \
   SIZE_CLASS( 12,      8,        6,      1,  6,              32) \
   SIZE_CLASS( 13,      8,        6,      2,  6,              32) \
   SIZE_CLASS( 14,      8,        6,      3,  6,              32) \
-  SIZE_CLASS( 15,      8,        6,      4,  6,              16) \
+  SIZE_CLASS( 15,      8,        6,      4,  6,              16) /* 512 */\
   \
   SIZE_CLASS( 16,      9,        7,      1,  7,              16) \
   SIZE_CLASS( 17,      9,        7,      2,  7,              16) \
   SIZE_CLASS( 18,      9,        7,      3,  7,              16) \
-  SIZE_CLASS( 19,      9,        7,      4,  7,               8) \
+  SIZE_CLASS( 19,      9,        7,      4,  7,               8) /* 1K */\
   \
   SIZE_CLASS( 20,     10,        8,      1,  8,               8) \
   SIZE_CLASS( 21,     10,        8,      2,  8,               8) \
   SIZE_CLASS( 22,     10,        8,      3,  8,               8) \
-  SIZE_CLASS( 23,     10,        8,      4,  8,               4) \
+  SIZE_CLASS( 23,     10,        8,      4,  8,               4) /* 2K */\
   \
   SIZE_CLASS( 24,     11,        9,      1,  9,               4) \
   SIZE_CLASS( 25,     11,        9,      2,  9,               4) \
   SIZE_CLASS( 26,     11,        9,      3,  9,               4) \
-  SIZE_CLASS( 27,     11,        9,      4,  9,               2) \
+  SIZE_CLASS( 27,     11,        9,      4,  9,               2) /* 4K */\
   \
   SIZE_CLASS( 28,     12,       10,      1, no,               2) \
   SIZE_CLASS( 29,     12,       10,      2, no,               2) \
   SIZE_CLASS( 30,     12,       10,      3, no,               2) \
-  SIZE_CLASS( 31,     12,       10,      4, no,               1) \
+  SIZE_CLASS( 31,     12,       10,      4, no,               1) /* 8K */\
   \
   SIZE_CLASS( 32,     13,       11,      1, no,               1) \
   SIZE_CLASS( 33,     13,       11,      2, no,               1) \
   SIZE_CLASS( 34,     13,       11,      3, no,               1) \
-  SIZE_CLASS( 35,     13,       11,      4, no,               1) \
+  SIZE_CLASS( 35,     13,       11,      4, no,               1) /* 16K */\
   \
   SIZE_CLASS( 36,     14,       12,      1, no,               1) \
   SIZE_CLASS( 37,     14,       12,      2, no,               1) \
   SIZE_CLASS( 38,     14,       12,      3, no,               1) \
-  SIZE_CLASS( 39,     14,       12,      4, no,               1) \
+  SIZE_CLASS( 39,     14,       12,      4, no,               1) /* 32K */\
   \
   SIZE_CLASS( 40,     15,       13,      1, no,               1) \
   SIZE_CLASS( 41,     15,       13,      2, no,               1) \
   SIZE_CLASS( 42,     15,       13,      3, no,               1) \
-  SIZE_CLASS( 43,     15,       13,      4, no,               1) \
+  SIZE_CLASS( 43,     15,       13,      4, no,               1) /* 64K */\
   \
   SIZE_CLASS( 44,     16,       14,      1, no,               1) \
   SIZE_CLASS( 45,     16,       14,      2, no,               1) \
   SIZE_CLASS( 46,     16,       14,      3, no,               1) \
-  SIZE_CLASS( 47,     16,       14,      4, no,               1) \
+  SIZE_CLASS( 47,     16,       14,      4, no,               1) /* 128K */\
   \
   SIZE_CLASS( 48,     17,       15,      1, no,               1) \
   SIZE_CLASS( 49,     17,       15,      2, no,               1) \
   SIZE_CLASS( 50,     17,       15,      3, no,               1) \
-  SIZE_CLASS( 51,     17,       15,      4, no,               1) \
+  SIZE_CLASS( 51,     17,       15,      4, no,               1) /* 256K */\
   \
   SIZE_CLASS( 52,     18,       16,      1, no,               1) \
   SIZE_CLASS( 53,     18,       16,      2, no,               1) \
   SIZE_CLASS( 54,     18,       16,      3, no,               1) \
-  SIZE_CLASS( 55,     18,       16,      4, no,               1) \
+  SIZE_CLASS( 55,     18,       16,      4, no,               1) /* 512K */\
   \
   SIZE_CLASS( 56,     19,       17,      1, no,               1) \
   SIZE_CLASS( 57,     19,       17,      2, no,               1) \
   SIZE_CLASS( 58,     19,       17,      3, no,               1) \
-  SIZE_CLASS( 59,     19,       17,      4, no,               1) \
+  SIZE_CLASS( 59,     19,       17,      4, no,               1) /* 1M */\
   \
   SIZE_CLASS( 60,     20,       18,      1, no,               1) \
   SIZE_CLASS( 61,     20,       18,      2, no,               1) \
   SIZE_CLASS( 62,     20,       18,      3, no,               1) \
-  SIZE_CLASS( 63,     20,       18,      4, no,               1) \
+  SIZE_CLASS( 63,     20,       18,      4, no,               1) /* 2M */\
   \
   SIZE_CLASS( 64,     21,       19,      1, no,               1) \
   SIZE_CLASS( 65,     21,       19,      2, no,               1) \
   SIZE_CLASS( 66,     21,       19,      3, no,               1) \
-  SIZE_CLASS( 67,     21,       19,      4, no,               1) \
+  SIZE_CLASS( 67,     21,       19,      4, no,               1) /* 4M */\
   \
   SIZE_CLASS( 68,     22,       20,      1, no,               1) \
   SIZE_CLASS( 69,     22,       20,      2, no,               1) \
   SIZE_CLASS( 70,     22,       20,      3, no,               1) \
-  SIZE_CLASS( 71,     22,       20,      4, no,               1) \
+  SIZE_CLASS( 71,     22,       20,      4, no,               1) /* 8M */\
   \
   SIZE_CLASS( 72,     23,       21,      1, no,               1) \
   SIZE_CLASS( 73,     23,       21,      2, no,               1) \
   SIZE_CLASS( 74,     23,       21,      3, no,               1) \
-  SIZE_CLASS( 75,     23,       21,      4, no,               1) \
+  SIZE_CLASS( 75,     23,       21,      4, no,               1) /* 16M */\
   \
   SIZE_CLASS( 76,     24,       22,      1, no,               1) \
   SIZE_CLASS( 77,     24,       22,      2, no,               1) \
   SIZE_CLASS( 78,     24,       22,      3, no,               1) \
-  SIZE_CLASS( 79,     24,       22,      4, no,               1) \
+  SIZE_CLASS( 79,     24,       22,      4, no,               1) /* 32M */\
   \
   SIZE_CLASS( 80,     25,       23,      1, no,               1) \
   SIZE_CLASS( 81,     25,       23,      2, no,               1) \
   SIZE_CLASS( 82,     25,       23,      3, no,               1) \
-  SIZE_CLASS( 83,     25,       23,      4, no,               1) \
+  SIZE_CLASS( 83,     25,       23,      4, no,               1) /* 64M */\
   \
   SIZE_CLASS( 84,     26,       24,      1, no,               1) \
   SIZE_CLASS( 85,     26,       24,      2, no,               1) \
   SIZE_CLASS( 86,     26,       24,      3, no,               1) \
-  SIZE_CLASS( 87,     26,       24,      4, no,               1) \
+  SIZE_CLASS( 87,     26,       24,      4, no,               1) /* 128M */\
   \
   SIZE_CLASS( 88,     27,       25,      1, no,               1) \
   SIZE_CLASS( 89,     27,       25,      2, no,               1) \
   SIZE_CLASS( 90,     27,       25,      3, no,               1) \
-  SIZE_CLASS( 91,     27,       25,      4, no,               1) \
+  SIZE_CLASS( 91,     27,       25,      4, no,               1) /* 256M */\
   \
   SIZE_CLASS( 92,     28,       26,      1, no,               1) \
   SIZE_CLASS( 93,     28,       26,      2, no,               1) \
   SIZE_CLASS( 94,     28,       26,      3, no,               1) \
-  SIZE_CLASS( 95,     28,       26,      4, no,               1) \
+  SIZE_CLASS( 95,     28,       26,      4, no,               1) /* 512M */\
   \
   SIZE_CLASS( 96,     29,       27,      1, no,               1) \
   SIZE_CLASS( 97,     29,       27,      2, no,               1) \
   SIZE_CLASS( 98,     29,       27,      3, no,               1) \
-  SIZE_CLASS( 99,     29,       27,      4, no,               1) \
+  SIZE_CLASS( 99,     29,       27,      4, no,               1) /* 1G */\
   \
   SIZE_CLASS(100,     30,       28,      1, no,               1) \
   SIZE_CLASS(101,     30,       28,      2, no,               1) \
   SIZE_CLASS(102,     30,       28,      3, no,               1) \
-  SIZE_CLASS(103,     30,       28,      4, no,               1) \
+  SIZE_CLASS(103,     30,       28,      4, no,               1) /* 2G */\
   \
   SIZE_CLASS(104,     31,       29,      1, no,               1) \
   SIZE_CLASS(105,     31,       29,      2, no,               1) \
-  SIZE_CLASS(106,     31,       29,      3, no,               1) \
+  SIZE_CLASS(106,     31,       29,      3, no,               1) /* 3.5G */\
 
 constexpr uint32_t kNumSizeClasses = 107;
 

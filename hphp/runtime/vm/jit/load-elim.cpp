@@ -100,6 +100,13 @@ struct State {
    * Currently available indexes in tracked.
    */
   ALocBits avail;
+
+  /*
+   * If we know a class' sprops or props are already initialized at this
+   * position.
+   */
+  jit::flat_set<const Class*> initSProps{};
+  jit::flat_set<const Class*> initProps{};
 };
 
 struct BlockInfo {
@@ -201,6 +208,29 @@ DEBUG_ONLY std::string show(const State& state) {
       folly::format(&ret, "  {: >3} = {}\n", idx, show(state.tracked[idx]));
     }
   }
+
+  folly::format(
+    &ret,
+    "  initSProps: {}\n",
+    [&] {
+      using namespace folly::gen;
+      return from(state.initSProps)
+        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
+        | unsplit<std::string>(",");
+    }()
+  );
+
+  folly::format(
+    &ret,
+    "  initProps: {}\n",
+    [&] {
+      using namespace folly::gen;
+      return from(state.initProps)
+        | map([&] (const Class* cls) { return cls->name()->toCppString(); })
+        | unsplit<std::string>(",");
+    }()
+  );
+
   return ret;
 }
 
@@ -437,6 +467,28 @@ Flags handle_general_effects(Local& env,
       }
     }
     break;
+
+  case CheckInitSProps:
+  case InitSProps: {
+    auto cls = inst.extra<ClassData>()->cls;
+    if (env.state.initSProps.count(cls) > 0) return FJmpNext{};
+    do {
+      // If we initialized a class' sprops, then it implies that all of its
+      // parent's sprops are initialized as well.
+      env.state.initSProps.insert(cls);
+      cls = cls->parent();
+    } while (cls);
+    break;
+  }
+
+  case CheckInitProps:
+  case InitProps: {
+    auto cls = inst.extra<ClassData>()->cls;
+    if (env.state.initProps.count(cls) > 0) return FJmpNext{};
+    // Unlike InitSProps, InitProps implies nothing about the class' parent.
+    env.state.initProps.insert(cls);
+    break;
+  }
 
   default:
     break;
@@ -907,6 +959,23 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
       }
     }
   );
+
+  // Properties must be initialized along both paths
+  for (auto it = dst.initSProps.begin(); it != dst.initSProps.end();) {
+    if (!src.initSProps.count(*it)) {
+      it = dst.initSProps.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  for (auto it = dst.initProps.begin(); it != dst.initProps.end();) {
+    if (!src.initProps.count(*it)) {
+      it = dst.initProps.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

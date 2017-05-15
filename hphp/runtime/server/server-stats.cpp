@@ -295,6 +295,25 @@ void ServerStats::SetThreadMode(ThreadMode mode) {
   ServerStats::s_logger->setThreadMode(mode);
 }
 
+ServerStats::ThreadMode ServerStats::GetThreadMode() {
+  return ServerStats::s_logger->m_threadStatus.m_mode;
+}
+
+const char* ServerStats::ThreadModeString(ThreadMode mode) {
+  switch (mode) {
+    case ThreadMode::Idling:
+      return "Idling";
+    case ThreadMode::Processing:
+      return "Processing";
+    case ThreadMode::Writing:
+      return "Writing";
+    case ThreadMode::PostProcessing:
+      return "PostProcessing";
+    default:
+      return "Unknown";
+  }
+}
+
 void ServerStats::SetThreadIOStatusAddress(const char *name) {
   ServerStats::s_logger->setThreadIOStatusAddress(name);
 }

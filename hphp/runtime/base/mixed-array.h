@@ -164,7 +164,7 @@ struct MixedArray final : ArrayData,
     int32_t hash;
 
     TYPE_SCAN_CUSTOM_FIELD(skey) {
-      if (hash < 0) scanner.scan(skey);
+      if (hash >= 0) scanner.scan(skey);
     }
   };
 

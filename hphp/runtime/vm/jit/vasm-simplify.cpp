@@ -321,25 +321,6 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool simplify(Env& env, const movzbl& inst, Vlabel b, size_t i) {
-  // movzbl{s, d}; shrli{2, s, d} --> ubfmli{2, 7, s, d}
-  return if_inst<Vinstr::shrli>(env, b, i + 1, [&](const shrli& sh) {
-    if (!(arch() == Arch::ARM &&
-      sh.s0.l() == 2 &&
-      env.use_counts[inst.d] == 1 &&
-      env.use_counts[sh.sf] == 0 &&
-      inst.d == sh.s1)) return false;
-
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      v << copy{inst.s, inst.d};
-      v << ubfmli{2, 7, inst.d, sh.d};
-      return 2;
-    });
-  });
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Perform peephole simplification at instruction `i' of block `b'.
  *

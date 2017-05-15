@@ -145,7 +145,7 @@ let rec splitdecllist ds funs classes optmain datadecls aliasdecls =
  match ds with
   | [] -> (match optmain with
            | None -> report_error "missing main"
-           | Some m -> Hhas_program.make funs classes aliasdecls m)
+           | Some m -> (datadecls, Hhas_program.make funs classes aliasdecls m))
   | Main_decl md :: rest ->
    (match optmain with
     | None -> splitdecllist rest funs classes

@@ -513,7 +513,53 @@ let droplast s = String.sub s 0 (String.length s - 1)
 let instruct_comparer = primitive_comparer
                         (fun i -> droplast (Hhbc_hhas.string_of_instruction i))
 
-let instruct_list_comparer = list_comparer instruct_comparer "\n"
+(* Hack to deal with adata needing to be looked up on the fly when printing
+   See get_array_identifier in hhbc_hhas to understand the issue
+*)
+let data_decls_ref1 = ref ([] : (int*Typed_value.t) list)
+let data_decls_ref2 = ref ([] : (int*Typed_value.t) list)
+exception Array_id
+let rec get_id_from_data_decl dd (tv : Typed_value.t) =
+ match dd with
+  | [] -> raise Array_id
+  | (n,tv') :: rest -> if tv = tv' then (n:int) else get_id_from_data_decl rest tv
+
+let my_string_of_instruction dd i =
+ let f s tv = s ^ " A_" ^ (string_of_int (get_id_from_data_decl dd tv)) in
+ match i with
+  | Hhbc_ast.ILitConst (Hhbc_ast.Array tv) -> f "Array" tv
+  | Hhbc_ast.ILitConst (Hhbc_ast.Dict tv) -> f "Dict" tv
+  | Hhbc_ast.ILitConst (Hhbc_ast.Vec tv) -> f "Vec" tv
+  | Hhbc_ast.ILitConst (Hhbc_ast.Keyset tv) -> f "Keyset" tv
+  | _ -> droplast (Hhbc_hhas.string_of_instruction i)
+
+(* this one's for use in larger contexts, where I can't tell which
+   program the instruction came from, so don't know where to look up
+   the data dictionary. Could refactor the whole diff library, but
+   expect a future diff to put the data dict in the program where it belongs
+   Note - even when that happens, we'll still need to thread the dictionary
+   through to the instruction comparison, to see if the data is the same, unless
+   we compare the dictionaries themselves as components of programs, which we
+   probably don't want to do, as we don't want to insist that they're identical.
+*)
+let stupid_string_of_instruction i =
+match i with
+ | Hhbc_ast.ILitConst (Hhbc_ast.Array _tv) -> "Array A_?"
+ | Hhbc_ast.ILitConst (Hhbc_ast.Dict _tv) -> "Dict A_?"
+ | Hhbc_ast.ILitConst (Hhbc_ast.Vec _tv) -> "Vec A_?"
+ | Hhbc_ast.ILitConst (Hhbc_ast.Keyset _tv) -> "Keyset A_?"
+ | _ -> droplast (Hhbc_hhas.string_of_instruction i)
+
+let my_instruct_comparer = {
+  comparer = (fun i1 i2 ->
+     if i1=i2 then (0,(1,""))
+     else (1,(1,subststring (my_string_of_instruction !data_decls_ref1 i1)
+                            (my_string_of_instruction !data_decls_ref2 i2))));
+  size_of = (fun _n -> 1);
+  string_of = stupid_string_of_instruction;
+}
+
+let instruct_list_comparer = list_comparer my_instruct_comparer "\n"
 
 let propstostring props = concatstrs (List.map (fun (v,v') -> "(" ^
 (Hhbc_hhas.string_of_local_id v) ^ "," ^
@@ -535,9 +581,9 @@ let instruct_list_comparer_with_semdiff = {
                   Printf.printf
                   "pc=%s, pc'=%s, i=%s i'=%s props=%s\nassumed=%s\ntodo=%s"
                   (string_of_pc pc) (string_of_pc pc')
-                  (Hhbc_hhas.string_of_instruction
+                  (my_string_of_instruction !data_decls_ref1
                     (List.nth l1 (Rhl.ip_of_pc pc)))
-                  (Hhbc_hhas.string_of_instruction
+                  (my_string_of_instruction !data_decls_ref2
                     (List.nth l2 (Rhl.ip_of_pc pc' )))
                   (propstostring props) (asnstostring assumed)
                   (asnstostring todo);

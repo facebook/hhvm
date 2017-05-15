@@ -39,7 +39,7 @@ open Hhas_parser_actions
 %token ALIASDIRECTIVE
 
 %start program
-%type <Hhas_program.t> program
+%type <((int*Typed_value.t) list) * Hhas_program.t> program
 %%
 program:
     nl decllist nl EOF { splitdecllist $2 [] [] None [] []}

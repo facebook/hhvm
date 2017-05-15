@@ -60,6 +60,7 @@ and hint_ =
   | Harray of hint option * hint option
   | Hdarray of hint * hint
   | Hvarray of hint
+  | Hdarray_or_varray of hint
   | Hprim of tprim
   | Hthis
 

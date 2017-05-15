@@ -125,6 +125,7 @@ and hint_ f = function
   | Hdarray (h1, h2) ->
     Hdarray (hint f h1, hint f h2)
   | Hvarray h -> Hvarray (hint f h)
+  | Hdarray_or_varray h -> Hdarray_or_varray (hint f h)
   | Hprim tprim -> Hprim tprim
   | Hoption h -> Hoption (hint f h)
   | Hfun (hl, b, h) ->

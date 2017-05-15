@@ -81,6 +81,7 @@ let rec reason = function
   | Rpredicated (p, f)       -> Rpredicated (pos p, f)
   | Rinstanceof (p, f)       -> Rinstanceof (pos p, f)
   | Rfinal_property p        -> Rfinal_property (pos p)
+  | Rdarray_or_varray_key p -> Rdarray_or_varray_key (pos p)
 let string_id (p, x) = pos p, x
 
 let rec ty (p, x) =

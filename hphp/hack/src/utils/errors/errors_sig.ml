@@ -368,4 +368,5 @@ module type S = sig
   val goto_label_undefined : Pos.t -> string -> unit
   val goto_label_defined_in_finally : Pos.t -> string -> unit
   val goto_invoked_in_finally : Pos.t -> string -> unit
+  val darray_or_varray_not_supported : Pos.t -> unit
 end

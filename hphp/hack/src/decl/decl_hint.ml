@@ -38,6 +38,11 @@ and hint_ p env = function
     Tdarray (hint env h1, hint env h2)
   | Hvarray (h) ->
     Tvarray (hint env h)
+  | Hdarray_or_varray h ->
+    Tarray (
+      Some (Typing_reason.Rdarray_or_varray_key p, Tprim Tarraykey),
+      Some (hint env h)
+    )
   | Hprim p -> Tprim p
   | Habstr x ->
     Tgeneric x

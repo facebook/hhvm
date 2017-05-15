@@ -2472,7 +2472,14 @@ void hphp_session_exit(const Transport* transport) {
   TI().onSessionExit();
 
   if (transport) {
-    HardwareCounter::UpdateServiceData(transport->getCpuTime(), true /*psp*/);
+    std::unique_ptr<StructuredLogEntry> entry;
+    if (RuntimeOption::EvalProfileHWStructLog) {
+      entry = std::make_unique<StructuredLogEntry>();
+      entry->setInt("response_code", transport->getResponseCode());
+    }
+    HardwareCounter::UpdateServiceData(transport->getCpuTime(), entry.get(),
+                                       true /*psp*/);
+    if (entry) StructuredLog::log("hhvm_request_perf", *entry);
   }
 
   // We might have events from after the final surprise flag check of the

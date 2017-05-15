@@ -46,6 +46,7 @@
 #include "hphp/util/network.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 namespace HPHP {
@@ -522,8 +523,14 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
     Eval::Debugger::InterruptRequestEnded(transport->getUrl());
   }
 
-  // Update non-PSP performance counters.
-  HardwareCounter::UpdateServiceData(transport->getCpuTime(), false /*psp*/);
+  std::unique_ptr<StructuredLogEntry> entry;
+  if (RuntimeOption::EvalProfileHWStructLog) {
+    entry = std::make_unique<StructuredLogEntry>();
+    entry->setInt("response_code", code);
+  }
+  HardwareCounter::UpdateServiceData(transport->getCpuTime(), entry.get(),
+                                     false /*psp*/);
+  if (entry) StructuredLog::log("hhvm_request_perf", *entry);
 
   // If we have registered post-send shutdown functions, end the request before
   // executing them. If we don't, be compatible with Zend by allowing usercode

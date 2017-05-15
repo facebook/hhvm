@@ -22,6 +22,7 @@
 
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
 #define _GNU_SOURCE 1
@@ -105,12 +106,15 @@ struct HardwareCounterImpl {
     close();
   }
 
-  void updateServiceData(bool includingPsp = true) {
+  void updateServiceData(StructuredLogEntry* entry, bool includingPsp) {
     auto& timeSeries = includingPsp ? m_timeSeries : m_timeSeriesNonPsp;
     if (timeSeries == nullptr) return;
 
     auto const value = read();
-    if (value != 0) timeSeries->addValue(value);
+    if (value != 0) {
+      if (entry) entry->setInt(m_desc, value);
+      timeSeries->addValue(value);
+    }
   }
 
   void init_if_not() {
@@ -487,13 +491,15 @@ void HardwareCounter::ClearPerfEvents() {
   s_counter->clearPerfEvents();
 }
 
-void HardwareCounter::updateServiceData(bool includingPsp) {
-  forEachCounter([includingPsp](HardwareCounterImpl& counter) {
-    counter.updateServiceData(includingPsp);
+void HardwareCounter::updateServiceData(StructuredLogEntry* entry,
+                                        bool includingPsp) {
+  forEachCounter([entry,includingPsp](HardwareCounterImpl& counter) {
+    counter.updateServiceData(entry, includingPsp);
   });
 }
 
 void HardwareCounter::UpdateServiceData(const timespec& begin,
+                                        StructuredLogEntry* entry,
                                         bool includingPsp) {
   // The begin timespec should be what was recorded at the beginning of the
   // request, so we subtract that out from the current measurement. The
@@ -503,16 +509,17 @@ void HardwareCounter::UpdateServiceData(const timespec& begin,
   struct timespec now;
   gettime(CLOCK_THREAD_CPUTIME_ID, &now);
 
-  s_counter->updateServiceData(includingPsp);
+  s_counter->updateServiceData(entry, includingPsp);
 
   static auto cpuTimeSeries = createTimeSeries("cpu-time-us");
   static auto cpuTimeNonPspSeries = createTimeSeries("cpu-time-us-nonpsp");
   auto& series = includingPsp ? cpuTimeSeries : cpuTimeNonPspSeries;
-
   auto const cpuTimeUs = gettime_diff_us(begin, now);
   if (cpuTimeUs > 0) {
+    if (entry) entry->setInt("cpu-time-us", cpuTimeUs);
     series->addValue(cpuTimeUs);
   }
+  if (entry) entry->setInt("includingPsp", includingPsp);
 }
 
 void HardwareCounter::getPerfEvents(PerfEventCallback f, void* data) {

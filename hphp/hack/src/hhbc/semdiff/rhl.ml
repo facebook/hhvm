@@ -504,12 +504,12 @@ and specials pc pc' props assumed todo =
         let prog_from_pc' = drop (ip_of_pc pc') prog' in
         (* a funny almost no-op that shows up sometimes *)
         match prog_from_pc, prog_from_pc' with
-         | (IMutator (SetL l1) :: IBasic PopC :: IMutator (SetL l2) :: _), _
+         | (IMutator (SetL l1) :: IBasic PopC :: IGet (PushL l2) :: _), _
            when l1 = l2 ->
              let newprops = List.filter (fun (x1,_x2) -> x1 != l1) props in
                check (succ (succ (succ pc))) pc' newprops
                      (((pc,pc'),props)::assumed) todo
-         | _, (IMutator (SetL l1) :: IBasic PopC :: IMutator (SetL l2) :: _)
+         | _, (IMutator (SetL l1) :: IBasic PopC :: IGet (PushL l2) :: _)
             when l1 = l2 ->
              let newprops = List.filter (fun (_x1,x2) -> x2 != l1) props in
                check pc (succ (succ (succ pc'))) newprops

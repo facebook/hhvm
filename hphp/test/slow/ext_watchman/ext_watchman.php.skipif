@@ -1,0 +1,3 @@
+<?php
+if (!extension_loaded("watchman")) die("skip");
+?>

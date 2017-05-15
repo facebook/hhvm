@@ -78,23 +78,15 @@ struct Marker {
     max_worklist_ = std::max(max_worklist_, work_.size());
   }
 
-  // Whether the object with the given type-index should be recorded as an
-  // "unknown" object.
-  bool typeIndexIsUnknown(type_scan::Index tyindex) const {
-    return type_scan::hasNonConservative() &&
-      tyindex == type_scan::kIndexUnknown;
-  }
-
   Counter allocd_, marked_, pinned_, unknown_; // bytes
   Counter cscanned_roots_, cscanned_; // bytes
   Counter xscanned_roots_, xscanned_; // bytes
-  size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, unknown_ns_, sweep_ns_;
+  size_t init_ns_, initfree_ns_, roots_ns_, mark_ns_, sweep_ns_;
   size_t max_worklist_{0}; // max size of work_
   size_t freed_bytes_{0};
   PtrMap ptrs_;
   type_scan::Scanner type_scanner_;
   std::vector<const Header*> work_;
-  std::vector<const Header*> unknown_objects_; // objs w/ unknown typescan id
 };
 
 // mark the object at p, return true if first time.
@@ -194,31 +186,40 @@ inline int64_t cpu_ns() {
   return HPHP::Timer::GetThreadCPUTimeNanos();
 }
 
+/*
+ * If we have non-conservative scanners, we must treat all unknown
+ * type-index allocations in the heap as roots. Why? The generated
+ * scanners will only report a pointer if it knows the pointer can point
+ * to an object on the request heap. It does this by tracking all types
+ * which are allocated via the allocation functions via the type-index
+ * mechanism. If an allocation has an unknown type-index, then by definition
+ * we don't know which type it contains, and therefore the auto generated
+ * scanners will never report a pointer to such a type.
+ *
+ * The only good way to solve this is to treat such allocations as roots
+ * and conservative scan them. If we're conservative scanning everything,
+ * we need to take no special action, as the above problem only applies to
+ * auto generated scanners.
+ */
+
 // initially parse the heap to find valid objects and initialize metadata.
 NEVER_INLINE void Marker::init() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { init_ns_ = cpu_ns() - t0; };
   MM().initFree();
   initfree_ns_ = cpu_ns() - t0;
-  auto tyindex_max = type_scan::Index(
-      type_scan::detail::g_metadata_table_size
-  );
   MM().iterate([&](Header* h, size_t allocSize) {
     auto kind = h->kind();
-    if (kind == HeaderKind::Free) return;
+    if (kind == HeaderKind::Free) return; // continue
     h->hdr_.clearMarks();
     allocd_ += allocSize;
     ptrs_.insert(h, allocSize);
-    if (type_scan::hasNonConservative()) {
-      auto tyindex = kind == HeaderKind::Resource ? h->res_.typeIndex() :
-                     kind == HeaderKind::NativeData ? h->native_.typeIndex() :
-                     kind == HeaderKind::SmallMalloc ? h->malloc_.typeIndex() :
-                     kind == HeaderKind::BigMalloc ? h->malloc_.typeIndex() :
-                     tyindex_max;
-      if (tyindex == type_scan::kIndexUnknown) {
-        unknown_objects_.emplace_back(h);
-        unknown_ += allocSize;
-      }
+    if ((kind == HeaderKind::SmallMalloc || kind == HeaderKind::BigMalloc) &&
+        !type_scan::isKnownType(h->malloc_.typeIndex())) {
+      // unknown type for a req::malloc'd block. See rationale above.
+      unknown_ += allocSize;
+      h->hdr_.mark(GCBits::Pin);
+      enqueue(h);
     }
   });
   ptrs_.prepare();
@@ -255,47 +256,11 @@ NEVER_INLINE void Marker::traceRoots() {
 NEVER_INLINE void Marker::trace() {
   auto const t0 = cpu_ns();
   SCOPE_EXIT { mark_ns_ = cpu_ns() - t0; };
-  const auto process_worklist = [this](){
-    while (!work_.empty()) {
-      auto h = work_.back();
-      work_.pop_back();
-      scanHeader(h, type_scanner_);
-      finish_typescan();
-    }
-  };
-
-  process_worklist();
-
-  /*
-   * If the type-scanners has non-conservative scanners, we must treat all
-   * unknown type-index allocations in the heap as roots. Why? The auto
-   * generated scanners will only report a pointer if it knows the pointer can
-   * point to an object on the request heap. It does this by tracking all types
-   * which are allocated via the allocation functions via the type-index
-   * mechanism. If an allocation has an unknown type-index, then by definition
-   * we don't know which type it contains, and therefore the auto generated
-   * scanners will never report a pointer to such a type. So, if there's a
-   * countable object which is only reachable via one of these unknown
-   * type-index allocations, we'll garbage collect that countable object even if
-   * the unknown type-index allocation is reachable. The only good way to solve
-   * this is to treat such allocations as roots and always conservative scan
-   * them. If we're conservative scanning everything, we need to take no special
-   * action, as the above problem only applies to auto generated scanners.
-   *
-   * Do this after draining the worklist, as we want to prefer discovering
-   * things via non-conservative means.
-   */
-  if (!unknown_objects_.empty()) {
-    auto const t0 = cpu_ns();
-    SCOPE_EXIT { unknown_ns_ = cpu_ns() - t0; };
-    for (const auto h : unknown_objects_) {
-      if (mark(h, GCBits::Pin)) {
-        enqueue(h);
-      }
-    }
-    process_worklist();
-  } else {
-    unknown_ns_ = 0;
+  while (!work_.empty()) {
+    auto h = work_.back();
+    work_.pop_back();
+    scanHeader(h, type_scanner_);
+    finish_typescan();
   }
 }
 
@@ -418,8 +383,7 @@ void logCollection(const char* phase, const Marker& mkr) {
   sample.setInt("init_micros", mkr.init_ns_/1000);
   sample.setInt("initfree_micros", mkr.initfree_ns_/1000);
   sample.setInt("roots_micros", mkr.roots_ns_/1000);
-  sample.setInt("mark_micros", mkr.mark_ns_/1000); // includes unknown
-  sample.setInt("unknown_micros", mkr.unknown_ns_/1000);
+  sample.setInt("mark_micros", mkr.mark_ns_/1000);
   sample.setInt("sweep_micros", mkr.sweep_ns_/1000);
   // size metrics gathered during gc
   sample.setInt("allocd_bytes", mkr.allocd_.bytes);

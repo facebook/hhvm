@@ -181,6 +181,11 @@ inline bool hasNonConservative() {
   return detail::g_metadata_table_size > 2;
 }
 
+// Return true if index is a valid type or if everything is conservative
+inline bool isKnownType(Index index) {
+  return !hasNonConservative() || index != kIndexUnknown;
+}
+
 inline bool hasScanner(Index index) {
   assert(index < detail::g_metadata_table_size);
   return detail::g_metadata_table[index].m_scan !=

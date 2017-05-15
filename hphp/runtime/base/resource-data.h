@@ -75,6 +75,7 @@ struct ResourceHdr final : Countable, // aux stores heap size
   void release() noexcept;
 
   void init(uint16_t size, type_scan::Index tyindex) {
+    assert(type_scan::isKnownType(tyindex));
     initHeader(size, HeaderKind::Resource, 1);
     m_type_index = tyindex;
   }

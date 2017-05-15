@@ -117,7 +117,9 @@ struct c_WaitHandle : ObjectData {
                  kind,
                  NoInit{}),
       m_tyindex(tyindex)
-  {}
+  {
+    assert(type_scan::isKnownType(tyindex));
+  }
 
   ~c_WaitHandle()
   {}

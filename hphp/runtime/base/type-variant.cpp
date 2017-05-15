@@ -89,7 +89,7 @@ Variant::Variant(StringData *v) noexcept {
 // the version of the high frequency function that is not inlined
 NEVER_INLINE
 Variant::Variant(const Variant& v) noexcept {
-  constructValHelper(v);
+  cellDup(tvToInitCell(v.asTypedValue()), *asTypedValue());
 }
 
 /*
@@ -152,21 +152,6 @@ void tweak_variant_dtors() {
   if (RuntimeOption::EnableObjDestructCall) return;
   g_destructors[typeToDestrIdx(KindOfObject)] =
     (RawDestructor)getMethodPtr(&ObjectData::releaseNoObjDestructCheck);
-}
-
-Variant &Variant::assign(const Variant& v) noexcept {
-  AssignValHelper(this, &v);
-  return *this;
-}
-
-Variant& Variant::assignRef(Variant& v) noexcept {
-  assignRefHelper(v);
-  return *this;
-}
-
-Variant& Variant::setWithRef(const Variant& v) noexcept {
-  setWithRefHelper(v, isRefcountedType(m_type));
-  return *this;
 }
 
 #define IMPLEMENT_SET(argType, setOp)                     \

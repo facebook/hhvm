@@ -826,7 +826,8 @@ ArrayData* MixedArray::zInitVal(TypedValue& tv, RefData* v) {
 
 ALWAYS_INLINE
 MixedArray* MixedArray::initRef(TypedValue& tv, Variant& v) {
-  tvAsUninitializedVariant(&tv).constructRefHelper(v);
+  tvBoxIfNeeded(v.asTypedValue());
+  refDup(*v.asTypedValue(), tv);
   return this;
 }
 

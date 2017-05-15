@@ -424,7 +424,8 @@ ArrayData* MixedArray::updateRef(K k, Variant& data) {
     tvBind(data.asRef(), &p.tv);
     return this;
   }
-  tvAsUninitializedVariant(&p.tv).constructRefHelper(data);
+  tvBoxIfNeeded(data.asTypedValue());
+  refDup(*data.asTypedValue(), p.tv);
   return this;
 }
 

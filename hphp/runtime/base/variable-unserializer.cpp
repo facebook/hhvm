@@ -767,7 +767,7 @@ void VariableUnserializer::unserializeVariant(
       int64_t id = readInt();
       Variant *v = getByVal(id);
       if (!v) throwOutOfRange(id);
-      Variant::AssignValHelper(&self, v);
+      tvSet(tvToInitCell(v->asTypedValue()), *self.asTypedValue());
     }
     break;
   case 'R':
@@ -783,7 +783,7 @@ void VariableUnserializer::unserializeVariant(
       int64_t id = readInt();
       Variant *v = getByRef(id);
       if (!v) throwOutOfRange(id);
-      self.assignRefHelper(*v);
+      self.assignRef(*v);
     }
     break;
   case 'b':

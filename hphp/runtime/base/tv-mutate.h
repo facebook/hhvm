@@ -44,6 +44,13 @@ ALWAYS_INLINE TypedValue* tvBox(TypedValue* tv) {
 }
 
 /*
+ * Box `tv' in place, if it's not already boxed.
+ */
+ALWAYS_INLINE void tvBoxIfNeeded(TypedValue* tv) {
+  if (tv->m_type != KindOfRef) tvBox(tv);
+}
+
+/*
  * Unbox `tv' in place.
  *
  * @requires: tv->m_type == KindOfRef
@@ -78,6 +85,22 @@ ALWAYS_INLINE Cell* tvToCell(TypedValue* tv) {
 }
 ALWAYS_INLINE const Cell* tvToCell(const TypedValue* tv) {
   return LIKELY(tv->m_type != KindOfRef) ? tv : tv->m_data.pref->tv();
+}
+
+/*
+ * Return an unboxed and initialized `cell'.
+ *
+ * This function:
+ *  - is *tvToCell() if `cell' is KindOfRef.
+ *  - returns a KindOfNull when `cell' is KindOfUninit.
+ *  - is the identity otherwise.
+ */
+ALWAYS_INLINE Cell tvToInitCell(const TypedValue* tv) {
+  if (UNLIKELY(tv->m_type == KindOfRef)) {
+    tv = tv->m_data.pref->tv();
+  }
+  if (tv->m_type == KindOfUninit) return make_tv<KindOfNull>();
+  return *tv;
 }
 
 /*
@@ -201,7 +224,7 @@ void tvDupWithRef(const TypedValue& fr, TypedValue& to) {
  * Duplicate `fr' to `to' with reference demotion semantics.
  *
  * Just like tvDupWithRef(fr, to), except we won't demote if the ref's
- * inner value is `container', to avoid array recursion.
+ * inner value is `container'.
  */
 ALWAYS_INLINE
 void tvDupWithRef(const TypedValue& fr, TypedValue& to,

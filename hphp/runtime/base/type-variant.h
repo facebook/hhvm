@@ -127,8 +127,10 @@ struct Variant : private TypedValue {
   }
 
   Variant(const Variant& other, WithRefBind) {
-    constructWithRefHelper(other);
+    tvDupWithRef(*other.asTypedValue(), *asTypedValue());
+    if (m_type == KindOfUninit) m_type = KindOfNull;
   }
+
   /* implicit */ Variant(const String& v) noexcept : Variant(v.get()) {}
   /* implicit */ Variant(const Array& v) noexcept : Variant(v.get()) { }
   /* implicit */ Variant(const Object& v) noexcept : Variant(v.get()) {}
@@ -234,7 +236,11 @@ struct Variant : private TypedValue {
     tvIncRefGen(asTypedValue());
   }
 
-  Variant(StrongBind, Variant& v) { constructRefHelper(v); }
+  Variant(StrongBind, Variant& v) {
+    assert(tvIsPlausible(v));
+    tvBoxIfNeeded(v.asTypedValue());
+    refDup(*v.asTypedValue(), *asTypedValue());
+  }
 
   Variant& operator=(const Variant& v) noexcept {
     return assign(v);
@@ -361,7 +367,6 @@ struct Variant : private TypedValue {
 
   //////////////////////////////////////////////////////////////////////
 
- public:
   /**
    * Break bindings and set to uninit.
    */
@@ -381,10 +386,14 @@ struct Variant : private TypedValue {
   /**
    * Clear the original data, and set it to be the same as in v, and if
    * v is referenced, keep the reference.
-   * In order to correctly copy circular arrays, even if v is the only
-   * strong reference to arr, we still keep the reference.
    */
-  Variant& setWithRef(const Variant& v) noexcept;
+  Variant& setWithRef(const Variant& v) noexcept {
+    auto const old = *asTypedValue();
+    tvDupWithRef(*v.asTypedValue(), *asTypedValue());
+    if (m_type == KindOfUninit) m_type = KindOfNull;
+    tvDecRefGen(old);
+    return *this;
+  }
 
   static Variant attach(TypedValue tv) noexcept {
     return Variant{tv, Attach{}};
@@ -676,9 +685,17 @@ struct Variant : private TypedValue {
   /**
    * Operators
    */
-  Variant &assign(const Variant& v) noexcept;
-  Variant &assignRef(Variant& v) noexcept;
-  Variant &assignRef(VRefParam v) = delete;;
+  Variant& assign(const Variant& v) noexcept {
+    tvSet(tvToInitCell(v.asTypedValue()), *asTypedValue());
+    return *this;
+  }
+  Variant& assignRef(Variant& v) noexcept {
+    assert(&v != &uninit_variant);
+    tvBoxIfNeeded(v.asTypedValue());
+    tvBind(v.asTypedValue(), asTypedValue());
+    return *this;
+  }
+  Variant& assignRef(VRefParam v) = delete;
 
   // Generic assignment operator. Forward argument (preserving rvalue-ness and
   // lvalue-ness) to the appropriate set function, as long as its not a Variant.
@@ -1007,7 +1024,7 @@ struct Variant : private TypedValue {
    * Access this Variant as a Ref, converting it to a Ref it isn't
    * one.
    */
-  Ref* asRef() { PromoteToRef(*this); return this; }
+  Ref* asRef() { tvBoxIfNeeded(asTypedValue()); return this; }
 
   TypedValue detach() noexcept {
     auto tv = *asTypedValue();
@@ -1196,74 +1213,7 @@ struct Variant : private TypedValue {
   void steal(ResourceHdr* v) noexcept;
   void steal(ResourceData* v) noexcept { steal(v->hdr()); }
 
- public: // for unserializeVariant
-  static ALWAYS_INLINE
-  void AssignValHelper(Variant *self, const Variant *other) {
-    assert(tvIsPlausible(*self) && tvIsPlausible(*other));
-    if (UNLIKELY(self->m_type == KindOfRef)) self = self->m_data.pref->var();
-    if (UNLIKELY(other->m_type == KindOfRef)) other = other->m_data.pref->var();
-    // An early check for self == other here would be faster in that case, but
-    // slows down the frequent case of self != other.
-    // The following code is correct even if self == other.
-    auto const oldSelf = *self->asTypedValue();
-    const DataType otype = other->m_type;
-    if (UNLIKELY(otype == KindOfUninit)) {
-      self->m_type = KindOfNull;
-    } else {
-      const Value odata = other->m_data;
-      tvIncRefGen(other);
-      self->m_data = odata;
-      self->m_type = otype;
-    }
-    tvDecRefGen(oldSelf);
-  }
-
- private:
-  static ALWAYS_INLINE void PromoteToRef(Variant& v) {
-    assert(&v != &uninit_variant);
-    if (v.m_type != KindOfRef) {
-      auto const ref = RefData::Make(*v.asTypedValue());
-      v.m_type = KindOfRef;
-      v.m_data.pref = ref;
-    }
-  }
-
- public:
-  ALWAYS_INLINE void assignRefHelper(Variant& v) {
-    assert(tvIsPlausible(*this) && tvIsPlausible(v));
-
-    PromoteToRef(v);
-    RefData* r = v.m_data.pref;
-    r->incRefCount(); // in case destruct() triggers deletion of v
-    auto const old = *asTypedValue();
-    m_type = KindOfRef;
-    m_data.pref = r;
-    tvDecRefGen(old);
-  }
-
-  ALWAYS_INLINE void constructRefHelper(Variant& v) {
-    assert(tvIsPlausible(v));
-    PromoteToRef(v);
-    v.m_data.pref->incRefCount();
-    m_data.pref = v.m_data.pref;
-    m_type = KindOfRef;
-  }
-
-  ALWAYS_INLINE void constructValHelper(const Variant& v) {
-    assert(tvIsPlausible(v));
-
-    const Variant *other =
-      UNLIKELY(v.m_type == KindOfRef) ? v.m_data.pref->var() : &v;
-    assert(this != other);
-    if (other->m_type == KindOfUninit) {
-      m_type = KindOfNull;
-    } else {
-      tvIncRefGen(other);
-      m_type = other->m_type;
-      m_data = other->m_data;
-    }
-  }
-
+private:
   void moveRefHelper(Variant&& v) {
     assert(tvIsPlausible(v));
 
@@ -1275,31 +1225,6 @@ struct Variant : private TypedValue {
     v.m_type = KindOfNull;
   }
 
-  ALWAYS_INLINE
-  void setWithRefHelper(const Variant& v, bool destroy) {
-    assert((!destroy || tvIsPlausible(*this)) && tvIsPlausible(v));
-    assert(this != &v);
-
-    const Variant& rhs =
-      v.m_type == KindOfRef && !v.m_data.pref->isReferenced()
-        ? *v.m_data.pref->var() : v;
-    tvIncRefGen(rhs.asTypedValue());
-    auto const old = *asTypedValue();
-    if (rhs.m_type == KindOfUninit) {
-      m_type = KindOfNull; // drop uninit
-    } else {
-      m_type = rhs.m_type;
-      m_data.num = rhs.m_data.num;
-    }
-    if (destroy) tvDecRefGen(old);
-  }
-
-  ALWAYS_INLINE
-  void constructWithRefHelper(const Variant& v) {
-    setWithRefHelper(v, false);
-  }
-
-private:
   bool   toBooleanHelper() const;
   int64_t  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;

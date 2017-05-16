@@ -849,21 +849,21 @@ let handle_event (state: state) (event: event) : unit =
 let respond_to_error (event: event) (e: exn) : unit =
   match event with
   | Client_message c
-    when c.ClientMessageQueue.is_request ->
+    when c.ClientMessageQueue.kind = ClientMessageQueue.Request ->
     print_error e |> respond stdout c;
   | _ -> ()
 
 let log_error (event: event) (e: exn) : unit =
   let (error_code, _message, _data) = get_error_info e in
-  let (command, is_request) = match event with
+  let (command, kind) = match event with
     | Client_message c ->
       let open ClientMessageQueue in
-      (Some c.method_, Some c.is_request)
+      (Some c.method_, Some (kind_to_string c.kind))
     | _ -> (None, None)
   in
   HackEventLogger.client_command_exception
     ~command
-    ~is_request
+    ~kind
     ~e
     ~error_code
 
@@ -889,7 +889,7 @@ let main () : unit =
           HackEventLogger.client_handled_command
             ~command:c.method_
             ~start_t:c.timestamp
-            ~is_request:c.is_request;
+            ~kind:(kind_to_string c.kind);
           (* If we're connected to a server and have no more messages in   *)
           (* the queue, then let the server know we're idle, so it will be *)
           (* free to handle command-line requests. *)

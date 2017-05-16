@@ -1,12 +1,20 @@
 open Core
 open Lsp_fmt
 
+type client_message_kind =
+ | Request
+ | Notification
+
+let kind_to_string = function
+ | Request -> "Request"
+ | Notification -> "Notification"
+
 type client_message = {
   timestamp : float;
-  method_ : string;
-  id : Hh_json.json option;
-  params : Hh_json.json option;
-  is_request : bool;
+  kind : client_message_kind;
+  method_ : string; (* mandatory for request+notification; empty otherwise *)
+  id : Hh_json.json option; (* mandatory for request+response *)
+  params : Hh_json.json option; (* optional for request+notification *)
 }
 
 type result =
@@ -40,18 +48,30 @@ type t = {
    editor messages can be read from. May throw if the message is malformed. *)
 let read_message (reader : Buffered_line_reader.t) : client_message =
   (* May throw an exception during parsing. *)
-  let message = reader
+  let message = try
+    reader
     |> Http_lite.read_message_utf8
-    |> Hh_json.json_of_string in
+    |> Hh_json.json_of_string
+    with
+    | Http_lite.Malformed message -> raise (Lsp.Error.Invalid_request message)
+    | e -> raise (Lsp.Error.Invalid_request (Printexc.to_string e))
+  in
   let json = Some message in
 
   let id = Jget.val_opt json "id" in
+  let method_ = Jget.string_opt json "method" in
+  let params = Jget.val_opt json "params" in
+  let kind = match id, method_ with
+    | Some _id, Some _method -> Request
+    | None,     Some _method -> Notification
+    | _,        _            -> raise (Lsp.Error.Invalid_request "Not JsonRPC")
+  in
   {
     timestamp = Unix.gettimeofday ();
     id;
-    method_ = Jget.string_exn json "method";
-    params = Jget.obj_opt json "params";
-    is_request = Option.is_some id;
+    method_ = Option.value method_ ~default:""; (* is easier to consume *)
+    params;
+    kind;
   }
 
 

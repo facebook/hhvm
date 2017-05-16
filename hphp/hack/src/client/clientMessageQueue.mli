@@ -3,15 +3,21 @@
 
 type t
 
+type client_message_kind =
+ | Request
+ | Notification
+
+val kind_to_string : client_message_kind -> string
+
 type client_message = {
   (* The timestamp field is added when this message is read. It's not part of
      the JSON RPC spec. *)
   timestamp : float;
 
-  method_ : string;
-  id : Hh_json.json option;
-  params : Hh_json.json option;
-  is_request : bool;
+  kind : client_message_kind;
+  method_ : string; (* mandatory for request+notification; empty otherwise *)
+  id : Hh_json.json option; (* mandatory for request+response *)
+  params : Hh_json.json option; (* optional for request+notification *)
 }
 
 type result =

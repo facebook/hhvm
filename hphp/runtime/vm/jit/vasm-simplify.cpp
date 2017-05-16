@@ -120,42 +120,6 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
   });
 }
 
-/*
- * Fold a cmov of a certain width into a copy if both values are the same
- * register or have the same known constant value.
- */
-=======
-template <typename Reg>
-bool operand_one(Env& env, Reg op) {
-  auto const op_it = env.unit.regToConst.find(op);
-  if (op_it == env.unit.regToConst.end()) return false;
-
-  auto const op_const = op_it->second;
-  if (op_const.isUndef) return false;
-  if (op_const.val != 1) return false;
-  return true;
-}
-
-// Reduce use of immediate one possibly removing def as dead code.
-// Specific to ARM using hard-coded zero register.
-template <typename Out, typename Inst>
-bool cmov_fold_one(Env& env, const Inst& inst, Vlabel b, size_t i) {
-  if (arch() != Arch::ARM) return false;
-  if (operand_one(env, inst.f)) {
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      v << Out{inst.cc, inst.sf, inst.t, inst.d};
-      return 1;
-      }); 
-  }
-  if (operand_one(env, inst.t)) {
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      v << Out{ccNegate(inst.cc), inst.sf, inst.f, inst.d};
-      return 1;
-      }); 
-  }
-  return false;
-}
-
 // Fold a cmov of a certain width into a copy if both values are the same
 // register or have the same known constant value.
 template <typename Inst>
@@ -239,7 +203,6 @@ bool cmov_setcc_impl(Env& env, const Inst& inst, Vlabel b,
 
 bool simplify(Env& env, const cmovb& inst, Vlabel b, size_t i) {
   if (cmov_fold_impl(env, inst, b, i)) return true;
-  if (cmov_fold_one<csoneb>(env, inst, b, i)) return true;
   return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << copy{src, dest}; }
@@ -248,7 +211,6 @@ bool simplify(Env& env, const cmovb& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmovw& inst, Vlabel b, size_t i) {
   if (cmov_fold_impl(env, inst, b, i)) return true;
-  if (cmov_fold_one<csonew>(env, inst, b, i)) return true;
   return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << movzbw{src, dest}; }
@@ -257,7 +219,6 @@ bool simplify(Env& env, const cmovw& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmovl& inst, Vlabel b, size_t i) {
   if (cmov_fold_impl(env, inst, b, i)) return true;
-  if (cmov_fold_one<csonel>(env, inst, b, i)) return true;
   return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << movzbl{src, dest}; }
@@ -266,7 +227,6 @@ bool simplify(Env& env, const cmovl& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
   if (cmov_fold_impl(env, inst, b, i)) return true;
-  if (cmov_fold_one<csoneq>(env, inst, b, i)) return true;
   return cmov_setcc_impl(
     env, inst, b, i,
     [](Vout& v, Vreg8 src, Vreg dest) { v << movzbq{src, dest}; }

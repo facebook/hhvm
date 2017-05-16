@@ -420,7 +420,6 @@ class MacroAssembler : public Assembler {
              Condition cond) {
     assert(allow_macro_instructions_);
     assert(!rd.IsZero());
-    assert(!rn.IsZero());
     assert((cond != al) && (cond != nv));
     csinc(rd, rn, rm, cond);
   }

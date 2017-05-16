@@ -22,6 +22,8 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-util.h"
 
+#include "hphp/vixl/a64/assembler-a64.h"
+
 namespace HPHP { namespace jit { namespace arm {
 
 namespace {
@@ -30,6 +32,57 @@ namespace {
 
 template<typename Inst>
 bool simplify(Env&, const Inst& inst, Vlabel b, size_t i) { return false; }
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool operand_one(Env& env, Vreg op) {
+  auto const op_it = env.unit.regToConst.find(op);
+  if (op_it == env.unit.regToConst.end()) return false;
+
+  auto const op_const = op_it->second;
+  if (op_const.isUndef) return false;
+  if (op_const.val != 1) return false;
+  return true;
+}
+
+// Reduce use of immediate one possibly removing def as dead code.
+// Specific to ARM using hard-coded zero register.
+template <typename Out, typename Inst>
+bool cmov_fold_one(Env& env, const Inst& inst, Vlabel b, size_t i) {
+  if (operand_one(env, inst.f)) {
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << Out{inst.cc, inst.sf, PhysReg(vixl::wzr), inst.t, inst.d};
+      return 1;
+    });
+  }
+  if (operand_one(env, inst.t)) {
+    return simplify_impl(env, b, i, [&] (Vout& v) {
+      v << Out{ccNegate(inst.cc), inst.sf, PhysReg(vixl::wzr), inst.f, inst.d};
+      return 1;
+    });
+  }
+  return false;
+}
+
+bool simplify(Env& env, const cmovb& inst, Vlabel b, size_t i) {
+  if (cmov_fold_one<csincb>(env, inst, b, i)) return true;
+  return false;
+}
+
+bool simplify(Env& env, const cmovw& inst, Vlabel b, size_t i) {
+  if (cmov_fold_one<csincw>(env, inst, b, i)) return true;
+  return false;
+}
+
+bool simplify(Env& env, const cmovl& inst, Vlabel b, size_t i) {
+  if (cmov_fold_one<csincl>(env, inst, b, i)) return true;
+  return false;
+}
+
+bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
+  if (cmov_fold_one<csincq>(env, inst, b, i)) return true;
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

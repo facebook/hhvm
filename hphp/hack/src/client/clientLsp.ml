@@ -119,7 +119,7 @@ type message_source =
   | From_server
 
 type lsp_state_machine =
-  | Pre_init
+  | Pre_init of bool (* is_retry, i.e. whether we rejected a previous init *)
   | Main_loop
   | Post_shutdown
 
@@ -152,6 +152,7 @@ let requests_outstanding: Callback.t IMap.t ref = ref IMap.empty
 
 let rec connect_persistent'
   (root: Path.t)
+  ~(force_stop_existing_persistent_connection: bool)
   (retries: int)
   (start_time: float)
   : Timeout.in_channel * out_channel =
@@ -165,6 +166,7 @@ let rec connect_persistent'
   let handoff_options = {
     MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
     force_dormant_start = false;
+    force_stop_existing_persistent_connection;
   } in
   let conn = ServerUtils.connect_to_monitor root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;
@@ -188,7 +190,8 @@ let rec connect_persistent'
     match e with
     | Monitor_connection_failure
     | Server_busy ->
-      connect_persistent' root (retries - 1) start_time
+      connect_persistent'
+        root ~force_stop_existing_persistent_connection (retries - 1) start_time
     | Server_dormant
     | Server_died
     | Server_missing
@@ -198,22 +201,35 @@ let rec connect_persistent'
       (* TODO: @ljw, @kasper: why doesn't the server handle? Shouldn't it? *)
       raise (Server_not_initialized "server must be started manually")
 
-let connect_persistent (root: Path.t) ~(retries: int) : server_conn =
+let connect_persistent
+  (root: Path.t)
+  ~(force_stop_existing_persistent_connection: bool)
+  ~(retries: int)
+  : server_conn =
   let start_time = Unix.time () in
   try
-    let (ic, oc) = connect_persistent' root retries start_time in
+    let (ic, oc) =
+      connect_persistent'
+        root ~force_stop_existing_persistent_connection retries start_time in
     HackEventLogger.client_established_connection start_time;
-    ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
+    let conn_type = if force_stop_existing_persistent_connection
+      then ServerCommandTypes.Persistent_hard
+      else ServerCommandTypes.Persistent_soft in
+    ServerCommand.send_connection_type oc conn_type;
 
     let fd = Unix.descr_of_out_channel oc in
     match Marshal_tools.from_fd_with_preamble fd with
-    | ServerCommandTypes.Connected -> ();
-
-    {
-      ic;
-      oc;
-      pending_messages = Queue.create ();
-    }
+    | ServerCommandTypes.Denied_due_to_existing_persistent_connection ->
+        let message = "Cannot provide Hack language services while " ^
+                      "this project is active in another window" in
+        raise (Error.Server_error_start (message,
+          {Lsp.Initialize.retry = true;}))
+    | ServerCommandTypes.Connected ->
+        {
+          ic;
+          oc;
+          pending_messages = Queue.create ();
+        }
   with
   | e ->
     HackEventLogger.client_establish_connection_exception e;
@@ -730,52 +746,51 @@ let do_document_formatting
   do_formatting_common conn action
 
 
-let do_initialize (params: Initialize.params)
+let do_initialize ~(is_retry: bool) (params: Initialize.params)
   : (server_conn option * Initialize.result) =
   let open Initialize in
   let root = if Option.is_some params.root_uri
              then ClientArgsUtils.get_root params.root_uri
              else ClientArgsUtils.get_root params.root_path in
 
-  try
-    let server_conn = connect_persistent root ~retries:800 in
-    rpc (Some server_conn) (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0);
-    let result = {
-      server_capabilities = {
-        text_document_sync = {
-          want_open_close = true;
-          want_change = IncrementalSync;
-          want_will_save = false;
-          want_will_save_wait_until = false;
-          want_did_save = { include_text = false }
-        };
-        hover_provider = true;
-        completion_provider = Some {
-          resolve_provider = true;
-          completion_trigger_characters = ["-"; ">"; "\\"];
-        };
-        signature_help_provider = None;
-        definition_provider = true;
-        references_provider = true;
-        document_highlight_provider = true;
-        document_symbol_provider = true;
-        workspace_symbol_provider = true;
-        code_action_provider = false;
-        code_lens_provider = None;
-        document_formatting_provider = true;
-        document_range_formatting_provider = true;
-        document_on_type_formatting_provider = None;
-        rename_provider = false;
-        document_link_provider = None;
-        execute_command_provider = None;
-        type_coverage_provider = true;
-      }
+  let force_stop_existing_persistent_connection = is_retry in
+  let server_conn = connect_persistent
+    root ~force_stop_existing_persistent_connection ~retries:800 in
+  rpc (Some server_conn) (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0);
+  let result = {
+    server_capabilities = {
+      text_document_sync = {
+        want_open_close = true;
+        want_change = IncrementalSync;
+        want_will_save = false;
+        want_will_save_wait_until = false;
+        want_did_save = { include_text = false }
+      };
+      hover_provider = true;
+      completion_provider = Some {
+        resolve_provider = true;
+        completion_trigger_characters = ["-"; ">"; "\\"];
+      };
+      signature_help_provider = None;
+      definition_provider = true;
+      references_provider = true;
+      document_highlight_provider = true;
+      document_symbol_provider = true;
+      workspace_symbol_provider = true;
+      code_action_provider = false;
+      code_lens_provider = None;
+      document_formatting_provider = true;
+      document_range_formatting_provider = true;
+      document_on_type_formatting_provider = None;
+      rename_provider = false;
+      document_link_provider = None;
+      execute_command_provider = None;
+      type_coverage_provider = true;
     }
-    in
-    (Some server_conn, result)
-  with
-  | e ->
-    raise e
+  }
+  in
+  (Some server_conn, result)
+
 
 (************************************************************************)
 (** Message handling                                                   **)
@@ -796,16 +811,22 @@ let handle_event (state: state) (event: event) : unit =
   | _, Client_exit -> exit ()
 
   (* initialize request*)
-  | Pre_init, Client_message c when c.method_ = "initialize" -> begin
+  | Pre_init is_retry, Client_message c when c.method_ = "initialize" -> begin
+    (* We can't directly determine whether the initialization request is a *)
+    (* retry, since that's not a part of the protocol. However, if we went *)
+    (* through initialize once failed with an exception, the next time we  *)
+    (* try an initialize will be a retry. We set the retry flag here to be *)
+    (* true so the next initialization request is treated as a retry.      *)
+    state.lsp_state <- Pre_init true;
     let (server_conn', result) =
-      parse_initialize c.params |> do_initialize in
+      parse_initialize c.params |> do_initialize ~is_retry in
     print_initialize result |> respond stdout c;
     state.lsp_state <- Main_loop;
     state.server_conn <- server_conn'
     end
 
   (* any request/notification if we haven't yet initialized *)
-  | Pre_init, Client_message _c ->
+  | Pre_init _, Client_message _c ->
     raise (Error.Server_not_initialized "init");
 
   (* textDocument/hover request *)
@@ -915,9 +936,13 @@ let handle_event (state: state) (event: event) : unit =
   | Post_shutdown, Client_message _c ->
     raise (Error.Invalid_request "already received shutdown request")
 
-  (* TODO message from server *)
+  (* server shut-down request *)
   | _, Server_message ServerCommandTypes.NEW_CLIENT_CONNECTED ->
-    () (* todo *)
+    print_log_message Message_type.ErrorMessage "Another client has connected"
+      |> notify stdout "window/logMessage";
+    exit ()
+
+  (* TODO message from server *)
   | _, Server_exit _ -> () (* todo *)
 
 (* respond_to_error: if we threw an exception during the handling of a request,
@@ -948,7 +973,7 @@ let log_error (event: event) (e: exn) : unit =
 let main () : unit =
   Printexc.record_backtrace true;
   let state = {
-    lsp_state = Pre_init;
+    lsp_state = Pre_init false;
     client = ClientMessageQueue.make ();
     server_conn = None;
   } in

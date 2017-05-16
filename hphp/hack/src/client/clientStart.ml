@@ -86,6 +86,7 @@ let should_start env =
   let handoff_options = {
     MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
     force_dormant_start = false;
+    force_stop_existing_persistent_connection = false;
   } in
   match ServerUtils.connect_to_monitor
     env.root handoff_options with

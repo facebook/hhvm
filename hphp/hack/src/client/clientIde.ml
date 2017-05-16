@@ -31,6 +31,7 @@ let rec connect_persistent env retries start_time =
   let handoff_options = {
     MonitorRpc.server_name = HhServerMonitorConfig.Program.hh_server;
     force_dormant_start = false;
+    force_stop_existing_persistent_connection = true;
   } in
   let conn = ServerUtils.connect_to_monitor env.root handoff_options in
   HackEventLogger.client_connect_once connect_once_start_t;
@@ -64,13 +65,16 @@ let read_connection_response fd =
   let res = Marshal_tools.from_fd_with_preamble fd in
   match res with
   | ServerCommandTypes.Connected -> ()
+  | ServerCommandTypes.Denied_due_to_existing_persistent_connection ->
+      assert false
+      (* clientIde never uses Persistent_tentative, so will always connect *)
 
 let connect_persistent env ~retries =
   let start_time = Unix.time () in
   try
     let (ic, oc) = connect_persistent env retries start_time in
     HackEventLogger.client_established_connection start_time;
-    Cmd.send_connection_type oc ServerCommandTypes.Persistent;
+    Cmd.send_connection_type oc ServerCommandTypes.Persistent_hard;
     read_connection_response (Unix.descr_of_out_channel oc);
     (ic, oc)
   with

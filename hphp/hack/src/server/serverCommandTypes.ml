@@ -1,11 +1,13 @@
 open Ide_api_types
 
 type connection_type =
-  | Persistent
+  | Persistent_hard  (* will kill any existing persistent connection *)
+  | Persistent_soft  (* will fail rather than kill existing p.connection *)
   | Non_persistent
 
 type connection_response =
   | Connected
+  | Denied_due_to_existing_persistent_connection
 
 type status_liveness =
   | Stale_status

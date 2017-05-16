@@ -980,5 +980,9 @@ let main () : unit =
       | _ -> ()
     with e ->
       respond_to_error event e;
-      log_error event e
+      log_error event e;
+      if e = Sys_error "Broken pipe" then exit 1
+      (* The reading/writing we do here is with hh_server, so this exception *)
+      (* means that our connection to hh_server has gone down, which is      *)
+      (* unrecoverable by us. We'll trust the LSP client to restart.         *)
   done
